@@ -24,7 +24,7 @@ win-list-loading = Učitavanje...
 ## Buttons and words used in many windows
 
 win-delete-button = &Izbriši
-win-find-label = &Pronađi:
+win-find-label = Pron&ađi:
 win-save-as-button = Sačuvaj &kao...
 win-too-many-files = Previše datoteka odjednom: izaberite manje.
 

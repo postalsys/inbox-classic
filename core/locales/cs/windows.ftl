@@ -21,7 +21,7 @@ win-list-loading = Načítání...
 ## Buttons and words used in many windows
 
 win-delete-button = Odst&ranit
-win-find-label = &Najít:
+win-find-label = Nají&t:
 win-save-as-button = Uložit &jako...
 win-too-many-files = Příliš mnoho souborů najednou: vyberte jich méně.
 

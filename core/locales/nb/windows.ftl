@@ -22,7 +22,7 @@ win-list-loading = Laster inn...
 ## Buttons and words used in many windows
 
 win-delete-button = Sle&tt
-win-find-label = &Finn:
+win-find-label = F&inn:
 win-save-as-button = La&gre som...
 win-too-many-files = For mange filer på en gang: velg færre.
 
@@ -108,7 +108,7 @@ win-edit = &Rediger...
 
 ## Options
 
-win-options-language-label = &Vis Inbox Classic på:
+win-options-language-label = V&is Inbox Classic på:
 win-options-restart-note = Start Inbox Classic på nytt for å bytte språk.
 win-options-notify = &Varsle meg når det kommer ny e-post
 win-restart-ask = Inbox Classic vises på { $language } når programmet startes på nytt. Vil du starte på nytt nå?

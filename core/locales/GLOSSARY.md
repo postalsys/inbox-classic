@@ -104,6 +104,9 @@ The terms of Outlook Express and Outlook in each language, kept the same everywh
 
 Forms of address: German uses "Sie", French "vous", Spanish "usted", Estonian the polite plural ("teie").
 
+French Cc/Cci use Alt+C/Alt+I on Windows and Linux; preserve literal English shortcuts in help and explain
+the localized combinations beside them.
+
 ### Estonian encryption and settings transfer
 
 - Use the polite plural in explanations and questions; short commands stay imperative ("Impordi", "Kontrolli").
@@ -123,6 +126,10 @@ Forms of address: German uses "Sie", French "vous", Spanish "usted", Estonian th
   must sign in again, which may use a browser rather than a password prompt.
 
 Context notes:
+
+- Check the Flag submenu's runtime colour mnemonics too: each colour takes its first unused letter, and
+  Clear Flag must use another. Account/folder context menus, Settings and folder-picker buttons have their
+  own combined scopes beyond the main menus. The extended review helper covers 44 such scopes.
 
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
   translating the English draft's vague "people" literally.

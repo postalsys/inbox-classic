@@ -73,7 +73,7 @@ win-files-not-saved = { $count ->
 }
 win-new-folder-in-highlighted = Den nye mappe oprettes i den markerede mappe.
 win-delete-folder-ask = Vil du slette mappen »{ $folder }« med dens meddelelser og de mapper, den indeholder? Den slettes også på serveren.
-win-rename = &Omdøb...
+win-rename = Om&døb...
 win-messages-not-saved = Meddelelserne kunne ikke gemmes.
 win-messages-not-forwarded = Meddelelserne kunne ikke videresendes.
 

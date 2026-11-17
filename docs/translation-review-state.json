@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Finnish catalogs complete: 1334 entries reviewed, 173 values improved. First resolve the recorded extended-native-mnemonic-scopes followup (13 previously reviewed languages), then review all 52 Finnish help topics. Use all 43 scopes for later languages. Recheck late additions after Finnish and after the full queue. Do not run the test suite. Active checkout build/i18n-wave1.",
+  "next_batch": "Finnish catalogs complete: 1334 entries reviewed, 174 catalog-value improvements including the mnemonic followup. Review all 52 Finnish help topics next. Extended 44-scope mnemonic followup complete across all 17 languages with reviewed catalogs; use these scopes for remaining languages. Recheck late additions after Finnish and after the full queue. Do not run the test suite. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -3333,6 +3333,26 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "cs-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "windows.ftl": [
+              "win-find-label"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/cs/windows.ftl": "c2cc5177b0e3017ce98294f4537601963578a34bc074162c8142e3f93de09091"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -4957,6 +4977,34 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "da-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-empty-folder",
+              "cmd-mark-all-read",
+              "ui-button-move",
+              "ui-clear-flag"
+            ],
+            "windows.ftl": [
+              "win-rename"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 5,
+          "files": {
+            "core/locales/da/app.ftl": "a322fb8dbf5ce76be1e0605125477ba9730aaad3b5ce73f8ff47b064a7161307",
+            "core/locales/da/windows.ftl": "3860802458c3752ea4b7ad266ca7d61455f7d2c6f29f36375d3b33bff800ffe5"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -5072,6 +5120,38 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "de-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-new-folder",
+              "cmd-empty-folder",
+              "cmd-mark-unread",
+              "cmd-go-to-folder",
+              "ui-properties",
+              "ui-account-move-down",
+              "ui-account-sync",
+              "ui-clear-flag"
+            ],
+            "windows.ftl": [
+              "win-save-as-button"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 9,
+          "files": {
+            "core/locales/de/app.ftl": "c5352d097b44d12b2632abff33de4ecc3cdbec21945211c09f1edc0d8809dba5",
+            "core/locales/de/windows.ftl": "fd4cd4d401e0a5547a58ea2801d04d8c1a6e8fedc01d9836c12dced85cfd04d5"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -6699,6 +6779,27 @@
           },
           "validation": "All Greek catalog/help structures pass after accounting for intentionally cleared marks; no structural exceptions. Tags, attributes, literal keys and platform branches preserved. No prohibited dashes or broken inline joins. Exact inventory and translation/English-source hashes reconcile. git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Reviewed all final 18 topics: rules, agents, connection/authentication/TLS/message/delivery troubleshooting, custom OAuth apps, language/defaults/updates/removal, CLI/search/keyboard references. Corrected queued sends and permission scope, rule processing, TLS-required not proving passwords, TLS failures not only certificate errors, app-specific malformed-message display, persisted credentials and native instructions. Search aliases cover all recipients; Greek name examples use actual Greek text. Preserved literal English keyboard tags and explained Greek Alt+Κ/Alt+Ι beside them. CLI sign-in-page-file is a URL, not HTML. All Greek help reviewed; no test suite run."
+        },
+        {
+          "id": "el-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-mark-all-read",
+              "ui-clear-flag"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/el/app.ftl": "d4673064d3a087fbe65032547c040af794414505c8c402a410e4133a4f81acaa"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -6814,6 +6915,38 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "es-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-archive",
+              "cmd-find-in-message",
+              "cmd-go-to-folder",
+              "cmd-add-sender-to-book",
+              "ui-menu-open",
+              "ui-menu-view-source",
+              "ui-properties",
+              "ui-group-by-conversation"
+            ],
+            "windows.ftl": [
+              "win-save-as-button"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 9,
+          "files": {
+            "core/locales/es/app.ftl": "4a0b6c6f0bec84b3d2daac8ee888395940e3a01b0ce146e12acb355a900435f6",
+            "core/locales/es/windows.ftl": "300702b22b3b347798a99c777eb347a81362c1971d1186da4e0a9f6d98b4129b"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -6929,6 +7062,44 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "et-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-reply-all",
+              "cmd-junk",
+              "cmd-not-junk",
+              "cmd-ignore-conversation",
+              "cmd-find-in-message",
+              "cmd-copy",
+              "cmd-next-unread",
+              "cmd-hide-read",
+              "cmd-view-source",
+              "ui-menu-view-source",
+              "ui-properties",
+              "ui-menu-delete",
+              "ui-card-picture-choose"
+            ],
+            "windows.ftl": [
+              "win-signature-button",
+              "win-find-label"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 15,
+          "files": {
+            "core/locales/et/app.ftl": "0e2a605152ed92d2eff1a494f8e253d42a7a4fadf3d958bab39853f85c9ab211",
+            "core/locales/et/windows.ftl": "0743364beca6ae94001962bcd600fc8778d6564047d93572fa0bbcaec075860d"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -8422,6 +8593,26 @@
               "ui-button-copy"
             ]
           }
+        },
+        {
+          "id": "fi-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-clear-flag"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/fi/app.ftl": "7886ef6fce58a1adf7f94105045d84233182bd9f6780594ba1cd5d6206f9d17a"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -8537,6 +8728,52 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "fr-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-new-folder",
+              "cmd-archive",
+              "cmd-junk",
+              "cmd-not-junk",
+              "cmd-copy",
+              "cmd-next-unread",
+              "cmd-collapse-all-threads",
+              "cmd-view-source",
+              "ui-menu-view-source",
+              "ui-properties",
+              "ui-remove",
+              "ui-menu-write-to"
+            ],
+            "windows.ftl": [
+              "win-save-as-button",
+              "win-show-bcc"
+            ],
+            "linux.ftl": [
+              "gtk-show-bcc"
+            ]
+          },
+          "followup_reviewed_help": [
+            "keyboard-shortcuts.html"
+          ],
+          "changed_values": 15,
+          "files": {
+            "core/locales/fr/app.ftl": "b94c20ea31ae13dc0011fa3c9f3126e3f7fcc6731bfe71432c357d1fe653c142",
+            "core/locales/fr/windows.ftl": "d19783b739ca4d6929fccb34aac30f215d4016dcffa7108d51c4673334d7478d",
+            "core/locales/fr/linux.ftl": "c037cb0b6365e4caf417d80a0f7e92f3b0e63b9cb847897c653d9ab11fdfd14c",
+            "core/crates/pe-html/help/fr/keyboard-shortcuts.html": "1f1a34953cae7b5d67b3f5a8d4503606b2e2dc5553d0ee165cbeeb33f97ed470"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4",
+            "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -13195,6 +13432,27 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "it-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-button-copy",
+              "ui-clear-flag"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/it/app.ftl": "1fe37d4f66e60cce8961c78ce16191c2c51270e490273bd1204ad77ce41e5914"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -17881,6 +18139,26 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "nl-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "windows.ftl": [
+              "win-rename"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/nl/windows.ftl": "627dccc6a434445cdfe77099df9d6158f4fc81366994c5a308b4e9c290d670a5"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -21102,6 +21380,26 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "pt-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-clear-flag"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pt/app.ftl": "4f8384b94105f0410ea3f8381fa20608db88aeec21406ae2f109d11180947980"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ]
     },
@@ -31413,6 +31711,32 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "ca-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-new-folder",
+              "ui-clear-flag"
+            ],
+            "windows.ftl": [
+              "win-find-label"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 3,
+          "files": {
+            "core/locales/ca/app.ftl": "e6d0dbf079cfb72c01f4cda88255dd9185a5c4202caecab05cffc1f3a44c5f0a",
+            "core/locales/ca/windows.ftl": "3d16149fa3b04a25aa43de83eb2875f26e079d0a6dd729b66a076762d6498beb"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -33103,6 +33427,33 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "nb-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "cmd-mark-all-read",
+              "ui-restart-later"
+            ],
+            "windows.ftl": [
+              "win-options-language-label",
+              "win-find-label"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 4,
+          "files": {
+            "core/locales/nb/app.ftl": "ae94a19aa3def6bec551462974181a66588e3ac7d62ae3ac5d27eaa69e03b4bd",
+            "core/locales/nb/windows.ftl": "035814760d51e12e3eb539a7701a6b5448cb448e69d0e77c22f9a011dabd807e"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -34808,6 +35159,26 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "pt-BR-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-clear-flag"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pt-BR/app.ftl": "36247d84577657b50d1f45fae71d0504eee9adafb736e821df470e3d2e2a2d39"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -36484,6 +36855,31 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "sr-Latn-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-remove"
+            ],
+            "windows.ftl": [
+              "win-find-label"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/sr-Latn/app.ftl": "088bd5c5d37c81d02bf2353d65e2f2042d2371e55c09531798a67689025f877f",
+            "core/locales/sr-Latn/windows.ftl": "d6ea35b19852d56945010f4f551d705aeb987ae5d9a58814952bf86c35c8d43a"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -38151,6 +38547,28 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "tr-native-mnemonics-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-account-move-down",
+              "ui-account-sync",
+              "ui-clear-flag"
+            ]
+          },
+          "followup_reviewed_help": [],
+          "changed_values": 3,
+          "files": {
+            "core/locales/tr/app.ftl": "0cb827cef29d7563cc7f34e238bf36295990d2b29510ae1347648429df8deaa3"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -38477,13 +38895,14 @@
     },
     {
       "id": "extended-native-mnemonic-scopes",
-      "status": "pending",
-      "issue": "Platform review identified additional actual Settings/accounts/folder/account-context/folder-picker scopes beyond the original 32. Finnish now passes all 43; check these additional scopes across previously reviewed languages and correct any collisions while preserving natural wording. Use the expanded scope definitions for later languages.",
+      "status": "complete",
+      "issue": "Expanded the original 32 scopes to 44 actual menu/dialog scopes, including Settings/accounts/folder contexts/folder picker and runtime Flag colour mnemonics. Audited all 17 languages with reviewed catalogs; corrected every collision found without changing visible catalog wording.",
       "evidence": [
         "app/src/options.cpp:OptionsDialog",
         "app/src/accounts.cpp:AccountsDialog",
         "app/src/mailbox.cpp:FolderMenu, AccountMenu",
-        "app/src/folderpicker.cpp:PickFolder"
+        "app/src/folderpicker.cpp:PickFolder",
+        "app/src/mailbox.cpp:FlagMenu runtime first-unused-letter assignment"
       ],
       "scope_helper": "/private/tmp/inbox-fi-mnemonics.py",
       "languages": [
@@ -38505,6 +38924,19 @@
         "el"
       ],
       "completed_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "cs",
+        "da",
+        "el",
         "fi",
         "pt",
         "pt-BR",
@@ -39823,7 +40255,424 @@
           }
         ]
       },
-      "pending_languages": [
+      "pending_languages": [],
+      "notes": "74 catalog access-key positions corrected in 16 languages; Bulgarian passed unchanged. French keyboard-shortcuts topic reviewed and its Cci explanation synchronized. Use all 44 scopes for later languages.",
+      "changed_catalog_entries": 74,
+      "reviewed_help_topics": 1,
+      "scopes": [
+        [
+          "menu-file",
+          "menu-edit",
+          "menu-view",
+          "menu-tools",
+          "menu-message",
+          "menu-help"
+        ],
+        [
+          "cmd-new-account",
+          "cmd-accounts",
+          "menu-folder",
+          "cmd-save-as",
+          "cmd-import",
+          "cmd-import-address-book",
+          "cmd-export-address-book",
+          "cmd-import-setup",
+          "cmd-export-setup",
+          "cmd-print",
+          "cmd-properties",
+          "cmd-exit"
+        ],
+        [
+          "cmd-new-folder",
+          "cmd-rename-folder",
+          "cmd-delete-folder",
+          "cmd-empty-folder"
+        ],
+        [
+          "cmd-new-mail",
+          "cmd-reply",
+          "cmd-reply-all",
+          "cmd-forward",
+          "cmd-flag",
+          "ui-menu-flag",
+          "cmd-archive",
+          "cmd-junk",
+          "cmd-not-junk",
+          "cmd-watch-conversation",
+          "cmd-ignore-conversation",
+          "cmd-create-rule-from-message"
+        ],
+        [
+          "cmd-undo",
+          "cmd-select-all",
+          "cmd-find",
+          "cmd-find-in-message",
+          "cmd-mark-read",
+          "cmd-mark-unread",
+          "cmd-mark-all-read",
+          "cmd-move",
+          "cmd-copy",
+          "cmd-delete"
+        ],
+        [
+          "menu-layout",
+          "cmd-folder-list",
+          "menu-sort-by",
+          "menu-text-size",
+          "cmd-next-message",
+          "cmd-previous-message",
+          "cmd-next-unread",
+          "cmd-go-to-folder",
+          "cmd-expand-all-threads",
+          "cmd-collapse-all-threads",
+          "cmd-hide-ignored",
+          "cmd-hide-read",
+          "cmd-pictures",
+          "cmd-view-source"
+        ],
+        [
+          "cmd-layout-automatic",
+          "cmd-layout-classic",
+          "cmd-layout-columns"
+        ],
+        [
+          "cmd-text-size-largest",
+          "cmd-text-size-larger",
+          "cmd-text-size-medium",
+          "cmd-text-size-smaller",
+          "cmd-text-size-smallest"
+        ],
+        [
+          "cmd-sync",
+          "cmd-outbox",
+          "cmd-address-book",
+          "cmd-add-sender-to-book",
+          "cmd-message-rules",
+          "cmd-encryption-keys",
+          "cmd-ai-agents",
+          "cmd-notify",
+          "cmd-default-app",
+          "cmd-options"
+        ],
+        [
+          "cmd-help",
+          "cmd-about"
+        ],
+        [
+          "ui-menu-open",
+          "cmd-reply",
+          "cmd-reply-all",
+          "cmd-forward",
+          "ui-menu-flag",
+          "cmd-watch-conversation",
+          "cmd-ignore-conversation",
+          "cmd-archive",
+          "cmd-create-rule-from-message",
+          "cmd-move",
+          "cmd-copy",
+          "win-delete-button",
+          "win-save-as-button",
+          "cmd-print",
+          "cmd-add-sender-to-book",
+          "ui-menu-view-source",
+          "ui-properties",
+          "cmd-mark-read",
+          "cmd-junk"
+        ],
+        [
+          "cmd-reply",
+          "cmd-reply-all",
+          "cmd-forward",
+          "ui-menu-flag",
+          "cmd-watch-conversation",
+          "cmd-ignore-conversation",
+          "cmd-archive",
+          "cmd-create-rule-from-message",
+          "cmd-move",
+          "cmd-copy",
+          "win-delete-button",
+          "win-save-as-button",
+          "cmd-print",
+          "cmd-add-sender-to-book",
+          "ui-menu-view-source",
+          "ui-properties",
+          "cmd-mark-read",
+          "cmd-not-junk"
+        ],
+        [
+          "ui-menu-open",
+          "cmd-reply",
+          "cmd-reply-all",
+          "cmd-forward",
+          "ui-menu-flag",
+          "cmd-watch-conversation",
+          "cmd-ignore-conversation",
+          "cmd-archive",
+          "cmd-create-rule-from-message",
+          "cmd-move",
+          "cmd-copy",
+          "win-delete-button",
+          "win-save-as-button",
+          "cmd-print",
+          "cmd-add-sender-to-book",
+          "ui-menu-view-source",
+          "ui-properties",
+          "cmd-mark-unread",
+          "cmd-junk"
+        ],
+        [
+          "cmd-reply",
+          "cmd-reply-all",
+          "cmd-forward",
+          "ui-menu-flag",
+          "cmd-watch-conversation",
+          "cmd-ignore-conversation",
+          "cmd-archive",
+          "cmd-create-rule-from-message",
+          "cmd-move",
+          "cmd-copy",
+          "win-delete-button",
+          "win-save-as-button",
+          "cmd-print",
+          "cmd-add-sender-to-book",
+          "ui-menu-view-source",
+          "ui-properties",
+          "cmd-mark-unread",
+          "cmd-not-junk"
+        ],
+        [
+          "ui-keys-new",
+          "ui-keys-import",
+          "ui-keys-export",
+          "ui-keys-backup",
+          "ui-keys-verify",
+          "win-properties-button",
+          "ui-remove"
+        ],
+        [
+          "ui-keys-backup-now",
+          "ui-keys-later"
+        ],
+        [
+          "ui-keys-passphrase",
+          "ui-keys-passphrase-again"
+        ],
+        [
+          "ui-setup-use-passphrase",
+          "ui-keys-passphrase",
+          "ui-keys-passphrase-again",
+          "ui-setup-export-button"
+        ],
+        [
+          "ui-verify-match",
+          "ui-verify-differ"
+        ],
+        [
+          "ui-account-key",
+          "ui-account-key-new",
+          "ui-account-autocrypt"
+        ],
+        [
+          "ui-contact-key-use-new",
+          "ui-contact-key-keep"
+        ],
+        [
+          "ui-menu-write-to",
+          "ui-properties",
+          "ui-menu-delete",
+          "ui-menu-new-contact",
+          "ui-menu-new-group"
+        ],
+        [
+          "ui-let-agents-connect",
+          "win-agent-programs",
+          "win-change",
+          "ui-remove",
+          "win-what-agents-did",
+          "cmd-undo",
+          "ui-clear-button"
+        ],
+        [
+          "win-send",
+          "ui-edit-first",
+          "win-dont-send"
+        ],
+        [
+          "ui-allow",
+          "win-dont-allow"
+        ],
+        [
+          "ui-turn-away",
+          "ui-allow"
+        ],
+        [
+          "ui-rule-new",
+          "ui-rule-edit",
+          "ui-rule-delete-button",
+          "ui-account-move-up",
+          "ui-account-move-down"
+        ],
+        [
+          "ui-rule-show",
+          "ui-rule-move",
+          "ui-rule-mark-read",
+          "ui-rule-flag",
+          "ui-rule-archive",
+          "ui-rule-junk",
+          "ui-rule-delete",
+          "ui-rule-quiet",
+          "ui-rule-apply-now"
+        ],
+        [
+          "ui-contact-add",
+          "ui-contact-set-default",
+          "ui-remove",
+          "ui-card-picture-choose"
+        ],
+        [
+          "ui-group-select-members",
+          "ui-contact-add",
+          "ui-remove"
+        ],
+        [
+          "ui-pick-to",
+          "ui-pick-cc",
+          "ui-pick-bcc",
+          "ui-remove"
+        ],
+        [
+          "win-show-cc",
+          "win-show-bcc"
+        ],
+        [
+          "win-options-language-label",
+          "win-options-notify",
+          "ui-group-by-conversation",
+          "ui-ok",
+          "ui-cancel"
+        ],
+        [
+          "win-add",
+          "win-properties-button",
+          "win-signature-button",
+          "ui-remove",
+          "win-sign-in-apps-button",
+          "ui-close"
+        ],
+        [
+          "ui-account-move-up",
+          "ui-account-move-down"
+        ],
+        [
+          "ui-restart-now",
+          "ui-restart-later"
+        ],
+        [
+          "win-add",
+          "win-edit",
+          "ui-remove",
+          "ui-close"
+        ],
+        [
+          "cmd-mark-all-read",
+          "cmd-new-folder",
+          "win-rename",
+          "win-delete-button",
+          "cmd-empty-folder"
+        ],
+        [
+          "cmd-mark-all-read",
+          "cmd-new-folder",
+          "win-rename",
+          "win-delete-button",
+          "ui-account-move-up",
+          "ui-account-move-down"
+        ],
+        [
+          "ui-account-sync",
+          "cmd-mark-all-read",
+          "cmd-new-folder",
+          "ui-account-move-up",
+          "ui-account-move-down",
+          "ui-account-properties"
+        ],
+        [
+          "win-find-label",
+          "cmd-new-folder",
+          "ui-button-move",
+          "ui-cancel"
+        ],
+        [
+          "win-find-label",
+          "cmd-new-folder",
+          "ui-button-copy",
+          "ui-cancel"
+        ],
+        [
+          "win-find-label",
+          "ui-ok",
+          "ui-cancel"
+        ],
+        [
+          "runtime-flag-red",
+          "runtime-flag-orange",
+          "runtime-flag-yellow",
+          "runtime-flag-green",
+          "runtime-flag-blue",
+          "runtime-flag-purple",
+          "runtime-flag-gray",
+          "ui-clear-flag"
+        ]
+      ],
+      "runtime_flag_note": "Synthetic runtime-flag-* scope members are fixed to the first unused lowercase alphabetic character of each translated flag-color branch, ordered red/orange/yellow/green/blue/purple/gray. Clear Flag must differ.",
+      "runtime_flag_corrections": {
+        "de": {
+          "file": "app.ftl",
+          "old": "Kennzeichnung &löschen",
+          "new": "&Kennzeichnung löschen"
+        },
+        "it": {
+          "file": "app.ftl",
+          "old": "&Rimuovi contrassegno",
+          "new": "Rimuovi &contrassegno"
+        },
+        "ca": {
+          "file": "app.ftl",
+          "old": "&Treu la bandera",
+          "new": "Tre&u la bandera"
+        },
+        "tr": {
+          "file": "app.ftl",
+          "old": "Bayrağı &Kaldır",
+          "new": "&Bayrağı Kaldır"
+        },
+        "da": {
+          "file": "app.ftl",
+          "old": "Fje&rn flag",
+          "new": "&Fjern flag"
+        },
+        "el": {
+          "file": "app.ftl",
+          "old": "&Κατάργηση σημαίας",
+          "new": "Κ&ατάργηση σημαίας"
+        },
+        "fi": {
+          "file": "app.ftl",
+          "old": "&Poista lippu",
+          "new": "Poista &lippu"
+        },
+        "pt": {
+          "file": "app.ftl",
+          "old": "&Limpar sinalizador",
+          "new": "L&impar sinalizador"
+        },
+        "pt-BR": {
+          "file": "app.ftl",
+          "old": "&Limpar sinalizador",
+          "new": "L&impar sinalizador"
+        }
+      },
+      "audited_languages": [
         "de",
         "es",
         "et",
@@ -39836,9 +40685,13 @@
         "tr",
         "cs",
         "da",
-        "el"
+        "el",
+        "fi",
+        "pt",
+        "pt-BR",
+        "bg"
       ],
-      "notes": "Read-only audit of all 43 scopes completed. Thirteen previously reviewed languages have current collisions, including older scopes in the round-1 languages; three pass unchanged. Resolve these next, preserving visible wording where possible, and record them as separate re-reviews rather than expanding the initial catalog count."
+      "validation": "44 actual scopes pass across all 17 audited languages. All 74 catalog edits preserve visible text; French help preserves markup and literal keys. Full catalog structures, exact inventories and translation/English hashes reconcile. No test suite run."
     }
   ]
 }

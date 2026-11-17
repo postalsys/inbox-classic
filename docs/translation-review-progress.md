@@ -16,9 +16,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), all 52 help topics. Its 1,334 catalog entries are reviewed, with 173 values improved.
-  First resolve the recorded mnemonic followup: the expanded 43-scope audit found collisions in 13 previously
-  reviewed languages; Portuguese, Brazilian Portuguese and Bulgarian pass unchanged. Exact findings are in state.
+- Resume with Finnish (fi), all 52 help topics. Its 1,334 catalog entries are reviewed, with 174 value improvements.
+  The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
+  with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
   Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
   attachment-reminder context followups are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
@@ -670,7 +670,21 @@ Static structure, exact inventories/hashes and git diff --check pass; review HTM
 build in the dedicated target passed and regenerated installer/Linux metadata, inspected and included.
 No test suite was run. Finnish core checkpoint: `4c1a1fcb`.
 
-Current totals: 17,451 catalog entries and 628 help pages reviewed; 2,655 catalog values improved. Remaining:
+### Expanded native menu and dialog shortcuts
+
+Audited all 17 languages with reviewed catalogs across 44 actual scopes. Added Settings/accounts, account/folder
+context menus, the folder picker and runtime Flag colour shortcuts to the original 32-scope check. Fixed 74
+catalog mnemonic positions in 16 languages without changing visible wording; Bulgarian passed unchanged.
+The colour menu assigns the first unused letter at runtime, which Clear Flag must avoid. French Cci now uses
+Alt+I on Windows and Linux; its keyboard-shortcuts topic explains localized Alt+C/Alt+I beside preserved literal
+English key tags. This followup does not add entries or topics to the initial review inventory.
+
+All 44 scopes and complete catalog ID/variable sets pass. Static checks account only for removed review marks
+and the seven recorded es/fr multiline-parser false positives. Exact completed inventories and source/file
+hashes reconcile; help markup and literal keys are preserved. Review HTML regenerated, git diff --check passes.
+No test suite was run. Finnish catalog checkpoint: `ac13722a`. Continue its 52 help topics.
+
+Current totals: 17,451 catalog entries and 628 help pages reviewed; 2,729 catalog values improved. Remaining:
 14,641 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final

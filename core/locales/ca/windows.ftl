@@ -21,7 +21,7 @@ win-list-loading = S’està carregant...
 ## Botons i paraules de moltes finestres
 
 win-delete-button = Suprimei&x
-win-find-label = &Cerca:
+win-find-label = Ce&rca:
 win-save-as-button = De&sa com a...
 win-too-many-files = Heu seleccionat massa fitxers. Trieu-ne menys i torneu-ho a provar.
 

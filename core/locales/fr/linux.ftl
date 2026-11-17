@@ -101,7 +101,7 @@ gtk-format-underline = Souligné (Ctrl+U)
 gtk-format-hyperlink = Lien hypertexte (Ctrl+K)
 gtk-font = Police
 gtk-show-cc = _Cc
-gtk-show-bcc = C_ci
+gtk-show-bcc = Cc_i
 gtk-save-tip = Enregistrer (Ctrl+S)
 gtk-link-status = { $link }    (Ctrl+clic pour ouvrir)
 

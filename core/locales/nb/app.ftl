@@ -45,7 +45,7 @@ cmd-print = &Skriv ut...
 cmd-import = Impo&rter meldinger...
 cmd-outbox = &Utboks...
 cmd-properties = &Egenskaper
-cmd-mark-all-read = &Merk alle som lest
+cmd-mark-all-read = Mer&k alle som lest
 cmd-junk = Merk som søppel&post
 cmd-not-junk = Merk som i&kke søppelpost
 cmd-archive = &Arkiver
@@ -462,7 +462,7 @@ ui-how-to-connect = Slik kobler du til en agent…
 ui-agent-programs = Programmer der agenter har bedt om tilgang til e-posten din
 ui-what-agents-did = Agentaktivitet
 ui-restart-now = &Start på nytt nå
-ui-restart-later = &Senere
+ui-restart-later = Se&nere
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 

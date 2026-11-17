@@ -22,7 +22,7 @@ win-list-loading = Chargement...
 
 win-delete-button = &Supprimer
 win-find-label = &Rechercher :
-win-save-as-button = Enregistrer &sous...
+win-save-as-button = Enregistrer so&us...
 win-too-many-files = Trop de fichiers à la fois : choisissez-en moins.
 
 ## La Boîte d'envoi
@@ -37,7 +37,7 @@ win-format-italic = Italique ({ $ctrl }+I)
 win-format-underline = Souligné ({ $ctrl }+U)
 win-format-link = Lien hypertexte ({ $ctrl }+K)
 win-show-cc = &Cc
-win-show-bcc = C&ci
+win-show-bcc = Cc&i
 win-signature-title = Signature : { $account }
 
 ## Les dossiers, la liste des messages et le volet de lecture
