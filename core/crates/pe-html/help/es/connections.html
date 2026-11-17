@@ -7,7 +7,7 @@
     <li><b>Los logotipos de marca</b> (BIMI), desde la dirección HTTPS de la marca cuando el mensaje no incluye el logotipo y no se puede reutilizar una copia guardada. Los logotipos descargados se guardan y reutilizan, incluso después de reiniciar el programa. Solo ocurre cuando su servidor de correo ha dado por buena la comprobación DMARC del mensaje y ha aprobado el logotipo.</li>
     <li><b>Las imágenes de internet</b>, solo cuando usted las pide.</li>
     <li><b>La cancelación de suscripciones</b>, solo cuando usted hace clic en ella. Una solicitud de un solo clic (RFC 8058) se envía solo cuando la lista firmó el mensaje con DKIM.</li>
-<!--review-->    <li><b>Las claves de cifrado</b>, solo cuando usted cifra para alguien cuya clave no tiene: el dominio propio de su dirección (Web Key Directory) y después keys.openpgp.org, salvo que lo haya desactivado. Solo se envía la dirección.</li><!--/review-->
+    <li><b>Las claves de cifrado</b> se buscan cuando falta la clave de un destinatario al cifrar un mensaje o cuando solicita una búsqueda de claves. Si busca por dirección de correo, se consulta primero el dominio de esa dirección (Web Key Directory). Si hace falta, se envía la dirección a keys.openpgp.org, salvo que haya desactivado esa búsqueda. Si busca por huella digital o identificador de clave, se envía ese dato a keys.openpgp.org en lugar de una dirección.</li>
     <!--os:mac--><li><b>Las actualizaciones</b>, desde inboxclassic.com, para ver si hay una versión nueva.</li><!--/os-->
 </ul>
 <p>Los códigos de inicio de sesión solo se ofrecen cuando el encabezado Authentication-Results de su proveedor indica que el dominio firmó el mensaje (DKIM). Esto no necesita ninguna conexión propia.</p>

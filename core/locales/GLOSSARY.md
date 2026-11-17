@@ -182,6 +182,13 @@ Context notes:
 - Address-based key lookup asks the address's domain first, then keys.openpgp.org when enabled and needed.
   An explicit fingerprint/key-ID lookup sends that identifier instead of an address. The keyserver switch leaves
   domain lookup available. Avoid the English note's implication that every lookup sends an email address.
+- The new connections paragraph must also cover explicit key searches, not only lookup while encrypting.
+  Private keys are encrypted in the mail database with a separate key kept alongside sign-in credentials;
+  the database file alone cannot decrypt them. Avoid a literal key "lying beside" passwords.
+- Autocrypt sends a public key when the sending address has one assigned and sharing is enabled. Inbox Classic
+  may learn a usable sender key when a message is opened. Receiving a key does not verify ownership, and a
+  different key for an address already in use waits for the user's choice. Describe public-key sharing directly,
+  not as keys that "travel" or an app that "learns" a contact. Keep the Autocrypt control and Security-tab labels.
 - An agent's message shown in the Outbox is queued for a delayed send. It has not been sent yet.
 - Approval in the agent send dialog queues a message with a 30-second minimum delay (`agents::SEND_DELAY`).
   It is separate from the user's normal send-delay setting; quitting only accelerates the user's undoable sends,

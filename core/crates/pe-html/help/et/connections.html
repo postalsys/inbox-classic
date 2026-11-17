@@ -7,7 +7,7 @@
     <li><b>Kaubamärkide logod</b> (BIMI), kaubamärgi HTTPS-aadressilt, kui logo pole kirjaga kaasas ja salvestatud koopiat ei saa kasutada. Allalaaditud logosid kasutatakse uuesti ka pärast programmi taaskäivitamist. Logo laaditakse alla ainult siis, kui kiri on läbinud meiliserveri DMARC-kontrolli ja server on logo heaks kiitnud.</li>
     <li><b>Pildid Internetist</b>, ainult siis, kui te neid küsite.</li>
     <li><b>Tellimusest loobumine</b>, ainult siis, kui seda klõpsate. Ühe klõpsuga päring (RFC 8058) saadetakse ainult siis, kui postiloend allkirjastas kirja DKIM-iga.</li>
-<!--review-->    <li><b>Krüpteerimisvõtmed</b>, ainult siis, kui krüpteerite kellelegi, kelle võtit teil pole: tema aadressi enda domeen (Web Key Directory), seejärel keys.openpgp.org, kui te pole seda välja lülitanud. Saadetakse ainult aadress.</li><!--/review-->
+    <li><b>Krüpteerimisvõtmeid</b> otsitakse siis, kui kirja krüpteerimiseks vajalik saaja võti puudub või kui käivitate ise võtmeotsingu. E-posti aadressi järgi otsides tehakse päring esmalt selle aadressi domeeni (Web Key Directory). Vajaduse korral saadetakse aadress serverisse keys.openpgp.org, kui see otsing on lubatud. Sõrmejälje või võtme ID järgi otsides saadetakse serverisse keys.openpgp.org aadressi asemel vastav tunnus.</li>
     <!--os:mac--><li><b>Uuendused</b>, saidilt inboxclassic.com, et näha, kas uus versioon on ilmunud.</li><!--/os-->
 </ul>
 <p>Sisselogimiskoode pakutakse ainult siis, kui teie teenusepakkuja päis Authentication-Results ütleb, et domeen allkirjastas kirja (DKIM). Selleks pole eraldi ühendust vaja.</p>

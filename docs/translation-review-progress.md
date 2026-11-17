@@ -36,8 +36,9 @@ Commit completed batches regularly and preserve an exact resume point.
   Hungarian app.ftl is now complete: 647 entries, 83 improvements and all 46 shortcut scopes passing.
   Help source `255205aa` from `chore/pgp-hardening` (observed at `80d02fcc`) is now integrated:
   one inserted passage in connections/data-storage/encryption-keys in every language and English. Every byte
-  of prior reviewed prose is preserved. NEXT review the three insertions in de/es/et/fr, then the other 14
-  earlier languages. Ten broad drafts retain their full-topic marks. Exact source/retained-review provenance
+  of prior reviewed prose is preserved. The de/es/et/fr insertions are now reviewed. NEXT nl/it/pt/pt-BR,
+  then ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. Ten broad drafts retain their full-topic marks.
+  Exact source/retained-review provenance
   is in `key_help_source_integration` and `key-storage-autocrypt-context`. Preserve the source worktree's
   unrelated uncommitted UI/fuzz work. Only the help source commit was imported.
   Then Hungarian core.ftl 450, help.ftl 24, linux.ftl 87, mac.ftl 65, windows.ftl 69 and all 52 help topics.
@@ -45,7 +46,7 @@ Commit completed batches regularly and preserve an exact resume point.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,716 catalog entries and 1,320 help topics; 12,773 entries and 574 topics remain in the integrated queue.
+  32,716 catalog entries and 1,320 help topics; 12,773 entries and 562 topics remain in the integrated queue.
   The key help additions bring four round-1 topics into scope and reopen 50 counted topics; 30 full drafts
   already had the affected topics pending. Previously reviewed passages have not been discarded.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
@@ -1765,9 +1766,29 @@ The 339 since-start entries and 214 passages match the queue. Fixed the temporar
 help line as the report does, allowing newly changed whole topics to match their 160-character previews.
 HTML regenerated; git diff --check passes; no conflict markers. No test suites or builds run.
 
-Current totals: 19,943 catalog entries and 746 help topics fully completed; 3,357 historical catalog value
-improvements. Remaining: 12,773 catalog entries and 574 help topics. Earlier reviewed passages are preserved;
-54 topics now need only their new insertion reviewed. Scope: 32,716 entries and 1,320 topics. `REVIEWED` unchanged.
+### German, Spanish, Estonian and French key help additions reviewed
+
+Reviewed the twelve inserted passages in connections, data-storage and encryption-keys, improving all twelve.
+Every byte outside those passages is unchanged. Key lookup now includes explicit requests and distinguishes
+address queries from fingerprint/key-ID queries. Storage prose explains encrypted private keys and the separate
+protecting key held with sign-in credentials. Autocrypt descriptions explain optional public-key sharing and
+receiving usable sender keys on message opening, without claiming verified ownership. Estonian retains polite
+plural address; the new informal draft wording and literal “keys travel”/“app learns” phrases are removed.
+
+All four check-language runs have exactly 1,404 expected removed-mark diagnostics and no structural findings.
+Tags, attributes, literal code/keyboard tokens and platform branches are intact. Autocrypt/Security label joins
+were inspected for Windows, Mac and Linux; dynamic keyboard labels remain outside the helper. All 28 full
+inventories and current translation/source hashes reconcile: 19,977 unmarked messages, 10,270 changed help lines
+and 14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds run.
+Previous/source integration checkpoint: `7491abc8`.
+
+All seven observed source refs and the guide remain unchanged; root has no relevant edits. The 339 since-start
+entries and 202 passages match the queue. The help-only import leaves non-help changes and the active source
+worktree untouched. Next: nl/it/pt/pt-BR, then the other ten earlier languages listed in Resume here.
+
+Current totals: 19,943 catalog entries and 758 help topics fully completed; 3,357 historical catalog improvements.
+Remaining: 12,773 catalog entries and 562 help topics. Of those help topics, 42 need only their new insertion;
+520 belong to the ten broader language drafts. Scope: 32,716 entries and 1,320 topics. `REVIEWED` unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
