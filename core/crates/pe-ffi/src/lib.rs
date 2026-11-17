@@ -292,6 +292,11 @@ mod tests {
         use crate::core::{PeReaderLink, pe_reader_link};
         let link = |uri: &str| unsafe { pe_reader_link(CString::new(uri).unwrap().as_ptr()) };
         assert_eq!(link(pe_html::BOUNCED_MESSAGE_LINK), PeReaderLink::BouncedMessage);
+        assert_eq!(
+            link("inboxclassic:attachment-0123456789abcdef0123456789abcdef-1"),
+            PeReaderLink::Attachment
+        );
+        assert_eq!(link("inboxclassic:attachment-x-1"), PeReaderLink::Other);
         assert_eq!(link("https://example.com/"), PeReaderLink::Other);
         assert_eq!(link("mailto:a@example.com"), PeReaderLink::Other);
         assert_eq!(unsafe { pe_reader_link(std::ptr::null()) }, PeReaderLink::Other);

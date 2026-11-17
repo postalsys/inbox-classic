@@ -170,6 +170,12 @@ pub enum PeEventKind {
     /// The action `uid` of `pe_selection_act_start` or `pe_mark_read_start` is done in the store and handed to the
     /// server: `message` is what the status bar says; with `failure` `Other` it was refused, and `message` says why
     Acted = 35,
+    /// The picture of a preview the document server asked for (`pe_preview_ask`, the ask in `uid`) is there, or will
+    /// not be: `pe_preview_answer` gives what to answer the web view with
+    PreviewAnswered = 36,
+    /// A PDF file ended the app while it was drawn, so PDF previews are now off (`pe_pdf_previews`); the documents
+    /// built from now on say so where the previews are
+    PdfPreviewsOff = 37,
 }
 
 #[repr(C)]
@@ -260,8 +266,10 @@ impl Callback {
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
             Event::SignInAppChecked { request } => (PeEventKind::SignInAppChecked, 0, 0, *request),
             Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
-            // previews come to the apps with the reading pane that shows them (the plan's PR 2)
-            Event::PreviewReady { .. } | Event::PdfPreviewsOff => return,
+            // the core's own: the document servers wait for PreviewAnswered
+            Event::PreviewReady { .. } => return,
+            Event::PreviewAnswered { ask } => (PeEventKind::PreviewAnswered, 0, 0, *ask),
+            Event::PdfPreviewsOff => (PeEventKind::PdfPreviewsOff, 0, 0, 0),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
             Event::NewMail {
                 account, folder, uid, ..
@@ -2141,6 +2149,10 @@ pub struct PeMessageInfo {
     /// memory as the page is; `pe_part_document` says which part an address asks for), whose document
     /// `pe_message_view_part` gives
     pub part_count: usize,
+    /// The token of the previews of its attachments after the text, empty when `document` shows none: the document
+    /// server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the page's origin),
+    /// and the window ends them with `pe_previews_end` when it shows another document or closes
+    pub preview_token: *const c_char,
 }
 
 /// The colour of the security bar: green, blue, amber, grey; none without one
@@ -2264,6 +2276,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         protection_encrypted: view.protection.as_ref().is_some_and(|p| p.encrypted),
         protection_details: strings.add(&view.protection.as_ref().map(|p| p.details()).unwrap_or_default()),
         part_count: view.part_documents.len(),
+        preview_token: strings.add(view.preview_token.as_deref().unwrap_or_default()),
     };
     let parts = view
         .part_documents
@@ -2315,6 +2328,9 @@ pub enum PeReaderLink {
     OpenCalendar = 3,
     /// The label of a signed or encrypted part: the Details window of the message (`protection_details`)
     Part = 4,
+    /// A preview of an attachment after the text: open the attachment `pe_preview_link` names, as a double-click in
+    /// the strip does
+    Attachment = 5,
 }
 
 /// Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
@@ -2398,6 +2414,8 @@ pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
             PeReaderLink::OpenCalendar
         } else if pe_html::part_link(uri).is_some() {
             PeReaderLink::Part
+        } else if pe_html::is_preview_link(uri) {
+            PeReaderLink::Attachment
         } else {
             PeReaderLink::Other
         }
@@ -2526,6 +2544,159 @@ pub unsafe extern "C" fn pe_part_document(address: *const c_char) -> i64 {
     // SAFETY: as the caller guarantees
     let address = unsafe { arg(address) }.unwrap_or_default();
     guard(|| pe_html::part_document(address).map_or(-1, |index| index as i64)).unwrap_or(-1)
+}
+
+// ---- previews of attachments in the reading pane ----
+
+/// A picture of a preview, to answer a web view with, owned by its `PePreviewAnswer`
+#[repr(C)]
+pub struct PePreviewPicture {
+    /// `image/png` or `image/jpeg` (the core's own encode, never the sender's bytes)
+    pub mime_type: *const c_char,
+    pub bytes: *const u8,
+    pub length: usize,
+}
+
+/// The answer to an ask: its picture (`pe_preview_answer_picture`); free with `pe_preview_answer_free`
+pub struct PePreviewAnswer {
+    picture: PePreviewPicture,
+    _mime: CString,
+    _bytes: std::sync::Arc<pe_core::previews::Picture>,
+}
+
+/// The document server of the reading pane (or a message's window) was asked for `address`, the whole URL or its
+/// path: when it is a preview's picture of a view shown, the ask to wait for (keep the request, WebView2's deferral,
+/// the `WKURLSchemeTask` or the `WebKitURISchemeRequest`, under it): `PreviewAnswered` with it in `uid` follows on a
+/// worker thread, never on this one. 0 for any other address: answer "not found" now. Quick, for the window thread:
+/// the message is read and the picture drawn off it.
+///
+/// # Safety
+/// `core` must be a live handle; `address` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_preview_ask(core: *const PeCore, address: *const c_char) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(address) = (unsafe { arg(address) }) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.preview_ask(address).unwrap_or(0)) }
+}
+
+/// The answer to `ask`, once, after its `PreviewAnswered`: the picture, or NULL to answer "not found" (the view's
+/// previews ended, or the ask is unknown). A request the web view stopped meanwhile is not answered; free the answer
+/// all the same.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_preview_answer(core: *const PeCore, ask: u64) -> *mut PePreviewAnswer {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.preview_answer(ask).map_or(null_mut(), |picture| {
+                let mime = c_string(picture.mime.as_str().to_string());
+                handed(PePreviewAnswer {
+                    picture: PePreviewPicture {
+                        mime_type: mime.as_ptr(),
+                        bytes: picture.bytes.as_ptr(),
+                        length: picture.bytes.len(),
+                    },
+                    _mime: mime,
+                    _bytes: picture,
+                })
+            })
+        })
+    }
+}
+
+/// The picture of an answer, owned by it; NULL for a NULL answer
+///
+/// # Safety
+/// `answer` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_preview_answer_picture(answer: *const PePreviewAnswer) -> *const PePreviewPicture {
+    // SAFETY: as the caller guarantees
+    unsafe { answer.as_ref() }.map_or(null(), |answer| &answer.picture)
+}
+
+/// # Safety
+/// `answer` must be NULL or from `pe_preview_answer`, freed once.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_preview_answer_free(answer: *mut PePreviewAnswer) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(answer) }
+}
+
+/// The attachment (its index in the view's list) a preview's link opens, after `pe_reader_link` said
+/// `PE_READER_LINK_ATTACHMENT`; -1 when it is not a link of a view shown. The window opens it as a double-click in the
+/// strip does.
+///
+/// # Safety
+/// `core` must be a live handle; `uri` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_preview_link(core: *const PeCore, uri: *const c_char) -> i64 {
+    // SAFETY: as the caller guarantees
+    let Some(uri) = (unsafe { arg(uri) }) else {
+        return -1;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, -1, |core| core.preview_link(uri).map_or(-1, |index| index as i64)) }
+}
+
+/// The window no longer shows the document of the view with this `preview_token` (it shows another, or closed): its
+/// pictures are not drawn or answered anymore, and an ask still waiting is answered with none
+///
+/// # Safety
+/// `core` must be a live handle; `token` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_previews_end(core: *const PeCore, token: *const c_char) {
+    // SAFETY: as the caller guarantees
+    let Some(token) = (unsafe { arg(token) }).filter(|token| !token.is_empty()) else {
+        return;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.previews_end(token)) }
+}
+
+/// Settings' "Show attachments in messages": pictures and PDF files after a message's text
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_show_previews(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, true, |core| core.show_previews()) }
+}
+
+/// Turns previews on or off, for the documents built from now on
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_show_previews(core: *const PeCore, on: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_show_previews(on).is_ok()) }
+}
+
+/// Settings' "Show PDF files in messages", under "Show attachments in messages": off when the user turned it off, or
+/// when the core did after a PDF file ended the app (`PdfPreviewsOff`)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pdf_previews(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, true, |core| core.pdf_previews().unwrap_or(true)) }
+}
+
+/// Turns PDF previews on or off; on again, the note that a PDF file ended the app is gone
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_pdf_previews(core: *const PeCore, on: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_pdf_previews(on).is_ok()) }
 }
 
 /// # Safety
