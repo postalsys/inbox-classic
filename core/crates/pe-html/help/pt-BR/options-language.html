@@ -1,31 +1,30 @@
-<!--review--><h1>Configurações</h1>
-<p class="summary">Escolha o idioma do Inbox Classic, como ele mostra e anuncia seus e-mails e o que ele baixa antecipadamente.</p>
-<p>Escolha <b data-settings=""></b>. As configurações ficam em três páginas: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> e <b data-text="ui-download-heading"></b>.<!--os:windows--> Clique em <b data-text="ui-ok"></b> para manter as alterações, ou em <b data-text="ui-apply"></b> para mantê-las e deixar a janela aberta. <b data-text="ui-cancel"></b> desfaz todas as alterações ainda não aplicadas, inclusive os remetentes confiáveis que você removeu e o aplicativo escolhido para os arquivos .eml.<!--/os--><!--os:mac,linux--> Cada alteração entra em vigor imediatamente.<!--/os--></p>
+<h1>Configurações</h1>
+<p class="summary">Escolha o idioma do Inbox Classic e configure a exibição das mensagens, as notificações e o download antecipado dos e-mails.</p>
+<p>Abra <b data-settings=""></b>. As configurações estão divididas em três páginas: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> e <b data-text="ui-download-heading"></b>.<!--os:windows--> Clique em <b data-text="ui-ok"></b> para aplicar as alterações e fechar a janela, ou em <b data-text="ui-apply"></b> para aplicá-las sem fechar a janela. <b data-text="ui-cancel"></b> descarta as alterações ainda não aplicadas, inclusive as remoções da lista de remetentes confiáveis. As escolhas feitas nas configurações de aplicativos padrão do Windows são mantidas.<!--/os--><!--os:mac,linux--> As alterações são aplicadas imediatamente.<!--/os--></p>
 <h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li><b data-text="ui-language-label"></b> escolhe o idioma das janelas e desta ajuda: o idioma do seu sistema ou um dos idiomas da lista. Quando o Inbox Classic não tem o idioma do seu sistema, ele usa o inglês.</li>
-    <li><b data-text="ui-notify-new-mail"></b> mostra uma notificação quando chegam e-mails novos. Ela começa ativada.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> mostra o código de uma mensagem de login na notificação dela. Ela começa desativada, porque uma notificação pode ser lida com a tela bloqueada, e fica indisponível enquanto as notificações estão desativadas.</li>
-    <li><b data-text="ui-send-delay"></b> mantém por alguns segundos na Caixa de Saída a mensagem que você envia, para que você ainda possa cancelá-la com Desfazer. O atraso começa em 10 segundos.</li>
-    <li><b data-text="cmd-default-app"></b> abre os links de e-mail no Inbox Classic, e <b data-text="ui-eml-default"></b> abre os arquivos de mensagem. Consulte <a href="topic:default-mail-program"></a>.</li>
-    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> procura uma nova versão do Inbox Classic de tempos em tempos. Consulte <a href="topic:updates"></a>.</li><!--/os-->
+    <li>Em <b data-text="ui-language-label"></b>, escolha o idioma das janelas e desta ajuda. Você pode usar o idioma do sistema ou outro idioma da lista. Se o Inbox Classic não estiver disponível no idioma do sistema, ele usa o inglês.</li>
+    <li><b data-text="ui-notify-new-mail"></b> mostra uma notificação quando chegam e-mails novos. Esta opção está ativada por padrão.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> mostra os códigos de login diretamente nas notificações das mensagens que os contêm. Esta opção está desativada por padrão, porque as notificações podem ser lidas com a tela bloqueada. Ela só fica disponível se as notificações estiverem ativadas.</li>
+    <li>Em <b data-text="ui-send-delay"></b>, escolha quanto tempo uma mensagem fica na Caixa de Saída antes de ser enviada. Durante esse tempo, você pode cancelar o envio com o comando Desfazer. O tempo de espera padrão é de 10 segundos.</li>
+    <li>Os botões <b data-text="cmd-default-app"></b> e <b data-text="ui-eml-default"></b> permitem definir o Inbox Classic como aplicativo padrão para abrir links de e-mail e arquivos de mensagens. Consulte <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> verifica periodicamente se há uma nova versão do Inbox Classic. Consulte <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
-<p>É necessário reiniciar o Inbox Classic para aplicar a mudança de idioma. Clique em <b data-text="ui-restart-now"></b>, ou em <b data-text="ui-restart-later"></b> para mudá-lo na próxima vez que ele for iniciado.</p>
+<p>O novo idioma é aplicado depois que o Inbox Classic é reiniciado. Clique em <b data-text="ui-restart-now"></b> para reiniciar imediatamente, ou em <b data-text="ui-restart-later"></b> para usar o novo idioma na próxima vez que abrir o aplicativo.</p>
 <h2><b data-text="ui-settings-reading"></b></h2>
 <ul>
-    <li><b data-text="ui-layout-label"></b> define o layout: automático, conforme a largura da janela, clássico ou em colunas. Consulte <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-group-by-conversation"></b> agrupa em uma só linha as mensagens que respondem umas às outras. Ela começa ativada.</li>
-    <li><b data-text="ui-list-pictures"></b> mostra logotipos de marcas, imagens dos contatos e iniciais no layout em colunas. Ela começa ativada.</li>
-    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> mostra as mensagens que você lê e escreve em um fundo escuro enquanto o sistema está no modo escuro. Ela começa ativada.</li><!--/os-->
-    <li><b data-text="ui-pictures-always-option"></b> baixa as imagens de todas as mensagens. Ela começa desativada, porque assim os remetentes podem saber quando você lê as mensagens deles. Consulte <a href="topic:pictures-tracking"></a>.</li>
-    <li><b data-text="ui-trusted-senders-button"></b> lista os remetentes cujas imagens são sempre baixadas, e ali você pode removê-los.</li>
+    <li>Em <b data-text="ui-layout-label"></b>, escolha o layout clássico, o layout em colunas ou a adaptação automática à largura da janela. Consulte <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> agrupa as mensagens da mesma conversa em uma única linha. Esta opção está ativada por padrão.</li>
+    <li><b data-text="ui-list-pictures"></b> mostra logotipos de marcas, imagens do Catálogo de Endereços ou iniciais no layout em colunas. Esta opção está ativada por padrão.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> mostra as mensagens que você lê e escreve em um fundo escuro quando o sistema está no modo escuro. Esta opção está ativada por padrão.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> baixa automaticamente as imagens externas das mensagens, exceto na pasta de lixo eletrônico. Nas partes criptografadas, você precisa autorizar o carregamento de imagens externas a cada abertura. Esta opção está desativada por padrão, porque os remetentes podem descobrir quando você lê suas mensagens. Consulte <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> abre a lista de remetentes cujas imagens são baixadas automaticamente quando o domínio deles é confirmado. Você pode remover remetentes dessa lista.</li>
 </ul>
 <h2><b data-text="ui-download-heading"></b></h2>
 <ul>
-    <li><b data-text="ui-download-ahead"></b> escolhe as mensagens baixadas antes de você abri-las: no início, as mensagens recentes de até 1 MB cada. Consulte <a href="topic:download-ahead"></a>.</li>
-    <li><b data-text="ui-download-limit"></b> limita o espaço ocupado pelas mensagens baixadas de cada conta. O limite começa em 1 GB.</li>
+    <li>Em <b data-text="ui-download-ahead"></b>, escolha quais mensagens baixar antes de abri-las. Por padrão, são baixadas as mensagens dos últimos 30 dias com tamanho de até 1 MB. Consulte <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> limita o espaço ocupado neste computador pelas mensagens baixadas de cada conta. O limite padrão é de 1 GB por conta.</li>
 </ul>
 <!--os:windows--><p>O instalador pede o idioma na primeira instalação e salva essa escolha nesta configuração.</p><!--/os-->
 <!--os:mac--><p>Você também pode escolher o idioma só do Inbox Classic em <i>Ajustes do Sistema &gt; Geral &gt; Idioma e Região &gt; Aplicativos</i>.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>
-<!--/review-->

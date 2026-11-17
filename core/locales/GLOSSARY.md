@@ -177,6 +177,8 @@ Context notes:
 - `ui-event-span` joins dates or date-and-time values; for a same-day event, `$end` is just a time.
 - `agent-original-not-downloaded` applies to both replies and forwards.
 - Keep help references to menu items and buttons in sync when changing their labels.
+- Help control labels (`help.rs::words`) lose access-key markers, ellipses and trailing colons. Add sentence
+  punctuation outside `data-text` tags and check each rendered platform branch for duplicate prepositions.
 - `ui-pictures-*` and the trusted-sender settings concern external images inside messages. `ui-list-pictures-*`
   concerns the sender's picture beside a message: a verified brand logo, then an Address Book picture for a verified
   sender domain, otherwise initials. Do not describe these as the same kind of picture.

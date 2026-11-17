@@ -381,33 +381,19 @@ ui-sign-in-apps-intro = Os aplicativos de login permitem que as contas façam lo
 ui-col-issuer = Emissor
 ui-col-used-by = Usado por
 ui-options-system-default = Padrão do sistema ({ $language })
-# review: new
 ui-settings-general = Geral
-# review: new
 ui-settings-reading = Leitura
-# review: new
 ui-settings-new-mail = E-mails novos
-# review: new
 ui-settings-sending = Envio
-# review: new
-ui-settings-default-apps = Apps padrão
-# review: new
+ui-settings-default-apps = Aplicativos padrão
 ui-settings-message-list = Lista de mensagens
-# review: new
 ui-settings-messages = Mensagens
-# review: new
 ui-settings-language = Idioma
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = &Aplicar
-# review: new
 ui-language-label = &Idioma:
-# review: new
 ui-restart-note = Reinicie o Inbox Classic para mudar o idioma.
-# review: new
-ui-restart-ask = O Inbox Classic mostra { $language } depois de reiniciar. Reiniciar agora?
-# review: new
+ui-restart-ask = Depois de reiniciar, o Inbox Classic usará o idioma { $language }. Reiniciar agora?
 ui-notify-new-mail = &Notificar quando chegarem e-mails novos
 ui-new-folder-title = Nova pasta
 ui-rename-folder-title = Renomear pasta
@@ -578,27 +564,22 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Não foi possível salvar o catálogo de endereços: { $reason }
 ui-code-copied = Código copiado
-# review: changed
 ui-codes-in-notifications = &Mostrar códigos de login nas notificações de e-mails novos
 ui-tool-unread-only = Não lidas
 ui-no-unread = Não há mensagens não lidas aqui.
 ui-pictures-always-sender = Sempre baixar imagens de { $sender }
 ui-pictures-always-domain = Sempre baixar imagens de remetentes do domínio { $domain }
 ui-pictures-unconfirmed = Não foi possível verificar o domínio do remetente ({ $domain }), por isso as imagens desta mensagem não são baixadas automaticamente.
-# review: changed
 ui-pictures-always-option = &Baixar imagens em todas as mensagens
 ui-pictures-always-warning = Os remetentes poderão saber quando você lê as mensagens deles.
 ui-protection-details = &Detalhes...
 ui-protection-details-title = Detalhes de segurança
 ui-download-heading = Download
-# review: changed
 ui-download-ahead = &Baixar mensagens antecipadamente:
 ui-download-ahead-recent = Mensagens recentes até 1 MB cada
 ui-download-ahead-all = Todas as mensagens
 ui-download-ahead-never = Só quando são abertas
-# review: changed
 ui-download-limit = &Limite de armazenamento por conta:
-# review: changed
 ui-send-delay = Tempo &de espera antes do envio:
 ui-send-delay-note = Enquanto uma mensagem aguarda o envio, você pode cancelar o envio com Desfazer.
 ui-dark-messages = Mostrar as mensagens em um fundo escuro quando o sistema está no modo escuro
@@ -611,19 +592,16 @@ ui-send-too-late = { $subject } já foi enviada.
 ui-outbox-status-undo = Será enviada às { $time }
 ui-download-note = As mensagens baixadas antecipadamente abrem imediatamente. Quando o limite de armazenamento é excedido, as cópias locais mais antigas são removidas e baixadas novamente quando você as abrir.
 ui-attachment-downloading = O download desta mensagem ainda não terminou. Tente novamente quando o download estiver concluído.
-# review: changed
 ui-trusted-senders-button = &Remetentes confiáveis...
 ui-trusted-senders-title = Remetentes confiáveis
 ui-trusted-senders-note = As imagens das mensagens destes remetentes são baixadas automaticamente quando seu provedor de e-mail verifica o domínio do remetente.
 ui-trusted-everyone-at = Remetentes do domínio { $domain }
 ui-trusted-senders-empty = Nenhum remetente confiável foi adicionado ainda.
-# review: changed
 ui-eml-default = Abrir arquivos .&eml com o Inbox Classic
 ui-eml-default-done = O Inbox Classic agora abre os arquivos .eml.
 ui-eml-default-failed = Não foi possível definir o Inbox Classic como aplicativo padrão para arquivos .eml: { $reason }
 ui-folders = Pastas
 ui-sorted-by = Ordenado por { $field }
-# review: changed
 ui-layout-label = &Layout:
 ui-columns-note = A janela é larga o suficiente para o layout em colunas. Você pode alterar o layout em Exibir > Layout.
 ui-row-unread = Não lida
@@ -634,10 +612,8 @@ ui-row-messages = { $count ->
     [one] { $count } mensagem
    *[other] { $count } mensagens
 }
-# review: changed
 ui-list-pictures = &Mostrar as imagens dos remetentes na lista de mensagens
-# review: changed
-ui-list-pictures-note = Mostra logotipos de marcas ou imagens do Catálogo de Endereços quando o domínio do remetente é verificado, e as iniciais quando não há imagem. Os logotipos baixados são salvos e reutilizados em várias mensagens.
+ui-list-pictures-note = No layout em colunas, mostra logotipos de marcas ou imagens do Catálogo de Endereços quando o domínio do remetente é verificado, e as iniciais quando não há imagem. Os logotipos baixados são salvos e reutilizados em várias mensagens.
 ui-card-picture = Imagem:
 ui-card-picture-choose = &Escolher...
 ui-picture-not-picture = Este arquivo não é uma imagem PNG ou JPEG.
