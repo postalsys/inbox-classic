@@ -635,7 +635,7 @@ fn an_agent_does_not_answer_encrypted_mail() {
             signature: true,
             ..Default::default()
         };
-        let outcome = w.core.agent_save_draft(&host, &written);
+        let outcome = w.core.agent_save_draft(&host, &written, None);
         match outcome {
             Err(pe_core::Error::Unavailable(why)) => assert!(why.contains("encrypted"), "{why}"),
             other => panic!("{kind:?}: {other:?}"),

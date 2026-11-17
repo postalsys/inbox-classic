@@ -6,7 +6,7 @@
 //! text from strangers that an agent reads as instructions it may follow; nothing in it can answer a question here,
 //! so an agent tricked into sending something still needs the user to say yes, in the app's own window.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 use pe_content::Label;
 use pe_mime::parser::{self, html_to_text, parse_addresses, text_to_html};
@@ -18,6 +18,13 @@ pub use pe_store::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry};
 use pe_i18n::{Text, tr, tr_args};
 
 use crate::{Core, Draft, DraftKind, Error, Event, Outgoing, Result};
+
+mod drafts;
+mod reads;
+
+pub use drafts::OwnDraft;
+pub use drafts::draft_note;
+pub use reads::{AccountOverview, everywhere};
 
 /// How long a message an agent sent waits in the Outbox, where the user can still delete it
 pub const SEND_DELAY: i64 = 30;
@@ -163,6 +170,16 @@ impl AgentAsk {
     }
 }
 
+/// How an agent wrote its text
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum TextFormat {
+    /// Plain text, paragraphs apart by an empty line
+    #[default]
+    Text,
+    /// Markdown, made into the message's HTML here ([`pe_html::markdown_html`]); never HTML of the agent's own
+    Markdown,
+}
+
 /// What an agent wrote, to save as a draft or to send
 #[derive(Debug, Clone, Default)]
 pub struct Written {
@@ -170,11 +187,68 @@ pub struct Written {
     /// The message it answers or forwards, and how
     pub original: Option<(FolderId, u64, DraftKind)>,
     pub outgoing: Outgoing,
-    /// What it wrote, as plain text
+    /// What it wrote, as `format` says
     pub text: String,
+    pub format: TextFormat,
     /// The account's signature under the text, as the user's own messages have it
     pub signature: bool,
 }
+
+impl Written {
+    /// What it wrote as the HTML of a message
+    fn html(&self) -> String {
+        match self.format {
+            TextFormat::Text => text_to_html(&self.text),
+            TextFormat::Markdown => pe_html::markdown_html(&self.text),
+        }
+    }
+
+    /// What it wrote as the send question shows it: as text
+    fn plain_text(&self) -> String {
+        match self.format {
+            TextFormat::Text => self.text.clone(),
+            TextFormat::Markdown => html_to_text(&self.html()).trim().to_string(),
+        }
+    }
+}
+
+impl Asked {
+    /// The answer to come, of a question that is new; one already gone for [`Asked::Before`], which keyless
+    /// questions never are
+    fn receiver(self) -> oneshot::Receiver<AgentAnswer> {
+        match self {
+            Asked::New { answer, .. } => answer,
+            Asked::Before(_) => oneshot::channel().1,
+        }
+    }
+}
+
+/// A question put to the user, or the one put before for the same idempotency key
+#[derive(Debug)]
+pub enum Asked {
+    New {
+        /// What [`Core::agent_send_status`] knows it by
+        ask_id: u64,
+        answer: oneshot::Receiver<AgentAnswer>,
+    },
+    /// The program asked with the same key before: no second question
+    Before(u64),
+}
+
+/// What became of a message an agent asked to send ([`Core::agent_send_status`])
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SendStatus {
+    /// The question waits for the user
+    Waiting,
+    /// The user answered: [`AgentAnswer::Send`], [`AgentAnswer::Compose`] or [`AgentAnswer::DontSend`]
+    Answered(AgentAnswer),
+    /// No such question of this program, or it was answered too long ago to be remembered
+    Unknown,
+}
+
+/// How many answers to send questions are remembered for [`Core::agent_send_status`], and idempotency keys for
+/// sends and drafts
+const REMEMBERED: usize = 500;
 
 /// The user's answer
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -239,6 +313,20 @@ type Answered = Option<(DraftKind, String)>;
 pub(crate) struct Asks {
     next: u64,
     waiting: HashMap<u64, (AgentAsk, oneshot::Sender<AgentAnswer>)>,
+    /// The send questions of each program by the idempotency key it gave them
+    keys: HashMap<(AgentHostId, String), u64>,
+    /// The answers to send questions, newest last: the question, its program, the answer
+    answered: VecDeque<(u64, AgentHostId, AgentAnswer)>,
+    /// The drafts of each program by the idempotency key it gave them: their Message-IDs
+    drafts: HashMap<(AgentHostId, String), String>,
+}
+
+/// Remembers `value` for `key` in `map`, forgetting others when it holds [`REMEMBERED`] already
+fn remember<V>(map: &mut HashMap<(AgentHostId, String), V>, key: (AgentHostId, String), value: V) {
+    if map.len() >= REMEMBERED {
+        map.clear();
+    }
+    map.insert(key, value);
 }
 
 impl Asks {
@@ -675,28 +763,51 @@ impl Core {
 
     /// Puts a question to the user: [`Event::AgentAsk`] tells the windows
     fn ask(&self, ask: AgentAsk) -> Result<oneshot::Receiver<AgentAnswer>> {
-        self.ask_unless(ask, |_| Ok(()))
+        self.ask_unless(ask, None, |_| Ok(())).map(Asked::receiver)
     }
 
     /// [`Core::ask`] unless `refused` says why not, checked under the same hold of the questions' lock as the question
     /// is put up, so two calls of one program at once can not both pass (the yes that counts against a limit is written
-    /// under that lock too, [`Core::agent_answer`])
-    fn ask_unless(
-        &self,
-        ask: AgentAsk,
-        refused: impl FnOnce(&Asks) -> Result<()>,
-    ) -> Result<oneshot::Receiver<AgentAnswer>> {
+    /// under that lock too, [`Core::agent_answer`]). With `key`, an idempotency key the program asked with before
+    /// gives that question ([`Asked::Before`]) rather than a second one.
+    fn ask_unless(&self, ask: AgentAsk, key: Option<&str>, refused: impl FnOnce(&Asks) -> Result<()>) -> Result<Asked> {
         let (sender, receiver) = oneshot::channel();
+        let keyed = key.zip(ask.host_id()).map(|(key, host)| (host, key.to_string()));
         let request = {
             let mut asks = self.asks();
+            if let Some(&before) = keyed.as_ref().and_then(|keyed| asks.keys.get(keyed)) {
+                return Ok(Asked::Before(before));
+            }
             refused(&asks)?;
             asks.next += 1;
             let request = asks.next;
             asks.waiting.insert(request, (ask, sender));
+            if let Some(keyed) = keyed {
+                remember(&mut asks.keys, keyed, request);
+            }
             request
         };
         self.post(Event::AgentAsk { request })?;
-        Ok(receiver)
+        Ok(Asked::New {
+            ask_id: request,
+            answer: receiver,
+        })
+    }
+
+    /// What became of the message program `host` asked to send with question `ask_id` ([`Asked`])
+    pub fn agent_send_status(&self, host: AgentHostId, ask_id: u64) -> SendStatus {
+        let asks = self.asks();
+        if let Some((AgentAsk::Send(ask), _)) = asks.waiting.get(&ask_id)
+            && ask.host.id == host
+        {
+            return SendStatus::Waiting;
+        }
+        asks.answered
+            .iter()
+            .find(|(id, of, _)| *id == ask_id && *of == host)
+            .map_or(SendStatus::Unknown, |(_, _, answer)| {
+                SendStatus::Answered(answer.clone())
+            })
     }
 
     /// Whether agents may connect at all
@@ -821,6 +932,13 @@ impl Core {
                 }])?;
             }
         }
+        // what became of a message to send, for the agent that asks after it
+        if let AgentAsk::Send(sent) = &ask {
+            if asks.answered.len() >= REMEMBERED {
+                asks.answered.pop_front();
+            }
+            asks.answered.push_back((request, sent.host.id, answer.clone()));
+        }
         drop(asks);
         if matches!(ask, AgentAsk::Connect { .. }) {
             self.agents_changed();
@@ -876,7 +994,6 @@ impl Core {
         let Written {
             account,
             original,
-            text,
             signature,
             ..
         } = written;
@@ -917,7 +1034,7 @@ impl Core {
         } else {
             String::new()
         };
-        let body = text_to_html(text) + &pe_html::signature_block(&signature);
+        let body = written.html() + &pe_html::signature_block(&signature);
         outgoing.html = Some(body.clone());
         draft.to = outgoing.to.clone();
         draft.cc = outgoing.cc.clone();
@@ -932,31 +1049,10 @@ impl Core {
         })
     }
 
-    /// Saves what an agent wrote in the Drafts of its account, as [`Core::agent_ask_send`] would send it; logged.
-    /// Refused when the agent saved [`DRAFTS_PER_HOUR`] in the last hour.
-    pub fn agent_save_draft(&self, host: &AgentHost, written: &Written) -> Result<()> {
-        let saved = self.store().agent_log_count(host.id, "save_draft", now() - 3600)?;
-        if saved >= DRAFTS_PER_HOUR {
-            return Err(Error::Unavailable(format!(
-                "An agent may save {DRAFTS_PER_HOUR} drafts an hour, and this one has. Try again later."
-            )));
-        }
-        let account = written.account;
-        let outgoing = self.agent_outgoing(written)?.outgoing;
-        let subject = outgoing.subject.clone();
-        self.save_draft(account, outgoing)?;
-        self.log_agent(&[NewLogEntry {
-            host: host.id,
-            what: "save_draft".into(),
-            account: Some(account),
-            summary: tr_args(Text::AgentLogDraft, &[("subject", (&subject).into())]),
-            ..Default::default()
-        }])
-    }
-
     /// Asks the user whether to send what an agent wrote, a reply or forward when it names the original. Refused now
     /// when it can not be sent as it is, the agent sent too much, or one of its messages waits for the user already.
-    pub fn agent_ask_send(&self, host: &AgentHost, written: &Written) -> Result<oneshot::Receiver<AgentAnswer>> {
+    /// With `key`, an idempotency key the program asked with before gives that question again ([`Asked::Before`]).
+    pub fn agent_ask_send(&self, host: &AgentHost, written: &Written, key: Option<&str>) -> Result<Asked> {
         let account = written.account;
         let Made {
             outgoing,
@@ -998,14 +1094,14 @@ impl Core {
             from,
             recipients,
             subject: outgoing.subject.clone(),
-            text: shown_text(&written.text, &signature),
+            text: shown_text(&written.plain_text(), &signature),
             original: answered,
             attachments,
             outgoing,
             draft,
         }));
         // the hour's sends counted with the question put up: a yes logs its send under the same lock
-        self.ask_unless(ask, |asks| {
+        self.ask_unless(ask, key, |asks| {
             asks.one_at_a_time(host.id, |ask| matches!(ask, AgentAsk::Send(_)), "message")?;
             let sent = self.store().agent_log_count(host.id, "send", now() - 3600)?;
             if sent >= SENDS_PER_HOUR {
@@ -1082,7 +1178,7 @@ impl Core {
             logged: Default::default(),
         };
         let count = ask.lists.len() as u64;
-        let answer = self.ask_unless(AgentAsk::Unsubscribe(Box::new(ask.clone())), |asks| {
+        let answer = self.ask_unless(AgentAsk::Unsubscribe(Box::new(ask.clone())), None, |asks| {
             asks.one_at_a_time(
                 host.id,
                 |ask| matches!(ask, AgentAsk::Unsubscribe(_)),
@@ -1097,7 +1193,7 @@ impl Core {
             }
             Ok(())
         })?;
-        Ok((ask, answer))
+        Ok((ask, answer.receiver()))
     }
 
     /// Asks the user whether an agent may unsubscribe from the mailing lists of messages `uids` of `folder`, in one

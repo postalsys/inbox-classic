@@ -1408,10 +1408,16 @@ impl Worker {
         let moved_from = outgoing.draft_account.filter(|from| *from != self.account);
         let time = unix_now();
         let settings = self.sender(store, &outgoing)?;
+        // an agent's draft says so in Drafts alone
+        let agent = outgoing.agent.clone();
         let built = build(settings, outgoing, time, crate::compose::draft_message, keys).await?;
+        let raw = match agent {
+            Some(agent) => crate::compose::with_agent_header(built.raw, &agent),
+            None => built.raw,
+        };
         Ok(upload::Upload::Draft {
             drafts: drafts.id,
-            raw: built.raw,
+            raw,
             message_id,
             time,
             moved_from,
