@@ -5,26 +5,26 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Catalan (ca) combined agent additions, then nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Recheck preview-pane platform work and review its nine preview IDs plus both help insertions when their UI context is ready.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR. Phase2 reopens only their affected help passages.
+- **Next: Review Norwegian Bokmål (nb) combined agent additions, then sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers now exist on all three platforms: recheck the recorded UI snapshot, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca.
 - Current scope: 34,400 catalog entries and 1,356 help topics.
-  Completed: 21,340 entries and 768 full topics; pending: 13,060 entries and 588 topics.
-  Historical catalog improvements: 3,809. Importing drafts earns no review credit.
+  Completed: 21,351 entries and 770 full topics; pending: 13,049 entries and 586 topics.
+  Historical catalog improvements: 3,813. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French needed that correction; German/Spanish/Estonian/Dutch/Italian/both Portuguese variants already convey the distinction.
+  contains no instructions. French needed that correction; the other completed languages, including Catalan, already convey the distinction.
 - PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
   `PostalExpress-preview2`. The six new IDs per language and both help insertions are imported from `03568aef`;
   its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
-  Linux reader/webview preview handlers have now appeared as uncommitted work. Recheck final platform wiring,
-  settings and layout before reviewing the preview strings and recovery instruction.
+  Preview controls and attachment handlers now exist on all three platforms. Their 21-file UI/settings snapshot
+  and inspected behavior are recorded. Check Reading-page shortcuts, wrapping and available screenshots next.
   An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
@@ -2449,3 +2449,15 @@ Brazilian Portuguese structural checker has 1,456 expected mark-only diagnostics
 Linux preview handlers appeared in the other worktree during this batch. Their source hashes and observed calls are recorded as unfinished platform context; no preview wording has been marked reviewed on that basis.
 
 Review Catalan (ca) combined agent additions, then nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Recheck preview-pane platform work and review its nine preview IDs plus both help insertions when their UI context is ready.
+
+## Catalan combined agent additions
+
+Reviewed 11 entries and both agent help topics. Four catalog values and 13 help wording lines improved; seven good values retained. The text now explains selected-list consent, the rolling per-program quota, optional signature text, read-only rule previews and the save/autosave boundary for agent-owned drafts. Catalan vós, singular imperative controls and the existing correct malicious-instructions warning are preserved. All older unmarked help passages remain unchanged.
+
+Catalan structural checker has 1,456 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 11 reviewed entries, 4 changed values, ten help blocks and 13 changed help wording lines. All older unmarked prose, tags, attributes, controls, platform branches, literal keys and generated IDs retained; variable sets, selectors and access-key counts intact. Windows unsubscribe C/N keys are distinct; shared Mac/Linux labels are plain. All three platform help joins inspected. Seven notice UI hashes match; no backend runtime change since the recorded snapshot. Global reconciliation: 21,389 unmarked entries, 10,736 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1,314 entries/341 passages reconcile. Source audit covers 44 worktrees/185 refs, exact integrated source trees and 290 unchanged old copies, with no additional translation work. HTML regenerated; git diff --check passes. No tests or build run for this wording batch.
+
+All three platforms now have preview settings and attachment-link/image handlers. The exact 21-file snapshot and inspected behavior are recorded separately; no native UI or test run was performed. The earlier missing-callers concern is superseded. Preview wording remains marked until its actual controls, shortcuts and layout are reviewed.
+
+Review Norwegian Bokmål (nb) combined agent additions, then sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers now exist on all three platforms: recheck the recorded UI snapshot, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.
+
+The preview backend delta was also inspected: the core/FFI additions are a crash-simulation test hook and tests; the HTML renderer now puts filename/size captions above preview pages. The more-pages link remains below. Exact companion snapshots are recorded, and no tests were run. The old source comment placing PDF details below the pages is now stale; use the actual renderer context.

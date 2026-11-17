@@ -329,6 +329,11 @@ Plurals: `[one]` (exactly 1) and `*[other]` (0, 2 and more). A literal 1 in `[on
 - Provider prompts use the provider name followed by a colon so named providers and the fallback work without
   changing the article or preposition. Cc/Cco controls use Alt+C / Alt+O on Windows and Linux.
 
+- Agent actions use "cancel·lar subscripcions" and "llistes de correu", matching the existing reader command.
+  A cancellation is a request, not a guarantee. "Text de la signatura" is the optional account footer, distinct from "signatura digital".
+- Keep "descartar l’esborrany" for abandoning an agent-created draft and explain its permanent removal. Saving,
+  including autosave, ends agent access; opening alone does not. Prose keeps vós, while buttons use singular imperatives.
+
 ### Čeština (cs)
 
 Terms: Doručená pošta; Pošta k odeslání; Odeslaná pošta; Odstraněná pošta; Koncepty; Nevyžádaná pošta; zpráva;

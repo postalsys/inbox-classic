@@ -435,8 +435,7 @@ day-sunday = diumenge
 ## Agents d’IA
 
 agent-level-read = Llegir el correu: accedir a carpetes, llistes de missatges, cerques i contingut dels missatges
-# review: changed
-agent-level-organize = Organitzar el correu: canviar l’estat de lectura, marcar amb bandera o com a correu brossa, moure missatges i suprimir-los enviant-los a Elements suprimits
+agent-level-organize = Organitzar el correu: canviar l’estat de lectura i les banderes, gestionar el correu brossa, moure i arxivar missatges, crear carpetes, suprimir missatges (movent-los a Elements suprimits) i cancel·lar subscripcions a llistes de correu amb la vostra autorització
 agent-level-drafts = Escriure esborranys perquè els envieu vós
 agent-level-send = Enviar correu, amb la vostra aprovació per a cada missatge
 agent-connect-title = { $program } vol fer servir el vostre correu
@@ -485,11 +484,8 @@ agent-log-composed = Ha obert «{ $subject }» en una finestra de composició pe
 agent-log-refused = Heu rebutjat l’enviament de «{ $subject }»
 agent-log-sent = Ha posat «{ $subject }» a la cua per enviar-lo a { $to }
 agent-log-draft = Ha desat l’esborrany «{ $subject }»
-# review: new
 agent-log-draft-replaced = Ha substituït l’esborrany «{ $subject }»
-# review: new
 agent-log-draft-discarded = Ha descartat l’esborrany «{ $subject }»
-# review: new
 agent-draft-note = { $program }, un agent d’IA, ha escrit aquest esborrany. Comproveu els destinataris i el text abans d’enviar-lo.
 agent-log-read = Ha marcat com a llegit «{ $subject }»
 agent-log-unread = Ha marcat com a no llegit «{ $subject }»
@@ -502,19 +498,15 @@ agent-log-not-junk = Ha marcat «{ $subject }» com a correu legítim
 agent-log-archived = Ha arxivat «{ $subject }»
 agent-log-folder = Ha creat la carpeta «{ $name }»
 agent-log-unsubscribed = S’ha donat de baixa de la llista de «{ $subject }»
-# review: new
-agent-log-unsubscribe-failed = No s’ha pogut cancel·lar la subscripció a la llista de «{ $subject }»: { $reason }
-# review: new
-agent-log-unsubscribe-refused = No us heu donat de baixa de { $senders }
-# review: new
+agent-log-unsubscribe-failed = No s’ha pogut cancel·lar la subscripció a la llista de correu associada al missatge «{ $subject }»: { $reason }
+agent-log-unsubscribe-refused = No heu autoritzat la cancel·lació de subscripcions. Remitents: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } vol cancel·lar la vostra subscripció a una llista de correu
    *[other] { $program } vol cancel·lar la vostra subscripció a { $count } llistes de correu
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic demana a la llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix. No s’envia res més, i els missatges que teniu es queden on són.
-   *[other] Inbox Classic demana a cada llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix la llista. No s’envia res més, i els missatges que teniu es queden on són.
+    [1] Inbox Classic demana a la llista de correu següent que deixi d’enviar-vos missatges, fent servir l’opció de cancel·lació amb un sol clic. No s’envia res més. Els missatges que ja teniu no es modifiquen ni es mouen.
+   *[other] Inbox Classic demana a cadascuna de les llistes de correu següents que deixi d’enviar-vos missatges, fent servir l’opció de cancel·lació amb un sol clic. No s’envia res més. Els missatges que ja teniu no es modifiquen ni es mouen.
 }
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
