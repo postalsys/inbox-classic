@@ -425,8 +425,7 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Leer el correo: consultar carpetas y mensajes, y realizar búsquedas
-# review: changed
-agent-level-organize = Organizar el correo: marcar como leído o no leído, añadir marcas, gestionar el correo no deseado, mover mensajes y enviarlos a Elementos eliminados
+agent-level-organize = Organizar el correo: cambiar el estado de lectura y las marcas, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a Elementos eliminados, crear carpetas y cancelar suscripciones a listas de correo con su autorización
 agent-level-drafts = Escribir borradores para que usted los envíe
 agent-level-send = Enviar correo, cada mensaje solo después de que usted lo apruebe
 agent-connect-title = { $program } solicita acceso a su correo
@@ -484,19 +483,15 @@ agent-log-not-junk = «{ $subject }» marcado como correo deseado
 agent-log-archived = Se archivó «{ $subject }»
 agent-log-folder = Se creó la carpeta «{ $name }»
 agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
-# review: new
 agent-log-unsubscribe-failed = No se pudo cancelar la suscripción a la lista que envió «{ $subject }»: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Usted no canceló la suscripción a { $senders }
-# review: new
+agent-log-unsubscribe-refused = No canceló la suscripción a estas listas: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } quiere cancelar su suscripción a una lista de correo
    *[other] { $program } quiere cancelar su suscripción a { $count } listas de correo
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic pide a la lista siguiente que deje de enviarle correo, mediante la opción de un solo clic que ofrece. No se envía nada más, y los mensajes que ya tiene se quedan donde están.
-   *[other] Inbox Classic pide a cada una de las listas siguientes que deje de enviarle correo, mediante la opción de un solo clic que ofrece la lista. No se envía nada más, y los mensajes que ya tiene se quedan donde están.
+    [1] Para solicitar la baja de la lista indicada, Inbox Classic usa la opción de un clic que esta ofrece. No se envía nada más. Los mensajes que ya tiene no se modifican.
+   *[other] Para solicitar la baja de las listas indicadas, Inbox Classic usa la opción de un clic que ofrece cada lista. No se envía nada más. Los mensajes que ya tiene no se modifican.
 }
 
 ## Keys

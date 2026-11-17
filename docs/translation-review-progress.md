@@ -5,14 +5,13 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Spanish agent unsubscribe review**, then Estonian/French and the remaining 24 languages.
-  German is complete: eight entries reviewed, three values improved and both help targets updated.
-  Source-only preview/MCP import is validated: 280 new entries, 28 source-changed entries and 56 changed help
-  topics are now in the checkout/report. Nineteen completed entries and 36 topics reopened. Previously reviewed
-  wording is retained where English changed, with exact source candidates saved for manual adaptation.
+- **Next: Estonian agent unsubscribe review, then French and the remaining 24 languages.**
+  Agent additions complete: de, es. Each has eight entries and both affected help topics reviewed.
+  The source-only preview/MCP import adds 280 entries, changes 28 source entries and affects 56 help topics.
+  Previously reviewed wording is retained where English changed, with exact source candidates saved for adaptation.
 - Current scope: 34,148 catalog entries and 1,352 help topics.
-  Completed: 21,260 entries and 786 full topics; pending: 12,888 entries and 566 topics.
-  Historical catalog improvements: 3,779. Importing drafts earns no review credit.
+  Completed: 21,268 entries and 788 full topics; pending: 12,880 entries and 564 topics.
+  Historical catalog improvements: 3,782. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
@@ -2308,3 +2307,11 @@ all inventories/hashes reconcile. Global checks account for 21,298 unmarked entr
 14 verified baseline pairs; since-start 1,153 entries/273 passages match the pending queue. Report refreshed.
 No test suites or repeated build. The new upstream merge contains precisely the already imported MCP translations.
 Continue Spanish agent additions next; PDF recovery instructions stay pending actual platform setting callers.
+
+## Spanish agent unsubscribe review
+
+Reviewed eight strings and four marked help blocks across two topics. Three catalog values and six help lines now read more naturally. The permission lists the added actions; the refusal log introduces sender addresses clearly. Help explains one batch confirmation, the per-program rolling limit including failed approved requests, and the optional text signature. Five good catalog values and the positive unsubscribe help action were retained. Every earlier unmarked passage is unchanged.
+
+Spanish static checker has1,453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 IDs,3 changed values and6 help wording lines; every other byte retained. Help tags/attributes, controls, platform branches and literal keys unchanged. All platform label joins inspected; Windows C/N are distinct, plain Mac/Linux labels retained. Global reconciliation:21,306 unmarked entries,10,667 help lines and14 verified baseline pairs; latest hashes match. All28 full inventories and since-start1,145 entries/269 passages reconcile. HTML regenerated; git diff --check passes. No test suites or build run.
+
+Estonian agent unsubscribe review, then French and the remaining 24 languages. PDF recovery instructions remain pending actual platform setting callers.
