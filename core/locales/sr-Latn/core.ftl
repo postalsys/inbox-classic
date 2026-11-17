@@ -639,62 +639,44 @@ pgp-publish-done = Vaš ključ može da se pronađe na keys.openpgp.org pretrago
 pgp-publish-failed = Ključ nije moguće objaviti: { $error }
 pgp-keyserver-off = Pretraga ključeva na serveru keys.openpgp.org isključena je u podešavanjima { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [1] Šifrovano i potpisano: mogu da je pročitaju samo vi i { $addresses }.
-   *[other] Šifrovano i potpisano: mogu da je pročitaju samo vi i njeni primaoci ({ $count }).
+    [1] Poruka će biti šifrovana i potpisana pri slanju. Sadržaj možete da pročitate samo vi i { $addresses }.
+    [one] Poruka će biti šifrovana i potpisana pri slanju. Sadržaj možete da pročitate samo vi i { $count } primalac.
+    [few] Poruka će biti šifrovana i potpisana pri slanju. Sadržaj možete da pročitate samo vi i { $count } primaoca.
+   *[other] Poruka će biti šifrovana i potpisana pri slanju. Sadržaj možete da pročitate samo vi i { $count } primalaca.
 }
-# review: new
-pgp-compose-encrypt-ready = Biće šifrovana i potpisana. Dodajte primaoce čije ključeve imate.
-# review: new
+pgp-compose-encrypt-ready = Poruka će biti šifrovana i potpisana pri slanju. Dodajte primaoce za koje imate upotrebljive ključeve.
 pgp-compose-missing = { $count ->
-    [1] { $addresses } nema ključ, pa poruka još ne može da se šifruje.
-   *[other] Primaoci bez ključa ({ $count }): { $addresses }. Zato poruka još ne može da se šifruje.
+    [1] Za ovog primaoca nema upotrebljivog ključa: { $addresses }. Poruka još ne može da se šifruje.
+    [one] { $count } primalac nema upotrebljiv ključ: { $addresses }. Poruka još ne može da se šifruje.
+    [few] { $count } primaoca nemaju upotrebljiv ključ: { $addresses }. Poruka još ne može da se šifruje.
+   *[other] { $count } primalaca nema upotrebljiv ključ: { $addresses }. Poruka još ne može da se šifruje.
 }
-# review: new
 pgp-compose-looking = Traže se ključevi za: { $addresses }...
-# review: new
-pgp-compose-signed = Potpisano: primaoci mogu da provere da je od vas i da nije menjana.
-# review: new
-pgp-compose-reply-clear = Nije šifrovano, iako je poruka na koju odgovara ili koju prosleđuje bila šifrovana.
-# review: new
-pgp-compose-encrypted-files = Priložene su datoteke šifrovane poruke, pa ova poruka može da se pošalje samo šifrovana. Uključite Šifruj ili uklonite te datoteke.
-# review: new
-pgp-compose-sign-tip = Potpišite poruku svojim ključem kako bi primaoci mogli da provere da je od vas i da nije menjana
-# review: new
-pgp-compose-sign-tip-encrypted = Šifrovana poruka je uvek potpisana
-# review: new
-pgp-compose-encrypt-tip = Šifrujte poruku kako bi samo vi i njeni primaoci mogli da je pročitaju
-# review: new
-pgp-compose-make-key = Još nemate ključ za { $address }. Da li želite da ga napravite sada? Sa njim vaše poruke mogu da se potpisuju i šifruju.
-# review: new
-pgp-compose-key-unusable = Vaš ključ za { $address } ne može da se koristi ({ $state }). Otvorite prozor Ključevi za šifrovanje da biste uvezli njegovu rezervnu kopiju ili napravili novi ključ.
-# review: new
-pgp-compose-encrypt-off-quote = Ova poruka citira ili prosleđuje šifrovanu poruku. Bez šifrovanja ne može da se pošalje dok ne uklonite citirani sadržaj. Da li ipak želite da isključite šifrovanje?
-# review: new
-pgp-compose-encrypt-off-reply = Ova poruka odgovara na šifrovanu poruku ili je prosleđuje. Bez šifrovanja vašu poruku može da pročita svako ko njome rukuje usput. Da li želite da isključite šifrovanje?
-# review: new
+pgp-compose-signed = Poruka će biti digitalno potpisana pri slanju. Primaoci će moći da provere potpis i da li je sadržaj izmenjen.
+pgp-compose-reply-clear = Šifrovanje je isključeno, iako je izvorna poruka bila šifrovana.
+pgp-compose-encrypted-files = Poruka sadrži priloge iz šifrovane poruke i može da se pošalje samo šifrovana. Uključite opciju „Šifruj“ ili uklonite te priloge.
+pgp-compose-sign-tip = Digitalno potpišite poruku pri slanju da bi primaoci mogli da provere potpis i da li je sadržaj izmenjen
+pgp-compose-sign-tip-encrypted = Šifrovane poruke se uvek potpisuju pri slanju
+pgp-compose-encrypt-tip = Šifrujte sadržaj poruke pri slanju tako da ga možete pročitati samo vi i primaoci
+pgp-compose-make-key = Još niste podesili sopstveni ključ za adresu { $address }. Da li želite da ga napravite sada? Njime možete da potpisujete i šifrujete poruke.
+pgp-compose-key-unusable = Vaš ključ za adresu { $address } ne može da se koristi. Razlog: { $state }
+    Otvorite prozor „Ključevi za šifrovanje“ da biste uvezli rezervnu kopiju tog ključa ili napravili novi.
+pgp-compose-encrypt-off-quote = Poruka još sadrži tekst, slike ili priloge iz šifrovane poruke. Uklonite taj sadržaj pre slanja bez šifrovanja. Da li ipak želite da isključite šifrovanje?
+pgp-compose-encrypt-off-reply = Izvorna poruka je bila šifrovana. Ako odgovor ili prosleđenu poruku pošaljete bez šifrovanja, serveri e-pošte mogu da pročitaju sadržaj. Da li želite da isključite šifrovanje?
 pgp-recipient-verified = Ključ proveren
-# review: new
 pgp-recipient-found = Ključ nije proveren
-# review: new
 pgp-recipient-own = Vaš ključ
-# review: new
 pgp-recipient-looking = Traži se ključ...
-# review: new
 pgp-recipient-missing = Nema ključa
-# review: new
-pgp-recipient-not-found = Nema ključa: { $date } nije pronađen nijedan
-# review: new
+pgp-recipient-not-found = Nije pronađen ključ. Poslednja pretraga: { $date }
 pgp-recipient-unusable = Ključ ne može da se koristi: { $state }
-# review: new
-pgp-recipients-intro = Poruka se šifruje ključem svakog primaoca i vašim.
-# review: new
+pgp-recipients-intro = Poruka će biti šifrovana ključevima primalaca i vašim ključem.
 pgp-recipients-intro-missing = { $count ->
-    [1] Jedan primalac nema ključ za šifrovanje. Pronađite njegov ključ, uklonite ga iz ove poruke ili je pošaljite bez šifrovanja.
-    [one] { $count } primalac nema ključ za šifrovanje. Pronađite njihove ključeve, uklonite ih iz ove poruke ili je pošaljite bez šifrovanja.
-    [few] { $count } primaoca nemaju ključ za šifrovanje. Pronađite njihove ključeve, uklonite ih iz ove poruke ili je pošaljite bez šifrovanja.
-   *[other] { $count } primalaca nema ključ za šifrovanje. Pronađite njihove ključeve, uklonite ih iz ove poruke ili je pošaljite bez šifrovanja.
+    [1] Jedan primalac nema upotrebljiv ključ. Pronađite ključ ili uklonite primaoca iz poruke. Slanje bez šifrovanja je moguće samo ako poruka ne sadrži tekst, slike ili priloge iz šifrovanih poruka.
+    [one] { $count } primalac nema upotrebljiv ključ. Pronađite ključeve ili uklonite te primaoce iz poruke. Slanje bez šifrovanja je moguće samo ako poruka ne sadrži tekst, slike ili priloge iz šifrovanih poruka.
+    [few] { $count } primaoca nemaju upotrebljiv ključ. Pronađite ključeve ili uklonite te primaoce iz poruke. Slanje bez šifrovanja je moguće samo ako poruka ne sadrži tekst, slike ili priloge iz šifrovanih poruka.
+   *[other] { $count } primalaca nema upotrebljiv ključ. Pronađite ključeve ili uklonite te primaoce iz poruke. Slanje bez šifrovanja je moguće samo ako poruka ne sadrži tekst, slike ili priloge iz šifrovanih poruka.
 }
 pgp-details-part = Deo { $number }: { $label }
 pgp-details-signed = Potpisano { $when } ključem { $key }

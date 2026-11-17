@@ -807,6 +807,12 @@ Review notes (round 2):
 - "Podaci za prijavu" covers passwords and OAuth credentials; importing an unprotected setup requires
   another password or browser sign-in. Cc/Bcc and Alt+C/Alt+B remain unchanged.
 - All 32 actual menu/context/dialog scopes have distinct access keys, including native Serbian letters.
+- Compose explanations keep formal plural and feminine agreement with "poruka"; protection is applied "pri slanju".
+  Use "upotrebljiv ključ" when keys must be usable, and distinguish digital-signature checks from key ownership.
+- Compose recipient counts use exact `[1]`, then numeric `[one]` (21), `[few]` (2, 22), and `*[other]` (5, 11).
+  Keep count placeholders in every category branch. Complete reasons follow "Razlog:", dates "Poslednja pretraga:".
+- Unencrypted sending requires removing inherited text, images and attachments. Removing recipients affects the
+  message fields, not contacts. Keep the existing "Žutonarandžasta" color term shared with reading-security help.
 
 ### Suomi (fi)
 

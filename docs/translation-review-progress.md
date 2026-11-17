@@ -5,14 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Serbian Latin compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb.
+- **Next: Turkish compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn.
   Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
   recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
+- Remaining compose languages: tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
   Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 21,071 entries and 810 full topics; pending: 12,797 entries and 542 topics.
-  Historical catalog improvements: 3,692.
+  Completed: 21,111 entries and 812 full topics; pending: 12,757 entries and 540 topics.
+  Historical catalog improvements: 3,708.
 - All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
   catalogs/generated identifiers; implementation provenance is recorded separately.
 - Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
@@ -2206,3 +2206,15 @@ All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark dia
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,053 entries/195 passages reconcile. No tests.
 Completed 21,071 entries/810 topics; pending 12,797/542; scope 33,868/1,352; historical catalog improvements 3,692. Next: Serbian Latin. REVIEWED remains unchanged.
+
+
+### Serbian Latin compose signing and encryption reviewed
+
+Reviewed all 40 compose additions. Retained 17 natural app labels and seven core values; improved 16 core values. Kept Ekavian, formal plural prose, feminine agreement with poruka and protection pri slanju. Expanded the encrypted/missing statuses to exact [1] plus [one]/[few]/*[other], with numeric count placeholders and natural primalac/primaoca/primalaca forms. Signature checks remain distinct from ownership. Usable keys, complete Razlog explanations and Poslednja pretraga dates fit actual callers. Sending without encryption requires removal of inherited protected text, images and attachments.
+
+Reviewed the new help topic and writing-help insertion, improving 14 help lines while preserving all earlier writing-help prose. Help covers cross-platform status symbols, own/unusable keys, the selected From key, recipient removal and encrypted drafts/sent copies. Retained Žutonarandžasta to match existing reading-security help. Glossary updated.
+
+All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 16 value edits and 40 mark removals; all other catalog bytes preserved. Plural selection inspected for 0,1,2,3,4,5,11,12,14,21,22,24,25,101, with representative value substitutions and actual positive-count callers/separate zero-recipient state checked. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked in commands.toml. No relevant Serbian screenshots found; source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,145 unmarked messages, 10,599 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.
+
+Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,013 entries/193 passages reconcile. No tests.
+Completed 21,111 entries/812 topics; pending 12,757/540; scope 33,868/1,352; historical catalog improvements 3,708. Next: Turkish. REVIEWED remains unchanged.
