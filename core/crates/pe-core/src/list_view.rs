@@ -13,7 +13,7 @@ use std::collections::BTreeSet;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
-use pe_store::{FolderId, Generation, Message, MessageRef, RowRef, Scope, Search, Show, Sort};
+use pe_store::{Anchor, FolderId, Generation, Message, MessageRef, RowRef, Scope, Search, Show, Sort};
 
 use crate::{Action, Core, NextUnread, Result, Selected, Summary};
 
@@ -209,6 +209,32 @@ impl Kept {
             .filter(|(_, row)| row.at == wanted)
             .map(|(index, _)| index)
             .min_by_key(|index| index.abs_diff(hint))
+    }
+
+    /// Where the page of `limit` rows at `offset` can be read from rather than counted from the top (keyset paging,
+    /// see [`pe_store::Anchor`]): the row just above it or just below it in a page read at `at`, or else the end of
+    /// the list when the page is nearer to it. None for the top, and for a list with conversations open, whose rows
+    /// are not all of their own conversations.
+    fn anchor(&self, offset: u64, limit: u64, at: When) -> Option<Anchor> {
+        if offset == 0 || self.search.threads.as_ref().is_some_and(|open| !open.is_empty()) {
+            return None;
+        }
+        let row = |index: u64| {
+            self.pages
+                .iter()
+                .rev()
+                .filter(|p| p.at == at)
+                .find(|p| index >= p.offset && index - p.offset < p.rows.len() as u64)
+                .map(|p| p.rows[(index - p.offset) as usize].at)
+        };
+        if let Some(above) = offset.checked_sub(1).and_then(row) {
+            return Some(Anchor::Above(above));
+        }
+        if let Some(below) = row(offset + limit) {
+            return Some(Anchor::Below(below));
+        }
+        let rows = self.rows.filter(|_| self.at == at)?;
+        (offset > rows / 2).then_some(Anchor::End(rows))
     }
 
     /// Whether the list was counted at `at` (nothing was written since)
@@ -498,11 +524,11 @@ impl ListView {
         })
     }
 
-    /// The messages of the list and how many of them are unread, for the status bar (see [`Core::list_counts`])
+    /// The messages of the list and how many of them are unread, for the status bar (see [`Core::count_search`])
     pub fn counts(&self, core: &Core) -> Result<(u64, u64)> {
         self.remembered(core, (0, 0), |search, moment| {
             self.memo.with(moment, |kept| {
-                kept.counted(|k| &mut k.counts, || core.list_counts(search))
+                kept.counted(|k| &mut k.counts, || core.count_search(search))
             })
         })
     }
@@ -512,7 +538,7 @@ impl ListView {
     pub fn counts_and_rows(&self, core: &Core) -> Result<(u64, u64, u64)> {
         self.remembered(core, (0, 0, 0), |search, moment| {
             self.memo.with(moment, |kept| {
-                let (total, unread) = kept.counted(|k| &mut k.counts, || core.list_counts(search))?;
+                let (total, unread) = kept.counted(|k| &mut k.counts, || core.count_search(search))?;
                 let rows = kept.counted(|k| &mut k.rows, || rows_of(core, search, self.grouped, total))?;
                 Ok((total, unread, rows))
             })
@@ -747,21 +773,25 @@ impl ListView {
             let before = core.generation()?;
             if counted {
                 load.lists_recipients = core.lists_recipients(&search)?;
-                (load.total, load.unread) = core.list_counts(&search)?;
+                (load.total, load.unread) = core.count_search(&search)?;
                 load.rows = rows_of(core, &search, self.grouped, load.total)?;
                 if dropped() {
                     return Ok(None);
                 }
-            }
-            load.messages = core.search(&search, self.sort, offset, LIST_PAGE)?;
-            if dropped() {
-                return Ok(None);
             }
             let moment = Moment {
                 search: &search,
                 sort: self.sort,
                 at,
             };
+            // from a row of a page read before next to it, or from the end, rather than from the top
+            load.messages = match self.memo.with(moment, |kept| kept.anchor(offset, LIST_PAGE, at)) {
+                Some(anchor) => core.search_from(&search, self.sort, offset, LIST_PAGE, anchor)?,
+                None => core.search(&search, self.sort, offset, LIST_PAGE)?,
+            };
+            if dropped() {
+                return Ok(None);
+            }
             let page = Page {
                 offset,
                 limit: LIST_PAGE,
