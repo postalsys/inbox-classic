@@ -2,13 +2,16 @@
 // agent host would and runs one fixed conversation through it, writing each answer as a line of JSON to OUT, so the
 // test can answer the app's questions (let it in, send the message) and check what the agent saw and changed.
 // The tests run it from a copy of the Node.js binary named "My AI agent", which is what the app then calls it.
+// After the send it waits for the file OUT.unsubscribe, which the test makes once it has looked at the Outbox and the
+// AI Agents window, and then asks to unsubscribe from the two mailing lists the test added.
 //   APP=<executable> STORE=<store> OUT=<file> "My AI agent" agent.mjs
 import { spawn } from 'node:child_process';
-import { appendFileSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, rmSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 
 const { APP, STORE, OUT } = process.env;
 writeFileSync(OUT, '');
+rmSync(`${OUT}.unsubscribe`, { force: true });
 const record = (step, result) => appendFileSync(OUT, JSON.stringify({ step, result }) + '\n');
 
 const relay = spawn(APP, ['--mcp', '--store', STORE], { stdio: ['pipe', 'pipe', 'inherit'] });
@@ -52,7 +55,7 @@ try {
     const uids = unread.messages.map(message => message.uid);
     // read without marking read, then marked read: the windows show it
     record('read', await call('get_message', { folder: inbox, uid: uids[0] }));
-    record('marked', await call('mark_read', { folder: inbox, uids }));
+    record('marked', await call('mark_messages_read', { folder: inbox, uids }));
     // waits for the user's yes
     record(
         'sent',
@@ -63,6 +66,18 @@ try {
             text: 'Hi Pat,\n\nWould Friday at noon work for lunch? The usual place.\n\nThanks!'
         })
     );
+    // the test's go: the Outbox and the AI Agents window are checked
+    for (let waited = 0; !existsSync(`${OUT}.unsubscribe`); waited += 200) {
+        if (waited > 180000) throw new Error('the test never said to unsubscribe');
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    // two list messages, added by the test before the agent starts, found by their subject
+    const lists = await call('search_messages', { query: 'subject:"Weekly digest" OR subject:"Monthly offers"' });
+    record('lists', lists);
+    // downloads them: the one-click way is read from the message itself
+    for (const message of lists.messages) await call('get_message', { folder: message.folder, uid: message.uid });
+    // waits for the user's answer
+    record('unsubscribe', await call('unsubscribe_from_list', { folder: inbox, uids: lists.messages.map(message => message.uid) }));
     record('done', true);
 } catch (error) {
     record('error', String(error));

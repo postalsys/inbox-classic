@@ -149,6 +149,19 @@ impl FlagColor {
         FlagColor::Gray,
     ];
 
+    /// Its name in English, lowercase (`red`): what the catalogs select its word by, and what an AI agent is told
+    pub fn id(self) -> &'static str {
+        match self {
+            FlagColor::Red => "red",
+            FlagColor::Orange => "orange",
+            FlagColor::Yellow => "yellow",
+            FlagColor::Green => "green",
+            FlagColor::Blue => "blue",
+            FlagColor::Purple => "purple",
+            FlagColor::Gray => "gray",
+        }
+    }
+
     /// Its keyword bits: red none, orange bit 0, yellow bit 1, green 0 and 1, blue 2, purple 0 and 2, gray 1 and 2
     pub fn bits(self) -> u8 {
         self as u8 - 1

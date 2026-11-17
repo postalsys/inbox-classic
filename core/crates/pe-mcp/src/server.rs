@@ -9,14 +9,14 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use pe_core::Core;
-use pe_core::agents::{AgentAnswer, Connect, HostInfo};
+use pe_core::agents::{AgentAnswer, AgentLevels, Connect, HostInfo};
 use serde_json::{Value, json};
 use tokio::io::{AsyncRead, AsyncWrite, BufReader};
 
 use crate::protocol::{self, INVALID_PARAMS, INVALID_REQUEST, Incoming, METHOD_NOT_FOUND, NOT_ALLOWED};
 
 /// The versions of MCP this server speaks, newest first
-const VERSIONS: &[&str] = &["2025-06-18", "2025-03-26", "2024-11-05"];
+const VERSIONS: &[&str] = &["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 
 /// How long `initialize` waits for the user to let a new program in
 const APPROVAL_WAIT: Duration = Duration::from_secs(120);
@@ -163,10 +163,15 @@ struct Session {
     host: HostInfo,
     /// The program, once the user let it in
     allowed: Option<i64>,
+    /// What the program could do when it was last told its tools: a change is announced (`list_changed`)
+    told: AgentLevels,
 }
 
+/// The notification that the tools of this program changed: the client lists them again
+const TOOLS_CHANGED: &str = "notifications/tools/list_changed";
+
 /// Serves one connection of a relay until it closes
-pub async fn serve<S: AsyncRead + AsyncWrite + Unpin>(core: Arc<Core>, stream: S) {
+pub async fn serve<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(core: Arc<Core>, stream: S) {
     let (read, mut write) = tokio::io::split(stream);
     let mut read = BufReader::new(read);
     // the relay's first line names the program it was started by
@@ -181,23 +186,46 @@ pub async fn serve<S: AsyncRead + AsyncWrite + Unpin>(core: Arc<Core>, stream: S
         .await;
         return;
     };
+    let mut changes = core.agent_changes();
     let mut session = Session {
         core,
         host,
         allowed: None,
+        told: AgentLevels(0),
     };
-    while let Some(line) = protocol::read_line(&mut read).await {
-        let answer = match protocol::parse(&line) {
-            Incoming::Request { id, method, params } => Some(session.request(&id, &method, &params).await),
-            Incoming::Notification => None,
-            Incoming::Invalid(answer) => Some(answer),
+    // lines are read on a task of their own, so waiting for one never stops a change from being told
+    let (lines, mut incoming) = tokio::sync::mpsc::channel(4);
+    let reader = tokio::spawn(async move {
+        while let Some(line) = protocol::read_line(&mut read).await {
+            if lines.send(line).await.is_err() {
+                break;
+            }
+        }
+    });
+    loop {
+        let answer = tokio::select! {
+            line = incoming.recv() => {
+                let Some(line) = line else { break };
+                match protocol::parse(&line) {
+                    Incoming::Request { id, method, params } => Some(session.request(&id, &method, &params).await),
+                    Incoming::Notification => None,
+                    Incoming::Invalid(answer) => Some(answer),
+                }
+            }
+            changed = changes.changed() => {
+                if changed.is_err() {
+                    break;
+                }
+                session.tools_changed()
+            }
         };
         if let Some(answer) = answer
             && protocol::write_message(&mut write, &answer).await.is_err()
         {
-            return;
+            break;
         }
     }
+    reader.abort();
 }
 
 fn hello_host(line: &str) -> Option<HostInfo> {
@@ -223,19 +251,32 @@ pub(crate) fn hello_line(host: &HostInfo) -> String {
 }
 
 impl Session {
+    /// What the program may do now: nothing once it is turned away or forgotten, or agents are off
+    fn levels(&self) -> AgentLevels {
+        self.allowed
+            .and_then(|host| self.core.agent_host_now(host).ok())
+            .map_or(AgentLevels(0), |now| now.levels())
+    }
+
+    /// The notification to send when what the program may do changed since it was told its tools
+    fn tools_changed(&mut self) -> Option<Value> {
+        self.allowed?;
+        let levels = self.levels();
+        if levels == self.told {
+            return None;
+        }
+        self.told = levels;
+        Some(json!({ "jsonrpc": "2.0", "method": TOOLS_CHANGED }))
+    }
+
     async fn request(&mut self, id: &Value, method: &str, params: &Value) -> Value {
         match method {
             "ping" => protocol::result(id, json!({})),
             "initialize" => self.initialize(id, params).await,
             _ if self.allowed.is_none() => protocol::error(id, INVALID_REQUEST, "initialize first"),
             "tools/list" => {
-                let levels = self
-                    .allowed
-                    .and_then(|host| self.core.agent_host(host).ok().flatten())
-                    .filter(|host| host.allowed)
-                    .map(|host| host.levels)
-                    .unwrap_or_default();
-                protocol::result(id, json!({ "tools": crate::tools::definitions(levels) }))
+                self.told = self.levels();
+                protocol::result(id, json!({ "tools": crate::tools::definitions(self.told) }))
             }
             "tools/call" => {
                 let Some(name) = params.get("name").and_then(Value::as_str) else {
@@ -243,14 +284,16 @@ impl Session {
                 };
                 let arguments = params.get("arguments").cloned().unwrap_or(Value::Null);
                 let host = self.allowed.unwrap_or_default();
-                let (content, is_error) = match crate::tools::call(&self.core, host, name, &arguments).await {
-                    Ok(result) => (serde_json::to_string_pretty(&result).unwrap_or_default(), false),
-                    Err(why) => (why, true),
+                let answer = match crate::tools::call(&self.core, host, name, &arguments).await {
+                    // the same as compact JSON text, for clients that read only the text
+                    Ok(result) => json!({
+                        "content": [{ "type": "text", "text": result.to_string() }],
+                        "structuredContent": result,
+                        "isError": false,
+                    }),
+                    Err(why) => json!({ "content": [{ "type": "text", "text": why }], "isError": true }),
                 };
-                protocol::result(
-                    id,
-                    json!({ "content": [{ "type": "text", "text": content }], "isError": is_error }),
-                )
+                protocol::result(id, answer)
             }
             "resources/list" => protocol::result(id, json!({ "resources": [] })),
             "prompts/list" => protocol::result(id, json!({ "prompts": [] })),
@@ -289,11 +332,12 @@ impl Session {
             Err(_) => return refused("Inbox Classic could not check this program."),
         };
         self.allowed = Some(host);
+        self.told = self.levels();
         protocol::result(
             id,
             json!({
                 "protocolVersion": version,
-                "capabilities": { "tools": { "listChanged": false } },
+                "capabilities": { "tools": { "listChanged": true } },
                 "serverInfo": { "name": "inbox-classic", "title": "Inbox Classic", "version": env!("CARGO_PKG_VERSION") },
                 "instructions": INSTRUCTIONS,
             }),

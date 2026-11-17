@@ -23,6 +23,10 @@ use crate::{Core, Draft, DraftKind, Error, Event, Outgoing, Result};
 pub const SEND_DELAY: i64 = 30;
 /// How many messages one agent may send from one account in an hour
 pub const SENDS_PER_HOUR: u64 = 20;
+/// How many drafts one agent may save in an hour
+pub const DRAFTS_PER_HOUR: u64 = 30;
+/// How many mailing lists one agent may ask to leave in a day
+pub const UNSUBSCRIBES_PER_DAY: u64 = 30;
 
 /// What level `bit` lets an agent do, in the language in use
 pub fn level_text(bit: u32) -> String {
@@ -91,6 +95,50 @@ pub struct SendAsk {
     pub(crate) draft: Draft,
 }
 
+/// A mailing list an agent wants to leave, as the question lists it
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct UnsubscribeList {
+    /// The address of the message it was found on: `news@shop.example`. The question shows it whole, first, so a
+    /// name can never hide it
+    pub address: String,
+    /// The name From gives with it, empty when it gives none or only the address again
+    pub name: String,
+    /// That message's subject (the one it came with, never a decrypted one)
+    pub subject: String,
+    /// The host the request goes to
+    pub target: String,
+    /// [`UnsubscribeList::target`] as the question shows it: `→ list.example.com`
+    pub target_label: String,
+    pub(crate) url: String,
+}
+
+impl UnsubscribeList {
+    /// The sender as From says it, `News <news@shop.example>`, for the agent
+    pub fn sender(&self) -> String {
+        crate::address_label(&self.name, &self.address)
+    }
+}
+
+/// The mailing lists an agent wants to leave, for the user to look at first
+#[derive(Debug, Clone)]
+pub struct UnsubscribeAsk {
+    pub host: AgentHost,
+    pub account: AccountId,
+    pub lists: Vec<UnsubscribeList>,
+    /// The log's entries of the lists, written at the user's yes (they count against [`UNSUBSCRIBES_PER_DAY`] from
+    /// then on), in the order of `lists`: what each list answered is written into them after
+    pub(crate) logged: std::sync::Arc<std::sync::Mutex<Vec<i64>>>,
+}
+
+/// What became of an agent's unsubscribe
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Unsubscribed {
+    /// The user said no: nothing was asked of the lists
+    Refused,
+    /// The user said yes: each list's sender, with why it did not work, None when the list took the address off
+    Done(Vec<(String, Option<String>)>),
+}
+
 /// A question for the user
 #[derive(Debug, Clone)]
 pub enum AgentAsk {
@@ -101,6 +149,31 @@ pub enum AgentAsk {
         accounts: Vec<(AccountId, String)>,
     },
     Send(Box<SendAsk>),
+    Unsubscribe(Box<UnsubscribeAsk>),
+}
+
+impl AgentAsk {
+    /// The program that asks, once it was let in (a Connect question is asked before)
+    fn host_id(&self) -> Option<AgentHostId> {
+        match self {
+            AgentAsk::Connect { .. } => None,
+            AgentAsk::Send(ask) => Some(ask.host.id),
+            AgentAsk::Unsubscribe(ask) => Some(ask.host.id),
+        }
+    }
+}
+
+/// What an agent wrote, to save as a draft or to send
+#[derive(Debug, Clone, Default)]
+pub struct Written {
+    pub account: AccountId,
+    /// The message it answers or forwards, and how
+    pub original: Option<(FolderId, u64, DraftKind)>,
+    pub outgoing: Outgoing,
+    /// What it wrote, as plain text
+    pub text: String,
+    /// The account's signature under the text, as the user's own messages have it
+    pub signature: bool,
 }
 
 /// The user's answer
@@ -119,6 +192,30 @@ pub enum AgentAnswer {
     Compose,
     /// Do not send it
     DontSend,
+    /// Ask the lists to take the address off
+    Unsubscribe,
+    /// Leave the lists as they are
+    DontUnsubscribe,
+}
+
+/// What a program may do at this moment ([`Core::agent_host_now`])
+#[derive(Debug)]
+pub enum HostNow {
+    Allowed(AgentHost),
+    /// Turned away or forgotten since it connected
+    Refused,
+    /// Agents are turned off
+    Off,
+}
+
+impl HostNow {
+    /// What it may do: nothing unless it is allowed
+    pub fn levels(&self) -> AgentLevels {
+        match self {
+            HostNow::Allowed(host) => host.levels,
+            _ => AgentLevels(0),
+        }
+    }
 }
 
 /// What [`Core::agent_connect`] found
@@ -142,6 +239,57 @@ type Answered = Option<(DraftKind, String)>;
 pub(crate) struct Asks {
     next: u64,
     waiting: HashMap<u64, (AgentAsk, oneshot::Sender<AgentAnswer>)>,
+}
+
+impl Asks {
+    /// Refused when `host` has a question of the kind `same` picks waiting for the user: one at a time, so an agent
+    /// can not pile them up for a hurried yes, not even from several connections at once
+    fn one_at_a_time(&self, host: AgentHostId, same: fn(&AgentAsk) -> bool, what: &str) -> Result<()> {
+        let waiting = self
+            .waiting
+            .values()
+            .any(|(ask, _)| same(ask) && ask.host_id() == Some(host));
+        if waiting {
+            return Err(Error::Unavailable(format!(
+                "The user has not answered this program's last {what} yet. Wait for that answer before asking again."
+            )));
+        }
+        Ok(())
+    }
+}
+
+/// A message, its draft for a window that writes it, what it answers, and the account's signature it carries (sanitized
+/// HTML, empty for none)
+struct Made {
+    outgoing: Outgoing,
+    draft: Draft,
+    answered: Answered,
+    signature: String,
+}
+
+/// What an agent wrote as the send question shows it: its text, and the signature that goes under it
+fn shown_text(text: &str, signature: &str) -> String {
+    let mut shown = text.to_string();
+    if !signature.trim().is_empty() {
+        shown.push_str("\n\n-- \n");
+        shown.push_str(html_to_text(signature).trim());
+    }
+    shown
+}
+
+/// The log's entries of the lists of `ask`, as the user's yes writes them: each unsubscribed, until its list answers
+/// otherwise
+fn unsubscribe_entries(ask: &UnsubscribeAsk) -> Vec<NewLogEntry> {
+    ask.lists
+        .iter()
+        .map(|list| NewLogEntry {
+            host: ask.host.id,
+            what: "unsubscribe".into(),
+            account: Some(ask.account),
+            summary: tr_args(Text::AgentLogUnsubscribed, &[("subject", (&list.subject).into())]),
+            ..Default::default()
+        })
+        .collect()
 }
 
 /// A message as an agent reads it: what a reader of it sees, as text
@@ -205,6 +353,17 @@ pub fn send_text(ask: &SendAsk) -> SendText {
         original,
         warning,
     }
+}
+
+/// The question and the words under it when an agent wants to leave mailing lists
+pub fn unsubscribe_text(ask: &UnsubscribeAsk) -> (String, String) {
+    (
+        tr_args(
+            Text::AgentUnsubscribeTitle,
+            &[("program", (&ask.host.name).into()), ("count", ask.lists.len().into())],
+        ),
+        tr_args(Text::AgentUnsubscribeDetail, &[("count", ask.lists.len().into())]),
+    )
 }
 
 /// The heading and words of Change in the AI Agents window, for `host`
@@ -386,14 +545,23 @@ pub(crate) fn agent_message(source: &[u8]) -> AgentMessage {
     AgentMessage {
         written,
         earlier,
-        attachments: message
-            .attachments
-            .iter()
-            .filter(|a| !a.related)
+        attachments: crate::view::agent_listed(&message.attachments)
             .map(|a| (a.safe_filename(), a.mime_type.clone(), a.content.len() as u64))
             .collect(),
         ..envelope
     }
+}
+
+/// Attachment `index` of a message's source as an agent reads it, numbered as [`agent_message`] lists them: refused for
+/// an encrypted message, whose files are never decrypted for an agent; None when there is no such attachment
+pub(crate) fn agent_attachment(source: &[u8], index: usize) -> Result<Option<(String, String, Vec<u8>)>> {
+    if crate::protect::has_encrypted(source) {
+        return Err(Error::Unavailable(tr(Text::AgentEncrypted)));
+    }
+    let Ok(message) = parser::parse(source) else {
+        return Ok(None);
+    };
+    Ok(crate::view::agent_attachment(&message, index))
 }
 
 /// How a change of an agent is taken back, as the log keeps it
@@ -416,6 +584,14 @@ pub enum Undo {
     Unsend { account: AccountId, message_id: String },
     /// The message with `message_id` was archived from `from` (into the Archive folder, or off its Gmail labels)
     Archive { from: FolderId, message_id: String },
+    /// The message with `message_id` was marked junk (or not junk) in `from` and went to `to` (the same folder when
+    /// it was there already)
+    Junk {
+        from: FolderId,
+        to: FolderId,
+        junk: bool,
+        message_id: String,
+    },
 }
 
 impl Undo {
@@ -425,6 +601,12 @@ impl Undo {
             Undo::Move { from, to, message_id } => format!("move {from} {to} {message_id}"),
             Undo::Unsend { account, message_id } => format!("unsend {account} {message_id}"),
             Undo::Archive { from, message_id } => format!("archive {from} {message_id}"),
+            Undo::Junk {
+                from,
+                to,
+                junk,
+                message_id,
+            } => format!("junk {from} {to} {} {message_id}", u8::from(*junk)),
         }
     }
 
@@ -452,6 +634,15 @@ impl Undo {
             "archive" => match words(3)[..] {
                 [_, from, message_id] => Some(Undo::Archive {
                     from: from.parse().ok()?,
+                    message_id: message_id.to_string(),
+                }),
+                _ => None,
+            },
+            "junk" => match words(5)[..] {
+                [_, from, to, junk, message_id] => Some(Undo::Junk {
+                    from: from.parse().ok()?,
+                    to: to.parse().ok()?,
+                    junk: junk == "1",
                     message_id: message_id.to_string(),
                 }),
                 _ => None,
@@ -484,9 +675,21 @@ impl Core {
 
     /// Puts a question to the user: [`Event::AgentAsk`] tells the windows
     fn ask(&self, ask: AgentAsk) -> Result<oneshot::Receiver<AgentAnswer>> {
+        self.ask_unless(ask, |_| Ok(()))
+    }
+
+    /// [`Core::ask`] unless `refused` says why not, checked under the same hold of the questions' lock as the question
+    /// is put up, so two calls of one program at once can not both pass (the yes that counts against a limit is written
+    /// under that lock too, [`Core::agent_answer`])
+    fn ask_unless(
+        &self,
+        ask: AgentAsk,
+        refused: impl FnOnce(&Asks) -> Result<()>,
+    ) -> Result<oneshot::Receiver<AgentAnswer>> {
         let (sender, receiver) = oneshot::channel();
         let request = {
             let mut asks = self.asks();
+            refused(&asks)?;
             asks.next += 1;
             let request = asks.next;
             asks.waiting.insert(request, (ask, sender));
@@ -502,7 +705,19 @@ impl Core {
     }
 
     pub fn set_agents_enabled(&self, enabled: bool) -> Result<()> {
-        Ok(self.store().set_agents_enabled(enabled)?)
+        self.store().set_agents_enabled(enabled)?;
+        self.agents_changed();
+        Ok(())
+    }
+
+    /// A number that grows each time what programs may do changes (the switch, a program's levels or accounts, one let
+    /// in or forgotten): the MCP server tells its agents their tools changed
+    pub fn agent_changes(&self) -> tokio::sync::watch::Receiver<u64> {
+        self.agent_changes.subscribe()
+    }
+
+    fn agents_changed(&self) {
+        self.agent_changes.send_modify(|n| *n += 1);
     }
 
     /// A program connects: let in, turned away, or the user is asked
@@ -550,7 +765,9 @@ impl Core {
     /// The user's answer to `request`. A program let in or turned away is kept; a message to send goes into the
     /// Outbox to wait [`SEND_DELAY`]; one to write further comes back as the draft for the window that writes it.
     pub fn agent_answer(&self, request: u64, answer: AgentAnswer) -> Result<Option<Draft>> {
-        let (ask, sender) = self.asks().waiting.remove(&request).ok_or(Error::NotFound)?;
+        // held until what the answer does is logged: a limit checked under it ([`Core::ask_unless`]) counts this yes
+        let mut asks = self.asks();
+        let (ask, sender) = asks.waiting.remove(&request).ok_or(Error::NotFound)?;
         let mut compose = None;
         match (&ask, &answer) {
             // allowed to do nothing is turned away
@@ -582,6 +799,31 @@ impl Core {
                     ..Default::default()
                 }])?;
             }
+            // counted from the yes; the lists are asked by the task that waits for this answer
+            // (Core::agent_ask_unsubscribe), which writes what each answered into these entries
+            (AgentAsk::Unsubscribe(ask), AgentAnswer::Unsubscribe) => {
+                let ids = self.store().log_agent(&unsubscribe_entries(ask), now())?;
+                *ask.logged.lock().unwrap_or_else(|p| p.into_inner()) = ids;
+                self.post(Event::AgentLogChanged)?;
+            }
+            (AgentAsk::Unsubscribe(ask), _) => {
+                // by their addresses only, as a name could pass for another sender's
+                let senders: Vec<&str> = ask.lists.iter().map(|l| l.address.as_str()).collect();
+                self.log_agent(&[NewLogEntry {
+                    host: ask.host.id,
+                    what: "unsubscribe_refused".into(),
+                    account: Some(ask.account),
+                    summary: tr_args(
+                        Text::AgentLogUnsubscribeRefused,
+                        &[("senders", (&senders.join(", ")).into())],
+                    ),
+                    ..Default::default()
+                }])?;
+            }
+        }
+        drop(asks);
+        if matches!(ask, AgentAsk::Connect { .. }) {
+            self.agents_changed();
         }
         // the agent may be gone by now; what the user decided stands
         let _ = sender.send(answer);
@@ -630,16 +872,19 @@ impl Core {
     /// What an agent wrote, made a message: `outgoing` from `account` with `text`, as a reply or forward of
     /// `original` (quoted and threaded as the windows do it) when there is one; with the draft for a window that
     /// writes it and what it answers. Refused when the original is not of that account or not downloaded yet.
-    fn agent_outgoing(
-        &self,
-        account: AccountId,
-        original: Option<(FolderId, u64, DraftKind)>,
-        mut outgoing: Outgoing,
-        text: &str,
-    ) -> Result<(Outgoing, Draft, Answered)> {
+    fn agent_outgoing(&self, written: &Written) -> Result<Made> {
+        let Written {
+            account,
+            original,
+            text,
+            signature,
+            ..
+        } = written;
+        let account = *account;
+        let mut outgoing = written.outgoing.clone();
         let mut draft = Draft::default();
         let mut answered = None;
-        if let Some((folder, uid, kind)) = original {
+        if let Some((folder, uid, kind)) = *original {
             if self.store().folder(folder)?.account_id != account {
                 return Err(Error::NotFound);
             }
@@ -666,25 +911,38 @@ impl Core {
             outgoing.in_reply_to = draft.in_reply_to.clone();
             outgoing.references = draft.references.clone();
         }
-        outgoing.html = Some(text_to_html(text));
+        // the account's signature under the text, as a message the user starts has it
+        let signature = if *signature {
+            self.signature(account)?
+        } else {
+            String::new()
+        };
+        let body = text_to_html(text) + &pe_html::signature_block(&signature);
+        outgoing.html = Some(body.clone());
         draft.to = outgoing.to.clone();
         draft.cc = outgoing.cc.clone();
         draft.bcc = outgoing.bcc.clone();
         draft.subject = outgoing.subject.clone();
-        draft.body = text_to_html(text);
-        Ok((outgoing, draft, answered))
+        draft.body = body;
+        Ok(Made {
+            outgoing,
+            draft,
+            answered,
+            signature,
+        })
     }
 
-    /// Saves what an agent wrote in the Drafts of `account`, as [`Core::agent_ask_send`] would send it; logged
-    pub fn agent_save_draft(
-        &self,
-        host: &AgentHost,
-        account: AccountId,
-        original: Option<(FolderId, u64, DraftKind)>,
-        outgoing: Outgoing,
-        text: &str,
-    ) -> Result<()> {
-        let (outgoing, _, _) = self.agent_outgoing(account, original, outgoing, text)?;
+    /// Saves what an agent wrote in the Drafts of its account, as [`Core::agent_ask_send`] would send it; logged.
+    /// Refused when the agent saved [`DRAFTS_PER_HOUR`] in the last hour.
+    pub fn agent_save_draft(&self, host: &AgentHost, written: &Written) -> Result<()> {
+        let saved = self.store().agent_log_count(host.id, "save_draft", now() - 3600)?;
+        if saved >= DRAFTS_PER_HOUR {
+            return Err(Error::Unavailable(format!(
+                "An agent may save {DRAFTS_PER_HOUR} drafts an hour, and this one has. Try again later."
+            )));
+        }
+        let account = written.account;
+        let outgoing = self.agent_outgoing(written)?.outgoing;
         let subject = outgoing.subject.clone();
         self.save_draft(account, outgoing)?;
         self.log_agent(&[NewLogEntry {
@@ -696,23 +954,16 @@ impl Core {
         }])
     }
 
-    /// Asks the user whether to send what an agent wrote: `outgoing` from `account`, a reply or forward of
-    /// `original` when there is one. Refused now when it can not be sent as it is or the agent sent too much.
-    pub fn agent_ask_send(
-        &self,
-        host: &AgentHost,
-        account: AccountId,
-        original: Option<(FolderId, u64, DraftKind)>,
-        outgoing: Outgoing,
-        text: &str,
-    ) -> Result<oneshot::Receiver<AgentAnswer>> {
-        let sent = self.store().agent_log_count(host.id, "send", now() - 3600)?;
-        if sent >= SENDS_PER_HOUR {
-            return Err(Error::Unavailable(format!(
-                "an agent may send {SENDS_PER_HOUR} messages an hour, and this one has"
-            )));
-        }
-        let (outgoing, draft, answered) = self.agent_outgoing(account, original, outgoing, text)?;
+    /// Asks the user whether to send what an agent wrote, a reply or forward when it names the original. Refused now
+    /// when it can not be sent as it is, the agent sent too much, or one of its messages waits for the user already.
+    pub fn agent_ask_send(&self, host: &AgentHost, written: &Written) -> Result<oneshot::Receiver<AgentAnswer>> {
+        let account = written.account;
+        let Made {
+            outgoing,
+            draft,
+            answered,
+            signature,
+        } = self.agent_outgoing(written)?;
         crate::compose::check(&outgoing).map_err(Error::Compose)?;
         let (from, recipients) = {
             let store = self.store();
@@ -741,18 +992,170 @@ impl Core {
                 (name, std::fs::metadata(path).map_or(0, |m| m.len()))
             })
             .collect();
-        self.ask(AgentAsk::Send(Box::new(SendAsk {
+        let ask = AgentAsk::Send(Box::new(SendAsk {
             host: host.clone(),
             account,
             from,
             recipients,
             subject: outgoing.subject.clone(),
-            text: text.to_string(),
+            text: shown_text(&written.text, &signature),
             original: answered,
             attachments,
             outgoing,
             draft,
-        })))
+        }));
+        // the hour's sends counted with the question put up: a yes logs its send under the same lock
+        self.ask_unless(ask, |asks| {
+            asks.one_at_a_time(host.id, |ask| matches!(ask, AgentAsk::Send(_)), "message")?;
+            let sent = self.store().agent_log_count(host.id, "send", now() - 3600)?;
+            if sent >= SENDS_PER_HOUR {
+                return Err(Error::Unavailable(format!(
+                    "An agent may send {SENDS_PER_HOUR} messages an hour, and this one has. Try again later."
+                )));
+            }
+            Ok(())
+        })
+    }
+
+    /// The lists of messages `uids` of `folder`, for an agent's unsubscribe: each message must offer the one-click way
+    /// from a verified sender; one list once, however many of its messages are named
+    fn lists_of(&self, folder: FolderId, uids: &[u64]) -> Result<Vec<UnsubscribeList>> {
+        let mut lists: Vec<UnsubscribeList> = Vec::new();
+        let mut none = Vec::new();
+        let trusted = self.trusted(folder)?;
+        for &uid in uids {
+            let message = self.store().message(folder, uid)?.ok_or(Error::NotFound)?;
+            let Some(url) = self.one_click_with(folder, uid, &trusted)? else {
+                none.push(uid.to_string());
+                continue;
+            };
+            if lists.iter().any(|list| list.url == url) {
+                continue;
+            }
+            let target = crate::unsubscribe::Unsubscribe::OneClick { url: url.clone() }.target();
+            let (name, address) = (message.info.from_name.trim(), &message.info.from_address);
+            lists.push(UnsubscribeList {
+                address: address.clone(),
+                name: if name.eq_ignore_ascii_case(address) {
+                    String::new()
+                } else {
+                    name.to_string()
+                },
+                subject: message.agent_subject().to_string(),
+                target_label: format!("\u{2192} {target}"),
+                target,
+                url,
+            });
+        }
+        if !none.is_empty() {
+            return Err(Error::Unavailable(format!(
+                "The messages with uids {} offer no one-click unsubscribe from a verified sender, or are not \
+                 downloaded yet (get_message downloads a message). Nothing was asked of the user.",
+                none.join(", ")
+            )));
+        }
+        Ok(lists)
+    }
+
+    /// The question of an agent that wants to leave the mailing lists of messages `uids` of `folder`, put to the
+    /// user. Refused in Junk E-mail (a spammer's link tells them the address is read), when a message offers no
+    /// one-click way, past [`UNSUBSCRIBES_PER_DAY`] (counted under the questions' lock, with the yeses before), or
+    /// while another such question of the agent waits.
+    fn ask_lists(
+        &self,
+        host: &AgentHost,
+        folder: FolderId,
+        uids: &[u64],
+    ) -> Result<(UnsubscribeAsk, oneshot::Receiver<AgentAnswer>)> {
+        let found = self.store().folder(folder)?;
+        if found.info.special_use.as_deref() == Some("\\Junk") {
+            return Err(Error::Unavailable(
+                "Lists are not unsubscribed from in Junk E-mail: a link in junk may be a spammer's, and using it tells \
+                 them the address is read. Only the user can do that."
+                    .into(),
+            ));
+        }
+        let ask = UnsubscribeAsk {
+            host: host.clone(),
+            account: found.account_id,
+            lists: self.lists_of(folder, uids)?,
+            logged: Default::default(),
+        };
+        let count = ask.lists.len() as u64;
+        let answer = self.ask_unless(AgentAsk::Unsubscribe(Box::new(ask.clone())), |asks| {
+            asks.one_at_a_time(
+                host.id,
+                |ask| matches!(ask, AgentAsk::Unsubscribe(_)),
+                "unsubscribe question",
+            )?;
+            let today = self.store().agent_log_count(host.id, "unsubscribe", now() - 86_400)?;
+            if today + count > UNSUBSCRIBES_PER_DAY {
+                return Err(Error::Unavailable(format!(
+                    "An agent may unsubscribe from {UNSUBSCRIBES_PER_DAY} lists a day, and this one has from {today} \
+                     today. Nothing was asked of the user."
+                )));
+            }
+            Ok(())
+        })?;
+        Ok((ask, answer))
+    }
+
+    /// Asks the user whether an agent may unsubscribe from the mailing lists of messages `uids` of `folder`, in one
+    /// question listing their senders ([`Core::ask_lists`] says when it is refused). On a yes the lists are asked in
+    /// the background, whatever becomes of the agent; the receiver gets what each answered, or
+    /// [`Unsubscribed::Refused`].
+    pub fn agent_ask_unsubscribe(
+        self: &std::sync::Arc<Self>,
+        host: &AgentHost,
+        folder: FolderId,
+        uids: &[u64],
+    ) -> Result<oneshot::Receiver<Unsubscribed>> {
+        let (ask, answer) = self.ask_lists(host, folder, uids)?;
+        let (done, outcome) = oneshot::channel();
+        let core = std::sync::Arc::downgrade(self);
+        self.runtime()?.spawn(async move {
+            if answer.await != Ok(AgentAnswer::Unsubscribe) {
+                let _ = done.send(Unsubscribed::Refused);
+                return;
+            }
+            let mut asked = tokio::task::JoinSet::new();
+            for (index, list) in ask.lists.iter().enumerate() {
+                let url = list.url.clone();
+                asked.spawn(async move { (index, crate::unsubscribe::post(&url).await) });
+            }
+            let mut problems = vec![None; ask.lists.len()];
+            while let Some(Ok((index, problem))) = asked.join_next().await {
+                problems[index] = problem;
+            }
+            let outcome: Vec<(String, Option<String>)> =
+                ask.lists.iter().map(UnsubscribeList::sender).zip(problems).collect();
+            // what a list refused, into its entry of the log (written at the yes), off this runtime's threads
+            let ids = std::mem::take(&mut *ask.logged.lock().unwrap_or_else(|p| p.into_inner()));
+            let noted = outcome.clone();
+            crate::connections::in_background(core, crate::connections::Connection::Actions, move |core| {
+                core.note_unsubscribe_failures(&ask, &ids, &noted)
+            })
+            .await;
+            let _ = done.send(Unsubscribed::Done(outcome));
+        });
+        Ok(outcome)
+    }
+
+    /// Writes into the log entries `ids` of the lists of `ask` why each list that did not take the address off did not
+    fn note_unsubscribe_failures(&self, ask: &UnsubscribeAsk, ids: &[i64], outcome: &[(String, Option<String>)]) {
+        let mut changed = false;
+        for ((list, id), (_, problem)) in ask.lists.iter().zip(ids).zip(outcome) {
+            if let Some(why) = problem {
+                let summary = tr_args(
+                    Text::AgentLogUnsubscribeFailed,
+                    &[("subject", (&list.subject).into()), ("reason", why.into())],
+                );
+                changed |= self.store().set_agent_log_summary(*id, &summary).is_ok();
+            }
+        }
+        if changed {
+            let _ = self.post(Event::AgentLogChanged);
+        }
     }
 
     /// Writes what an agent did in its log, all of it at once (the windows hear of it once)
@@ -824,6 +1227,23 @@ impl Core {
                     },
                 )?;
             }
+            Undo::Junk {
+                from,
+                to,
+                junk,
+                message_id,
+            } => {
+                let uid = self
+                    .store()
+                    .uid_of_message_id(to, &message_id)?
+                    .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoNotArrived)))?;
+                // the keyword it was given goes, and the message goes back where it was
+                let (given, _) = crate::junk_keywords(junk);
+                self.set_flag_many(to, &[uid], given, false)?;
+                if to != from {
+                    self.move_messages(to, &[uid], from)?;
+                }
+            }
             Undo::Unsend { account, message_id } => {
                 let queued = self
                     .store()
@@ -855,6 +1275,7 @@ impl Core {
         if !self.store().update_agent_host(id, allowed, levels, accounts)? {
             return Err(Error::NotFound);
         }
+        self.agents_changed();
         Ok(())
     }
 
@@ -863,7 +1284,19 @@ impl Core {
         if !self.store().remove_agent_host(id)? {
             return Err(Error::NotFound);
         }
+        self.agents_changed();
         self.post(Event::AgentLogChanged)
+    }
+
+    /// What program `id` may do at this moment, read for every call so a change in the AI Agents window counts at once
+    pub fn agent_host_now(&self, id: AgentHostId) -> Result<HostNow> {
+        if !self.agents_enabled()? {
+            return Ok(HostNow::Off);
+        }
+        Ok(match self.agent_host(id)? {
+            Some(host) if host.allowed => HostNow::Allowed(host),
+            _ => HostNow::Refused,
+        })
     }
 
     /// What a program may do now (the user may have changed it since it connected), None once it is forgotten
@@ -882,10 +1315,7 @@ impl Core {
         let Some(source) = self.store().source(folder, uid)? else {
             return Ok(None);
         };
-        if crate::protect::has_encrypted(&source) {
-            return Err(Error::Unavailable(tr(Text::AgentEncrypted)));
-        }
-        Ok(crate::view::attachment_with_type(&source, index))
+        agent_attachment(&source, index)
     }
 
     /// A message as an agent reads it, None when its source is not here yet ([`Core::open_message`] fetches it)
@@ -998,6 +1428,12 @@ mod tests {
                 account: 4,
                 message_id: "<x@y>".into(),
             },
+            Undo::Junk {
+                from: 1,
+                to: 5,
+                junk: true,
+                message_id: "<a b@c>".into(),
+            },
         ] {
             assert_eq!(Undo::read(&undo.write()), Some(undo));
         }
@@ -1017,6 +1453,50 @@ mod tests {
         // the HTML part is what the reading pane shows, without what it hides; the text part is not read
         assert!(message.written.contains("See you at noon."), "{}", message.written);
         assert!(!message.written.contains("invoice"), "{}", message.written);
+    }
+
+    /// The names get_message lists, and the name get_attachment gives for each index
+    fn numbered(source: &[u8]) -> (Vec<String>, Vec<String>) {
+        let listed = agent_message(source).attachments.into_iter().map(|a| a.0).collect();
+        let read = (0..)
+            .map_while(|index| agent_attachment(source, index).unwrap())
+            .map(|a| a.0)
+            .collect();
+        (listed, read)
+    }
+
+    #[test]
+    fn attachments_have_one_numbering() {
+        // a bounce: the delivery report's parts for servers are no files, the returned message is
+        let bounce = b"From: MAILER-DAEMON@example.com\r\nTo: me@example.com\r\nSubject: Undelivered Mail\r\n\
+            Content-Type: multipart/report; report-type=delivery-status; boundary=r\r\n\r\n\
+            --r\r\nContent-Type: text/plain\r\n\r\nYour message could not be delivered.\r\n\
+            --r\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; mx.example.com\r\n\r\n\
+            Final-Recipient: rfc822; gone@example.org\r\nAction: failed\r\nStatus: 5.1.1\r\n\
+            --r\r\nContent-Type: text/plain; name=notes.txt\r\nContent-Disposition: attachment; filename=notes.txt\r\n\r\n\
+            the notes\r\n\
+            --r\r\nContent-Type: message/rfc822\r\n\r\nFrom: me@example.com\r\nTo: gone@example.org\r\n\
+            Subject: Hello\r\n\r\nHi\r\n--r--\r\n";
+        let (listed, read) = numbered(bounce);
+        assert_eq!(listed, read);
+        assert_eq!(listed.len(), 2, "{listed:?}");
+        assert_eq!(listed[0], "notes.txt");
+        assert_eq!(agent_attachment(bounce, 0).unwrap().unwrap().2, b"the notes");
+        // a signed message: its signature is no file
+        let signed = b"From: Ann <ann@example.com>\r\nTo: me@example.com\r\nSubject: Signed\r\n\
+            Content-Type: multipart/signed; micalg=pgp-sha256; protocol=\"application/pgp-signature\"; boundary=s\r\n\r\n\
+            --s\r\nContent-Type: multipart/mixed; boundary=m\r\n\r\n\
+            --m\r\nContent-Type: text/plain\r\n\r\nThe plan.\r\n\
+            --m\r\nContent-Type: text/csv; name=plan.csv\r\nContent-Disposition: attachment; filename=plan.csv\r\n\r\n\
+            a,b\r\n--m--\r\n\
+            --s\r\nContent-Type: application/pgp-signature; name=signature.asc\r\n\
+            Content-Disposition: attachment; filename=signature.asc\r\n\r\n\
+            -----BEGIN PGP SIGNATURE-----\r\n\r\nAAAA\r\n-----END PGP SIGNATURE-----\r\n--s--\r\n";
+        let (listed, read) = numbered(signed);
+        assert_eq!(listed, read);
+        assert_eq!(listed, ["plan.csv"]);
+        assert_eq!(agent_attachment(signed, 0).unwrap().unwrap().1, "text/csv");
+        assert!(agent_attachment(signed, 1).unwrap().is_none());
     }
 
     #[test]

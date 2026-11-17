@@ -665,8 +665,8 @@ day-sunday = diumenge
 
 # review: new
 agent-level-read = Llegir el correu: carpetes, llista de missatges, cerca i missatges
-# review: new
-agent-level-organize = Organitzar el correu: estat de lectura, banderes, correu brossa, moure, suprimir a Elements suprimits
+# review: changed
+agent-level-organize = Organitzar el correu: estat de lectura, banderes, correu brossa, moure, arxivar, carpetes noves, suprimir a Elements suprimits i donar-vos de baixa de llistes de correu després que digueu que sí
 # review: new
 agent-level-drafts = Escriure esborranys perquè els envieu vós
 # review: new
@@ -777,6 +777,20 @@ agent-log-archived = Ha arxivat «{ $subject }»
 agent-log-folder = Ha creat la carpeta «{ $name }»
 # review: new
 agent-log-unsubscribed = S’ha donat de baixa de la llista de «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = No s’ha pogut cancel·lar la subscripció a la llista de «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = No us heu donat de baixa de { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vol cancel·lar la vostra subscripció a una llista de correu
+   *[other] { $program } vol cancel·lar la vostra subscripció a { $count } llistes de correu
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic demana a la llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix. No s’envia res més, i els missatges que teniu es queden on són.
+   *[other] Inbox Classic demana a cada llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix la llista. No s’envia res més, i els missatges que teniu es queden on són.
+}
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
 

@@ -853,6 +853,8 @@ ui-allow = &Consenti
 # review: new
 ui-dont-send = Non inviare
 # review: new
+ui-dont-unsubscribe = Non annullare l’iscrizione
+# review: new
 ui-edit-first = Prima &modifica
 # review: new
 ui-new-address = Nuovo indirizzo

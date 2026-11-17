@@ -396,3 +396,31 @@ final class AttachmentTile: NSView {
 final class FlippedView: NSView {
     override var isFlipped: Bool { true }
 }
+
+/// `content` in a scroll `width` wide and `height` tall that scrolls up and down, laid out from its top
+@MainActor
+func scrolledColumn(_ content: NSView, width: CGFloat, height: CGFloat) -> NSScrollView {
+    let document = FlippedView()
+    document.addSubview(content)
+    content.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        content.topAnchor.constraint(equalTo: document.topAnchor),
+        content.leadingAnchor.constraint(equalTo: document.leadingAnchor),
+        content.trailingAnchor.constraint(equalTo: document.trailingAnchor),
+        content.bottomAnchor.constraint(equalTo: document.bottomAnchor),
+    ])
+    let scroll = NSScrollView()
+    scroll.hasVerticalScroller = true
+    scroll.drawsBackground = false
+    scroll.documentView = document
+    document.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint.activate([
+        document.topAnchor.constraint(equalTo: scroll.contentView.topAnchor),
+        document.leadingAnchor.constraint(equalTo: scroll.contentView.leadingAnchor),
+        document.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
+    ])
+    scroll.translatesAutoresizingMaskIntoConstraints = false
+    scroll.widthAnchor.constraint(equalToConstant: width).isActive = true
+    scroll.heightAnchor.constraint(equalToConstant: height).isActive = true
+    return scroll
+}

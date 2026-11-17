@@ -653,8 +653,8 @@ day-sunday = söndag
 
 # review: new
 agent-level-read = Läsa e-post: mappar, meddelandelistan, sökning och meddelanden
-# review: new
-agent-level-organize = Ordna e-post: läsläge, flaggor, skräppost, flytt, borttagning till Borttaget
+# review: changed
+agent-level-organize = Ordna e-post: läsläge, flaggor, skräppost, flytt, arkivering, nya mappar, borttagning till Borttaget och att lämna e-postlistor efter att du har sagt ja
 # review: new
 agent-level-drafts = Skriva utkast som du skickar
 # review: new
@@ -765,6 +765,20 @@ agent-log-archived = Arkiverade ”{ $subject }”
 agent-log-folder = Skapade mappen ”{ $name }”
 # review: new
 agent-log-unsubscribed = Avslutade prenumerationen på listan för ”{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Kunde inte avsluta prenumerationen på listan för ”{ $subject }”: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Du valde att inte avsluta prenumerationerna: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vill avsluta din prenumeration på en e-postlista
+   *[other] { $program } vill avsluta dina prenumerationer på { $count } e-postlistor
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic ber listan nedan att sluta skicka till dig, genom den avanmälan med ett klick som den erbjuder. Inget annat skickas, och meddelandena du har ligger kvar där de är.
+   *[other] Inbox Classic ber varje lista nedan att sluta skicka till dig, genom den avanmälan med ett klick som listan erbjuder. Inget annat skickas, och meddelandena du har ligger kvar där de är.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

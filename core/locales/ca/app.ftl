@@ -853,6 +853,8 @@ ui-allow = &Permet
 # review: new
 ui-dont-send = No l’enviïs
 # review: new
+ui-dont-unsubscribe = No cancel·lis la subscripció
+# review: new
 ui-edit-first = &Edita’l primer
 # review: new
 ui-new-address = Adreça nova

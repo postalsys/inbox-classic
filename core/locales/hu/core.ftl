@@ -634,8 +634,8 @@ day-sunday = vasárnap
 
 # review: new
 agent-level-read = Levelek olvasása: mappák, az üzenetlista, a keresés és az üzenetek
-# review: new
-agent-level-organize = Levelek rendezése: olvasottság, jelölők, levélszemét, áthelyezés, törlés a Törölt elemek mappába
+# review: changed
+agent-level-organize = Levelek rendezése: olvasottság, jelölők, levélszemét, áthelyezés, archiválás, új mappák, törlés a Törölt elemek mappába, valamint leiratkozás levelezőlistákról az Ön jóváhagyása után
 # review: new
 agent-level-drafts = Piszkozatok írása, amelyeket Ön küld el
 # review: new
@@ -746,6 +746,20 @@ agent-log-archived = Archiválva: „{ $subject }”
 agent-log-folder = Mappa létrehozva: „{ $name }”
 # review: new
 agent-log-unsubscribed = Leiratkozás a levelezőlistáról: „{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Sikertelen leiratkozás a levelezőlistáról („{ $subject }”): { $reason }
+# review: new
+agent-log-unsubscribe-refused = Nem iratkozott le innen: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } le szeretné iratkoztatni Önt egy levelezőlistáról
+   *[other] { $program } le szeretné iratkoztatni Önt { $count } levelezőlistáról
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Az Inbox Classic megkéri az alábbi listát, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+   *[other] Az Inbox Classic az alábbi listák mindegyikét megkéri, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -854,6 +854,8 @@ ui-allow = &Salli
 # review: new
 ui-dont-send = Älä lähetä
 # review: new
+ui-dont-unsubscribe = Älä peruuta tilausta
+# review: new
 ui-edit-first = &Muokkaa ensin
 # review: new
 ui-new-address = Uusi osoite

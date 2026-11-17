@@ -1264,6 +1264,13 @@ const sections = [
                 what: "Turn agents off altogether, see the programs let in or turned away and change what each may do, and see everything agents did, newest first, with Undo for read state, flags, moves and deletes, and for a message still in the Outbox. How to Connect an Agent gives the settings to paste into an agent's configuration.",
                 how: 'Tools > AI Agents.',
                 checked: ['It lists the program and what it may do', 'And what its agent did, newest first', 'Undo takes the message back']
+            },
+            {
+                shot: 'agents-7-unsubscribe',
+                name: 'Leaving mailing lists asks you first',
+                what: "An agent that may organize mail can ask to unsubscribe you from mailing lists: one question lists every list by its sender, the address first and whole so a name can not hide it, and where the request goes. Don't Unsubscribe is the default; Unsubscribe asks each list the one-click way, and the agent learns what each answered. Never from Junk E-mail, and at most 30 lists a day.",
+                how: 'Shown when an agent asks to unsubscribe; only for a program allowed to organize mail.',
+                checked: ['One question lists both senders and where the requests go', "Don't Unsubscribe is the default", 'The agent learns the user said no']
             }
         ]
     },

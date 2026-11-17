@@ -853,6 +853,8 @@ ui-allow = &Povoliť
 # review: new
 ui-dont-send = Neodoslať
 # review: new
+ui-dont-unsubscribe = Neodhlásiť
+# review: new
 ui-edit-first = Najprv &upraviť
 # review: new
 ui-new-address = Nová adresa

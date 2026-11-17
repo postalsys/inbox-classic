@@ -14,7 +14,8 @@ use crate::{PeDraft, guard, ids, into_c_string};
 
 /// What an agent may do, bits for `levels`: read mail
 pub const PE_AGENT_READ: u32 = 1;
-/// Organize it: read state, flags, junk, moves, deletes to Deleted Items
+/// Organize it: read state, flags, junk, moves, archiving, new folders, deletes to Deleted Items, and leaving
+/// mailing lists after the user says yes
 pub const PE_AGENT_ORGANIZE: u32 = 2;
 /// Write drafts
 pub const PE_AGENT_DRAFTS: u32 = 4;
@@ -173,6 +174,9 @@ pub enum PeAgentAskKind {
     Connect = 1,
     /// An agent wants to send a message: `pe_agent_send_info`, answered with `pe_agent_answer_send`
     Send = 2,
+    /// An agent wants to leave mailing lists: `pe_agent_unsubscribe_info`, answered with
+    /// `pe_agent_answer_unsubscribe`
+    Unsubscribe = 3,
 }
 
 /// What question `request` (an `AgentAsk` event) is
@@ -186,6 +190,7 @@ pub unsafe extern "C" fn pe_agent_ask_kind(core: *const PeCore, request: u64) ->
         with(core, PeAgentAskKind::None, |core| match core.agent_ask(request) {
             Some(AgentAsk::Connect { .. }) => PeAgentAskKind::Connect,
             Some(AgentAsk::Send(_)) => PeAgentAskKind::Send,
+            Some(AgentAsk::Unsubscribe(_)) => PeAgentAskKind::Unsubscribe,
             None => PeAgentAskKind::None,
         })
     }
@@ -432,6 +437,128 @@ pub unsafe extern "C" fn pe_agent_answer_send(
                 Ok(Some(draft)) => draft_handle(&draft),
                 _ => null_mut(),
             }
+        })
+    }
+}
+
+/// The mailing lists an agent wants to leave, as the question shows them
+#[repr(C)]
+pub struct PeAgentUnsubscribe {
+    /// The question: "Claude wants to unsubscribe you from 3 mailing lists"
+    pub title: *const c_char,
+    /// What the dialog says under it
+    pub detail: *const c_char,
+}
+
+/// A mailing list of the question, by the sender of its message
+#[repr(C)]
+pub struct PeAgentList {
+    /// The sender's address, "news@shop.example": shown whole and first, so a name can never hide it
+    pub address: *const c_char,
+    /// The name From gives with it, "News"; empty when it gives none
+    pub name: *const c_char,
+    /// The subject of the message it was found on
+    pub subject: *const c_char,
+    /// The host the request goes to
+    pub target: *const c_char,
+    /// The host as the question shows it: "→ list.example.com"
+    pub target_label: *const c_char,
+}
+
+pub struct PeAgentUnsubscribeInfo {
+    info: PeAgentUnsubscribe,
+    lists: Rows<PeAgentList>,
+    _strings: Strings,
+}
+
+/// The lists of question `request`, NULL when it is not an Unsubscribe question. Free with
+/// `pe_agent_unsubscribe_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_unsubscribe_info(core: *const PeCore, request: u64) -> *mut PeAgentUnsubscribeInfo {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Some(AgentAsk::Unsubscribe(ask)) = core.agent_ask(request) else {
+                return null_mut();
+            };
+            let (title, detail) = pe_core::agents::unsubscribe_text(&ask);
+            let mut strings = Strings::default();
+            let info = PeAgentUnsubscribe {
+                title: strings.add(&title),
+                detail: strings.add(&detail),
+            };
+            let lists = Rows::new(&ask.lists, |l, strings| PeAgentList {
+                address: strings.add(&l.address),
+                name: strings.add(&l.name),
+                subject: strings.add(&l.subject),
+                target: strings.add(&l.target),
+                target_label: strings.add(&l.target_label),
+            });
+            handed(PeAgentUnsubscribeInfo {
+                info,
+                lists,
+                _strings: strings,
+            })
+        })
+    }
+}
+
+/// # Safety
+/// `info` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_unsubscribe(info: *const PeAgentUnsubscribeInfo) -> *const PeAgentUnsubscribe {
+    // SAFETY: as the caller guarantees
+    unsafe { info.as_ref() }.map_or(null(), |info| &info.info)
+}
+
+/// # Safety
+/// `info` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_unsubscribe_list_count(info: *const PeAgentUnsubscribeInfo) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { info.as_ref() }.map(|info| &info.lists))
+}
+
+/// List `index`, NULL past the end
+///
+/// # Safety
+/// `info` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_unsubscribe_list(
+    info: *const PeAgentUnsubscribeInfo,
+    index: usize,
+) -> *const PeAgentList {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { info.as_ref() }.map(|info| &info.lists), index)
+}
+
+/// # Safety
+/// `info` must be NULL or not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_unsubscribe_free(info: *mut PeAgentUnsubscribeInfo) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(info) }
+}
+
+/// Answers an Unsubscribe question: ask the lists to take the address off (`unsubscribe`), in the background, or
+/// leave them (the safe answer). False when the question was answered already.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_answer_unsubscribe(core: *const PeCore, request: u64, unsubscribe: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, false, |core| {
+            let answer = if unsubscribe {
+                AgentAnswer::Unsubscribe
+            } else {
+                AgentAnswer::DontUnsubscribe
+            };
+            core.agent_answer(request, answer).is_ok()
         })
     }
 }

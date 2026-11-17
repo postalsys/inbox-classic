@@ -852,6 +852,8 @@ ui-allow = &Engedélyezés
 # review: new
 ui-dont-send = Nincs küldés
 # review: new
+ui-dont-unsubscribe = Nincs leiratkozás
+# review: new
 ui-edit-first = Előbb &szerkesztem
 # review: new
 ui-new-address = Új cím

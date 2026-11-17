@@ -14,7 +14,8 @@
 // What an agent may do, bits for `levels`: read mail
 #define PE_AGENT_READ 1
 
-// Organize it: read state, flags, junk, moves, deletes to Deleted Items
+// Organize it: read state, flags, junk, moves, archiving, new folders, deletes to Deleted Items, and leaving
+// mailing lists after the user says yes
 #define PE_AGENT_ORGANIZE 2
 
 // Write drafts
@@ -103,6 +104,9 @@ typedef enum PeAgentAskKind {
   PE_AGENT_ASK_KIND_CONNECT = 1,
   // An agent wants to send a message: `pe_agent_send_info`, answered with `pe_agent_answer_send`
   PE_AGENT_ASK_KIND_SEND = 2,
+  // An agent wants to leave mailing lists: `pe_agent_unsubscribe_info`, answered with
+  // `pe_agent_answer_unsubscribe`
+  PE_AGENT_ASK_KIND_UNSUBSCRIBE = 3,
 } PeAgentAskKind;
 
 typedef enum PeAgentSendAnswer {
@@ -640,6 +644,8 @@ typedef struct PeAgentLog PeAgentLog;
 
 typedef struct PeAgentSendInfo PeAgentSendInfo;
 
+typedef struct PeAgentUnsubscribeInfo PeAgentUnsubscribeInfo;
+
 // A lookup's result; free with `pe_autoconfig_free`
 typedef struct PeAutoconfig PeAutoconfig;
 
@@ -790,6 +796,28 @@ typedef struct PeAgentRecipient {
   // The user never wrote to this address
   bool new_address;
 } PeAgentRecipient;
+
+// The mailing lists an agent wants to leave, as the question shows them
+typedef struct PeAgentUnsubscribe {
+  // The question: "Claude wants to unsubscribe you from 3 mailing lists"
+  const char *title;
+  // What the dialog says under it
+  const char *detail;
+} PeAgentUnsubscribe;
+
+// A mailing list of the question, by the sender of its message
+typedef struct PeAgentList {
+  // The sender's address, "news@shop.example": shown whole and first, so a name can never hide it
+  const char *address;
+  // The name From gives with it, "News"; empty when it gives none
+  const char *name;
+  // The subject of the message it was found on
+  const char *subject;
+  // The host the request goes to
+  const char *target;
+  // The host as the question shows it: "→ list.example.com"
+  const char *target_label;
+} PeAgentList;
 
 // A program the user decided about
 typedef struct PeAgentHost {
@@ -1894,6 +1922,42 @@ void pe_agent_send_free(struct PeAgentSendInfo *info);
 struct PeDraft *pe_agent_answer_send(const struct PeCore *core,
                                      uint64_t request,
                                      enum PeAgentSendAnswer answer);
+
+// The lists of question `request`, NULL when it is not an Unsubscribe question. Free with
+// `pe_agent_unsubscribe_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAgentUnsubscribeInfo *pe_agent_unsubscribe_info(const struct PeCore *core,
+                                                         uint64_t request);
+
+// # Safety
+// `info` must be NULL or live.
+const struct PeAgentUnsubscribe *pe_agent_unsubscribe(const struct PeAgentUnsubscribeInfo *info);
+
+// # Safety
+// `info` must be NULL or live.
+size_t pe_agent_unsubscribe_list_count(const struct PeAgentUnsubscribeInfo *info);
+
+// List `index`, NULL past the end
+//
+// # Safety
+// `info` must be NULL or live.
+const struct PeAgentList *pe_agent_unsubscribe_list(const struct PeAgentUnsubscribeInfo *info,
+                                                    size_t index);
+
+// # Safety
+// `info` must be NULL or not freed yet.
+void pe_agent_unsubscribe_free(struct PeAgentUnsubscribeInfo *info);
+
+// Answers an Unsubscribe question: ask the lists to take the address off (`unsubscribe`), in the background, or
+// leave them (the safe answer). False when the question was answered already.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_agent_answer_unsubscribe(const struct PeCore *core,
+                                 uint64_t request,
+                                 bool unsubscribe);
 
 // Whether agents may connect at all
 //

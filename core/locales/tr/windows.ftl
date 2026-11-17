@@ -146,6 +146,10 @@ win-send = &Gönder
 # review: new
 win-dont-send = Gö&nderme
 # review: new
+win-unsubscribe = &Abonelikten Çık
+# review: new
+win-dont-unsubscribe = Abonelikten Çık&ma
+# review: new
 win-forget-program-ask = Bu program, izinleri ve aracılarının etkinlik geçmişi kaldırılsın mı? Bir sonraki bağlantısında yeniden izin istenecek.
 # review: new
 win-clear-log-ask = Aracıların etkinlik geçmişi temizlensin mi? Bu, aracıların yaptığı değişiklikleri geri almaz.

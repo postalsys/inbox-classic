@@ -676,8 +676,8 @@ day-sunday = domingo
 
 # review: new
 agent-level-read = Ler os e-mails: pastas, lista de mensagens, pesquisa e mensagens
-# review: new
-agent-level-organize = Organizar os e-mails: status de leitura, sinalizadores, lixo, mover, excluir para Itens Excluídos
+# review: changed
+agent-level-organize = Organizar os e-mails: status de leitura, sinalizadores, lixo, mover, arquivar, novas pastas, excluir para Itens Excluídos e sair de listas de e-mails depois que você disser sim
 # review: new
 agent-level-drafts = Escrever rascunhos para enviar
 # review: new
@@ -788,6 +788,20 @@ agent-log-archived = Arquivou “{ $subject }”
 agent-log-folder = Criou a pasta “{ $name }”
 # review: new
 agent-log-unsubscribed = Cancelou a inscrição na lista de “{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Não foi possível cancelar a inscrição na lista de “{ $subject }”: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Você não cancelou sua inscrição em { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } quer cancelar sua inscrição em uma lista de e-mails
+   *[other] { $program } quer cancelar sua inscrição em { $count } listas de e-mails
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] O Inbox Classic pede à lista abaixo que pare de enviar mensagens para você, pelo cancelamento com um clique que ela oferece. Nada mais é enviado, e as mensagens que você tem ficam onde estão.
+   *[other] O Inbox Classic pede a cada lista abaixo que pare de enviar mensagens para você, pelo cancelamento com um clique que a lista oferece. Nada mais é enviado, e as mensagens que você tem ficam onde estão.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

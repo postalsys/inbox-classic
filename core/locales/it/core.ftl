@@ -663,8 +663,8 @@ day-sunday = domenica
 
 # review: new
 agent-level-read = Leggere la posta: cartelle, elenco messaggi, ricerca e messaggi
-# review: new
-agent-level-organize = Organizzare la posta: stato di lettura, contrassegni, posta indesiderata, spostamento, eliminazione in Posta eliminata
+# review: changed
+agent-level-organize = Organizzare la posta: stato di lettura, contrassegni, posta indesiderata, spostamento, archiviazione, nuove cartelle, eliminazione in Posta eliminata e annullamento dell’iscrizione alle mailing list dopo il tuo sì
 # review: new
 agent-level-drafts = Scrivere bozze che invierai tu
 # review: new
@@ -775,6 +775,20 @@ agent-log-archived = Archiviato “{ $subject }”
 agent-log-folder = Creata la cartella “{ $name }”
 # review: new
 agent-log-unsubscribed = Annullata l’iscrizione alla lista di “{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Impossibile annullare l’iscrizione alla lista di “{ $subject }”: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Non hai annullato l’iscrizione a { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vuole annullare la tua iscrizione a una mailing list
+   *[other] { $program } vuole annullare la tua iscrizione a { $count } mailing list
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic chiede alla lista qui sotto di smettere di scriverti, con il metodo a un clic che offre. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.
+   *[other] Inbox Classic chiede a ogni lista qui sotto di smettere di scriverti, con il metodo a un clic offerto dalla lista. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

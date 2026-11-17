@@ -147,6 +147,10 @@ win-send = &Lähetä
 # review: new
 win-dont-send = Ä&lä lähetä
 # review: new
+win-unsubscribe = &Peruuta tilaus
+# review: new
+win-dont-unsubscribe = Ä&lä peruuta tilausta
+# review: new
 win-forget-program-ask = Poistetaanko tämä ohjelma, sen käyttöoikeudet ja sen agenttien toimintahistoria? Sinulta kysytään lupaa uudelleen, kun se seuraavan kerran muodostaa yhteyden.
 # review: new
 win-clear-log-ask = Tyhjennetäänkö agenttien toimintahistoria? Tämä ei kumoa agenttien tekemiä muutoksia.

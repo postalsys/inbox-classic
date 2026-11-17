@@ -176,6 +176,30 @@ fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
     attachments.iter().filter(|a| is_listed(a))
 }
 
+/// The parts that carry a signature of the rest of the message, which the reading pane shows as the signature's
+/// verdict, never as a file
+const SIGNATURE_PARTS: [&str; 3] = [
+    "application/pgp-signature",
+    "application/pkcs7-signature",
+    "application/x-pkcs7-signature",
+];
+
+/// The attachments an AI agent is told of and reads, in one numbering for both: those of the attachment bar, without
+/// a signature's own part (the reading pane shows the signature's verdict instead)
+pub(crate) fn agent_listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
+    listed(attachments).filter(|a| !SIGNATURE_PARTS.iter().any(|p| a.mime_type.eq_ignore_ascii_case(p)))
+}
+
+/// The `index`th attachment of [`agent_listed`], with its name to save it under and its type
+pub(crate) fn agent_attachment(message: &parser::Message, index: usize) -> Option<(String, String, Vec<u8>)> {
+    let attachment = agent_listed(&message.attachments).nth(index)?;
+    Some((
+        attachment.safe_filename(),
+        attachment.mime_type.clone(),
+        attachment.content.clone(),
+    ))
+}
+
 /// An attachment of the list: not a picture of the HTML body, not a part of a delivery report
 fn is_listed(attachment: &Attachment) -> bool {
     !attachment.related

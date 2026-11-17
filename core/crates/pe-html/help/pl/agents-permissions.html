@@ -3,18 +3,25 @@
 <p>Gdy agent programu łączy się po raz pierwszy, Inbox Classic pyta Cię o zgodę, podając nazwę programu. Wybierz, co agent może robić:</p>
 <ul>
     <li>czytanie poczty: foldery, lista wiadomości, wyszukiwanie i wiadomości</li>
-    <li>porządkowanie poczty: stan przeczytania, flagi, śmieci, przenoszenie i usuwanie do folderu <b data-text="folder-deleted"></b></li>
+    <li>porządkowanie poczty: stan przeczytania, flagi, śmieci, przenoszenie, archiwizowanie, nowe foldery i usuwanie do folderu <b data-text="folder-deleted"></b>, a także wypisywanie z list mailingowych po Twojej zgodzie</li>
     <li>pisanie wersji roboczych do wysłania przez Ciebie</li>
     <li>wysyłanie poczty, każdej wiadomości dopiero po Twojej zgodzie</li>
 </ul>
 <p>Potem wybierz konta, które agent może widzieć, i kliknij <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> odrzuca program i Inbox Classic nie pyta już o niego.</p>
 <p>Agent nigdy niczego nie usuwa trwale i nigdy nie zmienia ustawień kont. Przeczytanie wiadomości przez agenta nie oznacza jej jako przeczytanej. To, co zmieni, od razu widać w oknach.</p>
+<h2>Wypisywanie z list mailingowych</h2>
+<p>Agent, który może porządkować pocztę, może poprosić o wypisanie Cię z list mailingowych. Inbox Classic najpierw pyta Cię o to jeden raz, podając każdą listę z jej nadawcą:</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> prosi każdą listę, aby przestała wysyłać Ci wiadomości.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, wybór domyślny, pozostawia je bez zmian.</li>
+</ul>
+<p>Agent nie może wypisać Cię z listy na podstawie wiadomości w folderze <b data-text="folder-junk"></b>, a dziennie może wypisać Cię z najwyżej 30 list.</p>
 <h2>Przeglądanie i zmiana dostępu</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> wymienia programy, które wpuszczono lub odrzucono, oraz wszystko, co zrobili agenci, od najnowszych działań.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> zmienia, co program może robić.</li>
     <li><b data-text="ui-remove"></b> zapomina program, więc przy następnym połączeniu Inbox Classic znów zapyta o zgodę.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> cofa zmianę stanu przeczytania, flagę, przeniesienie lub usunięcie oraz wiadomość, która jest jeszcze w Skrzynce nadawczej.</li>
+    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> cofa zmianę stanu przeczytania, flagę, przeniesienie, oznaczenie jako śmieci, archiwizację lub usunięcie oraz wiadomość, która jest jeszcze w Skrzynce nadawczej.</li>
 </ul>
 <aside class="warning">Pocztę piszą inni ludzie, a wiadomość może próbować namówić agenta do przesłania dalej lub usunięcia Twojej poczty. Inbox Classic ukrywa przed agentami tekst, który wiadomość ukrywa przed Tobą, i mówi im, że poczta nie jest poleceniami. Agenta wciąż można oszukać. Zezwalaj tylko na to, czego potrzebujesz.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav><!--/review-->

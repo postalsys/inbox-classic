@@ -146,6 +146,10 @@ win-send = &Envia
 # review: new
 win-dont-send = &No l’enviïs
 # review: new
+win-unsubscribe = &Cancel·la la subscripció
+# review: new
+win-dont-unsubscribe = &No cancel·lis la subscripció
+# review: new
 win-forget-program-ask = Voleu eliminar aquest programa, els seus permisos i l’historial d’activitat dels seus agents? Se us tornarà a demanar permís la propera vegada que es connecti.
 # review: new
 win-clear-log-ask = Voleu esborrar l’historial d’activitat dels agents? Això no desfarà els canvis que han fet els agents.

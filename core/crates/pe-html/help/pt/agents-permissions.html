@@ -3,18 +3,25 @@
 <p>Da primeira vez que o agente de um programa se liga, o Inbox Classic pergunta-lhe, indicando o nome do programa. Escolha o que pode fazer:</p>
 <ul>
     <li>ler o correio: pastas, lista de mensagens, pesquisa e mensagens</li>
-    <li>organizar o correio: estado de leitura, sinalizadores, lixo, mover e eliminar para <b data-text="folder-deleted"></b></li>
+    <li>organizar o correio: estado de leitura, sinalizadores, lixo, mover, arquivar, novas pastas e eliminar para <b data-text="folder-deleted"></b>, e sair de listas de correio depois de dizer que sim</li>
     <li>escrever rascunhos para enviar</li>
     <li>enviar correio, cada mensagem só depois de dizer que sim</li>
 </ul>
 <p>Depois escolha as contas que pode ver e clique em <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> recusa o programa, e não voltará a ser questionado sobre ele.</p>
 <p>Um agente nunca elimina nada permanentemente e nunca altera as definições das suas contas. Ler uma mensagem não a marca como lida. O que altera aparece de imediato nas janelas.</p>
+<h2>Sair de listas de correio</h2>
+<p>Um agente que pode organizar o correio pode pedir para cancelar a sua subscrição de listas de correio. Primeiro, o Inbox Classic pergunta-lhe uma vez, indicando cada lista pelo seu remetente:</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> pede a cada lista que deixe de lhe enviar mensagens.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, a opção predefinida, deixa-as como estão.</li>
+</ul>
+<p>Um agente não pode cancelar subscrições a partir de mensagens em <b data-text="folder-junk"></b>, e pode cancelar no máximo 30 listas por dia.</p>
 <h2>Ver e alterar o acesso</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> mostra os programas que deixou entrar ou recusou, e tudo o que os agentes fizeram, do mais recente para o mais antigo.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> altera o que um programa pode fazer.</li>
     <li><b data-text="ui-remove"></b> esquece um programa, para que lhe seja perguntado novamente da próxima vez que se ligar.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> anula um estado de leitura, um sinalizador, uma ação de mover ou eliminar, e uma mensagem que ainda esteja na Caixa de Saída.</li>
+    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> anula um estado de leitura, um sinalizador, uma ação de mover, marcar como lixo, arquivar ou eliminar, e uma mensagem que ainda esteja na Caixa de Saída.</li>
 </ul>
 <aside class="warning">O correio é escrito por outras pessoas, e uma mensagem pode tentar convencer um agente a reencaminhar ou eliminar o seu correio. O Inbox Classic esconde dos agentes o texto que uma mensagem lhe esconde a si, e diz-lhes que o correio não são instruções. Mesmo assim, um agente pode ser enganado. Permita apenas o que precisa.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

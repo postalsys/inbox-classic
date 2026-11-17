@@ -854,6 +854,8 @@ ui-allow = &Tillat
 # review: new
 ui-dont-send = Ikke send
 # review: new
+ui-dont-unsubscribe = Ikke meld av
+# review: new
 ui-edit-first = &Rediger først
 # review: new
 ui-new-address = Ny adresse

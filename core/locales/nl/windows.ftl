@@ -146,6 +146,10 @@ win-send = &Verzenden
 # review: new
 win-dont-send = &Niet verzenden
 # review: new
+win-unsubscribe = &Afmelden
+# review: new
+win-dont-unsubscribe = &Niet afmelden
+# review: new
 win-forget-program-ask = Dit programma verwijderen, met de machtigingen en de activiteitengeschiedenis van de agents? Bij de volgende verbinding wordt opnieuw om toestemming gevraagd.
 # review: new
 win-clear-log-ask = De activiteitengeschiedenis van de agents wissen? Wijzigingen die de agents hebben gemaakt, worden hiermee niet ongedaan gemaakt.

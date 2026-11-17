@@ -854,6 +854,8 @@ ui-allow = &Разрешаване
 # review: new
 ui-dont-send = Не изпращай
 # review: new
+ui-dont-unsubscribe = Не се отписвай
+# review: new
 ui-edit-first = Първо &редактиране
 # review: new
 ui-new-address = Нов адрес

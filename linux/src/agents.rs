@@ -1,6 +1,7 @@
 //! AI agents: the questions only the user answers (a program that connects for the first time, every message an
-//! agent wants to send) and Tools > AI Agents, with the programs let in and what agents did. The rules, the words and
-//! what the answers do are the core's (pe-core agents.rs); these windows show them and pass the answers on.
+//! agent wants to send, the mailing lists it wants to leave) and Tools > AI Agents, with the programs let in and what
+//! agents did. The rules, the words and what the answers do are the core's (pe-core agents.rs); these windows show
+//! them and pass the answers on.
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -40,7 +41,13 @@ impl AccessForm {
         widget.append(&heading(&t!(GtkAgentItMay)));
         let mut boxes = Vec::new();
         for (index, bit) in LEVEL_BITS.iter().enumerate() {
-            let check = gtk::CheckButton::with_label(&agents::level_text(*bit));
+            // wrapped: a long level (organizing names everything it may do) keeps the form from growing wide
+            let check = gtk::CheckButton::new();
+            let label = ui::wrapped_label(&ui::no_lone_word(&agents::level_text(*bit)));
+            // wide enough that the short levels stay on one line and the long one takes two or three
+            label.set_width_chars(48);
+            check.update_relation(&[gtk::accessible::Relation::LabelledBy(&[label.upcast_ref()])]);
+            check.set_child(Some(&label));
             check.set_active(levels.has(*bit));
             check.set_widget_name(&format!("agent-level-{index}"));
             widget.append(&check);
@@ -153,7 +160,7 @@ pub async fn question(request: u64) {
                 "agent-send",
             );
             dialog.set_response_appearance("send", adw::ResponseAppearance::Suggested);
-            send_after_a_moment(&dialog);
+            enable_later(&dialog, "send");
             let answer = match dialog.choose_future(Some(&window)).await.as_str() {
                 "send" => AgentAnswer::Send,
                 "compose" => AgentAnswer::Compose,
@@ -163,11 +170,19 @@ pub async fn question(request: u64) {
                 shell().open_draft(ask.account, draft);
             }
         }
+        Some(AgentAsk::Unsubscribe(ask)) => {
+            let dialog = unsubscribe_dialog(&ask);
+            let answer = match dialog.choose_future(Some(&window)).await.as_str() {
+                "unsubscribe" => AgentAnswer::Unsubscribe,
+                _ => AgentAnswer::DontUnsubscribe,
+            };
+            let _ = core.agent_answer(request, answer);
+        }
         None => {}
     }
 }
 
-/// How long Send stays off once the question is on screen
+/// How long Send or Unsubscribe stays off once the question is on screen
 const SEND_DELAY: std::time::Duration = std::time::Duration::from_millis(1500);
 
 #[cfg(feature = "e2e")]
@@ -176,10 +191,11 @@ thread_local! {
     static SEND_WAITED: std::cell::Cell<Option<std::time::Duration>> = const { std::cell::Cell::new(None) };
 }
 
-/// Send comes on a moment after the question is on screen, so a key pressed for another window does not send. Counted
+/// The answer `id` (Send, Unsubscribe) comes on a moment after the question is on screen, so a key pressed for
+/// another window does not answer it. Counted
 /// from when it is shown, not made: a busy window can show it later than it was made
-fn send_after_a_moment(dialog: &adw::AlertDialog) {
-    dialog.set_response_enabled("send", false);
+fn enable_later(dialog: &adw::AlertDialog, id: &'static str) {
+    dialog.set_response_enabled(id, false);
     #[cfg(feature = "e2e")]
     SEND_WAITED.with(|waited| waited.set(None));
     let started = std::cell::Cell::new(false);
@@ -192,7 +208,7 @@ fn send_after_a_moment(dialog: &adw::AlertDialog) {
         let shown = std::time::Instant::now();
         glib::timeout_add_local_once(SEND_DELAY, move || {
             if let Some(dialog) = later.upgrade() {
-                dialog.set_response_enabled("send", true);
+                dialog.set_response_enabled(id, true);
                 #[cfg(feature = "e2e")]
                 SEND_WAITED.with(|waited| waited.set(Some(shown.elapsed())));
             }
@@ -205,6 +221,79 @@ fn send_after_a_moment(dialog: &adw::AlertDialog) {
 #[cfg(feature = "e2e")]
 pub fn send_waited(dialog: &adw::AlertDialog) -> bool {
     !dialog.is_response_enabled("send") || SEND_WAITED.with(|waited| waited.get()).is_some_and(|w| w >= SEND_DELAY)
+}
+
+/// The question of an agent that wants to leave mailing lists: Don't Unsubscribe the default and Esc, Unsubscribe
+/// on after a moment and shown as what can not be taken back
+fn unsubscribe_dialog(ask: &agents::UnsubscribeAsk) -> adw::AlertDialog {
+    let (title, detail) = agents::unsubscribe_text(ask);
+    let dialog = question_dialog(
+        &title,
+        &detail,
+        &unsubscribe_lists(ask),
+        &[
+            ("dont", t!(UiDontUnsubscribe).as_str()),
+            ("unsubscribe", t!(UiUnsubscribe).as_str()),
+        ],
+        "agent-unsubscribe",
+    );
+    dialog.set_response_appearance("unsubscribe", adw::ResponseAppearance::Destructive);
+    enable_later(&dialog, "unsubscribe");
+    dialog
+}
+
+/// The mailing lists an agent wants to leave, a row each: the sender's address first and whole (wrapped, never cut,
+/// so a name can not hide who it is), then the name, the subject it came with and where the request goes; scrolled
+/// past about eight
+fn unsubscribe_lists(ask: &agents::UnsubscribeAsk) -> gtk::ScrolledWindow {
+    let list = gtk::ListBox::new();
+    list.set_selection_mode(gtk::SelectionMode::None);
+    list.add_css_class("boxed-list");
+    for (index, entry) in ask.lists.iter().enumerate() {
+        let content = gtk::Box::new(gtk::Orientation::Vertical, 2);
+        content.set_margin_top(8);
+        content.set_margin_bottom(8);
+        content.set_margin_start(12);
+        content.set_margin_end(12);
+        let address = ui::wrapped_label(&entry.address);
+        address.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+        address.add_css_class("heading");
+        address.set_widget_name(&format!("agent-list-{index}"));
+        content.append(&address);
+        // the name under it, the subject secondary, where the request goes smaller still
+        for (text, name, dim, class) in [
+            (entry.name.clone(), "agent-list-name", false, "body"),
+            (entry.subject.clone(), "agent-list-subject", true, "body"),
+            (entry.target_label.clone(), "agent-list-target", true, "caption"),
+        ] {
+            if text.is_empty() {
+                continue;
+            }
+            let label = gtk::Label::new(Some(&text));
+            label.set_xalign(0.0);
+            label.set_ellipsize(gtk::pango::EllipsizeMode::End);
+            label.set_tooltip_text(Some(&text));
+            if dim {
+                label.add_css_class("dim-label");
+            }
+            label.add_css_class(class);
+            label.set_widget_name(name);
+            content.append(&label);
+        }
+        let row = gtk::ListBoxRow::builder()
+            .child(&content)
+            .activatable(false)
+            .focusable(false)
+            .build();
+        list.append(&row);
+    }
+    gtk::ScrolledWindow::builder()
+        .child(&list)
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .propagate_natural_height(true)
+        .max_content_height(360)
+        .min_content_width(480)
+        .build()
 }
 
 /// The message as it would go: every recipient on a row of its own, address first, so a name can not hide where it
@@ -291,6 +380,16 @@ fn send_details(ask: &agents::SendAsk, text: &agents::SendText) -> gtk::Box {
 
 // ---- Tools > AI Agents ----
 
+/// A row of plain text: nothing in a program's name, a subject or an address (`A <a@x>`) is read as markup. Markup is
+/// turned off before the words go in, as a builder may set the title first
+fn plain_row(title: &str, subtitle: &str) -> adw::ActionRow {
+    let row = adw::ActionRow::new();
+    row.set_use_markup(false);
+    row.set_title(title);
+    row.set_subtitle(subtitle);
+    row
+}
+
 /// What a button of the window does, given the window
 type Act = fn(Rc<AgentsDialog>) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()>>>;
 
@@ -330,12 +429,7 @@ impl AgentsDialog {
             let used = host
                 .last_used
                 .map_or(t!(GtkNeverUsed), |at| t!(GtkLastUsed, date = &ui::format_date(at)));
-            // plain text: nothing in a program's name or a subject is read as markup
-            let row = adw::ActionRow::builder()
-                .use_markup(false)
-                .title(&host.name)
-                .subtitle(format!("{}  \u{00B7}  {used}", agents::access_text(host)))
-                .build();
+            let row = plain_row(&host.name, &format!("{}  \u{00B7}  {used}", agents::access_text(host)));
             row.set_widget_name("agents-host");
             self.hosts.append(&row);
         }
@@ -344,11 +438,10 @@ impl AgentsDialog {
         let log = core.agent_log(500).unwrap_or_default();
         for entry in &log {
             let summary = agents::log_text(entry);
-            let row = adw::ActionRow::builder()
-                .use_markup(false)
-                .title(&summary)
-                .subtitle(format!("{}  \u{00B7}  {}", ui::format_date(entry.at), entry.host_name))
-                .build();
+            let row = plain_row(
+                &summary,
+                &format!("{}  \u{00B7}  {}", ui::format_date(entry.at), entry.host_name),
+            );
             row.set_widget_name("agents-entry");
             self.log.append(&row);
         }

@@ -1504,6 +1504,10 @@ enum AgentControlId : WORD {
     IDC_AGENT_SEND,
     IDC_AGENT_COMPOSE,
     IDC_AGENT_DONT_SEND,
+    // mailing lists to leave: the lists and the two answers
+    IDC_AGENT_LISTS,
+    IDC_AGENT_UNSUBSCRIBE,
+    IDC_AGENT_DONT_UNSUBSCRIBE,
     // Tools > AI Agents
     IDC_AGENTS_ENABLED = 630,
     IDC_AGENTS_HOSTS,

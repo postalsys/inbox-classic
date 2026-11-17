@@ -147,6 +147,10 @@ win-send = &Enviar
 # review: new
 win-dont-send = &Não enviar
 # review: new
+win-unsubscribe = &Cancelar inscrição
+# review: new
+win-dont-unsubscribe = &Não cancelar inscrição
+# review: new
 win-forget-program-ask = Remover este programa, as permissões dele e o histórico de atividade dos seus agentes? Ele precisará pedir autorização novamente na próxima vez que se conectar.
 # review: new
 win-clear-log-ask = Limpar o histórico de atividade dos agentes? Isso não desfaz as alterações feitas pelos agentes.

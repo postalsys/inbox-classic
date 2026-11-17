@@ -677,8 +677,8 @@ day-sunday = воскресенье
 
 # review: new
 agent-level-read = Чтение почты: папки, список сообщений, поиск и сообщения
-# review: new
-agent-level-organize = Упорядочивание почты: прочитанность, флажки, нежелательная почта, перемещение, удаление в папку «Удаленные»
+# review: changed
+agent-level-organize = Упорядочивание почты: прочитанность, флажки, нежелательная почта, перемещение, архивирование, новые папки, удаление в папку «Удаленные» и отписка от рассылок после вашего согласия
 # review: new
 agent-level-drafts = Создание черновиков, которые отправляете вы
 # review: new
@@ -789,6 +789,23 @@ agent-log-archived = В архиве: «{ $subject }»
 agent-log-folder = Создана папка «{ $name }»
 # review: new
 agent-log-unsubscribed = Отменена подписка на рассылку «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = Не удалось отписаться от рассылки «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Вы не стали отписываться от рассылок: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [1] { $program } хочет отписать вас от рассылки
+    [one] { $program } хочет отписать вас от { $count } рассылки
+    [few] { $program } хочет отписать вас от { $count } рассылок
+    [many] { $program } хочет отписать вас от { $count } рассылок
+   *[other] { $program } хочет отписать вас от { $count } рассылки
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic попросит рассылку ниже больше не присылать вам писем, используя отписку в один щелчок, которую она предлагает. Больше ничего не отправляется, а ваши сообщения остаются на своих местах.
+   *[other] Inbox Classic попросит каждую рассылку ниже больше не присылать вам писем, используя отписку в один щелчок, которую предлагает рассылка. Больше ничего не отправляется, а ваши сообщения остаются на своих местах.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

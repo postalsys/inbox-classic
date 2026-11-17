@@ -540,24 +540,8 @@ private final class SetupImportWindow: NSObject {
         let holder = indented([list])
         guard file.accounts.count > 4 else { return holder }
         // as tall as four accounts, the rest under them in the scroll
-        let document = FlippedView()
-        document.addSubview(holder)
-        holder.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            holder.topAnchor.constraint(equalTo: document.topAnchor),
-            holder.leadingAnchor.constraint(equalTo: document.leadingAnchor),
-            holder.trailingAnchor.constraint(equalTo: document.trailingAnchor),
-            holder.bottomAnchor.constraint(equalTo: document.bottomAnchor),
-        ])
-        let scroll = NSScrollView()
-        scroll.hasVerticalScroller = true
-        scroll.drawsBackground = false
-        scroll.documentView = document
-        document.translatesAutoresizingMaskIntoConstraints = false
-        document.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor).isActive = true
-        scroll.widthAnchor.constraint(equalToConstant: width).isActive = true
         let four = list.arrangedSubviews.prefix(4).reduce(0) { $0 + $1.fittingSize.height } + 3 * list.spacing
-        scroll.heightAnchor.constraint(equalToConstant: ceil(four) + 4).isActive = true
+        let scroll = scrolledColumn(holder, width: width, height: ceil(four) + 4)
         return scroll
     }
 

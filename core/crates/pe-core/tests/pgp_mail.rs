@@ -628,13 +628,14 @@ fn an_agent_does_not_answer_encrypted_mail() {
         last_used: None,
     };
     for kind in [pe_core::DraftKind::Reply, pe_core::DraftKind::Forward] {
-        let outcome = w.core.agent_save_draft(
-            &host,
+        let written = pe_core::agents::Written {
             account,
-            Some((folder, 1, kind)),
-            pe_core::Outgoing::default(),
-            "Here you go",
-        );
+            original: Some((folder, 1, kind)),
+            text: "Here you go".into(),
+            signature: true,
+            ..Default::default()
+        };
+        let outcome = w.core.agent_save_draft(&host, &written);
         match outcome {
             Err(pe_core::Error::Unavailable(why)) => assert!(why.contains("encrypted"), "{why}"),
             other => panic!("{kind:?}: {other:?}"),

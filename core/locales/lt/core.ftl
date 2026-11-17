@@ -677,8 +677,8 @@ day-sunday = sekmadienis
 
 # review: new
 agent-level-read = Skaityti paštą: aplankai, laiškų sąrašas, paieška ir laiškai
-# review: new
-agent-level-organize = Tvarkyti paštą: skaitymo būsena, vėliavėlės, nepageidaujami laiškai, perkėlimas, panaikinimas į „Panaikinti laiškai“
+# review: changed
+agent-level-organize = Tvarkyti paštą: skaitymo būsena, vėliavėlės, nepageidaujami laiškai, perkėlimas, archyvavimas, nauji aplankai, panaikinimas į „Panaikinti laiškai“ ir adresatų sąrašų prenumeratos atsisakymas jums sutikus
 # review: new
 agent-level-drafts = Rašyti juodraščius, kuriuos išsiųsite jūs
 # review: new
@@ -790,6 +790,21 @@ agent-log-archived = Archyvuotas „{ $subject }“
 agent-log-folder = Sukurtas aplankas „{ $name }“
 # review: new
 agent-log-unsubscribed = Atsisakyta „{ $subject }“ adresatų sąrašo
+# review: new
+agent-log-unsubscribe-failed = Nepavyko atsisakyti „{ $subject }“ adresatų sąrašo: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Neatsisakėte prenumeratos: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašo prenumeratos
+    [few] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos
+   *[other] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic paprašo toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį jis siūlo. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
+   *[other] Inbox Classic paprašo kiekvieno toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį siūlo sąrašas. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

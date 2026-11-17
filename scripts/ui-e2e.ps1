@@ -3495,9 +3495,21 @@ public static class Dragger {
 
     Step 'an AI agent'
     $IDC_AGENT_LEVEL = 600; $IDC_AGENT_PATH = 611; $IDC_AGENT_RECIPIENTS = 612; $IDC_AGENT_WARNING = 614; $IDC_AGENT_SEND = 615
+    $IDC_AGENT_LISTS = 618; $IDC_AGENT_UNSUBSCRIBE = 619; $IDC_AGENT_DONT_UNSUBSCRIBE = 620
     $IDC_AGENTS_HOSTS = 631; $IDC_AGENTS_LOG = 634; $IDC_AGENTS_UNDO = 635; $BM_GETCHECK = 0x00F0; $BM_SETCHECK = 0x00F1
-    # two new messages for the agent to read, whatever the steps before left unread
     $inboxBefore = @(Messages 'INBOX').Count
+    # two mailing lists the agent asks to leave at the end, read already so the agent's unread two are the ones below;
+    # signed by the list as the provider says, with the one-click way
+    foreach ($mailing in @(@('Weekly Digest <digest@list.example.com>', 'Weekly digest: five things to read', 1),
+                        @('Shop Offers <offers@list.example.com>', 'Monthly offers for you', 2))) {
+        AddMessage ("Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com`r`n" +
+            "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; b=y`r`n" +
+            "From: $($mailing[0])`r`nTo: testuser@inboxclassic.test`r`nSubject: $($mailing[1])`r`n" +
+            "Date: $([DateTime]::UtcNow.AddHours(-1).ToString('r'))`r`nMessage-ID: <list-$($mailing[2])@list.example.com>`r`n" +
+            "List-Unsubscribe: <https://list.example.com/u/$($mailing[2])>`r`nList-Unsubscribe-Post: List-Unsubscribe=One-Click`r`n`r`n" +
+            "This month on the list.`r`n") @('\Seen')
+    }
+    # two new messages for the agent to read, whatever the steps before left unread
     foreach ($new in @(@('Maria Lopez <maria@example.org>', 'Quarterly report draft', 'Here is the draft of the quarterly report. Comments by Thursday?'),
                        @('Sam Lee <sam@example.org>', 'Team lunch on Friday', 'Who is in for lunch on Friday at noon?'))) {
         AddMessage ("From: $($new[0])`r`nTo: testuser@inboxclassic.test`r`nSubject: $($new[1])`r`nDate: $([DateTime]::UtcNow.ToString('r'))`r`n" +
@@ -3506,7 +3518,7 @@ public static class Dragger {
     SelectFolder 0
     Command $main $IDM_SYNC
     # the messages the status bar counts: the rows are fewer where replies share a conversation's row
-    [void](WaitFor { (StatusPart $mainStatus 2) -match '^(\d+) message' -and [int]$Matches[1] -ge $inboxBefore + 2 } 20)
+    [void](WaitFor { (StatusPart $mainStatus 2) -match '^(\d+) message' -and [int]$Matches[1] -ge $inboxBefore + 4 } 20)
     $unreadBefore = @(Messages 'INBOX' | Where-Object { $_.flags -notcontains '\Seen' }).Count
     Start-Sleep -Seconds 1
     Shot $main 'agents-1-before'
@@ -3587,6 +3599,51 @@ public static class Dragger {
         Check ((ListCount ([Native.Win]::GetDlgItem($outbox, 450))) -eq 0) 'and the Outbox is empty'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
+    }
+    # the agent's go: it asks to leave the two mailing lists added above
+    Set-Content -Path "$agentOut.unsubscribe" -Value ''
+    $leave = WaitShown 'InboxClassicAgentUnsubscribe' 30
+    Check ($null -ne $leave) 'the agent asks to unsubscribe from two mailing lists'
+    if ($leave) {
+        $heading = Statics $leave
+        Check ($heading -match 'My AI agent wants to unsubscribe you from 2 mailing lists') "one question names the program and the count ($heading)"
+        $lists = [Native.Win]::GetDlgItem($leave, $IDC_AGENT_LISTS)
+        $listed = @(0..1 | ForEach-Object { "$([Native.Win]::RemoteListText($lists, $_, 0))|$([Native.Win]::RemoteListText($lists, $_, 1))|$([Native.Win]::RemoteListText($lists, $_, 3))" })
+        Check ((ListCount $lists) -eq 2 -and ($listed -join ';') -match 'digest@list\.example\.com' -and ($listed -join ';') -match 'offers@list\.example\.com' -and
+               @($listed | Where-Object { $_ -match "$([char]0x2192) list\.example\.com$" }).Count -eq 2) "it lists both senders and where the requests go ($($listed -join '; '))"
+        # the address first and alone in its column, the name beside it, so a name can not hide who it is; the column
+        # wide enough for the whole address
+        $addressShown = [int][Native.Win]::SendMessage($lists, 0x101D, [IntPtr]0, [IntPtr]::Zero)
+        Check ((@($listed | Where-Object { $_ -match '^digest@list\.example\.com\|Weekly Digest\|' -or $_ -match '^offers@list\.example\.com\|Shop Offers\|' }).Count -eq 2) -and $addressShown -ge 200) "each list shows its address whole, first, and the name apart ($($listed -join '; '); $addressShown)"
+        # every column fits: no scroll bar sideways for lists of ordinary addresses
+        Check (-not ([Native.Win]::GetWindowLong($lists, -16) -band 0x00100000)) 'the columns fit the list, with no scroll bar sideways'
+        Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($leave, $IDC_AGENT_UNSUBSCRIBE))) 'Unsubscribe waits a moment before it can be pressed'
+        Start-Sleep -Seconds 2
+        # another window in front and back again, as a question raised while the app is behind: the safe answer keeps
+        # the keyboard (the picture brings the question to the front)
+        $taskbar = [Native.Win]::FindWindow('Shell_TrayWnd', [NullString]::Value)
+        if ($taskbar -ne [IntPtr]::Zero) { [void][Native.Win]::SetForegroundWindow($taskbar); Start-Sleep -Milliseconds 500 }
+        Shot $leave 'agents-7-unsubscribe'
+        $dontButton = [Native.Win]::GetDlgItem($leave, $IDC_AGENT_DONT_UNSUBSCRIBE)
+        Check ([bool](WaitFor { [Native.Win]::FocusOf($leave) -eq $dontButton } 5)) "back in front, Don't Unsubscribe has the keyboard ($([Native.Win]::FocusOf($leave)) $dontButton)"
+        $defId = [int64][Native.Win]::SendMessage($leave, 0x400, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ((($defId -shr 16) -band 0xFFFF) -eq 0x534B -and ($defId -band 0xFFFF) -eq $IDC_AGENT_DONT_UNSUBSCRIBE) "Don't Unsubscribe is the default ($('{0:X}' -f $defId))"
+        # Enter where the keyboard is
+        $focused = [Native.Win]::FocusOf($leave)
+        Key $(if ($focused -ne [IntPtr]::Zero) { $focused } else { $leave }) 0x0D
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($leave) } 10)) 'Enter answers it'
+    }
+    $unsubscribed = WaitFor { & $agentSaid 'unsubscribe' } 20
+    Check ($null -ne $unsubscribed -and $unsubscribed.result.unsubscribed -eq $false) "the agent learns the user said no ($($unsubscribed | ConvertTo-Json -Compress -Depth 6))"
+    Command $main $IDM_AI_AGENTS
+    $agents = WaitShown 'InboxClassicAgents' 10
+    if ($agents) {
+        $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
+        $newest = [Native.Win]::RemoteListText($log, 0, 2)
+        Check ($newest -match '^You did not unsubscribe from ' -and $newest -match 'digest@list\.example\.com' -and $newest -match 'offers@list\.example\.com') "and no list was asked ($newest)"
+        Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($agents, $IDC_AGENTS_UNDO))) 'which can not be undone'
+        [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
     }
     if ($agent -and -not $agent.HasExited) { $agent | Stop-Process -Force -ErrorAction SilentlyContinue }
 

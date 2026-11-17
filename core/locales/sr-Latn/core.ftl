@@ -685,8 +685,8 @@ day-sunday = nedelja
 
 # review: new
 agent-level-read = Čitanje pošte: fascikle, lista poruka, pretraga i poruke
-# review: new
-agent-level-organize = Organizovanje pošte: stanje pročitanosti, zastavice, neželjena pošta, premeštanje, brisanje u fasciklu Izbrisane stavke
+# review: changed
+agent-level-organize = Organizovanje pošte: stanje pročitanosti, zastavice, neželjena pošta, premeštanje, arhiviranje, nove fascikle, brisanje u fasciklu Izbrisane stavke i napuštanje lista za slanje kada vi to odobrite
 # review: new
 agent-level-drafts = Pisanje radnih verzija koje ćete vi poslati
 # review: new
@@ -798,6 +798,22 @@ agent-log-archived = Arhivirano: „{ $subject }“
 agent-log-folder = Napravljena fascikla „{ $name }“
 # review: new
 agent-log-unsubscribed = Otkazana pretplata na listu poruke „{ $subject }“
+# review: new
+agent-log-unsubscribe-failed = Otkazivanje pretplate na listu poruke „{ $subject }“ nije uspelo: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Niste otkazali pretplatu: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [1] { $program } želi da otkaže vašu pretplatu na listu za slanje
+    [one] { $program } želi da otkaže vašu pretplatu na { $count } listu za slanje
+    [few] { $program } želi da otkaže vašu pretplatu na { $count } liste za slanje
+   *[other] { $program } želi da otkaže vašu pretplatu na { $count } lista za slanje
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic traži od liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+   *[other] Inbox Classic traži od svake liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje lista nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -52,7 +52,7 @@ pub use marks::{Conversation, ThreadMark};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Protection, Sort, SortField};
 pub use outbox::Queued;
 pub use pgp::{KeyAddress, PgpIdentity, PgpPeer, StoredKey, normal_address};
-pub use query::Query;
+pub use query::{Query, SEARCH_OPERATORS, SEARCH_SYNTAX};
 pub use recovery::Recovery;
 pub use rules::{Rule, RuleId};
 pub use rusqlite::Error;

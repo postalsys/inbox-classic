@@ -853,6 +853,8 @@ ui-allow = &Leisti
 # review: new
 ui-dont-send = Nesiųsti
 # review: new
+ui-dont-unsubscribe = Neatsisakyti prenumeratos
+# review: new
 ui-edit-first = &Pirma redaguoti
 # review: new
 ui-new-address = Naujas adresas

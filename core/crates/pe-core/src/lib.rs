@@ -485,6 +485,8 @@ pub struct Core {
     closed: Arc<AtomicBool>,
     /// The questions of AI agents waiting for the user (agents.rs)
     agent_asks: Mutex<agents::Asks>,
+    /// Grows each time what programs may do changes (agents.rs `agent_changes`)
+    agent_changes: tokio::sync::watch::Sender<u64>,
     /// The attachments of the messages shown lately and the files written to open them (opening.rs)
     attachment_files: Arc<opening::Files>,
     /// Lookups of servers; None when the address has no domain
@@ -597,6 +599,7 @@ impl Core {
             }),
             closed,
             agent_asks: Mutex::default(),
+            agent_changes: tokio::sync::watch::Sender::new(0),
             attachment_files: Arc::default(),
             autoconfig: Requests::default(),
             pgp_lookups: Requests::default(),
@@ -1118,37 +1121,35 @@ impl Core {
     /// the background; [`Event::Unsubscribed`] follows with the request this returns. Refused for a message that
     /// offers no one-click way ([`crate::unsubscribe::of`]), whose source is not in the store.
     pub fn unsubscribe(&self, folder: FolderId, uid: u64) -> Result<u64> {
-        // the header block is all it takes
-        let start = self
-            .store()
-            .source_start(folder, uid, view::MAX_HEADER_TEXT)?
-            .ok_or(Error::NotFound)?;
-        let message = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?;
-        let Some(unsubscribe::Unsubscribe::OneClick { url }) =
-            unsubscribe::of(&message.headers, &self.trusted(folder)?)
-        else {
-            return Err(Error::NotFound);
-        };
+        let url = self.one_click(folder, uid)?.ok_or(Error::NotFound)?;
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let events = self.events.clone();
         self.runtime()?.spawn(async move {
-            let answer = pe_net::http::post_form(
-                &url,
-                &[("List-Unsubscribe", "One-Click")],
-                std::time::Duration::from_secs(30),
-            )
-            .await;
-            let problem = match answer {
-                Ok(response) if (200..300).contains(&response.status) => None,
-                Ok(response) => Some(tr_args(
-                    Text::ErrorListAnswered,
-                    &[("status", u32::from(response.status).into())],
-                )),
-                Err(error) => Some(error.to_string()),
-            };
+            let problem = unsubscribe::post(&url).await;
             events(Event::Unsubscribed { request, problem });
         });
         Ok(request)
+    }
+
+    /// The address a message's one-click unsubscribe (RFC 8058) goes to, None when it offers none
+    /// ([`crate::unsubscribe::of`]) or its source is not in the store
+    pub(crate) fn one_click(&self, folder: FolderId, uid: u64) -> Result<Option<String>> {
+        self.one_click_with(folder, uid, &self.trusted(folder)?)
+    }
+
+    /// [`Core::one_click`] with the servers whose verdicts count for the folder's account already read
+    pub(crate) fn one_click_with(&self, folder: FolderId, uid: u64, trusted: &[String]) -> Result<Option<String>> {
+        // the header block is all it takes
+        let Some(start) = self.store().source_start(folder, uid, view::MAX_HEADER_TEXT)? else {
+            return Ok(None);
+        };
+        let Ok(message) = pe_mime::parser::parse(&start) else {
+            return Ok(None);
+        };
+        Ok(match unsubscribe::of(&message.headers, trusted) {
+            Some(unsubscribe::Unsubscribe::OneClick { url }) => Some(url),
+            _ => None,
+        })
     }
 
     /// Looks up the servers of `email` in the background: [`Event::AutoconfigDone`] follows with the request
@@ -2337,7 +2338,7 @@ impl Core {
 
     /// The folder junk (or not junk) goes to from `folder`: the account's Junk folder, or its Inbox. Refused, saying
     /// so, when the account has none.
-    pub(crate) fn junk_target(&self, folder: FolderId, junk: bool) -> Result<FolderId> {
+    pub fn junk_target(&self, folder: FolderId, junk: bool) -> Result<FolderId> {
         let store = self.store();
         let account = store.folder(folder)?.account_id;
         let target = if junk {

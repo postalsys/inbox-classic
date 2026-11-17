@@ -651,8 +651,8 @@ day-sunday = søndag
 
 # review: new
 agent-level-read = Lese e-post: mapper, meldingslisten, søk og meldinger
-# review: new
-agent-level-organize = Organisere e-post: lest-status, flagg, søppelpost, flytting, sletting til Slettede elementer
+# review: changed
+agent-level-organize = Organisere e-post: lest-status, flagg, søppelpost, flytting, arkivering, nye mapper, sletting til Slettede elementer, og avmelding fra e-postlister etter at du sier ja
 # review: new
 agent-level-drafts = Skrive utkast som du sender selv
 # review: new
@@ -763,6 +763,20 @@ agent-log-archived = Arkiverte «{ $subject }»
 agent-log-folder = Opprettet mappen «{ $name }»
 # review: new
 agent-log-unsubscribed = Meldte av listen til «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = Kunne ikke melde av listen til «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Du meldte deg ikke av { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vil melde deg av en e-postliste
+   *[other] { $program } vil melde deg av { $count } e-postlister
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic ber listen nedenfor om å slutte å sende til deg, med ettklikksavmeldingen den tilbyr. Ingenting annet sendes, og meldingene du har, blir liggende der de er.
+   *[other] Inbox Classic ber hver liste nedenfor om å slutte å sende til deg, med ettklikksavmeldingen listen tilbyr. Ingenting annet sendes, og meldingene du har, blir liggende der de er.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

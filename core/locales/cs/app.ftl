@@ -850,6 +850,8 @@ ui-allow = &Povolit
 # review: new
 ui-dont-send = Neodesílat
 # review: new
+ui-dont-unsubscribe = Neodhlašovat
+# review: new
 ui-edit-first = Nejdřív &upravit
 # review: new
 ui-new-address = Nová adresa

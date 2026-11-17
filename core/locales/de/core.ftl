@@ -416,7 +416,8 @@ day-sunday = Sonntag
 ## AI agents
 
 agent-level-read = E-Mails lesen: Ordner und Nachrichten anzeigen und durchsuchen
-agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben und löschen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
+# review: changed
+agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, neue Ordner erstellen und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
 agent-level-drafts = Entwürfe erstellen, die Sie selbst senden
 agent-level-send = E-Mail senden, jede Nachricht erst nach Ihrer Zustimmung
 agent-connect-title = { $program } möchte auf Ihre E-Mails zugreifen
@@ -477,6 +478,20 @@ agent-log-not-junk = „{ $subject }“ als Nicht-Junk markiert
 agent-log-archived = „{ $subject }“ archiviert
 agent-log-folder = Ordner „{ $name }“ erstellt
 agent-log-unsubscribed = Mailingliste der Nachricht „{ $subject }“ abbestellt
+# review: new
+agent-log-unsubscribe-failed = Mailingliste der Nachricht „{ $subject }“ konnte nicht abbestellt werden: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Sie haben { $senders } nicht abbestellt
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } möchte eine Mailingliste für Sie abbestellen
+   *[other] { $program } möchte { $count } Mailinglisten für Sie abbestellen
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic bittet die folgende Liste, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den sie anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.
+   *[other] Inbox Classic bittet jede der folgenden Listen, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den die Liste anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.
+}
 
 ## Keys
 

@@ -146,6 +146,10 @@ win-send = &Skicka
 # review: new
 win-dont-send = Skicka &inte
 # review: new
+win-unsubscribe = &Avsluta prenumeration
+# review: new
+win-dont-unsubscribe = Avsluta &inte
+# review: new
 win-forget-program-ask = Vill du ta bort programmet, dess behörigheter och dess agenters aktivitetshistorik? Du tillfrågas om behörighet igen nästa gång det ansluter.
 # review: new
 win-clear-log-ask = Rensa agenternas aktivitetshistorik? Det ångrar inte ändringar som agenterna har gjort.

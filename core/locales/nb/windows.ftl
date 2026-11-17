@@ -147,6 +147,10 @@ win-send = &Send
 # review: new
 win-dont-send = &Ikke send
 # review: new
+win-unsubscribe = &Meld av
+# review: new
+win-dont-unsubscribe = &Ikke meld av
+# review: new
 win-forget-program-ask = Vil du fjerne dette programmet, tillatelsene og aktivitetsloggen til agentene? Du blir spurt om tillatelse igjen neste gang det kobler til.
 # review: new
 win-clear-log-ask = Vil du tømme aktivitetsloggen til agentene? Dette angrer ikke endringer som agentene har gjort.
