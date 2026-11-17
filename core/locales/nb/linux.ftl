@@ -164,7 +164,6 @@ gtk-nothing-yet = Ingenting ennå.
 ## Preferences
 
 gtk-preferences = Brukervalg
-# review: changed
 gtk-notify-subtitle = Bare mens Inbox Classic er i bakgrunnen
 
 ## The desktop entry and the page of the software stores

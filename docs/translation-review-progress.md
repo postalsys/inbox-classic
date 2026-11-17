@@ -17,15 +17,15 @@ Commit completed batches regularly and preserve an exact resume point.
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
-  German, Spanish, Estonian, French, Dutch, Italian, European/Brazilian Portuguese and Catalan settings are
-  complete, including encrypted-image and rendered-label followups. Fresh upstream audit at baac8a3b found
-  no additional work. Continue Norwegian Bokmål: 27 catalog entries and 11 help topics pending.
-  Then process sr-Latn/tr/bg/cs/da/el/fi and
+  German, Spanish, Estonian, French, Dutch, Italian, European/Brazilian Portuguese, Catalan and Norwegian
+  Bokmål settings are complete, including encrypted-image and rendered-label followups. Fresh upstream audit
+  at 42a456a9 found no additional work. Continue Serbian Latin: 27 catalog entries and 11 help topics pending.
+  Then process tr/bg/cs/da/el/fi and
   Croatian app before returning to the remaining initial reviews. Exact source IDs/topics are in state.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,440 catalog entries and 1,292 help topics; 14,262 entries and 660 topics are currently pending.
+  32,440 catalog entries and 1,292 help topics; 14,235 entries and 649 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were reviewed with 74 improvements; its new settings entries remain pending.
@@ -1058,9 +1058,27 @@ Continue Norwegian Bokmål settings, then Serbian Latin, Turkish, Bulgarian, Cze
 Croatian app additions before the remaining initial reviews. Nine languages have completed all three settings-context
 followups; 19 remain. Label-punctuation followup checkpoint: `7bc58321`.
 
-Current totals: 18,178 catalog entries and 632 help topics completed in the active scope; 2,912 historical
-catalog value improvements. Remaining: 14,262 catalog entries and 660 help topics. Earlier context followups
-are preserved; settings review remains pending in 19 languages. `REVIEWED` remains unchanged.
+### Norwegian Bokmål settings review completed
+
+Reviewed all 27 settings entries and 11 affected help topics, improving one catalog value. Added the column-layout
+condition and established Adressebok name to the sender-image note; retained fluent labels. Rewrote Settings help
+with accurate Apply/Cancel, external default-app choices, queued sending, exact download defaults and image/domain
+conditions. Corrected trusted-sender meaning, collapsed-conversation actions, installed-app wording, large-message
+downloads, draft attachments/compose windows and background operation. Clarified domain signatures, encrypted-image
+permission and download-label punctuation. Retained direct du prose and earlier notification/logo-cache corrections.
+
+Static check-language reports only 1,395 deliberately removed marks. All 46 shortcut scopes, catalog invariants and
+help markup pass. Three platform reading-help joins and the download-label sentence were inspected after control
+substitution. Exact inventories and completed/source hashes reconcile (18,239 messages and 8,370 changed help lines),
+with 14 verified moved baseline pairs. Report regenerated; git diff --check passes. No tests run.
+
+Fresh fetch at Catalan checkpoint `42a456a9` confirmed unchanged refs and no new languages or unintegrated source
+changes. Since-start contains the 513 known settings entries and 209 passages in 19 languages, with no extra work.
+Continue Serbian Latin. Ten languages have completed all three settings-context followups; 18 remain.
+
+Current totals: 18,205 catalog entries and 643 help topics completed in the active scope; 2,913 historical
+catalog value improvements. Remaining: 14,235 catalog entries and 649 help topics. Earlier context followups
+are preserved; settings review remains pending in 18 languages. `REVIEWED` remains unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
