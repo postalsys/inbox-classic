@@ -149,6 +149,8 @@ void Editor::Configure() {
             } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'S') {
                 args->put_Handled(TRUE);
                 handlers_.save();
+            } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && (GetKeyState(VK_SHIFT) & 0x8000) && handlers_.shortcut(key)) {
+                args->put_Handled(TRUE);
             } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'K') {
                 args->put_Handled(TRUE);
                 handlers_.editLink();

@@ -1175,6 +1175,24 @@ LRESULT CALLBACK ModalProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
 
 }  // namespace
 
+void SetDefaultButton(HWND dialog, int id) {
+    int current = DefaultButtonId(dialog);
+    if (current == id) {
+        return;
+    }
+    if (HWND old = current ? GetDlgItem(dialog, current) : nullptr) {
+        SendMessageW(old, BM_SETSTYLE, BS_PUSHBUTTON, TRUE);
+    }
+    if (HWND button = GetDlgItem(dialog, id)) {
+        SendMessageW(button, BM_SETSTYLE, BS_DEFPUSHBUTTON, TRUE);
+    }
+    // what Enter in a field takes (DM_GETDEFID), when RunModal runs it already
+    DWORD_PTR running = 0;
+    if (GetWindowSubclass(dialog, ModalProc, 0, &running)) {
+        SetWindowSubclass(dialog, ModalProc, 0, static_cast<DWORD_PTR>(id));
+    }
+}
+
 void RunModal(HWND dialog, HWND focus, const bool& done) {
     SetWindowSubclass(dialog, ModalProc, 0, static_cast<DWORD_PTR>(DefaultButtonId(dialog)));
     HWND root = GetWindow(dialog, GW_OWNER);

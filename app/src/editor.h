@@ -40,6 +40,9 @@ public:
         std::function<void(const std::wstring& link)> link = [](const std::wstring&) {};
         // Ctrl+K, or Edit Link in the menu of a link: the Link dialog
         std::function<void()> editLink = [] {};
+        // Ctrl+Shift with a letter (`key`, its virtual key): true when the window took it (the compose window's
+        // Digitally Sign and Encrypt)
+        std::function<bool(UINT key)> shortcut = [](UINT) { return false; };
     };
 
     // creates the host window, a child of `parent` with the control id `id`, and the WebView2 in it

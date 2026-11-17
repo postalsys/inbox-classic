@@ -42,6 +42,8 @@ enum ToolbarIcon : int {
     ICON_MAIL_EDIT = 20,
     ICON_FILTER = 21,
     ICON_PANEL_LEFT = 22,
+    ICON_RIBBON = 23,
+    ICON_LOCK_CLOSED = 24,
 };
 
 enum FormatIcon : int {
