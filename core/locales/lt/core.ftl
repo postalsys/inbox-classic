@@ -1370,7 +1370,7 @@ preview-pdf-option = Rodyti PDF failus laiškuose
 # review: new
 preview-pdf-off = PDF failai laiškuose nerodomi.
 # review: new
-preview-pdf-off-crashed = PDF failas uždarė Inbox Classic, kol buvo rodomas, todėl PDF failai laiškuose nebėra rodomi. Paveikslėliai vis dar rodomi. Norėdami vėl rodyti PDF failus, skaitymo parinktyse įjunkite { $option }.
+preview-pdf-off-crashed = PDF failas uždarė Inbox Classic, kol buvo rodomas, todėl PDF failai laiškuose nebėra rodomi. Paveikslėliai vis dar rodomi. Norėdami vėl rodyti PDF failus, skiltyje { $settings } įjunkite { $option }.
 # review: new
 preview-pdf-details = { $count ->
     [one] { $count } puslapis, { $size }

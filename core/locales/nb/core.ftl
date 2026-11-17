@@ -836,7 +836,7 @@ preview-pdf-option = Vis PDF-filer i meldinger
 # review: new
 preview-pdf-off = PDF-filer vises ikke i meldinger.
 # review: new
-preview-pdf-off-crashed = En PDF-fil lukket Inbox Classic mens den ble vist, så PDF-filer vises ikke lenger i meldinger. Bilder vises fortsatt. Slå på { $option } i leseinnstillingene for å vise PDF-filer igjen.
+preview-pdf-off-crashed = En PDF-fil lukket Inbox Classic mens den ble vist, så PDF-filer vises ikke lenger i meldinger. Bilder vises fortsatt. Slå på { $option } under { $settings } for å vise PDF-filer igjen.
 # review: new
 preview-pdf-details = { $count ->
     [one] 1 side, { $size }

@@ -5,7 +5,7 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Import the recorded preview-warning followup 2e6a5d00 (one English and 28 already-pending values add $settings), then review Croatian combined agent additions, hu and the broader drafts. Preview wording remains pending; recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before its review.**
+- **Next: Review Croatian combined agent additions, then hu and the broader drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.**
   Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
@@ -28,6 +28,8 @@ Commit completed batches regularly and preserve an exact resume point.
   its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
   Preview controls and attachment handlers now exist on all three platforms. Their 21-file UI/settings snapshot
   and inspected behavior are recorded. Check Reading-page shortcuts, wrapping and available screenshots next.
+  Later source `2e6a5d00` now supplies the localized settings path in the PDF warning; all 28 exact drafts
+  are imported and remain pending. The runtime caller and exact source snapshot are recorded.
   An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
@@ -2558,3 +2560,11 @@ Finnish structural checker has 1,415 expected mark-only diagnostics and no struc
 The all-language approval-time log correction remains complete in 34a2cc25. The prior 21-file preview UI/settings snapshot and three-file backend followup remain the resume point for preview context. This batch does not mark any preview wording reviewed. Late-arrival scan found preview source 2e6a5d00 at cb9716a7. Its exact 29-file snapshot and runtime caller are recorded under pending_source_integrations. Only preview-pdf-off-crashed changed; it remains pending in all 28 languages. Import this source followup next, without claiming linguistic review.
 
 Import the recorded preview-warning followup 2e6a5d00 (one English and 28 already-pending values add $settings), then review Croatian combined agent additions, hu and the broader drafts. Preview wording remains pending; recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before its review.
+
+## Preview-warning settings-path source followup (validated)
+
+Imported the exact `preview-pdf-off-crashed` update from `2e6a5d00` in English and all 28 translations. The runtime now supplies `$settings` as the localized platform path to Reading settings, alongside the option label. No new IDs, help changes or completed-entry reopens; scope and pending totals stay unchanged. All review marks remain. Earlier catalog wording and comments are preserved. The runtime change was inspected as context and was not imported. The existing crash-causation overstatement still needs linguistic correction. No tests or build run.
+
+All 28 language checkers pass structurally with exactly 27,539 expected draft-mark diagnostics. Exact reconstruction verifies 29 source-only replacements, unchanged review marks and all earlier values/comments, unchanged scope and pending inventories, and no linguistic review credit. Both variables match English; generated IDs and REVIEWED are unchanged, so no build was required. Global reconciliation accounts for 21,490 unmarked entries, 10,848 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1226 entries/261 passages reconcile. Source audit covers 44 worktrees/185 refs and the exact new source tree; 290 old draft copies remain unchanged. No additional unrecorded work. HTML regenerated; git diff --check passes. No tests or build run.
+
+Review Croatian combined agent additions, then hu and the broader drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.

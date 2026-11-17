@@ -1403,7 +1403,7 @@ preview-pdf-option = Zobrazovať súbory PDF v správach
 # review: new
 preview-pdf-off = Súbory PDF sa v správach nezobrazujú.
 # review: new
-preview-pdf-off-crashed = Súbor PDF ukončil Inbox Classic počas zobrazenia, preto sa súbory PDF v správach už nezobrazujú. Obrázky áno. Ak chcete súbory PDF znova zobrazovať, zapnite { $option } v možnostiach čítania.
+preview-pdf-off-crashed = Súbor PDF ukončil Inbox Classic počas zobrazenia, preto sa súbory PDF v správach už nezobrazujú. Obrázky áno. Ak chcete súbory PDF znova zobrazovať, zapnite { $option } v { $settings }.
 # review: new
 preview-pdf-details = { $count ->
     [one] 1 strana, { $size }

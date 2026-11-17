@@ -836,7 +836,7 @@ preview-pdf-option = Show PDF files in messages
 # the tile of a PDF file while PDF previews are off
 preview-pdf-off = PDF files are not shown in messages.
 # the note where previews are, after a PDF file ended the app: { $option } is the option's name
-preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in the reading options.
+preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in { $settings }.
 # under the pages of a PDF file shown in a message: its page count and size ("3 pages, 84 KB")
 preview-pdf-details = { $count ->
     [one] 1 page, { $size }

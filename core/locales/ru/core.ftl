@@ -1404,7 +1404,7 @@ preview-pdf-option = Показывать PDF-файлы в письмах
 # review: new
 preview-pdf-off = PDF-файлы в письмах не показываются.
 # review: new
-preview-pdf-off-crashed = PDF-файл закрыл Inbox Classic во время показа, поэтому PDF-файлы в письмах больше не показываются. Изображения по-прежнему показываются. Чтобы снова показывать PDF-файлы, включите параметр { $option } в настройках чтения.
+preview-pdf-off-crashed = PDF-файл закрыл Inbox Classic во время показа, поэтому PDF-файлы в письмах больше не показываются. Изображения по-прежнему показываются. Чтобы снова показывать PDF-файлы, включите параметр { $option } в разделе { $settings }.
 # review: new
 preview-pdf-details = { $count ->
     [one] { $count } страница, { $size }

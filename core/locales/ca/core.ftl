@@ -856,7 +856,7 @@ preview-pdf-option = Mostra els fitxers PDF als missatges
 # review: new
 preview-pdf-off = Els fitxers PDF no es mostren als missatges.
 # review: new
-preview-pdf-off-crashed = Un fitxer PDF ha tancat Inbox Classic mentre es mostrava, per això els fitxers PDF ja no es mostren als missatges. Les imatges sí. Per tornar a mostrar els fitxers PDF, activeu { $option } a les opcions de lectura.
+preview-pdf-off-crashed = Un fitxer PDF ha tancat Inbox Classic mentre es mostrava, per això els fitxers PDF ja no es mostren als missatges. Les imatges sí. Per tornar a mostrar els fitxers PDF, activeu { $option } a { $settings }.
 # review: new
 preview-pdf-details = { $count ->
     [one] 1 pàgina, { $size }

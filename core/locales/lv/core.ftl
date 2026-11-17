@@ -1362,7 +1362,7 @@ preview-pdf-option = Rādīt PDF failus vēstulēs
 # review: new
 preview-pdf-off = PDF faili vēstulēs netiek rādīti.
 # review: new
-preview-pdf-off-crashed = PDF fails aizvēra Inbox Classic, kamēr tas tika rādīts, tāpēc PDF faili vēstulēs vairs netiek rādīti. Attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, lasīšanas opcijās ieslēdziet { $option }.
+preview-pdf-off-crashed = PDF fails aizvēra Inbox Classic, kamēr tas tika rādīts, tāpēc PDF faili vēstulēs vairs netiek rādīti. Attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, sadaļā { $settings } ieslēdziet { $option }.
 # review: new
 preview-pdf-details = { $count ->
     [zero] { $count } lappušu, { $size }

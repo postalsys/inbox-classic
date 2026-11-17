@@ -880,7 +880,7 @@ preview-pdf-option = Mostrar arquivos PDF nas mensagens
 # review: new
 preview-pdf-off = Os arquivos PDF não são mostrados nas mensagens.
 # review: new
-preview-pdf-off-crashed = Um arquivo PDF fechou o Inbox Classic enquanto era mostrado, por isso os arquivos PDF não são mais mostrados nas mensagens. As imagens continuam sendo. Para voltar a mostrar arquivos PDF, ative { $option } nas opções de leitura.
+preview-pdf-off-crashed = Um arquivo PDF fechou o Inbox Classic enquanto era mostrado, por isso os arquivos PDF não são mais mostrados nas mensagens. As imagens continuam sendo. Para voltar a mostrar arquivos PDF, ative { $option } em { $settings }.
 # review: new
 preview-pdf-details = { $count ->
     [one] 1 página, { $size }

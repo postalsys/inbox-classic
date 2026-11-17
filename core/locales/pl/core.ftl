@@ -1418,7 +1418,7 @@ preview-pdf-option = Pokazuj pliki PDF w wiadomościach
 # review: new
 preview-pdf-off = Pliki PDF nie są pokazywane w wiadomościach.
 # review: new
-preview-pdf-off-crashed = Plik PDF zamknął Inbox Classic podczas wyświetlania, dlatego pliki PDF nie są już pokazywane w wiadomościach. Obrazy nadal są. Aby znów pokazywać pliki PDF, włącz { $option } w opcjach czytania.
+preview-pdf-off-crashed = Plik PDF zamknął Inbox Classic podczas wyświetlania, dlatego pliki PDF nie są już pokazywane w wiadomościach. Obrazy nadal są. Aby znów pokazywać pliki PDF, włącz { $option } w { $settings }.
 # review: new
 preview-pdf-details = { $count ->
     [one] 1 strona, { $size }

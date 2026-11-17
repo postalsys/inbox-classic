@@ -839,7 +839,7 @@ preview-pdf-option = PDF-bestanden in berichten tonen
 # review: new
 preview-pdf-off = PDF-bestanden worden niet in berichten getoond.
 # review: new
-preview-pdf-off-crashed = Een PDF-bestand heeft Inbox Classic gesloten terwijl het werd getoond, daarom worden PDF-bestanden niet meer in berichten getoond. Afbeeldingen wel. Schakel { $option } in bij de leesopties om PDF-bestanden weer te tonen.
+preview-pdf-off-crashed = Een PDF-bestand heeft Inbox Classic gesloten terwijl het werd getoond, daarom worden PDF-bestanden niet meer in berichten getoond. Afbeeldingen wel. Schakel { $option } in bij { $settings } om PDF-bestanden weer te tonen.
 # review: new
 preview-pdf-details = { $count ->
     [one] 1 pagina, { $size }
