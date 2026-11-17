@@ -1051,6 +1051,22 @@ Svara alla; Vidarebefordra; Cc / Bcc: Kopia / Hemlig kopia (Outlook).
 - Quotes ” ” (both the closing form), apostrophe ’; keys Ctrl / Skift / Del / Retur.
 - The reply header is "Ursprungligt meddelande"; "Create Mail" is "Skapa e-post" as in Outlook Express.
 
+Swedish agent permissions and activity:
+
+- Use "hantera e-post" for organization beyond sorting; short permission summaries use "hantera". The read/unread
+  flag is a "lästmarkering", not "läsläge" (a reading mode). Permission lists keep infinitives and logs use past tense.
+- Logs distinguish putting a message in the send queue from delivery. An unavailable Undo says the message is
+  absent from "Utkorgen". Introduce folder placeholders with "mappen" and quotes; no endings attach to names.
+- Keep "Avsluta prenumeration" / "Avsluta inte" and the distinct Windows A/I keys. "Avanmälan" names the action;
+  a request or approval does not prove the list stopped sending. The quota counts approvals per program over
+  the preceding 24 hours, one per list, including failed attempts.
+- "Textsignatur" is the optional account footer, distinct from a digital signature. Keep "du", sentence case,
+  Swedish ” ” quotes, all existing plural branches and their numeric placeholders. The delay caller supplies 30.
+- Permanent deletion is allowed only for the agent's own drafts not saved by the user. Save/autosave or sending
+  ends permission to change/delete; opening alone does not. Read permission is separate. Removing program access
+  does not uninstall it. Preserve the reviewed neutral connection-switch instruction.
+- Explain that agents must not follow instructions in email; do not claim that email contains no instructions.
+
 ### Türkçe (tr)
 
 Terms (Outlook / Outlook Express Turkish): Gelen Kutusu; Giden Kutusu; Gönderilmiş Öğeler; Silinmiş Öğeler; Taslaklar;

@@ -650,138 +650,80 @@ day-sunday = söndag
 
 ## AI agents
 
-# review: new
-agent-level-read = Läsa e-post: mappar, meddelandelistan, sökning och meddelanden
-# review: new
-agent-level-organize = Ordna e-post: läsläge, flaggor, skräppost, flytt, arkivering, nya mappar, borttagning till Borttaget och att lämna e-postlistor efter att du har sagt ja
-# review: new
-agent-level-drafts = Skriva utkast som du skickar
-# review: new
-agent-level-send = Skicka e-post, varje meddelande först efter att du har sagt ja
-# review: new
-agent-connect-title = { $program } vill använda din e-post
-# review: new
-agent-connect-detail = En AI-agent bad om att få arbeta med Inbox Classic. Välj vad den får göra och vilka konton den får se; du kan ändra det senare under Verktyg > AI-agenter.
+agent-level-read = Läsa e-post: visa mappar, meddelandelistan och meddelanden samt söka i e-posten
+agent-level-organize = Hantera e-post: ändra lästmarkeringar, flaggor och skräppostmarkeringar, flytta och arkivera meddelanden, skapa mappar, flytta meddelanden till Borttaget och avsluta prenumerationer på e-postlistor med ditt godkännande
+agent-level-drafts = Skriva utkast som du kan skicka själv
+agent-level-send = Skicka e-post när du har godkänt varje meddelande
+agent-connect-title = { $program } vill ha åtkomst till din e-post
+agent-connect-detail = En AI-agent vill arbeta med din e-post via Inbox Classic. Välj vad den får göra och vilka konton den får komma åt. Det kan du ändra senare under Verktyg > AI-agenter.
 
-    Agenter läser e-post som andra har skrivit, och ett meddelande kan försöka lura dem. Inbox Classic frågar dig alltid innan en agent skickar något.
-# review: new
+    E-post kan innehålla instruktioner som är avsedda att lura agenten. Inbox Classic ber alltid om ditt godkännande innan agenten skickar ett meddelande.
 agent-reply-to = Svar på ”{ $subject }”
-# review: new
 agent-reply-all-on = Svar till alla på ”{ $subject }”
-# review: new
 agent-forward-of = Vidarebefordran av ”{ $subject }”
-# review: new
 agent-never-written-one = Du har aldrig skrivit till { $address }.
-# review: new
 agent-never-written-many = Du har aldrig skrivit till { $count } av de här adresserna.
-# review: new
 agent-send-title = { $program } vill skicka det här meddelandet
-# review: new
-agent-send-detail = Kontrollera mottagarna och meddelandets innehåll. När du har bekräftat väntar meddelandet { $seconds } sekunder i Utkorgen, där du fortfarande kan ta bort det.
-# review: new
+agent-send-detail = Kontrollera mottagarna och meddelandets innehåll. När du har godkänt meddelandet ligger det i Utkorgen i minst { $seconds } sekunder. Du kan ta bort det där innan det skickas.
 agent-change-title = Vad { $program } får göra
-# review: new
 agent-change-allowed = Ändra vad programmets AI-agenter får göra med din e-post.
-# review: new
-agent-change-refused = Du nekade programmet åtkomst. Tillåt det för att ge dess agenter åtkomst till din e-post igen.
-# review: new
+agent-change-refused = Du har nekat programmet åtkomst. Tillåt åtkomst för att låta dess agenter arbeta med din e-post igen.
 agent-log-taken-back = { $entry } (ångrat)
-# review: new
 agent-files = Filer: { $files }
-# review: new
 agent-undo-refused = Det kan inte ångras.
-# review: new
 agent-undo-refused-why = Det kan inte ångras: { $reason }.
-# review: new
 agent-undo-impossible = det här kan inte ångras
-# review: new
 agent-undo-not-in-folder = meddelandet finns inte längre i den mappen
-# review: new
-agent-undo-not-arrived = meddelandet finns inte (ännu) i mappen som det flyttades till
-# review: new
-agent-undo-sent = meddelandet har redan skickats
-# review: new
+agent-undo-not-arrived = meddelandet finns ännu inte i målmappen
+agent-undo-sent = meddelandet finns inte längre i Utkorgen
 agent-original-not-downloaded = det ursprungliga meddelandet har inte hämtats ännu. Öppna det först
-# review: new
-agent-turned-away = Avvisad
-# review: new
+agent-turned-away = Åtkomst nekad
 agent-can-nothing = Inget
-# review: new
 agent-can-read = läsa
-# review: new
-agent-can-organize = ordna
-# review: new
+agent-can-organize = hantera
 agent-can-drafts = skriva utkast
-# review: new
-agent-can-send = skicka när du säger ja
+agent-can-send = skicka med ditt godkännande
 # "Läsa, ordna och skriva utkast"
-# review: new
 agent-can-list = { $first } och { $last }
-# review: new
 agent-accounts = { $count ->
     [0] inga konton
     [one] { $count } konto
    *[other] { $count } konton
 }
 # "Läsa och ordna; 1 konto"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Det här meddelandet kan inte läsas.
-# review: new
 agent-encrypted-original = Det här meddelandet är krypterat: en agent kan inte svara på det eller vidarebefordra det, eftersom den inte kan kryptera.
-# review: new
-agent-encrypted = Det här meddelandet är krypterat. Bara användaren kan läsa det, i Inbox Classic.
+agent-encrypted = Det här meddelandet är krypterat och agenten kan inte läsa innehållet. Du kan öppna det i Inbox Classic.
 # review: new
 list-encrypted = Krypterat meddelande
-# review: new
-agent-log-composed = Öppnade ”{ $subject }” i ett nytt meddelande som du kan göra klart
-# review: new
-agent-log-refused = Du skickade inte ”{ $subject }”
-# review: new
-agent-log-sent = Skickade ”{ $subject }” till { $to }
-# review: new
+agent-log-composed = Öppnade ett nytt meddelande för redigering. Ämne: ”{ $subject }”
+agent-log-refused = Du avböjde att skicka meddelandet ”{ $subject }”
+agent-log-sent = Lade meddelandet ”{ $subject }” i kö för att skickas. Mottagare: { $to }
 agent-log-draft = Sparade utkastet ”{ $subject }”
-# review: new
 agent-log-draft-replaced = Ersatte utkastet ”{ $subject }”
-# review: new
-agent-log-draft-discarded = Kastade utkastet ”{ $subject }”
-# review: new
-agent-draft-note = { $program }, en AI-agent, skrev det här utkastet. Kontrollera mottagarna och texten innan du skickar det.
-# review: new
+agent-log-draft-discarded = Tog bort utkastet ”{ $subject }” permanent
+agent-draft-note = AI-agenten { $program } skrev det här utkastet. Kontrollera mottagarna och texten innan du skickar det.
 agent-log-read = Markerade ”{ $subject }” som läst
-# review: new
 agent-log-unread = Markerade ”{ $subject }” som oläst
-# review: new
 agent-log-flagged = Flaggade ”{ $subject }”
-# review: new
 agent-log-unflagged = Tog bort flaggan från ”{ $subject }”
-# review: new
 agent-log-deleted = Tog bort ”{ $subject }”
-# review: new
-agent-log-moved = Flyttade ”{ $subject }” till { $folder }
-# review: new
+agent-log-moved = Flyttade ”{ $subject }” till mappen ”{ $folder }”
 agent-log-junk = Markerade ”{ $subject }” som skräppost
-# review: new
-agent-log-not-junk = Markerade ”{ $subject }” som ej skräppost
-# review: new
+agent-log-not-junk = Tog bort skräppostmarkeringen från ”{ $subject }”
 agent-log-archived = Arkiverade ”{ $subject }”
-# review: new
 agent-log-folder = Skapade mappen ”{ $name }”
 agent-log-unsubscribed = Du godkände begäran om att avsluta prenumerationen. Meddelande: ”{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Kunde inte avsluta prenumerationen på listan för ”{ $subject }”: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Du valde att inte avsluta prenumerationerna: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Begäran om att avsluta prenumerationen misslyckades. Meddelande: ”{ $subject }”. Orsak: { $reason }
+agent-log-unsubscribe-refused = Du avböjde begäran om avanmälan. Avsändare: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } vill avsluta din prenumeration på en e-postlista
    *[other] { $program } vill avsluta dina prenumerationer på { $count } e-postlistor
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic ber listan nedan att sluta skicka till dig, genom den avanmälan med ett klick som den erbjuder. Inget annat skickas, och meddelandena du har ligger kvar där de är.
-   *[other] Inbox Classic ber varje lista nedan att sluta skicka till dig, genom den avanmälan med ett klick som listan erbjuder. Inget annat skickas, och meddelandena du har ligger kvar där de är.
+    [1] Inbox Classic ber e-postlistan nedan att avsluta din prenumeration via listans funktion för avanmälan med ett klick. Inget e-postmeddelande skickas och dina befintliga meddelanden ändras inte.
+   *[other] Inbox Classic ber varje e-postlista nedan att avsluta din prenumeration via listans funktion för avanmälan med ett klick. Inget e-postmeddelande skickas och dina befintliga meddelanden ändras inte.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

@@ -144,9 +144,7 @@ win-book-find-label = Skriv ett namn eller en e-postadress:
 win-send = &Skicka
 # review: new
 win-dont-send = Skicka &inte
-# review: new
 win-unsubscribe = &Avsluta prenumeration
-# review: new
 win-dont-unsubscribe = Avsluta &inte
 # review: new
 win-forget-program-ask = Vill du ta bort programmet, dess behörigheter och dess agenters aktivitetshistorik? Du tillfrågas om behörighet igen nästa gång det ansluter.

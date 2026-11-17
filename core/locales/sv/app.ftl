@@ -468,7 +468,6 @@ ui-no-match-in = Sökningen i { $folder } omfattar ämnen, avsändare, mottagare
 ui-no-items = Det finns inga objekt i den här vyn.
 # review: new
 ui-choose-folder = Välj en mapp för att se dess meddelanden.
-# review: new
 ui-unsubscribe = Avsluta prenumeration
 # review: new
 ui-open-in-calendar = Öppna i kalendern
@@ -852,7 +851,6 @@ ui-dont-allow = Tillåt inte
 ui-allow = &Tillåt
 # review: new
 ui-dont-send = Skicka inte
-# review: new
 ui-dont-unsubscribe = Avsluta inte
 # review: new
 ui-edit-first = &Redigera först

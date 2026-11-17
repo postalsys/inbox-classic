@@ -1,28 +1,27 @@
-<!--review--><h1>Vad en agent får göra</h1>
-<p class="summary">Välj vad varje AI-agent får göra med din e-post, och se och ångra vad den har gjort.</p>
-<p>Första gången ett programs agent ansluter frågar Inbox Classic dig och anger programmets namn. Välj vad den får göra:</p>
+<h1>Vad en agent får göra</h1>
+<p class="summary">Välj vad AI-agenter får göra med din e-post, granska deras aktivitet och ångra ändringar vid behov.</p>
+<p>När en agent ansluter för första gången visar Inbox Classic programmets namn och ber om ditt godkännande. Välj vad agenten får göra:</p>
 <ul>
-    <li>läsa e-post: mappar, meddelandelistan, konversationer, sökning och meddelanden, och slå upp dina meddelanderegler och de personer du skriver till</li>
-    <li>ordna e-post: läst och oläst, flaggor, skräppost, flytta, arkivera, skapa mappar och ta bort till <b data-text="folder-deleted"></b>, och lämna e-postlistor efter att du har sagt ja</li>
-    <li>skriva utkast som du skickar, och ändra eller ta bort de utkast den har skrivit tills du ändrar dem</li>
-    <li>skicka e-post, varje meddelande först efter att du har sagt ja</li>
+    <li>läsa e-post: visa mappar, meddelanden och konversationer, söka efter meddelanden, visa regler och söka efter kontakter</li>
+    <li>hantera e-post: ändra lästmarkeringar, flaggor och skräppostmarkeringar, flytta och arkivera meddelanden, skapa mappar, flytta meddelanden till <b data-text="folder-deleted"></b> och avsluta prenumerationer på e-postlistor med ditt godkännande</li>
+    <li>skriva utkast som du kan skicka själv samt ändra sina egna utkast eller ta bort dem permanent, tills du sparar eller skickar dem</li>
+    <li>skicka e-post när du har godkänt varje meddelande</li>
 </ul>
-<p>Välj sedan vilka konton den får se och klicka på <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> avvisar programmet, och du får inte frågan om det igen.</p>
-<p>En agent tar aldrig bort något permanent och ändrar aldrig dina kontoinställningar. Den kan läsa och prova dina meddelanderegler, men aldrig skapa, ändra eller ta bort någon. Ett meddelande som agenten läser markeras inte som läst. Det den ändrar syns direkt i fönstren.</p>
-<h2>Lämna e-postlistor</h2>
-<p>En agent som får ordna e-post kan be om att avsluta dina prenumerationer på e-postlistor. Inbox Classic frågar dig först en gång och visar varje lista med dess avsändare:</p>
+<p>Välj sedan vilka konton agenten får komma åt och klicka på <b data-text="ui-allow"></b>. Med <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> nekar du programmet åtkomst och slipper fler frågor om det. Du kan ändra behörigheterna senare.</p>
+<p>När agenten tar bort meddelanden flyttas de till mappen för borttagen e-post. Om kontot saknar en sådan mapp nekas åtgärden. Agenten får bara ta bort sina egna utkast permanent, och bara om du ännu inte har sparat dem i redigeraren. Den kan inte ändra kontoinställningar eller skapa, ändra eller ta bort regler. Den kan visa regler och vilka meddelanden som matchar dem, utan att utföra reglernas åtgärder. Krypterade meddelandens innehåll och bilagor är inte tillgängliga för agenten. Att agenten läser ett meddelande markerar det inte som läst. Ändringar syns direkt i fönstren.</p>
+<h2>Avsluta prenumerationer på e-postlistor</h2>
+<p>En agent med behörighet att hantera e-post kan be om att avsluta prenumerationer på e-postlistor. Inbox Classic ber om ditt godkännande för alla listor i samma begäran och visar avsändaren för varje lista:</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> ber varje lista att sluta skicka till dig.</li>
-    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, standardvalet, låter dem vara som de är.</li>
+    <li>Med <!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> skickas en begäran om avanmälan till varje lista.</li>
+    <li>Med <!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, som är förvalt, avböjer du begäran och behåller prenumerationerna.</li>
 </ul>
-<p>En agent kan inte avsluta prenumerationer för meddelanden i <b data-text="folder-junk"></b>, och högst på 30 listor per dag.</p>
+<p>Agenten kan inte begära avanmälan utifrån meddelanden i <b data-text="folder-junk"></b>. Gränsen är 30 godkända avanmälningar per program under de senaste 24 timmarna, en per e-postlista. Även misslyckade avanmälningar räknas om du har godkänt dem.</p>
 <h2>Se och ändra åtkomst</h2>
-<p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> visar de program du har släppt in eller avvisat, och allt som agenter har gjort, det senaste först.</p>
+<p>Under <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> visas de program du har tillåtit eller nekat åtkomst och deras agenters aktivitet. De senaste händelserna visas först.</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ändrar vad ett program får göra.</li>
-    <li><b data-text="ui-remove"></b> glömmer ett program, så att du får frågan igen nästa gång det ansluter.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> tar tillbaka en ändring av läst och oläst, en flagga, en flytt, skräppost, en arkivering eller en borttagning, och ett meddelande som fortfarande ligger i Utkorgen.</li>
+    <li>Med <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ändrar du programmets behörigheter.</li>
+    <li>Med <b data-text="ui-remove"></b> tar du bort programmets behörigheter och aktivitetshistorik. Programmet avinstalleras inte. Nästa gång det ansluter frågar Inbox Classic om åtkomst igen.</li>
+    <li>Med <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> återställer du lästmarkeringar, flaggor och skräppostmarkeringar eller ångrar en flytt, arkivering eller borttagning. Du kan också stoppa ett meddelande som fortfarande ligger i Utkorgen. Ett meddelande som redan har skickats kan inte återkallas.</li>
 </ul>
-<aside class="warning">E-post skrivs av andra, och ett meddelande kan försöka övertala en agent att vidarebefordra eller ta bort din e-post. Inbox Classic döljer för agenter den text som ett meddelande döljer för dig, och talar om för dem att e-post inte är instruktioner. En agent kan ändå luras. Tillåt bara det du behöver.</aside>
+<aside class="warning">Meddelanden från andra kan innehålla instruktioner som försöker få agenten att vidarebefordra eller ta bort din e-post. Inbox Classic döljer text som inte visas för dig och uppmanar agenten att inte följa instruktioner i e-posten. Agenten kan ändå bli lurad. Tillåt bara de åtgärder du behöver.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->
