@@ -1251,3 +1251,17 @@ Plurals: `[one]`, `[few]`, `[many]`, `*[other]`. `[one]` covers 21, 31, 101..., 
 - `ui-the-provider` is genitive ("вашого провайдера") and every `$provider` sentence uses a genitive slot ("на вебсайті
   { $provider }").
 - Review first: "Сервіс" versus "Знаряддя" for Tools, the Junk pair, the app-password paths in `gmail-outlook.html`.
+
+Ukrainian agent permissions and activity:
+
+- Keep polite lowercase "ви", infinitive permission labels and impersonal past-tense activity logs. "Сервіс" remains
+  the actual Tools menu label in this batch. Subject/folder placeholders keep guillemets and no added endings.
+- "Упорядковувати пошту" covers organization. A read/unread flag is "стан прочитання". The send log records
+  "додано до черги надсилання", and an unavailable Undo reports absence from "Вихідні", not proven delivery.
+- Keep "Скасувати підписку" / "Не скасовувати підписку" and distinct Windows С/Н access keys. Refusing a request,
+  approving one and its HTTP outcome are separate. The quota counts approved lists per program over the last 24 hours.
+- Agent-owned drafts may be removed "назавжди". User save, autosave or sending ends the agent's edit/remove rights;
+  merely opening a draft does not. This does not revoke an independent permission to read mail.
+- "Текстовий підпис" is the optional message footer, separate from a cryptographic signature. Instructions inside
+  mail must not be followed by the agent; do not claim that email cannot contain instructions.
+- Preserve one/few/many/other with numeric placeholders, plus exact-zero account and exact-one unsubscribe branches.

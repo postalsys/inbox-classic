@@ -696,74 +696,41 @@ day-sunday = неділя
 
 ## AI agents
 
-# review: new
 agent-level-read = Читати пошту: папки, список повідомлень, пошук і повідомлення
-# review: new
-agent-level-organize = Упорядковувати пошту: стан прочитання, прапорці, небажана пошта, переміщення, архівування, нові папки, видалення в «Видалені» та вихід зі списків розсилки після вашого «так»
-# review: new
-agent-level-drafts = Писати чернетки, які надсилаєте ви
-# review: new
-agent-level-send = Надсилати пошту, кожне повідомлення лише після вашого «так»
-# review: new
-agent-connect-title = { $program } хоче користуватися вашою поштою
-# review: new
-agent-connect-detail = ШІ-агент попросив дозволу працювати з Inbox Classic. Виберіть, що йому можна робити і які облікові записи він може бачити; пізніше це можна змінити в меню Сервіс > ШІ-агенти.
+agent-level-organize = Упорядковувати пошту: змінювати стан прочитання, прапорці й позначки небажаної пошти, переміщувати й архівувати повідомлення, створювати папки, переміщувати повідомлення до папки «Видалені» та скасовувати підписки на розсилки з вашої згоди
+agent-level-drafts = Писати чернетки, які ви можете надіслати
+agent-level-send = Надсилати пошту лише після вашого схвалення кожного повідомлення
+agent-connect-title = { $program } запитує доступ до вашої пошти
+agent-connect-detail = ШІ-агент запитує дозвіл працювати з Inbox Classic. Виберіть дозволені дії та облікові записи, до яких він матиме доступ. Згодом ці дозволи можна змінити в меню Сервіс > ШІ-агенти.
 
-    Агенти читають пошту, яку написали інші люди, і повідомлення може спробувати їх обдурити. Inbox Classic завжди запитує вас, перш ніж агент щось надішле.
-# review: new
+    Повідомлення від інших людей можуть містити інструкції, покликані обдурити агента. Inbox Classic завжди просить вашого схвалення, перш ніж агент надішле повідомлення.
 agent-reply-to = Відповідь на «{ $subject }»
-# review: new
 agent-reply-all-on = Відповідь усім на «{ $subject }»
-# review: new
 agent-forward-of = Пересилання «{ $subject }»
-# review: new
-agent-never-written-one = Ви ще ніколи не писали на { $address }.
-# review: new
-agent-never-written-many = Ви ще ніколи не писали на деякі з цих адрес: { $count }.
-# review: new
+agent-never-written-one = Ви ще не писали на адресу { $address }.
+agent-never-written-many = Ви ще не писали на { $count } з цих адрес.
 agent-send-title = { $program } хоче надіслати це повідомлення
-# review: new
 agent-send-detail = Перевірте одержувачів і вміст повідомлення. Після підтвердження повідомлення чекатиме в папці «Вихідні» { $seconds } с, і там його ще можна буде видалити.
-# review: new
 agent-change-title = Що може робити { $program }
-# review: new
-agent-change-allowed = Змініть, що ШІ-агентам цієї програми можна робити з вашою поштою.
-# review: new
-agent-change-refused = Ви заборонили цій програмі доступ. Дозвольте його, щоб знову надати її агентам доступ до вашої пошти.
-# review: new
+agent-change-allowed = Виберіть, що ШІ-агенти цієї програми можуть робити з вашою поштою.
+agent-change-refused = Ви заборонили цій програмі доступ до пошти. Надайте дозвіл, щоб її агенти знову могли працювати з вашою поштою.
 agent-log-taken-back = { $entry } (скасовано)
-# review: new
 agent-files = Файли: { $files }
-# review: new
-agent-undo-refused = Це неможливо скасувати.
-# review: new
-agent-undo-refused-why = Це неможливо скасувати: { $reason }.
-# review: new
+agent-undo-refused = Цю дію неможливо скасувати.
+agent-undo-refused-why = Цю дію неможливо скасувати: { $reason }.
 agent-undo-impossible = це неможливо скасувати
-# review: new
 agent-undo-not-in-folder = повідомлення вже немає в тій папці
-# review: new
-agent-undo-not-arrived = повідомлення (ще) немає в папці, куди його перенесено
-# review: new
-agent-undo-sent = повідомлення вже надіслано
-# review: new
+agent-undo-not-arrived = повідомлення немає в папці, до якої його переміщено
+agent-undo-sent = повідомлення вже немає в папці «Вихідні»
 agent-original-not-downloaded = початкове повідомлення ще не завантажено. Спершу відкрийте його
-# review: new
-agent-turned-away = Відхилено
-# review: new
+agent-turned-away = Доступ заборонено
 agent-can-nothing = Нічого
-# review: new
 agent-can-read = читати
-# review: new
 agent-can-organize = упорядковувати
-# review: new
 agent-can-drafts = писати чернетки
-# review: new
 agent-can-send = надсилати з вашої згоди
 # "Read, organize and write drafts"
-# review: new
 agent-can-list = { $first } і { $last }
-# review: new
 agent-accounts = { $count ->
     [0] жодного облікового запису
     [one] { $count } обліковий запис
@@ -772,56 +739,32 @@ agent-accounts = { $count ->
    *[other] { $count } облікового запису
 }
 # "Read and organize; 1 account"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Це повідомлення неможливо прочитати.
-# review: new
-agent-encrypted-original = Це повідомлення зашифроване: агент не може відповісти на нього чи переслати його, бо не вміє шифрувати.
-# review: new
-agent-encrypted = Це повідомлення зашифроване. Прочитати його може лише користувач, в Inbox Classic.
+agent-encrypted-original = Це повідомлення зашифроване. Агент не може відповісти на нього чи переслати його, оскільки не підтримує шифрування.
+agent-encrypted = Це повідомлення зашифроване, тому агент не може прочитати його вміст. Ви можете відкрити його в Inbox Classic.
 # review: new
 list-encrypted = Зашифроване повідомлення
-# review: new
-agent-log-composed = Відкрито «{ $subject }» у новому повідомленні, щоб ви його завершили
-# review: new
-agent-log-refused = Ви не надіслали «{ $subject }»
-# review: new
-agent-log-sent = Надіслано «{ $subject }» до { $to }
-# review: new
+agent-log-composed = Відкрито нове повідомлення для редагування. Тема: «{ $subject }»
+agent-log-refused = Ви відхилили запит на надсилання повідомлення «{ $subject }»
+agent-log-sent = Повідомлення «{ $subject }» додано до черги надсилання. Одержувачі: { $to }
 agent-log-draft = Збережено чернетку «{ $subject }»
-# review: new
 agent-log-draft-replaced = Замінено чернетку «{ $subject }»
-# review: new
-agent-log-draft-discarded = Відкинуто чернетку «{ $subject }»
-# review: new
-agent-draft-note = { $program }, ШІ-агент, написав цю чернетку. Перевірте одержувачів і текст, перш ніж надіслати її.
-# review: new
-agent-log-read = Позначено як прочитане «{ $subject }»
-# review: new
-agent-log-unread = Позначено як непрочитане «{ $subject }»
-# review: new
+agent-log-draft-discarded = Чернетку «{ $subject }» видалено назавжди
+agent-draft-note = Цю чернетку створив ШІ-агент { $program }. Перевірте одержувачів і текст, перш ніж надсилати її.
+agent-log-read = Позначено «{ $subject }» як прочитане
+agent-log-unread = Позначено «{ $subject }» як непрочитане
 agent-log-flagged = Позначено прапорцем «{ $subject }»
-# review: new
-agent-log-unflagged = Знято прапорець з «{ $subject }»
-# review: new
+agent-log-unflagged = Знято прапорець із повідомлення «{ $subject }»
 agent-log-deleted = Видалено «{ $subject }»
-# review: new
-agent-log-moved = Переміщено «{ $subject }» у { $folder }
-# review: new
+agent-log-moved = Переміщено «{ $subject }» до папки «{ $folder }»
 agent-log-junk = Позначено «{ $subject }» як небажане
-# review: new
-agent-log-not-junk = Позначено «{ $subject }» як не небажане
-# review: new
+agent-log-not-junk = Знято позначку небажаної пошти з повідомлення «{ $subject }»
 agent-log-archived = Заархівовано «{ $subject }»
-# review: new
 agent-log-folder = Створено папку «{ $name }»
 agent-log-unsubscribed = Ви схвалили запит на скасування підписки. Повідомлення: «{ $subject }»
-# review: new
-agent-log-unsubscribe-failed = Не вдалося скасувати підписку на список розсилки «{ $subject }»: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Ви не скасували підписку: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Не вдалося скасувати підписку. Повідомлення: «{ $subject }». Причина: { $reason }
+agent-log-unsubscribe-refused = Ви відхилили запит на скасування підписок. Відправники: { $senders }
 agent-unsubscribe-title = { $count ->
     [1] { $program } хоче скасувати вашу підписку на список розсилки
     [one] { $program } хоче скасувати вашу підписку на { $count } список розсилки
@@ -829,10 +772,9 @@ agent-unsubscribe-title = { $count ->
     [many] { $program } хоче скасувати вашу підписку на { $count } списків розсилки
    *[other] { $program } хоче скасувати вашу підписку на { $count } списку розсилки
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic просить список нижче більше не надсилати вам листів, через скасування підписки одним клацанням, яке він пропонує. Більше нічого не надсилається, а ваші повідомлення залишаються там, де є.
-   *[other] Inbox Classic просить кожен список нижче більше не надсилати вам листів, через скасування підписки одним клацанням, яке пропонує список. Більше нічого не надсилається, а ваші повідомлення залишаються там, де є.
+    [1] Inbox Classic надішле розсилці нижче запит через її функцію скасування підписки одним клацанням. Електронний лист не надсилатиметься, а ваші наявні повідомлення не зміняться.
+   *[other] Inbox Classic надішле кожній розсилці нижче запит через її функцію скасування підписки одним клацанням. Електронний лист не надсилатиметься, а ваші наявні повідомлення не зміняться.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

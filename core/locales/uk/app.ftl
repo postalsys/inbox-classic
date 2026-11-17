@@ -469,7 +469,6 @@ ui-no-match-in = Пошук у папці «{ $folder }» охоплює тем�
 ui-no-items = У цьому поданні немає елементів.
 # review: new
 ui-choose-folder = Виберіть папку, щоб побачити її повідомлення.
-# review: new
 ui-unsubscribe = Скасувати підписку
 # review: new
 ui-open-in-calendar = Відкрити в календарі
@@ -854,7 +853,6 @@ ui-dont-allow = Не дозволяти
 ui-allow = &Дозволити
 # review: new
 ui-dont-send = Не надсилати
-# review: new
 ui-dont-unsubscribe = Не скасовувати підписку
 # review: new
 ui-edit-first = Спершу &змінити
