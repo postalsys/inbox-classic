@@ -308,6 +308,11 @@ Plurals: `[one]` (exactly 1) and `*[other]` (0, 2 and more). A literal 1 in `[on
   label "Altres adreces d’enviament", also named in the corresponding core error.
 - Use "credencials d’inici de sessió" when passwords and OAuth tokens are both included. Unprotected exports
   require signing in again, possibly through the browser. Distinguish "signatura digital" from account signatures.
+- Compose explanations and tooltips keep polite vós; short command labels keep their imperative singular.
+  Protection is applied "en enviar-lo". Use "clau utilitzable" for missing/unusable-key guidance, and introduce
+  complete key-state reasons with "Motiu:" before a separate instruction. Recipient removal affects fields, not contacts.
+- The compose menu uses Alt+N for "Insereix" to avoid Eines (Alt+I). "Cerca la clau" uses Alt+E to avoid
+  "Conserva l’actual" (Alt+C) in the combined recipient-key dialog.
 - Provider prompts use the provider name followed by a colon so named providers and the fallback work without
   changing the article or preposition. Cc/Cco controls use Alt+C / Alt+O on Windows and Linux.
 

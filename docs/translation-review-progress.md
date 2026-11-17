@@ -5,16 +5,16 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Catalan compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR.
+- **Next: Norwegian Bokmål compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca.
   Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
   recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
+- Remaining compose languages: nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
   Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 20,991 entries and 806 full topics; pending: 12,877 entries and 546 topics.
-  Historical catalog improvements: 3,657.
+  Completed: 21,031 entries and 808 full topics; pending: 12,837 entries and 544 topics.
+  Historical catalog improvements: 3,676.
 - All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
-  catalogs/generated identifiers; dependent hardening code remains on its source branch.
+  catalogs/generated identifiers; implementation provenance is recorded separately.
 - Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
   hashes reconcile. HTML refreshed. No test suites or builds run for wording batches; the earlier source-import
   build passed in the separate target. `REVIEWED` stays unchanged until the full queue and final audit finish.
@@ -2182,3 +2182,15 @@ All 53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diag
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,133 entries/199 passages reconcile. No tests.
 Completed 20,991 entries/806 topics; pending 12,877/546; scope 33,868/1,352; historical catalog improvements 3,657. Next: Catalan. REVIEWED remains unchanged.
+
+
+### Catalan compose signing and encryption reviewed
+
+Reviewed all 40 additions, improving 17 core values and two app access keys. Insert now uses Alt+N to avoid Tools; Find Key uses Alt+E to avoid Keep Current. Short commands retain imperative singular, while explanatory prose and tooltips use polite vós. Protection is applied en enviar-lo; signature integrity is distinct from verified ownership. Clau utilitzable covers unusable keys, complete reasons follow Motiu, and names/addresses need no forced article. Unencrypted sending depends on removing inherited protected text, images and attachments.
+
+Reviewed the new help topic and only the writing-help insertion, improving 14 help lines. All earlier writing-help prose is preserved. Help covers platform-specific status symbols, own/unusable keys, the selected From key, recipient removal and encrypted drafts/sent copies. Glossary updated.
+
+All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 19 value edits and 40 mark removals; all other catalog bytes and earlier writing-help prose are preserved. Help tags, attributes, controls, platform branches and literal keys match. Platform label joins inspected; no relevant Catalan screenshots available, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,065 unmarked messages, 10,559 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.
+
+Fresh fetch found origin/master advanced to cb5e4778, including hardening merge 3161dddc; chore/pgp-hardening advanced to 51d67bb4. All 87 help files and 29 core catalogs introduced upstream exactly match the already tracked help/signature source imports; no additional strings, edited translations or languages. The hardening-tip delta only changes a Windows UI-test wait. The guide is unchanged. Dependent hardening implementation is now on origin/master but remains outside this translation worktree; unrelated code/corpus changes were not merged. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,093 entries/197 passages reconcile. No tests.
+Completed 21,031 entries/808 topics; pending 12,837/544; scope 33,868/1,352; historical catalog improvements 3,676. Next: Norwegian Bokmål. REVIEWED remains unchanged.

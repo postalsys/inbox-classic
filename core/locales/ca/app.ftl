@@ -14,8 +14,7 @@ menu-layout = &Disposició
 menu-sort-by = Ordena &per
 menu-text-size = &Mida del text
 menu-folder = Carpet&a
-# review: new
-menu-insert = &Insereix
+menu-insert = I&nsereix
 
 ## Les ordres dels menús, la barra d’eines i la safata del sistema (core/commands.toml)
 
@@ -98,11 +97,8 @@ cmd-import-address-book = Importa la &llibreta d’adreces...
 cmd-export-address-book = &Exporta la llibreta d’adreces...
 cmd-export-setup = Exporta la configuració i els comp&tes...
 cmd-import-setup = Importa la con&figuració i els comptes...
-# review: new
 cmd-compose-sign = &Signa digitalment
-# review: new
 cmd-compose-encrypt = &Xifra
-# review: new
 cmd-attach-my-key = Adjunta la meva clau &pública
 
 ## El menú de la icona de la safata del sistema
@@ -222,11 +218,8 @@ ui-format-line = Insereix una línia horitzontal
 ui-tb-send = Envia
 ui-tb-save = Desa
 ui-tb-attach = Adjunta
-# review: new
 ui-tb-sign = Signa
-# review: new
 ui-tb-encrypt = Xifra
-# review: new
 ui-field-keys = Claus:
 ui-field-from = De:
 ui-field-to = Per a:
@@ -705,25 +698,15 @@ ui-contact-key = Clau de xifratge:
 ui-contact-key-none = Cap clau
 ui-contact-key-use-new = Usa la clau &nova
 ui-contact-key-keep = &Conserva l’actual
-# review: new
 ui-recipient-keys-title = Claus dels destinataris
-# review: new
 ui-recipient-col-recipient = Destinatari
-# review: new
 ui-recipient-col-key = Clau
-# review: new
-ui-recipient-find-key = &Cerca la clau
-# review: new
+ui-recipient-find-key = C&erca la clau
 ui-recipient-remove = &Treu del missatge
-# review: new
 ui-send-unencrypted = Envia &sense xifrar
-# review: new
 ui-compose-make-key = C&rea una clau...
-# review: new
 ui-compose-show-keys = &Claus de xifratge...
-# review: new
 ui-compose-encrypt-off = &Desactiva el xifratge
-# review: new
 ui-compose-keep-encrypted = &Mantén-lo xifrat
 ui-setup-export-title = Exporta la configuració i els comptes
 ui-setup-import-title = Importa la configuració i els comptes

@@ -616,60 +616,38 @@ pgp-publish-done = La vostra clau està publicada a keys.openpgp.org. Adreces: {
 pgp-publish-failed = No s’ha pogut publicar la clau: { $error }
 pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Xifrat i signat: només vós i { $addresses } el podeu llegir.
-   *[other] Xifrat i signat: només vós i els seus { $count } destinataris el podeu llegir.
+    [one] El missatge es xifrarà i se signarà en enviar-lo. Només vós i { $addresses } en podreu llegir el contingut.
+   *[other] El missatge es xifrarà i se signarà en enviar-lo. Només vós i els { $count } destinataris en podreu llegir el contingut.
 }
-# review: new
-pgp-compose-encrypt-ready = Es xifrarà i se signarà. Afegiu destinataris de qui tingueu la clau.
-# review: new
+pgp-compose-encrypt-ready = El missatge es xifrarà i se signarà en enviar-lo. Afegiu destinataris de qui tingueu una clau utilitzable.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } no té cap clau, així que encara no es pot xifrar el missatge.
-   *[other] { $count } destinataris no tenen cap clau, així que encara no es pot xifrar el missatge: { $addresses }.
+    [one] No hi ha cap clau utilitzable per a aquest destinatari: { $addresses }. Encara no es pot xifrar el missatge.
+   *[other] No hi ha claus utilitzables per a { $count } destinataris: { $addresses }. Encara no es pot xifrar el missatge.
 }
-# review: new
-pgp-compose-looking = S’estan cercant les claus de { $addresses }...
-# review: new
-pgp-compose-signed = Signat: els destinataris poden comprovar que ve de vós i que no s’ha canviat.
-# review: new
-pgp-compose-reply-clear = No xifrat, tot i que el missatge al qual respon o que reenvia sí que ho era.
-# review: new
-pgp-compose-encrypted-files = Hi ha adjunts fitxers d’un missatge xifrat, així que aquest missatge només es pot enviar xifrat. Activeu Xifra, o suprimiu aquests fitxers.
-# review: new
-pgp-compose-sign-tip = Signa el missatge amb la vostra clau, perquè els destinataris puguin comprovar que ve de vós i que no s’ha canviat
-# review: new
-pgp-compose-sign-tip-encrypted = Un missatge xifrat sempre va signat
-# review: new
-pgp-compose-encrypt-tip = Xifra el missatge, perquè només vós i els seus destinataris el pugueu llegir
-# review: new
-pgp-compose-make-key = Encara no teniu cap clau per a { $address }. Voleu crear-ne una ara? Amb ella, els vostres missatges es poden signar i xifrar.
-# review: new
-pgp-compose-key-unusable = La vostra clau per a { $address } no es pot fer servir ({ $state }). Obriu Claus de xifratge per importar-ne la còpia de seguretat o crear una clau nova.
-# review: new
-pgp-compose-encrypt-off-quote = Aquest missatge cita o reenvia un missatge xifrat. Sense xifratge, no es podrà enviar fins que no suprimiu el que cita. Voleu desactivar el xifratge igualment?
-# review: new
-pgp-compose-encrypt-off-reply = Aquest missatge respon a un missatge xifrat o el reenvia. Sense xifratge, qualsevol que tracti el vostre missatge pel camí el pot llegir. Voleu desactivar el xifratge?
-# review: new
+pgp-compose-looking = S’estan cercant claus: { $addresses }...
+pgp-compose-signed = El missatge se signarà digitalment en enviar-lo. Els destinataris podran comprovar la signatura i la integritat del contingut.
+pgp-compose-reply-clear = Sense xifrar, tot i que el missatge original estava xifrat.
+pgp-compose-encrypted-files = Aquest missatge conté fitxers adjunts provinents d’un missatge xifrat i només es pot enviar xifrat. Activeu «Xifra» o traieu aquests fitxers adjunts.
+pgp-compose-sign-tip = Signeu el missatge digitalment en enviar-lo perquè els destinataris puguin comprovar la signatura i la integritat del contingut
+pgp-compose-sign-tip-encrypted = Els missatges xifrats sempre se signen en enviar-los
+pgp-compose-encrypt-tip = Xifreu el contingut del missatge en enviar-lo perquè només vós i els destinataris el pugueu llegir
+pgp-compose-make-key = Encara no hi ha cap clau pròpia configurada per a l’adreça { $address }. Voleu crear-ne una ara? Us permetrà signar i xifrar missatges.
+pgp-compose-key-unusable = La vostra clau per a l’adreça { $address } no es pot fer servir. Motiu: { $state }
+    Obriu «Claus de xifratge» per importar una còpia de seguretat d’aquesta clau o crear-ne una de nova.
+pgp-compose-encrypt-off-quote = Aquest missatge encara conté text, imatges o fitxers adjunts provinents d’un missatge xifrat. Traieu-los abans d’enviar-lo sense xifrar. Voleu desactivar el xifratge igualment?
+pgp-compose-encrypt-off-reply = El missatge original estava xifrat. Si envieu la resposta o el missatge reenviat sense xifrar, els servidors de correu en podran llegir el contingut. Voleu desactivar el xifratge?
 pgp-recipient-verified = Clau verificada
-# review: new
 pgp-recipient-found = Clau no verificada
-# review: new
 pgp-recipient-own = La vostra clau
-# review: new
 pgp-recipient-looking = S’està cercant una clau...
-# review: new
 pgp-recipient-missing = Cap clau
-# review: new
-pgp-recipient-not-found = Cap clau: no se n’ha trobat cap el { $date }
-# review: new
+pgp-recipient-not-found = No s’ha trobat cap clau. Darrera cerca: { $date }
 pgp-recipient-unusable = La clau no es pot fer servir: { $state }
-# review: new
-pgp-recipients-intro = El missatge es xifra amb la clau de cada destinatari, i amb la vostra.
-# review: new
+pgp-recipients-intro = Inbox Classic farà servir les claus dels destinataris i la vostra per xifrar el missatge.
 pgp-recipients-intro-missing = { $count ->
-    [one] Un destinatari no té cap clau amb què xifrar. Cerqueu-ne la clau, traieu-lo d’aquest missatge o envieu-lo sense xifrar.
-   *[other] { $count } destinataris no tenen cap clau amb què xifrar. Cerqueu-ne les claus, traieu-los d’aquest missatge o envieu-lo sense xifrar.
+    [one] Falta una clau utilitzable per a un destinatari. Cerqueu la clau o traieu el destinatari del missatge. Només podeu enviar-lo sense xifrar si ja no conté text, imatges ni fitxers adjunts de missatges xifrats.
+   *[other] Falten claus utilitzables per a { $count } destinataris. Cerqueu les claus o traieu aquests destinataris del missatge. Només podeu enviar-lo sense xifrar si ja no conté text, imatges ni fitxers adjunts de missatges xifrats.
 }
 pgp-details-part = Part { $number }: { $label }
 pgp-details-signed = Data de la signatura: { $when }. Clau: { $key }
