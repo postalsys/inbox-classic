@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Signer og krypter en melding</h1>
-<p class="summary">Signer en melding så mottakerne vet at den er fra deg, og krypter den så bare de kan lese den.</p>
-<p>En signert melding viser at du skrev den, og at ingen endret den underveis. En kryptert melding kan bare leses av mottakerne og av deg, og den er alltid signert også. Til begge deler trenger du en egen nøkkel.</p>
+<p class="summary">Signer meldinger digitalt og krypter innholdet slik at bare du og mottakerne kan lese det.</p>
+<p>En digital signatur gjør det mulig å kontrollere om innholdet er endret etter signeringen. Hvem nøkkelen tilhører, må bekreftes separat. Bare du og mottakerne kan lese innholdet i en kryptert melding. Krypterte meldinger signeres også når de sendes. Du trenger en egen nøkkel for å signere eller kryptere.</p>
 <p>Slik signerer eller krypterer du en melding:</p>
 <ol>
-    <li>Klikk på <b data-text="ui-tb-sign"></b> eller <b data-text="ui-tb-encrypt"></b> i meldingsvinduet, eller velg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> eller <b data-text="cmd-compose-encrypt"></b>. Du kan også trykke på <kbd data-command="compose_sign"></kbd> eller <kbd data-command="compose_encrypt"></kbd>. Hvis du ikke har en nøkkel ennå, tilbyr Inbox Classic å lage en.</li>
+    <li>Klikk på <b data-text="ui-tb-sign"></b> eller <b data-text="ui-tb-encrypt"></b> i meldingsvinduet, eller velg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> eller <b data-text="cmd-compose-encrypt"></b>. Du kan også trykke på <kbd data-command="compose_sign"></kbd> eller <kbd data-command="compose_encrypt"></kbd>. Hvis du ikke har satt opp en nøkkel for adressen du sender fra, tilbyr Inbox Classic å lage en.</li>
     <li>Klikk på <b data-text="ui-tb-send"></b>.</li>
 </ol>
-<p>Mens <b data-text="ui-tb-encrypt"></b> er slått på, viser linjen under emnet hver mottaker med en lås, og Inbox Classic ser etter nøklene den ikke har ennå:</p>
+<p>Når <b data-text="ui-tb-encrypt"></b> er slått på, vises et statussymbol ved siden av hver mottaker under emnet. Inbox Classic ser etter nøklene som mangler:</p>
 <table>
-    <tr><th>Lås</th><th>Hva den betyr</th></tr>
-    <tr><td>Grønn</td><td>Du har bekreftet mottakerens nøkkel.</td></tr>
-    <tr><td>Blå</td><td>Du har mottakerens nøkkel, men du har ikke bekreftet den.</td></tr>
+    <tr><th>Farge</th><th>Hva den betyr</th></tr>
+    <tr><td>Grønn</td><td>Du har bekreftet hvem nøkkelen tilhører.</td></tr>
+    <tr><td>Blå</td><td>Nøkkelen er din egen, eller du har ikke bekreftet hvem den tilhører.</td></tr>
     <tr><td>Grå</td><td>Inbox Classic ser etter mottakerens nøkkel.</td></tr>
-    <tr><td>Ravgul</td><td>Fant ingen nøkkel for mottakeren.</td></tr>
+    <tr><td>Oransje</td><td>Det mangler en brukbar nøkkel for mottakeren.</td></tr>
 </table>
-<h2>Hvis en mottaker ikke har en nøkkel</h2>
-<p>En kryptert melding sendes bare når alle mottakerne har en nøkkel. Hvis noen mangler, åpner <b data-text="ui-tb-send"></b> vinduet <b data-text="ui-recipient-keys-title"></b>. Der kan du klikke på <b data-text="ui-recipient-find-key"></b> for å lete igjen, på <b data-text="ui-recipient-remove"></b> for å utelate personen, eller på <b data-text="ui-send-unencrypted"></b>. Du kan også be personen om den offentlige nøkkelen og importere den.</p>
+<h2>Hvis en brukbar nøkkel mangler</h2>
+<p>Du må ha brukbare nøkler til alle mottakerne for å sende en kryptert melding. Hvis en nøkkel mangler, klikker du på <b data-text="ui-tb-send"></b> for å åpne <b data-text="ui-recipient-keys-title"></b>. Bruk <b data-text="ui-recipient-find-key"></b> for å søke på nytt eller <b data-text="ui-recipient-remove"></b> for å fjerne mottakeren fra meldingen. Du kan bare velge <b data-text="ui-send-unencrypted"></b> når meldingen ikke inneholder noe fra krypterte meldinger. Du kan også be mottakeren om den offentlige nøkkelen og importere den.</p>
 <h2>Svar på kryptert e-post</h2>
-<p>Et svar på en kryptert melding, eller en videresending av en, starter med <b data-text="ui-tb-encrypt"></b> slått på, og Inbox Classic spør før du slår det av. Så lenge meldingen fortsatt siterer den krypterte teksten eller har vedleggene, kan den bare sendes kryptert.</p>
-<p>Utkast til en kryptert melding lagres kryptert, og det samme gjør kopien i <b data-text="folder-sent"></b>.</p>
+<p>Når du svarer på eller videresender en kryptert melding, slås <b data-text="ui-tb-encrypt"></b> på automatisk. Inbox Classic ber om bekreftelse før krypteringen slås av. Så lenge meldingen inneholder sitert tekst, bilder eller vedlegg fra den krypterte meldingen, kan den bare sendes kryptert.</p>
+<p>Utkast til slike meldinger krypteres med din egen nøkkel. Kopien i <b data-text="folder-sent"></b> lagres også kryptert.</p>
 <h2>Del den offentlige nøkkelen din</h2>
-<p>For at andre skal kunne sende deg kryptert e-post, velger du <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Den offentlige nøkkelen din legges ved meldingen som en fil.</p>
+<p>Velg <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b> for å dele den offentlige nøkkelen din. Nøkkelen til adressen du sender fra, legges ved som en fil. Mottakerne kan bruke den til å sende deg krypterte meldinger.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

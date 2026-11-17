@@ -599,60 +599,38 @@ pgp-publish-done = Nøkkelen din kan nå finnes på keys.openpgp.org ved å søk
 pgp-publish-failed = Nøkkelen kunne ikke publiseres: { $error }
 pgp-keyserver-off = Søk etter nøkler på keys.openpgp.org er slått av under { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Kryptert og signert: bare du og { $addresses } kan lese den.
-   *[other] Kryptert og signert: bare du og de { $count } mottakerne kan lese den.
+    [one] Meldingen krypteres og signeres når du sender den. Bare du og { $addresses } kan lese innholdet.
+   *[other] Meldingen krypteres og signeres når du sender den. Bare du og de { $count } mottakerne kan lese innholdet.
 }
-# review: new
-pgp-compose-encrypt-ready = Den blir kryptert og signert. Legg til mottakere du har nøklene til.
-# review: new
+pgp-compose-encrypt-ready = Meldingen krypteres og signeres når du sender den. Legg til mottakere du har brukbare nøkler til.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } har ingen nøkkel, så meldingen kan ikke krypteres ennå.
-   *[other] { $count } mottakere har ingen nøkkel, så meldingen kan ikke krypteres ennå: { $addresses }.
+    [one] Det mangler en brukbar nøkkel for { $addresses }, så meldingen kan ikke krypteres ennå.
+   *[other] Det mangler brukbare nøkler for { $count } mottakere: { $addresses }. Meldingen kan ikke krypteres ennå.
 }
-# review: new
 pgp-compose-looking = Ser etter nøklene til { $addresses }...
-# review: new
-pgp-compose-signed = Signert: mottakerne kan kontrollere at den kommer fra deg og ikke er endret.
-# review: new
-pgp-compose-reply-clear = Ikke kryptert, selv om meldingen den svarer på eller videresender, var det.
-# review: new
-pgp-compose-encrypted-files = Filer fra en kryptert melding er lagt ved, så denne meldingen kan bare sendes kryptert. Slå på Krypter, eller fjern de filene.
-# review: new
-pgp-compose-sign-tip = Signer meldingen med nøkkelen din, så mottakerne kan kontrollere at den kommer fra deg og ikke er endret
-# review: new
-pgp-compose-sign-tip-encrypted = En kryptert melding blir alltid signert
-# review: new
-pgp-compose-encrypt-tip = Krypter meldingen, så bare du og mottakerne kan lese den
-# review: new
-pgp-compose-make-key = Du har ingen nøkkel for { $address } ennå. Vil du lage en nå? Med den kan meldingene dine signeres og krypteres.
-# review: new
-pgp-compose-key-unusable = Nøkkelen din for { $address } kan ikke brukes ({ $state }). Åpne Krypteringsnøkler for å importere sikkerhetskopien eller lage en ny nøkkel.
-# review: new
-pgp-compose-encrypt-off-quote = Denne meldingen siterer eller videresender en kryptert melding. Uten kryptering kan den ikke sendes før du fjerner det den siterer. Vil du slå av kryptering likevel?
-# review: new
-pgp-compose-encrypt-off-reply = Denne meldingen svarer på eller videresender en kryptert melding. Uten kryptering kan alle som håndterer meldingen din underveis, lese den. Vil du slå av kryptering?
-# review: new
+pgp-compose-signed = Meldingen signeres digitalt når du sender den. Mottakerne kan kontrollere signaturen og om innholdet er endret.
+pgp-compose-reply-clear = Ikke kryptert, selv om den opprinnelige meldingen var kryptert.
+pgp-compose-encrypted-files = Meldingen inneholder vedlegg fra en kryptert melding og kan bare sendes kryptert. Slå på «Krypter» eller fjern disse vedleggene.
+pgp-compose-sign-tip = Signer meldingen digitalt når du sender den, slik at mottakerne kan kontrollere signaturen og om innholdet er endret
+pgp-compose-sign-tip-encrypted = Krypterte meldinger signeres alltid når de sendes
+pgp-compose-encrypt-tip = Krypter innholdet når du sender meldingen, slik at bare du og mottakerne kan lese det
+pgp-compose-make-key = Du har ikke satt opp en egen nøkkel for { $address }. Vil du lage en nå? Med nøkkelen kan du signere og kryptere meldinger.
+pgp-compose-key-unusable = Nøkkelen din for { $address } kan ikke brukes. Årsak: { $state }
+    Åpne «Krypteringsnøkler» for å importere en sikkerhetskopi av denne nøkkelen eller lage en ny.
+pgp-compose-encrypt-off-quote = Meldingen inneholder fortsatt tekst, bilder eller vedlegg fra en kryptert melding. Fjern dette innholdet før du sender uten kryptering. Vil du slå av krypteringen likevel?
+pgp-compose-encrypt-off-reply = Den opprinnelige meldingen var kryptert. Hvis du sender svaret eller videresender meldingen uten kryptering, kan e-postserverne lese innholdet. Vil du slå av krypteringen?
 pgp-recipient-verified = Nøkkelen er bekreftet
-# review: new
 pgp-recipient-found = Nøkkelen er ikke bekreftet
-# review: new
 pgp-recipient-own = Din egen nøkkel
-# review: new
 pgp-recipient-looking = Ser etter en nøkkel...
-# review: new
 pgp-recipient-missing = Ingen nøkkel
-# review: new
-pgp-recipient-not-found = Ingen nøkkel: ingen ble funnet { $date }
-# review: new
+pgp-recipient-not-found = Fant ingen nøkkel. Siste søk: { $date }
 pgp-recipient-unusable = Nøkkelen kan ikke brukes: { $state }
-# review: new
-pgp-recipients-intro = Meldingen krypteres til nøkkelen til hver mottaker, og til din.
-# review: new
+pgp-recipients-intro = Meldingen krypteres med mottakernes nøkler og din egen nøkkel.
 pgp-recipients-intro-missing = { $count ->
-    [one] Én mottaker har ingen nøkkel å kryptere til. Finn nøkkelen, fjern mottakeren fra denne meldingen, eller send den uten kryptering.
-   *[other] { $count } mottakere har ingen nøkkel å kryptere til. Finn nøklene deres, fjern dem fra denne meldingen, eller send den uten kryptering.
+    [one] Én mottaker mangler en brukbar nøkkel. Finn nøkkelen eller fjern mottakeren fra meldingen. Du kan bare sende uten kryptering når meldingen ikke inneholder tekst, bilder eller vedlegg fra krypterte meldinger.
+   *[other] { $count } mottakere mangler brukbare nøkler. Finn nøklene eller fjern mottakerne fra meldingen. Du kan bare sende uten kryptering når meldingen ikke inneholder tekst, bilder eller vedlegg fra krypterte meldinger.
 }
 pgp-details-part = Del { $number }: { $label }
 pgp-details-signed = Signert { $when } med nøkkelen { $key }

@@ -5,14 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Norwegian Bokmål compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca.
+- **Next: Serbian Latin compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb.
   Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
   recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
+- Remaining compose languages: sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
   Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 21,031 entries and 808 full topics; pending: 12,837 entries and 544 topics.
-  Historical catalog improvements: 3,676.
+  Completed: 21,071 entries and 810 full topics; pending: 12,797 entries and 542 topics.
+  Historical catalog improvements: 3,692.
 - All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
   catalogs/generated identifiers; implementation provenance is recorded separately.
 - Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
@@ -2194,3 +2194,15 @@ All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark dia
 
 Fresh fetch found origin/master advanced to cb5e4778, including hardening merge 3161dddc; chore/pgp-hardening advanced to 51d67bb4. All 87 help files and 29 core catalogs introduced upstream exactly match the already tracked help/signature source imports; no additional strings, edited translations or languages. The hardening-tip delta only changes a Windows UI-test wait. The guide is unchanged. Dependent hardening implementation is now on origin/master but remains outside this translation worktree; unrelated code/corpus changes were not merged. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,093 entries/197 passages reconcile. No tests.
 Completed 21,031 entries/808 topics; pending 12,837/544; scope 33,868/1,352; historical catalog improvements 3,676. Next: Norwegian Bokmål. REVIEWED remains unchanged.
+
+
+### Norwegian Bokmål compose signing and encryption reviewed
+
+Reviewed all 40 compose additions. Retained 17 natural app labels and seven core values; improved 16 core values. Direct du wording describes protection when sending, signature checks without assuming verified identity, and brukbare nøkler. Complete key-state explanations follow Årsak, while date values follow Siste søk. Replaced literal encryption-to-a-key wording. Unencrypted sending requires removal of inherited protected text, images and attachments.
+
+Reviewed the new help topic and writing-help insertion, improving 14 help lines. All earlier writing-help prose is preserved. Help explains status colors across platform icons, own/unusable keys, the selected From key, recipient removal and encrypted drafts/sent copies. Glossary updated.
+
+All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 16 value edits and 40 mark removals, preserving all other catalog bytes. Help tags, attributes, controls, platform branches and literal keys match; all prior writing-help prose is retained. Label joins inspected on all platforms and dynamic shortcuts checked in commands.toml. No relevant Norwegian screenshots available; source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,105 unmarked messages, 10,579 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.
+
+Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,053 entries/195 passages reconcile. No tests.
+Completed 21,071 entries/810 topics; pending 12,797/542; scope 33,868/1,352; historical catalog improvements 3,692. Next: Serbian Latin. REVIEWED remains unchanged.

@@ -611,6 +611,10 @@ Review notes (round 2):
   requires another password or browser sign-in. Domain authentication does not verify a person's identity.
 - Actual menu/context/dialog access keys were checked in 32 scopes, including Norwegian Ø where needed.
   Recipient controls use Alt+K and Alt+B, which help must explain beside unchanged English keyboard tags.
+- Compose status describes protection "når du sender den"; encrypted drafts are not signed. Use "brukbar nøkkel"
+  when an available key must also be usable. Digital signatures do not by themselves confirm key ownership.
+- Introduce complete key-state explanations with "Årsak:" and dates with "Siste søk:". Recipient removal affects
+  message fields, not contacts. Sending without encryption requires removing inherited text, images and attachments.
 
 ### Polski (pl)
 
