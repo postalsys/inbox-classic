@@ -677,74 +677,41 @@ day-sunday = nedelja
 
 ## AI agents
 
-# review: new
-agent-level-read = Branje pošte: mape, seznam sporočil, iskanje in sporočila
-# review: new
-agent-level-organize = Urejanje pošte: stanje branja, zastavice, neželena pošta, premikanje, arhiviranje, nove mape, brisanje v mapo Izbrisano in odjava s poštnih seznamov po vaši potrditvi
-# review: new
+agent-level-read = Branje pošte: pregled map, seznama sporočil in vsebine sporočil ter iskanje
+agent-level-organize = Urejanje pošte: spreminjanje prebranosti in zastavic, označevanje neželene pošte, premikanje in arhiviranje sporočil, ustvarjanje map, brisanje v mapo Izbrisano ter odjava s poštnih seznamov po vaši potrditvi
 agent-level-drafts = Pisanje osnutkov, ki jih pošljete sami
-# review: new
-agent-level-send = Pošiljanje pošte, vsakega sporočila šele po vaši potrditvi
-# review: new
-agent-connect-title = { $program } želi uporabljati vašo pošto
-# review: new
-agent-connect-detail = Agent UI je zaprosil za delo s programom Inbox Classic. Izberite, kaj sme početi in katere račune sme videti; to lahko pozneje spremenite v meniju Orodja > Agenti UI.
+agent-level-send = Pošiljanje pošte samo z vašo potrditvijo vsakega sporočila
+agent-connect-title = { $program } želi dostop do vaše pošte
+agent-connect-detail = Agent UI želi dostop do vaše pošte prek programa Inbox Classic. Izberite dovoljena dejanja in račune, do katerih sme dostopati. To lahko pozneje spremenite v meniju Orodja > Agenti UI.
 
-    Agenti berejo pošto, ki so jo napisali drugi ljudje, in sporočilo jih lahko poskuša preslepiti. Inbox Classic vas vedno vpraša, preden agent kar koli pošlje.
-# review: new
-agent-reply-to = Odgovor na »{ $subject }«
-# review: new
-agent-reply-all-on = Odgovor vsem na »{ $subject }«
-# review: new
-agent-forward-of = Posredovanje »{ $subject }«
-# review: new
-agent-never-written-one = Naslovu { $address } še niste nikoli pisali.
-# review: new
-agent-never-written-many = Nekaterim od teh naslovov ({ $count }) še niste nikoli pisali.
-# review: new
+    Sporočila drugih ljudi lahko vsebujejo navodila, namenjena zavajanju agenta. Preden agent pošlje sporočilo, Inbox Classic vedno zahteva vašo potrditev.
+agent-reply-to = Odgovor na sporočilo »{ $subject }«
+agent-reply-all-on = Odgovor vsem na sporočilo »{ $subject }«
+agent-forward-of = Posredovanje sporočila »{ $subject }«
+agent-never-written-one = Na naslov { $address } še niste pisali.
+agent-never-written-many = Število naslovov, na katere še niste pisali: { $count }.
 agent-send-title = { $program } želi poslati to sporočilo
-# review: new
-agent-send-detail = Preverite prejemnike in vsebino sporočila. Ko potrdite, sporočilo { $seconds } s čaka v mapi Odpošiljanje, kjer ga lahko še izbrišete.
-# review: new
-agent-change-title = Kaj sme { $program }
-# review: new
-agent-change-allowed = Spremenite, kaj smejo agenti UI tega programa početi z vašo pošto.
-# review: new
-agent-change-refused = Temu programu ste zavrnili dostop. Dovolite ga, da bodo njegovi agenti znova imeli dostop do vaše pošte.
-# review: new
-agent-log-taken-back = { $entry } (preklicano)
-# review: new
+agent-send-detail = Preverite prejemnike in vsebino sporočila. Po potrditvi sporočilo čaka v mapi Odpošiljanje najmanj { $seconds } sekund. Dokler ni poslano, ga lahko izbrišete.
+agent-change-title = Kaj sme početi { $program }
+agent-change-allowed = Izberite, kaj smejo agenti UI tega programa početi z vašo pošto.
+agent-change-refused = Temu programu ste zavrnili dostop. Znova mu ga lahko dovolite, da bodo njegovi agenti lahko delali z vašo pošto.
+agent-log-taken-back = { $entry } (razveljavljeno)
 agent-files = Datoteke: { $files }
-# review: new
-agent-undo-refused = Tega ni mogoče preklicati.
-# review: new
-agent-undo-refused-why = Tega ni mogoče preklicati: { $reason }.
-# review: new
-agent-undo-impossible = tega ni mogoče preklicati
-# review: new
+agent-undo-refused = Tega dejanja ni mogoče razveljaviti.
+agent-undo-refused-why = Tega dejanja ni mogoče razveljaviti: { $reason }.
+agent-undo-impossible = tega dejanja ni mogoče razveljaviti
 agent-undo-not-in-folder = sporočila ni več v tej mapi
-# review: new
-agent-undo-not-arrived = sporočila (še) ni v mapi, v katero je bilo premaknjeno
-# review: new
-agent-undo-sent = sporočilo je že bilo poslano
-# review: new
+agent-undo-not-arrived = sporočila še ni v ciljni mapi
+agent-undo-sent = sporočila ni več v mapi Odpošiljanje
 agent-original-not-downloaded = izvirno sporočilo še ni bilo preneseno. Najprej ga odprite
-# review: new
-agent-turned-away = Zavrnjen
-# review: new
+agent-turned-away = Dostop zavrnjen
 agent-can-nothing = Nič
-# review: new
 agent-can-read = branje
-# review: new
 agent-can-organize = urejanje
-# review: new
 agent-can-drafts = pisanje osnutkov
-# review: new
 agent-can-send = pošiljanje z vašo potrditvijo
 # "Read, organize and write drafts"
-# review: new
 agent-can-list = { $first } in { $last }
-# review: new
 agent-accounts = { $count ->
     [0] noben račun
     [one] { $count } račun
@@ -753,56 +720,32 @@ agent-accounts = { $count ->
    *[other] { $count } računov
 }
 # "Read and organize; 1 account"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Tega sporočila ni mogoče prebrati.
-# review: new
 agent-encrypted-original = To sporočilo je šifrirano: agent nanj ne more odgovoriti ali ga posredovati, ker ne zna šifrirati.
-# review: new
-agent-encrypted = To sporočilo je šifrirano. Prebere ga lahko samo uporabnik, v programu Inbox Classic.
+agent-encrypted = To sporočilo je šifrirano, zato agent ne more prebrati njegove vsebine. Odprete ga lahko v programu Inbox Classic.
 # review: new
 list-encrypted = Šifrirano sporočilo
-# review: new
-agent-log-composed = Odprl »{ $subject }« v novem sporočilu, da ga dokončate
-# review: new
-agent-log-refused = Niste poslali »{ $subject }«
-# review: new
-agent-log-sent = Poslal »{ $subject }« za { $to }
-# review: new
+agent-log-composed = Odprl novo sporočilo za urejanje. Zadeva: »{ $subject }«
+agent-log-refused = Niste dovolili pošiljanja sporočila »{ $subject }«
+agent-log-sent = Uvrstil sporočilo »{ $subject }« v čakalno vrsto za pošiljanje. Prejemniki: { $to }
 agent-log-draft = Shranil osnutek »{ $subject }«
-# review: new
 agent-log-draft-replaced = Zamenjal osnutek »{ $subject }«
-# review: new
-agent-log-draft-discarded = Zavrgel osnutek »{ $subject }«
-# review: new
-agent-draft-note = { $program }, agent UI, je napisal ta osnutek. Pred pošiljanjem preverite prejemnike in besedilo.
-# review: new
-agent-log-read = Označil kot prebrano »{ $subject }«
-# review: new
-agent-log-unread = Označil kot neprebrano »{ $subject }«
-# review: new
-agent-log-flagged = Označil z zastavico »{ $subject }«
-# review: new
-agent-log-unflagged = Odstranil zastavico z »{ $subject }«
-# review: new
-agent-log-deleted = Izbrisal »{ $subject }«
-# review: new
-agent-log-moved = Premaknil »{ $subject }« v { $folder }
-# review: new
-agent-log-junk = Označil »{ $subject }« kot neželeno
-# review: new
-agent-log-not-junk = Označil »{ $subject }« kot želeno
-# review: new
-agent-log-archived = Arhiviral »{ $subject }«
-# review: new
+agent-log-draft-discarded = Trajno izbrisal osnutek »{ $subject }«
+agent-draft-note = Ta osnutek je napisal agent UI { $program }. Pred pošiljanjem preverite prejemnike in besedilo.
+agent-log-read = Označil sporočilo »{ $subject }« kot prebrano
+agent-log-unread = Označil sporočilo »{ $subject }« kot neprebrano
+agent-log-flagged = Označil sporočilo »{ $subject }« z zastavico
+agent-log-unflagged = Odstranil zastavico s sporočila »{ $subject }«
+agent-log-deleted = Izbrisal sporočilo »{ $subject }«
+agent-log-moved = Premaknil sporočilo »{ $subject }« v mapo »{ $folder }«
+agent-log-junk = Označil sporočilo »{ $subject }« kot neželeno
+agent-log-not-junk = Odstranil oznako neželene pošte s sporočila »{ $subject }«
+agent-log-archived = Arhiviral sporočilo »{ $subject }«
 agent-log-folder = Ustvaril mapo »{ $name }«
 agent-log-unsubscribed = Odobrili ste zahtevo za odjavo s poštnega seznama. Sporočilo: »{ $subject }«
-# review: new
-agent-log-unsubscribe-failed = Odjava s seznama sporočila »{ $subject }« ni uspela: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Odjavo s seznamov ste zavrnili: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Zahteva za odjavo ni uspela. Sporočilo: »{ $subject }«. Razlog: { $reason }
+agent-log-unsubscribe-refused = Odjave niste dovolili. Pošiljatelji: { $senders }
 agent-unsubscribe-title = { $count ->
     [1] { $program } vas želi odjaviti s poštnega seznama
     [one] { $program } vas želi odjaviti s poštnih seznamov ({ $count })
@@ -810,10 +753,9 @@ agent-unsubscribe-title = { $count ->
     [few] { $program } vas želi odjaviti s poštnih seznamov ({ $count })
    *[other] { $program } vas želi odjaviti s poštnih seznamov ({ $count })
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic spodnji seznam prosi, naj vam preneha pošiljati, in sicer z odjavo z enim klikom, ki jo ponuja. Nič drugega se ne pošlje in sporočila, ki jih imate, ostanejo, kjer so.
-   *[other] Inbox Classic vsak spodnji seznam prosi, naj vam preneha pošiljati, in sicer z odjavo z enim klikom, ki jo seznam ponuja. Nič drugega se ne pošlje in sporočila, ki jih imate, ostanejo, kjer so.
+    [1] Inbox Classic bo spodaj navedenemu poštnemu seznamu poslal zahtevo za odjavo. Uporabil bo možnost odjave z enim klikom, ki jo seznam ponuja. Pri tem se e-pošta ne pošilja, prejeta sporočila pa ostanejo nespremenjena.
+   *[other] Inbox Classic bo vsakemu spodaj navedenemu poštnemu seznamu poslal zahtevo za odjavo. Uporabil bo možnost odjave z enim klikom, ki jo ponuja posamezni seznam. Pri tem se e-pošta ne pošilja, prejeta sporočila pa ostanejo nespremenjena.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

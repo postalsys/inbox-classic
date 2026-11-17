@@ -154,9 +154,7 @@ win-book-find-label = Vnesite ime ali e-poštni naslov:
 win-send = &Pošlji
 # review: new
 win-dont-send = &Ne pošlji
-# review: new
-win-unsubscribe = &Odjava
-# review: new
+win-unsubscribe = &Odjavi
 win-dont-unsubscribe = &Ne odjavi
 # review: new
 win-forget-program-ask = Želite odstraniti ta program, njegova dovoljenja in zgodovino dejavnosti njegovih agentov? Ko se bo naslednjič povezal, boste znova vprašani za dovoljenje.
