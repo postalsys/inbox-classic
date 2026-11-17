@@ -78,13 +78,6 @@ try {
     for (const message of lists.messages) await call('get_message', { folder: message.folder, uid: message.uid });
     // waits for the user's answer
     record('unsubscribe', await call('unsubscribe_from_list', { folder: inbox, uids: lists.messages.map(message => message.uid) }));
-    // the test's go-ahead: the question would otherwise come up over the windows it checks
-    while (!existsSync(`${OUT}.unsubscribe`)) await sleep(200);
-    // two list messages, added by the test before the agent starts, found by their subject and downloaded
-    const lists = await call('search_messages', { query: 'subject:"Weekly digest" OR subject:"Monthly offers"' });
-    for (const message of lists.messages) await call('get_message', { folder: message.folder, uid: message.uid });
-    // waits for the user's answer
-    record('unsubscribe', await call('unsubscribe_from_list', { folder: inbox, uids: lists.messages.map(message => message.uid) }));
     record('done', true);
 } catch (error) {
     record('error', String(error));
