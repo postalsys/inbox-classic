@@ -753,6 +753,8 @@ ui-settings-message-list = İleti listesi
 # review: new
 ui-settings-messages = İletiler
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Uygula
 # review: new
 ui-language-label = &Dil:

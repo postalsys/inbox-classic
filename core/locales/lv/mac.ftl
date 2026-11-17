@@ -42,6 +42,8 @@ mac-no-updates = Šī Inbox Classic versija neatbalsta automātiskos atjaunināj
 mac-settings-title = Iestatījumi
 # review: new
 mac-check-updates-automatically = Automātiski meklēt atjauninājumus
+# review: new
+mac-settings-updates = Atjauninājumi
 
 ## Dialogs
 

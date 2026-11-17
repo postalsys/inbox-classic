@@ -755,6 +755,8 @@ ui-settings-message-list = Lista de mesaje
 # review: new
 ui-settings-messages = Mesaje
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Aplicare
 # review: new
 ui-language-label = &Limbă:

@@ -754,6 +754,8 @@ ui-settings-message-list = Списък със съобщения
 # review: new
 ui-settings-messages = Съобщения
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Приложи
 # review: new
 ui-language-label = &Език:

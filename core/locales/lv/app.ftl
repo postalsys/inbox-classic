@@ -756,6 +756,8 @@ ui-settings-message-list = Ziņojumu saraksts
 # review: new
 ui-settings-messages = Ziņojumi
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Lietot
 # review: new
 ui-language-label = &Valoda:

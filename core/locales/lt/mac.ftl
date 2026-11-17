@@ -39,6 +39,8 @@ mac-no-updates = Ši Inbox Classic versija nepalaiko automatinių naujinimų. Na
 mac-settings-title = Nustatymai
 # review: new
 mac-check-updates-automatically = Automatiškai ieškoti naujinių
+# review: new
+mac-settings-updates = Naujiniai
 
 ## Dialogs
 

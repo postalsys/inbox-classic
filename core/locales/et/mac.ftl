@@ -23,6 +23,8 @@ mac-no-updates = See Inbox Classicu versioon ei toeta automaatseid uuendusi. Uus
 mac-settings-title = Seaded
 # review: new
 mac-check-updates-automatically = Kontrolli uuendusi automaatselt
+# review: new
+mac-settings-updates = Uuendused
 
 ## Dialogs
 

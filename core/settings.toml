@@ -14,11 +14,11 @@
 #   label           its catalog message: the tab, the pane's toolbar item and window title, the view switcher
 #   mac_symbol      the SF Symbol of its toolbar item on the Mac
 #   linux_icon      the icon of its view switcher button on Linux
-# [[page.group]]    a group of the page: a group box on Windows, extra space between groups on the Mac (no heading,
-#                   as Apple's own panes), an AdwPreferencesGroup on Linux
+# [[page.group]]    a group of the page: a group box on Windows, set apart by space on the Mac (its title with a colon
+#                   in the label column, on its first control's row, unless that is a pop-up with a label of its
+#                   own, as Apple's own panes), an AdwPreferencesGroup on Linux
 #   id              the name in code
-#   label           its title; none for the one group of a page, which the page titles, or a group only the Mac
-#                   has, which shows no headings
+#   label           its title; none for the one group of a page, which the page titles
 #                   (a group shows on the platforms that have one of its settings)
 #   note            a note under the group (Linux: its description)
 # [[page.group.setting]]
@@ -89,6 +89,7 @@ label = "ui-eml-default"
 
 [[page.group]]
 id = "updates"
+label = "mac-settings-updates"
 
 [[page.group.setting]]
 id = "check_for_updates"

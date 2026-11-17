@@ -753,6 +753,8 @@ ui-settings-message-list = Meddelandelista
 # review: new
 ui-settings-messages = Meddelanden
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Verkställ
 # review: new
 ui-language-label = S&pråk:

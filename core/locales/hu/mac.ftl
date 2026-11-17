@@ -41,6 +41,8 @@ mac-no-updates = Az Inbox Classic ezen verziója nem támogatja az automatikus f
 mac-settings-title = Beállítások
 # review: new
 mac-check-updates-automatically = Frissítések automatikus keresése
+# review: new
+mac-settings-updates = Frissítések
 
 ## Dialogs
 

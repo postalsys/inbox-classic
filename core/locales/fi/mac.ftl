@@ -42,6 +42,8 @@ mac-no-updates = T채m채 Inbox Classicin versio ei tue automaattisia p채ivityksi�
 mac-settings-title = Asetukset
 # review: new
 mac-check-updates-automatically = Tarkista p채ivitykset automaattisesti
+# review: new
+mac-settings-updates = P채ivitykset
 
 ## Dialogs
 

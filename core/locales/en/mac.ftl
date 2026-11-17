@@ -25,6 +25,8 @@ mac-no-updates = This version of Inbox Classic does not support automatic update
 mac-settings-title = Settings
 # the Mac only: Sparkle's automatic check for a new version, in General
 mac-check-updates-automatically = Check for updates automatically
+# the title of that group, in the label column of the pane
+mac-settings-updates = Updates
 
 ## Dialogs
 

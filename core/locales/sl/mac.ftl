@@ -41,6 +41,8 @@ mac-no-updates = Ta različica programa Inbox Classic ne podpira samodejnih poso
 mac-settings-title = Nastavitve
 # review: new
 mac-check-updates-automatically = Samodejno preveri posodobitve
+# review: new
+mac-settings-updates = Posodobitve
 
 ## Dialogs
 

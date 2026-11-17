@@ -752,6 +752,8 @@ ui-settings-message-list = Üzenetlista
 # review: new
 ui-settings-messages = Üzenetek
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = Al&kalmaz
 # review: new
 ui-language-label = &Nyelv:

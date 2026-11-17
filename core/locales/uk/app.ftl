@@ -755,6 +755,8 @@ ui-settings-message-list = Список повідомлень
 # review: new
 ui-settings-messages = Повідомлення
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Застосувати
 # review: new
 ui-language-label = &Мова:

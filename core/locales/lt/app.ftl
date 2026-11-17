@@ -753,6 +753,8 @@ ui-settings-message-list = Laiškų sąrašas
 # review: new
 ui-settings-messages = Laiškai
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Taikyti
 # review: new
 ui-language-label = &Kalba:

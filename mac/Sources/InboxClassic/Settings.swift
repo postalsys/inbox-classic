@@ -202,17 +202,25 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         SettingsPage(rawValue: item.itemIdentifier.rawValue).map { select($0) }
     }
 
-    /// A pane: its groups' settings in a grid, the labels of pop-ups right aligned before them and everything else
-    /// in the controls' column, the groups set apart by space, and the help button in the bottom right corner
+    /// A pane: its groups' settings in a grid, the labels right aligned before the controls, as Apple's panes have
+    /// them (a pop-up's own, and a group's title on its first control's row when that is no pop-up), the groups set
+    /// apart by space, and the help button in the bottom right corner
     private func makePane(_ page: SettingsPage) -> NSView {
         let settings = page.groups.flatMap(\.settings)
         let controls = Dictionary(uniqueKeysWithValues: settings.map { ($0, control(for: $0)) })
-        // the labels of the pop-ups as wide as the widest of them, up to a limit that leaves the widest pop-up or push
-        // button its room (those do not wrap); check boxes and notes wrap in what is left
+        // the labels as wide as the widest of them, up to a limit that leaves the widest pop-up or push button its room
+        // (those do not wrap); check boxes and notes wrap in what is left
         let room = Self.width - 2 * Self.margin
         let widestFixed = controls.values.filter { !($0 is WrappingCheckbox) }.map(\.intrinsicContentSize.width).max() ?? 0
         let limit = max(min(Self.widestLabel, room - Self.spacing - ceil(widestFixed)), Self.widestLabel / 2)
-        let labels = Dictionary(uniqueKeysWithValues: settings.filter { $0.kind == .choice }.map { ($0, choiceLabel($0, limit)) })
+        var labels: [Setting: NSTextField] = [:]
+        for group in page.groups {
+            for setting in group.settings {
+                if let text = labelText(setting, in: group) {
+                    labels[setting] = label(text, limit)
+                }
+            }
+        }
         let labelWidth = labels.values.map(\.preferredMaxLayoutWidth).max() ?? 0
         let column = labelWidth > 0 ? room - labelWidth - Self.spacing : room
         let grid = NSGridView()
@@ -225,7 +233,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
                 // a check box that depends on the one before it starts where that one's title does
                 let width = column - (setting.dependsOn == nil ? 0 : Self.indent)
                 (control as? WrappingCheckbox)?.preferredMaxLayoutWidth = width
-                labels[setting].map(control.setAccessibilityTitleUIElement)
+                if setting.kind == .choice {
+                    labels[setting].map(control.setAccessibilityTitleUIElement)
+                }
                 let cell = stacked(control, note: setting.note, setting: setting, width: width)
                 let row = grid.addRow(with: [labels[setting] ?? NSGridCell.emptyContentView,
                                              width < column ? indented(cell, by: column - width) : cell])
@@ -344,9 +354,18 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         return button
     }
 
-    /// a pop-up's label, right aligned, wrapping when it is longer than the label column may be
-    private func choiceLabel(_ setting: Setting, _ limit: CGFloat) -> NSTextField {
-        let text = hyphensKept(setting.label.text)
+    /// the words before `setting`: a pop-up's own label, its group's title with a colon on the group's first row
+    private func labelText(_ setting: Setting, in group: SettingsGroup) -> String? {
+        if setting.kind == .choice {
+            return setting.label.text
+        }
+        guard setting == group.settings.first, let title = group.label else { return nil }
+        return Text.uiSettingsLabel.text(["label": title.text])
+    }
+
+    /// a label of the label column, right aligned, wrapping when it is longer than the column may be
+    private func label(_ words: String, _ limit: CGFloat) -> NSTextField {
+        let text = hyphensKept(words)
         let width = min(ceil(NSTextField(labelWithString: text).intrinsicContentSize.width), limit)
         let label = NSTextField(wrappingLabelWithString: text)
         label.isSelectable = false

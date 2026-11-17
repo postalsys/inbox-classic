@@ -756,6 +756,8 @@ ui-settings-message-list = Seznam sporočil
 # review: new
 ui-settings-messages = Sporočila
 # review: new
+ui-settings-label = { $label }:
+# review: new
 ui-apply = &Uporabi
 # review: new
 ui-language-label = &Jezik:

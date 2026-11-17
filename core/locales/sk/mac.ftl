@@ -39,6 +39,8 @@ mac-no-updates = Táto verzia Inbox Classic nepodporuje automatické aktualizác
 mac-settings-title = Nastavenia
 # review: new
 mac-check-updates-automatically = Automaticky vyhľadávať aktualizácie
+# review: new
+mac-settings-updates = Aktualizácie
 
 ## Dialogs
 

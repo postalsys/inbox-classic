@@ -313,14 +313,14 @@ fn swift(table: &Table) -> String {
         list(p.groups(platform).map(|g| camel(&g.id, false)).collect())
     });
     out.push_str(
-        "}\n\n/// A group of a pane: set apart by space, without a heading\nenum SettingsGroup: CaseIterable {\n",
+        "}\n\n/// A group of a pane: set apart by space, its title in the label column on its first row\nenum SettingsGroup: CaseIterable {\n",
     );
     for group in &groups {
         writeln!(out, "    case {}", group_case(group)).unwrap();
     }
     out.push_str("\n    var page: SettingsPage {\n");
     swift_switch(&mut out, &groups, group_case, |g| format!(".{}", camel(&g.0.id, false)));
-    out.push_str("\n    /// Its title as the other platforms show it, nil for none\n    var label: Text? {\n");
+    out.push_str("\n    /// Its title, nil for none\n    var label: Text? {\n");
     swift_switch(&mut out, &groups, group_case, |g| swift_text(g.1.label.as_ref()));
     out.push_str("\n    /// A note under the group, nil for none\n    var note: Text? {\n");
     swift_switch(&mut out, &groups, group_case, |g| swift_text(g.1.note.as_ref()));

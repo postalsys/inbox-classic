@@ -34,7 +34,7 @@ enum SettingsPage: String, CaseIterable {
     }
 }
 
-/// A group of a pane: set apart by space, without a heading
+/// A group of a pane: set apart by space, its title in the label column on its first row
 enum SettingsGroup: CaseIterable {
     case language
     case newMail
@@ -58,14 +58,14 @@ enum SettingsGroup: CaseIterable {
         }
     }
 
-    /// Its title as the other platforms show it, nil for none
+    /// Its title, nil for none
     var label: Text? {
         switch self {
         case .language: return .uiLanguageLabel
         case .newMail: return .uiSettingsNewMail
         case .sending: return .uiSettingsSending
         case .defaultApps: return .uiSettingsDefaultApps
-        case .updates: return nil
+        case .updates: return .macSettingsUpdates
         case .messageList: return .uiSettingsMessageList
         case .messages: return .uiSettingsMessages
         case .downloading: return nil
