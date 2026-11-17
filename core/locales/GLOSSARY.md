@@ -117,6 +117,12 @@ the localized combinations beside them.
 - A list of addresses must work for one or several entries. Introduce it with a colon instead of forcing a
   singular case onto the placeholder. Contact names can be placed in parentheses to avoid requiring inflection.
 
+Estonian settings review (round 2):
+- New-mail settings heading: "Uued kirjad". A notification is a "teatis"; "teavita" remains the action.
+- Use "Kettaruumi piir konto kohta" for the downloaded-message storage limit, not a possible network quota.
+- In help, a settings page is introduced by "seadetes" / "seadetest" before `data-settings`, not "kohas"
+  or a bare menu reference. Apply "rakendab muudatused"; Cancel discards changes not yet applied.
+
 ### Spanish encryption and settings transfer
 
 - Use "contraseña" for the password protecting a key backup or settings export, as in the account dialogs.
