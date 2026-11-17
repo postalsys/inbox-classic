@@ -95,7 +95,12 @@ impl Search {
             return None;
         }
         let shown = self.show == Show::All || (unread && self.show == Show::Unread);
-        if !shown || self.uids.is_some() || self.up_to.is_some() || !Query::parse(&self.text, 0).terms.is_empty() {
+        if !shown
+            || self.uids.is_some()
+            || self.up_to.is_some()
+            || self.accounts.is_some()
+            || !Query::parse(&self.text, 0).terms.is_empty()
+        {
             return None;
         }
         let mut values = Vec::new();

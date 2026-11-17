@@ -85,6 +85,37 @@ pub struct Query {
     pub terms: Vec<Term>,
 }
 
+/// What can be typed besides words, each as an example and what it finds: the help an AI agent's search tool gives
+/// (pe-mcp writes its description from this). A test checks that every example is read as the operator it shows.
+pub const SEARCH_OPERATORS: &[(&str, &str)] = &[
+    ("from:ann", "a word of the sender's name or address"),
+    ("to:ann", "a word of a recipient (cc: and bcc: are the same)"),
+    ("subject:invoice", "a word of the subject"),
+    ("filename:pdf", "a word of an attachment's name"),
+    ("is:unread", "unread messages (is:read for read ones)"),
+    ("is:starred", "flagged messages (is:flagged is the same; is:unstarred)"),
+    ("is:answered", "messages replied to"),
+    ("is:bounce", "delivery failure and delay notices"),
+    ("is:signed", "OpenPGP signed messages"),
+    ("is:encrypted", "OpenPGP encrypted messages"),
+    ("has:attachment", "messages with files"),
+    (
+        "in:inbox",
+        "a folder: inbox, sent, drafts, trash, spam, archive, a folder's name, or anywhere (label: is the same)",
+    ),
+    ("before:2026/01/31", "dated before that day (2026-01-31 works too)"),
+    ("after:2026/01/31", "dated on or after that day"),
+    ("older_than:2d", "older than days, months or years (2d, 3m, 1y)"),
+    ("newer_than:3m", "newer than days, months or years"),
+    ("larger:5M", "larger than a size in bytes, or with K, M or G"),
+    ("smaller:100K", "smaller than a size"),
+    ("list:announce", "from a mailing list, by a part of its List-Id"),
+];
+
+/// How words are combined, after [`SEARCH_OPERATORS`]: as the Find box reads them
+pub const SEARCH_SYNTAX: &str = "Plain words match where words start; \"exact phrase\" for words in that order; -word (or \
+    -from:ann) for messages without it; OR between alternatives (invoice OR receipt); everything else must all match.";
+
 const DAY: i64 = 86_400;
 
 impl Query {
@@ -379,6 +410,16 @@ fn bytes(text: &str) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_operator_told_is_one() {
+        for (example, _) in SEARCH_OPERATORS {
+            let query = Query::parse(example, 0);
+            assert_eq!(query.terms.len(), 1, "{example}");
+            let plain_word = matches!(&query.terms[0], Term::Text { any_of, .. } if any_of[0].field == Field::Any);
+            assert!(!plain_word, "{example} is read as a word");
+        }
+    }
 
     fn words(text: &str, field: Field) -> Term {
         Term::Text {

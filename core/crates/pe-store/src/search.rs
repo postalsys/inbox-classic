@@ -117,6 +117,8 @@ pub struct Search {
     /// Leaves out the messages whose text in the index came from decrypting them when it looks for words: an agent's
     /// search never matches what only the user can read (its other terms, such as `is:encrypted`, still find them)
     pub no_decrypted: bool,
+    /// Only the messages of these accounts (those an AI agent may use, which can be some only); None for every account
+    pub accounts: Option<Vec<AccountId>>,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -295,6 +297,21 @@ impl Search {
                 "0".into()
             } else {
                 format!("uid IN ({})", listed.join(", "))
+            });
+        }
+        // the accounts' folders, whatever folders the search names
+        if let Some(accounts) = &self.accounts {
+            let listed: Vec<String> = accounts
+                .iter()
+                .map(|&account| value(&mut values, Value::Integer(account)))
+                .collect();
+            parts.push(if listed.is_empty() {
+                "0".into()
+            } else {
+                format!(
+                    "folder_id IN (SELECT id FROM folders WHERE account_id IN ({}))",
+                    listed.join(", ")
+                )
             });
         }
         // stored up to Select All's bound (the + keeps SQLite on the indexes of the list)
@@ -1355,6 +1372,50 @@ mod tests {
             )
             .unwrap();
         assert!(plan.contains("messages_flagged"), "{plan}");
+    }
+
+    #[test]
+    fn a_search_keeps_to_its_accounts() {
+        let (store, inbox, archive) = setup();
+        let first = store.folder(inbox).unwrap().account_id;
+        let second = store.add_account(&AccountSettings::example("b@example.org")).unwrap();
+        let folder = FolderInfo {
+            path: "INBOX".into(),
+            name: "INBOX".into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(second, &[folder]).unwrap();
+        let inbox2 = store.folders(second).unwrap()[0].id;
+        store.add_messages(inbox, &[message(1, "Hello", "Ann", &[])]).unwrap();
+        store.add_messages(archive, &[message(2, "Hello", "Ann", &[])]).unwrap();
+        store.add_messages(inbox2, &[message(3, "Hello", "Ann", &[])]).unwrap();
+        let found = |accounts: Option<Vec<AccountId>>, text: &str| -> Vec<u64> {
+            let search = Search {
+                text: text.into(),
+                accounts: accounts.clone(),
+                ..Default::default()
+            };
+            assert_eq!(
+                store.count_search(&search).unwrap().0,
+                store.search(&search, Sort::default(), 0, 10).unwrap().len() as u64,
+                "{accounts:?} {text}"
+            );
+            let mut uids: Vec<u64> = store
+                .search(&search, Sort::default(), 0, 10)
+                .unwrap()
+                .iter()
+                .map(|m| m.info.uid)
+                .collect();
+            uids.sort_unstable();
+            uids
+        };
+        assert_eq!(found(None, ""), [1, 2, 3]);
+        assert_eq!(found(Some(vec![first]), ""), [1, 2]);
+        assert_eq!(found(Some(vec![second]), "from:ann"), [3]);
+        // a folder named does not reach past them
+        assert_eq!(found(Some(vec![second]), "in:inbox"), [3]);
+        assert_eq!(found(Some(vec![]), ""), Vec::<u64>::new());
     }
 
     #[test]

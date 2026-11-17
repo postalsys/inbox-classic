@@ -471,6 +471,7 @@ impl ListView {
             no_decrypted: false,
             uids: None,
             up_to: None,
+            accounts: None,
         })
     }
 
@@ -850,7 +851,7 @@ impl ListView {
         }
         if reselect.restored {
             match self.restored_rows(core, found)? {
-                Back::Found(back) => return Ok(Some(back)),
+                Back::Found(back) => return Ok(Some(*back)),
                 Back::Behind if !found.last => return Ok(None),
                 // the last read: they are left for the next load
                 Back::Behind | Back::None => {}
@@ -929,7 +930,7 @@ impl ListView {
             })))
         })?;
         Ok(match taken.flatten() {
-            Some(back) => Back::Found(back),
+            Some(back) => Back::Found(Box::new(back)),
             None if behind => Back::Behind,
             None => Back::None,
         })
@@ -972,7 +973,7 @@ struct Found<'a> {
 /// What Undo brought back, in a list
 enum Back {
     None,
-    Found(Reselected),
+    Found(Box<Reselected>),
     /// The store changed since the list was read
     Behind,
 }
