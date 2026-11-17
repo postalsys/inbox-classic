@@ -2994,13 +2994,23 @@ extension UITest {
         selectFolder(named: "Inbox")
         // two new messages for the agent to read, whatever the steps before left unread
         let rowsBefore = list.numberOfRows
+        // and two mailing lists for it to leave, read already: one-click, signed by the list, verified by the provider
+        for (index, (from, subject)) in [("Weekly Digest <digest@list.example.com>", "Weekly digest"),
+                                         ("Monthly Offers <offers@list.example.com>", "Monthly offers")].enumerated() {
+            try await addMessage("Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com\r\n"
+                + "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n"
+                + "From: \(from)\r\nTo: testuser@inboxclassic.test\r\nSubject: \(subject)\r\nDate: \(rfc2822(Date()))\r\n"
+                + "Message-ID: <\(UUID().uuidString)@list.example.com>\r\n"
+                + "List-Unsubscribe: <https://list.example.com/u/\(index + 1)>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n"
+                + "\r\nThis month's news.\r\n", flags: ["\\Seen"])
+        }
         for (from, subject, body) in [("Maria Lopez <maria@example.org>", "Quarterly report draft", "Here is the draft of the quarterly report. Comments by Thursday?"),
                                       ("Sam Lee <sam@example.org>", "Team lunch on Friday", "Who is in for lunch on Friday at noon?")] {
             try await addMessage("From: \(from)\r\nTo: testuser@inboxclassic.test\r\nSubject: \(subject)\r\nDate: \(rfc2822(Date()))\r\n"
                 + "Message-ID: <\(UUID().uuidString)@example.org>\r\n\r\n\(body)\r\n")
         }
         command(.sync)
-        _ = await waitUntil { list.numberOfRows >= rowsBefore + 2 }
+        _ = await waitUntil { list.numberOfRows >= rowsBefore + 4 }
         let unreadBefore = await unreadOnServer()
         await pause(1)
         await shot(main.window, "agents-1-before")
@@ -3036,6 +3046,7 @@ extension UITest {
             let level = { (index: Int) -> NSButton? in self.find("agent.level.\(index)", in: ask) }
             check(level(0)?.state == .on && level(1)?.state == .on && level(2)?.state == .off && level(3)?.state == .off,
                   "reading and organizing are offered, sending is not")
+            check(ask.frame.width < 700, "the longest level wraps within the question (\(Int(ask.frame.width)) wide)")
             // sending too, for the rest of the test
             level(3)?.state = .on
             await shot(ask, "agents-2-connect")
@@ -3094,6 +3105,19 @@ extension UITest {
             check(cell(log, 2, 0).hasPrefix("Sent “Lunch on Friday?” to pat@example.net") && cell(log, 2, 1).hasPrefix("Marked read"),
                   "and what its agent did, newest first")
             await shot(agents, "agents-6-window")
+            // Change opens the same form for a program let in, with what it may do now
+            hosts?.selectRowIndexes([0], byExtendingSelection: false)
+            press(find("agents.change", in: agents))
+            if let access = await waitWindow("agent.access", 10) {
+                let level = { (index: Int) -> NSButton? in self.find("agent.level.\(index)", in: access) }
+                check(level(0)?.state == .on && level(1)?.state == .on && level(2)?.state == .off && level(3)?.state == .on
+                      && access.frame.width < 700,
+                      "Change shows what the program may do, the levels wrapped (\(Int(access.frame.width)) wide)")
+                press(find("agent.cancel", in: access))
+                _ = await waitUntil { !access.isVisible }
+            } else {
+                check(false, "Change opens the access form")
+            }
             press(find("agents.undo", in: agents))
             check(await waitUntil(10) { cell(log, 2, 0).contains("taken back") }, "Undo takes the message back")
             NSApp.stopModal()
@@ -3107,6 +3131,56 @@ extension UITest {
             check(table?.numberOfRows == 0, "and the Outbox is empty")
             NSApp.stopModal()
             _ = await waitUntil { !outbox.isVisible }
+        }
+        try await agentUnsubscribes(agentOut)
+    }
+
+    /// the agent asks to leave two mailing lists, in one question, and hears the user's no
+    private func agentUnsubscribes(_ agentOut: URL) async throws {
+        _ = await waitUntil(10) { NSApp.modalWindow == nil }
+        try Data().write(to: URL(fileURLWithPath: agentOut.path + ".unsubscribe"))
+        let ask = await waitWindow("agent.unsubscribe", 30)
+        check(ask != nil, "the agent asks to unsubscribe from two mailing lists")
+        guard let ask else { return }
+        let label = { (id: String) -> String in (self.find(id, in: ask) as NSTextField?)?.stringValue ?? "" }
+        let heading = label("agent.heading")
+        check(heading.contains("My AI agent") && heading.contains("2"), "the question names the program and the number of lists (\(heading))")
+        let senders = [label("agent.list.0"), label("agent.list.1")]
+        check(Set(senders) == ["Weekly Digest <digest@list.example.com>", "Monthly Offers <offers@list.example.com>"]
+              && label("agent.list.0.target") == "→ list.example.com" && label("agent.list.1.target") == "→ list.example.com",
+              "one question lists both senders and where the requests go (\(senders))")
+        let unsubscribe: NSButton? = find("agent.unsubscribe", in: ask)
+        let dont: NSButton? = find("agent.dontUnsubscribe", in: ask)
+        check(unsubscribe?.isEnabled == false, "Unsubscribe waits a moment before it can be pressed")
+        // as the user comes to it: the app in front, the question key
+        onMain {
+            NSApp.activate()
+            ask.makeKeyAndOrderFront(nil)
+        }
+        _ = await waitUntil(5) { ask.isKeyWindow }
+        await pause(2)
+        await shot(ask, "agents-7-unsubscribe")
+        check(dont?.keyEquivalent == "\r" && unsubscribe?.keyEquivalent == "" && ask.defaultButtonCell === dont?.cell,
+              "Don’t Unsubscribe is the default, for Return and Esc")
+        // Return, posted to the queue as a key pressed is
+        let enter = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                     windowNumber: ask.windowNumber, context: nil, characters: "\r", charactersIgnoringModifiers: "\r",
+                                     isARepeat: false, keyCode: 36)
+        enter.map { event in onMain { NSApp.postEvent(event, atStart: false) } }
+        let said = await waitFor(20) { agentSaid(agentOut, "unsubscribe") as? [String: Any] }
+        check(said?["unsubscribed"] as? Bool == false, "Return answers no, and the agent learns the user said no")
+        command(.aiAgents)
+        if let agents = await waitWindow("agents", 10) {
+            let log: NSTableView? = find("agents.log", in: agents)
+            let cell = { (log?.view(atColumn: 2, row: 0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? "" }
+            _ = await waitUntil(10) { cell().hasPrefix("You did not unsubscribe from") }
+            let first = cell()
+            check(first.hasPrefix("You did not unsubscribe from") && first.contains("digest@list.example.com"),
+                  "and the AI Agents window says no list was asked (\(first))")
+            NSApp.stopModal()
+            _ = await waitUntil { !agents.isVisible }
+        } else {
+            check(false, "Tools > AI Agents opens")
         }
     }
 
