@@ -694,6 +694,10 @@ Plurals: the catalog's plurals follow pt-PT (pe-i18n gives the bundle that local
 - Rules "processam" messages; reserve "ordenar" for their display order.
 - Use "assinatura digital" for cryptographic signatures, "frase de acesso", "chave privada", "chave pública"
   and "impressão digital". Confirm every address before completing key verification.
+- Compose status describes protection "no envio", not completed delivery. Use "chave utilizável" when sending
+  needs a usable key, including expiry/revocation constraints. Encrypt with keys, not "para a chave".
+- Put complete key-state reasons after "Motivo:" and separate the next instruction. Recipient removal affects
+  the message address fields, not the Livro de Endereços. Keep polite third-person wording without "você".
 - "Credenciais de início de sessão" includes saved browser tokens. An unprotected export requires signing in
   again, not necessarily entering a password. Use "ID do cliente" and "segredo do cliente" for OAuth fields.
 
