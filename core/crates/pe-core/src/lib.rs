@@ -30,6 +30,7 @@ pub mod mailto;
 pub mod opening;
 pub mod otp;
 pub mod pictures;
+pub mod previews;
 pub mod protect;
 mod protect_out;
 mod reads;
@@ -237,6 +238,12 @@ pub enum Event {
     /// The view of a message is built: [`Core::message_view_result`]
     ViewReady {
         request: u64,
+    },
+    /// Something more came of the previews `request` of a message's attachment `attachment` (its description, a
+    /// page, a refusal, or the end): [`Core::preview_file`]
+    PreviewReady {
+        request: u64,
+        attachment: usize,
     },
     /// A message went into the Outbox, left it, or got a reason why it did not go
     OutboxChanged {
@@ -529,6 +536,8 @@ pub struct Core {
     list_loads: list_load::ListLoads,
     /// Drafts and attachments read off the window thread (reads.rs)
     reads: reads::Reads,
+    /// Previews of attachments: the render thread and what it drew (previews.rs)
+    previews: previews::Previews,
 }
 
 impl Core {
@@ -622,6 +631,7 @@ impl Core {
             connections: Default::default(),
             list_loads: Default::default(),
             reads: Default::default(),
+            previews: Default::default(),
         })
     }
 

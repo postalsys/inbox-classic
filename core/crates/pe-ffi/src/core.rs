@@ -260,6 +260,8 @@ impl Callback {
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
             Event::SignInAppChecked { request } => (PeEventKind::SignInAppChecked, 0, 0, *request),
             Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
+            // previews come to the apps with the reading pane that shows them (the plan's PR 2)
+            Event::PreviewReady { .. } => return,
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
             Event::NewMail {
                 account, folder, uid, ..
