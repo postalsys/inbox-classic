@@ -1,5 +1,11 @@
 # Inbox Classic
 
+> [!NOTE]
+> Development of Inbox Classic is entirely AI driven, so pull requests are not expected and will not be merged.
+>
+> - **Found a bug?** [Open an issue](https://github.com/postalsys/inbox-classic/issues) on GitHub.
+> - **Want a feature?** Suggest it, or vote for one already there, on the [feature board](https://features.inboxclassic.com).
+
 An email client for Windows, the Mac and Linux in the style of Outlook Express: folders on the left, messages on top, the reading pane below. The protocol and parsing code is Rust, ported from our own JavaScript libraries, the same on every platform; each platform's windows are a thin native layer on top of it: C++ and Win32 in the classic look on Windows, Swift and AppKit on the Mac, Rust and GTK 4 on Linux. Homepage: https://inboxclassic.com
 
 - Any IMAP and SMTP account, its servers looked up from the address; Gmail, Google Workspace, Outlook.com and Microsoft 365 add with Sign in with Google or Microsoft, so the password is typed on their page, never into the app
