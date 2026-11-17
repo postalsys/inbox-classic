@@ -435,8 +435,7 @@ day-sunday = søndag
 ## AI agents
 
 agent-level-read = Læse mail: mapper, meddelelseslisten, søgning og meddelelser
-# review: changed
-agent-level-organize = Organisere mail: ændre læst/ulæst og flag, markere som uønsket, flytte og slette til Slettet post
+agent-level-organize = Organisere mail: ændre læst/ulæst-status og flag, håndtere uønsket mail, flytte og arkivere meddelelser, oprette mapper, slette ved at flytte til Slettet post og afmelde mailinglister med din godkendelse
 agent-level-drafts = Skrive kladder, som du selv sender
 agent-level-send = Sende mail, men kun efter din godkendelse af hver meddelelse
 agent-connect-title = { $program } vil bruge din mail
@@ -485,12 +484,9 @@ agent-log-composed = Åbnede »{ $subject }« i en ny meddelelse, som du kan gø
 agent-log-refused = Du sendte ikke »{ $subject }«
 agent-log-sent = Satte »{ $subject }« i kø til afsendelse til { $to }
 agent-log-draft = Gemte kladden »{ $subject }«
-# review: new
 agent-log-draft-replaced = Erstattede kladden »{ $subject }«
-# review: new
 agent-log-draft-discarded = Kasserede kladden »{ $subject }«
-# review: new
-agent-draft-note = { $program }, en AI-agent, har skrevet denne kladde. Kontrollér modtagerne og teksten, før du sender den.
+agent-draft-note = AI-agenten { $program } har skrevet denne kladde. Kontrollér modtagerne og teksten, før du sender den.
 agent-log-read = Markerede »{ $subject }« som læst
 agent-log-unread = Markerede »{ $subject }« som ulæst
 agent-log-flagged = Satte flag på »{ $subject }«
@@ -502,19 +498,15 @@ agent-log-not-junk = Markerede »{ $subject }« som ikke uønsket
 agent-log-archived = Arkiverede »{ $subject }«
 agent-log-folder = Oprettede mappen »{ $name }«
 agent-log-unsubscribed = Du godkendte afmeldingsanmodningen. Meddelelse: »{ $subject }«
-# review: new
-agent-log-unsubscribe-failed = Kunne ikke afmelde listen for »{ $subject }«: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Du afmeldte ikke { $senders }
-# review: new
+agent-log-unsubscribe-failed = Afmeldingen mislykkedes. Meddelelse: »{ $subject }«. Årsag: { $reason }
+agent-log-unsubscribe-refused = Du godkendte ikke afmeldingen. Afsendere: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } vil afmelde dig fra en mailingliste
    *[other] { $program } vil afmelde dig fra { $count } mailinglister
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic beder listen herunder om at holde op med at sende til dig, på den måde med ét klik, som den tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
-   *[other] Inbox Classic beder hver liste herunder om at holde op med at sende til dig, på den måde med ét klik, som listen tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
+    [1] Inbox Classic beder mailinglisten nedenfor om at stoppe med at sende dig meddelelser. Det sker via listens mulighed for afmelding med ét klik. Der sendes ikke andet. Dine eksisterende meddelelser ændres eller flyttes ikke.
+   *[other] Inbox Classic beder hver mailingliste nedenfor om at stoppe med at sende dig meddelelser. Det sker via den enkelte listes mulighed for afmelding med ét klik. Der sendes ikke andet. Dine eksisterende meddelelser ændres eller flyttes ikke.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

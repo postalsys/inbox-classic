@@ -409,6 +409,11 @@ Outlook Express).
 - Help task titles use the imperative, »Signer og krypter en meddelelse«. Status colors match the reading-security
   help (Orange); per-recipient icons differ across platforms. Recipient removal affects message fields, not contacts.
 
+- Agent controls retain "Afmeld" / "Afmeld ikke" (Windows A/I). Use "afmeldingsanmodning" for a request,
+  not a completed cancellation. Logs identify the subject with "Meddelelse:" and sender addresses with "Afsendere:".
+- Keep "kassere en kladde" and explain permanent removal of agent-owned drafts. Saving, including autosave,
+  ends agent access; opening alone does not. "Signaturtekst" is the optional account footer, distinct from "digital signatur".
+
 ### Hrvatski (hr)
 
 Terms: Ulazna pošta; Izlazna pošta; Poslane stavke; Izbrisane stavke; Skice; Neželjena e-pošta; poruka; mapa; račun;

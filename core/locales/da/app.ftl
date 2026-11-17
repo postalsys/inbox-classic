@@ -437,7 +437,6 @@ ui-browser-sign-in-server = { $server } (login via browser)
 ui-dont-allow = Tillad ikke
 ui-allow = &Tillad
 ui-dont-send = Send ikke
-# review: new
 ui-dont-unsubscribe = Afmeld ikke
 ui-edit-first = &Rediger først
 ui-new-address = Ny adresse
