@@ -1148,7 +1148,7 @@ ui-trusted-senders-empty = Nu a fost adăugat încă niciun expeditor de încred
 # review: new
 ui-search-encrypted = Căutare în mesajele &criptate
 # review: new
-ui-search-encrypted-note = Mesajele criptate pe care le deschideți sunt adăugate în indexul de căutare de pe acest computer, ca să le puteți găsi cuvintele. Indexul nu este criptat, iar agenții AI nu caută niciodată în el. Dezactivați opțiunea pentru a le elimina din index.
+ui-search-encrypted-note = Mesajele criptate sunt decriptate pe acest computer după ce sunt descărcate sau deschise, ca să le puteți găsi cuvintele, iar lista să le afișeze subiectul propriu. Indexul nu este criptat, iar agenții AI nu caută niciodată în el. Dezactivați opțiunea pentru a le elimina din index.
 # review: new
 ui-pgp-keyserver = Căutare chei &pe keys.openpgp.org
 # review: new

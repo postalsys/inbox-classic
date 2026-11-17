@@ -1157,7 +1157,7 @@ ui-trusted-senders-empty = Dodan še ni noben zaupanja vreden pošiljatelj.
 # review: new
 ui-search-encrypted = Išči v &šifriranih sporočilih
 # review: new
-ui-search-encrypted-note = Šifrirana sporočila, ki jih odprete, se dodajo v iskalni indeks v tem računalniku, da je mogoče najti njihove besede. Indeks ni šifriran in agenti UI v njem nikoli ne iščejo. Izklopite to, da jih odstranite iz indeksa.
+ui-search-encrypted-note = Šifrirana sporočila se v tem računalniku dešifrirajo, ko so prenesena ali odprta, da je mogoče najti njihove besede in seznam prikaže njihovo pravo zadevo. Indeks ni šifriran in agenti UI v njem nikoli ne iščejo. Izklopite to, da jih odstranite iz indeksa.
 # review: new
 ui-pgp-keyserver = &Išči ključe na keys.openpgp.org
 # review: new

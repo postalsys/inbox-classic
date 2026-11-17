@@ -1143,7 +1143,7 @@ ui-trusted-senders-empty = Vēl nav pievienots neviens uzticams sūtītājs.
 # review: new
 ui-search-encrypted = Meklēt &šifrētos ziņojumos
 # review: new
-ui-search-encrypted-note = Atvērtie šifrētie ziņojumi tiek pievienoti šī datora meklēšanas indeksam, lai to vārdus varētu atrast. Indekss nav šifrēts, un MI aģenti tajā nekad nemeklē. Izslēdziet šo, lai tos noņemtu no indeksa.
+ui-search-encrypted-note = Šifrētie ziņojumi šajā datorā tiek atšifrēti pēc lejupielādes vai atvēršanas, lai to vārdus varētu atrast un sarakstā būtu redzams to īstais temats. Indekss nav šifrēts, un MI aģenti tajā nekad nemeklē. Izslēdziet šo, lai tos noņemtu no indeksa.
 # review: new
 ui-pgp-keyserver = &Meklēt atslēgas vietnē keys.openpgp.org
 # review: new

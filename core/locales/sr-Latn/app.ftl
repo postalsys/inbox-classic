@@ -1149,7 +1149,7 @@ ui-trusted-senders-empty = Još nije dodat nijedan pouzdani pošiljalac.
 # review: new
 ui-search-encrypted = Pretraži &šifrovane poruke
 # review: new
-ui-search-encrypted-note = Šifrovane poruke koje otvorite dodaju se u indeks pretrage na ovom računaru kako bi se njihove reči mogle pronaći. Indeks nije šifrovan i AI agenti ga nikada ne pretražuju. Isključite ovo da biste ih uklonili iz indeksa.
+ui-search-encrypted-note = Šifrovane poruke se dešifruju na ovom računaru kada se preuzmu ili otvore, kako bi se njihove reči mogle pronaći, a lista prikazala njihovu pravu temu. Indeks nije šifrovan i AI agenti ga nikada ne pretražuju. Isključite ovo da biste ih uklonili iz indeksa.
 # review: new
 ui-pgp-keyserver = &Traži ključeve na keys.openpgp.org
 # review: new

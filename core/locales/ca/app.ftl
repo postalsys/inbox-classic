@@ -1138,7 +1138,7 @@ ui-trusted-senders-empty = Encara no s’ha afegit cap remitent de confiança.
 # review: new
 ui-search-encrypted = Cerca als missatges &xifrats
 # review: new
-ui-search-encrypted-note = Els missatges xifrats que obriu s’afegeixen a l’índex de cerca d’aquest ordinador, perquè se’n puguin trobar les paraules. L’índex no està xifrat i els agents d’IA no hi cerquen mai. Desactiveu-ho per treure’ls de l’índex.
+ui-search-encrypted-note = Els missatges xifrats es desxifren en aquest ordinador un cop baixats o oberts, perquè se’n puguin trobar les paraules i la llista en mostri l’assumpte propi. L’índex no està xifrat i els agents d’IA no hi cerquen mai. Desactiveu-ho per treure’ls de l’índex.
 # review: new
 ui-pgp-keyserver = C&erca claus a keys.openpgp.org
 # review: new

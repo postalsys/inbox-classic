@@ -1142,7 +1142,7 @@ ui-trusted-senders-empty = Zatím nebyli přidáni žádní důvěryhodní odes�
 # review: new
 ui-search-encrypted = Hledat v &šifrovaných zprávách
 # review: new
-ui-search-encrypted-note = Šifrované zprávy, které otevřete, se přidávají do indexu vyhledávání v tomto počítači, aby bylo možné najít jejich slova. Index není šifrovaný a agenti AI v něm nikdy nehledají. Vypnutím je z indexu odeberete.
+ui-search-encrypted-note = Šifrované zprávy se v tomto počítači dešifrují, jakmile se stáhnou nebo otevřou, aby bylo možné najít jejich slova a seznam ukázal jejich vlastní předmět. Index není šifrovaný a agenti AI v něm nikdy nehledají. Vypnutím je z indexu odeberete.
 # review: new
 ui-pgp-keyserver = &Hledat klíče na keys.openpgp.org
 # review: new

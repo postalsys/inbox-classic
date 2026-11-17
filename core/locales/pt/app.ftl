@@ -1144,7 +1144,7 @@ ui-trusted-senders-empty = Ainda não foram adicionados remetentes fidedignos.
 # review: new
 ui-search-encrypted = &Pesquisar em mensagens encriptadas
 # review: new
-ui-search-encrypted-note = As mensagens encriptadas que abrir são adicionadas ao índice de pesquisa deste computador, para que as suas palavras possam ser encontradas. O índice não está encriptado e os agentes de IA nunca pesquisam nele. Desative esta opção para as remover do índice.
+ui-search-encrypted-note = As mensagens encriptadas são desencriptadas neste computador depois de transferidas ou abertas, para que as suas palavras possam ser encontradas e a lista mostre o assunto delas. O índice não está encriptado e os agentes de IA nunca pesquisam nele. Desative esta opção para as remover do índice.
 # review: new
 ui-pgp-keyserver = Procurar &chaves em keys.openpgp.org
 # review: new

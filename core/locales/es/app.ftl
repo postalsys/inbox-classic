@@ -622,7 +622,7 @@ ui-trusted-senders-empty = Aún no hay remitentes de confianza.
 # review: new
 ui-search-encrypted = &Buscar en mensajes cifrados
 # review: new
-ui-search-encrypted-note = Los mensajes cifrados que abra se añaden al índice de búsqueda de este equipo, para que se puedan encontrar sus palabras. El índice no está cifrado y los agentes de IA nunca buscan en él. Desactívelo para quitarlos del índice.
+ui-search-encrypted-note = Los mensajes cifrados se descifran en este equipo una vez descargados o abiertos, para que se puedan encontrar sus palabras y la lista muestre su propio asunto. El índice no está cifrado y los agentes de IA nunca buscan en él. Desactívelo para quitarlos del índice.
 # review: new
 ui-pgp-keyserver = Buscar claves &en keys.openpgp.org
 # review: new

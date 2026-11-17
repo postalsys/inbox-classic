@@ -622,7 +622,7 @@ ui-trusted-senders-empty = Usaldusväärseid saatjaid pole veel lisatud.
 # review: new
 ui-search-encrypted = Otsi &krüptitud kirjadest
 # review: new
-ui-search-encrypted-note = Avatud krüptitud kirjad lisatakse selle arvuti otsinguindeksisse, et nende sõnu saaks leida. Indeks ei ole krüptitud ja tehisintellekti agendid ei otsi sellest kunagi. Lülita see välja, et need indeksist eemaldada.
+ui-search-encrypted-note = Krüptitud kirjad dekrüptitakse selles arvutis pärast allalaadimist või avamist, et nende sõnu saaks leida ja loend näitaks nende enda teemat. Indeks ei ole krüptitud ja tehisintellekti agendid ei otsi sellest kunagi. Lülitage see välja, et need indeksist eemaldada.
 # review: new
 ui-pgp-keyserver = &Otsi võtmeid serverist keys.openpgp.org
 # review: new

@@ -1138,7 +1138,7 @@ ui-trusted-senders-empty = Henüz güvenilen gönderen eklenmedi.
 # review: new
 ui-search-encrypted = Şifreli iletilerde &ara
 # review: new
-ui-search-encrypted-note = Açtığınız şifreli iletiler, sözcükleri bulunabilsin diye bu bilgisayardaki arama dizinine eklenir. Dizin şifreli değildir ve yapay zeka aracıları dizinde hiçbir zaman arama yapmaz. Dizinden kaldırmak için bunu kapatın.
+ui-search-encrypted-note = Şifreli iletiler indirildikten veya açıldıktan sonra bu bilgisayarda çözülür; böylece sözcükleri bulunabilir ve liste kendi konularını gösterir. Dizin şifreli değildir ve yapay zeka aracıları dizinde hiçbir zaman arama yapmaz. Dizinden kaldırmak için bunu kapatın.
 # review: new
 ui-pgp-keyserver = A&nahtarları keys.openpgp.org üzerinde ara
 # review: new

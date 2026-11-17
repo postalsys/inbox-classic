@@ -1137,7 +1137,7 @@ ui-trusted-senders-empty = Még nincs megbízható feladó.
 # review: new
 ui-search-encrypted = Keresés a &titkosított üzenetekben
 # review: new
-ui-search-encrypted-note = A megnyitott titkosított üzenetek bekerülnek a számítógép keresési indexébe, így a szavaik megtalálhatók. Az index nincs titkosítva, és az MI-ügynökök soha nem keresnek benne. Kapcsolja ki, hogy eltávolítsa őket az indexből.
+ui-search-encrypted-note = A titkosított üzeneteket a letöltésük vagy megnyitásuk után ez a számítógép visszafejti, így a szavaik megtalálhatók, a lista pedig a saját tárgyukat mutatja. Az index nincs titkosítva, és az MI-ügynökök soha nem keresnek benne. Kapcsolja ki, hogy eltávolítsa őket az indexből.
 # review: new
 ui-pgp-keyserver = Kulcsok keresése a keys.openpgp.org &oldalon
 # review: new

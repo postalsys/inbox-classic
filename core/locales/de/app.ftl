@@ -622,7 +622,7 @@ ui-trusted-senders-empty = Es wurden noch keine vertrauenswürdigen Absender hin
 # review: new
 ui-search-encrypted = In verschlüsselten Nachrichten &suchen
 # review: new
-ui-search-encrypted-note = Verschlüsselte Nachrichten, die Sie öffnen, werden in den Suchindex auf diesem Computer aufgenommen, damit ihre Wörter gefunden werden. Der Index ist nicht verschlüsselt, und KI-Agenten durchsuchen ihn nie. Schalten Sie dies aus, um sie aus dem Index zu entfernen.
+ui-search-encrypted-note = Verschlüsselte Nachrichten werden auf diesem Computer entschlüsselt, sobald sie heruntergeladen oder geöffnet sind, damit ihre Wörter gefunden werden und die Liste ihren eigenen Betreff zeigt. Der Index ist nicht verschlüsselt, und KI-Agenten durchsuchen ihn nie. Schalten Sie dies aus, um sie aus dem Index zu entfernen.
 # review: new
 ui-pgp-keyserver = Schlüssel &auf keys.openpgp.org suchen
 # review: new

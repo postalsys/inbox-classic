@@ -1155,7 +1155,7 @@ ui-trusted-senders-empty = Nie dodano jeszcze zaufanych nadawców.
 # review: new
 ui-search-encrypted = &Szukaj w zaszyfrowanych wiadomościach
 # review: new
-ui-search-encrypted-note = Otwierane zaszyfrowane wiadomości są dodawane do indeksu wyszukiwania na tym komputerze, aby można było znaleźć ich słowa. Indeks nie jest zaszyfrowany, a agenci AI nigdy go nie przeszukują. Wyłącz tę opcję, aby usunąć je z indeksu.
+ui-search-encrypted-note = Zaszyfrowane wiadomości są odszyfrowywane na tym komputerze po pobraniu lub otwarciu, aby można było znaleźć ich słowa, a lista pokazywała ich własny temat. Indeks nie jest zaszyfrowany, a agenci AI nigdy go nie przeszukują. Wyłącz tę opcję, aby usunąć je z indeksu.
 # review: new
 ui-pgp-keyserver = Szukaj &kluczy na keys.openpgp.org
 # review: new

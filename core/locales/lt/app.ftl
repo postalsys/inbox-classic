@@ -1144,7 +1144,7 @@ ui-trusted-senders-empty = Patikimų siuntėjų dar nepridėta.
 # review: new
 ui-search-encrypted = Ieškoti &užšifruotuose laiškuose
 # review: new
-ui-search-encrypted-note = Atidaryti užšifruoti laiškai įtraukiami į šio kompiuterio paieškos indeksą, kad būtų galima rasti jų žodžius. Indeksas nėra šifruotas, o DI agentai jame niekada neieško. Išjunkite, kad jie būtų pašalinti iš indekso.
+ui-search-encrypted-note = Užšifruoti laiškai šiame kompiuteryje iššifruojami juos atsisiuntus ar atidarius, kad būtų galima rasti jų žodžius, o sąraše būtų rodoma jų tikroji tema. Indeksas nėra šifruotas, o DI agentai jame niekada neieško. Išjunkite, kad jie būtų pašalinti iš indekso.
 # review: new
 ui-pgp-keyserver = I&eškoti raktų keys.openpgp.org
 # review: new

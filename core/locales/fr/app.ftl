@@ -623,7 +623,7 @@ ui-trusted-senders-empty = Aucun expéditeur de confiance n'a encore été ajout
 # review: new
 ui-search-encrypted = Rechercher dans les messages &chiffrés
 # review: new
-ui-search-encrypted-note = Les messages chiffrés que vous ouvrez sont ajoutés à l'index de recherche de cet ordinateur, pour que leurs mots puissent être trouvés. L'index n'est pas chiffré et les agents d'IA n'y cherchent jamais. Désactivez cette option pour les retirer de l'index.
+ui-search-encrypted-note = Les messages chiffrés sont déchiffrés sur cet ordinateur une fois téléchargés ou ouverts, pour que leurs mots puissent être trouvés et que la liste affiche leur propre objet. L'index n'est pas chiffré et les agents d'IA n'y cherchent jamais. Désactivez cette option pour les retirer de l'index.
 # review: new
 ui-pgp-keyserver = Rechercher les clés &sur keys.openpgp.org
 # review: new

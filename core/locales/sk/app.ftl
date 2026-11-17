@@ -1146,7 +1146,7 @@ ui-trusted-senders-empty = Zatiaľ neboli pridaní žiadni dôveryhodní odosiel
 # review: new
 ui-search-encrypted = Hľadať v &šifrovaných správach
 # review: new
-ui-search-encrypted-note = Šifrované správy, ktoré otvoríte, sa pridávajú do indexu vyhľadávania v tomto počítači, aby bolo možné nájsť ich slová. Index nie je šifrovaný a agenti AI v ňom nikdy nevyhľadávajú. Vypnutím ich z indexu odstránite.
+ui-search-encrypted-note = Šifrované správy sa v tomto počítači dešifrujú, keď sa stiahnu alebo otvoria, aby bolo možné nájsť ich slová a zoznam ukázal ich vlastný predmet. Index nie je šifrovaný a agenti AI v ňom nikdy nevyhľadávajú. Vypnutím ich z indexu odstránite.
 # review: new
 ui-pgp-keyserver = &Hľadať kľúče na keys.openpgp.org
 # review: new

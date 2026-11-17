@@ -1138,7 +1138,7 @@ ui-trusted-senders-empty = Er zijn nog geen vertrouwde afzenders toegevoegd.
 # review: new
 ui-search-encrypted = &Zoeken in versleutelde berichten
 # review: new
-ui-search-encrypted-note = Versleutelde berichten die je opent, worden opgenomen in de zoekindex op deze computer, zodat hun woorden kunnen worden gevonden. De index is niet versleuteld en AI-agents zoeken er nooit in. Zet dit uit om ze uit de index te verwijderen.
+ui-search-encrypted-note = Versleutelde berichten worden op deze computer ontsleuteld zodra ze zijn gedownload of geopend, zodat hun woorden kunnen worden gevonden en de lijst hun eigen onderwerp toont. De index is niet versleuteld en AI-agents zoeken er nooit in. Zet dit uit om ze uit de index te verwijderen.
 # review: new
 ui-pgp-keyserver = &Sleutels zoeken op keys.openpgp.org
 # review: new

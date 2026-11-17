@@ -1139,7 +1139,7 @@ ui-trusted-senders-empty = Ingen klarerte avsendere er lagt til ennå.
 # review: new
 ui-search-encrypted = &Søk i krypterte meldinger
 # review: new
-ui-search-encrypted-note = Krypterte meldinger du åpner, legges til i søkeindeksen på denne datamaskinen, slik at ordene i dem kan finnes. Indeksen er ikke kryptert, og KI-agenter søker aldri i den. Slå av dette for å fjerne dem fra indeksen.
+ui-search-encrypted-note = Krypterte meldinger dekrypteres på denne datamaskinen når de er lastet ned eller åpnet, slik at ordene i dem kan finnes og listen viser deres eget emne. Indeksen er ikke kryptert, og KI-agenter søker aldri i den. Slå av dette for å fjerne dem fra indeksen.
 # review: new
 ui-pgp-keyserver = Søk &etter nøkler på keys.openpgp.org
 # review: new
