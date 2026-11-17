@@ -139,6 +139,12 @@ the localized combinations beside them.
 - A key-state reason can be a full recovery instruction. Put it after "Põhjus:" and separate the next instruction;
   do not embed it in parentheses. Keep polite plural wording in explanations and confirmation questions.
 
+Estonian agent unsubscribe additions:
+- Use "meililist" and "tellimusest loobumine" with the existing "Loobu tellimusest" action. A "loobumistaotlus"
+  requests removal; it does not guarantee future mail will stop. "Lugemisolek" is the read/unread state of a message.
+  The account footer is "allkirjatekst", distinct from "digiallkiri". Keep polite plural explanations and concise
+  imperative buttons; explain the per-program quota over the preceding 24 hours, counting approvals.
+
 Estonian settings review (round 2):
 - New-mail settings heading: "Uued kirjad". A notification is a "teatis"; "teavita" remains the action.
 - Use "Kettaruumi piir konto kohta" for the downloaded-message storage limit, not a possible network quota.

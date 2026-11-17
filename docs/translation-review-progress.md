@@ -5,13 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Estonian agent unsubscribe review, then French and the remaining 24 languages.**
-  Agent additions complete: de, es. Each has eight entries and both affected help topics reviewed.
+- **Next: French agent unsubscribe review, then the remaining 24 languages.**
+  Agent additions complete: de, es, et. Each has eight entries and both affected help topics reviewed.
   The source-only preview/MCP import adds 280 entries, changes 28 source entries and affects 56 help topics.
   Previously reviewed wording is retained where English changed, with exact source candidates saved for adaptation.
+  Additional uncommitted source work is recorded separately: 3 new English entries, with translation drafts still awaited.
 - Current scope: 34,148 catalog entries and 1,352 help topics.
-  Completed: 21,268 entries and 788 full topics; pending: 12,880 entries and 564 topics.
-  Historical catalog improvements: 3,782. Importing drafts earns no review credit.
+  Completed: 21,276 entries and 790 full topics; pending: 12,872 entries and 562 topics.
+  Historical catalog improvements: 3,784. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
@@ -2315,3 +2316,11 @@ Reviewed eight strings and four marked help blocks across two topics. Three cata
 Spanish static checker has1,453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 IDs,3 changed values and6 help wording lines; every other byte retained. Help tags/attributes, controls, platform branches and literal keys unchanged. All platform label joins inspected; Windows C/N are distinct, plain Mac/Linux labels retained. Global reconciliation:21,306 unmarked entries,10,667 help lines and14 verified baseline pairs; latest hashes match. All28 full inventories and since-start1,145 entries/269 passages reconcile. HTML regenerated; git diff --check passes. No test suites or build run.
 
 Estonian agent unsubscribe review, then French and the remaining 24 languages. PDF recovery instructions remain pending actual platform setting callers.
+
+## Estonian agent unsubscribe review
+
+Reviewed eight strings and four marked help blocks across two topics. Two catalog values and seven help lines, including the new heading, were improved. Six good catalog values remain unchanged. Help now describes requests rather than guaranteed delivery changes, the per-program 24-hour limit, and the optional account signature text. Every earlier unmarked passage is unchanged. The wider audit observed three new uncommitted English draft-related IDs in PostalExpress-mcp2; no translated drafts yet. Their exact snapshot is recorded separately and excluded from checkout totals.
+
+Estonian static checker has1,453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 IDs,2 changed values and7 help wording lines; every other byte retained. Help tags/attributes, controls, platform branches and literal keys unchanged. All platform label joins inspected; Windows L/R are distinct, plain Mac/Linux labels retained. Global reconciliation:21,314 unmarked entries,10,675 help lines and14 verified baseline pairs; latest hashes match. All28 full inventories and since-start1,137 entries/265 passages reconcile. HTML regenerated; git diff --check passes. No test suites or build run.
+
+French agent unsubscribe review, then the remaining 24 languages. PDF recovery instructions remain pending actual platform setting callers.

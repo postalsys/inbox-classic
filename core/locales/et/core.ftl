@@ -401,8 +401,7 @@ day-sunday = pühapäeval
 ## AI agents
 
 agent-level-read = Lugeda e-posti: vaadata kaustu ja kirju ning kasutada otsingut
-# review: changed
-agent-level-organize = Hallata e-posti: märkida kirju loetuks või lugemata kirjadeks, lisada lippe, hallata rämpsposti, teisaldada kirju ja viia neid kausta Kustutatud kirjad
+agent-level-organize = Hallata e-posti: muuta kirjade lugemisolekut ja lippe, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta Kustutatud kirjad, luua kaustu ning teie nõusolekul loobuda meililistide tellimustest
 agent-level-drafts = Koostada mustandeid, mille saadate ise
 agent-level-send = Saata kirju, küsides iga kirja jaoks teie nõusolekut
 agent-connect-title = { $program } soovib kasutada teie e-posti
@@ -460,19 +459,15 @@ agent-log-not-junk = „{ $subject }“ märgiti tavapostiks
 agent-log-archived = „{ $subject }“ arhiveeriti
 agent-log-folder = Loodi kaust „{ $name }“
 agent-log-unsubscribed = Loobuti kirja „{ $subject }“ saatnud meililisti tellimusest
-# review: new
 agent-log-unsubscribe-failed = Kirja „{ $subject }“ saatnud meililisti tellimusest ei õnnestunud loobuda: { $reason }
-# review: new
 agent-log-unsubscribe-refused = Te ei loobunud tellimusest: { $senders }
-# review: new
 agent-unsubscribe-title = { $count ->
     [one] { $program } soovib teie nimel loobuda ühe meililisti tellimusest
    *[other] { $program } soovib teie nimel loobuda { $count } meililisti tellimusest
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic palub allolevalt meililistilt lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.
-   *[other] Inbox Classic palub igal alloleval meililistil lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.
+    [1] Inbox Classic saadab allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
+   *[other] Inbox Classic saadab igale allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
 }
 
 ## Keys

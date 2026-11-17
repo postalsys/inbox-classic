@@ -92,9 +92,7 @@ win-never-written-to = Pole kunagi kirjutanud
 win-book-find-label = Sisestage nimi või e-posti aadress:
 win-send = &Saada
 win-dont-send = Ä&ra saada
-# review: new
 win-unsubscribe = &Loobu tellimusest
-# review: new
 win-dont-unsubscribe = Ä&ra loobu tellimusest
 win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide tegevusajalooga? Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.
