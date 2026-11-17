@@ -440,8 +440,7 @@ day-sunday = neděle
 ## AI agents
 
 agent-level-read = Číst poštu: prohlížet složky a zprávy a vyhledávat v nich
-# review: changed
-agent-level-organize = Uspořádat poštu: měnit stav přečtení a příznaky, označovat nevyžádanou poštu, přesouvat zprávy a odstraňovat je do složky Odstraněná pošta
+agent-level-organize = Uspořádat poštu: měnit stav přečtení a příznaky, spravovat nevyžádanou poštu, přesouvat a archivovat zprávy, vytvářet složky, odstraňovat zprávy přesunem do složky Odstraněná pošta a s vaším souhlasem odhlašovat odběr zpráv
 agent-level-drafts = Psát koncepty, které odešlete vy
 agent-level-send = Odesílat poštu, každou zprávu až po vašem souhlasu
 agent-connect-title = { $program } chce používat vaši poštu
@@ -489,12 +488,9 @@ agent-log-composed = Otevřena nová zpráva „{ $subject }“, abyste ji mohli
 agent-log-refused = Odeslání zprávy „{ $subject }“ nebylo schváleno
 agent-log-sent = Zpráva „{ $subject }“ zařazena k odeslání. Příjemci: { $to }
 agent-log-draft = Uložen koncept „{ $subject }“
-# review: new
 agent-log-draft-replaced = Nahrazen koncept „{ $subject }“
-# review: new
 agent-log-draft-discarded = Zahozen koncept „{ $subject }“
-# review: new
-agent-draft-note = { $program }, agent AI, napsal tento koncept. Před odesláním zkontrolujte příjemce a text.
+agent-draft-note = Tento koncept napsal agent AI { $program }. Před odesláním zkontrolujte příjemce a text.
 agent-log-read = Označeno jako přečtené: „{ $subject }“
 agent-log-unread = Označeno jako nepřečtené: „{ $subject }“
 agent-log-flagged = Označeno příznakem: „{ $subject }“
@@ -506,20 +502,16 @@ agent-log-not-junk = Označeno jako vyžádané: „{ $subject }“
 agent-log-archived = Archivováno: „{ $subject }“
 agent-log-folder = Vytvořena složka „{ $name }“
 agent-log-unsubscribed = Schválili jste žádost o odhlášení odběru. Zpráva: „{ $subject }“
-# review: new
-agent-log-unsubscribe-failed = Odhlášení z konference zprávy „{ $subject }“ se nezdařilo: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Neodhlásili jste se z odběru: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Odhlášení odběru se nezdařilo. Zpráva: „{ $subject }“. Důvod: { $reason }
+agent-log-unsubscribe-refused = Odhlášení odběru jste neschválili. Odesílatelé: { $senders }
 agent-unsubscribe-title = { $count ->
-    [one] { $program } vás chce odhlásit z konference
-    [few] { $program } vás chce odhlásit z { $count } konferencí
-   *[other] { $program } vás chce odhlásit z { $count } konferencí
+    [one] { $program } chce odhlásit váš odběr zpráv
+    [few] { $program } chce odhlásit vaše { $count } odběry zpráv
+   *[other] { $program } chce odhlásit vašich { $count } odběrů zpráv
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic požádá konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
-   *[other] Inbox Classic požádá každou konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který konference nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
+    [1] Inbox Classic odešle níže uvedenému rozesílacímu seznamu žádost o ukončení zasílání zpráv. Použije k tomu možnost odhlášení jedním kliknutím, kterou seznam nabízí. Nic dalšího se neodešle. Stávající zprávy se nezmění ani nepřesunou.
+   *[other] Inbox Classic odešle každému z níže uvedených rozesílacích seznamů žádost o ukončení zasílání zpráv. Použije k tomu možnost odhlášení jedním kliknutím, kterou daný seznam nabízí. Nic dalšího se neodešle. Stávající zprávy se nezmění ani nepřesunou.
 }
 
 ## Keys

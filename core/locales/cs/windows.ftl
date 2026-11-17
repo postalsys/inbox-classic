@@ -96,9 +96,7 @@ win-never-written-to = Nikdy jste nepsali
 win-book-find-label = Zadejte jméno nebo e-mailovou adresu:
 win-send = &Odeslat
 win-dont-send = &Neodesílat
-# review: new
 win-unsubscribe = &Odhlásit odběr
-# review: new
 win-dont-unsubscribe = &Neodhlašovat
 win-forget-program-ask = Odebrat tento program, jeho oprávnění a historii činnosti jeho agentů? Při příštím připojení budete znovu požádáni o svolení.
 win-clear-log-ask = Vymazat historii činnosti agentů? Změny provedené agenty se tím nevrátí zpět.

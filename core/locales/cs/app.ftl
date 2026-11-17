@@ -434,7 +434,6 @@ ui-browser-sign-in-server = { $server } (přihlášení v prohlížeči)
 ui-dont-allow = Nepovolit
 ui-allow = &Povolit
 ui-dont-send = Neodesílat
-# review: new
 ui-dont-unsubscribe = Neodhlašovat
 ui-edit-first = Nejdřív &upravit
 ui-new-address = Nová adresa

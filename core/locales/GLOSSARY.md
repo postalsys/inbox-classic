@@ -373,6 +373,13 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
   „Použít nový klíč“ (Alt+N) in the recipient-key dialog. Unencrypted sending requires removal of inherited
   text/images/attachments. Use „Oranžová“ consistently with the reading-security help.
 
+- Agent consent uses "odhlásit odběr zpráv" and "rozesílací seznam" for mailing lists, including newsletters.
+  Controls retain "Odhlásit odběr" / "Neodhlašovat" (Windows O/N). A request does not guarantee that mail stops.
+- Counted subscription titles use "váš odběr", "vaše 2 odběry" and "vašich 5 odběrů". Failure logs label the
+  subject as "Zpráva:" and refusal logs use "Odesílatelé:" before the address list; placeholders stay uninflected.
+- Keep "zahodit koncept" for discarding an agent-owned draft and explain permanent removal in help. Saving,
+  including autosave, ends agent access; opening alone does not. "Textový podpis" distinguishes the account footer.
+
 ### Dansk (da)
 
 Terms: Indbakke; Udbakke; Sendt post; Slettet post; Kladder; Uønsket mail; meddelelse ("mail" as the mass noun);
