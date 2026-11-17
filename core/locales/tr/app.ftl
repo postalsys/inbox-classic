@@ -1160,6 +1160,10 @@ ui-row-flagged = Bayraklı
 # review: new
 ui-row-attachments = Ekleri var
 # review: new
+ui-row-encrypted = Şifreli
+# review: new
+ui-row-signed = İmzalı
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } ileti
    *[other] { $count } ileti

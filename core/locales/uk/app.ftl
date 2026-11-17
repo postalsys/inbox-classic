@@ -1173,6 +1173,10 @@ ui-row-flagged = З прапорцем
 # review: new
 ui-row-attachments = Має вкладення
 # review: new
+ui-row-encrypted = Зашифровано
+# review: new
+ui-row-signed = Підписано
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } повідомлення
     [few] { $count } повідомлення

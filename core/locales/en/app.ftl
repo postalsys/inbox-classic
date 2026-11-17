@@ -607,6 +607,8 @@ ui-columns-note = The window is wide enough for the column layout. You can chang
 ui-row-unread = Unread
 ui-row-flagged = Flagged
 ui-row-attachments = Has attachments
+ui-row-encrypted = Encrypted
+ui-row-signed = Signed
 ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages

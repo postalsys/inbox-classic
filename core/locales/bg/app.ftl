@@ -1161,6 +1161,10 @@ ui-row-flagged = С флаг
 # review: new
 ui-row-attachments = Има прикачени файлове
 # review: new
+ui-row-encrypted = Шифровано
+# review: new
+ui-row-signed = Подписано
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } съобщение
    *[other] { $count } съобщения

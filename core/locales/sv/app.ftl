@@ -1160,6 +1160,10 @@ ui-row-flagged = Flaggat
 # review: new
 ui-row-attachments = Har bilagor
 # review: new
+ui-row-encrypted = Krypterat
+# review: new
+ui-row-signed = Signerat
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } meddelande
    *[other] { $count } meddelanden

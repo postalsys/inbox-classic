@@ -1177,6 +1177,10 @@ ui-row-flagged = Z flagą
 # review: new
 ui-row-attachments = Ma załączniki
 # review: new
+ui-row-encrypted = Zaszyfrowana
+# review: new
+ui-row-signed = Podpisana
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } wiadomość
     [few] { $count } wiadomości

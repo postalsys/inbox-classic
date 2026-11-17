@@ -1161,6 +1161,10 @@ ui-row-flagged = Liputettu
 # review: new
 ui-row-attachments = Sisältää liitteitä
 # review: new
+ui-row-encrypted = Salattu
+# review: new
+ui-row-signed = Allekirjoitettu
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } viesti
    *[other] { $count } viestiä

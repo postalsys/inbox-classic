@@ -1166,6 +1166,10 @@ ui-row-flagged = Su vėliavėle
 # review: new
 ui-row-attachments = Yra priedų
 # review: new
+ui-row-encrypted = Užšifruotas
+# review: new
+ui-row-signed = Pasirašytas
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } laiškas
     [few] { $count } laiškai

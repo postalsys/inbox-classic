@@ -635,6 +635,10 @@ ui-columns-note = Aken on veergudega paigutuse jaoks piisavalt lai. Paigutust sa
 ui-row-unread = Lugemata
 ui-row-flagged = Lipuga
 ui-row-attachments = Manustega
+# review: new
+ui-row-encrypted = Krüptitud
+# review: new
+ui-row-signed = Allkirjastatud
 ui-row-messages = { $count ->
     [one] { $count } kiri
    *[other] { $count } kirja

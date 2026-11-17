@@ -1165,6 +1165,10 @@ ui-row-flagged = Označeno zastavicom
 # review: new
 ui-row-attachments = Ima privitke
 # review: new
+ui-row-encrypted = Šifrirano
+# review: new
+ui-row-signed = Potpisano
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } poruka
     [few] { $count } poruke

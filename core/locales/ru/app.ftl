@@ -1170,6 +1170,10 @@ ui-row-flagged = С флажком
 # review: new
 ui-row-attachments = Есть вложения
 # review: new
+ui-row-encrypted = Зашифровано
+# review: new
+ui-row-signed = Подписано
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } сообщение
     [few] { $count } сообщения

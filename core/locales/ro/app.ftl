@@ -1170,6 +1170,10 @@ ui-row-flagged = Semnalizat
 # review: new
 ui-row-attachments = Are atașări
 # review: new
+ui-row-encrypted = Criptat
+# review: new
+ui-row-signed = Semnat
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } mesaj
     [few] { $count } mesaje

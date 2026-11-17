@@ -1161,6 +1161,10 @@ ui-row-flagged = Med flagg
 # review: new
 ui-row-attachments = Har vedlegg
 # review: new
+ui-row-encrypted = Kryptert
+# review: new
+ui-row-signed = Signert
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } melding
    *[other] { $count } meldinger

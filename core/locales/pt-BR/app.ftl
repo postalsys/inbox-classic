@@ -1166,6 +1166,10 @@ ui-row-flagged = Sinalizada
 # review: new
 ui-row-attachments = Tem anexos
 # review: new
+ui-row-encrypted = Criptografada
+# review: new
+ui-row-signed = Assinada
+# review: new
 ui-row-messages = { $count ->
     [0] 0 mensagens
     [one] { $count } mensagem

@@ -635,6 +635,10 @@ ui-columns-note = Das Fenster ist breit genug für das Spaltenlayout. Sie könne
 ui-row-unread = Ungelesen
 ui-row-flagged = Gekennzeichnet
 ui-row-attachments = Mit Anlagen
+# review: new
+ui-row-encrypted = Verschlüsselt
+# review: new
+ui-row-signed = Signiert
 ui-row-messages = { $count ->
     [one] { $count } Nachricht
    *[other] { $count } Nachrichten

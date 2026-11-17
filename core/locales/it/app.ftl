@@ -1160,6 +1160,10 @@ ui-row-flagged = Contrassegnato
 # review: new
 ui-row-attachments = Con allegati
 # review: new
+ui-row-encrypted = Crittografato
+# review: new
+ui-row-signed = Firmato
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } messaggio
    *[other] { $count } messaggi

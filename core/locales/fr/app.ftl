@@ -636,6 +636,10 @@ ui-columns-note = La fenêtre est assez large pour la disposition en colonnes. V
 ui-row-unread = Non lu
 ui-row-flagged = Avec indicateur
 ui-row-attachments = Avec pièces jointes
+# review: new
+ui-row-encrypted = Chiffré
+# review: new
+ui-row-signed = Signé
 ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages

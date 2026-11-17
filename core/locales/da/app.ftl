@@ -1160,6 +1160,10 @@ ui-row-flagged = Med flag
 # review: new
 ui-row-attachments = Har vedhæftede filer
 # review: new
+ui-row-encrypted = Krypteret
+# review: new
+ui-row-signed = Signeret
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } meddelelse
    *[other] { $count } meddelelser

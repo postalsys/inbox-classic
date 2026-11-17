@@ -1160,6 +1160,10 @@ ui-row-flagged = Με σημαία
 # review: new
 ui-row-attachments = Έχει συνημμένα
 # review: new
+ui-row-encrypted = Κρυπτογραφημένο
+# review: new
+ui-row-signed = Υπογεγραμμένο
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } μήνυμα
    *[other] { $count } μηνύματα

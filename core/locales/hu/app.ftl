@@ -1159,6 +1159,10 @@ ui-row-flagged = Megjelölt
 # review: new
 ui-row-attachments = Van melléklete
 # review: new
+ui-row-encrypted = Titkosított
+# review: new
+ui-row-signed = Aláírt
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } üzenet
    *[other] { $count } üzenet

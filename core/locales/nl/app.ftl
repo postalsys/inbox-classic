@@ -1160,6 +1160,10 @@ ui-row-flagged = Gemarkeerd
 # review: new
 ui-row-attachments = Heeft bijlagen
 # review: new
+ui-row-encrypted = Versleuteld
+# review: new
+ui-row-signed = Ondertekend
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } bericht
    *[other] { $count } berichten

@@ -1165,6 +1165,10 @@ ui-row-flagged = Ar karodziņu
 # review: new
 ui-row-attachments = Ir pielikumi
 # review: new
+ui-row-encrypted = Šifrēts
+# review: new
+ui-row-signed = Parakstīts
+# review: new
 ui-row-messages = { $count ->
     [zero] { $count } ziņojumu
     [one] { $count } ziņojums

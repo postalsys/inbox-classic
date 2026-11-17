@@ -1160,6 +1160,10 @@ ui-row-flagged = Amb bandera
 # review: new
 ui-row-attachments = Té fitxers adjunts
 # review: new
+ui-row-encrypted = Xifrat
+# review: new
+ui-row-signed = Signat
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } missatge
    *[other] { $count } missatges

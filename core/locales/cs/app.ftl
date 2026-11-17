@@ -1164,6 +1164,10 @@ ui-row-flagged = S příznakem
 # review: new
 ui-row-attachments = Obsahuje přílohy
 # review: new
+ui-row-encrypted = Šifrováno
+# review: new
+ui-row-signed = Podepsáno
+# review: new
 ui-row-messages = { $count ->
     [one] { $count } zpráva
     [few] { $count } zprávy
