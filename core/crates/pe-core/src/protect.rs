@@ -392,6 +392,12 @@ fn envelope_good(verdict: &Verdict) -> bool {
         && (verdict.encrypted || matches!(verdict.signature, Signature::Verified { .. } | Signature::Signed { .. }))
 }
 
+/// The Subject in a message's own top headers, as it travelled: under a protected Subject, the placeholder
+pub(crate) fn outer_subject(raw: &[u8]) -> Option<String> {
+    let head = outline(raw).root().map_or(raw, |root| &raw[..root.body]);
+    pe_mime::parser::parse(head).ok()?.subject
+}
+
 /// The protected Subject of a payload: in its own header block, when the payload says its headers are protected
 fn inner_subject(payload: &[u8]) -> Option<String> {
     let outline = outline(payload);

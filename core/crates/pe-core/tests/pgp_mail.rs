@@ -434,6 +434,28 @@ fn protected_subject() {
 }
 
 #[test]
+fn a_protected_subject_stays_out_of_a_reply() {
+    // the sender hid the Subject inside the encryption: a reply or forward, whose Subject goes in the clear, takes
+    // the placeholder it travelled under, never the protected one
+    let w = world("pgp-subject-reply");
+    let inner =
+        "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: Secret plan\r\n\r\nBody";
+    let raw = message(
+        "alice@example.org",
+        &encrypted_part(inner, &[&w.me], Some(&w.alice), "e"),
+    )
+    .replacen("Subject: Test", "Subject: ...", 1);
+    let folder = stored(&w, 1, &raw);
+    for kind in [pe_core::DraftKind::Reply, pe_core::DraftKind::Forward] {
+        let draft = w.core.draft(folder, 1, kind).unwrap().unwrap();
+        assert!(!draft.subject.contains("Secret"), "{kind:?}: {}", draft.subject);
+        assert!(draft.encrypt);
+    }
+    // the shown subject is the protected one, as the list shows it once decrypted
+    assert_eq!(w.view(&raw).subject, "Secret plan");
+}
+
+#[test]
 fn attachments_come_from_the_decrypted_part() {
     let w = world("pgp-attachment");
     let inner = mixed(&[

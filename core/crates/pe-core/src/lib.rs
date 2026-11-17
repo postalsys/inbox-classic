@@ -1955,13 +1955,23 @@ impl Core {
             // only encrypted
             let source = store.source(folder, uid)?;
             let encrypted = source.as_deref().is_some_and(protect::has_encrypted);
+            // the Subject of an encrypted message as it travelled: a Subject the sender protected inside the
+            // encryption (RFC 9788) is shown, but never copied into the Subject of a reply, which goes in the clear
+            let outer = encrypted
+                .then(|| source.as_deref().and_then(protect::outer_subject))
+                .flatten();
             let source = source.map(|source| self.shown(&store, source));
-            (source, own_addresses(&store, account)?, date, encrypted)
+            (source, own_addresses(&store, account)?, date, (encrypted, outer))
         };
         let Some(source) = source else {
             return Ok(None);
         };
+        let (encrypted, outer) = encrypted;
         let mut draft = compose::draft(&source, kind, &own, date);
+        if encrypted {
+            let prefix = if kind == DraftKind::Forward { "Fw: " } else { "Re: " };
+            draft.subject = compose::prefixed(prefix, outer.as_deref().unwrap_or_default());
+        }
         draft.quote_encrypted = encrypted;
         draft.encrypt = encrypted;
         draft.sign = encrypted;
