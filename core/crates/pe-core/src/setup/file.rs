@@ -80,6 +80,13 @@ pub(crate) struct SettingsPart {
     pub pgp_index_encrypted: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub send_delay: Option<u64>,
+    /// Settings > Reading > Messages: pictures and PDF files shown after a message's text
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub show_previews: Option<bool>,
+    /// and PDF files among them (left out when the core turned them off after a PDF file ended the app: that is this
+    /// computer's own)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pdf_previews: Option<bool>,
 }
 
 impl SettingsPart {
@@ -100,6 +107,8 @@ impl SettingsPart {
             pgp_keyserver: self.pgp_keyserver,
             pgp_index_encrypted: self.pgp_index_encrypted,
             send_delay: self.send_delay.filter(|delay| crate::SEND_DELAYS.contains(delay)),
+            show_previews: self.show_previews,
+            pdf_previews: self.pdf_previews,
         }
     }
 
@@ -113,6 +122,8 @@ impl SettingsPart {
             self.pgp_keyserver.is_some(),
             self.pgp_index_encrypted.is_some(),
             self.send_delay.is_some(),
+            self.show_previews.is_some(),
+            self.pdf_previews.is_some(),
         ]
         .iter()
         .filter(|set| **set)

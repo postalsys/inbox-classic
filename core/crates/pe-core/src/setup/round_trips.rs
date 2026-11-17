@@ -163,6 +163,8 @@ fn fill_with(core: &Core, issuer: &str) -> Filled {
     core.set_pgp_index_encrypted(false).unwrap();
     core.set_send_delay(20).unwrap();
     core.set_dark_messages(false).unwrap();
+    core.set_show_previews(false).unwrap();
+    core.set_pdf_previews(false).unwrap();
 
     let dave = core
         .save_card(&Card {
@@ -297,7 +299,7 @@ fn every_part_round_trips_without_a_passphrase() {
         ),
         (0, 1, 2, 2)
     );
-    assert_eq!(counts.settings, 8);
+    assert_eq!(counts.settings, 10);
     assert_eq!(
         file.prefs,
         [
@@ -346,6 +348,8 @@ fn every_part_round_trips_without_a_passphrase() {
     assert!(!b.pgp_index_encrypted().unwrap());
     assert_eq!(b.send_delay().unwrap(), 20);
     assert!(!b.dark_messages());
+    assert!(!b.show_previews());
+    assert!(!b.pdf_previews().unwrap());
 
     let cards = b.cards("").unwrap();
     assert_eq!(cards.len(), 2);

@@ -245,6 +245,11 @@ pub enum Event {
         request: u64,
         attachment: usize,
     },
+    /// The picture a document server asked for ([`Core::preview_ask`]) is there, or will not be: answer the web view
+    /// with [`Core::preview_answer`]
+    PreviewAnswered {
+        ask: u64,
+    },
     /// The app ended while a file's preview was drawn (it may have been a hostile file), so PDF previews are now off:
     /// [`Core::previews_notice`] says why and how to turn them on again
     PdfPreviewsOff,
@@ -1512,6 +1517,7 @@ impl Core {
         let Some(found) = self.view_source(folder, uid)? else {
             return Ok(None);
         };
+        let describe = |pdfs, file, wait| self.preview_describe(pdfs, file, wait);
         let view = finish_view(
             &found,
             allow_remote_images,
@@ -1521,6 +1527,7 @@ impl Core {
             &|event| {
                 let _ = self.post(event);
             },
+            self.preview_settings().map(|settings| (settings, &describe as _)),
         );
         if let Some(view) = &view {
             self.remember_attachments(folder, uid, view);
@@ -1528,8 +1535,10 @@ impl Core {
         Ok(view.map(|view| self.learned(view)))
     }
 
-    /// A view taken by its window: what it said for Autocrypt learned now, with the key book at hand
+    /// A view taken by its window: what it said for Autocrypt learned now, with the key book at hand; its previews
+    /// answered from now on
     fn learned(&self, mut view: MessageView) -> MessageView {
+        self.previews_shown(&mut view);
         if let Some(seen) = view.autocrypt.take() {
             let _ = self.learn_autocrypt(&seen);
         }
@@ -1563,7 +1572,16 @@ impl Core {
                 return None;
             }
             let found = core.view_source(folder, uid).ok().flatten()?;
-            let view = finish_view(&found, allow_remote_images, &dropped, || Some(core.store()), &*events);
+            let describe = |pdfs, file, wait| core.preview_describe(pdfs, file, wait);
+            let previews = core.preview_settings().map(|settings| (settings, &describe as _));
+            let view = finish_view(
+                &found,
+                allow_remote_images,
+                &dropped,
+                || Some(core.store()),
+                &*events,
+                previews,
+            );
             core.timings
                 .view_built(found.folder, found.uid, std::time::Instant::now());
             if let Some(view) = &view {
@@ -2027,15 +2045,29 @@ impl Core {
         let (source, _) = read_message_file(path)?;
         let always = self.store().always_load_pictures()?;
         let ring = self.ring_for(&self.store(), &source);
+        let describe = |file, wait| {
+            let pdfs = self.pdf_previews().unwrap_or(true);
+            self.preview_describe(pdfs, file, wait)
+        };
+        let plan = self.preview_settings().map(|(pdfs, notice)| previews::PreviewPlan {
+            describe: &describe,
+            pdfs,
+            notice,
+        });
         let trust = view::Trust {
             pictures: pictures::Rules {
                 always,
                 ..Default::default()
             },
             ring: ring.as_deref(),
+            previews: plan.as_ref(),
             ..Default::default()
         };
-        let view = view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
+        let mut view =
+            view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
+        if view.preview_token.is_some() {
+            view.preview_source = Some(previews::PreviewSource::File(Arc::new(source)));
+        }
         self.remember_file_attachments(path, &view);
         Ok(self.learned(view))
     }
@@ -2987,6 +3019,16 @@ fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
     found
 }
 
+/// Whether PDF files are drawn, and the notice of the previews ([`Core::preview_settings`])
+type PreviewSettings = (bool, Option<String>);
+
+/// Reads a file's description for the view: whether PDF files are drawn, the file, the longest wait
+type Describe<'a> = &'a dyn Fn(
+    bool,
+    Arc<Vec<u8>>,
+    std::time::Duration,
+) -> std::result::Result<Arc<previews::PreviewDescription>, previews::PreviewRefusal>;
+
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
 /// give up. `store` gives the store a bounce needs: the message it returns is looked up there, and a bounce the list
 /// did not mark yet (one found by the heuristics) is marked, with `events` told the folder changed.
@@ -2996,6 +3038,7 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     dropped: &dyn Fn() -> bool,
     store: impl Fn() -> Option<S>,
     events: &dyn Fn(Event),
+    previews: Option<(PreviewSettings, Describe)>,
 ) -> Option<MessageView> {
     let find = |message_id: &str| {
         store()?
@@ -3014,8 +3057,31 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
             senders: &found.trusted_senders,
         },
         ring: found.ring.as_deref(),
+        previews: None,
+    };
+    let describe;
+    let plan = match previews {
+        Some(((pdfs, notice), describe_with)) => {
+            describe = move |file, wait| describe_with(pdfs, file, wait);
+            Some(previews::PreviewPlan {
+                describe: &describe,
+                pdfs,
+                notice,
+            })
+        }
+        None => None,
+    };
+    let trust = view::Trust {
+        previews: plan.as_ref(),
+        ..trust
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
+    if view.preview_token.is_some() {
+        view.preview_source = Some(previews::PreviewSource::Stored {
+            folder: found.folder,
+            uid: found.uid,
+        });
+    }
     decrypted_for_view(found, &mut view, &store);
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the
     // same rules

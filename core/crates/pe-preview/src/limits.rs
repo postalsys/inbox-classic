@@ -27,6 +27,15 @@ pub const MAX_PICTURE_PIXELS: u64 = 100_000_000;
 /// The most memory a picture's decoder may take ([`image::Limits::max_alloc`]): 100 MP of RGBA and a little more
 pub const MAX_PICTURE_ALLOC: u64 = 448 * 1024 * 1024;
 
+/// The previews in one message, pictures and PDF pages counted together, in the order of its files: a file past it
+/// has none
+pub const MAX_PREVIEWS: usize = 20;
+
+/// How long the reading pane waits for the sizes of a message's files before it shows the message: the files not
+/// described by then have no previews in it (an ordinary file is described in a few milliseconds; the wait is for a
+/// hostile one, or a render thread busy with the page of a message shown before)
+pub const DESCRIBE_WAIT: Duration = Duration::from_millis(250);
+
 /// The pixels of all the previews of one message together: about 20 pictures of 2048 by 1536
 pub const MESSAGE_PIXELS: u64 = 64 * 1024 * 1024;
 

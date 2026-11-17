@@ -220,6 +220,8 @@ fn settings_part(store: &Store) -> Result<SettingsPart> {
         pgp_keyserver: Some(store.pgp_keyserver()?),
         pgp_index_encrypted: Some(store.pgp_index_encrypted()?),
         send_delay: Some(store.send_delay()?),
+        show_previews: Some(store.show_previews()?),
+        pdf_previews: (!store.pdf_previews_crashed()?).then_some(store.pdf_previews()?),
     })
 }
 

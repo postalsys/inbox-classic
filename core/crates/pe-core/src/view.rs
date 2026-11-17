@@ -94,7 +94,8 @@ pub struct MessageView {
     /// ([`pe_html::part_document`]); empty for a part with nothing to show
     pub part_documents: Vec<String>,
     /// What is printed of such a message, None for any other (its `document` is): one document of every part's
-    /// text, as a printer prints no frames, the bar's words and each part's label in its printed header
+    /// text, as a printer prints no frames, the bar's words and each part's label in its printed header; for a
+    /// message with previews of its attachments, its document without them
     pub print_document: Option<String>,
     /// An encrypted message's text, decrypted, for the search index (when Options lets it keep it), stored when the
     /// window takes the view
@@ -102,6 +103,14 @@ pub struct MessageView {
     /// What [`crate::protect::decrypted_for_index`] made of the message while the view was built (as it is shown, and
     /// its protected Subject), for `decrypted`; never kept past the view's building
     pub(crate) decrypted_source: Option<(Vec<u8>, Option<String>)>,
+    /// The token of the previews of its attachments after its text: the addresses of their pictures and their links
+    /// carry it, and the core answers them while the view is shown ([`crate::Core::preview_ask`]). None when the
+    /// document shows no previews
+    pub preview_token: Option<String>,
+    /// The attachments the document shows previews of, each with how many pictures
+    pub(crate) preview_files: Vec<(usize, usize)>,
+    /// Where those files are read from when their pictures are asked for
+    pub(crate) preview_source: Option<crate::previews::PreviewSource>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -151,6 +160,8 @@ pub(crate) struct Trust<'a> {
     pub pictures: crate::pictures::Rules<'a>,
     /// The keys to read a signed or encrypted message with; None for a message that is neither
     pub ring: Option<&'a crate::protect::KeyRing>,
+    /// How to show the pictures and PDF files attached after the text; None when they are not shown
+    pub previews: Option<&'a crate::previews::PreviewPlan<'a>>,
 }
 
 /// Finds a message of the account by its Message-ID, for the link of a bounce's card
@@ -172,7 +183,7 @@ const REPORT_PARTS: [&str; 4] = [
 ];
 
 /// The attachments the attachment bar lists: not the images of an HTML body, nor a delivery report's parts for servers
-fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
+pub(crate) fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
     attachments.iter().filter(|a| is_listed(a))
 }
 
@@ -260,6 +271,14 @@ pub(crate) fn build_unless(
     if dropped() {
         return None;
     }
+    // the pictures and PDF files attached, shown after the text: never of signed or encrypted mail (yet)
+    let planned = trust
+        .previews
+        .filter(|_| !may_be_signed_or_encrypted(source))
+        .map(|plan| crate::previews::section(&message, plan));
+    if dropped() {
+        return None;
+    }
     // the earlier messages of a reply or forward folded behind "..."
     let body = crate::fold::body(&message);
     if dropped() {
@@ -319,8 +338,22 @@ pub(crate) fn build_unless(
         otp: otp_card.as_ref(),
         event: event_card.as_ref(),
         bounce: card.as_ref(),
+        previews: planned.as_ref().map(|(section, _)| section),
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &header, &cards);
+    // the files the document shows (not those its HTML shows already), under the token of their addresses
+    let (preview_token, preview_files) = match planned {
+        Some((section, files)) if !rendered.previewed.is_empty() => (
+            Some(section.token),
+            files
+                .into_iter()
+                .filter(|(attachment, _)| rendered.previewed.contains(attachment))
+                .collect(),
+        ),
+        _ => (None, Vec::new()),
+    };
+    // the previews are not printed (the print windows serve none of their pictures)
+    let print_document = pe_html::without_previews(&rendered.document);
     Some(MessageView {
         subject,
         from,
@@ -342,10 +375,25 @@ pub(crate) fn build_unless(
         protection: None,
         autocrypt: crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now()),
         part_documents: Vec::new(),
-        print_document: None,
+        print_document,
         decrypted: None,
         decrypted_source: None,
+        preview_token,
+        preview_files,
+        preview_source: None,
     })
+}
+
+/// Whether a message may have signed or encrypted parts, OpenPGP or S/MIME: such mail gets no previews of its
+/// attachments yet (docs/attachment-preview-plan.md, PR 4), so nothing of an encrypted part can show in another
+fn may_be_signed_or_encrypted(source: &[u8]) -> bool {
+    crate::protect::may_be_protected(source)
+        || pe_mime::outline::outline(source).parts.iter().any(|part| {
+            matches!(
+                part.content_type.as_str(),
+                "multipart/signed" | "multipart/encrypted" | "application/pkcs7-mime" | "application/x-pkcs7-mime"
+            )
+        })
 }
 
 /// The view of a message with signed or encrypted parts: the page of its sections ([`pe_html::secure_page`]), each

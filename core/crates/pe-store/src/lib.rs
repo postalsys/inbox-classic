@@ -166,6 +166,16 @@ impl Store {
         self.set_bool_setting("attachments.decrypted_noted", true)
     }
 
+    /// "Show attachments in messages": pictures and PDF files shown after a message's text, on until the user turns it
+    /// off
+    pub fn show_previews(&self) -> Result<bool> {
+        self.bool_setting("previews.shown", true)
+    }
+
+    pub fn set_show_previews(&self, on: bool) -> Result<()> {
+        self.set_bool_setting("previews.shown", on)
+    }
+
     /// "Show PDF files in messages": on until the user turns it off, or the core does after a PDF file ended the app
     pub fn pdf_previews(&self) -> Result<bool> {
         self.bool_setting("previews.pdf", true)

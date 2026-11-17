@@ -428,6 +428,12 @@ impl Core {
         if let Some(delay) = settings.send_delay {
             self.set_send_delay(delay)?;
         }
+        if let Some(on) = settings.show_previews {
+            self.set_show_previews(on)?;
+        }
+        if let Some(on) = settings.pdf_previews {
+            self.set_pdf_previews(on)?;
+        }
         Ok(())
     }
 
