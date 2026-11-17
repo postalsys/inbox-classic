@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Finish Croatian: ten encryption/search catalog targets; inserted passages in encrypted-and-signed-mail, encryption-keys and options-language; search-words still needs its full original review including the new search additions. Do not use the focused encryption helper unchanged: Croatian has ten pending help topics, with search-words wholly marked. Then finish its other six original topics: all-inboxes, command-line, keyboard-shortcuts, removing, save-print-import, updates. The other 17 previously completed languages are caught up. Preserve current reviewed prose; context/provenance are in encryption-search-context. Use available keys, index cleanup, unconditional encrypted-notification label, agent envelope versus protected contents and address versus fingerprint lookup context. Scope 32712/1316; pending 13430/530; completed 19282/786. Then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, including their existing context followups and mnemonic issues. No tests; active checkout build/i18n-wave1; REVIEWED unchanged. Latest source audit found no additional relevant work.",
+  "next_batch": "Start Hungarian app.ftl (647 pending IDs), then core.ftl (450), help.ftl (24), linux.ftl (87), mac.ftl (65), windows.ftl (69) and all 52 help topics. Continue lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All 18 earlier languages including Croatian have no pending marks and current completed/source hashes match. Ten broad drafts retain provider sign-in/troubleshooting, no-Trash deletion, settings/encrypted-image, encryption/search and search-negation context followups plus recorded mnemonic issues. Read their glossary notes and actual callers; do not remove marks by structure alone. Search-negation context: date/age/size operators ignore minus, so no universal-negation promise. Use available keys, index cleanup, unconditional encrypted-notification label, agent envelope versus protected contents and address versus fingerprint lookup context. Scope 32712/1316; pending 13420/520; completed 19292/796. No test suites; active checkout build/i18n-wave1; REVIEWED unchanged. Latest fresh source audit found no new languages or unrecorded translations.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -2014,6 +2014,23 @@
           },
           "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Bulgarian polite plural and established шифроване/дешифриране, частен ключ, отпечатък and прикачен файл. Опцията supplies feminine agreement around uninflected labels. Available keys qualify decryption; plaintext local indexing and removal on disable are clear. Notifications always retain the encrypted-message indication; agents cannot access/search protected contents. Domain/address lookup differs from fingerprint/key-ID lookup. Labels and access keys retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "bg-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/bg/search-words.html": "b46d04ba451fb523197c9a012c59ec45ef91386bd3e94e48f0139a75e3f1bda9"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -4037,6 +4054,23 @@
           },
           "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Czech formal vy prose, soukromý klíč, otisk, příloha and oznámení. Row adjectives now agree with zpráva and the neighboring Nepřečtená label, describing classification rather than completed operations. Nastavení gives the inserted path a grammatical head noun; volba supplies agreement for infinitive control labels. Available keys, plaintext local index and removal on disable are explicit. Notifications are unconditional, agents cannot access protected contents and lookup distinguishes address/domain from key identifiers. Mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "cs-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/cs/search-words.html": "fea94a95123fa742894243ee8533e818c2ecf49c64d8634189919fe2084eb017"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -6028,6 +6062,23 @@
           },
           "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Danish du prose, meddelelse, privat nøgle, fingeraftryk and vedhæftet fil. Clear textual excerpts replace literal own-subject/find-words phrases. Available keys qualify decryption; plaintext local search content and removal on disable are explicit. Notifications always retain the encrypted-message text. Agent restrictions concern protected contents; address/domain lookup differs from fingerprint/key-ID lookup. Suitable control labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "da-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/da/search-words.html": "4c82e8d9e336859302f3efd166e1e782a6c7ce2a23460d18681f5c332563f035"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -6531,6 +6582,23 @@
           },
           "validation": "Static check-language: 1404 expected removed-mark diagnostics only; no structural findings. All 46 menu/dialog mnemonic scopes pass. IDs/full variable sets/comments/access keys and exact markup/literal tokens retained. All current 28 pending inventories and completed/source hashes match. Global reconciliation accounts for 19156 unmarked messages and 10014 changed help lines, with 14 verified baseline pairs. Substituted controls/settings paths/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside the preview helper. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed ten catalog targets and seven inserted passages across four help topics in their actual settings, list, notification, search and agent contexts. Improved three catalog values and six help passages. Available keys are required for decryption; indexed content is local and unencrypted, removed logically when disabled. Signed list markers do not assert validity. Encrypted notifications always use ListEncrypted; list preview and protected subjects depend on available decrypted indexed data. Agents cannot access encrypted content/attachments but may see envelope metadata. Address lookup uses WKD then optional keyserver, while handle lookup sends fingerprint/key ID; disabling keyserver leaves WKD. Existing controls/access keys and all markup/literal tokens retained. Every byte outside the new help passages remains unchanged. No tests."
+        },
+        {
+          "id": "de-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/de/search-words.html": "8b919a8810d6051e5b79a7316467ebae1ac66d5413fe48bc0ea3b5bc184024aa"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -8522,6 +8590,23 @@
           },
           "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Greek polite plural, ιδιωτικό κλειδί, αποτύπωμα, συνημμένο and πράκτορας ΤΝ. Added ενότητα before inserted settings paths to avoid article/case mismatches across platforms; labels stay nominative. Available keys, plaintext local index and removal on disable are explicit. Notifications always retain encrypted-message wording; agents cannot access protected contents. Domain/address queries differ from fingerprint/key-ID queries. Existing labels and Greek mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "el-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/el/search-words.html": "3be7ae805bef25ff72dd3f92c46628d8934032824ea013bf3e0589423b054b33"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -9024,6 +9109,23 @@
           },
           "validation": "Static check-language: 1404 expected removed-mark diagnostics only in each language; no structural findings. All 46 actual mnemonic scopes pass. Exact catalog IDs/full variables/comments/access-key counts and help tags/attributes/literal search tokens retained. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside the preview helper. All 28 pending inventories and current completed/source hashes match. Global reconciliation: 19186 unmarked messages, 10035 changed help lines, 14 verified baseline pairs. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Spanish formal usted register and existing cifrado/huella digital/archivos adjuntos terminology. Replaced literal own-subject/words phrasing. Available keys qualify decryption; unencrypted local indexed content and disabled-setting cleanup are explicit. Notifications retain the encrypted-message label separately from list previews. Agents cannot access encrypted content, without claiming that outer envelope metadata is hidden. Key lookup distinguishes address/domain lookup from fingerprint or key-ID lookup; disabling keyserver leaves domain lookup available. Existing labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "es-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/es/search-words.html": "d577513cfd135513ff4627eec10889d4710e487cc07de94a6dc4443486f1fe9f"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -9533,6 +9635,23 @@
           },
           "validation": "Static check-language: 1404 expected removed-mark diagnostics only in each language; no structural findings. All 46 actual mnemonic scopes pass. Exact catalog IDs/full variables/comments/access-key counts and help tags/attributes/literal search tokens retained. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside the preview helper. All 28 pending inventories and current completed/source hashes match. Global reconciliation: 19186 unmarked messages, 10035 changed help lines, 14 verified baseline pairs. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Estonian polite plural and established krüpteerima/dekrüpteerima, võtme sõrmejälg, manus and teatis terminology. Corrected all new krüptitud forms to match reviewed catalogs/help. Settings paths follow seadetes rather than an untranslated grammatical join. Available keys qualify decryption; decrypted index contents and disabled-setting cleanup are explicit. Notifications keep the encrypted placeholder independently of list previews. Agent limits concern encrypted content/attachments, not all envelope metadata. Address/domain and fingerprint/key-ID lookup are distinguished; keyserver switch leaves domain lookup available. Existing access keys retained. Reviewed all ten targets and seven inserted help passages; 7 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "et-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/et/search-words.html": "d9bde07ddc170a77e330343fc65f3984d1e6fa9587f84d645bf69fad36267e93"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -11531,6 +11650,23 @@
           },
           "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Finnish informal singular, yksityinen avain, sormenjälki and liite. Decryption purkaa viestin salauksen, not purkaa viestin; local search index is hakuindeksi, replacing the literal hakuhakemisto. Asetus carries grammar around unchanged labels; paths remain uninflected. Available private keys qualify decryption. Plaintext local contents are removed from index on disable. Notifications always use the encrypted-message text; agents cannot access protected contents. Address/domain lookup differs from key-identifier lookup. Good labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "fi-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fi/search-words.html": "e678d9cba7005c1b152055d29d5e71a144358e8b4e79f1d12d1cb477d7836f9b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -12047,38 +12183,29 @@
           },
           "validation": "Static check-language: 1404 expected removed-mark diagnostics only in each language; no structural findings. All 46 actual mnemonic scopes pass. Exact catalog IDs/full variables/comments/access-key counts and help tags/attributes/literal search tokens retained. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside the preview helper. All 28 pending inventories and current completed/source hashes match. Global reconciliation: 19186 unmarked messages, 10035 changed help lines, 14 verified baseline pairs. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "French vous register and existing chiffrement/empreinte/pièces jointes terminology, with en clair for unencrypted index contents. Replaced literal own-object/words phrasing and gave setting controls grammatical noun-led joins. Decryption requires available keys; disabling removes indexed decrypted contents logically. Notifications keep the encrypted-message indication independently of list previews. Agent restrictions concern encrypted contents/attachments, not outer envelope metadata. Domain/address lookup and fingerprint/key-ID lookup are distinct; keyserver switch leaves domain lookup available. Existing labels and access keys retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "fr-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fr/search-words.html": "1b2b9f46d9aab03abdd4b1e1c73132f41b5d386d10c7afed47d2e48561c8d33f"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
     "hr": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-encryption",
-          "ui-search-encrypted",
-          "ui-search-encrypted-note",
-          "ui-pgp-keyserver",
-          "ui-pgp-keyserver-note",
-          "ui-row-encrypted",
-          "ui-row-signed"
-        ],
-        "core.ftl": [
-          "agent-encrypted",
-          "list-encrypted",
-          "pgp-keyserver-off"
-        ]
-      },
-      "pending_help": [
-        "all-inboxes.html",
-        "command-line.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "keyboard-shortcuts.html",
-        "options-language.html",
-        "removing.html",
-        "save-print-import.html",
-        "search-words.html",
-        "updates.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "hr-loading-round2",
@@ -13880,6 +14007,80 @@
           },
           "validation": "All 28 catalog inventories, full variable sets, access-key counts, 52 help topics per language, references and exact pending marks pass. Static check-language has only 25185 expected removed/partial-review-mark diagnostics. All 46 mnemonic scopes pass in the 18 previously reviewed app languages; all three settings-page scopes pass in all 28. The ten broad drafts have exactly their pre-merge collisions; Romanian Gri still has no free runtime flag mnemonic. These are pending initial-review work, not new integration defects. All 76 imported nontranslation source/generated paths match feature 38841d96 exactly. Prior catalog values/comments and help prose retained; all 19146 unmarked messages and 10007 changed help lines reconcile, with 14 verified baseline pairs. All completed/source hashes match. HTML regenerated; locale/help/record diff checks pass. Full staged diff passes with core.whitespace=cr-at-eol: the imported secure-protected-subject.eml has intentional CRLF endings and matches upstream byte-for-byte. No tests or builds run; installer/store metadata was not changed.",
           "notes": "Integrated nine new catalog IDs, the changed pgp-keyserver-off with its new settings placeholder, and new passages in four help topics. Every unaffected catalog value/comment and all prior help prose are retained. Previously reviewed topics mark only the inserted passages; original pending topics remain wholly marked. Affected current reviewed inventories are reopened, with history retained in reopened_ fields. No new translation is counted reviewed."
+        },
+        {
+          "id": "hr-final-help-encryption-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ],
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted",
+              "pgp-keyserver-off"
+            ]
+          },
+          "reviewed_help": [
+            "all-inboxes.html",
+            "command-line.html",
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "keyboard-shortcuts.html",
+            "options-language.html",
+            "removing.html",
+            "save-print-import.html",
+            "search-words.html",
+            "updates.html"
+          ],
+          "changed_values": 4,
+          "files": {
+            "core/locales/hr/app.ftl": "a2ff5445b620bfe41b73e9e909ab0edd495dbef26311c4bacb64558db37579dc",
+            "core/locales/hr/core.ftl": "bce585e0ca4992ee5f508a8bf8d41c59fb2fb00f3bb36e525112da805e26c7e9",
+            "core/crates/pe-html/help/hr/all-inboxes.html": "ef1ea4dc886c4aa557960d25afe15fef3e64569bf14f13eb20b7f749b457a0e1",
+            "core/crates/pe-html/help/hr/command-line.html": "906ac6b373a640ebbd12b12d311ebdbb6b3e764d01013312d99b7e918b50dac4",
+            "core/crates/pe-html/help/hr/encrypted-and-signed-mail.html": "7e95ac6bc62aca4ce53c6c5adb879704eab55b4a470fa55088a697830b921c3d",
+            "core/crates/pe-html/help/hr/encryption-keys.html": "6a7e069097342538e4e538c7ddf06f0dbad92d26b481fd47ef95890ba5a5054e",
+            "core/crates/pe-html/help/hr/keyboard-shortcuts.html": "3b07162f9da7d30613799019fa465c6a3983609103169841409cf661b6c36b00",
+            "core/crates/pe-html/help/hr/options-language.html": "bc436db444345ff4371864e0ea1cf9ea0c9cceaca9275826e49a329405c61784",
+            "core/crates/pe-html/help/hr/removing.html": "5eadaacf8ccdb40183d3a6b60216d975f2532e7387dae916756404793801f1b2",
+            "core/crates/pe-html/help/hr/save-print-import.html": "dad69293b85c1a40dfa1bf461195c5cb75d3e9e8a7c954a988bc61474a537b29",
+            "core/crates/pe-html/help/hr/search-words.html": "5eb67017d7ba2570698c4a53f09996f551ddcef87ea48ff2478feee3a4cef67a",
+            "core/crates/pe-html/help/hr/updates.html": "31f3470aa8fe103c7493f663f74a68518d3f853abeae4c44f6f17a32219fcdf3"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2",
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3",
+            "core/crates/pe-html/help/en/all-inboxes.html": "4c79d7df5307fffeb3316cf05acae6e4f8005d7a220d242268a8d233b138eb70",
+            "core/crates/pe-html/help/en/command-line.html": "39216fa072adf81b4ce1480e5df5729a4ef7524d25d69aef5e1f374044c18e70",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "c640a1eeadc79803b4af97eb32c487657c51ead16e2b2b96cba037ee22a575cd",
+            "core/crates/pe-html/help/en/encryption-keys.html": "214716a55c27dc7ab03e2045252b08f3d50b892bb4bd07b1fe1d1a41d3819930",
+            "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b",
+            "core/crates/pe-html/help/en/options-language.html": "572fec92ff593a5f4af6711766752289e6f28e97e673d5e346a5c9b3b3894df0",
+            "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+            "core/crates/pe-html/help/en/save-print-import.html": "91e96db89168f7d0b359513f4bb7870171d89fc69fa700e77fde8efb53f3d1f9",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080",
+            "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59"
+          },
+          "validation": "Croatian passes all 46 mnemonic collision scopes, full IDs/variables/access-key counts, comments and dash checks. check-language has only 1404 expected removed-mark diagnostics. All ten help topics retain exact tags/attributes and literal code/keyboard contents. Three partial topics retain every byte outside the five new passages. Control/settings/topic joins inspected on Windows/Mac/Linux; dynamic command-key labels and generated shortcut tables are not rendered by the helper. All 28 pending inventories and completed/source hashes match. Global reconciliation: 19326 unmarked messages, 10258 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds. One isolated in-memory SQLite query confirmed the existing unicode61 remove_diacritics 2 behavior for Croatian letters.",
+          "notes": "Reviewed ten encryption/search catalog targets, seven full original help topics and five inserted passages in three previously reviewed topics. Formal Croatian plural prose and established privitak, otisak ključa, baza pošte and podaci za prijavu retained. Partial help edits preserve every byte outside inserted passages; full topics retain all tags/attributes, literal keyboard names, command tokens and search examples. Verified encrypted index/notification/agent/lookup context. Search now describes supported Gmail-style syntax, all-recipient aliases, inclusive after dates and the actual Croatian FTS diacritic behavior (č/ć/š/ž fold; đ differs from d), without claiming minus works with every operator. Combined folders expand/collapse; account selection and original-message operations are clear. CLI sign-in file contains a URL; credentials include tokens; pinning can accept several PEM certificates. Cc/Bcc use Alt+K/Alt+S beside retained English key tags; Shift+Delete suggestions exclude saved contacts/groups; hidden reply text is not summarized. Removal clears sign-in credentials when accounts are removed first; multi-save avoids overwriting; Mac update checks are enabled by default and configurable. No test suites or builds.",
+          "changed_help_lines": {
+            "all-inboxes.html": 10,
+            "command-line.html": 9,
+            "encrypted-and-signed-mail.html": 2,
+            "encryption-keys.html": 1,
+            "keyboard-shortcuts.html": 12,
+            "options-language.html": 2,
+            "removing.html": 6,
+            "save-print-import.html": 6,
+            "search-words.html": 15,
+            "updates.html": 5
+          }
         }
       ]
     },
@@ -17618,6 +17819,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19226 unmarked messages, 10063 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Italian informal tu register and established crittografare/decrittografare, chiave privata, impronta digitale and allegato terms. Replaced literal true-subject/find-their-words phrases; option supplies agreement for interpolated command labels. Private-key availability, plaintext local index and removal on disable are explicit. Notifications always retain encrypted-message wording; agents cannot access/search encrypted content. Key lookup distinguishes addresses from fingerprints or key IDs; domain lookup remains available. Good labels/mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "it-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/it/search-words.html": "46028cd318b658de37f6014639457600b44eb69b5c65ade1dd63fd2ddef1d10c"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -22934,6 +23152,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19226 unmarked messages, 10063 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Dutch informal je register; existing versleutelen/ontsleutelen, privésleutel, vingerafdruk and bijlage terminology. Replaced literal own-subject/words phrasing. Available private keys qualify decryption; unencrypted indexed content and removal from the index are explicit. Notification labels remain unconditional. Agents cannot read/search protected content, without hiding outer metadata. Address/domain lookup and fingerprint/key-ID lookup are distinguished. All labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "nl-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nl/search-words.html": "73896ac2f9737a156c14db411d11924ce7965d5763aaa1b256f021411ca5734a"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -26669,6 +26904,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19226 unmarked messages, 10063 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "European Portuguese polite third person, encriptar/desencriptar, transferir, guardar, utilizador and pré-visualização. Replaced literal their-words/subject wording; opção gives natural feminine agreement around unchanged labels. Decryption requires an available private key; plaintext local search content is removed on disable, without promising secure erasure. Notifications always use the encrypted-message label; agent limitations cover protected contents rather than envelope metadata. Address/domain lookup differs from fingerprint/key-ID lookup. Existing labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "pt-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/search-words.html": "71468f911b1b3c0c10e59f2fe92ad9db2d471f2e89ac475408c627a15b720684"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ]
     },
@@ -38048,6 +38300,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19266 unmarked messages, 10091 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Catalan vós prose and existing xifrar/desxifrar, empremta digital, fitxer adjunt and vista prèvia terminology. Opció supplies agreement around imperative control labels. Clarified available private keys, local plaintext search content and removal from the index. Notifications always show the encrypted-message indication; agents cannot read/search protected contents. Address/domain lookup and fingerprint/key-ID lookup are distinct. Labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests. Substituted settings joins exposed de Eines/de Inbox Classic; rephrased the relative clause to work on every platform without eliding before the inserted path."
+        },
+        {
+          "id": "ca-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/search-words.html": "6134aff2b3c5c4ef95ddad03cd3b3ba8308da4d2f28ac4857b00df5586d96970"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -40115,6 +40384,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19266 unmarked messages, 10091 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Norwegian Bokmål direct du prose, KI-agent, privat nøkkel and fingeravtrykk. Replaced literal own-subject/find-words wording with tekstutdrag and the subject from the encrypted part. Available keys qualify decryption. Plaintext local search contents and logical removal on disable are explicit. Notifications always use the encrypted-message text; agent restrictions concern protected contents, not all envelope metadata. Address/domain search and fingerprint/key-ID lookup distinguished. Existing labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "nb-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nb/search-words.html": "4cc9580a545ca4d2267ebd8647a4b56a8b41acde1d0a0be5c671e7c257decfad"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -42188,6 +42474,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19226 unmarked messages, 10063 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Brazilian você register and criptografar/descriptografar, baixar, armazenar, usuário and prévia wording, distinct from the European variant. Opção fixes agreement around unchanged labels. Available private keys qualify decryption; local unencrypted content and removal from the index are explicit. Notification wording is unconditional. Agents cannot access protected content or attachments, without claiming metadata is invisible. Address/domain lookup differs from fingerprint/key-ID lookup. Search error uses natural busca de chaves; all labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "pt-BR-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt-BR/search-words.html": "7a1157091ca2db668134ae1557790fdb2919c6d27329b19724d8a498be77ad82"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -44233,6 +44536,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19266 unmarked messages, 10091 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Serbian Latin Ekavian, formal plural prose, privatni ključ, otisak ključa and prilog. Added podešavanja head noun for settings-path grammar without inflecting the placeholder; opcija supplies agreement for control labels. Available private keys qualify decryption; local plaintext content and removal from index are explicit. Notifications always retain encrypted-message text. Agent limits apply to protected contents; address/domain search and key-identifier lookup are distinct. Existing labels/mnemonics and all retained prose preserved. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "sr-Latn-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/search-words.html": "d7b93e822333859c181b599c8bc0e7ca8e7a64f6885b10eb36afb6cacad5e830"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -46251,6 +46571,23 @@
           },
           "validation": "All 46 actual mnemonic scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. Global reconciliation: 19266 unmarked messages, 10091 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
           "notes": "Turkish polite prose and established gizli anahtar, parmak izi, etki alanı, ileti, ek and yapay zeka aracısı. Used head nouns for inserted paths/labels; placeholder never takes a suffix. Shortened the keyserver label to idiomatic location wording, retaining the n mnemonic and settings sentence case. ASCII suffix apostrophes retained. Available keys qualify decryption; plaintext local contents and removal from the index are explicit. Notifications remain unconditional; agent restrictions concern protected contents. Address/domain queries differ from fingerprint/key-ID queries. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
+        },
+        {
+          "id": "tr-search-negation-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/tr/search-words.html": "efdcee81ac9cd0ef9024df98e61d29558a8565394a8e45bdc3e22da812e1b8b4"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
+          "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -49349,7 +49686,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "At d3512067: bg/cs/da/el/fi encryption additions reviewed. Six refs and guide match after this turn’s fresh fetch; root has no locale/help/settings edits. Only five known unrelated upstream paths remain unmerged. No new relevant work. All 380 since-start entries/146 passages, full inventories and current hashes reconcile. Pending 13430 catalogs/530 help; final late-arrival audit still required. REVIEWED unchanged.",
+    "latest_source_audit": "At b0bdea4a: Croatian final help/encryption review and 17 search-negation corrections completed. Six refs and guide match after fresh fetch; root has no locale/help/settings edits. Only five known unrelated upstream paths remain unmerged. All 370 since-start entries/140 passages and all current inventories/hashes reconcile. No new relevant source work. Pending 13420 catalogs/520 help, all in the ten broader drafts. Final late-arrival audit still required; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -51043,6 +51380,64 @@
         "review_commit": "d351206714b780383df33157fda646b60376d3d7",
         "new_languages": 0,
         "validation": "All six recorded refs and guide match after this turn’s fresh fetch; root has no uncommitted locale/help/settings changes. Only five previously inspected unrelated README/Linux test/CI paths remain outside the review branch. All 380 since-start entries and 146 passages match the pending queue. All 28 full inventories and current file/source hashes match. No tests run."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+            "paths": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "scripts/linux-ui-e2e-run.sh"
+            ],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "since_start_pending_catalog_entries": 370,
+        "since_start_pending_help_passages": 140,
+        "pending_catalog_entries": 13420,
+        "pending_help_topics": 520,
+        "additional_unrecorded_work": 0,
+        "root_locale_help_settings_status": [],
+        "kind": "Croatian review completed and search-negation context corrected in 18 languages",
+        "review_commit": "b0bdea4a20192c07eeb6892dfcd828d2398bb12e",
+        "new_languages": 0,
+        "validation": "All six recorded refs and guide match after this turn’s fresh fetch; root has no uncommitted locale/help/settings changes. Only five previously inspected unrelated README/Linux test/CI paths remain outside the review branch. All 370 since-start entries and 140 passages match the pending queue. All 28 full inventories and current file/source hashes match. No test suites run."
       }
     ],
     "settings_source_integration": {
@@ -61056,7 +61451,6 @@
         "search-words.html"
       ],
       "pending_languages": [
-        "hr",
         "hu",
         "lt",
         "lv",
@@ -61085,7 +61479,8 @@
         "cs",
         "da",
         "el",
-        "fi"
+        "fi",
+        "hr"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/encrypted-and-signed-mail.html": {
@@ -61525,6 +61920,54 @@
         "List encrypted/signed marks classify message protection, not signature validity or verified ownership. ListEncrypted is the preview/status placeholder when there is no decrypted snippet. Protected-subject and preview storage depends on the indexing setting.",
         "New-mail notification code always substitutes ListEncrypted for encrypted messages, independently of subsequent decryption. The list placeholder is conditional on a missing decrypted snippet. Translate these as distinct conditions."
       ]
+    },
+    {
+      "id": "search-negation-context",
+      "reason": "Source help says minus works before any search word, and some translations explicitly generalize that to every operator. query.rs::term ignores raw.negated for before/after, older_than/newer_than and larger/smaller. Avoid promising universal negation. No English or app-code edit is part of this review.",
+      "source_checkpoint": "b0bdea4a20192c07eeb6892dfcd828d2398bb12e",
+      "catalog_ids": {},
+      "help_topics": [
+        "search-words.html"
+      ],
+      "completed_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr"
+      ],
+      "pending_languages": [
+        "hu",
+        "lt",
+        "lv",
+        "pl",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk"
+      ],
+      "scope_added_catalogs": 0,
+      "scope_added_help": 0,
+      "verified_context": [
+        "Words/field searches, state/protection/attachment conditions, folders and list-id conditions carry negation. Date, age and size branches do not.",
+        "The 17 previously reviewed languages received a one-line correction; Croatian was corrected in its full original-topic review. Ten broad drafts retain this item within their existing marked search-words topic. No previously reviewed passage remains pending."
+      ],
+      "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds."
     }
   ]
 }

@@ -385,7 +385,6 @@ ui-settings-sending = Slanje
 ui-settings-default-apps = Zadane aplikacije
 ui-settings-message-list = Popis poruka
 ui-settings-messages = Poruke
-# review: new
 ui-settings-encryption = Šifriranje
 ui-settings-language = Jezik
 ui-settings-label = { $label }:
@@ -598,14 +597,10 @@ ui-trusted-senders-title = Pouzdani pošiljatelji
 ui-trusted-senders-note = Slike u porukama ovih pošiljatelja preuzimaju se automatski kad vaš davatelj usluge e-pošte potvrdi domenu pošiljatelja.
 ui-trusted-everyone-at = Svi s domene { $domain }
 ui-trusted-senders-empty = Još nije dodan nijedan pouzdani pošiljatelj.
-# review: new
 ui-search-encrypted = Pretraži &šifrirane poruke
-# review: new
-ui-search-encrypted-note = Šifrirane poruke dešifriraju se na ovom računalu nakon preuzimanja ili otvaranja kako bi se njihove riječi mogle pronaći, a popis prikazao njihov vlastiti predmet. Indeks nije šifriran i AI agenti ga nikad ne pretražuju. Isključite ovo kako biste ih uklonili iz indeksa.
-# review: new
+ui-search-encrypted-note = Ako je dostupan odgovarajući privatni ključ, Inbox Classic može dešifrirati preuzete ili otvorene poruke na ovom računalu. Tada možete pretraživati tekst, a popis prikazuje početak teksta i predmet iz šifriranog dijela, ako je ondje naveden. Dešifrirani sadržaj sprema se nešifriran u lokalni indeks pretraživanja. AI agenti ne mogu pretraživati taj sadržaj. Isključivanjem ove postavke dešifrirani sadržaj uklanja se iz indeksa.
 ui-pgp-keyserver = &Traži ključeve na keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Kad šifrirate poruku ili tražite ključ, tražena adresa šalje se na keys.openpgp.org. Najprije se pita vlastita domena adrese.
+ui-pgp-keyserver-note = Pri traženju ključa prema adresi e-pošte najprije se pretražuje domena te adrese. Po potrebi adresa se šalje na keys.openpgp.org. Ako tražite prema otisku ili identifikatoru ključa, šalje se taj identifikator umjesto adrese.
 ui-eml-default = Otvaraj &datoteke .eml u programu Inbox Classic
 ui-eml-default-done = Inbox Classic sada otvara datoteke .eml.
 ui-eml-default-failed = Inbox Classic nije moguće postaviti kao zadanu aplikaciju za datoteke .eml: { $reason }
@@ -616,9 +611,7 @@ ui-columns-note = Prozor je dovoljno širok za raspored u stupcima. Raspored mo�
 ui-row-unread = Nepročitano
 ui-row-flagged = Označeno zastavicom
 ui-row-attachments = Ima privitke
-# review: new
 ui-row-encrypted = Šifrirano
-# review: new
 ui-row-signed = Potpisano
 ui-row-messages = { $count ->
     [one] { $count } poruka

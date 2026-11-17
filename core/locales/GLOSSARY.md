@@ -395,6 +395,11 @@ Review notes (round 2):
   describe retries as attempts, not delivery promises. Damaged mail may be unreadable by this app, not all apps.
   Browser sign-in is required for Outlook.com; Gmail app passwords depend on account eligibility and two-step
   verification. Two-step verification alone does not mean an app password is needed.
+- Search syntax stays literal. The search index folds č/ć/š/ž, but đ and d remain distinct. Do not promise that
+  a minus negates every operator: date, age and size filters currently ignore it. `after:` includes the given day.
+- The sign-in-page file contains a URL. Account removal clears saved sign-in credentials, including browser tokens.
+  Address suggestions use "Unos odabrane adrese", not "Preuzimanje osobe"; removing an automatic suggestion leaves
+  saved Address Book contacts and groups intact. Combined views are "prošireni" / "sažeti", not open/closed folders.
 
 ### Italiano (it)
 

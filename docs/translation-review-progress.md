@@ -24,29 +24,29 @@ Commit completed batches regularly and preserve an exact resume point.
   broader language drafts still require those corrections. Fresh fetch at 27d00888 found all six source tips
   unchanged; origin/master remains 5c645187 with unrelated README/Linux test/CI changes left unmerged.
   No new translation/help or app-behavior changes. Fresh fetch at 0190587f confirms unchanged refs and guide.
-  Croatian's catalogs and 45 help topics are reviewed; seven topics remain in the integrated scope. Its prior
-  three settings-context followups are complete. Password troubleshooting is now corrected in Croatian and
+  Croatian's catalogs and all 52 help topics are now reviewed, including the encryption/search additions.
+  Its three prior settings-context followups are complete. Password troubleshooting is corrected in Croatian and
   the 17 previously completed languages; the ten broader drafts retain it.
 - Encryption/search feature `38841d96`, observed in origin/master merge `08c9ef12`, is now integrated after
-  reviewed checkpoint `3aa142c1`, committed as `c83a2e31`. All 17 previously completed languages are caught up:
-  de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi. Each has ten catalog targets and seven inserted
-  passages in four help topics reviewed. NEXT Croatian: ten catalog targets, the inserted passages in three
-  reviewed topics, and the full original search-words topic. Its other six original topics follow. The focused
-  encryption helper needs adapting for Croatian's whole-topic mark and ten pending help topics.
-  Exact IDs and retained-prose provenance are in `encryption-search-context`; 11 languages remain pending.
-  Original reviewed text is retained. Check the verified decryption/index/agent/key-lookup context in state.
-  Then finish Croatian's all-inboxes/command-line/keyboard-shortcuts/removing/save-print-import/search-words/
-  updates and the ten broader language queues. Do not restart full reviews.
+  reviewed checkpoint `3aa142c1`, committed as `c83a2e31`. All 18 earlier languages are caught up:
+  de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. Croatian's seven original help topics and
+  encryption additions are finished. The shared search-negation overclaim is corrected in all 18 languages;
+  the ten broader drafts retain it within their existing marked search-words topic. Exact context/provenance
+  is in `encryption-search-context` and `search-negation-context`.
+  NEXT Hungarian app.ftl: 647 pending IDs. Then core.ftl 450, help.ftl 24, linux.ftl 87, mac.ftl 65,
+  windows.ftl 69 and 52 help topics. Continue lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All prior context followups
+  remain relevant to those drafts. Do not restart completed reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,712 catalog entries and 1,316 help topics; 13,430 entries and 530 topics are pending after seventeen languages’ encryption reviews.
+  32,712 catalog entries and 1,316 help topics; 13,420 entries and 520 topics remain, all in the ten broader drafts.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
   further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
-  have 54 more. Four provider introductions have subsequent corrections; 45 help topics are reviewed, with
-  seven original topics remaining, plus the new encryption passages. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  have 54 more. Four provider introductions have subsequent corrections. All 52 Croatian help topics and
+  the encryption additions are now reviewed; the final catalog batch adds four improvements. Continue the
+  ten broader language drafts in the order recorded above.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -1659,11 +1659,44 @@ no new languages or unrecorded work were found. Croatian is next. Its search-wor
 so review the entire topic along with the inserted encryption passages in the other three affected topics. Then
 finish all-inboxes, command-line, keyboard-shortcuts, removing, save-print-import and updates.
 
-Current totals: 19,282 catalog entries and 786 help topics completed in the active scope; 3,252 historical
-catalog value improvements. Remaining: 13,430 catalog entries and 530 help topics. Seventeen languages have no
-pending work. Croatian has ten catalog targets and ten pending help topics (seven original plus three reopened).
-The ten broader queues are hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, including their encryption and other context followups.
-`REVIEWED` is unchanged.
+### Croatian review completed; shared search-negation wording corrected
+
+Reviewed Croatian's ten encryption/search catalog targets and all ten remaining help topics: seven original
+full topics plus five inserted passages in three previously reviewed topics. Improved four catalog values and
+68 help lines, excluding mark removal. Croatian now has no pending catalog entries or help topics.
+
+The new encryption prose describes available keys, unencrypted local indexing, index cleanup, conditional list
+previews, unconditional notification labels, protected contents unavailable to agents and address versus key-ID
+lookup. Original help now uses expanded/collapsed combined views, actual account selection, URL output for the
+sign-in-page option, broad sign-in credentials, Croatian Alt+K/Alt+S beside the original Cc/Bcc keyboard tags,
+and address selection rather than “taking a person”. Removing suggestions leaves saved contacts/groups intact.
+Uninstall instructions distinguish local data from server mail. Multi-message export avoids overwriting existing
+files; Mac update checks are enabled by default and configurable. Localized Windows/Mac/Linux joins were inspected.
+
+Search examples and all literal command/keyboard tokens are preserved. The search page describes supported
+Gmail-style syntax, common recipient aliases, inclusive after dates and actual Croatian diacritic behavior:
+č/ć/š/ž match their unaccented forms, while đ and d differ. Verified this with an isolated in-memory SQLite query
+using the app's configured tokenizer, without running any project test suite.
+
+Code review also exposed a source-help overclaim: minus does not negate date, age or size filters. Corrected that
+one table sentence in the 17 previously completed languages, retaining every other byte. Croatian received the
+correction during its full review. `search-negation-context` records the evidence and the ten broader drafts still
+to process. This adds no new scope or pending topics because those drafts already have search-words marked.
+
+Croatian passes all 46 shortcut collision scopes. It and the 17 search-only followups have exactly 1,404 expected
+removed-mark diagnostics each and no structural findings. All help tags, attributes and literal tokens match.
+The preview helper substitutes control/settings/topic labels; dynamic command-key labels and generated shortcut
+tables are outside that preview. All 28 inventories and current file/source hashes reconcile, covering 19,326
+unmarked messages, 10,258 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check
+passes. No test suites or builds run. Previous checkpoint: `b0bdea4a`.
+
+Fresh fetch found the same six source refs and guide, no root locale/help/settings edits and no new languages.
+Only five known unrelated upstream paths remain unmerged. The 370 since-start entries and 140 passages match
+the pending queue. Hungarian is next, beginning with its 647 pending app.ftl entries.
+
+Current totals: 19,292 catalog entries and 796 help topics completed in the active scope; 3,256 historical
+catalog value improvements. Remaining: 13,420 catalog entries and 520 help topics, all in hu/lt/lv/pl/ro/ru/sk/sl/sv/uk.
+All 18 earlier languages have no pending work. `REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
