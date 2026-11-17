@@ -9,15 +9,11 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue key-storage-autocrypt-context: three inserted passages per earlier language, next nl/it/pt/pt-BR, then ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. de/es/et/fr are complete. Preserve every byte outside the new marks (parent e33a6887). Source help imported as7491abc8 from255205aa; full28-source integration already structurally validated. Ten broad drafts retain whole-topic marks and receive these passages during full help reviews. Then Hungarian core450/help24/linux87/mac65/windows69 and52topics, followed by lt/lv/pl/ro/ru/sk/sl/sv/uk. Use actual manual/address/key-ID lookup, separate encryption key with credentials, optional public-key sharing and key ownership distinction. Hungarian app647 complete,83 improvements. Active scope32716/1320; pending12773/562; completed19943/758; historical catalog improvements3357. No tests/builds; REVIEWED unchanged. Reuse current helpers; audit help preview trims each nonempty line as scanHelp does.",
+  "next_batch": "Hungarian core.ftl450 pending entries, then help.ftl24/linux.ftl87/mac.ftl65/windows.ftl69 and all52 help topics. Hungarian app647 complete,83 improvements. All18 earlier languages are caught up, including54 late key-help passages. Then lt/lv/pl/ro/ru/sk/sl/sv/uk. Ten broad drafts retain provider, encryption/search, search-negation, Undo Send and key-storage/Autocrypt context followups within their pending entries/topics. Preserve actual manual/address/key-ID lookup, separate protection key with credentials, optional public-key sharing and unverified ownership. Scope32716/1320; pending12773/520; completed19943/800; historical catalog improvements3357. No tests/builds; REVIEWED unchanged. Helpers and source audit recorded; check upstream again at the next source checkpoint and after the full queue.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "bg-app-round2",
@@ -2097,16 +2093,35 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "bg-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/bg/connections.html": "f0b34ba7c634539bb4e06822f0f464954f84dbcb2e4e93b667ec0a6ff3142b97",
+            "core/crates/pe-html/help/bg/data-storage.html": "a22c16428f62b0fa027edbd4b368908574c8b188d07fbe0e3d3709b392d1d3ca",
+            "core/crates/pe-html/help/bg/encryption-keys.html": "54503c535c0196752a5874586e22ebad08e8bb7e5d46515d63a05104679d0303"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Polite lowercase вие; данни за влизане includes browser sign-in. Public/private key and fingerprint terminology follows the catalogs. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
     "cs": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "cs-loading-round2",
@@ -4203,16 +4218,35 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "cs-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/cs/connections.html": "8725dad3bbee9b93aba9c9df8c8ea93515d67e2bc1e6ce287e2955b653163038",
+            "core/crates/pe-html/help/cs/data-storage.html": "9767798259b9611bcc362fac9beec1da88e71c0c34a07222fec9f92a60d0afc1",
+            "core/crates/pe-html/help/cs/encryption-keys.html": "509c73ba0c0337cd7a5677b0d92de88181000a49c0214c95099a80ea8c75bb33"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Formal lowercase vy; přihlašovací údaje covers browser sign-in. Otisk, soukromý/veřejný klíč and karta follow existing help and catalog wording. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
     "da": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "da-loading-round2",
@@ -6271,6 +6305,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "da-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/da/connections.html": "537bded52d95ac84de3974d06934ef328bbce54a3d353d5f94cb3a2d207c7b88",
+            "core/crates/pe-html/help/da/data-storage.html": "d79b187b2ae600d7d0b50f59f8ac4a0a2404607ec15c6422893727337a781b97",
+            "core/crates/pe-html/help/da/encryption-keys.html": "5eb9a09a6bb5845bd99568774286e23425ffda42e2b49f7064cc5bed5c490ff1"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Informal du; meddelelse for a message and mail for mail generally. Loginoplysninger includes browser sign-in; fingeraftryk/nøgle-id follows the lookup note. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
@@ -6868,11 +6925,7 @@
     },
     "el": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "el-loading-round2",
@@ -8931,6 +8984,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "el-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/el/connections.html": "7d80af852035fd805c9ab7603fe56e29380994dec6cd836baa0b8d5331ab0c48",
+            "core/crates/pe-html/help/el/data-storage.html": "a4aea91bcef868a3f875b0f7d188cf0b271819f0d1b3602a0cc0bc71f82159c8",
+            "core/crates/pe-html/help/el/encryption-keys.html": "e39c278fc76c31bc3858bbfc2c8b8639fe51519de121de0baa7a7d207ec0668b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Polite plural; στοιχεία σύνδεσης covers browser sign-in. Control names remain nominative after επιλογή/καρτέλα; αποτύπωμα/αναγνωριστικό agrees with the lookup note. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
@@ -10125,11 +10201,7 @@
     },
     "fi": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "fi-loading-round2",
@@ -12195,6 +12267,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "fi-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fi/connections.html": "b6e5479fca5cd692d8cf0ce05f62f114e566cb7ffce8d798ac483d153294e744",
+            "core/crates/pe-html/help/fi/data-storage.html": "b46de579bf9b4cfbe2e53af1aa3d689d3e156a1adc50ddc9160e70d865953592",
+            "core/crates/pe-html/help/fi/encryption-keys.html": "e8d937f2a5c7079f897394f6f53eb055f3ee9f83eef62dfc67e06f02a447c916"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Informal singular; postitietokanta, kirjautumistiedot and salauksen purkaminen follow the glossary. The long checkbox uses quoted asetus, with the case carried by välilehdellä. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
@@ -12805,11 +12900,7 @@
     },
     "hr": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "hr-loading-round2",
@@ -14741,6 +14832,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "hr-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hr/connections.html": "ea23708ec06f7567c2bd40e99aecaaaefae2cf828490471b4ef65fabd00eabc6",
+            "core/crates/pe-html/help/hr/data-storage.html": "5745fe3250db644ad82c7d78ef5d35ded4b3b7b39f064549dacde60364f13fdf",
+            "core/crates/pe-html/help/hr/encryption-keys.html": "de367821bcb89083220acf1beb0ef332478476471aff64244025d4918d93ba79"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Formal plural; baza pošte and podaci za prijavu follow the glossary. The quoted checkbox name is introduced by mogućnost; otisak refers to the key, not a human fingerprint. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
@@ -16325,11 +16439,7 @@
     },
     "it": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "it-app-round2",
@@ -18595,6 +18705,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "it-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/it/connections.html": "77d55ab914925eba8b7da79a66c72900367bff13ab6099ec0fabec36dcf79768",
+            "core/crates/pe-html/help/it/data-storage.html": "3296a45982ad3912324f41b30734dddeeeb5c57f9ca9280e2c51ed0659abbb58",
+            "core/crates/pe-html/help/it/encryption-keys.html": "6b27e5dcf519c200df8ec09b550654ad9af380ee9c88b050fb864517b4430ae7"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained informal tu, chiave privata/pubblica, impronta digitale and credenziali di accesso; control-label joins use opzione and scheda. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
@@ -21728,11 +21861,7 @@
     },
     "nl": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "nl-app-main-compose-accounts-round2",
@@ -24030,6 +24159,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "nl-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nl/connections.html": "fc043b4f1ddfb8f0e4136844d4d177e40808f59dbcaddd9b412bfd5861a3236f",
+            "core/crates/pe-html/help/nl/data-storage.html": "b01925a2d8a13d83859545ca62b46c080241c8dd040aeaacd75d14fca126dc02",
+            "core/crates/pe-html/help/nl/encryption-keys.html": "73392506d7bab08e0de4d478f915e9b60c9a332f4aa81cca86af26a369a0d846"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained informal je, openbare sleutel/privésleutel and aanmeldgegevens; avoided literal keys travelling and an app learning a person’s key. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
@@ -25599,11 +25751,7 @@
     },
     "pt": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "pt-app-round2",
@@ -27868,6 +28016,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "pt-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/connections.html": "47f8176e25232cb81d7eadfab8b895d142eaee8de98344270dbba9f512da2693",
+            "core/crates/pe-html/help/pt/data-storage.html": "6d83007b98aee0d6f3af10e90122d0d0fd0b28a83dacc6df9e4e88b280767a3c",
+            "core/crates/pe-html/help/pt/encryption-keys.html": "1978c54d63f5de23d9f23c1915e26a206a0a4f88d02f0aa7a60787dfa7b3f095"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained European Portuguese ficheiro/base de dados, encriptação, polite third person without você, and credenciais de início de sessão. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ]
     },
@@ -37257,11 +37428,7 @@
     },
     "ca": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "ca-app-round2",
@@ -39438,6 +39605,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "ca-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/connections.html": "4dba916038fa6fc9115b334d82ae352d12da0de9cd6ce2701b7f963c7f9ec475",
+            "core/crates/pe-html/help/ca/data-storage.html": "646d5a43589290befa0c884ea656aa4d360c4dc27a301e87da404ed9dee2ab14",
+            "core/crates/pe-html/help/ca/encryption-keys.html": "a495c34e987c81859f434f7531f1ee84605b19e314e354248b1db545a9fe81ad"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained vós prose, fitxer, xifratge/desxifrar, empremta digital, and credencials d’inici de sessió; used head nouns for interpolated control labels. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -39446,11 +39636,7 @@
     },
     "nb": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "nb-app-round2",
@@ -41588,6 +41774,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "nb-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nb/connections.html": "26e0314183da673d4acfc888d44fd5dfe78dd62e41ec71aa5ca52d756da68db0",
+            "core/crates/pe-html/help/nb/data-storage.html": "82d1b0eb30ab3ef9ad84e57e4a60a4f79f9bdabe28a6c2b5b558ace992c6584f",
+            "core/crates/pe-html/help/nb/encryption-keys.html": "3d0182a82044fef4e3b9dca90bc04faa7c981eb97a4bb8bd05095e9942ac6a8e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained du, offentlig/privat nøkkel, fingeravtrykk and påloggingsopplysninger; keys are saved or sent rather than learned by an app. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -41596,11 +41805,7 @@
     },
     "pt-BR": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "pt-BR-app-round2",
@@ -43744,6 +43949,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "pt-BR-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt-BR/connections.html": "d305d2564634a72e61d106d36c6c9fb1e8650ba40ec0cdbfe5756a4777fa292f",
+            "core/crates/pe-html/help/pt-BR/data-storage.html": "474a5917efb68422286ed35149ce44ef96eb54ee1237c18b4e5b87cf7b451b94",
+            "core/crates/pe-html/help/pt-BR/encryption-keys.html": "c20bfa1c90f6e452991b1cb67cfb57bc94e309b2f0a970be93f4c34fa2945f0c"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained Brazilian arquivo/banco de dados, criptografia, aplicativos, você and credenciais de login, keeping the variant distinct from pt-PT. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -43752,11 +43980,7 @@
     },
     "sr-Latn": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "sr-app-round2",
@@ -45872,6 +46096,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "sr-Latn-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/connections.html": "2e9926850747613663fb8d09ec01fbd8a1f8c3a71389978899029cafe5a208f5",
+            "core/crates/pe-html/help/sr-Latn/data-storage.html": "5f507d1aa0b2337b9ee5f9e2936410066a27a6cfcb5be727648d06d1ea58d17e",
+            "core/crates/pe-html/help/sr-Latn/encryption-keys.html": "7ea3603495f8f3436b0d6ae6df797c826cb9c4e062cd25ac893d6b270a78f24b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained Serbian Ekavian and formal plural, nalog/datoteka/pošiljalac, otisak ključa and podaci za prijavu; no Croatian terminology introduced. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -45880,11 +46127,7 @@
     },
     "tr": {
       "pending_catalogs": {},
-      "pending_help": [
-        "connections.html",
-        "data-storage.html",
-        "encryption-keys.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "tr-app-round2",
@@ -47973,6 +48216,29 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "tr-key-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/tr/connections.html": "ed158c91de9b6e5bf492cd211af84c6e57933d1ab2e5fb6b302d8fb3618a3358",
+            "core/crates/pe-html/help/tr/data-storage.html": "b6d63393d43d9310e2d281c22d06b79b0f906e42e47163969f7ddf46a0416898",
+            "core/crates/pe-html/help/tr/encryption-keys.html": "1bd81ffe256c795c44caeafe330df4569fdbbe927e70b931edfc39877112af20"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/encryption-keys.html": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained polite Turkish, etki alanı, gizli/ortak anahtar and oturum açma bilgileri; suffixes are on sekme/seçenek rather than dynamic control names. No test suites or builds.",
+          "changed_help_lines": 3
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -51327,7 +51593,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "After source integration7491abc8: de/es/et/fr three inserted key help passages each reviewed. All seven observed refs/guide unchanged; root has no relevant edits. All339 since-start entries/202 passages and current inventories/hashes reconcile. Remaining key additions:14 earlier languages with three focused passages each, plus ten full draft languages with these topics already pending. Source-only help import255205aa; other hardening code/docs/tests untouched. Scope32716/1320, pending12773/562, completed19943/758. REVIEWED unchanged.",
+    "latest_source_audit": "After ed362530: remaining14 earlier languages each completed three inserted key-help passages; all18 earlier languages caught up. Seven refs audited after fresh fetch; no new translation/help edits or languages, guide unchanged and root has no relevant edits. Exact imported help source255205aa verified; non-help branches untouched. Since-start339 entries/160 passages and full inventories/current hashes reconcile. Scope32716/1320, pending12773/520, completed19943/800. REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -53329,6 +53595,196 @@
         "review_commit": "7491abc8318154fbb0cfd03f4304526000ef047f",
         "new_languages": 0,
         "validation": "All seven observed source refs and guide unchanged after this turn’s fetch and latest comparison. Root has no relevant edits. All339 since-start entries/202 passages and current full inventories/hashes match. Source-only help integration retains original prose; non-help branch changes remain untouched. No tests."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "76504947cc7d30ca8536024511a8fc614536d1a5"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 5,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "scripts/linux-ui-e2e-run.sh"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "README.md": 1,
+              "linux/Dockerfile": 1,
+              "linux/src": 1,
+              "scripts/linux-ui-e2e-run.sh": 1
+            }
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16815,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/ci.yml",
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "README.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/fuzz/.gitignore",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/Dockerfile",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/linux-ui-e2e-run.sh",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 2,
+              "CLAUDE.md": 1,
+              "README.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 8,
+              "core/fuzz": 16781,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/Dockerfile": 1,
+              "linux/src": 8,
+              "mac/Sources": 3,
+              "scripts/linux-ui-e2e-run.sh": 1,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "3afef3c18315e5d952ac1b32c103a6670f2ee09c4ed27eea854b23c692d49ab2",
+            "complete_path_list_artifact": "/private/tmp/inbox-key-help-remaining14-unmerged-chore-pgp-hardening.txt"
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 16815,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          ".github/workflows/ci.yml",
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "README.md",
+          "app/CMakeLists.txt",
+          "app/src/main.cpp",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "core/fuzz/.gitignore",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/Dockerfile",
+          "linux/src/agents.rs",
+          "linux/src/app.rs",
+          "linux/src/e2e.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "linux/src/mailbox.rs",
+          "mac/Sources/InboxClassic/App.swift",
+          "mac/Sources/InboxClassic/MainWindow.swift",
+          "mac/Sources/InboxClassic/UITestSteps.swift",
+          "scripts/linux-ui-e2e-run.sh",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e.ps1",
+          "scripts/ui-e2e/SCENARIO.md"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {},
+        "since_start_pending_catalog_entries": 339,
+        "since_start_pending_help_passages": 160,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12773,
+        "pending_help_topics": 520,
+        "additional_unrecorded_work": 0,
+        "kind": "Key help additions completed in remaining14 earlier languages",
+        "review_commit": "ed3625307643cb9a52a988900adf46a230e55855",
+        "new_languages": 0,
+        "validation": "Fresh fetch and all seven observed refs checked; no new translation/help edits or languages since the previous source checkpoint. Imported87 help files still match recorded source hashes; English import unchanged. Guide unchanged; root has no locale/help/settings edits. Full inventories and current hashes reconcile. Non-help changes on source branches, including new UI/fuzz work, remain outside the review and untouched. No tests."
       }
     ],
     "settings_source_integration": {
@@ -58291,7 +58747,7 @@
           "source_sha256": "71870307517b7c9876558f0e1715bb81bcb77deedabcdb74e68f09c5114d2128"
         }
       },
-      "status": "integrated;12 of84 inserted translated passages reviewed in de/es/et/fr;72 remain pending",
+      "status": "integrated;54 of84 inserted translated passages reviewed in all18 earlier languages;30 remain in the ten broader draft languages",
       "other_changed_paths": [
         ".github/workflows/ci.yml",
         ".github/workflows/pgp-interop-suite.yml",
@@ -58590,7 +59046,21 @@
         "de",
         "es",
         "et",
-        "fr"
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr"
       ]
     }
   },
@@ -64695,36 +65165,36 @@
         "encryption-keys.html"
       ],
       "pending_languages": [
-        "bg",
-        "cs",
-        "da",
-        "el",
-        "fi",
-        "hr",
         "hu",
-        "it",
         "lt",
         "lv",
-        "nl",
         "pl",
-        "pt",
         "ro",
         "ru",
         "sk",
         "sl",
         "sv",
-        "uk",
-        "ca",
-        "nb",
-        "pt-BR",
-        "sr-Latn",
-        "tr"
+        "uk"
       ],
       "completed_languages": [
         "de",
         "es",
         "et",
-        "fr"
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr"
       ],
       "scope_added_catalogs": 0,
       "scope_added_help": 4,
@@ -65011,7 +65481,7 @@
         "connections insertion incorrectly restricts requests to encryption and claims address-only lookups; explicit lookups also exist and may send a fingerprint/key ID",
         "Autocrypt insertion should describe optional public-key sharing and receiving a usable key, without implying ownership verification or guaranteed encryption by other apps"
       ],
-      "validation": "All twelve inserted passages retain exact tags/attributes, literal code/keyboard tokens and every byte outside the new passages. check-language for de/es/et/fr has exactly 1404 expected removed-mark diagnostics each and no structural findings. Substituted Autocrypt/Security controls inspected on Windows/Mac/Linux, with correct sentence joins; dynamic command-key labels are outside the preview helper. All 28 full inventories and pending marks match; completed/source hashes reconcile globally:19977 unmarked messages,10270 changed help lines,14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds. Four languages complete; all other language additions remain pending."
+      "validation": "All 54 new passages in the 18 earlier languages are reviewed. The latest14-language batch improves42 passages with exact preservation outside the insertions. check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds. The remaining30 insertions stay marked within full help topics in the ten broad drafts."
     }
   ]
 }

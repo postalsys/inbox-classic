@@ -36,8 +36,8 @@ Commit completed batches regularly and preserve an exact resume point.
   Hungarian app.ftl is now complete: 647 entries, 83 improvements and all 46 shortcut scopes passing.
   Help source `255205aa` from `chore/pgp-hardening` (observed at `80d02fcc`) is now integrated:
   one inserted passage in connections/data-storage/encryption-keys in every language and English. Every byte
-  of prior reviewed prose is preserved. The de/es/et/fr insertions are now reviewed. NEXT nl/it/pt/pt-BR,
-  then ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. Ten broad drafts retain their full-topic marks.
+  of prior reviewed prose is preserved. All 54 insertions in the 18 earlier languages are now reviewed.
+  Ten broad drafts retain their full-topic marks, including the remaining 30 insertions. NEXT: Hungarian core.ftl.
   Exact source/retained-review provenance
   is in `key_help_source_integration` and `key-storage-autocrypt-context`. Preserve the source worktree's
   unrelated uncommitted UI/fuzz work. Only the help source commit was imported.
@@ -46,7 +46,7 @@ Commit completed batches regularly and preserve an exact resume point.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,716 catalog entries and 1,320 help topics; 12,773 entries and 562 topics remain in the integrated queue.
+  32,716 catalog entries and 1,320 help topics; 12,773 entries and 520 topics remain in the integrated queue.
   The key help additions bring four round-1 topics into scope and reopen 50 counted topics; 30 full drafts
   already had the affected topics pending. Previously reviewed passages have not been discarded.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
@@ -1786,7 +1786,7 @@ All seven observed source refs and the guide remain unchanged; root has no relev
 entries and 202 passages match the queue. The help-only import leaves non-help changes and the active source
 worktree untouched. Next: nl/it/pt/pt-BR, then the other ten earlier languages listed in Resume here.
 
-Current totals: 19,943 catalog entries and 758 help topics fully completed; 3,357 historical catalog improvements.
+At that checkpoint: 19,943 catalog entries and 758 help topics fully completed; 3,357 historical catalog improvements.
 Remaining: 12,773 catalog entries and 562 help topics. Of those help topics, 42 need only their new insertion;
 520 belong to the ten broader language drafts. Scope: 32,716 entries and 1,320 topics. `REVIEWED` unchanged.
 
@@ -1796,3 +1796,34 @@ consistency findings when reviewing their encryption, transfer, attachment and f
 Additional context for later languages: a TLS-required server response does not prove the password valid;
 a malformed message is unreadable by this app, not necessarily every mail app. Attachment opening uses an
 external handler after saving a temporary copy. The sign-in-page-file switch writes a URL, not page HTML.
+
+
+### Remaining key help additions reviewed in all earlier languages
+
+Reviewed and improved all 42 inserted passages in Dutch, Italian, European and Brazilian Portuguese, Catalan,
+Norwegian Bokmål, Serbian Latin, Turkish, Bulgarian, Czech, Danish, Greek, Finnish and Croatian. All 18 earlier
+languages are caught up again. Every byte outside the new passages is preserved. The 30 insertions in the ten
+broader drafts remain marked within their full topics and will be reviewed with those topics.
+
+Key lookup includes explicit requests and distinguishes addresses from fingerprints or key IDs. Private keys
+are encrypted in the local mail database with a separate protecting key held with sign-in credentials. Autocrypt
+sharing depends on the sending address's assigned key and setting; receiving a sender's public key when opening
+a message does not verify its owner. Each language retains its established register and technical terminology.
+Replaced literal descriptions of keys travelling, learning a contact, and files opening keys with natural prose.
+
+All 14 check-language runs report exactly 1,404 expected removed-mark diagnostics each and no structural findings.
+Tags, attributes, literal code/keyboard tokens and platform branches are intact. Autocrypt/Security sentence joins
+were inspected with the actual labels on Windows, Mac and Linux. Croatian quotes were aligned with the glossary
+and its checks repeated. All 28 full inventories, pending marks and current translation/source hashes reconcile:
+19,977 unmarked messages, 10,312 changed help lines and 14 verified baseline pairs. HTML regenerated;
+git diff --check passes. No test suites or builds run. Previous checkpoint: `ed362530`.
+
+Fresh fetch and all seven observed refs show no additional translation edits or languages. The guide is unchanged;
+root has no relevant edits. The exact imported source for all 87 help files is still verified. Other source-branch
+changes, including UI behavior and fuzz corpora, remain outside this review and untouched. The 339 since-start
+entries and 160 passages match the queue. State records the audit with compact counts for the large corpus tree.
+
+Current totals: 19,943 catalog entries and 800 help topics fully completed; 3,357 historical catalog improvements.
+Remaining: 12,773 catalog entries and 520 help topics in hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Scope: 32,716 entries and
+1,320 topics. Next: Hungarian core.ftl (450 entries), then its remaining catalogs and all 52 help topics.
+`REVIEWED` remains unchanged until the full queue and final late-arrival audit are complete.

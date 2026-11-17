@@ -7,7 +7,7 @@
     <li><b>Merkelogoer</b> (BIMI), fra HTTPS-adressen til merket når meldingen ikke inneholder logoen og en lagret kopi ikke kan brukes. Nedlastede logoer lagres og gjenbrukes, også etter at programmet er startet på nytt. Dette skjer bare når e-postserveren din har godkjent DMARC-kontrollen av meldingen og godkjent logoen.</li>
     <li><b>Bilder fra Internett</b>, når du ber om dem, eller automatisk i samsvar med bildeinnstillingene dine.</li>
     <li><b>Avmelding</b>, bare når du klikker den. En ettklikksforespørsel (RFC 8058) sendes bare når listen har signert meldingen med DKIM.</li>
-<!--review-->    <li><b>Krypteringsnøkler</b>, bare når du krypterer til noen du ikke har nøkkelen til: domenet til adressen (Web Key Directory), deretter keys.openpgp.org hvis du ikke har slått det av. Bare adressen sendes.</li><!--/review-->
+    <li><b>Krypteringsnøkler</b> søkes opp når en mottakers nøkkel mangler ved kryptering, eller når du ber om et nøkkelsøk. Ved søk på e-postadresse spør Inbox Classic først domenet til adressen (Web Key Directory). Om nødvendig sendes adressen deretter til keys.openpgp.org, hvis dette søket er slått på. Ved søk på fingeravtrykk eller nøkkel-ID sendes denne identifikatoren til keys.openpgp.org i stedet for en e-postadresse.</li>
     <!--os:mac--><li><b>Oppdateringer</b>, fra inboxclassic.com, for å se om en ny versjon er kommet.</li><!--/os-->
 </ul>
 <p>Påloggingskoder tilbys bare når Authentication-Results-hodet fra leverandøren din sier at domenet har signert meldingen (DKIM). Dette krever ingen egen tilkobling.</p>

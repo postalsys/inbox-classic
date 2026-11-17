@@ -7,7 +7,7 @@
     <li><b>Brandlogoer</b> (BIMI), fra brandets HTTPS-adresse, når meddelelsen ikke indeholder logoet, og et gemt logo ikke kan genbruges. Logoer gemmes og genbruges, også efter genstart. Det sker kun, når din mailserver har godkendt meddelelsens DMARC-kontrol og logoet.</li>
     <li><b>Billeder fra internettet</b>, når du tillader det for meddelelsen, afsenderen eller domænet eller har slået automatisk hentning til i indstillingerne.</li>
     <li><b>Afmelding</b>, kun når du klikker på den. En anmodning med ét klik (RFC 8058) sendes kun, når listen har signeret meddelelsen med DKIM.</li>
-<!--review-->    <li><b>Krypteringsnøgler</b>, kun når du krypterer til en, hvis nøgle du ikke har: adressens eget domæne (Web Key Directory) og derefter keys.openpgp.org, medmindre du har slået det fra. Kun adressen sendes.</li><!--/review-->
+    <li><b>Krypteringsnøgler</b> søges, når du krypterer en meddelelse og mangler modtagerens nøgle, eller når du selv starter en søgning. Ved søgning med en e-mailadresse kontakter Inbox Classic først adressens domæne (Web Key Directory). Hvis nøglen ikke findes, og søgning på keys.openpgp.org er slået til, sendes adressen også dertil. Ved søgning med et fingeraftryk eller nøgle-id sendes denne identifikator til keys.openpgp.org i stedet for e-mailadressen.</li>
     <!--os:mac--><li><b>Opdateringer</b>, fra inboxclassic.com, for at se, om der er kommet en ny version.</li><!--/os-->
 </ul>
 <p>Loginkoder vises kun særskilt, når udbyderens Authentication-Results-header bekræfter afsenderens domæne via DKIM. Genkendelsen foregår lokalt og kræver ingen særskilt forbindelse.</p>
