@@ -19,7 +19,8 @@ Commit completed batches regularly and preserve an exact resume point.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
   German, Spanish, Estonian, French, Dutch, Italian, European and Brazilian Portuguese settings are complete,
   including the encrypted-image exception. Fresh upstream audit at baac8a3b found no additional work.
-  Fix download-help label separators in de/es/et/fr/it/pt, then Catalan: 27 entries and 11 help topics pending.
+  Download-help label separators are now fixed in the eight completed settings languages.
+  Continue Catalan: 27 catalog entries and 11 help topics pending.
   Then process nb/sr-Latn/tr/bg/cs/da/el/fi and
   Croatian app before returning to the remaining initial reviews. Exact source IDs/topics are in state.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
@@ -1023,6 +1024,21 @@ checkpoint: `085f2668`.
 The help renderer strips trailing colons from catalog labels. Brazilian Portuguese download help now supplies its
 own separator; fix the same missing separator in de/es/et/fr/it/pt before Catalan. Dutch already has a full sentence.
 The glossary records the renderer behavior for later reviews.
+
+### Rendered download-label punctuation followup completed
+
+Added explicit separators after the download-field label in German, Spanish, Estonian, French, Italian and European
+Portuguese. The renderer removes the catalog colon, so the original help ran the label into the following sentence.
+Adjusted capitalization and preserved the French nonbreaking space before the colon. Dutch already has a full
+sentence; Brazilian Portuguese was corrected in its settings batch. These six edits do not add completion counts.
+
+All six check-language runs report only the 1,395 deliberate missing marks. Exact markup and other text are preserved;
+joined sentences were inspected with substitutions matching the renderer. Completed/source hashes reconcile with
+18,185 unmarked messages and 8,080 changed help lines, including 14 verified moved baseline pairs. Report regenerated;
+git diff --check passes. No tests run. Brazilian Portuguese checkpoint: `6605b96a`.
+
+Continue Catalan. In each later language, complete `settings-pages-context`, `encrypted-image-permission` and
+`help-label-punctuation` together; the latter two concern topics already pending in the settings queue.
 
 Current totals: 18,151 catalog entries and 621 help topics completed in the active scope; 2,909 historical
 catalog value improvements. Remaining: 14,289 catalog entries and 671 help topics. Earlier context followups

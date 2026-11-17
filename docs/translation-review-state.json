@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Fix the missing separator after the rendered download-field label in de/es/et/fr/it/pt download-ahead help (words() strips the catalog colon; nl and pt-BR joins are correct), then Catalan (ca) settings: 27 catalog entries and 11 help topics. de/es/et/fr/nl/it/pt/pt-BR settings and encrypted-image followups complete. Then nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app before remaining initial reviews. Use 46 mnemonic scopes and glossary context/source-error notes. Source audit at baac8a3b found no additions beyond bd4a2bd1. Pending 14289 catalogs and 671 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Continue Catalan (ca) settings: 27 catalog entries and 11 help topics. de/es/et/fr/nl/it/pt/pt-BR settings, encrypted-image and rendered-label followups complete. Then nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app before remaining initial reviews. Use 46 mnemonic scopes and glossary context/source-error notes; finish settings-pages-context, encrypted-image-permission and help-label-punctuation followups per language. Source audit at baac8a3b found no additions beyond bd4a2bd1. Pending 14289 catalogs and 671 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -5862,6 +5862,23 @@
           },
           "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
+        },
+        {
+          "id": "de-help-label-punctuation-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "download-ahead.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/de/download-ahead.html": "39380614a2602dff89884babbae5537b1fea62e9a8fee32340b0e76ad8f7952b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08"
+          },
+          "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
+          "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
         }
       ]
     },
@@ -8030,6 +8047,23 @@
           },
           "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
+        },
+        {
+          "id": "es-help-label-punctuation-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "download-ahead.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/es/download-ahead.html": "a6b9721c8a84a887f91aab918d9dbc8fcf116815a846177330e73e3000c3d669"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08"
+          },
+          "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
+          "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
         }
       ]
     },
@@ -8389,6 +8423,23 @@
           },
           "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
+        },
+        {
+          "id": "et-help-label-punctuation-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "download-ahead.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/et/download-ahead.html": "d7c7cdce45fe52e5b6f5535f7a720bc5ff405182006a5ea4f3095e5a712891c4"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08"
+          },
+          "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
+          "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
         }
       ]
     },
@@ -10578,6 +10629,23 @@
           },
           "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
+        },
+        {
+          "id": "fr-help-label-punctuation-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "download-ahead.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fr/download-ahead.html": "ca3f5433c4af24640d4cd9ff63764e075468b951a304cba50f30cf911c4d226f"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08"
+          },
+          "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
+          "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
         }
       ]
     },
@@ -15673,6 +15741,23 @@
           },
           "validation": "Static check-language it reports exactly 1395 intentionally removed marks and no structural findings. All 46 actual mnemonic scopes pass. IDs, variables, access-key counts, comments, plural branches, exact help tags/attributes, OS branches and literal keys preserved. All 28 pending inventories match. Global 18131 unmarked messages and 7787 help lines reconcile; 14 unchanged/moved baseline pairs across de/es/et/fr independently verified. Completed translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
           "notes": "Reviewed all 27 new/changed settings entries and all 11 affected help topics in app context. Improved restart wording, column-layout sender-image note and automatic-update label. Rewrote Settings help in informal Italian with natural default terminology, accurate Apply/Cancel, external default-app choices, queued sending, exact download defaults, image/domain conditions and the encrypted-part image permission exception verified in view.rs. Improved logo fallback, download-option joins, outbox/retry wording, sorting instructions, main-window notification condition, background operation and code-card authentication. Retained fluent prior corrections elsewhere. No Italian screenshots available; current structure verified from settings.toml and callers. Tags/controls/OS branches/literal keys, variables and comments preserved. Added the encrypted-image context note to the glossary. No tests run."
+        },
+        {
+          "id": "it-help-label-punctuation-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "download-ahead.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/it/download-ahead.html": "c6d12ba52494125e9d1bfd7b7db0995a499308bac2c7f1e9277dbd1ceaefc35d"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08"
+          },
+          "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
+          "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
         }
       ]
     },
@@ -24324,6 +24409,23 @@
           },
           "validation": "Static check-language pt reports exactly 1395 intentionally removed marks and no structural findings. All 46 actual mnemonic scopes pass. Full catalog IDs/variables/access-key counts, comments and plural branches preserved; all 11 help topics preserve tags/attributes, OS branches and literal keys. All 28 pending inventories match. Global 18158 unmarked messages and 7932 help lines reconcile with completed batches; 14 unchanged/moved baseline pairs remain independently verified. Translation/English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all 27 settings entries and 11 affected help topics in app context, using European Portuguese and polite third person. Improved the restart prompt and added column-layout context to the sender-image note. Rewrote expanded Settings help with natural default wording, correct Apply/Cancel and external Windows default-app choices, queued sending, exact download defaults and image/domain conditions. Clarified encrypted-part image permission, persisted logo reuse, the storage limit, download-option joins, background operation, quoted-message folding and code-card domain authentication/expiry. Retained fluent prior corrections and settings paths. No Portuguese screenshots available; settings.toml and actual callers define current structure/behavior. Preserved markup, OS branches, controls, literal keys, variables and comments. No tests run."
+        },
+        {
+          "id": "pt-help-label-punctuation-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "download-ahead.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/download-ahead.html": "9b2927d3e9362658e798821138fb7a29cf1ff14fd3cfb66692cc61a33c865467"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08"
+          },
+          "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
+          "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
         }
       ]
     },
@@ -49793,6 +49895,46 @@
         "pictures-tracking.html"
       ],
       "note": "Encrypted message parts always require explicit permission for external image loading, even when automatic loading or a trusted sender is configured. Include the exception when the settings/image help claims that all images load automatically. Italian already had it in pictures-tracking and now in options-language. Corrected the other five completed settings languages in a focused followup; all remaining languages have these topics pending in the normal queue.",
+      "completed_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR"
+      ],
+      "pending_languages": [
+        "bg",
+        "ca",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr",
+        "hu",
+        "lt",
+        "lv",
+        "nb",
+        "pl",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sr-Latn",
+        "sv",
+        "tr",
+        "uk"
+      ]
+    },
+    {
+      "id": "help-label-punctuation",
+      "source": "core/crates/pe-html/src/help.rs::words",
+      "topics": [
+        "download-ahead.html"
+      ],
+      "note": "The help renderer removes catalog access keys, ellipses and trailing colons. Ensure explicit punctuation or a full grammatical sentence around download labels; check joined platform branches for duplicate prepositions. The English download help also lacks the separator; do not reproduce that error. Dutch already uses a full sentence and Brazilian Portuguese was fixed in its settings batch. Six other completed settings languages corrected by followups.",
       "completed_languages": [
         "de",
         "es",
