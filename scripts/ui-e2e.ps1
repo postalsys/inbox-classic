@@ -148,9 +148,10 @@ public static RECT RemoteToolRect(IntPtr owner, long id) {
         int count = (int)SendMessage(tip, 0x040D, IntPtr.Zero, IntPtr.Zero);
         for (int i = 0; i < count && remote != IntPtr.Zero; i++) {
             IntPtr done;
-            // a TOOLINFOW of 64-bit Windows: cbSize, uFlags, hwnd, uId, rect, then pointers left empty (no text copied)
+            // a TOOLINFOW of 64-bit Windows in its first version's size, as the classic tooltips take it: cbSize,
+            // uFlags, hwnd, uId, rect, then pointers left empty (no text copied)
             byte[] info = new byte[72];
-            BitConverter.GetBytes(72).CopyTo(info, 0);
+            BitConverter.GetBytes(64).CopyTo(info, 0);
             WriteProcessMemory(process, remote, info, (IntPtr)72, out done);
             if (SendMessage(tip, 0x043A, (IntPtr)i, remote) == IntPtr.Zero) { continue; }
             ReadProcessMemory(process, remote, info, (IntPtr)72, out done);
@@ -2572,13 +2573,15 @@ public static class Dragger {
     $tipOverHeader = {
         $h = [Native.Win]::RemoteRect($header, 0x1207, [IntPtr]$COL_SECURE, 0)
         $t = [Native.Win]::RemoteToolRect($header, [long]$COL_SECURE)
-        ($t.Right -gt $t.Left) -and $t.Left -eq $h.Left -and $t.Right -eq $h.Right
+        @((($t.Right -gt $t.Left) -and $t.Left -eq $h.Left -and $t.Right -eq $h.Right), "tip $($t.Left)..$($t.Right), header $($h.Left)..$($h.Right)")
     }
-    Check (& $tipOverHeader) 'the lock column header has its tooltip over it'
+    $over = & $tipOverHeader
+    Check $over[0] "the lock column header has its tooltip over it ($($over[1]))"
     $flagWidth = & $headerWidth $COL_FLAG
     [void][Native.Win]::SendMessage($list, 0x101E, [IntPtr]$COL_FLAG, [IntPtr]($flagWidth + 20))
     Start-Sleep -Milliseconds 300
-    Check (& $tipOverHeader) 'the tooltip follows the lock column header when a column before it is resized'
+    $over = & $tipOverHeader
+    Check $over[0] "the tooltip follows the lock column header when a column before it is resized ($($over[1]))"
     [void][Native.Win]::SendMessage($list, 0x101E, [IntPtr]$COL_FLAG, [IntPtr]$flagWidth)
     Shot $main 'main-12-lock-in-list'
     # selected, the lock stays on the highlight

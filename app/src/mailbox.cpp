@@ -475,7 +475,8 @@ void Mailbox::AddHeaderTips() {
     headerTip_ = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
                                  CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parent_, nullptr, GetModuleHandleW(nullptr), nullptr);
     for (const IconColumnOf& icon : kIconColumns) {
-        TOOLINFOW tool = {sizeof(tool)};
+        // the classic tooltips take the size of their first version (ui.cpp AddTip): a larger one is refused
+        TOOLINFOW tool = {TTTOOLINFOW_V2_SIZE};
         tool.uFlags = TTF_SUBCLASS;
         tool.hwnd = header;
         tool.uId = static_cast<UINT_PTR>(icon.column);
@@ -493,7 +494,7 @@ void Mailbox::PlaceHeaderTips() {
         return;
     }
     for (const IconColumnOf& icon : kIconColumns) {
-        TOOLINFOW tool = {sizeof(tool)};
+        TOOLINFOW tool = {TTTOOLINFOW_V2_SIZE};
         tool.hwnd = header;
         tool.uId = static_cast<UINT_PTR>(icon.column);
         Header_GetItemRect(header, icon.column, &tool.rect);
