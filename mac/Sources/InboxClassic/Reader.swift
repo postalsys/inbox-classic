@@ -77,6 +77,7 @@ final class Reader: NSObject {
     init(core: Core) {
         self.core = core
         super.init()
+        preview.core = core
         header.isSelectable = true
         header.setAccessibilityIdentifier("reader.header")
         header.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -277,7 +278,7 @@ final class Reader: NSObject {
         security.show(info)
         // the parts of a signed or encrypted message are documents of their own, in frames the app sizes to them
         let parts = info.part_count > 0 ? { [view] (index: Int) in view.part(index) } : nil
-        preview.show(text(info.document), pictures: allowed, parts: parts)
+        preview.show(text(info.document), pictures: allowed, parts: parts, previews: text(info.preview_token))
         // offered only for a message with pictures on the internet, until they are shown
         picturesOffered = info.remote_images && !allowed
         pictures.isHidden = !picturesOffered
@@ -586,6 +587,15 @@ final class Reader: NSObject {
         case PE_READER_LINK_PART:
             // after the web view's question is answered: the window runs modally
             onMain { [weak self] in self?.showSecurityDetails() }
+            return true
+        case PE_READER_LINK_ATTACHMENT:
+            // a preview after the text: its file opened as a double-click in the strip opens it; only a link of the
+            // message this reader shows (its view's token)
+            let token = text(messageView?.info?.pointee.preview_token)
+            let index = link.withCString { pe_preview_link(core.handle, $0) }
+            if index >= 0, !token.isEmpty, link.contains(token) {
+                onMain { [weak self] in self?.openAttachment(Int(index)) }
+            }
             return true
         default:
             return false

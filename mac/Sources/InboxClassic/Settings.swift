@@ -201,6 +201,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     /// Show messages on a dark background when the system is dark
     var darkMessages: NSButton { box(.darkMessages) }
     var pictures: NSButton { box(.picturesAlways) }
+    /// Show attachments in messages, and under it Show PDF files in messages
+    var showPreviews: NSButton { box(.showPreviews) }
+    var pdfPreviews: NSButton { box(.pdfPreviews) }
     /// Search in encrypted messages and Look up keys on keys.openpgp.org, under Encryption
     var searchEncrypted: NSButton { box(.searchEncrypted) }
     var keyserver: NSButton { box(.keyserver) }
@@ -325,6 +328,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
             return toggle(setting, app?.listPictures ?? true, #selector(listPicturesChanged))
         case .darkMessages:
             return toggle(setting, core.darkMessages, #selector(darkMessagesChanged))
+        case .showPreviews:
+            return toggle(setting, core.showPreviews, #selector(showPreviewsChanged))
+        case .pdfPreviews:
+            return toggle(setting, core.pdfPreviews, #selector(pdfPreviewsChanged))
         case .picturesAlways:
             return toggle(setting, core.alwaysLoadPictures, #selector(picturesChanged))
         case .searchEncrypted:
@@ -523,6 +530,23 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
 
     @objc func keyserverChanged() {
         core.keyserver = keyserver.state == .on
+    }
+
+    @objc func showPreviewsChanged() {
+        core.showPreviews = showPreviews.state == .on
+        updateDependents()
+        // the messages shown now made again as the setting has it
+        AppDelegate.shared?.main?.reloadMessagesShown()
+    }
+
+    @objc func pdfPreviewsChanged() {
+        core.pdfPreviews = pdfPreviews.state == .on
+        AppDelegate.shared?.main?.reloadMessagesShown()
+    }
+
+    /// the PDF row as the core has it now (turned off after a PDF file ended the app)
+    func refreshPreviews() {
+        pdfPreviews.state = core.pdfPreviews ? .on : .off
     }
 
     @objc func darkMessagesChanged() {

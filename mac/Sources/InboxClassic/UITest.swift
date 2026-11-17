@@ -552,6 +552,7 @@ final class UITest {
         try await addAccount()
         try await reading()
         try await openingAttachments()
+        try await previewsInMessages()
         try await writing()
         try await notDownloaded()
         try await largeMessage()

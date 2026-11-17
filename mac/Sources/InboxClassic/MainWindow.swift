@@ -260,6 +260,11 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     // ---- the core's events ----
 
     func onEvent(_ event: CoreEvent) {
+        // a preview's picture drawn: for the web view waiting for it, and nothing else of the windows changed
+        if event.kind == PE_EVENT_KIND_PREVIEW_ANSWERED {
+            DocumentServer.answered(event.uid, core: core)
+            return
+        }
         switch event.kind {
         case PE_EVENT_KIND_SYNC_STARTED:
             failing.remove(event.account)
@@ -321,6 +326,9 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         // rules, trusted senders and sign-in apps are modal and read theirs when they open
         case PE_EVENT_KIND_ACCOUNTS_CHANGED:
             mailbox.reload()
+        case PE_EVENT_KIND_PDF_PREVIEWS_OFF:
+            // a PDF file ended the app: the setting shows it off (the documents say why)
+            SettingsWindow.current?.refreshPreviews()
         case PE_EVENT_KIND_SETTINGS_CHANGED:
             Preview.dark = core.darkMessages
             TextSize.apply(pe_text_zoom(core.handle))
