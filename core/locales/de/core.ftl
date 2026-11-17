@@ -455,9 +455,7 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Diese Nachricht kann nicht gelesen werden.
 agent-encrypted-original = Agenten können diese verschlüsselte Nachricht weder beantworten noch weiterleiten, da sie keine Nachrichten verschlüsseln können.
-# review: new
-agent-encrypted = Diese Nachricht ist verschlüsselt. Nur der Benutzer kann sie in Inbox Classic lesen.
-# review: new
+agent-encrypted = Diese Nachricht ist verschlüsselt. KI-Agenten können ihren Inhalt nicht lesen. Der Benutzer muss sie selbst in Inbox Classic öffnen.
 list-encrypted = Verschlüsselte Nachricht
 agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster geöffnet
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
@@ -587,7 +585,6 @@ pgp-find-unavailable = Die Schlüsselsuche ist derzeit nicht verfügbar: { $erro
 pgp-publish-pending = keys.openpgp.org hat einen Bestätigungslink an folgende Adressen gesendet: { $addresses }. Bestätigen Sie jede Adresse, damit Ihr Schlüssel darüber gefunden werden kann.
 pgp-publish-done = Ihr Schlüssel ist auf keys.openpgp.org für { $addresses } veröffentlicht.
 pgp-publish-failed = Der Schlüssel konnte nicht veröffentlicht werden: { $error }
-# review: changed
 pgp-keyserver-off = Die Schlüsselsuche auf keys.openpgp.org ist unter { $settings } ausgeschaltet.
 pgp-details-part = Teil { $number }: { $label }
 pgp-details-signed = Am { $when } mit Schlüssel { $key } signiert

@@ -171,6 +171,17 @@ Context notes:
 
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
   translating the English draft's vague "people" literally.
+- Encrypted search uses available private keys and downloaded sources; it does not guarantee that every message
+  can be decrypted. The setting defaults on. Decrypted text is kept unencrypted in the local index; disabling it
+  removes that indexed content and previews and restores the outer subject. Do not imply secure erasure.
+- The list's lock/seal identifies encrypted/signed mail, not signature validity or verified ownership. A decrypted
+  preview and protected subject depend on the index setting. New encrypted-mail notifications always use
+  `list-encrypted`; unlike the English help's "until then", they do not switch to the decrypted subject.
+- Agents cannot read encrypted message contents or attachments or search decrypted text. They can still receive
+  outer envelope metadata; do not claim that encrypted messages are completely invisible to them.
+- Address-based key lookup asks the address's domain first, then keys.openpgp.org when enabled and needed.
+  An explicit fingerprint/key-ID lookup sends that identifier instead of an address. The keyserver switch leaves
+  domain lookup available. Avoid the English note's implication that every lookup sends an email address.
 - An agent's message shown in the Outbox is queued for a delayed send. It has not been sent yet.
 - Approval in the agent send dialog queues a message with a 30-second minimum delay (`agents::SEND_DELAY`).
   It is separate from the user's normal send-delay setting; quitting only accelerates the user's undoable sends,
