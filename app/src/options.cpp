@@ -11,7 +11,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cwctype>
 
 // a setting of core/settings.toml that AddSetting's switch leaves out fails the build
 #pragma warning(error : 4062)
@@ -271,17 +270,9 @@ bool AskRestart(HWND owner, const std::wstring& name) {
 
 // ---- Options: what it shows and sets ----
 
-// what the pages show: the main window's settings, the core's, and the language (0 System default, else its place in
-// Languages() plus one)
-struct OptionValues {
-    WindowOptions window;
-    int language = 0;
-    int sendDelay = 0;
-    int ahead = 0;
-    int limit = 0;
-    bool pictures = false;
-    bool operator==(const OptionValues&) const = default;
-};
+// what the pages show, a value for each setting: 0 or 1 for a check box, the place chosen in a list (the language's: 0
+// System default, else its place in Languages() plus one), 0 for a button
+using OptionValues = std::array<int, PE_SETTING_COUNT>;
 
 struct OptionsState {
     PeCore* core = nullptr;
@@ -295,12 +286,15 @@ struct OptionsState {
     bool restart = false;
     std::vector<Language> languages;
     // what OK or Apply set last; before that, what was set when the window opened
-    OptionValues applied;
+    OptionValues applied = {};
     // the trusted senders removed in their window, untrusted by OK or Apply
     std::vector<int64_t> untrusted;
     std::function<void(const WindowOptions&)> applyWindow;
-    // each page's controls, shown with its tab
+    // each setting's control, and each page's controls, shown with its tab
+    std::array<HWND, PE_SETTING_COUNT> controls = {};
     std::array<std::vector<HWND>, PE_SETTINGS_PAGE_COUNT> pages;
+    // the words of each list
+    std::array<std::vector<std::wstring>, PE_SETTING_COUNT> items;
     // the height of a drop-down list in the dialog font, which its label is centered on
     int comboHeight = 0;
 };
@@ -316,49 +310,105 @@ int LanguageIndex(const std::vector<Language>& languages) {
     return 0;
 }
 
-OptionValues CurrentValues(PeCore* core, const WindowOptions& window, const std::vector<Language>& languages) {
-    OptionValues values;
-    values.window = window;
-    values.language = LanguageIndex(languages);
-    values.sendDelay = static_cast<int>(pe_send_delay_index(core));
-    values.ahead = static_cast<int>(pe_download_ahead(core));
-    values.limit = static_cast<int>(pe_download_limit_index(core));
-    values.pictures = pe_always_load_pictures(core);
-    return values;
+// what `setting` is now: the core's, the main window's (`window`) or the language's
+int CurrentValue(const OptionsState& state, PeSetting setting, const WindowOptions& window) {
+    switch (setting) {
+    case PE_SETTING_LANGUAGE:
+        return LanguageIndex(state.languages);
+    case PE_SETTING_NOTIFY_NEW_MAIL:
+        return window.notify;
+    case PE_SETTING_CODES_IN_NOTIFICATIONS:
+        return window.codes;
+    case PE_SETTING_SEND_DELAY:
+        return static_cast<int>(pe_send_delay_index(state.core));
+    case PE_SETTING_LAYOUT:
+        return std::clamp(window.layout, 0, 2);
+    case PE_SETTING_GROUP_BY_CONVERSATION:
+        return window.threads;
+    case PE_SETTING_LIST_PICTURES:
+        return window.listPictures;
+    case PE_SETTING_PICTURES_ALWAYS:
+        return pe_always_load_pictures(state.core);
+    case PE_SETTING_DOWNLOAD_AHEAD:
+        return static_cast<int>(pe_download_ahead(state.core));
+    case PE_SETTING_DOWNLOAD_LIMIT:
+        return static_cast<int>(pe_download_limit_index(state.core));
+    case PE_SETTING_DEFAULT_MAIL_APP:
+    case PE_SETTING_EML_DEFAULT:
+    case PE_SETTING_TRUSTED_SENDERS:
+    case PE_SETTING_COUNT:
+        return 0;
+    }
+    return 0;
 }
 
-bool Checked(HWND dialog, int id) {
-    return Button_GetCheck(GetDlgItem(dialog, id)) == BST_CHECKED;
+// `setting` set to `value`: in the core, or in `window` for the main window; the language is set once Options closes
+void StoreValue(PeCore* core, PeSetting setting, int value, WindowOptions& window) {
+    switch (setting) {
+    case PE_SETTING_NOTIFY_NEW_MAIL:
+        window.notify = value != 0;
+        return;
+    case PE_SETTING_CODES_IN_NOTIFICATIONS:
+        window.codes = value != 0;
+        return;
+    case PE_SETTING_SEND_DELAY:
+        pe_set_send_delay_index(core, static_cast<size_t>(value));
+        return;
+    case PE_SETTING_LAYOUT:
+        window.layout = value;
+        return;
+    case PE_SETTING_GROUP_BY_CONVERSATION:
+        window.threads = value != 0;
+        return;
+    case PE_SETTING_LIST_PICTURES:
+        window.listPictures = value != 0;
+        return;
+    case PE_SETTING_PICTURES_ALWAYS:
+        pe_set_always_load_pictures(core, value != 0);
+        return;
+    case PE_SETTING_DOWNLOAD_AHEAD:
+        pe_set_download_ahead(core, static_cast<PeDownloadAhead>(value));
+        return;
+    case PE_SETTING_DOWNLOAD_LIMIT:
+        pe_set_download_limit_index(core, static_cast<size_t>(value));
+        return;
+    case PE_SETTING_LANGUAGE:
+    case PE_SETTING_DEFAULT_MAIL_APP:
+    case PE_SETTING_EML_DEFAULT:
+    case PE_SETTING_TRUSTED_SENDERS:
+    case PE_SETTING_COUNT:
+        return;
+    }
 }
 
-// the place chosen in a list, or `fallback` with none
-int Selected(HWND dialog, int id, int fallback) {
-    int index = static_cast<int>(SendDlgItemMessageW(dialog, id, CB_GETCURSEL, 0, 0));
-    return index >= 0 ? index : fallback;
+bool Checked(HWND control) {
+    return Button_GetCheck(control) == BST_CHECKED;
 }
 
-// what the pages show now
+// what the pages show now; a list with nothing chosen as what was applied
 OptionValues ShownValues(const OptionsState& state) {
-    HWND d = state.dialog;
-    const OptionValues& was = state.applied;
-    OptionValues values;
-    values.window.notify = Checked(d, IDC_OPTIONS_NOTIFY);
-    values.window.codes = Checked(d, IDC_OPTIONS_CODES);
-    values.window.threads = Checked(d, IDC_OPTIONS_THREADS);
-    values.window.layout = Selected(d, IDC_OPTIONS_LAYOUT, was.window.layout);
-    values.window.listPictures = Checked(d, IDC_OPTIONS_LIST_PICTURES);
-    values.language = Selected(d, IDC_OPTIONS_LANGUAGE, was.language);
-    values.sendDelay = Selected(d, IDC_OPTIONS_SEND_DELAY, was.sendDelay);
-    values.ahead = Selected(d, IDC_OPTIONS_DOWNLOAD_AHEAD, was.ahead);
-    values.limit = Selected(d, IDC_OPTIONS_DOWNLOAD_LIMIT, was.limit);
-    values.pictures = Checked(d, IDC_OPTIONS_PICTURES);
+    OptionValues values = state.applied;
+    for (const PeSettingInfo& info : kSettings) {
+        HWND control = state.controls[info.setting];
+        if (info.kind == PE_SETTING_KIND_SWITCH) {
+            values[info.setting] = Checked(control);
+        } else if (info.kind == PE_SETTING_KIND_CHOICE) {
+            int index = static_cast<int>(SendMessageW(control, CB_GETCURSEL, 0, 0));
+            values[info.setting] = index >= 0 ? index : values[info.setting];
+        }
+    }
     return values;
 }
 
-// Apply enabled while the pages show something OK would change; the codes only with the notifications on
+// a check box that depends on another enabled while that one is checked; Apply enabled while the pages show something
+// OK would change
 void UpdateOptions(const OptionsState& state) {
-    EnableWindow(GetDlgItem(state.dialog, IDC_OPTIONS_CODES), Checked(state.dialog, IDC_OPTIONS_NOTIFY));
-    bool changed = !(ShownValues(state) == state.applied) || !state.untrusted.empty();
+    for (const PeSettingInfo& info : kSettings) {
+        if (info.hasParent) {
+            EnableWindow(state.controls[info.setting], Checked(state.controls[info.dependsOn]));
+        }
+    }
+    bool changed = ShownValues(state) != state.applied || !state.untrusted.empty();
     HWND apply = GetDlgItem(state.dialog, IDC_OPTIONS_APPLY);
     if (!changed && GetFocus() == apply) {
         // a disabled button can not keep the focus: OK takes it, as the default button
@@ -370,18 +420,18 @@ void UpdateOptions(const OptionsState& state) {
 // what the pages show set (OK, Apply), but the language: the code it is to be, empty for Windows' own
 std::wstring ApplyOptions(OptionsState& state) {
     OptionValues values = ShownValues(state);
-    state.applyWindow(values.window);
-    pe_set_always_load_pictures(state.core, values.pictures);
-    pe_set_download_ahead(state.core, static_cast<PeDownloadAhead>(values.ahead));
-    pe_set_download_limit_index(state.core, static_cast<size_t>(values.limit));
-    pe_set_send_delay_index(state.core, static_cast<size_t>(values.sendDelay));
+    WindowOptions window;
+    for (const PeSettingInfo& info : kSettings) {
+        StoreValue(state.core, info.setting, values[info.setting], window);
+    }
+    state.applyWindow(window);
     for (int64_t id : state.untrusted) {
         pe_untrust_sender(state.core, id);
     }
     state.untrusted.clear();
     state.applied = values;
     UpdateOptions(state);
-    int picked = values.language;
+    int picked = values[PE_SETTING_LANGUAGE];
     return picked > 0 && static_cast<size_t>(picked) <= state.languages.size() ? state.languages[picked - 1].code : L"";
 }
 
@@ -399,129 +449,6 @@ void ShowPage(OptionsState& state, int page) {
     if (!focus || !IsWindowVisible(focus)) {
         SetFocus(state.tabs);
     }
-}
-
-// a group's title from its label: without the access key and the colon of a list's label ("&Language:")
-std::wstring GroupTitle(PeText label) {
-    std::wstring title = core::Plain(label);
-    while (!title.empty() && (title.back() == L':' || title.back() == L'：' || title.back() == L' ' || iswspace(title.back()))) {
-        title.pop_back();
-    }
-    return title;
-}
-
-// one page's controls laid out: its groups one under the other, each control under the one before it
-struct PageBuilder {
-    OptionsState& state;
-    PeSettingsPage page;
-    // the page's area, and where the next control goes
-    int left = 0;
-    int right = 0;
-    int y = 0;
-    // the edges of the group's controls
-    int x0 = 0;
-    int x1 = 0;
-    // the column of the lists' labels, the lists to its right; 0 when the labels go above their lists
-    int labelColumn = 0;
-    // a list beside its label too narrow for its longest entry: the page is built again with the labels above
-    bool cramped = false;
-    // the right edge of the row of buttons going on, the next button to its right; -1 when none is
-    int buttonRight = -1;
-    int buttonTop = 0;
-};
-
-// the space between controls; the indent of the words beside a check box, and of a check box under the one it
-// depends on; a group box's margins and the space between groups
-constexpr int kGap = 6;
-constexpr int kCheckIndent = 18;
-constexpr int kGroupMargin = 10;
-constexpr int kGroupTop = 20;
-constexpr int kGroupGap = 8;
-constexpr int kButtonHeight = 25;
-
-HWND AddControl(PageBuilder& b, const wchar_t* className, const std::wstring& text, DWORD style, int id, const RECT& bounds) {
-    HWND control = CreateChild(b.state.dialog, className, text.c_str(), style, id, bounds);
-    b.state.pages[b.page].push_back(control);
-    return control;
-}
-
-void EndButtons(PageBuilder& b) {
-    b.buttonRight = -1;
-}
-
-// a note from `x` to the group's right edge, its words wrapped as an edit control wraps them: a word longer than the
-// line is broken rather than cut off
-void AddNote(PageBuilder& b, const std::wstring& note, int x, int id) {
-    HDC dc = GetDC(nullptr);
-    HGDIOBJ old = SelectObject(dc, GetStockObject(DEFAULT_GUI_FONT));
-    RECT bounds = {0, 0, b.x1 - x, 0};
-    DrawTextW(dc, note.c_str(), static_cast<int>(note.size()), &bounds, DT_CALCRECT | DT_NOPREFIX | DT_WORDBREAK | DT_EDITCONTROL);
-    SelectObject(dc, old);
-    ReleaseDC(nullptr, dc);
-    AddControl(b, L"STATIC", note, SS_LEFT | SS_NOPREFIX | SS_EDITCONTROL, id, {x, b.y, b.x1, b.y + bounds.bottom});
-    b.y += bounds.bottom;
-}
-
-// a control's note, if it has one, under it from `x`; then the space before the next control
-void EndRow(PageBuilder& b, const PeSettingInfo& info, int x, int noteId) {
-    if (info.hasNote) {
-        b.y += Scale(2);
-        AddNote(b, core::T(info.note), x, noteId);
-    }
-    b.y += Scale(kGap);
-}
-
-// a check box, its words wrapped to the group's width; one that depends on another under it, indented
-void AddSwitch(PageBuilder& b, const PeSettingInfo& info, int id, int noteId, bool checked) {
-    EndButtons(b);
-    int x = b.x0 + (info.hasParent ? Scale(kCheckIndent) : 0);
-    std::wstring text = core::T(info.label);
-    int height = std::max(Scale(16), static_cast<int>(MeasureText(text, b.x1 - x - Scale(kCheckIndent + 2)).cy) + Scale(2));
-    HWND box = AddControl(b, L"BUTTON", text, WS_TABSTOP | BS_AUTOCHECKBOX | BS_MULTILINE | BS_TOP, id, {x, b.y, b.x1, b.y + height});
-    Button_SetCheck(box, checked ? BST_CHECKED : BST_UNCHECKED);
-    b.y += height;
-    EndRow(b, info, x + Scale(kCheckIndent - 1), noteId);
-}
-
-// a drop-down list with its label in the page's column before it (or above it), its note under the list
-void AddChoice(PageBuilder& b, const PeSettingInfo& info, int id, int noteId, const std::vector<std::wstring>& items, int selected) {
-    EndButtons(b);
-    std::wstring label = core::T(info.label);
-    int listLeft = b.x0 + b.labelColumn;
-    // the label first: its access key moves the focus to the control after it
-    if (b.labelColumn) {
-        int textHeight = static_cast<int>(MeasureText(label).cy);
-        int top = b.y + (b.state.comboHeight - textHeight) / 2;
-        AddControl(b, L"STATIC", label, SS_LEFT, 0, {b.x0, top, listLeft - Scale(kGap), top + textHeight});
-    } else {
-        int height = static_cast<int>(MeasureText(label, b.x1 - b.x0).cy);
-        AddControl(b, L"STATIC", label, SS_LEFT, 0, {b.x0, b.y, b.x1, b.y + height});
-        b.y += height + Scale(3);
-    }
-    HWND list = AddControl(b, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, id, {listLeft, b.y, b.x1, b.y + Scale(200)});
-    for (const std::wstring& item : items) {
-        SendMessageW(list, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
-    }
-    SendMessageW(list, CB_SETCURSEL, static_cast<WPARAM>(selected), 0);
-    for (const std::wstring& item : items) {
-        b.cramped |= static_cast<int>(MeasureText(item).cx) + GetSystemMetrics(SM_CXVSCROLL) + Scale(8) > b.x1 - listLeft;
-    }
-    b.y += b.state.comboHeight;
-    EndRow(b, info, listLeft, noteId);
-}
-
-// a push button as wide as its words, beside the button before it while they fit on the row, else under it
-void AddButton(PageBuilder& b, const PeSettingInfo& info, int id) {
-    std::wstring text = core::T(info.label);
-    int width = ButtonWidth({text});
-    if (b.buttonRight < 0 || b.buttonRight + Scale(kGap) + width > b.x1) {
-        b.buttonRight = b.x0 - Scale(kGap);
-        b.buttonTop = b.y;
-        b.y += Scale(kButtonHeight) + Scale(kGap);
-    }
-    int x = b.buttonRight + Scale(kGap);
-    AddControl(b, L"BUTTON", text, WS_TABSTOP, id, {x, b.buttonTop, x + width, b.buttonTop + Scale(kButtonHeight)});
-    b.buttonRight = x + width;
 }
 
 // the words of a list the core makes: `count` of them, each from `text`
@@ -549,57 +476,194 @@ std::vector<std::wstring> LanguageItems(const OptionsState& state) {
     return items;
 }
 
-// each setting's control, its id (app.h, which the UI test finds it by) and what it shows
-void AddSetting(PageBuilder& b, const PeSettingInfo& info) {
-    const OptionValues& v = b.state.applied;
-    switch (info.setting) {
+// the words of a list, in the order of its values
+std::vector<std::wstring> ChoiceItems(const OptionsState& state, PeSetting setting) {
+    switch (setting) {
     case PE_SETTING_LANGUAGE:
-        AddChoice(b, info, IDC_OPTIONS_LANGUAGE, IDC_OPTIONS_NOTE, LanguageItems(b.state), v.language);
-        return;
-    case PE_SETTING_NOTIFY_NEW_MAIL:
-        AddSwitch(b, info, IDC_OPTIONS_NOTIFY, 0, v.window.notify);
-        return;
-    case PE_SETTING_CODES_IN_NOTIFICATIONS:
-        AddSwitch(b, info, IDC_OPTIONS_CODES, 0, v.window.codes);
-        return;
+        return LanguageItems(state);
     case PE_SETTING_SEND_DELAY:
-        AddChoice(b, info, IDC_OPTIONS_SEND_DELAY, IDC_OPTIONS_SEND_DELAY_NOTE, CoreItems(pe_send_delay_count, pe_send_delay_text),
-                  v.sendDelay);
-        return;
-    case PE_SETTING_DEFAULT_MAIL_APP:
-        AddButton(b, info, IDC_OPTIONS_DEFAULT_APP);
-        return;
-    case PE_SETTING_EML_DEFAULT:
-        AddButton(b, info, IDC_OPTIONS_EML);
-        return;
+        return CoreItems(pe_send_delay_count, pe_send_delay_text);
     case PE_SETTING_LAYOUT:
         // View > Layout's three, in the order of PeLayoutMode
-        AddChoice(b, info, IDC_OPTIONS_LAYOUT, 0,
-                  {core::Plain(PE_TEXT_CMD_LAYOUT_AUTOMATIC), core::Plain(PE_TEXT_CMD_LAYOUT_CLASSIC), core::Plain(PE_TEXT_CMD_LAYOUT_COLUMNS)},
-                  std::clamp(v.window.layout, 0, 2));
-        return;
-    case PE_SETTING_GROUP_BY_CONVERSATION:
-        AddSwitch(b, info, IDC_OPTIONS_THREADS, 0, v.window.threads);
-        return;
-    case PE_SETTING_LIST_PICTURES:
-        AddSwitch(b, info, IDC_OPTIONS_LIST_PICTURES, IDC_OPTIONS_LIST_PICTURES_NOTE, v.window.listPictures);
-        return;
-    case PE_SETTING_PICTURES_ALWAYS:
-        AddSwitch(b, info, IDC_OPTIONS_PICTURES, IDC_OPTIONS_PICTURES_NOTE, v.pictures);
-        return;
-    case PE_SETTING_TRUSTED_SENDERS:
-        AddButton(b, info, IDC_OPTIONS_TRUSTED);
-        return;
+        return {core::Plain(PE_TEXT_CMD_LAYOUT_AUTOMATIC), core::Plain(PE_TEXT_CMD_LAYOUT_CLASSIC), core::Plain(PE_TEXT_CMD_LAYOUT_COLUMNS)};
     case PE_SETTING_DOWNLOAD_AHEAD:
         // in the order of PeDownloadAhead
-        AddChoice(b, info, IDC_OPTIONS_DOWNLOAD_AHEAD, 0,
-                  {core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_RECENT), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_ALL), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_NEVER)},
-                  v.ahead);
-        return;
+        return {core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_RECENT), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_ALL), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_NEVER)};
     case PE_SETTING_DOWNLOAD_LIMIT:
-        AddChoice(b, info, IDC_OPTIONS_DOWNLOAD_LIMIT, 0, CoreItems(pe_download_limit_count, pe_download_limit_text), v.limit);
-        return;
+        return CoreItems(pe_download_limit_count, pe_download_limit_text);
+    case PE_SETTING_NOTIFY_NEW_MAIL:
+    case PE_SETTING_CODES_IN_NOTIFICATIONS:
+    case PE_SETTING_DEFAULT_MAIL_APP:
+    case PE_SETTING_EML_DEFAULT:
+    case PE_SETTING_GROUP_BY_CONVERSATION:
+    case PE_SETTING_LIST_PICTURES:
+    case PE_SETTING_PICTURES_ALWAYS:
+    case PE_SETTING_TRUSTED_SENDERS:
     case PE_SETTING_COUNT:
+        return {};
+    }
+    return {};
+}
+
+// each setting's control id and its note's (app.h, which the UI test finds them by)
+struct SettingIds {
+    int control = 0;
+    int note = 0;
+};
+
+SettingIds Ids(PeSetting setting) {
+    switch (setting) {
+    case PE_SETTING_LANGUAGE:
+        return {IDC_OPTIONS_LANGUAGE, IDC_OPTIONS_NOTE};
+    case PE_SETTING_NOTIFY_NEW_MAIL:
+        return {IDC_OPTIONS_NOTIFY};
+    case PE_SETTING_CODES_IN_NOTIFICATIONS:
+        return {IDC_OPTIONS_CODES};
+    case PE_SETTING_SEND_DELAY:
+        return {IDC_OPTIONS_SEND_DELAY, IDC_OPTIONS_SEND_DELAY_NOTE};
+    case PE_SETTING_DEFAULT_MAIL_APP:
+        return {IDC_OPTIONS_DEFAULT_APP};
+    case PE_SETTING_EML_DEFAULT:
+        return {IDC_OPTIONS_EML};
+    case PE_SETTING_LAYOUT:
+        return {IDC_OPTIONS_LAYOUT};
+    case PE_SETTING_GROUP_BY_CONVERSATION:
+        return {IDC_OPTIONS_THREADS};
+    case PE_SETTING_LIST_PICTURES:
+        return {IDC_OPTIONS_LIST_PICTURES, IDC_OPTIONS_LIST_PICTURES_NOTE};
+    case PE_SETTING_PICTURES_ALWAYS:
+        return {IDC_OPTIONS_PICTURES, IDC_OPTIONS_PICTURES_NOTE};
+    case PE_SETTING_TRUSTED_SENDERS:
+        return {IDC_OPTIONS_TRUSTED};
+    case PE_SETTING_DOWNLOAD_AHEAD:
+        return {IDC_OPTIONS_DOWNLOAD_AHEAD};
+    case PE_SETTING_DOWNLOAD_LIMIT:
+        return {IDC_OPTIONS_DOWNLOAD_LIMIT};
+    case PE_SETTING_COUNT:
+        return {};
+    }
+    return {};
+}
+
+// one page's controls laid out: its groups one under the other, each control under the one before it
+struct PageBuilder {
+    OptionsState& state;
+    PeSettingsPage page;
+    // the page's area, and where the next control goes
+    int left = 0;
+    int right = 0;
+    int y = 0;
+    // the edges of the group's controls
+    int x0 = 0;
+    int x1 = 0;
+    // the column of the lists' labels, the lists to its right; 0 when the labels go above their lists
+    int labelColumn = 0;
+    // the right edge of the row of buttons going on, the next button to its right; -1 when none is
+    int buttonRight = -1;
+    int buttonTop = 0;
+};
+
+// the space between controls; the indent of the words beside a check box, and of a check box under the one it
+// depends on; a group box's margins and the space between groups
+constexpr int kGap = 6;
+constexpr int kCheckIndent = 18;
+constexpr int kGroupMargin = 10;
+constexpr int kGroupTop = 20;
+constexpr int kGroupGap = 8;
+constexpr int kButtonHeight = 25;
+
+HWND AddControl(PageBuilder& b, const wchar_t* className, const std::wstring& text, DWORD style, int id, const RECT& bounds) {
+    HWND control = CreateChild(b.state.dialog, className, text.c_str(), style, id, bounds);
+    b.state.pages[b.page].push_back(control);
+    return control;
+}
+
+void EndButtons(PageBuilder& b) {
+    b.buttonRight = -1;
+}
+
+// a note from `x` to the group's right edge, its words wrapped as an edit control wraps them: a word longer than the
+// line is broken rather than cut off
+void AddNote(PageBuilder& b, const std::wstring& note, int x, int id) {
+    int height = static_cast<int>(MeasureText(note, b.x1 - x, DT_NOPREFIX | DT_EDITCONTROL).cy);
+    AddControl(b, L"STATIC", note, SS_LEFT | SS_NOPREFIX | SS_EDITCONTROL, id, {x, b.y, b.x1, b.y + height});
+    b.y += height;
+}
+
+// a control's note, if it has one, under it from `x`; then the space before the next control
+void EndRow(PageBuilder& b, const PeSettingInfo& info, int x) {
+    if (info.hasNote) {
+        b.y += Scale(2);
+        AddNote(b, core::T(info.note), x, Ids(info.setting).note);
+    }
+    b.y += Scale(kGap);
+}
+
+// a check box, its words wrapped to the group's width; one that depends on another under it, indented
+void AddSwitch(PageBuilder& b, const PeSettingInfo& info) {
+    EndButtons(b);
+    int x = b.x0 + (info.hasParent ? Scale(kCheckIndent) : 0);
+    std::wstring text = core::T(info.label);
+    int height = std::max(Scale(16), static_cast<int>(MeasureText(text, b.x1 - x - Scale(kCheckIndent + 2)).cy) + Scale(2));
+    HWND box = AddControl(b, L"BUTTON", text, WS_TABSTOP | BS_AUTOCHECKBOX | BS_MULTILINE | BS_TOP, Ids(info.setting).control,
+                          {x, b.y, b.x1, b.y + height});
+    Button_SetCheck(box, b.state.applied[info.setting] ? BST_CHECKED : BST_UNCHECKED);
+    b.state.controls[info.setting] = box;
+    b.y += height;
+    EndRow(b, info, x + Scale(kCheckIndent - 1));
+}
+
+// a drop-down list with its label in the page's column before it (or above it), its note under the list
+void AddChoice(PageBuilder& b, const PeSettingInfo& info) {
+    EndButtons(b);
+    std::wstring label = core::T(info.label);
+    int listLeft = b.x0 + b.labelColumn;
+    // the label first: its access key moves the focus to the control after it
+    if (b.labelColumn) {
+        int textHeight = static_cast<int>(MeasureText(label).cy);
+        int top = b.y + (b.state.comboHeight - textHeight) / 2;
+        AddControl(b, L"STATIC", label, SS_LEFT, 0, {b.x0, top, listLeft - Scale(kGap), top + textHeight});
+    } else {
+        int height = static_cast<int>(MeasureText(label, b.x1 - b.x0).cy);
+        AddControl(b, L"STATIC", label, SS_LEFT, 0, {b.x0, b.y, b.x1, b.y + height});
+        b.y += height + Scale(3);
+    }
+    HWND list = AddControl(b, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, Ids(info.setting).control,
+                           {listLeft, b.y, b.x1, b.y + Scale(200)});
+    for (const std::wstring& item : b.state.items[info.setting]) {
+        SendMessageW(list, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
+    }
+    SendMessageW(list, CB_SETCURSEL, static_cast<WPARAM>(b.state.applied[info.setting]), 0);
+    b.state.controls[info.setting] = list;
+    b.y += b.state.comboHeight;
+    EndRow(b, info, listLeft);
+}
+
+// a push button as wide as its words, beside the button before it while they fit on the row, else under it
+void AddButton(PageBuilder& b, const PeSettingInfo& info) {
+    std::wstring text = core::T(info.label);
+    int width = ButtonWidth({text});
+    if (b.buttonRight < 0 || b.buttonRight + Scale(kGap) + width > b.x1) {
+        b.buttonRight = b.x0 - Scale(kGap);
+        b.buttonTop = b.y;
+        b.y += Scale(kButtonHeight) + Scale(kGap);
+    }
+    int x = b.buttonRight + Scale(kGap);
+    b.state.controls[info.setting] =
+        AddControl(b, L"BUTTON", text, WS_TABSTOP, Ids(info.setting).control, {x, b.buttonTop, x + width, b.buttonTop + Scale(kButtonHeight)});
+    b.buttonRight = x + width;
+}
+
+void AddSetting(PageBuilder& b, const PeSettingInfo& info) {
+    switch (info.kind) {
+    case PE_SETTING_KIND_SWITCH:
+        AddSwitch(b, info);
+        return;
+    case PE_SETTING_KIND_CHOICE:
+        AddChoice(b, info);
+        return;
+    case PE_SETTING_KIND_BUTTON:
+        AddButton(b, info);
         return;
     }
 }
@@ -613,7 +677,7 @@ void AddGroup(PageBuilder& b, const PeSettingsGroupInfo& group) {
     b.x0 = b.left + margin;
     b.x1 = b.right - margin;
     if (group.titled) {
-        box = AddControl(b, L"BUTTON", GroupTitle(group.label), BS_GROUPBOX, 0, {b.left, top, b.right, top + Scale(kGroupTop)});
+        box = AddControl(b, L"BUTTON", core::T(group.label), BS_GROUPBOX, 0, {b.left, top, b.right, top + Scale(kGroupTop)});
         b.y = top + Scale(kGroupTop);
     }
     for (const PeSettingInfo& info : kSettings) {
@@ -634,38 +698,37 @@ void AddGroup(PageBuilder& b, const PeSettingsGroupInfo& group) {
     b.y += Scale(kGroupGap);
 }
 
-// the labels' column of a page's lists: as wide as the longest label, unless that leaves too little of `width` for the
-// lists, when the labels go above them (0)
-int LabelColumn(PeSettingsPage page, int width) {
-    int widest = 0;
+// the labels' column of a page's lists, `width` wide: as wide as the longest label, unless that leaves less than a
+// minimum for the lists or too little for a list's longest entry, when the labels go above them (0). The lists' words
+// are filled in on the way
+int LabelColumn(OptionsState& state, PeSettingsPage page, int width) {
+    int widest = 0, room = Scale(160);
     for (const PeSettingInfo& info : kSettings) {
-        if (info.page == page && info.kind == PE_SETTING_KIND_CHOICE) {
-            widest = std::max(widest, static_cast<int>(MeasureText(core::T(info.label)).cx));
+        if (info.page != page || info.kind != PE_SETTING_KIND_CHOICE) {
+            continue;
         }
+        state.items[info.setting] = ChoiceItems(state, info.setting);
+        widest = std::max(widest, static_cast<int>(MeasureText(core::T(info.label)).cx));
+        // a group without a box has its margins for its lists
+        int margins = kSettingsGroups[info.group].titled ? 0 : 2 * Scale(kGroupMargin);
+        int list = LabelWidth(state.items[info.setting], 0, 0) + GetSystemMetrics(SM_CXVSCROLL) + Scale(8);
+        room = std::max(room, list - margins);
     }
     int column = widest + Scale(kGap) + Scale(4);
-    return width - column >= Scale(160) ? column : 0;
+    return width - column >= room ? column : 0;
 }
 
-// page `page` built from `top` down between left and right, the lists beside their labels in `labelColumn` (0: under
-// them); the bottom of its last group. Again with the labels above the lists when a list was too narrow beside its label
-int BuildPage(OptionsState& state, PeSettingsPage page, int left, int right, int top, int labelColumn) {
+// page `page` built from `top` down between left and right; the bottom of its last group
+int BuildPage(OptionsState& state, PeSettingsPage page, int left, int right, int top) {
     PageBuilder b{state, page};
     b.left = left;
     b.right = right;
     b.y = top;
-    b.labelColumn = labelColumn;
+    b.labelColumn = LabelColumn(state, page, right - left - 2 * Scale(kGroupMargin));
     for (const PeSettingsGroupInfo& group : kSettingsGroups) {
         if (group.page == page) {
             AddGroup(b, group);
         }
-    }
-    if (b.cramped && labelColumn) {
-        for (HWND control : state.pages[page]) {
-            DestroyWindow(control);
-        }
-        state.pages[page].clear();
-        return BuildPage(state, page, left, right, top, 0);
     }
     return b.y - Scale(kGroupGap);
 }
@@ -796,9 +859,7 @@ void BuildOptions(OptionsState& state) {
     TabCtrl_AdjustRect(state.tabs, FALSE, &display);
     int inset = Scale(8), bottom = 0;
     for (const PeSettingsPageInfo& page : kSettingsPages) {
-        int left = display.left + inset, right = display.right - inset;
-        int column = LabelColumn(page.page, right - left - 2 * Scale(kGroupMargin));
-        bottom = std::max(bottom, BuildPage(state, page.page, left, right, display.top + inset, column));
+        bottom = std::max(bottom, BuildPage(state, page.page, display.left + inset, display.right - inset, display.top + inset));
     }
     // the tab strip's frame under the tallest page
     tabBounds.bottom = bottom + inset + (tabBounds.bottom - display.bottom);
@@ -808,14 +869,13 @@ void BuildOptions(OptionsState& state) {
     int x = width - pad - 3 * buttonWidth - 2 * Scale(kGap);
     const std::pair<int, const std::wstring*> buttons[] = {{IDOK, &ok}, {IDCANCEL, &cancel}, {IDC_OPTIONS_APPLY, &apply}};
     for (const auto& [id, text] : buttons) {
-        HWND button = CreateChild(dialog, L"BUTTON", text->c_str(), WS_TABSTOP | (id == IDOK ? BS_DEFPUSHBUTTON : 0), id,
-                                  {x, top, x + buttonWidth, top + Scale(kButtonHeight)});
-        // nothing to apply yet
-        EnableWindow(button, id != IDC_OPTIONS_APPLY);
+        CreateChild(dialog, L"BUTTON", text->c_str(), WS_TABSTOP | (id == IDOK ? BS_DEFPUSHBUTTON : 0), id,
+                    {x, top, x + buttonWidth, top + Scale(kButtonHeight)});
         x += buttonWidth + Scale(kGap);
     }
     ResizeClient(dialog, width, top + Scale(kButtonHeight) + pad);
-    EnableWindow(GetDlgItem(dialog, IDC_OPTIONS_CODES), state.applied.window.notify);
+    // nothing to apply yet; the settings that depend on another enabled by it
+    UpdateOptions(state);
     ShowPage(state, PE_SETTINGS_PAGE_GENERAL);
 }
 
@@ -835,7 +895,9 @@ bool OptionsDialog(HWND owner, PeCore* core, const WindowOptions& window, const 
     OptionsState state;
     state.core = core;
     state.languages = Languages();
-    state.applied = CurrentValues(core, window, state.languages);
+    for (const PeSettingInfo& info : kSettings) {
+        state.applied[info.setting] = CurrentValue(state, info.setting, window);
+    }
     state.applyWindow = apply;
     state.dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), Scale(kOptionsWidth), Scale(400));
     BuildOptions(state);

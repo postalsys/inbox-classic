@@ -148,8 +148,9 @@ void AddTip(HWND owner, HWND tool, const std::wstring& text);
 // how wide the words of a control are in `font` (the dialog font when NULL), its & left out
 int TextWidth(HWND control, HFONT font);
 
-// how big `text` is in the dialog font, its & left out: one line, or wrapped at `wrapWidth` when it is not 0
-SIZE MeasureText(const std::wstring& text, int wrapWidth = 0);
+// how big `text` is in the dialog font, its & left out: one line, or wrapped at `wrapWidth` when it is not 0. `flags`
+// are DrawText's more (DT_EDITCONTROL); with DT_NOPREFIX the & are measured as they are
+SIZE MeasureText(const std::wstring& text, int wrapWidth = 0, UINT flags = 0);
 // a push button wide enough for the longest of `labels`, at least `least` pixels at 96 DPI
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least = 80);
 int ButtonWidth(const std::vector<std::wstring>& labels, int least = 80);

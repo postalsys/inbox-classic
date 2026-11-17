@@ -122,13 +122,15 @@ void RegisterDialogClass(const wchar_t* name, WNDPROC proc) {
 
 namespace {
 // `text` without its menu letter marks, measured in `font` (the dialog font when null), wrapped at `wrapWidth` if set
-SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0) {
+SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0, UINT flags = 0) {
     std::wstring plain = text;
-    plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
+    if (!(flags & DT_NOPREFIX)) {
+        plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
+    }
     HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
     RECT bounds = {0, 0, wrapWidth > 0 ? wrapWidth : 0, 0};
     DrawTextW(dc, plain.c_str(), static_cast<int>(plain.size()), &bounds,
-              DT_CALCRECT | DT_NOPREFIX | (wrapWidth > 0 ? DT_WORDBREAK : DT_SINGLELINE));
+              DT_CALCRECT | DT_NOPREFIX | flags | (wrapWidth > 0 ? DT_WORDBREAK : DT_SINGLELINE));
     SelectObject(dc, old);
     return {bounds.right - bounds.left, bounds.bottom - bounds.top};
 }
@@ -220,9 +222,9 @@ int TextWidth(HWND control, HFONT font) {
     return width;
 }
 
-SIZE MeasureText(const std::wstring& text, int wrapWidth) {
+SIZE MeasureText(const std::wstring& text, int wrapWidth, UINT flags) {
     HDC dc = GetDC(nullptr);
-    SIZE size = Measure(dc, nullptr, text, wrapWidth);
+    SIZE size = Measure(dc, nullptr, text, wrapWidth, flags);
     ReleaseDC(nullptr, dc);
     return size;
 }
