@@ -1718,8 +1718,6 @@ const behind = [
 // the screenshots a platform's UI test does not take yet, each a gap to close, or of a feature it does not have
 const notYet = {
     windows: [
-        // the MCP update, phase 1: the apps' unsubscribe question is still to come
-        'agents-7-unsubscribe',
         // the Mac and Linux only: Windows keeps the classic light look
         'dark-1-plain',
         'dark-2-written',

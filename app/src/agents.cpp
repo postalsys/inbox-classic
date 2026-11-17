@@ -1,7 +1,9 @@
 // AI agents: the questions only the user answers (a program that connects for the first time, every message an
-// agent wants to send) and Tools > AI Agents, with the programs let in and what agents did. The rules, the words and
+// agent wants to send, the mailing lists an agent wants to leave) and Tools > AI Agents, with the programs let in and what agents did. The rules, the words and
 // the decisions' effects are the core's (pe-core agents.rs); these windows show them and pass the answers on.
 #include <windowsx.h>
+
+#include <algorithm>
 
 #include "app.h"
 
@@ -9,6 +11,7 @@ namespace {
 
 const wchar_t* kAccessClass = L"InboxClassicAgentAccess";
 const wchar_t* kSendClass = L"InboxClassicAgentSend";
+const wchar_t* kUnsubscribeClass = L"InboxClassicAgentUnsubscribe";
 const wchar_t* kAgentsClass = L"InboxClassicAgents";
 
 // the dialog's heading: the message font, larger and bold
@@ -123,7 +126,16 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     int width = Scale(500);
     int inner = width - 2 * pad;
     int detailHeight = TextHeight(owner, detail, inner);
-    int height = pad + Scale(24) + detailHeight + Scale(10) + Scale(18) + Scale(10) + Scale(20) + 4 * Scale(22) + Scale(10) + Scale(18) +
+    // a level's words wrap under their check box when they are long (Organize names everything it lets an agent do)
+    std::wstring labels[PE_AGENT_LEVEL_COUNT];
+    int rows[PE_AGENT_LEVEL_COUNT] = {};
+    int levelsHeight = 0;
+    for (size_t i = 0; i < PE_AGENT_LEVEL_COUNT; i++) {
+        labels[i] = Text(pe_agent_level_label(i));
+        rows[i] = std::max(Scale(20), TextHeight(owner, labels[i], inner - Scale(4) - Scale(20)) + Scale(4));
+        levelsHeight += rows[i] + Scale(2);
+    }
+    int height = pad + Scale(24) + detailHeight + Scale(10) + Scale(18) + Scale(10) + Scale(20) + levelsHeight + Scale(10) + Scale(18) +
                  Scale(92) + Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kAccessClass, core::Plain(mode == AccessMode::Ask ? PE_TEXT_UI_AI_AGENT : PE_TEXT_UI_AI_AGENT_ACCESS).c_str(), width, height);
     AccessState state{core};
@@ -141,11 +153,12 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_IT_MAY).c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
     y += Scale(20);
     for (size_t i = 0; i < PE_AGENT_LEVEL_COUNT; i++) {
-        state.levels[i] = CreateChild(dialog, L"BUTTON", Text(pe_agent_level_label(i)).c_str(),
-                                      WS_TABSTOP | BS_AUTOCHECKBOX | (i == 0 ? WS_GROUP : 0), IDC_AGENT_LEVEL + static_cast<int>(i),
-                                      {pad + Scale(4), y, width - pad, y + Scale(20)});
+        DWORD wrap = rows[i] > Scale(20) ? BS_MULTILINE | BS_TOP : 0;
+        state.levels[i] = CreateChild(dialog, L"BUTTON", labels[i].c_str(),
+                                      WS_TABSTOP | BS_AUTOCHECKBOX | wrap | (i == 0 ? WS_GROUP : 0), IDC_AGENT_LEVEL + static_cast<int>(i),
+                                      {pad + Scale(4), y, width - pad, y + rows[i]});
         Button_SetCheck(state.levels[i], (levels & pe_agent_level_bit(i)) ? BST_CHECKED : BST_UNCHECKED);
-        y += Scale(22);
+        y += rows[i] + Scale(2);
     }
     y += Scale(10);
     CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_ACCOUNTS_IT_MAY_USE).c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
@@ -328,6 +341,133 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
     if (draft) {
         OpenCompose(GetAncestor(owner, GA_ROOT), core, account, pe_draft_info(draft.get()));
     }
+}
+
+// ---- mailing lists to leave ----
+
+struct UnsubscribeState {
+    bool done = false;
+    bool unsubscribe = false;
+    HWND unsubscribeButton = nullptr;
+    HWND lists = nullptr;
+    HFONT bold = nullptr;
+};
+
+// the senders bold, so who each list is reads first; where the request goes dim
+LRESULT DrawListCell(UnsubscribeState& state, NMLVCUSTOMDRAW& draw) {
+    switch (draw.nmcd.dwDrawStage) {
+    case CDDS_PREPAINT:
+        return CDRF_NOTIFYITEMDRAW;
+    case CDDS_ITEMPREPAINT:
+        return CDRF_NOTIFYSUBITEMDRAW;
+    case CDDS_ITEMPREPAINT | CDDS_SUBITEM: {
+        bool selected = ListView_GetItemState(state.lists, static_cast<int>(draw.nmcd.dwItemSpec), LVIS_SELECTED) != 0 &&
+                        GetFocus() == state.lists;
+        SelectObject(draw.nmcd.hdc, draw.iSubItem == 0 && state.bold ? state.bold : reinterpret_cast<HFONT>(SendMessageW(state.lists, WM_GETFONT, 0, 0)));
+        draw.clrText = draw.iSubItem == 2 && !selected ? GetSysColor(COLOR_GRAYTEXT) : CLR_DEFAULT;
+        return CDRF_NEWFONT;
+    }
+    }
+    return CDRF_DODEFAULT;
+}
+
+LRESULT CALLBACK UnsubscribeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<UnsubscribeState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    if (!state) {
+        return DefWindowProcW(hwnd, message, wParam, lParam);
+    }
+    switch (message) {
+    case WM_COMMAND:
+        switch (LOWORD(wParam)) {
+        case IDC_AGENT_UNSUBSCRIBE:
+            state->unsubscribe = true;
+            state->done = true;
+            return 0;
+        case IDCANCEL:
+        case IDC_AGENT_DONT_UNSUBSCRIBE:
+            state->unsubscribe = false;
+            state->done = true;
+            return 0;
+        }
+        return 0;
+    case WM_NOTIFY: {
+        auto* header = reinterpret_cast<NMHDR*>(lParam);
+        if (header->hwndFrom == state->lists && header->code == NM_CUSTOMDRAW) {
+            return DrawListCell(*state, *reinterpret_cast<NMLVCUSTOMDRAW*>(lParam));
+        }
+        return 0;
+    }
+    case WM_TIMER:
+        // Unsubscribe comes on after a moment, as Send does, so a key pressed for another window does not answer
+        if (wParam == kSendTimer) {
+            KillTimer(hwnd, kSendTimer);
+            EnableWindow(state->unsubscribeButton, TRUE);
+        }
+        return 0;
+    case WM_CLOSE:
+        state->unsubscribe = false;
+        state->done = true;
+        return 0;
+    case WM_CTLCOLORSTATIC:
+        return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+void UnsubscribeDialog(HWND owner, PeCore* core, uint64_t request) {
+    core::AgentUnsubscribe info(pe_agent_unsubscribe_info(core, request));
+    const PeAgentUnsubscribe* ask = pe_agent_unsubscribe(info.get());
+    if (!ask) {
+        return;
+    }
+    RegisterDialogClass(kUnsubscribeClass, UnsubscribeProc);
+    int pad = Scale(12);
+    int width = Scale(600);
+    int inner = width - 2 * pad;
+    std::wstring detail = Text(ask->detail);
+    int detailHeight = TextHeight(owner, detail, inner);
+    int count = static_cast<int>(pe_agent_unsubscribe_list_count(info.get()));
+    // room for up to eight lists, then it scrolls (an agent may name up to 30 a day)
+    int listHeight = Scale(26) + std::clamp(count, 3, 8) * Scale(18);
+    int height = pad + Scale(24) + detailHeight + Scale(12) + listHeight + Scale(16) + Scale(25) + pad;
+    HWND dialog = CreateModalWindow(owner, kUnsubscribeClass, core::Plain(PE_TEXT_UI_AI_AGENT).c_str(), width, height);
+    UnsubscribeState state;
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    int y = pad;
+    Heading(dialog, Text(ask->title), {pad, y, width - pad, y + Scale(22)});
+    y += Scale(24);
+    CreateChild(dialog, L"STATIC", detail.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + detailHeight});
+    y += detailHeight + Scale(12);
+    // one row a list: its sender as From says it (the address with the name, so a name can not hide who it is), the
+    // subject it came with, and the host the request goes to
+    state.lists = CreateReportList(dialog, IDC_AGENT_LISTS, {pad, y, width - pad, y + listHeight});
+    // a sender too long for its column shows whole under the mouse
+    ListView_SetExtendedListViewStyle(state.lists, LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP);
+    LOGFONTW face = {};
+    GetObjectW(reinterpret_cast<HFONT>(SendMessageW(state.lists, WM_GETFONT, 0, 0)), sizeof(face), &face);
+    face.lfWeight = FW_BOLD;
+    state.bold = CreateFontIndirectW(&face);
+    AddColumn(state.lists, 0, core::T(PE_TEXT_UI_COL_FROM).c_str(), 250);
+    AddColumn(state.lists, 1, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 190);
+    AddColumn(state.lists, 2, L"", 120);
+    for (int i = 0; i < count; i++) {
+        const PeAgentList* list = pe_agent_unsubscribe_list(info.get(), static_cast<size_t>(i));
+        int row = AddRow(state.lists, i, Text(list->sender));
+        SetCell(state.lists, row, 1, Text(list->subject));
+        SetCell(state.lists, row, 2, L"→ " + Text(list->target));
+    }
+    ListView_SetColumnWidth(state.lists, 2, LVSCW_AUTOSIZE_USEHEADER);
+    y += listHeight + Scale(16);
+    std::wstring unsubscribe = core::T(PE_TEXT_WIN_UNSUBSCRIBE), dontUnsubscribe = core::T(PE_TEXT_WIN_DONT_UNSUBSCRIBE);
+    int button = ButtonWidth({unsubscribe, dontUnsubscribe}, 110);
+    state.unsubscribeButton = CreateChild(dialog, L"BUTTON", unsubscribe.c_str(), WS_TABSTOP | WS_DISABLED, IDC_AGENT_UNSUBSCRIBE,
+                                          {width - pad - 2 * button - Scale(8), y, width - pad - button - Scale(8), y + Scale(25)});
+    HWND dontButton = CreateChild(dialog, L"BUTTON", dontUnsubscribe.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_AGENT_DONT_UNSUBSCRIBE,
+                                  {width - pad - button, y, width - pad, y + Scale(25)});
+    SetTimer(dialog, kSendTimer, 1500, nullptr);
+    RunModal(dialog, dontButton, state.done);
+    DeleteObject(state.bold);
+    pe_agent_answer_unsubscribe(core, request, state.unsubscribe);
 }
 
 // ---- Tools > AI Agents ----
@@ -544,6 +684,9 @@ void AgentQuestion(HWND owner, PeCore* core, uint64_t request) {
     }
     case PE_AGENT_ASK_KIND_SEND:
         SendDialog(owner, core, request);
+        break;
+    case PE_AGENT_ASK_KIND_UNSUBSCRIBE:
+        UnsubscribeDialog(owner, core, request);
         break;
     default:
         break;
