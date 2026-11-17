@@ -242,6 +242,26 @@ fn a_key_that_is_not_the_one_in_use_does_not_sign_for_the_sender() {
 }
 
 #[test]
+fn a_sender_other_than_from_is_not_signed_for() {
+    // the plan's From rule: a Sender that differs from the one From never gives blue or green
+    let w = world("pgp-sender");
+    let raw = message(
+        "Alice <alice@example.org>",
+        &signed_part(&text("Hello Bob"), &w.alice, "s"),
+    )
+    .replacen("To: ", "Sender: mallory@example.net\r\nTo: ", 1);
+    let protection = w.view(&raw).protection.unwrap();
+    assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
+    // the same address as From changes nothing
+    let raw = message(
+        "Alice <alice@example.org>",
+        &signed_part(&text("Hello Bob"), &w.alice, "s"),
+    )
+    .replacen("To: ", "Sender: Alice@example.org\r\nTo: ", 1);
+    assert_eq!(w.view(&raw).protection.unwrap().tone, Tone::Good);
+}
+
+#[test]
 fn an_unknown_key() {
     let w = world("pgp-unknown");
     let raw = message("mallory@example.net", &signed_part(&text("Hi"), &w.mallory, "s"));

@@ -2843,22 +2843,37 @@ fn write_invitation(source: &[u8], dir: &Path) -> Result<Option<PathBuf>> {
 
 /// Every address of every From header of a message (two senders are nobody's signature)
 pub(crate) fn from_addresses(source: &[u8]) -> Vec<String> {
-    let Ok(message) = pe_mime::parser::parse(source) else {
+    // the top header block only, not the body (an encrypted one's ciphertext)
+    let head = pe_mime::outline::outline(source)
+        .root()
+        .map_or(source, |root| &source[..root.body]);
+    let Ok(message) = pe_mime::parser::parse(head) else {
         return Vec::new();
     };
-    message
-        .headers
-        .iter()
-        .filter(|header| header.key == "from")
-        .flat_map(|header| pe_mime::parser::parse_addresses(&header.value))
-        .flat_map(|address| {
-            address
-                .mailboxes()
-                .iter()
-                .map(|m| m.address.clone())
-                .collect::<Vec<_>>()
-        })
-        .collect()
+    let addresses = |name: &str| -> Vec<String> {
+        message
+            .headers
+            .iter()
+            .filter(|header| header.key == name)
+            .flat_map(|header| pe_mime::parser::parse_addresses(&header.value))
+            .flat_map(|address| {
+                address
+                    .mailboxes()
+                    .iter()
+                    .map(|m| m.address.clone())
+                    .collect::<Vec<_>>()
+            })
+            .collect()
+    };
+    let mut from = addresses("from");
+    // a Sender other than the one From: someone else sent it, so no signature speaks for the From address (the
+    // signatures read only a From of one address)
+    for sender in addresses("sender") {
+        if !from.iter().any(|address| address.eq_ignore_ascii_case(&sender)) {
+            from.push(sender);
+        }
+    }
+    from
 }
 
 /// Every attachment of `source` written into `dir` under its safe name, a file there kept and the new one numbered: how
