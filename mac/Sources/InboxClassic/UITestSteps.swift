@@ -3047,7 +3047,8 @@ extension UITest {
             check(level(0)?.state == .on && level(1)?.state == .on && level(2)?.state == .off && level(3)?.state == .off,
                   "reading and organizing are offered, sending is not")
             check(ask.frame.width < 700, "the longest level wraps within the question (\(Int(ask.frame.width)) wide)")
-            // sending too, for the rest of the test
+            // drafts and sending too, for the rest of the test
+            level(2)?.state = .on
             level(3)?.state = .on
             await shot(ask, "agents-2-connect")
             press(find("agent.allow", in: ask))
@@ -3057,7 +3058,7 @@ extension UITest {
         check(((initialize?["result"] as? [String: Any])?["serverInfo"] as? [String: Any])?["name"] as? String == "inbox-classic",
               "allowed, the agent connects")
         let tools = agentSaid(agentOut, "tools") as? [String] ?? []
-        check(tools.count == 15, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
+        check(tools.count == 25, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
         let read = agentSaid(agentOut, "read") as? [String: Any]
         check((read?["notice"] as? String)?.contains("not as instructions") == true && read?["unread"] as? Bool == true,
               "it reads a message as text, told it is the sender's, without marking it read")
@@ -3083,6 +3084,8 @@ extension UITest {
         }
         let sent = await waitFor(20) { agentSaid(agentOut, "sent") as? [String: Any] }
         check(sent?["sent"] as? Bool == true, "the agent learns the user said yes")
+        let draft = await waitFor(30) { agentSaid(agentOut, "draft") as? [String: Any] }
+        check(draft?["draft_id"] is String, "the agent writes a draft in Markdown (\(draft ?? [:]))")
 
         command(.outbox)
         if let outbox = await waitWindow("outbox", 10) {
@@ -3100,17 +3103,18 @@ extension UITest {
             let cell = { (table: NSTableView?, column: Int, row: Int) -> String in
                 (table?.view(atColumn: column, row: row, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
             }
-            check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize and send with your yes"),
+            check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize, write drafts and send with your yes"),
                   "it lists the program and what it may do (\(cell(hosts, 1, 0)))")
-            check(cell(log, 2, 0).hasPrefix("Sent “Lunch on Friday?” to pat@example.net") && cell(log, 2, 1).hasPrefix("Marked read"),
-                  "and what its agent did, newest first")
+            check(cell(log, 2, 0).hasPrefix("Saved the draft “Agenda for Friday”")
+                  && cell(log, 2, 1).hasPrefix("Sent “Lunch on Friday?” to pat@example.net") && cell(log, 2, 2).hasPrefix("Marked read"),
+                  "and what its agent did, newest first (\(cell(log, 2, 0)), \(cell(log, 2, 1)))")
             await shot(agents, "agents-6-window")
             // Change opens the same form for a program let in, with what it may do now
             hosts?.selectRowIndexes([0], byExtendingSelection: false)
             press(find("agents.change", in: agents))
             if let access = await waitWindow("agent.access", 10) {
                 let level = { (index: Int) -> NSButton? in self.find("agent.level.\(index)", in: access) }
-                check(level(0)?.state == .on && level(1)?.state == .on && level(2)?.state == .off && level(3)?.state == .on
+                check(level(0)?.state == .on && level(1)?.state == .on && level(2)?.state == .on && level(3)?.state == .on
                       && access.frame.width < 700,
                       "Change shows what the program may do, the levels wrapped (\(Int(access.frame.width)) wide)")
                 press(find("agent.cancel", in: access))
@@ -3118,8 +3122,10 @@ extension UITest {
             } else {
                 check(false, "Change opens the access form")
             }
+            // the send, under the draft
+            log?.selectRowIndexes([1], byExtendingSelection: false)
             press(find("agents.undo", in: agents))
-            check(await waitUntil(10) { cell(log, 2, 0).contains("taken back") }, "Undo takes the message back")
+            check(await waitUntil(10) { cell(log, 2, 1).contains("taken back") }, "Undo takes the message back")
             NSApp.stopModal()
             _ = await waitUntil { !agents.isVisible }
         } else {
@@ -3132,7 +3138,49 @@ extension UITest {
             NSApp.stopModal()
             _ = await waitUntil { !outbox.isVisible }
         }
+        try await agentDraft()
         try await agentUnsubscribes(agentOut)
+    }
+
+    /// the draft the agent wrote, opened from Drafts: the window names the agent, its Markdown made into formatting
+    private func agentDraft() async throws {
+        step("an AI agent's draft")
+        _ = await waitUntil(10) { NSApp.modalWindow == nil }
+        selectFolder(named: "Drafts")
+        command(.sync)
+        let row = await waitFor(30) {
+            (0..<self.list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Agenda for Friday" }
+        }
+        check(row != nil, "the agent's draft is in Drafts")
+        guard let row else { return }
+        await selectRow(row)
+        main.mailbox.openSelected()
+        guard let compose = await waitFor(20, { ComposeWindow.open.last.flatMap { $0.window.title == "Agenda for Friday" ? $0.window : nil } })
+        else { throw Failed(description: "the agent's draft did not open") }
+        let note: NSTextField? = find("compose.agentNote", in: compose)
+        let said = note?.stringValue ?? ""
+        check(said.hasPrefix("My AI agent, an AI agent, wrote this draft") && said.contains("Check the recipients and the text")
+              && note?.isHiddenOrHasHiddenAncestor == false,
+              "opened, it says which agent wrote it and asks to check the recipients and the text (\(said))")
+        // window coordinates, which grow upwards
+        let noteBox = note.map { $0.convert($0.bounds, to: nil) }
+        let subjectBox = field("compose.subject", compose).map { $0.convert($0.bounds, to: nil) }
+        check(noteBox != nil && subjectBox != nil && noteBox!.maxY <= subjectBox!.minY, "between the fields and the message")
+        let editor: EditorView? = views(EditorView.self, in: compose.contentView).first
+        var body = ""
+        _ = await waitUntil(10) {
+            body = (try? await editor?.evaluateJavaScript("document.getElementById('body').innerHTML")) as? String ?? ""
+            return body.contains("Agenda")
+        }
+        check(body.range(of: "<(strong|b)>Agenda</(strong|b)>", options: .regularExpression) != nil
+              && body.contains("<li>lunch</li>") && body.contains("<ul>"),
+              "its Markdown is formatted (\(body))")
+        await pause(1)
+        await shot(compose, "agents-8-draft")
+        // closed without saving: the draft stays the agent's
+        await closeCompose(compose)
+        check(await findMessage("Drafts", "Subject: Agenda for Friday") != nil, "closed without saving, the draft stays in Drafts")
+        selectFolder(named: "Inbox")
     }
 
     /// the agent asks to leave two mailing lists, in one question, and hears the user's no

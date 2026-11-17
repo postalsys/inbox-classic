@@ -312,6 +312,9 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// mail
     private var lastHtml = ""
     let securityLine = SecurityBar(id: "compose.security")
+    /// the line over a draft an AI agent wrote, naming the agent: set when the window opens, kept while it is open
+    private let agentNote: String?
+    private lazy var agentLine = NoteBar(id: "compose.agentNote", symbol: "sparkles")
     let keysRow = KeyChipsRow()
     private(set) var signButton: NSButton?
     private(set) var encryptButton: NSButton?
@@ -325,15 +328,16 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// opens a compose window from `account`, with `draft` (a reply, a forward, a saved draft, a mailto: link)
     @discardableResult
     static func open(core: Core, account: Int64, draft: Draft?) -> ComposeWindow {
-        let window = ComposeWindow(core: core, account: account, draft: draft?.info?.pointee)
+        let window = ComposeWindow(core: core, account: account, draft: draft?.info?.pointee, agentNote: draft?.agentNote)
         open.append(window)
         window.window.makeKeyAndOrderFront(nil)
         return window
     }
 
-    private init(core: Core, account: Int64, draft: PeDraftInfo?) {
+    private init(core: Core, account: Int64, draft: PeDraftInfo?, agentNote: String?) {
         self.core = core
         self.account = account
+        self.agentNote = agentNote
         let title = draft.map { text($0.subject) }.flatMap { $0.isEmpty ? nil : $0 } ?? Text.uiNewMessageTitle.text
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 620),
                           styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
@@ -496,14 +500,17 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             content.addSubview(view)
         }
         // the line of signing and encrypting between the fields and the format bar, from edge to edge as the reading
-        // pane's bar; the format bar under the fields while there is none
-        formatBarTop = formatBar.view.topAnchor.constraint(equalTo: grid.bottomAnchor, constant: 10)
+        // pane's bar; the format bar under the fields while there is none. A draft an agent wrote has its note over
+        // both, and they follow it
+        let fieldsEnd = placeAgentLine(in: content)
+        let underNote = agentNote != nil
+        formatBarTop = formatBar.view.topAnchor.constraint(equalTo: fieldsEnd, constant: underNote ? 8 : 10)
         formatBarUnderLine = formatBar.view.topAnchor.constraint(equalTo: securityLine.bottomAnchor, constant: 8)
         NSLayoutConstraint.activate([
             grid.topAnchor.constraint(equalTo: content.topAnchor, constant: 10),
             grid.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 10),
             grid.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -10),
-            securityLine.topAnchor.constraint(equalTo: grid.bottomAnchor, constant: 10),
+            securityLine.topAnchor.constraint(equalTo: fieldsEnd, constant: underNote ? 0 : 10),
             securityLine.leadingAnchor.constraint(equalTo: content.leadingAnchor),
             securityLine.trailingAnchor.constraint(equalTo: content.trailingAnchor),
             formatBarTop,
@@ -520,6 +527,20 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         ])
         window.setContentBorderThickness(26, for: .minY)
         return content
+    }
+
+    /// the agent's note under the fields, from edge to edge, when there is one: where what follows the fields starts
+    private func placeAgentLine(in content: NSView) -> NSLayoutYAxisAnchor {
+        guard let agentNote else { return grid.bottomAnchor }
+        agentLine.text = agentNote
+        agentLine.translatesAutoresizingMaskIntoConstraints = false
+        content.addSubview(agentLine)
+        NSLayoutConstraint.activate([
+            agentLine.topAnchor.constraint(equalTo: grid.bottomAnchor, constant: 10),
+            agentLine.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            agentLine.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+        ])
+        return agentLine.bottomAnchor
     }
 
     /// To, Cc or Bcc: Select Recipients, what is chosen added to the fields

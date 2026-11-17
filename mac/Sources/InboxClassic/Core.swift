@@ -1089,6 +1089,9 @@ final class Draft {
     deinit { pe_draft_free(handle) }
 
     var info: UnsafePointer<PeDraftInfo>? { pe_draft_info(handle) }
+
+    /// the line a draft an AI agent wrote shows in the compose window, the core's words; nil for the user's own
+    var agentNote: String? { info?.pointee.agent_note.map { String(cString: $0) } }
 }
 
 /// Bytes the core returned (an attachment, a message source), freed with pe_bytes_free
