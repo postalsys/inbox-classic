@@ -676,8 +676,7 @@ day-sunday = sekmadienis
 
 # review: new
 agent-level-read = Skaityti paštą: aplankai, laiškų sąrašas, paieška ir laiškai
-# review: new
-agent-level-organize = Tvarkyti paštą: skaitymo būsena, vėliavėlės, nepageidaujami laiškai, perkėlimas, archyvavimas, nauji aplankai, panaikinimas į „Panaikinti laiškai“ ir adresatų sąrašų prenumeratos atsisakymas jums sutikus
+agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti aplankus, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
 # review: new
 agent-level-drafts = Rašyti juodraščius, kuriuos išsiųsite jūs
 # review: new
@@ -767,11 +766,8 @@ agent-log-refused = Neišsiuntėte „{ $subject }“
 agent-log-sent = Išsiųstas „{ $subject }“ (kam: { $to })
 # review: new
 agent-log-draft = Įrašytas juodraštis „{ $subject }“
-# review: new
 agent-log-draft-replaced = Pakeistas juodraštis „{ $subject }“
-# review: new
 agent-log-draft-discarded = Atmestas juodraštis „{ $subject }“
-# review: new
 agent-draft-note = Šį juodraštį parašė DI agentas { $program }. Prieš siųsdami patikrinkite gavėjus ir tekstą.
 # review: new
 agent-log-read = Pažymėtas kaip skaitytas: „{ $subject }“
@@ -794,20 +790,16 @@ agent-log-archived = Archyvuotas „{ $subject }“
 # review: new
 agent-log-folder = Sukurtas aplankas „{ $name }“
 agent-log-unsubscribed = Patvirtinote prašymą atsisakyti prenumeratos. Laiškas: „{ $subject }“
-# review: new
-agent-log-unsubscribe-failed = Nepavyko atsisakyti „{ $subject }“ adresatų sąrašo: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Neatsisakėte prenumeratos: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Nepavyko atsisakyti prenumeratos. Laiškas: „{ $subject }“. Priežastis: { $reason }
+agent-log-unsubscribe-refused = Nepatvirtinote prašymo atsisakyti prenumeratos. Siuntėjai: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašo prenumeratos
     [few] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos
    *[other] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic paprašo toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį jis siūlo. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
-   *[other] Inbox Classic paprašo kiekvieno toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį siūlo sąrašas. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
+    [1] Inbox Classic paprašo toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
+   *[other] Inbox Classic paprašo kiekvieno toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama kiekvieno sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

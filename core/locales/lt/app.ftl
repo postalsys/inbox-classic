@@ -852,7 +852,6 @@ ui-dont-allow = Neleisti
 ui-allow = &Leisti
 # review: new
 ui-dont-send = Nesiųsti
-# review: new
 ui-dont-unsubscribe = Neatsisakyti prenumeratos
 # review: new
 ui-edit-first = &Pirma redaguoti

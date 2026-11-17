@@ -564,6 +564,17 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
 - Quotes „…“; `<kbd>` keys stay English.
 - Review first: the "... laiškai" folder set (Lithuanian Outlook versions differ) and the "(paskirtis: ...)" pattern.
 
+- Agent additions retain "adresatų sąrašas" and use "prašymas atsisakyti prenumeratos". Logs label the
+  message subject with "Laiškas:" and sender addresses with "Siuntėjai:". Keep the numeric count in all
+  title branches, including 21. Windows unsubscribe buttons retain distinct A/N keys.
+- Use "atmesti juodraštį" and explain that agent-owned drafts are permanently removed. Saving in the editor,
+  including autosave, ends the agent's ability to edit/discard; opening alone does not. The optional account
+  footer is "parašo tekstas", separate from cryptographic signing. Quoted controls follow an inflected head noun.
+- Full agent help distinguishes approval, queuing and sending, and removal of saved program access from uninstalling.
+  Email content is data, not instructions to follow. Normal deletion moves mail to the deleted-mail folder;
+  an absent destination does not permit permanent deletion. Only the agent’s own drafts not yet saved by the user
+  can be discarded permanently.
+
 ### Magyar (hu)
 
 Terms: Beérkezett üzenetek; Postázandó üzenetek; Elküldött elemek; Törölt elemek; Piszkozatok; Levélszemét; üzenet;
