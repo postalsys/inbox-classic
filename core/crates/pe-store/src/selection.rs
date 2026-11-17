@@ -68,6 +68,10 @@ impl Picked {
     }
 }
 
+/// Up to this many messages or conversations are placed one by one from their sort keys (keyset.rs); more by one
+/// ranking of the whole list
+pub(crate) const FEW: usize = 8;
+
 /// SQLite's limit on the values of one statement is 32766; picked messages go in by this many at a time
 pub(crate) const CHUNK: usize = 400;
 
@@ -151,6 +155,16 @@ impl Store {
     pub fn positions(&self, search: &Search, sort: Sort, refs: &[MessageRef]) -> Result<Vec<u64>> {
         if refs.is_empty() {
             return Ok(Vec::new());
+        }
+        if refs.len() <= FEW {
+            // each counted on the order's index, never the list ranked
+            let mut found = Vec::new();
+            for r in refs {
+                found.extend(self.search_index(search, sort, r.folder, r.uid)?);
+            }
+            found.sort_unstable();
+            found.dedup();
+            return Ok(found);
         }
         self.with_picked_refs(refs, || {
             if let Some(expanded) = &search.threads {
@@ -253,6 +267,9 @@ impl Store {
             threads: None,
             ..search.clone()
         };
+        if let Some(summary) = self.summary_kept(&search)? {
+            return Ok(summary);
+        }
         let (condition, values) = search.condition(false);
         let mut statement = self.db.prepare(&format!(
             "SELECT folder_id, COUNT(*), COALESCE(SUM(NOT seen), 0), \

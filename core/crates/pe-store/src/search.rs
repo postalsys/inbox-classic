@@ -5,9 +5,22 @@
 use rusqlite::types::Value;
 use rusqlite::{OptionalExtension, params, params_from_iter};
 
+use crate::keyset::{Cursor, Order, Rows, Walk};
 use crate::messages::{COLUMNS, from_row};
 use crate::query::{Field, Place, Query, Term, Word};
 use crate::{AccountId, FolderId, Message, MessageRef, Result, Sort, SortField, Store};
+
+/// Where a page is read from rather than counted from the top of the list ([`Store::search_from`]): a row next to it
+/// in the list read before, the store unchanged since, or the end of the list
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Anchor {
+    /// The row just above the page
+    Above(MessageRef),
+    /// The row just below it
+    Below(MessageRef),
+    /// The end of the list, which has this many rows
+    End(u64),
+}
 
 /// Which messages of the list are shown, whatever words are searched for
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -76,7 +89,7 @@ const IS_FLAGGED: &str = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
 /// The folders whose flagged messages [`Scope::Flagged`] lists: of an account with a folder of its flagged messages
 /// (Gmail's Starred, \Flagged) that one alone, as the others hold the same messages again; of any other account every
 /// folder but what was thrown away, junk and all mail
-const FLAGGED_FROM: &str = "SELECT id FROM folders f WHERE CASE \
+pub(crate) const FLAGGED_FROM: &str = "SELECT id FROM folders f WHERE CASE \
      WHEN EXISTS (SELECT 1 FROM folders s WHERE s.account_id = f.account_id AND s.special_use = '\\Flagged') \
      THEN f.special_use = '\\Flagged' \
      ELSE COALESCE(f.special_use, '') NOT IN ('\\Trash', '\\Junk', '\\All') END";
@@ -149,6 +162,35 @@ pub(crate) fn fts_columns(row: &str) -> String {
     )
 }
 
+/// Whether a page in the order of `sort` walks an index of every folder (date, received, sender, subject) for a list of
+/// several folders, rather than sort what the folder indexes find ([`Search::condition`] `in_order`)
+pub(crate) fn walks_index(sort: Sort) -> bool {
+    matches!(
+        sort.field,
+        SortField::Date | SortField::Received | SortField::From | SortField::Subject
+    )
+}
+
+/// The messages `search` finds, one row each, as keyset.rs reads them (`in_order` as for a page, see
+/// [`Search::condition`])
+fn message_rows(search: &Search, in_order: bool) -> Rows {
+    let (condition, values) = search.condition(in_order);
+    Rows {
+        with: String::new(),
+        from: "messages".into(),
+        condition,
+        values,
+    }
+}
+
+/// The message of a row of `folder_id, uid`
+fn message_ref(row: &rusqlite::Row) -> rusqlite::Result<MessageRef> {
+    Ok(MessageRef {
+        folder: row.get(0)?,
+        uid: row.get::<_, i64>(1)? as u64,
+    })
+}
+
 /// The current time, for `older_than:`
 fn now() -> i64 {
     std::time::SystemTime::now()
@@ -185,7 +227,7 @@ impl Search {
     }
 
     /// The WHERE of the search and its values, ?1 on. `in_order`: for a page in an order that has an index over every
-    /// folder (date, received), which then walks it rather than sort all the Inboxes have.
+    /// folder ([`walks_index`]), which then walks it rather than sort all the Inboxes have.
     pub(crate) fn condition(&self, in_order: bool) -> (String, Vec<Value>) {
         self.condition_with(in_order, true)
     }
@@ -362,8 +404,7 @@ impl Store {
         if let Some(expanded) = &search.threads {
             return self.thread_rows(search, sort, expanded, offset, limit);
         }
-        let in_order = matches!(sort.field, SortField::Date | SortField::Received);
-        let (condition, mut values) = search.condition(in_order);
+        let (condition, mut values) = search.condition(walks_index(sort));
         let at = values.len();
         values.push(Value::Integer(limit as i64));
         values.push(Value::Integer(offset as i64));
@@ -374,6 +415,31 @@ impl Store {
             at + 2
         ))?;
         statement.query_map(params_from_iter(values), from_row)?.collect()
+    }
+
+    /// [`Store::search`] read from `anchor` (keyset.rs): the same rows, found on the order's index from a row next to
+    /// them (or from the end of the list) without going through those above them. From the top when the anchor is not
+    /// in the list, or the list is grouped with conversations open or from what a search finds.
+    pub fn search_from(
+        &self,
+        search: &Search,
+        sort: Sort,
+        offset: u64,
+        limit: u64,
+        anchor: Anchor,
+    ) -> Result<Vec<Message>> {
+        if let Some(expanded) = &search.threads {
+            return match self.kept_conversations(search)? {
+                Some(kept) if expanded.is_empty() => self.kept_rows_from(search, &kept, sort, offset, limit, anchor),
+                _ => self.search(search, sort, offset, limit),
+            };
+        }
+        let place = |at: MessageRef| self.message_place(search, sort, at.folder, at.uid);
+        let Some(walk) = Walk::from(anchor, offset, limit, place)? else {
+            return self.search(search, sort, offset, limit);
+        };
+        let rows = message_rows(search, walks_index(sort));
+        self.walk(&rows, &Order::messages(sort), &walk, COLUMNS, from_row)
     }
 
     /// The Inbox of every account, the folders [`Scope::AllInboxes`] lists
@@ -410,6 +476,9 @@ impl Store {
     /// How many messages `search` finds, and how many of them are unread, grouped by conversation or not (see
     /// [`Store::count_rows`] for the rows of the list)
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
+        if let Some(counted) = self.count_kept(search)? {
+            return Ok(counted);
+        }
         let (condition, values) = search.condition(false);
         let mut statement = self.db.prepare_cached(&format!(
             "SELECT COUNT(*), COALESCE(SUM(NOT seen), 0) FROM messages WHERE {condition}"
@@ -431,17 +500,49 @@ impl Store {
         if let Some(expanded) = &search.threads {
             return self.thread_row_index(search, sort, expanded, folder, uid);
         }
-        let (positioned, mut values) = search.positioned(sort);
+        if search.scope == Scope::Flagged {
+            // its few messages, found on the index of flagged ones, ranked: the order's index would range over
+            // every folder's
+            let (positioned, mut values) = search.positioned(sort);
+            let at = values.len();
+            values.push(Value::Integer(folder));
+            values.push(Value::Integer(uid as i64));
+            let mut statement = self.db.prepare_cached(&format!(
+                "SELECT position FROM ({positioned}) WHERE folder_id = ?{} AND uid = ?{}",
+                at + 1,
+                at + 2
+            ))?;
+            return statement
+                .query_row(params_from_iter(values), |row| row.get(0))
+                .optional();
+        }
+        // the messages above it, counted on the order's index
+        let Some(place) = self.message_place(search, sort, folder, uid)? else {
+            return Ok(None);
+        };
+        let rows = message_rows(search, false);
+        Ok(Some(self.count_before(&rows, &Order::messages(sort), &place)?))
+    }
+
+    /// Where the message `uid` of `folder` is in the order of `sort` ([`Cursor`]), None when `search` does not find it
+    fn message_place(&self, search: &Search, sort: Sort, folder: FolderId, uid: u64) -> Result<Option<Cursor>> {
+        let (condition, mut values) = search.condition(false);
         let at = values.len();
         values.push(Value::Integer(folder));
         values.push(Value::Integer(uid as i64));
         let mut statement = self.db.prepare_cached(&format!(
-            "SELECT position FROM ({positioned}) WHERE folder_id = ?{} AND uid = ?{}",
+            "SELECT {}, uid, id FROM messages WHERE folder_id = ?{} AND uid = ?{} AND {condition}",
+            crate::messages::sort_key(sort.field),
             at + 1,
             at + 2
         ))?;
         statement
-            .query_row(params_from_iter(values), |row| row.get(0))
+            .query_row(params_from_iter(values), |row| {
+                Ok(Cursor {
+                    key: row.get(0)?,
+                    ties: vec![row.get(1)?, row.get(2)?],
+                })
+            })
             .optional()
     }
 
@@ -472,29 +573,16 @@ impl Store {
             };
             return Ok(Some((before.copied(), after.copied())));
         }
-        let (condition, mut values) = search.condition(false);
-        let order = sort.order_by();
-        let at = values.len();
-        values.push(Value::Integer(folder));
-        values.push(Value::Integer(uid as i64));
-        let mut statement = self.db.prepare_cached(&format!(
-            "SELECT pf, pu, nf, nu FROM (SELECT folder_id, uid, \
-             LAG(folder_id) OVER w AS pf, LAG(uid) OVER w AS pu, LEAD(folder_id) OVER w AS nf, LEAD(uid) OVER w AS nu \
-             FROM messages WHERE {condition} WINDOW w AS (ORDER BY {order})) WHERE folder_id = ?{} AND uid = ?{}",
-            at + 1,
-            at + 2
-        ))?;
-        let reference = |folder: Option<FolderId>, uid: Option<i64>| {
-            Some(MessageRef {
-                folder: folder?,
-                uid: uid? as u64,
-            })
+        // the nearest on each side, walking the order's index from it
+        let Some(place) = self.message_place(search, sort, folder, uid)? else {
+            return Ok(None);
         };
-        statement
-            .query_row(params_from_iter(values), |row| {
-                Ok((reference(row.get(0)?, row.get(1)?), reference(row.get(2)?, row.get(3)?)))
-            })
-            .optional()
+        let (rows, order) = (message_rows(search, walks_index(sort)), Order::messages(sort));
+        let next = |after| -> Result<Option<MessageRef>> {
+            let walk = Walk::next(place.clone(), after);
+            Ok(self.walk(&rows, &order, &walk, "folder_id, uid", message_ref)?.pop())
+        };
+        Ok(Some((next(false)?, next(true)?)))
     }
 
     /// The first unread message after message `uid` of `folder` in what `search` finds in the order of `sort` (from the
@@ -503,40 +591,28 @@ impl Store {
         if search.threads.is_some() {
             return self.next_unread_in_threads(search, sort, folder, uid);
         }
-        if uid == 0 && search.show == Show::All {
-            // from the top: the first unread one, without ranking the list
-            let mut unread = search.clone();
-            unread.show = Show::Unread;
-            return Ok(self
-                .search(&unread, sort, 0, 1)?
-                .into_iter()
-                .next()
-                .map(|m| MessageRef {
-                    folder: m.folder_id,
-                    uid: m.info.uid,
-                }));
+        let mut rows = message_rows(search, walks_index(sort));
+        rows.condition.push_str(" AND seen = 0");
+        match self.message_place(search, sort, folder, uid)? {
+            // walking the order's index from it
+            Some(place) => {
+                let walk = Walk::next(place, true);
+                Ok(self
+                    .walk(&rows, &Order::messages(sort), &walk, "folder_id, uid", message_ref)?
+                    .pop())
+            }
+            // from the top when it is not in the list
+            None => {
+                let mut statement = self.db.prepare_cached(&format!(
+                    "SELECT folder_id, uid FROM messages WHERE {} ORDER BY {} LIMIT 1",
+                    rows.condition,
+                    sort.order_by()
+                ))?;
+                statement
+                    .query_row(params_from_iter(rows.values), message_ref)
+                    .optional()
+            }
         }
-        let (condition, mut values) = search.condition(false);
-        let order = sort.order_by();
-        let at = values.len();
-        values.push(Value::Integer(folder));
-        values.push(Value::Integer(uid as i64));
-        let mut statement = self.db.prepare_cached(&format!(
-            "WITH ranked AS (SELECT folder_id, uid, seen, ROW_NUMBER() OVER (ORDER BY {order}) AS position \
-             FROM messages WHERE {condition}) \
-             SELECT folder_id, uid FROM ranked WHERE seen = 0 AND position > \
-             COALESCE((SELECT position FROM ranked WHERE folder_id = ?{} AND uid = ?{}), 0) ORDER BY position LIMIT 1",
-            at + 1,
-            at + 2
-        ))?;
-        statement
-            .query_row(params_from_iter(values), |row| {
-                Ok(MessageRef {
-                    folder: row.get(0)?,
-                    uid: row.get::<_, i64>(1)? as u64,
-                })
-            })
-            .optional()
     }
 
     /// Cached sources the index does not have the text of yet, a few at a time: (message id, source)

@@ -218,18 +218,23 @@ pub struct Sort {
 impl Sort {
     /// The ORDER BY, each matching an index of the schema
     pub(crate) fn order_by(self) -> String {
-        let column = match self.field {
-            SortField::Date => LIST_DATE.to_string(),
-            SortField::Received => "internal_date".to_string(),
-            SortField::From => format!("{FROM_KEY} COLLATE NOCASE"),
-            SortField::To => TO_KEY.to_string(),
-            SortField::Subject => format!("{SUBJECT_KEY} COLLATE NOCASE"),
-            SortField::Size => "size".to_string(),
-        };
+        let column = sort_key(self.field);
         let direction = if self.ascending { "ASC" } else { "DESC" };
         // the id last: the same UID in two folders has one order across folders too (an index ends with the rowid, so
         // the indexes still serve the order)
         format!("{column} {direction}, uid {direction}, id {direction}")
+    }
+}
+
+/// What a list of messages is sorted by for `field`, with its collation: the expression of its index (schema.rs)
+pub(crate) fn sort_key(field: SortField) -> String {
+    match field {
+        SortField::Date => LIST_DATE.to_string(),
+        SortField::Received => "internal_date".to_string(),
+        SortField::From => format!("{FROM_KEY} COLLATE NOCASE"),
+        SortField::To => TO_KEY.to_string(),
+        SortField::Subject => format!("{SUBJECT_KEY} COLLATE NOCASE"),
+        SortField::Size => "size".to_string(),
     }
 }
 
@@ -349,17 +354,20 @@ impl Store {
             // the id after the highest given, never one of a message deleted since (Store::newest_message)
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
-             attachment_names, attachment_count, refs, bounce, auth_headers, list_id, sort_from, sort_subject, id) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, \
-             ?23, ?24, ?25, (SELECT high + 1 FROM message_ids)) \
+             attachment_names, attachment_count, refs, bounce, auth_headers, list_id, sort_from, sort_subject, thread_id, \
+             id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, \
+             ?22, ?23, ?24, ?25, ?26, (SELECT high + 1 FROM message_ids)) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
-        let mut threaded = self
-            .db
-            .prepare_cached("UPDATE messages SET thread_id = ?3 WHERE folder_id = ?1 AND uid = ?2")?;
         for m in messages {
-            let new = !known.exists(params![folder, m.uid])?;
+            // a message new to the store goes into its conversation at once (one already here keeps its own), so its
+            // row is stored with it and counted there once (schema.rs, the conversations' triggers)
+            let thread = if known.exists(params![folder, m.uid])? {
+                0
+            } else {
+                self.thread_of(account, &crate::threads::thread_keys(m))?
+            };
             let flags = canonical_flags(&m.flags);
             statement.execute(params![
                 folder,
@@ -390,13 +398,9 @@ impl Store {
                 } else {
                     &m.from_name
                 }),
-                crate::fold::fold(&m.subject)
+                crate::fold::fold(&m.subject),
+                thread
             ])?;
-            // a message new to the store goes into its conversation at once (one already here keeps its own)
-            if new {
-                let thread = self.thread_of(account, &crate::threads::thread_keys(m))?;
-                threaded.execute(params![folder, m.uid, thread])?;
-            }
         }
         Ok(())
     }
@@ -458,18 +462,6 @@ impl Store {
         }
         tx.commit()?;
         Ok(changed)
-    }
-
-    /// How many messages are unread in the Inboxes of all accounts, for the tray and the taskbar
-    pub fn inbox_unread(&self) -> Result<u64> {
-        self.db.query_row(
-            &format!(
-                "SELECT COUNT(*) FROM messages WHERE folder_id IN ({}) AND seen = 0",
-                crate::search::INBOXES
-            ),
-            [],
-            |row| row.get(0),
-        )
     }
 
     /// The unread messages of a folder from UID `uid` on, the newest first
