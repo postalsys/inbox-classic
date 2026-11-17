@@ -917,6 +917,13 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"
   another password or browser sign-in. Key verification checks every listed address before accepting it.
   "Eşleşiyor" / "Eşleşmiyor" are the matching and mismatching fingerprint buttons.
 - Bilgi/Gizli keep Alt+B/Alt+G; help preserves original keyboard tags and explains these localized keys.
+- Compose explanations describe protection "gönderilirken" and use "kullanılabilir anahtar" for usable keys.
+  Names/addresses keep their original form; use "adresi" or a colon rather than suffixes on placeholders.
+- Complete key-state reasons follow "Neden:", dates "Son arama:". Commands in prose take a head noun such as
+  "seçeneği" or "penceresi". Digital signatures do not by themselves confirm who owns the key.
+- "Şifrelemeden Gönder" uses Alt+N to avoid "Geçerli Olanı Koru" (Alt+G) in the recipient-key dialog.
+  Unencrypted sending requires removing inherited text, images and attachments. Keep "Kehribar" consistent with
+  the existing reading-security help; individual recipient symbols vary by platform.
 
 - The checker reads a message only up to a `}` in column 0, so selectors that English puts first stay first
   (`done-flagged-color` ends with the colour; the Linux search result counts come before a colon).

@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Turkish compose additions:17 app IDs,23 core IDs,new sign-and-encrypt topic and write-message insertion. Continue remaining compose languages, then48 original Hungarian help topics and lt/lv/pl/ro/ru/sk/sl/sv/uk. Include recorded source-worktree audit. Completed 21,111 entries/812 topics; pending 12,757/540; scope 33,868/1,352; historical catalog improvements 3,708. No test suites; REVIEWED unchanged.",
+  "next_batch": "Review Bulgarian compose additions:17 app IDs,23 core IDs,new sign-and-encrypt topic and write-message insertion. Continue remaining compose languages, then48 original Hungarian help topics and lt/lv/pl/ro/ru/sk/sl/sv/uk. Include recorded source-worktree audit. Completed 21,151 entries/814 topics; pending 12,717/538; scope 33,868/1,352; historical catalog improvements 3,725. No test suites; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -49720,56 +49720,8 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "tr": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "menu-insert",
-          "cmd-compose-sign",
-          "cmd-compose-encrypt",
-          "cmd-attach-my-key",
-          "ui-tb-sign",
-          "ui-tb-encrypt",
-          "ui-field-keys",
-          "ui-recipient-keys-title",
-          "ui-recipient-col-recipient",
-          "ui-recipient-col-key",
-          "ui-recipient-find-key",
-          "ui-recipient-remove",
-          "ui-send-unencrypted",
-          "ui-compose-make-key",
-          "ui-compose-show-keys",
-          "ui-compose-encrypt-off",
-          "ui-compose-keep-encrypted"
-        ],
-        "core.ftl": [
-          "pgp-compose-encrypted",
-          "pgp-compose-encrypt-ready",
-          "pgp-compose-missing",
-          "pgp-compose-looking",
-          "pgp-compose-signed",
-          "pgp-compose-reply-clear",
-          "pgp-compose-encrypted-files",
-          "pgp-compose-sign-tip",
-          "pgp-compose-sign-tip-encrypted",
-          "pgp-compose-encrypt-tip",
-          "pgp-compose-make-key",
-          "pgp-compose-key-unusable",
-          "pgp-compose-encrypt-off-quote",
-          "pgp-compose-encrypt-off-reply",
-          "pgp-recipient-verified",
-          "pgp-recipient-found",
-          "pgp-recipient-own",
-          "pgp-recipient-looking",
-          "pgp-recipient-missing",
-          "pgp-recipient-not-found",
-          "pgp-recipient-unusable",
-          "pgp-recipients-intro",
-          "pgp-recipients-intro-missing"
-        ]
-      },
-      "pending_help": [
-        "sign-and-encrypt.html",
-        "write-message.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "tr-app-round2",
@@ -51965,6 +51917,93 @@
           },
           "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
           "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
+        },
+        {
+          "id": "tr-compose-sign-encrypt-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-insert",
+              "cmd-compose-sign",
+              "cmd-compose-encrypt",
+              "cmd-attach-my-key",
+              "ui-tb-sign",
+              "ui-tb-encrypt",
+              "ui-field-keys",
+              "ui-recipient-keys-title",
+              "ui-recipient-col-recipient",
+              "ui-recipient-col-key",
+              "ui-recipient-find-key",
+              "ui-recipient-remove",
+              "ui-send-unencrypted",
+              "ui-compose-make-key",
+              "ui-compose-show-keys",
+              "ui-compose-encrypt-off",
+              "ui-compose-keep-encrypted"
+            ],
+            "core.ftl": [
+              "pgp-compose-encrypted",
+              "pgp-compose-encrypt-ready",
+              "pgp-compose-missing",
+              "pgp-compose-looking",
+              "pgp-compose-signed",
+              "pgp-compose-reply-clear",
+              "pgp-compose-encrypted-files",
+              "pgp-compose-sign-tip",
+              "pgp-compose-sign-tip-encrypted",
+              "pgp-compose-encrypt-tip",
+              "pgp-compose-make-key",
+              "pgp-compose-key-unusable",
+              "pgp-compose-encrypt-off-quote",
+              "pgp-compose-encrypt-off-reply",
+              "pgp-recipient-verified",
+              "pgp-recipient-found",
+              "pgp-recipient-own",
+              "pgp-recipient-looking",
+              "pgp-recipient-missing",
+              "pgp-recipient-not-found",
+              "pgp-recipient-unusable",
+              "pgp-recipients-intro",
+              "pgp-recipients-intro-missing"
+            ]
+          },
+          "reviewed_help": [
+            "sign-and-encrypt.html",
+            "write-message.html"
+          ],
+          "changed_values": 17,
+          "files": {
+            "core/locales/tr/app.ftl": "3df5c3cc9f5a0779ba2bf8e7d41234e484d7b4aeebb801b7c37a5f3d0de1b4df",
+            "core/locales/tr/core.ftl": "7d86daa35359d788634bc9b2c9de476190a1fb7092bca2aece8ae3ffeaab4db0",
+            "core/crates/pe-html/help/tr/sign-and-encrypt.html": "9e1262a69eae9318b453891b0358e22f3a36143b6e4c6a4886d688667919fa2c",
+            "core/crates/pe-html/help/tr/write-message.html": "53fe9977fd371340e4f898833791f3d73d455e33d553ef22e289cbc47d303efe"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a0b8f5de6157b820dcb5543c0ca40728c6ce41a6664b69bf31d9fd27f5878299",
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e",
+            "core/crates/pe-html/help/en/sign-and-encrypt.html": "7ab75ec9da59bc24d60b1f36e7073dbecd478c18e061b9e947a06e1f01446675",
+            "core/crates/pe-html/help/en/write-message.html": "d161c1a2aeffb7539b2e8086d1a7ee6ea4bc39d5f702d93e362d8d10bfe8ff42"
+          },
+          "validation": "All 53 mnemonic scopes pass; the changed label maps to GTK Şifrelemeden Gö_nder through the actual gtk_mnemonic caller. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 17 value edits and 40 mark removals; all other catalog bytes preserved. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform joins inspected; dynamic shortcuts checked against commands.toml. No relevant Turkish screenshots found, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,185 unmarked messages, 10,619 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
+          "notes": "Reviewed17 app labels and23 core messages in actual compose/recipient/own-key/downgrade contexts. Improved16 core values and1 app shortcut: Send Without Encryption now Alt+N rather than colliding with Keep Current Alt+G. All53 scopes pass; Turkish dotted/dotless I avoided. Polite imperatives, singular nouns after counts, no suffix on address/name placeholders. Protection gönderilirken; digital-signature integrity separate from ownership; kullanılabilir anahtar includes unusable keys. Full reasons after Neden, dates after Son arama; control names use head nouns. Unencrypted sending conditional on removal of inherited text/images/attachments. Help includes cross-platform status, own/unusable keys, selected From key, recipient removal and encrypted drafts/sent copies; existing Kehribar terminology retained. All earlier writing-help prose preserved. No Turkish screenshots; source layouts/wrapping and per-platform control joins inspected. No tests.",
+          "glossary_sha256": "3f377ad8a50177bc9d5fef55f793a5fbb0ec0a2856598097de53ee1dc0b225a9",
+          "mnemonic_scopes": 53,
+          "retained_write_message_prose_verified": true,
+          "mnemonic_fixes": {
+            "ui-send-unencrypted": {
+              "before": "g",
+              "after": "n",
+              "conflict": "ui-contact-key-keep"
+            }
+          },
+          "changed_help_lines": 14,
+          "screenshot_context": {
+            "searched": [
+              "build/ui-e2e",
+              "build/ui-e2e-mac",
+              "build/ui-e2e-linux"
+            ],
+            "limitation": "No relevant Turkish compose/encryption screenshots available. Source layouts/wrapping and substituted platform help joins inspected; no GUI run."
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -55424,7 +55463,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Serbian Latin compose checkpoint: Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,013 entries/193 passages reconcile. No tests. Completed 21,111 entries/812 topics; pending 12,757/540; scope 33,868/1,352; historical catalog improvements 3,708. REVIEWED unchanged.",
+    "latest_source_audit": "Turkish compose checkpoint: Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 973 entries/191 passages reconcile. No tests. Completed 21,151 entries/814 topics; pending 12,717/538; scope 33,868/1,352; historical catalog improvements 3,725. REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -66165,6 +66204,528 @@
         "kind": "Serbian Latin compose signing/encryption review",
         "review_commit": "3d55d48d2cda626fd75ff0943b42ddab831797d9",
         "validation": "Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,013 entries/193 passages reconcile. No tests."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "cb5e4778ca46794b30a4c4b81f3f72c995cb9843",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "51d67bb4e5fb6732f5baea4b8004bc46507f1442"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16827,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/fuzz/.gitignore",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 23,
+              "core/fuzz": 16781,
+              "core/include": 1,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 4,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "49d9defb7cd5a49e388398c9f1acc01570072be32bcb9e7f0ce39e3f30086309",
+            "complete_path_list_artifact": "/private/tmp/inbox-tr-compose-unmerged-origin-master.txt"
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16827,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/fuzz/.gitignore",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 23,
+              "core/fuzz": 16781,
+              "core/include": 1,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 4,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "49d9defb7cd5a49e388398c9f1acc01570072be32bcb9e7f0ce39e3f30086309",
+            "complete_path_list_artifact": "/private/tmp/inbox-tr-compose-unmerged-chore-pgp-hardening.txt"
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 16827,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "app/CMakeLists.txt",
+          "app/src/main.cpp",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/src/autocrypt.rs",
+          "core/crates/pe-core/src/compose_keys.rs",
+          "core/crates/pe-core/src/export.rs",
+          "core/crates/pe-core/src/keys.rs",
+          "core/crates/pe-core/src/lib.rs",
+          "core/crates/pe-core/src/protect.rs",
+          "core/crates/pe-core/src/protect_out.rs",
+          "core/crates/pe-core/src/secrets.rs",
+          "core/crates/pe-core/src/worker/background.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-core/tests/pgp_mail.rs",
+          "core/crates/pe-keys/src/lib.rs",
+          "core/crates/pe-net/src/http.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/lib.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/sealed.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "core/crates/pe-store/src/pgp.rs",
+          "core/fuzz/.gitignore",
+          "core/include/texts.h",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/src/agents.rs",
+          "linux/src/app.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "linux/src/mailbox.rs",
+          "mac/Sources/InboxClassic/App.swift",
+          "mac/Sources/InboxClassic/Generated/Texts.swift",
+          "mac/Sources/InboxClassic/MainWindow.swift",
+          "mac/Sources/InboxClassic/UITestSteps.swift",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e.ps1",
+          "scripts/ui-e2e/SCENARIO.md"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {},
+        "integrated_active_key_source_check": {
+          "status": "source-only catalogs integrated and reviewed",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {
+            "core/locales/bg/core.ftl": {
+              "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
+            },
+            "core/locales/ca/core.ftl": {
+              "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
+            },
+            "core/locales/cs/core.ftl": {
+              "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
+            },
+            "core/locales/da/core.ftl": {
+              "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
+            },
+            "core/locales/de/core.ftl": {
+              "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
+            },
+            "core/locales/el/core.ftl": {
+              "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
+            },
+            "core/locales/en/core.ftl": {
+              "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
+            },
+            "core/locales/es/core.ftl": {
+              "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
+            },
+            "core/locales/et/core.ftl": {
+              "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
+            },
+            "core/locales/fi/core.ftl": {
+              "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
+            },
+            "core/locales/fr/core.ftl": {
+              "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
+            },
+            "core/locales/hr/core.ftl": {
+              "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
+            },
+            "core/locales/hu/core.ftl": {
+              "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
+            },
+            "core/locales/it/core.ftl": {
+              "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
+            },
+            "core/locales/lt/core.ftl": {
+              "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
+            },
+            "core/locales/lv/core.ftl": {
+              "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
+            },
+            "core/locales/nb/core.ftl": {
+              "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
+            },
+            "core/locales/nl/core.ftl": {
+              "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
+            },
+            "core/locales/pl/core.ftl": {
+              "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
+            },
+            "core/locales/pt-BR/core.ftl": {
+              "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/pt/core.ftl": {
+              "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/ro/core.ftl": {
+              "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
+            },
+            "core/locales/ru/core.ftl": {
+              "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
+            },
+            "core/locales/sk/core.ftl": {
+              "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
+            },
+            "core/locales/sl/core.ftl": {
+              "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
+            },
+            "core/locales/sr-Latn/core.ftl": {
+              "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
+            },
+            "core/locales/sv/core.ftl": {
+              "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
+            },
+            "core/locales/tr/core.ftl": {
+              "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
+            },
+            "core/locales/uk/core.ftl": {
+              "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
+            }
+          },
+          "note": "New signature reason from the hardening branch: a valid signature used a key other than the active key for the From address. Exact source entry was imported in205bd846 and reviewed; current source entry still matches. Other hardening code/fuzz changes stay separate; inspect caller before review."
+        },
+        "source_worktree_relevant_status": {
+          "/Users/andris/Projects/PostalExpress": [],
+          "/Users/andris/Projects/PostalExpress-wave1": [],
+          "/Users/andris/Projects/PostalExpress-lang": [
+            "?? core/crates/pe-html/help/ca/",
+            "?? core/crates/pe-html/help/nb/",
+            "?? core/crates/pe-html/help/pt-BR/",
+            "?? core/crates/pe-html/help/sr-Latn/",
+            "?? core/crates/pe-html/help/tr/",
+            "?? core/locales/ca/",
+            "?? core/locales/nb/",
+            "?? core/locales/pt-BR/",
+            "?? core/locales/sr-Latn/",
+            "?? core/locales/tr/"
+          ],
+          "/Users/andris/Projects/PostalExpress-settings": [],
+          "/Users/andris/Projects/PostalExpress-pgp11": [],
+          "/Users/andris/Projects/PostalExpress-pgp7": []
+        },
+        "untracked_initial_wave1_copy_audit": {
+          "worktree": "/Users/andris/Projects/PostalExpress-lang",
+          "codes": [
+            "ca",
+            "nb",
+            "pt-BR",
+            "sr-Latn",
+            "tr"
+          ],
+          "status": "All290 files are exact copies of the already integrated initial wave1 draft snapshot; no later edits or new work. Left untouched.",
+          "source_snapshot": "cfdf55ab135d7def5ca1ce42e8603d866a33ce26",
+          "files": 290,
+          "exact_matches_initial_snapshot": 290,
+          "exact_matches_current_wave1_tip": 275,
+          "manifest_artifact": "/private/tmp/inbox-untracked-wave1-copies.json",
+          "manifest_sha256": "5e2e255d82be9f6ae6ae6b4d1433a356fbef80c6b56a9b8aa7e6b561a548a059"
+        },
+        "since_start_pending_catalog_entries": 973,
+        "since_start_pending_help_passages": 191,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12717,
+        "pending_help_topics": 538,
+        "additional_unrecorded_work": 0,
+        "kind": "Turkish compose signing/encryption review",
+        "review_commit": "ca95afb392c601cc6aafa038686a32314f33ea64",
+        "validation": "Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 973 entries/191 passages reconcile. No tests."
       }
     ],
     "settings_source_integration": {
@@ -82394,8 +82955,7 @@
         "sk",
         "sl",
         "sv",
-        "uk",
-        "tr"
+        "uk"
       ],
       "completed_languages": [
         "de",
@@ -82408,7 +82968,8 @@
         "pt-BR",
         "ca",
         "nb",
-        "sr-Latn"
+        "sr-Latn",
+        "tr"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/write-message.html": {
@@ -82558,7 +83119,8 @@
         "pt-BR": "All 53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies15 value edits/40 mark removals and preserves other catalog bytes. Help tags/attributes/control references/platform branches/literal keys match. All platform label joins inspected; no Portuguese compose/encryption screenshots available, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All28 inventories/current hashes reconcile:21,025 unmarked messages,10,539 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes.",
         "ca": "All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 19 value edits and 40 mark removals; all other catalog bytes and earlier writing-help prose are preserved. Help tags, attributes, controls, platform branches and literal keys match. Platform label joins inspected; no relevant Catalan screenshots available, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,065 unmarked messages, 10,559 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
         "nb": "All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 16 value edits and 40 mark removals, preserving all other catalog bytes. Help tags, attributes, controls, platform branches and literal keys match; all prior writing-help prose is retained. Label joins inspected on all platforms and dynamic shortcuts checked in commands.toml. No relevant Norwegian screenshots available; source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,105 unmarked messages, 10,579 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
-        "sr-Latn": "All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 16 value edits and 40 mark removals; all other catalog bytes preserved. Plural selection inspected for 0,1,2,3,4,5,11,12,14,21,22,24,25,101, with representative value substitutions and actual positive-count callers/separate zero-recipient state checked. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked in commands.toml. No relevant Serbian screenshots found; source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,145 unmarked messages, 10,599 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes."
+        "sr-Latn": "All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 16 value edits and 40 mark removals; all other catalog bytes preserved. Plural selection inspected for 0,1,2,3,4,5,11,12,14,21,22,24,25,101, with representative value substitutions and actual positive-count callers/separate zero-recipient state checked. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked in commands.toml. No relevant Serbian screenshots found; source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,145 unmarked messages, 10,599 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
+        "tr": "All 53 mnemonic scopes pass; the changed label maps to GTK Şifrelemeden Gö_nder through the actual gtk_mnemonic caller. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 17 value edits and 40 mark removals; all other catalog bytes preserved. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform joins inspected; dynamic shortcuts checked against commands.toml. No relevant Turkish screenshots found, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,185 unmarked messages, 10,619 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes."
       }
     },
     {

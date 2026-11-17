@@ -14,7 +14,6 @@ menu-layout = &Yerleşim
 menu-sort-by = &Sıralama Ölçütü
 menu-text-size = &Metin Boyutu
 menu-folder = K&lasör
-# review: new
 menu-insert = &Ekle
 
 ## Menülerin, araç çubuğunun ve sistem tepsisinin komutları (core/commands.toml)
@@ -98,11 +97,8 @@ cmd-import-address-book = Adres &Defterini İçe Aktar...
 cmd-export-address-book = Adres Defterini Dışa Akta&r...
 cmd-export-setup = Ayarları &ve Hesapları Dışa Aktar...
 cmd-import-setup = Ayarları ve Hesa&pları İçe Aktar...
-# review: new
 cmd-compose-sign = &Dijital Olarak İmzala
-# review: new
 cmd-compose-encrypt = Şif&rele
-# review: new
 cmd-attach-my-key = Ortak &Anahtarımı Ekle
 
 ## Sistem tepsisi simgesinin menüsü
@@ -222,11 +218,8 @@ ui-format-line = Yatay Çizgi Ekle
 ui-tb-send = Gönder
 ui-tb-save = Kaydet
 ui-tb-attach = Ekle
-# review: new
 ui-tb-sign = İmzala
-# review: new
 ui-tb-encrypt = Şifrele
-# review: new
 ui-field-keys = Anahtarlar:
 ui-field-from = Kimden:
 ui-field-to = Kime:
@@ -705,25 +698,15 @@ ui-contact-key = Şifreleme anahtarı:
 ui-contact-key-none = Anahtar yok
 ui-contact-key-use-new = &Yeni Anahtarı Kullan
 ui-contact-key-keep = &Geçerli Olanı Koru
-# review: new
 ui-recipient-keys-title = Alıcıların Anahtarları
-# review: new
 ui-recipient-col-recipient = Alıcı
-# review: new
 ui-recipient-col-key = Anahtar
-# review: new
 ui-recipient-find-key = &Anahtarı Bul
-# review: new
 ui-recipient-remove = İletiden &Kaldır
-# review: new
-ui-send-unencrypted = Şifrelemeden &Gönder
-# review: new
+ui-send-unencrypted = Şifrelemeden Gö&nder
 ui-compose-make-key = Anahtar &Oluştur...
-# review: new
 ui-compose-show-keys = Şif&releme Anahtarları...
-# review: new
 ui-compose-encrypt-off = Şifrelemeyi &Kapat
-# review: new
 ui-compose-keep-encrypted = Şifreli &Tut
 ui-setup-export-title = Ayarları ve Hesapları Dışa Aktar
 ui-setup-import-title = Ayarları ve Hesapları İçe Aktar
