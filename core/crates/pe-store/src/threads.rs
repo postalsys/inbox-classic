@@ -385,14 +385,7 @@ fn key_column(field: SortField) -> String {
 /// The order of the conversations of [`groups`]: by Date or Received, by their newest message, as mail that came last
 /// is on top; by another column, by their first message's
 fn group_order(sort: Sort) -> String {
-    let direction = if sort.ascending { "ASC" } else { "DESC" };
-    let first = match sort.field {
-        SortField::Date => "newest".to_string(),
-        SortField::Received => "newest_received".to_string(),
-        SortField::Size => "k".to_string(),
-        _ => "k COLLATE NOCASE".to_string(),
-    };
-    format!("{first} {direction}, t {direction}")
+    Order::conversations(sort).walking(true)
 }
 
 /// The messages of the conversations `threads` in what `search` finds, as a WHERE with its values: found by the
@@ -413,24 +406,31 @@ fn row_count_sql(condition: &str, open: &str) -> String {
 }
 
 impl Store {
-    /// The conversations of the grouped list of `search` as a `WITH g` ([`groups`]) with its values: those kept for
-    /// whole folders ([`Store::kept_conversations`], `in_order` for a page), otherwise counted from what it finds
-    fn grouped(&self, search: &Search, sort: Sort, in_order: bool) -> Result<(String, Vec<Value>)> {
-        if let Some(kept) = self.kept_conversations(search)? {
-            return Ok((kept_groups(&kept.condition(in_order), sort), kept.values));
+    /// The conversations of the grouped list of `search` as a `WITH g` ([`groups`]) with its values: those `kept`
+    /// ([`Search::kept_conversations`]), otherwise counted from what it finds
+    fn grouped(search: &Search, kept: Option<&Kept>, sort: Sort) -> (String, Vec<Value>) {
+        if let Some(kept) = kept {
+            return (kept_groups(&kept.condition(false), sort), kept.values.clone());
         }
         let (condition, values) = search.condition(false);
-        Ok((groups(&condition, sort), values))
+        (groups(&condition, sort), values)
     }
 
     /// The conversations in what `search` finds, in the order of `sort` ([`group_order`]): `limit` of them from
     /// `offset` on, with how many messages each has there and how many of those are unread. One pass over the
     /// list's messages, grouped by conversation on its index.
-    fn thread_page(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Group>> {
-        if let Some(kept) = self.kept_conversations(search)? {
-            return self.kept_page(&kept, sort, offset, limit);
+    fn thread_page(
+        &self,
+        search: &Search,
+        kept: Option<&Kept>,
+        sort: Sort,
+        offset: u64,
+        limit: u64,
+    ) -> Result<Vec<Group>> {
+        if let Some(kept) = kept {
+            return self.kept_page(kept, sort, offset, limit);
         }
-        let (groups, mut values) = self.grouped(search, sort, true)?;
+        let (groups, mut values) = Self::grouped(search, None, sort);
         let at = values.len();
         values.push(Value::Integer(limit as i64));
         values.push(Value::Integer(offset as i64));
@@ -471,13 +471,11 @@ impl Store {
     /// The conversations kept `threads` with how many messages each has and how many of them are unread, in that
     /// order
     fn kept_numbers(&self, kept: &Kept, threads: Vec<i64>) -> Result<Vec<Group>> {
-        let mut values = kept.values.clone();
-        let marks = id_list(&mut values, &threads);
+        let (wanted, values) = kept.of_threads(&threads);
         let mut numbers: HashMap<i64, (u32, u32)> = self
             .db
             .prepare(&format!(
-                "SELECT thread_id, total, unread FROM conversations WHERE {} AND thread_id IN ({marks})",
-                kept.condition(false)
+                "SELECT thread_id, total, unread FROM conversations WHERE {wanted}"
             ))?
             .query_map(params_from_iter(values), |row| {
                 Ok((row.get(0)?, (row.get(1)?, row.get(2)?)))
@@ -514,7 +512,7 @@ impl Store {
         };
         let threads = self.walk(&kept_rows(kept, sort, true), &order, &walk, "t", |row| row.get(0))?;
         let page = self.kept_numbers(kept, threads)?;
-        self.rows_of_groups(search, &HashSet::new(), page, 0, limit)
+        self.rows_of_groups(search, Some(kept), &HashSet::new(), page, 0, limit)
     }
 
     /// The conversations with rows in `offset..offset + limit` of the grouped list, with the conversations `expanded`
@@ -523,12 +521,13 @@ impl Store {
     fn thread_window(
         &self,
         search: &Search,
+        kept: Option<&Kept>,
         sort: Sort,
         expanded: &[i64],
         offset: u64,
         limit: u64,
     ) -> Result<(Vec<Group>, u64)> {
-        let (groups, mut values) = self.grouped(search, sort, false)?;
+        let (groups, mut values) = Self::grouped(search, kept, sort);
         let open = id_list(&mut values, expanded);
         let at = values.len();
         values.push(Value::Integer(offset as i64));
@@ -563,19 +562,16 @@ impl Store {
     /// The first message of each of the conversations `threads` in what `search` finds, by conversation (the first to
     /// arrive, [`ARRIVED`]): one query, whose numbering finds each conversation's first on its index and reads only those
     /// rows whole
-    fn thread_firsts(&self, search: &Search, threads: &[i64]) -> Result<HashMap<i64, Message>> {
+    fn thread_firsts(&self, search: &Search, kept: Option<&Kept>, threads: &[i64]) -> Result<HashMap<i64, Message>> {
         if threads.is_empty() {
             return Ok(HashMap::new());
         }
-        let (sql, values) = match self.kept_conversations(search)? {
+        let (sql, values) = match kept {
             // as kept
             Some(kept) => {
-                let mut values = kept.values.clone();
-                let marks = id_list(&mut values, threads);
+                let (wanted, values) = kept.of_threads(threads);
                 let sql = format!(
-                    "SELECT {COLUMNS} FROM messages WHERE id IN \
-                     (SELECT first_id FROM conversations WHERE {} AND thread_id IN ({marks}))",
-                    kept.condition(false)
+                    "SELECT {COLUMNS} FROM messages WHERE id IN (SELECT first_id FROM conversations WHERE {wanted})"
                 );
                 (sql, values)
             }
@@ -621,7 +617,7 @@ impl Store {
     /// snippet stays its own, the first message's, which selecting the row opens, beside its sender and subject). Its own
     /// small query on the conversations' index rather than a MAX in [`groups`]: with a MAX there besides the MIN, SQLite
     /// would no longer take the key sorts' bare column (`k`) from the first message's row.
-    fn date_collapsed(&self, search: &Search, rows: &mut [Message]) -> Result<()> {
+    fn date_collapsed(&self, search: &Search, kept: Option<&Kept>, rows: &mut [Message]) -> Result<()> {
         let threads: Vec<i64> = rows
             .iter()
             .filter_map(|m| m.thread.filter(ThreadPlace::collapsed))
@@ -630,14 +626,10 @@ impl Store {
         if threads.is_empty() {
             return Ok(());
         }
-        let (sql, values) = match self.kept_conversations(search)? {
+        let (sql, values) = match kept {
             Some(kept) => {
-                let mut values = kept.values.clone();
-                let marks = id_list(&mut values, &threads);
-                let sql = format!(
-                    "SELECT thread_id, newest, newest_received FROM conversations WHERE {} AND thread_id IN ({marks})",
-                    kept.condition(false)
-                );
+                let (wanted, values) = kept.of_threads(&threads);
+                let sql = format!("SELECT thread_id, newest, newest_received FROM conversations WHERE {wanted}");
                 (sql, values)
             }
             None => {
@@ -700,11 +692,11 @@ impl Store {
         {
             return Ok(Some(found));
         }
-        if let Some(kept) = self.kept_conversations(search)? {
+        if let Some(kept) = search.kept_conversations() {
             let next = self.next_unread_kept(&kept, sort, current.map(|(thread, _)| thread))?;
             return next.map_or(Ok(None), |thread| first_unread(thread, None));
         }
-        let (groups, mut values) = self.grouped(search, sort, false)?;
+        let (groups, mut values) = Self::grouped(search, None, sort);
         values.push(Value::Integer(current.map_or(0, |(thread, _)| thread)));
         let mut statement = self.db.prepare_cached(&format!(
             "{groups}, ranked AS (SELECT t, u, ROW_NUMBER() OVER (ORDER BY {}) AS r FROM g) \
@@ -776,15 +768,21 @@ impl Store {
 
     /// Where the conversations `threads` are among the conversations of the list (their first message's row without
     /// the expanded ones above), and how many messages each has there; those not in the list left out
-    fn thread_ranks(&self, search: &Search, sort: Sort, threads: &[i64]) -> Result<Vec<(u64, i64, u64)>> {
+    fn thread_ranks(
+        &self,
+        search: &Search,
+        kept: Option<&Kept>,
+        sort: Sort,
+        threads: &[i64],
+    ) -> Result<Vec<(u64, i64, u64)>> {
         if threads.is_empty() {
             return Ok(Vec::new());
         }
         if threads.len() <= FEW
-            && let Some(kept) = self.kept_conversations(search)?
+            && let Some(kept) = kept
         {
             // each counted on the order's index, never the list ranked
-            let (rows, order) = (kept_rows(&kept, sort, false), Order::conversations(sort));
+            let (rows, order) = (kept_rows(kept, sort, false), Order::conversations(sort));
             let mut ranks = Vec::new();
             for &thread in threads {
                 if let Some((cursor, count)) = self.conversation_place(&rows, &order, thread)? {
@@ -794,7 +792,7 @@ impl Store {
             ranks.sort_unstable();
             return Ok(ranks);
         }
-        let (groups, mut values) = self.grouped(search, sort, false)?;
+        let (groups, mut values) = Self::grouped(search, kept, sort);
         let marks = id_list(&mut values, threads);
         let mut statement = self.db.prepare(&format!(
             "{groups} SELECT r, t, n FROM (SELECT t, n, ROW_NUMBER() OVER (ORDER BY {}) - 1 AS r FROM g) \
@@ -811,19 +809,17 @@ impl Store {
     /// How many rows the list grouped by conversation has, with the conversations `expanded` open: one a
     /// conversation, and the others of the open ones' messages
     pub(crate) fn count_thread_rows(&self, search: &Search, expanded: &[i64]) -> Result<u64> {
-        if let Some(kept) = self.kept_conversations(search)? {
+        if let Some(kept) = search.kept_conversations() {
             let conversations = self.count_kept_conversations(&kept)?;
             if expanded.is_empty() {
                 return Ok(conversations);
             }
             // and the other messages of those open
-            let mut values = kept.values.clone();
-            let open = id_list(&mut values, expanded);
+            let (open, values) = kept.of_threads(expanded);
             let under: u64 = self
                 .db
                 .prepare(&format!(
-                    "SELECT COALESCE(SUM(total - 1), 0) FROM conversations WHERE {} AND thread_id IN ({open})",
-                    kept.condition(false)
+                    "SELECT COALESCE(SUM(total - 1), 0) FROM conversations WHERE {open}"
                 ))?
                 .query_row(params_from_iter(values), |row| row.get(0))?;
             return Ok(conversations + under);
@@ -856,13 +852,15 @@ impl Store {
         limit: u64,
     ) -> Result<Vec<Message>> {
         let open: HashSet<i64> = expanded.iter().copied().collect();
+        let kept = search.kept_conversations();
+        let kept = kept.as_ref();
         // the conversations with rows on the page, and how many rows of the first one are above it
         let (page, above) = if open.is_empty() {
-            (self.thread_page(search, sort, offset, limit)?, 0)
+            (self.thread_page(search, kept, sort, offset, limit)?, 0)
         } else {
-            self.thread_window(search, sort, expanded, offset, limit)?
+            self.thread_window(search, kept, sort, expanded, offset, limit)?
         };
-        self.rows_of_groups(search, &open, page, above, limit)
+        self.rows_of_groups(search, kept, &open, page, above, limit)
     }
 
     /// The rows of the conversations `page` of a grouped list, with those `open` expanded, `above` rows of the first
@@ -871,13 +869,14 @@ impl Store {
     fn rows_of_groups(
         &self,
         search: &Search,
+        kept: Option<&Kept>,
         open: &HashSet<i64>,
         page: Vec<Group>,
         mut above: u64,
         limit: u64,
     ) -> Result<Vec<Message>> {
         let (opened, closed): (Vec<i64>, Vec<i64>) = page.iter().map(|g| g.0).partition(|t| open.contains(t));
-        let mut firsts = self.thread_firsts(search, &closed)?;
+        let mut firsts = self.thread_firsts(search, kept, &closed)?;
         let mut lists = self.thread_lists(search, &opened)?;
         let mut rows = Vec::new();
         for (thread, count, unread) in page {
@@ -908,7 +907,7 @@ impl Store {
                 });
             }
         }
-        self.date_collapsed(search, &mut rows)?;
+        self.date_collapsed(search, kept, &mut rows)?;
         Ok(rows)
     }
 
@@ -968,7 +967,8 @@ impl Store {
         // each conversation's first row: its rank, and the rows of the open ones above it
         let mut first_rows: HashMap<i64, u64> = HashMap::new();
         let mut opened_above = 0;
-        for (rank, thread, n) in self.thread_ranks(search, sort, &wanted)? {
+        let kept = search.kept_conversations();
+        for (rank, thread, n) in self.thread_ranks(search, kept.as_ref(), sort, &wanted)? {
             first_rows.insert(thread, rank + opened_above);
             if open.contains(&thread) {
                 opened_above += n.saturating_sub(1);
@@ -1011,13 +1011,14 @@ impl Store {
         if expanded.contains(&thread) {
             return Ok(None);
         }
-        let first = self.thread_firsts(search, &[thread])?.remove(&thread);
+        let kept = search.kept_conversations();
+        let first = self.thread_firsts(search, kept.as_ref(), &[thread])?.remove(&thread);
         Ok(first.filter(|m| m.at() != MessageRef { folder, uid }).map(|_| thread))
     }
 
     /// The conversations in what `search` finds that have more than one message there: what Expand All opens
     pub fn threads_with_replies(&self, search: &Search) -> Result<Vec<i64>> {
-        if let Some(kept) = self.kept_conversations(search)? {
+        if let Some(kept) = search.kept_conversations() {
             let mut statement = self.db.prepare_cached(&format!(
                 "SELECT thread_id FROM conversations WHERE {} AND total > 1",
                 kept.condition(false)
@@ -1523,10 +1524,10 @@ mod tests {
         }
         let list = Search::folder(inbox);
         let started = std::time::Instant::now();
-        store.thread_page(&list, Sort::default(), 0, 100).unwrap();
+        store.thread_page(&list, None, Sort::default(), 0, 100).unwrap();
         eprintln!("page of ids {:?}", started.elapsed());
         let started = std::time::Instant::now();
-        store.thread_page(&list, Sort::default(), 0, 100).unwrap();
+        store.thread_page(&list, None, Sort::default(), 0, 100).unwrap();
         eprintln!("page of ids again {:?}", started.elapsed());
         let (condition, _) = list.condition(false);
         let plan: Vec<String> = store
@@ -1785,7 +1786,7 @@ mod tests {
                         threads: Some(Vec::new()),
                         ..Default::default()
                     };
-                    let kept = store.kept_conversations(&search).unwrap().unwrap();
+                    let kept = search.kept_conversations().unwrap();
                     let page = plan(
                         &store,
                         &format!(

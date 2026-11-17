@@ -6,6 +6,8 @@
 //! synchronous; the sync runs them between network round trips.
 #![forbid(unsafe_code)]
 
+#[macro_use]
+mod sql;
 mod accounts;
 mod agents;
 mod bounces;

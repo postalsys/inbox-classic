@@ -28,6 +28,8 @@ impl Order {
     pub fn messages(sort: Sort) -> Order {
         Order {
             key: crate::messages::sort_key(sort.field),
+            // the id last: the same UID in two folders has one order across folders too (an index ends with the
+            // rowid, so the indexes still serve the order)
             ties: &["uid", "id"],
             ascending: sort.ascending,
         }
@@ -153,6 +155,16 @@ pub(crate) struct Rows {
     pub values: Vec<Value>,
 }
 
+impl Rows {
+    /// How many of them `piece` holds for, as SQL
+    fn count_sql(&self, piece: &str) -> String {
+        format!(
+            "{} SELECT COUNT(*) FROM {} WHERE {} AND {piece}",
+            self.with, self.from, self.condition
+        )
+    }
+}
+
 impl Store {
     /// How many rows of `rows` are above `place` in `order`: each range counted on the index
     pub(crate) fn count_before(&self, rows: &Rows, order: &Order, place: &Cursor) -> Result<u64> {
@@ -160,17 +172,12 @@ impl Store {
         for (piece, values) in order.beyond(place, false, &rows.values) {
             count += self
                 .db
-                .prepare_cached(&format!(
-                    "{} SELECT COUNT(*) FROM {} WHERE {} AND {piece}",
-                    rows.with, rows.from, rows.condition
-                ))?
+                .prepare_cached(&rows.count_sql(&piece))?
                 .query_row(params_from_iter(values), |row| row.get::<_, u64>(0))?;
         }
         Ok(count)
     }
-}
 
-impl Store {
     /// The rows of `rows` that `walk` reaches ([`Walk`]), read with `read` from the columns `columns`, in the list's
     /// order: a page read from a row next to it, never counted from the top
     pub(crate) fn walk<T>(
@@ -217,10 +224,7 @@ impl Store {
                 // all of this range skipped: the rest from the next
                 let count: u64 = self
                     .db
-                    .prepare_cached(&format!(
-                        "{} SELECT COUNT(*) FROM {} WHERE {} AND {piece}",
-                        rows.with, rows.from, rows.condition
-                    ))?
+                    .prepare_cached(&rows.count_sql(&piece))?
                     .query_row(params_from_iter(counted), |row| row.get(0))?;
                 skip -= count.min(skip);
             } else {

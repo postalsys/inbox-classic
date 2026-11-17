@@ -110,14 +110,7 @@ impl Store {
     /// is None; the verified mark of an address stays while the key holds it.
     pub fn save_pgp_key(&self, key: &StoredKey, addresses: &[String]) -> Result<()> {
         // a savepoint, so that a caller's transaction (keys.rs learns a key and its addresses at once) holds it
-        self.db.execute_batch("SAVEPOINT save_pgp_key")?;
-        let saved = self.save_pgp_key_rows(key, addresses);
-        let end = match saved {
-            Ok(()) => "RELEASE save_pgp_key",
-            Err(_) => "ROLLBACK TO save_pgp_key; RELEASE save_pgp_key",
-        };
-        self.db.execute_batch(end)?;
-        saved
+        self.atomic(|| self.save_pgp_key_rows(key, addresses))
     }
 
     fn save_pgp_key_rows(&self, key: &StoredKey, addresses: &[String]) -> Result<()> {

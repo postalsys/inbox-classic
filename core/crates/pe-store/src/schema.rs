@@ -598,23 +598,26 @@ END;
     // lists whose reads do not grow with the store (counts.rs): each folder's messages, unread and flagged ones and
     // conversations counted, and each conversation of a folder in a row of its own, kept by the triggers as messages
     // come, change and go. The global orders carry the folder, so a list of several folders (All Inboxes) skips the
-    // others' messages without reading them, and the From and Subject orders have one too.
-    r#"
+    // others' messages without reading them, and the From and Subject orders have one too. Its expressions are those
+    // of the queries (sql.rs).
+    concat!(
+        "
 ALTER TABLE folders ADD COLUMN total INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE folders ADD COLUMN unread INTEGER NOT NULL DEFAULT 0;
--- flagged as the Flagged folder finds them (search.rs IS_FLAGGED)
+-- flagged as the Flagged folder finds them
 ALTER TABLE folders ADD COLUMN flagged INTEGER NOT NULL DEFAULT 0;
 -- its rows in `conversations`
 ALTER TABLE folders ADD COLUMN threads INTEGER NOT NULL DEFAULT 0;
 UPDATE folders SET
     total = (SELECT COUNT(*) FROM messages m WHERE m.folder_id = folders.id),
     unread = (SELECT COUNT(*) FROM messages m WHERE m.folder_id = folders.id AND m.seen = 0),
-    flagged = (SELECT COUNT(*) FROM messages m WHERE m.folder_id = folders.id
-        AND instr(' ' || m.flags || ' ', ' \Flagged ') > 0);
+    flagged = (SELECT COUNT(*) FROM messages m WHERE m.folder_id = folders.id AND ",
+        is_flagged!("m."),
+        ");
 
 -- a conversation's messages in one folder: how many, unread and flagged (in any case, as a selection counts them),
--- its newest dates (the Date and Received orders), and its first message, by arrival (threads.rs ARRIVED, a message
--- without a date first), whose row stands for it, with what the other orders sort it by
+-- its newest dates (the Date and Received orders), and its first message, by arrival (a message without a date
+-- first), whose row stands for it, with what the other orders sort it by
 CREATE TABLE conversations (
     folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
     thread_id INTEGER NOT NULL,
@@ -633,15 +636,9 @@ CREATE TABLE conversations (
 ) WITHOUT ROWID;
 INSERT INTO conversations (folder_id, thread_id, total, unread, flagged, newest, newest_received, first_id, first_at,
     first_uid, first_from, first_subject, first_size)
-SELECT folder_id, thread_id, COUNT(*), SUM(seen = 0), SUM(instr(' ' || lower(flags) || ' ', ' \flagged ') > 0),
-    MAX(COALESCE(MIN(date, internal_date), date, internal_date)), MAX(internal_date),
-    MAX(CASE r WHEN 1 THEN id END), MAX(CASE r WHEN 1 THEN COALESCE(internal_date, date, -9223372036854775807) END),
-    MAX(CASE r WHEN 1 THEN uid END),
-    MAX(CASE r WHEN 1 THEN COALESCE(sort_from, CASE from_name WHEN '' THEN from_address ELSE from_name END) END),
-    MAX(CASE r WHEN 1 THEN COALESCE(sort_subject, subject) END), MAX(CASE r WHEN 1 THEN size END)
-FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY folder_id, thread_id
-        ORDER BY COALESCE(internal_date, date, -9223372036854775807), uid, id) AS r FROM messages)
-GROUP BY folder_id, thread_id;
+",
+        conversations_counted!(),
+        ";
 UPDATE folders SET threads = (SELECT COUNT(*) FROM conversations c WHERE c.folder_id = folders.id);
 -- the grouped list's orders in a folder and over several (the folder is in the key, so those of other folders are
 -- skipped in the index)
@@ -661,147 +658,72 @@ CREATE TRIGGER conversations_uncounted AFTER DELETE ON conversations BEGIN
     UPDATE folders SET threads = threads - 1 WHERE id = OLD.folder_id;
 END;
 
--- a message stored: counted in its folder and its conversation
 CREATE TRIGGER messages_counted AFTER INSERT ON messages BEGIN
-    UPDATE folders SET total = total + 1, unread = unread + (NEW.seen = 0),
-        flagged = flagged + (instr(' ' || NEW.flags || ' ', ' \Flagged ') > 0) WHERE id = NEW.folder_id;
-    INSERT INTO conversations (folder_id, thread_id, total, unread, flagged, newest, newest_received, first_id,
-        first_at, first_uid, first_from, first_subject, first_size)
-    VALUES (NEW.folder_id, NEW.thread_id, 1, NEW.seen = 0, instr(' ' || lower(NEW.flags) || ' ', ' \flagged ') > 0,
-        COALESCE(MIN(NEW.date, NEW.internal_date), NEW.date, NEW.internal_date), NEW.internal_date, NEW.id,
-        COALESCE(NEW.internal_date, NEW.date, -9223372036854775807), NEW.uid,
-        COALESCE(NEW.sort_from, CASE NEW.from_name WHEN '' THEN NEW.from_address ELSE NEW.from_name END),
-        COALESCE(NEW.sort_subject, NEW.subject), NEW.size)
-    ON CONFLICT (folder_id, thread_id) DO UPDATE SET total = total + 1, unread = unread + excluded.unread,
-        flagged = flagged + excluded.flagged;
-    UPDATE conversations SET newest = COALESCE(MIN(NEW.date, NEW.internal_date), NEW.date, NEW.internal_date)
-    WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id
-        AND COALESCE(MIN(NEW.date, NEW.internal_date), NEW.date, NEW.internal_date)
-            > COALESCE(newest, -9223372036854775807);
-    UPDATE conversations SET newest_received = NEW.internal_date
-    WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id
-        AND NEW.internal_date > COALESCE(newest_received, -9223372036854775807);
-    UPDATE conversations SET first_id = NEW.id, first_at = COALESCE(NEW.internal_date, NEW.date, -9223372036854775807),
-        first_uid = NEW.uid,
-        first_from = COALESCE(NEW.sort_from, CASE NEW.from_name WHEN '' THEN NEW.from_address ELSE NEW.from_name END),
-        first_subject = COALESCE(NEW.sort_subject, NEW.subject), first_size = NEW.size
-    WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id
-        AND (COALESCE(NEW.internal_date, NEW.date, -9223372036854775807), NEW.uid, NEW.id)
-            < (first_at, first_uid, first_id);
+    ",
+        count_message!("NEW."),
+        "
 END;
-
--- a message gone: taken out of its folder's counts and its conversation, whose newest dates and first message are
--- found again when they were its
-CREATE TRIGGER messages_uncounted AFTER DELETE ON messages BEGIN
-    UPDATE folders SET total = total - 1, unread = unread - (OLD.seen = 0),
-        flagged = flagged - (instr(' ' || OLD.flags || ' ', ' \Flagged ') > 0) WHERE id = OLD.folder_id;
-    UPDATE conversations SET total = total - 1, unread = unread - (OLD.seen = 0),
-        flagged = flagged - (instr(' ' || lower(OLD.flags) || ' ', ' \flagged ') > 0)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id;
-    DELETE FROM conversations WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id AND total <= 0;
-    UPDATE conversations SET newest = (SELECT MAX(COALESCE(MIN(m.date, m.internal_date), m.date, m.internal_date))
-        FROM messages m WHERE m.folder_id = OLD.folder_id AND m.thread_id = OLD.thread_id)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id
-        AND newest IS COALESCE(MIN(OLD.date, OLD.internal_date), OLD.date, OLD.internal_date);
-    UPDATE conversations SET newest_received = (SELECT MAX(m.internal_date) FROM messages m
-        WHERE m.folder_id = OLD.folder_id AND m.thread_id = OLD.thread_id)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id AND newest_received IS OLD.internal_date;
-    UPDATE conversations SET (first_id, first_at, first_uid, first_from, first_subject, first_size) = (
-        SELECT m.id, COALESCE(m.internal_date, m.date, -9223372036854775807), m.uid,
-            COALESCE(m.sort_from, CASE m.from_name WHEN '' THEN m.from_address ELSE m.from_name END),
-            COALESCE(m.sort_subject, m.subject), m.size
-        FROM messages m WHERE m.folder_id = OLD.folder_id AND m.thread_id = OLD.thread_id
-        ORDER BY COALESCE(m.internal_date, m.date, -9223372036854775807), m.uid, m.id LIMIT 1)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id AND first_id = OLD.id;
+-- a message of a folder deleted with it is not counted again: the folder and its conversations are gone
+CREATE TRIGGER messages_uncounted AFTER DELETE ON messages
+WHEN EXISTS (SELECT 1 FROM folders WHERE id = OLD.folder_id) BEGIN
+    ",
+        uncount_message!("OLD."),
+        "
 END;
-
 -- read or flagged: the counts follow (unless the message also moved, which the next trigger counts whole)
 CREATE TRIGGER messages_flags_counted AFTER UPDATE OF seen, flags ON messages
-WHEN (OLD.seen IS NOT NEW.seen OR OLD.flags IS NOT NEW.flags)
-    AND OLD.folder_id IS NEW.folder_id AND OLD.thread_id IS NEW.thread_id AND OLD.uid IS NEW.uid
-    AND OLD.date IS NEW.date AND OLD.internal_date IS NEW.internal_date AND OLD.size IS NEW.size
-    AND OLD.sort_from IS NEW.sort_from AND OLD.sort_subject IS NEW.sort_subject AND OLD.from_name IS NEW.from_name
-    AND OLD.from_address IS NEW.from_address AND OLD.subject IS NEW.subject
+WHEN (OLD.seen IS NOT NEW.seen OR OLD.flags IS NOT NEW.flags) AND ",
+        placed_by_changed!("IS", "AND"),
+        "
 BEGIN
     UPDATE folders SET unread = unread + (NEW.seen = 0) - (OLD.seen = 0),
-        flagged = flagged + (instr(' ' || NEW.flags || ' ', ' \Flagged ') > 0)
-            - (instr(' ' || OLD.flags || ' ', ' \Flagged ') > 0)
+        flagged = flagged + (",
+        is_flagged!("NEW."),
+        ") - (",
+        is_flagged!("OLD."),
+        ")
     WHERE id = NEW.folder_id;
     UPDATE conversations SET unread = unread + (NEW.seen = 0) - (OLD.seen = 0),
-        flagged = flagged + (instr(' ' || lower(NEW.flags) || ' ', ' \flagged ') > 0)
-            - (instr(' ' || lower(OLD.flags) || ' ', ' \flagged ') > 0)
+        flagged = flagged + (",
+        any_flagged!("NEW."),
+        ") - (",
+        any_flagged!("OLD."),
+        ")
     WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id;
 END;
-
 -- moved to another conversation (conversations joined, threads.rs), or anything it is placed by changed: taken out
 -- as it was and counted again as it is
 CREATE TRIGGER messages_recounted AFTER UPDATE OF folder_id, thread_id, uid, date, internal_date, size, sort_from,
     sort_subject, from_name, from_address, subject ON messages
-WHEN OLD.folder_id IS NOT NEW.folder_id OR OLD.thread_id IS NOT NEW.thread_id OR OLD.uid IS NOT NEW.uid
-    OR OLD.date IS NOT NEW.date OR OLD.internal_date IS NOT NEW.internal_date OR OLD.size IS NOT NEW.size
-    OR OLD.sort_from IS NOT NEW.sort_from OR OLD.sort_subject IS NOT NEW.sort_subject
-    OR OLD.from_name IS NOT NEW.from_name OR OLD.from_address IS NOT NEW.from_address OR OLD.subject IS NOT NEW.subject
+WHEN ",
+        placed_by_changed!("IS NOT", "OR"),
+        "
 BEGIN
-    UPDATE folders SET total = total - 1, unread = unread - (OLD.seen = 0),
-        flagged = flagged - (instr(' ' || OLD.flags || ' ', ' \Flagged ') > 0) WHERE id = OLD.folder_id;
-    UPDATE conversations SET total = total - 1, unread = unread - (OLD.seen = 0),
-        flagged = flagged - (instr(' ' || lower(OLD.flags) || ' ', ' \flagged ') > 0)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id;
-    DELETE FROM conversations WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id AND total <= 0;
-    UPDATE conversations SET newest = (SELECT MAX(COALESCE(MIN(m.date, m.internal_date), m.date, m.internal_date))
-        FROM messages m WHERE m.folder_id = OLD.folder_id AND m.thread_id = OLD.thread_id)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id
-        AND newest IS COALESCE(MIN(OLD.date, OLD.internal_date), OLD.date, OLD.internal_date);
-    UPDATE conversations SET newest_received = (SELECT MAX(m.internal_date) FROM messages m
-        WHERE m.folder_id = OLD.folder_id AND m.thread_id = OLD.thread_id)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id AND newest_received IS OLD.internal_date;
-    UPDATE conversations SET (first_id, first_at, first_uid, first_from, first_subject, first_size) = (
-        SELECT m.id, COALESCE(m.internal_date, m.date, -9223372036854775807), m.uid,
-            COALESCE(m.sort_from, CASE m.from_name WHEN '' THEN m.from_address ELSE m.from_name END),
-            COALESCE(m.sort_subject, m.subject), m.size
-        FROM messages m WHERE m.folder_id = OLD.folder_id AND m.thread_id = OLD.thread_id
-        ORDER BY COALESCE(m.internal_date, m.date, -9223372036854775807), m.uid, m.id LIMIT 1)
-    WHERE folder_id = OLD.folder_id AND thread_id = OLD.thread_id AND first_id = OLD.id;
-
-    UPDATE folders SET total = total + 1, unread = unread + (NEW.seen = 0),
-        flagged = flagged + (instr(' ' || NEW.flags || ' ', ' \Flagged ') > 0) WHERE id = NEW.folder_id;
-    INSERT INTO conversations (folder_id, thread_id, total, unread, flagged, newest, newest_received, first_id,
-        first_at, first_uid, first_from, first_subject, first_size)
-    VALUES (NEW.folder_id, NEW.thread_id, 1, NEW.seen = 0, instr(' ' || lower(NEW.flags) || ' ', ' \flagged ') > 0,
-        COALESCE(MIN(NEW.date, NEW.internal_date), NEW.date, NEW.internal_date), NEW.internal_date, NEW.id,
-        COALESCE(NEW.internal_date, NEW.date, -9223372036854775807), NEW.uid,
-        COALESCE(NEW.sort_from, CASE NEW.from_name WHEN '' THEN NEW.from_address ELSE NEW.from_name END),
-        COALESCE(NEW.sort_subject, NEW.subject), NEW.size)
-    ON CONFLICT (folder_id, thread_id) DO UPDATE SET total = total + 1, unread = unread + excluded.unread,
-        flagged = flagged + excluded.flagged;
-    UPDATE conversations SET newest = COALESCE(MIN(NEW.date, NEW.internal_date), NEW.date, NEW.internal_date)
-    WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id
-        AND COALESCE(MIN(NEW.date, NEW.internal_date), NEW.date, NEW.internal_date)
-            > COALESCE(newest, -9223372036854775807);
-    UPDATE conversations SET newest_received = NEW.internal_date
-    WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id
-        AND NEW.internal_date > COALESCE(newest_received, -9223372036854775807);
-    UPDATE conversations SET first_id = NEW.id, first_at = COALESCE(NEW.internal_date, NEW.date, -9223372036854775807),
-        first_uid = NEW.uid,
-        first_from = COALESCE(NEW.sort_from, CASE NEW.from_name WHEN '' THEN NEW.from_address ELSE NEW.from_name END),
-        first_subject = COALESCE(NEW.sort_subject, NEW.subject), first_size = NEW.size
-    WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id
-        AND (COALESCE(NEW.internal_date, NEW.date, -9223372036854775807), NEW.uid, NEW.id)
-            < (first_at, first_uid, first_id);
+    ",
+        uncount_message!("OLD."),
+        "
+    ",
+        count_message!("NEW."),
+        "
 END;
 
 -- the orders over several folders with the folder in the index, and the From and Subject orders over several
 DROP INDEX messages_all_by_date;
-CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id,
-    folder_id);
+CREATE INDEX messages_all_by_date ON messages (",
+        list_date!(""),
+        ", uid, id, folder_id);
 DROP INDEX messages_all_by_received;
 CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id, folder_id);
-CREATE INDEX messages_all_by_from ON messages (
-    COALESCE(sort_from, CASE from_name WHEN '' THEN from_address ELSE from_name END) COLLATE NOCASE, uid, id, folder_id);
-CREATE INDEX messages_all_by_subject ON messages (COALESCE(sort_subject, subject) COLLATE NOCASE, uid, id, folder_id);
+CREATE INDEX messages_all_by_from ON messages (",
+        from_key!(""),
+        " COLLATE NOCASE, uid, id, folder_id);
+CREATE INDEX messages_all_by_subject ON messages (",
+        subject_key!(""),
+        " COLLATE NOCASE, uid, id, folder_id);
 -- the messages read since a time (Hide Read Messages keeps them in the list, counts.rs)
 CREATE INDEX messages_read_at ON messages (seen_at) WHERE seen_at IS NOT NULL;
-"#,
+"
+    ),
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

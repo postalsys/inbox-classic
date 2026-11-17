@@ -107,11 +107,6 @@ impl Store {
                 position as i64
             ])?;
         }
-        // the conversations of those gone first, as reset_folder does
-        self.db.execute(
-            "DELETE FROM conversations WHERE folder_id IN (SELECT id FROM folders WHERE account_id = ?1 AND position = -1)",
-            [account],
-        )?;
         self.db
             .execute("DELETE FROM folders WHERE account_id = ?1 AND position = -1", [account])?;
         // rules imported before this account's folders were here find theirs now

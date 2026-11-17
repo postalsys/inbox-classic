@@ -232,15 +232,8 @@ impl Store {
     }
 
     pub fn remove_account(&self, id: AccountId) -> Result<()> {
-        self.atomic(|| {
-            // its conversations first, so that none is counted again for each of its messages deleted
-            self.db.execute(
-                "DELETE FROM conversations WHERE folder_id IN (SELECT id FROM folders WHERE account_id = ?1)",
-                [id],
-            )?;
-            self.db.execute("DELETE FROM accounts WHERE id = ?1", [id])?;
-            Ok(())
-        })
+        self.db.execute("DELETE FROM accounts WHERE id = ?1", [id])?;
+        Ok(())
     }
 
     pub fn accounts(&self) -> Result<Vec<Account>> {

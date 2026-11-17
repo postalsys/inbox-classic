@@ -84,7 +84,7 @@ pub(crate) const SENT: &str = "SELECT id FROM folders WHERE special_use = '\\Sen
 pub(crate) const DRAFTS: &str = "SELECT id FROM folders WHERE special_use = '\\Drafts'";
 
 /// A message is flagged, as SQL; the same words as the index `messages_flagged`, so SQLite can use it
-const IS_FLAGGED: &str = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
+const IS_FLAGGED: &str = is_flagged!("");
 
 /// The folders whose flagged messages [`Scope::Flagged`] lists: of an account with a folder of its flagged messages
 /// (Gmail's Starred, \Flagged) that one alone, as the others hold the same messages again; of any other account every
@@ -207,6 +207,13 @@ impl Search {
         }
     }
 
+    /// Whether a message's place is counted on the order's index ([`crate::keyset`]): not in the Flagged folder, whose
+    /// few messages its own index finds, ranked faster than the order's index ranges over every folder's (walking from
+    /// a message to its neighbours or a page stops at the first few, and stays on the order's index there too)
+    pub(crate) fn places_by_key(&self) -> bool {
+        self.scope != Scope::Flagged
+    }
+
     /// The same list, one row a message
     pub fn ungrouped(&self) -> Search {
         Search {
@@ -266,7 +273,7 @@ impl Search {
                 let folders = scope.gathered().unwrap_or_default();
                 // the + keeps SQLite off the folder indexes, which would sort every message of the Inboxes for a page;
                 // Sent Items and Drafts hold a small part of the mail, which the folder indexes find at once
-                let plus = if in_order && scope == Scope::AllInboxes {
+                let plus = if in_order && scope.walks_every_folder() {
                     "+"
                 } else {
                     ""
@@ -429,7 +436,7 @@ impl Store {
         anchor: Anchor,
     ) -> Result<Vec<Message>> {
         if let Some(expanded) = &search.threads {
-            return match self.kept_conversations(search)? {
+            return match search.kept_conversations() {
                 Some(kept) if expanded.is_empty() => self.kept_rows_from(search, &kept, sort, offset, limit, anchor),
                 _ => self.search(search, sort, offset, limit),
             };
@@ -500,9 +507,7 @@ impl Store {
         if let Some(expanded) = &search.threads {
             return self.thread_row_index(search, sort, expanded, folder, uid);
         }
-        if search.scope == Scope::Flagged {
-            // its few messages, found on the index of flagged ones, ranked: the order's index would range over
-            // every folder's
+        if !search.places_by_key() {
             let (positioned, mut values) = search.positioned(sort);
             let at = values.len();
             values.push(Value::Integer(folder));

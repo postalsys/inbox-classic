@@ -218,11 +218,7 @@ pub struct Sort {
 impl Sort {
     /// The ORDER BY, each matching an index of the schema
     pub(crate) fn order_by(self) -> String {
-        let column = sort_key(self.field);
-        let direction = if self.ascending { "ASC" } else { "DESC" };
-        // the id last: the same UID in two folders has one order across folders too (an index ends with the rowid, so
-        // the indexes still serve the order)
-        format!("{column} {direction}, uid {direction}, id {direction}")
+        crate::keyset::Order::messages(self).walking(true)
     }
 }
 
@@ -264,13 +260,13 @@ fn is_seen(canonical: &str) -> bool {
 /// What the From order sorts by: the sender's name, their address when the message has none, case folded
 /// ([`crate::fold`]) by the store as it writes the message; a row an older version wrote has no key and sorts by the
 /// name as it is (the schema's index has the same expression)
-pub(crate) const FROM_KEY: &str = "COALESCE(sort_from, CASE from_name WHEN '' THEN from_address ELSE from_name END)";
+pub(crate) const FROM_KEY: &str = from_key!("");
 /// What the Subject order sorts by, as [`FROM_KEY`]
-pub(crate) const SUBJECT_KEY: &str = "COALESCE(sort_subject, subject)";
+pub(crate) const SUBJECT_KEY: &str = subject_key!("");
 /// What the To order sorts by: folded as it is read (no index; Sent Items and Drafts are small)
 pub(crate) const TO_KEY: &str = "fold(recipients)";
 
-pub(crate) const LIST_DATE: &str = "COALESCE(MIN(date, internal_date), date, internal_date)";
+pub(crate) const LIST_DATE: &str = list_date!("");
 
 /// [`LIST_DATE`] of the messages of a table named `alias` in a query
 pub(crate) fn list_date(alias: &str) -> String {
