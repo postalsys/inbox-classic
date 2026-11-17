@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Viestin allekirjoittaminen ja salaaminen</h1>
+<p class="summary">Allekirjoita viesti, niin vastaanottajat tietävät sen olevan sinulta, ja salaa se, niin vain he voivat lukea sen.</p>
+<p>Allekirjoitettu viesti osoittaa, että sinä kirjoitit sen eikä kukaan muuttanut sitä matkalla. Salatun viestin voivat lukea vain sen vastaanottajat ja sinä, ja se on aina myös allekirjoitettu. Kumpaankin tarvitset oman avaimen.</p>
+<p>Näin allekirjoitat tai salaat viestin:</p>
+<ol>
+    <li>Napsauta viesti-ikkunassa <b data-text="ui-tb-sign"></b> tai <b data-text="ui-tb-encrypt"></b>, tai valitse <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> tai <b data-text="cmd-compose-encrypt"></b>. Voit myös painaa <kbd data-command="compose_sign"></kbd> tai <kbd data-command="compose_encrypt"></kbd>. Jos sinulla ei vielä ole avainta, Inbox Classic tarjoutuu luomaan sen.</li>
+    <li>Napsauta <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Kun <b data-text="ui-tb-encrypt"></b> on käytössä, aiheen alla oleva rivi näyttää jokaisen vastaanottajan lukon kanssa, ja Inbox Classic hakee avaimet, joita sillä ei vielä ole:</p>
+<table>
+    <tr><th>Lukko</th><th>Merkitys</th></tr>
+    <tr><td>Vihreä</td><td>Olet vahvistanut vastaanottajan avaimen.</td></tr>
+    <tr><td>Sininen</td><td>Sinulla on vastaanottajan avain, mutta et ole vahvistanut sitä.</td></tr>
+    <tr><td>Harmaa</td><td>Inbox Classic hakee vastaanottajan avainta.</td></tr>
+    <tr><td>Keltainen</td><td>Vastaanottajalle ei löytynyt avainta.</td></tr>
+</table>
+<h2>Jos vastaanottajalla ei ole avainta</h2>
+<p>Salattu viesti lähetetään vain, kun jokaisella vastaanottajalla on avain. Jos jollakulla ei ole, <b data-text="ui-tb-send"></b> avaa ikkunan <b data-text="ui-recipient-keys-title"></b>. Siellä voit napsauttaa <b data-text="ui-recipient-find-key"></b> hakeaksesi uudelleen, <b data-text="ui-recipient-remove"></b> jättääksesi henkilön pois tai <b data-text="ui-send-unencrypted"></b>. Voit myös pyytää häneltä julkista avainta ja tuoda sen.</p>
+<h2>Vastaukset salattuun postiin</h2>
+<p>Vastaus salattuun viestiin tai sen välitys alkaa <b data-text="ui-tb-encrypt"></b> käytössä, ja Inbox Classic kysyy ennen kuin poistat sen käytöstä. Niin kauan kuin viesti yhä lainaa salattua tekstiä tai sisältää sen liitteet, sen voi lähettää vain salattuna.</p>
+<p>Salatun viestin luonnokset tallennetaan salattuina, samoin sen kopio kansiossa <b data-text="folder-sent"></b>.</p>
+<h2>Julkisen avaimen jakaminen</h2>
+<p>Jotta joku voi lähettää sinulle salattua postia, valitse <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Julkinen avaimesi liitetään viestiin tiedostona.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

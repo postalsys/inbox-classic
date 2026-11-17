@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Een bericht ondertekenen en versleutelen</h1>
+<p class="summary">Onderteken een bericht zodat de ontvangers weten dat het van jou komt, en versleutel het zodat alleen zij het kunnen lezen.</p>
+<p>Een ondertekend bericht laat zien dat jij het hebt geschreven en dat niemand het onderweg heeft veranderd. Een versleuteld bericht kan alleen door de ontvangers en door jou worden gelezen, en het is altijd ook ondertekend. Voor allebei heb je een eigen sleutel nodig.</p>
+<p>Om een bericht te ondertekenen of te versleutelen:</p>
+<ol>
+    <li>Klik in het berichtvenster op <b data-text="ui-tb-sign"></b> of <b data-text="ui-tb-encrypt"></b>, of kies <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> of <b data-text="cmd-compose-encrypt"></b>. Je kunt ook op <kbd data-command="compose_sign"></kbd> of <kbd data-command="compose_encrypt"></kbd> drukken. Heb je nog geen sleutel, dan biedt Inbox Classic aan er een te maken.</li>
+    <li>Klik op <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Zolang <b data-text="ui-tb-encrypt"></b> aan staat, toont de regel onder het onderwerp elke ontvanger met een slot, en zoekt Inbox Classic de sleutels die het nog niet heeft:</p>
+<table>
+    <tr><th>Slot</th><th>Wat het betekent</th></tr>
+    <tr><td>Groen</td><td>Je hebt de sleutel van de ontvanger geverifieerd.</td></tr>
+    <tr><td>Blauw</td><td>Je hebt de sleutel van de ontvanger, maar je hebt hem niet geverifieerd.</td></tr>
+    <tr><td>Grijs</td><td>Inbox Classic zoekt de sleutel van de ontvanger.</td></tr>
+    <tr><td>Oranje</td><td>Er is geen sleutel voor de ontvanger gevonden.</td></tr>
+</table>
+<h2>Als een ontvanger geen sleutel heeft</h2>
+<p>Een versleuteld bericht wordt alleen verzonden als elke ontvanger een sleutel heeft. Is dat niet zo, dan opent <b data-text="ui-tb-send"></b> het venster <b data-text="ui-recipient-keys-title"></b>. Daar klik je op <b data-text="ui-recipient-find-key"></b> om opnieuw te zoeken, op <b data-text="ui-recipient-remove"></b> om die persoon weg te laten, of op <b data-text="ui-send-unencrypted"></b>. Je kunt de ontvanger ook om de openbare sleutel vragen en die importeren.</p>
+<h2>Antwoorden op versleutelde e-mail</h2>
+<p>Een antwoord op een versleuteld bericht, of een doorgestuurd versleuteld bericht, begint met <b data-text="ui-tb-encrypt"></b> aan, en Inbox Classic vraagt het je voordat je het uitzet. Zolang het bericht de versleutelde tekst nog citeert of de bijlagen ervan bevat, kan het alleen versleuteld worden verzonden.</p>
+<p>Concepten van een versleuteld bericht worden versleuteld opgeslagen, en de kopie in <b data-text="folder-sent"></b> ook.</p>
+<h2>Je openbare sleutel delen</h2>
+<p>Om iemand versleutelde e-mail naar je te laten sturen, kies je <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Je openbare sleutel wordt als bestand aan het bericht toegevoegd.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

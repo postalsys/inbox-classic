@@ -1007,6 +1007,66 @@ pgp-publish-failed = Ključa ni bilo mogoče objaviti: { $error }
 # review: changed
 pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno v { $settings }.
 # review: new
+pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno v Možnostih.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [1] Šifrirano in podpisano: prebrati ga lahko samo vi in { $addresses }.
+   *[other] Šifrirano in podpisano: prebrati ga lahko samo vi in njegovi prejemniki ({ $count }).
+}
+# review: new
+pgp-compose-encrypt-ready = Sporočilo bo šifrirano in podpisano. Dodajte prejemnike, katerih ključe imate.
+# review: new
+pgp-compose-missing = { $count ->
+    [1] { $addresses } nima ključa, zato sporočila še ni mogoče šifrirati.
+   *[other] Prejemniki brez ključa ({ $count }): { $addresses }. Zato sporočila še ni mogoče šifrirati.
+}
+# review: new
+pgp-compose-looking = Iskanje ključev za { $addresses }...
+# review: new
+pgp-compose-signed = Podpisano: prejemniki lahko preverijo, da je od vas in da ni bilo spremenjeno.
+# review: new
+pgp-compose-reply-clear = Ni šifrirano, čeprav je bilo sporočilo, na katero odgovarja ali ki ga posreduje, šifrirano.
+# review: new
+pgp-compose-encrypted-files = Pripete so datoteke šifriranega sporočila, zato je to sporočilo mogoče poslati samo šifrirano. Vklopite Šifriraj ali odstranite te datoteke.
+# review: new
+pgp-compose-sign-tip = Podpišite sporočilo s svojim ključem, da lahko prejemniki preverijo, da je od vas in da ni bilo spremenjeno
+# review: new
+pgp-compose-sign-tip-encrypted = Šifrirano sporočilo je vedno podpisano
+# review: new
+pgp-compose-encrypt-tip = Šifrirajte sporočilo, da ga lahko preberete samo vi in njegovi prejemniki
+# review: new
+pgp-compose-make-key = Za { $address } še nimate ključa. Ga želite ustvariti zdaj? Z njim lahko svoja sporočila podpisujete in šifrirate.
+# review: new
+pgp-compose-key-unusable = Vašega ključa za { $address } ni mogoče uporabiti ({ $state }). Odprite okno Šifrirni ključi, da uvozite njegovo varnostno kopijo ali ustvarite nov ključ.
+# review: new
+pgp-compose-encrypt-off-quote = To sporočilo navaja ali posreduje šifrirano sporočilo. Brez šifriranja ga ni mogoče poslati, dokler ne odstranite navedenega. Ali želite kljub temu izklopiti šifriranje?
+# review: new
+pgp-compose-encrypt-off-reply = To sporočilo odgovarja na šifrirano sporočilo ali ga posreduje. Brez šifriranja lahko vaše sporočilo prebere vsak, ki ga obravnava na poti. Ali želite izklopiti šifriranje?
+# review: new
+pgp-recipient-verified = Ključ preverjen
+# review: new
+pgp-recipient-found = Ključ ni preverjen
+# review: new
+pgp-recipient-own = Vaš ključ
+# review: new
+pgp-recipient-looking = Iskanje ključa...
+# review: new
+pgp-recipient-missing = Ni ključa
+# review: new
+pgp-recipient-not-found = Ni ključa: { $date } ni bil najden noben
+# review: new
+pgp-recipient-unusable = Ključa ni mogoče uporabiti: { $state }
+# review: new
+pgp-recipients-intro = Sporočilo je šifrirano s ključem vsakega prejemnika in z vašim.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] { $count } prejemnik nima ključa za šifriranje. Poiščite njegov ključ, ga odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
+    [two] { $count } prejemnika nimata ključa za šifriranje. Poiščite njuna ključa, ju odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
+    [few] { $count } prejemniki nimajo ključa za šifriranje. Poiščite njihove ključe, jih odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
+   *[other] { $count } prejemnikov nima ključa za šifriranje. Poiščite njihove ključe, jih odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
+}
+# review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new
 pgp-details-signed = Podpisano { $when } s ključem { $key }

@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Firmare e crittografare un messaggio</h1>
+<p class="summary">Firma un messaggio perché i destinatari sappiano che viene da te, e crittografalo perché solo loro possano leggerlo.</p>
+<p>Un messaggio firmato dimostra che l’hai scritto tu e che nessuno l’ha modificato lungo il percorso. Un messaggio crittografato possono leggerlo solo i suoi destinatari e tu, ed è sempre anche firmato. Per entrambe le cose ti serve una chiave tua.</p>
+<p>Per firmare o crittografare un messaggio:</p>
+<ol>
+    <li>Nella finestra del messaggio, fai clic su <b data-text="ui-tb-sign"></b> o <b data-text="ui-tb-encrypt"></b>, oppure scegli <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> o <b data-text="cmd-compose-encrypt"></b>. Puoi anche premere <kbd data-command="compose_sign"></kbd> o <kbd data-command="compose_encrypt"></kbd>. Se non hai ancora una chiave, Inbox Classic si offre di crearne una.</li>
+    <li>Fai clic su <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Mentre <b data-text="ui-tb-encrypt"></b> è attivo, la riga sotto l’oggetto mostra ogni destinatario con un lucchetto, e Inbox Classic cerca le chiavi che non ha ancora:</p>
+<table>
+    <tr><th>Lucchetto</th><th>Cosa significa</th></tr>
+    <tr><td>Verde</td><td>Hai verificato la chiave del destinatario.</td></tr>
+    <tr><td>Blu</td><td>Hai la chiave del destinatario, ma non l’hai verificata.</td></tr>
+    <tr><td>Grigio</td><td>Inbox Classic sta cercando la chiave del destinatario.</td></tr>
+    <tr><td>Ambra</td><td>Non è stata trovata nessuna chiave per il destinatario.</td></tr>
+</table>
+<h2>Se un destinatario non ha una chiave</h2>
+<p>Un messaggio crittografato viene inviato solo quando ogni destinatario ha una chiave. Se qualcuno non ce l’ha, <b data-text="ui-tb-send"></b> apre <b data-text="ui-recipient-keys-title"></b>. Lì puoi fare clic su <b data-text="ui-recipient-find-key"></b> per cercare di nuovo, su <b data-text="ui-recipient-remove"></b> per escludere quella persona, oppure su <b data-text="ui-send-unencrypted"></b>. Puoi anche chiedergli la sua chiave pubblica e importarla.</p>
+<h2>Risposte alla posta crittografata</h2>
+<p>Una risposta a un messaggio crittografato, o il suo inoltro, inizia con <b data-text="ui-tb-encrypt"></b> attivo, e Inbox Classic chiede conferma prima che tu lo disattivi. Finché il messaggio cita ancora il testo crittografato o ne contiene gli allegati, può essere inviato solo crittografato.</p>
+<p>Le bozze di un messaggio crittografato vengono salvate crittografate, come anche la sua copia in <b data-text="folder-sent"></b>.</p>
+<h2>Condividere la tua chiave pubblica</h2>
+<p>Perché qualcuno possa inviarti posta crittografata, scegli <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. La tua chiave pubblica viene allegata al messaggio come file.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

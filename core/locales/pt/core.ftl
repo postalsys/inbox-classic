@@ -995,6 +995,64 @@ pgp-publish-failed = Não foi possível publicar a chave: { $error }
 # review: changed
 pgp-keyserver-off = A procura de chaves em keys.openpgp.org está desativada em { $settings }.
 # review: new
+pgp-keyserver-off = A procura de chaves em keys.openpgp.org está desativada em Opções.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Encriptada e assinada: só pode ser lida por si e por { $addresses }.
+   *[other] Encriptada e assinada: só pode ser lida por si e pelos { $count } destinatários.
+}
+# review: new
+pgp-compose-encrypt-ready = Vai ser encriptada e assinada. Adicione destinatários cujas chaves tenha.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] { $addresses } não tem nenhuma chave, por isso a mensagem ainda não pode ser encriptada.
+   *[other] { $count } destinatários não têm nenhuma chave, por isso a mensagem ainda não pode ser encriptada: { $addresses }.
+}
+# review: new
+pgp-compose-looking = A procurar as chaves de { $addresses }...
+# review: new
+pgp-compose-signed = Assinada: os destinatários podem verificar que vem de si e que não foi alterada.
+# review: new
+pgp-compose-reply-clear = Não encriptada, embora a mensagem a que responde ou que reencaminha estivesse encriptada.
+# review: new
+pgp-compose-encrypted-files = Estão anexados ficheiros de uma mensagem encriptada, por isso esta mensagem só pode ser enviada encriptada. Ative Encriptar, ou remova esses ficheiros.
+# review: new
+pgp-compose-sign-tip = Assinar a mensagem com a sua chave, para que os destinatários possam verificar que vem de si e que não foi alterada
+# review: new
+pgp-compose-sign-tip-encrypted = Uma mensagem encriptada é sempre assinada
+# review: new
+pgp-compose-encrypt-tip = Encriptar a mensagem, para que só possa ser lida por si e pelos destinatários
+# review: new
+pgp-compose-make-key = Ainda não tem nenhuma chave para { $address }. Criar uma agora? Com ela, as suas mensagens podem ser assinadas e encriptadas.
+# review: new
+pgp-compose-key-unusable = A sua chave para { $address } não pode ser usada ({ $state }). Abra Chaves de encriptação para importar a cópia de segurança ou criar uma chave nova.
+# review: new
+pgp-compose-encrypt-off-quote = Esta mensagem cita ou reencaminha uma mensagem encriptada. Sem encriptação, só pode ser enviada depois de remover o que cita. Desativar a encriptação mesmo assim?
+# review: new
+pgp-compose-encrypt-off-reply = Esta mensagem responde a uma mensagem encriptada ou reencaminha-a. Sem encriptação, qualquer pessoa que trate a sua mensagem pelo caminho pode lê-la. Desativar a encriptação?
+# review: new
+pgp-recipient-verified = Chave verificada
+# review: new
+pgp-recipient-found = Chave não verificada
+# review: new
+pgp-recipient-own = A sua própria chave
+# review: new
+pgp-recipient-looking = A procurar uma chave...
+# review: new
+pgp-recipient-missing = Sem chave
+# review: new
+pgp-recipient-not-found = Sem chave: não foi encontrada nenhuma a { $date }
+# review: new
+pgp-recipient-unusable = A chave não pode ser usada: { $state }
+# review: new
+pgp-recipients-intro = A mensagem é encriptada para a chave de cada destinatário e para a sua.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Um destinatário não tem nenhuma chave para a qual encriptar. Procure a chave dele, remova-o desta mensagem ou envie-a sem encriptação.
+   *[other] { $count } destinatários não têm nenhuma chave para a qual encriptar. Procure as chaves deles, remova-os desta mensagem ou envie-a sem encriptação.
+}
+# review: new
 pgp-details-part = Parte { $number }: { $label }
 # review: new
 pgp-details-signed = Assinada { $when } com a chave { $key }

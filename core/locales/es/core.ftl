@@ -665,6 +665,64 @@ pgp-publish-failed = No se pudo publicar la clave: { $error }
 # review: changed
 pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en { $settings }.
 # review: new
+pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en Opciones.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Cifrado y firmado: solo usted y { $addresses } pueden leerlo.
+   *[other] Cifrado y firmado: solo usted y sus { $count } destinatarios pueden leerlo.
+}
+# review: new
+pgp-compose-encrypt-ready = Se cifrará y firmará. Agregue destinatarios cuyas claves tenga.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] { $addresses } no tiene ninguna clave, así que el mensaje aún no se puede cifrar.
+   *[other] { $count } destinatarios no tienen ninguna clave, así que el mensaje aún no se puede cifrar: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Buscando las claves de { $addresses }...
+# review: new
+pgp-compose-signed = Firmado: los destinatarios pueden comprobar que procede de usted y que nadie lo cambió.
+# review: new
+pgp-compose-reply-clear = Sin cifrar, aunque el mensaje al que responde o que reenvía estaba cifrado.
+# review: new
+pgp-compose-encrypted-files = Lleva adjuntos archivos de un mensaje cifrado, así que este mensaje solo se puede enviar cifrado. Active Cifrar, o quite esos archivos.
+# review: new
+pgp-compose-sign-tip = Firmar el mensaje con su clave, para que los destinatarios puedan comprobar que procede de usted y que nadie lo cambió
+# review: new
+pgp-compose-sign-tip-encrypted = Un mensaje cifrado siempre se firma
+# review: new
+pgp-compose-encrypt-tip = Cifrar el mensaje, para que solo usted y sus destinatarios puedan leerlo
+# review: new
+pgp-compose-make-key = Aún no tiene ninguna clave para { $address }. ¿Crear una ahora? Con ella, sus mensajes se pueden firmar y cifrar.
+# review: new
+pgp-compose-key-unusable = Su clave para { $address } no se puede usar ({ $state }). Abra Claves de cifrado para importar su copia de seguridad o crear una clave nueva.
+# review: new
+pgp-compose-encrypt-off-quote = Este mensaje cita o reenvía un mensaje cifrado. Sin cifrado, no se podrá enviar hasta que quite lo que cita. ¿Desactivar el cifrado de todos modos?
+# review: new
+pgp-compose-encrypt-off-reply = Este mensaje responde a un mensaje cifrado o lo reenvía. Sin cifrado, cualquiera que maneje su mensaje por el camino podrá leerlo. ¿Desactivar el cifrado?
+# review: new
+pgp-recipient-verified = Clave verificada
+# review: new
+pgp-recipient-found = Clave sin verificar
+# review: new
+pgp-recipient-own = Su propia clave
+# review: new
+pgp-recipient-looking = Buscando una clave...
+# review: new
+pgp-recipient-missing = Sin clave
+# review: new
+pgp-recipient-not-found = Sin clave: no se encontró ninguna el { $date }
+# review: new
+pgp-recipient-unusable = La clave no se puede usar: { $state }
+# review: new
+pgp-recipients-intro = El mensaje se cifra para la clave de cada destinatario, y para la suya.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Un destinatario no tiene ninguna clave para cifrar. Busque su clave, quítelo de este mensaje o envíelo sin cifrar.
+   *[other] { $count } destinatarios no tienen ninguna clave para cifrar. Busque sus claves, quítelos de este mensaje o envíelo sin cifrar.
+}
+# review: new
 pgp-details-part = Parte { $number }: { $label }
 # review: new
 pgp-details-signed = Firmado { $when } con la clave { $key }

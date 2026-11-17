@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Podpísanie a zašifrovanie správy</h1>
+<p class="summary">Podpíšte správu, aby príjemcovia vedeli, že je od vás, a zašifrujte ju, aby ju mohli prečítať iba oni.</p>
+<p>Podpísaná správa dokazuje, že ste ju napísali vy a že ju cestou nikto nezmenil. Šifrovanú správu môžu prečítať iba jej príjemcovia a vy a je vždy aj podpísaná. Na oboje potrebujete vlastný kľúč.</p>
+<p>Podpísanie alebo zašifrovanie správy:</p>
+<ol>
+    <li>V okne správy kliknite na <b data-text="ui-tb-sign"></b> alebo <b data-text="ui-tb-encrypt"></b>, prípadne vyberte <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> alebo <b data-text="cmd-compose-encrypt"></b>. Môžete tiež stlačiť <kbd data-command="compose_sign"></kbd> alebo <kbd data-command="compose_encrypt"></kbd>. Ak ešte nemáte kľúč, Inbox Classic ponúkne jeho vytvorenie.</li>
+    <li>Kliknite na <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Keď je <b data-text="ui-tb-encrypt"></b> zapnuté, riadok pod predmetom zobrazuje každého príjemcu so zámkou a Inbox Classic hľadá kľúče, ktoré ešte nemá:</p>
+<table>
+    <tr><th>Farba zámky</th><th>Čo znamená</th></tr>
+    <tr><td>Zelená</td><td>Kľúč príjemcu ste overili.</td></tr>
+    <tr><td>Modrá</td><td>Kľúč príjemcu máte, ale neoverili ste ho.</td></tr>
+    <tr><td>Sivá</td><td>Inbox Classic hľadá kľúč príjemcu.</td></tr>
+    <tr><td>Jantárová</td><td>Pre príjemcu sa nenašiel žiadny kľúč.</td></tr>
+</table>
+<h2>Keď príjemca nemá kľúč</h2>
+<p>Šifrovaná správa sa odošle, iba ak má kľúč každý príjemca. Ak ho niektorý nemá, <b data-text="ui-tb-send"></b> otvorí okno <b data-text="ui-recipient-keys-title"></b>. Tam môžete kliknúť na <b data-text="ui-recipient-find-key"></b> a hľadať znova, na <b data-text="ui-recipient-remove"></b> a túto osobu vynechať alebo na <b data-text="ui-send-unencrypted"></b>. Príjemcu môžete tiež požiadať o jeho verejný kľúč a importovať ho.</p>
+<h2>Odpovede na šifrovanú poštu</h2>
+<p>Odpoveď na šifrovanú správu alebo jej preposlanie sa začína so zapnutým <b data-text="ui-tb-encrypt"></b> a Inbox Classic sa spýta, skôr ako ho vypnete. Kým správa cituje šifrovaný text alebo obsahuje prílohy šifrovanej správy, možno ju odoslať iba šifrovanú.</p>
+<p>Koncepty šifrovanej správy sa ukladajú šifrované, rovnako ako jej kópia v priečinku <b data-text="folder-sent"></b>.</p>
+<h2>Zdieľanie verejného kľúča</h2>
+<p>Aby vám ostatní mohli posielať šifrovanú poštu, vyberte <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Váš verejný kľúč sa k správe priloží ako súbor.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

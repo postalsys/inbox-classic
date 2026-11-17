@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Potpisivanje i šifrovanje poruke</h1>
+<p class="summary">Potpišite poruku da bi primaoci znali da je od vas i šifrujte je da bi samo oni mogli da je pročitaju.</p>
+<p>Potpisana poruka pokazuje da ste je vi napisali i da je niko nije promenio usput. Šifrovanu poruku mogu da pročitaju samo njeni primaoci i vi, a uvek je i potpisana. Za oboje vam je potreban sopstveni ključ.</p>
+<p>Da biste potpisali ili šifrovali poruku:</p>
+<ol>
+    <li>U prozoru poruke kliknite na <b data-text="ui-tb-sign"></b> ili <b data-text="ui-tb-encrypt"></b> ili izaberite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> ili <b data-text="cmd-compose-encrypt"></b>. Možete i da pritisnete <kbd data-command="compose_sign"></kbd> ili <kbd data-command="compose_encrypt"></kbd>. Ako još nemate ključ, Inbox Classic nudi da ga napravi.</li>
+    <li>Kliknite na <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Dok je <b data-text="ui-tb-encrypt"></b> uključeno, red ispod teme prikazuje svakog primaoca sa katancem, a Inbox Classic traži ključeve koje još nema:</p>
+<table>
+    <tr><th>Boja katanca</th><th>Značenje</th></tr>
+    <tr><td>Zelena</td><td>Proverili ste ključ primaoca.</td></tr>
+    <tr><td>Plava</td><td>Imate ključ primaoca, ali ga niste proverili.</td></tr>
+    <tr><td>Siva</td><td>Inbox Classic traži ključ primaoca.</td></tr>
+    <tr><td>Žutonarandžasta</td><td>Za primaoca nije pronađen nijedan ključ.</td></tr>
+</table>
+<h2>Ako primalac nema ključ</h2>
+<p>Šifrovana poruka se šalje samo ako svaki primalac ima ključ. Ako ga neki nema, <b data-text="ui-tb-send"></b> otvara prozor <b data-text="ui-recipient-keys-title"></b>. Tamo možete da kliknete na <b data-text="ui-recipient-find-key"></b> da biste ponovo potražili ključ, na <b data-text="ui-recipient-remove"></b> da biste izostavili tu osobu ili na <b data-text="ui-send-unencrypted"></b>. Možete i da zamolite primaoca za njegov javni ključ i da ga uvezete.</p>
+<h2>Odgovori na šifrovanu poštu</h2>
+<p>Odgovor na šifrovanu poruku ili njeno prosleđivanje počinje sa uključenim <b data-text="ui-tb-encrypt"></b>, a Inbox Classic pita pre nego što ga isključite. Dok poruka još citira šifrovani tekst ili sadrži priloge šifrovane poruke, može da se pošalje samo šifrovana.</p>
+<p>Radne verzije šifrovane poruke čuvaju se šifrovane, kao i njena kopija u fascikli <b data-text="folder-sent"></b>.</p>
+<h2>Deljenje javnog ključa</h2>
+<p>Da bi vam drugi mogli da šalju šifrovanu poštu, izaberite <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Vaš javni ključ se prilaže poruci kao datoteka.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

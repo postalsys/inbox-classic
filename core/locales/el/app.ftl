@@ -24,6 +24,8 @@ menu-sort-by = &Ταξινόμηση κατά
 menu-text-size = Μέγε&θος κειμένου
 # review: new
 menu-folder = &Φάκελος
+# review: new
+menu-insert = Ει&σαγωγή
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -185,6 +187,12 @@ cmd-export-address-book = Εξαγωγή βιβλίου δ&ιευθύνσεων.
 cmd-export-setup = Εξα&γωγή ρυθμίσεων και λογαριασμών...
 # review: new
 cmd-import-setup = Εισαγωγή ρ&υθμίσεων και λογαριασμών...
+# review: new
+cmd-compose-sign = Ψηφιακή &υπογραφή
+# review: new
+cmd-compose-encrypt = &Κρυπτογράφηση
+# review: new
+cmd-attach-my-key = Επισύναψη του &δημόσιου κλειδιού μου
 
 ## The tray icon's menu
 
@@ -406,6 +414,12 @@ ui-tb-send = Αποστολή
 ui-tb-save = Αποθήκευση
 # review: new
 ui-tb-attach = Επισύναψη
+# review: new
+ui-tb-sign = Υπογραφή
+# review: new
+ui-tb-encrypt = Κρυπτογράφηση
+# review: new
+ui-field-keys = Κλειδιά:
 # review: new
 ui-field-from = Από:
 # review: new
@@ -1325,6 +1339,26 @@ ui-contact-key-none = Χωρίς κλειδί
 ui-contact-key-use-new = Χρήση του &νέου κλειδιού
 # review: new
 ui-contact-key-keep = &Διατήρηση του τρέχοντος
+# review: new
+ui-recipient-keys-title = Κλειδιά παραληπτών
+# review: new
+ui-recipient-col-recipient = Παραλήπτης
+# review: new
+ui-recipient-col-key = Κλειδί
+# review: new
+ui-recipient-find-key = &Εύρεση κλειδιού
+# review: new
+ui-recipient-remove = Α&φαίρεση από το μήνυμα
+# review: new
+ui-send-unencrypted = Αποστολή &χωρίς κρυπτογράφηση
+# review: new
+ui-compose-make-key = &Δημιουργία κλειδιού...
+# review: new
+ui-compose-show-keys = Κλειδιά κρ&υπτογράφησης...
+# review: new
+ui-compose-encrypt-off = Απε&νεργοποίηση κρυπτογράφησης
+# review: new
+ui-compose-keep-encrypted = &Διατήρηση κρυπτογράφησης
 # review: new
 ui-setup-export-title = Εξαγωγή ρυθμίσεων και λογαριασμών
 # review: new

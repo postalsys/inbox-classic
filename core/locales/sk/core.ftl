@@ -1025,6 +1025,65 @@ pgp-publish-failed = Kľúč sa nepodarilo zverejniť: { $error }
 # review: changed
 pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v { $settings }.
 # review: new
+pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v Možnostiach.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Šifrované a podpísané: prečítať ju môžete iba vy a { $addresses }.
+   *[other] Šifrované a podpísané: prečítať ju môžete iba vy a jej príjemcovia ({ $count }).
+}
+# review: new
+pgp-compose-encrypt-ready = Bude zašifrovaná a podpísaná. Pridajte príjemcov, ktorých kľúče máte.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] { $addresses } nemá kľúč, preto správu zatiaľ nemožno zašifrovať.
+   *[other] Príjemcovia bez kľúča ({ $count }): { $addresses }. Správu preto zatiaľ nemožno zašifrovať.
+}
+# review: new
+pgp-compose-looking = Hľadajú sa kľúče pre { $addresses }...
+# review: new
+pgp-compose-signed = Podpísané: príjemcovia si môžu overiť, že je od vás a nebola zmenená.
+# review: new
+pgp-compose-reply-clear = Nešifrované, hoci správa, na ktorú odpovedá alebo ktorú preposiela, šifrovaná bola.
+# review: new
+pgp-compose-encrypted-files = Sú priložené súbory šifrovanej správy, preto túto správu možno odoslať iba šifrovanú. Zapnite Šifrovať alebo tieto súbory odstráňte.
+# review: new
+pgp-compose-sign-tip = Podpísať správu vaším kľúčom, aby si príjemcovia mohli overiť, že je od vás a nebola zmenená
+# review: new
+pgp-compose-sign-tip-encrypted = Šifrovaná správa je vždy podpísaná
+# review: new
+pgp-compose-encrypt-tip = Zašifrovať správu, aby ju mohli prečítať iba vy a jej príjemcovia
+# review: new
+pgp-compose-make-key = Pre { $address } zatiaľ nemáte kľúč. Vytvoriť ho teraz? S ním možno vaše správy podpisovať a šifrovať.
+# review: new
+pgp-compose-key-unusable = Váš kľúč pre { $address } nemožno použiť ({ $state }). Otvorte Šifrovacie kľúče a importujte jeho zálohu alebo vytvorte nový kľúč.
+# review: new
+pgp-compose-encrypt-off-quote = Táto správa cituje alebo preposiela šifrovanú správu. Bez šifrovania ju nemožno odoslať, kým neodstránite citovaný obsah. Napriek tomu vypnúť šifrovanie?
+# review: new
+pgp-compose-encrypt-off-reply = Táto správa odpovedá na šifrovanú správu alebo ju preposiela. Bez šifrovania si vašu správu môže prečítať ktokoľvek, kto s ňou cestou pracuje. Vypnúť šifrovanie?
+# review: new
+pgp-recipient-verified = Kľúč overený
+# review: new
+pgp-recipient-found = Kľúč neoverený
+# review: new
+pgp-recipient-own = Váš kľúč
+# review: new
+pgp-recipient-looking = Hľadá sa kľúč...
+# review: new
+pgp-recipient-missing = Žiadny kľúč
+# review: new
+pgp-recipient-not-found = Žiadny kľúč: { $date } sa nenašiel žiadny
+# review: new
+pgp-recipient-unusable = Kľúč nemožno použiť: { $state }
+# review: new
+pgp-recipients-intro = Správa sa šifruje pre kľúč každého príjemcu a pre váš.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Jeden príjemca nemá kľúč na šifrovanie. Nájdite jeho kľúč, odstráňte ho z tejto správy alebo ju odošlite bez šifrovania.
+    [few] { $count } príjemcovia nemajú kľúč na šifrovanie. Nájdite ich kľúče, odstráňte ich z tejto správy alebo ju odošlite bez šifrovania.
+   *[other] { $count } príjemcov nemá kľúč na šifrovanie. Nájdite ich kľúče, odstráňte ich z tejto správy alebo ju odošlite bez šifrovania.
+}
+# review: new
 pgp-details-part = Časť { $number }: { $label }
 # review: new
 pgp-details-signed = Podpísané { $when } kľúčom { $key }

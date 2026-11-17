@@ -25,6 +25,8 @@ menu-sort-by = &Kārtot pēc
 menu-text-size = &Teksta lielums
 # review: new
 menu-folder = &Mape
+# review: new
+menu-insert = &Ievietot
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -186,6 +188,12 @@ cmd-export-address-book = Eksportēt adrešu &grāmatu...
 cmd-export-setup = Eksportēt iestatījumus un k&ontus...
 # review: new
 cmd-import-setup = Importēt iestatījumus u&n kontus...
+# review: new
+cmd-compose-sign = &Digitāli parakstīt
+# review: new
+cmd-compose-encrypt = Šif&rēt
+# review: new
+cmd-attach-my-key = Pievienot manu &publisko atslēgu
 
 ## The tray icon's menu
 
@@ -409,6 +417,12 @@ ui-tb-send = Sūtīt
 ui-tb-save = Saglabāt
 # review: new
 ui-tb-attach = Pievienot
+# review: new
+ui-tb-sign = Parakstīt
+# review: new
+ui-tb-encrypt = Šifrēt
+# review: new
+ui-field-keys = Atslēgas:
 # review: new
 ui-field-from = No:
 # review: new
@@ -1331,6 +1345,26 @@ ui-contact-key-none = Nav atslēgas
 ui-contact-key-use-new = Izmantot &jauno atslēgu
 # review: new
 ui-contact-key-keep = &Paturēt pašreizējo
+# review: new
+ui-recipient-keys-title = Adresātu atslēgas
+# review: new
+ui-recipient-col-recipient = Adresāts
+# review: new
+ui-recipient-col-key = Atslēga
+# review: new
+ui-recipient-find-key = &Meklēt atslēgu
+# review: new
+ui-recipient-remove = &Noņemt no ziņojuma
+# review: new
+ui-send-unencrypted = Sūtīt &bez šifrēšanas
+# review: new
+ui-compose-make-key = &Izveidot atslēgu...
+# review: new
+ui-compose-show-keys = Šifrēšanas a&tslēgas...
+# review: new
+ui-compose-encrypt-off = &Izslēgt šifrēšanu
+# review: new
+ui-compose-keep-encrypted = &Paturēt šifrētu
 # review: new
 ui-setup-export-title = Eksportēt iestatījumus un kontus
 # review: new

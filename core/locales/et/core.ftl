@@ -641,6 +641,64 @@ pgp-publish-failed = Võtit ei saanud avaldada: { $error }
 # review: changed
 pgp-keyserver-off = Võtmete otsimine serverist keys.openpgp.org on välja lülitatud: { $settings }.
 # review: new
+pgp-keyserver-off = Võtmete otsimine saidilt keys.openpgp.org on suvandites välja lülitatud.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Krüpteeritud ja allkirjastatud: seda saavad lugeda ainult sina ja { $addresses }.
+   *[other] Krüpteeritud ja allkirjastatud: seda saavad lugeda ainult sina ja kirja { $count } saajat.
+}
+# review: new
+pgp-compose-encrypt-ready = Kiri krüpteeritakse ja allkirjastatakse. Lisa saajad, kelle võtmed sul on.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] Aadressil { $addresses } pole võtit, seega ei saa kirja veel krüpteerida.
+   *[other] { $count } saajal pole võtit, seega ei saa kirja veel krüpteerida: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Otsitakse võtmeid: { $addresses }...
+# review: new
+pgp-compose-signed = Allkirjastatud: saajad saavad kontrollida, et kiri on sinult ja seda pole muudetud.
+# review: new
+pgp-compose-reply-clear = Krüpteerimata, kuigi kiri, millele see vastab või mida see edastab, oli krüpteeritud.
+# review: new
+pgp-compose-encrypted-files = Kirjale on lisatud krüpteeritud kirja faile, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda need failid.
+# review: new
+pgp-compose-sign-tip = Allkirjasta kiri oma võtmega, et saajad saaksid kontrollida, et see on sinult ja seda pole muudetud
+# review: new
+pgp-compose-sign-tip-encrypted = Krüpteeritud kiri on alati allkirjastatud
+# review: new
+pgp-compose-encrypt-tip = Krüpteeri kiri, et seda saaksid lugeda ainult sina ja selle saajad
+# review: new
+pgp-compose-make-key = Sul pole veel aadressi { $address } jaoks võtit. Kas luua see nüüd? Selle abil saab su kirju allkirjastada ja krüpteerida.
+# review: new
+pgp-compose-key-unusable = Sinu aadressi { $address } võtit ei saa kasutada ({ $state }). Ava Krüpteerimisvõtmed, et importida selle varukoopia või luua uus võti.
+# review: new
+pgp-compose-encrypt-off-quote = See kiri tsiteerib või edastab krüpteeritud kirja. Ilma krüpteerimiseta ei saa seda saata enne, kui eemaldad tsiteeritud osa. Kas lülitada krüpteerimine ikkagi välja?
+# review: new
+pgp-compose-encrypt-off-reply = See kiri vastab krüpteeritud kirjale või edastab selle. Ilma krüpteerimiseta saab su kirja lugeda igaüks, kes seda teel käsitleb. Kas lülitada krüpteerimine välja?
+# review: new
+pgp-recipient-verified = Võti kontrollitud
+# review: new
+pgp-recipient-found = Võti kontrollimata
+# review: new
+pgp-recipient-own = Sinu enda võti
+# review: new
+pgp-recipient-looking = Otsitakse võtit...
+# review: new
+pgp-recipient-missing = Võtit pole
+# review: new
+pgp-recipient-not-found = Võtit pole: { $date } ei leitud ühtegi
+# review: new
+pgp-recipient-unusable = Võtit ei saa kasutada: { $state }
+# review: new
+pgp-recipients-intro = Kiri krüpteeritakse iga saaja võtmele ja ka sinu omale.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Ühel saajal pole võtit, millele krüpteerida. Otsi tema võti, eemalda ta sellest kirjast või saada kiri krüpteerimata.
+   *[other] { $count } saajal pole võtit, millele krüpteerida. Otsi nende võtmed, eemalda nad sellest kirjast või saada kiri krüpteerimata.
+}
+# review: new
 pgp-details-part = Osa { $number }: { $label }
 # review: new
 pgp-details-signed = Allkirjastatud { $when } võtmega { $key }
