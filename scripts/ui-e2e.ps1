@@ -3608,11 +3608,18 @@ public static class Dragger {
                @($listed | Where-Object { $_ -match "$([char]0x2192) list\.example\.com$" }).Count -eq 2) "it lists both senders and where the requests go ($($listed -join '; '))"
         Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($leave, $IDC_AGENT_UNSUBSCRIBE))) 'Unsubscribe waits a moment before it can be pressed'
         Start-Sleep -Seconds 2
+        # another window in front and back again, as a question raised while the app is behind: the safe answer keeps
+        # the keyboard (the picture brings the question to the front)
+        $taskbar = [Native.Win]::FindWindow('Shell_TrayWnd', [NullString]::Value)
+        if ($taskbar -ne [IntPtr]::Zero) { [void][Native.Win]::SetForegroundWindow($taskbar); Start-Sleep -Milliseconds 500 }
         Shot $leave 'agents-7-unsubscribe'
+        $dontButton = [Native.Win]::GetDlgItem($leave, $IDC_AGENT_DONT_UNSUBSCRIBE)
+        Check ([bool](WaitFor { [Native.Win]::FocusOf($leave) -eq $dontButton } 5)) "back in front, Don't Unsubscribe has the keyboard ($([Native.Win]::FocusOf($leave)) $dontButton)"
         $defId = [int64][Native.Win]::SendMessage($leave, 0x400, [IntPtr]::Zero, [IntPtr]::Zero)
         Check ((($defId -shr 16) -band 0xFFFF) -eq 0x534B -and ($defId -band 0xFFFF) -eq $IDC_AGENT_DONT_UNSUBSCRIBE) "Don't Unsubscribe is the default ($('{0:X}' -f $defId))"
-        # Enter on the button that has the focus when the question comes up
-        Key ([Native.Win]::GetDlgItem($leave, $IDC_AGENT_DONT_UNSUBSCRIBE)) 0x0D
+        # Enter where the keyboard is
+        $focused = [Native.Win]::FocusOf($leave)
+        Key $(if ($focused -ne [IntPtr]::Zero) { $focused } else { $leave }) 0x0D
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($leave) } 10)) 'Enter answers it'
     }
     $unsubscribed = WaitFor { & $agentSaid 'unsubscribe' } 20
