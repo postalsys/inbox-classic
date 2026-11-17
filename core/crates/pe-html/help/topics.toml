@@ -35,7 +35,7 @@ topics = ["sign-in-codes", "delivery-problems", "invitations", "unsubscribe", "b
 
 [[section]]
 id = "encrypted-mail"
-topics = ["encrypted-and-signed-mail", "encryption-keys", "verify-a-key"]
+topics = ["encrypted-and-signed-mail", "sign-and-encrypt", "encryption-keys", "verify-a-key"]
 
 [[section]]
 id = "settings"
@@ -76,3 +76,4 @@ message-rules = "message-rules"
 encryption-keys = "encryption-keys"
 verify-key = "verify-a-key"
 protection-details = "encrypted-and-signed-mail"
+recipient-keys = "sign-and-encrypt"
