@@ -149,7 +149,13 @@ pub async fn backup(parent: &impl IsA<gtk::Widget>, fingerprint: &str) {
     content.append(&ui::wrapped_label(&t!(UiKeysBackupIntro)));
     content.append(&pair.group);
     content.append(&pair.feedback);
-    let (dialog, ok) = ui::dialog_with_buttons(&title, &content, &t!(UiOk), 480);
+    // scrolled when the window is too low for it (a small screen, a tiled window), so OK and the fields stay in reach
+    let scrolled = gtk::ScrolledWindow::builder()
+        .child(&content)
+        .hscrollbar_policy(gtk::PolicyType::Never)
+        .propagate_natural_height(true)
+        .build();
+    let (dialog, ok) = ui::dialog_with_buttons(&title, &scrolled, &t!(UiOk), 480);
     dialog.set_widget_name("key-backup-dialog");
     {
         let (checked, ok) = (pair.clone(), ok.clone());

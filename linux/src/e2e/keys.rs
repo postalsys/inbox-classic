@@ -187,6 +187,7 @@ pub(super) async fn encryption_keys(d: &Driver) {
     set_text(&b, "key-passphrase", PASSPHRASE);
     set_text(&b, "key-passphrase-again", PASSPHRASE);
     d.shot(&backup, "keys-4-backup").await;
+    fits_a_low_window(d, &backup).await;
     let saved = d.out.join("backup.asc");
     let _ = std::fs::remove_file(&saved);
     FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![saved.clone()]));
@@ -524,4 +525,43 @@ pub(super) async fn encryption_keys(d: &Driver) {
         );
         close_keys(&keys).await;
     }
+}
+
+/// The backup window in a window lower than it is tall (a small screen, a tiled window): it scrolls, its OK and both
+/// fields still in reach, and the window back to its size after
+async fn fits_a_low_window(d: &Driver, backup: &adw::Dialog) {
+    let Some(window) = backup.root().and_downcast::<gtk::Window>() else {
+        d.check(false, "the backup window is in a window");
+        return;
+    };
+    let (width, height) = (window.width(), window.height());
+    // what the backup window needs at the least, and would like (an AdwDialog itself says 0: its content says it)
+    let Some(content) = backup.child() else {
+        d.check(false, "the backup window has its content");
+        return;
+    };
+    let needs = || content.measure(gtk::Orientation::Vertical, content.width());
+    // lower than the backup window's own height, as on a 768 pixel screen with a panel and a tiled window
+    let low = (needs().1 - 40).max(200);
+    window.set_default_size(width, low);
+    let shrunk = wait_until(10, || window.height() < height && window.height() <= low + 40).await;
+    pause(300).await;
+    let b: gtk::Widget = backup.clone().upcast();
+    let inside = |name: &str| {
+        named_in(&b, name)
+            .and_then(|w| w.compute_bounds(&window))
+            .is_some_and(|r| r.y() >= 0.0 && r.y() + r.height() <= window.height() as f32 + 0.5)
+    };
+    let (minimum, _, _, _) = needs();
+    d.check(
+        shrunk && minimum <= window.height() && backup.height() <= window.height() && inside("dialog-ok"),
+        &format!(
+            "in a window {} high the backup window fits ({} high, {minimum} at the least), OK in reach",
+            window.height(),
+            backup.height()
+        ),
+    );
+    d.shot(backup, "keys-4b-backup-low").await;
+    window.set_default_size(width, height);
+    wait_until(10, || window.height() == height).await;
 }
