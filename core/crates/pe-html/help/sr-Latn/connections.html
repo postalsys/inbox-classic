@@ -7,6 +7,7 @@
     <li><b>Logotipi brendova</b> (BIMI), sa HTTPS adrese brenda kada poruka ne sadrži logotip, jednom pri svakom pokretanju programa Inbox Classic. To se dešava samo kada je poruka prošla DMARC proveru na vašem serveru e-pošte i kada je on odobrio logotip.</li>
     <li><b>Slike sa interneta</b>, samo kada ih zatražite.</li>
     <li><b>Otkazivanje pretplate</b>, samo kada kliknete na njega. Zahtev jednim klikom (RFC 8058) šalje se samo ako je lista potpisala poruku DKIM-om.</li>
+    <li><b>Ključevi za šifrovanje</b>, samo kada šifrujete nekome čiji ključ nemate: prvo domen njegove adrese (Web Key Directory), zatim keys.openpgp.org, osim ako ste to isključili. Šalje se samo adresa.</li>
     <!--os:mac--><li><b>Ažuriranja</b>, sa sajta inboxclassic.com, radi provere da li je izašla nova verzija.</li><!--/os-->
 </ul>
 <p>Kodovi za prijavu nude se samo kada zaglavlje Authentication-Results vašeg dobavljača kaže da je domen potpisao poruku (DKIM). Za to nije potrebna posebna veza.</p>

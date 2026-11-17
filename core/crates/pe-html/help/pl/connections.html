@@ -7,6 +7,7 @@
     <li><b>Logo marek</b> (BIMI), z adresu HTTPS marki, gdy wiadomość nie zawiera logo, raz przy każdym uruchomieniu Inbox Classic. Dzieje się to tylko wtedy, gdy serwer poczty potwierdził kontrolę DMARC wiadomości i zatwierdził logo.</li>
     <li><b>Obrazy z internetu</b>, tylko gdy o nie poprosisz.</li>
     <li><b>Wypisywanie się</b>, tylko po kliknięciu. Prośba jednym kliknięciem (RFC 8058) jest wysyłana tylko wtedy, gdy lista podpisała wiadomość przez DKIM.</li>
+    <li><b>Klucze szyfrowania</b>, tylko gdy szyfrujesz do kogoś, czyjego klucza nie masz: najpierw domena jego adresu (Web Key Directory), potem keys.openpgp.org, chyba że to wyłączysz. Wysyłany jest tylko adres.</li>
     <!--os:mac--><li><b>Uaktualnienia</b>, z inboxclassic.com, aby sprawdzić, czy jest nowa wersja.</li><!--/os-->
 </ul>
 <p>Kody logowania są proponowane tylko wtedy, gdy nagłówek Authentication-Results od dostawcy mówi, że domena podpisała wiadomość (DKIM). Nie wymaga to osobnego połączenia.</p>

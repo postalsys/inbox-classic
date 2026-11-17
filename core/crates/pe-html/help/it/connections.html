@@ -7,6 +7,7 @@
     <li><b>Loghi dei marchi</b> (BIMI), dall’indirizzo HTTPS del marchio quando il messaggio non contiene il logo, una volta per ogni esecuzione di Inbox Classic. Succede solo quando il tuo server di posta ha superato il controllo DMARC del messaggio e approvato il logo.</li>
     <li><b>Immagini da internet</b>, solo quando le richiedi.</li>
     <li><b>Annullamento dell’iscrizione</b>, solo quando fai clic. Una richiesta con un clic (RFC 8058) viene inviata solo se la lista ha firmato il messaggio con DKIM.</li>
+    <li><b>Chiavi di crittografia</b>, solo quando cifri per qualcuno di cui non hai la chiave: il dominio del suo indirizzo (Web Key Directory), poi keys.openpgp.org, a meno che tu non l’abbia disattivato. Viene inviato solo l’indirizzo.</li>
     <!--os:mac--><li><b>Aggiornamenti</b>, da inboxclassic.com, per sapere se è uscita una nuova versione.</li><!--/os-->
 </ul>
 <p>I codici di accesso vengono proposti solo quando l’intestazione Authentication-Results del provider dice che il dominio ha firmato il messaggio (DKIM). Questo non richiede alcuna connessione propria.</p>

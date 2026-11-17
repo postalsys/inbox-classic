@@ -8,6 +8,7 @@
     <li><b>Logá značiek</b> (BIMI), z adresy HTTPS značky, keď správa logo neobsahuje, raz pri každom spustení Inbox Classic. Deje sa to, iba keď správa prešla na vašom poštovom serveri kontrolou DMARC a server logo schválil.</li>
     <li><b>Obrázky z internetu</b>, iba keď o ne požiadate.</li>
     <li><b>Odhlásenie odberu</b>, iba keď naň kliknete. Žiadosť jedným kliknutím (RFC 8058) sa posiela, iba keď zoznam adresátov správu podpísal pomocou DKIM.</li>
+    <li><b>Šifrovacie kľúče</b>, iba keď šifrujete niekomu, koho kľúč nemáte: vlastná doména jeho adresy (Web Key Directory), potom keys.openpgp.org, ak ste to nevypli. Odosiela sa iba adresa.</li>
     <!--os:mac--><li><b>Aktualizácie</b>, z inboxclassic.com, aby sa zistilo, či vyšla nová verzia.</li><!--/os-->
 </ul>
 <p>Prihlasovacie kódy sa ponúkajú, iba keď hlavička Authentication-Results vášho poskytovateľa uvádza, že doména správu podpísala (DKIM). Nepotrebuje to žiadne vlastné pripojenie.</p>

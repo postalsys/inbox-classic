@@ -7,6 +7,7 @@
     <li><b>Loga značek</b> (BIMI) z adresy HTTPS značky, když zpráva logo sama nenese, jednou při každém spuštění Inbox Classic. Stane se to jen tehdy, když váš poštovní server zprávu ověřil kontrolou DMARC a logo schválil.</li>
     <li><b>Obrázky z internetu</b>, jen když o ně požádáte.</li>
     <li><b>Odhlášení odběru</b>, jen když na něj kliknete. Požadavek jedním kliknutím (RFC 8058) se odešle, jen pokud konference zprávu podepsala pomocí DKIM.</li>
+    <li><b>Šifrovací klíče</b>, jen když šifrujete někomu, jehož klíč nemáte: vlastní doména jeho adresy (Web Key Directory), potom keys.openpgp.org, pokud jste to nevypnuli. Odesílá se jen adresa.</li>
     <!--os:mac--><li><b>Aktualizace</b> z inboxclassic.com, aby se zjistilo, zda vyšla nová verze.</li><!--/os-->
 </ul>
 <p>Přihlašovací kódy se nabízejí, jen když hlavička Authentication-Results od vašeho poskytovatele uvádí, že doména zprávu podepsala (DKIM). K tomu není potřeba žádné další připojení.</p>

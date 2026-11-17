@@ -7,6 +7,7 @@
     <li><b>Merklogo’s</b> (BIMI), van het HTTPS-adres van het merk als het bericht het logo niet meebrengt, één keer per keer dat Inbox Classic draait. Dat gebeurt alleen als je mailserver het bericht door de DMARC-controle heeft laten komen en het logo heeft goedgekeurd.</li>
     <li><b>Afbeeldingen van internet</b>, alleen als je erom vraagt.</li>
     <li><b>Afmelden</b>, alleen als je erop klikt. Een verzoek met één klik (RFC 8058) wordt alleen verzonden als de lijst het bericht met DKIM heeft ondertekend.</li>
+    <li><b>Sleutels voor versleuteling</b>, alleen als je versleutelt naar iemand van wie je de sleutel niet hebt: eerst het eigen domein van het adres (Web Key Directory), dan keys.openpgp.org, tenzij je dat hebt uitgezet. Alleen het adres wordt verstuurd.</li>
     <!--os:mac--><li><b>Updates</b>, van inboxclassic.com, om te zien of er een nieuwe versie is.</li><!--/os-->
 </ul>
 <p>Aanmeldcodes worden alleen aangeboden als de Authentication-Results-header van je provider zegt dat het domein het bericht heeft ondertekend (DKIM). Daar is geen eigen verbinding voor nodig.</p>
