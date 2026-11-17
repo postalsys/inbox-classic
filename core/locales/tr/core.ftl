@@ -417,8 +417,7 @@ day-sunday = Pazar
 ## Yapay zeka aracıları
 
 agent-level-read = Postayı okuma: klasörleri, ileti listelerini ve içeriklerini görüntüleme, arama yapma
-# review: changed
-agent-level-organize = Postayı düzenleme: okundu durumunu ve bayrakları değiştirme, gereksiz postayı işaretleme, taşıma ve Silinmiş Öğeler'e taşıyarak silme
+agent-level-organize = Postayı düzenleme: okundu durumunu ve bayrakları değiştirme, gereksiz postayı yönetme, iletileri taşıma ve arşivleme, klasör oluşturma, iletileri Silinmiş Öğeler'e taşıyarak silme ve onayınızla posta listelerinden çıkma
 agent-level-drafts = Göndermeniz için taslak yazma
 agent-level-send = Posta gönderme, her iletiyi ancak siz onayladıktan sonra
 agent-connect-title = { $program } postanıza erişmek istiyor
@@ -467,11 +466,8 @@ agent-log-composed = Tamamlamanız için yeni bir ileti açıldı: “{ $subject
 agent-log-refused = Gönderimi reddedildi: “{ $subject }”
 agent-log-sent = Gönderilmek üzere sıraya alındı: “{ $subject }”. Alıcı: { $to }
 agent-log-draft = Taslak kaydedildi: “{ $subject }”
-# review: new
 agent-log-draft-replaced = Taslak değiştirildi: “{ $subject }”
-# review: new
-agent-log-draft-discarded = Taslak atıldı: “{ $subject }”
-# review: new
+agent-log-draft-discarded = Taslak silindi: “{ $subject }”
 agent-draft-note = Bu taslağı bir yapay zeka aracısı olan { $program } yazdı. Göndermeden önce alıcıları ve metni kontrol edin.
 agent-log-read = Okundu olarak işaretlendi: “{ $subject }”
 agent-log-unread = Okunmadı olarak işaretlendi: “{ $subject }”
@@ -484,19 +480,15 @@ agent-log-not-junk = Gereksiz değil olarak işaretlendi: “{ $subject }”
 agent-log-archived = Arşivlendi: “{ $subject }”
 agent-log-folder = Klasör oluşturuldu: “{ $name }”
 agent-log-unsubscribed = Abonelikten çıkma isteği gönderildi. İleti: “{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = “{ $subject }” iletisinin listesinden abonelik iptal edilemedi: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Abonelikten çıkmadınız: { $senders }
-# review: new
+agent-log-unsubscribe-failed = “{ $subject }” konulu iletinin geldiği listeden çıkılamadı: { $reason }
+agent-log-unsubscribe-refused = Abonelikten çıkmayı onaylamadınız. Gönderenler: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } bir posta listesindeki aboneliğinizi iptal etmek istiyor
    *[other] { $program } { $count } posta listesindeki aboneliğinizi iptal etmek istiyor
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic, aşağıdaki listeden, sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
-   *[other] Inbox Classic, aşağıdaki her listeden, listenin sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
+    [1] Inbox Classic, aşağıdaki listeye abonelikten çıkma isteği gönderir. Bunun için listenin sunduğu tek tıklamayla abonelikten çıkma seçeneğini kullanır. Başka bir şey gönderilmez. Mevcut iletiler değiştirilmez veya taşınmaz.
+   *[other] Inbox Classic, aşağıdaki listelerin her birine abonelikten çıkma isteği gönderir. Bunun için her listenin sunduğu tek tıklamayla abonelikten çıkma seçeneğini kullanır. Başka bir şey gönderilmez. Mevcut iletiler değiştirilmez veya taşınmaz.
 }
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)

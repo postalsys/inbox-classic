@@ -987,6 +987,12 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"
 - The checker reads a message only up to a `}` in column 0, so selectors that English puts first stay first
   (`done-flagged-color` ends with the colour; the Linux search result counts come before a colon).
 
+- Agent controls retain "Abonelikten Çık" / "Abonelikten Çıkma" (Windows A/M, avoiding dotted/dotless i).
+  Use "abonelikten çıkma isteği" for the request; it does not guarantee that mail stops. Refusal logs use
+  "Gönderenler:" before address placeholders, without suffixes.
+- Agent-owned draft discard is "taslağı silme", with permanent deletion explained in help. Saving, including
+  autosave, ends agent access; opening alone does not. "İmza metni" is the optional account footer, not a digital signature.
+
 ### Ελληνικά (el)
 
 Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Διαγραμμένα; Πρόχειρα; Ανεπιθύμητη αλληλογραφία; Archive: Αρχειοθέτηση

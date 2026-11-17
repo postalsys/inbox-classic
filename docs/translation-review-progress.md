@@ -5,15 +5,15 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Turkish combined agent additions, then bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn. Phase2 reopens only their affected help passages.
+- **Next: Review Bulgarian combined agent additions, then cs, da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr.
 - Current scope: 34,400 catalog entries and 1,356 help topics.
-  Completed: 21,373 entries and 774 full topics; pending: 13,027 entries and 582 topics.
-  Historical catalog improvements: 3,825. Importing drafts earns no review credit.
+  Completed: 21,384 entries and 776 full topics; pending: 13,016 entries and 580 topics.
+  Historical catalog improvements: 3,830. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
@@ -2481,3 +2481,13 @@ Serbian Latin structural checker has 1,456 expected mark-only diagnostics and no
 The prior 21-file preview UI/settings snapshot and three-file backend followup remain the resume point for preview context. This batch does not mark any preview wording reviewed.
 
 Review Turkish combined agent additions, then bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.
+
+## Turkish combined agent additions
+
+Reviewed 11 entries and both agent help topics. Five catalog values and 13 help wording lines improved; six good values retained. Replaced the literal discarded-draft wording with Taslak silindi and clarified the unsubscribe request, failure and refusal logs. Help explains complete permissions, batch consent, the rolling per-program quota, optional signature text, rule previews and saving/autosave as the boundary for agent-owned drafts. All older unmarked prose remains unchanged.
+
+Turkish structural checker has 1,456 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 11 reviewed entries, 5 changed values, 10 help edits and 13 changed help wording lines. All older unmarked prose retained. Tags, attributes, controls, platform branches, literal keys and generated IDs retained; variable sets, selectors and access-key counts intact. Windows unsubscribe A/m keys are distinct; shared Mac/Linux labels are plain. All three platform help joins inspected. Seven notice UI hashes match; no backend runtime change since the recorded snapshot. Global reconciliation: 21,422 unmarked entries, 10,778 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1,281 entries/311 passages reconcile. Source audit covers 44 worktrees/185 refs, exact integrated source trees and 290 unchanged old copies, with no additional translation work. HTML regenerated; git diff --check passes. No tests or build run for this wording batch.
+
+The prior 21-file preview UI/settings snapshot and three-file backend followup remain the resume point for preview context. This batch does not mark any preview wording reviewed.
+
+Review Bulgarian combined agent additions, then cs, da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.
