@@ -866,6 +866,13 @@ Review notes (round 2):
 - Unencrypted sending requires removing inherited text, images and attachments. Removing recipients affects the
   message fields, not contacts. Keep the existing "Žutonarandžasta" color term shared with reading-security help.
 
+- Agent controls retain "Otkaži pretplatu" / "Nemoj otkazati pretplatu" (Windows O/N). Prose uses
+  "otkazivanje pretplata" and "liste za slanje pošte"; a request does not guarantee that mail stops.
+- Keep the numeric placeholder in the Serbian [one] title (21 lists); exact [1] handles one subscription.
+  Refusal logs introduce sender addresses with "Pošiljaoci:", without attaching case endings to placeholders.
+- Agent drafts use "radna verzija" and "odbaciti". Saving, including autosave, ends agent access; opening alone
+  does not. "Tekst potpisa" is the optional account footer, distinct from a digital signature.
+
 ### Suomi (fi)
 
 Terms: Saapuneet; Lähtevät; Lähetetyt; Poistetut; Luonnokset; Roskaposti; viesti; kansio; tili; liite; lippu (liputa,

@@ -452,8 +452,7 @@ day-sunday = nedelja
 ## AI agents
 
 agent-level-read = Čitanje pošte: fascikle, lista poruka, pretraga i poruke
-# review: changed
-agent-level-organize = Organizovanje pošte: menjanje oznaka pročitanosti i zastavica, označavanje neželjene pošte, premeštanje poruka i brisanje u fasciklu Izbrisane stavke
+agent-level-organize = Organizovanje pošte: promena stanja pročitanosti i zastavica, upravljanje neželjenom poštom, premeštanje i arhiviranje poruka, pravljenje fascikli, brisanje poruka premeštanjem u Izbrisane stavke i otkazivanje pretplata uz vaše odobrenje
 agent-level-drafts = Pisanje radnih verzija koje ćete vi poslati
 agent-level-send = Slanje pošte, svake poruke tek nakon vašeg odobrenja
 agent-connect-title = { $program } želi da koristi vašu poštu
@@ -503,11 +502,8 @@ agent-log-composed = Poruka „{ $subject }“ je otvorena za uređivanje da bis
 agent-log-refused = Odbili ste slanje poruke „{ $subject }“
 agent-log-sent = Poruka „{ $subject }“ je stavljena u red za slanje; primaoci: { $to }
 agent-log-draft = Sačuvana radna verzija „{ $subject }“
-# review: new
 agent-log-draft-replaced = Zamenjena radna verzija „{ $subject }“
-# review: new
 agent-log-draft-discarded = Odbačena radna verzija „{ $subject }“
-# review: new
 agent-draft-note = { $program }, AI agent, napisao je ovu radnu verziju. Pre slanja proverite primaoce i tekst.
 agent-log-read = Označeno kao pročitano: „{ $subject }“
 agent-log-unread = Označeno kao nepročitano: „{ $subject }“
@@ -520,21 +516,17 @@ agent-log-not-junk = Označeno kao poželjna pošta: „{ $subject }“
 agent-log-archived = Arhivirano: „{ $subject }“
 agent-log-folder = Napravljena fascikla „{ $name }“
 agent-log-unsubscribed = Poslat je zahtev za odjavu sa liste za poruku „{ $subject }“
-# review: new
-agent-log-unsubscribe-failed = Otkazivanje pretplate na listu poruke „{ $subject }“ nije uspelo: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Niste otkazali pretplatu: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Otkazivanje pretplate na listu sa koje je stigla poruka „{ $subject }“ nije uspelo: { $reason }
+agent-log-unsubscribe-refused = Niste odobrili otkazivanje pretplata. Pošiljaoci: { $senders }
 agent-unsubscribe-title = { $count ->
-    [1] { $program } želi da otkaže vašu pretplatu na listu za slanje
-    [one] { $program } želi da otkaže vašu pretplatu na { $count } listu za slanje
-    [few] { $program } želi da otkaže vašu pretplatu na { $count } liste za slanje
-   *[other] { $program } želi da otkaže vašu pretplatu na { $count } lista za slanje
+    [1] { $program } želi da otkaže vašu pretplatu na listu za slanje pošte
+    [one] { $program } želi da otkaže vaše pretplate na { $count } listu za slanje pošte
+    [few] { $program } želi da otkaže vaše pretplate na { $count } liste za slanje pošte
+   *[other] { $program } želi da otkaže vaše pretplate na { $count } lista za slanje pošte
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic traži od liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
-   *[other] Inbox Classic traži od svake liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje lista nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+    [1] Inbox Classic šalje zahtev da vam sa navedene liste više ne stižu poruke, koristeći opciju za otkazivanje pretplate jednim klikom. Ništa drugo se ne šalje. Postojeće poruke se ne menjaju niti premeštaju.
+   *[other] Inbox Classic šalje zahtev da vam sa svake od navedenih lista više ne stižu poruke, koristeći opciju za otkazivanje pretplate jednim klikom. Ništa drugo se ne šalje. Postojeće poruke se ne menjaju niti premeštaju.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
