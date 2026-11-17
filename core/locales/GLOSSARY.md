@@ -147,6 +147,10 @@ Context notes:
   eligible account. Do not imply that every provider or account supports them. The focused followup and official
   provider sources are recorded under `provider-app-password-context` in the review state.
 
+- Deleting a message is permanent both inside Deleted Items and when the account has no Trash folder.
+  `Core::trash_for`/`deletes_for_good` and the selection summary enforce this; all three platforms ask first.
+  The English deletion help omits the missing-folder case. Qualify the normal move and describe both cases.
+
 - Settings now have General, Reading and Downloading pages from `core/settings.toml`. Group headings have
   no access key or colon; `ui-settings-label` supplies the Mac label punctuation. Check each page's access
   keys together with OK, Cancel and Apply, and use `data-settings` for help navigation.
@@ -352,6 +356,11 @@ Review notes (round 2):
 - Help uses "objedinjeni prikaz" for combined folders and explains hidden quoted text separately from a collapsed
   conversation ("sažeti razgovor"). Search indexing does not require the user to open or mark a message read.
   Use "mogućnost" before long setting labels and quote them when needed to keep the rendered sentence grammatical.
+- Rules use "kriteriji" and "lista e-pošte"; folder expansion is "proširiti/sažeti", not opening/closing.
+  Replies hide quoted text ("skrivena"), rather than summarizing it. Account signatures are added below the text.
+- Attachment reminders currently recognize EN/DE/ET/ES/FR only, not Croatian. Undo Send is available only during
+  the send delay (default ten seconds); quitting the app attempts immediate sending. Failed sends are retried,
+  not guaranteed to succeed. Permanent deletion also applies when an account has no deleted-mail folder.
 
 ### Italiano (it)
 

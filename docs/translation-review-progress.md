@@ -20,23 +20,23 @@ Commit completed batches regularly and preserve an exact resume point.
   German, Spanish, Estonian, French, Dutch, Italian, European/Brazilian Portuguese, Catalan, Norwegian
   Bokmål, Serbian Latin, Turkish, Bulgarian, Czech, Danish, Greek and Finnish settings are complete, including
   encrypted-image and rendered-label followups. The provider-app-password followup is now complete in all
-  17 previously completed languages and Croatian. Only the ten broader language drafts still require it.
-  Fresh fetch at 09aa4b57 found origin/master at 5c645187 with only README updates and the previously seen
-  Linux date-format test/CI changes; these unrelated changes remain unmerged. No new translation/help or
-  app-behavior changes. Croatian's catalogs and first eight help topics are reviewed; 44 help topics remain.
-  NEXT review Croatian message-rules/delete-and-undo/folders/write-message/reply-forward/attachments/
-  drafts-outbox/signatures, then its other pending topics. Keep its three settings-context followups open
-  until the relevant help is reviewed. Exact source IDs/topics are in state; do not restart full language reviews.
+  17 previously completed languages and Croatian, as is the no-Trash deletion followup. Only the ten
+  broader language drafts still require those corrections. Fresh fetch at 27d00888 found all six source tips
+  unchanged; origin/master remains 5c645187 with unrelated README/Linux test/CI changes left unmerged.
+  No new translation/help or app-behavior changes. Croatian's catalogs and 16 help topics are reviewed;
+  36 help topics remain. NEXT review Croatian download-ahead/brand-logos/pictures-tracking/sign-in-codes/
+  new-mail/options-language/default-mail-program. Keep its three settings-context followups open until
+  those remaining targets are reviewed. Exact source IDs/topics are in state; do not restart full reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,456 catalog entries and 1,296 help topics; 13,330 entries and 564 topics are currently pending.
+  32,456 catalog entries and 1,300 help topics; 13,330 entries and 556 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
   further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
-  have 54 more. Four provider introductions have subsequent corrections; eight help topics are reviewed, with
-  44 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  have 54 more. Four provider introductions have subsequent corrections; 16 help topics are reviewed, with
+  36 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -57,6 +57,7 @@ Commit completed batches regularly and preserve an exact resume point.
   that scope to 32,260 entries and 1,252 topics. The settings integration has a net increase of
   180 catalog entries and 40 help topics, bringing that scope to 32,440 entries and 1,292 topics. The provider
   context followup adds 16 previously out-of-scope catalog entries and four help topics, for 32,456 and 1,296.
+  The no-Trash deletion followup adds four round-1 help topics, bringing the scope to 32,456 and 1,300.
   Other affected items were already counted and are reopened without increasing scope.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
@@ -1372,10 +1373,38 @@ changes remain unmerged. Other five source refs and the guide hash are unchanged
 help/app-behavior work. All 270 entries and 118 passages in the since-start report match the pending inventory.
 The formerly omitted Czech/Danish/Dutch provider introductions are now all corrected and reviewed.
 
-Current totals: 19,126 catalog entries and 732 help topics completed in the active scope; 3,188 historical
-catalog value improvements. Remaining: 13,330 catalog entries and 564 help topics. Seventeen languages have no
-pending content. Croatian has 44 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
-including provider context. Settings followups still await these 11 languages. `REVIEWED` is unchanged.
+### Croatian mail-task help and deletion behavior
+
+Reviewed eight more Croatian help topics: message-rules, delete-and-undo, folders, write-message,
+reply-forward, attachments, drafts-outbox and signatures. Improved natural Croatian instructions and
+named-control joins against the actual rule editor, folder tree, composer, attachment handling and send queue.
+Clarified cumulative rules, top-level folders, Reply All recipients, hidden quotations, supported attachment-
+reminder languages, temporary unencrypted attachment copies and startup cleanup. Draft and Outbox help now
+distinguishes retries from successful delivery, the default 10-second delay, Undo Send during that delay and
+sending when quitting the app. Signature help describes automatic placement and account switching accurately.
+
+Found a shared source omission: Delete can permanently remove a message when its account has no Trash folder.
+Verified Core::delete_messages/trash_for/deletes_for_good, selection summaries and confirmation callers on all
+three platforms. Corrected Croatian and reopened the first two deletion-help paragraphs in the 17 previously
+completed languages. All 17 focused corrections are now complete; each topic's other content is unchanged.
+Four round-1 topics enter the active scope; other reopened topics are not counted twice. The ten broader drafts
+retain this followup for their normal reviews. English and app code are unchanged; the glossary records the issue.
+
+Croatian's static check reports only 1,359 deliberately removed marks; each other language reports 1,395.
+No structural findings; all 46 shortcut scopes pass. Exact tags, attributes, platform branches and literal keys
+are preserved. Inspected substituted controls, settings paths and topic-title joins, correcting a Catalan
+folder-name join. These previews do not render dynamic data-command keyboard labels. All 28 inventories and
+completed/source hashes reconcile: 19,160 unmarked messages, 9,644 changed help lines and 14 verified baseline
+pairs. Report regenerated; git diff --check passes. No tests run. Previous checkpoint: `27d00888`.
+
+Fresh fetch found all six source tips unchanged. origin/master remains `5c645187` with only the previously
+inspected README/Linux test/CI changes left unmerged; guide hash unchanged. No new languages or relevant source
+changes. All 270 since-start entries and 117 help passages match the pending inventory; no reopened-pair omissions.
+
+Current totals: 19,126 catalog entries and 744 help topics completed in the active scope; 3,188 historical
+catalog value improvements. Remaining: 13,330 catalog entries and 556 help topics. Seventeen languages have no
+pending content. Croatian has 36 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
+including provider and deletion context. Settings followups still await these 11 languages. `REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

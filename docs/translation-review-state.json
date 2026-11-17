@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Resume Croatian help: all catalogs and first eight topics are reviewed, with 44 help topics pending. Start message-rules/delete-and-undo/folders/write-message/reply-forward/attachments/drafts-outbox/signatures, inspecting actual callers, settings and substituted control joins. Keep the three Croatian settings-context followups open until their remaining help topics are reviewed. Provider followup is now complete in all 17 previously completed languages plus Croatian; only hu/lt/lv/pl/ro/ru/sk/sl/sv/uk require it during their broader reviews. No tests. Scope 32456 catalogs/1296 topics; pending 13330/564. Active checkout build/i18n-wave1; REVIEWED unchanged. Fresh source audit recorded origin/master 5c645187 with only unrelated README/test changes left unmerged.",
+  "next_batch": "Continue Croatian help: all catalogs and 16 of 52 topics are reviewed; 36 topics remain. Next review download-ahead/brand-logos/pictures-tracking/sign-in-codes/new-mail/options-language/default-mail-program, checking actual settings behavior and substituted control joins. These seven topics complete the remaining Croatian settings-context help; close its three related followups only after checking their exact targets. Provider and no-Trash deletion followups are complete in Croatian and all 17 previously completed languages; apply them to hu/lt/lv/pl/ro/ru/sk/sl/sv/uk during their broader reviews. No tests. Scope 32456 catalogs/1300 topics; pending 13330/556. Active checkout build/i18n-wave1; REVIEWED unchanged. Source audit found no new relevant work.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -1456,7 +1456,6 @@
             "address-book.html",
             "all-inboxes.html",
             "attachments.html",
-            "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
             "main-window.html",
@@ -1475,7 +1474,7 @@
             "core/crates/pe-html/help/bg/all-inboxes.html": "f94dfc2a1f8bcc8a0242463073a1030eb777985e8798b3eaac23f5fb55167151",
             "core/crates/pe-html/help/bg/attachments.html": "9edbf947f0c811146c86e3720ad2efde9de96caf9381ea4d8e7140ec5b24c3c1",
             "core/crates/pe-html/help/bg/conversations.html": "579faa57439bc774208112fe173f1d92eff3681e1cea64ba722a597296ec8bdc",
-            "core/crates/pe-html/help/bg/delete-and-undo.html": "075cdb2c134a318c48c996021967244292f4960b88226ce2595da8022e606bf0",
+            "core/crates/pe-html/help/bg/delete-and-undo.html": "4c52089eef973a3f1c4b1cf2746e112358d439c75caf1b1eff7c7c1e9dafbe09",
             "core/crates/pe-html/help/bg/drafts-outbox.html": "0956c5a3b95cfe7cb402967cd32044224d9f3adf2598d7a0ab10e2a988c8b7b2",
             "core/crates/pe-html/help/bg/find-messages.html": "3b3daf933ce7dffb2d10ff45b27b5291a1883562427ec964ed77b897750d4b7b",
             "core/crates/pe-html/help/bg/folders.html": "c6889423e042682c4f96019da76b9b614a83093822599428461fa4059e9b1ea1",
@@ -1523,7 +1522,8 @@
             "layouts.html",
             "new-mail.html",
             "read-messages.html",
-            "gmail-outlook.html"
+            "gmail-outlook.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -1910,6 +1910,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reassessed and reopened the four provider introductions: provider-wide app-password support is too broad for Microsoft mail. Clarified account-specific mail access and required browser sign-in. Reviewed Gmail/Outlook help against account setup callers, MICROSOFT_WARNING and official provider sources; app-password steps are for eligible Google accounts with two-step verification. Corrected surrounding heading and Google-button note. Preserved Bulgarian polite plural, акаунт and парола за приложение, exact control labels and provider/fallback grammar. Preserved all markup, attributes, variables, controls, platform branches and literal keys. No tests run. Substituted controls exposed abrupt joins at the account-window title; added the localized word for window in the two instructions."
+        },
+        {
+          "id": "bg-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/bg/delete-and-undo.html": "7d4dc7ff972fa517532f733e4e55aa0d9bdee0383f7e7961000406c6aae3d218"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -3354,7 +3370,6 @@
             "address-book.html",
             "all-inboxes.html",
             "attachments.html",
-            "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
             "main-window.html",
@@ -3373,7 +3388,7 @@
             "core/crates/pe-html/help/cs/all-inboxes.html": "2986a452276c7b265d812b8327873827870c7351a4e1ed083549bcdc458fe204",
             "core/crates/pe-html/help/cs/attachments.html": "491cdbfe0d63abd5a1c9223901de90ffb31b559e611eb4b261c8a8c38c4c9132",
             "core/crates/pe-html/help/cs/conversations.html": "d881054f71387a45f60f7a4efa561a64dfcdf5fc5db40192a57a91888166e8b1",
-            "core/crates/pe-html/help/cs/delete-and-undo.html": "e61afbc627bbaea6fc0ab9854623c2aa848886adef4b4a81906d45e5b1881e0b",
+            "core/crates/pe-html/help/cs/delete-and-undo.html": "2a10e88f5abe2b01e29b3fa483ed83ac94f375b85a4cd3d3daba07d309a4999c",
             "core/crates/pe-html/help/cs/drafts-outbox.html": "956f9da61a9286f997c4fcf40a88ac027d7d5a36413d810f6d39f2c1b6b2cd00",
             "core/crates/pe-html/help/cs/find-messages.html": "d85cbed1045fb44d2f3eef6b61ef753e7d8106edfba8d95e84e8a794a71f28b5",
             "core/crates/pe-html/help/cs/folders.html": "9b6301077f907fc1aef0bea8e5bfa3988e833e0f9a9ce5a7968ff81b6e770ee0",
@@ -3421,7 +3436,8 @@
             "layouts.html",
             "new-mail.html",
             "read-messages.html",
-            "gmail-outlook.html"
+            "gmail-outlook.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -3829,6 +3845,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and recorded official provider sources. Clarified required Microsoft browser sign-in and conditional Google app-password support with two-step verification; removed the incorrect Microsoft app-password path. Read the surrounding heading and Google-button note for coherence. Preserved formal Czech plural, heslo aplikace and přihlašovací aplikace. Provider names and nominative fallback remain in parentheses without inflection. Preserved markup, attributes, variables, controls, platform branches and literal keys. No tests run."
+        },
+        {
+          "id": "cs-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/cs/delete-and-undo.html": "49d9b6faa70380a04af359bad9f59e7d88e2f2e5b536d1ef48f6be8c3bb51d51"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -5273,7 +5305,6 @@
             "address-book.html",
             "all-inboxes.html",
             "attachments.html",
-            "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
             "main-window.html",
@@ -5292,7 +5323,7 @@
             "core/crates/pe-html/help/da/all-inboxes.html": "803234a7cfd466dcac18793de26a2d33e368399b67d306592af71792423ca6f5",
             "core/crates/pe-html/help/da/attachments.html": "3e6fdbe19c1d5b5d03573cf04211e19414316b6700ff567c3c2a5276729a337f",
             "core/crates/pe-html/help/da/conversations.html": "a8a2a67592a15cdc1bfe26cfacd9e12553f9638a1f6691aadf7ddf93617114f5",
-            "core/crates/pe-html/help/da/delete-and-undo.html": "72d99c131fc4d99f8796720a9ae086cf93cdbffc7a695ddbe3034e7fab2cb42c",
+            "core/crates/pe-html/help/da/delete-and-undo.html": "499ee55780729416c3e6a74623fb98828233d04dc378ff236455c09a60713971",
             "core/crates/pe-html/help/da/drafts-outbox.html": "b222f36b218d298c3317423aa83b8b36c8e4be3eea3cb36db1d7b874776a6b46",
             "core/crates/pe-html/help/da/find-messages.html": "465c0fc3db1831a0a16c96d15791b588b37d032b72b89950bd17d782aaec1d12",
             "core/crates/pe-html/help/da/folders.html": "63194b6048376963c7e19e4b39d57db29531db510d4e467927e2f435bbd8d1bc",
@@ -5340,7 +5371,8 @@
             "layouts.html",
             "new-mail.html",
             "read-messages.html",
-            "gmail-outlook.html"
+            "gmail-outlook.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -5716,6 +5748,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and recorded official provider sources. Clarified required Microsoft browser sign-in and conditional Google app-password support with two-step verification; removed the incorrect Microsoft app-password path. Read the surrounding heading and Google-button note for coherence. Preserved Danish du, appadgangskode and login-app, and the provider-name/fallback construction without a genitive suffix. Preserved markup, attributes, variables, controls, platform branches and literal keys. No tests run. Substituted controls exposed abrupt joins at the account-window title; added the localized word for window in the two instructions."
+        },
+        {
+          "id": "da-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/da/delete-and-undo.html": "73a7d157a0ac6c24671c0c8f33f964d68bfd92407284dcdb8f61231d9e9a11d7"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -6115,6 +6163,22 @@
           },
           "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
           "notes": "Reviewed the four provider introductions and Gmail/Outlook help in German against actual account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Preserve formal Sie and existing provider-name/fallback grammar. App passwords are conditional on support for email; Outlook.com and Microsoft 365 explicitly require browser sign-in. Help limits the app-password steps to eligible Google accounts, explains two-step verification and removes the incorrect Microsoft app-password path. Improved the adjacent disabled-Google-button sentence and qualified its app-password alternative. All other reviewed text retained; tags, attributes, controls, platform branches and keyboard keys preserved. No tests run."
+        },
+        {
+          "id": "de-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/de/delete-and-undo.html": "110c958de3483f152f170b0d82bdb7d4a0543dcd635c61c5da022422548eb8cb"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -7572,7 +7636,6 @@
             "main-window.html",
             "find-messages.html",
             "organize-mail.html",
-            "delete-and-undo.html",
             "folders.html",
             "write-message.html",
             "reply-forward.html",
@@ -7594,7 +7657,7 @@
             "core/crates/pe-html/help/el/find-messages.html": "7c11faa359c5892c1f45758f3e65e4dc880cca7dcce067c9626636e81e137a4d",
             "core/crates/pe-html/help/el/conversations.html": "15f51eb55529b32f6ca1f9049f256f1a6d24a2181fb544c76509d4e879af6210",
             "core/crates/pe-html/help/el/organize-mail.html": "340cf67ffe50fcc9c4b7c5cd44b664d938dad9a16058e402ed41ca7cd79749e2",
-            "core/crates/pe-html/help/el/delete-and-undo.html": "d87fa348981cd910e8dbe68e18a9d815124eb18f9848613ae30b090c95320306",
+            "core/crates/pe-html/help/el/delete-and-undo.html": "514da8be57e74cebd3571e2cfa1092fa17ee71154c07b2aed7dc3a69334559c1",
             "core/crates/pe-html/help/el/folders.html": "37f15453d67a01136767aef0435c37a025cca139ddcbfc24d2024dabd52a95d3",
             "core/crates/pe-html/help/el/write-message.html": "0f7221b75cf994aa1d7b2476c9c5cad481da391ba2595f779f34b61619b157a3",
             "core/crates/pe-html/help/el/reply-forward.html": "1ba6498e1fef0d7abd57198f90690db4960028fdce08d37653c46aef04c17e11",
@@ -7639,7 +7702,8 @@
             "conversations.html",
             "drafts-outbox.html",
             "new-mail.html",
-            "gmail-outlook.html"
+            "gmail-outlook.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -8000,6 +8064,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and recorded official provider sources. Clarified required Microsoft browser sign-in and conditional Google app-password support with two-step verification; removed the incorrect Microsoft app-password path. Read the surrounding heading and Google-button note for coherence. Preserved Greek polite plural, κωδικός πρόσβασης εφαρμογής, nominative control references and parenthesized provider/fallback grammar. Used Greek ano teleia, not the Greek question-mark semicolon. Preserved markup, attributes, variables, controls, platform branches and literal keys. No tests run."
+        },
+        {
+          "id": "el-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/el/delete-and-undo.html": "e6fbdfb61b3dedbc58f2d1afd49300f1e39ba6854aeae57ff1f28eb1bc431899"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -8398,6 +8478,22 @@
           },
           "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Microsoft mail explicitly uses browser sign-in; app-password use is conditional. Help restricts app-password steps to eligible Google accounts with two-step verification and removes the incorrect Microsoft app-password path. Preserved formal usted, contraseña de aplicación and the existing provider placeholder grammar. Qualified Google eligibility and clarified the disabled sign-in button without changing its image label. Preserved all tags, attributes, control references, platform branches, literal keyboard tags, IDs and variables. No tests run."
+        },
+        {
+          "id": "es-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/es/delete-and-undo.html": "e3d0c33c3b3a3d4f0db049d56be110c4e2b6de80b7ffeb8fc724a9646b5bddd9"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -8803,6 +8899,22 @@
           },
           "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Microsoft mail explicitly uses browser sign-in; app-password use is conditional. Help restricts app-password steps to eligible Google accounts with two-step verification and removes the incorrect Microsoft app-password path. Preserved polite plural instructions and rakenduse parool. Provider placeholders remain uninflected subjects after mida haldab; browser sign-in is explicit for Microsoft. Improved the adjacent Google eligibility wording. Preserved all tags, attributes, control references, platform branches, literal keyboard tags, IDs and variables. No tests run."
+        },
+        {
+          "id": "et-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/et/delete-and-undo.html": "3a835c73189ebaee87612232dc81475ba9895557512b038e18f7f33a359e0a49"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -10323,7 +10435,6 @@
           "id": "fi-help-everyday-round2",
           "reviewed_ids": {},
           "reviewed_help": [
-            "delete-and-undo.html",
             "folders.html",
             "write-message.html",
             "reply-forward.html",
@@ -10337,7 +10448,7 @@
           ],
           "changed_values": 0,
           "files": {
-            "core/crates/pe-html/help/fi/delete-and-undo.html": "db58ab890a1a2a615098cf1a2c9ced1e260267b3d8f482960da311f5177d4cdd",
+            "core/crates/pe-html/help/fi/delete-and-undo.html": "28f0ea4307fc43c11c56365d7a30b96c0938a4ce21adeb2ed5ae5a05a087a3ad",
             "core/crates/pe-html/help/fi/folders.html": "cad7807ce024f6d9cbb7507ae8bf0d8ec96be2c70dcff2bf591da777be1dec2e",
             "core/crates/pe-html/help/fi/write-message.html": "951b41374bd13fd924ad874c15e05cc35677eda8a450948b5ba435781302f030",
             "core/crates/pe-html/help/fi/reply-forward.html": "5793817a8e8d914d9f75c23cbbc32d1e0cc14458bdd462626d9fed11ee1945d1",
@@ -10373,7 +10484,8 @@
           "followup_reviewed_help": [],
           "reopened_reviewed_help": [
             "drafts-outbox.html",
-            "new-mail.html"
+            "new-mail.html",
+            "delete-and-undo.html"
           ],
           "reopened_followup_reviewed_help": [
             "conversations.html"
@@ -10695,6 +10807,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and recorded official provider sources. Clarified required Microsoft browser sign-in and conditional Google app-password support with two-step verification; removed the incorrect Microsoft app-password path. Read the surrounding heading and Google-button note for coherence. Preserved Finnish informal singular, sovellussalasana, kirjautumissovellus and colon-based provider/fallback grammar. Literal brands inflect naturally while placeholders remain unchanged. Preserved markup, attributes, variables, controls, platform branches and literal keys. No tests run."
+        },
+        {
+          "id": "fi-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fi/delete-and-undo.html": "5a901988a6fc932f79870b25bbb0248275735c05ee65740c85bb9b6e7b596ce2"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -11107,6 +11235,22 @@
           },
           "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Microsoft mail explicitly uses browser sign-in; app-password use is conditional. Help restricts app-password steps to eligible Google accounts with two-step verification and removes the incorrect Microsoft app-password path. Preserved formal vous and mot de passe d'application, as well as the provider-name/fallback construction. Qualified Google eligibility and the disabled-button alternative; no branded label changes. Preserved all tags, attributes, control references, platform branches, literal keyboard tags, IDs and variables. No tests run."
+        },
+        {
+          "id": "fr-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fr/delete-and-undo.html": "e776580ea23d4a6723ddaa1d1fb02f411bbd9a6506bb70dc2167f9275bb03994"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -11119,27 +11263,22 @@
         "agents-permissions.html",
         "agents-sending.html",
         "all-inboxes.html",
-        "attachments.html",
         "brand-logos.html",
         "certificate-errors.html",
         "command-line.html",
         "connections.html",
         "data-storage.html",
         "default-mail-program.html",
-        "delete-and-undo.html",
         "delivery-problems.html",
         "download-ahead.html",
-        "drafts-outbox.html",
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "folders.html",
         "invitations.html",
         "keyboard-shortcuts.html",
         "links-scripts.html",
         "manage-accounts.html",
         "message-not-shown.html",
-        "message-rules.html",
         "move-computer.html",
         "new-mail.html",
         "no-connection.html",
@@ -11147,16 +11286,13 @@
         "password-not-accepted.html",
         "pictures-tracking.html",
         "removing.html",
-        "reply-forward.html",
         "save-print-import.html",
         "search-words.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
-        "signatures.html",
         "unsubscribe.html",
         "updates.html",
-        "verify-a-key.html",
-        "write-message.html"
+        "verify-a-key.html"
       ],
       "completed_batches": [
         {
@@ -12751,6 +12887,43 @@
           },
           "validation": "Static check-language: 1351 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog invariants pass. Eight help topics preserve all tags, attributes, platform branches, empty controls/settings references and literal keyboard tags. Relevant control/settings joins inspected with renderer-style substitution on all three platforms; no runtime UI test. All 28 pending inventories match. All cross-language reopening edits are review marks only and match their pre-reopen content hashes. Global 19100 unmarked messages and 9467 changed help lines reconcile, with 14 unchanged/moved baseline pairs verified; retained unmarked passages in partially reopened topics are verified byte-for-byte against their prior Git checkpoint. Translation and English hashes match. Fresh fetch: six source refs unchanged and no new languages or unintegrated relevant changes. Since-start lists 318 known entries and 169 passages, matched to exact pending inventories; 12 reopened cs/da/nl provider entries omitted because their marked starting pairs are unchanged are separately verified and remain pending. Report regenerated; git diff --check passes. No test suite run.",
           "notes": "Reviewed eight Croatian getting-started/reading help topics and four provider-introduction followups against native controls, tree construction, search/indexing, notifications and account sign-in callers. Improved formal-plural instructions and rendered control joins; corrected combined-folder order, collapsed unread totals, quoted-text folding, search indexing versus user reading, and watched-notification foreground/settings conditions. Corrected Microsoft app-password guidance against the existing autoconfig MICROSOFT_WARNING and official Microsoft documentation: Outlook.com and Exchange Online use browser sign-in; Google app passwords require an eligible account with two-step verification. Preserved all tags, attributes, platform branches, empty control/settings links and literal keyboard tags. Four catalog followups retain IDs/variables and access-key counts. Broader provider-context followup is being inventoried separately. No tests run."
+        },
+        {
+          "id": "hr-help-rules-compose-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "message-rules.html",
+            "delete-and-undo.html",
+            "folders.html",
+            "write-message.html",
+            "reply-forward.html",
+            "attachments.html",
+            "drafts-outbox.html",
+            "signatures.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hr/message-rules.html": "39b025e8370bd2cd9e1d1e330f8ed676cdb8d6294fce7abfb0e8ac1455c5a0d3",
+            "core/crates/pe-html/help/hr/delete-and-undo.html": "00b1f3961a4dea4c05eab4d10a7ba799fa606c1bb9fd526aca733373c53e8d88",
+            "core/crates/pe-html/help/hr/folders.html": "f8a629156018b46c39789022109ce41cbcb6f58fdcd27e01535acd4304fc91eb",
+            "core/crates/pe-html/help/hr/write-message.html": "fef72944b999e96148a0c37ea738b84bf43f65b3ac080836140a1f7fff7b0d84",
+            "core/crates/pe-html/help/hr/reply-forward.html": "25ea28c306b4a743ca873bfcf95e3e466d885eaeb56379f2d761359a8ff6a762",
+            "core/crates/pe-html/help/hr/attachments.html": "3f2f39c560ee51f2191a95be34ad720d30f06ad419e1814bdac900835499a2c2",
+            "core/crates/pe-html/help/hr/drafts-outbox.html": "4e68b1707913f7ab76fe72225b4d985b6bf49f5636b9e0dc0fe6d13cd7c411e4",
+            "core/crates/pe-html/help/hr/signatures.html": "b118244e2d7fc9d86136d75fe91f8af7d608124394e2d70122c1736173b41a3c"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/message-rules.html": "50f114b3f1de58156b49d24f24c6b1c13f6ddd25d386b0f5ed10e30f0ed4f41d",
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c",
+            "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9",
+            "core/crates/pe-html/help/en/reply-forward.html": "67f77f7ce6fb74698b0924028b6fd6085f2983ca19587969d5aa15c81d7c78f8",
+            "core/crates/pe-html/help/en/attachments.html": "e88d54aad038c2f9860965b6edc4403609c943f79d8e29ea07e88be139ecc468",
+            "core/crates/pe-html/help/en/drafts-outbox.html": "02c23a726181a6f1670fffee29610d75b51cd801ef5aae229e5d2195b676c153",
+            "core/crates/pe-html/help/en/signatures.html": "5b16b6f8daa40f8a34940e50f29c1409d89e0e074e450b7f063cea4d4c1b1f66"
+          },
+          "validation": "Static check-language reports only 1359 deliberately removed marks, with no structural findings. All 46 actual mnemonic scopes pass. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed eight Croatian help topics in app context: rules/query editor and cumulative actions; destructive deletion and confirmation when the account has no Trash folder; top-level folder creation and expansion state; recipient completion, supported reminder languages, reply-all known To/Cc recipients, hidden quotes and attachment forwarding; external attachment opening and unencrypted temporary copies cleaned at startup; draft recovery, 10-second default send delay, retry versus guaranteed delivery, Undo Send only during the delay and sending on app quit; text signatures and account switching. Improved formal instructions, natural Croatian vocabulary and named-control joins. Preserved every tag/attribute, setting/control reference, platform branch and literal key. The deletion help source omits the no-Trash condition; focused followup recorded separately for already reviewed languages. No tests run."
         }
       ]
     },
@@ -15749,7 +15922,6 @@
           "id": "it-help-writing-files-round2",
           "reviewed_ids": {},
           "reviewed_help": [
-            "delete-and-undo.html",
             "folders.html",
             "attachments.html",
             "write-message.html",
@@ -15759,7 +15931,7 @@
           ],
           "changed_values": 0,
           "files": {
-            "core/crates/pe-html/help/it/delete-and-undo.html": "9602c5c8c364452ee487b83141b86eb3d5f049bcfb3ad9819025a021d5a67730",
+            "core/crates/pe-html/help/it/delete-and-undo.html": "db2bb0195d5a9300972c69eaca0684b6af0fd6da9ad4ce0293a0d5d9ee1c4e61",
             "core/crates/pe-html/help/it/folders.html": "107a4575792d0c7277e0da2d773ff8854c824e9d576ad46d046c00cbec88bf6b",
             "core/crates/pe-html/help/it/attachments.html": "d64853400683fdea36c1ff8da503bb30b3105940d35514191b518523d15432c1",
             "core/crates/pe-html/help/it/write-message.html": "ebe1f57095239465b0c87487f6f3076112b6042b34c5e8b6fd78c5310cf44e09",
@@ -15777,7 +15949,10 @@
             "core/crates/pe-html/help/en/save-print-import.html": "91e96db89168f7d0b359513f4bb7870171d89fc69fa700e77fde8efb53f3d1f9"
           },
           "validation": "All 72 localization/help tests pass after the complete Italian review. Structural catalog/help checks pass with only cleared marks. Inventory and file/source hashes reconcile; git diff --check passes; review HTML regenerated. Expanded catalog menu/dialog mnemonic checks pass; installer/Linux generated text inspected.",
-          "notes": "Reviewed deletion, folders, composing, replies, signatures, attachments and message files. Corrected top-level folder instructions and attachment cleanup/encryption/platform marking from app behavior; replaced literal wording and repaired platform-specific prepositions."
+          "notes": "Reviewed deletion, folders, composing, replies, signatures, attachments and message files. Corrected top-level folder instructions and attachment cleanup/encryption/platform marking from app behavior; replaced literal wording and repaired platform-specific prepositions.",
+          "reopened_reviewed_help": [
+            "delete-and-undo.html"
+          ]
         },
         {
           "id": "it-help-mail-accounts-round2",
@@ -16344,6 +16519,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language; no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins and provider fallbacks inspected. All 28 inventories and completed/source hashes reconcile: 19132 unmarked messages, 9499 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Clarified Microsoft browser sign-in and conditional Google app-password support, including two-step verification; removed the incorrect Microsoft app-password path. Preserved informal tu, password per le app, colon-based provider fallback grammar and existing control labels. Read the surrounding heading and Google-button note for coherence. All markup, attributes, variables, controls, platform branches and literal keys preserved. No tests run."
+        },
+        {
+          "id": "it-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/it/delete-and-undo.html": "9756632dee4d125a72c4e45089f1dd0c08bfec00d92f8654af605733fa619904"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -20878,7 +21069,6 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "message-rules.html",
-            "delete-and-undo.html",
             "folders.html",
             "write-message.html",
             "reply-forward.html",
@@ -20888,7 +21078,7 @@
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/nl/message-rules.html": "34e66c7f7915213d8faac2fc8606d5ffba2eef053dbb70ca738d55ea726aede4",
-            "core/crates/pe-html/help/nl/delete-and-undo.html": "b9dc59504e1ba5719bb494c9ce5a442e0d31cc1d4c6198715f3387c268ea02ed",
+            "core/crates/pe-html/help/nl/delete-and-undo.html": "4032907af07a25d02ac6600f08a5f211c1aa4f815ad84a7b7483a094ebb16357",
             "core/crates/pe-html/help/nl/folders.html": "2615025aeadeb627f77d3ef357ac744eb2a8561519e038c50841cefda331fb0b",
             "core/crates/pe-html/help/nl/write-message.html": "3c88db0ac78b58a1a6d935e675ba4fd83f4115648921b26a1257b10c985a7881",
             "core/crates/pe-html/help/nl/reply-forward.html": "cec8774b844eeb0b3fba40a29786b2c9682950648459c25cbc4ce539f35766fa",
@@ -20909,7 +21099,8 @@
           "validation": "Passed all 72 pe-i18n/pe-html tests after complete Dutch review; structural checks pass except intentionally cleared markers; git diff --check and review inventory/hash reconciliation pass.",
           "notes": "Reviewed eight topics on rules, folder operations, composing, replies, attachments, drafts and signatures. Clarified root-folder creation, temporary attachment storage and cleanup, address selection, quoted content and send cancellation. Preserved markup, keys and platform branches.",
           "reopened_reviewed_help": [
-            "drafts-outbox.html"
+            "drafts-outbox.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -21484,6 +21675,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language; no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins and provider fallbacks inspected. All 28 inventories and completed/source hashes reconcile: 19132 unmarked messages, 9499 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Clarified Microsoft browser sign-in and conditional Google app-password support, including two-step verification; removed the incorrect Microsoft app-password path. Preserved informal je, app-wachtwoord, natural Dutch compounds, provider fallback grammar and existing control labels. Read the surrounding heading and Google-button note for coherence. All markup, attributes, variables, controls, platform branches and literal keys preserved. No tests run."
+        },
+        {
+          "id": "nl-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nl/delete-and-undo.html": "8ba6f513f29b050b3e70b36badbc61afe2e65c34f5ec9c2e0c3e6269d34ed1ea"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -24456,7 +24663,6 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "organize-mail.html",
-            "delete-and-undo.html",
             "folders.html",
             "write-message.html",
             "reply-forward.html"
@@ -24465,7 +24671,7 @@
           "files": {
             "core/crates/pe-html/help/pt/conversations.html": "ad9bb361946ba2042abe296f4acd0562b26d5555c8da5638069e910974ddc426",
             "core/crates/pe-html/help/pt/organize-mail.html": "789c1113953b19721db58dcda93ca636b762fcecf0e7d5104c6d484b8bc58fb0",
-            "core/crates/pe-html/help/pt/delete-and-undo.html": "5a99b46aff160fe6fd66af088a65598b6437fa20f8ab3526e063b756a0d39c1c",
+            "core/crates/pe-html/help/pt/delete-and-undo.html": "bc59c903999254d6f53129cdbfc92972dd4d6af22689c4bca7c42d0a511ba52e",
             "core/crates/pe-html/help/pt/folders.html": "8944c5959dfc6187cb0da58d3c6739a10e71e94d6b52ab1fd1f441f4ab220a48",
             "core/crates/pe-html/help/pt/write-message.html": "fc7812eb87488aeb5a45022c0828ee7799c5f8cbdbff6f37324cc8dc84e73731",
             "core/crates/pe-html/help/pt/reply-forward.html": "250deada2fd9ab0131caf1d4a500f0d16780ef72831eb70280a76eb0a4691392"
@@ -24481,7 +24687,8 @@
           "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
           "notes": "Reviewed conversation actions, notifications, organization, deletion, folder creation and composing/replies. Improved natural wording and aligned folder-navigation instructions and undo examples with actual controls.",
           "reopened_reviewed_help": [
-            "conversations.html"
+            "conversations.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -25074,6 +25281,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language; no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins and provider fallbacks inspected. All 28 inventories and completed/source hashes reconcile: 19132 unmarked messages, 9499 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Clarified Microsoft browser sign-in and conditional Google app-password support, including two-step verification; removed the incorrect Microsoft app-password path. Preserved polite third-person European Portuguese, palavra-passe, definições, browser, colon-based provider fallback grammar and existing control labels. Read the surrounding heading and Google-button note for coherence. All markup, attributes, variables, controls, platform branches and literal keys preserved. No tests run."
+        },
+        {
+          "id": "pt-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/delete-and-undo.html": "357eee419496a7ca2218382dbf6cbcbb75416348eaa394ef631cc2a79569039d"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ]
     },
@@ -35595,7 +35818,6 @@
             "main-window.html",
             "find-messages.html",
             "organize-mail.html",
-            "delete-and-undo.html",
             "folders.html"
           ],
           "changed_values": 0,
@@ -35607,7 +35829,7 @@
             "core/crates/pe-html/help/ca/find-messages.html": "5be020bcb1c2c3c7192347497c21c6408225f18d170d9e8c9bc7c130c382a7e3",
             "core/crates/pe-html/help/ca/conversations.html": "fa43718cc140f7cbfc3da3da28eb84524f2a318cdc9f63ad7717ca37c13a7a76",
             "core/crates/pe-html/help/ca/organize-mail.html": "127a45f6ea2bf5f4c5eb0cdd9108fa8bd6ff5c5d5591e59226eec4783542fdba",
-            "core/crates/pe-html/help/ca/delete-and-undo.html": "7bb6220e61f2fff7d017b7ef56232e716cb32cff76fb2fe5d7cecba2d8eedeb2",
+            "core/crates/pe-html/help/ca/delete-and-undo.html": "234af5cdb53e1834531a5be3d891bb51982e9137de3dc8255654e5ab19ecedeb",
             "core/crates/pe-html/help/ca/folders.html": "c9c6188ae6a207a191e94f22c49007f73e264be0acb354b570a6aee8212dc5b2"
           },
           "english_sources": {
@@ -35626,7 +35848,8 @@
           "reopened_reviewed_help": [
             "layouts.html",
             "read-messages.html",
-            "conversations.html"
+            "conversations.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -36147,6 +36370,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Clarified required Microsoft browser sign-in and conditional Google app-password support with two-step verification; removed the incorrect Microsoft app-password path. Read the surrounding heading and Google-button note for coherence. Preserved Catalan vós, iniciar la sessió, contrasenya d’aplicació, typographic apostrophes and colon-based provider fallback grammar. Preserved markup, attributes, variables, controls, platform branches and literal keys. No tests run. Substituted controls exposed abrupt joins at the account-window title; added the localized word for window in the two instructions."
+        },
+        {
+          "id": "ca-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/delete-and-undo.html": "b8811840cdd606f0b5c5ac51eca953581c70380456f11c0a982990beea1c0f6a"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run. Used la carpeta before the nominative folder control to avoid the ungrammatical substituted join de Elements suprimits."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -37579,7 +37818,6 @@
             "address-book.html",
             "all-inboxes.html",
             "attachments.html",
-            "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
             "main-window.html",
@@ -37598,7 +37836,7 @@
             "core/crates/pe-html/help/nb/all-inboxes.html": "64554fe6808a5f18f6fe311994836188113cbcafc6b559ec69625af9a0aaf26e",
             "core/crates/pe-html/help/nb/attachments.html": "da2ed197463856b7c4f381df338a05fe1767cd723822cf6d7cacd099de2951d4",
             "core/crates/pe-html/help/nb/conversations.html": "edf259838aae1f4d3e7fe96ddf085e764cc97a1294a13a8e6ded2db01875d13c",
-            "core/crates/pe-html/help/nb/delete-and-undo.html": "50d6eaa7af139320b5e75f72dad7b49a89b8d3c290034aa8d8c055683f19f085",
+            "core/crates/pe-html/help/nb/delete-and-undo.html": "cdac31ff4f20e83278b57dcbaa6df05539a4b6db5e1baa026efa225162632c34",
             "core/crates/pe-html/help/nb/drafts-outbox.html": "ba11ac99312c3b4d895209690343ea6ae73dbec209639417135c611083814f1a",
             "core/crates/pe-html/help/nb/find-messages.html": "ea1c877437e6cf8b551ac65bc2d58e610cb03d15b1ab38c606c8e21e45553d53",
             "core/crates/pe-html/help/nb/folders.html": "a77b172db56280ea9c7b5ab04881ab7242c69d754079c825bce3baf4b4645aa5",
@@ -37646,7 +37884,8 @@
             "layouts.html",
             "new-mail.html",
             "read-messages.html",
-            "gmail-outlook.html"
+            "gmail-outlook.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -38108,6 +38347,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Clarified required Microsoft browser sign-in and conditional Google app-password support with two-step verification; removed the incorrect Microsoft app-password path. Read the surrounding heading and Google-button note for coherence. Preserved Norwegian du, logg på, app-passord and påloggingsapp, with the existing colon-based provider fallback grammar. Preserved markup, attributes, variables, controls, platform branches and literal keys. No tests run. Substituted controls exposed abrupt joins at the account-window title; added the localized word for window in the two instructions."
+        },
+        {
+          "id": "nb-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nb/delete-and-undo.html": "e01378ba48ac9c83445b68c2f88ce9aa6f15d2e65c6781aae5f13daed352e8e8"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -39557,7 +39812,6 @@
             "main-window.html",
             "find-messages.html",
             "organize-mail.html",
-            "delete-and-undo.html",
             "folders.html"
           ],
           "changed_values": 0,
@@ -39569,7 +39823,7 @@
             "core/crates/pe-html/help/pt-BR/find-messages.html": "773e26f5eb4e53d94ead9633dd0eafa041ee5dc5326c379f604ae6bac5d1ec57",
             "core/crates/pe-html/help/pt-BR/conversations.html": "5a7cf7d0e98fb674a7fcc5bd0b85ff003250751d64d4b582695f9468e692bf06",
             "core/crates/pe-html/help/pt-BR/organize-mail.html": "0b299619a7133cd8038392fb5797305b746c95bebab036d610160d8efd582b23",
-            "core/crates/pe-html/help/pt-BR/delete-and-undo.html": "733bc2e4bbaaf154b7191657d8684e53712b12f6de6a4c41eb14185bcc40af5c",
+            "core/crates/pe-html/help/pt-BR/delete-and-undo.html": "2de212c2ffc7e0df4a6ccb7ec39f6afc6198fcb033c37d36f2eefca582eb3757",
             "core/crates/pe-html/help/pt-BR/folders.html": "e9da115a529d0a311d77f4fdd62fa1583a20121febae7684d1576d9a379893fe"
           },
           "english_sources": {
@@ -39588,7 +39842,8 @@
           "reopened_reviewed_help": [
             "layouts.html",
             "read-messages.html",
-            "conversations.html"
+            "conversations.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -40075,6 +40330,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language; no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins and provider fallbacks inspected. All 28 inventories and completed/source hashes reconcile: 19132 unmarked messages, 9499 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Clarified Microsoft browser sign-in and conditional Google app-password support, including two-step verification; removed the incorrect Microsoft app-password path. Preserved Brazilian você, senha de app, configurações, fazer login, navegador, colon-based provider fallback grammar and existing control labels. Read the surrounding heading and Google-button note for coherence. All markup, attributes, variables, controls, platform branches and literal keys preserved. No tests run."
+        },
+        {
+          "id": "pt-BR-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt-BR/delete-and-undo.html": "26ee9c785634d28e09e0b82246665b00e8ac2025aa6351036654f39194fcf1f5"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -41507,7 +41778,6 @@
             "main-window.html",
             "find-messages.html",
             "organize-mail.html",
-            "delete-and-undo.html",
             "folders.html",
             "write-message.html",
             "reply-forward.html",
@@ -41528,7 +41798,7 @@
             "core/crates/pe-html/help/sr-Latn/find-messages.html": "1c2c0fa6913dee7d773be011967d105f31ea2e53b6b8bd50763b898912fea0f2",
             "core/crates/pe-html/help/sr-Latn/conversations.html": "c6b50e322c121f97a4ad6d2c9b8181171cd2ae6b1cfb455a09f909db4b3bdc29",
             "core/crates/pe-html/help/sr-Latn/organize-mail.html": "e0edd57119d12e6303757549573ef390c37663c25f9c09c90ae455a82753fa21",
-            "core/crates/pe-html/help/sr-Latn/delete-and-undo.html": "6e4d5370db4c4087daaa6db7d8f76081d7261f5f7d21a81802eb328b0f2543de",
+            "core/crates/pe-html/help/sr-Latn/delete-and-undo.html": "0d19e4103efadee1248293154bdd9a52e41fdb31b64d9829b0cc71a370a3217d",
             "core/crates/pe-html/help/sr-Latn/folders.html": "845c5f67a6cb046be631693f6ac25403598444dfa9f646278c6be8b70d40da12",
             "core/crates/pe-html/help/sr-Latn/write-message.html": "8f14969a7abb3a7d93083369eea9ba6599ecedec962e9aef3206fe15c47218a6",
             "core/crates/pe-html/help/sr-Latn/reply-forward.html": "f195f79c899600e793a83d8363a6e9ab051ff22e811af6e288af1761513de4b0",
@@ -41574,7 +41844,8 @@
             "conversations.html",
             "drafts-outbox.html",
             "new-mail.html",
-            "gmail-outlook.html"
+            "gmail-outlook.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -42014,6 +42285,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Clarified required Microsoft browser sign-in and conditional Google app-password support with two-step verification; removed the incorrect Microsoft app-password path. Read the surrounding heading and Google-button note for coherence. Preserved Serbian Latin ekavian and polite plural, nalog, pregledač and lozinka za aplikaciju. Retained English Google UI labels with Serbian explanations; provider names and fallbacks remain uninflected. Preserved markup, attributes, variables, controls, platform branches and literal keys. No tests run."
+        },
+        {
+          "id": "sr-Latn-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/delete-and-undo.html": "d7c627ce4dc841fb330e9ebc6fbdfeabf181ba18830084e7b8ade32efcbd9658"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -43437,7 +43724,6 @@
             "main-window.html",
             "find-messages.html",
             "organize-mail.html",
-            "delete-and-undo.html",
             "folders.html",
             "write-message.html",
             "reply-forward.html",
@@ -43458,7 +43744,7 @@
             "core/crates/pe-html/help/tr/find-messages.html": "c32522da6d38c1f4c276d2d916a23d76334497896f6cbc1a524e013cc566f487",
             "core/crates/pe-html/help/tr/conversations.html": "d9e0796898be002639d797b4671a39aad74ca355cf9f85e1dc21b5c62c27d931",
             "core/crates/pe-html/help/tr/organize-mail.html": "2c730091373c9cf1c88efac641fa48ffb098dedd77ab92a20a21e3ea2ad9cad8",
-            "core/crates/pe-html/help/tr/delete-and-undo.html": "893496edadf51a0f94d25cfb8498acea0a101956ca22ebd5f4bd03a753497f91",
+            "core/crates/pe-html/help/tr/delete-and-undo.html": "146aa31a4d66289e74fed790fb862213f8c8570c6973502e8bb6d8672f38c19a",
             "core/crates/pe-html/help/tr/folders.html": "69f2e26d66e63746114f39684cbc611759497fe675d94728fcf98a9b662d258f",
             "core/crates/pe-html/help/tr/write-message.html": "5cc9296961bf938059819007f460d0a2e2bfe10174c1c1142a2fc6bd4437bf68",
             "core/crates/pe-html/help/tr/reply-forward.html": "b590bc48863a4739a430bf55a151616da4144445080b2a62ed3309c07d2684b8",
@@ -43504,7 +43790,8 @@
             "conversations.html",
             "drafts-outbox.html",
             "new-mail.html",
-            "gmail-outlook.html"
+            "gmail-outlook.html",
+            "delete-and-undo.html"
           ]
         },
         {
@@ -43928,6 +44215,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. IDs/full variables/access-key counts/comments/dashes and exact help markup/attributes/controls/platform branches/literal keys preserved. Substituted control joins, topic titles and provider fallbacks inspected; account-window joins improved in ca/nb/bg/da. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9526 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed Gmail/Outlook help against existing account setup behavior and recorded official provider sources. Microsoft accounts require browser sign-in; app-password steps apply only to eligible Google accounts with two-step verification. Corrected surrounding heading and Google-button note; retained Turkish polite imperatives, uygulama parolası and Google’s own Uygulama şifreleri label. All four catalog introductions already condition app-password use on account support and remain unchanged. Preserved all markup, attributes, controls, platform branches and literal keys. No tests run."
+        },
+        {
+          "id": "tr-delete-without-trash-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/tr/delete-and-undo.html": "954b9a04a6ccc0d105387fa15ec7289d69c217e86cc9127b1fc255003f94b999"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c"
+          },
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -46302,16 +46605,40 @@
         ]
       ],
       "note": "The four round-1 languages had these messages/topics outside the active round scope. Other affected entries/topics were already counted and are reopened without adding scope. Croatian four catalog corrections/eight help topics are complete; Bulgarian/Turkish catalog introductions already make support conditional and remain reviewed. Microsoft app-password steps in all other completed help topics require correction."
+    },
+    {
+      "kind": "permanent deletion without a Trash folder context followup",
+      "catalog_entries": 0,
+      "help_pages": 4,
+      "new_help_topics": [
+        [
+          "de",
+          "delete-and-undo.html"
+        ],
+        [
+          "es",
+          "delete-and-undo.html"
+        ],
+        [
+          "et",
+          "delete-and-undo.html"
+        ],
+        [
+          "fr",
+          "delete-and-undo.html"
+        ]
+      ],
+      "note": "Four round-1 help topics were outside this active round. Thirteen other completed topics are reopened without increasing scope. Croatian is already corrected; ten pending full-language drafts contain this topic."
     }
   ],
   "total_catalog_entries": 32456,
-  "total_help_pages": 1296,
+  "total_help_pages": 1300,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fresh fetch at 09aa4b57: origin/master is 5c645187 with README updates plus previously seen Linux date-format test/CI changes, all inspected and left unmerged. Other five refs and guide unchanged; no new languages or translation/help/app-behavior changes. Since-start has 270 known entries and 118 passages, all matched to pending inventory; formerly omitted cs/da/nl provider entries are now reviewed. All 28 full inventories and completed/source hashes reconcile. Pending 13330 catalogs/564 help topics; baseline unchanged. Final late-arrival audit remains required.",
+    "latest_source_audit": "Fresh fetch at 27d00888: all six source tips and guide hash unchanged. origin/master remains 5c645187 with only unrelated README/Linux test/CI changes left unmerged. No new languages or translation/help/app-behavior work. Since-start has 270 known entries and 117 passages, all matched to pending inventory; no reopened-pair omissions remain. All 28 full inventories and completed/source hashes reconcile. Pending 13330 catalogs/556 help topics; baseline unchanged. Final late-arrival audit remains required.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -46862,6 +47189,63 @@
         "review_commit": "09aa4b5794314f51691f984b1b7f77ce89e0c708",
         "new_languages": 0,
         "validation": "Fresh fetch found origin/master advanced to 5c645187 with README documentation updates, inspected. Combined unmerged delta consists of README and the four previously inspected Linux regional-date test/CI paths. No translation/help/settings/commands/language-registry or app-behavior changes; unrelated updates remain unmerged. Other five refs and guide hash unchanged. All 28 full inventories/variables and marks match. All 270 since-start entries and 118 passages match the pending inventory; no pending reopened-pair omissions remain. Completed/source hashes reconcile. No tests run."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "5c6451872aff1cbc78a7afbece67037e2e100ffc",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "merge_base": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+            "paths": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "scripts/linux-ui-e2e-run.sh"
+            ],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "since_start_pending_catalog_entries": 270,
+        "since_start_pending_help_passages": 117,
+        "pending_catalog_entries": 13330,
+        "pending_help_topics": 556,
+        "additional_unrecorded_work": 0,
+        "kind": "Croatian mail-task help and no-Trash deletion followup",
+        "review_commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+        "new_languages": 0,
+        "validation": "Fresh fetch found all six source tips unchanged. The only unmerged origin/master delta remains README plus four inspected Linux date-format test/CI paths, with no translation/help/settings/commands/language-registry or app-behavior changes. Guide hash unchanged. All 28 full inventories/variables/marks match. All 270 since-start entries and 117 passages match the pending inventory; no pending reopened-pair omissions remain. Completed/source hashes reconcile. No tests run."
       }
     ],
     "settings_source_integration": {
@@ -49305,6 +49689,11 @@
     "since_start_reopened_unchanged": {
       "ids": [],
       "note": "The twelve formerly omitted cs/da/nl provider introductions are now corrected and reviewed. No pending reopened message is currently omitted for this reason. Always combine --since with the full current marks, because unchanged reopened pairs can be omitted by --since."
+    },
+    "delete_without_trash": {
+      "source_issue": "English delete-and-undo omits permanent deletion when the account has no Trash folder. No English/app code edited.",
+      "behavior": "Core sends Expunge when trash_for returns None, including an account without Trash. Selection summary prompts for confirmation on Windows, Mac and Linux.",
+      "followup": "delete-without-trash-context"
     }
   },
   "context_followups": [
@@ -52072,6 +52461,277 @@
         }
       },
       "reopening_validation": "All 60 reopened catalog entries and 17 three-passage help reopenings preserve the original text byte-for-byte after removing review marks. Pending order matches source file order. Reopening moves old completed IDs/topics to historical reopened fields and updates only their latest file checkpoint hashes, with both hashes retained here. Previously reviewed unmarked help passages are separately reconciled against commit 5e4fd524. Four Croatian catalog followups and its Gmail/Outlook topic are corrected. Bulgarian/Turkish catalog conditions were read and retained; their help remains pending. No tests run."
+    },
+    {
+      "id": "delete-without-trash-context",
+      "status": "pending",
+      "issue": "English delete-and-undo help says Delete always moves a message to Deleted Items. Core::trash_for/deletes_for_good also permanently deletes when the account has no Trash folder; all three platforms ask for confirmation. Qualify the normal move and explain both permanent-delete cases.",
+      "evidence": [
+        "core/crates/pe-core/src/lib.rs: delete_messages, deletes_for_good, trash_for",
+        "core/crates/pe-core/src/selection.rs: Summary::delete_question",
+        "app/src/mailbox.cpp: Mailbox::DeleteSelected",
+        "linux/src/mailbox.rs: delete_selected",
+        "mac/Sources/InboxClassic/Mailbox.swift: deleteSelected"
+      ],
+      "catalog_ids": {},
+      "help_topics": [
+        "delete-and-undo.html"
+      ],
+      "completed_languages": [
+        "hr",
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi"
+      ],
+      "pending_languages": [
+        "hu",
+        "lt",
+        "lv",
+        "pl",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk"
+      ],
+      "reopened_help_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi"
+      ],
+      "reopened_help_passages_per_language": 2,
+      "checkpoint_files": {
+        "core/crates/pe-html/help/de/delete-and-undo.html": {
+          "previous_sha256": "bdbd666063f03d2a8c721d7d1066121651ea7039291a22b5a12b392884c101d0",
+          "sha256": "2f93ceaf5b3b6d7ac8cc4ace976e763024cd84074741c6c75b0e4dbe1404e467",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/es/delete-and-undo.html": {
+          "previous_sha256": "153f6e10f295304d44629bbe462a3249256908d49ff062fadecfeab23f9ee20d",
+          "sha256": "03a6f7bec838e8bd885a11349b4958731bf7a6ec14dc892eb2a36547925d078a",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/et/delete-and-undo.html": {
+          "previous_sha256": "75ade79f0ab6d63630c23840be6fc7a47691ebadc0c264397b68e42654d9c3b8",
+          "sha256": "8a82b7b33b0e97f284e3229172cddb8107d192275fc9d44da1543f689f48e09c",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/fr/delete-and-undo.html": {
+          "previous_sha256": "dfa4a38a6fb465b0bd4187fe2d8e963860435bf0212ccf9637e0c3fa545b8d9e",
+          "sha256": "4a781e959e07185727dda7502fd5de61f34a16abc8ef45b59a0711bbf94957ae",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/nl/delete-and-undo.html": {
+          "previous_sha256": "b9dc59504e1ba5719bb494c9ce5a442e0d31cc1d4c6198715f3387c268ea02ed",
+          "sha256": "4032907af07a25d02ac6600f08a5f211c1aa4f815ad84a7b7483a094ebb16357",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/it/delete-and-undo.html": {
+          "previous_sha256": "9602c5c8c364452ee487b83141b86eb3d5f049bcfb3ad9819025a021d5a67730",
+          "sha256": "db2bb0195d5a9300972c69eaca0684b6af0fd6da9ad4ce0293a0d5d9ee1c4e61",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/pt/delete-and-undo.html": {
+          "previous_sha256": "5a99b46aff160fe6fd66af088a65598b6437fa20f8ab3526e063b756a0d39c1c",
+          "sha256": "bc59c903999254d6f53129cdbfc92972dd4d6af22689c4bca7c42d0a511ba52e",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/pt-BR/delete-and-undo.html": {
+          "previous_sha256": "733bc2e4bbaaf154b7191657d8684e53712b12f6de6a4c41eb14185bcc40af5c",
+          "sha256": "2de212c2ffc7e0df4a6ccb7ec39f6afc6198fcb033c37d36f2eefca582eb3757",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/ca/delete-and-undo.html": {
+          "previous_sha256": "7bb6220e61f2fff7d017b7ef56232e716cb32cff76fb2fe5d7cecba2d8eedeb2",
+          "sha256": "234af5cdb53e1834531a5be3d891bb51982e9137de3dc8255654e5ab19ecedeb",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/nb/delete-and-undo.html": {
+          "previous_sha256": "50d6eaa7af139320b5e75f72dad7b49a89b8d3c290034aa8d8c055683f19f085",
+          "sha256": "cdac31ff4f20e83278b57dcbaa6df05539a4b6db5e1baa026efa225162632c34",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/sr-Latn/delete-and-undo.html": {
+          "previous_sha256": "6e4d5370db4c4087daaa6db7d8f76081d7261f5f7d21a81802eb328b0f2543de",
+          "sha256": "0d19e4103efadee1248293154bdd9a52e41fdb31b64d9829b0cc71a370a3217d",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/tr/delete-and-undo.html": {
+          "previous_sha256": "893496edadf51a0f94d25cfb8498acea0a101956ca22ebd5f4bd03a753497f91",
+          "sha256": "146aa31a4d66289e74fed790fb862213f8c8570c6973502e8bb6d8672f38c19a",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/bg/delete-and-undo.html": {
+          "previous_sha256": "075cdb2c134a318c48c996021967244292f4960b88226ce2595da8022e606bf0",
+          "sha256": "4c52089eef973a3f1c4b1cf2746e112358d439c75caf1b1eff7c7c1e9dafbe09",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/cs/delete-and-undo.html": {
+          "previous_sha256": "e61afbc627bbaea6fc0ab9854623c2aa848886adef4b4a81906d45e5b1881e0b",
+          "sha256": "2a10e88f5abe2b01e29b3fa483ed83ac94f375b85a4cd3d3daba07d309a4999c",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/da/delete-and-undo.html": {
+          "previous_sha256": "72d99c131fc4d99f8796720a9ae086cf93cdbffc7a695ddbe3034e7fab2cb42c",
+          "sha256": "499ee55780729416c3e6a74623fb98828233d04dc378ff236455c09a60713971",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/el/delete-and-undo.html": {
+          "previous_sha256": "d87fa348981cd910e8dbe68e18a9d815124eb18f9848613ae30b090c95320306",
+          "sha256": "514da8be57e74cebd3571e2cfa1092fa17ee71154c07b2aed7dc3a69334559c1",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        },
+        "core/crates/pe-html/help/fi/delete-and-undo.html": {
+          "previous_sha256": "db58ab890a1a2a615098cf1a2c9ced1e260267b3d8f482960da311f5177d4cdd",
+          "sha256": "28f0ea4307fc43c11c56365d7a30b96c0938a4ce21adeb2ed5ae5a05a087a3ad",
+          "change": "Review marks only around the first two body paragraphs; permanent deletion without a Trash folder needs clarification."
+        }
+      },
+      "retained_help_reviews": {
+        "core/crates/pe-html/help/de/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "bdbd666063f03d2a8c721d7d1066121651ea7039291a22b5a12b392884c101d0",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/es/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "153f6e10f295304d44629bbe462a3249256908d49ff062fadecfeab23f9ee20d",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/et/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "75ade79f0ab6d63630c23840be6fc7a47691ebadc0c264397b68e42654d9c3b8",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/fr/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "dfa4a38a6fb465b0bd4187fe2d8e963860435bf0212ccf9637e0c3fa545b8d9e",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/nl/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "b9dc59504e1ba5719bb494c9ce5a442e0d31cc1d4c6198715f3387c268ea02ed",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/it/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "9602c5c8c364452ee487b83141b86eb3d5f049bcfb3ad9819025a021d5a67730",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/pt/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "5a99b46aff160fe6fd66af088a65598b6437fa20f8ab3526e063b756a0d39c1c",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/pt-BR/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "733bc2e4bbaaf154b7191657d8684e53712b12f6de6a4c41eb14185bcc40af5c",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/ca/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "7bb6220e61f2fff7d017b7ef56232e716cb32cff76fb2fe5d7cecba2d8eedeb2",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/nb/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "50d6eaa7af139320b5e75f72dad7b49a89b8d3c290034aa8d8c055683f19f085",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/sr-Latn/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "6e4d5370db4c4087daaa6db7d8f76081d7261f5f7d21a81802eb328b0f2543de",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/tr/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "893496edadf51a0f94d25cfb8498acea0a101956ca22ebd5f4bd03a753497f91",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/bg/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "075cdb2c134a318c48c996021967244292f4960b88226ce2595da8022e606bf0",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/cs/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "e61afbc627bbaea6fc0ab9854623c2aa848886adef4b4a81906d45e5b1881e0b",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/da/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "72d99c131fc4d99f8796720a9ae086cf93cdbffc7a695ddbe3034e7fab2cb42c",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/el/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "d87fa348981cd910e8dbe68e18a9d815124eb18f9848613ae30b090c95320306",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        },
+        "core/crates/pe-html/help/fi/delete-and-undo.html": {
+          "commit": "27d00888083ea5dd33c88cd5d47e0d6b660a2573",
+          "sha256": "db58ab890a1a2a615098cf1a2c9ced1e260267b3d8f482960da311f5177d4cdd",
+          "scope": "Previously reviewed topic outside its first two body paragraphs. Retained content must equal this checkpoint with only review marks removed until recorded complete."
+        }
+      },
+      "note": "Complete in Croatian and all 17 previously completed languages. Only the ten broader language drafts remain pending; apply the correction during their normal help reviews. The source omits permanent deletion when the account has no Trash folder. Core deletion logic and all three platform confirmation callers establish the behavior. Preserve the remainder of previously reviewed help. Reopening provenance is retained without counting old completed topics twice.",
+      "completion_checkpoints": [
+        {
+          "languages": [
+            "hr",
+            "de",
+            "es",
+            "et",
+            "fr",
+            "nl",
+            "it",
+            "pt",
+            "pt-BR",
+            "ca",
+            "nb",
+            "sr-Latn",
+            "tr",
+            "bg",
+            "cs",
+            "da",
+            "el",
+            "fi"
+          ],
+          "reviewed_help_topics": 18,
+          "new_scope_help_topics": 4,
+          "note": "Croatian was reviewed as part of its eight-topic batch; the other seventeen languages received focused corrections to their first two deletion-help paragraphs. Four round-1 topics were added to active scope; the other completed topics were reopened without double-counting.",
+          "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run."
+        }
+      ]
     }
   ]
 }
