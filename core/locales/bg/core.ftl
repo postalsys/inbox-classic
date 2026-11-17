@@ -766,33 +766,27 @@ setup-skipped-unreachable = Приложението { $name } е пропусн
 attachment-runs-programs = Файлът „{ $name }“ може да изпълнява програмен код, затова Inbox Classic не го отваря. Можете да го запазите и да го отворите сами, ако имате доверие на източника му.
 attachment-decrypted-note = Този прикачен файл е от шифровано съобщение. За да го отвори с друга програма, Inbox Classic запазва нешифровано копие във временна папка за вашия потребителски акаунт. При стартиране на Inbox Classic се изтриват копията, по-стари от един ден.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Сървърът не премести { $messages } в папка { $folder }, затова съобщението отново е в папка { $from }: { $reason }
-   *[other] Сървърът не премести { $messages } в папка { $folder }, затова съобщенията отново са в папка { $from }: { $reason }
+    [one] Сървърът не премести { $messages } в папка „{ $folder }“, затова съобщението отново е в папка „{ $from }“: { $reason }
+   *[other] Сървърът не премести { $messages } в папка „{ $folder }“, затова съобщенията отново са в папка „{ $from }“: { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Сървърът не изтри { $messages }, затова съобщението отново е в папка { $from }: { $reason }
-   *[other] Сървърът не изтри { $messages }, затова съобщенията отново са в папка { $from }: { $reason }
+    [one] Сървърът не изтри { $messages }, затова съобщението отново е в папка „{ $from }“: { $reason }
+   *[other] Сървърът не изтри { $messages }, затова съобщенията отново са в папка „{ $from }“: { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Сървърът не архивира { $messages }, затова съобщението отново е в папка { $from }: { $reason }
-   *[other] Сървърът не архивира { $messages }, затова съобщенията отново са в папка { $from }: { $reason }
+    [one] Сървърът не архивира { $messages }, затова съобщението отново е в папка „{ $from }“: { $reason }
+   *[other] Сървърът не архивира { $messages }, затова съобщенията отново са в папка „{ $from }“: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Сървърът не маркира { $messages } като прочетено, затова съобщението отново е непрочетено: { $reason }
    *[other] Сървърът не маркира { $messages } като прочетени, затова съобщенията отново са непрочетени: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Сървърът не маркира { $messages } като непрочетено, затова съобщението отново е прочетено: { $reason }
    *[other] Сървърът не маркира { $messages } като непрочетени, затова съобщенията отново са прочетени: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Сървърът не промени флаговете на { $messages }, затова съобщението е както преди: { $reason }
-   *[other] Сървърът не промени флаговете на { $messages }, затова съобщенията са както преди: { $reason }
+    [one] Сървърът не промени флаговете на { $messages }, затова промяната е отменена: { $reason }
+   *[other] Сървърът не промени флаговете на { $messages }, затова промяната е отменена: { $reason }
 }

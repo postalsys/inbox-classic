@@ -9,19 +9,10 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the remaining 138 new rollback messages in bg, ca, cs, da, el, hr, hu, it, lt, lv, nb, nl, pl, pt, pt-BR, ro, ru, sk, sl, sr-Latn, sv, tr, uk (six undone-* IDs each). Finnish and de/es/et/fr late rollback entries are done; Finnish complete at 1340 catalogs and 52 help, 174 catalog value improvements. Watched-conversation notification followup is complete across all 17 previously reviewed languages. Then Croatian initial review and the remaining ten languages. Follow the glossary notification-context note during those reviews. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Review the remaining 66 late rollback messages in hr, hu, lt, lv, pl, ro, ru, sk, sl, sv and uk (six undone-* IDs each), checking their preformatted messages phrases too. The other 17 languages have completed these additions. Then Croatian initial review and the remaining ten languages. All recorded context followups are complete. Do not run tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -1715,20 +1706,34 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "bg-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 4,
+          "files": {
+            "core/locales/bg/core.ftl": "1b3a17f92a4762f956f9301181046986d291cb3169dc29384aeee7a6696b9734"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run. Quoted source/destination folder names consistently with the glossary."
         }
       ]
     },
     "cs": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -3439,20 +3444,34 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "cs-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 3,
+          "files": {
+            "core/locales/cs/core.ftl": "36032f5dc5184f55aa01510a01e937dcd75d9295c9d09a8beb4ac314c62931d5"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run. Five-or-more message status adjectives use genitive plural; the preformatted count phrase stays intact."
         }
       ]
     },
     "da": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -5134,6 +5153,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "da-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/da/core.ftl": "770bceb33b7dce002d8f4a59e51b7f2e82487b570e78c1eb3b1a910a08807117"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run."
         }
       ]
     },
@@ -5330,16 +5372,7 @@
       ]
     },
     "el": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -7017,6 +7050,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "el-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/el/core.ftl": "901013b16c553cc51fa28b28c076fb5f3d5811899f7f2e184228c1f5f58c75bc"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run."
         }
       ]
     },
@@ -12229,16 +12285,7 @@
       ]
     },
     "it": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -14085,6 +14132,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "it-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/it/core.ftl": "951cf1b86aa660217c2315d039527fd72b392c1904910a7ca22e33c1fd13238e"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run."
         }
       ]
     },
@@ -16991,16 +17061,7 @@
       ]
     },
     "nl": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -18874,6 +18935,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "nl-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/nl/core.ftl": "452864c3a0c77a54b3dc8b1b494170398fa88f45f15042ff52572a6f82552527"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run."
         }
       ]
     },
@@ -20329,16 +20413,7 @@
       ]
     },
     "pt": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -22178,6 +22253,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "pt-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/pt/core.ftl": "f0e69faebd893167874727f43a8a1ff078d7d0c6bdbbd4ddca064f9c03906314"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run."
         }
       ]
     },
@@ -30888,16 +30986,7 @@
       ]
     },
     "ca": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -32678,6 +32767,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "ca-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/ca/core.ftl": "5871a706c743c06a29a755bfca3b04e3766ac54fa9fcd45102fabba4279e4f23"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -32685,16 +32797,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "nb": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -34438,6 +34541,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "nb-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/nb/core.ftl": "42c6c089589787321eeac5ef33e00852288adff8f6201771ec5fca501905fcc3"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -34445,16 +34571,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "pt-BR": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -36206,6 +36323,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "pt-BR-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/pt-BR/core.ftl": "009a6b6f35e2e280aa02d0a2c56e17c4b26620657c2aab43425b300890c75ffb"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run. Exact [1] distinguishes one message from every other count because the following standalone noun/pronoun is singular only for exactly one; $messages retains its own locale-aware counting. This prevents Brazilian zero and Serbian 21/101 from selecting a singular standalone reference."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -36213,16 +36353,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "sr-Latn": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -37950,6 +38081,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "sr-Latn-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/sr-Latn/core.ftl": "399471e846dc0f53781035d454dfd718ae3f0e6165f3f26b1f9f100ac971e5b3"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run. Exact [1] distinguishes one message from every other count because the following standalone noun/pronoun is singular only for exactly one; $messages retains its own locale-aware counting. This prevents Brazilian zero and Serbian 21/101 from selecting a singular standalone reference."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -37957,16 +38111,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "tr": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -39682,6 +39827,29 @@
           },
           "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
+        },
+        {
+          "id": "tr-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/tr/core.ftl": "cb8575c0526dd5574d69bbd6493aae9f0b6e352529e952e3966f161fb7c12467"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16704 intentionally removed-mark diagnostics, no structural findings. Full catalog ID/variable sets match English; reviewed plural selections/default branches checked with the preformatted count phrases. Exact [1] in pt-BR/sr-Latn is deliberate. All pending marks match inventories. Global 17605 unmarked catalog entries and 9122 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback sentences against text::undone_text, worker::restore_on_failure/set_flag_or_take_back/undone and the actual preformatted messages phrase. Move/delete/archive restore local rows after failure; read/unread/flags roll back the requested flag on server refusal. Preserved names without inflection, singular/plural agreement, English variable sets and good draft wording. Replaced vague as-it-was wording with the requested change being undone; improved restored-status phrasing where needed. No tests run. Natural passive sentences allow the counted-message phrase to remain uninflected; folder head nouns carry case endings."
         }
       ],
       "source_ref": "feat/languages-wave1",

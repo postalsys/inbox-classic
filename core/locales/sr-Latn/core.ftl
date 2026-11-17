@@ -822,39 +822,27 @@ setup-skipped-unreachable = Aplikacija { $name } je preskočena jer njena usluga
 attachment-runs-programs = Datoteka „{ $name }“ može da izvršava kôd, pa je Inbox Classic ne otvara direktno. Sačuvajte je i otvorite sami samo ako verujete njenom izvoru.
 attachment-decrypted-note = Ovaj prilog potiče iz šifrovane poruke. Da bi ga otvorio u drugom programu, Inbox Classic čuva privremenu dešifrovanu kopiju u fascikli vašeg korisničkog naloga. Kopije starije od 24 sata uklanjaju se pri sledećem pokretanju programa.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Server nije izvršio premeštanje ({ $messages }, odredište: { $folder }), pa je poruka ponovo u fascikli { $from }: { $reason }
-    [few] Server nije izvršio premeštanje ({ $messages }, odredište: { $folder }), pa su poruke ponovo u fascikli { $from }: { $reason }
-   *[other] Server nije izvršio premeštanje ({ $messages }, odredište: { $folder }), pa su poruke ponovo u fascikli { $from }: { $reason }
+    [1] Server nije premestio poruku u fasciklu { $folder } ({ $messages }), pa je ona ponovo u fascikli { $from }: { $reason }
+   *[other] Server nije premestio poruke u fasciklu { $folder } ({ $messages }), pa su one ponovo u fascikli { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Server nije izvršio brisanje ({ $messages }), pa je poruka ponovo u fascikli { $from }: { $reason }
-    [few] Server nije izvršio brisanje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
-   *[other] Server nije izvršio brisanje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
+    [1] Server nije izbrisao poruku ({ $messages }), pa je ona ponovo u fascikli { $from }: { $reason }
+   *[other] Server nije izbrisao poruke ({ $messages }), pa su one ponovo u fascikli { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Server nije izvršio arhiviranje ({ $messages }), pa je poruka ponovo u fascikli { $from }: { $reason }
-    [few] Server nije izvršio arhiviranje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
-   *[other] Server nije izvršio arhiviranje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
+    [1] Server nije arhivirao poruku ({ $messages }), pa je ona ponovo u fascikli { $from }: { $reason }
+   *[other] Server nije arhivirao poruke ({ $messages }), pa su one ponovo u fascikli { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Server nije izvršio označavanje kao pročitano ({ $messages }), pa je poruka ponovo nepročitana: { $reason }
-    [few] Server nije izvršio označavanje kao pročitano ({ $messages }), pa su poruke ponovo nepročitane: { $reason }
-   *[other] Server nije izvršio označavanje kao pročitano ({ $messages }), pa su poruke ponovo nepročitane: { $reason }
+    [1] Server nije označio poruku kao pročitanu ({ $messages }), pa je ona ponovo nepročitana: { $reason }
+   *[other] Server nije označio poruke kao pročitane ({ $messages }), pa su one ponovo nepročitane: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Server nije izvršio označavanje kao nepročitano ({ $messages }), pa je poruka ponovo pročitana: { $reason }
-    [few] Server nije izvršio označavanje kao nepročitano ({ $messages }), pa su poruke ponovo pročitane: { $reason }
-   *[other] Server nije izvršio označavanje kao nepročitano ({ $messages }), pa su poruke ponovo pročitane: { $reason }
+    [1] Server nije označio poruku kao nepročitanu ({ $messages }), pa je ona ponovo pročitana: { $reason }
+   *[other] Server nije označio poruke kao nepročitane ({ $messages }), pa su one ponovo pročitane: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Server nije promenio zastavice ({ $messages }), pa je poruka ponovo kao pre: { $reason }
-    [few] Server nije promenio zastavice ({ $messages }), pa su poruke ponovo kao pre: { $reason }
-   *[other] Server nije promenio zastavice ({ $messages }), pa su poruke ponovo kao pre: { $reason }
+    [1] Server nije promenio zastavice poruke ({ $messages }), pa je promena poništena: { $reason }
+   *[other] Server nije promenio zastavice poruka ({ $messages }), pa je promena poništena: { $reason }
 }

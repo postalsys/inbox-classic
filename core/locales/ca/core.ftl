@@ -774,33 +774,27 @@ setup-skipped-unreachable = No s’ha importat l’aplicació { $name }: no s’
 attachment-runs-programs = «{ $name }» pot executar programes. Inbox Classic no permet obrir-lo directament, però podeu desar-lo i obrir-lo manualment si confieu en l’origen.
 attachment-decrypted-note = Aquest fitxer adjunt prové d’un missatge xifrat. Per obrir-lo, Inbox Classic en desa una còpia sense xifrar en una carpeta temporal del vostre compte d’usuari. La còpia hi pot continuar després de tancar el programa que l’ha obert. En iniciar-se, Inbox Classic elimina d’aquesta carpeta les còpies de més d’un dia.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] El servidor no ha mogut { $messages } a { $folder }, així que torna a ser a { $from }: { $reason }
    *[other] El servidor no ha mogut { $messages } a { $folder }, així que tornen a ser a { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] El servidor no ha suprimit { $messages }, així que torna a ser a { $from }: { $reason }
    *[other] El servidor no ha suprimit { $messages }, així que tornen a ser a { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] El servidor no ha arxivat { $messages }, així que torna a ser a { $from }: { $reason }
    *[other] El servidor no ha arxivat { $messages }, així que tornen a ser a { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] El servidor no ha marcat { $messages } com a llegit, així que torna a estar sense llegir: { $reason }
    *[other] El servidor no ha marcat { $messages } com a llegits, així que tornen a estar sense llegir: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] El servidor no ha marcat { $messages } com a no llegit, així que torna a estar llegit: { $reason }
-   *[other] El servidor no ha marcat { $messages } com a no llegits, així que tornen a estar llegits: { $reason }
+    [one] El servidor no ha marcat { $messages } com a no llegit, així que torna a figurar com a llegit: { $reason }
+   *[other] El servidor no ha marcat { $messages } com a no llegits, així que tornen a figurar com a llegits: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] El servidor no ha canviat les banderes de { $messages }, així que està com estava: { $reason }
-   *[other] El servidor no ha canviat les banderes de { $messages }, així que estan com estaven: { $reason }
+    [one] El servidor no ha canviat les banderes de { $messages }, per això s’ha desfet el canvi: { $reason }
+   *[other] El servidor no ha canviat les banderes de { $messages }, per això s’ha desfet el canvi: { $reason }
 }

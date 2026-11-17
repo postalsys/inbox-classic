@@ -754,33 +754,27 @@ setup-skipped-unreachable = { $name } ble hoppet over: påloggingstjenesten kunn
 attachment-runs-programs = «{ $name }» kan kjøre programmer, så Inbox Classic åpner den ikke. Lagre den, og åpne den selv hvis du stoler på hvor den kommer fra.
 attachment-decrypted-note = Dette vedlegget kommer fra en kryptert melding. For å åpne det i et annet program lagrer Inbox Classic en dekryptert, midlertidig kopi i en mappe for brukeren din. Kopier som er eldre enn 24 timer, fjernes neste gang Inbox Classic starter.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] Serveren flyttet ikke { $messages } til { $folder }, så den er tilbake i { $from }: { $reason }
    *[other] Serveren flyttet ikke { $messages } til { $folder }, så de er tilbake i { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Serveren slettet ikke { $messages }, så den er tilbake i { $from }: { $reason }
    *[other] Serveren slettet ikke { $messages }, så de er tilbake i { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Serveren arkiverte ikke { $messages }, så den er tilbake i { $from }: { $reason }
    *[other] Serveren arkiverte ikke { $messages }, så de er tilbake i { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Serveren merket ikke { $messages } som lest, så den er ulest igjen: { $reason }
    *[other] Serveren merket ikke { $messages } som lest, så de er uleste igjen: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Serveren merket ikke { $messages } som ulest, så den er lest igjen: { $reason }
    *[other] Serveren merket ikke { $messages } som ulest, så de er lest igjen: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Serveren endret ikke flaggene på { $messages }, så den er som før: { $reason }
-   *[other] Serveren endret ikke flaggene på { $messages }, så de er som før: { $reason }
+    [one] Serveren endret ikke flaggene på { $messages }, så endringen er angret: { $reason }
+   *[other] Serveren endret ikke flaggene på { $messages }, så endringen er angret: { $reason }
 }

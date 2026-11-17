@@ -757,33 +757,27 @@ setup-skipped-unreachable = De aanmeldapp { $name } is overgeslagen: de bijbehor
 attachment-runs-programs = “{ $name }” kan programma’s uitvoeren, dus Inbox Classic opent het niet. Sla het op en open het daarna zelf als je vertrouwt waar het vandaan komt.
 attachment-decrypted-note = Deze bijlage komt uit een versleuteld bericht. Om de bijlage te openen, slaat Inbox Classic een onversleutelde kopie op in een tijdelijke map voor jouw gebruikersaccount. Kopieën die ouder zijn dan een dag worden verwijderd wanneer Inbox Classic start.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] De server heeft { $messages } niet naar { $folder } verplaatst, dus het staat weer in { $from }: { $reason }
    *[other] De server heeft { $messages } niet naar { $folder } verplaatst, dus ze staan weer in { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] De server heeft { $messages } niet verwijderd, dus het staat weer in { $from }: { $reason }
    *[other] De server heeft { $messages } niet verwijderd, dus ze staan weer in { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] De server heeft { $messages } niet gearchiveerd, dus het staat weer in { $from }: { $reason }
    *[other] De server heeft { $messages } niet gearchiveerd, dus ze staan weer in { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] De server heeft { $messages } niet als gelezen gemarkeerd, dus het is weer ongelezen: { $reason }
    *[other] De server heeft { $messages } niet als gelezen gemarkeerd, dus ze zijn weer ongelezen: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] De server heeft { $messages } niet als ongelezen gemarkeerd, dus het is weer gelezen: { $reason }
    *[other] De server heeft { $messages } niet als ongelezen gemarkeerd, dus ze zijn weer gelezen: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] De server heeft de markeringen van { $messages } niet gewijzigd, dus het is zoals het was: { $reason }
-   *[other] De server heeft de markeringen van { $messages } niet gewijzigd, dus ze zijn zoals ze waren: { $reason }
+    [one] De server heeft de markeringen van { $messages } niet gewijzigd, dus de wijziging is teruggedraaid: { $reason }
+   *[other] De server heeft de markeringen van { $messages } niet gewijzigd, dus de wijziging is teruggedraaid: { $reason }
 }
