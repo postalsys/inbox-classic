@@ -717,6 +717,11 @@ Plurals: CLDR's `pt` (pe-i18n gives the catalog that locale), where 0 and 1 are 
 - The additional sender-address field is “Outros endereços de envio”; use that exact label in errors and help.
   Use “ID do cliente” / “segredo do cliente” consistently for OAuth fields.
 
+- Agent actions use "cancelar inscrições" and "listas de e-mails", matching the existing reader command. A request
+  does not guarantee cancellation. "Texto da assinatura" is the optional account footer, distinct from "assinatura digital".
+- Keep "descartar o rascunho" for abandoning an agent-created draft; explain that this permanently deletes it.
+  Saving, including autosave, ends agent access; opening alone does not. Keep Brazilian "salvar", "contatos" and "você".
+
 ### Português (pt, Portugal)
 
 Terms: Caixa de Entrada; Caixa de Saída; Itens Enviados; Itens Eliminados; Rascunhos; Lixo Eletrónico; mensagem (f.);

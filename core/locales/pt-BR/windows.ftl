@@ -94,9 +94,7 @@ win-never-written-to = Nenhuma mensagem enviada
 win-book-find-label = Digite um nome ou endereço de e-mail:
 win-send = &Enviar
 win-dont-send = &Não enviar
-# review: new
 win-unsubscribe = &Cancelar inscrição
-# review: new
 win-dont-unsubscribe = &Não cancelar inscrição
 win-forget-program-ask = Remover este programa, suas permissões e o histórico de atividade dos agentes? Na próxima conexão, você precisará autorizar o acesso novamente.
 win-clear-log-ask = Limpar o histórico de atividade dos agentes? Isso não desfaz as alterações feitas pelos agentes.

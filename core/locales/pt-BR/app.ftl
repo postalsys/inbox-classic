@@ -438,7 +438,6 @@ ui-browser-sign-in-server = { $server } (login no navegador)
 ui-dont-allow = Não permitir
 ui-allow = &Permitir
 ui-dont-send = Não enviar
-# review: new
 ui-dont-unsubscribe = Não cancelar inscrição
 ui-edit-first = Editar &primeiro
 ui-new-address = Endereço novo

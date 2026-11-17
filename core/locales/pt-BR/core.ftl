@@ -446,8 +446,7 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Ler os e-mails: pastas, lista de mensagens, pesquisa e mensagens
-# review: changed
-agent-level-organize = Organizar e-mails: alterar o status de leitura e os sinalizadores, marcar como lixo eletrônico, mover mensagens e enviá-las para Itens Excluídos
+agent-level-organize = Organizar e-mails: alterar o status de leitura e os sinalizadores, gerenciar o lixo eletrônico, mover e arquivar mensagens, criar pastas, excluir mensagens (movendo-as para Itens Excluídos) e cancelar inscrições em listas de e-mails com sua autorização
 agent-level-drafts = Escrever rascunhos para você enviar
 agent-level-send = Enviar e-mails, com sua confirmação para cada mensagem
 agent-connect-title = { $program } quer acessar seus e-mails
@@ -496,11 +495,8 @@ agent-log-composed = Abriu “{ $subject }” na janela de escrita para você co
 agent-log-refused = Você não enviou “{ $subject }”
 agent-log-sent = Colocou “{ $subject }” na fila de envio para { $to }
 agent-log-draft = Salvou o rascunho “{ $subject }”
-# review: new
 agent-log-draft-replaced = Substituiu o rascunho “{ $subject }”
-# review: new
 agent-log-draft-discarded = Descartou o rascunho “{ $subject }”
-# review: new
 agent-draft-note = { $program }, um agente de IA, escreveu este rascunho. Confira os destinatários e o texto antes de enviá-lo.
 agent-log-read = Marcou como lida “{ $subject }”
 agent-log-unread = Marcou como não lida “{ $subject }”
@@ -513,19 +509,15 @@ agent-log-not-junk = Marcou “{ $subject }” como e-mail legítimo
 agent-log-archived = Arquivou “{ $subject }”
 agent-log-folder = Criou a pasta “{ $name }”
 agent-log-unsubscribed = Cancelou a inscrição na lista de “{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Não foi possível cancelar a inscrição na lista de “{ $subject }”: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Você não cancelou sua inscrição em { $senders }
-# review: new
+agent-log-unsubscribe-failed = Não foi possível cancelar a inscrição na lista de e-mails associada à mensagem “{ $subject }”: { $reason }
+agent-log-unsubscribe-refused = Você não autorizou o cancelamento de inscrições. Remetentes: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } quer cancelar sua inscrição em uma lista de e-mails
    *[other] { $program } quer cancelar sua inscrição em { $count } listas de e-mails
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] O Inbox Classic pede à lista abaixo que pare de enviar mensagens para você, pelo cancelamento com um clique que ela oferece. Nada mais é enviado, e as mensagens que você tem ficam onde estão.
-   *[other] O Inbox Classic pede a cada lista abaixo que pare de enviar mensagens para você, pelo cancelamento com um clique que a lista oferece. Nada mais é enviado, e as mensagens que você tem ficam onde estão.
+    [1] O Inbox Classic pede à lista de e-mails abaixo que pare de enviar mensagens para você, usando a opção de cancelamento com um clique. Nada mais é enviado. As mensagens existentes não são alteradas nem movidas.
+   *[other] O Inbox Classic pede a cada lista de e-mails abaixo que pare de enviar mensagens para você, usando a opção de cancelamento com um clique. Nada mais é enviado. As mensagens existentes não são alteradas nem movidas.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
