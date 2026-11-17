@@ -164,12 +164,15 @@ const RULES: &[(&str, &str)] = &[
         "C img.p",
         "background:#fff;border:1px solid #c9c9c9;box-shadow:0 1px 3px rgba(0,0,0,.12)",
     ),
-    ("C figcaption", "display:block;margin:0;color:#5b5b5b;font:inherit"),
+    (
+        "C figcaption",
+        "display:block;margin:0 0 6px;color:#5b5b5b;font:inherit",
+    ),
     ("C .n", "display:inline;color:#1f1f1f;margin:0 8px 0 0;font:inherit"),
     ("C .d", "display:inline;color:#6b6b6b;font:inherit"),
     (
         "C a.m",
-        "display:inline-block;margin:4px 0 0;color:#0b5cad;text-decoration:underline",
+        "display:inline-block;margin:0;color:#0b5cad;text-decoration:underline",
     ),
     (
         "C .w",
@@ -247,10 +250,15 @@ pub(crate) fn section(previews: &PreviewSection, embedded: &dyn Fn(&str) -> bool
     (out, files.iter().map(|file| file.attachment).collect())
 }
 
-/// A file's figure: its pictures in one link (one stop for Tab), then its name and size
+/// A file's figure: its name and size first (a long PDF file's name is not three pages away), then its pictures in
+/// one link (one stop for Tab), and under a PDF file with more pages the link that opens it
 fn figure(token: &str, file: &PreviewFile) -> String {
     let href = link(token, file.attachment);
-    let mut out = format!("<figure><a href=\"{href}\">");
+    let mut out = format!(
+        "<figure><figcaption><span class=\"n\">{}</span><span class=\"d\">{}</span></figcaption><a href=\"{href}\">",
+        shown(&file.name, MAX_VALUE),
+        shown(&file.details, MAX_VALUE)
+    );
     for page in &file.pages {
         // the size in an inline important style, which no rule of the message beats; the height follows the width
         out.push_str(&format!(
@@ -263,18 +271,14 @@ fn figure(token: &str, file: &PreviewFile) -> String {
             h = page.height.max(1),
         ));
     }
-    out.push_str(&format!(
-        "</a><figcaption><span class=\"n\">{}</span><span class=\"d\">{}</span>",
-        shown(&file.name, MAX_VALUE),
-        shown(&file.details, MAX_VALUE)
-    ));
+    out.push_str("</a>");
     if let Some(more) = &file.more {
         out.push_str(&format!(
-            "<br><a class=\"m\" href=\"{href}\">{}</a>",
+            "<a class=\"m\" href=\"{href}\">{}</a>",
             shown(more, MAX_VALUE)
         ));
     }
-    out.push_str("</figcaption></figure>");
+    out.push_str("</figure>");
     out
 }
 
