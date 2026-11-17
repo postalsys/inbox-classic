@@ -7048,8 +7048,9 @@ public static bool HasIcon(IntPtr window) {
             CheckPseudo $form 'the account form'
             Shot $form 'lang-3-pseudo-form'
             Click $form 2
+            # Exit while the form is still open is not taken: wait for it to be gone, not a guess of how long that takes
+            [void](WaitFor { if (-not [Native.Win]::IsWindow($form)) { $true } } 10)
         }
-        Start-Sleep -Milliseconds 500
         Quit $main 'pseudo-language'
     }
 } catch {
