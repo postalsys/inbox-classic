@@ -685,74 +685,41 @@ day-sunday = duminică
 
 ## AI agents
 
-# review: new
-agent-level-read = Citirea e-mailului: foldere, lista de mesaje, căutare și mesaje
-# review: new
-agent-level-organize = Organizarea e-mailului: stare de citire, semnalizări, nedorite, mutare, arhivare, foldere noi, ștergere în Elemente șterse și dezabonare de la liste de corespondență după ce sunteți de acord
-# review: new
-agent-level-drafts = Scrierea de schițe pe care le trimiteți dvs.
-# review: new
-agent-level-send = Trimiterea de e-mail, fiecare mesaj doar după ce spuneți da
-# review: new
-agent-connect-title = { $program } vrea să vă folosească e-mailul
-# review: new
-agent-connect-detail = Un agent IA a cerut să lucreze cu Inbox Classic. Alegeți ce poate face și ce conturi poate vedea; puteți schimba asta mai târziu în Instrumente > Agenți IA.
+agent-level-read = Citirea mesajelor: foldere, lista de mesaje, căutare și conținutul mesajelor
+agent-level-organize = Organizarea mesajelor: marcare ca citite sau necitite, semnalizare, marcare ca nedorite, mutare, arhivare, creare de foldere, mutare în Elemente șterse și dezabonare de la liste de corespondență cu acordul dvs.
+agent-level-drafts = Crearea de schițe pe care să le trimiteți dvs.
+agent-level-send = Trimiterea mesajelor, numai cu aprobarea dvs. pentru fiecare mesaj
+agent-connect-title = { $program } solicită acces la mesajele dvs.
+agent-connect-detail = Un agent IA solicită acces prin Inbox Classic. Alegeți ce poate face și la ce conturi are acces. Puteți modifica ulterior aceste permisiuni în Instrumente > Agenți IA.
 
-    Agenții citesc e-mailuri scrise de alte persoane, iar un mesaj poate încerca să îi păcălească. Inbox Classic vă întreabă întotdeauna înainte ca un agent să trimită ceva.
-# review: new
-agent-reply-to = Răspuns la „{ $subject }”
-# review: new
-agent-reply-all-on = Răspuns tuturor la „{ $subject }”
-# review: new
-agent-forward-of = Redirecționare a „{ $subject }”
-# review: new
-agent-never-written-one = Nu ați scris niciodată la { $address }.
-# review: new
-agent-never-written-many = Nu ați scris niciodată la { $count } dintre aceste adrese.
-# review: new
+    Agenții citesc mesaje scrise de alte persoane, iar acestea pot conține instrucțiuni înșelătoare. Inbox Classic vă cere întotdeauna acordul înainte ca un agent să trimită un mesaj.
+agent-reply-to = Răspuns la mesajul „{ $subject }”
+agent-reply-all-on = Răspuns tuturor la mesajul „{ $subject }”
+agent-forward-of = Redirecționarea mesajului „{ $subject }”
+agent-never-written-one = Nu ați trimis niciodată mesaje la adresa { $address }.
+agent-never-written-many = Nu ați trimis niciodată mesaje la { $count } dintre aceste adrese.
 agent-send-title = { $program } vrea să trimită acest mesaj
-# review: new
-agent-send-detail = Verificați destinatarii și conținutul mesajului. După ce confirmați, mesajul așteaptă { $seconds } secunde în Mesaje de trimis, unde îl puteți încă șterge.
-# review: new
+agent-send-detail = Verificați destinatarii și conținutul mesajului. După confirmare, mesajul rămâne în folderul Mesaje de trimis timp de { $seconds } de secunde. Îl puteți șterge de acolo înainte de trimitere.
 agent-change-title = Ce poate face { $program }
-# review: new
-agent-change-allowed = Schimbați ce pot face agenții IA ai acestui program cu e-mailul dvs.
-# review: new
-agent-change-refused = Ați refuzat accesul acestui program. Permiteți-l pentru a le da din nou agenților lui acces la e-mailul dvs.
-# review: new
-agent-log-taken-back = { $entry } (anulat)
-# review: new
+agent-change-allowed = Alegeți ce pot face agenții IA ai acestui program cu mesajele dvs.
+agent-change-refused = Ați refuzat accesul acestui program. Permiteți accesul pentru ca agenții săi să poată lucra din nou cu mesajele dvs.
+agent-log-taken-back = { $entry } (acțiune anulată)
 agent-files = Fișiere: { $files }
-# review: new
-agent-undo-refused = Nu poate fi anulat.
-# review: new
-agent-undo-refused-why = Nu poate fi anulat: { $reason }.
-# review: new
-agent-undo-impossible = acest lucru nu poate fi anulat
-# review: new
+agent-undo-refused = Acțiunea nu poate fi anulată.
+agent-undo-refused-why = Acțiunea nu poate fi anulată: { $reason }.
+agent-undo-impossible = această acțiune nu poate fi anulată
 agent-undo-not-in-folder = mesajul nu mai este în acel folder
-# review: new
-agent-undo-not-arrived = mesajul nu este (încă) în folderul în care a fost mutat
-# review: new
-agent-undo-sent = mesajul a fost deja trimis
-# review: new
+agent-undo-not-arrived = mesajul nu se află încă în folderul de destinație
+agent-undo-sent = mesajul nu se mai află în folderul Mesaje de trimis
 agent-original-not-downloaded = mesajul original nu a fost descărcat încă. Deschideți-l mai întâi
-# review: new
-agent-turned-away = Refuzat
-# review: new
+agent-turned-away = Acces refuzat
 agent-can-nothing = Nimic
-# review: new
 agent-can-read = citire
-# review: new
 agent-can-organize = organizare
-# review: new
-agent-can-drafts = scriere de schițe
-# review: new
+agent-can-drafts = creare de schițe
 agent-can-send = trimitere cu acordul dvs.
 # "Citire, organizare și scriere de schițe"
-# review: new
 agent-can-list = { $first } și { $last }
-# review: new
 agent-accounts = { $count ->
     [0] niciun cont
     [one] 1 cont
@@ -760,65 +727,40 @@ agent-accounts = { $count ->
    *[other] { $count } de conturi
 }
 # "Citire și organizare; 1 cont"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Acest mesaj nu poate fi citit.
-# review: new
-agent-encrypted-original = Acest mesaj este criptat: un agent nu poate să îi răspundă sau să îl redirecționeze, deoarece nu poate cripta.
-# review: new
-agent-encrypted = Acest mesaj este criptat. Doar utilizatorul îl poate citi, în Inbox Classic.
+agent-encrypted-original = Acest mesaj este criptat. Agentul nu poate nici să răspundă la el, nici să îl redirecționeze, deoarece nu poate cripta mesaje.
+agent-encrypted = Acest mesaj este criptat. Agentul nu îi poate citi conținutul. Îl puteți deschide în Inbox Classic.
 # review: new
 list-encrypted = Mesaj criptat
-# review: new
-agent-log-composed = A deschis „{ $subject }” într-un mesaj nou, pe care să îl terminați dvs.
-# review: new
-agent-log-refused = Nu ați trimis „{ $subject }”
-# review: new
-agent-log-sent = A trimis „{ $subject }” către { $to }
-# review: new
+agent-log-composed = A deschis un mesaj nou pentru editare. Subiect: „{ $subject }”
+agent-log-refused = Nu ați aprobat trimiterea mesajului „{ $subject }”
+agent-log-sent = A pus mesajul „{ $subject }” în coada de trimitere. Destinatari: { $to }
 agent-log-draft = A salvat schița „{ $subject }”
-# review: new
 agent-log-draft-replaced = A înlocuit schița „{ $subject }”
-# review: new
-agent-log-draft-discarded = A renunțat la schița „{ $subject }”
-# review: new
-agent-draft-note = { $program }, un agent IA, a scris această schiță. Verificați destinatarii și textul înainte de a o trimite.
-# review: new
-agent-log-read = A marcat ca citit „{ $subject }”
-# review: new
-agent-log-unread = A marcat ca necitit „{ $subject }”
-# review: new
-agent-log-flagged = A semnalizat „{ $subject }”
-# review: new
-agent-log-unflagged = A scos semnalizarea de la „{ $subject }”
-# review: new
-agent-log-deleted = A șters „{ $subject }”
-# review: new
-agent-log-moved = A mutat „{ $subject }” în { $folder }
-# review: new
-agent-log-junk = A marcat „{ $subject }” ca nedorit
-# review: new
-agent-log-not-junk = A marcat „{ $subject }” ca dorit
-# review: new
-agent-log-archived = A arhivat „{ $subject }”
-# review: new
+agent-log-draft-discarded = A șters definitiv schița „{ $subject }”
+agent-draft-note = Agentul IA { $program } a redactat această schiță. Verificați destinatarii și textul înainte de a o trimite.
+agent-log-read = A marcat mesajul „{ $subject }” ca citit
+agent-log-unread = A marcat mesajul „{ $subject }” ca necitit
+agent-log-flagged = A semnalizat mesajul „{ $subject }”
+agent-log-unflagged = A eliminat semnalizarea mesajului „{ $subject }”
+agent-log-deleted = A șters mesajul „{ $subject }”
+agent-log-moved = A mutat mesajul „{ $subject }” în folderul „{ $folder }”
+agent-log-junk = A marcat mesajul „{ $subject }” ca nedorit
+agent-log-not-junk = A eliminat marcajul de e-mail nedorit pentru mesajul „{ $subject }”
+agent-log-archived = A arhivat mesajul „{ $subject }”
 agent-log-folder = A creat folderul „{ $name }”
 agent-log-unsubscribed = Ați aprobat cererea de dezabonare. Mesaj: „{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Dezabonarea de la lista lui „{ $subject }” nu a reușit: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Nu v-ați dezabonat de la { $senders }
-# review: new
+agent-log-unsubscribe-failed = Cererea de dezabonare nu a reușit. Mesaj: „{ $subject }”. Motiv: { $reason }
+agent-log-unsubscribe-refused = Nu ați aprobat dezabonarea. Expeditori: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } vrea să vă dezaboneze de la o listă de corespondență
     [few] { $program } vrea să vă dezaboneze de la { $count } liste de corespondență
    *[other] { $program } vrea să vă dezaboneze de la { $count } de liste de corespondență
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic cere listei de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.
-   *[other] Inbox Classic cere fiecărei liste de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă lista. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.
+    [1] Inbox Classic trimite listei de mai jos o cerere de dezabonare, folosind opțiunea de dezabonare cu un clic oferită de listă. Nu trimite niciun e-mail și nu modifică mesajele pe care le aveți deja.
+   *[other] Inbox Classic trimite fiecărei liste de mai jos o cerere de dezabonare, folosind opțiunea de dezabonare cu un clic oferită de listă. Nu trimite niciun e-mail și nu modifică mesajele pe care le aveți deja.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

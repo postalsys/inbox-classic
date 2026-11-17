@@ -153,9 +153,7 @@ win-book-find-label = Introduceți un nume sau o adresă de e-mail:
 win-send = &Trimitere
 # review: new
 win-dont-send = &Nu trimiteți
-# review: new
 win-unsubscribe = &Dezabonare
-# review: new
 win-dont-unsubscribe = &Nu vă dezabonați
 # review: new
 win-forget-program-ask = Eliminați acest program, permisiunile lui și istoricul activității agenților lui? Vi se va cere din nou permisiunea data viitoare când se conectează.
