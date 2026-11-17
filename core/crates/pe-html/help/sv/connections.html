@@ -7,6 +7,7 @@
     <li><b>Varumärkeslogotyper</b> (BIMI), från varumärkets HTTPS-adress när meddelandet inte har med logotypen, en gång varje gång Inbox Classic körs. Det sker bara när din e-postserver har godkänt meddelandets DMARC-kontroll och logotypen.</li>
     <li><b>Bilder från internet</b>, bara när du ber om dem.</li>
     <li><b>Avsluta prenumeration</b>, bara när du klickar på det. En begäran med ett klick (RFC 8058) skickas bara när listan har signerat meddelandet med DKIM.</li>
+    <li><b>Krypteringsnycklar</b>, bara när du krypterar till någon vars nyckel du inte har: först adressens egen domän (Web Key Directory), sedan keys.openpgp.org om du inte har stängt av det. Bara adressen skickas.</li>
     <!--os:mac--><li><b>Uppdateringar</b>, från inboxclassic.com, för att se om en ny version finns.</li><!--/os-->
 </ul>
 <p>Inloggningskoder erbjuds bara när leverantörens huvud Authentication-Results säger att domänen har signerat meddelandet (DKIM). Det kräver ingen egen anslutning.</p>

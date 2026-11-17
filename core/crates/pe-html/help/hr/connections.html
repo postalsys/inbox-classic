@@ -7,6 +7,7 @@
     <li><b>Logotipi robnih marki</b> (BIMI): preuzimaju se s HTTPS adrese robne marke ako nisu priloženi poruci. Preuzeti logotipi spremaju se, ponovno upotrebljavaju i povremeno osvježavaju, umjesto da se preuzimaju za svaku poruku ili pri svakom pokretanju. Prikazuju se samo ako je poslužitelj e-pošte potvrdio provjeru DMARC i odobrio logotip.</li>
     <li><b>Slike s interneta</b>: preuzimaju se uz vaše dopuštenje za pojedinu poruku, pouzdanog pošiljatelja ili automatsko učitavanje. U neželjenoj pošti i šifriranim dijelovima poruka ne učitavaju se automatski.</li>
     <li><b>Otkazivanje pretplate</b>: pokreće se tek nakon vaše potvrde. Izravni zahtjev jednim klikom (RFC 8058) šalje se samo ako davatelj usluge potvrdi valjan potpis DKIM koji obuhvaća upute za otkazivanje pretplate.</li>
+<!--review-->    <li><b>Ključevi za šifriranje</b>, samo kad šifrirate nekome čiji ključ nemate: vlastita domena njegove adrese (Web Key Directory), zatim keys.openpgp.org, osim ako ste to isključili. Šalje se samo adresa.</li><!--/review-->
     <!--os:mac--><li><b>Ažuriranja</b>: provjera novih verzija putem stranice inboxclassic.com.</li><!--/os-->
 </ul>
 <p>Kodovi za prijavu prikazuju se samo ako davatelj usluge u zaglavlju Authentication-Results potvrdi potpis DKIM odgovarajuće domene. Za pronalaženje koda ne uspostavlja se dodatna veza.</p>

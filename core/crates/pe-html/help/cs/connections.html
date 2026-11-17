@@ -7,6 +7,7 @@
     <li><b>Loga značek</b> (BIMI) z adresy HTTPS značky, pokud zpráva logo neobsahuje a nelze použít uloženou kopii. Stažená loga se ukládají a používají znovu, i po restartu aplikace. Stane se to jen tehdy, když váš poštovní server zprávu ověřil kontrolou DMARC a logo schválil.</li>
     <li><b>Obrázky z internetu</b>, pokud je stáhnete ručně nebo povolíte jejich automatické stahování.</li>
     <li><b>Odhlášení odběru</b>, jen když na něj kliknete. Přímý požadavek na odhlášení (RFC 8058) se odešle jen při ověřeném podpisu DKIM odesílajícího seznamu.</li>
+<!--review-->    <li><b>Šifrovací klíče</b>, jen když šifrujete někomu, jehož klíč nemáte: vlastní doména jeho adresy (Web Key Directory), potom keys.openpgp.org, pokud jste to nevypnuli. Odesílá se jen adresa.</li><!--/review-->
     <!--os:mac--><li><b>Aktualizace</b> z inboxclassic.com, aby se zjistilo, zda vyšla nová verze.</li><!--/os-->
 </ul>
 <p>Přihlašovací kódy se nabízejí, jen když hlavička Authentication-Results od vašeho poskytovatele uvádí, že doména zprávu podepsala (DKIM). K tomu není potřeba žádné další připojení.</p>

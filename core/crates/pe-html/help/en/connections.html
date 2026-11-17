@@ -7,6 +7,7 @@
     <li><b>Brand logos</b> (BIMI), from the brand’s HTTPS address when the message does not carry the logo, once each time Inbox Classic runs. This happens only when your mail server passed the message’s DMARC check and approved the logo.</li>
     <li><b>Pictures from the internet</b>, only when you ask for them.</li>
     <li><b>Unsubscribe</b>, only when you click it. A one-click request (RFC 8058) is sent only when the list signed the message with DKIM.</li>
+    <li><b>Encryption keys</b>, only when you encrypt to someone whose key you do not have: their address’s own domain (Web Key Directory), then keys.openpgp.org unless you turned it off. Only the address is sent.</li>
     <!--os:mac--><li><b>Updates</b>, from inboxclassic.com, to see whether a new version is out.</li><!--/os-->
 </ul>
 <p>Sign-in codes are offered only when your provider’s Authentication-Results header says the domain signed the message (DKIM). This needs no connection of its own.</p>

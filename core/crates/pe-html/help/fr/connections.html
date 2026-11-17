@@ -7,6 +7,7 @@
     <li><b>Les logos des marques</b> (BIMI), depuis l'adresse HTTPS de la marque quand le message ne contient pas le logo et qu'aucune copie conservée ne peut être réutilisée. Les logos téléchargés sont conservés et réutilisés, même après un redémarrage du programme. Cela n'arrive que si le message a passé le contrôle DMARC de votre serveur de messagerie et que celui-ci a approuvé le logo.</li>
     <li><b>Les images d'Internet</b>, seulement quand vous les demandez.</li>
     <li><b>Le désabonnement</b>, seulement quand vous cliquez dessus. Une demande en un clic (RFC 8058) n'est envoyée que si la liste a signé le message avec DKIM.</li>
+<!--review-->    <li><b>Les clés de chiffrement</b>, seulement quand vous chiffrez pour quelqu’un dont vous n’avez pas la clé : le domaine de son adresse (Web Key Directory), puis keys.openpgp.org, sauf si vous l’avez désactivé. Seule l’adresse est envoyée.</li><!--/review-->
     <!--os:mac--><li><b>Les mises à jour</b>, depuis inboxclassic.com, pour savoir si une nouvelle version est disponible.</li><!--/os-->
 </ul>
 <p>Les codes de connexion ne sont proposés que si l'en-tête Authentication-Results de votre fournisseur indique que le domaine a signé le message (DKIM). Cela ne demande aucune connexion particulière.</p>

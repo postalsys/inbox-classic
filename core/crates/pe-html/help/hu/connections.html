@@ -7,6 +7,7 @@
     <li><b>Márkalogók</b> (BIMI), a márka HTTPS-címéről, ha az üzenet nem tartalmazza a logót, az Inbox Classic minden futása során egyszer. Ez csak akkor történik meg, ha a levelezőkiszolgálón az üzenet átment a DMARC-ellenőrzésen, és a kiszolgáló jóváhagyta a logót.</li>
     <li><b>Képek az internetről</b>, csak ha kéri őket.</li>
     <li><b>Leiratkozás</b>, csak ha rákattint. Egykattintásos kérést (RFC 8058) csak akkor küld, ha a lista DKIM-mel aláírta az üzenetet.</li>
+    <li><b>Titkosítási kulcsok</b>, csak ha olyasvalakinek titkosít, akinek nincs meg a kulcsa: először a címe saját tartománya (Web Key Directory), majd a keys.openpgp.org, hacsak ki nem kapcsolta. Csak a cím kerül elküldésre.</li>
     <!--os:mac--><li><b>Frissítések</b>, az inboxclassic.com webhelyről, annak ellenőrzésére, hogy megjelent-e új verzió.</li><!--/os-->
 </ul>
 <p>Bejelentkezési kódot csak akkor ajánl fel, ha a szolgáltató Authentication-Results fejléce szerint a tartomány aláírta az üzenetet (DKIM). Ehhez nem kell külön kapcsolat.</p>

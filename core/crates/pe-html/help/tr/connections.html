@@ -7,6 +7,7 @@
     <li><b>Marka logoları</b> (BIMI): ileti logoyu içermiyorsa ve kayıtlı bir kopya kullanılamıyorsa markanın HTTPS adresinden indirilir. İndirilen logolar kaydedilir ve program yeniden başlatıldıktan sonra da kullanılır. Bu yalnızca posta sunucunuz iletinin DMARC denetimini geçirip logoyu onayladığında olur.</li>
     <li><b>İnternetten resimler</b>: bir ileti, gönderen veya etki alanı için izin verdiğinizde ya da otomatik yüklemeyi açtığınızda indirilir.</li>
     <li><b>Abonelikten çıkma</b>: yalnızca işlemi onayladığınızda. Tek tıklamalı bir istek (RFC 8058) yalnızca liste iletiyi DKIM ile imzaladıysa gönderilir.</li>
+<!--review-->    <li><b>Şifreleme anahtarları</b>: yalnızca anahtarına sahip olmadığınız birine şifrelediğinizde. Önce adresin kendi alan adı (Web Key Directory), sonra kapatmadıysanız keys.openpgp.org. Yalnızca adres gönderilir.</li><!--/review-->
     <!--os:mac--><li><b>Güncellemeler</b>: yeni bir sürüm çıkıp çıkmadığını görmek için inboxclassic.com'dan.</li><!--/os-->
 </ul>
 <p>Oturum açma kodları yalnızca sağlayıcınızın Authentication-Results üst bilgisi gönderen etki alanının imzasının doğrulandığını (DKIM) bildirdiğinde gösterilir. Bunun için ayrı bir bağlantı gerekmez.</p>

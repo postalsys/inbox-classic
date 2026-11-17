@@ -7,6 +7,7 @@
     <li><b>Siglele mărcilor</b> (BIMI), de la adresa HTTPS a mărcii când mesajul nu conține sigla, o singură dată la fiecare rulare a Inbox Classic. Acest lucru se întâmplă doar când serverul dvs. de e-mail a trecut mesajul prin verificarea DMARC și a aprobat sigla.</li>
     <li><b>Imaginile de pe internet</b>, doar când le cereți.</li>
     <li><b>Dezabonarea</b>, doar când faceți clic pe ea. O cerere cu un singur clic (RFC 8058) este trimisă doar când lista a semnat mesajul cu DKIM.</li>
+    <li><b>Cheile de criptare</b>, doar când criptați pentru cineva a cărui cheie nu o aveți: întâi domeniul adresei sale (Web Key Directory), apoi keys.openpgp.org, dacă nu l-ați dezactivat. Se trimite doar adresa.</li>
     <!--os:mac--><li><b>Actualizările</b>, de la inboxclassic.com, pentru a vedea dacă a apărut o versiune nouă.</li><!--/os-->
 </ul>
 <p>Codurile de conectare sunt oferite doar când antetul Authentication-Results al furnizorului spune că domeniul a semnat mesajul (DKIM). Pentru aceasta nu este nevoie de o conexiune separată.</p>

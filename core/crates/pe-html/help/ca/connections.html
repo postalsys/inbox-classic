@@ -7,6 +7,7 @@
     <li><b>Els logotips de marca</b> (BIMI), des de l’adreça HTTPS de la marca quan el missatge no inclou el logotip i no es pot reutilitzar una còpia desada. Els logotips baixats es desen i es reutilitzen, també després de reiniciar l’aplicació. Només passa quan el vostre servidor de correu ha comprovat el DMARC del missatge i ha aprovat el logotip.</li>
     <li><b>Les imatges d’Internet</b>, quan n’autoritzeu el carregament, també mitjançant les opcions de remitents de confiança o de càrrega automàtica.</li>
     <li><b>La cancel·lació de la subscripció</b>, només quan hi feu clic. Una sol·licitud d’un sol clic (RFC 8058) només s’envia quan la llista ha signat el missatge amb DKIM.</li>
+<!--review-->    <li><b>Les claus de xifratge</b>, només quan xifreu per a algú de qui no teniu la clau: el domini de la seva adreça (Web Key Directory) i després keys.openpgp.org, tret que l’hàgiu desactivat. Només s’envia l’adreça.</li><!--/review-->
     <!--os:mac--><li><b>Les actualitzacions</b>, des d’inboxclassic.com, per veure si ha sortit una versió nova.</li><!--/os-->
 </ul>
 <p>Els codis d’inici de sessió només s’ofereixen quan la capçalera Authentication-Results del vostre proveïdor diu que el domini ha signat el missatge (DKIM). Aquesta comprovació no requereix cap connexió addicional.</p>

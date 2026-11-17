@@ -8,6 +8,7 @@
     <li><b>Prekių ženklų logotipai</b> (BIMI), iš prekės ženklo HTTPS adreso, kai laiške logotipo nėra, vieną kartą kiekvieno Inbox Classic paleidimo metu. Tai vyksta tik tada, kai jūsų pašto serveris patvirtino laiško DMARC patikrą ir logotipą.</li>
     <li><b>Paveikslėliai iš interneto</b>, tik kai jų paprašote.</li>
     <li><b>Prenumeratos atsisakymas</b>, tik kai jį spustelėjate. Vieno spustelėjimo užklausa (RFC 8058) siunčiama tik tada, kai sąrašas pasirašė laišką DKIM.</li>
+    <li><b>Šifravimo raktai</b>, tik kai šifruojate kam nors, kurio rakto neturite: pirmiausia jo adreso domenas (Web Key Directory), tada keys.openpgp.org, nebent tai išjungėte. Siunčiamas tik adresas.</li>
     <!--os:mac--><li><b>Naujinimai</b>, iš inboxclassic.com, siekiant sužinoti, ar išleista nauja versija.</li><!--/os-->
 </ul>
 <p>Prisijungimo kodai siūlomi tik tada, kai jūsų paslaugų teikėjo Authentication-Results antraštė nurodo, kad domenas pasirašė laišką (DKIM). Tam atskiro ryšio nereikia.</p>
