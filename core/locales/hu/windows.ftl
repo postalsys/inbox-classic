@@ -146,6 +146,10 @@ win-send = &Küldés
 # review: new
 win-dont-send = &Nincs küldés
 # review: new
+win-unsubscribe = &Leiratkozás
+# review: new
+win-dont-unsubscribe = &Nincs leiratkozás
+# review: new
 win-forget-program-ask = Eltávolítja ezt a programot, az engedélyeit és az ügynökei tevékenységnaplóját? A következő csatlakozáskor újra engedélyt kér.
 # review: new
 win-clear-log-ask = Törli az ügynökök tevékenységnaplóját? Ez nem vonja vissza az ügynökök által végzett módosításokat.

@@ -853,6 +853,8 @@ ui-allow = &Toestaan
 # review: new
 ui-dont-send = Niet verzenden
 # review: new
+ui-dont-unsubscribe = Niet afmelden
+# review: new
 ui-edit-first = Eerst &bewerken
 # review: new
 ui-new-address = Nieuw adres

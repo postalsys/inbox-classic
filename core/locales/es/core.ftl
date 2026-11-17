@@ -427,7 +427,8 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Leer el correo: consultar carpetas y mensajes, y realizar búsquedas
-agent-level-organize = Organizar el correo: marcar como leído o no leído, añadir marcas, gestionar el correo no deseado, mover mensajes y enviarlos a Elementos eliminados
+# review: changed
+agent-level-organize = Organizar el correo: marcar como leído o no leído, añadir marcas, gestionar el correo no deseado, mover y archivar mensajes, crear carpetas, enviar mensajes a Elementos eliminados y cancelar suscripciones a listas de correo cuando usted lo apruebe
 agent-level-drafts = Escribir borradores para que usted los envíe
 agent-level-send = Enviar correo, cada mensaje solo después de que usted lo apruebe
 agent-connect-title = { $program } solicita acceso a su correo
@@ -488,6 +489,17 @@ agent-log-not-junk = «{ $subject }» marcado como correo deseado
 agent-log-archived = Se archivó «{ $subject }»
 agent-log-folder = Se creó la carpeta «{ $name }»
 agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = No se pudo cancelar la suscripción a la lista que envió «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Usted no canceló la suscripción a { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } quiere cancelar su suscripción a una lista de correo
+   *[other] { $program } quiere cancelar su suscripción a { $count } listas de correo
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic pide a cada una de las listas siguientes que deje de enviarle correo, mediante la opción de un solo clic que ofrece la lista. No se envía nada más, y los mensajes que ya tiene se quedan donde están.
 
 ## Keys
 

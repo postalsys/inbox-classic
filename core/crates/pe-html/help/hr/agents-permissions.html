@@ -3,18 +3,25 @@
 <p>Kad se agent nekog programa prvi put poveže, Inbox Classic vas pita i navodi naziv programa. Odaberite što smije raditi:</p>
 <ul>
     <li>čitati poštu: mape, popis poruka, pretraživanje i poruke</li>
-    <li>organizirati poštu: stanje pročitanosti, zastavice, neželjenu poštu, premještanje i brisanje u <b data-text="folder-deleted"></b></li>
+    <li>organizirati poštu: stanje pročitanosti, zastavice, neželjenu poštu, premještanje, arhiviranje, nove mape i brisanje u <b data-text="folder-deleted"></b> te otkazivanje pretplate na popise za slanje nakon vašeg odobrenja</li>
     <li>pisati skice koje ćete vi poslati</li>
     <li>slati poštu, svaku poruku tek nakon vašeg odobrenja</li>
 </ul>
 <p>Zatim odaberite račune koje smije vidjeti i kliknite <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> odbija program i više vas se za njega ne pita.</p>
 <p>Agent nikad ništa ne briše trajno i nikad ne mijenja postavke vašeg računa. Čitanje poruke ne označava je kao pročitanu. Ono što agent promijeni odmah se vidi u prozorima.</p>
+<h2>Napuštanje popisa za slanje</h2>
+<p>Agent koji smije organizirati poštu može zatražiti otkazivanje vaše pretplate na popise za slanje. Inbox Classic vas najprije pita jednom i navodi svaki popis po njegovom pošiljatelju:</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> traži od svakog popisa da vam prestane slati poruke.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, zadani odabir, ostavlja ih kakvi jesu.</li>
+</ul>
+<p>Agent ne može otkazati pretplatu na temelju poruka u mapi <b data-text="folder-junk"></b>, a dnevno može otkazati najviše 30 popisa.</p>
 <h2>Pregled i promjena pristupa</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> prikazuje programe koje ste pustili ili odbili te sve što su agenti napravili, od najnovijeg.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> mijenja što program smije raditi.</li>
     <li><b data-text="ui-remove"></b> zaboravlja program, pa vas se pri njegovom sljedećem povezivanju ponovno pita.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> poništava promjenu stanja pročitanosti, zastavicu, premještanje ili brisanje te poruku koja je još u mapi Izlazna pošta.</li>
+    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> poništava promjenu stanja pročitanosti, zastavicu, premještanje, označavanje kao neželjene pošte, arhiviranje ili brisanje te poruku koja je još u mapi Izlazna pošta.</li>
 </ul>
 <aside class="warning">Poštu pišu drugi ljudi, a poruka može pokušati nagovoriti agenta da proslijedi ili izbriše vašu poštu. Inbox Classic skriva od agenata tekst koji poruka skriva od vas i govori im da pošta nisu upute. Agenta ipak još uvijek mogu prevariti. Dopustite samo ono što vam treba.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

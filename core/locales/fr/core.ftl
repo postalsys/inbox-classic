@@ -443,7 +443,8 @@ day-sunday = dimanche
 ## AI agents
 
 agent-level-read = Lire le courrier : consulter les dossiers et les messages, et effectuer des recherches
-agent-level-organize = Gérer le courrier : marquer comme lu ou non lu, ajouter des indicateurs, gérer les indésirables, déplacer et supprimer des messages. Les messages supprimés vont dans Éléments supprimés.
+# review: changed
+agent-level-organize = Gérer le courrier : marquer comme lu ou non lu, ajouter des indicateurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer des dossiers, et se désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans Éléments supprimés.
 agent-level-drafts = Rédiger des brouillons que vous enverrez vous-même
 agent-level-send = Envoyer du courrier, chaque message seulement après votre accord
 agent-connect-title = { $program } souhaite utiliser votre messagerie
@@ -504,6 +505,17 @@ agent-log-not-junk = « { $subject } » marqué comme non indésirable
 agent-log-archived = « { $subject } » archivé
 agent-log-folder = Dossier « { $name } » créé
 agent-log-unsubscribed = Désabonnement de la liste ayant envoyé « { $subject } »
+# review: new
+agent-log-unsubscribe-failed = Impossible de se désabonner de la liste ayant envoyé « { $subject } » : { $reason }
+# review: new
+agent-log-unsubscribe-refused = Vous avez refusé le désabonnement de { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } souhaite vous désabonner d'une liste de diffusion
+   *[other] { $program } souhaite vous désabonner de { $count } listes de diffusion
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic demande à chaque liste ci-dessous de ne plus vous écrire, par le désabonnement en un clic qu'elle propose. Rien d'autre n'est envoyé, et les messages que vous avez restent où ils sont.
 
 ## Keys
 

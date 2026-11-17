@@ -653,8 +653,8 @@ day-sunday = sunnuntai
 
 # review: new
 agent-level-read = Lukea postia: kansiot, viestiluettelo, haku ja viestit
-# review: new
-agent-level-organize = Järjestellä postia: luettu-tila, liput, roskaposti, siirtäminen, poistaminen Poistetut-kansioon
+# review: changed
+agent-level-organize = Järjestellä postia: luettu-tila, liput, roskaposti, siirtäminen, arkistointi, uudet kansiot, poistaminen Poistetut-kansioon ja postituslistojen tilausten peruuttaminen, kun hyväksyt sen
 # review: new
 agent-level-drafts = Kirjoittaa luonnoksia, jotka sinä lähetät
 # review: new
@@ -765,6 +765,17 @@ agent-log-archived = Arkistoi: ”{ $subject }”
 agent-log-folder = Loi kansion ”{ $name }”
 # review: new
 agent-log-unsubscribed = Peruutti tilauksen listalta, jolta tuli ”{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Tilauksen peruuttaminen listalta, jolta tuli ”{ $subject }”, epäonnistui: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Et peruuttanut tilausta: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } haluaa peruuttaa tilauksesi postituslistalta
+   *[other] { $program } haluaa peruuttaa tilauksesi { $count } postituslistalta
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic pyytää jokaista alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

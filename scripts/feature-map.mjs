@@ -1264,6 +1264,13 @@ const sections = [
                 what: "Turn agents off altogether, see the programs let in or turned away and change what each may do, and see everything agents did, newest first, with Undo for read state, flags, moves and deletes, and for a message still in the Outbox. How to Connect an Agent gives the settings to paste into an agent's configuration.",
                 how: 'Tools > AI Agents.',
                 checked: ['It lists the program and what it may do', 'And what its agent did, newest first', 'Undo takes the message back']
+            },
+            {
+                shot: 'agents-7-unsubscribe',
+                name: 'Leaving mailing lists asks you first',
+                what: "An agent that may organize mail can ask to unsubscribe you from mailing lists: one question lists every list by its sender and where the request goes. Don't Unsubscribe is the default; Unsubscribe asks each list the one-click way, and the agent learns what each answered. Never from Junk E-mail, and at most 30 lists a day.",
+                how: 'Shown when an agent asks to unsubscribe; only for a program allowed to organize mail.',
+                checked: ['One question lists both senders and where the requests go', "Don't Unsubscribe is the default", 'The agent learns the user said no']
             }
         ]
     },
@@ -1711,6 +1718,8 @@ const behind = [
 // the screenshots a platform's UI test does not take yet, each a gap to close, or of a feature it does not have
 const notYet = {
     windows: [
+        // the MCP update, phase 1: the apps' unsubscribe question is still to come
+        'agents-7-unsubscribe',
         // the Mac and Linux only: Windows keeps the classic light look
         'dark-1-plain',
         'dark-2-written',
@@ -1721,6 +1730,8 @@ const notYet = {
         'secure-13-dark'
     ],
     mac: [
+        // the MCP update, phase 1: the apps' unsubscribe question is still to come
+        'agents-7-unsubscribe',
         // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
         // not be taken from inside the app (the test answers the panels in their place and checks what they did)
         'read-3-attachments',
@@ -1750,6 +1761,8 @@ const notYet = {
         'write-16-link-menu'
     ],
     linux: [
+        // the MCP update, phase 1: the apps' unsubscribe question is still to come
+        'agents-7-unsubscribe',
         // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
         // not be taken from inside the app (the test answers the panels in their place and checks what they did)
         'read-4-save',

@@ -853,6 +853,8 @@ ui-allow = &Να επιτρέπεται
 # review: new
 ui-dont-send = Να μη σταλεί
 # review: new
+ui-dont-unsubscribe = Να μη γίνει κατάργηση εγγραφής
+# review: new
 ui-edit-first = &Επεξεργασία πρώτα
 # review: new
 ui-new-address = Νέα διεύθυνση

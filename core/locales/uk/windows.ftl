@@ -158,6 +158,10 @@ win-send = &Надіслати
 # review: new
 win-dont-send = Н&е надсилати
 # review: new
+win-unsubscribe = &Скасувати підписку
+# review: new
+win-dont-unsubscribe = &Не скасовувати підписку
+# review: new
 win-forget-program-ask = Вилучити цю програму, її дозволи й історію дій її агентів? Наступного разу, коли вона під’єднається, у вас знову запитають дозвіл.
 # review: new
 win-clear-log-ask = Очистити історію дій агентів? Це не скасує змін, які зробили агенти.

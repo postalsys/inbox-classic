@@ -661,8 +661,8 @@ day-sunday = Κυριακή
 
 # review: new
 agent-level-read = Ανάγνωση αλληλογραφίας: φάκελοι, λίστα μηνυμάτων, αναζήτηση και μηνύματα
-# review: new
-agent-level-organize = Οργάνωση αλληλογραφίας: κατάσταση ανάγνωσης, σημαίες, ανεπιθύμητα, μετακίνηση, διαγραφή στα Διαγραμμένα
+# review: changed
+agent-level-organize = Οργάνωση αλληλογραφίας: κατάσταση ανάγνωσης, σημαίες, ανεπιθύμητα, μετακίνηση, αρχειοθέτηση, νέοι φάκελοι, διαγραφή στα Διαγραμμένα και κατάργηση εγγραφής από λίστες αλληλογραφίας αφού συμφωνήσετε
 # review: new
 agent-level-drafts = Σύνταξη πρόχειρων που στέλνετε εσείς
 # review: new
@@ -773,6 +773,17 @@ agent-log-archived = Αρχειοθετήθηκε το «{ $subject }»
 agent-log-folder = Δημιουργήθηκε ο φάκελος «{ $name }»
 # review: new
 agent-log-unsubscribed = Έγινε κατάργηση εγγραφής από τη λίστα του «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = Δεν ήταν δυνατή η κατάργηση εγγραφής από τη λίστα του «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Δεν καταργήσατε την εγγραφή σας από: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] Το πρόγραμμα { $program } θέλει να καταργήσει την εγγραφή σας από μια λίστα αλληλογραφίας
+   *[other] Το πρόγραμμα { $program } θέλει να καταργήσει την εγγραφή σας από { $count } λίστες αλληλογραφίας
+}
+# review: new
+agent-unsubscribe-detail = Το Inbox Classic ζητά από κάθε λίστα παρακάτω να σταματήσει να σας στέλνει μηνύματα, με τον τρόπο ενός κλικ που προσφέρει η λίστα. Δεν στέλνεται τίποτε άλλο, και τα μηνύματα που έχετε μένουν εκεί που είναι.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

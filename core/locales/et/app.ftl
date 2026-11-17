@@ -462,6 +462,8 @@ ui-browser-sign-in-server = { $server } (sisselogimine brauseris)
 ui-dont-allow = Ära luba
 ui-allow = &Luba
 ui-dont-send = Ära saada
+# review: new
+ui-dont-unsubscribe = Ära loobu tellimusest
 ui-edit-first = &Muuda enne
 ui-new-address = Uus aadress
 ui-turn-away = &Keela

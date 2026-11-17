@@ -852,6 +852,8 @@ ui-allow = &Разрешить
 # review: new
 ui-dont-send = Не отправлять
 # review: new
+ui-dont-unsubscribe = Не отписываться
+# review: new
 ui-edit-first = &Сначала изменить
 # review: new
 ui-new-address = Новый адрес

@@ -699,8 +699,8 @@ day-sunday = неділя
 
 # review: new
 agent-level-read = Читати пошту: папки, список повідомлень, пошук і повідомлення
-# review: new
-agent-level-organize = Упорядковувати пошту: стан прочитання, прапорці, небажана пошта, переміщення, видалення в «Видалені»
+# review: changed
+agent-level-organize = Упорядковувати пошту: стан прочитання, прапорці, небажана пошта, переміщення, архівування, нові папки, видалення в «Видалені» та вихід зі списків розсилки після вашого «так»
 # review: new
 agent-level-drafts = Писати чернетки, які надсилаєте ви
 # review: new
@@ -813,6 +813,20 @@ agent-log-archived = Заархівовано «{ $subject }»
 agent-log-folder = Створено папку «{ $name }»
 # review: new
 agent-log-unsubscribed = Скасовано підписку на список розсилки «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = Не вдалося скасувати підписку на список розсилки «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Ви не скасували підписку: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [1] { $program } хоче скасувати вашу підписку на список розсилки
+    [one] { $program } хоче скасувати вашу підписку на { $count } список розсилки
+    [few] { $program } хоче скасувати вашу підписку на { $count } списки розсилки
+    [many] { $program } хоче скасувати вашу підписку на { $count } списків розсилки
+   *[other] { $program } хоче скасувати вашу підписку на { $count } списку розсилки
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic просить кожен список нижче більше не надсилати вам листів, через скасування підписки одним клацанням, яке пропонує список. Більше нічого не надсилається, а ваші повідомлення залишаються там, де є.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

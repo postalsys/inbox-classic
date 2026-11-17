@@ -650,8 +650,8 @@ day-sunday = Pazar
 
 # review: new
 agent-level-read = Postayı okuma: klasörler, ileti listesi, arama ve iletiler
-# review: new
-agent-level-organize = Postayı düzenleme: okundu durumu, bayraklar, gereksiz posta, taşıma, Silinmiş Öğeler'e silme
+# review: changed
+agent-level-organize = Postayı düzenleme: okundu durumu, bayraklar, gereksiz posta, taşıma, arşivleme, yeni klasörler, Silinmiş Öğeler'e silme ve onay verdikten sonra posta listelerinden ayrılma
 # review: new
 agent-level-drafts = Göndermeniz için taslak yazma
 # review: new
@@ -762,6 +762,17 @@ agent-log-archived = Arşivlendi: “{ $subject }”
 agent-log-folder = Klasör oluşturuldu: “{ $name }”
 # review: new
 agent-log-unsubscribed = “{ $subject }” iletisinin listesinden abonelik iptal edildi
+# review: new
+agent-log-unsubscribe-failed = “{ $subject }” iletisinin listesinden abonelik iptal edilemedi: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Abonelikten çıkmadınız: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } bir posta listesindeki aboneliğinizi iptal etmek istiyor
+   *[other] { $program } { $count } posta listesindeki aboneliğinizi iptal etmek istiyor
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic, aşağıdaki her listeden, listenin sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
 

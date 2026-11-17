@@ -154,6 +154,10 @@ win-send = &Pošalji
 # review: new
 win-dont-send = &Nemoj poslati
 # review: new
+win-unsubscribe = &Otkaži pretplatu
+# review: new
+win-dont-unsubscribe = &Nemoj otkazati pretplatu
+# review: new
 win-forget-program-ask = Da li želite da uklonite ovaj program, njegove dozvole i istoriju aktivnosti njegovih agenata? Pri sledećem povezivanju ponovo će se tražiti vaša dozvola.
 # review: new
 win-clear-log-ask = Da li želite da obrišete istoriju aktivnosti agenata? Time se neće opozvati promene koje su agenti napravili.

@@ -654,8 +654,8 @@ day-sunday = zondag
 
 # review: new
 agent-level-read = E-mail lezen: mappen, de berichtenlijst, zoeken en berichten
-# review: new
-agent-level-organize = E-mail ordenen: gelezen of ongelezen, markeringen, ongewenst, verplaatsen, verwijderen naar Verwijderde items
+# review: changed
+agent-level-organize = E-mail ordenen: gelezen of ongelezen, markeringen, ongewenst, verplaatsen, archiveren, nieuwe mappen, verwijderen naar Verwijderde items, en afmelden bij mailinglijsten nadat je ja zegt
 # review: new
 agent-level-drafts = Concepten schrijven die jij verzendt
 # review: new
@@ -766,6 +766,17 @@ agent-log-archived = “{ $subject }” gearchiveerd
 agent-log-folder = De map “{ $name }” gemaakt
 # review: new
 agent-log-unsubscribed = Afgemeld bij de lijst van “{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Afmelden bij de lijst van “{ $subject }” is mislukt: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Je hebt je niet afgemeld bij { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } wil je afmelden bij een mailinglijst
+   *[other] { $program } wil je afmelden bij { $count } mailinglijsten
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic vraagt elke lijst hieronder om je niets meer te sturen, via de afmelding met één klik die de lijst aanbiedt. Er wordt verder niets verzonden, en de berichten die je hebt, blijven waar ze zijn.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

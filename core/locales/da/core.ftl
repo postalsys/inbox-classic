@@ -653,8 +653,8 @@ day-sunday = søndag
 
 # review: new
 agent-level-read = Læse mail: mapper, meddelelseslisten, søgning og meddelelser
-# review: new
-agent-level-organize = Organisere mail: læst/ulæst, flag, uønsket, flytning, sletning til Slettet post
+# review: changed
+agent-level-organize = Organisere mail: læst/ulæst, flag, uønsket, flytning, arkivering, nye mapper, sletning til Slettet post og afmelding af mailinglister, når du siger ja
 # review: new
 agent-level-drafts = Skrive kladder, som du selv sender
 # review: new
@@ -765,6 +765,17 @@ agent-log-archived = Arkiverede »{ $subject }«
 agent-log-folder = Oprettede mappen »{ $name }«
 # review: new
 agent-log-unsubscribed = Afmeldte listen for »{ $subject }«
+# review: new
+agent-log-unsubscribe-failed = Kunne ikke afmelde listen for »{ $subject }«: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Du afmeldte ikke { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vil afmelde dig fra en mailingliste
+   *[other] { $program } vil afmelde dig fra { $count } mailinglister
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic beder hver liste herunder om at holde op med at sende til dig, på den måde med ét klik, som listen tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

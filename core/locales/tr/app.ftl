@@ -853,6 +853,8 @@ ui-allow = İzin &Ver
 # review: new
 ui-dont-send = Gönderme
 # review: new
+ui-dont-unsubscribe = Abonelikten Çıkma
+# review: new
 ui-edit-first = Önce &Düzenle
 # review: new
 ui-new-address = Yeni adres

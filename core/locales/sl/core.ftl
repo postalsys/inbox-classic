@@ -680,8 +680,8 @@ day-sunday = nedelja
 
 # review: new
 agent-level-read = Branje pošte: mape, seznam sporočil, iskanje in sporočila
-# review: new
-agent-level-organize = Urejanje pošte: stanje branja, zastavice, neželena pošta, premikanje, brisanje v mapo Izbrisano
+# review: changed
+agent-level-organize = Urejanje pošte: stanje branja, zastavice, neželena pošta, premikanje, arhiviranje, nove mape, brisanje v mapo Izbrisano in odjava s poštnih seznamov po vaši potrditvi
 # review: new
 agent-level-drafts = Pisanje osnutkov, ki jih pošljete sami
 # review: new
@@ -794,6 +794,20 @@ agent-log-archived = Arhiviral »{ $subject }«
 agent-log-folder = Ustvaril mapo »{ $name }«
 # review: new
 agent-log-unsubscribed = Odjavil od seznama sporočila »{ $subject }«
+# review: new
+agent-log-unsubscribe-failed = Odjava s seznama sporočila »{ $subject }« ni uspela: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Odjavo s seznamov ste zavrnili: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [1] { $program } vas želi odjaviti s poštnega seznama
+    [one] { $program } vas želi odjaviti s poštnih seznamov ({ $count })
+    [two] { $program } vas želi odjaviti s poštnih seznamov ({ $count })
+    [few] { $program } vas želi odjaviti s poštnih seznamov ({ $count })
+   *[other] { $program } vas želi odjaviti s poštnih seznamov ({ $count })
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic vsak spodnji seznam prosi, naj vam preneha pošiljati, in sicer z odjavo z enim klikom, ki jo seznam ponuja. Nič drugega se ne pošlje in sporočila, ki jih imate, ostanejo, kjer so.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

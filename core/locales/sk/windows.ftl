@@ -149,6 +149,10 @@ win-send = &Odoslať
 # review: new
 win-dont-send = &Neodoslať
 # review: new
+win-unsubscribe = &Odhlásiť odber
+# review: new
+win-dont-unsubscribe = &Neodhlásiť
+# review: new
 win-forget-program-ask = Odstrániť tento program, jeho oprávnenia a históriu aktivity jeho agentov? Pri ďalšom pripojení sa vás znova opýta na povolenie.
 # review: new
 win-clear-log-ask = Vymazať históriu aktivity agentov? Zmeny, ktoré agenti urobili, sa tým nevrátia.

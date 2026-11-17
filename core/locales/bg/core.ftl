@@ -663,8 +663,8 @@ day-sunday = неделя
 
 # review: new
 agent-level-read = Четене на поща: папки, списък със съобщения, търсене и съобщения
-# review: new
-agent-level-organize = Подреждане на поща: прочетено, флагове, нежелана поща, преместване, изтриване в „Изтрити“
+# review: changed
+agent-level-organize = Подреждане на поща: прочетено, флагове, нежелана поща, преместване, архивиране, нови папки, изтриване в „Изтрити“ и отписване от пощенски списъци след вашето „да“
 # review: new
 agent-level-drafts = Писане на чернови, които вие изпращате
 # review: new
@@ -775,6 +775,17 @@ agent-log-archived = „{ $subject }“ е архивирано
 agent-log-folder = Създадена е папката „{ $name }“
 # review: new
 agent-log-unsubscribed = Отписване от списъка на „{ $subject }“
+# review: new
+agent-log-unsubscribe-failed = Отписването от списъка на „{ $subject }“ не успя: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Не се отписахте от { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } иска да ви отпише от пощенски списък
+   *[other] { $program } иска да ви отпише от { $count } пощенски списъка
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic моли всеки от списъците по-долу да спре да ви изпраща съобщения, по начина с едно щракване, който списъкът предлага. Нищо друго не се изпраща, а съобщенията, които имате, остават там, където са.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

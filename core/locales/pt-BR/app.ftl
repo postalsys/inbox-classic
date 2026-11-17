@@ -854,6 +854,8 @@ ui-allow = &Permitir
 # review: new
 ui-dont-send = Não enviar
 # review: new
+ui-dont-unsubscribe = Não cancelar inscrição
+# review: new
 ui-edit-first = Editar &primeiro
 # review: new
 ui-new-address = Endereço novo

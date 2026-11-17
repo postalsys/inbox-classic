@@ -673,8 +673,8 @@ day-sunday = neděle
 
 # review: new
 agent-level-read = Číst poštu: složky, seznam zpráv, hledání a zprávy
-# review: new
-agent-level-organize = Třídit poštu: stav přečtení, příznaky, nevyžádaná pošta, přesouvání, odstraňování do složky Odstraněná pošta
+# review: changed
+agent-level-organize = Třídit poštu: stav přečtení, příznaky, nevyžádaná pošta, přesouvání, archivace, nové složky, odstraňování do složky Odstraněná pošta a odhlašování z konferencí po vašem souhlasu
 # review: new
 agent-level-drafts = Psát koncepty, které odešlete vy
 # review: new
@@ -784,6 +784,18 @@ agent-log-archived = Archivováno: „{ $subject }“
 agent-log-folder = Vytvořena složka „{ $name }“
 # review: new
 agent-log-unsubscribed = Odhlášeno z konference zprávy „{ $subject }“
+# review: new
+agent-log-unsubscribe-failed = Odhlášení z konference zprávy „{ $subject }“ se nezdařilo: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Neodhlásili jste se z odběru: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vás chce odhlásit z konference
+    [few] { $program } vás chce odhlásit z { $count } konferencí
+   *[other] { $program } vás chce odhlásit z { $count } konferencí
+}
+# review: new
+agent-unsubscribe-detail = Inbox Classic požádá každou konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který konference nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
 
 ## Keys
 

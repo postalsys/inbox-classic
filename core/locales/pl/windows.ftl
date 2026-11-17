@@ -157,6 +157,10 @@ win-send = &Wyślij
 # review: new
 win-dont-send = &Nie wysyłaj
 # review: new
+win-unsubscribe = &Wypisz się
+# review: new
+win-dont-unsubscribe = &Nie wypisuj
+# review: new
 win-forget-program-ask = Usunąć ten program, jego uprawnienia i historię działań jego agentów? Przy następnym połączeniu Inbox Classic ponownie poprosi o zgodę.
 # review: new
 win-clear-log-ask = Wyczyścić historię działań agentów? Nie cofnie to zmian wprowadzonych przez agentów.

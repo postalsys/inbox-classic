@@ -851,6 +851,8 @@ ui-allow = &Dopusti
 # review: new
 ui-dont-send = Nemoj poslati
 # review: new
+ui-dont-unsubscribe = Nemoj otkazati pretplatu
+# review: new
 ui-edit-first = Najprije &uredi
 # review: new
 ui-new-address = Nova adresa
