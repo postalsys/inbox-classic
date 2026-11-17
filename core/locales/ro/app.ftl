@@ -24,6 +24,8 @@ menu-sort-by = Sor&tare după
 menu-text-size = &Dimensiune text
 # review: new
 menu-folder = Fo&lder
+# review: new
+menu-insert = I&nserare
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -185,6 +187,12 @@ cmd-export-address-book = E&xport agendă...
 cmd-export-setup = Export setări și con&turi...
 # review: new
 cmd-import-setup = Import setări și cont&uri...
+# review: new
+cmd-compose-sign = &Semnare digitală
+# review: new
+cmd-compose-encrypt = &Criptare
+# review: new
+cmd-attach-my-key = Atașare cheie &publică proprie
 
 ## The tray icon's menu
 
@@ -408,6 +416,12 @@ ui-tb-send = Trimitere
 ui-tb-save = Salvare
 # review: new
 ui-tb-attach = Atașare
+# review: new
+ui-tb-sign = Semnare
+# review: new
+ui-tb-encrypt = Criptare
+# review: new
+ui-field-keys = Chei:
 # review: new
 ui-field-from = De la:
 # review: new
@@ -1336,6 +1350,26 @@ ui-contact-key-none = Nicio cheie
 ui-contact-key-use-new = Folosire cheie &nouă
 # review: new
 ui-contact-key-keep = &Păstrare cheie actuală
+# review: new
+ui-recipient-keys-title = Cheile destinatarilor
+# review: new
+ui-recipient-col-recipient = Destinatar
+# review: new
+ui-recipient-col-key = Cheie
+# review: new
+ui-recipient-find-key = &Găsire cheie
+# review: new
+ui-recipient-remove = &Eliminare din mesaj
+# review: new
+ui-send-unencrypted = Trimitere &fără criptare
+# review: new
+ui-compose-make-key = &Creare cheie...
+# review: new
+ui-compose-show-keys = Chei de c&riptare...
+# review: new
+ui-compose-encrypt-off = &Dezactivare criptare
+# review: new
+ui-compose-keep-encrypted = &Păstrare criptare
 # review: new
 ui-setup-export-title = Export setări și conturi
 # review: new

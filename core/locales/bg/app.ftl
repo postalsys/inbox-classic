@@ -15,6 +15,8 @@ menu-layout = &Оформление
 menu-sort-by = &Сортиране по
 menu-text-size = &Размер на текста
 menu-folder = &Папка
+# review: new
+menu-insert = &Вмъкване
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -97,6 +99,12 @@ cmd-import-address-book = Импортиране на адресна &книга
 cmd-export-address-book = &Експортиране на адресна книга...
 cmd-export-setup = Експ&ортиране на настройки и акаунти...
 cmd-import-setup = Импортиране на настройки и акаун&ти...
+# review: new
+cmd-compose-sign = Цифрово &подписване
+# review: new
+cmd-compose-encrypt = &Шифроване
+# review: new
+cmd-attach-my-key = Прикачване на публичния ми &ключ
 
 ## The tray icon's menu
 
@@ -215,6 +223,12 @@ ui-format-line = Вмъкване на хоризонтална линия
 ui-tb-send = Изпращане
 ui-tb-save = Запазване
 ui-tb-attach = Прикачване
+# review: new
+ui-tb-sign = Подписване
+# review: new
+ui-tb-encrypt = Шифроване
+# review: new
+ui-field-keys = Ключове:
 ui-field-from = От:
 ui-field-to = До:
 ui-field-cc = Копие:
@@ -692,6 +706,26 @@ ui-contact-key = Ключ за шифроване:
 ui-contact-key-none = Няма ключ
 ui-contact-key-use-new = Използване на &новия ключ
 ui-contact-key-keep = &Запазване на текущия
+# review: new
+ui-recipient-keys-title = Ключове на получателите
+# review: new
+ui-recipient-col-recipient = Получател
+# review: new
+ui-recipient-col-key = Ключ
+# review: new
+ui-recipient-find-key = &Намиране на ключ
+# review: new
+ui-recipient-remove = &Премахване от съобщението
+# review: new
+ui-send-unencrypted = Изпращане &без шифроване
+# review: new
+ui-compose-make-key = &Създаване на ключ...
+# review: new
+ui-compose-show-keys = &Ключове за шифроване...
+# review: new
+ui-compose-encrypt-off = &Изключване на шифроването
+# review: new
+ui-compose-keep-encrypted = &Запазване на шифроването
 ui-setup-export-title = Експортиране на настройки и акаунти
 ui-setup-import-title = Импортиране на настройки и акаунти
 ui-setup-export-intro = Изберете какво да пренесете на друг компютър. Файлът не съдържа съобщения: те се изтеглят отново там.

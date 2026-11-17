@@ -1,9 +1,10 @@
 //! The editor of the compose window and the signature editor: a web view with the page of pe_html::editor_document,
 //! whose own script (allowed by a nonce, nothing else can run) makes the message editable. The page talks back with
 //! plain strings through the "host" message handler: "html:", "split:" and "full:" after pe.send(), "state:" for the
-//! format bar, "dirty" on the first change, "caret:" and "hover:" with the link at the cursor and under the mouse,
-//! "open:" for a Ctrl+clicked link (see the top of core/crates/pe-html/src/editor.js). The host drives it with the six
-//! functions every platform's window calls. Files dropped on it never reach the page: the window takes them.
+//! format bar, "dirty" on the first change, "edited" once typing pauses, "caret:" and "hover:" with the link at the
+//! cursor and under the mouse, "open:" for a Ctrl+clicked link (see the top of core/crates/pe-html/src/editor.js).
+//! The host drives it with the six functions every platform's window calls. Files dropped on it never reach the
+//! page: the window takes them.
 
 use std::cell::{Cell, RefCell};
 use std::path::PathBuf;
@@ -35,6 +36,8 @@ pub struct Handlers {
     /// One '0' or '1' per format of the bar: bold, italic, underline, numbers, bullets, left, center, right
     pub state: OnText,
     pub dirty: Option<Box<dyn Fn()>>,
+    /// The text changed, once typing pauses (unfolding the quote with "..." is no change)
+    pub edited: Option<Box<dyn Fn()>>,
     /// Ctrl+Enter
     pub send: Option<Box<dyn Fn()>>,
     /// Ctrl+S
@@ -128,6 +131,10 @@ impl Editor {
         } else if message == "dirty" {
             if let Some(dirty) = &handlers.dirty {
                 dirty();
+            }
+        } else if message == "edited" {
+            if let Some(edited) = &handlers.edited {
+                edited();
             }
         } else if let Some(link) = message.strip_prefix("caret:") {
             *self.caret_link.borrow_mut() = link.to_string();

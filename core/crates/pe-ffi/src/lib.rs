@@ -8,6 +8,7 @@
 
 mod agents;
 mod book;
+mod compose_keys;
 mod core;
 mod help;
 mod keys;

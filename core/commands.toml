@@ -19,6 +19,8 @@
 #            folder was chosen is read before it runs; other commands run without waiting for it
 #   submenu  the submenu of its menu it is in (layout: View > Layout), labelled by the catalog's menu-<submenu>; its
 #            items one after another here
+#   window   compose: a command of the compose window (its own toolbar and menus, Insert among them; on the Mac the
+#            menu bar's, enabled while a compose window is in front), not of the main window; main when left out
 
 [[command]]
 id = "new_account"
@@ -540,3 +542,30 @@ menu = "file"
 id = "import_setup"
 windows = 174
 menu = "file"
+
+# The compose window: Sign and Encrypt as Outlook Express had them (Tools > Digitally Sign and Tools > Encrypt, and
+# the toolbar's Sign and Encrypt), both off for a new message; Encrypt signs too. The Mac takes GPG Suite's keys.
+[[command]]
+id = "compose_sign"
+windows = 175
+menu = "tools"
+window = "compose"
+key = "Mod+Shift+D"
+mac = "Mod+Alt+Y"
+toggle = true
+
+[[command]]
+id = "compose_encrypt"
+windows = 176
+menu = "tools"
+window = "compose"
+key = "Mod+Shift+E"
+mac = "Mod+Alt+X"
+toggle = true
+
+# the public key of the address the message goes from, attached as a file (Insert > Attach My Public Key)
+[[command]]
+id = "attach_my_key"
+windows = 177
+menu = "insert"
+window = "compose"

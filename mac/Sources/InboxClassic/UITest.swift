@@ -425,8 +425,9 @@ final class UITest {
         let signInPage = out.appendingPathComponent("sign-in-page.txt").path
         try? FileManager.default.removeItem(atPath: signInPage)
         // ImapKit's certificate is self-signed: the app trusts it, and only it, for this run
+        // and looks up keys only on the harness
         let arguments = Arguments(["InboxClassic", "--store", store, "--memory-passwords", "--pin-certificate", port("cert"),
-                                   "--sign-in-page-file", signInPage])
+                                   "--sign-in-page-file", signInPage, "--key-server", "http://127.0.0.1:\(port("pgp"))"])
         // the test reads English, whatever the languages of the machine it runs on
         Languages.apply("en")
         let delegate = AppDelegate(arguments)
@@ -562,6 +563,7 @@ final class UITest {
         try await encryptionKeys()
         try await secureMail()
         try await encryptedAttachment()
+        try await composeKeys()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await textSize()

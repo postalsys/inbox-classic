@@ -15,6 +15,8 @@ menu-layout = &Asettelu
 menu-sort-by = &Lajittele
 menu-text-size = &Tekstin koko
 menu-folder = &Kansio
+# review: new
+menu-insert = &Lisää
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -97,6 +99,12 @@ cmd-import-address-book = Tuo osoitekirj&a...
 cmd-export-address-book = Vi&e osoitekirja...
 cmd-export-setup = Vie asetukset &ja tilit...
 cmd-import-setup = Tuo a&setukset ja tilit...
+# review: new
+cmd-compose-sign = &Allekirjoita digitaalisesti
+# review: new
+cmd-compose-encrypt = &Salaa
+# review: new
+cmd-attach-my-key = Liitä oma &julkinen avain
 
 ## The tray icon's menu
 
@@ -215,6 +223,12 @@ ui-format-line = Lisää vaakaviiva
 ui-tb-send = Lähetä
 ui-tb-save = Tallenna
 ui-tb-attach = Liitä
+# review: new
+ui-tb-sign = Allekirjoita
+# review: new
+ui-tb-encrypt = Salaa
+# review: new
+ui-field-keys = Avaimet:
 ui-field-from = Lähettäjä:
 ui-field-to = Vastaanottaja:
 ui-field-cc = Kopio:
@@ -692,6 +706,26 @@ ui-contact-key = Salausavain:
 ui-contact-key-none = Ei avainta
 ui-contact-key-use-new = Käytä &uutta avainta
 ui-contact-key-keep = &Säilytä nykyinen
+# review: new
+ui-recipient-keys-title = Vastaanottajien avaimet
+# review: new
+ui-recipient-col-recipient = Vastaanottaja
+# review: new
+ui-recipient-col-key = Avain
+# review: new
+ui-recipient-find-key = &Etsi avain
+# review: new
+ui-recipient-remove = Poista &viestistä
+# review: new
+ui-send-unencrypted = Lähetä &ilman salausta
+# review: new
+ui-compose-make-key = &Luo avain...
+# review: new
+ui-compose-show-keys = &Salausavaimet...
+# review: new
+ui-compose-encrypt-off = Poista salaus &käytöstä
+# review: new
+ui-compose-keep-encrypted = Pidä &salattuna
 ui-setup-export-title = Vie asetukset ja tilit
 ui-setup-import-title = Tuo asetukset ja tilit
 ui-setup-export-intro = Valitse, mitä viet toiseen tietokoneeseen. Tiedosto ei sisällä viestejä: ne ladataan toisessa tietokoneessa uudelleen palvelimelta.

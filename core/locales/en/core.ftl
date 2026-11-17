@@ -597,6 +597,39 @@ pgp-publish-pending = keys.openpgp.org sent a confirmation link to these address
 pgp-publish-done = Your key is published on keys.openpgp.org for { $addresses }.
 pgp-publish-failed = The key could not be published: { $error }
 pgp-keyserver-off = Looking up keys on keys.openpgp.org is turned off in { $settings }.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+pgp-compose-encrypted = { $count ->
+    [one] Encrypted and signed: only you and { $addresses } can read it.
+   *[other] Encrypted and signed: only you and its { $count } recipients can read it.
+}
+pgp-compose-encrypt-ready = It will be encrypted and signed. Add recipients whose keys you have.
+pgp-compose-missing = { $count ->
+    [one] { $addresses } has no key, so the message can not be encrypted yet.
+   *[other] { $count } recipients have no key, so the message can not be encrypted yet: { $addresses }.
+}
+pgp-compose-looking = Looking for the keys of { $addresses }...
+pgp-compose-signed = Signed: recipients can check that it comes from you and was not changed.
+pgp-compose-reply-clear = Not encrypted, although the message it answers or forwards was.
+pgp-compose-encrypted-files = Files of an encrypted message are attached, so this message can only be sent encrypted. Turn Encrypt on, or remove those files.
+pgp-compose-sign-tip = Sign the message with your key, so recipients can check that it comes from you and was not changed
+pgp-compose-sign-tip-encrypted = An encrypted message is always signed
+pgp-compose-encrypt-tip = Encrypt the message, so only you and its recipients can read it
+pgp-compose-make-key = You have no key for { $address } yet. Make one now? With it, your messages can be signed and encrypted.
+pgp-compose-key-unusable = Your key for { $address } can not be used ({ $state }). Open Encryption Keys to import its backup or make a new key.
+pgp-compose-encrypt-off-quote = This message quotes or forwards an encrypted message. Without encryption, it can not be sent until you remove what it quotes. Turn encryption off anyway?
+pgp-compose-encrypt-off-reply = This message answers or forwards an encrypted message. Without encryption, anyone who handles your message on the way can read it. Turn encryption off?
+pgp-recipient-verified = Key verified
+pgp-recipient-found = Key not verified
+pgp-recipient-own = Your own key
+pgp-recipient-looking = Looking for a key...
+pgp-recipient-missing = No key
+pgp-recipient-not-found = No key: none was found on { $date }
+pgp-recipient-unusable = Key can not be used: { $state }
+pgp-recipients-intro = The message is encrypted to each recipient’s key, and to yours.
+pgp-recipients-intro-missing = { $count ->
+    [one] One recipient has no key to encrypt to. Find their key, remove them from this message, or send it without encryption.
+   *[other] { $count } recipients have no key to encrypt to. Find their keys, remove them from this message, or send it without encryption.
+}
 pgp-details-part = Part { $number }: { $label }
 pgp-details-signed = Signed { $when } with the key { $key }
 pgp-details-unknown-key = Signed with the key { $key }, which you do not have

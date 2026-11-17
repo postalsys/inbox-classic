@@ -22,6 +22,8 @@ menu-sort-by = &Rikiuoti pagal
 menu-text-size = &Teksto dydis
 # review: new
 menu-folder = &Aplankas
+# review: new
+menu-insert = Įt&erpti
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -183,6 +185,12 @@ cmd-export-address-book = &Eksportuoti adresų knygelę...
 cmd-export-setup = Eksportuoti nus&tatymus ir paskyras...
 # review: new
 cmd-import-setup = Importuoti n&ustatymus ir paskyras...
+# review: new
+cmd-compose-sign = Skaitmeniškai &pasirašyti
+# review: new
+cmd-compose-encrypt = Ši&fruoti
+# review: new
+cmd-attach-my-key = Pridėti mano &viešąjį raktą
 
 ## The tray icon's menu
 
@@ -406,6 +414,12 @@ ui-tb-send = Siųsti
 ui-tb-save = Įrašyti
 # review: new
 ui-tb-attach = Pridėti
+# review: new
+ui-tb-sign = Pasirašyti
+# review: new
+ui-tb-encrypt = Šifruoti
+# review: new
+ui-field-keys = Raktai:
 # review: new
 ui-field-from = Nuo:
 # review: new
@@ -1332,6 +1346,26 @@ ui-contact-key-none = Rakto nėra
 ui-contact-key-use-new = Naudoti &naująjį raktą
 # review: new
 ui-contact-key-keep = &Palikti dabartinį
+# review: new
+ui-recipient-keys-title = Gavėjų raktai
+# review: new
+ui-recipient-col-recipient = Gavėjas
+# review: new
+ui-recipient-col-key = Raktas
+# review: new
+ui-recipient-find-key = &Rasti raktą
+# review: new
+ui-recipient-remove = Pašalinti iš &laiško
+# review: new
+ui-send-unencrypted = Siųsti &nešifruotą
+# review: new
+ui-compose-make-key = &Sukurti raktą...
+# review: new
+ui-compose-show-keys = Šifravimo ra&ktai...
+# review: new
+ui-compose-encrypt-off = &Išjungti šifravimą
+# review: new
+ui-compose-keep-encrypted = &Palikti užšifruotą
 # review: new
 ui-setup-export-title = Eksportuoti nustatymus ir paskyras
 # review: new

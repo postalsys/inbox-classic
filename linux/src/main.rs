@@ -15,6 +15,7 @@ mod attachments;
 mod book_dialogs;
 mod complete;
 mod compose;
+mod compose_keys;
 #[cfg(feature = "e2e")]
 mod e2e;
 mod editor;
@@ -63,7 +64,8 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// The command line. Options for test runs: --store <file> uses another mail store, --memory-passwords keeps passwords
 /// for this run only, --pin-certificate <file> trusts only that server certificate, --sign-in-page-file <file> writes
-/// the page of a browser sign-in there for the test to open instead of the browser. A mailto: link (and what follows
+/// the page of a browser sign-in there for the test to open instead of the browser, --key-server <url> looks keys up on
+/// the test's own server. A mailto: link (and what follows
 /// it) is a new message to write; a message file (.eml) opens in a window of its own, another file is a message to put
 /// into the selected folder.
 #[derive(Debug, Clone, Default, PartialEq)]
@@ -83,6 +85,8 @@ pub struct Arguments {
     pub background: bool,
     /// --language <code>: the windows in this language for this run, whatever Preferences says (tests: de, qps)
     pub language: Option<String>,
+    /// --key-server <url>: OpenPGP keys looked up on the UI tests' server on this computer (a loopback address only)
+    pub key_server: Option<String>,
 }
 
 impl Arguments {
@@ -103,6 +107,7 @@ impl Arguments {
                 "--sign-in-page-file" => parsed.sign_in_page_file = rest.next().map(PathBuf::from),
                 "--e2e" => parsed.e2e = rest.next().map(PathBuf::from),
                 "--language" => parsed.language = rest.next().map(str::to_string),
+                "--key-server" => parsed.key_server = rest.next().map(str::to_string),
                 "--memory-passwords" => parsed.memory_passwords = true,
                 "--version" => parsed.version = true,
                 "--mcp" => parsed.mcp = true,
@@ -270,6 +275,12 @@ mod tests {
         assert_eq!(parsed.store, Some(PathBuf::from("/tmp/s.db")));
         assert_eq!(parsed.certificate, Some(PathBuf::from("c.pem")));
         assert!(parsed.memory_passwords && !parsed.version);
+        assert_eq!(
+            Arguments::parse(&["--key-server", "http://127.0.0.1:4000"])
+                .key_server
+                .as_deref(),
+            Some("http://127.0.0.1:4000")
+        );
         // what follows the link is part of it, however it looks
         let parsed = Arguments::parse(&[
             "--memory-passwords",

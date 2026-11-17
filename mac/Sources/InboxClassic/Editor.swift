@@ -19,6 +19,8 @@ final class Editor: NSObject, WKScriptMessageHandler {
         /// one 0 or 1 per format: bold, italic, underline, numbers, bullets, left, center, right
         var state: (String) -> Void = { _ in }
         var dirty: () -> Void = {}
+        /// the text changed, once typing pauses
+        var edited: () -> Void = {}
         /// Command-Return
         var send: () -> Void = {}
         /// Command-S
@@ -75,6 +77,8 @@ final class Editor: NSObject, WKScriptMessageHandler {
             handlers.state(String(body.dropFirst(6)))
         } else if body == "dirty" {
             handlers.dirty()
+        } else if body == "edited" {
+            handlers.edited()
         } else if body == "drop" {
             handlers.dropped(view.takeDropped())
         } else if body.hasPrefix("caret:") || body.hasPrefix("hover:") {

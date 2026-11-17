@@ -944,6 +944,48 @@ const sections = [
                 what: 'The bar and the labels in dark colours.',
                 how: 'Dark mode.',
                 checked: ['Readable']
+            },
+            {
+                shot: 'write-30-sign',
+                name: 'Sign what you write',
+                what: 'Sign on the toolbar and in Tools (Outlook Express\'s Digitally Sign) signs the message with the key of the address it goes from (PGP/MIME). Both Sign and Encrypt start off; without a key of your own, Inbox Classic offers to make one. The line under the fields says what will happen.',
+                how: 'Sign in the message window, Tools > Digitally Sign, or Ctrl+Shift+D.',
+                checked: ['The button pressed and the menu checked', 'The line under the fields', 'OpenPGP.js finds the signature good']
+            },
+            {
+                shot: 'write-31-encrypt',
+                name: 'Encrypt what you write',
+                what: 'Encrypt encrypts the message to every recipient\'s key and your own, and always signs it, so Sign shows on and greyed. Each recipient shows a lock: green for a key you verified, blue for one you did not, amber for none. The copy in Sent Items and drafts are encrypted too.',
+                how: 'Encrypt in the message window, Tools > Encrypt, or Ctrl+Shift+E.',
+                checked: ['Sign on and greyed', 'A green lock for Alice', 'OpenPGP.js decrypts it and finds it signed, to her key', 'The server holds none of its words']
+            },
+            {
+                shot: 'write-32-missing-key',
+                name: 'A recipient without a key',
+                what: 'No message goes out half encrypted. With Encrypt on, the keys of recipients that have none are looked up (the domain\'s own directory, then keys.openpgp.org); one still missing turns their lock amber, and Send opens Recipients\' Keys: Find Key, Remove from Message, or Send Without Encryption.',
+                how: 'Encrypt a message to someone whose key is not known, and click Send.',
+                checked: ['Grey while it is looked up, then amber', 'Send opens Recipients\' Keys', 'Remove from Message, then it goes encrypted to the others']
+            },
+            {
+                shot: 'write-33-reply-encrypted',
+                name: 'A reply to encrypted mail starts encrypted',
+                what: 'A reply to an encrypted message, or a forward of one, starts with Encrypt on; turning it off asks first.',
+                how: 'Reply to an encrypted message, then click Encrypt.',
+                checked: ['Encrypt and Sign on at the start', 'The question before it goes off']
+            },
+            {
+                shot: 'write-34-quote-in-clear',
+                name: 'An encrypted quote never goes in the clear',
+                what: 'While a message still quotes encrypted mail or carries its attachments, it can only be sent encrypted: the line says so and Send refuses. Once the quote is removed, your own words may go unencrypted, and the line says the answer is not encrypted.',
+                how: 'Turn Encrypt off on such a reply.',
+                checked: ['The amber line', 'Send refused', 'Sent once the quote is removed, without its words']
+            },
+            {
+                shot: 'write-35-attach-key',
+                name: 'Attach My Public Key',
+                what: 'Your public key attached to the message as a file, sent as application/pgp-keys, which mail programs offer to import.',
+                how: 'Insert > Attach My Public Key (File on the Mac).',
+                checked: ['The key in the Attach line', 'Sent as application/pgp-keys']
             }
         ]
     },

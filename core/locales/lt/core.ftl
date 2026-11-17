@@ -998,6 +998,65 @@ pgp-publish-done = Jūsų raktas paskelbtas keys.openpgp.org adresams { $address
 pgp-publish-failed = Rakto paskelbti nepavyko: { $error }
 # review: changed
 pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta skiltyje { $settings }.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Užšifruota ir pasirašyta: perskaityti gali tik jūs ir { $addresses }.
+    [few] Užšifruota ir pasirašyta: perskaityti gali tik jūs ir { $count } jo gavėjai.
+   *[other] Užšifruota ir pasirašyta: perskaityti gali tik jūs ir { $count } jo gavėjų.
+}
+# review: new
+pgp-compose-encrypt-ready = Laiškas bus užšifruotas ir pasirašytas. Pridėkite gavėjų, kurių raktus turite.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] { $addresses } neturi rakto, todėl laiško dar negalima užšifruoti.
+    [few] { $count } gavėjai neturi rakto, todėl laiško dar negalima užšifruoti: { $addresses }.
+   *[other] { $count } gavėjų neturi rakto, todėl laiško dar negalima užšifruoti: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Ieškoma raktų: { $addresses }...
+# review: new
+pgp-compose-signed = Pasirašyta: gavėjai gali patikrinti, kad laiškas yra nuo jūsų ir nebuvo pakeistas.
+# review: new
+pgp-compose-reply-clear = Neužšifruota, nors laiškas, į kurį atsakoma arba kuris persiunčiamas, buvo užšifruotas.
+# review: new
+pgp-compose-encrypted-files = Pridėti užšifruoto laiško failai, todėl šį laišką galima siųsti tik užšifruotą. Įjunkite šifravimą arba pašalinkite tuos failus.
+# review: new
+pgp-compose-sign-tip = Pasirašyti laišką savo raktu, kad gavėjai galėtų patikrinti, jog jis nuo jūsų ir nebuvo pakeistas
+# review: new
+pgp-compose-sign-tip-encrypted = Užšifruotas laiškas visada pasirašomas
+# review: new
+pgp-compose-encrypt-tip = Užšifruoti laišką, kad jį galėtumėte perskaityti tik jūs ir jo gavėjai
+# review: new
+pgp-compose-make-key = Dar neturite { $address } rakto. Sukurti jį dabar? Su juo jūsų laiškus bus galima pasirašyti ir užšifruoti.
+# review: new
+pgp-compose-key-unusable = Jūsų { $address } rakto naudoti negalima ({ $state }). Atidarykite Šifravimo raktai, kad importuotumėte jo atsarginę kopiją arba sukurtumėte naują raktą.
+# review: new
+pgp-compose-encrypt-off-quote = Šis laiškas cituoja arba persiunčia užšifruotą laišką. Be šifravimo jo negalima išsiųsti, kol nepašalinsite to, ką jis cituoja. Vis tiek išjungti šifravimą?
+# review: new
+pgp-compose-encrypt-off-reply = Šis laiškas atsako į užšifruotą laišką arba jį persiunčia. Be šifravimo jūsų laišką pakeliui gali perskaityti bet kas, kas jį tvarko. Išjungti šifravimą?
+# review: new
+pgp-recipient-verified = Raktas patikrintas
+# review: new
+pgp-recipient-found = Raktas nepatikrintas
+# review: new
+pgp-recipient-own = Jūsų raktas
+# review: new
+pgp-recipient-looking = Ieškoma rakto...
+# review: new
+pgp-recipient-missing = Rakto nėra
+# review: new
+pgp-recipient-not-found = Rakto nėra: { $date } nerasta
+# review: new
+pgp-recipient-unusable = Rakto naudoti negalima: { $state }
+# review: new
+pgp-recipients-intro = Laiškas šifruojamas kiekvieno gavėjo raktu ir jūsų raktu.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] { $count } gavėjas neturi rakto, kuriuo būtų galima šifruoti. Raskite jo raktą, pašalinkite jį iš šio laiško arba išsiųskite laišką nešifruotą.
+    [few] { $count } gavėjai neturi rakto, kuriuo būtų galima šifruoti. Raskite jų raktus, pašalinkite juos iš šio laiško arba išsiųskite laišką nešifruotą.
+   *[other] { $count } gavėjų neturi rakto, kuriuo būtų galima šifruoti. Raskite jų raktus, pašalinkite juos iš šio laiško arba išsiųskite laišką nešifruotą.
+}
 # review: new
 pgp-details-part = { $number } dalis: { $label }
 # review: new

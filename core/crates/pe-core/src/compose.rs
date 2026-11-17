@@ -137,6 +137,8 @@ pub enum ComposeError {
     MissingKeys(Vec<String>),
     /// Encrypt off for a message that quotes or forwards an encrypted one
     EncryptedQuote,
+    /// Encrypt off for a message that carries files of an encrypted one (forwarded, or of a draft saved encrypted)
+    EncryptedFiles,
     /// Signing or encrypting failed, and why
     Protect(String),
 }
@@ -162,6 +164,7 @@ impl std::fmt::Display for ComposeError {
                 ],
             )),
             ComposeError::EncryptedQuote => f.write_str(&tr(Text::PgpErrorEncryptedQuote)),
+            ComposeError::EncryptedFiles => f.write_str(&tr(Text::PgpComposeEncryptedFiles)),
             ComposeError::Protect(why) => f.write_str(&tr_args(Text::PgpErrorProtect, &[("reason", why.into())])),
             ComposeError::Attachment(path, error) => f.write_str(&tr_args(
                 Text::ErrorAttachment,
@@ -255,7 +258,7 @@ fn build(
             .map(|n| n.to_string_lossy().into_owned())
             .unwrap_or_default();
         attachments.push(Attachment {
-            content_type: pe_smtp::mime_types::mime_type(&filename).to_string(),
+            content_type: attachment_type(&filename, &content).to_string(),
             filename,
             content,
             content_id: None,
@@ -298,6 +301,18 @@ fn build(
         signed: outgoing.sign || outgoing.encrypt,
         ..Default::default()
     })
+}
+
+/// The type a file is attached as: by its name, but an armored public key (Attach My Public Key, or a key saved
+/// before) as `application/pgp-keys`, which mail programs offer to import
+fn attachment_type(filename: &str, content: &[u8]) -> &'static str {
+    let armored_key = content
+        .trim_ascii_start()
+        .starts_with(b"-----BEGIN PGP PUBLIC KEY BLOCK-----");
+    if armored_key && filename.to_ascii_lowercase().ends_with(".asc") {
+        return "application/pgp-keys";
+    }
+    pe_smtp::mime_types::mime_type(filename)
 }
 
 /// The message as plain text, when it goes as such: nothing formatted in what was written (the editor is always
@@ -636,6 +651,19 @@ pub fn address_label(name: &str, address: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_armored_public_key_goes_as_a_key() {
+        let key = b"-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nxjMEaucN\n-----END PGP PUBLIC KEY BLOCK-----\n";
+        assert_eq!(attachment_type("Alice public key.asc", key), "application/pgp-keys");
+        assert_eq!(attachment_type("ALICE.ASC", key), "application/pgp-keys");
+        // by its name otherwise: another .asc (a signature), or a key under another name
+        assert_eq!(
+            attachment_type("notes.asc", b"-----BEGIN PGP SIGNATURE-----"),
+            pe_smtp::mime_types::mime_type("notes.asc")
+        );
+        assert_eq!(attachment_type("key.txt", key), "text/plain");
+    }
 
     #[test]
     fn a_reply_kept_for_a_crash_opens_with_its_quote_folded() {

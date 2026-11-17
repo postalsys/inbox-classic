@@ -15,6 +15,8 @@ menu-layout = &Esquema
 menu-sort-by = &Ordenar por
 menu-text-size = &Tamanho do texto
 menu-folder = &Pasta
+# review: new
+menu-insert = &Inserir
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -97,6 +99,12 @@ cmd-import-address-book = Importar &Livro de Endereços...
 cmd-export-address-book = &Exportar Livro de Endereços...
 cmd-export-setup = Exportar &definições e contas...
 cmd-import-setup = Importar de&finições e contas...
+# review: new
+cmd-compose-sign = &Assinar digitalmente
+# review: new
+cmd-compose-encrypt = &Encriptar
+# review: new
+cmd-attach-my-key = Anexar a minha chave &pública
 
 ## The tray icon's menu
 
@@ -215,6 +223,12 @@ ui-format-line = Inserir linha horizontal
 ui-tb-send = Enviar
 ui-tb-save = Guardar
 ui-tb-attach = Anexar
+# review: new
+ui-tb-sign = Assinar
+# review: new
+ui-tb-encrypt = Encriptar
+# review: new
+ui-field-keys = Chaves:
 ui-field-from = De:
 ui-field-to = Para:
 ui-field-cc = Cc:
@@ -698,6 +712,26 @@ ui-contact-key = Chave de encriptação:
 ui-contact-key-none = Sem chave
 ui-contact-key-use-new = Usar a &nova chave
 ui-contact-key-keep = &Manter a atual
+# review: new
+ui-recipient-keys-title = Chaves dos destinatários
+# review: new
+ui-recipient-col-recipient = Destinatário
+# review: new
+ui-recipient-col-key = Chave
+# review: new
+ui-recipient-find-key = &Procurar chave
+# review: new
+ui-recipient-remove = &Remover da mensagem
+# review: new
+ui-send-unencrypted = Enviar &sem encriptação
+# review: new
+ui-compose-make-key = &Criar uma chave...
+# review: new
+ui-compose-show-keys = C&haves de encriptação...
+# review: new
+ui-compose-encrypt-off = &Desativar a encriptação
+# review: new
+ui-compose-keep-encrypted = &Manter encriptada
 ui-setup-export-title = Exportar definições e contas
 ui-setup-import-title = Importar definições e contas
 ui-setup-export-intro = Escolha os dados a transferir para outro computador. O ficheiro não inclui mensagens: estas serão novamente transferidas do servidor no outro computador.

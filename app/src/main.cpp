@@ -601,6 +601,10 @@ void OnEvent(const UiEvent& event) {
         // keys an import added: read where they are used (the Encryption Keys window, which is not open meanwhile,
         // and the security bar of the next message opened)
         break;
+    case PE_EVENT_KIND_KEYS_FOUND:
+        // the compose window that looked keys up takes them; every one shows its recipients' keys again
+        ComposeKeysFound(event.uid);
+        break;
     case PE_EVENT_KIND_RULES_APPLIED:
         g_rulesSaid = core::T(PE_TEXT_UI_RULES_APPLIED, {{"count", std::to_wstring(event.count)}});
         SetStatus(g_rulesSaid);
@@ -1121,6 +1125,7 @@ std::wstring StorePath() {
 
 // the command line, options for test runs: --store <file> uses another mail store, --memory-passwords keeps
 // passwords for this run only, --pin-certificate <file> trusts only that server certificate (see res/help.html),
+// --key-server <url> looks keys up on a server of the UI test on this computer,
 // --sign-in-page-file <file> writes the page of a browser sign-in there for the test to open instead of the browser
 struct Arguments {
     std::wstring store;
@@ -1140,6 +1145,9 @@ struct Arguments {
     // asks which notification was shown (kTestNotification); messages are downloaded only when opened, which the test's
     // steps expect (its step of Options checks the choices)
     bool testHooks = false;
+    // --key-server <url>: keys are looked up on this server on this computer (the UI test's harness), never on the
+    // internet
+    std::wstring keyServer;
     // --language <code>: the windows in that language (`de`; `qps` the pseudo-language of the UI test), whatever
     // Options says
     std::wstring language;
@@ -1213,6 +1221,9 @@ void ReadArguments() {
         if (arg == L"--store" && i + 1 < count) {
             g_arguments.store = argv[++i];
             keep(g_arguments.store);
+        } else if (arg == L"--key-server" && i + 1 < count) {
+            g_arguments.keyServer = argv[++i];
+            keep(g_arguments.keyServer);
         } else if (arg == L"--pin-certificate" && i + 1 < count) {
             g_arguments.certificate = argv[++i];
             keep(g_arguments.certificate);
@@ -1247,6 +1258,9 @@ bool OpenCore(HWND hwnd) {
     if (g_core) {
         // View > Text Size of the last run
         webview::SetTextZoom(pe_text_zoom(g_core.get()));
+    }
+    if (g_core && !g_arguments.keyServer.empty()) {
+        pe_core_use_test_key_server(g_core.get(), core::Narrow(g_arguments.keyServer).c_str());
     }
     if (g_core && g_arguments.testHooks) {
         pe_set_download_ahead(g_core.get(), PE_DOWNLOAD_AHEAD_NEVER);

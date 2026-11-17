@@ -1,19 +1,28 @@
 //! The security bar over a signed or encrypted message, under its header: what the core says of the whole message, in
 //! the tone's colours and with pictures that say the same without them (the lock for an encrypted message; the shield
-//! with a check, the ribbon or the warning sign by tone), and Details. The Security Details window shows what the
-//! core says of each part. Nothing here reads mail data: the words are the core's.
+//! with a check, the ribbon or the warning sign by tone), and Details. The compose window's line under the fields is
+//! the same bar, saying what will happen to the message. The Security Details window shows what the core says of each
+//! part. Nothing here reads mail data: the words are the core's.
 
 use adw::prelude::*;
 use pe_core::MessageView;
 use pe_core::protect::Tone;
 
 /// The CSS class of each tone (its colours are in the app's style, `ui.rs`)
-const TONE_CLASSES: [&str; 4] = [
+pub const TONE_CLASSES: [&str; 4] = [
     "security-verified",
     "security-good",
     "security-warning",
     "security-neutral",
 ];
+
+/// `widget` in the colours of `tone`: its class, and none of the others
+pub fn set_tone(widget: &impl IsA<gtk::Widget>, tone: Tone) {
+    for class in TONE_CLASSES {
+        widget.as_ref().remove_css_class(class);
+    }
+    widget.as_ref().add_css_class(tone_class(tone));
+}
 
 fn tone_class(tone: Tone) -> &'static str {
     match tone {
@@ -44,7 +53,9 @@ pub struct SecurityBar {
 }
 
 impl SecurityBar {
-    pub fn new() -> SecurityBar {
+    /// The bar, its widgets named `{prefix}-security`, `{prefix}-security-text` and so on: "reader" over a message,
+    /// "compose" under the fields of a message written
+    pub fn new(prefix: &str) -> SecurityBar {
         let picture = |name: &str| {
             let image = gtk::Image::from_icon_name("ic-lock-closed-symbolic");
             image.set_pixel_size(16);
@@ -54,8 +65,8 @@ impl SecurityBar {
             image.set_accessible_role(gtk::AccessibleRole::Presentation);
             image
         };
-        let lock = picture("reader-security-lock");
-        let icon = picture("reader-security-icon");
+        let lock = picture(&format!("{prefix}-security-lock"));
+        let icon = picture(&format!("{prefix}-security-icon"));
         let text = gtk::Label::new(None);
         text.set_xalign(0.0);
         text.set_hexpand(true);
@@ -64,10 +75,11 @@ impl SecurityBar {
         text.set_wrap(true);
         text.set_wrap_mode(gtk::pango::WrapMode::WordChar);
         text.set_selectable(false);
-        text.set_widget_name("reader-security-text");
-        let details = gtk::Button::with_mnemonic(&pe_core::i18n::gtk_mnemonic(&t!(UiProtectionDetails)));
+        text.set_widget_name(&format!("{prefix}-security-text"));
+        let details =
+            gtk::Button::with_mnemonic(&pe_core::i18n::gtk_mnemonic(&t!(UiProtectionDetails)).replace("...", "…"));
         details.set_valign(gtk::Align::Center);
-        details.set_widget_name("reader-security-details");
+        details.set_widget_name(&format!("{prefix}-security-details"));
         let widget = gtk::Box::builder()
             .orientation(gtk::Orientation::Horizontal)
             .spacing(8)
@@ -75,20 +87,13 @@ impl SecurityBar {
             .visible(false)
             .build();
         widget.add_css_class("security-bar");
-        widget.set_widget_name("reader-security");
+        widget.set_widget_name(&format!("{prefix}-security"));
         widget.append(&lock);
         widget.append(&icon);
         widget.append(&text);
         widget.append(&details);
         // the dark colours while the windows are dark (the core's labels in the page follow the same style)
-        let styles = adw::StyleManager::default();
-        crate::ui::set_class(&widget, "dark", styles.is_dark());
-        let bar = widget.downgrade();
-        styles.connect_dark_notify(move |styles| {
-            if let Some(bar) = bar.upgrade() {
-                crate::ui::set_class(&bar, "dark", styles.is_dark());
-            }
-        });
+        follow_dark(&widget);
         SecurityBar {
             widget,
             lock,
@@ -100,28 +105,33 @@ impl SecurityBar {
 
     /// The bar of `view`: shown with its tone, pictures and words for a signed or encrypted message, hidden otherwise
     pub fn show(&self, view: &MessageView) {
-        let Some(protection) = &view.protection else {
+        match &view.protection {
+            Some(protection) => self.show_tone(Some(protection.tone), protection.encrypted, &protection.text),
+            None => self.hide(),
+        }
+    }
+
+    /// The bar in `tone` with the core's words, the lock when `encrypted`: a message's, or what the compose window will
+    /// send; hidden without a tone
+    pub fn show_tone(&self, tone: Option<Tone>, encrypted: bool, text: &str) {
+        let Some(tone) = tone else {
             self.hide();
             return;
         };
-        for class in TONE_CLASSES {
-            self.widget.remove_css_class(class);
-        }
-        self.widget.add_css_class(tone_class(protection.tone));
-        self.lock.set_visible(protection.encrypted);
-        match tone_icon(protection.tone) {
+        set_tone(&self.widget, tone);
+        self.lock.set_visible(encrypted);
+        match tone_icon(tone) {
             Some(name) => {
                 self.icon.set_icon_name(Some(name));
                 self.icon.set_visible(true);
             }
             None => self.icon.set_visible(false),
         }
-        self.text.set_text(&protection.text);
+        self.text.set_text(text);
         // what a screen reader says of the bar, and of its button
-        self.widget
-            .update_property(&[gtk::accessible::Property::Label(&protection.text)]);
+        self.widget.update_property(&[gtk::accessible::Property::Label(text)]);
         self.details
-            .update_property(&[gtk::accessible::Property::Description(&protection.text)]);
+            .update_property(&[gtk::accessible::Property::Description(text)]);
         self.widget.set_visible(true);
     }
 
@@ -148,6 +158,18 @@ impl SecurityBar {
             .collect();
         Some((self.text.text().to_string(), tone, pictures))
     }
+}
+
+/// The `dark` class on `widget` while the windows are dark, which gives the tones' classes in it their dark colours
+pub fn follow_dark(widget: &impl IsA<gtk::Widget>) {
+    let styles = adw::StyleManager::default();
+    crate::ui::set_class(widget, "dark", styles.is_dark());
+    let shown = widget.as_ref().downgrade();
+    styles.connect_dark_notify(move |styles| {
+        if let Some(widget) = shown.upgrade() {
+            crate::ui::set_class(&widget, "dark", styles.is_dark());
+        }
+    });
 }
 
 /// The Security Details window over `parent`: the title, what the core says of the message and each part (read only,

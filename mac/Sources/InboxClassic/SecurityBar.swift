@@ -6,8 +6,9 @@
 import AppKit
 import CInboxClassic
 
-/// The colours of a tone: its border, its fill and its words, light and dark (secure.rs)
-private struct ToneColors {
+/// The colours of a tone: its border, its fill and its words, light and dark (secure.rs); the compose window's line
+/// and its recipients' chips use them too
+struct ToneColors {
     let border: NSColor
     let fill: NSColor
     let words: NSColor
@@ -62,11 +63,13 @@ final class SecurityBar: NSView {
         }
     }
 
-    init() {
+    /// `id`: the accessibility identifier, its parts' identifiers start with it (the reading pane's, the compose
+    /// window's)
+    init(id: String = "reader.security") {
         super.init(frame: .zero)
         wantsLayer = true
         isHidden = true
-        setAccessibilityIdentifier("reader.security")
+        setAccessibilityIdentifier(id)
         setAccessibilityElement(true)
         setAccessibilityRole(.group)
         let symbols = NSImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
@@ -79,14 +82,14 @@ final class SecurityBar: NSView {
             image.setAccessibilityElement(false)
         }
         lock.image = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil)
-        lock.setAccessibilityIdentifier("reader.security.lock")
-        mark.setAccessibilityIdentifier("reader.security.mark")
+        lock.setAccessibilityIdentifier("\(id).lock")
+        mark.setAccessibilityIdentifier("\(id).mark")
         words.font = .systemFont(ofSize: NSFont.systemFontSize, weight: .medium)
         words.isSelectable = false
         words.maximumNumberOfLines = 0
         words.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         words.setContentHuggingPriority(.init(1), for: .horizontal)
-        words.setAccessibilityIdentifier("reader.security.words")
+        words.setAccessibilityIdentifier("\(id).words")
         detailsButton.title = Text.uiProtectionDetails.opens
         detailsButton.bezelStyle = .push
         detailsButton.controlSize = .small
@@ -95,7 +98,7 @@ final class SecurityBar: NSView {
         detailsButton.action = #selector(detailsClicked)
         detailsButton.setContentHuggingPriority(.required, for: .horizontal)
         detailsButton.setContentCompressionResistancePriority(.required, for: .horizontal)
-        detailsButton.setAccessibilityIdentifier("reader.security.details")
+        detailsButton.setAccessibilityIdentifier("\(id).details")
         let row = NSStackView(views: [lock, mark, words, detailsButton])
         row.spacing = 6
         row.setCustomSpacing(10, after: words)
@@ -134,14 +137,19 @@ final class SecurityBar: NSView {
 
     /// the bar of a message: hidden for one without protection
     func show(_ info: PeMessageInfo) {
-        tone = info.protection
+        show(tone: info.protection, encrypted: info.protection_encrypted, text: text(info.protection_text))
+    }
+
+    /// the bar in `tone` with the core's words, the lock when `encrypted`: a message's, or what the compose window
+    /// will send
+    func show(tone: PeProtectionTone, encrypted: Bool, text core: String) {
+        self.tone = tone
         guard tone != PE_PROTECTION_TONE_NONE else {
             hide()
             return
         }
-        encrypted = info.protection_encrypted
+        self.encrypted = encrypted
         colors = ToneColors.of(tone)
-        let core = text(info.protection_text)
         words.stringValue = core
         words.textColor = colors.words
         lock.isHidden = !encrypted

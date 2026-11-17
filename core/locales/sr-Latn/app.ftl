@@ -16,6 +16,8 @@ menu-layout = &Raspored
 menu-sort-by = &Sortiraj po
 menu-text-size = &Veličina teksta
 menu-folder = &Fascikla
+# review: new
+menu-insert = Um&etni
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -98,6 +100,12 @@ cmd-import-address-book = Uvezi &adresar...
 cmd-export-address-book = Iz&vezi adresar...
 cmd-export-setup = Izvezi podešavanja i nalo&ge...
 cmd-import-setup = Uvezi po&dešavanja i naloge...
+# review: new
+cmd-compose-sign = &Digitalno potpiši
+# review: new
+cmd-compose-encrypt = Ši&fruj
+# review: new
+cmd-attach-my-key = Priloži moj &javni ključ
 
 ## The tray icon's menu
 
@@ -218,6 +226,12 @@ ui-format-line = Umetni vodoravnu crtu
 ui-tb-send = Pošalji
 ui-tb-save = Sačuvaj
 ui-tb-attach = Priloži
+# review: new
+ui-tb-sign = Potpiši
+# review: new
+ui-tb-encrypt = Šifruj
+# review: new
+ui-field-keys = Ključevi:
 ui-field-from = Od:
 ui-field-to = Za:
 ui-field-cc = Cc:
@@ -703,6 +717,26 @@ ui-contact-key = Ključ za šifrovanje:
 ui-contact-key-none = Nema ključa
 ui-contact-key-use-new = Koristi &novi ključ
 ui-contact-key-keep = &Zadrži trenutni
+# review: new
+ui-recipient-keys-title = Ključevi primalaca
+# review: new
+ui-recipient-col-recipient = Primalac
+# review: new
+ui-recipient-col-key = Ključ
+# review: new
+ui-recipient-find-key = &Pronađi ključ
+# review: new
+ui-recipient-remove = &Ukloni iz poruke
+# review: new
+ui-send-unencrypted = Pošalji &bez šifrovanja
+# review: new
+ui-compose-make-key = &Napravi ključ...
+# review: new
+ui-compose-show-keys = &Ključevi za šifrovanje...
+# review: new
+ui-compose-encrypt-off = &Isključi šifrovanje
+# review: new
+ui-compose-keep-encrypted = &Zadrži šifrovanje
 ui-setup-export-title = Izvezi podešavanja i naloge
 ui-setup-import-title = Uvezi podešavanja i naloge
 ui-setup-export-intro = Izaberite šta želite da prenesete na drugi računar. Datoteka ne sadrži poruke: tamo se ponovo preuzimaju.

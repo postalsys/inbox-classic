@@ -16,6 +16,7 @@ mod bounce;
 pub mod calendar;
 pub mod card_pictures;
 mod compose;
+pub mod compose_keys;
 mod connections;
 mod contentline;
 mod export;
@@ -491,7 +492,9 @@ pub struct Core {
     /// Lookups of OpenPGP keys and their result, learned when taken (lookup.rs)
     pgp_lookups: Requests<lookup::Fetched>,
     pgp_publishes: Requests<lookup::PublishOutcome>,
-    pgp_servers: Option<pe_keys::Servers>,
+    /// The addresses whose keys are being looked up, each with its lookup: the compose window's "Looking for a key"
+    pgp_looking: Mutex<HashMap<String, u64>>,
+    pgp_servers: Mutex<Option<pe_keys::Servers>>,
     /// BIMI logos being drawn, as pixels once done
     logos: Requests<Option<Vec<u8>>>,
     /// The pictures of the list's rows being drawn, as pixels once done
@@ -598,7 +601,8 @@ impl Core {
             autoconfig: Requests::default(),
             pgp_lookups: Requests::default(),
             pgp_publishes: Requests::default(),
-            pgp_servers: options.pgp_servers.clone(),
+            pgp_looking: Mutex::default(),
+            pgp_servers: Mutex::new(options.pgp_servers.clone()),
             logos: Requests::default(),
             pictures: Requests::default(),
             logo_downloads: Arc::default(),
@@ -1839,7 +1843,7 @@ impl Core {
         let account = self.store().folder(folder)?.account_id;
         draft.from = self.other_address(account, draft.from.take())?;
         if !files.is_empty() {
-            draft.attachments = attachments_out(&format!("draft-{folder}-{uid}"), files)?;
+            draft.attachments = attachments_out(&format!("{DRAFT_OUT}{folder}-{uid}"), files)?;
         }
         Ok(Some(draft))
     }
@@ -1964,7 +1968,7 @@ impl Core {
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
-                draft.attachments = attachments_out(&format!("forward-{folder}-{uid}"), files)?;
+                draft.attachments = attachments_out(&format!("{FORWARD_OUT}{folder}-{uid}"), files)?;
             }
         }
         Ok(Some(draft))
@@ -2003,7 +2007,7 @@ impl Core {
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
-                draft.attachments = attachments_out("forward-file", files)?;
+                draft.attachments = attachments_out(&format!("{FORWARD_OUT}file"), files)?;
             }
         }
         Ok(draft)
@@ -2562,6 +2566,14 @@ pub(crate) fn own_addresses(store: &pe_store::Store, account: AccountId) -> Resu
     Ok(own)
 }
 
+/// The folders a message's own files are written out to for the compose window, by what it is: a forward's, a
+/// reopened draft's, a message taken back. A file under one of them came out of a message rather than being chosen by
+/// the user (compose_keys.rs `written_out`), which matters for a message that forwards encrypted mail.
+pub(crate) const FORWARD_OUT: &str = "forward-";
+pub(crate) const DRAFT_OUT: &str = "draft-";
+pub(crate) const UNSENT_OUT: &str = "unsent-";
+pub(crate) const WRITTEN_OUT: [&str; 3] = [FORWARD_OUT, DRAFT_OUT, UNSENT_OUT];
+
 /// [`write_out`] for a message to write on: its files, or why they could not be written out, in words
 pub(crate) fn attachments_out(name: &str, files: Vec<(String, Vec<u8>)>) -> Result<Vec<PathBuf>> {
     write_out(name, files).map_err(|error| {
@@ -2633,7 +2645,7 @@ fn same_owner(_a: &std::path::Path, _b: &std::path::Path) -> std::io::Result<boo
 
 /// Where the folders of [`private_dir`] are: the runtime folder on Linux (its temporary folder is shared by every user),
 /// the temporary folder elsewhere (each user's own on the Mac and Windows)
-fn private_root() -> PathBuf {
+pub(crate) fn private_root() -> PathBuf {
     if cfg!(all(unix, not(target_os = "macos"))) {
         std::env::var_os("XDG_RUNTIME_DIR")
             .map(PathBuf::from)

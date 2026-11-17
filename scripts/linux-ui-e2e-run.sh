@@ -14,6 +14,11 @@ export LIBGL_ALWAYS_SOFTWARE=1
 export NO_AT_BRIDGE=1
 export GTK_A11Y=none
 export LANG=${LANG:-C.UTF-8}
+# dates in a regional format other than the C locale's US one, so the test sees them follow LC_TIME (linux/Dockerfile
+# and CI generate en_GB.UTF-8; without it the dates stay in the C locale's format)
+if [ -z "${LC_TIME:-}" ] && locale -a 2>/dev/null | grep -qix 'en_GB\.utf-\?8'; then
+    export LC_TIME=en_GB.UTF-8
+fi
 status=0
 xvfb-run -a -s "-screen 0 1600x1100x24" dbus-run-session -- "$binary" --e2e "$out" || status=$?
 cat "$out/result.txt" 2>/dev/null || echo "no result"

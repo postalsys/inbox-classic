@@ -1,0 +1,25 @@
+<!--review--><h1>Semnarea și criptarea unui mesaj</h1>
+<p class="summary">Semnați un mesaj pentru ca destinatarii să știe că este de la dvs. și criptați-l pentru ca doar ei să-l poată citi.</p>
+<p>Un mesaj semnat arată că dvs. l-ați scris și că nimeni nu l-a modificat pe drum. Un mesaj criptat poate fi citit doar de destinatarii lui și de dvs. și este întotdeauna și semnat. Pentru ambele aveți nevoie de o cheie proprie.</p>
+<p>Pentru a semna sau a cripta un mesaj:</p>
+<ol>
+    <li>În fereastra mesajului, faceți clic pe <b data-text="ui-tb-sign"></b> sau pe <b data-text="ui-tb-encrypt"></b> ori alegeți <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> sau <b data-text="cmd-compose-encrypt"></b>. Puteți apăsa și <kbd data-command="compose_sign"></kbd> sau <kbd data-command="compose_encrypt"></kbd>. Dacă nu aveți încă o cheie, Inbox Classic se oferă să creeze una.</li>
+    <li>Faceți clic pe <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Cât timp <b data-text="ui-tb-encrypt"></b> este activată, linia de sub subiect arată fiecare destinatar cu un lacăt, iar Inbox Classic caută cheile pe care nu le are încă:</p>
+<table>
+    <tr><th>Lacăt</th><th>Ce înseamnă</th></tr>
+    <tr><td>Verde</td><td>Ați verificat cheia destinatarului.</td></tr>
+    <tr><td>Albastru</td><td>Aveți cheia destinatarului, dar nu ați verificat-o.</td></tr>
+    <tr><td>Gri</td><td>Inbox Classic caută cheia destinatarului.</td></tr>
+    <tr><td>Chihlimbariu</td><td>Nu s-a găsit nicio cheie pentru destinatar.</td></tr>
+</table>
+<h2>Dacă un destinatar nu are cheie</h2>
+<p>Un mesaj criptat este trimis doar când fiecare destinatar are o cheie. Dacă unul nu are, <b data-text="ui-tb-send"></b> deschide <b data-text="ui-recipient-keys-title"></b>. Acolo puteți face clic pe <b data-text="ui-recipient-find-key"></b> pentru a căuta din nou, pe <b data-text="ui-recipient-remove"></b> pentru a lăsa persoana respectivă deoparte sau pe <b data-text="ui-send-unencrypted"></b>. Îi puteți cere și cheia publică și o puteți importa.</p>
+<h2>Răspunsuri la e-mailuri criptate</h2>
+<p>Un răspuns la un mesaj criptat sau o redirecționare a lui începe cu <b data-text="ui-tb-encrypt"></b> activată, iar Inbox Classic vă întreabă înainte să o dezactivați. Cât timp mesajul citează încă textul criptat sau conține atașările lui, poate fi trimis doar criptat.</p>
+<p>Schițele unui mesaj criptat sunt salvate criptat, la fel și copia lui din <b data-text="folder-sent"></b>.</p>
+<h2>Partajarea cheii publice</h2>
+<p>Pentru ca cineva să vă poată trimite e-mail criptat, alegeți <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Cheia dvs. publică este atașată mesajului ca fișier.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

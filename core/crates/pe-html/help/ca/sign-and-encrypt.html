@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Signar i xifrar un missatge</h1>
+<p class="summary">Signeu un missatge perquè els destinataris sàpiguen que és vostre, i xifreu-lo perquè només ells el puguin llegir.</p>
+<p>Un missatge signat demostra que l’heu escrit vós i que ningú no l’ha canviat pel camí. Un missatge xifrat només el poden llegir els seus destinataris i vós, i sempre va signat també. Per a totes dues coses, us cal una clau pròpia.</p>
+<p>Per signar o xifrar un missatge:</p>
+<ol>
+    <li>A la finestra del missatge, feu clic a <b data-text="ui-tb-sign"></b> o <b data-text="ui-tb-encrypt"></b>, o trieu <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> o <b data-text="cmd-compose-encrypt"></b>. També podeu prémer <kbd data-command="compose_sign"></kbd> o <kbd data-command="compose_encrypt"></kbd>. Si encara no teniu cap clau, Inbox Classic us ofereix de crear-ne una.</li>
+    <li>Feu clic a <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Mentre <b data-text="ui-tb-encrypt"></b> està activat, la línia de sota l’assumpte mostra cada destinatari amb un cadenat, i Inbox Classic cerca les claus que encara no té:</p>
+<table>
+    <tr><th>Cadenat</th><th>Què vol dir</th></tr>
+    <tr><td>Verd</td><td>Heu verificat la clau del destinatari.</td></tr>
+    <tr><td>Blau</td><td>Teniu la clau del destinatari, però no l’heu verificada.</td></tr>
+    <tr><td>Gris</td><td>Inbox Classic està cercant la clau del destinatari.</td></tr>
+    <tr><td>Ambre</td><td>No s’ha trobat cap clau per al destinatari.</td></tr>
+</table>
+<h2>Si un destinatari no té clau</h2>
+<p>Un missatge xifrat només s’envia quan tots els destinataris tenen clau. Si n’hi ha algun que no en té, <b data-text="ui-tb-send"></b> obre <b data-text="ui-recipient-keys-title"></b>. Allà podeu fer clic a <b data-text="ui-recipient-find-key"></b> per tornar a cercar, a <b data-text="ui-recipient-remove"></b> per deixar fora aquella persona, o a <b data-text="ui-send-unencrypted"></b>. També li podeu demanar la seva clau pública i importar-la.</p>
+<h2>Respostes al correu xifrat</h2>
+<p>Una resposta a un missatge xifrat, o un reenviament d’un, comença amb <b data-text="ui-tb-encrypt"></b> activat, i Inbox Classic us ho pregunta abans que el desactiveu. Mentre el missatge encara citi el text xifrat o en porti els fitxers adjunts, només es pot enviar xifrat.</p>
+<p>Els esborranys d’un missatge xifrat es desen xifrats, i també la seva còpia a <b data-text="folder-sent"></b>.</p>
+<h2>Compartir la vostra clau pública</h2>
+<p>Perquè algú us pugui enviar correu xifrat, trieu <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. La vostra clau pública s’adjunta al missatge com a fitxer.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

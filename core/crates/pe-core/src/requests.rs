@@ -79,6 +79,11 @@ impl<T: Send + 'static> Requests<T> {
         Some(answer)
     }
 
+    /// Whether `request` still runs
+    pub(crate) fn is_running(&self, request: u64) -> bool {
+        matches!(self.map().get(&request), Some(State::Running(_)))
+    }
+
     /// Stops work the user no longer waits for, and forgets it
     pub(crate) fn cancel(&self, request: u64) {
         if let Some(State::Running(task)) = self.map().remove(&request) {

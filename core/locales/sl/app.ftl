@@ -23,6 +23,8 @@ menu-sort-by = Razvrsti p&o
 menu-text-size = &Velikost besedila
 # review: new
 menu-folder = M&apa
+# review: new
+menu-insert = &Vstavi
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -184,6 +186,12 @@ cmd-export-address-book = Izvozi im&enik...
 cmd-export-setup = Izvozi nastavit&ve in račune...
 # review: new
 cmd-import-setup = Uvo&zi nastavitve in račune...
+# review: new
+cmd-compose-sign = &Digitalno podpiši
+# review: new
+cmd-compose-encrypt = Ši&friraj
+# review: new
+cmd-attach-my-key = Pripni moj &javni ključ
 
 ## The tray icon's menu
 
@@ -409,6 +417,12 @@ ui-tb-send = Pošlji
 ui-tb-save = Shrani
 # review: new
 ui-tb-attach = Pripni
+# review: new
+ui-tb-sign = Podpiši
+# review: new
+ui-tb-encrypt = Šifriraj
+# review: new
+ui-field-keys = Ključi:
 # review: new
 ui-field-from = Od:
 # review: new
@@ -1346,6 +1360,26 @@ ui-contact-key-none = Ni ključa
 ui-contact-key-use-new = Uporabi &novi ključ
 # review: new
 ui-contact-key-keep = &Obdrži trenutnega
+# review: new
+ui-recipient-keys-title = Ključi prejemnikov
+# review: new
+ui-recipient-col-recipient = Prejemnik
+# review: new
+ui-recipient-col-key = Ključ
+# review: new
+ui-recipient-find-key = &Najdi ključ
+# review: new
+ui-recipient-remove = &Odstrani iz sporočila
+# review: new
+ui-send-unencrypted = Pošlji &brez šifriranja
+# review: new
+ui-compose-make-key = &Ustvari ključ...
+# review: new
+ui-compose-show-keys = Šifrirni &ključi...
+# review: new
+ui-compose-encrypt-off = &Izklopi šifriranje
+# review: new
+ui-compose-keep-encrypted = &Ohrani šifriranje
 # review: new
 ui-setup-export-title = Izvozi nastavitve in račune
 # review: new

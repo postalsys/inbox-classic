@@ -9,7 +9,6 @@
 //! - **A draft** with Encrypt on: encrypted to the sender's own key only, not signed (RFC 9787 section 9.5).
 
 use pe_pgp::{Cert, SecretKey};
-use pe_store::normal_address;
 
 use crate::compose::{ComposeError, Outgoing};
 use crate::worker::unix_now;
@@ -39,17 +38,11 @@ impl std::fmt::Debug for OutgoingKeys {
     }
 }
 
-/// The addresses of a list as typed
+/// The addresses of a list as typed, as the compose window lists them
 fn addresses(list: &str) -> Vec<String> {
-    pe_mime::parser::parse_addresses(list)
-        .iter()
-        .flat_map(|address| {
-            address
-                .mailboxes()
-                .iter()
-                .map(|m| normal_address(&m.address))
-                .collect::<Vec<_>>()
-        })
+    crate::compose_keys::mailboxes_in(list)
+        .into_iter()
+        .map(|(address, _)| address)
         .collect()
 }
 
@@ -62,13 +55,12 @@ impl Core {
         outgoing: &Outgoing,
         draft: bool,
     ) -> Result<Option<std::sync::Arc<OutgoingKeys>>> {
-        if outgoing.quote_encrypted && !outgoing.encrypt && !draft {
-            return Err(crate::Error::Compose(ComposeError::EncryptedQuote));
+        // what still quotes or carries encrypted mail goes only encrypted; once that is removed, it may go without
+        let encrypted_content = crate::compose_keys::encrypted_content(outgoing);
+        if let Some(reason) = encrypted_content.clone().filter(|_| !outgoing.encrypt && !draft) {
+            return Err(crate::Error::Compose(reason));
         }
-        let from = match outgoing.from.as_deref() {
-            Some(other) => normal_address(other),
-            None => normal_address(&self.store().account(account)?.settings.email),
-        };
+        let from = crate::compose_keys::sending_address(self, account, outgoing)?;
         let no_key = || crate::Error::Compose(ComposeError::NoOwnKey(from.clone()));
         // the sender's key in the Autocrypt header, unless its switch is off; not in a draft
         let autocrypt = match draft {
@@ -77,7 +69,7 @@ impl Core {
         };
         // a draft quoting encrypted mail is saved encrypted to the sender's key, whatever Encrypt says: what was
         // encrypted never reaches the server in the clear
-        let encrypt = outgoing.encrypt || (draft && outgoing.quote_encrypted);
+        let encrypt = outgoing.encrypt || (draft && encrypted_content.is_some());
         if !(encrypt || (outgoing.sign && !draft)) {
             return Ok(autocrypt.map(|header| {
                 std::sync::Arc::new(OutgoingKeys {
@@ -116,7 +108,12 @@ impl Core {
             let mut missing = Vec::new();
             let mut visible: Vec<(String, Cert)> = Vec::new();
             let mut usable = |address: String| -> Result<Option<Cert>> {
-                match book.cert_for(&address)?.filter(|cert| cert.can_encrypt(now).is_ok()) {
+                // the user's other own addresses are encrypted to by their own key
+                let cert = match book.cert_for(&address)? {
+                    Some(cert) => Some(cert),
+                    None => book.identity_cert(&address)?,
+                };
+                match cert.filter(|cert| cert.can_encrypt(now).is_ok()) {
                     Some(cert) => Ok(Some(cert)),
                     None if address == from => Ok(None),
                     None => {

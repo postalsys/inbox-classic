@@ -14,6 +14,9 @@ use crate::{Core, Event, Result};
 
 /// A miss is asked again after this long
 const MISS_KEPT: i64 = 24 * 60 * 60;
+/// An address is asked again after this long when the user asks (Find Key): keys.openpgp.org allows one lookup a
+/// minute for an address
+const ASKED_KEPT: i64 = 60;
 
 /// What a lookup is for
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,12 +52,57 @@ pub struct PublishOutcome {
 impl Core {
     /// Where keys are looked up: keys.openpgp.org and every domain's own directory, or the servers of the tests
     fn key_servers(&self) -> pe_keys::Servers {
-        self.pgp_servers.clone().unwrap_or_default()
+        let servers = self.pgp_servers.lock().unwrap_or_else(|e| e.into_inner());
+        servers.clone().unwrap_or_default()
+    }
+
+    /// The UI tests' key server (`--key-server`): keys.openpgp.org and every domain's directory played by one server
+    /// on this computer. Refused for anything but a loopback address, so no one can send the lookups elsewhere.
+    pub fn use_test_key_server(&self, base: &str) -> bool {
+        let loopback = ["http://127.0.0.1:", "http://[::1]:", "http://localhost:"];
+        let base = base.trim_end_matches('/');
+        let Some(port) = loopback.iter().find_map(|prefix| base.strip_prefix(prefix)) else {
+            return false;
+        };
+        if port.is_empty() || !port.bytes().all(|b| b.is_ascii_digit()) {
+            return false;
+        }
+        *self.pgp_servers.lock().unwrap_or_else(|e| e.into_inner()) = Some(pe_keys::Servers {
+            keyserver: base.to_string(),
+            wkd_base: Some(base.to_string()),
+        });
+        true
     }
 
     /// Looks up the keys of `addresses` that have none (and were not looked up in vain in the last day), in the
     /// background: [`Event::KeysFound`] follows with the request this returns; None when there is nothing to ask
     pub fn pgp_find(&self, addresses: &[String]) -> Result<Option<u64>> {
+        self.find_addresses(addresses, MISS_KEPT, false)
+    }
+
+    /// [`Core::pgp_find`] as the user asks it again (Find Key): a miss is asked again after a minute, and an address
+    /// whose key can no longer encrypt (expired, revoked) is asked too, for a newer key
+    pub(crate) fn pgp_find_again(&self, addresses: &[String]) -> Result<Option<u64>> {
+        self.find_addresses(addresses, ASKED_KEPT, true)
+    }
+
+    /// Whether `address` was looked up in the last minute: Find Key waits for that
+    pub(crate) fn asked_lately(&self, address: &str, now: i64) -> Result<bool> {
+        Ok(self
+            .store()
+            .pgp_lookup(address)?
+            .is_some_and(|(at, _)| now - at < ASKED_KEPT))
+    }
+
+    /// Whether the key of `address` is being looked up now
+    pub(crate) fn looking_for(&self, address: &str) -> bool {
+        let mut looking = self.pgp_looking.lock().unwrap_or_else(|e| e.into_inner());
+        // a lookup that ended is no longer waited for, whether its result was taken or not
+        looking.retain(|_, request| self.pgp_lookups.is_running(*request));
+        looking.contains_key(address)
+    }
+
+    fn find_addresses(&self, addresses: &[String], miss_kept: i64, unusable_too: bool) -> Result<Option<u64>> {
         let now = unix_now();
         let store = self.store();
         // the user's own addresses are never asked about: their keys are their own
@@ -72,10 +120,19 @@ impl Core {
             if address.is_empty() || wanted.contains(&address) || own.contains(&address) {
                 continue;
             }
-            let has_key = store.pgp_peer(&address)?.and_then(|peer| peer.fingerprint).is_some();
+            let key = store.pgp_peer(&address)?.and_then(|peer| peer.fingerprint);
+            let has_key = match key {
+                // asked again for a newer key when the one there can no longer encrypt
+                Some(fingerprint) if unusable_too => store
+                    .pgp_key(&fingerprint)?
+                    .and_then(|key| self.pgp_certs.get(&key))
+                    .is_some_and(|cert| cert.can_encrypt(now).is_ok()),
+                Some(_) => true,
+                None => false,
+            };
             let missed = store
                 .pgp_lookup(&address)?
-                .is_some_and(|(at, found)| !found && now - at < MISS_KEPT);
+                .is_some_and(|(at, found)| !found && now - at < miss_kept);
             if !has_key && !missed {
                 wanted.push(address);
             }
@@ -85,7 +142,10 @@ impl Core {
         if wanted.is_empty() {
             return Ok(None);
         }
-        self.start_lookup(Wanted::Addresses(wanted), use_keyserver).map(Some)
+        let request = self.start_lookup(Wanted::Addresses(wanted.clone()), use_keyserver)?;
+        let mut looking = self.pgp_looking.lock().unwrap_or_else(|e| e.into_inner());
+        looking.extend(wanted.into_iter().map(|address| (address, request)));
+        Ok(Some(request))
     }
 
     /// Looks up the key with `handle` (a fingerprint or key id) on keys.openpgp.org: for a signature by a key not

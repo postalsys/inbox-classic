@@ -56,6 +56,9 @@ mod secure;
 /// Step 19i: encrypted and signed mail in the list and the search, and Search in encrypted messages
 mod encrypted_list;
 
+/// Step 19j: signing and encrypting what is written
+mod compose_keys;
+
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
 /// Step 45a: settings and accounts to another computer
@@ -78,6 +81,8 @@ struct Ports {
     second_imap: u16,
     second_smtp: u16,
     second_rest: u16,
+    /// The harness's OpenPGP checks and key server
+    pgp: u16,
 }
 
 struct Driver {
@@ -132,6 +137,8 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
         // English whatever the system or Preferences say: the checks read the English words. PE_E2E_LANGUAGE runs it
         // in another language for its screenshots, where the checks of English words fail
         language: Some(std::env::var("PE_E2E_LANGUAGE").unwrap_or_else(|_| "en".into())),
+        // keys are looked up on the harness, never on the internet
+        key_server: Some(format!("http://127.0.0.1:{}", driver.ports.pgp)),
         ..Default::default()
     };
     let store = out.join("store.db").to_string_lossy().into_owned();
@@ -146,6 +153,8 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
         cert,
         "--sign-in-page-file".into(),
         page,
+        "--key-server".into(),
+        format!("http://127.0.0.1:{}", driver.ports.pgp),
     ];
     DRIVER.with(|d| *d.borrow_mut() = Some(driver.clone()));
     // the driver starts once the app has
@@ -235,6 +244,7 @@ fn start_harness() -> Result<((Child, ChildStdin), Ports), String> {
             second_imap: second("imap"),
             second_smtp: second("smtp"),
             second_rest: second("rest"),
+            pgp: port("pgp"),
         },
     ))
 }
@@ -1015,6 +1025,7 @@ async fn scenario(d: Rc<Driver>) {
     rules::message_rules(&d).await;
     keys::encryption_keys(&d).await;
     secure::signed_and_encrypted(&d).await;
+    compose_keys::signing_and_encrypting(&d).await;
     attach::opening_attachments(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
@@ -1180,6 +1191,31 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     }
 }
 
+/// The dates follow the system's regional format (LC_ALL, LC_TIME, then LANG), not the app's language:
+/// scripts/linux-ui-e2e-run.sh sets LC_TIME to en_GB.UTF-8 where that locale is installed, the C locale otherwise
+fn regional_dates(d: &Driver) {
+    d.step("dates in the regional format");
+    let locale = ["LC_ALL", "LC_TIME", "LANG"]
+        .iter()
+        .filter_map(|name| std::env::var(name).ok())
+        .find(|value| !value.is_empty())
+        .unwrap_or_default();
+    let expected = if locale.starts_with("en_GB") {
+        "28/12/26 22:58"
+    } else if locale.is_empty() || ["C", "C.UTF-8", "C.utf8", "POSIX"].contains(&locale.as_str()) {
+        "12/28/26 22:58"
+    } else {
+        d.write(&format!("   (no expected date for {locale})"));
+        return;
+    };
+    let date = glib::DateTime::from_local(2026, 12, 28, 22, 58, 0.0).map_or(0, |date| date.to_unix());
+    let text = crate::ui::format_date(date);
+    d.check(
+        text == expected,
+        &format!("a date is written as {locale} writes it ({text}, {expected} expected)"),
+    );
+}
+
 async fn reading(d: &Driver) {
     d.step("syncing");
     let main = main_window();
@@ -1196,6 +1232,7 @@ async fn reading(d: &Driver) {
     let count = wait_for(30, || (rows() >= 4).then(rows)).await;
     d.check(count == Some(4), &format!("the messages are in the list ({count:?})"));
     d.shot(&main, "main-1-inbox").await;
+    regional_dates(d);
 
     d.step("reading an HTML message");
     select_row(0).await;

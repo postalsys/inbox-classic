@@ -101,6 +101,8 @@ using Export = std::unique_ptr<PeExport, Deleter<pe_export_free>>;
 using KeyList = std::unique_ptr<PeKeyList, Deleter<pe_pgp_key_list_free>>;
 using PeerKeys = std::unique_ptr<PePeerKeys, Deleter<pe_pgp_peer_free>>;
 using IdentityList = std::unique_ptr<PeIdentityList, Deleter<pe_pgp_identity_list_free>>;
+using ComposeSecurity = std::unique_ptr<PeComposeSecurity, Deleter<pe_compose_security_free>>;
+using ComposeToggled = std::unique_ptr<PeComposeToggled, Deleter<pe_compose_toggled_free>>;
 using FromChoices = std::unique_ptr<PeFromChoices, Deleter<pe_from_choices_free>>;
 // a setup file: an export being set up, a file read, the lines of what was done, the app preferences it carries
 using SetupExport = std::unique_ptr<PeSetupExport, Deleter<pe_setup_export_free>>;

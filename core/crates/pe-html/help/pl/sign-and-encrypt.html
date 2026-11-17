@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Podpisywanie i szyfrowanie wiadomości</h1>
+<p class="summary">Podpisz wiadomość, aby odbiorcy wiedzieli, że pochodzi od Ciebie, i zaszyfruj ją, aby tylko oni mogli ją przeczytać.</p>
+<p>Podpisana wiadomość pokazuje, że jesteś jej autorem i że nikt jej nie zmienił po drodze. Zaszyfrowaną wiadomość mogą przeczytać tylko jej odbiorcy i Ty, a do tego jest ona zawsze podpisana. Do obu potrzebny jest Twój własny klucz.</p>
+<p>Aby podpisać lub zaszyfrować wiadomość:</p>
+<ol>
+    <li>W oknie wiadomości kliknij <b data-text="ui-tb-sign"></b> lub <b data-text="ui-tb-encrypt"></b> albo wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> lub <b data-text="cmd-compose-encrypt"></b>. Możesz też nacisnąć <kbd data-command="compose_sign"></kbd> lub <kbd data-command="compose_encrypt"></kbd>. Jeśli nie masz jeszcze klucza, Inbox Classic zaproponuje jego utworzenie.</li>
+    <li>Kliknij <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Gdy <b data-text="ui-tb-encrypt"></b> jest włączone, wiersz pod tematem pokazuje każdego odbiorcę z kłódką, a Inbox Classic wyszukuje klucze, których jeszcze nie ma:</p>
+<table>
+    <tr><th>Kolor kłódki</th><th>Co oznacza</th></tr>
+    <tr><td>Zielony</td><td>Klucz odbiorcy został przez Ciebie zweryfikowany.</td></tr>
+    <tr><td>Niebieski</td><td>Masz klucz odbiorcy, ale nie został on zweryfikowany.</td></tr>
+    <tr><td>Szary</td><td>Inbox Classic wyszukuje klucz odbiorcy.</td></tr>
+    <tr><td>Bursztynowy</td><td>Nie znaleziono klucza odbiorcy.</td></tr>
+</table>
+<h2>Gdy odbiorca nie ma klucza</h2>
+<p>Zaszyfrowana wiadomość zostanie wysłana tylko wtedy, gdy każdy odbiorca ma klucz. Jeśli któryś go nie ma, <b data-text="ui-tb-send"></b> otwiera okno <b data-text="ui-recipient-keys-title"></b>. Tam możesz kliknąć <b data-text="ui-recipient-find-key"></b>, aby wyszukać ponownie, <b data-text="ui-recipient-remove"></b>, aby pominąć tę osobę, albo <b data-text="ui-send-unencrypted"></b>. Możesz też poprosić tę osobę o jej klucz publiczny i go zaimportować.</p>
+<h2>Odpowiedzi na zaszyfrowaną pocztę</h2>
+<p>Odpowiedź na zaszyfrowaną wiadomość lub jej przekazanie zaczyna się z włączonym <b data-text="ui-tb-encrypt"></b>, a Inbox Classic pyta, zanim to wyłączysz. Dopóki wiadomość cytuje zaszyfrowany tekst albo zawiera załączniki zaszyfrowanej wiadomości, można ją wysłać tylko zaszyfrowaną.</p>
+<p>Wersje robocze zaszyfrowanej wiadomości są zapisywane zaszyfrowane, podobnie jak jej kopia w folderze <b data-text="folder-sent"></b>.</p>
+<h2>Udostępnianie klucza publicznego</h2>
+<p>Aby ktoś mógł wysyłać Ci zaszyfrowaną pocztę, wybierz <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Twój klucz publiczny zostanie załączony do wiadomości jako plik.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

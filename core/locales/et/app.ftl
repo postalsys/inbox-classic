@@ -12,6 +12,8 @@ menu-layout = Pai&gutus
 menu-sort-by = Sor&teeri
 menu-text-size = Teksti &suurus
 menu-folder = K&aust
+# review: new
+menu-insert = &Lisa
 
 ## The commands
 
@@ -94,6 +96,12 @@ cmd-import-address-book = Impordi aadressi&raamat...
 cmd-export-address-book = &Ekspordi aadressiraamat...
 cmd-export-setup = Ekspordi seade&d ja kontod...
 cmd-import-setup = I&mpordi seaded ja kontod...
+# review: new
+cmd-compose-sign = &Allkirjasta digitaalselt
+# review: new
+cmd-compose-encrypt = &Krüpteeri
+# review: new
+cmd-attach-my-key = Manusta minu &avalik võti
 
 ## The tray icon's menu
 
@@ -209,6 +217,12 @@ ui-format-line = Lisa horisontaaljoon
 ui-tb-send = Saada
 ui-tb-save = Salvesta
 ui-tb-attach = Manusta
+# review: new
+ui-tb-sign = Allkirjasta
+# review: new
+ui-tb-encrypt = Krüpteeri
+# review: new
+ui-field-keys = Võtmed:
 ui-field-from = Saatja:
 ui-field-to = Saaja:
 ui-field-cc = Koopia:
@@ -687,6 +701,26 @@ ui-contact-key = Krüpteerimisvõti:
 ui-contact-key-none = Võtit pole
 ui-contact-key-use-new = Kasuta &uut võtit
 ui-contact-key-keep = &Säilita senine võti
+# review: new
+ui-recipient-keys-title = Saajate võtmed
+# review: new
+ui-recipient-col-recipient = Saaja
+# review: new
+ui-recipient-col-key = Võti
+# review: new
+ui-recipient-find-key = &Otsi võtit
+# review: new
+ui-recipient-remove = &Eemalda kirjast
+# review: new
+ui-send-unencrypted = Saada &krüpteerimata
+# review: new
+ui-compose-make-key = Loo &võti...
+# review: new
+ui-compose-show-keys = &Krüpteerimisvõtmed...
+# review: new
+ui-compose-encrypt-off = Lülita krüpteerimine &välja
+# review: new
+ui-compose-keep-encrypted = &Jäta krüpteerituks
 ui-setup-export-title = Ekspordi seaded ja kontod
 ui-setup-import-title = Impordi seaded ja kontod
 ui-setup-export-intro = Valige, millised andmed soovite teise arvutisse üle kanda. Kirju faili ei lisata: need laaditakse teises arvutis uuesti alla.

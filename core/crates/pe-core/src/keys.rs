@@ -373,7 +373,7 @@ pub(crate) fn unwrap(
 pub(crate) struct CertCache(Mutex<HashMap<String, (Vec<u8>, Cert)>>);
 
 impl CertCache {
-    fn get(&self, key: &StoredKey) -> Option<Cert> {
+    pub(crate) fn get(&self, key: &StoredKey) -> Option<Cert> {
         let mut cache = self.0.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
         if let Some((bytes, cert)) = cache.get(&key.fingerprint)
             && *bytes == key.cert

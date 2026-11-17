@@ -5,19 +5,21 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: import newly arrived compose signing/encryption translations from `origin/master` at `a6ed91d6`.**
-  The source audit records exact hashes for all 117 affected paths: 1,120 new catalog entries (40 per language),
-  28 new sign-and-encrypt topics and 28 write-message insertions. Eighteen completed topics must reopen for
-  their insertion. No new language was added. Existing values are unchanged; 56 apparent changes were only
-  trailing blank lines at insertion boundaries. Preserve reviewed prose and the prior key-help import.
-  These additions are inventoried separately in `review_workspace.pending_source_import`; they are not yet
-  integrated or included in the active checkout totals below. Adjust scope and pending records during import.
-  The 18 earlier languages were caught up before this arrival and now need the compose additions reviewed.
-- Hungarian's remaining 245 catalog entries and first four help topics are complete. The active checkout has
-  20,642 catalog entries and 804 help topics completed, with 3,516 historical catalog improvements.
-  Remaining here: 12,078 entries and 516 topics, plus the upstream additions above. Hungarian has 48 help
-  topics left; after integration, continue read-messages/find-messages/conversations/organize-mail, then
-  lt/lv/pl/ro/ru/sk/sl/sv/uk. No test suites run; `REVIEWED` is unchanged.
+- **Next: review the new compose signing/encryption additions, starting with de/es/et/fr.**
+  Feature `162c0dd2`, observed in upstream merge `a6ed91d6`, is integrated after `040b7373`. All 1,120 new
+  catalog entries (17 app and 23 core IDs per language), 28 new sign-and-encrypt topics and 28 write-message
+  insertions remain marked. Eighteen previously completed write-message topics need only their new paragraph.
+  Exact targets and verified behavior are in `compose-sign-encrypt-context`; no new language was added.
+  Continue nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and Hungarian afterward.
+- Current scope: 33,840 catalog entries and 1,352 help topics. Completed: 20,642 entries and 790 full topics;
+  pending: 13,198 entries and 562 topics. Earlier prose is preserved; the completed-topic count fell because
+  existing topics reopened for the new insertion. Historical catalog improvements: 3,516.
+  Hungarian has 48 original help topics left in addition to this new compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
+- Structural checks pass with only expected mark diagnostics; 116 catalog/help outputs preserve all prior bytes,
+  and 76 implementation/generated source imports match upstream. Existing English corrections are retained.
+  The mnemonic helper now covers 53 actual scopes, including compose menus and recipient/question dialogs.
+  New conflicts in nine languages are recorded for their review. No test suites or builds run for this import.
+  `REVIEWED` is unchanged; source discovery and the final late-arrival audit remain required.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
 - Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md` (including the
   language's own notes), and `core/crates/pe-html/help/FORMAT.md`.
@@ -1920,3 +1922,33 @@ Current checkout: 20,642 catalog entries and 804 help topics completed; 3,516 hi
 Remaining here: 12,078 catalog entries and 516 help topics. Scope: 32,720 entries and 1,320 topics. Hungarian has
 48 help topics left. The next batch is the compose source integration and followup review, then Hungarian help.
 `REVIEWED` remains unchanged; the full queue and final late-arrival audit are still required.
+
+
+### Compose signing/encryption source integrated; review pending
+
+Merged feature `162c0dd2` (observed in origin/master merge `a6ed91d6`) after Hungarian checkpoint `040b7373`.
+Resolved 52 catalog/help overlaps using the prepared parent-plus-insertions result. All earlier catalog bytes,
+comments and help prose remain intact, including five prior English source corrections. All 116 catalog/help
+outputs match that prepared result; the 76 imported implementation/generated paths and topics metadata match
+upstream. Existing key-help additions and unrelated worktrees remain untouched.
+
+The import adds 40 IDs per language and a new sign-and-encrypt topic, plus one paragraph in write-message.
+Previously reviewed write-message topics mark only the insertion. Four round-1 topics enter scope and fourteen
+already counted topics reopen; ten original drafts were already pending. New scope is 33,840 entries and 1,352
+help topics; pending is 13,198 entries and 562 topics. Completed: 20,642 entries and 790 full topics. This is
+source integration only: no new draft was counted linguistically reviewed.
+
+All 28 catalog/variable/access-key inventories, help references and pending marks pass. Structural checkers
+report exactly 26,718 expected removed/partial-mark diagnostics and no other findings. Global reconciliation
+accounts for 20,676 unmarked messages, 10,371 changed help lines and 14 verified baseline pairs. Current hashes
+match. The 1,453 since-start catalog entries and 215 passages match the queue. Both staged and unstaged
+whitespace checks pass. Expanded the actual-menu helper from 46 to 53 scopes. New collisions in bg/cs/lt/pl/sk/sl/uk/ca/tr are
+recorded for review, along with the prior broader-draft issues. HTML regenerated; no tests or builds run.
+
+Actual behavior requires context corrections during review: compose status describes intended protection;
+valid signatures do not prove key ownership. Recipients need usable keys, and missing-key counts include
+unusable ones. Verified keys use a green shield, with locks, lookup indicators and warning icons for other
+states. Unencrypted sending stays blocked while protected quoted text, inline media or extracted attachments
+remain. Encrypted drafts use the sender's key only and are not signed; sent copies retain encryption.
+Remove from Message removes recipient fields, not contacts. All details and source callers are in state.
+Review German next, followed by Spanish, Estonian and French, then the other earlier languages and Hungarian.
