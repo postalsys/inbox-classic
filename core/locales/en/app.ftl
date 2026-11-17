@@ -389,6 +389,7 @@ ui-settings-sending = Sending
 ui-settings-default-apps = Default Apps
 ui-settings-message-list = Message List
 ui-settings-messages = Messages
+ui-settings-language = Language
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }:
 ui-apply = &Apply

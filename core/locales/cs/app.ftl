@@ -750,6 +750,8 @@ ui-settings-message-list = Seznam zpráv
 # review: new
 ui-settings-messages = Zprávy
 # review: new
+ui-settings-language = Jazyk
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = &Použít

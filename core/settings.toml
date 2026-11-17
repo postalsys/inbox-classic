@@ -18,7 +18,8 @@
 #                   in the label column, on its first control's row, unless that is a pop-up with a label of its
 #                   own, as Apple's own panes), an AdwPreferencesGroup on Linux
 #   id              the name in code
-#   label           its title; none for the one group of a page, which the page titles
+#   label           its title, a heading of its own (no access key, no colon, never a field's label); none for the
+#                   one group of a page, which the page titles
 #                   (a group shows on the platforms that have one of its settings)
 #   note            a note under the group (Linux: its description)
 # [[page.group.setting]]
@@ -40,7 +41,7 @@ linux_icon = "emblem-system-symbolic"
 
 [[page.group]]
 id = "language"
-label = "ui-language-label"
+label = "ui-settings-language"
 
 [[page.group.setting]]
 id = "language"

@@ -753,6 +753,8 @@ ui-settings-message-list = Meddelelsesliste
 # review: new
 ui-settings-messages = Meddelelser
 # review: new
+ui-settings-language = Sprog
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = &Anvend

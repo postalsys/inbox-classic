@@ -757,6 +757,8 @@ ui-settings-message-list = Lista poruka
 # review: new
 ui-settings-messages = Poruke
 # review: new
+ui-settings-language = Jezik
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = &Primeni

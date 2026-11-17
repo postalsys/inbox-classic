@@ -35,7 +35,7 @@ enum SettingsPage: String, CaseIterable {
 }
 
 /// A group of a pane: set apart by space, its title in the label column on its first row
-enum SettingsGroup: CaseIterable {
+enum SettingsGroup {
     case language
     case newMail
     case sending
@@ -45,23 +45,10 @@ enum SettingsGroup: CaseIterable {
     case messages
     case downloading
 
-    var page: SettingsPage {
-        switch self {
-        case .language: return .general
-        case .newMail: return .general
-        case .sending: return .general
-        case .defaultApps: return .general
-        case .updates: return .general
-        case .messageList: return .reading
-        case .messages: return .reading
-        case .downloading: return .downloading
-        }
-    }
-
     /// Its title, nil for none
     var label: Text? {
         switch self {
-        case .language: return .uiLanguageLabel
+        case .language: return .uiSettingsLanguage
         case .newMail: return .uiSettingsNewMail
         case .sending: return .uiSettingsSending
         case .defaultApps: return .uiSettingsDefaultApps
@@ -107,7 +94,7 @@ enum SettingKind {
 }
 
 /// A setting of the settings window
-enum Setting: CaseIterable {
+enum Setting {
     case language
     case notifyNewMail
     case codesInNotifications
@@ -123,26 +110,6 @@ enum Setting: CaseIterable {
     case trustedSenders
     case downloadAhead
     case downloadLimit
-
-    var group: SettingsGroup {
-        switch self {
-        case .language: return .language
-        case .notifyNewMail: return .newMail
-        case .codesInNotifications: return .newMail
-        case .sendDelay: return .sending
-        case .defaultMailApp: return .defaultApps
-        case .emlDefault: return .defaultApps
-        case .checkForUpdates: return .updates
-        case .layout: return .messageList
-        case .groupByConversation: return .messageList
-        case .listPictures: return .messageList
-        case .darkMessages: return .messages
-        case .picturesAlways: return .messages
-        case .trustedSenders: return .messages
-        case .downloadAhead: return .downloading
-        case .downloadLimit: return .downloading
-        }
-    }
 
     var kind: SettingKind {
         switch self {

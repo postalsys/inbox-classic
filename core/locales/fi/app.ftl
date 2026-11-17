@@ -754,6 +754,8 @@ ui-settings-message-list = Viestiluettelo
 # review: new
 ui-settings-messages = Viestit
 # review: new
+ui-settings-language = Kieli
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = &Käytä

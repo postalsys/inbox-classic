@@ -753,6 +753,8 @@ ui-settings-message-list = Λίστα μηνυμάτων
 # review: new
 ui-settings-messages = Μηνύματα
 # review: new
+ui-settings-language = Γλώσσα
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = Ε&φαρμογή

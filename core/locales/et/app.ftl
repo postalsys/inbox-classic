@@ -395,6 +395,8 @@ ui-settings-message-list = Kirjade loend
 # review: new
 ui-settings-messages = Kirjad
 # review: new
+ui-settings-language = Keel
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = R&akenda

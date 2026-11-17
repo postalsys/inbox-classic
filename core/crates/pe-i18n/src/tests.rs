@@ -215,6 +215,17 @@ fn mnemonics() {
 }
 
 #[test]
+fn field_titles() {
+    assert_eq!(field_title("&Language:"), "Language");
+    assert_eq!(field_title("Nom :"), "Nom");
+    assert_eq!(field_title("Nom\u{a0}:"), "Nom");
+    assert_eq!(field_title("名前："), "名前");
+    assert_eq!(field_title("Q&&A:"), "Q&A");
+    assert_eq!(field_title("Downloading"), "Downloading");
+    assert_eq!(field_title("[Ļåñĝüåĝé: ~~~~]"), "[Ļåñĝüåĝé ~~~~]");
+}
+
+#[test]
 fn pseudo_is_longer_and_bracketed() {
     let text = pseudo("Move to Folder");
     assert!(text.starts_with("[Mövé") && text.ends_with(']'), "{text}");

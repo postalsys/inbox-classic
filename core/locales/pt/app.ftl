@@ -754,6 +754,8 @@ ui-settings-message-list = Lista de mensagens
 # review: new
 ui-settings-messages = Mensagens
 # review: new
+ui-settings-language = Idioma
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = &Aplicar

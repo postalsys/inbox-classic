@@ -3,77 +3,35 @@ use std::collections::HashMap;
 
 include!(concat!(env!("OUT_DIR"), "/settings_table.rs"));
 
-const ROOT: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../..");
-
-/// The names of a generated file in order from `from` on: what follows each `prefix` up to the first character that
-/// cannot be in a name
-fn names(file: &str, from: &str, prefix: &str) -> Vec<String> {
-    let text = std::fs::read_to_string(format!("{ROOT}/{file}")).unwrap();
-    let at = text.find(from).unwrap_or_else(|| panic!("{file} has no {from}"));
-    text[at..]
-        .split(prefix)
-        .skip(1)
-        .map(|rest| {
-            rest.chars()
-                .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
-                .collect()
-        })
-        .collect()
-}
-
-fn camel(id: &str, upper_first: bool) -> String {
-    id.split('_')
-        .enumerate()
-        .map(|(i, word)| {
-            let mut chars = word.chars();
-            let first = chars.next().map(|c| {
-                if i == 0 && !upper_first {
-                    c.to_string()
-                } else {
-                    c.to_uppercase().to_string()
-                }
-            });
-            first.unwrap_or_default() + chars.as_str()
-        })
-        .collect()
-}
-
 fn on(platform: &str) -> impl Iterator<Item = &'static str> + '_ {
     SETTINGS.iter().filter(move |s| s.6.contains(&platform)).map(|s| s.2)
 }
 
-/// Each platform's file lists its settings, and only those, in the order of the table
+/// The settings only some platforms have: Windows is always light, so no dark messages there; the Mac's own updates
 #[test]
-fn every_platform_has_its_settings_in_order() {
-    let windows: Vec<String> = on("windows").map(|id| id.to_uppercase()).collect();
-    let mut c = names("core/include/settings.h", "enum PeSetting :", "    PE_SETTING_");
-    c.truncate(c.iter().position(|n| n == "COUNT").unwrap());
-    assert_eq!(c, windows);
-
-    let mac: Vec<String> = on("mac").map(|id| camel(id, false)).collect();
-    // the last enum of the file: its cases are the last at that indent
-    let swift = names(
-        "mac/Sources/InboxClassic/Generated/SettingsPages.swift",
-        "enum Setting:",
-        "\n    case ",
-    );
-    assert_eq!(swift, mac);
-
-    let linux: Vec<String> = on("linux").map(|id| camel(id, true)).collect();
-    let rust = names(
-        "linux/src/generated/settings_pages.rs",
-        "pub const ALL: &[Setting]",
-        "Setting::",
-    );
-    assert_eq!(&rust[..linux.len()], &linux[..]);
-    // the list ends there: next is the first arm of a match, a whole list again
-    assert_eq!(rust[linux.len()], linux[0]);
-
-    // Windows always light, so no dark messages there; the Mac's own updates
+fn some_settings_are_on_some_platforms() {
     assert!(!on("windows").any(|id| id == "dark_messages"));
     assert!(on("linux").any(|id| id == "dark_messages"));
     assert!(on("mac").any(|id| id == "check_for_updates"));
     assert!(!on("linux").any(|id| id == "check_for_updates"));
+}
+
+/// A group's title is a heading of its own in every language, never a field's label: no access key, no colon, so no
+/// app takes anything off it
+#[test]
+fn group_titles_are_headings_in_every_language() {
+    let mut problems = Vec::new();
+    for (language, _) in pe_i18n::LANGUAGES {
+        for (group, id) in GROUPS.iter().filter(|g| !g.1.is_empty()) {
+            let text = pe_i18n::message_in(language, id).unwrap();
+            if text.contains('&') || text.trim_end().ends_with([':', '\u{ff1a}']) {
+                problems.push(format!(
+                    "{language}: the {group} group's {id} is a field's label: {text}"
+                ));
+            }
+        }
+    }
+    assert!(problems.is_empty(), "{}", problems.join("\n"));
 }
 
 #[test]

@@ -753,6 +753,8 @@ ui-settings-message-list = Berichtenlijst
 # review: new
 ui-settings-messages = Berichten
 # review: new
+ui-settings-language = Taal
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = &Toepassen

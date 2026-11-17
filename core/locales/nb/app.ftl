@@ -754,6 +754,8 @@ ui-settings-message-list = Meldingsliste
 # review: new
 ui-settings-messages = Meldinger
 # review: new
+ui-settings-language = Språk
+# review: new
 ui-settings-label = { $label }:
 # review: new
 ui-apply = &Bruk

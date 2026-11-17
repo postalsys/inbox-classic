@@ -63,24 +63,10 @@ pub enum SettingsGroup {
 }
 
 impl SettingsGroup {
-    pub const ALL: &[SettingsGroup] = &[SettingsGroup::Language, SettingsGroup::NewMail, SettingsGroup::Sending, SettingsGroup::DefaultApps, SettingsGroup::MessageList, SettingsGroup::Messages, SettingsGroup::Downloading];
-
-    pub fn page(self) -> SettingsPage {
-        match self {
-            SettingsGroup::Language => SettingsPage::General,
-            SettingsGroup::NewMail => SettingsPage::General,
-            SettingsGroup::Sending => SettingsPage::General,
-            SettingsGroup::DefaultApps => SettingsPage::General,
-            SettingsGroup::MessageList => SettingsPage::Reading,
-            SettingsGroup::Messages => SettingsPage::Reading,
-            SettingsGroup::Downloading => SettingsPage::Downloading,
-        }
-    }
-
     /// Its title, None for the one group of a page, which the page titles
     pub fn title(self) -> Option<Text> {
         match self {
-            SettingsGroup::Language => Some(Text::UiLanguageLabel),
+            SettingsGroup::Language => Some(Text::UiSettingsLanguage),
             SettingsGroup::NewMail => Some(Text::UiSettingsNewMail),
             SettingsGroup::Sending => Some(Text::UiSettingsSending),
             SettingsGroup::DefaultApps => Some(Text::UiSettingsDefaultApps),
@@ -145,9 +131,8 @@ pub enum Setting {
 }
 
 impl Setting {
-    pub const ALL: &[Setting] = &[Setting::Language, Setting::NotifyNewMail, Setting::CodesInNotifications, Setting::SendDelay, Setting::DefaultMailApp, Setting::EmlDefault, Setting::Layout, Setting::GroupByConversation, Setting::ListPictures, Setting::DarkMessages, Setting::PicturesAlways, Setting::TrustedSenders, Setting::DownloadAhead, Setting::DownloadLimit];
-
     /// Its name in code and the UI test (`codes_in_notifications`)
+    #[allow(dead_code)]
     pub fn name(self) -> &'static str {
         match self {
             Setting::Language => "language",
@@ -164,25 +149,6 @@ impl Setting {
             Setting::TrustedSenders => "trusted_senders",
             Setting::DownloadAhead => "download_ahead",
             Setting::DownloadLimit => "download_limit",
-        }
-    }
-
-    pub fn group(self) -> SettingsGroup {
-        match self {
-            Setting::Language => SettingsGroup::Language,
-            Setting::NotifyNewMail => SettingsGroup::NewMail,
-            Setting::CodesInNotifications => SettingsGroup::NewMail,
-            Setting::SendDelay => SettingsGroup::Sending,
-            Setting::DefaultMailApp => SettingsGroup::DefaultApps,
-            Setting::EmlDefault => SettingsGroup::DefaultApps,
-            Setting::Layout => SettingsGroup::MessageList,
-            Setting::GroupByConversation => SettingsGroup::MessageList,
-            Setting::ListPictures => SettingsGroup::MessageList,
-            Setting::DarkMessages => SettingsGroup::Messages,
-            Setting::PicturesAlways => SettingsGroup::Messages,
-            Setting::TrustedSenders => SettingsGroup::Messages,
-            Setting::DownloadAhead => SettingsGroup::Downloading,
-            Setting::DownloadLimit => SettingsGroup::Downloading,
         }
     }
 
