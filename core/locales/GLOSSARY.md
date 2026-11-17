@@ -1043,6 +1043,12 @@ Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Δ�
   "Κίτρινο" after Κ was used for "Κόκκινο". Preserve the correct colour spelling; this needs an app-side
   review, not a translation workaround. Collision checks alone do not validate that generated shortcut.
 
+- Agent consent uses "Κατάργηση εγγραφής" / "Διατήρηση εγγραφής", with distinct unaccented Greek Κ/Δ access keys.
+  The latter keeps the subscription and sends no request. "Αίτημα κατάργησης εγγραφής" is not a completed cancellation.
+- Logs label the subject as "Μήνυμα:" and addresses as "Αποστολείς:"; agent names follow "Ο πράκτορας ΤΝ" unchanged.
+- Keep "απόρριψη πρόχειρου" and explain permanent removal of agent-owned drafts. Saving, including autosave,
+  ends agent access; opening alone does not. "Κείμενο της υπογραφής" distinguishes the optional account footer.
+
 ### Български (bg)
 
 Terms: Входящи; Изходящи; Изпратени; Изтрити; Чернови; Нежелана поща; съобщение; папка; акаунт; прикачен файл; флаг

@@ -444,8 +444,7 @@ ui-browser-sign-in-server = { $server } (σύνδεση μέσω προγράμ�
 ui-dont-allow = Να μην επιτρέπεται
 ui-allow = Να ε&πιτρέπεται
 ui-dont-send = Να μη σταλεί
-# review: new
-ui-dont-unsubscribe = Να μη γίνει κατάργηση εγγραφής
+ui-dont-unsubscribe = Διατήρηση εγγραφής
 ui-edit-first = &Επεξεργασία πρώτα
 ui-new-address = Νέα διεύθυνση
 ui-turn-away = &Απόρριψη
