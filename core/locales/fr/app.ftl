@@ -375,33 +375,19 @@ ui-sign-in-apps-intro = Les applications de connexion permettent aux comptes de 
 ui-col-issuer = Émetteur
 ui-col-used-by = Utilisée par
 ui-options-system-default = Langue du système ({ $language })
-# review: new
 ui-settings-general = Général
-# review: new
 ui-settings-reading = Lecture
-# review: new
 ui-settings-new-mail = Nouveau courrier
-# review: new
 ui-settings-sending = Envoi
-# review: new
 ui-settings-default-apps = Applications par défaut
-# review: new
 ui-settings-message-list = Liste des messages
-# review: new
 ui-settings-messages = Messages
-# review: new
 ui-settings-language = Langue
-# review: new
 ui-settings-label = { $label } :
-# review: new
 ui-apply = &Appliquer
-# review: new
 ui-language-label = &Langue :
-# review: new
 ui-restart-note = Redémarrez Inbox Classic pour appliquer la nouvelle langue.
-# review: new
 ui-restart-ask = Inbox Classic s'affichera dans la langue choisie ({ $language }) après un redémarrage. Redémarrer maintenant ?
-# review: new
 ui-notify-new-mail = Me &prévenir de l'arrivée de nouveaux messages
 ui-new-folder-title = Nouveau dossier
 ui-rename-folder-title = Renommer le dossier
@@ -568,27 +554,22 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Le carnet d'adresses n'a pas pu être enregistré : { $reason }
 ui-code-copied = Code copié
-# review: changed
 ui-codes-in-notifications = Affi&cher les codes de connexion dans les notifications de nouveau courrier
 ui-tool-unread-only = Non lus
 ui-no-unread = Il n'y a aucun message non lu ici.
 ui-pictures-always-sender = Toujours télécharger les images de { $sender }
 ui-pictures-always-domain = Toujours télécharger les images des expéditeurs du domaine { $domain }
 ui-pictures-unconfirmed = Le domaine de l'expéditeur ({ $domain }) n'a pas pu être vérifié. Les images de ce message ne sont donc pas téléchargées automatiquement.
-# review: changed
 ui-pictures-always-option = &Télécharger les images de tous les messages
 ui-pictures-always-warning = Les expéditeurs peuvent alors savoir quand vous lisez leurs messages.
 ui-protection-details = &Détails...
 ui-protection-details-title = Détails de sécurité
 ui-download-heading = Téléchargement
-# review: changed
 ui-download-ahead = &Télécharger les messages à l’avance :
 ui-download-ahead-recent = Messages récents de 1 Mo maximum
 ui-download-ahead-all = Tous les messages
 ui-download-ahead-never = Seulement à l’ouverture
-# review: changed
 ui-download-limit = &Espace maximal par compte :
-# review: changed
 ui-send-delay = &Délai avant l’envoi :
 ui-send-delay-note = Tant qu’un message est en attente d’envoi, vous pouvez annuler son envoi avec le bouton Annuler.
 ui-dark-messages = Afficher les messages sur fond sombre lorsque le système est en mode sombre
@@ -601,19 +582,16 @@ ui-send-too-late = { $subject } a déjà été envoyé.
 ui-outbox-status-undo = Envoi à { $time }
 ui-download-note = Les messages téléchargés à l'avance s'ouvrent immédiatement. Lorsque la limite de stockage est dépassée, les copies locales les plus anciennes sont supprimées, puis téléchargées à nouveau à l'ouverture des messages.
 ui-attachment-downloading = Le téléchargement de ce message est encore en cours. Réessayez une fois le téléchargement terminé.
-# review: changed
 ui-trusted-senders-button = &Expéditeurs de confiance...
 ui-trusted-senders-title = Expéditeurs de confiance
 ui-trusted-senders-note = Les images des messages de ces expéditeurs sont téléchargées automatiquement lorsque votre fournisseur de messagerie vérifie le domaine de l'expéditeur.
 ui-trusted-everyone-at = Tous les expéditeurs du domaine { $domain }
 ui-trusted-senders-empty = Aucun expéditeur de confiance n'a encore été ajouté.
-# review: changed
 ui-eml-default = &Ouvrir les fichiers .eml avec Inbox Classic
 ui-eml-default-done = Inbox Classic ouvre maintenant les fichiers .eml.
 ui-eml-default-failed = Impossible de définir Inbox Classic comme application par défaut pour les fichiers .eml : { $reason }
 ui-folders = Dossiers
 ui-sorted-by = Tri : { $field }
-# review: changed
 ui-layout-label = &Disposition :
 ui-columns-note = La fenêtre est assez large pour la disposition en colonnes. Vous pouvez modifier la disposition dans Affichage > Disposition.
 ui-row-unread = Non lu
@@ -623,10 +601,8 @@ ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages
 }
-# review: changed
 ui-list-pictures = Afficher &les images des expéditeurs dans la liste des messages
-# review: changed
-ui-list-pictures-note = Affiche les logos de marque ou les photos du Carnet d'adresses si le domaine de l'expéditeur est confirmé, et ses initiales si aucune image n'est disponible. Les logos téléchargés sont conservés et réutilisés pour plusieurs messages.
+ui-list-pictures-note = Dans la disposition en colonnes, affiche les logos de marque ou les photos du Carnet d'adresses si le domaine de l'expéditeur est confirmé, et ses initiales si aucune image n'est disponible. Les logos téléchargés sont conservés et réutilisés pour plusieurs messages.
 ui-card-picture = Image :
 ui-card-picture-choose = &Choisir...
 ui-picture-not-picture = Ce fichier n'est pas une image PNG ou JPEG.

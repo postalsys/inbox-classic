@@ -163,8 +163,7 @@ gtk-nothing-yet = Rien pour l'instant.
 ## Preferences
 
 gtk-preferences = Préférences
-# review: changed
-gtk-notify-subtitle = Uniquement lorsque Inbox Classic est en arrière-plan
+gtk-notify-subtitle = Uniquement lorsqu’Inbox Classic est en arrière-plan
 
 ## The desktop entry and the page of the software stores
 

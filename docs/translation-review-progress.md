@@ -17,13 +17,14 @@ Commit completed batches regularly and preserve an exact resume point.
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
-  German, Spanish and Estonian are complete again after their settings reviews. Continue French:
-  27 catalog entries (24 app, one Linux, two Mac) and 11 help topics remain. Then process nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
+  German, Spanish, Estonian and French are complete again after their settings reviews. Audit upstream,
+  then continue Dutch: 27 catalog entries (24 app, one Linux, two Mac) and 11 help topics remain.
+  Then process it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
   Croatian app before returning to the remaining initial reviews. Exact source IDs/topics are in state.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,440 catalog entries and 1,292 help topics; 14,424 entries and 726 topics are currently pending.
+  32,440 catalog entries and 1,292 help topics; 14,397 entries and 715 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were reviewed with 74 improvements; its new settings entries remain pending.
@@ -925,9 +926,23 @@ verified for German/Spanish. Report regenerated; git diff --check passes. No tes
 
 Continue French settings next. Spanish settings checkpoint: `64101fe2`.
 
-Current totals: 18,016 catalog entries and 566 help topics completed in the active scope; 2,897 historical
-catalog value improvements. Remaining: 14,424 catalog entries and 726 help topics. Earlier context followups
-are preserved; settings review remains pending in 25 languages. `REVIEWED` remains unchanged.
+### French settings review completed
+
+Reviewed 27 catalog entries and all 11 affected help topics, improving two catalog values. Added the column-layout
+condition to the sender-image note and corrected the background-condition elision. Retained fluent settings labels.
+Rewrote Settings help with accurate Apply/Cancel, external Windows default-app behavior, queued sending, defaults
+and image conditions. Improved conversation rows, retry wording, sorting criteria, background operation and
+code-card authentication while preserving earlier notification and persistent logo-cache corrections.
+
+All 46 mnemonic scopes pass. Static check-language reports only 1,395 deliberately removed marks. IDs, variables,
+access-key counts, comments, help tags/attributes, OS branches and literal shortcuts are preserved. All 28 pending
+inventories and completed/source hashes reconcile (18,077 messages and 7,497 changed help lines). Three French
+moved baseline pairs join the 11 already verified for German/Spanish/Estonian. Report regenerated; git diff --check
+passes. No tests run. Audit upstream next, then continue Dutch settings. Estonian checkpoint: `1e4fd054`.
+
+Current totals: 18,043 catalog entries and 577 help topics completed in the active scope; 2,899 historical
+catalog value improvements. Remaining: 14,397 catalog entries and 715 help topics. Earlier context followups
+are preserved; settings review remains pending in 24 languages. `REVIEWED` remains unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
