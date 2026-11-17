@@ -999,8 +999,6 @@ pgp-publish-done = Jūsų raktas paskelbtas keys.openpgp.org adresams { $address
 pgp-publish-failed = Rakto paskelbti nepavyko: { $error }
 # review: changed
 pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta skiltyje { $settings }.
-# review: new
-pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta parinktyse.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

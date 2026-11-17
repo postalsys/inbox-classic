@@ -979,8 +979,6 @@ pgp-publish-done = Το κλειδί σας δημοσιεύτηκε στο keys
 pgp-publish-failed = Δεν ήταν δυνατή η δημοσίευση του κλειδιού: { $error }
 # review: changed
 pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στο { $settings }.
-# review: new
-pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στις Επιλογές.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

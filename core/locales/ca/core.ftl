@@ -983,8 +983,6 @@ pgp-publish-done = La vostra clau està publicada a keys.openpgp.org per a { $ad
 pgp-publish-failed = No s’ha pogut publicar la clau: { $error }
 # review: changed
 pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a { $settings }.
-# review: new
-pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a Opcions.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

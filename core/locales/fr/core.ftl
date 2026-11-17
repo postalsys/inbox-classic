@@ -680,8 +680,6 @@ pgp-publish-done = Votre clé est publiée sur keys.openpgp.org pour { $addresse
 pgp-publish-failed = La clé n'a pas pu être publiée : { $error }
 # review: changed
 pgp-keyserver-off = La recherche de clés sur keys.openpgp.org est désactivée dans { $settings }.
-# review: new
-pgp-keyserver-off = La recherche de clés sur keys.openpgp.org est désactivée dans les Options.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

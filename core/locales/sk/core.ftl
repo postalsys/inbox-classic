@@ -1024,8 +1024,6 @@ pgp-publish-done = Váš kľúč je zverejnený na keys.openpgp.org pre { $addre
 pgp-publish-failed = Kľúč sa nepodarilo zverejniť: { $error }
 # review: changed
 pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v { $settings }.
-# review: new
-pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v Možnostiach.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

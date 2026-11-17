@@ -951,8 +951,6 @@ pgp-publish-done = A kulcsa közzétéve a keys.openpgp.org oldalon ezekhez a c�
 pgp-publish-failed = A kulcsot nem sikerült közzétenni: { $error }
 # review: changed
 pgp-keyserver-off = A kulcsok keresése a keys.openpgp.org oldalon ki van kapcsolva itt: { $settings }.
-# review: new
-pgp-keyserver-off = A kulcsok keresése a keys.openpgp.org oldalon ki van kapcsolva a Beállításokban.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

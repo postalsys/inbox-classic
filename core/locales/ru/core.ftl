@@ -997,8 +997,6 @@ pgp-publish-done = Ваш ключ опубликован на keys.openpgp.org 
 pgp-publish-failed = Не удалось опубликовать ключ: { $error }
 # review: changed
 pgp-keyserver-off = Поиск ключей на keys.openpgp.org выключен в разделе { $settings }.
-# review: new
-pgp-keyserver-off = Поиск ключей на keys.openpgp.org отключен в параметрах.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

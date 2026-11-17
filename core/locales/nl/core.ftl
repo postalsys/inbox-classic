@@ -972,8 +972,6 @@ pgp-publish-done = Je sleutel is gepubliceerd op keys.openpgp.org voor { $addres
 pgp-publish-failed = De sleutel kon niet worden gepubliceerd: { $error }
 # review: changed
 pgp-keyserver-off = Sleutels zoeken op keys.openpgp.org staat uit bij { $settings }.
-# review: new
-pgp-keyserver-off = Sleutels opzoeken op keys.openpgp.org is uitgeschakeld in Opties.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

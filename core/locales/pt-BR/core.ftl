@@ -997,8 +997,6 @@ pgp-publish-done = Sua chave está publicada em keys.openpgp.org para { $address
 pgp-publish-failed = Não foi possível publicar a chave: { $error }
 # review: changed
 pgp-keyserver-off = A procura de chaves em keys.openpgp.org está desativada em { $settings }.
-# review: new
-pgp-keyserver-off = A procura de chaves em keys.openpgp.org está desativada em Opções.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

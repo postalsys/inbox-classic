@@ -1007,8 +1007,6 @@ pgp-publish-done = Twój klucz jest opublikowany na keys.openpgp.org dla { $addr
 pgp-publish-failed = Nie udało się opublikować klucza: { $error }
 # review: changed
 pgp-keyserver-off = Wyszukiwanie kluczy na keys.openpgp.org jest wyłączone w { $settings }.
-# review: new
-pgp-keyserver-off = Wyszukiwanie kluczy na keys.openpgp.org jest wyłączone w Opcjach.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

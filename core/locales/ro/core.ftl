@@ -1010,8 +1010,6 @@ pgp-publish-done = Cheia dvs. este publicată pe keys.openpgp.org pentru { $addr
 pgp-publish-failed = Cheia nu a putut fi publicată: { $error }
 # review: changed
 pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în { $settings }.
-# review: new
-pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în Opțiuni.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

@@ -1010,8 +1010,6 @@ pgp-publish-done = Jūsu atslēga ir publicēta vietnē keys.openpgp.org adresei
 pgp-publish-failed = Atslēgu nevarēja publicēt: { $error }
 # review: changed
 pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta sadaļā { $settings }.
-# review: new
-pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta opcijās.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

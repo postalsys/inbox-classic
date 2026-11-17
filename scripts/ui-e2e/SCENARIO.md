@@ -365,6 +365,20 @@ Encrypted mail in the list and the search (screenshots `main-12-lock-in-list`, `
   shows its first words; `secure-protected-subject.eml` (an encrypted message with a protected Subject, in
   `scripts/ui-e2e/pgp/`) is listed by its protected Subject, not "..."
 
+## 19j. Signing and encrypting what is written
+
+Screenshots: `write-30-sign`, `write-31-encrypt`, `write-32-missing-key`, `write-33-reply-encrypted`, `write-34-quote-in-clear`, `write-35-attach-key`
+
+After 19i: `me.asc` is the account's key, Alice's key is imported and verified, Dave's (dave@example.com) is in no file. The app runs with `--key-server http://127.0.0.1:<pgp>` (the harness's port), so its lookups never leave the computer and Dave's key is not found. Each message sent lands in the Inbox (ImapKit's SMTP server delivers there) and is checked with `POST /pgp/check` of the harness: its raw source as the REST API gives it, `me.asc` and its passphrase as `key`, and `alice.asc` in `recipients`. Each is taken away after.
+
+- a new message starts with Sign and Encrypt off on the toolbar and unchecked in Tools, and no line under the fields
+- Sign (Tools > Digitally Sign, Ctrl+Shift+D, the Mac's Option-Command-Y) on a message to alice@example.org: the button pressed, the menu item checked, the line under the fields says "Signed: recipients can check that it comes from you and was not changed." in blue (`write-30-sign`); sent, the harness says `signed`, `valid`, and the text is the one written
+- Encrypt (Ctrl+Shift+E, Option-Command-X) on a message to Alice Example <alice@example.org>: Sign shows on and greyed, its tooltip "An encrypted message is always signed"; the Keys line shows Alice with a green lock; the line says "Encrypted and signed: only you and Alice Example can read it." in green (`write-31-encrypt`); sent, the harness says `encrypted`, `signed`, `valid`, `to: [true]`, and the server's copy holds none of the words written
+- Encrypt on a message to Alice and Dave <dave@example.com>: Dave's lock is grey ("Looking for a key...") until the harness answers, then amber ("No key: none was found on" today); the line is amber and names Dave; Send opens Recipients' Keys instead of sending: the intro "One recipient has no key to encrypt to...", Alice (Key verified) and Dave (No key) with their locks, Find Key greyed for Dave (asked less than a minute ago), Remove from Message, Send Without Encryption and Cancel (`write-32-missing-key`); Remove from Message takes Dave out of To, the window then shows only Alice and Send sends it encrypted to her
+- Reply to `secure-encrypted.eml` (put in the Inbox again): the message opens with Encrypt and Sign on, Alice's lock green; Encrypt clicked off asks "This message quotes or forwards an encrypted message..." with Turn Encryption Off and Keep It Encrypted (`write-33-reply-encrypted`); Keep It Encrypted leaves it on
+- Turn Encryption Off: the line is amber, "This message quotes or forwards an encrypted message, so it can only be sent encrypted..." (`write-34-quote-in-clear`); Send is refused with the same words and the message stays open; the quote unfolded ("...") and deleted, the line says "Not encrypted, although the message it answers or forwards was."; sent, the harness says `signed` (Sign stayed on) and its text holds no "old mill"
+- Insert > Attach My Public Key (File > Attach My Public Key on the Mac) on a message to Alice: the Attach line lists "Alex Morgan public key.asc" (`write-35-attach-key`); sent, the harness lists an attachment of type `application/pgp-keys` with that name
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`

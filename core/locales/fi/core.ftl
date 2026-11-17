@@ -971,8 +971,6 @@ pgp-publish-done = Avaimesi on julkaistu palvelussa keys.openpgp.org osoitteelle
 pgp-publish-failed = Avainta ei voitu julkaista: { $error }
 # review: changed
 pgp-keyserver-off = Avainten haku palvelusta keys.openpgp.org on poistettu käytöstä kohdassa { $settings }.
-# review: new
-pgp-keyserver-off = Avainten haku palvelusta keys.openpgp.org on poistettu käytöstä Asetuksissa.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

@@ -968,8 +968,6 @@ pgp-publish-done = Anahtarınız keys.openpgp.org'da şu adresler için yayımla
 pgp-publish-failed = Anahtar yayımlanamadı: { $error }
 # review: changed
 pgp-keyserver-off = keys.openpgp.org üzerinde anahtar arama { $settings } altında kapalı.
-# review: new
-pgp-keyserver-off = keys.openpgp.org'da anahtar arama Seçenekler'de kapalı.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

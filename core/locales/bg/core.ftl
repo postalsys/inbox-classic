@@ -981,8 +981,6 @@ pgp-publish-done = Ключът ви е публикуван в keys.openpgp.org
 pgp-publish-failed = Ключът не можа да бъде публикуван: { $error }
 # review: changed
 pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в { $settings }.
-# review: new
-pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в „Опции“.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

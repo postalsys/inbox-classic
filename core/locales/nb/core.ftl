@@ -969,8 +969,6 @@ pgp-publish-done = Nøkkelen din er publisert på keys.openpgp.org for { $addres
 pgp-publish-failed = Nøkkelen kunne ikke publiseres: { $error }
 # review: changed
 pgp-keyserver-off = Søk etter nøkler på keys.openpgp.org er slått av under { $settings }.
-# review: new
-pgp-keyserver-off = Oppslag av nøkler på keys.openpgp.org er slått av under Alternativer.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->

@@ -980,8 +980,6 @@ pgp-publish-done = Vaš je ključ objavljen na keys.openpgp.org za { $addresses 
 pgp-publish-failed = Ključ nije moguće objaviti: { $error }
 # review: changed
 pgp-keyserver-off = Traženje ključeva na keys.openpgp.org isključeno je u { $settings }.
-# review: new
-pgp-keyserver-off = Traženje ključeva na keys.openpgp.org isključeno je u Mogućnostima.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 # review: new
 pgp-compose-encrypted = { $count ->
