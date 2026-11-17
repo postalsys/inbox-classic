@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Apply the verified encrypted-image exception to options-language and pictures-tracking in de/es/et/fr/nl as a focused completed-content followup, then Portuguese (pt) settings: 27 catalog entries and 11 help topics. de/es/et/fr/nl/it settings complete. Then pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app before remaining initial reviews. Use 46 mnemonic scopes and glossary context/source-error notes. Upstream audit after French found no additions beyond bd4a2bd1. Pending 14343 catalogs and 693 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Continue Portuguese (pt) settings: 27 catalog entries and 11 help topics pending. de/es/et/fr/nl/it settings and their encrypted-image followup complete. Then pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app before remaining initial reviews. Use 46 mnemonic scopes and glossary context/source-error notes; complete both settings-pages-context and encrypted-image-permission followups as each language finishes. Upstream audit after French found no additions beyond bd4a2bd1. Pending 14343 catalogs and 693 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -5842,6 +5842,26 @@
               "ui-restart-ask"
             ]
           }
+        },
+        {
+          "id": "de-encrypted-images-settings-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "options-language.html",
+            "pictures-tracking.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/de/options-language.html": "0fc9df293c9a2ddfb01a581f770237d753a452af2fa5426a4e58d3cade538223",
+            "core/crates/pe-html/help/de/pictures-tracking.html": "7ba97d04b300560f752ba758ad72574caa5a6a48a2f1cb4f1e1d96c84295f2f6"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/options-language.html": "56b4cae37e1c43b7e9ab75ed961a7011953e4f22cfd943fa851062bc0d95a0aa",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "19ddf63f03ccc3a7a643100cbddecf826f96a6be4b061c6c8b196322be319a42"
+          },
+          "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
         }
       ]
     },
@@ -7990,6 +8010,26 @@
               "ui-settings-language"
             ]
           }
+        },
+        {
+          "id": "es-encrypted-images-settings-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "options-language.html",
+            "pictures-tracking.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/es/options-language.html": "d76fbc4384b71f1e7bdffbd00ceb55c8e3df6c01d720e32c5802dce6a5ca6ac7",
+            "core/crates/pe-html/help/es/pictures-tracking.html": "37028791ecf2f2b5502b9828589083f8f3e8ec160e85a444ad5cb5c21c0e5e9b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/options-language.html": "56b4cae37e1c43b7e9ab75ed961a7011953e4f22cfd943fa851062bc0d95a0aa",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "19ddf63f03ccc3a7a643100cbddecf826f96a6be4b061c6c8b196322be319a42"
+          },
+          "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
         }
       ]
     },
@@ -8329,6 +8369,26 @@
               "ui-settings-language"
             ]
           }
+        },
+        {
+          "id": "et-encrypted-images-settings-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "options-language.html",
+            "pictures-tracking.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/et/options-language.html": "4458af26c16c1c8ffaa18be64cc8e534ac3cfa8205fd68a5eeee29188d3963bd",
+            "core/crates/pe-html/help/et/pictures-tracking.html": "51f53a2d18ce58abba6a5555e1bc87610bf651a04e8a57cec23d6c15988d1c3e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/options-language.html": "56b4cae37e1c43b7e9ab75ed961a7011953e4f22cfd943fa851062bc0d95a0aa",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "19ddf63f03ccc3a7a643100cbddecf826f96a6be4b061c6c8b196322be319a42"
+          },
+          "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
         }
       ]
     },
@@ -10498,6 +10558,26 @@
               "ui-settings-language"
             ]
           }
+        },
+        {
+          "id": "fr-encrypted-images-settings-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "options-language.html",
+            "pictures-tracking.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fr/options-language.html": "c14f816a29f9d522404db841f8e7eb998c0f6ab5792bc18ba62b285276ee608b",
+            "core/crates/pe-html/help/fr/pictures-tracking.html": "2bcc7c8e773f332c7c94ab38a659908899fd4adcfb9faaabb38540cae2cf2562"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/options-language.html": "56b4cae37e1c43b7e9ab75ed961a7011953e4f22cfd943fa851062bc0d95a0aa",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "19ddf63f03ccc3a7a643100cbddecf826f96a6be4b061c6c8b196322be319a42"
+          },
+          "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
         }
       ]
     },
@@ -20680,6 +20760,26 @@
           },
           "validation": "Static check-language nl reports exactly 1395 intentionally removed marks and no structural findings. All 46 actual mnemonic scopes pass. IDs, variables, access-key counts, comments, plural branches, exact help tags/attributes, OS branches and literal keys preserved. All 28 pending inventories match. Global 18104 unmarked messages and 7642 help lines reconcile; 14 unchanged/moved baseline pairs across de/es/et/fr independently verified. Completed translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
           "notes": "Reviewed all 27 new/changed settings entries and all 11 affected help topics in current app context. Improved the restart prompt and added column-layout context to the sender-image subtitle. Rewrote expanded Settings help with informal je, accurate Apply/Cancel, external Windows default-app behavior, queued sending, exact download defaults and image/domain conditions. Improved collapsed-conversation actions, default-file association, main-window notification condition, image blocking and code-card authentication. Retained fluent prior corrections elsewhere, including persistent logo caching. No Dutch screenshots were available; current settings structure verified from settings.toml and platform callers. Tags/controls/OS branches/literal keys, variables and comments preserved. No tests run."
+        },
+        {
+          "id": "nl-encrypted-images-settings-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "options-language.html",
+            "pictures-tracking.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nl/options-language.html": "a40f64fddacb6fd5bac0b07d092375b999c63f0d32979c9c3f5299ee0370c401",
+            "core/crates/pe-html/help/nl/pictures-tracking.html": "a8992092ff5633b95e460fd60bbcd63c759c48806a62f592ccef9ef27456c344"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/options-language.html": "56b4cae37e1c43b7e9ab75ed961a7011953e4f22cfd943fa851062bc0d95a0aa",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "19ddf63f03ccc3a7a643100cbddecf826f96a6be4b061c6c8b196322be319a42"
+          },
+          "validation": "Static check-language reports exactly 1395 intentionally removed marks for this language, no structural findings. Both edited topics preserve exact markup, OS branches, literal shortcuts and other wording; no prohibited dashes. All 28 exact pending inventories match. Global 18131 unmarked catalog messages and 7787 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Completed translation and English-source hashes match. HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed and corrected the two automatic-image-loading claims: encrypted message parts still require explicit permission to load external images. Verified view.rs: encrypted sections use clicked, regardless of allow_remote_images. Preserved all other wording, tags, attributes, OS branches and literal shortcuts. These are already completed topics, not additional completed-scope counts. No tests run."
         }
       ]
     },
@@ -49570,6 +49670,47 @@
       "mnemonic_scopes": 46,
       "settings_page_scope_validation": "All three new page scopes pass in all 28 languages. All 46 scopes pass for de/es/et/fr/nl/it/ca/nb/sr-Latn/tr/cs/da/el/fi/pt/pt-BR/bg/hr. Other languages still await their full initial reviews. This static check is not linguistic review.",
       "helpers": "/private/tmp/inbox-settings-mnemonics.py, LOCALE supplied via runpy init_globals; data-driven settings scopes replace the old Options scope."
+    },
+    {
+      "id": "encrypted-image-permission",
+      "source": "core/crates/pe-core/src/view.rs:346",
+      "topics": [
+        "options-language.html",
+        "pictures-tracking.html"
+      ],
+      "note": "Encrypted message parts always require explicit permission for external image loading, even when automatic loading or a trusted sender is configured. Include the exception when the settings/image help claims that all images load automatically. Italian already had it in pictures-tracking and now in options-language. Corrected the other five completed settings languages in a focused followup; all remaining languages have these topics pending in the normal queue.",
+      "completed_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it"
+      ],
+      "pending_languages": [
+        "bg",
+        "ca",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr",
+        "hu",
+        "lt",
+        "lv",
+        "nb",
+        "pl",
+        "pt",
+        "pt-BR",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sr-Latn",
+        "sv",
+        "tr",
+        "uk"
+      ]
     }
   ]
 }

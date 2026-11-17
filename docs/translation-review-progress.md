@@ -18,8 +18,8 @@ Commit completed batches regularly and preserve an exact resume point.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
   German, Spanish, Estonian, French, Dutch and Italian settings are complete. Fresh upstream audit at French
-  checkpoint 3ff603ac found no additional work. Add the verified encrypted-image exception to the settings/image
-  help in de/es/et/fr/nl, then continue Portuguese: 27 catalog entries and 11 help topics pending.
+  checkpoint 3ff603ac found no additional work. The verified encrypted-image exception is now clarified in all
+  six completed settings languages. Continue Portuguese: 27 catalog entries and 11 help topics pending.
   Then process pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
   Croatian app before returning to the remaining initial reviews. Exact source IDs/topics are in state.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
@@ -975,6 +975,19 @@ Static check-language reports only 1,395 deliberately removed marks. All 46 shor
 help markup and exact 28-language pending inventories pass. Completed/source hashes reconcile with 18,131 messages
 and 7,787 changed help lines; 14 moved baseline pairs remain verified. Report regenerated; git diff --check passes.
 No tests run. Dutch checkpoint: `2a52474b`. Add the image exception to de/es/et/fr/nl settings/image help, then Portuguese.
+
+### Encrypted-image permission followup completed
+
+Clarified the settings and image-loading help in German, Spanish, Estonian, French and Dutch: encrypted message
+parts still require explicit permission to load external images. Italian already has this wording. All 10 edits
+preserve surrounding text, tags, attributes, platform branches and shortcuts. Each language’s static checker reports
+only the 1,395 deliberate missing marks; inventories and completed/source hashes reconcile. Global totals remain
+18,131 unmarked messages and 7,787 changed help lines, with 14 verified moved baseline pairs. Report regenerated;
+git diff --check passes. No tests run. These are followups on completed topics and do not inflate completion totals.
+
+State tracks the exception for the 22 remaining settings languages under `encrypted-image-permission`. Complete
+that followup alongside `settings-pages-context` when each language is reviewed. Continue Portuguese settings.
+Italian checkpoint: `5bfb208c`.
 
 Current totals: 18,097 catalog entries and 599 help topics completed in the active scope; 2,904 historical
 catalog value improvements. Remaining: 14,343 catalog entries and 693 help topics. Earlier context followups
