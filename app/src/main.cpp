@@ -318,8 +318,9 @@ void HideToTray() {
     }
 }
 
-// the heading of the last new mail notification, until the UI test asks for it (kTestNotification)
+// the heading of the last new mail notification and its text, until the UI test asks for them (kTestNotification)
 std::wstring g_lastNotification;
+std::wstring g_lastNotificationText;
 
 // new mail: a notification, unless the window is in front (the list shows it) or notifications are off
 void NotifyNewMail(const UiEvent& event) {
@@ -331,8 +332,10 @@ void NotifyNewMail(const UiEvent& event) {
     }
     // the core's words: who it is from over its subject, or how many over the newest, a watched conversation's
     // saying so in the title
+    std::wstring text = core::Widen(event.detail.c_str());
     g_lastNotification = event.message;
-    TrayNotify(g_main, event.message, core::Widen(event.detail.c_str()), event.folder, event.uid);
+    g_lastNotificationText = text;
+    TrayNotify(g_main, event.message, text, event.folder, event.uid);
 }
 
 void TrayMenu() {
@@ -1548,7 +1551,8 @@ constexpr ULONG_PTR kCopyMailto = 1;
 constexpr ULONG_PTR kCopyFile = 2;
 // with --test-hooks only: the selected messages dragged into a folder (its path), files dropped onto a tree item
 // ("<item>|<path>|<path>..."); the result is what the message returns. kTestNotification: 1 when the heading of the
-// last new mail notification since the last ask is the text (empty: none was shown), which is then forgotten
+// last new mail notification since the last ask is the text (empty: none was shown), or its heading and text on two
+// lines; it is then forgotten
 constexpr ULONG_PTR kTestDragOut = 0x44524F55;
 constexpr ULONG_PTR kTestDropFiles = 0x44524F50;
 constexpr ULONG_PTR kTestNotification = 0x4E4F5445;
@@ -2065,7 +2069,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestNotification && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
-            return std::exchange(g_lastNotification, std::wstring()) == text ? 1 : 0;
+            std::wstring heading = std::exchange(g_lastNotification, std::wstring());
+            std::wstring words = std::exchange(g_lastNotificationText, std::wstring());
+            return heading == text || (!heading.empty() && heading + L"\n" + words == text) ? 1 : 0;
         }
         if (g_arguments.testHooks && (data->dwData == kTestDragOut || data->dwData == kTestDropFiles) &&
             data->cbData % sizeof(wchar_t) == 0) {

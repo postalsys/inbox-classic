@@ -58,7 +58,11 @@ std::wstring ShortDate(int64_t seconds, int64_t now, int64_t offset) {
         return DatePart(local, 0, L"dddd");
     case PE_DATE_STYLE_DAY_MONTH:
 #ifdef DATE_MONTHDAY
-        return DatePart(local, DATE_MONTHDAY, nullptr);
+        // a locale without a day and month pattern of its own has none: the day and the month's short name then
+        if (std::wstring day = DatePart(local, DATE_MONTHDAY, nullptr); !day.empty()) {
+            return day;
+        }
+        return DatePart(local, 0, L"d MMM");
 #else
         return DatePart(local, 0, L"d MMM");
 #endif
@@ -123,7 +127,7 @@ void DrawDot(HDC dc, int x, int y, int size, COLORREF color) {
 }
 
 // the marks of the second line from the right: the conversation's mark (watched or ignored), the flag in its colour,
-// the paper clip or a bounce's mark. How wide they are together
+// the paper clip or a bounce's mark, the lock or the seal. How wide they are together
 int DrawMarks(const RowPaint& paint, const PeMessage& row, bool selected, HIMAGELIST strip, int iconSize) {
     std::vector<int> icons;
     if (row.mark == PE_THREAD_MARK_WATCH) {
@@ -140,12 +144,15 @@ int DrawMarks(const RowPaint& paint, const PeMessage& row, bool selected, HIMAGE
     } else if (row.has_attachments) {
         icons.push_back(LIST_ATTACH);
     }
+    if (int security = SecurityIcon(row); security >= 0) {
+        icons.push_back(security);
+    }
     int x = paint.right, gap = Scale(3);
     int top = paint.top + paint.line + (paint.line - iconSize) / 2;
     for (int icon : icons) {
         x -= iconSize;
         if (icon >= 0) {
-            ImageList_Draw(strip, icon, paint.dc, x, top, ILD_TRANSPARENT);
+            DrawListMark(paint.dc, strip, icon, x, top, iconSize, selected);
         } else {
             DrawFlagMark(paint.dc, x, top, iconSize, selected, row.flag_color);
         }
@@ -231,6 +238,9 @@ std::wstring Mailbox::ColumnsRowText(const PeMessage& row) const {
     }
     if (row.flagged) {
         parts.push_back(core::T(PE_TEXT_UI_ROW_FLAGGED));
+    }
+    if (row.protection != PE_PROTECTION_NONE) {
+        parts.push_back(core::T(row.protection == PE_PROTECTION_ENCRYPTED ? PE_TEXT_UI_ROW_ENCRYPTED : PE_TEXT_UI_ROW_SIGNED));
     }
     if (row.has_attachments) {
         parts.push_back(core::T(PE_TEXT_UI_ROW_ATTACHMENTS));

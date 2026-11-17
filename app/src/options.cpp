@@ -329,6 +329,10 @@ int CurrentValue(const OptionsState& state, PeSetting setting, const WindowOptio
         return window.listPictures;
     case PE_SETTING_PICTURES_ALWAYS:
         return pe_always_load_pictures(state.core);
+    case PE_SETTING_SEARCH_ENCRYPTED:
+        return pe_pgp_index_encrypted(state.core);
+    case PE_SETTING_KEYSERVER:
+        return pe_pgp_keyserver(state.core);
     case PE_SETTING_DOWNLOAD_AHEAD:
         return static_cast<int>(pe_download_ahead(state.core));
     case PE_SETTING_DOWNLOAD_LIMIT:
@@ -365,6 +369,12 @@ void StoreValue(PeCore* core, PeSetting setting, int value, WindowOptions& windo
         return;
     case PE_SETTING_PICTURES_ALWAYS:
         pe_set_always_load_pictures(core, value != 0);
+        return;
+    case PE_SETTING_SEARCH_ENCRYPTED:
+        pe_pgp_set_index_encrypted(core, value != 0);
+        return;
+    case PE_SETTING_KEYSERVER:
+        pe_pgp_set_keyserver(core, value != 0);
         return;
     case PE_SETTING_DOWNLOAD_AHEAD:
         pe_set_download_ahead(core, static_cast<PeDownloadAhead>(value));
@@ -499,6 +509,8 @@ std::vector<std::wstring> ChoiceItems(const OptionsState& state, PeSetting setti
     case PE_SETTING_LIST_PICTURES:
     case PE_SETTING_PICTURES_ALWAYS:
     case PE_SETTING_TRUSTED_SENDERS:
+    case PE_SETTING_SEARCH_ENCRYPTED:
+    case PE_SETTING_KEYSERVER:
     case PE_SETTING_COUNT:
         return {};
     }
@@ -535,6 +547,10 @@ SettingIds Ids(PeSetting setting) {
         return {IDC_OPTIONS_PICTURES, IDC_OPTIONS_PICTURES_NOTE};
     case PE_SETTING_TRUSTED_SENDERS:
         return {IDC_OPTIONS_TRUSTED};
+    case PE_SETTING_SEARCH_ENCRYPTED:
+        return {IDC_OPTIONS_SEARCH_ENCRYPTED, IDC_OPTIONS_SEARCH_ENCRYPTED_NOTE};
+    case PE_SETTING_KEYSERVER:
+        return {IDC_OPTIONS_KEYSERVER, IDC_OPTIONS_KEYSERVER_NOTE};
     case PE_SETTING_DOWNLOAD_AHEAD:
         return {IDC_OPTIONS_DOWNLOAD_AHEAD};
     case PE_SETTING_DOWNLOAD_LIMIT:

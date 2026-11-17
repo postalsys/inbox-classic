@@ -129,6 +129,12 @@ void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb);
 // a row's flag in its colour (red for none, 0), on a selected row on a plate of the list's background so that a
 // colour close to the highlight's can still be seen
 void DrawFlagMark(HDC dc, int left, int top, int size, bool selected, int color);
+// a mark of the list strip (the paper clip, the lock) of `size` pixels at `left`, `top`; on a selected row on the same
+// plate as the flag, so its smoothed edges and dark ink do not sit on the highlight
+void DrawListMark(HDC dc, HIMAGELIST strip, int icon, int left, int top, int size, bool selected);
+// the mark of a row's protection in the list strip, as the security bar shows it: the lock for an encrypted message
+// (also when it is signed inside), the seal for a signed one; -1 for neither
+int SecurityIcon(const PeMessage& row);
 // the field of a View > Sort By item, and the item of a field (columnrow.cpp)
 PeSortField SortFieldOfItem(WORD id);
 WORD SortItemOf(PeSortField field);
@@ -1163,6 +1169,11 @@ private:
     void LayoutUndoneBar(RECT& list);
     void DrawUndoneBar(const DRAWITEMSTRUCT& item) const;
     void FitSubjectColumn();
+    // the tooltips of the icon columns' headers (what the paper clip, the flag and the lock stand for), over where
+    // those headers are now
+    void AddHeaderTips();
+    void PlaceHeaderTips();
+    HWND headerTip_ = nullptr;
     int LinkWidth(HWND link) const;
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;
@@ -1491,6 +1502,11 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_TABS,
     IDC_OPTIONS_APPLY,
     IDC_OPTIONS_DEFAULT_APP,
+    // Reading > Encryption: Search in encrypted messages, Look up keys on keys.openpgp.org, and their notes
+    IDC_OPTIONS_SEARCH_ENCRYPTED,
+    IDC_OPTIONS_SEARCH_ENCRYPTED_NOTE,
+    IDC_OPTIONS_KEYSERVER,
+    IDC_OPTIONS_KEYSERVER_NOTE,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them
