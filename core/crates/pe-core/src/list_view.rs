@@ -213,10 +213,10 @@ impl Kept {
 
     /// Where the page of `limit` rows at `offset` can be read from rather than counted from the top (keyset paging,
     /// see [`pe_store::Anchor`]): the row just above it or just below it in a page read at `at`, or else the end of
-    /// the list when the page is nearer to it. None for the top, and for a list with conversations open, whose rows
-    /// are not all of their own conversations.
+    /// the list when the page is nearer to it (the store reads a list with conversations open from the top). None for
+    /// the top.
     fn anchor(&self, offset: u64, limit: u64, at: When) -> Option<Anchor> {
-        if offset == 0 || self.search.threads.as_ref().is_some_and(|open| !open.is_empty()) {
+        if offset == 0 {
             return None;
         }
         let row = |index: u64| {
