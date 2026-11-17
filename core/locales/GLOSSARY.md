@@ -745,6 +745,11 @@ Plurals: the catalog's plurals follow pt-PT (pe-i18n gives the bundle that local
 - "Credenciais de início de sessão" includes saved browser tokens. An unprotected export requires signing in
   again, not necessarily entering a password. Use "ID do cliente" and "segredo do cliente" for OAuth fields.
 
+- Agent actions use "cancelar subscrições" and "listas de correio", matching the existing reader command. A request
+  does not guarantee cancellation. "Texto da assinatura" is the optional account footer, distinct from "assinatura digital".
+- Use "eliminar" for draft removal. Agents can permanently remove only their own unchanged drafts. Saving, including
+  autosave, ends their access; opening a draft alone does not. Retain European Portuguese "guardar" and "contactos".
+
 ### Română (ro)
 
 Terms: Mesaje primite; Mesaje de trimis; Elemente trimise; Elemente șterse; Schițe; E-mail nedorit; mesaj; folder;

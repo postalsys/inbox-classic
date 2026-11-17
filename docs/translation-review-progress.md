@@ -5,23 +5,25 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Portuguese (pt) combined agent additions, then pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it. Phase2 reopens only their affected help passages.
+- **Next: Recheck and import the recorded preview-pane additions (six IDs per language, 168 drafts), then review Brazilian Portuguese (pt-BR) combined agent additions, followed by ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
   New notice UI now exists on all three platforms in an exact recorded uncommitted snapshot.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt.
 - Current scope: 34,232 catalog entries and 1,352 help topics.
-  Completed: 21,318 entries and 796 full topics; pending: 12,914 entries and 556 topics.
-  Historical catalog improvements: 3,800. Importing drafts earns no review credit.
+  Completed: 21,329 entries and 798 full topics; pending: 12,903 entries and 554 topics.
+  Historical catalog improvements: 3,805. Importing drafts earns no review credit.
+  A separate pending source snapshot adds 168 preview drafts, not yet included in the imported scope above.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French needed that correction; German/Spanish/Estonian/Dutch/Italian already convey the distinction.
-- PDF core context is inspected, but the source branch has no platform reading-setting control yet. Keep the
-  recovery instruction marked until actual callers arrive. An unfinished render marker does not prove the PDF
-  caused the crash. Original text sources: preview `687113a3`, MCP `9a24e99b`. Preview `2567d2d7` has the same text and still no setting caller.
+  contains no instructions. French needed that correction; German/Spanish/Estonian/Dutch/Italian/Portuguese already convey the distinction.
+- PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
+  `PostalExpress-preview2`, alongside six new IDs per language. The exact 59-file snapshot is recorded.
+  Handwritten preview consumers were not yet present at capture; recheck before reviewing the recovery instruction.
+  An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
 - The latest checkpoint covers 44 worktrees/185 refs. Upstream `65087591` includes the already imported MCP
@@ -2415,3 +2417,13 @@ Italian structural checker has1,456 expected mark-only diagnostics and no struct
 The new `PostalExpress-preview2` / `feat/preview-pane` worktree was also checked: currently clean at65087591, with only generated PDF enum references and no reading-setting consumer. Watch it for the outstanding PDF context.
 
 Review Portuguese (pt) combined agent additions, then pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts.
+
+## European Portuguese combined agent additions and new preview drafts
+
+Reviewed 11 entries and both agent help topics. Five catalog values and 13 help wording lines improved; six good values retained. The wording now explains selected-list consent, the rolling per-program quota, optional account signature text, draft takeover through saving/autosave and permanent removal of agent-owned drafts. European Portuguese terms and the existing accurate malicious-instructions warning are preserved. Every older unmarked help passage remains unchanged.
+
+European Portuguese structural checker has 1,456 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 11 reviewed entries, five changed values, ten help blocks and 13 changed help wording lines. Every older unmarked passage, tag, attribute, control, platform branch, literal key and generated ID is retained; variable sets, selectors and access-key counts are intact. Windows unsubscribe C/N keys are distinct; shared Mac/Linux labels have no mnemonic. All three platform help joins inspected. Seven notice UI source hashes remain exact and no backend runtime changes since the snapshot. Global reconciliation: 21,367 unmarked entries, 10,708 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1,168 entries/315 passages reconcile. Source audit covers 44 worktrees/185 refs and 290 unchanged old copies. Six new preview IDs per language (168 drafts) are captured in a separate exact pending source snapshot, not yet imported or reviewed. HTML regenerated; git diff --check passes. No tests or build run.
+
+The late-arrival scan found six new preview IDs in every translated language, plus two reading-setting definitions. Their exact 59 source files are recorded in `/private/tmp/inbox-preview-pane-pending-source-20261117.json` and the state file, with an immutable file snapshot. These 168 drafts have earned no review credit and are not yet included in the imported scope. No existing catalog values or help passages changed in that snapshot. Mac/Linux draft-notice code was committed during the review, with all seven recorded UI file hashes still matching.
+
+Recheck and import the recorded preview-pane additions (six IDs per language, 168 drafts), then review Brazilian Portuguese (pt-BR) combined agent additions, followed by ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts.

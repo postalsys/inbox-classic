@@ -447,8 +447,7 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Ler o correio: pastas, lista de mensagens, pesquisa e mensagens
-# review: changed
-agent-level-organize = Organizar o correio: alterar o estado de leitura e os sinalizadores, marcar como lixo eletrónico, mover mensagens e eliminá-las para Itens Eliminados
+agent-level-organize = Organizar o correio: alterar o estado de leitura e os sinalizadores, gerir o lixo eletrónico, mover e arquivar mensagens, criar pastas, eliminar mensagens (movendo-as para Itens Eliminados) e cancelar subscrições de listas de correio com a sua autorização
 agent-level-drafts = Escrever rascunhos para que os possa enviar
 agent-level-send = Enviar correio, com a sua confirmação para cada mensagem
 agent-connect-title = { $program } quer usar o seu correio
@@ -497,11 +496,8 @@ agent-log-composed = Abriu «{ $subject }» numa janela de composição para que
 agent-log-refused = Não enviou «{ $subject }»
 agent-log-sent = Colocou «{ $subject }» em espera para envio a { $to }
 agent-log-draft = Guardou o rascunho «{ $subject }»
-# review: new
 agent-log-draft-replaced = Substituiu o rascunho «{ $subject }»
-# review: new
-agent-log-draft-discarded = Descartou o rascunho «{ $subject }»
-# review: new
+agent-log-draft-discarded = Eliminou o rascunho «{ $subject }»
 agent-draft-note = { $program }, um agente de IA, escreveu este rascunho. Verifique os destinatários e o texto antes de o enviar.
 agent-log-read = Marcou como lida «{ $subject }»
 agent-log-unread = Marcou como não lida «{ $subject }»
@@ -514,19 +510,15 @@ agent-log-not-junk = Marcou «{ $subject }» como correio legítimo
 agent-log-archived = Arquivou «{ $subject }»
 agent-log-folder = Criou a pasta «{ $name }»
 agent-log-unsubscribed = Cancelou a subscrição da lista de «{ $subject }»
-# review: new
-agent-log-unsubscribe-failed = Não foi possível cancelar a subscrição da lista de «{ $subject }»: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Não cancelou a subscrição de { $senders }
-# review: new
+agent-log-unsubscribe-failed = Não foi possível cancelar a subscrição da lista de correio associada à mensagem «{ $subject }»: { $reason }
+agent-log-unsubscribe-refused = Não autorizou o cancelamento de subscrições. Remetentes: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } quer cancelar a sua subscrição de uma lista de correio
    *[other] { $program } quer cancelar a sua subscrição de { $count } listas de correio
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] O Inbox Classic pede à lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que ela oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.
-   *[other] O Inbox Classic pede a cada lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que a lista oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.
+    [1] O Inbox Classic pede à lista de correio abaixo que deixe de lhe enviar mensagens, usando a opção de cancelamento com um clique. Não é enviado mais nada. As mensagens existentes não são alteradas nem movidas.
+   *[other] O Inbox Classic pede a cada lista de correio abaixo que deixe de lhe enviar mensagens, usando a opção de cancelamento com um clique. Não é enviado mais nada. As mensagens existentes não são alteradas nem movidas.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
