@@ -2091,10 +2091,16 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     // out of the list at once
     let mut changes = 0;
     let mut failures = 0;
+    // what came, with when, said should it stop: with the server gone the failures come within milliseconds (40 runs
+    // beside the whole suite took under 50 ms), and the one run seen to wait 20 seconds told nothing of why
+    let started = std::time::Instant::now();
+    let mut seen = Vec::new();
     while failures < 2 || changes < 4 {
-        // the failures come once the reconnects give up, which a loaded machine (a full test run beside other work)
-        // can take longer than 20 seconds to reach
-        match events.recv_timeout(Duration::from_secs(60)).expect("events") {
+        let event = events
+            .recv_timeout(Duration::from_secs(60))
+            .unwrap_or_else(|_| panic!("no more events after {seen:#?}"));
+        seen.push((started.elapsed(), event.clone()));
+        match event {
             Event::FolderChanged { folder, .. } if folder == inbox => changes += 1,
             Event::Failed { kind, .. } => {
                 assert_ne!(kind, FailureKind::Authentication);
