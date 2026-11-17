@@ -421,8 +421,7 @@ day-sunday = zondag
 ## AI agents
 
 agent-level-read = E-mail lezen: mappen en berichten bekijken en doorzoeken
-# review: changed
-agent-level-organize = E-mail ordenen: leesstatus en markeringen wijzigen, ongewenste e-mail markeren, berichten verplaatsen en verwijderen (naar Verwijderde items)
+agent-level-organize = E-mail ordenen: leesstatus en markeringen wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar Verwijderde items), mappen maken en je na jouw toestemming afmelden voor mailinglijsten
 agent-level-drafts = Concepten schrijven die jij verzendt
 agent-level-send = E-mail verzenden, met jouw toestemming voor elk bericht
 agent-connect-title = { $program } wil je e-mail gebruiken
@@ -482,19 +481,15 @@ agent-log-not-junk = “{ $subject }” gemarkeerd als gewenst
 agent-log-archived = “{ $subject }” gearchiveerd
 agent-log-folder = De map “{ $name }” gemaakt
 agent-log-unsubscribed = Afgemeld voor de mailinglijst bij het bericht “{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Afmelden bij de lijst van “{ $subject }” is mislukt: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Je hebt je niet afgemeld bij { $senders }
-# review: new
+agent-log-unsubscribe-failed = Afmelden voor de mailinglijst bij het bericht “{ $subject }” is mislukt: { $reason }
+agent-log-unsubscribe-refused = Je hebt je niet afgemeld voor deze mailinglijsten: { $senders }
 agent-unsubscribe-title = { $count ->
-    [one] { $program } wil je afmelden bij een mailinglijst
-   *[other] { $program } wil je afmelden bij { $count } mailinglijsten
+    [one] { $program } wil je afmelden voor een mailinglijst
+   *[other] { $program } wil je afmelden voor { $count } mailinglijsten
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic vraagt de lijst hieronder om je niets meer te sturen, via de afmelding met één klik die de lijst aanbiedt. Er wordt verder niets verzonden, en de berichten die je hebt, blijven waar ze zijn.
-   *[other] Inbox Classic vraagt elke lijst hieronder om je niets meer te sturen, via de afmelding met één klik die de lijst aanbiedt. Er wordt verder niets verzonden, en de berichten die je hebt, blijven waar ze zijn.
+    [1] Via de afmeldfunctie met één klik vraagt Inbox Classic de onderstaande mailinglijst om je geen berichten meer te sturen. Er wordt verder niets verzonden. Je bestaande berichten blijven ongewijzigd.
+   *[other] Via de afmeldfunctie met één klik vraagt Inbox Classic elke onderstaande mailinglijst om je geen berichten meer te sturen. Er wordt verder niets verzonden. Je bestaande berichten blijven ongewijzigd.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

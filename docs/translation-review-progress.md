@@ -5,22 +5,22 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Dutch agent unsubscribe review, then the remaining 23 languages.**
-  Agent additions complete: de, es, et, fr. Each has eight entries and both affected help topics reviewed.
+- **Next: Integrate the committed agent-draft source snapshot e5d3f046; review its additions in de/es/et/fr/nl, then continue Italian with both agent batches.**
+  Agent additions complete: de, es, et, fr, nl. Each has eight entries and both affected help topics reviewed.
   The source-only preview/MCP import adds 280 entries, changes 28 source entries and affects 56 help topics.
   Previously reviewed wording is retained where English changed, with exact source candidates saved for adaptation.
-  Additional uncommitted source work is recorded separately: 3 new English entries, with translation drafts still awaited.
+  Pending source import: 84 new translated entries and 56 changed help targets. These are excluded from checkout totals.
 - Current scope: 34,148 catalog entries and 1,352 help topics.
-  Completed: 21,284 entries and 792 full topics; pending: 12,864 entries and 560 topics.
-  Historical catalog improvements: 3,787. Importing drafts earns no review credit.
+  Completed: 21,292 entries and 794 full topics; pending: 12,856 entries and 558 topics.
+  Historical catalog improvements: 3,792. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French needed that correction; German/Spanish/Estonian already convey the distinction.
+  contains no instructions. French needed that correction; German/Spanish/Estonian/Dutch already convey the distinction.
 - PDF core context is inspected, but the source branch has no platform reading-setting control yet. Keep the
   recovery instruction marked until actual callers arrive. An unfinished render marker does not prove the PDF
-  caused the crash. Exact source tips: preview `687113a3`, MCP `9a24e99b`.
+  caused the crash. Original text sources: preview `687113a3`, MCP `9a24e99b`. Preview `2567d2d7` has the same text and still no setting caller.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
 - The latest checkpoint covers 43 worktrees/184 refs. Upstream `9e994df3` now includes the already imported MCP
@@ -2334,3 +2334,11 @@ Reviewed eight strings and four marked help blocks across two topics. Three cata
 French static checker has1,453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 IDs,3 changed values and9 help wording lines, including one explicitly reopened older warning; every other byte retained. Help tags/attributes, controls, platform branches and literal keys unchanged. All platform label joins inspected; Windows S/N are distinct, plain Mac/Linux labels retained. Global reconciliation:21,322 unmarked entries,10,684 help lines and14 verified baseline pairs; latest hashes match. All28 full inventories and since-start1,129 entries/261 passages reconcile. HTML regenerated; git diff --check passes. No test suites or build run.
 
 Dutch agent unsubscribe review, then the remaining 23 languages. PDF recovery instructions remain pending actual platform setting callers.
+
+## Dutch agent unsubscribe review
+
+Reviewed eight strings and four marked help blocks across two topics. Five catalog values and eight help lines were improved; three good control labels remain unchanged. The failure log now clearly names a message subject, and afmelden voor mailinglijsten is used consistently. Help clarifies batch consent, the rolling per-program quota and optional handtekeningtekst. Every earlier unmarked passage is retained. The new phase2 source is now fully committed:84 translated draft entries and56 changed help targets are captured exactly for import;10 complete help topics must reopen only their new passages. The preview branch inherited MCP upstream changes, but its three-ID preview section remains byte-for-byte unchanged and has no platform setting caller yet.
+
+Dutch static checker has1,453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 IDs,5 changed values and8 help wording lines; every other byte retained. Help tags/attributes, controls, platform branches and literal keys unchanged. All platform label joins inspected; Windows A/N are distinct, plain Mac/Linux labels retained. Global reconciliation:21,330 unmarked entries,10,692 help lines and14 verified baseline pairs; latest hashes match. All28 full inventories and since-start1,121 entries/257 passages reconcile. HTML regenerated; git diff --check passes. No test suites or build run.
+
+Integrate the committed agent-draft source snapshot e5d3f046; review its additions in de/es/et/fr/nl, then continue Italian with both agent batches. PDF recovery instructions remain pending actual platform setting callers.
