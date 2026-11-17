@@ -862,6 +862,20 @@ const sections = [
                 checked: ['The lock', 'The text shown']
             },
             {
+                shot: 'main-12-lock-in-list',
+                name: 'Encrypted and signed mail in the list',
+                what: 'The list marks an encrypted message with a lock and a signed one with a seal, known from its structure before it is opened (Windows in the icon column, the Mac and Linux on the row). Until an encrypted message is opened, its line of first words and its new mail notification say "Encrypted message", never its outer subject\'s placeholder or its ciphertext; its ciphertext is not counted as an attachment.',
+                how: 'Always there, in every layout.',
+                checked: ['The lock on the encrypted message, the seal on the signed one, neither on a plain one', 'The encrypted message says "Encrypted message" until it is opened']
+            },
+            {
+                shot: 'search-9-encrypted',
+                name: 'Searching encrypted mail',
+                what: 'is:encrypted and is:signed find protected mail. An encrypted message is found by its envelope at once, and by the words of its text once it was opened, while Search in encrypted messages is on (Settings > Reading). AI agents never search what was decrypted, and read an encrypted message as its envelope and one line saying it is encrypted.',
+                how: 'Type is:encrypted, is:signed or a word of an encrypted message you opened.',
+                checked: ['is:encrypted and is:signed list only those messages', 'A word of an encrypted message is found only after it was opened', 'Turned off in Settings, it is found by its sender only']
+            },
+            {
                 shot: 'secure-4-mixed-parts',
                 name: 'Parts protected differently',
                 what: 'Each part of a message is a document of its own in a frame with its own label, so nothing a sender writes can reach a label. The bar counts the parts of each kind.',
@@ -1600,6 +1614,13 @@ const sections = [
                 checked: ['The Reading page shows its settings in the order of core/settings.toml']
             },
             {
+                shot: 'options-4-encryption',
+                name: 'Settings: Search in encrypted messages',
+                what: "The Reading page's Encryption group: Search in encrypted messages (on at first) keeps the text of encrypted messages the user opened in the search index on this computer, which its note says is not encrypted and AI agents never search. Turned off, that text leaves the index, with the names of the files inside.",
+                how: 'Tools > Options > Reading (Inbox Classic > Settings > Reading on the Mac, Main Menu > Preferences > Reading on Linux).',
+                checked: ['On at first, with its note', 'Turned off, the words of encrypted messages are no longer found']
+            },
+            {
                 shot: 'lang-1-german',
                 name: 'In German',
                 what: 'Every word of the windows comes from the catalogs of the core (Fluent), the same on every platform: menus, toolbar, dialogs, status bar, the reading pane, the help. Dates and sizes follow the language too.',
@@ -1648,6 +1669,10 @@ const behind = [
 // the screenshots a platform's UI test does not take yet, each a gap to close, or of a feature it does not have
 const notYet = {
     windows: [
+        // OpenPGP PR 10: the apps' part (the lock and the seal in the list, the setting, their UI test steps) follows
+        'main-12-lock-in-list',
+        'search-9-encrypted',
+        'options-4-encryption',
         // the Mac and Linux only: Windows keeps the classic light look
         'dark-1-plain',
         'dark-2-written',
@@ -1658,6 +1683,10 @@ const notYet = {
         'secure-13-dark'
     ],
     mac: [
+        // OpenPGP PR 10: the apps' part (the lock and the seal in the list, the setting, their UI test steps) follows
+        'main-12-lock-in-list',
+        'search-9-encrypted',
+        'options-4-encryption',
         // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
         // not be taken from inside the app (the test answers the panels in their place and checks what they did)
         'read-3-attachments',
@@ -1687,6 +1716,10 @@ const notYet = {
         'write-16-link-menu'
     ],
     linux: [
+        // OpenPGP PR 10: the apps' part (the lock and the seal in the list, the setting, their UI test steps) follows
+        'main-12-lock-in-list',
+        'search-9-encrypted',
+        'options-4-encryption',
         // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
         // not be taken from inside the app (the test answers the panels in their place and checks what they did)
         'read-4-save',
