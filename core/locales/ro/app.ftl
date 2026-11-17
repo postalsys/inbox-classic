@@ -855,6 +855,8 @@ ui-allow = &Permitere
 # review: new
 ui-dont-send = Nu trimiteți
 # review: new
+ui-dont-unsubscribe = Nu vă dezabonați
+# review: new
 ui-edit-first = &Editați mai întâi
 # review: new
 ui-new-address = Adresă nouă

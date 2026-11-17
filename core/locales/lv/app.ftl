@@ -856,6 +856,8 @@ ui-allow = &Atļaut
 # review: new
 ui-dont-send = Nesūtīt
 # review: new
+ui-dont-unsubscribe = Neatteikties
+# review: new
 ui-edit-first = &Vispirms rediģēt
 # review: new
 ui-new-address = Jauna adrese

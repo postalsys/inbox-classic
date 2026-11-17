@@ -680,7 +680,7 @@ day-sunday = niedziela
 # review: new
 agent-level-read = Czytanie poczty: foldery, lista wiadomości, wyszukiwanie i wiadomości
 # review: new
-agent-level-organize = Porządkowanie poczty: stan przeczytania, flagi, śmieci, przenoszenie, usuwanie do Elementów usuniętych
+agent-level-organize = Porządkowanie poczty: stan przeczytania, flagi, śmieci, przenoszenie, archiwizowanie, nowe foldery, usuwanie do Elementów usuniętych oraz wypisywanie z list mailingowych po Twojej zgodzie
 # review: new
 agent-level-drafts = Pisanie wersji roboczych do wysłania przez Ciebie
 # review: new
@@ -793,6 +793,22 @@ agent-log-archived = Zarchiwizowano „{ $subject }”
 agent-log-folder = Utworzono folder „{ $name }”
 # review: new
 agent-log-unsubscribed = Wypisano się z listy „{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Nie udało się wypisać z listy „{ $subject }”: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Nie wyrażono zgody na wypisanie z list: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } chce wypisać Cię z listy mailingowej
+    [few] { $program } chce wypisać Cię z { $count } list mailingowych
+    [many] { $program } chce wypisać Cię z { $count } list mailingowych
+   *[other] { $program } chce wypisać Cię z { $count } list mailingowych
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic prosi poniższą listę o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez nią wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.
+   *[other] Inbox Classic prosi każdą z poniższych list o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez listę wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1389,3 +1405,12 @@ undone-flags = { $count ->
     [many] Serwer nie zmienił flag wiadomości, więc cofnięto tę zmianę ({ $messages }): { $reason }
    *[other] Serwer nie zmienił flag wiadomości, więc cofnięto tę zmianę ({ $messages }): { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Pokazuj pliki PDF w wiadomościach
+# review: new
+preview-pdf-off = Pliki PDF nie są pokazywane w wiadomościach.
+# review: new
+preview-pdf-off-crashed = Plik PDF zamknął Inbox Classic podczas wyświetlania, dlatego pliki PDF nie są już pokazywane w wiadomościach. Obrazy nadal są. Aby znów pokazywać pliki PDF, włącz { $option } w opcjach czytania.

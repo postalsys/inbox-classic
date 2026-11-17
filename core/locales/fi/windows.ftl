@@ -94,6 +94,10 @@ win-never-written-to = Ei aiempia lähetyksiä
 win-book-find-label = Kirjoita nimi tai sähköpostiosoite:
 win-send = &Lähetä
 win-dont-send = Älä lä&hetä
+# review: new
+win-unsubscribe = &Peruuta tilaus
+# review: new
+win-dont-unsubscribe = Ä&lä peruuta tilausta
 win-forget-program-ask = Poistetaanko tämä ohjelma, sen käyttöoikeudet ja sen agenttien toimintahistoria? Sinulta kysytään lupaa uudelleen, kun se seuraavan kerran muodostaa yhteyden.
 win-clear-log-ask = Tyhjennetäänkö agenttien toimintahistoria? Tämä ei kumoa agenttien tekemiä muutoksia.
 win-agent-programs = &Ohjelmat, joiden agentit ovat pyytäneet pääsyä postiisi:

@@ -702,7 +702,7 @@ day-sunday = nedeľa
 # review: new
 agent-level-read = Čítať poštu: priečinky, zoznam správ, vyhľadávanie a správy
 # review: new
-agent-level-organize = Usporadúvať poštu: stav prečítania, príznaky, nevyžiadaná pošta, presúvanie, odstraňovanie do priečinka Odstránená pošta
+agent-level-organize = Usporadúvať poštu: stav prečítania, príznaky, nevyžiadaná pošta, presúvanie, archivovanie, nové priečinky, odstraňovanie do priečinka Odstránená pošta a po vašom súhlase odhlasovanie zo zoznamov adresátov
 # review: new
 agent-level-drafts = Písať koncepty, ktoré odošlete vy
 # review: new
@@ -814,6 +814,21 @@ agent-log-archived = Archivované: „{ $subject }“
 agent-log-folder = Vytvorený priečinok „{ $name }“
 # review: new
 agent-log-unsubscribed = Odhlásené zo zoznamu adresátov správy „{ $subject }“
+# review: new
+agent-log-unsubscribe-failed = Nepodarilo sa odhlásiť zo zoznamu adresátov správy „{ $subject }“: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Odhlásenie zo zoznamov ste odmietli: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vás chce odhlásiť zo zoznamu adresátov
+    [few] { $program } vás chce odhlásiť z { $count } zoznamov adresátov
+   *[other] { $program } vás chce odhlásiť z { $count } zoznamov adresátov
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic požiada zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.
+   *[other] Inbox Classic požiada každý zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré zoznam ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1375,3 +1390,12 @@ undone-flags = { $count ->
     [few] Server nezmenil príznaky správ, preto bola zmena vrátená späť ({ $messages }): { $reason }
    *[other] Server nezmenil príznaky správ, preto bola zmena vrátená späť ({ $messages }): { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Zobrazovať súbory PDF v správach
+# review: new
+preview-pdf-off = Súbory PDF sa v správach nezobrazujú.
+# review: new
+preview-pdf-off-crashed = Súbor PDF ukončil Inbox Classic počas zobrazenia, preto sa súbory PDF v správach už nezobrazujú. Obrázky áno. Ak chcete súbory PDF znova zobrazovať, zapnite { $option } v možnostiach čítania.

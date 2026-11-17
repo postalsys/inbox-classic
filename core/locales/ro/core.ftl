@@ -688,7 +688,7 @@ day-sunday = duminică
 # review: new
 agent-level-read = Citirea e-mailului: foldere, lista de mesaje, căutare și mesaje
 # review: new
-agent-level-organize = Organizarea e-mailului: stare de citire, semnalizări, nedorite, mutare, ștergere în Elemente șterse
+agent-level-organize = Organizarea e-mailului: stare de citire, semnalizări, nedorite, mutare, arhivare, foldere noi, ștergere în Elemente șterse și dezabonare de la liste de corespondență după ce sunteți de acord
 # review: new
 agent-level-drafts = Scrierea de schițe pe care le trimiteți dvs.
 # review: new
@@ -800,6 +800,21 @@ agent-log-archived = A arhivat „{ $subject }”
 agent-log-folder = A creat folderul „{ $name }”
 # review: new
 agent-log-unsubscribed = S-a dezabonat de la lista lui „{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Dezabonarea de la lista lui „{ $subject }” nu a reușit: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Nu v-ați dezabonat de la { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vrea să vă dezaboneze de la o listă de corespondență
+    [few] { $program } vrea să vă dezaboneze de la { $count } liste de corespondență
+   *[other] { $program } vrea să vă dezaboneze de la { $count } de liste de corespondență
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic cere listei de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.
+   *[other] Inbox Classic cere fiecărei liste de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă lista. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1357,3 +1372,12 @@ undone-flags = { $count ->
     [one] Serverul nu a schimbat semnalizările pentru { $messages }, așa că modificarea a fost anulată: { $reason }
    *[other] Serverul nu a schimbat semnalizările pentru { $messages }, așa că modificarea a fost anulată: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Afișează fișierele PDF în mesaje
+# review: new
+preview-pdf-off = Fișierele PDF nu sunt afișate în mesaje.
+# review: new
+preview-pdf-off-crashed = Un fișier PDF a închis Inbox Classic în timp ce era afișat, așa că fișierele PDF nu mai sunt afișate în mesaje. Imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați { $option } în opțiunile de citire.

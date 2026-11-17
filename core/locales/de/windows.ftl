@@ -93,6 +93,10 @@ win-never-written-to = Nie angeschrieben
 win-book-find-label = Namen oder E-Mail-Adresse eingeben:
 win-send = &Senden
 win-dont-send = &Nicht senden
+# review: new
+win-unsubscribe = &Abbestellen
+# review: new
+win-dont-unsubscribe = &Nicht abbestellen
 win-forget-program-ask = Dieses Programm mit seinen Berechtigungen und dem Aktivitätsverlauf seiner Agenten entfernen? Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
 win-clear-log-ask = Aktivitätsverlauf der Agenten löschen? Die vorgenommenen Änderungen werden dadurch nicht rückgängig gemacht.
 win-agent-programs = &Programme, deren Agenten Zugriff auf Ihre E-Mails angefordert haben:

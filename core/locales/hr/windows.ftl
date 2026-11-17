@@ -95,6 +95,10 @@ win-never-written-to = Nikad niste pisali
 win-book-find-label = Upišite ime ili adresu e-pošte:
 win-send = &Pošalji
 win-dont-send = &Nemoj poslati
+# review: new
+win-unsubscribe = &Otkaži pretplatu
+# review: new
+win-dont-unsubscribe = &Nemoj otkazati pretplatu
 win-forget-program-ask = Želite li ukloniti ovaj program s popisa, zajedno s njegovim dozvolama i poviješću aktivnosti agenata? Pri sljedećem povezivanju ponovno će se tražiti vaša dozvola.
 win-clear-log-ask = Želite li izbrisati povijest aktivnosti agenata? Time se neće poništiti promjene koje su agenti napravili.
 win-agent-programs = &Programi čiji su agenti zatražili pristup vašoj pošti:

@@ -3,18 +3,25 @@
 <p>La primera vegada que es connecta l’agent d’un programa, Inbox Classic demana autorització i mostra el nom del programa. Trieu què pot fer:</p>
 <ul>
     <li>llegir el correu: accedir a les carpetes, les llistes de missatges, la cerca i el contingut dels missatges</li>
-    <li>organitzar el correu: canviar l’estat de lectura, marcar amb bandera o com a correu brossa, moure missatges i suprimir-los enviant-los a la carpeta <b data-text="folder-deleted"></b></li>
+<!--review-->    <li>organitzar el correu: canviar l’estat de lectura, marcar amb bandera o com a correu brossa, moure missatges i suprimir-los enviant-los a la carpeta <b data-text="folder-deleted"></b></li><!--/review-->
     <li>escriure esborranys perquè els envieu vós</li>
     <li>enviar correu, amb la vostra aprovació per a cada missatge</li>
 </ul>
 <p>Després trieu els comptes que pot veure i feu clic a <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> rebutja el programa, i no se us tornarà a demanar autorització per a aquest programa.</p>
 <p>A través d’Inbox Classic, un agent no pot suprimir missatges definitivament ni canviar la configuració dels comptes. Llegir un missatge no el marca com a llegit. El que canvia es veu a les finestres immediatament.</p>
+<!--review--><h2>Donar-se de baixa de llistes de correu</h2>
+<p>Un agent que pot organitzar el correu pot demanar de donar-vos de baixa de llistes de correu. Inbox Classic primer us ho pregunta una vegada i mostra cada llista pel seu remitent:</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> demana a cada llista que deixi d’enviar-vos correu.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, l’opció predeterminada, les deixa com estan.</li>
+</ul>
+<p>Un agent no us pot donar de baixa a partir de missatges de <b data-text="folder-junk"></b>, ni de més de 30 llistes al dia.</p><!--/review-->
 <h2>Veure i canviar l’accés</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> mostra els programes als quals heu permès o denegat l’accés, i tot el que han fet els agents, del més nou al més antic.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> canvia què pot fer un programa.</li>
     <li><b data-text="ui-remove"></b> elimina un programa i els seus permisos. La propera vegada que es connecti, caldrà tornar-ne a autoritzar l’accés.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> desfà canvis en l’estat de lectura i les banderes, trasllats i supressions, i cancel·la l’enviament de missatges que encara són a la Safata de sortida.</li>
+<!--review-->    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> desfà canvis en l’estat de lectura i les banderes, trasllats i supressions, i cancel·la l’enviament de missatges que encara són a la Safata de sortida.</li><!--/review-->
 </ul>
 <aside class="warning">El correu l’escriuen altres persones, i un missatge pot intentar convèncer un agent perquè reenviï o suprimeixi el vostre correu. Inbox Classic oculta als agents el text que no veieu al missatge i els indica que el contingut del correu no s’ha de tractar com a instruccions. Tot i així, un agent es pot deixar enganyar. Permeteu només el que necessiteu.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

@@ -401,6 +401,7 @@ day-sunday = vasárnap
 ## AI agents
 
 agent-level-read = Levelek olvasása: mappák, az üzenetlista, a keresés és az üzenetek
+# review: changed
 agent-level-organize = Levelek kezelése: olvasottság, jelölők, levélszemét, áthelyezés, törlés a Törölt elemek közé
 agent-level-drafts = Piszkozatok írása, amelyeket később elküldhet
 agent-level-send = Levélküldés, minden üzenet külön jóváhagyásával
@@ -461,6 +462,20 @@ agent-log-not-junk = Nem levélszemétként megjelölve: „{ $subject }”
 agent-log-archived = Archiválva: „{ $subject }”
 agent-log-folder = Mappa létrehozva: „{ $name }”
 agent-log-unsubscribed = Leiratkozás a levelezőlistáról: „{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Sikertelen leiratkozás a levelezőlistáról („{ $subject }”): { $reason }
+# review: new
+agent-log-unsubscribe-refused = Nem iratkozott le innen: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } le szeretné iratkoztatni Önt egy levelezőlistáról
+   *[other] { $program } le szeretné iratkoztatni Önt { $count } levelezőlistáról
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Az Inbox Classic megkéri az alábbi listát, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+   *[other] Az Inbox Classic az alábbi listák mindegyikét megkéri, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -819,3 +834,12 @@ undone-flags = { $count ->
     [one] A kiszolgáló nem módosította az üzenet jelölőit, ezért visszaállt az eredeti jelölés ({ $messages }): { $reason }
    *[other] A kiszolgáló nem módosította az üzenetek jelölőit, ezért visszaállt az eredeti jelölés ({ $messages }): { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = PDF-fájlok megjelenítése az üzenetekben
+# review: new
+preview-pdf-off = A PDF-fájlok nem jelennek meg az üzenetekben.
+# review: new
+preview-pdf-off-crashed = Egy PDF-fájl megjelenítés közben bezárta az Inbox Classicot, ezért a PDF-fájlok már nem jelennek meg az üzenetekben. A képek továbbra is megjelennek. A PDF-fájlok ismételt megjelenítéséhez kapcsolja be az olvasási beállításokban ezt: { $option }.

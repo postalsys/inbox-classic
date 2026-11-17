@@ -3,18 +3,25 @@
 <p>Na primeira vez que o agente de um programa se conecta, o Inbox Classic pede autorização e mostra o nome do programa. Escolha o que ele pode fazer:</p>
 <ul>
     <li>ler e-mails: acessar pastas, listas de mensagens, pesquisa e conteúdo das mensagens</li>
-    <li>organizar e-mails: alterar o status de leitura, sinalizar, marcar como lixo eletrônico, mover e excluir mensagens, enviando-as para <b data-text="folder-deleted"></b></li>
+<!--review-->    <li>organizar e-mails: alterar o status de leitura, sinalizar, marcar como lixo eletrônico, mover e excluir mensagens, enviando-as para <b data-text="folder-deleted"></b></li><!--/review-->
     <li>escrever rascunhos</li>
     <li>enviar e-mails, com sua aprovação para cada mensagem</li>
 </ul>
 <p>Depois escolha as contas que ele pode ver e clique em <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> recusa o programa, e o aplicativo não volta a pedir autorização para esse programa.</p>
 <p>Pelo Inbox Classic, um agente não pode excluir mensagens permanentemente nem alterar as configurações das suas contas. Ler uma mensagem não a marca como lida. O que ele altera aparece imediatamente nas janelas.</p>
+<!--review--><h2>Sair de listas de e-mails</h2>
+<p>Um agente que pode organizar e-mails pode pedir para cancelar sua inscrição em listas de e-mails. Antes, o Inbox Classic pergunta a você uma vez, mostrando cada lista pelo remetente:</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> pede a cada lista que pare de enviar mensagens para você.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, a opção padrão, deixa as listas como estão.</li>
+</ul>
+<p>Um agente não pode cancelar inscrições a partir de mensagens em <b data-text="folder-junk"></b>, e pode cancelar no máximo 30 listas por dia.</p><!--/review-->
 <h2>Ver e alterar o acesso</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> mostra os programas que você permitiu ou recusou, e tudo o que os agentes fizeram, do mais recente para o mais antigo.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> altera o que um programa pode fazer.</li>
     <li><b data-text="ui-remove"></b> remove um programa e suas permissões. Na próxima conexão, será necessário autorizar o acesso novamente.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> desfaz alterações de status de leitura e sinalizadores, movimentações e exclusões, e cancela o envio de mensagens ainda na Caixa de Saída.</li>
+<!--review-->    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> desfaz alterações de status de leitura e sinalizadores, movimentações e exclusões, e cancela o envio de mensagens ainda na Caixa de Saída.</li><!--/review-->
 </ul>
 <aside class="warning">Os e-mails são escritos por outras pessoas, e uma mensagem pode tentar convencer um agente a encaminhar ou excluir seus e-mails. O Inbox Classic oculta dos agentes o texto que não aparece para você na mensagem e informa a eles que o conteúdo dos e-mails não deve ser tratado como instruções. Mesmo assim, um agente pode ser enganado. Permita apenas o que for necessário.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

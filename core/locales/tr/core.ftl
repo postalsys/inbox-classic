@@ -417,6 +417,7 @@ day-sunday = Pazar
 ## Yapay zeka aracıları
 
 agent-level-read = Postayı okuma: klasörleri, ileti listelerini ve içeriklerini görüntüleme, arama yapma
+# review: changed
 agent-level-organize = Postayı düzenleme: okundu durumunu ve bayrakları değiştirme, gereksiz postayı işaretleme, taşıma ve Silinmiş Öğeler'e taşıyarak silme
 agent-level-drafts = Göndermeniz için taslak yazma
 agent-level-send = Posta gönderme, her iletiyi ancak siz onayladıktan sonra
@@ -477,6 +478,20 @@ agent-log-not-junk = Gereksiz değil olarak işaretlendi: “{ $subject }”
 agent-log-archived = Arşivlendi: “{ $subject }”
 agent-log-folder = Klasör oluşturuldu: “{ $name }”
 agent-log-unsubscribed = Abonelikten çıkma isteği gönderildi. İleti: “{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = “{ $subject }” iletisinin listesinden abonelik iptal edilemedi: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Abonelikten çıkmadınız: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } bir posta listesindeki aboneliğinizi iptal etmek istiyor
+   *[other] { $program } { $count } posta listesindeki aboneliğinizi iptal etmek istiyor
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic, aşağıdaki listeden, sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
+   *[other] Inbox Classic, aşağıdaki her listeden, listenin sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
+}
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
 
@@ -814,3 +829,12 @@ undone-flags = { $count ->
     [one] Sunucuda bayrak değişikliği uygulanamadı ({ $messages }); değişiklik geri alındı: { $reason }
    *[other] Sunucuda bayrak değişikliği uygulanamadı ({ $messages }); değişiklik geri alındı: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = İletilerde PDF dosyalarını göster
+# review: new
+preview-pdf-off = PDF dosyaları iletilerde gösterilmiyor.
+# review: new
+preview-pdf-off-crashed = Bir PDF dosyası gösterilirken Inbox Classic'i kapattı, bu yüzden PDF dosyaları artık iletilerde gösterilmiyor. Resimler hâlâ gösteriliyor. PDF dosyalarını yeniden göstermek için okuma seçeneklerinde { $option } seçeneğini açın.

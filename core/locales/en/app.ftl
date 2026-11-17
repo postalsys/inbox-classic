@@ -440,6 +440,7 @@ ui-browser-sign-in-server = { $server } (browser sign-in)
 ui-dont-allow = Don’t Allow
 ui-allow = &Allow
 ui-dont-send = Don’t Send
+ui-dont-unsubscribe = Don’t Unsubscribe
 ui-edit-first = &Edit First
 ui-new-address = New address
 ui-turn-away = &Turn Away

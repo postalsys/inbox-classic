@@ -93,6 +93,10 @@ win-never-written-to = Nog niet eerder gemaild
 win-book-find-label = Typ een naam of e-mailadres:
 win-send = &Verzenden
 win-dont-send = &Niet verzenden
+# review: new
+win-unsubscribe = &Afmelden
+# review: new
+win-dont-unsubscribe = &Niet afmelden
 win-forget-program-ask = Dit programma verwijderen, met de machtigingen en de activiteitengeschiedenis van de agents? Bij de volgende verbinding wordt opnieuw om toestemming gevraagd.
 win-clear-log-ask = De activiteitengeschiedenis van de agents wissen? Wijzigingen die de agents hebben gemaakt, worden hiermee niet ongedaan gemaakt.
 win-agent-programs = &Programma’s waarvan agents toegang tot je e-mail hebben gevraagd:

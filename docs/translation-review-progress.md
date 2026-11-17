@@ -5,28 +5,29 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: integrate the newly discovered preview/MCP source additions, then Greek compose review.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
-  Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
-  recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
-  Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
-- Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 21,271 entries and 820 full topics; pending: 12,597 entries and 532 topics.
-  Historical catalog improvements: 3,776.
-- All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
-  catalogs/generated identifiers; implementation provenance is recorded separately.
-- Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
-  hashes reconcile. HTML refreshed. No test suites or builds run for wording batches; the earlier source-import
-  build passed in the separate target. `REVIEWED` stays unchanged until the full queue and final audit finish.
-- The wider source audit found 280 new and 28 edited strings plus 56 changed help targets on preview-render
-  `687113a3` and MCP `9a24e99b`. Exact pending imports are recorded; the checkout totals above exclude them.
-  Importing them must reopen 19 completed catalog entries and 36 help topics before review.
-- All 42 worktrees and 183 refs were inventoried. All external worktrees have no new relevant uncommitted edits.
-  Run `/private/tmp/inbox-compose-all-source-audit.py <batch-prefix>` at future checkpoints, in addition to
-  the primary source audit and six-worktree copy verification. The 290 old untracked ca/nb/pt-BR/sr-Latn/tr files in PostalExpress-lang still match the
-  imported initial snapshot `cfdf55ab` exactly. Recompare them with the recorded helper at later checkpoints.
-- Individual recipients use green/blue locks and platform-specific lookup/warning symbols. The separate
-  overall status bar uses the verified shield. Keep this distinction in future help edits.
+- **Next: German agent unsubscribe review**, then the remaining 27 languages for this addition.
+  Source-only preview/MCP import is validated: 280 new entries, 28 source-changed entries and 56 changed help
+  topics are now in the checkout/report. Nineteen completed entries and 36 topics reopened. Previously reviewed
+  wording is retained where English changed, with exact source candidates saved for manual adaptation.
+- Current scope: 34,148 catalog entries and 1,352 help topics.
+  Completed: 21,252 entries and 784 full topics; pending: 12,896 entries and 568 topics.
+  Historical catalog improvements: 3,776. Importing drafts earns no review credit.
+- Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
+  per program over the preceding 24 hours. The text signature is included by default but can be omitted.
+  Correct the new help accordingly; preserve prior Undo/Outbox corrections.
+- PDF core context is inspected, but the source branch has no platform reading-setting control yet. Keep the
+  recovery instruction marked until actual callers arrive. An unfinished render marker does not prove the PDF
+  caused the crash. Exact source tips: preview `687113a3`, MCP `9a24e99b`.
+- Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
+  offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
+- Fresh fetch plus all 42 worktrees/183 refs found no further unrecorded changes. Use the extended source audit,
+  six-worktree copy audit and all-source audit at checkpoints. The 290 old untracked language files still match
+  their original imported snapshot exactly and remain untouched.
+- Compose additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
+  Remaining: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Resume Greek after the agent additions,
+  then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
+- All 28 active-key warnings are reviewed in `25eff7b8`; compose source `162c0dd2` was integrated in `3552434d`.
+  Individual recipient locks and the separate overall verified shield remain distinct in future help edits.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
 - Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md` (including the
   language's own notes), and `core/crates/pe-html/help/FORMAT.md`.
@@ -2270,3 +2271,21 @@ All53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagn
 
 The seven primary refs are unchanged after fetch and the guide is unchanged. A broader discovery scan of42 worktrees and183 refs found preview-render687113a3 and MCP9a24e99b additions:280 new catalog entries,28 edited entries and56 changed help targets across28 languages. Exact source values/hashes and affected completed content are now recorded in pending_source_integrations. These additions are not yet included in checkout totals or the HTML. Nineteen completed catalog entries and36 completed help topics must reopen on import. No new languages. The release branch has the same relevant tree as origin/master; other non-ancestral historical tips predate the review baseline. All41 external worktrees are clean in relevant paths except the known old five-language copies. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 853 entries/185 passages reconcile. No tests.
 Completed 21,271 entries/820 topics; pending 12,597/532; scope 33,868/1,352; historical catalog improvements 3,776. Next: Greek. REVIEWED remains unchanged.
+
+## PDF preview and agent unsubscribe source integration
+
+Imported the exact new English/draft entries from preview `687113a3` and MCP `9a24e99b`, without unrelated
+implementation. All ten new IDs per language remain pending. Changed reviewed values are retained and marked,
+with source candidates stored in state, so existing fluency and context corrections are not overwritten. New help
+sections are imported exactly; 36 formerly complete topics reopen only the affected passages. Broad drafts retain
+whole-topic marks. Exact reversible import evidence covers 145 source files and 55 retained sentences/values.
+
+Actual source inspection found two further context issues: PDF recovery points to a setting not yet wired into
+any platform, and unfinished render markers establish interruption but not causation. The agent help's signature
+promise is too broad because include_signature is optional. Its unsubscribe quota counts approvals, including
+failed requests, per program over 24 hours. These are recorded for the language review, not treated as resolved.
+
+All 28 structural checkers have only 27,343 expected mark diagnostics. Reconciliation accounts for 21,290 unmarked
+entries and 10,651 changed help lines, with 14 verified baseline pairs. Since-start 1,161 entries/277 passages match
+the queue. Required C/Swift identifiers were regenerated by an isolated offline build and match all 1,403 IDs.
+No test suites run. The report is refreshed. All source/worktree checks passed; review German agent additions next.

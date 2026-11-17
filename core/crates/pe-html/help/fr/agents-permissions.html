@@ -3,18 +3,25 @@
 <p>La première fois que l'agent d'un programme se connecte, Inbox Classic vous demande votre accord en nommant le programme. Choisissez ce qu'il peut faire :</p>
 <ul>
     <li>lire le courrier : les dossiers, la liste des messages, la recherche et les messages</li>
-    <li>organiser le courrier : l'état lu, les indicateurs, le courrier indésirable, le déplacement et la suppression vers <b data-text="folder-deleted"></b></li>
+<!--review-->    <li>organiser le courrier : l'état lu, les indicateurs, le courrier indésirable, le déplacement et la suppression vers <b data-text="folder-deleted"></b></li><!--/review-->
     <li>écrire des brouillons que vous enverrez vous-même</li>
     <li>envoyer du courrier, chaque message seulement après votre accord</li>
 </ul>
 <p>Choisissez ensuite les comptes qu'il peut voir, puis cliquez sur <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> refuse le programme, et la question ne vous est plus posée.</p>
 <p>Un agent ne supprime jamais rien définitivement et ne modifie jamais les paramètres de vos comptes. Lire un message ne le marque pas comme lu. Ce qu'il modifie apparaît aussitôt dans les fenêtres.</p>
+<!--review--><h2>Quitter des listes de diffusion</h2>
+<p>Un agent qui peut organiser le courrier peut demander à vous désabonner de listes de diffusion. Inbox Classic vous demande d'abord votre accord, une seule fois, en indiquant chaque liste par son expéditeur :</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> demande à chaque liste de ne plus vous écrire.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, le choix par défaut, les laisse telles quelles.</li>
+</ul>
+<p>Un agent ne peut pas vous désabonner à partir de messages qui se trouvent dans <b data-text="folder-junk"></b>, ni de plus de 30 listes par jour.</p><!--/review-->
 <h2>Consulter et modifier les accès</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> liste les programmes que vous avez laissés entrer ou refusés, et tout ce que les agents ont fait, du plus récent au plus ancien.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> modifie ce qu'un programme peut faire.</li>
     <li><b data-text="ui-remove"></b> oublie un programme : la question vous sera de nouveau posée à sa prochaine connexion.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> annule un changement d'état lu, un indicateur, un déplacement ou une suppression, ainsi qu'un message encore dans la Boîte d'envoi.</li>
+<!--review-->    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> annule un changement d'état lu, un indicateur, un déplacement ou une suppression, ainsi qu'un message encore dans la Boîte d'envoi.</li><!--/review-->
 </ul>
 <aside class="warning">Le courrier est écrit par d'autres personnes, et un message peut tenter de persuader un agent de transférer ou de supprimer votre courrier. Inbox Classic cache aux agents le texte qu'un message vous cache, et leur indique que le courrier ne contient pas d'instructions. Un agent peut tout de même être trompé. N'autorisez que ce dont vous avez besoin.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

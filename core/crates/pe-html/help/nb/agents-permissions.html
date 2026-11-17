@@ -3,18 +3,25 @@
 <p>Første gang agenten til et program kobler til, spør Inbox Classic deg og oppgir navnet på programmet. Velg hva den har lov til:</p>
 <ul>
     <li>lese e-post: mapper, meldingslisten, søk og meldinger</li>
-    <li>organisere e-post: lest-status, flagg, søppelpost, flytting og sletting til <b data-text="folder-deleted"></b></li>
+<!--review-->    <li>organisere e-post: lest-status, flagg, søppelpost, flytting og sletting til <b data-text="folder-deleted"></b></li><!--/review-->
     <li>skrive utkast som du sender selv</li>
     <li>sende e-post etter at du har godkjent hver melding</li>
 </ul>
 <p>Velg så hvilke kontoer den kan se, og klikk <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> avviser programmet, og du blir ikke spurt om det igjen.</p>
 <p>Gjennom Inbox Classic kan en agent ikke slette meldinger permanent eller endre kontoinnstillingene. Å lese en melding merker den ikke som lest. Det agenten endrer, vises i vinduene med en gang.</p>
+<!--review--><h2>Melde seg av e-postlister</h2>
+<p>En agent som kan organisere e-post, kan be om å melde deg av e-postlister. Inbox Classic spør deg først én gang og viser hver liste med avsenderen:</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> ber hver liste om å slutte å sende til deg.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, som er standardvalget, lar dem være som de er.</li>
+</ul>
+<p>En agent kan ikke melde deg av via meldinger i <b data-text="folder-junk"></b>, og den kan melde deg av høyst 30 lister om dagen.</p><!--/review-->
 <h2>Se og endre tilgang</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> viser programmene du har gitt eller nektet tilgang, og alt agentene har gjort, med det nyeste først.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> endrer hva et program har lov til.</li>
     <li><b data-text="ui-remove"></b> fjerner programmet, tillatelsene og aktivitetsloggen. Du blir spurt på nytt neste gang det kobler til.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> angrer endringer av lest-status, flagg, flytting og sletting. Du kan også avbryte sending av en melding som fortsatt ligger i Utboks.</li>
+<!--review-->    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> angrer endringer av lest-status, flagg, flytting og sletting. Du kan også avbryte sending av en melding som fortsatt ligger i Utboks.</li><!--/review-->
 </ul>
 <aside class="warning">E-post skrives av andre, og en melding kan prøve å lure en agent til å videresende eller slette e-posten din. Inbox Classic skjuler for agentene teksten som en melding skjuler for deg, og forteller dem at e-post ikke er instruksjoner. En agent kan likevel bli lurt. Tillat bare det du trenger.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

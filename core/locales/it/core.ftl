@@ -439,6 +439,7 @@ day-sunday = domenica
 ## AI agents
 
 agent-level-read = Leggere la posta: consultare cartelle e messaggi ed eseguire ricerche
+# review: changed
 agent-level-organize = Organizzare la posta: cambiare lo stato di lettura e i contrassegni, segnare messaggi come indesiderati, spostarli o eliminarli (in Posta eliminata)
 agent-level-drafts = Scrivere bozze che invierai tu
 agent-level-send = Inviare posta, con la tua conferma per ogni messaggio
@@ -499,6 +500,20 @@ agent-log-not-junk = Segnato “{ $subject }” come posta desiderata
 agent-log-archived = Archiviato “{ $subject }”
 agent-log-folder = Creata la cartella “{ $name }”
 agent-log-unsubscribed = Annullata l’iscrizione alla mailing list del messaggio “{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Impossibile annullare l’iscrizione alla lista di “{ $subject }”: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Non hai annullato l’iscrizione a { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vuole annullare la tua iscrizione a una mailing list
+   *[other] { $program } vuole annullare la tua iscrizione a { $count } mailing list
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic chiede alla lista qui sotto di smettere di scriverti, con il metodo a un clic che offre. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.
+   *[other] Inbox Classic chiede a ogni lista qui sotto di smettere di scriverti, con il metodo a un clic offerto dalla lista. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -839,3 +854,12 @@ undone-flags = { $count ->
     [one] Il server non ha cambiato i contrassegni di { $messages }, quindi la modifica è stata annullata: { $reason }
    *[other] Il server non ha cambiato i contrassegni di { $messages }, quindi la modifica è stata annullata: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Mostra i file PDF nei messaggi
+# review: new
+preview-pdf-off = I file PDF non vengono mostrati nei messaggi.
+# review: new
+preview-pdf-off-crashed = Un file PDF ha chiuso Inbox Classic mentre veniva mostrato, quindi i file PDF non vengono più mostrati nei messaggi. Le immagini sì. Per mostrare di nuovo i file PDF, attiva { $option } nelle opzioni di lettura.

@@ -93,6 +93,10 @@ win-never-written-to = Hiç yazılmadı
 win-book-find-label = Bir ad veya e-posta adresi yazın:
 win-send = &Gönder
 win-dont-send = Gö&nderme
+# review: new
+win-unsubscribe = &Abonelikten Çık
+# review: new
+win-dont-unsubscribe = Abonelikten Çık&ma
 win-forget-program-ask = Bu program, izinleri ve aracılarının etkinlik geçmişi kaldırılsın mı? Bir sonraki bağlantısında yeniden izin istenecek.
 win-clear-log-ask = Aracıların etkinlik geçmişi temizlensin mi? Bu, aracıların yaptığı değişiklikleri geri almaz.
 win-agent-programs = Postanıza erişim isteyen aracıların &programları:

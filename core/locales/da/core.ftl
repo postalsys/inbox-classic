@@ -435,6 +435,7 @@ day-sunday = søndag
 ## AI agents
 
 agent-level-read = Læse mail: mapper, meddelelseslisten, søgning og meddelelser
+# review: changed
 agent-level-organize = Organisere mail: ændre læst/ulæst og flag, markere som uønsket, flytte og slette til Slettet post
 agent-level-drafts = Skrive kladder, som du selv sender
 agent-level-send = Sende mail, men kun efter din godkendelse af hver meddelelse
@@ -495,6 +496,20 @@ agent-log-not-junk = Markerede »{ $subject }« som ikke uønsket
 agent-log-archived = Arkiverede »{ $subject }«
 agent-log-folder = Oprettede mappen »{ $name }«
 agent-log-unsubscribed = Afmeldte mailinglisten bag »{ $subject }«
+# review: new
+agent-log-unsubscribe-failed = Kunne ikke afmelde listen for »{ $subject }«: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Du afmeldte ikke { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vil afmelde dig fra en mailingliste
+   *[other] { $program } vil afmelde dig fra { $count } mailinglister
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic beder listen herunder om at holde op med at sende til dig, på den måde med ét klik, som den tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
+   *[other] Inbox Classic beder hver liste herunder om at holde op med at sende til dig, på den måde med ét klik, som listen tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -832,3 +847,12 @@ undone-flags = { $count ->
     [one] Serveren ændrede ikke flagene på { $messages }, så ændringen er fortrudt: { $reason }
    *[other] Serveren ændrede ikke flagene på { $messages }, så ændringen er fortrudt: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Vis PDF-filer i meddelelser
+# review: new
+preview-pdf-off = PDF-filer vises ikke i meddelelser.
+# review: new
+preview-pdf-off-crashed = En PDF-fil lukkede Inbox Classic, mens den blev vist, så PDF-filer vises ikke længere i meddelelser. Billeder vises stadig. Slå { $option } til i læseindstillingerne for at vise PDF-filer igen.

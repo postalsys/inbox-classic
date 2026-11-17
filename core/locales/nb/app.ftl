@@ -438,6 +438,8 @@ ui-browser-sign-in-server = { $server } (pålogging i nettleser)
 ui-dont-allow = Ikke tillat
 ui-allow = &Tillat
 ui-dont-send = Ikke send
+# review: new
+ui-dont-unsubscribe = Ikke meld av
 ui-edit-first = &Rediger først
 ui-new-address = Ny adresse
 ui-turn-away = &Avvis

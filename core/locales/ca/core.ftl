@@ -435,6 +435,7 @@ day-sunday = diumenge
 ## Agents d’IA
 
 agent-level-read = Llegir el correu: accedir a carpetes, llistes de missatges, cerques i contingut dels missatges
+# review: changed
 agent-level-organize = Organitzar el correu: canviar l’estat de lectura, marcar amb bandera o com a correu brossa, moure missatges i suprimir-los enviant-los a Elements suprimits
 agent-level-drafts = Escriure esborranys perquè els envieu vós
 agent-level-send = Enviar correu, amb la vostra aprovació per a cada missatge
@@ -495,6 +496,20 @@ agent-log-not-junk = Ha marcat «{ $subject }» com a correu legítim
 agent-log-archived = Ha arxivat «{ $subject }»
 agent-log-folder = Ha creat la carpeta «{ $name }»
 agent-log-unsubscribed = S’ha donat de baixa de la llista de «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = No s’ha pogut cancel·lar la subscripció a la llista de «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = No us heu donat de baixa de { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vol cancel·lar la vostra subscripció a una llista de correu
+   *[other] { $program } vol cancel·lar la vostra subscripció a { $count } llistes de correu
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic demana a la llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix. No s’envia res més, i els missatges que teniu es queden on són.
+   *[other] Inbox Classic demana a cada llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix la llista. No s’envia res més, i els missatges que teniu es queden on són.
+}
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
 
@@ -835,3 +850,12 @@ undone-flags = { $count ->
     [one] El servidor no ha canviat les banderes de { $messages }, per això s’ha desfet el canvi: { $reason }
    *[other] El servidor no ha canviat les banderes de { $messages }, per això s’ha desfet el canvi: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Mostra els fitxers PDF als missatges
+# review: new
+preview-pdf-off = Els fitxers PDF no es mostren als missatges.
+# review: new
+preview-pdf-off-crashed = Un fitxer PDF ha tancat Inbox Classic mentre es mostrava, per això els fitxers PDF ja no es mostren als missatges. Les imatges sí. Per tornar a mostrar els fitxers PDF, activeu { $option } a les opcions de lectura.

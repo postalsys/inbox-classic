@@ -3,18 +3,25 @@
 <p>Første gang en agent opretter forbindelse, viser Inbox Classic programmets navn og beder dig vælge, hvad agenten må:</p>
 <ul>
     <li>læse mail: mapper, meddelelseslisten, søgning og meddelelser</li>
-    <li>organisere mail: ændre læst/ulæst-status, sætte flag, markere som uønsket, flytte og slette til <b data-text="folder-deleted"></b></li>
+<!--review-->    <li>organisere mail: ændre læst/ulæst-status, sætte flag, markere som uønsket, flytte og slette til <b data-text="folder-deleted"></b></li><!--/review-->
     <li>skrive kladder, som du selv sender</li>
     <li>sende mail, hver meddelelse først når du siger ja</li>
 </ul>
 <p>Vælg derefter de konti, den må se, og klik på <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> afviser programmet, og du bliver ikke spurgt om det igen.</p>
 <p>Gennem Inbox Classic kan en agent hverken slette meddelelser permanent eller ændre dine kontoindstillinger. Når den læser en meddelelse, markeres den ikke som læst. Agentens ændringer vises straks i programmets vinduer.</p>
+<!--review--><h2>Afmeld mailinglister</h2>
+<p>En agent, der må organisere mail, kan bede om at afmelde dig mailinglister. Inbox Classic spørger dig først én gang og viser hver liste ved dens afsender:</p>
+<ul>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> beder hver liste om at holde op med at sende til dig.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, som er standard, lader dem være, som de er.</li>
+</ul>
+<p>En agent kan ikke afmelde dig ud fra meddelelser i <b data-text="folder-junk"></b>, og højst 30 lister om dagen.</p><!--/review-->
 <h2>Se og ændr adgang</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> viser de programmer, du har givet adgang eller afvist, og alt, hvad agenterne har gjort, med det nyeste først.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ændrer, hvad et program må.</li>
     <li><b data-text="ui-remove"></b> fjerner programmets gemte tilladelser eller afvisning, så du bliver spurgt igen, næste gang det opretter forbindelse.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> fortryder ændringer af læst/ulæst-status, flag, flytninger og sletninger. Du kan også annullere en afsendelse, så længe meddelelsen stadig ligger i Udbakke.</li>
+<!--review-->    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> fortryder ændringer af læst/ulæst-status, flag, flytninger og sletninger. Du kan også annullere en afsendelse, så længe meddelelsen stadig ligger i Udbakke.</li><!--/review-->
 </ul>
 <aside class="warning">Mail er skrevet af andre, og en meddelelse kan forsøge at overtale en agent til at videresende eller slette din mail. Inbox Classic udelader skjult meddelelsestekst fra det indhold, agenter får, og angiver, at mail skal behandles som indhold, ikke som instruktioner. En agent kan stadig blive narret. Tillad kun det, du har brug for.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

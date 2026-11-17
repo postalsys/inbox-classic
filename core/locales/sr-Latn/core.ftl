@@ -452,6 +452,7 @@ day-sunday = nedelja
 ## AI agents
 
 agent-level-read = Čitanje pošte: fascikle, lista poruka, pretraga i poruke
+# review: changed
 agent-level-organize = Organizovanje pošte: menjanje oznaka pročitanosti i zastavica, označavanje neželjene pošte, premeštanje poruka i brisanje u fasciklu Izbrisane stavke
 agent-level-drafts = Pisanje radnih verzija koje ćete vi poslati
 agent-level-send = Slanje pošte, svake poruke tek nakon vašeg odobrenja
@@ -513,6 +514,22 @@ agent-log-not-junk = Označeno kao poželjna pošta: „{ $subject }“
 agent-log-archived = Arhivirano: „{ $subject }“
 agent-log-folder = Napravljena fascikla „{ $name }“
 agent-log-unsubscribed = Poslat je zahtev za odjavu sa liste za poruku „{ $subject }“
+# review: new
+agent-log-unsubscribe-failed = Otkazivanje pretplate na listu poruke „{ $subject }“ nije uspelo: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Niste otkazali pretplatu: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [1] { $program } želi da otkaže vašu pretplatu na listu za slanje
+    [one] { $program } želi da otkaže vašu pretplatu na { $count } listu za slanje
+    [few] { $program } želi da otkaže vašu pretplatu na { $count } liste za slanje
+   *[other] { $program } želi da otkaže vašu pretplatu na { $count } lista za slanje
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic traži od liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+   *[other] Inbox Classic traži od svake liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje lista nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -889,3 +906,12 @@ undone-flags = { $count ->
     [1] Server nije promenio zastavice poruke ({ $messages }), pa je promena poništena: { $reason }
    *[other] Server nije promenio zastavice poruka ({ $messages }), pa je promena poništena: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Prikaži PDF datoteke u porukama
+# review: new
+preview-pdf-off = PDF datoteke se ne prikazuju u porukama.
+# review: new
+preview-pdf-off-crashed = PDF datoteka je zatvorila Inbox Classic dok se prikazivala, pa se PDF datoteke više ne prikazuju u porukama. Slike se i dalje prikazuju. Da biste ponovo prikazivali PDF datoteke, uključite { $option } u opcijama čitanja.

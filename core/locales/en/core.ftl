@@ -418,7 +418,7 @@ day-sunday = Sunday
 ## AI agents
 
 agent-level-read = Read mail: folders, the message list, search and messages
-agent-level-organize = Organize mail: read state, flags, junk, moving, deleting to Deleted Items
+agent-level-organize = Organize mail: read state, flags, junk, moving, archiving, new folders, deleting to Deleted Items, and leaving mailing lists after you say yes
 agent-level-drafts = Write drafts for you to send
 agent-level-send = Send mail, each message only after you say yes
 agent-connect-title = { $program } wants to use your mail
@@ -478,6 +478,17 @@ agent-log-not-junk = Marked “{ $subject }” as not junk
 agent-log-archived = Archived “{ $subject }”
 agent-log-folder = Made the folder “{ $name }”
 agent-log-unsubscribed = Unsubscribed from the list of “{ $subject }”
+agent-log-unsubscribe-failed = Could not unsubscribe from the list of “{ $subject }”: { $reason }
+# "You did not unsubscribe from news@shop.example, deals@example.com": the lists' addresses, never their names
+agent-log-unsubscribe-refused = You did not unsubscribe from { $senders }
+agent-unsubscribe-title = { $count ->
+    [one] { $program } wants to unsubscribe you from a mailing list
+   *[other] { $program } wants to unsubscribe you from { $count } mailing lists
+}
+agent-unsubscribe-detail = { $count ->
+    [one] Inbox Classic asks the list below to stop sending to you, the one-click way it offers. Nothing else is sent, and the messages you have stay where they are.
+   *[other] Inbox Classic asks each list below to stop sending to you, the one-click way the list offers. Nothing else is sent, and the messages you have stay where they are.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -814,3 +825,12 @@ undone-flags = { $count ->
     [one] The server did not change the flags of { $messages }, so it is as it was: { $reason }
    *[other] The server did not change the flags of { $messages }, so they are as they were: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# the reading option that turns PDF previews on and off (the apps show it)
+preview-pdf-option = Show PDF files in messages
+# the tile of a PDF file while PDF previews are off
+preview-pdf-off = PDF files are not shown in messages.
+# the note where previews are, after a PDF file ended the app: { $option } is the option's name
+preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in the reading options.

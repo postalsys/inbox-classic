@@ -452,6 +452,7 @@ day-sunday = Κυριακή
 ## AI agents
 
 agent-level-read = Ανάγνωση αλληλογραφίας: φάκελοι, λίστα μηνυμάτων, αναζήτηση και μηνύματα
+# review: changed
 agent-level-organize = Οργάνωση αλληλογραφίας: επισήμανση ως αναγνωσμένου ή αδιάβαστου, σημαίες, ανεπιθύμητα, μετακίνηση και διαγραφή στα Διαγραμμένα
 agent-level-drafts = Σύνταξη πρόχειρων που στέλνετε εσείς
 agent-level-send = Αποστολή αλληλογραφίας, με ξεχωριστή έγκριση για κάθε μήνυμα
@@ -512,6 +513,20 @@ agent-log-not-junk = Επισημάνθηκε ως μη ανεπιθύμητο �
 agent-log-archived = Αρχειοθετήθηκε το «{ $subject }»
 agent-log-folder = Δημιουργήθηκε ο φάκελος «{ $name }»
 agent-log-unsubscribed = Καταργήθηκε η εγγραφή στη λίστα αλληλογραφίας του μηνύματος «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = Δεν ήταν δυνατή η κατάργηση εγγραφής από τη λίστα του «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Δεν καταργήσατε την εγγραφή σας από: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] Το πρόγραμμα { $program } θέλει να καταργήσει την εγγραφή σας από μια λίστα αλληλογραφίας
+   *[other] Το πρόγραμμα { $program } θέλει να καταργήσει την εγγραφή σας από { $count } λίστες αλληλογραφίας
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Το Inbox Classic ζητά από τη λίστα παρακάτω να σταματήσει να σας στέλνει μηνύματα, με τον τρόπο ενός κλικ που προσφέρει. Δεν στέλνεται τίποτε άλλο, και τα μηνύματα που έχετε μένουν εκεί που είναι.
+   *[other] Το Inbox Classic ζητά από κάθε λίστα παρακάτω να σταματήσει να σας στέλνει μηνύματα, με τον τρόπο ενός κλικ που προσφέρει η λίστα. Δεν στέλνεται τίποτε άλλο, και τα μηνύματα που έχετε μένουν εκεί που είναι.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -871,3 +886,12 @@ undone-flags = { $count ->
     [one] Ο διακομιστής δεν άλλαξε τις σημαίες για { $messages }, οπότε η αλλαγή αναιρέθηκε: { $reason }
    *[other] Ο διακομιστής δεν άλλαξε τις σημαίες για { $messages }, οπότε η αλλαγή αναιρέθηκε: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Εμφάνιση αρχείων PDF στα μηνύματα
+# review: new
+preview-pdf-off = Τα αρχεία PDF δεν εμφανίζονται στα μηνύματα.
+# review: new
+preview-pdf-off-crashed = Ένα αρχείο PDF έκλεισε το Inbox Classic ενώ εμφανιζόταν, οπότε τα αρχεία PDF δεν εμφανίζονται πλέον στα μηνύματα. Οι εικόνες εμφανίζονται ακόμα. Για να εμφανίζονται ξανά τα αρχεία PDF, ενεργοποιήστε την επιλογή { $option } στις επιλογές ανάγνωσης.

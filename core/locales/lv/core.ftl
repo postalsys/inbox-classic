@@ -689,7 +689,7 @@ day-sunday = svētdiena
 # review: new
 agent-level-read = Lasīt pastu: mapes, ziņojumu sarakstu, meklēšanu un ziņojumus
 # review: new
-agent-level-organize = Kārtot pastu: lasīšanas stāvoklis, karodziņi, nevēlamais pasts, pārvietošana, dzēšana uz Izdzēstie vienumi
+agent-level-organize = Kārtot pastu: lasīšanas stāvoklis, karodziņi, nevēlamais pasts, pārvietošana, arhivēšana, jaunas mapes, dzēšana uz Izdzēstie vienumi un atteikšanās no adresātu sarakstiem pēc jūsu piekrišanas
 # review: new
 agent-level-drafts = Rakstīt melnrakstus, kurus nosūtāt jūs
 # review: new
@@ -801,6 +801,21 @@ agent-log-archived = Arhivēja „{ $subject }”
 agent-log-folder = Izveidoja mapi „{ $name }”
 # review: new
 agent-log-unsubscribed = Atteicās no „{ $subject }” adresātu saraksta
+# review: new
+agent-log-unsubscribe-failed = Neizdevās atteikties no „{ $subject }” adresātu saraksta: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Jūs neatteicāties no abonēšanas: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [zero] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu sarakstiem
+    [one] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu saraksta
+   *[other] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu sarakstiem
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic lūdz tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot tā piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.
+   *[other] Inbox Classic lūdz katram tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot saraksta piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1334,3 +1349,12 @@ undone-unread = { $count ->
 undone-flags = { $count ->
    *[other] Serveris nemainīja karodziņus ({ $messages }), tāpēc izmaiņa ir atcelta: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Rādīt PDF failus vēstulēs
+# review: new
+preview-pdf-off = PDF faili vēstulēs netiek rādīti.
+# review: new
+preview-pdf-off-crashed = PDF fails aizvēra Inbox Classic, kamēr tas tika rādīts, tāpēc PDF faili vēstulēs vairs netiek rādīti. Attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, lasīšanas opcijās ieslēdziet { $option }.

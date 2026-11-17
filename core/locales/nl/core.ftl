@@ -421,6 +421,7 @@ day-sunday = zondag
 ## AI agents
 
 agent-level-read = E-mail lezen: mappen en berichten bekijken en doorzoeken
+# review: changed
 agent-level-organize = E-mail ordenen: leesstatus en markeringen wijzigen, ongewenste e-mail markeren, berichten verplaatsen en verwijderen (naar Verwijderde items)
 agent-level-drafts = Concepten schrijven die jij verzendt
 agent-level-send = E-mail verzenden, met jouw toestemming voor elk bericht
@@ -481,6 +482,20 @@ agent-log-not-junk = “{ $subject }” gemarkeerd als gewenst
 agent-log-archived = “{ $subject }” gearchiveerd
 agent-log-folder = De map “{ $name }” gemaakt
 agent-log-unsubscribed = Afgemeld voor de mailinglijst bij het bericht “{ $subject }”
+# review: new
+agent-log-unsubscribe-failed = Afmelden bij de lijst van “{ $subject }” is mislukt: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Je hebt je niet afgemeld bij { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } wil je afmelden bij een mailinglijst
+   *[other] { $program } wil je afmelden bij { $count } mailinglijsten
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic vraagt de lijst hieronder om je niets meer te sturen, via de afmelding met één klik die de lijst aanbiedt. Er wordt verder niets verzonden, en de berichten die je hebt, blijven waar ze zijn.
+   *[other] Inbox Classic vraagt elke lijst hieronder om je niets meer te sturen, via de afmelding met één klik die de lijst aanbiedt. Er wordt verder niets verzonden, en de berichten die je hebt, blijven waar ze zijn.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -818,3 +833,12 @@ undone-flags = { $count ->
     [one] De server heeft de markeringen van { $messages } niet gewijzigd, dus de wijziging is teruggedraaid: { $reason }
    *[other] De server heeft de markeringen van { $messages } niet gewijzigd, dus de wijziging is teruggedraaid: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = PDF-bestanden in berichten tonen
+# review: new
+preview-pdf-off = PDF-bestanden worden niet in berichten getoond.
+# review: new
+preview-pdf-off-crashed = Een PDF-bestand heeft Inbox Classic gesloten terwijl het werd getoond, daarom worden PDF-bestanden niet meer in berichten getoond. Afbeeldingen wel. Schakel { $option } in bij de leesopties om PDF-bestanden weer te tonen.

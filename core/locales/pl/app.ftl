@@ -854,6 +854,8 @@ ui-allow = &Zezwól
 # review: new
 ui-dont-send = Nie wysyłaj
 # review: new
+ui-dont-unsubscribe = Nie wypisuj
+# review: new
 ui-edit-first = Najpierw &edytuj
 # review: new
 ui-new-address = Nowy adres

@@ -430,6 +430,7 @@ day-sunday = неделя
 ## AI agents
 
 agent-level-read = Четене на поща: преглед на папки и съобщения, търсене
+# review: changed
 agent-level-organize = Подреждане на поща: маркиране като прочетено, поставяне на флагове, нежелана поща, преместване и изтриване в „Изтрити“
 agent-level-drafts = Писане на чернови, които вие изпращате
 agent-level-send = Изпращане на поща: всяко съобщение изисква вашето потвърждение
@@ -490,6 +491,20 @@ agent-log-not-junk = Маркирано като желана поща: „{ $su
 agent-log-archived = Архивирано: „{ $subject }“
 agent-log-folder = Създадена е папката „{ $name }“
 agent-log-unsubscribed = Изпратена заявка за отписване от пощенския списък на „{ $subject }“
+# review: new
+agent-log-unsubscribe-failed = Отписването от списъка на „{ $subject }“ не успя: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Не се отписахте от { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } иска да ви отпише от пощенски списък
+   *[other] { $program } иска да ви отпише от { $count } пощенски списъка
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic моли списъка по-долу да спре да ви изпраща съобщения, по начина с едно щракване, който той предлага. Нищо друго не се изпраща, а съобщенията, които имате, остават там, където са.
+   *[other] Inbox Classic моли всеки от списъците по-долу да спре да ви изпраща съобщения, по начина с едно щракване, който списъкът предлага. Нищо друго не се изпраща, а съобщенията, които имате, остават там, където са.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -827,3 +842,12 @@ undone-flags = { $count ->
     [one] Сървърът не промени флаговете на { $messages }, затова промяната е отменена: { $reason }
    *[other] Сървърът не промени флаговете на { $messages }, затова промяната е отменена: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Показване на PDF файлове в съобщенията
+# review: new
+preview-pdf-off = PDF файловете не се показват в съобщенията.
+# review: new
+preview-pdf-off-crashed = PDF файл затвори Inbox Classic, докато се показваше, затова PDF файловете вече не се показват в съобщенията. Изображенията все още се показват. За да показвате отново PDF файлове, включете { $option } в настройките за четене.

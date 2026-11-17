@@ -447,6 +447,7 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Ler o correio: pastas, lista de mensagens, pesquisa e mensagens
+# review: changed
 agent-level-organize = Organizar o correio: alterar o estado de leitura e os sinalizadores, marcar como lixo eletrónico, mover mensagens e eliminá-las para Itens Eliminados
 agent-level-drafts = Escrever rascunhos para que os possa enviar
 agent-level-send = Enviar correio, com a sua confirmação para cada mensagem
@@ -507,6 +508,20 @@ agent-log-not-junk = Marcou «{ $subject }» como correio legítimo
 agent-log-archived = Arquivou «{ $subject }»
 agent-log-folder = Criou a pasta «{ $name }»
 agent-log-unsubscribed = Cancelou a subscrição da lista de «{ $subject }»
+# review: new
+agent-log-unsubscribe-failed = Não foi possível cancelar a subscrição da lista de «{ $subject }»: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Não cancelou a subscrição de { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } quer cancelar a sua subscrição de uma lista de correio
+   *[other] { $program } quer cancelar a sua subscrição de { $count } listas de correio
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] O Inbox Classic pede à lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que ela oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.
+   *[other] O Inbox Classic pede a cada lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que a lista oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -859,3 +874,12 @@ undone-flags = { $count ->
     [one] O servidor não alterou os sinalizadores de { $messages }, por isso a alteração foi anulada: { $reason }
    *[other] O servidor não alterou os sinalizadores de { $messages }, por isso a alteração foi anulada: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Mostrar ficheiros PDF nas mensagens
+# review: new
+preview-pdf-off = Os ficheiros PDF não são mostrados nas mensagens.
+# review: new
+preview-pdf-off-crashed = Um ficheiro PDF fechou o Inbox Classic enquanto era mostrado, pelo que os ficheiros PDF deixaram de ser mostrados nas mensagens. As imagens continuam a ser. Para voltar a mostrar ficheiros PDF, ative { $option } nas opções de leitura.

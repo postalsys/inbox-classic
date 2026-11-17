@@ -414,6 +414,7 @@ day-sunday = Sonntag
 ## AI agents
 
 agent-level-read = E-Mails lesen: Ordner und Nachrichten anzeigen und durchsuchen
+# review: changed
 agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben und löschen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
 agent-level-drafts = Entwürfe erstellen, die Sie selbst senden
 agent-level-send = E-Mail senden, jede Nachricht erst nach Ihrer Zustimmung
@@ -472,6 +473,20 @@ agent-log-not-junk = „{ $subject }“ als Nicht-Junk markiert
 agent-log-archived = „{ $subject }“ archiviert
 agent-log-folder = Ordner „{ $name }“ erstellt
 agent-log-unsubscribed = Mailingliste der Nachricht „{ $subject }“ abbestellt
+# review: new
+agent-log-unsubscribe-failed = Mailingliste der Nachricht „{ $subject }“ konnte nicht abbestellt werden: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Sie haben { $senders } nicht abbestellt
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } möchte eine Mailingliste für Sie abbestellen
+   *[other] { $program } möchte { $count } Mailinglisten für Sie abbestellen
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic bittet die folgende Liste, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den sie anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.
+   *[other] Inbox Classic bittet jede der folgenden Listen, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den die Liste anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.
+}
 
 ## Keys
 
@@ -800,3 +815,12 @@ undone-flags = { $count ->
     [one] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher ist sie wie zuvor: { $reason }
    *[other] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher sind sie wie zuvor: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = PDF-Dateien in Nachrichten anzeigen
+# review: new
+preview-pdf-off = PDF-Dateien werden in Nachrichten nicht angezeigt.
+# review: new
+preview-pdf-off-crashed = Eine PDF-Datei hat Inbox Classic beim Anzeigen beendet, daher werden PDF-Dateien in Nachrichten nicht mehr angezeigt. Bilder werden weiterhin angezeigt. Um PDF-Dateien wieder anzuzeigen, aktivieren Sie { $option } in den Leseoptionen.

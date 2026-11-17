@@ -420,6 +420,7 @@ day-sunday = sunnuntai
 ## AI agents
 
 agent-level-read = Lukea postia: kansiot, viestiluettelo, haku ja viestit
+# review: changed
 agent-level-organize = Järjestellä: luettu/lukematon, liput, roskaposti, siirto, poisto Poistettuihin
 agent-level-drafts = Kirjoittaa luonnoksia, jotka sinä lähetät
 agent-level-send = Lähettää postia, jokaisen viestin vasta hyväksyntäsi jälkeen
@@ -480,6 +481,20 @@ agent-log-not-junk = Poisti roskapostimerkinnän: ”{ $subject }”
 agent-log-archived = Arkistoi: ”{ $subject }”
 agent-log-folder = Loi kansion ”{ $name }”
 agent-log-unsubscribed = Peruutti tilauksen postituslistalta, jolta viesti ”{ $subject }” tuli
+# review: new
+agent-log-unsubscribe-failed = Tilauksen peruuttaminen listalta, jolta tuli ”{ $subject }”, epäonnistui: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Et peruuttanut tilausta: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } haluaa peruuttaa tilauksesi postituslistalta
+   *[other] { $program } haluaa peruuttaa tilauksesi { $count } postituslistalta
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic pyytää alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
+   *[other] Inbox Classic pyytää jokaista alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -839,3 +854,12 @@ undone-flags = { $count ->
     [one] Palvelin ei muuttanut viestin lippuja, joten { $messages } on ennallaan: { $reason }
    *[other] Palvelin ei muuttanut viestien lippuja, joten { $messages } on ennallaan: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Näytä PDF-tiedostot viesteissä
+# review: new
+preview-pdf-off = PDF-tiedostoja ei näytetä viesteissä.
+# review: new
+preview-pdf-off-crashed = PDF-tiedosto sulki Inbox Classicin näytettäessä, joten PDF-tiedostoja ei enää näytetä viesteissä. Kuvat näytetään edelleen. Voit näyttää PDF-tiedostot uudelleen ottamalla asetuksen { $option } käyttöön lukuasetuksissa.

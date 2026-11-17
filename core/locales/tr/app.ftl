@@ -437,6 +437,8 @@ ui-browser-sign-in-server = { $server } (tarayıcıda oturum açma)
 ui-dont-allow = İzin Verme
 ui-allow = İ&zin Ver
 ui-dont-send = Gönderme
+# review: new
+ui-dont-unsubscribe = Abonelikten Çıkma
 ui-edit-first = Önce &Düzenle
 ui-new-address = Yeni adres
 ui-turn-away = &Reddet

@@ -440,6 +440,7 @@ day-sunday = neděle
 ## AI agents
 
 agent-level-read = Číst poštu: prohlížet složky a zprávy a vyhledávat v nich
+# review: changed
 agent-level-organize = Uspořádat poštu: měnit stav přečtení a příznaky, označovat nevyžádanou poštu, přesouvat zprávy a odstraňovat je do složky Odstraněná pošta
 agent-level-drafts = Psát koncepty, které odešlete vy
 agent-level-send = Odesílat poštu, každou zprávu až po vašem souhlasu
@@ -499,6 +500,21 @@ agent-log-not-junk = Označeno jako vyžádané: „{ $subject }“
 agent-log-archived = Archivováno: „{ $subject }“
 agent-log-folder = Vytvořena složka „{ $name }“
 agent-log-unsubscribed = Odhlášen odběr ze seznamu, z něhož přišla zpráva „{ $subject }“
+# review: new
+agent-log-unsubscribe-failed = Odhlášení z konference zprávy „{ $subject }“ se nezdařilo: { $reason }
+# review: new
+agent-log-unsubscribe-refused = Neodhlásili jste se z odběru: { $senders }
+# review: new
+agent-unsubscribe-title = { $count ->
+    [one] { $program } vás chce odhlásit z konference
+    [few] { $program } vás chce odhlásit z { $count } konferencí
+   *[other] { $program } vás chce odhlásit z { $count } konferencí
+}
+# review: new
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic požádá konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
+   *[other] Inbox Classic požádá každou konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který konference nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
+}
 
 ## Keys
 
@@ -868,3 +884,12 @@ undone-flags = { $count ->
     [few] Server nezměnil příznaky zpráv, proto byla změna vrácena zpět ({ $messages }): { $reason }
    *[other] Server nezměnil příznaky zpráv, proto byla změna vrácena zpět ({ $messages }): { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Zobrazovat soubory PDF ve zprávách
+# review: new
+preview-pdf-off = Soubory PDF se ve zprávách nezobrazují.
+# review: new
+preview-pdf-off-crashed = Soubor PDF ukončil Inbox Classic během zobrazení, proto se soubory PDF ve zprávách už nezobrazují. Obrázky ano. Chcete-li soubory PDF znovu zobrazovat, zapněte { $option } v možnostech čtení.

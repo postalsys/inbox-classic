@@ -93,6 +93,10 @@ win-never-written-to = Nunca le ha escrito
 win-book-find-label = Escriba un nombre o una dirección de correo:
 win-send = &Enviar
 win-dont-send = &No enviar
+# review: new
+win-unsubscribe = &Cancelar suscripción
+# review: new
+win-dont-unsubscribe = &No cancelar suscripción
 win-forget-program-ask = ¿Quitar este programa, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
 win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los cambios realizados.
 win-agent-programs = P&rogramas cuyos agentes pidieron usar su correo:

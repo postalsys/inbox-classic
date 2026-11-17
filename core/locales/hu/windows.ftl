@@ -93,6 +93,10 @@ win-never-written-to = Még nem írt ide
 win-book-find-label = Írjon be egy nevet vagy e-mail-címet:
 win-send = &Küldés
 win-dont-send = &Nincs küldés
+# review: new
+win-unsubscribe = &Leiratkozás
+# review: new
+win-dont-unsubscribe = &Nincs leiratkozás
 win-forget-program-ask = Eltávolítja a programot a listából, és törli az engedélyeit, valamint az ügynökei tevékenységnaplóját? A következő csatlakozáskor az Inbox Classic ismét engedélyt kér.
 win-clear-log-ask = Törli az ügynökök tevékenységnaplóját? Ez nem vonja vissza az ügynökök által végzett módosításokat.
 win-agent-programs = &Programok, amelyek ügynökei hozzáférést kértek a leveleihez:

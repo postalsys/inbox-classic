@@ -853,6 +853,8 @@ ui-allow = &Tillåt
 # review: new
 ui-dont-send = Skicka inte
 # review: new
+ui-dont-unsubscribe = Avsluta inte
+# review: new
 ui-edit-first = &Redigera först
 # review: new
 ui-new-address = Ny adress

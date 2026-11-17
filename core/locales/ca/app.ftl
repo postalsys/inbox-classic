@@ -437,6 +437,8 @@ ui-browser-sign-in-server = { $server } (inici de sessió al navegador)
 ui-dont-allow = No ho permetis
 ui-allow = &Permet
 ui-dont-send = No l’enviïs
+# review: new
+ui-dont-unsubscribe = No cancel·lis la subscripció
 ui-edit-first = Edita’l &primer
 ui-new-address = Adreça nova
 ui-turn-away = &Rebutja
