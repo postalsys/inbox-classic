@@ -826,7 +826,7 @@ fn decrypted_text_in_the_search_but_never_for_agents() {
     assert_eq!(found(false), 0, "not opened yet");
     assert!(w.core.pgp_index_encrypted().unwrap(), "on out of the box");
     let view = w.core.message_view(folder, 1, false).unwrap().unwrap();
-    assert!(view.document.contains("zebrafish"));
+    assert!(shown(&view).contains("zebrafish"));
     assert_eq!(found(false), 1, "opened: its text is searched");
     assert_eq!(found(true), 0, "but never by an agent");
     let agent = w.core.agent_message(folder, 1).unwrap().unwrap();

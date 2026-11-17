@@ -145,6 +145,12 @@ impl Iterator for Mail<'_> {
             in_reply_to: references.last().cloned(),
             has_attachments: r.chance(15),
             references: references.clone(),
+            // about one in a hundred encrypted and one in forty signed (OpenPGP), without changing the rest
+            protection: match uid {
+                _ if uid % 97 == 0 => pe_store::PROTECTION_ENCRYPTED,
+                _ if uid % 41 == 0 => pe_store::PROTECTION_SIGNED,
+                _ => 0,
+            },
             ..Default::default()
         };
         self.recent.push((message_id, subject, references));
@@ -405,6 +411,21 @@ fn list_calls_within_budget() {
         ("Flagged", Scope::Flagged, "", false, newest),
         ("search 'report'", Scope::AllInboxes, "report", false, newest),
         ("search 'report' grouped", Scope::AllInboxes, "report", true, newest),
+        // a mark rather than words: few messages have it, read from the order's index
+        (
+            "search 'is:encrypted'",
+            Scope::AllInboxes,
+            "is:encrypted",
+            false,
+            newest,
+        ),
+        (
+            "search 'is:encrypted' grouped",
+            Scope::AllInboxes,
+            "is:encrypted",
+            true,
+            newest,
+        ),
     ];
     for (name, scope, text, grouped, sort) in lists {
         let list = view(scope, text, grouped, sort);

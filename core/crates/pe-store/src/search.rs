@@ -853,6 +853,74 @@ mod tests {
         }
     }
 
+    /// The marks of signed and encrypted mail are searched; the text decrypted from one is found by the user, never by
+    /// an agent's words, and leaves the index (with the people and files inside) when the switch is turned off
+    #[test]
+    fn encrypted_mail_in_the_search() {
+        let (store, inbox, _) = setup();
+        let mut signed = message(1, "Signed", "Ann", &[]);
+        signed.protection = crate::PROTECTION_SIGNED;
+        let mut encrypted = message(2, "Sealed", "Bob", &[]);
+        encrypted.protection = crate::PROTECTION_ENCRYPTED;
+        store
+            .add_messages(inbox, &[signed, encrypted, message(3, "Plain", "Cid", &[])])
+            .unwrap();
+        assert_eq!(found(&store, &words(None, "is:signed")), [1]);
+        assert_eq!(found(&store, &words(None, "is:encrypted")), [2]);
+        assert_eq!(found(&store, &words(None, "-is:encrypted")), [1, 3]);
+        assert_eq!(store.count_search(&words(Some(inbox), "is:encrypted")).unwrap().0, 1);
+
+        let id: i64 = store
+            .db
+            .query_row("SELECT id FROM messages WHERE uid = 2", [], |row| row.get(0))
+            .unwrap();
+        assert!(store.wants_decrypted_text(inbox, 2).unwrap());
+        let text = IndexText {
+            sender_people: "Bob Inner".into(),
+            attachment_names: "zebra.pdf".into(),
+            attachment_count: 1,
+            body: "the zebrafish plan".into(),
+            snippet: "the zebrafish plan".into(),
+            ..Default::default()
+        };
+        store.index_decrypted(inbox, 2, &text).unwrap();
+        assert!(!store.wants_decrypted_text(inbox, 2).unwrap(), "once");
+        let agent = |text: &str| Search {
+            no_decrypted: true,
+            ..words(None, text)
+        };
+        assert_eq!(found(&store, &words(None, "zebrafish")), [2]);
+        assert_eq!(found(&store, &words(None, "filename:zebra")), [2]);
+        assert_eq!(found(&store, &agent("zebrafish")), [] as [u64; 0]);
+        assert_eq!(found(&store, &agent("-zebrafish")), [1, 3], "nor by leaving it out");
+        assert_eq!(
+            found(&store, &agent("is:encrypted")),
+            [2],
+            "its mark is no decrypted word"
+        );
+
+        store.set_pgp_index_encrypted(false).unwrap();
+        store.forget_decrypted().unwrap();
+        assert!(!store.wants_decrypted_text(inbox, 2).unwrap(), "off");
+        assert_eq!(found(&store, &words(None, "zebrafish")), [] as [u64; 0]);
+        assert_eq!(found(&store, &words(None, "filename:zebra")), [] as [u64; 0]);
+        assert_eq!(
+            found(&store, &words(None, "sealed bob")),
+            [2],
+            "its envelope is searched"
+        );
+        let row = &store
+            .search(&words(None, "is:encrypted"), Sort::default(), 0, 1)
+            .unwrap()[0];
+        assert_eq!(row.snippet.as_deref(), Some(""));
+        assert_eq!(row.info.attachment_count, 0);
+        let decrypted: i64 = store
+            .db
+            .query_row("SELECT decrypted FROM messages WHERE id = ?1", [id], |row| row.get(0))
+            .unwrap();
+        assert_eq!(decrypted, 0);
+    }
+
     #[test]
     fn typed_text_can_only_be_words() {
         let word = |text: &str| Word {
