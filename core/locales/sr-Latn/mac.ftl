@@ -25,9 +25,7 @@ mac-no-updates = Ova verzija programa Inbox Classic ne podržava automatska ažu
 ## Settings
 
 mac-settings-title = Podešavanja
-# review: new
 mac-check-updates-automatically = Automatski traži ažuriranja
-# review: new
 mac-settings-updates = Ažuriranja
 
 ## Dialogs

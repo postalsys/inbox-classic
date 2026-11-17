@@ -171,7 +171,6 @@ gtk-nothing-yet = Zasad ništa.
 ## Preferences
 
 gtk-preferences = Podešavanja
-# review: changed
 gtk-notify-subtitle = Samo dok je Inbox Classic u pozadini
 
 ## The desktop entry and the page of the software stores
