@@ -923,6 +923,8 @@ pgp-why-key-not-valid = Érvénytelen kulccsal aláírva
 # review: new
 pgp-why-not-for-you = Más címzetteknek aláírva, Önnek továbbítva
 # review: new
+pgp-why-not-key-in-use = Más kulccsal aláírva, mint amelyet a(z) { $address } címhez használ
+# review: new
 pgp-part-pictures-loaded = { $label }. A képek az internetről töltődtek be
 # review: new
 pgp-error-no-own-key = Nincs olyan kulcsa, amellyel ezt a címet aláírhatná vagy titkosíthatná: { $address }. Hozzon létre egyet az Eszközök > Titkosítási kulcsok menüpontban, vagy kapcsolja ki az Aláírást és a Titkosítást.

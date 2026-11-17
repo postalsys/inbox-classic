@@ -859,6 +859,12 @@ impl<'a> Book<'a> {
                 ring.keys.push(secret);
             }
         }
+        for (address, fingerprint) in self.store.pgp_keys_in_use()? {
+            ring.in_use.insert(address, fingerprint);
+        }
+        for identity in self.store.pgp_identities()? {
+            ring.in_use.insert(identity.address, identity.fingerprint);
+        }
         for held in self.store.pgp_key_addresses(None)? {
             // the names the labels say: the Address Book's
             if !ring.names.contains_key(&held.address)

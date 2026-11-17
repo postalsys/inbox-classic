@@ -652,6 +652,8 @@ pgp-why-key-not-valid = Signé avec une clé non valide
 # review: new
 pgp-why-not-for-you = Signé pour d'autres destinataires et transmis à vous
 # review: new
+pgp-why-not-key-in-use = Signé avec une autre clé que celle utilisée pour { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Des images ont été chargées depuis Internet
 # review: new
 pgp-error-no-own-key = Vous n'avez pas de clé pour { $address } pour signer ou chiffrer. Créez-en une dans Outils > Clés de chiffrement, ou désactivez Signer et Chiffrer.

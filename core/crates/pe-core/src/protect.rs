@@ -30,6 +30,9 @@ pub struct KeyRing {
     /// The Address Book's name of an address a key holds: the words a label names a signer by (never the key's own
     /// free text, which anyone writes)
     pub names: HashMap<String, String>,
+    /// The key in use for each address that has one (a correspondent's, an own address's): a signature by another
+    /// key that holds the address (one waiting for the user's decision, one the user kept away) is not the sender's
+    pub in_use: HashMap<String, String>,
 }
 
 /// How a part's colour and words read (green, blue, amber, grey): the page's own tones
@@ -652,6 +655,14 @@ impl Reader<'_> {
                 };
                 let signer = signer_name(self.ring, &addresses, &key, sender.as_deref());
                 match sender {
+                    Some(sender)
+                        if addresses.contains(&sender)
+                            && self.ring.in_use.get(&sender).is_some_and(|in_use| *in_use != key) =>
+                    {
+                        Signature::Bad {
+                            why: tr_args(Text::PgpWhyNotKeyInUse, &[("address", (&sender).into())]),
+                        }
+                    }
                     Some(sender) if addresses.contains(&sender) => {
                         if self.ring.verified.contains(&(key.clone(), sender)) {
                             Signature::Verified { signer, at, key }

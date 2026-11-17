@@ -953,6 +953,8 @@ pgp-why-key-not-valid = Firmato con una chiave non valida
 # review: new
 pgp-why-not-for-you = Firmato per altri destinatari, e poi passato a te
 # review: new
+pgp-why-not-key-in-use = Firmato con una chiave diversa da quella in uso per { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Le immagini sono state caricate da internet
 # review: new
 pgp-error-no-own-key = Non hai una chiave per { $address } con cui firmare o crittografare. Creane una in Strumenti > Chiavi di crittografia, o disattiva Firma e Crittografa.

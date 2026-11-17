@@ -636,6 +636,8 @@ pgp-why-key-not-valid = Firmado con una clave no válida
 # review: new
 pgp-why-not-for-you = Firmado para otros destinatarios y reenviado a usted
 # review: new
+pgp-why-not-key-in-use = Firmado con una clave distinta de la que se usa para { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Se cargaron imágenes de internet
 # review: new
 pgp-error-no-own-key = No tiene ninguna clave para { $address } con la que firmar o cifrar. Cree una en Herramientas > Claves de cifrado, o desactive Firmar y Cifrar.

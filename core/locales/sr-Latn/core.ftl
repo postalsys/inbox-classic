@@ -981,6 +981,8 @@ pgp-why-key-not-valid = Potpisano ključem koji nije važeći
 # review: new
 pgp-why-not-for-you = Potpisano za druge primaoce i prosleđeno vama
 # review: new
+pgp-why-not-key-in-use = Potpisano drugim ključem od onog koji se koristi za { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Slike su učitane sa interneta
 # review: new
 pgp-error-no-own-key = Nemate ključ za { $address } kojim biste potpisivali ili šifrovali. Napravite ga u meniju Alatke > Ključevi za šifrovanje ili isključite Potpiši i Šifruj.

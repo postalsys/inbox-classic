@@ -625,6 +625,8 @@ pgp-why-key-not-valid = Mit einem ungültigen Schlüssel signiert
 # review: new
 pgp-why-not-for-you = Für andere Empfänger signiert und an Sie weitergegeben
 # review: new
+pgp-why-not-key-in-use = Mit einem anderen Schlüssel signiert als dem, der für { $address } verwendet wird
+# review: new
 pgp-part-pictures-loaded = { $label }. Bilder wurden aus dem Internet geladen
 # review: new
 pgp-error-no-own-key = Sie haben keinen Schlüssel für { $address }, um zu signieren oder zu verschlüsseln. Erstellen Sie einen unter Extras > Verschlüsselungsschlüssel, oder schalten Sie Signieren und Verschlüsseln aus.

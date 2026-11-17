@@ -996,6 +996,8 @@ pgp-why-key-not-valid = Podpísané kľúčom, ktorý nie je platný
 # review: new
 pgp-why-not-for-you = Podpísané pre iných príjemcov a preposlané vám
 # review: new
+pgp-why-not-key-in-use = Podpísané iným kľúčom, než aký sa používa pre { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Obrázky boli načítané z internetu
 # review: new
 pgp-error-no-own-key = Nemáte kľúč pre { $address }, ktorým by ste podpisovali alebo šifrovali. Vytvorte ho v ponuke Nástroje > Šifrovacie kľúče alebo vypnite Podpísať a Šifrovať.

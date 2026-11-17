@@ -219,6 +219,29 @@ fn changed_text_does_not_match() {
 }
 
 #[test]
+fn a_key_that_is_not_the_one_in_use_does_not_sign_for_the_sender() {
+    // Mallory makes a key with Alice's address and gets it stored (an Autocrypt header of a forged message, a file):
+    // it waits for the user's decision beside Alice's, and what it signs is not Alice's, before and after Keep
+    let w = world("pgp-not-in-use");
+    let impostor = pe_pgp::generate("Alice", &["alice@example.org".into()], now() - 60).unwrap();
+    w.core
+        .pgp_import(impostor.cert().armored().as_bytes(), None, KeySource::Paste)
+        .unwrap();
+    let raw = message(
+        "Alice <alice@example.org>",
+        &signed_part(&text("Pay Mallory 1000 euros"), &impostor, "s"),
+    );
+    let protection = w.view(&raw).protection.unwrap();
+    assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
+    assert!(protection.text.contains("another key"), "{}", protection.text);
+    w.core.pgp_decide("alice@example.org", false).unwrap();
+    assert_eq!(w.view(&raw).protection.unwrap().tone, Tone::Warning);
+    // Alice's own key still signs for her
+    let raw = message("Alice <alice@example.org>", &signed_part(&text("Hi"), &w.alice, "s"));
+    assert_eq!(w.view(&raw).protection.unwrap().tone, Tone::Good);
+}
+
+#[test]
 fn an_unknown_key() {
     let w = world("pgp-unknown");
     let raw = message("mallory@example.net", &signed_part(&text("Hi"), &w.mallory, "s"));

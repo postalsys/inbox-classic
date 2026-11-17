@@ -943,6 +943,8 @@ pgp-why-key-not-valid = Signerad med en nyckel som inte är giltig
 # review: new
 pgp-why-not-for-you = Signerad för andra mottagare och vidarebefordrad till dig
 # review: new
+pgp-why-not-key-in-use = Signerad med en annan nyckel än den som används för { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Bilder hämtades från internet
 # review: new
 pgp-error-no-own-key = Du har ingen nyckel för { $address } att signera eller kryptera med. Skapa en i Verktyg > Krypteringsnycklar, eller stäng av Signera och Kryptera.
