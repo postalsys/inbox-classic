@@ -61,6 +61,8 @@ mod compose_keys;
 
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
+/// Step 8b: pictures and PDF files in the message
+mod previews;
 /// Step 45a: settings and accounts to another computer
 mod setup;
 
@@ -1027,6 +1029,7 @@ async fn scenario(d: Rc<Driver>) {
     secure::signed_and_encrypted(&d).await;
     compose_keys::signing_and_encrypting(&d).await;
     attach::opening_attachments(&d).await;
+    previews::previews(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;

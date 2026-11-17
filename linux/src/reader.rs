@@ -330,7 +330,22 @@ impl Reader {
                 }
             });
         });
+        // a picture or PDF page after the text: its file opened as a double-click in the strip opens it, when the core
+        // says it is of the message shown
+        let this = Rc::downgrade(self);
+        let preview = move |uri: &str| {
+            let Some(index) = shell().core.preview_link(uri) else {
+                return;
+            };
+            if let Some(this) = this.upgrade() {
+                spawn(async move { this.open_attachment(index).await });
+            }
+        };
         self.preview.set_links(move |uri| {
+            if pe_html::is_preview_link(uri) {
+                preview(uri);
+                return true;
+            }
             if pe_html::part_link(uri).is_some() {
                 part();
                 return true;
@@ -710,7 +725,8 @@ impl Reader {
 
     /// The message as it is shown, with the pictures the user allowed, through the print dialog over `window`. A
     /// signed or encrypted message prints the core's document of it (a printer prints no frames): every part's text,
-    /// with the bar's words and the parts' labels in its header
+    /// with the bar's words and the parts' labels in its header; a message with previews prints the core's document
+    /// without them
     pub fn print(&self, window: &impl IsA<gtk::Window>) {
         if !self.shows_message() || !self.has_view() {
             return;
@@ -869,6 +885,7 @@ impl Reader {
         self.preview.show_parts(
             &view.document,
             &view.part_documents,
+            view.preview_token.as_deref(),
             remote_images || view.pictures_loaded,
         );
         // a signed or encrypted message's parts are frames, each sized to its document

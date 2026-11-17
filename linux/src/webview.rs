@@ -1,6 +1,8 @@
 //! The web views, locked down the way the Windows app locks WebView2 down: the core's documents are served from the
 //! app's own scheme (`inboxclassic://preview/<n>/`, `inboxclassic://compose/<n>/`) out of memory, and the parts of a
-//! signed or encrypted message beside its page (`inboxclassic://preview/<n>/part-N`, each in a frame of the page).
+//! signed or encrypted message beside its page (`inboxclassic://preview/<n>/part-N`, each in a frame of the page),
+//! and the previews of its attachments (`inboxclassic://preview/pv/<token>-<file>-<page>`), answered once the core
+//! has drawn them ([`preview_answered`]), never by waiting in the scheme's handler.
 //! Every other load is blocked by the content rules the core gives (only the pictures of a message the user allowed
 //! get through), nothing navigates away from the document, links open in the browser, no window opens, no
 //! dev tools, an ephemeral network session (nothing on disk). Page scripts are off but in the editor, whose page runs
@@ -26,12 +28,25 @@ pub struct Web {
     filters: RefCell<Option<(webkit::UserContentFilter, webkit::UserContentFilter)>>,
     /// Loads waiting for the rules: no document is shown without them
     waiting: RefCell<Vec<Box<dyn FnOnce()>>>,
+    /// The previews asked for and not answered yet, by the core's ask
+    pending: RefCell<HashMap<u64, webkit::URISchemeRequest>>,
 }
 
-/// A page and the documents of its frames
+/// A page and the documents of its frames, and the token of its previews (ended with the page)
 struct Served {
     page: Rc<str>,
     parts: Rc<[String]>,
+    previews: Option<String>,
+}
+
+impl Served {
+    /// The page no longer shown: the core stops answering its previews, and answers those still asked for with none
+    /// (which finishes their requests)
+    fn end(self) {
+        if let Some(token) = &self.previews {
+            crate::app::shell().core.previews_end(token);
+        }
+    }
 }
 
 thread_local! {
@@ -52,13 +67,18 @@ impl Web {
             next: Cell::new(0),
             filters: RefCell::new(None),
             waiting: RefCell::default(),
+            pending: RefCell::default(),
         });
         let served = Rc::downgrade(&web);
         context.register_uri_scheme(pe_html::DOCUMENT_SCHEME, move |request| {
-            let document = served
-                .upgrade()
-                .and_then(|web| web.document(&request.uri().unwrap_or_default()));
-            match document {
+            let Some(web) = served.upgrade() else { return };
+            let uri = request.uri().unwrap_or_default();
+            // a preview of a page shown: kept until the core has drawn it (an address of no page shown is not found)
+            if let Some(ask) = crate::app::shell().core.preview_ask(&uri) {
+                web.pending.borrow_mut().insert(ask, request.clone());
+                return;
+            }
+            match web.document(&uri) {
                 Some(document) => {
                     let bytes = glib::Bytes::from_owned(document.as_bytes().to_vec());
                     let length = bytes.len() as i64;
@@ -126,26 +146,60 @@ impl Web {
         }
     }
 
-    /// A new URI under `kind` serving `document` and its `parts` beside it, and the one it replaces given up. It ends
-    /// in `/`, so the page's frames (`part-N`) ask for addresses under it
-    fn serve(&self, kind: &str, document: &str, parts: &[String], replaces: Option<&str>) -> String {
+    /// A new URI under `kind` serving `document` and its `parts` beside it, its previews under the token `previews`,
+    /// and the one it replaces given up. It ends in `/`, so the page's frames (`part-N`) ask for addresses under it
+    fn serve(
+        &self,
+        kind: &str,
+        document: &str,
+        parts: &[String],
+        previews: Option<&str>,
+        replaces: Option<&str>,
+    ) -> String {
         let n = self.next.get() + 1;
         self.next.set(n);
         let uri = format!("{}://{kind}/{n}/", pe_html::DOCUMENT_SCHEME);
-        let mut documents = self.documents.borrow_mut();
-        if let Some(old) = replaces {
-            documents.remove(old);
-        }
         let served = Served {
             page: Rc::from(document),
             parts: Rc::from(parts),
+            previews: previews.map(str::to_string),
         };
-        documents.insert(uri.clone(), served);
+        let old = {
+            let mut documents = self.documents.borrow_mut();
+            documents.insert(uri.clone(), served);
+            replaces.and_then(|old| documents.remove(old))
+        };
+        if let Some(old) = old {
+            old.end();
+        }
         uri
     }
 
     fn forget(&self, uri: &str) {
-        self.documents.borrow_mut().remove(uri);
+        let old = self.documents.borrow_mut().remove(uri);
+        if let Some(old) = old {
+            old.end();
+        }
+    }
+}
+
+/// The core drew (or gave up) the preview of `ask`: the web view that asked for it answered with the picture, or
+/// "not found" (a page no longer shown). On the window thread, as every event of the core
+pub fn preview_answered(ask: u64) {
+    let Some(request) = web().pending.borrow_mut().remove(&ask) else {
+        return;
+    };
+    match crate::app::shell().core.preview_answer(ask) {
+        Some(picture) => {
+            let bytes = glib::Bytes::from(&picture.bytes[..]);
+            let length = bytes.len() as i64;
+            let stream = gio::MemoryInputStream::from_bytes(&bytes);
+            request.finish(&stream, length, Some(picture.mime.as_str()));
+        }
+        None => {
+            let mut error = glib::Error::new(gio::IOErrorEnum::NotFound, "no such preview");
+            request.finish_error(&mut error);
+        }
     }
 }
 
@@ -264,8 +318,8 @@ impl DocumentView {
         // no window opens from a document
         view.connect_create(|_, _| None);
         // the page's own menu without what makes no sense here (reload, back, inspect)
-        view.connect_context_menu(|_, menu, _| {
-            keep_useful(menu);
+        view.connect_context_menu(|_, menu, hit| {
+            keep_useful(menu, hit);
             false
         });
         let measuring: Rc<Cell<bool>> = Rc::default();
@@ -324,12 +378,12 @@ impl DocumentView {
 
     /// Shows `document`, with the message's pictures from the internet only when `remote_images`
     pub fn show(&self, document: &str, remote_images: bool) {
-        self.show_parts(document, &[], remote_images);
+        self.show_parts(document, &[], None, remote_images);
     }
 
-    /// Shows `document` whose frames show `parts` (a signed or encrypted message's), with the message's pictures
-    /// from the internet only when `remote_images`
-    pub fn show_parts(&self, document: &str, parts: &[String], remote_images: bool) {
+    /// Shows `document` whose frames show `parts` (a signed or encrypted message's) and whose previews are under the
+    /// token `previews` (the view's), with the message's pictures from the internet only when `remote_images`
+    pub fn show_parts(&self, document: &str, parts: &[String], previews: Option<&str>, remote_images: bool) {
         // the frames of the document before are not this one's
         self.measure_frames(false);
         let web = web();
@@ -338,6 +392,7 @@ impl DocumentView {
             self.kind,
             document,
             parts,
+            previews,
             (!previous.is_empty()).then_some(previous.as_str()),
         );
         *self.current.borrow_mut() = uri.clone();
@@ -439,27 +494,30 @@ fn decide(
 }
 
 /// The items of a page's context menu that do something here: copying, selecting, the editing ones and the spelling
-/// guesses of the editor
-fn keep_useful(menu: &webkit::ContextMenu) {
+/// guesses of the editor. On an attachment's preview not its link (the app's own, opening the file) and only Copy
+/// Image of the picture (saving or opening it would give the app's copy, not the file)
+fn keep_useful(menu: &webkit::ContextMenu, hit: &webkit::HitTestResult) {
     use webkit::ContextMenuAction as Action;
+    let preview = hit.link_uri().is_some_and(|uri| pe_html::is_preview_link(&uri));
     let items = menu.items();
     for item in items {
-        let keep = matches!(
-            item.stock_action(),
-            Action::Copy
-                | Action::CopyLinkToClipboard
-                | Action::CopyImageToClipboard
-                | Action::Cut
-                | Action::Paste
-                | Action::PasteAsPlainText
-                | Action::Delete
-                | Action::SelectAll
-                | Action::SpellingGuess
-                | Action::IgnoreSpelling
-                | Action::LearnSpelling
-                | Action::NoGuessesFound
-                | Action::Custom
-        );
+        let keep = !(preview && item.stock_action() == Action::CopyLinkToClipboard)
+            && matches!(
+                item.stock_action(),
+                Action::Copy
+                    | Action::CopyLinkToClipboard
+                    | Action::CopyImageToClipboard
+                    | Action::Cut
+                    | Action::Paste
+                    | Action::PasteAsPlainText
+                    | Action::Delete
+                    | Action::SelectAll
+                    | Action::SpellingGuess
+                    | Action::IgnoreSpelling
+                    | Action::LearnSpelling
+                    | Action::NoGuessesFound
+                    | Action::Custom
+            );
         if !keep {
             menu.remove(&item);
         }
