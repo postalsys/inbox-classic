@@ -175,13 +175,14 @@ impl Store {
         self.set_bool_setting("agents.enabled", enabled)
     }
 
-    /// Writes what an agent did in the log, in one transaction
-    pub fn log_agent(&self, entries: &[NewLogEntry], now: i64) -> Result<()> {
+    /// Writes what an agent did in the log, in one transaction; the entries' ids, in their order
+    pub fn log_agent(&self, entries: &[NewLogEntry], now: i64) -> Result<Vec<i64>> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let mut statement = self.db.prepare_cached(
             "INSERT INTO agent_log (host_id, at, what, account_id, folder_id, uid, message_id, summary, undo) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
         )?;
+        let mut ids = Vec::with_capacity(entries.len());
         for entry in entries {
             statement.execute(params![
                 entry.host,
@@ -194,9 +195,18 @@ impl Store {
                 entry.summary,
                 entry.undo
             ])?;
+            ids.push(self.db.last_insert_rowid());
         }
         drop(statement);
-        tx.commit()
+        tx.commit()?;
+        Ok(ids)
+    }
+
+    /// Says in entry `id` of the log what came of it after all (an unsubscribe the list refused)
+    pub fn set_agent_log_summary(&self, id: i64, summary: &str) -> Result<()> {
+        self.db
+            .execute("UPDATE agent_log SET summary = ?1 WHERE id = ?2", params![summary, id])?;
+        Ok(())
     }
 
     /// The newest `limit` entries of the log, newest first
@@ -357,6 +367,11 @@ mod tests {
         assert_eq!(store.agent_log_count(host, "send", 15).unwrap(), 1);
         assert_eq!(store.agent_log_count(host, "send", 25).unwrap(), 0);
         store.set_agent_log_undone(first).unwrap();
+        store.set_agent_log_summary(first, "Marked \"Hi\" read again").unwrap();
+        assert_eq!(
+            store.agent_log_entry(first).unwrap().unwrap().entry.summary,
+            "Marked \"Hi\" read again"
+        );
         assert!(store.agent_log_entry(first).unwrap().unwrap().undone);
         // a host forgotten takes its log along
         store.remove_agent_host(host).unwrap();

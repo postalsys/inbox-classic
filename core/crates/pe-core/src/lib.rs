@@ -1134,6 +1134,11 @@ impl Core {
     /// The address a message's one-click unsubscribe (RFC 8058) goes to, None when it offers none
     /// ([`crate::unsubscribe::of`]) or its source is not in the store
     pub(crate) fn one_click(&self, folder: FolderId, uid: u64) -> Result<Option<String>> {
+        self.one_click_with(folder, uid, &self.trusted(folder)?)
+    }
+
+    /// [`Core::one_click`] with the servers whose verdicts count for the folder's account already read
+    pub(crate) fn one_click_with(&self, folder: FolderId, uid: u64, trusted: &[String]) -> Result<Option<String>> {
         // the header block is all it takes
         let Some(start) = self.store().source_start(folder, uid, view::MAX_HEADER_TEXT)? else {
             return Ok(None);
@@ -1141,7 +1146,7 @@ impl Core {
         let Ok(message) = pe_mime::parser::parse(&start) else {
             return Ok(None);
         };
-        Ok(match unsubscribe::of(&message.headers, &self.trusted(folder)?) {
+        Ok(match unsubscribe::of(&message.headers, trusted) {
             Some(unsubscribe::Unsubscribe::OneClick { url }) => Some(url),
             _ => None,
         })

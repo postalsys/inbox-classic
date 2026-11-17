@@ -247,6 +247,21 @@ fn an_agent_works_on_the_mailbox() {
     let weekly = server.add_message("INBOX", &list_message("Weekly", port, "ok"), &[]);
     let monthly = server.add_message("INBOX", &list_message("Monthly", port, "fail"), &[]);
     let kept = server.add_message("INBOX", &list_message("Keep", port, "keep"), &[]);
+    // a list that takes its time to answer: the yes counts before it does
+    let slow_port = {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        std::thread::spawn(move || {
+            use std::io::{Read, Write};
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut buffer = [0u8; 4096];
+            let _ = stream.read(&mut buffer);
+            std::thread::sleep(Duration::from_secs(3));
+            let _ = stream.write_all(b"HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nok");
+        });
+        port
+    };
+    let slow = server.add_message("INBOX", &list_message("Slow", slow_port, "slow"), &[]);
 
     let dir = TempDir::new("mcp");
     let (sender, events) = channel();
@@ -326,8 +341,8 @@ fn an_agent_works_on_the_mailbox() {
             .map(|f| f["folder"].as_i64().unwrap())
             .unwrap();
         let list = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
-        assert_eq!(list["messages"].as_array().unwrap().len(), 7, "{list}");
-        assert_eq!((list["total"].as_u64(), list["has_more"].as_bool()), (Some(7), Some(false)));
+        assert_eq!(list["messages"].as_array().unwrap().len(), 8, "{list}");
+        assert_eq!((list["total"].as_u64(), list["has_more"].as_bool()), (Some(8), Some(false)));
         let page = agent.call("list_messages", json!({ "folder": inbox, "limit": 2 })).await.unwrap();
         assert_eq!(page["has_more"], true, "{page}");
         // each row says where it is and what it is, its empty fields left out
@@ -453,7 +468,7 @@ fn an_agent_works_on_the_mailbox() {
         assert!(for_good.unwrap_err().contains("Only the user"));
 
         // unsubscribing asks the user once for all the lists, and tells what each list did
-        for uid in [weekly, monthly, kept] {
+        for uid in [weekly, monthly, kept, slow] {
             agent.call("get_message", json!({ "folder": inbox, "uid": uid })).await.unwrap();
         }
         let none = agent
@@ -488,9 +503,16 @@ fn an_agent_works_on_the_mailbox() {
             .collect();
         asked.sort();
         assert_eq!(asked, ["POST /u/fail", "POST /u/ok"]);
+        // logged at the yes, and what the refusing list answered written into its entry
         let summaries: Vec<String> = core.agent_log(2).unwrap().into_iter().map(|e| e.entry.summary).collect();
         assert!(
             summaries.contains(&"Unsubscribed from the list of \u{201c}News of Weekly\u{201d}".to_string()),
+            "{summaries:?}"
+        );
+        assert!(
+            summaries
+                .iter()
+                .any(|s| s.starts_with("Could not unsubscribe from the list of \u{201c}News of Monthly\u{201d}")),
             "{summaries:?}"
         );
         // a no asks no list (the list server took its two requests and is gone)
@@ -500,8 +522,8 @@ fn an_agent_works_on_the_mailbox() {
             .unwrap();
         assert_eq!(kept_on["unsubscribed"], false, "{kept_on}");
         assert!(core.agent_log(1).unwrap()[0].entry.summary.starts_with("You did not unsubscribe from news@list.example.com"));
-        // 30 lists a day
-        let earlier: Vec<pe_store::NewLogEntry> = (0..28)
+        // 30 lists a day, each counted from the user's yes, not from when its list answers
+        let earlier: Vec<pe_store::NewLogEntry> = (0..27)
             .map(|_| pe_store::NewLogEntry {
                 host: host.id,
                 what: "unsubscribe".into(),
@@ -510,10 +532,32 @@ fn an_agent_works_on_the_mailbox() {
             })
             .collect();
         core.log_agent(&earlier).unwrap();
+        let leaving = tokio::spawn({
+            let socket = socket.clone();
+            async move {
+                let mut other = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+                other.initialize().await;
+                other
+                    .call("unsubscribe_from_list", json!({ "folder": inbox, "uids": [slow] }))
+                    .await
+            }
+        });
+        // the yes is logged at once; the slow list has not answered yet
+        assert!(
+            eventually_async(10, || {
+                core.agent_log(1)
+                    .unwrap()
+                    .first()
+                    .is_some_and(|e| e.entry.summary.contains("News of Slow"))
+            })
+            .await
+        );
         let capped = agent
             .call("unsubscribe_from_list", json!({ "folder": inbox, "uids": [kept] }))
             .await;
         assert!(capped.as_ref().unwrap_err().contains("30 lists a day"), "{capped:?}");
+        assert!(!leaving.is_finished(), "the slow list answered already");
+        assert_eq!(leaving.await.unwrap().unwrap()["unsubscribed"], true);
 
         // sending waits for the user; a yes puts it in the Outbox, where it waits and can be taken back
         let sent = agent
@@ -555,6 +599,30 @@ fn an_agent_works_on_the_mailbox() {
         let request = core.agent_asks_waiting()[0];
         core.agent_answer(request, AgentAnswer::DontSend).unwrap();
         assert_eq!(waiting.await.unwrap().unwrap()["sent"], false);
+        // nor from calls at the same moment: the check and the question are one step
+        let written = pe_core::agents::Written {
+            account,
+            outgoing: pe_core::Outgoing {
+                to: "friend@example.com".into(),
+                subject: "Wait at once".into(),
+                ..Default::default()
+            },
+            text: "Now".into(),
+            ..Default::default()
+        };
+        let start = Arc::new(std::sync::Barrier::new(8));
+        let callers: Vec<_> = (0..8)
+            .map(|_| {
+                let (core, host, written, start) = (core.clone(), host.clone(), written.clone(), start.clone());
+                std::thread::spawn(move || {
+                    start.wait();
+                    core.agent_ask_send(&host, &written).is_ok()
+                })
+            })
+            .collect();
+        let asked = callers.into_iter().map(|c| c.join().unwrap()).filter(|ok| *ok).count();
+        assert_eq!((asked, core.agent_asks_waiting().len()), (1, 1));
+        core.agent_answer(core.agent_asks_waiting()[0], AgentAnswer::DontSend).unwrap();
 
         // a draft, a reply named by `reply_to` as before, with the signature under the text
         agent
