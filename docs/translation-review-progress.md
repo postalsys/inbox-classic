@@ -5,20 +5,20 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Italian combined agent additions:8 unsubscribe entries plus3 draft entries and both help topics. Then Portuguese and the remaining agent queue.**
-  Original unsubscribe additions complete: de, es, et, fr, nl. Phase2 reopens only their affected help passages.
+- **Next: Review Portuguese (pt) combined agent additions, then pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
   New notice UI now exists on all three platforms in an exact recorded uncommitted snapshot.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it.
 - Current scope: 34,232 catalog entries and 1,352 help topics.
-  Completed: 21,307 entries and 794 full topics; pending: 12,925 entries and 558 topics.
-  Historical catalog improvements: 3,795. Importing drafts earns no review credit.
+  Completed: 21,318 entries and 796 full topics; pending: 12,914 entries and 556 topics.
+  Historical catalog improvements: 3,800. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French needed that correction; German/Spanish/Estonian/Dutch already convey the distinction.
+  contains no instructions. French needed that correction; German/Spanish/Estonian/Dutch/Italian already convey the distinction.
 - PDF core context is inspected, but the source branch has no platform reading-setting control yet. Keep the
   recovery instruction marked until actual callers arrive. An unfinished render marker does not prove the PDF
   caused the crash. Original text sources: preview `687113a3`, MCP `9a24e99b`. Preview `2567d2d7` has the same text and still no setting caller.
@@ -2405,3 +2405,13 @@ Reviewed German, Spanish, Estonian and French notices and their final marked hel
 Four language checkers pass structurally with5,824 expected mark-only diagnostics. Exact replay verifies4 notice reviews,2 changed values and4 help lines, preserving all other bytes, variables, markup and generated IDs. Seven UI source hashes unchanged; Windows/macOS captures copied unchanged, earlier Linux observations retained after generated capture files were cleared. No new GUI/test run. Global reconciliation:21,345 unmarked entries,10,680 help lines and14 baseline pairs; latest hashes match. Full28-language inventories and since-start1,190 entries/335 passages reconcile. HTML regenerated and git diff --check passes. Fresh source audit covers44worktrees/185refs and290 old copies. Upstream65087591 merged the exact existing preview section in29catalogs; no new strings or prose. Old release ref re-proved identical to historically audited9e994df3. No test suites or build run.
 
 Review Italian combined agent additions:8 unsubscribe entries plus3 draft entries and both help topics. Then Portuguese and the remaining agent queue.
+
+## Italian combined agent additions
+
+Reviewed11 entries and both help topics against original unsubscribe, phase2 draft ownership/read tools and the new notice UI. Five catalog values improved; six retained. Thirteen help wording lines now explain selected-list consent, default refusal, the rolling per-program quota, optional account signature text, draft takeover and permanent deletion of agent-owned drafts. The warning about malicious mail instructions was already correct and is retained. Both help topics are complete, with every older unmarked passage preserved. Italian glossary notes record the terminology and draft lifecycle.
+
+Italian structural checker has1,456 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies11 reviewed entries,5 changed values,10 help blocks and13 changed help wording lines. All older prose, tags/attributes/controls/platform branches/literal keys and generated IDs retained; variable sets/selectors/access-key counts intact. Windows unsubscribe A/N keys distinct; shared Mac/Linux labels plain. All3platform help joins inspected. Seven notice UI source hashes remain exact and no backend runtime changes since the snapshot. Global reconciliation:21,356 unmarked entries,10,694 help lines and14 baseline pairs; latest hashes match. All28 full inventories and since-start1,179 entries/325 passages reconcile. Source audit44worktrees/185refs, exact integrated source trees and290 old copies, no new strings. HTML regenerated; git diff --check passes. No tests or build run.
+
+The new `PostalExpress-preview2` / `feat/preview-pane` worktree was also checked: currently clean at65087591, with only generated PDF enum references and no reading-setting consumer. Watch it for the outstanding PDF context.
+
+Review Portuguese (pt) combined agent additions, then pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts.

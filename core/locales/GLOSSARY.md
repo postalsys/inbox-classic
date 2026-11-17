@@ -493,6 +493,11 @@ account (masculine, invariable); allegato; contrassegno (contrassegnare); Rispon
 - Keys in catalog prose Ctrl / Maiusc / Canc, help `<kbd>` stays English; the Help menu is "?" as Italian Windows
   writes it. Raw network errors ("TLS error") are quoted in English in the help.
 
+- For agent actions, use "annullare l’iscrizione" and "mailing list" with the existing reader command. An unsubscribe
+  is a request, not a guarantee. "Testo della firma" is the optional account footer, distinct from "firma digitale".
+- Draft removal uses "eliminare". Agents can permanently remove only their own unchanged drafts. Saving, including
+  autosave, ends their access; opening a draft alone does not.
+
 ### Latviešu (lv)
 
 Terms: Iesūtne; Izsūtne; Nosūtītie vienumi; Izdzēstie vienumi; Melnraksti; Nevēlamais e-pasts; ziņojums; mape; konts;

@@ -439,8 +439,7 @@ day-sunday = domenica
 ## AI agents
 
 agent-level-read = Leggere la posta: consultare cartelle e messaggi ed eseguire ricerche
-# review: changed
-agent-level-organize = Organizzare la posta: cambiare lo stato di lettura e i contrassegni, segnare messaggi come indesiderati, spostarli o eliminarli (in Posta eliminata)
+agent-level-organize = Organizzare la posta: cambiare lo stato di lettura e i contrassegni, gestire la posta indesiderata, spostare, archiviare ed eliminare messaggi (in Posta eliminata), creare cartelle e annullare l’iscrizione alle mailing list con il tuo consenso
 agent-level-drafts = Scrivere bozze che invierai tu
 agent-level-send = Inviare posta, con la tua conferma per ogni messaggio
 agent-connect-title = { $program } vuole accedere alla tua posta
@@ -489,11 +488,8 @@ agent-log-composed = Aperto “{ $subject }” in un nuovo messaggio da completa
 agent-log-refused = Non hai inviato “{ $subject }”
 agent-log-sent = “{ $subject }” messo in coda per l’invio a { $to }
 agent-log-draft = Salvata la bozza “{ $subject }”
-# review: new
 agent-log-draft-replaced = Sostituita la bozza “{ $subject }”
-# review: new
-agent-log-draft-discarded = Scartata la bozza “{ $subject }”
-# review: new
+agent-log-draft-discarded = Eliminata la bozza “{ $subject }”
 agent-draft-note = { $program }, un agente IA, ha scritto questa bozza. Controlla i destinatari e il testo prima di inviarla.
 agent-log-read = Segnato come letto “{ $subject }”
 agent-log-unread = Segnato come da leggere “{ $subject }”
@@ -506,19 +502,15 @@ agent-log-not-junk = Segnato “{ $subject }” come posta desiderata
 agent-log-archived = Archiviato “{ $subject }”
 agent-log-folder = Creata la cartella “{ $name }”
 agent-log-unsubscribed = Annullata l’iscrizione alla mailing list del messaggio “{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Impossibile annullare l’iscrizione alla lista di “{ $subject }”: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Non hai annullato l’iscrizione a { $senders }
-# review: new
+agent-log-unsubscribe-failed = Impossibile annullare l’iscrizione alla mailing list del messaggio “{ $subject }”: { $reason }
+agent-log-unsubscribe-refused = Non hai confermato l’annullamento dell’iscrizione. Mittenti: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } vuole annullare la tua iscrizione a una mailing list
    *[other] { $program } vuole annullare la tua iscrizione a { $count } mailing list
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic chiede alla lista qui sotto di smettere di scriverti, con il metodo a un clic che offre. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.
-   *[other] Inbox Classic chiede a ogni lista qui sotto di smettere di scriverti, con il metodo a un clic offerto dalla lista. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.
+    [1] Inbox Classic chiede alla mailing list qui sotto di non inviarti più messaggi, usando la funzione di annullamento dell’iscrizione con un clic. Non viene inviato nient’altro. I messaggi già presenti restano invariati.
+   *[other] Inbox Classic chiede a ogni mailing list qui sotto di non inviarti più messaggi, usando la funzione di annullamento dell’iscrizione con un clic. Non viene inviato nient’altro. I messaggi già presenti restano invariati.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
