@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the remaining 138 new rollback messages in bg, ca, cs, da, el, hr, hu, it, lt, lv, nb, nl, pl, pt, pt-BR, ro, ru, sk, sl, sr-Latn, sv, tr, uk (six undone-* IDs each). Finnish, de/es/et/fr late rollback entries are done. Complete the 24 remaining watched-conversation-notifications followup topics; de/es/et/fr and Finnish are done. Then Croatian initial review and remaining ten languages. Finnish now complete: 1340 catalogs, 52 help, 174 catalog value improvements. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Review the remaining 138 new rollback messages in bg, ca, cs, da, el, hr, hu, it, lt, lv, nb, nl, pl, pt, pt-BR, ro, ru, sk, sl, sr-Latn, sv, tr, uk (six undone-* IDs each). Finnish and de/es/et/fr late rollback entries are done; Finnish complete at 1340 catalogs and 52 help, 174 catalog value improvements. Watched-conversation notification followup is complete across all 17 previously reviewed languages. Then Croatian initial review and the remaining ten languages. Follow the glossary notification-context note during those reviews. Do not run tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -1695,6 +1695,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "bg-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/bg/conversations.html": "112dbed92c0f31891040f41b732b64332e78d8875b314c3b17a4658536b937d6",
+            "core/crates/pe-html/help/bg/new-mail.html": "5a18c54837dffa83c135387b932bf33c26fac04374ed696e08fabe12ca30d597"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ]
     },
@@ -3399,6 +3419,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "cs-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/cs/conversations.html": "ae60ac6cbccdef606a3845d9ee9966eda45cb2207c907d803b2953882747a657",
+            "core/crates/pe-html/help/cs/new-mail.html": "93cc272e1d118d397480be7d5066cb99a9a3b932d444d35f3fc907857eae5c30"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ]
     },
@@ -5074,6 +5114,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "da-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/da/conversations.html": "04cf85751c7538265915e01996f764a044958edd05062d5e30f6dc3b5f0f59ab",
+            "core/crates/pe-html/help/da/new-mail.html": "0a6b1b2028cf94ccea2041d32375d9fedc1fafe5fb866e4bd29f455644993c21"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ]
     },
@@ -6937,6 +6997,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "el-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/el/conversations.html": "31d354b8219e92007757dd029681936efea7bccdc9c58780c3233acad88758c4",
+            "core/crates/pe-html/help/el/new-mail.html": "ecef0de025032cee33fc0dad26241c6f0e4a9b38ef7372170c1759e3e751e8da"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ]
     },
@@ -13985,6 +14065,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "it-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/it/conversations.html": "158b2c4b175be5f5397eb75d0dc433cc0652ac10665bdf277fbdd0e80474d365",
+            "core/crates/pe-html/help/it/new-mail.html": "11758f83d2a178b6f585f48ba4ba46f713dffa8259ece2e36ca61e2f09ee0652"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ]
     },
@@ -18754,6 +18854,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "nl-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nl/conversations.html": "44274594efbc2ad2f692a4fc976251654da776c6b9f94ec49853e2fbf6f12bbd",
+            "core/crates/pe-html/help/nl/new-mail.html": "dcda36d112ae4ac3d2533371f435490c2352c799c6c61104ed3257acdb371d39"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ]
     },
@@ -22038,6 +22158,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "pt-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/conversations.html": "e2a4dc73f29a137dd7bafa9d9e7fdc805e915ad81b5eba4ed549f03e76058cd6",
+            "core/crates/pe-html/help/pt/new-mail.html": "af9446b072a20be26e0638de18f4bdbde7d1f5330472278a7e8bc468b7134381"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ]
     },
@@ -32518,6 +32658,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "ca-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/conversations.html": "7ea0f7daabf163f71982eb60f37500a6f0b05836c82305a16ad1e5b9149f8d60",
+            "core/crates/pe-html/help/ca/new-mail.html": "7d6eee6e29090a11f238f17bc4f5debe1a4353542761a3582be9e8e7419c68b1"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -34258,6 +34418,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "nb-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nb/conversations.html": "0d527f5c0ee242f6bc0f09ed9c5287efd725d999fa054dc47a7be7cd68fb3a28",
+            "core/crates/pe-html/help/nb/new-mail.html": "c665e3f09f4790fa6a7e5cc9fda49b3df4c7e958b9f8aec34d353b53764a2fc5"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -36006,6 +36186,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "pt-BR-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt-BR/conversations.html": "36cf61a7275eefa60e148c1f1efb1a88d097eb7613719dfad288d14ff13c9906",
+            "core/crates/pe-html/help/pt-BR/new-mail.html": "88eb372c677307960894ee42defe41dc72b72aef063d97d8abc4136a4f4c6fe2"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -37730,6 +37930,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "sr-Latn-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/conversations.html": "5e6a2228e0474b446b33927461d941eedb508883e582019b0ca24f523501c160",
+            "core/crates/pe-html/help/sr-Latn/new-mail.html": "95d42555af8773bdce5e5d91661f748900a860633e91240fd2cc0a772f292973"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -39442,6 +39662,26 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "tr-notification-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "conversations.html",
+            "new-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/tr/conversations.html": "92b0ab43d177ac089220ba636d8050a84a836845ba2693e923740346be4cd693",
+            "core/crates/pe-html/help/tr/new-mail.html": "b4a773320b576f2f116fa6451ba53b5b1746a7273edf78d9ec20a3e88f870bdc"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4"
+          },
+          "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed the watched-conversation passages and surrounding notification instructions against watch::arrived and Windows/Mac/Linux notification handlers. Clarified alerts for user folders, subject to notification enablement and foreground main-window suppression. Preserved established register and terminology, all markup/attributes, platform branches and literal keyboard tags. Corrected the neighboring Bulgarian notification pronoun and Danish punctuation where applicable. No initial-scope count increase. No tests run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -41628,7 +41868,7 @@
     },
     {
       "id": "watched-conversation-notifications",
-      "status": "pending",
+      "status": "complete",
       "issue": "English conversations/new-mail says watched conversations are always announced, but notification enablement and foreground-window suppression apply on all three platforms. Core announces watched messages in Inbox and user folders, not every special folder. Correct Finnish in the current batch and audit the already-reviewed translations listed here; preserve the app-context condition and do not promise notifications override settings. Do not edit English or app code.",
       "evidence": [
         "core/crates/pe-core/src/watch.rs: arrived",
@@ -41636,64 +41876,29 @@
         "mac/Sources/InboxClassic/MainWindow.swift: notifyNewMail",
         "linux/src/app.rs: notify_new_mail"
       ],
-      "pending_help": {
-        "nl": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "it": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "pt": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "pt-BR": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "ca": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "nb": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "sr-Latn": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "tr": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "bg": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "cs": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "da": [
-          "conversations.html",
-          "new-mail.html"
-        ],
-        "el": [
-          "conversations.html",
-          "new-mail.html"
-        ]
-      },
+      "pending_help": {},
       "completed_languages": [
         "fi",
         "de",
         "es",
         "et",
-        "fr"
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el"
       ],
-      "note": "Eight topics in de/es/et/fr corrected after Finnish. Twenty-four topics remain in 12 previously reviewed languages. Correct this context in the initial review of the remaining 11 languages too. Followup topics do not increase initial-scope completion totals."
+      "note": "All 32 previously reviewed topics corrected across 16 languages; Finnish was corrected earlier. Rechecked all platform handlers after upstream 46b938a7 integration. Notification enablement and foreground suppression apply to watched conversations; core announces watched mail in Inbox and user folders. Apply this context in the remaining 11 initial reviews. No initial-scope count increase.",
+      "reviewed_followup_topics": 32,
+      "validation": "Static check-language across these 12 languages reports only 16632 intentionally removed-mark diagnostics, no structural findings. All 24 help files preserve exact tags/attributes, platform branches and literal keyboard contents; final text and inline joins read and checked. All 28 pending inventories match marks. Global 17533 unmarked catalog messages and 9122 help lines reconcile to completed records; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run."
     }
   ]
 }

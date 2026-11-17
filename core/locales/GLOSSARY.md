@@ -131,6 +131,10 @@ Context notes:
   Clear Flag must use another. Account/folder context menus, Settings and folder-picker buttons have their
   own combined scopes beyond the main menus. The extended review helper covers 44 such scopes.
 
+- Watched-conversation alerts obey notification settings and are suppressed while the main window is in
+  front. Watching also enables alerts for messages in user folders, not every special folder. Do not promise
+  that watched messages are always announced. Ignored conversations do not produce new-mail alerts.
+
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
   translating the English draft's vague "people" literally.
 - An agent's message shown in the Outbox is queued for a delayed send. It has not been sent yet.

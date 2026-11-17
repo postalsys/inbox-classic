@@ -18,14 +18,14 @@ Commit completed batches regularly and preserve an exact resume point.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
 - Finnish is complete: 1,340 catalog entries and all 52 help topics reviewed, with 174 catalog value
   improvements. The 168 new rollback messages are reviewed in fi/de/es/et/fr (30 entries); 138 remain
-  across the other 23 languages. Continue those, then the 24 remaining notification-context help topics
-  in 12 languages. Finnish and de/es/et/fr already have the corrected notification guidance.
-  Continue Croatian (hr) and the remaining ten initial-review languages afterward.
-  These followups are separate from initial-scope totals and must be resolved before completing the round.
+  across the other 23 languages. Continue those, then Croatian (hr) and the remaining ten initial-review
+  languages. The notification-context followup is complete across all 17 previously reviewed languages:
+  all 32 queued topics corrected, with Finnish handled earlier. Apply the glossary context note to the
+  remaining initial reviews. Followup topics are separate from initial-scope totals.
   The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
   with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
-  Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
+  Greek’s original scope is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
   attachment-reminder context followups are complete. Eleven languages still need their initial reviews; 23 have the new rollback drafts pending. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
@@ -781,9 +781,22 @@ accounted for. Catalog variables/plurals and help tags/attributes/literal keys a
 and completed/source hashes reconcile (17,533 messages and 9,122 changed help lines). Report regenerated;
 git diff --check passes. No test suite was run. Upstream integration checkpoint: `b4dbd1e3`.
 
+### Watched-conversation notification followup completed
+
+Corrected the remaining 24 help topics in nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el, preserving each
+language's register and terminology. All 32 queued conversations/new-mail topics are now corrected, with
+Finnish handled earlier. The guidance explains user-folder alerts, notification settings and foreground
+suppression; it no longer promises notifications override these conditions. Added the verified behavior to
+the glossary for the 11 remaining initial reviews. Also fixed adjacent Bulgarian agreement and Danish
+punctuation. These followups do not add initial-scope catalog entries or help topics.
+
+All 24 files preserve markup, attributes, platform branches and literal keys. Static structural checks have
+no unexpected findings; exact pending inventories and completed/source hashes reconcile. Report regenerated;
+git diff --check passes. No test suite was run. First late-review checkpoint: `d38c230c`.
+
 Current totals: 17,481 catalog entries and 680 help pages reviewed; 2,732 catalog values improved. Remaining:
-14,779 catalog entries and 572 help pages (including the five additional languages), plus the 24-topic
-notification-context followup. `REVIEWED` remains unchanged until the full round is complete.
+14,779 catalog entries and 572 help pages (including 138 late rollback entries). All recorded context
+followups are complete. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
