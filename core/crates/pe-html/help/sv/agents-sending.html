@@ -1,26 +1,23 @@
-<!--review--><h1>När en agent skickar e-post</h1>
-<p class="summary">Varje meddelande som en AI-agent vill skicka visas för dig först och väntar i Utkorgen innan det skickas.</p>
-<p>En agent kan bara skicka e-post om du har tillåtit det, och varje meddelande bara efter att du har sagt ja.</p>
-<img src="picture:agents-4-send" alt="Fönstret som frågar om ett meddelande som en agent har skrivit ska skickas, med varje mottagare och en ny adress markerad">
-<p>När agenten vill skicka visar Inbox Classic meddelandet med varje mottagares adress. Adresser som du aldrig har skrivit till markeras med <b data-text="ui-new-address"></b>.</p>
+<h1>När en agent skickar e-post</h1>
+<p class="summary">Du godkänner varje meddelande innan agenten får skicka det. Därefter väntar det i Utkorgen.</p>
+<p>Agenten kan bara skicka e-post om du har gett den behörighet till det. Du måste dessutom godkänna varje utskick.</p>
+<img src="picture:agents-4-send" alt="Bekräftelse innan ett meddelande skrivet av en agent skickas. Fönstret visar mottagaren, meddelandetexten och en varning om en ny adress.">
+<p>Inbox Classic visar meddelandet och alla mottagaradresser. Adresser som du inte har skrivit till tidigare får markeringen <b data-text="ui-new-address"></b>.</p>
 <ol>
-    <li>Läs mottagarna och texten.</li>
+    <li>Kontrollera mottagarna och meddelandetexten.</li>
     <li>Välj ett av alternativen:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> skickar det. Knappen blir aktiv efter en liten stund, så att du inte kan trycka på den av misstag.</li>
-            <li><b data-text="ui-edit-first"></b> öppnar det i ett nytt meddelande så att du kan ändra det.</li>
-            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, som är standardvalet, skickar det inte.</li>
+            <li>Med <!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> lägger du meddelandet i kö för att skickas. Knappen blir tillgänglig efter en kort fördröjning för att minska risken för felklick.</li>
+            <li>Med <b data-text="ui-edit-first"></b> öppnar du meddelandet i redigeraren och kan ändra det.</li>
+            <li>Med <!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, som är förvalt, avböjer du att skicka meddelandet.</li>
         </ul>
     </li>
 </ol>
-<p>En agent frågar om ett meddelande i taget. Om du dröjer med svaret får agenten veta att meddelandet väntar på dig, och den kan senare fråga vad du bestämde. Meddelanden och utkast som den skriver slutar med din signatur, precis som dina egna.</p>
-<p>Ett meddelande som du skickar väntar 30 sekunder i Utkorgen. Tills det har gått iväg kan du ta bort det där, eller klicka på <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> i <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<h2>Utkast som en agent skriver</h2>
-<p>När du öppnar ett utkast som en agent har skrivit visas agentens namn på en rad ovanför meddelandet. Kontrollera mottagarna och texten innan du skickar det.</p>
-<!--/review-->
+<p>För varje program kan bara en begäran om att skicka e-post vänta på ditt svar åt gången. Om du inte svarar direkt kan agenten kontrollera ditt beslut senare. Kontots textsignatur läggs till i meddelanden och utkast som standard, men agenten kan välja att utelämna den.</p>
+<p>När du har godkänt meddelandet ligger det i Utkorgen i minst 30 sekunder. Innan det skickas kan du ta bort det där eller klicka på <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> under <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> för att stoppa det.</p>
+<h2>Agentens utkast</h2>
+<p>När du öppnar ett utkast som agenten har skrivit visas agentens namn ovanför meddelandetexten. Kontrollera mottagarna och texten innan du skickar det.</p>
 <img src="picture:agents-8-draft" alt="Ett utkast skrivet av en AI-agent, öppet i ett eget fönster. Agentens namn visas ovanför meddelandetexten.">
-<!--review-->
-<p>Agenten kan ändra eller ta bort sitt utkast tills du själv sparar det. Därefter är utkastet ditt.</p>
-<aside class="warning">En agent som också har andra verktyg, till exempel för att surfa på webben eller läsa dina filer, kan föra vidare det den läser genom dem. Inbox Classic kan inte se dem. Låt en agent skicka bara om du behöver det.</aside>
+<p>Agenten får bara ändra sina egna utkast. Den kan också ta bort dem permanent. När du sparar ett utkast i redigeraren får agenten inte längre ändra eller ta bort det. Det gäller även när dina ändringar sparas automatiskt eller när du skickar utkastet. Att bara öppna utkastet påverkar inte dessa behörigheter.</p>
+<aside class="warning">Om agenten har andra verktyg, till exempel åtkomst till webbsidor eller dina filer, kan den föra vidare information genom dem. Inbox Classic styr inte dessa verktyg. Ge bara behörighet att skicka e-post när det behövs.</aside>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>
-<!--/review-->
