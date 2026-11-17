@@ -94,10 +94,8 @@ win-never-written-to = Aldri skrevet til
 win-book-find-label = Skriv inn et navn eller en e-postadresse:
 win-send = &Send
 win-dont-send = &Ikke send
-# review: new
-win-unsubscribe = &Meld av
-# review: new
-win-dont-unsubscribe = &Ikke meld av
+win-unsubscribe = &Meld meg av
+win-dont-unsubscribe = &Ikke meld meg av
 win-forget-program-ask = Vil du fjerne dette programmet, tillatelsene og aktivitetsloggen til agentene? Du blir spurt om tillatelse igjen neste gang det kobler til.
 win-clear-log-ask = Vil du tømme aktivitetsloggen til agentene? Dette angrer ikke endringer som agentene har gjort.
 win-agent-programs = &Programmer der agenter har bedt om tilgang til e-posten din:

@@ -5,21 +5,21 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Norwegian Bokmål (nb) combined agent additions, then sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers now exist on all three platforms: recheck the recorded UI snapshot, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca. Phase2 reopens only their affected help passages.
-  Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
+- **Next: Review Serbian Latin (sr-Latn) combined agent additions, then tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb. Phase2 reopens only their affected help passages.
+  Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb.
 - Current scope: 34,400 catalog entries and 1,356 help topics.
-  Completed: 21,351 entries and 770 full topics; pending: 13,049 entries and 586 topics.
-  Historical catalog improvements: 3,813. Importing drafts earns no review credit.
+  Completed: 21,362 entries and 772 full topics; pending: 13,038 entries and 584 topics.
+  Historical catalog improvements: 3,820. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French needed that correction; the other completed languages, including Catalan, already convey the distinction.
+  contains no instructions. French and Norwegian Bokmål needed that correction; the other completed languages already convey the distinction.
 - PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
   `PostalExpress-preview2`. The six new IDs per language and both help insertions are imported from `03568aef`;
   its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
@@ -2461,3 +2461,13 @@ All three platforms now have preview settings and attachment-link/image handlers
 Review Norwegian Bokmål (nb) combined agent additions, then sr-Latn, tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers now exist on all three platforms: recheck the recorded UI snapshot, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.
 
 The preview backend delta was also inspected: the core/FFI additions are a crash-simulation test hook and tests; the HTML renderer now puts filename/size captions above preview pages. The more-pages link remains below. Exact companion snapshots are recorded, and no tests were run. The old source comment placing PDF details below the pages is now stale; use the actual renderer context.
+
+## Norwegian Bokmål combined agent additions
+
+Reviewed 11 entries and both agent help topics. Seven catalog values and 14 help wording lines improved; four good values retained. The buttons now read Meld meg av / Ikke meld meg av. The help explains batch consent, the rolling per-program quota, optional signature text, rule previews and saving/autosave as the boundary for agent-owned drafts. Two older passages were explicitly reopened: the instruction warning now says not to treat email content as agent instructions, and the sending step asks the user to check recipients. Every other older unmarked passage remains unchanged.
+
+Norwegian Bokmål structural checker has 1,456 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 11 reviewed entries, 7 changed values, 12 help edits and 14 changed help wording lines. Older unmarked prose is retained except the explicitly reopened instruction warning and recipient-check step, both recorded before/after. Tags, attributes, controls, platform branches, literal keys and generated IDs retained; variable sets, selectors and access-key counts intact. Windows unsubscribe M/I keys are distinct; shared Mac/Linux labels are plain. All three platform help joins inspected. Seven notice UI hashes match; no backend runtime change since the recorded snapshot. Global reconciliation: 21,400 unmarked entries, 10,750 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1,303 entries/331 passages reconcile. Source audit covers 44 worktrees/185 refs, exact integrated source trees and 290 unchanged old copies, with no additional translation work. HTML regenerated; git diff --check passes. No tests or build run for this wording batch.
+
+The prior 21-file preview UI/settings snapshot and three-file backend followup remain the resume point for preview context. This batch does not mark any preview wording reviewed.
+
+Review Serbian Latin (sr-Latn) combined agent additions, then tr, bg, cs, da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.

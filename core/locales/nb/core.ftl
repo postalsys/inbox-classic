@@ -418,8 +418,7 @@ day-sunday = søndag
 ## AI agents
 
 agent-level-read = Lese e-post: mapper, meldingslisten, søk og meldinger
-# review: changed
-agent-level-organize = Organisere e-post: endre lest-status og flagg, merke søppelpost, flytte meldinger og legge dem i Slettede elementer
+agent-level-organize = Organisere e-post: merke meldinger som lest eller ulest, endre flagg, håndtere søppelpost, flytte og arkivere meldinger, opprette mapper, slette meldinger (flytte dem til Slettede elementer) og melde deg av e-postlister med din godkjenning
 agent-level-drafts = Skrive utkast som du sender selv
 agent-level-send = Sende e-post etter at du har godkjent hver melding
 agent-connect-title = { $program } vil bruke e-posten din
@@ -468,11 +467,8 @@ agent-log-composed = Åpnet «{ $subject }» i skrivevinduet slik at du kan gjø
 agent-log-refused = Du avslo å sende «{ $subject }»
 agent-log-sent = La «{ $subject }» i kø for sending til { $to }
 agent-log-draft = Lagret utkastet «{ $subject }»
-# review: new
 agent-log-draft-replaced = Erstattet utkastet «{ $subject }»
-# review: new
 agent-log-draft-discarded = Forkastet utkastet «{ $subject }»
-# review: new
 agent-draft-note = { $program }, en KI-agent, skrev dette utkastet. Kontroller mottakerne og teksten før du sender det.
 agent-log-read = Merket «{ $subject }» som lest
 agent-log-unread = Merket «{ $subject }» som ulest
@@ -485,19 +481,15 @@ agent-log-not-junk = Merket «{ $subject }» som ikke søppelpost
 agent-log-archived = Arkiverte «{ $subject }»
 agent-log-folder = Opprettet mappen «{ $name }»
 agent-log-unsubscribed = Sendte en avmeldingsforespørsel for e-postlisten bak «{ $subject }»
-# review: new
-agent-log-unsubscribe-failed = Kunne ikke melde av listen til «{ $subject }»: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Du meldte deg ikke av { $senders }
-# review: new
+agent-log-unsubscribe-failed = Kunne ikke melde deg av e-postlisten knyttet til meldingen «{ $subject }»: { $reason }
+agent-log-unsubscribe-refused = Du godkjente ikke avmeldingen. Avsendere: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } vil melde deg av en e-postliste
    *[other] { $program } vil melde deg av { $count } e-postlister
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic ber listen nedenfor om å slutte å sende til deg, med ettklikksavmeldingen den tilbyr. Ingenting annet sendes, og meldingene du har, blir liggende der de er.
-   *[other] Inbox Classic ber hver liste nedenfor om å slutte å sende til deg, med ettklikksavmeldingen listen tilbyr. Ingenting annet sendes, og meldingene du har, blir liggende der de er.
+    [1] Inbox Classic bruker funksjonen for avmelding med ett klikk til å be e-postlisten nedenfor om å slutte å sende deg meldinger. Ingenting annet sendes. Meldingene dine blir ikke endret eller flyttet.
+   *[other] Inbox Classic bruker funksjonen for avmelding med ett klikk til å be hver e-postliste nedenfor om å slutte å sende deg meldinger. Ingenting annet sendes. Meldingene dine blir ikke endret eller flyttet.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

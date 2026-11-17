@@ -652,6 +652,12 @@ Review notes (round 2):
 - Introduce complete key-state explanations with "Årsak:" and dates with "Siste søk:". Recipient removal affects
   message fields, not contacts. Sending without encryption requires removing inherited text, images and attachments.
 
+- Agent unsubscribe buttons use "Meld meg av" / "Ikke meld meg av"; help and logs use "avmeldingsforespørsel"
+  where a request, rather than a completed cancellation, is meant. "Signaturtekst" is the optional account footer.
+- Keep "forkaste utkast" for abandoning an agent-created draft and explain that removal is permanent. Saving,
+  including autosave, ends agent access; opening alone does not. Warn that email content must not be treated as
+  instructions to the agent, not that messages cannot contain instructions.
+
 ### Polski (pl)
 
 Terms: Skrzynka odbiorcza; Skrzynka nadawcza; Elementy wysłane; Elementy usunięte; Wersje robocze; Wiadomości-śmieci;
