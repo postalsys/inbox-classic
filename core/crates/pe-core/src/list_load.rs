@@ -433,7 +433,13 @@ pub(crate) mod tests {
         let load = loaded(&core, &events, &view, restored.clone());
         assert_eq!(load.reselected.how, Reselection::Kept, "none back: the selection stays");
 
-        *core.restored.lock().unwrap() = vec![crate::selection::Back::There(inbox, vec![10, 12])];
+        // what came back in another folder too: not in this list, so not in the selection either, where Delete would
+        // reach it unseen
+        let elsewhere = inbox + 1000;
+        *core.restored.lock().unwrap() = vec![
+            crate::selection::Back::There(inbox, vec![10, 12]),
+            crate::selection::Back::There(elsewhere, vec![5]),
+        ];
         let load = loaded(&core, &events, &view, restored.clone());
         assert_eq!(
             load.reselected,

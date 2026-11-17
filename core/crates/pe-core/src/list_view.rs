@@ -888,11 +888,13 @@ impl ListView {
             let Some(&first) = rows.first() else {
                 return Ok(Some(None));
             };
+            // only what this list shows: what came back elsewhere is not selected, so no command acts on it unseen
+            let shown = core.store().refs_found(found.moment.search, refs)?;
             Ok(Some(Some(Reselected {
                 how: Reselection::Restored,
                 rows,
                 focus: Some(first),
-                selection: Selected::Listed(refs.to_vec()),
+                selection: Selected::Listed(shown),
             })))
         })?;
         Ok(match taken.flatten() {

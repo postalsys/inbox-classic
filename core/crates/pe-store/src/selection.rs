@@ -171,6 +171,30 @@ impl Store {
         })
     }
 
+    /// Those of `refs` that `search` finds, in the order given: a selection made of them holds only messages its list
+    /// shows, never one of another folder or one that left it
+    pub fn refs_found(&self, search: &Search, refs: &[MessageRef]) -> Result<Vec<MessageRef>> {
+        if refs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let found: std::collections::HashSet<MessageRef> = self.with_picked_refs(refs, || {
+            let (condition, values) = search.ungrouped().condition(false);
+            let mut statement = self.db.prepare(&format!(
+                "SELECT folder_id, uid FROM messages WHERE ({condition}) \
+                 AND (folder_id, uid) IN (SELECT folder_id, uid FROM temp.picked_refs)"
+            ))?;
+            statement
+                .query_map(params_from_iter(values), |row| {
+                    Ok(MessageRef {
+                        folder: row.get(0)?,
+                        uid: row.get(1)?,
+                    })
+                })?
+                .collect()
+        })?;
+        Ok(refs.iter().copied().filter(|r| found.contains(r)).collect())
+    }
+
     /// `f` run with `refs` in the table `temp.picked_refs` (folder_id, uid), emptied again after
     fn with_picked_refs<T>(&self, refs: &[MessageRef], f: impl FnOnce() -> Result<T>) -> Result<T> {
         self.scratch(|| {
