@@ -615,60 +615,38 @@ pgp-publish-done = Votre clé est publiée sur keys.openpgp.org pour { $addresse
 pgp-publish-failed = La clé n'a pas pu être publiée : { $error }
 pgp-keyserver-off = La recherche de clés sur keys.openpgp.org est désactivée dans { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Chiffré et signé : seuls vous et { $addresses } pouvez le lire.
-   *[other] Chiffré et signé : seuls vous et ses { $count } destinataires pouvez le lire.
+    [one] Le message sera chiffré et signé à l’envoi. Seuls vous et { $addresses } pourrez en lire le contenu.
+   *[other] Le message sera chiffré et signé à l’envoi. Seuls vous et ses { $count } destinataires pourrez en lire le contenu.
 }
-# review: new
-pgp-compose-encrypt-ready = Le message sera chiffré et signé. Ajoutez des destinataires dont vous avez la clé.
-# review: new
+pgp-compose-encrypt-ready = Le message sera chiffré et signé à l’envoi. Ajoutez des destinataires pour lesquels vous disposez d’une clé utilisable.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } n’a pas de clé, le message ne peut donc pas encore être chiffré.
-   *[other] { $count } destinataires n’ont pas de clé, le message ne peut donc pas encore être chiffré : { $addresses }.
+    [one] Aucune clé utilisable pour ce destinataire : { $addresses }. Le message ne peut pas encore être chiffré.
+   *[other] Aucune clé utilisable pour { $count } destinataires : { $addresses }. Le message ne peut pas encore être chiffré.
 }
-# review: new
-pgp-compose-looking = Recherche des clés de { $addresses }...
-# review: new
-pgp-compose-signed = Signé : les destinataires peuvent vérifier qu’il vient de vous et qu’il n’a pas été modifié.
-# review: new
-pgp-compose-reply-clear = Non chiffré, alors que le message auquel il répond ou qu’il transfère l’était.
-# review: new
-pgp-compose-encrypted-files = Des fichiers d’un message chiffré sont joints : ce message ne peut donc être envoyé que chiffré. Activez Chiffrer, ou supprimez ces fichiers.
-# review: new
-pgp-compose-sign-tip = Signer le message avec votre clé, pour que les destinataires puissent vérifier qu’il vient de vous et qu’il n’a pas été modifié
-# review: new
-pgp-compose-sign-tip-encrypted = Un message chiffré est toujours signé
-# review: new
-pgp-compose-encrypt-tip = Chiffrer le message, pour que seuls vous et ses destinataires puissiez le lire
-# review: new
-pgp-compose-make-key = Vous n’avez pas encore de clé pour { $address }. En créer une maintenant ? Avec elle, vos messages peuvent être signés et chiffrés.
-# review: new
-pgp-compose-key-unusable = Votre clé pour { $address } ne peut pas être utilisée ({ $state }). Ouvrez Clés de chiffrement pour importer sa sauvegarde ou créer une nouvelle clé.
-# review: new
-pgp-compose-encrypt-off-quote = Ce message cite ou transfère un message chiffré. Sans chiffrement, il ne pourra pas être envoyé tant que vous n’aurez pas supprimé ce qu’il cite. Désactiver quand même le chiffrement ?
-# review: new
-pgp-compose-encrypt-off-reply = Ce message répond à un message chiffré ou le transfère. Sans chiffrement, toute personne qui traite votre message en chemin peut le lire. Désactiver le chiffrement ?
-# review: new
+pgp-compose-looking = Recherche de clés pour { $addresses }...
+pgp-compose-signed = Le message sera signé numériquement à l’envoi. Les destinataires pourront vérifier la signature et l’intégrité du contenu.
+pgp-compose-reply-clear = Non chiffré, alors que le message d’origine l’était.
+pgp-compose-encrypted-files = Ce message contient des pièces jointes provenant d’un message chiffré. Il doit donc être envoyé chiffré. Activez « Chiffrer » ou retirez ces pièces jointes.
+pgp-compose-sign-tip = Signer numériquement le message à l’envoi pour que les destinataires puissent vérifier sa signature et l’intégrité de son contenu
+pgp-compose-sign-tip-encrypted = Un message envoyé chiffré est toujours signé
+pgp-compose-encrypt-tip = Chiffrer le contenu du message à l’envoi pour que seuls vous et ses destinataires puissiez le lire
+pgp-compose-make-key = Aucune clé n’est encore configurée pour l’adresse { $address }. Voulez-vous en créer une maintenant ? Elle vous permettra de signer et de chiffrer vos messages.
+pgp-compose-key-unusable = La clé associée à l’adresse { $address } est inutilisable. Motif : { $state }
+    Ouvrez « Clés de chiffrement » pour importer une sauvegarde de cette clé ou en créer une nouvelle.
+pgp-compose-encrypt-off-quote = Ce message contient encore du texte, des images ou des pièces jointes provenant d’un message chiffré. Retirez-les avant de l’envoyer sans chiffrement. Voulez-vous tout de même désactiver le chiffrement ?
+pgp-compose-encrypt-off-reply = Le message d’origine était chiffré. Sans chiffrement, les serveurs de messagerie pourront lire le contenu de votre réponse ou du message transféré. Voulez-vous désactiver le chiffrement ?
 pgp-recipient-verified = Clé vérifiée
-# review: new
 pgp-recipient-found = Clé non vérifiée
-# review: new
 pgp-recipient-own = Votre propre clé
-# review: new
 pgp-recipient-looking = Recherche d’une clé...
-# review: new
 pgp-recipient-missing = Aucune clé
-# review: new
-pgp-recipient-not-found = Aucune clé : aucune n’a été trouvée le { $date }
-# review: new
+pgp-recipient-not-found = Aucune clé trouvée. Dernière recherche : { $date }
 pgp-recipient-unusable = Clé inutilisable : { $state }
-# review: new
-pgp-recipients-intro = Le message est chiffré pour la clé de chaque destinataire, et pour la vôtre.
-# review: new
+pgp-recipients-intro = Inbox Classic utilisera les clés des destinataires et la vôtre pour chiffrer le message.
 pgp-recipients-intro-missing = { $count ->
-    [one] { $count } destinataire n’a pas de clé pour chiffrer. Trouvez sa clé, retirez-le de ce message, ou envoyez celui-ci sans chiffrement.
-   *[other] { $count } destinataires n’ont pas de clé pour chiffrer. Trouvez leurs clés, retirez-les de ce message, ou envoyez celui-ci sans chiffrement.
+    [one] Aucune clé utilisable pour { $count } destinataire. Recherchez sa clé ou retirez-le du message. Vous pouvez envoyer le message sans chiffrement s’il ne contient plus de texte, d’images ni de pièces jointes provenant de messages chiffrés.
+   *[other] Aucune clé utilisable pour { $count } destinataires. Recherchez leurs clés ou retirez-les du message. Vous pouvez envoyer le message sans chiffrement s’il ne contient plus de texte, d’images ni de pièces jointes provenant de messages chiffrés.
 }
 pgp-details-part = Partie { $number } : { $label }
 pgp-details-signed = Signé le { $when } avec la clé { $key }

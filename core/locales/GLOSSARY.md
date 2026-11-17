@@ -138,6 +138,15 @@ Estonian settings review (round 2):
 - In help, a settings page is introduced by "seadetes" / "seadetest" before `data-settings`, not "kohas"
   or a bare menu reference. Apply "rakendab muudatused"; Cancel discards changes not yet applied.
 
+### French compose signing and encryption
+
+- Use "signature numérique" and "signer numériquement" for cryptographic signing, distinct from signature text.
+  Compose status describes protection applied "à l’envoi"; signature checks alone do not confirm key ownership.
+- Use "clé utilisable" when encryption requires a usable key; expired or revoked keys also trigger the warning.
+  A message is encrypted with keys, not "pour la clé". Retirer du message affects recipients, not contacts.
+- Put complete key-state reasons after "Motif :" with the following instruction separate. Use "pour" before
+  arbitrary names/address lists to avoid required elision after "de". Date placeholders follow Dernière recherche.
+
 ### Spanish encryption and settings transfer
 
 - Use "contraseña" for the password protecting a key backup or settings export, as in the account dialogs.

@@ -5,18 +5,18 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: French compose signing/encryption additions.** German, Spanish and Estonian have all 40 new
-  compose entries and both help targets reviewed. Estonian adds 17 catalog improvements and 20 changed help
-  lines, including three explicitly reopened older writing-help passages. All other earlier prose is retained.
+- **Next: Dutch compose signing/encryption additions.** German, Spanish, Estonian and French have all
+  40 new compose entries and both help targets reviewed. French adds 17 catalog improvements and 19 changed
+  help lines, including five explicitly reopened older writing-help passages. Other prior prose is retained.
   Exact targets/context are in `compose-sign-encrypt-context`; feature `162c0dd2` was integrated in `3552434d`.
 - Continue the compose work for nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu, then the broader drafts.
   The active-key signature reason is reviewed in all 28 languages, committed in `25eff7b8`: 13 warning values
   improved and 15 retained, plus the Swedish encrypted-part wrapper corrected to neuter agreement.
   The source-only import is `205bd846`; dependent hardening code remains on its source branch.
-- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,791 entries and 796
-  full topics; pending: 13,077 entries and 556 topics. Historical catalog improvements: 3,578.
+- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,831 entries and 798
+  full topics; pending: 13,037 entries and 554 topics. Historical catalog improvements: 3,595.
   Hungarian has 48 original help topics left in addition to compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
-- Structural checks and German/Spanish/Estonian's 53 actual mnemonic scopes pass. All full inventories and current
+- Structural checks and German/Spanish/Estonian/French's 53 actual mnemonic scopes pass. All full inventories and current
   hashes reconcile. The latest fresh fetch/seven-ref audit found no new strings or languages; existing source
   imports and the guide are unchanged. HTML regenerated. No test suites or builds run for this wording batch;
   the earlier source-import build passed in the separate target. `REVIEWED` remains unchanged.
@@ -2079,3 +2079,28 @@ Since-start1333 entries/209 passages match the queue. HTML regenerated and git d
 Fresh fetch/seven-ref audit found no new strings or languages; existing source imports and guide unchanged,
 root has no relevant edits. Other hardening/corpus changes untouched. Completed20791 entries/796 topics;
 pending13077/556; scope33868/1352; historical catalog improvements3578. French compose is next. REVIEWED unchanged.
+
+
+### French compose signing and encryption reviewed
+
+Reviewed all 40 additions, retaining the 17 app labels and improving 17 core values. Status now describes
+protection applied à l’envoi; signature checks establish integrity without claiming verified ownership.
+Clé utilisable covers unavailable/expired/revoked keys, and Motif introduces complete key-state reasons.
+Names/address lists avoid forced elision after de; dates follow Dernière recherche. Original numeric
+placeholders/selectors remain intact. Unencrypted sending is conditional on removing protected content.
+
+Reviewed the new help topic and write-message insertion, with 19 improved help lines. Five older writing-help
+passages were explicitly reopened and recorded: suggestions, subject entry, account selection, plain-text
+sending and link-menu joins. All other earlier prose is retained. Help describes colors/status across platforms,
+own/unusable keys, the selected From key, recipient removal and encrypted drafts/sent copies. Glossary updated.
+
+All 53 mnemonic scopes pass. The structural checker reports only 1,446 expected removed-mark diagnostics.
+Exact reconstruction verifies 17 value edits and 40 mark removals; help tags, attributes, controls, platform
+branches and literal keys are preserved. Joins inspected on all platforms. The old screenshot predates the
+new controls; their wrapping/layouts were checked in source. No GUI run, test suites or builds.
+All 28 inventories/current hashes reconcile: 20,865 unmarked messages, 10,459 changed help lines and 14 baseline
+pairs. Since-start 1,293 entries/207 passages match the queue. HTML regenerated; git diff --check passes.
+Fresh fetch confirms all seven audited source tips unchanged, with no new strings/languages. Existing source
+imports and guide unchanged; root has no relevant edits. Other hardening/corpus work untouched.
+Completed: 20,831 entries/798 topics; pending: 13,037/554; scope:33,868/1,352; historical improvements:3,595.
+Dutch compose is next. REVIEWED remains unchanged.
