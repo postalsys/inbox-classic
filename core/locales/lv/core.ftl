@@ -686,74 +686,41 @@ day-sunday = svētdiena
 
 ## AI agents
 
-# review: new
-agent-level-read = Lasīt pastu: mapes, ziņojumu sarakstu, meklēšanu un ziņojumus
-# review: new
-agent-level-organize = Kārtot pastu: lasīšanas stāvoklis, karodziņi, nevēlamais pasts, pārvietošana, arhivēšana, jaunas mapes, dzēšana uz Izdzēstie vienumi un atteikšanās no adresātu sarakstiem pēc jūsu piekrišanas
-# review: new
-agent-level-drafts = Rakstīt melnrakstus, kurus nosūtāt jūs
-# review: new
+agent-level-read = Lasīt pastu: skatīt mapes, ziņojumus un sarunas, meklēt ziņojumus un kontaktus, kā arī skatīt ziņojumu kārtulas
+agent-level-organize = Kārtot pastu: atzīmēt ziņojumus kā lasītus vai nelasītus, mainīt karodziņus un nevēlamā pasta atzīmes, pārvietot un arhivēt ziņojumus, veidot mapes, dzēst ziņojumus, pārvietojot tos uz mapi „Izdzēstie vienumi”, un ar jūsu piekrišanu atteikties no adresātu sarakstu abonēšanas
+agent-level-drafts = Rakstīt melnrakstus, kurus varat nosūtīt
 agent-level-send = Sūtīt pastu, katru ziņojumu tikai pēc jūsu piekrišanas
-# review: new
 agent-connect-title = { $program } vēlas izmantot jūsu pastu
-# review: new
-agent-connect-detail = MI aģents lūdza atļauju strādāt ar Inbox Classic. Izvēlieties, ko tas drīkst darīt un kurus kontus tas drīkst redzēt; to var mainīt vēlāk sadaļā Rīki > MI aģenti.
+agent-connect-detail = MI aģents lūdz piekļuvi jūsu pastam lietotnē Inbox Classic. Izvēlieties, ko tas drīkst darīt un kuriem kontiem piekļūt. Šīs atļaujas vēlāk varat mainīt sadaļā „Rīki > MI aģenti”.
 
-    Aģenti lasa pastu, ko rakstījuši citi cilvēki, un ziņojums var mēģināt tos piemānīt. Inbox Classic vienmēr jums pajautā, pirms aģents kaut ko nosūta.
-# review: new
-agent-reply-to = Atbilde uz „{ $subject }”
-# review: new
-agent-reply-all-on = Atbilde visiem uz „{ $subject }”
-# review: new
-agent-forward-of = Pārsūtīts „{ $subject }”
-# review: new
-agent-never-written-one = Jūs nekad neesat rakstījis uz { $address }.
-# review: new
-agent-never-written-many = Uz { $count } no šīm adresēm jūs nekad neesat rakstījis.
-# review: new
+    Aģenti lasa citu cilvēku rakstītus ziņojumus, kuros var būt mēģinājumi tos apmānīt. Pirms katra ziņojuma nosūtīšanas ar Inbox Classic aģentam jāsaņem jūsu piekrišana.
+agent-reply-to = Atbilde uz ziņojumu „{ $subject }”
+agent-reply-all-on = Atbilde visiem uz ziņojumu „{ $subject }”
+agent-forward-of = Ziņojuma „{ $subject }” pārsūtīšana
+agent-never-written-one = Uz adresi { $address } vēl neesat rakstījuši.
+agent-never-written-many = Uz { $count } no šīm adresēm vēl neesat rakstījuši.
 agent-send-title = { $program } vēlas nosūtīt šo ziņojumu
-# review: new
-agent-send-detail = Pārbaudiet adresātus un ziņojuma saturu. Kad apstiprināsiet, ziņojums { $seconds } sekundes gaidīs mapē Izsūtne, kur to vēl varat izdzēst.
-# review: new
+agent-send-detail = Pārbaudiet adresātus un ziņojuma saturu. Pēc jūsu apstiprinājuma ziņojums vismaz { $seconds } s gaidīs mapē „Izsūtne”. Šajā laikā varat to izdzēst, lai atceltu nosūtīšanu.
 agent-change-title = Ko { $program } drīkst darīt
-# review: new
 agent-change-allowed = Mainiet, ko šīs programmas MI aģenti drīkst darīt ar jūsu pastu.
-# review: new
-agent-change-refused = Jūs liedzāt šai programmai piekļuvi. Atļaujiet to, lai tās aģenti atkal varētu piekļūt jūsu pastam.
-# review: new
-agent-log-taken-back = { $entry } (atsaukts)
-# review: new
+agent-change-refused = Šai programmai piekļuve ir liegta. Varat to atļaut, lai programmas aģenti varētu izmantot jūsu pastu.
+agent-log-taken-back = { $entry } (darbība atsaukta)
 agent-files = Faili: { $files }
-# review: new
-agent-undo-refused = To nevar atsaukt.
-# review: new
-agent-undo-refused-why = To nevar atsaukt: { $reason }.
-# review: new
+agent-undo-refused = Šo darbību nevar atsaukt.
+agent-undo-refused-why = Šo darbību nevar atsaukt: { $reason }.
 agent-undo-impossible = to nevar atsaukt
-# review: new
 agent-undo-not-in-folder = ziņojuma šajā mapē vairs nav
-# review: new
-agent-undo-not-arrived = ziņojuma (vēl) nav mapē, uz kuru tas tika pārvietots
-# review: new
-agent-undo-sent = ziņojums jau tika nosūtīts
-# review: new
+agent-undo-not-arrived = ziņojums vēl nav atrasts galamērķa mapē
+agent-undo-sent = ziņojuma mapē „Izsūtne” vairs nav
 agent-original-not-downloaded = sākotnējais ziņojums vēl nav lejupielādēts. Vispirms atveriet to
-# review: new
-agent-turned-away = Atraidīts
-# review: new
+agent-turned-away = Piekļuve liegta
 agent-can-nothing = Neko
-# review: new
 agent-can-read = lasīt
-# review: new
 agent-can-organize = kārtot
-# review: new
 agent-can-drafts = rakstīt melnrakstus
-# review: new
 agent-can-send = sūtīt ar jūsu piekrišanu
 # "Lasīt, kārtot un rakstīt melnrakstus"
-# review: new
 agent-can-list = { $first } un { $last }
-# review: new
 agent-accounts = { $count ->
     [0] neviens konts
     [zero] { $count } kontu
@@ -761,65 +728,40 @@ agent-accounts = { $count ->
    *[other] { $count } konti
 }
 # "Lasīt un kārtot; 1 konts"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Šo ziņojumu nevar nolasīt.
-# review: new
 agent-encrypted-original = Šis ziņojums ir šifrēts: aģents nevar uz to atbildēt vai to pārsūtīt, jo nevar šifrēt.
-# review: new
-agent-encrypted = Šis ziņojums ir šifrēts. To var izlasīt tikai lietotājs lietotnē Inbox Classic.
+agent-encrypted = Šis ziņojums ir šifrēts. Aģents nevar izlasīt tā saturu. Ziņojums jāatver lietotājam lietotnē Inbox Classic.
 # review: new
 list-encrypted = Šifrēts ziņojums
-# review: new
-agent-log-composed = Atvēra „{ $subject }” jaunā ziņojumā, lai jūs to pabeigtu
-# review: new
-agent-log-refused = Jūs nenosūtījāt „{ $subject }”
-# review: new
-agent-log-sent = Nosūtīja „{ $subject }” adresātam { $to }
-# review: new
+agent-log-composed = Atvēra jaunu ziņojumu „{ $subject }”, kuru varat pabeigt rakstīt
+agent-log-refused = Noraidījāt pieprasījumu nosūtīt ziņojumu „{ $subject }”
+agent-log-sent = Ievietoja ziņojumu „{ $subject }” nosūtīšanas rindā. Adresāti: { $to }
 agent-log-draft = Saglabāja melnrakstu „{ $subject }”
-# review: new
 agent-log-draft-replaced = Aizstāja melnrakstu „{ $subject }”
-# review: new
 agent-log-draft-discarded = Atmeta melnrakstu „{ $subject }”
-# review: new
 agent-draft-note = Šo melnrakstu uzrakstīja MI aģents { $program }. Pirms nosūtāt, pārbaudiet adresātus un tekstu.
-# review: new
 agent-log-read = Atzīmēja kā lasītu „{ $subject }”
-# review: new
 agent-log-unread = Atzīmēja kā nelasītu „{ $subject }”
-# review: new
 agent-log-flagged = Atzīmēja ar karodziņu „{ $subject }”
-# review: new
-agent-log-unflagged = Noņēma karodziņu „{ $subject }”
-# review: new
+agent-log-unflagged = Noņēma karodziņu ziņojumam „{ $subject }”
 agent-log-deleted = Izdzēsa „{ $subject }”
-# review: new
-agent-log-moved = Pārvietoja „{ $subject }” uz { $folder }
-# review: new
+agent-log-moved = Pārvietoja ziņojumu „{ $subject }” uz mapi „{ $folder }”
 agent-log-junk = Atzīmēja „{ $subject }” kā nevēlamu
-# review: new
 agent-log-not-junk = Atzīmēja „{ $subject }” kā vēlamu
-# review: new
 agent-log-archived = Arhivēja „{ $subject }”
-# review: new
 agent-log-folder = Izveidoja mapi „{ $name }”
 agent-log-unsubscribed = Apstiprinājāt pieprasījumu atteikties no abonēšanas. Ziņojums: „{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Neizdevās atteikties no „{ $subject }” adresātu saraksta: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Jūs neatteicāties no abonēšanas: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Neizdevās atteikties no abonēšanas. Ziņojums: „{ $subject }”. Iemesls: { $reason }
+agent-log-unsubscribe-refused = Noraidījāt pieprasījumu atteikties no abonēšanas. Sūtītāji: { $senders }
 agent-unsubscribe-title = { $count ->
     [zero] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu sarakstiem
     [one] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu saraksta
    *[other] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu sarakstiem
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic lūdz tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot tā piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.
-   *[other] Inbox Classic lūdz katram tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot saraksta piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.
+    [1] Pēc jūsu apstiprinājuma Inbox Classic lūgs tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot tā piedāvāto atteikšanos ar vienu klikšķi. Netiek sūtīti e-pasta ziņojumi, un jūsu esošie ziņojumi paliek nemainīti savās vietās.
+   *[other] Pēc jūsu apstiprinājuma Inbox Classic lūgs katram tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot saraksta piedāvāto atteikšanos ar vienu klikšķi. Netiek sūtīti e-pasta ziņojumi, un jūsu esošie ziņojumi paliek nemainīti savās vietās.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

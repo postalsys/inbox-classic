@@ -151,9 +151,7 @@ win-book-find-label = Ierakstiet vārdu vai e-pasta adresi:
 win-send = &Sūtīt
 # review: new
 win-dont-send = &Nesūtīt
-# review: new
 win-unsubscribe = &Atteikties no abonēšanas
-# review: new
 win-dont-unsubscribe = &Neatteikties
 # review: new
 win-forget-program-ask = Noņemt šo programmu, tās atļaujas un tās aģentu darbību vēsturi? Kad tā nākamreiz pieslēgsies, atļauja tiks prasīta vēlreiz.

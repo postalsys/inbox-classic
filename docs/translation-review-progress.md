@@ -5,15 +5,15 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Latvian agent strings, including the entire pending core agent block, unsubscribe/draft additions and both full help topics; then pl/ro/ru/sk/sl/sv/uk. Check queue/Outbox semantics and the other recorded app-context corrections in every draft. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending; preserve the settings-path followup and recheck current platform controls and runtime.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt. Phase2 reopens only their affected help passages.
+- **Next: Review Polish agent strings, including the entire pending core agent block, unsubscribe/draft additions, shared controls and both full help topics; then ro/ru/sk/sl/sv/uk. Apply the recorded queue/Outbox, draft, quota and permission context. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending; preserve the latest settings-path followup and recheck platform controls and runtime.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 21,535 entries and 792 full topics; pending: 12,869 entries and 564 topics.
-  Historical catalog improvements: 3,920. Importing drafts earns no review credit.
+  Completed: 21,597 entries and 794 full topics; pending: 12,807 entries and 562 topics.
+  Historical catalog improvements: 3,946. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
   Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
@@ -22,7 +22,7 @@ Commit completed batches regularly and preserve an exact resume point.
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French, Norwegian Bokmål, Hungarian and Lithuanian needed that correction; the other completed languages already convey the distinction.
+  contains no instructions. French, Norwegian Bokmål, Hungarian, Lithuanian and Latvian needed that correction; the other completed languages already convey the distinction.
 - PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
   `PostalExpress-preview2`. The six new IDs per language and both help insertions are imported from `03568aef`;
   its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
@@ -2606,3 +2606,11 @@ Reviewed all 50 remaining agent core entries, improving 18 values and retaining 
 Lithuanian structural checker reports 75 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 50 reviewed entries, 18 changed values and 32 retained good values; no help topics changed. Untargeted values, comments, variable sets, plural branches, mnemonic counts, generated IDs and prior reviews are preserved. Three live runtime/UI files match the recorded snapshots. Global reconciliation verifies 21,573 unmarked entries, 10,932 help lines and 14 unchanged/moved baseline pairs; all latest translation and English hashes match. All 28 full inventories and since-start 1,192 entries/247 passages reconcile. Source audit covers 44 worktrees/185 refs, exact imported source trees and 290 unchanged old draft copies, with no additional unrecorded translation work. HTML regenerated; git diff --check passes. No tests, builds or GUI runs. REVIEWED remains unchanged.
 
 Review Latvian agent strings, including the entire pending core agent block, unsubscribe/draft additions and both full help topics; then pl/ro/ru/sk/sl/sv/uk. Check queue/Outbox semantics and the other recorded app-context corrections in every draft. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending; preserve the settings-path followup and recheck current platform controls and runtime.
+
+## Latvian agent core, additions and complete help
+
+Reviewed all 58 pending core agent entries, four associated app/Windows labels and both complete help drafts. Improved 26 catalog values and 29 help wording lines; 36 good values were retained. Logs now distinguish queuing, delivery, approval, refusal and failure. Permissions describe actual capabilities. Help explains permanent removal of agent-owned drafts, saving/autosave as the access boundary, batch consent, the rolling per-program quota, optional account signature text and rule previews without actions. The warning now distinguishes mail content from instructions to follow. The previously reviewed approval log and all untargeted values remain unchanged. Latvian still has broader catalogs and help pending.
+
+Latvian structural checker reports 76 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 62 reviewed entries, 26 changed values, 36 retained good values and two complete help topics, with 29 changed help wording lines. Untargeted values and the previously reviewed approval log remain unchanged. Tags, attributes, controls, platform branches, literal keys, variable sets, plural branches, mnemonic counts and generated IDs are preserved. Windows unsubscribe A/N keys are distinct; Mac/Linux shared labels are plain. Help joins with actual control labels were inspected for all three platforms. Seven notice UI files and seven runtime/agent UI files match the recorded snapshots. Existing English captures supply context; no Latvian rendering is claimed. Global reconciliation verifies 21,635 unmarked entries, 10,967 help lines and 14 unchanged/moved baseline pairs; all latest source/file hashes match. All 28 full inventories and since-start 1,180 entries/245 passages reconcile. The source audit covers 44 worktrees/185 refs, exact imported source trees and 290 unchanged old draft copies, with no additional unrecorded translation work. HTML regenerated; git diff --check passes. No tests, builds or GUI runs. REVIEWED remains unchanged.
+
+Review Polish agent strings, including the entire pending core agent block, unsubscribe/draft additions, shared controls and both full help topics; then ro/ru/sk/sl/sv/uk. Apply the recorded queue/Outbox, draft, quota and permission context. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending; preserve the latest settings-path followup and recheck platform controls and runtime.

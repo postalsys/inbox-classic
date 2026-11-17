@@ -547,6 +547,16 @@ where the singular reads better ("Pārvietot ziņojumu").
 - Quotes „…”; days of the week lowercase; keys unchanged.
 - Access keys on ASCII letters only (no ā, č, ē and so on).
 
+- Agent permissions use verbs for the available actions. Keep "adresātu saraksts" and "atteikties no abonēšanas"
+  consistent with the reader command. The Windows unsubscribe buttons retain distinct ASCII A/N keys.
+- Agent logs use third-person past-tense verbs for agent actions and polite plural for user decisions. Send logs
+  describe queuing; an absent Outbox entry does not prove delivery. Subjects and actual folder names follow
+  an inflected head noun and remain unchanged inside quotes. Use "darbība atsaukta" in the log wrapper.
+- Agent-owned draft removal is permanent. Saving in the editor, including autosave, ends the agent's access;
+  opening alone does not. "Paraksta teksts" is the optional account footer, distinct from "digitālais paraksts".
+- The email warning says that message content is data, not instructions to follow. The unsubscribe quota counts
+  user-approved list requests per program over the preceding 24 hours, including failed attempts.
+
 ### Lietuvių (lt)
 
 Terms: Gauti laiškai; Siunčiami laiškai; Išsiųsti laiškai; Panaikinti laiškai; Juodraščiai; Nepageidaujami laiškai;

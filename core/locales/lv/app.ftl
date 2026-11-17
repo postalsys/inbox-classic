@@ -471,7 +471,6 @@ ui-no-match-in = Meklēšana mapē { $folder } aptver tēmas, sūtītājus, adre
 ui-no-items = Šajā skatā nav neviena vienuma.
 # review: new
 ui-choose-folder = Izvēlieties mapi, lai redzētu tās ziņojumus.
-# review: new
 ui-unsubscribe = Atteikties no abonēšanas
 # review: new
 ui-open-in-calendar = Atvērt kalendārā
@@ -855,7 +854,6 @@ ui-dont-allow = Neatļaut
 ui-allow = &Atļaut
 # review: new
 ui-dont-send = Nesūtīt
-# review: new
 ui-dont-unsubscribe = Neatteikties
 # review: new
 ui-edit-first = &Vispirms rediģēt
