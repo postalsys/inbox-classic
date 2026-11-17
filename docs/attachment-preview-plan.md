@@ -641,6 +641,9 @@ or picture, peak memory is of the whole process. Page 1 was compared with Popple
 - Pictures: the header checks refuse every oversized picture before decoding. A text page's PNG is 10 to 500 KB; a
   scanned page's was 2 to 3 MB, so a page (or an opaque lossless picture) whose PNG is over 768 KB is written as a JPEG
   when that is less than half the size.
+- After the review's fixes the spike set draws as before (the same pages, sizes and times); pdf.js's `bomb_giant.pdf`,
+  which hayro had drawn by giving up on its picture, is now refused before drawing, as its picture says it is far over
+  the limit.
 - Fuzzing found one more: a 684 byte WebP whose EXIF chunk says 4 GB made image-webp 0.2.4 allocate 4 GB when the
   orientation was read. pe-preview now refuses a WebP whose chunks run past the end of the file
   (`picture::webp_chunks`; the file is `tests/files/webp-exif-4gb.webp`). The tiff crate prints a `dbg!` line to
@@ -661,24 +664,41 @@ or picture, peak memory is of the whole process. Page 1 was compared with Popple
   `pages().render(n)`: 1,240 pixels wide unless the long side would pass 2,048, a page taller than four widths shows
   its top, on white, annotations' appearances drawn, no system font.
 - `streams`: before a page is drawn, every stream it reaches (its content, its resources' forms, pictures, fonts,
-  patterns and shadings, its annotations' appearances; not the page tree, other pages or actions) is measured: Flate,
-  LZW and RunLength run counting their output into a 64 KB buffer, ASCIIHex and ASCII85 decoded (they shrink), a
-  picture counted as width by height in RGBA. A page is refused past 160 MB for one stream, 8 MB of content, or 384 MB
-  for the pages of the file together. Inline images in a content stream are not measured (the spec keeps them small;
-  hayro does not).
+  patterns and shadings, its annotations' appearances; not the page tree, other pages or actions) is measured, and
+  every inline picture (`BI ... ID ... EI`) in the content streams among them (the page's, forms', tiling patterns',
+  Type 3 glyphs', appearances'). Flate is counted as hayro reads it: flate2 on zlib, then on raw deflate, and when
+  both fail a counting port of hayro's lenient decoder (pdf.js's: it skips back-references to before the start and
+  ignores stored lengths and the checksum), so a stream only the lenient decoder reads is not counted as nothing
+  (`streams/inflate.rs`; a test compares the counts with what hayro inflates). LZW and RunLength run counting their
+  output into a 64 KB buffer, ASCIIHex and ASCII85 are decoded (they shrink). A picture counts as its pixels in RGBA by
+  the larger of its dictionary's size and its codec's: CCITT by its Columns (and Rows), JPEG 2000 by its codestream's
+  SIZ marker (none: refused), JBIG2 by its page information segment (a striped page, or a region of unknown length
+  before it, as 65,535 tall, the most hayro-jbig2 allows); DCT by its dictionary. A size that disagrees with the
+  dictionary is not refused as such, as legitimate files differ (striped JBIG2, JPEG 2000 at a reduced resolution):
+  the larger size is what is measured. A page is refused past 160 MB for one stream or picture, 8 MB of content, or
+  384 MB for the pages of the file together.
 - `limits`: every number in one place (file 50 MB, 2,048 px, 5 pages, 2 s a page, 5 s a picture, 64 MP of previews a
   message, 96 MB of cache, two abandoned threads at most, a 32 MB stack for the render thread).
 - `Previewer` (service.rs): a dispatcher thread and a render thread, both the crate's own. Requests queue in order
   (`request`); `describe(file, wait)` goes ahead of the queue and returns within `wait` (for PR 2's view, which needs
-  the sizes before the document). The dispatcher answers from the cache (by SHA-256 of the file, never for
-  `keep: false`, which PR 4 uses for decrypted parts), checks the message's pixel budget, and follows the render
+  the sizes before the document). The dispatcher answers from the cache what it holds (by SHA-256 of the file, never
+  for `keep: false`, which PR 4 uses for decrypted parts: the reading pane gives it for any part that was decrypted):
+  the description, the pages drawn and the refusals that come of the file itself (password, unreadable, too large),
+  and sends only the pages it does not hold to the render thread. It checks the message's pixel budget, and follows the render
   thread step by step: each page or picture has its own deadline. Past it the render is abandoned, a new thread takes
   the next file, the file is added to the refused list, after a PDF no PDF is drawn for the session, and after two
   abandoned threads nothing is. A panic is caught (the file is a tile, the next draws). `cancel(owner)` drops the
   owner's waiting files, stops its file under way after the current page and frees its budget.
-- `marker`: `rendering-<sha256>` written in `previews/` beside the store before each file (with "folder, message,
-  attachment"), removed when the render ends or unwinds. At start, markers left behind join `refused` (the newest 512
-  kept) and are deleted; a file in it is `Refusal::Crashed` from then on.
+- `marker`: `rendering-<sha256>` written in `previews/` beside the store before each file (with its kind and "folder,
+  message, attachment"), removed when the render ends or unwinds. At start, markers left behind join `refused` (the
+  newest 512 kept) and are deleted; a file in it is `Refusal::Crashed` from then on. As the key is the file's content,
+  a sender could change one byte a message and end the app once a message: so a marker left behind also turns PDF
+  previews off (the store's `previews.pdf`, with `previews.pdf_crashed` noting why), checked as the core opens.
+  `Event::PdfPreviewsOff` says so, `Core::previews_notice()` gives the words for where previews are shown (why, and
+  that "Show PDF files in messages" in the reading options turns them on again), `Core::set_pdf_previews(true)` turns
+  them on and clears the note. Pictures stay on: their decoders have hard limits. A PDF file then is
+  `Refusal::Disabled` (`previews::refusal_text`). The words are in English and drafted in every language, marked for
+  review; the apps show them in PR 2.
 - `pe-core`: `Core::previews_start(folder, uid, attachments) -> request` reads the source once on the reads connection
   (blocking pool), takes the listed attachments and hands them to the render thread (started by the first preview);
   `Event::PreviewReady { request, attachment }` follows each step; `Core::preview_file(request, attachment)` gives the
@@ -686,13 +706,19 @@ or picture, peak memory is of the whole process. Page 1 was compared with Popple
   `previews_cancel(request)`. The C API does not change in this PR; pe-ffi does not pass the event on yet.
 
 Tests: unit tests of every limit, the page sizes, titles, encoders and profiles, the cache, the markers (left behind,
-panic, the list's length); `tests/render_thread.rs` with a fake engine that hangs, panics and counts (watchdog, PDFs
-off, two hangs stop all, a marker left behind, cancel, the budget, the cache, `describe` in time); `tests/pictures.rs`
+panic, the list's length), the codecs' sizes, the lenient count against hayro's own inflate; `tests/render_thread.rs`
+with a fake engine that hangs, panics and counts (watchdog, PDFs off, two hangs stop all, a marker left behind, cancel,
+the budget, the cache answering pages and lasting refusals with only missing pages drawn, the PDF setting,
+`describe` in time); `tests/pictures.rs`
 (orientation 1 to 8, GPS and EXIF gone, ICC kept, CMYK profile dropped, every format, 24 MP scaled, a 200 frame GIF,
 truncated files); `tests/files.rs` over the committed files (`tests/files/generate.py` makes them; none is anyone's
-real file), the real engine abandoning `xobject-laughs.pdf`; `pe-core` previews of a stored message. Fuzz targets
+real file), among them the review's five (`lenient-flate-bomb.pdf`, `inline-image-bomb.pdf`, `ccitt-columns.pdf`,
+`jpx-siz.pdf`, `jbig2-page.pdf`, which took 290 MB, 425 MB, 1.2 GB and 4.8 GB before the meter knew them, and are now
+refused), the real engine abandoning `xobject-laughs.pdf`; `pe-core` previews of a stored message, and a crash
+marker turning PDF previews off until they are turned on. Fuzz targets
 `preview_picture` and `preview_pdf`, ten minutes each (96,605 and 14,119 runs, after the WebP fix no failure, no
-input over a second), corpora minimized and committed.
+input over a second; again after the review's fixes, 159,700 and 14,831 runs, no failure), corpora minimized and
+committed.
 
 ### The web views
 
