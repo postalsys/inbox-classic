@@ -501,7 +501,7 @@ agent-log-junk = Markerede »{ $subject }« som uønsket
 agent-log-not-junk = Markerede »{ $subject }« som ikke uønsket
 agent-log-archived = Arkiverede »{ $subject }«
 agent-log-folder = Oprettede mappen »{ $name }«
-agent-log-unsubscribed = Afmeldte mailinglisten bag »{ $subject }«
+agent-log-unsubscribed = Du godkendte afmeldingsanmodningen. Meddelelse: »{ $subject }«
 # review: new
 agent-log-unsubscribe-failed = Kunne ikke afmelde listen for »{ $subject }«: { $reason }
 # review: new

@@ -793,8 +793,7 @@ agent-log-not-junk = Pažymėtas kaip pageidaujamas: „{ $subject }“
 agent-log-archived = Archyvuotas „{ $subject }“
 # review: new
 agent-log-folder = Sukurtas aplankas „{ $name }“
-# review: new
-agent-log-unsubscribed = Atsisakyta „{ $subject }“ adresatų sąrašo
+agent-log-unsubscribed = Patvirtinote prašymą atsisakyti prenumeratos. Laiškas: „{ $subject }“
 # review: new
 agent-log-unsubscribe-failed = Nepavyko atsisakyti „{ $subject }“ adresatų sąrašo: { $reason }
 # review: new

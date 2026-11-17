@@ -494,7 +494,7 @@ agent-log-junk = Poruka „{ $subject }“ označena je kao neželjena pošta
 agent-log-not-junk = Poruka „{ $subject }“ označena je kao poželjna pošta
 agent-log-archived = Poruka „{ $subject }“ je arhivirana
 agent-log-folder = Stvorena mapa „{ $name }“
-agent-log-unsubscribed = Otkazana je pretplata na listu e-pošte s koje je stigla poruka „{ $subject }“
+agent-log-unsubscribed = Odobrili ste zahtjev za otkazivanje pretplate. Poruka: „{ $subject }“
 # review: new
 agent-log-unsubscribe-failed = Otkazivanje pretplate na popis poruke „{ $subject }“ nije uspjelo: { $reason }
 # review: new

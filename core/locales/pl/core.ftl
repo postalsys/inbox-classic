@@ -797,8 +797,7 @@ agent-log-not-junk = Oznaczono „{ $subject }” jako nie śmieci
 agent-log-archived = Zarchiwizowano „{ $subject }”
 # review: new
 agent-log-folder = Utworzono folder „{ $name }”
-# review: new
-agent-log-unsubscribed = Wypisano się z listy „{ $subject }”
+agent-log-unsubscribed = Zatwierdzono prośbę o wypisanie z listy mailingowej. Wiadomość: „{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Nie udało się wypisać z listy „{ $subject }”: { $reason }
 # review: new

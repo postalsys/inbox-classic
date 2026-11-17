@@ -486,7 +486,7 @@ agent-log-junk = Merkitsi roskapostiksi: ”{ $subject }”
 agent-log-not-junk = Poisti roskapostimerkinnän: ”{ $subject }”
 agent-log-archived = Arkistoi: ”{ $subject }”
 agent-log-folder = Loi kansion ”{ $name }”
-agent-log-unsubscribed = Peruutti tilauksen postituslistalta, jolta viesti ”{ $subject }” tuli
+agent-log-unsubscribed = Hyväksyit tilauksen peruutuspyynnön. Viesti: ”{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Tilauksen peruuttaminen listalta, jolta tuli ”{ $subject }”, epäonnistui: { $reason }
 # review: new

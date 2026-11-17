@@ -11,10 +11,13 @@ Commit completed batches regularly and preserve an exact resume point.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
   Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg. Continue the remaining agent queue.
   Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg.
-- Current scope: 34,400 catalog entries and 1,356 help topics.
-  Completed: 21,395 entries and 778 full topics; pending: 13,005 entries and 578 topics.
-  Historical catalog improvements: 3,836. Importing drafts earns no review credit.
+- Current scope: 34,404 catalog entries and 1,356 help topics.
+  Completed: 21,408 entries and 778 full topics; pending: 12,996 entries and 578 topics.
+  Historical catalog improvements: 3,864. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
+- All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
+  Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
+  were completed. English still overstates completion; the source problem and runtime evidence are recorded.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
@@ -2501,3 +2504,17 @@ Bulgarian structural checker has 1,456 expected mark-only diagnostics and no str
 The prior 21-file preview UI/settings snapshot and three-file backend followup remain the resume point for preview context. This batch does not mark any preview wording reviewed.
 
 Review Czech combined agent additions, then da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.
+
+## Unsubscribe log approval timing, all languages
+
+The app records `agent-log-unsubscribed` when the user approves, before sending any HTTP requests.
+All 28 translations now describe approval and label the placeholder as a message subject. They no longer
+claim successful unsubscription or an already-sent request. This completes nine pending drafts and corrects
+19 older reviewed translations; four of the latter enter this round from the previous baseline.
+
+All 28 structural language checks passed after accounting for exactly 27,495 known draft-mark diagnostics. Exact reconstruction verifies only agent-log-unsubscribed changed in each language; all other values, comments, selectors and mnemonics are unchanged. The subject variable is preserved and explicitly labeled as a message. Nineteen previously unmarked entries were reopened, including four baseline-only entries newly added to this round; nine pending drafts completed. Prior completed IDs were moved to reopened history, without discarding earlier review evidence. Global reconciliation matches 21,446 unmarked entries, 10,792 help lines and 14 unchanged/moved baseline pairs; latest translation and English hashes match. All full inventories and since-start 1,270 entries/301 passages reconcile. Source audit covers 44 worktrees/185 refs and 290 unchanged old draft copies, with no additional translation work. Runtime source still matches the inspected snapshot. English, help, REVIEWED and generated identifiers are unchanged. HTML regenerated; git diff --check passed. No test suites or builds run.
+
+Review Czech combined agent additions, then da, el, fi, hr, hu and the broader drafts. Preview callers exist on all three platforms: recheck the recorded UI/backend snapshots, Reading-page shortcuts/wrapping and available screenshots before reviewing the nine preview IDs and both help insertions.
+
+Czech editorial spec: `/private/tmp/inbox-cs-agents-spec.json`, prepared but not applied. Adapt the parent
+commit in the editor before use. The approval log is already reviewed and must remain unchanged.

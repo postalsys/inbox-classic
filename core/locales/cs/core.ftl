@@ -505,7 +505,7 @@ agent-log-junk = Označeno jako nevyžádané: „{ $subject }“
 agent-log-not-junk = Označeno jako vyžádané: „{ $subject }“
 agent-log-archived = Archivováno: „{ $subject }“
 agent-log-folder = Vytvořena složka „{ $name }“
-agent-log-unsubscribed = Odhlášen odběr ze seznamu, z něhož přišla zpráva „{ $subject }“
+agent-log-unsubscribed = Schválili jste žádost o odhlášení odběru. Zpráva: „{ $subject }“
 # review: new
 agent-log-unsubscribe-failed = Odhlášení z konference zprávy „{ $subject }“ se nezdařilo: { $reason }
 # review: new

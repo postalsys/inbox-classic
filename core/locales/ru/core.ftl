@@ -792,8 +792,7 @@ agent-log-not-junk = «{ $subject }» помечено как обычное
 agent-log-archived = В архиве: «{ $subject }»
 # review: new
 agent-log-folder = Создана папка «{ $name }»
-# review: new
-agent-log-unsubscribed = Отменена подписка на рассылку «{ $subject }»
+agent-log-unsubscribed = Вы одобрили запрос на отмену подписки. Сообщение: «{ $subject }»
 # review: new
 agent-log-unsubscribe-failed = Не удалось отписаться от рассылки «{ $subject }»: { $reason }
 # review: new

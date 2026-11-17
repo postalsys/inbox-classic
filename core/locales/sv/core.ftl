@@ -768,8 +768,7 @@ agent-log-not-junk = Markerade ”{ $subject }” som ej skräppost
 agent-log-archived = Arkiverade ”{ $subject }”
 # review: new
 agent-log-folder = Skapade mappen ”{ $name }”
-# review: new
-agent-log-unsubscribed = Avslutade prenumerationen på listan för ”{ $subject }”
+agent-log-unsubscribed = Du godkände begäran om att avsluta prenumerationen. Meddelande: ”{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Kunde inte avsluta prenumerationen på listan för ”{ $subject }”: { $reason }
 # review: new

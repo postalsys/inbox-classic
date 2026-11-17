@@ -467,7 +467,7 @@ agent-log-junk = Levélszemétként megjelölve: „{ $subject }”
 agent-log-not-junk = Nem levélszemétként megjelölve: „{ $subject }”
 agent-log-archived = Archiválva: „{ $subject }”
 agent-log-folder = Mappa létrehozva: „{ $name }”
-agent-log-unsubscribed = Leiratkozás a levelezőlistáról: „{ $subject }”
+agent-log-unsubscribed = Jóváhagyta a leiratkozási kérelmet. Üzenet: „{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Sikertelen leiratkozás a levelezőlistáról („{ $subject }”): { $reason }
 # review: new

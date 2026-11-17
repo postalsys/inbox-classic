@@ -818,8 +818,7 @@ agent-log-not-junk = Označené ako vyžiadané: „{ $subject }“
 agent-log-archived = Archivované: „{ $subject }“
 # review: new
 agent-log-folder = Vytvorený priečinok „{ $name }“
-# review: new
-agent-log-unsubscribed = Odhlásené zo zoznamu adresátov správy „{ $subject }“
+agent-log-unsubscribed = Schválili ste žiadosť o odhlásenie odberu. Správa: „{ $subject }“
 # review: new
 agent-log-unsubscribe-failed = Nepodarilo sa odhlásiť zo zoznamu adresátov správy „{ $subject }“: { $reason }
 # review: new

@@ -816,8 +816,7 @@ agent-log-not-junk = Позначено «{ $subject }» як не небажа�
 agent-log-archived = Заархівовано «{ $subject }»
 # review: new
 agent-log-folder = Створено папку «{ $name }»
-# review: new
-agent-log-unsubscribed = Скасовано підписку на список розсилки «{ $subject }»
+agent-log-unsubscribed = Ви схвалили запит на скасування підписки. Повідомлення: «{ $subject }»
 # review: new
 agent-log-unsubscribe-failed = Не вдалося скасувати підписку на список розсилки «{ $subject }»: { $reason }
 # review: new

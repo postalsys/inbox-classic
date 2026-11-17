@@ -797,8 +797,7 @@ agent-log-not-junk = Označil »{ $subject }« kot želeno
 agent-log-archived = Arhiviral »{ $subject }«
 # review: new
 agent-log-folder = Ustvaril mapo »{ $name }«
-# review: new
-agent-log-unsubscribed = Odjavil od seznama sporočila »{ $subject }«
+agent-log-unsubscribed = Odobrili ste zahtevo za odjavo s poštnega seznama. Sporočilo: »{ $subject }«
 # review: new
 agent-log-unsubscribe-failed = Odjava s seznama sporočila »{ $subject }« ni uspela: { $reason }
 # review: new

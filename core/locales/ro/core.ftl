@@ -804,8 +804,7 @@ agent-log-not-junk = A marcat „{ $subject }” ca dorit
 agent-log-archived = A arhivat „{ $subject }”
 # review: new
 agent-log-folder = A creat folderul „{ $name }”
-# review: new
-agent-log-unsubscribed = S-a dezabonat de la lista lui „{ $subject }”
+agent-log-unsubscribed = Ați aprobat cererea de dezabonare. Mesaj: „{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Dezabonarea de la lista lui „{ $subject }” nu a reușit: { $reason }
 # review: new

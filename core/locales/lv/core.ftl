@@ -805,8 +805,7 @@ agent-log-not-junk = Atzīmēja „{ $subject }” kā vēlamu
 agent-log-archived = Arhivēja „{ $subject }”
 # review: new
 agent-log-folder = Izveidoja mapi „{ $name }”
-# review: new
-agent-log-unsubscribed = Atteicās no „{ $subject }” adresātu saraksta
+agent-log-unsubscribed = Apstiprinājāt pieprasījumu atteikties no abonēšanas. Ziņojums: „{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Neizdevās atteikties no „{ $subject }” adresātu saraksta: { $reason }
 # review: new

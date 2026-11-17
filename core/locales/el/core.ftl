@@ -518,7 +518,7 @@ agent-log-junk = Επισημάνθηκε ως ανεπιθύμητο το «{ $
 agent-log-not-junk = Επισημάνθηκε ως μη ανεπιθύμητο το «{ $subject }»
 agent-log-archived = Αρχειοθετήθηκε το «{ $subject }»
 agent-log-folder = Δημιουργήθηκε ο φάκελος «{ $name }»
-agent-log-unsubscribed = Καταργήθηκε η εγγραφή στη λίστα αλληλογραφίας του μηνύματος «{ $subject }»
+agent-log-unsubscribed = Εγκρίνατε το αίτημα κατάργησης εγγραφής. Μήνυμα: «{ $subject }»
 # review: new
 agent-log-unsubscribe-failed = Δεν ήταν δυνατή η κατάργηση εγγραφής από τη λίστα του «{ $subject }»: { $reason }
 # review: new

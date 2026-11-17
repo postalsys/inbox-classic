@@ -50,6 +50,14 @@ Rules for every language:
 - Keys in the help stay `<kbd>Ctrl</kbd>`, `<kbd>Shift</kbd>`, `<kbd>Alt</kbd>`, `<kbd>Del</kbd>`, `<kbd>Enter</kbd>`
   in every language: the page names them as the keyboard does (`key-*` in `core.ftl`, and the Mac's symbols there).
 
+## Agent unsubscribe log timing
+
+The `agent-log-unsubscribed` entry is written when the user approves the request, before any HTTP request
+is made. Translate it as user approval, not completed cancellation or a request already sent. The subject
+placeholder identifies the source message, not a list name; introduce it with the localized message label.
+Use the language's normal form of address. Polish uses an impersonal approval to avoid gendered user forms;
+Slovenian addresses the approving user here, rather than using the masculine participle for an agent action.
+
 ## Fixed terms
 
 The terms of Outlook Express and Outlook in each language, kept the same everywhere.
