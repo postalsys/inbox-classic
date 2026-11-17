@@ -6481,6 +6481,8 @@ public static class Dragger {
             Check (-not (& $boxOn $options $id)) "Options opened again shows $id off"
             [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($options, $id), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
             Click $options $id
+            # the click is posted: Apply is enabled once the dialog has handled it, not before
+            Check ([bool](WaitFor { [Native.Win]::IsWindowEnabled($apply) } 5)) "turning $id on again enables Apply"
             Click $options $IDC_OPTIONS_APPLY
             [void](WaitFor { -not [Native.Win]::IsWindowEnabled($apply) } 5)
             Click $options 2
