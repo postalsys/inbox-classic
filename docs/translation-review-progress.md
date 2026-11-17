@@ -6,13 +6,13 @@ Commit completed batches regularly and preserve an exact resume point.
 ## Resume here
 
 - Publishing policy: the user authorized pushing and merging every validated batch into GitHub `master` immediately. Fetch and fast-forward the clean review branch to `origin/master` after each merge. Keep local test suites disabled.
-- **Next: First import and review the new agent-draft picture/alt followup from 38e7f5cf, preserving prior prose and reopening only its new passages in completed topics. Then review Romanian agent strings, including the entire pending core agent block, unsubscribe/draft additions, shared controls and both full help topics; then ru/sk/sl/sv/uk. Apply the recorded queue/Outbox, draft, quota and permission context. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending; preserve the latest settings-path followup and recheck platform controls and runtime.**
+- **Next: Review Romanian agent strings, including the entire pending core agent block, unsubscribe/draft additions, shared controls and both full help topics; then ru/sk/sl/sv/uk. Preserve the reviewed screenshot alt line when completing these topics. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.**
   Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
   Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl. Continue the remaining agent queue.
   Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl.
-- New late source: `38e7f5cf` adds a draft screenshot and alt text to all 28 agent-sending topics. Its exact snapshot is recorded but not imported yet. On import, reopen only the new passage in 22 completed topics; six full drafts already remain pending. Existing counts and HTML below cover the current checkout.
+- Agent-draft screenshot source `38e7f5cf` is imported. All 28 new alt descriptions are reviewed against the three platform captures. Older prose is unchanged; six full help topics remain pending. This adds 28 reviewed passages and no full-topic credit.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
   Completed: 21,659 entries and 796 full topics; pending: 12,745 entries and 560 topics.
   Historical catalog improvements: 3,974. Importing drafts earns no review credit.
@@ -35,10 +35,7 @@ Commit completed batches regularly and preserve an exact resume point.
   An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
-- The latest checkpoint covers 44 worktrees/185 refs. Upstream `65087591` includes the already imported MCP
-  and preview features; all 232 relevant source paths match their exact composed snapshots. Use the updated source audit,
-  six-worktree copy audit and all-source audit at checkpoints. The 290 old untracked language files still match
-  their original imported snapshot exactly and remain untouched.
+- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `37eb82fa` contains the review history. The new screenshot source rebased onto that master during this batch; its 33 exact image/alt additions and unchanged older prose are verified. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
 - Compose additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
   Remaining: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Resume Greek after the agent additions,
   then finish 46 remaining original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
@@ -113,7 +110,7 @@ Commit completed batches regularly and preserve an exact resume point.
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
   the feature implementation was initially isolated and has now reached origin/master at `76f67e82`.
-  The translation review edits remain on the isolated review branch.
+  The completed translation review commits were merged into GitHub master through PR #139; later validated batches are published immediately.
   This adds 6,655 catalog entries and 260 help topics: scope after that addition was 32,008 entries and 1,252 topics. The later loading labels add 84 entries,
   bringing that scope to 32,092 entries and 1,252 topics. The 168 later rollback messages increase
   that scope to 32,260 entries and 1,252 topics. The settings integration has a net increase of
@@ -2630,3 +2627,9 @@ First import and review the new agent-draft picture/alt followup from 38e7f5cf, 
 Integrated upstream `65087591` into the review branch for publication at the user’s request. Resolved 181 conflicts after verifying all incoming locale/help text was already imported. The reviewed catalogs/help and generated text IDs are byte-identical to `bb6a8abc`; unrelated upstream implementation is retained. All 28 language checkers pass structurally with 27,754 expected draft-mark diagnostics, and all 1,412 C/Swift IDs match English. The review diff against upstream passes the whitespace check. No local tests or build run.
 
 The user requests an immediate push and GitHub merge after every future validated batch. This checkpoint records the local integration; confirm the resulting PR/merge in GitHub. The next translation task remains the pending draft-picture/alt import, then Romanian agent work and the broader queue. REVIEWED is unchanged.
+
+### Agent-draft screenshot descriptions in all 28 languages
+
+Imported the new screenshot, its English description and FORMAT example from `38e7f5cf`. Reviewed each translated alt description against the supplied Windows, Mac and Linux captures, the local agent/draft terms and adjacent help. Replaced literal relative-clause chains with clear descriptions of the draft window and agent name above the message. All older prose is byte-identical. Six full drafts retain marks around their older prose; only the image description is newly reviewed. No catalog entries or additional full topics receive credit. All 28 language structural checkers pass with 27,754 expected mark-only diagnostics. Exact reconstruction verifies 33 imported source paths, 28 improved alt descriptions and byte-identical older prose, catalogs, pending inventories and prior review records. Existing tags/attributes are preserved; the new image source is exact and only its translated alt value is edited. Global reconciliation accounts for 21,697 unmarked entries, 11,002 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. Since-start 1,168 entries/249 marked passages and all full inventories reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. The source branch rebased onto reviewed master during this batch; all 33 relevant additions still match the original image/alt snapshot and every older prose byte is preserved. No unrecorded translation work found. HTML refreshed and git diff --check passes. No local test suites, builds or GUI runs. REVIEWED and full-topic totals remain unchanged.
+
+Publication checkpoint: [PR #139](https://github.com/postalsys/inbox-classic/pull/139) merged the prior review history into GitHub master as `37eb82fa` on November 17 at 21:12 UTC. Subsequent validated batches follow the same push/merge policy.
