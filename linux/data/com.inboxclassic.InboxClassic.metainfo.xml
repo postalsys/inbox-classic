@@ -147,9 +147,9 @@
       Podržava IMAP i SMTP naloge, kao i prijavu na Outlook.com i Microsoft 365 putem pregledača.
     </p>
     <p xml:lang="fi">
-      Inbox Classic lukee ja kirjoittaa sähköpostia niin kuin sähköpostiohjelmat ennen: kansiot vasemmalla, viestit
-      ylhäällä ja valittu viesti alla. Se toimii minkä tahansa IMAP- ja SMTP-tilin kanssa ja kirjautuu Outlook.comiin ja
-      Microsoft 365:een selaimen kautta.
+      Inbox Classic on perinteinen sähköpostiohjelma: kansiot vasemmalla, viestiluettelo ylhäällä ja valittu viesti sen
+      alla. Se toimii IMAP- ja SMTP-tilien kanssa ja tukee kirjautumista Outlook.comiin ja Microsoft 365:een selaimen
+      kautta.
     </p>
     <p xml:lang="sv">
       Inbox Classic läser och skriver e-post med mapparna till vänster, meddelandena överst och meddelandet nedanför,
@@ -270,10 +270,10 @@
       <li xml:lang="sr@latin">Pretraga tema, pošiljalaca, primalaca, naziva priloga i teksta poruka, uz operatore kao u Gmailu</li>
       <li xml:lang="sr@latin">Citirane poruke u odgovorima su sažete i mogu da se prošire po potrebi</li>
       <li xml:lang="sr@latin">Čitajte preuzetu poštu i bez interneta. Lozinke se čuvaju u sistemskom privesku ključeva</li>
-      <li xml:lang="fi">Jokainen viesti näytetään puhdistettuna, ilman skriptejä, ja internetin kuvat vain, kun sallit ne</li>
-      <li xml:lang="fi">Haku, joka löytää sanat aiheesta, henkilöistä, tiedostonimistä ja tekstistä Gmailin hakuoperaattoreilla</li>
-      <li xml:lang="fi">Vastaukset piilottavat lainaamansa aiemmat viestit</li>
-      <li xml:lang="fi">Posti pysyy luettavana ilman verkkoyhteyttä, ja salasanat säilytetään avainnipussasi</li>
+      <li xml:lang="fi">Viestit näytetään ilman skriptejä ja muuta suoritettavaa sisältöä. Internetin kuvat ladataan vain luvallasi</li>
+      <li xml:lang="fi">Haku kattaa aiheen, lähettäjät, vastaanottajat, liitteiden nimet ja viestitekstin sekä tukee Gmailin hakuoperaattoreita</li>
+      <li xml:lang="fi">Vastausten lainaukset supistetaan, ja ne voi avata tarvittaessa</li>
+      <li xml:lang="fi">Ladattuja viestejä voi lukea ilman verkkoyhteyttä. Salasanat säilytetään järjestelmän avainnipussa</li>
       <li xml:lang="sv">Varje meddelande visas rensat, utan skript, och bilder från internet bara när du tillåter det</li>
       <li xml:lang="sv">En sökning som hittar ord i ämnet, personerna, filnamnen och texten, med Gmails operatorer</li>
       <li xml:lang="sv">Svar fäller ihop de tidigare meddelanden som de citerar</li>

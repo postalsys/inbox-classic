@@ -16,12 +16,12 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), 255 remaining platform/help-title entries and all 52 help topics.
-  Its UI/core entries and one coupled Windows button are reviewed: 1,079 entries including the three earlier
-  loading labels, with 134 values improved.
+- Resume with Finnish (fi), all 52 help topics. Its 1,334 catalog entries are reviewed, with 173 values improved.
+  First resolve the recorded mnemonic followup: the expanded 43-scope audit found collisions in 13 previously
+  reviewed languages; Portuguese, Brazilian Portuguese and Bulgarian pass unchanged. Exact findings are in state.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
-  Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. Both context followups
-  are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
+  Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
+  attachment-reminder context followups are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
   The persistent-logo-cache followup is now complete: 42 help topics checked (37 changed, five retained)
@@ -657,8 +657,21 @@ Structural checks report only deliberately removed review marks. Exact inventori
 hashes reconcile, review HTML regenerated and git diff --check passes. No test suite was run.
 Finnish UI checkpoint: `1da11a3f`. Its 255 remaining platform/help-title entries and all 52 help topics are next.
 
-Current totals: 17,196 catalog entries and 628 help pages reviewed; 2,616 catalog values improved. Remaining:
-14,896 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Finnish catalogs completed
+
+Reviewed the 255 remaining platform/help-title entries and rechecked two shared UI controls, improving 39
+values. Corrected Windows-user installation wording, background-mail notices, file-save failures, account
+fallbacks, queued timestamps and Linux store descriptions. Retained native Mac terms and branded sign-in labels.
+The expanded audit covers 43 actual menu/dialog scopes and fixed collisions in Settings, account/folder menus
+and the copy dialog. Its additional scopes will also be checked across previously reviewed languages.
+
+All 1,334 Finnish catalog entries are reviewed, with 173 values improved. Its 52 help topics remain.
+Static structure, exact inventories/hashes and git diff --check pass; review HTML regenerated. Offline pe-ffi
+build in the dedicated target passed and regenerated installer/Linux metadata, inspected and included.
+No test suite was run. Finnish core checkpoint: `4c1a1fcb`.
+
+Current totals: 17,451 catalog entries and 628 help pages reviewed; 2,655 catalog values improved. Remaining:
+14,641 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

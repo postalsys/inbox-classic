@@ -613,6 +613,8 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
 - Cc/Bcc are "Kopio" / "Piilokopio", with Alt+K/Alt+P in the compose window. The recipient picker has its own
   shortcut scope. Native ä/ö may be used when needed to keep menu shortcuts distinct.
   Open Draft and Not Junk never coexist: their folder roles are mutually exclusive.
+  Additional platform checks cover Settings, accounts, folder/account context menus and the folder picker.
+  "Siirrä alas" uses Alt+L and the copy dialog uses Alt+O to keep these scopes distinct.
 - Sender images rely on authenticated domains, not verified people or message contents. Downloaded logos are
   cached and reused across messages; do not claim that each logo is only ever downloaded once.
 - Agent send logs describe queuing ("Lisäsi ... lähetysjonoon"), while the sent status confirms actual sending.

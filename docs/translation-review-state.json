@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue Finnish (fi): review the remaining 255 platform/help-title entries (windows.ftl 72, mac.ftl 67, linux.ftl 92, help.ftl 24), then all 52 help topics. Finnish UI/core reviewed: 1079 entries including three earlier loading labels, 134 values improved. Recheck late additions after Finnish and after the full queue. Do not run the test suite. Active checkout build/i18n-wave1.",
+  "next_batch": "Finnish catalogs complete: 1334 entries reviewed, 173 values improved. First resolve the recorded extended-native-mnemonic-scopes followup (13 previously reviewed languages), then review all 52 Finnish help topics. Use all 43 scopes for later languages. Recheck late additions after Finnish and after the full queue. Do not run the test suite. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -6933,271 +6933,7 @@
       ]
     },
     "fi": {
-      "pending_catalogs": {
-        "help.ftl": [
-          "help-title",
-          "help-section-get-started",
-          "help-section-everyday",
-          "help-section-accounts",
-          "help-section-message-features",
-          "help-section-encrypted-mail",
-          "help-section-settings",
-          "help-section-agents",
-          "help-section-reference",
-          "help-section-troubleshooting",
-          "help-section-privacy",
-          "help-section-advanced",
-          "help-column-command",
-          "help-column-keys",
-          "help-contents",
-          "help-search",
-          "help-search-placeholder",
-          "help-no-results",
-          "help-hide",
-          "help-show",
-          "help-back",
-          "help-forward",
-          "help-home",
-          "help-print"
-        ],
-        "linux.ftl": [
-          "gtk-search-looks-in",
-          "gtk-search-still-indexing",
-          "gtk-search-results-everywhere",
-          "gtk-search-results-in",
-          "gtk-search-indexing",
-          "gtk-menu-rename",
-          "gtk-import-one-question",
-          "gtk-files-not-saved",
-          "gtk-unsubscribe-one-click",
-          "gtk-unsubscribe-mail",
-          "gtk-unsubscribe-web",
-          "gtk-unsubscribe-failed",
-          "gtk-toolbar-create-mail-menu",
-          "gtk-toolbar-send-recv-menu",
-          "gtk-main-menu",
-          "gtk-folder-list",
-          "gtk-quit",
-          "gtk-new-folder-at-top-of",
-          "gtk-unread-messages",
-          "gtk-outbox-empty",
-          "gtk-outbox-row",
-          "gtk-still-running-detail",
-          "gtk-sign-in-again-ask",
-          "gtk-default-app-not-installed",
-          "gtk-default-app-now",
-          "gtk-default-app-failed",
-          "gtk-reader-date",
-          "gtk-reader-files",
-          "gtk-files",
-          "gtk-pictures-blocked",
-          "gtk-download-pictures",
-          "gtk-save-attachments-menu",
-          "gtk-format-bold",
-          "gtk-format-italic",
-          "gtk-format-underline",
-          "gtk-format-hyperlink",
-          "gtk-font",
-          "gtk-show-cc",
-          "gtk-show-bcc",
-          "gtk-save-tip",
-          "gtk-link-status",
-          "gtk-plain-warning",
-          "gtk-account-name-title",
-          "gtk-display-name-title",
-          "gtk-turned-off-why",
-          "gtk-turned-off-why-long",
-          "gtk-next",
-          "gtk-provider-sign-in",
-          "gtk-provider-sign-in-apps",
-          "gtk-accounts-add",
-          "gtk-accounts-properties",
-          "gtk-accounts-signature",
-          "gtk-accounts-sign-in-apps",
-          "gtk-app-server",
-          "gtk-app-port",
-          "gtk-app-security",
-          "gtk-issuer-found",
-          "gtk-client-id",
-          "gtk-client-secret",
-          "gtk-scopes",
-          "gtk-redirect-uri",
-          "gtk-issuer-usable",
-          "gtk-app-built-in",
-          "gtk-built-in",
-          "gtk-offered-for-new",
-          "gtk-edit-button",
-          "gtk-remove-app-ask",
-          "gtk-sign-in-apps-intro",
-          "gtk-agent-it-may",
-          "gtk-agent-accounts",
-          "gtk-never-used",
-          "gtk-last-used",
-          "gtk-forget-program",
-          "gtk-forget-program-detail",
-          "gtk-no-agents-yet",
-          "gtk-nothing-yet",
-          "gtk-preferences",
-          "gtk-language",
-          "gtk-language-subtitle",
-          "gtk-new-mail-group",
-          "gtk-notify-new-mail",
-          "gtk-notify-subtitle",
-          "gtk-restart-to-change",
-          "gtk-desktop-generic-name",
-          "gtk-desktop-comment",
-          "gtk-desktop-keywords",
-          "gtk-metainfo-summary",
-          "gtk-metainfo-description",
-          "gtk-metainfo-feature-sanitized",
-          "gtk-metainfo-feature-search",
-          "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
-        ],
-        "mac.ftl": [
-          "mac-quit",
-          "mac-settings",
-          "mac-services",
-          "mac-hide",
-          "mac-hide-others",
-          "mac-show-all",
-          "mac-check-updates",
-          "mac-close-window",
-          "mac-redo",
-          "mac-cut",
-          "mac-paste",
-          "mac-menu-window",
-          "mac-minimize",
-          "mac-zoom",
-          "mac-no-updates",
-          "mac-settings-title",
-          "mac-language-label",
-          "mac-restart-hint",
-          "mac-notify-new-mail",
-          "mac-restart-question",
-          "mac-choose",
-          "mac-still-running-detail",
-          "mac-outbox-waiting",
-          "mac-sending",
-          "mac-checking",
-          "mac-account-said",
-          "mac-not-bundle",
-          "mac-not-made-default",
-          "mac-tool-search",
-          "mac-still-indexing-more",
-          "mac-results-everywhere",
-          "mac-results-in",
-          "mac-still-indexing",
-          "mac-folder-unread",
-          "mac-import-messages",
-          "mac-save-messages",
-          "mac-save-attachments-menu",
-          "mac-files-not-saved",
-          "mac-no-calendar-app",
-          "mac-file-not-saved",
-          "mac-unsubscribing",
-          "mac-bold",
-          "mac-italic",
-          "mac-underline",
-          "mac-bcc",
-          "mac-command-click-to-open",
-          "mac-saving-to-drafts",
-          "mac-dont-save",
-          "mac-files",
-          "mac-next",
-          "mac-name-placeholder",
-          "mac-more-sign-in-options",
-          "mac-add-sign-in-app",
-          "mac-looking-up",
-          "mac-add-button",
-          "mac-properties-button",
-          "mac-signature-button",
-          "mac-security-button",
-          "mac-sign-in-apps-button",
-          "mac-forget-program",
-          "mac-forget-program-detail",
-          "mac-checking-issuer",
-          "mac-edit-button",
-          "mac-use-for-new-accounts",
-          "mac-built-in",
-          "mac-new-folder-button",
-          "mac-edit-link"
-        ],
-        "windows.ftl": [
-          "win-still-running-detail",
-          "win-default-app-not-installed",
-          "win-default-app-settings",
-          "win-no-unread",
-          "win-unread-messages",
-          "win-print-failed",
-          "win-print-title-of",
-          "win-no-bodies",
-          "win-webview-failed",
-          "win-webview-missing",
-          "win-delete-button",
-          "win-find-label",
-          "win-save-as-button",
-          "win-too-many-files",
-          "win-editor-failed",
-          "win-ctrl-click-to-open",
-          "win-format-bold",
-          "win-format-italic",
-          "win-format-underline",
-          "win-format-link",
-          "win-show-cc",
-          "win-show-bcc",
-          "win-signature-title",
-          "win-search-found-all",
-          "win-search-found-in",
-          "win-search-indexing",
-          "win-no-match-indexing",
-          "win-files",
-          "win-click-to-retry",
-          "win-save-attachments",
-          "win-files-not-saved",
-          "win-new-folder-in-highlighted",
-          "win-delete-folder-ask",
-          "win-rename",
-          "win-messages-not-saved",
-          "win-messages-not-forwarded",
-          "win-sign-in-google",
-          "win-sign-in-microsoft",
-          "win-next",
-          "win-your-account",
-          "win-browser-sign-in",
-          "win-add",
-          "win-properties-button",
-          "win-signature-button",
-          "win-sign-in-apps-button",
-          "win-dont-allow",
-          "win-col-address",
-          "win-never-written-to",
-          "win-book-find-label",
-          "win-send",
-          "win-forget-program-ask",
-          "win-clear-log-ask",
-          "win-agent-programs",
-          "win-change",
-          "win-what-agents-did",
-          "win-how-to-connect",
-          "win-built-in",
-          "win-edit",
-          "win-options-language-label",
-          "win-options-restart-note",
-          "win-options-notify",
-          "win-restart-ask",
-          "win-folders-hide",
-          "win-folders-pin",
-          "win-folders-show",
-          "win-installer-start",
-          "win-installer-welcome-new",
-          "win-installer-welcome-same",
-          "win-installer-welcome-update",
-          "win-installer-older-ask",
-          "win-installer-still-running",
-          "win-installer-remove-mail-ask"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [
         "account-security.html",
         "add-account.html",
@@ -8394,6 +8130,298 @@
           },
           "validation": "Static check-language passes except exactly 1079 intentionally removed review marks. All Finnish catalog IDs, full variable sets and exact pending inventories match; original plural and mnemonic structures preserved. Global 17200 unmarked catalog messages and 8414 help lines reconcile to recorded batches, including followups; completed translation and English-source hashes match. Review HTML regenerated; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Read all 449 core entries beside English and checked delivery/status contexts, agent queue logging and permission dialog width, key verification/decryption/publication, setup import outcomes and decrypted attachment lifecycle. Improved 75 values. Existing Finnish plurals and count-independent labels retained where natural; all original selectors preserved. AgentLogSent occurs at queue insertion, not delivery. PgpDetailsOpened means decryption using a matching private key; locked keys require restoring their private-key backup. Every publication address needs confirmation. Setup tokens are sign-in credentials, and duplicate rules may be disabled. Temporary plaintext attachment copies older than a day are removed at startup. No tests run per user instruction."
+        },
+        {
+          "id": "fi-platform-round2",
+          "reviewed_ids": {
+            "help.ftl": [
+              "help-title",
+              "help-section-get-started",
+              "help-section-everyday",
+              "help-section-accounts",
+              "help-section-message-features",
+              "help-section-encrypted-mail",
+              "help-section-settings",
+              "help-section-agents",
+              "help-section-reference",
+              "help-section-troubleshooting",
+              "help-section-privacy",
+              "help-section-advanced",
+              "help-column-command",
+              "help-column-keys",
+              "help-contents",
+              "help-search",
+              "help-search-placeholder",
+              "help-no-results",
+              "help-hide",
+              "help-show",
+              "help-back",
+              "help-forward",
+              "help-home",
+              "help-print"
+            ],
+            "linux.ftl": [
+              "gtk-search-looks-in",
+              "gtk-search-still-indexing",
+              "gtk-search-results-everywhere",
+              "gtk-search-results-in",
+              "gtk-search-indexing",
+              "gtk-menu-rename",
+              "gtk-import-one-question",
+              "gtk-files-not-saved",
+              "gtk-unsubscribe-one-click",
+              "gtk-unsubscribe-mail",
+              "gtk-unsubscribe-web",
+              "gtk-unsubscribe-failed",
+              "gtk-toolbar-create-mail-menu",
+              "gtk-toolbar-send-recv-menu",
+              "gtk-main-menu",
+              "gtk-folder-list",
+              "gtk-quit",
+              "gtk-new-folder-at-top-of",
+              "gtk-unread-messages",
+              "gtk-outbox-empty",
+              "gtk-outbox-row",
+              "gtk-still-running-detail",
+              "gtk-sign-in-again-ask",
+              "gtk-default-app-not-installed",
+              "gtk-default-app-now",
+              "gtk-default-app-failed",
+              "gtk-reader-date",
+              "gtk-reader-files",
+              "gtk-files",
+              "gtk-pictures-blocked",
+              "gtk-download-pictures",
+              "gtk-save-attachments-menu",
+              "gtk-format-bold",
+              "gtk-format-italic",
+              "gtk-format-underline",
+              "gtk-format-hyperlink",
+              "gtk-font",
+              "gtk-show-cc",
+              "gtk-show-bcc",
+              "gtk-save-tip",
+              "gtk-link-status",
+              "gtk-plain-warning",
+              "gtk-account-name-title",
+              "gtk-display-name-title",
+              "gtk-turned-off-why",
+              "gtk-turned-off-why-long",
+              "gtk-next",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps",
+              "gtk-accounts-add",
+              "gtk-accounts-properties",
+              "gtk-accounts-signature",
+              "gtk-accounts-sign-in-apps",
+              "gtk-app-server",
+              "gtk-app-port",
+              "gtk-app-security",
+              "gtk-issuer-found",
+              "gtk-client-id",
+              "gtk-client-secret",
+              "gtk-scopes",
+              "gtk-redirect-uri",
+              "gtk-issuer-usable",
+              "gtk-app-built-in",
+              "gtk-built-in",
+              "gtk-offered-for-new",
+              "gtk-edit-button",
+              "gtk-remove-app-ask",
+              "gtk-sign-in-apps-intro",
+              "gtk-agent-it-may",
+              "gtk-agent-accounts",
+              "gtk-never-used",
+              "gtk-last-used",
+              "gtk-forget-program",
+              "gtk-forget-program-detail",
+              "gtk-no-agents-yet",
+              "gtk-nothing-yet",
+              "gtk-preferences",
+              "gtk-language",
+              "gtk-language-subtitle",
+              "gtk-new-mail-group",
+              "gtk-notify-new-mail",
+              "gtk-notify-subtitle",
+              "gtk-restart-to-change",
+              "gtk-desktop-generic-name",
+              "gtk-desktop-comment",
+              "gtk-desktop-keywords",
+              "gtk-metainfo-summary",
+              "gtk-metainfo-description",
+              "gtk-metainfo-feature-sanitized",
+              "gtk-metainfo-feature-search",
+              "gtk-metainfo-feature-replies",
+              "gtk-metainfo-feature-offline"
+            ],
+            "mac.ftl": [
+              "mac-quit",
+              "mac-settings",
+              "mac-services",
+              "mac-hide",
+              "mac-hide-others",
+              "mac-show-all",
+              "mac-check-updates",
+              "mac-close-window",
+              "mac-redo",
+              "mac-cut",
+              "mac-paste",
+              "mac-menu-window",
+              "mac-minimize",
+              "mac-zoom",
+              "mac-no-updates",
+              "mac-settings-title",
+              "mac-language-label",
+              "mac-restart-hint",
+              "mac-notify-new-mail",
+              "mac-restart-question",
+              "mac-choose",
+              "mac-still-running-detail",
+              "mac-outbox-waiting",
+              "mac-sending",
+              "mac-checking",
+              "mac-account-said",
+              "mac-not-bundle",
+              "mac-not-made-default",
+              "mac-tool-search",
+              "mac-still-indexing-more",
+              "mac-results-everywhere",
+              "mac-results-in",
+              "mac-still-indexing",
+              "mac-folder-unread",
+              "mac-import-messages",
+              "mac-save-messages",
+              "mac-save-attachments-menu",
+              "mac-files-not-saved",
+              "mac-no-calendar-app",
+              "mac-file-not-saved",
+              "mac-unsubscribing",
+              "mac-bold",
+              "mac-italic",
+              "mac-underline",
+              "mac-bcc",
+              "mac-command-click-to-open",
+              "mac-saving-to-drafts",
+              "mac-dont-save",
+              "mac-files",
+              "mac-next",
+              "mac-name-placeholder",
+              "mac-more-sign-in-options",
+              "mac-add-sign-in-app",
+              "mac-looking-up",
+              "mac-add-button",
+              "mac-properties-button",
+              "mac-signature-button",
+              "mac-security-button",
+              "mac-sign-in-apps-button",
+              "mac-forget-program",
+              "mac-forget-program-detail",
+              "mac-checking-issuer",
+              "mac-edit-button",
+              "mac-use-for-new-accounts",
+              "mac-built-in",
+              "mac-new-folder-button",
+              "mac-edit-link"
+            ],
+            "windows.ftl": [
+              "win-still-running-detail",
+              "win-default-app-not-installed",
+              "win-default-app-settings",
+              "win-no-unread",
+              "win-unread-messages",
+              "win-print-failed",
+              "win-print-title-of",
+              "win-no-bodies",
+              "win-webview-failed",
+              "win-webview-missing",
+              "win-delete-button",
+              "win-find-label",
+              "win-save-as-button",
+              "win-too-many-files",
+              "win-editor-failed",
+              "win-ctrl-click-to-open",
+              "win-format-bold",
+              "win-format-italic",
+              "win-format-underline",
+              "win-format-link",
+              "win-show-cc",
+              "win-show-bcc",
+              "win-signature-title",
+              "win-search-found-all",
+              "win-search-found-in",
+              "win-search-indexing",
+              "win-no-match-indexing",
+              "win-files",
+              "win-click-to-retry",
+              "win-save-attachments",
+              "win-files-not-saved",
+              "win-new-folder-in-highlighted",
+              "win-delete-folder-ask",
+              "win-rename",
+              "win-messages-not-saved",
+              "win-messages-not-forwarded",
+              "win-sign-in-google",
+              "win-sign-in-microsoft",
+              "win-next",
+              "win-your-account",
+              "win-browser-sign-in",
+              "win-add",
+              "win-properties-button",
+              "win-signature-button",
+              "win-sign-in-apps-button",
+              "win-dont-allow",
+              "win-col-address",
+              "win-never-written-to",
+              "win-book-find-label",
+              "win-send",
+              "win-forget-program-ask",
+              "win-clear-log-ask",
+              "win-agent-programs",
+              "win-change",
+              "win-what-agents-did",
+              "win-how-to-connect",
+              "win-built-in",
+              "win-edit",
+              "win-options-language-label",
+              "win-options-restart-note",
+              "win-options-notify",
+              "win-restart-ask",
+              "win-folders-hide",
+              "win-folders-pin",
+              "win-folders-show",
+              "win-installer-start",
+              "win-installer-welcome-new",
+              "win-installer-welcome-same",
+              "win-installer-welcome-update",
+              "win-installer-older-ask",
+              "win-installer-still-running",
+              "win-installer-remove-mail-ask"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 39,
+          "files": {
+            "core/locales/fi/help.ftl": "28bc8bdf972ae01022d2ae36e978dabb47193dc87581dd68f85761b142818b3c",
+            "core/locales/fi/linux.ftl": "8831fdfa80741a95ae02e215db7e79da002802ff1bea57e253f6c385cbf0e682",
+            "core/locales/fi/mac.ftl": "3a8a31d4ec4b9f650d5b6928fd7e9ccbaabf40a96e8e9844e262fbb98b6f4afe",
+            "core/locales/fi/windows.ftl": "cebce25067ab77b02730febd2b9ab6781bdb07706fa30ac76c05e212dfbc02f5",
+            "core/locales/fi/app.ftl": "1ee6b111ed2eeb49549fab46745b0fdd9ec6aca4b96db2204123f959d9f29245"
+          },
+          "english_sources": {
+            "core/locales/en/help.ftl": "73d0115b3e6fb0439774d432da51ec4f975c7481d8520e292536ba8a966fab8b",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Static check-language passes except exactly 1334 intentionally removed catalog review marks. IDs, complete variable sets, original plural structures and all 43 actual mnemonic scopes pass. Global 17455 unmarked catalog messages and 8414 help lines reconcile to exact completed inventories; translation/English-source and generated-file hashes match. Offline pe-ffi build in isolated target passed; installer and Linux metadata regenerated and inspected. Review HTML regenerated and git diff --check passes. No test suite run.",
+          "notes": "Read all remaining Windows, Mac, Linux and help-title entries beside English; checked callers and native UI. Improved installer Windows-user wording, save-failure counts, background-mail notices, default-app guidance, queued timestamps, provider fallbacks and store descriptions. Preserved native Mac terminology, Cc/Bcc shortcuts, plural structures and branded sign-in labels. Expanded mnemonic audit from 32 to 43 actual scopes: Settings/accounts/sign-in apps/restart, account/folder contexts and folder picker. Fixed Settings language access key plus two already-reviewed app controls (recorded as followups). Offline pe-ffi build in dedicated review target regenerated installer and Linux metadata, which were inspected. No tests run.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-account-move-down",
+              "ui-button-copy"
+            ]
+          }
         }
       ]
     },
@@ -38193,9 +38221,9 @@
     "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e"
   },
   "generated_files": {
-    "installer/languages.nsh": "669f2422a449ef15627e9459b46889bf2648f648420b3196fc939a664aac9e29",
+    "installer/languages.nsh": "d2e5c3e6f810987f21eb374138ff0f7ad898b9dfaa26d248ac079f0ea0cf9c38",
     "linux/data/com.inboxclassic.InboxClassic.desktop": "28328ce5c07bd0ad603f2658aa722e56a6a5ee4326a6ae848a50d1a3c0672f14",
-    "linux/data/com.inboxclassic.InboxClassic.metainfo.xml": "fc156a0e6b30584275edfad9cff50840c472d0c3512514a49832071e3dcb7da4",
+    "linux/data/com.inboxclassic.InboxClassic.metainfo.xml": "692568889ec69f54a98f292158d1a63c3be4c03da72cae27c713314b34e82578",
     "core/include/languages.tsv": "adb821f3459cb74929a470e8e8fef36480fe5f793ad8361c6ccd0521271c816e"
   },
   "scope_additions": [
@@ -38446,6 +38474,1371 @@
       "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
       "checkpoint_parent": "a41119feead6230ac5e6c620226437d1f5bb14e4",
       "counting": "Eleven already-reviewed help paragraphs re-reviewed; do not add to initial-scope totals. Greek corrected as part of its initial first-21 help batch."
+    },
+    {
+      "id": "extended-native-mnemonic-scopes",
+      "status": "pending",
+      "issue": "Platform review identified additional actual Settings/accounts/folder/account-context/folder-picker scopes beyond the original 32. Finnish now passes all 43; check these additional scopes across previously reviewed languages and correct any collisions while preserving natural wording. Use the expanded scope definitions for later languages.",
+      "evidence": [
+        "app/src/options.cpp:OptionsDialog",
+        "app/src/accounts.cpp:AccountsDialog",
+        "app/src/mailbox.cpp:FolderMenu, AccountMenu",
+        "app/src/folderpicker.cpp:PickFolder"
+      ],
+      "scope_helper": "/private/tmp/inbox-fi-mnemonics.py",
+      "languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el"
+      ],
+      "completed_languages": [
+        "fi",
+        "pt",
+        "pt-BR",
+        "bg"
+      ],
+      "findings": {
+        "de": [
+          {
+            "scope": 2,
+            "key": "l",
+            "ids": [
+              "cmd-delete-folder",
+              "cmd-empty-folder"
+            ],
+            "labels": [
+              "Ordner &löschen",
+              "Ordner &leeren"
+            ]
+          },
+          {
+            "scope": 5,
+            "key": "g",
+            "ids": [
+              "cmd-go-to-folder",
+              "cmd-hide-read"
+            ],
+            "labels": [
+              "&Gehe zu Ordner...",
+              "&Gelesene Nachrichten ausblenden"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "e",
+            "ids": [
+              "cmd-forward",
+              "ui-properties"
+            ],
+            "labels": [
+              "W&eiterleiten",
+              "&Eigenschaften"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "e",
+            "ids": [
+              "cmd-forward",
+              "ui-properties"
+            ],
+            "labels": [
+              "W&eiterleiten",
+              "&Eigenschaften"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "u",
+            "ids": [
+              "win-save-as-button",
+              "cmd-not-junk"
+            ],
+            "labels": [
+              "Speichern &unter...",
+              "Als Nicht-J&unk markieren"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "e",
+            "ids": [
+              "cmd-forward",
+              "ui-properties"
+            ],
+            "labels": [
+              "W&eiterleiten",
+              "&Eigenschaften"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "u",
+            "ids": [
+              "win-save-as-button",
+              "cmd-mark-unread"
+            ],
+            "labels": [
+              "Speichern &unter...",
+              "Als &ungelesen markieren"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "e",
+            "ids": [
+              "cmd-forward",
+              "ui-properties"
+            ],
+            "labels": [
+              "W&eiterleiten",
+              "&Eigenschaften"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "u",
+            "ids": [
+              "win-save-as-button",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "labels": [
+              "Speichern &unter...",
+              "Als &ungelesen markieren",
+              "Als Nicht-J&unk markieren"
+            ]
+          },
+          {
+            "scope": 37,
+            "key": "l",
+            "ids": [
+              "win-delete-button",
+              "cmd-empty-folder"
+            ],
+            "labels": [
+              "&Löschen",
+              "Ordner &leeren"
+            ]
+          },
+          {
+            "scope": 38,
+            "key": "o",
+            "ids": [
+              "cmd-new-folder",
+              "ui-account-move-up"
+            ],
+            "labels": [
+              "Neuer &Ordner...",
+              "Nach &oben"
+            ]
+          },
+          {
+            "scope": 38,
+            "key": "u",
+            "ids": [
+              "win-rename",
+              "ui-account-move-down"
+            ],
+            "labels": [
+              "&Umbenennen...",
+              "Nach &unten"
+            ]
+          },
+          {
+            "scope": 39,
+            "key": "e",
+            "ids": [
+              "ui-account-sync",
+              "ui-account-properties"
+            ],
+            "labels": [
+              "Senden und &empfangen",
+              "&Eigenschaften..."
+            ]
+          },
+          {
+            "scope": 39,
+            "key": "o",
+            "ids": [
+              "cmd-new-folder",
+              "ui-account-move-up"
+            ],
+            "labels": [
+              "Neuer &Ordner...",
+              "Nach &oben"
+            ]
+          }
+        ],
+        "es": [
+          {
+            "scope": 3,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Responder al remitente",
+              "A&rchivar"
+            ]
+          },
+          {
+            "scope": 4,
+            "key": "t",
+            "ids": [
+              "cmd-select-all",
+              "cmd-find-in-message"
+            ],
+            "labels": [
+              "Seleccionar &todo",
+              "Buscar en es&te mensaje..."
+            ]
+          },
+          {
+            "scope": 5,
+            "key": "i",
+            "ids": [
+              "cmd-go-to-folder",
+              "cmd-pictures"
+            ],
+            "labels": [
+              "&Ir a la carpeta...",
+              "Descargar &imágenes"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "ui-menu-flag"
+            ],
+            "labels": [
+              "&Abrir",
+              "Marc&a"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Responder al remitente",
+              "A&rchivar"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "c",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "ui-menu-view-source"
+            ],
+            "labels": [
+              "&Copiar a carpeta...",
+              "Guardar &como...",
+              "Ver &código fuente"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "p",
+            "ids": [
+              "cmd-print",
+              "ui-properties"
+            ],
+            "labels": [
+              "Im&primir...",
+              "&Propiedades"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Responder al remitente",
+              "A&rchivar"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "c",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "ui-menu-view-source"
+            ],
+            "labels": [
+              "&Copiar a carpeta...",
+              "Guardar &como...",
+              "Ver &código fuente"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "p",
+            "ids": [
+              "cmd-print",
+              "ui-properties"
+            ],
+            "labels": [
+              "Im&primir...",
+              "&Propiedades"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "ui-menu-flag"
+            ],
+            "labels": [
+              "&Abrir",
+              "Marc&a"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Responder al remitente",
+              "A&rchivar"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "c",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "ui-menu-view-source"
+            ],
+            "labels": [
+              "&Copiar a carpeta...",
+              "Guardar &como...",
+              "Ver &código fuente"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "p",
+            "ids": [
+              "cmd-print",
+              "ui-properties"
+            ],
+            "labels": [
+              "Im&primir...",
+              "&Propiedades"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Responder al remitente",
+              "A&rchivar"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "c",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "ui-menu-view-source"
+            ],
+            "labels": [
+              "&Copiar a carpeta...",
+              "Guardar &como...",
+              "Ver &código fuente"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "p",
+            "ids": [
+              "cmd-print",
+              "ui-properties"
+            ],
+            "labels": [
+              "Im&primir...",
+              "&Propiedades"
+            ]
+          },
+          {
+            "scope": 32,
+            "key": "a",
+            "ids": [
+              "win-options-notify",
+              "ui-group-by-conversation"
+            ],
+            "labels": [
+              "&Avisarme cuando llegue correo nuevo",
+              "&Agrupar los mensajes por conversación"
+            ]
+          }
+        ],
+        "et": [
+          {
+            "scope": 3,
+            "key": "i",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-ignore-conversation"
+            ],
+            "labels": [
+              "L&ipp",
+              "&Ignoreeri vestlust"
+            ]
+          },
+          {
+            "scope": 3,
+            "key": "r",
+            "ids": [
+              "cmd-archive",
+              "cmd-junk"
+            ],
+            "labels": [
+              "A&rhiveeri",
+              "Märgi &rämpspostiks"
+            ]
+          },
+          {
+            "scope": 4,
+            "key": "s",
+            "ids": [
+              "cmd-find-in-message",
+              "cmd-delete"
+            ],
+            "labels": [
+              "Otsi &sellest kirjast...",
+              "Ku&stuta kiri"
+            ]
+          },
+          {
+            "scope": 5,
+            "key": "l",
+            "ids": [
+              "cmd-next-unread",
+              "cmd-expand-all-threads",
+              "cmd-hide-read",
+              "cmd-view-source"
+            ],
+            "labels": [
+              "Järgmine &lugemata kiri",
+              "&Laienda kõik vestlused",
+              "Peida &loetud kirjad",
+              "Kirja &lähtekood"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "cmd-copy",
+              "ui-properties"
+            ],
+            "labels": [
+              "&Ava",
+              "Kopeeri k&austa...",
+              "&Atribuudid"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "k",
+            "ids": [
+              "cmd-reply-all",
+              "win-delete-button"
+            ],
+            "labels": [
+              "Vasta &kõigile",
+              "&Kustuta"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "i",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-ignore-conversation"
+            ],
+            "labels": [
+              "L&ipp",
+              "&Ignoreeri vestlust"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "r",
+            "ids": [
+              "cmd-archive",
+              "cmd-junk"
+            ],
+            "labels": [
+              "A&rhiveeri",
+              "Märgi &rämpspostiks"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "l",
+            "ids": [
+              "ui-menu-view-source",
+              "cmd-mark-read"
+            ],
+            "labels": [
+              "Vaata &lähtekoodi",
+              "Märgi &loetuks"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "k",
+            "ids": [
+              "cmd-reply-all",
+              "win-delete-button"
+            ],
+            "labels": [
+              "Vasta &kõigile",
+              "&Kustuta"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "i",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-ignore-conversation"
+            ],
+            "labels": [
+              "L&ipp",
+              "&Ignoreeri vestlust"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "t",
+            "ids": [
+              "cmd-move",
+              "cmd-not-junk"
+            ],
+            "labels": [
+              "&Teisalda kausta...",
+              "Märgi &tavapostiks"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "a",
+            "ids": [
+              "cmd-copy",
+              "ui-properties"
+            ],
+            "labels": [
+              "Kopeeri k&austa...",
+              "&Atribuudid"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "l",
+            "ids": [
+              "ui-menu-view-source",
+              "cmd-mark-read"
+            ],
+            "labels": [
+              "Vaata &lähtekoodi",
+              "Märgi &loetuks"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "cmd-copy",
+              "ui-properties"
+            ],
+            "labels": [
+              "&Ava",
+              "Kopeeri k&austa...",
+              "&Atribuudid"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "k",
+            "ids": [
+              "cmd-reply-all",
+              "win-delete-button"
+            ],
+            "labels": [
+              "Vasta &kõigile",
+              "&Kustuta"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "i",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-ignore-conversation"
+            ],
+            "labels": [
+              "L&ipp",
+              "&Ignoreeri vestlust"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "r",
+            "ids": [
+              "cmd-archive",
+              "cmd-junk"
+            ],
+            "labels": [
+              "A&rhiveeri",
+              "Märgi &rämpspostiks"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "k",
+            "ids": [
+              "cmd-reply-all",
+              "win-delete-button"
+            ],
+            "labels": [
+              "Vasta &kõigile",
+              "&Kustuta"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "i",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-ignore-conversation"
+            ],
+            "labels": [
+              "L&ipp",
+              "&Ignoreeri vestlust"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "t",
+            "ids": [
+              "cmd-move",
+              "cmd-not-junk"
+            ],
+            "labels": [
+              "&Teisalda kausta...",
+              "Märgi &tavapostiks"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "a",
+            "ids": [
+              "cmd-copy",
+              "ui-properties"
+            ],
+            "labels": [
+              "Kopeeri k&austa...",
+              "&Atribuudid"
+            ]
+          },
+          {
+            "scope": 21,
+            "key": "k",
+            "ids": [
+              "ui-menu-delete",
+              "ui-menu-new-contact"
+            ],
+            "labels": [
+              "&Kustuta",
+              "Uus &kontakt..."
+            ]
+          },
+          {
+            "scope": 28,
+            "key": "v",
+            "ids": [
+              "ui-contact-set-default",
+              "ui-card-picture-choose"
+            ],
+            "labels": [
+              "Määra &vaikeaadressiks",
+              "&Vali..."
+            ]
+          },
+          {
+            "scope": 33,
+            "key": "l",
+            "ids": [
+              "win-add",
+              "win-signature-button"
+            ],
+            "labels": [
+              "&Lisa...",
+              "A&llkiri..."
+            ]
+          },
+          {
+            "scope": 41,
+            "key": "o",
+            "ids": [
+              "win-find-label",
+              "ui-button-copy"
+            ],
+            "labels": [
+              "&Otsi:",
+              "K&opeeri"
+            ]
+          }
+        ],
+        "fr": [
+          {
+            "scope": 3,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Répondre à l'expéditeur",
+              "A&rchiver"
+            ]
+          },
+          {
+            "scope": 4,
+            "key": "c",
+            "ids": [
+              "cmd-find-in-message",
+              "cmd-copy"
+            ],
+            "labels": [
+              "Rechercher dans &ce message...",
+              "&Copier vers un dossier..."
+            ]
+          },
+          {
+            "scope": 5,
+            "key": "s",
+            "ids": [
+              "cmd-next-message",
+              "cmd-view-source"
+            ],
+            "labels": [
+              "Message &suivant",
+              "Code &source du message"
+            ]
+          },
+          {
+            "scope": 5,
+            "key": "l",
+            "ids": [
+              "cmd-next-unread",
+              "cmd-hide-read"
+            ],
+            "labels": [
+              "Message non &lu suivant",
+              "Masquer les messages &lus"
+            ]
+          },
+          {
+            "scope": 5,
+            "key": "d",
+            "ids": [
+              "cmd-expand-all-threads",
+              "cmd-collapse-all-threads"
+            ],
+            "labels": [
+              "&Développer toutes les conversations",
+              "Ré&duire toutes les conversations"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Répondre à l'expéditeur",
+              "A&rchiver"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "c",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy"
+            ],
+            "labels": [
+              "Indi&cateur",
+              "&Copier vers un dossier..."
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "d",
+            "ids": [
+              "cmd-move",
+              "cmd-junk"
+            ],
+            "labels": [
+              "&Déplacer vers un dossier...",
+              "Marquer comme in&désirable"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "s",
+            "ids": [
+              "win-delete-button",
+              "win-save-as-button",
+              "ui-menu-view-source"
+            ],
+            "labels": [
+              "&Supprimer",
+              "Enregistrer &sous...",
+              "Afficher la &source"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Répondre à l'expéditeur",
+              "A&rchiver"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "c",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy"
+            ],
+            "labels": [
+              "Indi&cateur",
+              "&Copier vers un dossier..."
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "s",
+            "ids": [
+              "win-delete-button",
+              "win-save-as-button",
+              "ui-menu-view-source",
+              "cmd-not-junk"
+            ],
+            "labels": [
+              "&Supprimer",
+              "Enregistrer &sous...",
+              "Afficher la &source",
+              "Marquer comme non indé&sirable"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Répondre à l'expéditeur",
+              "A&rchiver"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "c",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy"
+            ],
+            "labels": [
+              "Indi&cateur",
+              "&Copier vers un dossier..."
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "d",
+            "ids": [
+              "cmd-move",
+              "cmd-junk"
+            ],
+            "labels": [
+              "&Déplacer vers un dossier...",
+              "Marquer comme in&désirable"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "s",
+            "ids": [
+              "win-delete-button",
+              "win-save-as-button",
+              "ui-menu-view-source"
+            ],
+            "labels": [
+              "&Supprimer",
+              "Enregistrer &sous...",
+              "Afficher la &source"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "r",
+            "ids": [
+              "cmd-reply",
+              "cmd-archive"
+            ],
+            "labels": [
+              "&Répondre à l'expéditeur",
+              "A&rchiver"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "c",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy"
+            ],
+            "labels": [
+              "Indi&cateur",
+              "&Copier vers un dossier..."
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "s",
+            "ids": [
+              "win-delete-button",
+              "win-save-as-button",
+              "ui-menu-view-source",
+              "cmd-not-junk"
+            ],
+            "labels": [
+              "&Supprimer",
+              "Enregistrer &sous...",
+              "Afficher la &source",
+              "Marquer comme non indé&sirable"
+            ]
+          },
+          {
+            "scope": 21,
+            "key": "c",
+            "ids": [
+              "ui-menu-write-to",
+              "ui-menu-new-contact"
+            ],
+            "labels": [
+              "É&crire à",
+              "Nouveau &contact..."
+            ]
+          },
+          {
+            "scope": 29,
+            "key": "s",
+            "ids": [
+              "ui-group-select-members",
+              "ui-remove"
+            ],
+            "labels": [
+              "&Sélectionner les membres...",
+              "&Supprimer"
+            ]
+          },
+          {
+            "scope": 31,
+            "key": "c",
+            "ids": [
+              "win-show-cc",
+              "win-show-bcc"
+            ],
+            "labels": [
+              "&Cc",
+              "C&ci"
+            ]
+          },
+          {
+            "scope": 38,
+            "key": "d",
+            "ids": [
+              "cmd-new-folder",
+              "ui-account-move-down"
+            ],
+            "labels": [
+              "Nouveau &dossier...",
+              "&Descendre"
+            ]
+          },
+          {
+            "scope": 39,
+            "key": "d",
+            "ids": [
+              "cmd-new-folder",
+              "ui-account-move-down"
+            ],
+            "labels": [
+              "Nouveau &dossier...",
+              "&Descendre"
+            ]
+          },
+          {
+            "scope": 40,
+            "key": "d",
+            "ids": [
+              "cmd-new-folder",
+              "ui-button-move"
+            ],
+            "labels": [
+              "Nouveau &dossier...",
+              "&Déplacer"
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "scope": 38,
+            "key": "h",
+            "ids": [
+              "win-rename",
+              "ui-account-move-up"
+            ],
+            "labels": [
+              "&Hernoemen...",
+              "Om&hoog"
+            ]
+          }
+        ],
+        "it": [
+          {
+            "scope": 41,
+            "key": "c",
+            "ids": [
+              "cmd-new-folder",
+              "ui-button-copy"
+            ],
+            "labels": [
+              "Nuova &cartella...",
+              "&Copia"
+            ]
+          }
+        ],
+        "pt": [],
+        "pt-BR": [],
+        "ca": [
+          {
+            "scope": 40,
+            "key": "c",
+            "ids": [
+              "win-find-label",
+              "cmd-new-folder"
+            ],
+            "labels": [
+              "&Cerca:",
+              "&Carpeta nova..."
+            ]
+          },
+          {
+            "scope": 41,
+            "key": "c",
+            "ids": [
+              "win-find-label",
+              "cmd-new-folder",
+              "ui-button-copy"
+            ],
+            "labels": [
+              "&Cerca:",
+              "&Carpeta nova...",
+              "&Copia"
+            ]
+          }
+        ],
+        "nb": [
+          {
+            "scope": 32,
+            "key": "v",
+            "ids": [
+              "win-options-language-label",
+              "win-options-notify"
+            ],
+            "labels": [
+              "&Vis Inbox Classic på:",
+              "&Varsle meg når det kommer ny e-post"
+            ]
+          },
+          {
+            "scope": 35,
+            "key": "s",
+            "ids": [
+              "ui-restart-now",
+              "ui-restart-later"
+            ],
+            "labels": [
+              "&Start på nytt nå",
+              "&Senere"
+            ]
+          },
+          {
+            "scope": 39,
+            "key": "m",
+            "ids": [
+              "ui-account-sync",
+              "cmd-mark-all-read"
+            ],
+            "labels": [
+              "Send og &motta",
+              "&Merk alle som lest"
+            ]
+          },
+          {
+            "scope": 40,
+            "key": "f",
+            "ids": [
+              "win-find-label",
+              "ui-button-move"
+            ],
+            "labels": [
+              "&Finn:",
+              "&Flytt"
+            ]
+          }
+        ],
+        "sr-Latn": [
+          {
+            "scope": 36,
+            "key": "u",
+            "ids": [
+              "win-edit",
+              "ui-remove"
+            ],
+            "labels": [
+              "&Uredi...",
+              "&Ukloni"
+            ]
+          },
+          {
+            "scope": 40,
+            "key": "p",
+            "ids": [
+              "win-find-label",
+              "ui-button-move"
+            ],
+            "labels": [
+              "&Pronađi:",
+              "&Premesti"
+            ]
+          }
+        ],
+        "tr": [
+          {
+            "scope": 38,
+            "key": "a",
+            "ids": [
+              "win-rename",
+              "ui-account-move-down"
+            ],
+            "labels": [
+              "Yeniden &Adlandır...",
+              "Aşağı T&aşı"
+            ]
+          },
+          {
+            "scope": 39,
+            "key": "l",
+            "ids": [
+              "ui-account-sync",
+              "ui-account-properties"
+            ],
+            "labels": [
+              "Gönder ve A&l",
+              "Öze&llikler..."
+            ]
+          }
+        ],
+        "bg": [],
+        "cs": [
+          {
+            "scope": 40,
+            "key": "n",
+            "ids": [
+              "win-find-label",
+              "cmd-new-folder"
+            ],
+            "labels": [
+              "&Najít:",
+              "&Nová složka..."
+            ]
+          },
+          {
+            "scope": 41,
+            "key": "n",
+            "ids": [
+              "win-find-label",
+              "cmd-new-folder"
+            ],
+            "labels": [
+              "&Najít:",
+              "&Nová složka..."
+            ]
+          }
+        ],
+        "da": [
+          {
+            "scope": 37,
+            "key": "t",
+            "ids": [
+              "cmd-mark-all-read",
+              "win-delete-button",
+              "cmd-empty-folder"
+            ],
+            "labels": [
+              "Marker alle som læs&te",
+              "Sle&t",
+              "&Tøm mappe"
+            ]
+          },
+          {
+            "scope": 38,
+            "key": "t",
+            "ids": [
+              "cmd-mark-all-read",
+              "win-delete-button"
+            ],
+            "labels": [
+              "Marker alle som læs&te",
+              "Sle&t"
+            ]
+          },
+          {
+            "scope": 38,
+            "key": "o",
+            "ids": [
+              "win-rename",
+              "ui-account-move-up"
+            ],
+            "labels": [
+              "&Omdøb...",
+              "Flyt &op"
+            ]
+          },
+          {
+            "scope": 40,
+            "key": "f",
+            "ids": [
+              "win-find-label",
+              "ui-button-move"
+            ],
+            "labels": [
+              "&Find:",
+              "&Flyt"
+            ]
+          }
+        ],
+        "el": [
+          {
+            "scope": 37,
+            "key": "ν",
+            "ids": [
+              "cmd-mark-all-read",
+              "cmd-new-folder"
+            ],
+            "labels": [
+              "Επισήμανση όλων ως αναγ&νωσμένων",
+              "&Νέος φάκελος..."
+            ]
+          },
+          {
+            "scope": 38,
+            "key": "ν",
+            "ids": [
+              "cmd-mark-all-read",
+              "cmd-new-folder"
+            ],
+            "labels": [
+              "Επισήμανση όλων ως αναγ&νωσμένων",
+              "&Νέος φάκελος..."
+            ]
+          },
+          {
+            "scope": 39,
+            "key": "ν",
+            "ids": [
+              "cmd-mark-all-read",
+              "cmd-new-folder"
+            ],
+            "labels": [
+              "Επισήμανση όλων ως αναγ&νωσμένων",
+              "&Νέος φάκελος..."
+            ]
+          }
+        ]
+      },
+      "pending_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "cs",
+        "da",
+        "el"
+      ],
+      "notes": "Read-only audit of all 43 scopes completed. Thirteen previously reviewed languages have current collisions, including older scopes in the round-1 languages; three pass unchanged. Resolve these next, preserving visible wording where possible, and record them as separate re-reviews rather than expanding the initial catalog count."
     }
   ]
 }
