@@ -420,8 +420,7 @@ day-sunday = sunnuntai
 ## AI agents
 
 agent-level-read = Lukea postia: kansiot, viestiluettelo, haku ja viestit
-# review: changed
-agent-level-organize = Järjestellä: luettu/lukematon, liput, roskaposti, siirto, poisto Poistettuihin
+agent-level-organize = Järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda kansioita, poistaa viestejä siirtämällä ne Poistetut-kansioon ja peruuttaa postituslistojen tilauksia luvallasi
 agent-level-drafts = Kirjoittaa luonnoksia, jotka sinä lähetät
 agent-level-send = Lähettää postia, jokaisen viestin vasta hyväksyntäsi jälkeen
 agent-connect-title = { $program } haluaa käyttää postiasi
@@ -470,12 +469,9 @@ agent-log-composed = Avasi viestin ”{ $subject }” uutena viestinä, jonka vi
 agent-log-refused = Et lähettänyt viestiä ”{ $subject }”
 agent-log-sent = Lisäsi viestin ”{ $subject }” lähetysjonoon. Vastaanottajat: { $to }
 agent-log-draft = Tallensi luonnoksen ”{ $subject }”
-# review: new
 agent-log-draft-replaced = Korvasi luonnoksen ”{ $subject }”
-# review: new
 agent-log-draft-discarded = Hylkäsi luonnoksen ”{ $subject }”
-# review: new
-agent-draft-note = { $program }, tekoälyagentti, kirjoitti tämän luonnoksen. Tarkista vastaanottajat ja teksti ennen kuin lähetät sen.
+agent-draft-note = Tekoälyagentti { $program } kirjoitti tämän luonnoksen. Tarkista vastaanottajat ja teksti ennen lähettämistä.
 agent-log-read = Merkitsi luetuksi: ”{ $subject }”
 agent-log-unread = Merkitsi lukemattomaksi: ”{ $subject }”
 agent-log-flagged = Liputti: ”{ $subject }”
@@ -487,19 +483,15 @@ agent-log-not-junk = Poisti roskapostimerkinnän: ”{ $subject }”
 agent-log-archived = Arkistoi: ”{ $subject }”
 agent-log-folder = Loi kansion ”{ $name }”
 agent-log-unsubscribed = Hyväksyit tilauksen peruutuspyynnön. Viesti: ”{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Tilauksen peruuttaminen listalta, jolta tuli ”{ $subject }”, epäonnistui: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Et peruuttanut tilausta: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Tilauksen peruuttaminen epäonnistui. Viesti: ”{ $subject }”. Syy: { $reason }
+agent-log-unsubscribe-refused = Et hyväksynyt tilauksen peruutuspyyntöä. Lähettäjät: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } haluaa peruuttaa tilauksesi postituslistalta
    *[other] { $program } haluaa peruuttaa tilauksesi { $count } postituslistalta
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic pyytää alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
-   *[other] Inbox Classic pyytää jokaista alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
+    [1] Inbox Classic pyytää alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
+   *[other] Inbox Classic pyytää jokaista alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää kunkin listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

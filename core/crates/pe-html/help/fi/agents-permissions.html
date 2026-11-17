@@ -2,26 +2,26 @@
 <p class="summary">Määritä kunkin tekoälyagentin käyttöoikeudet, tarkastele sen toimia ja kumoa muutoksia.</p>
 <p>Kun agentti muodostaa yhteyden ensimmäisen kerran, Inbox Classic näyttää sen ohjelman nimen ja pyytää käyttöoikeuksia. Valitse sallitut toiminnot:</p>
 <ul>
-<!--review-->    <li>lukea postia: kansiot, viestiluettelo, haku ja viestit</li><!--/review-->
-<!--review-->    <li>järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, liputtaa, merkitä roskapostiksi, siirtää ja poistaa kansioon <b data-text="folder-deleted"></b></li><!--/review-->
-<!--review-->    <li>kirjoittaa luonnoksia, jotka sinä lähetät</li><!--/review-->
+    <li>lukea postia: tarkastella kansioita, viestejä ja keskusteluja, hakea viestejä ja yhteystietoja sekä tarkastella viestisääntöjä</li>
+    <li>järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda kansioita, poistaa viestejä siirtämällä ne kansioon <b data-text="folder-deleted"></b> ja peruuttaa postituslistojen tilauksia luvallasi</li>
+    <li>kirjoittaa luonnoksia, jotka sinä lähetät, sekä muokata tai hylätä itse luomiaan luonnoksia, kunnes tallennat ne</li>
     <li>lähettää viestejä, joista jokainen edellyttää erillistä hyväksyntääsi</li>
 </ul>
 <p>Valitse sitten tilit, joita agentti saa käyttää, ja napsauta <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> estää ohjelman yhteyden. Samaa lupaa ei kysytä uudelleen.</p>
-<!--review--><p>Inbox Classicin kautta agentti ei voi poistaa viestejä pysyvästi eikä muuttaa tilien asetuksia. Viestin lukeminen agentin kautta ei merkitse sitä luetuksi. Agentin tekemät muutokset näkyvät sovelluksessa heti.</p><!--/review-->
-<!--review--><h2>Postituslistoilta lähteminen</h2>
-<p>Agentti, joka saa järjestellä postia, voi pyytää peruuttamaan postituslistojen tilauksiasi. Inbox Classic kysyy ensin sinulta kerran ja näyttää jokaisen listan sen lähettäjän mukaan:</p>
+<p>Agentti voi poistaa pysyvästi vain itse luomiaan luonnoksia, joita et ole vielä tallentanut. Se ei voi muuttaa tilien asetuksia. Agentti voi tarkastella viestisääntöjä ja selvittää, mihin viesteihin ne vaikuttaisivat, muuttamatta viestejä. Se ei voi luoda, muokata eikä poistaa sääntöjä. Viestin lukeminen agentin kautta ei merkitse sitä luetuksi. Agentin tekemät muutokset näkyvät sovelluksessa heti.</p>
+<h2>Postituslistojen tilausten peruuttaminen</h2>
+<p>Agentti, jolla on oikeus järjestellä postia, voi ehdottaa postituslistojen tilausten peruuttamista. Inbox Classic näyttää lähettäjien osoitteet ja pyytää yhden vahvistuksen kaikille valituille listoille:</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> pyytää jokaista listaa lopettamaan lähettämisen sinulle.</li>
-    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, oletusvalinta, jättää ne ennalleen.</li>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> lähettää valituille listoille pyynnön lopettaa viestien lähettäminen sinulle.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> on oletusvalinta eikä lähetä peruutuspyyntöjä.</li>
 </ul>
-<p>Agentti ei voi peruuttaa tilauksia kansiossa <b data-text="folder-junk"></b> olevien viestien perusteella, ja se voi peruuttaa enintään 30 listan tilauksen päivässä.</p><!--/review-->
+<p>Agentti ei voi käyttää kansiossa <b data-text="folder-junk"></b> olevia viestejä tilausten peruuttamiseen. Ohjelmakohtainen raja on 30 hyväksymääsi peruutuspyyntöä viimeisten 24 tunnin aikana. Myös epäonnistuneet pyynnöt lasketaan mukaan.</p>
 <h2>Käyttöoikeuksien tarkastelu ja muuttaminen</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> näyttää ohjelmat, joille olet sallinut tai estänyt yhteyden, sekä agenttien toimet uusimmasta alkaen.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> avaa ohjelman käyttöoikeudet muokattaviksi.</li>
     <li><b data-text="ui-remove"></b> poistaa ohjelman tallennetun lupapäätöksen. Käyttöoikeuksia kysytään uudelleen, kun ohjelma seuraavan kerran muodostaa yhteyden.</li>
-<!--review-->    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> kumoaa luettu-tilan tai lipun muutoksen, siirron tai poiston. Sillä voi myös perua lähettämisen, jos viesti odottaa vielä Lähtevät-kansiossa.</li><!--/review-->
+    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> kumoaa luettu/lukematon-merkintöjen, lippujen ja roskapostimerkintöjen muutokset sekä viestien siirrot, arkistoinnit ja poistot. Sillä voi myös perua lähettämisen, jos viesti odottaa vielä Lähtevät-kansiossa.</li>
 </ul>
 <aside class="warning">Viestin sisältö voi yrittää ohjata agenttia välittämään tai poistamaan postiasi. Inbox Classic jättää agenteille annetusta tekstistä pois viestissä piilotetun sisällön ja ohjeistaa käsittelemään postia tietona, ei toimintaohjeina. Agenttia voidaan silti huijata. Myönnä vain tarvitsemasi oikeudet.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

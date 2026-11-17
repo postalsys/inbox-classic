@@ -926,13 +926,18 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
 - Use "tuotemerkin logo" consistently in help. OAuth "asiakassalaisuus" is the client secret;
   "käyttöoikeustunnus" is an access token. Keep both distinct from the client ID ("asiakastunnus").
 - Agent send logs describe queuing ("Lisäsi ... lähetysjonoon"), while the sent status confirms actual sending.
-  Permission descriptions apply to access through Inbox Classic. The compact Organize permission uses
-  "Poistettuihin" for the Deleted Items folder because Windows shows it in a single-line checkbox.
+  Permission descriptions apply to access through Inbox Classic. The current Windows access dialog measures
+  and wraps permission checkboxes; use complete wording and "Poistetut-kansioon" for deletion by moving.
 - "Salaus purettu avaimella" describes decryption, not encryption. A locked key requires restoring the private
   key backup; publication requires confirmation of every address. Unencrypted temporary attachment copies
   older than a day are removed at app startup, not automatically exactly one day after opening.
 - Decryption "purkaa viestin salauksen", not "purkaa viestin". Use "hakuindeksi" for the local search index;
   disabling encrypted search removes the decrypted content from that index, not the messages themselves.
+
+- Agent controls retain "Peruuta tilaus" / "Älä peruuta tilausta" (Windows P/L). Use "peruutuspyyntö" for
+  the request, not completed cancellation. Logs label the subject as "Viesti:" and addresses as "Lähettäjät:".
+- Keep "hylätä luonnos" and explain permanent removal of agent-owned drafts. Saving, including autosave,
+  ends agent access; opening alone does not. "Allekirjoitusteksti" distinguishes the optional account footer.
 
 ### Svenska (sv)
 

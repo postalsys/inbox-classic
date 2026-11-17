@@ -445,7 +445,6 @@ ui-browser-sign-in-server = { $server } (kirjautuminen selaimessa)
 ui-dont-allow = Älä salli
 ui-allow = &Salli
 ui-dont-send = Älä lähetä
-# review: new
 ui-dont-unsubscribe = Älä peruuta tilausta
 ui-edit-first = &Muokkaa ensin
 ui-new-address = Uusi osoite
