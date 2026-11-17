@@ -361,6 +361,11 @@ Review notes (round 2):
 - Attachment reminders currently recognize EN/DE/ET/ES/FR only, not Croatian. Undo Send is available only during
   the send delay (default ten seconds); quitting the app attempts immediate sending. Failed sends are retried,
   not guaranteed to succeed. Permanent deletion also applies when an account has no deleted-mail folder.
+- Settings help uses "Postavka" or "Mogućnost" before quoted control labels; send delay is "koliko dugo poruka
+  čeka", not the ambiguous "koliko poruka čeka". Use explicit punctuation after stripped download labels.
+  Windows Cancel keeps prior Apply results and external default-app choices; Mac/Linux apply immediately except
+  language. Encrypted parts still require permission for external images, even for trusted senders. One-time
+  codes use "uvećanim znakovima" for large type, not "velikim slovima" (uppercase).
 
 ### Italiano (it)
 

@@ -23,20 +23,21 @@ Commit completed batches regularly and preserve an exact resume point.
   17 previously completed languages and Croatian, as is the no-Trash deletion followup. Only the ten
   broader language drafts still require those corrections. Fresh fetch at 27d00888 found all six source tips
   unchanged; origin/master remains 5c645187 with unrelated README/Linux test/CI changes left unmerged.
-  No new translation/help or app-behavior changes. Croatian's catalogs and 16 help topics are reviewed;
-  36 help topics remain. NEXT review Croatian download-ahead/brand-logos/pictures-tracking/sign-in-codes/
-  new-mail/options-language/default-mail-program. Keep its three settings-context followups open until
-  those remaining targets are reviewed. Exact source IDs/topics are in state; do not restart full reviews.
+  No new translation/help or app-behavior changes. Fresh fetch at 0190587f confirms unchanged refs and guide.
+  Croatian's catalogs and 23 help topics are reviewed; 29 topics remain. Its three settings-context followups
+  are complete: all 27 catalog targets and 11 help targets are accounted for. NEXT review account-security/
+  connections/links-scripts/data-storage/move-computer/manage-accounts/sign-in-apps/unsubscribe, then its
+  other pending topics. Exact source IDs/topics are in state; do not restart full reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,456 catalog entries and 1,300 help topics; 13,330 entries and 556 topics are currently pending.
+  32,456 catalog entries and 1,300 help topics; 13,330 entries and 549 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
   further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
-  have 54 more. Four provider introductions have subsequent corrections; 16 help topics are reviewed, with
-  36 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  have 54 more. Four provider introductions have subsequent corrections; 23 help topics are reviewed, with
+  29 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -1401,10 +1402,34 @@ Fresh fetch found all six source tips unchanged. origin/master remains `5c645187
 inspected README/Linux test/CI changes left unmerged; guide hash unchanged. No new languages or relevant source
 changes. All 270 since-start entries and 117 help passages match the pending inventory; no reopened-pair omissions.
 
-Current totals: 19,126 catalog entries and 744 help topics completed in the active scope; 3,188 historical
-catalog value improvements. Remaining: 13,330 catalog entries and 556 help topics. Seventeen languages have no
-pending content. Croatian has 36 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
-including provider and deletion context. Settings followups still await these 11 languages. `REVIEWED` is unchanged.
+### Croatian settings help completed
+
+Reviewed download-ahead, brand-logos, pictures-tracking, sign-in-codes, new-mail, options-language and
+default-mail-program. Improved Croatian control-label joins, download-label punctuation and unambiguous send-delay
+wording. Clarified conditional background downloads, local-cache eviction, persistent logo reuse and domain
+verification versus personal identity. Codes appear in large type, not necessarily uppercase. Watched-conversation
+alerts obey notification settings and foreground suppression and only extend to ordinary user folders.
+
+Windows Cancel discards unapplied local changes but cannot undo default-app choices in Windows Settings. Apply
+may offer a language restart; Mac/Linux changes apply immediately except language. Both image topics explain
+explicit permission for encrypted parts, even with a trusted sender or automatic loading enabled. All 27 catalog
+targets and 11 help targets are now reviewed; closed Croatian's three settings-context followups. Other Croatian
+help remains pending. No English or app-code changes.
+
+Static checks report only 1,366 deliberately removed marks, no structural findings; all 46 shortcut scopes pass.
+Exact tags, attributes, platform branches and literal keys are preserved. Inspected substituted controls, settings
+paths and topic-title joins; dynamic keyboard labels are outside the preview helper. All 28 inventories and
+completed/source hashes reconcile: 19,160 unmarked messages, 9,725 changed help lines and 14 verified baseline
+pairs. Report regenerated; git diff --check passes. No tests run. Previous checkpoint: `0190587f`.
+
+Fresh fetch confirms unchanged six source tips and guide. No new languages or relevant source changes; the same
+unrelated README/Linux test/CI updates remain unmerged. All 270 since-start entries and 110 passages match pending
+inventory, with no reopened-pair omissions.
+
+Current totals: 19,126 catalog entries and 751 help topics completed in the active scope; 3,188 historical
+catalog value improvements. Remaining: 13,330 catalog entries and 549 help topics. Seventeen languages have no
+pending content. Croatian has 29 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
+including provider, deletion and settings context. `REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
