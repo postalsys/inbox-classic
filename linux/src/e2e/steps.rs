@@ -372,8 +372,28 @@ fn agent_said(file: &std::path::Path, step: &str) -> Option<Value> {
 pub async fn agent(d: &Driver) {
     d.step("an AI agent");
     select_folder("Inbox");
-    // two new messages for the agent to read, whatever the steps before left unread
     let rows_before = rows();
+    // two mailing lists for the agent to leave, read and an hour old, so the agent's newest unread are the two below;
+    // signed by the list and passed by the trusted receiving server, as one-click unsubscribing needs
+    for (index, (from, subject)) in [
+        ("Weekly Digest <digest@list.example.com>", "Weekly digest"),
+        ("Shop Offers <offers@list.example.com>", "Monthly offers"),
+    ]
+    .iter()
+    .enumerate()
+    {
+        let raw = format!(
+            "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com\r\n\
+             DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; \
+             b=y\r\nFrom: {from}\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\n\
+             Message-ID: <agent-list-{index}@list.example.com>\r\n\
+             List-Unsubscribe: <https://list.example.com/u/{index}>\r\n\
+             List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThis month on the list.\r\n",
+            date_now(-60)
+        );
+        let _ = d.add_message(&raw, &["\\Seen"]);
+    }
+    // two new messages for the agent to read, whatever the steps before left unread
     for (from, subject, body) in [
         (
             "Maria Lopez <maria@example.org>",
@@ -393,7 +413,7 @@ pub async fn agent(d: &Driver) {
         let _ = d.add_message(&raw, &[]);
     }
     run_command(Command::Sync);
-    wait_until(20, || rows() >= rows_before + 2).await;
+    wait_until(20, || rows() >= rows_before + 4).await;
     let unread = || d.unread_at(d.ports.rest);
     let before = unread();
     d.shot(&main_window(), "agents-1-before").await;
@@ -567,9 +587,84 @@ pub async fn agent(d: &Driver) {
         shell().core.outbox().unwrap_or_default().is_empty(),
         "and the Outbox is empty",
     );
+    agent_unsubscribes(d, &out).await;
     if let Some(agent) = agent.as_mut() {
         let _ = agent.kill();
         let _ = agent.wait();
+    }
+}
+
+/// The agent asks to leave two mailing lists in one question; Don't Unsubscribe, the default, asks no list
+async fn agent_unsubscribes(d: &Driver, out: &std::path::Path) {
+    // the agent's go (scripts/ui-e2e/agent.mjs)
+    let _ = std::fs::write(out.with_extension("jsonl.unsubscribe"), "");
+    let ask = wait_for(60, || alert().filter(|a| a.widget_name() == "agent-unsubscribe")).await;
+    let Some(ask) = ask else {
+        let said = agent_said(out, "lists").or_else(|| agent_said(out, "unsubscribe"));
+        d.check(
+            false,
+            &format!("the agent asks to unsubscribe from two mailing lists ({said:?})"),
+        );
+        return;
+    };
+    let root: gtk::Widget = ask.clone().upcast();
+    let heading = ask.heading().unwrap_or_default().to_string();
+    let lists: Vec<String> = (0..3).map(|n| label_of(&root, &format!("agent-list-{n}"))).collect();
+    let targets: Vec<String> = descendants::<gtk::Label>(&root)
+        .into_iter()
+        .filter(|l| l.widget_name() == "agent-list-target")
+        .map(|l| l.text().to_string())
+        .collect();
+    d.check(
+        heading.contains("My AI agent")
+            && heading.contains('2')
+            && lists[..2].contains(&"Weekly Digest <digest@list.example.com>".to_string())
+            && lists[..2].contains(&"Shop Offers <offers@list.example.com>".to_string())
+            && lists[2].is_empty()
+            && targets.len() == 2
+            && targets.iter().all(|t| t.ends_with(" list.example.com")),
+        &format!(
+            "the agent asks to unsubscribe from two mailing lists: one question lists both senders and where the \
+             requests go ({heading}; {lists:?}; {targets:?})"
+        ),
+    );
+    d.check(
+        ask.default_response().as_deref() == Some("dont")
+            && ask.close_response() == "dont"
+            && ask.response_appearance("unsubscribe") == adw::ResponseAppearance::Destructive
+            && !ask.is_response_enabled("unsubscribe"),
+        "Don't Unsubscribe is the default and Esc; Unsubscribe waits a moment and can not be taken back",
+    );
+    pause(2000).await;
+    d.shot(&ask, "agents-7-unsubscribe").await;
+    // Esc
+    ask.close();
+    let said = wait_for(20, || agent_said(out, "unsubscribe")).await;
+    let asked = std::fs::read_to_string(out).unwrap_or_default();
+    d.check(
+        said.is_some_and(|s| s["unsubscribed"] == false && s["note"].as_str().is_some_and(|n| n.contains("said no")))
+            && !asked.contains("\"lists\":[{\"sender\""),
+        "the agent learns the user said no, and no list was asked",
+    );
+    command(Command::AiAgents);
+    if let Some(agents) = wait_dialog(10, "agents-dialog").await {
+        let mut rows: Vec<adw::ActionRow> = descendants::<adw::ActionRow>(agents.upcast_ref())
+            .into_iter()
+            .filter(|row| row.widget_name() == "agents-entry")
+            .collect();
+        rows.sort_by_key(|row| row.index());
+        let entries: Vec<String> = rows.iter().map(|row| row.title().to_string()).collect();
+        let undo = named_in(agents.upcast_ref(), "agents-undo").is_some_and(|u| u.is_sensitive());
+        d.check(
+            entries
+                .first()
+                .is_some_and(|e| e.starts_with("You did not unsubscribe from Weekly Digest <digest@list.example.com>"))
+                && !undo,
+            &format!("and the AI Agents log says so, with nothing to undo ({entries:?})"),
+        );
+        d.shot(&agents, "agents-8-unsubscribe-log").await;
+        agents.close();
+        wait_gone(10, "agents-dialog").await;
     }
 }
 
