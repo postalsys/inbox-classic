@@ -257,7 +257,8 @@ jobs:
                       build-essential pkg-config ca-certificates curl xz-utils git dpkg-dev \
                       libgtk-4-dev libadwaita-1-dev libwebkitgtk-6.0-dev libdbus-1-dev \
                       xvfb xauth dbus dbus-x11 at-spi2-core gnome-keyring libsecret-tools \
-                      fonts-dejavu-core fonts-cantarell adwaita-icon-theme
+                      fonts-dejavu-core fonts-cantarell adwaita-icon-theme locales
+                  locale-gen en_GB.UTF-8
             - uses: actions/checkout@v6
             - uses: dtolnay/rust-toolchain@stable
               with:

@@ -1175,6 +1175,31 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     }
 }
 
+/// The dates follow the system's regional format (LC_ALL, LC_TIME, then LANG), not the app's language:
+/// scripts/linux-ui-e2e-run.sh sets LC_TIME to en_GB.UTF-8 where that locale is installed, the C locale otherwise
+fn regional_dates(d: &Driver) {
+    d.step("dates in the regional format");
+    let locale = ["LC_ALL", "LC_TIME", "LANG"]
+        .iter()
+        .filter_map(|name| std::env::var(name).ok())
+        .find(|value| !value.is_empty())
+        .unwrap_or_default();
+    let expected = if locale.starts_with("en_GB") {
+        "28/12/26 22:58"
+    } else if locale.is_empty() || ["C", "C.UTF-8", "C.utf8", "POSIX"].contains(&locale.as_str()) {
+        "12/28/26 22:58"
+    } else {
+        d.write(&format!("   (no expected date for {locale})"));
+        return;
+    };
+    let date = glib::DateTime::from_local(2026, 12, 28, 22, 58, 0.0).map_or(0, |date| date.to_unix());
+    let text = crate::ui::format_date(date);
+    d.check(
+        text == expected,
+        &format!("a date is written as {locale} writes it ({text}, {expected} expected)"),
+    );
+}
+
 async fn reading(d: &Driver) {
     d.step("syncing");
     let main = main_window();
@@ -1191,6 +1216,7 @@ async fn reading(d: &Driver) {
     let count = wait_for(30, || (rows() >= 4).then(rows)).await;
     d.check(count == Some(4), &format!("the messages are in the list ({count:?})"));
     d.shot(&main, "main-1-inbox").await;
+    regional_dates(d);
 
     d.step("reading an HTML message");
     select_row(0).await;
