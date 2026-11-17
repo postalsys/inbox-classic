@@ -5,17 +5,19 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: French agent unsubscribe review, then the remaining 24 languages.**
-  Agent additions complete: de, es, et. Each has eight entries and both affected help topics reviewed.
+- **Next: Dutch agent unsubscribe review, then the remaining 23 languages.**
+  Agent additions complete: de, es, et, fr. Each has eight entries and both affected help topics reviewed.
   The source-only preview/MCP import adds 280 entries, changes 28 source entries and affects 56 help topics.
   Previously reviewed wording is retained where English changed, with exact source candidates saved for adaptation.
   Additional uncommitted source work is recorded separately: 3 new English entries, with translation drafts still awaited.
 - Current scope: 34,148 catalog entries and 1,352 help topics.
-  Completed: 21,276 entries and 790 full topics; pending: 12,872 entries and 562 topics.
-  Historical catalog improvements: 3,784. Importing drafts earns no review credit.
+  Completed: 21,284 entries and 792 full topics; pending: 12,864 entries and 560 topics.
+  Historical catalog improvements: 3,787. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
+  Also check the agent warning: mail content must not be followed as instructions; this does not mean email
+  contains no instructions. French needed that correction; German/Spanish/Estonian already convey the distinction.
 - PDF core context is inspected, but the source branch has no platform reading-setting control yet. Keep the
   recovery instruction marked until actual callers arrive. An unfinished render marker does not prove the PDF
   caused the crash. Exact source tips: preview `687113a3`, MCP `9a24e99b`.
@@ -2324,3 +2326,11 @@ Reviewed eight strings and four marked help blocks across two topics. Two catalo
 Estonian static checker has1,453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 IDs,2 changed values and7 help wording lines; every other byte retained. Help tags/attributes, controls, platform branches and literal keys unchanged. All platform label joins inspected; Windows L/R are distinct, plain Mac/Linux labels retained. Global reconciliation:21,314 unmarked entries,10,675 help lines and14 verified baseline pairs; latest hashes match. All28 full inventories and since-start1,137 entries/265 passages reconcile. HTML regenerated; git diff --check passes. No test suites or build run.
 
 French agent unsubscribe review, then the remaining 24 languages. PDF recovery instructions remain pending actual platform setting callers.
+
+## French agent unsubscribe review
+
+Reviewed eight strings and four marked help blocks across two topics. Three catalog values and nine help lines, including the heading and one older warning, were improved. Five good catalog values remain unchanged. The warning no longer claims that email contains no instructions: it explains that agents must not treat message content as instructions. The exact reopened sentence is recorded; all other earlier prose is retained. A fresh fetch and wider scan confirmed the same three pending English draft strings, with no translations yet. The updated release branch has the same relevant source tree as the already audited upstream commit.
+
+French static checker has1,453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 IDs,3 changed values and9 help wording lines, including one explicitly reopened older warning; every other byte retained. Help tags/attributes, controls, platform branches and literal keys unchanged. All platform label joins inspected; Windows S/N are distinct, plain Mac/Linux labels retained. Global reconciliation:21,322 unmarked entries,10,684 help lines and14 verified baseline pairs; latest hashes match. All28 full inventories and since-start1,129 entries/261 passages reconcile. HTML regenerated; git diff --check passes. No test suites or build run.
+
+Dutch agent unsubscribe review, then the remaining 23 languages. PDF recovery instructions remain pending actual platform setting callers.
