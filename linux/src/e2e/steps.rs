@@ -454,9 +454,11 @@ pub async fn agent(d: &Driver) {
             on(0) && on(1) && !on(2) && !on(3),
             "reading and organizing are offered, sending is not",
         );
-        // sending too, for the rest of the test
-        if let Some(send) = level(3) {
-            send.set_active(true);
+        // writing drafts and sending too, for the rest of the test
+        for index in [2, 3] {
+            if let Some(check) = level(index) {
+                check.set_active(true);
+            }
         }
         d.shot(ask, "agents-2-connect").await;
         answer(ask, "Allow");
@@ -469,7 +471,7 @@ pub async fn agent(d: &Driver) {
     let tools = agent_said(&out, "tools")
         .and_then(|t| t.as_array().map(Vec::len))
         .unwrap_or(0);
-    d.check(tools == 15, &format!("with the tools of what it may do ({tools})"));
+    d.check(tools == 25, &format!("with the tools of what it may do ({tools})"));
     let read = agent_said(&out, "read").unwrap_or_default();
     d.check(
         read["notice"]
@@ -556,23 +558,36 @@ pub async fn agent(d: &Driver) {
             let hosts = subtitles(&agents, "agents-host");
             d.check(
                 hosts.first().is_some_and(|(name, access)| {
-                    name == "My AI agent" && access.starts_with("Read, organize and send with your yes")
+                    name == "My AI agent" && access.starts_with("Read, organize, write drafts and send with your yes")
                 }),
                 &format!("it lists the program and what it may do ({hosts:?})"),
             );
             let entries = subtitles(&agents, "agents-entry");
             d.check(
-                entries.first().is_some_and(|(what, _)| {
-                    what.starts_with("Sent \u{201c}Lunch on Friday?\u{201d} to pat@example.net")
-                }) && entries.get(1).is_some_and(|(what, _)| what.starts_with("Marked read")),
+                entries
+                    .first()
+                    .is_some_and(|(what, _)| what.starts_with("Saved the draft \u{201c}Agenda for Friday\u{201d}"))
+                    && entries.get(1).is_some_and(|(what, _)| {
+                        what.starts_with("Sent \u{201c}Lunch on Friday?\u{201d} to pat@example.net")
+                    })
+                    && entries.get(2).is_some_and(|(what, _)| what.starts_with("Marked read")),
                 &format!("and what its agent did, newest first ({entries:?})"),
             );
             d.shot(&agents, "agents-6-window").await;
+            // the message sent, under the draft
+            let sent_row = descendants::<adw::ActionRow>(agents.upcast_ref())
+                .into_iter()
+                .find(|row| row.widget_name() == "agents-entry" && row.index() == 1);
+            if let Some(row) = sent_row
+                && let Some(log) = row.parent().and_downcast::<gtk::ListBox>()
+            {
+                log.select_row(Some(&row));
+            }
             click(agents.upcast_ref(), "agents-undo");
             d.check(
                 wait_until(10, || {
                     subtitles(&agents, "agents-entry")
-                        .first()
+                        .get(1)
                         .is_some_and(|(what, _)| what.contains("taken back"))
                 })
                 .await,
@@ -587,11 +602,70 @@ pub async fn agent(d: &Driver) {
         shell().core.outbox().unwrap_or_default().is_empty(),
         "and the Outbox is empty",
     );
+    agent_draft(d, &out).await;
     agent_unsubscribes(d, &out).await;
     if let Some(agent) = agent.as_mut() {
         let _ = agent.kill();
         let _ = agent.wait();
     }
+}
+
+/// The agent's draft in Markdown: opened from Drafts, the compose window says which agent wrote it and shows the
+/// Markdown formatted; closed unchanged, it stays the agent's
+async fn agent_draft(d: &Driver, out: &std::path::Path) {
+    let draft = wait_for(30, || agent_said(out, "draft")).await;
+    d.check(
+        draft.as_ref().is_some_and(|r| r["draft_id"].is_string()),
+        &format!("the agent writes a draft in Markdown ({draft:?})"),
+    );
+    command(Command::Sync);
+    select_folder("Drafts");
+    let listed = || {
+        shell()
+            .main()
+            .list_view()
+            .rows(&shell().core, 0, 100)
+            .unwrap_or_default()
+            .iter()
+            .any(|m| m.info.subject == "Agenda for Friday")
+    };
+    d.check(
+        wait_until(30, listed).await,
+        &format!("the agent's draft is in Drafts ({} listed)", messages_listed()),
+    );
+    select_subject("Agenda for Friday").await;
+    shell().main().open_selected();
+    let Some(c) = wait_compose(20).await else {
+        d.check(false, "opening the agent's draft opens the compose window");
+        return;
+    };
+    let note = named_in(c.window.upcast_ref(), "compose-agent-note").and_downcast::<gtk::Label>();
+    let text = note.as_ref().map(|l| l.text().to_string()).unwrap_or_default();
+    d.check(
+        note.is_some_and(|l| l.is_visible())
+            && text.starts_with("My AI agent, an AI agent, wrote this draft")
+            && text.contains("Check the recipients and the text"),
+        &format!("it says which agent wrote it and asks to check the recipients and the text ({text})"),
+    );
+    let html = c
+        .editor
+        .document
+        .view
+        .evaluate_javascript_future("document.getElementById('body').innerHTML", None, None)
+        .await
+        .map(|v| v.to_str().to_string())
+        .unwrap_or_default();
+    d.check(
+        html.contains("<strong>Agenda</strong>") && html.contains("<li>lunch</li>"),
+        &format!("its Markdown is formatted ({})", html.trim()),
+    );
+    d.shot(&c.window, "agents-8-draft").await;
+    close_compose(&c).await;
+    d.check(
+        wait_until(10, || d.find("Drafts", "Subject: Agenda for Friday").is_some()).await,
+        "closed unchanged, the draft stays in Drafts",
+    );
+    select_folder("Inbox");
 }
 
 /// The agent asks to leave two mailing lists in one question; Don't Unsubscribe, the default, asks no list

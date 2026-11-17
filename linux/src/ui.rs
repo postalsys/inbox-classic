@@ -73,6 +73,11 @@ row.drop-below { background-position: center bottom; }
 .dark.security-good, .dark .security-good { --security-border: #7fb0f0; --security-fill: #1f2c40; --security-text: #bcd6f7; }
 .dark.security-warning, .dark .security-warning { --security-border: #f0b45a; --security-fill: #3a2c14; --security-text: #f6d29c; }
 .dark.security-neutral, .dark .security-neutral { --security-border: #777777; --security-fill: #2a2a2a; --security-text: #cccccc; }
+.agent-note { padding: 6px 10px; border-top: 1px solid #7e6bc4; border-bottom: 1px solid #7e6bc4; background-color: #f1eefb; color: #463885; }
+.agent-note > image { color: #7e6bc4; margin-top: 1px; }
+.agent-note.dark { border-color: #9d8cf0; background-color: #27223b; color: #d6cffa; }
+.agent-note.dark > image { color: #9d8cf0; }
+.agent-note + .security-bar { border-top-width: 0; }
 .compose-keys flowboxchild { padding: 0; }
 button.key-chip { min-height: 0; padding: 1px 8px 1px 6px; border-radius: 999px; border: 1px solid var(--security-border); background-color: var(--security-fill); color: var(--security-text); font-weight: normal; }
 button.key-chip:hover { background-image: linear-gradient(alpha(currentColor, 0.08), alpha(currentColor, 0.08)); }
