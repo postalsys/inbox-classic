@@ -64,7 +64,11 @@ pub(crate) enum Incoming {
         method: String,
         params: Value,
     },
-    Notification,
+    /// A notification, or a response (MCP servers do not ask clients anything here: its method is empty)
+    Notification {
+        method: String,
+        params: Value,
+    },
     /// Not JSON-RPC: the answer to send
     Invalid(Value),
 }
@@ -77,7 +81,10 @@ pub(crate) fn parse(line: &str) -> Incoming {
     let Some(method) = message.get("method").and_then(Value::as_str) else {
         // a response (MCP servers do not ask clients anything here) or something else
         return match id {
-            Some(_) if message.get("result").is_some() || message.get("error").is_some() => Incoming::Notification,
+            Some(_) if message.get("result").is_some() || message.get("error").is_some() => Incoming::Notification {
+                method: String::new(),
+                params: Value::Null,
+            },
             _ => Incoming::Invalid(error(&id.unwrap_or(Value::Null), INVALID_REQUEST, "not a request")),
         };
     };
@@ -88,7 +95,10 @@ pub(crate) fn parse(line: &str) -> Incoming {
             params: message.get("params").cloned().unwrap_or(Value::Null),
         },
         Some(id) => Incoming::Invalid(error(&id, INVALID_REQUEST, "an id is a string or a number")),
-        None => Incoming::Notification,
+        None => Incoming::Notification {
+            method: method.to_string(),
+            params: message.get("params").cloned().unwrap_or(Value::Null),
+        },
     }
 }
 
@@ -116,7 +126,11 @@ mod tests {
         ));
         assert!(matches!(
             parse(r#"{"jsonrpc":"2.0","method":"notifications/initialized"}"#),
-            Incoming::Notification
+            Incoming::Notification { .. }
+        ));
+        assert!(matches!(
+            parse(r#"{"jsonrpc":"2.0","method":"notifications/cancelled","params":{"requestId":7}}"#),
+            Incoming::Notification { method, params } if method == "notifications/cancelled" && params["requestId"] == 7
         ));
         assert!(matches!(parse("{"), Incoming::Invalid(e) if e["error"]["code"] == PARSE_ERROR));
         assert!(matches!(parse(r#"{"id":{},"method":"x"}"#), Incoming::Invalid(_)));
