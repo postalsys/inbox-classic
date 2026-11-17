@@ -54,9 +54,7 @@ pub struct Folder {
 }
 
 const COLUMNS: &str = "f.id, f.account_id, f.path, f.name, f.delimiter, f.flags, f.special_use, f.subscribed, \
-     f.selectable, f.uid_validity, f.uid_next, f.highest_modseq, \
-     (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id), \
-     (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id AND m.seen = 0)";
+     f.selectable, f.uid_validity, f.uid_next, f.highest_modseq, f.total, f.unread";
 
 fn from_row(row: &Row) -> rusqlite::Result<Folder> {
     Ok(Folder {
@@ -124,8 +122,8 @@ impl Store {
         statement.query_map([account], from_row)?.collect()
     }
 
-    /// A folder with its counts, which read its messages (on the folder index); [`Store::folder_info`] is the folder
-    /// alone
+    /// A folder with its counts (kept as its messages change, see the schema's triggers); [`Store::folder_info`] is
+    /// the folder alone
     pub fn folder(&self, id: FolderId) -> Result<Folder> {
         self.db
             .prepare_cached(&format!("SELECT {COLUMNS} FROM folders f WHERE f.id = ?1"))?
@@ -195,7 +193,12 @@ impl Store {
 
     /// Forgets the cached messages of a folder, for a new UIDVALIDITY
     pub fn reset_folder(&self, folder: FolderId, uid_validity: Option<u64>) -> Result<()> {
-        self.db.execute("DELETE FROM messages WHERE folder_id = ?1", [folder])?;
+        self.atomic(|| {
+            // its conversations first: then each message deleted finds none of them to count again
+            self.db
+                .execute("DELETE FROM conversations WHERE folder_id = ?1", [folder])?;
+            self.db.execute("DELETE FROM messages WHERE folder_id = ?1", [folder])
+        })?;
         self.set_sync_state(
             folder,
             &SyncState {

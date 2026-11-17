@@ -267,6 +267,27 @@ pub(crate) mod tests {
         }
     }
 
+    /// Pages read from a row of a page next to them, or from the end of the list, are those read from the top
+    #[test]
+    fn pages_read_from_their_neighbours_are_those_from_the_top() {
+        let dir = pe_testkit::TempDir::new("core-list-load-anchored");
+        let (core, inbox, events) = opened(&dir, 900);
+        for grouped in [false, true] {
+            let mut view = inbox_view(inbox);
+            view.set_grouped(grouped);
+            let rows = loaded(&core, &events, &view, Reselect::default()).rows;
+            // the end first (nearer to it than to the top), then up from it, then down from the first page
+            for offset in [rows - 60, rows - 160, 100, 150, rows - 5] {
+                let page = core.list_load_page(&view, offset).unwrap();
+                assert_eq!(next_ready(&events), (page, false));
+                let read = core.list_load_result(page).unwrap().unwrap();
+                let from_top = view.clone().rows(&core, offset, crate::LIST_PAGE).unwrap();
+                assert_eq!(read.messages, from_top, "grouped {grouped}, offset {offset}");
+                assert!(!from_top.is_empty());
+            }
+        }
+    }
+
     #[test]
     fn a_view_listing_nothing_loads_nothing() {
         let dir = pe_testkit::TempDir::new("core-list-load-none");

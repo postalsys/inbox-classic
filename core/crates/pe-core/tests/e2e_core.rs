@@ -3118,10 +3118,10 @@ fn ignored_conversations_arrive_read_and_watched_ones_are_announced() {
     // the status bar counts what the list shows: the folder's own counts, or what is left with ignored ones hidden
     let folder = s.core.folder(inbox).unwrap();
     assert_eq!(
-        s.core.list_counts(&Search::folder(inbox)).unwrap(),
+        s.core.count_search(&Search::folder(inbox)).unwrap(),
         (folder.total, folder.unread)
     );
-    assert_eq!(s.core.list_counts(&hidden).unwrap(), (1, 1));
+    assert_eq!(s.core.count_search(&hidden).unwrap(), (1, 1));
 }
 
 #[test]

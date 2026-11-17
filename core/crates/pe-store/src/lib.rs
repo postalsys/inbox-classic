@@ -6,14 +6,20 @@
 //! synchronous; the sync runs them between network round trips.
 #![forbid(unsafe_code)]
 
+#[macro_use]
+mod sql;
 mod accounts;
 mod agents;
 mod bounces;
 mod cards;
 mod contacts;
+mod counts;
 mod download;
 mod fold;
 mod folders;
+#[cfg(test)]
+mod kept_check;
+mod keyset;
 mod marks;
 mod messages;
 mod outbox;
@@ -50,7 +56,7 @@ pub use query::Query;
 pub use recovery::Recovery;
 pub use rules::{Rule, RuleId};
 pub use rusqlite::Error;
-pub use search::{IndexText, Scope, Search, Show};
+pub use search::{Anchor, IndexText, Scope, Search, Show};
 pub use selection::{FolderSummary, MessageRef, Picked};
 pub use senders::{LOGO_KEPT_MS, LOGO_RETRY_MS, StoredLogo, ToJudge};
 pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
@@ -181,6 +187,22 @@ impl Store {
             (key, value),
         )?;
         Ok(())
+    }
+
+    /// Runs `f` as a whole or not at all, in the transaction under way or on its own: a savepoint, rolled back when
+    /// `f` fails
+    pub(crate) fn atomic<T>(&self, f: impl FnOnce() -> Result<T>) -> Result<T> {
+        self.db.execute_batch("SAVEPOINT atomic")?;
+        match f() {
+            Ok(value) => {
+                self.db.execute_batch("RELEASE atomic")?;
+                Ok(value)
+            }
+            Err(error) => {
+                self.db.execute_batch("ROLLBACK TO atomic; RELEASE atomic")?;
+                Err(error)
+            }
+        }
     }
 
     /// Runs `f` in one transaction: a sync step lands as a whole or not at all. Rolled back when
