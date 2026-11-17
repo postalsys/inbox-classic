@@ -34,8 +34,10 @@ pub enum PasswordStore {
 }
 
 /// A place passwords outlive the process in
-trait Backend: Send + Sync {
-    fn load(&self, key: Key) -> Option<String>;
+pub(crate) trait Backend: Send + Sync {
+    /// The secret kept for `key`: None when there is none, an error when the store could not be read (locked,
+    /// refused, not answering), which is not the same
+    fn load(&self, key: Key) -> Result<Option<String>, String>;
     fn save(&self, key: Key, password: &str) -> Result<(), String>;
     fn remove(&self, key: Key);
 }
@@ -95,8 +97,15 @@ mod native {
     }
 
     impl super::Backend for NativeStore {
-        fn load(&self, key: Key) -> Option<String> {
-            self.entry(key)?.get_password().ok()
+        fn load(&self, key: Key) -> Result<Option<String>, String> {
+            let entry = self
+                .entry(key)
+                .ok_or_else(|| pe_i18n::tr_args(pe_i18n::Text::SecretsUnavailable, &[("store", (&name()).into())]))?;
+            match entry.get_password() {
+                Ok(password) => Ok(Some(password)),
+                Err(keyring_core::Error::NoEntry) => Ok(None),
+                Err(error) => Err(error.to_string()),
+            }
         }
 
         fn save(&self, key: Key, password: &str) -> Result<(), String> {
@@ -169,13 +178,33 @@ impl Secrets {
     }
 
     pub(crate) fn get(&self, key: impl Into<Key>) -> Option<String> {
+        self.lookup(key).ok().flatten()
+    }
+
+    /// [`Secrets::get`], telling a store that could not be read from one with nothing kept
+    pub(crate) fn lookup(&self, key: impl Into<Key>) -> Result<Option<String>, String> {
         let key = key.into();
         if let Some(password) = self.map().passwords.get(&key) {
-            return Some(password.clone());
+            return Ok(Some(password.clone()));
         }
-        let password = self.backend.as_ref()?.load(key)?;
+        let Some(backend) = self.backend.as_ref() else {
+            return Ok(None);
+        };
+        let Some(password) = backend.load(key)? else {
+            return Ok(None);
+        };
         // a password set while this one was loaded is the newer one
-        Some(self.map().passwords.entry(key).or_insert(password).clone())
+        Ok(Some(self.map().passwords.entry(key).or_insert(password).clone()))
+    }
+
+    /// Secrets kept in `backend`, for the tests of a store that fails
+    #[cfg(test)]
+    pub(crate) fn with_backend(backend: Arc<dyn Backend>) -> Secrets {
+        Secrets {
+            map: Arc::default(),
+            backend: Some(backend),
+            unavailable: None,
+        }
     }
 
     /// Keeps the password for this run, and between runs where the system has a place for it; the error says

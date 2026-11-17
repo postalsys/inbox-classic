@@ -289,7 +289,20 @@ fn locked_text() -> String {
 /// The master key: the one in the system's store, or a new one kept there. None when there is none and `create`
 /// is false.
 fn master(secrets: &Secrets, create: bool) -> Result<Option<Zeroizing<[u8; 32]>>> {
-    if let Some(encoded) = secrets.get(Key::Pgp) {
+    let no_store = |why: &str| {
+        Error::Unavailable(tr_args(
+            Text::PgpErrorNoStore,
+            &[("store", (&store_name()).into()), ("error", why.into())],
+        ))
+    };
+    let kept = match secrets.lookup(Key::Pgp) {
+        Ok(kept) => kept,
+        // locked, refused, not answering: the keys show as locked; a new master key would be written over the one
+        // there and lock every private key for good, so none is made
+        Err(_) if !create => return Ok(None),
+        Err(why) => return Err(no_store(&why)),
+    };
+    if let Some(encoded) = kept {
         let bytes = Zeroizing::new(STANDARD.decode(encoded.trim()).unwrap_or_default());
         let mut key = Zeroizing::new([0u8; 32]);
         if bytes.len() == 32 {
@@ -305,12 +318,7 @@ fn master(secrets: &Secrets, create: bool) -> Result<Option<Zeroizing<[u8; 32]>>
         .fill(&mut key[..])
         .map_err(|_| Error::Unavailable("random".into()))?;
     let encoded = Zeroizing::new(STANDARD.encode(&key[..]));
-    secrets.set(Key::Pgp, &encoded).map_err(|why| {
-        Error::Unavailable(tr_args(
-            Text::PgpErrorNoStore,
-            &[("store", (&store_name()).into()), ("error", (&why).into())],
-        ))
-    })?;
+    secrets.set(Key::Pgp, &encoded).map_err(|why| no_store(&why))?;
     Ok(Some(key))
 }
 
@@ -1245,6 +1253,30 @@ mod tests {
         let first = master(&secrets, true).unwrap().unwrap();
         let again = master(&secrets, false).unwrap().unwrap();
         assert_eq!(*first, *again);
+    }
+
+    /// A system store that holds a master key it can not read now (locked, the access refused), and takes writes
+    struct Unreadable(std::sync::Mutex<Option<String>>);
+
+    impl crate::secrets::Backend for Unreadable {
+        fn load(&self, _: crate::secrets::Key) -> std::result::Result<Option<String>, String> {
+            Err("the keychain is locked".into())
+        }
+        fn save(&self, _: crate::secrets::Key, password: &str) -> std::result::Result<(), String> {
+            *self.0.lock().unwrap() = Some(password.into());
+            Ok(())
+        }
+        fn remove(&self, _: crate::secrets::Key) {}
+    }
+
+    #[test]
+    fn a_master_key_that_can_not_be_read_is_never_replaced() {
+        // a new one written over it would lock every private key it wraps for good
+        let store = std::sync::Arc::new(Unreadable(Default::default()));
+        let secrets = Secrets::with_backend(store.clone());
+        assert!(master(&secrets, false).unwrap().is_none(), "read as locked");
+        assert!(matches!(master(&secrets, true), Err(Error::Unavailable(_))));
+        assert!(store.0.lock().unwrap().is_none(), "nothing written");
     }
 
     #[test]
