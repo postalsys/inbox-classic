@@ -213,6 +213,13 @@ func insertPicture(_ editor: Editor) {
 final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTokenFieldDelegate {
     /// the compose windows open, in the order they opened
     static private(set) var open: [ComposeWindow] = []
+    /// the one in front, which the commands of the menus are about: the key window, or while the app is not active
+    /// the frontmost window when it is one
+    static var key: ComposeWindow? {
+        if let key = open.first(where: { $0.window.isKeyWindow }) { return key }
+        guard !NSApp.isActive, let front = NSApp.orderedWindows.first else { return nil }
+        return open.first { $0.window === front }
+    }
 
     let window: NSWindow
     private let core: Core
@@ -239,8 +246,11 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     }()
     private let ccButton = NSButton(title: Text.headerCc.text, target: nil, action: nil)
     private let bccButton = NSButton(title: Text.macBcc.text, target: nil, action: nil)
-    private var rows: [NSGridRow] = []
     private let grid = NSGridView()
+    /// the rows of the field grid
+    private enum Row {
+        static let from = 0, to = 1, cc = 2, bcc = 3, keys = 4, subject = 5, attach = 6
+    }
     private var inReplyTo = ""
     private var references = ""
     private var quote = ""
@@ -256,7 +266,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// the account whose Drafts has that copy, 0 before the first save
     private var draftAccount: Int64 = 0
     private enum Pending {
-        case none, send, save, saveAndClose, autosave
+        /// refresh: only what was written, for whether it still quotes encrypted mail
+        case none, send, save, saveAndClose, autosave, refresh
     }
     private var pending = Pending.none
     private var quoteState = EditorQuote.folded
@@ -276,6 +287,31 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// the copy in Drafts was saved automatically since: closing asks about it, and without saving removes it unless
     /// it was kept
     private var autosaved = false
+
+    // signing and encrypting (ComposeSecurity.swift): the user's own Sign, Encrypt, whether it answers or forwards
+    // encrypted mail, and what the core says of them now
+    private var sign = false
+    private var encrypt = false
+    private var quoteEncrypted = false
+    private(set) var security = ComposeSecurityState()
+    /// the lookups of keys this window started: their KeysFound brings what they found
+    private var lookups = Set<UInt64>()
+    /// the recipients typed: the security asked again once typing stops
+    private var recipientsTimer: Timer?
+    /// what was written as the editor last gave it: whether it still holds a quote counts while it answers encrypted
+    /// mail
+    private var lastHtml = ""
+    private var quoteTimer: Timer?
+    let securityLine = SecurityBar(id: "compose.security")
+    let keysRow = KeyChipsRow()
+    private(set) var signButton: NSButton?
+    private(set) var encryptButton: NSButton?
+    private var signItem: NSToolbarItem?
+    private var encryptItem: NSToolbarItem?
+    private var formatBarTop: NSLayoutConstraint!
+    private var formatBarUnderLine: NSLayoutConstraint!
+    /// Recipients' Keys while it is open
+    private(set) weak var keysSheet: RecipientKeysSheet?
 
     /// opens a compose window from `account`, with `draft` (a reply, a forward, a saved draft, a mailto: link)
     @discardableResult
@@ -317,6 +353,10 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             kept = !messageId.isEmpty
             // a reply from the address its message was sent to, a draft from the one it was saved with
             selectFrom(text(draft.from))
+            // a reply to encrypted mail starts encrypted, a draft as it was saved
+            sign = draft.sign
+            encrypt = draft.encrypt
+            quoteEncrypted = draft.quote_encrypted
             for index in 0..<draft.attachment_count {
                 if let path = draft.attachments[index] {
                     addFile(URL(fileURLWithPath: String(cString: path)))
@@ -330,6 +370,10 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         (window.contentView as? DropView)?.dropped = { [weak self] in self?.addFiles($0) }
         showFiles()
         filling = false
+        refreshSecurity()
+        if encrypt {
+            findKeys()
+        }
         if !TestHooks.testing {
             window.setFrameAutosaveName("Compose")
         }
@@ -351,6 +395,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         from.target = self
         from.action = #selector(chooseFrom)
         for (field, id) in [(to, "compose.to"), (cc, "compose.cc"), (bcc, "compose.bcc")] {
+            // many recipients scroll in the field, never widen the window
+            field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
             field.core = core
             field.setAccessibilityIdentifier(id)
             field.delegate = self
@@ -406,6 +452,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         grid.addRow(with: [picks[0], toRow])
         grid.addRow(with: [picks[1], cc])
         grid.addRow(with: [picks[2], bcc])
+        grid.addRow(with: [label(Text.uiFieldKeys.text), keysRow])
         grid.addRow(with: [label(Text.uiFieldSubject.text), subject])
         grid.addRow(with: [label(Text.uiFieldAttach.text), attached])
         grid.column(at: 0).xPlacement = .trailing
@@ -414,28 +461,43 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             .compactMap { grid.cell(atColumnIndex: 0, rowIndex: $0).contentView?.fittingSize.width }.max() ?? 0
         grid.rowAlignment = .firstBaseline
         grid.rowSpacing = 6
-        grid.row(at: 2).isHidden = !showCc
-        grid.row(at: 3).isHidden = !showBcc
+        grid.row(at: Row.cc).isHidden = !showCc
+        grid.row(at: Row.bcc).isHidden = !showBcc
         ccButton.isHidden = showCc
         bccButton.isHidden = showBcc
-        for row in 1..<6 {
+        for row in Row.to...Row.attach {
             grid.cell(atColumnIndex: 1, rowIndex: row).xPlacement = .fill
         }
+        // the chips are no text: the row's label in the middle of them
+        grid.row(at: Row.keys).yPlacement = .center
+        grid.row(at: Row.keys).rowAlignment = .none
+        grid.row(at: Row.keys).isHidden = true
+        keysRow.clicked = { [weak self] in self?.openRecipientKeys() }
+        securityLine.details = { [weak self] in self?.openRecipientKeys() }
         status.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         status.textColor = .secondaryLabelColor
         status.lineBreakMode = .byTruncatingTail
+        // a long status (the keys a lookup did not find) is cut off, never widens the window
+        status.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         status.setAccessibilityIdentifier("compose.status")
         let editorView = editor.view
         let content = DropView()
-        for view in [grid, formatBar.view, editorView, status] as [NSView] {
+        for view in [grid, securityLine, formatBar.view, editorView, status] as [NSView] {
             view.translatesAutoresizingMaskIntoConstraints = false
             content.addSubview(view)
         }
+        // the line of signing and encrypting between the fields and the format bar, from edge to edge as the reading
+        // pane's bar; the format bar under the fields while there is none
+        formatBarTop = formatBar.view.topAnchor.constraint(equalTo: grid.bottomAnchor, constant: 10)
+        formatBarUnderLine = formatBar.view.topAnchor.constraint(equalTo: securityLine.bottomAnchor, constant: 8)
         NSLayoutConstraint.activate([
             grid.topAnchor.constraint(equalTo: content.topAnchor, constant: 10),
             grid.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 10),
             grid.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -10),
-            formatBar.view.topAnchor.constraint(equalTo: grid.bottomAnchor, constant: 10),
+            securityLine.topAnchor.constraint(equalTo: grid.bottomAnchor, constant: 10),
+            securityLine.leadingAnchor.constraint(equalTo: content.leadingAnchor),
+            securityLine.trailingAnchor.constraint(equalTo: content.trailingAnchor),
+            formatBarTop,
             formatBar.view.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 10),
             formatBar.view.trailingAnchor.constraint(lessThanOrEqualTo: content.trailingAnchor, constant: -10),
             editorView.topAnchor.constraint(equalTo: formatBar.view.bottomAnchor, constant: 6),
@@ -470,16 +532,17 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             (index == 1 ? ccButton : bccButton).isHidden = true
         }
         changed()
+        recipientsChanged()
     }
 
     @objc private func showCcRow() {
-        grid.row(at: 2).isHidden = false
+        grid.row(at: Row.cc).isHidden = false
         ccButton.isHidden = true
         window.makeFirstResponder(cc)
     }
 
     @objc private func showBccRow() {
-        grid.row(at: 3).isHidden = false
+        grid.row(at: Row.bcc).isHidden = false
         bccButton.isHidden = true
         window.makeFirstResponder(bcc)
     }
@@ -533,6 +596,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             editor.signature(taken(pe_signature_block(core.handle, account)) ?? "")
         }
         changed()
+        refreshSecurity()
     }
 
     // ---- the editor ----
@@ -544,6 +608,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         if !saved, let signature = taken(pe_signature_block(core.handle, account)) {
             body += signature
         }
+        lastHtml = body
         let page = taken(body.withCString { body in
             draft?.quote.map { pe_editor_document($0, draft!.quote_folded, body) } ?? pe_editor_document(nil, false, body)
         }) ?? ""
@@ -553,7 +618,10 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             onMain { self?.htmlArrived(html, quote: quote, edited: edited) }
         }
         handlers.state = { [weak self] in self?.formatBar.showState($0) }
-        handlers.dirty = { [weak self] in self?.changed() }
+        handlers.dirty = { [weak self] in
+            self?.changed()
+            self?.textEdited()
+        }
         handlers.send = { [weak self] in self?.request(.send) }
         handlers.save = { [weak self] in self?.request(.save) }
         handlers.dropped = { [weak self] in self?.dropOnText($0) }
@@ -588,6 +656,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     private func setStatus(_ text: String) {
         statusText = text
         status.stringValue = text
+        status.toolTip = text.isEmpty ? nil : text
     }
 
     /// where the link under the mouse, or else the one the cursor is in, goes; the status as it was without either
@@ -644,7 +713,12 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             // the window named by its subject as it is typed, as one opened with a subject is
             window.title = subject.stringValue.isEmpty ? Text.uiNewMessageTitle.text : subject.stringValue
         }
-        (notification.object as? AddressField)?.typed(notification)
+        if let field = notification.object as? AddressField {
+            field.typed(notification)
+            // the locks of the recipients once typing stops
+            recipientsTimer?.invalidate()
+            recipientsTimer = after(0.4) { [weak self] in self?.recipientsChanged() }
+        }
     }
 
     // ---- the attached files ----
@@ -669,8 +743,12 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// the attached files in the Attach row; the row is there only with files
     private func showFiles() {
         attached.objectValue = files.map(\.label)
-        if grid.numberOfRows > 5 {
-            grid.row(at: 5).isHidden = files.isEmpty
+        if grid.numberOfRows > Row.attach {
+            grid.row(at: Row.attach).isHidden = files.isEmpty
+        }
+        // a forwarded encrypted message's files can only go encrypted
+        if !filling {
+            refreshSecurity()
         }
     }
 
@@ -678,8 +756,12 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         addFiles(openFilesPanel(title: Text.uiInsertAttachment.text))
     }
 
-    /// a file taken off in the Attach row (Delete, or Remove in its menu)
+    /// a file taken off in the Attach row (Delete, or Remove in its menu); an address field left: its recipients' locks
     func controlTextDidEndEditing(_ notification: Notification) {
+        if notification.object is AddressField {
+            recipientsChanged()
+            return
+        }
         syncFilesFromTokens()
     }
 
@@ -726,7 +808,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             pending = action
             requestedAt = changes
             editor.requestHtml()
-        } else if pending == .autosave && action != .autosave {
+        } else if (pending == .autosave || pending == .refresh) && action != .refresh {
             // the user's own Send or Save comes after the automatic save the HTML was asked for
             pending = action
         }
@@ -738,6 +820,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     private func htmlArrived(_ html: String, quote state: EditorQuote, edited: String) {
         quoteState = state
         editedQuote = edited
+        lastHtml = html
         let action = pending
         pending = .none
         switch action {
@@ -745,7 +828,11 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         case .save: save(html, close: false)
         case .saveAndClose: save(html, close: true)
         case .autosave: autosave(html)
-        case .none: break
+        case .refresh, .none: break
+        }
+        // the quote unfolded, edited or deleted: whether it may still go in the clear
+        if action != .send && window.isVisible {
+            refreshSecurity()
         }
     }
 
@@ -764,13 +851,17 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             // saved in another account's Drafts before From changed: the core moves it once this account has it
             draft_account: draftAccount != account ? draftAccount : 0,
             quote_plain: quotePlain, quote_text: folded && !quoteText.isEmpty ? strings.add(quoteText) : nil,
-            from: strings.optional(fromAddress))
+            from: strings.optional(fromAddress), sign: sign, encrypt: encrypt, quote_encrypted: quoteEncrypted)
     }
 
     /// sends with the HTML the editor gave, now or with the next Send/Recv
     private func send(_ html: String) {
         let strings = CStrings()
         var message = outgoing(html, strings)
+        // signed or encrypted as it can not go: what is missing asked for first
+        if sendBlocked(&message) {
+            return
+        }
         // it says a file is attached and none is: Go Back is the default
         if let word = taken(pe_forgotten_attachment(&message)),
            ask(Text.uiAttachmentForgotten.text(["word": word]), yes: Text.uiGoBack.text, no: Text.uiSendAnyway.text) {
@@ -873,6 +964,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
 
     func windowWillClose(_ notification: Notification) {
         cancelAutosave()
+        recipientsTimer?.invalidate()
+        quoteTimer?.invalidate()
         // nothing left to open again after a crash
         if !messageId.isEmpty {
             messageId.withCString { pe_compose_closed(core.handle, $0) }
@@ -939,16 +1032,257 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     }
 }
 
+// ---- signing and encrypting ----
+
+extension ComposeWindow: RecipientKeysOwner {
+    /// what the core says of signing and encrypting the message as it is now, shown: the toolbar's switches, the line
+    /// under the fields, the Keys row and Recipients' Keys
+    func refreshSecurity() {
+        let strings = CStrings()
+        var message = outgoing(lastHtml, strings)
+        guard let state = ComposeSecurityState(pe_compose_security(core.handle, account, &message)) else { return }
+        security = state
+        showSecurity()
+    }
+
+    private func showSecurity() {
+        showSwitches()
+        let line = security.tone != PE_PROTECTION_TONE_NONE && !security.text.isEmpty
+        securityLine.show(tone: line ? security.tone : PE_PROTECTION_TONE_NONE, encrypted: security.encrypt, text: security.text)
+        securityLine.detailsButton.isHidden = !security.encrypt
+        formatBarTop.isActive = !line
+        formatBarUnderLine.isActive = line
+        // the recipients' locks, while Encrypt is on
+        keysRow.show(security.recipients)
+        let keys = security.encrypt && !security.recipients.isEmpty
+        if grid.row(at: Row.keys).isHidden == keys {
+            grid.row(at: Row.keys).isHidden = !keys
+        }
+        keysSheet?.refresh()
+    }
+
+    /// the toolbar's Sign and Encrypt as the core has them
+    private func showSwitches() {
+        signButton?.state = security.sign ? .on : .off
+        // an encrypted message is always signed: Sign shows on and can not be clicked, its tip says why (on the item,
+        // as a disabled button shows none)
+        signButton?.isEnabled = security.signEnabled
+        signButton?.superview?.toolTip = security.signTip
+        signItem?.toolTip = security.signTip
+        signButton?.setAccessibilityHelp(security.signTip)
+        encryptButton?.state = security.encrypt ? .on : .off
+        encryptButton?.superview?.toolTip = security.encryptTip
+        encryptItem?.toolTip = security.encryptTip
+        encryptButton?.setAccessibilityHelp(security.encryptTip)
+    }
+
+    /// the recipients changed: their locks, and with Encrypt on the keys of those that have none looked up
+    func recipientsChanged() {
+        recipientsTimer?.invalidate()
+        recipientsTimer = nil
+        if encrypt {
+            findKeys()
+        }
+        refreshSecurity()
+    }
+
+    private func findKeys() {
+        let strings = CStrings()
+        var message = outgoing(lastHtml, strings)
+        let request = pe_compose_find_keys(core.handle, account, &message)
+        if request != 0 {
+            lookups.insert(request)
+            refreshSecurity()
+        }
+    }
+
+    /// what was written changed: while it answers encrypted mail, whether it still quotes it, once typing stops
+    private func textEdited() {
+        guard quoteEncrypted else { return }
+        quoteTimer?.invalidate()
+        quoteTimer = after(0.6) { [weak self] in self?.request(.refresh) }
+    }
+
+    /// keys were looked up (KeysFound) or changed: a lookup this window started is taken in and told in the status
+    /// bar; another window's may have found a key of this one's recipients too
+    static func onEvent(_ event: CoreEvent) {
+        guard event.kind == PE_EVENT_KIND_KEYS_FOUND || event.kind == PE_EVENT_KIND_KEYS_CHANGED else { return }
+        for compose in open {
+            compose.keysFound(event.kind == PE_EVENT_KIND_KEYS_FOUND ? event.uid : 0)
+        }
+    }
+
+    private func keysFound(_ request: UInt64) {
+        if request != 0, lookups.remove(request) != nil, let said = taken(pe_pgp_find_result(core.handle, request)) {
+            setStatus(said)
+        }
+        refreshSecurity()
+    }
+
+    /// a click on Sign or Encrypt (the toolbar, the menu, the keys): `on` what it is to become; the core may ask first
+    func toggle(_ which: PeComposeSwitch, on: Bool, confirmed: Bool = false) {
+        let strings = CStrings()
+        var message = outgoing(lastHtml, strings)
+        guard let result = pe_compose_toggle(core.handle, account, &message, which, on, confirmed) else {
+            showSecurity()
+            return
+        }
+        let toggled = result.pointee
+        let question = toggled.question
+        let (said, yes, no) = (text(toggled.text), menuless(text(toggled.yes)), menuless(text(toggled.no)))
+        if toggled.lookup != 0 {
+            lookups.insert(toggled.lookup)
+        }
+        if toggled.sign != sign || toggled.encrypt != encrypt {
+            sign = toggled.sign
+            encrypt = toggled.encrypt
+            changed()
+        }
+        pe_compose_toggled_free(result)
+        refreshSecurity()
+        guard question != PE_COMPOSE_QUESTION_NONE else { return }
+        // the safe answer (Cancel, Keep It Encrypted) is the default; turning encryption off is marked as destructive
+        let off = question == PE_COMPOSE_QUESTION_TURN_OFF_ENCRYPT
+        guard ask(said, yes: yes, no: no, style: off ? .warning : .information, destructive: off, safeDefault: true) else { return }
+        switch question {
+        case PE_COMPOSE_QUESTION_MAKE_KEY:
+            // New Key for the account it goes from, then the switch again
+            if KeyActions.makeKey(core: core, accounts: core.accounts().filter { $0.id == account }) != nil {
+                toggle(which, on: on)
+            }
+        case PE_COMPOSE_QUESTION_SHOW_KEYS:
+            KeysWindow.open(core: core)
+            refreshSecurity()
+        default:
+            toggle(which, on: on, confirmed: true)
+        }
+    }
+
+    @objc func signClicked() {
+        // the button changed its own state with the click: the core's answer sets it
+        toggle(PE_COMPOSE_SWITCH_SIGN, on: !sign)
+    }
+
+    @objc func encryptClicked() {
+        toggle(PE_COMPOSE_SWITCH_ENCRYPT, on: !encrypt)
+    }
+
+    /// File > Attach My Public Key: the key of the address it goes from, attached as a file
+    func attachMyKey() {
+        let strings = CStrings()
+        var message = outgoing(lastHtml, strings)
+        var error: UnsafeMutablePointer<CChar>?
+        guard let path = taken(pe_compose_own_key_file(core.handle, account, &message, &error)) else {
+            inform(taken(error) ?? Text.uiNotSent.text, style: .warning)
+            return
+        }
+        addFiles([URL(fileURLWithPath: path)])
+    }
+
+    /// the commands of the menus about the compose window in front
+    func perform(_ command: Command) {
+        switch command {
+        case .composeSign:
+            if security.signEnabled { signClicked() }
+        case .composeEncrypt: encryptClicked()
+        case .attachMyKey: attachMyKey()
+        default: break
+        }
+    }
+
+    /// whether a command of the compose window can be chosen now, and whether it shows checked
+    func validate(_ command: Command) -> (enabled: Bool, on: Bool) {
+        switch command {
+        case .composeSign: (security.signEnabled, security.sign)
+        case .composeEncrypt: (true, security.encrypt)
+        case .attachMyKey: (security.hasOwnKey, false)
+        default: (false, false)
+        }
+    }
+
+    /// Send of a message that can not go as it is signed or encrypted: what is missing asked for, and true
+    private func sendBlocked(_ message: inout PeOutgoing) -> Bool {
+        guard let state = ComposeSecurityState(pe_compose_security(core.handle, account, &message)) else { return false }
+        security = state
+        showSecurity()
+        switch state.block {
+        case PE_COMPOSE_BLOCK_MISSING_KEYS:
+            openRecipientKeys()
+        case PE_COMPOSE_BLOCK_NO_OWN_KEY:
+            // the question of the switch that needs the key: Make a Key, or Encryption Keys
+            toggle(encrypt ? PE_COMPOSE_SWITCH_ENCRYPT : PE_COMPOSE_SWITCH_SIGN, on: true)
+        case PE_COMPOSE_BLOCK_ENCRYPTED_QUOTE:
+            inform(state.blockText, style: .warning)
+        default:
+            return false
+        }
+        return true
+    }
+
+    /// Recipients' Keys, a sheet on the window: Send there sends encrypted, Send Without Encryption without
+    /// encrypting (Sign as the user had it)
+    func openRecipientKeys() {
+        guard keysSheet == nil else { return }
+        let sheet = RecipientKeysSheet(owner: self)
+        keysSheet = sheet
+        let answer = sheet.run(on: window)
+        keysSheet = nil
+        switch answer {
+        case .send:
+            request(.send)
+        case .sendUnencrypted:
+            encrypt = false
+            changed()
+            refreshSecurity()
+            request(.send)
+        case .cancel:
+            break
+        }
+    }
+
+    func findKey(_ address: String) {
+        let request = address.withCString { pe_compose_find_key(core.handle, $0) }
+        if request != 0 {
+            lookups.insert(request)
+        }
+        refreshSecurity()
+    }
+
+    /// Remove from Message: the address out of To, Cc or Bcc
+    func removeRecipient(_ address: String) {
+        let strings = CStrings()
+        var message = outgoing(lastHtml, strings)
+        var toList: UnsafeMutablePointer<CChar>?
+        var ccList: UnsafeMutablePointer<CChar>?
+        var bccList: UnsafeMutablePointer<CChar>?
+        guard address.withCString({ pe_compose_without_recipient(&message, $0, &toList, &ccList, &bccList) }) else { return }
+        for (field, list) in zip([to, cc, bcc], [toList, ccList, bccList]) {
+            field.stringValue = taken(list) ?? field.stringValue
+        }
+        changed()
+        refreshSecurity()
+    }
+
+    func decideKey(_ address: String, useNew: Bool) {
+        _ = address.withCString { pe_pgp_decide(core.handle, $0, useNew) }
+        refreshSecurity()
+    }
+}
+
 extension ComposeWindow: NSToolbarDelegate {
     private static var items: [(String, String, String, Selector)] {
         [
             ("send", Text.uiTbSend.text, "send", #selector(sendClicked)), ("save", Text.uiTbSave.text, "save", #selector(saveClicked)),
             ("attach", Text.uiTbAttach.text, "attach", #selector(attach)),
+            ("sign", Text.uiTbSign.text, "ribbon", #selector(signClicked)),
+            ("encrypt", Text.uiTbEncrypt.text, "lock_closed", #selector(encryptClicked)),
         ]
     }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [NSToolbarItem.Identifier("send"), .space, NSToolbarItem.Identifier("save"), .space, NSToolbarItem.Identifier("attach")]
+        // Sign and Encrypt apart at the end, as Apple Mail keeps its lock and seal away from Send
+        [NSToolbarItem.Identifier("send"), .space, NSToolbarItem.Identifier("save"), .space, NSToolbarItem.Identifier("attach"),
+         .flexibleSpace, NSToolbarItem.Identifier("sign"), NSToolbarItem.Identifier("encrypt")]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -957,14 +1291,40 @@ extension ComposeWindow: NSToolbarDelegate {
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier identifier: NSToolbarItem.Identifier,
                  willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
-        guard let (_, label, icon, action) = ComposeWindow.items.first(where: { $0.0 == identifier.rawValue }) else { return nil }
+        guard let (id, label, icon, action) = ComposeWindow.items.first(where: { $0.0 == identifier.rawValue }) else { return nil }
         let item = NSToolbarItem(itemIdentifier: identifier)
         item.label = label
         item.toolTip = label
-        item.image = Icons.toolbar(icon)
-        item.target = self
-        item.action = action
-        item.isBordered = true
+        guard id == "sign" || id == "encrypt" else {
+            item.image = Icons.toolbar(icon)
+            item.target = self
+            item.action = action
+            item.isBordered = true
+            return item
+        }
+        // a switch that stays pressed while it is on, in a holder that shows its tip while it can not be clicked
+        let button = NSButton(image: Icons.toolbar(icon) ?? NSImage(), target: self, action: action)
+        button.title = ""
+        button.setButtonType(.pushOnPushOff)
+        button.bezelStyle = .toolbar
+        button.setAccessibilityLabel(label)
+        button.setAccessibilityIdentifier("compose.\(id)")
+        let holder = NSView()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        holder.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.leadingAnchor.constraint(equalTo: holder.leadingAnchor), button.trailingAnchor.constraint(equalTo: holder.trailingAnchor),
+            button.topAnchor.constraint(equalTo: holder.topAnchor), button.bottomAnchor.constraint(equalTo: holder.bottomAnchor),
+        ])
+        item.view = holder
+        if id == "sign" {
+            signButton = button
+            signItem = item
+        } else {
+            encryptButton = button
+            encryptItem = item
+        }
+        showSwitches()
         return item
     }
 }

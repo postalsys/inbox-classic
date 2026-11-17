@@ -324,6 +324,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         mailbox.onEvent(event)
         // the messages open in windows of their own
         MessageWindow.onEvent(event)
+        // the compose windows: the recipients' keys looked up, or changed
+        ComposeWindow.onEvent(event)
         // the Dock: what is unread in the Inboxes, when a folder changed
         if event.kind == PE_EVENT_KIND_FOLDER_CHANGED || event.kind == PE_EVENT_KIND_SYNC_FINISHED {
             showUnread()

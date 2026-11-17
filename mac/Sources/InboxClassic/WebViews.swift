@@ -327,7 +327,7 @@ enum Help {
         "contact": "address-book", "group": "address-book", "pick": "address-book", "compose": "compose",
         "keys": "encryption-keys", "key.new": "encryption-keys", "key.backup": "encryption-keys",
         "key.import": "encryption-keys", "key.properties": "encryption-keys", "account.security": "encryption-keys",
-        "key.verify": "verify-key", "protection.details": "protection-details",
+        "key.verify": "verify-key", "protection.details": "protection-details", "recipient.keys": "recipient-keys",
         "setup.export": "setup", "setup.import": "setup", "setup.passphrase": "setup", "setup.done": "setup",
     ]
 

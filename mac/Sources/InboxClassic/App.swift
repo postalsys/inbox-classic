@@ -8,7 +8,8 @@ import Sparkle
 
 /// The command line, options for test runs: --store <file> uses another mail store, --memory-passwords keeps
 /// passwords for this run only, --pin-certificate <file> trusts only that server certificate, --sign-in-page-file
-/// <file> writes the page of a browser sign-in there for the test to open instead of the browser
+/// <file> writes the page of a browser sign-in there for the test to open instead of the browser, --key-server <url>
+/// looks up OpenPGP keys on a server on this computer (the e2e harness), never on the internet
 public struct Arguments {
     public var store: String?
     public var certificate: String?
@@ -23,6 +24,8 @@ public struct Arguments {
     public var background = false
     /// --language <code>: the language of the windows for this run (tests: de, qps), over the one chosen
     public var language: String?
+    /// --key-server <url>: a loopback http server for the lookups of keys (UI tests)
+    public var keyServer: String?
 
     public init(_ arguments: [String]) {
         var rest = arguments.dropFirst().makeIterator()
@@ -36,6 +39,7 @@ public struct Arguments {
             case "--mcp": mcp = true
             case "--background": background = true
             case "--language": language = rest.next()
+            case "--key-server": keyServer = rest.next()
             default:
                 if argument.lowercased().hasPrefix("mailto:") {
                     mailto = argument
@@ -219,6 +223,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             return
         }
         self.core = core
+        if let url = arguments.keyServer {
+            _ = url.withCString { pe_core_use_test_key_server(core.handle, $0) }
+        }
         // the documents dark in a dark window, as Settings has it (Windows keeps them light)
         pe_follow_dark_windows(core.handle)
         Preview.dark = core.darkMessages
@@ -441,7 +448,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
                                        item(for: .importSetup), item(for: .exportSetup), separator(),
                                        item(for: .properties), separator(),
                                        NSMenuItem(title: Text.macCloseWindow.text, action: #selector(NSWindow.performClose(_:)),
-                                                  keyEquivalent: "w")]
+                                                  keyEquivalent: "w"),
+                                       // Apple Mail attaches in File: the compose window's
+                                       separator(), item(for: .attachMyKey)]
         assert(file.allSatisfy { command in fileItems.contains { $0.tag == command.rawValue } })
         _ = submenu(Text.menuFile.text, fileItems)
 
@@ -472,7 +481,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
                                 item(for: .notJunk)])
         _ = submenu(Text.menuTools.text, [item(for: .sync), item(for: .outbox), separator(), item(for: .addressBook),
                                                   item(for: .addSenderToBook), separator(), item(for: .aiAgents), separator(), item(for: .notify),
-                              item(for: .defaultApp)])
+                              item(for: .defaultApp), separator(), item(for: .composeSign), item(for: .composeEncrypt)])
         let window = submenu(Text.macMenuWindow.text, [
             NSMenuItem(title: Text.macMinimize.text, action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"),
             NSMenuItem(title: Text.macZoom.text, action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""),
@@ -536,6 +545,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     /// what each command does; every command of the table is here, the build fails for one that is not
     func perform(_ command: Command) {
         guard let main else { return }
+        // the compose window's own commands: the one in front
+        if command.window == "compose" {
+            ComposeWindow.key?.perform(command)
+            return
+        }
         // a message's own window in front: the commands about a message are about that one
         if let message = MessageWindow.key, message.perform(command) {
             return
@@ -625,6 +639,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .createRuleFromMessage: main.mailbox.createRuleFromMessage()
         case .exportSetup: SetupFiles.export(core: core)
         case .importSetup: SetupFiles.importFile(core: core)
+        // above, for the compose window in front
+        case .composeSign, .composeEncrypt, .attachMyKey: break
         }
     }
 
@@ -683,6 +699,12 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             return true
         }
         guard let command = Command(rawValue: item.tag), item.action == #selector(runCommand(_:)) else { return true }
+        // Sign, Encrypt and Attach My Public Key: only with a compose window in front, checked as its switches are
+        if command.window == "compose" {
+            let state = ComposeWindow.key?.validate(command) ?? (enabled: false, on: false)
+            item.state = state.on ? .on : .off
+            return state.enabled
+        }
         if command == .notify {
             item.state = notify ? .on : .off
         }

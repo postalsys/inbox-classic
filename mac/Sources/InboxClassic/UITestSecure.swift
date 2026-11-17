@@ -489,7 +489,7 @@ extension UITest {
         var ratio = 0.0
         bar.effectiveAppearance.performAsCurrentDrawingAppearance {
             guard let fill = bar.layer?.backgroundColor.flatMap({ NSColor(cgColor: $0) }),
-                  let words = (find("reader.security.words", in: bar) as NSTextField?)?.textColor else { return }
+                  let words = (find(bar.accessibilityIdentifier() + ".words", in: bar) as NSTextField?)?.textColor else { return }
             func luminance(_ color: NSColor) -> Double {
                 guard let c = color.usingColorSpace(.sRGB) else { return 0 }
                 let linear = { (v: CGFloat) -> Double in

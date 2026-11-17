@@ -20,12 +20,29 @@ func inform(_ text: String, title: String = appName, style: AlertStyle = .inform
     run(alert)
 }
 
-/// A question; true for the first button. `destructive` makes the second one the default, as for deleting
+/// A question; true for `yes`. `destructive` marks `yes` as destructive and makes `no` the default, as for deleting;
+/// `safeDefault` makes `no` the alert's first button, its default (Return), and Esc too, whatever its words
 @MainActor
 func ask(_ text: String, title: String = appName, yes: String = Text.uiYes.text, no: String = Text.uiNo.text,
          style: AlertStyle = .warning,
-         destructive: Bool = false) -> Bool {
+         destructive: Bool = false, safeDefault: Bool = false) -> Bool {
     let alert = makeAlert(text, title: title, style: style)
+    if safeDefault {
+        let safe = alert.addButton(withTitle: no)
+        let other = alert.addButton(withTitle: yes)
+        other.hasDestructiveAction = destructive
+        // set here rather than left to AppKit, which did not always give the first button Return
+        safe.keyEquivalent = "\r"
+        other.keyEquivalent = ""
+        // AppKit gives Esc only to a button named Cancel
+        let escape = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            guard event.keyCode == 53, event.window === alert.window else { return event }
+            safe.performClick(nil)
+            return nil
+        }
+        defer { escape.map(NSEvent.removeMonitor) }
+        return run(alert) == .alertSecondButtonReturn
+    }
     let first = alert.addButton(withTitle: yes)
     let second = alert.addButton(withTitle: no)
     if destructive {
