@@ -987,8 +987,8 @@ pgp-publish-pending = keys.openpgp.org poslal na { $addresses } odkaz k potvrzen
 pgp-publish-done = Váš klíč je zveřejněn na keys.openpgp.org pro { $addresses }.
 # review: new
 pgp-publish-failed = Klíč nelze zveřejnit: { $error }
-# review: new
-pgp-keyserver-off = Vyhledávání klíčů na keys.openpgp.org je v Možnostech vypnuté.
+# review: changed
+pgp-keyserver-off = Vyhledávání klíčů na keys.openpgp.org je vypnuté v { $settings }.
 # review: new
 pgp-details-part = Část { $number }: { $label }
 # review: new

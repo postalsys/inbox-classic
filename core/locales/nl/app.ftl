@@ -1140,6 +1140,10 @@ ui-search-encrypted = &Zoeken in versleutelde berichten
 # review: new
 ui-search-encrypted-note = Versleutelde berichten die je opent, worden opgenomen in de zoekindex op deze computer, zodat hun woorden kunnen worden gevonden. De index is niet versleuteld en AI-agents zoeken er nooit in. Zet dit uit om ze uit de index te verwijderen.
 # review: new
+ui-pgp-keyserver = &Sleutels zoeken op keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Als je een bericht versleutelt of naar een sleutel zoekt, wordt het gezochte adres naar keys.openpgp.org gestuurd. Eerst wordt het eigen domein van het adres gevraagd.
+# review: new
 ui-eml-default = .&eml-bestanden openen met Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic opent nu .eml-bestanden.

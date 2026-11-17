@@ -303,16 +303,32 @@ fn topic_body(id: &str, platform: Platform, language: &str, target: HelpTarget) 
 /// The way to a page of the settings window (`reading`) as the platform names it: Tools > Options > Reading,
 /// Inbox Classic > Settings > Reading, Main Menu > Preferences > Reading; the window alone for an empty `page`
 fn settings_path(page: &str, platform: Platform, language: &str) -> String {
-    let b = |id: &str| format!("<b>{}</b>", words(language, id));
-    let mut path = match platform {
-        Platform::Windows => format!("{} &gt; {}", b("menu-tools"), b("cmd-options")),
-        Platform::Mac => format!("Inbox Classic &gt; {}", b("mac-settings")),
-        Platform::Linux => format!("{} &gt; {}", b("gtk-main-menu"), b("gtk-preferences")),
+    settings_way(page, platform, language, |text| format!("<b>{text}</b>"), " &gt; ")
+}
+
+/// [`settings_path`] as plain words, for a message that names where a setting is (the help's words, as the window
+/// names it)
+pub fn settings_words(page: &str, platform: Platform, language: &str) -> String {
+    settings_way(page, platform, language, |text| text.to_string(), " > ")
+}
+
+fn settings_way(
+    page: &str,
+    platform: Platform,
+    language: &str,
+    mark: impl Fn(&str) -> String,
+    between: &str,
+) -> String {
+    let b = |id: &str| mark(&words(language, id));
+    let mut parts = match platform {
+        Platform::Windows => vec![b("menu-tools"), b("cmd-options")],
+        Platform::Mac => vec!["Inbox Classic".to_string(), b("mac-settings")],
+        Platform::Linux => vec![b("gtk-main-menu"), b("gtk-preferences")],
     };
     if let Some((_, label)) = SETTINGS_PAGES.iter().find(|(id, _)| *id == page) {
-        path.push_str(&format!(" &gt; {}", b(label)));
+        parts.push(b(label));
     }
-    path
+    parts.join(between)
 }
 
 /// Where a link to the topic `id` goes: the viewer opens `topic:` itself, the exported pages are files

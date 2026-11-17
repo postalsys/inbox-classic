@@ -978,8 +978,8 @@ pgp-publish-pending = keys.openpgp.org poslao je poveznicu za potvrdu na { $addr
 pgp-publish-done = Vaš je ključ objavljen na keys.openpgp.org za { $addresses }.
 # review: new
 pgp-publish-failed = Ključ nije moguće objaviti: { $error }
-# review: new
-pgp-keyserver-off = Traženje ključeva na keys.openpgp.org isključeno je u Mogućnostima.
+# review: changed
+pgp-keyserver-off = Traženje ključeva na keys.openpgp.org isključeno je u { $settings }.
 # review: new
 pgp-details-part = Dio { $number }: { $label }
 # review: new

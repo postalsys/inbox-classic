@@ -949,8 +949,8 @@ pgp-publish-pending = A keys.openpgp.org megerősítő hivatkozást küldött id
 pgp-publish-done = A kulcsa közzétéve a keys.openpgp.org oldalon ezekhez a címekhez: { $addresses }.
 # review: new
 pgp-publish-failed = A kulcsot nem sikerült közzétenni: { $error }
-# review: new
-pgp-keyserver-off = A kulcsok keresése a keys.openpgp.org oldalon ki van kapcsolva a Beállításokban.
+# review: changed
+pgp-keyserver-off = A kulcsok keresése a keys.openpgp.org oldalon ki van kapcsolva itt: { $settings }.
 # review: new
 pgp-details-part = { $number }. rész: { $label }
 # review: new

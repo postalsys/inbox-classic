@@ -1141,6 +1141,10 @@ ui-search-encrypted = Търсене в &шифрованите съобщени
 # review: new
 ui-search-encrypted-note = Шифрованите съобщения, които отворите, се добавят към индекса за търсене на този компютър, за да могат думите им да бъдат намерени. Индексът не е шифрован и агентите с ИИ никога не търсят в него. Изключете това, за да ги премахнете от индекса.
 # review: new
+ui-pgp-keyserver = &Търсене на ключове в keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Когато шифровате съобщение или търсите ключ, търсеният адрес се изпраща до keys.openpgp.org. Първо се пита собственият домейн на адреса.
+# review: new
 ui-eml-default = &Отваряне на файловете .eml с Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic вече отваря файловете .eml.

@@ -1146,6 +1146,10 @@ ui-search-encrypted = Pesquisar em mensagens &criptografadas
 # review: new
 ui-search-encrypted-note = As mensagens criptografadas que você abre são adicionadas ao índice de pesquisa deste computador, para que suas palavras possam ser encontradas. O índice não é criptografado, e agentes de IA nunca pesquisam nele. Desative esta opção para removê-las do índice.
 # review: new
+ui-pgp-keyserver = &Procurar chaves em keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Quando você criptografa uma mensagem ou procura uma chave, o endereço procurado é enviado para keys.openpgp.org. O próprio domínio do endereço é consultado primeiro.
+# review: new
 ui-eml-default = Abrir arquivos .&eml com o Inbox Classic
 # review: new
 ui-eml-default-done = O Inbox Classic agora abre os arquivos .eml.

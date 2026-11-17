@@ -1146,6 +1146,10 @@ ui-search-encrypted = Ieškoti &užšifruotuose laiškuose
 # review: new
 ui-search-encrypted-note = Atidaryti užšifruoti laiškai įtraukiami į šio kompiuterio paieškos indeksą, kad būtų galima rasti jų žodžius. Indeksas nėra šifruotas, o DI agentai jame niekada neieško. Išjunkite, kad jie būtų pašalinti iš indekso.
 # review: new
+ui-pgp-keyserver = I&eškoti raktų keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kai šifruojate laišką arba ieškote rakto, ieškomas adresas siunčiamas į keys.openpgp.org. Pirmiausia klausiama paties adreso domeno.
+# review: new
 ui-eml-default = &Atidaryti .eml failus su Inbox Classic
 # review: new
 ui-eml-default-done = Dabar .eml failus atidaro Inbox Classic.

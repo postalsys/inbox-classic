@@ -1005,8 +1005,8 @@ pgp-publish-pending = keys.openpgp.org wysłał link potwierdzający na adres { 
 pgp-publish-done = Twój klucz jest opublikowany na keys.openpgp.org dla { $addresses }.
 # review: new
 pgp-publish-failed = Nie udało się opublikować klucza: { $error }
-# review: new
-pgp-keyserver-off = Wyszukiwanie kluczy na keys.openpgp.org jest wyłączone w Opcjach.
+# review: changed
+pgp-keyserver-off = Wyszukiwanie kluczy na keys.openpgp.org jest wyłączone w { $settings }.
 # review: new
 pgp-details-part = Część { $number }: { $label }
 # review: new

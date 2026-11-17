@@ -1145,6 +1145,10 @@ ui-search-encrypted = Meklēt &šifrētos ziņojumos
 # review: new
 ui-search-encrypted-note = Atvērtie šifrētie ziņojumi tiek pievienoti šī datora meklēšanas indeksam, lai to vārdus varētu atrast. Indekss nav šifrēts, un MI aģenti tajā nekad nemeklē. Izslēdziet šo, lai tos noņemtu no indeksa.
 # review: new
+ui-pgp-keyserver = &Meklēt atslēgas vietnē keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kad šifrējat ziņojumu vai meklējat atslēgu, meklētā adrese tiek nosūtīta uz keys.openpgp.org. Vispirms tiek vaicāts pašas adreses domēnam.
+# review: new
 ui-eml-default = Atvērt .&eml failus ar Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic tagad atver .eml failus.

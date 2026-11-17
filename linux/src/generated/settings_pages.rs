@@ -101,7 +101,7 @@ impl SettingsGroup {
             SettingsGroup::DefaultApps => &[Setting::DefaultMailApp, Setting::EmlDefault],
             SettingsGroup::MessageList => &[Setting::Layout, Setting::GroupByConversation, Setting::ListPictures],
             SettingsGroup::Messages => &[Setting::DarkMessages, Setting::PicturesAlways, Setting::TrustedSenders],
-            SettingsGroup::Encryption => &[Setting::SearchEncrypted],
+            SettingsGroup::Encryption => &[Setting::SearchEncrypted, Setting::Keyserver],
             SettingsGroup::Downloading => &[Setting::DownloadAhead, Setting::DownloadLimit],
         }
     }
@@ -131,6 +131,7 @@ pub enum Setting {
     PicturesAlways,
     TrustedSenders,
     SearchEncrypted,
+    Keyserver,
     DownloadAhead,
     DownloadLimit,
 }
@@ -152,6 +153,7 @@ impl Setting {
             Setting::PicturesAlways => "pictures_always",
             Setting::TrustedSenders => "trusted_senders",
             Setting::SearchEncrypted => "search_encrypted",
+            Setting::Keyserver => "keyserver",
             Setting::DownloadAhead => "download_ahead",
             Setting::DownloadLimit => "download_limit",
         }
@@ -172,6 +174,7 @@ impl Setting {
             Setting::PicturesAlways => SettingKind::Switch,
             Setting::TrustedSenders => SettingKind::Button,
             Setting::SearchEncrypted => SettingKind::Switch,
+            Setting::Keyserver => SettingKind::Switch,
             Setting::DownloadAhead => SettingKind::Choice,
             Setting::DownloadLimit => SettingKind::Choice,
         }
@@ -193,6 +196,7 @@ impl Setting {
             Setting::PicturesAlways => Text::UiPicturesAlwaysOption,
             Setting::TrustedSenders => Text::UiTrustedSendersButton,
             Setting::SearchEncrypted => Text::UiSearchEncrypted,
+            Setting::Keyserver => Text::UiPgpKeyserver,
             Setting::DownloadAhead => Text::UiDownloadAhead,
             Setting::DownloadLimit => Text::UiDownloadLimit,
         }
@@ -214,6 +218,7 @@ impl Setting {
             Setting::PicturesAlways => Some(Text::UiPicturesAlwaysWarning),
             Setting::TrustedSenders => None,
             Setting::SearchEncrypted => Some(Text::UiSearchEncryptedNote),
+            Setting::Keyserver => Some(Text::UiPgpKeyserverNote),
             Setting::DownloadAhead => None,
             Setting::DownloadLimit => None,
         }
@@ -235,6 +240,7 @@ impl Setting {
             Setting::PicturesAlways => None,
             Setting::TrustedSenders => None,
             Setting::SearchEncrypted => None,
+            Setting::Keyserver => None,
             Setting::DownloadAhead => None,
             Setting::DownloadLimit => None,
         }

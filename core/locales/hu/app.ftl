@@ -1139,6 +1139,10 @@ ui-search-encrypted = Keresés a &titkosított üzenetekben
 # review: new
 ui-search-encrypted-note = A megnyitott titkosított üzenetek bekerülnek a számítógép keresési indexébe, így a szavaik megtalálhatók. Az index nincs titkosítva, és az MI-ügynökök soha nem keresnek benne. Kapcsolja ki, hogy eltávolítsa őket az indexből.
 # review: new
+ui-pgp-keyserver = Kulcsok keresése a keys.openpgp.org &oldalon
+# review: new
+ui-pgp-keyserver-note = Ha titkosít egy üzenetet vagy kulcsot keres, a keresett cím a keys.openpgp.org oldalra kerül. Először a cím saját tartományát kérdezi meg.
+# review: new
 ui-eml-default = .&eml fájlok megnyitása az Inbox Classickal
 # review: new
 ui-eml-default-done = Az Inbox Classic mostantól megnyitja az .eml fájlokat.

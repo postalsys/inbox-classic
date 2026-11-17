@@ -1022,8 +1022,8 @@ pgp-publish-pending = keys.openpgp.org poslal odkaz na potvrdenie na { $addresse
 pgp-publish-done = Váš kľúč je zverejnený na keys.openpgp.org pre { $addresses }.
 # review: new
 pgp-publish-failed = Kľúč sa nepodarilo zverejniť: { $error }
-# review: new
-pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v Možnostiach.
+# review: changed
+pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v { $settings }.
 # review: new
 pgp-details-part = Časť { $number }: { $label }
 # review: new

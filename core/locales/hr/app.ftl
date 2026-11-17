@@ -1145,6 +1145,10 @@ ui-search-encrypted = Pretraži &šifrirane poruke
 # review: new
 ui-search-encrypted-note = Šifrirane poruke koje otvorite dodaju se u indeks pretraživanja na ovom računalu kako bi se njihove riječi mogle pronaći. Indeks nije šifriran i AI agenti ga nikad ne pretražuju. Isključite ovo kako biste ih uklonili iz indeksa.
 # review: new
+ui-pgp-keyserver = &Traži ključeve na keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kad šifrirate poruku ili tražite ključ, tražena adresa šalje se na keys.openpgp.org. Najprije se pita vlastita domena adrese.
+# review: new
 ui-eml-default = Otvaraj &datoteke .eml u programu Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic sada otvara datoteke .eml.

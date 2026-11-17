@@ -970,8 +970,8 @@ pgp-publish-pending = keys.openpgp.org heeft een bevestigingslink gestuurd naar 
 pgp-publish-done = Je sleutel is gepubliceerd op keys.openpgp.org voor { $addresses }.
 # review: new
 pgp-publish-failed = De sleutel kon niet worden gepubliceerd: { $error }
-# review: new
-pgp-keyserver-off = Sleutels opzoeken op keys.openpgp.org is uitgeschakeld in Opties.
+# review: changed
+pgp-keyserver-off = Sleutels zoeken op keys.openpgp.org staat uit bij { $settings }.
 # review: new
 pgp-details-part = Deel { $number }: { $label }
 # review: new

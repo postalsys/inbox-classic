@@ -1148,6 +1148,10 @@ ui-search-encrypted = Hľadať v &šifrovaných správach
 # review: new
 ui-search-encrypted-note = Šifrované správy, ktoré otvoríte, sa pridávajú do indexu vyhľadávania v tomto počítači, aby bolo možné nájsť ich slová. Index nie je šifrovaný a agenti AI v ňom nikdy nevyhľadávajú. Vypnutím ich z indexu odstránite.
 # review: new
+ui-pgp-keyserver = &Hľadať kľúče na keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Keď šifrujete správu alebo hľadáte kľúč, hľadaná adresa sa odošle na keys.openpgp.org. Najprv sa opýta vlastnej domény adresy.
+# review: new
 ui-eml-default = Otvárať &súbory .eml v Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic teraz otvára súbory .eml.

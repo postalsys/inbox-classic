@@ -967,8 +967,8 @@ pgp-publish-pending = keys.openpgp.org sendte en bekreftelseslenke til { $addres
 pgp-publish-done = Nøkkelen din er publisert på keys.openpgp.org for { $addresses }.
 # review: new
 pgp-publish-failed = Nøkkelen kunne ikke publiseres: { $error }
-# review: new
-pgp-keyserver-off = Oppslag av nøkler på keys.openpgp.org er slått av under Alternativer.
+# review: changed
+pgp-keyserver-off = Søk etter nøkler på keys.openpgp.org er slått av under { $settings }.
 # review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new

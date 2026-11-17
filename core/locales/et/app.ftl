@@ -623,6 +623,10 @@ ui-trusted-senders-empty = Usaldusväärseid saatjaid pole veel lisatud.
 ui-search-encrypted = Otsi &krüptitud kirjadest
 # review: new
 ui-search-encrypted-note = Avatud krüptitud kirjad lisatakse selle arvuti otsinguindeksisse, et nende sõnu saaks leida. Indeks ei ole krüptitud ja tehisintellekti agendid ei otsi sellest kunagi. Lülita see välja, et need indeksist eemaldada.
+# review: new
+ui-pgp-keyserver = &Otsi võtmeid serverist keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kui krüptite kirja või otsite võtit, saadetakse otsitav aadress serverisse keys.openpgp.org. Kõigepealt küsitakse aadressi enda domeenilt.
 # review: changed
 ui-eml-default = Ava .eml-&failid Inbox Classicuga
 ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.

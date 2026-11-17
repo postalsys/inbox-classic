@@ -86,7 +86,7 @@ enum SettingsGroup {
         case .updates: return [.checkForUpdates]
         case .messageList: return [.layout, .groupByConversation, .listPictures]
         case .messages: return [.darkMessages, .picturesAlways, .trustedSenders]
-        case .encryption: return [.searchEncrypted]
+        case .encryption: return [.searchEncrypted, .keyserver]
         case .downloading: return [.downloadAhead, .downloadLimit]
         }
     }
@@ -113,6 +113,7 @@ enum Setting {
     case picturesAlways
     case trustedSenders
     case searchEncrypted
+    case keyserver
     case downloadAhead
     case downloadLimit
 
@@ -132,6 +133,7 @@ enum Setting {
         case .picturesAlways: return .toggle
         case .trustedSenders: return .button
         case .searchEncrypted: return .toggle
+        case .keyserver: return .toggle
         case .downloadAhead: return .choice
         case .downloadLimit: return .choice
         }
@@ -154,6 +156,7 @@ enum Setting {
         case .picturesAlways: return .uiPicturesAlwaysOption
         case .trustedSenders: return .uiTrustedSendersButton
         case .searchEncrypted: return .uiSearchEncrypted
+        case .keyserver: return .uiPgpKeyserver
         case .downloadAhead: return .uiDownloadAhead
         case .downloadLimit: return .uiDownloadLimit
         }
@@ -176,6 +179,7 @@ enum Setting {
         case .picturesAlways: return .uiPicturesAlwaysWarning
         case .trustedSenders: return nil
         case .searchEncrypted: return .uiSearchEncryptedNote
+        case .keyserver: return .uiPgpKeyserverNote
         case .downloadAhead: return nil
         case .downloadLimit: return nil
         }
@@ -198,6 +202,7 @@ enum Setting {
         case .picturesAlways: return nil
         case .trustedSenders: return nil
         case .searchEncrypted: return nil
+        case .keyserver: return nil
         case .downloadAhead: return nil
         case .downloadLimit: return nil
         }

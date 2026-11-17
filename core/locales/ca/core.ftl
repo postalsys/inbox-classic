@@ -981,8 +981,8 @@ pgp-publish-pending = keys.openpgp.org ha enviat un enllaç de confirmació a { 
 pgp-publish-done = La vostra clau està publicada a keys.openpgp.org per a { $addresses }.
 # review: new
 pgp-publish-failed = No s’ha pogut publicar la clau: { $error }
-# review: new
-pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a Opcions.
+# review: changed
+pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a { $settings }.
 # review: new
 pgp-details-part = Part { $number }: { $label }
 # review: new

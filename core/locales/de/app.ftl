@@ -623,6 +623,10 @@ ui-trusted-senders-empty = Es wurden noch keine vertrauenswürdigen Absender hin
 ui-search-encrypted = In verschlüsselten Nachrichten &suchen
 # review: new
 ui-search-encrypted-note = Verschlüsselte Nachrichten, die Sie öffnen, werden in den Suchindex auf diesem Computer aufgenommen, damit ihre Wörter gefunden werden. Der Index ist nicht verschlüsselt, und KI-Agenten durchsuchen ihn nie. Schalten Sie dies aus, um sie aus dem Index zu entfernen.
+# review: new
+ui-pgp-keyserver = Schlüssel &auf keys.openpgp.org suchen
+# review: new
+ui-pgp-keyserver-note = Wenn Sie eine Nachricht verschlüsseln oder einen Schlüssel suchen, wird die gesuchte Adresse an keys.openpgp.org gesendet. Zuerst wird die Domain der Adresse selbst gefragt.
 # review: changed
 ui-eml-default = .&eml-Dateien mit Inbox Classic öffnen
 ui-eml-default-done = Inbox Classic öffnet jetzt .eml-Dateien.

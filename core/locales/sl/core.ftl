@@ -1004,8 +1004,8 @@ pgp-publish-pending = keys.openpgp.org je poslal potrditveno povezavo na { $addr
 pgp-publish-done = Vaš ključ je objavljen na keys.openpgp.org za { $addresses }.
 # review: new
 pgp-publish-failed = Ključa ni bilo mogoče objaviti: { $error }
-# review: new
-pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno v Možnostih.
+# review: changed
+pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno v { $settings }.
 # review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new

@@ -979,8 +979,8 @@ pgp-publish-pending = keys.openpgp.org изпрати връзка за потв
 pgp-publish-done = Ключът ви е публикуван в keys.openpgp.org за { $addresses }.
 # review: new
 pgp-publish-failed = Ключът не можа да бъде публикуван: { $error }
-# review: new
-pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в „Опции“.
+# review: changed
+pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в { $settings }.
 # review: new
 pgp-details-part = Част { $number }: { $label }
 # review: new

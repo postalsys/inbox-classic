@@ -638,8 +638,8 @@ pgp-publish-pending = keys.openpgp.org saatis kinnituslingi aadressile { $addres
 pgp-publish-done = Sinu võti on keys.openpgp.org lehel avaldatud aadressi { $addresses } jaoks.
 # review: new
 pgp-publish-failed = Võtit ei saanud avaldada: { $error }
-# review: new
-pgp-keyserver-off = Võtmete otsimine saidilt keys.openpgp.org on suvandites välja lülitatud.
+# review: changed
+pgp-keyserver-off = Võtmete otsimine serverist keys.openpgp.org on välja lülitatud: { $settings }.
 # review: new
 pgp-details-part = Osa { $number }: { $label }
 # review: new

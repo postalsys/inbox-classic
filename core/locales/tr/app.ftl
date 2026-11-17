@@ -1140,6 +1140,10 @@ ui-search-encrypted = Şifreli iletilerde &ara
 # review: new
 ui-search-encrypted-note = Açtığınız şifreli iletiler, sözcükleri bulunabilsin diye bu bilgisayardaki arama dizinine eklenir. Dizin şifreli değildir ve yapay zeka aracıları dizinde hiçbir zaman arama yapmaz. Dizinden kaldırmak için bunu kapatın.
 # review: new
+ui-pgp-keyserver = A&nahtarları keys.openpgp.org üzerinde ara
+# review: new
+ui-pgp-keyserver-note = Bir iletiyi şifrelediğinizde veya anahtar aradığınızda, aranan adres keys.openpgp.org adresine gönderilir. Önce adresin kendi etki alanına sorulur.
+# review: new
 ui-eml-default = .&eml Dosyalarını Inbox Classic ile Aç
 # review: new
 ui-eml-default-done = Inbox Classic artık .eml dosyalarını açıyor.

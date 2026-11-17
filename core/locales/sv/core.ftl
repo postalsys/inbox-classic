@@ -969,8 +969,8 @@ pgp-publish-pending = keys.openpgp.org skickade en bekräftelselänk till { $add
 pgp-publish-done = Din nyckel är publicerad på keys.openpgp.org för { $addresses }.
 # review: new
 pgp-publish-failed = Nyckeln kunde inte publiceras: { $error }
-# review: new
-pgp-keyserver-off = Sökning efter nycklar på keys.openpgp.org är avstängd i Alternativ.
+# review: changed
+pgp-keyserver-off = Sökning efter nycklar på keys.openpgp.org är avstängd under { $settings }.
 # review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new

@@ -977,8 +977,8 @@ pgp-publish-pending = Το keys.openpgp.org έστειλε σύνδεσμο επ
 pgp-publish-done = Το κλειδί σας δημοσιεύτηκε στο keys.openpgp.org για { $addresses }.
 # review: new
 pgp-publish-failed = Δεν ήταν δυνατή η δημοσίευση του κλειδιού: { $error }
-# review: new
-pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στις Επιλογές.
+# review: changed
+pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στο { $settings }.
 # review: new
 pgp-details-part = Τμήμα { $number }: { $label }
 # review: new

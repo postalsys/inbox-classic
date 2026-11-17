@@ -966,8 +966,8 @@ pgp-publish-pending = keys.openpgp.org şu adreslere bir onay bağlantısı gön
 pgp-publish-done = Anahtarınız keys.openpgp.org'da şu adresler için yayımlandı: { $addresses }.
 # review: new
 pgp-publish-failed = Anahtar yayımlanamadı: { $error }
-# review: new
-pgp-keyserver-off = keys.openpgp.org'da anahtar arama Seçenekler'de kapalı.
+# review: changed
+pgp-keyserver-off = keys.openpgp.org üzerinde anahtar arama { $settings } altında kapalı.
 # review: new
 pgp-details-part = Bölüm { $number }: { $label }
 # review: new

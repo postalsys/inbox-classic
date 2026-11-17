@@ -3606,6 +3606,18 @@ bool pe_pgp_index_encrypted(const struct PeCore *core);
 // `core` must be a live handle.
 bool pe_pgp_set_index_encrypted(const struct PeCore *core, bool on);
 
+// Settings > Reading > Encryption: whether keys are looked up on keys.openpgp.org (Encrypt and Find Key)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pgp_keyserver(const struct PeCore *core);
+
+// Turns it on or off
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pgp_set_keyserver(const struct PeCore *core, bool on);
+
 // The layout of a window `width` wide (96 DPI pixels, points or sp) that shows `current` now, for `mode`: Automatic
 // turns to Columns at 1320 and back to Classic below 1200; Columns chosen holds down to 900
 enum PeLayout pe_layout_for(enum PeLayoutMode mode,

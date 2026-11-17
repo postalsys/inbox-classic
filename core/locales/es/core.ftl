@@ -662,8 +662,8 @@ pgp-publish-pending = keys.openpgp.org envió un enlace de confirmación a { $ad
 pgp-publish-done = Su clave está publicada en keys.openpgp.org para { $addresses }.
 # review: new
 pgp-publish-failed = No se pudo publicar la clave: { $error }
-# review: new
-pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en Opciones.
+# review: changed
+pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en { $settings }.
 # review: new
 pgp-details-part = Parte { $number }: { $label }
 # review: new

@@ -997,8 +997,8 @@ pgp-publish-pending = keys.openpgp.org išsiuntė patvirtinimo nuorodą adresu {
 pgp-publish-done = Jūsų raktas paskelbtas keys.openpgp.org adresams { $addresses }.
 # review: new
 pgp-publish-failed = Rakto paskelbti nepavyko: { $error }
-# review: new
-pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta parinktyse.
+# review: changed
+pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta skiltyje { $settings }.
 # review: new
 pgp-details-part = { $number } dalis: { $label }
 # review: new

@@ -969,8 +969,8 @@ pgp-publish-pending = keys.openpgp.org lähetti vahvistuslinkin osoitteeseen { $
 pgp-publish-done = Avaimesi on julkaistu palvelussa keys.openpgp.org osoitteelle { $addresses }.
 # review: new
 pgp-publish-failed = Avainta ei voitu julkaista: { $error }
-# review: new
-pgp-keyserver-off = Avainten haku palvelusta keys.openpgp.org on poistettu käytöstä Asetuksissa.
+# review: changed
+pgp-keyserver-off = Avainten haku palvelusta keys.openpgp.org on poistettu käytöstä kohdassa { $settings }.
 # review: new
 pgp-details-part = Osa { $number }: { $label }
 # review: new

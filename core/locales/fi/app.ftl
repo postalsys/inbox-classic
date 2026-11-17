@@ -1141,6 +1141,10 @@ ui-search-encrypted = Hae &salatuista viesteistä
 # review: new
 ui-search-encrypted-note = Avaamasi salatut viestit lisätään tämän tietokoneen hakuhakemistoon, jotta niiden sanat löytyvät. Hakemistoa ei ole salattu, eivätkä tekoälyagentit koskaan hae siitä. Poista tämä käytöstä, niin ne poistetaan hakemistosta.
 # review: new
+ui-pgp-keyserver = &Hae avaimia palvelusta keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kun salaat viestin tai haet avainta, haettu osoite lähetetään palveluun keys.openpgp.org. Ensin kysytään osoitteen omalta verkkotunnukselta.
+# review: new
 ui-eml-default = &Avaa .eml-tiedostot Inbox Classicilla
 # review: new
 ui-eml-default-done = Inbox Classic avaa nyt .eml-tiedostot.

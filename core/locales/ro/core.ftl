@@ -1008,8 +1008,8 @@ pgp-publish-pending = keys.openpgp.org a trimis un link de confirmare la { $addr
 pgp-publish-done = Cheia dvs. este publicată pe keys.openpgp.org pentru { $addresses }.
 # review: new
 pgp-publish-failed = Cheia nu a putut fi publicată: { $error }
-# review: new
-pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în Opțiuni.
+# review: changed
+pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în { $settings }.
 # review: new
 pgp-details-part = Partea { $number }: { $label }
 # review: new

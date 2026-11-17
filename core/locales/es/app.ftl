@@ -623,6 +623,10 @@ ui-trusted-senders-empty = Aún no hay remitentes de confianza.
 ui-search-encrypted = &Buscar en mensajes cifrados
 # review: new
 ui-search-encrypted-note = Los mensajes cifrados que abra se añaden al índice de búsqueda de este equipo, para que se puedan encontrar sus palabras. El índice no está cifrado y los agentes de IA nunca buscan en él. Desactívelo para quitarlos del índice.
+# review: new
+ui-pgp-keyserver = Buscar claves &en keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Cuando cifra un mensaje o busca una clave, la dirección buscada se envía a keys.openpgp.org. Antes se consulta al propio dominio de la dirección.
 # review: changed
 ui-eml-default = Abrir &los archivos .eml con Inbox Classic
 ui-eml-default-done = Inbox Classic abre ahora los archivos .eml.

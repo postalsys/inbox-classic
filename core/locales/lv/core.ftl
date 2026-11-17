@@ -1008,8 +1008,8 @@ pgp-publish-pending = keys.openpgp.org nosūtīja apstiprinājuma saiti uz { $ad
 pgp-publish-done = Jūsu atslēga ir publicēta vietnē keys.openpgp.org adresei { $addresses }.
 # review: new
 pgp-publish-failed = Atslēgu nevarēja publicēt: { $error }
-# review: new
-pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta opcijās.
+# review: changed
+pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta sadaļā { $settings }.
 # review: new
 pgp-details-part = { $number }. daļa: { $label }
 # review: new

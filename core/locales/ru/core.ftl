@@ -995,8 +995,8 @@ pgp-publish-pending = keys.openpgp.org отправил ссылку для по
 pgp-publish-done = Ваш ключ опубликован на keys.openpgp.org для { $addresses }.
 # review: new
 pgp-publish-failed = Не удалось опубликовать ключ: { $error }
-# review: new
-pgp-keyserver-off = Поиск ключей на keys.openpgp.org отключен в параметрах.
+# review: changed
+pgp-keyserver-off = Поиск ключей на keys.openpgp.org выключен в разделе { $settings }.
 # review: new
 pgp-details-part = Часть { $number }: { $label }
 # review: new

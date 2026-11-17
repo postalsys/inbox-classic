@@ -1150,6 +1150,10 @@ ui-search-encrypted = Căutare în mesajele &criptate
 # review: new
 ui-search-encrypted-note = Mesajele criptate pe care le deschideți sunt adăugate în indexul de căutare de pe acest computer, ca să le puteți găsi cuvintele. Indexul nu este criptat, iar agenții AI nu caută niciodată în el. Dezactivați opțiunea pentru a le elimina din index.
 # review: new
+ui-pgp-keyserver = Căutare chei &pe keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Când criptați un mesaj sau căutați o cheie, adresa căutată este trimisă la keys.openpgp.org. Mai întâi este întrebat domeniul adresei.
+# review: new
 ui-eml-default = &Deschidere fișiere .eml cu Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic deschide acum fișierele .eml.

@@ -155,6 +155,12 @@ kind = "switch"
 label = "ui-search-encrypted"
 note = "ui-search-encrypted-note"
 
+[[page.group.setting]]
+id = "keyserver"
+kind = "switch"
+label = "ui-pgp-keyserver"
+note = "ui-pgp-keyserver-note"
+
 [[page]]
 id = "downloading"
 label = "ui-download-heading"
