@@ -760,9 +760,9 @@ try {
     $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
     $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
     # the message list's columns (Column in mailbox.cpp)
-    $COL_FROM = 2; $COL_SUBJECT = 3; $COL_RECEIVED = 4; $COL_FOLDER = 5
-    # the columns of a folder's list: attachment, flag, From, Subject, Received; a search adds Folder
-    $FOLDER_COLUMNS = 5
+    $COL_FLAG = 1; $COL_SECURE = 2; $COL_FROM = 3; $COL_SUBJECT = 4; $COL_RECEIVED = 5; $COL_FOLDER = 6
+    # the columns of a folder's list: attachment, flag, the lock, From, Subject, Received; a search adds Folder
+    $FOLDER_COLUMNS = 6
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
     # a tree row's text without its unread count
@@ -868,6 +868,29 @@ try {
         Key $list $VK_HOME
         for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
         Start-Sleep -Milliseconds 1500
+    }
+    # a picture of a part of the list's row $row as the screen shows it, the main window in front: the part $rect gives
+    # for the row (asked while the window is in front); $null when it is empty
+    function CellPicture($row, [scriptblock]$rect) {
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 300
+        $cell = & $rect $row
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
+        $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
+        CopyScreen $picture $cell.Left $cell.Top
+        $picture
+    }
+    # every pixel of the part $rect gives of the row $row (CellPicture) handed to $visit; false when the part is empty.
+    # $visit keeps what it finds in a hashtable of its caller's
+    function ScanCell($row, [scriptblock]$rect, [scriptblock]$visit) {
+        $picture = CellPicture $row $rect
+        if (-not $picture) { return $false }
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) { $null = & $visit $picture.GetPixel($x, $y) }
+        }
+        $true
     }
     SelectFolder 0
     $rows = WaitFor { if ((Rows) -ge 4) { Rows } }
@@ -2435,6 +2458,142 @@ public static class Dragger {
     [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, ($place.Right - $place.Left), ($place.Bottom - $place.Top), 0x16)
     RemoveSecure 'secure-long.eml' 'A long encrypted message'
 
+    # ---- encrypted mail in the list and the search ----
+
+    Step 'encrypted mail in the list and the search'
+    # Reading > Encryption in Options (app.h), the Find box in its field
+    $IDM_OPTIONS = 137; $IDC_OPTIONS_SEARCH_ENCRYPTED = 683; $IDC_OPTIONS_APPLY = 681
+    $IDM_LAYOUT_CLASSIC = 157; $IDM_LAYOUT_COLUMNS = 158
+    $secureFind = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
+    # Search in encrypted messages set in Options with OK; whether it was found
+    function SetSearchEncrypted([bool]$on) {
+        Command $main $IDM_OPTIONS
+        $o = WaitShown 'InboxClassicOptions' 10
+        if (-not $o) { return $false }
+        OptionsPage $o 1
+        $box = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_SEARCH_ENCRYPTED)
+        [void][Native.Win]::SendMessage($box, $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
+        Click $o $IDC_OPTIONS_SEARCH_ENCRYPTED
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+        $box -ne [IntPtr]::Zero
+    }
+    # the subjects the list shows for the words typed in the Find box
+    function FoundSubjects([string]$words) {
+        [void][Native.Win]::SendMessage($secureFind, $WM_SETTEXT, [IntPtr]::Zero, $words)
+        Start-Sleep -Milliseconds 800
+        Settled
+        $count = Rows
+        if ($count -eq 0) { return @() }
+        @(0..($count - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
+    }
+    # the security column of a row (LVM_GETSUBITEMRECT), and its dark pixels as the screen shows them: where its mark is
+    $secureCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]$COL_SECURE -shl 32)) }
+    $secureMark = {
+        param($row)
+        $picture = CellPicture $row $secureCell
+        if (-not $picture) { return '' }
+        $dark = @()
+        for ($x = 0; $x -lt $picture.Width; $x++) {
+            for ($y = 0; $y -lt $picture.Height; $y++) {
+                $p = $picture.GetPixel($x, $y)
+                if ($p.R -lt 120 -and $p.G -lt 120 -and $p.B -lt 120) { $dark += "$x,$y" }
+            }
+        }
+        $dark -join ' '
+    }
+
+    # with Search in encrypted messages off: nothing is decrypted for the list or the search
+    Check (SetSearchEncrypted $false) 'Options has Search in encrypted messages, turned off'
+    $plainSubject = 'Plain words about lunch'
+    AddMessage ("From: Kim Example <kim@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $plainSubject`r`n" +
+        "Message-ID: <plain-beside-secure@example.com>`r`nDate: Sun, 01 Nov 2026 09:00:00 +0000`r`n`r`nNothing protected here.`r`n") @('\Seen')
+    foreach ($file in 'secure-signed.eml', 'secure-encrypted.eml') {
+        AddMessage ([IO.File]::ReadAllText((Join-Path $pgpFiles $file))) @('\Seen')
+    }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $listed = WaitFor { if (@(SubjectRows $plainSubject).Count -eq 1 -and @(SubjectRows 'Signed by Alice').Count -eq 1 -and @(SubjectRows '...').Count -eq 1) { $true } } 30
+    Check ([bool]$listed) 'a plain, a signed and an encrypted message are in the Inbox together, the encrypted one as "..."'
+    $rowOfSubject = { param($subject) @(SubjectRows $subject)[0] }
+    # the plain one selected, so the marks are drawn on the list's white
+    SelectRow (& $rowOfSubject $plainSubject)
+    $lockMark = & $secureMark (& $rowOfSubject '...')
+    $sealMark = & $secureMark (& $rowOfSubject 'Signed by Alice')
+    $plainMark = & $secureMark (& $rowOfSubject $plainSubject)
+    Check ($lockMark -ne '') 'the encrypted message has a mark in the security column'
+    Check ($sealMark -ne '' -and $sealMark -ne $lockMark) 'the signed one has another mark (the seal, not the lock)'
+    Check ($plainMark -eq '') 'the plain one has none'
+    $header = [Native.Win]::SendMessage($list, 0x101F, [IntPtr]::Zero, [IntPtr]::Zero)
+    $headerWidth = { param($column) $r = [Native.Win]::RemoteRect($header, 0x1207, [IntPtr]$column, 0); $r.Right - $r.Left }
+    Check ((& $headerWidth $COL_SECURE) -gt 0 -and (& $headerWidth $COL_SECURE) -eq (& $headerWidth 0)) "the column is as narrow as the paper clip's ($(& $headerWidth $COL_SECURE))"
+    Shot $main 'main-12-lock-in-list'
+    # selected, the lock stays on the highlight
+    SelectRow (& $rowOfSubject '...')
+    Check ((& $secureMark (& $rowOfSubject '...')) -ne '') 'the lock is drawn on a selected row too'
+    Shot $main 'main-12b-lock-selected'
+    # the column layout: the marks among the second line's, "Encrypted message" for its first words; a screen reader
+    # hears Encrypted or Signed (the first column's text in that layout)
+    Command $main $IDM_LAYOUT_COLUMNS
+    Start-Sleep -Seconds 1
+    $spoken = { param($subject) $r = @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) -eq $subject })[0]; if ($null -ne $r) { [Native.Win]::RemoteListText($list, $r, 0) } }
+    $encryptedSpoken = & $spoken '...'
+    $signedSpoken = & $spoken 'Signed by Alice'
+    Check ($encryptedSpoken -match ', Encrypted, ' -and $encryptedSpoken -match 'Encrypted message$') "the encrypted row says Encrypted, and Encrypted message for its first words ($encryptedSpoken)"
+    Check ($signedSpoken -match ', Signed, ') "the signed row says Signed ($signedSpoken)"
+    Check ((& $spoken $plainSubject) -notmatch ', (Encrypted|Signed),') "the plain one says neither ($(& $spoken $plainSubject))"
+    Shot $main 'main-12c-lock-in-columns'
+    Command $main $IDM_LAYOUT_CLASSIC
+    Start-Sleep -Seconds 1
+
+    # the search: is:encrypted, is:signed; with the switch off a word of its text finds nothing, its sender finds it
+    $found = @(FoundSubjects 'in:inbox is:encrypted')
+    Check ($found.Count -eq 1 -and $found[0] -eq '...') "is:encrypted lists the encrypted message alone ($($found -join ', '))"
+    $found = @(FoundSubjects 'in:inbox is:signed')
+    Check ($found.Count -eq 1 -and $found[0] -eq 'Signed by Alice') "is:signed lists the signed one alone ($($found -join ', '))"
+    $found = @(FoundSubjects 'in:inbox -is:encrypted')
+    Check ($found -notcontains '...' -and $found -contains 'Signed by Alice' -and $found -contains $plainSubject) "-is:encrypted lists all but the encrypted one ($($found.Count))"
+    $found = @(FoundSubjects 'alice')
+    Check ($found -contains '...') "its sender finds it ($($found -join ', '))"
+    # opened while the switch is off: shown, but its words stay out of the index
+    $at = [array]::IndexOf($found, '...')
+    if ($at -ge 0) { SelectRow $at }
+    Check ([bool](WaitFor { (WindowText $securityBar) -match '^Encrypted\.' } 20)) "opened, it is decrypted for the reading pane ($(WindowText $securityBar))"
+    $found = @(FoundSubjects 'mill')
+    Check ($found.Count -eq 0) "with the switch off, a word of its text finds nothing, opened or not ($($found -join ', '))"
+    [void](FoundSubjects '')
+    # on again: the background pass decrypts what is downloaded, without it being opened again
+    SelectRow (& $rowOfSubject $plainSubject)
+    Check (SetSearchEncrypted $true) 'Search in encrypted messages turned on again'
+    $found = WaitFor { $f = @(FoundSubjects 'mill'); if ($f.Count -ge 1) { , $f } } 30
+    Check ($null -ne $found) "turned on, the background pass decrypts it: a word of its text finds it ($($found -join ', '))"
+    Shot $main 'search-9-encrypted'
+    [void](FoundSubjects '')
+
+    # an encrypted message with a protected Subject: listed by it once decrypted, the row changing in place while it
+    # is selected
+    AddMessage ([IO.File]::ReadAllText((Join-Path $pgpFiles 'secure-protected-subject.eml'))) @('\Seen')
+    Command $main $IDM_SYNC
+    [void](WaitFor { @(SubjectRows '...').Count -ge 2 } 30)
+    # it and the encrypted message without one are both "..." until it is opened: each opened in turn
+    $selectedRow = { [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) }
+    $renamed = $null
+    foreach ($row in @(SubjectRows '...')) {
+        SelectRow $row
+        $renamed = WaitFor { $r = & $selectedRow; if ($r -ge 0 -and [Native.Win]::RemoteListText($list, $r, $COL_SUBJECT) -eq 'The mill on Friday') { $r } } 10
+        if ($null -ne $renamed) { break }
+    }
+    Check ($null -ne $renamed) "the message with a protected Subject is listed as The mill on Friday, not ..., and stays selected ($(@(0..((Rows) - 1) | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) }) -join ', '))"
+    Shot $main 'main-12d-protected-subject'
+
+    # taken away again
+    foreach ($id in '<plain-beside-secure@example.com>', '<signed@ui-test.example>', '<encrypted@ui-test.example>', '<protected-subject@ui-test.example>') {
+        $added = Find 'INBOX' ([regex]::Escape($id))
+        if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { @(SubjectRows $plainSubject).Count -eq 0 -and @(SubjectRows 'Signed by Alice').Count -eq 0 -and @(SubjectRows 'The mill on Friday').Count -eq 0 } 20)
+
     # ---- opening attachments ----
 
     Step 'opening an attachment'
@@ -3395,31 +3554,8 @@ public static class Dragger {
     SelectFolder 0
     $rowOf = { param($subject) @(SubjectRows $subject)[0] }
     [void](WaitFor { $null -ne (& $rowOf $apple) } 20)
-    # a picture of a part of the list's row $row as the screen shows it, the main window in front: the part $rect gives
-    # for the row (asked while the window is in front); $null when it is empty
-    function CellPicture($row, [scriptblock]$rect) {
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
-        [void][Native.Win]::SetForegroundWindow($main)
-        Start-Sleep -Milliseconds 300
-        $cell = & $rect $row
-        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
-        if ($cell.Right -le $cell.Left -or $cell.Bottom -le $cell.Top) { return $null }
-        $picture = New-Object System.Drawing.Bitmap ($cell.Right - $cell.Left), ($cell.Bottom - $cell.Top)
-        CopyScreen $picture $cell.Left $cell.Top
-        $picture
-    }
-    # every pixel of the part $rect gives of the row $row (CellPicture) handed to $visit; false when the part is empty.
-    # $visit keeps what it finds in a hashtable of its caller's
-    function ScanCell($row, [scriptblock]$rect, [scriptblock]$visit) {
-        $picture = CellPicture $row $rect
-        if (-not $picture) { return $false }
-        for ($x = 0; $x -lt $picture.Width; $x++) {
-            for ($y = 0; $y -lt $picture.Height; $y++) { $null = & $visit $picture.GetPixel($x, $y) }
-        }
-        $true
-    }
-    # LVM_GETSUBITEMRECT of the flag column (1), its bounds
-    $flagCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]1 -shl 32)) }
+    # LVM_GETSUBITEMRECT of the flag column, its bounds
+    $flagCell = { param($row) [Native.Win]::RemoteRect($list, 0x1038, [IntPtr]$row, ([long]$COL_FLAG -shl 32)) }
     # the colour of a row's flag: the most coloured pixel of its flag cell, as the screen shows it
     $flagColor = {
         param($row)
@@ -5925,6 +6061,49 @@ public static class Dragger {
         $options = WaitShown 'InboxClassicOptions'
     }
     if ($options) {
+        # Reading > Encryption: Search in encrypted messages and Look up keys on keys.openpgp.org, both on at first,
+        # each with its note under it (app.h)
+        $IDC_OPTIONS_SEARCH_ENCRYPTED = 683; $IDC_OPTIONS_SEARCH_ENCRYPTED_NOTE = 684; $IDC_OPTIONS_KEYSERVER = 685; $IDC_OPTIONS_KEYSERVER_NOTE = 686
+        $apply = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_APPLY)
+        $boxOn = { param($o, $id) [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $id), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 }
+        OptionsPage $options 1
+        Check ((Visible $options $IDC_OPTIONS_SEARCH_ENCRYPTED) -and (& $boxOn $options $IDC_OPTIONS_SEARCH_ENCRYPTED)) 'Reading has Search in encrypted messages, on'
+        Check ((Visible $options $IDC_OPTIONS_KEYSERVER) -and (& $boxOn $options $IDC_OPTIONS_KEYSERVER)) 'and Look up keys on keys.openpgp.org, on'
+        $searchNote = GetText $options $IDC_OPTIONS_SEARCH_ENCRYPTED_NOTE
+        $keyserverNote = GetText $options $IDC_OPTIONS_KEYSERVER_NOTE
+        Check ($searchNote -match 'not encrypted' -and $searchNote -match 'AI agents never search') "its note says the index is not encrypted and AI agents never search it ($searchNote)"
+        Check ($keyserverNote -match 'address') "the keyserver's note says what is sent ($keyserverNote)"
+        Shot $options 'options-4-encryption'
+        # each off, with Apply, kept when Options opens again; then on again
+        foreach ($id in $IDC_OPTIONS_SEARCH_ENCRYPTED, $IDC_OPTIONS_KEYSERVER) {
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($options, $id), $BM_SETCHECK, [IntPtr]0, [IntPtr]::Zero)
+            Click $options $id
+            Check ([bool](WaitFor { [Native.Win]::IsWindowEnabled($apply) } 5)) "turning $id off enables Apply"
+            Click $options $IDC_OPTIONS_APPLY
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindowEnabled($apply) } 5)) 'Apply sets it'
+            Click $options 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($options) } 5)
+            Command $main $IDM_OPTIONS
+            $options = WaitShown 'InboxClassicOptions'
+            if (-not $options) { break }
+            $apply = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_APPLY)
+            OptionsPage $options 1
+            Check (-not (& $boxOn $options $id)) "Options opened again shows $id off"
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($options, $id), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+            Click $options $id
+            Click $options $IDC_OPTIONS_APPLY
+            [void](WaitFor { -not [Native.Win]::IsWindowEnabled($apply) } 5)
+            Click $options 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($options) } 5)
+            Command $main $IDM_OPTIONS
+            $options = WaitShown 'InboxClassicOptions'
+            if (-not $options) { break }
+            $apply = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_APPLY)
+            OptionsPage $options 1
+            Check (& $boxOn $options $id) "on again, it stays on when Options opens again ($id)"
+        }
+    }
+    if ($options) {
         # grouped again for the steps after, with OK
         OptionsPage $options 1
         $threadsBox = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_THREADS)
@@ -6209,6 +6388,10 @@ public static bool HasIcon(IntPtr window) {
     Start-Sleep -Seconds 6
     $desktop = [Native.Win]::GetDesktopWindow()
     Shot $desktop 'tray-1-notification'
+    # an encrypted message: announced by its sender over "Encrypted message", never the Subject outside its encryption
+    [void](Notified '')
+    AddMessage ([IO.File]::ReadAllText((Join-Path $pgpFiles 'secure-encrypted.eml')))
+    Check ([bool](WaitFor { Notified "Alice Example`nEncrypted message" } 30)) 'an encrypted message is announced as Encrypted message, from Alice Example'
     # a click on the icon brings it back, with the new message in the Inbox
     $WM_TRAY = 0x8000 + 60; $NIN_SELECT = 0x0400
     [void][Native.Win]::PostMessage($main, $WM_TRAY, [IntPtr]::Zero, [IntPtr]$NIN_SELECT)
@@ -6222,6 +6405,9 @@ public static bool HasIcon(IntPtr window) {
     Check ($null -ne $badge) "the taskbar button shows the unread count as an overlay ($([Native.Win]::SendText($main, 0x42414447, '') - 10))"
     $taskbar = [Native.Win]::FindWindow('Shell_TrayWnd', [NullString]::Value)
     if ($taskbar -ne [IntPtr]::Zero) { Shot $taskbar 'tray-3-badge' }
+    $added = Find 'INBOX' ([regex]::Escape('<encrypted@ui-test.example>'))
+    if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    Command $main $IDM_SYNC
 
     Step 'closing'
     # a message being written is asked about first: Cancel keeps the app and the message, No lets both go

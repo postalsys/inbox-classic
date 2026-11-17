@@ -1669,10 +1669,6 @@ const behind = [
 // the screenshots a platform's UI test does not take yet, each a gap to close, or of a feature it does not have
 const notYet = {
     windows: [
-        // OpenPGP PR 10: the apps' part (the lock and the seal in the list, the setting, their UI test steps) follows
-        'main-12-lock-in-list',
-        'search-9-encrypted',
-        'options-4-encryption',
         // the Mac and Linux only: Windows keeps the classic light look
         'dark-1-plain',
         'dark-2-written',
