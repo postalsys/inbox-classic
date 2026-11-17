@@ -609,7 +609,7 @@ pub unsafe extern "C" fn pe_pgp_set_account_key(
     }
 }
 
-/// Options > Security: whether the search index keeps the text of encrypted messages once they are opened
+/// Settings, Reading > Encryption: whether the search index keeps the text of encrypted messages once they are decrypted
 ///
 /// # Safety
 /// `core` must be a live handle.

@@ -3594,7 +3594,7 @@ bool pe_pgp_set_account_key(const struct PeCore *core,
                             const char *fingerprint,
                             bool autocrypt);
 
-// Options > Security: whether the search index keeps the text of encrypted messages once they are opened
+// Settings, Reading > Encryption: whether the search index keeps the text of encrypted messages once they are decrypted
 //
 // # Safety
 // `core` must be a live handle.

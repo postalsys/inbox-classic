@@ -175,9 +175,8 @@ impl Worker {
                 match text {
                     Some((text, subject)) => {
                         store.set_indexed_decrypted(*message, text, subject.as_deref())?;
-                        if subject.is_some() {
-                            changed.insert(*folder);
-                        }
+                        // its row changes: the first words always, the Subject when it had a protected one
+                        changed.insert(*folder);
                     }
                     None => store.mark_decrypt_tried(*message)?,
                 }
