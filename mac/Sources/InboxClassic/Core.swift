@@ -178,6 +178,18 @@ final class Core {
         set { pe_set_always_load_pictures(handle, newValue) }
     }
 
+    /// Settings > Reading > Encryption: "Search in encrypted messages"; off takes their decrypted text out of the index
+    var searchEncrypted: Bool {
+        get { pe_pgp_index_encrypted(handle) }
+        set { _ = pe_pgp_set_index_encrypted(handle, newValue) }
+    }
+
+    /// Settings > Reading > Encryption: "Look up keys on keys.openpgp.org"
+    var keyserver: Bool {
+        get { pe_pgp_keyserver(handle) }
+        set { _ = pe_pgp_set_keyserver(handle, newValue) }
+    }
+
     /// Settings' "Show messages on a dark background when the system is dark", for the documents built from then on
     var darkMessages: Bool {
         get { pe_dark_messages(handle) }
@@ -948,6 +960,8 @@ struct Message {
     let flagColor: UInt8
     let answered: Bool
     let hasAttachments: Bool
+    /// encrypted or signed as a whole, from its structure (the list's lock or rosette)
+    let protection: PeProtection
     /// bold: unread, or a collapsed conversation's row with an unread message (the core decides)
     let bold: Bool
     /// its place in a list grouped by conversation: the conversation (0 when not grouped), 0 for the conversation's
@@ -990,6 +1004,7 @@ struct Message {
         flagColor = message.flag_color
         answered = message.answered
         hasAttachments = message.has_attachments
+        protection = message.protection
         thread = message.thread
         threadDepth = message.thread_depth
         threadCount = message.thread_count

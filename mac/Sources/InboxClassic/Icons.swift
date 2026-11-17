@@ -58,6 +58,11 @@ enum Icons {
     /// drawn in the paper clip's colour (white on a selected row, as the clip is); the card says how bad it is
     static var bounce: NSImage? { symbol("exclamationmark.circle", key: "bounce", template: true) }
 
+    /// The marks of a message encrypted or signed as a whole: the security bar's lock and rosette, so the row and the bar
+    /// say the same; templates in the paper clip's colour (white on a selected row, as the clip is)
+    static var encrypted: NSImage? { symbol("lock.fill", key: "encrypted", template: true) }
+    static var signed: NSImage? { symbol("rosette", key: "signed", template: true) }
+
     /// A system symbol at the list's size, cached under `key`: a template the cell tints, or drawn in `colors`
     private static func symbol(_ name: String, key: String, colors: [NSColor] = [], template: Bool = false) -> NSImage? {
         if let image = cache[key] { return image }

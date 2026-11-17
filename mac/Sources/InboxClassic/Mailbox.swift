@@ -772,7 +772,7 @@ public final class Mailbox: NSObject {
     var grouped: Bool { listView.grouped }
 
     private enum ColumnID: String, CaseIterable {
-        case attach, flag, from, subject, received, folder
+        case attach, flag, secure, from, subject, received, folder
     }
 
     private func setUpList() {
@@ -796,7 +796,7 @@ public final class Mailbox: NSObject {
         let columns: [(ColumnID, String, CGFloat)] = [
             // no envelope, Watch or Size column: bold says a message is unread, the menus say a conversation is watched,
             // and the subject gets the room
-            (.attach, "", 22), (.flag, "", 22), (.from, Text.uiColFrom.text, 200), (.subject, Text.headerSubject.text, 420),
+            (.attach, "", 22), (.flag, "", 22), (.secure, "", 22), (.from, Text.uiColFrom.text, 200), (.subject, Text.headerSubject.text, 420),
             (.received, Text.uiColReceived.text, 130),
         ]
         for (id, title, width) in columns {
@@ -804,12 +804,15 @@ public final class Mailbox: NSObject {
         }
         // the paper clip and the flag in their headers, as Outlook Express has them (a header cell does not draw the
         // image of a column without a title on its own)
-        for (id, image) in [("attach", Icons.list("attach")), ("flag", Icons.list("flag"))] {
+        for (id, image) in [("attach", Icons.list("attach")), ("flag", Icons.list("flag")), ("secure", Icons.encrypted)] {
             guard let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id)), let image else { continue }
             let header = IconHeaderCell(textCell: "")
             header.icon = image
             column.headerCell = header
         }
+        // the lock alone in a header does not say what the column is
+        list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.secure.rawValue))?.headerToolTip =
+            Text.uiSettingsEncryption.text
         showSortIndicator()
     }
 
@@ -820,7 +823,7 @@ public final class Mailbox: NSObject {
         }
         column.title = title
         column.width = width
-        if [.attach, .flag].contains(id) {
+        if [.attach, .flag, .secure].contains(id) {
             column.minWidth = width
             column.maxWidth = width
             column.resizingMask = []
@@ -1199,6 +1202,8 @@ public final class Mailbox: NSObject {
     fileprivate func sortBy(_ column: NSTableColumn) {
         let field: PeSortField
         switch ColumnID(rawValue: column.identifier.rawValue) {
+        // the marks' columns sort nothing, as Windows' do
+        case .attach, .flag, .secure: return
         case .from: field = PE_SORT_FIELD_FROM
         case .subject: field = PE_SORT_FIELD_SUBJECT
         default: field = PE_SORT_FIELD_DATE
@@ -2789,11 +2794,12 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             return rowCell(tableView, message)
         }
         switch ColumnID(rawValue: id.rawValue) {
-        case .attach, .flag:
+        case .attach, .flag, .secure:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
             switch ColumnID(rawValue: id.rawValue) {
             // a bounce's mark in the paper clip's place, whether or not it has files
             case .attach: cell.show(message.attachIcon)
+            case .secure: cell.show(message.secureIcon, tip: message.secureWords)
             default: cell.show(message.flagIcons.plain, selected: message.flagIcons.selected)
             }
             return cell
@@ -3027,10 +3033,13 @@ final class IconCell: NSTableCellView {
     private var onSelection: NSImage?
 
     /// `image`, and `selected` in its place on a selected row (a coloured flag turns white there, as Mail shows it,
-    /// so a blue flag stays visible on the blue of the selection)
-    func show(_ image: NSImage?, selected: NSImage? = nil) {
+    /// so a blue flag stays visible on the blue of the selection); `tip`: what the mark means, its tooltip and the
+    /// words a screen reader says of it
+    func show(_ image: NSImage?, selected: NSImage? = nil, tip: String? = nil) {
         plain = image
         onSelection = selected
+        toolTip = tip
+        icon.setAccessibilityLabel(tip)
         update()
     }
 
@@ -3115,6 +3124,25 @@ extension Message {
     /// the mark in the paper clip's place: a bounce's whether or not it has files, else the paper clip, or none
     var attachIcon: NSImage? {
         bounce ? Icons.bounce : (hasAttachments ? Icons.list("attach") : nil)
+    }
+
+    /// the lock of a message encrypted as a whole, else the rosette of a signed one, or none: encrypted says more, as an
+    /// encrypted message is often signed inside too
+    var secureIcon: NSImage? {
+        switch protection {
+        case PE_PROTECTION_ENCRYPTED: Icons.encrypted
+        case PE_PROTECTION_SIGNED: Icons.signed
+        default: nil
+        }
+    }
+
+    /// the words of that mark: its tooltip and what a screen reader says of the row
+    var secureWords: String? {
+        switch protection {
+        case PE_PROTECTION_ENCRYPTED: Text.uiRowEncrypted.text
+        case PE_PROTECTION_SIGNED: Text.uiRowSigned.text
+        default: nil
+        }
     }
 
     /// its flag in its colour, and white for a selected row (a blue flag stays visible on the selection's blue)
@@ -3220,6 +3248,8 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     private let folder = MessageRowCell.label(11)
     private let attach = NSImageView()
     private let flag = NSImageView()
+    /// the lock or the rosette, left of the paper clip
+    private let secure = NSImageView()
     private let snippet = MessageRowCell.label(12)
     private let count = MessageRowCell.label(12)
     let disclosure = NSButton()
@@ -3264,7 +3294,7 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         dot.wantsLayer = true
         dot.layer?.cornerRadius = 3.5
         dot.translatesAutoresizingMaskIntoConstraints = false
-        for icon in [attach, flag] {
+        for icon in [secure, attach, flag] {
             icon.translatesAutoresizingMaskIntoConstraints = false
             icon.widthAnchor.constraint(equalToConstant: 14).isActive = true
             icon.heightAnchor.constraint(equalToConstant: 14).isActive = true
@@ -3276,7 +3306,7 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         setUpDisclosure(disclosure, action: #selector(clicked))
         let text = NSStackView(views: [
             MessageRowCell.line(who, [date], baseline: true),
-            MessageRowCell.line(subject, [folder, attach, flag]),
+            MessageRowCell.line(subject, [folder, secure, attach, flag]),
             MessageRowCell.line(snippet, [count, disclosure]),
         ])
         text.orientation = .vertical
@@ -3311,6 +3341,9 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    /// the lock or the rosette the row shows, nil for none (for the UI test)
+    var secureMark: NSImage? { secure.isHidden ? nil : secure.image }
 
     /// the row shows itself unread: its dot, and its subject bold (for the UI test)
     var unreadShown: Bool {
@@ -3354,9 +3387,16 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         folder.isHidden = place.isEmpty
         attach.image = message.attachIcon
         attach.isHidden = attach.image == nil
+        secure.image = message.secureIcon
+        secure.isHidden = secure.image == nil
+        secure.toolTip = message.secureWords
         flags = message.flagIcons
         flag.isHidden = !message.flagged
         snippet.stringValue = message.snippet
+        // "Encrypted message" is the core's word for a state, not the sender's: in italics, so it reads as one
+        let state = message.protection == PE_PROTECTION_ENCRYPTED && message.snippet == Text.listEncrypted.text
+        snippet.font = state ? NSFontManager.shared.convert(.systemFont(ofSize: 12), toHaveTrait: .italicFontMask)
+            : .systemFont(ofSize: 12)
         // the count is a number alone, which needs no words of a language
         count.stringValue = "\(message.threadCount)"
         count.isHidden = !message.opens
@@ -3376,6 +3416,7 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         parts += [name, subject.stringValue, when]
         if message.flagged { parts.append(Text.uiRowFlagged.text) }
         if message.hasAttachments { parts.append(Text.uiRowAttachments.text) }
+        if let words = message.secureWords { parts.append(words) }
         if message.opens { parts.append(Text.uiRowMessages.text(["count": message.threadCount])) }
         if !message.snippet.isEmpty { parts.append(message.snippet) }
         return parts.joined(separator: ", ")
@@ -3396,7 +3437,9 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
             picture.onSelection = selected
         }
         flag.image = selected ? (flags.selected ?? flags.plain) : flags.plain
-        attach.contentTintColor = selected ? .alternateSelectedControlTextColor : nil
+        for icon in [secure, attach] {
+            icon.contentTintColor = selected ? .alternateSelectedControlTextColor : nil
+        }
     }
 
     @objc private func clicked() {

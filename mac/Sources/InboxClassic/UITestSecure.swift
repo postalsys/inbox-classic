@@ -310,6 +310,156 @@ extension UITest {
         await shot(main.window, "secure-13-dark")
         onMain { NSApp.appearance = before }
         await removeFixture(uid)
+        try await secureInList()
+    }
+
+    /// the mark in the classic list's security column on row `index`
+    func secureColumnMark(_ index: Int) -> NSImage? {
+        let column = list.column(withIdentifier: NSUserInterfaceItemIdentifier("secure"))
+        guard column >= 0, let cell = list.view(atColumn: column, row: index, makeIfNecessary: true) else { return nil }
+        return views(NSImageView.self, in: cell).first?.image
+    }
+
+    /// the row of the list whose message is `uid`
+    func listIndex(uid: UInt64) -> Int? {
+        (0..<list.numberOfRows).first { main.mailbox.row($0)?.uid == uid }
+    }
+
+    /// the uids the list shows now
+    var listedUids: Set<UInt64> {
+        Set((0..<list.numberOfRows).compactMap { main.mailbox.row($0)?.uid })
+    }
+
+    /// encrypted and signed mail in the list and the search (19i): the lock and the rosette on their rows, in both
+    /// layouts, light and dark; is:encrypted and is:signed; with Search in encrypted messages off its words are not
+    /// found, on the background pass decrypts it without its being opened, and a protected Subject takes the place of
+    /// the outer "..."
+    func secureInList() async throws {
+        step("encrypted mail in the list")
+        let core = main.core
+        onMain { core.searchEncrypted = false }
+        await search("")
+        selectFolder(named: "Inbox")
+        try await addMessage("From: Alice Example <alice@example.org>\r\nTo: testuser@inboxclassic.test\r\n"
+            + "Subject: Walk on Sunday\r\nMessage-ID: <plain-walk@example.org>\r\nDate: Sun, 01 Nov 2026 09:00:00 +0000\r\n\r\n"
+            + "Shall we walk to the lake on Sunday?\r\n", flags: ["\\Seen"])
+        let signed = try await addFixture("secure-signed.eml")
+        let encrypted = try await addFixture("secure-encrypted.eml")
+        command(.sync)
+        guard let plainMessage = await waitFor(30, { () -> Message? in
+            guard listIndex(uid: signed) != nil, listIndex(uid: encrypted) != nil else { return nil }
+            return (0..<list.numberOfRows).compactMap { main.mailbox.row($0) }.first { $0.subject == "Walk on Sunday" }
+        }) else {
+            throw Failed(description: "the three messages are not in the list")
+        }
+        let plain = plainMessage.uid
+        let row = { (uid: UInt64) in self.listIndex(uid: uid).flatMap { self.main.mailbox.row($0) } }
+        check(row(encrypted)?.protection == PE_PROTECTION_ENCRYPTED && row(signed)?.protection == PE_PROTECTION_SIGNED
+              && row(plain)?.protection == PE_PROTECTION_NONE,
+              "the core knows each one's protection from its structure, before it is opened")
+        let marks = { (uid: UInt64) in self.listIndex(uid: uid).flatMap { self.secureColumnMark($0) } }
+        check(marks(encrypted) === Icons.encrypted && marks(signed) === Icons.signed && marks(plain) == nil,
+              "the classic list's security column: the lock on the encrypted row, the rosette on the signed one, nothing on the plain one")
+        let header = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("secure"))
+        check(header?.headerToolTip == Text.uiSettingsEncryption.text && (header?.width ?? 99) <= 22,
+              "a narrow column beside the flag's, its header the lock with a tooltip (\(header?.headerToolTip ?? ""))")
+        let width = { (id: String) in self.list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id))?.width ?? 0 }
+        check(width("subject") > width("from") && width("from") >= 150,
+              "From and Subject keep their room (\(Int(width("from"))), \(Int(width("subject"))))")
+        check(row(encrypted)?.subject == "..." && row(encrypted)?.snippet == Text.listEncrypted.text
+              && row(encrypted)?.hasAttachments == false,
+              "with Search in encrypted messages off, the encrypted row is the outer \"...\", \"Encrypted message\", no paper clip (\(row(encrypted)?.snippet ?? ""))")
+        let tip = listIndex(uid: encrypted).flatMap { list.view(atColumn: list.column(withIdentifier: NSUserInterfaceItemIdentifier("secure")), row: $0, makeIfNecessary: true)?.toolTip }
+        check(tip == Text.uiRowEncrypted.text, "its mark's tooltip says Encrypted (\(tip ?? ""))")
+        // a signed row selected: its mark stays visible on the selection (the encrypted one would be opened)
+        if let at = listIndex(uid: signed) {
+            list.scrollRowToVisible(at)
+            await selectRow(at)
+        }
+        await shot(main.window, "main-12-lock-in-list-classic")
+
+        command(.layoutColumns)
+        check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_COLUMNS }, "the column layout")
+        let cellOf = { (uid: UInt64) in self.listIndex(uid: uid).flatMap { self.rowCell($0) } }
+        check(cellOf(encrypted)?.secureMark === Icons.encrypted && cellOf(signed)?.secureMark === Icons.signed
+              && cellOf(plain)?.secureMark == nil,
+              "its rows: the lock among the encrypted row's marks, the rosette among the signed one's, none on the plain one")
+        let spoken = cellOf(encrypted)?.accessibilityLabel() ?? ""
+        check(spoken.contains(Text.uiRowEncrypted.text) && spoken.contains(Text.listEncrypted.text)
+              && (cellOf(signed)?.accessibilityLabel() ?? "").contains(Text.uiRowSigned.text),
+              "a screen reader hears Encrypted and Signed (\(spoken))")
+        await shot(main.window, "main-12-lock-in-list")
+        let before = NSApp.appearance
+        onMain { NSApp.appearance = NSAppearance(named: .darkAqua) }
+        await pause(0.5)
+        await shot(main.window, "main-12-lock-in-list-dark")
+        command(.layoutClassic)
+        _ = await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_CLASSIC && list.headerView != nil }
+        main.mailbox.placeDividers()
+        await pause(0.5)
+        await shot(main.window, "main-12-lock-in-list-classic-dark")
+        onMain { NSApp.appearance = before }
+
+        step("searching encrypted mail")
+        await search("is:encrypted")
+        check(listedUids == [encrypted], "is:encrypted lists the encrypted message alone (\(list.numberOfRows))")
+        await search("is:signed")
+        check(listedUids == [signed], "is:signed the signed one alone (\(list.numberOfRows))")
+        await search("-is:encrypted")
+        check(!listedUids.contains(encrypted) && listedUids.isSuperset(of: [signed, plain]),
+              "-is:encrypted all but the encrypted one (\(list.numberOfRows))")
+        await search("mill")
+        check(!listedUids.contains(encrypted), "with the switch off, a word of its text (mill) finds nothing")
+        await search("alice")
+        check(listedUids.contains(encrypted), "while its envelope (alice) finds it")
+
+        // on: the background pass decrypts what is downloaded, without its being opened
+        final class Announced { var all: [(title: String, text: String)] = [] }
+        let announced = Announced()
+        TestHooks.notified = { title, text in announced.all.append((title, text)) }
+        defer { TestHooks.notified = nil }
+        onMain {
+            core.searchEncrypted = true
+            core.downloadAhead = PE_DOWNLOAD_AHEAD_RECENT
+        }
+        await search("")
+        selectFolder(named: "Inbox")
+        let raw = try String(contentsOf: pgpFixtures.appendingPathComponent("secure-protected-subject.eml"), encoding: .utf8)
+        try await addMessage(raw)
+        command(.sync)
+        guard let protected = await waitFor(30, { () -> UInt64? in
+            (0..<list.numberOfRows).compactMap { main.mailbox.row($0) }
+                .first { $0.protection == PE_PROTECTION_ENCRYPTED && $0.uid != encrypted }?.uid
+        }) else {
+            throw Failed(description: "secure-protected-subject.eml is not in the list")
+        }
+        check(await waitUntil(30) { announced.all.contains { $0.text.contains(Text.listEncrypted.text) } }
+              && announced.all.contains { "\($0.title) \($0.text)".contains("Alice Example") }
+              && !announced.all.contains { $0.text.contains("mill") },
+              "its new mail notification says \"Encrypted message\" (\(announced.all.map { "\($0.title): \($0.text)" }))")
+        // the plain message selected while the encrypted ones change beside it
+        if let at = listIndex(uid: plain) {
+            await selectRow(at)
+        }
+        let scrolled = list.enclosingScrollView?.contentView.bounds.origin
+        check(await waitUntil(60) { row(protected)?.subject == "The mill on Friday" },
+              "secure-protected-subject.eml is listed by its protected Subject once decrypted, not \"...\" (\(row(protected)?.subject ?? ""))")
+        check(await waitUntil(30) { row(encrypted)?.snippet != Text.listEncrypted.text && row(encrypted)?.snippet.isEmpty == false },
+              "the encrypted row shows its first words, without the folder chosen again (\(row(encrypted)?.snippet ?? ""))")
+        check(list.selectedRowIndexes.count == 1 && main.mailbox.row(list.selectedRow)?.uid == plain
+              && list.enclosingScrollView?.contentView.bounds.origin == scrolled,
+              "the selection and the scroll stay where they were as the rows change")
+        check(await waitUntil(30) {
+            await search("mill")
+            return listedUids.contains(encrypted)
+        }, "on again, the background pass decrypts it without its being opened: mill finds it")
+        await shot(main.window, "search-9-encrypted")
+        onMain { core.downloadAhead = PE_DOWNLOAD_AHEAD_NEVER }
+        await search("")
+        selectFolder(named: "Inbox")
+        for uid in [encrypted, signed, protected, plain] {
+            await removeFixture(uid)
+        }
     }
 
     /// Print of the message shown: every part's text on the paper
