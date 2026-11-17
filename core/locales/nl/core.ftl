@@ -602,60 +602,38 @@ pgp-publish-done = Je sleutel is gepubliceerd op keys.openpgp.org voor { $addres
 pgp-publish-failed = De sleutel kon niet worden gepubliceerd: { $error }
 pgp-keyserver-off = Sleutels zoeken op keys.openpgp.org staat uit bij { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Versleuteld en ondertekend: alleen jij en { $addresses } kunnen het lezen.
-   *[other] Versleuteld en ondertekend: alleen jij en de { $count } ontvangers kunnen het lezen.
+    [one] Het bericht wordt bij het verzenden versleuteld en ondertekend. Alleen jij en { $addresses } kunnen de inhoud lezen.
+   *[other] Het bericht wordt bij het verzenden versleuteld en ondertekend. Alleen jij en de { $count } ontvangers kunnen de inhoud lezen.
 }
-# review: new
-pgp-compose-encrypt-ready = Het wordt versleuteld en ondertekend. Voeg ontvangers toe van wie je de sleutel hebt.
-# review: new
+pgp-compose-encrypt-ready = Het bericht wordt bij het verzenden versleuteld en ondertekend. Voeg ontvangers toe van wie je een bruikbare sleutel hebt.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } heeft geen sleutel, dus het bericht kan nog niet worden versleuteld.
-   *[other] { $count } ontvangers hebben geen sleutel, dus het bericht kan nog niet worden versleuteld: { $addresses }.
+    [one] Er is geen bruikbare sleutel voor deze ontvanger: { $addresses }. Het bericht kan nog niet worden versleuteld.
+   *[other] Voor { $count } ontvangers ontbreken bruikbare sleutels: { $addresses }. Het bericht kan nog niet worden versleuteld.
 }
-# review: new
 pgp-compose-looking = Sleutels van { $addresses } worden gezocht...
-# review: new
-pgp-compose-signed = Ondertekend: ontvangers kunnen controleren dat het van jou komt en niet is gewijzigd.
-# review: new
+pgp-compose-signed = Het bericht wordt bij het verzenden digitaal ondertekend. Ontvangers kunnen de handtekening controleren en zien of de inhoud is gewijzigd.
 pgp-compose-reply-clear = Niet versleuteld, hoewel het bericht dat je beantwoordt of doorstuurt dat wel was.
-# review: new
-pgp-compose-encrypted-files = Er zijn bestanden van een versleuteld bericht bijgevoegd, dus dit bericht kan alleen versleuteld worden verzonden. Zet Versleutelen aan, of verwijder die bestanden.
-# review: new
-pgp-compose-sign-tip = Het bericht met je sleutel ondertekenen, zodat ontvangers kunnen controleren dat het van jou komt en niet is gewijzigd
-# review: new
-pgp-compose-sign-tip-encrypted = Een versleuteld bericht wordt altijd ondertekend
-# review: new
-pgp-compose-encrypt-tip = Het bericht versleutelen, zodat alleen jij en de ontvangers het kunnen lezen
-# review: new
-pgp-compose-make-key = Je hebt nog geen sleutel voor { $address }. Nu een maken? Daarmee kunnen je berichten worden ondertekend en versleuteld.
-# review: new
-pgp-compose-key-unusable = Je sleutel voor { $address } kan niet worden gebruikt ({ $state }). Open Versleutelingssleutels om de back-up ervan te importeren of een nieuwe sleutel te maken.
-# review: new
-pgp-compose-encrypt-off-quote = Dit bericht citeert of stuurt een versleuteld bericht door. Zonder versleuteling kan het pas worden verzonden als je verwijdert wat het citeert. Versleuteling toch uitzetten?
-# review: new
-pgp-compose-encrypt-off-reply = Dit bericht beantwoordt een versleuteld bericht of stuurt het door. Zonder versleuteling kan iedereen die je bericht onderweg verwerkt het lezen. Versleuteling uitzetten?
-# review: new
+pgp-compose-encrypted-files = Dit bericht bevat bijlagen uit een versleuteld bericht en kan daarom alleen versleuteld worden verzonden. Zet “Versleutelen” aan of verwijder die bijlagen.
+pgp-compose-sign-tip = Het bericht bij het verzenden digitaal ondertekenen, zodat ontvangers kunnen controleren of de inhoud ongewijzigd is
+pgp-compose-sign-tip-encrypted = Een versleuteld bericht wordt bij het verzenden altijd ondertekend
+pgp-compose-encrypt-tip = De inhoud van het bericht bij het verzenden versleutelen, zodat alleen jij en de ontvangers die kunnen lezen
+pgp-compose-make-key = Voor { $address } is nog geen eigen sleutel ingesteld. Wil je er nu een maken? Daarmee kun je berichten ondertekenen en versleutelen.
+pgp-compose-key-unusable = Je sleutel voor { $address } kan niet worden gebruikt. Reden: { $state }
+    Open “Versleutelingssleutels” om een back-up van deze sleutel te importeren of een nieuwe sleutel te maken.
+pgp-compose-encrypt-off-quote = Dit bericht bevat nog tekst, afbeeldingen of bijlagen uit een versleuteld bericht. Verwijder die voordat je het onversleuteld verzendt. Wil je de versleuteling toch uitzetten?
+pgp-compose-encrypt-off-reply = Het oorspronkelijke bericht was versleuteld. Als je je antwoord of het doorgestuurde bericht onversleuteld verzendt, kunnen mailservers die het bericht verwerken de inhoud lezen. Wil je de versleuteling uitzetten?
 pgp-recipient-verified = Sleutel geverifieerd
-# review: new
 pgp-recipient-found = Sleutel niet geverifieerd
-# review: new
 pgp-recipient-own = Je eigen sleutel
-# review: new
 pgp-recipient-looking = Sleutel zoeken...
-# review: new
 pgp-recipient-missing = Geen sleutel
-# review: new
-pgp-recipient-not-found = Geen sleutel: op { $date } niet gevonden
-# review: new
+pgp-recipient-not-found = Geen sleutel gevonden. Laatst gezocht: { $date }
 pgp-recipient-unusable = Sleutel kan niet worden gebruikt: { $state }
-# review: new
-pgp-recipients-intro = Het bericht wordt versleuteld voor de sleutel van elke ontvanger, en voor die van jou.
-# review: new
+pgp-recipients-intro = Inbox Classic gebruikt de sleutels van alle ontvangers en je eigen sleutel om het bericht te versleutelen.
 pgp-recipients-intro-missing = { $count ->
-    [one] Eén ontvanger heeft geen sleutel om voor te versleutelen. Zoek de sleutel, verwijder de ontvanger uit dit bericht, of verzend het zonder versleuteling.
-   *[other] { $count } ontvangers hebben geen sleutel om voor te versleutelen. Zoek hun sleutels, verwijder hen uit dit bericht, of verzend het zonder versleuteling.
+    [one] Voor één ontvanger ontbreekt een bruikbare sleutel. Zoek de sleutel of verwijder de ontvanger uit het bericht. Je kunt het bericht alleen onversleuteld verzenden als het geen tekst, afbeeldingen of bijlagen uit versleutelde berichten meer bevat.
+   *[other] Voor { $count } ontvangers ontbreken bruikbare sleutels. Zoek hun sleutels of verwijder deze ontvangers uit het bericht. Je kunt het bericht alleen onversleuteld verzenden als het geen tekst, afbeeldingen of bijlagen uit versleutelde berichten meer bevat.
 }
 pgp-details-part = Deel { $number }: { $label }
 pgp-details-signed = Ondertekend op { $when } met de sleutel { $key }

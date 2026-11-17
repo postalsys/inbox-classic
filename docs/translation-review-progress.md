@@ -5,21 +5,24 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Dutch compose signing/encryption additions.** German, Spanish, Estonian and French have all
-  40 new compose entries and both help targets reviewed. French adds 17 catalog improvements and 19 changed
-  help lines, including five explicitly reopened older writing-help passages. Other prior prose is retained.
-  Exact targets/context are in `compose-sign-encrypt-context`; feature `162c0dd2` was integrated in `3552434d`.
-- Continue the compose work for nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu, then the broader drafts.
+- **Next: Italian compose signing/encryption additions.** German, Spanish, Estonian, French and Dutch
+  have all 40 new compose entries and both help targets reviewed. Dutch adds 15 catalog improvements and
+  15 changed help lines; all earlier writing-help prose is preserved. Exact targets/context are recorded in
+  `compose-sign-encrypt-context`; feature `162c0dd2` was integrated in `3552434d`.
+- Continue the compose work for it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu, then the broader drafts.
   The active-key signature reason is reviewed in all 28 languages, committed in `25eff7b8`: 13 warning values
   improved and 15 retained, plus the Swedish encrypted-part wrapper corrected to neuter agreement.
   The source-only import is `205bd846`; dependent hardening code remains on its source branch.
-- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,831 entries and 798
-  full topics; pending: 13,037 entries and 554 topics. Historical catalog improvements: 3,595.
+- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,871 entries and 800
+  full topics; pending: 12,997 entries and 552 topics. Historical catalog improvements: 3,610.
   Hungarian has 48 original help topics left in addition to compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
-- Structural checks and German/Spanish/Estonian/French's 53 actual mnemonic scopes pass. All full inventories and current
+- Structural checks and German/Spanish/Estonian/French/Dutch's 53 actual mnemonic scopes pass. All full inventories and current
   hashes reconcile. The latest fresh fetch/seven-ref audit found no new strings or languages; existing source
   imports and the guide are unchanged. HTML regenerated. No test suites or builds run for this wording batch;
   the earlier source-import build passed in the separate target. `REVIEWED` remains unchanged.
+- Also checked relevant uncommitted files in six source worktrees. The only extra drafts are 290 untracked
+  files for ca/nb/pt-BR/sr-Latn/tr in PostalExpress-lang, all exactly matching the already imported initial
+  snapshot `cfdf55ab`. They contain no new work and remain untouched. Recompare them on later audits.
 - The initial icon note was corrected: individual recipients use green/blue locks and platform-specific
   lookup/warning symbols; the separate overall status bar uses the verified shield. Keep this distinction.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
@@ -2104,3 +2107,31 @@ Fresh fetch confirms all seven audited source tips unchanged, with no new string
 imports and guide unchanged; root has no relevant edits. Other hardening/corpus work untouched.
 Completed: 20,831 entries/798 topics; pending: 13,037/554; scope:33,868/1,352; historical improvements:3,595.
 Dutch compose is next. REVIEWED remains unchanged.
+
+
+### Dutch compose signing and encryption reviewed
+
+Reviewed all 40 additions, retaining the 17 app labels and eight good core values while improving 15 core
+values. Status describes protection bij het verzenden, signature checks without assuming verified ownership,
+and bruikbare sleutels rather than any keys. Dates use Laatst gezocht; complete key-state reasons follow Reden.
+Corrected literal encryption-for-a-key wording. Unencrypted sending requires removing inherited protected
+text, images and attachments. Informal je/jij and existing terminology remain consistent.
+
+Reviewed the new help topic and only the writing-help insertion, improving 15 help lines. Earlier writing-help
+prose is preserved exactly. The help uses a color/status table across platform icons, includes own and unusable
+keys, and explains the selected From key, recipient removal and encrypted drafts/sent copies. Glossary updated.
+All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings.
+Exact reconstruction verifies 15 value edits and 40 mark removals. Help tags/attributes/controls/platform branches
+and literal keys are preserved. Joins inspected on all platforms; no Dutch compose/encryption screenshot was
+available in the three screenshot trees, so layouts/wrapping were checked in source. No GUI run, tests or builds.
+
+All 28 inventories/current hashes reconcile: 20,905 unmarked messages, 10,479 changed help lines and 14 baseline
+pairs. Since-start 1,253 entries/205 passages match the queue. HTML regenerated; git diff --check passes.
+Seven source refs remain unchanged after fresh fetch. Also audited uncommitted locale/help/commands/settings/
+registry paths in root, wave1, more-languages, settings, hardening and compose worktrees. Only the old five-language
+copies in PostalExpress-lang were found: all 290 files exactly match initial snapshot cfdf55ab already imported.
+There are no later edits/new strings in those copies. They remain untouched, with comparison provenance recorded.
+
+Completed: 20,871 entries and 800 topics; pending: 12,997/552; scope:33,868/1,352; historical improvements:3,610.
+Italian compose is next, followed by the recorded languages and remaining Hungarian help. REVIEWED is unchanged;
+the complete queue and final late-arrival audit are still required.

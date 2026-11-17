@@ -547,6 +547,10 @@ Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; O
 - Message rules "verwerken" messages; reserve "sorteren" for the display order of a message list.
 - Use "digitale handtekening" where needed to distinguish a cryptographic signature from the account signature
   added below a message. Key verification confirms ownership by comparing fingerprints.
+- Compose status describes protection "bij het verzenden"; it does not report completed delivery. Use
+  "bruikbare sleutel" when encryption requires a usable key, including expiry/revocation constraints.
+- Encrypt "met" keys rather than "voor de sleutel". "Uit bericht verwijderen" changes recipients, not contacts.
+  Place complete key-state reasons after "Reden:" and separate the next instruction instead of using parentheses.
 - The account field for additional sender addresses is "Andere afzenderadressen". Refer to this exact label in
   errors and instructions.
 - Keys Ctrl / Shift / Del as Dutch keyboards print them. Google's button "Inloggen met Google", Microsoft's

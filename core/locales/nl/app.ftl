@@ -14,7 +14,6 @@ menu-layout = &Indeling
 menu-sort-by = Sor&teren op
 menu-text-size = Te&kstgrootte
 menu-folder = &Map
-# review: new
 menu-insert = &Invoegen
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -98,11 +97,8 @@ cmd-import-address-book = Adres&boek importeren...
 cmd-export-address-book = Adresboek e&xporteren...
 cmd-export-setup = Instellingen en accounts ex&porteren...
 cmd-import-setup = Instellingen en accounts impor&teren...
-# review: new
 cmd-compose-sign = Digitaal &ondertekenen
-# review: new
 cmd-compose-encrypt = &Versleutelen
-# review: new
 cmd-attach-my-key = Mijn &openbare sleutel bijvoegen
 
 ## The tray icon's menu
@@ -222,11 +218,8 @@ ui-format-line = Horizontale lijn invoegen
 ui-tb-send = Verzenden
 ui-tb-save = Opslaan
 ui-tb-attach = Bijvoegen
-# review: new
 ui-tb-sign = Ondertekenen
-# review: new
 ui-tb-encrypt = Versleutelen
-# review: new
 ui-field-keys = Sleutels:
 ui-field-from = Van:
 ui-field-to = Aan:
@@ -705,25 +698,15 @@ ui-contact-key = Versleutelingssleutel:
 ui-contact-key-none = Geen sleutel
 ui-contact-key-use-new = De &nieuwe sleutel gebruiken
 ui-contact-key-keep = De &huidige behouden
-# review: new
 ui-recipient-keys-title = Sleutels van ontvangers
-# review: new
 ui-recipient-col-recipient = Ontvanger
-# review: new
 ui-recipient-col-key = Sleutel
-# review: new
 ui-recipient-find-key = Sleutel &zoeken
-# review: new
 ui-recipient-remove = Uit bericht &verwijderen
-# review: new
 ui-send-unencrypted = &Onversleuteld verzenden
-# review: new
 ui-compose-make-key = Sleutel &maken...
-# review: new
 ui-compose-show-keys = &Versleutelingssleutels...
-# review: new
 ui-compose-encrypt-off = Versleuteling &uitzetten
-# review: new
 ui-compose-keep-encrypted = Versleuteld &houden
 ui-setup-export-title = Instellingen en accounts exporteren
 ui-setup-import-title = Instellingen en accounts importeren
