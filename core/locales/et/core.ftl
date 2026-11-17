@@ -450,8 +450,7 @@ agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
 agent-log-draft = Mustand „{ $subject }“ salvestati
 agent-log-draft-replaced = Mustand „{ $subject }“ asendati
 agent-log-draft-discarded = Mustand „{ $subject }“ kustutati
-# review: new
-agent-draft-note = { $program }, tehisintellekti agent, kirjutas selle mustandi. Kontrollige enne saatmist adressaate ja teksti.
+agent-draft-note = Selle mustandi koostas tehisintellekti agent { $program }. Kontrollige enne saatmist adressaate ja teksti.
 agent-log-read = „{ $subject }“ märgiti loetuks
 agent-log-unread = „{ $subject }“ märgiti lugemata kirjaks
 agent-log-flagged = „{ $subject }“ märgiti lipuga

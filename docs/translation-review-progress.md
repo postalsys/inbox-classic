@@ -5,15 +5,15 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review the remaining draft notices in German, Spanish, Estonian and French against the new UI snapshot, then continue Italian with both agent batches.**
+- **Next: Review Italian combined agent additions:8 unsubscribe entries plus3 draft entries and both help topics. Then Portuguese and the remaining agent queue.**
   Original unsubscribe additions complete: de, es, et, fr, nl. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
   New notice UI now exists on all three platforms in an exact recorded uncommitted snapshot.
-  Dutch notice/help is complete; finish the four earlier languages, then the remaining agent queue.
-  Phase2 runtime-backed logs/help reviewed: de, es, et, fr, nl. Fully reviewed phase2 languages: nl.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl.
 - Current scope: 34,232 catalog entries and 1,352 help topics.
-  Completed: 21,303 entries and 790 full topics; pending: 12,929 entries and 562 topics.
-  Historical catalog improvements: 3,793. Importing drafts earns no review credit.
+  Completed: 21,307 entries and 794 full topics; pending: 12,925 entries and 558 topics.
+  Historical catalog improvements: 3,795. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
@@ -24,8 +24,8 @@ Commit completed batches regularly and preserve an exact resume point.
   caused the crash. Original text sources: preview `687113a3`, MCP `9a24e99b`. Preview `2567d2d7` has the same text and still no setting caller.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
-- The latest checkpoint covers 43 worktrees/184 refs. Upstream `9e994df3` now includes the already imported MCP
-  feature; all 232 relevant source paths match the frozen imports. Use the updated source audit,
+- The latest checkpoint covers 44 worktrees/185 refs. Upstream `65087591` includes the already imported MCP
+  and preview features; all 232 relevant source paths match their exact composed snapshots. Use the updated source audit,
   six-worktree copy audit and all-source audit at checkpoints. The 290 old untracked language files still match
   their original imported snapshot exactly and remain untouched.
 - Compose additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
@@ -2397,3 +2397,11 @@ Review the remaining draft notices in German, Spanish, Estonian and French again
 ## Agent-draft notice UI arrived during the Dutch batch
 
 The committed source still lacks consumers, but the source worktree now has Windows/macOS/GTK consumers. Seven UI files were captured with exact hashes and diffs in `/private/tmp/inbox-agent-draft-ui-observation.json`. Existing `agents-8-draft.png` captures on all three platforms and a narrow German GTK capture with encryption were inspected. The information bar is below fields and above the editor, wraps as needed, and persists for the window lifetime. It is not a security guarantee. No code was imported and no GUI/test run was performed. Recheck this snapshot before later batches; inspect changes rather than assuming unchanged committed tips mean unchanged runtime work. Dutch completed its notice in the current batch; German/Spanish/Estonian/French retain one notice and one help paragraph each, now ready for context review.
+
+## Four earlier draft notices completed
+
+Reviewed German, Spanish, Estonian and French notices and their final marked help paragraphs against the newly available platform UI. German and Spanish notices were already fluent. Estonian now uses natural word order, with an uninflected program name; French uses rédiger consistently with the section heading. Every help sentence directly locates the agent name above the message body. The four help topics are complete again.
+
+Four language checkers pass structurally with5,824 expected mark-only diagnostics. Exact replay verifies4 notice reviews,2 changed values and4 help lines, preserving all other bytes, variables, markup and generated IDs. Seven UI source hashes unchanged; Windows/macOS captures copied unchanged, earlier Linux observations retained after generated capture files were cleared. No new GUI/test run. Global reconciliation:21,345 unmarked entries,10,680 help lines and14 baseline pairs; latest hashes match. Full28-language inventories and since-start1,190 entries/335 passages reconcile. HTML regenerated and git diff --check passes. Fresh source audit covers44worktrees/185refs and290 old copies. Upstream65087591 merged the exact existing preview section in29catalogs; no new strings or prose. Old release ref re-proved identical to historically audited9e994df3. No test suites or build run.
+
+Review Italian combined agent additions:8 unsubscribe entries plus3 draft entries and both help topics. Then Portuguese and the remaining agent queue.

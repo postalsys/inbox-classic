@@ -490,8 +490,7 @@ agent-log-sent = « { $subject } » envoyé à { $to }
 agent-log-draft = Brouillon « { $subject } » enregistré
 agent-log-draft-replaced = Brouillon « { $subject } » remplacé
 agent-log-draft-discarded = Brouillon « { $subject } » supprimé
-# review: new
-agent-draft-note = { $program }, un agent d'IA, a écrit ce brouillon. Vérifiez les destinataires et le texte avant de l'envoyer.
+agent-draft-note = { $program }, un agent d'IA, a rédigé ce brouillon. Vérifiez les destinataires et le texte avant de l'envoyer.
 agent-log-read = « { $subject } » marqué comme lu
 agent-log-unread = « { $subject } » marqué comme non lu
 agent-log-flagged = Indicateur ajouté à « { $subject } »

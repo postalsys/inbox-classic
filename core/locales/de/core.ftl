@@ -463,7 +463,6 @@ agent-log-sent = „{ $subject }“ an { $to } gesendet
 agent-log-draft = Entwurf „{ $subject }“ gespeichert
 agent-log-draft-replaced = Entwurf „{ $subject }“ ersetzt
 agent-log-draft-discarded = Entwurf „{ $subject }“ verworfen
-# review: new
 agent-draft-note = { $program }, ein KI-Agent, hat diesen Entwurf geschrieben. Prüfen Sie die Empfänger und den Text, bevor Sie ihn senden.
 agent-log-read = „{ $subject }“ als gelesen markiert
 agent-log-unread = „{ $subject }“ als ungelesen markiert
