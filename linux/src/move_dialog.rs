@@ -259,7 +259,7 @@ fn target_row(target: &TargetRow, current: Option<i64>) -> gtk::ListBoxRow {
     } else if !target.choosable {
         line.add_css_class("dim-label");
     }
-    line.append(&gtk::Image::from_icon_name(icon));
+    line.append(&crate::icons::image(icon));
     line.append(&text);
     row.set_child(Some(&line));
     row.set_widget_name(&match target.kind {

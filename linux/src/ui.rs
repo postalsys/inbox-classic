@@ -1117,7 +1117,7 @@ pub fn window_of(widget: &impl IsA<gtk::Widget>) -> Option<gtk::Window> {
 
 /// A flat button with a symbolic icon and a tooltip
 pub fn icon_button(icon: &str, tooltip: &str) -> gtk::Button {
-    let button = gtk::Button::from_icon_name(icon);
+    let button = crate::icons::kept(gtk::Button::from_icon_name(icon));
     button.set_tooltip_text(Some(tooltip));
     button
 }

@@ -734,7 +734,7 @@ impl Members {
             } else {
                 "mail-unread-symbolic"
             };
-            row.add_prefix(&gtk::Image::from_icon_name(icon));
+            row.add_prefix(&crate::icons::image(icon));
             let remove = row_button(
                 "ic-dismiss-symbolic",
                 &words::field_title(Text::UiRemove),

@@ -193,7 +193,7 @@ impl Reader {
         logo_frame.append(&logo);
         let attachments_label = gtk::Label::new(Some("1 file"));
         let clip = gtk::Box::new(gtk::Orientation::Horizontal, 6);
-        clip.append(&gtk::Image::from_icon_name("ic-attach-symbolic"));
+        clip.append(&crate::icons::image("ic-attach-symbolic"));
         clip.append(&attachments_label);
         let attachments = gtk::MenuButton::new();
         attachments.set_child(Some(&clip));
@@ -223,7 +223,7 @@ impl Reader {
         let retry = gtk::Box::new(gtk::Orientation::Horizontal, 10);
         retry.add_css_class("info-bar");
         retry.set_widget_name("reader-retry");
-        retry.append(&gtk::Image::from_icon_name("ic-arrow-sync-symbolic"));
+        retry.append(&crate::icons::image("ic-arrow-sync-symbolic"));
         retry.append(&note_retry);
         retry.append(&try_again);
         retry.set_visible(false);
@@ -1462,10 +1462,12 @@ fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton) {
     text.set_valign(gtk::Align::Center);
     let download = gtk::Button::with_label(&t!(GtkDownloadPictures));
     download.set_widget_name("reader-download-pictures");
-    let always = gtk::MenuButton::builder()
-        .icon_name("pan-down-symbolic")
-        .tooltip_text(t!(GtkDownloadPictures))
-        .build();
+    let always = crate::icons::kept(
+        gtk::MenuButton::builder()
+            .icon_name("pan-down-symbolic")
+            .tooltip_text(t!(GtkDownloadPictures))
+            .build(),
+    );
     always.set_widget_name("reader-pictures-always");
     always.set_visible(false);
     // Download Pictures and its arrow as one button
@@ -1477,7 +1479,7 @@ fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton) {
     let bar = gtk::Box::new(gtk::Orientation::Horizontal, 10);
     bar.add_css_class("info-bar");
     bar.set_widget_name("reader-pictures");
-    bar.append(&gtk::Image::from_icon_name("ic-image-symbolic"));
+    bar.append(&crate::icons::image("ic-image-symbolic"));
     bar.append(&text);
     bar.append(&buttons);
     bar.set_visible(false);

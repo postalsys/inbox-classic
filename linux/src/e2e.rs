@@ -697,6 +697,27 @@ fn popover_origin(popover: &gtk::Popover, window: &gtk::Window) -> Option<graphe
     Some(graphene::Point::new(left, top))
 }
 
+/// The icons shown in `root` by images that look them up by name: none but those the toolkit draws in its own widgets
+/// (the Find box, the window buttons), as the app's images draw kept icons (icons.rs)
+pub(crate) fn icons_by_name(root: &gtk::Widget) -> Vec<String> {
+    let toolkit = [gtk::SearchEntry::static_type(), gtk::WindowControls::static_type()];
+    descendants::<gtk::Image>(root)
+        .into_iter()
+        .filter(|image| image.is_mapped() && !toolkit.iter().any(|t| image.ancestor(*t).is_some()))
+        .filter_map(|image| match image.storage_type() {
+            gtk::ImageType::IconName => image.icon_name().map(|name| name.to_string()),
+            gtk::ImageType::Gicon => Some(
+                image
+                    .gicon()
+                    .and_then(|icon| icon.to_string())
+                    .unwrap_or_default()
+                    .to_string(),
+            ),
+            _ => None,
+        })
+        .collect()
+}
+
 /// Every widget of type `T` under `root`, popovers' children included, in the order they are drawn (a dialog opened
 /// over another after it)
 pub(crate) fn descendants<T: IsA<gtk::Widget>>(root: &gtk::Widget) -> Vec<T> {

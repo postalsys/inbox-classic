@@ -101,7 +101,7 @@ impl Completion {
         for found in found {
             let row = gtk::Box::new(gtk::Orientation::Horizontal, 6);
             if found.group {
-                row.append(&gtk::Image::from_icon_name("system-users-symbolic"));
+                row.append(&crate::icons::image("system-users-symbolic"));
             }
             let label = gtk::Label::new(Some(if found.group { &found.name } else { &found.label }));
             label.set_xalign(0.0);

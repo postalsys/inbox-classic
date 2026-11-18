@@ -273,6 +273,7 @@ impl MessageWindow {
         };
         self.junk.set_action_name(Some(&format!("win.{}", command.name())));
         self.junk.set_icon_name(icon);
+        crate::icons::keep(&self.junk);
         self.junk.set_tooltip_text(Some(&tooltip));
         *self.summary.borrow_mut() = summary;
     }

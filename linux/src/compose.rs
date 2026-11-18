@@ -189,6 +189,7 @@ impl FormatBar {
                     gtk::Button::new()
                 };
                 button.set_icon_name(spec.icon);
+                crate::icons::keep(&button);
                 button.set_tooltip_text(Some(&tr(spec.tooltip)));
                 button.add_css_class("flat");
                 button.set_widget_name(spec.name);
@@ -503,7 +504,7 @@ fn field_button(text: &str, name: &str) -> gtk::Button {
 /// message. Set once, it stays while the window is open.
 fn agent_note(draft: Option<&Draft>) -> Option<gtk::Box> {
     let note = pe_core::agents::draft_note(draft?)?;
-    let picture = gtk::Image::from_icon_name("ic-sparkle-symbolic");
+    let picture = crate::icons::image("ic-sparkle-symbolic");
     picture.set_pixel_size(16);
     picture.set_valign(gtk::Align::Start);
     // the words say it all
