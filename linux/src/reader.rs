@@ -81,6 +81,9 @@ pub struct Reader {
     opening: Cell<bool>,
     /// Its view once the core built it, with its pictures from the internet when `remote_images`
     view: RefCell<Option<MessageView>>,
+    /// The view shown was made of the message's text while the rest of it was still coming: the message's arrival
+    /// makes it again
+    text_first: Cell<bool>,
     remote_images: Cell<bool>,
     /// The view and the logo being made for it, and the one-click unsubscribe on the way; 0 for none
     view_request: Cell<u64>,
@@ -270,6 +273,7 @@ impl Reader {
             size: Cell::default(),
             file: RefCell::default(),
             view: RefCell::default(),
+            text_first: Cell::new(false),
             remote_images: Cell::new(false),
             view_request: Cell::new(0),
             logo_request: Cell::new(0),
@@ -580,7 +584,11 @@ impl Reader {
     pub fn on_event(self: &Rc<Self>, event: &Event) -> Option<Loaded> {
         let shown = |folder: i64, uid: u64| uid != 0 && folder == self.folder.get() && uid == self.uid.get();
         match event {
-            Event::MessageReady { folder, uid } if shown(*folder, *uid) => {
+            // another window may have asked for the same message: a view shown whole stays, as the core makes only
+            // the newest view asked for, and one made here at the same time would leave the other window without its
+            Event::MessageReady { folder, uid }
+                if shown(*folder, *uid) && (!self.has_view() || self.text_first.get()) =>
+            {
                 self.stop_downloading_note();
                 self.start_view();
                 Some(Loaded::Fetched)
@@ -649,6 +657,8 @@ impl Reader {
             return false;
         };
         self.show(&view, self.remote_images.get());
+        self.text_first
+            .set(core.message_downloading(self.folder.get(), self.uid.get()));
         self.hide_logo();
         if view.has_logo {
             let request = core
