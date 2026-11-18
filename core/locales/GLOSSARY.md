@@ -964,6 +964,17 @@ Slovak agent permissions and activity:
   or sending ends its permission to edit/delete; merely opening does not. Other read permissions are separate.
 - Mail may contain hostile instructions: explain that agents must not follow them. Disabling agent access
   uses the already reviewed neutral "vypnite možnosť" wording for the switch/checkbox on each platform.
+- Compose statuses describe protection "pri odoslaní" and agree with feminine správa. Verified key ownership
+  ("Vlastník kľúča je overený") is separate from signature integrity. Use "použiteľný kľúč" for encryption readiness.
+- Keep one/few/other in recipient guidance, with "2 príjemcovia nemajú" and "5 príjemcov nemá". Other status
+  counts can remain parenthesized. Names/address lists follow a head noun and colon without inflection.
+- Dates follow "Posledné vyhľadávanie:" and complete key-state explanations follow "Dôvod:". Use "Priložiť svoj
+  verejný kľúč" for the selected sender address. "Nájsť &kľúč" keeps K distinct from "Použiť &nový kľúč" (N).
+- Retain plural vy, lowercase pronouns, „…“ quotes, English literal keys and access keys without diacritics.
+  Removing a recipient affects the message, not contacts. Drafts are encrypted only to the sender, without a
+  digital signature. Inherited text, images and attachments require encryption until removed.
+- Writing help describes current completion, accounts, copied recipients and formatting. Attachment reminders
+  recognize English, German, Estonian, Spanish and French expressions, not Slovak; do not give a Slovak trigger.
 
 ### Slovenščina (sl)
 

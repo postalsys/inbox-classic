@@ -22,7 +22,6 @@ menu-sort-by = Zorad&iť podľa
 menu-text-size = &Veľkosť textu
 # review: new
 menu-folder = P&riečinok
-# review: new
 menu-insert = Vl&ožiť
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -185,12 +184,9 @@ cmd-export-address-book = E&xportovať adresár...
 cmd-export-setup = Exportovať na&stavenia a kontá...
 # review: new
 cmd-import-setup = Im&portovať nastavenia a kontá...
-# review: new
 cmd-compose-sign = &Digitálne podpísať
-# review: new
 cmd-compose-encrypt = Ši&frovať
-# review: new
-cmd-attach-my-key = Priložiť môj &verejný kľúč
+cmd-attach-my-key = Priložiť svoj &verejný kľúč
 
 ## The tray icon's menu
 
@@ -414,11 +410,8 @@ ui-tb-send = Odoslať
 ui-tb-save = Uložiť
 # review: new
 ui-tb-attach = Priložiť
-# review: new
 ui-tb-sign = Podpísať
-# review: new
 ui-tb-encrypt = Šifrovať
-# review: new
 ui-field-keys = Kľúče:
 # review: new
 ui-field-from = Od:
@@ -1356,25 +1349,15 @@ ui-contact-key-none = Žiadny kľúč
 ui-contact-key-use-new = Použiť &nový kľúč
 # review: new
 ui-contact-key-keep = &Ponechať súčasný
-# review: new
 ui-recipient-keys-title = Kľúče príjemcov
-# review: new
 ui-recipient-col-recipient = Príjemca
-# review: new
 ui-recipient-col-key = Kľúč
-# review: new
-ui-recipient-find-key = &Nájsť kľúč
-# review: new
+ui-recipient-find-key = Nájsť &kľúč
 ui-recipient-remove = &Odstrániť zo správy
-# review: new
 ui-send-unencrypted = Odoslať &bez šifrovania
-# review: new
 ui-compose-make-key = &Vytvoriť kľúč...
-# review: new
 ui-compose-show-keys = Šifrovacie &kľúče...
-# review: new
 ui-compose-encrypt-off = &Vypnúť šifrovanie
-# review: new
 ui-compose-keep-encrypted = &Ponechať šifrovanie
 # review: new
 ui-setup-export-title = Exportovať nastavenia a kontá
