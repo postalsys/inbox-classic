@@ -380,7 +380,7 @@ fn an_agent_works_on_the_mailbox() {
         let host = hosts[0].clone();
         let tools = agent.request("tools/list", json!({})).await;
         let tools = tools["result"]["tools"].as_array().unwrap().clone();
-        assert_eq!(tools.len(), 25);
+        assert_eq!(tools.len(), 28);
         let delete = tools.iter().find(|t| t["name"] == "delete_messages").unwrap();
         assert_eq!(delete["annotations"]["destructiveHint"], true, "{delete}");
         let search = tools.iter().find(|t| t["name"] == "search_messages").unwrap();
@@ -1617,6 +1617,113 @@ fn an_agent_reads_what_the_reading_pane_shows() {
             .await;
         let why = refused.unwrap_err();
         assert!(why.contains("is 11.0 MB") && why.contains("up to 10 MB"), "{why}");
+    });
+    mcp.stop();
+}
+
+/// Flag colours, Watch and Ignore Conversation, and folders made and renamed, each in the log; the special folders
+/// are not renamed
+#[test]
+fn an_agent_organizes_folders_and_conversations() {
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let plans = server.add_message(
+        "INBOX",
+        "From: Bob <bob@example.com>\r\nTo: testuser@example.com\r\nSubject: Plans\r\n\
+         Message-ID: <plans@example.com>\r\n\r\nShall we meet?\r\n",
+        &[],
+    );
+    let dir = TempDir::new("mcp-organize");
+    let (core, account, mut mcp, socket) = engine_on(&server, &dir);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        agent.initialize().await;
+        let folders = agent.call("list_folders", json!({ "account": account })).await.unwrap();
+        let (inbox, sent) = (special(&folders, "inbox"), special(&folders, "sent"));
+
+        // a flag in a colour, in the log, taken back to no flag
+        agent
+            .call(
+                "set_flag_color",
+                json!({ "folder": inbox, "uids": [plans], "color": "purple" }),
+            )
+            .await
+            .unwrap();
+        let has = |flag: &str| server.flags("INBOX", plans).iter().any(|f| f == flag);
+        assert!(eventually(10, || has("\\Flagged")
+            && has("$MailFlagBit0")
+            && has("$MailFlagBit2")));
+        let flagged = core.agent_log(1).unwrap()[0].clone();
+        assert_eq!(said(&flagged), "Flagged \u{201c}Plans\u{201d} purple");
+        core.agent_undo(flagged.id).unwrap();
+        assert!(eventually(10, || !has("\\Flagged") && !has("$MailFlagBit0")));
+        let wrong = agent
+            .call(
+                "set_flag_color",
+                json!({ "folder": inbox, "uids": [plans], "color": "pink" }),
+            )
+            .await;
+        assert!(wrong.unwrap_err().contains("purple"));
+
+        // watched, then ignored, which marks it read
+        let list = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
+        let thread = list["messages"][0]["thread"].clone();
+        agent
+            .call("set_conversation_mark", json!({ "thread": thread, "mark": "watch" }))
+            .await
+            .unwrap();
+        assert_eq!(
+            core.message(inbox, plans).unwrap().unwrap().mark,
+            pe_store::ThreadMark::Watch
+        );
+        assert_eq!(
+            said(&core.agent_log(1).unwrap()[0]),
+            "Watched the conversation \u{201c}Plans\u{201d}"
+        );
+        agent
+            .call("set_conversation_mark", json!({ "thread": thread, "mark": "ignore" }))
+            .await
+            .unwrap();
+        assert!(eventually(10, || has("\\Seen")));
+        // the same mark again keeps it, rather than taking it away as the menu's toggle would
+        agent
+            .call("set_conversation_mark", json!({ "thread": thread, "mark": "ignore" }))
+            .await
+            .unwrap();
+        assert_eq!(
+            core.message(inbox, plans).unwrap().unwrap().mark,
+            pe_store::ThreadMark::Ignore
+        );
+
+        // a folder made, its id given; renamed; the special folders are not
+        let made = agent
+            .call("create_folder", json!({ "account": account, "name": "Projects" }))
+            .await
+            .unwrap();
+        let projects = made["folder"].as_i64().expect("the new folder's id");
+        assert_eq!(core.folder(projects).unwrap().info.name, "Projects");
+        agent
+            .call("rename_folder", json!({ "folder": projects, "name": "Clients" }))
+            .await
+            .unwrap();
+        assert!(eventually(10, || {
+            core.folders(account).unwrap().iter().any(|f| f.info.name == "Clients")
+        }));
+        assert_eq!(
+            said(&core.agent_log(1).unwrap()[0]),
+            "Renamed the folder \u{201c}Projects\u{201d} to \u{201c}Clients\u{201d}"
+        );
+        for fixed in [inbox, sent] {
+            let refused = agent
+                .call("rename_folder", json!({ "folder": fixed, "name": "Mine" }))
+                .await;
+            assert!(refused.unwrap_err().contains("not renamed"));
+        }
     });
     mcp.stop();
 }

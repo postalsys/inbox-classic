@@ -24,17 +24,42 @@ impl Core {
     /// Watch Conversation (`mark` Watch) or Ignore Conversation (Ignore) on the messages `refs`: their conversations
     /// get the mark, or lose it when all of them have it already. Returns what the status bar says.
     pub(crate) fn mark_conversations(&self, refs: &[MessageRef], mark: ThreadMark) -> Result<String> {
+        let (set, count) = self.give_mark(refs, |all| {
+            if all.iter().all(|c| c.mark == mark) {
+                ThreadMark::None
+            } else {
+                mark
+            }
+        })?;
+        let text = match (mark, set) {
+            (ThreadMark::Watch, ThreadMark::Watch) => Text::DoneWatched,
+            (ThreadMark::Watch, _) => Text::DoneUnwatched,
+            (_, ThreadMark::Ignore) => Text::DoneIgnored,
+            _ => Text::DoneUnignored,
+        };
+        Ok(tr_args(text, &[("count", count.into())]))
+    }
+
+    /// The conversations of the messages `refs` get `mark` (None takes Watch or Ignore away), whatever they had: an AI
+    /// agent's Watch and Ignore, which says what it wants rather than turning a mark on and off
+    pub fn set_conversation_mark(&self, refs: &[MessageRef], mark: ThreadMark) -> Result<()> {
+        self.give_mark(refs, |_| mark).map(|_| ())
+    }
+
+    /// Gives the conversations of `refs` the mark `choose` picks from them, marking an ignored one's unread messages
+    /// read; the mark and how many conversations
+    fn give_mark(
+        &self,
+        refs: &[MessageRef],
+        choose: impl FnOnce(&[pe_store::Conversation]) -> ThreadMark,
+    ) -> Result<(ThreadMark, u64)> {
         let (set, count, unseen, folders) = {
             let mut store = self.store();
             let conversations = store.conversations_of(refs)?;
             if conversations.is_empty() {
                 return Err(Error::Unavailable(tr(Text::MessagesGone)));
             }
-            let set = if conversations.iter().all(|c| c.mark == mark) {
-                ThreadMark::None
-            } else {
-                mark
-            };
+            let set = choose(&conversations);
             store.transaction(|store| {
                 for c in &conversations {
                     store.set_thread_mark(c.account, c.thread, set)?;
@@ -65,13 +90,7 @@ impl Core {
                 self.post(Event::FolderChanged { account, folder })?;
             }
         }
-        let text = match (mark, set) {
-            (ThreadMark::Watch, ThreadMark::Watch) => Text::DoneWatched,
-            (ThreadMark::Watch, _) => Text::DoneUnwatched,
-            (_, ThreadMark::Ignore) => Text::DoneIgnored,
-            _ => Text::DoneUnignored,
-        };
-        Ok(tr_args(text, &[("count", count.into())]))
+        Ok((set, count))
     }
 }
 

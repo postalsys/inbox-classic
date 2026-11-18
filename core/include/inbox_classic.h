@@ -14,8 +14,8 @@
 // What an agent may do, bits for `levels`: read mail
 #define PE_AGENT_READ 1
 
-// Organize it: read state, flags, junk, moves, archiving, new folders, deletes to Deleted Items, and leaving
-// mailing lists after the user says yes
+// Organize it: read state, flags and their colours, junk, moves, archiving, new and renamed folders, Watch and Ignore
+// Conversation, deletes to Deleted Items, and leaving mailing lists after the user says yes
 #define PE_AGENT_ORGANIZE 2
 
 // Write drafts

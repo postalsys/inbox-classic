@@ -699,6 +699,12 @@ pub enum Undo {
         junk: bool,
         message_id: String,
     },
+    /// The message in `folder` was flagged in colour `was`, or not flagged (None)
+    Color {
+        folder: FolderId,
+        uid: u64,
+        was: Option<pe_store::FlagColor>,
+    },
 }
 
 impl Undo {
@@ -714,6 +720,9 @@ impl Undo {
                 junk,
                 message_id,
             } => format!("junk {from} {to} {} {message_id}", u8::from(*junk)),
+            Undo::Color { folder, uid, was } => {
+                format!("color {folder} {uid} {}", was.map_or("none", pe_store::FlagColor::id))
+            }
         }
     }
 
@@ -751,6 +760,14 @@ impl Undo {
                     to: to.parse().ok()?,
                     junk: junk == "1",
                     message_id: message_id.to_string(),
+                }),
+                _ => None,
+            },
+            "color" => match words(4)[..] {
+                [_, folder, uid, was] => Some(Undo::Color {
+                    folder: folder.parse().ok()?,
+                    uid: uid.parse().ok()?,
+                    was: pe_store::FlagColor::ALL.into_iter().find(|c| c.id() == was),
                 }),
                 _ => None,
             },
@@ -1309,6 +1326,12 @@ impl Core {
                     self.set_flag_many(folder, &[uid], flag, was)?;
                 }
             }
+            Undo::Color { folder, uid, was } => {
+                if self.store().message(folder, uid)?.is_none() {
+                    return Err(Error::Unavailable(tr(Text::AgentUndoNotInFolder)));
+                }
+                self.set_flag_color_many(folder, &[uid], was)?;
+            }
             Undo::Move { from, to, message_id } => {
                 let uid = self
                     .store()
@@ -1555,6 +1578,16 @@ mod tests {
                 to: 5,
                 junk: true,
                 message_id: "<a b@c>".into(),
+            },
+            Undo::Color {
+                folder: 2,
+                uid: 9,
+                was: Some(pe_store::FlagColor::Purple),
+            },
+            Undo::Color {
+                folder: 2,
+                uid: 9,
+                was: None,
             },
         ] {
             assert_eq!(Undo::read(&undo.write()), Some(undo));

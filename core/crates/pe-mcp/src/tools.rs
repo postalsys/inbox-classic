@@ -17,6 +17,7 @@ use crate::server::Progress;
 mod drafts;
 mod lookups;
 mod mail;
+mod organize;
 mod threads;
 
 pub(crate) use mail::CONTENT_KEY;
@@ -483,11 +484,65 @@ const TOOLS: &[Tool] = &[
         },
     },
     Tool {
+        name: "set_flag_color",
+        title: "Flag messages in a colour",
+        level: AgentLevels::ORGANIZE,
+        hints: SETS,
+        description: Description::Text(
+            "Flags messages of a folder in one of the colours Inbox Classic offers (the colours of Apple Mail's flags), or takes the flag away with `color` none. The user can take it back in Inbox Classic.",
+        ),
+        schema: || {
+            object(
+                json!({
+                    "folder": integer("The folder."),
+                    "uids": ids("The messages."),
+                    "color": { "type": "string", "enum": organize::COLORS, "description": "The flag's colour, or none for no flag." }
+                }),
+                &["folder", "uids", "color"],
+            )
+        },
+    },
+    Tool {
+        name: "set_conversation_mark",
+        title: "Watch or ignore a conversation",
+        level: AgentLevels::ORGANIZE,
+        hints: SETS,
+        description: Description::Text(
+            "Watches a conversation (Inbox Classic announces its new messages, in any folder of the user's) or ignores it (its unread messages are marked read, and new ones arrive read and unannounced), or takes either mark away with `mark` none. The conversation is named by its `thread`, as message rows give it.",
+        ),
+        schema: || {
+            object(
+                json!({
+                    "thread": integer("The conversation: the `thread` of one of its messages."),
+                    "mark": { "type": "string", "enum": ["watch", "ignore", "none"] }
+                }),
+                &["thread", "mark"],
+            )
+        },
+    },
+    Tool {
+        name: "rename_folder",
+        title: "Rename a folder",
+        level: AgentLevels::ORGANIZE,
+        hints: SETS,
+        description: Description::Text(
+            "Renames a folder of the user's, its subfolders going along. Not the Inbox or the special folders (Sent Items, Drafts, Deleted Items, Junk E-mail, Archive and the like). The folder may get a new id once the server renamed it: list_folders gives it.",
+        ),
+        schema: || {
+            object(
+                json!({ "folder": integer("The folder."), "name": text("Its new name.") }),
+                &["folder", "name"],
+            )
+        },
+    },
+    Tool {
         name: "create_folder",
         title: "Make a folder",
         level: AgentLevels::ORGANIZE,
         hints: MAKES,
-        description: Description::Text("Makes a folder in an account, at the top or inside another folder."),
+        description: Description::Text(
+            "Makes a folder in an account, at the top or inside another folder, and gives its id once the server made it (`folder`; without it, list_folders shows it later).",
+        ),
         schema: || {
             object(
                 json!({
@@ -1024,7 +1079,10 @@ async fn run(
         "delete_messages" => move_messages(&call, &args, true),
         "mark_messages_junk" => mark_junk(&call, &args),
         "archive_messages" => archive_messages(&call, &args),
-        "create_folder" => create_folder(&call, &args),
+        "create_folder" => organize::create_folder(&call, &args).await,
+        "rename_folder" => organize::rename_folder(&call, &args),
+        "set_flag_color" => organize::set_flag_color(&call, &args),
+        "set_conversation_mark" => organize::set_conversation_mark(&call, &args),
         "unsubscribe_from_list" => unsubscribe(&call, &args).await,
         "save_draft" => drafts::save_draft(&call, &args),
         "replace_draft" => drafts::replace_draft(&call, &args).await,
@@ -1410,19 +1468,6 @@ fn archive_messages(call: &Call, args: &Args) -> Outcome {
         .collect();
     call.log(&entries)?;
     Ok(json!({ "done": true, "messages": uids.len() }))
-}
-
-fn create_folder(call: &Call, args: &Args) -> Outcome {
-    let account = args.int("account")?;
-    call.account(account)?;
-    let parent = match args.opt_int("parent") {
-        Some(parent) => Some(call.folder(parent)?.id),
-        None => None,
-    };
-    let name = args.string("name");
-    call.core.create_folder(account, parent, &name).map_err(engine)?;
-    call.log(&[call.entry(account, Text::AgentLogFolder, &[("name", (&name).into())])])?;
-    Ok(json!({ "done": true, "note": "The folder shows in list_folders once the server made it." }))
 }
 
 async fn unsubscribe(call: &Call<'_>, args: &Args<'_>) -> Outcome {
