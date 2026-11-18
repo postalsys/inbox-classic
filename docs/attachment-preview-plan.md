@@ -782,3 +782,51 @@ keeps addresses unique, as planned. The spike programs were throwaway (not commi
   `pe_print_result`, `PE_EVENT_KIND_PRINT_READY`, `pe_scroll_script`, `pe_scroll_to_script`.
 - Help: the section of `attachments.html` in every language; ten translations had the section twice, the copy is
   gone.
+
+## As built (PR 4, the core, 2026-11-18)
+
+- **A token per part document.** A message with signed or encrypted parts (`view.rs` `protected_view`) gets the
+  previews of each part's files after that part's text, in the part's own document (`part-N`), under a token of the
+  part's own (`previews::PreviewDocument`). The files keep their place in the strip (the parts' listed attachments in
+  order), and one budget (20 pictures, the wait for their sizes) is shared by the parts in their order
+  (`plan::part_section`, `plan::Budget`). The view's `preview_token` then names the view only: no document carries it,
+  so the apps' calls (`pe_preview_link`, `pe_preview_show`, `pe_print_start`, `pe_previews_end`) are unchanged.
+  `preview_ask` answers an address only for a file its own document shows; `preview_link` takes a part's link only
+  when its token is a document of the view the reader names and the file is that part's. The apps can not tell which
+  frame asked; they do not need to: a part's document is the only place its token is written, the sanitized mail of
+  another part has no script to read a sibling frame, and 128 random bits can not be guessed, so the token is the
+  capability.
+- **Read as the view read it.** A view of a protected message reads its files again as its parts showed them
+  (`Read::Protected`: `protect::shown_decrypted`, nothing when that fails now, so a file is never taken from another
+  listing than the one its document was made of); an ordinary view reads the source as it is (`Read::Raw`), never
+  decrypting. S/MIME is shown as any message (the app reads no S/MIME), so its previews are any message's; the old
+  `may_be_signed_or_encrypted` wall is gone.
+- **Memory only for what was decrypted** (decision 6). When anything of the message was decrypted its files'
+  descriptions and pages are never put in the cache (`Request::keep` false, now also for `describe_file`, whose PDF
+  title is the file's words). The crash marker and the refused list name such a file by where it is
+  (`pe_preview::key_of_place`: SHA-256 of "folder F, message U, attachment N", or a message file by a digest of its
+  bytes as they are), never by a hash of its decrypted bytes (which would let anyone who reads the folder confirm a
+  guess), and the marker leaves out its type. A file that hung or ended the app is still refused at the next start,
+  by its place. When the view ends, its drawn files, the answers no web view took and the printouts no window took are
+  dropped (`forget_shown`). Not done: the bytes are not zeroed when freed.
+- **Printing.** Decrypted pictures print: the printout already carries the decrypted text, and the pictures are the
+  same mail. The printout is made in memory (`pe_html::print_parts`, `print_document_with`) and handed to the window,
+  whose print web view is served from memory (WebView2 from memory, WKWebView's scheme handler with a non-persistent
+  store, WebKitGTK with an ephemeral session); only the system's print spooler, or a file the user prints to, writes
+  it, as for the text. The pictures come after all the text, each named with its part ("Part 2: floor-plan.png"); PDF
+  pages are not printed, as for any message.
+- **Frames.** Every picture's width, height and aspect ratio are in its markup, so a part's frame measures as tall as
+  it will be before the picture comes; Windows and Linux measure every 400 ms from the moment the page is shown, the
+  Mac only from `didFinish`, which waits for the frames' pictures (see the apps below).
+- **Agents** read the source as it is (`agents.rs`), never a view: an encrypted message's files stay refused, and no
+  tool of pe-mcp reaches a preview.
+- Tests: `pe-core/tests/pgp_previews.rs` with `scripts/ui-e2e/pgp/secure-previews.eml` (a plain part with
+  `harbour.png`, an encrypted part with `floor-plan.png`, made by `cargo run -p pe-pgp --example
+ui_fixture_previews -- ../scripts/ui-e2e/pgp` with the committed key): each part's token answers only its own file
+  (checked by the pixels answered), the links, the view's end, a message file, the printout, the agents, and nothing
+  decrypted on disk (the store's folder, the private attachments folder and the temporary folder scanned for the
+  decrypted file's and its preview's bytes and hashes, with a control that the scan finds a copy written on purpose).
+  `pe-preview`: a decrypted file's marker and refused entry name its place, its description is not kept.
+- **The apps** need: Windows, a preview link clicked in a part's frame (`FrameNavigationStarting`, now opened only
+  externally) passed to the reader's link handler; the Mac, frames measured from the moment the page is shown, not
+  from `didFinish`. Linux needs nothing. UI test: `pgp-attachment-preview`.
