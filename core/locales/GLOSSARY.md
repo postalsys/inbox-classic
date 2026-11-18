@@ -925,6 +925,15 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - Only the agent's own drafts not yet saved in the editor can be permanently deleted. Saving, including
   autosave, or sending ends agent access; merely opening does not. "Textul semnăturii contului" is optional
   message footer text, distinct from a digital signature. Removing program access does not uninstall it.
+- Compose status describes protection "la trimitere". Signature integrity does not confirm the key's owner;
+  use "Proprietarul cheii a fost confirmat" for verified ownership and "cheie utilizabilă" for encryption readiness.
+- Keep Romanian one/few/other counts: "2 destinatari", "101 destinatari", but "20 de destinatari" and
+  "100 de destinatari". Dates follow "Ultima căutare:"; complete key-state explanations follow "Motiv:".
+- Preserve polite plural prose, nominal command labels and "atașare". Quote inserted control labels in help.
+  Recipient removal affects the message, not the address book. Encrypting drafts uses only the sender's key,
+  without a digital signature; inherited text, images and attachments require encryption until removed.
+- Writing help explains the actual account, completion and formatting behavior. Attachment reminders recognize
+  English, German, Estonian, Spanish and French expressions, not Romanian. Do not give a Romanian trigger example.
 
 ### Slovenčina (sk)
 
