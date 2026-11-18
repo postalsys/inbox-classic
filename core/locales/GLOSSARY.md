@@ -661,6 +661,14 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
 - Setup files contain no mail. Only server-held messages can be downloaded on the new computer. Protected exports
   include accessible saved credentials and private keys; unprotected exports require signing in again, including
   browser sign-in where used. Shared Address Book/layout guidance avoids a Windows-only menu path.
+- Conversation statuses and Move/Copy dialogs retain numeric counts in one/few/other; empty-folder warnings
+  use exact [1] for singular prose. Transfer progress names the current message number, not a completed count.
+  Already-counted message/size phrases follow labels ("iš viso:"), never the preposition "iš".
+- Message import status says "Importuojama" while the server command is queued. Outbox failure notes describe
+  another sending attempt, not assured delivery. Shared authentication/relay advice names account controls
+  without a Windows-only menu path; paths and provider identifiers follow an inflected head noun or a colon.
+- Bounce explanations report what the remote server said. Greylisting advice distinguishes a delay from a final
+  failure; do not promise a retry after a final notice or assert that large attachments are always rejected first.
 
 ### Magyar (hu)
 
