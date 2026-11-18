@@ -907,46 +907,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = PDF-fájlok megjelenítése az üzenetekben
-# review: new
 preview-pdf-off = A PDF-fájlok nem jelennek meg az üzenetekben.
-# review: new
-preview-pdf-off-crashed = Egy PDF-fájl megjelenítés közben bezárta az Inbox Classicot, ezért a PDF-fájlok már nem jelennek meg az üzenetekben. A képek továbbra is megjelennek. A PDF-fájlok ismételt megjelenítéséhez kapcsolja be ezt: { $option }, itt: { $settings }.
-# review: new
+preview-pdf-off-crashed = Az Inbox Classic leállt egy fájl megjelenítése közben, ezért kikapcsolta a PDF-előnézeteket. A képek továbbra is megjelennek. Az újbóli megjelenítéshez kapcsolja be ezt a lehetőséget: { $option }. Itt találja: { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 oldal, { $size }
    *[other] { $count } oldal, { $size }
 }
-# review: new
-preview-page-alt = { $name }, { $page }. oldal / { $count }
-# review: new
+preview-page-alt = { $name }, { $page }. oldal (összesen { $count } oldal)
 preview-more-pages = { $count ->
-    [one] Nyissa meg az oldal megtekintéséhez
-   *[other] Nyissa meg mind a(z) { $count } oldal megtekintéséhez
+    [one] Nyissa meg a fájlt az oldal megtekintéséhez
+   *[other] Nyissa meg a fájlt az összes oldal megtekintéséhez ({ $count } oldal)
 }
-# review: new
 preview-more-files = { $count ->
-    [one] További 1 fájl a fenti listában van
-   *[other] További { $count } fájl a fenti listában van
+    [one] A fenti listában még 1 fájl található
+   *[other] A fenti listában még { $count } fájl található
 }
-# review: new
 preview-tile-downloading = Letöltés…
-# review: new
 preview-tile-preparing = Előkészítés…
-# review: new
-preview-tile-format = A(z) { $format } képek még nem jelennek meg
-# review: new
+preview-tile-format = Ez a képformátum még nem jeleníthető meg: { $format }
 preview-tile-password = Jelszóval védett: nyissa meg a jelszó megadásához
-# review: new
 preview-tile-too-large = Túl nagy a megjelenítéshez
-# review: new
 preview-tile-unreadable = Nem jeleníthető meg
-# review: new
-preview-tile-timed-out = A megjelenítés túl sokáig tartott
-# review: new
-preview-tile-crashed = Nem jelenik meg: egyszer bezárta az Inbox Classicot
-# review: new
-preview-tile-off = Nem jelenik meg, amíg az Inbox Classic újra nem indul
-# review: new
-preview-not-printed = A(z) { $name } ({ $details }) nem kerül nyomtatásra. A nyomtatáshoz nyissa meg.
+preview-tile-timed-out = Az előnézet elkészítése túl sokáig tartott
+preview-tile-crashed = Nem jeleníthető meg: az Inbox Classic korábban leállt a fájl megjelenítése közben
+preview-tile-off = Az Inbox Classic újraindításáig nem jeleníthető meg
+preview-not-printed = A melléklet tartalma nem szerepel a nyomaton: { $name } ({ $details }). Nyomtatáshoz nyissa meg a fájlt.

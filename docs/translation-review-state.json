@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -21380,12 +21380,6 @@
     },
     "hu": {
       "pending_catalogs": {
-        "app.ftl": [
-          "ui-attachment-show-in-message",
-          "ui-preview-show",
-          "ui-preview-show-note",
-          "ui-preview-pdfs"
-        ],
         "core.ftl": [
           "agent-level-read",
           "agent-level-organize",
@@ -21414,24 +21408,7 @@
           "agent-terminal-program-windows",
           "agent-terminal-program-linux",
           "agent-connect-title-terminal",
-          "agent-connect-terminal-detail",
-          "preview-pdf-option",
-          "preview-pdf-off",
-          "preview-pdf-off-crashed",
-          "preview-pdf-details",
-          "preview-page-alt",
-          "preview-more-pages",
-          "preview-more-files",
-          "preview-tile-downloading",
-          "preview-tile-preparing",
-          "preview-tile-format",
-          "preview-tile-password",
-          "preview-tile-too-large",
-          "preview-tile-unreadable",
-          "preview-tile-timed-out",
-          "preview-tile-crashed",
-          "preview-tile-off",
-          "preview-not-printed"
+          "agent-connect-terminal-detail"
         ],
         "windows.ftl": [
           "win-agent-reads",
@@ -21452,7 +21429,6 @@
         "download-ahead.html",
         "invitations.html",
         "keyboard-shortcuts.html",
-        "links-scripts.html",
         "manage-accounts.html",
         "message-not-shown.html",
         "message-rules.html",
@@ -21461,7 +21437,6 @@
         "no-connection.html",
         "options-language.html",
         "password-not-accepted.html",
-        "pictures-tracking.html",
         "removing.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
@@ -23951,6 +23926,170 @@
             "source-notes.json": "/private/tmp/inbox-hu-encryption-20261118-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-hu-encryption-20261118-screenshots.json",
             "html.log": "/private/tmp/inbox-hu-encryption-20261118-html.log"
+          }
+        },
+        {
+          "id": "hu-previews-privacy-20261118",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-attachment-show-in-message",
+              "ui-preview-show",
+              "ui-preview-show-note",
+              "ui-preview-pdfs"
+            ],
+            "core.ftl": [
+              "preview-pdf-option",
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-details",
+              "preview-page-alt",
+              "preview-more-pages",
+              "preview-more-files",
+              "preview-tile-downloading",
+              "preview-tile-preparing",
+              "preview-tile-format",
+              "preview-tile-password",
+              "preview-tile-too-large",
+              "preview-tile-unreadable",
+              "preview-tile-timed-out",
+              "preview-tile-crashed",
+              "preview-tile-off",
+              "preview-not-printed"
+            ]
+          },
+          "reviewed_help": [
+            "pictures-tracking.html",
+            "links-scripts.html"
+          ],
+          "changed_values": 10,
+          "files": {
+            "core/locales/hu/app.ftl": "1bde334e0d93bec339b7e081b200592484e929809c5f1b720114732d495b33a7",
+            "core/locales/hu/core.ftl": "912661077f518b29843cbce147e53b9be4e5418b411fc71554fbd465e334cdca",
+            "core/crates/pe-html/help/hu/pictures-tracking.html": "4dea7d5aaa85052dadd77551273d99058d0feb1495977f512b59f5541efb7090",
+            "core/crates/pe-html/help/hu/links-scripts.html": "055779152f1d4a7c4554c6cbcbb8df3dc1dd1aec3aa7befba859a9e6188877a9"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "f36bda20f41e7f878ba2568967b08c12650036cf0d0a815c1ab19a0f5b4a0fbc",
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "12d2fe255a61675a9eb26253e177c94264f4522e0adb46fac00ef7ec08e34353",
+            "core/crates/pe-html/help/en/links-scripts.html": "88850a56321ad291a4db09fe9e82d9f2429e735b2989c35a60eb42d1dafb3a2c"
+          },
+          "validation": "Hungarian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 21 reviewed catalog entries: 10 improved values and 11 retained. Two complete help topics have 21 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls and platform branches are preserved. Static counts 1/2/5/21/101, PDF page/print labels, format names, settings-path substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reading-page access keys remain collision-free; Mac and Linux preview controls use plain labels. Twenty-nine runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,551 unmarked entries and 11,856 help lines; since-start 1,885 entries/471 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations were found. Preview/privacy source discrepancies are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed all 21 Hungarian preview entries and both privacy help topics against preview rendering, count callers, attachment menus, settings, printing, picture permissions, sanitization, link handling, domain checks and logo fetching. Improved ten values; eleven natural values retained. Corrected attachment-opening, domain-identity and decoder overclaims, crash-file wording and encrypted-picture exceptions.",
+          "help_wording_lines_changed": 21,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/hu/pictures-tracking.html": 12,
+            "core/crates/pe-html/help/hu/links-scripts.html": 9
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-html/src/lib.rs": "7a15a2aecf233a4f138788a4a83805c969a01db9582aa4b150221b9a1fdacca9",
+            "core/crates/pe-html/src/previews.rs": "1a21cb9e50b4292df54a4f843f717eae1424c136e5a9ff9b48437927a292d07a",
+            "core/crates/pe-core/src/view.rs": "f6d5f36337c27cb17ba34e46c5cb672d25b68201b56f3d77641d8988318666b2",
+            "core/crates/pe-core/src/opening.rs": "deaed51a590dbfa66c848553085ea0e34710008472e6ae32d564c589d159931f",
+            "core/crates/pe-core/src/pictures.rs": "b71999c78a2caaa5b18ba7a66676b9f3b6d6b9aca7d37b541d59c28665d60053",
+            "core/crates/pe-core/src/bimi.rs": "91cf358f5addda07ddc44f5b2b8e2a3b9db7d03f487938540ff2cfdd74e050c4",
+            "core/crates/pe-core/src/otp.rs": "99ed04f0777e21204105cf7f16225e74cb80b85027208de695908f91285566c3",
+            "core/crates/pe-core/src/previews.rs": "1557b86ba9dc25f5e38ee30b3080e20032228d58a06ea5510675fbfd5e0443df",
+            "core/crates/pe-core/src/previews/plan.rs": "8507c6e71c134d19960d2c34282d798fa37070ccc0cb06785366e595a5bce9a6",
+            "core/crates/pe-core/src/previews/print.rs": "38042cdb1393333e85180cacb4bf51489624028a70cb230b57f3287f346d44a4",
+            "core/crates/pe-preview/src/lib.rs": "aa2733a3f60005790ea183abeb6f779be0dbffdd2d8a2f2c525073605fa120b1",
+            "core/crates/pe-preview/src/picture.rs": "6cb64ac3512cb3e38c1a70da949dea17892754fc8b502e5e526dfe0d11815907",
+            "app/src/options.cpp": "5204d767e2f09bfffaeb64ebeb13ef566cdcc5540cb774126a24771856b91a09",
+            "app/src/reader.cpp": "e4b54775476bc93a3c29f9e42adf16b4ebab72eba5f9bb58d0cf69e3bed1405e",
+            "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+            "app/src/webview.cpp": "62a9730d9871ee32262c9649a9f41a0ebf27d3449546e308dc3824b9853a5791",
+            "linux/src/settings.rs": "632422f86bfcf0f591efb0b47208ce4a1f8f4a534befecdfc3d7225ae3b8d8d1",
+            "linux/src/reader.rs": "18773f6639887286b42e22b2e9a92e269f3d0b0b71761c4e62f3a7b145f385f8",
+            "linux/src/attachments.rs": "10199f87fb37860ca88c435cbd29efae5ead04eb430744914b0ce3a23a5582c1",
+            "linux/src/compose.rs": "cbf30207811e2b753be8e5f58f65c6a3616909a48b740b27413b2982de6f2260",
+            "linux/src/webview.rs": "9a5055ab61a917acc748284ac5317ce802da8dbc6de719cfeb44c15e26950fd7",
+            "mac/Sources/InboxClassic/Settings.swift": "8c50dbffdf76b69cf63ea158bf39f0b608a43e0a42cef1b631a1f802dc79c3e2",
+            "mac/Sources/InboxClassic/Reader.swift": "d8c17c4c5b479ec87edce1995502d1340570caf0d713cdec127a2ac7c4c466d1",
+            "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+            "mac/Sources/InboxClassic/WebViews.swift": "790a33e3da3d557b0b0c3455227e30aca6fecef1c0318b4fda6902f3f42cc26a",
+            "linux/src/preferences.rs": "110319b0d23078a5222c7b908a39e2e098115d3994143e1e0e0d2cd675bd049f"
+          },
+          "catalog_dependencies": {
+            "core/locales/hu/mac.ftl": "ccfdfd4bb00809d2e36c35135443102555a0350bf8f2b12f1a50f049ad7d0aaa",
+            "core/locales/hu/linux.ftl": "4ee069a706d1647d0ca4f8315b1400b638b6e1251a1217718191c422f8f2f9b1",
+            "core/locales/hu/app.ftl": "1bde334e0d93bec339b7e081b200592484e929809c5f1b720114732d495b33a7",
+            "core/locales/hu/core.ftl": "912661077f518b29843cbce147e53b9be4e5418b411fc71554fbd465e334cdca",
+            "core/locales/hu/windows.ftl": "c04c8213db225027ead1c06b307c2db093fe31f68adc6ae905c1f65b7717f377",
+            "core/locales/hu/help.ftl": "22bf1437995d992179c920e30b4c01dced3cf535af44c5d478b2a3226e13b0ce"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "topic": "links-scripts.html",
+                "finding": "The English help says attachments are saved and never opened from Inbox Classic. Opening is user-requested and uses the system-associated external app; recognized program/script/active formats are blocked. Corrected the Hungarian description, without editing English or code.",
+                "evidence": [
+                  "core/crates/pe-core/src/opening.rs",
+                  "app/src/reader.cpp",
+                  "linux/src/reader.rs",
+                  "mac/Sources/InboxClassic/Reader.swift"
+                ]
+              },
+              {
+                "topic": "links-scripts.html",
+                "finding": "The reader strips message scripts/active markup, but app-owned scripts can execute; web links and mailto links are distinct. Embedded images are re-encoded by the previewer; their encodes still reach a web view, and allowed remote images are not routed through that same decoder. Replaced blanket no-code/no-system-decoder claims with the precise user-visible behavior.",
+                "evidence": [
+                  "core/crates/pe-html/src/lib.rs",
+                  "core/crates/pe-preview/src/lib.rs",
+                  "app/src/webview.cpp",
+                  "mac/Sources/InboxClassic/WebViews.swift",
+                  "linux/src/webview.rs"
+                ]
+              },
+              {
+                "topic": "pictures-tracking.html",
+                "finding": "Remote images are blocked by default. Trusted-sender rules use a provider-confirmed sender domain, not personal identity; encrypted parts require an explicit click even with trust/always settings. Logo sources can require a network request, so the help avoids an absolute no-tracking claim.",
+                "evidence": [
+                  "core/crates/pe-core/src/pictures.rs",
+                  "core/crates/pe-core/src/view.rs",
+                  "core/crates/pe-core/src/bimi.rs"
+                ]
+              },
+              {
+                "topic": "links-scripts.html",
+                "finding": "The highlighted sign-in code requires a provider-confirmed DKIM signature of the code domain or its parent. This does not verify the sender person. Compose status shows the link under the mouse, otherwise the text cursor.",
+                "evidence": [
+                  "core/crates/pe-core/src/otp.rs",
+                  "app/src/compose.cpp",
+                  "linux/src/compose.rs",
+                  "mac/Sources/InboxClassic/Compose.swift"
+                ]
+              },
+              {
+                "catalog": "core.ftl",
+                "ids": [
+                  "preview-pdf-off-crashed",
+                  "preview-tile-crashed"
+                ],
+                "finding": "A left-behind preview marker means the app ended while drawing a file, not necessarily a PDF and not proof the file itself caused termination. PDF previews are disabled on next startup. Hungarian now describes the observed condition.",
+                "evidence": [
+                  "core/crates/pe-core/src/previews.rs",
+                  "core/crates/pe-core/src/previews/plan.rs",
+                  "core/crates/pe-preview/src/lib.rs"
+                ]
+              }
+            ],
+            "unchanged_source_policy": "Source findings recorded; English/app code unchanged. Compare other languages, retain accurate text and reopen only affected passages. Do not add scope credit for a comparison task."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-hu-previews-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-hu-previews-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-hu-previews-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-hu-previews-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-hu-previews-20261118-joins.log",
+            "catalog-examples.log": "/private/tmp/inbox-hu-previews-20261118-catalog-examples.log",
+            "mnemonics.json": "/private/tmp/inbox-hu-previews-20261118-mnemonics.json",
+            "source-audit.json": "/private/tmp/inbox-hu-previews-20261118-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-hu-previews-20261118-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-hu-previews-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-hu-previews-20261118-html.log"
           }
         }
       ]
@@ -76482,7 +76621,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Hungarian structural checks pass with 1,430 expected mark-only diagnostics. Exact reconstruction verifies five catalog entries: four pending entries completed and one previously reviewed key-lock message reopened from source evidence, with no duplicate scope credit. Two values improved and three compact part-count values retained. Four full help topics have 46 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls, platform branches and literal keyboard/code contents are preserved. Static counts 1/2/5/21/101, attachment-tooltip substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Twenty-eight runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,530 unmarked entries and 11,830 help lines; since-start 1,906 entries/473 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs. Key-lock and connection-encryption source discrepancies are recorded for targeted comparison in other languages. Incoming MCP phase3a advanced from 79505992 to 1769b17a without translation changes; the existing incoming queue is unchanged and remains separate. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Hungarian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 21 reviewed catalog entries: 10 improved values and 11 retained. Two complete help topics have 21 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls and platform branches are preserved. Static counts 1/2/5/21/101, PDF page/print labels, format names, settings-path substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reading-page access keys remain collision-free; Mac and Linux preview controls use plain labels. Twenty-nine runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,551 unmarked entries and 11,856 help lines; since-start 1,885 entries/471 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations were found. Preview/privacy source discrepancies are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -137298,7 +137437,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
+      "next": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -140218,7 +140357,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -141989,7 +142128,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+      "next": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -143873,6 +144012,18 @@
         "merge_commit": "3d58cc8899bd1d59084b4c60c8bec25455912379",
         "merged_at": "2026-11-18T20:51:19Z",
         "verified_master": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "hu-encryption-help-status-20261118",
+        "pr": 180,
+        "url": "https://github.com/postalsys/inbox-classic/pull/180",
+        "review_commit": "b8736e5412af93951db9890b18461bafb6ba31df",
+        "merge_commit": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+        "merged_at": "2026-11-18T21:02:19Z",
+        "verified_master": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
@@ -154313,15 +154464,15 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "c2960a8d717bb19330156cfeb347ff42126466671a4d713626a451ceb878c350",
+      "core/locales/GLOSSARY.md": "65fc0cd212949cd4b388e90d99f226972003d7d0ec96213435ecfb58fe59ebfc",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
       "core/locales/hr/core.ftl": "2a04b325362596e53a616476582ee6f5d76da89b955627a28982ba4f4df8d97c",
       "core/crates/pe-html/help/hr/sign-and-encrypt.html": "be6f0535c8ce298a97abd0a95a0b947e73d0de3bd4b504f4e9c045d1d2a2504b",
       "core/crates/pe-html/help/hr/write-message.html": "ed4739498a9e8b3fb4b6579d96457ba42aaac85ff66cda13eac6728d87977865",
-      "core/locales/hu/app.ftl": "3123a1db5bf792eb97ee5583c39513826fab1a59b62dece366d9577288171e3c",
-      "core/locales/hu/core.ftl": "96259267544388c8b62bd98ecd16b6f544e26f09d016e965f955228517d07b6c",
+      "core/locales/hu/app.ftl": "1bde334e0d93bec339b7e081b200592484e929809c5f1b720114732d495b33a7",
+      "core/locales/hu/core.ftl": "912661077f518b29843cbce147e53b9be4e5418b411fc71554fbd465e334cdca",
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
       "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
       "core/locales/lt/app.ftl": "4fd94d26751396a3db103af8db60c1b37aa92a90705d2c0aea38cfe450b8f2cd",
@@ -154354,8 +154505,8 @@
       "core/crates/pe-html/help/fr/pictures-tracking.html": "8fc7ccd085b40296c7a2b0bd02b1e6484417ad29eb5d78e50e37318b9cbb030c",
       "core/crates/pe-html/help/hr/links-scripts.html": "19cb8a6264e052559b36c5a6e5a07050f93b2b380f937e0a68f8814189fe2d7f",
       "core/crates/pe-html/help/hr/pictures-tracking.html": "e33a1214f8c5afa983aecabe31199b118dc2cb2e8323c8f0795b18ed931d4525",
-      "core/crates/pe-html/help/hu/links-scripts.html": "bd22e5c7fc9b98e94654b7ebabb2e8ee21fdd11a39523c3e0f0152e4cbc2d46c",
-      "core/crates/pe-html/help/hu/pictures-tracking.html": "778c1fabd28d9d31075a6af0320125243f55d4507841927c980bde44386f50da",
+      "core/crates/pe-html/help/hu/links-scripts.html": "055779152f1d4a7c4554c6cbcbb8df3dc1dd1aec3aa7befba859a9e6188877a9",
+      "core/crates/pe-html/help/hu/pictures-tracking.html": "4dea7d5aaa85052dadd77551273d99058d0feb1495977f512b59f5541efb7090",
       "core/crates/pe-html/help/it/links-scripts.html": "f682b7c9a0ff988c80e4ef14e2b80b948a5889ee8a559c384e3475281782fdd4",
       "core/crates/pe-html/help/it/pictures-tracking.html": "069176cb68a7a24e2150f83a85c0b091a4ed6f220031d056bedc04103c6d8cb8",
       "core/crates/pe-html/help/lt/links-scripts.html": "072466f39ed2bc548f6179287d6f3ad1667c056d8cac526e431204c1aa8d4803",
@@ -166933,6 +167084,93 @@
             "conclusion": "Existing incoming translation queue is unchanged; local and remote refs identify the same source."
           }
         ]
+      },
+      {
+        "batch": "hu-previews-privacy-20261118",
+        "review_parent": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 13107,
+          "pending_help": 617,
+          "completed_catalog": 22517,
+          "completed_help": 759
+        },
+        "validation": "Hungarian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 21 reviewed catalog entries: 10 improved values and 11 retained. Two complete help topics have 21 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls and platform branches are preserved. Static counts 1/2/5/21/101, PDF page/print labels, format names, settings-path substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reading-page access keys remain collision-free; Mac and Linux preview controls use plain labels. Twenty-nine runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,551 unmarked entries and 11,856 help lines; since-start 1,885 entries/471 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations were found. Preview/privacy source discrepancies are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 204,
+          "worktree_count": 6,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+            "refs/remotes/origin/HEAD": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+            "refs/remotes/origin/i18n/review-resume-20261118": "b8736e5412af93951db9890b18461bafb6ba31df",
+            "refs/remotes/origin/master": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "b7c49acbf30c46a3943f008e0f00b1002c73567d"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "3baf8a41703a6b941bb61c08b688e62813c79456",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/hu/links-scripts.html\n M core/crates/pe-html/help/hu/pictures-tracking.html\n M core/locales/GLOSSARY.md\n M core/locales/hu/app.ftl\n M core/locales/hu/core.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/hu/links-scripts.html": "055779152f1d4a7c4554c6cbcbb8df3dc1dd1aec3aa7befba859a9e6188877a9",
+                "core/crates/pe-html/help/hu/pictures-tracking.html": "4dea7d5aaa85052dadd77551273d99058d0feb1495977f512b59f5541efb7090",
+                "core/locales/GLOSSARY.md": "65fc0cd212949cd4b388e90d99f226972003d7d0ec96213435ecfb58fe59ebfc",
+                "core/locales/hu/app.ftl": "1bde334e0d93bec339b7e081b200592484e929809c5f1b720114732d495b33a7",
+                "core/locales/hu/core.ftl": "912661077f518b29843cbce147e53b9be4e5418b411fc71554fbd465e334cdca"
+              }
+            }
+          ],
+          "master": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-hu-previews-20261118-edit.py": "7da0ff2e0005c08c867963f45536d06f74994b725c8e58956dc691bb0c2bb137",
+          "/private/tmp/inbox-hu-previews-20261118-finalize.py": "acd2f502628f0519078ab6cec94b58ce74071ba2ff58140cba9e82537a896b04",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a",
+          "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -168062,6 +168300,109 @@
           }
         ],
         "instruction": "Compare exact current passages and the key-lock message against verified behavior; retain accurate existing wording. Reopen only affected text. This comparison queue adds no scope or review credit before affected passages are identified. English/app code remain outside this review."
+      },
+      {
+        "id": "previews-privacy-behavior-context-20261118",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+        "completed_languages": [
+          "hu"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "it",
+          "lt",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "pictures-tracking.html",
+          "links-scripts.html"
+        ],
+        "catalog_ids": {
+          "core.ftl": [
+            "preview-pdf-off-crashed",
+            "preview-tile-crashed"
+          ]
+        },
+        "issues": [
+          {
+            "topic": "links-scripts.html",
+            "finding": "The English help says attachments are saved and never opened from Inbox Classic. Opening is user-requested and uses the system-associated external app; recognized program/script/active formats are blocked. Corrected the Hungarian description, without editing English or code.",
+            "evidence": [
+              "core/crates/pe-core/src/opening.rs",
+              "app/src/reader.cpp",
+              "linux/src/reader.rs",
+              "mac/Sources/InboxClassic/Reader.swift"
+            ]
+          },
+          {
+            "topic": "links-scripts.html",
+            "finding": "The reader strips message scripts/active markup, but app-owned scripts can execute; web links and mailto links are distinct. Embedded images are re-encoded by the previewer; their encodes still reach a web view, and allowed remote images are not routed through that same decoder. Replaced blanket no-code/no-system-decoder claims with the precise user-visible behavior.",
+            "evidence": [
+              "core/crates/pe-html/src/lib.rs",
+              "core/crates/pe-preview/src/lib.rs",
+              "app/src/webview.cpp",
+              "mac/Sources/InboxClassic/WebViews.swift",
+              "linux/src/webview.rs"
+            ]
+          },
+          {
+            "topic": "pictures-tracking.html",
+            "finding": "Remote images are blocked by default. Trusted-sender rules use a provider-confirmed sender domain, not personal identity; encrypted parts require an explicit click even with trust/always settings. Logo sources can require a network request, so the help avoids an absolute no-tracking claim.",
+            "evidence": [
+              "core/crates/pe-core/src/pictures.rs",
+              "core/crates/pe-core/src/view.rs",
+              "core/crates/pe-core/src/bimi.rs"
+            ]
+          },
+          {
+            "topic": "links-scripts.html",
+            "finding": "The highlighted sign-in code requires a provider-confirmed DKIM signature of the code domain or its parent. This does not verify the sender person. Compose status shows the link under the mouse, otherwise the text cursor.",
+            "evidence": [
+              "core/crates/pe-core/src/otp.rs",
+              "app/src/compose.cpp",
+              "linux/src/compose.rs",
+              "mac/Sources/InboxClassic/Compose.swift"
+            ]
+          },
+          {
+            "catalog": "core.ftl",
+            "ids": [
+              "preview-pdf-off-crashed",
+              "preview-tile-crashed"
+            ],
+            "finding": "A left-behind preview marker means the app ended while drawing a file, not necessarily a PDF and not proof the file itself caused termination. PDF previews are disabled on next startup. Hungarian now describes the observed condition.",
+            "evidence": [
+              "core/crates/pe-core/src/previews.rs",
+              "core/crates/pe-core/src/previews/plan.rs",
+              "core/crates/pe-preview/src/lib.rs"
+            ]
+          }
+        ],
+        "instruction": "Source findings recorded; English/app code unchanged. Compare other languages, retain accurate text and reopen only affected passages. Do not add scope credit for a comparison task."
       }
     ]
   },
