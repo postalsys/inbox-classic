@@ -719,6 +719,16 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
 - Privacy help describes web links separately from mail links and user-requested attachment opening in an external
   app. The reader removes message scripts and processes embedded pictures; avoid claiming its view cannot run any
   code or that every picture bypasses system decoders. One-time codes require the relevant domain's signature.
+- Agent read permissions cover conversations, attachments, rules, address-book entries and permitted mail contacts.
+  Read-log attachments use "tartalmát kérte le", not an external-file opening claim. List counts are "bejegyzés"
+  because conversation-grouped lists count rows; the placeable can be a folder or a combined-view identifier.
+- Agent folder-create and rename log entries say "kérve": they are recorded after queuing the server request,
+  before server completion. A new folder may still be absent when the tool finishes waiting.
+- Terminal labels use "Terminálból (...) indított programok" without inflecting the program name. Separate names
+  distinguish saved grants; unnamed agents from the same terminal program share access, not all terminals globally.
+- Read summaries count each kind independently and join through agent-can-list. Read details can have zero results;
+  the Windows heading is an hour range. The log keeps subjects/queries/file names, not message bodies. Clearing it
+  does not reset sending limits; ordinary change entries may be pruned before 30 days.
 
 ### Nederlands (nl)
 
