@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Review the Lithuanian platform catalogs: 87 Linux, 65 Mac and 66 Windows entries, followed by 50 help topics. All current app, core and help-section catalog entries are reviewed. Recheck shared mnemonic scopes when platform labels change; follow the no-build/no-test policy for generated metadata. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -27908,119 +27908,6 @@
     },
     "lt": {
       "pending_catalogs": {
-        "core.ftl": [
-          "setup-part-settings",
-          "setup-part-preferences",
-          "setup-part-accounts",
-          "setup-part-sign-in-apps",
-          "setup-part-contacts",
-          "setup-part-keys",
-          "setup-part-rules",
-          "setup-part-trusted-senders",
-          "setup-holds-settings",
-          "setup-holds-preferences",
-          "setup-holds-accounts",
-          "setup-holds-sign-in-apps",
-          "setup-holds-built-in",
-          "setup-holds-contacts",
-          "setup-holds-groups",
-          "setup-holds-own-keys",
-          "setup-holds-contact-keys",
-          "setup-holds-rules",
-          "setup-holds-trusted-senders",
-          "setup-sign-in-password",
-          "setup-account-secret-password",
-          "setup-account-secret-token",
-          "setup-account-asks-password",
-          "setup-account-signs-in-again",
-          "setup-account-here",
-          "setup-account-no-app",
-          "setup-invalid-address",
-          "setup-invalid-server",
-          "setup-invalid-user",
-          "setup-invalid-sign-in",
-          "setup-error-empty",
-          "setup-error-too-large",
-          "setup-error-not-setup",
-          "setup-error-damaged",
-          "setup-error-newer",
-          "setup-error-needs-passphrase",
-          "setup-error-wrong-passphrase",
-          "setup-error-changed",
-          "setup-error-read",
-          "setup-error-write",
-          "setup-error-no-parts",
-          "setup-left-out",
-          "setup-imported-settings",
-          "setup-imported-preferences",
-          "setup-added-accounts",
-          "setup-skipped-here",
-          "setup-skipped-no-app",
-          "setup-skipped-invalid",
-          "setup-asks-password",
-          "setup-signs-in-again",
-          "setup-added-sign-in-apps",
-          "setup-skipped-sign-in-apps",
-          "setup-added-contacts",
-          "setup-skipped-contacts",
-          "setup-added-groups",
-          "setup-added-own-keys",
-          "setup-added-contact-keys",
-          "setup-added-rules",
-          "setup-skipped-rules",
-          "setup-skipped-rules-account",
-          "setup-rules-waiting",
-          "setup-added-trusted-senders",
-          "setup-nothing",
-          "setup-account-servers",
-          "setup-file-name",
-          "setup-skipped-unreachable",
-          "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "preview-pdf-option",
-          "preview-pdf-off",
-          "preview-pdf-off-crashed",
-          "preview-pdf-details",
-          "preview-page-alt",
-          "preview-more-pages",
-          "preview-more-files",
-          "preview-tile-downloading",
-          "preview-tile-preparing",
-          "preview-tile-format",
-          "preview-tile-password",
-          "preview-tile-too-large",
-          "preview-tile-unreadable",
-          "preview-tile-timed-out",
-          "preview-tile-crashed",
-          "preview-tile-off",
-          "preview-not-printed"
-        ],
-        "help.ftl": [
-          "help-title",
-          "help-section-get-started",
-          "help-section-everyday",
-          "help-section-accounts",
-          "help-section-message-features",
-          "help-section-encrypted-mail",
-          "help-section-settings",
-          "help-section-agents",
-          "help-section-reference",
-          "help-section-troubleshooting",
-          "help-section-privacy",
-          "help-section-advanced",
-          "help-column-command",
-          "help-column-keys",
-          "help-contents",
-          "help-search",
-          "help-search-placeholder",
-          "help-no-results",
-          "help-hide",
-          "help-show",
-          "help-back",
-          "help-forward",
-          "help-home",
-          "help-print"
-        ],
         "linux.ftl": [
           "gtk-search-looks-in",
           "gtk-search-still-indexing",
@@ -31088,6 +30975,311 @@
             "mnemonics.json": "/private/tmp/inbox-lt-core-security-20261119-mnemonics.json",
             "plurals.json": "/private/tmp/inbox-lt-core-security-20261119-plurals.json",
             "substitutions.json": "/private/tmp/inbox-lt-core-security-20261119-substitutions.json"
+          }
+        },
+        {
+          "id": "lt-core-setup-previews-help-labels-20261119",
+          "reviewed_ids": {
+            "core.ftl": [
+              "setup-part-settings",
+              "setup-part-preferences",
+              "setup-part-accounts",
+              "setup-part-sign-in-apps",
+              "setup-part-contacts",
+              "setup-part-keys",
+              "setup-part-rules",
+              "setup-part-trusted-senders",
+              "setup-holds-settings",
+              "setup-holds-preferences",
+              "setup-holds-accounts",
+              "setup-holds-sign-in-apps",
+              "setup-holds-built-in",
+              "setup-holds-contacts",
+              "setup-holds-groups",
+              "setup-holds-own-keys",
+              "setup-holds-contact-keys",
+              "setup-holds-rules",
+              "setup-holds-trusted-senders",
+              "setup-sign-in-password",
+              "setup-account-secret-password",
+              "setup-account-secret-token",
+              "setup-account-asks-password",
+              "setup-account-signs-in-again",
+              "setup-account-here",
+              "setup-account-no-app",
+              "setup-invalid-address",
+              "setup-invalid-server",
+              "setup-invalid-user",
+              "setup-invalid-sign-in",
+              "setup-error-empty",
+              "setup-error-too-large",
+              "setup-error-not-setup",
+              "setup-error-damaged",
+              "setup-error-newer",
+              "setup-error-needs-passphrase",
+              "setup-error-wrong-passphrase",
+              "setup-error-changed",
+              "setup-error-read",
+              "setup-error-write",
+              "setup-error-no-parts",
+              "setup-left-out",
+              "setup-imported-settings",
+              "setup-imported-preferences",
+              "setup-added-accounts",
+              "setup-skipped-here",
+              "setup-skipped-no-app",
+              "setup-skipped-invalid",
+              "setup-asks-password",
+              "setup-signs-in-again",
+              "setup-added-sign-in-apps",
+              "setup-skipped-sign-in-apps",
+              "setup-added-contacts",
+              "setup-skipped-contacts",
+              "setup-added-groups",
+              "setup-added-own-keys",
+              "setup-added-contact-keys",
+              "setup-added-rules",
+              "setup-skipped-rules",
+              "setup-skipped-rules-account",
+              "setup-rules-waiting",
+              "setup-added-trusted-senders",
+              "setup-nothing",
+              "setup-account-servers",
+              "setup-file-name",
+              "setup-skipped-unreachable",
+              "attachment-runs-programs",
+              "attachment-decrypted-note",
+              "preview-pdf-option",
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-details",
+              "preview-page-alt",
+              "preview-more-pages",
+              "preview-more-files",
+              "preview-tile-downloading",
+              "preview-tile-preparing",
+              "preview-tile-format",
+              "preview-tile-password",
+              "preview-tile-too-large",
+              "preview-tile-unreadable",
+              "preview-tile-timed-out",
+              "preview-tile-crashed",
+              "preview-tile-off",
+              "preview-not-printed"
+            ],
+            "help.ftl": [
+              "help-title",
+              "help-section-get-started",
+              "help-section-everyday",
+              "help-section-accounts",
+              "help-section-message-features",
+              "help-section-encrypted-mail",
+              "help-section-settings",
+              "help-section-agents",
+              "help-section-reference",
+              "help-section-troubleshooting",
+              "help-section-privacy",
+              "help-section-advanced",
+              "help-column-command",
+              "help-column-keys",
+              "help-contents",
+              "help-search",
+              "help-search-placeholder",
+              "help-no-results",
+              "help-hide",
+              "help-show",
+              "help-back",
+              "help-forward",
+              "help-home",
+              "help-print"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 35,
+          "files": {
+            "core/locales/lt/core.ftl": "24192c43a90ce43611024019f8aa0122f1501fc107b0c30d8a5c9ac701441e4d",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5",
+            "core/locales/en/help.ftl": "73d0115b3e6fb0439774d432da51ec4f975c7481d8520e292536ba8a966fab8b"
+          },
+          "validation": "Lithuanian structural checks pass with 1,241 expected mark-only diagnostics. Exact reconstruction verifies 109 catalog entries: all 85 remaining core messages and 24 help labels, with 35 improved values and 74 retained. No help prose changed. IDs, variables, ellipses and comments are preserved. PDF page instructions intentionally use exact [1] and plural prose with a parenthesized total otherwise. Static inspection covers all 27 selector messages with 324 count samples and 45 substitutions, including independent setup counts, arbitrary app/account names, complete settings paths and counted size phrases. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Twenty runtime/source files and six catalog dependencies match the evidence. Existing English Windows/Linux help captures were inspected; setup and preview layouts were checked in source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,706 unmarked entries and 12,184 help lines; since-start 1,767 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed all 85 remaining Lithuanian core entries and 24 help labels. Clarified setup credentials, account/app names, server validation, pending rule destinations, temporary decrypted files, preview failures and total-page instructions. Platform catalogs and 50 help topics remain pending.",
+          "help_wording_lines_changed": 0,
+          "help_changes_by_file": {},
+          "runtime_files": {
+            "core/crates/pe-core/src/setup/mod.rs": "53ec1e31377d2d0b587ac1d1ab824e076c9e8447de7865a1acb173bbd0ef21b1",
+            "core/crates/pe-core/src/setup/file.rs": "e719f3a1073825064d90aab391e5968d57f5757bc8d9b7c214755f354a245967",
+            "core/crates/pe-core/src/setup/import.rs": "1a67289f5fa474a397c568292878fe01098bc26922ab9c00272ab8c91b3390ad",
+            "core/crates/pe-core/src/setup/export.rs": "5bf89e9575c36513fc2afb593d35cc06e553057fc10ccfd5648254c2e81cc0ea",
+            "core/crates/pe-core/src/opening.rs": "deaed51a590dbfa66c848553085ea0e34710008472e6ae32d564c589d159931f",
+            "core/crates/pe-core/src/lib.rs": "e335529ecfdf749a044ea64db2b467881d13bea93ccf6760caf2f1decb36beac",
+            "core/crates/pe-core/src/previews.rs": "1557b86ba9dc25f5e38ee30b3080e20032228d58a06ea5510675fbfd5e0443df",
+            "core/crates/pe-core/src/previews/plan.rs": "8507c6e71c134d19960d2c34282d798fa37070ccc0cb06785366e595a5bce9a6",
+            "core/crates/pe-core/src/previews/print.rs": "38042cdb1393333e85180cacb4bf51489624028a70cb230b57f3287f346d44a4",
+            "core/crates/pe-preview/src/lib.rs": "aa2733a3f60005790ea183abeb6f779be0dbffdd2d8a2f2c525073605fa120b1",
+            "core/crates/pe-preview/src/service.rs": "f77de01355015d82d1c64bd580b595f4a1ccf2a7780784f807f1b23406022444",
+            "core/crates/pe-store/src/rules.rs": "3d0fd208654f0ff1ef6373079ebc828db697d111d296e69d9360ec0b16fbc784",
+            "core/crates/pe-store/src/folders.rs": "71b76159d9145a579bee41f07509932ec677e4989d9221e27d7dfee3ecb64d51",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-html/help/topics.toml": "3cdc6e357306b6bbe018a0c3c4be1b44a972881506909870bc62dd261dd1dc74",
+            "app/src/setup.cpp": "b457feb33bd4dc051d2ad83361249d915a751a7ccdd353aaf8e9f6fbbe6342fd",
+            "app/src/help.cpp": "eab5913c96b87f451fc11237ce709a77060128788ed8b0ad30f0ac248ba50a58",
+            "mac/Sources/InboxClassic/Setup.swift": "9b965806d90f53d40d42ae9b96b8509b3dd1e0f2f3764ba009320b446edc947c",
+            "linux/src/setup.rs": "8de4e6075bb63c96a4bdef7ee8481dfb3ba20557ad472d2597a0fb3ca54b0cf4",
+            "linux/src/help.rs": "d8557b96aa7937c1d478d4d89d2a7a7bbd8aca0a32791ba908360fbd1e38b9cb"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "75da81b2b96ee1d095b9e92d7222db3d0853a14f572c4b275c3654fd2d173957",
+            "core/locales/lt/linux.ftl": "a2bd0012bcba9f4689d89d9d8b7dcd2b55e5aa7577db7d1498d6c59666c609b5",
+            "core/locales/lt/app.ftl": "c704e3afa8bdf7f568ac9f15c8df46d837e3375cf61c3b86f58a48270a987d6c",
+            "core/locales/lt/core.ftl": "24192c43a90ce43611024019f8aa0122f1501fc107b0c30d8a5c9ac701441e4d",
+            "core/locales/lt/windows.ftl": "57481088d3a5e7cd2657126ef625a39e8887876c5501447a846d80b770eb11d0",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "catalog_ids": [
+                  "setup-account-secret-token",
+                  "setup-account-secret-password",
+                  "setup-account-asks-password",
+                  "setup-account-signs-in-again",
+                  "setup-account-here",
+                  "setup-account-no-app",
+                  "setup-skipped-no-app",
+                  "setup-skipped-here",
+                  "setup-skipped-invalid",
+                  "setup-skipped-unreachable"
+                ],
+                "finding": "Account notes are shown below the account label before import. Saved OAuth secrets are credentials, not a login action. Existing accounts are matched by address and IMAP server. Discovery refusal can identify either a sign-in app or an account; name must be neutral and recovery must refer to the required sign-in app. A failed issuer lookup does not necessarily establish network unreachability.",
+                "sources": [
+                  "core/crates/pe-core/src/setup/import.rs",
+                  "core/crates/pe-core/src/setup/file.rs",
+                  "app/src/setup.cpp",
+                  "mac/Sources/InboxClassic/Setup.swift",
+                  "linux/src/setup.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "setup-invalid-server",
+                  "setup-invalid-sign-in",
+                  "setup-error-too-large",
+                  "setup-error-newer",
+                  "setup-error-changed",
+                  "setup-error-write"
+                ],
+                "finding": "Server validation also rejects an unknown security setting. Invalid sign-in can mean an unusable OAuth issuer, not only an unknown login method. Size refusal is used on export and import, before parsing. Newer-format errors display app_version, with a question-mark fallback. Integrity refusal does not establish exactly when corruption occurred.",
+                "sources": [
+                  "core/crates/pe-core/src/setup/file.rs",
+                  "core/crates/pe-core/src/setup/export.rs",
+                  "core/crates/pe-core/src/setup/import.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "setup-holds-contacts",
+                  "setup-holds-groups",
+                  "setup-holds-own-keys",
+                  "setup-holds-contact-keys",
+                  "setup-left-out",
+                  "setup-added-groups",
+                  "setup-skipped-rules-account",
+                  "setup-rules-waiting"
+                ],
+                "finding": "Setup counts are integers; contact/group and own/contact-key totals are independent and joined by a comma. Counted import summaries are omitted at zero. Existing groups may be extended. Missing-account rules include both the filter account and destination account. A missing target folder stays pending until a matching account/path is found; synchronization does not guarantee its creation.",
+                "sources": [
+                  "core/crates/pe-core/src/setup/mod.rs",
+                  "core/crates/pe-core/src/setup/file.rs",
+                  "core/crates/pe-core/src/setup/import.rs",
+                  "core/crates/pe-store/src/rules.rs",
+                  "core/crates/pe-store/src/folders.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "attachment-runs-programs",
+                  "attachment-decrypted-note"
+                ],
+                "finding": "Open refuses executable-capable attachments but permits saving. Opening decrypted data writes an unencrypted copy in a private temporary folder; startup cleanup attempts removal of folders older than a day. It is not a timer that empties the folder exactly a day later.",
+                "sources": [
+                  "core/crates/pe-core/src/opening.rs",
+                  "core/crates/pe-core/src/lib.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "preview-pdf-off-crashed",
+                  "preview-more-pages",
+                  "preview-tile-too-large",
+                  "preview-tile-crashed",
+                  "preview-tile-off",
+                  "preview-tile-timed-out",
+                  "preview-not-printed"
+                ],
+                "finding": "A leftover rendering marker disables PDF previews; it establishes interruption during rendering, not proof the file caused the app to exit. Per-file Crashed also covers a previous hang. TooLarge text also serves the combined message pixel budget. More-pages count is the total, not the omitted count. Exact [1] plus plural prose avoids invalid Lithuanian all-pages agreement for 10/21/101. Print placeholders can be arbitrary filenames and already-counted page/size descriptions. The settings value is a complete platform path.",
+                "sources": [
+                  "core/crates/pe-core/src/previews.rs",
+                  "core/crates/pe-core/src/previews/plan.rs",
+                  "core/crates/pe-core/src/previews/print.rs",
+                  "core/crates/pe-preview/src/lib.rs",
+                  "core/crates/pe-preview/src/service.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "help-section-message-features",
+                  "help-section-advanced",
+                  "help-column-keys",
+                  "help-no-results",
+                  "help-search",
+                  "help-hide",
+                  "help-show",
+                  "help-home"
+                ],
+                "finding": "Section labels group the topics in topics.toml; message features includes codes, delivery reports, invitations, unsubscribe and logos, and advanced includes sign-in apps and CLI. Keys labels the generated shortcut table. Help search requires every whitespace-separated query component, matching case-insensitive substrings. Shared Search serves both a Windows tab and its button; retain an action label. Hide/Show toggles the contents/search pane, and Home opens the main-window topic.",
+                "sources": [
+                  "core/crates/pe-html/help/topics.toml",
+                  "core/crates/pe-html/src/help.rs",
+                  "app/src/help.cpp",
+                  "linux/src/help.rs"
+                ]
+              }
+            ],
+            "reference_screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/help-2-contents.png",
+                "sha256": "aa66ba24d96be143707c82fab38d898c5c61ea16b2a1d79f9de409b566cc18aa",
+                "locale": "English",
+                "observation": "Existing help-window capture inspected for section, search and navigation context; no Lithuanian GUI-fit claim."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/help-2-contents.png",
+                "sha256": "094e505748605e0c920b77237dd31f8fd200715c5b2a780409e2a4e6239e0b6d",
+                "locale": "English",
+                "observation": "Existing help-window capture inspected for section, search and navigation context; no Lithuanian GUI-fit claim."
+              }
+            ],
+            "limits": "No local test suite, build or Fluent runtime execution. No setup/preview reference capture found in the standard screenshot roots; current source and layout were inspected instead. Help prose remains pending."
+          },
+          "mnemonic_scope_count": 60,
+          "plural_changes": {
+            "preview-more-pages": "Exact [1] for one page; plural instruction with parenthesized total otherwise, including 10/21/101."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-core-finish-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-core-finish-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-core-finish-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-core-finish-20261119-since.log",
+            "source-audit.json": "/private/tmp/inbox-lt-core-finish-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-core-finish-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-core-finish-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-core-finish-20261119-html.log",
+            "mnemonics.json": "/private/tmp/inbox-lt-core-finish-20261119-mnemonics.json",
+            "plurals.json": "/private/tmp/inbox-lt-core-finish-20261119-plurals.json",
+            "substitutions.json": "/private/tmp/inbox-lt-core-finish-20261119-substitutions.json"
           }
         }
       ],
@@ -77681,7 +77873,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 1,132 expected mark-only diagnostics. Exact reconstruction verifies 152 core entries: 48 improved values and 104 retained. No help content changed. IDs, variables, ellipses and comments are preserved. Missing-recipient-key instructions intentionally use exact [1], leaving 21/101 in plural prose. Static inspection covers all 18 selector messages with 247 count/color/recurrence samples and 54 substitutions, including nested recurrence, independent activity counts, system-store names and signer identities. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Twenty-five runtime/source files and six catalog dependencies match the evidence. Existing English sign-in and agent captures were inspected; historical log wording is superseded by current source behavior. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,597 unmarked entries and 12,184 help lines; since-start 1,784 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. Primary provider, key-server and Microsoft terminology references were checked; the private Google registration approval itself was not externally verified. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,241 expected mark-only diagnostics. Exact reconstruction verifies 109 catalog entries: all 85 remaining core messages and 24 help labels, with 35 improved values and 74 retained. No help prose changed. IDs, variables, ellipses and comments are preserved. PDF page instructions intentionally use exact [1] and plural prose with a parenthesized total otherwise. Static inspection covers all 27 selector messages with 324 count samples and 45 substitutions, including independent setup counts, arbitrary app/account names, complete settings paths and counted size phrases. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Twenty runtime/source files and six catalog dependencies match the evidence. Existing English Windows/Linux help captures were inspected; setup and preview layouts were checked in source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,706 unmarked entries and 12,184 help lines; since-start 1,767 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -138497,7 +138689,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Review the Lithuanian platform catalogs: 87 Linux, 65 Mac and 66 Windows entries, followed by 50 help topics. All current app, core and help-section catalog entries are reviewed. Recheck shared mnemonic scopes when platform labels change; follow the no-build/no-test policy for generated metadata. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -141417,7 +141609,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Review the Lithuanian platform catalogs: 87 Linux, 65 Mac and 66 Windows entries, followed by 50 help topics. All current app, core and help-section catalog entries are reviewed. Recheck shared mnemonic scopes when platform labels change; follow the no-build/no-test policy for generated metadata. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -143188,7 +143380,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Review the Lithuanian platform catalogs: 87 Linux, 65 Mac and 66 Windows entries, followed by 50 help topics. All current app, core and help-section catalog entries are reviewed. Recheck shared mnemonic scopes when platform labels change; follow the no-build/no-test policy for generated metadata. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -145234,6 +145426,24 @@
         "merge_commit": "7cb143076cc22405c7483ec22ea4ff2665373a90",
         "merged_at": "2026-11-18T23:34:24Z",
         "verified_master": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true,
+        "post_publication_source_check": {
+          "ref": "origin/release-please--branches--master--components--inbox-classic",
+          "commit": "2a993d9f6ae6271c7a6968390ed70932558bb3eb",
+          "merge_base": "e6e736298c4979647c1eff7496b9c90fd00b63b4",
+          "translation_delta_paths": []
+        }
+      },
+      {
+        "batch": "lt-core-signin-agents-security-20261119",
+        "pr": 195,
+        "url": "https://github.com/postalsys/inbox-classic/pull/195",
+        "review_commit": "ff48ba17ba2491dbb1bf189944dad89dee3723fa",
+        "merge_commit": "41388d43ebb02b261d259d817fed0f10aa240b69",
+        "merged_at": "2026-11-18T23:49:14Z",
+        "verified_master": "41388d43ebb02b261d259d817fed0f10aa240b69",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true,
@@ -155680,7 +155890,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "5dedf99a881f27884986e4b71084bed7b64d35ff75442abdcb7a48930d8b3459",
+      "core/locales/GLOSSARY.md": "5c68dbd02560e8b2c40dcb95449228556adec7f3b2ffc01f78ba92237f77b377",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -155692,7 +155902,7 @@
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
       "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
       "core/locales/lt/app.ftl": "c704e3afa8bdf7f568ac9f15c8df46d837e3375cf61c3b86f58a48270a987d6c",
-      "core/locales/lt/core.ftl": "556e3f94cfe173f4553ff4db922200247d5a53b2449e0126aa656af8c083611b",
+      "core/locales/lt/core.ftl": "24192c43a90ce43611024019f8aa0122f1501fc107b0c30d8a5c9ac701441e4d",
       "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
       "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e",
       "core/locales/lv/app.ftl": "3310cec05b61d52c666cad3c51afce9fba308b9dfdae2d251a6705c6d09741d1",
@@ -155828,7 +156038,8 @@
       "core/crates/pe-html/help/hu/keyboard-shortcuts.html": "13e1f8ad90dae0ab1f8148bafbcd11cd66297781f2ff697fa002ece906c379db",
       "core/crates/pe-html/help/hu/options-language.html": "99c4d467f549cca78245341e2d27b53a40fc3d4ba864026fa816aec04f6a3d55",
       "core/crates/pe-html/help/hu/sign-in-codes.html": "4d12bf47cd850b1b45a35ffc1387c2ba0b98ea5711168de45c607cb4ab750190",
-      "core/locales/lt/windows.ftl": "57481088d3a5e7cd2657126ef625a39e8887876c5501447a846d80b770eb11d0"
+      "core/locales/lt/windows.ftl": "57481088d3a5e7cd2657126ef625a39e8887876c5501447a846d80b770eb11d0",
+      "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
     },
     "resumed_review_checkpoints": [
       {
@@ -175850,6 +176061,119 @@
           "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b",
           "/private/tmp/inbox-settings-mnemonics.py": "3ea34d18000e86852c799c640b462d7511cb1dcde5e4f7b162a6a9acd07254f1"
         }
+      },
+      {
+        "batch": "lt-core-setup-previews-help-labels-20261119",
+        "review_parent": "41388d43ebb02b261d259d817fed0f10aa240b69",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 11952,
+          "pending_help": 591,
+          "completed_catalog": 23672,
+          "completed_help": 785
+        },
+        "validation": "Lithuanian structural checks pass with 1,241 expected mark-only diagnostics. Exact reconstruction verifies 109 catalog entries: all 85 remaining core messages and 24 help labels, with 35 improved values and 74 retained. No help prose changed. IDs, variables, ellipses and comments are preserved. PDF page instructions intentionally use exact [1] and plural prose with a parenthesized total otherwise. Static inspection covers all 27 selector messages with 324 count samples and 45 substitutions, including independent setup counts, arbitrary app/account names, complete settings paths and counted size phrases. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Twenty runtime/source files and six catalog dependencies match the evidence. Existing English Windows/Linux help captures were inspected; setup and preview layouts were checked in source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,706 unmarked entries and 12,184 help lines; since-start 1,767 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 192,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "41388d43ebb02b261d259d817fed0f10aa240b69",
+            "refs/remotes/origin/HEAD": "41388d43ebb02b261d259d817fed0f10aa240b69",
+            "refs/remotes/origin/i18n/review-resume-20261118": "ff48ba17ba2491dbb1bf189944dad89dee3723fa",
+            "refs/remotes/origin/master": "41388d43ebb02b261d259d817fed0f10aa240b69"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "effbbdd527ea9384c0c77557753fecda3d338d41",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "7ac55d1b22af496d1fbb0f68f7b9d034b57ecc38",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "f0a1d2c033a47346911fe7fafde06abfea9144ef",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "1ca0f5311213324ead36beabc1c5a591d4404397",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "41388d43ebb02b261d259d817fed0f10aa240b69",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/locales/GLOSSARY.md\n M core/locales/lt/core.ftl\n M core/locales/lt/help.ftl",
+              "translation_hashes": {
+                "core/locales/GLOSSARY.md": "5c68dbd02560e8b2c40dcb95449228556adec7f3b2ffc01f78ba92237f77b377",
+                "core/locales/lt/core.ftl": "24192c43a90ce43611024019f8aa0122f1501fc107b0c30d8a5c9ac701441e4d",
+                "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+              }
+            }
+          ],
+          "master": "41388d43ebb02b261d259d817fed0f10aa240b69",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "41388d43ebb02b261d259d817fed0f10aa240b69",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-core-finish-20261119-edit.py": "d31dbd9cf19e99aa65c2b34e427c3c53d2b5197f825a06c8044dd7d6e22f9912",
+          "/private/tmp/inbox-lt-core-finish-20261119-proofs.py": "a33715b7dcc86dbaea9a31aabbe30b3fecec226de7296522eaaf43e7e91fa586",
+          "/private/tmp/inbox-lt-core-finish-20261119-finalize.py": "02a8fb0df245af2d4dc14f406c8ea3f95df19e4017ffd78271185d0223a42175",
+          "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b",
+          "/private/tmp/inbox-settings-mnemonics.py": "3ea34d18000e86852c799c640b462d7511cb1dcde5e4f7b162a6a9acd07254f1"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -178462,6 +178786,196 @@
               "core/crates/pe-core/src/lookup.rs",
               "core/crates/pe-core/src/compose_keys.rs",
               "core/crates/pe-core/src/compose.rs"
+            ]
+          }
+        ],
+        "instruction": "Compare against caller and language rules, reusing earlier related context work. Retain accurate wording, reopen only affected entries and add no duplicate scope credit. English/app code remains outside this review."
+      },
+      {
+        "id": "core-setup-preview-help-context-20261119",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "41388d43ebb02b261d259d817fed0f10aa240b69",
+        "completed_languages": [
+          "lt"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "hu",
+          "it",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "catalog_ids": [
+          "attachment-decrypted-note",
+          "attachment-runs-programs",
+          "help-column-keys",
+          "help-hide",
+          "help-home",
+          "help-no-results",
+          "help-search",
+          "help-section-advanced",
+          "help-section-message-features",
+          "help-show",
+          "preview-more-pages",
+          "preview-not-printed",
+          "preview-pdf-off-crashed",
+          "preview-tile-crashed",
+          "preview-tile-off",
+          "preview-tile-timed-out",
+          "preview-tile-too-large",
+          "setup-account-asks-password",
+          "setup-account-here",
+          "setup-account-no-app",
+          "setup-account-secret-password",
+          "setup-account-secret-token",
+          "setup-account-signs-in-again",
+          "setup-added-groups",
+          "setup-error-changed",
+          "setup-error-newer",
+          "setup-error-too-large",
+          "setup-error-write",
+          "setup-holds-contact-keys",
+          "setup-holds-contacts",
+          "setup-holds-groups",
+          "setup-holds-own-keys",
+          "setup-invalid-server",
+          "setup-invalid-sign-in",
+          "setup-left-out",
+          "setup-rules-waiting",
+          "setup-skipped-here",
+          "setup-skipped-invalid",
+          "setup-skipped-no-app",
+          "setup-skipped-rules-account",
+          "setup-skipped-unreachable"
+        ],
+        "issues": [
+          {
+            "catalog_ids": [
+              "setup-account-secret-token",
+              "setup-account-secret-password",
+              "setup-account-asks-password",
+              "setup-account-signs-in-again",
+              "setup-account-here",
+              "setup-account-no-app",
+              "setup-skipped-no-app",
+              "setup-skipped-here",
+              "setup-skipped-invalid",
+              "setup-skipped-unreachable"
+            ],
+            "finding": "Account notes are shown below the account label before import. Saved OAuth secrets are credentials, not a login action. Existing accounts are matched by address and IMAP server. Discovery refusal can identify either a sign-in app or an account; name must be neutral and recovery must refer to the required sign-in app. A failed issuer lookup does not necessarily establish network unreachability.",
+            "sources": [
+              "core/crates/pe-core/src/setup/import.rs",
+              "core/crates/pe-core/src/setup/file.rs",
+              "app/src/setup.cpp",
+              "mac/Sources/InboxClassic/Setup.swift",
+              "linux/src/setup.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "setup-invalid-server",
+              "setup-invalid-sign-in",
+              "setup-error-too-large",
+              "setup-error-newer",
+              "setup-error-changed",
+              "setup-error-write"
+            ],
+            "finding": "Server validation also rejects an unknown security setting. Invalid sign-in can mean an unusable OAuth issuer, not only an unknown login method. Size refusal is used on export and import, before parsing. Newer-format errors display app_version, with a question-mark fallback. Integrity refusal does not establish exactly when corruption occurred.",
+            "sources": [
+              "core/crates/pe-core/src/setup/file.rs",
+              "core/crates/pe-core/src/setup/export.rs",
+              "core/crates/pe-core/src/setup/import.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "setup-holds-contacts",
+              "setup-holds-groups",
+              "setup-holds-own-keys",
+              "setup-holds-contact-keys",
+              "setup-left-out",
+              "setup-added-groups",
+              "setup-skipped-rules-account",
+              "setup-rules-waiting"
+            ],
+            "finding": "Setup counts are integers; contact/group and own/contact-key totals are independent and joined by a comma. Counted import summaries are omitted at zero. Existing groups may be extended. Missing-account rules include both the filter account and destination account. A missing target folder stays pending until a matching account/path is found; synchronization does not guarantee its creation.",
+            "sources": [
+              "core/crates/pe-core/src/setup/mod.rs",
+              "core/crates/pe-core/src/setup/file.rs",
+              "core/crates/pe-core/src/setup/import.rs",
+              "core/crates/pe-store/src/rules.rs",
+              "core/crates/pe-store/src/folders.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "attachment-runs-programs",
+              "attachment-decrypted-note"
+            ],
+            "finding": "Open refuses executable-capable attachments but permits saving. Opening decrypted data writes an unencrypted copy in a private temporary folder; startup cleanup attempts removal of folders older than a day. It is not a timer that empties the folder exactly a day later.",
+            "sources": [
+              "core/crates/pe-core/src/opening.rs",
+              "core/crates/pe-core/src/lib.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "preview-pdf-off-crashed",
+              "preview-more-pages",
+              "preview-tile-too-large",
+              "preview-tile-crashed",
+              "preview-tile-off",
+              "preview-tile-timed-out",
+              "preview-not-printed"
+            ],
+            "finding": "A leftover rendering marker disables PDF previews; it establishes interruption during rendering, not proof the file caused the app to exit. Per-file Crashed also covers a previous hang. TooLarge text also serves the combined message pixel budget. More-pages count is the total, not the omitted count. Exact [1] plus plural prose avoids invalid Lithuanian all-pages agreement for 10/21/101. Print placeholders can be arbitrary filenames and already-counted page/size descriptions. The settings value is a complete platform path.",
+            "sources": [
+              "core/crates/pe-core/src/previews.rs",
+              "core/crates/pe-core/src/previews/plan.rs",
+              "core/crates/pe-core/src/previews/print.rs",
+              "core/crates/pe-preview/src/lib.rs",
+              "core/crates/pe-preview/src/service.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "help-section-message-features",
+              "help-section-advanced",
+              "help-column-keys",
+              "help-no-results",
+              "help-search",
+              "help-hide",
+              "help-show",
+              "help-home"
+            ],
+            "finding": "Section labels group the topics in topics.toml; message features includes codes, delivery reports, invitations, unsubscribe and logos, and advanced includes sign-in apps and CLI. Keys labels the generated shortcut table. Help search requires every whitespace-separated query component, matching case-insensitive substrings. Shared Search serves both a Windows tab and its button; retain an action label. Hide/Show toggles the contents/search pane, and Home opens the main-window topic.",
+            "sources": [
+              "core/crates/pe-html/help/topics.toml",
+              "core/crates/pe-html/src/help.rs",
+              "app/src/help.cpp",
+              "linux/src/help.rs"
             ]
           }
         ],

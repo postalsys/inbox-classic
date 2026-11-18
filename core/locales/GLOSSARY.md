@@ -682,6 +682,20 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   to match a unique From address. Integrity failure does not establish when or by whom data changed.
 - Key lookup messages list addresses, not keys. Publication confirms every email address separately before
   address lookup works. Missing-recipient-key instructions use exact [1], so 21/101 get plural instructions.
+- Setup account notes say "prisijungimo duomenys" for saved OAuth credentials; import summaries introduce
+  addresses with "paskyra" and sign-in app names with "prisijungimo programa". The shared discovery-failure
+  message uses "Neimportuota:" because its name can identify either an app or an account.
+- Setup server validation includes the security setting, and its size limit applies on export and import.
+  Rule summaries cover both filter and destination accounts. A missing destination remains pending until found;
+  do not guarantee that synchronization will create it. Keep independent setup counts separately inflected.
+- Opening a decrypted attachment writes an unencrypted temporary copy. Cleanup runs at startup for copies older
+  than a day; do not promise deletion exactly one day later. Preview failures can be hangs or stale crash markers,
+  and size refusal can be a combined preview limit. Describe the observed state without blaming a file for a crash.
+- "Atidarykite failą" opens the complete attachment. PDF page instructions use exact [1] and a parenthesized
+  total for all other counts, avoiding "visus 10 puslapių". Print notices identify the file and distinguish it
+  from the message being printed. Settings placeholders contain a complete platform-specific path.
+- Help uses "Papildomos laiškų funkcijos", "Išplėstinės funkcijos" and "Spartieji klavišai" for their respective
+  sections and shortcut-table column. Reviewing these labels does not complete the pending help prose.
 
 ### Magyar (hu)
 

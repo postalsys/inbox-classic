@@ -786,238 +786,170 @@ pgp-bar-count-signed = { $count ->
 pgp-bar-count-warning = reikia dėmesio: { $count }
 pgp-bar-count-neutral = be patvirtinto parašo: { $count }
 # the setup file: settings, accounts, contacts and keys carried to another computer
-# review: new
 setup-part-settings = Nustatymai
-# review: new
 setup-part-preferences = Langų nuostatos
-# review: new
 setup-part-accounts = Paskyros
-# review: new
 setup-part-sign-in-apps = Prisijungimo programos
-# review: new
 setup-part-contacts = Kontaktai ir grupės
-# review: new
 setup-part-keys = Šifravimo raktai
-# review: new
 setup-part-rules = Laiškų taisyklės
-# review: new
 setup-part-trusted-senders = Patikimi siuntėjai
-# review: new
 setup-holds-settings = { $count ->
     [one] { $count } nustatymas
     [few] { $count } nustatymai
    *[other] { $count } nustatymų
 }
-# review: new
 setup-holds-preferences = { $count ->
     [one] { $count } nuostata
     [few] { $count } nuostatos
    *[other] { $count } nuostatų
 }
-# review: new
 setup-holds-accounts = { $count ->
     [one] { $count } paskyra
     [few] { $count } paskyros
    *[other] { $count } paskyrų
 }
-# review: new
 setup-holds-sign-in-apps = { $count ->
     [one] { $count } prisijungimo programa
     [few] { $count } prisijungimo programos
    *[other] { $count } prisijungimo programų
 }
-# review: new
 setup-holds-built-in = Kurios įtaisytosios prisijungimo programos įjungtos
-# review: new
 setup-holds-contacts = { $count ->
     [one] { $count } kontaktas
     [few] { $count } kontaktai
    *[other] { $count } kontaktų
 }
-# review: new
 setup-holds-groups = { $count ->
     [one] { $count } grupė
     [few] { $count } grupės
    *[other] { $count } grupių
 }
-# review: new
 setup-holds-own-keys = { $count ->
     [one] { $count } jūsų raktas
     [few] { $count } jūsų raktai
    *[other] { $count } jūsų raktų
 }
-# review: new
 setup-holds-contact-keys = { $count ->
     [one] { $count } kontakto raktas
     [few] { $count } kontaktų raktai
    *[other] { $count } kontaktų raktų
 }
-# review: new
 setup-holds-rules = { $count ->
     [one] { $count } taisyklė
     [few] { $count } taisyklės
    *[other] { $count } taisyklių
 }
-# review: new
 setup-holds-trusted-senders = { $count ->
     [one] { $count } patikimas siuntėjas
     [few] { $count } patikimi siuntėjai
    *[other] { $count } patikimų siuntėjų
 }
-# review: new
 setup-sign-in-password = Slaptažodis
-# review: new
-setup-account-secret-password = Jos slaptažodis yra faile.
-# review: new
-setup-account-secret-token = Jos prisijungimas yra faile.
-# review: new
-setup-account-asks-password = Po importo ji paprašys slaptažodžio.
-# review: new
-setup-account-signs-in-again = Po importo prie jos prisijungsite iš naujo.
-# review: new
-setup-account-here = Ji čia jau nustatyta, todėl praleidžiama.
-# review: new
-setup-account-no-app = Ji jungiasi per { $app }, kuri čia nenustatyta. Importuokite ir prisijungimo programas.
-# review: new
+setup-account-secret-password = Paskyros slaptažodis įtrauktas į failą.
+setup-account-secret-token = Prisijungimo duomenys įtraukti į failą.
+setup-account-asks-password = Importavus paskyrą reikės įvesti jos slaptažodį.
+setup-account-signs-in-again = Importavus paskyrą reikės prisijungti iš naujo.
+setup-account-here = Ši paskyra jau pridėta, todėl importuojant bus praleista.
+setup-account-no-app = Šiai paskyrai reikia prisijungimo programos „{ $app }“, kurios čia nėra. Importuokite ir reikiamą prisijungimo programą.
 setup-invalid-address = „{ $address }“ nėra el. pašto adresas.
-# review: new
-setup-invalid-server = { $server } serveris neturi tinkamo vardo arba prievado.
-# review: new
-setup-invalid-user = Ji neturi naudotojo vardo.
-# review: new
-setup-invalid-sign-in = Ji jungiasi būdu, kurio Inbox Classic nežino.
-# review: new
+setup-invalid-server = Netinkamas { $server } serverio adresas, prievadas arba ryšio saugos nustatymas.
+setup-invalid-user = Nenurodytas naudotojo vardas.
+setup-invalid-sign-in = Netinkami paskyros prisijungimo nustatymai.
 setup-error-empty = Failas tuščias.
-# review: new
-setup-error-too-large = Failas per didelis, kad būtų Inbox Classic sąranka.
-# review: new
-setup-error-not-setup = Šis failas nėra Inbox Classic sąranka.
-# review: new
+setup-error-too-large = Sąrankos duomenys viršija leistiną dydį.
+setup-error-not-setup = Tai nėra Inbox Classic sąrankos failas.
 setup-error-damaged = Sąrankos failas sugadintas, jo perskaityti negalima.
-# review: new
 setup-error-newer = Šią sąranką įrašė naujesnė Inbox Classic versija ({ $version }). Atnaujinkite Inbox Classic ir importuokite ją dar kartą.
-# review: new
-setup-error-needs-passphrase = Ši sąranka apsaugota slaptafraze. Įveskite slaptafrazę, su kuria ji buvo įrašyta.
-# review: new
-setup-error-wrong-passphrase = Tai ne ta slaptafrazė, su kuria buvo įrašyta ši sąranka.
-# review: new
-setup-error-changed = Sąrankos failas po įrašymo buvo pakeistas arba sugadintas, todėl jo importuoti negalima.
-# review: new
+setup-error-needs-passphrase = Sąrankos failas apsaugotas slaptafraze. Įveskite ją, kad atrakintumėte failą.
+setup-error-wrong-passphrase = Sąrankos failo slaptafrazė neteisinga.
+setup-error-changed = Nepavyko patikrinti sąrankos failo vientisumo. Failas gali būti pakeistas arba sugadintas, todėl jo importuoti negalima.
 setup-error-read = Sąrankos failo perskaityti nepavyko: { $error }
-# review: new
-setup-error-write = Sąrankos įrašyti nepavyko: { $error }
-# review: new
+setup-error-write = Sąrankos failo įrašyti nepavyko: { $error }
 setup-error-no-parts = Pasirinkite bent vieną dalį.
-# review: new
 setup-left-out = { $count ->
     [one] Dalyje „{ $part }“ yra { $count } įrašas, kurio negalima naudoti, todėl jis praleidžiamas.
     [few] Dalyje „{ $part }“ yra { $count } įrašai, kurių negalima naudoti, todėl jie praleidžiami.
    *[other] Dalyje „{ $part }“ yra { $count } įrašų, kurių negalima naudoti, todėl jie praleidžiami.
 }
-# review: new
 setup-imported-settings = Nustatymai pakeisti.
-# review: new
 setup-imported-preferences = Langų nuostatos pakeistos.
-# review: new
 setup-added-accounts = { $count ->
     [one] Pridėta { $count } paskyra.
     [few] Pridėtos { $count } paskyros.
    *[other] Pridėta paskyrų: { $count }.
 }
-# review: new
-setup-skipped-here = { $address } čia jau nustatyta, todėl praleista.
-# review: new
-setup-skipped-no-app = { $address } praleista: ji jungiasi per { $app }, kuri čia nenustatyta.
-# review: new
-setup-skipped-invalid = { $address } praleista: { $reason }
-# review: new
-setup-asks-password = { $address } paprašys slaptažodžio, kai jungsis.
-# review: new
-setup-signs-in-again = { $address } paprašys prisijungti iš naujo, kai jungsis.
-# review: new
+setup-skipped-here = Paskyra „{ $address }“ jau pridėta, todėl praleista.
+setup-skipped-no-app = Paskyra „{ $address }“ praleista, nes nėra reikiamos prisijungimo programos „{ $app }“.
+setup-skipped-invalid = Paskyra „{ $address }“ praleista: { $reason }
+setup-asks-password = Jungiantis prie paskyros „{ $address }“ bus paprašyta įvesti slaptažodį.
+setup-signs-in-again = Jungiantis prie paskyros „{ $address }“ bus paprašyta prisijungti iš naujo.
 setup-added-sign-in-apps = { $count ->
     [one] Pridėta { $count } prisijungimo programa.
     [few] Pridėtos { $count } prisijungimo programos.
    *[other] Pridėta prisijungimo programų: { $count }.
 }
-# review: new
 setup-skipped-sign-in-apps = { $count ->
     [one] { $count } prisijungimo programa čia jau nustatyta.
     [few] { $count } prisijungimo programos čia jau nustatytos.
    *[other] Prisijungimo programų, kurios čia jau nustatytos: { $count }.
 }
-# review: new
 setup-added-contacts = { $count ->
     [one] Į adresų knygelę pridėtas { $count } kontaktas.
     [few] Į adresų knygelę pridėti { $count } kontaktai.
    *[other] Į adresų knygelę pridėta kontaktų: { $count }.
 }
-# review: new
 setup-skipped-contacts = { $count ->
     [one] { $count } kontaktas jau yra adresų knygelėje.
     [few] { $count } kontaktai jau yra adresų knygelėje.
    *[other] Kontaktų, kurie jau yra adresų knygelėje: { $count }.
 }
-# review: new
 setup-added-groups = { $count ->
     [one] Pridėta arba papildyta { $count } grupė.
     [few] Pridėtos arba papildytos { $count } grupės.
    *[other] Pridėta arba papildyta grupių: { $count }.
 }
-# review: new
 setup-added-own-keys = { $count ->
     [one] Pridėtas { $count } jūsų raktas.
     [few] Pridėti { $count } jūsų raktai.
    *[other] Pridėta jūsų raktų: { $count }.
 }
-# review: new
 setup-added-contact-keys = { $count ->
     [one] Pridėtas { $count } kontakto raktas.
     [few] Pridėti { $count } kontaktų raktai.
    *[other] Pridėta kontaktų raktų: { $count }.
 }
-# review: new
 setup-added-rules = { $count ->
     [one] Pridėta { $count } laiškų taisyklė.
     [few] Pridėtos { $count } laiškų taisyklės.
    *[other] Pridėta laiškų taisyklių: { $count }.
 }
-# review: new
 setup-skipped-rules = { $count ->
     [one] { $count } laiškų taisyklė čia jau yra.
     [few] { $count } laiškų taisyklės čia jau yra.
    *[other] Laiškų taisyklių, kurios čia jau yra: { $count }.
 }
-# review: new
 setup-skipped-rules-account = { $count ->
-    [one] { $count } laiškų taisyklė skirta paskyrai, kurios čia nėra, todėl praleista.
-    [few] { $count } laiškų taisyklės skirtos paskyroms, kurių čia nėra, todėl praleistos.
-   *[other] Laiškų taisyklių, skirtų paskyroms, kurių čia nėra, praleista: { $count }.
+    [one] Praleista { $count } laiškų taisyklė, nes nėra jai reikalingos paskyros.
+    [few] Praleistos { $count } laiškų taisyklės, nes nėra joms reikalingų paskyrų.
+   *[other] Praleista { $count } laiškų taisyklių, nes nėra joms reikalingų paskyrų.
 }
-# review: new
 setup-rules-waiting = { $count ->
-    [one] { $count } laiškų taisyklė perkelia laiškus į aplanką, kuris atsiras, kai jo paskyra bus sinchronizuota.
-    [few] { $count } laiškų taisyklės perkelia laiškus į aplankus, kurie atsiras, kai jų paskyros bus sinchronizuotos.
-   *[other] Laiškų taisyklių, kurios perkelia laiškus į aplankus, atsirasiančius sinchronizavus jų paskyras: { $count }.
+    [one] { $count } laiškų taisyklė laukia, kol sinchronizuojant bus rastas paskirties aplankas.
+    [few] { $count } laiškų taisyklės laukia, kol sinchronizuojant bus rasti paskirties aplankai.
+   *[other] { $count } laiškų taisyklių laukia, kol sinchronizuojant bus rasti paskirties aplankai.
 }
-# review: new
 setup-added-trusted-senders = { $count ->
     [one] Pridėtas { $count } patikimas siuntėjas.
     [few] Pridėti { $count } patikimi siuntėjai.
    *[other] Pridėta patikimų siuntėjų: { $count }.
 }
-# review: new
 setup-nothing = Nieko neimportuota.
-# review: new
 setup-account-servers = { $imap } ir { $smtp } ({ $signin })
-# review: new
 setup-file-name = Inbox Classic nustatymai ir paskyros
-# review: new
-setup-skipped-unreachable = { $name } praleista: nepavyko pasiekti jos prisijungimo paslaugos. Pridėkite ją dar kartą lange „Prisijungimo programos“.
-# review: new
+setup-skipped-unreachable = Neimportuota: { $name }. Nepavyko patikrinti prisijungimo paslaugos nustatymų. Reikiamą prisijungimo programą galite pridėti lange „Prisijungimo programos“, tada bandykite importuoti dar kartą.
 attachment-runs-programs = Failas „{ $name }“ gali paleisti programas, todėl Inbox Classic jo neatidaro. Įrašykite jį, tada atidarykite patys, jei pasitikite jo šaltiniu.
-# review: new
-attachment-decrypted-note = Šis priedas yra iš užšifruoto laiško. Kad galėtų jį atidaryti, Inbox Classic laiko jį iššifruotą šiame kompiuteryje, jūsų aplanke, kurį Inbox Classic ištuština po paros.
+attachment-decrypted-note = Šis priedas yra iš užšifruoto laiško. Kad jį būtų galima atidaryti, Inbox Classic įrašo nešifruotą kopiją į jūsų naudotojo paskyros laikinąjį aplanką. Paleidus programą šalinamos senesnės nei paros kopijos.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [1] Serveris neperkėlė laiško į aplanką „{ $folder }“, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
@@ -1046,52 +978,33 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Rodyti PDF failus laiškuose
-# review: new
 preview-pdf-off = PDF failai laiškuose nerodomi.
-# review: new
-preview-pdf-off-crashed = PDF failas uždarė Inbox Classic, kol buvo rodomas, todėl PDF failai laiškuose nebėra rodomi. Paveikslėliai vis dar rodomi. Norėdami vėl rodyti PDF failus, skiltyje { $settings } įjunkite { $option }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic užsidarė, kol laiške buvo rodoma failo peržiūra, todėl PDF peržiūros išjungtos. Paveikslėliai ir toliau rodomi. Norėdami vėl matyti PDF peržiūras, įjunkite parinktį „{ $option }“ čia: { $settings }.
 preview-pdf-details = { $count ->
     [one] { $count } puslapis, { $size }
     [few] { $count } puslapiai, { $size }
     [many] { $count } puslapio, { $size }
    *[other] { $count } puslapių, { $size }
 }
-# review: new
 preview-page-alt = { $name }, { $page } puslapis iš { $count }
-# review: new
 preview-more-pages = { $count ->
-    [one] Atidarykite, kad matytumėte visą { $count } puslapį
-    [few] Atidarykite, kad matytumėte visus { $count } puslapius
-    [many] Atidarykite, kad matytumėte visus { $count } puslapio
-   *[other] Atidarykite, kad matytumėte visus { $count } puslapių
+    [1] Atidarykite failą, kad peržiūrėtumėte puslapį
+   *[other] Atidarykite failą, kad peržiūrėtumėte visus puslapius ({ $count })
 }
-# review: new
 preview-more-files = { $count ->
     [one] Dar { $count } failas yra sąraše viršuje
     [few] Dar { $count } failai yra sąraše viršuje
     [many] Dar { $count } failo yra sąraše viršuje
    *[other] Dar { $count } failų yra sąraše viršuje
 }
-# review: new
 preview-tile-downloading = Atsisiunčiama…
-# review: new
 preview-tile-preparing = Ruošiama…
-# review: new
 preview-tile-format = { $format } paveikslėliai kol kas nerodomi
-# review: new
-preview-tile-password = Apsaugota slaptažodžiu: atidarykite, kad įvestumėte slaptažodį
-# review: new
-preview-tile-too-large = Per didelis, kad būtų rodomas
-# review: new
+preview-tile-password = Failas apsaugotas slaptažodžiu. Atidarykite jį ir įveskite slaptažodį
+preview-tile-too-large = Viršyta peržiūros dydžio riba
 preview-tile-unreadable = Negalima parodyti
-# review: new
-preview-tile-timed-out = Rodymas užtruko per ilgai
-# review: new
-preview-tile-crashed = Nerodoma: šis failas kartą uždarė Inbox Classic
-# review: new
-preview-tile-off = Nerodoma, kol Inbox Classic nebus paleista iš naujo
-# review: new
-preview-not-printed = { $name } ({ $details }) nespausdinamas. Atidarykite jį, kad atspausdintumėte.
+preview-tile-timed-out = Peržiūros parengimas užtruko per ilgai
+preview-tile-crashed = Šio failo peržiūra išjungta po ankstesnio sutrikimo
+preview-tile-off = Peržiūra išjungta iki kito Inbox Classic paleidimo
+preview-not-printed = Failas „{ $name }“ ({ $details }) nespausdinamas kartu su laišku. Norėdami jį išspausdinti, atidarykite failą.
