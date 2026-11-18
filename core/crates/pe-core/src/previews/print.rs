@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 
 use pe_i18n::{Text, tr_args};
 
-use super::{Files, PreviewFile, lock, lock_shown, unpoisoned};
+use super::{Files, PreviewDocument, PreviewFile, lock, lock_shown, unpoisoned};
 use crate::connections::Connection;
 use crate::{Core, Event};
 
@@ -30,9 +30,10 @@ struct Printout {
 /// way to newer ones, so none is kept until the app quits
 const PRINTOUTS_KEPT: usize = 8;
 
-/// Keeps a printout for its window, dropping the oldest past [`PRINTOUTS_KEPT`] (requests only grow)
-fn keep_printout(prints: &mut HashMap<u64, String>, request: u64, document: String) {
-    prints.insert(request, document);
+/// Keeps a printout of the view `token` for its window, dropping the oldest past [`PRINTOUTS_KEPT`] (requests only
+/// grow); one whose view ended is dropped then
+fn keep_printout(prints: &mut HashMap<u64, (String, String)>, request: u64, token: String, document: String) {
+    prints.insert(request, (token, document));
     while prints.len() > PRINTOUTS_KEPT {
         let Some(oldest) = prints.keys().min().copied() else {
             break;
@@ -50,17 +51,18 @@ impl Core {
             let mut shown = lock_shown(&self.previews.shown);
             let view = shown.iter_mut().find(|shown| shown.token == token)?;
             let parts = view.print.clone()?;
-            let pictures = view.files.iter().any(is_printed_picture);
+            let pictures = view.files().any(is_printed_picture);
             Printout {
                 parts,
-                files: view.files.clone(),
+                files: view.documents.iter().flat_map(printed_files).collect(),
                 request: if pictures { self.shown_request(view) } else { None },
             }
         };
         let print = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let token = token.to_string();
         let work = self.in_background(Connection::Reads, move |core| {
             let document = printed(&core.previews.files, &printout);
-            keep_printout(&mut unpoisoned(&core.previews.prints), print, document);
+            keep_printout(&mut unpoisoned(&core.previews.prints), print, token, document);
             let _ = core.post(Event::PrintReady { request: print });
         });
         self.runtime().ok()?.spawn(work);
@@ -69,8 +71,23 @@ impl Core {
 
     /// The document of a printout [`Core::print_start`] made, once, after its [`Event::PrintReady`]
     pub fn print_result(&self, request: u64) -> Option<String> {
-        unpoisoned(&self.previews.prints).remove(&request)
+        unpoisoned(&self.previews.prints)
+            .remove(&request)
+            .map(|(_, document)| document)
     }
+}
+
+/// A document's files as the printout names them: a part's under its part's name ("Part 2: photo.jpg"), as every
+/// part's text is printed in one document
+fn printed_files(document: &PreviewDocument) -> Vec<pe_html::PreviewFile> {
+    let mut files = document.files.clone();
+    if let Some(part) = document.part {
+        let name = tr_args(Text::HeaderPart, &[("number", (part + 1).into())]);
+        for file in &mut files {
+            file.name = format!("{name}: {}", file.name);
+        }
+    }
+    files
 }
 
 /// A file the printout shows as a picture: a picture drawn in the document (not a PDF file's page, not a tile)
@@ -157,7 +174,7 @@ mod keep_tests {
     fn printouts_nobody_takes_give_way_to_newer_ones() {
         let mut prints = HashMap::new();
         for request in 1..=(PRINTOUTS_KEPT as u64 + 3) {
-            keep_printout(&mut prints, request, format!("doc {request}"));
+            keep_printout(&mut prints, request, "t".into(), format!("doc {request}"));
         }
         assert_eq!(prints.len(), PRINTOUTS_KEPT);
         assert!(!prints.contains_key(&3) && prints.contains_key(&4));

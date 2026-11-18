@@ -42,6 +42,9 @@ pub(crate) struct Choices {
 pub(crate) struct PreviewPlan<'a> {
     /// The core whose render thread reads the files' descriptions
     pub core: &'a Core,
+    /// Where the message is, as a crash marker names it (`PreviewSource::about`): a decrypted part's file is named by
+    /// it, never by its bytes ([`pe_preview::key_of_place`])
+    pub about: String,
     /// Options' "Show attachments in messages": files drawn without the user asking
     pub auto: bool,
     /// PDF files are drawn
@@ -70,11 +73,37 @@ enum Fate {
     Shown(pe_html::PreviewFile, ShowInMessage),
 }
 
-/// The files of a message the view goes through, with the time left to read their sizes and the pictures left
-struct Walk<'a, 'p> {
-    plan: &'a PreviewPlan<'p>,
+/// What the documents of one view share as the plan goes through them, one after another: the time left to read
+/// their files' sizes and the pictures left
+pub(crate) struct Budget {
     until: Instant,
     left: usize,
+}
+
+impl Budget {
+    /// A view's: at most [`DESCRIBE`] for the sizes of all its files, [`MAX_PREVIEWS`] pictures
+    pub(crate) fn new() -> Budget {
+        Budget {
+            until: Instant::now() + DESCRIBE,
+            left: MAX_PREVIEWS,
+        }
+    }
+}
+
+/// Where one document's files are among the message's attachments
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Among {
+    /// The place of its first file in the strip (the files of the parts before it come first)
+    pub first: usize,
+    /// Its files' descriptions may be kept in the cache: false for a message something of which was decrypted
+    pub keep: bool,
+}
+
+/// The files of a document the view goes through, with the budget of the whole view
+struct Walk<'a, 'p> {
+    plan: &'a PreviewPlan<'p>,
+    budget: &'a mut Budget,
+    among: Among,
     /// A PDF file was left out because PDF files are off
     pdf_off: bool,
 }
@@ -84,17 +113,30 @@ struct Walk<'a, 'p> {
 /// [`MAX_PREVIEWS`] pictures in all unless the user asked for more; a tile for a file that is not drawn, and a line
 /// for those past the budget
 pub(crate) fn section(message: &pe_mime::parser::Message, plan: &PreviewPlan) -> Planned {
+    let among = Among { first: 0, keep: true };
+    part_section(message, plan, &mut Budget::new(), among)
+}
+
+/// [`section`] of one part of a message with signed or encrypted parts, `part` that part's message: its files
+/// numbered by their place in the strip (`among`), under a token of the part's own; `budget` the view's, shared by
+/// its parts in their order
+pub(crate) fn part_section(
+    part: &pe_mime::parser::Message,
+    plan: &PreviewPlan,
+    budget: &mut Budget,
+    among: Among,
+) -> Planned {
     let mut walk = Walk {
         plan,
-        until: Instant::now() + DESCRIBE,
-        left: MAX_PREVIEWS,
+        budget,
+        among,
         pdf_off: false,
     };
     let mut files = Vec::new();
     let mut states = Vec::new();
     let mut more = 0;
-    for (index, attachment) in view::listed(&message.attachments).enumerate() {
-        let state = match walk.fate(index, attachment) {
+    for (index, attachment) in view::listed(&part.attachments).enumerate() {
+        let state = match walk.fate(among.first + index, attachment) {
             Fate::Left(state) => state,
             Fate::More => {
                 more += 1;
@@ -147,9 +189,9 @@ impl Walk<'_, '_> {
         // a file asked for has a wait and a budget of its own
         let wait = match asked {
             true => DESCRIBE,
-            false => self.until.saturating_duration_since(Instant::now()),
+            false => self.budget.until.saturating_duration_since(Instant::now()),
         };
-        if !asked && (self.left == 0 || wait.is_zero()) {
+        if !asked && (self.budget.left == 0 || wait.is_zero()) {
             return Fate::More;
         }
         self.drawn(index, attachment, kind, asked, wait)
@@ -166,13 +208,15 @@ impl Walk<'_, '_> {
     ) -> Fate {
         let file = Arc::new(attachment.content.clone());
         let size = attachment.content.len() as u64;
-        let description = self.plan.core.preview_describe(self.plan.pdfs, file, wait, asked);
+        let about = format!("{}, attachment {index}", self.plan.about);
+        let (pdfs, keep) = (self.plan.pdfs, self.among.keep);
+        let description = self.plan.core.preview_describe(pdfs, file, about, wait, asked, keep);
         let pdf = kind == FileKind::Pdf;
-        let left = if asked { MAX_PREVIEWS } else { self.left };
+        let left = if asked { MAX_PREVIEWS } else { self.budget.left };
         match description.map(|d| preview_file(index, attachment, pdf, &d, left)) {
             Ok(Some(file)) => {
                 if !asked {
-                    self.left -= file.pages.len();
+                    self.budget.left -= file.pages.len();
                 }
                 Fate::Shown(file, ShowInMessage::On)
             }

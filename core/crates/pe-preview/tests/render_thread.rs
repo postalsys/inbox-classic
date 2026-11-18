@@ -471,7 +471,7 @@ fn pdfs_off_by_the_setting_are_disabled_and_come_back_on() {
     previewer.request(request(1, 1, file(PNG, "b")));
     assert_eq!(pages(&until_done(&outcomes, 1, 1)), [0]);
     // a PDF file the user asked to see (Show in Message) is described and drawn all the same
-    let asked = previewer.describe_file(file(PDF, "c"), String::new(), Duration::from_secs(5), true);
+    let asked = previewer.describe_file(file(PDF, "c"), String::new(), Duration::from_secs(5), true, true);
     assert!(asked.is_ok(), "{asked:?}");
     assert_eq!(
         previewer.describe(file(PDF, "c"), String::new(), Duration::from_secs(5)),
@@ -485,4 +485,82 @@ fn pdfs_off_by_the_setting_are_disabled_and_come_back_on() {
     previewer.set_pdfs(true);
     previewer.request(request(1, 2, file(PDF, "a")));
     assert_eq!(pages(&until_done(&outcomes, 1, 2)), [0]);
+}
+
+/// A decrypted part's file (`keep` false): its crash marker names it by where it is, never by a hash of its bytes or
+/// by its type, so nothing in the app's folder lets anyone confirm a guess of what was encrypted; one that hung is
+/// still never drawn again, by where it is, and its description is not kept either
+#[test]
+fn a_decrypted_file_is_named_by_its_place_never_its_bytes() {
+    let fake = Fake::new();
+    let markers = dir("decrypted");
+    let (previewer, outcomes) = start(settings(fake.clone(), Some(markers.clone())));
+    let secret = file(PDF, "the secret plan hang");
+    let private = |owner, attachment| Request {
+        keep: false,
+        ..request(owner, attachment, secret.clone())
+    };
+    previewer.request(private(1, 0));
+    // the marker while it draws (it hangs until abandoned)
+    let until = Instant::now() + Duration::from_secs(5);
+    let marker = loop {
+        let found = std::fs::read_dir(&markers).ok().and_then(|entries| {
+            entries
+                .flatten()
+                .find(|e| e.file_name().to_string_lossy().starts_with("rendering-"))
+        });
+        if let Some(found) = found {
+            break found;
+        }
+        assert!(Instant::now() < until, "no marker written");
+        std::thread::sleep(Duration::from_millis(2));
+    };
+    let place = pe_preview::key_of_place("message 1, attachment 0");
+    assert_eq!(
+        marker.file_name().to_string_lossy(),
+        format!("rendering-{}", place.as_str())
+    );
+    let text = std::fs::read_to_string(marker.path()).unwrap_or_default();
+    let bytes = pe_preview::key_of(&secret);
+    assert!(!text.contains(bytes.as_str()) && !text.contains("Pdf"), "{text}");
+    assert_eq!(refusal(&until_done(&outcomes, 1, 0)), Some((None, Refusal::TimedOut)));
+    fake.release.store(true, Ordering::SeqCst);
+    drop(previewer);
+    // the refused list names its place, not its bytes
+    let refused = std::fs::read_to_string(markers.join("refused")).unwrap();
+    assert!(
+        refused.contains(place.as_str()) && !refused.contains(bytes.as_str()),
+        "{refused}"
+    );
+    // the next session: the same place is refused, the same bytes elsewhere (not decrypted) are not
+    let fake = Fake::new();
+    let (previewer, outcomes) = start(settings(fake.clone(), Some(markers.clone())));
+    previewer.request(private(1, 0));
+    assert_eq!(refusal(&until_done(&outcomes, 1, 0)), Some((None, Refusal::Crashed)));
+    fake.release.store(true, Ordering::SeqCst);
+    previewer.request(request(2, 0, secret.clone()));
+    assert_ne!(refusal(&until_done(&outcomes, 2, 0)), Some((None, Refusal::Crashed)));
+    assert_eq!(fake.runs.load(Ordering::SeqCst), 1);
+    let _ = std::fs::remove_dir_all(markers);
+}
+
+/// A decrypted part's description (a PDF file's title is its words) is read each time, never from the cache
+#[test]
+fn a_decrypted_file_s_description_is_not_kept() {
+    let fake = Fake::new();
+    let (previewer, _outcomes) = start(settings(fake.clone(), None));
+    for _ in 0..2 {
+        let described = previewer.describe_file(file(PNG, "private"), "m".into(), Duration::from_secs(5), false, false);
+        assert!(described.is_ok(), "{described:?}");
+    }
+    assert_eq!(fake.runs.load(Ordering::SeqCst), 2);
+    // a file that may be kept is read once
+    for _ in 0..2 {
+        assert!(
+            previewer
+                .describe(file(PNG, "public"), "m".into(), Duration::from_secs(5))
+                .is_ok()
+        );
+    }
+    assert_eq!(fake.runs.load(Ordering::SeqCst), 3);
 }

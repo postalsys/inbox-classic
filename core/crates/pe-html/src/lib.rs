@@ -291,6 +291,21 @@ pub fn print_document_with(parts: &PrintParts, items: &[PrintItem]) -> String {
     wrap(&parts.body, &options, &header, &parts.card, After::Printed(&section)).0
 }
 
+/// What a printout made of `html` (the core's own markup: a message with signed or encrypted parts prints each part's
+/// words under its label) is wrapped from, sanitized as any message, with no pictures from the internet; with
+/// [`print_document_with`] it prints with the pictures of the parts' previews after it, or with none
+pub fn print_parts(html: &str, header: &[(&str, &str)]) -> PrintParts {
+    PrintParts {
+        body: builder_noting(&[], None, None).clean(html).to_string(),
+        allow_remote_images: false,
+        header: header
+            .iter()
+            .map(|(name, value)| (name.to_string(), value.to_string()))
+            .collect(),
+        card: String::new(),
+    }
+}
+
 /// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows (on
 /// screen the window shows them above the message), and whether the message has pictures on the internet
 pub fn render_view(html: &str, options: &RenderOptions, images: &[InlineImage], header: &[(&str, &str)]) -> Rendered {
@@ -1024,5 +1039,35 @@ mod tests {
             },
         );
         assert!(allowed.contains("img-src data: http: https:;"));
+    }
+
+    /// The core's own printout (a message with signed or encrypted parts): its markup sanitized, its header and
+    /// pictures as any printout's, and with none the same document as before
+    #[test]
+    fn print_parts_wrap_the_core_s_own_markup() {
+        let parts = print_parts(
+            "<p><b>Part 1: Signed</b></p><p>Hi</p><script>x()</script>",
+            &[("From", "Ann")],
+        );
+        let plain = print_document_with(&parts, &[]);
+        assert!(
+            plain.contains("<b>Part 1: Signed</b>") && !plain.contains("<script"),
+            "{plain}"
+        );
+        assert!(
+            plain.contains("img-src data:;") && plain.contains(":</span> Ann</div>"),
+            "{plain}"
+        );
+        let items = [PrintItem::Picture {
+            name: "Part 2: a.png",
+            mime: "image/png",
+            bytes: b"\x89PNG",
+        }];
+        let printed = print_document_with(&parts, &items);
+        assert!(
+            printed.contains("<img src=\"data:image/png;base64,iVBORw==\""),
+            "{printed}"
+        );
+        assert!(printed.contains("Part 2: a.png"), "{printed}");
     }
 }

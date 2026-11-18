@@ -1393,9 +1393,11 @@ typedef struct PeMessageInfo {
   size_t part_count;
   // The token of the previews of its attachments after the text, empty for a message with no picture or PDF file:
   // the document server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the
-  // page's origin), the strip's Show in Message names the view by it (`pe_preview_show`), Print starts the
-  // printout with it (`pe_print_start`), and the window ends them with `pe_previews_end` when it shows another
-  // document or closes
+  // page's origin; the parts of a signed or encrypted message each show their own files' previews in their own
+  // document under a token of their own, served the same way whichever frame asks), the strip's Show in Message
+  // names the view by it (`pe_preview_show`), Print starts the printout with it (`pe_print_start`), a preview's
+  // link is checked against it (`pe_preview_link`, a part's link too), and the window ends them with
+  // `pe_previews_end` when it shows another document or closes
   const char *preview_token;
 } PeMessageInfo;
 
@@ -3064,9 +3066,10 @@ const struct PePreviewPicture *pe_preview_answer_picture(const struct PePreviewA
 void pe_preview_answer_free(struct PePreviewAnswer *answer);
 
 // The attachment (its index in the view's list) a preview's link opens, after `pe_reader_link` said
-// `PE_READER_LINK_ATTACHMENT`; `token` is the `preview_token` of the view the reader shows. -1 when the link is not
-// of that view (another view's, even one still shown, or none). The window opens it as a double-click in the strip
-// does.
+// `PE_READER_LINK_ATTACHMENT`, also one clicked in a part's frame of a signed or encrypted message; `token` is the
+// `preview_token` of the view the reader shows. -1 when the link is not of that view (another view's, even one still
+// shown, or none), or names a file its document does not show (a part's link names only its part's files). The
+// window opens it as a double-click in the strip does.
 //
 // # Safety
 // `core` must be a live handle; `uri` and `token` NULL or NUL-terminated strings.

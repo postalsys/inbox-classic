@@ -61,7 +61,9 @@ pub struct Request {
     pub about: String,
     /// How many pages to draw: at most [`MAX_PAGES`] are; 0 describes the file only
     pub pages: usize,
-    /// Whether its previews may be kept in the cache: not those of a decrypted part
+    /// Whether its previews may be kept in the cache: not those of a decrypted part, which are kept only under its
+    /// owner until it is cancelled, and whose crash marker names the file by `about` ([`crate::key_of_place`]), never
+    /// by its bytes or its type
     pub keep: bool,
     /// The user asked to see this file (Show in Message): a PDF file is drawn while PDF files are off by the setting
     /// ([`Refusal::Disabled`]), and its pictures have a budget of their own, not its owner's
@@ -212,17 +214,19 @@ impl Previewer {
     /// every file waiting, waited for at most `wait`: what the reading pane needs before it shows a document. A file
     /// not read in time is [`Refusal::TimedOut`] here, while the render thread goes on with it under its own limits
     pub fn describe(&self, file: Arc<Vec<u8>>, about: String, wait: Duration) -> Result<Arc<Description>, Refusal> {
-        self.describe_file(file, about, wait, false)
+        self.describe_file(file, about, wait, false, true)
     }
 
     /// [`Previewer::describe`] of a file the user asked to see (`asked`, [`Request::asked`]): a PDF file is described
-    /// while PDF files are off by the setting
+    /// while PDF files are off by the setting; `keep` false for a decrypted part's file ([`Request::keep`]): its
+    /// description (a PDF file's title is its words) is not kept in the cache
     pub fn describe_file(
         &self,
         file: Arc<Vec<u8>>,
         about: String,
         wait: Duration,
         asked: bool,
+        keep: bool,
     ) -> Result<Arc<Description>, Refusal> {
         let (reply, answers) = mpsc::channel();
         {
@@ -236,7 +240,7 @@ impl Previewer {
                 file,
                 about,
                 pages: 0,
-                keep: true,
+                keep,
                 asked,
             };
             queue.jobs.push_front(Job {
@@ -294,6 +298,8 @@ enum Message {
 
 struct Work {
     kind: Kind,
+    /// Not a decrypted part's file: its type may be written in its marker
+    keep: bool,
     file: Arc<Vec<u8>>,
     pages: Vec<usize>,
     budget: u64,
@@ -383,7 +389,10 @@ impl Dispatcher {
         if kind == Kind::Pdf && self.pdfs_off {
             return Err(Refusal::Off);
         }
-        let key = crate::key_of(&request.file);
+        let key = match request.keep {
+            true => crate::key_of(&request.file),
+            false => crate::key_of_place(&request.about),
+        };
         if self.refused.contains(&key) {
             return Err(Refusal::Crashed);
         }
@@ -463,6 +472,7 @@ impl Dispatcher {
         let (steps, messages) = mpsc::channel();
         let work = Work {
             kind,
+            keep: job.request.keep,
             file: job.request.file.clone(),
             pages,
             budget: self.budget(purse(&job.request)),
@@ -638,7 +648,7 @@ fn spawn_worker(engine: Arc<dyn Engine>, markers: Option<Arc<Markers>>) -> Optio
             while let Ok(work) = works.recv() {
                 let marker = markers
                     .as_ref()
-                    .map(|markers| markers.begin(&work.key, work.kind, &work.about));
+                    .map(|markers| markers.begin(&work.key, work.keep.then_some(work.kind), &work.about));
                 let steps = work.steps.clone();
                 let stop = work.stop.clone();
                 let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
