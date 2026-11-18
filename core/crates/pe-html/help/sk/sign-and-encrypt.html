@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Podpísanie a zašifrovanie správy</h1>
-<p class="summary">Podpíšte správu, aby príjemcovia vedeli, že je od vás, a zašifrujte ju, aby ju mohli prečítať iba oni.</p>
-<p>Podpísaná správa dokazuje, že ste ju napísali vy a že ju cestou nikto nezmenil. Šifrovanú správu môžu prečítať iba jej príjemcovia a vy a je vždy aj podpísaná. Na oboje potrebujete vlastný kľúč.</p>
-<p>Podpísanie alebo zašifrovanie správy:</p>
+<p class="summary">Chráňte obsah správy digitálnym podpisom a šifrovaním.</p>
+<p>Digitálny podpis umožňuje overiť, či sa obsah správy po podpísaní nezmenil. Vlastník kľúča sa overuje osobitne. Zašifrovaný obsah môžu čítať iba príjemcovia a vy. Správy odoslané v zašifrovanej podobe sú aj digitálne podpísané. Na podpisovanie a šifrovanie potrebujete vlastný kľúč.</p>
+<p>Ak chcete správu podpísať alebo zašifrovať:</p>
 <ol>
-    <li>V okne správy kliknite na <b data-text="ui-tb-sign"></b> alebo <b data-text="ui-tb-encrypt"></b>, prípadne vyberte <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> alebo <b data-text="cmd-compose-encrypt"></b>. Môžete tiež stlačiť <kbd data-command="compose_sign"></kbd> alebo <kbd data-command="compose_encrypt"></kbd>. Ak ešte nemáte kľúč, Inbox Classic ponúkne jeho vytvorenie.</li>
-    <li>Kliknite na <b data-text="ui-tb-send"></b>.</li>
+    <li>V okne správy kliknite na „<b data-text="ui-tb-sign"></b>“ alebo „<b data-text="ui-tb-encrypt"></b>“, prípadne vyberte <!--os:windows,mac-->„<b data-text="menu-tools"></b>“<!--/os--><!--os:linux-->„<b data-text="gtk-main-menu"></b>“<!--/os--> &gt; „<b data-text="cmd-compose-sign"></b>“ alebo „<b data-text="cmd-compose-encrypt"></b>“. Môžete tiež stlačiť <kbd data-command="compose_sign"></kbd> alebo <kbd data-command="compose_encrypt"></kbd>. Ak nemáte vlastný kľúč pre adresu odosielateľa, Inbox Classic ponúkne jeho vytvorenie.</li>
+    <li>Kliknite na „<b data-text="ui-tb-send"></b>“.</li>
 </ol>
-<p>Keď je <b data-text="ui-tb-encrypt"></b> zapnuté, riadok pod predmetom zobrazuje každého príjemcu so zámkou a Inbox Classic hľadá kľúče, ktoré ešte nemá:</p>
+<p>Keď je zapnutá možnosť „<b data-text="ui-tb-encrypt"></b>“, pod predmetom sa zobrazuje stav kľúča každého príjemcu, označený farbou a ikonou. Inbox Classic automaticky hľadá chýbajúce kľúče:</p>
 <table>
-    <tr><th>Farba zámky</th><th>Čo znamená</th></tr>
-    <tr><td>Zelená</td><td>Kľúč príjemcu ste overili.</td></tr>
-    <tr><td>Modrá</td><td>Kľúč príjemcu máte, ale neoverili ste ho.</td></tr>
+    <tr><th>Farba</th><th>Význam</th></tr>
+    <tr><td>Zelená</td><td>Overili ste, že kľúč patrí príjemcovi.</td></tr>
+    <tr><td>Modrá</td><td>Kľúč príjemcu máte, ale jeho vlastník ešte nie je overený. Modrá označuje aj váš vlastný kľúč.</td></tr>
     <tr><td>Sivá</td><td>Inbox Classic hľadá kľúč príjemcu.</td></tr>
-    <tr><td>Jantárová</td><td>Pre príjemcu sa nenašiel žiadny kľúč.</td></tr>
+    <tr><td>Jantárová</td><td>Kľúč príjemcu chýba alebo ho nemožno použiť na šifrovanie.</td></tr>
 </table>
-<h2>Keď príjemca nemá kľúč</h2>
-<p>Šifrovaná správa sa odošle, iba ak má kľúč každý príjemca. Ak ho niektorý nemá, <b data-text="ui-tb-send"></b> otvorí okno <b data-text="ui-recipient-keys-title"></b>. Tam môžete kliknúť na <b data-text="ui-recipient-find-key"></b> a hľadať znova, na <b data-text="ui-recipient-remove"></b> a túto osobu vynechať alebo na <b data-text="ui-send-unencrypted"></b>. Príjemcu môžete tiež požiadať o jeho verejný kľúč a importovať ho.</p>
-<h2>Odpovede na šifrovanú poštu</h2>
-<p>Odpoveď na šifrovanú správu alebo jej preposlanie sa začína so zapnutým <b data-text="ui-tb-encrypt"></b> a Inbox Classic sa spýta, skôr ako ho vypnete. Kým správa cituje šifrovaný text alebo obsahuje prílohy šifrovanej správy, možno ju odoslať iba šifrovanú.</p>
-<p>Koncepty šifrovanej správy sa ukladajú šifrované, rovnako ako jej kópia v priečinku <b data-text="folder-sent"></b>.</p>
+<h2>Keď chýba použiteľný kľúč</h2>
+<p>Na odoslanie zašifrovanej správy potrebujete použiteľný kľúč každého príjemcu. Ak niektorý chýba, kliknutím na „<b data-text="ui-tb-send"></b>“ otvoríte okno „<b data-text="ui-recipient-keys-title"></b>“. Kliknutím na „<b data-text="ui-recipient-find-key"></b>“ zopakujete hľadanie a kliknutím na „<b data-text="ui-recipient-remove"></b>“ odstránite príjemcu zo správy. Možnosť „<b data-text="ui-send-unencrypted"></b>“ je dostupná iba vtedy, keď správa neobsahuje text, obrázky ani prílohy zo zašifrovanej správy. Príjemcu môžete tiež požiadať o verejný kľúč a importovať ho.</p>
+<h2>Odpovede na zašifrované správy</h2>
+<p>Pri odpovedi na zašifrovanú správu alebo jej preposlaní je možnosť „<b data-text="ui-tb-encrypt"></b>“ najprv zapnutá. Inbox Classic si pred vypnutím šifrovania vyžiada potvrdenie. Správu môžete odoslať bez šifrovania až po odstránení textu, obrázkov a príloh zo zašifrovanej správy.</p>
+<p>Pri zapnutom šifrovaní sa koncepty šifrujú iba vaším kľúčom a ukladajú bez digitálneho podpisu. Ak koncept obsahuje text, obrázky alebo prílohy zo zašifrovanej správy, uloží sa zašifrovaný aj po vypnutí šifrovania. Kópia odoslanej zašifrovanej správy v priečinku „<b data-text="folder-sent"></b>“ tiež zostáva zašifrovaná.</p>
 <h2>Zdieľanie verejného kľúča</h2>
-<p>Aby vám ostatní mohli posielať šifrovanú poštu, vyberte <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Váš verejný kľúč sa k správe priloží ako súbor.</p>
+<p>Aby vám ostatní mohli posielať zašifrované správy, vyberte <!--os:windows-->„<b data-text="menu-insert"></b>“<!--/os--><!--os:mac-->„<b data-text="menu-file"></b>“<!--/os--><!--os:linux-->„<b data-text="gtk-main-menu"></b>“<!--/os--> &gt; „<b data-text="cmd-attach-my-key"></b>“. Verejný kľúč vybratej adresy odosielateľa sa k správe priloží ako súbor.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->
