@@ -6,6 +6,7 @@
 use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
+use pe_core::i18n::{Text, tr, tr_args};
 use pe_core::timing::{Link, Served};
 use pe_core::{Action, Core, Event, FailureKind, MessageRef, Scope, Search};
 use pe_store::{AccountSettings, Sort, SortField};
@@ -89,6 +90,39 @@ impl Setup {
             }
         }
     }
+}
+
+/// What the core says of `count` messages with `text` ("Moved { $messages } to { $folder }"), in `folder` when
+/// there is one, as the catalog words it
+fn said(text: Text, count: u64, folder: Option<Text>) -> String {
+    let messages = pe_core::messages(count);
+    let folder = folder.map(tr).unwrap_or_default();
+    tr_args(
+        text,
+        &[
+            ("count", count.into()),
+            ("messages", (&messages).into()),
+            ("folder", (&folder).into()),
+        ],
+    )
+}
+
+/// Stands for an argument of a catalog text the test can not know (a server's reason, a path as shown)
+const MARK: &str = "\u{1}";
+
+/// The words of a catalog text around its arguments given as [`MARK`]: what core text with other values in their
+/// place has to contain
+fn words_of(text: Text, args: &[(&str, pe_core::i18n::Arg)]) -> Vec<String> {
+    tr_args(text, args)
+        .split(MARK)
+        .filter(|part| !part.is_empty())
+        .map(str::to_string)
+        .collect()
+}
+
+/// Whether `told` has every word of `text` around its unknown arguments ([`words_of`])
+fn has_words(told: &str, text: Text, args: &[(&str, pe_core::i18n::Arg)]) -> bool {
+    words_of(text, args).iter().all(|words| told.contains(words.as_str()))
 }
 
 #[test]
@@ -332,7 +366,10 @@ fn archives_into_an_archive_folder_made_for_it() {
         .core
         .refs_in_ranges(&Search::folder(inbox), Sort::default(), &[(0, 2)])
         .unwrap();
-    assert_eq!(s.core.act(&all, Action::Archive).unwrap(), "Archived 2 messages");
+    assert_eq!(
+        s.core.act(&all, Action::Archive).unwrap(),
+        said(Text::DoneArchived, 2, None)
+    );
     assert!(
         s.core.messages(inbox, Sort::default(), 0, 10).unwrap().is_empty(),
         "out of the list at once"
@@ -353,7 +390,7 @@ fn archives_into_an_archive_folder_made_for_it() {
     );
     assert!(s.server.subjects("INBOX").is_empty());
 
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Archive"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoArchive)));
     s.core.undo().unwrap();
     eventually(|| s.server.subjects("INBOX").len() == 2, "back in the Inbox with Undo");
     assert!(s.server.subjects("Archive").is_empty());
@@ -493,12 +530,15 @@ fn empties_deleted_items_and_junk() {
     assert!(!s.core.can_empty(inbox).unwrap());
     assert_eq!(
         s.core.empty_folder_question(trash).unwrap().as_deref(),
-        Some("Empty Deleted Items?\n\nThe 2 messages in it are deleted for good. They can not be brought back.")
+        Some(said(Text::EmptyQuestion, 2, Some(Text::FolderDeleted)).as_str())
     );
     assert_eq!(s.core.empty_folder_question(inbox).unwrap(), None);
     assert!(s.core.empty_folder(inbox).is_err(), "the Inbox is not emptied");
 
-    assert_eq!(s.core.empty_folder(trash).unwrap(), "Deleted 2 messages for good");
+    assert_eq!(
+        s.core.empty_folder(trash).unwrap(),
+        said(Text::DoneDeletedForGood, 2, None)
+    );
     assert!(
         s.core.messages(trash, Sort::default(), 0, 10).unwrap().is_empty(),
         "out of the list at once"
@@ -548,7 +588,10 @@ fn archives_on_gmail_by_taking_every_label_off() {
     assert!(labels().contains(&"\\Inbox".to_string()), "{:?}", labels());
 
     let picked = [MessageRef { folder: inbox, uid }];
-    assert_eq!(s.core.act(&picked, Action::Archive).unwrap(), "Archived 1 message");
+    assert_eq!(
+        s.core.act(&picked, Action::Archive).unwrap(),
+        said(Text::DoneArchived, 1, None)
+    );
     assert!(
         s.core.messages(inbox, Sort::default(), 0, 10).unwrap().is_empty(),
         "out of the list at once"
@@ -800,7 +843,7 @@ fn all_inboxes_list_and_mark_every_account() {
     let rows = inboxes(&s.core);
     assert_eq!(
         (rows[0].label.as_str(), rows[0].title.as_str()),
-        ("Work", "Inbox - Work")
+        ("Work", format!("{} - Work", tr(Text::FolderInbox)).as_str())
     );
     // the second account dragged first: the accounts and All Inboxes' rows in that order; then back
     s.core.move_account(second, 0).unwrap();
@@ -1003,7 +1046,10 @@ fn sends_replies_and_keeps_a_copy() {
         raw.contains("Content-Type: text/html") && raw.contains("Content-Type: text/plain"),
         "{raw}"
     );
-    assert!(raw.contains("<b>six</b>") && raw.contains("Original Message"), "{raw}");
+    assert!(
+        raw.contains("<b>six</b>") && raw.contains(&tr(Text::QuoteOriginal)),
+        "{raw}"
+    );
 
     // a recipient that is no address: nothing is sent
     let bad = pe_core::Outgoing {
@@ -1012,7 +1058,8 @@ fn sends_replies_and_keeps_a_copy() {
         ..Default::default()
     };
     let refused = s.core.send(account, bad).unwrap_err();
-    assert!(refused.to_string().contains("not an e-mail address"), "{refused}");
+    let bad_address = tr_args(Text::ErrorBadAddress, &[("address", "not an address".into())]);
+    assert!(refused.to_string().contains(&bad_address), "{refused}");
     assert_eq!(s.server.messages("INBOX").len(), 2);
 }
 
@@ -1124,7 +1171,11 @@ fn signs_in_with_oauth() {
     let (refused, _) = sign_in(USER, "wrong-code");
     assert!(core.sign_in_result(refused).unwrap_err().contains("invalid_grant"));
     // told once, then forgotten
-    assert!(core.sign_in_result(refused).unwrap_err().contains("not finished"));
+    assert!(
+        core.sign_in_result(refused)
+            .unwrap_err()
+            .contains(&tr(Text::SignInNotFinished))
+    );
 
     // a cancelled sign-in is forgotten
     let (cancelled, _) = core.sign_in_begin(google, USER).unwrap();
@@ -1288,7 +1339,10 @@ fn signs_in_with_a_sign_in_app() {
         unreachable!()
     };
     assert_eq!(kind, FailureKind::Authentication);
-    assert!(message.contains("check that the app\u{2019}s scopes"), "{message}");
+    assert!(
+        has_words(&message, Text::ErrorAppScopes, &[("reason", MARK.into())]),
+        "{message}"
+    );
 
     // removed once nothing uses it, and its account goes first
     core.remove_account(bob).unwrap();
@@ -1543,15 +1597,21 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!((summary.count, summary.unread, summary.flagged), (3, 3, 0));
     assert_eq!((summary.accounts, summary.folders, summary.for_good), (1, 1, 0));
     assert!(!summary.in_junk);
-    assert_eq!(summary.title(), "3 messages selected");
-    assert_eq!(summary.move_title(false), "Move 3 Messages");
-    assert_eq!(summary.move_prompt(true), "Copy the 3 selected messages to:");
-    assert_eq!(summary.detail(), "3 unread");
+    assert_eq!(summary.title(), tr_args(Text::SelectionTitle, &[("count", 3.into())]));
+    assert_eq!(
+        summary.move_title(false),
+        tr_args(Text::MoveWindowTitleMove, &[("count", 3.into())])
+    );
+    assert_eq!(
+        summary.move_prompt(true),
+        tr_args(Text::MoveWindowPromptCopy, &[("count", 3.into())])
+    );
+    assert_eq!(summary.detail(), tr_args(Text::SelectionUnread, &[("count", 3.into())]));
 
     // read and flagged, with one command each
     assert_eq!(
         s.core.act(&three, Action::Read(true)).unwrap(),
-        "Marked 3 messages as read"
+        said(Text::DoneRead, 3, None)
     );
     s.core.act(&three[..2], Action::Flag(true)).unwrap();
     let summary = s.core.summary(&three).unwrap();
@@ -1573,12 +1633,15 @@ fn acts_on_selected_messages_and_undoes() {
     // moved together, then back with Undo
     assert_eq!(
         s.core.act(&three, Action::Move(archive)).unwrap(),
-        "Moved 3 messages to Archive"
+        said(Text::DoneMoved, 3, Some(Text::FolderArchive))
     );
     assert_eq!(in_store(inbox), ["Four"]);
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Move"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoMove)));
     // at once, before the folder they went to has shown them: the worker takes it back after the move
-    assert_eq!(s.core.undo().unwrap(), "Moved 3 messages back to Inbox");
+    assert_eq!(
+        s.core.undo().unwrap(),
+        said(Text::DoneMovedBack, 3, Some(Text::FolderInbox))
+    );
     assert_eq!(s.core.undo_label(), None);
     eventually(&|| in_store(inbox).len() == 4 && in_store(archive).is_empty());
     // the window selects them once they are back; then they are forgotten
@@ -1595,9 +1658,9 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!(s.core.summary(&all).unwrap().delete_question(), None);
     assert_eq!(
         s.core.act(&all[..2], Action::Delete).unwrap(),
-        "Moved 2 messages to Deleted Items"
+        said(Text::DoneMoved, 2, Some(Text::FolderDeleted))
     );
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Delete"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoDelete)));
     eventually(&|| in_store(trash).len() == 2);
     s.core.undo().unwrap();
     eventually(&|| in_store(inbox).len() == 4 && s.server.subjects("Trash").is_empty());
@@ -1606,10 +1669,10 @@ fn acts_on_selected_messages_and_undoes() {
     let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
     assert_eq!(
         s.core.act(&all[..1], Action::Junk(true)).unwrap(),
-        "Moved 1 message to Junk E-mail"
+        said(Text::DoneMoved, 1, Some(Text::FolderJunk))
     );
     eventually(&|| in_store(junk).len() == 1);
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Mark as Junk"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoJunk)));
     s.core.undo().unwrap();
     eventually(&|| in_store(inbox).len() == 4 && s.server.subjects("Junk").is_empty());
     eventually(&|| {
@@ -1623,7 +1686,7 @@ fn acts_on_selected_messages_and_undoes() {
     let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
     assert_eq!(
         s.core.act(&all[..2], Action::Copy(archive)).unwrap(),
-        "Copied 2 messages to Archive"
+        said(Text::DoneCopied, 2, Some(Text::FolderArchive))
     );
     eventually(&|| in_store(archive).len() == 2);
     assert_eq!(in_store(inbox).len(), 4);
@@ -1640,15 +1703,15 @@ fn acts_on_selected_messages_and_undoes() {
     let mixed = [in_trash[0], all[0]];
     assert_eq!(
         s.core.summary(&mixed).unwrap().delete_question().as_deref(),
-        Some("1 of the 2 messages will be deleted for good. Delete the messages?")
+        Some(tr_args(Text::DeleteForGoodSome, &[("count", 1.into()), ("total", 2.into())]).as_str())
     );
     assert_eq!(
         s.core.summary(&in_trash).unwrap().delete_question().as_deref(),
-        Some("These 2 messages will be deleted for good. Delete them?")
+        Some(tr_args(Text::DeleteForGoodAll, &[("count", 2.into())]).as_str())
     );
     assert_eq!(
         s.core.act(&in_trash, Action::Delete).unwrap(),
-        "Deleted 2 messages for good"
+        said(Text::DoneDeletedForGood, 2, None)
     );
     assert_eq!(s.core.undo_label(), None, "for good is not undone");
     eventually(&|| s.server.subjects("Trash").is_empty());
@@ -1727,12 +1790,19 @@ fn moves_and_copies_between_accounts() {
     let rows = s.core.move_targets(Some(inbox), "").unwrap();
     assert_eq!(rows[0].kind, pe_core::TargetKind::Heading);
     assert_eq!((rows[1].kind, rows[1].folder), (pe_core::TargetKind::Recent, archive2));
-    assert!(rows[1].label.starts_with("Archive ("), "{}", rows[1].label);
+    assert!(
+        rows[1].label.starts_with(&format!("{} (", tr(Text::FolderArchive))),
+        "{}",
+        rows[1].label
+    );
     let current = rows
         .iter()
         .find(|r| r.kind == pe_core::TargetKind::Folder && r.folder == inbox)
         .unwrap();
-    assert_eq!(current.label, "Inbox (current)");
+    assert_eq!(
+        current.label,
+        tr_args(Text::TargetCurrent, &[("folder", (&tr(Text::FolderInbox)).into())])
+    );
     assert!(!current.choosable);
     assert_eq!(
         rows.iter().filter(|r| r.kind == pe_core::TargetKind::Account).count(),
@@ -1758,7 +1828,7 @@ fn moves_and_copies_between_accounts() {
     assert_eq!(s.server.subjects("INBOX"), ["Copy me"]);
 
     // Undo takes the move back, across the accounts again
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Move"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoMove)));
     s.core.undo().unwrap();
     eventually(&|| s.server.subjects("INBOX").len() == 2);
     eventually(&|| other_server.subjects("Archive") == ["Copy me"]);
@@ -1772,7 +1842,7 @@ fn moves_and_copies_between_accounts() {
         .refs_in_ranges(&Search::folder(inbox), Sort::default(), &[(0, 2)])
         .unwrap();
     s.core.act(&back[..1], Action::Move(gone)).unwrap();
-    s.wait(|e| matches!(e, Event::Failed { account, message, .. } if *account == first && message.contains("could not be moved")));
+    s.wait(|e| matches!(e, Event::Failed { account, message, .. } if *account == first && has_words(message, Text::TransferNotMoved, &[("count", 1.into()), ("messages", (&pe_core::messages(1)).into()), ("reason", MARK.into())])));
     eventually(&|| in_store(inbox).len() == 2);
     assert_eq!(s.server.subjects("INBOX").len(), 2);
 }
@@ -1922,7 +1992,7 @@ fn messages_become_files() {
         .core
         .import_files(inbox, &[written[0].clone(), notes.clone()])
         .unwrap();
-    assert_eq!(said, "Put 1 message in Inbox");
+    assert_eq!(said, self::said(Text::ImportPut, 1, Some(Text::FolderInbox)));
     let report = report.unwrap();
     assert!(report.contains("notes.txt") && !report.contains("Lunch"), "{report}");
     assert!(pe_core::is_message_file(&written[0]) && !pe_core::is_message_file(&notes));
@@ -2136,10 +2206,24 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
             _ => {}
         }
     }
-    assert_eq!(said.unwrap().unwrap(), "Moved 2 messages to Archive");
+    assert_eq!(
+        said.unwrap().unwrap(),
+        self::said(Text::DoneMoved, 2, Some(Text::FolderArchive))
+    );
     let undone = undone.unwrap();
     assert!(
-        undone.starts_with("The server did not move 2 messages to Archive, so they are back in Inbox: "),
+        undone.starts_with(
+            &words_of(
+                Text::UndoneMove,
+                &[
+                    ("count", 2.into()),
+                    ("messages", (&pe_core::messages(2)).into()),
+                    ("folder", (&tr(Text::FolderArchive)).into()),
+                    ("from", (&tr(Text::FolderInbox)).into()),
+                    ("reason", MARK.into()),
+                ]
+            )[0]
+        ),
         "{undone}"
     );
     assert_eq!(uids(inbox), [first, second], "back as they were");
@@ -2162,8 +2246,15 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
             _ => {}
         }
     }
-    assert_eq!(said.unwrap().unwrap(), "Marked 1 message as read");
-    assert!(undone.unwrap().contains("so it is unread again"));
+    assert_eq!(said.unwrap().unwrap(), self::said(Text::DoneRead, 1, None));
+    let undone = undone.unwrap();
+    let one = pe_core::messages(1);
+    let args = [
+        ("count", 1.into()),
+        ("messages", (&one).into()),
+        ("reason", MARK.into()),
+    ];
+    assert!(has_words(&undone, Text::UndoneRead, &args), "{undone}");
     let message = s.core.message(trash, trashed).unwrap().unwrap();
     assert!(!message.info.flags.iter().any(|f| f == "\\Seen"), "unread again");
 }
@@ -2254,7 +2345,10 @@ fn saves_and_imports_messages_as_files() {
     let text = dir.path().join("notes.txt");
     std::fs::write(&text, "just some notes\nnothing else\n").unwrap();
     let refused = s.core.import_message(archive, &text).unwrap_err();
-    assert!(refused.to_string().contains("not an e-mail message"), "{refused}");
+    assert!(
+        has_words(&refused.to_string(), Text::ErrorImportNotMail, &[("path", MARK.into())]),
+        "{refused}"
+    );
     assert!(s.core.import_message(archive, &dir.path().join("missing.eml")).is_err());
 }
 
@@ -2286,7 +2380,10 @@ fn the_outbox_keeps_what_did_not_go() {
     // a send that can not go waits in the Outbox with the reason, not lost
     s.core.send(account, message("Waiting")).unwrap();
     let failed = failure();
-    assert!(failed.contains("waits in the Outbox"), "{failed}");
+    assert!(
+        failed.contains(&tr_args(Text::ErrorOutboxWaits, &[("count", 1.into())])),
+        "{failed}"
+    );
     let queued = s.core.outbox().unwrap();
     assert_eq!(queued.len(), 1);
     assert_eq!(queued[0].subject, "Waiting");
@@ -2345,16 +2442,27 @@ fn a_message_sent_waits_and_can_be_taken_back() {
         "the message waits in the Outbox",
     );
     assert!(s.core.undo_is_send());
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Send"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoSend)));
     assert!(
-        s.core
-            .send_waiting_text()
-            .unwrap()
-            .starts_with("Sending “Taken back” in "),
+        s.core.send_waiting_text().unwrap().starts_with(
+            &words_of(
+                Text::UiSendingIn,
+                &[
+                    ("subject", (&pe_core::quoted_subject("Taken back")).into()),
+                    ("count", MARK.into())
+                ]
+            )[0]
+        ),
         "the status bar counts down"
     );
     let (taken, said) = s.core.undo_send().unwrap();
-    assert_eq!(said, "“Taken back” was not sent. The message has reopened for editing.");
+    assert_eq!(
+        said,
+        tr_args(
+            Text::UiSendUndone,
+            &[("subject", (&pe_core::quoted_subject("Taken back")).into())]
+        )
+    );
     let (from, draft) = taken.unwrap();
     assert_eq!(from, account);
     assert_eq!(
@@ -2381,7 +2489,12 @@ fn a_message_sent_waits_and_can_be_taken_back() {
     assert_eq!(s.server.subjects("INBOX"), ["Let go"]);
     let (taken, said) = s.core.undo_send().unwrap();
     assert!(
-        taken.is_none() && said == "Sending “Let go” can no longer be undone.",
+        taken.is_none()
+            && said
+                == tr_args(
+                    Text::UiSendTooLate,
+                    &[("subject", (&pe_core::quoted_subject("Let go")).into())]
+                ),
         "{said}"
     );
     assert!(s.core.send_waiting_text().is_none());
@@ -3045,13 +3158,13 @@ fn new_mail_names_its_code_when_asked() {
         &[],
     );
     let text = text_of(s.wait(|e| matches!(e, Event::NewMail { .. })));
-    assert!(
-        text.starts_with("482913 is your code for accounts.example.com\n"),
-        "{text}"
-    );
+    assert!(text.starts_with(&format!("{}\n", otp_words("482913"))), "{text}");
     s.server.add_message("INBOX", &code_mail("", "771204"), &[]);
     let text = text_of(s.wait(|e| matches!(e, Event::NewMail { .. })));
-    assert!(!text.contains("771204") && !text.contains("is your code"), "{text}");
+    assert!(
+        !text.contains("771204") && !text.contains(&otp_words("771204")),
+        "{text}"
+    );
     pe_core::otp::set_in_notifications(false);
 }
 
@@ -3228,7 +3341,7 @@ fn ignored_conversations_arrive_read_and_watched_ones_are_announced() {
     };
     assert_eq!((folder, subject.as_str(), watched), (lists, "Re: Release plan", true));
     // the notification's words, made by the core for every app
-    assert_eq!(title, "Watched conversation");
+    assert_eq!(title, tr(Text::UiWatchedConversation));
     assert!(text.ends_with("\nRe: Release plan"), "{text}");
 
     // hidden from a list that hides ignored conversations
@@ -3672,7 +3785,10 @@ fn a_message_that_can_not_be_downloaded_says_why() {
     );
     assert!(!message.is_empty());
     let page = pe_core::reader_page(pe_core::ReaderState::Failed { kind, reason: &message });
-    assert!(page.contains("could not be reached"), "{page}");
+    assert!(
+        has_words(&page, Text::ReaderFailedNetwork, &[("reason", MARK.into())]),
+        "{page}"
+    );
 
     // a sync that can not reach the server says so as it finishes: the windows do not try the message again yet
     s.core.sync(account).unwrap();
@@ -3825,7 +3941,7 @@ fn bounces_are_marked_and_explained() {
         })
     );
     assert!(
-        view.document.contains("The address does not exist"),
+        view.document.contains(&tr(Text::BounceUserUnknown)),
         "{}",
         view.document
     );
@@ -3844,7 +3960,11 @@ fn bounces_are_marked_and_explained() {
     s.wait(|e| *e == Event::ViewReady { request });
     let view = s.core.message_view_result(request).unwrap();
     assert!(view.bounce);
-    assert!(view.document.contains("The mailbox is full"), "{}", view.document);
+    assert!(
+        view.document.contains(&tr(Text::BounceMailboxFull)),
+        "{}",
+        view.document
+    );
     // it names no message of the account
     assert_eq!(view.bounced_message, None);
     assert_eq!(marked("is:bounce"), [report, plain]);
@@ -4373,7 +4493,7 @@ fn a_large_message_shows_its_text_before_its_attachment() {
     // how far it is, then that it is all here, without another MessageReady: the window has its text
     let progress = s.wait(|e| matches!(e, Event::Transferring { .. }));
     assert!(
-        matches!(&progress, Event::Transferring { text } if text.starts_with("Downloading")),
+        matches!(&progress, Event::Transferring { text } if text.starts_with(&words_of(Text::DownloadProgress, &[("done", MARK.into()), ("total", MARK.into())])[0])),
         "{progress:?}"
     );
     loop {
@@ -4385,7 +4505,8 @@ fn a_large_message_shows_its_text_before_its_attachment() {
                 uid: big
             }
         );
-        if matches!(&event, Event::Transferring { text } if text.starts_with("Downloaded")) {
+        if matches!(&event, Event::Transferring { text } if text.starts_with(&words_of(Text::DownloadDone, &[("size", MARK.into())])[0]))
+        {
             break;
         }
     }
@@ -4585,4 +4706,12 @@ fn a_setup_moves_two_accounts_to_an_empty_store() {
             "delivered by its own server"
         );
     }
+}
+
+/// The notification's words for a one-time `code` of the test account's sign-in service
+fn otp_words(code: &str) -> String {
+    tr_args(
+        Text::OtpNotification,
+        &[("code", code.into()), ("domain", "accounts.example.com".into())],
+    )
 }

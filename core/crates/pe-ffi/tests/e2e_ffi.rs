@@ -10,7 +10,7 @@ use std::sync::mpsc::{Receiver, Sender, channel};
 
 use base64::Engine;
 use pe_ffi::*;
-use pe_i18n::{Text, tr};
+use pe_i18n::{Text, tr, tr_args};
 use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
 use serde_json::json;
 
@@ -181,7 +181,7 @@ fn reads_mail_through_the_c_api() {
             inbox.unread,
             inbox.depth
         ),
-        ("INBOX".into(), "Inbox".into(), 2, 1, 0)
+        ("INBOX".into(), tr(Text::FolderInbox), 2, 1, 0)
     );
     let sent = rows
         .iter()
@@ -519,14 +519,14 @@ fn reads_mail_through_the_c_api() {
     let mut status: *mut c_char = std::ptr::null_mut();
     let card = unsafe { pe_book_add_sender(core, inbox, uid, &mut added, &mut status) };
     assert!(card > 0 && added);
-    assert_eq!(text(status), "Sender was added to the Address Book.");
+    assert_eq!(text(status), tr_args(Text::UiSenderAdded, &[("name", "Sender".into())]));
     unsafe { pe_string_free(status) };
     assert_eq!(
         unsafe { pe_book_add_sender(core, inbox, uid, &mut added, &mut status) },
         card
     );
     assert!(!added);
-    assert_eq!(text(status), "Sender is already in the Address Book.");
+    assert_eq!(text(status), tr_args(Text::UiSenderKnown, &[("name", "Sender".into())]));
     unsafe { pe_string_free(status) };
     assert_eq!(
         unsafe { pe_book_add_sender(core, inbox, 999_999, &mut added, std::ptr::null_mut()) },
@@ -559,7 +559,7 @@ fn reads_mail_through_the_c_api() {
     let attachment_path = c(attachment_path.to_str().unwrap());
     let attachments = [attachment_path.as_ptr()];
     let (body, empty, html) = (c("My answer"), c(""), c("<p>My <b>answer</b></p>"));
-    assert!(info.quote_folded && text(info.quote).contains("Original Message"));
+    assert!(info.quote_folded && text(info.quote).contains(&tr(Text::QuoteOriginal)));
     let outgoing = PeOutgoing {
         to: info.to,
         cc: empty.as_ptr(),
@@ -594,7 +594,7 @@ fn reads_mail_through_the_c_api() {
     );
     // the editor's HTML with the quote after it, and the text made from them
     assert!(
-        raw.contains("<b>answer</b>") && raw.contains("Original Message"),
+        raw.contains("<b>answer</b>") && raw.contains(&tr(Text::QuoteOriginal)),
         "{raw}"
     );
     assert!(
@@ -628,7 +628,8 @@ fn reads_mail_through_the_c_api() {
     };
     let mut reason: *mut c_char = null_mut();
     assert!(!unsafe { pe_message_send(core, account, &typo, &mut reason) });
-    assert!(text(reason).contains("not an e-mail address"), "{}", text(reason));
+    let bad_address = tr_args(Text::ErrorBadAddress, &[("address", "not an address".into())]);
+    assert!(text(reason).contains(&bad_address), "{}", text(reason));
     unsafe { pe_string_free(reason) };
 
     // a wrong password: a Failed event with the reason
@@ -837,7 +838,10 @@ fn sign_in_apps_through_the_c_api() {
         unsafe { pe_sign_in_app_save(core, 0, &plain, PeSecretChange::Keep, std::ptr::null(), &mut reason) },
         0
     );
-    assert!(text(reason).contains("SSL/TLS"));
+    assert_eq!(
+        text(reason),
+        pe_core::sentence(&tr_args(Text::SignInAppPlain, &[("server", "IMAP".into())]))
+    );
     unsafe { pe_string_free(reason) };
     let app = unsafe { pe_sign_in_app_save(core, 0, &form, PeSecretChange::Keep, std::ptr::null(), null_mut()) };
     assert!(app > 0);
@@ -880,7 +884,7 @@ fn sign_in_apps_through_the_c_api() {
     let row = |i| unsafe { &*pe_sign_in_app_list_get(rows, i) };
     assert_eq!((row(0).provider, row(0).enabled), (PeOAuthProvider::Microsoft, true));
     assert_eq!((row(1).provider, row(1).enabled), (PeOAuthProvider::Google, false));
-    assert!(text(row(1).off_reason).contains("test users"));
+    assert_eq!(text(row(1).off_reason), tr(Text::SignInOffGoogle));
     assert_eq!(
         (row(2).provider, row(2).id, row(2).enabled),
         (PeOAuthProvider::App, app, true)
@@ -997,7 +1001,7 @@ fn null_and_bad_arguments() {
         assert_eq!(text(redirect), "http://localhost");
         pe_string_free(redirect);
         let hint = pe_sign_in_register_hint(std::ptr::null());
-        assert!(text(hint).contains("redirect URI"));
+        assert_eq!(text(hint), tr(Text::SignInRegisterOther));
         pe_string_free(hint);
     }
     // a lookup of an address without a domain finishes with nothing
