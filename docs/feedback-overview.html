@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feature Board Plan</title>
+<style>
+:root{
+  --bg:#f6f5f1;--panel:#fff;--ink:#1d1f24;--muted:#5d6370;--line:#e2e0d9;
+  --accent:#1f5fae;--soft:#e6eefa;--s:#1d7a46;--sbg:#e3f3ea;--m:#946200;--mbg:#fbf0d6;--l:#a3352b;--lbg:#f9e4e1;
+  --send:#1f5fae;--read:#1d7a46;--sort:#6b4fb3;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:46px 0 6px}
+h3{font-size:16.5px;margin:0}
+p{margin:0 0 10px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.lede{color:var(--muted);font-size:16px;max-width:780px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:22px}
+.sub{color:var(--muted);margin-bottom:16px;max-width:780px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.road{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-top:14px}
+.step{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--send);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.step.read{border-top-color:var(--read)}.step.sort{border-top-color:var(--sort)}
+.step b{display:block;font-size:14px}
+.step .n{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sz{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.sz.S{background:var(--sbg);color:var(--s)}.sz.M{background:var(--mbg);color:var(--m)}.sz.L{background:var(--lbg);color:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.feat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--send);border-radius:10px;padding:18px 20px;margin:14px 0}
+.feat.read{border-left-color:var(--read)}.feat.sort{border-left-color:var(--sort)}
+.feat header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:8px}
+.pr{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.cols{display:grid;gap:8px 28px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:8px}
+.cols h4{margin:8px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.cols ul{font-size:14px}
+.mock{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;white-space:pre;overflow-x:auto}
+.flow{counter-reset:f;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:f;position:relative;padding:9px 12px 9px 46px;border-bottom:1px solid var(--line);margin:0}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);position:absolute;left:12px;top:9px;width:23px;height:23px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.flow li.key{background:var(--soft)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td:first-child{font-weight:600;white-space:nowrap}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.small{font-size:13px;color:var(--muted)}
+.step.key{border-top-color:var(--sort)}.step.hard{border-top-color:var(--l)}
+.feat.key{border-left-color:var(--sort)}.feat.hard{border-left-color:var(--l)}
+.msg{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);margin-top:12px;max-width:760px}
+.bar{padding:9px 14px;background:var(--soft);border-bottom:1px solid var(--line);font-size:13.5px}
+.bar b{color:var(--accent)}
+.bar .native,.page .native{float:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.page{padding:12px 14px 14px}
+.frame{border:2px solid var(--line);border-radius:8px;margin:10px 0 0;font-size:14px}
+.frame .lab{font-size:12.5px;font-weight:700;padding:4px 10px;border-bottom:1px solid var(--line)}
+.frame .txt{padding:8px 10px}
+.frame.ok{border-color:var(--s)}.frame.ok .lab{background:var(--sbg);color:var(--s);border-color:var(--s)}
+.frame.known{border-color:var(--accent)}.frame.known .lab{background:var(--soft);color:var(--accent);border-color:var(--accent)}
+.frame.warn{border-color:var(--m)}.frame.warn .lab{background:var(--mbg);color:var(--m);border-color:var(--m)}
+.frame.none .lab{color:var(--muted)}
+.fake{border:2px solid var(--s);border-radius:8px;margin-top:6px}
+.fake .lab{background:var(--sbg);color:var(--s);font-size:12.5px;font-weight:700;padding:4px 10px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--sbg);color:var(--s)}.pill.known{background:var(--soft);color:var(--accent)}.pill.warn{background:var(--mbg);color:var(--m)}.pill.none{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pipe{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px}
+.pipe div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px}
+.pipe b{display:block;font-size:13.5px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>From the feature board</h1>
+<p class="lede">Four posts of features.inboxclassic.com, planned together: the whole setup in one file, 21 more languages, All Sent and All Drafts, and opening attachments with a double-click. Each lands on Windows, the Mac and Linux in the same pull request.</p>
+<p class="meta">16 November 2026 · the full plan is <code>feedback-plan.md</code> beside this page · the four posts are marked planned on the board · the work starts after the OpenPGP plan and the folder list change are merged</p>
+
+<div class="tablewrap">
+<table>
+<tr><th>Post</th><th>Feature</th><th>Board</th></tr>
+<tr><td><a href="https://features.inboxclassic.com/posts/9">#9</a></td><td>Open attachments with a double-click</td><td>planned</td></tr>
+<tr><td><a href="https://features.inboxclassic.com/posts/6">#6</a></td><td>All Sent and All Drafts across accounts</td><td>planned</td></tr>
+<tr><td><a href="https://features.inboxclassic.com/posts/1">#1</a></td><td>Export and import settings, accounts and contacts in one file</td><td>planned</td></tr>
+<tr><td><a href="https://features.inboxclassic.com/posts/2">#2</a></td><td>More languages: all official EU languages, Ukrainian and Russian</td><td>planned</td></tr>
+</table>
+</div>
+
+<h2>The order</h2>
+<p class="sub">Each step is a pull request with the core, the three apps, the words, the help and the UI tests.</p>
+<div class="road">
+  <div class="step"><span class="n">1 · #9</span><b>Open attachments <span class="sz M">M</span></b>A strip of icons, double-click opens, files that can run code are never opened.</div>
+  <div class="step read"><span class="n">2 · #6</span><b>All Sent and All Drafts <span class="sz M">M</span></b>After the folder list change: rows like All Inboxes, one per account under each.</div>
+  <div class="step sort"><span class="n">3 · #1</span><b>The setup file <span class="sz L">L</span></b>The core's file format, then Export and Import in the three apps.</div>
+  <div class="step hard"><span class="n">4 · #2</span><b>21 languages <span class="sz L">L</span></b>Every list of languages from one place, then three pull requests of seven languages.</div>
+</div>
+
+<h2>Decided</h2>
+<div class="grid">
+  <div class="card">
+    <h3>Setup file (#1)</h3>
+    <ul>
+      <li>Passwords, sign-in tokens and private keys only when the file has a passphrase; then the whole file is encrypted.</li>
+      <li>Carries settings, accounts, sign-in apps, contacts with groups, OpenPGP keys, message rules and trusted senders.</li>
+      <li>Import shows what the file holds and lets you choose parts and accounts.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Languages (#2)</h3>
+    <ul>
+      <li>All 21 offered at once, not marked as beta.</li>
+      <li>Drafted translations, marked for review in the catalogs, edited later.</li>
+      <li>The full help in every language.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>All Sent and All Drafts (#6)</h3>
+    <ul>
+      <li>As All Inboxes: rows after it, a row per account under each.</li>
+      <li>Sent Items and Drafts leave the account headings (two or more accounts).</li>
+      <li>A draft opened from All Drafts opens in its own account.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Attachments (#9)</h3>
+    <ul>
+      <li>A native strip under the header: icon, name, size. Double-click or Enter opens.</li>
+      <li>Files that can run code are never opened, only saved.</li>
+      <li>A decrypted attachment opens too; the first time a note says it is stored decrypted while open.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>What it looks like</h2>
+<div class="grid">
+  <div class="card">
+    <h3>The folder list with two accounts</h3>
+    <div class="mock">All Inboxes            3
+   Gmail               2
+   Work                1
+All Sent
+   Gmail
+   Work
+All Drafts             2
+   Gmail               1
+   Work                1
+Flagged                4
+Gmail
+   Archive
+   Junk E-mail
+   Deleted Items
+Work
+   ...</div>
+  </div>
+  <div class="card">
+    <h3>The attachment strip</h3>
+    <div class="mock">From:    Alice Example
+Subject: The contract
+----------------------------------------------
+ [PDF] Contract.pdf     [IMG] Plan.png
+       240 KB                 1.2 MB
+----------------------------------------------
+Double-click or Enter: Open
+Right-click: Open · Save As... · Save All...
+setup.exe: Open greyed, "can run programs:
+Save it to open it yourself"</div>
+  </div>
+</div>
+
+<h2>The setup file</h2>
+<div class="feat sort">
+  <header><h3>Export and import</h3><span class="pr">#1</span></header>
+  <div class="cols">
+    <div><h4>Export</h4><ul><li>File &gt; Export &gt; Setup...</li><li>Choose the parts; optional passphrase typed twice (8 characters or more)</li><li>One file: <code>Name.inboxclassic</code>, encrypted with Argon2id and ChaCha20-Poly1305 when it has a passphrase</li></ul></div>
+    <div><h4>Import</h4><ul><li>File &gt; Import &gt; Setup..., and on the first run from Add Mail Account</li><li>The passphrase when asked, then what the file holds with a check box each</li><li>Accounts already here are skipped; contacts merge; settings replaced; keys follow the changed-key rule</li></ul></div>
+    <div><h4>Stays out</h4><ul><li>Messages (they download again)</li><li>Window positions, open folders, agents' permissions</li><li>Caches</li></ul></div>
+  </div>
+</div>
+
+<h2>21 languages</h2>
+<div class="feat hard">
+  <header><h3>Bulgarian, Croatian, Czech, Danish, Dutch, Finnish, Greek, Hungarian, Irish, Italian, Latvian, Lithuanian, Maltese, Polish, Portuguese, Romanian, Slovak, Slovenian, Swedish, Ukrainian, Russian</h3><span class="pr">#2</span></header>
+  <div class="cols">
+    <div><h4>One list</h4><ul><li>The installer, the sign-in buttons, Linux's desktop files, the Mac's help search, the homepage's help and the UI tests read the core's list of languages</li><li>Greek and Cyrillic in the sign-in buttons</li></ul></div>
+    <div><h4>Each language</h4><ul><li>About 1,200 messages and 50 help topics</li><li>Plural forms per language (Irish five, the Slavic and Baltic ones three or four)</li><li>Every draft marked for a native review later</li></ul></div>
+    <div><h4>Checked</h4><ul><li>No English left, nothing cut off, on all three platforms, in every language</li><li>The board post invites reviewers</li></ul></div>
+  </div>
+</div>
+
+<h2>How each pull request is done</h2>
+<ol class="flow">
+  <li>The core and its tests: unit tests, <code>e2e_core</code> against ImapKit, fuzz targets for the setup file.</li>
+  <li>The C API, then the three apps.</li>
+  <li>The words in every language and the help.</li>
+  <li>UI end-to-end steps on all three platforms, with the feature map's entries.</li>
+  <li class="key">UX review from the screenshots as a principal UX, mail app UI and product expert: light and dark, narrow, keyboard only, the longest languages; fix and look again until nothing is left.</li>
+  <li>/simplify with the maintainability check.</li>
+  <li class="key">/security-review: the setup file is untrusted input that carries secrets; opening attachments is the classic way in.</li>
+  <li>fmt, clippy, tests, prettier, the shells check; push, CI green, merge; the board post moves to started, then completed.</li>
+</ol>
+
+<h2>Tests, in one place</h2>
+<div class="tablewrap">
+<table>
+<tr><th>Feature</th><th>Core</th><th>UI end-to-end (three platforms)</th></tr>
+<tr><td>Attachments</td><td>The kind table row by row; files private, marked, never overwritten; refused types; the decrypted note once; cleaning</td><td><code>attach-1-strip</code> to <code>attach-5-encrypted-note</code>, in a message window too, keyboard only</td></tr>
+<tr><td>All Sent and All Drafts</td><td>The tree's rows with one and two accounts; the scopes and counts on an index; a draft reopened in its account</td><td><code>all-sent-1-list</code>, <code>all-drafts-1-list</code>, <code>all-drafts-2-open</code></td></tr>
+<tr><td>Setup file</td><td>Round trips of every part with and without a passphrase; wrong passphrase, changed byte, newer version, oversized; partial import; existing account; keys rewrapped; fuzz target; export and import between two stores against ImapKit</td><td><code>setup-1-export</code> to <code>setup-5-first-run</code></td></tr>
+<tr><td>Languages</td><td>Every catalog matches English; plural forms per language; the help builds in all 26</td><td>A tour of every language with the pseudo-language's checks, screenshots of the longest</td></tr>
+</table>
+</div>
+
+<p class="small" style="margin-top:28px">No release is cut along the way: the translations wait for your review first.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Next Languages</title>
+<style>
+:root{
+  --bg:#f6f5f1;--panel:#fff;--ink:#1d1f24;--muted:#5d6370;--line:#e2e0d9;
+  --accent:#1f5fae;--soft:#e6eefa;--s:#1d7a46;--sbg:#e3f3ea;--m:#946200;--mbg:#fbf0d6;--l:#a3352b;--lbg:#f9e4e1;
+  --send:#1f5fae;--read:#1d7a46;--sort:#6b4fb3;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:46px 0 6px}
+h3{font-size:16.5px;margin:0}
+p{margin:0 0 10px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.lede{color:var(--muted);font-size:16px;max-width:780px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:22px}
+.sub{color:var(--muted);margin-bottom:16px;max-width:780px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.road{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-top:14px}
+.step{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--send);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.step.read{border-top-color:var(--read)}.step.sort{border-top-color:var(--sort)}
+.step b{display:block;font-size:14px}
+.step .n{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sz{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.sz.S{background:var(--sbg);color:var(--s)}.sz.M{background:var(--mbg);color:var(--m)}.sz.L{background:var(--lbg);color:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.feat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--send);border-radius:10px;padding:18px 20px;margin:14px 0}
+.feat.read{border-left-color:var(--read)}.feat.sort{border-left-color:var(--sort)}
+.feat header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:8px}
+.pr{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.cols{display:grid;gap:8px 28px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:8px}
+.cols h4{margin:8px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.cols ul{font-size:14px}
+.mock{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;white-space:pre;overflow-x:auto}
+.flow{counter-reset:f;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:f;position:relative;padding:9px 12px 9px 46px;border-bottom:1px solid var(--line);margin:0}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);position:absolute;left:12px;top:9px;width:23px;height:23px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.flow li.key{background:var(--soft)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td:first-child{font-weight:600;white-space:nowrap}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.small{font-size:13px;color:var(--muted)}
+.step.key{border-top-color:var(--sort)}.step.hard{border-top-color:var(--l)}
+.feat.key{border-left-color:var(--sort)}.feat.hard{border-left-color:var(--l)}
+.msg{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);margin-top:12px;max-width:760px}
+.bar{padding:9px 14px;background:var(--soft);border-bottom:1px solid var(--line);font-size:13.5px}
+.bar b{color:var(--accent)}
+.bar .native,.page .native{float:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.page{padding:12px 14px 14px}
+.frame{border:2px solid var(--line);border-radius:8px;margin:10px 0 0;font-size:14px}
+.frame .lab{font-size:12.5px;font-weight:700;padding:4px 10px;border-bottom:1px solid var(--line)}
+.frame .txt{padding:8px 10px}
+.frame.ok{border-color:var(--s)}.frame.ok .lab{background:var(--sbg);color:var(--s);border-color:var(--s)}
+.frame.known{border-color:var(--accent)}.frame.known .lab{background:var(--soft);color:var(--accent);border-color:var(--accent)}
+.frame.warn{border-color:var(--m)}.frame.warn .lab{background:var(--mbg);color:var(--m);border-color:var(--m)}
+.frame.none .lab{color:var(--muted)}
+.fake{border:2px solid var(--s);border-radius:8px;margin-top:6px}
+.fake .lab{background:var(--sbg);color:var(--s);font-size:12.5px;font-weight:700;padding:4px 10px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--sbg);color:var(--s)}.pill.known{background:var(--soft);color:var(--accent)}.pill.warn{background:var(--mbg);color:var(--m)}.pill.none{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pipe{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px}
+.pipe div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px}
+.pipe b{display:block;font-size:13.5px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Which languages next</h1>
+<p class="lede">After this round Inbox Classic speaks 24 languages: English, German, Estonian, Spanish, French and 19 drafted ones, all in Europe. The big gaps are outside Europe. This page suggests what to add next, in what order, and what each needs beyond the translation itself.</p>
+<p class="meta">16 November 2026 · speaker numbers are rough, for scale only · the next language is now only catalogs, help and one line in <code>pe_i18n::LANGUAGES</code>, unless it needs one of the deeper changes below</p>
+
+<h2>Recommended order</h2>
+<div class="road">
+  <div class="step read"><span class="n">Wave 1 · translation only</span><b>Brazilian Portuguese, Turkish, Norwegian, Catalan, Serbian <span class="sz S">S</span></b>Latin or Cyrillic script, everything already supports them. Days, then review.</div>
+  <div class="step"><span class="n">Wave 2 · translation only</span><b>Indonesian, Vietnamese, Malay, Filipino, Swahili <span class="sz S">S</span></b>Large and growing; Latin script; few plural forms.</div>
+  <div class="step sort"><span class="n">Wave 3 · search and fonts first</span><b>Japanese, Chinese (Simplified and Traditional), Korean <span class="sz L">L</span></b>Search must find words without spaces, and the sign-in buttons need CJK fonts.</div>
+  <div class="step hard"><span class="n">Wave 4 · right to left first</span><b>Arabic, Hebrew, Persian <span class="sz L">L</span></b>Every window mirrored on three platforms, the editor and the documents too.</div>
+</div>
+
+<h2>The candidates</h2>
+<div class="tablewrap">
+<table>
+<tr><th>Language</th><th>Speakers (rough)</th><th>Why</th><th>What it needs beyond translation</th><th>Draft quality</th></tr>
+<tr><td>Portuguese (Brazil)</td><td>210 million</td><td>The largest single gap: Portugal's Portuguese reads foreign in Brazil (ficheiro vs arquivo, ecrã vs tela)</td><td>A second catalog <code>pt-BR</code> beside <code>pt</code>; the code picks it for Brazil</td><td>High</td></tr>
+<tr><td>Turkish</td><td>85 million</td><td>A large desktop market, used to Outlook</td><td>Turkish dotted and dotless i in case-insensitive matching (search, sorting) checked</td><td>High</td></tr>
+<tr><td>Norwegian (Bokmål)</td><td>5 million</td><td>Completes the Nordics (Danish, Swedish, Finnish are in); left out of the board post</td><td>None</td><td>High</td></tr>
+<tr><td>Catalan</td><td>10 million</td><td>Strong software localization culture, often asked for</td><td>None</td><td>High</td></tr>
+<tr><td>Serbian</td><td>8 million</td><td>The neighbour of Croatian and Slovenian</td><td>Cyrillic and Latin both used: pick one (Cyrillic is official) or ship both</td><td>Good</td></tr>
+<tr><td>Indonesian</td><td>200 million (with second language)</td><td>A huge, growing internet population; simple grammar, no plurals</td><td>None</td><td>High</td></tr>
+<tr><td>Vietnamese</td><td>85 million</td><td>Large, fast-growing; a desktop mail habit at work</td><td>Fonts with stacked diacritics in the sign-in buttons</td><td>Good</td></tr>
+<tr><td>Malay, Filipino, Swahili</td><td>tens of millions each</td><td>Growing regions where English is the fallback today</td><td>None</td><td>Fair: a native review matters more</td></tr>
+<tr><td>Japanese</td><td>125 million</td><td>A large paying market with a long desktop-mail tradition</td><td>Search tokenizer for text without spaces; CJK fonts for the sign-in buttons; input methods in compose (system ones, should just work); line breaking in the documents</td><td>Good</td></tr>
+<tr><td>Chinese (Simplified, Traditional)</td><td>1 billion+</td><td>The largest language; two scripts, two catalogs</td><td>As Japanese</td><td>Good</td></tr>
+<tr><td>Korean</td><td>80 million</td><td>Large, very online</td><td>As Japanese (Korean has spaces, but search still needs to match parts of words)</td><td>Good</td></tr>
+<tr><td>Arabic</td><td>370 million</td><td>Very large; few good desktop mail clients in Arabic</td><td>Right to left: mirrored windows, toolbars and the folder tree on all three platforms, <code>dir="rtl"</code> in the reading pane, compose and help, bidirectional text in lists; six plural forms</td><td>Good</td></tr>
+<tr><td>Hebrew</td><td>9 million</td><td>A small but technical and paying market</td><td>Right to left, as Arabic</td><td>Good</td></tr>
+<tr><td>Persian</td><td>80 million</td><td>Large; right to left like Arabic, once that work is done it is cheap</td><td>Right to left; Persian digits</td><td>Good</td></tr>
+<tr><td>Hindi, Bengali, Tamil, Thai</td><td>hundreds of millions together</td><td>Very large, but desktop software there is mostly used in English</td><td>Complex script shaping in the classic Windows controls (works through Uniscribe, to be checked); Thai also needs the search tokenizer</td><td>Fair</td></tr>
+</table>
+</div>
+
+<h2>What the deeper changes are</h2>
+<div class="grid">
+  <div class="card">
+    <h3>Search for text without spaces</h3>
+    <ul>
+      <li>Search splits words on spaces (SQLite FTS5 <code>unicode61</code>): Chinese, Japanese and Thai would only find whole runs of text.</li>
+      <li>Add a trigram index beside it (FTS5's own <code>trigram</code> tokenizer) used for queries in those scripts, so any part of a word matches; a migration rebuilds the index in the background.</li>
+      <li>Needed for mail in those languages even if the windows stay English, so worth doing on its own.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Right to left</h3>
+    <ul>
+      <li>Mac and Linux mirror their windows by themselves; checking every custom view (the strip, the security bar, the tree's counts).</li>
+      <li>Windows: <code>WS_EX_LAYOUTRTL</code> on every window and dialog, the classic controls mirror, owner-drawn parts (list rows, toolbar) checked by hand.</li>
+      <li>The documents (reading pane, compose editor, help, print) with <code>dir="rtl"</code>, and mixed text in subjects and names kept readable.</li>
+      <li>The biggest single piece: worth doing once for Arabic, Hebrew and Persian together.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Fonts</h3>
+    <ul>
+      <li>The Google and Microsoft sign-in buttons are pictures drawn per language: they need Noto Sans CJK and Noto Sans Arabic/Hebrew as the Greek and Cyrillic round needed Roboto's subsets.</li>
+      <li>The windows themselves use the system's fonts, which cover every script on all three platforms.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Quality, honestly</h3>
+    <ul>
+      <li>Maltese and Irish were skipped this round: the drafts would not have been a good start. The same care applies here: Malay, Filipino and Swahili most need a native reviewer.</li>
+      <li>Every draft ships marked for review, and the board post invites native reviewers per language.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Suggestion</h2>
+<ol class="flow">
+  <li class="key">Wave 1 now, alongside the current work: Brazilian Portuguese, Turkish, Norwegian, Catalan and Serbian (Cyrillic). They cost what this round cost per language and reach about 300 million people.</li>
+  <li>Wave 2 after: Indonesian and Vietnamese first.</li>
+  <li>The CJK search index as its own piece of work (it helps everyone who receives mail in those languages), then Japanese, Chinese and Korean.</li>
+  <li>Right to left as a planned feature, then Arabic, Hebrew and Persian together.</li>
+  <li>Maltese and Irish when a native speaker offers to help (the board post can ask).</li>
+</ol>
+</main>
+</body>
+</html>
