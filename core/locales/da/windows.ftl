@@ -104,6 +104,10 @@ win-clear-log-ask = Vil du rydde agenternes aktivitetshistorik? Det fortryder ik
 win-agent-programs = &Programmer, hvis agenter har bedt om adgang til din mail:
 win-change = &Rediger...
 win-what-agents-did = Agent&aktivitet:
+# review: new
+win-agent-reads = Hvad der blev læst fra { $from } til { $to }:
+# review: new
+win-agent-reads-hint = Marker en række med læsninger ovenfor for at se, hvad der blev læst.
 win-how-to-connect = Sådan tilslutter du en agent
 
 ## Sign-in apps

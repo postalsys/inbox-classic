@@ -160,6 +160,10 @@ win-change = &Keisti...
 # review: new
 win-what-agents-did = Agentų &veikla:
 # review: new
+win-agent-reads = Kas perskaityta nuo { $from } iki { $to }:
+# review: new
+win-agent-reads-hint = Pažymėkite viršuje skaitymų eilutę, kad pamatytumėte, kas perskaityta.
+# review: new
 win-how-to-connect = Kaip prijungti agentą
 
 ## Sign-in apps

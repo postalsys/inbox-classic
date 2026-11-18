@@ -103,6 +103,10 @@ win-clear-log-ask = Vymazat historii činnosti agentů? Změny provedené agenty
 win-agent-programs = Programy, jejic&hž agenti požádali o přístup k vaší poště:
 win-change = Zm&ěnit...
 win-what-agents-did = Či&nnost agentů:
+# review: new
+win-agent-reads = Co bylo přečteno od { $from } do { $to }:
+# review: new
+win-agent-reads-hint = Vyberte výše řádek s přečteným a uvidíte, co bylo přečteno.
 win-how-to-connect = Jak připojit agenta
 
 ## Sign-in apps

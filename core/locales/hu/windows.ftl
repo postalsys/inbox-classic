@@ -100,6 +100,10 @@ win-clear-log-ask = Törli az ügynökök tevékenységnaplóját? Ez nem vonja 
 win-agent-programs = &Programok, amelyek ügynökei hozzáférést kértek a leveleihez:
 win-change = &Módosítás...
 win-what-agents-did = Ügynöki &tevékenység:
+# review: new
+win-agent-reads = Olvasva { $from } és { $to } között:
+# review: new
+win-agent-reads-hint = Jelöljön ki fent egy olvasásokat összegző sort, hogy lássa, mit olvasott.
 win-how-to-connect = Hogyan csatlakoztatható egy ügynök
 
 ## Sign-in apps

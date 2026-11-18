@@ -168,6 +168,10 @@ win-change = &Zmień...
 # review: new
 win-what-agents-did = &Działania agentów:
 # review: new
+win-agent-reads = Co przeczytano od { $from } do { $to }:
+# review: new
+win-agent-reads-hint = Zaznacz powyżej wiersz z odczytami, aby zobaczyć, co przeczytano.
+# review: new
 win-how-to-connect = Jak połączyć agenta
 
 ## Sign-in apps

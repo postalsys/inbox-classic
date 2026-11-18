@@ -1426,19 +1426,21 @@ enum Text: UInt32 {
     case winAgentPrograms = 1420
     case winChange = 1421
     case winWhatAgentsDid = 1422
-    case winHowToConnect = 1423
-    case winBuiltIn = 1424
-    case winEdit = 1425
-    case winFoldersHide = 1426
-    case winFoldersPin = 1427
-    case winFoldersShow = 1428
-    case winInstallerStart = 1429
-    case winInstallerWelcomeNew = 1430
-    case winInstallerWelcomeSame = 1431
-    case winInstallerWelcomeUpdate = 1432
-    case winInstallerOlderAsk = 1433
-    case winInstallerStillRunning = 1434
-    case winInstallerRemoveMailAsk = 1435
+    case winAgentReads = 1423
+    case winAgentReadsHint = 1424
+    case winHowToConnect = 1425
+    case winBuiltIn = 1426
+    case winEdit = 1427
+    case winFoldersHide = 1428
+    case winFoldersPin = 1429
+    case winFoldersShow = 1430
+    case winInstallerStart = 1431
+    case winInstallerWelcomeNew = 1432
+    case winInstallerWelcomeSame = 1433
+    case winInstallerWelcomeUpdate = 1434
+    case winInstallerOlderAsk = 1435
+    case winInstallerStillRunning = 1436
+    case winInstallerRemoveMailAsk = 1437
 
     /// In the language in use, menu marks (&) left out
     var text: String {

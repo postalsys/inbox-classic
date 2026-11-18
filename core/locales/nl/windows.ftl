@@ -100,6 +100,10 @@ win-clear-log-ask = De activiteitengeschiedenis van de agents wissen? Wijziginge
 win-agent-programs = &Programma’s waarvan agents toegang tot je e-mail hebben gevraagd:
 win-change = Wi&jzigen...
 win-what-agents-did = &Activiteit van agents:
+# review: new
+win-agent-reads = Wat er is gelezen van { $from } tot { $to }:
+# review: new
+win-agent-reads-hint = Selecteer hierboven een rij met gelezen berichten om te zien wat er is gelezen.
 win-how-to-connect = Een agent verbinden
 
 ## Sign-in apps

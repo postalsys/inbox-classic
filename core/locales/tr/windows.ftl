@@ -100,6 +100,10 @@ win-clear-log-ask = Aracıların etkinlik geçmişi temizlensin mi? Bu, aracıla
 win-agent-programs = Postanıza erişim isteyen aracıların &programları:
 win-change = &Değiştir...
 win-what-agents-did = Aracı &etkinliği:
+# review: new
+win-agent-reads = { $from } ile { $to } arasında okunanlar:
+# review: new
+win-agent-reads-hint = Neyin okunduğunu görmek için yukarıdan okumaları özetleyen bir satır seçin.
 win-how-to-connect = Aracı Nasıl Bağlanır
 
 ## Oturum açma uygulamaları

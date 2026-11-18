@@ -108,6 +108,10 @@ win-clear-log-ask = Da li želite da obrišete istoriju aktivnosti agenata? Time
 win-agent-programs = &Programi čiji su agenti zatražili pristup vašoj pošti:
 win-change = Pro&meni...
 win-what-agents-did = &Aktivnost agenata:
+# review: new
+win-agent-reads = Šta je pročitano od { $from } do { $to }:
+# review: new
+win-agent-reads-hint = Izaberite gore red sa čitanjima da vidite šta je pročitano.
 win-how-to-connect = Kako povezati agenta
 
 ## Sign-in apps
