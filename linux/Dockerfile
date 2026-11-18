@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential pkg-config ca-certificates curl xz-utils git dpkg-dev \
         libgtk-4-dev libadwaita-1-dev libwebkitgtk-6.0-dev libdbus-1-dev \
         xvfb xauth dbus dbus-x11 at-spi2-core gnome-keyring libsecret-tools \
-        fonts-dejavu-core fonts-cantarell adwaita-icon-theme locales \
+        fonts-dejavu-core fonts-cantarell adwaita-icon-theme locales gdb \
     && locale-gen en_GB.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 

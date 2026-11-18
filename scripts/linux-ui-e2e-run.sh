@@ -22,8 +22,28 @@ export G_DEBUG=${G_DEBUG:-fatal-criticals}
 if [ -z "${LC_TIME:-}" ] && locale -a 2>/dev/null | grep -qix 'en_GB\.utf-\?8'; then
     export LC_TIME=en_GB.UTF-8
 fi
+# a crash leaves a core dump, read by gdb once the app has ended (the run is not slowed by a debugger), so the log
+# shows where it crashed. The kernel's core_pattern says where cores go: a file name (relative: the app's working
+# directory, this one) lands here; a pipe (|...) hands it to the host's crash handler, outside a container
+ulimit -c unlimited 2>/dev/null || true
+started=$(mktemp)
 status=0
 xvfb-run -a -s "-screen 0 1600x1100x24" dbus-run-session -- "$binary" --e2e "$out" || status=$?
 cat "$out/result.txt" 2>/dev/null || echo "no result"
 echo
+if [ "$status" -gt 128 ]; then
+    echo "the app ended with signal $((status - 128))"
+    pattern=$(cat /proc/sys/kernel/core_pattern 2>/dev/null || true)
+    core=$(find "$PWD" "$out" -maxdepth 1 -type f -name 'core*' -newer "$started" 2>/dev/null | head -n 1)
+    if [ -z "$core" ]; then
+        echo "no core dump here (the kernel's core_pattern is: $pattern)"
+    elif ! command -v gdb >/dev/null; then
+        echo "a core dump is in $core, but gdb is not installed to read it"
+    else
+        echo "the stacks of the app's threads when it ended, from $core:"
+        gdb -batch -nx -q -ex "set pagination off" -ex "thread apply all bt" "$binary" "$core" 2>&1 || true
+        rm -f "$core"
+    fi
+fi
+rm -f "$started"
 exit $status
