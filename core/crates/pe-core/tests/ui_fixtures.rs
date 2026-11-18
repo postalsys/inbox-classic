@@ -103,4 +103,11 @@ fn each_case_reads_as_the_ui_tests_expect() {
     assert!(print.contains(&text) && print.contains("Part 2") && !print.contains("<iframe"));
     let (_, _, view) = bar("secure-long.eml");
     assert!(shown(&view).contains("Line 40 of the long part"));
+    // a picture in each of two parts, the second encrypted: each previewed in its own part's document
+    let (_, text, view) = bar("secure-previews.eml");
+    assert!(text.contains("2 parts"), "{text}");
+    assert!(!view.document.contains("/pv/"));
+    assert!(view.part_documents[0].contains("alt=\"harbour.png\""));
+    assert!(view.part_documents[1].contains("alt=\"floor-plan.png\""));
+    assert!(shown(&view).contains("for your eyes only"));
 }
