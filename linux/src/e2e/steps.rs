@@ -473,7 +473,7 @@ pub async fn agent(d: &Driver) {
     let tools = agent_said(&out, "tools")
         .and_then(|t| t.as_array().map(Vec::len))
         .unwrap_or(0);
-    d.check(tools == 25, &format!("with the tools of what it may do ({tools})"));
+    d.check(tools == 28, &format!("with the tools of what it may do ({tools})"));
     let read = agent_said(&out, "read").unwrap_or_default();
     d.check(
         read["notice"]
@@ -565,21 +565,21 @@ pub async fn agent(d: &Driver) {
                 &format!("it lists the program and what it may do ({hosts:?})"),
             );
             let entries = subtitles(&agents, "agents-entry");
+            let said = |index: usize, start: &str| entries.get(index).is_some_and(|(what, _)| what.starts_with(start));
             d.check(
-                entries
-                    .first()
-                    .is_some_and(|(what, _)| what.starts_with("Saved the draft \u{201c}Agenda for Friday\u{201d}"))
-                    && entries.get(1).is_some_and(|(what, _)| {
-                        what.starts_with("Sent \u{201c}Lunch on Friday?\u{201d} to pat@example.net")
-                    })
-                    && entries.get(2).is_some_and(|(what, _)| what.starts_with("Marked read")),
-                &format!("and what its agent did, newest first ({entries:?})"),
+                said(0, "Saved the draft \u{201c}Agenda for Friday\u{201d}")
+                    && said(1, "Sent \u{201c}Lunch on Friday?\u{201d} to pat@example.net")
+                    && said(2, "Watched the conversation \u{201c}")
+                    && said(3, "Flagged \u{201c}")
+                    && entries.get(3).is_some_and(|(what, _)| what.ends_with("\u{201d} blue"))
+                    && said(4, "Marked read"),
+                &format!("and what its agent did, newest first, its flag's colour and the conversation it watches ({entries:?})"),
             );
             d.shot(&agents, "agents-6-window").await;
             // the message sent, under the draft
             let sent_row = descendants::<adw::ActionRow>(agents.upcast_ref())
                 .into_iter()
-                .find(|row| row.widget_name() == "agents-entry" && row.index() == 1);
+                .find(|row| row.widget_name() == "agents-entry" && row.title().starts_with("Sent "));
             if let Some(row) = sent_row
                 && let Some(log) = row.parent().and_downcast::<gtk::ListBox>()
             {
@@ -595,6 +595,7 @@ pub async fn agent(d: &Driver) {
                 .await,
                 "Undo takes the message back",
             );
+            super::agent_log::reads(d, &agents).await;
             agents.close();
             wait_gone(10, "agents-dialog").await;
         }
@@ -610,6 +611,9 @@ pub async fn agent(d: &Driver) {
         let _ = agent.kill();
         let _ = agent.wait();
     }
+    super::agent_log::in_another_language(d).await;
+    super::agent_log::cleared(d).await;
+    super::agent_log::terminal_programs(d).await;
 }
 
 /// The agent's draft in Markdown: opened from Drafts, the compose window says which agent wrote it and shows the
