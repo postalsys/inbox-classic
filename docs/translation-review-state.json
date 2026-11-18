@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue the Lithuanian core catalog at sign-in-off-google: sign-in guidance, calendar recurrence, agent additions, security and other remaining messages. Lithuanian has 237 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -27909,158 +27909,6 @@
     "lt": {
       "pending_catalogs": {
         "core.ftl": [
-          "sign-in-off-google",
-          "sign-in-off-other",
-          "sign-in-app-no-name",
-          "sign-in-app-no-client",
-          "sign-in-app-no-scopes",
-          "sign-in-app-bad-host",
-          "sign-in-app-plain",
-          "sign-in-app-not-checked",
-          "sign-in-app-issuer-changed",
-          "sign-in-register-google",
-          "sign-in-register-microsoft",
-          "sign-in-register-other",
-          "repeats",
-          "repeats-every",
-          "repeats-on",
-          "repeats-times",
-          "day-monday",
-          "day-tuesday",
-          "day-wednesday",
-          "day-thursday",
-          "day-friday",
-          "day-saturday",
-          "day-sunday",
-          "agent-level-organize",
-          "agent-too-many-changes",
-          "agent-too-many-reads",
-          "list-encrypted",
-          "agent-log-flag-color",
-          "agent-log-renamed",
-          "agent-log-watched",
-          "agent-log-ignored",
-          "agent-log-unmarked",
-          "agent-reads-messages",
-          "agent-reads-attachments",
-          "agent-reads-searches",
-          "agent-reads-lists",
-          "agent-read-message",
-          "agent-read-conversation",
-          "agent-read-attachment",
-          "agent-read-search",
-          "agent-read-people",
-          "agent-read-list",
-          "agent-read-changes",
-          "agent-terminal-programs-mac",
-          "agent-terminal-programs-windows",
-          "agent-terminal-programs-linux",
-          "agent-terminal-program-mac",
-          "agent-terminal-program-windows",
-          "agent-terminal-program-linux",
-          "agent-connect-title-terminal",
-          "agent-connect-terminal-detail",
-          "key-ctrl",
-          "key-alt",
-          "key-shift",
-          "key-del",
-          "key-enter",
-          "sign-in-no-refresh",
-          "sign-in-no-account",
-          "sign-in-not-finished",
-          "secrets-unavailable",
-          "secrets-unavailable-why",
-          "secrets-windows",
-          "secrets-mac",
-          "secrets-linux",
-          "error-no-such-file",
-          "cards-file-too-big",
-          "ui-sender-added",
-          "ui-sender-known",
-          "ui-sender-none",
-          "card-name-needed",
-          "cards-file-failed",
-          "otp-heading",
-          "otp-copy",
-          "otp-note",
-          "otp-old",
-          "event-attendees",
-          "otp-notification",
-          "pgp-key-valid",
-          "pgp-key-expires",
-          "pgp-key-expired",
-          "pgp-key-revoked",
-          "pgp-key-revoked-why",
-          "pgp-key-not-valid",
-          "pgp-key-locked",
-          "pgp-source-own",
-          "pgp-source-file",
-          "pgp-source-paste",
-          "pgp-source-attachment",
-          "pgp-source-vcard",
-          "pgp-source-wkd",
-          "pgp-source-keyserver",
-          "pgp-source-autocrypt",
-          "pgp-error-no-store",
-          "pgp-error-wrong-passphrase",
-          "pgp-error-not-a-key",
-          "pgp-error-too-large",
-          "pgp-error-unusable",
-          "pgp-imported-private",
-          "pgp-imported-public",
-          "pgp-imported-pending",
-          "pgp-error-needs-passphrase",
-          "pgp-error-mismatch",
-          "pgp-file-name-public",
-          "pgp-file-name-private",
-          "pgp-pending",
-          "pgp-part-verified",
-          "pgp-part-signed",
-          "pgp-part-other",
-          "pgp-part-unknown-key",
-          "pgp-part-not-signed",
-          "pgp-part-not-checked",
-          "pgp-part-encrypted",
-          "pgp-part-no-key",
-          "pgp-part-changed",
-          "pgp-part-unprotected",
-          "pgp-part-broken",
-          "pgp-why-mismatch",
-          "pgp-why-weak-hash",
-          "pgp-why-key-expired",
-          "pgp-why-key-revoked",
-          "pgp-why-not-signing-key",
-          "pgp-why-from-future",
-          "pgp-why-signature-expired",
-          "pgp-why-key-not-valid",
-          "pgp-why-not-for-you",
-          "pgp-part-pictures-loaded",
-          "pgp-error-no-own-key",
-          "pgp-error-missing-keys",
-          "pgp-error-encrypted-quote",
-          "pgp-error-protect",
-          "pgp-found-keys",
-          "pgp-found-none",
-          "pgp-found-no-key",
-          "pgp-find-unavailable",
-          "pgp-publish-pending",
-          "pgp-publish-done",
-          "pgp-publish-failed",
-          "pgp-keyserver-off",
-          "pgp-details-part",
-          "attachment-from-part",
-          "pgp-details-signed",
-          "pgp-details-unknown-key",
-          "pgp-details-opened",
-          "pgp-details-for",
-          "pgp-details-plain",
-          "pgp-bar-parts",
-          "pgp-bar-count-verified",
-          "pgp-bar-count-encrypted-signed",
-          "pgp-bar-count-encrypted",
-          "pgp-bar-count-signed",
-          "pgp-bar-count-warning",
-          "pgp-bar-count-neutral",
           "setup-part-settings",
           "setup-part-preferences",
           "setup-part-accounts",
@@ -30838,6 +30686,408 @@
             "mnemonics.json": "/private/tmp/inbox-lt-core-mail-20261119-mnemonics.json",
             "plurals.json": "/private/tmp/inbox-lt-core-mail-20261119-plurals.json",
             "substitutions.json": "/private/tmp/inbox-lt-core-mail-20261119-substitutions.json"
+          }
+        },
+        {
+          "id": "lt-core-signin-agents-security-20261119",
+          "reviewed_ids": {
+            "core.ftl": [
+              "sign-in-off-google",
+              "sign-in-off-other",
+              "sign-in-app-no-name",
+              "sign-in-app-no-client",
+              "sign-in-app-no-scopes",
+              "sign-in-app-bad-host",
+              "sign-in-app-plain",
+              "sign-in-app-not-checked",
+              "sign-in-app-issuer-changed",
+              "sign-in-register-google",
+              "sign-in-register-microsoft",
+              "sign-in-register-other",
+              "repeats",
+              "repeats-every",
+              "repeats-on",
+              "repeats-times",
+              "day-monday",
+              "day-tuesday",
+              "day-wednesday",
+              "day-thursday",
+              "day-friday",
+              "day-saturday",
+              "day-sunday",
+              "agent-level-organize",
+              "agent-too-many-changes",
+              "agent-too-many-reads",
+              "list-encrypted",
+              "agent-log-flag-color",
+              "agent-log-renamed",
+              "agent-log-watched",
+              "agent-log-ignored",
+              "agent-log-unmarked",
+              "agent-reads-messages",
+              "agent-reads-attachments",
+              "agent-reads-searches",
+              "agent-reads-lists",
+              "agent-read-message",
+              "agent-read-conversation",
+              "agent-read-attachment",
+              "agent-read-search",
+              "agent-read-people",
+              "agent-read-list",
+              "agent-read-changes",
+              "agent-terminal-programs-mac",
+              "agent-terminal-programs-windows",
+              "agent-terminal-programs-linux",
+              "agent-terminal-program-mac",
+              "agent-terminal-program-windows",
+              "agent-terminal-program-linux",
+              "agent-connect-title-terminal",
+              "agent-connect-terminal-detail",
+              "key-ctrl",
+              "key-alt",
+              "key-shift",
+              "key-del",
+              "key-enter",
+              "sign-in-no-refresh",
+              "sign-in-no-account",
+              "sign-in-not-finished",
+              "secrets-unavailable",
+              "secrets-unavailable-why",
+              "secrets-windows",
+              "secrets-mac",
+              "secrets-linux",
+              "error-no-such-file",
+              "cards-file-too-big",
+              "ui-sender-added",
+              "ui-sender-known",
+              "ui-sender-none",
+              "card-name-needed",
+              "cards-file-failed",
+              "otp-heading",
+              "otp-copy",
+              "otp-note",
+              "otp-old",
+              "event-attendees",
+              "otp-notification",
+              "pgp-key-valid",
+              "pgp-key-expires",
+              "pgp-key-expired",
+              "pgp-key-revoked",
+              "pgp-key-revoked-why",
+              "pgp-key-not-valid",
+              "pgp-key-locked",
+              "pgp-source-own",
+              "pgp-source-file",
+              "pgp-source-paste",
+              "pgp-source-attachment",
+              "pgp-source-vcard",
+              "pgp-source-wkd",
+              "pgp-source-keyserver",
+              "pgp-source-autocrypt",
+              "pgp-error-no-store",
+              "pgp-error-wrong-passphrase",
+              "pgp-error-not-a-key",
+              "pgp-error-too-large",
+              "pgp-error-unusable",
+              "pgp-imported-private",
+              "pgp-imported-public",
+              "pgp-imported-pending",
+              "pgp-error-needs-passphrase",
+              "pgp-error-mismatch",
+              "pgp-file-name-public",
+              "pgp-file-name-private",
+              "pgp-pending",
+              "pgp-part-verified",
+              "pgp-part-signed",
+              "pgp-part-other",
+              "pgp-part-unknown-key",
+              "pgp-part-not-signed",
+              "pgp-part-not-checked",
+              "pgp-part-encrypted",
+              "pgp-part-no-key",
+              "pgp-part-changed",
+              "pgp-part-unprotected",
+              "pgp-part-broken",
+              "pgp-why-mismatch",
+              "pgp-why-weak-hash",
+              "pgp-why-key-expired",
+              "pgp-why-key-revoked",
+              "pgp-why-not-signing-key",
+              "pgp-why-from-future",
+              "pgp-why-signature-expired",
+              "pgp-why-key-not-valid",
+              "pgp-why-not-for-you",
+              "pgp-part-pictures-loaded",
+              "pgp-error-no-own-key",
+              "pgp-error-missing-keys",
+              "pgp-error-encrypted-quote",
+              "pgp-error-protect",
+              "pgp-found-keys",
+              "pgp-found-none",
+              "pgp-found-no-key",
+              "pgp-find-unavailable",
+              "pgp-publish-pending",
+              "pgp-publish-done",
+              "pgp-publish-failed",
+              "pgp-keyserver-off",
+              "pgp-details-part",
+              "attachment-from-part",
+              "pgp-details-signed",
+              "pgp-details-unknown-key",
+              "pgp-details-opened",
+              "pgp-details-for",
+              "pgp-details-plain",
+              "pgp-bar-parts",
+              "pgp-bar-count-verified",
+              "pgp-bar-count-encrypted-signed",
+              "pgp-bar-count-encrypted",
+              "pgp-bar-count-signed",
+              "pgp-bar-count-warning",
+              "pgp-bar-count-neutral"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 48,
+          "files": {
+            "core/locales/lt/core.ftl": "556e3f94cfe173f4553ff4db922200247d5a53b2449e0126aa656af8c083611b"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5"
+          },
+          "validation": "Lithuanian structural checks pass with 1,132 expected mark-only diagnostics. Exact reconstruction verifies 152 core entries: 48 improved values and 104 retained. No help content changed. IDs, variables, ellipses and comments are preserved. Missing-recipient-key instructions intentionally use exact [1], leaving 21/101 in plural prose. Static inspection covers all 18 selector messages with 247 count/color/recurrence samples and 54 substitutions, including nested recurrence, independent activity counts, system-store names and signer identities. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Twenty-five runtime/source files and six catalog dependencies match the evidence. Existing English sign-in and agent captures were inspected; historical log wording is superseded by current source behavior. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,597 unmarked entries and 12,184 help lines; since-start 1,784 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. Primary provider, key-server and Microsoft terminology references were checked; the private Google registration approval itself was not externally verified. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed 152 Lithuanian core entries covering sign-in, recurrence, agent access/read logs, credentials, code cards and key/security messages. Corrected decryption versus encryption, verified ownership, data-access and queued-rename wording, key-store and publication semantics, arbitrary names and plural instructions. Provider docs checked. Setup/remaining core, platform catalogs and help stay pending.",
+          "help_wording_lines_changed": 0,
+          "help_changes_by_file": {},
+          "runtime_files": {
+            "core/crates/pe-core/src/sign_in_apps.rs": "f2f6ec3fed94e298979d5f8d688691b9b5918568781c2ef86c8a0999348d21bb",
+            "core/crates/pe-core/src/calendar.rs": "6bd72752932d73ec1fc7c9162a56357a56365b0a38447172bc50b92a757c86c0",
+            "core/crates/pe-core/src/agents.rs": "d7bbae6f4a16aac79b22314fa6f861b3fb63c93ff4ab5a16a6f431c3afae3efb",
+            "core/crates/pe-core/src/agents/log.rs": "a30b29e5f45ef76253202aa9d9d42b3ad8b559d7949df47b11a8bfa8cccccb2c",
+            "core/crates/pe-core/src/agents/hosts.rs": "1c8a2d5246d116110fd24bfea87ee53e7969f671693ced6b5ae929059876f36f",
+            "core/crates/pe-core/src/secrets.rs": "f5aae6a69f175cd3837c86c816cfa767b9667073ccc52d7c59fed224a81fca6e",
+            "core/crates/pe-core/src/otp.rs": "99ed04f0777e21204105cf7f16225e74cb80b85027208de695908f91285566c3",
+            "core/crates/pe-core/src/book.rs": "20a81959e58322831351a030f76833d1e5453f31db2ca870057c96e7c1d6b462",
+            "core/crates/pe-core/src/lib.rs": "e335529ecfdf749a044ea64db2b467881d13bea93ccf6760caf2f1decb36beac",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-core/src/protect.rs": "402d75886280eb50d23da4e0f9330aed5b602f2bbfd96ed4b9d2cf0a3a91d353",
+            "core/crates/pe-core/src/view.rs": "f6d5f36337c27cb17ba34e46c5cb672d25b68201b56f3d77641d8988318666b2",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-core/src/compose.rs": "3ec708f28386f8b09bc84a2ab295a1e032c269bc8c330a688ca4eb756d53b66f",
+            "core/crates/pe-core/src/compose_keys.rs": "c0bddbece71f214ae35769d95fbe10e6b9522422b3845741b928148e90bd4c6e",
+            "core/crates/pe-mcp/src/tools/organize.rs": "e5ad5a88cb4de96d4dd3654fa6ecebece390bf3e5546aabdb4ee0084c9bea674",
+            "core/crates/pe-mcp/src/tools/lookups.rs": "af28646905f6b658120c2284eec46e24db1c766030165d928dc7a82efc0b39a8",
+            "core/crates/pe-mcp/src/tools.rs": "6960ce939d86e7b8c9a74d0d5da918f240ceca55cf80debdcd38810bbcebd530",
+            "core/crates/pe-store/src/agents.rs": "ef964f5ccae7d486bdd4bd6dcebf7c97179d39c185697960593f1987ef7de599",
+            "core/crates/pe-pgp/src/cert.rs": "2571bc5751cfa118888b11eb2514c75b7873966134c91c8c88563d1d19a80cfb",
+            "core/crates/pe-pgp/src/produce.rs": "db9df464c7da59fb1fd1784c342e7a266286241e95addcd2bf03820989e3b364",
+            "core/crates/pe-pgp/src/lib.rs": "a58299b559303fef301f2dfb9c24eeee962e80694cf0c195abc3b2c759bdb7e3",
+            "app/src/signinapps.cpp": "6cd5a5fb374f8c39326d0e96c7d1f6d8a4c7b6d67cd2f205dd8a3fba8879d6cc",
+            "mac/Sources/InboxClassic/SignInApps.swift": "c07ac8825c4d4a4c390ca33726851bd9932128c4f1d874e66b54b1ee767157a1",
+            "linux/src/sign_in_apps.rs": "bb8ee879c383754b53338a89689aaf8179cff0fd12868764d85ae2c8959b7233"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "75da81b2b96ee1d095b9e92d7222db3d0853a14f572c4b275c3654fd2d173957",
+            "core/locales/lt/linux.ftl": "a2bd0012bcba9f4689d89d9d8b7dcd2b55e5aa7577db7d1498d6c59666c609b5",
+            "core/locales/lt/app.ftl": "c704e3afa8bdf7f568ac9f15c8df46d837e3375cf61c3b86f58a48270a987d6c",
+            "core/locales/lt/core.ftl": "556e3f94cfe173f4553ff4db922200247d5a53b2449e0126aa656af8c083611b",
+            "core/locales/lt/windows.ftl": "57481088d3a5e7cd2657126ef625a39e8887876c5501447a846d80b770eb11d0",
+            "core/locales/lt/help.ftl": "f5b896c4e1dd76d7e246d6e019311e189cea022d081108a86d3187f176c8ad89"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "catalog_ids": [
+                  "sign-in-off-google",
+                  "sign-in-off-other",
+                  "sign-in-app-bad-host",
+                  "sign-in-register-google",
+                  "sign-in-register-microsoft",
+                  "sign-in-register-other"
+                ],
+                "finding": "Shared sign-in windows exist on all platforms; Windows File paths are not universal. Invalid server configuration includes port zero. Preserve provider scope/client/redirect values; app passwords depend on account support. Built-in Google disabled text reflects the current source assumption about this private app registration; external docs establish general requirements, not its actual approval status.",
+                "sources": [
+                  "core/crates/pe-core/src/sign_in_apps.rs",
+                  "app/src/signinapps.cpp",
+                  "mac/Sources/InboxClassic/SignInApps.swift",
+                  "linux/src/sign_in_apps.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "repeats-every",
+                  "repeats-times",
+                  "event-attendees"
+                ],
+                "finding": "Recurrence uses unsigned interval with fallback one and day/week/month/year units; COUNT can remain an invalid raw string. Exact [1] distinguishes singular prose from category one for 21/101. Attendee counts and repetition counts are separate.",
+                "sources": [
+                  "core/crates/pe-core/src/calendar.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "agent-too-many-changes",
+                  "agent-too-many-reads",
+                  "agent-log-renamed",
+                  "agent-read-attachment",
+                  "agent-reads-attachments",
+                  "agent-read-list",
+                  "agent-read-changes",
+                  "agent-terminal-programs-mac",
+                  "agent-terminal-program-mac"
+                ],
+                "finding": "Limits concern per-program log entries over 30 days. Rename is logged after queuing and before server completion. Attachment access is logged after reading data, before response size/type restrictions, and does not launch a file. List/change logs count metadata entries rather than full message reads. Mixed hourly totals are independently inflected. Terminal names can be arbitrary app names.",
+                "sources": [
+                  "core/crates/pe-core/src/agents.rs",
+                  "core/crates/pe-core/src/agents/log.rs",
+                  "core/crates/pe-core/src/agents/hosts.rs",
+                  "core/crates/pe-store/src/agents.rs",
+                  "core/crates/pe-mcp/src/tools/organize.rs",
+                  "core/crates/pe-mcp/src/tools.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "secrets-windows",
+                  "secrets-unavailable",
+                  "secrets-unavailable-why",
+                  "pgp-key-locked",
+                  "pgp-error-no-store"
+                ],
+                "finding": "Official Lithuanian Windows name is Kredencialų tvarkytuvas. System storage holds the wrapping key; private keys are encrypted separately. Locked state also follows inaccessible storage, so it does not prove permanent key loss. Four Lithuanian help topics retain old terminology and remain pending for full review.",
+                "sources": [
+                  "core/crates/pe-core/src/secrets.rs",
+                  "core/crates/pe-core/src/keys.rs"
+                ],
+                "pending_lithuanian_help": [
+                  "sign-in-apps.html",
+                  "data-storage.html",
+                  "account-security.html",
+                  "encryption-keys.html"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "cards-file-too-big",
+                  "otp-heading",
+                  "otp-note",
+                  "otp-old",
+                  "otp-notification"
+                ],
+                "finding": "Address-book size refusal happens before parsing and does not establish the file is not an address book. Code heading uses domain, the warning uses its trusted signer, and the old-code note compares sent time with opening time.",
+                "sources": [
+                  "core/crates/pe-core/src/book.rs",
+                  "core/crates/pe-core/src/otp.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "pgp-error-unusable",
+                  "pgp-error-mismatch",
+                  "pgp-part-verified",
+                  "pgp-part-signed",
+                  "pgp-part-other",
+                  "pgp-part-changed",
+                  "pgp-details-opened",
+                  "pgp-bar-count-verified"
+                ],
+                "finding": "Unusable includes a missing suitable signing/encryption key, not only weak cryptography. Verified means verified ownership. OtherPerson also covers missing/multiple From addresses, so a known different signer is not certain. Integrity failure does not establish when data changed. Opened means decrypted, not encrypted.",
+                "sources": [
+                  "core/crates/pe-core/src/protect.rs",
+                  "core/crates/pe-core/src/view.rs",
+                  "core/crates/pe-core/src/keys.rs",
+                  "core/crates/pe-pgp/src/cert.rs",
+                  "core/crates/pe-pgp/src/produce.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "pgp-found-keys",
+                  "pgp-found-none",
+                  "pgp-publish-pending",
+                  "pgp-publish-done",
+                  "pgp-keyserver-off",
+                  "pgp-error-no-own-key",
+                  "pgp-error-missing-keys",
+                  "pgp-error-encrypted-quote"
+                ],
+                "finding": "Lookup results list addresses. Publication requires confirmation of each address before lookup by that address. Settings is a complete platform-specific path. Missing-recipient instructions need exact [1]; 21/101 use plural prose. Unencrypted sending can require removing inherited encrypted content, including embedded images and attachments, not just quoted words.",
+                "sources": [
+                  "core/crates/pe-core/src/lookup.rs",
+                  "core/crates/pe-core/src/compose_keys.rs",
+                  "core/crates/pe-core/src/compose.rs"
+                ]
+              }
+            ],
+            "primary_references_checked": [
+              {
+                "url": "https://developers.google.com/identity/protocols/oauth2/native-app",
+                "observation": "Native desktop OAuth client and loopback flow."
+              },
+              {
+                "url": "https://developers.google.com/workspace/guides/configure-oauth-consent",
+                "observation": "Consent configuration and test users."
+              },
+              {
+                "url": "https://developers.google.com/workspace/gmail/imap/xoauth2-protocol",
+                "observation": "Full mail.google.com scope for mail protocols."
+              },
+              {
+                "url": "https://support.google.com/accounts/answer/185833",
+                "observation": "App passwords require appropriate account settings and are not always available."
+              },
+              {
+                "url": "https://learn.microsoft.com/en-us/exchange/client-developer/legacy-protocols/how-to-authenticate-an-imap-pop-smtp-application-by-using-oauth",
+                "observation": "Delegated mail permissions and offline_access."
+              },
+              {
+                "url": "https://learn.microsoft.com/en-us/entra/identity-platform/scenario-desktop-app-configuration",
+                "observation": "Desktop/mobile registration and localhost system-browser redirect."
+              },
+              {
+                "url": "https://www.rfc-editor.org/rfc/rfc8252.html#section-7.3",
+                "observation": "Loopback IP redirects permit dynamic ports."
+              },
+              {
+                "url": "https://keys.openpgp.org/about/api/",
+                "observation": "Email verification enables discovery by each confirmed address."
+              },
+              {
+                "url": "https://support.microsoft.com/lt-lt/windows/security/credential-manager-in-windows",
+                "observation": "Official Lithuanian Kredencialų tvarkytuvas terminology."
+              }
+            ],
+            "reference_screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-mac/signin-4-editor.png",
+                "sha256": "5455091e762d76c3d72cb903a7e46a87b5a26dfdf8cf86e14a27dc64fa0ba311",
+                "locale": "English",
+                "observation": "Existing capture inspected for structure; agent capture has historical log wording, so current source determines queued-action meaning."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/agents-6-window.png",
+                "sha256": "f888c710f66682c309165f141c06787b04df28cf0341ce640da6f79c69c2b7f5",
+                "locale": "English",
+                "observation": "Existing capture inspected for structure; agent capture has historical log wording, so current source determines queued-action meaning."
+              }
+            ],
+            "limits": "No local test suite, build or Fluent runtime execution. No Lithuanian GUI-fit claim. Private Google registration approval not externally verified."
+          },
+          "mnemonic_scope_count": 60,
+          "plural_changes": {
+            "pgp-error-missing-keys": "Exact [1] for one recipient; other contains plural instructions including 21/101."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-core-security-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-core-security-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-core-security-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-core-security-20261119-since.log",
+            "source-audit.json": "/private/tmp/inbox-lt-core-security-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-core-security-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-core-security-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-core-security-20261119-html.log",
+            "mnemonics.json": "/private/tmp/inbox-lt-core-security-20261119-mnemonics.json",
+            "plurals.json": "/private/tmp/inbox-lt-core-security-20261119-plurals.json",
+            "substitutions.json": "/private/tmp/inbox-lt-core-security-20261119-substitutions.json"
           }
         }
       ],
@@ -77431,7 +77681,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 980 expected mark-only diagnostics. Exact reconstruction verifies 208 core entries: 39 improved values and 169 retained. No help content changed. IDs, variables, ellipses and comments are preserved. Five intentional selector corrections are verified: exact [1] for empty-folder singular prose and counted one/few/other in four Move/Copy controls. Static inspection covers all 34 selector messages with 398 count/color samples and 32 other substitutions, including 21/101, independent list counts, size phrases and fallback destinations. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Eighteen runtime/source files and six catalog dependencies match the evidence. English Windows bounce and Linux Move captures were inspected; no Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,445 unmarked entries and 12,184 help lines; since-start 1,817 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs or new incoming translation deltas. Existing MCP additions remain separately queued. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,132 expected mark-only diagnostics. Exact reconstruction verifies 152 core entries: 48 improved values and 104 retained. No help content changed. IDs, variables, ellipses and comments are preserved. Missing-recipient-key instructions intentionally use exact [1], leaving 21/101 in plural prose. Static inspection covers all 18 selector messages with 247 count/color/recurrence samples and 54 substitutions, including nested recurrence, independent activity counts, system-store names and signer identities. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Twenty-five runtime/source files and six catalog dependencies match the evidence. Existing English sign-in and agent captures were inspected; historical log wording is superseded by current source behavior. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,597 unmarked entries and 12,184 help lines; since-start 1,784 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. Primary provider, key-server and Microsoft terminology references were checked; the private Google registration approval itself was not externally verified. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -138247,7 +138497,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Continue the Lithuanian core catalog at sign-in-off-google: sign-in guidance, calendar recurrence, agent additions, security and other remaining messages. Lithuanian has 237 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -141167,7 +141417,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Continue the Lithuanian core catalog at sign-in-off-google: sign-in guidance, calendar recurrence, agent additions, security and other remaining messages. Lithuanian has 237 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -142938,7 +143188,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Continue the Lithuanian core catalog at sign-in-off-google: sign-in guidance, calendar recurrence, agent additions, security and other remaining messages. Lithuanian has 237 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Continue the Lithuanian core catalog at setup-part-settings: setup transfer, loading/rollback messages, settings and remaining additions. Lithuanian has 85 core entries, 24 help-section labels, 87 Linux, 65 Mac and 66 Windows entries, plus 50 help topics pending. All current app entries are reviewed. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -144973,6 +145223,24 @@
           "ref": "origin/release-please--branches--master--components--inbox-classic",
           "commit": "98cadde0ac8527ef4047281ed68217b48f28bb42",
           "merge_base": "ad9aa9ab86263074d8020e6146ab673a16575660",
+          "translation_delta_paths": []
+        }
+      },
+      {
+        "batch": "lt-core-mail-counts-errors-20261119",
+        "pr": 194,
+        "url": "https://github.com/postalsys/inbox-classic/pull/194",
+        "review_commit": "26cc6898bafb9c9250475e573bcec828006c0de7",
+        "merge_commit": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+        "merged_at": "2026-11-18T23:34:24Z",
+        "verified_master": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true,
+        "post_publication_source_check": {
+          "ref": "origin/release-please--branches--master--components--inbox-classic",
+          "commit": "2a993d9f6ae6271c7a6968390ed70932558bb3eb",
+          "merge_base": "e6e736298c4979647c1eff7496b9c90fd00b63b4",
           "translation_delta_paths": []
         }
       }
@@ -155412,7 +155680,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "11f23a8fa9225cb1810a8331e030de97efbabec0343cc117d36aadbecbe62a0b",
+      "core/locales/GLOSSARY.md": "5dedf99a881f27884986e4b71084bed7b64d35ff75442abdcb7a48930d8b3459",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -155424,7 +155692,7 @@
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
       "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
       "core/locales/lt/app.ftl": "c704e3afa8bdf7f568ac9f15c8df46d837e3375cf61c3b86f58a48270a987d6c",
-      "core/locales/lt/core.ftl": "69225eb920f29488d2b27114a35c8ea7ce28cf87b2d02c4ea0d7f8162bd42e55",
+      "core/locales/lt/core.ftl": "556e3f94cfe173f4553ff4db922200247d5a53b2449e0126aa656af8c083611b",
       "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
       "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e",
       "core/locales/lv/app.ftl": "3310cec05b61d52c666cad3c51afce9fba308b9dfdae2d251a6705c6d09741d1",
@@ -175469,6 +175737,119 @@
           "retained_values": 169,
           "reason": "Network failures include dropped established connections; downloaded sizes can contain a counted byte phrase. Final static checkers rerun and reconciled; no local tests or builds."
         }
+      },
+      {
+        "batch": "lt-core-signin-agents-security-20261119",
+        "review_parent": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 12061,
+          "pending_help": 591,
+          "completed_catalog": 23563,
+          "completed_help": 785
+        },
+        "validation": "Lithuanian structural checks pass with 1,132 expected mark-only diagnostics. Exact reconstruction verifies 152 core entries: 48 improved values and 104 retained. No help content changed. IDs, variables, ellipses and comments are preserved. Missing-recipient-key instructions intentionally use exact [1], leaving 21/101 in plural prose. Static inspection covers all 18 selector messages with 247 count/color/recurrence samples and 54 substitutions, including nested recurrence, independent activity counts, system-store names and signer identities. No Fluent runtime execution claimed. Reviewed entries have no access keys; all 60 established menu/dialog scopes and keys remain unchanged without collisions. Twenty-five runtime/source files and six catalog dependencies match the evidence. Existing English sign-in and agent captures were inspected; historical log wording is superseded by current source behavior. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,597 unmarked entries and 12,184 help lines; since-start 1,784 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. Primary provider, key-server and Microsoft terminology references were checked; the private Google registration approval itself was not externally verified. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 192,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+            "refs/remotes/origin/HEAD": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+            "refs/remotes/origin/i18n/review-resume-20261118": "26cc6898bafb9c9250475e573bcec828006c0de7",
+            "refs/remotes/origin/master": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "2a993d9f6ae6271c7a6968390ed70932558bb3eb"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "effbbdd527ea9384c0c77557753fecda3d338d41",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "7ac55d1b22af496d1fbb0f68f7b9d034b57ecc38",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "f0a1d2c033a47346911fe7fafde06abfea9144ef",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "1ca0f5311213324ead36beabc1c5a591d4404397",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/locales/GLOSSARY.md\n M core/locales/lt/core.ftl",
+              "translation_hashes": {
+                "core/locales/GLOSSARY.md": "5dedf99a881f27884986e4b71084bed7b64d35ff75442abdcb7a48930d8b3459",
+                "core/locales/lt/core.ftl": "556e3f94cfe173f4553ff4db922200247d5a53b2449e0126aa656af8c083611b"
+              }
+            }
+          ],
+          "master": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-core-security-20261119-edit.py": "da1da30fe24439adfc5e039c66e3dba2d92979ffa77646708140d69919638d5d",
+          "/private/tmp/inbox-lt-core-security-20261119-proofs.py": "10cb403ada366005ab4150cebca5838aa5659c26d4aea1506a79338fe7bf7bc7",
+          "/private/tmp/inbox-lt-core-security-20261119-finalize.py": "26c8ca1cf368ad38926213bdc338adfa2911d48f1a1949d944387726cdcd8f52",
+          "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b",
+          "/private/tmp/inbox-settings-mnemonics.py": "3ea34d18000e86852c799c640b462d7511cb1dcde5e4f7b162a6a9acd07254f1"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -177872,6 +178253,214 @@
               "core/crates/pe-core/src/lib.rs",
               "core/crates/pe-core/src/worker.rs",
               "core/crates/pe-core/src/sign_in_apps.rs",
+              "core/crates/pe-core/src/compose.rs"
+            ]
+          }
+        ],
+        "instruction": "Compare against caller and language rules, reusing earlier related context work. Retain accurate wording, reopen only affected entries and add no duplicate scope credit. English/app code remains outside this review."
+      },
+      {
+        "id": "core-signin-agent-security-context-20261119",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "7cb143076cc22405c7483ec22ea4ff2665373a90",
+        "completed_languages": [
+          "lt"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "hu",
+          "it",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "catalog_ids": [
+          "agent-log-renamed",
+          "agent-read-attachment",
+          "agent-read-changes",
+          "agent-read-list",
+          "agent-reads-attachments",
+          "agent-terminal-program-mac",
+          "agent-terminal-programs-mac",
+          "agent-too-many-changes",
+          "agent-too-many-reads",
+          "cards-file-too-big",
+          "event-attendees",
+          "otp-heading",
+          "otp-note",
+          "otp-notification",
+          "otp-old",
+          "pgp-bar-count-verified",
+          "pgp-details-opened",
+          "pgp-error-encrypted-quote",
+          "pgp-error-mismatch",
+          "pgp-error-missing-keys",
+          "pgp-error-no-own-key",
+          "pgp-error-no-store",
+          "pgp-error-unusable",
+          "pgp-found-keys",
+          "pgp-found-none",
+          "pgp-key-locked",
+          "pgp-keyserver-off",
+          "pgp-part-changed",
+          "pgp-part-other",
+          "pgp-part-signed",
+          "pgp-part-verified",
+          "pgp-publish-done",
+          "pgp-publish-pending",
+          "repeats-every",
+          "repeats-times",
+          "secrets-unavailable",
+          "secrets-unavailable-why",
+          "secrets-windows",
+          "sign-in-app-bad-host",
+          "sign-in-off-google",
+          "sign-in-off-other",
+          "sign-in-register-google",
+          "sign-in-register-microsoft",
+          "sign-in-register-other"
+        ],
+        "issues": [
+          {
+            "catalog_ids": [
+              "sign-in-off-google",
+              "sign-in-off-other",
+              "sign-in-app-bad-host",
+              "sign-in-register-google",
+              "sign-in-register-microsoft",
+              "sign-in-register-other"
+            ],
+            "finding": "Shared sign-in windows exist on all platforms; Windows File paths are not universal. Invalid server configuration includes port zero. Preserve provider scope/client/redirect values; app passwords depend on account support. Built-in Google disabled text reflects the current source assumption about this private app registration; external docs establish general requirements, not its actual approval status.",
+            "sources": [
+              "core/crates/pe-core/src/sign_in_apps.rs",
+              "app/src/signinapps.cpp",
+              "mac/Sources/InboxClassic/SignInApps.swift",
+              "linux/src/sign_in_apps.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "repeats-every",
+              "repeats-times",
+              "event-attendees"
+            ],
+            "finding": "Recurrence uses unsigned interval with fallback one and day/week/month/year units; COUNT can remain an invalid raw string. Exact [1] distinguishes singular prose from category one for 21/101. Attendee counts and repetition counts are separate.",
+            "sources": [
+              "core/crates/pe-core/src/calendar.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "agent-too-many-changes",
+              "agent-too-many-reads",
+              "agent-log-renamed",
+              "agent-read-attachment",
+              "agent-reads-attachments",
+              "agent-read-list",
+              "agent-read-changes",
+              "agent-terminal-programs-mac",
+              "agent-terminal-program-mac"
+            ],
+            "finding": "Limits concern per-program log entries over 30 days. Rename is logged after queuing and before server completion. Attachment access is logged after reading data, before response size/type restrictions, and does not launch a file. List/change logs count metadata entries rather than full message reads. Mixed hourly totals are independently inflected. Terminal names can be arbitrary app names.",
+            "sources": [
+              "core/crates/pe-core/src/agents.rs",
+              "core/crates/pe-core/src/agents/log.rs",
+              "core/crates/pe-core/src/agents/hosts.rs",
+              "core/crates/pe-store/src/agents.rs",
+              "core/crates/pe-mcp/src/tools/organize.rs",
+              "core/crates/pe-mcp/src/tools.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "secrets-windows",
+              "secrets-unavailable",
+              "secrets-unavailable-why",
+              "pgp-key-locked",
+              "pgp-error-no-store"
+            ],
+            "finding": "Official Lithuanian Windows name is Kredencialų tvarkytuvas. System storage holds the wrapping key; private keys are encrypted separately. Locked state also follows inaccessible storage, so it does not prove permanent key loss. Four Lithuanian help topics retain old terminology and remain pending for full review.",
+            "sources": [
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/keys.rs"
+            ],
+            "pending_lithuanian_help": [
+              "sign-in-apps.html",
+              "data-storage.html",
+              "account-security.html",
+              "encryption-keys.html"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "cards-file-too-big",
+              "otp-heading",
+              "otp-note",
+              "otp-old",
+              "otp-notification"
+            ],
+            "finding": "Address-book size refusal happens before parsing and does not establish the file is not an address book. Code heading uses domain, the warning uses its trusted signer, and the old-code note compares sent time with opening time.",
+            "sources": [
+              "core/crates/pe-core/src/book.rs",
+              "core/crates/pe-core/src/otp.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "pgp-error-unusable",
+              "pgp-error-mismatch",
+              "pgp-part-verified",
+              "pgp-part-signed",
+              "pgp-part-other",
+              "pgp-part-changed",
+              "pgp-details-opened",
+              "pgp-bar-count-verified"
+            ],
+            "finding": "Unusable includes a missing suitable signing/encryption key, not only weak cryptography. Verified means verified ownership. OtherPerson also covers missing/multiple From addresses, so a known different signer is not certain. Integrity failure does not establish when data changed. Opened means decrypted, not encrypted.",
+            "sources": [
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/view.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/produce.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "pgp-found-keys",
+              "pgp-found-none",
+              "pgp-publish-pending",
+              "pgp-publish-done",
+              "pgp-keyserver-off",
+              "pgp-error-no-own-key",
+              "pgp-error-missing-keys",
+              "pgp-error-encrypted-quote"
+            ],
+            "finding": "Lookup results list addresses. Publication requires confirmation of each address before lookup by that address. Settings is a complete platform-specific path. Missing-recipient instructions need exact [1]; 21/101 use plural prose. Unencrypted sending can require removing inherited encrypted content, including embedded images and attachments, not just quoted words.",
+            "sources": [
+              "core/crates/pe-core/src/lookup.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
               "core/crates/pe-core/src/compose.rs"
             ]
           }

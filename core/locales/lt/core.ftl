@@ -387,36 +387,22 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-# review: new
-sign-in-off-google = Google dar nepatvirtino Inbox Classic, todėl leidžia prisijungti tik bandomiesiems naudotojams. Naudokite savo Google prisijungimo programą arba programos slaptažodį, o jei esate bandomasis naudotojas, įjunkite ją lange „Prisijungimo programos“ (Failas > Paskyros).
-# review: new
-sign-in-off-other = Ji buvo išjungta lange „Prisijungimo programos“ (Failas > Paskyros), kur ją galima vėl įjungti.
-# review: new
+sign-in-off-google = Google dar nepatvirtino šios Inbox Classic prisijungimo programos, todėl ja gali naudotis tik bandomųjų naudotojų sąraše esančios paskyros. Naudokite savo Google prisijungimo programą arba, jei jūsų paskyrai leidžiama, programos slaptažodį. Jei esate bandomasis naudotojas, lange „Paskyros“ atverkite „Prisijungimo programos“ ir įjunkite šią programą.
+sign-in-off-other = Ši prisijungimo programa išjungta. Lange „Paskyros“ atverkite „Prisijungimo programos“ ir galėsite ją vėl įjungti.
 sign-in-app-no-name = prisijungimo programai reikia pavadinimo
-# review: new
-sign-in-app-no-client = trūksta kliento ID
-# review: new
+sign-in-app-no-client = nenurodytas tinkamas kliento ID
 sign-in-app-no-scopes = prisijungimo programai reikia teisių (scopes), kurios suteikia prieigą prie pašto
-# review: new
-sign-in-app-bad-host = { $server } serverio adreso trūksta arba jis nėra tinkamas pagrindinio kompiuterio vardas
-# review: new
+sign-in-app-bad-host = nenurodytas tinkamas { $server } serverio adresas arba prievadas
 sign-in-app-plain = { $server } serveris turi naudoti SSL/TLS arba STARTTLS
-# review: new
 sign-in-app-not-checked = išdavėjas dar nepatikrintas
-# review: new
 sign-in-app-issuer-changed = išdavėjas pasikeitė: įveskite kliento paslaptį dar kartą arba ją pašalinkite
-# review: new
-sign-in-register-google = Google Cloud Console sukurkite OAuth klientą, kurio tipas Desktop app, o jo sutikimo ekrane nurodykite teisę https://mail.google.com/. Kol programa bandoma, prisijungti gali tik jos bandomieji naudotojai.
-# review: new
-sign-in-register-microsoft = Microsoft Entra užregistruokite programą su platforma Mobile and desktop applications, peradresavimo URI http://localhost, leistais viešojo kliento srautais ir deleguotomis teisėmis IMAP.AccessAsUser.All, SMTP.Send ir offline_access. Jei tik savo organizacijai, kaip išdavėją naudokite https://login.microsoftonline.com/<tenant ID>/v2.0.
-# review: new
-sign-in-register-other = Užregistruokite vietinį (viešąjį) klientą su toliau nurodytu peradresavimo URI; paslaugų teikėjas turi leisti bet kurį jo prievadą (RFC 8252). Įtraukite teisę, kuria paslaugų teikėjas suteikia prieigą prie pašto.
+sign-in-register-google = Google Cloud Console sukurkite „Desktop app“ tipo OAuth klientą. Sutikimo nustatymuose pridėkite prieigos teisę https://mail.google.com/. Kol programa veikia bandymo režimu, prisijungti gali tik į bandomųjų naudotojų sąrašą įtrauktos paskyros.
+sign-in-register-microsoft = Microsoft Entra užregistruokite programą, pasirinkę platformą „Mobile and desktop applications“ ir peradresavimo URI http://localhost. Leiskite viešojo kliento prisijungimą ir suteikite deleguotąsias teises IMAP.AccessAsUser.All, SMTP.Send bei offline_access. Jei programa skirta tik jūsų organizacijai, išdavėjo laukelyje nurodykite https://login.microsoftonline.com/<tenant ID>/v2.0.
+sign-in-register-other = Užregistruokite kompiuteryje veikiančios programos viešąjį OAuth klientą su toliau nurodytu peradresavimo URI. Paslaugų teikėjas turi leisti šiame vietiniame adrese naudoti bet kurį prievadą (RFC 8252). Pridėkite teikėjo nurodytą prieigos prie pašto teisę.
 
 ## Calendar invitations
 
-# review: new
 repeats = Kartojasi
-# review: new
 repeats-every = { $unit ->
     [day] { $interval ->
         [1] Kasdien
@@ -444,34 +430,24 @@ repeats-every = { $unit ->
     }
 }
 # "Kas savaitę: pirmadienis, trečiadienis"
-# review: new
 repeats-on = { $repeats }: { $days }
 # "Kas savaitę, 10 kartų"
-# review: new
 repeats-times = { $count ->
     [one] { $repeats }, { $count } kartą
     [few] { $repeats }, { $count } kartus
    *[other] { $repeats }, { $count } kartų
 }
-# review: new
 day-monday = pirmadienis
-# review: new
 day-tuesday = antradienis
-# review: new
 day-wednesday = trečiadienis
-# review: new
 day-thursday = ketvirtadienis
-# review: new
 day-friday = penktadienis
-# review: new
 day-saturday = šeštadienis
-# review: new
 day-sunday = sekmadienis
 
 ## AI agents
 
 agent-level-read = Skaityti paštą: peržiūrėti aplankus, laiškus ir pokalbius, ieškoti laiškų bei kontaktų ir peržiūrėti laiškų taisykles
-# review: changed
 agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles, jų spalvas ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti ir pervadinti aplankus, stebėti ir ignoruoti pokalbius, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
 agent-level-drafts = Rašyti juodraščius, kuriuos galėsite išsiųsti
 agent-level-send = Siųsti laiškus, kiekvieną tik jums sutikus
@@ -517,11 +493,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Šio laiško perskaityti negalima.
 agent-encrypted-original = Šis laiškas užšifruotas: agentas negali į jį atsakyti ar jo persiųsti, nes negali šifruoti.
 agent-encrypted = Šis laiškas užšifruotas. Agentas negali perskaityti jo turinio. Laišką turi atidaryti naudotojas programoje Inbox Classic.
-# review: new
-agent-too-many-changes = Per daug pakeitimų per pastarąsias 30 dienų: šis agentas jų atliko tiek, kiek Inbox Classic vienai programai saugo žurnale. Daugiau galės atlikti, kai seniausiems sukaks 30 dienų.
-# review: new
-agent-too-many-reads = Per daug skaityta per pastarąsias 30 dienų: šis agentas perskaitė tiek, kiek Inbox Classic vienai programai saugo žurnale. Daugiau galės skaityti, kai seniausiems skaitymams sukaks 30 dienų.
-# review: new
+agent-too-many-changes = Pasiekta vienai programai taikoma paskutinių 30 dienų veiksmų žurnalo riba. Agentas vėl galės atlikti pakeitimus, kai seniausiems įrašams sukaks 30 dienų.
+agent-too-many-reads = Pasiekta vienai programai taikoma paskutinių 30 dienų skaitymo žurnalo riba. Agentas vėl galės skaityti, kai seniausiems įrašams sukaks 30 dienų.
 list-encrypted = Užšifruotas laiškas
 agent-log-composed = Atidarytas naujas laiškas „{ $subject }“, kurį galite baigti rašyti
 agent-log-refused = Atmetėte prašymą išsiųsti laišką „{ $subject }“
@@ -552,8 +525,7 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic paprašo toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
    *[other] Inbox Classic paprašo kiekvieno toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama kiekvieno sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
 }
-# review: new
-agent-log-flag-color = Pažymėtas { $color ->
+agent-log-flag-color = Laiškas „{ $subject }“ pažymėtas { $color ->
     [red] raudona vėliavėle
     [orange] oranžine vėliavėle
     [yellow] geltona vėliavėle
@@ -561,151 +533,103 @@ agent-log-flag-color = Pažymėtas { $color ->
     [blue] mėlyna vėliavėle
     [purple] violetine vėliavėle
    *[gray] pilka vėliavėle
-}: „{ $subject }“
-# review: new
-agent-log-renamed = Aplankas „{ $old }“ pervardytas į „{ $name }“
-# review: new
+}
+agent-log-renamed = Paprašyta pervardyti aplanką „{ $old }“ į „{ $name }“
 agent-log-watched = Pradėtas stebėti pokalbis „{ $subject }“
-# review: new
 agent-log-ignored = Pradėtas ignoruoti pokalbis „{ $subject }“
-# review: new
 agent-log-unmarked = Nebestebimas ir nebeignoruojamas pokalbis „{ $subject }“
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] perskaitytas { $count } laiškas
     [few] perskaityti { $count } laiškai
    *[other] perskaityta { $count } laiškų
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] atidarytas { $count } priedas
-    [few] atidaryti { $count } priedai
-   *[other] atidaryta { $count } priedų
+    [one] priedų duomenys pasiekti { $count } kartą
+    [few] priedų duomenys pasiekti { $count } kartus
+   *[other] priedų duomenys pasiekti { $count } kartų
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] ieškota { $count } kartą
     [few] ieškota { $count } kartus
    *[other] ieškota { $count } kartų
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] laiškų sąrašai peržiūrėti { $count } kartą
     [few] laiškų sąrašai peržiūrėti { $count } kartus
    *[other] laiškų sąrašai peržiūrėti { $count } kartų
 }
 # each read under that row
-# review: new
 agent-read-message = Perskaitytas laiškas „{ $subject }“
-# review: new
 agent-read-conversation = { $count ->
     [one] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškas)
     [few] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškai)
    *[other] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškų)
 }
-# review: new
-agent-read-attachment = Atidarytas laiško „{ $subject }“ priedas „{ $name }“
-# review: new
+agent-read-attachment = Pasiekti laiško „{ $subject }“ priedo „{ $name }“ duomenys
 agent-read-search = { $count ->
     [one] Ieškota „{ $query }“: rastas { $count } laiškas
     [few] Ieškota „{ $query }“: rasti { $count } laiškai
    *[other] Ieškota „{ $query }“: rasta { $count } laiškų
 }
-# review: new
 agent-read-people = Ieškota kontaktų, kurių vardas ar adresas prasideda „{ $query }“
-# review: new
 agent-read-list = { $count ->
-    [one] Peržiūrėtas { $count } laiškas aplanke „{ $folder }“
-    [few] Peržiūrėti { $count } laiškai aplanke „{ $folder }“
-   *[other] Peržiūrėta { $count } laiškų aplanke „{ $folder }“
+    [one] Peržiūrėtas { $count } laiškų sąrašo įrašas. Aplankas: „{ $folder }“.
+    [few] Peržiūrėti { $count } laiškų sąrašo įrašai. Aplankas: „{ $folder }“.
+   *[other] Peržiūrėta { $count } laiškų sąrašo įrašų. Aplankas: „{ $folder }“.
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Peržiūrėtas { $count } naujas laiškas
-    [few] Peržiūrėti { $count } nauji laiškai
-   *[other] Peržiūrėta { $count } naujų laiškų
+    [one] Peržiūrėtas { $count } naujų laiškų sąrašo įrašas.
+    [few] Peržiūrėti { $count } naujų laiškų sąrašo įrašai.
+   *[other] Peržiūrėta { $count } naujų laiškų sąrašo įrašų.
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
-agent-terminal-programs-mac = Iš programėlės { $terminal } paleistos programos
-# review: new
+agent-terminal-programs-mac = Iš programos „{ $terminal }“ paleistos programos
 agent-terminal-programs-windows = Iš terminalo ({ $terminal }) paleistos programos
-# review: new
 agent-terminal-programs-linux = Iš terminalo ({ $terminal }) paleistos programos
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
-agent-terminal-program-mac = Iš programėlės { $terminal } paleista programa
-# review: new
+agent-terminal-program-mac = Iš programos „{ $terminal }“ paleista programa
 agent-terminal-program-windows = Iš terminalo ({ $terminal }) paleista programa
-# review: new
 agent-terminal-program-linux = Iš terminalo ({ $terminal }) paleista programa
-# review: new
 agent-connect-title-terminal = { $programs } nori naudotis jūsų paštu
-# review: new
 agent-connect-terminal-detail = Visi DI agentai, kuriuos paleidžiate iš šio terminalo, bendrai naudojasi čia suteikta prieiga. Norėdami suteikti agentui atskirą prieigą, agento MCP nustatymuose į jo argumentus įtraukite --name ir savo pasirinktą pavadinimą.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
-# review: new
 key-ctrl = Ctrl
-# review: new
 key-alt = Alt
-# review: new
 key-shift = Shift
-# review: new
 key-del = Del
-# review: new
 key-enter = Enter
 
 ## Signing in and passwords
 
-# review: new
 sign-in-no-refresh = paslaugų teikėjas nepateikė atnaujinimo rakto (refresh token)
-# review: new
 sign-in-no-account = paslaugų teikėjas nenurodė, kuri paskyra prisijungė
-# review: new
 sign-in-not-finished = prisijungimas nebaigtas
-# review: new
-secrets-unavailable = { $store } nepasiekiama
-# review: new
-secrets-unavailable-why = { $store } nepasiekiama: { $error }
-# review: new
-secrets-windows = Kredencialų tvarkytuvė
-# review: new
+secrets-unavailable = Slaptažodžių saugykla „{ $store }“ nepasiekiama
+secrets-unavailable-why = Slaptažodžių saugykla „{ $store }“ nepasiekiama: { $error }
+secrets-windows = Kredencialų tvarkytuvas
 secrets-mac = Raktinė
-# review: new
 secrets-linux = sistemos raktinė (Secret Service)
-# review: new
 error-no-such-file = tokio failo nėra
-# review: new
-cards-file-too-big = Šis failas per didelis, kad būtų adresų knygelė.
-# review: new
+cards-file-too-big = Šis failas per didelis, kad jį būtų galima importuoti kaip adresų knygelę.
 ui-sender-added = Įtraukta į adresų knygelę: { $name }.
-# review: new
 ui-sender-known = Jau yra adresų knygelėje: { $name }.
-# review: new
 ui-sender-none = Šio laiško siuntėjas neturi el. pašto adreso, kurį būtų galima įtraukti.
-# review: new
 card-name-needed = Kontaktas neturi nei vardo, nei el. pašto adreso.
 # a file of Import Address Book that could not be read: "contacts.vcf: tokio failo nėra"
-# review: new
 cards-file-failed = { $file }: { $reason }
 
 ## One-time codes: the card at the top of a message with a sign-in or verification code
 
 # the domain the code is for, which signed the message
-# review: new
-otp-heading = Kodas iš { $domain }
-# review: new
+otp-heading = Kodas svetainei: { $domain }
 otp-copy = Kopijuoti
-# review: new
-otp-note = Įveskite jį tik { $domain } puslapyje.
-# review: new
+otp-note = Įveskite kodą tik šio domeno puslapyje: { $domain }.
 otp-old = Šis kodas išsiųstas daugiau nei valandą prieš jums atidarant laišką, todėl tikriausiai nebegalioja.
 
 # how many are invited, in the card of an event
-# review: new
 event-attendees =
     { $count ->
         [one] { $count } dalyvis
@@ -714,146 +638,84 @@ event-attendees =
     }
 
 # the first line of a new message's notification when it has a code, for a domain that signed it
-# review: new
 otp-notification = { $code }: jūsų kodas svetainei { $domain }
 
 ## OpenPGP keys (keys.rs)
-# review: new
 pgp-key-valid = Galioja
-# review: new
 pgp-key-expires = Galioja iki { $date }
-# review: new
 pgp-key-expired = Nebegalioja nuo { $date }
-# review: new
 pgp-key-revoked = Atšauktas
-# review: new
 pgp-key-revoked-why = Atšauktas: { $reason }
-# review: new
 pgp-key-not-valid = Negalioja
-# review: new
-pgp-key-locked = Naudoti negalima: jį saugantis raktas nebėra vietoje „{ $store }“. Vėl importuokite jo atsarginę kopiją.
-# review: new
-pgp-source-own = Sukurtas Inbox Classic
-# review: new
+pgp-key-locked = Šio privačiojo rakto atrakinti nepavyko. Patikrinkite, ar prieinama saugykla „{ $store }“. Jei jį saugantis raktas prarastas, importuokite privačiojo rakto atsarginę kopiją.
+pgp-source-own = Sukurtas programoje Inbox Classic
 pgp-source-file = Importuotas iš failo
-# review: new
 pgp-source-paste = Įklijuotas
-# review: new
 pgp-source-attachment = Iš laiško
-# review: new
 pgp-source-vcard = Iš kontakto kortelės
-# review: new
-pgp-source-wkd = Iš siuntėjo pašto paslaugų teikėjo
-# review: new
+pgp-source-wkd = Gautas iš el. pašto adreso domeno
 pgp-source-keyserver = Iš keys.openpgp.org
-# review: new
 pgp-source-autocrypt = Iš laiško Autocrypt antraštės
-# review: new
-pgp-error-no-store = Privatieji raktai saugomi vietoje „{ $store }“, kurios naudoti negalima: { $error }
-# review: new
+pgp-error-no-store = Privačiųjų raktų apsaugai naudojama saugykla „{ $store }“, bet jos pasiekti nepavyko: { $error }
 pgp-error-wrong-passphrase = Slaptafrazė neteisinga.
-# review: new
 pgp-error-not-a-key = Tai nėra OpenPGP raktas.
-# review: new
 pgp-error-too-large = Raktas per didelis.
-# review: new
-pgp-error-unusable = Raktas naudoja seną arba silpną kriptografiją, todėl jo naudoti negalima.
-# review: new
+pgp-error-unusable = Šis raktas netinka pasirinktai operacijai arba neatitinka saugumo reikalavimų.
 pgp-imported-private = { $count ->
     [one] Importuotas { $count } privatusis raktas.
     [few] Importuoti { $count } privatieji raktai.
    *[other] Importuota privačiųjų raktų: { $count }.
 }
-# review: new
 pgp-imported-public = { $count ->
     [one] Importuotas { $count } raktas.
     [few] Importuoti { $count } raktai.
    *[other] Importuota raktų: { $count }.
 }
-# review: new
-pgp-imported-pending = Adresams { $addresses } jau naudojamas kitas raktas: naujasis laukia kontakte, kol jį pasirinksite.
-# review: new
+pgp-imported-pending = Šiems adresams jau naudojamas kitas raktas: { $addresses }. Naujasis raktas rodomas kontakto ypatybėse; galėsite pasirinkti, ar jį naudoti.
 pgp-error-needs-passphrase = Privatusis raktas apsaugotas slaptafraze. Įveskite ją, kad importuotumėte raktą.
-# review: new
-pgp-error-mismatch = Privatusis raktas nepriklauso savo viešajam raktui. Jis galėjo būti pakeistas.
-# review: new
+pgp-error-mismatch = Privatusis raktas neatitinka viešojo rakto. Jis galėjo būti pakeistas.
 pgp-file-name-public = Viešasis raktas ({ $who }).asc
-# review: new
 pgp-file-name-private = Privačiojo rakto atsarginė kopija ({ $who }).asc
-# review: new
-pgp-pending = { $date } rastas kitas { $address } raktas.
+pgp-pending = Rastas kitas raktas. Adresas: { $address }. Radimo data: { $date }.
 
 ## Reading signed and encrypted mail (protect.rs)
-# review: new
-pgp-part-verified = Pasirašė { $signer }, raktas patikrintas
-# review: new
-pgp-part-signed = Pasirašė { $signer } (raktas nepatikrintas)
-# review: new
-pgp-part-other = Pasirašė { $signer }, kuris nėra siuntėjas
-# review: new
+pgp-part-verified = Pasirašė: { $signer }; rakto savininkas patikrintas
+pgp-part-signed = Pasirašė: { $signer } (rakto savininkas nepatikrintas)
+pgp-part-other = Nepavyko patvirtinti, kad parašas atitinka laiško siuntėją. Pasirašė: { $signer }
 pgp-part-unknown-key = Pasirašyta, bet raktas nežinomas
-# review: new
 pgp-part-not-signed = Nepasirašyta
-# review: new
 pgp-part-not-checked = Parašas netikrintas
-# review: new
 pgp-part-encrypted = Užšifruota. { $signature }
-# review: new
 pgp-part-no-key = Užšifruota raktu, kurio neturite
-# review: new
-pgp-part-changed = Užšifruota dalis pakeista pakeliui, todėl nerodoma
-# review: new
+pgp-part-changed = Nepavyko patikrinti užšifruotos dalies vientisumo, todėl ji nerodoma
 pgp-part-unprotected = Užšifruota be apsaugos nuo pakeitimų, todėl nerodoma
-# review: new
 pgp-part-broken = Užšifruotos dalies perskaityti negalima
-# review: new
 pgp-why-mismatch = Parašas neatitinka šio teksto
-# review: new
-pgp-why-weak-hash = Parašas naudoja { $hash }, kuris nebėra saugus
-# review: new
+pgp-why-weak-hash = Parašui naudotas nesaugus maišos algoritmas: { $hash }
 pgp-why-key-expired = Pasirašyta po to, kai raktas nustojo galioti ({ $date })
-# review: new
 pgp-why-key-revoked = Pasirašyta atšauktu raktu
-# review: new
 pgp-why-not-signing-key = Pasirašyta raktu, kuriuo pasirašyti negalima
-# review: new
 pgp-why-from-future = Parašo data yra ateityje
-# review: new
 pgp-why-signature-expired = Parašas nebegalioja
-# review: new
 pgp-why-key-not-valid = Pasirašyta negaliojančiu raktu
-# review: new
 pgp-why-not-for-you = Pasirašyta kitiems gavėjams ir persiųsta jums
 pgp-why-not-key-in-use = Pasirašyta kitu raktu nei naudojamas adresui { $address }
-# review: new
 pgp-part-pictures-loaded = { $label }. Paveikslėliai įkelti iš interneto
-# review: new
-pgp-error-no-own-key = Neturite { $address } rakto, kuriuo būtų galima pasirašyti ar šifruoti. Sukurkite jį per Įrankiai > Šifravimo raktai arba išjunkite pasirašymą ir šifravimą.
-# review: new
+pgp-error-no-own-key = Neturite pasirašyti ar šifruoti tinkamo rakto šiam adresui: { $address }. Sukurkite raktą lange „Šifravimo raktai“ arba išjunkite pasirašymą ir šifravimą.
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } neturi rakto, kuriuo būtų galima šifruoti.
-   *[other] Šie gavėjai neturi rakto, kuriuo būtų galima šifruoti: { $addresses }.
+    [1] Šiam gavėjui nėra šifruoti tinkamo rakto: { $addresses }.
+   *[other] Šiems gavėjams nėra šifruoti tinkamo rakto: { $addresses }.
 }
-# review: new
-pgp-error-encrypted-quote = Šis laiškas cituoja arba persiunčia užšifruotą laišką, todėl jį galima siųsti tik užšifruotą. Įjunkite šifravimą arba pašalinkite cituojamą tekstą.
-# review: new
+pgp-error-encrypted-quote = Laiške yra turinio iš užšifruoto laiško. Kad jį išsiųstumėte, įjunkite šifravimą arba pašalinkite šį turinį.
 pgp-error-protect = Laiško nepavyko pasirašyti ar užšifruoti: { $reason }
-# review: new
-pgp-found-keys = Rastas raktas: { $addresses }.
-# review: new
-pgp-found-none = Rakto nerasta: { $addresses }. Paprašykite atsiųsti jums savo viešąjį raktą.
-# review: new
+pgp-found-keys = Adresai, kuriems rasti raktai: { $addresses }.
+pgp-found-none = Šiems adresams raktų nerasta: { $addresses }. Paprašykite adresų savininkų atsiųsti savo viešuosius raktus.
 pgp-found-no-key = Rakto nerasta.
-# review: new
 pgp-find-unavailable = Šiuo metu raktų ieškoti nepavyko: { $error }
-# review: new
-pgp-publish-pending = keys.openpgp.org išsiuntė patvirtinimo nuorodą adresu { $addresses }. Ją spustelėjus, jūsų raktas ten bus paskelbtas.
-# review: new
-pgp-publish-done = Jūsų raktas paskelbtas keys.openpgp.org adresams { $addresses }.
-# review: new
+pgp-publish-pending = keys.openpgp.org išsiuntė patvirtinimo nuorodas šiais adresais: { $addresses }. Patvirtinkite kiekvieną adresą, kad pagal jį būtų galima rasti jūsų raktą.
+pgp-publish-done = Jūsų raktą keys.openpgp.org galima rasti pagal šiuos adresus: { $addresses }.
 pgp-publish-failed = Rakto paskelbti nepavyko: { $error }
-# review: changed
-pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta skiltyje { $settings }.
+pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta. Ją galite įjungti čia: { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 pgp-compose-encrypted = { $count ->
     [1] Laiškas bus išsiųstas užšifruotas ir pasirašytas. Turinį galėsite perskaityti tik jūs ir gavėjas: { $addresses }.
@@ -897,45 +759,31 @@ pgp-recipients-intro-missing = { $count ->
     [few] { $count } gavėjai neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
    *[other] { $count } gavėjų neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
 }
-# review: new
 pgp-details-part = { $number } dalis: { $label }
-# review: new
 attachment-from-part = Iš { $number } dalies: { $label }
-# review: new
-pgp-details-signed = Pasirašyta { $when } raktu { $key }
-# review: new
+pgp-details-signed = Pasirašyta: { $when }. Raktas: { $key }
 pgp-details-unknown-key = Pasirašyta raktu { $key }, kurio neturite
-# review: new
-pgp-details-opened = Užšifruota jūsų raktu { $key }
-# review: new
+pgp-details-opened = Iššifruota jūsų raktu { $key }
 pgp-details-for = Užšifruota raktais: { $keys }
-# review: new
 pgp-details-plain = Nepasirašyta ir neužšifruota
-# review: new
-pgp-bar-parts = Šio laiško dalys ({ $count }): { $list }. Kiekviena dalis nurodo, kaip ji apsaugota.
-# review: new
-pgp-bar-count-verified = patikrinta: { $count }
-# review: new
+pgp-bar-parts = Šio laiško dalys ({ $count }): { $list }. Prie kiekvienos dalies nurodyta, kaip ji apsaugota.
+pgp-bar-count-verified = su patikrinto savininko parašu: { $count }
 pgp-bar-count-encrypted-signed = { $count ->
     [one] { $count } užšifruota ir pasirašyta
     [few] { $count } užšifruotos ir pasirašytos
    *[other] { $count } užšifruotų ir pasirašytų
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] { $count } užšifruota
     [few] { $count } užšifruotos
    *[other] { $count } užšifruotų
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] { $count } pasirašyta
     [few] { $count } pasirašytos
    *[other] { $count } pasirašytų
 }
-# review: new
 pgp-bar-count-warning = reikia dėmesio: { $count }
-# review: new
 pgp-bar-count-neutral = be patvirtinto parašo: { $count }
 # the setup file: settings, accounts, contacts and keys carried to another computer
 # review: new

@@ -669,6 +669,19 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   without a Windows-only menu path; paths and provider identifiers follow an inflected head noun or a colon.
 - Bounce explanations report what the remote server said. Greylisting advice distinguishes a delay from a final
   failure; do not promise a retry after a final notice or assert that large attachments are always rejected first.
+- Sign-in guidance keeps exact provider scope/URI values and uses shared account-window names. App passwords
+  are conditional on account support. Invalid server settings can mean a bad port as well as a bad host name.
+- Agent folder-rename logs describe the queued request. Read-list/change logs describe list entries, not full
+  message reads, and attachment logs describe data access, not launching a file. Limits count program log entries.
+- Windows uses the official title "Kredencialų tvarkytuvas"; wrap system-store names with "saugykla" so differing
+  genders fit. Apply this term when reviewing the still-pending sign-in-apps, data-storage, account-security and
+  encryption-keys help. Those topics remain marked; no full-help review is claimed here.
+- Private keys are wrapped by a key in the system store, not stored there directly. A locked key may reflect an
+  inaccessible store as well as a missing protection key; recovery advice must distinguish those cases.
+- "Iššifruota" means decrypted. Signature labels distinguish verified ownership, a valid signature, and inability
+  to match a unique From address. Integrity failure does not establish when or by whom data changed.
+- Key lookup messages list addresses, not keys. Publication confirms every email address separately before
+  address lookup works. Missing-recipient-key instructions use exact [1], so 21/101 get plural instructions.
 
 ### Magyar (hu)
 
