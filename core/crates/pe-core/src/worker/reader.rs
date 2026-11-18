@@ -234,7 +234,8 @@ impl Worker {
             }
         }
         if !self.spare {
-            self.ctx.opening.set_ready(self.account, false);
+            // a large one given to it and not reached yet goes with it, so later clicks are not sent to the spare
+            self.ctx.opening.forget(self.account);
         }
         let _ = self.index_all_parsed(store).await;
         self.log_out().await;

@@ -1443,7 +1443,7 @@ impl Core {
             true => Kind::Spare,
             false => Kind::Reader,
         };
-        self.send_to(
+        let sent = self.send_to(
             reader,
             account,
             Command::FetchSource {
@@ -1451,7 +1451,12 @@ impl Core {
                 uid,
                 asked: std::time::Instant::now(),
             },
-        )
+        );
+        // not handed on: the reader was never given it
+        if sent.is_err() && reader == Kind::Reader {
+            self.opening.opened(account, folder, uid);
+        }
+        sent
     }
 
     /// Whether the reader of `account` waits with a connection of its own, so the next open needs no new one
