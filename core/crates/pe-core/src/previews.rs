@@ -112,11 +112,14 @@ fn lock_asks(asks: &Asks) -> MutexGuard<'_, AskState> {
     asks.lock().unwrap_or_else(|p| p.into_inner())
 }
 
-/// How the view shows a message's pictures and PDF files after its text
+fn lock_shown(shown: &Mutex<VecDeque<Shown>>) -> MutexGuard<'_, VecDeque<Shown>> {
+    shown.lock().unwrap_or_else(|p| p.into_inner())
+}
+
+/// How the view shows a message's pictures and PDF files after its text ([`Core::preview_plan`])
 pub(crate) struct PreviewPlan<'a> {
-    /// Reads a file's description (a picture's size, a PDF's pages) on the render thread, waiting at most the time
-    /// given
-    pub describe: &'a dyn Fn(Arc<Vec<u8>>, Duration) -> std::result::Result<Arc<PreviewDescription>, PreviewRefusal>,
+    /// The core whose render thread reads the files' descriptions
+    pub core: &'a Core,
     /// PDF files are drawn
     pub pdfs: bool,
     /// What the section says when PDF files are not drawn because one ended the app ([`Core::previews_notice`])
@@ -126,26 +129,14 @@ pub(crate) struct PreviewPlan<'a> {
 /// The previews of a message's listed attachments, in the order of the strip: each picture, and the first pages of
 /// each PDF file, with the sizes read before the document is shown (at most [`DESCRIBE_WAIT`] for them all), at most
 /// [`MAX_PREVIEWS`] pictures in all. A file that is not a picture or PDF file by its name and by its content, or one
-/// not described in time, has none. With the attachments shown and how many pictures each
-pub(crate) fn section(
-    message: &pe_mime::parser::Message,
-    plan: &PreviewPlan,
-) -> (pe_html::PreviewSection, Vec<(usize, usize)>) {
-    use crate::opening::FileKind;
+/// not described in time, has none.
+pub(crate) fn section(message: &pe_mime::parser::Message, plan: &PreviewPlan) -> pe_html::PreviewSection {
     let until = Instant::now() + DESCRIBE;
     let mut files = Vec::new();
-    let mut planned = Vec::new();
     let mut left = MAX_PREVIEWS;
     let mut pdf_left_out = false;
     for (index, attachment) in view::listed(&message.attachments).enumerate() {
-        let content = &attachment.content;
-        let kind = crate::opening::file_kind_of(&attachment.safe_filename(), &attachment.mime_type, content);
-        let wanted = match (kind, pe_preview::kind_of(content)) {
-            (FileKind::Image, Some(pe_preview::Kind::Picture)) => Some(false),
-            (FileKind::Pdf, Some(pe_preview::Kind::Pdf)) => Some(true),
-            _ => None,
-        };
-        let Some(pdf) = wanted.filter(|_| content.len() <= MAX_FILE) else {
+        let Some(pdf) = previewed_as_pdf(attachment) else {
             continue;
         };
         if pdf && !plan.pdfs {
@@ -156,76 +147,103 @@ pub(crate) fn section(
         if left == 0 || wait.is_zero() {
             continue;
         }
-        let Ok(description) = (plan.describe)(Arc::new(content.clone()), wait) else {
+        let file = Arc::new(attachment.content.clone());
+        let Ok(description) = plan.core.preview_describe(plan.pdfs, file, wait) else {
             continue;
         };
-        let name = attachment.display_filename();
-        let size = crate::format_size(content.len() as u64);
-        let pages: Vec<pe_html::PreviewPage> = description
-            .sizes
-            .iter()
-            .enumerate()
-            .take(PREVIEW_PAGES)
-            .filter_map(|(page, size)| size.map(|size| (page, size)))
-            .take(left)
-            .map(|(page, (width, height))| {
-                // a PDF page is drawn for a display of two pixels a point of CSS: half its pixels wide
-                let (width, height) = if pdf {
-                    (width.div_ceil(2), height.div_ceil(2))
-                } else {
-                    (width, height)
-                };
-                let alt = if pdf {
-                    tr_args(
-                        Text::PreviewPageAlt,
-                        &[
-                            ("name", (&name).into()),
-                            ("page", (page + 1).into()),
-                            ("count", description.pages.into()),
-                        ],
-                    )
-                } else {
-                    name.clone()
-                };
-                pe_html::PreviewPage {
-                    page,
-                    width,
-                    height,
-                    alt,
-                }
-            })
-            .collect();
-        if pages.is_empty() {
-            continue;
+        if let Some(file) = preview_file(index, attachment, pdf, &description, left) {
+            left -= file.pages.len();
+            files.push(file);
         }
-        left -= pages.len();
-        let details = if pdf {
-            tr_args(
-                Text::PreviewPdfDetails,
-                &[("count", description.pages.into()), ("size", (&size).into())],
-            )
-        } else {
-            size
-        };
-        let more = (pdf && description.pages > pages.len())
-            .then(|| tr_args(Text::PreviewMorePages, &[("count", description.pages.into())]));
-        planned.push((index, pages.len()));
-        files.push(pe_html::PreviewFile {
-            attachment: index,
-            content_id: attachment.content_id.clone(),
-            paper: pdf,
-            pages,
-            name,
-            details,
-            more,
-        });
     }
-    let section = pe_html::PreviewSection {
+    pe_html::PreviewSection {
         token: pe_html::preview_token(),
         files,
         notice: plan.notice.clone().filter(|_| pdf_left_out),
+    }
+}
+
+/// Whether an attachment has previews, a picture or a PDF file by its name and by its content, and not too large:
+/// Some(true) for a PDF file, Some(false) for a picture
+fn previewed_as_pdf(attachment: &pe_mime::parser::Attachment) -> Option<bool> {
+    use crate::opening::FileKind;
+    let content = &attachment.content;
+    if content.len() > MAX_FILE {
+        return None;
+    }
+    let kind = crate::opening::file_kind_of(&attachment.safe_filename(), &attachment.mime_type, content);
+    match (kind, pe_preview::kind_of(content)) {
+        (FileKind::Image, Some(pe_preview::Kind::Picture)) => Some(false),
+        (FileKind::Pdf, Some(pe_preview::Kind::Pdf)) => Some(true),
+        _ => None,
+    }
+}
+
+/// The previews of one file as its description has them, at most `left` pictures; None when it has none
+fn preview_file(
+    index: usize,
+    attachment: &pe_mime::parser::Attachment,
+    pdf: bool,
+    description: &PreviewDescription,
+    left: usize,
+) -> Option<pe_html::PreviewFile> {
+    let name = attachment.display_filename();
+    let pages: Vec<pe_html::PreviewPage> = description
+        .sizes
+        .iter()
+        .enumerate()
+        .take(PREVIEW_PAGES)
+        .filter_map(|(page, size)| size.map(|size| (page, size)))
+        .take(left)
+        .map(|(page, (width, height))| {
+            if !pdf {
+                return pe_html::PreviewPage {
+                    page,
+                    width,
+                    height,
+                    alt: name.clone(),
+                };
+            }
+            // a PDF page is drawn for a display of two pixels a point of CSS: half its pixels wide
+            let alt = tr_args(
+                Text::PreviewPageAlt,
+                &[
+                    ("name", (&name).into()),
+                    ("page", (page + 1).into()),
+                    ("count", description.pages.into()),
+                ],
+            );
+            pe_html::PreviewPage {
+                page,
+                width: width.div_ceil(2),
+                height: height.div_ceil(2),
+                alt,
+            }
+        })
+        .collect();
+    if pages.is_empty() {
+        return None;
+    }
+    let size = crate::format_size(attachment.content.len() as u64);
+    let details = if pdf {
+        tr_args(
+            Text::PreviewPdfDetails,
+            &[("count", description.pages.into()), ("size", (&size).into())],
+        )
+    } else {
+        size
     };
-    (section, planned)
+    let more = (pdf && description.pages > pages.len())
+        .then(|| tr_args(Text::PreviewMorePages, &[("count", description.pages.into())]));
+    Some(pe_html::PreviewFile {
+        attachment: index,
+        content_id: attachment.content_id.clone(),
+        paper: pdf,
+        pages,
+        name,
+        details,
+        more,
+    })
 }
 
 fn lock(files: &Files) -> MutexGuard<'_, HashMap<(u64, usize), PreviewFile>> {
@@ -423,15 +441,19 @@ impl Core {
 
     /// How a view built now shows the attachments after the text, None when the user turned that off; read on the
     /// thread that builds the view
-    pub(crate) fn preview_settings(&self) -> Option<(bool, Option<String>)> {
+    pub(crate) fn preview_plan(&self) -> Option<PreviewPlan<'_>> {
         if !self.show_previews() {
             return None;
         }
-        Some((self.pdf_previews().unwrap_or(true), self.previews_notice()))
+        Some(PreviewPlan {
+            core: self,
+            pdfs: self.pdf_previews().unwrap_or(true),
+            notice: self.previews_notice(),
+        })
     }
 
     /// A file's description for the view, read on the render thread ahead of the files waiting
-    pub(crate) fn preview_describe(
+    fn preview_describe(
         &self,
         pdfs: bool,
         file: Arc<Vec<u8>>,
@@ -448,7 +470,7 @@ impl Core {
         };
         let files = std::mem::take(&mut view.preview_files);
         let gone = {
-            let mut shown = self.previews.shown.lock().unwrap_or_else(|p| p.into_inner());
+            let mut shown = lock_shown(&self.previews.shown);
             shown.push_back(Shown {
                 token,
                 source,
@@ -467,7 +489,7 @@ impl Core {
     /// drawn or answered anymore, and a picture still asked for is answered with none
     pub fn previews_end(&self, token: &str) {
         let gone = {
-            let mut shown = self.previews.shown.lock().unwrap_or_else(|p| p.into_inner());
+            let mut shown = lock_shown(&self.previews.shown);
             let at = shown.iter().position(|shown| shown.token == token);
             at.and_then(|at| shown.remove(at))
         };
@@ -481,18 +503,19 @@ impl Core {
             return;
         };
         self.previews_cancel(request);
-        let ended: Vec<u64> = {
+        let mut ended = Vec::new();
+        {
             let mut asks = lock_asks(&self.previews.asks);
-            let (ended, waiting) = std::mem::take(&mut asks.waiting)
-                .into_iter()
-                .partition(|ask| ask.request == request);
-            asks.waiting = waiting;
-            let ended: Vec<u64> = ended.iter().map(|ask: &Ask| ask.id).collect();
-            for id in &ended {
-                asks.answers.insert(*id, None);
-            }
-            ended
-        };
+            let AskState { waiting, answers, .. } = &mut *asks;
+            waiting.retain(|ask| {
+                if ask.request != request {
+                    return true;
+                }
+                answers.insert(ask.id, None);
+                ended.push(ask.id);
+                false
+            });
+        }
         for ask in ended {
             let _ = self.post(Event::PreviewAnswered { ask });
         }
@@ -506,7 +529,7 @@ impl Core {
     pub fn preview_ask(self: &Arc<Self>, address: &str) -> Option<u64> {
         let (token, attachment, page) = pe_html::parse_preview_address(address)?;
         let request = {
-            let mut shown = self.previews.shown.lock().unwrap_or_else(|p| p.into_inner());
+            let mut shown = lock_shown(&self.previews.shown);
             let view = shown.iter_mut().find(|shown| shown.token == token)?;
             let pages = view.files.iter().find(|(a, _)| *a == attachment)?.1;
             if page >= pages {
@@ -557,7 +580,7 @@ impl Core {
     /// opens, None for a link that is not of a view shown: the window opens it as a double-click in the strip does
     pub fn preview_link(&self, uri: &str) -> Option<usize> {
         let (token, attachment) = pe_html::parse_preview_link(uri)?;
-        let shown = self.previews.shown.lock().unwrap_or_else(|p| p.into_inner());
+        let shown = lock_shown(&self.previews.shown);
         let view = shown.iter().find(|shown| shown.token == token)?;
         view.files.iter().any(|(a, _)| *a == attachment).then_some(attachment)
     }
@@ -587,8 +610,8 @@ fn not_drawn_picture() -> Arc<Picture> {
 /// file done without them); the asks answered
 fn answer_waiting(asks: &Asks, request: u64, attachment: usize, file: &PreviewFile) -> Vec<u64> {
     let mut asks = lock_asks(asks);
+    let AskState { waiting, answers, .. } = &mut *asks;
     let mut answered = Vec::new();
-    let mut waiting = std::mem::take(&mut asks.waiting);
     waiting.retain(|ask| {
         if ask.request != request || ask.attachment != attachment {
             return true;
@@ -599,14 +622,11 @@ fn answer_waiting(asks: &Asks, request: u64, attachment: usize, file: &PreviewFi
             None if file.refused.is_some() || file.done => not_drawn_picture(),
             None => return true,
         };
-        answered.push((ask.id, picture));
+        answers.insert(ask.id, Some(picture));
+        answered.push(ask.id);
         false
     });
-    asks.waiting = waiting;
-    for (id, picture) in &answered {
-        asks.answers.insert(*id, Some(picture.clone()));
-    }
-    answered.into_iter().map(|(id, _)| id).collect()
+    answered
 }
 
 /// A file that is not there (the message left the store, or has no such attachment): refused, and done

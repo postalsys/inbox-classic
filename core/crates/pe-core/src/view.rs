@@ -338,16 +338,18 @@ pub(crate) fn build_unless(
         otp: otp_card.as_ref(),
         event: event_card.as_ref(),
         bounce: card.as_ref(),
-        previews: planned.as_ref().map(|(section, _)| section),
+        previews: planned.as_ref(),
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &header, &cards);
     // the files the document shows (not those its HTML shows already), under the token of their addresses
     let (preview_token, preview_files) = match planned {
-        Some((section, files)) if !rendered.previewed.is_empty() => (
+        Some(section) if !rendered.previewed.is_empty() => (
             Some(section.token),
-            files
-                .into_iter()
-                .filter(|(attachment, _)| rendered.previewed.contains(attachment))
+            section
+                .files
+                .iter()
+                .filter(|file| rendered.previewed.contains(&file.attachment))
+                .map(|file| (file.attachment, file.pages.len()))
                 .collect(),
         ),
         _ => (None, Vec::new()),

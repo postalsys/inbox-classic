@@ -198,9 +198,10 @@ const DARK_RULES: &[(&str, &str)] = &[
 ];
 
 fn rules(class: &str, rules: &[(&str, &str)]) -> String {
+    let class = format!(".{class}");
     let mut css = String::new();
     for (selectors, declarations) in rules {
-        css.push_str(&selectors.replace('C', &format!(".{class}")));
+        css.push_str(&selectors.replace('C', &class));
         css.push('{');
         for declaration in declarations.split(';') {
             css.push_str(declaration);
