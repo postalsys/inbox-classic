@@ -5,124 +5,36 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- Publishing policy: the user authorized pushing and merging every validated batch into GitHub `master` immediately. Fetch and fast-forward the clean review branch to `origin/master` after each merge. Keep local test suites disabled.
-- **Next: Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Phase2 reopens only their affected help passages.
-  Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
-  Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. The agent-addition queue is complete; continue the compose and broader review queues.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
-- Agent-draft screenshot source `38e7f5cf` is imported. All 28 new alt descriptions are reviewed against the three platform captures. Older prose was unchanged by the picture batch; all 28 full agent-sending topics are now reviewed. This adds 28 reviewed passages and no full-topic credit.
-- Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 22,071 entries and 800 full topics; pending: 12,333 entries and 556 topics.
-  Historical catalog improvements: 4,193. Importing drafts earns no review credit.
-  The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
-- All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
-  Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
-  were completed. English still overstates completion; the source problem and runtime evidence are recorded.
-- Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
-  per program over the preceding 24 hours. The text signature is included by default but can be omitted.
-  Correct the new help accordingly; preserve prior Undo/Outbox corrections.
-  Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French, Norwegian Bokmål, Hungarian, Lithuanian, Latvian, Polish, Romanian, Russian, Slovak, Slovenian, Swedish and Ukrainian needed that correction; the other completed languages already convey the distinction.
-- PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
-  `PostalExpress-preview2`. The six new IDs per language and both help insertions are imported from `03568aef`;
-  its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
-  Preview controls and attachment handlers now exist on all three platforms. Their 21-file UI/settings snapshot
-  and inspected behavior are recorded. Check Reading-page shortcuts, wrapping and available screenshots next.
-  Later source `2e6a5d00` now supplies the localized settings path in the PDF warning; all 28 exact drafts
-  are imported and remain pending. The runtime caller and exact source snapshot are recorded.
-  An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
-- Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
-  offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
-- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `79332925` contains the review history through the Ukrainian agent review, the CI wording assertions, the agent-control instruction followup and the PDF notice settings-placeholder fix. The screenshot source’s 33 exact image/alt additions and unchanged older prose are verified against its recorded source snapshot. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
-- Compose additions reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el.
-  Greek is complete for this batch. Two Linux navigation passages reopen in each of the other 15 topics;
-  correct those first, then resume fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, the 46 original Hungarian help
-  topics and broader catalogs/help. Reopening adds 15 pending topics and no new scope.
-- All 28 active-key warnings are reviewed in `25eff7b8`; compose source `162c0dd2` was integrated in `3552434d`.
-  Individual recipient locks and the separate overall verified shield remain distinct in future help edits.
-- Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
-- Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md` (including the
-  language's own notes), and `core/crates/pe-html/help/FORMAT.md`.
-- Initial scope: 25,353 catalog entries and 992 help pages. Nineteen new languages each have 1,331 entries and
-  52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
-- `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
-  and git history before resuming, so later source or translation changes are not missed.
-- Continue in `/Users/andris/Projects/PostalExpress/build/i18n-wave1` on `i18n/review-wave1`.
-  This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
-  and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
-  All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
-  German, Spanish, Estonian, French, Dutch, Italian, European/Brazilian Portuguese, Catalan, Norwegian
-  Bokmål, Serbian Latin, Turkish, Bulgarian, Czech, Danish, Greek and Finnish settings are complete, including
-  encrypted-image and rendered-label followups. The provider-app-password followup is now complete in all
-  17 previously completed languages and Croatian, as is the no-Trash deletion followup. Only the ten
-  broader language drafts still require those corrections. Fresh fetch at 27d00888 found all six source tips
-  unchanged; origin/master remains 5c645187 with unrelated README/Linux test/CI changes left unmerged.
-  No new translation/help or app-behavior changes. Fresh fetch at 0190587f confirms unchanged refs and guide.
-  Croatian's catalogs and all 52 help topics are now reviewed, including the encryption/search additions.
-  Its three prior settings-context followups are complete. Password troubleshooting is corrected in Croatian and
-  the 17 previously completed languages; the ten broader drafts retain it.
-- Encryption/search feature `38841d96`, observed in origin/master merge `08c9ef12`, is now integrated after
-  reviewed checkpoint `3aa142c1`, committed as `c83a2e31`. All 18 earlier languages are caught up:
-  de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. Croatian's seven original help topics and
-  encryption additions are finished. The shared search-negation overclaim is corrected in all 18 languages;
-  the ten broader drafts retain it within their existing marked search-words topic. Exact context/provenance
-  is in `encryption-search-context` and `search-negation-context`.
-  Hungarian app.ftl is complete: 647 entries, 83 improvements and all 46 shortcut scopes passing.
-  Its remaining 450 core.ftl entries are now reviewed too, with 96 improvements.
-  Help source `255205aa` from `chore/pgp-hardening` (observed at `80d02fcc`) is now integrated:
-  one inserted passage in connections/data-storage/encryption-keys in every language and English. Every byte
-  of prior reviewed prose is preserved. All 54 insertions in the 18 earlier languages are now reviewed.
-  Ten broad drafts retain their full-topic marks, including the remaining 30 insertions. Hungarian
-  help.ftl and platform catalogs (245 entries) are now reviewed; the new compose import above comes next.
-  Exact source/retained-review provenance
-  is in `key_help_source_integration` and `key-storage-autocrypt-context`. Preserve the source worktree's
-  unrelated uncommitted UI/fuzz work. Only the help source commit was imported.
-  Hungarian catalogs are complete for this checkout, along with add-account/gmail-outlook/main-window/layouts;
-  48 help topics remain before the new compose import.
-  Continue lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All prior context followups remain relevant to those drafts.
-- The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
-  each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
-  Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,720 catalog entries and 1,320 help topics; 12,078 entries and 516 topics remain in the integrated queue.
-  Four round-1 agent-undo status strings now enter scope; all 18 earlier languages have that correction.
-  The key help additions bring four round-1 topics into scope and reopen 50 counted topics; 30 full drafts
-  already had the affected topics pending. Previously reviewed passages have not been discarded.
-- The 13 completed new-language initial reviews and round-1 languages received this late review work.
-  Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
-  one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
-  further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
-  have 54 more. Four provider introductions have subsequent corrections. All 52 Croatian help topics and
-  the encryption additions are now reviewed; the final catalog batch adds four improvements. Continue the
-  ten broader language drafts in the order recorded above.
-- All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
-  and watched-notification followups remain preserved. Use their verified context in new reviews.
-- The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
-  They pass across the 19 languages with reviewed app catalogs; all three settings-page scopes pass
-  across all 28 languages. This is structural validation, not linguistic review of the new drafts.
-- Check the new Settings help against Windows behavior: Cancel discards uncommitted local settings and
-  trusted-sender removals, but cannot undo a default-app choice in external Windows Settings. The English
-  source incorrectly promises that it can; the context note is in state and the glossary.
-- The isolated offline pe-ffi build passed in 9.41 seconds. All 76 imported implementation/generated
-  paths match upstream. Structural checks, inventory and hashes pass; no test suite was run.
-- Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
-  (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
-  not yet on `master` or `origin/master`. They are included in the isolated review checkout;
-  the feature implementation was initially isolated and has now reached origin/master at `76f67e82`.
-  The completed translation review commits were merged into GitHub master through PR #139; later validated batches are published immediately.
-  This adds 6,655 catalog entries and 260 help topics: scope after that addition was 32,008 entries and 1,252 topics. The later loading labels add 84 entries,
-  bringing that scope to 32,092 entries and 1,252 topics. The 168 later rollback messages increase
-  that scope to 32,260 entries and 1,252 topics. The settings integration has a net increase of
-  180 catalog entries and 40 help topics, bringing that scope to 32,440 entries and 1,292 topics. The provider
-  context followup adds 16 previously out-of-scope catalog entries and four help topics, for 32,456 and 1,296.
-  The no-Trash deletion followup adds four round-1 help topics, bringing the scope to 32,456 and 1,300.
-  The password-troubleshooting followup adds four further round-1 topics, bringing it to 32,456 and 1,304.
-  Other affected items were already counted and are reopened without increasing scope. The encryption batch
-  adds 252 new IDs, four changed round-1 IDs and twelve round-1 help topics: scope is now 32,712 and 1,316.
-  The state records exact inventories and the source commit. Recheck the branch and master for later edits.
-- Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
+- Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`; branch `i18n/review-resume-20261118`.
+  Created from GitHub master `45f519ae` on November 18 after the main worker merged the available translations.
+  The old `build/i18n-wave1` worktree no longer exists. All older checkout references below are historical.
+- **Next: Review Finnish compose additions, then hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch. Watch feat/preview-cid and the MCP phase3 worktree for committed/merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.**
+- Current scope: 35,624 catalog entries and 1,372 help topics.
+  Completed: 22,011 entries and 747 full topics;
+  pending: 13,613 entries and 625 topics.
+  All 28 language directories are inventoried; no new languages were added at this source checkpoint.
+- Resumed source audit: 250 translated files changed since `31f89fa7`, with every changed value/passage marked.
+  Merged agent read-log/terminal/organize additions and preview tiles/protected-part additions are now in the exact queue.
+  English source fixes `22e156ab` / `8a4a143f` are incorporated; older runtime/source-issue notes below are historical.
+  Recheck current behavior before reviewing those new drafts, especially protected attachment previews and agent access.
+- Linux compose-menu paths are reviewed in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el.
+  This batch restores 16 full topics after reviewing precisely 32 reopened passages. Three wording lines improved;
+  other good wording retained. The remaining 12 full compose topics stay pending.
+- Scope totals are rebuilt from exact completed/pending ID and topic unions. Earlier summary arithmetic omitted
+  four recorded catalog entries and twelve recorded help topics; correcting that discrepancy adds no review credit.
+- Source discovery covers 194 refs and six worktrees. `feat/preview-cid` at `6a37b3de` has 56 new translated
+  help passages; MCP phase3 has uncommitted translation changes in its own worktree. Both are tracked as incoming
+  sources and left untouched. Recheck them at the next checkpoint and integrate reviewed translations as appropriate.
+- All 28 current language structural checks have only expected missing/full-page review-mark diagnostics; all 16 changed languages were checked again after editing. Exact reconstruction verifies 32 reviewed passages in 16 topics, three wording lines improved, and unchanged tags, attributes, platform branches, controls, shortcuts and surrounding prose. All catalog and English files match the resumed source snapshot. Global --check reports 22045 unmarked entries and 11152 help lines, all accounted for by existing reviews and the recorded source delta. Pending marks, full IDs, variables, help inventories and file hashes reconcile. Static platform sentence joins inspected. Old German Linux and Mac compose screenshots lack the current protection controls and do not verify current menu layout; current source constructs establish the menu paths. No test suites, builds or GUI runs. REVIEWED unchanged.
+- The generated review report is `/Users/andris/Projects/PostalExpress/build/i18n-review.html`, regenerated from this checkout.
+- Review guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`, unchanged SHA-256 `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`.
+  Starting commit remains `e99f7e59248bed137903150db7ef417e27755d18` and review baseline remains `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
+- Exact source deltas, pending IDs/topics, file/source hashes and source refs are in
+  `translation-review-state.json` under `review_workspace.resume_source_checkpoint`.
+  Historical completed batches and round-1 archives are preserved. Do not use old hardcoded-worktree helpers
+  without redirecting their root and checking their assumptions.
+- Standing publication authorization: push and merge each validated batch into GitHub master, then fetch and
+  fast-forward this clean review branch. No local test suites and no manually launched CI runs.
 
 ## Review and checkpoint rules
 
@@ -2738,3 +2650,13 @@ Publication checkpoint: [PR #148](https://github.com/postalsys/inbox-classic/pul
 Completed: 22,071 catalog entries and 800 full topics. Pending: 12,333 entries and 556 topics. Historical catalog improvements: 4,193. The help count reflects 15 accurately reopened topics, not lost review work.
 
 Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.
+
+### Resumed from merged master: compose menu followups
+
+Reconciled the unfinished round against master `45f519ae` in a fresh isolated worktree. The previous review commits, including PR #150, are already merged. New agent and attachment-preview drafts are recorded without review credit; prior completed wording is retained.
+
+Reviewed the two menu-navigation passages in each of de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el. Current upstream platform branches already name the correct menus. Split the German menu/shortcut sentence and removed redundant menu introductions before full Estonian menu paths. Retained the other 29 passages and all surrounding prose. No catalog values changed.
+
+All 28 current language structural checks have only expected missing/full-page review-mark diagnostics; all 16 changed languages were checked again after editing. Exact reconstruction verifies 32 reviewed passages in 16 topics, three wording lines improved, and unchanged tags, attributes, platform branches, controls, shortcuts and surrounding prose. All catalog and English files match the resumed source snapshot. Global --check reports 22045 unmarked entries and 11152 help lines, all accounted for by existing reviews and the recorded source delta. Pending marks, full IDs, variables, help inventories and file hashes reconcile. Static platform sentence joins inspected. Old German Linux and Mac compose screenshots lack the current protection controls and do not verify current menu layout; current source constructs establish the menu paths. No test suites, builds or GUI runs. REVIEWED unchanged.
+
+Completed: 22,011 catalog entries and 747 full topics. Pending: 13,613 entries and 625 topics. Review Finnish compose additions, then hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch. Watch feat/preview-cid and the MCP phase3 worktree for committed/merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.
