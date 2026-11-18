@@ -1724,6 +1724,33 @@ fn an_agent_organizes_folders_and_conversations() {
                 .await;
             assert!(refused.unwrap_err().contains("not renamed"));
         }
+
+        // agents started from a terminal share one access, which the windows name so; --name gives one its own
+        let mut typed = Client::connect(&socket, "/bin/zsh", "zsh").await;
+        typed.initialize().await;
+        typed.call("list_folders", json!({ "account": account })).await.unwrap();
+        let named = pe_mcp::named_by_arguments(
+            pe_core::agents::HostInfo {
+                path: "/bin/zsh".into(),
+                name: "zsh".into(),
+            },
+            ["--mcp".to_string(), "--name".into(), "Claude Code".into()],
+        );
+        let mut own = Client::connect(&socket, &named.path, &named.name).await;
+        own.initialize().await;
+        let hosts = core.agent_hosts().unwrap();
+        let labels: Vec<String> = hosts
+            .iter()
+            .map(|h| pe_core::agents::host_label(&h.name, &h.path))
+            .collect();
+        assert_eq!(hosts.len(), 3, "{labels:?}");
+        assert!(
+            labels
+                .iter()
+                .any(|l| l.starts_with("Programs started from") && l.contains("zsh")),
+            "{labels:?}"
+        );
+        assert!(labels.contains(&"Claude Code".to_string()), "{labels:?}");
     });
     mcp.stop();
 }

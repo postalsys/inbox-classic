@@ -3,7 +3,7 @@
 //! agent from another for the user, it proves nothing (a program of the same user could pretend), which is fine, as
 //! such a program could read the mail store itself.
 
-use pe_core::agents::HostInfo;
+use pe_core::agents::{HostInfo, program_name};
 
 /// Programs that start other programs on an agent's behalf: the one that started them is the agent
 const LAUNCHERS: &[&str] = &[
@@ -29,21 +29,9 @@ const LAUNCHERS: &[&str] = &[
     "pwsh",
     "pwsh.exe",
     "conhost.exe",
+    // a terminal's session on the Mac: its shell runs under login, which the Terminal started
+    "login",
 ];
-
-/// A program's name from its file: `Claude` for `/Applications/Claude.app/Contents/MacOS/Claude`, `Cursor` for
-/// `C:\...\Cursor.exe`
-pub(crate) fn program_name(path: &str) -> String {
-    if let Some(bundle) = path.split('/').find(|part| part.ends_with(".app")) {
-        return bundle.trim_end_matches(".app").to_string();
-    }
-    let file = path.rsplit(['/', '\\']).next().unwrap_or(path);
-    let name = file
-        .strip_suffix(".exe")
-        .or_else(|| file.strip_suffix(".EXE"))
-        .unwrap_or(file);
-    name.to_string()
-}
 
 fn is_launcher(path: &str) -> bool {
     let file = path.rsplit(['/', '\\']).next().unwrap_or(path).to_ascii_lowercase();
@@ -115,16 +103,6 @@ fn process(pid: u32) -> Option<(String, u32)> {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn programs_are_named_from_their_files() {
-        assert_eq!(program_name("/Applications/Claude.app/Contents/MacOS/Claude"), "Claude");
-        assert_eq!(
-            program_name(r"C:\Users\a\AppData\Local\Programs\cursor\Cursor.exe"),
-            "Cursor"
-        );
-        assert_eq!(program_name("/usr/bin/code"), "code");
-    }
 
     #[test]
     fn launchers_are_passed() {

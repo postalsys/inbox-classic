@@ -622,7 +622,7 @@ pub unsafe extern "C" fn pe_agent_hosts(core: *const PeCore) -> *mut PeAgentHost
                 let (change_title, change_detail) = pe_core::agents::change_text(h);
                 PeAgentHost {
                     id: h.id,
-                    name: strings.add(&h.name),
+                    name: strings.add(&pe_core::agents::host_label(&h.name, &h.path)),
                     path: strings.add(&h.path),
                     allowed: h.allowed,
                     levels: h.levels.0,

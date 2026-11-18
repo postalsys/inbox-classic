@@ -21,12 +21,14 @@ use crate::{Core, Draft, DraftKind, Error, Event, Outgoing, Result};
 
 mod drafts;
 mod facts;
+mod hosts;
 mod log;
 mod reads;
 
 pub use drafts::OwnDraft;
 pub use drafts::draft_note;
 pub use facts::{AgentBounce, AgentInvitation, AgentSignature, BouncedRecipient, Facts};
+pub use hosts::{connect_text, host_label, host_one, named, program_name};
 pub use log::{LogRow, log_entry, log_text, read_summary_text, read_text};
 pub use reads::{AccountOverview, everywhere};
 
@@ -434,14 +436,6 @@ pub struct SendText {
     pub warning: String,
 }
 
-/// The question and the words under it when `host` connects for the first time
-pub fn connect_text(host: &HostInfo) -> (String, String) {
-    (
-        tr_args(Text::AgentConnectTitle, &[("program", (&host.name).into())]),
-        tr(Text::AgentConnectDetail),
-    )
-}
-
 /// The words of the confirmation of `ask`
 pub fn send_text(ask: &SendAsk) -> SendText {
     let original = match &ask.original {
@@ -462,7 +456,7 @@ pub fn send_text(ask: &SendAsk) -> SendText {
         many => tr_args(Text::AgentNeverWrittenMany, &[("count", many.len().into())]),
     };
     SendText {
-        title: tr_args(Text::AgentSendTitle, &[("program", (&ask.host.name).into())]),
+        title: tr_args(Text::AgentSendTitle, &[("program", (&host_one(&ask.host)).into())]),
         detail: tr_args(Text::AgentSendDetail, &[("seconds", SEND_DELAY.into())]),
         original,
         warning,
@@ -474,7 +468,10 @@ pub fn unsubscribe_text(ask: &UnsubscribeAsk) -> (String, String) {
     (
         tr_args(
             Text::AgentUnsubscribeTitle,
-            &[("program", (&ask.host.name).into()), ("count", ask.lists.len().into())],
+            &[
+                ("program", (&host_one(&ask.host)).into()),
+                ("count", ask.lists.len().into()),
+            ],
         ),
         tr_args(Text::AgentUnsubscribeDetail, &[("count", ask.lists.len().into())]),
     )

@@ -200,12 +200,22 @@ impl Core {
     /// The newest `limit` rows of the AI Agents window's log, newest first: what agents did, and a summary of what
     /// each program read in each hour, in the language in use
     pub fn agent_log_rows(&self, limit: u64) -> Result<Vec<LogRow>> {
-        let (entries, summaries) = {
+        let (entries, summaries, hosts) = {
             let store = self.store();
-            (store.agent_log(limit)?, store.read_summaries(limit)?)
+            (
+                store.agent_log(limit)?,
+                store.read_summaries(limit)?,
+                store.agent_hosts()?,
+            )
         };
         let mut rows: Vec<LogRow> = entries.iter().map(LogRow::of_entry).collect();
         rows.extend(summaries.iter().map(LogRow::of_reads));
+        // each program as the list of programs names it
+        for row in &mut rows {
+            if let Some(host) = hosts.iter().find(|h| h.id == row.host) {
+                row.host_name = super::host_label(&host.name, &host.path);
+            }
+        }
         rows.sort_by(|a, b| b.at.cmp(&a.at).then(b.id.cmp(&a.id)));
         rows.truncate(usize::try_from(limit).unwrap_or(usize::MAX));
         Ok(rows)
