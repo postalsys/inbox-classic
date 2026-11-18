@@ -2,8 +2,8 @@
 <p class="summary">Välj vad AI-agenter får göra med din e-post, granska deras aktivitet och ångra ändringar vid behov.</p>
 <p>När en agent ansluter för första gången visar Inbox Classic programmets namn och ber om ditt godkännande. Välj vad agenten får göra:</p>
 <ul>
-    <li>läsa e-post: visa mappar, meddelanden och konversationer, söka efter meddelanden, visa regler och söka efter kontakter</li>
-    <li>hantera e-post: ändra lästmarkeringar, flaggor och skräppostmarkeringar, flytta och arkivera meddelanden, skapa mappar, flytta meddelanden till <b data-text="folder-deleted"></b> och avsluta prenumerationer på e-postlistor med ditt godkännande</li>
+    <!--review--><li>läsa e-post: visa mappar, meddelanden och konversationer, även PDF-, Office- och bildfiler på upp till 10 MB i meddelanden, söka efter meddelanden, visa regler och söka efter kontakter</li><!--/review-->
+    <!--review--><li>hantera e-post: ändra lästmarkeringar, flaggor och flaggfärger samt skräppostmarkeringar, flytta och arkivera meddelanden, skapa mappar, byta namn på dina egna mappar, bevaka och ignorera konversationer, flytta meddelanden till <b data-text="folder-deleted"></b> och avsluta prenumerationer på e-postlistor med ditt godkännande</li><!--/review-->
     <li>skriva utkast som du kan skicka själv samt ändra sina egna utkast eller ta bort dem permanent, tills du sparar eller skickar dem</li>
     <li>skicka e-post när du har godkänt varje meddelande</li>
 </ul>
@@ -18,10 +18,11 @@
 <p>Agenten kan inte begära avanmälan utifrån meddelanden i <b data-text="folder-junk"></b>. Gränsen är 30 godkända avanmälningar per program under de senaste 24 timmarna, en per e-postlista. Även misslyckade avanmälningar räknas om du har godkänt dem.</p>
 <h2>Se och ändra åtkomst</h2>
 <p>Under <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> visas de program du har tillåtit eller nekat åtkomst och deras agenters aktivitet. De senaste händelserna visas först.</p>
+<!--review--><p>Det en agent läser visas som en rad per program och timme, till exempel ”Läste 14 meddelanden och sökte 3 gånger”. Markera raden för att se ämnena på det den läste och vad den sökte efter, men aldrig texten i meddelandena. Loggen sparas i 30 dagar. Att rensa den ändrar inte hur många meddelanden en agent fortfarande får skicka.</p><!--/review-->
 <ul>
     <li>Med <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ändrar du programmets behörigheter.</li>
     <li>Med <b data-text="ui-remove"></b> tar du bort programmets behörigheter och aktivitetshistorik. Programmet avinstalleras inte. Nästa gång det ansluter frågar Inbox Classic om åtkomst igen.</li>
-    <li>Med <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> återställer du lästmarkeringar, flaggor och skräppostmarkeringar eller ångrar en flytt, arkivering eller borttagning. Du kan också stoppa ett meddelande som fortfarande ligger i Utkorgen. Ett meddelande som redan har skickats kan inte återkallas.</li>
+    <!--review--><li>Med <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> återställer du lästmarkeringar, flaggor och deras färger samt skräppostmarkeringar eller ångrar en flytt, arkivering eller borttagning. Du kan också stoppa ett meddelande som fortfarande ligger i Utkorgen. Ett meddelande som redan har skickats kan inte återkallas.</li><!--/review-->
 </ul>
 <aside class="warning">Meddelanden från andra kan innehålla instruktioner som försöker få agenten att vidarebefordra eller ta bort din e-post. Inbox Classic döljer text som inte visas för dig och uppmanar agenten att inte följa instruktioner i e-posten. Agenten kan ändå bli lurad. Tillåt bara de åtgärder du behöver.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

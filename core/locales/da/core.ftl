@@ -508,6 +508,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic beder mailinglisten nedenfor om at stoppe med at sende dig meddelelser. Det sker via listens mulighed for afmelding med ét klik. Der sendes ikke andet. Dine eksisterende meddelelser ændres eller flyttes ikke.
    *[other] Inbox Classic beder hver mailingliste nedenfor om at stoppe med at sende dig meddelelser. Det sker via den enkelte listes mulighed for afmelding med ét klik. Der sendes ikke andet. Dine eksisterende meddelelser ændres eller flyttes ikke.
 }
+# review: new
+agent-log-flag-color = { $color ->
+    [red] Satte rødt flag på »{ $subject }«
+    [orange] Satte orange flag på »{ $subject }«
+    [yellow] Satte gult flag på »{ $subject }«
+    [green] Satte grønt flag på »{ $subject }«
+    [blue] Satte blåt flag på »{ $subject }«
+    [purple] Satte lilla flag på »{ $subject }«
+   *[gray] Satte gråt flag på »{ $subject }«
+}
+# review: new
+agent-log-renamed = Omdøbte mappen »{ $old }« til »{ $name }«
+# review: new
+agent-log-watched = Begyndte at følge samtalen »{ $subject }«
+# review: new
+agent-log-ignored = Begyndte at ignorere samtalen »{ $subject }«
+# review: new
+agent-log-unmarked = Holdt op med at følge eller ignorere samtalen »{ $subject }«
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] læste 1 meddelelse
+   *[other] læste { $count } meddelelser
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] åbnede 1 vedhæftet fil
+   *[other] åbnede { $count } vedhæftede filer
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] søgte én gang
+   *[other] søgte { $count } gange
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] så på en meddelelsesliste én gang
+   *[other] så på meddelelseslister { $count } gange
+}
+# each read under that row
+# review: new
+agent-read-message = Læste »{ $subject }«
+# review: new
+agent-read-conversation = { $count ->
+    [one] Læste samtalen »{ $subject }« (1 meddelelse)
+   *[other] Læste samtalen »{ $subject }« ({ $count } meddelelser)
+}
+# review: new
+agent-read-attachment = Åbnede »{ $name }« fra »{ $subject }«
+# review: new
+agent-read-search = { $count ->
+    [one] Søgte efter »{ $query }«: 1 meddelelse
+   *[other] Søgte efter »{ $query }«: { $count } meddelelser
+}
+# review: new
+agent-read-people = Slog personer op, der begynder med »{ $query }«
+# review: new
+agent-read-list = { $count ->
+    [one] Så på 1 meddelelse i { $folder }
+   *[other] Så på { $count } meddelelser i { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Så på 1 ny meddelelse
+   *[other] Så på { $count } nye meddelelser
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programmer startet fra { $terminal }
+# review: new
+agent-terminal-programs-windows = Programmer startet fra en terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programmer startet fra en terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Et program startet fra { $terminal }
+# review: new
+agent-terminal-program-windows = Et program startet fra en terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Et program startet fra en terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } vil bruge din mail
+# review: new
+agent-connect-terminal-detail = Alle AI-agenter, du starter fra denne terminal, deler den adgang, du giver her. Hvis en agent skal have sin egen adgang, skal du føje --name og et navn efter eget valg til dens argumenter i agentens MCP-indstillinger.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

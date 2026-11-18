@@ -2,13 +2,13 @@
 <p class="summary">Elija qué puede hacer cada agente de IA con su correo, y vea y deshaga lo que hizo.</p>
 <p>La primera vez que se conecta el agente de un programa, Inbox Classic le pregunta, indicando el nombre del programa. Elija qué puede hacer:</p>
 <ul>
-    <li>leer el correo: ver carpetas, mensajes y conversaciones, buscar mensajes, consultar reglas de mensajes y buscar personas por su nombre o dirección de correo</li>
-    <li>organizar el correo: cambiar el estado de lectura y las marcas, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a <b data-text="folder-deleted"></b>, crear carpetas y cancelar suscripciones a listas de correo con su autorización</li>
+    <!--review--><li>leer el correo: ver carpetas, mensajes y conversaciones, con sus archivos PDF, de Office e imágenes de hasta 10 MB, buscar mensajes, consultar reglas de mensajes y buscar personas por su nombre o dirección de correo</li><!--/review-->
+    <!--review--><li>organizar el correo: cambiar el estado de lectura, las marcas y sus colores, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a <b data-text="folder-deleted"></b>, crear carpetas, cambiar el nombre de sus propias carpetas, seguir e ignorar conversaciones y cancelar suscripciones a listas de correo con su autorización</li><!--/review-->
     <li>escribir borradores para que usted los envíe y modificar o descartar los que haya creado el agente, mientras usted no los haya guardado</li>
     <li>enviar correo, cada mensaje solo después de que usted lo confirme</li>
 </ul>
 <p>Después elija las cuentas que puede ver y haga clic en <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> rechaza el programa, y no se le vuelve a preguntar por él.</p>
-<p>Un agente no elimina sus mensajes definitivamente, salvo los borradores que él mismo haya creado y que usted aún no haya guardado. Tampoco cambia la configuración de sus cuentas. Puede consultar las reglas de mensajes y comprobar qué mensajes coincidirían con ellas, pero no crear, modificar ni eliminar reglas. Leer un mensaje no lo marca como leído. Lo que cambia se ve en las ventanas al instante.</p>
+<!--review--><p>Un agente no elimina sus mensajes definitivamente, salvo los borradores que él mismo haya creado y que usted aún no haya guardado. Tampoco cambia la configuración de sus cuentas. Puede consultar las reglas de mensajes y comprobar qué mensajes coincidirían con ellas, pero no crear, modificar ni eliminar reglas. Nunca lee el contenido ni los archivos adjuntos de un mensaje cifrado. Leer un mensaje no lo marca como leído. Lo que cambia se ve en las ventanas al instante.</p><!--/review-->
 <h2>Cancelar suscripciones a listas de correo</h2>
 <p>Si tiene permiso para organizar el correo, un agente puede proponer la cancelación de suscripciones a listas de correo. Inbox Classic muestra las direcciones de los remitentes y le pide una sola confirmación para todas las listas seleccionadas:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>No se pueden usar mensajes de la carpeta <b data-text="folder-junk"></b> para que un agente cancele una suscripción. Cada programa tiene un límite de 30 solicitudes de baja autorizadas en las últimas 24 horas. Las solicitudes fallidas también cuentan.</p>
 <h2>Ver y cambiar el acceso</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> muestra los programas a los que permitió o denegó el acceso, y todo lo que hicieron los agentes, empezando por lo más reciente.</p>
+<!--review--><p>Lo que lee un agente aparece en una fila por programa y hora, como «Leyó 14 mensajes y buscó 3 veces». Seleccione la fila para ver los asuntos que leyó y lo que buscó, nunca el texto de los mensajes. El registro se conserva 30 días. Borrarlo no cambia cuántos mensajes puede enviar todavía un agente.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> cambia lo que puede hacer un programa.</li>
     <li><b data-text="ui-remove"></b> olvida un programa, de modo que se le volverá a preguntar la próxima vez que se conecte.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> revierte cambios en el estado de lectura y las marcas, así como la clasificación como correo no deseado. También permite deshacer traslados, archivados y eliminaciones. Puede cancelar un envío si el mensaje sigue en la Bandeja de salida.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> revierte cambios en el estado de lectura, las marcas y sus colores, así como la clasificación como correo no deseado. También permite deshacer traslados, archivados y eliminaciones. Puede cancelar un envío si el mensaje sigue en la Bandeja de salida.</li><!--/review-->
 </ul>
 <aside class="warning">El correo lo escriben otras personas, y un mensaje puede intentar convencer a un agente de que reenvíe o elimine su correo. Inbox Classic oculta a los agentes el texto que un mensaje le oculta a usted, y les indica que el correo no son instrucciones. Aun así, un agente puede dejarse engañar. Permita solo lo que necesite.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

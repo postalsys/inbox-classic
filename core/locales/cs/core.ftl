@@ -513,6 +513,98 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic odešle níže uvedenému rozesílacímu seznamu žádost o ukončení zasílání zpráv. Použije k tomu možnost odhlášení jedním kliknutím, kterou seznam nabízí. Nic dalšího se neodešle. Stávající zprávy se nezmění ani nepřesunou.
    *[other] Inbox Classic odešle každému z níže uvedených rozesílacích seznamů žádost o ukončení zasílání zpráv. Použije k tomu možnost odhlášení jedním kliknutím, kterou daný seznam nabízí. Nic dalšího se neodešle. Stávající zprávy se nezmění ani nepřesunou.
 }
+# review: new
+agent-log-flag-color = Označeno příznakem: „{ $subject }“. Barva: { $color ->
+    [red] červená
+    [orange] oranžová
+    [yellow] žlutá
+    [green] zelená
+    [blue] modrá
+    [purple] fialová
+   *[gray] šedá
+}
+# review: new
+agent-log-renamed = Složka „{ $old }“ přejmenována na „{ $name }“
+# review: new
+agent-log-watched = Zahájeno sledování konverzace „{ $subject }“
+# review: new
+agent-log-ignored = Zahájeno ignorování konverzace „{ $subject }“
+# review: new
+agent-log-unmarked = Ukončeno sledování nebo ignorování konverzace „{ $subject }“
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] přečtena 1 zpráva
+    [few] přečteny { $count } zprávy
+   *[other] přečteno { $count } zpráv
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] otevřena 1 příloha
+    [few] otevřeny { $count } přílohy
+   *[other] otevřeno { $count } příloh
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] 1 vyhledávání
+    [few] { $count } vyhledávání
+   *[other] { $count } vyhledávání
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] 1 zobrazení seznamu zpráv
+    [few] { $count } zobrazení seznamů zpráv
+   *[other] { $count } zobrazení seznamů zpráv
+}
+# each read under that row
+# review: new
+agent-read-message = Přečteno: „{ $subject }“
+# review: new
+agent-read-conversation = { $count ->
+    [one] Přečtena konverzace „{ $subject }“ (1 zpráva)
+    [few] Přečtena konverzace „{ $subject }“ ({ $count } zprávy)
+   *[other] Přečtena konverzace „{ $subject }“ ({ $count } zpráv)
+}
+# review: new
+agent-read-attachment = Otevřena příloha „{ $name }“ ze zprávy „{ $subject }“
+# review: new
+agent-read-search = { $count ->
+    [one] Hledáno „{ $query }“: 1 zpráva
+    [few] Hledáno „{ $query }“: { $count } zprávy
+   *[other] Hledáno „{ $query }“: { $count } zpráv
+}
+# review: new
+agent-read-people = Hledány kontakty začínající na „{ $query }“
+# review: new
+agent-read-list = { $count ->
+    [one] Zobrazena 1 zpráva ve složce { $folder }
+    [few] Zobrazeny { $count } zprávy ve složce { $folder }
+   *[other] Zobrazeno { $count } zpráv ve složce { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Zobrazena 1 nová zpráva
+    [few] Zobrazeny { $count } nové zprávy
+   *[other] Zobrazeno { $count } nových zpráv
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programy spuštěné z aplikace { $terminal }
+# review: new
+agent-terminal-programs-windows = Programy spuštěné z terminálu ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programy spuštěné z terminálu ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Program spuštěný z aplikace { $terminal }
+# review: new
+agent-terminal-program-windows = Program spuštěný z terminálu ({ $terminal })
+# review: new
+agent-terminal-program-linux = Program spuštěný z terminálu ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } chtějí používat vaši poštu
+# review: new
+agent-connect-terminal-detail = Všichni agenti AI, které spustíte z tohoto terminálu, sdílejí přístup, který zde povolíte. Chcete-li některému z nich dát vlastní přístup, přidejte v nastavení MCP agenta do jeho argumentů --name a název podle svého výběru.
 
 ## Keys
 

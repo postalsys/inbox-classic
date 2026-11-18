@@ -2,13 +2,13 @@
 <p class="summary">Nastavte oprávnění agentů AI, sledujte jejich činnost a podle potřeby vracejte provedené změny zpět.</p>
 <p>Když se agent nějakého programu připojí poprvé, Inbox Classic se vás zeptá a uvede název programu. Zvolte, co smí dělat:</p>
 <ul>
-    <li>číst poštu: prohlížet složky, zprávy a konverzace, vyhledávat zprávy a kontakty a prohlížet pravidla pro zprávy</li>
-    <li>uspořádat poštu: měnit stav přečtení a příznaky, spravovat nevyžádanou poštu, přesouvat a archivovat zprávy, vytvářet složky, odstraňovat zprávy přesunem do složky <b data-text="folder-deleted"></b> a s vaším souhlasem odhlašovat odběr zpráv</li>
+    <!--review--><li>číst poštu: prohlížet složky, zprávy a konverzace včetně jejich souborů PDF, Office a obrázků do 10 MB, vyhledávat zprávy a kontakty a prohlížet pravidla pro zprávy</li><!--/review-->
+    <!--review--><li>uspořádat poštu: měnit stav přečtení, příznaky a jejich barvy, spravovat nevyžádanou poštu, přesouvat a archivovat zprávy, vytvářet složky, přejmenovávat vaše vlastní složky, sledovat a ignorovat konverzace, odstraňovat zprávy přesunem do složky <b data-text="folder-deleted"></b> a s vaším souhlasem odhlašovat odběr zpráv</li><!--/review-->
     <li>psát koncepty, které odešlete vy, a upravovat nebo zahazovat vlastní koncepty, dokud je neuložíte</li>
     <li>odesílat poštu, každou zprávu až po vašem souhlasu</li>
 </ul>
 <p>Potom zvolte účty, které smí vidět, a klikněte na <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> přístup programu zamítne. Při dalším připojení už aplikace tento dotaz nezobrazí.</p>
-<p>Agent může trvale odstranit pouze koncepty, které sám vytvořil a které jste ještě neuložili. Nemůže měnit nastavení účtů. Může prohlížet pravidla pro zprávy a zjistit, na které zprávy by se použila, aniž by tyto zprávy změnil. Nemůže pravidla vytvářet, upravovat ani odstraňovat. Načtení zprávy agentem nezmění její stav přečtení. Provedené změny se v aplikaci projeví okamžitě.</p>
+<p>Agent může trvale odstranit pouze koncepty, které sám vytvořil a které jste ještě neuložili. Nemůže měnit nastavení účtů. Může prohlížet pravidla pro zprávy a zjistit, na které zprávy by se použila, aniž by tyto zprávy změnil. Nemůže pravidla vytvářet, upravovat ani odstraňovat. <!--review-->Nikdy nečte obsah ani přílohy šifrované zprávy.<!--/review--> Načtení zprávy agentem nezmění její stav přečtení. Provedené změny se v aplikaci projeví okamžitě.</p>
 <h2>Odhlášení odběru zpráv</h2>
 <p>Agent s oprávněním uspořádat poštu může navrhnout odhlášení odběru zpráv z rozesílacích seznamů. Inbox Classic zobrazí adresy odesílatelů a vyžádá si jedno potvrzení pro všechny vybrané seznamy:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>Agent nemůže k odhlášení odběru použít zprávy ze složky <b data-text="folder-junk"></b>. Pro každý program platí limit 30 žádostí o odhlášení, které jste schválili za posledních 24 hodin. Do limitu se započítávají i neúspěšné žádosti.</p>
 <h2>Zobrazení a změna přístupu</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> zobrazí programy s povoleným i zamítnutým přístupem a záznam činnosti agentů od nejnovějšího.</p>
+<!--review--><p>To, co agent čte, se zobrazuje jako jeden řádek pro každý program a hodinu, například „Přečteno 14 zpráv a 3 vyhledávání“. Po výběru řádku uvidíte předměty přečtených zpráv a hledané výrazy, nikdy text zpráv. Záznam se uchovává 30 dní. Jeho vymazání nezmění, kolik zpráv smí agent ještě odeslat.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> změní, co program smí dělat.</li>
     <li><b data-text="ui-remove"></b> odstraní záznam programu, jeho oprávnění i historii. Při příštím připojení se dotaz na přístup zobrazí znovu.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> vrátí změny stavu přečtení, příznaků a označení nevyžádané pošty i přesuny, archivaci a odstranění zpráv. Může také zrušit odeslání zprávy, která dosud čeká ve složce Pošta k odeslání.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> vrátí změny stavu přečtení, příznaků a jejich barev a označení nevyžádané pošty i přesuny, archivaci a odstranění zpráv. Může také zrušit odeslání zprávy, která dosud čeká ve složce Pošta k odeslání.</li><!--/review-->
 </ul>
 <aside class="warning">Přijaté zprávy mohou obsahovat pokyny, které se snaží agenta přimět k přeposlání nebo odstranění vaší pošty. Inbox Classic agentům nepředává skrytý text a upozorňuje je, aby obsah zpráv nepovažovali za pokyny. Přesto lze agenta oklamat. Povolte jen potřebná oprávnění.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

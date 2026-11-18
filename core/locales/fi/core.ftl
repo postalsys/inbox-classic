@@ -493,6 +493,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic pyytää alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
    *[other] Inbox Classic pyytää jokaista alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää kunkin listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
 }
+# review: new
+agent-log-flag-color = Liputti { $color ->
+    [red] punaisella
+    [orange] oranssilla
+    [yellow] keltaisella
+    [green] vihreällä
+    [blue] sinisellä
+    [purple] violetilla
+   *[gray] harmaalla
+} lipulla: ”{ $subject }”
+# review: new
+agent-log-renamed = Nimesi kansion ”{ $old }” uudelleen. Uusi nimi: ”{ $name }”
+# review: new
+agent-log-watched = Alkoi seurata keskustelua ”{ $subject }”
+# review: new
+agent-log-ignored = Alkoi ohittaa keskustelun ”{ $subject }”
+# review: new
+agent-log-unmarked = Lopetti keskustelun ”{ $subject }” seuraamisen tai ohittamisen
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] luki 1 viestin
+   *[other] luki { $count } viestiä
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] avasi 1 liitteen
+   *[other] avasi { $count } liitettä
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] haki kerran
+   *[other] haki { $count } kertaa
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] katsoi viestiluetteloa kerran
+   *[other] katsoi viestiluetteloita { $count } kertaa
+}
+# each read under that row
+# review: new
+agent-read-message = Luki viestin ”{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [one] Luki keskustelun ”{ $subject }” (1 viesti)
+   *[other] Luki keskustelun ”{ $subject }” ({ $count } viestiä)
+}
+# review: new
+agent-read-attachment = Avasi liitteen ”{ $name }” viestistä ”{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [one] Haki tekstillä ”{ $query }”: 1 viesti
+   *[other] Haki tekstillä ”{ $query }”: { $count } viestiä
+}
+# review: new
+agent-read-people = Haki henkilöitä, joiden nimi tai osoite alkaa ”{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [one] Katsoi 1 viestin kansiossa { $folder }
+   *[other] Katsoi { $count } viestiä kansiossa { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Katsoi 1 uuden viestin
+   *[other] Katsoi { $count } uutta viestiä
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Sovelluksesta { $terminal } käynnistetyt ohjelmat
+# review: new
+agent-terminal-programs-windows = Päätteestä ({ $terminal }) käynnistetyt ohjelmat
+# review: new
+agent-terminal-programs-linux = Päätteestä ({ $terminal }) käynnistetyt ohjelmat
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Sovelluksesta { $terminal } käynnistetty ohjelma
+# review: new
+agent-terminal-program-windows = Päätteestä ({ $terminal }) käynnistetty ohjelma
+# review: new
+agent-terminal-program-linux = Päätteestä ({ $terminal }) käynnistetty ohjelma
+# review: new
+agent-connect-title-terminal = { $programs } haluavat käyttää postiasi
+# review: new
+agent-connect-terminal-detail = Kaikki tästä päätteestä käynnistämäsi tekoälyagentit jakavat tässä sallimasi käyttöoikeudet. Jos haluat antaa agentille omat käyttöoikeudet, lisää sen argumentteihin agentin MCP-asetuksissa --name ja valitsemasi nimi.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

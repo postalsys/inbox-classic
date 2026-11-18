@@ -491,6 +491,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic bruker funksjonen for avmelding med ett klikk til å be e-postlisten nedenfor om å slutte å sende deg meldinger. Ingenting annet sendes. Meldingene dine blir ikke endret eller flyttet.
    *[other] Inbox Classic bruker funksjonen for avmelding med ett klikk til å be hver e-postliste nedenfor om å slutte å sende deg meldinger. Ingenting annet sendes. Meldingene dine blir ikke endret eller flyttet.
 }
+# review: new
+agent-log-flag-color = Satte { $color ->
+    [red] rødt
+    [orange] oransje
+    [yellow] gult
+    [green] grønt
+    [blue] blått
+    [purple] lilla
+   *[gray] grått
+} flagg på «{ $subject }»
+# review: new
+agent-log-renamed = Endret navnet på mappen «{ $old }» til «{ $name }»
+# review: new
+agent-log-watched = Begynte å følge samtalen «{ $subject }»
+# review: new
+agent-log-ignored = Begynte å ignorere samtalen «{ $subject }»
+# review: new
+agent-log-unmarked = Sluttet å følge eller ignorere samtalen «{ $subject }»
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] leste 1 melding
+   *[other] leste { $count } meldinger
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] åpnet 1 vedlegg
+   *[other] åpnet { $count } vedlegg
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] søkte én gang
+   *[other] søkte { $count } ganger
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] så på en meldingsliste én gang
+   *[other] så på meldingslister { $count } ganger
+}
+# each read under that row
+# review: new
+agent-read-message = Leste «{ $subject }»
+# review: new
+agent-read-conversation = { $count ->
+    [one] Leste samtalen «{ $subject }» (1 melding)
+   *[other] Leste samtalen «{ $subject }» ({ $count } meldinger)
+}
+# review: new
+agent-read-attachment = Åpnet «{ $name }» i «{ $subject }»
+# review: new
+agent-read-search = { $count ->
+    [one] Søkte etter «{ $query }»: 1 melding
+   *[other] Søkte etter «{ $query }»: { $count } meldinger
+}
+# review: new
+agent-read-people = Slo opp personer som begynner med «{ $query }»
+# review: new
+agent-read-list = { $count ->
+    [one] Så på 1 melding i { $folder }
+   *[other] Så på { $count } meldinger i { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Så på 1 ny melding
+   *[other] Så på { $count } nye meldinger
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programmer startet fra { $terminal }
+# review: new
+agent-terminal-programs-windows = Programmer startet fra en terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programmer startet fra en terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Et program startet fra { $terminal }
+# review: new
+agent-terminal-program-windows = Et program startet fra en terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Et program startet fra en terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } vil bruke e-posten din
+# review: new
+agent-connect-terminal-detail = Alle KI-agenter du starter fra denne terminalen, deler tilgangen du gir her. Vil du gi en agent egen tilgang, legger du til --name og et navn du velger, blant argumentene i MCP-innstillingene til agenten.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

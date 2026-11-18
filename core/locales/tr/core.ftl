@@ -490,6 +490,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic, aşağıdaki listeye abonelikten çıkma isteği gönderir. Bunun için listenin sunduğu tek tıklamayla abonelikten çıkma seçeneğini kullanır. Başka bir şey gönderilmez. Mevcut iletiler değiştirilmez veya taşınmaz.
    *[other] Inbox Classic, aşağıdaki listelerin her birine abonelikten çıkma isteği gönderir. Bunun için her listenin sunduğu tek tıklamayla abonelikten çıkma seçeneğini kullanır. Başka bir şey gönderilmez. Mevcut iletiler değiştirilmez veya taşınmaz.
 }
+# review: new
+agent-log-flag-color = Bayrak kondu: “{ $subject }”, { $color ->
+    [red] kırmızı
+    [orange] turuncu
+    [yellow] sarı
+    [green] yeşil
+    [blue] mavi
+    [purple] mor
+   *[gray] gri
+}
+# review: new
+agent-log-renamed = Klasör yeniden adlandırıldı: “{ $old }”. Yeni ad: “{ $name }”
+# review: new
+agent-log-watched = Konuşma izlemeye alındı: “{ $subject }”
+# review: new
+agent-log-ignored = Konuşma yoksayıldı: “{ $subject }”
+# review: new
+agent-log-unmarked = Konuşmanın izlenmesi veya yoksayılması kaldırıldı: “{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] 1 ileti okudu
+   *[other] { $count } ileti okudu
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] 1 ek açtı
+   *[other] { $count } ek açtı
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] bir kez arama yaptı
+   *[other] { $count } kez arama yaptı
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] bir kez ileti listesine baktı
+   *[other] { $count } kez ileti listelerine baktı
+}
+# each read under that row
+# review: new
+agent-read-message = Okudu: “{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [one] Konuşmayı okudu: “{ $subject }” (1 ileti)
+   *[other] Konuşmayı okudu: “{ $subject }” ({ $count } ileti)
+}
+# review: new
+agent-read-attachment = Ek açtı: “{ $name }”. İleti: “{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [one] Arama yaptı: “{ $query }”, 1 ileti
+   *[other] Arama yaptı: “{ $query }”, { $count } ileti
+}
+# review: new
+agent-read-people = “{ $query }” ile başlayan kişileri aradı
+# review: new
+agent-read-list = { $count ->
+    [one] 1 iletiye baktı. Klasör: { $folder }
+   *[other] { $count } iletiye baktı. Klasör: { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] 1 yeni iletiye baktı
+   *[other] { $count } yeni iletiye baktı
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = { $terminal } uygulamasından başlatılan programlar
+# review: new
+agent-terminal-programs-windows = Bir terminalden ({ $terminal }) başlatılan programlar
+# review: new
+agent-terminal-programs-linux = Bir terminalden ({ $terminal }) başlatılan programlar
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = { $terminal } uygulamasından başlatılan bir program
+# review: new
+agent-terminal-program-windows = Bir terminalden ({ $terminal }) başlatılan bir program
+# review: new
+agent-terminal-program-linux = Bir terminalden ({ $terminal }) başlatılan bir program
+# review: new
+agent-connect-title-terminal = { $programs } postanıza erişmek istiyor
+# review: new
+agent-connect-terminal-detail = Bu terminalden başlattığınız her yapay zeka aracısı, burada izin verdiğiniz erişimi paylaşır. Bir aracıya ayrı erişim vermek için aracının MCP ayarlarında bağımsız değişkenlerine --name ve seçtiğiniz bir ad ekleyin.
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
 

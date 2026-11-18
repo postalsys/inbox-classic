@@ -2,13 +2,13 @@
 <p class="summary">Trieu què pot fer cada agent d’IA amb el vostre correu, consulteu-ne l’activitat i desfeu-ne els canvis.</p>
 <p>La primera vegada que es connecta l’agent d’un programa, Inbox Classic demana autorització i mostra el nom del programa. Trieu què pot fer:</p>
 <ul>
-    <li>llegir el correu: consultar carpetes, missatges i converses, cercar missatges, consultar regles de missatges i cercar contactes</li>
-    <li>organitzar el correu: canviar l’estat de lectura i les banderes, gestionar el correu brossa, moure i arxivar missatges, crear carpetes, suprimir missatges (movent-los a la carpeta <b data-text="folder-deleted"></b>) i cancel·lar subscripcions a llistes de correu amb la vostra autorització</li>
+    <!--review--><li>llegir el correu: consultar carpetes, missatges i converses, amb els seus fitxers PDF, d’Office i d’imatge de fins a 10 MB, cercar missatges, consultar regles de missatges i cercar contactes</li><!--/review-->
+    <!--review--><li>organitzar el correu: canviar l’estat de lectura, les banderes i els seus colors, gestionar el correu brossa, moure i arxivar missatges, crear carpetes, canviar el nom de les vostres carpetes, seguir i ignorar converses, suprimir missatges (movent-los a la carpeta <b data-text="folder-deleted"></b>) i cancel·lar subscripcions a llistes de correu amb la vostra autorització</li><!--/review-->
     <li>escriure esborranys perquè els envieu vós i modificar o descartar els esborranys creats pel mateix agent, mentre no els deseu</li>
     <li>enviar correu, amb la vostra aprovació per a cada missatge</li>
 </ul>
 <p>Després trieu els comptes que pot veure i feu clic a <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> rebutja el programa, i no se us tornarà a demanar autorització per a aquest programa.</p>
-<p>Un agent només pot suprimir definitivament els esborranys que ha creat i que encara no heu desat. No canvia la configuració dels vostres comptes. Pot consultar les regles de missatges i veure a quins missatges s’aplicarien, sense modificar aquests missatges. No pot crear, modificar ni suprimir regles. Llegir un missatge no el marca com a llegit. Els canvis que fa l’agent es veuen immediatament a l’aplicació.</p>
+<!--review--><p>Un agent només pot suprimir definitivament els esborranys que ha creat i que encara no heu desat. No canvia la configuració dels vostres comptes. Pot consultar les regles de missatges i veure a quins missatges s’aplicarien, sense modificar aquests missatges. No pot crear, modificar ni suprimir regles. Mai no llegeix el contingut ni els fitxers adjunts d’un missatge xifrat. Llegir un missatge no el marca com a llegit. Els canvis que fa l’agent es veuen immediatament a l’aplicació.</p><!--/review-->
 <h2>Cancel·lar subscripcions a llistes de correu</h2>
 <p>Un agent autoritzat a organitzar el correu pot proposar-vos de cancel·lar subscripcions a llistes de correu. Inbox Classic mostra les adreces dels remitents i demana una sola confirmació per a totes les llistes seleccionades:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>Un agent no pot fer servir missatges de la carpeta <b data-text="folder-junk"></b> per cancel·lar subscripcions. Per a cada programa, el límit és de 30 sol·licituds de cancel·lació autoritzades per vós durant les últimes 24 hores. Les sol·licituds que fallen també compten per a aquest límit.</p>
 <h2>Veure i canviar l’accés</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> mostra els programes als quals heu permès o denegat l’accés, i tot el que han fet els agents, del més nou al més antic.</p>
+<!--review--><p>El que llegeix un agent apareix en una fila per programa i hora, com ara «Ha llegit 14 missatges i ha cercat 3 vegades». Seleccioneu la fila per veure els assumptes que ha llegit i el que ha cercat, mai el text dels missatges. El registre es conserva 30 dies. Esborrar-lo no canvia quants missatges pot enviar encara un agent.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> canvia què pot fer un programa.</li>
     <li><b data-text="ui-remove"></b> elimina un programa i els seus permisos. La propera vegada que es connecti, caldrà tornar-ne a autoritzar l’accés.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> desfà els canvis en l’estat de lectura, les banderes i la classificació com a correu brossa, així com els trasllats, els arxivaments i les supressions de missatges. També permet cancel·lar l’enviament de missatges que encara són a la Safata de sortida.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> desfà els canvis en l’estat de lectura, les banderes i els seus colors, i la classificació com a correu brossa, així com els trasllats, els arxivaments i les supressions de missatges. També permet cancel·lar l’enviament de missatges que encara són a la Safata de sortida.</li><!--/review-->
 </ul>
 <aside class="warning">El correu l’escriuen altres persones, i un missatge pot intentar convèncer un agent perquè reenviï o suprimeixi el vostre correu. Inbox Classic oculta als agents el text que no veieu al missatge i els indica que el contingut del correu no s’ha de tractar com a instruccions. Tot i així, un agent es pot deixar enganyar. Permeteu només el que necessiteu.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

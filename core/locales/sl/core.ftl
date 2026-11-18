@@ -757,6 +757,106 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic bo spodaj navedenemu poštnemu seznamu poslal zahtevo za odjavo. Uporabil bo možnost odjave z enim klikom, ki jo seznam ponuja. Pri tem se e-pošta ne pošilja, prejeta sporočila pa ostanejo nespremenjena.
    *[other] Inbox Classic bo vsakemu spodaj navedenemu poštnemu seznamu poslal zahtevo za odjavo. Uporabil bo možnost odjave z enim klikom, ki jo ponuja posamezni seznam. Pri tem se e-pošta ne pošilja, prejeta sporočila pa ostanejo nespremenjena.
 }
+# review: new
+agent-log-flag-color = Označil sporočilo »{ $subject }« { $color ->
+    [red] z rdečo zastavico
+    [orange] z oranžno zastavico
+    [yellow] z rumeno zastavico
+    [green] z zeleno zastavico
+    [blue] z modro zastavico
+    [purple] z vijolično zastavico
+   *[gray] s sivo zastavico
+}
+# review: new
+agent-log-renamed = Preimenoval mapo »{ $old }« v »{ $name }«
+# review: new
+agent-log-watched = Začel spremljati pogovor »{ $subject }«
+# review: new
+agent-log-ignored = Prezrl pogovor »{ $subject }«
+# review: new
+agent-log-unmarked = Prenehal spremljati ali prezirati pogovor »{ $subject }«
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] prebral { $count } sporočilo
+    [two] prebral { $count } sporočili
+    [few] prebral { $count } sporočila
+   *[other] prebral { $count } sporočil
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] odprl { $count } priponko
+    [two] odprl { $count } priponki
+    [few] odprl { $count } priponke
+   *[other] odprl { $count } priponk
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] iskal { $count }-krat
+    [two] iskal { $count }-krat
+    [few] iskal { $count }-krat
+   *[other] iskal { $count }-krat
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] pregledal seznam sporočil { $count }-krat
+    [two] pregledal sezname sporočil { $count }-krat
+    [few] pregledal sezname sporočil { $count }-krat
+   *[other] pregledal sezname sporočil { $count }-krat
+}
+# each read under that row
+# review: new
+agent-read-message = Prebral sporočilo »{ $subject }«
+# review: new
+agent-read-conversation = { $count ->
+    [one] Prebral pogovor »{ $subject }« ({ $count } sporočilo)
+    [two] Prebral pogovor »{ $subject }« ({ $count } sporočili)
+    [few] Prebral pogovor »{ $subject }« ({ $count } sporočila)
+   *[other] Prebral pogovor »{ $subject }« ({ $count } sporočil)
+}
+# review: new
+agent-read-attachment = Odprl priponko »{ $name }« sporočila »{ $subject }«
+# review: new
+agent-read-search = { $count ->
+    [one] Iskal »{ $query }«: { $count } sporočilo
+    [two] Iskal »{ $query }«: { $count } sporočili
+    [few] Iskal »{ $query }«: { $count } sporočila
+   *[other] Iskal »{ $query }«: { $count } sporočil
+}
+# review: new
+agent-read-people = Poiskal stike, ki se začnejo z »{ $query }«
+# review: new
+agent-read-list = { $count ->
+    [one] Pregledal { $count } sporočilo v mapi { $folder }
+    [two] Pregledal { $count } sporočili v mapi { $folder }
+    [few] Pregledal { $count } sporočila v mapi { $folder }
+   *[other] Pregledal { $count } sporočil v mapi { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Pregledal { $count } novo sporočilo
+    [two] Pregledal { $count } novi sporočili
+    [few] Pregledal { $count } nova sporočila
+   *[other] Pregledal { $count } novih sporočil
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Iz aplikacije { $terminal } zagnani programi
+# review: new
+agent-terminal-programs-windows = Iz terminala ({ $terminal }) zagnani programi
+# review: new
+agent-terminal-programs-linux = Iz terminala ({ $terminal }) zagnani programi
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Iz aplikacije { $terminal } zagnan program
+# review: new
+agent-terminal-program-windows = Iz terminala ({ $terminal }) zagnan program
+# review: new
+agent-terminal-program-linux = Iz terminala ({ $terminal }) zagnan program
+# review: new
+agent-connect-title-terminal = { $programs } želijo dostop do vaše pošte
+# review: new
+agent-connect-terminal-detail = Vsi agenti UI, ki jih zaženete iz tega terminala, si delijo dostop, ki ga dovolite tukaj. Če želite enemu od njih dati lasten dostop, v agentovih nastavitvah MCP med njegove argumente dodajte --name in poljubno ime.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

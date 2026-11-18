@@ -472,6 +472,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic saadab allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
    *[other] Inbox Classic saadab igale allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
 }
+# review: new
+agent-log-flag-color = „{ $subject }“ märgiti { $color ->
+    [red] punase
+    [orange] oranži
+    [yellow] kollase
+    [green] rohelise
+    [blue] sinise
+    [purple] lilla
+   *[gray] halli
+} lipuga
+# review: new
+agent-log-renamed = Kausta „{ $old }“ nimeks muudeti „{ $name }“
+# review: new
+agent-log-watched = Vestlust „{ $subject }“ hakati jälgima
+# review: new
+agent-log-ignored = Vestlust „{ $subject }“ hakati ignoreerima
+# review: new
+agent-log-unmarked = Vestluse „{ $subject }“ jälgimine või ignoreerimine lõpetati
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] loeti 1 kiri
+   *[other] loeti { $count } kirja
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] avati 1 manus
+   *[other] avati { $count } manust
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] otsiti üks kord
+   *[other] otsiti { $count } korda
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] vaadati kirjade loendit üks kord
+   *[other] vaadati kirjade loendeid { $count } korda
+}
+# each read under that row
+# review: new
+agent-read-message = Loeti kiri „{ $subject }“
+# review: new
+agent-read-conversation = { $count ->
+    [one] Loeti vestlus „{ $subject }“ (1 kiri)
+   *[other] Loeti vestlus „{ $subject }“ ({ $count } kirja)
+}
+# review: new
+agent-read-attachment = Avati kirja „{ $subject }“ manus „{ $name }“
+# review: new
+agent-read-search = { $count ->
+    [one] Otsiti teksti „{ $query }“: leiti 1 kiri
+   *[other] Otsiti teksti „{ $query }“: leiti { $count } kirja
+}
+# review: new
+agent-read-people = Otsiti inimesi, kelle nimi või aadress algab tekstiga „{ $query }“
+# review: new
+agent-read-list = { $count ->
+    [one] Vaadati 1 kirja kaustas { $folder }
+   *[other] Vaadati { $count } kirja kaustas { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Vaadati 1 uut kirja
+   *[other] Vaadati { $count } uut kirja
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Rakendusest { $terminal } käivitatud programmid
+# review: new
+agent-terminal-programs-windows = Terminalist ({ $terminal }) käivitatud programmid
+# review: new
+agent-terminal-programs-linux = Terminalist ({ $terminal }) käivitatud programmid
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Rakendusest { $terminal } käivitatud programm
+# review: new
+agent-terminal-program-windows = Terminalist ({ $terminal }) käivitatud programm
+# review: new
+agent-terminal-program-linux = Terminalist ({ $terminal }) käivitatud programm
+# review: new
+agent-connect-title-terminal = { $programs } soovivad kasutada teie e-posti
+# review: new
+agent-connect-terminal-detail = Kõik tehisintellekti agendid, mille sellest terminalist käivitate, jagavad siin antud juurdepääsu. Kui soovite anda agendile eraldi juurdepääsu, lisage agendi MCP-sätetes selle argumentidele --name ja enda valitud nimi.
 
 ## Keys
 

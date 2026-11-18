@@ -502,6 +502,98 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic šalje listi e-pošte u nastavku zahtjev da vam prestane slati poruke. Koristi mogućnost otkazivanja jednim klikom koju ta lista nudi. Ne šalje se ništa drugo. Poruke koje već imate ne mijenjaju se niti premještaju.
    *[other] Inbox Classic šalje svakoj listi e-pošte u nastavku zahtjev da vam prestane slati poruke. Koristi mogućnost otkazivanja jednim klikom koju svaka lista nudi. Ne šalje se ništa drugo. Poruke koje već imate ne mijenjaju se niti premještaju.
 }
+# review: new
+agent-log-flag-color = Poruka „{ $subject }“ označena je { $color ->
+    [red] crvenom zastavicom
+    [orange] narančastom zastavicom
+    [yellow] žutom zastavicom
+    [green] zelenom zastavicom
+    [blue] plavom zastavicom
+    [purple] ljubičastom zastavicom
+   *[gray] sivom zastavicom
+}
+# review: new
+agent-log-renamed = Mapa „{ $old }“ preimenovana je u „{ $name }“
+# review: new
+agent-log-watched = Razgovor „{ $subject }“ sada se prati
+# review: new
+agent-log-ignored = Razgovor „{ $subject }“ sada se zanemaruje
+# review: new
+agent-log-unmarked = Razgovor „{ $subject }“ više se ne prati niti zanemaruje
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] pročitana { $count } poruka
+    [few] pročitane { $count } poruke
+   *[other] pročitano { $count } poruka
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] otvoren { $count } privitak
+    [few] otvorena { $count } privitka
+   *[other] otvoreno { $count } privitaka
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] { $count } pretraživanje
+    [few] { $count } pretraživanja
+   *[other] { $count } pretraživanja
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] { $count } pregled popisa poruka
+    [few] { $count } pregleda popisa poruka
+   *[other] { $count } pregleda popisa poruka
+}
+# each read under that row
+# review: new
+agent-read-message = Pročitana poruka „{ $subject }“
+# review: new
+agent-read-conversation = { $count ->
+    [one] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
+    [few] Pročitan razgovor „{ $subject }“ ({ $count } poruke)
+   *[other] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
+}
+# review: new
+agent-read-attachment = Otvoren privitak „{ $name }“ poruke „{ $subject }“
+# review: new
+agent-read-search = { $count ->
+    [one] Pretraživanje „{ $query }“: { $count } poruka
+    [few] Pretraživanje „{ $query }“: { $count } poruke
+   *[other] Pretraživanje „{ $query }“: { $count } poruka
+}
+# review: new
+agent-read-people = Traženi kontakti čije ime počinje s „{ $query }“
+# review: new
+agent-read-list = { $count ->
+    [one] Pregledana { $count } poruka u mapi { $folder }
+    [few] Pregledane { $count } poruke u mapi { $folder }
+   *[other] Pregledano { $count } poruka u mapi { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Pregledana { $count } nova poruka
+    [few] Pregledane { $count } nove poruke
+   *[other] Pregledano { $count } novih poruka
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programi pokrenuti iz aplikacije { $terminal }
+# review: new
+agent-terminal-programs-windows = Programi pokrenuti iz terminala ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programi pokrenuti iz terminala ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Program pokrenut iz aplikacije { $terminal }
+# review: new
+agent-terminal-program-windows = Program pokrenut iz terminala ({ $terminal })
+# review: new
+agent-terminal-program-linux = Program pokrenut iz terminala ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } žele koristiti vašu poštu
+# review: new
+agent-connect-terminal-detail = Svi AI agenti koje pokrenete iz ovog terminala dijele pristup koji ovdje dopustite. Da biste jednom od njih dali zaseban pristup, u MCP postavkama agenta dodajte među njegove argumente --name i naziv po izboru.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

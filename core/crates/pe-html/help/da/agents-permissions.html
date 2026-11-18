@@ -2,13 +2,13 @@
 <p class="summary">Vælg, hvad hver AI-agent må gøre med din mail, og se og fortryd det, den har gjort.</p>
 <p>Første gang en agent opretter forbindelse, viser Inbox Classic programmets navn og beder dig vælge, hvad agenten må:</p>
 <ul>
-    <li>læse mail: se mapper, meddelelser og samtaler, søge efter meddelelser og kontakter samt se meddelelsesregler</li>
-    <li>organisere mail: ændre læst/ulæst-status og flag, håndtere uønsket mail, flytte og arkivere meddelelser, oprette mapper, slette ved at flytte til <b data-text="folder-deleted"></b> og afmelde mailinglister med din godkendelse</li>
+    <!--review--><li>læse mail: se mapper, meddelelser og samtaler, også PDF-, Office- og billedfiler på op til 10 MB i meddelelser, søge efter meddelelser og kontakter samt se meddelelsesregler</li><!--/review-->
+    <!--review--><li>organisere mail: ændre læst/ulæst-status, flag og flagfarver, håndtere uønsket mail, flytte og arkivere meddelelser, oprette mapper, omdøbe dine egne mapper, følge og ignorere samtaler, slette ved at flytte til <b data-text="folder-deleted"></b> og afmelde mailinglister med din godkendelse</li><!--/review-->
     <li>skrive kladder, som du selv sender, og redigere eller kassere sine egne kladder, indtil du gemmer dem</li>
     <li>sende mail, hver meddelelse først når du siger ja</li>
 </ul>
 <p>Vælg derefter de konti, den må se, og klik på <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> afviser programmet, og du bliver ikke spurgt om det igen.</p>
-<p>En agent kan kun slette sine egne kladder permanent, og kun indtil du gemmer dem. Den kan ikke ændre kontoindstillinger. Agenten kan se meddelelsesregler og undersøge, hvilke meddelelser de ville gælde for, uden at ændre meddelelserne. Den kan ikke oprette, ændre eller slette regler. Når den læser en meddelelse, markeres den ikke som læst. Agentens ændringer vises straks i programmets vinduer.</p>
+<!--review--><p>En agent kan kun slette sine egne kladder permanent, og kun indtil du gemmer dem. Den kan ikke ændre kontoindstillinger. Agenten kan se meddelelsesregler og undersøge, hvilke meddelelser de ville gælde for, uden at ændre meddelelserne. Den kan ikke oprette, ændre eller slette regler. Den læser aldrig, hvad en krypteret meddelelse indeholder eller har vedhæftet. Når den læser en meddelelse, markeres den ikke som læst. Agentens ændringer vises straks i programmets vinduer.</p><!--/review-->
 <h2>Afmeld mailinglister</h2>
 <p>En agent, der må organisere mail, kan foreslå at afmelde dig fra mailinglister. Inbox Classic viser afsenderadresserne og beder om én samlet godkendelse for de valgte lister:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>En agent kan ikke bruge meddelelser i <b data-text="folder-junk"></b> til at afmelde dig. Grænsen er 30 godkendte afmeldingsanmodninger pr. program inden for de seneste 24 timer. Anmodninger, der mislykkes, tæller også med.</p>
 <h2>Se og ændr adgang</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> viser de programmer, du har givet adgang eller afvist, og alt, hvad agenterne har gjort, med det nyeste først.</p>
+<!--review--><p>Det, en agent læser, vises som én række pr. program og time, fx »Læste 14 meddelelser og søgte 3 gange«. Markér rækken for at se emnerne på det, den læste, og det, den søgte efter, men aldrig selve teksten i meddelelserne. Loggen gemmes i 30 dage. Hvis du rydder den, ændrer det ikke, hvor mange meddelelser en agent stadig må sende.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ændrer, hvad et program må.</li>
     <li><b data-text="ui-remove"></b> fjerner programmets gemte tilladelser eller afvisning, så du bliver spurgt igen, næste gang det opretter forbindelse.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> fortryder ændringer af læst/ulæst-status, flag og markering som uønsket mail samt flytning, arkivering og sletning af meddelelser. Du kan også annullere en afsendelse, så længe meddelelsen stadig ligger i Udbakke.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> fortryder ændringer af læst/ulæst-status, flag og flagfarve og markering som uønsket mail samt flytning, arkivering og sletning af meddelelser. Du kan også annullere en afsendelse, så længe meddelelsen stadig ligger i Udbakke.</li><!--/review-->
 </ul>
 <aside class="warning">Mail er skrevet af andre, og en meddelelse kan forsøge at overtale en agent til at videresende eller slette din mail. Inbox Classic udelader skjult meddelelsestekst fra det indhold, agenter får, og angiver, at mail skal behandles som indhold, ikke som instruktioner. En agent kan stadig blive narret. Tillad kun det, du har brug for.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

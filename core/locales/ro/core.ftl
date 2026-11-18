@@ -762,6 +762,98 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic trimite listei de mai jos o cerere de dezabonare, folosind opțiunea de dezabonare cu un clic oferită de listă. Nu trimite niciun e-mail și nu modifică mesajele pe care le aveți deja.
    *[other] Inbox Classic trimite fiecărei liste de mai jos o cerere de dezabonare, folosind opțiunea de dezabonare cu un clic oferită de listă. Nu trimite niciun e-mail și nu modifică mesajele pe care le aveți deja.
 }
+# review: new
+agent-log-flag-color = A pus semnalizarea { $color ->
+    [red] roșie
+    [orange] portocalie
+    [yellow] galbenă
+    [green] verde
+    [blue] albastră
+    [purple] violet
+   *[gray] gri
+} pentru mesajul „{ $subject }”
+# review: new
+agent-log-renamed = A redenumit folderul „{ $old }” în „{ $name }”
+# review: new
+agent-log-watched = A început să urmărească conversația „{ $subject }”
+# review: new
+agent-log-ignored = A început să ignore conversația „{ $subject }”
+# review: new
+agent-log-unmarked = A oprit urmărirea sau ignorarea conversației „{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] a citit 1 mesaj
+    [few] a citit { $count } mesaje
+   *[other] a citit { $count } de mesaje
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] a deschis 1 atașare
+    [few] a deschis { $count } atașări
+   *[other] a deschis { $count } de atașări
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] a căutat o dată
+    [few] a căutat de { $count } ori
+   *[other] a căutat de { $count } de ori
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] a consultat o listă de mesaje o dată
+    [few] a consultat liste de mesaje de { $count } ori
+   *[other] a consultat liste de mesaje de { $count } de ori
+}
+# each read under that row
+# review: new
+agent-read-message = A citit mesajul „{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [one] A citit conversația „{ $subject }” (1 mesaj)
+    [few] A citit conversația „{ $subject }” ({ $count } mesaje)
+   *[other] A citit conversația „{ $subject }” ({ $count } de mesaje)
+}
+# review: new
+agent-read-attachment = A deschis atașarea „{ $name }” din mesajul „{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [one] A căutat „{ $query }”: 1 mesaj
+    [few] A căutat „{ $query }”: { $count } mesaje
+   *[other] A căutat „{ $query }”: { $count } de mesaje
+}
+# review: new
+agent-read-people = A căutat persoane al căror nume sau adresă începe cu „{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [one] A consultat 1 mesaj din folderul „{ $folder }”
+    [few] A consultat { $count } mesaje din folderul „{ $folder }”
+   *[other] A consultat { $count } de mesaje din folderul „{ $folder }”
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] A consultat 1 mesaj nou
+    [few] A consultat { $count } mesaje noi
+   *[other] A consultat { $count } de mesaje noi
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programe pornite din { $terminal }
+# review: new
+agent-terminal-programs-windows = Programe pornite dintr-un terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programe pornite dintr-un terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Un program pornit din { $terminal }
+# review: new
+agent-terminal-program-windows = Un program pornit dintr-un terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Un program pornit dintr-un terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } solicită acces la mesajele dvs.
+# review: new
+agent-connect-terminal-detail = Toți agenții IA pe care îi porniți din acest terminal folosesc accesul pe care îl permiteți aici. Pentru ca un agent să aibă propriul acces, adăugați --name și un nume ales de dvs. la argumentele sale din setările MCP ale agentului.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

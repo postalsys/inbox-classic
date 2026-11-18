@@ -8,5 +8,6 @@
     <li>Start agenten. Første gang den kobler til, spør Inbox Classic deg hva den har lov til.</li>
 </ol>
 <p>Agenten starter Inbox Classic i bakgrunnen hvis programmet ikke kjører. Bare programmer som kjører under din brukerkonto på denne datamaskinen, kan koble til agentgrensesnittet.</p>
+<!--review--><p>Agenter du starter fra en terminal, for eksempel Claude Code, er ett program for Inbox Classic. Det spør én gang om <!--os:mac-->programmer startet fra Terminal<!--/os--><!--os:windows,linux-->programmer startet fra en terminal<!--/os-->, og de deler det du tillater. Vil du gi en agent egen tilgang, legger du til <code>--name</code> og et navn du velger, etter <code>--mcp</code> i innstillingene til agenten, for eksempel <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic spør deretter om den med det navnet.</p><!--/review-->
 <p>Vil du stenge tilgangen for alle agenter på én gang, slår du av innstillingen <b data-text="ui-let-agents-connect"></b> under <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>

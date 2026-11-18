@@ -2,13 +2,13 @@
 <p class="summary">Velg hva hver KI-agent har lov til å gjøre med e-posten din, og se og angre det den har gjort.</p>
 <p>Første gang agenten til et program kobler til, spør Inbox Classic deg og oppgir navnet på programmet. Velg hva den har lov til:</p>
 <ul>
-    <li>lese e-post: se mapper, meldinger og samtaler, søke etter meldinger, se meldingsregler og finne kontakter</li>
-    <li>organisere e-post: merke meldinger som lest eller ulest, endre flagg, håndtere søppelpost, flytte og arkivere meldinger, opprette mapper, slette meldinger (flytte dem til <b data-text="folder-deleted"></b>) og melde deg av e-postlister med din godkjenning</li>
+    <!--review--><li>lese e-post: se mapper, meldinger og samtaler, også PDF-, Office- og bildefiler på opptil 10 MB i meldinger, søke etter meldinger, se meldingsregler og finne kontakter</li><!--/review-->
+    <!--review--><li>organisere e-post: merke meldinger som lest eller ulest, endre flagg og flaggfarger, håndtere søppelpost, flytte og arkivere meldinger, opprette mapper, gi egne mapper nytt navn, følge og ignorere samtaler, slette meldinger (flytte dem til <b data-text="folder-deleted"></b>) og melde deg av e-postlister med din godkjenning</li><!--/review-->
     <li>skrive utkast som du sender selv, og endre eller forkaste utkast agenten selv har skrevet, frem til du lagrer dem</li>
     <li>sende e-post etter at du har godkjent hver melding</li>
 </ul>
 <p>Velg så hvilke kontoer den kan se, og klikk <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> avviser programmet, og du blir ikke spurt om det igjen.</p>
-<p>En agent kan bare slette utkast permanent hvis den har skrevet dem selv og du ikke har lagret dem. Den kan ikke endre kontoinnstillingene. Den kan se meldingsregler og hvilke meldinger som oppfyller kriteriene, uten å endre meldingene. Den kan ikke opprette, endre eller slette regler. Å lese en melding merker den ikke som lest. Endringene agenten gjør, vises med en gang i appen.</p>
+<!--review--><p>En agent kan bare slette utkast permanent hvis den har skrevet dem selv og du ikke har lagret dem. Den kan ikke endre kontoinnstillingene. Den kan se meldingsregler og hvilke meldinger som oppfyller kriteriene, uten å endre meldingene. Den kan ikke opprette, endre eller slette regler. Den leser aldri hva en kryptert melding inneholder eller har som vedlegg. Å lese en melding merker den ikke som lest. Endringene agenten gjør, vises med en gang i appen.</p><!--/review-->
 <h2>Melde seg av e-postlister</h2>
 <p>En agent med tillatelse til å organisere e-post kan be om å melde deg av e-postlister. Inbox Classic viser avsenderadressene og ber om én felles godkjenning for alle de valgte listene:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>En agent kan ikke bruke meldinger i <b data-text="folder-junk"></b> til avmelding. For hvert program er grensen 30 avmeldingsforespørsler som du har godkjent i løpet av de siste 24 timene. Mislykkede forespørsler teller også med.</p>
 <h2>Se og endre tilgang</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> viser programmene du har gitt eller nektet tilgang, og alt agentene har gjort, med det nyeste først.</p>
+<!--review--><p>Det en agent leser, vises som én rad per program og time, for eksempel «Leste 14 meldinger og søkte 3 ganger». Merk raden for å se emnene den leste og hva den søkte etter, men aldri teksten i meldingene. Loggen beholdes i 30 dager. Å tømme den endrer ikke hvor mange meldinger en agent fortsatt kan sende.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> endrer hva et program har lov til.</li>
     <li><b data-text="ui-remove"></b> fjerner programmet, tillatelsene og aktivitetsloggen. Du blir spurt på nytt neste gang det kobler til.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> angrer merking som lest eller ulest og endringer i flagg og søppelpoststatus. Du kan også angre flytting, arkivering og sletting, eller avbryte sending av en melding som fortsatt ligger i Utboks.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> angrer merking som lest eller ulest og endringer i flagg, flaggfarge og søppelpoststatus. Du kan også angre flytting, arkivering og sletting, eller avbryte sending av en melding som fortsatt ligger i Utboks.</li><!--/review-->
 </ul>
 <aside class="warning">E-post skrives av andre, og en melding kan prøve å lure en agent til å videresende eller slette e-posten din. Inbox Classic skjuler for agentene teksten som en melding skjuler for deg, og forteller dem at innholdet i e-post ikke skal behandles som instruksjoner til agenten. En agent kan likevel bli lurt. Tillat bare det du trenger.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>
