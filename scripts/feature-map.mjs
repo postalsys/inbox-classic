@@ -992,6 +992,13 @@ const sections = [
                 checked: ['In its own frame', 'Opens its file', 'Printed with its part']
             },
             {
+                shot: 'secure-15-strip-parts',
+                name: 'Which part a file came from',
+                what: "In a message whose parts differ, a file of an encrypted part has a small lock in the strip, and its tooltip and what screen readers hear say its part and how that part was protected (\"From part 2: Encrypted. Not signed\"). The lock says where the file came from: it is decrypted for viewing.",
+                how: 'Open a message with a file in a plain part and one in an encrypted part.',
+                checked: ['The lock on the encrypted part\'s file only', 'Its part in the tooltip']
+            },
+            {
                 shot: 'write-30-sign',
                 name: 'Sign what you write',
                 what: 'Sign on the toolbar and in Tools (Outlook Express\'s Digitally Sign) signs the message with the key of the address it goes from (PGP/MIME). Both Sign and Encrypt start off; without a key of your own, Inbox Classic offers to make one. The line under the fields says what will happen.',
