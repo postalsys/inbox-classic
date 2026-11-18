@@ -813,8 +813,9 @@ keeps addresses unique, as planned. The spike programs were throwaway (not commi
   same mail. The printout is made in memory (`pe_html::print_parts`, `print_document_with`) and handed to the window,
   whose print web view is served from memory (WebView2 from memory, WKWebView's scheme handler with a non-persistent
   store, WebKitGTK with an ephemeral session); only the system's print spooler, or a file the user prints to, writes
-  it, as for the text. The pictures come after all the text, each named with its part ("Part 2: floor-plan.png"); PDF
-  pages are not printed, as for any message.
+  it, as for the text. Each part's pictures come right after that part's text (`pe_html::print_parts` keeps each
+  part's text apart, `print_document_with` takes each item with its part), each named with its part ("Part 2:
+  floor-plan.png"); PDF pages are not printed, as for any message.
 - **Frames.** Every picture's width, height and aspect ratio are in its markup, so a part's frame measures as tall as
   it will be before the picture comes; Windows and Linux measure every 400 ms from the moment the page is shown, the
   Mac only from `didFinish`, which waits for the frames' pictures (see the apps below).
@@ -830,3 +831,11 @@ ui_fixture_previews -- ../scripts/ui-e2e/pgp` with the committed key): each part
 - **The apps** need: Windows, a preview link clicked in a part's frame (`FrameNavigationStarting`, now opened only
   externally) passed to the reader's link handler; the Mac, frames measured from the moment the page is shown, not
   from `didFinish`. Linux needs nothing. UI test: `pgp-attachment-preview`.
+- **After the UI reviews** (same PR): a link clicked in a part opens: the part's document has `<base target="_top">`
+  (`RenderOptions::in_frame`) and its frame's sandbox `allow-top-navigation-by-user-activation`, so a click navigates
+  the top page, whose handler in every app cancels it and opens the link or the file; `frame-src` is `'self'` again
+  (a frame navigation was refused before WebKit asked the app). Two readers of one message each get their view: only
+  a reader's own `message_view_cancel` drops a view. Each strip row says its part (`PeAttachment.part`, from 1),
+  `protection` (none, signed, encrypted: the apps draw a lock for encrypted) and `part_text` ("From part 2:
+  Encrypted. Not signed", also the tooltip's last line). The bar counts "encrypted and signed", "encrypted", "verified",
+  "signed", "need attention" and "without a confirmed signature".

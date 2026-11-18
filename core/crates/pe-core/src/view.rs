@@ -709,7 +709,8 @@ fn protected_view(
 
 /// The printout of a message with signed or encrypted parts: the header a printout has, then the bar's words and each
 /// part's label (in the header, where the message's styles can not reach them), then each part's text, in order; the
-/// pictures of its parts' previews come after it ([`crate::Core::print_start`]), each named with its part
+/// pictures of each part's previews come right after that part's text ([`crate::Core::print_start`]), each named with
+/// its part
 fn print_parts(
     message: &parser::Message,
     bar: &str,
@@ -737,15 +738,18 @@ fn print_parts(
         .iter()
         .map(|(name, value)| (name.as_str(), value.as_str()))
         .collect();
-    // each part as plain text under its label in bold: no part has markup, so the bold labels can only be ours
-    let body: String = texts
+    // each part as plain text under its label in bold: no part has markup, so the bold labels can only be ours; each
+    // part's pictures come after its own text
+    let body: Vec<(usize, String)> = texts
         .iter()
         .map(|(index, text)| {
             let label = format!("{}: {}", part_name(*index), parts[*index].label);
-            format!("<p><b>{}</b></p>{}", escape_html(&label), text_to_html(text))
+            (
+                *index,
+                format!("<p><b>{}</b></p>{}", escape_html(&label), text_to_html(text)),
+            )
         })
-        .collect::<Vec<_>>()
-        .join("<hr>");
+        .collect();
     pe_html::print_parts(&body, &header)
 }
 

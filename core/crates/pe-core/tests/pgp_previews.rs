@@ -194,8 +194,9 @@ fn a_message_file_shows_each_part_s_previews() {
     assert_eq!(colour(&answered(&core, &events, ask).unwrap()), [214, 228, 247]);
 }
 
-/// The printout: one document of every part's words (a printer prints no frames), then each part's pictures as the
-/// core encoded them, named with their part; made in memory and handed to the window, never written
+/// The printout: one document of every part's words (a printer prints no frames), each part's pictures as the core
+/// encoded them right after that part's words, named with their part; made in memory and handed to the window, never
+/// written
 #[test]
 fn the_printout_names_each_picture_s_part() {
     let dir = pe_testkit::TempDir::new("pgp-previews-print");
@@ -224,6 +225,11 @@ fn the_printout_names_each_picture_s_part() {
     );
     assert!(printed.contains("Part 1: harbour.png") && printed.contains("Part 2: floor-plan.png"));
     assert!(!printed.contains("/pv/"), "{printed}");
+    // each part's picture right after that part's text: part 1's before part 2's words, part 2's after them
+    let at = |text: &str| printed.find(text).unwrap_or_else(|| panic!("{text} in {printed}"));
+    assert!(at("The harbour, as promised.") < at("Part 1: harbour.png"));
+    assert!(at("Part 1: harbour.png") < at("for your eyes only"));
+    assert!(at("for your eyes only") < at("Part 2: floor-plan.png"));
 }
 
 /// Agents never see what was decrypted: the message is encrypted for them, its files refused, and no preview of it

@@ -21,7 +21,8 @@ const PRINT_WAIT: Duration = Duration::from_secs(30);
 /// What a printout is made of, taken from the view while it is shown
 struct Printout {
     parts: pe_html::PrintParts,
-    files: Vec<pe_html::PreviewFile>,
+    /// The files shown, each with the part whose document shows it (None for a message's one document)
+    files: Vec<(Option<usize>, pe_html::PreviewFile)>,
     /// The request drawing the pictures; None when the document has none
     request: Option<u64>,
 }
@@ -79,7 +80,7 @@ impl Core {
 
 /// A document's files as the printout names them: a part's under its part's name ("Part 2: photo.jpg"), as every
 /// part's text is printed in one document
-fn printed_files(document: &PreviewDocument) -> Vec<pe_html::PreviewFile> {
+fn printed_files(document: &PreviewDocument) -> Vec<(Option<usize>, pe_html::PreviewFile)> {
     let mut files = document.files.clone();
     if let Some(part) = document.part {
         let name = tr_args(Text::HeaderPart, &[("number", (part + 1).into())]);
@@ -87,7 +88,7 @@ fn printed_files(document: &PreviewDocument) -> Vec<pe_html::PreviewFile> {
             file.name = format!("{name}: {}", file.name);
         }
     }
-    files
+    files.into_iter().map(|file| (document.part, file)).collect()
 }
 
 /// A file the printout shows as a picture: a picture drawn in the document (not a PDF file's page, not a tile)
@@ -95,39 +96,42 @@ fn is_printed_picture(file: &pe_html::PreviewFile) -> bool {
     !file.paper && file.tile.is_none() && !file.pages.is_empty()
 }
 
-/// The document to print: the message, then each picture drawn and a line for every other file shown
+/// The document to print: the message, then each picture drawn and a line for every other file shown; in a message
+/// with signed or encrypted parts each part's after that part's text
 fn printed(files: &Files, printout: &Printout) -> String {
+    let shown: Vec<pe_html::PreviewFile> = printout.files.iter().map(|(_, file)| file.clone()).collect();
     let drawn = match printout.request {
-        Some(request) => wait_drawn(files, request, &printout.files, Instant::now() + PRINT_WAIT),
+        Some(request) => wait_drawn(files, request, &shown, Instant::now() + PRINT_WAIT),
         None => HashMap::new(),
     };
     let lines: Vec<String> = printout
         .files
         .iter()
-        .map(|file| {
+        .map(|(_, file)| {
             tr_args(
                 Text::PreviewNotPrinted,
                 &[("name", (&file.name).into()), ("details", (&file.details).into())],
             )
         })
         .collect();
-    let items: Vec<pe_html::PrintItem> = printout
+    let items: Vec<(Option<usize>, pe_html::PrintItem)> = printout
         .files
         .iter()
         .zip(&lines)
-        .map(|(file, line)| {
+        .map(|((part, file), line)| {
             // only the printed pictures were waited for
             let picture = drawn
                 .get(&file.attachment)
                 .and_then(|drawn| drawn.pages.get(&0)?.as_ref().ok());
-            match picture {
+            let item = match picture {
                 Some(picture) => pe_html::PrintItem::Picture {
                     name: &file.name,
                     mime: picture.mime.as_str(),
                     bytes: &picture.bytes,
                 },
                 None => pe_html::PrintItem::Line(line),
-            }
+            };
+            (*part, item)
         })
         .collect();
     pe_html::print_document_with(&printout.parts, &items)
