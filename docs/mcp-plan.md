@@ -14,7 +14,7 @@ The encrypted mail wall (an agent could read decrypted attachments of encrypted 
 6. **Read logging**: an hourly summary per program ("Read 14 messages, searched 3 times"), expandable to the subjects, no bodies, kept 30 days. The log is capped, and clearing it no longer resets the send limit.
 7. **Agent drafts** are marked: opening one in the compose window says it was written by the agent, with a reminder to check recipients and text.
 8. **Calendar**: agents read invitations now; accept and decline come in phase 3, only through the Send question.
-9. **Programs started from a terminal** share one grant today. The connect dialog says "programs started from Terminal", and an optional `--name` in the agent's configuration gives each its own grant (informative, like the rest of the identity).
+9. **Programs started from a terminal** share one grant today. The connect dialog says "programs started from Terminal", and an optional `--name` in the agent's configuration gives each its own grant (informative, like the rest of the identity). Since phase 3 the app finds the program from the connection's process rather than the relay's hello, so a hello can no longer claim another program's grant. The identity is still the executable of the first ancestor that is not a launcher, so a program of the same user can run a granted program's executable with its own code (`ELECTRON_RUN_AS_NODE` on Electron hosts such as VS Code, `LD_PRELOAD` on Linux, parent-process spoofing on Windows) and inherit its grant. Grants separate cooperating programs, not hostile ones running as the same user, which can read the store anyway.
 
 ## Phase 1: quick wins
 
@@ -46,11 +46,11 @@ The encrypted mail wall (an agent could read decrypted attachments of encrypted 
 
 ## Phase 3
 
-- `apply_to_search` per decision 5.
-- "Undo everything this program did since..." in the AI Agents window; `undo_my_change` for agents.
-- Calendar accept and decline through the Send question (decision 8).
-- The real calling process checked on Windows and Linux instead of trusting the relay's hello.
-- MCP resources and subscriptions (`inboxclassic://inbox`) and prompts ("Triage my inbox", "Summarize unread").
+- `apply_to_search` per decision 5. Done in #168.
+- "Undo everything this program did since..." in the AI Agents window; `undo_my_change` for agents. Done in #168.
+- Calendar accept and decline through the Send question (decision 8). Done in #168 (`respond_to_invitation`).
+- The real calling process checked on Windows and Linux instead of trusting the relay's hello. Done in this PR, on the Mac too: the app finds the program from the process at the other end of the connection, and the connect question says when the hello named another one.
+- MCP resources and subscriptions (`inboxclassic://inbox`) and prompts ("Triage my inbox", "Summarize unread"). Done in this PR: the Inbox, accounts, folders and messages as resources read through the matching tools, subscriptions told by `notifications/resources/updated`, and the two prompts.
 
 ## How each PR is done
 
