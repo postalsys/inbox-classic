@@ -551,7 +551,16 @@ void AskPassword(int64_t account) {
 }
 
 void OnEvent(const UiEvent& event) {
+    // the picture of a preview, for the page that asked for it: nothing else changed
+    if (event.kind == PE_EVENT_KIND_PREVIEW_ANSWERED) {
+        Preview::Answered(g_core.get(), event.uid);
+        return;
+    }
     switch (event.kind) {
+    case PE_EVENT_KIND_PDF_PREVIEWS_OFF:
+        // the documents say so themselves; Options, should it be open, shows the setting off
+        OptionsPdfPreviewsOff();
+        break;
     case PE_EVENT_KIND_SYNC_STARTED:
         g_failing.erase(event.account);
         SetSyncStatus(core::T(PE_TEXT_UI_CHECKING, {{"account", g_mailbox.AccountName(event.account)}}));
@@ -1622,6 +1631,11 @@ constexpr ULONG_PTR kTestRemoteRequests = 0x4E455452;
 constexpr ULONG_PTR kTestListOrder = 0x4C4F5244;
 // with --test-hooks only: the list of a folder clicked held unread ("1"), to see it waiting, or let go ("0")
 constexpr ULONG_PTR kTestHoldList = 0x484F4C44;
+// with --test-hooks only: the reading pane's look at the previews of the message shown (Preview::TestPreviews, the
+// text its query; "window:" before it for the first message window's)
+constexpr ULONG_PTR kTestPreviews = 0x50565753;
+// with --test-hooks only: PDF previews off as after a PDF file ended the app (pe_pdf_previews_crashed_for_tests)
+constexpr ULONG_PTR kTestPdfCrashed = 0x50444643;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1831,6 +1845,8 @@ void OnCommand(WORD id, WORD code) {
         shown.threads = g_mailbox.Grouped();
         shown.layout = static_cast<int>(g_layoutMode);
         shown.listPictures = g_mailbox.ListPicturesShown();
+        shown.previews = pe_show_previews(g_core.get());
+        shown.pdfPreviews = pe_pdf_previews(g_core.get());
         // OK and Apply: the main window follows at once, with Options still open after Apply
         bool restart = OptionsDialog(g_main, g_core.get(), shown, [](const WindowOptions& set) {
             g_mailbox.SetListPictures(set.listPictures);
@@ -1841,6 +1857,15 @@ void OnCommand(WORD id, WORD code) {
             SetPreference(kCodesPreference, set.codes ? 1 : 0);
             pe_set_codes_in_notifications(set.codes);
             g_mailbox.SetGrouped(set.threads);
+            // the messages shown with or without the previews of their files
+            if (set.previews != pe_show_previews(g_core.get()) || set.pdfPreviews != pe_pdf_previews(g_core.get())) {
+                pe_set_show_previews(g_core.get(), set.previews);
+                pe_set_pdf_previews(g_core.get(), set.pdfPreviews);
+                // one after the other, the main window's first
+                std::vector<Reader*> readers = MessageWindowReaders();
+                readers.insert(readers.begin(), g_mailbox.MessageReader());
+                Reader::Rebuild(std::move(readers));
+            }
         });
         if (restart) {
             // as File > Exit, the messages being written asked first; started again once the window is gone
@@ -2079,6 +2104,16 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_arguments.testHooks && data->dwData == kTestHoldList && data->cbData >= sizeof(wchar_t)) {
             g_mailbox.TestHoldList(*static_cast<const wchar_t*>(data->lpData) == L'1');
             return 1;
+        }
+        if (g_arguments.testHooks && data->dwData == kTestPreviews && data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring query(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            if (query.starts_with(L"window:")) {
+                return static_cast<LRESULT>(MessageWindowTestPreviews(query.substr(7)));
+            }
+            return static_cast<LRESULT>(g_mailbox.TestPreviews(query));
+        }
+        if (g_arguments.testHooks && data->dwData == kTestPdfCrashed) {
+            return pe_pdf_previews_crashed_for_tests(g_core.get()) ? 1 : 0;
         }
         if (g_arguments.testHooks && data->dwData == kTestFromStore) {
             return pe_last_open_from_store(g_core.get()) ? 11 : 10;

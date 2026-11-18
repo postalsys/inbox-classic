@@ -4,8 +4,12 @@
 #include "preview.h"
 
 #include <shellapi.h>
+#include <shlwapi.h>
 
 #include <algorithm>
+#include <climits>
+#include <cstring>
+#include <map>
 #include <utility>
 
 #include "app.h"
@@ -21,6 +25,26 @@ namespace {
 
 // where the documents are served from memory (webview.h); .invalid never resolves
 const wchar_t* kPageUrl = L"https://preview.inboxclassic.invalid/";
+
+// where the page asks for the pictures of the previews of attachments (root-relative /pv/ in the document)
+const wchar_t* kPreviewsUrl = L"https://preview.inboxclassic.invalid/pv/";
+
+// the Previews keeping a request for each ask, until the core answers it
+std::map<uint64_t, Preview*> g_asks;
+
+// the UI test's looks at the previews: the pictures (how many, how many loaded, how many are PDF pages, a notice), and
+// the middle of a file's first picture (or the link to all of a PDF file's pages), scrolled into view, in pixels of
+// the pane
+const wchar_t* kPreviewsState =
+    L"(()=>{const s=document.querySelector('section[class^=\"pe-att-\"]');"
+    L"const a=[...document.images].filter(i=>i.src.includes('/pv/'));"
+    L"const l=a.filter(i=>i.complete&&i.naturalWidth>0).length,p=a.filter(i=>i.classList.contains('p')).length;"
+    L"return a.length*1000000+l*10000+p*100+(s&&s.querySelector('.w')?1:0)})()";
+std::wstring PreviewsPoint(const wchar_t* element) {
+    return std::wstring(L"(()=>{const f=document.querySelectorAll('section[class^=\"pe-att-\"] figure');const e=") + element +
+           L";if(!e)return 0;e.scrollIntoView({block:'center'});const r=e.getBoundingClientRect(),d=devicePixelRatio;"
+           L"return Math.round((r.left+r.width/2)*d)*100000+Math.round((r.top+r.height/2)*d)})()";
+}
 
 // the UI test's look at a page of parts: how many frames, whether each is as tall as its document, their heights
 const wchar_t* kFramesCheck =
@@ -94,7 +118,10 @@ void Preview::Configure() {
                 document = parts_[static_cast<size_t>(index)];
             }
             return true;
-        });
+        },
+        // the pictures of the previews, answered once the core has them
+        [this](const wchar_t* uri, ICoreWebView2WebResourceRequestedEventArgs* args) { return AskPreview(uri, args); });
+    TrimMenu();
 
     // links open in the browser, the pane only ever shows the documents it is given
     view_->add_NavigationStarting(
@@ -197,10 +224,164 @@ void Preview::Configure() {
         controller_->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
     }
     if (pending_) {
-        Show(document_, remoteImages_, parts_);
+        // the document given before, with the token of its previews
+        Load();
     } else {
         Clear();
     }
+}
+
+bool Preview::AskPreview(const wchar_t* uri, ICoreWebView2WebResourceRequestedEventArgs* args) {
+    if (!core_ || !StartsWith(uri, kPreviewsUrl)) {
+        return false;
+    }
+    // the core only looks the address up here; the picture is read and drawn off this thread, PreviewAnswered follows
+    uint64_t ask = pe_preview_ask(core_, core::Narrow(uri).c_str());
+    ComPtr<ICoreWebView2Deferral> deferral;
+    if (ask && SUCCEEDED(args->GetDeferral(&deferral)) && deferral) {
+        waiting_[ask] = {args, deferral};
+        g_asks[ask] = this;
+        return true;
+    }
+    // no preview of the document shown (or one the core answers to nobody, then dropped in Answered)
+    ComPtr<ICoreWebView2WebResourceResponse> response;
+    environment_->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
+    args->put_Response(response.Get());
+    return true;
+}
+
+void Preview::Answered(PeCore* core, uint64_t ask) {
+    PePreviewAnswer* answer = pe_preview_answer(core, ask);
+    if (auto found = g_asks.find(ask); found != g_asks.end()) {
+        Preview* preview = found->second;
+        g_asks.erase(found);
+        preview->Answer(ask, pe_preview_answer_picture(answer));
+    }
+    pe_preview_answer_free(answer);
+}
+
+void Preview::Answer(uint64_t ask, const PePreviewPicture* picture) {
+    auto found = waiting_.find(ask);
+    if (found == waiting_.end()) {
+        return;
+    }
+    Waiting request = std::move(found->second);
+    waiting_.erase(found);
+    ComPtr<ICoreWebView2WebResourceResponse> response;
+    // the core's own encode, one of two types
+    bool known = picture && picture->mime_type &&
+                 (std::strcmp(picture->mime_type, "image/png") == 0 || std::strcmp(picture->mime_type, "image/jpeg") == 0);
+    if (environment_ && known && picture->bytes && picture->length > 0 && picture->length <= UINT_MAX) {
+        ComPtr<IStream> stream;
+        stream.Attach(SHCreateMemStream(picture->bytes, static_cast<UINT>(picture->length)));
+        std::wstring headers = L"Content-Type: " + core::Widen(picture->mime_type) + L"\r\nCache-Control: no-store";
+        if (stream) {
+            environment_->CreateWebResourceResponse(stream.Get(), 200, L"OK", headers.c_str(), &response);
+        }
+    }
+    if (!response && environment_) {
+        environment_->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
+    }
+    if (response) {
+        request.args->put_Response(response.Get());
+    }
+    request.deferral->Complete();
+}
+
+void Preview::EndPreviews() {
+    if (core_ && !previewToken_.empty()) {
+        pe_previews_end(core_, previewToken_.c_str());
+    }
+    previewToken_.clear();
+    // finished now: the core's answers to them, which follow, find nobody waiting
+    std::map<uint64_t, Waiting> waiting = std::exchange(waiting_, {});
+    for (const auto& [ask, request] : waiting) {
+        g_asks.erase(ask);
+        ComPtr<ICoreWebView2WebResourceResponse> response;
+        if (environment_) {
+            environment_->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
+            request.args->put_Response(response.Get());
+        }
+        request.deferral->Complete();
+    }
+}
+
+void Preview::TrimMenu() {
+    ComPtr<ICoreWebView2_11> view;
+    if (FAILED(view_.As(&view))) {
+        return;
+    }
+    view->add_ContextMenuRequested(
+        Callback<ICoreWebView2ContextMenuRequestedEventHandler>([](ICoreWebView2*, ICoreWebView2ContextMenuRequestedEventArgs* args) {
+            ComPtr<ICoreWebView2ContextMenuTarget> target;
+            BOOL hasSource = FALSE;
+            LPWSTR source = nullptr;
+            if (FAILED(args->get_ContextMenuTarget(&target)) || !target || FAILED(target->get_HasSourceUri(&hasSource)) || !hasSource ||
+                FAILED(target->get_SourceUri(&source))) {
+                return S_OK;
+            }
+            bool preview = StartsWith(source, kPreviewsUrl);
+            CoTaskMemFree(source);
+            ComPtr<ICoreWebView2ContextMenuItemCollection> items;
+            UINT32 count = 0;
+            if (!preview || FAILED(args->get_MenuItems(&items)) || !items || FAILED(items->get_Count(&count))) {
+                return S_OK;
+            }
+            // a preview is Inbox Classic's copy of the file, not the file: nothing saves or opens it as if it were;
+            // Copy Image stays
+            for (UINT32 i = count; i-- > 0;) {
+                ComPtr<ICoreWebView2ContextMenuItem> item;
+                LPWSTR name = nullptr;
+                if (FAILED(items->GetValueAtIndex(i, &item)) || FAILED(item->get_Name(&name)) || !name) {
+                    continue;
+                }
+                std::wstring kind = name;
+                CoTaskMemFree(name);
+                bool image = kind.find(L"Image") != std::wstring::npos && kind != L"copyImage";
+                bool link = kind == L"saveLinkAs" || kind == L"copyLinkLocation" || kind == L"openLinkInNewWindow";
+                if (image || link) {
+                    items->RemoveValueAtIndex(i);
+                }
+            }
+            return S_OK;
+        }).Get(),
+        nullptr);
+}
+
+int64_t Preview::TestPreviews(const std::wstring& query) {
+    std::wstring script;
+    if (query == L"state") {
+        script = kPreviewsState;
+    } else if (query == L"photo") {
+        script = PreviewsPoint(L"f[0]&&f[0].querySelector('img')");
+    } else if (query == L"second") {
+        script = PreviewsPoint(L"f[1]&&f[1].querySelector('img')");
+    } else if (query == L"last") {
+        script = PreviewsPoint(L"f[f.length-1]&&f[f.length-1].querySelector('img')");
+    } else if (query == L"overflow") {
+        // how far the page is wider than the pane, 0 when it fits
+        script = L"Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth)";
+    } else if (query == L"more") {
+        script = PreviewsPoint(L"document.querySelector('section[class^=\"pe-att-\"] a.m')");
+    } else {
+        return -1;
+    }
+    auto last = testPreviews_.find(query);
+    int64_t answer = last != testPreviews_.end() ? last->second : -1;
+    testPreviews_.erase(query);
+    if (view_) {
+        view_->ExecuteScript(script.c_str(), Callback<ICoreWebView2ExecuteScriptCompletedHandler>([this, query](HRESULT result, LPCWSTR json) {
+                                                 testPreviews_[query] = SUCCEEDED(result) && json ? _wtoi64(json) : -1;
+                                                 return S_OK;
+                                             }).Get());
+    }
+    // a point in the pane, on the screen
+    if (answer > 0 && query != L"state" && query != L"overflow") {
+        POINT origin = {bounds_.left, bounds_.top};
+        ClientToScreen(parent_, &origin);
+        answer = (origin.x + answer / 100000) * 100000 + origin.y + answer % 100000;
+    }
+    return answer;
 }
 
 void Preview::Follow(const wchar_t* uri) {
@@ -210,9 +391,11 @@ void Preview::Follow(const wchar_t* uri) {
     OpenExternally(uri);
 }
 
-void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std::string> parts) {
-    // the places found were in the document before
+void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std::string> parts, const char* previewToken) {
+    // the places found were in the document before, its previews too
     StopFind();
+    EndPreviews();
+    previewToken_ = previewToken ? previewToken : "";
     remoteImages_ = remoteImages;
     parts_ = std::move(parts);
     remoteRequests_ = 0;
@@ -222,6 +405,10 @@ void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std:
         pending_ = true;
         return;
     }
+    Load();
+}
+
+void Preview::Load() {
     pending_ = false;
     // a new address for each document, so it is loaded again rather than taken from history; a folder, so the frames of
     // a page of parts ask for theirs beside it (part-N)
@@ -372,6 +559,7 @@ void Preview::StopFind() {
 
 void Preview::Close() {
     StopFind();
+    EndPreviews();
     if (controller_) {
         webview::UntrackTextZoom(controller_.Get());
         controller_->Close();

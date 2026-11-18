@@ -27,10 +27,13 @@ void CreateIn(HWND parent, ICoreWebView2Environment* environment,
 
 // answers every request: `serve` gives the document for the address of the page (`url` is its prefix), anything else
 // from the network is refused unless `allow` says otherwise. `part`, when there is one, answers the other addresses
-// under `url` it knows (a signed or encrypted message's parts): true with the document in UTF-8, empty for none (404)
+// under `url` it knows (a signed or encrypted message's parts): true with the document in UTF-8, empty for none (404).
+// `later`, when there is one, is asked first: true when it took the request to answer itself (a preview's picture,
+// answered once the core has it, with the request's deferral)
 void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, const wchar_t* url,
                     std::function<const std::wstring&()> serve, std::function<bool(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT)> allow,
-                    std::function<bool(const wchar_t* uri, std::string& document)> part = nullptr);
+                    std::function<bool(const wchar_t* uri, std::string& document)> part = nullptr,
+                    std::function<bool(const wchar_t* uri, ICoreWebView2WebResourceRequestedEventArgs* args)> later = nullptr);
 
 // a picture from the internet, which a page loads only when the user allowed it for the message shown: http(s), an
 // image, not the page's own address `url`

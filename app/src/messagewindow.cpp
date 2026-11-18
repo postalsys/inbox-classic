@@ -578,6 +578,25 @@ bool OpenMessageFile(HWND main, PeCore* core, Mailbox* mailbox, const std::wstri
     return true;
 }
 
+std::vector<Reader*> MessageWindowReaders() {
+    std::vector<Reader*> readers;
+    for (HWND hwnd : MessageWindows()) {
+        if (MessageWindow* state = StateOf(hwnd)) {
+            readers.push_back(&state->reader);
+        }
+    }
+    return readers;
+}
+
+int64_t MessageWindowTestPreviews(const std::wstring& query) {
+    for (HWND hwnd : MessageWindows()) {
+        if (MessageWindow* state = StateOf(hwnd)) {
+            return state->reader.TestPreviews(query);
+        }
+    }
+    return -1;
+}
+
 void MessageWindowsEvent(const UiEvent& event) {
     for (HWND hwnd : MessageWindows()) {
         MessageWindow* state = StateOf(hwnd);

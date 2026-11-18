@@ -506,12 +506,17 @@ struct WindowOptions {
     bool threads = false;
     int layout = 0;
     bool listPictures = true;
+    // the core's, set by the window as the views of the messages shown are built again with them
+    bool previews = true;
+    bool pdfPreviews = true;
     bool operator==(const WindowOptions&) const = default;
 };
 // Tools > Options, a tab for each page of core/settings.toml, the main window's settings from `window`; OK and Apply
 // hand `apply` what it is to set, Cancel undoes what was changed since the last Apply. True when the user chose to
 // restart now for a new language
 bool OptionsDialog(HWND owner, PeCore* core, const WindowOptions& window, const std::function<void(const WindowOptions&)>& apply);
+// the core turned PDF previews off (PdfPreviewsOff): an open Options shows it so, as set
+void OptionsPdfPreviewsOff();
 // Tools > Make Default Mail App, and its button in Options: Windows' Default Apps settings, where only the user can
 // choose it, or what says it is chosen already
 void MakeDefaultMailApp(HWND owner);
@@ -610,6 +615,11 @@ void OpenMessageWindow(HWND main, PeCore* core, Mailbox* mailbox, MessageListOrd
 bool OpenMessageFile(HWND main, PeCore* core, Mailbox* mailbox, const std::wstring& path, std::wstring& error);
 // an event of the core for the open message windows: their message ready or failed, gone from its folder
 void MessageWindowsEvent(const UiEvent& event);
+// the readers of the open message windows, to build their views again after a setting they follow changed (the
+// previews: Reader::Rebuild)
+std::vector<Reader*> MessageWindowReaders();
+// the UI test's look at the previews of the message in the first message window (Preview::TestPreviews), -1 for none
+int64_t MessageWindowTestPreviews(const std::wstring& query);
 // a key in a message window that is one of its shortcuts (Esc, Delete, Ctrl+R, Ctrl+Shift+R, Ctrl+F, Ctrl+P): true when
 // handled
 bool MessageWindowKey(const MSG& msg);
@@ -718,6 +728,10 @@ public:
     int64_t TestFrames() { return reader_.TestFrames(); }
     // the UI test's count of requests of the message shown to the internet (Preview::RemoteRequests)
     int TestRemoteRequests() const { return reader_.RemoteRequests(); }
+    // the UI test's look at the previews of the message shown (Preview::TestPreviews)
+    int64_t TestPreviews(const std::wstring& query) { return reader_.TestPreviews(query); }
+    // the reader of the message shown, to build its view again after a setting it follows changed (Reader::Rebuild)
+    Reader* MessageReader() { return &reader_; }
     DWORD TestDropFiles(HTREEITEM item, const std::vector<std::wstring>& paths);
     // what a background save or forward of several messages finished with (WM_FILES_DONE)
     void FilesDone(LPARAM done);
@@ -1442,6 +1456,8 @@ enum ControlId : WORD {
     // no control: the reading pane's "Show the message that bounced" clicked, sent to its window once the WebView2's
     // event is over
     IDC_BOUNCED_MESSAGE,
+    // no control: a preview of an attachment after the message's text clicked, likewise
+    IDC_OPEN_PREVIEW,
     // in the status bar: takes back the message that waits to be sent (Undo Send)
     IDC_UNDO_SEND = 225,
     // the toolbar of a message window, and its Previous and Next buttons
@@ -1557,6 +1573,10 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_SEARCH_ENCRYPTED_NOTE,
     IDC_OPTIONS_KEYSERVER,
     IDC_OPTIONS_KEYSERVER_NOTE,
+    // Reading > Messages: pictures and PDF files after a message's text, its note, and PDF files under it
+    IDC_OPTIONS_PREVIEWS,
+    IDC_OPTIONS_PREVIEWS_NOTE,
+    IDC_OPTIONS_PDF_PREVIEWS,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -22,7 +23,21 @@ public:
     // remoteImages lets images from the network load, for this document only. `parts`: the documents of a page of
     // parts (a signed or encrypted message, UTF-8), each in a frame of its own that asks for `part-N` beside the page;
     // their frames are sized to their documents once it loaded and on each Measure()
-    void Show(const std::wstring& html, bool remoteImages = false, std::vector<std::string> parts = {});
+    // `previewToken`: the token of the view whose document it is (PeMessageInfo.preview_token), whose previews' pictures
+    // its page asks for under /pv/ (ServePreviews); the previews of the document before are ended
+    void Show(const std::wstring& html, bool remoteImages = false, std::vector<std::string> parts = {}, const char* previewToken = nullptr);
+    // before Create: the pictures of the previews of attachments its documents show, asked of `core` (pe_preview_ask)
+    // and answered once the core has them (Answered), never waited for on the window thread
+    void ServePreviews(PeCore* core) { core_ = core; }
+    // a PreviewAnswered of the core: the Preview that keeps that ask answers its page, with the picture or "not found";
+    // an ask no Preview keeps any more (its document gone) is taken from the core all the same
+    static void Answered(PeCore* core, uint64_t ask);
+    // the UI test's look at the previews of the document shown, as TestFrames: `query` "state" (how many pictures,
+    // how many of them loaded, how many are PDF pages, and whether the section has a notice), "photo"/"second"/"last"
+    // (the middle of the first, second or last file's first picture, scrolled into view, on the screen), "more" (the
+    // link to all of a PDF file's pages, likewise), "overflow" (how far the page is wider than the pane); -1 before
+    // there is an answer
+    int64_t TestPreviews(const std::wstring& query);
     // the frames of the page shown sized again to their documents (the core's script, run by the app with the page's
     // own scripts off), when it is a page of parts
     void Measure();
@@ -73,6 +88,18 @@ public:
 
 private:
     void Configure();
+    // the document given (document_) loaded, at an address of its own
+    void Load();
+    // a request of the page for a preview's picture (under /pv/): kept until the core answers it (Answered), or
+    // answered "not found" now; true when it was one
+    bool AskPreview(const wchar_t* uri, ICoreWebView2WebResourceRequestedEventArgs* args);
+    // the picture of `ask` given to the page (NULL: "not found"), its request finished
+    void Answer(uint64_t ask, const PePreviewPicture* picture);
+    // the document shown no longer: the core told, its requests still waiting finished with "not found"
+    void EndPreviews();
+    // the reading pane's own menu: the browser's items for saving or opening a preview's picture taken off (the
+    // picture is Inbox Classic's copy, not the file)
+    void TrimMenu();
 
     HWND parent_ = nullptr;
     RECT bounds_ = {};
@@ -87,6 +114,16 @@ private:
     bool remoteImages_ = false;
     // the documents of the parts of the page shown, in frames sized by Measure(); none for another page
     std::vector<std::string> parts_;
+    // the core its previews are asked of (none: the help, which has none), the token of the document shown, and its
+    // requests waiting for their pictures, by their asks
+    PeCore* core_ = nullptr;
+    std::string previewToken_;
+    struct Waiting {
+        Microsoft::WRL::ComPtr<ICoreWebView2WebResourceRequestedEventArgs> args;
+        Microsoft::WRL::ComPtr<ICoreWebView2Deferral> deferral;
+    };
+    std::map<uint64_t, Waiting> waiting_;
+    std::map<std::wstring, int64_t> testPreviews_;
     int remoteRequests_ = 0;
     int64_t testFrames_ = -1;
     bool textZoom_ = true;
