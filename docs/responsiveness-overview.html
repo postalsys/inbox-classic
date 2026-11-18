@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Responsiveness Review</title>
+<style>
+:root{
+  --bg:#f6f5f1;--panel:#fff;--ink:#1d1f24;--muted:#5d6370;--line:#e2e0d9;
+  --accent:#1f5fae;--soft:#e6eefa;--s:#1d7a46;--sbg:#e3f3ea;--m:#946200;--mbg:#fbf0d6;--l:#a3352b;--lbg:#f9e4e1;
+  --send:#1f5fae;--read:#1d7a46;--sort:#6b4fb3;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:46px 0 6px}
+h3{font-size:16.5px;margin:0}
+p{margin:0 0 10px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.lede{color:var(--muted);font-size:16px;max-width:780px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:22px}
+.sub{color:var(--muted);margin-bottom:16px;max-width:780px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.road{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-top:14px}
+.step{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--send);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.step.read{border-top-color:var(--read)}.step.sort{border-top-color:var(--sort)}
+.step b{display:block;font-size:14px}
+.step .n{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sz{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.sz.S{background:var(--sbg);color:var(--s)}.sz.M{background:var(--mbg);color:var(--m)}.sz.L{background:var(--lbg);color:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.feat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--send);border-radius:10px;padding:18px 20px;margin:14px 0}
+.feat.read{border-left-color:var(--read)}.feat.sort{border-left-color:var(--sort)}
+.feat header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:8px}
+.pr{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.cols{display:grid;gap:8px 28px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:8px}
+.cols h4{margin:8px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.cols ul{font-size:14px}
+.mock{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;white-space:pre;overflow-x:auto}
+.flow{counter-reset:f;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:f;position:relative;padding:9px 12px 9px 46px;border-bottom:1px solid var(--line);margin:0}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);position:absolute;left:12px;top:9px;width:23px;height:23px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.flow li.key{background:var(--soft)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td:first-child{font-weight:600;white-space:nowrap}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.small{font-size:13px;color:var(--muted)}
+.step.key{border-top-color:var(--sort)}.step.hard{border-top-color:var(--l)}
+.feat.key{border-left-color:var(--sort)}.feat.hard{border-left-color:var(--l)}
+.msg{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);margin-top:12px;max-width:760px}
+.bar{padding:9px 14px;background:var(--soft);border-bottom:1px solid var(--line);font-size:13.5px}
+.bar b{color:var(--accent)}
+.bar .native,.page .native{float:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.page{padding:12px 14px 14px}
+.frame{border:2px solid var(--line);border-radius:8px;margin:10px 0 0;font-size:14px}
+.frame .lab{font-size:12.5px;font-weight:700;padding:4px 10px;border-bottom:1px solid var(--line)}
+.frame .txt{padding:8px 10px}
+.frame.ok{border-color:var(--s)}.frame.ok .lab{background:var(--sbg);color:var(--s);border-color:var(--s)}
+.frame.known{border-color:var(--accent)}.frame.known .lab{background:var(--soft);color:var(--accent);border-color:var(--accent)}
+.frame.warn{border-color:var(--m)}.frame.warn .lab{background:var(--mbg);color:var(--m);border-color:var(--m)}
+.frame.none .lab{color:var(--muted)}
+.fake{border:2px solid var(--s);border-radius:8px;margin-top:6px}
+.fake .lab{background:var(--sbg);color:var(--s);font-size:12.5px;font-weight:700;padding:4px 10px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--sbg);color:var(--s)}.pill.known{background:var(--soft);color:var(--accent)}.pill.warn{background:var(--mbg);color:var(--m)}.pill.none{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pipe{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px}
+.pipe div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px}
+.pipe b{display:block;font-size:13.5px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Instant feedback, then the data</h1>
+<p class="lede">Clicking All Inboxes waits for the message list before the folder row even shows as chosen. The same pattern runs through the app: every list query runs on the window thread, inside the click. This review measures it, says what a principal mail app does instead, and proposes a plan in three steps for Windows, the Mac and Linux.</p>
+<p class="meta">16 November 2026 · measured on a synthetic store of 3 accounts, 232,000 messages (Inboxes of 30k, 60k and 100k, a third in conversations), M5 Pro with the file cache warm: a cold disk or the Windows build machine is several times slower · no board post matches</p>
+
+<h2>What happens today</h2>
+<div class="grid">
+  <div class="card">
+    <h3>The click waits for the list</h3>
+    <ul>
+      <li>All three apps run the list work inside the tree's selection-changed handler, so the new highlight paints only after it.</li>
+      <li>For All Inboxes grouped by conversation (the default): counts, row count and the first page, <b>about 80 ms</b> here, several times that on a real disk or a slower PC.</li>
+      <li>Startup runs the same path plus finding the newest message (about 90 ms more) before the first paint.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Why the queries are slow</h3>
+    <ul>
+      <li>Grouping by conversation runs <code>GROUP BY thread_id</code> over every message of the list for each page, each click on a row, and Next Unread (55 to 130 ms).</li>
+      <li>Window functions over the whole list: a message window's previous and next (110 to 250 ms), finding a message's row (up to 130 ms), Select All (675 ms grouped).</li>
+      <li>Counts read every Inbox row, and twice when not grouped.</li>
+      <li>Sorting several folders by sender has no index: the last page takes 750 ms.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Where else the window freezes</h3>
+    <ul>
+      <li>Syncing: each change to the folder shown reloads the list at once (about 170 ms in All Inboxes), so it stutters while mail arrives.</li>
+      <li>Every click on a row in a grouped list: 55 to 85 ms.</li>
+      <li>Opening a message reads its whole source on the window thread; Reply, Forward, a draft and an attachment parse and decrypt there.</li>
+      <li>Mark All Read on 20,000 unread: about 2 s. Moving or deleting many: one long transaction on the window thread.</li>
+      <li>The Address Book searches on every key press.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>A real bug</h3>
+    <ul>
+      <li>A search grouped by conversation, then Expand All: <b>6.7 seconds</b> frozen. SQLite probes every open conversation for every search hit (a cross product). All three apps.</li>
+      <li>Background work (saving files, pictures) takes the same store lock, so the window also waits behind it.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>The principle</h2>
+<div class="feat sort">
+  <header><h3>Answer the hand at once; bring the data as soon as it is there</h3></header>
+  <div class="cols">
+    <div><h4>Within one frame (16 ms)</h4><ul><li>The row clicked is highlighted, the folder bar and window title say where you are, the keyboard focus moves</li><li>Nothing that reads the store runs in the click</li></ul></div>
+    <div><h4>Within 100 ms</h4><ul><li>The list shows the new folder: counts and the first rows</li><li>Until then the previous list stays, quietly dimmed, never an empty flash</li></ul></div>
+    <div><h4>After 400 ms</h4><ul><li>Only then a small "Loading" in the list (a slow disk, a huge search), never a spinner for short waits</li><li>A newer click wins: a list nobody waits for any more is thrown away</li></ul></div>
+  </div>
+</div>
+<div class="mock">Click All Inboxes
+ 0 ms   row highlighted, title "All Inboxes", folder bar, focus     (window thread)
+ 0 ms   request: list of All Inboxes, generation 7                  (core, its own read connection)
+        previous list dimmed, still scrollable
+60 ms   counts + first 100 rows of generation 7 arrive → list drawn, status bar counts
+        (generation 6 arriving later is dropped)
+400 ms  only if nothing arrived yet: "Loading..." in the list</div>
+
+<h2>The plan</h2>
+<div class="road">
+  <div class="step"><span class="n">Step 1 · days</span><b>Paint first <span class="sz S">S</span></b>Defer the list work past the click, fix the 6.7 s plan, count once, debounce, quiet sync reloads.</div>
+  <div class="step read"><span class="n">Step 2 · a week</span><b>Lists off the window thread <span class="sz M">M</span></b>The core loads a list in the background on its own read connection, newest request wins, as message views already do.</div>
+  <div class="step hard"><span class="n">Step 3 · a week or two</span><b>Queries that do not grow <span class="sz L">L</span></b>Counts kept up to date, a conversation summary table, keyset paging: big lists cost what small ones do.</div>
+</div>
+
+<h2>Step 1: paint first (quick wins)</h2>
+<div class="feat">
+  <header><h3>Feedback before the queries</h3><span class="pr">one PR, three apps</span></header>
+  <div class="cols">
+    <div><h4>Folder click</h4><ul><li>The selection handler only records the row and schedules the list load for after the paint (Windows: PostMessage; Mac: perform after the run loop turn; Linux: idle callback). The highlight, title and folder bar paint at once</li><li>The old list is dimmed until the new one is drawn</li><li>Startup: show the window with the tree first, then the list</li></ul></div>
+    <div><h4>Core fixes</h4><ul><li>The grouped count with a search: materialize the conversations first, then count (6.7 s to milliseconds)</li><li>Not grouped: the row count is the count already made, not a second query</li><li>A list's sort no longer re-checks the folder's counts on every page (Linux paid two COUNTs per page)</li><li>A grouped row click uses the page already in memory, not a new GROUP BY</li></ul></div>
+    <div><h4>Quieter while syncing</h4><ul><li>Changes to the folder shown are gathered for 300 ms, as All lists are already</li><li>A reload during sync refreshes counts and the visible rows only, keeping scroll and selection without finding the row again</li><li>Address Book search waits 150 ms after the last key</li></ul></div>
+  </div>
+</div>
+
+<h2>Step 2: lists off the window thread</h2>
+<div class="feat read">
+  <header><h3>One request, one answer, newest wins</h3><span class="pr">core + three apps</span></header>
+  <div class="cols">
+    <div><h4>The core</h4><ul><li><code>pe_list_view_load(view, generation)</code>: counts, row count, the first page and the selected row's place, computed on a read connection of its own (WAL lets it read while sync writes), answered with a <code>ListReady</code> event</li><li>Later pages the same way, prefetched one page ahead</li><li>The pattern of message views today: the newest request wins, older ones are cancelled</li></ul></div>
+    <div><h4>The apps</h4><ul><li>Draw from the snapshot the event brings; never query in a paint</li><li>Rows not yet here show as blank lines of the right height (no jumping), filled when their page arrives</li><li>Sort, grouping, Hide Read and Expand All use the same load</li></ul></div>
+    <div><h4>Also off the window thread</h4><ul><li>Opening a message: its source read in the background, as parsing already is</li><li>Reply, Forward, drafts, attachments</li><li>Mark All Read, moving and deleting many: done in the background, the list updated at once (the rows disappear or turn read); if the server refuses, the rows come back and a bar over the list says why</li><li>Select All gives its count at once; the full list of messages only when a command needs it</li></ul></div>
+  </div>
+</div>
+
+<h2>Step 3: queries that do not grow with the mailbox</h2>
+<div class="feat hard">
+  <header><h3>Big lists cost what small ones do</h3><span class="pr">core, a migration</span></header>
+  <div class="cols">
+    <div><h4>Counts kept, not counted</h4><ul><li>Each folder's total and unread kept in the folders table, updated as messages change</li><li>All Inboxes, All Sent and All Drafts add up their folders: instant at any size</li></ul></div>
+    <div><h4>Conversations summarized</h4><ul><li>A table of each conversation in each folder (newest date, count, unread, flagged), indexed by folder and date</li><li>The grouped first page reads it by index across the Inboxes instead of grouping every message</li></ul></div>
+    <div><h4>Paging by key</h4><ul><li>Pages, previous and next, and a message's place found from its sort key with an index, not by OFFSET or window functions over the whole list</li><li>Sorting several folders by sender or subject: indexes for those orders too</li></ul></div>
+  </div>
+</div>
+
+<h2>Targets, checked by a benchmark in CI</h2>
+<div class="tablewrap">
+<table>
+<tr><th>Moment</th><th>Today (232k messages)</th><th>After step 1</th><th>After steps 2 and 3</th></tr>
+<tr><td>Folder row highlighted</td><td>after the list, 80 ms or more</td><td>at once</td><td>at once</td></tr>
+<tr><td>All Inboxes drawn (grouped)</td><td>80 ms, blocking</td><td>80 ms, after the highlight</td><td>under 20 ms, never blocking</td></tr>
+<tr><td>Click on a grouped row</td><td>55 to 85 ms</td><td>under 5 ms</td><td>under 5 ms</td></tr>
+<tr><td>Message window previous and next</td><td>110 to 250 ms</td><td>same</td><td>under 5 ms</td></tr>
+<tr><td>Grouped search, Expand All</td><td>6.7 s</td><td>under 100 ms</td><td>under 50 ms</td></tr>
+<tr><td>Mail arriving while All Inboxes is shown</td><td>170 ms stutter each time</td><td>once per 300 ms, visible rows only</td><td>no stutter</td></tr>
+<tr><td>Mark All Read, 20k unread</td><td>about 2 s frozen</td><td>same</td><td>instant, done in the background</td></tr>
+</table>
+</div>
+
+<h2>How it is checked</h2>
+<ol class="flow">
+  <li>The benchmark used for this review becomes a test of the core: a store of 230k messages built once, each list operation timed against a budget, run in CI.</li>
+  <li>Each app's UI test measures the time from a folder click to the row highlighted and to the list drawn, with a large store, on all three platforms.</li>
+  <li class="key">A UX review of the waits from screenshots and screen recordings: no empty flashes, no jumping rows, the loading words only after 400 ms.</li>
+  <li>/simplify and /security-review per pull request, as always.</li>
+</ol>
+
+<h2>Decided</h2>
+<div class="tablewrap">
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>When</td><td>All three steps back to back, right after #9 (attachments) and #1 (settings and accounts), before #2 (languages) and the remaining OpenPGP pull requests</td></tr>
+<tr><td>While a list loads</td><td>The previous list stays, dimmed and not clickable, until the new one is drawn; "Loading..." only after 400 ms</td></tr>
+<tr><td>A big action the server refuses</td><td>Mark All Read, Move and Delete act on the list at once; if the server refuses, the rows come back as they were and a bar over the list says why, as Delete's Undo looks</td></tr>
+</table>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five More Languages</title>
+<style>
+:root{
+  --bg:#f6f5f1;--panel:#fff;--ink:#1d1f24;--muted:#5d6370;--line:#e2e0d9;
+  --accent:#1f5fae;--soft:#e6eefa;--s:#1d7a46;--sbg:#e3f3ea;--m:#946200;--mbg:#fbf0d6;--l:#a3352b;--lbg:#f9e4e1;
+  --send:#1f5fae;--read:#1d7a46;--sort:#6b4fb3;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:46px 0 6px}
+h3{font-size:16.5px;margin:0}
+p{margin:0 0 10px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.lede{color:var(--muted);font-size:16px;max-width:780px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:22px}
+.sub{color:var(--muted);margin-bottom:16px;max-width:780px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.road{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-top:14px}
+.step{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--send);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.step.read{border-top-color:var(--read)}.step.sort{border-top-color:var(--sort)}
+.step b{display:block;font-size:14px}
+.step .n{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sz{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.sz.S{background:var(--sbg);color:var(--s)}.sz.M{background:var(--mbg);color:var(--m)}.sz.L{background:var(--lbg);color:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.feat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--send);border-radius:10px;padding:18px 20px;margin:14px 0}
+.feat.read{border-left-color:var(--read)}.feat.sort{border-left-color:var(--sort)}
+.feat header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:8px}
+.pr{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.cols{display:grid;gap:8px 28px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:8px}
+.cols h4{margin:8px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.cols ul{font-size:14px}
+.mock{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;white-space:pre;overflow-x:auto}
+.flow{counter-reset:f;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:f;position:relative;padding:9px 12px 9px 46px;border-bottom:1px solid var(--line);margin:0}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);position:absolute;left:12px;top:9px;width:23px;height:23px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.flow li.key{background:var(--soft)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td:first-child{font-weight:600;white-space:nowrap}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.small{font-size:13px;color:var(--muted)}
+.step.key{border-top-color:var(--sort)}.step.hard{border-top-color:var(--l)}
+.feat.key{border-left-color:var(--sort)}.feat.hard{border-left-color:var(--l)}
+.msg{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);margin-top:12px;max-width:760px}
+.bar{padding:9px 14px;background:var(--soft);border-bottom:1px solid var(--line);font-size:13.5px}
+.bar b{color:var(--accent)}
+.bar .native,.page .native{float:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.page{padding:12px 14px 14px}
+.frame{border:2px solid var(--line);border-radius:8px;margin:10px 0 0;font-size:14px}
+.frame .lab{font-size:12.5px;font-weight:700;padding:4px 10px;border-bottom:1px solid var(--line)}
+.frame .txt{padding:8px 10px}
+.frame.ok{border-color:var(--s)}.frame.ok .lab{background:var(--sbg);color:var(--s);border-color:var(--s)}
+.frame.known{border-color:var(--accent)}.frame.known .lab{background:var(--soft);color:var(--accent);border-color:var(--accent)}
+.frame.warn{border-color:var(--m)}.frame.warn .lab{background:var(--mbg);color:var(--m);border-color:var(--m)}
+.frame.none .lab{color:var(--muted)}
+.fake{border:2px solid var(--s);border-radius:8px;margin-top:6px}
+.fake .lab{background:var(--sbg);color:var(--s);font-size:12.5px;font-weight:700;padding:4px 10px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--sbg);color:var(--s)}.pill.known{background:var(--soft);color:var(--accent)}.pill.warn{background:var(--mbg);color:var(--m)}.pill.none{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pipe{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px}
+.pipe div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px}
+.pipe b{display:block;font-size:13.5px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Five more languages</h1>
+<p class="lede">Brazilian Portuguese, Turkish, Norwegian, Catalan and Serbian: the next languages that need nothing but translation, about 300 million speakers. They run alongside the current work, as the 19 did.</p>
+<p class="meta">16 November 2026 · the full plan is <code>languages-wave1-plan.md</code> beside this page · the suggestions behind it: <code>more-languages-overview.html</code></p>
+
+<h2>Decided</h2>
+<div class="tablewrap">
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>Which</td><td>Wave 1 only: Brazilian Portuguese, Turkish, Norwegian (Bokmål), Catalan, Serbian. CJK (with a new search index) and right-to-left languages are not in this plan</td></tr>
+<tr><td>When</td><td>Alongside the current work; the test machines only for the language tours at the end</td></tr>
+<tr><td>Serbian</td><td>Latin script only (Srpski)</td></tr>
+<tr><td>Chinese, for later</td><td>Both Simplified and Traditional, if a CJK wave is planned</td></tr>
+</table>
+</div>
+
+<h2>The five</h2>
+<div class="grid">
+  <div class="card"><h3>Português (Brasil) <span class="sz S">pt-BR</span></h3><ul><li>Its own catalog beside Portugal's; the list shows both, with the country</li><li>Started from Portugal's: arquivo, tela, salvar, você</li><li>Brazilian systems get it; other Portuguese systems get Portugal's</li></ul></div>
+  <div class="card"><h3>Türkçe <span class="sz S">tr</span></h3><ul><li>A core test that search, sorting and address completion treat İ/i and I/ı as Turkish users expect</li></ul></div>
+  <div class="card"><h3>Norsk bokmål <span class="sz S">nb</span></h3><ul><li>Completes the Nordic languages</li><li>A system set to no or nb gets it; Nynorsk is not in this plan</li></ul></div>
+  <div class="card"><h3>Català <span class="sz S">ca</span></h3><ul><li>Apostrophe contractions around placeables (l', d') handled by rephrasing</li></ul></div>
+  <div class="card"><h3>Srpski <span class="sz S">sr-Latn</span></h3><ul><li>Latin script; a Serbian system gets it whichever script it uses</li></ul></div>
+</div>
+
+<h2>The order</h2>
+<div class="road">
+  <div class="step"><span class="n">1</span><b>Region tags <span class="sz S">S</span></b>The language list takes pt-BR and sr-Latn; a system's tag matched by language, then region or script; every generated list writes them as its platform expects.</div>
+  <div class="step read"><span class="n">2</span><b>Translations <span class="sz M">M</span></b>Five translators in parallel, the same brief and checker as the 19; Brazilian Portuguese from Portugal's catalog.</div>
+  <div class="step sort"><span class="n">3</span><b>Registration <span class="sz S">S</span></b>The list, the sign-in buttons, the glossary, the builds.</div>
+  <div class="step hard"><span class="n">4</span><b>Tours and review <span class="sz S">S</span></b>The three platforms' language tours, cut-offs fixed; then ready for your review.</div>
+</div>
+
+<h2>Checked by</h2>
+<ol class="flow">
+  <li><code>check-language.mjs</code> for each language; the core's catalog, plural and help tests over every language.</li>
+  <li>Tests of matching a system's language to pt-BR, pt, nb and sr-Latn.</li>
+  <li class="key">The Turkish matching test (İ/i, I/ı) for search, sorting and address completion.</li>
+  <li>The language tours on Windows, the Mac and Linux, with the longest words looked at.</li>
+  <li>/simplify and /security-review per pull request; the board post asks for native reviewers. No release until you have reviewed the translations.</li>
+</ol>
+</main>
+</body>
+</html>
