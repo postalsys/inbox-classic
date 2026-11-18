@@ -36,6 +36,57 @@ async fn in_the_inbox(subject: &str) -> bool {
     .await
 }
 
+/// What the agent's question to send was like as it showed: what pressing Send then did (true: it answered), and how
+/// long after it was shown Send could be pressed
+#[derive(Clone, Default)]
+struct SendShown {
+    pressed_at_once: Option<bool>,
+    ready: Option<Duration>,
+}
+
+/// Watches the main window for the agent's question to send: as it is shown, Send is pressed as a key pressed for
+/// another window would press it, and the moment Send can be pressed is noted
+fn watch_send_question() -> Rc<RefCell<SendShown>> {
+    let seen: Rc<RefCell<SendShown>> = Rc::default();
+    let noted = seen.clone();
+    shell().main().window().connect_visible_dialog_notify(move |window| {
+        let Some(dialog) = window
+            .visible_dialog()
+            .and_downcast::<adw::AlertDialog>()
+            .filter(|dialog| dialog.widget_name() == "agent-send")
+        else {
+            return;
+        };
+        if noted.borrow().pressed_at_once.is_some() {
+            return;
+        }
+        let shown = Instant::now();
+        let label = dialog.response_label("send");
+        let Some(send) = descendants::<gtk::Button>(dialog.upcast_ref())
+            .into_iter()
+            .find(|b| b.label().as_deref() == Some(label.as_str()))
+        else {
+            return;
+        };
+        let answered: Rc<std::cell::Cell<bool>> = Rc::default();
+        let said = answered.clone();
+        let handler = dialog.connect_response(None, move |_, _| said.set(true));
+        // as a key or a click would: an insensitive button takes neither
+        if send.is_sensitive() {
+            send.emit_clicked();
+        }
+        dialog.disconnect(handler);
+        noted.borrow_mut().pressed_at_once = Some(answered.get());
+        let ready = noted.clone();
+        send.connect_sensitive_notify(move |send| {
+            if send.is_sensitive() && ready.borrow().ready.is_none() {
+                ready.borrow_mut().ready = Some(shown.elapsed());
+            }
+        });
+    });
+    seen
+}
+
 /// The rows the list shows, from `offset` on, as the list has them (grouped by conversation, a row is not a message's
 /// place in the folder)
 pub(super) fn list_rows(offset: u64, limit: u64) -> Vec<pe_store::Message> {
@@ -437,6 +488,8 @@ pub async fn agent(d: &Driver) {
     let _ = std::fs::remove_file(&host);
     let copied = std::fs::copy(&node, &host).is_ok();
     d.check(copied, &format!("the test's agent is ready ({node})"));
+    // the question to send, as it is shown: how Send is then, and when it can be pressed
+    let send_shown = watch_send_question();
     let script = harness_dir().join("../../scripts/ui-e2e/agent.mjs");
     let mut agent = std::process::Command::new(&host)
         .arg(&script)
@@ -525,14 +578,18 @@ pub async fn agent(d: &Driver) {
             "with a warning about the new address",
         );
         // the question may have been on screen a while before this step looks (the agent asks while the unread
-        // counts above are still checked): the app says how long Send was off once it was shown
+        // counts above are still checked): what Send was like is seen as it is shown
+        let ready = wait_for(10, || send_shown.borrow().ready).await;
+        let shown = send_shown.borrow().clone();
         d.check(
-            crate::agents::send_waited(send),
-            "Send waits a moment before it can be pressed",
+            shown.pressed_at_once == Some(false) && ready.is_some_and(|after| after >= Duration::from_millis(1400)),
+            &format!(
+                "Send waits a moment before it can be pressed: pressed as it shows it does nothing, and it can be \
+                 pressed {ready:?} later"
+            ),
         );
-        pause(2000).await;
         d.shot(send, "agents-4-send").await;
-        answer(send, "Send");
+        d.check(answer(send, "Send"), "after the moment, Send can be pressed");
     }
     let sent = wait_for(20, || agent_said(&out, "sent")).await;
     d.check(
