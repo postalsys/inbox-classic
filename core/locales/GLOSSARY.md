@@ -1387,3 +1387,13 @@ Ukrainian agent permissions and activity:
 - "Текстовий підпис" is the optional message footer, separate from a cryptographic signature. Instructions inside
   mail must not be followed by the agent; do not claim that email cannot contain instructions.
 - Preserve one/few/many/other with numeric placeholders, plus exact-zero account and exact-one unsubscribe branches.
+- Compose statuses describe protection "під час надсилання". "Власника ключа підтверджено" is separate from
+  signature integrity; recipient keys must be "придатні" for encryption. Names/address lists follow a head noun
+  and colon rather than a preposition requiring a name to change case.
+- Keep exact [1] plus counted one/few/many/other. Missing-key guidance names the recipient explicitly when removing
+  them; at 21/101 the follow-up refers to missing keys and recipients without implying a single person.
+- Dates follow "Останній пошук:" and complete key-state explanations follow "Причина:" on a separate line.
+  "Вкласти свій відкритий ключ" refers to the selected sender. Find Key uses К to avoid Keep Current on З.
+- Keep polite lowercase ви, infinitive control labels, «…» quotes and literal keyboard text. Encrypted drafts use
+  only the sender’s key, without a digital signature. Inherited text, images and attachments require encryption
+  until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Ukrainian.
