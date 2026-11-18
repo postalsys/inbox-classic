@@ -686,6 +686,16 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   inherited encrypted text, images and attachments must be removed before unencrypted sending.
 - The attachment reminder currently recognizes English, German, Estonian, Spanish and French phrases, not Hungarian.
   Do not suggest a Hungarian example will trigger it or promise identical plain-text rendering in every mail app.
+- Reading/search help uses "keresési feltétel" and "keresési index". Indexing does not mark mail read; offline search
+  covers locally available data. Prefix matching needs at least two letters, and after: includes the UTC start date.
+- Keep search operator names/examples literal; to:/cc:/bcc: all search recipient fields. OR joins text alternatives,
+  and a minus does not negate every operator. Relative months/years mean 30/365 days. Unknown operators become words.
+- Help describes "nézet" for combined mail and Flagged, and "kibontás/összecsukás" for tree/conversation expansion.
+  With several accounts, Flagged follows All Inboxes, All Sent and All Drafts. Date-sorted conversations use their newest mail.
+- Articles follow inserted words and literal keys: az Enter but a Return; a Ctrl but az Option. Use colon-led menu paths,
+  a Keresés a titkosított üzenetekben, and az Üzenetek... settings. No a(z) or endings attached to inserted controls.
+- Permanent deletion also applies when the account lacks Deleted Items; emptying folders is not undoable. Watched
+  conversation notices still depend on notification settings. Decrypted searchable content is kept unencrypted locally.
 
 ### Nederlands (nl)
 
