@@ -301,6 +301,26 @@ public static bool FitsOwnFont(IntPtr hwnd, string text) {
     ReleaseDC(hwnd, dc);
     return need.Right <= width && need.Bottom <= client.Bottom - client.Top;
 }
+// the visible top-level windows of class `cls` of the processes `pids`, in z-order (the front one first)
+public static System.Collections.Generic.List<IntPtr> TopWindowsOf(uint[] pids, string cls) {
+    var found = new System.Collections.Generic.List<IntPtr>();
+    EnumWindows((hwnd, _) => {
+        uint pid;
+        GetWindowThreadProcessId(hwnd, out pid);
+        if (Array.IndexOf(pids, pid) < 0 || !IsWindowVisible(hwnd)) { return true; }
+        var name = new System.Text.StringBuilder(64);
+        GetClassName(hwnd, name, 64);
+        if (name.ToString() == cls) { found.Add(hwnd); }
+        return true;
+    }, IntPtr.Zero);
+    return found;
+}
+// the window that owns the menu of the thread of `menu` (GUITHREADINFO.hwndMenuOwner)
+public static IntPtr MenuOwnerOf(IntPtr menu) {
+    uint pid;
+    var info = new GUITHREADINFO { cbSize = Marshal.SizeOf(typeof(GUITHREADINFO)) };
+    return GetGUIThreadInfo(GetWindowThreadProcessId(menu, out pid), ref info) ? info.menuOwner : IntPtr.Zero;
+}
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
     var found = new System.Collections.Generic.List<IntPtr>();
@@ -370,7 +390,11 @@ Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
 $failures = @()
 # the apps started again (StartAgain), ended at the end should one hang
 $started = @()
-function Step([string]$text) { Write-Host "== $text" }
+function Step([string]$text) {
+    # whatever a step before left open over the app is closed first, so it can not fail the steps after it too
+    CloseStrays "before '$text'"
+    Write-Host "== $text"
+}
 function Check([bool]$ok, [string]$what) {
     if ($ok) { Write-Host "   ok: $what" } else { Write-Host "   FAILED: $what"; $script:failures += $what }
 }
@@ -573,65 +597,178 @@ function TypeInEditor([IntPtr]$compose, [string]$text) {
     Start-Sleep -Milliseconds 500
     return $true
 }
-# a file dialog answered: the path typed into its name box (characters, as the dialog keeps its own copy), then Open or Save
+# the process ids of the app: the run going on, and those started before it (a second start, a restart)
+# (an array, even of one)
+function AppIds { , [uint32[]]@(@($script:app) + @($script:started) | Where-Object { $_ -and -not $_.HasExited } | ForEach-Object { $_.Id }) }
+# a window's class and title, for the log
+function Describe([IntPtr]$w) {
+    $cls = New-Object System.Text.StringBuilder 64
+    [void][Native.Win]::GetClassName($w, $cls, 64)
+    "$cls '$(WindowText $w)'"
+}
+# a dialog of the app closed as a user would: Cancel, else No (a question with Yes and No only), else its close box.
+# Whether it closed
+function CloseDialog([IntPtr]$dialog) {
+    foreach ($answer in 2, 7) {
+        if (-not [Native.Win]::IsWindow($dialog)) { return $true }
+        if ($answer -eq 7 -and [Native.Win]::GetDlgItem($dialog, 7) -eq [IntPtr]::Zero) { continue }
+        [void][Native.Win]::PostMessage($dialog, $WM_COMMAND, [IntPtr]$answer, [Native.Win]::GetDlgItem($dialog, $answer))
+        if (WaitFor { -not [Native.Win]::IsWindow($dialog) } 3) { return $true }
+    }
+    [void][Native.Win]::PostMessage($dialog, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 5)
+}
+# what a step left open over the app closed: the popup menus and the dialogs (#32770: message boxes, file and folder
+# pickers) of the app's own processes, never a window of anything else, each one said in the log. The app's own
+# windows (forms, compose, the keys) are left as they are: a step may mean them to stay open
+function CloseStrays([string]$where) {
+    $ids = AppIds
+    if ($ids.Length -eq 0) { return }
+    foreach ($menu in [Native.Win]::TopWindowsOf($ids, '#32768')) {
+        Write-Host "   (closing a menu left open, $where)"
+        # Esc as the menu takes it, then the way EndMenu ends one: WM_CANCELMODE to the window it is for
+        Key $menu $VK_ESCAPE
+        if (-not (WaitFor { -not [Native.Win]::IsWindowVisible($menu) } 2)) {
+            $owner = [Native.Win]::MenuOwnerOf($menu)
+            if ($owner -ne [IntPtr]::Zero) { [void][Native.Win]::PostMessage($owner, 0x001F, [IntPtr]::Zero, [IntPtr]::Zero) }
+            [void](WaitFor { -not [Native.Win]::IsWindowVisible($menu) } 3)
+        }
+    }
+    # the front one first: a dialog over another is the one that takes input (the one under it is disabled)
+    for ($pass = 0; $pass -lt 5; $pass++) {
+        $open = @([Native.Win]::TopWindowsOf($ids, '#32770'))
+        if ($open.Count -eq 0) { return }
+        $dialog = $open[0]
+        $words = Statics $dialog
+        if ($words.Length -gt 160) { $words = $words.Substring(0, 160) + '...' }
+        $closed = CloseDialog $dialog
+        Write-Host "   (closing a dialog left open, $where`: $(Describe $dialog) $(if ($words) { "saying '$words'" }), $(if ($closed) { 'closed' } else { 'did not close' }))"
+    }
+}
+# a picture of the whole screen when a file dialog goes wrong (debug-file-dialog-<title>-<what>), to tell what held it up
+function DialogDebugShot([string]$kind, [string]$title, [string]$what) {
+    Shot ([Native.Win]::GetDesktopWindow()) "debug-$kind-dialog-$(($title -replace '[^\w]+', '-').Trim('-').ToLowerInvariant())-$what"
+}
+# the name box of a file dialog once it is ready to take a name: shown, enabled, the dialog shown and enabled, and the
+# box holding the keyboard focus, which the dialog gives it last when it is set up (it fills in the box before that,
+# over anything put there earlier). `find` gives the box; $null when there is none
+function ReadyNameBox([IntPtr]$dialog, [scriptblock]$find) {
+    $name = WaitFor {
+        $n = & $find
+        if ($n -and [Native.Win]::IsWindowVisible($dialog) -and [Native.Win]::IsWindowEnabled($dialog) -and
+            [Native.Win]::IsWindowVisible($n) -and [Native.Win]::IsWindowEnabled($n)) { $n }
+    } 20
+    if (-not $name) { return $null }
+    if (-not (WaitFor { [Native.Win]::FocusOf($dialog) -eq $name } 10)) {
+        Write-Host "   (the file dialog's name box did not get the focus: going on)"
+    }
+    # and what it holds no longer changing
+    [void](WaitFor { $a = WindowText $name; Start-Sleep -Milliseconds 300; if ((WindowText $name) -eq $a) { $true } } 5)
+    $name
+}
+# `text` put in a name box: all of it but the last character set at once (WM_SETTEXT), then that one typed at the end,
+# so the dialog sees an edit of the user's (it keeps its own copy of the name). Whether the box has it, and keeps it a
+# moment later. Where that does not take, every character typed
+function PutName([IntPtr]$name, [string]$text) {
+    $held = { $t = WindowText $name; if ($t -eq $text) { Start-Sleep -Milliseconds 400; (WindowText $name) -eq $text } }
+    $head = $text.Substring(0, $text.Length - 1)
+    [void][Native.Win]::SendMessage($name, $WM_SETTEXT, [IntPtr]::Zero, $head)
+    [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]$head.Length, [IntPtr]$head.Length)
+    [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$text[-1], [IntPtr]::Zero)
+    if (WaitFor $held 5) { return $true }
+    Write-Host "   (the name box holds '$(WindowText $name)': typing all of it)"
+    [void][Native.Win]::SendMessage($name, $WM_SETTEXT, [IntPtr]::Zero, '')
+    foreach ($c in $text.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
+    [bool](WaitFor $held 10)
+}
+# a dialog left over by a file dialog that went wrong closed (what it asked, said), then the file dialog itself and
+# whatever else is left over the app, so the steps after it start clean
+function GiveUpFileDialog([string]$kind, [IntPtr]$dialog, [string]$title, [string]$what) {
+    Write-Host "   (the $kind dialog '$title' $what)"
+    DialogDebugShot $kind $title $what
+    if ([Native.Win]::IsWindow($dialog)) {
+        $edits = @([Native.Win]::FindDescendants($dialog, 'Edit') | ForEach-Object { "$([Native.Win]::IsWindowVisible($_)):'$(WindowText $_)'" }) -join ', '
+        Write-Host "   (its edit fields: $edits)"
+        Write-Host "   (Cancel: $(if (CloseDialog $dialog) { 'closed' } else { 'did not close' }))"
+    }
+    CloseStrays "after the $kind dialog '$title'"
+}
+# a box (a #32770 of the app) shown over a dialog, by the dialog: "the file is not there", "replace it?"; or $null
+function BoxOver([IntPtr]$dialog) {
+    [Native.Win]::TopWindowsOf((AppIds), '#32770') | Where-Object { $_ -ne $dialog -and [Native.Win]::GetWindow($_, 4) -eq $dialog } | Select-Object -First 1
+}
+# Open or Save of a file dialog pressed (posted, as Click does: whether or not the dialog is in front) once the name box
+# holds `path`, up to three times; whether it closed. A box it shows says why it would not, and ends the tries
+function PressUntilClosed([string]$kind, [IntPtr]$dialog, [IntPtr]$name, [string]$path, [string]$title, [scriptblock]$between = $null) {
+    for ($try = 1; $try -le 3; $try++) {
+        if (-not [Native.Win]::IsWindow($dialog)) { return $true }
+        if (-not (PutName $name $path)) {
+            Write-Host "   (the $kind dialog '$title' did not take the name, try $try)"
+            continue
+        }
+        Click $dialog 1
+        if ($between) { & $between }
+        if (WaitFor { -not [Native.Win]::IsWindow($dialog) } 10) { return $true }
+        $box = BoxOver $dialog
+        if ($box) {
+            Write-Host "   (the $kind dialog '$title' answered: $(Statics $box))"
+            return $false
+        }
+        Write-Host "   (the $kind dialog '$title' is still open after $(if ($kind -eq 'folder') { 'Select Folder' } else { 'Open or Save' }), try $try)"
+    }
+    -not [Native.Win]::IsWindow($dialog)
+}
+# a file dialog answered with `path`, whose name box has the suggested name `suggested` in a Save dialog: once it is
+# ready (ReadyNameBox), the name put in (PutName) and Open or Save pressed until it closes (PressUntilClosed); a picture
+# `shot` of it first. On a failure the dialog and what it left are closed (GiveUpFileDialog), so one check fails, not
+# the steps after it
 function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]$suggested = $null) {
     # the first file dialog of a session can take long to open while the shell starts (CI runners)
     $dialog = WaitWindow '#32770' $title 40
-    # on a failure, a picture of the screen as it was (debug-file-dialog-*), to tell what held the dialog up
-    if (-not $dialog) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-missing'; return $false }
+    if (-not $dialog) {
+        GiveUpFileDialog 'file' ([IntPtr]::Zero) $title 'missing'
+        return $false
+    }
     # the name box: the one with the suggested name in a Save dialog, the one in the name combo box (1148) otherwise
-    $name = WaitFor {
+    $name = ReadyNameBox $dialog {
         if ($suggested) {
             [Native.Win]::FindDescendants($dialog, 'Edit') | Where-Object { (WindowText $_) -like $suggested } | Select-Object -First 1
         } else {
             $combo = [Native.Win]::GetDlgItem($dialog, 1148)
             if ($combo -ne [IntPtr]::Zero) { [Native.Win]::FindDescendants($combo, 'Edit') | Select-Object -First 1 }
         }
-    } 10
-    if (-not $name) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-name'; return $false }
+    }
+    if (-not $name) {
+        GiveUpFileDialog 'file' $dialog $title 'name'
+        return $false
+    }
     if ($shot) { Shot $dialog $shot }
-    [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
-    foreach ($c in $path.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
-    # the dialog's own Open or Save button (id 1) once the box has all of the path: Enter could go to the list of
-    # suggestions that opens while a path is typed
-    if (-not (WaitFor { (WindowText $name) -eq $path } 10)) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-typed'; return $false }
-    Click $dialog 1
-    $closed = [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
-    if (-not $closed) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-open' }
-    $closed
+    if (PressUntilClosed 'file' $dialog $name $path $title) { return $true }
+    GiveUpFileDialog 'file' $dialog $title 'open'
+    $false
 }
-# the Windows folder picker (Save Messages In) answered with `path`: typed into its Folder box, then Select Folder
+# the Windows folder picker (Save Messages In) answered with `path`: put into its Folder box, then Select Folder, as
+# AnswerFileDialog does
 function AnswerFolderDialog([string]$title, [string]$path) {
     $dialog = WaitWindow '#32770' $title 40
     if (-not $dialog) {
-        Shot ([Native.Win]::GetDesktopWindow()) 'debug-folder-dialog-missing'
+        GiveUpFileDialog 'folder' ([IntPtr]::Zero) $title 'missing'
         return $false
     }
     # the Folder box: the one edit field it shows (the address bar's is hidden until clicked)
-    $name = WaitFor { [Native.Win]::FindDescendants($dialog, 'Edit') | Where-Object { [Native.Win]::IsWindowVisible($_) } | Select-Object -First 1 } 10
-    $answered = $false
-    if ($name) {
-        [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
-        foreach ($c in $path.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
-        if (WaitFor { (WindowText $name) -eq $path } 10) {
-            Click $dialog 1
-            # a typed folder is opened first, its name then in the box: Select Folder once more chooses it
-            $leaf = Split-Path -Leaf $path
-            if (-not (WaitFor { -not [Native.Win]::IsWindow($dialog) } 3) -and (WaitFor { (WindowText $name) -eq $leaf } 5)) {
-                Click $dialog 1
-            }
-            $answered = [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
-        }
+    $name = ReadyNameBox $dialog { [Native.Win]::FindDescendants($dialog, 'Edit') | Where-Object { [Native.Win]::IsWindowVisible($_) } | Select-Object -First 1 }
+    if (-not $name) {
+        GiveUpFileDialog 'folder' $dialog $title 'name'
+        return $false
     }
-    if (-not $answered -and [Native.Win]::IsWindow($dialog)) {
-        $edits = @([Native.Win]::FindDescendants($dialog, 'Edit') | ForEach-Object { "$([Native.Win]::IsWindowVisible($_)):'$(WindowText $_)'" }) -join ', '
-        Write-Host "   (the folder dialog: edit fields $edits)"
-        Shot $dialog 'debug-folder-dialog'
-        # not left open over the steps after this one
-        [void][Native.Win]::PostMessage($dialog, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        [void](WaitFor { -not [Native.Win]::IsWindow($dialog) } 5)
+    # a typed folder is opened first, its name then in the box: Select Folder once more chooses it
+    $leaf = Split-Path -Leaf $path
+    $again = {
+        if (-not (WaitFor { -not [Native.Win]::IsWindow($dialog) } 3) -and (WaitFor { (WindowText $name) -eq $leaf } 5)) { Click $dialog 1 }
     }
-    return $answered
+    if (PressUntilClosed 'folder' $dialog $name $path $title $again) { return $true }
+    GiveUpFileDialog 'folder' $dialog $title 'open'
+    $false
 }
 # whether a button of the format bar is pressed
 function Pressed([IntPtr]$compose, [int]$id) {
@@ -838,10 +975,7 @@ try {
         Click $start $IDC_SETUP_FIRST_RUN
         $open = WaitWindow '#32770' 'Import Settings and Accounts' 40
         Check ($null -ne $open) 'the link opens the import, which asks for a file'
-        if ($open) {
-            Click $open 2
-            [void](WaitFor { -not [Native.Win]::IsWindow($open) } 10)
-        }
+        if ($open) { Check (CloseDialog $open) 'Cancel closes it' }
         Check ($null -ne (StartPage $true 20)) 'cancelled, Add Mail Account is there again'
     }
     AddAccount 'Alex Morgan' 'testuser' 'testpass' $true
@@ -1091,25 +1225,11 @@ try {
         }
         Check ($null -ne $save) 'choosing one asks where to save it'
         if ($save) {
-            # the file name box: the edit field that holds the suggested name (Explorer may hide the extension)
-            $name = WaitFor { [Native.Win]::FindDescendants($save, 'Edit') | Where-Object { (WindowText $_) -like 'report*' } | Select-Object -First 1 } 10
-            Check ($null -ne $name) "the suggested name is the file's"
-            Shot $save 'read-4-save'
+            # the file name box holds the suggested name (Explorer may hide the extension)
             $target = Join-Path (Resolve-Path $Out) 'report-saved.pdf'
-            if ($name) {
-                # typed, as the dialog keeps its own copy of the name and does not see WM_SETTEXT
-                [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
-                foreach ($c in $target.ToCharArray()) {
-                    [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero)
-                }
-                Start-Sleep -Milliseconds 800
-                Key $name $VK_RETURN
-            }
+            Check (AnswerFileDialog 'Save Attachment As' $target 'read-4-save' 'report*') "the suggested name is the file's"
             $saved = WaitFor { if (Test-Path $target) { Get-Content -Raw $target } } 10
-            if (-not $saved) {
-                Shot $save 'read-4-save-failed'
-                [void][Native.Win]::PostMessage($save, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-            }
+            if (-not $saved) { Shot $main 'read-4-save-failed' }
             Check ($saved -eq $pdf) 'the attachment is saved as it was sent'
             # marked as from the internet, so SmartScreen and Protected View look at it when it is opened
             $zone = Get-Content -Path $target -Stream Zone.Identifier -ErrorAction SilentlyContinue
@@ -1236,10 +1356,8 @@ try {
     $count = { ListBoxCount $attached }
     foreach ($file in 'trail-map.txt', 'packing-list.txt') {
         $before = & $count
-        # once more if the dialog did not take the file, after closing what is left of it
+        # once more if the dialog did not take the file (AnswerFileDialog closes what is left of it)
         for ($try = 0; $try -lt 2 -and (& $count) -le $before; $try++) {
-            $left = [Native.Win]::FindWindow('#32770', 'Insert Attachment')
-            if ($left -ne [IntPtr]::Zero) { Click $left 2; [void](WaitFor { -not [Native.Win]::IsWindow($left) } 10) }
             Command $compose $IDC_ATTACH
             if (-not (AnswerFileDialog 'Insert Attachment' (Join-Path $files $file) $null)) { Write-Host "   the file dialog did not take $file (try $($try + 1))" }
             [void](WaitFor { (& $count) -gt $before } 10)
