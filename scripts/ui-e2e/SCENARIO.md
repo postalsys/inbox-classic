@@ -118,6 +118,24 @@ taken away after: `photo-and-pdf.eml`, a photo (`lake.jpg`) and a three-page inv
   switch): the message shows the photo and the notice that a PDF file closed Inbox Classic, naming "Show PDF files in
   messages" (`read-31-previews-pdf-off`); the setting shows it off; turned on, the notice is gone and the pages are back
 - on the Mac and Linux in dark mode: the photo as it is, the pages still on white, the names in the dark colours
+
+## 8c. Tiles, Show in Message and printing
+
+Screenshots: `read-32-previews-tiles`, `read-33-previews-print`
+
+`tiles.eml` of `scripts/ui-e2e/previews/` is put in the Inbox too: a HEIC picture (`boat.heic`), a photo
+(`shore.jpg`) and a booking that wants a password (`booking-4471.pdf`).
+
+- the HEIC picture and the booking are tiles, each with its name, size and why it is not shown; the photo between
+  them is drawn (`read-32-previews-tiles`)
+- Tab and Enter on a tile open its file
+- the strip's menu of the HEIC picture has Show in Message after Save All, greyed
+- on `photo-and-pdf.eml`, scrolled down a little: the invoice's Show in Message is checked; chosen, the invoice is
+  taken out of the message (the strip still lists it) and the text stays where it was scrolled to; chosen again, the
+  invoice is back, the text still in place
+- "Show attachments in messages" off: Show in Message on the photo draws it alone; the setting on again, both show
+- Print on `photo-and-pdf.eml`: the printout has the photo and a line naming the invoice, which is not printed
+  (`read-33-previews-print`, the print preview or the print document)
 - `tiles.eml` (a HEIC picture, a photo and a PDF file with a password): the photo shows, the HEIC picture and the PDF
   file are tiles of the same size with their type, name, size and why they are not shown; Tab and Enter on a tile
   opens its file (`read-32-previews-tiles`)
