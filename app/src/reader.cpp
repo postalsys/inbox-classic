@@ -222,6 +222,8 @@ struct StripOpened {
 
 void SetOpenedFilesLog(const std::wstring& path) {
     g_openedFilesLog = path;
+    // and the links a message's links would open in the browser, in the same file
+    webview::SetOpenedLinksLog(path);
 }
 
 void Reader::Create(HWND parent, PeCore* core) {
@@ -258,6 +260,8 @@ void Reader::Create(HWND parent, PeCore* core) {
                          IDC_ATTACHMENT_STRIP, {});
     ListView_SetExtendedListViewStyle(strip_, LVS_EX_INFOTIP);
     ListView_SetImageList(strip_, IconList(IconSet::Files), LVSIL_SMALL);
+    // the lock over a file that came from an encrypted part: overlay 1 of the list the strips share
+    ImageList_SetOverlayImage(IconList(IconSet::Files), KIND_LOCK_BADGE, 1);
     SetAccessibleName(strip_, core::T(PE_TEXT_UI_ATTACHMENTS_STRIP));
     SetWindowSubclass(strip_, StripProc, 0, reinterpret_cast<DWORD_PTR>(this));
     ShowWindow(stripFrame_, SW_HIDE);
@@ -841,7 +845,7 @@ void Reader::FillStrip(const PeMessageInfo* info) {
     for (size_t i = 0; info && i < info->attachment_count; i++) {
         if (const PeAttachment* attachment = pe_message_view_attachment(view_.get(), i)) {
             files.push_back(Text(attachment->filename) + L"\n" + Text(attachment->size_text) + L"\n" +
-                            std::to_wstring(static_cast<int>(attachment->kind)));
+                            std::to_wstring(static_cast<int>(attachment->kind)) + L"\n" + Text(attachment->part_text));
         }
     }
     if (files == stripFiles_) {
@@ -861,12 +865,17 @@ void Reader::FillStrip(const PeMessageInfo* info) {
         }
         std::wstring label = StripLabel(dc, *attachment, Scale(220));
         LVITEMW item = {};
-        item.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
+        item.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE;
         item.iItem = ListView_GetItemCount(strip_);
         item.pszText = label.data();
         item.iImage = KindIcon(attachment->kind);
         item.lParam = static_cast<LPARAM>(i);
-        ListView_InsertItem(strip_, &item);
+        // a file of an encrypted part has the lock of the part's label (shown decrypted, not encrypted now)
+        item.stateMask = LVIS_OVERLAYMASK;
+        item.state = attachment->protection == PE_PROTECTION_ENCRYPTED ? INDEXTOOVERLAYMASK(1) : 0;
+        int inserted = ListView_InsertItem(strip_, &item);
+        // its part for a screen reader ("From part 2: Encrypted. Not signed"), as the end of its tooltip says
+        SetAccessibleDescription(strip_, Text(attachment->part_text), inserted + 1);
         widest = std::max(widest, ListView_GetStringWidth(strip_, label.c_str()));
     }
     SelectObject(dc, font);

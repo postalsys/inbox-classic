@@ -194,8 +194,9 @@ void KeyboardLink(HWND label);
 bool ClickMnemonic(HWND root, wchar_t letter);
 // for WM_SETCURSOR of the window with the links: the hand over a link; true when it set it
 bool SetLinkCursor(HWND hwnd, WPARAM wParam);
-// what a screen reader says about a control besides its name (the reason a button is turned off)
-void SetAccessibleDescription(HWND control, const std::wstring& text);
+// what a screen reader says about a control besides its name (the reason a button is turned off); of one of its items
+// with `child` (a list view's item from 1)
+void SetAccessibleDescription(HWND control, const std::wstring& text, long child = CHILDID_SELF);
 // the name a screen reader gives a control that has no label of its own
 void SetAccessibleName(HWND control, const std::wstring& text);
 // a dialog window centered on the window of `owner`, owned by it, with this client size; RunModal shows it, runs it
@@ -299,7 +300,8 @@ struct SignInChoice {
 uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const std::wstring& email);
 // test runs (--sign-in-page-file): the sign-in page is written to this file for the test to open, not to the browser
 void SetSignInPageFile(const std::wstring& path);
-// test runs (--opened-files-log): an attachment opened is written to this file, a line of its path, not opened
+// test runs (--opened-files-log): an attachment opened is written to this file, a line of its path, not opened; a
+// link opened in the browser too, a line of its address
 void SetOpenedFilesLog(const std::wstring& path);
 // File > Accounts: the accounts listed, to add, change (Properties) or remove; true when one changed
 bool AccountsDialog(HWND owner, PeCore* core);

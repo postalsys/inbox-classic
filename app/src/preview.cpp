@@ -57,9 +57,11 @@ std::wstring PartPreviews(int n, const std::wstring& name) {
            L"return a.length*100+l*10+(c&&c.textContent==='" +
            name + L"'?1:0)})()";
 }
-std::wstring PartPreviewPoint(int n) {
+// (or of its first link to the web, `link`)
+std::wstring PartPreviewPoint(int n, bool link = false) {
     return L"(()=>{const f=document.querySelectorAll('iframe.pe-d')[" + std::to_wstring(n - 1) +
-           L"];const e=f&&f.contentDocument&&f.contentDocument.querySelector('figure img');if(!e)return 0;"
+           L"];const e=f&&f.contentDocument&&f.contentDocument.querySelector('" +
+           (link ? L"a[href^=\"http\"]" : L"figure img") + L"');if(!e)return 0;"
            L"e.scrollIntoView({block:'center'});const o=f.getBoundingClientRect(),r=e.getBoundingClientRect(),d=devicePixelRatio;"
            L"return Math.round((o.left+f.clientLeft+r.left+r.width/2)*d)*100000+Math.round((o.top+f.clientTop+r.top+r.height/2)*d)})()";
 }
@@ -170,10 +172,12 @@ void Preview::Configure() {
             return S_OK;
         }).Get(),
         nullptr);
-    // a part's frame (a signed or encrypted message's) loads its document beside the page, by the page's doing only;
-    // a link clicked in it leaves the frame where it is and opens in the browser, never as one of the page's own links,
-    // which only the page's labels are; but a preview of the part's files opens its file (the core takes only a link
-    // whose token is that part's)
+    // a part's frame (a signed or encrypted message's) loads its document beside the page, by the page's doing only.
+    // A link clicked in it navigates the top page (the part's <base target="_top">), which NavigationStarting above
+    // cancels and follows: a link to the browser, a preview to its file. Should a navigation of the frame itself come,
+    // it leaves the frame where it is: a preview of the part's files opens its file (the core takes only a link whose
+    // token is that part's), any other link opens in the browser, never as one of the page's own links, which only the
+    // page's labels are
     view_->add_FrameNavigationStarting(
         Callback<ICoreWebView2NavigationStartingEventHandler>([this](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
             LPWSTR uri = nullptr;
@@ -419,6 +423,8 @@ int64_t Preview::TestPreviews(const std::wstring& query) {
         script = PartPreviews(query[5] - L'0', NameOnly(query.substr(7)));
     } else if (query.starts_with(L"partpoint:") && query.size() == 11) {
         script = PartPreviewPoint(query[10] - L'0');
+    } else if (query.starts_with(L"partlink:") && query.size() == 10) {
+        script = PartPreviewPoint(query[9] - L'0', true);
     } else if (query.starts_with(L"partframe:") && query.size() == 11) {
         // part N's label and frame scrolled to the top of the pane
         script = L"(()=>{const f=document.querySelectorAll('iframe.pe-d')[" + std::to_wstring(query[10] - L'1') +

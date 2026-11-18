@@ -29,9 +29,10 @@ LIST=(attach flag search dismiss calendar_ltr mail_error glasses speaker_mute lo
 # the security bar over a signed or encrypted message: the lock, then the pictures of its states (verified, signed,
 # a warning), each strip drawn in the words' color over the fill of one state (the INK and fill pairs below)
 SECURE=(lock_closed shield_checkmark ribbon warning)
-# the attachment strip of the reading pane: a file of each kind the core names (PeAttachment.kind), in its order
+# the attachment strip of the reading pane: a file of each kind the core names (PeAttachment.kind), in its order, then
+# the overlay of a file from an encrypted part (lock_badge, see badge below)
 FILES=(image document_pdf document_text document_table slide_text folder_zip music_note_2 video calendar_ltr contact_card key
-    document_one_page mail window_shield document)
+    document_one_page mail window_shield document lock_badge)
 # the small ones of the format bar
 FORMAT=(text_bold text_italic text_underline text_color text_number_list_ltr text_bullet_list_ltr text_indent_decrease_ltr
     text_indent_increase_ltr text_align_left text_align_center text_align_right link line_horizontal_1 image)
@@ -52,12 +53,36 @@ source() {
     exit 1
 }
 
+# badge SIZE OUT: the overlay of a file of the strip that came from an encrypted part, a whole frame for the image
+# list's overlay: Fluent's filled lock in the blue of an encrypted part's label (pe-html secure.rs, the security bar's
+# tone), a little over half the frame, in its bottom right corner, with a ring of near white (not the strip's
+# transparent white) so it stands apart from the file's icon under it
+badge() {
+    local size=$1 out=$2 lock=$(( (size * 5 + 4) / 8 )) svg
+    if [ "$lock" -le 12 ]; then svg="$SVG/lock_closed_filled_12.svg"; else svg="$SVG/lock_closed_filled_16.svg"; fi
+    sed "s/#212121/#1F5FAE/g" "$svg" > "$work/badge.svg"
+    sed "s/#212121/#FCFCFC/g" "$svg" > "$work/halo.svg"
+    rsvg-convert -w "$lock" -h "$lock" "$work/badge.svg" -o "$work/badge-$size.png"
+    rsvg-convert -w "$lock" -h "$lock" "$work/halo.svg" -o "$work/halo-$size.png"
+    # the ring: the lock's shape grown by a pixel, its edge made whole (a half see-through pixel over white would be
+    # white again, and so see-through)
+    magick "$work/halo-$size.png" -bordercolor none -border 1 -alpha extract -morphology Dilate Square:1 -threshold 1% \
+        -background '#FCFCFC' -alpha shape "$work/halo-$size.png"
+    magick -size "${size}x${size}" xc:white "$work/halo-$size.png" -gravity SouthEast -composite \
+        "$work/badge-$size.png" -gravity SouthEast -geometry +1+1 -composite -alpha remove "$out"
+}
+
 # strip NAME SIZE BACKGROUND ICON...: the icons side by side at SIZE pixels over BACKGROUND, a 24-bit BMP
 strip() {
     local name=$1 size=$2 background=$3
     shift 3
     local frames=()
     for icon in "$@"; do
+        if [ "$icon" = lock_badge ]; then
+            badge "$size" "$work/$icon-$size.png"
+            frames+=("$work/$icon-$size.png")
+            continue
+        fi
         sed "s/#212121/$INK/g" "$(source "$icon" "$size")" > "$work/$icon.svg"
         rsvg-convert -w "$size" -h "$size" -b "$background" "$work/$icon.svg" -o "$work/$icon-$size.png"
         frames+=("$work/$icon-$size.png")
