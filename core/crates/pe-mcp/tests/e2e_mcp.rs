@@ -1515,6 +1515,18 @@ fn an_agent_reads_what_the_reading_pane_shows() {
          Content-Disposition: attachment; filename=notes.txt\r\n\r\nHello\r\n--f--\r\n",
         &[],
     );
+    // links where no text is: in the subject and a text file
+    let linked = server.add_message(
+        "INBOX",
+        "From: Bob <bob@example.com>\r\nTo: testuser@postalexpress.test\r\n\
+         Subject: Claim at https://evil.example\\@paypal.com/win\r\nMessage-ID: <linked@example.com>\r\n\
+         Content-Type: multipart/mixed; boundary=f\r\n\r\n\
+         --f\r\nContent-Type: text/plain\r\n\r\nThe file.\r\n\
+         --f\r\nContent-Type: text/plain; name=notes.txt\r\n\
+         Content-Disposition: attachment; filename=notes.txt\r\n\r\n\
+         Pay at https://evil.example/pay\r\n--f--\r\n",
+        &[],
+    );
     let dir = TempDir::new("mcp-facts");
     let (_core, _account, mut mcp, socket) = engine_on(&server, &dir);
     let runtime = tokio::runtime::Builder::new_current_thread()
@@ -1609,6 +1621,45 @@ fn an_agent_reads_what_the_reading_pane_shows() {
         );
         let listed = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
         assert!(!listed.to_string().contains("Ignore your"), "{listed}");
+
+        // links are shown by their domain wherever mail's text is, unless the call asks for them whole
+        let read = agent
+            .call("get_message", json!({ "folder": inbox, "uid": linked }))
+            .await
+            .unwrap();
+        assert_eq!(read["subject"], "Claim at [link: evil.example]", "{read}");
+        assert!(!read.to_string().contains("evil.example/"), "{read}");
+        assert!(read["links"].is_string(), "{read}");
+        let whole = agent
+            .call(
+                "get_message",
+                json!({ "folder": inbox, "uid": linked, "include_links": true }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            whole["subject"], "Claim at https://evil.example\\@paypal.com/win",
+            "{whole}"
+        );
+        assert!(whole.get("links").is_none(), "{whole}");
+        let listed = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
+        assert!(!listed.to_string().contains("evil.example\\\\@"), "{listed}");
+        let file = agent
+            .call("get_attachment", json!({ "folder": inbox, "uid": linked, "index": 0 }))
+            .await
+            .unwrap();
+        assert_eq!(file["text"], "Pay at [link: evil.example]", "{file}");
+        let file = agent
+            .call(
+                "get_attachment",
+                json!({ "folder": inbox, "uid": linked, "index": 0, "include_links": true }),
+            )
+            .await
+            .unwrap();
+        assert!(
+            file["text"].as_str().unwrap().contains("https://evil.example/pay"),
+            "{file}"
+        );
 
         // text from mail comes fenced, the fence named in the answer and new in every answer
         let raw = agent

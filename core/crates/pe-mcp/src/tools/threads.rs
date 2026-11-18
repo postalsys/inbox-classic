@@ -173,8 +173,6 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
         .first()
         .map(|m| m.agent_subject().to_string())
         .unwrap_or_default();
-    let links = args.flag("include_links", false);
-    let mut shortened = 0;
     // the newest first while the text lasts, so the oldest are the ones left without
     let mut budget = CONVERSATION_TEXT;
     let mut read: Vec<Value> = Vec::with_capacity(messages.len());
@@ -192,8 +190,7 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
             continue;
         };
         let mut fields = read_fields(&summary, place, &message, call.fence);
-        let (written, links_shortened) = super::with_links(&message.written, links);
-        shortened += links_shortened;
+        let written = call.fence.links(&message.written);
         let (text, more) = part(&written, 0, budget);
         budget -= text.chars().count();
         if more.is_some() {
@@ -211,7 +208,6 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
         "thread": thread,
         "notice": UNTRUSTED,
         "left_out": left_out,
-        "links": (shortened > 0).then_some(super::LINKS_NOTE),
         "messages": read,
     }))
 }

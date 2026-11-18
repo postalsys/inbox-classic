@@ -281,14 +281,15 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::READ,
         hints: READS,
         description: Description::Text(
-            "An attachment of a message, numbered as get_message lists them: a text file (text/plain, text/csv, text/calendar and the like, up to 256 KB) as its text; a PDF or Office file (Word, Excel, PowerPoint, OpenDocument, RTF) as an embedded resource with the file in base64; a picture (PNG, JPEG, GIF, WebP) as an image. Files up to 10 MB; larger ones and other types are refused, saying why. Nothing of an encrypted message is handed over.",
+            "An attachment of a message, numbered as get_message lists them: a text file (text/plain, text/csv, text/calendar and the like, up to 256 KB) as its text; a PDF or Office file (Word, Excel, PowerPoint, OpenDocument, RTF) as an embedded resource with the file in base64; a picture (PNG, JPEG, GIF, WebP) as an image. Files up to 10 MB; larger ones and other types are refused, saying why. Web links in a text file are shown by their domain unless include_links is true. Nothing of an encrypted message is handed over.",
         ),
         schema: || {
             object(
                 json!({
                     "folder": integer("The folder."),
                     "uid": integer("The message's uid."),
-                    "index": integer("The attachment's index, as get_message lists it.")
+                    "index": integer("The attachment's index, as get_message lists it."),
+                    "include_links": boolean("Web links in a text file whole, rather than by their domain.")
                 }),
                 &["folder", "uid", "index"],
             )
@@ -1002,7 +1003,7 @@ pub(crate) async fn call(
     progress: &Progress,
     call_id: &str,
 ) -> Outcome {
-    let fence = Fence::new();
+    let fence = Fence::new(arguments.get("include_links").and_then(Value::as_bool).unwrap_or(false));
     let mut answer = run(core, host_id, name, arguments, progress, call_id, &fence)
         .await
         .map(compact)
@@ -1225,26 +1226,11 @@ fn read_fields(
     fields
 }
 
-/// Text of a message as the agent asked for it: its web links whole (`include_links`) or by their domain, with how
-/// many were shortened
-fn with_links(text: &str, include_links: bool) -> (String, usize) {
-    if include_links {
-        (text.to_string(), 0)
-    } else {
-        mail::links_by_domain(text)
-    }
-}
-
-/// What an answer says when it shortened links
-const LINKS_NOTE: &str = "Web links in the text are shown by their domain, [link: example.com]; include_links: true \
-    gives them whole.";
-
 async fn get_message(call: &Call<'_>, args: &Args<'_>) -> Outcome {
     let folder = call.folder(args.int("folder")?)?;
     let uid = args.uid()?;
     let max = args.size("max_chars", DEFAULT_TEXT)?.clamp(1, MAX_TEXT);
     let offset = args.size("text_offset", 0)?;
-    let links = args.flag("include_links", false);
     let summary = call.message(folder.id, uid)?;
     downloaded(call, folder.id, uid).await?;
     let message = call
@@ -1253,7 +1239,8 @@ async fn get_message(call: &Call<'_>, args: &Args<'_>) -> Outcome {
         .map_err(engine)?
         .ok_or_else(|| format!("There is no message with uid {uid} in folder {}.", folder.id))?;
     call.read("message", 1, &summary.info.subject, "")?;
-    let (written, mut shortened) = with_links(&message.written, links);
+    // by their domain unless asked for whole, before it is cut in parts, so the parts meet
+    let written = call.fence.links(&message.written);
     let (text, next) = part(&written, offset, max);
     let mut fields = read_fields(&summary, Some(&Place::of(&folder)), &message, call.fence);
     for (key, value) in [
@@ -1267,15 +1254,11 @@ async fn get_message(call: &Call<'_>, args: &Args<'_>) -> Outcome {
     }
     if !message.earlier.is_empty() {
         if args.flag("include_earlier", false) {
-            let (earlier, more) = with_links(&message.earlier, links);
-            shortened += more;
+            let earlier = call.fence.links(&message.earlier);
             fields.insert("earlier_messages".into(), call.fence.wrap(&part(&earlier, 0, max).0));
         } else {
             fields.insert("earlier_messages_left_out".into(), json!(true));
         }
-    }
-    if shortened > 0 {
-        fields.insert("links".into(), json!(LINKS_NOTE));
     }
     Ok(Value::Object(fields))
 }
