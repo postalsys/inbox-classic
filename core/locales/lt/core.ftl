@@ -1059,63 +1059,47 @@ pgp-publish-failed = Rakto paskelbti nepavyko: { $error }
 # review: changed
 pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta skiltyje { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Užšifruota ir pasirašyta: perskaityti gali tik jūs ir { $addresses }.
-    [few] Užšifruota ir pasirašyta: perskaityti gali tik jūs ir { $count } jo gavėjai.
-   *[other] Užšifruota ir pasirašyta: perskaityti gali tik jūs ir { $count } jo gavėjų.
+    [1] Laiškas bus išsiųstas užšifruotas ir pasirašytas. Turinį galėsite perskaityti tik jūs ir gavėjas: { $addresses }.
+    [one] Laiškas bus išsiųstas užšifruotas ir pasirašytas. Turinį galėsite perskaityti tik jūs ir { $count } gavėjas.
+    [few] Laiškas bus išsiųstas užšifruotas ir pasirašytas. Turinį galėsite perskaityti tik jūs ir { $count } gavėjai.
+   *[other] Laiškas bus išsiųstas užšifruotas ir pasirašytas. Turinį galėsite perskaityti tik jūs ir { $count } gavėjų.
 }
-# review: new
 pgp-compose-encrypt-ready = Laiškas bus užšifruotas ir pasirašytas. Pridėkite gavėjų, kurių raktus turite.
-# review: new
 pgp-compose-missing = { $count ->
-    [one] { $addresses } neturi rakto, todėl laiško dar negalima užšifruoti.
-    [few] { $count } gavėjai neturi rakto, todėl laiško dar negalima užšifruoti: { $addresses }.
-   *[other] { $count } gavėjų neturi rakto, todėl laiško dar negalima užšifruoti: { $addresses }.
+    [one] Tinkamo rakto neturi { $count } gavėjas: { $addresses }. Laiško dar negalima užšifruoti.
+    [few] Tinkamo rakto neturi { $count } gavėjai: { $addresses }. Laiško dar negalima užšifruoti.
+   *[other] Tinkamo rakto neturi { $count } gavėjų: { $addresses }. Laiško dar negalima užšifruoti.
 }
-# review: new
 pgp-compose-looking = Ieškoma raktų: { $addresses }...
-# review: new
-pgp-compose-signed = Pasirašyta: gavėjai gali patikrinti, kad laiškas yra nuo jūsų ir nebuvo pakeistas.
-# review: new
-pgp-compose-reply-clear = Neužšifruota, nors laiškas, į kurį atsakoma arba kuris persiunčiamas, buvo užšifruotas.
-# review: new
-pgp-compose-encrypted-files = Pridėti užšifruoto laiško failai, todėl šį laišką galima siųsti tik užšifruotą. Įjunkite šifravimą arba pašalinkite tuos failus.
-# review: new
-pgp-compose-sign-tip = Pasirašyti laišką savo raktu, kad gavėjai galėtų patikrinti, jog jis nuo jūsų ir nebuvo pakeistas
-# review: new
-pgp-compose-sign-tip-encrypted = Užšifruotas laiškas visada pasirašomas
-# review: new
-pgp-compose-encrypt-tip = Užšifruoti laišką, kad jį galėtumėte perskaityti tik jūs ir jo gavėjai
-# review: new
-pgp-compose-make-key = Dar neturite { $address } rakto. Sukurti jį dabar? Su juo jūsų laiškus bus galima pasirašyti ir užšifruoti.
-# review: new
-pgp-compose-key-unusable = Jūsų { $address } rakto naudoti negalima ({ $state }). Atidarykite Šifravimo raktai, kad importuotumėte jo atsarginę kopiją arba sukurtumėte naują raktą.
-# review: new
-pgp-compose-encrypt-off-quote = Šis laiškas cituoja arba persiunčia užšifruotą laišką. Be šifravimo jo negalima išsiųsti, kol nepašalinsite to, ką jis cituoja. Vis tiek išjungti šifravimą?
-# review: new
-pgp-compose-encrypt-off-reply = Šis laiškas atsako į užšifruotą laišką arba jį persiunčia. Be šifravimo jūsų laišką pakeliui gali perskaityti bet kas, kas jį tvarko. Išjungti šifravimą?
-# review: new
-pgp-recipient-verified = Raktas patikrintas
-# review: new
-pgp-recipient-found = Raktas nepatikrintas
-# review: new
+pgp-compose-signed = Siunčiant laiškas bus pasirašytas skaitmeniniu parašu. Gavėjai galės patikrinti, ar jo turinys po pasirašymo nebuvo pakeistas.
+pgp-compose-reply-clear = Laiškas bus išsiųstas nešifruotas, nors pradinis laiškas buvo užšifruotas.
+pgp-compose-encrypted-files = Laiške yra priedų iš užšifruoto laiško, todėl jį galima išsiųsti tik užšifruotą. Įjunkite parinktį „Šifruoti“ arba pašalinkite šiuos priedus.
+pgp-compose-sign-tip = Skaitmeniškai pasirašyti laišką savo raktu, kad gavėjai galėtų patikrinti, ar jo turinys nepakeistas
+pgp-compose-sign-tip-encrypted = Siunčiamas užšifruotas laiškas visada pasirašomas
+pgp-compose-encrypt-tip = Užšifruoti laiško turinį, kad jį galėtumėte perskaityti tik jūs ir gavėjai
+pgp-compose-make-key = Dar neturite savo rakto šiam adresui: { $address }. Sukurti jį dabar? Šiuo raktu galėsite pasirašyti ir šifruoti laiškus.
+pgp-compose-key-unusable =
+    Šiam adresui skirto jūsų rakto naudoti negalima: { $address }
+
+    Priežastis: { $state }
+
+    Atidarykite langą „Šifravimo raktai“ ir importuokite šio rakto atsarginę kopiją arba sukurkite naują raktą.
+pgp-compose-encrypt-off-quote = Laiške yra teksto, paveikslėlių arba priedų iš užšifruoto laiško. Laišką galima siųsti nešifruotą tik pašalinus šį turinį. Vis tiek išjungti šifravimą?
+pgp-compose-encrypt-off-reply = Atsakote į užšifruotą laišką arba jį persiunčiate. Nešifruoto laiško turinį gali perskaityti ir jį perduodantys serveriai. Išjungti šifravimą?
+pgp-recipient-verified = Rakto savininkas patikrintas
+pgp-recipient-found = Rakto savininkas nepatikrintas
 pgp-recipient-own = Jūsų raktas
-# review: new
 pgp-recipient-looking = Ieškoma rakto...
-# review: new
 pgp-recipient-missing = Rakto nėra
-# review: new
-pgp-recipient-not-found = Rakto nėra: { $date } nerasta
-# review: new
+pgp-recipient-not-found = Rakto nerasta. Paskutinė paieška: { $date }
 pgp-recipient-unusable = Rakto naudoti negalima: { $state }
-# review: new
 pgp-recipients-intro = Laiškas šifruojamas kiekvieno gavėjo raktu ir jūsų raktu.
-# review: new
 pgp-recipients-intro-missing = { $count ->
-    [one] { $count } gavėjas neturi rakto, kuriuo būtų galima šifruoti. Raskite jo raktą, pašalinkite jį iš šio laiško arba išsiųskite laišką nešifruotą.
-    [few] { $count } gavėjai neturi rakto, kuriuo būtų galima šifruoti. Raskite jų raktus, pašalinkite juos iš šio laiško arba išsiųskite laišką nešifruotą.
-   *[other] { $count } gavėjų neturi rakto, kuriuo būtų galima šifruoti. Raskite jų raktus, pašalinkite juos iš šio laiško arba išsiųskite laišką nešifruotą.
+    [1] Vienas gavėjas neturi tinkamo šifravimo rakto. Raskite jo raktą, pašalinkite gavėją iš laiško arba išsiųskite laišką nešifruotą.
+    [one] { $count } gavėjas neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
+    [few] { $count } gavėjai neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
+   *[other] { $count } gavėjų neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
 }
 # review: new
 pgp-details-part = { $number } dalis: { $label }
