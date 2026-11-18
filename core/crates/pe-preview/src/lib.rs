@@ -85,6 +85,53 @@ pub fn kind_of(bytes: &[u8]) -> Option<Kind> {
     picture::format_of(bytes).map(|_| Kind::Picture)
 }
 
+/// The picture formats this crate knows but does not draw (docs/attachment-preview-plan.md, decision 3): their name
+/// for the tile that stands for such a picture, by its content
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum NotDrawn {
+    Heic,
+    Avif,
+    JpegXl,
+}
+
+impl NotDrawn {
+    /// The format's name, the same in every language
+    pub fn name(self) -> &'static str {
+        match self {
+            NotDrawn::Heic => "HEIC",
+            NotDrawn::Avif => "AVIF",
+            NotDrawn::JpegXl => "JPEG XL",
+        }
+    }
+}
+
+/// HEIC, AVIF or JPEG XL by the start of `bytes`: an ISO media file's `ftyp` box naming the brand (AVIF before the
+/// HEIF brands, which an AVIF file names too), or JPEG XL's signature. None for anything else
+pub fn not_drawn(bytes: &[u8]) -> Option<NotDrawn> {
+    const JXL_BOX: &[u8] = b"\0\0\0\x0cJXL \r\n\x87\n";
+    if bytes.starts_with(&[0xff, 0x0a]) || bytes.starts_with(JXL_BOX) {
+        return Some(NotDrawn::JpegXl);
+    }
+    if bytes.get(4..8) != Some(b"ftyp") {
+        return None;
+    }
+    let size = u32::from_be_bytes(bytes.get(..4)?.try_into().ok()?) as usize;
+    let header = bytes.get(8..size.clamp(16, 256).min(bytes.len()))?;
+    // the major brand, then (after the minor version) the compatible brands
+    let compatible = header.get(8..).unwrap_or_default().as_chunks::<4>().0;
+    let brands: Vec<&[u8]> = std::iter::once(header.get(..4)?)
+        .chain(compatible.iter().map(|brand| brand.as_slice()))
+        .collect();
+    let named = |names: &[&[u8]]| brands.iter().any(|brand| names.contains(brand));
+    if named(&[b"avif", b"avis"]) {
+        return Some(NotDrawn::Avif);
+    }
+    let heif: &[&[u8]] = &[
+        b"heic", b"heix", b"hevc", b"hevx", b"heim", b"heis", b"hevm", b"hevs", b"mif1", b"msf1",
+    ];
+    named(heif).then_some(NotDrawn::Heic)
+}
+
 /// What the reading pane says of a file before its previews are drawn, read from a picture's header or a PDF's page
 /// tree
 #[derive(Debug, Clone, PartialEq, Eq)]

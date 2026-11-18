@@ -9,6 +9,11 @@
 //! core keeps while the view is shown ([`Core::preview_ask`], [`Core::previews_end`]). The apps' document servers ask
 //! for a picture and answer the web view when [`Event::PreviewAnswered`] says it is there.
 //!
+//! What the section shows of each file is decided in [`plan`]: drawn, a tile that says why not (a format not drawn,
+//! a password, a file too large, one still downloading), or counted in the line of files past the budget; the
+//! strip's Show in Message draws or takes out one file while the message is shown ([`Core::preview_show`], never
+//! kept). The printout puts the pictures in its document as `data:` addresses ([`print`], [`Core::print_start`]).
+//!
 //! The crash markers and the list of files never drawn again are kept in `previews` beside the store. A marker left
 //! behind means a file ended the app while it was drawn: the core then turns PDF previews off (a sender could change
 //! a byte of the file for each message and end the app once a message), says so ([`Event::PdfPreviewsOff`],
@@ -18,19 +23,25 @@
 use std::collections::{BTreeMap, HashMap, VecDeque};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
-use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
-use std::time::{Duration, Instant};
+use std::sync::{Arc, Condvar, Mutex, MutexGuard, OnceLock};
+use std::time::Duration;
 
 use pe_i18n::{Text, tr, tr_args};
 use pe_preview::{Outcome, Previewer, Request, Settings, What};
 use pe_store::{FolderId, Store};
 
+use pe_preview::limits::DESCRIBE_WAIT;
 pub use pe_preview::limits::MAX_PAGES as PREVIEW_PAGES;
-use pe_preview::limits::{DESCRIBE_WAIT, MAX_FILE, MAX_PREVIEWS};
 pub use pe_preview::{Description as PreviewDescription, Mime as PreviewMime, Picture, Refusal as PreviewRefusal};
 
 use crate::connections::Connection;
 use crate::{Core, Event, EventSink, Result, view};
+
+mod plan;
+mod print;
+
+pub(crate) use plan::{Choices, Planned, PreviewPlan, section};
+pub use plan::{ShowInMessage, tile_words};
 
 /// What came of one file's previews so far
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -45,7 +56,14 @@ pub struct PreviewFile {
     pub done: bool,
 }
 
-type Files = Arc<Mutex<HashMap<(u64, usize), PreviewFile>>>;
+/// What came of the files of each request still wanted, by request and attachment, and word when more came
+#[derive(Default)]
+struct FilesState {
+    map: Mutex<HashMap<(u64, usize), PreviewFile>>,
+    changed: Condvar,
+}
+
+type Files = Arc<FilesState>;
 
 #[derive(Default)]
 pub(crate) struct Previews {
@@ -57,11 +75,15 @@ pub(crate) struct Previews {
     shown: Mutex<VecDeque<Shown>>,
     /// The pictures the document servers asked for, and their answers
     asks: Asks,
+    /// Show in Message, for each message while a window shows it ([`Core::preview_show`])
+    choices: Mutex<Vec<(PreviewSource, Choices)>>,
+    /// The printouts made ([`Core::print_start`]), until they are taken
+    prints: Mutex<HashMap<u64, String>>,
 }
 
 /// How long a view waits for its files' sizes ([`DESCRIBE_WAIT`]); the tests wait longer, as an unoptimized build
 /// on a busy runner reads a PDF file's page tree slowly
-const DESCRIBE: Duration = if cfg!(test) {
+pub(crate) const DESCRIBE: Duration = if cfg!(test) {
     Duration::from_secs(20)
 } else {
     DESCRIBE_WAIT
@@ -84,10 +106,24 @@ pub(crate) enum PreviewSource {
 struct Shown {
     token: String,
     source: PreviewSource,
-    /// The attachments shown, each with how many pictures
-    files: Vec<(usize, usize)>,
+    /// The attachments shown, drawn or as tiles, in the document's order
+    files: Vec<pe_html::PreviewFile>,
+    /// Show in Message of each listed attachment
+    states: Vec<ShowInMessage>,
+    /// What its printout is made of again with the pictures drawn
+    print: Option<pe_html::PrintParts>,
     /// The request drawing them, once the first picture was asked for
     request: Option<u64>,
+}
+
+impl Shown {
+    /// The pictures of attachment `attachment`, None for one the document does not show
+    fn pages(&self, attachment: usize) -> Option<usize> {
+        self.files
+            .iter()
+            .find(|file| file.attachment == attachment)
+            .map(|file| file.pages.len())
+    }
 }
 
 /// A picture a document server asked for, waiting to be drawn
@@ -116,138 +152,8 @@ fn lock_shown(shown: &Mutex<VecDeque<Shown>>) -> MutexGuard<'_, VecDeque<Shown>>
     shown.lock().unwrap_or_else(|p| p.into_inner())
 }
 
-/// How the view shows a message's pictures and PDF files after its text ([`Core::preview_plan`])
-pub(crate) struct PreviewPlan<'a> {
-    /// The core whose render thread reads the files' descriptions
-    pub core: &'a Core,
-    /// PDF files are drawn
-    pub pdfs: bool,
-    /// What the section says when PDF files are not drawn because one ended the app ([`Core::previews_notice`])
-    pub notice: Option<String>,
-}
-
-/// The previews of a message's listed attachments, in the order of the strip: each picture, and the first pages of
-/// each PDF file, with the sizes read before the document is shown (at most [`DESCRIBE_WAIT`] for them all), at most
-/// [`MAX_PREVIEWS`] pictures in all. A file that is not a picture or PDF file by its name and by its content, or one
-/// not described in time, has none.
-pub(crate) fn section(message: &pe_mime::parser::Message, plan: &PreviewPlan) -> pe_html::PreviewSection {
-    let until = Instant::now() + DESCRIBE;
-    let mut files = Vec::new();
-    let mut left = MAX_PREVIEWS;
-    let mut pdf_left_out = false;
-    for (index, attachment) in view::listed(&message.attachments).enumerate() {
-        let Some(pdf) = previewed_as_pdf(attachment) else {
-            continue;
-        };
-        if pdf && !plan.pdfs {
-            pdf_left_out = true;
-            continue;
-        }
-        let wait = until.saturating_duration_since(Instant::now());
-        if left == 0 || wait.is_zero() {
-            continue;
-        }
-        let file = Arc::new(attachment.content.clone());
-        let Ok(description) = plan.core.preview_describe(plan.pdfs, file, wait) else {
-            continue;
-        };
-        if let Some(file) = preview_file(index, attachment, pdf, &description, left) {
-            left -= file.pages.len();
-            files.push(file);
-        }
-    }
-    pe_html::PreviewSection {
-        token: pe_html::preview_token(),
-        files,
-        notice: plan.notice.clone().filter(|_| pdf_left_out),
-    }
-}
-
-/// Whether an attachment has previews, a picture or a PDF file by its name and by its content, and not too large:
-/// Some(true) for a PDF file, Some(false) for a picture
-fn previewed_as_pdf(attachment: &pe_mime::parser::Attachment) -> Option<bool> {
-    use crate::opening::FileKind;
-    let content = &attachment.content;
-    if content.len() > MAX_FILE {
-        return None;
-    }
-    let kind = crate::opening::file_kind_of(&attachment.safe_filename(), &attachment.mime_type, content);
-    match (kind, pe_preview::kind_of(content)) {
-        (FileKind::Image, Some(pe_preview::Kind::Picture)) => Some(false),
-        (FileKind::Pdf, Some(pe_preview::Kind::Pdf)) => Some(true),
-        _ => None,
-    }
-}
-
-/// The previews of one file as its description has them, at most `left` pictures; None when it has none
-fn preview_file(
-    index: usize,
-    attachment: &pe_mime::parser::Attachment,
-    pdf: bool,
-    description: &PreviewDescription,
-    left: usize,
-) -> Option<pe_html::PreviewFile> {
-    let name = attachment.display_filename();
-    let pages: Vec<pe_html::PreviewPage> = description
-        .sizes
-        .iter()
-        .enumerate()
-        .take(PREVIEW_PAGES)
-        .filter_map(|(page, size)| size.map(|size| (page, size)))
-        .take(left)
-        .map(|(page, (width, height))| {
-            if !pdf {
-                return pe_html::PreviewPage {
-                    page,
-                    width,
-                    height,
-                    alt: name.clone(),
-                };
-            }
-            // a PDF page is drawn for a display of two pixels a point of CSS: half its pixels wide
-            let alt = tr_args(
-                Text::PreviewPageAlt,
-                &[
-                    ("name", (&name).into()),
-                    ("page", (page + 1).into()),
-                    ("count", description.pages.into()),
-                ],
-            );
-            pe_html::PreviewPage {
-                page,
-                width: width.div_ceil(2),
-                height: height.div_ceil(2),
-                alt,
-            }
-        })
-        .collect();
-    if pages.is_empty() {
-        return None;
-    }
-    let size = crate::format_size(attachment.content.len() as u64);
-    let details = if pdf {
-        tr_args(
-            Text::PreviewPdfDetails,
-            &[("count", description.pages.into()), ("size", (&size).into())],
-        )
-    } else {
-        size
-    };
-    let more = (pdf && description.pages > pages.len())
-        .then(|| tr_args(Text::PreviewMorePages, &[("count", description.pages.into())]));
-    Some(pe_html::PreviewFile {
-        attachment: index,
-        content_id: attachment.content_id.clone(),
-        paper: pdf,
-        pages,
-        name,
-        details,
-        more,
-    })
-}
-
 fn lock(files: &Files) -> MutexGuard<'_, HashMap<(u64, usize), PreviewFile>> {
-    files.lock().unwrap_or_else(|p| p.into_inner())
+    files.map.lock().unwrap_or_else(|p| p.into_inner())
 }
 
 /// The folder of the crash markers, beside the store at `store_path`
@@ -279,15 +185,17 @@ impl Core {
     /// core reads is refused ([`PreviewRefusal::Unsupported`]); so is the whole request when the message is not in
     /// the store. The previews of an encrypted message are not kept once the request is cancelled.
     pub fn previews_start(self: &Arc<Self>, folder: FolderId, uid: u64, attachments: Vec<usize>) -> Result<u64> {
+        let attachments = attachments.into_iter().map(|attachment| (attachment, false)).collect();
         self.previews_start_from(PreviewSource::Stored { folder, uid }, attachments)
     }
 
-    /// [`Core::previews_start`] of a message in the store or of a message file
-    fn previews_start_from(self: &Arc<Self>, source: PreviewSource, attachments: Vec<usize>) -> Result<u64> {
+    /// [`Core::previews_start`] of a message in the store or of a message file, each attachment with whether the user
+    /// asked to see it ([`pe_preview::Request::asked`])
+    fn previews_start_from(self: &Arc<Self>, source: PreviewSource, attachments: Vec<(usize, bool)>) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         {
             let mut files = lock(&self.previews.files);
-            for &attachment in &attachments {
+            for &(attachment, _) in &attachments {
                 files.insert((request, attachment), PreviewFile::default());
             }
         }
@@ -363,7 +271,7 @@ impl Core {
     }
 
     /// Reads the message once and hands its files to the render thread, on a thread of the blocking pool
-    fn request_previews(&self, request: u64, from: &PreviewSource, attachments: &[usize]) {
+    fn request_previews(&self, request: u64, from: &PreviewSource, attachments: &[(usize, bool)]) {
         let found = {
             let store = self.store();
             let pdfs = store.pdf_previews().unwrap_or(true);
@@ -387,7 +295,7 @@ impl Core {
         let asks = self.previews.asks.clone();
         let events = self.events.clone();
         let Some((source, keep, pdfs)) = found else {
-            for &attachment in attachments {
+            for &(attachment, _) in attachments {
                 not_drawn(&files, &asks, &events, request, attachment);
             }
             return;
@@ -395,7 +303,7 @@ impl Core {
         let mut listed = view::attachments(&source);
         drop(source);
         let previewer = self.previewer(pdfs);
-        for &attachment in attachments {
+        for &(attachment, asked) in attachments {
             if !lock(&files).contains_key(&(request, attachment)) {
                 // cancelled meanwhile
                 continue;
@@ -408,6 +316,7 @@ impl Core {
                     about: format!("{about}, attachment {attachment}"),
                     pages: PREVIEW_PAGES,
                     keep,
+                    asked,
                 }),
                 None => not_drawn(&files, &asks, &events, request, attachment),
             }
@@ -439,27 +348,74 @@ impl Core {
         Ok(self.store().set_show_previews(on)?)
     }
 
-    /// How a view built now shows the attachments after the text, None when the user turned that off; read on the
-    /// thread that builds the view
-    pub(crate) fn preview_plan(&self) -> Option<PreviewPlan<'_>> {
-        if !self.show_previews() {
-            return None;
-        }
-        Some(PreviewPlan {
+    /// How a view of the message `source` built now shows the attachments after the text: the setting, and what the
+    /// user chose with Show in Message while the message is shown; read on the thread that builds the view
+    pub(crate) fn preview_plan(&self, source: &PreviewSource) -> PreviewPlan<'_> {
+        PreviewPlan {
             core: self,
+            auto: self.show_previews(),
             pdfs: self.pdf_previews().unwrap_or(true),
             notice: self.previews_notice(),
-        })
+            choices: self.preview_choices(source),
+            downloading: None,
+        }
     }
 
-    /// A file's description for the view, read on the render thread ahead of the files waiting
+    /// What the user chose with Show in Message for the message `source`, while a window shows it
+    fn preview_choices(&self, source: &PreviewSource) -> Choices {
+        let choices = self.previews.choices.lock().unwrap_or_else(|p| p.into_inner());
+        choices
+            .iter()
+            .find(|(of, _)| of == source)
+            .map(|(_, choices)| choices.clone())
+            .unwrap_or_default()
+    }
+
+    /// A file's description for the view, read on the render thread ahead of the files waiting; `asked` for a file
+    /// the user asked to see (drawn while PDF files are off)
     fn preview_describe(
         &self,
         pdfs: bool,
         file: Arc<Vec<u8>>,
         wait: Duration,
+        asked: bool,
     ) -> std::result::Result<Arc<PreviewDescription>, PreviewRefusal> {
-        self.previewer(pdfs).describe(file, "a message shown".to_string(), wait)
+        self.previewer(pdfs)
+            .describe_file(file, "a message shown".to_string(), wait, asked)
+    }
+
+    /// Show in Message chosen in the strip for attachment `attachment` of the view `token` (`show`: draw it in the
+    /// message; false: take it out), for as long as a window shows the message, never kept. Whether that changes the
+    /// document: the window then builds the view again (keeping its scroll, [`pe_html::SCROLL_SCRIPT`]). False for
+    /// a file whose command is greyed or already as asked, or a view not shown
+    pub fn preview_show(&self, token: &str, attachment: usize, show: bool) -> bool {
+        let source = {
+            let shown = lock_shown(&self.previews.shown);
+            let Some(view) = shown.iter().find(|shown| shown.token == token) else {
+                return false;
+            };
+            let state = view.states.get(attachment).copied().unwrap_or_default();
+            if !matches!((state, show), (ShowInMessage::Off, true) | (ShowInMessage::On, false)) {
+                return false;
+            }
+            view.source.clone()
+        };
+        let mut all = self.previews.choices.lock().unwrap_or_else(|p| p.into_inner());
+        let at = match all.iter().position(|(of, _)| *of == source) {
+            Some(at) => at,
+            None => {
+                all.push((source, Choices::default()));
+                all.len() - 1
+            }
+        };
+        let choices = &mut all[at].1;
+        let (add, remove) = match show {
+            true => (&mut choices.shown, &mut choices.hidden),
+            false => (&mut choices.hidden, &mut choices.shown),
+        };
+        remove.remove(&attachment);
+        // chosen already (the window has not shown the view built again yet)
+        add.insert(attachment)
     }
 
     /// A view taken by a window: its previews answered from now on, until [`Core::previews_end`] (or until
@@ -469,12 +425,16 @@ impl Core {
             return;
         };
         let files = std::mem::take(&mut view.preview_files);
+        let states = view.attachments.iter().map(|a| a.show_in_message).collect();
+        let print = view.preview_print.take();
         let gone = {
             let mut shown = lock_shown(&self.previews.shown);
             shown.push_back(Shown {
                 token,
                 source,
                 files,
+                states,
+                print,
                 request: None,
             });
             let over = shown.len().saturating_sub(MAX_SHOWN);
@@ -499,6 +459,7 @@ impl Core {
     }
 
     fn forget_shown(&self, shown: Shown) {
+        self.forget_choices(&shown.source);
         let Some(request) = shown.request else {
             return;
         };
@@ -521,6 +482,35 @@ impl Core {
         }
     }
 
+    /// Show in Message's choices for a message no window shows anymore are gone
+    fn forget_choices(&self, source: &PreviewSource) {
+        let still = lock_shown(&self.previews.shown)
+            .iter()
+            .any(|shown| shown.source == *source);
+        if !still {
+            let mut choices = self.previews.choices.lock().unwrap_or_else(|p| p.into_inner());
+            choices.retain(|(of, _)| of != source);
+        }
+    }
+
+    /// The request drawing the pictures of `view`, started with the first picture asked for: every file of the view
+    /// with pictures, in the order of the document, so the first picture comes first
+    fn shown_request(self: &Arc<Self>, view: &mut Shown) -> Option<u64> {
+        if let Some(request) = view.request {
+            return Some(request);
+        }
+        let choices = self.preview_choices(&view.source);
+        let attachments = view
+            .files
+            .iter()
+            .filter(|file| !file.pages.is_empty())
+            .map(|file| (file.attachment, choices.shown.contains(&file.attachment)))
+            .collect();
+        let request = self.previews_start_from(view.source.clone(), attachments).ok()?;
+        view.request = Some(request);
+        Some(request)
+    }
+
     /// A document server asks for the picture at `address` (`/pv/<token>-<attachment>-<page>`, or the whole URL on the
     /// reading pane's origin): the ask to wait for, answered by [`Event::PreviewAnswered`] (never on the calling
     /// thread) and taken with [`Core::preview_answer`]. None for an address that is no picture of a view shown: the
@@ -531,20 +521,10 @@ impl Core {
         let request = {
             let mut shown = lock_shown(&self.previews.shown);
             let view = shown.iter_mut().find(|shown| shown.token == token)?;
-            let pages = view.files.iter().find(|(a, _)| *a == attachment)?.1;
-            if page >= pages {
+            if page >= view.pages(attachment)? {
                 return None;
             }
-            match view.request {
-                Some(request) => request,
-                None => {
-                    // every file of the view, in the order of the document, so the first picture comes first
-                    let attachments = view.files.iter().map(|(a, _)| *a).collect();
-                    let request = self.previews_start_from(view.source.clone(), attachments).ok()?;
-                    view.request = Some(request);
-                    request
-                }
-            }
+            self.shown_request(view)?
         };
         let id = {
             let mut asks = lock_asks(&self.previews.asks);
@@ -586,7 +566,7 @@ impl Core {
         }
         let shown = lock_shown(&self.previews.shown);
         let view = shown.iter().find(|shown| shown.token == token)?;
-        view.files.iter().any(|(a, _)| *a == attachment).then_some(attachment)
+        view.pages(attachment).map(|_| attachment)
     }
 }
 
@@ -686,6 +666,7 @@ fn record(
         }
         file.clone()
     };
+    files.changed.notify_all();
     for ask in answer_waiting(asks, owner, attachment, &file) {
         events(Event::PreviewAnswered { ask });
     }
@@ -809,7 +790,9 @@ mod tests {
 mod view_tests {
     use super::*;
     use crate::list_load::tests::opened;
+    use pe_preview::limits::MAX_PREVIEWS;
     use std::sync::mpsc::Receiver;
+    use std::time::Instant;
 
     /// The answer to `ask` once its event came
     fn answered(core: &Core, events: &Receiver<Event>, ask: u64) -> Option<Arc<Picture>> {
@@ -1008,17 +991,22 @@ mod view_tests {
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
         assert!(core.show_previews());
 
-        // PDF files turned off by the user: the picture only, and no notice
+        // PDF files turned off by the user: the picture drawn, the PDF file a tile that says so (and opens it), and
+        // no notice
         core.set_pdf_previews(false).unwrap();
         let view = shown(&core, inbox);
         let token = token(&view);
         assert!(view.document.contains(&format!("/pv/{token}-0-0")));
         assert!(!view.document.contains(&format!("/pv/{token}-1-")));
         assert!(!view.document.contains("class=\"w\""), "{}", view.document);
+        assert!(view.document.contains(&tr(Text::PreviewPdfOff)), "{}", view.document);
         assert_eq!(
             core.preview_link(&format!("inboxclassic:attachment-{token}-1"), &token),
-            None
+            Some(1)
         );
+        assert_eq!(core.preview_ask(&format!("/pv/{token}-1-0")), None);
+        let states: Vec<_> = view.attachments.iter().map(|a| a.show_in_message).collect();
+        assert_eq!(states, [ShowInMessage::On, ShowInMessage::Off, ShowInMessage::None]);
 
         // turned off by the core after a PDF file ended the app: the notice says so where the PDF file would be
         core.store().set_pdf_previews_crashed(true).unwrap();
@@ -1027,14 +1015,23 @@ mod view_tests {
         assert!(view.document.contains(&pe_html_text(&notice)), "{}", view.document);
         core.set_pdf_previews(true).unwrap();
 
-        // previews off: none at all, and the CSP as before
+        // previews off: none at all, and the CSP as before; the strip's Show in Message still draws one
         core.set_show_previews(false).unwrap();
         assert!(!core.show_previews());
         let view = shown(&core, inbox);
-        assert_eq!(view.preview_token, None);
-        assert!(!view.document.contains("/pv/"), "{}", view.document);
+        assert!(view.preview_token.is_some());
+        assert!(
+            !view.document.contains("/pv/") && !view.document.contains("<section"),
+            "{}",
+            view.document
+        );
         assert!(view.document.contains("img-src data:;"));
         assert_eq!(view.print_document, None);
+        let states: Vec<_> = view.attachments.iter().map(|a| a.show_in_message).collect();
+        assert_eq!(states, [ShowInMessage::Off, ShowInMessage::Off, ShowInMessage::None]);
+        // a message with no picture or PDF file has no token
+        core.store().set_source(inbox, 1, b"Subject: x\r\n\r\nhi\r\n").unwrap();
+        assert_eq!(shown(&core, inbox).preview_token, None);
     }
 
     /// The notice as the document writes it
@@ -1203,6 +1200,9 @@ mod view_tests {
         );
     }
 }
+
+#[cfg(test)]
+mod show_tests;
 
 #[cfg(test)]
 mod crash_tests {

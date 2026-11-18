@@ -21,6 +21,8 @@ pub struct AttachmentView {
     pub tooltip: String,
     /// What to say when a file that does not open is opened anyway, naming it; None for one that opens
     pub refusal: Option<String>,
+    /// The strip's Show in Message for it: none, checked, unchecked or greyed
+    pub show_in_message: crate::previews::ShowInMessage,
 }
 
 impl AttachmentView {
@@ -39,6 +41,7 @@ impl AttachmentView {
             mime_type: attachment.mime_type.clone(),
             size,
             size_text,
+            show_in_message: Default::default(),
         }
     }
 
@@ -107,8 +110,10 @@ pub struct MessageView {
     /// carry it, and the core answers them while the view is shown ([`crate::Core::preview_ask`]). None when the
     /// document shows no previews
     pub preview_token: Option<String>,
-    /// The attachments the document shows previews of, each with how many pictures
-    pub(crate) preview_files: Vec<(usize, usize)>,
+    /// The attachments the document shows after the text, drawn or as tiles
+    pub(crate) preview_files: Vec<pe_html::PreviewFile>,
+    /// What its printout is made of again with the pictures drawn ([`crate::Core::print_start`])
+    pub(crate) preview_print: Option<pe_html::PrintParts>,
     /// Where those files are read from when their pictures are asked for
     pub(crate) preview_source: Option<crate::previews::PreviewSource>,
 }
@@ -160,7 +165,7 @@ pub(crate) struct Trust<'a> {
     pub pictures: crate::pictures::Rules<'a>,
     /// The keys to read a signed or encrypted message with; None for a message that is neither
     pub ring: Option<&'a crate::protect::KeyRing>,
-    /// How to show the pictures and PDF files attached after the text; None when they are not shown
+    /// How to show the pictures and PDF files attached after the text; None for no previews (tests and tools)
     pub previews: Option<&'a crate::previews::PreviewPlan<'a>>,
 }
 
@@ -338,22 +343,13 @@ pub(crate) fn build_unless(
         otp: otp_card.as_ref(),
         event: event_card.as_ref(),
         bounce: card.as_ref(),
-        previews: planned.as_ref(),
+        previews: planned.as_ref().map(|planned| &planned.section),
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &header, &cards);
-    // the files the document shows (not those its HTML shows already), under the token of their addresses
-    let (preview_token, preview_files) = match planned {
-        Some(section) if !rendered.previewed.is_empty() => (
-            Some(section.token),
-            section
-                .files
-                .iter()
-                .filter(|file| rendered.previewed.contains(&file.attachment))
-                .map(|file| (file.attachment, file.pages.len()))
-                .collect(),
-        ),
-        _ => (None, Vec::new()),
-    };
+    let mut attachments: Vec<AttachmentView> = listed(&message.attachments).map(AttachmentView::of).collect();
+    let (preview_token, preview_files) = planned
+        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments))
+        .unwrap_or_default();
     Some(MessageView {
         subject,
         from,
@@ -364,7 +360,7 @@ pub(crate) fn build_unless(
         remote_images: rendered.remote_images,
         pictures_loaded: allow_remote_images,
         sender,
-        attachments: listed(&message.attachments).map(AttachmentView::of).collect(),
+        attachments,
         unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         picture: 0,
@@ -375,14 +371,41 @@ pub(crate) fn build_unless(
         protection: None,
         autocrypt: crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now()),
         part_documents: Vec::new(),
-        // the previews are not printed (the print windows serve none of their pictures)
+        // the previews are not printed here (the print windows serve none of their pictures): Core::print_start
+        // makes the printout with them
         print_document: rendered.print_document,
         decrypted: None,
         decrypted_source: None,
         preview_token,
         preview_files,
+        preview_print: rendered.print,
         preview_source: None,
     })
+}
+
+/// The files the document shows after the text (not those its HTML shows already) under the token of their
+/// addresses, and Show in Message of each attachment; no token for a message with no picture or PDF file
+fn shown_previews(
+    planned: crate::previews::Planned,
+    previewed: &[usize],
+    attachments: &mut [AttachmentView],
+) -> (Option<String>, Vec<pe_html::PreviewFile>) {
+    use crate::previews::ShowInMessage;
+    let section = planned.section;
+    for (index, (attachment, state)) in attachments.iter_mut().zip(planned.states).enumerate() {
+        // a file of the section the HTML shows already is not the strip's to show again
+        let in_text = section.files.iter().any(|f| f.attachment == index) && !previewed.contains(&index);
+        attachment.show_in_message = if in_text { ShowInMessage::None } else { state };
+    }
+    if attachments.iter().all(|a| a.show_in_message == ShowInMessage::None) {
+        return (None, Vec::new());
+    }
+    let files = section
+        .files
+        .into_iter()
+        .filter(|file| previewed.contains(&file.attachment))
+        .collect();
+    (Some(section.token), files)
 }
 
 /// Whether a message may have signed or encrypted parts, OpenPGP or S/MIME: such mail gets no previews of its
@@ -850,6 +873,7 @@ mod tests {
                 kind: crate::opening::FileKind::Pdf,
                 tooltip: format!("../../report.pdf ({})", crate::format_size(4)),
                 refusal: None,
+                show_in_message: Default::default(),
             }]
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));

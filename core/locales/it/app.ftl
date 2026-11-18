@@ -417,6 +417,8 @@ ui-save-attachments = Salva allegati
 ui-attachment-open = Apri
 ui-attachment-save-as = Salva con nome...
 ui-attachment-save-all = Salva tutti...
+# review: new
+ui-attachment-show-in-message = Mostra nel messaggio
 ui-attachments-strip = Allegati
 ui-attachment-note-title = Apertura del file
 ui-attachment-program-tip = Il comando Apri è disattivato per questo tipo di file, che può eseguire programmi. Salva il file se vuoi aprirlo manualmente.

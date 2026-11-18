@@ -1394,3 +1394,28 @@ preview-more-pages = { $count ->
     [many] Відкрийте файл, щоб побачити всі { $count } сторінок
    *[other] Відкрийте файл, щоб побачити всі { $count } сторінки
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Ще { $count } файл у списку вище
+    [few] Ще { $count } файли у списку вище
+    [many] Ще { $count } файлів у списку вище
+   *[other] Ще { $count } файлу у списку вище
+}
+# review: new
+preview-tile-downloading = Завантаження…
+# review: new
+preview-tile-format = Зображення { $format } поки не показуються
+# review: new
+preview-tile-password = Захищено паролем
+# review: new
+preview-tile-too-large = Завеликий для показу
+# review: new
+preview-tile-unreadable = Неможливо показати
+# review: new
+preview-tile-timed-out = Показ тривав надто довго
+# review: new
+preview-tile-crashed = Не показано: цей файл одного разу закрив Inbox Classic
+# review: new
+preview-tile-off = Не показано до перезапуску Inbox Classic
+# review: new
+preview-not-printed = { $name } ({ $details }) не друкується. Відкрийте його, щоб надрукувати.

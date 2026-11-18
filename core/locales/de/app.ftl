@@ -412,6 +412,8 @@ ui-save-attachments = Anlagen speichern
 ui-attachment-open = Öffnen
 ui-attachment-save-as = Speichern unter...
 ui-attachment-save-all = Alle speichern...
+# review: new
+ui-attachment-show-in-message = In Nachricht anzeigen
 ui-attachments-strip = Anlagen
 ui-attachment-note-title = Anlage öffnen
 ui-attachment-program-tip = Inbox Classic öffnet diesen Dateityp nicht, da er Programme ausführen kann. Bei Bedarf können Sie die Datei speichern und selbst öffnen.

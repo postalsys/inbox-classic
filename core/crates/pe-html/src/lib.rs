@@ -41,8 +41,9 @@ pub use markdown::markdown_html;
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};
 pub use previews::{
-    PREVIEW_LINK, PREVIEW_PATH, PreviewFile, PreviewPage, PreviewSection, is_preview_link, parse_preview_address,
-    parse_preview_link, preview_address, preview_origin, preview_token,
+    PREVIEW_LINK, PREVIEW_PATH, PreviewFile, PreviewPage, PreviewSection, PreviewTile, PrintItem, SCROLL_SCRIPT,
+    is_preview_link, parse_preview_address, parse_preview_link, preview_address, preview_origin, preview_token,
+    scroll_to_script,
 };
 pub use secure::{
     MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, part_document, part_link, secure_page,
@@ -258,6 +259,36 @@ pub struct Rendered {
     /// The document to print when this one shows previews: the same message wrapped again with none (the print
     /// windows serve none of their pictures; PDF pages are printed from their own program). None when it shows none
     pub print_document: Option<String>,
+    /// What the printout of a document with previews is made of again once their pictures are drawn
+    /// ([`print_document_with`]); None when it shows none
+    pub print: Option<PrintParts>,
+}
+
+/// A sanitized message as [`render_view_cards`] wrapped it, kept to wrap it again for a printout with the pictures
+/// of its previews ([`print_document_with`]): never cut out of a finished document
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PrintParts {
+    body: String,
+    allow_remote_images: bool,
+    header: Vec<(String, String)>,
+    card: String,
+}
+
+/// A printout of a message with previews of its attachments, its pictures put after its text as `data:` addresses
+/// of the core's own encodes (the print windows serve nothing but the page), and a line for each file that is not
+/// printed (a PDF file, printed from its own program). The CSP lets pictures come from `data:` only, as any document
+/// of [`render_view`]
+pub fn print_document_with(parts: &PrintParts, items: &[PrintItem]) -> String {
+    let header: Vec<(&str, &str)> = parts
+        .header
+        .iter()
+        .map(|(name, value)| (name.as_str(), value.as_str()))
+        .collect();
+    let options = RenderOptions {
+        allow_remote_images: parts.allow_remote_images,
+    };
+    let section = previews::print_section(items);
+    wrap(&parts.body, &options, &header, &parts.card, After::Printed(&section)).0
 }
 
 /// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows (on
@@ -322,16 +353,36 @@ pub fn render_view_cards(
         section: previews,
         embedded: &embedded,
     });
-    let (document, previewed) = wrap(&body, options, header, &card, previews);
+    let after = previews.map_or(After::Nothing, After::Previews);
+    let (document, previewed) = wrap(&body, options, header, &card, after);
     // built from the same parts, never cut out of the document: the message's own style text may forge any marker
-    let print_document = (!previewed.is_empty()).then(|| wrap(&body, options, header, &card, None).0);
+    let print_document = (!previewed.is_empty()).then(|| wrap(&body, options, header, &card, After::Nothing).0);
+    let print = (!previewed.is_empty()).then(|| PrintParts {
+        allow_remote_images: options.allow_remote_images,
+        header: header
+            .iter()
+            .map(|(name, value)| (name.to_string(), value.to_string()))
+            .collect(),
+        card: card.clone(),
+        body: body.clone(),
+    });
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
         remote_images: remote.load(Ordering::Relaxed) || style_elements_load_remote(&body),
         document,
         previewed,
         print_document,
+        print,
     }
+}
+
+/// What a document has after the message's text
+enum After<'a> {
+    Nothing,
+    /// The previews of its attachments
+    Previews(Previews<'a>),
+    /// A printout's pictures and lines ([`print_document_with`])
+    Printed(&'a str),
 }
 
 /// The previews to put after a message's text, and the pictures its HTML showed already
@@ -403,7 +454,7 @@ fn wrap(
     options: &RenderOptions,
     header: &[(&str, &str)],
     card: &str,
-    previews: Option<Previews>,
+    after: After,
 ) -> (String, Vec<usize>) {
     let mut image_sources = if options.allow_remote_images {
         "data: http: https:".to_string()
@@ -430,11 +481,19 @@ fn wrap(
         dark::Look::Dark { .. } => ("light dark", dark::DOCUMENT_DARK),
     };
     // the previews after the text, their pictures from the preview path of the page's own origin and nowhere else
-    let (section, previewed) = previews.map_or_else(Default::default, |previews| {
-        let embedded = |id: &str| previews.embedded.contains(id);
-        previews::section(previews.section, &embedded, matches!(look, dark::Look::Dark { .. }))
-    });
-    if !previewed.is_empty() {
+    let ours = match after {
+        After::Nothing => previews::Shown::default(),
+        After::Previews(previews) => {
+            let embedded = |id: &str| previews.embedded.contains(id);
+            previews::section(previews.section, &embedded, matches!(look, dark::Look::Dark { .. }))
+        }
+        After::Printed(section) => previews::Shown {
+            html: section.to_string(),
+            ..Default::default()
+        },
+    };
+    let (section, previewed) = (ours.html, ours.files);
+    if ours.pictures {
         image_sources.push(' ');
         image_sources.push_str(&previews::preview_source());
     }
@@ -749,6 +808,7 @@ mod tests {
                 },
             ],
             notice: None,
+            more_files: None,
         }
     }
 
@@ -855,6 +915,46 @@ mod tests {
         // a document without previews is printed as it is
         let plain = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &Cards::default());
         assert_eq!(plain.print_document, None);
+    }
+
+    /// The printout of a document with previews: wrapped again with its pictures as `data:` addresses and a line for
+    /// each file not printed; nothing loads from the preview path, and the CSP lets pictures come from `data:` only
+    #[test]
+    fn a_printout_has_the_pictures_as_data() {
+        let token = preview_token();
+        let section = previews(&token);
+        let cards = Cards {
+            previews: Some(&section),
+            ..Default::default()
+        };
+        let header = [("Subject", "Photos")];
+        let rendered = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &header, &cards);
+        let parts = rendered.print.clone().unwrap();
+        let items = [
+            PrintItem::Picture {
+                name: "red.png",
+                mime: "image/png",
+                bytes: b"\x89PNG",
+            },
+            PrintItem::Line("invoice.pdf (1 page, 3 KB) is not printed. Open it to print it."),
+        ];
+        let printed = print_document_with(&parts, &items);
+        assert!(printed.contains("<p>hi</p>"), "{printed}");
+        assert!(printed.contains("Photos"), "{printed}");
+        assert!(printed.contains("src=\"data:image/png;base64,iVBORw==\""), "{printed}");
+        assert!(
+            printed.contains("invoice.pdf (1 page, 3 KB) is not printed."),
+            "{printed}"
+        );
+        assert!(!printed.contains(&token) && !printed.contains("/pv/"), "{printed}");
+        let csp = printed[printed.find(CSP_START).unwrap()..].split('>').next().unwrap();
+        assert!(csp.contains("img-src data:;"), "{csp}");
+        // after the text, and a page of the print window as any printout
+        assert!(printed.find("<p>hi</p>").unwrap() < printed.find("pe-prt-").unwrap());
+        assert!(print_page(&printed).unwrap().contains("data:image/png;base64"));
+        // a document without previews has none to print again
+        let plain = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &Cards::default());
+        assert_eq!(plain.print, None);
     }
 
     /// The markup of a document outside its style elements

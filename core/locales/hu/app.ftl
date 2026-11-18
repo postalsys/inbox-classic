@@ -423,6 +423,8 @@ ui-save-attachments = Mellékletek mentése
 ui-attachment-open = Megnyitás
 ui-attachment-save-as = Mentés másként...
 ui-attachment-save-all = Az összes mentése...
+# review: new
+ui-attachment-show-in-message = Megjelenítés az üzenetben
 ui-attachments-strip = Mellékletek
 ui-attachment-note-title = A fájl megnyitása
 ui-attachment-program-tip = Az ilyen fájlok programot futtathatnak, ezért a Megnyitás nem érhető el. Ha mégis meg szeretné nyitni a fájlt, előbb mentse.

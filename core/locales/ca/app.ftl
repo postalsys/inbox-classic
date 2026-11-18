@@ -417,6 +417,8 @@ ui-save-attachments = Desa els fitxers adjunts
 ui-attachment-open = Obre
 ui-attachment-save-as = Desa com a...
 ui-attachment-save-all = Desa-ho tot...
+# review: new
+ui-attachment-show-in-message = Mostra al missatge
 ui-attachments-strip = Adjunts
 ui-attachment-note-title = Obrir un fitxer adjunt
 ui-attachment-program-tip = L’opció Obre està desactivada per a aquest tipus de fitxer perquè pot executar programes. Si confieu en l’origen, podeu desar-lo i obrir-lo manualment.

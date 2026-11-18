@@ -417,6 +417,8 @@ ui-save-attachments = Gem vedhæftede filer
 ui-attachment-open = Åbn
 ui-attachment-save-as = Gem som...
 ui-attachment-save-all = Gem alle...
+# review: new
+ui-attachment-show-in-message = Vis i meddelelsen
 ui-attachments-strip = Vedhæftede filer
 ui-attachment-note-title = Åbning af denne fil
 ui-attachment-program-tip = Åbn er slået fra for denne filtype: den kan køre programmer. Gem den for selv at åbne den.

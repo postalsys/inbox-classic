@@ -927,3 +927,27 @@ preview-more-pages = { $count ->
     [few] Otvorite datoteku da biste videli sve { $count } stranice
    *[other] Otvorite datoteku da biste videli svih { $count } stranica
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Još { $count } datoteka se nalazi na listi iznad
+    [few] Još { $count } datoteke se nalaze na listi iznad
+   *[other] Još { $count } datoteka se nalazi na listi iznad
+}
+# review: new
+preview-tile-downloading = Preuzimanje…
+# review: new
+preview-tile-format = { $format } slike se još ne prikazuju
+# review: new
+preview-tile-password = Zaštićeno lozinkom
+# review: new
+preview-tile-too-large = Prevelika za prikaz
+# review: new
+preview-tile-unreadable = Ne može da se prikaže
+# review: new
+preview-tile-timed-out = Prikaz je trajao predugo
+# review: new
+preview-tile-crashed = Nije prikazano: ova datoteka je jednom zatvorila Inbox Classic
+# review: new
+preview-tile-off = Nije prikazano dok se Inbox Classic ponovo ne pokrene
+# review: new
+preview-not-printed = { $name } ({ $details }) se ne štampa. Otvorite datoteku da biste je odštampali.

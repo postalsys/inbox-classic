@@ -818,3 +818,26 @@ preview-more-pages = { $count ->
     [one] Avage fail, et lehekülge näha
    *[other] Avage fail, et näha kõiki { $count } lehekülge
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Veel 1 fail on ülal loendis
+   *[other] Veel { $count } faili on ülal loendis
+}
+# review: new
+preview-tile-downloading = Laaditakse alla…
+# review: new
+preview-tile-format = { $format }-pilte veel ei näidata
+# review: new
+preview-tile-password = Kaitstud parooliga
+# review: new
+preview-tile-too-large = Näitamiseks liiga suur
+# review: new
+preview-tile-unreadable = Ei saa näidata
+# review: new
+preview-tile-timed-out = Näitamine võttis liiga kaua aega
+# review: new
+preview-tile-crashed = Ei näidata: see fail sulges korra Inbox Classicu
+# review: new
+preview-tile-off = Ei näidata enne, kui Inbox Classic uuesti käivitub
+# review: new
+preview-not-printed = Faili { $name } ({ $details }) ei prindita. Printimiseks avage see.

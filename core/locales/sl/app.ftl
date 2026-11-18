@@ -815,6 +815,8 @@ ui-attachment-save-as = Shrani kot...
 # review: new
 ui-attachment-save-all = Shrani vse...
 # review: new
+ui-attachment-show-in-message = Pokaži v sporočilu
+# review: new
 ui-attachments-strip = Priponke
 # review: new
 ui-attachment-note-title = Odpiranje te datoteke

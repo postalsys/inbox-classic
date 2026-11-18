@@ -907,3 +907,28 @@ preview-more-pages = { $count ->
     [many] Otevřete soubor a uvidíte všech { $count } stránky
    *[other] Otevřete soubor a uvidíte všech { $count } stránek
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Další 1 soubor je v seznamu nahoře
+    [few] Další { $count } soubory jsou v seznamu nahoře
+    [many] Dalších { $count } souboru je v seznamu nahoře
+   *[other] Dalších { $count } souborů je v seznamu nahoře
+}
+# review: new
+preview-tile-downloading = Stahování…
+# review: new
+preview-tile-format = Obrázky { $format } se zatím nezobrazují
+# review: new
+preview-tile-password = Chráněno heslem
+# review: new
+preview-tile-too-large = Příliš velké k zobrazení
+# review: new
+preview-tile-unreadable = Nelze zobrazit
+# review: new
+preview-tile-timed-out = Zobrazení trvalo příliš dlouho
+# review: new
+preview-tile-crashed = Nezobrazeno: tento soubor jednou ukončil Inbox Classic
+# review: new
+preview-tile-off = Nezobrazeno do příštího spuštění Inbox Classic
+# review: new
+preview-not-printed = { $name } ({ $details }) se netiskne. Chcete-li jej vytisknout, otevřete jej.

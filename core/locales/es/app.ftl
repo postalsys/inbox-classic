@@ -412,6 +412,8 @@ ui-save-attachments = Guardar archivos adjuntos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Guardar como...
 ui-attachment-save-all = Guardar todos...
+# review: new
+ui-attachment-show-in-message = Mostrar en el mensaje
 ui-attachments-strip = Archivos adjuntos
 ui-attachment-note-title = Abrir archivo adjunto
 ui-attachment-program-tip = Inbox Classic no abre este tipo de archivo porque puede ejecutar programas. Si lo necesita, guárdelo y ábralo por su cuenta.

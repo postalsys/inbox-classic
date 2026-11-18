@@ -417,6 +417,8 @@ ui-save-attachments = Bijlagen opslaan
 ui-attachment-open = Openen
 ui-attachment-save-as = Opslaan als...
 ui-attachment-save-all = Alles opslaan...
+# review: new
+ui-attachment-show-in-message = Tonen in bericht
 ui-attachments-strip = Bijlagen
 ui-attachment-note-title = Bijlage openen
 ui-attachment-program-tip = Inbox Classic opent dit type bestand niet, omdat het programma’s kan uitvoeren. Sla het bestand op als je het zelf wilt openen.

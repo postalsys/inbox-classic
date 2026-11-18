@@ -412,6 +412,8 @@ ui-save-attachments = Enregistrer les pièces jointes
 ui-attachment-open = Ouvrir
 ui-attachment-save-as = Enregistrer sous...
 ui-attachment-save-all = Tout enregistrer...
+# review: new
+ui-attachment-show-in-message = Afficher dans le message
 ui-attachments-strip = Pièces jointes
 ui-attachment-note-title = Ouvrir une pièce jointe
 ui-attachment-program-tip = Inbox Classic n’ouvre pas ce type de fichier, car il peut exécuter des programmes. Si nécessaire, enregistrez-le pour l’ouvrir vous-même.

@@ -815,6 +815,8 @@ ui-attachment-save-as = Saglabāt kā...
 # review: new
 ui-attachment-save-all = Saglabāt visus...
 # review: new
+ui-attachment-show-in-message = Rādīt vēstulē
+# review: new
 ui-attachments-strip = Pielikumi
 # review: new
 ui-attachment-note-title = Šī faila atvēršana

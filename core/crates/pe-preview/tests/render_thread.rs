@@ -31,6 +31,7 @@ fn request(owner: u64, attachment: usize, file: Arc<Vec<u8>>) -> Request {
         about: format!("message {owner}, attachment {attachment}"),
         pages: 5,
         keep: true,
+        asked: false,
     }
 }
 
@@ -218,6 +219,7 @@ fn the_cache_answers_a_file_drawn_before() {
     // a decrypted part's file is never kept, and so drawn again
     let private = || Request {
         keep: false,
+        asked: false,
         ..request(3, 0, file(PNG, "private"))
     };
     previewer.request(private());
@@ -356,6 +358,15 @@ fn the_message_budget_counts_every_preview() {
     previewer.cancel(1);
     previewer.request(request(1, 2, file(PDF, "big")));
     assert_eq!(pages(&until_done(&outcomes, 1, 2)).len(), 4);
+    // a file the user asked to see (Show in Message) has a budget of its own, not the message's spent one
+    previewer.request(Request {
+        asked: true,
+        ..request(1, 3, file(PDF, "asked"))
+    });
+    assert_eq!(pages(&until_done(&outcomes, 1, 3)).len(), 4);
+    // and the message's own budget is as it was: still spent
+    previewer.request(request(1, 4, file(PDF, "not asked")));
+    assert!(pages(&until_done(&outcomes, 1, 4)).is_empty());
 }
 
 #[test]
@@ -459,6 +470,18 @@ fn pdfs_off_by_the_setting_are_disabled_and_come_back_on() {
     // pictures still draw
     previewer.request(request(1, 1, file(PNG, "b")));
     assert_eq!(pages(&until_done(&outcomes, 1, 1)), [0]);
+    // a PDF file the user asked to see (Show in Message) is described and drawn all the same
+    let asked = previewer.describe_file(file(PDF, "c"), String::new(), Duration::from_secs(5), true);
+    assert!(asked.is_ok(), "{asked:?}");
+    assert_eq!(
+        previewer.describe(file(PDF, "c"), String::new(), Duration::from_secs(5)),
+        Err(Refusal::Disabled)
+    );
+    previewer.request(Request {
+        asked: true,
+        ..request(1, 3, file(PDF, "c"))
+    });
+    assert_eq!(pages(&until_done(&outcomes, 1, 3)), [0]);
     previewer.set_pdfs(true);
     previewer.request(request(1, 2, file(PDF, "a")));
     assert_eq!(pages(&until_done(&outcomes, 1, 2)), [0]);

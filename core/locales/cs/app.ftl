@@ -414,6 +414,8 @@ ui-save-attachments = Uložit přílohy
 ui-attachment-open = Otevřít
 ui-attachment-save-as = Uložit jako...
 ui-attachment-save-all = Uložit vše...
+# review: new
+ui-attachment-show-in-message = Zobrazit ve zprávě
 ui-attachments-strip = Přílohy
 ui-attachment-note-title = Otevření tohoto souboru
 ui-attachment-program-tip = Tento typ souboru může spouštět programy, proto jej zde nelze přímo otevřít. Pokud jej chcete otevřít sami, nejprve jej uložte.

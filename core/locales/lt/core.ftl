@@ -1329,3 +1329,28 @@ preview-more-pages = { $count ->
     [many] Atidarykite, kad matytumėte visus { $count } puslapio
    *[other] Atidarykite, kad matytumėte visus { $count } puslapių
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Dar { $count } failas yra sąraše viršuje
+    [few] Dar { $count } failai yra sąraše viršuje
+    [many] Dar { $count } failo yra sąraše viršuje
+   *[other] Dar { $count } failų yra sąraše viršuje
+}
+# review: new
+preview-tile-downloading = Atsisiunčiama…
+# review: new
+preview-tile-format = { $format } paveikslėliai kol kas nerodomi
+# review: new
+preview-tile-password = Apsaugota slaptažodžiu
+# review: new
+preview-tile-too-large = Per didelis, kad būtų rodomas
+# review: new
+preview-tile-unreadable = Negalima parodyti
+# review: new
+preview-tile-timed-out = Rodymas užtruko per ilgai
+# review: new
+preview-tile-crashed = Nerodoma: šis failas kartą uždarė Inbox Classic
+# review: new
+preview-tile-off = Nerodoma, kol Inbox Classic nebus paleista iš naujo
+# review: new
+preview-not-printed = { $name } ({ $details }) nespausdinamas. Atidarykite jį, kad atspausdintumėte.

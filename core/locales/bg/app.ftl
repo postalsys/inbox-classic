@@ -418,6 +418,8 @@ ui-save-attachments = Запазване на прикачените файло�
 ui-attachment-open = Отваряне
 ui-attachment-save-as = Запазване като...
 ui-attachment-save-all = Запазване на всички...
+# review: new
+ui-attachment-show-in-message = Показване в съобщението
 ui-attachments-strip = Прикачени файлове
 ui-attachment-note-title = Отваряне на този файл
 ui-attachment-program-tip = „Отваряне“ е недостъпно за този вид файл, защото той може да изпълнява програмен код. Можете да го запазите и да го отворите сами.

@@ -250,6 +250,10 @@ pub enum Event {
     PreviewAnswered {
         ask: u64,
     },
+    /// The printout of a message with previews is made ([`Core::print_start`]): [`Core::print_result`] gives it
+    PrintReady {
+        request: u64,
+    },
     /// The app ended while a file's preview was drawn (it may have been a hostile file), so PDF previews are now off:
     /// [`Core::previews_notice`] says why and how to turn them on again
     PdfPreviewsOff,
@@ -1526,7 +1530,7 @@ impl Core {
             &|event| {
                 let _ = self.post(event);
             },
-            self.preview_plan(),
+            Some(self.preview_plan(&previews::PreviewSource::Stored { folder, uid })),
         );
         if let Some(view) = &view {
             self.remember_attachments(folder, uid, view);
@@ -1577,7 +1581,7 @@ impl Core {
                 &dropped,
                 || Some(core.store()),
                 &*events,
-                core.preview_plan(),
+                Some(core.preview_plan(&previews::PreviewSource::Stored { folder, uid })),
             );
             core.timings
                 .view_built(found.folder, found.uid, std::time::Instant::now());
@@ -2042,20 +2046,22 @@ impl Core {
         let (source, _) = read_message_file(path)?;
         let always = self.store().always_load_pictures()?;
         let ring = self.ring_for(&self.store(), &source);
-        let plan = self.preview_plan();
+        let source = Arc::new(source);
+        let preview_source = previews::PreviewSource::File(source.clone());
+        let plan = self.preview_plan(&preview_source);
         let trust = view::Trust {
             pictures: pictures::Rules {
                 always,
                 ..Default::default()
             },
             ring: ring.as_deref(),
-            previews: plan.as_ref(),
+            previews: Some(&plan),
             ..Default::default()
         };
         let mut view =
             view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
         if view.preview_token.is_some() {
-            view.preview_source = Some(previews::PreviewSource::File(Arc::new(source)));
+            view.preview_source = Some(preview_source);
         }
         self.remember_file_attachments(path, &view);
         Ok(self.learned(view))
@@ -3018,8 +3024,12 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     dropped: &dyn Fn() -> bool,
     store: impl Fn() -> Option<S>,
     events: &dyn Fn(Event),
-    previews: Option<previews::PreviewPlan>,
+    mut previews: Option<previews::PreviewPlan>,
 ) -> Option<MessageView> {
+    // a large message's text first: its files are tiles that say they are on their way
+    if let (Some(plan), Some(first)) = (previews.as_mut(), found.first.as_ref()) {
+        plan.downloading = Some(first.sizes.clone());
+    }
     let find = |message_id: &str| {
         store()?
             .find_message_id(found.account, message_id)

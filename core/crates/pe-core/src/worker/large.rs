@@ -32,7 +32,7 @@ impl Partials {
         self.lock().get(&(folder, uid)).cloned()
     }
 
-    fn insert(&self, folder: FolderId, uid: u64, first: pe_sync::TextFirst) {
+    pub(crate) fn insert(&self, folder: FolderId, uid: u64, first: pe_sync::TextFirst) {
         self.lock().insert((folder, uid), Arc::new(first));
     }
 

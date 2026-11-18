@@ -849,3 +849,28 @@ preview-more-pages = { $count ->
     [one] Open to see the page
    *[other] Open to see all { $count } pages
 }
+# after the files shown in a message, when it has more pictures and PDF files than are shown; the list is the
+# strip of files over the message
+preview-more-files = { $count ->
+    [one] 1 more file is in the list above
+   *[other] { $count } more files are in the list above
+}
+# the tile of a picture or PDF file of a message still downloading (the ellipsis as in reader-downloading)
+preview-tile-downloading = Downloading…
+# the tile of a picture in a format not shown yet: { $format } is its name (HEIC, AVIF, JPEG XL)
+preview-tile-format = { $format } pictures are not shown yet
+# the tile of a PDF file that wants a password to open
+preview-tile-password = Protected by a password
+# the tile of a picture or PDF file over the size or pixel limit
+preview-tile-too-large = Too large to show
+# the tile of a file that is broken, or not what its name says
+preview-tile-unreadable = Can not be shown
+# the tile of a file that took too long to draw
+preview-tile-timed-out = Took too long to show
+# the tile of a file that closed the app once while it was drawn: never drawn again
+preview-tile-crashed = Not shown: it closed Inbox Classic once
+# the tile of a file while previews are paused after a file took too long, until the app starts again
+preview-tile-off = Not shown until Inbox Classic starts again
+# in a printout, for a file shown in the message that is not printed (a PDF file, a tile): { $details } is its size,
+# or a PDF file's pages and size
+preview-not-printed = { $name } ({ $details }) is not printed. Open it to print it.

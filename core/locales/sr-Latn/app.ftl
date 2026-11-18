@@ -421,6 +421,8 @@ ui-save-attachments = Sačuvaj priloge
 ui-attachment-open = Otvori
 ui-attachment-save-as = Sačuvaj kao...
 ui-attachment-save-all = Sačuvaj sve...
+# review: new
+ui-attachment-show-in-message = Prikaži u poruci
 ui-attachments-strip = Prilozi
 ui-attachment-note-title = Otvaranje ove datoteke
 ui-attachment-program-tip = Otvaranje je isključeno za ovu vrstu datoteke jer može da pokreće programe. Sačuvajte je da biste je sami otvorili.

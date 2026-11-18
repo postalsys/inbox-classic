@@ -814,6 +814,8 @@ ui-attachment-save-as = Зберегти як...
 # review: new
 ui-attachment-save-all = Зберегти всі...
 # review: new
+ui-attachment-show-in-message = Показати в листі
+# review: new
 ui-attachments-strip = Вкладення
 # review: new
 ui-attachment-note-title = Відкриття цього файлу

@@ -280,6 +280,8 @@ typedef enum PeEventKind {
   // A PDF file ended the app while it was drawn, so PDF previews are now off (`pe_pdf_previews`); the documents
   // built from now on say so where the previews are
   PE_EVENT_KIND_PDF_PREVIEWS_OFF = 37,
+  // The printout `pe_print_start` started (its request in `uid`) is made: `pe_print_result` gives the document
+  PE_EVENT_KIND_PRINT_READY = 38,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -434,6 +436,19 @@ typedef enum PeFileKind {
   // It can run code: never opened from a message
   PE_FILE_KIND_PROGRAM = 14,
 } PeFileKind;
+
+// What the strip menu's Show in Message says of a file
+typedef enum PeShowInMessage {
+  // Not a picture or PDF file: the menu has no such item for it
+  PE_SHOW_IN_MESSAGE_NONE = 0,
+  // Drawn in the message: the item is checked, and choosing it takes the file out of the message
+  PE_SHOW_IN_MESSAGE_ON = 1,
+  // Not drawn, and it can be: unchecked, and choosing it draws the file in the message
+  PE_SHOW_IN_MESSAGE_OFF = 2,
+  // A tile that can not be drawn (a HEIC picture, a PDF file with a password, still downloading): unchecked and
+  // greyed
+  PE_SHOW_IN_MESSAGE_UNAVAILABLE = 3,
+} PeShowInMessage;
 
 typedef enum PeDraftKind {
   PE_DRAFT_KIND_REPLY = 0,
@@ -1305,7 +1320,8 @@ typedef struct PeMessageInfo {
   // The sanitized document for the preview, with its CSP
   const char *document;
   // The document to print (for `pe_print_page`): `document` for most messages; for one with signed or encrypted
-  // parts, one document of every part's text with the labels as words, as a printer prints no frames
+  // parts, one document of every part's text with the labels as words, as a printer prints no frames; for one with
+  // previews, the message without them (`pe_print_start` makes the printout with its pictures)
   const char *print_document;
   size_t attachment_count;
   // The message has pictures on the internet, blocked until it is shown again with remote images allowed
@@ -1357,9 +1373,11 @@ typedef struct PeMessageInfo {
   // memory as the page is; `pe_part_document` says which part an address asks for), whose document
   // `pe_message_view_part` gives
   size_t part_count;
-  // The token of the previews of its attachments after the text, empty when `document` shows none: the document
-  // server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the page's origin),
-  // and the window ends them with `pe_previews_end` when it shows another document or closes
+  // The token of the previews of its attachments after the text, empty for a message with no picture or PDF file:
+  // the document server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the
+  // page's origin), the strip's Show in Message names the view by it (`pe_preview_show`), Print starts the
+  // printout with it (`pe_print_start`), and the window ends them with `pe_previews_end` when it shows another
+  // document or closes
   const char *preview_token;
 } PeMessageInfo;
 
@@ -1381,6 +1399,8 @@ typedef struct PeAttachment {
   const char *tooltip;
   // What to say when it is opened while `can_open` is false, naming it (empty when it opens)
   const char *refusal;
+  // The strip menu's Show in Message for it (`pe_preview_show`): no item, checked, unchecked or greyed
+  enum PeShowInMessage show_in_message;
 } PeAttachment;
 
 // A picture of a preview, to answer a web view with, owned by its `PePreviewAnswer`
@@ -3019,6 +3039,47 @@ int64_t pe_preview_link(const struct PeCore *core,
 // `core` must be a live handle; `token` NULL or a NUL-terminated string.
 void pe_previews_end(const struct PeCore *core,
                      const char *token);
+
+// The strip menu's Show in Message chosen for attachment `attachment` of the view with this `preview_token` (`show`:
+// draw it in the message, false: take it out), for as long as a window shows the message, never kept. True when that
+// changes the document: the window then builds the view again (`pe_message_view_start`, or `pe_file_view` for a
+// message file) and shows it where it was scrolled to (`pe_scroll_script`, `pe_scroll_to_script`). False for a file
+// whose item is greyed or already so, or a view no longer shown.
+//
+// # Safety
+// `core` must be a live handle; `token` NULL or a NUL-terminated string.
+bool pe_preview_show(const struct PeCore *core,
+                     const char *token,
+                     size_t attachment,
+                     bool show);
+
+// Starts the printout of the view with this `preview_token`, its pictures in it (drawn first if they are not yet,
+// off the window thread): `PrintReady` with the request this returns follows, and `pe_print_result` gives the
+// document for `pe_print_page`. 0 for a view that shows no previews (an empty token, or one no longer shown): print
+// its `print_document` as it is.
+//
+// # Safety
+// `core` must be a live handle; `token` NULL or a NUL-terminated string.
+uint64_t pe_print_start(const struct PeCore *core,
+                        const char *token);
+
+// The document of the printout `request`, once, after its `PrintReady`: the message with the pictures of its
+// previews as `data:` addresses and a line for each file not printed, for `pe_print_page`. NULL when it was taken or
+// is unknown. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_print_result(const struct PeCore *core,
+                      uint64_t request);
+
+// The script the app runs in the reading pane before it shows the same message's document again (after Show in
+// Message, and when the whole of a large message came after its text): how far it is scrolled, a number. A static
+// string, not freed.
+const char *pe_scroll_script(void);
+
+// The script that scrolls the new document back to `y` (what `pe_scroll_script` answered), run once it has loaded.
+// Free with `pe_string_free`.
+char *pe_scroll_to_script(double y);
 
 // Settings' "Show attachments in messages": pictures and PDF files after a message's text
 //
