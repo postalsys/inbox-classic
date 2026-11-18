@@ -374,6 +374,14 @@ const PeMessageInfo* Reader::Info() const {
     return uid_ || !file_.empty() ? pe_message_view_info(view_.get()) : nullptr;
 }
 
+int Reader::TestShown(const std::wstring& subject) const {
+    const PeMessageInfo* info = Info();
+    if (!info || !preview_.Loaded()) {
+        return 0;
+    }
+    return subject.empty() || Text(info->subject) == subject ? 1 : 0;
+}
+
 // the paper clip and the information bar shown or not, the pane laid out again only when that changes
 void Reader::ShowBars(bool files, bool pictures) {
     // the arrow only when its menu has more than the bar's own click: an Always, or why there is none (encrypted mail
@@ -1135,6 +1143,8 @@ void Reader::FindInMessage(HWND owner, bool again) {
     if (again && preview_.Finding() && preview_.FindNext()) {
         return;
     }
+    // no answer yet, from the moment the words are asked for
+    testFound_ = -1;
     std::vector<FormField> fields = {{core::T(PE_TEXT_WIN_FIND_LABEL), findWords_}};
     if (!FormDialog(owner, core::Title(PE_TEXT_CMD_FIND_IN_MESSAGE), core::T(PE_TEXT_UI_FIND_IN_MESSAGE_HINT), fields) ||
         fields[0].value.empty()) {
@@ -1142,6 +1152,7 @@ void Reader::FindInMessage(HWND owner, bool again) {
     }
     findWords_ = fields[0].value;
     preview_.Find(findWords_, [this, words = findWords_](int count) {
+        testFound_ = count >= 0 ? count : -2;
         if (onFound && count >= 0) {
             onFound(count > 0 ? L"" : core::T(PE_TEXT_UI_FIND_NOT_FOUND, {{"words", words}}));
         }

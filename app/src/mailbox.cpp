@@ -1670,6 +1670,16 @@ void Mailbox::ClearReader(bool loading) {
     summaryPage_.clear();
 }
 
+int Mailbox::TestShown(const std::wstring& subject) {
+    if (subject.empty()) {
+        const PeMessage* row = SelectedCount() == 1 ? SelectedRow() : nullptr;
+        if (!row || row->uid != reader_.Uid() || row->folder != reader_.Folder()) {
+            return 0;
+        }
+    }
+    return reader_.TestShown(subject);
+}
+
 void Mailbox::OnMessageShown() {
     // read after a moment on screen, not while the user moves through the list
     SetTimer(parent_, TIMER_MARK_READ, 1000, nullptr);
