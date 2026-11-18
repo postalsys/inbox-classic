@@ -1,10 +1,12 @@
-//! Step 8b of the UI test: pictures and PDF files after a message's text. The two messages of
+//! Step 8b of the UI test: pictures and PDF files after a message's text. The three messages of
 //! `scripts/ui-e2e/previews/` and one with many pictures (made here) put in the Inbox over ImapKit's API: the previews
 //! answered by the document server once the core drew them, read back with the app's own script (page scripts off);
 //! a click on one opening the file as the strip does; the long PDF file's link; a message window; the two switches of
-//! Preferences; PDF previews off as after a crash; the dark look (a pixel of the photo's sky read back); printing; a
-//! narrow window and the words in German for the review of the look. The messages are taken away at the end.
+//! Preferences; PDF previews off as after a crash; the tiles, Show in Message and printing (`preview_tiles.rs`); the
+//! dark look (a pixel of the photo's sky read back); a narrow window and the words in German for the review of the
+//! look. The messages are taken away at the end.
 
+use super::preview_tiles::{TILES, TILES_ID};
 use super::steps::{document_text, folder_id, open_by_subject};
 use super::*;
 use crate::attachments::take_opened;
@@ -96,7 +98,7 @@ fn many_raw() -> String {
 }
 
 /// The value of the app's own `script` in `view` (the page's scripts stay off), empty when it could not run
-async fn run_script(view: &webkit::WebView, script: &str) -> String {
+pub(super) async fn run_script(view: &webkit::WebView, script: &str) -> String {
     match view.evaluate_javascript_future(script, None, None).await {
         Ok(value) => value.to_str().to_string(),
         Err(_) => String::new(),
@@ -112,9 +114,9 @@ const LOADED: &str = "(function(){var s=document.querySelector('section[class^=\
 
 /// Pictures (all of them) and how many have come, with the captions' places
 #[derive(Debug, Default, PartialEq)]
-struct Loaded {
-    pictures: usize,
-    come: usize,
+pub(super) struct Loaded {
+    pub(super) pictures: usize,
+    pub(super) come: usize,
     captions: String,
 }
 
@@ -129,7 +131,7 @@ async fn loaded(view: &webkit::WebView) -> Option<Loaded> {
 }
 
 /// Waits until the `count` previews of `view` have all come; what was seen last
-async fn all_come(view: &webkit::WebView, count: usize, seconds: u64) -> Option<Loaded> {
+pub(super) async fn all_come(view: &webkit::WebView, count: usize, seconds: u64) -> Option<Loaded> {
     let deadline = Instant::now() + Duration::from_secs(seconds);
     let mut last = None;
     while Instant::now() < deadline {
@@ -164,7 +166,7 @@ async fn click_preview(view: &webkit::WebView, n: usize, more: bool) -> bool {
 }
 
 /// The opened files the hook recorded within `seconds`
-async fn opened(seconds: u64) -> Vec<PathBuf> {
+pub(super) async fn opened(seconds: u64) -> Vec<PathBuf> {
     let mut found = Vec::new();
     wait_until(seconds, || {
         found.extend(take_opened());
@@ -182,14 +184,19 @@ pub(super) async fn previews(d: &Driver) {
         return;
     };
     let photo_raw = fixture("photo-and-pdf.eml");
-    let added = [photo_raw.clone(), fixture("long-pdf.eml"), many_raw()]
-        .iter()
-        .all(|raw| d.add_message(raw, &["\\Seen"]).is_ok());
+    let added = [
+        photo_raw.clone(),
+        fixture("long-pdf.eml"),
+        many_raw(),
+        fixture("tiles.eml"),
+    ]
+    .iter()
+    .all(|raw| d.add_message(raw, &["\\Seen"]).is_ok());
     run_command(Command::Sync);
     select_folder("Inbox");
     let arrived = wait_until(30, || {
         let listed = listed_in_folder(inbox, 0, 500);
-        [PHOTO, LONG, MANY]
+        [PHOTO, LONG, MANY, TILES]
             .iter()
             .all(|subject| listed.iter().any(|m| m.info.subject == *subject))
     })
@@ -268,7 +275,9 @@ pub(super) async fn previews(d: &Driver) {
     in_window(d, inbox).await;
     switches(d, inbox).await;
     pdf_off(d, inbox).await;
-    printing(d, inbox).await;
+    preview_tiles::tiles(d, inbox).await;
+    preview_tiles::show_in_message(d, inbox, PHOTO).await;
+    preview_tiles::printing(d, inbox, PHOTO).await;
     many(d, inbox).await;
     dark(d, inbox).await;
     german(d, inbox).await;
@@ -353,7 +362,7 @@ async fn in_window(d: &Driver, inbox: i64) {
 }
 
 /// Preferences open on its Reading page
-async fn reading_page() -> Option<adw::Dialog> {
+pub(super) async fn reading_page() -> Option<adw::Dialog> {
     command(Command::Options);
     let dialog = wait_dialog(10, "preferences-dialog").await?;
     preferences_page(&dialog, SettingsPage::Reading);
@@ -361,17 +370,17 @@ async fn reading_page() -> Option<adw::Dialog> {
     Some(dialog)
 }
 
-fn switch(dialog: &adw::Dialog, setting: Setting) -> Option<adw::SwitchRow> {
+pub(super) fn switch(dialog: &adw::Dialog, setting: Setting) -> Option<adw::SwitchRow> {
     setting_row(dialog.upcast_ref(), setting).and_downcast::<adw::SwitchRow>()
 }
 
-async fn close(dialog: adw::Dialog) {
+pub(super) async fn close(dialog: adw::Dialog) {
     dialog.close();
     wait_gone(10, "preferences-dialog").await;
 }
 
 /// How many of the page's pictures are previews, and how many of them are of the file at `attachment`
-async fn previews_shown(view: &webkit::WebView, attachment: usize) -> (usize, usize) {
+pub(super) async fn previews_shown(view: &webkit::WebView, attachment: usize) -> (usize, usize) {
     let sources = sources(view).await;
     let previews: Vec<&str> = sources.split(' ').filter(|s| s.starts_with("/pv/")).collect();
     let of_file = previews
@@ -517,35 +526,6 @@ async fn pdf_off(d: &Driver, inbox: i64) {
     );
 }
 
-/// Printing the message: the core's document without the previews (no picture of the app's in it)
-async fn printing(d: &Driver, inbox: i64) {
-    open_by_subject(inbox, PHOTO).await;
-    let main_window = shell().main().window().clone().upcast::<gtk::Window>();
-    command(Command::Print);
-    let dialog = wait_for(20, || {
-        windows()
-            .into_iter()
-            .find(|w| w != &main_window && w.is::<gtk::PrintUnixDialog>())
-    })
-    .await;
-    let printed = crate::reader::printing().unwrap_or_default();
-    d.check(
-        dialog.is_some()
-            && document_text(&printed).contains("the lodge's invoice")
-            && !printed.contains("/pv/")
-            && !printed.contains("pe-att-"),
-        "Print of a message with previews opens the print dialog and prints the message without them",
-    );
-    if let Some(dialog) = dialog {
-        pause(1000).await;
-        let closed = dialog.downgrade();
-        dialog.close();
-        drop(dialog);
-        wait_until(10, || closed.upgrade().is_none_or(|w| !w.is_visible())).await;
-    }
-    wait_until(10, || crate::reader::printing().is_none()).await;
-}
-
 /// More pictures than the core shows: the first 20, every one come (none broken), the rest only in the strip; in a
 /// narrow window nothing wider than the pane
 async fn many(d: &Driver, inbox: i64) {
@@ -676,6 +656,9 @@ async fn dark(d: &Driver, inbox: i64) {
     open_by_subject(inbox, MANY).await;
     all_come(&view, 20, 30).await;
     d.shot(main.window(), "read-30l-previews-many-dark").await;
+    open_by_subject(inbox, TILES).await;
+    all_come(&view, 1, 20).await;
+    d.shot(main.window(), "read-32e-previews-tiles-dark").await;
     if let Some(dialog) = reading_page().await {
         d.shot(&dialog, "read-30m-previews-settings-dark").await;
         close(dialog).await;
@@ -712,7 +695,7 @@ async fn german(d: &Driver, inbox: i64) {
 async fn remove_messages(d: &Driver, inbox: i64) {
     for message in d.messages("INBOX") {
         let raw = raw_text(&message);
-        if [PHOTO_ID, LONG_ID, MANY_ID].iter().any(|id| raw.contains(id))
+        if [PHOTO_ID, LONG_ID, MANY_ID, TILES_ID].iter().any(|id| raw.contains(id))
             && let Some(uid) = message["uid"].as_u64()
         {
             let _ = http(
@@ -726,7 +709,7 @@ async fn remove_messages(d: &Driver, inbox: i64) {
     run_command(Command::Sync);
     let gone = wait_until(30, || {
         let listed = listed_in_folder(inbox, 0, 500);
-        ![PHOTO, LONG, MANY]
+        ![PHOTO, LONG, MANY, TILES]
             .iter()
             .any(|subject| listed.iter().any(|m| m.info.subject == *subject))
     })

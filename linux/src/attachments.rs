@@ -13,6 +13,7 @@ use adw::prelude::*;
 use gtk::{gdk, gio, glib};
 use pe_core::AttachmentView;
 use pe_core::opening::FileKind;
+use pe_core::previews::ShowInMessage;
 
 /// The pixels of a file's icon
 const ICON_SIZE: i32 = 32;
@@ -41,12 +42,20 @@ fn icon_names(kind: FileKind) -> &'static [&'static str] {
     }
 }
 
+/// What the strip calls when a file's Show in Message is chosen: its index, and what the item said then
+type ShowChosen = Rc<dyn Fn(usize, ShowInMessage)>;
+
 pub struct Strip {
     /// The strip, scrolling when there are more files than [`ROWS_SHOWN`] rows hold
     pub widget: gtk::ScrolledWindow,
     pub flow: gtk::FlowBox,
     /// The files shown, as the core described them
     files: RefCell<Vec<AttachmentView>>,
+    /// Show in Message chosen in a file's menu: its index and what the item said when chosen
+    show_in_message: RefCell<Option<ShowChosen>>,
+    /// The Show in Message of the menu open last, None when it had none (the UI test reads it)
+    #[cfg(feature = "e2e")]
+    menu_action: RefCell<Option<gio::SimpleAction>>,
 }
 
 impl Strip {
@@ -73,16 +82,21 @@ impl Strip {
             widget,
             flow,
             files: RefCell::default(),
+            show_in_message: RefCell::default(),
+            #[cfg(feature = "e2e")]
+            menu_action: RefCell::default(),
         });
         strip.connect_menu();
         strip
     }
 
     /// The files of a message: one item each, the strip hidden when there are none. The same files as shown (the
-    /// message shown again, with its pictures, say) keep their items, and the one chosen
+    /// message shown again, with its pictures, or a file taken out of it with Show in Message) keep their items, and
+    /// the one chosen
     pub fn show(&self, attachments: &[AttachmentView]) {
         self.widget.set_visible(!attachments.is_empty());
-        if *self.files.borrow() == attachments {
+        if same_items(&self.files.borrow(), attachments) {
+            *self.files.borrow_mut() = attachments.to_vec();
             return;
         }
         self.flow.remove_all();
@@ -125,6 +139,11 @@ impl Strip {
                 open(index);
             }
         });
+    }
+
+    /// Calls `show` with the index of a file whose Show in Message was chosen, and what the item said then
+    pub fn connect_show_in_message(&self, show: impl Fn(usize, ShowInMessage) + 'static) {
+        self.show_in_message.replace(Some(Rc::new(show)));
     }
 
     /// The file chosen in the strip: the one with the keyboard focus, or the one selected
@@ -183,15 +202,17 @@ impl Strip {
         self.flow.add_controller(keys);
     }
 
-    /// The menu of the file of `child`: Open (greyed for a file that can run programs), Save As..., Save All...;
+    /// The menu of the file of `child`: Open (greyed for a file that can run programs), Save As..., Save All...,
+    /// and for a picture or PDF file Show in Message (ticked while it is in the message, greyed when it can not be);
     /// where the click was, or under the file
     pub fn popup_menu(&self, child: &gtk::FlowBoxChild, at: Option<(f64, f64)>) {
-        let Some((index, can_open)) = usize::try_from(child.index())
+        let Some((index, attachment)) = usize::try_from(child.index())
             .ok()
-            .and_then(|index| Some((index, self.file(index)?.kind.can_open())))
+            .and_then(|index| Some((index, self.file(index)?)))
         else {
             return;
         };
+        let can_open = attachment.kind.can_open();
         let target = (index as u32).to_variant();
         let menu = gio::Menu::new();
         let file = gio::Menu::new();
@@ -210,7 +231,18 @@ impl Strip {
         let all = gio::Menu::new();
         all.append(Some(&t!(UiAttachmentSaveAll)), Some("reader.save-all"));
         menu.append_section(None, &all);
-        let popover = gtk::PopoverMenu::from_model(Some(&menu));
+        let shown = self.show_in_message_action(index, attachment.show_in_message);
+        if shown.is_some() {
+            let section = gio::Menu::new();
+            section.append(Some(&t!(UiAttachmentShowInMessage)), Some("strip.show-in-message"));
+            menu.append_section(None, &section);
+        }
+        // its action there before its items are made, so Show in Message is made a check box from the start
+        let popover = gtk::PopoverMenu::from_model(None::<&gio::MenuModel>);
+        if let Some(group) = shown {
+            popover.insert_action_group("strip", Some(&group));
+        }
+        popover.set_menu_model(Some(&menu));
         popover.set_widget_name("reader-strip-menu");
         popover.set_parent(&self.flow);
         popover.set_has_arrow(false);
@@ -237,6 +269,41 @@ impl Strip {
             });
         });
         popover.popup();
+    }
+
+    /// The action of a file's Show in Message, a check box with the state the core gave: none for a file that is not
+    /// a picture or PDF file
+    fn show_in_message_action(&self, index: usize, state: ShowInMessage) -> Option<gio::SimpleActionGroup> {
+        #[cfg(feature = "e2e")]
+        self.menu_action.replace(None);
+        if state == ShowInMessage::None {
+            return None;
+        }
+        let action =
+            gio::SimpleAction::new_stateful("show-in-message", None, &(state == ShowInMessage::On).to_variant());
+        action.set_enabled(state != ShowInMessage::Unavailable);
+        let show = self.show_in_message.borrow().clone();
+        action.connect_activate(move |_, _| {
+            if let Some(show) = &show {
+                // after the menu has closed: the message is shown again
+                let show = show.clone();
+                glib::idle_add_local_once(move || show(index, state));
+            }
+        });
+        let group = gio::SimpleActionGroup::new();
+        group.add_action(&action);
+        #[cfg(feature = "e2e")]
+        self.menu_action.replace(Some(action));
+        Some(group)
+    }
+
+    /// The Show in Message of the menu open last: whether it is ticked, and whether it can be chosen; None when the
+    /// menu had none
+    #[cfg(feature = "e2e")]
+    pub fn show_in_message_item(&self) -> Option<(bool, bool)> {
+        let action = self.menu_action.borrow().clone()?;
+        let ticked = action.state().and_then(|s| s.get::<bool>()).unwrap_or(false);
+        Some((ticked, action.is_enabled()))
     }
 
     /// The strip's menu open now, when it is (the UI test reads and closes it)
@@ -294,6 +361,18 @@ pub struct Shown {
     pub size: String,
     pub icon: String,
     pub tooltip: String,
+}
+
+/// Whether `shown` and `files` are the same files, but for what Show in Message says of them
+fn same_items(shown: &[AttachmentView], files: &[AttachmentView]) -> bool {
+    shown.len() == files.len()
+        && shown.iter().zip(files).all(|(a, b)| {
+            let a = AttachmentView {
+                show_in_message: b.show_in_message,
+                ..a.clone()
+            };
+            a == *b
+        })
 }
 
 /// The item of file `index`: its icon, its name (shortened in the middle, the whole of it in the tooltip) and its size

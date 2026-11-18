@@ -245,6 +245,11 @@ pub struct DocumentView {
     /// Whether the document shown has frames to size ([`DocumentView::measure_frames`]), and the timer that sizes them
     measuring: Rc<Cell<bool>>,
     measure_timer: Rc<RefCell<Option<glib::SourceId>>>,
+    /// Counts the documents asked for: a document shown in place ([`DocumentView::show_in_place`]) waits for the
+    /// scroll of the one before and is dropped when another was asked for meanwhile
+    asked: Rc<Cell<u64>>,
+    /// The app's script that scrolls the document being loaded to where the one before was, until it has loaded
+    scroll_back: Rc<RefCell<Option<(String, webkit::UserScript)>>>,
 }
 
 /// Asked of a link clicked in a document before the browser opens it: true when the owner took it (the bounce card's)
@@ -324,9 +329,24 @@ impl DocumentView {
         });
         let measuring: Rc<Cell<bool>> = Rc::default();
         let measure = measuring.clone();
+        let scroll_back: Rc<RefCell<Option<(String, webkit::UserScript)>>> = Rc::default();
+        let scrolled = scroll_back.clone();
+        let scripts = manager.clone();
         view.connect_load_changed(move |view, event| {
-            if event == webkit::LoadEvent::Finished && measure.get() {
+            if event != webkit::LoadEvent::Finished {
+                return;
+            }
+            if measure.get() {
                 size_frames(view);
+            }
+            // the document is where the one before was: the script is not for the next one (a document before it that
+            // stopped loading finishes too)
+            let done = scrolled
+                .borrow()
+                .as_ref()
+                .is_some_and(|(uri, _)| view.uri().is_some_and(|shown| shown == *uri));
+            if done && let Some((_, script)) = scrolled.borrow_mut().take() {
+                scripts.remove_script(&script);
             }
         });
         DocumentView {
@@ -337,6 +357,8 @@ impl DocumentView {
             links,
             measuring,
             measure_timer: Rc::default(),
+            asked: Rc::default(),
+            scroll_back,
         }
     }
 
@@ -384,8 +406,44 @@ impl DocumentView {
     /// Shows `document` whose frames show `parts` (a signed or encrypted message's) and whose previews are under the
     /// token `previews` (the view's), with the message's pictures from the internet only when `remote_images`
     pub fn show_parts(&self, document: &str, parts: &[String], previews: Option<&str>, remote_images: bool) {
-        // the frames of the document before are not this one's
+        self.ask();
+        self.load(document, parts, previews, remote_images, 0.0);
+    }
+
+    /// Another document asked for: the one waiting for its scroll dropped, the frames of the one before no longer
+    /// measured (the owner turns it on for the new one right after)
+    fn ask(&self) -> u64 {
+        let asked = self.asked.get() + 1;
+        self.asked.set(asked);
         self.measure_frames(false);
+        asked
+    }
+
+    /// Shows `document` (the same message's again: Show in Message, its whole source after its text, its pictures
+    /// allowed) scrolled to where the one shown was, so its text does not move: the core's script reads how far down
+    /// it is, and the new one is scrolled there as it loads, before it is drawn
+    pub fn show_in_place(&self, document: &str, parts: &[String], previews: Option<&str>, remote_images: bool) {
+        let asked = self.ask();
+        let (document, parts, previews) = (document.to_string(), parts.to_vec(), previews.map(str::to_string));
+        let this = self.clone();
+        self.view.evaluate_javascript(
+            pe_html::SCROLL_SCRIPT,
+            None,
+            None,
+            gio::Cancellable::NONE,
+            move |value| {
+                // another document was asked for meanwhile
+                if this.asked.get() != asked {
+                    return;
+                }
+                let y = value.ok().and_then(|v| v.to_str().parse::<f64>().ok()).unwrap_or(0.0);
+                this.load(&document, &parts, previews.as_deref(), remote_images, y);
+            },
+        );
+    }
+
+    /// The document served and loaded once the rules are there, scrolled down `y` CSS pixels as it loads
+    fn load(&self, document: &str, parts: &[String], previews: Option<&str>, remote_images: bool, y: f64) {
         let web = web();
         let previous = self.current.borrow().clone();
         let uri = web.serve(
@@ -406,6 +464,21 @@ impl DocumentView {
             if let Some((blocked, allowing)) = &*rules.filters.borrow() {
                 this.manager.remove_all_filters();
                 this.manager.add_filter(if remote_images { allowing } else { blocked });
+            }
+            if let Some((_, script)) = this.scroll_back.borrow_mut().take() {
+                this.manager.remove_script(&script);
+            }
+            if y > 0.0 {
+                // when the document is parsed, before it is drawn; its pictures' sizes are in its markup
+                let script = webkit::UserScript::new(
+                    &pe_html::scroll_to_script(y),
+                    webkit::UserContentInjectedFrames::TopFrame,
+                    webkit::UserScriptInjectionTime::End,
+                    &[],
+                    &[],
+                );
+                this.manager.add_script(&script);
+                this.scroll_back.replace(Some((uri.clone(), script)));
             }
             this.view.load_uri(&uri);
         });

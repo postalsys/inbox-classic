@@ -98,14 +98,14 @@ fn press(strip: &Strip, key: gdk::Key, state: gdk::ModifierType) -> bool {
 }
 
 /// The item of the menu labelled `label`, and whether it can be chosen
-fn menu_item_sensitive(popover: &gtk::PopoverMenu, label: &str) -> Option<bool> {
+pub(super) fn menu_item_sensitive(popover: &gtk::PopoverMenu, label: &str) -> Option<bool> {
     descendants::<gtk::Widget>(popover.upcast_ref())
         .into_iter()
         .find(|w| w.css_name() == "modelbutton" && descendants::<gtk::Label>(w).iter().any(|l| l.text() == label))
         .map(|w| w.is_sensitive())
 }
 
-async fn close_menu(strip: &Strip) {
+pub(super) async fn close_menu(strip: &Strip) {
     if let Some(menu) = strip.open_menu() {
         menu.popdown();
     }
@@ -218,8 +218,8 @@ pub(super) async fn opening_attachments(d: &Driver) {
     let menu = wait_for(5, || strip.open_menu()).await;
     let labels = menu_labels(menu.as_ref());
     d.check(
-        pressed && labels == ["Open", "Save As\u{2026}", "Save All\u{2026}"],
-        &format!("the menu key offers Open, Save As... and Save All... ({labels:?})"),
+        pressed && labels == ["Open", "Save As\u{2026}", "Save All\u{2026}", "Show in Message"],
+        &format!("the menu key offers Open, Save As..., Save All... and, for a PDF file, Show in Message ({labels:?})"),
     );
     d.shot(main.window(), "attach-2-menu").await;
     // Save As... from it: the file saved where the dialog said

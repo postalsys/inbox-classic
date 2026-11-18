@@ -410,6 +410,10 @@ impl Shell {
         }
         main.on_event(&event);
         crate::message_window::on_event(&event);
+        // a printout whose window went before it was made: dropped (a reader printing it took it already)
+        if let Event::PrintReady { request } = event {
+            drop(self.core.print_result(request));
+        }
         // the tray and the dock: what is unread in the Inboxes, when a folder changed
         if matches!(event, Event::FolderChanged { .. } | Event::SyncFinished { .. }) {
             self.show_unread();
