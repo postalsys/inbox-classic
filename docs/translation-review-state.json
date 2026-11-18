@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Hungarian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Hungarian catalog entries are reviewed; 12 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue broader catalogs/help across all 28 languages. Compare recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review the final six current Hungarian help topics: brand-logos, command-line, invitations, keyboard-shortcuts, options-language and sign-in-codes. All current Hungarian catalog entries are reviewed; six help topics remain, plus incoming translations and targeted context checks. Then continue broader catalogs/help across all 28 languages. Compare recorded behavior findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Incoming MCP phase3 translations remain separately queued; Mac printing PR 177 is merged and its static translation-context follow-up is closed. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -21383,16 +21383,10 @@
       "pending_help": [
         "brand-logos.html",
         "command-line.html",
-        "connections.html",
-        "data-storage.html",
-        "default-mail-program.html",
         "invitations.html",
         "keyboard-shortcuts.html",
-        "move-computer.html",
         "options-language.html",
-        "removing.html",
-        "sign-in-codes.html",
-        "updates.html"
+        "sign-in-codes.html"
       ],
       "completed_batches": [
         {
@@ -24615,6 +24609,181 @@
             "source-notes.json": "/private/tmp/inbox-hu-mail-20261118-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-hu-mail-20261118-screenshots.json",
             "html.log": "/private/tmp/inbox-hu-mail-20261118-html.log"
+          }
+        },
+        {
+          "id": "hu-storage-transfer-help-20261119",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "data-storage.html",
+            "connections.html",
+            "move-computer.html",
+            "removing.html",
+            "updates.html",
+            "default-mail-program.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hu/data-storage.html": "bc14119a326ea75054dea69d8b658cf313a99a35afb256f703dc5b517ea2006e",
+            "core/crates/pe-html/help/hu/connections.html": "265e8447ec0508a77e8516478d28484bffefd3f42a3d497742d948cb63f196dc",
+            "core/crates/pe-html/help/hu/move-computer.html": "d105e36a9543d4c21e5ad2501fbcb58c102756c50035043962c8fb27d418e3dd",
+            "core/crates/pe-html/help/hu/removing.html": "4d29f32ae4c44e849cb3426f567c8935d56bdd70ec8c3a6b72b784a009832454",
+            "core/crates/pe-html/help/hu/updates.html": "d502d427c6000896d9428cb4cc8936db5f16131e1ae39e64fdc7469258081e6a",
+            "core/crates/pe-html/help/hu/default-mail-program.html": "a7c8b46a08f02b7e6e1843f5bcccdd775b90f99947f664560ca99757191fbd6d"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+            "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59",
+            "core/crates/pe-html/help/en/default-mail-program.html": "bbf56849460a56e424aad0d96f55b684807776aaab66bbbdc07daa0b8cf9382e"
+          },
+          "validation": "Hungarian structural checks pass with 1,502 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 43 improved wording lines. All six Hungarian catalogs are unchanged. Tags, attributes, controls, platform branches and literal keyboard/code contents are preserved. Static Windows/Mac/Linux sentence joins inspected with current labels and settings paths. Thirty-three runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 12,083 help lines; since-start 1,855 entries/459 passages match the queue. Source checkpoint covers 188 refs/10 worktrees, and upstream has no changed review inputs. Incoming MCP phase3a merged current master without additional catalog scope; its exact refreshed delta remains queued separately. Mac printing PR 177 is merged and its translation-context follow-up is closed after static comparison. Storage, transfer, network, removal and platform source findings are recorded for targeted comparison elsewhere. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed six full Hungarian storage, network, setup transfer, removal, updating and default-app help topics against current app behavior. Natural impersonal prose and accurate platform/control joins. Preserved markup, controls, links and literal commands. No catalog values changed.",
+          "help_wording_lines_changed": 43,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/hu/data-storage.html": 7,
+            "core/crates/pe-html/help/hu/connections.html": 11,
+            "core/crates/pe-html/help/hu/move-computer.html": 9,
+            "core/crates/pe-html/help/hu/removing.html": 6,
+            "core/crates/pe-html/help/hu/updates.html": 6,
+            "core/crates/pe-html/help/hu/default-mail-program.html": 4
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-core/src/lib.rs": "e335529ecfdf749a044ea64db2b467881d13bea93ccf6760caf2f1decb36beac",
+            "core/crates/pe-core/src/secrets.rs": "f5aae6a69f175cd3837c86c816cfa767b9667073ccc52d7c59fed224a81fca6e",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-core/src/bimi.rs": "91cf358f5addda07ddc44f5b2b8e2a3b9db7d03f487938540ff2cfdd74e050c4",
+            "core/crates/pe-core/src/otp.rs": "99ed04f0777e21204105cf7f16225e74cb80b85027208de695908f91285566c3",
+            "core/crates/pe-core/src/unsubscribe.rs": "f4b48ffe97b6b93a7c8bb22a72bb4bb7436cdacb61a8b426a5caa0ffcca72bb8",
+            "core/crates/pe-core/src/mailto.rs": "fa9c77f1a2676d5b1399475864ed6c4b8b0920644913dd3e2acf36ff12dd9298",
+            "core/crates/pe-core/src/setup/export.rs": "5bf89e9575c36513fc2afb593d35cc06e553057fc10ccfd5648254c2e81cc0ea",
+            "core/crates/pe-core/src/setup/import.rs": "1a67289f5fa474a397c568292878fe01098bc26922ab9c00272ab8c91b3390ad",
+            "core/crates/pe-core/src/setup/file.rs": "e719f3a1073825064d90aab391e5968d57f5757bc8d9b7c214755f354a245967",
+            "core/crates/pe-store/src/senders.rs": "41651a5728f91e48cbef660a22df5cf6a30f72cd5e48bdb44d14167c7059f2a3",
+            "core/crates/pe-autoconfig/src/lib.rs": "0c9fc12441b8e47b07b33404f6420ee267502b5f3aaba7c9243d20d904b0c0f7",
+            "core/crates/pe-autoconfig/src/resolve.rs": "0b3ccf7da2a5ee284fed9bd959b82fba3238f62f806de73cf1c88e734a78551c",
+            "core/crates/pe-autoconfig/src/config.rs": "85f91e8a535bc678bb46da2e82de413afe6e4fca9af3f419efd8a615094b7f62",
+            "core/crates/pe-autoconfig/src/dns.rs": "a529fcf3cb9c68e5e4792e5d98cd7f3d126ccbb5f2ff24190c43904c1abb4b43",
+            "core/crates/pe-autoconfig/src/io.rs": "d0b3825a9f39119ada1f20af4acca6528394b5e60f6f9271e348e7c1197a1768",
+            "core/crates/pe-autoconfig/src/autodiscover.rs": "48560762e56a1a98801f0d9e56239516e09efbc6d93c01b442470ff7976aaf96",
+            "core/crates/pe-net/src/stream.rs": "5a90bc2fef1c9b12587ae587cacc27f79d71bb5734f9cf0cba04711e99ffc79a",
+            "app/src/main.cpp": "86654a505ca1bfa2e00049f0bfb312dbbc2c324e1d6957bd707716dc96f92c8c",
+            "app/src/options.cpp": "5204d767e2f09bfffaeb64ebeb13ef566cdcc5540cb774126a24771856b91a09",
+            "installer/inbox-classic.nsi": "157a867c40055428fc3388c5d1f26755b199ec7aead144ccb97987aa06d4229e",
+            "linux/src/main.rs": "dfa5deb4a064fc1c4289c30f4c9aa9f2dedfbc7eeb27a5fe3a635a244a525f0c",
+            "linux/src/app.rs": "5337c4a5dbc100fbe7bd3e75efe53739f9743c4980655c8d27db93e168cb777e",
+            "linux/src/preferences.rs": "110319b0d23078a5222c7b908a39e2e098115d3994143e1e0e0d2cd675bd049f",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234",
+            "mac/Sources/InboxClassic/MainWindow.swift": "92ec176fc30d9249871f9d61d28171a10a9ebe7b46eda61203623175e54667b6",
+            "mac/Sources/InboxClassic/Settings.swift": "8c50dbffdf76b69cf63ea158bf39f0b608a43e0a42cef1b631a1f802dc79c3e2",
+            "mac/Sources/InboxClassic/WebViews.swift": "3091d5942d015e0788c72433ac456ecd28170482a93909cb8057284b6d052318",
+            "mac/Resources/Info.plist": "d967a087eaca8383fd803aafc91748366b97687d6ddd30f1b6398830b71e7312"
+          },
+          "catalog_dependencies": {
+            "core/locales/hu/mac.ftl": "ccfdfd4bb00809d2e36c35135443102555a0350bf8f2b12f1a50f049ad7d0aaa",
+            "core/locales/hu/linux.ftl": "4ee069a706d1647d0ca4f8315b1400b638b6e1251a1217718191c422f8f2f9b1",
+            "core/locales/hu/app.ftl": "0ad1b8b105d9301593800e6e56a6377a7d661c363647a99b2feae4e3d2906e31",
+            "core/locales/hu/core.ftl": "2df0c97bf89aed3f7ff3468b7fbe8aa235cf5073ddfcbb6d958443071acea4de",
+            "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be",
+            "core/locales/hu/help.ftl": "22bf1437995d992179c920e30b4c01dced3cf535af44c5d478b2a3226e13b0ce"
+          },
+          "source_context_findings": {
+            "scope": "Six complete Hungarian storage, network, settings-transfer, removal, update and default-app help topics. Source and static sentence-join inspection only.",
+            "issues": [
+              {
+                "topic": "data-storage.html",
+                "finding": "Paths describe defaults: --store and Linux data-directory settings can override them. The mail database itself is not encrypted. Account passwords, OAuth refresh tokens and application client secrets use the system secret store by default; unavailable or memory-only storage must not be described as guaranteed persistence. Linux uses a Secret Service provider, not exclusively GNOME Keyring. Private OpenPGP keys are encrypted in the database with a separate protection key. Local analysis does not mean the entire application makes no network requests.",
+                "sources": [
+                  "core/crates/pe-core/src/secrets.rs",
+                  "core/crates/pe-core/src/keys.rs",
+                  "app/src/main.cpp",
+                  "linux/src/main.rs",
+                  "mac/Sources/InboxClassic/App.swift"
+                ]
+              },
+              {
+                "topic": "connections.html",
+                "finding": "DNS over HTTPS applies to configuration MX/SRV lookups; ordinary server hostname resolution uses the system resolver. Provider autoconfig requests can include an email address. Autodiscover sends a password only after a HTTPS Basic challenge. Logos use persistent cached SVG data, not a fresh download on every app run: source retention is 30 days, failed requests wait 24 hours. External pictures can be enabled by settings/trusted-sender rules; encrypted parts still require a click. Direct unsubscribe requires confirmation and trusted DKIM coverage of the unsubscribe headers. Key discovery includes manual lookup and fingerprint/key-ID requests; publishing sends public key data and confirmation addresses. OTP detection uses a trusted provider verdict for the relevant origin/From domain or a parent, not any DKIM signature. Mac automatic update checking is optional.",
+                "sources": [
+                  "core/crates/pe-autoconfig/src/dns.rs",
+                  "core/crates/pe-autoconfig/src/lib.rs",
+                  "core/crates/pe-autoconfig/src/config.rs",
+                  "core/crates/pe-autoconfig/src/autodiscover.rs",
+                  "core/crates/pe-net/src/stream.rs",
+                  "core/crates/pe-core/src/lib.rs",
+                  "core/crates/pe-core/src/bimi.rs",
+                  "core/crates/pe-store/src/senders.rs",
+                  "core/crates/pe-core/src/lookup.rs",
+                  "core/crates/pe-core/src/unsubscribe.rs",
+                  "core/crates/pe-core/src/otp.rs",
+                  "mac/Sources/InboxClassic/Settings.swift"
+                ]
+              },
+              {
+                "topic": "move-computer.html",
+                "finding": "The passphrase must match and contain at least eight Unicode characters. Only protected exports can contain saved account/app secrets and own private keys. Private keys that cannot be opened locally are skipped. Setup exports contain no messages, so only server-held mail can download on the other machine; local outgoing mail is not transferred. An unprotected export requires fresh sign-in, potentially through the browser. Existing accounts are kept, selected contained settings applied, contacts merged, pending rule folders resolved after sync and replacement contact keys left for user selection.",
+                "sources": [
+                  "core/crates/pe-core/src/keys.rs",
+                  "core/crates/pe-core/src/setup/export.rs",
+                  "core/crates/pe-core/src/setup/import.rs",
+                  "core/crates/pe-core/src/setup/file.rs"
+                ]
+              },
+              {
+                "topic": "removing.html",
+                "finding": "The Windows uninstaller's remove-mail confirmation deletes the full local data directory, including settings, contacts, keys and queued mail; WebView cache is removed separately. Mac/Linux data-folder removal also affects these local records. This does not delete server mail. Removing an account requests removal of its account credential, not every application/PGP secret. The Windows uninstaller explicitly leaves system credential-store entries, and uninstalling must not be represented as clearing all secrets. Preserve literal package commands without executing them.",
+                "sources": [
+                  "installer/inbox-classic.nsi",
+                  "core/crates/pe-core/src/lib.rs",
+                  "core/crates/pe-core/src/secrets.rs",
+                  "app/src/main.cpp",
+                  "linux/src/main.rs",
+                  "mac/Sources/InboxClassic/App.swift"
+                ]
+              },
+              {
+                "topic": "updates.html",
+                "finding": "Mac Sparkle checks are enabled by default but controlled by settings; the help must not promise unconditional automatic updating or a prompt before every possible installation. Describe following updater instructions. Linux repository/package instructions are conditional on installation method, without an unconditional claim about a particular distribution's update service. Installer paths preserve the existing local data.",
+                "sources": [
+                  "mac/Resources/Info.plist",
+                  "mac/Sources/InboxClassic/App.swift",
+                  "mac/Sources/InboxClassic/Settings.swift",
+                  "installer/inbox-classic.nsi"
+                ]
+              },
+              {
+                "topic": "default-mail-program.html",
+                "finding": "Windows opens system association settings for installed copies when the association is not already set. Mac/Linux attempt system association changes and report failure; success is not unconditional. Mailto and .eml associations are separate. Mailto parsing accepts addresses, subject and body, not attachments or arbitrary fields. All three frontends require an existing account and ask the user to click the link again after adding one.",
+                "sources": [
+                  "app/src/main.cpp",
+                  "app/src/options.cpp",
+                  "linux/src/app.rs",
+                  "linux/src/preferences.rs",
+                  "mac/Sources/InboxClassic/MainWindow.swift",
+                  "mac/Sources/InboxClassic/Settings.swift",
+                  "core/crates/pe-core/src/mailto.rs"
+                ]
+              }
+            ],
+            "limitations": "No local test suites, builds, Fluent bundle execution, native-speaker certification or GUI-fit evidence. English and runtime code are unchanged. Other languages need targeted comparison before affected passages are reopened."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-hu-storage-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-hu-storage-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-hu-storage-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-hu-storage-20261119-since.log",
+            "joins.log": "/private/tmp/inbox-hu-storage-20261119-joins.log",
+            "source-audit.json": "/private/tmp/inbox-hu-storage-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-hu-storage-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-hu-storage-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-hu-storage-20261119-html.log",
+            "mcp-sync.json": "/private/tmp/inbox-hu-storage-20261119-mcp-sync.json"
           }
         }
       ]
@@ -77146,7 +77315,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Hungarian structural checks pass with 1,496 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 54 improved wording lines, plus one previously reviewed success message corrected without additional scope credit. Other catalog values are unchanged. Tags, attributes, control order, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins inspected with current labels and shortcuts; the shared success message has no variables or access keys. Thirty runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 12,028 help lines; since-start 1,855 entries/462 passages match the queue. Source checkpoint covers 184 refs/6 worktrees, and upstream has no changed review inputs. Microsoft documentation was checked for WebView2 Runtime guidance. Notification, download/cache, delivery-report, rule and unsubscribe findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Hungarian structural checks pass with 1,502 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 43 improved wording lines. All six Hungarian catalogs are unchanged. Tags, attributes, controls, platform branches and literal keyboard/code contents are preserved. Static Windows/Mac/Linux sentence joins inspected with current labels and settings paths. Thirty-three runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 12,083 help lines; since-start 1,855 entries/459 passages match the queue. Source checkpoint covers 188 refs/10 worktrees, and upstream has no changed review inputs. Incoming MCP phase3a merged current master without additional catalog scope; its exact refreshed delta remains queued separately. Mac printing PR 177 is merged and its translation-context follow-up is closed after static comparison. Storage, transfer, network, removal and platform source findings are recorded for targeted comparison elsewhere. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -137962,7 +138131,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Hungarian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Hungarian catalog entries are reviewed; 12 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue broader catalogs/help across all 28 languages. Compare recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
+      "next": "Review the final six current Hungarian help topics: brand-logos, command-line, invitations, keyboard-shortcuts, options-language and sign-in-codes. All current Hungarian catalog entries are reviewed; six help topics remain, plus incoming translations and targeted context checks. Then continue broader catalogs/help across all 28 languages. Compare recorded behavior findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Incoming MCP phase3 translations remain separately queued; Mac printing PR 177 is merged and its static translation-context follow-up is closed. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -140882,7 +141051,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Hungarian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Hungarian catalog entries are reviewed; 12 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue broader catalogs/help across all 28 languages. Compare recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review the final six current Hungarian help topics: brand-logos, command-line, invitations, keyboard-shortcuts, options-language and sign-in-codes. All current Hungarian catalog entries are reviewed; six help topics remain, plus incoming translations and targeted context checks. Then continue broader catalogs/help across all 28 languages. Compare recorded behavior findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Incoming MCP phase3 translations remain separately queued; Mac printing PR 177 is merged and its static translation-context follow-up is closed. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -142653,7 +142822,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Hungarian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Hungarian catalog entries are reviewed; 12 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue broader catalogs/help across all 28 languages. Compare recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+      "next": "Review the final six current Hungarian help topics: brand-logos, command-line, invitations, keyboard-shortcuts, options-language and sign-in-codes. All current Hungarian catalog entries are reviewed; six help topics remain, plus incoming translations and targeted context checks. Then continue broader catalogs/help across all 28 languages. Compare recorded behavior findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Incoming MCP phase3 translations remain separately queued; Mac printing PR 177 is merged and its static translation-context follow-up is closed. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -144587,6 +144756,31 @@
         "verified_master": "2609c0c48619578d7b1788dc6fd8cd0b332f5a48",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "hu-mail-delivery-rules-help-20261118",
+        "pr": 184,
+        "url": "https://github.com/postalsys/inbox-classic/pull/184",
+        "review_commit": "05ef64c82735bfd8ce143b278846e71378cb3cd1",
+        "merge_commit": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+        "merged_at": "2026-11-18T21:56:02Z",
+        "verified_master": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+        "clean_worktree": true,
+        "review_tree_equals_merge": false,
+        "translation_and_review_records_equal_merge": true,
+        "inspected_upstream_delta": {
+          "pr": 177,
+          "merge_commit": "cc85211e6",
+          "source_commit": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+          "changed_paths": [
+            "mac/Sources/InboxClassic/WebViews.swift"
+          ],
+          "diff_artifact": "/private/tmp/inbox-hu-mail-20261118-upstream-mac-print.diff",
+          "after_sha256": "3091d5942d015e0788c72433ac456ecd28170482a93909cb8057284b6d052318",
+          "finding": "Printer replaces the async img.decode wait with a document-start app-owned script selecting synchronous image decoding, then prints after navigation completes. No translated or English help changes. The existing Hungarian help distinguishes the app-owned script and describes the printing window without a decoding implementation promise. No new wording change identified by this static follow-up. GUI printing was not run.",
+          "next_record_update": "Record this merged source and close the pending Mac-print integration follow-up in the next real translation batch; retain other targeted context comparisons."
+        },
         "no_local_test_suites": true
       }
     ],
@@ -155025,7 +155219,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "e851c5569b43b676798b9820c5d721870f3111c0b997714e81763049a4f73415",
+      "core/locales/GLOSSARY.md": "ad4df1a52626fa8fbbfee3413b4fda109699446526fea150f7661c81a008413f",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -155160,7 +155354,13 @@
       "core/crates/pe-html/help/hu/message-not-shown.html": "0b53b94532eb204870564db01ef786e09b918197f360d8f77fb1011d904f6ec4",
       "core/crates/pe-html/help/hu/delivery-problems.html": "cc75d6d10cfab802794ad6c19dc7af1c1277a0df862063ff5cedb363f193388e",
       "core/crates/pe-html/help/hu/message-rules.html": "df02f062a7456f664cc1276875bbd4634285b0ba5cad82e681fa9cc077a4ec85",
-      "core/crates/pe-html/help/hu/unsubscribe.html": "61c58e6ef31407654d81ac3b3d317db94fb1e3014ffb5bc63565dc94d615eeea"
+      "core/crates/pe-html/help/hu/unsubscribe.html": "61c58e6ef31407654d81ac3b3d317db94fb1e3014ffb5bc63565dc94d615eeea",
+      "core/crates/pe-html/help/hu/data-storage.html": "bc14119a326ea75054dea69d8b658cf313a99a35afb256f703dc5b517ea2006e",
+      "core/crates/pe-html/help/hu/connections.html": "265e8447ec0508a77e8516478d28484bffefd3f42a3d497742d948cb63f196dc",
+      "core/crates/pe-html/help/hu/move-computer.html": "d105e36a9543d4c21e5ad2501fbcb58c102756c50035043962c8fb27d418e3dd",
+      "core/crates/pe-html/help/hu/removing.html": "4d29f32ae4c44e849cb3426f567c8935d56bdd70ec8c3a6b72b784a009832454",
+      "core/crates/pe-html/help/hu/updates.html": "d502d427c6000896d9428cb4cc8936db5f16131e1ae39e64fdc7469258081e6a",
+      "core/crates/pe-html/help/hu/default-mail-program.html": "a7c8b46a08f02b7e6e1843f5bcccdd775b90f99947f664560ca99757191fbd6d"
     },
     "resumed_review_checkpoints": [
       {
@@ -168010,6 +168210,3296 @@
           "/private/tmp/inbox-hu-mail-20261118-finalize.py": "f42dcf44187ed4d29d68b76a44b84c1c8bd1d4c61c58d1ba5ceb383c8e44415d",
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
         }
+      },
+      {
+        "batch": "hu-storage-transfer-help-20261119",
+        "review_parent": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 13077,
+          "pending_help": 597,
+          "completed_catalog": 22547,
+          "completed_help": 779
+        },
+        "validation": "Hungarian structural checks pass with 1,502 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 43 improved wording lines. All six Hungarian catalogs are unchanged. Tags, attributes, controls, platform branches and literal keyboard/code contents are preserved. Static Windows/Mac/Linux sentence joins inspected with current labels and settings paths. Thirty-three runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 12,083 help lines; since-start 1,855 entries/459 passages match the queue. Source checkpoint covers 188 refs/10 worktrees, and upstream has no changed review inputs. Incoming MCP phase3a merged current master without additional catalog scope; its exact refreshed delta remains queued separately. Mac printing PR 177 is merged and its translation-context follow-up is closed after static comparison. Storage, transfer, network, removal and platform source findings are recorded for targeted comparison elsewhere. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 188,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/feat/mcp-phase3a": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+            "refs/heads/i18n/review-resume-20261118": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "refs/heads/master": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "refs/heads/test/steady-linux": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "refs/heads/test/steady-mac": "0354bc117ff99f99696ca313e27e9b3f63c4e373",
+            "refs/heads/test/steady-rust": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "refs/heads/test/steady-win": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "refs/remotes/origin/HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "refs/remotes/origin/feat/mcp-phase3a": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+            "refs/remotes/origin/i18n/review-resume-20261118": "05ef64c82735bfd8ce143b278846e71378cb3cd1",
+            "refs/remotes/origin/master": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "b7b7ffb1e8e1a3341c1ce3dcfd771f9983b38423"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "0354bc117ff99f99696ca313e27e9b3f63c4e373",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/hu/connections.html\n M core/crates/pe-html/help/hu/data-storage.html\n M core/crates/pe-html/help/hu/default-mail-program.html\n M core/crates/pe-html/help/hu/move-computer.html\n M core/crates/pe-html/help/hu/removing.html\n M core/crates/pe-html/help/hu/updates.html\n M core/locales/GLOSSARY.md",
+              "translation_hashes": {
+                "core/crates/pe-html/help/hu/connections.html": "265e8447ec0508a77e8516478d28484bffefd3f42a3d497742d948cb63f196dc",
+                "core/crates/pe-html/help/hu/data-storage.html": "bc14119a326ea75054dea69d8b658cf313a99a35afb256f703dc5b517ea2006e",
+                "core/crates/pe-html/help/hu/default-mail-program.html": "a7c8b46a08f02b7e6e1843f5bcccdd775b90f99947f664560ca99757191fbd6d",
+                "core/crates/pe-html/help/hu/move-computer.html": "d105e36a9543d4c21e5ad2501fbcb58c102756c50035043962c8fb27d418e3dd",
+                "core/crates/pe-html/help/hu/removing.html": "4d29f32ae4c44e849cb3426f567c8935d56bdd70ec8c3a6b72b784a009832454",
+                "core/crates/pe-html/help/hu/updates.html": "d502d427c6000896d9428cb4cc8936db5f16131e1ae39e64fdc7469258081e6a",
+                "core/locales/GLOSSARY.md": "ad4df1a52626fa8fbbfee3413b4fda109699446526fea150f7661c81a008413f"
+              }
+            }
+          ],
+          "master": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+          "new_unmerged_source_deltas": [
+            {
+              "ref": "refs/heads/feat/mcp-phase3a",
+              "commit": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+              "merge_base": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "paths": [
+                "core/crates/pe-html/help/bg/agents-permissions.html",
+                "core/crates/pe-html/help/bg/agents-sending.html",
+                "core/crates/pe-html/help/bg/invitations.html",
+                "core/crates/pe-html/help/ca/agents-permissions.html",
+                "core/crates/pe-html/help/ca/agents-sending.html",
+                "core/crates/pe-html/help/ca/invitations.html",
+                "core/crates/pe-html/help/cs/agents-permissions.html",
+                "core/crates/pe-html/help/cs/agents-sending.html",
+                "core/crates/pe-html/help/cs/invitations.html",
+                "core/crates/pe-html/help/da/agents-permissions.html",
+                "core/crates/pe-html/help/da/agents-sending.html",
+                "core/crates/pe-html/help/da/invitations.html",
+                "core/crates/pe-html/help/de/agents-permissions.html",
+                "core/crates/pe-html/help/de/agents-sending.html",
+                "core/crates/pe-html/help/de/invitations.html",
+                "core/crates/pe-html/help/el/agents-permissions.html",
+                "core/crates/pe-html/help/el/agents-sending.html",
+                "core/crates/pe-html/help/el/invitations.html",
+                "core/crates/pe-html/help/en/agents-permissions.html",
+                "core/crates/pe-html/help/en/agents-sending.html",
+                "core/crates/pe-html/help/en/invitations.html",
+                "core/crates/pe-html/help/es/agents-permissions.html",
+                "core/crates/pe-html/help/es/agents-sending.html",
+                "core/crates/pe-html/help/es/invitations.html",
+                "core/crates/pe-html/help/et/agents-permissions.html",
+                "core/crates/pe-html/help/et/agents-sending.html",
+                "core/crates/pe-html/help/et/invitations.html",
+                "core/crates/pe-html/help/fi/agents-permissions.html",
+                "core/crates/pe-html/help/fi/agents-sending.html",
+                "core/crates/pe-html/help/fi/invitations.html",
+                "core/crates/pe-html/help/fr/agents-permissions.html",
+                "core/crates/pe-html/help/fr/agents-sending.html",
+                "core/crates/pe-html/help/fr/invitations.html",
+                "core/crates/pe-html/help/hr/agents-permissions.html",
+                "core/crates/pe-html/help/hr/agents-sending.html",
+                "core/crates/pe-html/help/hr/invitations.html",
+                "core/crates/pe-html/help/hu/agents-permissions.html",
+                "core/crates/pe-html/help/hu/agents-sending.html",
+                "core/crates/pe-html/help/hu/invitations.html",
+                "core/crates/pe-html/help/it/agents-permissions.html",
+                "core/crates/pe-html/help/it/agents-sending.html",
+                "core/crates/pe-html/help/it/invitations.html",
+                "core/crates/pe-html/help/lt/agents-permissions.html",
+                "core/crates/pe-html/help/lt/agents-sending.html",
+                "core/crates/pe-html/help/lt/invitations.html",
+                "core/crates/pe-html/help/lv/agents-permissions.html",
+                "core/crates/pe-html/help/lv/agents-sending.html",
+                "core/crates/pe-html/help/lv/invitations.html",
+                "core/crates/pe-html/help/nb/agents-permissions.html",
+                "core/crates/pe-html/help/nb/agents-sending.html",
+                "core/crates/pe-html/help/nb/invitations.html",
+                "core/crates/pe-html/help/nl/agents-permissions.html",
+                "core/crates/pe-html/help/nl/agents-sending.html",
+                "core/crates/pe-html/help/nl/invitations.html",
+                "core/crates/pe-html/help/pl/agents-permissions.html",
+                "core/crates/pe-html/help/pl/agents-sending.html",
+                "core/crates/pe-html/help/pl/invitations.html",
+                "core/crates/pe-html/help/pt-BR/agents-permissions.html",
+                "core/crates/pe-html/help/pt-BR/agents-sending.html",
+                "core/crates/pe-html/help/pt-BR/invitations.html",
+                "core/crates/pe-html/help/pt/agents-permissions.html",
+                "core/crates/pe-html/help/pt/agents-sending.html",
+                "core/crates/pe-html/help/pt/invitations.html",
+                "core/crates/pe-html/help/ro/agents-permissions.html",
+                "core/crates/pe-html/help/ro/agents-sending.html",
+                "core/crates/pe-html/help/ro/invitations.html",
+                "core/crates/pe-html/help/ru/agents-permissions.html",
+                "core/crates/pe-html/help/ru/agents-sending.html",
+                "core/crates/pe-html/help/ru/invitations.html",
+                "core/crates/pe-html/help/sk/agents-permissions.html",
+                "core/crates/pe-html/help/sk/agents-sending.html",
+                "core/crates/pe-html/help/sk/invitations.html",
+                "core/crates/pe-html/help/sl/agents-permissions.html",
+                "core/crates/pe-html/help/sl/agents-sending.html",
+                "core/crates/pe-html/help/sl/invitations.html",
+                "core/crates/pe-html/help/sr-Latn/agents-permissions.html",
+                "core/crates/pe-html/help/sr-Latn/agents-sending.html",
+                "core/crates/pe-html/help/sr-Latn/invitations.html",
+                "core/crates/pe-html/help/sv/agents-permissions.html",
+                "core/crates/pe-html/help/sv/agents-sending.html",
+                "core/crates/pe-html/help/sv/invitations.html",
+                "core/crates/pe-html/help/tr/agents-permissions.html",
+                "core/crates/pe-html/help/tr/agents-sending.html",
+                "core/crates/pe-html/help/tr/invitations.html",
+                "core/crates/pe-html/help/uk/agents-permissions.html",
+                "core/crates/pe-html/help/uk/agents-sending.html",
+                "core/crates/pe-html/help/uk/invitations.html",
+                "core/locales/bg/app.ftl",
+                "core/locales/bg/core.ftl",
+                "core/locales/bg/windows.ftl",
+                "core/locales/ca/app.ftl",
+                "core/locales/ca/core.ftl",
+                "core/locales/ca/windows.ftl",
+                "core/locales/cs/app.ftl",
+                "core/locales/cs/core.ftl",
+                "core/locales/cs/windows.ftl",
+                "core/locales/da/app.ftl",
+                "core/locales/da/core.ftl",
+                "core/locales/da/windows.ftl",
+                "core/locales/de/app.ftl",
+                "core/locales/de/core.ftl",
+                "core/locales/de/windows.ftl",
+                "core/locales/el/app.ftl",
+                "core/locales/el/core.ftl",
+                "core/locales/el/windows.ftl",
+                "core/locales/en/app.ftl",
+                "core/locales/en/core.ftl",
+                "core/locales/en/windows.ftl",
+                "core/locales/es/app.ftl",
+                "core/locales/es/core.ftl",
+                "core/locales/es/windows.ftl",
+                "core/locales/et/app.ftl",
+                "core/locales/et/core.ftl",
+                "core/locales/et/windows.ftl",
+                "core/locales/fi/app.ftl",
+                "core/locales/fi/core.ftl",
+                "core/locales/fi/windows.ftl",
+                "core/locales/fr/app.ftl",
+                "core/locales/fr/core.ftl",
+                "core/locales/fr/windows.ftl",
+                "core/locales/hr/app.ftl",
+                "core/locales/hr/core.ftl",
+                "core/locales/hr/windows.ftl",
+                "core/locales/hu/app.ftl",
+                "core/locales/hu/core.ftl",
+                "core/locales/hu/windows.ftl",
+                "core/locales/it/app.ftl",
+                "core/locales/it/core.ftl",
+                "core/locales/it/windows.ftl",
+                "core/locales/lt/app.ftl",
+                "core/locales/lt/core.ftl",
+                "core/locales/lt/windows.ftl",
+                "core/locales/lv/app.ftl",
+                "core/locales/lv/core.ftl",
+                "core/locales/lv/windows.ftl",
+                "core/locales/nb/app.ftl",
+                "core/locales/nb/core.ftl",
+                "core/locales/nb/windows.ftl",
+                "core/locales/nl/app.ftl",
+                "core/locales/nl/core.ftl",
+                "core/locales/nl/windows.ftl",
+                "core/locales/pl/app.ftl",
+                "core/locales/pl/core.ftl",
+                "core/locales/pl/windows.ftl",
+                "core/locales/pt-BR/app.ftl",
+                "core/locales/pt-BR/core.ftl",
+                "core/locales/pt-BR/windows.ftl",
+                "core/locales/pt/app.ftl",
+                "core/locales/pt/core.ftl",
+                "core/locales/pt/windows.ftl",
+                "core/locales/ro/app.ftl",
+                "core/locales/ro/core.ftl",
+                "core/locales/ro/windows.ftl",
+                "core/locales/ru/app.ftl",
+                "core/locales/ru/core.ftl",
+                "core/locales/ru/windows.ftl",
+                "core/locales/sk/app.ftl",
+                "core/locales/sk/core.ftl",
+                "core/locales/sk/windows.ftl",
+                "core/locales/sl/app.ftl",
+                "core/locales/sl/core.ftl",
+                "core/locales/sl/windows.ftl",
+                "core/locales/sr-Latn/app.ftl",
+                "core/locales/sr-Latn/core.ftl",
+                "core/locales/sr-Latn/windows.ftl",
+                "core/locales/sv/app.ftl",
+                "core/locales/sv/core.ftl",
+                "core/locales/sv/windows.ftl",
+                "core/locales/tr/app.ftl",
+                "core/locales/tr/core.ftl",
+                "core/locales/tr/windows.ftl",
+                "core/locales/uk/app.ftl",
+                "core/locales/uk/core.ftl",
+                "core/locales/uk/windows.ftl"
+              ],
+              "catalog_delta": {
+                "core/locales/bg/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/bg/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/bg/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ca/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ca/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ca/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/cs/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/cs/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/cs/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/da/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/da/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/da/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/de/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/de/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/de/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/el/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/el/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/el/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/en/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/en/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/en/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/es/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/es/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/es/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/et/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/et/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/et/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fi/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fi/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fi/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fr/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fr/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fr/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hr/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hr/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hr/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hu/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hu/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hu/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/it/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/it/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/it/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lt/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lt/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lt/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lv/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lv/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lv/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nb/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nb/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nb/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nl/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nl/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nl/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pl/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pl/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pl/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt-BR/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt-BR/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt-BR/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ro/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ro/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ro/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ru/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ru/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ru/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sk/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sk/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sk/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sl/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sl/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sl/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sv/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sv/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sv/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/tr/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/tr/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/tr/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/uk/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/uk/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/uk/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                }
+              },
+              "help_paths": [
+                "core/crates/pe-html/help/bg/agents-permissions.html",
+                "core/crates/pe-html/help/bg/agents-sending.html",
+                "core/crates/pe-html/help/bg/invitations.html",
+                "core/crates/pe-html/help/ca/agents-permissions.html",
+                "core/crates/pe-html/help/ca/agents-sending.html",
+                "core/crates/pe-html/help/ca/invitations.html",
+                "core/crates/pe-html/help/cs/agents-permissions.html",
+                "core/crates/pe-html/help/cs/agents-sending.html",
+                "core/crates/pe-html/help/cs/invitations.html",
+                "core/crates/pe-html/help/da/agents-permissions.html",
+                "core/crates/pe-html/help/da/agents-sending.html",
+                "core/crates/pe-html/help/da/invitations.html",
+                "core/crates/pe-html/help/de/agents-permissions.html",
+                "core/crates/pe-html/help/de/agents-sending.html",
+                "core/crates/pe-html/help/de/invitations.html",
+                "core/crates/pe-html/help/el/agents-permissions.html",
+                "core/crates/pe-html/help/el/agents-sending.html",
+                "core/crates/pe-html/help/el/invitations.html",
+                "core/crates/pe-html/help/en/agents-permissions.html",
+                "core/crates/pe-html/help/en/agents-sending.html",
+                "core/crates/pe-html/help/en/invitations.html",
+                "core/crates/pe-html/help/es/agents-permissions.html",
+                "core/crates/pe-html/help/es/agents-sending.html",
+                "core/crates/pe-html/help/es/invitations.html",
+                "core/crates/pe-html/help/et/agents-permissions.html",
+                "core/crates/pe-html/help/et/agents-sending.html",
+                "core/crates/pe-html/help/et/invitations.html",
+                "core/crates/pe-html/help/fi/agents-permissions.html",
+                "core/crates/pe-html/help/fi/agents-sending.html",
+                "core/crates/pe-html/help/fi/invitations.html",
+                "core/crates/pe-html/help/fr/agents-permissions.html",
+                "core/crates/pe-html/help/fr/agents-sending.html",
+                "core/crates/pe-html/help/fr/invitations.html",
+                "core/crates/pe-html/help/hr/agents-permissions.html",
+                "core/crates/pe-html/help/hr/agents-sending.html",
+                "core/crates/pe-html/help/hr/invitations.html",
+                "core/crates/pe-html/help/hu/agents-permissions.html",
+                "core/crates/pe-html/help/hu/agents-sending.html",
+                "core/crates/pe-html/help/hu/invitations.html",
+                "core/crates/pe-html/help/it/agents-permissions.html",
+                "core/crates/pe-html/help/it/agents-sending.html",
+                "core/crates/pe-html/help/it/invitations.html",
+                "core/crates/pe-html/help/lt/agents-permissions.html",
+                "core/crates/pe-html/help/lt/agents-sending.html",
+                "core/crates/pe-html/help/lt/invitations.html",
+                "core/crates/pe-html/help/lv/agents-permissions.html",
+                "core/crates/pe-html/help/lv/agents-sending.html",
+                "core/crates/pe-html/help/lv/invitations.html",
+                "core/crates/pe-html/help/nb/agents-permissions.html",
+                "core/crates/pe-html/help/nb/agents-sending.html",
+                "core/crates/pe-html/help/nb/invitations.html",
+                "core/crates/pe-html/help/nl/agents-permissions.html",
+                "core/crates/pe-html/help/nl/agents-sending.html",
+                "core/crates/pe-html/help/nl/invitations.html",
+                "core/crates/pe-html/help/pl/agents-permissions.html",
+                "core/crates/pe-html/help/pl/agents-sending.html",
+                "core/crates/pe-html/help/pl/invitations.html",
+                "core/crates/pe-html/help/pt-BR/agents-permissions.html",
+                "core/crates/pe-html/help/pt-BR/agents-sending.html",
+                "core/crates/pe-html/help/pt-BR/invitations.html",
+                "core/crates/pe-html/help/pt/agents-permissions.html",
+                "core/crates/pe-html/help/pt/agents-sending.html",
+                "core/crates/pe-html/help/pt/invitations.html",
+                "core/crates/pe-html/help/ro/agents-permissions.html",
+                "core/crates/pe-html/help/ro/agents-sending.html",
+                "core/crates/pe-html/help/ro/invitations.html",
+                "core/crates/pe-html/help/ru/agents-permissions.html",
+                "core/crates/pe-html/help/ru/agents-sending.html",
+                "core/crates/pe-html/help/ru/invitations.html",
+                "core/crates/pe-html/help/sk/agents-permissions.html",
+                "core/crates/pe-html/help/sk/agents-sending.html",
+                "core/crates/pe-html/help/sk/invitations.html",
+                "core/crates/pe-html/help/sl/agents-permissions.html",
+                "core/crates/pe-html/help/sl/agents-sending.html",
+                "core/crates/pe-html/help/sl/invitations.html",
+                "core/crates/pe-html/help/sr-Latn/agents-permissions.html",
+                "core/crates/pe-html/help/sr-Latn/agents-sending.html",
+                "core/crates/pe-html/help/sr-Latn/invitations.html",
+                "core/crates/pe-html/help/sv/agents-permissions.html",
+                "core/crates/pe-html/help/sv/agents-sending.html",
+                "core/crates/pe-html/help/sv/invitations.html",
+                "core/crates/pe-html/help/tr/agents-permissions.html",
+                "core/crates/pe-html/help/tr/agents-sending.html",
+                "core/crates/pe-html/help/tr/invitations.html",
+                "core/crates/pe-html/help/uk/agents-permissions.html",
+                "core/crates/pe-html/help/uk/agents-sending.html",
+                "core/crates/pe-html/help/uk/invitations.html"
+              ]
+            },
+            {
+              "ref": "refs/remotes/origin/feat/mcp-phase3a",
+              "commit": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+              "merge_base": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "paths": [
+                "core/crates/pe-html/help/bg/agents-permissions.html",
+                "core/crates/pe-html/help/bg/agents-sending.html",
+                "core/crates/pe-html/help/bg/invitations.html",
+                "core/crates/pe-html/help/ca/agents-permissions.html",
+                "core/crates/pe-html/help/ca/agents-sending.html",
+                "core/crates/pe-html/help/ca/invitations.html",
+                "core/crates/pe-html/help/cs/agents-permissions.html",
+                "core/crates/pe-html/help/cs/agents-sending.html",
+                "core/crates/pe-html/help/cs/invitations.html",
+                "core/crates/pe-html/help/da/agents-permissions.html",
+                "core/crates/pe-html/help/da/agents-sending.html",
+                "core/crates/pe-html/help/da/invitations.html",
+                "core/crates/pe-html/help/de/agents-permissions.html",
+                "core/crates/pe-html/help/de/agents-sending.html",
+                "core/crates/pe-html/help/de/invitations.html",
+                "core/crates/pe-html/help/el/agents-permissions.html",
+                "core/crates/pe-html/help/el/agents-sending.html",
+                "core/crates/pe-html/help/el/invitations.html",
+                "core/crates/pe-html/help/en/agents-permissions.html",
+                "core/crates/pe-html/help/en/agents-sending.html",
+                "core/crates/pe-html/help/en/invitations.html",
+                "core/crates/pe-html/help/es/agents-permissions.html",
+                "core/crates/pe-html/help/es/agents-sending.html",
+                "core/crates/pe-html/help/es/invitations.html",
+                "core/crates/pe-html/help/et/agents-permissions.html",
+                "core/crates/pe-html/help/et/agents-sending.html",
+                "core/crates/pe-html/help/et/invitations.html",
+                "core/crates/pe-html/help/fi/agents-permissions.html",
+                "core/crates/pe-html/help/fi/agents-sending.html",
+                "core/crates/pe-html/help/fi/invitations.html",
+                "core/crates/pe-html/help/fr/agents-permissions.html",
+                "core/crates/pe-html/help/fr/agents-sending.html",
+                "core/crates/pe-html/help/fr/invitations.html",
+                "core/crates/pe-html/help/hr/agents-permissions.html",
+                "core/crates/pe-html/help/hr/agents-sending.html",
+                "core/crates/pe-html/help/hr/invitations.html",
+                "core/crates/pe-html/help/hu/agents-permissions.html",
+                "core/crates/pe-html/help/hu/agents-sending.html",
+                "core/crates/pe-html/help/hu/invitations.html",
+                "core/crates/pe-html/help/it/agents-permissions.html",
+                "core/crates/pe-html/help/it/agents-sending.html",
+                "core/crates/pe-html/help/it/invitations.html",
+                "core/crates/pe-html/help/lt/agents-permissions.html",
+                "core/crates/pe-html/help/lt/agents-sending.html",
+                "core/crates/pe-html/help/lt/invitations.html",
+                "core/crates/pe-html/help/lv/agents-permissions.html",
+                "core/crates/pe-html/help/lv/agents-sending.html",
+                "core/crates/pe-html/help/lv/invitations.html",
+                "core/crates/pe-html/help/nb/agents-permissions.html",
+                "core/crates/pe-html/help/nb/agents-sending.html",
+                "core/crates/pe-html/help/nb/invitations.html",
+                "core/crates/pe-html/help/nl/agents-permissions.html",
+                "core/crates/pe-html/help/nl/agents-sending.html",
+                "core/crates/pe-html/help/nl/invitations.html",
+                "core/crates/pe-html/help/pl/agents-permissions.html",
+                "core/crates/pe-html/help/pl/agents-sending.html",
+                "core/crates/pe-html/help/pl/invitations.html",
+                "core/crates/pe-html/help/pt-BR/agents-permissions.html",
+                "core/crates/pe-html/help/pt-BR/agents-sending.html",
+                "core/crates/pe-html/help/pt-BR/invitations.html",
+                "core/crates/pe-html/help/pt/agents-permissions.html",
+                "core/crates/pe-html/help/pt/agents-sending.html",
+                "core/crates/pe-html/help/pt/invitations.html",
+                "core/crates/pe-html/help/ro/agents-permissions.html",
+                "core/crates/pe-html/help/ro/agents-sending.html",
+                "core/crates/pe-html/help/ro/invitations.html",
+                "core/crates/pe-html/help/ru/agents-permissions.html",
+                "core/crates/pe-html/help/ru/agents-sending.html",
+                "core/crates/pe-html/help/ru/invitations.html",
+                "core/crates/pe-html/help/sk/agents-permissions.html",
+                "core/crates/pe-html/help/sk/agents-sending.html",
+                "core/crates/pe-html/help/sk/invitations.html",
+                "core/crates/pe-html/help/sl/agents-permissions.html",
+                "core/crates/pe-html/help/sl/agents-sending.html",
+                "core/crates/pe-html/help/sl/invitations.html",
+                "core/crates/pe-html/help/sr-Latn/agents-permissions.html",
+                "core/crates/pe-html/help/sr-Latn/agents-sending.html",
+                "core/crates/pe-html/help/sr-Latn/invitations.html",
+                "core/crates/pe-html/help/sv/agents-permissions.html",
+                "core/crates/pe-html/help/sv/agents-sending.html",
+                "core/crates/pe-html/help/sv/invitations.html",
+                "core/crates/pe-html/help/tr/agents-permissions.html",
+                "core/crates/pe-html/help/tr/agents-sending.html",
+                "core/crates/pe-html/help/tr/invitations.html",
+                "core/crates/pe-html/help/uk/agents-permissions.html",
+                "core/crates/pe-html/help/uk/agents-sending.html",
+                "core/crates/pe-html/help/uk/invitations.html",
+                "core/locales/bg/app.ftl",
+                "core/locales/bg/core.ftl",
+                "core/locales/bg/windows.ftl",
+                "core/locales/ca/app.ftl",
+                "core/locales/ca/core.ftl",
+                "core/locales/ca/windows.ftl",
+                "core/locales/cs/app.ftl",
+                "core/locales/cs/core.ftl",
+                "core/locales/cs/windows.ftl",
+                "core/locales/da/app.ftl",
+                "core/locales/da/core.ftl",
+                "core/locales/da/windows.ftl",
+                "core/locales/de/app.ftl",
+                "core/locales/de/core.ftl",
+                "core/locales/de/windows.ftl",
+                "core/locales/el/app.ftl",
+                "core/locales/el/core.ftl",
+                "core/locales/el/windows.ftl",
+                "core/locales/en/app.ftl",
+                "core/locales/en/core.ftl",
+                "core/locales/en/windows.ftl",
+                "core/locales/es/app.ftl",
+                "core/locales/es/core.ftl",
+                "core/locales/es/windows.ftl",
+                "core/locales/et/app.ftl",
+                "core/locales/et/core.ftl",
+                "core/locales/et/windows.ftl",
+                "core/locales/fi/app.ftl",
+                "core/locales/fi/core.ftl",
+                "core/locales/fi/windows.ftl",
+                "core/locales/fr/app.ftl",
+                "core/locales/fr/core.ftl",
+                "core/locales/fr/windows.ftl",
+                "core/locales/hr/app.ftl",
+                "core/locales/hr/core.ftl",
+                "core/locales/hr/windows.ftl",
+                "core/locales/hu/app.ftl",
+                "core/locales/hu/core.ftl",
+                "core/locales/hu/windows.ftl",
+                "core/locales/it/app.ftl",
+                "core/locales/it/core.ftl",
+                "core/locales/it/windows.ftl",
+                "core/locales/lt/app.ftl",
+                "core/locales/lt/core.ftl",
+                "core/locales/lt/windows.ftl",
+                "core/locales/lv/app.ftl",
+                "core/locales/lv/core.ftl",
+                "core/locales/lv/windows.ftl",
+                "core/locales/nb/app.ftl",
+                "core/locales/nb/core.ftl",
+                "core/locales/nb/windows.ftl",
+                "core/locales/nl/app.ftl",
+                "core/locales/nl/core.ftl",
+                "core/locales/nl/windows.ftl",
+                "core/locales/pl/app.ftl",
+                "core/locales/pl/core.ftl",
+                "core/locales/pl/windows.ftl",
+                "core/locales/pt-BR/app.ftl",
+                "core/locales/pt-BR/core.ftl",
+                "core/locales/pt-BR/windows.ftl",
+                "core/locales/pt/app.ftl",
+                "core/locales/pt/core.ftl",
+                "core/locales/pt/windows.ftl",
+                "core/locales/ro/app.ftl",
+                "core/locales/ro/core.ftl",
+                "core/locales/ro/windows.ftl",
+                "core/locales/ru/app.ftl",
+                "core/locales/ru/core.ftl",
+                "core/locales/ru/windows.ftl",
+                "core/locales/sk/app.ftl",
+                "core/locales/sk/core.ftl",
+                "core/locales/sk/windows.ftl",
+                "core/locales/sl/app.ftl",
+                "core/locales/sl/core.ftl",
+                "core/locales/sl/windows.ftl",
+                "core/locales/sr-Latn/app.ftl",
+                "core/locales/sr-Latn/core.ftl",
+                "core/locales/sr-Latn/windows.ftl",
+                "core/locales/sv/app.ftl",
+                "core/locales/sv/core.ftl",
+                "core/locales/sv/windows.ftl",
+                "core/locales/tr/app.ftl",
+                "core/locales/tr/core.ftl",
+                "core/locales/tr/windows.ftl",
+                "core/locales/uk/app.ftl",
+                "core/locales/uk/core.ftl",
+                "core/locales/uk/windows.ftl"
+              ],
+              "catalog_delta": {
+                "core/locales/bg/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/bg/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/bg/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ca/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ca/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ca/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/cs/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/cs/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/cs/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/da/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/da/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/da/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/de/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/de/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/de/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/el/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/el/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/el/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/en/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/en/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/en/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/es/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/es/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/es/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/et/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/et/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/et/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fi/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fi/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fi/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fr/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fr/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/fr/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hr/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hr/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hr/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hu/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hu/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/hu/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/it/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/it/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/it/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lt/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lt/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lt/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lv/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lv/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/lv/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nb/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nb/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nb/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nl/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nl/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/nl/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pl/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pl/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pl/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt-BR/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt-BR/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt-BR/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/pt/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ro/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ro/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ro/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ru/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ru/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/ru/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sk/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sk/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sk/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sl/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sl/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sl/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sv/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sv/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/sv/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/tr/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/tr/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/tr/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/uk/app.ftl": {
+                  "added": [
+                    "ui-take-back",
+                    "ui-undo-since-button",
+                    "ui-undo-since-span"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/uk/core.ftl": {
+                  "added": [
+                    "agent-invitation-reply",
+                    "agent-log-bulk-archived",
+                    "agent-log-bulk-color",
+                    "agent-log-bulk-deleted",
+                    "agent-log-bulk-flagged",
+                    "agent-log-bulk-junk",
+                    "agent-log-bulk-moved",
+                    "agent-log-bulk-not-junk",
+                    "agent-log-bulk-read",
+                    "agent-log-bulk-unflagged",
+                    "agent-log-bulk-unread",
+                    "agent-undo-changed",
+                    "agent-undo-done",
+                    "agent-undo-left-changed",
+                    "agent-undo-left-gone",
+                    "agent-undo-left-impossible",
+                    "agent-undo-left-sent",
+                    "agent-undo-since-detail",
+                    "agent-undo-since-question",
+                    "agent-undo-span",
+                    "invitation-reply-subject",
+                    "invitation-reply-text"
+                  ],
+                  "changed": [],
+                  "removed": []
+                },
+                "core/locales/uk/windows.ftl": {
+                  "added": [
+                    "win-take-back",
+                    "win-undo-since"
+                  ],
+                  "changed": [],
+                  "removed": []
+                }
+              },
+              "help_paths": [
+                "core/crates/pe-html/help/bg/agents-permissions.html",
+                "core/crates/pe-html/help/bg/agents-sending.html",
+                "core/crates/pe-html/help/bg/invitations.html",
+                "core/crates/pe-html/help/ca/agents-permissions.html",
+                "core/crates/pe-html/help/ca/agents-sending.html",
+                "core/crates/pe-html/help/ca/invitations.html",
+                "core/crates/pe-html/help/cs/agents-permissions.html",
+                "core/crates/pe-html/help/cs/agents-sending.html",
+                "core/crates/pe-html/help/cs/invitations.html",
+                "core/crates/pe-html/help/da/agents-permissions.html",
+                "core/crates/pe-html/help/da/agents-sending.html",
+                "core/crates/pe-html/help/da/invitations.html",
+                "core/crates/pe-html/help/de/agents-permissions.html",
+                "core/crates/pe-html/help/de/agents-sending.html",
+                "core/crates/pe-html/help/de/invitations.html",
+                "core/crates/pe-html/help/el/agents-permissions.html",
+                "core/crates/pe-html/help/el/agents-sending.html",
+                "core/crates/pe-html/help/el/invitations.html",
+                "core/crates/pe-html/help/en/agents-permissions.html",
+                "core/crates/pe-html/help/en/agents-sending.html",
+                "core/crates/pe-html/help/en/invitations.html",
+                "core/crates/pe-html/help/es/agents-permissions.html",
+                "core/crates/pe-html/help/es/agents-sending.html",
+                "core/crates/pe-html/help/es/invitations.html",
+                "core/crates/pe-html/help/et/agents-permissions.html",
+                "core/crates/pe-html/help/et/agents-sending.html",
+                "core/crates/pe-html/help/et/invitations.html",
+                "core/crates/pe-html/help/fi/agents-permissions.html",
+                "core/crates/pe-html/help/fi/agents-sending.html",
+                "core/crates/pe-html/help/fi/invitations.html",
+                "core/crates/pe-html/help/fr/agents-permissions.html",
+                "core/crates/pe-html/help/fr/agents-sending.html",
+                "core/crates/pe-html/help/fr/invitations.html",
+                "core/crates/pe-html/help/hr/agents-permissions.html",
+                "core/crates/pe-html/help/hr/agents-sending.html",
+                "core/crates/pe-html/help/hr/invitations.html",
+                "core/crates/pe-html/help/hu/agents-permissions.html",
+                "core/crates/pe-html/help/hu/agents-sending.html",
+                "core/crates/pe-html/help/hu/invitations.html",
+                "core/crates/pe-html/help/it/agents-permissions.html",
+                "core/crates/pe-html/help/it/agents-sending.html",
+                "core/crates/pe-html/help/it/invitations.html",
+                "core/crates/pe-html/help/lt/agents-permissions.html",
+                "core/crates/pe-html/help/lt/agents-sending.html",
+                "core/crates/pe-html/help/lt/invitations.html",
+                "core/crates/pe-html/help/lv/agents-permissions.html",
+                "core/crates/pe-html/help/lv/agents-sending.html",
+                "core/crates/pe-html/help/lv/invitations.html",
+                "core/crates/pe-html/help/nb/agents-permissions.html",
+                "core/crates/pe-html/help/nb/agents-sending.html",
+                "core/crates/pe-html/help/nb/invitations.html",
+                "core/crates/pe-html/help/nl/agents-permissions.html",
+                "core/crates/pe-html/help/nl/agents-sending.html",
+                "core/crates/pe-html/help/nl/invitations.html",
+                "core/crates/pe-html/help/pl/agents-permissions.html",
+                "core/crates/pe-html/help/pl/agents-sending.html",
+                "core/crates/pe-html/help/pl/invitations.html",
+                "core/crates/pe-html/help/pt-BR/agents-permissions.html",
+                "core/crates/pe-html/help/pt-BR/agents-sending.html",
+                "core/crates/pe-html/help/pt-BR/invitations.html",
+                "core/crates/pe-html/help/pt/agents-permissions.html",
+                "core/crates/pe-html/help/pt/agents-sending.html",
+                "core/crates/pe-html/help/pt/invitations.html",
+                "core/crates/pe-html/help/ro/agents-permissions.html",
+                "core/crates/pe-html/help/ro/agents-sending.html",
+                "core/crates/pe-html/help/ro/invitations.html",
+                "core/crates/pe-html/help/ru/agents-permissions.html",
+                "core/crates/pe-html/help/ru/agents-sending.html",
+                "core/crates/pe-html/help/ru/invitations.html",
+                "core/crates/pe-html/help/sk/agents-permissions.html",
+                "core/crates/pe-html/help/sk/agents-sending.html",
+                "core/crates/pe-html/help/sk/invitations.html",
+                "core/crates/pe-html/help/sl/agents-permissions.html",
+                "core/crates/pe-html/help/sl/agents-sending.html",
+                "core/crates/pe-html/help/sl/invitations.html",
+                "core/crates/pe-html/help/sr-Latn/agents-permissions.html",
+                "core/crates/pe-html/help/sr-Latn/agents-sending.html",
+                "core/crates/pe-html/help/sr-Latn/invitations.html",
+                "core/crates/pe-html/help/sv/agents-permissions.html",
+                "core/crates/pe-html/help/sv/agents-sending.html",
+                "core/crates/pe-html/help/sv/invitations.html",
+                "core/crates/pe-html/help/tr/agents-permissions.html",
+                "core/crates/pe-html/help/tr/agents-sending.html",
+                "core/crates/pe-html/help/tr/invitations.html",
+                "core/crates/pe-html/help/uk/agents-permissions.html",
+                "core/crates/pe-html/help/uk/agents-sending.html",
+                "core/crates/pe-html/help/uk/invitations.html"
+              ]
+            }
+          ],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched.",
+          "incoming_source_sync": {
+            "old_commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+            "new_commit": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+            "new_base": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+            "delta_paths_before": 174,
+            "delta_paths_after": 174,
+            "changed_feature_deltas": [
+              "core/crates/pe-html/help/hu/agents-permissions.html"
+            ],
+            "note": "Current master was merged into phase3a. Catalog additions and values unchanged; all feature help deltas identical except Hungarian permissions, whose reviewed master prose was preserved around the existing marked additions. Exact current feature deltas are recorded in this batch source audit.",
+            "source_audit_artifact": "/private/tmp/inbox-hu-storage-20261119-source-audit.json"
+          }
+        },
+        "upstream_inputs_check": {
+          "master": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-hu-storage-20261119-edit.py": "6ab5121bba9fc1aa7b27a21b353fd9af44ceab69aa44dabb4951624ef40b46bd",
+          "/private/tmp/inbox-hu-storage-20261119-finalize.py": "9746ad192548e2de72b240e805d018e27710963e14c705132bdca46fc7d34338",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -168148,9 +171638,9 @@
         },
         {
           "ref": "refs/heads/feat/mcp-phase3a",
-          "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
-          "merge_base": "3baf8a41703a6b941bb61c08b688e62813c79456",
-          "status": "Unmerged incoming source. Exact added/changed/removed catalog IDs and help paths are recorded in this checkpoint; recheck integration before importing.",
+          "commit": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+          "merge_base": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+          "status": "Unmerged incoming source, refreshed after merging current master. Same 27 catalog additions per language and three help paths; Hungarian permissions now preserves the completed master review around marked feature additions. No additional active review credit.",
           "catalog_additions_by_language": {
             "bg": 27,
             "ca": 27,
@@ -168275,13 +171765,14 @@
             "tr": 3,
             "uk": 3
           },
-          "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e"
+          "previous_commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+          "latest_exact_delta_batch": "hu-storage-transfer-help-20261119"
         },
         {
           "ref": "refs/remotes/origin/feat/mcp-phase3a",
-          "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
-          "merge_base": "3baf8a41703a6b941bb61c08b688e62813c79456",
-          "status": "Unmerged incoming source. Exact added/changed/removed catalog IDs and help paths are recorded in this checkpoint; recheck integration before importing.",
+          "commit": "6ac3e98c8ea7bdffdd5b89c051fba7bcb3389f59",
+          "merge_base": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+          "status": "Unmerged incoming source, refreshed after merging current master. Same 27 catalog additions per language and three help paths; Hungarian permissions now preserves the completed master review around marked feature additions. No additional active review credit.",
           "catalog_additions_by_language": {
             "bg": 27,
             "ca": 27,
@@ -168406,7 +171897,8 @@
             "tr": 3,
             "uk": 3
           },
-          "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e"
+          "previous_commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+          "latest_exact_delta_batch": "hu-storage-transfer-help-20261119"
         }
       ],
       "other_pending_source": "preview-cid at 6a37b3de merged in PR 159 and integrated at 3baf8a41. Its 56 translated help additions are now in the active pending inventory; exact changes are in resumed_source_integrations."
@@ -169608,6 +173100,146 @@
           }
         ],
         "instruction": "Compare exact current passages against verified behavior, retaining already accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review."
+      },
+      {
+        "id": "storage-transfer-platform-behavior-context-20261119",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+        "completed_languages": [
+          "hu"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "it",
+          "lt",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "data-storage.html",
+          "connections.html",
+          "move-computer.html",
+          "removing.html",
+          "updates.html",
+          "default-mail-program.html"
+        ],
+        "issues": [
+          {
+            "topic": "data-storage.html",
+            "finding": "Paths describe defaults: --store and Linux data-directory settings can override them. The mail database itself is not encrypted. Account passwords, OAuth refresh tokens and application client secrets use the system secret store by default; unavailable or memory-only storage must not be described as guaranteed persistence. Linux uses a Secret Service provider, not exclusively GNOME Keyring. Private OpenPGP keys are encrypted in the database with a separate protection key. Local analysis does not mean the entire application makes no network requests.",
+            "sources": [
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "app/src/main.cpp",
+              "linux/src/main.rs",
+              "mac/Sources/InboxClassic/App.swift"
+            ]
+          },
+          {
+            "topic": "connections.html",
+            "finding": "DNS over HTTPS applies to configuration MX/SRV lookups; ordinary server hostname resolution uses the system resolver. Provider autoconfig requests can include an email address. Autodiscover sends a password only after a HTTPS Basic challenge. Logos use persistent cached SVG data, not a fresh download on every app run: source retention is 30 days, failed requests wait 24 hours. External pictures can be enabled by settings/trusted-sender rules; encrypted parts still require a click. Direct unsubscribe requires confirmation and trusted DKIM coverage of the unsubscribe headers. Key discovery includes manual lookup and fingerprint/key-ID requests; publishing sends public key data and confirmation addresses. OTP detection uses a trusted provider verdict for the relevant origin/From domain or a parent, not any DKIM signature. Mac automatic update checking is optional.",
+            "sources": [
+              "core/crates/pe-autoconfig/src/dns.rs",
+              "core/crates/pe-autoconfig/src/lib.rs",
+              "core/crates/pe-autoconfig/src/config.rs",
+              "core/crates/pe-autoconfig/src/autodiscover.rs",
+              "core/crates/pe-net/src/stream.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/bimi.rs",
+              "core/crates/pe-store/src/senders.rs",
+              "core/crates/pe-core/src/lookup.rs",
+              "core/crates/pe-core/src/unsubscribe.rs",
+              "core/crates/pe-core/src/otp.rs",
+              "mac/Sources/InboxClassic/Settings.swift"
+            ]
+          },
+          {
+            "topic": "move-computer.html",
+            "finding": "The passphrase must match and contain at least eight Unicode characters. Only protected exports can contain saved account/app secrets and own private keys. Private keys that cannot be opened locally are skipped. Setup exports contain no messages, so only server-held mail can download on the other machine; local outgoing mail is not transferred. An unprotected export requires fresh sign-in, potentially through the browser. Existing accounts are kept, selected contained settings applied, contacts merged, pending rule folders resolved after sync and replacement contact keys left for user selection.",
+            "sources": [
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/setup/export.rs",
+              "core/crates/pe-core/src/setup/import.rs",
+              "core/crates/pe-core/src/setup/file.rs"
+            ]
+          },
+          {
+            "topic": "removing.html",
+            "finding": "The Windows uninstaller's remove-mail confirmation deletes the full local data directory, including settings, contacts, keys and queued mail; WebView cache is removed separately. Mac/Linux data-folder removal also affects these local records. This does not delete server mail. Removing an account requests removal of its account credential, not every application/PGP secret. The Windows uninstaller explicitly leaves system credential-store entries, and uninstalling must not be represented as clearing all secrets. Preserve literal package commands without executing them.",
+            "sources": [
+              "installer/inbox-classic.nsi",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "app/src/main.cpp",
+              "linux/src/main.rs",
+              "mac/Sources/InboxClassic/App.swift"
+            ]
+          },
+          {
+            "topic": "updates.html",
+            "finding": "Mac Sparkle checks are enabled by default but controlled by settings; the help must not promise unconditional automatic updating or a prompt before every possible installation. Describe following updater instructions. Linux repository/package instructions are conditional on installation method, without an unconditional claim about a particular distribution's update service. Installer paths preserve the existing local data.",
+            "sources": [
+              "mac/Resources/Info.plist",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Settings.swift",
+              "installer/inbox-classic.nsi"
+            ]
+          },
+          {
+            "topic": "default-mail-program.html",
+            "finding": "Windows opens system association settings for installed copies when the association is not already set. Mac/Linux attempt system association changes and report failure; success is not unconditional. Mailto and .eml associations are separate. Mailto parsing accepts addresses, subject and body, not attachments or arbitrary fields. All three frontends require an existing account and ask the user to click the link again after adding one.",
+            "sources": [
+              "app/src/main.cpp",
+              "app/src/options.cpp",
+              "linux/src/app.rs",
+              "linux/src/preferences.rs",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/Settings.swift",
+              "core/crates/pe-core/src/mailto.rs"
+            ]
+          }
+        ],
+        "instruction": "Compare current passages against verified behavior, retaining accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review."
+      }
+    ],
+    "completed_source_followups": [
+      {
+        "pr": 177,
+        "merge_commit": "cc85211e6",
+        "source_commit": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+        "changed_paths": [
+          "mac/Sources/InboxClassic/WebViews.swift"
+        ],
+        "diff_artifact": "/private/tmp/inbox-hu-mail-20261118-upstream-mac-print.diff",
+        "after_sha256": "3091d5942d015e0788c72433ac456ecd28170482a93909cb8057284b6d052318",
+        "finding": "Printer replaces the async img.decode wait with a document-start app-owned script selecting synchronous image decoding, then prints after navigation completes. No translated or English help changes. The existing Hungarian help distinguishes the app-owned script and describes the printing window without a decoding implementation promise. No new wording change identified by this static follow-up. GUI printing was not run.",
+        "id": "mac-print-merged-context-followup-20261119",
+        "status": "completed static context comparison",
+        "recorded_in_batch": "hu-storage-transfer-help-20261119",
+        "requires_gui_validation": false,
+        "validation_limit": "No GUI printing was run; this closes only the translation-context integration follow-up."
       }
     ]
   },

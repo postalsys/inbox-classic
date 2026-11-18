@@ -743,6 +743,15 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
 - Unsubscribe confirmation means the request was accepted, not that future mail is guaranteed to stop. Direct
   requests require confirmation and provider-validated signatures covering the unsubscribe headers. Bounce analysis
   happens locally; a delay notice describes the server's report, not a guarantee of later delivery.
+- Storage/transfer help distinguishes the unencrypted "levéladatbázis", system "jelszótároló" and encrypted
+  "titkos kulcs". Exported "beállításfájl" contains no mail; only server-held mail can download on the new computer.
+  Unprotected exports omit saved credentials and private keys; inaccessible private keys cannot be exported either.
+- Removal of the local data folder also removes settings, contacts, keys and queued mail. Removing an account
+  requests deletion of its saved credentials; uninstalling does not clear every secret in the system password store.
+- Network help limits DNS over HTTPS to configuration lookups, describes persistent logo reuse and allows pictures
+  under explicit download settings. Key lookup may send an address or identifier; publishing sends a public key.
+- Default-app help describes the system association request and possible failure. Automatic update checks on Mac
+  are a setting, not a promise of unconditional automatic installation. Introduce settings paths with a colon.
 
 ### Nederlands (nl)
 
