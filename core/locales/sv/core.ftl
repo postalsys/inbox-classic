@@ -1022,60 +1022,42 @@ pgp-publish-failed = Nyckeln kunde inte publiceras: { $error }
 # review: changed
 pgp-keyserver-off = Sökning efter nycklar på keys.openpgp.org är avstängd under { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Krypterat och signerat: bara du och { $addresses } kan läsa det.
-   *[other] Krypterat och signerat: bara du och dess { $count } mottagare kan läsa det.
+    [one] Meddelandet krypteras och signeras digitalt när det skickas. Bara du och { $addresses } kan läsa innehållet.
+   *[other] Meddelandet krypteras och signeras digitalt när det skickas. Bara du och de { $count } mottagarna kan läsa innehållet.
 }
-# review: new
-pgp-compose-encrypt-ready = Det krypteras och signeras. Lägg till mottagare vars nycklar du har.
-# review: new
+pgp-compose-encrypt-ready = Meddelandet krypteras och signeras digitalt när det skickas. Lägg till mottagare vars nycklar du har.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } har ingen nyckel, så meddelandet kan inte krypteras ännu.
-   *[other] { $count } mottagare har ingen nyckel, så meddelandet kan inte krypteras ännu: { $addresses }.
+    [one] En användbar krypteringsnyckel saknas för { $addresses }. Meddelandet kan ännu inte krypteras.
+   *[other] { $count } mottagare saknar användbara krypteringsnycklar: { $addresses }. Meddelandet kan ännu inte krypteras.
 }
-# review: new
-pgp-compose-looking = Söker efter nycklarna för { $addresses }...
-# review: new
-pgp-compose-signed = Signerat: mottagarna kan kontrollera att det kommer från dig och inte har ändrats.
-# review: new
-pgp-compose-reply-clear = Inte krypterat, fast meddelandet som det svarar på eller vidarebefordrar var det.
-# review: new
-pgp-compose-encrypted-files = Filer från ett krypterat meddelande är bifogade, så det här meddelandet kan bara skickas krypterat. Slå på Kryptera eller ta bort de filerna.
-# review: new
-pgp-compose-sign-tip = Signera meddelandet med din nyckel, så att mottagarna kan kontrollera att det kommer från dig och inte har ändrats
-# review: new
-pgp-compose-sign-tip-encrypted = Ett krypterat meddelande signeras alltid
-# review: new
-pgp-compose-encrypt-tip = Kryptera meddelandet, så att bara du och dess mottagare kan läsa det
-# review: new
-pgp-compose-make-key = Du har ingen nyckel för { $address } ännu. Vill du skapa en nu? Med den kan dina meddelanden signeras och krypteras.
-# review: new
-pgp-compose-key-unusable = Din nyckel för { $address } kan inte användas ({ $state }). Öppna Krypteringsnycklar för att importera säkerhetskopian eller skapa en ny nyckel.
-# review: new
-pgp-compose-encrypt-off-quote = Det här meddelandet citerar eller vidarebefordrar ett krypterat meddelande. Utan kryptering kan det inte skickas förrän du tar bort det som citeras. Vill du stänga av krypteringen ändå?
-# review: new
-pgp-compose-encrypt-off-reply = Det här meddelandet svarar på eller vidarebefordrar ett krypterat meddelande. Utan kryptering kan alla som hanterar ditt meddelande på vägen läsa det. Vill du stänga av krypteringen?
-# review: new
-pgp-recipient-verified = Nyckeln verifierad
-# review: new
-pgp-recipient-found = Nyckeln inte verifierad
-# review: new
+pgp-compose-looking = Söker efter nycklar för { $addresses }...
+pgp-compose-signed = Meddelandet signeras digitalt när det skickas. Mottagarna kan kontrollera om innehållet har ändrats efter signeringen.
+pgp-compose-reply-clear = Meddelandet skickas utan kryptering, trots att det ursprungliga meddelandet var krypterat.
+pgp-compose-encrypted-files = Meddelandet innehåller bilagor från ett krypterat meddelande och kan därför bara skickas krypterat. Aktivera ”Kryptera” eller ta bort bilagorna.
+pgp-compose-sign-tip = Signera meddelandet digitalt med din nyckel så att mottagarna kan kontrollera om innehållet har ändrats efter signeringen
+pgp-compose-sign-tip-encrypted = Meddelanden som skickas krypterade signeras också digitalt
+pgp-compose-encrypt-tip = Kryptera innehållet så att bara du och mottagarna kan läsa det
+pgp-compose-make-key = Du har ännu ingen egen nyckel för adressen { $address }. Vill du skapa en nu? Med den kan du signera och kryptera meddelanden.
+pgp-compose-key-unusable =
+    Din nyckel för adressen { $address } kan inte användas.
+
+    Orsak: { $state }
+
+    Öppna ”Krypteringsnycklar” för att importera en säkerhetskopia av nyckeln eller skapa en ny nyckel.
+pgp-compose-encrypt-off-quote = Meddelandet innehåller text, bilder eller bilagor från ett krypterat meddelande. Du måste ta bort det innehållet innan du kan skicka utan kryptering. Vill du ändå stänga av krypteringen?
+pgp-compose-encrypt-off-reply = Du svarar på eller vidarebefordrar ett krypterat meddelande. Utan kryptering kan även servrar som förmedlar ditt meddelande läsa innehållet. Vill du stänga av krypteringen?
+pgp-recipient-verified = Nyckelns ägare är verifierad
+pgp-recipient-found = Nyckelns ägare är inte verifierad
 pgp-recipient-own = Din egen nyckel
-# review: new
 pgp-recipient-looking = Söker efter en nyckel...
-# review: new
 pgp-recipient-missing = Ingen nyckel
-# review: new
-pgp-recipient-not-found = Ingen nyckel: ingen hittades { $date }
-# review: new
+pgp-recipient-not-found = Ingen nyckel hittades. Senaste sökning: { $date }
 pgp-recipient-unusable = Nyckeln kan inte användas: { $state }
-# review: new
-pgp-recipients-intro = Meddelandet krypteras till varje mottagares nyckel och till din.
-# review: new
+pgp-recipients-intro = När meddelandet skickas krypteras det med mottagarnas nycklar och din egen nyckel.
 pgp-recipients-intro-missing = { $count ->
-    [one] En mottagare har ingen nyckel att kryptera till. Sök efter mottagarens nyckel, ta bort mottagaren från meddelandet eller skicka det utan kryptering.
-   *[other] { $count } mottagare har ingen nyckel att kryptera till. Sök efter deras nycklar, ta bort dem från meddelandet eller skicka det utan kryptering.
+    [one] En mottagare saknar en användbar krypteringsnyckel. Sök efter mottagarens nyckel, ta bort mottagaren från meddelandet eller skicka det utan kryptering.
+   *[other] { $count } mottagare saknar användbara krypteringsnycklar. Sök efter deras nycklar, ta bort mottagarna från meddelandet eller skicka det utan kryptering.
 }
 # review: new
 pgp-details-part = Del { $number }: { $label }
