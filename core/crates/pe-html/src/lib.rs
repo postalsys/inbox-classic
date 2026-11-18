@@ -123,11 +123,12 @@ pub(crate) fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
     let mut builder = mail_builder();
     builder.attribute_filter(move |element, attribute, value| {
         let img_src = element == "img" && attribute == "src";
-        match scheme_of(value).as_str() {
+        let address = url_text(value);
+        match scheme_of(&address).as_str() {
             // data: is for images only, a data: link could open a document of its own
             "data:" if !img_src => None,
             scheme if scheme.starts_with("cid:") && (img_src || attribute == "background") => {
-                Some(embedder.embed(value).map_or(Cow::Borrowed(value), Cow::Owned))
+                Some(embedder.embed(&address).map_or(Cow::Borrowed(value), Cow::Owned))
             }
             _ => Some(Cow::Borrowed(value)),
         }
@@ -135,13 +136,20 @@ pub(crate) fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
     builder
 }
 
-/// The first five characters of an address, lowercased: its scheme when it is `data:` or `cid:`
-fn scheme_of(value: &str) -> String {
-    value
-        .trim_start()
-        .get(..5)
-        .map(str::to_ascii_lowercase)
-        .unwrap_or_default()
+/// An attribute's address as a URL parser reads it: without the controls and spaces around it, and without tabs and
+/// newlines anywhere (`da&#9;ta:` is `data:`)
+fn url_text(value: &str) -> Cow<'_, str> {
+    let value = value.trim_matches(|c: char| c <= ' ');
+    if value.contains(['\t', '\n', '\r']) {
+        Cow::Owned(value.chars().filter(|c| !matches!(c, '\t' | '\n' | '\r')).collect())
+    } else {
+        Cow::Borrowed(value)
+    }
+}
+
+/// The first five characters of an address ([`url_text`]), lowercased: its scheme when it is `data:` or `cid:`
+fn scheme_of(address: &str) -> String {
+    address.get(..5).map(str::to_ascii_lowercase).unwrap_or_default()
 }
 
 /// The sanitizer of a message shown in the reading pane: as [`builder`], but no picture of the message's text reaches
@@ -154,10 +162,11 @@ fn reading_builder(router: Arc<inline::Router>, remote: Arc<AtomicBool>) -> ammo
     let mut builder = mail_builder();
     builder.attribute_filter(move |element, attribute, value| {
         let img_src = element == "img" && attribute == "src";
+        let address = url_text(value);
         let loads = match attribute {
             "style" => css_loads_remote(value),
-            "background" => is_remote(value),
-            _ => img_src && is_remote(value),
+            "background" => is_remote(&address),
+            _ => img_src && is_remote(&address),
         };
         if loads {
             remote.store(true, Ordering::Relaxed);
@@ -167,10 +176,10 @@ fn reading_builder(router: Arc<inline::Router>, remote: Arc<AtomicBool>) -> ammo
         if attribute == "style" {
             return Some(css::clean(value));
         }
-        let route = match scheme_of(value).as_str() {
-            "data:" if img_src => router.data(value),
+        let route = match scheme_of(&address).as_str() {
+            "data:" if img_src => router.data(&address),
             "data:" => inline::Route::Drop,
-            scheme if scheme.starts_with("cid:") && (img_src || attribute == "background") => router.part(value),
+            scheme if scheme.starts_with("cid:") && (img_src || attribute == "background") => router.part(&address),
             _ => inline::Route::Keep,
         };
         match route {
@@ -943,6 +952,36 @@ mod tests {
         );
         assert!(out.contains("<img alt=\"Logo\">"), "{out}");
         assert!(out.contains("img-src 'none';"), "{out}");
+    }
+
+    /// An address is read as a URL parser reads it: a tab or a newline in its scheme, or controls before it, hide no
+    /// `data:` (or `cid:`) address from the sanitizer, on screen or in the editor
+    #[test]
+    fn a_data_address_is_found_however_it_is_written() {
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: b"\x89PNG",
+        };
+        let rendered = routed(
+            "<img src=\"da&#9;ta:image/gif;base64,R0lGODlh\"><img src=\"&#1;data:image/gif;base64,R0lGODlh\">\
+             <img src=\" c&#10;id:a@x\"><table background=\"da&#9;ta:image/png;base64,AAAA\"></table>\
+             <a href=\"da&#13;ta:text/html,x\">y</a>",
+            &[png],
+        );
+        let out = &rendered.document;
+        // the two data: pictures are one picture, the cid: one another
+        assert_eq!(rendered.inline.len(), 2, "{out}");
+        assert_eq!(out.matches(&format!("src=\"/pv/{TOKEN}-")).count(), 3, "{out}");
+        let squeezed: String = out.chars().filter(|c| !c.is_control()).collect();
+        assert!(!squeezed.to_ascii_lowercase().contains("data:"), "{out}");
+        assert!(!out.contains("background=") && !out.contains("href="), "{out}");
+        // the editor's sanitizer: a data: link is taken out, a cid: picture embedded
+        let edited = builder(&[png])
+            .clean("<a href=\"da&#9;ta:text/html,x\">y</a><img src=\"&#1;cid:a@x\">")
+            .to_string();
+        assert!(!edited.contains("href"), "{edited}");
+        assert!(edited.contains("src=\"data:image/png;base64,iVBORw==\""), "{edited}");
     }
 
     /// A `data:` picture of an img is routed as a `cid:` one is; anywhere else a `data:` address is taken out, and the
