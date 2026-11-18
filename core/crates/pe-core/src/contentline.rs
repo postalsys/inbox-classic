@@ -6,10 +6,11 @@
 pub(crate) type Line = (String, Vec<(String, String)>, String);
 
 /// The lines of a file with the folded ones unfolded (a line that starts with a space or tab goes on the one before),
-/// without empty ones
+/// without empty ones. CRLF, LF and a bare CR each end a line, so no line read from a file holds a CR that a writer
+/// could later turn into a line break of its own.
 pub(crate) fn unfold(text: &str) -> Vec<String> {
     let mut unfolded: Vec<String> = Vec::new();
-    for line in text.split('\n').map(|l| l.trim_end_matches('\r')) {
+    for line in text.split(['\r', '\n']) {
         match (line.strip_prefix([' ', '\t']), unfolded.last_mut()) {
             (Some(rest), Some(last)) => last.push_str(rest),
             _ if !line.is_empty() => unfolded.push(line.to_string()),
@@ -112,4 +113,22 @@ pub(crate) fn has_type(params: &[(String, String)], kind: &str) -> bool {
         key.eq_ignore_ascii_case(kind)
             || (key == "TYPE" && value.split(',').any(|v| v.trim().eq_ignore_ascii_case(kind)))
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_bare_cr_ends_a_line() {
+        assert_eq!(
+            unfold("A:1\r\n  more\rB:2\nC:3\r\r\n\tfolded\r"),
+            ["A:1 more", "B:2", "C:3folded"]
+        );
+        assert!(
+            lines("UID:1\rX-INJECTED:1")
+                .iter()
+                .all(|(_, _, value)| !value.contains('\r'))
+        );
+    }
 }

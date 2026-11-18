@@ -71,20 +71,45 @@ fn param_value(value: &str) -> String {
     }
 }
 
-/// The user's attendee line with `partstat`: its other parameters kept but RSVP, which a reply does not ask
-fn attendee_line(params: &[(String, String)], value: &str, partstat: &str) -> String {
-    let mut line = String::from("ATTENDEE");
-    for (name, param) in params {
-        if name != "PARTSTAT" && name != "RSVP" {
-            line.push_str(&format!(";{name}={}", param_value(param)));
-        }
-    }
-    line.push_str(&format!(";PARTSTAT={partstat}:{}", value.trim()));
-    line
+/// Whether a value read from an invitation can be written into the reply: no line break or other control character
+/// (but tab), which a writer could turn into a line of its own
+fn clean(value: &str) -> bool {
+    !value.chars().any(|c| c.is_control() && c != '\t')
 }
 
-/// The lines of the first event of `calendar`, unfolded and taken apart, each with its text as written
-fn first_event(calendar: &str) -> Vec<(Line, String)> {
+/// A parameter name as a content line may carry it: an iana-token or an x-name
+fn param_name(name: &str) -> bool {
+    !name.is_empty() && name.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+}
+
+/// A content line written from its parts, never copied: `name`, the parameters of a proper name (each value quoted
+/// when it must be), and `value`. None when the value or a parameter has a control character.
+fn content_line(name: &str, params: &[(String, String)], value: &str) -> Option<String> {
+    if !clean(value) || params.iter().any(|(_, v)| !clean(v)) {
+        return None;
+    }
+    let mut line = name.to_string();
+    for (key, param) in params.iter().filter(|(key, _)| param_name(key)) {
+        line.push_str(&format!(";{key}={}", param_value(param)));
+    }
+    line.push(':');
+    line.push_str(value.trim());
+    Some(line)
+}
+
+/// The user's attendee line with `partstat`: its other parameters kept but RSVP, which a reply does not ask
+fn attendee_line(params: &[(String, String)], value: &str, partstat: &str) -> Option<String> {
+    let mut kept: Vec<(String, String)> = params
+        .iter()
+        .filter(|(name, _)| name != "PARTSTAT" && name != "RSVP")
+        .cloned()
+        .collect();
+    kept.push(("PARTSTAT".into(), partstat.into()));
+    content_line("ATTENDEE", &kept, value)
+}
+
+/// The lines of the first event of `calendar`, unfolded and taken apart
+fn first_event(calendar: &str) -> Vec<Line> {
     let mut event = Vec::new();
     let mut inside = false;
     for text in unfold(calendar) {
@@ -96,7 +121,7 @@ fn first_event(calendar: &str) -> Vec<(Line, String)> {
             ("END", "VEVENT") if inside => return event,
             // a component inside the event (an alarm) is not the event's
             ("BEGIN", _) if inside => return event,
-            _ if inside => event.push((line, text)),
+            _ if inside => event.push(line),
             _ => {}
         }
     }
@@ -107,22 +132,33 @@ fn first_event(calendar: &str) -> Vec<(Line, String)> {
 pub(crate) fn event_uid(calendar: &str) -> Option<String> {
     first_event(calendar)
         .into_iter()
-        .find(|((name, _, _), _)| name == "UID")
-        .map(|((_, _, value), _)| value.trim().to_string())
+        .find(|(name, _, _)| name == "UID")
+        .map(|(_, _, value)| value.trim().to_string())
 }
 
+/// Why an invitation can not be answered, in a sentence for the agent
+const NO_UID: &str = "The invitation's event has no UID.";
+const NOT_INVITED: &str = "The invitation does not name this account's address as an attendee, or names no organizer.";
+const MALFORMED: &str = "The invitation's calendar file has control characters in what an answer repeats.";
+
 /// The answer `response` of the user (one of `own`, the account's addresses) to the first event of `calendar`, an
-/// invitation, written at `now`. None when the event names no UID, no organizer, or none of `own` as an attendee.
-pub(crate) fn reply(calendar: &str, own: &[String], response: Response, now: i64) -> Option<Reply> {
+/// invitation, written at `now`. Every line of it is written from the values read, never copied, so nothing of the
+/// invitation but those values reaches the organizer. Refused, with why, when the event names no UID, no organizer,
+/// or none of `own` as an attendee, or when a value the answer repeats has a control character.
+pub(crate) fn reply(calendar: &str, own: &[String], response: Response, now: i64) -> Result<Reply, &'static str> {
     let event = first_event(calendar);
-    let find = |name: &str| event.iter().find(|((n, _, _), _)| n == name);
-    let uid = find("UID")?.0.2.trim().to_string();
-    let organizer = find("ORGANIZER")?;
-    let attendee = event.iter().find_map(|((name, params, value), _)| {
-        let address = mailto_address(value);
-        let mine = name == "ATTENDEE" && own.iter().any(|o| o.eq_ignore_ascii_case(address));
-        mine.then(|| (attendee_line(params, value, response.partstat()), address.to_string()))
-    })?;
+    let find = |name: &str| event.iter().find(|(n, _, _)| n == name);
+    let uid = find("UID").ok_or(NO_UID)?.2.trim().to_string();
+    let (_, organizer_params, organizer) = find("ORGANIZER").ok_or(NOT_INVITED)?;
+    let (attendee_value, attendee) = event
+        .iter()
+        .find_map(|(name, params, value)| {
+            let address = mailto_address(value);
+            let mine = name == "ATTENDEE" && own.iter().any(|o| o.eq_ignore_ascii_case(address));
+            mine.then(|| (value, params, address.to_string()))
+        })
+        .map(|(value, params, address)| (attendee_line(params, value, response.partstat()), address))
+        .ok_or(NOT_INVITED)?;
     let stamp = pe_mime::date::DateTime::from_timestamp(now);
     let mut lines = vec![
         "BEGIN:VCALENDAR".to_string(),
@@ -130,7 +166,7 @@ pub(crate) fn reply(calendar: &str, own: &[String], response: Response, now: i64
         "VERSION:2.0".into(),
         "METHOD:REPLY".into(),
         "BEGIN:VEVENT".into(),
-        format!("UID:{uid}"),
+        content_line("UID", &[], &uid).ok_or(MALFORMED)?,
         format!(
             "DTSTAMP:{:04}{:02}{:02}T{:02}{:02}{:02}Z",
             stamp.year, stamp.month, stamp.day, stamp.hour, stamp.minute, stamp.second
@@ -138,22 +174,20 @@ pub(crate) fn reply(calendar: &str, own: &[String], response: Response, now: i64
     ];
     // as the invitation has them: which occurrence, which version, whose
     for name in ["RECURRENCE-ID", "SEQUENCE", "DTSTART", "DTEND"] {
-        lines.extend(
-            find(name)
-                .filter(|((_, params, _), _)| plain_time(params))
-                .map(|(_, text)| text.clone()),
-        );
+        if let Some((_, params, value)) = find(name).filter(|(_, params, _)| plain_time(params)) {
+            lines.push(content_line(name, params, value).ok_or(MALFORMED)?);
+        }
     }
-    lines.push(organizer.1.clone());
-    lines.push(attendee.0);
-    if let Some(((_, _, summary), _)) = find("SUMMARY") {
+    lines.push(content_line("ORGANIZER", organizer_params, organizer).ok_or(MALFORMED)?);
+    lines.push(attendee_value.ok_or(MALFORMED)?);
+    if let Some((_, _, summary)) = find("SUMMARY") {
         lines.push(format!("SUMMARY:{}", escape(&unescape(summary))));
     }
     lines.extend(["END:VEVENT".into(), "END:VCALENDAR".into()]);
-    Some(Reply {
+    Ok(Reply {
         uid,
-        organizer: mailto_address(&organizer.0.2).to_string(),
-        attendee: attendee.1,
+        organizer: mailto_address(organizer).to_string(),
+        attendee,
         ics: lines.iter().map(|line| folded(line)).collect(),
     })
 }
@@ -188,10 +222,7 @@ mod tests {
         );
         assert!(ics.contains("\r\nMETHOD:REPLY\r\n"), "{ics}");
         assert!(ics.contains("\r\nSEQUENCE:2\r\n"), "{ics}");
-        assert!(
-            ics.contains("ORGANIZER;CN=\"Ann Example\":mailto:ann@example.com"),
-            "{ics}"
-        );
+        assert!(ics.contains("ORGANIZER;CN=Ann Example:mailto:ann@example.com"), "{ics}");
         assert!(
             ics.contains("ATTENDEE;CN=Bob;ROLE=REQ-PARTICIPANT;PARTSTAT=DECLINED:mailto:Bob@Example.com"),
             "{ics}"
@@ -215,9 +246,113 @@ mod tests {
 
     #[test]
     fn no_answer_without_the_user_or_the_organizer() {
-        assert!(reply(INVITE, &["dave@example.com".into()], Response::Accept, 0).is_none());
+        assert_eq!(
+            reply(INVITE, &["dave@example.com".into()], Response::Accept, 0),
+            Err(NOT_INVITED)
+        );
         let no_organizer = INVITE.replace("ORGANIZER", "X-ORGANIZER");
-        assert!(reply(&no_organizer, &["bob@example.com".into()], Response::Accept, 0).is_none());
+        assert_eq!(
+            reply(&no_organizer, &["bob@example.com".into()], Response::Accept, 0),
+            Err(NOT_INVITED)
+        );
+        let no_uid = INVITE.replace("UID:1@", "X-UID:1@");
+        assert_eq!(
+            reply(&no_uid, &["bob@example.com".into()], Response::Accept, 0),
+            Err(NO_UID)
+        );
         assert_eq!(Response::Tentative.status(), "tentative");
+    }
+
+    /// The lines of a reply as they go: each line of the file (CRLF breaks, the folds undone), none of them holding a
+    /// CR or LF the message's writer could turn into a line of its own
+    fn sent_lines(reply: &Reply) -> Vec<String> {
+        let lines = crate::contentline::unfold(&reply.ics);
+        let unfolded = reply.ics.replace("\r\n ", "");
+        let raw: Vec<&str> = unfolded.trim_end_matches("\r\n").split("\r\n").collect();
+        assert_eq!(lines, raw, "{:?}", reply.ics);
+        assert!(lines.iter().all(|line| !line.contains(['\r', '\n'])));
+        lines
+    }
+
+    /// A bare CR in a line of the invitation the reply repeats (base64 lets a sender write one) never becomes a line
+    /// of the reply: the reply has exactly its own lines
+    #[test]
+    fn a_bare_cr_in_the_invitation_adds_no_line_to_the_reply() {
+        const PLAIN: &str = "BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:1@example.com\r\n\
+            RECURRENCE-ID:20260715T120000Z\r\nSEQUENCE:2\r\nDTEND:20260715T130000Z\r\n\
+            ORGANIZER:mailto:ann@example.com\r\nATTENDEE;PARTSTAT=NEEDS-ACTION:mailto:bob@example.com\r\n\
+            END:VEVENT\r\nEND:VCALENDAR\r\n";
+        let expected = [
+            "BEGIN:VCALENDAR",
+            "PRODID:-//Inbox Classic//EN",
+            "VERSION:2.0",
+            "METHOD:REPLY",
+            "BEGIN:VEVENT",
+            "UID:1@example.com",
+            "DTSTAMP:19700101T000000Z",
+            "RECURRENCE-ID:20260715T120000Z",
+            "SEQUENCE:2",
+            "DTEND:20260715T130000Z",
+            "ORGANIZER:mailto:ann@example.com",
+            "ATTENDEE;PARTSTAT=ACCEPTED:mailto:bob@example.com",
+            "END:VEVENT",
+            "END:VCALENDAR",
+        ];
+        let own = ["bob@example.com".to_string()];
+        assert_eq!(sent_lines(&reply(PLAIN, &own, Response::Accept, 0).unwrap()), expected);
+        let injected = "\rATTENDEE;PARTSTAT=DECLINED;DELEGATED-TO=\"mailto:eve@example.com\":mailto:carol@example.com\r\
+                        COMMENT:injected\rUID:2@example.com";
+        // the same, and the event ended early with another after it
+        let split = format!("{injected}\rEND:VEVENT\rBEGIN:VEVENT\rUID:3@example.com");
+        for line in [
+            "UID:1@example.com",
+            "RECURRENCE-ID:20260715T120000Z",
+            "SEQUENCE:2",
+            "DTEND:20260715T130000Z",
+            "ORGANIZER:mailto:ann@example.com",
+        ] {
+            let calendar = PLAIN.replace(&format!("{line}\r\n"), &format!("{line}{injected}\r\n"));
+            let answer = reply(&calendar, &own, Response::Accept, 0).unwrap();
+            assert_eq!(sent_lines(&answer), expected, "{line}");
+            assert!(
+                !answer.ics.contains("eve") && !answer.ics.contains("injected"),
+                "{line}"
+            );
+            assert_eq!(
+                (answer.uid.as_str(), answer.organizer.as_str()),
+                ("1@example.com", "ann@example.com")
+            );
+            // an event ended before the user's attendee is not answered; one ended after it is answered as it is
+            let calendar = PLAIN.replace(&format!("{line}\r\n"), &format!("{line}{split}\r\n"));
+            match reply(&calendar, &own, Response::Accept, 0) {
+                Ok(answer) => assert!(
+                    sent_lines(&answer).iter().all(|l| expected.contains(&l.as_str())),
+                    "{line}"
+                ),
+                Err(why) => assert_eq!(why, NOT_INVITED, "{line}"),
+            }
+        }
+    }
+
+    /// Any other control character in a value the reply repeats refuses the invitation
+    #[test]
+    fn control_characters_refuse_the_answer() {
+        let own = ["bob@example.com".to_string()];
+        for (from, to) in [
+            ("SEQUENCE:2", "SEQUENCE:2\u{b}X"),
+            ("UID:1@example.com", "UID:1@example.com\u{0}"),
+            ("CN=Bob;", "CN=B\u{c}ob;"),
+            ("mailto:ann@example.com", "mailto:ann@example.com\u{1b}"),
+        ] {
+            assert_eq!(
+                reply(&INVITE.replace(from, to), &own, Response::Accept, 0),
+                Err(MALFORMED),
+                "{to:?}"
+            );
+        }
+        // a parameter of a name no content line has is left out
+        let odd = INVITE.replace("CN=Bob;", "X\"A:B\"=1;CN=Bob;");
+        let reply = reply(&odd, &own, Response::Accept, 0).unwrap();
+        assert!(!reply.ics.contains("X\"A"), "{}", reply.ics);
     }
 }

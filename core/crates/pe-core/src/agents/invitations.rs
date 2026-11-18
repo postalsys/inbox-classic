@@ -146,11 +146,8 @@ impl Core {
             (account, source, crate::own_addresses(&store, account)?, name)
         };
         let invited = invited(&source)?;
-        let answer = crate::calendar_reply::reply(&invited.calendar, &own, reply.response, now()).ok_or_else(|| {
-            not_an_invitation(
-                "The invitation does not name this account's address as an attendee, or names no organizer.",
-            )
-        })?;
+        let answer =
+            crate::calendar_reply::reply(&invited.calendar, &own, reply.response, now()).map_err(not_an_invitation)?;
         let (outgoing, text) = reply_message(&invited, &answer, reply, &name, &own);
         let when = crate::calendar::when(&invited.event);
         let line = tr_args(
