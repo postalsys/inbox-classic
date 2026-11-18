@@ -875,7 +875,7 @@ fn icon_column(
             .and_downcast::<MessageRow>()
             .and_then(|row| row.with(|m| (icon(m), tip(m), m.dimmed())))
             .unwrap_or_default();
-        image.set_icon_name(name);
+        crate::icons::set(&image, name);
         image.set_tooltip_text(tip.as_deref());
         image.update_property(&[gtk::accessible::Property::Label(tip.as_deref().unwrap_or_default())]);
         set_class(&image, "dim-label", ignored);
@@ -1130,11 +1130,14 @@ fn subject_column() -> gtk::ColumnViewColumn {
         };
         expander.set_visible(true);
         cell.set_margin_start(if place.depth > 0 { REPLY_INDENT } else { 0 });
-        expander.set_icon_name(match (place.opens(), place.collapsed()) {
-            (false, _) => None,
-            (true, true) => Some("pan-end-symbolic"),
-            (true, false) => Some("pan-down-symbolic"),
-        });
+        crate::icons::set(
+            &expander,
+            match (place.opens(), place.collapsed()) {
+                (false, _) => None,
+                (true, true) => Some("pan-end-symbolic"),
+                (true, false) => Some("pan-down-symbolic"),
+            },
+        );
         if place.opens() {
             label.set_text(&format!("{subject} ({})", place.count));
         } else {

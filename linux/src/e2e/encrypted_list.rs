@@ -21,7 +21,7 @@ fn list_icons(name: &str) -> usize {
     let view: gtk::Widget = shell().main().list.view.clone().upcast();
     descendants::<gtk::Image>(&view)
         .iter()
-        .filter(|image| image.is_mapped() && image.icon_name().as_deref() == Some(name))
+        .filter(|image| image.is_mapped() && crate::icons::name_of(image).as_deref() == Some(name))
         .count()
 }
 
@@ -30,7 +30,7 @@ fn row_icons(name: &str) -> Vec<String> {
     let view: gtk::Widget = shell().main().list.rows_view.clone().upcast();
     descendants::<gtk::Image>(&view)
         .iter()
-        .filter(|image| image.is_mapped() && image.icon_name().as_deref() == Some(name))
+        .filter(|image| image.is_mapped() && crate::icons::name_of(image).as_deref() == Some(name))
         .map(|image| image.tooltip_text().map(|t| t.to_string()).unwrap_or_default())
         .collect()
 }

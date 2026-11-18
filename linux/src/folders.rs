@@ -634,9 +634,14 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>, arrows: Rc<Cell<bool>>) -> g
         folder
             .chain_property::<FolderItem>("markup")
             .bind(&label, "label", gtk::Widget::NONE);
+        // drawn from an icon kept for good, not looked up by its name (crate::icons says why)
         folder
             .chain_property::<FolderItem>("icon")
-            .bind(&icon, "icon-name", gtk::Widget::NONE);
+            .chain_closure::<gtk::IconPaintable>(glib::closure!(|_: Option<glib::Object>, name: String| {
+                let names: &[&str] = if name.is_empty() { &[] } else { &[name.as_str()] };
+                crate::icons::paintable(names, crate::icons::NORMAL_SIZE)
+            }))
+            .bind(&icon, "paintable", gtk::Widget::NONE);
         // a screen reader says the row's title, which names the account where the label alone does not
         folder
             .chain_property::<FolderItem>("title")
