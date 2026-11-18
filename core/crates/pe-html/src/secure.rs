@@ -113,7 +113,7 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; frame-src 'self'; \
-         img-src {images}; style-src 'unsafe-inline'; font-src data:\">\
+         img-src {images}; style-src 'unsafe-inline'; font-src 'none'\">\
          <meta name=\"color-scheme\" content=\"light dark\">\
          <style>\
          html{{background:Canvas}}body{{margin:6px 8px;font:10pt Arial,sans-serif}}\

@@ -14,6 +14,7 @@ use base64::engine::general_purpose::STANDARD;
 
 mod bounce;
 mod card;
+mod css;
 mod dark;
 mod editor;
 mod event;
@@ -161,6 +162,11 @@ fn reading_builder(router: Arc<inline::Router>, remote: Arc<AtomicBool>) -> ammo
         if loads {
             remote.store(true, Ordering::Relaxed);
         }
+        // the message's own CSS: no picture of its own (only those on the internet, which the CSP and the apps
+        // block until allowed), no font
+        if attribute == "style" {
+            return Some(css::clean(value));
+        }
         let route = match scheme_of(value).as_str() {
             "data:" if img_src => router.data(value),
             "data:" => inline::Route::Drop,
@@ -223,7 +229,7 @@ impl Embedder {
 /// frames, `meta` and `base`. Returns a body fragment, whose pictures of its own (`cid:`, `data:`) show nothing.
 pub fn sanitize(html: &str) -> String {
     let router = Arc::new(inline::Router::new(&[], None));
-    reading_builder(router, Arc::default()).clean(html).to_string()
+    css::clean_style_elements(&reading_builder(router, Arc::default()).clean(html).to_string())
 }
 
 /// Sanitizes `html` and wraps it in a complete document with a Content-Security-Policy, ready for the preview.
@@ -457,6 +463,8 @@ pub fn render_view_cards(
     let remote = Arc::new(AtomicBool::new(false));
     let router = Arc::new(inline::Router::new(images, cards.inline));
     let body = reading_builder(router.clone(), remote.clone()).clean(html).to_string();
+    // the style elements' text, which is no attribute: as the style attributes, without pictures or fonts of its own
+    let body = css::clean_style_elements(&body);
     let (pictures, embedded) = router.finish(images);
     // the size of each picture of the text where its img says none, so the text does not move when it comes
     let body = match cards.inline {
@@ -679,7 +687,7 @@ fn wrap_as(
     };
     let document = format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
+         <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src 'none'\">\
          <meta name=\"color-scheme\" content=\"{scheme}\">{base}\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
          div.pe-plain{{max-width:46em}}\
@@ -942,10 +950,49 @@ mod tests {
         assert!(!out.contains("PHA+") && !out.contains("background=\"data:"), "{out}");
         let csp = out[out.find(CSP_START).unwrap()..].split('>').next().unwrap();
         assert!(!csp.contains("data: ") && !csp.contains("data:;"), "{csp}");
-        assert!(csp.contains("font-src data:"), "{csp}");
+        assert!(csp.contains("font-src 'none'"), "{csp}");
         // sanitized alone: nothing to route it to, so nothing
         let out = sanitize("<img src=\"data:image/png;base64,AAAA\">");
         assert!(!out.contains("data:"), "{out}");
+    }
+
+    /// The message's own CSS names no picture or font of its own, on screen or in the printout (whose CSP allows
+    /// `data:` for the core's encodes), and no document allows a font from anywhere
+    #[test]
+    fn the_message_s_css_brings_no_picture_or_font_of_its_own() {
+        let html = "<style>@font-face{font-family:X;src:url(data:font/woff2;base64,AAAA)}\
+                    body{background:url(data:image/png;base64,AAAA)}li{list-style:u\\72l('d\\61ta:image/gif;base64,R0lG')}\
+                    h1{background:url(https://example.com/h.png)}</style>\
+                    <div style=\"background-image:url(data:image/png;base64,AAAA);border-image:url(&quot;data:x&quot;) 3\">x</div>\
+                    <p style=\"content:image-set('data:image/png;base64,AA' 1x)\">y</p><img src=\"cid:a@x\">";
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: b"\x89PNG",
+        };
+        let rendered = routed(html, &[png]);
+        let printed = print_document_with(&rendered.print.clone().unwrap(), &[]);
+        for document in [&rendered.document, &printed] {
+            let lower = document.to_ascii_lowercase();
+            let body = &lower[lower.find("<body>").unwrap()..];
+            // the only data: left is the printout's own placeholder for the picture not drawn
+            assert_eq!(
+                body.matches("data:").count(),
+                body.matches(&NOT_PRINTED_PICTURE.to_ascii_lowercase()).count(),
+                "{document}"
+            );
+            assert!(
+                !lower.contains("@font-face") && !lower.contains("@f\\6fnt"),
+                "{document}"
+            );
+            assert!(!body.contains("d\\61ta"), "{document}");
+            assert!(lower.contains("font-src 'none'"), "{document}");
+            assert!(!lower.contains("font-src data:"), "{document}");
+            // a picture on the internet stays, for Download Pictures
+            assert!(document.contains("url(https://example.com/h.png)"), "{document}");
+        }
+        assert!(rendered.remote_images);
+        assert!(rendered.document.contains("background:none"), "{}", rendered.document);
     }
 
     /// Past [`MAX_INLINE`] pictures (or [`MAX_INLINE_BYTES`] of them) the rest show nothing

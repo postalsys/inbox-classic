@@ -906,10 +906,18 @@ Decision 8: no picture a sender wrote into a message's text reaches a web view's
 - **WebKit content rules**: `^cid:` is no longer let through.
 - **The apps** serve the addresses as they serve previews (`pe_preview_ask`, `PreviewAnswered`); a view whose only
   pictures are in its text now has a `preview_token`, so its pictures are answered and ended as any.
-- **Not done**: the editor (a reply's or forward's quote, a draft opened again) still shows the quoted message's
-  `cid:` pictures as `data:` addresses of their bytes, as the message sent carries them; a `data:` picture in the
-  message's CSS still loads in a printout with pictures, whose CSP allows `data:` for the core's encodes; animated GIFs
-  show their first frame.
+- **The message's own CSS** (`pe-html/src/css.rs`, read as CSS reads it: comments, strings, escapes): every `url()`
+  that is not an address on the internet becomes `none` (a `data:` background, list marker, border image or
+  `content`), a string naming a `data:` address (`image-set("data:...")`) becomes empty, and `@font-face` rules are
+  taken out, in style attributes and style elements alike; what is taken out never leaves a `</` behind. So a
+  printout's `img-src data:` only ever serves the core's encodes. Pictures on the internet stay for Download
+  Pictures.
+- **Fonts**: every message document (the reading pane's, a message window's, a part's, the page of the parts, a
+  printout) has `font-src 'none'`: no sender's font reaches the system's font parsers. No document of the app relies
+  on a font of its own.
+- **Not done**: the compose editor (a reply's or forward's quote, a draft opened again) still shows the quoted
+  message's `cid:` pictures as `data:` addresses of their bytes, as the message sent carries them; animated GIFs show
+  their first frame.
 - Tests: `pe-html` (routing, limits, sizes, style text left alone, the CSP, the printout), `pe-preview` (SVG, the
   inline requests and their budget), `pe-core/src/previews/inline_tests.rs` (a newsletter with a PNG, a JPEG, a GIF,
   a broken PNG, a HEIC, an SVG and a `data:` PNG: every answer the core's encode, the placeholder for what is not
