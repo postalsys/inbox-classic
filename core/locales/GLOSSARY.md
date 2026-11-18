@@ -735,6 +735,14 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
 - Error quotations match current UI text; raw network diagnostics remain English, with a Hungarian explanation.
   TLS failure can concern more than certificates. Account removal also deletes queued outgoing messages locally;
   offline retry is not a delivery guarantee. Server ports and app passwords depend on provider/account support.
+- Download help describes "előzetes letöltés" and cached "üzenettartalom", not a hard limit on the whole database.
+  Neighbors are adjacent by date in the same folder; the selected mode and size limit apply. Drafts and messages
+  opened during the current run are spared from cache eviction. Large messages may show text first, not always.
+- Watched conversations still obey notification settings and foreground suppression. Rule help uses "kezelés" or
+  "feldolgozás", reserving "rendezés" for list sorting. Rules do not delete permanently when Trash is absent.
+- Unsubscribe confirmation means the request was accepted, not that future mail is guaranteed to stop. Direct
+  requests require confirmation and provider-validated signatures covering the unsubscribe headers. Bounce analysis
+  happens locally; a delay notice describes the server's report, not a guarantee of later delivery.
 
 ### Nederlands (nl)
 
