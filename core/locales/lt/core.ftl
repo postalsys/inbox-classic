@@ -8,393 +8,249 @@ messages = { $count ->
    *[other] { $count } laiškų
 }
 # the separator of decimals in sizes: 2,4 MB
-# review: new
 decimal-separator = ,
-# review: new
 size-bytes = { $count ->
     [one] { $count } baitas
     [few] { $count } baitai
    *[other] { $count } baitų
 }
-# review: new
 size-kb = { $size } KB
-# review: new
 size-mb = { $size } MB
-# review: new
 size-gb = { $size } GB
-# review: new
 send-delay-off = Išjungta
-# review: new
 send-delay-seconds = { $count ->
     [one] { $count } sekundė
     [few] { $count } sekundės
    *[other] { $count } sekundžių
 }
 # the status bar: "12 laiškų, neskaitytų: 3"
-# review: new
 list-counts = { $messages }, neskaitytų: { $unread }
-# review: new
 list-counts-selected = { $messages }, neskaitytų: { $unread }, pažymėtų: { $selected }
 # the status bar while searching: "Rasta: 12, neskaitytų: 3"
-# review: new
 list-counts-found = Rasta: { $found }, neskaitytų: { $unread }
-# review: new
 list-counts-found-selected = Rasta: { $found }, neskaitytų: { $unread }, pažymėtų: { $selected }
-# review: new
 list-counts-none = Laiškų nerasta
 
 ## Special folders, as Outlook names them
 
-# review: new
 folder-inbox = Gauti laiškai
-# review: new
 folder-sent = Išsiųsti laiškai
-# review: new
 folder-deleted = Panaikinti laiškai
-# review: new
 folder-drafts = Juodraščiai
-# review: new
 folder-junk = Nepageidaujami laiškai
-# review: new
 folder-archive = Archyvas
 
 ## The reading pane
 
-# review: new
 reader-no-message = Nepažymėtas joks laiškas.
-# review: new
 reader-downloading = Atsisiunčiamas laiškas…
-# review: new
 reader-downloading-detail = Laiškas bus parodytas čia, kai atsisiuntimas baigsis.
-# review: new
 reader-downloading-size = Laiško dydis: { $size }. Jis bus parodytas čia, kai bus atsisiųstas.
-# review: new
 reader-failed = Laiško atsisiųsti nepavyko
-# review: new
-reader-failed-network = Nepavyko pasiekti pašto serverio ({ $reason }).
-# review: new
-reader-failed-sign-in = Pašto serveris nepriėmė prisijungimo ({ $reason }). Patikrinkite slaptažodį arba vėl prisijunkite per Failas > Paskyros.
-# review: new
-reader-failed-security = Nepavyko apsaugoti ryšio su pašto serveriu ({ $reason }).
-# review: new
+reader-failed-network = Nepavyko užmegzti ryšio su pašto serveriu arba ryšys nutrūko ({ $reason }).
+reader-failed-sign-in = Pašto serveris atmetė prisijungimą ({ $reason }). Patikrinkite slaptažodį paskyros ypatybėse arba prisijunkite iš naujo lange „Paskyros“.
+reader-failed-security = Su pašto serveriu nepavyko užmegzti saugaus ryšio ({ $reason }).
 reader-failed-other = Pašto serveris atsakė: { $reason }.
-# review: new
 reader-retry-note = Bus bandoma dar kartą, kai paskyra vėl prisijungs.
-# review: new
 reader-unreadable = Šio laiško parodyti negalima: { $error }
-# review: new
 message-source-title = Laiško šaltinis: { $subject }
-# review: new
 message-source-untitled = Laiško šaltinis
 
 ## Printing a message, and the header of a message quoted in a reply or forward
 
-# review: new
 header-from = Nuo
-# review: new
 header-date = Data
-# review: new
 header-to = Kam
-# review: new
 header-cc = Kopija
-# review: new
 header-sent = Išsiųsta
-# review: new
 header-subject = Tema
-# review: new
 header-security = Sauga
-# review: new
 header-part = { $number } dalis
-# review: new
 quote-original = ----- Pradinis laiškas -----
-# review: new
 fold-show-earlier = Rodyti ankstesnius laiškus
 
 ## Bounces: the card at the top of a notice that a message was not delivered
 
-# review: new
 bounce-failed = Jūsų laiškas nebuvo pristatytas
-# review: new
 bounce-delayed = Jūsų laiškas dar nepristatytas
-# review: new
 bounce-delayed-note = Jūsų pašto serveris vis dar bando jį pristatyti. Siųsti jo dar kartą nereikia.
 # the link to the message the notice is about, in Sent Items or another folder
-# review: new
 bounce-show-message = Rodyti nepristatytą laišką
 # the link of a delay's card to the message that is still on its way
-# review: new
 bounce-show-delayed = Rodyti vėluojantį laišką
-# review: new
 bounce-what-to-do = Ką galite padaryti:
 # what to do about a recipient the message is still on its way to: in the card of a delay, and in the card of a failure
-# review: new
 bounce-delayed-do = Kol kas nieko. Jei laiško vis tiek nepavyks pristatyti, gausite dar vieną pranešimą.
-# review: new
 bounce-delayed-row-do = Kol kas nieko. Jūsų pašto serveris vis dar bando jį pristatyti, o jei nepavyks, gausite dar vieną pranešimą.
 # folds the receiving server's own words
-# review: new
 bounce-details = Išsami informacija
 # a recipient the notice does not name
-# review: new
 bounce-someone = Gavėjas
 # in Details: the server that refused the message, the status code it gave, and the server that wrote the notice
-# review: new
 bounce-server = Serveris: { $server }
-# review: new
 bounce-status = Būsena: { $status }
-# review: new
 bounce-reported-by = Pranešė: { $server }
-# review: new
 bounce-retry-minutes = Gaunantysis serveris paprašė prieš kitą bandymą palaukti { $count ->
     [one] { $count } minutę
     [few] { $count } minutes
    *[other] { $count } minučių
 }.
-# review: new
 bounce-retry-hours = Gaunantysis serveris paprašė prieš kitą bandymą palaukti { $count ->
     [one] { $count } valandą
     [few] { $count } valandas
    *[other] { $count } valandų
 }.
 # the names of the blocklists, "Spamhaus ZEN, Barracuda"
-# review: new
-bounce-blocklist = Juodasis sąrašas: { $lists }
-# review: new
+bounce-blocklist = Juodieji sąrašai: { $lists }
 bounce-user-unknown = Tokio adreso nėra
-# review: new
 bounce-user-unknown-why = Gaunančiajame serveryje nėra pašto dėžutės šiuo adresu. Adresas gali būti parašytas su klaida, arba žmogus juo nebesinaudoja.
-# review: new
 bounce-user-unknown-do = Patikrinkite, ar adresas parašytas teisingai, arba paklauskite žmogaus, kokiu adresu jis dabar naudojasi.
-# review: new
 bounce-invalid-address = Adresas netinkamas
-# review: new
 bounce-invalid-address-why = Adresas parašytas taip, kad juo negalima išsiųsti laiško.
-# review: new
 bounce-invalid-address-do = Ieškokite rašybos klaidų, pavyzdžiui, tarpo, trūkstamos raidės ar tuščios vietos po @.
-# review: new
 bounce-mailbox-disabled = Pašto dėžutė uždaryta
-# review: new
 bounce-mailbox-disabled-why = Adresas yra, bet jo pašto dėžutė išjungta arba nebenaudojama.
-# review: new
 bounce-mailbox-disabled-do = Susisiekite su žmogumi kitu būdu ir paklauskite, kokiu adresu jis dabar naudojasi.
-# review: new
 bounce-mailbox-full = Pašto dėžutė pilna
-# review: new
 bounce-mailbox-full-why = Gavėjo pašto dėžutėje nebėra vietos naujiems laiškams.
-# review: new
-bounce-mailbox-full-do = Išsiųskite laišką dar kartą po kelių dienų arba praneškite žmogui kitu būdu. Pirmiausia atmetami dideli priedai.
-# review: new
+bounce-mailbox-full-do = Išsiųskite laišką dar kartą po kelių dienų arba praneškite gavėjui kitu būdu. Jei laiške yra didelių priedų, pabandykite siųsti be jų.
 bounce-spam-blocked = Atmestas kaip brukalas
-# review: new
 bounce-spam-blocked-why = Gaunantysis serveris palaikė laišką brukalu.
-# review: new
 bounce-spam-blocked-do = Išsiųskite laišką dar kartą be to, kas atrodo kaip brukalas, pavyzdžiui, be daugybės nuorodų, sutrumpintų nuorodų ar didelio priedo. Jei tai kartojasi, kreipkitės į savo pašto paslaugų teikėją.
-# review: new
 bounce-virus-detected = Atmestas dėl viruso
-# review: new
-bounce-virus-detected-why = Gaunantysis serveris laiške arba jo prieduose rado virusą ar kitą kenksmingą turinį.
-# review: new
+bounce-virus-detected-why = Serveris pranešė, kad laiške arba jo prieduose yra virusas ar kitas kenksmingas turinys.
 bounce-virus-detected-do = Patikrinkite priedus antivirusine programa. Kai kurie serveriai atmeta visas programas ir archyvus, todėl tokiais failais dalinkitės nuoroda.
-# review: new
 bounce-ip-blocklisted = Jūsų pašto serveris yra juodajame sąraše
-# review: new
 bounce-ip-blocklisted-why = Gaunantysis serveris nepriima laiškų iš serverio, kuris siuntė jūsiškį, nes to serverio adresas yra juodajame sąraše.
-# review: new
 bounce-ip-blocklisted-do = Problema ne laiške. Persiųskite šį pranešimą savo pašto paslaugų teikėjui ir paprašykite, kad serveris būtų išbrauktas iš sąrašo.
-# review: new
 bounce-domain-blocklisted = Domenas yra juodajame sąraše
-# review: new
 bounce-domain-blocklisted-why = Gaunantysis serveris atmeta laišką, nes jūsų adreso domenas arba domenas iš laiško nuorodų yra juodajame sąraše.
-# review: new
 bounce-domain-blocklisted-do = Jei laiške yra nuorodų, pabandykite išsiųsti jį be jų. Kitu atveju persiųskite šį pranešimą tam, kas tvarko jūsų domeno paštą.
-# review: new
 bounce-policy-blocked = Atmestas pagal gaunančiojo serverio taisykles
-# review: new
 bounce-policy-blocked-why = Gaunančiojo serverio taisyklės šio laiško nepraleidžia, pavyzdžiui, dėl jo dydžio, priedų ar siuntėjo.
-# review: new
-bounce-policy-blocked-do = Priežastis dažnai nurodyta paties serverio žodžiuose, skiltyje „Išsami informacija“. Paklauskite gavėjo, ar jis gali priimti tokius laiškus.
-# review: new
+bounce-policy-blocked-do = Serverio pateikta informacija skiltyje „Išsami informacija“ dažnai padeda nustatyti priežastį. Paklauskite gavėjo, ar jis gali priimti tokius laiškus.
 bounce-geo-blocked = Atmestas dėl kilmės vietos
-# review: new
 bounce-geo-blocked-why = Gaunantysis serveris nepriima laiškų iš šalies ar tinklo, kuriame yra jūsų pašto serveris.
-# review: new
 bounce-geo-blocked-do = Susisiekite su žmogumi kitu būdu arba kreipkitės į savo pašto paslaugų teikėją.
-# review: new
 bounce-relay-denied = Serveris laiško neperdavė
-# review: new
 bounce-relay-denied-why = Serveris atsisakė perduoti laišką toliau, dažnai todėl, kad jis išsiųstas neprisijungus arba per serverį, kuris šio gavėjo neaptarnauja.
-# review: new
-bounce-relay-denied-do = Patikrinkite paskyros siunčiamųjų laiškų serverį per Failas > Paskyros ir ar jis prisijungia.
-# review: new
+bounce-relay-denied-do = Atverkite paskyros ypatybes. Patikrinkite siunčiamųjų laiškų serverio nustatymus ir prisijungimo duomenis.
 bounce-auth-failure = Jūsų siuntėjo adreso patvirtinti nepavyko
-# review: new
 bounce-auth-failure-why = Gaunantysis serveris negalėjo patvirtinti, kad laiškas tikrai atėjo iš jūsų domeno (SPF, DKIM arba DMARC).
-# review: new
 bounce-auth-failure-do = Persiųskite šį pranešimą tam, kas tvarko jūsų domeno paštą: reikia pataisyti jo nustatymus. Kol kas gali padėti siuntimas per paties paslaugų teikėjo serverį.
-# review: new
 bounce-rate-limited = Per daug laiškų vienu metu
-# review: new
 bounce-rate-limited-why = Gaunantysis serveris kol kas priima mažiau laiškų iš jūsų pašto serverio.
-# review: new
 bounce-rate-limited-do = Palaukite ir išsiųskite laišką dar kartą. Rašydami daugeliui žmonių, siųskite mažesnėmis grupėmis.
-# review: new
 bounce-greylisting = Trumpam sulaikytas
-# review: new
 bounce-greylisting-why = Gaunantysis serveris prašo nežinomų siuntėjų pabandyti šiek tiek vėliau. Tai įprasta apsauga nuo brukalo.
-# review: new
-bounce-greylisting-do = Nieko. Pašto serveriai bando dar kartą patys, ir laiškas paprastai pristatomas per valandą.
-# review: new
+bounce-greylisting-do = Jei laiškas dar laukia pristatymo, pašto serveris bandys jį pristatyti dar kartą. Jei gavote galutinį nepristatymo pranešimą, pabandykite išsiųsti laišką vėliau.
 bounce-server-error = Gaunančiajame serveryje kilo problema
-# review: new
 bounce-server-error-why = Gaunančiojo serverio nepavyko pasiekti arba jis negalėjo priimti laiško dėl savo paties problemos.
-# review: new
 bounce-server-error-do = Išsiųskite laišką vėliau. Jei vis nepavyksta, patikrinkite, ar adreso dalyje po @ nėra rašybos klaidų.
-# review: new
 bounce-unknown = Nepristatytas
-# review: new
 bounce-unknown-why = Pranešime aiškiai nenurodyta, kodėl.
-# review: new
-bounce-unknown-do = Daugiau gali paaiškinti paties serverio žodžiai, skiltyje „Išsami informacija“. Jei jie nepadeda, persiųskite šį pranešimą savo pašto paslaugų teikėjui.
+bounce-unknown-do = Daugiau informacijos gali būti skiltyje „Išsami informacija“. Jei ji nepadeda, persiųskite šį pranešimą savo pašto paslaugų teikėjui.
 
 ## Several messages selected
 
-# review: new
 selection-title = { $count ->
     [one] Pažymėtas { $count } laiškas
     [few] Pažymėti { $count } laiškai
    *[other] Pažymėta { $count } laiškų
 }
-# review: new
 selection-unread = { $count ->
     [one] { $count } neskaitytas
     [few] { $count } neskaityti
    *[other] { $count } neskaitytų
 }
-# review: new
 selection-flagged = { $count ->
     [one] { $count } su vėliavėle
     [few] { $count } su vėliavėlėmis
    *[other] { $count } su vėliavėlėmis
 }
-# review: new
 delete-for-good-one = Šis laiškas bus panaikintas visam laikui. Panaikinti jį?
-# review: new
 delete-for-good-all = Visam laikui bus panaikinta laiškų: { $count }. Panaikinti juos?
-# review: new
 delete-for-good-some = Visam laikui bus panaikinta laiškų: { $count } iš { $total }. Panaikinti laiškus?
-# review: new
 done-read = { $count ->
    *[other] Pažymėta kaip skaityti: { $messages }
 }
-# review: new
 done-unread = { $count ->
    *[other] Pažymėta kaip neskaityti: { $messages }
 }
-# review: new
 done-flagged = { $count ->
    *[other] Pažymėta vėliavėle: { $messages }
 }
-# review: new
 done-unflagged = Vėliavėlė nuimta: { $messages }
-# review: new
 done-deleted-for-good = { $count ->
    *[other] Visam laikui panaikinta: { $messages }
 }
-# review: new
 done-archived = { $count ->
    *[other] Archyvuota: { $messages }
 }
-# review: new
 done-moved = { $count ->
    *[other] Perkelta: { $messages } (paskirtis: { $folder })
 }
-# review: new
 done-copied = { $count ->
    *[other] Nukopijuota: { $messages } (paskirtis: { $folder })
 }
-# review: new
 done-moving = { $count ->
    *[other] Perkeliama: { $messages } (paskirtis: { $folder })...
 }
-# review: new
 done-copying = { $count ->
    *[other] Kopijuojama: { $messages } (paskirtis: { $folder })...
 }
-# review: new
 done-moved-back = { $count ->
    *[other] Grąžinta: { $messages } (paskirtis: { $folder })
 }
 # the status bar after Watch Conversation and Ignore Conversation, and after either again on a marked one
-# review: new
 done-watched = { $count ->
-    [one] Pokalbis stebimas
+    [one] Stebimas { $count } pokalbis
     [few] Stebimi { $count } pokalbiai
-   *[other] Stebima pokalbių: { $count }
+   *[other] Stebima { $count } pokalbių
 }
-# review: new
 done-unwatched = { $count ->
-    [one] Pokalbis nebestebimas
+    [one] Nebestebimas { $count } pokalbis
     [few] Nebestebimi { $count } pokalbiai
-   *[other] Nebestebima pokalbių: { $count }
+   *[other] Nebestebima { $count } pokalbių
 }
-# review: new
 done-ignored = { $count ->
-    [one] Pokalbis ignoruojamas
+    [one] Ignoruojamas { $count } pokalbis
     [few] Ignoruojami { $count } pokalbiai
-   *[other] Ignoruojama pokalbių: { $count }
+   *[other] Ignoruojama { $count } pokalbių
 }
-# review: new
 done-unignored = { $count ->
-    [one] Pokalbis nebeignoruojamas
+    [one] Nebeignoruojamas { $count } pokalbis
     [few] Nebeignoruojami { $count } pokalbiai
-   *[other] Nebeignoruojama pokalbių: { $count }
+   *[other] Nebeignoruojama { $count } pokalbių
 }
-# review: new
 their-folders = jų aplankai
-# review: new
 undo-move = Atšaukti perkėlimą
-# review: new
 undo-delete = Atšaukti panaikinimą
-# review: new
 undo-archive = Atšaukti archyvavimą
-# review: new
 undo-junk = Atšaukti žymėjimą nepageidaujamu
-# review: new
 undo-not-junk = Atšaukti žymėjimą pageidaujamu
-# review: new
 undo-send = Atšaukti siuntimą
-# review: new
 nothing-to-undo = Nėra ko atšaukti.
-# review: new
 messages-gone = Šių laiškų nebėra.
 # A non-selectable IMAP folder cannot contain messages; this does not mean it is empty.
-# review: new
 folder-holds-no-messages = Šiame aplanke negali būti laiškų.
-# review: new
 not-archived-here = Šiame aplanke esančių laiškų archyvuoti negalima.
-# review: new
 not-emptied-here = Išvalyti galima tik aplankus „Panaikinti laiškai“ ir „Nepageidaujami laiškai“.
-# review: new
 next-unread-question = Aplanke „{ $folder }“ neskaitytų laiškų nebėra.
 
-    Pereiti į aplanką „{ $next }“, kitą aplanką su neskaitytais laiškais?
-# review: new
+    Pereiti į kitą aplanką su neskaitytais laiškais: „{ $next }“?
 no-unread-left = Neskaitytų laiškų nebeliko.
-# review: new
 empty-question = { $count ->
-    [one] Išvalyti aplanką „{ $folder }“?
+    [1] Išvalyti aplanką „{ $folder }“?
 
         Jame esantis laiškas bus panaikintas visam laikui. Jo atkurti nebus galima.
    *[other] Išvalyti aplanką „{ $folder }“?
 
-        Jame esantys laiškai ({ $messages }) bus panaikinti visam laikui. Jų atkurti nebus galima.
+        Visam laikui bus panaikinta: { $messages }. Šių laiškų atkurti nebus galima.
 }
-# review: new
 no-junk-folder = Šioje paskyroje nėra aplanko „Nepageidaujami laiškai“, į kurį būtų galima perkelti laiškus.
-# review: new
 no-inbox-folder = Šioje paskyroje nėra aplanko „Gauti laiškai“, į kurį būtų galima perkelti laiškus.
 # the status bar after a flag in a colour: "2 laiškai: pažymėta mėlyna vėliavėle"
-# review: new
 done-flagged-color = { $messages }: pažymėta { $color ->
     [red] raudona vėliavėle
     [orange] oranžine vėliavėle
@@ -405,7 +261,6 @@ done-flagged-color = { $messages }: pažymėta { $color ->
    *[gray] pilka vėliavėle
 }
 # the Flag menu: the colours of Apple Mail's flags
-# review: new
 flag-color = { $color ->
     [red] Raudona
     [orange] Oranžinė
@@ -418,175 +273,116 @@ flag-color = { $color ->
 
 ## The Move and Copy window
 
-# review: new
 move-window-title-move = { $count ->
-    [one] Perkelti laišką
-   *[other] Perkelti laiškus ({ $count })
+    [one] Perkelti { $count } laišką
+    [few] Perkelti { $count } laiškus
+   *[other] Perkelti { $count } laiškų
 }
-# review: new
 move-window-title-copy = { $count ->
-    [one] Kopijuoti laišką
-   *[other] Kopijuoti laiškus ({ $count })
+    [one] Kopijuoti { $count } laišką
+    [few] Kopijuoti { $count } laiškus
+   *[other] Kopijuoti { $count } laiškų
 }
-# review: new
 move-window-prompt-move = { $count ->
-    [one] Perkelti pažymėtą laišką į:
-   *[other] Perkelti pažymėtus laiškus ({ $count }) į:
+    [one] Perkelti { $count } pažymėtą laišką į:
+    [few] Perkelti { $count } pažymėtus laiškus į:
+   *[other] Perkelti { $count } pažymėtų laiškų į:
 }
-# review: new
 move-window-prompt-copy = { $count ->
-    [one] Kopijuoti pažymėtą laišką į:
-   *[other] Kopijuoti pažymėtus laiškus ({ $count }) į:
+    [one] Kopijuoti { $count } pažymėtą laišką į:
+    [few] Kopijuoti { $count } pažymėtus laiškus į:
+   *[other] Kopijuoti { $count } pažymėtų laiškų į:
 }
 # the folders used last, over the folder tree
-# review: new
 targets-recent = Neseniai naudoti
 # the folder the messages are in, which can not be chosen
-# review: new
 target-current = { $folder } (dabartinis)
 # a folder used last, with its account when there are several: "Archyvas (Darbas)"
-# review: new
 target-recent = { $folder } ({ $account })
 
 ## Moving and copying to another account
 
-# review: new
-transfer-moving = Perkeliama { $done } iš { $messages } (paskirtis: { $folder })...
-# review: new
-transfer-copying = Kopijuojama { $done } iš { $messages } (paskirtis: { $folder })...
-# review: new
+transfer-moving = Perkeliamas laiškas Nr. { $done } (iš viso: { $messages }; paskirtis: { $folder })...
+transfer-copying = Kopijuojamas laiškas Nr. { $done } (iš viso: { $messages }; paskirtis: { $folder })...
 transfer-another-account = kita paskyra
-# review: new
 transfer-folder-gone = paskirties aplanko nebėra
-# review: new
 transfer-not-on-server = laiško serveryje nebėra
-# review: new
 transfer-not-moved = { $count ->
    *[other] Nepavyko perkelti į kitą paskyrą: { $messages } ({ $reason })
 }
-# review: new
 transfer-not-copied = { $count ->
    *[other] Nepavyko nukopijuoti į kitą paskyrą: { $messages } ({ $reason })
 }
-# review: new
 transfer-none-moved = Nepavyko perkelti nė vieno laiško
-# review: new
 transfer-none-copied = Nepavyko nukopijuoti nė vieno laiško
 
 ## Messages as files
 
-# review: new
 export-not-in-time = laiško nepavyko laiku atsisiųsti
-# review: new
-export-not-saved = Nepavyko įrašyti { $failed } iš { $messages } ({ $problems })
-# review: new
+export-not-saved = Nepavyko įrašyti: { $failed }. Iš viso: { $messages }. Priežastys: { $problems }
 export-not-attached = laiškų nepavyko pridėti: { $error }
 # the status bar after Save As with several: "Įrašyta: 3 laiškai (paskirtis: Darbalaukis)"
-# review: new
 saved-to = { $count ->
    *[other] Įrašyta: { $messages } (paskirtis: { $folder })
 }
-# review: new
-download-progress = Atsisiunčiama { $done } iš { $total }
-# review: new
-download-done = Atsisiųsta { $size }
-# review: new
+download-progress = Atsisiunčiama: { $done } (iš viso: { $total })
+download-done = Atsisiųsta: { $size }
 downloading-messages = { $count ->
    *[other] Atsisiunčiama: { $messages }...
 }
 # the status bar after files are dropped on a folder: "Įdėta: 3 laiškai (paskirtis: Archyvas)"
-# review: new
 import-put = { $count ->
-   *[other] Įdėta: { $messages } (paskirtis: { $folder })
+   *[other] Importuojama: { $messages } (paskirtis: { $folder })
 }
-# review: new
-import-not-put = Šie failai nebuvo įdėti į aplanką:
+import-not-put = Šių failų importuoti nepavyko:
 
     { $problems }
 
 ## Problems the windows show
 
-# review: new
 error-store = vietinė saugykla: { $error }
-# review: new
 error-not-found = nerasta
-# review: new
 error-closed = baigiamas darbas
-# review: new
-error-other-account = naršyklėje prisijungta kaip { $email }, o ne prie šios paskyros
+error-other-account = naršyklėje prisijungta prie kitos paskyros: { $email }
 # a password or sign-in the mail server refused, with the server's words
-# review: new
-failure-authentication = serveris nepriėmė prisijungimo ({ $reason })
+failure-authentication = serveris atmetė prisijungimą ({ $reason })
 # the mail server could not be reached or the connection broke, with the reason
-# review: new
-failure-network = nepavyko prisijungti prie serverio ({ $reason })
-# review: new
-error-in-use = jos negalima pašalinti, kol per ją jungiasi paskyros: { $accounts }
-# review: new
+failure-network = nepavyko užmegzti ryšio su serveriu arba ryšys nutrūko ({ $reason })
+error-in-use = prisijungimo programos pašalinti negalima, kol ją naudoja šios paskyros: { $accounts }
 error-turned-off = ši prisijungimo programa naujoms paskyroms išjungta
-# review: new
 error-folder-name = aplanko pavadinimas turi būti nuo 1 iki 200 simbolių ilgio ir negali turėti valdymo simbolių
-# review: new
 error-folder-separator = šiame serveryje aplanko pavadinime negali būti „{ $separator }“
-# review: new
 error-folder-special = aplanko „Gauti laiškai“ ir specialiųjų aplankų pervardyti ar panaikinti negalima
-# review: new
-error-no-recipients = laiškas neturi gavėjų
-# review: new
+error-no-recipients = nenurodyti laiško gavėjai
 error-bad-address = „{ $address }“ nėra el. pašto adresas
-# review: new
 error-not-own-address = { $address } nėra vienas iš šios paskyros siuntėjo adresų. Įtraukite jį į lauką „Kiti adresai, iš kurių siunčiate“ paskyros ypatybėse.
-# review: new
 rule-query-refused = Taisyklės negali filtruoti pagal aplanką ar datą ({ $words }).
-# review: new
 rule-no-query = Įveskite gaunamų laiškų paieškos kriterijus.
-# review: new
 rule-no-action = Pasirinkite bent vieną taisyklės veiksmą.
-# review: new
-error-attachment = Nepavyko perskaityti { $path }: { $error }
-# review: new
+error-attachment = Nepavyko perskaityti failo „{ $path }“: { $error }
 error-no-drafts = paskyroje nėra aplanko „Juodraščiai“, į kurį būtų galima įrašyti laišką
-# review: new
 error-draft-attachment = nepavyko išsaugoti juodraščio priedo: { $error }
-# review: new
 error-password-not-saved = nepavyko įrašyti slaptažodžio kitam paleidimui: { $error }
-# review: new
 error-sign-in-not-saved = nepavyko įrašyti naujų prisijungimo duomenų kitam paleidimui: { $error }
-# review: new
-error-import-unreadable = Negalima perskaityti { $path }: { $error }
-# review: new
-error-import-too-large = { $path } yra didesnis nei 50 MB
-# review: new
-error-import-not-mail = { $path } nėra el. laiškas
-# review: new
-error-list-answered = adresatų sąrašo serveris grąžino būseną { $status }
-# review: new
+error-import-unreadable = Nepavyko perskaityti failo „{ $path }“: { $error }
+error-import-too-large = Failas „{ $path }“ yra didesnis nei 50 MB
+error-import-not-mail = Failas „{ $path }“ nėra el. laiškas
+error-list-answered = adresatų sąrašo serveris atsakė būsenos kodu { $status }
 error-not-built = laiško nepavyko sudaryti
-# review: new
-error-outbox-waits = { $count ->
-    [one] { $count } laiškas laukia aplanke „Siunčiami laiškai“ ir bus išsiųstas kito siuntimo ir gavimo metu
-    [few] { $count } laiškai laukia aplanke „Siunčiami laiškai“ ir bus išsiųsti kito siuntimo ir gavimo metu
-   *[other] { $count } laiškų laukia aplanke „Siunčiami laiškai“ ir bus išsiųsta kito siuntimo ir gavimo metu
-}
-# review: new
+error-outbox-waits = aplanke „Siunčiami laiškai“ laukia { $count ->
+    [one] { $count } laiškas
+    [few] { $count } laiškai
+   *[other] { $count } laiškų
+}. Kitą kartą siunčiant ir gaunant paštą bus bandoma siųsti dar kartą
 error-draft-not-removed = ankstesnio laiško juodraščio nepavyko pašalinti iš aplanko „Juodraščiai“: { $reason }
-# review: new
 error-sent-but = laiškas išsiųstas, bet { $problem }
-# review: new
 error-sent-still-in-outbox = jis vis dar yra aplanke „Siunčiami laiškai“: { $error }
-# review: new
 error-sent-no-copy = nepavyko įrašyti kopijos į aplanką „Išsiųsti laiškai“: { $reason }
-# review: new
 error-no-password = šiai paskyrai nėra slaptažodžio
-# review: new
 error-no-sign-in = šiai paskyrai nėra prisijungimo duomenų
-# review: new
-error-provider-missing = ši versija negali prisijungti prie { $provider }: gal jos prisijungimo programa pašalinta?
-# review: new
+error-provider-missing = nepavyko rasti prisijungimo programos šiam teikėjui: { $provider }. Patikrinkite, ar prisijungimo programa nepašalinta
 error-provider-servers = šios paskyros serveriai nesutampa su jos prisijungimo programos serveriais
-# review: new
 error-app-scopes = { $reason }. Pašto serveris nepriėmė prisijungimo programos prieigos rakto: patikrinkite, ar programos teisės (scopes) suteikia prieigą prie pašto
-# review: new
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
