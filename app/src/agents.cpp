@@ -794,14 +794,16 @@ void UndoSince(HWND hwnd, AgentsState* state) {
         }
     }
     int labelHeight = TextHeight(hwnd, label, inner);
-    int detailHeight = TextHeight(hwnd, detail, inner);
+    // a word longer than a line broken, as SS_EDITCONTROL breaks it
+    int detailHeight = TextHeight(hwnd, detail, inner, nullptr, true);
     std::wstring takeBack = core::T(PE_TEXT_WIN_TAKE_BACK), cancel = core::T(PE_TEXT_UI_CANCEL), close = core::T(PE_TEXT_UI_CLOSE);
     int button = ButtonWidth({takeBack, cancel, close}, 100);
     int height = pad + labelHeight + Scale(4) + Scale(24) + Scale(16) + titleHeight + Scale(6) + detailHeight + Scale(18) + Scale(25) + pad;
     std::wstring windowTitle = core::Plain(PE_TEXT_WIN_UNDO_SINCE);
-    for (const wchar_t* dots : {L"...", L"…"}) {
-        if (windowTitle.ends_with(dots)) {
-            windowTitle.resize(windowTitle.size() - wcslen(dots));
+    // the command's name without the dots that say it asks first (in the pseudo-language before its padding)
+    for (const std::wstring dots : {L"...", L"…"}) {
+        if (size_t at = windowTitle.find(dots); at != std::wstring::npos) {
+            windowTitle.erase(at, dots.size());
         }
     }
     HWND dialog = CreateModalWindow(hwnd, kUndoSinceClass, windowTitle.c_str(), width, height);
@@ -821,7 +823,7 @@ void UndoSince(HWND hwnd, AgentsState* state) {
     undo.title = Heading(dialog, L"", {pad, y, width - pad, y + titleHeight}, true);
     SetWindowLongPtrW(undo.title, GWLP_ID, IDC_AGENT_UNDO_TITLE);
     y += titleHeight + Scale(6);
-    undo.detail = CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_AGENT_UNDO_DETAIL, {pad, y, width - pad, y + detailHeight});
+    undo.detail = CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_EDITCONTROL, IDC_AGENT_UNDO_DETAIL, {pad, y, width - pad, y + detailHeight});
     y = height - pad - Scale(25);
     // Cancel the default, as for anything that changes many messages at once
     undo.takeBack = CreateChild(dialog, L"BUTTON", takeBack.c_str(), WS_TABSTOP, IDC_AGENT_TAKE_BACK,
