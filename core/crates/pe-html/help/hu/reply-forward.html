@@ -1,16 +1,15 @@
-<!--review--><h1>Válasz és továbbítás</h1>
+<h1>Válasz és továbbítás</h1>
 <p class="summary">Válaszoljon a feladónak vagy mindenkinek, vagy küldje tovább az üzenetet valaki másnak.</p>
 <ul>
-    <li>A <b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) a feladónak válaszol.</li>
-    <li>A <b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) mindenkinek válaszol, akinek az üzenet szólt.</li>
-    <li>A <b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) továbbküldi az üzenetet. A címzetteket Ön adja meg.</li>
+    <li>A <b data-text="ui-tb-reply"></b> gombbal (<kbd data-command="reply"></kbd>) a feladónak válaszolhat. Ha a feladó külön válaszcímet adott meg, a válasz arra a címre megy.</li>
+    <li>A <b data-text="ui-tb-reply-all"></b> gombbal (<kbd data-command="reply_all"></kbd>) a feladónak és a többi címzettnek is válaszolhat, a saját fiók címeit kihagyva.</li>
+    <li>A <b data-text="ui-tb-forward"></b> gombbal (<kbd data-command="forward"></kbd>) továbbíthatja az üzenetet. A címzetteket ezután kell megadnia.</li>
 </ul>
-<p>A válasz vagy a továbbított üzenet abból a fiókból megy el, amelyben az eredeti üzenet van, és arról a címről, amelyre az eredetit küldték, ha az a fiók egyik további címe.</p>
+<p>A válasz vagy továbbítás kiinduló fiókja az, amelyben az eredeti üzenet található. Ha az eredetit a fiók egyik további címére küldték, ez lesz a feladó címe.</p>
 <h2>Az eredeti üzenet</h2>
-<p>Válaszban az eredeti üzenet egy ••• gomb mögé van összehajtva a szövege alatt, így csak azt látja, amit Ön ír. A válasszal együtt mindenképp elküldődik. A rövidítéséhez kattintson a gombra, vagy jelöljön ki mindent a <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os--> billentyűkkel: az eredeti ekkor a szövege részévé válik.</p>
-<p>Továbbításkor az eredeti kezdettől a szövegben van, hiszen azt küldi el.</p>
-<p>A válasz követi az eredeti formátumát. Egyszerű szöveges üzenetre adott válasz is egyszerű szöveg, az eredeti <b>&gt;</b> jellel idézve, hacsak nem formáz valamit.</p>
+<p>Válasz írásakor az eredeti üzenet az új szöveg alatt, egy ••• gomb mögé rejtve jelenik meg. Összecsukva is része az elküldött válasznak. Ha rövidíteni szeretné, kattintson a gombra, vagy jelöljön ki mindent ezzel: <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->. Az eredeti üzenet ekkor szerkeszthetővé válik.</p>
+<p>Továbbításkor az eredeti üzenet szövege kezdettől látható és szerkeszthető.</p>
+<p>A válasz az eredeti üzenet formátumát követi. Egyszerű szöveges üzenetre a válasz is egyszerű szövegként megy el, az eredeti sorai előtt <b>&gt;</b> jellel, amíg nem használ formázást.</p>
 <h2>Több üzenet továbbítása</h2>
-<p>Jelöljön ki több üzenetet, és kattintson a <b data-text="ui-tb-forward"></b> gombra. Egy új üzenet készül, amelyhez mindegyik <code>.eml</code> fájlként van csatolva. A tárgya az első üzenet tárgya.</p>
+<p>Jelöljön ki több üzenetet, és kattintson a <b data-text="ui-tb-forward"></b> gombra. Egyetlen új üzenet nyílik meg, amelyhez az összes kijelölt üzenet <code>.eml</code> fájlként csatlakozik. A tárgy az első üzenet tárgya lesz, Fw: előtaggal.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>
-<!--/review-->

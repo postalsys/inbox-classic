@@ -696,6 +696,14 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   a Keresés a titkosított üzenetekben, and az Üzenetek... settings. No a(z) or endings attached to inserted controls.
 - Permanent deletion also applies when the account lacks Deleted Items; emptying folders is not undoable. Watched
   conversation notices still depend on notification settings. Decrypted searchable content is kept unencrypted locally.
+- Writing help uses "aláírásszöveg" where needed to distinguish the account signature from a digital signature.
+  Replies honor a separate reply address; Reply All excludes the account's own addresses. An unfolded quote is editable.
+- Use "előnézet" for the rendered attachment, "mellékletlista" for the files. Memory-only decrypted previews do not
+  imply that separately opened/saved files never reach disk. Internet-origin marking applies to Windows and macOS.
+- Outbox prose distinguishes waiting, retrying and successful sending. Undo Send ends when its countdown expires;
+  recovery restores the latest saved state. Name "nyomtatási ablak" across platforms, without promising a preview.
+- Contacts are "névjegyek", their pictures "névjegyképek". A provider-confirmed sender domain is not verified personal
+  identity. Import skips cards only when all their email addresses are already present, rather than matching names.
 
 ### Nederlands (nl)
 

@@ -1,22 +1,21 @@
-<!--review--><h1>Piszkozatok és a Postázandó üzenetek mappa</h1>
-<p class="summary">Mentsen el egy üzenetet, hogy később befejezze, és nézze meg, mi vár elküldésre.</p>
+<h1>Piszkozatok és a Postázandó üzenetek mappa</h1>
+<p class="summary">Mentse az üzenetet későbbi folytatásra, és tekintse át az elküldésre váró leveleket.</p>
 <h2>Piszkozat mentése</h2>
-<p>Kattintson a <b data-text="ui-tb-save"></b> gombra, vagy nyomja le a <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os--> billentyűkombinációt. Az üzenet a fiók <b data-text="folder-drafts"></b> mappájába kerül, a kiszolgálón. Újabb mentéskor a korábbi példány helyére kerül. Az üzenet állapotsora mutatja, mikor mentette.</p>
-<p>Az Inbox Classic az üzenetet automatikusan is menti néhány másodperccel azután, hogy abbahagyta a gépelést, illetve folyamatos gépelés közben harmincmásodpercenként. Ha az Inbox Classic vagy a számítógép váratlanul leáll, a befejezetlen üzenetek az Inbox Classic következő indításakor újra megnyílnak.</p>
-<p>Ha módosított üzenetet zár be, a program megkérdezi, mentse-e a módosításokat:</p>
+<p>Kattintson a <b data-text="ui-tb-save"></b> gombra, vagy használja ezt a billentyűparancsot: <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Az üzenet a fiók <b data-text="folder-drafts"></b> mappájába kerül a kiszolgálón. Az újabb mentés lecseréli a korábbi példányt. Az üzenetablak állapotsora jelzi a mentés időpontját.</p>
+<p>Az Inbox Classic automatikusan is ment: néhány másodperccel a gépelés abbahagyása után, folyamatos gépelés közben pedig harmincmásodpercenként. Váratlan leállás után a befejezetlen üzenetek a következő indításkor újra megnyílnak, a legutóbb mentett állapotukban.</p>
+<p>Ha módosításokat tartalmazó üzenetablakot zár be, a program megkérdezi, mentse-e a változásokat:</p>
 <ul>
     <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os-->: a <b data-text="folder-drafts"></b> mappába menti.</li>
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os-->: elveti a módosításokat. Ha a piszkozatot csak az automatikus mentés hozta létre, a <b data-text="folder-drafts"></b> mappából is törlődik.</li>
     <li><b data-text="ui-cancel"></b>: visszatér az üzenethez.</li>
 </ul>
-<p>Ha folytatni szeretné az írást, kattintson duplán a piszkozatra a <b data-text="folder-drafts"></b> mappában. A címzettekkel, a szöveggel és a fájlokkal együtt nyílik meg. Elküldése után a piszkozat törlődik.</p>
-<p>A megírás alatt álló üzenet külön ablakban van, így közben olvashatja a leveleit. Az Inbox Classic bezárásakor először a megírás alatt álló üzenetek záródnak be, és a program rákérdez a módosítottakra.</p>
+<p>Az írás folytatásához kattintson duplán a piszkozatra a <b data-text="folder-drafts"></b> mappában. Az üzenet a címzettekkel, a szöveggel és a mellékletekkel együtt nyílik meg. Küldéskor a piszkozat törlődik, amint az üzenet biztonságosan a Postázandó üzenetek közé került.</p>
+<p>Az üzenetet külön ablakban írhatja, így közben más leveleket is olvashat. Kilépéskor az Inbox Classic először ezeket az ablakokat zárja be, és rákérdez a módosítások mentésére.</p>
 <h2>A Postázandó üzenetek mappa</h2>
-<p>A <b data-text="ui-tb-send"></b> gomb a Postázandó üzenetek mappába teszi az üzenetet. Alapértelmezés szerint néhány másodperc múlva elmegy. Eközben még visszavonhatja a küldést (lásd lent). A főablak állapotsora jelzi, amikor elment.</p>
-<p>Ha egy üzenet nem mehet el, például mert nincs kapcsolat, a Postázandó üzenetek mappában marad. A levelek következő ellenőrzésekor elmegy, így semmi sem vész el abból, amit megírt.</p>
-<p>Ha meg szeretné nézni, mi vár elküldésre, válassza ezt: <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. A lista minden üzenetnél megmutatja, miért nem ment el. Azonnal újrapróbálhatja ezzel: <b data-text="ui-outbox-send-all"></b>, és itt üzenetet is törölhet.</p>
+<p>A <b data-text="ui-tb-send"></b> gomb a Postázandó üzenetek közé helyezi a levelet. Alapértelmezés szerint a program néhány másodperc várakozás után kezdi küldeni. A visszaszámlálás alatt a küldés még visszavonható, az alábbiak szerint. A főablak állapotsora jelzi a sikeres küldést.</p>
+<p>Ha az üzenet nem küldhető el, például nincs internetkapcsolat, a Postázandó üzenetek között marad. A program a következő levélellenőrzéskor újra megpróbálja elküldeni.</p>
+<p>Az elküldésre váró levelek megtekintéséhez válassza ezt: <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. A lista jelzi az üzenetek állapotát és az esetleges hibákat. Azonnali küldési kísérlethez kattintson erre: <b data-text="ui-outbox-send-all"></b>. A listából üzeneteket is törölhet.</p>
 <h2>Üzenet küldésének visszavonása</h2>
-<p>Alapértelmezés szerint a <b data-text="ui-tb-send"></b> gombra kattintás után az üzenet néhány másodpercig vár, mielőtt elmegy. Az állapotsor visszaszámlálást mutat. Ezalatt kattintson a visszaszámlálás melletti <b data-text="ui-undo-button"></b> gombra, vagy válassza ezt: <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>, és a küldés elmarad. Az üzenet újra megnyílik, így szerkesztheti vagy elvetheti. Ez csak addig lehetséges, amíg az üzenet elküldésre vár.</p>
-<p>A várakozási idő módosításához, vagy ha azonnal szeretné küldeni az üzeneteket, nyissa meg a beállításokat (<b data-settings="general"></b>), és módosítsa ezt: <b data-text="ui-send-delay"></b>. Ha várakozó üzenet mellett lép ki az Inbox Classicból, a program azonnal megpróbálja elküldeni.</p>
+<p>Alapértelmezés szerint a <b data-text="ui-tb-send"></b> gombra kattintás után néhány másodperces visszaszámlálás jelenik meg az állapotsorban. Ezalatt a mellette lévő <b data-text="ui-undo-button"></b> gombbal, vagy ezzel a paranccsal vonhatja vissza a küldést: <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>. Az üzenet újra megnyílik szerkesztésre, így módosíthatja vagy elvetheti. A visszaszámlálás lejárta után a küldés már nem vonható vissza.</p>
+<p>A várakozási időt itt módosíthatja: <b data-settings="general"></b>, a <b data-text="ui-send-delay"></b> beállítással. A késleltetést ki is kapcsolhatja. Ha a visszaszámlálás alatt lép ki az Inbox Classicból, a program azonnal megpróbálja elküldeni az üzenetet.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->
