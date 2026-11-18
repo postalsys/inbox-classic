@@ -752,6 +752,16 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   under explicit download settings. Key lookup may send an address or identifier; publishing sends a public key.
 - Default-app help describes the system association request and possible failure. Automatic update checks on Mac
   are a setting, not a promise of unconditional automatic installation. Introduce settings paths with a colon.
+- Brand-logo help describes verified domains and persistent cached images, without promising personal identity
+  or that the logo server learns nothing from a download. Contact pictures may appear instead of initials.
+- Command-line help uses "levéladatbázis" and "jelszótároló". The sign-in-page-file option writes a web address,
+  not downloaded HTML. Keyboard help preserves literal keys and explains Hungarian Alt+M / Alt+T for Cc/Bcc.
+- Address completion suggests "cím vagy csoport". Forgetting a remembered address leaves saved contacts/groups intact.
+  Calendar help describes the first recognized event; times without an identified zone remain as written.
+- Windows Cancel discards unapplied options, not a system file association. Language changes require a restart;
+  previews use natural articles before Mellékletek and PDF. Download limits cover cached content, with exceptions.
+- Code cards verify a relevant domain's signature, not a person or every statement. Their expiry warning is based
+  on the message timestamp. Notification codes depend on freshness, size, timely download and notification settings.
 
 ### Nederlands (nl)
 
