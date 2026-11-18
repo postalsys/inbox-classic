@@ -2,6 +2,7 @@
 // agent host would and runs one fixed conversation through it, writing each answer as a line of JSON to OUT, so the
 // test can answer the app's questions (let it in, send the message) and check what the agent saw and changed.
 // The tests run it from a copy of the Node.js binary named "My AI agent", which is what the app then calls it.
+// After marking two messages read it flags one blue and watches the other's conversation.
 // A send the user has not answered in about 20 seconds is answered `waiting`: the agent then asks get_send_status
 // every second until it has the answer. After the send it saves a draft in Markdown, then waits for the file OUT.unsubscribe, which the test makes once it has looked at the Outbox and the
 // AI Agents window, and then asks to unsubscribe from the two mailing lists the test added.
@@ -57,6 +58,9 @@ try {
     // read without marking read, then marked read: the windows show it
     record('read', await call('get_message', { folder: inbox, uid: uids[0] }));
     record('marked', await call('mark_messages_read', { folder: inbox, uids }));
+    // a flag of a colour on the older one, and the newer one's conversation watched: the AI Agents log lists both
+    record('colored', await call('set_flag_color', { folder: inbox, uids: [uids[1]], color: 'blue' }));
+    record('watched', await call('set_conversation_mark', { thread: unread.messages[0].thread, mark: 'watch' }));
     // waits for the user's yes, asking again while the answer is that the user has not answered yet
     let sent = await call('send_message', {
         account,
