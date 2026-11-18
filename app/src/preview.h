@@ -25,7 +25,10 @@ public:
     // their frames are sized to their documents once it loaded and on each Measure()
     // `previewToken`: the token of the view whose document it is (PeMessageInfo.preview_token), whose previews' pictures
     // its page asks for under /pv/ (ServePreviews); the previews of the document before are ended
-    void Show(const std::wstring& html, bool remoteImages = false, std::vector<std::string> parts = {}, const char* previewToken = nullptr);
+    // `keepScroll`: the same message's document again (Show in Message, the whole message after its text), shown where
+    // the one before was scrolled to (pe_scroll_script read first, pe_scroll_to_script once it has loaded)
+    void Show(const std::wstring& html, bool remoteImages = false, std::vector<std::string> parts = {}, const char* previewToken = nullptr,
+              bool keepScroll = false);
     // before Create: the pictures of the previews of attachments its documents show, asked of `core` (pe_preview_ask)
     // and answered once the core has them (Answered), never waited for on the window thread
     void ServePreviews(PeCore* core) { core_ = core; }
@@ -36,7 +39,9 @@ public:
     // how many of them loaded, how many are PDF pages, and whether the section has a notice), "photo"/"second"/"last"
     // (the middle of the first, second or last file's first picture, scrolled into view, on the screen), "more" (the
     // link to all of a PDF file's pages, likewise), "overflow" (how far the page is wider than the pane); -1 before
-    // there is an answer
+    // there is an answer; "tiles" (the files shown as tiles times 100, plus how many of them say why), "scroll" (how
+    // far down the document is scrolled, plus 1), "scroll:N" (scrolled to N, then as "scroll"), "text:WORDS" (2
+    // when the document's text has the words, letters, digits and spaces only, else 1)
     int64_t TestPreviews(const std::wstring& query);
     // the frames of the page shown sized again to their documents (the core's script, run by the app with the page's
     // own scripts off), when it is a page of parts
@@ -88,6 +93,17 @@ public:
 
 private:
     void Configure();
+    // a document to show (Show), held while the scroll of the one shown is read
+    struct Next {
+        std::wstring html;
+        bool remoteImages = false;
+        std::vector<std::string> parts;
+        std::string previewToken;
+    };
+    // `next` shown in place of the document shown, scrolled to `scrollTo` once it has loaded (none when negative)
+    void Put(Next next, double scrollTo);
+    // DOMContentLoaded: the document loading scrolled to scrollTo_, when it is the one that keeps the scroll
+    void Scrolled();
     // the document given (document_) loaded, at an address of its own
     void Load();
     // a request of the page for a preview's picture (under /pv/): kept until the core answers it (Answered), or
@@ -113,6 +129,11 @@ private:
     bool focusPending_ = false;
     // documents shown, for an address of each
     unsigned shown_ = 0;
+    // documents asked for (Show): a scroll read for one that is not the newest is dropped
+    unsigned asked_ = 0;
+    // where the document loading is scrolled to once its DOM is there (none when negative), and its address
+    double scrollTo_ = -1;
+    std::wstring scrollPage_;
     bool remoteImages_ = false;
     // the documents of the parts of the page shown, in frames sized by Measure(); none for another page
     std::vector<std::string> parts_;
