@@ -36,6 +36,8 @@ final class UITest {
     var secondRest = ""
     var ports: [String: Any] = [:]
     var delegate: AppDelegate?
+    /// the agents started from a program called Terminal (UITestSteps terminalAgentAsks), stopped as it is forgotten
+    var terminalAgents: [Process] = []
     var main: MainWindow { delegate!.main }
 
     /// the repository, where core/e2e is: PE_REPO, or the one the bundle was built in (build/mac/...)

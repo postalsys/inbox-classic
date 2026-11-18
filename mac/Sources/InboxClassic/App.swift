@@ -37,6 +37,8 @@ public struct Arguments {
             case "--memory-passwords": memoryPasswords = true
             case "--version": version = true
             case "--mcp": mcp = true
+            // the agent's own name for its access, which the relay (pe-mcp) reads; never a file to open
+            case "--name": _ = rest.next()
             case "--background": background = true
             case "--language": language = rest.next()
             case "--key-server": keyServer = rest.next()
