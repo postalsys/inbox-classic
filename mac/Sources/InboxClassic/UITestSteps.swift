@@ -3361,13 +3361,15 @@ extension UITest {
             let compose: NSButton? = find("agent.compose", in: send)
             let dont: NSButton? = find("agent.dontSend", in: send)
             check(compose == nil && dont != nil, "it has no Edit First")
-            check(dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell,
-                  "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"))")
             checkQuestionFits(send, "the invitation's Send question")
             onMain {
                 NSApp.activate()
                 send.makeKeyAndOrderFront(nil)
             }
+            // a question raised while the app is in the background has its default button back once it is key (macOS
+            // takes the key from it until then), so this is checked when the user can press Return
+            let isDefault = await waitUntil(10) { send.isKeyWindow && dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell }
+            check(isDefault, "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"))")
             await pause(2)
             await shot(send, "agents-13-invitation")
             await darkShot(send, "agents-13-invitation-dark")
