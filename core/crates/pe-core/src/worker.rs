@@ -1495,6 +1495,10 @@ impl Worker {
                 Ok(_) => {
                     // sent: whatever happens next, the others still go and this one is not counted as failed
                     let unqueued = store.unqueue(message.id);
+                    // an answer to an invitation now counts as the user's (agents/invitations.rs)
+                    if let Some(message_id) = &message.message_id {
+                        let _ = store.invitation_reply_sent(message_id, unix_now());
+                    }
                     self.emit(Event::MessageSent {
                         account: self.account,
                         subject: message.subject.clone(),

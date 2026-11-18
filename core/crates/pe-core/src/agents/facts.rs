@@ -17,6 +17,8 @@ pub struct Context<'a> {
     pub own: &'a [String],
     /// The keys to check a signature with; None for a message that has no signature
     pub ring: Option<&'a KeyRing>,
+    /// The user's answers to invitations that were sent, by the event's UID: their status from then on
+    pub replies: &'a [(String, String)],
 }
 
 /// A recipient a bounce says the message did not reach (or not yet)
@@ -137,8 +139,9 @@ fn method_name(method: Method) -> &'static str {
     }
 }
 
-/// The invitation of `message`'s calendar part, with the answer of the attendee who is the user (`own`)
-fn invitation(message: &Message, own: &[String]) -> Option<AgentInvitation> {
+/// The invitation of `message`'s calendar part, with the answer of the attendee who is the user (`own`): the last one
+/// they sent (`replies`), or the one the invitation names
+fn invitation(message: &Message, own: &[String], replies: &[(String, String)]) -> Option<AgentInvitation> {
     let part = crate::view::calendar_part(&message.attachments)?;
     let calendar = String::from_utf8_lossy(&part.content);
     let Invitation {
@@ -164,7 +167,11 @@ fn invitation(message: &Message, own: &[String]) -> Option<AgentInvitation> {
         organizer,
         attendees,
         repeats,
-        your_status: crate::calendar::attendee_status(&calendar, own).unwrap_or_default(),
+        your_status: crate::calendar_reply::event_uid(&calendar)
+            .and_then(|uid| replies.iter().find(|(event, _)| *event == uid))
+            .map(|(_, status)| status.clone())
+            .or_else(|| crate::calendar::attendee_status(&calendar, own))
+            .unwrap_or_default(),
     })
 }
 
@@ -199,7 +206,7 @@ fn signature(source: &[u8], ring: &KeyRing) -> Option<AgentSignature> {
 pub(crate) fn of(message: &Message, source: &[u8], context: &Context) -> Facts {
     Facts {
         bounce: bounce(message, source),
-        invitation: invitation(message, context.own),
+        invitation: invitation(message, context.own, context.replies),
         sender_verified: sender_verified(message, context.trusted),
         signature: context.ring.and_then(|ring| signature(source, ring)),
     }

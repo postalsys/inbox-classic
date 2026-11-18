@@ -508,6 +508,113 @@ agent-log-renamed = Renamed the folder “{ $old }” to “{ $name }”
 agent-log-watched = Watched the conversation “{ $subject }”
 agent-log-ignored = Ignored the conversation “{ $subject }”
 agent-log-unmarked = Stopped watching or ignoring the conversation “{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+agent-undo-changed = the message was changed since
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+agent-log-bulk-read = { $count ->
+    [one] Marked 1 message read (search: { $query })
+   *[other] Marked { $count } messages read (search: { $query })
+}
+agent-log-bulk-unread = { $count ->
+    [one] Marked 1 message unread (search: { $query })
+   *[other] Marked { $count } messages unread (search: { $query })
+}
+agent-log-bulk-flagged = { $count ->
+    [one] Flagged 1 message (search: { $query })
+   *[other] Flagged { $count } messages (search: { $query })
+}
+agent-log-bulk-unflagged = { $count ->
+    [one] Took the flag off 1 message (search: { $query })
+   *[other] Took the flag off { $count } messages (search: { $query })
+}
+agent-log-bulk-color = { $count ->
+    [one] Flagged 1 message
+   *[other] Flagged { $count } messages
+} { $color ->
+    [red] red
+    [orange] orange
+    [yellow] yellow
+    [green] green
+    [blue] blue
+    [purple] purple
+   *[gray] gray
+} (search: { $query })
+agent-log-bulk-moved = { $count ->
+    [one] Moved 1 message to { $folder } (search: { $query })
+   *[other] Moved { $count } messages to { $folder } (search: { $query })
+}
+agent-log-bulk-archived = { $count ->
+    [one] Archived 1 message (search: { $query })
+   *[other] Archived { $count } messages (search: { $query })
+}
+agent-log-bulk-junk = { $count ->
+    [one] Marked 1 message as junk (search: { $query })
+   *[other] Marked { $count } messages as junk (search: { $query })
+}
+agent-log-bulk-not-junk = { $count ->
+    [one] Marked 1 message as not junk (search: { $query })
+   *[other] Marked { $count } messages as not junk (search: { $query })
+}
+agent-log-bulk-deleted = { $count ->
+    [one] Deleted 1 message (search: { $query })
+   *[other] Deleted { $count } messages (search: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+agent-undo-span = { $span ->
+    [quarter] In the last 15 minutes
+    [hour] In the last hour
+    [hours] In the last 4 hours
+    [day] In the last 24 hours
+    [week] In the last 7 days
+   *[all] In the last 30 days
+}
+# the question before it takes back what a program did in the span chosen
+agent-undo-since-question = { $count ->
+    [0] { $program } made no changes in this time that can be taken back.
+    [one] Take back the change { $program } made in this time?
+   *[other] Take back the { $count } changes { $program } made in this time?
+}
+agent-undo-since-detail = Messages go back to the folders they came from, read states and flags go back to what they were, and messages still waiting in the Outbox are deleted. What you or the server changed since is left as it is.
+# what taking back did, then a line for each kind of message it left as it is
+agent-undo-done = { $count ->
+    [0] Nothing was taken back.
+    [one] Took back 1 change.
+   *[other] Took back { $count } changes.
+}
+agent-undo-left-gone = { $count ->
+    [one] 1 message was no longer where the change put it.
+   *[other] { $count } messages were no longer where the change put them.
+}
+agent-undo-left-changed = { $count ->
+    [one] 1 message was changed since, by you or on the server, and was left as it is.
+   *[other] { $count } messages were changed since, by you or on the server, and were left as they are.
+}
+agent-undo-left-sent = { $count ->
+    [one] 1 message had already left the Outbox.
+   *[other] { $count } messages had already left the Outbox.
+}
+agent-undo-left-impossible = { $count ->
+    [one] 1 change can not be taken back.
+   *[other] { $count } changes can not be taken back.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+agent-invitation-reply = { $response ->
+    [accept] This message accepts the invitation “{ $summary }” ({ $when }).
+    [tentative] This message tentatively accepts the invitation “{ $summary }” ({ $when }).
+   *[decline] This message declines the invitation “{ $summary }” ({ $when }).
+} The organizer’s calendar takes it in. Your answer to the invitation changes only once the message has been sent.
+# the subject of an answer to an invitation, as calendar programs write it
+invitation-reply-subject = { $response ->
+    [accept] Accepted: { $summary }
+    [tentative] Tentative: { $summary }
+   *[decline] Declined: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+invitation-reply-text = { $response ->
+    [accept] { $name } has accepted this invitation.
+    [tentative] { $name } has tentatively accepted this invitation.
+   *[decline] { $name } has declined this invitation.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 agent-reads-messages = { $count ->
     [one] read 1 message

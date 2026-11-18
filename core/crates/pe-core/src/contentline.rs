@@ -64,6 +64,38 @@ pub(crate) fn unescape(value: &str) -> String {
     out
 }
 
+/// A TEXT value escaped for a content line (`\\`, `\,`, `\;`, `\n`)
+pub(crate) fn escape(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for c in value.chars() {
+        match c {
+            '\\' => out.push_str("\\\\"),
+            ',' => out.push_str("\\,"),
+            ';' => out.push_str("\\;"),
+            '\n' => out.push_str("\\n"),
+            '\r' => {}
+            other => out.push(other),
+        }
+    }
+    out
+}
+
+/// A content line, folded at 75 bytes as the standards have it (a fold never inside a character), with its CRLF
+pub(crate) fn folded(line: &str) -> String {
+    let mut out = String::new();
+    let mut width = 0;
+    for c in line.chars() {
+        if width + c.len_utf8() > 75 {
+            out.push_str("\r\n ");
+            width = 1;
+        }
+        out.push(c);
+        width += c.len_utf8();
+    }
+    out.push_str("\r\n");
+    out
+}
+
 /// Whether the parameters say `kind`: as a TYPE (`TYPE=WORK,PREF`, `type=pref`) or on its own (`PREF`)
 pub(crate) fn has_type(params: &[(String, String)], kind: &str) -> bool {
     params.iter().any(|(key, value)| {
