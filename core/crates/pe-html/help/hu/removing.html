@@ -1,9 +1,8 @@
-<!--review--><h1>Az Inbox Classic eltávolítása</h1>
-<p class="summary">Távolítsa el az Inbox Classicot a számítógépről, a letöltött levelekkel vagy azok nélkül.</p>
-<!--os:windows--><p>Távolítsa el az Inbox Classicot a <i>Gépház &gt; Alkalmazások &gt; Telepített alkalmazások</i> részben. Megkérdezi, hogy a letöltött leveleket is eltávolítsa-e.</p><!--/os-->
-<!--os:mac--><p>Lépjen ki az Inbox Classicból, és húzza az Alkalmazások mappából a Kukába. A letöltött levelek a <code>~/Library/Application Support/Inbox Classic</code> mappában maradnak, amíg azt a mappát is ki nem törli.</p><!--/os-->
-<!--os:linux--><p>Távolítsa el a csomagot a <code>sudo apt remove inbox-classic</code> paranccsal, Arch Linuxon és Omarchyn pedig a <code>sudo pacman -R inbox-classic</code> paranccsal. A letöltött levelek a <code>~/.local/share/inbox-classic</code> mappában maradnak, amíg azt a mappát is ki nem törli.</p><!--/os-->
-<p>A kiszolgálókon lévő levelek soha nem törlődnek.</p>
-<p>A mentett jelszavak eltávolításához előbb törölje az egyes fiókokat a <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> menüben. Egyetlen fiók eltávolításáról lásd: <a href="topic:manage-accounts"></a>.</p>
+<h1>Az Inbox Classic eltávolítása</h1>
+<p class="summary">Az Inbox Classic eltávolítható a helyi adatok megőrzésével vagy törlésével; törlés előtt mentse a csak ezen a számítógépen tárolt adatokat.</p>
+<!--os:windows--><p>Távolítsa el az Inbox Classicot itt: <i>Gépház &gt; Alkalmazások &gt; Telepített alkalmazások</i>. Az eltávolító megkérdezi, törölje-e a letöltött leveleket is. Ha igent választ, a teljes helyi adatmappa törlődik, a beállításokkal, névjegyekkel, kulcsokkal és küldésre váró üzenetekkel együtt.</p><!--/os-->
+<!--os:mac--><p>Lépjen ki az Inbox Classicból, és húzza az alkalmazást az Alkalmazások mappából a Kukába. A helyi adatok alapértelmezett mappája, <code>~/Library/Application Support/Inbox Classic</code>, megmarad. Ha az adatokat is el szeretné távolítani, az alkalmazás bezárása után törölje ezt a mappát.</p><!--/os-->
+<!--os:linux--><p>Távolítsa el a csomagot Debian-alapú rendszeren a <code>sudo apt remove inbox-classic</code>, Arch-alapú rendszeren, például Omarchyn a <code>sudo pacman -R inbox-classic</code> paranccsal. A helyi adatok alapértelmezett mappája, <code>~/.local/share/inbox-classic</code>, megmarad. Ha az adatokat is el szeretné távolítani, az alkalmazás bezárása után törölje ezt a mappát.</p><!--/os-->
+<p>Az eltávolítás nem törli a kiszolgálón tárolt leveleket. A helyi adatmappa viszont a letöltött leveleken kívül beállításokat, névjegyeket, kulcsokat és még el nem küldött üzeneteket is tartalmazhat.</p>
+<p>A fiókok mentett bejelentkezési adatainak törléséhez előbb távolítsa el a fiókokat itt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Az alkalmazás eltávolítása nem üríti ki a rendszer jelszótárolóját; a bejelentkezési alkalmazások titkos kulcsai és a titkosítási kulcsok védelméhez használt kulcs is megmaradhat. Egyetlen fiók eltávolításáról: <a href="topic:manage-accounts"></a>.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

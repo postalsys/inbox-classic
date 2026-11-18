@@ -1,16 +1,16 @@
-<!--review--><h1>Parancssori kapcsolók</h1>
-<p class="summary">Kapcsolók az Inbox Classic terminálból való indításához, teszteléshez és MI-ügynökök számára.</p>
-<p>Indítsa el a programot (<!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os-->) ezekkel a kapcsolókkal:</p>
+<h1>Parancssori kapcsolók</h1>
+<p class="summary">Az Inbox Classic indításakor használható kapcsolók, például teszteléshez és MI-ügynökök csatlakoztatásához.</p>
+<p>A program indításakor (<!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os-->) a következő kapcsolókat adhatja meg:</p>
 <table>
     <tr><th>Kapcsoló</th><th>Hatása</th></tr>
-    <tr><td><code>--store &lt;file&gt;</code></td><td>Másik levéltárat használ, például tesztelésre valót</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>A jelszavakat csak erre a futásra őrzi meg, sosem a rendszer jelszótárában</td></tr>
-    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Csak az ebben a fájlban (PEM vagy DER) lévő kiszolgálói tanúsítványt fogadja el, önaláírt tanúsítványú tesztkiszolgálóhoz</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>A böngészős bejelentkezés oldalát ebbe a fájlba írja, ahelyett, hogy megnyitná a böngészőt</td></tr>
-    <tr><td><code>--language &lt;code&gt;</code></td><td>Erre a futásra ezen a nyelven mutatja az ablakokat, például <code>de</code></td></tr>
-    <tr><td><code>--background</code></td><td>Ablak nélkül indul</td></tr>
-    <tr><td><code>--mcp</code></td><td>MI-ügynököt csatlakoztat az Inbox Classichoz. Ezt az ügynök programja indítja, nem Ön</td></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>Másik levéladatbázist használ, például egy tesztadatbázist</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>A bejelentkezési adatokat csak az alkalmazás bezárásáig tárolja, a rendszer jelszótárolójába nem menti őket</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Csak a megadott PEM- vagy DER-fájlban szereplő kiszolgálói tanúsítványokat fogadja el; például önaláírt tanúsítványú tesztkiszolgálóhoz használható</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>A bejelentkezési oldal webcímét a megadott fájlba írja, a böngészőt nem nyitja meg</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>Az alkalmazást a megadott nyelven indítja el, például <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>A főablak megnyitása nélkül indítja az alkalmazást</td></tr>
+    <tr><td><code>--mcp</code></td><td>Az MI-ügynökprogram ezzel kapcsolódik az Inbox Classichoz</td></tr>
     <tr><td><code>--version</code></td><td>Kiírja a verziót, és kilép</td></tr>
 </table>
-<p>Ha argumentumként egy <code>mailto:</code> hivatkozást ad meg, új üzenet nyílik meg, ahogy egy e-mail-hivatkozásnál.</p>
-<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav><!--/review-->
+<p>Argumentumként <code>mailto:</code> hivatkozást is megadhat. Ez egy új üzenet írását indítja el, ha már van beállított levelezőfiók.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
