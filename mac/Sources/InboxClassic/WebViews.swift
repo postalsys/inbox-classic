@@ -562,7 +562,7 @@ final class Printer: NSObject {
         super.init()
         view.navigationDelegate = navigation
         view.uiDelegate = navigation
-        navigation.loaded = { [weak self] in self?.run() }
+        navigation.loaded = { [weak self] in self?.picturesReady() }
         ContentRules.whenReady { [weak self] in
             guard let self else { return }
             ContentRules.apply(to: view.configuration.userContentController, pictures: pictures)
@@ -570,8 +570,19 @@ final class Printer: NSObject {
         }
     }
 
-    private func run() {
+    /// didFinish does not wait for the pictures to be decoded, and a picture not drawn yet prints as an empty box: the
+    /// app's own script (in its own world; the page runs none) waits for every picture, loaded and decoded or failed,
+    /// at most 5 seconds, then it prints
+    private func picturesReady() {
         navigation.loaded = nil
+        let script = "await Promise.race([Promise.all([...document.images].map(i => i.decode().catch(() => {}))),"
+            + " new Promise(done => setTimeout(done, 5000))]); return true"
+        view.callAsyncJavaScript(script, arguments: [:], in: nil, in: .defaultClient) { [weak self] _ in
+            self?.run()
+        }
+    }
+
+    private func run() {
         let info = NSPrintInfo.shared.copy() as! NSPrintInfo
         info.horizontalPagination = .fit
         info.verticalPagination = .automatic
