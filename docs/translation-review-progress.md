@@ -8,24 +8,25 @@ Commit completed batches regularly and preserve an exact resume point.
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`; branch `i18n/review-resume-20261118`.
   Created from GitHub master `45f519ae` on November 18 after the main worker merged the available translations.
   The old `build/i18n-wave1` worktree no longer exists. All older checkout references below are historical.
-- **Next: Review Finnish compose additions, then hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch. Watch feat/preview-cid and the MCP phase3 worktree for committed/merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.**
+- **Next: Review Croatian compose additions, then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.**
 - Current scope: 35,624 catalog entries and 1,372 help topics.
-  Completed: 22,011 entries and 747 full topics;
-  pending: 13,613 entries and 625 topics.
+  Completed: 22,051 entries and 749 full topics;
+  pending: 13,573 entries and 623 topics.
   All 28 language directories are inventoried; no new languages were added at this source checkpoint.
 - Resumed source audit: 250 translated files changed since `31f89fa7`, with every changed value/passage marked.
   Merged agent read-log/terminal/organize additions and preview tiles/protected-part additions are now in the exact queue.
   English source fixes `22e156ab` / `8a4a143f` are incorporated; older runtime/source-issue notes below are historical.
   Recheck current behavior before reviewing those new drafts, especially protected attachment previews and agent access.
-- Linux compose-menu paths are reviewed in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el.
-  This batch restores 16 full topics after reviewing precisely 32 reopened passages. Three wording lines improved;
-  other good wording retained. The remaining 12 full compose topics stay pending.
+- Linux compose-menu paths are reviewed in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi.
+  The preceding menu followup restored 16 full topics after reviewing 32 reopened passages. Three wording lines improved;
+  other good wording retained. Finnish compose additions are now complete too; the remaining 11 full compose topics stay pending.
 - Scope totals are rebuilt from exact completed/pending ID and topic unions. Earlier summary arithmetic omitted
   four recorded catalog entries and twelve recorded help topics; correcting that discrepancy adds no review credit.
-- Source discovery covers 194 refs and six worktrees. `feat/preview-cid` at `6a37b3de` has 56 new translated
-  help passages; MCP phase3 has uncommitted translation changes in its own worktree. Both are tracked as incoming
-  sources and left untouched. Recheck them at the next checkpoint and integrate reviewed translations as appropriate.
-- All 28 current language structural checks have only expected missing/full-page review-mark diagnostics; all 16 changed languages were checked again after editing. Exact reconstruction verifies 32 reviewed passages in 16 topics, three wording lines improved, and unchanged tags, attributes, platform branches, controls, shortcuts and surrounding prose. All catalog and English files match the resumed source snapshot. Global --check reports 22045 unmarked entries and 11152 help lines, all accounted for by existing reviews and the recorded source delta. Pending marks, full IDs, variables, help inventories and file hashes reconcile. Static platform sentence joins inspected. Old German Linux and Mac compose screenshots lack the current protection controls and do not verify current menu layout; current source constructs establish the menu paths. No test suites, builds or GUI runs. REVIEWED unchanged.
+- Source discovery now covers 195 refs and six worktrees. `feat/preview-cid` at `6a37b3de` has 56 new translated
+  help passages. MCP phase3 translations were committed during the Finnish batch; the exact source commit and
+  added/changed IDs are recorded in `resumed_incoming_source_queue`. Both sources remain queued separately.
+  Recheck their latest tips and integration status at the next checkpoint.
+- Initial resumption checks covered all 28 languages; the latest Finnish batch checks and counts are recorded below.
 - The generated review report is `/Users/andris/Projects/PostalExpress/build/i18n-review.html`, regenerated from this checkout.
 - Review guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`, unchanged SHA-256 `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`.
   Starting commit remains `e99f7e59248bed137903150db7ef417e27755d18` and review baseline remains `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
@@ -35,6 +36,9 @@ Commit completed batches regularly and preserve an exact resume point.
   without redirecting their root and checking their assumptions.
 - Standing publication authorization: push and merge each validated batch into GitHub master, then fetch and
   fast-forward this clean review branch. No local test suites and no manually launched CI runs.
+
+- Latest batch: Finnish, 40 catalog entries and two help targets reviewed; 17 values and 14 help wording lines improved. Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables, plural branches and all prior writing-help prose are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.
+- Publication checkpoint: [PR #160](https://github.com/postalsys/inbox-classic/pull/160) merged the resumed queue and 16-language menu followup as `cc54e353`; this worktree was synchronized before Finnish.
 
 ## Review and checkpoint rules
 
@@ -2660,3 +2664,15 @@ Reviewed the two menu-navigation passages in each of de/es/et/fr/nl/it/pt/pt-BR/
 All 28 current language structural checks have only expected missing/full-page review-mark diagnostics; all 16 changed languages were checked again after editing. Exact reconstruction verifies 32 reviewed passages in 16 topics, three wording lines improved, and unchanged tags, attributes, platform branches, controls, shortcuts and surrounding prose. All catalog and English files match the resumed source snapshot. Global --check reports 22045 unmarked entries and 11152 help lines, all accounted for by existing reviews and the recorded source delta. Pending marks, full IDs, variables, help inventories and file hashes reconcile. Static platform sentence joins inspected. Old German Linux and Mac compose screenshots lack the current protection controls and do not verify current menu layout; current source constructs establish the menu paths. No test suites, builds or GUI runs. REVIEWED unchanged.
 
 Completed: 22,011 catalog entries and 747 full topics. Pending: 13,613 entries and 625 topics. Review Finnish compose additions, then hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch. Watch feat/preview-cid and the MCP phase3 worktree for committed/merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.
+
+### Finnish compose signing, encryption and recipient keys
+
+Reviewed all 40 compose additions and both help targets. Improved 17 core values while retaining all 17 app labels and six good core values. Corrected protection timing, signature integrity versus verified key ownership, usable-key guidance, encrypted replies/attachments, and keys used to encrypt content. Help now covers platform menus, status colors, disabled unencrypted sending, sender-only encrypted drafts and encrypted sent copies. The writing-help insertion explicitly says digital signing; earlier prose is unchanged. Finnish terminology is recorded in the glossary.
+
+Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables, plural branches and all prior writing-help prose are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.
+
+Publication checkpoint: [PR #160](https://github.com/postalsys/inbox-classic/pull/160) merged as `cc54e353` on November 18 at 13:49 UTC; the review worktree was synchronized before this batch.
+
+Completed: 22,051 catalog entries and 749 full topics. Pending: 13,573 entries and 623 topics. Historical catalog improvements: 4210.
+
+Review Croatian compose additions, then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.
