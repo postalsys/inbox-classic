@@ -357,29 +357,62 @@ void Preview::EndPreviews() {
     }
 }
 
+namespace {
+
+// whether the menu's target is a picture the core drew: one served from /pv/, or one whose address WebView2 does not
+// tell (it gives none for a picture in a link, and every picture of the text is the core's but those of the internet
+// after Download Pictures)
+bool CorePicture(ICoreWebView2ContextMenuTarget* target) {
+    COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND kind = COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND_PAGE;
+    BOOL has = FALSE;
+    LPWSTR uri = nullptr;
+    if (FAILED(target->get_Kind(&kind)) || kind != COREWEBVIEW2_CONTEXT_MENU_TARGET_KIND_IMAGE) {
+        return false;
+    }
+    if (FAILED(target->get_HasSourceUri(&has)) || !has || FAILED(target->get_SourceUri(&uri))) {
+        return true;
+    }
+    bool preview = StartsWith(uri, kPreviewsUrl);
+    CoTaskMemFree(uri);
+    return preview;
+}
+
+// whether the menu's target is in a preview's link (inboxclassic:attachment-), which only the app opens
+bool PreviewLink(ICoreWebView2ContextMenuTarget* target) {
+    BOOL has = FALSE;
+    LPWSTR uri = nullptr;
+    if (FAILED(target->get_HasLinkUri(&has)) || !has || FAILED(target->get_LinkUri(&uri))) {
+        return false;
+    }
+    bool preview = StartsWith(uri, L"inboxclassic:attachment-");
+    CoTaskMemFree(uri);
+    return preview;
+}
+
+}  // namespace
+
 void Preview::TrimMenu() {
     ComPtr<ICoreWebView2_11> view;
     if (FAILED(view_.As(&view))) {
         return;
     }
     view->add_ContextMenuRequested(
-        Callback<ICoreWebView2ContextMenuRequestedEventHandler>([](ICoreWebView2*, ICoreWebView2ContextMenuRequestedEventArgs* args) {
+        Callback<ICoreWebView2ContextMenuRequestedEventHandler>([this](ICoreWebView2*, ICoreWebView2ContextMenuRequestedEventArgs* args) {
+            testMenu_ = 1000;
             ComPtr<ICoreWebView2ContextMenuTarget> target;
-            BOOL hasSource = FALSE;
-            LPWSTR source = nullptr;
-            if (FAILED(args->get_ContextMenuTarget(&target)) || !target || FAILED(target->get_HasSourceUri(&hasSource)) || !hasSource ||
-                FAILED(target->get_SourceUri(&source))) {
+            if (FAILED(args->get_ContextMenuTarget(&target)) || !target) {
                 return S_OK;
             }
-            bool preview = StartsWith(source, kPreviewsUrl);
-            CoTaskMemFree(source);
+            // a picture the core drew (a preview of a file, or a picture in the text) is Inbox Classic's copy, not
+            // the file: nothing saves or opens it as if it were, Copy Image stays; a preview's link opens the file in
+            // the app, nothing copies or opens it elsewhere, while a picture's link to the web keeps its items
+            bool image = CorePicture(target.Get());
+            bool link = PreviewLink(target.Get());
             ComPtr<ICoreWebView2ContextMenuItemCollection> items;
             UINT32 count = 0;
-            if (!preview || FAILED(args->get_MenuItems(&items)) || !items || FAILED(items->get_Count(&count))) {
+            if (FAILED(args->get_MenuItems(&items)) || !items || FAILED(items->get_Count(&count))) {
                 return S_OK;
             }
-            // a preview is Inbox Classic's copy of the file, not the file: nothing saves or opens it as if it were;
-            // Copy Image stays
             for (UINT32 i = count; i-- > 0;) {
                 ComPtr<ICoreWebView2ContextMenuItem> item;
                 LPWSTR name = nullptr;
@@ -388,10 +421,12 @@ void Preview::TrimMenu() {
                 }
                 std::wstring kind = name;
                 CoTaskMemFree(name);
-                bool image = kind.find(L"Image") != std::wstring::npos && kind != L"copyImage";
-                bool link = kind == L"saveLinkAs" || kind == L"copyLinkLocation" || kind == L"openLinkInNewWindow";
-                if (image || link) {
+                bool imageItem = kind.find(L"Image") != std::wstring::npos && kind != L"copyImage";
+                bool linkItem = kind == L"saveLinkAs" || kind == L"copyLinkLocation" || kind == L"openLinkInNewWindow";
+                if ((image && imageItem) || (link && linkItem)) {
                     items->RemoveValueAtIndex(i);
+                } else {
+                    testMenu_ += kind == L"copyLinkLocation" ? 100 : kind == L"copyImage" ? 10 : imageItem ? 1 : 0;
                 }
             }
             return S_OK;
@@ -400,9 +435,19 @@ void Preview::TrimMenu() {
 }
 
 int64_t Preview::TestPreviews(const std::wstring& query) {
+    if (query == L"menu") {
+        return testMenu_;
+    }
     std::wstring script;
     if (query == L"state") {
         script = kPreviewsState;
+    } else if (query == L"inline") {
+        // the pictures of the text: none from a data: or cid: address, the first served from /pv/ and its width
+        script = L"(()=>{const i=[...document.images],s=e=>e.getAttribute('src')||'',b=i[0];"
+                 L"return i.filter(e=>/^(data|cid):/i.test(s(e))).length*100000+"
+                 L"(b&&s(b).startsWith('/pv/')?10000:0)+(b&&b.complete?b.naturalWidth:0)})()";
+    } else if (query == L"banner") {
+        script = PreviewsPoint(L"document.images[0]");
     } else if (query == L"photo") {
         script = PreviewsPoint(L"f[0]&&f[0].querySelector('img')");
     } else if (query == L"second") {
@@ -455,7 +500,7 @@ int64_t Preview::TestPreviews(const std::wstring& query) {
                                              }).Get());
     }
     // a point in the pane, on the screen
-    if (answer > 0 && query != L"state" && query != L"overflow" && query != L"tiles" && !query.starts_with(L"scroll") &&
+    if (answer > 0 && query != L"state" && query != L"overflow" && query != L"tiles" && query != L"inline" && !query.starts_with(L"scroll") &&
         !query.starts_with(L"text:") && !query.starts_with(L"part:") &&
         !query.starts_with(L"partframe:")) {
         POINT origin = {bounds_.left, bounds_.top};

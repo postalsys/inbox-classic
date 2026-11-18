@@ -41,7 +41,10 @@ public:
     // link to all of a PDF file's pages, likewise), "overflow" (how far the page is wider than the pane); -1 before
     // there is an answer; "tiles" (the files shown as tiles times 100, plus how many of them say why), "scroll" (how
     // far down the document is scrolled, plus 1), "scroll:N" (scrolled to N, then as "scroll"), "text:WORDS" (2
-    // when the document's text has the words, letters, digits and spaces only, else 1)
+    // when the document's text has the words, letters, digits and spaces only, else 1), "inline" (the pictures of the
+    // text: 100,000 for each with a data: or cid: address, plus 10,000 when the first is served from /pv/, plus its
+    // width once loaded), "banner" (the middle of the text's first picture, as "photo"), "menu" (the items of the last
+    // context menu after TrimMenu: 1,000, plus 100 with Copy Link, 10 with Copy Image, 1 with any other image item)
     int64_t TestPreviews(const std::wstring& query);
     // the frames of the page shown sized again to their documents (the core's script, run by the app with the page's
     // own scripts off), when it is a page of parts
@@ -115,8 +118,8 @@ private:
     void EndPreviews();
     // the empty "not found" answer to a request (null without the environment)
     Microsoft::WRL::ComPtr<ICoreWebView2WebResourceResponse> NotFound() const;
-    // the reading pane's own menu: the browser's items for saving or opening a preview's picture taken off (the
-    // picture is Inbox Classic's copy, not the file)
+    // the reading pane's own menu: the browser's items for saving or opening a picture the core drew taken off (the
+    // picture is Inbox Classic's copy, not the file), and those of a preview's link; a link to the web keeps its own
     void TrimMenu();
 
     HWND parent_ = nullptr;
@@ -147,6 +150,8 @@ private:
     };
     std::map<uint64_t, Waiting> waiting_;
     std::map<std::wstring, int64_t> testPreviews_;
+    // what the last context menu offered, for the UI test ("menu")
+    int64_t testMenu_ = -1;
     int remoteRequests_ = 0;
     int64_t testFrames_ = -1;
     bool textZoom_ = true;
