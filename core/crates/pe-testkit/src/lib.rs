@@ -394,7 +394,18 @@ pub fn password() -> Credentials {
     }
 }
 
-/// Waits up to 10 seconds for an event `accept` takes, skipping others
+/// How long a test waits for an event or a state before it fails: long, as a shared CI runner can stall for many
+/// seconds, and a wait ends as soon as what it waits for comes, so a passing test is not slowed by it. 60 seconds,
+/// or `PE_TEST_PATIENCE` seconds. Not for asserting speed: a test of speed measures the time itself (docs/testing.md).
+pub fn patience() -> Duration {
+    let seconds = std::env::var("PE_TEST_PATIENCE")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(60);
+    Duration::from_secs(seconds)
+}
+
+/// Waits up to [`patience`] for an event `accept` takes, skipping others
 pub async fn wait_for(events: &mut UnboundedReceiver<Event>, mut accept: impl FnMut(&Event) -> bool) -> Event {
     let wait = async {
         loop {
@@ -404,9 +415,19 @@ pub async fn wait_for(events: &mut UnboundedReceiver<Event>, mut accept: impl Fn
             }
         }
     };
-    tokio::time::timeout(Duration::from_secs(10), wait)
-        .await
-        .expect("event within 10 seconds")
+    tokio::time::timeout(patience(), wait).await.expect("the event in time")
+}
+
+/// Waits up to [`patience`] for `done`, checking it every 25 ms
+pub fn eventually(done: impl Fn() -> bool, what: &str) {
+    let until = std::time::Instant::now() + patience();
+    while std::time::Instant::now() < until {
+        if done() {
+            return;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    assert!(done(), "did not get there: {what}");
 }
 
 /// The REST path of the messages of a mailbox, with `suffix` after it

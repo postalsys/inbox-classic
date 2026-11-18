@@ -7,10 +7,10 @@ use std::ffi::{CStr, CString, c_char, c_void};
 use std::ptr::null_mut;
 use std::sync::Mutex;
 use std::sync::mpsc::{Receiver, Sender, channel};
-use std::time::Duration;
 
 use base64::Engine;
 use pe_ffi::*;
+use pe_i18n::{Text, tr};
 use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
 use serde_json::json;
 
@@ -47,16 +47,24 @@ fn text(pointer: *const c_char) -> String {
     unsafe { CStr::from_ptr(pointer) }.to_str().unwrap().to_owned()
 }
 
+/// Waits up to [`pe_testkit::patience`] for an event `accept` takes, failing on a Failed event it does not take. An
+/// event of a kind that comes again and again (a folder changed) may be one of an earlier step: [`drain`] before the
+/// step, or wait for what it changes.
 fn wait(events: &Receiver<Copied>, accept: impl Fn(&Copied) -> bool) -> Copied {
+    let until = std::time::Instant::now() + pe_testkit::patience();
     loop {
-        let event = events
-            .recv_timeout(Duration::from_secs(10))
-            .expect("an event within 10 seconds");
+        let left = until.saturating_duration_since(std::time::Instant::now());
+        let event = events.recv_timeout(left).expect("the event in time");
         if accept(&event) {
             return event;
         }
         assert_ne!(event.kind, PeEventKind::Failed, "{event:?}");
     }
+}
+
+/// Discards the events told so far, so none of them can answer a wait for what the next step does
+fn drain(events: &Receiver<Copied>) {
+    while events.try_recv().is_ok() {}
 }
 
 #[test]
@@ -482,6 +490,7 @@ fn reads_mail_through_the_c_api() {
     // the server for agents starts once, for this store
     assert!(unsafe { pe_mcp_start(core) } && unsafe { pe_mcp_start(core) });
 
+    drain(&events);
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);
     let request = unsafe { pe_mark_read_start(core, PeMarkRead::Folder, inbox) };
@@ -838,25 +847,28 @@ fn sign_in_apps_through_the_c_api() {
         unsafe { pe_sign_in_app_save(core, app, &form, PeSecretChange::Set, secret.as_ptr(), null_mut()) },
         app
     );
-    let microsoft = c("https://login.microsoftonline.com/common/v2.0");
+    // another issuer: the provider of a second ImapKit, on this computer as the first (no internet in the tests)
+    let Some(other_server) = ImapKit::start(json!({ "oauth": {} })) else {
+        return;
+    };
+    let other = c(&other_server.oauth.clone().expect("ImapKit with its OAuth provider"));
     let moved = PeSignInAppForm {
-        issuer: microsoft.as_ptr(),
+        issuer: other.as_ptr(),
         ..form
     };
-    let check = unsafe { pe_sign_in_app_check(core, microsoft.as_ptr(), null_mut()) };
+    let check = unsafe { pe_sign_in_app_check(core, other.as_ptr(), null_mut()) };
     wait(&events, |e| e.kind == PeEventKind::SignInAppChecked && e.uid == check);
     let mut found = null_mut();
-    if unsafe { pe_sign_in_app_check_result(core, check, &mut found) } {
-        // only with the network: the check of Microsoft's issuer has to work for the save to get as far
-        let mut reason = null_mut();
-        assert_eq!(
-            unsafe { pe_sign_in_app_save(core, app, &moved, PeSecretChange::Keep, std::ptr::null(), &mut reason) },
-            0
-        );
-        assert!(text(reason).contains("client secret again"));
-        unsafe { pe_string_free(reason) };
-    }
+    // the check of the other issuer has to work for the save to get as far as the secret
+    assert!(unsafe { pe_sign_in_app_check_result(core, check, &mut found) });
     unsafe { pe_string_free(found) };
+    let mut reason = null_mut();
+    assert_eq!(
+        unsafe { pe_sign_in_app_save(core, app, &moved, PeSecretChange::Keep, std::ptr::null(), &mut reason) },
+        0
+    );
+    assert_eq!(text(reason), pe_core::sentence(&tr(Text::SignInAppIssuerChanged)));
+    unsafe { pe_string_free(reason) };
     assert_eq!(
         unsafe { pe_sign_in_app_save(core, app, &form, PeSecretChange::Remove, std::ptr::null(), null_mut()) },
         app

@@ -9,7 +9,7 @@ use std::time::Duration;
 use pe_core::timing::{Link, Served};
 use pe_core::{Action, Core, Event, FailureKind, MessageRef, Scope, Search};
 use pe_store::{AccountSettings, Sort, SortField};
-use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
+use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, eventually, patience, rfc822};
 use serde_json::json;
 
 struct Setup {
@@ -58,17 +58,35 @@ fn settings(server: &ImapKit) -> AccountSettings {
 }
 
 impl Setup {
-    /// Waits for an event `accept` takes, failing on a Failed event it does not take
+    /// Waits up to [`patience`] for an event `accept` takes, failing on a Failed event it does not take. An event of
+    /// a kind that comes again and again (FolderChanged, RulesApplied) may be one of an earlier step: wait for what
+    /// the step changes with [`Setup::wait_until`] instead, or [`Setup::drain`] before the step.
     fn wait(&self, accept: impl Fn(&Event) -> bool) -> Event {
+        let until = std::time::Instant::now() + patience();
         loop {
-            let event = self
-                .events
-                .recv_timeout(Duration::from_secs(10))
-                .expect("an event within 10 seconds");
+            let left = until.saturating_duration_since(std::time::Instant::now());
+            let event = self.events.recv_timeout(left).expect("the event in time");
             if accept(&event) {
                 return event;
             }
             assert!(!matches!(event, Event::Failed { .. }), "{event:?}");
+        }
+    }
+
+    /// Discards the events told so far, so none of them can answer a wait for what the next step does
+    fn drain(&self) {
+        while self.events.try_recv().is_ok() {}
+    }
+
+    /// Waits up to [`patience`] until `done` holds, looking again after every event (and every 100 ms), failing on a
+    /// Failed event: for what a step changes, which an event of an earlier step can not fake
+    fn wait_until(&self, done: impl Fn() -> bool, what: &str) {
+        let until = std::time::Instant::now() + patience();
+        while !done() {
+            assert!(std::time::Instant::now() < until, "did not get there: {what}");
+            if let Ok(event) = self.events.recv_timeout(Duration::from_millis(100)) {
+                assert!(!matches!(event, Event::Failed { .. }), "{event:?}");
+            }
         }
     }
 }
@@ -188,13 +206,7 @@ fn reads_mail_like_the_windows_do() {
                 .iter()
                 .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen")))
     };
-    for _ in 0..200 {
-        if all_seen(&s) {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    assert!(all_seen(&s), "{:?}", s.server.messages("INBOX"));
+    eventually(|| all_seen(&s), "every message read on the server");
     s.core.sync(account).unwrap();
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     assert_eq!(unread(&s), 0, "the sync keeps them read");
@@ -291,17 +303,6 @@ fn sent_items_and_drafts_list_the_recipients() {
         .map(|m| m.info.recipients)
         .collect();
     assert_eq!(listed, ["Adam", "Zoe"]);
-}
-
-/// Waits up to 10 seconds for `done`
-fn eventually(done: impl Fn() -> bool, what: &str) {
-    for _ in 0..400 {
-        if done() {
-            return;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    panic!("did not get there: {what}");
 }
 
 #[test]
@@ -813,12 +814,8 @@ fn all_inboxes_list_and_mark_every_account() {
     // mail arriving in the second account's Inbox is listed, newest first, and opens the window
     let newest = other_server.add_message("INBOX", &dated("Second's", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
     s.core.sync(second).unwrap();
-    s.wait(|e| {
-        *e == Event::FolderChanged {
-            account: second,
-            folder: inbox2,
-        }
-    });
+    // the message in the list, not a FolderChanged of that Inbox, which the first sync or IDLE may have told before
+    s.wait_until(|| subjects().len() == 2, "the new message listed");
     assert_eq!(subjects(), ["Second's", "First's"]);
     assert_eq!(s.core.count_search(&all).unwrap(), (2, 2));
     let start = pe_core::Start {
@@ -837,25 +834,20 @@ fn all_inboxes_list_and_mark_every_account() {
             .iter()
             .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen")))
     };
-    for _ in 0..200 {
-        if all_seen(&s.server) && all_seen(&other_server) {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    assert!(all_seen(&s.server) && all_seen(&other_server));
+    eventually(
+        || all_seen(&s.server) && all_seen(&other_server),
+        "both Inboxes read on their servers",
+    );
     assert_eq!(s.server.messages("Archive")[0]["flags"], json!([]), "only the Inboxes");
 
     // the account's Mark All Read: every folder of that account, no other account's
     other_server.add_message("INBOX", &dated("Second's again", "Wed, 8 Oct 2025 11:00:00 +0000"), &[]);
     s.core.sync(second).unwrap();
     // the message itself in the store, not just a change of that Inbox (the marking above makes some too)
-    for _ in 0..400 {
-        if s.core.count_search(&all).unwrap() == (3, 1) {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
+    s.wait_until(
+        || s.core.count_search(&all).unwrap() == (3, 1),
+        "the second new message stored",
+    );
     s.core.mark_account_read(first).unwrap();
     let archive_seen = || {
         s.server.messages("Archive")[0]["flags"]
@@ -863,13 +855,7 @@ fn all_inboxes_list_and_mark_every_account() {
             .unwrap()
             .contains(&json!("\\Seen"))
     };
-    for _ in 0..200 {
-        if archive_seen() {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    assert!(archive_seen(), "the first account's Archive is read");
+    eventually(archive_seen, "the first account's Archive read on its server");
     assert_eq!(
         s.core.count_search(&all).unwrap(),
         (3, 1),
@@ -1070,7 +1056,7 @@ fn signs_in_with_oauth() {
     // a message sent goes at once, as in the other tests
     core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
-        let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
+        let event = events.recv_timeout(patience()).expect("an event");
         if accept(&event) {
             return event;
         }
@@ -1180,7 +1166,7 @@ fn signs_in_with_a_sign_in_app() {
     // a message sent goes at once, as in the other tests
     core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
-        let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
+        let event = events.recv_timeout(patience()).expect("an event");
         if accept(&event) {
             return event;
         }
@@ -1377,7 +1363,7 @@ fn searches_the_local_index() {
     assert_eq!(s.core.count_search(&search).unwrap(), (2, 0));
     // the text of every message, fetched in the background after the sync (only the text parts, without marking
     // anything read or downloading the messages)
-    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    let deadline = std::time::Instant::now() + patience();
     while s.core.unindexed_count().unwrap() > 0 {
         assert!(std::time::Instant::now() < deadline, "the texts were not indexed");
         std::thread::sleep(Duration::from_millis(100));
@@ -1441,15 +1427,7 @@ fn flags_moves_and_deletes_messages() {
         subjects
     };
     // waits for the server to have what `done` checks
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..200 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("the server did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "the server did not get there");
 
     // a flag: in the store at once, on the server soon
     s.core.set_flag_many(inbox, &[flag], "\\Flagged", true).unwrap();
@@ -1541,15 +1519,7 @@ fn acts_on_selected_messages_and_undoes() {
     let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
     let (inbox, archive, trash, junk) = (id("INBOX"), id("Archive"), id("Trash"), id("Junk"));
     let at = |folder, uid| MessageRef { folder, uid };
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..400 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "did not get there");
     let in_store = |folder| -> Vec<String> {
         let mut subjects: Vec<String> = s
             .core
@@ -1724,15 +1694,7 @@ fn moves_and_copies_between_accounts() {
     };
     let (inbox, archive2) = (folder(first, "INBOX"), folder(second, "Archive"));
     let at = |folder, uid| MessageRef { folder, uid };
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..400 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "did not get there");
     let in_store = |folder| -> Vec<String> {
         let mut subjects: Vec<String> = s
             .core
@@ -1910,7 +1872,7 @@ fn messages_become_files() {
     );
     // none was opened: they are downloaded for the files, and kept
     assert!(!s.core.all_downloaded(&refs).unwrap());
-    let files = s.core.export_messages(&refs, Duration::from_secs(20)).unwrap();
+    let files = s.core.export_messages(&refs, patience()).unwrap();
     assert_eq!(files.len(), 3);
     let body = |f: &pe_core::Exported| String::from_utf8(f.source.clone().unwrap()).unwrap();
     assert!(body(&files[0]).contains("first") && body(&files[1]).contains("second"));
@@ -1919,10 +1881,7 @@ fn messages_become_files() {
     // saved into a folder, never over a file there
     let dir = TempDir::new("export");
     std::fs::write(dir.path().join("Other.eml"), "mine").unwrap();
-    let written = s
-        .core
-        .save_messages(&refs, dir.path(), Duration::from_secs(20))
-        .unwrap();
+    let written = s.core.save_messages(&refs, dir.path(), patience()).unwrap();
     let mut names: Vec<String> = written
         .iter()
         .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
@@ -1932,10 +1891,7 @@ fn messages_become_files() {
     assert_eq!(std::fs::read_to_string(dir.path().join("Other.eml")).unwrap(), "mine");
 
     // forwarded as attachments, the subject the first one's
-    let draft = s
-        .core
-        .forward_as_attachments(&refs[1..], Duration::from_secs(20))
-        .unwrap();
+    let draft = s.core.forward_as_attachments(&refs[1..], patience()).unwrap();
     assert_eq!(draft.subject, "Fw: Lunch");
     assert_eq!(draft.attachments.len(), 2);
     assert!(
@@ -1945,7 +1901,7 @@ fn messages_become_files() {
     );
 
     // for a drag: written into a folder of the user's own
-    let dragged = s.core.drag_files(&refs[..2], Duration::from_secs(20)).unwrap();
+    let dragged = s.core.drag_files(&refs[..2], patience()).unwrap();
     assert_eq!(dragged.len(), 2);
     assert!(std::fs::read_to_string(&dragged[1]).unwrap().contains("second"));
     // a file a drag promised: never over one there
@@ -1990,7 +1946,7 @@ fn messages_become_files() {
                 },
                 refs[2],
             ],
-            Duration::from_secs(20),
+            patience(),
         )
         .unwrap();
     assert!(files[0].source.is_err());
@@ -2019,15 +1975,7 @@ fn flags_in_colors_as_apple_mail_does() {
         .id;
     let at = |uid| MessageRef { folder: inbox, uid };
     let color = |uid| s.core.message(inbox, uid).unwrap().unwrap().info.flag_color();
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..400 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "did not get there");
     let has = |uid, flag: &str| s.server.flags("INBOX", uid).iter().any(|f| f == flag);
 
     // one flagged blue by Apple Mail reads as blue
@@ -2097,7 +2045,7 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     let mut seen = Vec::new();
     while failures < 2 || changes < 4 {
         let event = events
-            .recv_timeout(Duration::from_secs(60))
+            .recv_timeout(patience())
             .unwrap_or_else(|_| panic!("no more events after {seen:#?}"));
         seen.push((started.elapsed(), event.clone()));
         match event {
@@ -2173,7 +2121,7 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
     let mut said = None;
     let mut undone = None;
     while said.is_none() || undone.is_none() {
-        match s.events.recv_timeout(Duration::from_secs(30)).expect("events") {
+        match s.events.recv_timeout(patience()).expect("events") {
             Event::Acted { request: r, said: done } if r == request => said = Some(done),
             Event::ActionUndone {
                 account: a,
@@ -2207,7 +2155,7 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
     let mut said = None;
     let mut undone = None;
     while said.is_none() || undone.is_none() {
-        match s.events.recv_timeout(Duration::from_secs(30)).expect("events") {
+        match s.events.recv_timeout(patience()).expect("events") {
             Event::Acted { request: r, said: done } if r == request => said = Some(done),
             Event::ActionUndone { folder, text, .. } if folder == trash => undone = Some(text),
             Event::Failed { message, .. } => panic!("told as a bar, not as a failure: {message}"),
@@ -2330,7 +2278,7 @@ fn the_outbox_keeps_what_did_not_go() {
     };
     // what a send that did not go says, once it waits in the Outbox
     let failure = || loop {
-        if let Event::Failed { message, .. } = s.events.recv_timeout(Duration::from_secs(20)).expect("an event") {
+        if let Event::Failed { message, .. } = s.events.recv_timeout(patience()).expect("an event") {
             break message;
         }
     };
@@ -2611,18 +2559,10 @@ fn message_rules_sort_new_mail() {
         &[],
     );
     s.core.sync(account).unwrap();
-    // in one sync or two: IDLE can see the first delivery before the second is made
-    let applied = std::cell::Cell::new(0);
-    s.wait(|e| {
-        if let Event::RulesApplied { account: a, count } = e
-            && *a == account
-        {
-            applied.set(applied.get() + count);
-        }
-        applied.get() == 2
-    });
+    // in one sync or two (IDLE can see the first delivery before the second is made), each telling RulesApplied with
+    // its own count: what the rules did is waited for, not a sum of events
     // the newsletter moved to Archive, read; Ann's message flagged for a word of its text, and for its sender
-    eventually(
+    s.wait_until(
         || s.server.subjects("Archive").contains(&"This week".to_string()),
         "the newsletter in Archive",
     );
@@ -2649,6 +2589,8 @@ fn message_rules_sort_new_mail() {
             ..rule("Read Ann", "from:ann")
         })
         .unwrap();
+    // what the syncs told before is not what this run tells
+    s.drain();
     s.core.apply_rule_now(id_read).unwrap();
     s.wait(|e| matches!(e, Event::RulesApplied { account: a, count: 1 } if *a == account));
     eventually(
@@ -3058,9 +3000,7 @@ fn a_draft_follows_from_to_another_account() {
     outgoing.draft_account = Some(second);
     core.save_draft(first, outgoing.clone()).unwrap();
     loop {
-        let event = events
-            .recv_timeout(Duration::from_secs(20))
-            .expect("the failed save is told");
+        let event = events.recv_timeout(patience()).expect("the failed save is told");
         if matches!(event, Event::Failed { account, .. } if account == first) {
             break;
         }
@@ -3631,7 +3571,7 @@ fn rows_of_a_confirmed_contact_get_its_picture() {
             .unwrap()
     };
     // the background worker reads the verdicts after the sync
-    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    let deadline = std::time::Instant::now() + patience();
     while row("Confirmed").sender_auth == 0 {
         assert!(std::time::Instant::now() < deadline, "no verdict on the row");
         std::thread::sleep(Duration::from_millis(100));
@@ -4004,18 +3944,6 @@ fn sessions(server: &ImapKit) -> Vec<(u64, String)> {
         .collect()
 }
 
-/// The reader's session, once the three workers are connected and done: the main worker's and the background
-/// worker's have a folder selected, the reader's not before its first open
-fn reader_session(server: &ImapKit) -> Option<u64> {
-    let now = sessions(server);
-    let waiting: Vec<u64> = now
-        .iter()
-        .filter(|(_, state)| state == "Authenticated")
-        .map(|(number, _)| *number)
-        .collect();
-    (now.len() == 3 && waiting.len() == 1).then(|| waiting[0])
-}
-
 /// An account synced once, with these messages in its Inbox: (account, Inbox, their UIDs)
 fn synced_with(s: &Setup, subjects: &[&str]) -> (pe_store::AccountId, pe_store::FolderId, Vec<u64>) {
     let uids = subjects
@@ -4044,9 +3972,9 @@ fn open(s: &Setup, folder: pe_store::FolderId, uid: u64) {
 #[test]
 fn the_reader_is_connected_before_the_first_open() {
     let Some(s) = setup() else { return };
-    let (_, inbox, uids) = synced_with(&s, &["One"]);
+    let (account, inbox, uids) = synced_with(&s, &["One"]);
     eventually(
-        || reader_session(&s.server).is_some(),
+        || s.core.reader_ready(account),
         "the reader connects after the first sync",
     );
     open(&s, inbox, uids[0]);
@@ -4082,7 +4010,7 @@ fn a_dead_reader_connection_is_replaced_within_seconds() {
     s.core.open_message(inbox, uids[1]).unwrap();
     // the answer limit and a new connection: more than the 10 seconds of Setup::wait on a slow machine
     loop {
-        let event = s.events.recv_timeout(Duration::from_secs(20)).expect("the message");
+        let event = s.events.recv_timeout(patience()).expect("the message");
         if event
             == (Event::MessageReady {
                 folder: inbox,
@@ -4154,19 +4082,25 @@ fn finds(s: &Setup, folder: pe_store::FolderId, word: &str) -> bool {
 
 #[test]
 fn new_mail_shows_while_the_search_text_is_downloaded() {
-    // the text of the mail comes slowly: seconds for each batch
+    // the text of the mail comes slowly: many seconds for each batch
     let Some(s) = setup_with(json!({ "script": {
-        "on": "command", "match": "BODY\\.PEEK\\[1\\]", "delay": 3000
+        "on": "command", "match": "BODY\\.PEEK\\[1\\]", "delay": 10000
     } })) else {
         return;
     };
-    let (account, inbox, _) = synced_with(&s, &["One", "Two"]);
+    let (_, inbox, _) = synced_with(&s, &["One", "Two"]);
     // the main worker is on the Inbox meanwhile, not in the batch
     std::thread::sleep(Duration::from_millis(300));
     s.server.add_message("INBOX", &rfc822("Three", "x"), &[]);
-    let started = std::time::Instant::now();
-    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
-    assert!(started.elapsed() < Duration::from_secs(2), "{:?}", started.elapsed());
+    let listed = || {
+        s.core
+            .messages(inbox, Sort::default(), 0, 10)
+            .unwrap()
+            .iter()
+            .any(|m| m.info.subject == "Three")
+    };
+    s.wait_until(listed, "the new message listed");
+    assert!(!finds(&s, inbox, "Hello"), "the new mail waited for the search text");
     eventually(|| finds(&s, inbox, "Hello"), "the search text comes after");
 }
 
@@ -4326,8 +4260,8 @@ fn an_archived_message_keeps_its_downloaded_source() {
 
 #[test]
 fn a_draft_is_uploaded_on_a_connection_of_its_own() {
-    // the server takes its time with every upload
-    let Some(s) = setup_with(json!({ "script": { "on": "command", "command": "APPEND", "delay": 3000 } })) else {
+    // the server takes its time with every upload, far longer than a flag takes
+    let Some(s) = setup_with(json!({ "script": { "on": "command", "command": "APPEND", "delay": 8000 } })) else {
         return;
     };
     let (account, inbox, uids) = synced_with(&s, &["One"]);
@@ -4344,15 +4278,18 @@ fn a_draft_is_uploaded_on_a_connection_of_its_own() {
         ..outgoing
     };
     s.core.save_draft(account, again).unwrap();
-    // meanwhile the main worker does what the user asks at once
+    // meanwhile the main worker does what the user asks at once: read on the server before the first upload is done
     std::thread::sleep(Duration::from_millis(500));
-    let started = std::time::Instant::now();
     s.core.set_seen(inbox, uids[0], true).unwrap();
-    eventually(
-        || s.server.flags("INBOX", uids[0]).contains(&"\\Seen".to_string()),
-        "read on the server",
-    );
-    assert!(started.elapsed() < Duration::from_secs(2), "{:?}", started.elapsed());
+    let mut saved = Vec::new();
+    let until = std::time::Instant::now() + patience();
+    while !s.server.flags("INBOX", uids[0]).contains(&"\\Seen".to_string()) {
+        assert!(std::time::Instant::now() < until, "not read on the server");
+        if let Ok(event @ Event::DraftSaved { .. }) = s.events.recv_timeout(Duration::from_millis(100)) {
+            saved.push(event);
+        }
+    }
+    assert!(saved.is_empty(), "the flag waited for an upload: {saved:?}");
     for _ in 0..2 {
         let saved = s.wait(|e| matches!(e, Event::DraftSaved { .. }));
         assert!(matches!(saved, Event::DraftSaved { problem: None, .. }), "{saved:?}");
@@ -4363,29 +4300,30 @@ fn a_draft_is_uploaded_on_a_connection_of_its_own() {
 
 #[test]
 fn a_click_during_a_large_download_is_answered_first() {
-    // the first download of the whole message waits at the server
-    let Some(s) = setup_with(json!({ "script": {
-        "on": "command", "match": "BODY\\.PEEK\\[\\]", "delay": 4000, "times": 1
-    } })) else {
-        return;
-    };
+    let Some(s) = setup() else { return };
     let big = s
         .server
         .add_message("INBOX", &rfc822("Big", &"x".repeat(600 * 1024)), &[]);
     let (_, inbox, uids) = synced_with(&s, &["Small"]);
-    eventually(|| reader_session(&s.server).is_some(), "the reader connects");
+    // the download of the large one waits at the server, far longer than a new connection takes; aimed at its UID,
+    // as which download reaches the server first is not known
+    s.server.request(
+        "POST",
+        "/v1/script/rules",
+        Some(json!({
+            "on": "command", "command": "UID FETCH", "match": format!("UID FETCH {big} .*BODY\\.PEEK\\[\\]"),
+            "delay": 15000, "times": 1
+        })),
+    );
+    // the click on the large one marks the reader busy at once, whether it is connected yet or not: the next click
+    // goes to the spare reader and is answered while the large one still waits at the server
     s.core.open_message(inbox, big).unwrap();
-    std::thread::sleep(Duration::from_millis(500));
-    let started = std::time::Instant::now();
-    open(&s, inbox, uids[0]);
-    assert!(started.elapsed() < Duration::from_secs(3), "{:?}", started.elapsed());
+    s.core.open_message(inbox, uids[0]).unwrap();
+    let ready = |uid| Event::MessageReady { folder: inbox, uid };
+    let first = s.wait(|e| *e == ready(uids[0]) || *e == ready(big));
+    assert_eq!(first, ready(uids[0]), "the small one first");
     // and the large one still comes
-    s.wait(|e| {
-        *e == Event::MessageReady {
-            folder: inbox,
-            uid: big,
-        }
-    });
+    s.wait(|e| *e == ready(big));
 }
 
 // ---- large messages show their text first (phase 5) ----
@@ -4439,10 +4377,7 @@ fn a_large_message_shows_its_text_before_its_attachment() {
         "{progress:?}"
     );
     loop {
-        let event = s
-            .events
-            .recv_timeout(Duration::from_secs(20))
-            .expect("the whole message");
+        let event = s.events.recv_timeout(patience()).expect("the whole message");
         assert_ne!(
             event,
             Event::MessageReady {
@@ -4568,9 +4503,7 @@ fn core_trusting(dir: &TempDir, servers: &[&ImapKit]) -> (Core, Receiver<Event>)
 fn wait_synced(events: &Receiver<Event>, accounts: &[i64]) {
     let mut left: Vec<i64> = accounts.to_vec();
     while !left.is_empty() {
-        let event = events
-            .recv_timeout(Duration::from_secs(15))
-            .expect("a sync within 15 seconds");
+        let event = events.recv_timeout(patience()).expect("a sync in time");
         if let Event::SyncFinished { account, failure } = event {
             assert_eq!(failure, None, "account {account}");
             left.retain(|a| *a != account);
@@ -4637,9 +4570,7 @@ fn a_setup_moves_two_accounts_to_an_empty_store() {
         };
         b.send(account, outgoing).unwrap();
         loop {
-            let event = events_b
-                .recv_timeout(Duration::from_secs(15))
-                .expect("sent within 15 seconds");
+            let event = events_b.recv_timeout(patience()).expect("sent in time");
             assert!(
                 !matches!(event, Event::Failed { account: a, .. } if a == account),
                 "{event:?}"
