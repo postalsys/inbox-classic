@@ -257,7 +257,7 @@ ui-leave-mail = A leiratkozáshoz e-mailt kell küldeni ide: { $target }. Az Inb
 ui-leave-web = A levelezőlista leiratkozási oldala megnyílik a böngészőben ({ $target }).
 ui-unsubscribing = Leiratkozás: { $target }...
 ui-cannot-unsubscribe = Ez az üzenet nem kínál leiratkozási lehetőséget.
-ui-unsubscribed = A leiratkozási kérést elfogadták. A levelezőlista szerint nem küld több ilyen üzenetet.
+ui-unsubscribed = A leiratkozási kérést elfogadták.
 ui-not-unsubscribed = Nem sikerült leiratkozni: { $reason }
 ui-event-span = Kezdés: { $start }, befejezés: { $end }
 ui-event-floating = { $when } (a feladó helyi ideje)
@@ -416,7 +416,6 @@ ui-save-attachments = Mellékletek mentése
 ui-attachment-open = Megnyitás
 ui-attachment-save-as = Mentés másként...
 ui-attachment-save-all = Az összes mentése...
-# review: new
 ui-attachment-show-in-message = Megjelenítés az üzenetben
 ui-attachments-strip = Mellékletek
 ui-attachment-note-title = A fájl megnyitása
@@ -594,11 +593,8 @@ ui-download-limit = &Tárhelykorlát fiókonként:
 ui-send-delay = &Várakozás küldés előtt:
 ui-send-delay-note = Amíg az üzenet küldésre vár, a Visszavonás paranccsal leállíthatja a küldést.
 ui-dark-messages = Üzenetek sötét háttéren, ha a rendszer sötét módban van
-# review: new
 ui-preview-show = Mellékletek me&gjelenítése az üzenetekben
-# review: new
-ui-preview-show-note = Az üzenet szövege után megjeleníti a képeket és a PDF-fájlok első oldalait. Ezeket az előnézeteket az Inbox Classic maga készíti, így a fájlokban semmi sem tud elindulni.
-# review: new
+ui-preview-show-note = Az üzenet szövege után megjeleníti a képeket és a PDF-fájlok első oldalait. Az Inbox Classic maga készíti el az előnézeteket, a fájlokban lévő kód futtatása nélkül.
 ui-preview-pdfs = &PDF-fájlok megjelenítése az üzenetekben
 ui-sending-in = { $subject } elküldése { $count ->
     [one] 1 másodperc múlva

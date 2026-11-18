@@ -1,17 +1,17 @@
-<!--review--><h1>Tanúsítványhibák</h1>
-<p class="summary">Mi a teendő, ha az Inbox Classic nem tudja megerősíteni, hogy a valódi levelezőkiszolgálóval beszél.</p>
+<h1>Tanúsítványhibák</h1>
+<p class="summary">Mi a teendő, ha az Inbox Classic nem tudja ellenőrizni a levelezőkiszolgáló tanúsítványát.</p>
 <p>A következők egyikét láthatja:</p>
 <ul>
-    <li>Az állapotsorban: „TLS-hiba: …”</li>
+    <li>Az állapotsorban: „TLS error: …” (TLS-hiba)</li>
     <li>Az olvasóablakban: „Nem sikerült biztonságos kapcsolatot létesíteni a levelezőkiszolgálóval (…).”</li>
 </ul>
-<p>Az Inbox Classic nem tudta megerősíteni, hogy a kiszolgáló az, akinek mondja magát, ezért nem küldte el a jelszavát.</p>
+<p>Nem sikerült biztonságos kapcsolatot létrehozni. Ennek oka lehet a tanúsítvány hibája is. Az Inbox Classic ilyenkor megszakítja a kapcsolódást, mielőtt elküldené a bejelentkezési adatokat.</p>
 <p>A hiba javítása:</p>
 <ol>
     <li>Nyissa meg a fiók tulajdonságait itt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Ellenőrizze a kiszolgálók nevét. Ezeknek azoknak a neveknek kell lenniük, amelyekre a kiszolgáló tanúsítványa szól. Ez gyakran a szolgáltató neve, például <code>imap.provider.com</code>, nem az Ön saját tartománya.</li>
+    <li>Ellenőrizze a kiszolgálók nevét. A tanúsítványnak ezekre a nevekre kell szólnia. Gyakran a szolgáltató kiszolgálónevét kell megadni, például <code>imap.provider.com</code>, nem a saját e-mail-cím tartományát.</li>
     <li>Ellenőrizze, hogy a számítógép dátuma és ideje helyes-e.</li>
 </ol>
-<p>Ha olyan hálózaton van, amely vizsgálja a titkosított forgalmat, ahogy egyes munkahelyi vagy iskolai hálózatok teszik, forduljon a hálózat rendszergazdájához.</p>
-<aside class="note">Nincs olyan kapcsoló, amellyel bármilyen tanúsítvány elfogadható volna. Egy hamis tanúsítvány elfogadásával valaki a hálózaton elolvashatná a jelszavát és a leveleit.</aside>
-<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<p>Egyes munkahelyi és iskolai hálózatok ellenőrzik a titkosított forgalmat. Ha ilyen hálózaton jelentkezik a hiba, kérjen segítséget a rendszergazdától.</p>
+<aside class="note">Nincs olyan kapcsoló, amely minden tanúsítványt feltétel nélkül elfogadna. Hamis tanúsítvány elfogadásával egy támadó hozzáférhetne a bejelentkezési adatokhoz és a levelekhez.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>

@@ -1,20 +1,20 @@
-<!--review--><h1>Kézbesítetlen üzenetek</h1>
-<p class="summary">Ha egy elküldött üzenet visszapattan vagy késik, az Inbox Classic elmagyarázza, miért, és mit tehet.</p>
-<p>A kézbesítési értesítés mellett az üzenetlistában a kézbesítetlenséget jelző jel látható. Amikor megnyitja, egy kártya mutatja fölötte, hogy az üzenete nem lett kézbesítve, vagy csak késik.</p>
+<h1>Kézbesítési problémák</h1>
+<p class="summary">Az Inbox Classic a kézbesítési értesítés alapján segít megérteni, miért nem érkezett meg az elküldött levél, és mi a teendő.</p>
+<p>A felismert kézbesítési értesítést külön ikon jelzi az üzenetlistában. Megnyitásakor a fölötte látható kártya összefoglalja, hogy a kézbesítés sikertelen volt, vagy még késik.</p>
 <img src="picture:bounce-1-failed" alt="Kézbesítési értesítés egy kártyával, amely közli, hogy az üzenet nem lett kézbesítve, valamint a címzettet, az okot és a teendőt">
-<p>A kártya minden címzettnél közérthetően megadja az okot és a teendőt. A fogadó kiszolgáló saját szavait ez a rész mutatja: <b data-text="bounce-details"></b>.</p>
+<p>A kártya címzettenként összefoglalja az értesítésben szereplő okot és a javasolt teendőt. A kiszolgáló eredeti válaszát itt találja: <b data-text="bounce-details"></b>.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b>: kijelöli az elküldött üzenetet.</li>
-    <li>Késés esetén: <b data-text="bounce-show-delayed"></b>, ez kijelöli az üzenetet. A levelezőkiszolgálója még próbálkozik, így nem kell újra elküldenie.</li>
+    <li><b data-text="bounce-show-message"></b>: kijelöli az eredeti elküldött üzenetet, ha az megtalálható a fiókban.</li>
+    <li>Késés esetén az eredeti üzenetre ezzel a gombbal léphet: <b data-text="bounce-show-delayed"></b>. A késési értesítés szerint a kiszolgáló tovább próbálkozik, ezért egyelőre ne küldje el újra.</li>
 </ul>
 <p>Néhány gyakori ok:</p>
 <table>
     <tr><th>A kártya szövege</th><th>Teendő</th></tr>
-    <tr><td><b data-text="bounce-user-unknown"></b></td><td>Ellenőrizze a cím helyesírását, vagy kérdezze meg a címzettet, melyik címet használja most.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Küldje el újra néhány nap múlva, vagy érje el a címzettet más módon.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Küldje el újra a levélszemétnek tűnő részek nélkül, például sok hivatkozás vagy nagy melléklet nélkül.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Továbbítsa az értesítést a levelezési szolgáltatójának. Nem az üzenettel van a gond.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Semmi. Általában egy órán belül kézbesítésre kerül.</td></tr>
+    <tr><td><b data-text="bounce-user-unknown"></b></td><td>Ellenőrizze, nincs-e elírás a címben, vagy kérdezze meg a címzettet, melyik címen érhető el.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Ha a kézbesítés végleg meghiúsult, próbálja meg később újra, vagy keresse a címzettet más módon.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Nézze meg a kiszolgáló indoklását. Ha a kézbesítés végleg meghiúsult, ellenőrizze az üzenet tartalmát és hivatkozásait, majd szükség esetén kérjen segítséget a szolgáltatótól.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Továbbítsa az értesítést a levelezési szolgáltatójának. A jelzett tiltás a küldő kiszolgáló címét érinti.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Egyelőre nincs teendő. A fogadó kiszolgáló későbbi újrapróbálkozást kér; ezt a küldő kiszolgáló intézi.</td></tr>
 </table>
-<p>Az összes kézbesítési értesítés megkereséséhez keressen erre: <code>is:bounce</code>. Az okot a számítógépe állapítja meg, és semmi sem kerül el sehova.</p>
-<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<p>A felismert kézbesítési értesítéseket ezzel keresheti meg: <code>is:bounce</code>. Az Inbox Classic helyben elemzi az értesítés tartalmát, ehhez nem küldi el külső szolgáltatásnak.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

@@ -1,18 +1,17 @@
-<!--review--><h1>Leiratkozás levelezőlistáról</h1>
-<p class="summary">Állítsa le egy levelezőlista üzeneteit a Leiratkozás gombbal.</p>
-<p>Ha egy levelezőlista üzenete megadja, hogyan lehet leiratkozni róla, a fejléce jobb oldalán megjelenik ez a gomb: <b data-text="ui-unsubscribe"></b>.</p>
+<h1>Leiratkozás levelezőlistáról</h1>
+<p class="summary">Kérje a levelezőlistáról való leiratkozást az üzenet fejlécében lévő gombbal.</p>
+<p>Ha az üzenet használható leiratkozási adatokat tartalmaz, a fejléc jobb oldalán megjelenik a <b data-text="ui-unsubscribe"></b> gomb.</p>
 <p>Leiratkozás a listáról:</p>
 <ol>
-    <li>Kattintson a <b data-text="ui-unsubscribe"></b> gombra. Az Inbox Classic elmondja, mi fog történni, és előbb rákérdez.</li>
-    <li>Erősítse meg. A listától függően három dolog egyike történik:
+    <li>Kattintson a <b data-text="ui-unsubscribe"></b> gombra. Az Inbox Classic megmutatja, hová és hogyan jut el a kérés, majd megerősítést kér.</li>
+    <li>Erősítse meg a műveletet. A lista által megadott módtól függően az alábbiak egyike történik:
         <ul>
-            <li>Az Inbox Classic kéri a listát, hogy ne küldjön több levelet. Nem nyílik meg oldal, és nem megy el üzenet.</li>
-            <li>Az Inbox Classic megírja a lista által kért üzenetet. Kattintson a <b data-text="ui-tb-send"></b> gombra az elküldéséhez.</li>
-            <li>A lista oldala megnyílik a böngészőben, és ott fejezi be.</li>
+            <li>Az Inbox Classic közvetlenül, az interneten küldi el a leiratkozási kérést. Nem nyit böngészőlapot, és nem küld e-mailt.</li>
+            <li>Az Inbox Classic előkészíti a listának küldendő leiratkozási üzenetet. Elküldéséhez kattintson a <b data-text="ui-tb-send"></b> gombra.</li>
+            <li>A böngészőben megnyílik a lista oldala. Kövesse az ottani leiratkozási lépéseket.</li>
         </ul>
     </li>
 </ol>
-<p>Az állapotsor jelzi, ha a lista elfogadta a kérést.</p>
-<aside class="note">Az Inbox Classic csak akkor kéri magától a leiratkozást, ha az üzenetet a lista kiszolgálója írta alá. Egy kitalált üzenettel így senki más nem érhető el.</aside>
+<p>A közvetlenül küldött kérés eredményét az állapotsor jelzi. A sikeres visszajelzés a kérés elfogadását jelenti; a leiratkozás feldolgozása a listától függ.</p>
+<aside class="note">A közvetlen leiratkozási kérést az Inbox Classic csak akkor kínálja fel, ha a levelezési szolgáltató érvényesnek találta az üzenet digitális aláírását, és az a leiratkozási adatokat is védi. A kérés elküldéséhez ekkor is megerősítés szükséges.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

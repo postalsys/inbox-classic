@@ -23,7 +23,6 @@ menu-sort-by = &Сортувати за
 menu-text-size = Розмір &тексту
 # review: new
 menu-folder = &Папка
-# review: new
 menu-insert = Вс&тавлення
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -186,12 +185,9 @@ cmd-export-address-book = &Експортувати адресну книгу...
 cmd-export-setup = Експортувати параметри й &облікові записи...
 # review: new
 cmd-import-setup = Імпортувати пара&метри й облікові записи...
-# review: new
 cmd-compose-sign = &Підписати цифровим підписом
-# review: new
 cmd-compose-encrypt = &Зашифрувати
-# review: new
-cmd-attach-my-key = Вкласти мій &відкритий ключ
+cmd-attach-my-key = Вкласти свій &відкритий ключ
 
 ## The tray icon's menu
 
@@ -415,11 +411,8 @@ ui-tb-send = Надіслати
 ui-tb-save = Зберегти
 # review: new
 ui-tb-attach = Вкласти
-# review: new
 ui-tb-sign = Підписати
-# review: new
 ui-tb-encrypt = Зашифрувати
-# review: new
 ui-field-keys = Ключі:
 # review: new
 ui-field-from = Від:
@@ -1369,25 +1362,15 @@ ui-contact-key-none = Немає ключа
 ui-contact-key-use-new = Використати &новий ключ
 # review: new
 ui-contact-key-keep = &Залишити поточний
-# review: new
 ui-recipient-keys-title = Ключі одержувачів
-# review: new
 ui-recipient-col-recipient = Одержувач
-# review: new
 ui-recipient-col-key = Ключ
-# review: new
-ui-recipient-find-key = &Знайти ключ
-# review: new
+ui-recipient-find-key = Знайти &ключ
 ui-recipient-remove = &Вилучити з повідомлення
-# review: new
 ui-send-unencrypted = Надіслати &без шифрування
-# review: new
 ui-compose-make-key = Ст&ворити ключ...
-# review: new
 ui-compose-show-keys = &Ключі шифрування...
-# review: new
 ui-compose-encrypt-off = &Вимкнути шифрування
-# review: new
 ui-compose-keep-encrypted = &Залишити зашифрованим
 # review: new
 ui-setup-export-title = Експорт параметрів і облікових записів

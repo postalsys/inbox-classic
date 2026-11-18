@@ -1238,62 +1238,52 @@ pgp-publish-failed = Ključa ni bilo mogoče objaviti: { $error }
 # review: changed
 pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno v { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [1] Šifrirano in podpisano: prebrati ga lahko samo vi in { $addresses }.
-   *[other] Šifrirano in podpisano: prebrati ga lahko samo vi in njegovi prejemniki ({ $count }).
+    [1] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $addresses }.
+    [one] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemnik.
+    [two] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemnika.
+    [few] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemniki.
+   *[other] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemnikov.
 }
-# review: new
-pgp-compose-encrypt-ready = Sporočilo bo šifrirano in podpisano. Dodajte prejemnike, katerih ključe imate.
-# review: new
+pgp-compose-encrypt-ready = Ob pošiljanju bo sporočilo šifrirano in digitalno podpisano. Dodajte prejemnike, katerih ključe imate.
 pgp-compose-missing = { $count ->
-    [1] { $addresses } nima ključa, zato sporočila še ni mogoče šifrirati.
-   *[other] Prejemniki brez ključa ({ $count }): { $addresses }. Zato sporočila še ni mogoče šifrirati.
+    [1] Prejemnik nima uporabnega ključa: { $addresses }. Sporočila še ni mogoče šifrirati.
+    [one] { $count } prejemnik nima uporabnega ključa: { $addresses }. Sporočila še ni mogoče šifrirati.
+    [two] { $count } prejemnika nimata uporabnih ključev: { $addresses }. Sporočila še ni mogoče šifrirati.
+    [few] { $count } prejemniki nimajo uporabnih ključev: { $addresses }. Sporočila še ni mogoče šifrirati.
+   *[other] { $count } prejemnikov nima uporabnih ključev: { $addresses }. Sporočila še ni mogoče šifrirati.
 }
-# review: new
-pgp-compose-looking = Iskanje ključev za { $addresses }...
-# review: new
-pgp-compose-signed = Podpisano: prejemniki lahko preverijo, da je od vas in da ni bilo spremenjeno.
-# review: new
-pgp-compose-reply-clear = Ni šifrirano, čeprav je bilo sporočilo, na katero odgovarja ali ki ga posreduje, šifrirano.
-# review: new
-pgp-compose-encrypted-files = Pripete so datoteke šifriranega sporočila, zato je to sporočilo mogoče poslati samo šifrirano. Vklopite Šifriraj ali odstranite te datoteke.
-# review: new
-pgp-compose-sign-tip = Podpišite sporočilo s svojim ključem, da lahko prejemniki preverijo, da je od vas in da ni bilo spremenjeno
-# review: new
-pgp-compose-sign-tip-encrypted = Šifrirano sporočilo je vedno podpisano
-# review: new
-pgp-compose-encrypt-tip = Šifrirajte sporočilo, da ga lahko preberete samo vi in njegovi prejemniki
-# review: new
-pgp-compose-make-key = Za { $address } še nimate ključa. Ga želite ustvariti zdaj? Z njim lahko svoja sporočila podpisujete in šifrirate.
-# review: new
-pgp-compose-key-unusable = Vašega ključa za { $address } ni mogoče uporabiti ({ $state }). Odprite okno Šifrirni ključi, da uvozite njegovo varnostno kopijo ali ustvarite nov ključ.
-# review: new
-pgp-compose-encrypt-off-quote = To sporočilo navaja ali posreduje šifrirano sporočilo. Brez šifriranja ga ni mogoče poslati, dokler ne odstranite navedenega. Ali želite kljub temu izklopiti šifriranje?
-# review: new
-pgp-compose-encrypt-off-reply = To sporočilo odgovarja na šifrirano sporočilo ali ga posreduje. Brez šifriranja lahko vaše sporočilo prebere vsak, ki ga obravnava na poti. Ali želite izklopiti šifriranje?
-# review: new
-pgp-recipient-verified = Ključ preverjen
-# review: new
-pgp-recipient-found = Ključ ni preverjen
-# review: new
+pgp-compose-looking = Iskanje ključev prejemnikov: { $addresses }...
+pgp-compose-signed = Sporočilo bo ob pošiljanju digitalno podpisano. Prejemniki bodo lahko preverili, ali se je vsebina po podpisu spremenila.
+pgp-compose-reply-clear = Sporočilo bo poslano brez šifriranja, čeprav je bilo izvirno sporočilo šifrirano.
+pgp-compose-encrypted-files = Sporočilo vsebuje priponke iz šifriranega sporočila, zato ga ni mogoče poslati brez šifriranja. Vklopite možnost »Šifriraj« ali odstranite te priponke.
+pgp-compose-sign-tip = Digitalno podpišite sporočilo s svojim ključem, da bodo prejemniki lahko preverili, ali se je njegova vsebina po podpisu spremenila
+pgp-compose-sign-tip-encrypted = Sporočila, poslana v šifrirani obliki, so tudi digitalno podpisana
+pgp-compose-encrypt-tip = Šifrirajte vsebino sporočila, da bo dostopna le vam in prejemnikom
+pgp-compose-make-key = Za naslov { $address } še nimate lastnega ključa. Ga želite ustvariti zdaj? Z njim boste lahko digitalno podpisovali in šifrirali sporočila.
+pgp-compose-key-unusable =
+    Vašega ključa za naslov { $address } ni mogoče uporabiti.
+
+    Razlog: { $state }
+
+    Odprite okno »Šifrirni ključi«, da uvozite varnostno kopijo tega ključa ali ustvarite nov ključ.
+pgp-compose-encrypt-off-quote = Sporočilo vsebuje besedilo, slike ali priponke iz šifriranega sporočila. Brez šifriranja ga lahko pošljete šele, ko odstranite to vsebino. Ali želite kljub temu izklopiti šifriranje?
+pgp-compose-encrypt-off-reply = Odgovarjate na šifrirano sporočilo ali ga posredujete. Brez šifriranja lahko vsebino vašega sporočila preberejo tudi strežniki, prek katerih potuje. Ali želite izklopiti šifriranje?
+pgp-recipient-verified = Lastnik ključa je potrjen
+pgp-recipient-found = Lastnik ključa ni potrjen
 pgp-recipient-own = Vaš ključ
-# review: new
 pgp-recipient-looking = Iskanje ključa...
-# review: new
 pgp-recipient-missing = Ni ključa
-# review: new
-pgp-recipient-not-found = Ni ključa: { $date } ni bil najden noben
-# review: new
+pgp-recipient-not-found = Ključ ni bil najden. Zadnje iskanje: { $date }
 pgp-recipient-unusable = Ključa ni mogoče uporabiti: { $state }
-# review: new
-pgp-recipients-intro = Sporočilo je šifrirano s ključem vsakega prejemnika in z vašim.
-# review: new
+pgp-recipients-intro = Ob pošiljanju se sporočilo šifrira s ključi prejemnikov in z vašim ključem.
 pgp-recipients-intro-missing = { $count ->
-    [one] { $count } prejemnik nima ključa za šifriranje. Poiščite njegov ključ, ga odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
-    [two] { $count } prejemnika nimata ključa za šifriranje. Poiščite njuna ključa, ju odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
-    [few] { $count } prejemniki nimajo ključa za šifriranje. Poiščite njihove ključe, jih odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
-   *[other] { $count } prejemnikov nima ključa za šifriranje. Poiščite njihove ključe, jih odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
+    [1] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite njegov ključ, odstranite prejemnika iz sporočila ali sporočilo pošljite brez šifriranja.
+    [2] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite njuna ključa, odstranite oba prejemnika iz sporočila ali sporočilo pošljite brez šifriranja.
+    [one] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
+    [two] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
+    [few] { $count } prejemniki nimajo uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
+   *[other] { $count } prejemnikov nima uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
 }
 # review: new
 pgp-details-part = Del { $number }: { $label }

@@ -1,15 +1,14 @@
-<!--review--><h1>Egy névjegy kulcsának ellenőrzése</h1>
-<p class="summary">Vesse össze a kulcs ujjlenyomatát a tulajdonosával, hogy biztos legyen benne, valóban az övé a kulcs.</p>
-<p>Egy kulcs bárhonnan származhat: üzenetből, kulcskiszolgálóról, fájlból. Bárki készíthet kulcsot a névjegye nevével és címével. Az ellenőrzés megerősíti, hogy az Ön kulcsa ugyanaz, mint ami a névjegy tulajdonosánál van.</p>
+<h1>Kulcs tulajdonosának ellenőrzése</h1>
+<p class="summary">Egyeztesse a kulcs ujjlenyomatát a tulajdonosával, hogy meggyőződjön arról, valóban hozzá tartozik.</p>
+<p>Kulcsot üzenetből, kulcskiszolgálóról vagy fájlból is kaphat. Bárki létrehozhat kulcsot más nevével és címével. Az ellenőrzéssel azt erősíti meg, hogy a tárolt kulcs megegyezik a másik fél saját kulcsával, és a felsorolt címek is hozzá tartoznak.</p>
 <p>Kulcs ellenőrzése:</p>
 <ol>
-    <li>Válassza az <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> parancsot, jelölje ki a névjegy kulcsát, és kattintson erre: <b data-text="ui-keys-verify"></b>. Ugyanezt a Címjegyzékben, a névjegy tulajdonságaiban is megteheti.</li>
-    <li>Kérje meg az ismerősét, hogy olvassa fel a kulcsa ujjlenyomatát a saját alkalmazásából, személyesen vagy hívás közben.</li>
-    <li>Ha minden négyes csoport egyezik, kattintson erre: <b data-text="ui-verify-match"></b>. A kulcs ellenőrzöttként jelenik meg.</li>
-    <li>Az ablak felsorolja, mely címeket jelöli így meg. Egy kulcs bármilyen címet tartalmazhat, ezért ha valamelyik nem az ismerősé, inkább erre kattintson: <b data-text="ui-verify-differ"></b>.</li>
+    <li>Válassza ezt: <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>. Jelölje ki a másik fél kulcsát, és kattintson az <b data-text="ui-keys-verify"></b> gombra. Ez a Címjegyzékben, a névjegy tulajdonságaiból is elérhető.</li>
+    <li>Kérje meg a másik felet, hogy személyesen vagy telefonon olvassa fel a kulcsa ujjlenyomatát a saját alkalmazásából. Ellenőrizze azt is, hogy az ablakban felsorolt összes cím hozzá tartozik-e.</li>
+    <li>Ha az ujjlenyomat minden négy karakterből álló csoportja egyezik, és az összes felsorolt cím a másik félhez tartozik, kattintson az <b data-text="ui-verify-match"></b> gombra. A program a kulcs összes felsorolt címét ellenőrzöttként jelöli meg.</li>
+    <li>Ha bármelyik cím másvalakié, egyező ujjlenyomat esetén is a <b data-text="ui-verify-differ"></b> gombot válassza.</li>
 </ol>
-<aside class="warning">Ne vesse össze az ujjlenyomatot e-mailben kapottal. Aki egy üzenetben ki tudja cserélni a kulcsot, az ujjlenyomatot is ki tudja cserélni.</aside>
-<p>Ha az ujjlenyomatok eltérnek, kattintson erre: <b data-text="ui-verify-differ"></b>. Az Ön kulcsa nem az ismerősé: távolítsa el, és kérje meg az ismerősét, hogy küldje el újra a kulcsát.</p>
-<p>Az ellenőrzött kulccsal készült aláírások zölden jelennek meg. A nem ellenőrzött kulcs is használható titkosításra, az aláírásai kéken jelennek meg.</p>
+<aside class="warning">Ne e-mailben kapott ujjlenyomattal hasonlítsa össze a tárolt kulcsét. Aki az üzenetben kicserélheti a kulcsot, az ujjlenyomatot is kicserélheti.</aside>
+<p>Eltérő ujjlenyomatok esetén kattintson a <b data-text="ui-verify-differ"></b> gombra. A tárolt kulcs nem egyezik a másik fél kulcsával. Távolítsa el, és kérje el tőle újra a helyes kulcsot.</p>
+<p>A feladó érvényes digitális aláírását zöld jelzés mutatja, ha a kulcs tulajdonosát ellenőrizte, és kék, ha még nem. Az ellenőrizetlen tulajdonosú kulcs is használható titkosításra, ha egyébként érvényes és alkalmas rá.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

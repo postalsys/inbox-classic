@@ -1237,60 +1237,44 @@ pgp-publish-failed = Nie udało się opublikować klucza: { $error }
 # review: changed
 pgp-keyserver-off = Wyszukiwanie kluczy na keys.openpgp.org jest wyłączone w { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Zaszyfrowana i podpisana: mogą ją przeczytać tylko Ty i { $addresses }.
-   *[other] Zaszyfrowana i podpisana: mogą ją przeczytać tylko Ty i jej odbiorcy ({ $count }).
+    [one] Wiadomość zostanie wysłana zaszyfrowana i podpisana cyfrowo. Treść będzie dostępna tylko dla Ciebie i odbiorcy: { $addresses }.
+   *[other] Wiadomość zostanie wysłana zaszyfrowana i podpisana cyfrowo. Treść będzie dostępna tylko dla Ciebie i odbiorców ({ $count }).
 }
-# review: new
 pgp-compose-encrypt-ready = Zostanie zaszyfrowana i podpisana. Dodaj odbiorców, których klucze masz.
-# review: new
 pgp-compose-missing = { $count ->
-    [one] { $addresses } nie ma klucza, więc nie można jeszcze zaszyfrować wiadomości.
-   *[other] Odbiorcy bez klucza ({ $count }): { $addresses }. Nie można jeszcze zaszyfrować wiadomości.
+    [one] Brak odpowiedniego klucza dla odbiorcy: { $addresses }. Nie można jeszcze zaszyfrować wiadomości.
+   *[other] Odbiorcy bez odpowiedniego klucza ({ $count }): { $addresses }. Nie można jeszcze zaszyfrować wiadomości.
 }
-# review: new
 pgp-compose-looking = Wyszukiwanie kluczy dla: { $addresses }...
-# review: new
-pgp-compose-signed = Podpisana: odbiorcy mogą sprawdzić, że pochodzi od Ciebie i nie została zmieniona.
-# review: new
-pgp-compose-reply-clear = Niezaszyfrowana, choć wiadomość, na którą odpowiada lub którą przekazuje, była zaszyfrowana.
-# review: new
-pgp-compose-encrypted-files = Załączono pliki zaszyfrowanej wiadomości, więc tę wiadomość można wysłać tylko zaszyfrowaną. Włącz Szyfruj albo usuń te pliki.
-# review: new
-pgp-compose-sign-tip = Podpisz wiadomość swoim kluczem, aby odbiorcy mogli sprawdzić, że pochodzi od Ciebie i nie została zmieniona
-# review: new
-pgp-compose-sign-tip-encrypted = Zaszyfrowana wiadomość jest zawsze podpisana
-# review: new
-pgp-compose-encrypt-tip = Zaszyfruj wiadomość, aby mogli ją przeczytać tylko Ty i jej odbiorcy
-# review: new
-pgp-compose-make-key = Nie masz jeszcze klucza dla { $address }. Utworzyć go teraz? Dzięki niemu Twoje wiadomości mogą być podpisywane i szyfrowane.
-# review: new
-pgp-compose-key-unusable = Nie można użyć Twojego klucza dla { $address } ({ $state }). Otwórz Klucze szyfrowania, aby zaimportować jego kopię zapasową albo utworzyć nowy klucz.
-# review: new
-pgp-compose-encrypt-off-quote = Ta wiadomość cytuje lub przekazuje zaszyfrowaną wiadomość. Bez szyfrowania nie można jej wysłać, dopóki nie usuniesz cytowanego fragmentu. Mimo to wyłączyć szyfrowanie?
-# review: new
-pgp-compose-encrypt-off-reply = Ta wiadomość odpowiada na zaszyfrowaną wiadomość lub ją przekazuje. Bez szyfrowania każdy, kto obsługuje Twoją wiadomość po drodze, może ją przeczytać. Wyłączyć szyfrowanie?
-# review: new
-pgp-recipient-verified = Klucz zweryfikowany
-# review: new
-pgp-recipient-found = Klucz niezweryfikowany
-# review: new
+pgp-compose-signed = Wiadomość zostanie podpisana cyfrowo przy wysyłaniu. Odbiorcy będą mogli sprawdzić, czy jej treść nie zmieniła się od chwili podpisania.
+pgp-compose-reply-clear = Wiadomość zostanie wysłana bez szyfrowania, choć oryginalna wiadomość była zaszyfrowana.
+pgp-compose-encrypted-files = Wiadomość zawiera załączniki z zaszyfrowanej wiadomości, więc można ją wysłać tylko po zaszyfrowaniu. Włącz opcję „Szyfruj” albo usuń te załączniki.
+pgp-compose-sign-tip = Podpisz wiadomość cyfrowo swoim kluczem, aby odbiorcy mogli sprawdzić, czy jej treść nie została zmieniona
+pgp-compose-sign-tip-encrypted = Wiadomość wysyłana w postaci zaszyfrowanej jest też podpisywana cyfrowo
+pgp-compose-encrypt-tip = Zaszyfruj treść wiadomości, aby była dostępna tylko dla Ciebie i odbiorców
+pgp-compose-make-key = Nie masz jeszcze klucza dla adresu { $address }. Utworzyć go teraz? Za jego pomocą możesz cyfrowo podpisywać i szyfrować wiadomości.
+pgp-compose-key-unusable =
+    Nie można użyć Twojego klucza dla adresu { $address }.
+
+    Powód: { $state }
+
+    Otwórz okno „Klucze szyfrowania” i zaimportuj kopię zapasową tego klucza albo utwórz nowy klucz.
+pgp-compose-encrypt-off-quote = Wiadomość zawiera tekst, obrazy lub załączniki pochodzące z zaszyfrowanej wiadomości. Można ją wysłać bez szyfrowania dopiero po usunięciu tej zawartości. Mimo to wyłączyć szyfrowanie?
+pgp-compose-encrypt-off-reply = Odpowiadasz na zaszyfrowaną wiadomość lub przesyłasz ją dalej. Bez szyfrowania treść Twojej wiadomości mogą odczytać także serwery, przez które jest przesyłana. Wyłączyć szyfrowanie?
+pgp-recipient-verified = Potwierdzono właściciela klucza
+pgp-recipient-found = Nie potwierdzono właściciela klucza
 pgp-recipient-own = Twój klucz
-# review: new
 pgp-recipient-looking = Wyszukiwanie klucza...
-# review: new
 pgp-recipient-missing = Brak klucza
-# review: new
-pgp-recipient-not-found = Brak klucza: { $date } nie znaleziono żadnego
-# review: new
+pgp-recipient-not-found = Nie znaleziono klucza. Ostatnie wyszukiwanie: { $date }
 pgp-recipient-unusable = Nie można użyć klucza: { $state }
-# review: new
 pgp-recipients-intro = Wiadomość jest szyfrowana kluczem każdego odbiorcy oraz Twoim.
-# review: new
 pgp-recipients-intro-missing = { $count ->
-    [one] Jeden odbiorca nie ma klucza, którym można szyfrować. Znajdź jego klucz, usuń go z tej wiadomości albo wyślij ją bez szyfrowania.
-   *[other] Odbiorcy bez klucza, którym można szyfrować: { $count }. Znajdź ich klucze, usuń ich z tej wiadomości albo wyślij ją bez szyfrowania.
+    [one] Jeden odbiorca nie ma odpowiedniego klucza do szyfrowania. Znajdź jego klucz, usuń odbiorcę z wiadomości albo wyślij ją bez szyfrowania.
+    [few] { $count } odbiorcy nie mają odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania.
+    [many] { $count } odbiorców nie ma odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania.
+   *[other] { $count } odbiorców nie ma odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania.
 }
 # review: new
 pgp-details-part = Część { $number }: { $label }

@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Podpisovanje in šifriranje sporočila</h1>
-<p class="summary">Podpišite sporočilo, da prejemniki vedo, da je od vas, in ga šifrirajte, da ga lahko preberejo samo oni.</p>
-<p>Podpisano sporočilo dokazuje, da ste ga napisali vi in da ga na poti ni nihče spremenil. Šifrirano sporočilo lahko preberejo samo njegovi prejemniki in vi, poleg tega je vedno tudi podpisano. Za oboje potrebujete svoj ključ.</p>
-<p>Podpisovanje ali šifriranje sporočila:</p>
+<p class="summary">Zaščitite vsebino sporočila z digitalnim podpisom in šifriranjem.</p>
+<p>Digitalni podpis omogoča preverjanje, ali se je vsebina sporočila po podpisu spremenila. Lastnika ključa je treba potrditi posebej. Šifrirano vsebino lahko preberete le vi in prejemniki. Sporočila, poslana v šifrirani obliki, so tudi digitalno podpisana. Za podpisovanje in šifriranje potrebujete lastni ključ.</p>
+<p>Če želite sporočilo podpisati ali šifrirati:</p>
 <ol>
-    <li>V oknu sporočila kliknite <b data-text="ui-tb-sign"></b> ali <b data-text="ui-tb-encrypt"></b> ali izberite <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> ali <b data-text="cmd-compose-encrypt"></b>. Pritisnete lahko tudi <kbd data-command="compose_sign"></kbd> ali <kbd data-command="compose_encrypt"></kbd>. Če še nimate ključa, ga Inbox Classic ponudi ustvariti.</li>
-    <li>Kliknite <b data-text="ui-tb-send"></b>.</li>
+    <li>V oknu sporočila kliknite »<b data-text="ui-tb-sign"></b>« ali »<b data-text="ui-tb-encrypt"></b>« ali izberite <!--os:windows,mac-->»<b data-text="menu-tools"></b>«<!--/os--><!--os:linux-->»<b data-text="gtk-main-menu"></b>«<!--/os--> &gt; »<b data-text="cmd-compose-sign"></b>« ali »<b data-text="cmd-compose-encrypt"></b>«. Pritisnete lahko tudi <kbd data-command="compose_sign"></kbd> ali <kbd data-command="compose_encrypt"></kbd>. Če za naslov pošiljatelja nimate lastnega ključa, vam Inbox Classic ponudi njegovo ustvarjanje.</li>
+    <li>Kliknite »<b data-text="ui-tb-send"></b>«.</li>
 </ol>
-<p>Ko je <b data-text="ui-tb-encrypt"></b> vklopljeno, vrstica pod zadevo prikaže vsakega prejemnika s ključavnico, Inbox Classic pa poišče ključe, ki jih še nima:</p>
+<p>Ko je možnost »<b data-text="ui-tb-encrypt"></b>« vklopljena, pod zadevo vidite stanje ključa vsakega prejemnika, označeno z barvo in ikono. Inbox Classic samodejno išče manjkajoče ključe:</p>
 <table>
-    <tr><th>Ključavnica</th><th>Pomen</th></tr>
-    <tr><td>Zelena</td><td>Ključ prejemnika ste preverili.</td></tr>
-    <tr><td>Modra</td><td>Ključ prejemnika imate, vendar ga niste preverili.</td></tr>
+    <tr><th>Barva</th><th>Pomen</th></tr>
+    <tr><td>Zelena</td><td>Potrdili ste, da ključ pripada prejemniku.</td></tr>
+    <tr><td>Modra</td><td>Ključ prejemnika imate, vendar njegov lastnik še ni potrjen. Modra označuje tudi vaš lastni ključ.</td></tr>
     <tr><td>Siva</td><td>Inbox Classic išče ključ prejemnika.</td></tr>
-    <tr><td>Jantarna</td><td>Za prejemnika ni bil najden noben ključ.</td></tr>
+    <tr><td>Jantarna</td><td>Ključ prejemnika manjka ali ga ni mogoče uporabiti za šifriranje.</td></tr>
 </table>
-<h2>Če prejemnik nima ključa</h2>
-<p>Šifrirano sporočilo je poslano samo, če ima ključ vsak prejemnik. Če ga kateri nima, <b data-text="ui-tb-send"></b> odpre okno <b data-text="ui-recipient-keys-title"></b>. Tam lahko kliknete <b data-text="ui-recipient-find-key"></b>, da znova poiščete ključ, <b data-text="ui-recipient-remove"></b>, da to osebo izpustite, ali <b data-text="ui-send-unencrypted"></b>. Prejemnika lahko tudi prosite za njegov javni ključ in ga uvozite.</p>
-<h2>Odgovori na šifrirano pošto</h2>
-<p>Odgovor na šifrirano sporočilo ali njegovo posredovanje se začne z vklopljenim <b data-text="ui-tb-encrypt"></b>, Inbox Classic pa vas vpraša, preden ga izklopite. Dokler sporočilo navaja šifrirano besedilo ali vsebuje priponke šifriranega sporočila, ga je mogoče poslati samo šifrirano.</p>
-<p>Osnutki šifriranega sporočila se shranijo šifrirani, prav tako njegova kopija v mapi <b data-text="folder-sent"></b>.</p>
-<h2>Delite svoj javni ključ</h2>
-<p>Da vam lahko nekdo pošilja šifrirano pošto, izberite <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Vaš javni ključ se sporočilu pripne kot datoteka.</p>
+<h2>Če manjka uporaben ključ</h2>
+<p>Za pošiljanje šifriranega sporočila potrebujete uporaben ključ vsakega prejemnika. Če kateri manjka, klik na »<b data-text="ui-tb-send"></b>« odpre okno »<b data-text="ui-recipient-keys-title"></b>«. Kliknite »<b data-text="ui-recipient-find-key"></b>«, da ponovite iskanje, ali »<b data-text="ui-recipient-remove"></b>«, da prejemnika odstranite iz sporočila. Možnost »<b data-text="ui-send-unencrypted"></b>« je na voljo le, če sporočilo ne vsebuje besedila, slik ali priponk iz šifriranega sporočila. Prejemnika lahko tudi prosite za javni ključ in ga uvozite.</p>
+<h2>Odgovori na šifrirana sporočila</h2>
+<p>Ko odgovorite na šifrirano sporočilo ali ga posredujete, je možnost »<b data-text="ui-tb-encrypt"></b>« sprva vklopljena. Inbox Classic pred izklopom šifriranja zahteva potrditev. Sporočilo lahko pošljete brez šifriranja šele, ko odstranite besedilo, slike in priponke iz šifriranega sporočila.</p>
+<p>Ko je šifriranje vklopljeno, se osnutki šifrirajo samo z vašim ključem in shranijo brez digitalnega podpisa. Če osnutek vsebuje besedilo, slike ali priponke iz šifriranega sporočila, se shrani šifriran tudi po izklopu šifriranja. Kopija poslanega šifriranega sporočila v mapi »<b data-text="folder-sent"></b>« prav tako ostane šifrirana.</p>
+<h2>Deljenje javnega ključa</h2>
+<p>Če želite prejemati šifrirana sporočila, izberite <!--os:windows-->»<b data-text="menu-insert"></b>«<!--/os--><!--os:mac-->»<b data-text="menu-file"></b>«<!--/os--><!--os:linux-->»<b data-text="gtk-main-menu"></b>«<!--/os--> &gt; »<b data-text="cmd-attach-my-key"></b>«. Javni ključ za izbrani naslov pošiljatelja se pripne sporočilu kot datoteka.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

@@ -22,7 +22,6 @@ menu-sort-by = &Сортировка
 menu-text-size = &Размер текста
 # review: new
 menu-folder = Пап&ка
-# review: new
 menu-insert = Вс&тавка
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -185,12 +184,9 @@ cmd-export-address-book = &Экспорт адресной книги...
 cmd-export-setup = Экспорт нас&троек и учетных записей...
 # review: new
 cmd-import-setup = Импорт наст&роек и учетных записей...
-# review: new
 cmd-compose-sign = &Подписать цифровой подписью
-# review: new
 cmd-compose-encrypt = &Зашифровать
-# review: new
-cmd-attach-my-key = Вложить мой &открытый ключ
+cmd-attach-my-key = Вложить свой &открытый ключ
 
 ## The tray icon's menu
 
@@ -413,11 +409,8 @@ ui-tb-send = Отправить
 ui-tb-save = Сохранить
 # review: new
 ui-tb-attach = Вложить
-# review: new
 ui-tb-sign = Подписать
-# review: new
 ui-tb-encrypt = Зашифровать
-# review: new
 ui-field-keys = Ключи:
 # review: new
 ui-field-from = От:
@@ -1366,25 +1359,15 @@ ui-contact-key-none = Нет ключа
 ui-contact-key-use-new = &Использовать новый ключ
 # review: new
 ui-contact-key-keep = &Оставить текущий
-# review: new
 ui-recipient-keys-title = Ключи получателей
-# review: new
 ui-recipient-col-recipient = Получатель
-# review: new
 ui-recipient-col-key = Ключ
-# review: new
 ui-recipient-find-key = &Найти ключ
-# review: new
 ui-recipient-remove = &Удалить из сообщения
-# review: new
 ui-send-unencrypted = Отправить &без шифрования
-# review: new
 ui-compose-make-key = &Создать ключ...
-# review: new
 ui-compose-show-keys = &Ключи шифрования...
-# review: new
 ui-compose-encrypt-off = &Выключить шифрование
-# review: new
 ui-compose-keep-encrypted = Оставить &шифрование
 # review: new
 ui-setup-export-title = Экспорт настроек и учетных записей

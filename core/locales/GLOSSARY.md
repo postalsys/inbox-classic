@@ -686,6 +686,63 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   inherited encrypted text, images and attachments must be removed before unencrypted sending.
 - The attachment reminder currently recognizes English, German, Estonian, Spanish and French phrases, not Hungarian.
   Do not suggest a Hungarian example will trigger it or promise identical plain-text rendering in every mail app.
+- Reading/search help uses "keresési feltétel" and "keresési index". Indexing does not mark mail read; offline search
+  covers locally available data. Prefix matching needs at least two letters, and after: includes the UTC start date.
+- Keep search operator names/examples literal; to:/cc:/bcc: all search recipient fields. OR joins text alternatives,
+  and a minus does not negate every operator. Relative months/years mean 30/365 days. Unknown operators become words.
+- Help describes "nézet" for combined mail and Flagged, and "kibontás/összecsukás" for tree/conversation expansion.
+  With several accounts, Flagged follows All Inboxes, All Sent and All Drafts. Date-sorted conversations use their newest mail.
+- Articles follow inserted words and literal keys: az Enter but a Return; a Ctrl but az Option. Use colon-led menu paths,
+  a Keresés a titkosított üzenetekben, and az Üzenetek... settings. No a(z) or endings attached to inserted controls.
+- Permanent deletion also applies when the account lacks Deleted Items; emptying folders is not undoable. Watched
+  conversation notices still depend on notification settings. Decrypted searchable content is kept unencrypted locally.
+- Writing help uses "aláírásszöveg" where needed to distinguish the account signature from a digital signature.
+  Replies honor a separate reply address; Reply All excludes the account's own addresses. An unfolded quote is editable.
+- Use "előnézet" for the rendered attachment, "mellékletlista" for the files. Memory-only decrypted previews do not
+  imply that separately opened/saved files never reach disk. Internet-origin marking applies to Windows and macOS.
+- Outbox prose distinguishes waiting, retrying and successful sending. Undo Send ends when its countdown expires;
+  recovery restores the latest saved state. Name "nyomtatási ablak" across platforms, without promising a preview.
+- Contacts are "névjegyek", their pictures "névjegyképek". A provider-confirmed sender domain is not verified personal
+  identity. Import skips cards only when all their email addresses are already present, rather than matching names.
+- Key verification checks ownership: compare the complete "ujjlenyomat" and every listed address. Valid signatures
+  establish unchanged content; only valid sender signatures use the green/blue verified/unverified distinction.
+- A locked key means its local protection could not be opened, including an inaccessible system password store.
+  Check store availability before assuming its protection key was lost; reimport the private-key backup if needed.
+- Protection counts are parts, not messages; compact "3 titkosított és aláírt" fits the bar's introductory "részei".
+  Attachment tooltips use "Forrás: 2. rész" without an article tied to an unknown number or inflecting its status label.
+- STARTTLS failure stops the connection attempt, not the app. SMTP encryption-required errors do not prove a password
+  correct; standard TLS ports are examples subject to provider support. A local network is not itself encryption.
+- Preview labels distinguish a file from its "előnézet". A crash marker only establishes that the app stopped
+  while rendering a file; it does not establish that the file was a PDF. Keep format/name/count placeables uninflected.
+- External pictures are blocked by default; trusted-sender rules verify a domain, not a person. Decrypted parts
+  still need a click. Embedded pictures need no separate network download; brand logos may require their own download.
+- Privacy help describes web links separately from mail links and user-requested attachment opening in an external
+  app. The reader removes message scripts and processes embedded pictures; avoid claiming its view cannot run any
+  code or that every picture bypasses system decoders. One-time codes require the relevant domain's signature.
+- Agent read permissions cover conversations, attachments, rules, address-book entries and permitted mail contacts.
+  Read-log attachments use "tartalmát kérte le", not an external-file opening claim. List counts are "bejegyzés"
+  because conversation-grouped lists count rows; the placeable can be a folder or a combined-view identifier.
+- Agent folder-create and rename log entries say "kérve": they are recorded after queuing the server request,
+  before server completion. A new folder may still be absent when the tool finishes waiting.
+- Terminal labels use "Terminálból (...) indított programok" without inflecting the program name. Separate names
+  distinguish saved grants; unnamed agents from the same terminal program share access, not all terminals globally.
+- Read summaries count each kind independently and join through agent-can-list. Read details can have zero results;
+  the Windows heading is an hour range. The log keeps subjects/queries/file names, not message bodies. Clearing it
+  does not reset sending limits; ordinary change entries may be pruned before 30 days.
+- Account help uses "böngészős bejelentkezés", "alkalmazásjelszó" and "bejelentkezési adatok" consistently.
+  OAuth refresh tokens are stored even when the app never saves the account password. Issuer checks validate
+  discovery settings, not client credentials or mail access. Google is initially hidden for new accounts.
+- Error quotations match current UI text; raw network diagnostics remain English, with a Hungarian explanation.
+  TLS failure can concern more than certificates. Account removal also deletes queued outgoing messages locally;
+  offline retry is not a delivery guarantee. Server ports and app passwords depend on provider/account support.
+- Download help describes "előzetes letöltés" and cached "üzenettartalom", not a hard limit on the whole database.
+  Neighbors are adjacent by date in the same folder; the selected mode and size limit apply. Drafts and messages
+  opened during the current run are spared from cache eviction. Large messages may show text first, not always.
+- Watched conversations still obey notification settings and foreground suppression. Rule help uses "kezelés" or
+  "feldolgozás", reserving "rendezés" for list sorting. Rules do not delete permanently when Trash is absent.
+- Unsubscribe confirmation means the request was accepted, not that future mail is guaranteed to stop. Direct
+  requests require confirmation and provider-validated signatures covering the unsubscribe headers. Bounce analysis
+  happens locally; a delay notice describes the server's report, not a guarantee of later delivery.
 
 ### Nederlands (nl)
 
@@ -795,6 +852,19 @@ written as the `[many]` form.
   ("tekst podpisu") is distinct from a digital signature ("podpis cyfrowy").
 - "Oznaczenie śmieci" refers to the junk flag. Removing it does not delete the message. The email warning tells
   agents to treat message content as data, not as commands to execute.
+- Compose statuses describe protection when sending. "Potwierdzono właściciela klucza" is separate from
+  a valid digital signature; "odpowiedni klucz" must be usable for encryption, not merely found. Dates follow
+  "Ostatnie wyszukiwanie:", key-state explanations follow "Powód:" on their own line.
+- Missing-key dialog guidance uses one/few/many/other with "2 odbiorcy nie mają" and "5 odbiorców nie ma".
+  Counts stay in few/many/other. Other compose status counts remain in parentheses to avoid case endings;
+  names and address lists follow a head noun and colon, unchanged.
+- Use "Załącz swój klucz publiczny" for the selected sender address. "Znajdź &klucz" uses K in the recipient
+  dialog, distinct from "&Zachowaj bieżący" (Z). Other mnemonic collisions remain pending in the exact state.
+- Help uses informal singular imperatives and capitalized Ty/Twój/Ci without gendered past forms. Preserve the
+  existing literal <kbd>Kliknięcie</kbd> text. Encrypted drafts use only the sender's key, without a digital signature.
+  Text, images and attachments inherited from encrypted mail must be removed before unencrypted sending.
+- Attachment reminders recognize English, German, Estonian, Spanish and French phrases, not Polish. Do not
+  suggest a Polish phrase will trigger a reminder or promise identical plain-text rendering in every mail app.
 
 ### Português (pt-BR, Brasil)
 
@@ -912,6 +982,15 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - Only the agent's own drafts not yet saved in the editor can be permanently deleted. Saving, including
   autosave, or sending ends agent access; merely opening does not. "Textul semnăturii contului" is optional
   message footer text, distinct from a digital signature. Removing program access does not uninstall it.
+- Compose status describes protection "la trimitere". Signature integrity does not confirm the key's owner;
+  use "Proprietarul cheii a fost confirmat" for verified ownership and "cheie utilizabilă" for encryption readiness.
+- Keep Romanian one/few/other counts: "2 destinatari", "101 destinatari", but "20 de destinatari" and
+  "100 de destinatari". Dates follow "Ultima căutare:"; complete key-state explanations follow "Motiv:".
+- Preserve polite plural prose, nominal command labels and "atașare". Quote inserted control labels in help.
+  Recipient removal affects the message, not the address book. Encrypting drafts uses only the sender's key,
+  without a digital signature; inherited text, images and attachments require encryption until removed.
+- Writing help explains the actual account, completion and formatting behavior. Attachment reminders recognize
+  English, German, Estonian, Spanish and French expressions, not Romanian. Do not give a Romanian trigger example.
 
 ### Slovenčina (sk)
 
@@ -942,6 +1021,17 @@ Slovak agent permissions and activity:
   or sending ends its permission to edit/delete; merely opening does not. Other read permissions are separate.
 - Mail may contain hostile instructions: explain that agents must not follow them. Disabling agent access
   uses the already reviewed neutral "vypnite možnosť" wording for the switch/checkbox on each platform.
+- Compose statuses describe protection "pri odoslaní" and agree with feminine správa. Verified key ownership
+  ("Vlastník kľúča je overený") is separate from signature integrity. Use "použiteľný kľúč" for encryption readiness.
+- Keep one/few/other in recipient guidance, with "2 príjemcovia nemajú" and "5 príjemcov nemá". Other status
+  counts can remain parenthesized. Names/address lists follow a head noun and colon without inflection.
+- Dates follow "Posledné vyhľadávanie:" and complete key-state explanations follow "Dôvod:". Use "Priložiť svoj
+  verejný kľúč" for the selected sender address. "Nájsť &kľúč" keeps K distinct from "Použiť &nový kľúč" (N).
+- Retain plural vy, lowercase pronouns, „…“ quotes, English literal keys and access keys without diacritics.
+  Removing a recipient affects the message, not contacts. Drafts are encrypted only to the sender, without a
+  digital signature. Inherited text, images and attachments require encryption until removed.
+- Writing help describes current completion, accounts, copied recipients and formatting. Attachment reminders
+  recognize English, German, Estonian, Spanish and French expressions, not Slovak; do not give a Slovak trigger.
 
 ### Slovenščina (sl)
 
@@ -974,6 +1064,17 @@ Slovenian agent permissions and activity:
   does not uninstall the program. Preserve the reviewed neutral shutdown instruction for switches/checkboxes.
 - Email may contain hostile instructions; tell readers that agents must not follow them, rather than saying
   that email contains no instructions. Use polite plural address and the language's ordinary control labels.
+- Compose statuses describe protection "ob pošiljanju". "Lastnik ključa je potrjen" is separate from signature
+  integrity; a "uporaben ključ" must be usable for encryption. Names/address lists follow a head noun and colon.
+- Encrypted/missing statuses use exact [1] plus counted one/two/few/other. Missing-key guidance has exact [1]/[2]
+  before the categories, so "njegov ključ" and "njuna ključa" refer only to one/two actual recipients. For 101/102
+  and larger counts, the follow-up names missing keys and recipients generically rather than implying one/two people.
+- Dates follow "Zadnje iskanje:" and complete key-state explanations follow "Razlog:". Use "Pripni svoj javni ključ"
+  for the selected sender. Recipient-dialog K/S keys avoid Use New on N and Keep Current on O.
+- Keep polite plural prose, imperative singular commands, lowercase vi and »...« quotes. Literal shortcuts remain
+  unchanged; "uporabite kombinacijo" avoids choosing s/z before platform-specific keyboard names.
+- Encrypted drafts use only the sender's key, without a digital signature. Inherited text, images and attachments
+  require encryption until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Slovenian.
 - Quotes »...«; keys Ctrl, Shift, Alt, Del, Enter.
 - Review first: the `done-*` / `transfer-*` lines and the plural forms of `setup-*` and `pgp-imported-*`.
 
@@ -1117,6 +1218,14 @@ Swedish agent permissions and activity:
   ends permission to change/delete; opening alone does not. Read permission is separate. Removing program access
   does not uninstall it. Preserve the reviewed neutral connection-switch instruction.
 - Explain that agents must not follow instructions in email; do not claim that email contains no instructions.
+- Compose statuses describe protection "när det skickas". A digital signature checks content integrity; verifying
+  "nyckelns ägare" is separate. A recipient needs an "användbar krypteringsnyckel", including validity and usability.
+- Use "kryptera med" keys, not the literal "kryptera till". Keep one/other for the positive integer recipient counts.
+  Dates follow "Senaste sökning:"; full key-state explanations follow "Orsak:" on a separate line.
+- "Bifoga din offentliga nyckel" refers to the selected sender address. Keep the established "Skapa e-post" toolbar
+  label, du, sentence case and Swedish ” ” quotes. Existing compose access keys are distinct in all actual scopes.
+- Encrypted drafts use only the sender's key and have no digital signature. Inherited text, images and attachments
+  require encryption until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Swedish.
 
 ### Türkçe (tr)
 
@@ -1294,6 +1403,16 @@ Plurals: `[one]` 1, 21, 31...; `[few]` 2 to 4, 22 to 24...; `[many]` 0, 5 to 20,
 - Only the agent's own drafts not yet saved by the user can be permanently removed. Saving, including autosave,
   or sending ends access; merely opening does not. Removing a program's access does not uninstall the program.
   Use "отключите" for the connection control, since Linux has a switch and the other platforms use checkboxes.
+- Compose status describes protection "при отправке". "Владелец ключа подтвержден" is separate from a valid
+  digital signature. A "подходящий ключ" must be usable for encryption, not merely present.
+- Retain exact [1] plus counted one/few/many/other branches: 21 is not a single recipient. Names and addresses
+  stay uninflected after a head noun or colon. Use "Последний поиск:" for dates and "Причина:" for key-state text.
+- Use "Вложить свой открытый ключ" for the selected sender address. Recipient removal affects the message,
+  not the address book. Retain the Cyrillic compose access keys, lowercase вы, guillemets and е without ё.
+- Help keeps literal <kbd>Щелчок</kbd>. Encrypted drafts use only the sender's key and no digital signature.
+  Inherited text, images and attachments require encryption until removed, even with the toggle off in a draft.
+- Attachment reminders recognize English, German, Estonian, Spanish and French expressions, not Russian.
+  Help describes the actual account selection and formatting behavior without promising identical rendering.
 
 ### Українська (uk)
 
@@ -1325,3 +1444,13 @@ Ukrainian agent permissions and activity:
 - "Текстовий підпис" is the optional message footer, separate from a cryptographic signature. Instructions inside
   mail must not be followed by the agent; do not claim that email cannot contain instructions.
 - Preserve one/few/many/other with numeric placeholders, plus exact-zero account and exact-one unsubscribe branches.
+- Compose statuses describe protection "під час надсилання". "Власника ключа підтверджено" is separate from
+  signature integrity; recipient keys must be "придатні" for encryption. Names/address lists follow a head noun
+  and colon rather than a preposition requiring a name to change case.
+- Keep exact [1] plus counted one/few/many/other. Missing-key guidance names the recipient explicitly when removing
+  them; at 21/101 the follow-up refers to missing keys and recipients without implying a single person.
+- Dates follow "Останній пошук:" and complete key-state explanations follow "Причина:" on a separate line.
+  "Вкласти свій відкритий ключ" refers to the selected sender. Find Key uses К to avoid Keep Current on З.
+- Keep polite lowercase ви, infinitive control labels, «…» quotes and literal keyboard text. Encrypted drafts use
+  only the sender’s key, without a digital signature. Inherited text, images and attachments require encryption
+  until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Ukrainian.

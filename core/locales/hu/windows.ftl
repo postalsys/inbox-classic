@@ -105,10 +105,8 @@ win-undo-since = Visszavonás &időszakra...
 # review: new
 win-take-back = &Visszavonás
 win-what-agents-did = Ügynöki &tevékenység:
-# review: new
-win-agent-reads = Olvasva { $from } és { $to } között:
-# review: new
-win-agent-reads-hint = Jelöljön ki fent egy olvasásokat összegző sort, hogy lássa, mit olvasott.
+win-agent-reads = Olvasási műveletek: { $from } - { $to }
+win-agent-reads-hint = Válasszon ki fent egy olvasási összesítőt a részletek megtekintéséhez.
 win-how-to-connect = Hogyan csatlakoztatható egy ügynök
 
 ## Sign-in apps

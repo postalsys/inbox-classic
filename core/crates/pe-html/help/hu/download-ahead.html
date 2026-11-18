@@ -1,12 +1,11 @@
-<!--review--><h1>Előre letöltött üzenetek</h1>
-<p class="summary">Az új leveleket a program már érkezéskor letölti, így azonnal megnyílnak.</p>
-<p>Az Inbox Classic a háttérben, érkezésükkor tölti le az új üzeneteket. Így megnyitáskor azonnal megjelennek, kapcsolat nélkül is. Ha megnyit egy üzenetet, a fölötte és alatta lévő üzenetek is letöltődnek, hogy a következő is gyorsan megnyíljon.</p>
-<p>Az előre letöltendő üzeneteket a beállításokban adhatja meg (<b data-settings="downloading"></b>):</p>
+<h1>Üzenetek előzetes letöltése</h1>
+<p class="summary">Az előre letöltött üzenetek gyorsabban megnyílnak, és internetkapcsolat nélkül is olvashatók.</p>
+<p>Az Inbox Classic a beállításoknak megfelelő üzeneteket már megnyitásuk előtt letölti a háttérben. A letöltött tartalmat így kapcsolat nélkül is olvashatja. Ha az előzetes letöltés be van kapcsolva, megnyitáskor ugyanabból a mappából a dátum szerint szomszédos üzeneteket is letöltheti.</p>
+<p>Az előzetes letöltés beállításait itt módosíthatja: <b data-settings="downloading"></b>.</p>
 <ul>
-    <li><b data-text="ui-download-ahead"></b> <b data-text="ui-download-ahead-recent"></b>: az utolsó 30 nap üzeneteit tölti le, egyenként legfeljebb 1 MB-ig. <b data-text="ui-download-ahead-all"></b>: minden üzenetet letölt, amennyit az alábbi korlát enged. <b data-text="ui-download-ahead-never"></b>: az üzenetet csak megnyitáskor tölti le.</li>
-    <li><b data-text="ui-download-limit"></b>: ennyit tárol fiókonként a program. Ha ezt túllépi, a legrégebbi üzenetek törlődnek erről a számítógépről, de a kiszolgálón megmaradnak, és megnyitáskor újra letöltődnek.</li>
+    <li><b data-text="ui-download-ahead"></b>: a <b data-text="ui-download-ahead-recent"></b> beállítás az utolsó 30 nap legfeljebb 1 MB-os üzeneteit tölti le előre. A <b data-text="ui-download-ahead-all"></b> beállítás a régebbi és nagyobb üzeneteket is letölti, a tárhelykorlát figyelembevételével. A <b data-text="ui-download-ahead-never"></b> kikapcsolja az előzetes letöltést.</li>
+    <li><b data-text="ui-download-limit"></b>: a letöltött üzenettartalom számára megadott keret fiókonként. Túllépésekor a legrégebbi helyi másolatok törlődnek; a kiszolgálón lévő levelek megmaradnak. Megnyitáskor a tartalom újra letöltődik. A piszkozatok és az adott indítás óta megnyitott üzenetek kivételek, ezért a tényleges tárhelyhasználat meghaladhatja a keretet.</li>
 </ul>
-<p>A <b data-text="folder-junk"></b> és a <b data-text="folder-deleted"></b> mappa üzenetei, valamint a Gmail Összes levél mappájának üzenetei csak megnyitáskor töltődnek le.</p>
-<p>Egy nagy, 1 MB-nál nagyobb üzenetnek először a szövege jelenik meg. A mellékletei utána érkeznek, és az állapotsor mutatja, hol tart a letöltés. Amikor az egész üzenet megérkezett, a mellékletek megnyithatók, az üzenet pedig menthető és továbbítható.</p>
+<p>Az automatikus letöltés nem járja végig a <b data-text="folder-junk"></b>, a <b data-text="folder-deleted"></b> és a Gmail Összes levél mappáját. Az ottani üzenetek tartalmát megnyitáskor tölti le.</p>
+<p>Az 1 MB-nál nagyobb üzeneteknél először a szöveg jelenhet meg, ha ezt az üzenet felépítése lehetővé teszi. Ezután a teljes üzenet letöltése következik, amelynek előrehaladását az állapotsor mutatja. A mellékletek megnyitásához, valamint az üzenet mentéséhez és továbbításához meg kell várni a letöltés végét.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:read-messages"></a> <a href="topic:options-language"></a></nav>
-<!--/review-->

@@ -1,34 +1,34 @@
-<!--review--><h1>Fiókok módosítása, sorrendje és eltávolítása</h1>
+<h1>Fiókok módosítása, átrendezése és eltávolítása</h1>
 <p class="summary">Nevezzen át egy fiókot, módosítsa a beállításait vagy a jelszavát, állítsa be a fiókok sorrendjét, vagy távolítson el egyet.</p>
 <h2>Fiók módosítása</h2>
 <ol>
     <li>Válassza ezt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Az ablak felsorolja a fiókjait.</li>
-    <li>Jelöljön ki egyet, és kattintson erre: <!--os:windows--><b data-text="win-properties-button"></b><!--/os--><!--os:mac--><b data-text="mac-properties-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-properties"></b><!--/os-->, vagy kattintson rá duplán.</li>
-    <li>Módosítsa, amit szükséges, és kattintson az <b data-text="ui-ok"></b> gombra.</li>
+    <li>Jelöljön ki egy fiókot, és kattintson erre: <!--os:windows--><b data-text="win-properties-button"></b><!--/os--><!--os:mac--><b data-text="mac-properties-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-properties"></b><!--/os-->, vagy kattintson duplán a fiókra.</li>
+    <li>Módosítsa a kívánt beállításokat, majd kattintson az <b data-text="ui-ok"></b> gombra.</li>
 </ol>
 <ul>
     <li><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os-->: ezen a néven szerepel a fiók a mappalistában, például <i>Gmail</i> vagy <i>Munka</i>.</li>
     <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os-->: ezt a nevet látják azok, akiknek ír.</li>
     <li>Ha meg szeretné tartani a jelszót, hagyja üresen ezt a mezőt: <b data-text="ui-field-password"></b>.</li>
-    <li>A böngészőben bejelentkező fiók megmutatja, melyik bejelentkezési alkalmazást használja.</li>
-    <li><b data-text="ui-field-other-addresses"></b>: azok a további címek, amelyekről ezzel a fiókkal küld, például egy álnév, vesszővel elválasztva: <code>Értékesítés &lt;sales@example.com&gt;</code> vagy csak a cím. Ezután ez a mező: <b data-text="ui-field-from"></b>, a fiók alatt mindegyiket felkínálja.</li>
+    <li>Böngészős bejelentkezés esetén a fiók tulajdonságaiban az is látható, melyik bejelentkezési alkalmazást használja.</li>
+    <li>Az <b data-text="ui-field-other-addresses"></b> mezőben vesszővel elválasztva adhatja meg a fiókhoz tartozó további feladói címeket. Írhat nevet és címet, például <code>Értékesítés &lt;sales@example.com&gt;</code>, vagy csak címet. Üzenet írásakor a <b data-text="ui-field-from"></b> mező a fiók alatt ezeket is felkínálja.</li>
 </ul>
-<p>Ugyanebben az ablakban egy újabb fiókot adhat hozzá ezzel: <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</p>
+<p>A fiókok listájához ugyanebben az ablakban adhat újabb fiókot ezzel a gombbal: <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</p>
 <h2>A fiókok sorrendje</h2>
-<p>Két vagy több fiók esetén húzzon egy fiókot a mappalistában, vagy a sorát az összesített nézet alatt (<b data-text="ui-all-inboxes"></b>), egy másik fölé vagy alá. Egy vonal mutatja, hová kerül. Vagy kattintson a jobb gombbal a fiókra, és válassza ezt: <b data-text="ui-account-move-up"></b> vagy <b data-text="ui-account-move-down"></b>. A mappalista és az összesített nézet sorai is az új sorrendet követik.</p>
+<p>Ha legalább két fiókja van, húzza a fiók sorát egy másik fölé vagy alá a mappalistában, illetve az összesített nézetben (<b data-text="ui-all-inboxes"></b>). A beszúrás helyét vonal jelzi. A jobb gombbal megnyitott fiókmenüből is választhat: <b data-text="ui-account-move-up"></b> vagy <b data-text="ui-account-move-down"></b>. A mappalista és az összesített nézet is az új sorrendet követi.</p>
 <h2>A fiók menüje</h2>
-<p>Két vagy több fiók esetén kattintson a jobb gombbal egy fiókra a mappalistában, és ezek a parancsok jelennek meg. Egyetlen fiók esetén a mappalistában nincs sora: a parancsokat itt találja: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>, illetve ebben a menüben: <b data-text="menu-tools"></b>.</p>
+<p>Ha legalább két fiókja van, a mappalistában a fiók nevére jobb gombbal kattintva nyithatja meg a menüjét. Egyetlen fióknál a neve nem kap külön sort. Tulajdonságait ilyenkor itt nyithatja meg: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. A többi fiókparancsot az <b data-text="menu-tools"></b> menüben találja.</p>
 <ul>
     <li><b data-text="ui-account-sync"></b>: csak azt a fiókot ellenőrzi.</li>
-    <li><b data-text="cmd-mark-all-read"></b>: a fiók minden mappáját olvasottnak jelöli.</li>
+    <li><b data-text="cmd-mark-all-read"></b>: a fiók minden mappájában olvasottnak jelöli az összes üzenetet.</li>
     <li><b data-text="cmd-new-folder"></b>, <b data-text="ui-account-properties"></b>, <b data-text="ui-account-move-up"></b> és <b data-text="ui-account-move-down"></b>.</li>
 </ul>
 <h2>Fiók eltávolítása</h2>
-<aside class="note">Egy fiók eltávolítása törli erről a számítógépről a hozzá letöltött leveleket és a mentett jelszavát. A kiszolgálón lévő levelek megmaradnak.</aside>
+<aside class="note">A fiók eltávolítása törli erről a számítógépről a hozzá letöltött leveleket, a küldésre váró üzeneteket és a mentett bejelentkezési adatokat. Előtte mentse el, amire még szüksége van. A kiszolgálón tárolt levelek megmaradnak.</aside>
 <p>Fiók eltávolítása:</p>
 <ol>
     <li>Válassza ezt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
     <li>Jelölje ki a fiókot, és kattintson erre: <b data-text="ui-remove"></b>, vagy nyomja le a <kbd>Delete</kbd> billentyűt.</li>
-    <li>Erősítse meg. A fiók eltűnik a mappalistából.</li>
+    <li>Erősítse meg az eltávolítást. A fiók eltűnik a mappalistából.</li>
 </ol>
-<nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav><!--/review-->
+<nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav>
