@@ -1368,10 +1368,31 @@ thread_local! {
     static PRINTING: RefCell<Option<DocumentView>> = const { RefCell::new(None) };
 }
 
-/// `document` printed from a web view of its own, locked down as the reading pane's (no scripts at all), once it has
-/// loaded
+/// WebKit draws a picture on paper only when no decode of it is under way on its decoding threads: while one is, it
+/// draws nothing there and the picture prints as an empty box. The print view's own paint (it is never shown) starts
+/// such a decode for a picture it does not count as visible. Every picture of the page is made decoding="sync" as the
+/// parser puts it in, before anything is painted, so no paint starts one: the app's own script, in a world of its own
+/// (the page runs none), at the start of the document. The same fix as the Mac's (WebViews.swift `syncPictures`)
+const SYNC_PICTURES: &str = "new MutationObserver(changes => { for (const change of changes) for (const node of \
+    change.addedNodes) { if (node.nodeType !== 1) continue; if (node.localName === 'img') node.decoding = 'sync'; \
+    for (const img of node.getElementsByTagName('img')) img.decoding = 'sync' } })\
+    .observe(document, { childList: true, subtree: true })";
+
+/// The world of the app's own scripts in the print view, apart from the page's
+const PRINT_WORLD: &str = "inbox-classic-print";
+
+/// `document` printed from a web view of its own, locked down as the reading pane's (none of the page's scripts, the
+/// app's own [`SYNC_PICTURES`] in a world of its own), once it has loaded
 fn print_document(document: &str, pictures: bool, window: gtk::Window) {
     let view = DocumentView::new("print", false);
+    view.manager().add_script(&webkit::UserScript::for_world(
+        SYNC_PICTURES,
+        webkit::UserContentInjectedFrames::AllFrames,
+        webkit::UserScriptInjectionTime::Start,
+        PRINT_WORLD,
+        &[],
+        &[],
+    ));
     let started = Cell::new(false);
     view.view.connect_load_changed(move |_, event| {
         if event != webkit::LoadEvent::Finished || started.replace(true) {
@@ -1397,6 +1418,12 @@ fn print_document(document: &str, pictures: bool, window: gtk::Window) {
 #[cfg(feature = "e2e")]
 pub fn printing() -> Option<String> {
     PRINTING.with(|p| p.borrow().as_ref().map(|view| view.shown()))
+}
+
+/// The web view of the document being printed, as it prints it (the UI test reads its pictures); None when nothing is
+#[cfg(feature = "e2e")]
+pub fn printing_view() -> Option<webkit::WebView> {
+    PRINTING.with(|p| p.borrow().as_ref().map(|view| view.view.clone()))
 }
 
 /// The page of `view` through the print dialog over `window`

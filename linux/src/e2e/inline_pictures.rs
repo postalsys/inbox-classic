@@ -13,6 +13,11 @@ const BANNER: &str = "(function(){var b=document.querySelector('img[alt=\"Trail 
     var a=b.closest('a');return [b.getAttribute('src'),b.complete&&b.naturalWidth>0,b.naturalWidth,b.src,\
     a?a.href:''].concat(own).join('\\n')})()";
 
+/// Each picture of the printout: how it is decoded, whether it is in the printout itself (data:, the core's copy; a
+/// picture from the internet is blocked here), whether it has loaded (with a size), and its alt text, a line each
+const PRINTED_PICTURES: &str = "Array.prototype.slice.call(document.images).map(function(x){\
+    return [x.decoding,/^data:/.test(x.src),x.complete&&x.naturalWidth>0,x.alt].join(' ')}).join('\\n')";
+
 /// What [`BANNER`] says of `view`, once the banner has loaded (10 seconds at most)
 pub(super) async fn banner(view: &webkit::WebView) -> Vec<String> {
     let mut banner = Vec::new();
@@ -106,6 +111,23 @@ async fn print(d: &Driver) {
             && !printed.contains("/pv/")
             && !printed.contains("cid:"),
         "Print of the newsletter puts the banner into the printout as the core's PNG",
+    );
+    // what goes on paper: the print view's pictures loaded, and drawn as they are painted (a picture still being
+    // decoded on WebKit's threads would print as an empty box)
+    let pictures: Vec<String> = match crate::reader::printing_view() {
+        Some(view) => run_script(&view, PRINTED_PICTURES)
+            .await
+            .lines()
+            .map(str::to_string)
+            .collect(),
+        None => Vec::new(),
+    };
+    d.check(
+        pictures.iter().any(|p| p == "sync true true Trail Notes")
+            && pictures
+                .iter()
+                .all(|p| p.starts_with("sync ") && !p.starts_with("sync true false")),
+        &format!("the pictures of the printout have loaded and are drawn as the page is printed ({pictures:?})"),
     );
     if let Some(dialog) = dialog {
         let closed = dialog.downgrade();

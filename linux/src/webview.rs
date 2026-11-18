@@ -305,7 +305,7 @@ impl DocumentView {
         let view = webkit::WebView::builder()
             .web_context(&web.context)
             .network_session(&web.session)
-            .settings(&settings(javascript, kind == "preview"))
+            .settings(&settings(javascript, kind == "preview" || kind == "print"))
             .user_content_manager(&manager)
             .build();
         view.set_vexpand(true);
