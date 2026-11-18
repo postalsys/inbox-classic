@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review Hungarian mail-handling and delivery help: new-mail, download-ahead, message-not-shown, delivery-problems, message-rules and unsubscribe. All current Hungarian catalog entries are reviewed; 18 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -21381,9 +21381,7 @@
     "hu": {
       "pending_catalogs": {},
       "pending_help": [
-        "account-security.html",
         "brand-logos.html",
-        "certificate-errors.html",
         "command-line.html",
         "connections.html",
         "data-storage.html",
@@ -21392,16 +21390,12 @@
         "download-ahead.html",
         "invitations.html",
         "keyboard-shortcuts.html",
-        "manage-accounts.html",
         "message-not-shown.html",
         "message-rules.html",
         "move-computer.html",
         "new-mail.html",
-        "no-connection.html",
         "options-language.html",
-        "password-not-accepted.html",
         "removing.html",
-        "sign-in-apps.html",
         "sign-in-codes.html",
         "unsubscribe.html",
         "updates.html"
@@ -24257,6 +24251,186 @@
             "source-notes.json": "/private/tmp/inbox-hu-agents-20261118-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-hu-agents-20261118-screenshots.json",
             "html.log": "/private/tmp/inbox-hu-agents-20261118-html.log"
+          }
+        },
+        {
+          "id": "hu-accounts-connections-help-20261118",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "account-security.html",
+            "manage-accounts.html",
+            "sign-in-apps.html",
+            "certificate-errors.html",
+            "no-connection.html",
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hu/account-security.html": "1fcbbbb1413452d1a79801d8ae17f5c8e62bd1fbbe1984b329b0558743860934",
+            "core/crates/pe-html/help/hu/manage-accounts.html": "360b2a62bcefd8979d8ae2f14ff2af4a2bb7cdd9e2ce892629f1c8a117c46e1d",
+            "core/crates/pe-html/help/hu/sign-in-apps.html": "b2349a1139d55ed5e6966846c23c0e2c466486df8dec7312c482e7fc1202b11a",
+            "core/crates/pe-html/help/hu/certificate-errors.html": "1098dd33c123950946b167c2d665069605ca783efe71eb0093f2e282c97cdcc1",
+            "core/crates/pe-html/help/hu/no-connection.html": "e6ea5199925f1988a3eee927e5936bb5abb708e72c5d5ae989b3865d405fa728",
+            "core/crates/pe-html/help/hu/password-not-accepted.html": "bf706eae3dede4f57c6b17ebd4771385e60593e91f4e7b0718ffcfbe3171fa48"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/account-security.html": "adf8cbee09afd1c8bcaaf46181d1cbf6667a67e1b3ce6f35c13af4d1c016ed44",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/sign-in-apps.html": "c092b49a13a0eab86b8571ec49c3fe49696b16b2e71bc1cc1020bcbc0222c1b1",
+            "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+            "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+            "core/crates/pe-html/help/en/password-not-accepted.html": "389ccc305db88334ddbebd4d296b864d0c47c27cf0423a7e7bed5b679cf5c7e7"
+          },
+          "validation": "Hungarian structural checks pass with 1,490 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 47 improved wording lines. All six Hungarian catalogs are unchanged. Tags, attributes, control order, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins inspected with current labels; corrected articles before Egyéb feladócímek and Átirányítási URI. Twenty-five runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 11,956 help lines; since-start 1,855 entries/464 passages match the queue. Source checkpoint covers 184 refs/6 worktrees, and upstream has no changed review inputs. Provider documentation was checked for app-password and OAuth guidance. Account-removal, secret-storage, issuer-check and diagnostic-quotation findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed six full Hungarian account and connection help topics against account dialogs, sign-in apps/discovery, secret storage, TLS/authentication, account removal and queue behavior. Natural formal wording, accurate UI quotations and provider-specific app-password guidance. Existing tags, controls, platform branches and literal keyboard/code contents preserved.",
+          "help_wording_lines_changed": 47,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/hu/account-security.html": 8,
+            "core/crates/pe-html/help/hu/manage-accounts.html": 11,
+            "core/crates/pe-html/help/hu/sign-in-apps.html": 9,
+            "core/crates/pe-html/help/hu/certificate-errors.html": 6,
+            "core/crates/pe-html/help/hu/no-connection.html": 6,
+            "core/crates/pe-html/help/hu/password-not-accepted.html": 7
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-core/src/lib.rs": "e335529ecfdf749a044ea64db2b467881d13bea93ccf6760caf2f1decb36beac",
+            "core/crates/pe-core/src/secrets.rs": "f5aae6a69f175cd3837c86c816cfa767b9667073ccc52d7c59fed224a81fca6e",
+            "core/crates/pe-core/src/sign_in_apps.rs": "f2f6ec3fed94e298979d5f8d688691b9b5918568781c2ef86c8a0999348d21bb",
+            "core/crates/pe-core/src/worker.rs": "f5c1c28f0117606cf9b544a1d75736e84c88ad9bc53f26c7d7dda6985db8c28b",
+            "core/crates/pe-net/src/stream.rs": "5a90bc2fef1c9b12587ae587cacc27f79d71bb5734f9cf0cba04711e99ffc79a",
+            "core/crates/pe-net/src/tls.rs": "30b345868ca678c57306858765129790b6b8b8959b8aaecb2dddce8e8d9f130d",
+            "core/crates/pe-imap/src/client/mod.rs": "7f79a9453da917bf8e1585976e1de1b8e47b265b140e132c4352d1e5dd7bf29f",
+            "core/crates/pe-smtp/src/client.rs": "773e7d3f5b7f8eb6d6d4c89484bb5625d38bbaa4322afd39c2e134510deca7dc",
+            "core/crates/pe-oauth/src/discovery.rs": "bbd9d9425ef3b6aa861286cbe5d2a075578b15991d8e1e5d0c554e373eff9f5b",
+            "core/crates/pe-store/src/accounts.rs": "e35286fca375800e346f9c4fd99d6f5fff38e639e3246d12e522fee4cf52e3f8",
+            "core/crates/pe-store/src/schema.rs": "aa2bbc100f1069f46282a6d405dbaa5e2c2da642592d1092ef69b14853ed4e85",
+            "core/crates/pe-store/src/sign_in_apps.rs": "280c907936ab27bd4132d362045167ed8b3627010a1c71784f975561e159ee87",
+            "core/crates/pe-autoconfig/src/app_password.rs": "d71c340b3677cd7193efd89a940231f2d6df12ac65f3a9e18fad329d12b4330a",
+            "app/src/accounts.cpp": "d1965776fefd8a870c0558f5bf3b7d2e40ece8fd9de078a86c514ba554cb3f92",
+            "app/src/signinapps.cpp": "6cd5a5fb374f8c39326d0e96c7d1f6d8a4c7b6d67cd2f205dd8a3fba8879d6cc",
+            "app/src/mailbox.cpp": "47a345c703529fd0ad35e28f673c6e1a5a64ffd8549cb79e0bf10da9825f150b",
+            "linux/src/accounts.rs": "fd849106186b6a3c84a80398ddf08ead4e24f17cc00a2804545d9c024b905a43",
+            "linux/src/sign_in_apps.rs": "bb8ee879c383754b53338a89689aaf8179cff0fd12868764d85ae2c8959b7233",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "mac/Sources/InboxClassic/Accounts.swift": "d7c4ec2ca26c51ed9404fc6e1f4e93aac6cdb79082e512c11984b236636cb53d",
+            "mac/Sources/InboxClassic/SignInApps.swift": "c07ac8825c4d4a4c390ca33726851bd9932128c4f1d874e66b54b1ee767157a1",
+            "mac/Sources/InboxClassic/Mailbox.swift": "7a1ad5456e5599398d081cc3fa5274575d6bd4fbdc9104eaa285126e89263892"
+          },
+          "catalog_dependencies": {
+            "core/locales/hu/mac.ftl": "ccfdfd4bb00809d2e36c35135443102555a0350bf8f2b12f1a50f049ad7d0aaa",
+            "core/locales/hu/linux.ftl": "4ee069a706d1647d0ca4f8315b1400b638b6e1251a1217718191c422f8f2f9b1",
+            "core/locales/hu/app.ftl": "1bde334e0d93bec339b7e081b200592484e929809c5f1b720114732d495b33a7",
+            "core/locales/hu/core.ftl": "2df0c97bf89aed3f7ff3468b7fbe8aa235cf5073ddfcbb6d958443071acea4de",
+            "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be",
+            "core/locales/hu/help.ftl": "22bf1437995d992179c920e30b4c01dced3cf535af44c5d478b2a3226e13b0ce"
+          },
+          "source_context_findings": {
+            "scope": "Six Hungarian account and connection help topics; static source review, no runtime tests or GUI execution.",
+            "issues": [
+              {
+                "topic": "account-security.html",
+                "finding": "STARTTLS failure ends the connection attempt before authentication. A local network alone is not encryption; provider ports are conditional. Platform certificate trust is the default; explicit CLI certificate pinning exists, but no accept-anything mode or interactive certificate exception control was found.",
+                "sources": [
+                  "core/crates/pe-imap/src/client/mod.rs",
+                  "core/crates/pe-smtp/src/client.rs",
+                  "core/crates/pe-net/src/tls.rs",
+                  "core/crates/pe-core/src/lib.rs"
+                ]
+              },
+              {
+                "topic": "account-security.html",
+                "finding": "System secret storage is the default, with an explicit memory-only mode and possible persistence failures. OAuth stores a refresh token even though it does not store the account password. Do not imply browser sign-in has no stored credentials.",
+                "sources": [
+                  "core/crates/pe-core/src/secrets.rs",
+                  "core/crates/pe-core/src/worker.rs"
+                ]
+              },
+              {
+                "topic": "manage-accounts.html",
+                "finding": "Removing an account cascades to outbox rows and removes the stored account credential. Mark All Read applies to messages in every folder. Reordering and properties controls were checked on all three platforms. The preexisting Hungarian paragraph uses one all-inboxes control where English repeats it; retained its markup and used a clear reference back to the same view.",
+                "sources": [
+                  "core/crates/pe-store/src/schema.rs",
+                  "core/crates/pe-store/src/accounts.rs",
+                  "core/crates/pe-core/src/lib.rs",
+                  "app/src/accounts.cpp",
+                  "linux/src/accounts.rs",
+                  "mac/Sources/InboxClassic/Accounts.swift"
+                ]
+              },
+              {
+                "topic": "sign-in-apps.html",
+                "finding": "Check validates issuer discovery and endpoint configuration, not client credentials or mail access. Disabling an app affects offering it for new accounts; in-use apps cannot be removed. Google starts disabled for new accounts in this source. Avoid asserting the live verification status of the registered Google client.",
+                "sources": [
+                  "core/crates/pe-core/src/sign_in_apps.rs",
+                  "core/crates/pe-store/src/sign_in_apps.rs",
+                  "core/crates/pe-oauth/src/discovery.rs",
+                  "app/src/signinapps.cpp",
+                  "linux/src/sign_in_apps.rs",
+                  "mac/Sources/InboxClassic/SignInApps.swift"
+                ]
+              },
+              {
+                "topic": "certificate-errors.html",
+                "finding": "TLS failures are broader than certificate identity failures. Raw low-level TLS diagnostics remain English, so the help quotes the actual text and explains it in Hungarian. The secure reader failure uses the current Hungarian catalog sentence.",
+                "sources": [
+                  "core/crates/pe-net/src/stream.rs",
+                  "core/crates/pe-core/src/worker.rs",
+                  "core/locales/hu/core.ftl"
+                ]
+              },
+              {
+                "topic": "no-connection.html",
+                "finding": "Raw connection and timeout diagnostics remain English; localized failure wrappers are distinct. Port and TLS mode must match the provider. A queued message survives a failed connection and is retried, but reachability alone does not guarantee successful delivery.",
+                "sources": [
+                  "core/crates/pe-net/src/stream.rs",
+                  "core/crates/pe-core/src/worker.rs",
+                  "core/crates/pe-store/src/schema.rs",
+                  "core/locales/hu/core.ftl"
+                ]
+              },
+              {
+                "topic": "password-not-accepted.html",
+                "finding": "Two-step verification does not universally require or enable app passwords. Gmail app passwords require both two-step verification and account support. Outlook.com/Microsoft 365 guidance uses browser sign-in. iCloud is a supported app-password example. Quotes match current reader failure and sign-in-refused catalogs.",
+                "sources": [
+                  "core/crates/pe-autoconfig/src/app_password.rs",
+                  "core/locales/hu/app.ftl",
+                  "core/locales/hu/core.ftl"
+                ]
+              }
+            ],
+            "provider_references": [
+              {
+                "url": "https://support.google.com/accounts/answer/185833",
+                "supports": "Google recommends browser sign-in. App passwords require two-step verification and may be unavailable depending on account policy or protection settings."
+              },
+              {
+                "url": "https://support.apple.com/en-us/102654",
+                "supports": "App-specific passwords let third-party apps access iCloud and require two-factor authentication."
+              },
+              {
+                "url": "https://learn.microsoft.com/en-us/exchange/clients-and-mobile-in-exchange-online/deprecation-of-basic-authentication-exchange-online",
+                "supports": "Exchange Online removed Basic authentication for IMAP/POP; app passwords cannot replace OAuth for those protocols."
+              },
+              {
+                "url": "https://support.microsoft.com/en-us/support/known-issues/modern-authentication-methods-now-needed-to-continue-syncing-outlook-email-in-non-microsoft-email-ap",
+                "supports": "Outlook.com requires modern authentication; the provider's third-party mail guidance configures OAuth for IMAP and SMTP."
+              }
+            ],
+            "limitations": "No Fluent bundle execution, native-speaker certification, screenshot fit, full test suite, build or CI result claimed. External references were read during this batch. English and runtime source remain unchanged. Other languages require targeted comparison before any reopening or completion credit."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-hu-accounts-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-hu-accounts-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-hu-accounts-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-hu-accounts-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-hu-accounts-20261118-joins.log",
+            "source-audit.json": "/private/tmp/inbox-hu-accounts-20261118-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-hu-accounts-20261118-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-hu-accounts-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-hu-accounts-20261118-html.log"
           }
         }
       ]
@@ -76788,7 +76962,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Hungarian structural checks pass with 1,484 expected mark-only diagnostics. Exact reconstruction verifies 31 catalog entries: 30 pending entries completed and one earlier folder-creation log reopened without duplicate scope credit. Sixteen values improved and 15 retained; two full help topics have 14 improved wording lines. Variables, plural/color branches, access-key counts, comments, markup, attributes, controls, platform branches and literal code/keys are preserved. Static counts 0/1/2/5/21/101, mixed summary counts, seven colors, terminal-name substitutions, hour ranges and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reviewed strings introduce no access keys; existing helper scopes have no collisions. Twenty-seven runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 11,870 help lines; since-start 1,855 entries/464 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations. Agent context findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain separate. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Hungarian structural checks pass with 1,490 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 47 improved wording lines. All six Hungarian catalogs are unchanged. Tags, attributes, control order, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins inspected with current labels; corrected articles before Egyéb feladócímek and Átirányítási URI. Twenty-five runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 11,956 help lines; since-start 1,855 entries/464 passages match the queue. Source checkpoint covers 184 refs/6 worktrees, and upstream has no changed review inputs. Provider documentation was checked for app-password and OAuth guidance. Account-removal, secret-storage, issuer-check and diagnostic-quotation findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -137604,7 +137778,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
+      "next": "Review Hungarian mail-handling and delivery help: new-mail, download-ahead, message-not-shown, delivery-problems, message-rules and unsubscribe. All current Hungarian catalog entries are reviewed; 18 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -140524,7 +140698,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review Hungarian mail-handling and delivery help: new-mail, download-ahead, message-not-shown, delivery-problems, message-rules and unsubscribe. All current Hungarian catalog entries are reviewed; 18 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -142295,7 +142469,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+      "next": "Review Hungarian mail-handling and delivery help: new-mail, download-ahead, message-not-shown, delivery-problems, message-rules and unsubscribe. All current Hungarian catalog entries are reviewed; 18 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -144203,6 +144377,18 @@
         "merge_commit": "802ce727efec6b6990aaf4cee2fdca4dab664872",
         "merged_at": "2026-11-18T21:17:56Z",
         "verified_master": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "hu-agent-access-read-log-20261118",
+        "pr": 182,
+        "url": "https://github.com/postalsys/inbox-classic/pull/182",
+        "review_commit": "e5987097c8a9657baa18cc0c08e45d2f915a1030",
+        "merge_commit": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+        "merged_at": "2026-11-18T21:30:24Z",
+        "verified_master": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
@@ -154643,7 +154829,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "45c8106a6999e9f1ce0407b87c81fe53c2b2eb7e062d58856c8e53cd009be6a4",
+      "core/locales/GLOSSARY.md": "d13fb8c57aba8582e37a0570c7fa72435f705fa04b7d0b50e039682f9af0a5c0",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -154766,7 +154952,13 @@
       "core/crates/pe-html/help/hu/encryption-errors.html": "fd5a474190372febcdd83900562d1f02ca7d47ffc4cb8db0ac5628486a53896b",
       "core/crates/pe-html/help/hu/agents-connect.html": "2166208d63d0494a7e14ae7e338dac4340b4b2fe8884595b77fe51113ccbdba8",
       "core/crates/pe-html/help/hu/agents-permissions.html": "1d598b5f37cc0e263198d2773b6c7e2045125cb705565df1bf710466879a82e9",
-      "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be"
+      "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be",
+      "core/crates/pe-html/help/hu/account-security.html": "1fcbbbb1413452d1a79801d8ae17f5c8e62bd1fbbe1984b329b0558743860934",
+      "core/crates/pe-html/help/hu/manage-accounts.html": "360b2a62bcefd8979d8ae2f14ff2af4a2bb7cdd9e2ce892629f1c8a117c46e1d",
+      "core/crates/pe-html/help/hu/sign-in-apps.html": "b2349a1139d55ed5e6966846c23c0e2c466486df8dec7312c482e7fc1202b11a",
+      "core/crates/pe-html/help/hu/certificate-errors.html": "1098dd33c123950946b167c2d665069605ca783efe71eb0093f2e282c97cdcc1",
+      "core/crates/pe-html/help/hu/no-connection.html": "e6ea5199925f1988a3eee927e5936bb5abb708e72c5d5ae989b3865d405fa728",
+      "core/crates/pe-html/help/hu/password-not-accepted.html": "bf706eae3dede4f57c6b17ebd4771385e60593e91f4e7b0718ffcfbe3171fa48"
     },
     "resumed_review_checkpoints": [
       {
@@ -167439,6 +167631,94 @@
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a",
           "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b"
         }
+      },
+      {
+        "batch": "hu-accounts-connections-help-20261118",
+        "review_parent": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 13077,
+          "pending_help": 609,
+          "completed_catalog": 22547,
+          "completed_help": 767
+        },
+        "validation": "Hungarian structural checks pass with 1,490 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 47 improved wording lines. All six Hungarian catalogs are unchanged. Tags, attributes, control order, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins inspected with current labels; corrected articles before Egyéb feladócímek and Átirányítási URI. Twenty-five runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 11,956 help lines; since-start 1,855 entries/464 passages match the queue. Source checkpoint covers 184 refs/6 worktrees, and upstream has no changed review inputs. Provider documentation was checked for app-password and OAuth guidance. Account-removal, secret-storage, issuer-check and diagnostic-quotation findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 184,
+          "worktree_count": 6,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+            "refs/remotes/origin/HEAD": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+            "refs/remotes/origin/i18n/review-resume-20261118": "e5987097c8a9657baa18cc0c08e45d2f915a1030",
+            "refs/remotes/origin/master": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "0bfbac121a3a7e5d54eb237adb39b6737e21ede7"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "3baf8a41703a6b941bb61c08b688e62813c79456",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/hu/account-security.html\n M core/crates/pe-html/help/hu/certificate-errors.html\n M core/crates/pe-html/help/hu/manage-accounts.html\n M core/crates/pe-html/help/hu/no-connection.html\n M core/crates/pe-html/help/hu/password-not-accepted.html\n M core/crates/pe-html/help/hu/sign-in-apps.html\n M core/locales/GLOSSARY.md",
+              "translation_hashes": {
+                "core/crates/pe-html/help/hu/account-security.html": "1fcbbbb1413452d1a79801d8ae17f5c8e62bd1fbbe1984b329b0558743860934",
+                "core/crates/pe-html/help/hu/certificate-errors.html": "1098dd33c123950946b167c2d665069605ca783efe71eb0093f2e282c97cdcc1",
+                "core/crates/pe-html/help/hu/manage-accounts.html": "360b2a62bcefd8979d8ae2f14ff2af4a2bb7cdd9e2ce892629f1c8a117c46e1d",
+                "core/crates/pe-html/help/hu/no-connection.html": "e6ea5199925f1988a3eee927e5936bb5abb708e72c5d5ae989b3865d405fa728",
+                "core/crates/pe-html/help/hu/password-not-accepted.html": "bf706eae3dede4f57c6b17ebd4771385e60593e91f4e7b0718ffcfbe3171fa48",
+                "core/crates/pe-html/help/hu/sign-in-apps.html": "b2349a1139d55ed5e6966846c23c0e2c466486df8dec7312c482e7fc1202b11a",
+                "core/locales/GLOSSARY.md": "d13fb8c57aba8582e37a0570c7fa72435f705fa04b7d0b50e039682f9af0a5c0"
+              }
+            }
+          ],
+          "master": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-hu-accounts-20261118-edit.py": "8bf13136a237cb93972d540051aafb289600fddf834e529ab98c5dd0b2c3ccae",
+          "/private/tmp/inbox-hu-accounts-20261118-finalize.py": "6389f544ea1ed72dda161a012d170267be2a0fc52e2d05c9027dc62590189747",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -168800,6 +169080,124 @@
           }
         ],
         "instruction": "English and app code unchanged. Compare affected current passages elsewhere; retain accurate wording and reopen only affected content. Comparison tasks add no review credit."
+      },
+      {
+        "id": "accounts-connections-behavior-context-20261118",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
+        "completed_languages": [
+          "hu"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "it",
+          "lt",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "account-security.html",
+          "manage-accounts.html",
+          "sign-in-apps.html",
+          "certificate-errors.html",
+          "no-connection.html",
+          "password-not-accepted.html"
+        ],
+        "issues": [
+          {
+            "topic": "account-security.html",
+            "finding": "STARTTLS failure ends the connection attempt before authentication. A local network alone is not encryption; provider ports are conditional. Platform certificate trust is the default; explicit CLI certificate pinning exists, but no accept-anything mode or interactive certificate exception control was found.",
+            "sources": [
+              "core/crates/pe-imap/src/client/mod.rs",
+              "core/crates/pe-smtp/src/client.rs",
+              "core/crates/pe-net/src/tls.rs",
+              "core/crates/pe-core/src/lib.rs"
+            ]
+          },
+          {
+            "topic": "account-security.html",
+            "finding": "System secret storage is the default, with an explicit memory-only mode and possible persistence failures. OAuth stores a refresh token even though it does not store the account password. Do not imply browser sign-in has no stored credentials.",
+            "sources": [
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker.rs"
+            ]
+          },
+          {
+            "topic": "manage-accounts.html",
+            "finding": "Removing an account cascades to outbox rows and removes the stored account credential. Mark All Read applies to messages in every folder. Reordering and properties controls were checked on all three platforms. The preexisting Hungarian paragraph uses one all-inboxes control where English repeats it; retained its markup and used a clear reference back to the same view.",
+            "sources": [
+              "core/crates/pe-store/src/schema.rs",
+              "core/crates/pe-store/src/accounts.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "app/src/accounts.cpp",
+              "linux/src/accounts.rs",
+              "mac/Sources/InboxClassic/Accounts.swift"
+            ]
+          },
+          {
+            "topic": "sign-in-apps.html",
+            "finding": "Check validates issuer discovery and endpoint configuration, not client credentials or mail access. Disabling an app affects offering it for new accounts; in-use apps cannot be removed. Google starts disabled for new accounts in this source. Avoid asserting the live verification status of the registered Google client.",
+            "sources": [
+              "core/crates/pe-core/src/sign_in_apps.rs",
+              "core/crates/pe-store/src/sign_in_apps.rs",
+              "core/crates/pe-oauth/src/discovery.rs",
+              "app/src/signinapps.cpp",
+              "linux/src/sign_in_apps.rs",
+              "mac/Sources/InboxClassic/SignInApps.swift"
+            ]
+          },
+          {
+            "topic": "certificate-errors.html",
+            "finding": "TLS failures are broader than certificate identity failures. Raw low-level TLS diagnostics remain English, so the help quotes the actual text and explains it in Hungarian. The secure reader failure uses the current Hungarian catalog sentence.",
+            "sources": [
+              "core/crates/pe-net/src/stream.rs",
+              "core/crates/pe-core/src/worker.rs",
+              "core/locales/hu/core.ftl"
+            ]
+          },
+          {
+            "topic": "no-connection.html",
+            "finding": "Raw connection and timeout diagnostics remain English; localized failure wrappers are distinct. Port and TLS mode must match the provider. A queued message survives a failed connection and is retried, but reachability alone does not guarantee successful delivery.",
+            "sources": [
+              "core/crates/pe-net/src/stream.rs",
+              "core/crates/pe-core/src/worker.rs",
+              "core/crates/pe-store/src/schema.rs",
+              "core/locales/hu/core.ftl"
+            ]
+          },
+          {
+            "topic": "password-not-accepted.html",
+            "finding": "Two-step verification does not universally require or enable app passwords. Gmail app passwords require both two-step verification and account support. Outlook.com/Microsoft 365 guidance uses browser sign-in. iCloud is a supported app-password example. Quotes match current reader failure and sign-in-refused catalogs.",
+            "sources": [
+              "core/crates/pe-autoconfig/src/app_password.rs",
+              "core/locales/hu/app.ftl",
+              "core/locales/hu/core.ftl"
+            ]
+          }
+        ],
+        "instruction": "Compare exact current passages against verified behavior, retaining already accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review."
       }
     ]
   },

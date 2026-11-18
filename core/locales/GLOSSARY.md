@@ -729,6 +729,12 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
 - Read summaries count each kind independently and join through agent-can-list. Read details can have zero results;
   the Windows heading is an hour range. The log keeps subjects/queries/file names, not message bodies. Clearing it
   does not reset sending limits; ordinary change entries may be pruned before 30 days.
+- Account help uses "böngészős bejelentkezés", "alkalmazásjelszó" and "bejelentkezési adatok" consistently.
+  OAuth refresh tokens are stored even when the app never saves the account password. Issuer checks validate
+  discovery settings, not client credentials or mail access. Google is initially hidden for new accounts.
+- Error quotations match current UI text; raw network diagnostics remain English, with a Hungarian explanation.
+  TLS failure can concern more than certificates. Account removal also deletes queued outgoing messages locally;
+  offline retry is not a delivery guarantee. Server ports and app passwords depend on provider/account support.
 
 ### Nederlands (nl)
 
