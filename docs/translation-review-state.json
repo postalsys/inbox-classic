@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Slovenian compose additions, then sv/uk compose, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian and Slovak each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review Swedish then Ukrainian compose additions, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak and Slovenian each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak, 22 Slovenian), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -49613,7 +49613,6 @@
           "menu-sort-by",
           "menu-text-size",
           "menu-folder",
-          "menu-insert",
           "cmd-new-account",
           "cmd-exit",
           "cmd-sync",
@@ -49693,12 +49692,8 @@
           "cmd-export-address-book",
           "cmd-export-setup",
           "cmd-import-setup",
-          "cmd-compose-sign",
-          "cmd-compose-encrypt",
-          "cmd-attach-my-key",
           "tray-check",
           "tray-no-accounts",
-          "ui-tb-create-mail",
           "ui-tb-reply",
           "ui-tb-reply-all",
           "ui-tb-forward",
@@ -49799,9 +49794,6 @@
           "ui-tb-send",
           "ui-tb-save",
           "ui-tb-attach",
-          "ui-tb-sign",
-          "ui-tb-encrypt",
-          "ui-field-keys",
           "ui-field-from",
           "ui-field-to",
           "ui-field-cc",
@@ -50247,16 +50239,6 @@
           "ui-contact-key-none",
           "ui-contact-key-use-new",
           "ui-contact-key-keep",
-          "ui-recipient-keys-title",
-          "ui-recipient-col-recipient",
-          "ui-recipient-col-key",
-          "ui-recipient-find-key",
-          "ui-recipient-remove",
-          "ui-send-unencrypted",
-          "ui-compose-make-key",
-          "ui-compose-show-keys",
-          "ui-compose-encrypt-off",
-          "ui-compose-keep-encrypted",
           "ui-setup-export-title",
           "ui-setup-import-title",
           "ui-setup-export-intro",
@@ -50619,29 +50601,6 @@
           "pgp-publish-done",
           "pgp-publish-failed",
           "pgp-keyserver-off",
-          "pgp-compose-encrypted",
-          "pgp-compose-encrypt-ready",
-          "pgp-compose-missing",
-          "pgp-compose-looking",
-          "pgp-compose-signed",
-          "pgp-compose-reply-clear",
-          "pgp-compose-encrypted-files",
-          "pgp-compose-sign-tip",
-          "pgp-compose-sign-tip-encrypted",
-          "pgp-compose-encrypt-tip",
-          "pgp-compose-make-key",
-          "pgp-compose-key-unusable",
-          "pgp-compose-encrypt-off-quote",
-          "pgp-compose-encrypt-off-reply",
-          "pgp-recipient-verified",
-          "pgp-recipient-found",
-          "pgp-recipient-own",
-          "pgp-recipient-looking",
-          "pgp-recipient-missing",
-          "pgp-recipient-not-found",
-          "pgp-recipient-unusable",
-          "pgp-recipients-intro",
-          "pgp-recipients-intro-missing",
           "pgp-details-part",
           "attachment-from-part",
           "pgp-details-signed",
@@ -51043,14 +51002,12 @@
         "reply-forward.html",
         "save-print-import.html",
         "search-words.html",
-        "sign-and-encrypt.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
         "signatures.html",
         "unsubscribe.html",
         "updates.html",
-        "verify-a-key.html",
-        "write-message.html"
+        "verify-a-key.html"
       ],
       "completed_batches": [
         {
@@ -51741,8 +51698,760 @@
             "since.log": "/private/tmp/inbox-sl-agents-since.log",
             "html.log": "/private/tmp/inbox-sl-agents-html.log"
           }
+        },
+        {
+          "id": "sl-compose-sign-encrypt-20261118",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-insert",
+              "cmd-compose-sign",
+              "cmd-compose-encrypt",
+              "cmd-attach-my-key",
+              "ui-tb-sign",
+              "ui-tb-encrypt",
+              "ui-field-keys",
+              "ui-recipient-keys-title",
+              "ui-recipient-col-recipient",
+              "ui-recipient-col-key",
+              "ui-recipient-find-key",
+              "ui-recipient-remove",
+              "ui-send-unencrypted",
+              "ui-compose-make-key",
+              "ui-compose-show-keys",
+              "ui-compose-encrypt-off",
+              "ui-compose-keep-encrypted",
+              "ui-tb-create-mail"
+            ],
+            "core.ftl": [
+              "pgp-compose-encrypted",
+              "pgp-compose-encrypt-ready",
+              "pgp-compose-missing",
+              "pgp-compose-looking",
+              "pgp-compose-signed",
+              "pgp-compose-reply-clear",
+              "pgp-compose-encrypted-files",
+              "pgp-compose-sign-tip",
+              "pgp-compose-sign-tip-encrypted",
+              "pgp-compose-encrypt-tip",
+              "pgp-compose-make-key",
+              "pgp-compose-key-unusable",
+              "pgp-compose-encrypt-off-quote",
+              "pgp-compose-encrypt-off-reply",
+              "pgp-recipient-verified",
+              "pgp-recipient-found",
+              "pgp-recipient-own",
+              "pgp-recipient-looking",
+              "pgp-recipient-missing",
+              "pgp-recipient-not-found",
+              "pgp-recipient-unusable",
+              "pgp-recipients-intro",
+              "pgp-recipients-intro-missing"
+            ]
+          },
+          "reviewed_help": [
+            "sign-and-encrypt.html",
+            "write-message.html"
+          ],
+          "changed_values": 23,
+          "files": {
+            "core/locales/sl/app.ftl": "0ebbd3befdf14d965e6c57f4e666cfdc8349266a088addbca37ea94f062a1691",
+            "core/locales/sl/core.ftl": "63f192961341910f57acc18ca25cca925f02f3f97ae5c258664860e23b828f8a",
+            "core/crates/pe-html/help/sl/sign-and-encrypt.html": "ab21ebf2abe61055bd0d595096c62f67eeada3b220c240ada3cf3bf2c70dd651",
+            "core/crates/pe-html/help/sl/write-message.html": "0bd6d5e5d9404ac3f96856f8818c9f7a7dfe144479488beb7736de3cf9a0a266"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "f36bda20f41e7f878ba2568967b08c12650036cf0d0a815c1ab19a0f5b4a0fbc",
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5",
+            "core/crates/pe-html/help/en/sign-and-encrypt.html": "731c63934f9692a0ee3e803bfbdc5abeeac7fa8f7f9e1f988b96b9f77c00aaa4",
+            "core/crates/pe-html/help/en/write-message.html": "d161c1a2aeffb7539b2e8086d1a7ee6ea4bc39d5f702d93e362d8d10bfe8ff42"
+          },
+          "validation": "Slovenian structural checks pass with 118 expected mark-only diagnostics. Exact reconstruction verifies 41 reviewed entries, 23 changed values (21 wording improvements and two mnemonic-only fixes), 18 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Encrypted/missing statuses now have exact [1] plus one/two/few/other; missing-key guidance adds exact [1]/[2] before the same categories, preserving accurate counted forms at 101/102 and larger counts. All other plural branches are unchanged. Static CLDR examples cover 1/2/3/4/5/11/21/101/102/103/104/105/201/202; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key and Remove versus Keep Current; reviewed access keys are ASCII. 22 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including the improved Ustvari sporočilo toolbar label and uporabite kombinacijo before platform-dependent shortcuts. Twenty-two runtime/layout files match the evidence. No Slovenian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,446 unmarked entries and 11,480 help lines; since-start 1,990 entries/484 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed all 40 compose entries and both full writing/security help topics against current runtime. Improved send-time protection, signature integrity versus ownership, usable keys, inherited content and encrypted drafts/sent copies. Expanded encrypted/missing statuses to counted one/two/few/other after exact [1]. Guidance adds exact [1]/[2] so singular/dual pronouns do not imply one/two people at 101/102. Fixed Find Key K versus Use New N, and Remove S versus Keep Current O. Preserved polite plural prose, imperative singular commands, lowercase vi, guillemets and literal English keyboard text. Full writing help describes completion, copied recipients, accounts, formatting and supported reminder languages. Broader mnemonic collisions remain pending. Also reviewed ui-tb-create-mail at its Windows, macOS and Linux toolbar callers and changed Ustvari pošto to Ustvari sporočilo.",
+          "help_wording_lines_changed": 30,
+          "mnemonic_scopes_checked": 53,
+          "compose_mnemonic_scopes_passed": 7,
+          "wording_values_changed": 21,
+          "mnemonic_only_values_changed": 2,
+          "plural_changes": [
+            "pgp-compose-encrypted",
+            "pgp-compose-missing",
+            "pgp-recipients-intro-missing"
+          ],
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/crates/pe-core/src/compose_keys.rs": "c0bddbece71f214ae35769d95fbe10e6b9522422b3845741b928148e90bd4c6e",
+            "core/crates/pe-core/src/protect_out.rs": "f25706aab875e7bba611f8c7a3b5711b92e779e6f8744519d0bfa0536f3cf452",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+            "app/src/recipientkeys.cpp": "9f7d8d5f7419aefc712f2c3d8bc39b128695db4950a952f0bfa00f3928f9739d",
+            "linux/src/compose_keys.rs": "265c55610665a3c67b570f9cba06a3073f4e5e97bdccf246b36450ed5ecaa136",
+            "mac/Sources/InboxClassic/ComposeSecurity.swift": "159ae2355e185812acc76494fa88e7e892d2ecffd533a5a75b4325bf5bfb7a40",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234",
+            "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+            "app/src/securitybar.cpp": "cb486603a6b0f4b7061118c4ed92898729ff8fd22faf399e1a611d885f3edd41",
+            "mac/Sources/InboxClassic/SecurityBar.swift": "9c1b60e76a67a53a6a84935d45e896566575e1b9b8eb068a98a40193939491b9",
+            "linux/src/security.rs": "eb38b0cb5cbe0e83150ea53c7a13d9628f9f28d41d1d5a47336638cded5bb61b",
+            "core/crates/pe-core/src/compose.rs": "3ec708f28386f8b09bc84a2ab295a1e032c269bc8c330a688ca4eb756d53b66f",
+            "core/crates/pe-core/src/attachment_words.rs": "77ba5c35a7b2e7af56920cbf0784170596ed0e4604677fb5d21c7800669b56da",
+            "linux/src/compose.rs": "cbf30207811e2b753be8e5f58f65c6a3616909a48b740b27413b2982de6f2260",
+            "linux/src/complete.rs": "3c6423fd914cee91cf4e672ba5097ffdd44c3d78a296cf755397802ce1da2f56",
+            "core/crates/pe-html/src/editor.rs": "70e8f1f9601743d6678e0a1fd355536d974bca04203214adfd6d769dcef56755",
+            "app/src/main.cpp": "86654a505ca1bfa2e00049f0bfb312dbbc2c324e1d6957bd707716dc96f92c8c",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "mac/Sources/InboxClassic/MainWindow.swift": "92ec176fc30d9249871f9d61d28171a10a9ebe7b46eda61203623175e54667b6"
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-sl-compose-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-sl-compose-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-sl-compose-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-sl-compose-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-sl-compose-20261118-joins.log",
+            "source-audit.json": "/private/tmp/inbox-sl-compose-20261118-source-audit.json",
+            "screenshots.json": "/private/tmp/inbox-sl-compose-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-sl-compose-20261118-html.log",
+            "counts.json": "/private/tmp/inbox-sl-compose-20261118-counts.json",
+            "mnemonics-before.json": "/private/tmp/inbox-sl-compose-20261118-mnemonics-before.json",
+            "mnemonics-after.json": "/private/tmp/inbox-sl-compose-20261118-mnemonics-after.json"
+          }
         }
-      ]
+      ],
+      "pending_mnemonic_collisions": {
+        "checkpoint": "sl-compose-sign-encrypt-20261118",
+        "status": "Outside this compose batch; each collision group still includes pending catalog entries. Resolve across actual scopes during the broader Slovenian catalog review.",
+        "collisions": [
+          {
+            "scope": 1,
+            "key": "a",
+            "ids": [
+              "cmd-accounts",
+              "menu-folder"
+            ],
+            "scope_ids": [
+              "cmd-new-account",
+              "cmd-accounts",
+              "menu-folder",
+              "cmd-save-as",
+              "cmd-import",
+              "cmd-import-address-book",
+              "cmd-export-address-book",
+              "cmd-import-setup",
+              "cmd-export-setup",
+              "cmd-print",
+              "cmd-properties",
+              "cmd-exit"
+            ],
+            "pending_ids": [
+              "cmd-accounts",
+              "menu-folder"
+            ]
+          },
+          {
+            "scope": 3,
+            "key": "z",
+            "ids": [
+              "cmd-flag",
+              "ui-menu-flag"
+            ],
+            "scope_ids": [
+              "cmd-new-mail",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "cmd-flag",
+              "ui-menu-flag",
+              "cmd-archive",
+              "cmd-junk",
+              "cmd-not-junk",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-create-rule-from-message"
+            ],
+            "pending_ids": [
+              "cmd-flag",
+              "ui-menu-flag"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "o",
+            "ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "cmd-mark-read"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "cmd-mark-read"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "i",
+            "ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "cmd-mark-read"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "cmd-mark-read"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "i",
+            "ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "l",
+            "ids": [
+              "ui-properties",
+              "cmd-not-junk"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "ui-properties",
+              "cmd-not-junk"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "o",
+            "ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "i",
+            "ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "i",
+            "ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "win-delete-button",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "l",
+            "ids": [
+              "ui-properties",
+              "cmd-not-junk"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "ui-properties",
+              "cmd-not-junk"
+            ]
+          },
+          {
+            "scope": 17,
+            "key": "z",
+            "ids": [
+              "ui-setup-use-passphrase",
+              "ui-keys-passphrase"
+            ],
+            "scope_ids": [
+              "ui-setup-use-passphrase",
+              "ui-keys-passphrase",
+              "ui-keys-passphrase-again",
+              "ui-setup-export-button"
+            ],
+            "pending_ids": [
+              "ui-setup-use-passphrase",
+              "ui-keys-passphrase"
+            ]
+          },
+          {
+            "scope": 21,
+            "key": "s",
+            "ids": [
+              "ui-menu-new-contact",
+              "ui-menu-new-group"
+            ],
+            "scope_ids": [
+              "ui-menu-write-to",
+              "ui-properties",
+              "ui-menu-delete",
+              "ui-menu-new-contact",
+              "ui-menu-new-group"
+            ],
+            "pending_ids": [
+              "ui-menu-new-contact",
+              "ui-menu-new-group"
+            ]
+          },
+          {
+            "scope": 22,
+            "key": "d",
+            "ids": [
+              "ui-let-agents-connect",
+              "win-what-agents-did"
+            ],
+            "scope_ids": [
+              "ui-let-agents-connect",
+              "win-agent-programs",
+              "win-change",
+              "ui-remove",
+              "win-what-agents-did",
+              "cmd-undo",
+              "ui-clear-button"
+            ],
+            "pending_ids": [
+              "ui-let-agents-connect",
+              "win-what-agents-did"
+            ]
+          },
+          {
+            "scope": 22,
+            "key": "p",
+            "ids": [
+              "win-agent-programs",
+              "ui-clear-button"
+            ],
+            "scope_ids": [
+              "ui-let-agents-connect",
+              "win-agent-programs",
+              "win-change",
+              "ui-remove",
+              "win-what-agents-did",
+              "cmd-undo",
+              "ui-clear-button"
+            ],
+            "pending_ids": [
+              "win-agent-programs",
+              "ui-clear-button"
+            ]
+          },
+          {
+            "scope": 27,
+            "key": "n",
+            "ids": [
+              "ui-rule-junk",
+              "ui-rule-quiet"
+            ],
+            "scope_ids": [
+              "ui-rule-show",
+              "ui-rule-move",
+              "ui-rule-mark-read",
+              "ui-rule-flag",
+              "ui-rule-archive",
+              "ui-rule-junk",
+              "ui-rule-delete",
+              "ui-rule-quiet",
+              "ui-rule-apply-now"
+            ],
+            "pending_ids": [
+              "ui-rule-junk",
+              "ui-rule-quiet"
+            ]
+          },
+          {
+            "scope": 42,
+            "key": "o",
+            "ids": [
+              "runtime-flag-orange",
+              "ui-clear-flag"
+            ],
+            "scope_ids": [
+              "runtime-flag-red",
+              "runtime-flag-orange",
+              "runtime-flag-yellow",
+              "runtime-flag-green",
+              "runtime-flag-blue",
+              "runtime-flag-purple",
+              "runtime-flag-gray",
+              "ui-clear-flag"
+            ],
+            "pending_ids": [
+              "ui-clear-flag"
+            ]
+          }
+        ]
+      }
     },
     "sv": {
       "pending_catalogs": {
@@ -73923,7 +74632,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Slovak structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 21 changed values (20 wording improvements and one mnemonic-only fix), 19 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved: one/few/other guidance and one/other status selectors with parenthesized counts. Static CLDR examples cover 1/2/4/5/11/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key; reviewed access keys are ASCII. 31 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including z Prieskumníka/z Findera versus zo správcu súborov. Nineteen runtime/layout files match the evidence. No Slovak screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,405 unmarked entries and 11,444 help lines; since-start 2,030 entries/486 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Slovenian structural checks pass with 118 expected mark-only diagnostics. Exact reconstruction verifies 41 reviewed entries, 23 changed values (21 wording improvements and two mnemonic-only fixes), 18 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Encrypted/missing statuses now have exact [1] plus one/two/few/other; missing-key guidance adds exact [1]/[2] before the same categories, preserving accurate counted forms at 101/102 and larger counts. All other plural branches are unchanged. Static CLDR examples cover 1/2/3/4/5/11/21/101/102/103/104/105/201/202; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key and Remove versus Keep Current; reviewed access keys are ASCII. 22 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including the improved Ustvari sporočilo toolbar label and uporabite kombinacijo before platform-dependent shortcuts. Twenty-two runtime/layout files match the evidence. No Slovenian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,446 unmarked entries and 11,480 help lines; since-start 1,990 entries/484 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -134739,7 +135448,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Slovenian compose additions, then sv/uk compose, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian and Slovak each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites."
+      "next": "Review Swedish then Ukrainian compose additions, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak and Slovenian each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak, 22 Slovenian), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -137659,7 +138368,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Slovenian compose additions, then sv/uk compose, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian and Slovak each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review Swedish then Ukrainian compose additions, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak and Slovenian each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak, 22 Slovenian), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -139430,7 +140139,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Slovenian compose additions, then sv/uk compose, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian and Slovak each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+      "next": "Review Swedish then Ukrainian compose additions, remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak and Slovenian each have 50. Broader mnemonic collisions remain recorded (29 Lithuanian groups, 20 Latvian, 15 Polish, 23 Romanian, 28 Russian, 31 Slovak, 22 Slovenian), plus the Romanian gray flag without an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -141242,6 +141951,18 @@
         "merge_commit": "0fa0963dbf41fc8f8feedfb93ff9ce8821e2a4fa",
         "merged_at": "2026-11-18T19:43:51Z",
         "verified_master": "0fa0963dbf41fc8f8feedfb93ff9ce8821e2a4fa",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "sk-compose-sign-encrypt-20261118",
+        "pr": 173,
+        "url": "https://github.com/postalsys/inbox-classic/pull/173",
+        "review_commit": "02a3274627204a7d08d2732bae5f1a7842289366",
+        "merge_commit": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+        "merged_at": "2026-11-18T19:51:44Z",
+        "verified_master": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
@@ -151682,7 +152403,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "b503af4810d698b5df023e7e7d0b33e971ccb6225e8a2dcd5148476eb5cba41b",
+      "core/locales/GLOSSARY.md": "3c70d433b3ae2f7a51b4ed3f9f1db43f6304d075c1e40a10b87d605f994867aa",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -151772,7 +152493,11 @@
       "core/locales/sk/app.ftl": "ce36f941c2cf3a4b5053a463b2959fe3683d626704902fa1b408e0cfdf0adbb7",
       "core/locales/sk/core.ftl": "4838740c04ce32b49b6f71c89081daf7534b560777f15bef360b7915a5f47a17",
       "core/crates/pe-html/help/sk/sign-and-encrypt.html": "4faf5d0eda7a4412fba0c692763098ae9ce66e83d269891f34ac55639981749e",
-      "core/crates/pe-html/help/sk/write-message.html": "e8cc661a29ae5c3c824a8af5f490d26c8bca550e610bc44fccbba9acc9c9af4c"
+      "core/crates/pe-html/help/sk/write-message.html": "e8cc661a29ae5c3c824a8af5f490d26c8bca550e610bc44fccbba9acc9c9af4c",
+      "core/locales/sl/app.ftl": "0ebbd3befdf14d965e6c57f4e666cfdc8349266a088addbca37ea94f062a1691",
+      "core/locales/sl/core.ftl": "63f192961341910f57acc18ca25cca925f02f3f97ae5c258664860e23b828f8a",
+      "core/crates/pe-html/help/sl/sign-and-encrypt.html": "ab21ebf2abe61055bd0d595096c62f67eeada3b220c240ada3cf3bf2c70dd651",
+      "core/crates/pe-html/help/sl/write-message.html": "0bd6d5e5d9404ac3f96856f8818c9f7a7dfe144479488beb7736de3cf9a0a266"
     },
     "resumed_review_checkpoints": [
       {
@@ -160551,6 +161276,91 @@
         "helpers": {
           "/private/tmp/inbox-sk-compose-20261118-edit.py": "220964878c292791b04116e4ed655d989063ac2c7d2229eab115cfa0a11bf6e0",
           "/private/tmp/inbox-sk-compose-20261118-finalize.py": "b6b4c3efdd9777f20be97dcf0f92899d9712e5773e84e0e3d82492446a410334"
+        }
+      },
+      {
+        "batch": "sl-compose-sign-encrypt-20261118",
+        "review_parent": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 13212,
+          "pending_help": 641,
+          "completed_catalog": 22412,
+          "completed_help": 735
+        },
+        "validation": "Slovenian structural checks pass with 118 expected mark-only diagnostics. Exact reconstruction verifies 41 reviewed entries, 23 changed values (21 wording improvements and two mnemonic-only fixes), 18 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Encrypted/missing statuses now have exact [1] plus one/two/few/other; missing-key guidance adds exact [1]/[2] before the same categories, preserving accurate counted forms at 101/102 and larger counts. All other plural branches are unchanged. Static CLDR examples cover 1/2/3/4/5/11/21/101/102/103/104/105/201/202; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key and Remove versus Keep Current; reviewed access keys are ASCII. 22 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including the improved Ustvari sporočilo toolbar label and uporabite kombinacijo before platform-dependent shortcuts. Twenty-two runtime/layout files match the evidence. No Slovenian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,446 unmarked entries and 11,480 help lines; since-start 1,990 entries/484 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 203,
+          "worktree_count": 6,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+            "refs/remotes/origin/HEAD": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+            "refs/remotes/origin/i18n/review-resume-20261118": "02a3274627204a7d08d2732bae5f1a7842289366",
+            "refs/remotes/origin/master": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "29882ee65e3c405763b357f27fc23c5722af9902"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "3baf8a41703a6b941bb61c08b688e62813c79456",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "0fa0963dbf41fc8f8feedfb93ff9ce8821e2a4fa",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "70ecf011cd98703303a0fabb16226394db413829",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/sl/sign-and-encrypt.html\n M core/crates/pe-html/help/sl/write-message.html\n M core/locales/GLOSSARY.md\n M core/locales/sl/app.ftl\n M core/locales/sl/core.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/sl/sign-and-encrypt.html": "ab21ebf2abe61055bd0d595096c62f67eeada3b220c240ada3cf3bf2c70dd651",
+                "core/crates/pe-html/help/sl/write-message.html": "0bd6d5e5d9404ac3f96856f8818c9f7a7dfe144479488beb7736de3cf9a0a266",
+                "core/locales/GLOSSARY.md": "3c70d433b3ae2f7a51b4ed3f9f1db43f6304d075c1e40a10b87d605f994867aa",
+                "core/locales/sl/app.ftl": "0ebbd3befdf14d965e6c57f4e666cfdc8349266a088addbca37ea94f062a1691",
+                "core/locales/sl/core.ftl": "63f192961341910f57acc18ca25cca925f02f3f97ae5c258664860e23b828f8a"
+              }
+            }
+          ],
+          "master": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "d80dac2e7a6eb7e99340ef762e709c0417c52deb",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-sl-compose-20261118-edit.py": "aa893eda29795bb29d64de67a26b0f096e5fd18be17a12551349093ac7d5c3db",
+          "/private/tmp/inbox-sl-compose-20261118-finalize.py": "274c111eca429b97712cb810c68c6bb3f2816373271dcefe289abe2d5b511111"
         }
       }
     ],
@@ -170167,7 +170977,6 @@
         "sign-and-encrypt.html"
       ],
       "pending_languages": [
-        "sl",
         "sv",
         "uk"
       ],
@@ -170196,7 +171005,8 @@
         "pl",
         "ro",
         "ru",
-        "sk"
+        "sk",
+        "sl"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/write-message.html": {
@@ -170360,7 +171170,8 @@
         "pl": "Polish structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. The missing-key dialog adds Polish few/many forms alongside one/other; all other plural branches are preserved. Static CLDR examples cover 1/2/4/5/11/12/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Keep Current; 15 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Polish screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,285 unmarked entries and 11,336 help lines; since-start 2,150 entries/492 passages match the queue. Source checkpoint covers 202 refs/5 worktrees, and current upstream has no further changed review inputs. PR 159 added 56 marked translated help passages; integration adds four topics to this round and reopens 32 previously completed topics. The Polish batch files and all 19 runtime files are unchanged upstream. Unmerged MCP feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "ro": "Romanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved, including the correct Romanian one/few/other forms and de in other. Static CLDR examples cover 1/2/19/20/21/100/101/119/120/201; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass; 23 unchanged collision groups outside this batch and the gray flag menu without an available automatic mnemonic remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Romanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,325 unmarked entries and 11,372 help lines; since-start 2,110 entries/490 passages match the queue. Source checkpoint covers 202 refs/5 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
         "ru": "Russian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 20 improved values, 20 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved, including exact [1] and counted one/few/many/other forms. Static CLDR examples cover 1/2/4/5/11/14/20/21/22/25/101/111; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass; 28 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Russian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,365 unmarked entries and 11,408 help lines; since-start 2,070 entries/488 passages match the queue. Source checkpoint covers 202 refs/5 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
-        "sk": "Slovak structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 21 changed values (20 wording improvements and one mnemonic-only fix), 19 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved: one/few/other guidance and one/other status selectors with parenthesized counts. Static CLDR examples cover 1/2/4/5/11/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key; reviewed access keys are ASCII. 31 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including z Prieskumníka/z Findera versus zo správcu súborov. Nineteen runtime/layout files match the evidence. No Slovak screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,405 unmarked entries and 11,444 help lines; since-start 2,030 entries/486 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged."
+        "sk": "Slovak structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 21 changed values (20 wording improvements and one mnemonic-only fix), 19 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved: one/few/other guidance and one/other status selectors with parenthesized counts. Static CLDR examples cover 1/2/4/5/11/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key; reviewed access keys are ASCII. 31 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including z Prieskumníka/z Findera versus zo správcu súborov. Nineteen runtime/layout files match the evidence. No Slovak screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,405 unmarked entries and 11,444 help lines; since-start 2,030 entries/486 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
+        "sl": "Slovenian structural checks pass with 118 expected mark-only diagnostics. Exact reconstruction verifies 41 reviewed entries, 23 changed values (21 wording improvements and two mnemonic-only fixes), 18 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Encrypted/missing statuses now have exact [1] plus one/two/few/other; missing-key guidance adds exact [1]/[2] before the same categories, preserving accurate counted forms at 101/102 and larger counts. All other plural branches are unchanged. Static CLDR examples cover 1/2/3/4/5/11/21/101/102/103/104/105/201/202; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key and Remove versus Keep Current; reviewed access keys are ASCII. 22 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including the improved Ustvari sporočilo toolbar label and uporabite kombinacijo before platform-dependent shortcuts. Twenty-two runtime/layout files match the evidence. No Slovenian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,446 unmarked entries and 11,480 help lines; since-start 1,990 entries/484 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged."
       }
     },
     {
@@ -175638,10 +176449,10 @@
         "pl",
         "ro",
         "ru",
-        "sk"
+        "sk",
+        "sl"
       ],
       "pending_languages": [
-        "sl",
         "sv",
         "uk"
       ],
@@ -175842,7 +176653,8 @@
         "pl": "Polish structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. The missing-key dialog adds Polish few/many forms alongside one/other; all other plural branches are preserved. Static CLDR examples cover 1/2/4/5/11/12/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Keep Current; 15 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Polish screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,285 unmarked entries and 11,336 help lines; since-start 2,150 entries/492 passages match the queue. Source checkpoint covers 202 refs/5 worktrees, and current upstream has no further changed review inputs. PR 159 added 56 marked translated help passages; integration adds four topics to this round and reopens 32 previously completed topics. The Polish batch files and all 19 runtime files are unchanged upstream. Unmerged MCP feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "ro": "Romanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved, including the correct Romanian one/few/other forms and de in other. Static CLDR examples cover 1/2/19/20/21/100/101/119/120/201; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass; 23 unchanged collision groups outside this batch and the gray flag menu without an available automatic mnemonic remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Romanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,325 unmarked entries and 11,372 help lines; since-start 2,110 entries/490 passages match the queue. Source checkpoint covers 202 refs/5 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
         "ru": "Russian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 20 improved values, 20 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved, including exact [1] and counted one/few/many/other forms. Static CLDR examples cover 1/2/4/5/11/14/20/21/22/25/101/111; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass; 28 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Russian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,365 unmarked entries and 11,408 help lines; since-start 2,070 entries/488 passages match the queue. Source checkpoint covers 202 refs/5 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
-        "sk": "Slovak structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 21 changed values (20 wording improvements and one mnemonic-only fix), 19 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved: one/few/other guidance and one/other status selectors with parenthesized counts. Static CLDR examples cover 1/2/4/5/11/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key; reviewed access keys are ASCII. 31 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including z Prieskumníka/z Findera versus zo správcu súborov. Nineteen runtime/layout files match the evidence. No Slovak screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,405 unmarked entries and 11,444 help lines; since-start 2,030 entries/486 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged."
+        "sk": "Slovak structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 21 changed values (20 wording improvements and one mnemonic-only fix), 19 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. All plural branches are preserved: one/few/other guidance and one/other status selectors with parenthesized counts. Static CLDR examples cover 1/2/4/5/11/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key; reviewed access keys are ASCII. 31 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including z Prieskumníka/z Findera versus zo správcu súborov. Nineteen runtime/layout files match the evidence. No Slovak screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,405 unmarked entries and 11,444 help lines; since-start 2,030 entries/486 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
+        "sl": "Slovenian structural checks pass with 118 expected mark-only diagnostics. Exact reconstruction verifies 41 reviewed entries, 23 changed values (21 wording improvements and two mnemonic-only fixes), 18 retained values and two complete help topics with 30 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Encrypted/missing statuses now have exact [1] plus one/two/few/other; missing-key guidance adds exact [1]/[2] before the same categories, preserving accurate counted forms at 101/102 and larger counts. All other plural branches are unchanged. Static CLDR examples cover 1/2/3/4/5/11/21/101/102/103/104/105/201/202; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing Find Key versus Use New Key and Remove versus Keep Current; reviewed access keys are ASCII. 22 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, including the improved Ustvari sporočilo toolbar label and uporabite kombinacijo before platform-dependent shortcuts. Twenty-two runtime/layout files match the evidence. No Slovenian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,446 unmarked entries and 11,480 help lines; since-start 1,990 entries/484 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged."
       },
       "note": "Fifteen complete topics reopen only the signing/menu step and public-key menu paragraph. The twelve other languages already have the full topic pending. All catalog reviews and other help prose remain valid. Greek is corrected in el-compose-sign-encrypt-round2. No English or app code edited.",
       "reopen_validation": "Exact reconstruction verifies only two new review-mark pairs per topic in 15 languages. Unchanged outside prose equals bfff91d8 byte-for-byte; inventories and latest hashes updated without adding scope.",

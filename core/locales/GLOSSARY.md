@@ -1007,6 +1007,17 @@ Slovenian agent permissions and activity:
   does not uninstall the program. Preserve the reviewed neutral shutdown instruction for switches/checkboxes.
 - Email may contain hostile instructions; tell readers that agents must not follow them, rather than saying
   that email contains no instructions. Use polite plural address and the language's ordinary control labels.
+- Compose statuses describe protection "ob pošiljanju". "Lastnik ključa je potrjen" is separate from signature
+  integrity; a "uporaben ključ" must be usable for encryption. Names/address lists follow a head noun and colon.
+- Encrypted/missing statuses use exact [1] plus counted one/two/few/other. Missing-key guidance has exact [1]/[2]
+  before the categories, so "njegov ključ" and "njuna ključa" refer only to one/two actual recipients. For 101/102
+  and larger counts, the follow-up names missing keys and recipients generically rather than implying one/two people.
+- Dates follow "Zadnje iskanje:" and complete key-state explanations follow "Razlog:". Use "Pripni svoj javni ključ"
+  for the selected sender. Recipient-dialog K/S keys avoid Use New on N and Keep Current on O.
+- Keep polite plural prose, imperative singular commands, lowercase vi and »...« quotes. Literal shortcuts remain
+  unchanged; "uporabite kombinacijo" avoids choosing s/z before platform-specific keyboard names.
+- Encrypted drafts use only the sender's key, without a digital signature. Inherited text, images and attachments
+  require encryption until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Slovenian.
 - Quotes »...«; keys Ctrl, Shift, Alt, Del, Enter.
 - Review first: the `done-*` / `transfer-*` lines and the plural forms of `setup-*` and `pgp-imported-*`.
 
