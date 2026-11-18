@@ -1,20 +1,19 @@
-<!--review--><h1>Képek és követés</h1>
-<p class="summary">Miért vannak letiltva az internetről betöltött képek, és hogyan jelenítheti meg őket egy megbízható üzenetben vagy feladótól.</p>
-<p>Egy üzenet olyan képeket is megjeleníthet, amelyeket a feladó az interneten tárol. Egy ilyen kép letöltése elárulja a feladónak, hogy megnyitotta az üzenetet, mikor és honnan. Ezért az Inbox Classic nem tölti le őket.</p>
-<p>Az üzenetbe ágyazott képek megjelennek, mert semmit sem árulnak el a feladónak.</p>
-<p>Az Inbox Classic ezeket a képeket maga rajzolja ki, ahogy a csatolt képeket is, így semmi sem fut le bennük. Az a kép, amelyet nem tud kirajzolni (például a HEIC), üres helyként jelenik meg. Az animált képek az első képkockájukat mutatják. Az üzenettel küldött betűtípusokat nem használja.</p>
-<p>Ha egy üzenetben internetről betöltött képek vannak, egy sáv jelzi, hogy egyes képek le vannak tiltva. Megbízható üzenet képeinek megjelenítése:</p>
+<h1>Képek és követés</h1>
+<p class="summary">Miért tiltja le az alkalmazás az internetes képeket, és hogyan engedélyezheti őket egy megbízható üzenetben vagy feladó leveleiben.</p>
+<p>Az üzenetben olyan képek is lehetnek, amelyeket a feladó az interneten tárol. Letöltésük elárulhatja a feladónak, hogy mikor és honnan nyitotta meg az üzenetet. Ezért az Inbox Classic alapértelmezés szerint nem tölti le ezeket a képeket.</p>
+<p>Az üzenettel együtt érkező, beágyazott képek külön internetes letöltés nélkül jelenhetnek meg.</p>
+<p>Az Inbox Classic maga készíti el a beágyazott és csatolt képek előnézetét, a bennük lévő kód futtatása nélkül. A nem támogatott beágyazott képek, például a HEIC-képek helyén üres terület marad. Az animált képekből csak az első képkocka látható. Az üzenettel küldött betűtípusokat nem használja.</p>
+<p>Ha az üzenet internetes képei le vannak tiltva, ezt egy sáv jelzi az üzenet fölött. Ha megbízik az üzenetben, a képeket így jelenítheti meg:</p>
 <ul>
     <li><!--os:windows,mac-->Kattintson a sávra.<!--/os--><!--os:linux-->Kattintson a sávon a <b data-text="gtk-download-pictures"></b> gombra.<!--/os--></li>
-    <li>Vagy válassza a <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b> parancsot.</li>
+    <li>Vagy válassza ezt a menüpontot: <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Ez csak annak az üzenetnek a képeit jeleníti meg. A következő üzenetben a képek ismét le vannak tiltva.</p>
+<p>Ez csak az adott üzenet képeit engedélyezi. Más üzenetek képei ettől még nem töltődnek le automatikusan.</p>
 <h2>Megbízható feladók</h2>
-<p>Ha egy feladó képeit mindig látni szeretné, <!--os:windows-->kattintson a sáv jobb szélén lévő nyílra<!--/os--><!--os:mac-->kattintson a sávon a <b data-text="cmd-pictures"></b> melletti nyílra<!--/os--><!--os:linux-->kattintson a sávon a <b data-text="gtk-download-pictures"></b> melletti nyílra<!--/os-->. Válassza, hogy mindig letöltse-e a képeket attól a feladótól, vagy a tartományának mindenkitől.</p>
-<p>A képeik ezután maguktól betöltődnek, de csak akkor, ha a levelezési szolgáltatója megerősíti, hogy az üzenet valóban abból a tartományból jön. Az olyan üzenet, amely csak úgy tesz, mintha tőlük jönne, továbbra is rákérdez, és a sáv jelzi, hogy a feladót nem sikerült megerősíteni. A <b data-text="folder-junk"></b> mappában a képek soha nem töltődnek be maguktól.</p>
-<p>Feladó eltávolításához a listáról használja a <b data-text="ui-trusted-senders-button"></b> gombot itt: <b data-settings="reading"></b>.</p>
+<p>Ha egy feladó képeit mindig meg szeretné jeleníteni, <!--os:windows-->kattintson a sáv jobb szélén lévő nyílra<!--/os--><!--os:mac-->kattintson a sávon a <b data-text="cmd-pictures"></b> melletti nyílra<!--/os--><!--os:linux-->kattintson a sávon a <b data-text="gtk-download-pictures"></b> melletti nyílra<!--/os-->. Válassza ki, hogy csak ettől a feladótól vagy a tartomány összes feladójától engedélyezi a képek automatikus letöltését.</p>
+<p>A képek ezután automatikusan betöltődnek, ha a levelezési szolgáltató megerősíti az üzenet feladói tartományát. Ez nem igazolja a feladó személyazonosságát. Megerősítés nélkül a sáv jelzi, hogy a feladó tartományát nem sikerült ellenőrizni, és a képeket külön kell engedélyezni. A <b data-text="folder-junk"></b> mappában a képek soha nem töltődnek le automatikusan.</p>
+<p>Feladó eltávolításához kattintson a <b data-text="ui-trusted-senders-button"></b> gombra. Itt találja: <b data-settings="reading"></b>.</p>
 <h2>Képek minden üzenetben</h2>
-<p>A <b data-text="ui-pictures-always-option"></b> beállítás (<b data-settings="reading"></b>) minden üzenet képeit letölti, kivéve a <b data-text="folder-junk"></b> mappában. Alapértelmezés szerint ki van kapcsolva, mert így a feladók megtudhatják, mikor olvassa el az üzeneteiket.</p>
-<p>A fejléc melletti márkalogó nem követőkép. A levelezőkiszolgálója hagyja jóvá, és a márkától származik, nem a feladó képei közül.</p>
+<p>A <b data-text="ui-pictures-always-option"></b> beállítás (<b data-settings="reading"></b>) automatikusan letölti az internetes képeket, a <b data-text="folder-junk"></b> mappában lévő üzenetek kivételével. A titkosított üzenetrészek internetes képeit ekkor is külön kell engedélyezni. A beállítás alapértelmezés szerint ki van kapcsolva, mert a letöltés elárulhatja a feladónak, mikor olvassa el az üzenetet.</p>
+<p>A fejléc melletti márkalogót a levelezési szolgáltató ellenőrzi. Az alkalmazás ezt külön kezeli az üzenet képeitől; a logó megjelenítéséhez is szükség lehet internetes letöltésre.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

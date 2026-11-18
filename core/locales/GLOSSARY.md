@@ -712,6 +712,13 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   Attachment tooltips use "Forrás: 2. rész" without an article tied to an unknown number or inflecting its status label.
 - STARTTLS failure stops the connection attempt, not the app. SMTP encryption-required errors do not prove a password
   correct; standard TLS ports are examples subject to provider support. A local network is not itself encryption.
+- Preview labels distinguish a file from its "előnézet". A crash marker only establishes that the app stopped
+  while rendering a file; it does not establish that the file was a PDF. Keep format/name/count placeables uninflected.
+- External pictures are blocked by default; trusted-sender rules verify a domain, not a person. Decrypted parts
+  still need a click. Embedded pictures need no separate network download; brand logos may require their own download.
+- Privacy help describes web links separately from mail links and user-requested attachment opening in an external
+  app. The reader removes message scripts and processes embedded pictures; avoid claiming its view cannot run any
+  code or that every picture bypasses system decoders. One-time codes require the relevant domain's signature.
 
 ### Nederlands (nl)
 
