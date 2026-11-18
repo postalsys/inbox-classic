@@ -567,6 +567,7 @@ final class UITest {
         try await encryptionKeys()
         try await secureMail()
         try await encryptedAttachment()
+        try await securePreviews()
         try await composeKeys()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()

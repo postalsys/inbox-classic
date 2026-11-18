@@ -68,8 +68,9 @@ final class DocumentServer: NSObject, WKURLSchemeHandler {
             task.didFailWithError(URLError(.fileDoesNotExist))
             return
         }
+        // never kept, as a part's document can carry decrypted text
         let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1",
-                                       headerFields: ["Content-Type": "text/html; charset=utf-8"])!
+                                       headerFields: ["Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store"])!
         task.didReceive(response)
         task.didReceive(data)
         task.didFinish()
@@ -169,6 +170,8 @@ func lockedConfiguration(server: DocumentServer, scripts: Bool) -> WKWebViewConf
 /// that would navigate (a refresh, a form, a script) goes nowhere, and no window opens
 final class StayOnPage: NSObject, WKNavigationDelegate, WKUIDelegate {
     var loaded: (() -> Void)?
+    /// the document's first bytes are shown (before its frames and pictures are there)
+    var committed: (() -> Void)?
     /// asked of a link clicked in the document before the browser opens it: true when its owner took it (the bounce
     /// card's), which the browser then does not open
     var links: ((String) -> Bool)?
@@ -207,6 +210,10 @@ final class StayOnPage: NSObject, WKNavigationDelegate, WKUIDelegate {
             openExternally(action.request.url)
         }
         return nil
+    }
+
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        committed?()
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -283,6 +290,7 @@ final class Preview: NSObject {
         view.isInspectable = false
         view.setAccessibilityIdentifier("preview")
         navigation.loaded = { [weak self] in self?.pageLoaded() }
+        navigation.committed = { [weak self] in self?.pageCommitted() }
         ContentRules.whenReady { [weak self] in
             guard let self else { return }
             ready = true
@@ -311,7 +319,8 @@ final class Preview: NSObject {
 
     /// a document of the core; with `pictures` its pictures from the internet are let through. A signed or encrypted
     /// message's page has `parts`, the document of each of its frames: they are served beside it, and the frames are
-    /// sized to their documents once it loaded, and again every 400 ms while it is shown. `previews` is the view's
+    /// sized to their documents every 400 ms from the moment it is asked for while it is shown, and once more as it is
+    /// shown and as it has loaded. `previews` is the view's
     /// preview token (empty for none): the previews of the document before are ended.
     /// `keepScroll`: the same message made again, shown where the document before was scrolled to.
     func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil, previews: String = "",
@@ -345,15 +354,25 @@ final class Preview: NSObject {
     static let scrollScript = String(cString: pe_scroll_script())
 
     private func load(_ document: String, pictures: Bool, parts: ((Int) -> String?)?) {
-        measuring = parts != nil
         ContentRules.apply(to: view.configuration.userContentController, pictures: pictures)
         // a new address for each document, so it is loaded again rather than taken from history
         shown += 1
         server.clear()
         view.load(URLRequest(url: server.serve(document, host: "preview", path: "\(shown)", parts: parts)))
+        if parts != nil {
+            startMeasuring()
+        }
     }
 
     // ---- the frames of a message's parts ----
+
+    /// the page is shown: its frames sized at once, as every picture's size is in the parts' markup, rather than
+    /// after the pictures arrived (a PDF page can take seconds)
+    private func pageCommitted() {
+        if measuring {
+            measure()
+        }
+    }
 
     private func pageLoaded() {
         // the message made again: its text where it was (every picture's size is in the markup, so the same offset
@@ -362,8 +381,15 @@ final class Preview: NSObject {
             scrollTo = nil
             view.evaluateJavaScript(taken(pe_scroll_to_script(y)) ?? "", in: nil, in: .defaultClient) { _ in }
         }
-        guard measuring else { return }
-        measure()
+        if measuring {
+            measure()
+        }
+    }
+
+    /// the frames measured every 400 ms from now (the page coming, pictures arriving, "..." unfolded, the width or
+    /// the text size changed) until another document is shown
+    private func startMeasuring() {
+        measuring = true
         let timer = Timer(timeInterval: 0.4, repeats: true) { [weak self] timer in
             MainActor.assumeIsolated {
                 guard let self else {
