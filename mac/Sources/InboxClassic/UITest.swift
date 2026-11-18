@@ -399,7 +399,7 @@ final class UITest {
             + "Message-ID: <ui-e2e@example.com>\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nHi Alex,\r\n"
             + "the photos from Saturday are in the shared album. The one from the lake came out best.\r\n\r\nAnn\r\n")
         let html = "<div style=\"font-family:Georgia,serif;max-width:560px;color:#222\">"
-            + "<p><img src=\"cid:banner@example.com\" width=\"560\" height=\"110\" alt=\"Trail Notes\"></p>"
+            + "<p><a href=\"https://example.com/trail-notes\"><img src=\"cid:banner@example.com\" width=\"560\" height=\"110\" alt=\"Trail Notes\"></a></p>"
             + "<h2 style=\"color:#1f4d3a;margin:18px 0 6px\">Five autumn walks worth the drive</h2>"
             + "<p>The larches are turning gold and the summer crowds have gone home. This month we picked five routes for short "
             + "October days, each under four hours, with a warm cafe at the end.</p>"
@@ -671,6 +671,7 @@ final class UITest {
         check(main.window.title == "Inbox", "the title names the folder (\(main.window.title))")
         await pause(1)
         await shot(main.window, "read-1-html")
+        try await picturesInText()
 
         step("message properties")
         command(.properties)

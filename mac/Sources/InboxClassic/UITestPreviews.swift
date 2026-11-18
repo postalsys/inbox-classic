@@ -93,6 +93,109 @@ extension UITest {
         _ = try? await web?.evaluateJavaScript(script + ";0")
     }
 
+    /// 4a: the newsletter's banner (a `cid:` picture, linked) drawn by the core and served from the preview path, on
+    /// the paper as the core's own picture, and its link still copied from the web view's menu
+    func picturesInText() async throws {
+        step("pictures in the message drawn by Inbox Classic")
+        guard let web = readerWeb else { throw Failed(description: "no reading pane") }
+        let script = "JSON.stringify([...document.images].map(i=>[i.getAttribute('src')||'',i.complete&&i.naturalWidth>0,"
+            + "Math.round(i.getBoundingClientRect().width),i.alt,Math.round(i.getBoundingClientRect().top+scrollY)]))"
+        let images = { () async -> [[Any]] in
+            let answer = (try? await web.evaluateJavaScript(script)) as? String ?? ""
+            return (try? JSONSerialization.jsonObject(with: Data(answer.utf8)) as? [[Any]]) ?? []
+        }
+        let banner = { (rows: [[Any]]) in rows.first { $0.count == 5 && $0[3] as? String == "Trail Notes" } }
+        _ = await waitUntil(15) { (banner(await images())?[1] as? Bool) == true }
+        let rows = await images()
+        let shown = banner(rows)
+        let src = shown?[0] as? String ?? ""
+        check(src.hasPrefix("/pv/"), "the banner sent inside the message comes from the preview path (\(src))")
+        check(shown?[1] as? Bool == true && shown?[2] as? NSNumber == 560,
+              "it is drawn, 560 wide (\(shown.map { "\($0[1]) \($0[2])" } ?? "none"))")
+        let sources = rows.compactMap { $0.first as? String }
+        check(!sources.contains { $0.hasPrefix("data:") || $0.hasPrefix("cid:") },
+              "no picture of the document has a data: or cid: address (\(sources.map { String($0.prefix(24)) }))")
+
+        // the banner's link: Copy Link stays in the menu of the picture
+        var menuItems: [String]?
+        TestHooks.webMenu = { menu in
+            menuItems = menu.items.map { "\($0.identifier?.rawValue ?? "-") \($0.title)" }
+            onMain { menu.cancelTracking() }
+        }
+        let top = CGFloat((shown?[4] as? NSNumber)?.doubleValue ?? 40) + 50
+        let inWindow = web.convert(NSPoint(x: 120, y: top), to: nil)
+        if let click = NSEvent.mouseEvent(with: .rightMouseDown, location: inWindow, modifierFlags: [], timestamp: 0,
+                                          windowNumber: main.window.windowNumber, context: nil, eventNumber: 0,
+                                          clickCount: 1, pressure: 1) {
+            onMain { web.rightMouseDown(with: click) }
+        }
+        if await waitUntil(5, { menuItems != nil }), let items = menuItems {
+            say("   the linked banner's menu: \(items)")
+            check(items.contains { $0.contains("CopyLink") } && items.contains { $0.contains("CopyImage ") },
+                  "the linked banner's menu keeps Copy Link and Copy Image")
+            check(!items.contains { $0.contains("DownloadImage") || $0.contains("OpenImageInNewWindow") },
+                  "and has no Download Image or Open Image in New Window")
+        } else {
+            check(false, "the web view's menu opens on the banner")
+        }
+        TestHooks.webMenu = nil
+        await pause(0.5)
+
+        // Print: the banner on the paper as the core's own picture
+        let pdf = out.appendingPathComponent("newsletter-print.pdf")
+        try? FileManager.default.removeItem(at: pdf)
+        var printed = false
+        var document = ""
+        TestHooks.printTo = pdf
+        TestHooks.printed = { printed = $0 }
+        TestHooks.printDocument = { document = $0 }
+        main.mailbox.reader.print()
+        _ = await waitUntil(40) { printed }
+        TestHooks.printTo = nil
+        TestHooks.printed = nil
+        TestHooks.printDocument = nil
+        check(printed, "Print makes the printout of the newsletter")
+        check(document.contains("src=\"data:image/png") && !document.contains("/pv/") && !document.contains("cid:"),
+              "the print document has the banner as the core's own PNG, nothing from the preview path or cid:")
+        // the banner's green on the paper
+        var green = 0
+        // the document kept while its page is drawn (a page without its document draws nothing)
+        let paper = PDFDocument(url: pdf)
+        if let page = paper?.page(at: 0) {
+            let picture = page.thumbnail(of: NSSize(width: 600, height: 850), for: .mediaBox)
+            if let tiff = picture.tiffRepresentation, let bitmap = NSBitmapImageRep(data: tiff) {
+                for y in stride(from: 0, to: bitmap.pixelsHigh, by: 4) {
+                    for x in stride(from: 0, to: bitmap.pixelsWide, by: 4) {
+                        // a dark green (the paper's colour management lightens #1f4d3a a little)
+                        if let c = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB),
+                           c.greenComponent > c.redComponent + 0.1 && c.greenComponent > c.blueComponent + 0.03
+                           && c.greenComponent < 0.5 {
+                            green += 1
+                        }
+                    }
+                }
+                if let png = bitmap.representation(using: .png, properties: [:]) {
+                    try? png.write(to: out.appendingPathComponent("read-1b-html-print.png"))
+                }
+            }
+        }
+        check(green > 1000, "the banner is on the paper (\(green) points of its green)")
+
+        // a dark window: the banner drawn the same, in its place
+        let before = NSApp.appearance
+        onMain { NSApp.appearance = NSAppearance(named: .darkAqua) }
+        main.mailbox.reader.reload()
+        _ = await waitUntil(10) { await self.readerBackground() == "rgb(30, 31, 34)" }
+        _ = await waitUntil(15) { (banner(await images())?[1] as? Bool) == true }
+        let dark = banner(await images())
+        check(dark?[1] as? Bool == true && dark?[2] as? NSNumber == 560 && dark?[4] as? NSNumber == shown?[4] as? NSNumber,
+              "in a dark window the banner is drawn in the same place (\(dark.map { "\($0[1]) \($0[2]) \($0[4])" } ?? "none"))")
+        await shot(main.window, "read-1c-html-dark")
+        onMain { NSApp.appearance = before }
+        main.mailbox.reader.reload()
+        _ = await waitUntil(10) { (banner(await images())?[1] as? Bool) == true }
+    }
+
     func previewsInMessages() async throws {
         step("pictures and PDF files in the message")
         await search("")
