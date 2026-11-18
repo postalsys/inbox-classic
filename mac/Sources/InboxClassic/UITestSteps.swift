@@ -3368,8 +3368,10 @@ extension UITest {
             }
             // a question raised while the app is in the background has its default button back once it is key (macOS
             // takes the key from it until then), so this is checked when the user can press Return
-            let isDefault = await waitUntil(10) { send.isKeyWindow && dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell }
-            check(isDefault, "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"))")
+            _ = await waitUntil(5) { send.isKeyWindow }
+            let isDefault = await waitUntil(5) { dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell }
+            check(isDefault, "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"), "
+                  + "default \(send.defaultButtonCell === dont?.cell), key window \(send.isKeyWindow))")
             await pause(2)
             await shot(send, "agents-13-invitation")
             await darkShot(send, "agents-13-invitation-dark")
