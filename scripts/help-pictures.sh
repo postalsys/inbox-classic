@@ -19,4 +19,17 @@ for platform in windows mac linux; do
         magick "$source" -resize '720x>' -strip -colors 256 "PNG8:$out/$shot.png"
     done
 done
+# the screenshots the homepage does not show, from each platform's last UI test run
+UI_SHOTS=(agents-8-draft)
+for platform in windows mac linux; do
+    case $platform in
+    windows) runs=build/ui-e2e ;;
+    *) runs=build/ui-e2e-$platform ;;
+    esac
+    for shot in "${UI_SHOTS[@]}"; do
+        source="$runs/$shot.png"
+        [ -f "$source" ] || { echo "$source is missing: run the $platform UI test first" >&2; exit 1; }
+        magick "$source" -resize '720x>' -strip -colors 256 "PNG8:core/crates/pe-html/help/pictures/$platform/$shot.png"
+    done
+done
 du -sh core/crates/pe-html/help/pictures

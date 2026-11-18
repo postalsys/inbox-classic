@@ -2,7 +2,8 @@
 // agent host would and runs one fixed conversation through it, writing each answer as a line of JSON to OUT, so the
 // test can answer the app's questions (let it in, send the message) and check what the agent saw and changed.
 // The tests run it from a copy of the Node.js binary named "My AI agent", which is what the app then calls it.
-// After the send it waits for the file OUT.unsubscribe, which the test makes once it has looked at the Outbox and the
+// A send the user has not answered in about 20 seconds is answered `waiting`: the agent then asks get_send_status
+// every second until it has the answer. After the send it saves a draft in Markdown, then waits for the file OUT.unsubscribe, which the test makes once it has looked at the Outbox and the
 // AI Agents window, and then asks to unsubscribe from the two mailing lists the test added.
 //   APP=<executable> STORE=<store> OUT=<file> "My AI agent" agent.mjs
 import { spawn } from 'node:child_process';
@@ -56,14 +57,28 @@ try {
     // read without marking read, then marked read: the windows show it
     record('read', await call('get_message', { folder: inbox, uid: uids[0] }));
     record('marked', await call('mark_messages_read', { folder: inbox, uids }));
-    // waits for the user's yes
+    // waits for the user's yes, asking again while the answer is that the user has not answered yet
+    let sent = await call('send_message', {
+        account,
+        to: 'Pat Example <pat@example.net>',
+        subject: 'Lunch on Friday?',
+        text: 'Hi Pat,\n\nWould Friday at noon work for lunch? The usual place.\n\nThanks!'
+    });
+    for (let waited = 0; sent.status === 'waiting'; waited += 1000) {
+        if (waited > 180000) throw new Error('the user never answered the send');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        sent = await call('get_send_status', { ask_id: sent.ask_id });
+    }
+    record('sent', sent);
+    // a draft for the user to check, written in Markdown
     record(
-        'sent',
-        await call('send_message', {
+        'draft',
+        await call('save_draft', {
             account,
             to: 'Pat Example <pat@example.net>',
-            subject: 'Lunch on Friday?',
-            text: 'Hi Pat,\n\nWould Friday at noon work for lunch? The usual place.\n\nThanks!'
+            subject: 'Agenda for Friday',
+            text: 'Hi Pat,\n\n**Agenda**\n\n- lunch\n- the plan',
+            format: 'markdown'
         })
     );
     // the test's go: the Outbox and the AI Agents window are checked

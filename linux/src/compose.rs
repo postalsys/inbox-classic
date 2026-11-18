@@ -498,6 +498,31 @@ fn field_button(text: &str, name: &str) -> gtk::Button {
     button
 }
 
+/// The line under the fields of a draft an AI agent wrote, naming the agent and asking to check it before sending,
+/// drawn as the security line under it but in a tone of its own that tells and never warns; None for every other
+/// message. Set once, it stays while the window is open.
+fn agent_note(draft: Option<&Draft>) -> Option<gtk::Box> {
+    let note = pe_core::agents::draft_note(draft?)?;
+    let picture = gtk::Image::from_icon_name("ic-sparkle-symbolic");
+    picture.set_pixel_size(16);
+    picture.set_valign(gtk::Align::Start);
+    // the words say it all
+    picture.set_accessible_role(gtk::AccessibleRole::Presentation);
+    let label = gtk::Label::new(Some(&note));
+    label.set_widget_name("compose-agent-note");
+    label.set_xalign(0.0);
+    label.set_hexpand(true);
+    // the whole sentence on more lines in a narrow window, never cut off
+    label.set_wrap(true);
+    label.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+    let line = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+    line.add_css_class("agent-note");
+    line.append(&picture);
+    line.append(&label);
+    crate::security::follow_dark(&line);
+    Some(line)
+}
+
 fn field_entry(name: &str) -> gtk::Entry {
     let entry = gtk::Entry::new();
     entry.set_hexpand(true);
@@ -612,6 +637,9 @@ impl Compose {
         frame.append(&editor.document.view);
         let content = gtk::Box::new(gtk::Orientation::Vertical, 0);
         content.append(&grid);
+        if let Some(note) = agent_note(draft) {
+            content.append(&note);
+        }
         content.append(&protection.line.widget);
         content.append(&format.widget);
         content.append(&frame);
@@ -1292,6 +1320,8 @@ impl Compose {
             sign: self.protection.sign.get(),
             encrypt: self.protection.encrypt.get(),
             quote_encrypted: self.protection.quote_encrypted.get(),
+            // the user's own: what the window saves is never marked as an agent's
+            agent: None,
         }
     }
 

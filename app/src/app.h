@@ -1672,6 +1672,8 @@ enum ComposeKeysControlId : WORD {
     IDC_COMPOSE_SECURITY_DETAILS,
     IDC_COMPOSE_KEYS_LABEL,
     IDC_COMPOSE_KEYS,
+    // the line over them that says an AI agent wrote the draft
+    IDC_COMPOSE_AGENT_NOTE,
     // Recipients' Keys: what it says at its top, the list, the selected recipient's buttons, the key that waits for a
     // decision and its two answers, why Send Without Encryption is off, and the buttons at the bottom (Send is IDOK)
     IDC_RKEYS_INTRO = 360,

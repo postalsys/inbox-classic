@@ -3047,6 +3047,8 @@ pub(crate) unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         sign: o.sign,
         encrypt: o.encrypt,
         quote_encrypted: o.quote_encrypted,
+        // the window's own: what the user saves is never marked as an agent's
+        agent: None,
     })
 }
 
@@ -3314,6 +3316,9 @@ pub struct PeDraftInfo {
     pub encrypt: bool,
     /// It answers or forwards encrypted mail: for PeOutgoing.quote_encrypted, for as long as the window is open
     pub quote_encrypted: bool,
+    /// A saved draft an AI agent wrote: the line the window shows over the message, naming the agent and asking the
+    /// user to check the recipients and the text; NULL for the user's own
+    pub agent_note: *const c_char,
 }
 
 /// A draft; free with `pe_draft_free`
@@ -3350,6 +3355,7 @@ pub(crate) fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
         sign: draft.sign,
         encrypt: draft.encrypt,
         quote_encrypted: draft.quote_encrypted,
+        agent_note: pe_core::agents::draft_note(draft).map_or(null(), |note| strings.add(&note)),
     };
     handed(PeDraft {
         info,

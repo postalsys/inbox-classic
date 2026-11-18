@@ -81,6 +81,43 @@ pub struct Outgoing {
     pub encrypt: bool,
     /// It quotes or forwards a message that was encrypted ([`Draft::quote_encrypted`]): it may not go unencrypted
     pub quote_encrypted: bool,
+    /// The AI agent that wrote it, by its program's name: its copy in Drafts says so ([`AGENT_HEADER`]), which a
+    /// message that goes never does. None for the user's own.
+    pub agent: Option<String>,
+}
+
+/// The header of a draft an AI agent wrote, naming its program: kept only in Drafts, so the compose window can say
+/// who wrote it ([`Draft::agent`]); the user's own saves and every message sent are made without it
+pub const AGENT_HEADER: &str = "X-Inbox-Classic-Agent";
+
+/// The longest program name the header carries
+const AGENT_NAME_MAX: usize = 100;
+
+/// `raw`, a draft built for Drafts, with the header naming the agent that wrote it ([`AGENT_HEADER`])
+pub(crate) fn with_agent_header(raw: Vec<u8>, agent: &str) -> Vec<u8> {
+    let name: String = agent.chars().filter(|c| !c.is_control()).take(AGENT_NAME_MAX).collect();
+    let name = match name.trim() {
+        "" => "AI agent",
+        name => name,
+    };
+    let mut out = format!("{AGENT_HEADER}: {}\r\n", pe_smtp::encoding::encode_header_text(name)).into_bytes();
+    out.extend_from_slice(&raw);
+    out
+}
+
+/// The agent a saved draft's header names ([`AGENT_HEADER`]), None for a draft without one
+fn agent_of(message: &parser::Message) -> Option<String> {
+    message
+        .headers
+        .iter()
+        .find(|h| h.key.eq_ignore_ascii_case(AGENT_HEADER))
+        .map(|h| {
+            pe_mime::words::decode_words(h.value.trim())
+                .chars()
+                .take(AGENT_NAME_MAX)
+                .collect::<String>()
+        })
+        .filter(|name| !name.trim().is_empty())
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -120,6 +157,9 @@ pub struct Draft {
     pub sign: bool,
     /// The quote or the forwarded message was encrypted ([`Outgoing::quote_encrypted`])
     pub quote_encrypted: bool,
+    /// A saved draft an AI agent wrote: its program's name ([`AGENT_HEADER`]); the window says so
+    /// ([`crate::agents::draft_note`])
+    pub agent: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -420,6 +460,7 @@ pub(crate) fn recovered(recovery: pe_store::Recovery) -> Draft {
         encrypt: recovery.encrypt,
         sign: recovery.sign,
         quote_encrypted: recovery.quote_encrypted,
+        agent: None,
     }
 }
 
@@ -452,6 +493,7 @@ pub fn reopen(source: &[u8]) -> (Draft, Vec<(String, Vec<u8>)>) {
             .from
             .as_ref()
             .and_then(|a| a.mailboxes().first().map(|m| m.address.clone())),
+        agent: agent_of(&message),
         ..Default::default()
     };
     (draft, attached(message))

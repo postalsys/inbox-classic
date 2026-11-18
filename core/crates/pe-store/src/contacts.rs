@@ -2,7 +2,7 @@
 //! messages in Sent Items) and heard from (the senders of the rest, Junk left out), ranked by how often and how lately.
 //! It fills itself from the messages the store gets; a person forgotten stays out.
 
-use rusqlite::params;
+use rusqlite::{OptionalExtension, params};
 
 use crate::{FolderId, MessageInfo, Result, Store};
 
@@ -11,6 +11,18 @@ use crate::{FolderId, MessageInfo, Result, Store};
 pub struct Contact {
     pub name: String,
     pub address: String,
+}
+
+/// Someone an agent looks up ([`Store::people_matching`])
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Person {
+    pub name: String,
+    pub address: String,
+    /// A card of the address book has the address
+    pub in_book: bool,
+    /// The messages the user wrote to them and got from them
+    pub sent: u64,
+    pub received: u64,
 }
 
 /// How much one message written to someone counts against one heard from them
@@ -99,6 +111,50 @@ impl Store {
                 })
             })?
             .collect()
+    }
+
+    /// The people whose name or address starts with `typed`, at most `limit`, for an agent: the address book's first,
+    /// then (with `learned`) those written to and heard from, best first, no address twice. With `learned`, each
+    /// says how many messages the user wrote to them and got from them.
+    pub fn people_matching(&self, typed: &str, limit: usize, learned: bool) -> Result<Vec<Person>> {
+        let (book, _) = self.book_matching(typed, limit)?;
+        let mail = if learned {
+            self.contacts_matching(typed, limit)?
+        } else {
+            Vec::new()
+        };
+        let found = book
+            .into_iter()
+            .map(|(name, address)| (name, address, true))
+            .chain(mail.into_iter().map(|contact| (contact.name, contact.address, false)));
+        let mut counts = self
+            .db
+            .prepare_cached("SELECT sent, received FROM contacts WHERE address = ?1 AND hidden = 0")?;
+        let mut people: Vec<Person> = Vec::new();
+        for (name, address, in_book) in found {
+            if people.len() == limit {
+                break;
+            }
+            if people.iter().any(|p| p.address.eq_ignore_ascii_case(&address)) {
+                continue;
+            }
+            let (sent, received) = if learned {
+                counts
+                    .query_row([&address], |row| Ok((row.get(0)?, row.get(1)?)))
+                    .optional()?
+                    .unwrap_or_default()
+            } else {
+                (0, 0)
+            };
+            people.push(Person {
+                name,
+                address,
+                in_book,
+                sent,
+                received,
+            });
+        }
+        Ok(people)
     }
 
     /// Takes someone out of the completions, for good: mail from them later does not bring them back
@@ -221,5 +277,50 @@ mod tests {
             .add_messages(inbox, &[message(3, ("Andres", "andres@example.com"), &[], 40)])
             .unwrap();
         assert!(found("andres").is_empty());
+    }
+
+    #[test]
+    fn people_for_an_agent_come_from_the_book_first() {
+        let store = Store::open_in_memory().unwrap();
+        let (inbox, sent, _) = folders(&store);
+        store
+            .add_messages(inbox, &[message(1, ("Anna Lind", "anna@example.com"), &[], 10)])
+            .unwrap();
+        store
+            .add_messages(
+                sent,
+                &[message(
+                    1,
+                    ("Me", "me@example.com"),
+                    &[("Anna", "ANNA@example.com")],
+                    20,
+                )],
+            )
+            .unwrap();
+        store
+            .add_messages(inbox, &[message(2, ("Andy", "andy@example.com"), &[], 30)])
+            .unwrap();
+        store
+            .save_card(&crate::Card {
+                name: "Anna Lind".into(),
+                addresses: vec!["anna@example.com".into()],
+                ..Default::default()
+            })
+            .unwrap();
+        let people = store.people_matching("an", 10, true).unwrap();
+        let shown: Vec<(&str, bool, u64, u64)> = people
+            .iter()
+            .map(|p| (p.address.as_str(), p.in_book, p.sent, p.received))
+            .collect();
+        assert_eq!(
+            shown,
+            [("anna@example.com", true, 1, 1), ("andy@example.com", false, 0, 1)]
+        );
+        // the book alone, without what mail taught
+        let book = store.people_matching("an", 10, false).unwrap();
+        assert_eq!(book.len(), 1);
+        assert_eq!((book[0].sent, book[0].received), (0, 0));
+        assert_eq!(store.people_matching("an", 1, true).unwrap().len(), 1);
+        assert!(store.people_matching("", 10, true).unwrap().is_empty());
     }
 }

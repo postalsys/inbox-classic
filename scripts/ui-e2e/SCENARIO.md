@@ -473,7 +473,7 @@ Screenshot: `folders-6-one-account`
 
 ## 28. An AI agent
 
-Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`
+Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`, `agents-8-draft`
 
 The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named "My AI agent": it starts the app's `--mcp` relay as an agent host would, and runs one conversation through it. Two new unread messages are added first.
 
@@ -497,6 +497,9 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
 - and what its agent did, newest first
 - Undo takes the message back
 - and the Outbox is empty
+- the agent writes a draft in Markdown
+- opened, it says which agent wrote it and asks to check the recipients and the text
+- its Markdown is formatted
 - the agent asks to unsubscribe from two mailing lists: one question lists both senders and where the requests go
 - each list shows its sender's address first and whole, the name apart, so a name can not hide it
 - Don't Unsubscribe is the default

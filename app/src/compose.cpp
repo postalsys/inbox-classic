@@ -183,6 +183,9 @@ struct Compose : Writing {
     HWND keys = nullptr;
     HWND keysTip = nullptr;
     size_t keysTips = 0;
+    // the line over them that says which AI agent wrote the draft (its words its name, for a screen reader); there for
+    // the window's life when the draft opened was an agent's
+    HWND agentLine = nullptr;
     // the tooltip of a toolbar button, while it shows
     std::wstring tip;
     HFONT bold = nullptr;
@@ -315,6 +318,7 @@ bool IsButtonRow(int row) {
     return IsPickRow(row) || row == Compose::kKeysRow;
 }
 
+int PlaceAgentLine(Compose* state, int left, int top, int right);
 int PlaceSecurityLine(Compose* state, int left, int top, int right);
 void PlaceKeyTips(Compose* state);
 void RefreshSecurity(HWND hwnd, Compose* state);
@@ -376,6 +380,7 @@ void Layout(HWND hwnd, Compose* state) {
             buttonLeft += buttonWidth + Scale(4);
         }
     }
+    y = PlaceAgentLine(state, pad, y, right);
     y = PlaceSecurityLine(state, pad, y, right);
     y = PlaceFormatBar(state, pad, y, client.right - pad);
     state->editor.Resize({pad, y, client.right - pad, std::max(y, static_cast<int>(client.bottom) - pad)});
@@ -563,6 +568,69 @@ int PlaceSecurityLine(Compose* state, int left, int top, int right) {
     }
     InvalidateRect(state->securityLine, nullptr, FALSE);
     return top + height + Scale(4);
+}
+
+// ---- the line that says an AI agent wrote the draft ----
+
+constexpr UINT kAgentWords = DT_WORDBREAK | DT_NOPREFIX | DT_LEFT;
+
+int AgentIconSize() {
+    int cx = 0, cy = 0;
+    ImageList_GetIconSize(IconList(IconSet::Folders), &cx, &cy);
+    return cx;
+}
+
+// where the words go in the line `area`: after the Drafts picture, inside the frame
+RECT AgentWordsArea(const RECT& area) {
+    return {area.left + Scale(8) + AgentIconSize() + Scale(6), area.top + Scale(5), area.right - Scale(8), area.bottom - Scale(5)};
+}
+
+HFONT AgentFont(const Compose* state) {
+    return reinterpret_cast<HFONT>(SendMessageW(state->agentLine, WM_GETFONT, 0, 0));
+}
+
+// the line from `left` to `right` at `top`, as tall as its words wrapped; where what follows starts. Hidden unless
+// the draft was an agent's
+int PlaceAgentLine(Compose* state, int left, int top, int right) {
+    std::wstring words = GetWindowString(state->agentLine);
+    ShowWindow(state->agentLine, words.empty() ? SW_HIDE : SW_SHOW);
+    if (words.empty()) {
+        return top;
+    }
+    RECT bounds = AgentWordsArea({left, top, right, top});
+    bounds.bottom = bounds.top;
+    HDC dc = GetDC(state->agentLine);
+    HGDIOBJ old = SelectObject(dc, AgentFont(state));
+    DrawTextW(dc, words.c_str(), -1, &bounds, DT_CALCRECT | kAgentWords);
+    SelectObject(dc, old);
+    ReleaseDC(state->agentLine, dc);
+    int height = std::max<int>(AgentIconSize(), bounds.bottom - bounds.top) + 2 * Scale(5);
+    MoveWindow(state->agentLine, left, top, right - left, height, TRUE);
+    InvalidateRect(state->agentLine, nullptr, FALSE);
+    return top + height + Scale(4);
+}
+
+// the information bar's colors of the Windows scheme, as the reading pane's bars have them: the Drafts picture, then
+// the words
+void DrawAgentLine(const Compose* state, const DRAWITEMSTRUCT& item) {
+    RECT area = item.rcItem;
+    FillRect(item.hDC, &area, GetSysColorBrush(COLOR_INFOBK));
+    FrameRect(item.hDC, &area, GetSysColorBrush(COLOR_BTNSHADOW));
+    int icon = AgentIconSize();
+    ImageList_Draw(IconList(IconSet::Folders), FOLDER_DRAFTS, item.hDC, area.left + Scale(8), area.top + Scale(5), ILD_TRANSPARENT);
+    RECT words = AgentWordsArea(area);
+    std::wstring text = GetWindowString(state->agentLine);
+    HGDIOBJ old = SelectObject(item.hDC, AgentFont(state));
+    // one line in the middle of the picture's height
+    RECT measured = words;
+    DrawTextW(item.hDC, text.c_str(), -1, &measured, DT_CALCRECT | kAgentWords);
+    if (measured.bottom - measured.top < icon) {
+        words.top += (icon - (measured.bottom - measured.top)) / 2;
+    }
+    SetBkMode(item.hDC, TRANSPARENT);
+    SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
+    DrawTextW(item.hDC, text.c_str(), -1, &words, kAgentWords);
+    SelectObject(item.hDC, old);
 }
 
 // the line under the fields: its Details button is its child, whose click goes on to the window; it draws all of
@@ -1330,6 +1398,10 @@ void CreateFields(HWND hwnd, Compose* state) {
                                   WS_TABSTOP | LBS_MULTICOLUMN | LBS_NOINTEGRALHEIGHT | LBS_WANTKEYBOARDINPUT | LBS_OWNERDRAWFIXED | LBS_HASSTRINGS,
                                   IDC_FILES, {}, WS_EX_CLIENTEDGE);
     SendMessageW(state->attached, LB_SETITEMHEIGHT, 0, MeasureText(L"Ag").cy);
+    // the line under the fields that says an AI agent wrote the draft, before the security line as it is placed over it
+    // (its words its name, for a screen reader); hidden for every other message
+    state->agentLine = CreateChild(hwnd, L"STATIC", L"", SS_OWNERDRAW | SS_NOPREFIX, IDC_COMPOSE_AGENT_NOTE, {});
+    ShowWindow(state->agentLine, SW_HIDE);
     // the line under the fields that says what signing and encrypting come to (its words its name, for a screen
     // reader), Details at its right end while Encrypt is on; hidden while neither is on
     state->securityLine = CreateChild(hwnd, L"STATIC", L"", SS_OWNERDRAW | SS_NOPREFIX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS,
@@ -1643,6 +1715,10 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
                             DetailsReserve(state));
             return TRUE;
         }
+        if (state && wParam == IDC_COMPOSE_AGENT_NOTE) {
+            DrawAgentLine(state, *reinterpret_cast<DRAWITEMSTRUCT*>(lParam));
+            return TRUE;
+        }
         if (state && wParam == IDC_COMPOSE_KEYS) {
             DrawChips(state, *reinterpret_cast<DRAWITEMSTRUCT*>(lParam));
             return TRUE;
@@ -1876,6 +1952,10 @@ HWND OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
         }
         for (size_t i = 0; i < draft->attachment_count; i++) {
             AddFile(state, Text(draft->attachments[i]));
+        }
+        // an AI agent's draft says so for as long as the window is open
+        if (draft->agent_note) {
+            SetWindowTextW(state->agentLine, Text(draft->agent_note).c_str());
         }
         ShowFiles(state);
         // a reply to encrypted mail starts encrypted, a draft as it was saved

@@ -18,6 +18,7 @@ mod dark;
 mod editor;
 mod event;
 mod help;
+mod markdown;
 mod otp;
 mod platform;
 mod secure;
@@ -35,6 +36,7 @@ pub use help::{
     HELP_TOPIC_SCHEME, HelpSection, HelpTarget, HelpTopic, help_contents, help_context, help_export, help_link_topic,
     help_search, help_topic, settings_words,
 };
+pub use markdown::markdown_html;
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};
 pub use secure::{

@@ -475,6 +475,8 @@ struct AgentsState {
     HWND undo = nullptr;
     HWND clear = nullptr;
     std::vector<int64_t> hostIds;
+    // what each program may do, as its row says it: the tip of a row whose words do not fit
+    std::vector<std::wstring> hostAccess;
     std::vector<std::pair<int64_t, bool>> entries;
     bool done = false;
 };
@@ -495,23 +497,66 @@ void UpdateButtons(AgentsState* state) {
     EnableWindow(state->clear, !state->entries.empty());
 }
 
+// the width a column needs for `words` in `list`: the words with the room the list keeps around a cell's text
+int CellWidth(HWND list, const std::wstring& words) {
+    return ListView_GetStringWidth(list, words.c_str()) + Scale(16);
+}
+
+// the programs' columns: Program and Last used as wide as their words, Permissions the rest of the list
+void FitHostColumns(AgentsState* state) {
+    int widths[] = {0, 0, 0};
+    for (int column : {0, 2}) {
+        wchar_t title[128] = L"";
+        LVCOLUMNW header = {};
+        header.mask = LVCF_TEXT;
+        header.pszText = title;
+        header.cchTextMax = static_cast<int>(std::size(title));
+        ListView_GetColumn(state->hosts, column, &header);
+        widths[column] = CellWidth(state->hosts, title);
+        for (int row = 0; row < ListView_GetItemCount(state->hosts); row++) {
+            wchar_t cell[256] = L"";
+            ListView_GetItemText(state->hosts, row, column, cell, static_cast<int>(std::size(cell)));
+            widths[column] = std::max(widths[column], CellWidth(state->hosts, cell));
+        }
+    }
+    RECT client;
+    GetClientRect(state->hosts, &client);
+    widths[1] = std::max(Scale(120), static_cast<int>(client.right) - widths[0] - widths[2]);
+    for (int column = 0; column < 3; column++) {
+        ListView_SetColumnWidth(state->hosts, column, widths[column]);
+    }
+}
+
+// the widest that the Permissions column needs for the programs there are now, so the window can be made that wide
+int PermissionsWidth(PeCore* core) {
+    int widest = static_cast<int>(MeasureText(core::T(PE_TEXT_UI_COL_MAY)).cx);
+    core::AgentHostList hosts(pe_agent_hosts(core));
+    for (size_t i = 0; i < pe_agent_host_list_count(hosts.get()); i++) {
+        widest = std::max(widest, static_cast<int>(MeasureText(Text(pe_agent_host_list_get(hosts.get(), i)->access)).cx));
+    }
+    return widest + Scale(16);
+}
+
 void FillAgents(AgentsState* state) {
     int host = std::max(0, Selected(state->hosts));
     int entry = std::max(0, Selected(state->log));
     Button_SetCheck(state->enabled, pe_agents_enabled(state->core) ? BST_CHECKED : BST_UNCHECKED);
     ListView_DeleteAllItems(state->hosts);
     state->hostIds.clear();
+    state->hostAccess.clear();
     core::AgentHostList hosts(pe_agent_hosts(state->core));
     for (size_t i = 0; i < pe_agent_host_list_count(hosts.get()); i++) {
         const PeAgentHost* agent = pe_agent_host_list_get(hosts.get(), i);
         int row = AddRow(state->hosts, static_cast<int>(i), Text(agent->name));
-        SetCell(state->hosts, row, 1, Text(agent->access));
+        state->hostAccess.push_back(Text(agent->access));
+        SetCell(state->hosts, row, 1, state->hostAccess.back());
         SetCell(state->hosts, row, 2, agent->last_used ? FormatDate(agent->last_used) : core::T(PE_TEXT_UI_NEVER));
         state->hostIds.push_back(agent->id);
     }
     if (!state->hostIds.empty()) {
         SelectRow(state->hosts, host);
     }
+    FitHostColumns(state);
     ListView_DeleteAllItems(state->log);
     state->entries.clear();
     core::AgentLog log(pe_agent_log(state->core, 500));
@@ -625,6 +670,12 @@ LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
             UpdateButtons(state);
         } else if (header->hwndFrom == state->hosts && header->code == LVN_ITEMACTIVATE) {
             ChangeHost(hwnd, state);
+        } else if (header->hwndFrom == state->hosts && header->code == LVN_GETINFOTIPW) {
+            // the whole of what the program may do, should a narrow screen cut it
+            auto* tip = reinterpret_cast<NMLVGETINFOTIPW*>(lParam);
+            if (tip->iItem >= 0 && static_cast<size_t>(tip->iItem) < state->hostAccess.size() && tip->cchTextMax > 0) {
+                wcsncpy_s(tip->pszText, tip->cchTextMax, state->hostAccess[tip->iItem].c_str(), _TRUNCATE);
+            }
         }
         return 0;
     }
@@ -696,14 +747,18 @@ void AgentsDialog(HWND owner, PeCore* core) {
     HelpScope help("agents");
     RegisterDialogClass(kAgentsClass, AgentsProc);
     int pad = Scale(12);
-    int width = Scale(680);
+    std::wstring change = core::T(PE_TEXT_WIN_CHANGE), remove = core::T(PE_TEXT_UI_REMOVE), undo = core::T(PE_TEXT_CMD_UNDO);
+    std::wstring clear = core::T(PE_TEXT_UI_CLEAR_BUTTON), close = core::T(PE_TEXT_UI_CLOSE), setup = core::T(PE_TEXT_WIN_HOW_TO_CONNECT);
+    int button = ButtonWidth({change, remove, undo, clear, close}, 100);
+    // wide enough for what each program may do beside its name and when it was last used, within the screen
+    RECT screen = {};
+    SystemParametersInfoW(SPI_GETWORKAREA, 0, &screen, 0);
+    int wanted = 2 * pad + button + Scale(10) + Scale(4) + Scale(120) + PermissionsWidth(core) + Scale(110);
+    int width = std::clamp(wanted, Scale(680), std::max(Scale(680), static_cast<int>(screen.right - screen.left) - Scale(40)));
     int height = Scale(500);
     HWND dialog = CreateModalWindow(owner, kAgentsClass, core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), width, height);
     AgentsState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
-    std::wstring change = core::T(PE_TEXT_WIN_CHANGE), remove = core::T(PE_TEXT_UI_REMOVE), undo = core::T(PE_TEXT_CMD_UNDO);
-    std::wstring clear = core::T(PE_TEXT_UI_CLEAR_BUTTON), close = core::T(PE_TEXT_UI_CLOSE), setup = core::T(PE_TEXT_WIN_HOW_TO_CONNECT);
-    int button = ButtonWidth({change, remove, undo, clear, close}, 100);
     int listRight = width - pad - button - Scale(10);
     int y = pad;
     state.enabled = CreateChild(dialog, L"BUTTON", core::T(PE_TEXT_UI_LET_AGENTS_CONNECT).c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_AGENTS_ENABLED,
@@ -715,7 +770,7 @@ void AgentsDialog(HWND owner, PeCore* core) {
     AddColumn(state.hosts, 0, core::T(PE_TEXT_UI_COL_PROGRAM).c_str(), 120);
     AddColumn(state.hosts, 1, core::T(PE_TEXT_UI_COL_MAY).c_str(), 290);
     AddColumn(state.hosts, 2, core::T(PE_TEXT_UI_COL_LAST_USED).c_str(), 110);
-    ListView_SetColumnWidth(state.hosts, 2, LVSCW_AUTOSIZE_USEHEADER);
+    ListView_SetExtendedListViewStyle(state.hosts, LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
     state.change = CreateChild(dialog, L"BUTTON", change.c_str(), WS_TABSTOP, IDC_AGENTS_CHANGE, {width - pad - button, y, width - pad, y + Scale(25)});
     state.remove = CreateChild(dialog, L"BUTTON", remove.c_str(), WS_TABSTOP, IDC_AGENTS_REMOVE,
                                {width - pad - button, y + Scale(31), width - pad, y + Scale(56)});

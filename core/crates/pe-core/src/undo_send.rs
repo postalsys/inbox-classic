@@ -42,6 +42,10 @@ impl Core {
         self.check_sender(account, &outgoing)?;
         // the keys now, while the window is open: a missing one is told there, not after the message waited
         let keys = self.outgoing_keys(account, &outgoing, false)?;
+        // an agent's draft the user sends is theirs at once: the agent puts no copy back in Drafts
+        if let Some(draft) = outgoing.message_id.as_deref().and_then(compose::draft_id) {
+            self.store().take_draft(&draft)?;
+        }
         let delay = self.store().send_delay()? as i64;
         if delay == 0 {
             return self.send_command(

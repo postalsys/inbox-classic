@@ -1425,6 +1425,9 @@ typedef struct PeDraftInfo {
   bool encrypt;
   // It answers or forwards encrypted mail: for PeOutgoing.quote_encrypted, for as long as the window is open
   bool quote_encrypted;
+  // A saved draft an AI agent wrote: the line the window shows over the message, naming the agent and asking the
+  // user to check the recipients and the text; NULL for the user's own
+  const char *agent_note;
 } PeDraftInfo;
 
 // The servers found for an address

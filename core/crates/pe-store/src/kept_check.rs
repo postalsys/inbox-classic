@@ -427,6 +427,25 @@ impl World {
             self.store.inbox_unread().unwrap(),
             recounted(|| self.store.count_search(&inboxes).unwrap().1)
         );
+        // each account's, as an agent's overview reads them
+        for &account in &self.accounts {
+            let counted = |scope| {
+                let search = Search {
+                    scope,
+                    accounts: Some(vec![account]),
+                    ..Default::default()
+                };
+                recounted(|| self.store.count_search(&search).unwrap())
+            };
+            let (inbox, inbox_unread) = counted(Scope::AllInboxes);
+            let kept = crate::AccountCounts {
+                inbox,
+                inbox_unread,
+                flagged: counted(Scope::Flagged).0,
+                drafts: counted(Scope::AllDrafts).0,
+            };
+            assert_eq!(self.store.account_counts(account).unwrap(), kept);
+        }
     }
 
     /// A random list as the windows show them
@@ -479,6 +498,13 @@ impl World {
         let text = r
             .pick(&["", "", "", "", "", "is:encrypted", "is:signed", "-is:encrypted"])
             .to_string();
+        // now and then an agent's list: the accounts it may use, one, none or all
+        let accounts = match r.below(6) {
+            0 => Some(vec![self.accounts[0]]),
+            1 => Some(Vec::new()),
+            2 => Some(self.accounts.clone()),
+            _ => None,
+        };
         let search = Search {
             scope,
             show,
@@ -486,6 +512,7 @@ impl World {
             hide_ignored: r.chance(30),
             read_since,
             text,
+            accounts,
             ..Default::default()
         };
         (search, sort)
@@ -701,7 +728,8 @@ fn the_migration_counts_what_was_stored_before() {
          CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id); \
          CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id); \
          DROP INDEX messages_to_decrypt; ALTER TABLE messages DROP COLUMN protection; \
-         ALTER TABLE messages DROP COLUMN decrypted; ALTER TABLE messages DROP COLUMN outer_subject;",
+         ALTER TABLE messages DROP COLUMN decrypted; ALTER TABLE messages DROP COLUMN outer_subject; \
+         DROP TABLE drafts_taken;",
     )
     .unwrap();
     // from the migration that counts, and those after it

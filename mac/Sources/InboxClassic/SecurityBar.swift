@@ -188,6 +188,91 @@ final class SecurityBar: NSView {
     }
 }
 
+// ---- the agent's note ----
+
+/// The line over a draft an AI agent wrote, in the compose window under the fields and above the line of signing and
+/// encrypting, as that line is drawn: a fill from edge to edge, a line under it, the core's words wrapped. Its tone
+/// tells, never warns: the draft is the user's to check, nothing is wrong with it. A screen reader reads its words as
+/// text.
+@MainActor
+final class NoteBar: NSView {
+    private let picture = NSImageView()
+    let words = NSTextField(wrappingLabelWithString: "")
+    private let line = NSView()
+    /// violet, apart from the blue of a signed message and the amber of a warning, light and dark
+    private let colors = ToneColors((0x7e6bc4, 0xf1eefb, 0x463885), (0x9d8cf0, 0x27223b, 0xd6cffa))
+
+    /// `id`: the accessibility identifier of its words, `symbol` the SF Symbol before them
+    init(id: String, symbol: String) {
+        super.init(frame: .zero)
+        wantsLayer = true
+        picture.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+        picture.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        picture.contentTintColor = colors.border
+        picture.setContentHuggingPriority(.required, for: .horizontal)
+        picture.setContentCompressionResistancePriority(.required, for: .horizontal)
+        picture.widthAnchor.constraint(equalToConstant: 18).isActive = true
+        picture.setAccessibilityElement(false)
+        words.font = .systemFont(ofSize: NSFont.systemFontSize)
+        words.textColor = colors.words
+        words.isSelectable = false
+        words.maximumNumberOfLines = 0
+        words.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        words.setContentHuggingPriority(.init(1), for: .horizontal)
+        words.setAccessibilityIdentifier(id)
+        line.wantsLayer = true
+        for view in [picture, words, line] {
+            view.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(view)
+        }
+        // the words set the height, the picture beside their first line when they wrap
+        NSLayoutConstraint.activate([
+            picture.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+            picture.firstBaselineAnchor.constraint(equalTo: words.firstBaselineAnchor),
+            words.leadingAnchor.constraint(equalTo: picture.trailingAnchor, constant: 6),
+            words.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            words.topAnchor.constraint(equalTo: topAnchor, constant: 7),
+            words.bottomAnchor.constraint(equalTo: line.topAnchor, constant: -7),
+            line.leadingAnchor.constraint(equalTo: leadingAnchor),
+            line.trailingAnchor.constraint(equalTo: trailingAnchor),
+            line.bottomAnchor.constraint(equalTo: bottomAnchor),
+            line.heightAnchor.constraint(equalToConstant: 1),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    var text: String {
+        get { words.stringValue }
+        set { words.stringValue = newValue }
+    }
+
+    /// the words wrap at the width they have now, so the bar is as tall as their lines after any change of the
+    /// window's width or appearance
+    override func layout() {
+        super.layout()
+        let width = words.frame.width
+        if width > 0, words.preferredMaxLayoutWidth != width {
+            words.preferredMaxLayoutWidth = width
+            needsLayout = true
+        }
+    }
+
+    override var wantsUpdateLayer: Bool { true }
+
+    override func updateLayer() {
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.backgroundColor = colors.fill.cgColor
+            line.layer?.backgroundColor = colors.border.cgColor
+        }
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        needsDisplay = true
+    }
+}
+
 // ---- Security Details ----
 
 /// The window of Details: the core's text of every part (its label, the key that signed it and when, the key that
