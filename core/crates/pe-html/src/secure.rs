@@ -7,6 +7,9 @@
 //! the page at an address that ends in `/` and each part at `part-N` beside it ([`part_document`]), out of memory as
 //! they serve the page (not `srcdoc`, which WebKit drops while page scripts are off). `allow-same-origin` lets the app
 //! (never the message: it runs no script) measure each part's height and size its frame to it ([`MEASURE_SCRIPT`]).
+//! The page's `frame-src` also takes the app's scheme: a preview's link (`inboxclassic:attachment-...`) clicked in a
+//! part navigates that part's frame, which `'self'` alone refuses before the app is asked; the apps cancel every such
+//! navigation and open the file (the core checks the link's token).
 
 use crate::editor;
 
@@ -88,6 +91,7 @@ fn attribute(text: &str) -> String {
 /// own policy still decides for it).
 pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
     let images = if remote_images { "data: http: https:" } else { "data:" };
+    let scheme = crate::DOCUMENT_SCHEME;
     let mut body = String::new();
     for (index, part) in parts.iter().enumerate() {
         let label = editor::text(part.label);
@@ -105,7 +109,7 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
     }
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; frame-src 'self'; \
+         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; frame-src 'self' {scheme}:; \
          img-src {images}; style-src 'unsafe-inline'; font-src data:\">\
          <meta name=\"color-scheme\" content=\"light dark\">\
          <style>\
@@ -154,7 +158,7 @@ mod tests {
         assert!(page.contains("sandbox=\"allow-same-origin\""));
         assert!(!page.contains("allow-scripts"));
         assert!(page.contains("src=\"part-0\""));
-        assert!(page.contains("frame-src 'self'"));
+        assert!(page.contains("frame-src 'self' inboxclassic:;"));
         assert_eq!(page.matches("<iframe").count(), 1);
         assert!(page.contains(&format!("href=\"{PART_LINK}1\"")));
         assert!(page.contains("img-src data:;"));
