@@ -65,7 +65,7 @@ async fn opened(seconds: u64) -> Vec<PathBuf> {
 }
 
 /// The file at `path` was written into a private folder of the core's for opening
-fn in_private_folder(path: &Path) -> bool {
+pub(super) fn in_private_folder(path: &Path) -> bool {
     let Ok(probe) = shell().core.private_folder("check") else {
         return false;
     };
