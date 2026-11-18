@@ -159,6 +159,35 @@ fn joined(accounts: &[AccountId]) -> String {
     accounts.iter().map(i64::to_string).collect::<Vec<_>>().join(",")
 }
 
+/// The columns of an entry of the log as [`log_row`] reads them, and the tables they come from
+const LOG_COLUMNS: &str = "l.id, l.host_id, h.name, l.at, l.what, l.account_id, l.folder_id, l.uid, l.message_id, \
+    l.summary, l.undo, l.undone, l.kind, l.args, l.call_id, l.changes FROM agent_log l \
+    JOIN agent_hosts h ON h.id = l.host_id";
+
+/// An entry of the log, from a row of [`LOG_COLUMNS`]
+fn log_row(row: &rusqlite::Row) -> rusqlite::Result<AgentLogEntry> {
+    Ok(AgentLogEntry {
+        id: row.get(0)?,
+        host_name: row.get(2)?,
+        at: row.get(3)?,
+        entry: NewLogEntry {
+            host: row.get(1)?,
+            what: row.get(4)?,
+            account: row.get(5)?,
+            folder: row.get(6)?,
+            uid: row.get(7)?,
+            message_id: row.get(8)?,
+            summary: row.get(9)?,
+            undo: row.get(10)?,
+            kind: row.get(12)?,
+            args: row.get(13)?,
+            call_id: row.get(14)?,
+            changes: row.get(15)?,
+        },
+        undone: row.get(11)?,
+    })
+}
+
 impl Store {
     pub fn agent_hosts(&self) -> Result<Vec<AgentHost>> {
         let mut statement = self.db.prepare(&format!(
@@ -315,34 +344,9 @@ impl Store {
 
     fn agent_log_where(&self, filter: &str, value: i64, limit: u64) -> Result<Vec<AgentLogEntry>> {
         let mut statement = self.db.prepare(&format!(
-            "SELECT l.id, l.host_id, h.name, l.at, l.what, l.account_id, l.folder_id, l.uid, l.message_id, l.summary, \
-             l.undo, l.undone, l.kind, l.args, l.call_id, l.changes FROM agent_log l \
-             JOIN agent_hosts h ON h.id = l.host_id {filter} ORDER BY l.at DESC, l.id DESC LIMIT ?2"
+            "SELECT {LOG_COLUMNS} {filter} ORDER BY l.at DESC, l.id DESC LIMIT ?2"
         ))?;
-        statement
-            .query_map(params![value, limit], |row| {
-                Ok(AgentLogEntry {
-                    id: row.get(0)?,
-                    host_name: row.get(2)?,
-                    at: row.get(3)?,
-                    entry: NewLogEntry {
-                        host: row.get(1)?,
-                        what: row.get(4)?,
-                        account: row.get(5)?,
-                        folder: row.get(6)?,
-                        uid: row.get(7)?,
-                        message_id: row.get(8)?,
-                        summary: row.get(9)?,
-                        undo: row.get(10)?,
-                        kind: row.get(12)?,
-                        args: row.get(13)?,
-                        call_id: row.get(14)?,
-                        changes: row.get(15)?,
-                    },
-                    undone: row.get(11)?,
-                })
-            })?
-            .collect()
+        statement.query_map(params![value, limit], log_row)?.collect()
     }
 
     pub fn agent_log_entry(&self, id: i64) -> Result<Option<AgentLogEntry>> {
@@ -352,18 +356,11 @@ impl Store {
     /// The entries of host `host` since `since` that can still be taken back, newest first: those the user cleared
     /// from the window too, as they are still its changes
     pub fn agent_undoable_since(&self, host: AgentHostId, since: i64) -> Result<Vec<AgentLogEntry>> {
-        let mut statement = self.db.prepare(
-            "SELECT id FROM agent_log WHERE host_id = ?1 AND at >= ?2 AND undo IS NOT NULL AND undone = 0 \
-             ORDER BY at DESC, id DESC",
-        )?;
-        let ids: Vec<i64> = statement
-            .query_map(params![host, since], |row| row.get(0))?
-            .collect::<Result<_>>()?;
-        let mut entries = Vec::with_capacity(ids.len());
-        for id in ids {
-            entries.extend(self.agent_log_entry(id)?);
-        }
-        Ok(entries)
+        let mut statement = self.db.prepare(&format!(
+            "SELECT {LOG_COLUMNS} WHERE l.host_id = ?1 AND l.at >= ?2 AND l.undo IS NOT NULL AND l.undone = 0 \
+             ORDER BY l.at DESC, l.id DESC"
+        ))?;
+        statement.query_map(params![host, since], log_row)?.collect()
     }
 
     pub fn set_agent_log_undone(&self, id: i64) -> Result<()> {

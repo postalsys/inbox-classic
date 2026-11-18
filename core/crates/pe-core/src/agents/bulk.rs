@@ -7,6 +7,7 @@
 //! limits it is [`BULK_MAX`] and the program's ceiling of changes in the log, which counts every message of it.
 
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::sync::Arc;
 
 use pe_i18n::{Arg, Text};
@@ -97,8 +98,8 @@ impl Core {
     /// The place of `folder`, kept in `places` once read
     fn place_in<'a>(&self, places: &'a mut HashMap<FolderId, Place>, folder: FolderId) -> Result<&'a Place> {
         Ok(match places.entry(folder) {
-            std::collections::hash_map::Entry::Occupied(entry) => entry.into_mut(),
-            std::collections::hash_map::Entry::Vacant(entry) => entry.insert(self.place(folder)?),
+            Entry::Occupied(entry) => entry.into_mut(),
+            Entry::Vacant(entry) => entry.insert(self.place(folder)?),
         })
     }
 
@@ -426,7 +427,8 @@ impl Core {
         if did + messages.len() as u64 > pe_store::LOG_CEILING {
             return Err(Error::Unavailable(pe_i18n::tr(Text::AgentTooManyChanges)));
         }
-        let left = (ticket.messages.len() - messages.len()) as u64;
+        let changed = messages.len() as u64;
+        let left = ticket.messages.len() as u64 - changed;
         if messages.is_empty() {
             return Err(refused(
                 "None of the messages the dry run counted are as they were: they were changed or moved since.",
@@ -440,11 +442,7 @@ impl Core {
         }))?;
         done.await.map_err(|_| Error::Closed)??;
         let entry = self.log_bulk(host, &ticket, messages, call_id)?;
-        Ok(BulkDone {
-            changed: ticket.messages.len() as u64 - left,
-            left,
-            entry,
-        })
+        Ok(BulkDone { changed, left, entry })
     }
 
     /// The log's one entry of a change of many: what it did and to how many, with the Undo of every message
@@ -474,9 +472,7 @@ impl Core {
             changes: count,
             ..log_entry(host.id, "apply_to_search", ticket.action.log_text(), &args)
         };
-        let ids = self.store().log_agent(&[entry], now())?;
-        self.post(crate::Event::AgentLogChanged)?;
-        ids.first().copied().ok_or(Error::NotFound)
+        self.log_agent_ids(&[entry])?.first().copied().ok_or(Error::NotFound)
     }
 }
 

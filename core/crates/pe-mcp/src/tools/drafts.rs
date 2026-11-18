@@ -115,12 +115,7 @@ async fn answer_of(call: &Call<'_>, asked: Asked) -> Outcome {
 
 /// The answer respond_to_invitation names
 fn response(args: &Args) -> Result<Response, String> {
-    match args.string("response").as_str() {
-        "accept" => Ok(Response::Accept),
-        "tentative" => Ok(Response::Tentative),
-        "decline" => Ok(Response::Decline),
-        _ => Err("`response` is accept, tentative or decline.".into()),
-    }
+    Response::from_name(&args.string("response")).ok_or_else(|| "`response` is accept, tentative or decline.".into())
 }
 
 pub(super) async fn respond_to_invitation(call: &Call<'_>, args: &Args<'_>) -> Outcome {

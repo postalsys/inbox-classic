@@ -7,6 +7,7 @@ use pe_core::agents::{BULK_MAX, BulkAction, BulkPreview, TICKET_SECONDS};
 use pe_store::FlagColor;
 use serde_json::{Value, json};
 
+use super::organize::COLORS;
 use super::{Args, Call, Outcome, engine, row};
 
 /// The actions apply_to_search takes
@@ -31,11 +32,8 @@ fn action(call: &Call, args: &Args) -> Result<BulkAction, String> {
         "flag" => BulkAction::Flag,
         "unflag" => BulkAction::Unflag,
         "flag_color" => {
-            let name = args.string("color");
-            let color = FlagColor::ALL
-                .into_iter()
-                .find(|c| c.id() == name)
-                .ok_or("`color` is one of red, orange, yellow, green, blue, purple, gray for flag_color.")?;
+            let color = FlagColor::from_id(&args.string("color"))
+                .ok_or_else(|| format!("`color` is one of {} for flag_color.", COLORS[..7].join(", ")))?;
             BulkAction::Color(color)
         }
         "move" => BulkAction::Move(call.folder(args.int("to_folder")?)?.id),

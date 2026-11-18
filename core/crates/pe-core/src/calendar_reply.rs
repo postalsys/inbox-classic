@@ -2,7 +2,7 @@
 //! an invitation, naming the user's own attendee line with their answer, for the organizer's calendar to take in.
 //! Only the core writes one, from the invitation as it came; nothing of what an agent writes goes into it.
 
-use crate::contentline::{Line, escape, folded, split, unfold};
+use crate::contentline::{Line, escape, folded, mailto_address, split, unescape, unfold};
 
 /// What the user answers
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -13,6 +13,22 @@ pub enum Response {
 }
 
 impl Response {
+    pub const ALL: [Response; 3] = [Response::Accept, Response::Tentative, Response::Decline];
+
+    /// Its name, as an agent gives it and the catalogs select by (`accept`)
+    pub fn name(self) -> &'static str {
+        match self {
+            Response::Accept => "accept",
+            Response::Tentative => "tentative",
+            Response::Decline => "decline",
+        }
+    }
+
+    /// The one [`Response::name`] names
+    pub fn from_name(name: &str) -> Option<Response> {
+        Response::ALL.into_iter().find(|r| r.name() == name)
+    }
+
     /// Its PARTSTAT
     pub(crate) fn partstat(self) -> &'static str {
         match self {
@@ -43,17 +59,6 @@ pub(crate) struct Reply {
     pub attendee: String,
     /// The iCalendar file, CRLF line breaks
     pub ics: String,
-}
-
-/// An address of a `mailto:` value
-fn address(value: &str) -> String {
-    let value = value.trim();
-    value
-        .get(..7)
-        .filter(|p| p.eq_ignore_ascii_case("mailto:"))
-        .map_or(value, |_| &value[7..])
-        .trim()
-        .to_string()
 }
 
 /// A parameter value as a content line writes it: quoted when it has what would end it
@@ -114,8 +119,9 @@ pub(crate) fn reply(calendar: &str, own: &[String], response: Response, now: i64
     let uid = find("UID")?.0.2.trim().to_string();
     let organizer = find("ORGANIZER")?;
     let attendee = event.iter().find_map(|((name, params, value), _)| {
-        let mine = name == "ATTENDEE" && own.iter().any(|o| o.eq_ignore_ascii_case(&address(value)));
-        mine.then(|| (attendee_line(params, value, response.partstat()), address(value)))
+        let address = mailto_address(value);
+        let mine = name == "ATTENDEE" && own.iter().any(|o| o.eq_ignore_ascii_case(address));
+        mine.then(|| (attendee_line(params, value, response.partstat()), address.to_string()))
     })?;
     let stamp = pe_mime::date::DateTime::from_timestamp(now);
     let mut lines = vec![
@@ -141,12 +147,12 @@ pub(crate) fn reply(calendar: &str, own: &[String], response: Response, now: i64
     lines.push(organizer.1.clone());
     lines.push(attendee.0);
     if let Some(((_, _, summary), _)) = find("SUMMARY") {
-        lines.push(format!("SUMMARY:{}", escape(&crate::contentline::unescape(summary))));
+        lines.push(format!("SUMMARY:{}", escape(&unescape(summary))));
     }
     lines.extend(["END:VEVENT".into(), "END:VCALENDAR".into()]);
     Some(Reply {
         uid,
-        organizer: address(&organizer.0.2),
+        organizer: mailto_address(&organizer.0.2).to_string(),
         attendee: attendee.1,
         ics: lines.iter().map(|line| folded(line)).collect(),
     })

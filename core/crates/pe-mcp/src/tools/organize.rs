@@ -22,12 +22,7 @@ pub(super) fn set_flag_color(call: &Call, args: &Args) -> Outcome {
     let name = args.string("color");
     let color = match name.as_str() {
         "none" => None,
-        _ => Some(
-            FlagColor::ALL
-                .into_iter()
-                .find(|c| c.id() == name)
-                .ok_or_else(|| format!("`color` is one of {}.", COLORS.join(", ")))?,
-        ),
+        _ => Some(FlagColor::from_id(&name).ok_or_else(|| format!("`color` is one of {}.", COLORS.join(", ")))?),
     };
     let before = call.messages(folder.id, &uids)?;
     call.core.set_flag_color_many(folder.id, &uids, color).map_err(engine)?;

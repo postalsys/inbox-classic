@@ -34,15 +34,6 @@ pub struct InvitationReply {
     pub call_id: Option<String>,
 }
 
-/// The name of `response` the catalog selects by
-fn response_name(response: Response) -> &'static str {
-    match response {
-        Response::Accept => "accept",
-        Response::Tentative => "tentative",
-        Response::Decline => "decline",
-    }
-}
-
 /// Refused: the message is no invitation to answer
 fn not_an_invitation(why: &str) -> Error {
     Error::Unavailable(format!("{why} Nothing was asked of the user."))
@@ -91,10 +82,7 @@ fn invited(source: &[u8]) -> Result<Invited> {
 
 /// The values of the answer's words: what it answers and the event's name, with `extra`
 fn reply_args<'a>(response: Response, summary: &'a str, extra: &[(&'a str, Arg<'a>)]) -> Vec<(&'a str, Arg<'a>)> {
-    let mut all = vec![
-        ("response", response_name(response).into()),
-        ("summary", summary.into()),
-    ];
+    let mut all = vec![("response", response.name().into()), ("summary", summary.into())];
     all.extend_from_slice(extra);
     all
 }

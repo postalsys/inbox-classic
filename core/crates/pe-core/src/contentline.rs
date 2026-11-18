@@ -64,6 +64,16 @@ pub(crate) fn unescape(value: &str) -> String {
     out
 }
 
+/// The address of a `mailto:` value (an organizer, an attendee), trimmed; the value itself when it is no `mailto:`
+pub(crate) fn mailto_address(value: &str) -> &str {
+    let value = value.trim();
+    value
+        .get(..7)
+        .filter(|p| p.eq_ignore_ascii_case("mailto:"))
+        .map_or(value, |_| &value[7..])
+        .trim()
+}
+
 /// A TEXT value escaped for a content line (`\\`, `\,`, `\;`, `\n`)
 pub(crate) fn escape(value: &str) -> String {
     let mut out = String::with_capacity(value.len());

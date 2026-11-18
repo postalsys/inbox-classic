@@ -141,7 +141,7 @@ impl Undo {
                 _ => None,
             },
             "color" => {
-                let color = |id: &str| FlagColor::ALL.into_iter().find(|c| c.id() == id);
+                let color = FlagColor::from_id;
                 match text.split(' ').collect::<Vec<_>>()[..] {
                     [_, folder, uid, was] => Some(Undo::Color {
                         folder: folder.parse().ok()?,
@@ -341,10 +341,21 @@ impl Groups {
 }
 
 impl Core {
-    /// The messages `uids` of `folder` that are still there, as the store has them
-    fn still_there(&self, folder: FolderId, uids: &[u64]) -> Result<Vec<pe_store::Picked>> {
+    /// The messages `uids` of `folder` that are still there and still as the change left them (`as_left`); the rest
+    /// counted in `report` as gone or changed
+    fn still_as_left(
+        &self,
+        folder: FolderId,
+        uids: &[u64],
+        report: &mut UndoReport,
+        as_left: impl Fn(&pe_store::Picked) -> bool,
+    ) -> Result<Vec<u64>> {
         let refs: Vec<MessageRef> = uids.iter().map(|&uid| MessageRef { folder, uid }).collect();
-        Ok(self.store().picked(&refs)?)
+        let there = self.store().picked(&refs)?;
+        report.left(Text::AgentUndoNotInFolder, (uids.len() - there.len()) as u64);
+        let back: Vec<u64> = there.iter().filter(|p| as_left(p)).map(|p| p.at.uid).collect();
+        report.left(Text::AgentUndoChanged, (there.len() - back.len()) as u64);
+        Ok(back)
     }
 
     /// Puts `flag` of messages `uids` of `folder` back to `was`, those still as the change left them
@@ -358,11 +369,7 @@ impl Core {
             report.left(Text::AgentUndoImpossible, uids.len() as u64);
             return Ok(());
         };
-        let there = self.still_there(folder, uids)?;
-        report.left(Text::AgentUndoNotInFolder, (uids.len() - there.len()) as u64);
-        let (back, changed): (Vec<_>, Vec<_>) = there.iter().partition(|p| p.has_flag(flag) != was);
-        report.left(Text::AgentUndoChanged, changed.len() as u64);
-        let back: Vec<u64> = back.iter().map(|p| p.at.uid).collect();
+        let back = self.still_as_left(folder, uids, report, |p| p.has_flag(flag) != was)?;
         if back.is_empty() {
             return Ok(());
         }
@@ -378,12 +385,8 @@ impl Core {
 
     /// Puts the flag colour of messages `uids` of `folder` back to `was`
     fn undo_colors(&self, (folder, was, set): ColorKey, uids: &[u64], report: &mut UndoReport) -> Result<()> {
-        let there = self.still_there(folder, uids)?;
-        report.left(Text::AgentUndoNotInFolder, (uids.len() - there.len()) as u64);
         // only those still in the colour the change gave them
-        let (back, changed): (Vec<_>, Vec<_>) = there.iter().partition(|p| set.is_none_or(|set| color_now(p) == set));
-        report.left(Text::AgentUndoChanged, changed.len() as u64);
-        let back: Vec<u64> = back.iter().map(|p| p.at.uid).collect();
+        let back = self.still_as_left(folder, uids, report, |p| set.is_none_or(|set| color_now(p) == set))?;
         if !back.is_empty() {
             self.set_flag_color_many(folder, &back, was)?;
             report.undone += back.len() as u64;
@@ -494,11 +497,16 @@ impl Core {
     /// was left of a change of many messages is in the report.
     pub fn agent_undo_report(&self, id: i64) -> Result<UndoReport> {
         let entry = self.store().agent_log_entry(id)?.ok_or(Error::NotFound)?;
+        self.undo_one(&entry)
+    }
+
+    /// [`Core::agent_undo_report`] of `entry`, read already
+    fn undo_one(&self, entry: &AgentLogEntry) -> Result<UndoReport> {
         let mut report = UndoReport::default();
         if entry.undone {
             return Ok(report);
         }
-        self.undo_entry(&entry, &mut report)?;
+        self.undo_entry(entry, &mut report)?;
         if let Some(why) = report.refusal() {
             return Err(Error::Unavailable(why));
         }
@@ -520,7 +528,7 @@ impl Core {
         if entry.undone {
             return Err(Error::Unavailable("it was taken back already".into()));
         }
-        self.agent_undo_report(id)
+        self.undo_one(&entry)
     }
 
     /// How many changes of program `host` since `since` can still be taken back
