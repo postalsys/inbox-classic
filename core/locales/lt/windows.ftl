@@ -30,12 +30,10 @@ win-list-loading = Įkeliama...
 
 ## Buttons and words used in many windows
 
-# review: new
 win-delete-button = &Panaikinti
 # review: new
 win-find-label = &Ieškoti:
-# review: new
-win-save-as-button = Įrašyti &kaip...
+win-save-as-button = &Įrašyti kaip...
 # review: new
 win-too-many-files = Per daug failų vienu metu: pasirinkite mažiau.
 
@@ -60,8 +58,7 @@ win-format-link = Hipersaitas ({ $ctrl }+K)
 win-show-cc = &Kopija
 # review: new
 win-show-bcc = &Slapta kopija
-# review: new
-win-signature-title = Parašas: { $account }
+win-signature-title = Parašo tekstas: { $account }
 
 ## The folders, the message list and the reading pane
 
@@ -105,8 +102,7 @@ win-files-not-saved = Nepavyko įrašyti { $failed } iš { $count } failų.
 win-new-folder-in-highlighted = Naujas aplankas bus sukurtas pažymėtame aplanke.
 # review: new
 win-delete-folder-ask = Panaikinti aplanką „{ $folder }“ su jo laiškais ir jame esančiais aplankais? Jis bus panaikintas ir serveryje.
-# review: new
-win-rename = Per&vardyti...
+win-rename = Pe&rvardyti...
 # review: new
 win-messages-not-saved = Laiškų įrašyti nepavyko.
 # review: new
@@ -128,8 +124,7 @@ win-browser-sign-in = (prisijungimas naršyklėje)
 win-add = &Pridėti...
 # review: new
 win-properties-button = &Ypatybės...
-# review: new
-win-signature-button = Para&šas...
+win-signature-button = Parašo &tekstas...
 # review: new
 win-sign-in-apps-button = Prisijungimo pro&gramos...
 
