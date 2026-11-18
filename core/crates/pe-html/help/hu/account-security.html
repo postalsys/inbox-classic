@@ -1,13 +1,13 @@
-<!--review--><h1>A fiók biztonsági beállításai</h1>
-<p class="summary">A fiók kiszolgálóinak biztonsági beállításai, és hogy mit jelentenek.</p>
-<p>Minden fióknak két biztonsági beállítása van, a bejövő kiszolgálóhoz: <b data-text="ui-field-imap-security"></b>, a kimenőhöz: <b data-text="ui-field-smtp-security"></b>. Az Inbox Classic kitölti őket, amikor megtalálja a szolgáltató beállításait. A módosításukhoz nyissa meg a fiók tulajdonságait itt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<h1>A fiók biztonsági beállításai</h1>
+<p class="summary">Ismerje meg a bejövő és kimenő levelek kapcsolatbiztonsági beállításait.</p>
+<p>A bejövő levelek kapcsolatát az <b data-text="ui-field-imap-security"></b>, a kimenőkét az <b data-text="ui-field-smtp-security"></b> mezőben állíthatja be. Az Inbox Classic automatikusan kitölti ezeket, ha megtalálja a szolgáltató beállításait. Módosításukhoz nyissa meg a fiók tulajdonságait itt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Beállítás</th><th>Jelentés</th></tr>
-    <tr><td>SSL/TLS</td><td>A kapcsolat már az elejétől titkosított. Általában a 993-as port a bejövő és a 465-ös a kimenő levelekhez.</td></tr>
-    <tr><td>STARTTLS</td><td>A kapcsolat közvetlenül a megnyitása után lesz titkosított. Általában a 143-as port a bejövő és az 587-es a kimenő levelekhez. Az Inbox Classic leáll, ha a kiszolgáló nem kínál titkosítást.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>A jelszava és a levelei olvashatóan haladnak át a hálózaton, bárki láthatja őket.</td></tr>
+    <tr><td>SSL/TLS</td><td>A kapcsolat kezdettől titkosított. Gyakori a 993-as port a bejövő, a 465-ös a kimenő levelekhez. A szolgáltató által megadott portot használja.</td></tr>
+    <tr><td>STARTTLS</td><td>A kapcsolat a bejelentkezési adatok elküldése előtt vált titkosításra. Gyakori a 143-as port a bejövő, az 587-es a kimenő levelekhez; a szolgáltató beállításait kövesse. Ha a titkosítás nem hozható létre, az Inbox Classic megszakítja a kapcsolódást.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>A bejelentkezési adatok és a levelek titkosítás nélkül haladnak át a hálózaton. Aki le tudja hallgatni a kapcsolatot, elolvashatja őket.</td></tr>
 </table>
-<aside class="warning">Ezt a beállítást csak a saját számítógépén vagy helyi hálózatán futó kiszolgálóhoz használja: <b data-text="ui-security-none"></b>. Az Inbox Classic figyelmezteti, mielőtt használná.</aside>
-<p>Az Inbox Classic a rendszer által megbízhatónak tartott tanúsítványok alapján ellenőrzi, hogy minden kiszolgáló valóban az-e, aminek mondja magát. Nincs olyan kapcsoló, amellyel bármilyen tanúsítvány elfogadható volna.</p>
-<p>A jelszavát <!--os:windows-->a Windows Hitelesítőadat-kezelője<!--/os--><!--os:mac-->a bejelentkezési kulcskarika<!--/os--><!--os:linux-->a kulcstartó<!--/os--> őrzi, sosem a levéltár. A böngészőben bejelentkező fiók egyáltalán nem tárol jelszót.</p>
-<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav><!--/review-->
+<aside class="warning">Az alábbi beállítás nem titkosítja a kapcsolatot: <b data-text="ui-security-none"></b>. Csak akkor használja, ha a kapcsolatot más módon megfelelően védi. A helyi hálózat önmagában nem jelent védelmet. Az Inbox Classic figyelmeztet a titkosítatlan kapcsolat használata előtt.</aside>
+<p>Az Inbox Classic alapértelmezés szerint a rendszer által megbízhatónak tartott tanúsítványok és a kiszolgáló neve alapján ellenőrzi a kiszolgáló azonosságát. Nincs olyan kapcsoló, amely minden tanúsítványt feltétel nélkül elfogadna.</p>
+<p>A jelszót alapértelmezés szerint <!--os:windows-->a Windows Hitelesítőadat-kezelője<!--/os--><!--os:mac-->a bejelentkezési kulcskarika<!--/os--><!--os:linux-->a kulcstartó<!--/os--> tárolja, nem a levéladatbázis. A böngészős bejelentkezéshez az Inbox Classic nem menti a fiók jelszavát, de tárolja a hozzáférés megújítására szolgáló tokent.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
