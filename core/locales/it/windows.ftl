@@ -99,6 +99,11 @@ win-forget-program-ask = Rimuovere questo programma, le sue autorizzazioni e la 
 win-clear-log-ask = Cancellare la cronologia delle attività degli agenti? Le modifiche fatte dagli agenti non verranno annullate.
 win-agent-programs = &Programmi i cui agenti hanno chiesto l’accesso alla tua posta:
 win-change = &Modifica...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Annulla &da...
+# review: new
+win-take-back = &Annulla
 win-what-agents-did = At&tività degli agenti:
 # review: new
 win-agent-reads = Cosa è stato letto dalle { $from } alle { $to }:

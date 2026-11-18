@@ -448,6 +448,13 @@ ui-clear-agent-log-detail = Això no desfarà els canvis que han fet els agents.
 ui-let-agents-connect = &Permet que els agents d’IA es connectin a Inbox Classic
 ui-change-button = Canvia…
 ui-undo-button = Desfés
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Desfés des de…
+# review: new
+ui-undo-since-span = Desfés el que ha fet aquest programa:
+# review: new
+ui-take-back = Desfés
 ui-rules-title = Regles de missatge
 ui-rules-intro = Les regles processen els missatges nous de la Safata d’entrada mentre Inbox Classic s’executa. Les regles aplicables s’executen per ordre. Quan una regla mou un missatge fora de la Safata d’entrada, les següents ja no s’hi apliquen.
 ui-rules-none = Encara no hi ha cap regla. Feu clic a Nova per crear-ne una.

@@ -99,6 +99,11 @@ win-forget-program-ask = Eltávolítja a programot a listából, és törli az e
 win-clear-log-ask = Törli az ügynökök tevékenységnaplóját? Ez nem vonja vissza az ügynökök által végzett módosításokat.
 win-agent-programs = &Programok, amelyek ügynökei hozzáférést kértek a leveleihez:
 win-change = &Módosítás...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Visszavonás &időszakra...
+# review: new
+win-take-back = &Visszavonás
 win-what-agents-did = Ügynöki &tevékenység:
 # review: new
 win-agent-reads = Olvasva { $from } és { $to } között:

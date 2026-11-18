@@ -448,6 +448,13 @@ ui-clear-agent-log-detail = Αυτό δεν αναιρεί τις αλλαγές
 ui-let-agents-connect = Να &επιτρέπεται η σύνδεση πρακτόρων ΤΝ στο Inbox Classic
 ui-change-button = Αλλαγή…
 ui-undo-button = Αναίρεση
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Αναίρεση για διάστημα…
+# review: new
+ui-undo-since-span = Αναίρεση όσων έκανε αυτό το πρόγραμμα:
+# review: new
+ui-take-back = Αναίρεση
 ui-rules-title = Κανόνες μηνυμάτων
 ui-rules-intro = Οι κανόνες επεξεργάζονται τα νέα μηνύματα στα Εισερχόμενα όσο εκτελείται το Inbox Classic. Εκτελούνται με τη σειρά, εφόσον πληρούνται τα κριτήριά τους. Αν ένας κανόνας μετακινήσει ένα μήνυμα έξω από τα Εισερχόμενα, δεν εφαρμόζονται άλλοι κανόνες σε αυτό.
 ui-rules-none = Δεν υπάρχουν ακόμη κανόνες. Κάντε κλικ στο «Νέος» για να δημιουργήσετε έναν.

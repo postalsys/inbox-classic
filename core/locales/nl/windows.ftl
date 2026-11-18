@@ -99,6 +99,11 @@ win-forget-program-ask = Dit programma verwijderen, met de machtigingen en de ac
 win-clear-log-ask = De activiteitengeschiedenis van de agents wissen? Wijzigingen die de agents hebben gemaakt, worden hiermee niet ongedaan gemaakt.
 win-agent-programs = &Programma’s waarvan agents toegang tot je e-mail hebben gevraagd:
 win-change = Wi&jzigen...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Ongedaan maken &sinds...
+# review: new
+win-take-back = &Terugdraaien
 win-what-agents-did = &Activiteit van agents:
 # review: new
 win-agent-reads = Wat er is gelezen van { $from } tot { $to }:

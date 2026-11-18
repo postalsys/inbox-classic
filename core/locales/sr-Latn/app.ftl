@@ -452,6 +452,13 @@ ui-clear-agent-log-detail = Time se neće opozvati promene koje su agenti naprav
 ui-let-agents-connect = &Dozvoli AI agentima da se povežu sa programom Inbox Classic
 ui-change-button = Promeni…
 ui-undo-button = Opozovi
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Opozovi za period…
+# review: new
+ui-undo-since-span = Opozovi ono što je ovaj program uradio:
+# review: new
+ui-take-back = Opozovi
 ui-rules-title = Pravila za poruke
 ui-rules-intro = Pravila obrađuju nove poruke u Prijemnom sandučetu dok Inbox Classic radi. Primenjuju se redom na poruke koje ispunjavaju njihove kriterijume. Kada pravilo premesti poruku iz Prijemnog sandučeta, na nju se više ne primenjuju druga pravila.
 ui-rules-none = Još nema pravila. Kliknite Novo da biste ga napravili.

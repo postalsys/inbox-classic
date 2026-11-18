@@ -869,6 +869,13 @@ ui-let-agents-connect = &Разрешить ИИ-агентам подключа
 ui-change-button = Изменить…
 # review: new
 ui-undo-button = Отменить
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Отменить за период…
+# review: new
+ui-undo-since-span = Отменить то, что сделала эта программа:
+# review: new
+ui-take-back = Отменить
 # review: new
 ui-rules-title = Правила для сообщений
 # review: new

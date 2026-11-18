@@ -872,6 +872,13 @@ ui-let-agents-connect = &Permiteți agenților IA să se conecteze la Inbox Clas
 ui-change-button = Modificare…
 # review: new
 ui-undo-button = Anulare
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Anulare pe interval…
+# review: new
+ui-undo-since-span = Anulați ce a făcut acest program:
+# review: new
+ui-take-back = Anulare
 # review: new
 ui-rules-title = Reguli pentru mesaje
 # review: new

@@ -100,6 +100,11 @@ win-forget-program-ask = Poistetaanko tämä ohjelma, sen käyttöoikeudet ja se
 win-clear-log-ask = Tyhjennetäänkö agenttien toimintahistoria? Tämä ei kumoa agenttien tekemiä muutoksia.
 win-agent-programs = &Ohjelmat, joiden agentit ovat pyytäneet pääsyä postiisi:
 win-change = &Muuta...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Kumoa a&jalta...
+# review: new
+win-take-back = &Peru
 win-what-agents-did = Agenttien &toiminta:
 # review: new
 win-agent-reads = Luettu kello { $from } ja { $to } välillä:

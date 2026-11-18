@@ -100,6 +100,11 @@ win-forget-program-ask = Θέλετε να αφαιρέσετε αυτό το π
 win-clear-log-ask = Να διαγραφεί το ιστορικό δραστηριότητας των πρακτόρων; Αυτό δεν αναιρεί τις αλλαγές που έκαναν οι πράκτορες.
 win-agent-programs = &Προγράμματα των οποίων οι πράκτορες ζήτησαν πρόσβαση στην αλληλογραφία σας:
 win-change = &Αλλαγή...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Αναίρεση &για διάστημα...
+# review: new
+win-take-back = &Αναίρεση
 win-what-agents-did = &Δραστηριότητα πρακτόρων:
 # review: new
 win-agent-reads = Τι διαβάστηκε από { $from } έως { $to }:

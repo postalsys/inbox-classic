@@ -447,6 +447,13 @@ ui-clear-agent-log-detail = Ez nem vonja vissza az ügynökök által végzett m
 ui-let-agents-connect = MI-ügynökök &csatlakozhatnak az Inbox Classichoz
 ui-change-button = Módosítás…
 ui-undo-button = Visszavonás
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Visszavonás időszakra…
+# review: new
+ui-undo-since-span = A program által végzett módosítások visszavonása:
+# review: new
+ui-take-back = Visszavonás
 ui-rules-title = Üzenetszabályok
 ui-rules-intro = A szabályok az Inbox Classic futása közben dolgozzák fel a Beérkezett üzenetek mappába érkező új üzeneteket. Az üzenetre illeszkedő szabályok a lista sorrendjében futnak le. Ha egy szabály másik mappába helyezi át az üzenetet, a további szabályok már nem dolgozzák fel.
 ui-rules-none = Még nincs szabály. Létrehozásához kattintson az Új gombra.

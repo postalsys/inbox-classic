@@ -449,6 +449,13 @@ ui-clear-agent-log-detail = Isto não anula as alterações feitas pelos agentes
 ui-let-agents-connect = &Permitir que os agentes de IA se liguem ao Inbox Classic
 ui-change-button = Alterar…
 ui-undo-button = Anular
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Anular desde…
+# review: new
+ui-undo-since-span = Anular o que este programa fez:
+# review: new
+ui-take-back = Anular
 ui-rules-title = Regras de mensagens
 ui-rules-intro = As regras processam as novas mensagens da Caixa de Entrada enquanto o Inbox Classic está em execução. As regras cujos critérios são satisfeitos são aplicadas pela ordem da lista. Quando uma regra move uma mensagem para fora da Caixa de Entrada, as regras seguintes deixam de se aplicar a essa mensagem.
 ui-rules-none = Ainda não há regras. Clique em Nova para criar uma.

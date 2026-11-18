@@ -521,6 +521,135 @@ agent-log-watched = Se empezó a seguir la conversación «{ $subject }»
 agent-log-ignored = Se empezó a ignorar la conversación «{ $subject }»
 # review: new
 agent-log-unmarked = Se dejó de seguir o ignorar la conversación «{ $subject }»
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = el mensaje se cambió después
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] 1 mensaje marcado como leído (búsqueda: { $query })
+   *[other] { $count } mensajes marcados como leídos (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] 1 mensaje marcado como no leído (búsqueda: { $query })
+   *[other] { $count } mensajes marcados como no leídos (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Se añadió una marca a 1 mensaje (búsqueda: { $query })
+   *[other] Se añadió una marca a { $count } mensajes (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Se quitó la marca de 1 mensaje (búsqueda: { $query })
+   *[other] Se quitó la marca de { $count } mensajes (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-color = Se añadió una marca { $color ->
+    [red] roja
+    [orange] naranja
+    [yellow] amarilla
+    [green] verde
+    [blue] azul
+    [purple] morada
+   *[gray] gris
+} a { $count ->
+    [one] 1 mensaje
+   *[other] { $count } mensajes
+} (búsqueda: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] 1 mensaje movido a { $folder } (búsqueda: { $query })
+   *[other] { $count } mensajes movidos a { $folder } (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Se archivó 1 mensaje (búsqueda: { $query })
+   *[other] Se archivaron { $count } mensajes (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] 1 mensaje marcado como correo no deseado (búsqueda: { $query })
+   *[other] { $count } mensajes marcados como correo no deseado (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] 1 mensaje marcado como correo deseado (búsqueda: { $query })
+   *[other] { $count } mensajes marcados como correo deseado (búsqueda: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Se eliminó 1 mensaje (búsqueda: { $query })
+   *[other] Se eliminaron { $count } mensajes (búsqueda: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] En los últimos 15 minutos
+    [hour] En la última hora
+    [hours] En las últimas 4 horas
+    [day] En las últimas 24 horas
+    [week] En los últimos 7 días
+   *[all] En los últimos 30 días
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } no hizo en este tiempo ningún cambio que se pueda deshacer.
+    [one] ¿Deshacer el cambio que hizo { $program } en este tiempo?
+   *[other] ¿Deshacer los { $count } cambios que hizo { $program } en este tiempo?
+}
+# review: new
+agent-undo-since-detail = Los mensajes vuelven a las carpetas de las que salieron, los estados de lectura y las marcas vuelven a como estaban, y los mensajes que aún esperan en la Bandeja de salida se eliminan. Lo que usted o el servidor cambiaron después se deja como está.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] No se deshizo nada.
+    [one] Se deshizo 1 cambio.
+   *[other] Se deshicieron { $count } cambios.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 mensaje ya no estaba donde lo puso el cambio.
+   *[other] { $count } mensajes ya no estaban donde los puso el cambio.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 mensaje se cambió después, por usted o en el servidor, y se dejó como está.
+   *[other] { $count } mensajes se cambiaron después, por usted o en el servidor, y se dejaron como están.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 mensaje ya había salido de la Bandeja de salida.
+   *[other] { $count } mensajes ya habían salido de la Bandeja de salida.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 cambio no se puede deshacer.
+   *[other] { $count } cambios no se pueden deshacer.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Este mensaje acepta la invitación «{ $summary }» ({ $when }).
+    [tentative] Este mensaje acepta provisionalmente la invitación «{ $summary }» ({ $when }).
+   *[decline] Este mensaje rechaza la invitación «{ $summary }» ({ $when }).
+} El calendario del organizador lo registra. Su respuesta a la invitación solo cambia cuando se haya enviado el mensaje.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Aceptado: { $summary }
+    [tentative] Provisional: { $summary }
+   *[decline] Rechazado: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } ha aceptado esta invitación.
+    [tentative] { $name } ha aceptado provisionalmente esta invitación.
+   *[decline] { $name } ha rechazado esta invitación.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

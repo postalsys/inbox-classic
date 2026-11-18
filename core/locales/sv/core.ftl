@@ -749,6 +749,135 @@ agent-log-watched = Började bevaka konversationen ”{ $subject }”
 agent-log-ignored = Började ignorera konversationen ”{ $subject }”
 # review: new
 agent-log-unmarked = Slutade bevaka eller ignorera konversationen ”{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = meddelandet har ändrats sedan dess
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Markerade 1 meddelande som läst (sökning: { $query })
+   *[other] Markerade { $count } meddelanden som lästa (sökning: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Markerade 1 meddelande som oläst (sökning: { $query })
+   *[other] Markerade { $count } meddelanden som olästa (sökning: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Flaggade 1 meddelande (sökning: { $query })
+   *[other] Flaggade { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Tog bort flaggan från 1 meddelande (sökning: { $query })
+   *[other] Tog bort flaggan från { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Gav 1 meddelande
+   *[other] Gav { $count } meddelanden
+} { $color ->
+    [red] röd
+    [orange] orange
+    [yellow] gul
+    [green] grön
+    [blue] blå
+    [purple] lila
+   *[gray] grå
+} flagga (sökning: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Flyttade 1 meddelande till mappen ”{ $folder }” (sökning: { $query })
+   *[other] Flyttade { $count } meddelanden till mappen ”{ $folder }” (sökning: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arkiverade 1 meddelande (sökning: { $query })
+   *[other] Arkiverade { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Markerade 1 meddelande som skräppost (sökning: { $query })
+   *[other] Markerade { $count } meddelanden som skräppost (sökning: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Tog bort skräppostmarkeringen från 1 meddelande (sökning: { $query })
+   *[other] Tog bort skräppostmarkeringen från { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Tog bort 1 meddelande (sökning: { $query })
+   *[other] Tog bort { $count } meddelanden (sökning: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Under de senaste 15 minuterna
+    [hour] Under den senaste timmen
+    [hours] Under de senaste 4 timmarna
+    [day] Under de senaste 24 timmarna
+    [week] Under de senaste 7 dagarna
+   *[all] Under de senaste 30 dagarna
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } gjorde inga ändringar under den här tiden som kan ångras.
+    [one] Vill du ångra ändringen som { $program } gjorde under den här tiden?
+   *[other] Vill du ångra de { $count } ändringar som { $program } gjorde under den här tiden?
+}
+# review: new
+agent-undo-since-detail = Meddelanden flyttas tillbaka till mapparna de kom från, lästmarkeringar och flaggor återställs och meddelanden som fortfarande väntar i Utkorgen tas bort. Det som du eller servern har ändrat sedan dess lämnas som det är.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Ingenting ångrades.
+    [one] Ångrade 1 ändring.
+   *[other] Ångrade { $count } ändringar.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 meddelande fanns inte längre där ändringen lade det.
+   *[other] { $count } meddelanden fanns inte längre där ändringen lade dem.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 meddelande har ändrats sedan dess, av dig eller på servern, och lämnades som det är.
+   *[other] { $count } meddelanden har ändrats sedan dess, av dig eller på servern, och lämnades som de är.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 meddelande hade redan lämnat Utkorgen.
+   *[other] { $count } meddelanden hade redan lämnat Utkorgen.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 ändring kan inte ångras.
+   *[other] { $count } ändringar kan inte ångras.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Det här meddelandet tackar ja till inbjudan ”{ $summary }” ({ $when }).
+    [tentative] Det här meddelandet tackar preliminärt ja till inbjudan ”{ $summary }” ({ $when }).
+   *[decline] Det här meddelandet tackar nej till inbjudan ”{ $summary }” ({ $when }).
+} Organisatörens kalender tar emot svaret. Ditt svar på inbjudan ändras först när meddelandet har skickats.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Accepterat: { $summary }
+    [tentative] Preliminärt: { $summary }
+   *[decline] Avböjt: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } har accepterat den här inbjudan.
+    [tentative] { $name } har preliminärt accepterat den här inbjudan.
+   *[decline] { $name } har avböjt den här inbjudan.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

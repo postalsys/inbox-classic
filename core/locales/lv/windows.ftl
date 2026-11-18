@@ -161,6 +161,11 @@ win-clear-log-ask = Notīrīt aģentu darbību vēsturi? Tas neatsauks aģentu v
 win-agent-programs = &Programmas, kuru aģenti ir lūguši piekļuvi jūsu pastam:
 # review: new
 win-change = &Mainīt...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Atsaukt &kopš...
+# review: new
+win-take-back = &Atsaukt
 # review: new
 win-what-agents-did = Aģentu &darbības:
 # review: new

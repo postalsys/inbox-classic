@@ -443,6 +443,13 @@ ui-clear-agent-log-detail = Ajaloo tühjendamine ei võta agentide tehtud muudat
 ui-let-agents-connect = &Luba tehisintellekti agentidel Inbox Classicuga ühenduda
 ui-change-button = Muuda…
 ui-undo-button = Võta tagasi
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Võta tagasi alates…
+# review: new
+ui-undo-since-span = Võta tagasi, mida see programm tegi:
+# review: new
+ui-take-back = Võta tagasi
 ui-rules-title = Kirjade reeglid
 ui-rules-intro = Reeglid sorteerivad sisendkaustadesse saabuvaid kirju, kui Inbox Classic töötab. Sobivaid reegleid rakendatakse loendi järjekorras. Kui reegel teisaldab kirja sisendkaustast mujale, siis sellele kirjale järgmisi reegleid enam ei rakendata.
 ui-rules-none = Reegleid veel pole. Uue loomiseks klõpsake nuppu Uus.

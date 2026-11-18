@@ -864,6 +864,13 @@ ui-let-agents-connect = &Leisti DI agentams jungtis prie Inbox Classic
 ui-change-button = Keisti…
 # review: new
 ui-undo-button = Atšaukti
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Atšaukti nuo…
+# review: new
+ui-undo-since-span = Atšaukti, ką ši programa atliko:
+# review: new
+ui-take-back = Atšaukti
 # review: new
 ui-rules-title = Laiškų taisyklės
 # review: new

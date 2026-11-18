@@ -779,6 +779,167 @@ agent-log-watched = Zaczęto obserwować konwersację „{ $subject }”
 agent-log-ignored = Zaczęto ignorować konwersację „{ $subject }”
 # review: new
 agent-log-unmarked = Przestano obserwować lub ignorować konwersację „{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = wiadomość została od tego czasu zmieniona
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Oznaczono 1 wiadomość jako przeczytaną (wyszukiwanie: { $query })
+    [few] Oznaczono { $count } wiadomości jako przeczytane (wyszukiwanie: { $query })
+    [many] Oznaczono { $count } wiadomości jako przeczytane (wyszukiwanie: { $query })
+   *[other] Oznaczono { $count } wiadomości jako przeczytane (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Oznaczono 1 wiadomość jako nieprzeczytaną (wyszukiwanie: { $query })
+    [few] Oznaczono { $count } wiadomości jako nieprzeczytane (wyszukiwanie: { $query })
+    [many] Oznaczono { $count } wiadomości jako nieprzeczytane (wyszukiwanie: { $query })
+   *[other] Oznaczono { $count } wiadomości jako nieprzeczytane (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Oznaczono flagą 1 wiadomość (wyszukiwanie: { $query })
+    [few] Oznaczono flagą { $count } wiadomości (wyszukiwanie: { $query })
+    [many] Oznaczono flagą { $count } wiadomości (wyszukiwanie: { $query })
+   *[other] Oznaczono flagą { $count } wiadomości (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Usunięto flagę z 1 wiadomości (wyszukiwanie: { $query })
+    [few] Usunięto flagę z { $count } wiadomości (wyszukiwanie: { $query })
+    [many] Usunięto flagę z { $count } wiadomości (wyszukiwanie: { $query })
+   *[other] Usunięto flagę z { $count } wiadomości (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Oznaczono 1 wiadomość
+    [few] Oznaczono { $count } wiadomości
+    [many] Oznaczono { $count } wiadomości
+   *[other] Oznaczono { $count } wiadomości
+} flagą { $color ->
+    [red] czerwoną
+    [orange] pomarańczową
+    [yellow] żółtą
+    [green] zieloną
+    [blue] niebieską
+    [purple] fioletową
+   *[gray] szarą
+} (wyszukiwanie: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Przeniesiono 1 wiadomość do folderu { $folder } (wyszukiwanie: { $query })
+    [few] Przeniesiono { $count } wiadomości do folderu { $folder } (wyszukiwanie: { $query })
+    [many] Przeniesiono { $count } wiadomości do folderu { $folder } (wyszukiwanie: { $query })
+   *[other] Przeniesiono { $count } wiadomości do folderu { $folder } (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Zarchiwizowano 1 wiadomość (wyszukiwanie: { $query })
+    [few] Zarchiwizowano { $count } wiadomości (wyszukiwanie: { $query })
+    [many] Zarchiwizowano { $count } wiadomości (wyszukiwanie: { $query })
+   *[other] Zarchiwizowano { $count } wiadomości (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Oznaczono 1 wiadomość jako śmieci (wyszukiwanie: { $query })
+    [few] Oznaczono { $count } wiadomości jako śmieci (wyszukiwanie: { $query })
+    [many] Oznaczono { $count } wiadomości jako śmieci (wyszukiwanie: { $query })
+   *[other] Oznaczono { $count } wiadomości jako śmieci (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Usunięto oznaczenie „śmieci” z 1 wiadomości (wyszukiwanie: { $query })
+    [few] Usunięto oznaczenie „śmieci” z { $count } wiadomości (wyszukiwanie: { $query })
+    [many] Usunięto oznaczenie „śmieci” z { $count } wiadomości (wyszukiwanie: { $query })
+   *[other] Usunięto oznaczenie „śmieci” z { $count } wiadomości (wyszukiwanie: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Usunięto 1 wiadomość (wyszukiwanie: { $query })
+    [few] Usunięto { $count } wiadomości (wyszukiwanie: { $query })
+    [many] Usunięto { $count } wiadomości (wyszukiwanie: { $query })
+   *[other] Usunięto { $count } wiadomości (wyszukiwanie: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] W ciągu ostatnich 15 minut
+    [hour] W ciągu ostatniej godziny
+    [hours] W ciągu ostatnich 4 godzin
+    [day] W ciągu ostatnich 24 godzin
+    [week] W ciągu ostatnich 7 dni
+   *[all] W ciągu ostatnich 30 dni
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] W tym czasie program { $program } nie wprowadził żadnych zmian, które można cofnąć.
+    [one] Cofnąć zmianę wprowadzoną w tym czasie przez program { $program }?
+    [few] Cofnąć { $count } zmiany wprowadzone w tym czasie przez program { $program }?
+    [many] Cofnąć { $count } zmian wprowadzonych w tym czasie przez program { $program }?
+   *[other] Cofnąć { $count } zmian wprowadzonych w tym czasie przez program { $program }?
+}
+# review: new
+agent-undo-since-detail = Wiadomości wrócą do folderów, z których pochodzą, stan przeczytania i flagi wrócą do poprzedniego stanu, a wiadomości nadal czekające w Skrzynce nadawczej zostaną usunięte. To, co od tego czasu zmieniono (Ty lub serwer), pozostanie bez zmian.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Niczego nie cofnięto.
+    [one] Cofnięto 1 zmianę.
+    [few] Cofnięto { $count } zmiany.
+    [many] Cofnięto { $count } zmian.
+   *[other] Cofnięto { $count } zmian.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 wiadomości nie było już tam, gdzie umieściła ją zmiana.
+    [few] { $count } wiadomości nie było już tam, gdzie umieściła je zmiana.
+    [many] { $count } wiadomości nie było już tam, gdzie umieściła je zmiana.
+   *[other] { $count } wiadomości nie było już tam, gdzie umieściła je zmiana.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 wiadomość została od tego czasu zmieniona przez Ciebie lub na serwerze i pozostała bez zmian.
+    [few] { $count } wiadomości zostały od tego czasu zmienione przez Ciebie lub na serwerze i pozostały bez zmian.
+    [many] { $count } wiadomości zostało od tego czasu zmienionych przez Ciebie lub na serwerze i pozostało bez zmian.
+   *[other] { $count } wiadomości zostało od tego czasu zmienionych przez Ciebie lub na serwerze i pozostało bez zmian.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 wiadomość opuściła już Skrzynkę nadawczą.
+    [few] { $count } wiadomości opuściły już Skrzynkę nadawczą.
+    [many] { $count } wiadomości opuściło już Skrzynkę nadawczą.
+   *[other] { $count } wiadomości opuściło już Skrzynkę nadawczą.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] Nie można cofnąć 1 zmiany.
+    [few] Nie można cofnąć { $count } zmian.
+    [many] Nie można cofnąć { $count } zmian.
+   *[other] Nie można cofnąć { $count } zmian.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Ta wiadomość przyjmuje zaproszenie „{ $summary }” ({ $when }).
+    [tentative] Ta wiadomość wstępnie przyjmuje zaproszenie „{ $summary }” ({ $when }).
+   *[decline] Ta wiadomość odrzuca zaproszenie „{ $summary }” ({ $when }).
+} Kalendarz organizatora uwzględni tę odpowiedź. Twoja odpowiedź na zaproszenie zmieni się dopiero po wysłaniu wiadomości.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Zaakceptowano: { $summary }
+    [tentative] Wstępnie zaakceptowano: { $summary }
+   *[decline] Odrzucono: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } akceptuje to zaproszenie.
+    [tentative] { $name } wstępnie akceptuje to zaproszenie.
+   *[decline] { $name } odrzuca to zaproszenie.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

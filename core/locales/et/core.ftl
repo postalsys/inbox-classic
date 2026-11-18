@@ -497,6 +497,135 @@ agent-log-watched = Vestlust „{ $subject }“ hakati jälgima
 agent-log-ignored = Vestlust „{ $subject }“ hakati ignoreerima
 # review: new
 agent-log-unmarked = Vestluse „{ $subject }“ jälgimine või ignoreerimine lõpetati
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = kirja on vahepeal muudetud
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] 1 kiri märgiti loetuks (otsing: { $query })
+   *[other] { $count } kirja märgiti loetuks (otsing: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] 1 kiri märgiti lugemata kirjaks (otsing: { $query })
+   *[other] { $count } kirja märgiti lugemata kirjadeks (otsing: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] 1 kiri märgiti lipuga (otsing: { $query })
+   *[other] { $count } kirja märgiti lipuga (otsing: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] 1 kirjalt eemaldati lipp (otsing: { $query })
+   *[other] { $count } kirjalt eemaldati lipp (otsing: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] 1 kiri märgiti
+   *[other] { $count } kirja märgiti
+} { $color ->
+    [red] punase
+    [orange] oranži
+    [yellow] kollase
+    [green] rohelise
+    [blue] sinise
+    [purple] lilla
+   *[gray] halli
+} lipuga (otsing: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] 1 kiri teisaldati kausta { $folder } (otsing: { $query })
+   *[other] { $count } kirja teisaldati kausta { $folder } (otsing: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] 1 kiri arhiveeriti (otsing: { $query })
+   *[other] { $count } kirja arhiveeriti (otsing: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] 1 kiri märgiti rämpspostiks (otsing: { $query })
+   *[other] { $count } kirja märgiti rämpspostiks (otsing: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] 1 kiri märgiti tavapostiks (otsing: { $query })
+   *[other] { $count } kirja märgiti tavapostiks (otsing: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] 1 kiri kustutati (otsing: { $query })
+   *[other] { $count } kirja kustutati (otsing: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Viimase 15 minuti jooksul
+    [hour] Viimase tunni jooksul
+    [hours] Viimase 4 tunni jooksul
+    [day] Viimase 24 tunni jooksul
+    [week] Viimase 7 päeva jooksul
+   *[all] Viimase 30 päeva jooksul
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } ei teinud selle aja jooksul ühtegi muudatust, mida saaks tagasi võtta.
+    [one] Kas võtta tagasi muudatus, mille { $program } selle aja jooksul tegi?
+   *[other] Kas võtta tagasi { $count } muudatust, mille { $program } selle aja jooksul tegi?
+}
+# review: new
+agent-undo-since-detail = Kirjad viiakse tagasi kaustadesse, kust need tulid, lugemisolek ja lipud taastatakse ning väljundkaustas veel ootavad kirjad kustutatakse. Seda, mida teie või server on vahepeal muutnud, ei puudutata.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Midagi ei võetud tagasi.
+    [one] 1 muudatus võeti tagasi.
+   *[other] { $count } muudatust võeti tagasi.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 kiri polnud enam seal, kuhu muudatus selle viis.
+   *[other] { $count } kirja polnud enam seal, kuhu muudatus need viis.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 kirja olite teie või server vahepeal muutnud, see jäeti nii, nagu see on.
+   *[other] { $count } kirja olite teie või server vahepeal muutnud, need jäeti nii, nagu need on.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 kiri oli väljundkaustast juba lahkunud.
+   *[other] { $count } kirja olid väljundkaustast juba lahkunud.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 muudatust ei saa tagasi võtta.
+   *[other] { $count } muudatust ei saa tagasi võtta.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] See kiri võtab vastu kutse „{ $summary }“ ({ $when }).
+    [tentative] See kiri võtab kutse „{ $summary }“ ({ $when }) esialgselt vastu.
+   *[decline] See kiri lükkab tagasi kutse „{ $summary }“ ({ $when }).
+} Korraldaja kalender võtab vastuse arvesse. Teie vastus kutsele muutub alles siis, kui kiri on saadetud.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Vastu võetud: { $summary }
+    [tentative] Esialgne: { $summary }
+   *[decline] Tagasi lükatud: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } võttis selle kutse vastu.
+    [tentative] { $name } võttis selle kutse esialgselt vastu.
+   *[decline] { $name } lükkas selle kutse tagasi.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

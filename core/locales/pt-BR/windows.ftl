@@ -100,6 +100,11 @@ win-forget-program-ask = Remover este programa, suas permissões e o histórico 
 win-clear-log-ask = Limpar o histórico de atividade dos agentes? Isso não desfaz as alterações feitas pelos agentes.
 win-agent-programs = Pro&gramas cujos agentes pediram acesso ao seu e-mail:
 win-change = &Alterar...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Desfazer de&sde...
+# review: new
+win-take-back = &Desfazer
 win-what-agents-did = A&tividade dos agentes:
 # review: new
 win-agent-reads = O que foi lido das { $from } às { $to }:

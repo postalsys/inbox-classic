@@ -800,6 +800,151 @@ agent-log-watched = Zapnuté sledovanie konverzácie „{ $subject }“
 agent-log-ignored = Zapnuté ignorovanie konverzácie „{ $subject }“
 # review: new
 agent-log-unmarked = Zrušené sledovanie alebo ignorovanie konverzácie „{ $subject }“
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = správa bola odvtedy zmenená
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] 1 správa označená ako prečítaná (vyhľadávanie: { $query })
+    [few] { $count } správy označené ako prečítané (vyhľadávanie: { $query })
+   *[other] { $count } správ označených ako prečítané (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] 1 správa označená ako neprečítaná (vyhľadávanie: { $query })
+    [few] { $count } správy označené ako neprečítané (vyhľadávanie: { $query })
+   *[other] { $count } správ označených ako neprečítané (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] 1 správa označená príznakom (vyhľadávanie: { $query })
+    [few] { $count } správy označené príznakom (vyhľadávanie: { $query })
+   *[other] { $count } správ označených príznakom (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Z 1 správy bol odstránený príznak (vyhľadávanie: { $query })
+    [few] Z { $count } správ bol odstránený príznak (vyhľadávanie: { $query })
+   *[other] Z { $count } správ bol odstránený príznak (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] 1 správa označená
+    [few] { $count } správy označené
+   *[other] { $count } správ označených
+} { $color ->
+    [red] červeným príznakom
+    [orange] oranžovým príznakom
+    [yellow] žltým príznakom
+    [green] zeleným príznakom
+    [blue] modrým príznakom
+    [purple] fialovým príznakom
+   *[gray] sivým príznakom
+} (vyhľadávanie: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] 1 správa presunutá do priečinka „{ $folder }“ (vyhľadávanie: { $query })
+    [few] { $count } správy presunuté do priečinka „{ $folder }“ (vyhľadávanie: { $query })
+   *[other] { $count } správ presunutých do priečinka „{ $folder }“ (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] 1 správa archivovaná (vyhľadávanie: { $query })
+    [few] { $count } správy archivované (vyhľadávanie: { $query })
+   *[other] { $count } správ archivovaných (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] 1 správa označená ako nevyžiadaná (vyhľadávanie: { $query })
+    [few] { $count } správy označené ako nevyžiadané (vyhľadávanie: { $query })
+   *[other] { $count } správ označených ako nevyžiadané (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Pri 1 správe zrušené označenie ako nevyžiadanej (vyhľadávanie: { $query })
+    [few] Pri { $count } správach zrušené označenie ako nevyžiadaných (vyhľadávanie: { $query })
+   *[other] Pri { $count } správach zrušené označenie ako nevyžiadaných (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] 1 správa odstránená (vyhľadávanie: { $query })
+    [few] { $count } správy odstránené (vyhľadávanie: { $query })
+   *[other] { $count } správ odstránených (vyhľadávanie: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Za posledných 15 minút
+    [hour] Za poslednú hodinu
+    [hours] Za posledné 4 hodiny
+    [day] Za posledných 24 hodín
+    [week] Za posledných 7 dní
+   *[all] Za posledných 30 dní
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] Program { $program } za tento čas neurobil žiadne zmeny, ktoré by sa dali vrátiť.
+    [one] Vrátiť zmenu, ktorú program { $program } urobil za tento čas?
+    [few] Vrátiť { $count } zmeny, ktoré program { $program } urobil za tento čas?
+   *[other] Vrátiť { $count } zmien, ktoré program { $program } urobil za tento čas?
+}
+# review: new
+agent-undo-since-detail = Správy sa vrátia do priečinkov, z ktorých prišli, stav prečítania a príznaky budú také ako predtým a správy, ktoré ešte čakajú v priečinku Pošta na odoslanie, sa odstránia. Čo ste odvtedy zmenili vy alebo server, zostane bez zmeny.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nič sa nevrátilo.
+    [one] Vrátená 1 zmena.
+    [few] Vrátené { $count } zmeny.
+   *[other] Vrátených { $count } zmien.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 správa už nebola tam, kam ju zmena umiestnila.
+    [few] { $count } správy už neboli tam, kam ich zmena umiestnila.
+   *[other] { $count } správ už nebolo tam, kam ich zmena umiestnila.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 správa bola odvtedy zmenená, vami alebo na serveri, a zostala bez zmeny.
+    [few] { $count } správy boli odvtedy zmenené, vami alebo na serveri, a zostali bez zmeny.
+   *[other] { $count } správ bolo odvtedy zmenených, vami alebo na serveri, a zostalo bez zmeny.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 správa už opustila priečinok Pošta na odoslanie.
+    [few] { $count } správy už opustili priečinok Pošta na odoslanie.
+   *[other] { $count } správ už opustilo priečinok Pošta na odoslanie.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 zmenu nemožno vrátiť.
+    [few] { $count } zmeny nemožno vrátiť.
+   *[other] { $count } zmien nemožno vrátiť.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Táto správa prijíma pozvánku „{ $summary }“ ({ $when }).
+    [tentative] Táto správa predbežne prijíma pozvánku „{ $summary }“ ({ $when }).
+   *[decline] Táto správa odmieta pozvánku „{ $summary }“ ({ $when }).
+} Kalendár organizátora odpoveď zaznamená. Vaša odpoveď na pozvánku sa zmení až po odoslaní správy.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Prijaté: { $summary }
+    [tentative] Predbežne: { $summary }
+   *[decline] Odmietnuté: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } prijíma túto pozvánku.
+    [tentative] { $name } predbežne prijíma túto pozvánku.
+   *[decline] { $name } odmieta túto pozvánku.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

@@ -165,6 +165,11 @@ win-clear-log-ask = Wyczyścić historię działań agentów? Nie cofnie to zmia
 win-agent-programs = &Programy, których agenci poprosili o dostęp do Twojej poczty:
 # review: new
 win-change = &Zmień...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Cofnij &od...
+# review: new
+win-take-back = &Cofnij
 # review: new
 win-what-agents-did = &Działania agentów:
 # review: new

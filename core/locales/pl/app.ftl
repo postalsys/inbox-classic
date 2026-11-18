@@ -871,6 +871,13 @@ ui-let-agents-connect = &Pozwól agentom AI łączyć się z Inbox Classic
 ui-change-button = Zmień…
 # review: new
 ui-undo-button = Cofnij
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Cofnij od…
+# review: new
+ui-undo-since-span = Cofnij to, co zrobił ten program:
+# review: new
+ui-take-back = Cofnij
 # review: new
 ui-rules-title = Reguły wiadomości
 # review: new

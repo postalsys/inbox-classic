@@ -99,6 +99,11 @@ win-forget-program-ask = Dieses Programm mit seinen Berechtigungen und dem Aktiv
 win-clear-log-ask = Aktivitätsverlauf der Agenten löschen? Die vorgenommenen Änderungen werden dadurch nicht rückgängig gemacht.
 win-agent-programs = &Programme, deren Agenten Zugriff auf Ihre E-Mails angefordert haben:
 win-change = Ä&ndern...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Rückgängig &seit...
+# review: new
+win-take-back = &Rückgängig machen
 win-what-agents-did = &Aktivitätsverlauf der Agenten:
 # review: new
 win-agent-reads = Gelesen von { $from } bis { $to }:
