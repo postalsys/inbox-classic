@@ -220,9 +220,10 @@ fn said(entry: &pe_core::agents::AgentLogEntry) -> String {
     pe_core::agents::log_text(entry)
 }
 
-/// Waits up to `seconds` for `condition`
+/// Waits up to `seconds`, and at least [`pe_testkit::patience`], for `condition`
 fn eventually(seconds: u64, condition: impl Fn() -> bool) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(seconds);
+    // at least the patience of the other tests: a busy runner is slow, and the wait ends as soon as it holds
+    let deadline = Instant::now() + Duration::from_secs(seconds).max(pe_testkit::patience());
     while Instant::now() < deadline {
         if condition() {
             return true;
@@ -355,7 +356,7 @@ fn an_agent_works_on_the_mailbox() {
     answer_questions(core.clone(), events, others);
     core.sync(account).unwrap();
     let synced = |rest: &Receiver<Event>| loop {
-        match rest.recv_timeout(Duration::from_secs(20)).expect("the sync finishes") {
+        match rest.recv_timeout(pe_testkit::patience()).expect("the sync finishes") {
             Event::SyncFinished { failure: None, .. } => break,
             Event::Failed { message, .. } => panic!("{message}"),
             _ => {}
@@ -520,7 +521,8 @@ fn an_agent_works_on_the_mailbox() {
         // archived (into Archive here; on Gmail its labels would go), and taken back from the log
         // once the store has it back in the Inbox too, not only the server
         let mut news_now = None;
-        for _ in 0..200 {
+        let until = Instant::now() + pe_testkit::patience();
+        while Instant::now() < until {
             let back = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
             news_now = back["messages"]
                 .as_array()
@@ -786,7 +788,8 @@ fn an_agent_works_on_the_mailbox() {
 
 /// [`eventually`] without holding up the runtime the server's answers come from
 async fn eventually_async(seconds: u64, condition: impl Fn() -> bool) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(seconds);
+    // at least the patience of the other tests: a busy runner is slow, and the wait ends as soon as it holds
+    let deadline = Instant::now() + Duration::from_secs(seconds).max(pe_testkit::patience());
     while Instant::now() < deadline {
         if condition() {
             return true;
@@ -854,7 +857,7 @@ fn an_agent_never_reads_encrypted_mail() {
     answer_questions(core.clone(), events, others);
     core.sync(account).unwrap();
     loop {
-        match rest.recv_timeout(Duration::from_secs(20)).expect("the sync finishes") {
+        match rest.recv_timeout(pe_testkit::patience()).expect("the sync finishes") {
             Event::SyncFinished { failure: None, .. } => break,
             Event::Failed { message, .. } => panic!("{message}"),
             _ => {}
@@ -1024,7 +1027,7 @@ fn engine_on(server: &ImapKit, dir: &TempDir) -> (Arc<Core>, i64, McpServer, std
     answer_questions(core.clone(), events, others);
     core.sync(account).unwrap();
     loop {
-        match rest.recv_timeout(Duration::from_secs(20)).expect("the sync finishes") {
+        match rest.recv_timeout(pe_testkit::patience()).expect("the sync finishes") {
             Event::SyncFinished { failure: None, .. } => break,
             Event::Failed { message, .. } => panic!("{message}"),
             _ => {}
@@ -1151,7 +1154,8 @@ fn an_agent_reads_lists_and_keeps_its_drafts() {
         server.add_message("INBOX", &rfc822("Later", "It came later."), &[]);
         core.sync(account).unwrap();
         let mut came = Value::Null;
-        for _ in 0..200 {
+        let until = Instant::now() + pe_testkit::patience();
+        while Instant::now() < until {
             came = agent.call("list_changes", json!({ "since": cursor })).await.unwrap();
             if came.get("messages").is_some() {
                 break;
