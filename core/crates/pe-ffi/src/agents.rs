@@ -50,6 +50,7 @@ mod tests {
         );
         assert_eq!(PE_AGENT_SEND_DELAY, pe_core::agents::SEND_DELAY);
         assert_eq!(PE_AGENT_LEVEL_COUNT, pe_core::agents::LEVEL_BITS.len());
+        assert_eq!(PE_AGENT_UNDO_SPAN_COUNT, pe_core::agents::UNDO_SPANS.len());
         assert_eq!(pe_agent_level_bit(0), PE_AGENT_READ);
         assert!(!pe_agent_level_label(3).is_null() && pe_agent_level_label(4).is_null());
     }
@@ -319,6 +320,12 @@ pub struct PeAgentSend {
     pub warning: *const c_char,
     /// The files that go with it, one line ("Files: a.pdf (13 KB)"), empty without any
     pub files: *const c_char,
+    /// An answer to a calendar invitation: what it answers, when the event is, and that the user's answer changes once
+    /// it was sent, to show above the text; empty for any other message
+    pub invitation: *const c_char,
+    /// The user may open it to change it first (`PE_AGENT_SEND_ANSWER_COMPOSE`): not an answer to an invitation,
+    /// whose calendar file the core wrote. Without it the window offers only Send and Don't Send.
+    pub can_edit: bool,
 }
 
 pub struct PeAgentSendInfo {
@@ -351,6 +358,8 @@ pub unsafe extern "C" fn pe_agent_send_info(core: *const PeCore, request: u64) -
                 original: strings.add(&text.original),
                 warning: strings.add(&text.warning),
                 files: strings.add(&pe_core::agents::files_text(&ask)),
+                invitation: strings.add(&text.invitation),
+                can_edit: ask.can_edit(),
             };
             let recipients = Rows::new(&ask.recipients, |r, strings| PeAgentRecipient {
                 field: strings.add(r.field),
@@ -849,7 +858,9 @@ pub unsafe extern "C" fn pe_agent_reads_free(reads: *mut PeAgentReads) {
     unsafe { take_back(reads) }
 }
 
-/// Takes back what log entry `id` did: NULL when it was, else why not (free with `pe_string_free`)
+/// Takes back what log entry `id` did, every message of it still as it left it: NULL when all of it was taken back,
+/// else what to tell the user (free with `pe_string_free`): why none of it could be, or, for a change of many messages
+/// of which some were left, what was taken back and a line for each kind of message left as it is
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -857,9 +868,109 @@ pub unsafe extern "C" fn pe_agent_reads_free(reads: *mut PeAgentReads) {
 pub unsafe extern "C" fn pe_agent_undo(core: *const PeCore, id: i64) -> *mut c_char {
     // SAFETY: as the caller guarantees
     unsafe {
-        with(core, null_mut(), |core| match core.agent_undo(id) {
-            Ok(()) => null_mut(),
+        with(core, null_mut(), |core| match core.agent_undo_report(id) {
+            Ok(report) if report.whole() => null_mut(),
+            Ok(report) => into_c_string(report.text()),
             Err(error) => into_c_string(pe_core::agents::undo_refusal(&error)),
+        })
+    }
+}
+
+/// How many spans "Undo Everything Since" offers (`pe_agent_undo_span_label`)
+pub const PE_AGENT_UNDO_SPAN_COUNT: usize = 6;
+
+/// The label of span `index`, "In the last hour", in the language in use (free with `pe_string_free`); NULL past the
+/// end
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_agent_undo_span_label(index: usize) -> *mut c_char {
+    guard(|| pe_core::agents::undo_span_label(index).map_or(null_mut(), into_c_string)).unwrap_or(null_mut())
+}
+
+/// The question before taking back what a program did in a span
+#[repr(C)]
+pub struct PeAgentUndoQuestion {
+    /// The changes it would take back; with none, `title` says so and the window offers only Close
+    pub count: u64,
+    /// The moment the span reaches back to, seconds since the Unix epoch: what `pe_agent_undo_since` takes
+    pub since: i64,
+    /// "Take back the 12 changes Claude made in this time?"
+    pub title: *const c_char,
+    /// What taking back does and leaves
+    pub detail: *const c_char,
+}
+
+pub struct PeAgentUndoQuestionInfo {
+    info: PeAgentUndoQuestion,
+    _strings: Strings,
+}
+
+/// The question before taking back what program `host_id` did in span `index` (from now): NULL for no such program or
+/// span. Free with `pe_agent_undo_question_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_undo_question(
+    core: *const PeCore,
+    host_id: i64,
+    index: usize,
+) -> *mut PeAgentUndoQuestionInfo {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let (Some(since), Ok(Some(host))) = (pe_core::agents::undo_span_since(index), core.agent_host(host_id))
+            else {
+                return null_mut();
+            };
+            let Ok(count) = core.agent_undoable_since(host_id, since) else {
+                return null_mut();
+            };
+            let (title, detail) = pe_core::agents::undo_since_question(&host, count);
+            let mut strings = Strings::default();
+            handed(PeAgentUndoQuestionInfo {
+                info: PeAgentUndoQuestion {
+                    count,
+                    since,
+                    title: strings.add(&title),
+                    detail: strings.add(&detail),
+                },
+                _strings: strings,
+            })
+        })
+    }
+}
+
+/// # Safety
+/// `info` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_undo_question_get(
+    info: *const PeAgentUndoQuestionInfo,
+) -> *const PeAgentUndoQuestion {
+    // SAFETY: as the caller guarantees
+    unsafe { info.as_ref() }.map_or(null(), |info| &info.info)
+}
+
+/// # Safety
+/// `info` must be NULL or not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_undo_question_free(info: *mut PeAgentUndoQuestionInfo) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(info) }
+}
+
+/// Takes back everything program `host_id` did since `since` (a question's `since`) that can be, newest first: what
+/// to tell the user (free with `pe_string_free`), "Took back 12 changes." and a line for each kind of message left as
+/// it is (moved or changed since, already sent), or NULL when it could not be done at all
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_undo_since(core: *const PeCore, host_id: i64, since: i64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.agent_undo_since(host_id, since) {
+            Ok(report) => into_c_string(report.text()),
+            Err(_) => null_mut(),
         })
     }
 }

@@ -3381,6 +3381,7 @@ pub(crate) unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         quote_encrypted: o.quote_encrypted,
         // the window's own: what the user saves is never marked as an agent's
         agent: None,
+        calendar: None,
     })
 }
 
