@@ -606,6 +606,11 @@ impl Reader {
             Event::ViewReady { request } if self.view_request.get() != 0 && *request == self.view_request.get() => {
                 self.show_view().then_some(Loaded::Shown)
             }
+            // the files still "Preparing..." in the view shown are described: the view built again, where it was
+            Event::PreviewsPrepared { token } if self.shows_previews(token) => {
+                self.view_again();
+                None
+            }
             // the account is back: a message it could not give is tried again
             Event::SyncFinished { account, failure: None }
                 if *account == self.account.get() && self.uid.get() != 0 && self.shows_failure() =>
@@ -632,6 +637,11 @@ impl Reader {
             }
             _ => None,
         }
+    }
+
+    /// Whether the view shown is the one whose previews `token` names
+    fn shows_previews(&self, token: &str) -> bool {
+        self.view.borrow().as_ref().and_then(|v| v.preview_token.as_deref()) == Some(token)
     }
 
     /// The view of the message asked for, built on a worker; [`Reader::show_view`] shows it when it comes
