@@ -322,15 +322,15 @@ fn bind_marks(parts: &Parts, m: &Message) {
         pe_store::ThreadMark::Ignore => (Some("ic-speaker-mute-symbolic"), Some(Command::IgnoreConversation)),
         pe_store::ThreadMark::None => (None, None),
     };
-    parts.watch.set_icon_name(icon);
+    crate::icons::set(&parts.watch, icon);
     parts.watch.set_visible(icon.is_some());
     parts.watch.set_tooltip_text(command.map(Command::label));
     let security = security_icon(m);
-    parts.security.set_icon_name(security);
+    crate::icons::set(&parts.security, security);
     parts.security.set_visible(security.is_some());
     parts.security.set_tooltip_text(security_tip(m).as_deref());
     let attachment = attachment_icon(m);
-    parts.attachment.set_icon_name(attachment);
+    crate::icons::set(&parts.attachment, attachment);
     parts.attachment.set_visible(attachment.is_some());
     let color = m.info.flag_color();
     parts.flag.set_visible(color.is_some());
@@ -345,11 +345,14 @@ fn bind_thread(parts: &Parts, m: &Message) {
     parts.expander.set_visible(opens);
     if let Some(place) = place.filter(|p| p.opens()) {
         parts.count.set_text(&place.count.to_string());
-        parts.expander.set_icon_name(Some(if place.collapsed() {
-            "pan-end-symbolic"
-        } else {
-            "pan-down-symbolic"
-        }));
+        crate::icons::set(
+            &parts.expander,
+            Some(if place.collapsed() {
+                "pan-end-symbolic"
+            } else {
+                "pan-down-symbolic"
+            }),
+        );
     }
     let depth = place.map_or(0, |p| p.depth);
     parts.text.set_margin_start(if depth > 0 { REPLY_INDENT } else { 0 });

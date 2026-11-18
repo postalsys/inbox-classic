@@ -2166,7 +2166,7 @@ fn undelivered_marks() -> usize {
     let view: gtk::Widget = shell().main().list.view.clone().upcast();
     descendants::<gtk::Image>(&view)
         .iter()
-        .filter(|i| i.is_mapped() && i.icon_name().as_deref() == Some(crate::messages::UNDELIVERED_ICON))
+        .filter(|i| i.is_mapped() && crate::icons::name_of(i).as_deref() == Some(crate::messages::UNDELIVERED_ICON))
         .count()
 }
 

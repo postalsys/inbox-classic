@@ -111,7 +111,15 @@ impl Strip {
             *self.files.borrow_mut() = attachments.to_vec();
             return;
         }
-        self.flow.remove_all();
+        // the items only: remove_all would also take a file's menu, a child of the box while it is open (or about to
+        // be unparented), which it can not remove, and so never end
+        let mut child = self.flow.first_child();
+        while let Some(widget) = child {
+            child = widget.next_sibling();
+            if widget.is::<gtk::FlowBoxChild>() {
+                self.flow.remove(&widget);
+            }
+        }
         for (index, (file, lock)) in attachments.iter().zip(&locks).enumerate() {
             self.flow.append(&item(index, file, *lock));
         }
@@ -351,9 +359,7 @@ impl Strip {
             };
             let icon = crate::e2e::descendants::<gtk::Image>(child.upcast_ref())
                 .first()
-                .and_then(|image| image.gicon())
-                .and_downcast::<gio::ThemedIcon>()
-                .and_then(|icon| icon.names().first().map(|n| n.to_string()))
+                .and_then(crate::icons::name_of)
                 .unwrap_or_default();
             let lock = crate::e2e::descendants::<gtk::Image>(child.upcast_ref())
                 .into_iter()
@@ -434,18 +440,18 @@ fn description(file: &AttachmentView) -> Option<String> {
 /// The icon of a file, with a lock in the corner in `lock`'s colour for a file of an encrypted part: on a disc of the
 /// strip's background, so it reads as a mark on the file rather than a part of its picture
 fn file_icon(kind: FileKind, lock: Option<Tone>) -> gtk::Widget {
-    let icon = gtk::Image::from_gicon(&gio::ThemedIcon::from_names(icon_names(kind)));
+    // drawn from icons kept for good, not looked up by their names (crate::icons says why)
+    let icon = gtk::Image::new();
     icon.set_pixel_size(ICON_SIZE);
+    crate::icons::show(&icon, icon_names(kind));
     let Some(tone) = lock else {
         return icon.upcast();
     };
     // filled, to read at its size; the outline the bar has where the theme has no filled one
-    let badge = gtk::Image::from_gicon(&gio::ThemedIcon::from_names(&[
-        "ic-lock-closed-filled-symbolic",
-        "ic-lock-closed-symbolic",
-    ]));
+    let badge = gtk::Image::new();
     badge.set_widget_name("attachment-lock");
     badge.set_pixel_size(LOCK_SIZE);
+    crate::icons::show(&badge, &["ic-lock-closed-filled-symbolic", "ic-lock-closed-symbolic"]);
     badge.set_halign(gtk::Align::End);
     badge.set_valign(gtk::Align::End);
     badge.add_css_class("attachment-lock");
