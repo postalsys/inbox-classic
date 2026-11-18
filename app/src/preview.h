@@ -97,6 +97,8 @@ private:
     void Answer(uint64_t ask, const PePreviewPicture* picture);
     // the document shown no longer: the core told, its requests still waiting finished with "not found"
     void EndPreviews();
+    // the empty "not found" answer to a request (null without the environment)
+    Microsoft::WRL::ComPtr<ICoreWebView2WebResourceResponse> NotFound() const;
     // the reading pane's own menu: the browser's items for saving or opening a preview's picture taken off (the
     // picture is Inbox Classic's copy, not the file)
     void TrimMenu();

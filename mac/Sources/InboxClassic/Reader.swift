@@ -590,10 +590,10 @@ final class Reader: NSObject {
             return true
         case PE_READER_LINK_ATTACHMENT:
             // a preview after the text: its file opened as a double-click in the strip opens it; only a link of the
-            // message this reader shows (its view's token)
-            let token = text(messageView?.info?.pointee.preview_token)
-            let index = link.withCString { pe_preview_link(core.handle, $0) }
-            if index >= 0, !token.isEmpty, link.contains(token) {
+            // message this reader shows (the core checks its view's token)
+            let token = messageView?.info?.pointee.preview_token
+            let index = link.withCString { pe_preview_link(core.handle, $0, token) }
+            if index >= 0 {
                 onMain { [weak self] in self?.openAttachment(Int(index)) }
             }
             return true

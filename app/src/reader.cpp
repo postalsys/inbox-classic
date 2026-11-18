@@ -344,14 +344,16 @@ bool Reader::FollowLink(const wchar_t* uri) {
         PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_SECURITY_DETAILS, 0), 0);
         return true;
     }
-    case PE_READER_LINK_ATTACHMENT:
-        // a preview: its file opened as a double-click in the strip opens it, once the WebView2's event is over (a
-        // file that can not open says why in a message box)
-        previewOpen_ = pe_preview_link(core_, core::Narrow(uri).c_str());
+    case PE_READER_LINK_ATTACHMENT: {
+        // a preview of the view this reader shows (its token): its file opened as a double-click in the strip opens
+        // it, once the WebView2's event is over (a file that can not open says why in a message box)
+        const PeMessageInfo* info = Info();
+        previewOpen_ = info ? pe_preview_link(core_, core::Narrow(uri).c_str(), info->preview_token) : -1;
         if (previewOpen_ >= 0) {
             PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_OPEN_PREVIEW, 0), 0);
         }
         return true;
+    }
     case PE_READER_LINK_COPY_CODE:
         if (const PeMessageInfo* info = Info(); info && info->otp_code && *info->otp_code &&
                                                 CopyText(parent_, core::Widen(info->otp_code)) && onFound) {

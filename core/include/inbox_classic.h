@@ -3002,13 +3002,15 @@ const struct PePreviewPicture *pe_preview_answer_picture(const struct PePreviewA
 void pe_preview_answer_free(struct PePreviewAnswer *answer);
 
 // The attachment (its index in the view's list) a preview's link opens, after `pe_reader_link` said
-// `PE_READER_LINK_ATTACHMENT`; -1 when it is not a link of a view shown. The window opens it as a double-click in the
-// strip does.
+// `PE_READER_LINK_ATTACHMENT`; `token` is the `preview_token` of the view the reader shows. -1 when the link is not
+// of that view (another view's, even one still shown, or none). The window opens it as a double-click in the strip
+// does.
 //
 // # Safety
-// `core` must be a live handle; `uri` NULL or a NUL-terminated string.
+// `core` must be a live handle; `uri` and `token` NULL or NUL-terminated strings.
 int64_t pe_preview_link(const struct PeCore *core,
-                        const char *uri);
+                        const char *uri,
+                        const char *token);
 
 // The window no longer shows the document of the view with this `preview_token` (it shows another, or closed): its
 // pictures are not drawn or answered anymore, and an ask still waiting is answered with none

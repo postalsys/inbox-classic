@@ -2639,19 +2639,24 @@ pub unsafe extern "C" fn pe_preview_answer_free(answer: *mut PePreviewAnswer) {
 }
 
 /// The attachment (its index in the view's list) a preview's link opens, after `pe_reader_link` said
-/// `PE_READER_LINK_ATTACHMENT`; -1 when it is not a link of a view shown. The window opens it as a double-click in the
-/// strip does.
+/// `PE_READER_LINK_ATTACHMENT`; `token` is the `preview_token` of the view the reader shows. -1 when the link is not
+/// of that view (another view's, even one still shown, or none). The window opens it as a double-click in the strip
+/// does.
 ///
 /// # Safety
-/// `core` must be a live handle; `uri` NULL or a NUL-terminated string.
+/// `core` must be a live handle; `uri` and `token` NULL or NUL-terminated strings.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_preview_link(core: *const PeCore, uri: *const c_char) -> i64 {
+pub unsafe extern "C" fn pe_preview_link(core: *const PeCore, uri: *const c_char, token: *const c_char) -> i64 {
     // SAFETY: as the caller guarantees
-    let Some(uri) = (unsafe { arg(uri) }) else {
+    let (Some(uri), Some(token)) = (unsafe { arg(uri) }, unsafe { arg(token) }) else {
         return -1;
     };
     // SAFETY: as the caller guarantees
-    unsafe { with(core, -1, |core| core.preview_link(uri).map_or(-1, |index| index as i64)) }
+    unsafe {
+        with(core, -1, |core| {
+            core.preview_link(uri, token).map_or(-1, |index| index as i64)
+        })
+    }
 }
 
 /// The window no longer shows the document of the view with this `preview_token` (it shows another, or closed): its

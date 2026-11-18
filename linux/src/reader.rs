@@ -331,15 +331,17 @@ impl Reader {
             });
         });
         // a picture or PDF page after the text: its file opened as a double-click in the strip opens it, when the core
-        // says it is of the message shown
+        // says it is of the view this reader shows (its token)
         let this = Rc::downgrade(self);
         let preview = move |uri: &str| {
-            let Some(index) = shell().core.preview_link(uri) else {
+            let Some(this) = this.upgrade() else {
                 return;
             };
-            if let Some(this) = this.upgrade() {
-                spawn(async move { this.open_attachment(index).await });
-            }
+            let token = this.view.borrow().as_ref().and_then(|v| v.preview_token.clone());
+            let Some(index) = token.and_then(|token| shell().core.preview_link(uri, &token)) else {
+                return;
+            };
+            spawn(async move { this.open_attachment(index).await });
         };
         self.preview.set_links(move |uri| {
             if pe_html::is_preview_link(uri) {

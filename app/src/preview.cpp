@@ -244,10 +244,18 @@ bool Preview::AskPreview(const wchar_t* uri, ICoreWebView2WebResourceRequestedEv
         return true;
     }
     // no preview of the document shown (or one the core answers to nobody, then dropped in Answered)
-    ComPtr<ICoreWebView2WebResourceResponse> response;
-    environment_->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
-    args->put_Response(response.Get());
+    if (auto response = NotFound()) {
+        args->put_Response(response.Get());
+    }
     return true;
+}
+
+ComPtr<ICoreWebView2WebResourceResponse> Preview::NotFound() const {
+    ComPtr<ICoreWebView2WebResourceResponse> response;
+    if (environment_) {
+        environment_->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
+    }
+    return response;
 }
 
 void Preview::Answered(PeCore* core, uint64_t ask) {
@@ -279,8 +287,8 @@ void Preview::Answer(uint64_t ask, const PePreviewPicture* picture) {
             environment_->CreateWebResourceResponse(stream.Get(), 200, L"OK", headers.c_str(), &response);
         }
     }
-    if (!response && environment_) {
-        environment_->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
+    if (!response) {
+        response = NotFound();
     }
     if (response) {
         request.args->put_Response(response.Get());
@@ -297,9 +305,7 @@ void Preview::EndPreviews() {
     std::map<uint64_t, Waiting> waiting = std::exchange(waiting_, {});
     for (const auto& [ask, request] : waiting) {
         g_asks.erase(ask);
-        ComPtr<ICoreWebView2WebResourceResponse> response;
-        if (environment_) {
-            environment_->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
+        if (auto response = NotFound()) {
             request.args->put_Response(response.Get());
         }
         request.deferral->Complete();

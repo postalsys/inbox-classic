@@ -577,9 +577,13 @@ impl Core {
     }
 
     /// The attachment a preview's link (`inboxclassic:attachment-<token>-<attachment>`, clicked in the reading pane)
-    /// opens, None for a link that is not of a view shown: the window opens it as a double-click in the strip does
-    pub fn preview_link(&self, uri: &str) -> Option<usize> {
+    /// opens, `expected` the token of the view that reader shows (`preview_token`); None for a link of another view
+    /// (even one still shown elsewhere) or of no view shown: the window opens it as a double-click in the strip does
+    pub fn preview_link(&self, uri: &str, expected: &str) -> Option<usize> {
         let (token, attachment) = pe_html::parse_preview_link(uri)?;
+        if token != expected {
+            return None;
+        }
         let shown = lock_shown(&self.previews.shown);
         let view = shown.iter().find(|shown| shown.token == token)?;
         view.files.iter().any(|(a, _)| *a == attachment).then_some(attachment)
@@ -911,7 +915,10 @@ mod view_tests {
         // the window shows another document: the token is gone
         core.previews_end(&token);
         assert_eq!(core.preview_ask(&format!("/pv/{token}-0-0")), None);
-        assert_eq!(core.preview_link(&format!("inboxclassic:attachment-{token}-0")), None);
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{token}-0"), &token),
+            None
+        );
     }
 
     #[test]
@@ -922,16 +929,38 @@ mod view_tests {
         let view = shown(&core, inbox);
         let token = token(&view);
         assert_eq!(
-            core.preview_link(&format!("inboxclassic:attachment-{token}-1")),
+            core.preview_link(&format!("inboxclassic:attachment-{token}-1"), &token),
             Some(1)
         );
         // the text file has no preview, so no link of the view names it
-        assert_eq!(core.preview_link(&format!("inboxclassic:attachment-{token}-2")), None);
         assert_eq!(
-            core.preview_link("inboxclassic:attachment-0123456789abcdef0123456789abcdef-1"),
+            core.preview_link(&format!("inboxclassic:attachment-{token}-2"), &token),
             None
         );
-        assert_eq!(core.preview_link("https://example.com/"), None);
+        assert_eq!(
+            core.preview_link("inboxclassic:attachment-0123456789abcdef0123456789abcdef-1", &token),
+            None
+        );
+        assert_eq!(core.preview_link("https://example.com/", &token), None);
+        // another view still shown (another window's) does not open from this reader
+        let other = shown(&core, inbox).preview_token.unwrap();
+        assert_ne!(other, token);
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{other}-1"), &token),
+            None
+        );
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{token}-1"), &other),
+            None
+        );
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{other}-1"), &other),
+            Some(1)
+        );
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{token}-1"), &token),
+            Some(1)
+        );
     }
 
     /// Only the newest views' previews are answered: a window that never ends its views keeps no more than
@@ -944,11 +973,14 @@ mod view_tests {
         let first = token(&shown(&core, inbox));
         let tokens: Vec<String> = (0..MAX_SHOWN).map(|_| token(&shown(&core, inbox))).collect();
         assert!(!tokens.contains(&first));
-        assert_eq!(core.preview_link(&format!("inboxclassic:attachment-{first}-0")), None);
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{first}-0"), &first),
+            None
+        );
         assert_eq!(core.preview_ask(&format!("/pv/{first}-0-0")), None);
         for token in &tokens {
             assert_eq!(
-                core.preview_link(&format!("inboxclassic:attachment-{token}-0")),
+                core.preview_link(&format!("inboxclassic:attachment-{token}-0"), token),
                 Some(0)
             );
         }
@@ -983,7 +1015,10 @@ mod view_tests {
         assert!(view.document.contains(&format!("/pv/{token}-0-0")));
         assert!(!view.document.contains(&format!("/pv/{token}-1-")));
         assert!(!view.document.contains("class=\"w\""), "{}", view.document);
-        assert_eq!(core.preview_link(&format!("inboxclassic:attachment-{token}-1")), None);
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{token}-1"), &token),
+            None
+        );
 
         // turned off by the core after a PDF file ended the app: the notice says so where the PDF file would be
         core.store().set_pdf_previews_crashed(true).unwrap();
@@ -1101,7 +1136,10 @@ mod view_tests {
         assert!(view.document.contains(&format!("/pv/{token}-15-0")));
         assert!(!view.document.contains(&format!("/pv/{token}-16-0")));
         assert_eq!(view.preview_token.as_deref(), Some(token.as_str()));
-        assert_eq!(core.preview_link(&format!("inboxclassic:attachment-{token}-16")), None);
+        assert_eq!(
+            core.preview_link(&format!("inboxclassic:attachment-{token}-16"), &token),
+            None
+        );
     }
 
     /// The messages of the UI tests' previews step (`scripts/ui-e2e/previews/`) show what the tests look for
@@ -1157,7 +1195,10 @@ mod view_tests {
         token(&view);
         assert_eq!(core.preview_ask("/pv/00000000000000000000000000000000-0-0"), None);
         assert_eq!(
-            core.preview_link("inboxclassic:attachment-00000000000000000000000000000000-0"),
+            core.preview_link(
+                "inboxclassic:attachment-00000000000000000000000000000000-0",
+                "00000000000000000000000000000000"
+            ),
             None
         );
     }
