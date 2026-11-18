@@ -1464,8 +1464,12 @@ public static class Dragger {
     $progress = WaitFor { $t = WindowText $status; if (-not $seen.Contains($t)) { $seen.Add($t) }; if ($t -like 'Downloading*') { $t } } 15
     $fromStore = [Native.Win]::SendText($main, 0x53544F52, '')
     Check ($null -ne $progress) "the status bar says how far the rest of a large message is (seen: $($seen -join ' | '); from the store: $($fromStore -eq 11))"
+    # its PDF file a tile that says it is on its way, until the whole message is here and the view is made again
+    $textLook = { param($words) $v = WaitFor { $a = [Native.Win]::SendText($main, 0x50565753, "text:$words"); if ($a -gt 0) { "$a" } } 5; if ($v) { [int]$v } else { -1 } }
+    Check ($null -ne (WaitFor { if ((& $textLook 'Downloading') -eq 2) { 1 } } 10)) 'its PDF file is a tile that says it is on its way'
     Shot $main 'large-1-text-first'
     Check ($null -ne (WaitFor { $t = WindowText $status; if ($t -like 'Downloaded*') { $t } } 30)) "then that it is all here ($(WindowText $status))"
+    Check ($null -ne (WaitFor { if ((& $textLook 'Downloading') -eq 1 -and (& $textLook 'The figures are attached') -eq 2) { 1 } } 15)) 'and the message is made again: the tile no longer says it is on its way'
     SelectFolder 0
 
     Step 'the Outbox: a send that can not go'
@@ -3318,12 +3322,135 @@ public static class Dragger {
     }
     Check ($null -ne (PreviewsShown 4 3)) "turned on, the notice is gone and the pages are back ($(PreviewsState))"
 
-    foreach ($id in 'previews-1', 'previews-2') {
+    # tiles: the HEIC picture and the booking that wants a password, each a tile that says why, the photo between them
+    $tilesSubject = 'The boat trip, and the booking'
+    AddMessage ([IO.File]::ReadAllText((Join-Path $previewFiles 'tiles.eml'))) @('\Seen')
+    Command $main $IDM_SYNC
+    Check (SelectPreviews $tilesSubject) 'the message with a HEIC picture and a protected PDF file is in the Inbox'
+    Check ($null -ne (PreviewsShown 1 0)) "the photo shows ($(PreviewsState))"
+    $tiles = WaitFor { $t = PreviewsLook 'tiles'; if ($t -eq 202) { $t } } 10
+    Check ($null -ne $tiles) "the HEIC picture and the protected PDF file are tiles, each saying why ($(PreviewsLook 'tiles'))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'read-32-previews-tiles'
+    # the photo (the second file) clicked, then Tab: the booking's tile has the keyboard, and Enter opens it
+    $before = (OpenedFiles).Count
+    [void](ClickPreview 'second')
+    [void](NewlyOpened $before)
+    $before = (OpenedFiles).Count
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    [Native.Win]::keybd_event(0x09, 0, 0, [IntPtr]::Zero); [Native.Win]::keybd_event(0x09, 0, 2, [IntPtr]::Zero)
+    Start-Sleep -Milliseconds 300
+    [Native.Win]::keybd_event($VK_RETURN, 0, 0, [IntPtr]::Zero); [Native.Win]::keybd_event($VK_RETURN, 0, 2, [IntPtr]::Zero)
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'booking-4471.pdf') "Tab reaches the booking's tile, and Enter opens the file ($opened)"
+    # the strip's menu of a file: Show in Message after Save All, as the file is shown
+    function StripMenuOf([int]$item) {
+        Key $strip 0x24
+        for ($i = 0; $i -lt $item; $i++) { Key $strip $VK_DOWN }
+        Start-Sleep -Milliseconds 300
+        [void][Native.Win]::PostMessage($strip, 0x007B, $strip, [IntPtr](-1))
+        WaitWindow '#32768' $null 10
+    }
+    # the menu's labels and its last item's state (checked 0x8, greyed 0x3), closed or that item chosen
+    function ShowInMessageItem([IntPtr]$menu, [bool]$choose) {
+        $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+        $labels = @([Native.Win]::MenuLabels($hmenu))
+        $state = [Native.Win]::GetMenuState($hmenu, $labels.Count - 1, 0x400)
+        $item = [pscustomobject]@{ Labels = $labels -join '|'; Checked = ($state -band 0x8) -ne 0; Greyed = ($state -band 0x3) -ne 0 }
+        if ($choose) { Key $menu $VK_UP; Key $menu $VK_RETURN } else { Key $menu $VK_ESCAPE }
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+        $item
+    }
+    $menu = StripMenuOf 0
+    Check ($null -ne $menu) "the HEIC picture's menu opens"
+    if ($menu) {
+        Shot $main 'read-32b-previews-menu-greyed' $menu
+        $item = ShowInMessageItem $menu $false
+        Check ($item.Labels -eq 'Open|Save As...||Save All...||Show in Message' -and $item.Greyed -and -not $item.Checked) "it offers Show in Message, greyed ($($item.Labels))"
+    }
+
+    # Show in Message on the invoice: checked; chosen, the invoice is taken out and the text stays where it was; chosen
+    # again, it is back
+    [void](SelectPreviews $photoSubject)
+    Check ($null -ne (PreviewsShown 4 3)) "the photo and the invoice ($(PreviewsState))"
+    [void](PreviewsLook 'scroll:80')
+    $scrolled = WaitFor { $y = PreviewsLook 'scroll'; if ($y -gt 1) { $y } } 5
+    $menu = StripMenuOf 1
+    if ($menu) {
+        Shot $main 'read-32c-previews-menu' $menu
+        $item = ShowInMessageItem $menu $true
+        Check ($item.Labels -eq 'Open|Save As...||Save All...||Show in Message' -and $item.Checked -and -not $item.Greyed) "the invoice's menu has Show in Message, checked ($($item.Labels))"
+    } else {
+        Check $false "the invoice's menu opens"
+    }
+    Check ($null -ne (PreviewsShown 1 0)) "chosen, the invoice is taken out of the message, the photo stays ($(PreviewsState))"
+    Start-Sleep -Milliseconds 500
+    $y = PreviewsLook 'scroll'; $y = PreviewsLook 'scroll'
+    Check ($scrolled -and $y -eq $scrolled) "and the text stays where it was scrolled to ($($scrolled - 1) px, now $($y - 1))"
+    Check ((ListCount $strip) -eq 2) 'the strip still lists it'
+    $menu = StripMenuOf 1
+    if ($menu) {
+        $item = ShowInMessageItem $menu $true
+        Check (-not $item.Checked -and -not $item.Greyed) 'now Show in Message is not checked'
+    }
+    Check ($null -ne (PreviewsShown 4 3)) "chosen again, the invoice is back ($(PreviewsState))"
+    Start-Sleep -Milliseconds 500
+    $y = PreviewsLook 'scroll'; $y = PreviewsLook 'scroll'
+    Check ($y -eq $scrolled) "and the text is still where it was ($($y - 1) px)"
+
+    # with "Show attachments in messages" off, Show in Message draws one file (the choices made above are forgotten
+    # once no window shows the message)
+    [void](SelectPreviews $tilesSubject)
+    [void](SelectPreviews $photoSubject)
+    [void](PreviewsShown 4 3)
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        OptionsPage $o 1
+        PreviewsSet $o $IDC_OPTIONS_PREVIEWS $false
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+    }
+    Check ($null -ne (WaitFor { $s = PreviewsState; if ($s.Total -eq 0) { $s } } 20)) "with the setting off the message shows no previews ($(PreviewsState))"
+    $menu = StripMenuOf 1
+    if ($menu) {
+        $item = ShowInMessageItem $menu $true
+        Check (-not $item.Checked -and -not $item.Greyed) "the invoice's Show in Message is not checked ($($item.Labels))"
+    }
+    Check ($null -ne (PreviewsShown 3 3)) "chosen, the invoice alone shows ($(PreviewsState))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'read-32d-previews-one-shown'
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        OptionsPage $o 1
+        PreviewsSet $o $IDC_OPTIONS_PREVIEWS $true
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+    }
+    Check ($null -ne (PreviewsShown 4 3)) "the setting on again, both files show ($(PreviewsState))"
+
+    # Print: the photo in the printout as a picture, and a line naming the invoice, which is not printed
+    $kTestPrint = 0x50524E54
+    Command $main $IDM_PRINT
+    $print = WaitWindow 'InboxClassicPrint' $null 40
+    Check ($null -ne $print) 'Print of a message with previews opens the print preview'
+    if ($print) {
+        $looked = WaitFor { $v = [Native.Win]::SendText($main, $kTestPrint, 'invoice-2026-118.pdf (3 pages'); if ($v -eq 11) { $v } } 20
+        Check ($null -ne $looked) "the printout has the photo, loaded, and the line naming the invoice ($([Native.Win]::SendText($main, $kTestPrint, 'invoice-2026-118.pdf (3 pages')))"
+        Start-Sleep -Seconds 5
+        Shot $print 'read-33-previews-print'
+        [void][Native.Win]::PostMessage($print, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($print) } 10)
+    }
+
+    foreach ($id in 'previews-1', 'previews-2', 'previews-4') {
         $added = Find 'INBOX' "$id@example\.com"
         if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
     }
     Command $main $IDM_SYNC
-    [void](WaitFor { @(SubjectRows $photoSubject).Count -eq 0 -and @(SubjectRows $manualSubject).Count -eq 0 } 20)
+    [void](WaitFor { @(SubjectRows $photoSubject).Count -eq 0 -and @(SubjectRows $manualSubject).Count -eq 0 -and @(SubjectRows $tilesSubject).Count -eq 0 } 20)
 
     # ---- getting new mail ----
 

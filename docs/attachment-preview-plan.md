@@ -748,3 +748,37 @@ keeps addresses unique, as planned. The spike programs were throwaway (not commi
 - CJK text in fonts that are not embedded does not show. Options for later: a CJK fallback font (10 MB or more), or
   a tile for a PDF whose fonts are CJK and not embedded (the meter could tell, as it walks the fonts).
 - Benchmarks as a CI step (the plan's `benches`) are left for PR 2; the `measure` example gives the numbers.
+
+## As built (PR 3, the core, 2026-11-18)
+
+- **What each file gets** (`pe-core/src/previews/plan.rs`): every listed picture or PDF file by its name and type is
+  drawn, a tile, counted in the line of files past the budget, or left out (taken out with Show in Message, or the
+  setting off). A tile is the core's own markup (`pe_html::PreviewTile`): the type on an icon drawn in CSS, the name,
+  the size and the reason in words, one link that opens the file, the same size whatever it says. Tiles: HEIC, AVIF
+  and JPEG XL by their content (`pe_preview::not_drawn`), a file over 50 MB, content that is not what its name says,
+  a PDF file with a password, one refused, timed out or that ended the app once, PDF files while PDF previews are off,
+  and every picture and PDF file of a large message whose text came first ("Downloading…", with the sizes of its
+  structure). When the whole source comes the view is built again and the previews take the tiles' place after the
+  same text.
+- **The budget line**: past 20 pictures, "4 more files are in the list above" (the plan's words), plain text: the
+  strip is above the message on all three, and Show in Message draws any of them.
+- **Show in Message** (decisions 1 and 7): `Core::preview_show(token, attachment, show)` records the choice for the
+  message (not the view: a window that builds the view again, or another window showing the same message, sees it)
+  until no window shows it, never in the store. Each strip row has `show_in_message`: none (not a picture or PDF
+  file), on (drawn: checked, choosing takes it out), off (choosing draws it, also with the setting off or PDF files
+  off) or unavailable (a tile that can not be drawn: greyed). A file asked for has its own pixel budget and its own
+  wait for its size, and is drawn while PDF files are off by the setting (`pe_preview::Request::asked`); a file that
+  ended the app or hung stays a tile.
+- **The rebuild keeps the scroll**: the apps read `pe_html::SCROLL_SCRIPT` before they show the new document and run
+  `scroll_to_script(y)` once it loaded; the text is above the section and every picture's size is in the markup, so
+  the same offset shows the same text.
+- **Print** (decision 5): `Core::print_start(token)` draws the pictures if the reading pane has not (waiting at most 30
+  seconds, off the window thread), then wraps the sanitized message again (`pe_html::PrintParts`, never cut out of a
+  document) with the pictures as `data:` addresses of the core's own PNG and JPEG encodes, and a line for each PDF
+  file and tile ("invoice.pdf (3 pages, 84 KB) is not printed. Open it to print it."). `Event::PrintReady` says it is
+  there, `Core::print_result` gives it once. The print document's CSP is `img-src data:` as any document's; it has no
+  preview path.
+- **C API**: `PeAttachment.show_in_message` (`PeShowInMessage`), `pe_preview_show`, `pe_print_start`,
+  `pe_print_result`, `PE_EVENT_KIND_PRINT_READY`, `pe_scroll_script`, `pe_scroll_to_script`.
+- Help: the section of `attachments.html` in every language; ten translations had the section twice, the copy is
+  gone.

@@ -146,8 +146,15 @@ private:
     void OpenAttachment(int item);
     void OpenDone(StripOpened* opened);
     void StopOpening();
-    // the menu of an item of the strip (Open, Save As..., Save All...) at `screen`, (-1, -1) for the keyboard's
+    // the menu of an item of the strip (Open, Save As..., Save All..., Show in Message for a picture or PDF file) at
+    // `screen`, (-1, -1) for the keyboard's
     void StripMenu(POINT screen);
+    // Show in Message chosen for file `index`: drawn in the message (`show`) or taken out, the view built again
+    void ShowInMessage(size_t index, bool show);
+    // the printout started by Print is made (PrintReady): printed in the Print window, when it is this reader's
+    void PrintReady(uint64_t request);
+    // the printout waited for is not any more (another message shown, the pane closing)
+    void ForgetPrint();
     static LRESULT CALLBACK StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data);
     // a ReadDone: the reply, the file to save or the file to open it was for, if it was this pane's
     void OnReadDone(uint64_t request);
@@ -220,6 +227,12 @@ private:
     static void RebuildNext();
     // the file of the message whose preview was clicked, opened once the WebView2's event is over; -1 for none
     int64_t previewOpen_ = -1;
+    // the preview shows a document of the message shown (not a page of the pane's own): one built again keeps its
+    // scroll
+    bool documentShown_ = false;
+    // the printout of the message with its pictures, made by the core (0 for none), and the window it opens over
+    uint64_t printRequest_ = 0;
+    HWND printOwner_ = nullptr;
     // the words of the last Find in This Message
     std::wstring findWords_;
 };

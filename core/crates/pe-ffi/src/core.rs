@@ -176,6 +176,8 @@ pub enum PeEventKind {
     /// A PDF file ended the app while it was drawn, so PDF previews are now off (`pe_pdf_previews`); the documents
     /// built from now on say so where the previews are
     PdfPreviewsOff = 37,
+    /// The printout `pe_print_start` started (its request in `uid`) is made: `pe_print_result` gives the document
+    PrintReady = 38,
 }
 
 #[repr(C)]
@@ -270,6 +272,7 @@ impl Callback {
             Event::PreviewReady { .. } => return,
             Event::PreviewAnswered { ask } => (PeEventKind::PreviewAnswered, 0, 0, *ask),
             Event::PdfPreviewsOff => (PeEventKind::PdfPreviewsOff, 0, 0, 0),
+            Event::PrintReady { request } => (PeEventKind::PrintReady, 0, 0, *request),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
             Event::NewMail {
                 account, folder, uid, ..
@@ -1992,6 +1995,35 @@ pub struct PeAttachment {
     pub tooltip: *const c_char,
     /// What to say when it is opened while `can_open` is false, naming it (empty when it opens)
     pub refusal: *const c_char,
+    /// The strip menu's Show in Message for it (`pe_preview_show`): no item, checked, unchecked or greyed
+    pub show_in_message: PeShowInMessage,
+}
+
+/// What the strip menu's Show in Message says of a file
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeShowInMessage {
+    /// Not a picture or PDF file: the menu has no such item for it
+    None = 0,
+    /// Drawn in the message: the item is checked, and choosing it takes the file out of the message
+    On = 1,
+    /// Not drawn, and it can be: unchecked, and choosing it draws the file in the message
+    Off = 2,
+    /// A tile that can not be drawn (a HEIC picture, a PDF file with a password, still downloading): unchecked and
+    /// greyed
+    Unavailable = 3,
+}
+
+impl From<pe_core::previews::ShowInMessage> for PeShowInMessage {
+    fn from(state: pe_core::previews::ShowInMessage) -> Self {
+        use pe_core::previews::ShowInMessage;
+        match state {
+            ShowInMessage::None => PeShowInMessage::None,
+            ShowInMessage::On => PeShowInMessage::On,
+            ShowInMessage::Off => PeShowInMessage::Off,
+            ShowInMessage::Unavailable => PeShowInMessage::Unavailable,
+        }
+    }
 }
 
 /// What kind of file an attachment is: its icon in the strip
@@ -2097,7 +2129,8 @@ pub struct PeMessageInfo {
     /// The sanitized document for the preview, with its CSP
     pub document: *const c_char,
     /// The document to print (for `pe_print_page`): `document` for most messages; for one with signed or encrypted
-    /// parts, one document of every part's text with the labels as words, as a printer prints no frames
+    /// parts, one document of every part's text with the labels as words, as a printer prints no frames; for one with
+    /// previews, the message without them (`pe_print_start` makes the printout with its pictures)
     pub print_document: *const c_char,
     pub attachment_count: usize,
     /// The message has pictures on the internet, blocked until it is shown again with remote images allowed
@@ -2149,9 +2182,11 @@ pub struct PeMessageInfo {
     /// memory as the page is; `pe_part_document` says which part an address asks for), whose document
     /// `pe_message_view_part` gives
     pub part_count: usize,
-    /// The token of the previews of its attachments after the text, empty when `document` shows none: the document
-    /// server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the page's origin),
-    /// and the window ends them with `pe_previews_end` when it shows another document or closes
+    /// The token of the previews of its attachments after the text, empty for a message with no picture or PDF file:
+    /// the document server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the
+    /// page's origin), the strip's Show in Message names the view by it (`pe_preview_show`), Print starts the
+    /// printout with it (`pe_print_start`), and the window ends them with `pe_previews_end` when it shows another
+    /// document or closes
     pub preview_token: *const c_char,
 }
 
@@ -2206,6 +2241,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             can_open: a.kind.can_open(),
             tooltip: strings.add(&a.tooltip),
             refusal: strings.add(a.refusal.as_deref().unwrap_or_default()),
+            show_in_message: a.show_in_message.into(),
         })
         .collect();
     let invitation = view.invitation.as_ref().map(|event| {
@@ -2672,6 +2708,80 @@ pub unsafe extern "C" fn pe_previews_end(core: *const PeCore, token: *const c_ch
     };
     // SAFETY: as the caller guarantees
     unsafe { with(core, (), |core| core.previews_end(token)) }
+}
+
+/// The strip menu's Show in Message chosen for attachment `attachment` of the view with this `preview_token` (`show`:
+/// draw it in the message, false: take it out), for as long as a window shows the message, never kept. True when that
+/// changes the document: the window then builds the view again (`pe_message_view_start`, or `pe_file_view` for a
+/// message file) and shows it where it was scrolled to (`pe_scroll_script`, `pe_scroll_to_script`). False for a file
+/// whose item is greyed or already so, or a view no longer shown.
+///
+/// # Safety
+/// `core` must be a live handle; `token` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_preview_show(
+    core: *const PeCore,
+    token: *const c_char,
+    attachment: usize,
+    show: bool,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(token) = (unsafe { arg(token) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.preview_show(token, attachment, show)) }
+}
+
+/// Starts the printout of the view with this `preview_token`, its pictures in it (drawn first if they are not yet,
+/// off the window thread): `PrintReady` with the request this returns follows, and `pe_print_result` gives the
+/// document for `pe_print_page`. 0 for a view that shows no previews (an empty token, or one no longer shown): print
+/// its `print_document` as it is.
+///
+/// # Safety
+/// `core` must be a live handle; `token` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_print_start(core: *const PeCore, token: *const c_char) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(token) = (unsafe { arg(token) }).filter(|token| !token.is_empty()) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.print_start(token).unwrap_or(0)) }
+}
+
+/// The document of the printout `request`, once, after its `PrintReady`: the message with the pictures of its
+/// previews as `data:` addresses and a line for each file not printed, for `pe_print_page`. NULL when it was taken or
+/// is unknown. Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_print_result(core: *const PeCore, request: u64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.print_result(request).map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
+/// The script the app runs in the reading pane before it shows the same message's document again (after Show in
+/// Message, and when the whole of a large message came after its text): how far it is scrolled, a number. A static
+/// string, not freed.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_scroll_script() -> *const c_char {
+    static SCRIPT: std::sync::OnceLock<std::ffi::CString> = std::sync::OnceLock::new();
+    SCRIPT
+        .get_or_init(|| std::ffi::CString::new(pe_html::SCROLL_SCRIPT).unwrap_or_default())
+        .as_ptr()
+}
+
+/// The script that scrolls the new document back to `y` (what `pe_scroll_script` answered), run once it has loaded.
+/// Free with `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_scroll_to_script(y: f64) -> *mut c_char {
+    guard(|| into_c_string(pe_html::scroll_to_script(y))).unwrap_or(null_mut())
 }
 
 /// Settings' "Show attachments in messages": pictures and PDF files after a message's text

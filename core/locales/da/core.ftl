@@ -866,3 +866,26 @@ preview-more-pages = { $count ->
     [one] Åbn filen for at se siden
    *[other] Åbn filen for at se alle { $count } sider
 }
+# review: new
+preview-more-files = { $count ->
+    [one] 1 fil mere er på listen ovenfor
+   *[other] { $count } filer mere er på listen ovenfor
+}
+# review: new
+preview-tile-downloading = Henter…
+# review: new
+preview-tile-format = { $format }-billeder vises ikke endnu
+# review: new
+preview-tile-password = Beskyttet med adgangskode: åbn den for at indtaste adgangskoden
+# review: new
+preview-tile-too-large = For stor til at blive vist
+# review: new
+preview-tile-unreadable = Kan ikke vises
+# review: new
+preview-tile-timed-out = Det tog for lang tid at vise
+# review: new
+preview-tile-crashed = Vises ikke: filen lukkede Inbox Classic én gang
+# review: new
+preview-tile-off = Vises ikke, før Inbox Classic starter igen
+# review: new
+preview-not-printed = { $name } ({ $details }) udskrives ikke. Åbn filen for at udskrive den.

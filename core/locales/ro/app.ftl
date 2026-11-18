@@ -814,6 +814,8 @@ ui-attachment-save-as = Salvare ca...
 # review: new
 ui-attachment-save-all = Salvare toate...
 # review: new
+ui-attachment-show-in-message = Afișare în mesaj
+# review: new
 ui-attachments-strip = Atașări
 # review: new
 ui-attachment-note-title = Deschiderea acestui fișier

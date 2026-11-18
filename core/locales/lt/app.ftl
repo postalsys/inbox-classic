@@ -813,6 +813,8 @@ ui-attachment-save-as = Įrašyti kaip...
 # review: new
 ui-attachment-save-all = Įrašyti visus...
 # review: new
+ui-attachment-show-in-message = Rodyti laiške
+# review: new
 ui-attachments-strip = Priedai
 # review: new
 ui-attachment-note-title = Šio failo atidarymas

@@ -63,6 +63,16 @@ pub struct Request {
     pub pages: usize,
     /// Whether its previews may be kept in the cache: not those of a decrypted part
     pub keep: bool,
+    /// The user asked to see this file (Show in Message): a PDF file is drawn while PDF files are off by the setting
+    /// ([`Refusal::Disabled`]), and its pictures have a budget of their own, not its owner's
+    pub asked: bool,
+}
+
+/// Whose pixel budget a request's pictures are counted on: its owner's, or a file asked for its own
+type Purse = (u64, Option<usize>);
+
+fn purse(request: &Request) -> Purse {
+    (request.owner, request.asked.then_some(request.attachment))
 }
 
 /// What came of a request, told to the sink of the [`Previewer`] as it comes: [`What::Described`] first (or a
@@ -122,8 +132,8 @@ struct Queue {
     closed: bool,
     /// The owner of the job being drawn, and what stops it
     running: Option<(u64, Arc<AtomicBool>)>,
-    /// The pixels each owner's previews have used
-    used: HashMap<u64, u64>,
+    /// The pixels each owner's previews have used (and those of each file asked for its own)
+    used: HashMap<Purse, u64>,
 }
 
 struct Shared {
@@ -202,6 +212,18 @@ impl Previewer {
     /// every file waiting, waited for at most `wait`: what the reading pane needs before it shows a document. A file
     /// not read in time is [`Refusal::TimedOut`] here, while the render thread goes on with it under its own limits
     pub fn describe(&self, file: Arc<Vec<u8>>, about: String, wait: Duration) -> Result<Arc<Description>, Refusal> {
+        self.describe_file(file, about, wait, false)
+    }
+
+    /// [`Previewer::describe`] of a file the user asked to see (`asked`, [`Request::asked`]): a PDF file is described
+    /// while PDF files are off by the setting
+    pub fn describe_file(
+        &self,
+        file: Arc<Vec<u8>>,
+        about: String,
+        wait: Duration,
+        asked: bool,
+    ) -> Result<Arc<Description>, Refusal> {
         let (reply, answers) = mpsc::channel();
         {
             let mut queue = self.shared.queue();
@@ -215,6 +237,7 @@ impl Previewer {
                 about,
                 pages: 0,
                 keep: true,
+                asked,
             };
             queue.jobs.push_front(Job {
                 request,
@@ -244,7 +267,7 @@ impl Previewer {
         queue
             .jobs
             .retain(|job| job.reply.is_some() || job.request.owner != owner);
-        queue.used.remove(&owner);
+        queue.used.retain(|(of, _), _| *of != owner);
         if let Some((running, stop)) = &queue.running
             && *running == owner
         {
@@ -354,7 +377,7 @@ impl Dispatcher {
         if request.file.len() > MAX_FILE {
             return Err(Refusal::TooLarge);
         }
-        if kind == Kind::Pdf && !self.shared.pdfs.load(Ordering::Relaxed) {
+        if kind == Kind::Pdf && !request.asked && !self.shared.pdfs.load(Ordering::Relaxed) {
             return Err(Refusal::Disabled);
         }
         if kind == Kind::Pdf && self.pdfs_off {
@@ -393,7 +416,7 @@ impl Dispatcher {
         for page in wanted {
             match self.cache.get(key, Slot::Page(page)) {
                 Some(Entry::Page(picture)) => {
-                    let what = if self.spend(request.owner, &picture) {
+                    let what = if self.spend(purse(request), &picture) {
                         What::Page(page, picture)
                     } else {
                         What::Refused {
@@ -416,11 +439,11 @@ impl Dispatcher {
         Some((true, missing))
     }
 
-    /// Counts `picture` against its owner's budget, unless it does not fit
-    fn spend(&self, owner: u64, picture: &Picture) -> bool {
+    /// Counts `picture` against its budget, unless it does not fit
+    fn spend(&self, purse: Purse, picture: &Picture) -> bool {
         let pixels = u64::from(picture.width) * u64::from(picture.height);
         let mut queue = self.shared.queue();
-        let used = queue.used.entry(owner).or_default();
+        let used = queue.used.entry(purse).or_default();
         if *used + pixels > MESSAGE_PIXELS {
             return false;
         }
@@ -428,8 +451,8 @@ impl Dispatcher {
         true
     }
 
-    fn budget(&self, owner: u64) -> u64 {
-        MESSAGE_PIXELS.saturating_sub(self.shared.queue().used.get(&owner).copied().unwrap_or(0))
+    fn budget(&self, purse: Purse) -> u64 {
+        MESSAGE_PIXELS.saturating_sub(self.shared.queue().used.get(&purse).copied().unwrap_or(0))
     }
 
     /// Hands the pages `pages` of the file to the render thread and passes on its steps, abandoning it when a step
@@ -442,7 +465,7 @@ impl Dispatcher {
             kind,
             file: job.request.file.clone(),
             pages,
-            budget: self.budget(owner),
+            budget: self.budget(purse(&job.request)),
             key: key.clone(),
             about: job.request.about.clone(),
             stop: stop.clone(),
@@ -505,7 +528,7 @@ impl Dispatcher {
                     self.cache
                         .put(drawing.key.clone(), Slot::Page(page), Entry::Page(picture.clone()));
                 }
-                if self.spend(drawing.job.request.owner, &picture) {
+                if self.spend(purse(&drawing.job.request), &picture) {
                     What::Page(page, picture)
                 } else {
                     What::Refused {

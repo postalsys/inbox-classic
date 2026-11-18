@@ -425,6 +425,8 @@ ui-save-attachments = Tallenna liitteet
 ui-attachment-open = Avaa
 ui-attachment-save-as = Tallenna nimellä...
 ui-attachment-save-all = Tallenna kaikki...
+# review: new
+ui-attachment-show-in-message = Näytä viestissä
 ui-attachments-strip = Liitteet
 ui-attachment-note-title = Tämän tiedoston avaaminen
 ui-attachment-program-tip = Avaaminen ei ole käytössä tälle tiedostotyypille: se voi suorittaa ohjelmia. Tallenna tiedosto ja avaa se itse.

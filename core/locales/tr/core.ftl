@@ -848,3 +848,26 @@ preview-more-pages = { $count ->
     [one] Sayfayı görmek için dosyayı açın
    *[other] { $count } sayfanın tümünü görmek için dosyayı açın
 }
+# review: new
+preview-more-files = { $count ->
+    [one] 1 dosya daha yukarıdaki listede
+   *[other] { $count } dosya daha yukarıdaki listede
+}
+# review: new
+preview-tile-downloading = İndiriliyor…
+# review: new
+preview-tile-format = { $format } resimleri henüz gösterilmiyor
+# review: new
+preview-tile-password = Parolayla korunuyor: parolayı girmek için açın
+# review: new
+preview-tile-too-large = Gösterilemeyecek kadar büyük
+# review: new
+preview-tile-unreadable = Gösterilemiyor
+# review: new
+preview-tile-timed-out = Gösterilmesi çok uzun sürdü
+# review: new
+preview-tile-crashed = Gösterilmiyor: Inbox Classic'i bir kez kapattı
+# review: new
+preview-tile-off = Inbox Classic yeniden başlayana kadar gösterilmiyor
+# review: new
+preview-not-printed = { $name } ({ $details }) yazdırılmaz. Yazdırmak için açın.

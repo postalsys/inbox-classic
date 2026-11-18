@@ -873,3 +873,26 @@ preview-more-pages = { $count ->
     [one] Avaa tiedosto nähdäksesi sivun
    *[other] Avaa tiedosto nähdäksesi kaikki { $count } sivua
 }
+# review: new
+preview-more-files = { $count ->
+    [one] 1 tiedosto lisää on yllä olevassa luettelossa
+   *[other] { $count } tiedostoa lisää on yllä olevassa luettelossa
+}
+# review: new
+preview-tile-downloading = Ladataan…
+# review: new
+preview-tile-format = { $format }-kuvia ei vielä näytetä
+# review: new
+preview-tile-password = Suojattu salasanalla: avaa se ja anna salasana
+# review: new
+preview-tile-too-large = Liian suuri näytettäväksi
+# review: new
+preview-tile-unreadable = Ei voi näyttää
+# review: new
+preview-tile-timed-out = Näyttäminen kesti liian kauan
+# review: new
+preview-tile-crashed = Ei näytetä: tiedosto sulki Inbox Classicin kerran
+# review: new
+preview-tile-off = Ei näytetä ennen kuin Inbox Classic käynnistetään uudelleen
+# review: new
+preview-not-printed = Tiedostoa { $name } ({ $details }) ei tulosteta. Avaa se tulostaaksesi sen.

@@ -812,6 +812,8 @@ ui-attachment-save-as = Uložiť ako...
 # review: new
 ui-attachment-save-all = Uložiť všetky...
 # review: new
+ui-attachment-show-in-message = Zobraziť v správe
+# review: new
 ui-attachments-strip = Prílohy
 # review: new
 ui-attachment-note-title = Otvorenie tohto súboru

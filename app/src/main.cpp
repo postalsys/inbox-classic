@@ -1636,6 +1636,8 @@ constexpr ULONG_PTR kTestHoldList = 0x484F4C44;
 constexpr ULONG_PTR kTestPreviews = 0x50565753;
 // with --test-hooks only: PDF previews off as after a PDF file ended the app (pe_pdf_previews_crashed_for_tests)
 constexpr ULONG_PTR kTestPdfCrashed = 0x50444643;
+// with --test-hooks only: the newest Print window's look at its page (TestPrint, the text to find in it)
+constexpr ULONG_PTR kTestPrint = 0x50524E54;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -2111,6 +2113,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                 return static_cast<LRESULT>(MessageWindowTestPreviews(query.substr(7)));
             }
             return static_cast<LRESULT>(g_mailbox.TestPreviews(query));
+        }
+        if (g_arguments.testHooks && data->dwData == kTestPrint && data->cbData % sizeof(wchar_t) == 0) {
+            return static_cast<LRESULT>(TestPrint(std::wstring(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t))));
         }
         if (g_arguments.testHooks && data->dwData == kTestPdfCrashed) {
             return pe_pdf_previews_crashed_for_tests(g_core.get()) ? 1 : 0;

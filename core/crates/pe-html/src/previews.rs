@@ -56,6 +56,8 @@ pub struct PreviewSection {
     pub files: Vec<PreviewFile>,
     /// Said where the previews are, when PDF files are not shown because one ended the app
     pub notice: Option<String>,
+    /// The line after the files when the message has more than are shown ("3 more files are in the list above")
+    pub more_files: Option<String>,
 }
 
 /// One file's previews
@@ -75,6 +77,17 @@ pub struct PreviewFile {
     pub details: String,
     /// The link under a PDF file with more pages than are shown ("Open to see all 12 pages")
     pub more: Option<String>,
+    /// A file shown as a tile instead of pictures (it can not be drawn, or not yet); its `pages` are empty
+    pub tile: Option<PreviewTile>,
+}
+
+/// What a tile says of a file it stands for, beside its name and details
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct PreviewTile {
+    /// The file's type on its icon ("PDF", "HEIC"), a few letters
+    pub label: String,
+    /// Why it is a tile, in a few words ("Protected by a password", "Downloading…")
+    pub reason: String,
 }
 
 /// One picture of a file
@@ -179,6 +192,21 @@ const RULES: &[(&str, &str)] = &[
          border:1px solid #f0dfbd;border-left:3px solid #9a5b00;border-radius:4px;background:#fff9ee;color:#1f1f1f;\
          font:inherit",
     ),
+    (
+        "C a.t",
+        "display:flex;align-items:center;box-sizing:border-box;max-width:420px;min-height:66px;padding:10px 12px;\
+         border:1px solid #d0d0d0;border-radius:4px;background:#fafafa;color:inherit;text-decoration:none",
+    ),
+    (
+        "C .i",
+        "display:flex;align-items:center;justify-content:center;flex:none;box-sizing:border-box;width:36px;\
+         height:44px;margin:0 12px 0 0;border:1px solid #9a9a9a;border-radius:2px 9px 2px 2px;background:#fff;\
+         color:#444;font:bold 8pt/1 system-ui,-apple-system,'Segoe UI',Arial,sans-serif;overflow:hidden",
+    ),
+    ("C .x", "display:block;min-width:0;font:inherit"),
+    ("C .x>span", "display:block;margin:0"),
+    ("C .r", "color:#5b5b5b;margin:2px 0 0"),
+    ("C p.o", "display:block;margin:0 0 16px;color:#5b5b5b;font:inherit"),
 ];
 
 /// The section's colors when the document is dark: its own background and words, the pictures as they are and PDF
@@ -194,6 +222,10 @@ const DARK_RULES: &[(&str, &str)] = &[
         "C .w",
         "background:#45371f;border-color:#5a4a2a;border-left-color:#e8b55c;color:#e3e3e6",
     ),
+    ("C a.t", "background:#2a2b2f;border-color:#45464b"),
+    ("C .i", "background:#3a3b40;border-color:#6b6c72;color:#e3e3e6"),
+    ("C .r", "color:#a6a6ab"),
+    ("C p.o", "color:#a6a6ab"),
 ];
 
 fn rules(class: &str, rules: &[(&str, &str)]) -> String {
@@ -211,14 +243,22 @@ fn rules(class: &str, rules: &[(&str, &str)]) -> String {
     css
 }
 
+/// What a document shows after the message's text: its markup, the attachments it shows (drawn or as tiles), and
+/// whether any of them has pictures (the CSP then lets them load from the preview path)
+#[derive(Debug, Default)]
+pub(crate) struct Shown {
+    pub html: String,
+    pub files: Vec<usize>,
+    pub pictures: bool,
+}
+
 /// The section as markup for the end of the document, `embedded` the Content-IDs (lowercase) the message's HTML
-/// showed, `dark` whether the document follows a dark window; with the attachments it shows. Empty when there is
-/// nothing to show.
-pub(crate) fn section(previews: &PreviewSection, embedded: &dyn Fn(&str) -> bool, dark: bool) -> (String, Vec<usize>) {
+/// showed, `dark` whether the document follows a dark window. Empty when there is nothing to show.
+pub(crate) fn section(previews: &PreviewSection, embedded: &dyn Fn(&str) -> bool, dark: bool) -> Shown {
     let files: Vec<&PreviewFile> = previews
         .files
         .iter()
-        .filter(|file| !file.pages.is_empty())
+        .filter(|file| !file.pages.is_empty() || file.tile.is_some())
         .filter(|file| {
             !file
                 .content_id
@@ -226,8 +266,8 @@ pub(crate) fn section(previews: &PreviewSection, embedded: &dyn Fn(&str) -> bool
                 .is_some_and(|id| embedded(&crate::content_id(id).to_lowercase()))
         })
         .collect();
-    if files.is_empty() && previews.notice.is_none() {
-        return (String::new(), Vec::new());
+    if files.is_empty() && previews.notice.is_none() && previews.more_files.is_none() {
+        return Shown::default();
     }
     let class = format!("pe-att-{}", nonce());
     let mut css = format!("<style>@layer {class}{{{}", rules(&class, RULES));
@@ -246,14 +286,24 @@ pub(crate) fn section(previews: &PreviewSection, embedded: &dyn Fn(&str) -> bool
     for file in &files {
         out.push_str(&figure(&previews.token, file));
     }
+    if let Some(more) = &previews.more_files {
+        out.push_str(&format!("<p class=\"o\">{}</p>", shown(more, MAX_VALUE)));
+    }
     out.push_str("</section>");
-    (out, files.iter().map(|file| file.attachment).collect())
+    Shown {
+        html: out,
+        files: files.iter().map(|file| file.attachment).collect(),
+        pictures: files.iter().any(|file| file.tile.is_none()),
+    }
 }
 
 /// A file's figure: its name and size first (a long PDF file's name is not three pages away), then its pictures in
 /// one link (one stop for Tab), and under a PDF file with more pages the link that opens it
 fn figure(token: &str, file: &PreviewFile) -> String {
     let href = link(token, file.attachment);
+    if let Some(tile) = &file.tile {
+        return tile_figure(&href, file, tile);
+    }
     let mut out = format!(
         "<figure><figcaption><span class=\"n\">{}</span><span class=\"d\">{}</span></figcaption><a href=\"{href}\">",
         shown(&file.name, MAX_VALUE),
@@ -280,6 +330,97 @@ fn figure(token: &str, file: &PreviewFile) -> String {
     }
     out.push_str("</figure>");
     out
+}
+
+/// A file shown as a tile: its type on an icon, its name, size and why it is not drawn, all in one link that opens
+/// it (one stop for Tab). Its size is the same whatever it says, so a tile that becomes pictures moves only what is
+/// below it
+fn tile_figure(href: &str, file: &PreviewFile, tile: &PreviewTile) -> String {
+    format!(
+        "<figure><a class=\"t\" href=\"{href}\"><span class=\"i\" aria-hidden=\"true\">{}</span><span class=\"x\">\
+         <span class=\"n\">{}</span><span class=\"d\">{}</span><span class=\"r\">{}</span></span></a></figure>",
+        shown(&tile.label, 4),
+        shown(&file.name, MAX_VALUE),
+        shown(&file.details, MAX_VALUE),
+        shown(&tile.reason, MAX_VALUE)
+    )
+}
+
+/// What the printout shows of a file after the message's text ([`crate::print_document_with`])
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PrintItem<'a> {
+    /// A picture as the core encoded it (`image/png` or `image/jpeg`; anything else is left out), with its name under
+    /// it
+    Picture {
+        name: &'a str,
+        mime: &'a str,
+        bytes: &'a [u8],
+    },
+    /// A file that is not printed: a line that names it
+    Line(&'a str),
+}
+
+/// The rules of a printout's section, `C` its class: its own look whatever the message's styles say
+const PRINT_RULES: &[(&str, &str)] = &[
+    ("C", "all:initial"),
+    ("C *", "all:unset"),
+    ("C::before,C::after,C *::before,C *::after", "content:none;display:none"),
+    (
+        "C",
+        "display:block;clear:both;margin:16px 0 0;padding:0;color:#000;background:#fff;font:10pt Arial,sans-serif;\
+         text-align:left;direction:ltr;overflow-wrap:anywhere",
+    ),
+    (
+        "C figure",
+        "display:block;margin:0 0 12px;break-inside:avoid;page-break-inside:avoid",
+    ),
+    (
+        "C img",
+        "display:block;width:auto;height:auto;max-width:100%;max-height:95vh;margin:0 0 4px;border:0;padding:0",
+    ),
+    ("C figcaption", "display:block;color:#333;font:inherit"),
+    ("C p", "display:block;margin:0 0 8px;font:inherit"),
+];
+
+/// A printout's pictures and lines as markup, under a class and in a layer the message can not name, as the
+/// section's. Each picture is a `data:` address of its bytes: the print windows load nothing but the page. Empty
+/// when there is nothing to print
+pub(crate) fn print_section(items: &[PrintItem]) -> String {
+    use base64::Engine;
+    let mut body = String::new();
+    for item in items {
+        match *item {
+            PrintItem::Picture { name, mime, bytes } if matches!(mime, "image/png" | "image/jpeg") => {
+                body.push_str(&format!(
+                    "<figure><img src=\"data:{mime};base64,{}\" alt=\"{}\"><figcaption>{}</figcaption></figure>",
+                    base64::engine::general_purpose::STANDARD.encode(bytes),
+                    attribute(name),
+                    shown(name, MAX_VALUE)
+                ));
+            }
+            PrintItem::Picture { .. } => {}
+            PrintItem::Line(line) => body.push_str(&format!("<p>{}</p>", shown(line, 1000))),
+        }
+    }
+    if body.is_empty() {
+        return body;
+    }
+    let class = format!("pe-prt-{}", nonce());
+    format!(
+        "<style>@layer {class}{{{}}}</style><section class=\"{class}\">{body}</section>",
+        rules(&class, PRINT_RULES)
+    )
+}
+
+/// The script the apps run in the reading pane before they show the same message's document again (Show in
+/// Message, the whole message after its text): how far down it is scrolled, a number of CSS pixels
+pub const SCROLL_SCRIPT: &str = "Math.round(window.scrollY||0)";
+
+/// The script that scrolls the new document back to `y` ([`SCROLL_SCRIPT`]'s answer), run once it has loaded: its
+/// text is where it was, as the previews after it keep their sizes
+pub fn scroll_to_script(y: f64) -> String {
+    let y = if y.is_finite() { y.clamp(0.0, 1e7).round() } else { 0.0 };
+    format!("window.scrollTo(0,{y})")
 }
 
 /// A text as the value of an attribute, cut as a card's values are
@@ -358,6 +499,7 @@ mod tests {
             name: "<b>Invoice</b>.pdf".into(),
             details: "3 pages, 84 KB".into(),
             more: (pages > 1).then(|| "Open to see all 12 pages".into()),
+            tile: None,
         }
     }
 
@@ -367,8 +509,9 @@ mod tests {
             token: TOKEN.into(),
             files: vec![file(0, 1, false), file(2, 3, true), file(3, 0, false)],
             notice: None,
+            more_files: None,
         };
-        let (html, shown) = section(&previews, &|_| false, false);
+        let Shown { html, files: shown, .. } = section(&previews, &|_| false, false);
         // the file without pages is left out
         assert_eq!(shown, [0, 2]);
         assert_eq!(html.matches("<figure>").count(), 2, "{html}");
@@ -400,8 +543,9 @@ mod tests {
             token: TOKEN.into(),
             files: vec![file(0, 1, false)],
             notice: Some("PDF files are off".into()),
+            more_files: None,
         };
-        let (html, _) = section(&previews, &|_| false, true);
+        let html = section(&previews, &|_| false, true).html;
         let rest = html.split(SECTION_START).nth(1).unwrap();
         let class = format!("pe-att-{}", rest.split('"').next().unwrap());
         assert!(class.starts_with("pe-att-") && class.len() == 7 + 32, "{class}");
@@ -426,12 +570,135 @@ mod tests {
             token: TOKEN.into(),
             files: vec![file(0, 1, false), file(1, 1, false)],
             notice: None,
+            more_files: None,
         };
-        let (html, shown) = section(&previews, &|id| id == "f1@x", false);
+        let Shown { html, files: shown, .. } = section(&previews, &|id| id == "f1@x", false);
         assert_eq!(shown, [0]);
         assert_eq!(html.matches("<figure>").count(), 1);
         // nothing at all: no section
-        let (html, shown) = section(&previews, &|_| true, false);
+        let Shown { html, files: shown, .. } = section(&previews, &|_| true, false);
         assert!(html.is_empty() && shown.is_empty());
+    }
+
+    fn tile(attachment: usize, reason: &str) -> PreviewFile {
+        PreviewFile {
+            attachment,
+            name: "<i>photo</i>.heic".into(),
+            details: "2.1 MB".into(),
+            tile: Some(PreviewTile {
+                label: "HEIC".into(),
+                reason: reason.into(),
+            }),
+            ..Default::default()
+        }
+    }
+
+    /// A file that is not drawn is a tile: its type, name, size and the reason in words, one link that opens it, no
+    /// picture and nothing loaded
+    #[test]
+    fn a_tile_says_why_and_opens_the_file() {
+        let previews = PreviewSection {
+            token: TOKEN.into(),
+            files: vec![tile(4, "HEIC pictures are not shown yet")],
+            notice: None,
+            more_files: None,
+        };
+        let shown = section(&previews, &|_| false, false);
+        assert_eq!(shown.files, [4]);
+        // no pictures: the CSP needs no preview path
+        assert!(!shown.pictures);
+        let html = &shown.html;
+        assert!(!html.contains("<img") && !html.contains("/pv/"), "{html}");
+        assert_eq!(html.matches("<a ").count(), 1, "{html}");
+        assert!(
+            html.contains(&format!(
+                "<a class=\"t\" href=\"inboxclassic:attachment-{TOKEN}-4\"><span class=\"i\" aria-hidden=\"true\">HEIC</span>"
+            )),
+            "{html}"
+        );
+        assert!(
+            html.contains("<span class=\"n\">&lt;i&gt;photo&lt;/i&gt;.heic</span>"),
+            "{html}"
+        );
+        assert!(html.contains("<span class=\"d\">2.1 MB</span>"), "{html}");
+        assert!(
+            html.contains("<span class=\"r\">HEIC pictures are not shown yet</span>"),
+            "{html}"
+        );
+        // its own size whatever it says, drawn by the section's important rules
+        assert!(html.contains("min-height:66px!important"), "{html}");
+        // a tile among pictures: the pictures still load from the preview path
+        let mixed = PreviewSection {
+            files: vec![file(0, 1, false), tile(1, "Downloading…")],
+            ..previews
+        };
+        let shown = section(&mixed, &|_| false, false);
+        assert!(shown.pictures);
+        assert_eq!(shown.files, [0, 1]);
+    }
+
+    /// Past the message's budget, one line says how many files more are in the list
+    #[test]
+    fn more_files_are_named_in_one_line() {
+        let previews = PreviewSection {
+            token: TOKEN.into(),
+            files: vec![file(0, 1, false)],
+            notice: None,
+            more_files: Some("4 more files are in the list above".into()),
+        };
+        let html = section(&previews, &|_| false, false).html;
+        assert!(
+            html.contains("<p class=\"o\">4 more files are in the list above</p></section>"),
+            "{html}"
+        );
+        // the line alone still makes a section
+        let alone = PreviewSection {
+            files: Vec::new(),
+            ..previews
+        };
+        let shown = section(&alone, &|_| false, false);
+        assert!(shown.html.contains("4 more files"), "{}", shown.html);
+        assert!(shown.files.is_empty() && !shown.pictures);
+    }
+
+    #[test]
+    fn the_print_section_has_the_pictures_as_data_and_a_line_for_the_rest() {
+        let items = [
+            PrintItem::Picture {
+                name: "a\"<b>.jpg",
+                mime: "image/jpeg",
+                bytes: b"\xff\xd8\xff",
+            },
+            // never another type, whatever the caller says
+            PrintItem::Picture {
+                name: "x.svg",
+                mime: "image/svg+xml",
+                bytes: b"<svg onload=alert(1)>",
+            },
+            PrintItem::Line("invoice.pdf (3 pages, 84 KB) is not printed. Open it to print it."),
+        ];
+        let html = print_section(&items);
+        assert!(html.starts_with("<style>@layer pe-prt-"), "{html}");
+        assert!(
+            html.contains("<img src=\"data:image/jpeg;base64,/9j/\" alt=\"a&quot;&lt;b&gt;.jpg\">"),
+            "{html}"
+        );
+        assert!(!html.contains("svg"), "{html}");
+        assert!(
+            html.contains("<p>invoice.pdf (3 pages, 84 KB) is not printed."),
+            "{html}"
+        );
+        let css = html.split("<style>").nth(1).unwrap().split("</style>").next().unwrap();
+        assert_eq!(css.matches(';').count(), css.matches("!important;").count(), "{css}");
+        assert!(print_section(&[]).is_empty());
+    }
+
+    #[test]
+    fn the_scroll_scripts() {
+        assert_eq!(SCROLL_SCRIPT, "Math.round(window.scrollY||0)");
+        assert_eq!(scroll_to_script(120.4), "window.scrollTo(0,120)");
+        assert_eq!(scroll_to_script(-5.0), "window.scrollTo(0,0)");
+        assert_eq!(scroll_to_script(f64::NAN), "window.scrollTo(0,0)");
+        assert_eq!(scroll_to_script(f64::INFINITY), "window.scrollTo(0,0)");
     }
 }

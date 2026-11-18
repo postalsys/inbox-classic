@@ -1319,3 +1319,27 @@ preview-more-pages = { $count ->
     [one] Atveriet failu, lai redzētu visu { $count } lappusi
    *[other] Atveriet failu, lai redzētu visas { $count } lappuses
 }
+# review: new
+preview-more-files = { $count ->
+    [zero] Vēl { $count } failu ir sarakstā augstāk
+    [one] Vēl { $count } fails ir sarakstā augstāk
+   *[other] Vēl { $count } faili ir sarakstā augstāk
+}
+# review: new
+preview-tile-downloading = Notiek lejupielāde…
+# review: new
+preview-tile-format = { $format } attēli vēl netiek rādīti
+# review: new
+preview-tile-password = Aizsargāts ar paroli: atveriet, lai to ievadītu
+# review: new
+preview-tile-too-large = Pārāk liels, lai parādītu
+# review: new
+preview-tile-unreadable = Nevar parādīt
+# review: new
+preview-tile-timed-out = Parādīšana aizņēma pārāk ilgu laiku
+# review: new
+preview-tile-crashed = Netiek rādīts: šis fails reiz aizvēra Inbox Classic
+# review: new
+preview-tile-off = Netiek rādīts, līdz Inbox Classic tiks palaists no jauna
+# review: new
+preview-not-printed = { $name } ({ $details }) netiek drukāts. Atveriet to, lai izdrukātu.

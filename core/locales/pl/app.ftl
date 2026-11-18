@@ -813,6 +813,8 @@ ui-attachment-save-as = Zapisz jako...
 # review: new
 ui-attachment-save-all = Zapisz wszystkie...
 # review: new
+ui-attachment-show-in-message = Pokaż w wiadomości
+# review: new
 ui-attachments-strip = Załączniki
 # review: new
 ui-attachment-note-title = Otwieranie tego pliku

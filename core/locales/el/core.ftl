@@ -883,3 +883,26 @@ preview-more-pages = { $count ->
     [one] Ανοίξτε το για να δείτε τη σελίδα
    *[other] Ανοίξτε το για να δείτε και τις { $count } σελίδες
 }
+# review: new
+preview-more-files = { $count ->
+    [one] 1 ακόμη αρχείο βρίσκεται στη λίστα επάνω
+   *[other] { $count } ακόμη αρχεία βρίσκονται στη λίστα επάνω
+}
+# review: new
+preview-tile-downloading = Γίνεται λήψη…
+# review: new
+preview-tile-format = Οι εικόνες { $format } δεν εμφανίζονται ακόμη
+# review: new
+preview-tile-password = Προστατεύεται με κωδικό πρόσβασης: ανοίξτε το για να τον εισαγάγετε
+# review: new
+preview-tile-too-large = Πολύ μεγάλο για εμφάνιση
+# review: new
+preview-tile-unreadable = Δεν μπορεί να εμφανιστεί
+# review: new
+preview-tile-timed-out = Η εμφάνιση άργησε πολύ
+# review: new
+preview-tile-crashed = Δεν εμφανίζεται: έκλεισε το Inbox Classic μία φορά
+# review: new
+preview-tile-off = Δεν εμφανίζεται μέχρι να ξεκινήσει ξανά το Inbox Classic
+# review: new
+preview-not-printed = Το { $name } ({ $details }) δεν εκτυπώνεται. Ανοίξτε το για να το εκτυπώσετε.

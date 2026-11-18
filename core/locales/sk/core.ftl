@@ -1362,3 +1362,28 @@ preview-more-pages = { $count ->
     [many] Otvorte súbor a uvidíte všetkých { $count } strany
    *[other] Otvorte súbor a uvidíte všetkých { $count } strán
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Ďalší 1 súbor je v zozname vyššie
+    [few] Ďalšie { $count } súbory sú v zozname vyššie
+    [many] Ďalšieho { $count } súboru je v zozname vyššie
+   *[other] Ďalších { $count } súborov je v zozname vyššie
+}
+# review: new
+preview-tile-downloading = Sťahuje sa…
+# review: new
+preview-tile-format = Obrázky { $format } sa zatiaľ nezobrazujú
+# review: new
+preview-tile-password = Chránené heslom: otvorte ho a zadajte heslo
+# review: new
+preview-tile-too-large = Príliš veľké na zobrazenie
+# review: new
+preview-tile-unreadable = Nedá sa zobraziť
+# review: new
+preview-tile-timed-out = Zobrazenie trvalo príliš dlho
+# review: new
+preview-tile-crashed = Nezobrazené: tento súbor raz ukončil Inbox Classic
+# review: new
+preview-tile-off = Nezobrazené do ďalšieho spustenia Inbox Classic
+# review: new
+preview-not-printed = { $name } ({ $details }) sa netlačí. Ak ho chcete vytlačiť, otvorte ho.

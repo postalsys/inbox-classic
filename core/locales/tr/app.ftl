@@ -417,6 +417,8 @@ ui-save-attachments = Ekleri Kaydet
 ui-attachment-open = Aç
 ui-attachment-save-as = Farklı Kaydet...
 ui-attachment-save-all = Tümünü Kaydet...
+# review: new
+ui-attachment-show-in-message = İletide Göster
 ui-attachments-strip = Ekler
 ui-attachment-note-title = Dosyayı Açarken
 ui-attachment-program-tip = Bu tür dosyalar kod çalıştırabildiği için Aç komutu devre dışıdır. Dosyayı kendiniz açmak istiyorsanız önce kaydedin.

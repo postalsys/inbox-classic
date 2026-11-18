@@ -834,3 +834,26 @@ preview-more-pages = { $count ->
     [one] Öffnen, um die Seite zu sehen
    *[other] Öffnen, um alle { $count } Seiten zu sehen
 }
+# review: new
+preview-more-files = { $count ->
+    [one] 1 weitere Datei steht in der Liste oben
+   *[other] { $count } weitere Dateien stehen in der Liste oben
+}
+# review: new
+preview-tile-downloading = Wird heruntergeladen…
+# review: new
+preview-tile-format = { $format }-Bilder werden noch nicht angezeigt
+# review: new
+preview-tile-password = Mit einem Kennwort geschützt: Öffnen, um das Kennwort einzugeben
+# review: new
+preview-tile-too-large = Zu groß zum Anzeigen
+# review: new
+preview-tile-unreadable = Kann nicht angezeigt werden
+# review: new
+preview-tile-timed-out = Das Anzeigen dauerte zu lange
+# review: new
+preview-tile-crashed = Nicht angezeigt: Die Datei hat Inbox Classic einmal beendet
+# review: new
+preview-tile-off = Nicht angezeigt, bis Inbox Classic neu gestartet wird
+# review: new
+preview-not-printed = { $name } ({ $details }) wird nicht gedruckt. Öffnen Sie die Datei, um sie zu drucken.

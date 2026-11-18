@@ -132,6 +132,19 @@ fn heic_and_avif_are_tiles() {
         assert_eq!(pe_preview::kind_of(&read(name)), None, "{name}");
     }
     assert_eq!(pe_preview::kind_of(&read("invoice.pdf")), Some(Kind::Pdf));
+    // named on their tiles by what they are
+    use pe_preview::{NotDrawn, not_drawn};
+    assert_eq!(not_drawn(&read("photo.heic")), Some(NotDrawn::Heic));
+    assert_eq!(not_drawn(&read("photo.avif")), Some(NotDrawn::Avif));
+    assert_eq!(not_drawn(b"\xff\x0a\x00\x01"), Some(NotDrawn::JpegXl));
+    assert_eq!(not_drawn(b"\0\0\0\x0cJXL \r\n\x87\n\0\0"), Some(NotDrawn::JpegXl));
+    assert_eq!(NotDrawn::JpegXl.name(), "JPEG XL");
+    assert_eq!(not_drawn(&read("invoice.pdf")), None);
+    // an ISO media file of another brand (a video), and boxes that end early
+    assert_eq!(not_drawn(b"\0\0\0\x18ftypisom\0\0\0\0isommp41"), None);
+    assert_eq!(not_drawn(b"\0\0\0\x18ftyp"), None);
+    assert_eq!(not_drawn(b"\0\0\0\x10ftypmif1\0\0\0\0"), Some(NotDrawn::Heic));
+    assert_eq!(not_drawn(b""), None);
 }
 
 /// The forms of xobject-laughs.pdf draw each other 2^40 times: hayro never finishes. The watchdog abandons it, the
@@ -156,6 +169,7 @@ fn a_pdf_that_never_finishes_is_abandoned() {
         about: String::new(),
         pages: 5,
         keep: true,
+        asked: false,
     };
     let wait = |attachment| {
         let mut refused = None;

@@ -110,9 +110,14 @@ extension UITest {
         let said: NSTextField? = find("status.text", in: main.window)
         check(await waitUntil(10) { said?.stringValue.hasPrefix("Downloading") == true },
               "the status bar says how far the rest is (\(said?.stringValue ?? ""))")
+        check(await readerText().contains("Downloading"), "its PDF file is a tile that says it is on its way")
         await shot(main.window, "large-1-text-first")
         check(await waitUntil(30) { said?.stringValue.hasPrefix("Downloaded") == true },
               "then that it is all here (\(said?.stringValue ?? ""))")
+        check(await waitUntil(15) {
+            let text = await readerText()
+            return text.contains("The figures are attached") && !text.contains("Downloading")
+        }, "and the message is made again: the tile no longer says it is on its way")
         await search("")
         selectFolder(named: "Inbox")
     }

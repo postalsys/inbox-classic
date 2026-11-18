@@ -412,6 +412,8 @@ ui-save-attachments = Salvesta manused
 ui-attachment-open = Ava
 ui-attachment-save-as = Salvesta kui...
 ui-attachment-save-all = Salvesta kõik...
+# review: new
+ui-attachment-show-in-message = Näita kirjas
 ui-attachments-strip = Manused
 ui-attachment-note-title = Manuse avamine
 ui-attachment-program-tip = Inbox Classic seda tüüpi faile ei ava, sest need võivad käivitada programme. Vajaduse korral salvestage fail ja avage see ise.

@@ -9,7 +9,9 @@
 #include <algorithm>
 #include <climits>
 #include <cstring>
+#include <cwctype>
 #include <map>
+#include <memory>
 #include <utility>
 
 #include "app.h"
@@ -167,6 +169,15 @@ void Preview::Configure() {
                                        return S_OK;
                                    }).Get(),
                                    nullptr);
+    // the same message's document again: scrolled to where the one before was, once its DOM is there (before its
+    // pictures, which NavigationCompleted waits for)
+    if (ComPtr<ICoreWebView2_2> loaded; SUCCEEDED(view_.As(&loaded))) {
+        loaded->add_DOMContentLoaded(Callback<ICoreWebView2DOMContentLoadedEventHandler>([this](ICoreWebView2*, ICoreWebView2DOMContentLoadedEventArgs*) {
+                                         Scrolled();
+                                         return S_OK;
+                                     }).Get(),
+                                     nullptr);
+    }
     view_->add_NewWindowRequested(
         Callback<ICoreWebView2NewWindowRequestedEventHandler>([this](ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) {
             LPWSTR uri = nullptr;
@@ -369,6 +380,23 @@ int64_t Preview::TestPreviews(const std::wstring& query) {
         script = L"Math.max(0,document.documentElement.scrollWidth-document.documentElement.clientWidth)";
     } else if (query == L"more") {
         script = PreviewsPoint(L"document.querySelector('section[class^=\"pe-att-\"] a.m')");
+    } else if (query == L"tiles") {
+        // the files shown as tiles, times 100, plus how many of them say why
+        script = L"(()=>{const t=[...document.querySelectorAll('section[class^=\"pe-att-\"] a.t')];"
+                 L"return t.length*100+t.filter(a=>(a.querySelector('.r')||{}).textContent).length})()";
+    } else if (query.starts_with(L"text:")) {
+        // whether the document's text has the words after the colon: 2, else 1
+        std::wstring words;
+        for (wchar_t c : query.substr(5)) {
+            if (iswalnum(c) || c == L' ') {
+                words += c;
+            }
+        }
+        script = L"document.body&&document.body.innerText.includes('" + words + L"')?2:1";
+    } else if (query == L"scroll" || query.starts_with(L"scroll:")) {
+        // scrolled to a place first (a number only), then how far it is, plus 1 so the top is an answer too
+        std::wstring to = query.size() > 7 ? std::to_wstring(_wtoi(query.c_str() + 7)) : L"";
+        script = (to.empty() ? L"" : L"window.scrollTo(0," + to + L");") + L"Math.round(window.scrollY||0)+1";
     } else {
         return -1;
     }
@@ -382,7 +410,8 @@ int64_t Preview::TestPreviews(const std::wstring& query) {
                                              }).Get());
     }
     // a point in the pane, on the screen
-    if (answer > 0 && query != L"state" && query != L"overflow") {
+    if (answer > 0 && query != L"state" && query != L"overflow" && query != L"tiles" && !query.starts_with(L"scroll") &&
+        !query.starts_with(L"text:")) {
         POINT origin = {bounds_.left, bounds_.top};
         ClientToScreen(parent_, &origin);
         answer = (origin.x + answer / 100000) * 100000 + origin.y + answer % 100000;
@@ -397,16 +426,39 @@ void Preview::Follow(const wchar_t* uri) {
     OpenExternally(uri);
 }
 
-void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std::string> parts, const char* previewToken) {
+void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std::string> parts, const char* previewToken, bool keepScroll) {
+    unsigned asked = ++asked_;
+    Next next{html, remoteImages, std::move(parts), previewToken ? previewToken : ""};
+    if (!keepScroll || !view_ || pending_) {
+        Put(std::move(next), -1);
+        return;
+    }
+    // how far the document shown is scrolled, then the new one in its place (the one shown stays whole until then, its
+    // previews still answered); dropped when another was asked for meanwhile
+    auto held = std::make_shared<Next>(std::move(next));
+    static const std::wstring script = core::Widen(pe_scroll_script());
+    HRESULT started = view_->ExecuteScript(script.c_str(), Callback<ICoreWebView2ExecuteScriptCompletedHandler>([this, asked, held](HRESULT result, LPCWSTR json) {
+                                                               if (asked == asked_) {
+                                                                   Put(std::move(*held), SUCCEEDED(result) && json ? _wtof(json) : 0);
+                                                               }
+                                                               return S_OK;
+                                                           }).Get());
+    if (FAILED(started)) {
+        Put(std::move(*held), -1);
+    }
+}
+
+void Preview::Put(Next next, double scrollTo) {
     // the places found were in the document before, its previews too
     StopFind();
     EndPreviews();
-    previewToken_ = previewToken ? previewToken : "";
-    remoteImages_ = remoteImages;
-    parts_ = std::move(parts);
+    previewToken_ = std::move(next.previewToken);
+    remoteImages_ = next.remoteImages;
+    parts_ = std::move(next.parts);
     remoteRequests_ = 0;
     testFrames_ = -1;
-    document_ = html;
+    document_ = std::move(next.html);
+    scrollTo_ = scrollTo;
     if (!view_) {
         pending_ = true;
         return;
@@ -419,7 +471,24 @@ void Preview::Load() {
     // a new address for each document, so it is loaded again rather than taken from history; a folder, so the frames of
     // a page of parts ask for theirs beside it (part-N)
     std::wstring url = std::wstring(kPageUrl) + std::to_wstring(++shown_) + L"/";
+    scrollPage_ = scrollTo_ >= 0 ? url : L"";
     view_->Navigate(url.c_str());
+}
+
+void Preview::Scrolled() {
+    // its text where it was: every preview's size is in its markup, so the same offset shows the same text, before
+    // the pictures arrive
+    LPWSTR source = nullptr;
+    if (scrollPage_.empty() || FAILED(view_->get_Source(&source)) || !source) {
+        return;
+    }
+    bool same = scrollPage_ == source;
+    CoTaskMemFree(source);
+    if (same) {
+        core::String script(pe_scroll_to_script(std::exchange(scrollTo_, -1)));
+        scrollPage_.clear();
+        view_->ExecuteScript(core::Widen(script.get()).c_str(), nullptr);
+    }
 }
 
 void Preview::Measure() {

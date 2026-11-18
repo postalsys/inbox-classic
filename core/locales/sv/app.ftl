@@ -812,6 +812,8 @@ ui-attachment-save-as = Spara som...
 # review: new
 ui-attachment-save-all = Spara alla...
 # review: new
+ui-attachment-show-in-message = Visa i meddelandet
+# review: new
 ui-attachments-strip = Bilagor
 # review: new
 ui-attachment-note-title = Öppna den här filen

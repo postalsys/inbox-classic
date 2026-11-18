@@ -444,6 +444,8 @@ pub async fn agent(d: &Driver) {
     );
     if let Some(ask) = &ask {
         let root: gtk::Widget = ask.clone().upcast();
+        // its form drawn: the dialog is found as it opens, before its rows are on screen
+        wait_until(10, || named_in(&root, "agent-path").is_some()).await;
         d.check(
             label_of(&root, "agent-path").contains("My AI agent"),
             "the question names the program",
@@ -682,6 +684,8 @@ async fn agent_unsubscribes(d: &Driver, out: &std::path::Path) {
         return;
     };
     let root: gtk::Widget = ask.clone().upcast();
+    // its rows drawn: the dialog is found as it opens, before they are on screen
+    wait_until(10, || named_in(&root, "agent-list-0").is_some()).await;
     let heading = ask.heading().unwrap_or_default().to_string();
     let lists: Vec<String> = (0..3).map(|n| label_of(&root, &format!("agent-list-{n}"))).collect();
     let named = |name: &str| -> Vec<String> {
@@ -2787,11 +2791,26 @@ pub async fn large_message(d: &Driver) {
         wait_until(10, || said().starts_with("Downloading")).await,
         &format!("the status bar says how far the rest is ({})", said()),
     );
+    let text = || document_text(&reader.preview.shown());
+    d.check(
+        text().contains("Downloading"),
+        "its PDF file is a tile that says it is on its way",
+    );
     d.shot(&main, "large-1-text-first").await;
     d.check(
         wait_until(30, || said().starts_with("Downloaded")).await,
         &format!("then that it is all here ({})", said()),
     );
+    // the whole source stored: the view built again, the tile no longer on its way
+    d.check(
+        wait_until(15, || {
+            let text = text();
+            text.contains("The figures are attached") && !text.contains("Downloading")
+        })
+        .await,
+        "once all of it is here the tile is replaced, the text still shown",
+    );
+    d.shot(&main, "large-2-all-here").await;
     search("").await;
     select_folder("Inbox");
 }

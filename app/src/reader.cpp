@@ -309,6 +309,7 @@ void Reader::Destroy() {
     KillTimer(parent_, TIMER_MEASURE);
     StopOpening();
     CancelReads();
+    ForgetPrint();
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
         viewRequest_ = 0;
@@ -553,6 +554,8 @@ void Reader::Clear(bool loading) {
     remoteImages_ = false;
     file_.clear();
     view_.reset();
+    documentShown_ = false;
+    ForgetPrint();
     KillTimer(parent_, TIMER_DOWNLOADING);
     ShowRetry(false);
     // the security bar never stays over another message than its own
@@ -571,6 +574,7 @@ void Reader::Clear(bool loading) {
 }
 
 void Reader::ShowPage(const std::wstring& html) {
+    documentShown_ = false;
     preview_.Show(html);
 }
 
@@ -591,6 +595,7 @@ void Reader::Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage
 
 // the pane says the message is being downloaded, and how large it is
 void Reader::ShowDownloading() {
+    documentShown_ = false;
     preview_.ShowState(PE_READER_STATE_DOWNLOADING, PE_FAILURE_KIND_NONE, {}, size_);
 }
 
@@ -675,7 +680,10 @@ void Reader::ShowInfo() {
         parts.emplace_back(part ? part : "");
     }
     bool measured = !parts.empty();
-    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_, std::move(parts), info->preview_token);
+    // the same message's document again (Show in Message, the whole message after its text, its pictures allowed): its
+    // text stays where it was
+    bool again = std::exchange(documentShown_, true);
+    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_, std::move(parts), info->preview_token, again);
     if (measured) {
         SetTimer(parent_, TIMER_MEASURE, 400, nullptr);
     } else {
@@ -996,7 +1004,7 @@ void Reader::StripMenu(POINT screen) {
     if (!attachment) {
         return;
     }
-    enum : UINT { kOpen = 1, kSaveAs, kSaveAll };
+    enum : UINT { kOpen = 1, kSaveAs, kSaveAll, kShowInMessage };
     HMENU menu = CreatePopupMenu();
     // greyed for a file that can run code, which is only saved
     AppendMenuW(menu, MF_STRING | (attachment->can_open ? 0 : MF_GRAYED), kOpen, core::T(PE_TEXT_UI_ATTACHMENT_OPEN).c_str());
@@ -1006,6 +1014,13 @@ void Reader::StripMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, kSaveAs, core::T(PE_TEXT_UI_ATTACHMENT_SAVE_AS).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, kSaveAll, core::T(PE_TEXT_UI_ATTACHMENT_SAVE_ALL).c_str());
+    // a picture or PDF file: drawn in the message or not (checked when it is), greyed for one that can not be
+    PeShowInMessage shown = attachment->show_in_message;
+    if (shown != PE_SHOW_IN_MESSAGE_NONE) {
+        UINT state = (shown == PE_SHOW_IN_MESSAGE_ON ? MF_CHECKED : 0) | (shown == PE_SHOW_IN_MESSAGE_UNAVAILABLE ? MF_GRAYED : 0);
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        AppendMenuW(menu, MF_STRING | state, kShowInMessage, core::T(PE_TEXT_UI_ATTACHMENT_SHOW_IN_MESSAGE).c_str());
+    }
     UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
     DestroyMenu(menu);
     switch (chosen) {
@@ -1018,6 +1033,17 @@ void Reader::StripMenu(POINT screen) {
     case kSaveAll:
         SaveAllAttachments();
         break;
+    case kShowInMessage:
+        ShowInMessage(index, shown != PE_SHOW_IN_MESSAGE_ON);
+        break;
+    }
+}
+
+void Reader::ShowInMessage(size_t index, bool show) {
+    // the view built again with the file drawn or taken out (ShowInfo keeps the text where it was)
+    const PeMessageInfo* info = Info();
+    if (info && pe_preview_show(core_, info->preview_token, index, show)) {
+        StartView();
     }
 }
 
@@ -1178,10 +1204,58 @@ void Reader::ChoosePictures() {
     }
 }
 
+namespace {
+
+// the printouts a reader stopped waiting for (another message shown, the window closed): taken from the core and
+// dropped once they are made
+std::vector<uint64_t> g_droppedPrints;
+
+}  // namespace
+
 void Reader::Print(HWND owner) {
-    if (const PeMessageInfo* info = Info()) {
-        // the message as it is shown, with the pictures the user allowed or the core loaded
-        OpenPrintWindow(owner, preview_.Environment(), info->print_document, PicturesShown(), Text(info->subject));
+    const PeMessageInfo* info = Info();
+    if (!info) {
+        return;
+    }
+    // a message with previews: its pictures put in by the core off the window thread (PrintReady), the busy pointer
+    // meanwhile; another Print while it is made waits for the same printout
+    if (printRequest_) {
+        printOwner_ = owner;
+        return;
+    }
+    if (info->preview_token && *info->preview_token) {
+        if (uint64_t request = pe_print_start(core_, info->preview_token)) {
+            printRequest_ = request;
+            printOwner_ = owner;
+            BusyStart();
+            return;
+        }
+    }
+    // the message as it is shown, with the pictures the user allowed or the core loaded
+    OpenPrintWindow(owner, preview_.Environment(), info->print_document, PicturesShown(), Text(info->subject));
+}
+
+void Reader::PrintReady(uint64_t request) {
+    if (std::erase(g_droppedPrints, request) > 0) {
+        core::String dropped(pe_print_result(core_, request));
+        return;
+    }
+    if (!printRequest_ || request != printRequest_) {
+        return;
+    }
+    printRequest_ = 0;
+    BusyEnd();
+    core::String document(pe_print_result(core_, request));
+    const PeMessageInfo* info = Info();
+    if (document && info && IsWindow(printOwner_)) {
+        OpenPrintWindow(printOwner_, preview_.Environment(), document.get(), PicturesShown(), Text(info->subject));
+    }
+}
+
+void Reader::ForgetPrint() {
+    if (printRequest_) {
+        g_droppedPrints.push_back(std::exchange(printRequest_, 0));
+        BusyEnd();
     }
 }
 
@@ -1444,6 +1518,7 @@ void Reader::OnEvent(const UiEvent& event) {
             KillTimer(parent_, TIMER_DOWNLOADING);
             ShowBars(false, false);
             ShowRetry(true);
+            documentShown_ = false;
             preview_.ShowState(PE_READER_STATE_FAILED, event.failure, core::Narrow(event.message));
         }
         break;
@@ -1455,6 +1530,9 @@ void Reader::OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_READ_DONE:
         OnReadDone(event.uid);
+        break;
+    case PE_EVENT_KIND_PRINT_READY:
+        PrintReady(event.uid);
         break;
     case PE_EVENT_KIND_VIEW_READY:
         // a view for a message that is no longer shown was cancelled, its event is not this one

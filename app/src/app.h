@@ -408,6 +408,9 @@ void OutboxDialog(HWND owner, PeCore* core);
 // preview opens; it closes once the preview does
 // (`environment`: the reading pane's WebView2 environment to start from, or NULL for one of its own)
 void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const char* document, bool remoteImages, const std::wstring& subject);
+// the UI test's look at the newest Print window: the pictures its page has as data: addresses that have loaded, times
+// 10, plus 1 when its page has `text`; -1 without one or before the first answer (each look answers the one before)
+int64_t TestPrint(const std::wstring& text);
 
 // ---- securitybar.cpp ----
 

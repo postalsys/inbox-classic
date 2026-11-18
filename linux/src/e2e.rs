@@ -61,6 +61,8 @@ mod compose_keys;
 
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
+/// Step 8b: the files not drawn, Show in Message and printing
+mod preview_tiles;
 /// Step 8b: pictures and PDF files in the message
 mod previews;
 /// Step 45a: settings and accounts to another computer

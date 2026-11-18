@@ -1342,3 +1342,27 @@ preview-more-pages = { $count ->
     [few] Deschideți fișierul pentru a vedea toate cele { $count } pagini
    *[other] Deschideți fișierul pentru a vedea toate cele { $count } de pagini
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Încă 1 fișier este în lista de mai sus
+    [few] Încă { $count } fișiere sunt în lista de mai sus
+   *[other] Încă { $count } de fișiere sunt în lista de mai sus
+}
+# review: new
+preview-tile-downloading = Se descarcă…
+# review: new
+preview-tile-format = Imaginile { $format } nu sunt încă afișate
+# review: new
+preview-tile-password = Protejat cu parolă: deschideți-l pentru a introduce parola
+# review: new
+preview-tile-too-large = Prea mare pentru a fi afișat
+# review: new
+preview-tile-unreadable = Nu poate fi afișat
+# review: new
+preview-tile-timed-out = Afișarea a durat prea mult
+# review: new
+preview-tile-crashed = Nu este afișat: a închis o dată Inbox Classic
+# review: new
+preview-tile-off = Nu este afișat până la repornirea Inbox Classic
+# review: new
+preview-not-printed = { $name } ({ $details }) nu se tipărește. Deschideți-l pentru a-l tipări.

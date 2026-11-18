@@ -21,7 +21,12 @@ struct PrintState {
     ComPtr<ICoreWebView2Environment> environment;
     ComPtr<ICoreWebView2Controller> controller;
     ComPtr<ICoreWebView2> view;
+    // the UI test's last look at its pictures (TestPrint), -1 before one
+    int64_t pictures = -1;
 };
+
+// the newest Print window's, for the UI test (TestPrint)
+PrintState* g_newest = nullptr;
 
 void Configure(HWND hwnd, PrintState* state) {
     // the page's own script and its one message; no context menu
@@ -83,6 +88,9 @@ LRESULT CALLBACK PrintProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
         }
         return 0;
     case WM_NCDESTROY:
+        if (g_newest == state) {
+            g_newest = nullptr;
+        }
         delete state;
         SetWindowLongPtrW(hwnd, GWLP_USERDATA, 0);
         break;
@@ -121,6 +129,7 @@ void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const ch
     }
     auto* state = new PrintState{Text(page.get()), remoteImages};
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
+    g_newest = state;
     ShowWindow(hwnd, SW_SHOW);
     auto ready = [hwnd, state](ICoreWebView2Environment* created, ICoreWebView2Controller* controller) {
         state->environment = created;
@@ -138,4 +147,27 @@ void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const ch
     } else {
         webview::Create(hwnd, ready, failed);
     }
+}
+
+int64_t TestPrint(const std::wstring& text) {
+    PrintState* state = g_newest;
+    if (!state) {
+        return -1;
+    }
+    int64_t pictures = state->pictures;
+    // the pictures of the page put in by the core (data: addresses) that have loaded, told by the next look
+    if (state->view) {
+        state->view->ExecuteScript(L"[...document.images].filter(i=>i.src.startsWith('data:image/')&&i.complete&&i.naturalWidth>0).length",
+                                   Callback<ICoreWebView2ExecuteScriptCompletedHandler>([](HRESULT result, LPCWSTR json) {
+                                       if (g_newest) {
+                                           g_newest->pictures = SUCCEEDED(result) && json ? _wtoi64(json) : -1;
+                                       }
+                                       return S_OK;
+                                   }).Get());
+    }
+    if (pictures < 0) {
+        return -1;
+    }
+    bool found = !text.empty() && state->page.find(text) != std::wstring::npos;
+    return pictures * 10 + (found ? 1 : 0);
 }

@@ -417,6 +417,8 @@ ui-save-attachments = Αποθήκευση συνημμένων
 ui-attachment-open = Άνοιγμα
 ui-attachment-save-as = Αποθήκευση ως...
 ui-attachment-save-all = Αποθήκευση όλων...
+# review: new
+ui-attachment-show-in-message = Εμφάνιση στο μήνυμα
 ui-attachments-strip = Συνημμένα
 ui-attachment-note-title = Άνοιγμα αυτού του αρχείου
 ui-attachment-program-tip = Το Άνοιγμα είναι ανενεργό για αυτό το είδος αρχείου: μπορεί να εκτελέσει προγράμματα. Αποθηκεύστε το για να το ανοίξετε μόνοι σας.

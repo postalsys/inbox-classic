@@ -853,3 +853,26 @@ preview-more-pages = { $count ->
     [one] Nyissa meg az oldal megtekintéséhez
    *[other] Nyissa meg mind a(z) { $count } oldal megtekintéséhez
 }
+# review: new
+preview-more-files = { $count ->
+    [one] További 1 fájl a fenti listában van
+   *[other] További { $count } fájl a fenti listában van
+}
+# review: new
+preview-tile-downloading = Letöltés…
+# review: new
+preview-tile-format = A(z) { $format } képek még nem jelennek meg
+# review: new
+preview-tile-password = Jelszóval védett: nyissa meg a jelszó megadásához
+# review: new
+preview-tile-too-large = Túl nagy a megjelenítéshez
+# review: new
+preview-tile-unreadable = Nem jeleníthető meg
+# review: new
+preview-tile-timed-out = A megjelenítés túl sokáig tartott
+# review: new
+preview-tile-crashed = Nem jelenik meg: egyszer bezárta az Inbox Classicot
+# review: new
+preview-tile-off = Nem jelenik meg, amíg az Inbox Classic újra nem indul
+# review: new
+preview-not-printed = A(z) { $name } ({ $details }) nem kerül nyomtatásra. A nyomtatáshoz nyissa meg.

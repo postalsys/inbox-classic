@@ -420,6 +420,8 @@ ui-save-attachments = Save Attachments
 ui-attachment-open = Open
 ui-attachment-save-as = Save As...
 ui-attachment-save-all = Save All...
+# the strip's menu: a checked item for a picture or PDF file, drawn in the message (checked) or not
+ui-attachment-show-in-message = Show in Message
 ui-attachments-strip = Attachments
 ui-attachment-note-title = Opening this file
 ui-attachment-program-tip = Open is off for this kind of file: it can run programs. Save it to open it yourself.

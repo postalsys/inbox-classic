@@ -869,3 +869,26 @@ preview-more-pages = { $count ->
     [one] Obriu-lo per veure la pàgina
    *[other] Obriu-lo per veure les { $count } pàgines
 }
+# review: new
+preview-more-files = { $count ->
+    [one] 1 fitxer més és a la llista de dalt
+   *[other] { $count } fitxers més són a la llista de dalt
+}
+# review: new
+preview-tile-downloading = S’està baixant…
+# review: new
+preview-tile-format = Les imatges { $format } encara no es mostren
+# review: new
+preview-tile-password = Protegit amb contrasenya: obre'l per introduir-la
+# review: new
+preview-tile-too-large = Massa gran per mostrar-lo
+# review: new
+preview-tile-unreadable = No es pot mostrar
+# review: new
+preview-tile-timed-out = Ha trigat massa a mostrar-se
+# review: new
+preview-tile-crashed = No es mostra: va tancar l’Inbox Classic una vegada
+# review: new
+preview-tile-off = No es mostra fins que l’Inbox Classic es torni a iniciar
+# review: new
+preview-not-printed = { $name } ({ $details }) no s’imprimeix. Obriu-lo per imprimir-lo.

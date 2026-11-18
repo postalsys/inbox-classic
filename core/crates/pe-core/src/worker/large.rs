@@ -32,7 +32,7 @@ impl Partials {
         self.lock().get(&(folder, uid)).cloned()
     }
 
-    fn insert(&self, folder: FolderId, uid: u64, first: pe_sync::TextFirst) {
+    pub(crate) fn insert(&self, folder: FolderId, uid: u64, first: pe_sync::TextFirst) {
         self.lock().insert((folder, uid), Arc::new(first));
     }
 
@@ -43,19 +43,17 @@ impl Partials {
 
 impl Worker {
     /// Downloads a large message: its text first, shown at once ([`Event::MessageReady`]), then its whole source, how
-    /// far it is told as it comes (that it is all here, once it is stored, by the reader). The source, and whether the
-    /// window heard of it already.
+    /// far it is told as it comes (that it is all here, once it is stored, by the reader, and the window told again)
     pub(super) async fn download_large(
         &mut self,
         store: &mut Store,
         folder: FolderId,
         uid: u64,
         size: u64,
-    ) -> Result<(Vec<u8>, bool), Failure> {
+    ) -> Result<Vec<u8>, Failure> {
         let client = self.client(store).await?;
         // a structure the text can not be had from first: the whole message as it comes
         let first = pe_sync::fetch_text_first(client, store, folder, uid).await?;
-        let shown = first.is_some();
         if let Some(first) = first {
             self.ctx.partials.insert(folder, uid, first);
             self.emit(Event::MessageReady { folder, uid });
@@ -63,7 +61,7 @@ impl Worker {
         let source = self.download_told(store, folder, uid, size).await;
         // gone whatever happened: the whole source, or a failure the pane shows in its place
         self.ctx.partials.remove(folder, uid);
-        Ok((source?, shown))
+        source
     }
 
     /// The whole source in one FETCH, how far it is told every [`TOLD_EVERY`] for the status bar

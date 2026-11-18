@@ -5,6 +5,7 @@
 // context menu.
 import AppKit
 import CInboxClassic
+import PDFKit
 import WebKit
 
 extension UITest {
@@ -320,6 +321,204 @@ extension UITest {
         await removeFixture(manyUid)
         await removeFixture(manualUid)
         await removeFixture(photoUid)
+    }
+
+    /// The tiles of a document's previews: each one's type, name, size, why, width, height and file
+    struct TileShown {
+        var label = "", name = "", details = "", reason = "", href = ""
+        var width = 0.0, height = 0.0
+    }
+
+    func tilesShown(_ web: WKWebView?) async -> [TileShown] {
+        let script = "JSON.stringify([...document.querySelectorAll('section[class^=pe-att] a.t')].map(a=>{"
+            + "const t=c=>(a.querySelector(c)||{}).textContent||'';const r=a.getBoundingClientRect();"
+            + "return [t('.i'),t('.n'),t('.d'),t('.r'),a.getAttribute('href')||'',r.width,r.height]}))"
+        guard let web, let answer = try? await web.evaluateJavaScript(script) as? String,
+              let rows = try? JSONSerialization.jsonObject(with: Data(answer.utf8)) as? [[Any]] else { return [] }
+        return rows.filter { $0.count == 7 }.map { row in
+            TileShown(label: row[0] as? String ?? "", name: row[1] as? String ?? "", details: row[2] as? String ?? "",
+                      reason: row[3] as? String ?? "", href: row[4] as? String ?? "",
+                      width: (row[5] as? NSNumber)?.doubleValue ?? 0, height: (row[6] as? NSNumber)?.doubleValue ?? 0)
+        }
+    }
+
+    /// the strip menu's Show in Message of file `index` of the message shown, nil when the menu has none
+    func showInMessageItem(_ index: Int) -> NSMenuItem? {
+        main.mailbox.reader.fileMenu(index).items.first { $0.identifier?.rawValue == "attachment.showInMessage" }
+    }
+
+    /// Show in Message of file `index` chosen, as the menu chooses it
+    func chooseShowInMessage(_ index: Int) {
+        let menu = main.mailbox.reader.fileMenu(index)
+        guard let at = menu.items.firstIndex(where: { $0.identifier?.rawValue == "attachment.showInMessage" }) else { return }
+        onMain { menu.performActionForItem(at: at) }
+    }
+
+    /// how far the reading pane is scrolled, and where the first picture's top is in the view
+    func scrolled(_ web: WKWebView?) async -> (y: Int, photo: Int) {
+        let answer = (try? await web?.evaluateJavaScript("JSON.stringify([Math.round(scrollY),"
+            + "Math.round((document.querySelector('section[class^=pe-att] img')||document.body).getBoundingClientRect().top)])"))
+            as? String ?? ""
+        let numbers = (try? JSONSerialization.jsonObject(with: Data(answer.utf8)) as? [Int]) ?? []
+        return numbers.count == 2 ? (numbers[0], numbers[1]) : (-1, -1)
+    }
+
+    /// 8b: the files the core does not draw as tiles, Show in Message from the strip menu, and Print with the pictures
+    func previewTilesAndPrint() async throws {
+        step("tiles, Show in Message and printing a message with previews")
+        await search("")
+        let reader = main.mailbox.reader
+        let core = main.core
+        var opened: [URL] = []
+        TestHooks.openFile = { opened.append($0) }
+        defer { TestHooks.openFile = nil }
+
+        // the HEIC picture and the PDF file with a password: tiles of the same size that say why, the photo drawn
+        let tilesUid = try await addPreviewFixture("tiles.eml")
+        try await showInbox(tilesUid)
+        guard let web = readerWeb else { throw Failed(description: "no reading pane") }
+        _ = await waitUntil(15) { (await readerText()).contains("boat trip") }
+        let photo = await previewsLoaded(web, 1)
+        check(photo.loaded && photo.captions.first?.hasPrefix("shore.jpg") == true,
+              "the photo from the shore is drawn (\(photo.captions))")
+        let tiles = await tilesShown(web)
+        say("   tiles: \(tiles.map { "\($0.label) \($0.name) \($0.details) \($0.reason) \(Int($0.width))x\(Int($0.height))" })")
+        check(tiles.map(\.name) == ["boat.heic", "booking-4471.pdf"] && tiles.map(\.label) == ["HEIC", "PDF"],
+              "the HEIC picture and the booking are tiles with their type (\(tiles.map(\.name)))")
+        check(tiles.count == 2 && tiles.allSatisfy { !$0.reason.isEmpty && !$0.details.isEmpty }
+              && tiles[0].reason != tiles[1].reason,
+              "each says its size and why it is not shown (\(tiles.map(\.reason)))")
+        check(tiles.count == 2 && tiles[0].height == tiles[1].height && tiles[0].width == tiles[1].width
+              && tiles[0].height >= 60 && tiles[0].width <= web.bounds.width,
+              "the two tiles are the same size, whatever they say")
+        check(showInMessageItem(0).map { !$0.isEnabled && $0.state == .off } == true,
+              "on the HEIC picture Show in Message is greyed")
+        check(showInMessageItem(1).map { $0.isEnabled && $0.state == .on } == true, "on the photo it is checked")
+        check(showInMessageItem(2).map { !$0.isEnabled } == true, "on the booking with a password it is greyed")
+        await inPage(web, "document.querySelector('section[class^=pe-att] a.t').scrollIntoView({block:'center'})")
+        await pause(0.3)
+        await shot(main.window, "read-32-previews-tiles")
+        await inPage(web, "window.scrollTo(0,document.documentElement.scrollHeight)")
+        await pause(0.3)
+        await shot(main.window, "read-32a-previews-tiles-end")
+
+        // Option-Tab to the HEIC tile, Enter opens the file
+        main.window.makeFirstResponder(web)
+        await inPage(web, "window.scrollTo(0,0)")
+        var reached: [String] = []
+        for _ in 0..<4 {
+            NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [.option], timestamp: 0,
+                             windowNumber: main.window.windowNumber, context: nil, characters: "\t",
+                             charactersIgnoringModifiers: "\t", isARepeat: false, keyCode: 48).map(main.window.sendEvent)
+            await pause(0.3)
+            let href = (try? await web.evaluateJavaScript("document.activeElement.getAttribute('href')||''")) as? String ?? ""
+            reached.append(String(href.suffix(2)))
+            if href.hasSuffix("-0") { break }
+        }
+        check(reached.last == "-0", "Option-Tab reaches the HEIC tile (\(reached))")
+        onMain { self.pressKey(self.main.window, 36, "\r") }
+        check(await waitUntil(10) { opened.count == 1 } && opened.last?.lastPathComponent == "boat.heic"
+              && opened.last.flatMap { try? Data(contentsOf: $0) } == fixtureFile("tiles.eml", "boat.heic"),
+              "Enter on the tile opens the HEIC picture as it was sent (\(opened.last?.lastPathComponent ?? "none"))")
+        main.window.makeFirstResponder(list)
+
+        // Show in Message on the invoice: it goes, the text stays where it was; chosen again it is back
+        let photoUid = try await addPreviewFixture("photo-and-pdf.eml")
+        try await showInbox(photoUid)
+        let all = await previewsLoaded(web, 4)
+        check(all.loaded, "the photo and the invoice's pages show")
+        check(showInMessageItem(1).map { $0.isEnabled && $0.state == .on && $0.title == Text.uiAttachmentShowInMessage.text } == true,
+              "the invoice's menu has \"\(Text.uiAttachmentShowInMessage.text)\", checked")
+        await menuShot(reader.strip, "read-32b-previews-menu", file: 1)
+        let into = max(1, (all.captionTops.first ?? 120) / 2)
+        await inPage(web, "window.scrollTo(0,\(into))")
+        await pause(0.3)
+        let before = await scrolled(web)
+        check(before.y > 0, "the message is scrolled a little (\(before.y))")
+        chooseShowInMessage(1)
+        let without = await previewsLoaded(web, 1)
+        check(without.loaded && without.captions.count == 1 && without.captions[0].hasPrefix("lake.jpg"),
+              "choosing it takes the invoice out of the message (\(without.captions))")
+        check(reader.strip.files.count == 2, "the strip still lists it")
+        _ = await waitUntil(5) { await self.scrolled(web).y == before.y }
+        let after = await scrolled(web)
+        check(after == before, "the text stays where it was scrolled to (\(before) then \(after))")
+        check(showInMessageItem(1).map { $0.isEnabled && $0.state == .off } == true, "the item is now unticked")
+        await shot(main.window, "read-32c-previews-taken-out")
+        chooseShowInMessage(1)
+        let back = await previewsLoaded(web, 4)
+        _ = await waitUntil(5) { await self.scrolled(web).y == before.y }
+        check(back.loaded && back.captions.count == 2, "chosen again, the invoice is back (\(back.captions))")
+        check(await scrolled(web) == before, "and the text has not moved")
+
+        // the previews off: Show in Message draws the invoice alone. The choice lasts while a window shows the message:
+        // another message shown in between forgets it
+        try await showInbox(tilesUid)
+        try await showInbox(photoUid)
+        _ = await previewsLoaded(web, 4)
+        onMain {
+            core.showPreviews = false
+            reader.reload()
+        }
+        check(await waitUntil(15) {
+            let now = await self.previewsShown(web)
+            return now.pictures.isEmpty && now.captions.isEmpty
+        }, "with \"\(Text.uiPreviewShow.text)\" off the message shows no previews")
+        check(showInMessageItem(1).map { $0.isEnabled && $0.state == .off } == true, "Show in Message is offered, unticked")
+        chooseShowInMessage(1)
+        let alone = await previewsLoaded(web, 3)
+        check(alone.loaded && alone.captions.count == 1 && alone.captions[0].hasPrefix("invoice-2026-118.pdf"),
+              "choosing it draws the invoice alone (\(alone.captions))")
+        onMain {
+            core.showPreviews = true
+            reader.reload()
+        }
+        check((await previewsLoaded(web, 4)).loaded, "the setting on again: both are back")
+
+        // Print: the photo on the paper, a line for the invoice
+        let pdf = out.appendingPathComponent("previews-print.pdf")
+        try? FileManager.default.removeItem(at: pdf)
+        var printed = false
+        var document = ""
+        TestHooks.printTo = pdf
+        TestHooks.printed = { printed = $0 }
+        TestHooks.printDocument = { document = $0 }
+        reader.print()
+        _ = await waitUntil(40) { printed }
+        TestHooks.printTo = nil
+        TestHooks.printed = nil
+        TestHooks.printDocument = nil
+        check(printed, "Print makes the printout")
+        check(document.contains("src=\"data:image/") && !document.contains("/pv/"),
+              "the print document has the photo as the core's own picture, nothing from the preview path")
+        let paper = PDFDocument(url: pdf)
+        let words = (paper?.string ?? "").replacingOccurrences(of: "\n", with: " ")
+        say("   printed: \(words.prefix(300))")
+        check(words.contains("photo from the lake") && words.contains("invoice-2026-118.pdf")
+              && words.contains("not printed"),
+              "the paper has the text and a line naming the invoice, which is not printed")
+        // the photo's sky on the first page
+        var sky = 0
+        if let page = paper?.page(at: 0) {
+            let picture = page.thumbnail(of: NSSize(width: 600, height: 850), for: .mediaBox)
+            if let tiff = picture.tiffRepresentation, let bitmap = NSBitmapImageRep(data: tiff) {
+                for y in stride(from: 0, to: bitmap.pixelsHigh, by: 6) {
+                    for x in stride(from: 0, to: bitmap.pixelsWide, by: 6) {
+                        if let c = bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB),
+                           c.blueComponent > c.redComponent + 0.2 && c.blueComponent > 0.4 {
+                            sky += 1
+                        }
+                    }
+                }
+                if let png = bitmap.representation(using: .png, properties: [:]) {
+                    try? png.write(to: out.appendingPathComponent("read-33-previews-print.png"))
+                }
+            }
+        }
+        check(sky > 50, "the photo is on the paper (\(sky) points of its sky)")
+
+        await removeFixture(photoUid)
+        await removeFixture(tilesUid)
     }
 
     /// a message with `count` small pictures (PNGs of a colour each), one with a long name

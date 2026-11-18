@@ -418,6 +418,8 @@ ui-save-attachments = Lagre vedlegg
 ui-attachment-open = Åpne
 ui-attachment-save-as = Lagre som...
 ui-attachment-save-all = Lagre alle...
+# review: new
+ui-attachment-show-in-message = Vis i meldingen
 ui-attachments-strip = Vedlegg
 ui-attachment-note-title = Åpne denne filen
 ui-attachment-program-tip = Åpne er deaktivert for denne filtypen fordi filen kan kjøre kode. Du kan lagre filen og åpne den selv.

@@ -1,6 +1,7 @@
 """Writes the messages of the UI test's previews step (scripts/ui-e2e/SCENARIO.md, "Pictures and PDF files in the
-message"): a photo and a three-page invoice, and a twelve-page manual. Everything is drawn here, nothing is anyone's
-real file, and the output is the same on every run.
+message" and "Tiles, Show in Message and printing"): a photo and a three-page invoice, a twelve-page manual, and a
+photo with a HEIC picture and a booking PDF that wants a password (shown as tiles). Everything is drawn here, nothing
+is anyone's real file, and the output is the same on every run.
 
     python3 -m venv venv && venv/bin/pip install reportlab pillow
     venv/bin/python -I generate.py .
@@ -14,6 +15,7 @@ import sys
 from PIL import Image, ImageDraw
 from reportlab import rl_config
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.pdfencrypt import StandardEncryption
 from reportlab.pdfgen import canvas
 
 rl_config.invariant = 1
@@ -47,9 +49,11 @@ def photo():
     return buffer.getvalue()
 
 
-def pdf(title, pages, draw_page):
+def pdf(title, pages, draw_page, password=None):
     buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
+    # a password to open it: the reading pane shows a tile in its place
+    encrypt = StandardEncryption(password, ownerPassword=password) if password else None
+    c = canvas.Canvas(buffer, pagesize=A4, encrypt=encrypt)
     c.setTitle(title)
     c.setAuthor("Inbox Classic UI test")
     for page in range(pages):
@@ -92,6 +96,22 @@ def invoice_page(c, page, pages):
             c.drawString(50, h - 260 - i * 18, f"{page + 1}.{i + 1}  The lodge keeps the room for you until noon on the day of departure.")
     c.setFont("Helvetica", 9)
     c.drawString(50, 40, f"Page {page + 1} of {pages}")
+
+
+def booking_page(c, page, pages):
+    w, h = A4
+    c.setFont("Helvetica-Bold", 20)
+    c.drawString(50, h - 70, "Booking 4471")
+    c.setFont("Helvetica", 11)
+    c.drawString(50, h - 110, "Lakeside Lodge, 3 nights from 12 November 2026.")
+
+
+def heic():
+    """The start of a HEIC picture: its file type box naming the brands, then an empty media box. Nothing draws it;
+    the reading pane tells the format by this header and shows a tile"""
+    ftyp = b"ftyp" + b"heic" + (0).to_bytes(4, "big") + b"mif1heic"
+    box = len(ftyp) + 4
+    return box.to_bytes(4, "big") + ftyp + (8 + 64).to_bytes(4, "big") + b"mdat" + bytes(64)
 
 
 def manual_page(c, page, pages):
@@ -139,4 +159,12 @@ write("long-pdf.eml", message(
     "previews-2",
     "The manual you asked for is attached.\r\n\r\nMaria",
     [("kettle-manual.pdf", "application/pdf", pdf("Kettle K-200 manual", 12, manual_page))],
+))
+write("tiles.eml", message(
+    "The boat trip, and the booking",
+    "previews-4",
+    "Hi,\r\n\r\nthe boat trip from my phone, a photo from the shore, and the booking (the password is in my other "
+    "message).\r\n\r\nMaria",
+    [("boat.heic", "image/heic", heic()), ("shore.jpg", "image/jpeg", photo()),
+     ("booking-4471.pdf", "application/pdf", pdf("Booking 4471", 1, booking_page, password="lodge"))],
 ))

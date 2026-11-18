@@ -852,3 +852,26 @@ preview-more-pages = { $count ->
     [one] Open het bestand om de pagina te zien
    *[other] Open het bestand om alle { $count } pagina’s te zien
 }
+# review: new
+preview-more-files = { $count ->
+    [one] Nog 1 bestand staat in de lijst hierboven
+   *[other] Nog { $count } bestanden staan in de lijst hierboven
+}
+# review: new
+preview-tile-downloading = Downloaden…
+# review: new
+preview-tile-format = { $format }-afbeeldingen worden nog niet getoond
+# review: new
+preview-tile-password = Beveiligd met een wachtwoord: open het om het wachtwoord in te voeren
+# review: new
+preview-tile-too-large = Te groot om te tonen
+# review: new
+preview-tile-unreadable = Kan niet worden getoond
+# review: new
+preview-tile-timed-out = Tonen duurde te lang
+# review: new
+preview-tile-crashed = Niet getoond: dit bestand heeft Inbox Classic een keer afgesloten
+# review: new
+preview-tile-off = Niet getoond tot Inbox Classic opnieuw start
+# review: new
+preview-not-printed = { $name } ({ $details }) wordt niet afgedrukt. Open het om het af te drukken.

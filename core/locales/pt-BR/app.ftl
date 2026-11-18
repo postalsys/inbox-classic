@@ -418,6 +418,8 @@ ui-save-attachments = Salvar anexos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Salvar como...
 ui-attachment-save-all = Salvar todos...
+# review: new
+ui-attachment-show-in-message = Mostrar na mensagem
 ui-attachments-strip = Anexos
 ui-attachment-note-title = Abrindo este arquivo
 ui-attachment-program-tip = Abrir está desativado para este tipo de arquivo: ele pode executar programas. Salve-o para abri-lo você mesmo.

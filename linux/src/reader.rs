@@ -88,6 +88,9 @@ pub struct Reader {
     /// Without a logo, the sender's picture from the Address Book being drawn; 0 for none
     picture_request: Cell<u64>,
     unsubscribe_request: Cell<u64>,
+    /// The printout of a message with previews being made, and the window it prints over; 0 for none
+    print_request: Cell<u64>,
+    print_window: RefCell<Option<gtk::Window>>,
 }
 
 /// The pane says the message is being downloaded, and how large it is (0: not known), without Try Again
@@ -272,6 +275,8 @@ impl Reader {
             logo_request: Cell::new(0),
             picture_request: Cell::new(0),
             unsubscribe_request: Cell::new(0),
+            print_request: Cell::new(0),
+            print_window: RefCell::default(),
         };
         let reader = Rc::new(reader);
         reader.clear(false);
@@ -396,6 +401,12 @@ impl Reader {
         group.add_action(&all);
         group.add_action(&open);
         group.add_action(&refused);
+        let this = Rc::downgrade(self);
+        self.strip.connect_show_in_message(move |index, state| {
+            if let Some(this) = this.upgrade() {
+                this.show_in_message(index, state);
+            }
+        });
         let this = Rc::downgrade(self);
         self.strip.connect_open(move |index| {
             if let Some(this) = this.upgrade() {
@@ -599,6 +610,10 @@ impl Reader {
                 self.show_logo(shell().core.logo_result(*request), LOGO_SIZE);
                 None
             }
+            Event::PrintReady { request } if self.print_request.get() != 0 && *request == self.print_request.get() => {
+                self.print_ready(*request);
+                None
+            }
             Event::PictureReady { request }
                 if self.picture_request.get() != 0 && *request == self.picture_request.get() =>
             {
@@ -727,10 +742,19 @@ impl Reader {
 
     /// The message as it is shown, with the pictures the user allowed, through the print dialog over `window`. A
     /// signed or encrypted message prints the core's document of it (a printer prints no frames): every part's text,
-    /// with the bar's words and the parts' labels in its header; a message with previews prints the core's document
-    /// without them
+    /// with the bar's words and the parts' labels in its header. A message with pictures or PDF files prints the
+    /// document the core makes on a worker ([`Event::PrintReady`]): its pictures in it, a line for each other file;
+    /// the window shows it is busy meanwhile (the core waits for the pictures 30 seconds at most)
     pub fn print(&self, window: &impl IsA<gtk::Window>) {
-        if !self.shows_message() || !self.has_view() {
+        if !self.shows_message() || !self.has_view() || self.print_request.get() != 0 {
+            return;
+        }
+        let token = self.view.borrow().as_ref().and_then(|v| v.preview_token.clone());
+        if let Some(request) = token.and_then(|token| shell().core.print_start(&token)) {
+            let window = window.as_ref().clone();
+            window.set_cursor_from_name(Some("progress"));
+            self.print_request.set(request);
+            self.print_window.replace(Some(window));
             return;
         }
         let printed = self.view.borrow().as_ref().and_then(|v| v.print_document.clone());
@@ -738,8 +762,41 @@ impl Reader {
             print_dialog(&self.preview.view, window.as_ref());
             return;
         };
-        let pictures = self.remote_images.get() || self.view.borrow().as_ref().is_some_and(|v| v.pictures_loaded);
-        print_document(&document, pictures, window.as_ref().clone());
+        print_document(&document, self.pictures_shown(), window.as_ref().clone());
+    }
+
+    /// Whether the message's pictures from the internet are shown: asked for, or by themselves
+    fn pictures_shown(&self) -> bool {
+        self.remote_images.get() || self.view.borrow().as_ref().is_some_and(|v| v.pictures_loaded)
+    }
+
+    /// The printout of the message with its previews made: printed over the window it was asked in
+    fn print_ready(&self, request: u64) {
+        self.print_request.set(0);
+        let Some(window) = self.print_window.take() else { return };
+        window.set_cursor(None);
+        if let Some(document) = shell().core.print_result(request) {
+            print_document(&document, self.pictures_shown(), window);
+        }
+    }
+
+    /// The printout being made no longer wanted (another message, or none): the window not busy
+    fn stop_printing(&self) {
+        self.print_request.set(0);
+        if let Some(window) = self.print_window.take() {
+            window.set_cursor(None);
+        }
+    }
+
+    /// Show in Message chosen for file `index`, whose item said `state`: drawn in the message, or taken out of it; the
+    /// message shown again where it was
+    fn show_in_message(&self, index: usize, state: pe_core::previews::ShowInMessage) {
+        let token = self.view.borrow().as_ref().and_then(|v| v.preview_token.clone());
+        let Some(token) = token else { return };
+        let show = state != pe_core::previews::ShowInMessage::On;
+        if shell().core.preview_show(&token, index, show) {
+            self.view_again();
+        }
     }
 
     /// Emptied; saying there is no message selected unless one is `loading`. The bars of the message before stay
@@ -756,6 +813,7 @@ impl Reader {
         self.view.borrow_mut().take();
         self.logo_request.set(0);
         self.picture_request.set(0);
+        self.stop_printing();
         // what was looked for is not in the next message
         self.find_bar.set_search_mode(false);
         self.summary.borrow_mut().take();
@@ -883,8 +941,16 @@ impl Reader {
         self.to.set_text(&to);
         self.unsubscribe.set_visible(view.unsubscribe.is_some());
         self.show_attachments(view);
-        // shown when asked for, or by themselves (a trusted sender, or every message's)
-        self.preview.show_parts(
+        // the same message again (Show in Message, its whole source after its text, its pictures): where it was
+        let again = self.view.borrow().is_some();
+        let show = if again {
+            DocumentView::show_in_place
+        } else {
+            DocumentView::show_parts
+        };
+        // pictures from the internet shown when asked for, or by themselves (a trusted sender, or every message's)
+        show(
+            &self.preview,
             &view.document,
             &view.part_documents,
             view.preview_token.as_deref(),
