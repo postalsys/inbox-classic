@@ -400,10 +400,8 @@ day-sunday = vasárnap
 
 ## AI agents
 
-# review: changed
-agent-level-read = Levelek olvasása: mappák, az üzenetlista, a keresés és az üzenetek
-# review: changed
-agent-level-organize = Levelek kezelése: olvasottnak vagy olvasatlannak jelölés, jelölők és színeik, valamint levélszemét-jelölések módosítása, áthelyezés, archiválás, mappák létrehozása és átnevezése, beszélgetések figyelése és mellőzése, törlés a Törölt elemek mappába való áthelyezéssel, valamint leiratkozás levelezőlistákról külön jóváhagyással
+agent-level-read = Levelek olvasása: mappák, üzenetlisták és beszélgetések megtekintése, üzenetek és mellékleteik olvasása, keresés, üzenetszabályok megtekintése, névjegyek és levelezőpartnerek keresése
+agent-level-organize = Levelek kezelése: olvasottnak vagy olvasatlannak jelölés, jelölők és színeik módosítása, levélszemét-jelölés, áthelyezés, archiválás, mappák létrehozása, egyéni mappák átnevezése, beszélgetések figyelése és figyelmen kívül hagyása, törlés a Törölt elemek mappába való áthelyezéssel, valamint leiratkozás levelezőlistákról külön jóváhagyással
 agent-level-drafts = Piszkozatok írása, amelyeket később elküldhet
 agent-level-send = Levélküldés, minden üzenet külön jóváhagyásával
 agent-connect-title = { $program } hozzá szeretne férni a leveleihez
@@ -447,10 +445,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Ez az üzenet nem olvasható.
 agent-encrypted-original = Ez az üzenet titkosított: az ügynök nem válaszolhat rá és nem továbbíthatja, mert nem tud titkosítani.
 agent-encrypted = Ez az üzenet titkosított. Csak a felhasználó olvashatja el, az Inbox Classicban.
-# review: new
-agent-too-many-changes = Túl sok módosítás az elmúlt 30 napban: ez az ügynök annyit végzett, amennyit az Inbox Classic egy programnak a naplóban megőriz. Akkor végezhet többet, amikor a legrégebbiek 30 naposak lesznek.
-# review: new
-agent-too-many-reads = Túl sok olvasás az elmúlt 30 napban: ez az ügynök annyit olvasott, amennyit az Inbox Classic egy programnak a naplóban megőriz. Akkor olvashat többet, amikor a legrégebbi olvasások 30 naposak lesznek.
+agent-too-many-changes = Túl sok módosítás az elmúlt 30 napban. Az ügynök elérte az egy programhoz megőrizhető naplóbejegyzések számát. Újabb módosításokat akkor végezhet, ha a legrégebbi bejegyzések 30 naposnál régebbiek lesznek.
+agent-too-many-reads = Túl sok olvasási művelet az elmúlt 30 napban. Az ügynök elérte az egy programhoz megőrizhető olvasási naplóbejegyzések számát. Újabb adatokat akkor olvashat, ha a legrégebbi bejegyzések 30 naposnál régebbiek lesznek.
 list-encrypted = Titkosított üzenet
 agent-log-composed = Új üzenetként megnyitva további szerkesztéshez: „{ $subject }”
 agent-log-refused = Küldés elutasítva: „{ $subject }”
@@ -468,7 +464,7 @@ agent-log-moved = Áthelyezve: „{ $subject }”. Cél: { $folder }
 agent-log-junk = Levélszemétként megjelölve: „{ $subject }”
 agent-log-not-junk = Nem levélszemétként megjelölve: „{ $subject }”
 agent-log-archived = Archiválva: „{ $subject }”
-agent-log-folder = Mappa létrehozva: „{ $name }”
+agent-log-folder = Mappa létrehozása kérve: „{ $name }”
 agent-log-unsubscribed = Jóváhagyta a leiratkozási kérelmet. Üzenet: „{ $subject }”
 agent-log-unsubscribe-failed = Sikertelen leiratkozás. Üzenet: „{ $subject }”. Ok: { $reason }
 agent-log-unsubscribe-refused = Nem hagyta jóvá a leiratkozási kérelmet. Feladók: { $senders }
@@ -480,7 +476,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Az Inbox Classic leiratkozási kérelmet küld az alábbi levelezőlistának az általa kínált egykattintásos módon. Mást nem küld, és a meglévő üzeneteket nem módosítja és nem helyezi át.
    *[other] Az Inbox Classic leiratkozási kérelmet küld az alábbi levelezőlisták mindegyikének, az egyes listák által kínált egykattintásos módon. Mást nem küld, és a meglévő üzeneteket nem módosítja és nem helyezi át.
 }
-# review: new
 agent-log-flag-color = { $color ->
     [red] Piros
     [orange] Narancssárga
@@ -490,80 +485,57 @@ agent-log-flag-color = { $color ->
     [purple] Lila
    *[gray] Szürke
     } jelölővel ellátva: „{ $subject }”
-# review: new
-agent-log-renamed = Mappa átnevezve: „{ $old }”, új név: „{ $name }”
-# review: new
+agent-log-renamed = Mappa átnevezése kérve: „{ $old }”. Új név: „{ $name }”
 agent-log-watched = Beszélgetés figyelése bekapcsolva: „{ $subject }”
-# review: new
 agent-log-ignored = Beszélgetés figyelmen kívül hagyva: „{ $subject }”
-# review: new
 agent-log-unmarked = Beszélgetés figyelése vagy figyelmen kívül hagyása kikapcsolva: „{ $subject }”
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] 1 üzenetet olvasott el
    *[other] { $count } üzenetet olvasott el
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] 1 mellékletet nyitott meg
-   *[other] { $count } mellékletet nyitott meg
+    [one] 1 melléklet tartalmát kérte le
+   *[other] { $count } melléklet tartalmát kérte le
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] egyszer keresett
    *[other] { $count } alkalommal keresett
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] egyszer nézett meg üzenetlistát
    *[other] { $count } alkalommal nézett meg üzenetlistát
 }
 # each read under that row
-# review: new
 agent-read-message = Elolvasva: „{ $subject }”
-# review: new
 agent-read-conversation = { $count ->
     [one] Beszélgetés elolvasva: „{ $subject }” (1 üzenet)
    *[other] Beszélgetés elolvasva: „{ $subject }” ({ $count } üzenet)
 }
-# review: new
-agent-read-attachment = Melléklet megnyitva: „{ $name }”, üzenet: „{ $subject }”
-# review: new
+agent-read-attachment = Melléklet tartalma lekérve: „{ $name }”. Üzenet: „{ $subject }”
 agent-read-search = { $count ->
     [one] Keresés: „{ $query }”, eredmény: 1 üzenet
    *[other] Keresés: „{ $query }”, eredmény: { $count } üzenet
 }
-# review: new
-agent-read-people = „{ $query }” kezdetű névjegyek keresése
-# review: new
+agent-read-people = Személyek keresése név vagy e-mail-cím eleje alapján: „{ $query }”
 agent-read-list = { $count ->
-    [one] 1 üzenet megtekintve itt: { $folder }
-   *[other] { $count } üzenet megtekintve itt: { $folder }
+    [one] 1 bejegyzés megtekintve. Lista: { $folder }
+   *[other] { $count } bejegyzés megtekintve. Lista: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
     [one] 1 új üzenet megtekintve
    *[other] { $count } új üzenet megtekintve
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
-agent-terminal-programs-mac = { $terminal } alkalmazásból indított programok
-# review: new
+agent-terminal-programs-mac = Terminálból ({ $terminal }) indított programok
 agent-terminal-programs-windows = Terminálból ({ $terminal }) indított programok
-# review: new
 agent-terminal-programs-linux = Terminálból ({ $terminal }) indított programok
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
-agent-terminal-program-mac = Egy { $terminal } alkalmazásból indított program
-# review: new
+agent-terminal-program-mac = Egy terminálból ({ $terminal }) indított program
 agent-terminal-program-windows = Egy terminálból ({ $terminal }) indított program
-# review: new
 agent-terminal-program-linux = Egy terminálból ({ $terminal }) indított program
-# review: new
-agent-connect-title-terminal = { $programs } hozzá szeretnének férni a leveleihez
-# review: new
-agent-connect-terminal-detail = Az ebből a terminálból indított összes MI-ügynök közösen használja az itt megadott hozzáférést. Ha egy ügynöknek külön hozzáférést szeretne adni, az ügynök MCP-beállításaiban adja hozzá az argumentumaihoz a --name kapcsolót és egy tetszőleges nevet.
+agent-connect-title-terminal = Hozzáférést kérnek a leveleihez: { $programs }
+agent-connect-terminal-detail = Az ugyanebből a terminálprogramból indított, külön név nélküli MI-ügynökök közös jogosultságokat kapnak. Egy ügynök külön kezeléséhez adja meg a --name kapcsolót és egy tetszőleges nevet az MCP-beállításaiban, az indítási argumentumok között.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

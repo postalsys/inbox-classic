@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -21379,46 +21379,9 @@
       ]
     },
     "hu": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "agent-level-read",
-          "agent-level-organize",
-          "agent-too-many-changes",
-          "agent-too-many-reads",
-          "agent-log-flag-color",
-          "agent-log-renamed",
-          "agent-log-watched",
-          "agent-log-ignored",
-          "agent-log-unmarked",
-          "agent-reads-messages",
-          "agent-reads-attachments",
-          "agent-reads-searches",
-          "agent-reads-lists",
-          "agent-read-message",
-          "agent-read-conversation",
-          "agent-read-attachment",
-          "agent-read-search",
-          "agent-read-people",
-          "agent-read-list",
-          "agent-read-changes",
-          "agent-terminal-programs-mac",
-          "agent-terminal-programs-windows",
-          "agent-terminal-programs-linux",
-          "agent-terminal-program-mac",
-          "agent-terminal-program-windows",
-          "agent-terminal-program-linux",
-          "agent-connect-title-terminal",
-          "agent-connect-terminal-detail"
-        ],
-        "windows.ftl": [
-          "win-agent-reads",
-          "win-agent-reads-hint"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [
         "account-security.html",
-        "agents-connect.html",
-        "agents-permissions.html",
         "brand-logos.html",
         "certificate-errors.html",
         "command-line.html",
@@ -24090,6 +24053,210 @@
             "source-notes.json": "/private/tmp/inbox-hu-previews-20261118-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-hu-previews-20261118-screenshots.json",
             "html.log": "/private/tmp/inbox-hu-previews-20261118-html.log"
+          }
+        },
+        {
+          "id": "hu-agent-access-read-log-20261118",
+          "reviewed_ids": {
+            "core.ftl": [
+              "agent-level-read",
+              "agent-level-organize",
+              "agent-too-many-changes",
+              "agent-too-many-reads",
+              "agent-log-flag-color",
+              "agent-log-renamed",
+              "agent-log-watched",
+              "agent-log-ignored",
+              "agent-log-unmarked",
+              "agent-reads-messages",
+              "agent-reads-attachments",
+              "agent-reads-searches",
+              "agent-reads-lists",
+              "agent-read-message",
+              "agent-read-conversation",
+              "agent-read-attachment",
+              "agent-read-search",
+              "agent-read-people",
+              "agent-read-list",
+              "agent-read-changes",
+              "agent-terminal-programs-mac",
+              "agent-terminal-programs-windows",
+              "agent-terminal-programs-linux",
+              "agent-terminal-program-mac",
+              "agent-terminal-program-windows",
+              "agent-terminal-program-linux",
+              "agent-connect-title-terminal",
+              "agent-connect-terminal-detail",
+              "agent-log-folder"
+            ],
+            "windows.ftl": [
+              "win-agent-reads",
+              "win-agent-reads-hint"
+            ]
+          },
+          "reviewed_help": [
+            "agents-connect.html",
+            "agents-permissions.html"
+          ],
+          "changed_values": 16,
+          "files": {
+            "core/locales/hu/core.ftl": "2df0c97bf89aed3f7ff3468b7fbe8aa235cf5073ddfcbb6d958443071acea4de",
+            "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be",
+            "core/crates/pe-html/help/hu/agents-connect.html": "2166208d63d0494a7e14ae7e338dac4340b4b2fe8884595b77fe51113ccbdba8",
+            "core/crates/pe-html/help/hu/agents-permissions.html": "1d598b5f37cc0e263198d2773b6c7e2045125cb705565df1bf710466879a82e9"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5",
+            "core/locales/en/windows.ftl": "36cf4edee8cff1ebcd70f7ed7cd17cc5870ddfa79dce8e8d3417f28e2173b810",
+            "core/crates/pe-html/help/en/agents-connect.html": "8a19c917392f01dbdf6c6b4ee19e65f5ddbb69863f5124a6e7f89c40629f63fb",
+            "core/crates/pe-html/help/en/agents-permissions.html": "6a8b111710ba36db281824406e3c48363e45faecacc5ed87aaca55c825808cad"
+          },
+          "validation": "Hungarian structural checks pass with 1,484 expected mark-only diagnostics. Exact reconstruction verifies 31 catalog entries: 30 pending entries completed and one earlier folder-creation log reopened without duplicate scope credit. Sixteen values improved and 15 retained; two full help topics have 14 improved wording lines. Variables, plural/color branches, access-key counts, comments, markup, attributes, controls, platform branches and literal code/keys are preserved. Static counts 0/1/2/5/21/101, mixed summary counts, seven colors, terminal-name substitutions, hour ranges and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reviewed strings introduce no access keys; existing helper scopes have no collisions. Twenty-seven runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 11,870 help lines; since-start 1,855 entries/464 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations. Agent context findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain separate. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed 30 pending Hungarian agent additions and both full connection/permission topics. Reopened agent-log-folder because folder creation is logged at request time before server completion. Improved 16 values; retained 15. Clarified complete read capabilities, terminal grant grouping, attachment data access, list-row counts, limits, log expansion, encrypted envelopes and delayed server changes.",
+          "reopened_context_entries": {
+            "ids": {
+              "core.ftl": [
+                "agent-log-folder"
+              ]
+            },
+            "reason": "pe-mcp tools/organize.rs logs create_folder after queuing through Core::create_folder and before waiting for server completion; the result can still say the folder has not been made. agent-log-folder was previously reviewed but its completed-action wording is inaccurate.",
+            "previously_reviewed": true,
+            "additional_scope_credit": 0
+          },
+          "help_wording_lines_changed": 14,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/hu/agents-connect.html": 8,
+            "core/crates/pe-html/help/hu/agents-permissions.html": 6
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-core/src/agents.rs": "d7bbae6f4a16aac79b22314fa6f861b3fb63c93ff4ab5a16a6f431c3afae3efb",
+            "core/crates/pe-core/src/agents/log.rs": "a30b29e5f45ef76253202aa9d9d42b3ad8b559d7949df47b11a8bfa8cccccb2c",
+            "core/crates/pe-core/src/agents/hosts.rs": "1c8a2d5246d116110fd24bfea87ee53e7969f671693ced6b5ae929059876f36f",
+            "core/crates/pe-core/src/agents/reads.rs": "ea2b2f57cd1271c7aaba1f04942858d18a4b66fa686fff61b0b9cd771e720081",
+            "core/crates/pe-core/src/agents/drafts.rs": "cb8aa11c3035d0e5a9609b4279b5d65eaec2bc8991aa39d72c717c2a847c89ae",
+            "core/crates/pe-core/src/lib.rs": "e335529ecfdf749a044ea64db2b467881d13bea93ccf6760caf2f1decb36beac",
+            "core/crates/pe-core/src/worker.rs": "f5c1c28f0117606cf9b544a1d75736e84c88ad9bc53f26c7d7dda6985db8c28b",
+            "core/crates/pe-store/src/agents.rs": "ef964f5ccae7d486bdd4bd6dcebf7c97179d39c185697960593f1987ef7de599",
+            "core/crates/pe-mcp/src/host.rs": "1a4690b101ec86b4a05fbce8d8f7ce0fb8039577e54e164660e27019cb647cbb",
+            "core/crates/pe-mcp/src/relay.rs": "da8b85d45d54d36f744935db4d114296cb9751166cb1eed970e0399882cc6b7f",
+            "core/crates/pe-mcp/src/server.rs": "77728e02a008edfd29164de09465dbdde5a25bb989b8ccc2f35ccb8a3044b1b3",
+            "core/crates/pe-mcp/src/endpoint.rs": "6de4bef7a27e952bfea8974e1fb7d48b356a0844536d309b14025b17b8538c86",
+            "core/crates/pe-mcp/src/tools.rs": "6960ce939d86e7b8c9a74d0d5da918f240ceca55cf80debdcd38810bbcebd530",
+            "core/crates/pe-mcp/src/tools/mail.rs": "3951280b67c89402996123d228cf8df391325f763a6b6caa323d84bbf5196081",
+            "core/crates/pe-mcp/src/tools/threads.rs": "61f49dafdce4e54fb4980c55934934f90e9d795db78ae2625e24ef38def1c268",
+            "core/crates/pe-mcp/src/tools/organize.rs": "e5ad5a88cb4de96d4dd3654fa6ecebece390bf3e5546aabdb4ee0084c9bea674",
+            "core/crates/pe-mcp/src/tools/lookups.rs": "af28646905f6b658120c2284eec46e24db1c766030165d928dc7a82efc0b39a8",
+            "app/src/agents.cpp": "de485b1a72554db59f2257935ca8a89a2259d8c4beeaa459d78c2748aa374d47",
+            "linux/src/agents.rs": "63dc9e1fafae516ae7499dc01ab0f3a30c72e8d91e774b2a9a3a70fde4e6cf20",
+            "mac/Sources/InboxClassic/Agents.swift": "2cb65429022932a66dc032793e53d94ca5e5cc635270ca9a18050776b556f2a8",
+            "core/crates/pe-ffi/src/windows.rs": "457a37b9519dbe8c86cd94f7844e1fb5b1b3413b89293fd490e51682e2c4de47",
+            "app/src/main.cpp": "86654a505ca1bfa2e00049f0bfb312dbbc2c324e1d6957bd707716dc96f92c8c",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234"
+          },
+          "catalog_dependencies": {
+            "core/locales/hu/mac.ftl": "ccfdfd4bb00809d2e36c35135443102555a0350bf8f2b12f1a50f049ad7d0aaa",
+            "core/locales/hu/linux.ftl": "4ee069a706d1647d0ca4f8315b1400b638b6e1251a1217718191c422f8f2f9b1",
+            "core/locales/hu/app.ftl": "1bde334e0d93bec339b7e081b200592484e929809c5f1b720114732d495b33a7",
+            "core/locales/hu/core.ftl": "2df0c97bf89aed3f7ff3468b7fbe8aa235cf5073ddfcbb6d958443071acea4de",
+            "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be",
+            "core/locales/hu/help.ftl": "22bf1437995d992179c920e30b4c01dced3cf535af44c5d478b2a3226e13b0ce"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "catalog_ids": [
+                  "agent-level-read",
+                  "agent-level-organize"
+                ],
+                "finding": "Read access includes conversations, message attachments, rules and people lookup. People lookup includes address-book entries and, with every account granted, mail contacts; it is not restricted to saved contacts. Organize uses the same Hungarian Ignore Conversation term as the actual command.",
+                "evidence": [
+                  "core/crates/pe-core/src/agents/reads.rs",
+                  "core/crates/pe-mcp/src/tools/lookups.rs",
+                  "core/crates/pe-mcp/src/tools.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "agent-log-folder",
+                  "agent-log-renamed"
+                ],
+                "finding": "The create/rename log is written after enqueueing a server command, before success is known. Creation can finish its 15-second wait with the folder still absent. Hungarian says the action was requested. Previously completed agent-log-folder was reopened with no duplicate scope credit.",
+                "evidence": [
+                  "core/crates/pe-mcp/src/tools/organize.rs",
+                  "core/crates/pe-core/src/lib.rs",
+                  "core/crates/pe-core/src/worker.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "agent-reads-attachments",
+                  "agent-read-attachment",
+                  "agent-read-list"
+                ],
+                "finding": "Attachment reads hand content to the agent, not to an external file-opening application. The list count is rows.len(), so grouped conversations can count rows instead of individual messages. A list-name placeable can be a folder or an unlocalized combined-scope identifier. Hungarian uses entries and an uninflected list label.",
+                "evidence": [
+                  "core/crates/pe-mcp/src/tools/mail.rs",
+                  "core/crates/pe-mcp/src/tools/threads.rs",
+                  "core/crates/pe-core/src/agents/log.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "agents-connect.html",
+                  "agents-permissions.html"
+                ],
+                "finding": "Unnamed agents are grouped by the recognized terminal program path, not globally across all terminals. --name gives a distinct stored grant, not a verified security identity. Only local programs under the same OS user connect through the supported IPC.",
+                "evidence": [
+                  "core/crates/pe-core/src/agents/hosts.rs",
+                  "core/crates/pe-mcp/src/host.rs",
+                  "core/crates/pe-mcp/src/relay.rs",
+                  "core/crates/pe-mcp/src/server.rs",
+                  "core/crates/pe-ffi/src/windows.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "agents-permissions.html"
+                ],
+                "finding": "Read summaries combine independent positive counts per program/hour; details can have zero results. Log entries hold subjects, file names, queries and scope labels, not message bodies. Expiry happens on inserts; ordinary nonprotected changes may be pruned before 30 days. Clearing removes read records, hides changes and does not reset sending limits.",
+                "evidence": [
+                  "core/crates/pe-store/src/agents.rs",
+                  "core/crates/pe-core/src/agents/log.rs",
+                  "app/src/agents.cpp",
+                  "linux/src/agents.rs",
+                  "mac/Sources/InboxClassic/Agents.swift"
+                ]
+              },
+              {
+                "topics": [
+                  "agents-permissions.html"
+                ],
+                "finding": "Encrypted mail exposes only the outer envelope, not decrypted body or attachments. Saving a draft in the editor, including autosave, ends agent ownership; deletion of other mail requires a destination. Agent-log send undo calls outbox_delete while the queued message remains, unlike the ordinary Undo Send countdown. Server changes are not all visible immediately.",
+                "evidence": [
+                  "core/crates/pe-core/src/agents.rs",
+                  "core/crates/pe-core/src/agents/drafts.rs",
+                  "core/crates/pe-core/src/lib.rs"
+                ]
+              }
+            ],
+            "unchanged_source_policy": "English and app code unchanged. Compare affected current passages elsewhere; retain accurate wording and reopen only affected content. Comparison tasks add no review credit."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-hu-agents-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-hu-agents-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-hu-agents-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-hu-agents-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-hu-agents-20261118-joins.log",
+            "catalog-examples.log": "/private/tmp/inbox-hu-agents-20261118-catalog-examples.log",
+            "mnemonics.json": "/private/tmp/inbox-hu-agents-20261118-mnemonics.json",
+            "source-audit.json": "/private/tmp/inbox-hu-agents-20261118-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-hu-agents-20261118-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-hu-agents-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-hu-agents-20261118-html.log"
           }
         }
       ]
@@ -76621,7 +76788,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Hungarian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 21 reviewed catalog entries: 10 improved values and 11 retained. Two complete help topics have 21 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls and platform branches are preserved. Static counts 1/2/5/21/101, PDF page/print labels, format names, settings-path substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reading-page access keys remain collision-free; Mac and Linux preview controls use plain labels. Twenty-nine runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,551 unmarked entries and 11,856 help lines; since-start 1,885 entries/471 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations were found. Preview/privacy source discrepancies are recorded for targeted comparison elsewhere. Incoming MCP translations remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Hungarian structural checks pass with 1,484 expected mark-only diagnostics. Exact reconstruction verifies 31 catalog entries: 30 pending entries completed and one earlier folder-creation log reopened without duplicate scope credit. Sixteen values improved and 15 retained; two full help topics have 14 improved wording lines. Variables, plural/color branches, access-key counts, comments, markup, attributes, controls, platform branches and literal code/keys are preserved. Static counts 0/1/2/5/21/101, mixed summary counts, seven colors, terminal-name substitutions, hour ranges and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reviewed strings introduce no access keys; existing helper scopes have no collisions. Twenty-seven runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 11,870 help lines; since-start 1,855 entries/464 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations. Agent context findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain separate. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -137437,7 +137604,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
+      "next": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -140357,7 +140524,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -142128,7 +142295,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review the remaining Hungarian agent additions: 28 core entries and two Windows read-log labels, with agents-connect and agents-permissions help. Hungarian now has 30 pending catalog entries and 26 pending help topics. Then finish its remaining help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption and preview/privacy context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
+      "next": "Review Hungarian account and connection help: account-security, manage-accounts, sign-in-apps, certificate-errors, no-connection and password-not-accepted. All current Hungarian catalog entries are reviewed; 24 help topics remain, plus incoming translations and targeted context checks. Then finish its other help and continue the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact, encryption, preview/privacy and agent context findings elsewhere, reopening only affected content. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -144024,6 +144191,18 @@
         "merge_commit": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
         "merged_at": "2026-11-18T21:02:19Z",
         "verified_master": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "hu-previews-privacy-20261118",
+        "pr": 181,
+        "url": "https://github.com/postalsys/inbox-classic/pull/181",
+        "review_commit": "c6e0b48d381b8018180141e201d3f40f3ed41cd0",
+        "merge_commit": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+        "merged_at": "2026-11-18T21:17:56Z",
+        "verified_master": "802ce727efec6b6990aaf4cee2fdca4dab664872",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
@@ -154464,7 +154643,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "65fc0cd212949cd4b388e90d99f226972003d7d0ec96213435ecfb58fe59ebfc",
+      "core/locales/GLOSSARY.md": "45c8106a6999e9f1ce0407b87c81fe53c2b2eb7e062d58856c8e53cd009be6a4",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -154472,7 +154651,7 @@
       "core/crates/pe-html/help/hr/sign-and-encrypt.html": "be6f0535c8ce298a97abd0a95a0b947e73d0de3bd4b504f4e9c045d1d2a2504b",
       "core/crates/pe-html/help/hr/write-message.html": "ed4739498a9e8b3fb4b6579d96457ba42aaac85ff66cda13eac6728d87977865",
       "core/locales/hu/app.ftl": "1bde334e0d93bec339b7e081b200592484e929809c5f1b720114732d495b33a7",
-      "core/locales/hu/core.ftl": "912661077f518b29843cbce147e53b9be4e5418b411fc71554fbd465e334cdca",
+      "core/locales/hu/core.ftl": "2df0c97bf89aed3f7ff3468b7fbe8aa235cf5073ddfcbb6d958443071acea4de",
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
       "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
       "core/locales/lt/app.ftl": "4fd94d26751396a3db103af8db60c1b37aa92a90705d2c0aea38cfe450b8f2cd",
@@ -154584,7 +154763,10 @@
       "core/crates/pe-html/help/hu/encrypted-and-signed-mail.html": "7b8f67b6e56677f0a6ca1a2ff805e892758464359deba86a5736b68af0baec30",
       "core/crates/pe-html/help/hu/encryption-keys.html": "5a17f144031cb5652499310d17526d2f0735f52959fa94ffd9d9028b6e028360",
       "core/crates/pe-html/help/hu/verify-a-key.html": "2991ebeea47709d787a56668de7bd615eafe3d01ecc4afebd78f1c4a9cd4047c",
-      "core/crates/pe-html/help/hu/encryption-errors.html": "fd5a474190372febcdd83900562d1f02ca7d47ffc4cb8db0ac5628486a53896b"
+      "core/crates/pe-html/help/hu/encryption-errors.html": "fd5a474190372febcdd83900562d1f02ca7d47ffc4cb8db0ac5628486a53896b",
+      "core/crates/pe-html/help/hu/agents-connect.html": "2166208d63d0494a7e14ae7e338dac4340b4b2fe8884595b77fe51113ccbdba8",
+      "core/crates/pe-html/help/hu/agents-permissions.html": "1d598b5f37cc0e263198d2773b6c7e2045125cb705565df1bf710466879a82e9",
+      "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be"
     },
     "resumed_review_checkpoints": [
       {
@@ -167171,6 +167353,92 @@
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a",
           "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b"
         }
+      },
+      {
+        "batch": "hu-agent-access-read-log-20261118",
+        "review_parent": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 13077,
+          "pending_help": 615,
+          "completed_catalog": 22547,
+          "completed_help": 761
+        },
+        "validation": "Hungarian structural checks pass with 1,484 expected mark-only diagnostics. Exact reconstruction verifies 31 catalog entries: 30 pending entries completed and one earlier folder-creation log reopened without duplicate scope credit. Sixteen values improved and 15 retained; two full help topics have 14 improved wording lines. Variables, plural/color branches, access-key counts, comments, markup, attributes, controls, platform branches and literal code/keys are preserved. Static counts 0/1/2/5/21/101, mixed summary counts, seven colors, terminal-name substitutions, hour ranges and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Reviewed strings introduce no access keys; existing helper scopes have no collisions. Twenty-seven runtime/source files and six catalog dependencies match the evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,581 unmarked entries and 11,870 help lines; since-start 1,855 entries/464 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs and no new incoming translations. Agent context findings are recorded for targeted comparison elsewhere. Incoming MCP translations remain separate. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 204,
+          "worktree_count": 6,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+            "refs/remotes/origin/HEAD": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+            "refs/remotes/origin/i18n/review-resume-20261118": "c6e0b48d381b8018180141e201d3f40f3ed41cd0",
+            "refs/remotes/origin/master": "802ce727efec6b6990aaf4cee2fdca4dab664872"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "3baf8a41703a6b941bb61c08b688e62813c79456",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/hu/agents-connect.html\n M core/crates/pe-html/help/hu/agents-permissions.html\n M core/locales/GLOSSARY.md\n M core/locales/hu/core.ftl\n M core/locales/hu/windows.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/hu/agents-connect.html": "2166208d63d0494a7e14ae7e338dac4340b4b2fe8884595b77fe51113ccbdba8",
+                "core/crates/pe-html/help/hu/agents-permissions.html": "1d598b5f37cc0e263198d2773b6c7e2045125cb705565df1bf710466879a82e9",
+                "core/locales/GLOSSARY.md": "45c8106a6999e9f1ce0407b87c81fe53c2b2eb7e062d58856c8e53cd009be6a4",
+                "core/locales/hu/core.ftl": "2df0c97bf89aed3f7ff3468b7fbe8aa235cf5073ddfcbb6d958443071acea4de",
+                "core/locales/hu/windows.ftl": "dd03037aaedddb19e41737be8d4dfb518c192e84b502f6f0c7673168b67701be"
+              }
+            }
+          ],
+          "master": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-hu-agents-20261118-edit.py": "358df4147f56f3731f2e780845cc18bc488e092aa4249329a416991c99ecee5f",
+          "/private/tmp/inbox-hu-agents-20261118-finalize.py": "6767d49b873c50badc5bc103f92bffc5c9ca020e77d5ff1a399b4429e659a227",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a",
+          "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -168403,6 +168671,135 @@
           }
         ],
         "instruction": "Source findings recorded; English/app code unchanged. Compare other languages, retain accurate text and reopen only affected passages. Do not add scope credit for a comparison task."
+      },
+      {
+        "id": "agent-logs-permissions-context-20261118",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "802ce727efec6b6990aaf4cee2fdca4dab664872",
+        "completed_languages": [
+          "hu"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "it",
+          "lt",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "agents-connect.html",
+          "agents-permissions.html"
+        ],
+        "catalog_ids": {
+          "core.ftl": [
+            "agent-log-folder",
+            "agent-log-renamed",
+            "agent-read-list",
+            "agent-read-people",
+            "agent-reads-attachments",
+            "agent-read-attachment"
+          ]
+        },
+        "issues": [
+          {
+            "catalog_ids": [
+              "agent-level-read",
+              "agent-level-organize"
+            ],
+            "finding": "Read access includes conversations, message attachments, rules and people lookup. People lookup includes address-book entries and, with every account granted, mail contacts; it is not restricted to saved contacts. Organize uses the same Hungarian Ignore Conversation term as the actual command.",
+            "evidence": [
+              "core/crates/pe-core/src/agents/reads.rs",
+              "core/crates/pe-mcp/src/tools/lookups.rs",
+              "core/crates/pe-mcp/src/tools.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "agent-log-folder",
+              "agent-log-renamed"
+            ],
+            "finding": "The create/rename log is written after enqueueing a server command, before success is known. Creation can finish its 15-second wait with the folder still absent. Hungarian says the action was requested. Previously completed agent-log-folder was reopened with no duplicate scope credit.",
+            "evidence": [
+              "core/crates/pe-mcp/src/tools/organize.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/worker.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "agent-reads-attachments",
+              "agent-read-attachment",
+              "agent-read-list"
+            ],
+            "finding": "Attachment reads hand content to the agent, not to an external file-opening application. The list count is rows.len(), so grouped conversations can count rows instead of individual messages. A list-name placeable can be a folder or an unlocalized combined-scope identifier. Hungarian uses entries and an uninflected list label.",
+            "evidence": [
+              "core/crates/pe-mcp/src/tools/mail.rs",
+              "core/crates/pe-mcp/src/tools/threads.rs",
+              "core/crates/pe-core/src/agents/log.rs"
+            ]
+          },
+          {
+            "topics": [
+              "agents-connect.html",
+              "agents-permissions.html"
+            ],
+            "finding": "Unnamed agents are grouped by the recognized terminal program path, not globally across all terminals. --name gives a distinct stored grant, not a verified security identity. Only local programs under the same OS user connect through the supported IPC.",
+            "evidence": [
+              "core/crates/pe-core/src/agents/hosts.rs",
+              "core/crates/pe-mcp/src/host.rs",
+              "core/crates/pe-mcp/src/relay.rs",
+              "core/crates/pe-mcp/src/server.rs",
+              "core/crates/pe-ffi/src/windows.rs"
+            ]
+          },
+          {
+            "topics": [
+              "agents-permissions.html"
+            ],
+            "finding": "Read summaries combine independent positive counts per program/hour; details can have zero results. Log entries hold subjects, file names, queries and scope labels, not message bodies. Expiry happens on inserts; ordinary nonprotected changes may be pruned before 30 days. Clearing removes read records, hides changes and does not reset sending limits.",
+            "evidence": [
+              "core/crates/pe-store/src/agents.rs",
+              "core/crates/pe-core/src/agents/log.rs",
+              "app/src/agents.cpp",
+              "linux/src/agents.rs",
+              "mac/Sources/InboxClassic/Agents.swift"
+            ]
+          },
+          {
+            "topics": [
+              "agents-permissions.html"
+            ],
+            "finding": "Encrypted mail exposes only the outer envelope, not decrypted body or attachments. Saving a draft in the editor, including autosave, ends agent ownership; deletion of other mail requires a destination. Agent-log send undo calls outbox_delete while the queued message remains, unlike the ordinary Undo Send countdown. Server changes are not all visible immediately.",
+            "evidence": [
+              "core/crates/pe-core/src/agents.rs",
+              "core/crates/pe-core/src/agents/drafts.rs",
+              "core/crates/pe-core/src/lib.rs"
+            ]
+          }
+        ],
+        "instruction": "English and app code unchanged. Compare affected current passages elsewhere; retain accurate wording and reopen only affected content. Comparison tasks add no review credit."
       }
     ]
   },
