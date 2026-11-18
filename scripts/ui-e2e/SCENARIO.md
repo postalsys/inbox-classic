@@ -38,6 +38,10 @@ Screenshots: `read-1-html`
 - the paper clip of the attachments is there
 - the information bar says pictures are blocked
 - the title names the folder, as the folder bar does
+- the banner sent inside the message (`cid:banner@example.com`) is drawn by Inbox Classic: its `src` is a preview address (`/pv/...`) and it loads, 560 pixels wide
+- no picture of the document has a `data:` or `cid:` source
+- printing the newsletter puts the banner into the printout as a `data:image/png` picture (Windows counts it with the `kTestPrint` hook)
+- right-clicking the linked banner still offers Copy Link
 
 ## 5. Message properties
 
