@@ -66,8 +66,15 @@ extension UITest {
         let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: modifiers, timestamp: ProcessInfo.processInfo.systemUptime,
                                      windowNumber: compose.windowNumber, context: nil, characters: key, charactersIgnoringModifiers: key,
                                      isARepeat: false, keyCode: key == "y" ? 16 : 7)
-        if let event {
-            onMain { NSApp.sendEvent(event) }
+        guard let event else { return }
+        onMain {
+            if NSApp.keyWindow === compose {
+                NSApp.sendEvent(event)
+            } else if !compose.performKeyEquivalent(with: event) {
+                // the app in the background (another app holds the front): the key goes the way AppKit sends a key
+                // equivalent, the window with the cursor in the text first, then the menu bar
+                _ = NSApp.mainMenu?.performKeyEquivalent(with: event)
+            }
         }
         await pause(0.5)
     }
