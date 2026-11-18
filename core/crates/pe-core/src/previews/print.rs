@@ -26,6 +26,21 @@ struct Printout {
     request: Option<u64>,
 }
 
+/// Printouts kept for a window to take: one nobody takes (its window closed or showed another message first) gives
+/// way to newer ones, so none is kept until the app quits
+const PRINTOUTS_KEPT: usize = 8;
+
+/// Keeps a printout for its window, dropping the oldest past [`PRINTOUTS_KEPT`] (requests only grow)
+fn keep_printout(prints: &mut HashMap<u64, String>, request: u64, document: String) {
+    prints.insert(request, document);
+    while prints.len() > PRINTOUTS_KEPT {
+        let Some(oldest) = prints.keys().min().copied() else {
+            break;
+        };
+        prints.remove(&oldest);
+    }
+}
+
 impl Core {
     /// Starts the printout of the view `token`: [`Event::PrintReady`] follows with the request this returns, and
     /// [`Core::print_result`] gives the document to print. None for a view that shows no previews (or is not shown):
@@ -45,7 +60,7 @@ impl Core {
         let print = self.next_request.fetch_add(1, Ordering::Relaxed);
         let work = self.in_background(Connection::Reads, move |core| {
             let document = printed(&core.previews.files, &printout);
-            unpoisoned(&core.previews.prints).insert(print, document);
+            keep_printout(&mut unpoisoned(&core.previews.prints), print, document);
             let _ = core.post(Event::PrintReady { request: print });
         });
         self.runtime().ok()?.spawn(work);
@@ -131,5 +146,21 @@ fn wait_drawn(
             .wait_timeout(map, left)
             .map(|(map, _)| map)
             .unwrap_or_else(|p| p.into_inner().0);
+    }
+}
+
+#[cfg(test)]
+mod keep_tests {
+    use super::*;
+
+    #[test]
+    fn printouts_nobody_takes_give_way_to_newer_ones() {
+        let mut prints = HashMap::new();
+        for request in 1..=(PRINTOUTS_KEPT as u64 + 3) {
+            keep_printout(&mut prints, request, format!("doc {request}"));
+        }
+        assert_eq!(prints.len(), PRINTOUTS_KEPT);
+        assert!(!prints.contains_key(&3) && prints.contains_key(&4));
+        assert!(prints.contains_key(&(PRINTOUTS_KEPT as u64 + 3)));
     }
 }
