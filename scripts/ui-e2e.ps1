@@ -356,7 +356,7 @@ public static class AccLook {
 
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
 $WM_KEYUP = 0x0101; $CB_SETCURSEL = 0x014E; $CB_GETCOUNT = 0x0146; $CB_GETLBTEXT = 0x0148; $EM_SETSEL = 0x00B1; $EM_REPLACESEL = 0x00C2
-$TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004
+$TVM_GETCOUNT = 0x1105; $TVM_GETNEXTITEM = 0x110A; $TVM_SELECTITEM = 0x110B; $LVM_GETITEMCOUNT = 0x1004; $LVM_GETNEXTITEM = 0x100C
 $VK_RETURN = 0x0D; $VK_ESCAPE = 0x1B; $VK_SPACE = 0x20; $VK_HOME = 0x24; $VK_UP = 0x26; $VK_DOWN = 0x28; $VK_DELETE = 0x2E
 # app/src/app.h
 $IDM_NEW_ACCOUNT = 100; $IDM_EXIT = 101; $IDM_SYNC = 102; $IDM_MARK_READ = 103; $IDM_MARK_UNREAD = 104; $IDM_PICTURES = 105
@@ -396,11 +396,44 @@ $failures = @()
 $started = @()
 function Step([string]$text) {
     # whatever a step before left open over the app is closed first, so it can not fail the steps after it too
-    CloseStrays "before '$text'"
+    CloseStrays "before '$text'" -Writing
     Write-Host "== $text"
 }
+# a line of GitHub's annotations (::error:: and the like), under GitHub Actions only: the job's summary then names it
+function Annotate([string]$kind, [string]$what) {
+    if ($env:GITHUB_ACTIONS -ne 'true') { return }
+    $text = $what.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+    Write-Host "::$kind::$text"
+}
+# a check of what a user sees
 function Check([bool]$ok, [string]$what) {
-    if ($ok) { Write-Host "   ok: $what" } else { Write-Host "   FAILED: $what"; $script:failures += $what }
+    if ($ok) { Write-Host "   ok: $what" } else { Write-Host "   FAILED: $what"; Annotate 'error' $what; $script:failures += $what }
+}
+# a condition of the test itself that stops it from checking (a button that stays disabled, an error of the script):
+# a failure too, but said as one of the harness, not of the app
+function Harness([string]$what) {
+    Write-Host "   FAILED (harness): $what"
+    Annotate 'error' "harness: $what"
+    $script:failures += "harness: $what"
+}
+
+# where the time goes: the fixed pauses and the waits that ran out, in seconds by the lines that asked for them (the
+# caller's line after the helper's), said at the end
+$pauses = @{}; $waitedOut = @{}
+function Start-Sleep {
+    param([int]$Seconds = 0, [int]$Milliseconds = 0)
+    $calls = Get-PSCallStack
+    $where = if ($calls.Count -gt 2) { "$($calls[1].ScriptLineNumber)<$($calls[2].ScriptLineNumber)" } else { "$($calls[1].ScriptLineNumber)" }
+    $script:pauses[$where] += $Seconds + $Milliseconds / 1000
+    Microsoft.PowerShell.Utility\Start-Sleep -Milliseconds ($Seconds * 1000 + $Milliseconds)
+}
+function PollPause([int]$Milliseconds) { Microsoft.PowerShell.Utility\Start-Sleep -Milliseconds $Milliseconds }
+function TimingReport {
+    foreach ($kind in @(@{ Name = 'fixed pauses'; Table = $pauses }, @{ Name = 'waits that ran out'; Table = $waitedOut })) {
+        $total = ($kind.Table.Values | Measure-Object -Sum).Sum
+        Write-Host ("timing: {0:N0} s in {1}; the most at lines (line<caller):" -f $total, $kind.Name)
+        $kind.Table.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 25 | ForEach-Object { Write-Host ("   {0,7:N1} s  {1}" -f $_.Value, $_.Key) }
+    }
 }
 
 # waits up to $Seconds for $Condition to give something truthy, returns it (or $null)
@@ -409,8 +442,11 @@ function WaitFor([scriptblock]$Condition, [int]$Seconds = 20) {
     while ((Get-Date) -lt $deadline) {
         $value = & $Condition
         if ($value) { return $value }
-        Start-Sleep -Milliseconds 250
+        PollPause 250
     }
+    $calls = Get-PSCallStack
+    $where = if ($calls.Count -gt 2) { "$($calls[1].ScriptLineNumber)<$($calls[2].ScriptLineNumber)" } else { "$($calls[1].ScriptLineNumber)" }
+    $script:waitedOut[$where] += $Seconds
     return $null
 }
 
@@ -508,30 +544,38 @@ function InFront([IntPtr]$a, [IntPtr]$b) {
 }
 # presses a button as its click ends up: BN_CLICKED to its window, which works whether or not that window is active
 # (BM_CLICK can be lost when it is not, as on the CI runner). A disabled button can not be pressed, as with the mouse:
-# a check fails instead
+# one is waited for a few seconds (a window turns its buttons on as it fills in), then the harness says it stayed off
 function Click([IntPtr]$window, [int]$id) {
     $button = [Native.Win]::GetDlgItem($window, $id)
     if ($button -ne [IntPtr]::Zero -and -not [Native.Win]::IsWindowEnabled($button)) {
-        Check $false "button $id is enabled to be pressed"
-        return
+        if (-not (WaitFor { -not [Native.Win]::IsWindow($button) -or [Native.Win]::IsWindowEnabled($button) } 5)) {
+            Harness "button $id of $(Describe $window) stayed disabled, so it could not be pressed"
+            return
+        }
     }
     [void][Native.Win]::PostMessage($window, $WM_COMMAND, [IntPtr]($id -band 0xFFFF), $button)
 }
-# what is open when a window does not come: the app's visible windows, and a picture of $shown
-function ShowAppWindows([IntPtr]$shown, [string]$shot) {
-    [Native.Win]::EnumWindows({
+# the text of control $id of $window once it is there and has any (a window may make or fill a static after it shows);
+# $null when it does not come
+function WaitText([IntPtr]$window, [int]$id, [int]$Seconds = 10) {
+    WaitFor { $t = GetText $window $id; if ($t) { $t } } $Seconds
+}
+# the visible top-level windows of the app's processes, the front one first: their handles
+function AppWindows {
+    $ids = AppIds
+    $found = New-Object System.Collections.Generic.List[IntPtr]
+    [void][Native.Win]::EnumWindows({
         param($w, $l)
         $owner = [uint32]0
         [void][Native.Win]::GetWindowThreadProcessId($w, [ref]$owner)
-        if ($owner -eq $app.Id -and [Native.Win]::IsWindowVisible($w)) {
-            $cls = New-Object System.Text.StringBuilder 64
-            [void][Native.Win]::GetClassName($w, $cls, 64)
-            $title = New-Object System.Text.StringBuilder 256
-            [void][Native.Win]::InternalGetWindowText($w, $title, 256)
-            Write-Host "   window of the app: $cls '$title'"
-        }
+        if ($ids -contains $owner -and [Native.Win]::IsWindowVisible($w)) { $found.Add($w) }
         $true
-    }, [IntPtr]::Zero) | Out-Null
+    }, [IntPtr]::Zero)
+    $found.ToArray()
+}
+# what is open when a window does not come: the app's visible windows, and a picture of $shown
+function ShowAppWindows([IntPtr]$shown, [string]$shot) {
+    foreach ($w in AppWindows) { Write-Host "   window of the app: $(Describe $w)" }
     Shot $shown $shot
 }
 # a menu or toolbar command, posted as the menu would
@@ -623,9 +667,10 @@ function CloseDialog([IntPtr]$dialog) {
     [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 5)
 }
 # what a step left open over the app closed: the popup menus and the dialogs (#32770: message boxes, file and folder
-# pickers) of the app's own processes, never a window of anything else, each one said in the log. The app's own
-# windows (forms, compose, the keys) are left as they are: a step may mean them to stay open
-function CloseStrays([string]$where) {
+# pickers) of the app's own processes, never a window of anything else, each one said in the log; with -Writing the
+# compose windows too, not saved (a step that left one open has failed: the next would take it for its own, and Exit
+# would stop at its question). The app's other windows (forms, the keys) are left as they are
+function CloseStrays([string]$where, [switch]$Writing) {
     $ids = AppIds
     if ($ids.Length -eq 0) { return }
     foreach ($menu in [Native.Win]::TopWindowsOf($ids, '#32768')) {
@@ -641,7 +686,7 @@ function CloseStrays([string]$where) {
     # the front one first: a dialog over another is the one that takes input (the one under it is disabled)
     for ($pass = 0; $pass -lt 5; $pass++) {
         $open = @([Native.Win]::TopWindowsOf($ids, '#32770'))
-        if ($open.Count -eq 0) { return }
+        if ($open.Count -eq 0) { break }
         $dialog = $open[0]
         $what = Describe $dialog
         $words = Statics $dialog
@@ -649,7 +694,69 @@ function CloseStrays([string]$where) {
         $closed = CloseDialog $dialog
         Write-Host "   (closing a dialog left open, $where`: $what $(if ($words) { "saying '$words'" }), $(if ($closed) { 'closed' } else { 'did not close' }))"
     }
+    if ($Writing) {
+        foreach ($c in (ComposeWindows)) {
+            $what = Describe $c
+            Write-Host "   (closing a compose window left open, $where`: $what, $(if (CloseCompose $c) { 'closed' } else { 'did not close' }))"
+        }
+    }
 }
+# the compose windows of the app open now, shown or not
+function ComposeWindows {
+    $found = @()
+    $w = [IntPtr]::Zero
+    while (($w = [Native.Win]::FindWindowEx([IntPtr]::Zero, $w, 'InboxClassicCompose', [NullString]::Value)) -ne [IntPtr]::Zero) { $found += $w }
+    $found
+}
+# the compose window `composeAction` opens, once its fields are there (the window exists a moment before them): one
+# that was not open before it ran (or before `composeBefore`, the compose windows open earlier), never one left open
+# by a step before
+function WaitCompose([scriptblock]$composeAction = $null, $composeBefore = $null, [int]$Seconds = 20) {
+    $known = if ($null -ne $composeBefore) { @($composeBefore) } else { @(ComposeWindows) }
+    if ($composeAction) { . $composeAction }
+    WaitFor {
+        foreach ($c in (ComposeWindows)) {
+            if ($known -notcontains $c -and [Native.Win]::GetDlgItem($c, $IDC_BODY) -ne [IntPtr]::Zero) { return $c }
+        }
+    } $Seconds
+}
+# the message box `owner` shows over itself (a dialog of the app's it owns, GW_OWNER): the box this window asked, never
+# another window's with the same title; $null when there is none
+function OwnBox([IntPtr]$owner) {
+    [Native.Win]::TopWindowsOf((AppIds), '#32770') | Where-Object { [Native.Win]::GetWindow($_, 4) -eq $owner } | Select-Object -First 1
+}
+# OwnBox once it is there
+function BoxOf([IntPtr]$owner, [int]$Seconds = 10) { WaitFor { OwnBox $owner } $Seconds }
+# a compose window closed as a user closes it: its close box, then `answer` (No: not saved) when it asks whether to save
+# (its own box, BoxOf); whether it is gone. When it stays, what holds it open is said in the log, with a picture of
+# the screen (debug-compose-close-<n>)
+function CloseCompose([IntPtr]$compose, [int]$answer = 7) {
+    if (-not [Native.Win]::IsWindow($compose)) { return $true }
+    $name = Describe $compose
+    [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    $asked = WaitFor {
+        if (-not [Native.Win]::IsWindow($compose)) { return 'gone' }
+        OwnBox $compose
+    } 10
+    if ($asked -is [string]) { return $true }
+    if ($asked) {
+        $box = [IntPtr]$asked
+        $said = "$(Describe $box) saying '$(Statics $box)'"
+        Click $box $answer
+        if (WaitFor { -not [Native.Win]::IsWindow($compose) } 10) { return $true }
+        Write-Host "   (closing $name, it asked $said; answered $answer, the window stayed$(if ([Native.Win]::IsWindow($box)) { ' and so did the box' }))"
+    } else {
+        # what else holds it: the window over it that takes its input (GW_ENABLEDPOPUP), when there is one
+        $over = [Native.Win]::GetWindow($compose, 6)
+        $what = if ($over -ne [IntPtr]::Zero -and $over -ne $compose) { "$(Describe $over) is over it" } else { 'nothing is over it' }
+        Write-Host "   (closing $name, it neither closed nor asked: enabled $([Native.Win]::IsWindowEnabled($compose)), $what)"
+    }
+    foreach ($w in AppWindows) { Write-Host "   (window of the app: $(Describe $w), enabled $([Native.Win]::IsWindowEnabled($w)))" }
+    $script:composeShots++
+    Shot ([Native.Win]::GetDesktopWindow()) "debug-compose-close-$($script:composeShots)"
+    -not [Native.Win]::IsWindow($compose)
+}
+$composeShots = 0
 # a picture of the whole screen when a file dialog goes wrong (debug-file-dialog-<title>-<what>), to tell what held it up
 function DialogDebugShot([string]$kind, [string]$title, [string]$what) {
     Shot ([Native.Win]::GetDesktopWindow()) "debug-$kind-dialog-$(($title -replace '[^\w]+', '-').Trim('-').ToLowerInvariant())-$what"
@@ -780,6 +887,43 @@ function Pressed([IntPtr]$compose, [int]$id) {
     $bar = [Native.Win]::GetDlgItem($compose, 322)
     [int][Native.Win]::SendMessage($bar, 0x040A, [IntPtr]$id, [IntPtr]::Zero) -ne 0
 }
+# the language of a catalog, as the app shows it: id to words (core/locales/<language>/*.ftl), the access keys' & left
+# out; a message of one line by its id, each variant of a select by "id[key]" (the default also as "id[*]")
+function Catalog([string]$language) {
+    $words = @{}
+    foreach ($file in Get-ChildItem (Join-Path $PSScriptRoot "..\core\locales\$language") -Filter '*.ftl') {
+        $select = $null
+        foreach ($line in Get-Content -Encoding UTF8 $file.FullName) {
+            if ($line -match '^([a-z][a-z0-9-]*) =\s*(.*)$') {
+                $id = $Matches[1]; $value = $Matches[2]
+                $select = if ($value -eq '' -or $value -match '^\{ \$\w+ ->$') { $id } else { $null }
+                if (-not $select) { $words[$id] = $value.Replace('&', '') }
+            } elseif ($select -and $line -match '^\s+(\*?)\[(\w+)\] (.+)$') {
+                $words["$select[$($Matches[2])]"] = $Matches[3].Replace('&', '')
+                if ($Matches[1]) { $words["$select[*]"] = $Matches[3].Replace('&', '') }
+            } elseif ($line -match '^\S') {
+                $select = $null
+            }
+        }
+    }
+    $words
+}
+# a regular expression for a message of a catalog as the app shows it, from its start: its placeables { $name } the
+# words in `values`, any words where `values` has none
+function Pattern([string]$message, [hashtable]$values = @{}) {
+    if (-not $message) { return '^(?!)' }
+    $pattern = '^'
+    foreach ($piece in [regex]::Split($message, '(\{ \$\w+ \})')) {
+        if ($piece -match '^\{ \$(\w+) \}$') {
+            $pattern += if ($values.ContainsKey($Matches[1])) { [regex]::Escape([string]$values[$Matches[1]]) } else { '.+?' }
+        } else {
+            $pattern += [regex]::Escape($piece)
+        }
+    }
+    $pattern
+}
+# the English words of the app, which the checks of the run in English look for
+$en = Catalog 'en'
 function Visible([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowVisible([Native.Win]::GetDlgItem($window, $id)) }
 
 # ---- ImapKit, with mail to read ----
@@ -1090,16 +1234,38 @@ try {
         if ($row -ne [IntPtr]::Zero) { [void][Native.Win]::SendMessage($pickerTree, $TVM_SELECTITEM, [IntPtr]9, $row) }
         $row -ne [IntPtr]::Zero
     }
-    # a row of the list, reached with the keys as a user would
+    # the row selected in the list, -1 for none
+    function SelectedRow { [int][Native.Win]::SendMessage($list, $LVM_GETNEXTITEM, [IntPtr](-1), [IntPtr]2) }
+    # whether the reading pane shows the message with this subject (the selected row's when empty), loaded (the app's
+    # hook, main.cpp kTestShown)
+    $kTestShown = 0x53484F57
+    function Shown([string]$subject = '') { [Native.Win]::SendText($main, $kTestShown, $subject) -eq 1 }
+    # a row of the list, reached with the keys as a user would: once it is selected and the reading pane shows its
+    # message (a row that shows none, of a message not downloaded or of several, is waited for a few seconds)
     function SelectRow([int]$row) {
         # a click into the first row gives the list the keyboard, as it does for a user
         $point = [IntPtr]((28 -shl 16) -bor 60)
         [void][Native.Win]::PostMessage($list, 0x0201, [IntPtr]1, $point)
         [void][Native.Win]::PostMessage($list, 0x0202, [IntPtr]::Zero, $point)
-        Start-Sleep -Milliseconds 300
+        [void](WaitFor { [Native.Win]::FocusOf($list) -eq $list } 3)
+        # the click taken first (it selects the first row), so a row selected before is not taken for the one asked
+        # for: the keys posted after it come after it
+        if ($row -ne 0) { [void](WaitFor { (SelectedRow) -eq 0 } 3) }
         Key $list $VK_HOME
         for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
-        Start-Sleep -Milliseconds 1500
+        if (WaitFor { (SelectedRow) -eq $row } 5) {
+            [void](WaitFor { Shown } 5)
+        } else {
+            Write-Host "   (row $row was not selected: $(SelectedRow) is)"
+        }
+    }
+    # the first row with this subject selected, once the list has it, and the reading pane showing that message;
+    # whether it does
+    function SelectSubject([string]$subject) {
+        $row = WaitFor { $r = @(SubjectRows $subject); if ($r.Count) { "$($r[0])" } } 20
+        if ($null -eq $row) { return $false }
+        SelectRow ([int]$row)
+        [bool](WaitFor { Shown $subject } 15)
     }
     # a picture of a part of the list's row $row as the screen shows it, the main window in front: the part $rect gives
     # for the row (asked while the window is in front); $null when it is empty
@@ -1286,37 +1452,22 @@ try {
 
     Step 'a reply with the earlier message folded'
     SelectRow 3
-    Start-Sleep -Seconds 1
     Shot $main 'read-6-folded'
 
     # ---- writing ----
 
-    # a compose window, once its fields are there (the window exists a moment before them)
-    function WaitCompose {
-        WaitFor {
-            $c = [Native.Win]::FindWindow('InboxClassicCompose', [NullString]::Value)
-            if ($c -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($c, $IDC_BODY) -ne [IntPtr]::Zero) { $c }
-        }
-    }
-    function CloseCompose([IntPtr]$compose) {
-        [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        [void](WaitFor { -not [Native.Win]::IsWindow($compose) })
-    }
-
     Step 'forwarding'
     SelectRow 0
-    Command $main $IDM_FORWARD
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_FORWARD }
     Check ($null -ne $compose) 'Forward opens a compose window'
     Check ((GetText $compose $IDC_SUBJECT) -eq "Fw: $newsletter") 'the subject is marked Fw:'
     Check ((GetText $compose $IDC_TO) -eq '') 'the recipients are left to the user'
     Shot $compose 'write-1-forward'
-    CloseCompose $compose
+    [void](CloseCompose $compose)
 
     Step 'replying to all'
     SelectRow 2
-    Command $main $IDM_REPLY_ALL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_REPLY_ALL }
     Check ($null -ne $compose) 'Reply All opens a compose window'
     $to = GetText $compose $IDC_TO
     Check ($to -like '*bob@example.com*' -and $to -like '*dave@example.com*') "it goes to the sender and the others ($to)"
@@ -1324,12 +1475,11 @@ try {
     Check ((GetText $compose $IDC_CC) -like '*carol@example.com*') 'with the Cc kept'
     Check (Visible $compose $IDC_CC) 'the Cc row is open, as it has someone in it'
     Shot $compose 'write-2-reply-all'
-    CloseCompose $compose
+    [void](CloseCompose $compose)
 
     Step 'replying'
     SelectRow 1
-    Command $main $IDM_REPLY
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_REPLY }
     Check ($null -ne $compose) 'Reply opens a compose window'
     Check ((GetText $compose $IDC_TO) -like '*ann@example.com*') 'the reply goes to the sender'
     # the quote is folded behind "...", the cursor is at the top: Bold, then the answer
@@ -1363,8 +1513,7 @@ try {
     Check ($null -ne (WaitFor { Find 'Sent' "Subject: Re: $subject" })) 'a copy of the reply is in Sent'
 
     Step 'a new message'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     Check ($null -ne $compose) 'Create Mail opens an empty compose window'
     # only the rows that are needed: Cc, Bcc and Attach wait until there is something to put in them
     Check (-not (Visible $compose $IDC_CC) -and -not (Visible $compose $IDC_BCC) -and -not (Visible $compose $IDC_FILES)) 'a new message shows no empty Cc, Bcc or Attach row'
@@ -1379,7 +1528,7 @@ try {
     Check ((WindowText $compose) -eq 'Trail map for Sunday') "a new message's window is named by the subject typed ($(WindowText $compose))"
     Check (TypeInEditor $compose 'Hi Dave, here is the trail map for Sunday. See you at nine!') 'the editor of a new message takes typing'
     Command $compose $IDC_SEND
-    $problem = WaitWindow '#32770' 'Inbox Classic' 10
+    $problem = BoxOf $compose 10
     Check ($null -ne $problem) 'a mistyped address is pointed out before sending'
     if ($problem) {
         Shot $problem 'write-4-bad-address'
@@ -1474,8 +1623,7 @@ public static class Dragger {
     }
 }
 '@
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     SetText $compose $IDC_TO 'Dave <dave@example.com>'
     SetText $compose $IDC_SUBJECT 'Pictures dropped in the UI test'
     Check (TypeInEditor $compose 'A picture: ') 'the editor takes typing'
@@ -1512,8 +1660,7 @@ public static class Dragger {
     Step 'links in a message being written'
     # the mouse away from where the last step left it, so no link is under it
     [Native.Win]::Mouse(5, 5, 0)
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     SetText $compose $IDC_TO 'Dave <dave@example.com>'
     SetText $compose $IDC_SUBJECT 'Links in the UI test'
     $input = ClickEditor $compose
@@ -1678,8 +1825,7 @@ public static class Dragger {
 
     Step 'the Outbox: a send that can not go'
     SetSmtpPort '1'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     Check ([Native.Win]::GetDlgItem($compose, 308) -eq [IntPtr]::Zero) 'there is no Send Later: Send sends'
     SetText $compose $IDC_TO 'Erin <erin@example.com>'
     SetText $compose $IDC_SUBJECT 'Waited in the Outbox in the UI test'
@@ -1704,8 +1850,7 @@ public static class Dragger {
     Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Waited in the Outbox in the UI test' } 30)) 'once the server is back it goes by itself'
 
     Step 'Drafts'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     # a window of its own, not owned by the main window: the main window can come in front of it
     Check ([Native.Win]::GetWindow($compose, 4) -eq [IntPtr]::Zero) 'the message window is a window of its own'
     # neither pinned on top (the screenshots pin the window they take)
@@ -1719,7 +1864,7 @@ public static class Dragger {
     [void](TypeInEditor $compose 'Half written.')
     # closing what was written asks whether to keep it; Yes saves it in Drafts
     [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    $ask = BoxOf $compose 10
     Check ($null -ne $ask) 'closing a written message asks to save it'
     if ($ask) {
         Shot $ask 'write-8-save-draft'
@@ -1733,8 +1878,7 @@ public static class Dragger {
     SelectFolder 2
     Check ($null -ne (WaitFor { if ((Rows) -ge 1) { Rows } })) 'Drafts lists it'
     SelectRow 0
-    Key $list $VK_RETURN
-    $compose = WaitCompose
+    $compose = WaitCompose { Key $list $VK_RETURN }
     Check ($null -ne $compose) 'opening the draft opens a compose window'
     if ($compose) {
         Check ((GetText $compose $IDC_SUBJECT) -eq 'Draft from the UI test') 'with its subject'
@@ -1763,8 +1907,7 @@ public static class Dragger {
     SelectFolder 0
 
     Step 'drafts saved automatically'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     SetText $compose $IDC_TO 'Gus <gus@example.com>'
     SetText $compose $IDC_SUBJECT 'Saved by itself in the UI test'
     [void](TypeInEditor $compose 'Not saved by hand.')
@@ -1775,24 +1918,24 @@ public static class Dragger {
     Shot $compose 'write-20-autosave'
     # closed without saving: the copy only the automatic saving made goes
     [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    $ask = BoxOf $compose 10
     Check ($null -ne $ask) 'closing a message saved only automatically asks whether to keep it'
     if ($ask) { Click $ask 7 }
     Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'No closes the window'
     Check ([bool](WaitFor { -not (Find 'Drafts' 'Subject: Saved by itself in the UI test') } 30)) 'and removes the copy saved automatically from Drafts'
 
     Step 'a message being written opened again after a crash'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     SetText $compose $IDC_TO 'Hal <hal@example.com>'
     SetText $compose $IDC_SUBJECT 'Written when it crashed'
     [void](TypeInEditor $compose 'Kept for a crash.')
     $composeStatus = [Native.Win]::FindWindowEx($compose, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'Saved in Drafts at *') { $t } } 30)) 'saved by itself'
     # the window gone as a crash takes it, without closing, and what was kept opened as at the next start
+    $writing = @(ComposeWindows)
     $open = [Native.Win]::SendText($main, 0x43524153, '') - 10
     Check ($open -eq 1) "it opens again ($open)"
-    $restored = WaitCompose
+    $restored = WaitCompose -composeBefore $writing
     if ($restored) {
         Check ((GetText $restored $IDC_SUBJECT) -eq 'Written when it crashed') 'with its subject'
         Check ((GetText $restored $IDC_TO) -like '*hal@example.com*') 'and its recipient'
@@ -1801,7 +1944,7 @@ public static class Dragger {
         Start-Sleep -Milliseconds 500
         Shot $restored 'write-21-restored'
         [void][Native.Win]::PostMessage($restored, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        $ask = BoxOf $restored 10
         Check ($null -ne $ask) 'closing it asks whether to keep it'
         if ($ask) { Click $ask 7 }
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($restored) })) 'No closes it'
@@ -1824,8 +1967,7 @@ public static class Dragger {
     } else {
         Check $false 'Tools > Options opens'
     }
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     SetText $compose $IDC_TO 'Ida <ida@example.com>'
     SetText $compose $IDC_SUBJECT 'Taken back in the UI test'
     [void](TypeInEditor $compose 'On second thought.')
@@ -1837,8 +1979,7 @@ public static class Dragger {
     $undo = [Native.Win]::GetDlgItem($mainStatus, $IDC_UNDO_SEND)
     Check ($undo -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($undo)) 'with an Undo button'
     Shot $main 'write-22-undo-send'
-    Click $mainStatus $IDC_UNDO_SEND
-    $again = WaitCompose
+    $again = WaitCompose { Click $mainStatus $IDC_UNDO_SEND }
     Check ($null -ne $again -and (GetText $again $IDC_SUBJECT) -eq 'Taken back in the UI test') 'Undo opens the message again, as it was'
     Check (-not [Native.Win]::IsWindowVisible($undo)) 'and the Undo button goes'
     Check ((StatusPart $mainStatus 0) -like '*was not sent*') "the status bar says it was not sent ($(StatusPart $mainStatus 0))"
@@ -1862,13 +2003,12 @@ public static class Dragger {
     }
 
     Step 'a reminder when an attachment is missing'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     SetText $compose $IDC_TO 'Jo <jo@example.com>'
     SetText $compose $IDC_SUBJECT 'Forgot the file in the UI test'
     [void](TypeInEditor $compose 'Here is the attached plan.')
     Command $compose $IDC_SEND
-    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    $ask = BoxOf $compose 10
     Check ($null -ne $ask) 'a message that says a file is attached, with none, asks first'
     if ($ask) {
         Shot $ask 'write-25-attachment-reminder'
@@ -1877,7 +2017,7 @@ public static class Dragger {
     Start-Sleep -Seconds 1
     Check ([Native.Win]::IsWindow($compose)) 'No keeps the message open'
     Command $compose $IDC_SEND
-    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    $ask = BoxOf $compose 10
     if ($ask) { Click $ask 6 }
     Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Forgot the file in the UI test' } 30)) 'Yes sends it'
 
@@ -1886,7 +2026,6 @@ public static class Dragger {
     SelectFolder 0
     [void](WaitFor { if ((Rows) -ge 1) { Rows } } 20)
     SelectRow 0
-    Start-Sleep -Milliseconds 800
     Check (([Native.Win]::SendText($main, $kTextZoom, '') - 10) -eq 100) 'View > Text Size is Medium at first'
     Command $main $IDM_TEXT_SIZE_LARGER
     Check ([bool](WaitFor { ([Native.Win]::SendText($main, $kTextZoom, '') - 10) -eq 120 } 5)) 'Larger shows the message larger'
@@ -1914,8 +2053,7 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($accountsList) } 10)
     }
     SetOtherAddresses 'Sales Desk <sales@inboxclassic.test>' 'account-12-other-addresses'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     $fromBox = [Native.Win]::GetDlgItem($compose, $IDC_FROM)
     $choices = [int][Native.Win]::SendMessage($fromBox, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
     Check ($choices -eq 2) "From offers the other address ($choices choices)"
@@ -1936,15 +2074,12 @@ public static class Dragger {
     $row = WaitFor { $r = @(SubjectRows 'Price list please'); if ($r.Count -gt 0) { $r[0] } } 20
     if ($null -ne $row) {
         SelectRow $row
-        Command $main $IDM_REPLY
-        $reply = WaitCompose
+        $reply = WaitCompose { Command $main $IDM_REPLY }
         if ($reply) {
             $replyFrom = [Native.Win]::GetDlgItem($reply, $IDC_FROM)
             Check ([int][Native.Win]::SendMessage($replyFrom, 0x0147, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1) 'a reply to a message sent to it goes from it'
             Shot $reply 'write-27-reply-from-alias'
-            [void][Native.Win]::PostMessage($reply, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-            $ask = WaitWindow '#32770' 'Inbox Classic' 5
-            if ($ask) { Click $ask 7 }
+            Check (CloseCompose $reply) 'the reply closes without saving'
         }
     } else {
         Check $false 'the message sent to the other address is there'
@@ -2376,7 +2511,7 @@ public static class Dragger {
             [void](WaitFor { -not [Native.Win]::IsWindow($contact) } 5)
         }
         Click $book $IDC_BOOK_DELETE
-        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        $ask = BoxOf $book 10
         if ($ask) { Click $ask 6 }
         Check ([bool](WaitFor { (ListCount $bookList) -eq 0 } 5)) 'and the card goes again'
         [void][Native.Win]::PostMessage($book, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
@@ -2473,17 +2608,29 @@ public static class Dragger {
     function FramesFit([int]$count) {
         WaitFor { $f = Frames; if ($f.Count -eq $count -and $f.Fit) { $f } } 15
     }
+    # Find in This Message of the main window asked for `words`: how many places the reading pane found, as it answered
+    # (the app's hook, main.cpp kTestFound: its count plus 10, 9 before it answered); -1 when the form did not open or
+    # the pane did not answer
+    $kTestFound = 0x464F554E
+    function FindInShown([string]$words) {
+        Command $main $IDM_FIND_IN_MESSAGE
+        $form = WaitForm 'Find in This Message' 10
+        if (-not $form) { return -1 }
+        SetText $form 100 $words
+        Click $form 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($form) } 10)
+        $v = WaitFor { $n = [Native.Win]::SendText($main, $kTestFound, ''); if ($n -ne 9) { "$n" } } 10
+        if ($null -eq $v) { return -1 }
+        [int]$v - 10
+    }
     # words of the message shown found by Find in This Message (which looks into the parts' frames too)
     # (asked again a few times: a part's frame may still be loading its document)
     function FoundInSecure([string]$words) {
         for ($try = 0; $try -lt 3; $try++) {
-            Command $main $IDM_FIND_IN_MESSAGE
-            $form = WaitForm 'Find in This Message' 10
-            if (-not $form) { return $false }
-            SetText $form 100 $words
-            Click $form 1
-            Start-Sleep -Milliseconds 1500
-            if ((StatusPart $secureStatus 0) -notmatch 'not in this message') { return $true }
+            if ((FindInShown $words) -gt 0) { return $true }
+            # its parts' frames sized to their documents first, once they loaded
+            $f = Frames
+            if ($f.Count -gt 0) { [void](FramesFit $f.Count) }
         }
         $false
     }
@@ -2792,7 +2939,7 @@ public static class Dragger {
     Check ([bool]$listed) 'a plain, a signed and an encrypted message are in the Inbox together, the encrypted one as "..."'
     $rowOfSubject = { param($subject) @(SubjectRows $subject)[0] }
     # the plain one selected, so the marks are drawn on the list's white
-    SelectRow (& $rowOfSubject $plainSubject)
+    Check (SelectSubject $plainSubject) "the reading pane shows the message selected ($($plainSubject))"
     $lockMark = & $secureMark (& $rowOfSubject '...')
     $sealMark = & $secureMark (& $rowOfSubject 'Signed by Alice')
     $plainMark = & $secureMark (& $rowOfSubject $plainSubject)
@@ -2853,7 +3000,7 @@ public static class Dragger {
     Check ($found.Count -eq 0) "with the switch off, a word of its text finds nothing, opened or not ($($found -join ', '))"
     [void](FoundSubjects '')
     # on again: the background pass decrypts what is downloaded, without it being opened again
-    SelectRow (& $rowOfSubject $plainSubject)
+    Check (SelectSubject $plainSubject) "the reading pane shows the message selected ($($plainSubject))"
     Check (SetSearchEncrypted $true) 'Search in encrypted messages turned on again'
     $found = WaitFor { $f = @(FoundSubjects 'mill'); if ($f.Count -ge 1) { , $f } } 30
     Check ($null -ne $found) "turned on, the background pass decrypts it: a word of its text finds it ($($found -join ', '))"
@@ -2983,8 +3130,7 @@ public static class Dragger {
     }
     # a new message to `to` with `subject` and `text` written
     function NewMessageTo([string]$to, [string]$subject, [string]$text) {
-        Command $main $IDM_NEW_MAIL
-        $c = WaitCompose
+        $c = WaitCompose { Command $main $IDM_NEW_MAIL }
         if (-not $c) { return $null }
         SetText $c $IDC_TO $to
         SetText $c $IDC_SUBJECT $subject
@@ -3055,7 +3201,7 @@ public static class Dragger {
         if ($keysWindow) {
             $keyList = [Native.Win]::GetDlgItem($keysWindow, $IDC_RKEYS_LIST)
             $intro = GetText $keysWindow $IDC_RKEYS_INTRO
-            Check ($intro -match '^One recipient has no key') "it says why ($intro)"
+            Check ($intro -match (Pattern $en['pgp-recipients-intro-missing[one]'])) "it says why ($intro)"
             $rows = @(0..([Math]::Max(0, (ListCount $keyList) - 1)) | ForEach-Object { "$([Native.Win]::RemoteListText($keyList, $_, 0)) | $([Native.Win]::RemoteListText($keyList, $_, 1))" })
             Check ((ListCount $keyList) -eq 2 -and $rows[0] -eq 'Alice Example <alice@example.org> | Key verified' -and $rows[1] -match '^Dave <dave@example.com> \| No key: none was found on') "Alice and Dave with their keys ($($rows -join '; '))"
             Check (-not (Enabled $keysWindow $IDC_RKEYS_FIND) -and (Enabled $keysWindow $IDC_RKEYS_REMOVE)) "Dave is selected: Find Key greyed (asked a moment ago), Remove from Message"
@@ -3079,8 +3225,7 @@ public static class Dragger {
     AddMessage ([IO.File]::ReadAllText((Join-Path $pgpFiles 'secure-encrypted.eml'))) @('\Seen')
     Command $main $IDM_SYNC
     $words = SelectSecure 'Encrypted'
-    Command $main $IDM_REPLY
-    $reply = WaitCompose
+    $reply = WaitCompose { Command $main $IDM_REPLY }
     Check ($null -ne $reply) "Reply opens a compose window ($words)"
     if ($reply) {
         Check ([bool](WaitFor { (BarPressed $reply $IDM_COMPOSE_ENCRYPT) -and (BarPressed $reply $IDM_COMPOSE_SIGN) } 10)) 'the reply to encrypted mail starts with Encrypt and Sign on'
@@ -3111,7 +3256,7 @@ public static class Dragger {
         Check ((LineFill $reply) -eq $fills.warning) "in amber ($(LineFill $reply))"
         Shot $reply 'write-34-quote-in-clear'
         Command $reply $IDC_SEND
-        $refused = WaitWindow '#32770' 'Inbox Classic' 10
+        $refused = BoxOf $reply 10
         Check ($refused -and (Statics $refused) -match 'only be sent encrypted') "Send is refused with the same words ($(if ($refused) { Statics $refused }))"
         if ($refused) { Click $refused 2; [void](WaitFor { -not [Native.Win]::IsWindow($refused) } 5) }
         Check ([Native.Win]::IsWindow($reply)) 'the message stays open'
@@ -3122,7 +3267,7 @@ public static class Dragger {
         Start-Sleep -Milliseconds 500
         [System.Windows.Forms.SendKeys]::SendWait('{DEL}')
         [void](TypeInEditor $reply 'Nothing secret in this answer.')
-        $line = WaitFor { $t = SecurityLine $reply; if ($t -match '^Not encrypted') { $t } } 10
+        $line = WaitFor { $t = SecurityLine $reply; if ($t -match (Pattern $en['pgp-compose-reply-clear'])) { $t } } 10
         Check ($line -eq 'Not encrypted, although the message it answers or forwards was.') "without the quote, the line says it is not encrypted ($(SecurityLine $reply))"
         $before = NewestUid
         Command $reply $IDC_SEND
@@ -3248,7 +3393,7 @@ public static class Dragger {
     # trying to open it anyway says why, and nothing is opened
     $before = (OpenedFiles).Count
     Key $strip $VK_RETURN
-    $box = WaitWindow '#32770' 'Inbox Classic' 10
+    $box = BoxOf $main 10
     $said = if ($box) { Statics $box } else { '' }
     Check ($said -match 'program') "opening a program is refused, with why ($said)"
     if ($box) {
@@ -3272,7 +3417,7 @@ public static class Dragger {
             Check $false "the menu of $($page.Name) opens"
         }
         Key $strip $VK_RETURN
-        $box = WaitWindow '#32770' 'Inbox Classic' 10
+        $box = BoxOf $main 10
         $said = if ($box) { Statics $box } else { '' }
         Check ($said -match [regex]::Escape("$($page.Name)") -and $said -match 'program') "opening $($page.Name) is refused, naming it ($said)"
         if ($box) {
@@ -3809,7 +3954,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, 'nothing has this')
     Check ([bool](WaitFor { (Rows) -eq 0 })) 'and nothing when nothing has it'
     # the list then says so in its middle, and what to try
-    Check ([bool](WaitFor { (& $searchBar) -match '^No results for .nothing has this.' } 5)) "the search bar says there are no results ($(& $searchBar))"
+    Check ([bool](WaitFor { $b = & $searchBar; foreach ($id in 'win-search-found-all[0]', 'win-search-found-in[0]') { if ($b -match (Pattern $en[$id] @{ words = 'nothing has this' })) { $true } } } 5)) "the search bar says there are no results ($(& $searchBar))"
     Shot $main 'find-3-no-results'
     [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, '')
     Check ([bool](WaitFor { (Rows) -eq $all -and (& $columns) -eq $FOLDER_COLUMNS })) 'clearing it shows the folder again, without the Folder column'
@@ -3891,9 +4036,10 @@ public static class Dragger {
     Check ($null -ne (WaitFor { Find 'Trash' 'Subject: One more thing' } 20)) 'Delete puts it in Deleted Items'
     Check ($null -eq (Find 'INBOX' 'Subject: One more thing')) 'and takes it out of the Inbox'
     Check ([bool](WaitFor { (Rows) -eq $listed - 1 })) 'the list has one less'
-    # the next one is selected: move it to Archive through the dialog
-    $selected = [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2)
-    $next = [Native.Win]::RemoteListText($list, $selected, $COL_SUBJECT)
+    # the next one is selected, and shown: move it to Archive through the dialog
+    $selected = WaitFor { $s = SelectedRow; if ($s -ge 0 -and (Shown)) { "$s" } } 10
+    $next = if ($null -ne $selected) { [Native.Win]::RemoteListText($list, [int]$selected, $COL_SUBJECT) } else { '' }
+    Check ($next -ne '') "after Delete the next message is selected and shown ($next)"
     Command $main $IDM_MOVE
     $move = WaitPicker 'Move Message'
     Check ($null -ne $move) 'Move to Folder asks where'
@@ -3911,7 +4057,7 @@ public static class Dragger {
     [void](WaitFor { if ((Rows) -ge 1) { Rows } })
     SelectRow 0
     Command $main $IDM_DELETE
-    $sure = WaitWindow '#32770' 'Inbox Classic' 10
+    $sure = BoxOf $main 10
     Check ($null -ne $sure) 'deleting for good asks first'
     if ($sure) {
         Shot $sure 'organize-4-for-good'
@@ -4018,13 +4164,7 @@ public static class Dragger {
     # words of the message shown found by Find in This Message
     $foundInMessage = {
         param([string]$words)
-        Command $main $IDM_FIND_IN_MESSAGE
-        $form = WaitForm 'Find in This Message' 10
-        if (-not $form) { return $false }
-        SetText $form 100 $words
-        Click $form 1
-        Start-Sleep -Milliseconds 1500
-        (StatusPart $mainStatus 0) -notmatch 'not in this message'
+        (FindInShown $words) -gt 0
     }
 
     $invite = "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Invitation: Quarterly planning`r`n" +
@@ -4215,7 +4355,7 @@ public static class Dragger {
     $outbox = WaitShown 'InboxClassicOutbox' 10
     if ($outbox) {
         $outboxList = [Native.Win]::GetDlgItem($outbox, 450)
-        Check ([Native.Win]::RemoteListText($outboxList, 0, 3) -match '^Queued by an AI agent; sends at') 'it waits in the Outbox, where it can still be deleted'
+        Check ([Native.Win]::RemoteListText($outboxList, 0, 3) -match (Pattern $en['ui-outbox-status-agent'])) 'it waits in the Outbox, where it can still be deleted'
         Shot $outbox 'agents-5-outbox'
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
@@ -4235,9 +4375,9 @@ public static class Dragger {
         Check ($accessShown -ge $needed + 6 -and -not ([Native.Win]::GetWindowLong($hosts, -16) -band 0x00100000)) "what it may do is shown whole ($accessShown for $needed)"
         $logged = { param($row) [Native.Win]::RemoteListText($log, $row, 2) }
         # after the send the agent saved a draft (opened below)
-        [void](WaitFor { (& $logged 0) -match '^Saved the draft' } 20)
-        Check ((& $logged 0) -match "^Saved the draft $([char]0x201C)Agenda for Friday$([char]0x201D)" -and
-               (& $logged 1) -match "^Put $([char]0x201C)Lunch on Friday\?$([char]0x201D) in the Outbox for pat@example.net" -and (& $logged 4) -match '^Marked read') "and what its agent did, newest first ($(@(0..4 | ForEach-Object { & $logged $_ }) -join '; '))"
+        [void](WaitFor { (& $logged 0) -match (Pattern $en['agent-log-draft']) } 20)
+        Check ((& $logged 0) -match (Pattern $en['agent-log-draft'] @{ subject = 'Agenda for Friday' }) -and
+               (& $logged 1) -match (Pattern $en['agent-log-sent'] @{ subject = 'Lunch on Friday?'; to = 'pat@example.net' }) -and (& $logged 4) -match (Pattern $en['agent-log-read'])) "and what its agent did, newest first ($(@(0..4 | ForEach-Object { & $logged $_ }) -join '; '))"
         # the colour of a flag and a conversation watched, by the agent
         Check ((& $logged 2) -match "^Watched the conversation $([char]0x201C)" -and (& $logged 3) -match "^Flagged $([char]0x201C).+$([char]0x201D) blue$") "a flag's colour and a watched conversation are listed ($(& $logged 2); $(& $logged 3))"
         Shot $agents 'agents-6-window'
@@ -4252,7 +4392,7 @@ public static class Dragger {
         # shows each read with its time: the subjects, never what the messages say
         $reads = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_READS)
         $readsLabel = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_READS_LABEL)
-        Check ((WindowText $readsLabel) -match '^Select a row of reads' -and (ListCount $reads) -eq 0) "with another row selected, the list under the log says to select a row of reads ($(WindowText $readsLabel))"
+        Check ((WindowText $readsLabel) -match (Pattern $en['win-agent-reads-hint']) -and (ListCount $reads) -eq 0) "with another row selected, the list under the log says to select a row of reads ($(WindowText $readsLabel))"
         $rows = @(0..([Math]::Max(0, (ListCount $log) - 1)) | ForEach-Object { & $logged $_ })
         $readsRow = [Array]::FindIndex([string[]]$rows, [Predicate[string]] { param($r) $r -match '^Read \d+ messages?\b' })
         Check ($readsRow -gt 4 -and $rows[$readsRow] -match 'looked at (a )?message lists?') "what it read is one row, under what it did after ($($rows -join '; '))"
@@ -4260,10 +4400,11 @@ public static class Dragger {
             Key $log $VK_HOME
             for ($i = 0; $i -lt $readsRow; $i++) { Key $log $VK_DOWN }
             $readTexts = WaitFor { if ((ListCount $reads) -gt 0) { , @(0..((ListCount $reads) - 1) | ForEach-Object { [Native.Win]::RemoteListText($reads, $_, 1) }) } } 10
-            $subject = "$([char]0x201C)(Quarterly report draft|Team lunch on Friday)$([char]0x201D)"
-            Check (@($readTexts) -match "^Read $subject$" -and @($readTexts) -match '^Looked at \d+ messages? in ') "selected, the list under it shows each read: the subject, the message list ($($readTexts -join '; '))"
+            $readOf = @('Quarterly report draft', 'Team lunch on Friday' | ForEach-Object { (Pattern $en['agent-read-message'] @{ subject = $_ }) + '$' }) -join '|'
+            $lookedAt = @('agent-read-list[one]', 'agent-read-list[*]' | ForEach-Object { Pattern $en[$_] }) -join '|'
+            Check (@($readTexts) -match $readOf -and @($readTexts) -match $lookedAt) "selected, the list under it shows each read: the subject, the message list ($($readTexts -join '; '))"
             Check (-not (@($readTexts) -match 'Comments by Thursday|Who is in for lunch')) 'never what a message says'
-            Check ((WindowText $readsLabel) -match '^What was read from .+ to .+:$') "over it, the hour it covers ($(WindowText $readsLabel))"
+            Check ((WindowText $readsLabel) -match ((Pattern $en['win-agent-reads']) + '$')) "over it, the hour it covers ($(WindowText $readsLabel))"
             Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($agents, $IDC_AGENTS_UNDO))) 'reading can not be undone'
             Shot $agents 'agents-9-reads'
         }
@@ -4288,8 +4429,7 @@ public static class Dragger {
     Check ($null -ne $agentRow) 'the agent''s draft is in Drafts'
     if ($null -ne $agentRow) {
         SelectRow ([int]$agentRow)
-        Key $list $VK_RETURN
-        $compose = WaitCompose
+        $compose = WaitCompose { Key $list $VK_RETURN }
         Check ($null -ne $compose) 'opening it opens a compose window'
         if ($compose) {
             $note = GetText $compose $IDC_COMPOSE_AGENT_NOTE
@@ -4316,7 +4456,7 @@ public static class Dragger {
             [void][Native.Win]::SetWindowPos($compose, [IntPtr]::Zero, 0, 0, $wide.Right - $wide.Left, $wide.Bottom - $wide.Top, 0x16)
             # closed without saving: the draft stays the agent's
             [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-            $ask = WaitWindow '#32770' 'Inbox Classic' 10
+            $ask = BoxOf $compose 10
             if ($ask) { Click $ask 7 }
             Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) } 10)) 'closed without saving'
             Start-Sleep -Seconds 1
@@ -4367,7 +4507,7 @@ public static class Dragger {
     if ($agents) {
         $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
         $newest = [Native.Win]::RemoteListText($log, 0, 2)
-        Check ($newest -match '^You did not unsubscribe from ' -and $newest -match 'digest@list\.example\.com' -and $newest -match 'offers@list\.example\.com') "and no list was asked ($newest)"
+        Check ($newest -match (Pattern $en['agent-log-unsubscribe-refused']) -and $newest -match 'digest@list\.example\.com' -and $newest -match 'offers@list\.example\.com') "and no list was asked ($newest)"
         Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($agents, $IDC_AGENTS_UNDO))) 'which can not be undone'
         [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
@@ -4596,7 +4736,7 @@ public static class Dragger {
     if ($move) { Click $move 1 }
     $undoneBar = [Native.Win]::GetDlgItem($main, $IDC_UNDONE_BAR)
     $said = WaitFor { if ([Native.Win]::IsWindowVisible($undoneBar)) { WindowText $undoneBar } } 30
-    Check ($said -match '^The server did not move 1 message to Gone, so (it is|they are) back in Bulk: .+') "a move the server refuses is taken back, a bar over the list saying why in the core's words ($said)"
+    Check ($said -match (@('undone-move[one]', 'undone-move[*]' | ForEach-Object { Pattern $en[$_] @{ folder = 'Gone'; from = 'Bulk' } }) -join '|')) "a move the server refuses is taken back, a bar over the list saying why in the core's words ($said)"
     Check ([bool](WaitFor { (Rows) -eq 4 -and (SubjectRows $refused).Count -eq 1 } 20)) "and its row is back in the list ($(Rows) rows)"
     Check ((StatusPart $mainStatus 0) -notmatch 'to Gone') "the status bar no longer says it moved ($(StatusPart $mainStatus 0))"
     # selected again, in view, as what Undo brings back is
@@ -4684,8 +4824,7 @@ public static class Dragger {
     Check ([bool]$savedAll -and (Get-Content -Raw -LiteralPath $theirs) -eq 'mine') "and saves the three there, never over a file that is there ($(@(Get-ChildItem -LiteralPath $saveDir).Count) files)"
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -eq 'Saved 3 messages to saved-three' } 10)) "the status bar says where ($(StatusPart $mainStatus 0))"
     # Forward with three: one new message with them attached
-    Command $main $IDM_FORWARD
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_FORWARD }
     Check ($null -ne $compose) 'Forward with three selected writes one new message'
     if ($compose) {
         $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
@@ -4696,7 +4835,7 @@ public static class Dragger {
         [Native.Win]::Mouse(2, 2, 0)
         Start-Sleep -Milliseconds 300
         Shot $compose 'files-5-forward'
-        CloseCompose $compose
+        [void](CloseCompose $compose)
     }
     # .eml files dropped onto Archive are put in it; a file that is not a message is turned away
     $dropDir = Join-Path (Resolve-Path $Out) 'to-drop'
@@ -4764,7 +4903,7 @@ public static class Dragger {
     $flagsOf = { param($subject) @((Find 'INBOX' "Subject: $([regex]::Escape($subject))").flags) }
 
     # the menu: the seven colours and Clear Flag
-    SelectRow (& $rowOf $plain[0])
+    Check (SelectSubject $plain[0]) "the reading pane shows the message selected ($($plain[0]))"
     $WM_CONTEXTMENU = 0x007B
     [void][Native.Win]::PostMessage($main, $WM_CONTEXTMENU, $list, [IntPtr](-1))
     $menu = WaitWindow '#32768' $null 10
@@ -4784,12 +4923,12 @@ public static class Dragger {
     Command $main ($IDM_FLAG_COLOR + 2)
     Check ([bool](WaitFor { $f = & $flagsOf $plain[0]; ($f -contains '\Flagged') -and ($f -contains '$MailFlagBit0') -and ($f -notcontains '$MailFlagBit1') -and ($f -notcontains '$MailFlagBit2') } 20)) "Orange flags the message orange: \Flagged and `$MailFlagBit0 on the server ($((& $flagsOf $plain[0]) -join ' '))"
     Check ((StatusPart $mainStatus 0) -eq 'Flagged 1 message orange') "the status bar says so ($(StatusPart $mainStatus 0))"
-    SelectRow (& $rowOf $apple)
+    Check (SelectSubject $apple) "the reading pane shows the message selected ($($apple))"
     $orange = & $flagColor (& $rowOf $plain[0])
     Check (& $near $orange 247 99 12) "the flag column shows it in orange ($orange)"
 
     # blue on two selected
-    SelectRow (& $rowOf $plain[1])
+    Check (SelectSubject $plain[1]) "the reading pane shows the message selected ($($plain[1]))"
     [void][Native.Win]::SetForegroundWindow($main)
     [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero)
     $box = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr](& $rowOf $plain[2]), 0)
@@ -4847,7 +4986,7 @@ public static class Dragger {
     }
 
     # Clear Flag takes the flag and its colour away
-    SelectRow (& $rowOf $plain[0])
+    Check (SelectSubject $plain[0]) "the reading pane shows the message selected ($($plain[0]))"
     [void][Native.Win]::SetForegroundWindow($main)
     [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero)
     foreach ($s in $plain[1], $plain[2], $apple) {
@@ -4935,7 +5074,7 @@ public static class Dragger {
     Command $main $IDM_SYNC
     [void](WaitFor { if ((Rows) -ge 1) { Rows } } 20)
     Command $main $IDM_EMPTY_FOLDER
-    $sure = WaitWindow '#32770' 'Inbox Classic' 10
+    $sure = BoxOf $main 10
     Check ($null -ne $sure) 'Empty Folder asks first, saying how many go'
     if ($sure) {
         Shot $sure 'organize-9-empty'
@@ -4973,13 +5112,12 @@ public static class Dragger {
         Check ([bool](WaitFor { (WindowText $messageWindow) -eq "$firstSubject - Inbox Classic" } 10)) "Previous goes back ($(WindowText $messageWindow))"
         Start-Sleep -Milliseconds 1000
         Shot $messageWindow 'read-16-window'
-        Command $messageWindow $IDM_REPLY
-        $compose = WaitCompose
+        $compose = WaitCompose { Command $messageWindow $IDM_REPLY }
         Check ($null -ne $compose) 'Reply in the window opens a compose window'
         if ($compose) {
             $replySubject = GetText $compose $IDC_SUBJECT
             Check ($replySubject -eq "Re: $firstSubject" -or ($firstSubject -like 'Re:*' -and $replySubject -eq $firstSubject)) "a reply to that message ($replySubject)"
-            CloseCompose $compose
+            [void](CloseCompose $compose)
         }
         Key $messageWindow $VK_ESCAPE
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($messageWindow) } 10)) 'Esc closes the window'
@@ -4992,7 +5130,6 @@ public static class Dragger {
     $IDM_NEXT_MESSAGE = 140; $IDM_PREVIOUS_MESSAGE = 141; $IDM_NEXT_UNREAD = 142; $IDM_GO_TO_FOLDER = 143; $IDM_FIND_IN_MESSAGE = 144
     $IDM_MARK_ALL_READ = 126; $LVM_GETNEXTITEM = 0x100C
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
-    function SelectedRow { [int][Native.Win]::SendMessage($list, $LVM_GETNEXTITEM, [IntPtr](-1), [IntPtr]2) }
     SelectFolder 0
     [void](WaitFor { if ((Rows) -ge 3) { Rows } } 20)
     SelectRow 0
@@ -5016,7 +5153,7 @@ public static class Dragger {
     Check ([bool](WaitFor { (SelectedRow) -eq 2 } 5)) "Next Unread Message selects the next unread message ($(SelectedRow))"
     [void](WaitFor { Seen $thirdPattern } 20)
     Command $main $IDM_NEXT_UNREAD
-    $goOn = WaitWindow '#32770' 'Inbox Classic' 10
+    $goOn = BoxOf $main 10
     $asked = if ($goOn) { Statics $goOn } else { '' }
     Check ($asked -match 'Archive') "with none left it asks to go on to the next folder with unread mail ($asked)"
     if ($goOn) {
@@ -5042,17 +5179,16 @@ public static class Dragger {
     }
     SelectFolder 0
     [void](WaitFor { if ((Rows) -ge 3) { Rows } } 20)
-    $newsRow = WaitFor { $r = @(SubjectRows $newsletter); if ($r.Count) { "$($r[0])" } } 10
-    if ($newsRow) { SelectRow ([int]$newsRow) }
+    Check (SelectSubject $newsletter) "the reading pane shows the message selected ($newsletter)"
     Command $main $IDM_FIND_IN_MESSAGE
     $findForm = WaitForm 'Find in This Message' 10
     Check ($null -ne $findForm) 'Find in This Message asks for the words'
     if ($findForm) {
         SetText $findForm 100 'larches'
         Click $findForm 1
-        Start-Sleep -Milliseconds 1500
-        $said = StatusPart $mainStatus 0
-        Check ($said -notmatch 'not in this message') "it finds a word of the message shown ($said)"
+        [void](WaitFor { -not [Native.Win]::IsWindow($findForm) } 10)
+        $count = WaitFor { $n = [Native.Win]::SendText($main, $kTestFound, ''); if ($n -ne 9) { "$($n - 10)" } } 10
+        Check ([int]$count -gt 0) "it finds a word of the message shown ($count places; $(StatusPart $mainStatus 0))"
         Shot $main 'read-17-find'
     }
     Command $main $IDM_FIND_IN_MESSAGE
@@ -5060,7 +5196,7 @@ public static class Dragger {
     if ($findForm) {
         SetText $findForm 100 'zeppelins'
         Click $findForm 1
-        $said = WaitFor { $t = StatusPart $mainStatus 0; if ($t -match 'zeppelins.*not in this message') { $t } } 10
+        $said = WaitFor { $t = StatusPart $mainStatus 0; if ($t -match (Pattern $en['ui-find-not-found'] @{ words = 'zeppelins' })) { $t } } 10
         Check ($null -ne $said) "and says when it is not there ($(StatusPart $mainStatus 0))"
     } else {
         Check $false 'Find in This Message asks again'
@@ -5319,7 +5455,7 @@ public static class Dragger {
     Check ([int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONCHECKED, [IntPtr]$IDM_HIDE_READ, [IntPtr]::Zero) -ne 0) "the toolbar's Unread button is pressed"
     Check ((Get-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue).HideReadMessages -eq 1) 'and that is kept for the next start'
     # one read in the reading pane stays in the list until the folder changes
-    SelectRow (& $rowOf $unreadOnly[1])
+    Check (SelectSubject $unreadOnly[1]) "the reading pane shows the message selected ($($unreadOnly[1]))"
     Check ([bool](WaitFor { Seen "Subject: $([regex]::Escape($unreadOnly[1]))" } 20)) 'reading one marks it read on the server'
     Start-Sleep -Seconds 1
     Check (& $listed $unreadOnly[1]) 'and it stays in the list while the folder is shown'
@@ -5589,7 +5725,7 @@ public static class Dragger {
     Check ([bool](WaitFor { (WindowText $main) -eq 'Sent Items - Inbox Classic' -and (SelectedRow) -ge 0 -and [Native.Win]::RemoteListText($list, (SelectedRow), $COL_SUBJECT) -eq $bounced } 10)) "and it selects the message in Sent Items ($(WindowText $main))"
     SelectFolder 0
     [void](WaitFor { $null -ne (& $rowOf $failedSubject) } 20)
-    SelectRow (& $rowOf $failedSubject)
+    Check (SelectSubject $failedSubject) "the reading pane shows the message selected ($($failedSubject))"
     [void](WaitFor { $null -ne (& $cardPoint 196 43 28) } 15)
     Check ([bool](WaitFor { & $foundInMessage 'Your message was not delivered' } 5)) 'the card says the message was not delivered'
     Check ([bool](WaitFor { & $foundInMessage 'sam.nobody@example.org' } 5)) 'it names the recipient'
@@ -5599,7 +5735,7 @@ public static class Dragger {
     Check ([bool](WaitFor { & $foundInMessage $serverWords } 5)) "its Details show the server's own words"
     Shot $main 'bounce-1-failed'
 
-    SelectRow (& $rowOf $delayedSubject)
+    Check (SelectSubject $delayedSubject) "the reading pane shows the message selected ($($delayedSubject))"
     Check ([bool](WaitFor { $null -ne (& $cardPoint 154 91 0) } 15)) 'a delay notice shows the amber card'
     Check ([bool](WaitFor { & $foundInMessage 'Your message has not been delivered yet' } 5)) 'it says the message is not delivered yet'
     Check ([bool](WaitFor { & $foundInMessage 'still trying to deliver it' } 5)) 'and that it is still being tried'
@@ -5649,7 +5785,7 @@ public static class Dragger {
     $copied = {
         param($subject)
         Set-Clipboard -Value 'nothing'
-        SelectRow (& $rowOf $subject)
+        Check (SelectSubject $subject) "the reading pane shows the message selected ($($subject))"
         [void](WaitFor { (WindowText $main) -match 'Inbox' } 5)
         Start-Sleep -Seconds 2
         [void][Native.Win]::SendText($main, $kTestLink, 'inboxclassic:copy-code')
@@ -5698,7 +5834,7 @@ public static class Dragger {
     # a message shown, and whether the pictures bar is over it once it is there
     $showShop = {
         param($subject)
-        SelectRow (& $rowOf $subject)
+        Check (SelectSubject $subject) "the reading pane shows the message selected ($($subject))"
         Start-Sleep -Seconds 2
         Visible $main $IDC_PICTURES
     }
@@ -5862,7 +5998,7 @@ public static class Dragger {
         $plans = WaitFor { ArchiveChild }
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $plans)
         Command $main $IDM_DELETE_FOLDER
-        $sure = WaitWindow '#32770' 'Inbox Classic' 10
+        $sure = BoxOf $main 10
         Check ($null -ne $sure) 'deleting a folder asks first'
         if ($sure) {
             Shot $sure 'folders-3-delete'
@@ -5874,7 +6010,7 @@ public static class Dragger {
     SelectFolder 0
     Command $main $IDM_RENAME_FOLDER
     AnswerName 'Rename Folder' 'Mail' $null
-    $refused = WaitWindow '#32770' 'Inbox Classic' 10
+    $refused = BoxOf $main 10
     Check ($null -ne $refused) 'renaming the Inbox is refused with the reason'
     if ($refused) {
         Shot $refused 'folders-4-inbox'
@@ -5883,11 +6019,10 @@ public static class Dragger {
     }
 
     Step 'closing a message that was written'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     [void](TypeInEditor $compose 'Never mind.')
     [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    $ask = BoxOf $compose 10
     Check ($null -ne $ask) 'closing asks before throwing the text away'
     if ($ask) {
         Shot $ask 'write-6-close'
@@ -5913,15 +6048,11 @@ public static class Dragger {
     if ($linked) {
         Check ((GetText $linked $IDC_TO) -eq 'gina@example.com') "to the link's address ($(GetText $linked $IDC_TO))"
         Shot $linked 'write-18-mailto'
-        [void][Native.Win]::PostMessage($linked, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        $ask = WaitWindow '#32770' 'Inbox Classic' 5
-        if ($ask) { Click $ask 7 }
-        [void](WaitFor { -not [Native.Win]::IsWindow($linked) } 10)
+        Check (CloseCompose $linked) 'the message closes without saving'
     }
 
     Step 'completing an address'
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     if ($compose) {
         $to = [Native.Win]::GetDlgItem($compose, $IDC_TO)
         foreach ($c in 'ann'.ToCharArray()) { [void][Native.Win]::PostMessage($to, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
@@ -5943,10 +6074,7 @@ public static class Dragger {
         Key $to $VK_RETURN
         Check ([bool](WaitFor { (GetText $compose $IDC_TO) -eq 'Ann Example <ann@example.com>, ' } 5)) "Enter takes the first, with a comma for the next ($(GetText $compose $IDC_TO))"
         Check ($completion -and -not [Native.Win]::IsWindowVisible($completion)) 'and closes the list'
-        [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        $ask = WaitWindow '#32770' 'Inbox Classic' 5
-        if ($ask) { Click $ask 7 }
-        [void](WaitFor { -not [Native.Win]::IsWindow($compose) } 10)
+        Check (CloseCompose $compose) 'the message closes without saving'
     }
 
     Step 'a signature'
@@ -5970,8 +6098,7 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) } 10)
     }
     # a new message starts with it, under the line to write on
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     if ($compose) {
         SetText $compose $IDC_TO 'Fay <fay@example.com>'
         SetText $compose $IDC_SUBJECT 'Signed in the UI test'
@@ -5993,8 +6120,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Signed in the UI test"')
     [void](WaitFor { (Rows) -eq 1 } 20)
     SelectRow 0
-    Command $main $IDM_REPLY
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_REPLY }
     if ($compose) {
         Check (TypeInEditor $compose 'Thanks.') 'a reply takes typing'
         Command $compose $IDC_SEND
@@ -6004,7 +6130,7 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
     if ($compose -and [Native.Win]::IsWindow($compose)) {
         Shot $compose 'signature-3-reply-left'
-        CloseCompose $compose
+        [void](CloseCompose $compose)
         $left = WaitWindow '#32770' $null 5
         if ($left) { Click $left 7 }
     }
@@ -6109,8 +6235,7 @@ public static class Dragger {
     }
 
     # the To button of a message: Select Recipients
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     if ($compose) {
         Click $compose $IDC_PICK_TO_BUTTON
         $pick = WaitShown 'InboxClassicPick' 10
@@ -6151,7 +6276,7 @@ public static class Dragger {
         Key $cc $VK_RETURN
         Check ([bool](WaitFor { (GetText $compose $IDC_CC) -eq 'Mary Smith <mary@example.com>, dave@example.com, ' } 5)) "taking it puts its members in Cc ($(GetText $compose $IDC_CC))"
         [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        $ask = WaitWindow '#32770' 'Inbox Classic' 5
+        $ask = BoxOf $compose 5
         if ($ask) { Click $ask 7 }
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) } 10)) 'the message is closed without saving'
     }
@@ -6213,7 +6338,7 @@ public static class Dragger {
         Key $bookList $VK_HOME
         Start-Sleep -Milliseconds 300
         Key $bookList $VK_DELETE
-        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        $ask = BoxOf $book 10
         Check ($ask -and (Statics $ask) -match 'Delete this contact from the Address Book\?') "Delete asks first ($(if ($ask) { Statics $ask }))"
         if ($ask) { Click $ask 6 }
         Check ([bool](WaitFor { ((Names $bookList) -join ', ') -eq 'Mary Smith, Sender' } 10)) "then removes the selected contact ($((Names $bookList) -join ', '))"
@@ -6420,13 +6545,12 @@ public static class Dragger {
         [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
     }
     SelectRow ([array]::IndexOf($places, 'Work'))
-    Command $main $IDM_REPLY
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_REPLY }
     Check ($null -ne $compose) 'Reply opens a compose window'
     if ($compose) {
         $from = GetText $compose $IDC_FROM
         Check ($from -eq 'Work <testuser2@inboxclassic.test>') "a reply goes from the account of the message ($from)"
-        CloseCompose $compose
+        [void](CloseCompose $compose)
     }
     Command $main $IDM_MARK_ALL_READ
     $unreadOn = { param($server) @(Messages 'INBOX' $server | Where-Object { $_.flags -notcontains '\Seen' }).Count }
@@ -6523,8 +6647,7 @@ public static class Dragger {
     $draftRow = & $at $drafted
     if ($null -ne $draftRow) { SelectRow $draftRow }
     Shot $main 'all-drafts-1-list'
-    Key $list $VK_RETURN
-    $compose = WaitCompose
+    $compose = WaitCompose { Key $list $VK_RETURN }
     Check ($null -ne $compose) 'opening the draft opens a compose window'
     if ($compose) {
         $from = GetText $compose $IDC_FROM
@@ -6538,7 +6661,7 @@ public static class Dragger {
         $resaved = WaitFor { $d = @(Messages 'Drafts' | Where-Object { (RawText $_) -match "Subject: $drafted" }); if ($d.Count -eq 1 -and (RawText $d[0]) -match 'Started in the first account' -and (RawText $d[0]) -match 'Finished in All Drafts') { $d } } 30
         Check ($null -ne $resaved) "with the draft's text: written on and saved, it replaces the draft in the first account's Drafts"
         Check (@(Messages 'Drafts' $rest2).Count -eq 0) "and nothing goes to the second account's Drafts"
-        CloseCompose $compose
+        [void](CloseCompose $compose)
     }
     # what the step added taken away again, All Sent and All Drafts closed again as they start
     foreach ($m in @(@('Sent', $rest, $sentFirst), @('Sent', $rest2, $sentWork), @('Drafts', $rest, $drafted))) {
@@ -7110,7 +7233,7 @@ public static class Dragger {
         $parts = @(0..7 | ForEach-Object { GetText $export ($IDC_SETUP_PART + $_) })
         $chosen = @(0..7 | Where-Object { IsChecked $export ($IDC_SETUP_PART + $_) }).Count
         Check (($parts -join ', ') -eq 'Accounts, Sign-in apps, Settings, Window preferences, Contacts and groups, Encryption keys, Message rules, Trusted senders' -and $chosen -eq 8) "it lists the parts, all chosen ($($parts -join ', '); $chosen chosen)"
-        Check (-not (IsChecked $export $IDC_SETUP_USE_PASSPHRASE) -and -not (Enabled $export $IDC_SETUP_PASSPHRASE) -and (GetText $export $IDC_SETUP_PASSPHRASE_NOTE) -match '^With a passphrase, the file is encrypted and includes saved passwords, sign-in credentials and private keys\.') 'the passphrase is off, with the words of what it adds'
+        Check (-not (IsChecked $export $IDC_SETUP_USE_PASSPHRASE) -and -not (Enabled $export $IDC_SETUP_PASSPHRASE) -and (WaitText $export $IDC_SETUP_PASSPHRASE_NOTE) -eq $en['ui-setup-passphrase-note']) "the passphrase is off, with the words of what it adds ($(IsChecked $export $IDC_SETUP_USE_PASSPHRASE), $(Enabled $export $IDC_SETUP_PASSPHRASE), $(GetText $export $IDC_SETUP_PASSPHRASE_NOTE))"
         Check (Enabled $export 1) 'Export can go without a passphrase'
         Shot $export 'setup-1-export'
         SetCheck $export $IDC_SETUP_USE_PASSPHRASE $true
@@ -7147,7 +7270,7 @@ public static class Dragger {
         Key $bookList $VK_HOME
         Start-Sleep -Milliseconds 300
         Key $bookList $VK_DELETE
-        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        $ask = BoxOf $book 10
         if ($ask) { Click $ask 6 }
         Check ($contactsBefore.Count -gt 0 -and [bool](WaitFor { (ListCount $bookList) -eq $contactsBefore.Count - 1 } 10)) "a contact is deleted before the import ($($contactsBefore -join ', '))"
         [void][Native.Win]::PostMessage($book, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
@@ -7171,7 +7294,7 @@ public static class Dragger {
     $import = WaitShown 'InboxClassicSetupImport' 30
     Check ($null -ne $import) 'the right one shows what the file holds'
     if ($import) {
-        Check ((GetText $import $IDC_SETUP_FROM) -match '^Saved by Inbox Classic \d+\.\d+\.\d+ on .+\.$') "with when and by which version it was saved ($(GetText $import $IDC_SETUP_FROM))"
+        Check ((GetText $import $IDC_SETUP_FROM) -match ((Pattern $en['ui-setup-from']) + '$')) "with when and by which version it was saved ($(GetText $import $IDC_SETUP_FROM))"
         $accountBoxes = @(0..9 | Where-Object { [Native.Win]::GetDlgItem($import, $IDC_SETUP_ACCOUNT + $_) -ne [IntPtr]::Zero })
         $here = @($accountBoxes | Where-Object { -not (IsChecked $import ($IDC_SETUP_ACCOUNT + $_)) -and -not (Enabled $import ($IDC_SETUP_ACCOUNT + $_)) })
         $words = Statics $import
@@ -7513,13 +7636,12 @@ public static class Dragger {
             $emlSaved = WaitFor { $f = Join-Path $emlSaveDir 'file-notes.txt'; if (Test-Path $f) { Get-Content -Raw $f } } 10
             Check ($emlSaved -and $emlSaved.TrimEnd() -eq 'notes that came in the message file') "and saves the file's attachment there ($emlSaved)"
         }
-        Command $fileWindow $IDM_REPLY
-        $compose = WaitCompose
+        $compose = WaitCompose { Command $fileWindow $IDM_REPLY }
         Check ($null -ne $compose) 'Reply opens a new message'
         if ($compose) {
             $replySubject = GetText $compose $IDC_SUBJECT
             Check ($replySubject -eq "Re: $emlSubject") "answering the file's message ($replySubject)"
-            CloseCompose $compose
+            [void](CloseCompose $compose)
         }
         [void][Native.Win]::PostMessage($fileWindow, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($fileWindow) } 10)) 'and the window closes'
@@ -7602,13 +7724,12 @@ public static bool HasIcon(IntPtr window) {
 
     Step 'closing'
     # a message being written is asked about first: Cancel keeps the app and the message, No lets both go
-    Command $main $IDM_NEW_MAIL
-    $compose = WaitCompose
+    $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
     SetText $compose $IDC_SUBJECT 'Still writing'
     [void](TypeInEditor $compose 'Not done yet.')
     # File > Exit ends the app (the close button only hides it)
     Command $main $IDM_EXIT
-    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    $ask = BoxOf $compose 10
     Check ($null -ne $ask) 'closing the app asks about a message with changes'
     if ($ask) {
         Shot $ask 'write-12-close-app'
@@ -7616,23 +7737,13 @@ public static bool HasIcon(IntPtr window) {
         Start-Sleep -Seconds 1
         Check ([Native.Win]::IsWindow($main) -and [Native.Win]::IsWindow($compose)) 'Cancel keeps the app and the message open'
         Command $main $IDM_EXIT
-        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        $ask = BoxOf $compose 10
         if ($ask) { Click $ask 7 }
     }
     Check ($app.WaitForExit(15000)) 'No closes the message without saving, and the app'
 
     # ---- the other languages ----
 
-    # the language of a catalog, as the app shows it: id to words (core/locales/<language>/*.ftl), one line each
-    function Catalog([string]$language) {
-        $words = @{}
-        foreach ($file in Get-ChildItem (Join-Path $PSScriptRoot "..\core\locales\$language") -Filter '*.ftl') {
-            foreach ($line in Get-Content -Encoding UTF8 $file.FullName) {
-                if ($line -match '^([a-z][a-z0-9-]*) = (.+)$') { $words[$Matches[1]] = $Matches[2].Replace('&', '') }
-            }
-        }
-        $words
-    }
     # the app started again with this store; the main window once it shows its folders
     function StartAgain([string[]]$more) {
         # one that did not close (its failure is reported) would take the new start over
@@ -7653,9 +7764,24 @@ public static bool HasIcon(IntPtr window) {
         }
         $window
     }
+    # the app ended with File > Exit, as cleanup between the languages (the closing step above is the check of Exit):
+    # the windows a failed step left open are said and closed first, so the next start does not open them again; when
+    # the app still does not end, it is a check only when nothing was left open
     function Quit([IntPtr]$window, [string]$what) {
+        $left = @(AppWindows | Where-Object { $_ -ne $window })
+        if ($left.Count) {
+            Write-Host "   (windows left open before File > Exit ($what): $(@($left | ForEach-Object { Describe $_ }) -join '; '))"
+            Annotate 'warning' "windows left open before File > Exit ($what)"
+            CloseStrays "before File > Exit ($what)" -Writing
+        }
         Command $window $IDM_EXIT
-        Check ($script:app.WaitForExit(15000)) "File > Exit ends the app ($what)"
+        if ($script:app.WaitForExit(15000)) { return }
+        $still = @(AppWindows | ForEach-Object { Describe $_ }) -join '; '
+        if ($left.Count) {
+            Write-Host "   (File > Exit did not end the app ($what) after windows were left open; still open: $still)"
+        } else {
+            Check $false "File > Exit ends the app ($what; still open: $still)"
+        }
     }
     # the message with a photo and an invoice in the language of this start, for the review: opened as a message file
     # in a window of its own (`$prefix-previews`; this start has no passwords, and its sign-in prompt stays, as the
@@ -7719,8 +7845,7 @@ public static bool HasIcon(IntPtr window) {
     # the line's and the window's longer words, the Keys row with more recipients than fit (shots `$prefix-compose-keys`
     # and `$prefix-recipient-keys`, for the review; with `$pseudo` nothing left in English or cut off)
     function ComposeKeysShots([IntPtr]$window, [string]$prefix, [bool]$pseudo) {
-        Command $window $IDM_NEW_MAIL
-        $c = WaitCompose
+        $c = WaitCompose { Command $window $IDM_NEW_MAIL }
         if (-not $c) { Check $false "a compose window opens ($prefix)"; return }
         SetText $c $IDC_TO ('Alice Example <alice@example.org>, Dave <dave@example.com>, Bob Example <bob@example.net>, ' +
             'erin@example.com, frank@example.com, grace@example.com, heidi@example.com, ivan@example.com, judy@example.com, ' +
@@ -7772,10 +7897,7 @@ public static bool HasIcon(IntPtr window) {
             Click $k 2
             [void](WaitFor { -not [Native.Win]::IsWindow($k) } 5)
         }
-        [void][Native.Win]::PostMessage($c, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-        $ask = WaitWindow '#32770' 'Inbox Classic' 5
-        if ($ask) { Click $ask 7 }
-        [void](WaitFor { -not [Native.Win]::IsWindow($c) } 10)
+        Check (CloseCompose $c) "the message to ten recipients closes without saving ($prefix)"
     }
 
     # the AI agent's draft of the agent step, opened from the top row `$draftsRow` of the tree, All Drafts or Drafts (the
@@ -7800,18 +7922,14 @@ public static bool HasIcon(IntPtr window) {
         }
         if ($null -ne $row) {
             SelectRow ([int]$row)
-            Key $list $VK_RETURN
-            $c = WaitCompose
+            $c = WaitCompose { Key $list $VK_RETURN }
             Check ($null -ne $c) "it opens ($prefix)"
             if ($c) {
                 Check ((Visible $c 354) -and (GetText $c 354) -match 'My AI agent') "the compose window says an agent wrote it (${prefix}: $(GetText $c 354))"
                 if ($pseudo) { CheckPseudo $c 'the compose window of an agent''s draft' }
                 Start-Sleep -Milliseconds 800
                 Shot $c "$prefix-agent-draft"
-                [void][Native.Win]::PostMessage($c, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-                $ask = WaitWindow '#32770' 'Inbox Classic' 3
-                if ($ask) { Click $ask 7 }
-                [void](WaitFor { -not [Native.Win]::IsWindow($c) } 10)
+                Check (CloseCompose $c) "the agent's draft closes without saving ($prefix)"
             }
         }
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, @(ChildRows ([IntPtr]::Zero))[0])
@@ -7972,12 +8090,10 @@ public static bool HasIcon(IntPtr window) {
         CheckPseudo $main 'the main window' $true
         Shot $main 'lang-2-pseudo-main'
 
-        Command $main $IDM_NEW_MAIL
-        $compose = WaitCompose
+        $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
         if ($compose) {
             CheckPseudo $compose 'the compose window'
-            [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-            [void](WaitFor { if (-not [Native.Win]::IsWindow($compose)) { $true } } 10)
+            Check (CloseCompose $compose) 'the new message closes (pseudo-language)'
         }
 
         ComposeKeysShots $main 'lang-pseudo' $true
@@ -8030,7 +8146,7 @@ public static bool HasIcon(IntPtr window) {
         Quit $main 'pseudo-language'
     }
 } catch {
-    Check $false "unexpected error: $_ at line $($_.InvocationInfo.ScriptLineNumber)"
+    Harness "unexpected error: $_ at line $($_.InvocationInfo.ScriptLineNumber)"
 } finally {
     # this run's app, and any earlier one of it that did not close (a dialog left open by a failed step)
     foreach ($process in @($app) + $started) {
@@ -8077,6 +8193,7 @@ public static bool HasIcon(IntPtr window) {
     if (-not $harness.WaitForExit(5000)) { $harness.Kill() }
 }
 
+TimingReport
 $result = if ($failures.Count) { "FAILED: $($failures -join '; ')" } else { 'passed' }
 Write-Host $result
 Stop-Transcript | Out-Null

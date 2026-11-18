@@ -1671,6 +1671,10 @@ void Mailbox::ClearReader(bool loading) {
 }
 
 int Mailbox::TestShown(const std::wstring& subject) {
+    // a selection the list has not handed on yet (TIMER_SELECTION) shows its message only after
+    if (selectionPending_) {
+        return 0;
+    }
     if (subject.empty()) {
         const PeMessage* row = SelectedCount() == 1 ? SelectedRow() : nullptr;
         if (!row || row->uid != reader_.Uid() || row->folder != reader_.Folder()) {
