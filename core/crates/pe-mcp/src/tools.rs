@@ -1484,7 +1484,7 @@ async fn unsubscribe(call: &Call<'_>, args: &Args<'_>) -> Outcome {
             let lists: Vec<Value> = lists
                 .iter()
                 .map(|(sender, problem)| {
-                    json!({ "sender": call.fence.wrap(sender), "unsubscribed": problem.is_none(), "problem": problem })
+                    json!({ "sender": call.fence.wrap(sender), "unsubscribed": problem.is_none(), "problem": problem.as_deref().map(|why| call.fence.wrap(why)) })
                 })
                 .collect();
             Ok(json!({

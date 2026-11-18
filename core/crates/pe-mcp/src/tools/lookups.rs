@@ -133,7 +133,7 @@ pub(super) fn find_contacts(call: &Call, args: &Args) -> Outcome {
         .map(|p| {
             json!({
                 "name": call.fence.wrap(&p.name),
-                "address": p.address,
+                "address": super::mail::address(&p.address),
                 "in_address_book": p.in_book,
                 "messages_sent": p.sent,
                 "messages_received": p.received,
