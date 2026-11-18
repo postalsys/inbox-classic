@@ -4469,14 +4469,27 @@ public static class Dragger {
             Shot $since 'agents-12-undo-since'
             Click $since $IDC_AGENT_TAKE_BACK
             Check ([bool](WaitFor { -not [Native.Win]::IsWindow($since) } 10)) 'Take Back takes them back'
-            # what it took back and what it left, in a message box of the window (GW_ENABLEDPOPUP)
+            # what it took back, in a message box of the window (GW_ENABLEDPOPUP): all it offered, as the answer that
+            # already went is no longer offered
             $report = WaitFor { $w = [Native.Win]::GetWindow($agents, 6); if ($w -ne [IntPtr]::Zero -and $w -ne $agents) { $w } } 20
             $said = if ($report) { Statics $report } else { '' }
-            Check ($said -match 'Took back \d+ changes?\.' -and $said -match '1 message had already left the Outbox\.') "and says what it took back and what it left ($said)"
+            Check ($said.Trim() -eq "Took back $count changes.") "and says what it took back ($said)"
             if ($report) { Shot $report 'agents-12b-undo-since-report'; [void][Native.Win]::PostMessage($report, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero) }
             [void](WaitFor { [Native.Win]::GetWindow($agents, 6) -eq $agents -or [Native.Win]::GetWindow($agents, 6) -eq [IntPtr]::Zero } 10)
             Check ([bool](WaitFor { @(& $topRows) -match '^Marked 2 messages read \(search: subject:"Club newsletter"\) \(taken back\)$' } 10)) "the log shows the change taken back ($((& $topRows) -join '; '))"
             Check ([bool](WaitFor { & $newslettersUnread } 20)) 'and the newsletters are unread again'
+            # asked again, nothing is left to take back: only Close
+            Click $agents $IDC_AGENTS_UNDO_SINCE
+            $again = WaitShown 'InboxClassicAgentUndoSince' 10
+            if ($again) {
+                $title = WindowText ([Native.Win]::GetDlgItem($again, $IDC_AGENT_UNDO_TITLE))
+                Check ($title -eq 'My AI agent made no changes in this time that can be taken back.' -and -not (Visible $again $IDC_AGENT_TAKE_BACK) -and
+                       (WindowText ([Native.Win]::GetDlgItem($again, 2))) -eq 'Close') "asked again, nothing is left to take back, only Close ($title)"
+                Click $again 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($again) } 10)
+            } else {
+                Check $false 'Undo Since opens again'
+            }
         }
         [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
