@@ -1066,7 +1066,8 @@ final class MessageView {
         guard let attachment = pe_message_view_attachment(handle, index)?.pointee else { return nil }
         return Attachment(name: text(attachment.filename), size: attachment.size, sizeText: text(attachment.size_text),
                           kind: attachment.kind, canOpen: attachment.can_open, tooltip: text(attachment.tooltip),
-                          refusal: text(attachment.refusal))
+                          refusal: text(attachment.refusal), part: Int(attachment.part),
+                          protection: attachment.protection, partText: text(attachment.part_text))
     }
 
     /// what the strip menu's Show in Message says of file `index`: no item, checked, unchecked or greyed
@@ -1082,7 +1083,9 @@ final class MessageView {
 
 /// A file attached to a message, as the core describes it: its name for display, its size in bytes and in words, its
 /// kind (its icon), whether it may be opened from the message, the strip's tooltip and what is said when a file that
-/// may not be opened is (empty for one that may)
+/// may not be opened is (empty for one that may); in a message with signed or encrypted parts, the part it came from
+/// (from 1, 0 in any other message), how that part was protected (the strip's lock for an encrypted one) and the
+/// core's line that says so, which ends the tooltip too
 struct Attachment: Equatable {
     let name: String
     let size: UInt64
@@ -1091,6 +1094,9 @@ struct Attachment: Equatable {
     let canOpen: Bool
     let tooltip: String
     let refusal: String
+    var part = 0
+    var protection = PE_PROTECTION_NONE
+    var partText = ""
 }
 
 /// A draft of the core (a reply, a forward, a saved draft, a mailto: link); freed with it

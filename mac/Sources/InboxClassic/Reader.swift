@@ -504,6 +504,9 @@ final class Reader: NSObject {
         }
     }
 
+    /// a view asked for and not here yet
+    var waitingForView: Bool { viewRequest != 0 }
+
     /// a message is shown, of a folder or a file
     private var showsMessage: Bool { (uid != 0 || file != nil) && messageView != nil }
 

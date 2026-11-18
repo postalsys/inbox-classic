@@ -169,6 +169,18 @@ extension UITest {
               "three frames, each with its own label (\(page.labels))")
         check(page.fits, "each as tall as its document (\(page.heights) for \(page.needed))")
         await shot(main.window, "secure-4-mixed-parts")
+        // a link in a part's frame goes to the browser, through the top page; the page stays
+        var browsed: [URL] = []
+        TestHooks.openURL = { browsed.append($0) }
+        _ = await main.mailbox.reader.pageAnswer("[...document.querySelectorAll('iframe.pe-d')[0].contentDocument.links]"
+            + ".find(a=>a.textContent=='The mill').click()")
+        check(await waitUntil(10) { !browsed.isEmpty } && browsed.map(\.absoluteString) == ["https://example.org/mill"],
+              "\"The mill\" in part 1's frame opens https://example.org/mill in the browser (\(browsed))")
+        TestHooks.openURL = nil
+        await pause(0.5)
+        let stayed = await securePage()
+        check(stayed.labels == page.labels && stayed.texts.first?.contains("The mill") == true,
+              "and the page stays as it was (\(stayed.labels))")
         await checkPrinted(page)
         await removeFixture(uid)
 
@@ -512,6 +524,23 @@ extension UITest {
               && shown.frames.last?.captions.first?.hasPrefix("floor-plan.png") == true,
               "frame 1 (the plain part) harbour.png, frame 2 (the encrypted part) floor-plan.png (\(shown.frames.map(\.captions)))")
         check(reader.strip.files.map(\.name) == ["harbour.png", "floor-plan.png"], "the strip lists both (\(reader.strip.files.map(\.name)))")
+        check(securityBar.said.contains("2 parts: 1 encrypted, 1 without a confirmed signature"),
+              "the bar counts 2 parts: 1 encrypted, 1 without a confirmed signature (\(securityBar.said))")
+        // the strip says each file's part: the floor plan of the encrypted part with the lock, the harbour without
+        let tiles = reader.strip.tiles
+        let partOf = { (tile: AttachmentTile) in (tile.showsLock, tile.accessibilityHelp() ?? "", tile.toolTip ?? "") }
+        if tiles.count == 2 {
+            let (harbourLock, harbourHelp, harbourTip) = partOf(tiles[0])
+            let (floorLock, floorHelp, floorTip) = partOf(tiles[1])
+            check(floorLock && floorHelp.hasSuffix("From part 2: Encrypted. Not signed")
+                  && floorTip.hasSuffix("From part 2: Encrypted. Not signed"),
+                  "floor-plan.png has the lock, its tooltip and accessible help end \"From part 2: Encrypted. Not signed\" (\(floorHelp))")
+            check(!harbourLock && harbourHelp.hasSuffix("From part 1: Not signed") && harbourTip.hasSuffix("From part 1: Not signed"),
+                  "harbour.png has no lock, \"From part 1: Not signed\" (\(harbourHelp))")
+        } else {
+            check(false, "two tiles in the strip (\(tiles.count))")
+        }
+        await shot(main.window, "secure-15-strip-parts")
         _ = await waitUntil(5) {
             let page = await self.securePage()
             return page.fits && page.heights.count == 2
@@ -577,13 +606,15 @@ extension UITest {
         TestHooks.printDocument = nil
         let paper = (PDFDocument(url: pdf)?.string ?? "").replacingOccurrences(of: "\n", with: " ")
         say("   printed: \(paper.prefix(300))")
-        let order = ["as promised", "for your eyes only", "Part 1: harbour.png", "Part 2: floor-plan.png"].map {
+        let order = ["as promised", "Part 1: harbour.png", "for your eyes only", "Part 2: floor-plan.png"].map {
             paper.range(of: $0)?.lowerBound
         }
         check(printed && !order.contains(nil) && zip(order, order.dropFirst()).allSatisfy { $0! < $1! },
-              "Print gives both pictures after the text, captioned \"Part 1: harbour.png\" and \"Part 2: floor-plan.png\"")
+              "Print gives each part's picture after that part's text, \"Part 1: harbour.png\" before part 2's text")
         check(document.components(separatedBy: "src=\"data:image/").count == 3 && !document.contains("/pv/"),
               "the printout carries both pictures from memory, nothing from the preview path")
+
+        try await twoReaders()
 
         // dark: the frames and the bar as they are at night
         let before = NSApp.appearance
@@ -592,6 +623,36 @@ extension UITest {
         await shot(main.window, "secure-14-attachment-previews-dark")
         onMain { NSApp.appearance = before }
         await removeFixture(uid)
+    }
+
+    /// the message shown in the reading pane and in a window of its own; dark messages turned off and on again make
+    /// both again, and each gets its view: neither says the message could not be shown
+    func twoReaders() async throws {
+        let notShown = Text.uiNotShown.text
+        main.window.makeFirstResponder(list)
+        let enter = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: main.window.windowNumber,
+                                     context: nil, characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)
+        onMain { if let enter { self.list.keyDown(with: enter) } }
+        guard let window = await waitWindow("message", 10), let own = MessageWindow.open.last else {
+            check(false, "Enter opens the message in a window of its own")
+            return
+        }
+        let readers = [main.mailbox.reader, own.reader]
+        let headers = [main.window, window].map { find("reader.header", in: $0) as NSTextField? }
+        _ = await waitUntil(15) { readers.allSatisfy { $0.messageView != nil } }
+        for dark in [false, true] {
+            main.core.darkMessages = dark
+            Preview.dark = dark
+            AppDelegate.shared?.main?.reloadMessagesShown()
+            let both = await waitUntil(15) {
+                readers.allSatisfy { $0.messageView != nil && !$0.waitingForView }
+            }
+            let said = headers.map { $0?.stringValue ?? "" }
+            check(both && !said.contains { $0.contains(notShown) },
+                  "dark messages \(dark ? "on" : "off"): the pane and the window each show the message (\(said.map { $0.prefix(40) }))")
+        }
+        onMain { window.performClose(nil) }
+        _ = await waitUntil(10) { !window.isVisible }
     }
 
     /// Print of the message shown: every part's text on the paper

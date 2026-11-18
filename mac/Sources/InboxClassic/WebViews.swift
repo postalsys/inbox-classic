@@ -145,8 +145,13 @@ enum ContentRules {
 }
 
 /// Opens a link of a message or of the help in the default browser (or mail program): http, https and mailto only
+@MainActor
 func openExternally(_ url: URL?) {
     guard let url, let scheme = url.scheme?.lowercased(), ["http", "https", "mailto"].contains(scheme) else { return }
+    if let opened = TestHooks.openURL {
+        opened(url)
+        return
+    }
     NSWorkspace.shared.open(url)
 }
 

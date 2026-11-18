@@ -456,6 +456,8 @@ enum TestHooks {
     static var printDocument: ((String) -> Void)?
     /// a file the system would open with its program (an attachment), handed to the test instead: nothing launches
     static var openFile: ((URL) -> Void)?
+    /// a link the default browser (or mail program) would open, handed to the test instead: nothing launches
+    static var openURL: ((URL) -> Void)?
     /// the context menu of a message's web view as it opens, after the app took out what it does not offer
     static var webMenu: ((NSMenu) -> Void)?
 }
