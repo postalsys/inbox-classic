@@ -14,6 +14,9 @@ export LIBGL_ALWAYS_SOFTWARE=1
 export NO_AT_BRIDGE=1
 export GTK_A11Y=none
 export LANG=${LANG:-C.UTF-8}
+# a GLib, GTK or WebKit critical ends the test where it happens, its stack printed (linux/src/e2e.rs
+# trace_criticals), rather than a crash some steps later or a pass that hides it
+export G_DEBUG=${G_DEBUG:-fatal-criticals}
 # dates in a regional format other than the C locale's US one, so the test sees them follow LC_TIME (linux/Dockerfile
 # and CI generate en_GB.UTF-8; without it the dates stay in the C locale's format)
 if [ -z "${LC_TIME:-}" ] && locale -a 2>/dev/null | grep -qix 'en_GB\.utf-\?8'; then

@@ -117,6 +117,7 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
         }
     }
     let log = std::fs::File::create(out.join("log.txt")).expect("log.txt");
+    trace_criticals();
     let (harness, ports) = match start_harness() {
         Ok(started) => started,
         Err(error) => {
@@ -191,6 +192,31 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
     } else {
         glib::ExitCode::FAILURE
     }
+}
+
+/// A critical or an error that GLib, GTK or WebKit logs is printed with the stack that led to it, before GLib's own
+/// writer prints it (and ends the app, under G_DEBUG=fatal-criticals as CI runs the test): the bug is where the
+/// stack says, not where the app falls over later
+fn trace_criticals() {
+    glib::log_set_writer_func(|level, fields| {
+        if matches!(level, glib::LogLevel::Critical | glib::LogLevel::Error) {
+            let field = |key: &str| {
+                fields
+                    .iter()
+                    .find(|field| field.key() == key)
+                    .and_then(|field| field.value_str())
+                    .unwrap_or_default()
+                    .to_string()
+            };
+            eprintln!(
+                "{} {level:?}: {}\n{}",
+                field("GLIB_DOMAIN"),
+                field("MESSAGE"),
+                std::backtrace::Backtrace::force_capture()
+            );
+        }
+        glib::log_writer_default(level, fields)
+    });
 }
 
 /// The scenario's future, a panic in it turned into an error
