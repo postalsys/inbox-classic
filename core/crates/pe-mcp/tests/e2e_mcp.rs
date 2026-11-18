@@ -1660,6 +1660,17 @@ fn an_agent_organizes_folders_and_conversations() {
             && has("$MailFlagBit2")));
         let flagged = core.agent_log(1).unwrap()[0].clone();
         assert_eq!(said(&flagged), "Flagged \u{201c}Plans\u{201d} purple");
+        // the same colour again changes nothing and writes nothing in the log
+        let entries = core.agent_log(1_000).unwrap().len();
+        agent
+            .call(
+                "set_flag_color",
+                json!({ "folder": inbox, "uids": [plans], "color": "purple" }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(core.agent_log(1_000).unwrap().len(), entries);
+        assert_eq!(core.agent_log(1).unwrap()[0].id, flagged.id);
         core.agent_undo(flagged.id).unwrap();
         assert!(eventually(10, || !has("\\Flagged") && !has("$MailFlagBit0")));
         let wrong = agent

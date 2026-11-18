@@ -121,9 +121,16 @@ pub struct ReadSummary {
 
 /// How long the log keeps what agents did and read, in seconds: 30 days
 pub const LOG_KEPT: i64 = 30 * 86_400;
-/// The most entries the log keeps of what agents did, and of what they read
+/// The most entries the log keeps of what each program did, and of what it read: each program has its own, so one
+/// that writes many can not crowd out another's
 pub const LOG_ENTRIES: u64 = 5_000;
 pub const LOG_READS: u64 = 50_000;
+
+/// The entries of the log that [`LOG_ENTRIES`] never forgets, only [`LOG_KEPT`]: what can still be taken back, and
+/// what the limits count and an agent's drafts are its own by (sends, unsubscribes, drafts saved, replaced and
+/// discarded), so an agent can not write its way past the user's Undo or its own limits
+const LOG_PROTECTED: &str = "(undo IS NOT NULL AND undone = 0) \
+     OR what IN ('send', 'unsubscribe', 'save_draft', 'replace_draft', 'discard_draft')";
 
 const HOST_COLUMNS: &str = "id, path, name, allowed, levels, accounts, created, last_used";
 
@@ -254,21 +261,40 @@ impl Store {
             ids.push(self.db.last_insert_rowid());
         }
         drop(statement);
-        self.forget_old("agent_log", now, LOG_ENTRIES)?;
+        self.forget_old(
+            "agent_log",
+            entries.iter().map(|e| e.host),
+            now,
+            LOG_ENTRIES,
+            LOG_PROTECTED,
+        )?;
         tx.commit()?;
         Ok(ids)
     }
 
-    /// Forgets the rows of `table` older than [`LOG_KEPT`] and those past the newest `most`
-    fn forget_old(&self, table: &str, now: i64, most: u64) -> Result<()> {
+    /// Forgets the rows of `table` older than [`LOG_KEPT`], and of each of `hosts` those past its newest `most` that
+    /// are not `protected` (an SQL condition)
+    fn forget_old(
+        &self,
+        table: &str,
+        hosts: impl IntoIterator<Item = AgentHostId>,
+        now: i64,
+        most: u64,
+        protected: &str,
+    ) -> Result<()> {
         self.db
             .prepare_cached(&format!("DELETE FROM {table} WHERE at < ?1"))?
             .execute([now - LOG_KEPT])?;
-        self.db
-            .prepare_cached(&format!(
-                "DELETE FROM {table} WHERE id <= (SELECT id FROM {table} ORDER BY id DESC LIMIT 1 OFFSET ?1)"
-            ))?
-            .execute([most])?;
+        let mut hosts: Vec<AgentHostId> = hosts.into_iter().collect();
+        hosts.sort_unstable();
+        hosts.dedup();
+        let mut statement = self.db.prepare_cached(&format!(
+            "DELETE FROM {table} WHERE host_id = ?1 AND NOT ({protected}) AND id <= (SELECT id FROM {table} \
+             WHERE host_id = ?1 AND NOT ({protected}) ORDER BY id DESC LIMIT 1 OFFSET ?2)"
+        ))?;
+        for host in hosts {
+            statement.execute(params![host, most])?;
+        }
         Ok(())
     }
 
@@ -355,7 +381,7 @@ impl Store {
             ])?;
         }
         drop(statement);
-        self.forget_old("agent_reads", now, LOG_READS)?;
+        self.forget_old("agent_reads", reads.iter().map(|r| r.host), now, LOG_READS, "0")?;
         tx.commit()
     }
 
@@ -622,6 +648,97 @@ mod tests {
             .collect();
         store.log_agent(&entries, 10).unwrap();
         assert_eq!(store.agent_log_count(host, "set_read", 0).unwrap(), LOG_ENTRIES);
+    }
+
+    /// An agent that writes many entries crowds out only its own that nothing needs: not another program's, not what
+    /// can still be undone, not what its limits count or its drafts are its own by
+    #[test]
+    fn an_agent_can_not_write_its_way_past_the_log() {
+        let store = Store::open_in_memory().unwrap();
+        let agent = store
+            .save_agent_host("/usr/bin/agent", "Agent", true, AgentLevels::DEFAULT, &[], 1)
+            .unwrap();
+        let other = store
+            .save_agent_host("/usr/bin/other", "Other", true, AgentLevels::DEFAULT, &[], 1)
+            .unwrap();
+        let entry = |host: AgentHostId, what: &str, undo: Option<&str>| NewLogEntry {
+            host,
+            what: what.into(),
+            account: Some(1),
+            message_id: Some("<d@x>".into()),
+            undo: undo.map(Into::into),
+            ..Default::default()
+        };
+        let ids = store
+            .log_agent(
+                &[
+                    entry(agent, "trash_messages", Some("move:1:2:3")),
+                    entry(agent, "set_read", Some("seen:1:7:0")),
+                    entry(agent, "send", None),
+                    entry(agent, "unsubscribe", None),
+                    entry(agent, "save_draft", None),
+                    entry(agent, "set_read", None),
+                    entry(other, "set_read", None),
+                ],
+                10,
+            )
+            .unwrap();
+        let (delete, undone, plain) = (ids[0], ids[1], ids[5]);
+        store.set_agent_log_undone(undone).unwrap();
+        let flood: Vec<NewLogEntry> = (0..2 * LOG_ENTRIES)
+            .map(|_| entry(agent, "set_flag_color", None))
+            .collect();
+        store.log_agent(&flood, 20).unwrap();
+        // the other program's entry is still there, as is the delete's Undo
+        assert_eq!(store.agent_log_count(other, "set_read", 0).unwrap(), 1);
+        assert!(store.agent_log_entry(delete).unwrap().is_some());
+        // the limits still count, and the draft is still its own
+        assert_eq!(store.agent_log_count(agent, "send", 0).unwrap(), 1);
+        assert_eq!(store.agent_log_count(agent, "unsubscribe", 0).unwrap(), 1);
+        assert_eq!(store.agent_draft(agent, "<d@x>").unwrap(), Some(1));
+        // what nothing needs any more went: an entry undone already, one that could not be
+        assert!(store.agent_log_entry(undone).unwrap().is_none());
+        assert!(store.agent_log_entry(plain).unwrap().is_none());
+        assert_eq!(store.agent_log_count(agent, "set_flag_color", 0).unwrap(), LOG_ENTRIES);
+        // undoable entries are kept past the cap too, until 30 days have gone
+        let undoable: Vec<NewLogEntry> = (0..LOG_ENTRIES + 3)
+            .map(|_| entry(agent, "set_flag_color", Some("color:1:7:")))
+            .collect();
+        store.log_agent(&undoable, 30).unwrap();
+        assert_eq!(
+            store.agent_log_count(agent, "set_flag_color", 30).unwrap(),
+            LOG_ENTRIES + 3
+        );
+        assert!(store.agent_log_entry(delete).unwrap().is_some());
+        store
+            .log_agent(&[entry(other, "set_read", None)], 10 + LOG_KEPT + 1)
+            .unwrap();
+        assert!(store.agent_log_entry(delete).unwrap().is_none());
+        assert_eq!(store.agent_log_count(agent, "send", 0).unwrap(), 0);
+    }
+
+    #[test]
+    fn each_program_has_its_own_reads() {
+        let store = Store::open_in_memory().unwrap();
+        let agent = store
+            .save_agent_host("/usr/bin/agent", "Agent", true, AgentLevels::DEFAULT, &[], 1)
+            .unwrap();
+        let other = store
+            .save_agent_host("/usr/bin/other", "Other", true, AgentLevels::DEFAULT, &[], 1)
+            .unwrap();
+        let read = |host: AgentHostId| NewRead {
+            host,
+            what: "message".into(),
+            count: 1,
+            ..Default::default()
+        };
+        store.log_reads(&[read(other)], 3600).unwrap();
+        let flood: Vec<NewRead> = (0..LOG_READS + 3).map(|_| read(agent)).collect();
+        store.log_reads(&flood, 3600).unwrap();
+        let summaries = store.read_summaries(10).unwrap();
+        let messages = |host: AgentHostId| summaries.iter().find(|s| s.host == host).map(|s| s.messages);
+        assert_eq!(messages(other), Some(1));
+        assert_eq!(messages(agent), Some(LOG_READS));
     }
 
     #[test]

@@ -31,13 +31,17 @@ pub(super) fn set_flag_color(call: &Call, args: &Args) -> Outcome {
     };
     let before = call.messages(folder.id, &uids)?;
     call.core.set_flag_color_many(folder.id, &uids, color).map_err(engine)?;
+    // only what changed is written: a colour set again is no change to take back, and must not crowd the log
     let entries: Vec<_> = before
         .iter()
-        .map(|message| {
+        .filter_map(|message| {
             let was = message
                 .info
                 .flagged()
                 .then(|| message.info.flag_color().unwrap_or(FlagColor::Red));
+            (was != color).then_some((message, was))
+        })
+        .map(|(message, was)| {
             let undo = Undo::Color {
                 folder: folder.id,
                 uid: message.info.uid,
