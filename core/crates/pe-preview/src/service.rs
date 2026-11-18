@@ -81,9 +81,10 @@ type Purse = (u64, Option<usize>);
 const INLINE_PURSE: usize = usize::MAX;
 
 fn purse(request: &Request) -> Purse {
-    match request.inline {
-        true => (request.owner, Some(INLINE_PURSE)),
-        false => (request.owner, request.asked.then_some(request.attachment)),
+    if request.inline {
+        (request.owner, Some(INLINE_PURSE))
+    } else {
+        (request.owner, request.asked.then_some(request.attachment))
     }
 }
 
@@ -506,9 +507,10 @@ impl Dispatcher {
         if self.abandoned >= MAX_ABANDONED {
             return Err(Refusal::Off);
         }
-        let kind = match request.inline {
-            true => crate::inline_kind_of(&request.file),
-            false => crate::kind_of(&request.file),
+        let kind = if request.inline {
+            crate::inline_kind_of(&request.file)
+        } else {
+            crate::kind_of(&request.file)
         };
         let kind = kind.ok_or(Refusal::Unsupported)?;
         if request.file.len() > MAX_FILE {

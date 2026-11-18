@@ -635,13 +635,13 @@ fn protected_view(
     // each part's words (no markup of the message: one part's styles could hide another on the paper), by its place
     let mut print_texts: Vec<(usize, String)> = Vec::new();
     // the previews of each part's pictures and PDF files, in its own document under a token of its own
+    let keep = !protected.decrypted();
     let mut previews = trust.previews.map(|plan| PartPreviews {
         plan,
         budget: crate::previews::Budget::new(),
-        keep: !protected.decrypted(),
+        keep,
         next_inline: pe_html::INLINE_BASE,
     });
-    let keep = !protected.decrypted();
     let mut preview_documents = Vec::new();
     // parsed first: the printout's pictures borrow from them
     let parsed: Vec<Option<parser::Message>> = protected

@@ -143,6 +143,16 @@ pub(crate) struct PreviewDocument {
     pub keep: bool,
 }
 
+impl PreviewDocument {
+    /// The pictures of attachment `attachment`, None for one it does not show
+    fn file_pages(&self, attachment: usize) -> Option<usize> {
+        self.files
+            .iter()
+            .find(|file| file.attachment == attachment)
+            .map(|file| file.pages.len())
+    }
+}
+
 /// A picture of a document's text
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct InlineFile {
@@ -186,21 +196,22 @@ impl Shown {
     /// The pictures of attachment `attachment` in the document of `token`, or 1 for a picture of its text by its
     /// number; None for one that document does not show
     fn pages(&self, token: &str, attachment: usize) -> Option<usize> {
-        let document = self.documents.iter().find(|document| document.token == token)?;
-        let inline = document.inline.iter().any(|inline| inline.picture.number == attachment);
-        self.file_pages(token, attachment).or(inline.then_some(1))
+        let document = self.document(token)?;
+        document.file_pages(attachment).or_else(|| {
+            let inline = document.inline.iter().any(|inline| inline.picture.number == attachment);
+            inline.then_some(1)
+        })
     }
 
     /// The pictures of attachment `attachment` in the document of `token`, None for one that document does not show
     /// (a picture of its text is none: a link names a file of the strip only)
     fn file_pages(&self, token: &str, attachment: usize) -> Option<usize> {
-        self.documents
-            .iter()
-            .find(|document| document.token == token)?
-            .files
-            .iter()
-            .find(|file| file.attachment == attachment)
-            .map(|file| file.pages.len())
+        self.document(token)?.file_pages(attachment)
+    }
+
+    /// Its document that carries `token`
+    fn document(&self, token: &str) -> Option<&PreviewDocument> {
+        self.documents.iter().find(|document| document.token == token)
     }
 
     /// Whether one of its documents carries `token`

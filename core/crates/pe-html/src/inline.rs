@@ -219,17 +219,19 @@ fn data_picture(url: &str) -> Option<Vec<u8>> {
     let data = percent_decoded(data);
     let bytes = if base64 {
         let text: Vec<u8> = data.into_iter().filter(|b| !b.is_ascii_whitespace()).collect();
-        let engine = base64::engine::GeneralPurpose::new(
-            &base64::alphabet::STANDARD,
-            base64::engine::GeneralPurposeConfig::new()
-                .with_decode_padding_mode(base64::engine::DecodePaddingMode::Indifferent),
-        );
-        engine.decode(text).ok()?
+        LENIENT.decode(text).ok()?
     } else {
         data
     };
     (!bytes.is_empty() && bytes.len() <= MAX_INLINE_BYTES).then_some(bytes)
 }
+
+/// Base64 with or without its padding, as browsers read a `data:` address
+const LENIENT: base64::engine::GeneralPurpose = base64::engine::GeneralPurpose::new(
+    &base64::alphabet::STANDARD,
+    base64::engine::GeneralPurposeConfig::new()
+        .with_decode_padding_mode(base64::engine::DecodePaddingMode::Indifferent),
+);
 
 /// `text` with its percent escapes decoded
 fn percent_decoded(text: &str) -> Vec<u8> {
@@ -281,9 +283,10 @@ pub(crate) fn sized(body: &str, prefix: &str, size: &dyn Fn(usize) -> Option<(u3
         }
         let end = tag_end(rest);
         let tag = &rest[..end];
-        match rest.starts_with("<img") {
-            true => out.push_str(&sized_img(tag, prefix, size)),
-            false => out.push_str(tag),
+        if rest.starts_with("<img") {
+            out.push_str(&sized_img(tag, prefix, size));
+        } else {
+            out.push_str(tag);
         }
         rest = &rest[end..];
     }
@@ -343,9 +346,8 @@ fn sized_img(tag: &str, prefix: &str, size: &dyn Fn(usize) -> Option<(u32, u32)>
     let pixels = |name: &str| {
         let text = value(name)?.trim();
         let digits = text.trim_end_matches("px");
-        (!digits.is_empty() && digits.len() <= 6 && digits.bytes().all(|b| b.is_ascii_digit()))
-            .then(|| digits.parse::<u64>().ok())
-            .flatten()
+        let number = !digits.is_empty() && digits.len() <= 6 && digits.bytes().all(|b| b.is_ascii_digit());
+        number.then(|| digits.parse::<u64>().ok())?
     };
     let added = match (value("width"), value("height")) {
         (Some(_), Some(_)) => return tag.to_string(),

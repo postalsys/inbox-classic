@@ -361,30 +361,45 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
 /// or of an empty picture for one not drawn: the print windows load nothing but the page. The addresses replaced are
 /// the router's, whose token the sender does not know
 fn printed_inline(parts: &PrintParts, items: &[(Option<usize>, PrintItem)]) -> String {
-    use base64::Engine;
     let Some((prefix, numbers)) = &parts.inline else {
         return parts.body.clone();
     };
-    let mut body = parts.body.clone();
-    for number in numbers {
-        let drawn = items.iter().find_map(|(_, item)| match *item {
-            PrintItem::Inline {
-                number: of,
-                mime,
-                bytes,
-            } if of == *number && matches!(mime, "image/png" | "image/jpeg") => Some((mime, bytes)),
-            _ => None,
-        });
-        let address = match drawn {
-            Some((mime, bytes)) => format!(
-                "data:{mime};base64,{}",
-                base64::engine::general_purpose::STANDARD.encode(bytes)
-            ),
-            None => NOT_PRINTED_PICTURE.to_string(),
-        };
-        body = body.replace(&format!("\"{prefix}{number}-0\""), &format!("\"{address}\""));
+    // each picture's address by its number as the router wrote it: the first drawing of it, or the empty picture
+    let mut addresses: HashMap<String, String> = HashMap::new();
+    for (_, item) in items {
+        if let PrintItem::Inline { number, mime, bytes } = *item
+            && matches!(mime, "image/png" | "image/jpeg")
+            && numbers.contains(&number)
+        {
+            let address = || format!("data:{mime};base64,{}", STANDARD.encode(bytes));
+            addresses.entry(number.to_string()).or_insert_with(address);
+        }
     }
-    body
+    for number in numbers {
+        let empty = || NOT_PRINTED_PICTURE.to_string();
+        addresses.entry(number.to_string()).or_insert_with(empty);
+    }
+    // one pass over the text: `"<prefix><number>-0"` each
+    let start = format!("\"{prefix}");
+    let mut out = String::with_capacity(parts.body.len());
+    let mut rest = parts.body.as_str();
+    while let Some(at) = rest.find(&start) {
+        out.push_str(&rest[..at]);
+        let after = &rest[at + start.len()..];
+        let digits = after.bytes().take_while(u8::is_ascii_digit).count();
+        match addresses.get(&after[..digits]) {
+            Some(address) if after[digits..].starts_with("-0\"") => {
+                out.push_str(&format!("\"{address}\""));
+                rest = &after[digits + 3..];
+            }
+            _ => {
+                out.push_str(&start);
+                rest = after;
+            }
+        }
+    }
+    out.push_str(rest);
+    out
 }
 
 /// An empty picture (a transparent GIF of one pixel) where a picture of the text was not drawn
@@ -466,19 +481,22 @@ pub fn render_view_cards(
     // the style elements' text, which is no attribute: as the style attributes, without pictures or fonts of its own
     let body = css::clean_style_elements(&body);
     let (pictures, embedded) = router.finish(images);
+    // the options and the start of the preview addresses of the pictures of the text, when it has any
+    let routed = cards
+        .inline
+        .filter(|_| !pictures.is_empty())
+        .map(|options| (options, format!("{PREVIEW_PATH}{}-", options.token)));
     // the size of each picture of the text where its img says none, so the text does not move when it comes
-    let body = match cards.inline {
-        Some(options) if !pictures.is_empty() => {
-            let prefix = format!("{PREVIEW_PATH}{}-", options.token);
+    let body = match &routed {
+        Some((options, prefix)) => {
             let size = |number: usize| {
                 let picture = pictures.iter().find(|picture| picture.number == number)?;
                 (options.size)(picture)
             };
-            inline::sized(&body, &prefix, &size)
+            inline::sized(&body, prefix, &size)
         }
-        _ => body,
+        None => body,
     };
-    let routed = !pictures.is_empty();
     let card = [
         cards.otp.map(otp_card),
         cards.event.map(event_card),
@@ -492,14 +510,12 @@ pub fn render_view_cards(
         embedded: &embedded,
     });
     let after = previews.map_or(After::Nothing, After::Previews);
-    let (document, previewed) = wrap(&body, options, header, &card, after, routed);
+    let (document, previewed) = wrap(&body, options, header, &card, after, routed.is_some());
     // built from the same parts, never cut out of the document: the message's own style text may forge any marker
-    let print_document = (!previewed.is_empty()).then(|| wrap(&body, options, header, &card, After::Nothing, routed).0);
-    let inline = cards.inline.filter(|_| routed).map(|options| {
-        let numbers = pictures.iter().map(|picture| picture.number).collect();
-        (format!("{PREVIEW_PATH}{}-", options.token), numbers)
-    });
-    let print = (!previewed.is_empty() || routed).then(|| PrintParts {
+    let print_document =
+        (!previewed.is_empty()).then(|| wrap(&body, options, header, &card, After::Nothing, routed.is_some()).0);
+    let inline = routed.map(|(_, prefix)| (prefix, pictures.iter().map(|picture| picture.number).collect()));
+    let print = (!previewed.is_empty() || inline.is_some()).then(|| PrintParts {
         allow_remote_images: options.allow_remote_images,
         header: header
             .iter()
@@ -661,9 +677,10 @@ fn wrap_as(
     if (ours.pictures || routed) && !printed {
         image_sources.push(previews::preview_source());
     }
-    let image_sources = match image_sources.is_empty() {
-        true => "'none'".to_string(),
-        false => image_sources.join(" "),
+    let image_sources = if image_sources.is_empty() {
+        "'none'".to_string()
+    } else {
+        image_sources.join(" ")
     };
     let shown = "display:block!important;visibility:visible!important;opacity:1!important;position:static!important;\
                  color:#000!important;font:10pt Arial,sans-serif!important";
