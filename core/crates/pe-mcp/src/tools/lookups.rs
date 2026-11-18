@@ -115,7 +115,7 @@ pub(super) fn test_rule(call: &Call, args: &Args) -> Outcome {
     Ok(json!({
         "query": query,
         "matches": matches,
-        "samples": samples.iter().map(|m| row(m, places.get(&m.folder_id))).collect::<Vec<_>>(),
+        "samples": samples.iter().map(|m| row(m, places.get(&m.folder_id), call.fence)).collect::<Vec<_>>(),
         "note": "Nothing was changed: this is what a rule with this query would find in the Inbox now."
     }))
 }
@@ -132,7 +132,7 @@ pub(super) fn find_contacts(call: &Call, args: &Args) -> Outcome {
         .iter()
         .map(|p| {
             json!({
-                "name": p.name,
+                "name": call.fence.wrap(&p.name),
                 "address": p.address,
                 "in_address_book": p.in_book,
                 "messages_sent": p.sent,

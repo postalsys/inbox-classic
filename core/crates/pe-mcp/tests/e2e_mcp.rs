@@ -101,8 +101,16 @@ impl Client {
         } else {
             // the text is the structured result as compact JSON
             assert_eq!(text, result["structuredContent"].to_string());
-            Ok(result["structuredContent"].clone())
+            Ok(unfenced(result["structuredContent"].clone()))
         }
+    }
+
+    /// A tool's result as it came, its text from mail still fenced
+    async fn call_raw(&mut self, name: &str, arguments: Value) -> Value {
+        let answer = self
+            .request("tools/call", json!({ "name": name, "arguments": arguments }))
+            .await;
+        answer["result"].clone()
     }
 
     /// The next notification, one that came already or the next to come
@@ -178,6 +186,32 @@ fn list_message(sender: &str, port: u16, path: &str) -> String {
          List-Unsubscribe: <http://127.0.0.1:{port}/u/{path}>\r\n\
          List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThe news.\r\n"
     )
+}
+
+/// `answer` with the fence of its text from mail taken off, so the tests compare the text itself; every fenced value
+/// is checked to be one whole fence
+fn unfenced(mut answer: Value) -> Value {
+    let Some(tag) = answer
+        .as_object_mut()
+        .and_then(|fields| fields.remove("mail_boundary"))
+        .and_then(|tag| tag.as_str().map(str::to_string))
+    else {
+        return answer;
+    };
+    fn strip(value: &mut Value, open: &str, close: &str) {
+        match value {
+            Value::String(text) if text.starts_with(open) => {
+                assert!(text.ends_with(close), "{text}");
+                *text = text[open.len()..text.len() - close.len()].to_string();
+            }
+            Value::String(text) => assert!(!text.contains(open), "{text}"),
+            Value::Array(list) => list.iter_mut().for_each(|v| strip(v, open, close)),
+            Value::Object(map) => map.values_mut().for_each(|v| strip(v, open, close)),
+            _ => {}
+        }
+    }
+    strip(&mut answer, &format!("<{tag}>"), &format!("</{tag}>"));
+    answer
 }
 
 /// What a log entry says, as the window shows it
@@ -862,6 +896,10 @@ fn an_agent_never_reads_encrypted_mail() {
         let text = message["text"].as_str().unwrap();
         assert!(text.contains("encrypted") && !text.contains("mill"), "{message}");
         assert!(message.get("attachments").is_none(), "{message}");
+        // nor what the reading pane would tell of what is inside: an invitation, a bounce, a signature
+        for inside in ["invitation", "bounce", "signature"] {
+            assert!(message.get(inside).is_none(), "{inside}: {message}");
+        }
         let file = agent
             .call("get_attachment", json!({ "folder": inbox, "uid": sealed, "index": 0 }))
             .await;
@@ -1386,6 +1424,199 @@ fn requests_are_served_side_by_side() {
         core.agent_answer(core.agent_asks_waiting()[0], AgentAnswer::DontSend)
             .unwrap();
         assert_eq!(Client::result(&agent.answer(busy).await).unwrap()["status"], "not_sent");
+    });
+    mcp.stop();
+}
+
+/// A message with a file of `mime_type` named `name`, its `content` in base64
+fn with_file(subject: &str, name: &str, mime_type: &str, content: &[u8]) -> String {
+    use std::fmt::Write;
+    let mut encoded = String::new();
+    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for chunk in content.chunks(3) {
+        let n = chunk
+            .iter()
+            .enumerate()
+            .fold(0u32, |n, (i, b)| n | u32::from(*b) << (16 - 8 * i));
+        for i in 0..4 {
+            encoded.push(if i <= chunk.len() {
+                ALPHABET[(n >> (18 - 6 * i)) as usize & 63] as char
+            } else {
+                '='
+            });
+        }
+    }
+    let mut lines = String::new();
+    for line in encoded.as_bytes().chunks(76) {
+        let _ = write!(lines, "{}\r\n", String::from_utf8_lossy(line));
+    }
+    format!(
+        "From: Bob <bob@example.com>\r\nTo: testuser@postalexpress.test\r\nSubject: {subject}\r\n\
+         Message-ID: <{subject}@example.com>\r\nContent-Type: multipart/mixed; boundary=f\r\n\r\n\
+         --f\r\nContent-Type: text/plain\r\n\r\nThe file.\r\n\
+         --f\r\nContent-Type: {mime_type}; name={name}\r\nContent-Disposition: attachment; filename={name}\r\n\
+         Content-Transfer-Encoding: base64\r\n\r\n{lines}--f--\r\n"
+    )
+}
+
+/// What the reading pane knows of a message, told to the agent: a bounce explained, an invitation with the user's
+/// answer, whether the provider confirmed the sender; links by their domain; text from mail fenced; and files handed
+/// over as files, up to 10 MB
+#[test]
+fn an_agent_reads_what_the_reading_pane_shows() {
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let bounce = std::fs::read_to_string(
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../pe-bounce/tests/fixtures/bounces/gmail.eml"),
+    )
+    .unwrap();
+    let bounced = server.add_message("INBOX", &bounce, &[]);
+    let me = server.account_settings().email;
+    let invite = server.add_message(
+        "INBOX",
+        &format!(
+            "Authentication-Results: mx.example.com; dmarc=pass header.from=example.com\r\n\
+             From: Carol <carol@example.com>\r\nTo: {me}\r\nSubject: Planning\r\nMessage-ID: <invite@example.com>\r\n\
+             Content-Type: multipart/mixed; boundary=c\r\n\r\n\
+             --c\r\nContent-Type: text/plain\r\n\r\nSee the plan at https://docs.example.com/plan?id=7 please.\r\n\
+             --c\r\nContent-Type: text/calendar; method=REQUEST; name=invite.ics\r\n\r\n\
+             BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nSUMMARY:Planning\r\n\
+             DTSTART:20261120T090000Z\r\nDTEND:20261120T100000Z\r\nLOCATION:Room 4\r\n\
+             ORGANIZER;CN=Carol:mailto:carol@example.com\r\n\
+             ATTENDEE;PARTSTAT=TENTATIVE:mailto:{me}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--c--\r\n"
+        ),
+        &[],
+    );
+    let pdf = server.add_message(
+        "INBOX",
+        &with_file("Report", "report.pdf", "application/pdf", b"%PDF-1.4 the report"),
+        &[],
+    );
+    let picture = server.add_message(
+        "INBOX",
+        &with_file("Photo", "photo.png", "application/octet-stream", b"\x89PNG\r\n\x1a\n"),
+        &[],
+    );
+    let zip = server.add_message("INBOX", &with_file("Archive", "a.zip", "application/zip", b"PK"), &[]);
+    let big = server.add_message(
+        "INBOX",
+        &with_file("Big", "big.pdf", "application/pdf", &vec![b'x'; 11 * 1024 * 1024]),
+        &[],
+    );
+    let dir = TempDir::new("mcp-facts");
+    let (_core, _account, mut mcp, socket) = engine_on(&server, &dir);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        agent.initialize().await;
+        let folders = agent
+            .call("list_folders", json!({ "account": _account }))
+            .await
+            .unwrap();
+        let inbox = special(&folders, "inbox");
+
+        // a bounce explained: each recipient, what the server's words mean, and the words themselves
+        let read = agent
+            .call("get_message", json!({ "folder": inbox, "uid": bounced }))
+            .await
+            .unwrap();
+        let recipient = &read["bounce"]["recipients"][0];
+        assert!(recipient["address"].as_str().unwrap().contains('@'), "{read}");
+        assert!(
+            recipient["category"].is_string() && recipient["server_words"].is_string(),
+            "{read}"
+        );
+        assert_eq!(read["bounce"]["delayed"], false, "{read}");
+
+        // an invitation, with the user's own answer; the sender confirmed by the provider; links by their domain
+        let read = agent
+            .call("get_message", json!({ "folder": inbox, "uid": invite }))
+            .await
+            .unwrap();
+        let invitation = &read["invitation"];
+        assert_eq!(invitation["summary"], "Planning", "{read}");
+        assert_eq!(invitation["start"], "2026-11-20T09:00:00.000Z", "{read}");
+        assert_eq!(invitation["organizer"], "Carol", "{read}");
+        assert_eq!(invitation["your_status"], "tentative", "{read}");
+        assert_eq!(read["sender_verified"], true, "{read}");
+        let text = read["text"].as_str().unwrap();
+        assert!(
+            text.contains("[link: docs.example.com]") && !text.contains("plan?id"),
+            "{read}"
+        );
+        assert!(read["links"].is_string(), "{read}");
+        let whole = agent
+            .call(
+                "get_message",
+                json!({ "folder": inbox, "uid": invite, "include_links": true }),
+            )
+            .await
+            .unwrap();
+        assert!(
+            whole["text"]
+                .as_str()
+                .unwrap()
+                .contains("https://docs.example.com/plan?id=7"),
+            "{whole}"
+        );
+        // without a verdict of the provider's own, nothing is said of the sender
+        let read = agent
+            .call("get_message", json!({ "folder": inbox, "uid": pdf }))
+            .await
+            .unwrap();
+        assert!(read.get("sender_verified").is_none(), "{read}");
+        assert_eq!(read["attachments"][0]["readable"], true, "{read}");
+
+        // text from mail comes fenced, the fence named in the answer and new in every answer
+        let raw = agent
+            .call_raw("get_message", json!({ "folder": inbox, "uid": invite }))
+            .await;
+        let fenced = &raw["structuredContent"];
+        let tag = fenced["mail_boundary"].as_str().unwrap().to_string();
+        assert_eq!(fenced["subject"], format!("<{tag}>Planning</{tag}>"), "{fenced}");
+        assert!(
+            fenced["text"].as_str().unwrap().starts_with(&format!("<{tag}>")),
+            "{fenced}"
+        );
+        let again = agent.call_raw("list_messages", json!({ "folder": inbox })).await;
+        assert_ne!(again["structuredContent"]["mail_boundary"], tag.as_str());
+        let tools = agent.request("tools/list", json!({})).await;
+        let get = tools["result"]["tools"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|t| t["name"] == "get_message")
+            .unwrap();
+        assert!(get["description"].as_str().unwrap().contains("mail_boundary"), "{get}");
+
+        // a PDF as an embedded resource, a picture (named as bytes) as an image
+        let file = agent
+            .call_raw("get_attachment", json!({ "folder": inbox, "uid": pdf, "index": 0 }))
+            .await;
+        assert_eq!(file["isError"], false, "{file}");
+        let resource = &file["content"][1]["resource"];
+        assert_eq!(resource["mimeType"], "application/pdf", "{file}");
+        assert_eq!(resource["blob"], "JVBERi0xLjQgdGhlIHJlcG9ydA==", "{file}");
+        assert_eq!(file["structuredContent"]["uri"], resource["uri"], "{file}");
+        let image = agent
+            .call_raw("get_attachment", json!({ "folder": inbox, "uid": picture, "index": 0 }))
+            .await;
+        assert_eq!(image["content"][1]["type"], "image", "{image}");
+        assert_eq!(image["content"][1]["mimeType"], "image/png", "{image}");
+        // other types and larger files are refused, saying why
+        let refused = agent
+            .call("get_attachment", json!({ "folder": inbox, "uid": zip, "index": 0 }))
+            .await;
+        assert!(refused.unwrap_err().contains("application/zip"));
+        let refused = agent
+            .call("get_attachment", json!({ "folder": inbox, "uid": big, "index": 0 }))
+            .await;
+        let why = refused.unwrap_err();
+        assert!(why.contains("is 11.0 MB") && why.contains("up to 10 MB"), "{why}");
     });
     mcp.stop();
 }

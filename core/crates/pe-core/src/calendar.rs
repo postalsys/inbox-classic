@@ -319,6 +319,31 @@ pub fn invitation(calendar: &str, method: Option<&str>) -> Option<Invitation> {
     Some(invitation)
 }
 
+/// The answer the attendee with one of `addresses` gave to the first event of a calendar part, as its PARTSTAT says
+/// it, lowercase (`accepted`, `needs-action`); None when no attendee of it is one of them
+pub(crate) fn attendee_status(calendar: &str, addresses: &[String]) -> Option<String> {
+    let mut in_event = false;
+    for (name, params, value) in &lines(calendar) {
+        match (name.as_str(), value.trim().to_ascii_uppercase().as_str()) {
+            ("BEGIN", "VEVENT") => in_event = true,
+            ("END", "VEVENT") => return None,
+            ("ATTENDEE", _) if in_event => {
+                let address = value.trim();
+                let address = address
+                    .get(..7)
+                    .filter(|p| p.eq_ignore_ascii_case("mailto:"))
+                    .map_or(address, |_| &address[7..]);
+                if addresses.iter().any(|own| own.eq_ignore_ascii_case(address.trim())) {
+                    let status = param(params, "PARTSTAT").unwrap_or("NEEDS-ACTION");
+                    return Some(status.trim().to_ascii_lowercase());
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
 /// A DURATION (`PT1H30M`, `P1D`) in seconds
 fn seconds(value: &str) -> Option<i64> {
     let value = value.trim().strip_prefix('+').unwrap_or(value.trim());
