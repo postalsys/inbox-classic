@@ -562,7 +562,12 @@ final class Printer: NSObject {
         super.init()
         view.navigationDelegate = navigation
         view.uiDelegate = navigation
-        navigation.loaded = { [weak self] in self?.picturesReady() }
+        view.configuration.userContentController.addUserScript(Printer.syncPictures)
+        // didFinish comes after the load event, so every picture is loaded (or failed)
+        navigation.loaded = { [weak self] in
+            self?.navigation.loaded = nil
+            self?.run()
+        }
         ContentRules.whenReady { [weak self] in
             guard let self else { return }
             ContentRules.apply(to: view.configuration.userContentController, pictures: pictures)
@@ -570,17 +575,18 @@ final class Printer: NSObject {
         }
     }
 
-    /// didFinish does not wait for the pictures to be decoded, and a picture not drawn yet prints as an empty box: the
-    /// app's own script (in its own world; the page runs none) waits for every picture, loaded and decoded or failed,
-    /// at most 5 seconds, then it prints
-    private func picturesReady() {
-        navigation.loaded = nil
-        let script = "await Promise.race([Promise.all([...document.images].map(i => i.decode().catch(() => {}))),"
-            + " new Promise(done => setTimeout(done, 5000))]); return true"
-        view.callAsyncJavaScript(script, arguments: [:], in: nil, in: .defaultClient) { [weak self] _ in
-            self?.run()
-        }
-    }
+    /// WebKit draws a picture on paper only when no decode of it is under way on its decoding threads: while one is,
+    /// it draws nothing there and the picture prints as an empty box. The view's own paint (it is never shown) starts
+    /// such a decode for a picture it does not count as visible, and so does img.decode(), whose promise is kept by
+    /// any decode of the picture that ends, even the view's smaller one while its own is still queued. Every picture
+    /// of the page is made decoding="sync" as the parser puts it in, before anything is painted, so no paint starts
+    /// one: the app's own script, in its own world (the page runs none), at the start of the document
+    private static let syncPictures = WKUserScript(
+        source: "new MutationObserver(changes => { for (const change of changes) for (const node of change.addedNodes) {"
+            + " if (node.nodeType !== 1) continue; if (node.localName === 'img') node.decoding = 'sync';"
+            + " for (const img of node.getElementsByTagName('img')) img.decoding = 'sync' } })"
+            + ".observe(document, { childList: true, subtree: true })",
+        injectionTime: .atDocumentStart, forMainFrameOnly: false, in: .defaultClient)
 
     private func run() {
         let info = NSPrintInfo.shared.copy() as! NSPrintInfo
