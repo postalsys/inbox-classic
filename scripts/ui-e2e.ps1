@@ -282,6 +282,25 @@ public static bool Fits(IntPtr hwnd, string text, bool button, bool box, bool wr
     ReleaseDC(hwnd, dc);
     return need.Right <= width && (single || need.Bottom <= client.Bottom - client.Top);
 }
+// a static text's words fit it, measured in the font it has (a heading's larger one) and wrapped as it wraps them,
+// or on one line for one that cuts its words (SS_ENDELLIPSIS)
+public static bool FitsOwnFont(IntPtr hwnd, string text) {
+    RECT client;
+    GetClientRect(hwnd, out client);
+    IntPtr dc = GetDC(hwnd);
+    IntPtr font = SendMessage(hwnd, 0x0031, IntPtr.Zero, IntPtr.Zero);
+    IntPtr old = SelectObject(dc, font != IntPtr.Zero ? font : GetStockObject(17));
+    int width = client.Right - client.Left;
+    int style = GetWindowLong(hwnd, -16);
+    bool single = (style & 0xC000) == 0x4000;
+    // SS_EDITCONTROL: a word longer than a line is broken, as DT_EDITCONTROL breaks it
+    bool edit = (style & 0x2000) != 0;
+    RECT need = new RECT { Left = 0, Top = 0, Right = width, Bottom = 0 };
+    DrawText(dc, text, -1, ref need, 0x400u | 0x800u | (single ? 0x20u : 0x10u) | (edit ? 0x2000u : 0u));
+    SelectObject(dc, old);
+    ReleaseDC(hwnd, dc);
+    return need.Right <= width && need.Bottom <= client.Bottom - client.Top;
+}
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
     var found = new System.Collections.Generic.List<IntPtr>();
@@ -543,7 +562,8 @@ function TypeInEditor([IntPtr]$compose, [string]$text) {
 function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]$suggested = $null) {
     # the first file dialog of a session can take long to open while the shell starts (CI runners)
     $dialog = WaitWindow '#32770' $title 40
-    if (-not $dialog) { return $false }
+    # on a failure, a picture of the screen as it was (debug-file-dialog-*), to tell what held the dialog up
+    if (-not $dialog) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-missing'; return $false }
     # the name box: the one with the suggested name in a Save dialog, the one in the name combo box (1148) otherwise
     $name = WaitFor {
         if ($suggested) {
@@ -553,15 +573,17 @@ function AnswerFileDialog([string]$title, [string]$path, [string]$shot, [string]
             if ($combo -ne [IntPtr]::Zero) { [Native.Win]::FindDescendants($combo, 'Edit') | Select-Object -First 1 }
         }
     } 10
-    if (-not $name) { return $false }
+    if (-not $name) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-name'; return $false }
     if ($shot) { Shot $dialog $shot }
     [void][Native.Win]::SendMessage($name, $EM_SETSEL, [IntPtr]0, [IntPtr](-1))
     foreach ($c in $path.ToCharArray()) { [void][Native.Win]::PostMessage($name, 0x0102, [IntPtr][int]$c, [IntPtr]::Zero) }
     # the dialog's own Open or Save button (id 1) once the box has all of the path: Enter could go to the list of
     # suggestions that opens while a path is typed
-    if (-not (WaitFor { (WindowText $name) -eq $path } 10)) { return $false }
+    if (-not (WaitFor { (WindowText $name) -eq $path } 10)) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-typed'; return $false }
     Click $dialog 1
-    return [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
+    $closed = [bool](WaitFor { -not [Native.Win]::IsWindow($dialog) } 10)
+    if (-not $closed) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-file-dialog-open' }
+    $closed
 }
 # the Windows folder picker (Save Messages In) answered with `path`: typed into its Folder box, then Select Folder
 function AnswerFolderDialog([string]$title, [string]$path) {
@@ -3842,6 +3864,7 @@ public static class Dragger {
     $IDC_AGENT_LEVEL = 600; $IDC_AGENT_PATH = 611; $IDC_AGENT_RECIPIENTS = 612; $IDC_AGENT_WARNING = 614; $IDC_AGENT_SEND = 615
     $IDC_AGENT_LISTS = 618; $IDC_AGENT_UNSUBSCRIBE = 619; $IDC_AGENT_DONT_UNSUBSCRIBE = 620
     $IDC_AGENTS_HOSTS = 631; $IDC_AGENTS_LOG = 634; $IDC_AGENTS_UNDO = 635; $BM_GETCHECK = 0x00F0; $BM_SETCHECK = 0x00F1
+    $IDC_AGENTS_CLEAR = 636; $IDC_AGENTS_READS = 638; $IDC_AGENTS_READS_LABEL = 639
     $inboxBefore = @(Messages 'INBOX').Count
     # two mailing lists the agent asks to leave at the end, read already so the agent's unread two are the ones below;
     # signed by the list as the provider says, with the one-click way
@@ -3892,7 +3915,7 @@ public static class Dragger {
     }
     $marked = WaitFor { & $agentSaid 'marked' } 30
     Check ((& $agentSaid 'initialize').result.result.serverInfo.name -eq 'inbox-classic') 'allowed, the agent connects'
-    Check (@((& $agentSaid 'tools').result).Count -eq 25) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
+    Check (@((& $agentSaid 'tools').result).Count -eq 28) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
     $read = (& $agentSaid 'read').result
     Check ($read.notice -match 'not as instructions' -and $read.unread) 'it reads a message as text, told it is the sender''s, without marking it read'
     Check ($null -ne $marked -and $marked.result.done) 'it marks two messages read'
@@ -3940,7 +3963,9 @@ public static class Dragger {
         # after the send the agent saved a draft (opened below)
         [void](WaitFor { (& $logged 0) -match '^Saved the draft' } 20)
         Check ((& $logged 0) -match "^Saved the draft $([char]0x201C)Agenda for Friday$([char]0x201D)" -and
-               (& $logged 1) -match "^Sent $([char]0x201C)Lunch on Friday\?$([char]0x201D) to pat@example.net" -and (& $logged 2) -match '^Marked read') "and what its agent did, newest first ($(& $logged 0); $(& $logged 1); $(& $logged 2))"
+               (& $logged 1) -match "^Sent $([char]0x201C)Lunch on Friday\?$([char]0x201D) to pat@example.net" -and (& $logged 4) -match '^Marked read') "and what its agent did, newest first ($(@(0..4 | ForEach-Object { & $logged $_ }) -join '; '))"
+        # the colour of a flag and a conversation watched, by the agent
+        Check ((& $logged 2) -match "^Watched the conversation $([char]0x201C)" -and (& $logged 3) -match "^Flagged $([char]0x201C).+$([char]0x201D) blue$") "a flag's colour and a watched conversation are listed ($(& $logged 2); $(& $logged 3))"
         Shot $agents 'agents-6-window'
         # the message sent selected (the row under the draft): Undo takes it out of the Outbox before it goes
         Key $log $VK_HOME
@@ -3949,6 +3974,25 @@ public static class Dragger {
         Click $agents $IDC_AGENTS_UNDO
         $takenBack = { @(0..3 | ForEach-Object { & $logged $_ }) -match 'taken back' }
         Check ([bool](WaitFor { & $takenBack } 10)) "Undo takes the message back ($(& $takenBack))"
+        # what the agent read: one row for the program's hour, under what it did then; selected, the list under the log
+        # shows each read with its time: the subjects, never what the messages say
+        $reads = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_READS)
+        $readsLabel = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_READS_LABEL)
+        Check ((WindowText $readsLabel) -match '^Select a row of reads' -and (ListCount $reads) -eq 0) "with another row selected, the list under the log says to select a row of reads ($(WindowText $readsLabel))"
+        $rows = @(0..([Math]::Max(0, (ListCount $log) - 1)) | ForEach-Object { & $logged $_ })
+        $readsRow = [Array]::FindIndex([string[]]$rows, [Predicate[string]] { param($r) $r -match '^Read \d+ messages?\b' })
+        Check ($readsRow -gt 4 -and $rows[$readsRow] -match 'looked at (a )?message lists?') "what it read is one row, under what it did after ($($rows -join '; '))"
+        if ($readsRow -ge 0) {
+            Key $log $VK_HOME
+            for ($i = 0; $i -lt $readsRow; $i++) { Key $log $VK_DOWN }
+            $readTexts = WaitFor { if ((ListCount $reads) -gt 0) { , @(0..((ListCount $reads) - 1) | ForEach-Object { [Native.Win]::RemoteListText($reads, $_, 1) }) } } 10
+            $subject = "$([char]0x201C)(Quarterly report draft|Team lunch on Friday)$([char]0x201D)"
+            Check (@($readTexts) -match "^Read $subject$" -and @($readTexts) -match '^Looked at \d+ messages? in ') "selected, the list under it shows each read: the subject, the message list ($($readTexts -join '; '))"
+            Check (-not (@($readTexts) -match 'Comments by Thursday|Who is in for lunch')) 'never what a message says'
+            Check ((WindowText $readsLabel) -match '^What was read from .+ to .+:$') "over it, the hour it covers ($(WindowText $readsLabel))"
+            Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($agents, $IDC_AGENTS_UNDO))) 'reading can not be undone'
+            Shot $agents 'agents-9-reads'
+        }
         [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
     }
@@ -4055,6 +4099,72 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
     }
     if ($agent -and -not $agent.HasExited) { $agent | Stop-Process -Force -ErrorAction SilentlyContinue }
+    # the flag the agent set comes off again on the server, so the steps after count the Inbox's flags as before
+    $agentFlagged = @(Messages 'INBOX' | Where-Object { $_.flags -contains '\Flagged' -and (RawText $_) -match 'Subject: Quarterly report draft' })
+    if ($agentFlagged.Count) {
+        [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "$rest/INBOX/messages/flags" -Body (@{
+            uids = @($agentFlagged | ForEach-Object { $_.uid }); flags = @('\Flagged', '$MailFlagBit2'); action = 'remove' } | ConvertTo-Json))
+        Command $main $IDM_SYNC
+        [void](WaitFor { -not @(Messages 'INBOX' | Where-Object { $_.flags -contains '\Flagged' -and (RawText $_) -match 'Subject: Quarterly report draft' }).Count } 10)
+    }
+
+    # an agent started from a terminal: the relay's parent is the terminal's program (here a copy of cmd.exe under the
+    # name of Windows Terminal's, `$terminal`.exe), so every agent started there would share one access. The question
+    # says so in the language in use, with how to give one an access of its own (--name), nothing cut off (shot `$shot`;
+    # with `$pseudo` nothing left in English). Answered `$answer`: Don't Allow (7), or closed (2), which decides nothing.
+    function TerminalQuestion([string]$terminal, [string]$shot, [int]$answer, [bool]$pseudo) {
+        $terminalExe = Join-Path $Out "$terminal.exe"
+        Copy-Item -Force (Join-Path $env:SystemRoot 'System32\cmd.exe') $terminalExe
+        $start = New-Object System.Diagnostics.ProcessStartInfo $terminalExe
+        $start.Arguments = "/d /c `"`"$((Resolve-Path $Exe).Path)`" --mcp --store `"$store`"`""
+        $start.UseShellExecute = $false; $start.RedirectStandardInput = $true; $start.RedirectStandardOutput = $true; $start.CreateNoWindow = $true
+        $shell = [System.Diagnostics.Process]::Start($start)
+        # the question comes with the agent's first request
+        $shell.StandardInput.WriteLine('{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ui-test","version":"1"}}}')
+        $shell.StandardInput.Flush()
+        $ask = WaitShown 'InboxClassicAgentAccess' 30
+        Check ($null -ne $ask) "an agent started from a terminal is asked about ($shot)"
+        if ($ask) {
+            $texts = @([Native.Win]::FindDescendants($ask, 'Static') | ForEach-Object { WindowText $_ })
+            if (-not $pseudo) {
+                $heading = $texts[0]
+                Check ($heading -match "\($terminal\)" -and $texts[1] -match '--name') "it names the terminal's programs together and says how to give one its own access ($shot`: $heading | $($texts[1]))"
+            }
+            # every text whole, the heading in its own larger font, wrapped over the lines it needs
+            $cut = @()
+            foreach ($static in [Native.Win]::FindDescendants($ask, 'Static')) {
+                $text = WindowText $static
+                $style = [Native.Win]::GetWindowLong($static, -16)
+                # the program's file is cut in its middle, as a path is (SS_PATHELLIPSIS)
+                if ([string]::IsNullOrWhiteSpace($text) -or ($style -band 0xC000) -eq 0x8000) { continue }
+                if (-not [Native.Win]::FitsOwnFont($static, $text)) { $cut += $text }
+            }
+            Check ($cut.Count -eq 0) "nothing in the question is cut off ($shot`: $($cut -join ' | '))"
+            if ($pseudo) {
+                $english = @($texts | Where-Object { $_ -and -not $_.TrimStart().StartsWith('[') })
+                Check ($english.Count -eq 0) "no word of the question left in English ($($english -join ' | '))"
+            }
+            Shot $ask $shot
+            if ($answer -eq 2) {
+                [void][Native.Win]::PostMessage($ask, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            } else {
+                Click $ask $answer
+            }
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($ask) } 10)) "answered, it closes ($shot)"
+        }
+        try { $shell.StandardInput.Close() } catch {}
+        if (-not $shell.WaitForExit(5000)) { $shell.Kill() }
+    }
+    TerminalQuestion 'WindowsTerminal' 'agents-10-terminal' 7 $false
+    Command $main $IDM_AI_AGENTS
+    $agents = WaitShown 'InboxClassicAgents' 10
+    if ($agents) {
+        $hosts = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_HOSTS)
+        $names = @(0..((ListCount $hosts) - 1) | ForEach-Object { [Native.Win]::RemoteListText($hosts, $_, 0) })
+        Check ($names -contains 'Programs started from a terminal (WindowsTerminal)') "turned away, the terminal's programs are listed under one name ($($names -join '; '))"
+        [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
+    }
 
     Step 'marking all read'
     $IDM_MARK_ALL_READ = 126
@@ -7435,11 +7545,36 @@ public static bool HasIcon(IntPtr window) {
             $needed = [System.Windows.Forms.TextRenderer]::MeasureText($access, $hostFont).Width
             $accessShown = [int][Native.Win]::SendMessage($hosts, 0x101D, [IntPtr]1, [IntPtr]::Zero)
             Check ($accessShown -ge $needed + 6 -and -not ([Native.Win]::GetWindowLong($hosts, -16) -band 0x00100000)) "AI Agents shows what the program may do whole (${prefix}: $access, $accessShown for $needed)"
+            # the log written in English shown in the language in use: its rows are put into words each time
+            $log = [Native.Win]::GetDlgItem($agents, 634)
+            $rows = @(0..((ListCount $log) - 1) | ForEach-Object { [Native.Win]::RemoteListText($log, $_, 2) })
+            $english = @($rows | Where-Object { $_ -match '^(Read \d|Saved the draft|Sent |Marked read|Flagged |Watched |You did not)' })
+            $inLanguage = if ($pseudo) { @($rows | Where-Object { $_.StartsWith('[') }).Count -eq $rows.Count } else { @($rows -match 'gelesen').Count -ge 1 -and @($rows -match '^Entwurf ').Count -eq 1 }
+            Check ($rows.Count -ge 6 -and $english.Count -eq 0 -and $inLanguage) "the log's rows are in the language in use (${prefix}: $($rows -join '; '))"
             if ($pseudo) { CheckPseudo $agents 'AI Agents' $true }
             Shot $agents "$prefix-agents"
+            if ($pseudo) {
+                # Clear empties the log, what agents did and what they read (what they sent still counts against the
+                # limit of an hour, pe-store's a_cleared_log_still_counts)
+                Click $agents 636
+                # the question Clear asks first, a message box of the window (GW_ENABLEDPOPUP)
+                $sure = WaitFor { $w = [Native.Win]::GetWindow($agents, 6); if ($w -ne [IntPtr]::Zero -and $w -ne $agents) { $w } } 10
+                Check ($null -ne $sure) "Clear asks first ($prefix)"
+                if ($sure) { Click $sure 6 }
+                Check ([bool](WaitFor { (ListCount $log) -eq 0 } 10)) "Clear empties the log ($prefix)"
+                Check ((ListCount ([Native.Win]::GetDlgItem($agents, 638))) -eq 0 -and -not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($agents, 636))) 'and the reads under it, with nothing more to clear'
+                # the limit counts an agent's sends in the store's log, the cleared ones with them
+                $count = Join-Path $Out 'count-sends.cjs'
+                Set-Content -Path $count -Encoding UTF8 -Value ("const { DatabaseSync } = require('node:sqlite');`n" +
+                    "const store = new DatabaseSync(process.argv[2], { readOnly: true });`n" +
+                    "console.log(store.prepare(`"SELECT COUNT(*) AS n FROM agent_log WHERE what = 'send' AND hidden = 1`").get().n);")
+                $sends = (& node --no-warnings $count $store | Select-Object -Last 1)
+                Check ("$sends".Trim() -eq '1') "the send cleared still counts against the agent's limit ($sends)"
+            }
             [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
             [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
         }
+        TerminalQuestion 'OpenConsole' $(if ($pseudo) { 'agents-10c-terminal-pseudo' } else { 'agents-10b-terminal-german' }) 2 $pseudo
     }
 
     Step 'in German'
