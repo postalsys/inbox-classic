@@ -287,6 +287,12 @@ fn words_in_the_language_set() {
         localized_picture("brands/google-sign-in.png"),
         "brands/google-sign-in.png"
     );
+    // a value that chooses the words still chooses them
+    let flagged = tr_args(
+        Text::AgentLogFlagColor,
+        &[("subject", "Lunch".into()), ("color", "blue".into())],
+    );
+    assert!(flagged.contains("Lunch") && flagged.contains("blüé"), "{flagged}");
     // the dots off a title before the pseudo-language's padding too
     let options = title(Text::CmdOptions);
     assert!(

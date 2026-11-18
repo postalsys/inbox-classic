@@ -2924,6 +2924,7 @@ name = "pe-i18n"
 version = "0.18.0"
 dependencies = [
  "fluent-bundle",
+ "fluent-syntax",
  "unic-langid",
 ]
 
