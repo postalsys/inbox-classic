@@ -366,6 +366,9 @@ mod tests {
         ] {
             assert!(!tile_words(&reason).is_empty(), "{reason:?}");
         }
-        assert_eq!(tile_words(&PreviewRefusal::Password), "Protected by a password");
+        assert_eq!(
+            tile_words(&PreviewRefusal::Password),
+            "Protected by a password: open it to enter the password"
+        );
     }
 }

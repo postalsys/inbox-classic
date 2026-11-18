@@ -860,7 +860,7 @@ preview-tile-downloading = Downloading…
 # the tile of a picture in a format not shown yet: { $format } is its name (HEIC, AVIF, JPEG XL)
 preview-tile-format = { $format } pictures are not shown yet
 # the tile of a PDF file that wants a password to open
-preview-tile-password = Protected by a password
+preview-tile-password = Protected by a password: open it to enter the password
 # the tile of a picture or PDF file over the size or pixel limit
 preview-tile-too-large = Too large to show
 # the tile of a file that is broken, or not what its name says
