@@ -179,8 +179,10 @@ jobs:
               run: scripts\ui-e2e.ps1
             - name: Every feature shown
               run: node scripts/feature-map.mjs build/ui-e2e --check windows
+            # what to look at, not what is tested: an outage of the artifact storage does not fail the run
             - uses: actions/upload-artifact@v7
               if: always()
+              continue-on-error: true
               with:
                   name: ui-e2e
                   path: |
@@ -228,14 +230,24 @@ jobs:
                   name: InboxClassic-mac-arm64
                   path: build/InboxClassic-mac.zip
                   if-no-files-found: error
+            # what to look at, not what is tested: an outage of the artifact storage does not fail the run
             - uses: actions/upload-artifact@v7
               if: always()
+              continue-on-error: true
               with:
                   name: ui-e2e-mac
                   path: |
                       build/ui-e2e-mac/*.png
                       build/ui-e2e-mac/log.txt
                       build/feature-map-mac.html
+                  if-no-files-found: ignore
+            # the system's crash reports of the app, when the test or the boot test failed
+            - uses: actions/upload-artifact@v7
+              if: failure()
+              continue-on-error: true
+              with:
+                  name: crash-reports-mac
+                  path: ~/Library/Logs/DiagnosticReports/*Inbox*
                   if-no-files-found: ignore
 
     linux:
@@ -305,8 +317,10 @@ jobs:
               if: always()
               working-directory: .
               run: node scripts/feature-map.mjs build/ui-e2e-linux build/feature-map-linux.html
+            # what to look at, not what is tested: an outage of the artifact storage does not fail the run
             - uses: actions/upload-artifact@v7
               if: always()
+              continue-on-error: true
               with:
                   name: ui-e2e-linux
                   path: |
@@ -351,8 +365,10 @@ jobs:
             - name: Every feature shown
               working-directory: .
               run: node scripts/feature-map.mjs build/ui-e2e-arch --check linux
+            # what to look at, not what is tested: an outage of the artifact storage does not fail the run
             - uses: actions/upload-artifact@v7
               if: always()
+              continue-on-error: true
               with:
                   name: ui-e2e-arch
                   path: |
@@ -405,6 +421,7 @@ jobs:
                   done
             - uses: actions/upload-artifact@v7
               if: failure()
+              continue-on-error: true
               with:
                   name: fuzz-artifacts
                   path: core/fuzz/artifacts
