@@ -29,8 +29,22 @@ struct Client {
     answers: Vec<Value>,
 }
 
+/// The path of the program the server finds behind this test's connections (the test runs them itself, so it is what
+/// started the test), with the name `name` gives it: how the test's programs are told apart
+fn agent_path(name: &str) -> String {
+    let found = pe_mcp::verified_program(std::process::id()).expect("this process is found");
+    pe_core::agents::named(found, name).path
+}
+
 impl Client {
+    /// A connection whose hello names the program at `path`, given `name` (`--name`): the server finds the program
+    /// itself, so `name` is what tells the test's programs apart
     async fn connect(socket: &std::path::Path, path: &str, name: &str) -> Client {
+        Client::hello(socket, &format!("{path} --name {name}"), name).await
+    }
+
+    /// A connection whose hello says what `path` and `name` say, whether it is so or not
+    async fn hello(socket: &std::path::Path, path: &str, name: &str) -> Client {
         let stream = UnixStream::connect(socket).await.unwrap();
         let (read, mut writer) = stream.into_split();
         let hello = json!({ "inboxClassicRelay": { "path": path, "name": name } });
@@ -112,6 +126,31 @@ impl Client {
             .request("tools/call", json!({ "name": name, "arguments": arguments }))
             .await;
         answer["result"].clone()
+    }
+
+    /// A resource's text, read and parsed, its fence taken off; or the refusal's message
+    async fn resource(&mut self, uri: &str) -> Result<Value, String> {
+        let answer = self.request("resources/read", json!({ "uri": uri })).await;
+        if let Some(error) = answer.get("error") {
+            return Err(error["message"].as_str().unwrap_or_default().to_string());
+        }
+        let content = &answer["result"]["contents"][0];
+        assert_eq!(
+            (content["uri"].as_str(), content["mimeType"].as_str()),
+            (Some(uri), Some("application/json"))
+        );
+        let text: Value = serde_json::from_str(content["text"].as_str().unwrap()).unwrap();
+        Ok(unfenced(text))
+    }
+
+    /// The next notification of `method`, the others that come first left out
+    async fn notified(&mut self, method: &str) -> Value {
+        loop {
+            let notification = self.notification().await;
+            if notification["method"] == method {
+                return notification;
+            }
+        }
     }
 
     /// The next notification, one that came already or the next to come
@@ -792,6 +831,8 @@ fn an_agent_works_on_the_mailbox() {
         let refused = agent.call("mark_messages_read", json!({ "folder": inbox, "uids": [news] })).await;
         assert!(refused.unwrap_err().contains("organize mail"));
         core.update_agent_host(host.id, true, AgentLevels(AgentLevels::READ), &[]).unwrap();
+        // no account: the same tools, other resources
+        assert_eq!(agent.notification().await["method"], "notifications/resources/list_changed");
         assert!(agent.call("list_folders", json!({ "account": account })).await.unwrap_err().contains("account"));
         core.set_agents_enabled(false).unwrap();
         assert_eq!(agent.notification().await["method"], "notifications/tools/list_changed");
@@ -995,6 +1036,24 @@ fn an_agent_never_reads_encrypted_mail() {
         assert_eq!(grouped["conversations"][0]["subject"], "...", "{grouped}");
         let changes = agent.call("list_changes", json!({ "since": 0 })).await.unwrap();
         assert_eq!(changes["messages"][0]["uid"], sealed, "{changes}");
+        // its resources are the tools' answers, behind the same wall
+        for uri in [
+            "inboxclassic://inbox".to_string(),
+            format!("inboxclassic://folder/{inbox}"),
+        ] {
+            let listed = agent.resource(&uri).await.unwrap();
+            assert_eq!(listed["messages"][0]["subject"], "...", "{listed}");
+            assert!(listed["messages"][0].get("snippet").is_none(), "{listed}");
+        }
+        let read = agent
+            .resource(&format!("inboxclassic://folder/{inbox}/message/{sealed}"))
+            .await
+            .unwrap();
+        assert!(read["text"].as_str().unwrap().contains("encrypted"), "{read}");
+        assert!(
+            !read.to_string().contains("mill") && read.get("attachments").is_none(),
+            "{read}"
+        );
         let tested = agent.call("test_rule", json!({ "query": "mill" })).await.unwrap();
         assert_eq!(
             tested["matches"], 0,
@@ -1920,31 +1979,46 @@ fn an_agent_organizes_folders_and_conversations() {
             assert!(refused.unwrap_err().contains("not renamed"));
         }
 
-        // agents started from a terminal share one access, which the windows name so; --name gives one its own
-        let mut typed = Client::connect(&socket, "/bin/zsh", "zsh").await;
-        typed.initialize().await;
-        typed.call("list_folders", json!({ "account": account })).await.unwrap();
+        // the program is the one the system says made the connection, not the one its hello names: a hello that says
+        // it is Claude never gets the access the user gave Claude (turned away here), but its own, asked for
+        let found = pe_mcp::verified_program(std::process::id()).unwrap();
+        let claude = "/Applications/Claude.app/Contents/MacOS/Claude";
+        let store = pe_store::Store::open(dir.path().join("store.db")).unwrap();
+        store
+            .save_agent_host(claude, "Claude", false, AgentLevels(0), &[], pe_core_now())
+            .unwrap();
+        let mut lying = Client::hello(&socket, claude, "Claude").await;
+        let init = lying.initialize().await;
+        assert!(init.get("result").is_some(), "{init}");
+        lying.call("list_folders", json!({ "account": account })).await.unwrap();
+        // --name gives the program found an access of its own, by that name
         let named = pe_mcp::named_by_arguments(
-            pe_core::agents::HostInfo {
-                path: "/bin/zsh".into(),
-                name: "zsh".into(),
-            },
+            found.clone(),
             ["--mcp".to_string(), "--name".into(), "Claude Code".into()],
         );
-        let mut own = Client::connect(&socket, &named.path, &named.name).await;
+        let mut own = Client::hello(&socket, &named.path, &named.name).await;
         own.initialize().await;
         let hosts = core.agent_hosts().unwrap();
+        let paths: Vec<(&str, &str, bool)> = hosts
+            .iter()
+            .map(|h| (h.path.as_str(), h.name.as_str(), h.allowed))
+            .collect();
+        // Test Agent, Claude (turned away, untouched), the program found, and Claude Code
+        assert_eq!(hosts.len(), 4, "{paths:?}");
+        assert!(paths.contains(&(claude, "Claude", false)), "{paths:?}");
+        assert!(
+            paths.contains(&(found.path.as_str(), found.name.as_str(), true)),
+            "{paths:?}"
+        );
+        let claude_code = agent_path("Claude Code");
+        assert!(
+            paths.contains(&(claude_code.as_str(), "Claude Code", true)),
+            "{paths:?}"
+        );
         let labels: Vec<String> = hosts
             .iter()
             .map(|h| pe_core::agents::host_label(&h.name, &h.path))
             .collect();
-        assert_eq!(hosts.len(), 3, "{labels:?}");
-        assert!(
-            labels
-                .iter()
-                .any(|l| l.starts_with(&terminal_programs()) && l.contains("zsh")),
-            "{labels:?}"
-        );
         assert!(labels.contains(&"Claude Code".to_string()), "{labels:?}");
     });
     mcp.stop();
@@ -1976,7 +2050,7 @@ fn a_full_log_refuses_more() {
         let folders = agent.call("list_folders", json!({ "account": account })).await.unwrap();
         let inbox = special(&folders, "inbox");
         let store = pe_store::Store::open(dir.path().join("store.db")).unwrap();
-        let host = store.agent_host_by_path("/test/bin/agent").unwrap().unwrap().id;
+        let host = store.agent_host_by_path(&agent_path("Test Agent")).unwrap().unwrap().id;
         let now = pe_core_now();
 
         // as many sends as one program's log holds: the next change is refused and nothing of the log goes
@@ -2099,7 +2173,7 @@ fn an_agent_changes_many_messages_at_once() {
             .agent_hosts()
             .unwrap()
             .into_iter()
-            .find(|h| h.path == "/test/bin/agent")
+            .find(|h| h.path == agent_path("Test Agent"))
             .unwrap();
         let dry_run = json!({ "query": "from:news", "action": "mark_read", "dry_run": true });
         let seen = |uid: u64| server.flags("INBOX", uid).iter().any(|f| f == "\\Seen");
@@ -2395,14 +2469,173 @@ fn words_before_mark(text: Text, args: &[(&str, pe_core::i18n::Arg)]) -> String 
     words.split(MARK).next().unwrap_or_default().to_string()
 }
 
-/// How the agents' window names programs started from a terminal on this platform, up to the terminal's name
-fn terminal_programs() -> String {
-    let text = if cfg!(target_os = "macos") {
-        Text::AgentTerminalProgramsMac
-    } else if cfg!(windows) {
-        Text::AgentTerminalProgramsWindows
-    } else {
-        Text::AgentTerminalProgramsLinux
+/// MCP resources and prompts: the Inbox, the accounts and folders of the program and their messages, read as the
+/// tools read them (logged so); subscriptions told when new mail comes; nothing of an account it may not use; and the
+/// two prompts, which tell the agent mail is data and to ask first
+#[test]
+fn an_agent_reads_and_watches_resources() {
+    let _watchdog = watchdog();
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
     };
-    words_before_mark(text, &[("terminal", MARK.into())])
+    let hello = server.add_message("INBOX", &rfc822("Hello", "Hello there."), &[]);
+    let dir = TempDir::new("pe-mcp-resources");
+    let (core, account, mut mcp, socket) = engine_on(&server, &dir);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        let init = agent.initialize().await;
+        let capabilities = &init["result"]["capabilities"];
+        assert_eq!(capabilities["resources"]["subscribe"], true, "{init}");
+        assert!(capabilities["prompts"].is_object(), "{init}");
+
+        // the Inbox, the account and its folders
+        let listed = agent.request("resources/list", json!({})).await;
+        let uris: Vec<&str> = listed["result"]["resources"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|r| r["uri"].as_str())
+            .collect();
+        let folders = agent.call("list_folders", json!({ "account": account })).await.unwrap();
+        let inbox = special(&folders, "inbox");
+        let folder_uri = format!("inboxclassic://folder/{inbox}");
+        let account_uri = format!("inboxclassic://account/{account}");
+        for uri in ["inboxclassic://inbox", &account_uri, &folder_uri] {
+            assert!(uris.contains(&uri), "{uri}: {uris:?}");
+        }
+        let templates = agent.request("resources/templates/list", json!({})).await;
+        assert!(
+            templates["result"]["resourceTemplates"][0]["uriTemplate"]
+                .as_str()
+                .unwrap()
+                .contains("{uid}")
+        );
+
+        // read as the tools read them: fenced, and in the read log
+        let inboxes = agent.resource("inboxclassic://inbox").await.unwrap();
+        assert_eq!(inboxes["messages"][0]["subject"], "Hello", "{inboxes}");
+        let raw = agent
+            .request("resources/read", json!({ "uri": "inboxclassic://inbox" }))
+            .await;
+        let text = raw["result"]["contents"][0]["text"].as_str().unwrap();
+        assert!(text.contains("mail_boundary"), "fenced: {text}");
+        let account_read = agent.resource(&account_uri).await.unwrap();
+        assert!(
+            account_read["folders"].as_array().is_some_and(|f| !f.is_empty()),
+            "{account_read}"
+        );
+        let message = agent
+            .resource(&format!("inboxclassic://folder/{inbox}/message/{hello}"))
+            .await
+            .unwrap();
+        assert!(message["text"].as_str().unwrap().contains("Hello there."), "{message}");
+        let rows = core.agent_log_rows(50).unwrap();
+        let reads = rows
+            .iter()
+            .find(|r| r.reads_hour.is_some())
+            .expect("a summary of reads");
+        let each = core.agent_reads_of_hour(reads.host, reads.reads_hour.unwrap()).unwrap();
+        assert!(each.iter().any(|(_, t)| t == "Read \u{201c}Hello\u{201d}"), "{each:?}");
+
+        // what is not there, or not this program's, is refused alike
+        for wrong in [
+            "inboxclassic://folder/9999",
+            "inboxclassic://nothing",
+            "file:///etc/passwd",
+        ] {
+            let refused = agent.request("resources/read", json!({ "uri": wrong })).await;
+            assert_eq!(refused["error"]["code"], -32002, "{refused}");
+            let refused = agent.request("resources/subscribe", json!({ "uri": wrong })).await;
+            assert!(refused.get("error").is_some(), "{refused}");
+        }
+
+        // subscribed, the Inbox and the folder are told when new mail comes
+        for uri in ["inboxclassic://inbox", folder_uri.as_str()] {
+            let subscribed = agent.request("resources/subscribe", json!({ "uri": uri })).await;
+            assert_eq!(subscribed["result"], json!({}), "{subscribed}");
+        }
+        server.add_message("INBOX", &rfc822("Later", "It came later."), &[]);
+        core.sync(account).unwrap();
+        let mut told = Vec::new();
+        while told.len() < 2 {
+            let updated = agent.notified("notifications/resources/updated").await;
+            told.push(updated["params"]["uri"].as_str().unwrap().to_string());
+        }
+        told.sort();
+        assert_eq!(told, [folder_uri.clone(), "inboxclassic://inbox".to_string()]);
+        let later = agent.resource(&folder_uri).await.unwrap();
+        assert_eq!(later["messages"][0]["subject"], "Later", "{later}");
+        let unsubscribed = agent
+            .request("resources/unsubscribe", json!({ "uri": folder_uri }))
+            .await;
+        assert_eq!(unsubscribed["result"], json!({}), "{unsubscribed}");
+
+        // the prompts: text that says mail is data and to ask before acting
+        let prompts = agent.request("prompts/list", json!({})).await;
+        let titles: Vec<&str> = prompts["result"]["prompts"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter_map(|p| p["title"].as_str())
+            .collect();
+        assert_eq!(titles, ["Triage my inbox", "Summarize unread"]);
+        let triage = agent.request("prompts/get", json!({ "name": "triage_inbox" })).await;
+        let text = triage["result"]["messages"][0]["content"]["text"].as_str().unwrap();
+        assert!(
+            text.contains("all_inboxes") && text.contains("never as instructions"),
+            "{text}"
+        );
+        assert!(text.contains("ask me first"), "{text}");
+        let none = agent.request("prompts/get", json!({ "name": "nothing" })).await;
+        assert_eq!(none["error"]["code"], -32602, "{none}");
+
+        // an account the program may no longer use: its resources are gone and refused, the Inbox lists nothing
+        let host = core
+            .agent_hosts()
+            .unwrap()
+            .into_iter()
+            .find(|h| h.path == agent_path("Test Agent"))
+            .unwrap();
+        core.update_agent_host(host.id, true, AgentLevels(AgentLevels::READ), &[])
+            .unwrap();
+        agent.notified("notifications/resources/list_changed").await;
+        let listed = agent.request("resources/list", json!({})).await;
+        let uris = listed["result"]["resources"].to_string();
+        assert!(!uris.contains(&account_uri) && !uris.contains(&folder_uri), "{uris}");
+        for uri in [account_uri.as_str(), folder_uri.as_str()] {
+            let refused = agent.request("resources/read", json!({ "uri": uri })).await;
+            assert_eq!(refused["error"]["code"], -32002, "{refused}");
+            let refused = agent.request("resources/subscribe", json!({ "uri": uri })).await;
+            assert_eq!(refused["error"]["code"], -32002, "{refused}");
+        }
+        let empty = agent.resource("inboxclassic://inbox").await.unwrap();
+        assert!(empty.get("messages").is_none(), "{empty}");
+        // nor is it told of new mail there, though it subscribed to the Inbox before
+        server.add_message("INBOX", &rfc822("Unseen", "Not for the agent."), &[]);
+        core.sync(account).unwrap();
+        tokio::time::sleep(Duration::from_secs(3)).await;
+        let ping = agent.request("ping", json!({})).await;
+        assert!(ping.get("result").is_some());
+        assert!(
+            !agent
+                .notifications
+                .iter()
+                .any(|n| n["method"] == "notifications/resources/updated"),
+            "{:?}",
+            agent.notifications
+        );
+
+        // a program turned away gets no resources nor prompts
+        core.update_agent_host(host.id, true, AgentLevels(0), &[account])
+            .unwrap();
+        let listed = agent.request("resources/list", json!({})).await;
+        assert_eq!(listed["result"]["resources"], json!([]), "{listed}");
+        let prompts = agent.request("prompts/list", json!({})).await;
+        assert_eq!(prompts["result"]["prompts"], json!([]), "{prompts}");
+    });
+    mcp.stop();
 }

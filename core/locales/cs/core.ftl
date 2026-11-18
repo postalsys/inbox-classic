@@ -756,6 +756,8 @@ agent-terminal-program-linux = Program spuštěný z terminálu ({ $terminal })
 agent-connect-title-terminal = { $programs } chtějí používat vaši poštu
 # review: new
 agent-connect-terminal-detail = Všichni agenti AI, které spustíte z tohoto terminálu, sdílejí přístup, který zde povolíte. Chcete-li některému z nich dát vlastní přístup, přidejte v nastavení MCP agenta do jeho argumentů --name a název podle svého výběru.
+# review: new
+agent-connect-claimed = Program se představil jako { $claimed }. Inbox Classic ověřil, který program ho spustil: { $program }.
 
 ## Keys
 

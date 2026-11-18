@@ -3,26 +3,31 @@
 //! before it closes the engine: [`McpServer`] holds the engine, and dropping the engine's last handle on this
 //! thread's runtime would stop the engine's runtime from inside another one.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
-use pe_core::Core;
-use pe_core::agents::{AgentAnswer, AgentLevels, Connect, HostInfo};
+use pe_core::agents::{AgentAnswer, AgentLevels, Connect, HostInfo, HostNow};
+use pe_core::{Core, MailChange};
 use serde_json::{Value, json};
 use tokio::io::{AsyncRead, AsyncWrite, BufReader};
 use tokio::sync::mpsc;
 
-use crate::protocol::{self, INVALID_PARAMS, INVALID_REQUEST, Incoming, METHOD_NOT_FOUND, NOT_ALLOWED};
+use crate::protocol::{self, INVALID_PARAMS, INVALID_REQUEST, Incoming, METHOD_NOT_FOUND, NOT_ALLOWED, NOT_FOUND};
+use crate::resources::{self, Resource};
 
 /// The versions of MCP this server speaks, newest first
 const VERSIONS: &[&str] = &["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"];
 
 /// How long `initialize` waits for the user to let a new program in
 const APPROVAL_WAIT: Duration = Duration::from_secs(120);
+
+/// How long changes of the mail are gathered before the resources they changed are told: a sync that stores many
+/// messages tells each resource once
+const UPDATE_WAIT: Duration = Duration::from_secs(1);
 
 /// What the relay says first, before MCP: the program that started it
 pub(crate) const HELLO: &str = "inboxClassicRelay";
@@ -104,10 +109,13 @@ impl McpServer {
                         continue;
                     };
                     // the folder keeps others out; this is the second lock
-                    if stream.peer_cred().ok().map(|c| c.uid()) != owner {
+                    let Ok(peer) = stream.peer_cred() else { continue };
+                    if Some(peer.uid()) != owner {
                         continue;
                     }
-                    tokio::spawn(serve(core.clone(), stream));
+                    // the process at the other end, as the system tells it (SO_PEERCRED, LOCAL_PEERPID)
+                    let pid = peer.pid().and_then(|pid| u32::try_from(pid).ok());
+                    tokio::spawn(serve(core.clone(), stream, pid));
                 }
             })
         })
@@ -176,12 +184,19 @@ struct Session {
 struct State {
     /// The program, once the user let it in
     allowed: Option<i64>,
-    /// What the program could do when it was last told its tools: a change is announced (`list_changed`)
-    told: AgentLevels,
+    /// What the program could do and which accounts it could use when it was last told its tools and resources: a
+    /// change is announced (`list_changed`)
+    told: (AgentLevels, Vec<pe_store::AccountId>),
+    /// The resources it subscribed to
+    subscribed: HashSet<Resource>,
 }
 
 /// The notification that the tools of this program changed: the client lists them again
 const TOOLS_CHANGED: &str = "notifications/tools/list_changed";
+/// The notification that the resources it may list changed
+const RESOURCES_CHANGED: &str = "notifications/resources/list_changed";
+/// The notification that a resource it subscribed to changed: it reads it again
+const RESOURCE_UPDATED: &str = "notifications/resources/updated";
 
 /// The most requests of one connection served at once; more are refused until one is answered
 const MAX_RUNNING: usize = 16;
@@ -223,25 +238,41 @@ impl Progress {
     }
 }
 
-/// Serves one connection of a relay until it closes. Its requests are served side by side (a send that waits for
+/// Serves one connection of a relay until it closes, `peer` the process at its other end as the system told it
+/// (none when it did not: the connection is refused). Its requests are served side by side (a send that waits for
 /// the user holds up nothing else), their answers written one at a time as each is ready; `notifications/cancelled`
 /// stops the request it names, which then gets no answer.
-pub async fn serve<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(core: Arc<Core>, stream: S) {
+pub async fn serve<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(core: Arc<Core>, stream: S, peer: Option<u32>) {
+    // found before anything is read from the connection, while the process that connected is surely there
+    let verified = match peer {
+        Some(pid) => tokio::task::spawn_blocking(move || crate::host::verified_program(pid))
+            .await
+            .ok()
+            .flatten(),
+        None => None,
+    };
     let (read, mut write) = tokio::io::split(stream);
     let mut read = BufReader::new(read);
     // the relay's first line names the program it was started by
     let Some(hello) = protocol::read_line(&mut read).await else {
         return;
     };
-    let Some(host) = hello_host(&hello) else {
-        let _ = protocol::write_message(
-            &mut write,
-            &protocol::error(&Value::Null, INVALID_REQUEST, "connect through `--mcp`"),
-        )
-        .await;
-        return;
+    let refusal = match (hello_host(&hello), verified) {
+        (Some(hello), Some(verified)) => Ok(identity(verified, &hello)),
+        (None, _) => Err((INVALID_REQUEST, "connect through `--mcp`")),
+        (Some(_), None) => Err((NOT_ALLOWED, "Inbox Classic could not check which program this is.")),
+    };
+    let host = match refusal {
+        Ok(host) => host,
+        Err((code, why)) => {
+            let _ = protocol::write_message(&mut write, &protocol::error(&Value::Null, code, why)).await;
+            return;
+        }
     };
     let mut changes = core.agent_changes();
+    let mut mail = Some(core.mail_changes());
+    // the resources a change of the mail touched, told together once it has been quiet for a moment
+    let mut touched = Touched::default();
     let session = Arc::new(Session {
         core,
         host,
@@ -283,7 +314,25 @@ pub async fn serve<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(core: Arc
                 if changed.is_err() {
                     break;
                 }
-                session.tools_changed()
+                if write_all(&mut write, &session.lists_changed()).await.is_err() {
+                    break;
+                }
+                None
+            }
+            change = recv(&mut mail) => {
+                match change {
+                    Ok(change) => session.touch(&mut touched, Some(change)),
+                    Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => session.touch(&mut touched, None),
+                    // the engine closes: nothing more comes
+                    Err(tokio::sync::broadcast::error::RecvError::Closed) => mail = None,
+                }
+                None
+            }
+            () = touched.due() => {
+                if write_all(&mut write, &session.updates(&mut touched)).await.is_err() {
+                    break;
+                }
+                None
             }
         };
         if let Some(message) = message
@@ -295,6 +344,47 @@ pub async fn serve<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(core: Arc
     reader.abort();
     for task in running.into_values() {
         task.abort();
+    }
+}
+
+/// Writes `messages` one after another
+async fn write_all(write: &mut (impl AsyncWrite + Unpin), messages: &[Value]) -> std::io::Result<()> {
+    for message in messages {
+        protocol::write_message(write, message).await?;
+    }
+    Ok(())
+}
+
+/// The next change of the mail, waiting for ever once there are none to come
+async fn recv(
+    mail: &mut Option<tokio::sync::broadcast::Receiver<MailChange>>,
+) -> Result<MailChange, tokio::sync::broadcast::error::RecvError> {
+    match mail {
+        Some(mail) => mail.recv().await,
+        None => std::future::pending().await,
+    }
+}
+
+/// What changes of the mail touched since the program was last told: the resources to tell it, and whether its list
+/// of resources changed; when to tell
+#[derive(Default)]
+struct Touched {
+    resources: HashSet<Resource>,
+    list: bool,
+    at: Option<tokio::time::Instant>,
+}
+
+impl Touched {
+    /// Waits until it is time to tell what was touched; for ever while nothing was
+    async fn due(&self) {
+        match self.at {
+            Some(at) => tokio::time::sleep_until(at).await,
+            None => std::future::pending().await,
+        }
+    }
+
+    fn mark(&mut self) {
+        self.at.get_or_insert_with(|| tokio::time::Instant::now() + UPDATE_WAIT);
     }
 }
 
@@ -348,6 +438,20 @@ fn start(
     None
 }
 
+/// Who a connection is: the program found from its process, with the name its `--name` gave it in the hello; and
+/// what the hello said it was when that is another program
+fn identity(verified: HostInfo, hello: &HostInfo) -> HostInfo {
+    let (claimed, name) = pe_core::agents::split_named(&hello.path);
+    let mut host = match name {
+        Some(name) => pe_core::agents::named(verified.clone(), name),
+        None => verified.clone(),
+    };
+    if !claimed.is_empty() && !crate::host::same_file(claimed, &verified.path) {
+        host.claimed = pe_core::agents::program_name(claimed);
+    }
+    host
+}
+
 fn hello_host(line: &str) -> Option<HostInfo> {
     let hello: Value = serde_json::from_str(line).ok()?;
     let host = hello.get(HELLO)?;
@@ -362,6 +466,7 @@ fn hello_host(line: &str) -> Option<HostInfo> {
     Some(HostInfo {
         path: text("path"),
         name: text("name"),
+        ..Default::default()
     })
 }
 
@@ -375,26 +480,126 @@ impl Session {
         self.state.lock().unwrap_or_else(|p| p.into_inner())
     }
 
-    /// What the program may do now: nothing once it is turned away or forgotten, or agents are off
-    fn levels(&self) -> AgentLevels {
+    /// What the program may do now and the accounts it may use: nothing once it is turned away or forgotten, or
+    /// agents are off
+    fn now(&self) -> (AgentLevels, Vec<pe_store::AccountId>) {
         let allowed = self.state().allowed;
-        allowed
-            .and_then(|host| self.core.agent_host_now(host).ok())
-            .map_or(AgentLevels(0), |now| now.levels())
+        match allowed.and_then(|host| self.core.agent_host_now(host).ok()) {
+            Some(HostNow::Allowed(host)) => (host.levels, host.accounts),
+            _ => (AgentLevels(0), Vec::new()),
+        }
     }
 
     /// What the program may do now, kept as what it was told: the tools it is given go by it
     fn tell(&self) -> AgentLevels {
-        let levels = self.levels();
-        self.state().told = levels;
+        let now = self.now();
+        let levels = now.0;
+        self.state().told = now;
         levels
     }
 
-    /// The notification to send when what the program may do changed since it was told its tools
-    fn tools_changed(&self) -> Option<Value> {
-        self.state().allowed?;
-        let before = self.state().told;
-        (self.tell() != before).then(|| json!({ "jsonrpc": "2.0", "method": TOOLS_CHANGED }))
+    /// The notifications to send when what the program may do changed since it was told its tools (they changed),
+    /// or the accounts it may use or whether it may read (its resources changed)
+    fn lists_changed(&self) -> Vec<Value> {
+        if self.state().allowed.is_none() {
+            return Vec::new();
+        }
+        let before = self.state().told.clone();
+        self.tell();
+        let now = self.state().told.clone();
+        let mut told = Vec::new();
+        if now.0 != before.0 {
+            told.push(json!({ "jsonrpc": "2.0", "method": TOOLS_CHANGED }));
+        }
+        // the resources go by the accounts, and by whether it may read at all
+        let reads = |told: &(AgentLevels, Vec<pe_store::AccountId>)| told.0.has(AgentLevels::READ);
+        if now.1 != before.1 || reads(&now) != reads(&before) {
+            told.push(json!({ "jsonrpc": "2.0", "method": RESOURCES_CHANGED }));
+        }
+        told
+    }
+
+    /// Notes what `change` touched of what the program subscribed to (all of it when changes were missed)
+    fn touch(&self, touched: &mut Touched, change: Option<MailChange>) {
+        let subscribed: Vec<Resource> = self.state().subscribed.iter().copied().collect();
+        let list = matches!(change, Some(MailChange::Folders(_)) | None);
+        // most changes concern no connection: nothing is looked up for them
+        if self.state().allowed.is_none() || (subscribed.is_empty() && !list) {
+            return;
+        }
+        // nothing of an account the program may not use, not even that something changed there
+        let account = match change {
+            Some(MailChange::Folders(account) | MailChange::Folder(account, _)) => Some(account),
+            None => None,
+        };
+        if account.is_some_and(|account| !self.now().1.contains(&account)) {
+            return;
+        }
+        let hit: Vec<Resource> = match change {
+            Some(change) => {
+                // looked up once, and only when the Inbox is subscribed to
+                let inbox = std::cell::OnceCell::new();
+                let is_inbox = |folder| *inbox.get_or_init(|| resources::is_inbox(&self.core, folder));
+                subscribed
+                    .into_iter()
+                    .filter(|r| r.changed_by(change, is_inbox))
+                    .collect()
+            }
+            None => subscribed,
+        };
+        if hit.is_empty() && !list {
+            return;
+        }
+        touched.resources.extend(hit);
+        touched.list |= list;
+        touched.mark();
+    }
+
+    /// The notifications of what was touched, of what the program may still read; the touched forgotten
+    fn updates(&self, touched: &mut Touched) -> Vec<Value> {
+        let Touched { resources, list, .. } = std::mem::take(touched);
+        let Some(host) = self.state().allowed else {
+            return Vec::new();
+        };
+        let mut told: Vec<Value> = resources
+            .into_iter()
+            // still subscribed, and still the program's to read
+            .filter(|r| self.state().subscribed.contains(r) && resources::allowed(&self.core, host, r))
+            .map(|r| json!({ "jsonrpc": "2.0", "method": RESOURCE_UPDATED, "params": { "uri": r.uri() } }))
+            .collect();
+        if list {
+            told.push(json!({ "jsonrpc": "2.0", "method": RESOURCES_CHANGED }));
+        }
+        told
+    }
+
+    /// `resources/subscribe` and `resources/unsubscribe`
+    fn subscribe(&self, id: &Value, params: &Value, on: bool) -> Value {
+        let host = self.state().allowed.unwrap_or_default();
+        let Some(resource) = params.get("uri").and_then(Value::as_str).and_then(Resource::parse) else {
+            return protocol::error(
+                id,
+                INVALID_PARAMS,
+                "There is no such resource: resources/list lists them.",
+            );
+        };
+        if !on {
+            self.state().subscribed.remove(&resource);
+            return protocol::result(id, json!({}));
+        }
+        if !resources::allowed(&self.core, host, &resource) {
+            return protocol::error(id, NOT_FOUND, "There is no such resource this agent may read.");
+        }
+        let mut state = self.state();
+        if state.subscribed.len() >= resources::MAX_SUBSCRIBED && !state.subscribed.contains(&resource) {
+            return protocol::error(
+                id,
+                INVALID_REQUEST,
+                "This connection subscribed to as many resources as it may: unsubscribe from one first.",
+            );
+        }
+        state.subscribed.insert(resource);
+        protocol::result(id, json!({}))
     }
 
     async fn request(&self, id: &Value, method: &str, params: &Value, progress: &Progress) -> Value {
@@ -426,8 +631,39 @@ impl Session {
                 };
                 protocol::result(id, answer)
             }
-            "resources/list" => protocol::result(id, json!({ "resources": [] })),
-            "prompts/list" => protocol::result(id, json!({ "prompts": [] })),
+            "resources/list" => protocol::result(
+                id,
+                json!({ "resources": resources::list(&self.core, allowed.unwrap_or_default()) }),
+            ),
+            "resources/templates/list" => protocol::result(id, json!({ "resourceTemplates": resources::templates() })),
+            "resources/read" => {
+                let Some(resource) = params.get("uri").and_then(Value::as_str).and_then(Resource::parse) else {
+                    return protocol::error(id, NOT_FOUND, "There is no such resource: resources/list lists them.");
+                };
+                let host = allowed.unwrap_or_default();
+                match resources::read(&self.core, host, &resource, progress, &id.to_string()).await {
+                    Ok(result) => protocol::result(id, result),
+                    Err(why) => protocol::error(id, NOT_FOUND, &why),
+                }
+            }
+            "resources/subscribe" => self.subscribe(id, params, true),
+            "resources/unsubscribe" => self.subscribe(id, params, false),
+            // offered to a program that may read mail, as the tools they name
+            "prompts/list" => {
+                let prompts = if self.now().0.has(AgentLevels::READ) {
+                    crate::prompts::list()
+                } else {
+                    Vec::new()
+                };
+                protocol::result(id, json!({ "prompts": prompts }))
+            }
+            "prompts/get" => {
+                let name = params.get("name").and_then(Value::as_str).unwrap_or_default();
+                match crate::prompts::get(name).filter(|_| self.now().0.has(AgentLevels::READ)) {
+                    Some(prompt) => protocol::result(id, prompt),
+                    None => protocol::error(id, INVALID_PARAMS, "There is no such prompt: prompts/list lists them."),
+                }
+            }
             _ => protocol::error(id, METHOD_NOT_FOUND, "no such method"),
         }
     }
@@ -468,7 +704,11 @@ impl Session {
             id,
             json!({
                 "protocolVersion": version,
-                "capabilities": { "tools": { "listChanged": true } },
+                "capabilities": {
+                    "tools": { "listChanged": true },
+                    "resources": { "subscribe": true, "listChanged": true },
+                    "prompts": { "listChanged": false },
+                },
                 "serverInfo": { "name": "inbox-classic", "title": "Inbox Classic", "version": env!("CARGO_PKG_VERSION") },
                 "instructions": INSTRUCTIONS,
             }),
@@ -485,9 +725,38 @@ mod tests {
         let host = HostInfo {
             path: "/Applications/Agent.app/Contents/MacOS/Agent".into(),
             name: "Agent".into(),
+            ..Default::default()
         };
         assert_eq!(hello_host(&hello_line(&host)), Some(host));
         assert_eq!(hello_host(r#"{"jsonrpc":"2.0","id":1,"method":"initialize"}"#), None);
         assert_eq!(hello_host("not json"), None);
+    }
+
+    #[test]
+    fn the_program_found_counts_not_the_one_named() {
+        let found = HostInfo {
+            path: "/usr/bin/python3".into(),
+            name: "python3".into(),
+            ..Default::default()
+        };
+        let said = |path: &str| HostInfo {
+            path: path.into(),
+            name: "whatever".into(),
+            ..Default::default()
+        };
+        // the same: nothing to tell
+        assert_eq!(identity(found.clone(), &said("/usr/bin/python3")), found);
+        // another: the one found, and what it said
+        let lied = identity(found.clone(), &said("/Applications/Claude.app/Contents/MacOS/Claude"));
+        assert_eq!(
+            (lied.path.as_str(), lied.claimed.as_str()),
+            ("/usr/bin/python3", "Claude")
+        );
+        // --name gives the program found a name, never another program's access
+        let named = identity(found.clone(), &said("/bin/zsh --name Claude Code"));
+        assert_eq!(named.path, "/usr/bin/python3 --name Claude Code");
+        assert_eq!((named.name.as_str(), named.claimed.as_str()), ("Claude Code", "zsh"));
+        let named = identity(found.clone(), &said("/usr/bin/python3 --name Helper"));
+        assert_eq!((named.name.as_str(), named.claimed.as_str()), ("Helper", ""));
     }
 }

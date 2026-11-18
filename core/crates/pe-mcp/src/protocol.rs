@@ -12,6 +12,8 @@ pub(crate) const METHOD_NOT_FOUND: i64 = -32601;
 pub(crate) const INVALID_PARAMS: i64 = -32602;
 /// The user turned the program away, agents are off, or the user has not answered yet
 pub(crate) const NOT_ALLOWED: i64 = -32001;
+/// No such resource, or none this program may read (MCP's code for a resource not found)
+pub(crate) const NOT_FOUND: i64 = -32002;
 
 /// The next line, without its end; None at the end of the stream or for a line longer than [`MAX_LINE`]
 pub(crate) async fn read_line(reader: &mut (impl AsyncBufRead + Unpin)) -> Option<String> {

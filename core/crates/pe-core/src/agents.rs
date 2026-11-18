@@ -33,7 +33,7 @@ pub use bulk::{BULK_MAX, BulkAction, BulkDone, BulkPreview, TICKET_SECONDS};
 pub use drafts::OwnDraft;
 pub use drafts::draft_note;
 pub use facts::{AgentBounce, AgentInvitation, AgentSignature, BouncedRecipient, Facts};
-pub use hosts::{connect_text, host_label, host_one, named, program_name};
+pub use hosts::{connect_text, host_label, host_one, named, program_name, split_named};
 pub use invitations::{InvitationAnswer, InvitationReply};
 pub use log::{LogRow, log_entry, log_text, read_summary_text, read_text};
 pub use reads::{AccountOverview, everywhere};
@@ -83,6 +83,9 @@ pub struct HostInfo {
     pub path: String,
     /// What it is called, from its file (`Claude`), for the windows
     pub name: String,
+    /// What the relay said the program was, by its name, when the system found another one (empty when it said
+    /// the same): the question to let it in tells the user
+    pub claimed: String,
 }
 
 /// A recipient of a message an agent wants to send, as the confirmation shows it
@@ -783,6 +786,12 @@ impl Core {
     /// in or forgotten): the MCP server tells its agents their tools changed
     pub fn agent_changes(&self) -> tokio::sync::watch::Receiver<u64> {
         self.agent_changes.subscribe()
+    }
+
+    /// The folders whose mail changes from now on, as the windows are told: what an agent subscribed to
+    /// (`resources/subscribe`) is told to read again. One that falls far behind is told it missed some (`Lagged`).
+    pub fn mail_changes(&self) -> tokio::sync::broadcast::Receiver<crate::MailChange> {
+        self.mail_changes.subscribe()
     }
 
     fn agents_changed(&self) {

@@ -738,6 +738,8 @@ agent-terminal-program-linux = Um programa iniciado a partir de um terminal ({ $
 agent-connect-title-terminal = { $programs } querem acessar seus e-mails
 # review: new
 agent-connect-terminal-detail = Todos os agentes de IA que você iniciar neste terminal compartilham o acesso que você permitir aqui. Para dar a um agente seu próprio acesso, adicione --name e um nome de sua escolha aos argumentos dele nas configurações de MCP do agente.
+# review: new
+agent-connect-claimed = O programa se apresentou como { $claimed }. O Inbox Classic verificou qual programa o iniciou: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

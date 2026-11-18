@@ -662,6 +662,8 @@ agent-terminal-program-windows = A program started from a terminal ({ $terminal 
 agent-terminal-program-linux = A program started from a terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } want to use your mail
 agent-connect-terminal-detail = Every AI agent you start from this terminal shares the access you allow here. To give one its own, add --name and a name of your choice to its arguments in the agent’s MCP settings.
+# above the question when a program said it was another one than the system found: "It said it was Claude. Inbox Classic checked which program started it: python3."
+agent-connect-claimed = It said it was { $claimed }. Inbox Classic checked which program started it: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

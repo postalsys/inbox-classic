@@ -722,6 +722,8 @@ agent-terminal-program-linux = Програма, стартирана от те�
 agent-connect-title-terminal = { $programs } искат да използват пощата ви
 # review: new
 agent-connect-terminal-detail = Всеки ИИ агент, който стартирате от този терминал, споделя достъпа, който разрешите тук. За да има агентът собствен достъп, добавете --name и избрано от вас име към аргументите му в MCP настройките на агента.
+# review: new
+agent-connect-claimed = Програмата се представи като { $claimed }. Inbox Classic провери коя програма я е стартирала: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

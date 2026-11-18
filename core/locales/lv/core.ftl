@@ -1007,6 +1007,8 @@ agent-terminal-program-linux = No termināļa ({ $terminal }) palaista programma
 agent-connect-title-terminal = { $programs } vēlas izmantot jūsu pastu
 # review: new
 agent-connect-terminal-detail = Visi MI aģenti, ko palaižat no šī termināļa, kopīgi izmanto šeit atļauto piekļuvi. Lai aģentam piešķirtu atsevišķu piekļuvi, aģenta MCP iestatījumos pievienojiet tā argumentiem --name un paša izvēlētu nosaukumu.
+# review: new
+agent-connect-claimed = Programma norādīja, ka tā ir { $claimed }. Inbox Classic pārbaudīja, kura programma to palaida: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

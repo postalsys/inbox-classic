@@ -47,6 +47,7 @@ fn the_core_speaks_the_language_set() {
     let (title, detail) = pe_core::agents::connect_text(&pe_core::agents::HostInfo {
         path: "/x".into(),
         name: "Claude".into(),
+        ..Default::default()
     });
     assert_eq!(title, "Claude möchte auf Ihre E-Mails zugreifen");
     let moved = pe_core::agents::log_text(&moved);

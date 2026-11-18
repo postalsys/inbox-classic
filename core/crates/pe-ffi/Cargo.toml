@@ -24,6 +24,10 @@ tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "time", "sync"
 # a setup file's passphrase, wiped once the export is freed
 zeroize = "1.8"
 
+# the program at the other end of an agent's connection, as the system tells it (proc_pidpath, proc_pidinfo)
+[target.'cfg(target_os = "macos")'.dependencies]
+libc = "0.2.191"
+
 # the named pipe agents reach the app on, open to this user alone, and the program that started the relay
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61", features = [
