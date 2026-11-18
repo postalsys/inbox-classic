@@ -26,18 +26,20 @@ HFONT HeadingFont() {
     return font;
 }
 
-HWND Heading(HWND parent, const std::wstring& text, const RECT& bounds) {
-    HWND heading = CreateChild(parent, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, 0, bounds);
+// one line, cut with "..." should it not fit; with `wrap`, its words wrap over as many lines as `bounds` has room for
+HWND Heading(HWND parent, const std::wstring& text, const RECT& bounds, bool wrap = false) {
+    HWND heading = CreateChild(parent, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX | (wrap ? 0 : SS_ENDELLIPSIS), 0, bounds);
     SendMessageW(heading, WM_SETFONT, reinterpret_cast<WPARAM>(HeadingFont()), FALSE);
     return heading;
 }
 
-// the height a static text of `text` takes at `width`
-int TextHeight(HWND parent, const std::wstring& text, int width) {
+// the height a static text of `text` takes at `width`, in `font` (the dialogs' own when none); with `breakWords`, a
+// word longer than a line broken as a static text with SS_EDITCONTROL breaks it
+int TextHeight(HWND parent, const std::wstring& text, int width, HFONT font = nullptr, bool breakWords = false) {
     HDC dc = GetDC(parent);
-    HGDIOBJ old = SelectObject(dc, GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
     RECT bounds = {0, 0, width, 0};
-    DrawTextW(dc, text.c_str(), -1, &bounds, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX);
+    DrawTextW(dc, text.c_str(), -1, &bounds, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX | (breakWords ? DT_EDITCONTROL : 0));
     SelectObject(dc, old);
     ReleaseDC(parent, dc);
     return bounds.bottom;
@@ -125,7 +127,10 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     int pad = Scale(12);
     int width = Scale(500);
     int inner = width - 2 * pad;
-    int detailHeight = TextHeight(owner, detail, inner);
+    // the words under it name a terminal's program and the --name argument, a long word in any language
+    int detailHeight = TextHeight(owner, detail, inner, nullptr, true);
+    // the heading wraps when it is long: "Programs started from a terminal (WindowsTerminal) want to use your mail"
+    int headingHeight = std::max(Scale(22), TextHeight(owner, heading, inner, HeadingFont()));
     // a level's words wrap under their check box when they are long (Organize names everything it lets an agent do)
     std::wstring labels[PE_AGENT_LEVEL_COUNT];
     int rows[PE_AGENT_LEVEL_COUNT] = {};
@@ -135,15 +140,15 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
         rows[i] = std::max(Scale(20), TextHeight(owner, labels[i], inner - Scale(4) - Scale(20)) + Scale(4));
         levelsHeight += rows[i] + Scale(2);
     }
-    int height = pad + Scale(24) + detailHeight + Scale(10) + Scale(18) + Scale(10) + Scale(20) + levelsHeight + Scale(10) + Scale(18) +
+    int height = pad + headingHeight + Scale(2) + detailHeight + Scale(10) + Scale(18) + Scale(10) + Scale(20) + levelsHeight + Scale(10) + Scale(18) +
                  Scale(92) + Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kAccessClass, core::Plain(mode == AccessMode::Ask ? PE_TEXT_UI_AI_AGENT : PE_TEXT_UI_AI_AGENT_ACCESS).c_str(), width, height);
     AccessState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     int y = pad;
-    Heading(dialog, heading, {pad, y, width - pad, y + Scale(22)});
-    y += Scale(24);
-    CreateChild(dialog, L"STATIC", detail.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + detailHeight});
+    Heading(dialog, heading, {pad, y, width - pad, y + headingHeight}, true);
+    y += headingHeight + Scale(2);
+    CreateChild(dialog, L"STATIC", detail.c_str(), SS_LEFT | SS_NOPREFIX | SS_EDITCONTROL, 0, {pad, y, width - pad, y + detailHeight});
     y += detailHeight + Scale(10);
     std::wstring program = core::T(PE_TEXT_UI_PROGRAM_PATH, {{"path", path}});
     HWND file = CreateChild(dialog, L"STATIC", program.c_str(), SS_LEFT | SS_NOPREFIX | SS_PATHELLIPSIS, IDC_AGENT_PATH,
@@ -465,6 +470,15 @@ void UnsubscribeDialog(HWND owner, PeCore* core, uint64_t request) {
 
 // ---- Tools > AI Agents ----
 
+// a row of the log as the window keeps it: the entry Undo takes back, or the program and hour of a row of reads
+struct LogRow {
+    int64_t id = 0;
+    bool canUndo = false;
+    bool reads = false;
+    int64_t host = 0;
+    int64_t hour = 0;
+};
+
 struct AgentsState {
     PeCore* core;
     HWND enabled = nullptr;
@@ -474,10 +488,15 @@ struct AgentsState {
     HWND log = nullptr;
     HWND undo = nullptr;
     HWND clear = nullptr;
+    // under the log: what the selected row of reads covers
+    HWND readsLabel = nullptr;
+    HWND reads = nullptr;
     std::vector<int64_t> hostIds;
     // what each program may do, as its row says it: the tip of a row whose words do not fit
     std::vector<std::wstring> hostAccess;
-    std::vector<std::pair<int64_t, bool>> entries;
+    std::vector<LogRow> entries;
+    // the row of reads shown under the log, so a refresh keeps the list as it is when it is the same
+    std::pair<int64_t, int64_t> shownReads = {0, -1};
     bool done = false;
 };
 
@@ -493,8 +512,46 @@ void UpdateButtons(AgentsState* state) {
     EnableWindow(state->change, host >= 0);
     EnableWindow(state->remove, host >= 0);
     int entry = Selected(state->log);
-    EnableWindow(state->undo, entry >= 0 && static_cast<size_t>(entry) < state->entries.size() && state->entries[entry].second);
+    EnableWindow(state->undo, entry >= 0 && static_cast<size_t>(entry) < state->entries.size() && state->entries[entry].canUndo);
     EnableWindow(state->clear, !state->entries.empty());
+}
+
+// the hour from `hour` on, as a time: "14:00"
+std::wstring HourTime(int64_t hour) {
+    SYSTEMTIME local;
+    return UnixToSystemTime(hour, true, local) ? FormatTime(local) : std::wstring();
+}
+
+// under the log, what the selected row of reads covers, each read with its time: the subjects, searches and folders
+// (the core never gives what a message says); for another row, the words that say to select one
+void ShowReads(AgentsState* state) {
+    int entry = Selected(state->log);
+    const LogRow* row = entry >= 0 && static_cast<size_t>(entry) < state->entries.size() && state->entries[entry].reads ? &state->entries[entry] : nullptr;
+    std::pair<int64_t, int64_t> shown = row ? std::pair{row->host, row->hour} : std::pair<int64_t, int64_t>{0, -1};
+    std::wstring label = row ? core::T(PE_TEXT_WIN_AGENT_READS, {{"from", HourTime(row->hour)}, {"to", HourTime(row->hour + 3600)}})
+                             : core::T(PE_TEXT_WIN_AGENT_READS_HINT);
+    SetWindowTextW(state->readsLabel, label.c_str());
+    // the reads of an hour only grow: refilled, the list keeps where it was scrolled to
+    int top = shown == state->shownReads ? ListView_GetTopIndex(state->reads) : 0;
+    state->shownReads = shown;
+    SendMessageW(state->reads, WM_SETREDRAW, FALSE, 0);
+    ListView_DeleteAllItems(state->reads);
+    if (row) {
+        core::AgentReads reads(pe_agent_reads(state->core, row->host, row->hour));
+        for (size_t i = 0; i < pe_agent_reads_count(reads.get()); i++) {
+            const PeAgentRead* read = pe_agent_reads_get(reads.get(), i);
+            SYSTEMTIME local;
+            int at = AddRow(state->reads, static_cast<int>(i), UnixToSystemTime(read->at, true, local) ? FormatTime(local) : L"");
+            SetCell(state->reads, at, 1, Text(read->text));
+        }
+    }
+    ListView_SetColumnWidth(state->reads, 1, LVSCW_AUTOSIZE_USEHEADER);
+    RECT first = {};
+    if (top > 0 && ListView_GetItemRect(state->reads, 0, &first, LVIR_BOUNDS)) {
+        ListView_Scroll(state->reads, 0, top * (first.bottom - first.top));
+    }
+    SendMessageW(state->reads, WM_SETREDRAW, TRUE, 0);
+    InvalidateRect(state->reads, nullptr, TRUE);
 }
 
 // the width a column needs for `words` in `list`: the words with the room the list keeps around a cell's text
@@ -527,14 +584,18 @@ void FitHostColumns(AgentsState* state) {
     }
 }
 
-// the widest that the Permissions column needs for the programs there are now, so the window can be made that wide
-int PermissionsWidth(PeCore* core) {
-    int widest = static_cast<int>(MeasureText(core::T(PE_TEXT_UI_COL_MAY)).cx);
+// the widest that the Program and Permissions columns need for the programs there are now, so the window can be made
+// that wide ("Programs started from a terminal (WindowsTerminal)" is a long name)
+int HostColumnsWidth(PeCore* core) {
+    int program = std::max(Scale(120) - Scale(16), static_cast<int>(MeasureText(core::T(PE_TEXT_UI_COL_PROGRAM)).cx));
+    int access = static_cast<int>(MeasureText(core::T(PE_TEXT_UI_COL_MAY)).cx);
     core::AgentHostList hosts(pe_agent_hosts(core));
     for (size_t i = 0; i < pe_agent_host_list_count(hosts.get()); i++) {
-        widest = std::max(widest, static_cast<int>(MeasureText(Text(pe_agent_host_list_get(hosts.get(), i)->access)).cx));
+        const PeAgentHost* host = pe_agent_host_list_get(hosts.get(), i);
+        program = std::max(program, static_cast<int>(MeasureText(Text(host->name)).cx));
+        access = std::max(access, static_cast<int>(MeasureText(Text(host->access)).cx));
     }
-    return widest + Scale(16);
+    return program + access + 2 * Scale(16);
 }
 
 void FillAgents(AgentsState* state) {
@@ -565,12 +626,13 @@ void FillAgents(AgentsState* state) {
         int row = AddRow(state->log, static_cast<int>(i), FormatDate(done->at));
         SetCell(state->log, row, 1, Text(done->host));
         SetCell(state->log, row, 2, Text(done->summary));
-        state->entries.emplace_back(done->id, done->can_undo);
+        state->entries.push_back({done->id, done->can_undo, done->reads, done->host_id, done->reads_hour});
     }
     if (!state->entries.empty()) {
-        SelectRow(state->log, entry);
+        SelectRow(state->log, std::min(entry, static_cast<int>(state->entries.size()) - 1));
     }
     UpdateButtons(state);
+    ShowReads(state);
 }
 
 void ChangeHost(HWND hwnd, AgentsState* state) {
@@ -619,7 +681,7 @@ void UndoEntry(HWND hwnd, AgentsState* state) {
     if (index < 0 || static_cast<size_t>(index) >= state->entries.size()) {
         return;
     }
-    core::String why(pe_agent_undo(state->core, state->entries[index].first));
+    core::String why(pe_agent_undo(state->core, state->entries[index].id));
     if (why) {
         MessageBoxW(hwnd, Text(why.get()).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_OK | MB_ICONINFORMATION);
     }
@@ -668,6 +730,11 @@ LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
         auto* header = reinterpret_cast<NMHDR*>(lParam);
         if (header->code == LVN_ITEMCHANGED) {
             UpdateButtons(state);
+            // another row of the log selected: what it read, or nothing
+            auto* change = reinterpret_cast<NMLISTVIEW*>(lParam);
+            if (header->hwndFrom == state->log && (change->uNewState & LVIS_SELECTED) && !(change->uOldState & LVIS_SELECTED)) {
+                ShowReads(state);
+            }
         } else if (header->hwndFrom == state->hosts && header->code == LVN_ITEMACTIVATE) {
             ChangeHost(hwnd, state);
         } else if (header->hwndFrom == state->hosts && header->code == LVN_GETINFOTIPW) {
@@ -753,9 +820,9 @@ void AgentsDialog(HWND owner, PeCore* core) {
     // wide enough for what each program may do beside its name and when it was last used, within the screen
     RECT screen = {};
     SystemParametersInfoW(SPI_GETWORKAREA, 0, &screen, 0);
-    int wanted = 2 * pad + button + Scale(10) + Scale(4) + Scale(120) + PermissionsWidth(core) + Scale(110);
+    int wanted = 2 * pad + button + Scale(10) + Scale(4) + HostColumnsWidth(core) + Scale(110);
     int width = std::clamp(wanted, Scale(680), std::max(Scale(680), static_cast<int>(screen.right - screen.left) - Scale(40)));
-    int height = Scale(500);
+    int height = Scale(620);
     HWND dialog = CreateModalWindow(owner, kAgentsClass, core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), width, height);
     AgentsState state{core};
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
@@ -777,7 +844,10 @@ void AgentsDialog(HWND owner, PeCore* core) {
     y += Scale(120) + Scale(14);
     CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_WHAT_AGENTS_DID).c_str(), SS_LEFT, 0, {pad, y, listRight, y + Scale(16)});
     y += Scale(18);
-    int logBottom = height - pad - Scale(25) - Scale(12);
+    // the log over the reads of its selected row, as the message list over the preview
+    int readsHeight = Scale(110);
+    int readsTop = height - pad - Scale(25) - Scale(12) - readsHeight;
+    int logBottom = readsTop - Scale(8) - Scale(18);
     state.log = CreateReportList(dialog, IDC_AGENTS_LOG, {pad, y, listRight, logBottom});
     AddColumn(state.log, 0, core::T(PE_TEXT_UI_COL_WHEN).c_str(), 110);
     AddColumn(state.log, 1, core::T(PE_TEXT_UI_COL_PROGRAM).c_str(), 90);
@@ -786,6 +856,11 @@ void AgentsDialog(HWND owner, PeCore* core) {
     state.undo = CreateChild(dialog, L"BUTTON", undo.c_str(), WS_TABSTOP, IDC_AGENTS_UNDO, {width - pad - button, y, width - pad, y + Scale(25)});
     state.clear = CreateChild(dialog, L"BUTTON", clear.c_str(), WS_TABSTOP, IDC_AGENTS_CLEAR,
                               {width - pad - button, y + Scale(31), width - pad, y + Scale(56)});
+    state.readsLabel = CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, IDC_AGENTS_READS_LABEL,
+                                   {pad, logBottom + Scale(8), listRight, logBottom + Scale(8) + Scale(16)});
+    state.reads = CreateReportList(dialog, IDC_AGENTS_READS, {pad, readsTop, listRight, readsTop + readsHeight});
+    AddColumn(state.reads, 0, core::T(PE_TEXT_UI_COL_WHEN).c_str(), 110);
+    AddColumn(state.reads, 1, core::T(PE_TEXT_UI_COL_WHAT).c_str(), 320);
     int bottom = height - pad - Scale(25);
     int setupWidth = std::max(Scale(200), static_cast<int>(MeasureText(setup).cx) + Scale(12));
     CreateLinkButton(dialog, setup.c_str(), IDC_AGENTS_SETUP, {pad, bottom + Scale(4), pad + setupWidth, bottom + Scale(21)});
