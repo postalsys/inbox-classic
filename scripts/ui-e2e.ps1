@@ -639,10 +639,11 @@ function CloseStrays([string]$where) {
         $open = @([Native.Win]::TopWindowsOf($ids, '#32770'))
         if ($open.Count -eq 0) { return }
         $dialog = $open[0]
+        $what = Describe $dialog
         $words = Statics $dialog
         if ($words.Length -gt 160) { $words = $words.Substring(0, 160) + '...' }
         $closed = CloseDialog $dialog
-        Write-Host "   (closing a dialog left open, $where`: $(Describe $dialog) $(if ($words) { "saying '$words'" }), $(if ($closed) { 'closed' } else { 'did not close' }))"
+        Write-Host "   (closing a dialog left open, $where`: $what $(if ($words) { "saying '$words'" }), $(if ($closed) { 'closed' } else { 'did not close' }))"
     }
 }
 # a picture of the whole screen when a file dialog goes wrong (debug-file-dialog-<title>-<what>), to tell what held it up
