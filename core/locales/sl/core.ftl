@@ -1390,7 +1390,7 @@ preview-tile-downloading = Prenašanje…
 # review: new
 preview-tile-format = Slike { $format } se še ne prikazujejo
 # review: new
-preview-tile-password = Zaščiteno z geslom
+preview-tile-password = Zaščiteno z geslom: odprite ga, da vnesete geslo
 # review: new
 preview-tile-too-large = Prevelika za prikaz
 # review: new

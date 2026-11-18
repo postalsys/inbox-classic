@@ -883,7 +883,7 @@ preview-tile-downloading = Ladataan…
 # review: new
 preview-tile-format = { $format }-kuvia ei vielä näytetä
 # review: new
-preview-tile-password = Suojattu salasanalla
+preview-tile-password = Suojattu salasanalla: avaa se ja anna salasana
 # review: new
 preview-tile-too-large = Liian suuri näytettäväksi
 # review: new

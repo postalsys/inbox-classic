@@ -1353,7 +1353,7 @@ preview-tile-downloading = Se descarcă…
 # review: new
 preview-tile-format = Imaginile { $format } nu sunt încă afișate
 # review: new
-preview-tile-password = Protejat cu parolă
+preview-tile-password = Protejat cu parolă: deschideți-l pentru a introduce parola
 # review: new
 preview-tile-too-large = Prea mare pentru a fi afișat
 # review: new

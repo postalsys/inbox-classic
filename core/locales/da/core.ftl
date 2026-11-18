@@ -876,7 +876,7 @@ preview-tile-downloading = Henter…
 # review: new
 preview-tile-format = { $format }-billeder vises ikke endnu
 # review: new
-preview-tile-password = Beskyttet med adgangskode
+preview-tile-password = Beskyttet med adgangskode: åbn den for at indtaste adgangskoden
 # review: new
 preview-tile-too-large = For stor til at blive vist
 # review: new

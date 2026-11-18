@@ -862,7 +862,7 @@ preview-tile-downloading = Downloaden…
 # review: new
 preview-tile-format = { $format }-afbeeldingen worden nog niet getoond
 # review: new
-preview-tile-password = Beveiligd met een wachtwoord
+preview-tile-password = Beveiligd met een wachtwoord: open het om het wachtwoord in te voeren
 # review: new
 preview-tile-too-large = Te groot om te tonen
 # review: new

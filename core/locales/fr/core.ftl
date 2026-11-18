@@ -877,7 +877,7 @@ preview-tile-downloading = Téléchargement…
 # review: new
 preview-tile-format = Les images { $format } ne sont pas encore affichées
 # review: new
-preview-tile-password = Protégé par un mot de passe
+preview-tile-password = Protégé par un mot de passe : ouvrez-le pour le saisir
 # review: new
 preview-tile-too-large = Trop volumineux pour être affiché
 # review: new

@@ -879,7 +879,7 @@ preview-tile-downloading = S’està baixant…
 # review: new
 preview-tile-format = Les imatges { $format } encara no es mostren
 # review: new
-preview-tile-password = Protegit amb contrasenya
+preview-tile-password = Protegit amb contrasenya: obre'l per introduir-la
 # review: new
 preview-tile-too-large = Massa gran per mostrar-lo
 # review: new

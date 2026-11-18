@@ -903,7 +903,7 @@ preview-tile-downloading = A transferir…
 # review: new
 preview-tile-format = As imagens { $format } ainda não são mostradas
 # review: new
-preview-tile-password = Protegido por palavra-passe
+preview-tile-password = Protegido por palavra-passe: abra para introduzir a palavra-passe
 # review: new
 preview-tile-too-large = Demasiado grande para mostrar
 # review: new

@@ -1389,7 +1389,7 @@ preview-tile-downloading = Pobieranie…
 # review: new
 preview-tile-format = Obrazy { $format } nie są jeszcze pokazywane
 # review: new
-preview-tile-password = Chroniony hasłem
+preview-tile-password = Chroniony hasłem: otwórz go, aby wpisać hasło
 # review: new
 preview-tile-too-large = Za duży, aby go pokazać
 # review: new

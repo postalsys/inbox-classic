@@ -1280,7 +1280,7 @@ preview-tile-downloading = Hämtar…
 # review: new
 preview-tile-format = { $format }-bilder visas inte ännu
 # review: new
-preview-tile-password = Skyddad med lösenord
+preview-tile-password = Skyddad med lösenord: öppna den för att ange lösenordet
 # review: new
 preview-tile-too-large = För stor för att visas
 # review: new

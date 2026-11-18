@@ -1374,7 +1374,7 @@ preview-tile-downloading = Sťahuje sa…
 # review: new
 preview-tile-format = Obrázky { $format } sa zatiaľ nezobrazujú
 # review: new
-preview-tile-password = Chránené heslom
+preview-tile-password = Chránené heslom: otvorte ho a zadajte heslo
 # review: new
 preview-tile-too-large = Príliš veľké na zobrazenie
 # review: new

@@ -863,7 +863,7 @@ preview-tile-downloading = Letöltés…
 # review: new
 preview-tile-format = A(z) { $format } képek még nem jelennek meg
 # review: new
-preview-tile-password = Jelszóval védett
+preview-tile-password = Jelszóval védett: nyissa meg a jelszó megadásához
 # review: new
 preview-tile-too-large = Túl nagy a megjelenítéshez
 # review: new

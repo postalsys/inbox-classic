@@ -893,7 +893,7 @@ preview-tile-downloading = Γίνεται λήψη…
 # review: new
 preview-tile-format = Οι εικόνες { $format } δεν εμφανίζονται ακόμη
 # review: new
-preview-tile-password = Προστατεύεται με κωδικό πρόσβασης
+preview-tile-password = Προστατεύεται με κωδικό πρόσβασης: ανοίξτε το για να τον εισαγάγετε
 # review: new
 preview-tile-too-large = Πολύ μεγάλο για εμφάνιση
 # review: new

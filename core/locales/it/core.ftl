@@ -883,7 +883,7 @@ preview-tile-downloading = Download in corso…
 # review: new
 preview-tile-format = Le immagini { $format } non vengono ancora mostrate
 # review: new
-preview-tile-password = Protetto da password
+preview-tile-password = Protetto da password: aprilo per inserire la password
 # review: new
 preview-tile-too-large = Troppo grande per essere mostrato
 # review: new

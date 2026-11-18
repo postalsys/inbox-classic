@@ -828,7 +828,7 @@ preview-tile-downloading = Laaditakse alla…
 # review: new
 preview-tile-format = { $format }-pilte veel ei näidata
 # review: new
-preview-tile-password = Kaitstud parooliga
+preview-tile-password = Kaitstud parooliga: avage see parooli sisestamiseks
 # review: new
 preview-tile-too-large = Näitamiseks liiga suur
 # review: new

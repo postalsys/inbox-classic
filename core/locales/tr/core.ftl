@@ -858,7 +858,7 @@ preview-tile-downloading = İndiriliyor…
 # review: new
 preview-tile-format = { $format } resimleri henüz gösterilmiyor
 # review: new
-preview-tile-password = Parolayla korunuyor
+preview-tile-password = Parolayla korunuyor: parolayı girmek için açın
 # review: new
 preview-tile-too-large = Gösterilemeyecek kadar büyük
 # review: new

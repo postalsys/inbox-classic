@@ -1330,7 +1330,7 @@ preview-tile-downloading = Notiek lejupielāde…
 # review: new
 preview-tile-format = { $format } attēli vēl netiek rādīti
 # review: new
-preview-tile-password = Aizsargāts ar paroli
+preview-tile-password = Aizsargāts ar paroli: atveriet, lai to ievadītu
 # review: new
 preview-tile-too-large = Pārāk liels, lai parādītu
 # review: new

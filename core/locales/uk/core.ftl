@@ -1406,7 +1406,7 @@ preview-tile-downloading = Завантаження…
 # review: new
 preview-tile-format = Зображення { $format } поки не показуються
 # review: new
-preview-tile-password = Захищено паролем
+preview-tile-password = Захищено паролем: відкрийте, щоб ввести пароль
 # review: new
 preview-tile-too-large = Завеликий для показу
 # review: new

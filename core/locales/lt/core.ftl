@@ -1341,7 +1341,7 @@ preview-tile-downloading = Atsisiunčiama…
 # review: new
 preview-tile-format = { $format } paveikslėliai kol kas nerodomi
 # review: new
-preview-tile-password = Apsaugota slaptažodžiu
+preview-tile-password = Apsaugota slaptažodžiu: atidarykite, kad įvestumėte slaptažodį
 # review: new
 preview-tile-too-large = Per didelis, kad būtų rodomas
 # review: new

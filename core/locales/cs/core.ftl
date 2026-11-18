@@ -919,7 +919,7 @@ preview-tile-downloading = Stahování…
 # review: new
 preview-tile-format = Obrázky { $format } se zatím nezobrazují
 # review: new
-preview-tile-password = Chráněno heslem
+preview-tile-password = Chráněno heslem: otevřete soubor a zadejte heslo
 # review: new
 preview-tile-too-large = Příliš velké k zobrazení
 # review: new
