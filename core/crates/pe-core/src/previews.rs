@@ -414,8 +414,7 @@ impl Core {
             let asks = self.previews.asks.clone();
             let events = self.events.clone();
             let (picture_time, page_time) = RENDER_TIMES;
-            #[allow(unused_mut)]
-            let mut settings = Settings {
+            let settings = Settings {
                 dir: markers_dir(&self.path),
                 pdfs,
                 picture_time,
@@ -423,9 +422,13 @@ impl Core {
                 ..Settings::default()
             };
             #[cfg(test)]
-            if let Some(engine) = self.previews.engine.get() {
-                settings.engine = engine.clone();
-            }
+            let settings = match self.previews.engine.get() {
+                Some(engine) => Settings {
+                    engine: engine.clone(),
+                    ..settings
+                },
+                None => settings,
+            };
             Previewer::new(settings, move |outcome| record(&files, &asks, &events, outcome))
         })
     }

@@ -296,16 +296,17 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
         allow_remote_images: parts.allow_remote_images,
         ..Default::default()
     };
-    let of = |part: Option<usize>| -> Vec<PrintItem> {
-        items
+    // the section of the items whose part `pick` takes
+    let section_of = |pick: &dyn Fn(Option<usize>) -> bool| {
+        let picked: Vec<PrintItem> = items
             .iter()
-            .filter(|(of, _)| *of == part)
+            .filter(|(part, _)| pick(*part))
             .map(|(_, item)| *item)
-            .collect()
+            .collect();
+        previews::print_section(&picked)
     };
     if parts.parts.is_empty() {
-        let all: Vec<PrintItem> = items.iter().map(|(_, item)| *item).collect();
-        let section = previews::print_section(&all);
+        let section = section_of(&|_| true);
         return wrap(&parts.body, &options, &header, &parts.card, After::Printed(&section)).0;
     }
     // the look of the text alone, as without pictures: the sections' own rules are not the message's
@@ -314,15 +315,11 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
     let body: Vec<String> = parts
         .parts
         .iter()
-        .map(|(part, html)| format!("{html}{}", previews::print_section(&of(Some(*part)))))
+        .map(|(part, html)| format!("{html}{}", section_of(&|of| of == Some(*part))))
         .collect();
-    let known = |part: &Option<usize>| part.is_some_and(|part| parts.parts.iter().any(|(at, _)| *at == part));
-    let rest: Vec<PrintItem> = items
-        .iter()
-        .filter(|(part, _)| !known(part))
-        .map(|(_, item)| *item)
-        .collect();
-    let section = previews::print_section(&rest);
+    // the items of no part printed come after all of it
+    let known = |part: Option<usize>| part.is_some_and(|part| parts.parts.iter().any(|(at, _)| *at == part));
+    let section = section_of(&|part| !known(part));
     let after = After::Printed(&section);
     wrap_as(&body.join(PART_RULE), look, &options, &header, &parts.card, after).0
 }

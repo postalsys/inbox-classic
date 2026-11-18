@@ -99,9 +99,11 @@ fn is_printed_picture(file: &pe_html::PreviewFile) -> bool {
 /// The document to print: the message, then each picture drawn and a line for every other file shown; in a message
 /// with signed or encrypted parts each part's after that part's text
 fn printed(files: &Files, printout: &Printout) -> String {
-    let shown: Vec<pe_html::PreviewFile> = printout.files.iter().map(|(_, file)| file.clone()).collect();
     let drawn = match printout.request {
-        Some(request) => wait_drawn(files, request, &shown, Instant::now() + PRINT_WAIT),
+        Some(request) => {
+            let shown = printout.files.iter().map(|(_, file)| file);
+            wait_drawn(files, request, shown, Instant::now() + PRINT_WAIT)
+        }
         None => HashMap::new(),
     };
     let lines: Vec<String> = printout
@@ -138,14 +140,13 @@ fn printed(files: &Files, printout: &Printout) -> String {
 }
 
 /// The pictures of `shown` that `request` drew by `until`: each file once it is done, or as far as it came
-fn wait_drawn(
+fn wait_drawn<'a>(
     files: &Files,
     request: u64,
-    shown: &[pe_html::PreviewFile],
+    shown: impl Iterator<Item = &'a pe_html::PreviewFile>,
     until: Instant,
 ) -> HashMap<usize, PreviewFile> {
     let wanted: Vec<usize> = shown
-        .iter()
         .filter(|file| is_printed_picture(file))
         .map(|file| file.attachment)
         .collect();

@@ -546,15 +546,6 @@ fn render_part(part: &parser::Message, allow: bool, first: usize, previews: Opti
     }
 }
 
-/// Whether something of a message with signed or encrypted parts was decrypted (its previews are then kept nowhere
-/// but under the view, `protect::shown_decrypted` says the same)
-fn decrypted(protected: &crate::protect::Protected) -> bool {
-    protected
-        .sections
-        .iter()
-        .any(|section| section.entity.is_some() && section.verdict.as_ref().is_some_and(|v| v.encrypted))
-}
-
 /// The view of a message with signed or encrypted parts: the page of its sections ([`pe_html::secure_page`]), each
 /// rendered as any message is, its attachments from the sections, and what the bar says. Pictures from the internet
 /// load in a decrypted part only on the user's click (`clicked`): never by the sender's trust or the "always"
@@ -581,7 +572,7 @@ fn protected_view(
     let mut previews = trust.previews.map(|plan| PartPreviews {
         plan,
         budget: crate::previews::Budget::new(),
-        keep: !decrypted(&protected),
+        keep: !protected.decrypted(),
     });
     let mut preview_documents = Vec::new();
     // parsed first: the printout's pictures borrow from them
@@ -605,17 +596,9 @@ fn protected_view(
             || vec![pe_i18n::tr(pe_i18n::Text::PgpDetailsPlain)],
             crate::protect::Verdict::details,
         );
-        let signed = section.verdict.as_ref().is_some_and(|verdict| {
-            verdict.sealed.is_none()
-                && matches!(
-                    verdict.signature,
-                    crate::protect::Signature::Verified { .. } | crate::protect::Signature::Signed { .. }
-                )
-        });
-        let opened = encrypted && section.verdict.as_ref().is_some_and(|verdict| verdict.sealed.is_none());
         let first = attachments.len();
         let document = part.as_ref().map(|part| {
-            let rendered = render_part(part, allow, attachments.len(), previews.as_mut());
+            let rendered = render_part(part, allow, first, previews.as_mut());
             remote_images |= rendered.remote_images;
             blocked |= rendered.remote_images && !allow;
             if encrypted && allow && rendered.remote_images {
@@ -634,8 +617,11 @@ fn protected_view(
             tone,
             label,
             details,
-            encrypted: opened,
-            signed,
+            encrypted: section.verdict.as_ref().is_some_and(crate::protect::Verdict::opened),
+            signed: section
+                .verdict
+                .as_ref()
+                .is_some_and(crate::protect::Verdict::signature_confirmed),
         };
         // each file of the part says where it came from, the strip marking an encrypted part's
         for attachment in &mut attachments[first..] {

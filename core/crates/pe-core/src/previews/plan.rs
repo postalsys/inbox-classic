@@ -248,9 +248,7 @@ impl Walk<'_, '_> {
             }
         }
     }
-}
 
-impl Walk<'_, '_> {
     /// The description of a file: what came of it after an earlier view's wait, or read now, waiting at most `wait`;
     /// None when it did not come in time
     fn describe(
