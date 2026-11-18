@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review four Hungarian encryption help topics: encrypted-and-signed-mail, encryption-keys, verify-a-key and encryption-errors. Hungarian now has 32 pending help topics and 55 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search and writing/contact context findings in other languages, reopening only affected passages. The compose/security and Linux-menu followups remain complete. Review merged inline-picture/font passages and incoming MCP phase3 translations; recheck the Mac printing fix when merged. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -21415,10 +21415,6 @@
           "agent-terminal-program-linux",
           "agent-connect-title-terminal",
           "agent-connect-terminal-detail",
-          "attachment-from-part",
-          "pgp-bar-count-encrypted-signed",
-          "pgp-bar-count-encrypted",
-          "pgp-bar-count-signed",
           "preview-pdf-option",
           "preview-pdf-off",
           "preview-pdf-off-crashed",
@@ -21454,9 +21450,6 @@
         "default-mail-program.html",
         "delivery-problems.html",
         "download-ahead.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-errors.html",
-        "encryption-keys.html",
         "invitations.html",
         "keyboard-shortcuts.html",
         "links-scripts.html",
@@ -21473,8 +21466,7 @@
         "sign-in-apps.html",
         "sign-in-codes.html",
         "unsubscribe.html",
-        "updates.html",
-        "verify-a-key.html"
+        "updates.html"
       ],
       "completed_batches": [
         {
@@ -23819,6 +23811,146 @@
             "source-notes.json": "/private/tmp/inbox-hu-writing-20261118-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-hu-writing-20261118-screenshots.json",
             "html.log": "/private/tmp/inbox-hu-writing-20261118-html.log"
+          }
+        },
+        {
+          "id": "hu-encryption-help-status-20261118",
+          "reviewed_ids": {
+            "core.ftl": [
+              "attachment-from-part",
+              "pgp-bar-count-encrypted-signed",
+              "pgp-bar-count-encrypted",
+              "pgp-bar-count-signed",
+              "pgp-key-locked"
+            ]
+          },
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "verify-a-key.html",
+            "encryption-errors.html"
+          ],
+          "changed_values": 2,
+          "files": {
+            "core/locales/hu/core.ftl": "96259267544388c8b62bd98ecd16b6f544e26f09d016e965f955228517d07b6c",
+            "core/crates/pe-html/help/hu/encrypted-and-signed-mail.html": "7b8f67b6e56677f0a6ca1a2ff805e892758464359deba86a5736b68af0baec30",
+            "core/crates/pe-html/help/hu/encryption-keys.html": "5a17f144031cb5652499310d17526d2f0735f52959fa94ffd9d9028b6e028360",
+            "core/crates/pe-html/help/hu/verify-a-key.html": "2991ebeea47709d787a56668de7bd615eafe3d01ecc4afebd78f1c4a9cd4047c",
+            "core/crates/pe-html/help/hu/encryption-errors.html": "fd5a474190372febcdd83900562d1f02ca7d47ffc4cb8db0ac5628486a53896b"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "3c6789b9843b8e9c319a498798c43830dc597cf52f2ef948665abb86e0a6dfb1",
+            "core/crates/pe-html/help/en/encryption-keys.html": "88e116192bb0df60bfdbf9e5e10be090a2401bebeb575320b8556304109510b5",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153",
+            "core/crates/pe-html/help/en/encryption-errors.html": "a5a998593987b3275e7f6cf44f81d459ff641215dda884f275cbf9d8d0d710f1"
+          },
+          "validation": "Hungarian structural checks pass with 1,430 expected mark-only diagnostics. Exact reconstruction verifies five catalog entries: four pending entries completed and one previously reviewed key-lock message reopened from source evidence, with no duplicate scope credit. Two values improved and three compact part-count values retained. Four full help topics have 46 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls, platform branches and literal keyboard/code contents are preserved. Static counts 1/2/5/21/101, attachment-tooltip substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Twenty-eight runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,530 unmarked entries and 11,830 help lines; since-start 1,906 entries/473 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs. Key-lock and connection-encryption source discrepancies are recorded for targeted comparison in other languages. Incoming MCP phase3a advanced from 79505992 to 1769b17a without translation changes; the existing incoming queue is unchanged and remains separate. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed four full Hungarian encryption help topics and four pending protection-count/attachment strings. Reopened pgp-key-locked after code showed temporary password-store failures also cause Locked. Improved signature validity versus ownership, all-address verification, key replacement/Autocrypt, local search and preview storage, connection versus app failure and SMTP password uncertainty. Retained three natural compact count values.",
+          "reopened_context_entries": {
+            "ids": {
+              "core.ftl": [
+                "pgp-key-locked"
+              ]
+            },
+            "reason": "keys.rs master() can return no key when the password store is locked/refused/unavailable; state_of() then reports Locked. Missing or reset protection is not the only cause.",
+            "previously_reviewed": true,
+            "additional_scope_credit": 0
+          },
+          "help_wording_lines_changed": 46,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/hu/encrypted-and-signed-mail.html": 15,
+            "core/crates/pe-html/help/hu/encryption-keys.html": 12,
+            "core/crates/pe-html/help/hu/verify-a-key.html": 10,
+            "core/crates/pe-html/help/hu/encryption-errors.html": 9
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-core/src/protect.rs": "402d75886280eb50d23da4e0f9330aed5b602f2bbfd96ed4b9d2cf0a3a91d353",
+            "core/crates/pe-core/src/view.rs": "f6d5f36337c27cb17ba34e46c5cb672d25b68201b56f3d77641d8988318666b2",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-core/src/lib.rs": "e335529ecfdf749a044ea64db2b467881d13bea93ccf6760caf2f1decb36beac",
+            "core/crates/pe-core/src/autocrypt.rs": "a7946c2fb9149e4603199eb358e895f9016b5158181e8812293caa12903c6285",
+            "core/crates/pe-core/src/search.rs": "c72488f2132326a415b77a1aef19d418f08b76a932c1375698369c64d0861cbb",
+            "core/crates/pe-core/src/agents.rs": "d7bbae6f4a16aac79b22314fa6f861b3fb63c93ff4ab5a16a6f431c3afae3efb",
+            "core/crates/pe-core/src/opening.rs": "deaed51a590dbfa66c848553085ea0e34710008472e6ae32d564c589d159931f",
+            "core/crates/pe-core/src/previews/plan.rs": "8507c6e71c134d19960d2c34282d798fa37070ccc0cb06785366e595a5bce9a6",
+            "core/crates/pe-store/src/pgp.rs": "c6d9f72c5ddfe0c51530928770925ccd5ff0b666f7102ac8ac0e1a3884599c96",
+            "core/crates/pe-keys/src/lib.rs": "f70f9cfc4099259719c72b2fce7573ca92bc7140fecb18f9048c9639047815b7",
+            "core/crates/pe-net/src/stream.rs": "5a90bc2fef1c9b12587ae587cacc27f79d71bb5734f9cf0cba04711e99ffc79a",
+            "core/crates/pe-imap/src/client/mod.rs": "7f79a9453da917bf8e1585976e1de1b8e47b265b140e132c4352d1e5dd7bf29f",
+            "core/crates/pe-imap/src/client/error.rs": "47dc53f00234b80d19539b0dfbe200b97fc3f5ba2171f64085c27c271b8205f7",
+            "core/crates/pe-smtp/src/client.rs": "773e7d3f5b7f8eb6d6d4c89484bb5625d38bbaa4322afd39c2e134510deca7dc",
+            "app/src/keys.cpp": "e38795145cb1843a0bf5b6afb0f89c1d34f5e4b9ff00f536415d0f1cd2206869",
+            "app/src/accounts.cpp": "d1965776fefd8a870c0558f5bf3b7d2e40ece8fd9de078a86c514ba554cb3f92",
+            "app/src/reader.cpp": "e4b54775476bc93a3c29f9e42adf16b4ebab72eba5f9bb58d0cf69e3bed1405e",
+            "linux/src/keys.rs": "2cbbd8417329eb0a49f6f37f9c4ec5533d36d45c72fbf0c1f37cf6271c6b0596",
+            "linux/src/accounts.rs": "fd849106186b6a3c84a80398ddf08ead4e24f17cc00a2804545d9c024b905a43",
+            "linux/src/reader.rs": "18773f6639887286b42e22b2e9a92e269f3d0b0b71761c4e62f3a7b145f385f8",
+            "mac/Sources/InboxClassic/Keys.swift": "cb5c1713fe9f648aacc09e1cbec26833a45398b99971c14e2b95c9e332a708fd",
+            "mac/Sources/InboxClassic/Accounts.swift": "d7c4ec2ca26c51ed9404fc6e1f4e93aac6cdb79082e512c11984b236636cb53d",
+            "mac/Sources/InboxClassic/Reader.swift": "d8c17c4c5b479ec87edce1995502d1340570caf0d713cdec127a2ac7c4c466d1"
+          },
+          "catalog_dependencies": {
+            "core/locales/hu/mac.ftl": "ccfdfd4bb00809d2e36c35135443102555a0350bf8f2b12f1a50f049ad7d0aaa",
+            "core/locales/hu/linux.ftl": "4ee069a706d1647d0ca4f8315b1400b638b6e1251a1217718191c422f8f2f9b1",
+            "core/locales/hu/app.ftl": "3123a1db5bf792eb97ee5583c39513826fab1a59b62dece366d9577288171e3c",
+            "core/locales/hu/core.ftl": "96259267544388c8b62bd98ecd16b6f544e26f09d016e965f955228517d07b6c",
+            "core/locales/hu/windows.ftl": "c04c8213db225027ead1c06b307c2db093fe31f68adc6ae905c1f65b7717f377",
+            "core/locales/hu/help.ftl": "22bf1437995d992179c920e30b4c01dced3cf535af44c5d478b2a3226e13b0ce"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "topics": [
+                  "encryption-keys.html"
+                ],
+                "catalog_ids": {
+                  "core.ftl": [
+                    "pgp-key-locked"
+                  ]
+                },
+                "source": "core/crates/pe-core/src/keys.rs::master/state_of",
+                "finding": "Locked means the private part cannot be opened. A locked, refused or unavailable system secret store returns no master key for reading, so reset/missing protection is not the sole cause. Check availability before directing recovery from the private-key backup. Hungarian catalog entry was reopened and corrected in this batch."
+              },
+              {
+                "topics": [
+                  "encryption-errors.html"
+                ],
+                "source": "core/crates/pe-smtp/src/client.rs::Error::Display/Client::connect; pe-imap/src/client/mod.rs::start_session",
+                "finding": "STARTTLS is required before authentication: refusal aborts connection, not the app. SMTP 538 reports an encryption requirement and does not establish password correctness. TLS port suggestions require provider support; a local network does not itself provide encryption."
+              },
+              {
+                "topics": [
+                  "encrypted-and-signed-mail.html",
+                  "verify-a-key.html"
+                ],
+                "source": "pe-core/src/protect.rs::Verdict::tone/Reader::one_signature; keys.rs::pgp_set_key_verified; view.rs::counted/protected_view",
+                "finding": "Signature validity proves unchanged signed content, not individual identity. Green/blue signer claims require a valid sender signature; verification applies to all listed addresses. Part counts describe protection states. Decrypted previews stay in memory, separately opened/saved files do not; searchable text can be stored unencrypted locally."
+              },
+              {
+                "topics": [
+                  "encryption-keys.html"
+                ],
+                "source": "pe-core/src/autocrypt.rs::learn_autocrypt; keys.rs::peer_learns; lookup.rs::find_addresses/pgp_find_handle",
+                "finding": "Learning a key does not verify its owner or automatically replace the chosen key. Address lookup first asks the domain and optionally keys.openpgp.org; handle lookup sends an identifier instead. Keep these qualifications where omitted or mistranslated."
+              }
+            ]
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-hu-encryption-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-hu-encryption-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-hu-encryption-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-hu-encryption-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-hu-encryption-20261118-joins.log",
+            "catalog-examples.log": "/private/tmp/inbox-hu-encryption-20261118-catalog-examples.log",
+            "source-audit.json": "/private/tmp/inbox-hu-encryption-20261118-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-hu-encryption-20261118-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-hu-encryption-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-hu-encryption-20261118-html.log"
           }
         }
       ]
@@ -76350,7 +76482,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Hungarian structural checks pass with 1,422 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 56 improved wording lines. All six Hungarian catalogs are unchanged. Tags, attributes, control order, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins inspected with current control labels, command shortcuts and settings paths. Forty runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,526 unmarked entries and 11,774 help lines; since-start 1,910 entries/475 passages match the queue. Source checkpoint covers 204 refs/6 worktrees, and upstream has no changed review inputs. Draft-removal timing, attachment-copy lifetime, contact-domain identity limits and print-dialog wording are recorded for targeted cross-language comparison; English/app code unchanged. Incoming MCP translations remain queued separately. The unmerged Mac print correction remains recorded for follow-up; no print runtime validation is claimed. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Hungarian structural checks pass with 1,430 expected mark-only diagnostics. Exact reconstruction verifies five catalog entries: four pending entries completed and one previously reviewed key-lock message reopened from source evidence, with no duplicate scope credit. Two values improved and three compact part-count values retained. Four full help topics have 46 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls, platform branches and literal keyboard/code contents are preserved. Static counts 1/2/5/21/101, attachment-tooltip substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Twenty-eight runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,530 unmarked entries and 11,830 help lines; since-start 1,906 entries/473 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs. Key-lock and connection-encryption source discrepancies are recorded for targeted comparison in other languages. Incoming MCP phase3a advanced from 79505992 to 1769b17a without translation changes; the existing incoming queue is unchanged and remains separate. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -137166,7 +137298,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review four Hungarian encryption help topics: encrypted-and-signed-mail, encryption-keys, verify-a-key and encryption-errors. Hungarian now has 32 pending help topics and 55 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search and writing/contact context findings in other languages, reopening only affected passages. The compose/security and Linux-menu followups remain complete. Review merged inline-picture/font passages and incoming MCP phase3 translations; recheck the Mac printing fix when merged. Publish each validated batch promptly; no local test suites."
+      "next": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -140086,7 +140218,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review four Hungarian encryption help topics: encrypted-and-signed-mail, encryption-keys, verify-a-key and encryption-errors. Hungarian now has 32 pending help topics and 55 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search and writing/contact context findings in other languages, reopening only affected passages. The compose/security and Linux-menu followups remain complete. Review merged inline-picture/font passages and incoming MCP phase3 translations; recheck the Mac printing fix when merged. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -141857,7 +141989,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review four Hungarian encryption help topics: encrypted-and-signed-mail, encryption-keys, verify-a-key and encryption-errors. Hungarian now has 32 pending help topics and 55 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search and writing/contact context findings in other languages, reopening only affected passages. The compose/security and Linux-menu followups remain complete. Review merged inline-picture/font passages and incoming MCP phase3 translations; recheck the Mac printing fix when merged. Publish each validated batch promptly; no local test suites.",
+      "next": "Review Hungarian attachment-preview additions: four app entries and 17 core preview entries, together with pictures-tracking and links-scripts help. Hungarian now has 28 pending help topics and 51 pending catalog entries. Then continue its remaining help and the broader catalogs/help across all 28 languages. Compare the recorded reading/search, writing/contact and encryption context findings elsewhere, reopening only affected passages. Compose/security and Linux-menu followups remain complete. Review incoming MCP phase3 translations and recheck the Mac printing correction when merged. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -143729,6 +143861,18 @@
         "merge_commit": "fdb15f41408e7689819167c0e3568d4117e5a8f4",
         "merged_at": "2026-11-18T20:37:24Z",
         "verified_master": "fdb15f41408e7689819167c0e3568d4117e5a8f4",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "hu-writing-contacts-help-20261118",
+        "pr": 179,
+        "url": "https://github.com/postalsys/inbox-classic/pull/179",
+        "review_commit": "ddd7a8dd205cf581bab37ac6e07291314953d2b7",
+        "merge_commit": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+        "merged_at": "2026-11-18T20:51:19Z",
+        "verified_master": "3d58cc8899bd1d59084b4c60c8bec25455912379",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
@@ -154169,7 +154313,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "952ad4b5b38ab6ab45ee0120da3094d4dca6ba09950a3285cbd24bfd2fb0dcc2",
+      "core/locales/GLOSSARY.md": "c2960a8d717bb19330156cfeb347ff42126466671a4d713626a451ceb878c350",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -154177,7 +154321,7 @@
       "core/crates/pe-html/help/hr/sign-and-encrypt.html": "be6f0535c8ce298a97abd0a95a0b947e73d0de3bd4b504f4e9c045d1d2a2504b",
       "core/crates/pe-html/help/hr/write-message.html": "ed4739498a9e8b3fb4b6579d96457ba42aaac85ff66cda13eac6728d87977865",
       "core/locales/hu/app.ftl": "3123a1db5bf792eb97ee5583c39513826fab1a59b62dece366d9577288171e3c",
-      "core/locales/hu/core.ftl": "52e9ec5a8afb207a4b4380156c46045a9845e03470190a7daa8a82ad3fb36d23",
+      "core/locales/hu/core.ftl": "96259267544388c8b62bd98ecd16b6f544e26f09d016e965f955228517d07b6c",
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
       "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
       "core/locales/lt/app.ftl": "4fd94d26751396a3db103af8db60c1b37aa92a90705d2c0aea38cfe450b8f2cd",
@@ -154285,7 +154429,11 @@
       "core/crates/pe-html/help/hu/drafts-outbox.html": "a94b2db9553f1957fca07a4b6355bed8f4dd34f5245c7f7a884f3754adf9743a",
       "core/crates/pe-html/help/hu/signatures.html": "967dfebe8cc96e8d2452b7e548faeedabc7e1fb13b445859ee1e3c29c9edaa34",
       "core/crates/pe-html/help/hu/address-book.html": "3e7ab2e8d02dfda3b9ff116c785694d43bc3253beee0ffea901a99bf93c5a436",
-      "core/crates/pe-html/help/hu/save-print-import.html": "5c24ee99111ffe4071003c1365ec4c7700c2e933f781cb1436171faefdf060b4"
+      "core/crates/pe-html/help/hu/save-print-import.html": "5c24ee99111ffe4071003c1365ec4c7700c2e933f781cb1436171faefdf060b4",
+      "core/crates/pe-html/help/hu/encrypted-and-signed-mail.html": "7b8f67b6e56677f0a6ca1a2ff805e892758464359deba86a5736b68af0baec30",
+      "core/crates/pe-html/help/hu/encryption-keys.html": "5a17f144031cb5652499310d17526d2f0735f52959fa94ffd9d9028b6e028360",
+      "core/crates/pe-html/help/hu/verify-a-key.html": "2991ebeea47709d787a56668de7bd615eafe3d01ecc4afebd78f1c4a9cd4047c",
+      "core/crates/pe-html/help/hu/encryption-errors.html": "fd5a474190372febcdd83900562d1f02ca7d47ffc4cb8db0ac5628486a53896b"
     },
     "resumed_review_checkpoints": [
       {
@@ -166664,6 +166812,127 @@
           "/private/tmp/inbox-hu-writing-20261118-finalize.py": "321f68bb182fa8277d9bc53bab72d128e9cbd7ee8f19451f4313d8c7223935e5",
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
         }
+      },
+      {
+        "batch": "hu-encryption-help-status-20261118",
+        "review_parent": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 13128,
+          "pending_help": 619,
+          "completed_catalog": 22496,
+          "completed_help": 757
+        },
+        "validation": "Hungarian structural checks pass with 1,430 expected mark-only diagnostics. Exact reconstruction verifies five catalog entries: four pending entries completed and one previously reviewed key-lock message reopened from source evidence, with no duplicate scope credit. Two values improved and three compact part-count values retained. Four full help topics have 46 improved wording lines. Variables, plural branches, access-key counts, comments, markup, attributes, controls, platform branches and literal keyboard/code contents are preserved. Static counts 1/2/5/21/101, attachment-tooltip substitutions and Windows/Mac/Linux help joins inspected; no Fluent bundle execution claimed. Twenty-eight runtime/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI-fit claim. All 28 full inventories, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,530 unmarked entries and 11,830 help lines; since-start 1,906 entries/473 passages match the queue. Source checkpoint covers 204 refs/6 worktrees; upstream has no changed review inputs. Key-lock and connection-encryption source discrepancies are recorded for targeted comparison in other languages. Incoming MCP phase3a advanced from 79505992 to 1769b17a without translation changes; the existing incoming queue is unchanged and remains separate. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 204,
+          "worktree_count": 6,
+          "changed_refs": {
+            "refs/heads/feat/mcp-phase3a": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+            "refs/heads/i18n/review-resume-20261118": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+            "refs/remotes/origin/HEAD": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+            "refs/remotes/origin/feat/mcp-phase3a": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+            "refs/remotes/origin/i18n/review-resume-20261118": "ddd7a8dd205cf581bab37ac6e07291314953d2b7",
+            "refs/remotes/origin/master": "3d58cc8899bd1d59084b4c60c8bec25455912379"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "3baf8a41703a6b941bb61c08b688e62813c79456",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/hu/encrypted-and-signed-mail.html\n M core/crates/pe-html/help/hu/encryption-errors.html\n M core/crates/pe-html/help/hu/encryption-keys.html\n M core/crates/pe-html/help/hu/verify-a-key.html\n M core/locales/GLOSSARY.md\n M core/locales/hu/core.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/hu/encrypted-and-signed-mail.html": "7b8f67b6e56677f0a6ca1a2ff805e892758464359deba86a5736b68af0baec30",
+                "core/crates/pe-html/help/hu/encryption-errors.html": "fd5a474190372febcdd83900562d1f02ca7d47ffc4cb8db0ac5628486a53896b",
+                "core/crates/pe-html/help/hu/encryption-keys.html": "5a17f144031cb5652499310d17526d2f0735f52959fa94ffd9d9028b6e028360",
+                "core/crates/pe-html/help/hu/verify-a-key.html": "2991ebeea47709d787a56668de7bd615eafe3d01ecc4afebd78f1c4a9cd4047c",
+                "core/locales/GLOSSARY.md": "c2960a8d717bb19330156cfeb347ff42126466671a4d713626a451ceb878c350",
+                "core/locales/hu/core.ftl": "96259267544388c8b62bd98ecd16b6f544e26f09d016e965f955228517d07b6c"
+              }
+            }
+          ],
+          "master": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched. MCP phase3a tip comparison proved no translation changes; existing exact incoming inventory is retained in its earlier checkpoint, rather than duplicated here.",
+          "unchanged_incoming_source_refs": [
+            {
+              "ref": "refs/heads/feat/mcp-phase3a",
+              "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e",
+              "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+              "changed_translation_paths": [],
+              "conclusion": "Existing incoming translation queue is unchanged; local and remote refs identify the same source."
+            },
+            {
+              "ref": "refs/remotes/origin/feat/mcp-phase3a",
+              "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e",
+              "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+              "changed_translation_paths": [],
+              "conclusion": "Existing incoming translation queue is unchanged; local and remote refs identify the same source."
+            }
+          ],
+          "raw_master_to_feature_inventory_artifact": "/private/tmp/inbox-hu-encryption-20261118-source-audit-raw.json"
+        },
+        "upstream_inputs_check": {
+          "master": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-hu-encryption-20261118-edit.py": "7c24bcec0098d8734d8cfc4ab619314780644406d07c84bb0d9a4ce23676b45a",
+          "/private/tmp/inbox-hu-encryption-20261118-finalize.py": "939e77a0d99eff3879fc071175b91b02e06bbc395915770d51998315f08ca780",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        },
+        "source_tip_followup": [
+          {
+            "ref": "refs/heads/feat/mcp-phase3a",
+            "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e",
+            "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+            "changed_translation_paths": [],
+            "conclusion": "Existing incoming translation queue is unchanged; local and remote refs identify the same source."
+          },
+          {
+            "ref": "refs/remotes/origin/feat/mcp-phase3a",
+            "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e",
+            "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
+            "changed_translation_paths": [],
+            "conclusion": "Existing incoming translation queue is unchanged; local and remote refs identify the same source."
+          }
+        ]
       }
     ],
     "resumed_incoming_source_queue": {
@@ -166802,7 +167071,7 @@
         },
         {
           "ref": "refs/heads/feat/mcp-phase3a",
-          "commit": "795059923d9e39c46231685e9dff3d533c60dc7e",
+          "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
           "merge_base": "3baf8a41703a6b941bb61c08b688e62813c79456",
           "status": "Unmerged incoming source. Exact added/changed/removed catalog IDs and help paths are recorded in this checkpoint; recheck integration before importing.",
           "catalog_additions_by_language": {
@@ -166929,11 +167198,11 @@
             "tr": 3,
             "uk": 3
           },
-          "previous_commit": "70ecf011cd98703303a0fabb16226394db413829"
+          "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e"
         },
         {
           "ref": "refs/remotes/origin/feat/mcp-phase3a",
-          "commit": "795059923d9e39c46231685e9dff3d533c60dc7e",
+          "commit": "1769b17ab99917dbf6c25e0a1775c91c2024dcd1",
           "merge_base": "3baf8a41703a6b941bb61c08b688e62813c79456",
           "status": "Unmerged incoming source. Exact added/changed/removed catalog IDs and help paths are recorded in this checkpoint; recheck integration before importing.",
           "catalog_additions_by_language": {
@@ -167060,7 +167329,7 @@
             "tr": 3,
             "uk": 3
           },
-          "previous_commit": "70ecf011cd98703303a0fabb16226394db413829"
+          "previous_commit": "795059923d9e39c46231685e9dff3d533c60dc7e"
         }
       ],
       "other_pending_source": "preview-cid at 6a37b3de merged in PR 159 and integrated at 3baf8a41. Its 56 translated help additions are now in the active pending inventory; exact changes are in resumed_source_integrations."
@@ -167708,6 +167977,91 @@
           }
         ],
         "instruction": "Compare exact current passages against verified behavior, retaining already accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review."
+      },
+      {
+        "id": "encryption-key-lock-connection-context-20261118",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "3d58cc8899bd1d59084b4c60c8bec25455912379",
+        "completed_languages": [
+          "hu"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "it",
+          "lt",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "encrypted-and-signed-mail.html",
+          "encryption-keys.html",
+          "verify-a-key.html",
+          "encryption-errors.html"
+        ],
+        "catalog_ids": {
+          "core.ftl": [
+            "pgp-key-locked"
+          ]
+        },
+        "issues": [
+          {
+            "topics": [
+              "encryption-keys.html"
+            ],
+            "catalog_ids": {
+              "core.ftl": [
+                "pgp-key-locked"
+              ]
+            },
+            "source": "core/crates/pe-core/src/keys.rs::master/state_of",
+            "finding": "Locked means the private part cannot be opened. A locked, refused or unavailable system secret store returns no master key for reading, so reset/missing protection is not the sole cause. Check availability before directing recovery from the private-key backup. Hungarian catalog entry was reopened and corrected in this batch."
+          },
+          {
+            "topics": [
+              "encryption-errors.html"
+            ],
+            "source": "core/crates/pe-smtp/src/client.rs::Error::Display/Client::connect; pe-imap/src/client/mod.rs::start_session",
+            "finding": "STARTTLS is required before authentication: refusal aborts connection, not the app. SMTP 538 reports an encryption requirement and does not establish password correctness. TLS port suggestions require provider support; a local network does not itself provide encryption."
+          },
+          {
+            "topics": [
+              "encrypted-and-signed-mail.html",
+              "verify-a-key.html"
+            ],
+            "source": "pe-core/src/protect.rs::Verdict::tone/Reader::one_signature; keys.rs::pgp_set_key_verified; view.rs::counted/protected_view",
+            "finding": "Signature validity proves unchanged signed content, not individual identity. Green/blue signer claims require a valid sender signature; verification applies to all listed addresses. Part counts describe protection states. Decrypted previews stay in memory, separately opened/saved files do not; searchable text can be stored unencrypted locally."
+          },
+          {
+            "topics": [
+              "encryption-keys.html"
+            ],
+            "source": "pe-core/src/autocrypt.rs::learn_autocrypt; keys.rs::peer_learns; lookup.rs::find_addresses/pgp_find_handle",
+            "finding": "Learning a key does not verify its owner or automatically replace the chosen key. Address lookup first asks the domain and optionally keys.openpgp.org; handle lookup sends an identifier instead. Keep these qualifications where omitted or mistranslated."
+          }
+        ],
+        "instruction": "Compare exact current passages and the key-lock message against verified behavior; retain accurate existing wording. Reopen only affected text. This comparison queue adds no scope or review credit before affected passages are identified. English/app code remain outside this review."
       }
     ]
   },
