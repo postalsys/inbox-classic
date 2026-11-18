@@ -480,6 +480,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Aquest missatge no es pot llegir.
 agent-encrypted-original = El missatge original està xifrat. Un agent no hi pot respondre ni reenviar-lo perquè no pot xifrar el missatge de sortida.
 agent-encrypted = Aquest missatge està xifrat. Els agents d’IA no poden llegir-ne el contingut. L’usuari ha d’obrir-lo a Inbox Classic.
+# review: new
+agent-too-many-changes = Massa canvis en els últims 30 dies: aquest agent n’ha fet tants com Inbox Classic en desa al registre per a un programa. En podrà fer més quan els més antics tinguin 30 dies.
+# review: new
+agent-too-many-reads = Massa lectures en els últims 30 dies: aquest agent ha llegit tant com Inbox Classic en desa al registre per a un programa. Podrà llegir més quan les lectures més antigues tinguin 30 dies.
 list-encrypted = Missatge xifrat
 agent-log-composed = Ha obert «{ $subject }» en una finestra de composició perquè l’editeu
 agent-log-refused = Heu rebutjat l’enviament de «{ $subject }»

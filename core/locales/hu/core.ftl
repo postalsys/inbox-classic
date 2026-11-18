@@ -446,6 +446,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Ez az üzenet nem olvasható.
 agent-encrypted-original = Ez az üzenet titkosított: az ügynök nem válaszolhat rá és nem továbbíthatja, mert nem tud titkosítani.
 agent-encrypted = Ez az üzenet titkosított. Csak a felhasználó olvashatja el, az Inbox Classicban.
+# review: new
+agent-too-many-changes = Túl sok módosítás az elmúlt 30 napban: ez az ügynök annyit végzett, amennyit az Inbox Classic egy programnak a naplóban megőriz. Akkor végezhet többet, amikor a legrégebbiek 30 naposak lesznek.
+# review: new
+agent-too-many-reads = Túl sok olvasás az elmúlt 30 napban: ez az ügynök annyit olvasott, amennyit az Inbox Classic egy programnak a naplóban megőriz. Akkor olvashat többet, amikor a legrégebbi olvasások 30 naposak lesznek.
 list-encrypted = Titkosított üzenet
 agent-log-composed = Új üzenetként megnyitva további szerkesztéshez: „{ $subject }”
 agent-log-refused = Küldés elutasítva: „{ $subject }”

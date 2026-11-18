@@ -484,6 +484,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Tuto zprávu nelze přečíst.
 agent-encrypted-original = Tato zpráva je šifrovaná: agent na ni nemůže odpovědět ani ji přeposlat, protože neumí šifrovat.
 agent-encrypted = Tato zpráva je šifrovaná. Agenti AI nemohou číst její obsah. Uživatel ji musí otevřít v aplikaci Inbox Classic.
+# review: new
+agent-too-many-changes = Příliš mnoho změn za posledních 30 dní: tento agent jich provedl tolik, kolik Inbox Classic pro jeden program uchovává v protokolu. Další bude moci provést, až budou nejstarší staré 30 dní.
+# review: new
+agent-too-many-reads = Příliš mnoho čtení za posledních 30 dní: tento agent přečetl tolik, kolik Inbox Classic pro jeden program uchovává v protokolu. Dál bude moci číst, až budou nejstarší čtení stará 30 dní.
 list-encrypted = Šifrovaná zpráva
 agent-log-composed = Otevřena nová zpráva „{ $subject }“, abyste ji mohli dokončit
 agent-log-refused = Odeslání zprávy „{ $subject }“ nebylo schváleno

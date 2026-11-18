@@ -734,6 +734,10 @@ agent-unreadable = Šo ziņojumu nevar nolasīt.
 agent-encrypted-original = Šis ziņojums ir šifrēts: aģents nevar uz to atbildēt vai to pārsūtīt, jo nevar šifrēt.
 agent-encrypted = Šis ziņojums ir šifrēts. Aģents nevar izlasīt tā saturu. Ziņojums jāatver lietotājam lietotnē Inbox Classic.
 # review: new
+agent-too-many-changes = Pārāk daudz izmaiņu pēdējās 30 dienās: šis aģents ir veicis tik daudz, cik Inbox Classic vienai programmai glabā žurnālā. Vairāk varēs veikt, kad vecākās būs 30 dienas vecas.
+# review: new
+agent-too-many-reads = Pārāk daudz lasīts pēdējās 30 dienās: šis aģents ir lasījis tik daudz, cik Inbox Classic vienai programmai glabā žurnālā. Vairāk varēs lasīt, kad vecākās lasīšanas reizes būs 30 dienas vecas.
+# review: new
 list-encrypted = Šifrēts ziņojums
 agent-log-composed = Atvēra jaunu ziņojumu „{ $subject }”, kuru varat pabeigt rakstīt
 agent-log-refused = Noraidījāt pieprasījumu nosūtīt ziņojumu „{ $subject }”

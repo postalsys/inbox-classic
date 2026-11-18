@@ -1421,6 +1421,20 @@ impl Core {
         })
     }
 
+    /// Refuses program `host` what it would do (`changes`) or read once its log of the last 30 days holds as much as one
+    /// program's may ([`pe_store::LOG_CEILING`], [`pe_store::READS_CEILING`]): its log is never made room in by
+    /// forgetting what it did, so what it does past that is not done
+    pub fn agent_log_room(&self, host: AgentHostId, changes: bool) -> Result<()> {
+        let (did, read) = self.store().agent_log_live(host, now() - pe_store::LOG_KEPT)?;
+        if changes && did >= pe_store::LOG_CEILING {
+            return Err(Error::Unavailable(tr(Text::AgentTooManyChanges)));
+        }
+        if !changes && read >= pe_store::READS_CEILING {
+            return Err(Error::Unavailable(tr(Text::AgentTooManyReads)));
+        }
+        Ok(())
+    }
+
     /// What a program may do now (the user may have changed it since it connected), None once it is forgotten
     pub fn agent_host(&self, id: AgentHostId) -> Result<Option<AgentHost>> {
         Ok(self.store().agent_host(id)?)

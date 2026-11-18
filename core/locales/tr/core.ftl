@@ -462,6 +462,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Bu ileti okunamıyor.
 agent-encrypted-original = Bu ileti şifreli: aracı şifreleme yapamadığı için ona yanıt veremez veya onu iletemez.
 agent-encrypted = Bu ileti şifreli. Yapay zeka aracıları içeriğini okuyamaz. Kullanıcının iletiyi Inbox Classic'te açması gerekir.
+# review: new
+agent-too-many-changes = Son 30 günde çok fazla değişiklik: bu aracı, Inbox Classic'in bir program için günlükte tuttuğu kadar değişiklik yaptı. En eskileri 30 günlük olduğunda daha fazlasını yapabilir.
+# review: new
+agent-too-many-reads = Son 30 günde çok fazla okuma: bu aracı, Inbox Classic'in bir program için günlükte tuttuğu kadar okudu. En eski okumalar 30 günlük olduğunda daha fazlasını okuyabilir.
 list-encrypted = Şifreli ileti
 agent-log-composed = Tamamlamanız için yeni bir ileti açıldı: “{ $subject }”
 agent-log-refused = Gönderimi reddedildi: “{ $subject }”

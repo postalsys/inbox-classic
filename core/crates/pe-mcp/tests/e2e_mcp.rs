@@ -1855,3 +1855,74 @@ fn an_agent_organizes_folders_and_conversations() {
     });
     mcp.stop();
 }
+
+/// A program whose log of the last 30 days is full is refused more, in a sentence, rather than any of its log being
+/// forgotten to make room: what it did and what it read, each with its own ceiling
+#[test]
+fn a_full_log_refuses_more() {
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let hi = server.add_message(
+        "INBOX",
+        "From: Bob <bob@example.com>\r\nTo: testuser@example.com\r\nSubject: Hi\r\n\
+         Message-ID: <hi@example.com>\r\n\r\nHello\r\n",
+        &[],
+    );
+    let dir = TempDir::new("mcp-ceiling");
+    let (_core, account, mut mcp, socket) = engine_on(&server, &dir);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        agent.initialize().await;
+        let folders = agent.call("list_folders", json!({ "account": account })).await.unwrap();
+        let inbox = special(&folders, "inbox");
+        let store = pe_store::Store::open(dir.path().join("store.db")).unwrap();
+        let host = store.agent_host_by_path("/test/bin/agent").unwrap().unwrap().id;
+        let now = pe_core_now();
+
+        // as many sends as one program's log holds: the next change is refused and nothing of the log goes
+        let sends: Vec<pe_store::NewLogEntry> = (0..pe_store::LOG_CEILING)
+            .map(|_| pe_store::NewLogEntry {
+                host,
+                what: "send".into(),
+                ..Default::default()
+            })
+            .collect();
+        store.log_agent(&sends, now).unwrap();
+        let refused = agent
+            .call("mark_messages_read", json!({ "folder": inbox, "uids": [hi] }))
+            .await
+            .unwrap_err();
+        assert!(refused.starts_with("Too many changes in the last 30 days"), "{refused}");
+        assert_eq!(store.agent_log_live(host, 0).unwrap().0, pe_store::LOG_CEILING);
+        assert!(!server.flags("INBOX", hi).iter().any(|f| f == "\\Seen"));
+        // reading is not a change
+        agent
+            .call("get_message", json!({ "folder": inbox, "uid": hi }))
+            .await
+            .unwrap();
+
+        // as many reads as one program's log holds: the next read is refused, and not recorded
+        let reads: Vec<pe_store::NewRead> = (0..pe_store::READS_CEILING)
+            .map(|_| pe_store::NewRead {
+                host,
+                what: "message".into(),
+                count: 1,
+                ..Default::default()
+            })
+            .collect();
+        store.log_reads(&reads, now).unwrap();
+        let before = store.agent_log_live(host, 0).unwrap().1;
+        let refused = agent
+            .call("get_message", json!({ "folder": inbox, "uid": hi }))
+            .await
+            .unwrap_err();
+        assert!(refused.starts_with("Too many reads in the last 30 days"), "{refused}");
+        assert_eq!(store.agent_log_live(host, 0).unwrap().1, before);
+    });
+    mcp.stop();
+}

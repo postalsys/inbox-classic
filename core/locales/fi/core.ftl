@@ -465,6 +465,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Tätä viestiä ei voi lukea.
 agent-encrypted-original = Tämä viesti on salattu: agentti ei voi vastata siihen tai välittää sitä, koska se ei osaa salata.
 agent-encrypted = Tämä viesti on salattu. Tekoälyagentit eivät voi lukea sen sisältöä. Käyttäjän on avattava viesti Inbox Classicissa.
+# review: new
+agent-too-many-changes = Liikaa muutoksia viimeisten 30 päivän aikana: tämä agentti on tehnyt niitä niin monta kuin Inbox Classic säilyttää lokissaan yhdelle ohjelmalle. Se voi tehdä lisää, kun vanhimmat ovat 30 päivää vanhoja.
+# review: new
+agent-too-many-reads = Liikaa lukemista viimeisten 30 päivän aikana: tämä agentti on lukenut niin paljon kuin Inbox Classic säilyttää lokissaan yhdelle ohjelmalle. Se voi lukea lisää, kun vanhimmat lukukerrat ovat 30 päivää vanhoja.
 list-encrypted = Salattu viesti
 agent-log-composed = Avasi viestin ”{ $subject }” uutena viestinä, jonka viimeistelet
 agent-log-refused = Et lähettänyt viestiä ”{ $subject }”

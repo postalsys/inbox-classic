@@ -444,6 +444,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
 agent-encrypted-original = Agent ei saa krüpteeritud kirjale vastata ega seda edastada, sest agent ei toeta kirjade krüpteerimist.
 agent-encrypted = See kiri on krüpteeritud. Tehisintellekti agentidel pole selle sisule ligipääsu. Kasutaja peab selle ise Inbox Classicus avama.
+# review: new
+agent-too-many-changes = Viimase 30 päeva jooksul liiga palju muudatusi: see agent on teinud neid nii palju, kui Inbox Classic ühe programmi kohta logis hoiab. Rohkem saab teha, kui vanimad on 30 päeva vanad.
+# review: new
+agent-too-many-reads = Viimase 30 päeva jooksul liiga palju lugemist: see agent on lugenud nii palju, kui Inbox Classic ühe programmi kohta logis hoiab. Rohkem saab lugeda, kui vanimad lugemised on 30 päeva vanad.
 list-encrypted = Krüpteeritud kiri
 agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite selle valmis kirjutada
 agent-log-refused = Te ei saatnud kirja „{ $subject }“

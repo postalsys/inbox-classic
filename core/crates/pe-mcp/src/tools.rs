@@ -1051,6 +1051,10 @@ async fn run(
             }
         ));
     }
+    // a log full for the last 30 days refuses more, rather than forgetting what the agent did or read; asking how a
+    // send it asked for went changes nothing
+    let changes = tool.level != AgentLevels::READ && tool.name != "get_send_status";
+    core.agent_log_room(host.id, changes).map_err(engine)?;
     let empty = Map::new();
     let args = Args(arguments.as_object().unwrap_or(&empty));
     let call = Call {

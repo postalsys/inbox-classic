@@ -726,6 +726,10 @@ agent-unreadable = Nie można odczytać tej wiadomości.
 agent-encrypted-original = Ta wiadomość jest zaszyfrowana. Agent nie może na nią odpowiedzieć ani przesłać jej dalej, ponieważ nie może szyfrować wiadomości.
 agent-encrypted = Ta wiadomość jest zaszyfrowana. Agent nie może odczytać jej treści. Użytkownik musi ją otworzyć w programie Inbox Classic.
 # review: new
+agent-too-many-changes = Zbyt wiele zmian w ciągu ostatnich 30 dni: ten agent wprowadził ich tyle, ile Inbox Classic przechowuje w dzienniku dla jednego programu. Będzie mógł wprowadzić kolejne, gdy najstarsze będą miały 30 dni.
+# review: new
+agent-too-many-reads = Zbyt wiele odczytów w ciągu ostatnich 30 dni: ten agent przeczytał tyle, ile Inbox Classic przechowuje w dzienniku dla jednego programu. Będzie mógł czytać dalej, gdy najstarsze odczyty będą miały 30 dni.
+# review: new
 list-encrypted = Zaszyfrowana wiadomość
 agent-log-composed = Otwarto nową wiadomość „{ $subject }”, którą możesz dokończyć
 agent-log-refused = Odrzucono prośbę o wysłanie wiadomości „{ $subject }”

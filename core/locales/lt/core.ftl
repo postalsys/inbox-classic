@@ -722,6 +722,10 @@ agent-unreadable = Šio laiško perskaityti negalima.
 agent-encrypted-original = Šis laiškas užšifruotas: agentas negali į jį atsakyti ar jo persiųsti, nes negali šifruoti.
 agent-encrypted = Šis laiškas užšifruotas. Agentas negali perskaityti jo turinio. Laišką turi atidaryti naudotojas programoje Inbox Classic.
 # review: new
+agent-too-many-changes = Per daug pakeitimų per pastarąsias 30 dienų: šis agentas jų atliko tiek, kiek Inbox Classic vienai programai saugo žurnale. Daugiau galės atlikti, kai seniausiems sukaks 30 dienų.
+# review: new
+agent-too-many-reads = Per daug skaityta per pastarąsias 30 dienų: šis agentas perskaitė tiek, kiek Inbox Classic vienai programai saugo žurnale. Daugiau galės skaityti, kai seniausiems skaitymams sukaks 30 dienų.
+# review: new
 list-encrypted = Užšifruotas laiškas
 agent-log-composed = Atidarytas naujas laiškas „{ $subject }“, kurį galite baigti rašyti
 agent-log-refused = Atmetėte prašymą išsiųsti laišką „{ $subject }“

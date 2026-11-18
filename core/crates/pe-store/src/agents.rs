@@ -121,10 +121,14 @@ pub struct ReadSummary {
 
 /// How long the log keeps what agents did and read, in seconds: 30 days
 pub const LOG_KEPT: i64 = 30 * 86_400;
-/// The most entries the log keeps of what each program did, and of what it read: each program has its own, so one
-/// that writes many can not crowd out another's
+/// The most entries the log keeps of what each program did: each program has its own, so one that writes many can not
+/// crowd out another's
 pub const LOG_ENTRIES: u64 = 5_000;
-pub const LOG_READS: u64 = 50_000;
+/// The most entries a program may have in the log within [`LOG_KEPT`], of what it did and of what it read: beyond
+/// them pe-core refuses what it would do or read, so its log is never made room in by forgetting. What it read is
+/// kept whole for that reason; what it did loses past [`LOG_ENTRIES`] only what nothing counts or takes back.
+pub const LOG_CEILING: u64 = 20_000;
+pub const READS_CEILING: u64 = 200_000;
 
 /// The entries of the log that [`LOG_ENTRIES`] never forgets, only [`LOG_KEPT`]: what can still be taken back, and
 /// what the limits count and an agent's drafts are its own by (sends, unsubscribes, drafts saved, replaced and
@@ -261,36 +265,28 @@ impl Store {
             ids.push(self.db.last_insert_rowid());
         }
         drop(statement);
-        self.forget_old(
-            "agent_log",
-            entries.iter().map(|e| e.host),
-            now,
-            LOG_ENTRIES,
-            LOG_PROTECTED,
-        )?;
+        self.forget_expired("agent_log", now)?;
+        self.forget_past(entries.iter().map(|e| e.host), LOG_ENTRIES)?;
         tx.commit()?;
         Ok(ids)
     }
 
-    /// Forgets the rows of `table` older than [`LOG_KEPT`], and of each of `hosts` those past its newest `most` that
-    /// are not `protected` (an SQL condition)
-    fn forget_old(
-        &self,
-        table: &str,
-        hosts: impl IntoIterator<Item = AgentHostId>,
-        now: i64,
-        most: u64,
-        protected: &str,
-    ) -> Result<()> {
+    /// Forgets the rows of `table` older than [`LOG_KEPT`]
+    fn forget_expired(&self, table: &str, now: i64) -> Result<()> {
         self.db
             .prepare_cached(&format!("DELETE FROM {table} WHERE at < ?1"))?
             .execute([now - LOG_KEPT])?;
+        Ok(())
+    }
+
+    /// Forgets of each of `hosts` the entries of what it did past its newest `most` that are not [`LOG_PROTECTED`]
+    fn forget_past(&self, hosts: impl IntoIterator<Item = AgentHostId>, most: u64) -> Result<()> {
         let mut hosts: Vec<AgentHostId> = hosts.into_iter().collect();
         hosts.sort_unstable();
         hosts.dedup();
         let mut statement = self.db.prepare_cached(&format!(
-            "DELETE FROM {table} WHERE host_id = ?1 AND NOT ({protected}) AND id <= (SELECT id FROM {table} \
-             WHERE host_id = ?1 AND NOT ({protected}) ORDER BY id DESC LIMIT 1 OFFSET ?2)"
+            "DELETE FROM agent_log WHERE host_id = ?1 AND NOT ({LOG_PROTECTED}) AND id <= (SELECT id FROM agent_log \
+             WHERE host_id = ?1 AND NOT ({LOG_PROTECTED}) ORDER BY id DESC LIMIT 1 OFFSET ?2)"
         ))?;
         for host in hosts {
             statement.execute(params![host, most])?;
@@ -381,7 +377,7 @@ impl Store {
             ])?;
         }
         drop(statement);
-        self.forget_old("agent_reads", reads.iter().map(|r| r.host), now, LOG_READS, "0")?;
+        self.forget_expired("agent_reads", now)?;
         tx.commit()
     }
 
@@ -499,6 +495,16 @@ impl Store {
             "SELECT EXISTS (SELECT 1 FROM drafts_taken WHERE message_id = ?1)",
             [message_id],
             |row| row.get(0),
+        )
+    }
+
+    /// How many entries a host has in the log of what it did since `since`, and in the log of what it read
+    pub fn agent_log_live(&self, host: AgentHostId, since: i64) -> Result<(u64, u64)> {
+        self.db.query_row(
+            "SELECT (SELECT COUNT(*) FROM agent_log WHERE host_id = ?1 AND at >= ?2), \
+             (SELECT COUNT(*) FROM agent_reads WHERE host_id = ?1 AND at >= ?2)",
+            params![host, since],
+            |row| Ok((row.get(0)?, row.get(1)?)),
         )
     }
 
@@ -717,8 +723,10 @@ mod tests {
         assert_eq!(store.agent_log_count(agent, "send", 0).unwrap(), 0);
     }
 
+    /// What a program read is never forgotten to make room, only after 30 days; the ceiling counts it, and what it
+    /// did, by program
     #[test]
-    fn each_program_has_its_own_reads() {
+    fn reads_are_kept_and_counted_by_program() {
         let store = Store::open_in_memory().unwrap();
         let agent = store
             .save_agent_host("/usr/bin/agent", "Agent", true, AgentLevels::DEFAULT, &[], 1)
@@ -733,12 +741,20 @@ mod tests {
             ..Default::default()
         };
         store.log_reads(&[read(other)], 3600).unwrap();
-        let flood: Vec<NewRead> = (0..LOG_READS + 3).map(|_| read(agent)).collect();
-        store.log_reads(&flood, 3600).unwrap();
-        let summaries = store.read_summaries(10).unwrap();
-        let messages = |host: AgentHostId| summaries.iter().find(|s| s.host == host).map(|s| s.messages);
-        assert_eq!(messages(other), Some(1));
-        assert_eq!(messages(agent), Some(LOG_READS));
+        let many: Vec<NewRead> = (0..60_000).map(|_| read(agent)).collect();
+        store.log_reads(&many, 3600).unwrap();
+        let did = NewLogEntry {
+            host: agent,
+            what: "set_read".into(),
+            ..Default::default()
+        };
+        store.log_agent(&[did.clone(), did], 3700).unwrap();
+        assert_eq!(store.agent_log_live(agent, 0).unwrap(), (2, 60_000));
+        assert_eq!(store.agent_log_live(other, 0).unwrap(), (0, 1));
+        assert_eq!(store.agent_log_live(agent, 3650).unwrap(), (2, 0));
+        // 30 days on, the old reads are gone
+        store.log_reads(&[read(other)], 3600 + LOG_KEPT + 1).unwrap();
+        assert_eq!(store.agent_log_live(agent, 0).unwrap(), (2, 0));
     }
 
     #[test]

@@ -498,6 +498,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Ova poruka ne može da se pročita.
 agent-encrypted-original = Ova poruka je šifrovana: agent ne može na nju da odgovori niti da je prosledi jer ne može da šifruje.
 agent-encrypted = Ova poruka je šifrovana. AI agenti ne mogu da pročitaju njen sadržaj. Korisnik treba da je otvori u aplikaciji Inbox Classic.
+# review: new
+agent-too-many-changes = Previše promena u poslednjih 30 dana: ovaj agent ih je napravio onoliko koliko Inbox Classic za jedan program čuva u dnevniku. Moći će da napravi još kada najstarije budu stare 30 dana.
+# review: new
+agent-too-many-reads = Previše čitanja u poslednjih 30 dana: ovaj agent je pročitao onoliko koliko Inbox Classic za jedan program čuva u dnevniku. Moći će da čita još kada najstarija čitanja budu stara 30 dana.
 list-encrypted = Šifrovana poruka
 agent-log-composed = Poruka „{ $subject }“ je otvorena za uređivanje da biste je dovršili
 agent-log-refused = Odbili ste slanje poruke „{ $subject }“

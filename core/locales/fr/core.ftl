@@ -484,6 +484,10 @@ agent-access = { $can } ; { $accounts }
 agent-unreadable = Ce message ne peut pas être lu.
 agent-encrypted-original = Les agents ne peuvent ni répondre à ce message chiffré ni le transférer, car ils ne peuvent pas chiffrer de messages.
 agent-encrypted = Ce message est chiffré. Les agents d’IA n’ont pas accès à son contenu. L’utilisateur doit l’ouvrir lui-même dans Inbox Classic.
+# review: new
+agent-too-many-changes = Trop de modifications au cours des 30 derniers jours : cet agent en a fait autant qu’Inbox Classic en conserve dans son journal pour un programme. Il pourra en faire d’autres lorsque les plus anciennes auront 30 jours.
+# review: new
+agent-too-many-reads = Trop de lectures au cours des 30 derniers jours : cet agent a lu autant qu’Inbox Classic en conserve dans son journal pour un programme. Il pourra lire davantage lorsque les plus anciennes lectures auront 30 jours.
 list-encrypted = Message chiffré
 agent-log-composed = « { $subject } » ouvert dans un nouveau message à compléter
 agent-log-refused = Vous n'avez pas envoyé « { $subject } »

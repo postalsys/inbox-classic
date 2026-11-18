@@ -726,6 +726,10 @@ agent-unreadable = Tega sporočila ni mogoče prebrati.
 agent-encrypted-original = To sporočilo je šifrirano: agent nanj ne more odgovoriti ali ga posredovati, ker ne zna šifrirati.
 agent-encrypted = To sporočilo je šifrirano, zato agent ne more prebrati njegove vsebine. Odprete ga lahko v programu Inbox Classic.
 # review: new
+agent-too-many-changes = Preveč sprememb v zadnjih 30 dneh: ta agent jih je naredil toliko, kolikor jih Inbox Classic za en program hrani v dnevniku. Več jih bo lahko naredil, ko bodo najstarejše stare 30 dni.
+# review: new
+agent-too-many-reads = Preveč branja v zadnjih 30 dneh: ta agent je prebral toliko, kolikor Inbox Classic za en program hrani v dnevniku. Več bo lahko bral, ko bodo najstarejša branja stara 30 dni.
+# review: new
 list-encrypted = Šifrirano sporočilo
 agent-log-composed = Odprl novo sporočilo za urejanje. Zadeva: »{ $subject }«
 agent-log-refused = Niste dovolili pošiljanja sporočila »{ $subject }«

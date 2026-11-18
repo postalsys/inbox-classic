@@ -747,6 +747,10 @@ agent-unreadable = Túto správu nemožno prečítať.
 agent-encrypted-original = Táto správa je šifrovaná: agent na ňu nemôže odpovedať ani ju preposlať, pretože nevie šifrovať.
 agent-encrypted = Táto správa je šifrovaná a agent nemá prístup k jej obsahu. Otvoriť ju môžete v aplikácii Inbox Classic.
 # review: new
+agent-too-many-changes = Príliš veľa zmien za posledných 30 dní: tento agent ich urobil toľko, koľko Inbox Classic pre jeden program uchováva v denníku. Ďalšie bude môcť urobiť, keď budú najstaršie staré 30 dní.
+# review: new
+agent-too-many-reads = Príliš veľa čítania za posledných 30 dní: tento agent prečítal toľko, koľko Inbox Classic pre jeden program uchováva v denníku. Ďalej bude môcť čítať, keď budú najstaršie čítania staré 30 dní.
+# review: new
 list-encrypted = Šifrovaná správa
 agent-log-composed = Otvorená nová správa na úpravu. Predmet: „{ $subject }“
 agent-log-refused = Nepovolili ste odoslanie správy „{ $subject }“

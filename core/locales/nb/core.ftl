@@ -463,6 +463,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Denne meldingen kan ikke leses.
 agent-encrypted-original = Denne meldingen er kryptert: en agent kan ikke svare på den eller videresende den, siden den ikke kan kryptere.
 agent-encrypted = Denne meldingen er kryptert. KI-agenter kan ikke lese innholdet. Brukeren må åpne den i Inbox Classic.
+# review: new
+agent-too-many-changes = For mange endringer de siste 30 dagene: denne agenten har gjort så mange som Inbox Classic lagrer i loggen for ett program. Den kan gjøre flere når de eldste er 30 dager gamle.
+# review: new
+agent-too-many-reads = For mye lest de siste 30 dagene: denne agenten har lest så mye som Inbox Classic lagrer i loggen for ett program. Den kan lese mer når de eldste lesingene er 30 dager gamle.
 list-encrypted = Kryptert melding
 agent-log-composed = Åpnet «{ $subject }» i skrivevinduet slik at du kan gjøre meldingen ferdig
 agent-log-refused = Du avslo å sende «{ $subject }»

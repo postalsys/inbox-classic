@@ -457,6 +457,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Diese Nachricht kann nicht gelesen werden.
 agent-encrypted-original = Agenten können diese verschlüsselte Nachricht weder beantworten noch weiterleiten, da sie keine Nachrichten verschlüsseln können.
 agent-encrypted = Diese Nachricht ist verschlüsselt. KI-Agenten können ihren Inhalt nicht lesen. Der Benutzer muss sie selbst in Inbox Classic öffnen.
+# review: new
+agent-too-many-changes = Zu viele Änderungen in den letzten 30 Tagen: Dieser Agent hat so viele vorgenommen, wie Inbox Classic für ein Programm im Protokoll aufbewahrt. Weitere sind möglich, sobald die ältesten 30 Tage alt sind.
+# review: new
+agent-too-many-reads = Zu viele Lesezugriffe in den letzten 30 Tagen: Dieser Agent hat so viel gelesen, wie Inbox Classic für ein Programm im Protokoll aufbewahrt. Weiteres Lesen ist möglich, sobald die ältesten Zugriffe 30 Tage alt sind.
 list-encrypted = Verschlüsselte Nachricht
 agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster geöffnet
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet

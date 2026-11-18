@@ -733,6 +733,10 @@ agent-unreadable = Acest mesaj nu poate fi citit.
 agent-encrypted-original = Acest mesaj este criptat. Agentul nu poate nici să răspundă la el, nici să îl redirecționeze, deoarece nu poate cripta mesaje.
 agent-encrypted = Acest mesaj este criptat. Agentul nu îi poate citi conținutul. Îl puteți deschide în Inbox Classic.
 # review: new
+agent-too-many-changes = Prea multe modificări în ultimele 30 de zile: acest agent a făcut atâtea câte păstrează Inbox Classic în jurnal pentru un program. Va putea face mai multe când cele mai vechi vor avea 30 de zile.
+# review: new
+agent-too-many-reads = Prea multe citiri în ultimele 30 de zile: acest agent a citit cât păstrează Inbox Classic în jurnal pentru un program. Va putea citi mai mult când cele mai vechi citiri vor avea 30 de zile.
+# review: new
 list-encrypted = Mesaj criptat
 agent-log-composed = A deschis un mesaj nou pentru editare. Subiect: „{ $subject }”
 agent-log-refused = Nu ați aprobat trimiterea mesajului „{ $subject }”

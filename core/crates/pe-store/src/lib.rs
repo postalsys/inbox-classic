@@ -44,8 +44,8 @@ use rusqlite::OptionalExtension;
 
 pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_provider};
 pub use agents::{
-    AgentHost, AgentHostId, AgentLevels, AgentLogEntry, AgentRead, LOG_ENTRIES, LOG_KEPT, LOG_READS, NewLogEntry,
-    NewRead, ReadSummary,
+    AgentHost, AgentHostId, AgentLevels, AgentLogEntry, AgentRead, LOG_CEILING, LOG_ENTRIES, LOG_KEPT, NewLogEntry,
+    NewRead, READS_CEILING, ReadSummary,
 };
 pub use cards::{Card, CardId, Group, GroupId, Member, MemberRow, display_name};
 pub use contacts::{Contact, Person};

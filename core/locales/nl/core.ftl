@@ -466,6 +466,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Dit bericht kan niet worden gelezen.
 agent-encrypted-original = Dit bericht is versleuteld: een agent kan het niet beantwoorden of doorsturen, omdat hij niet kan versleutelen.
 agent-encrypted = Dit bericht is versleuteld. AI-agents kunnen de inhoud niet lezen. De gebruiker moet het in Inbox Classic openen.
+# review: new
+agent-too-many-changes = Te veel wijzigingen in de afgelopen 30 dagen: deze agent heeft er zoveel gedaan als Inbox Classic voor één programma in het logboek bewaart. Er kunnen er meer bij zodra de oudste 30 dagen oud zijn.
+# review: new
+agent-too-many-reads = Te veel gelezen in de afgelopen 30 dagen: deze agent heeft zoveel gelezen als Inbox Classic voor één programma in het logboek bewaart. Er kan meer worden gelezen zodra de oudste leesacties 30 dagen oud zijn.
 list-encrypted = Versleuteld bericht
 agent-log-composed = “{ $subject }” geopend als nieuw bericht dat je zelf kunt afmaken
 agent-log-refused = Je hebt “{ $subject }” niet verzonden
