@@ -919,6 +919,12 @@ impl Reader {
         self.retry.is_visible()
     }
 
+    /// Whether it says the message could not be shown (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn says_not_shown(&self) -> bool {
+        self.note.is_visible() && self.note.text() == t!(UiNotShown)
+    }
+
     pub fn failed(&self) {
         self.stop_downloading_note();
         self.header.set_visible(true);
@@ -1011,7 +1017,11 @@ impl Reader {
     /// name the sender gave, its size), then all of them into a folder
     fn show_attachments(&self, view: &MessageView) {
         let count = view.attachments.len();
-        self.strip.show(&view.attachments);
+        let parts = view
+            .protection
+            .as_ref()
+            .map_or(&[][..], |protection| &protection.parts[..]);
+        self.strip.show(&view.attachments, parts);
         ui::set_class(&self.header, "with-files", count > 0);
         self.attachments.set_visible(count > 0);
         if count == 0 {

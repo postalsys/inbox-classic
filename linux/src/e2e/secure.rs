@@ -299,6 +299,7 @@ pub(super) async fn signed_and_encrypted(d: &Driver) {
         "each part has its own label: Not signed, Signed by..., Not signed",
     );
     d.shot(main.window(), "secure-4-mixed-parts").await;
+    link_in_part(d).await;
     details(d).await;
     printing(d).await;
 
@@ -419,6 +420,31 @@ async fn in_window(d: &Driver, inbox: i64) {
     d.shot(&window.window, "secure-14-window").await;
     let _ = WidgetExt::activate_action(&window.window, "window.close", None);
     wait_until(10, || crate::message_window::windows().is_empty()).await;
+}
+
+/// "The mill" clicked in part 1's frame of the message of three parts: the link goes to the browser, the page stays
+async fn link_in_part(d: &Driver) {
+    let view = shell().main().reader.preview.view.clone();
+    let before = shell().main().reader.preview.shown();
+    crate::ui::take_opened_links();
+    let script = "(function(){var f=document.querySelectorAll('iframe.pe-d')[0];var d=f&&f.contentDocument;\
+        var a=d&&d.querySelector('a[href=\"https://example.org/mill\"]');if(!a)return 'no';a.click();return 'yes'})()";
+    let clicked = previews::run_script(&view, script).await == "yes";
+    let opened = wait_for(10, || {
+        Some(crate::ui::take_opened_links()).filter(|links| !links.is_empty())
+    })
+    .await
+    .unwrap_or_default();
+    pause(500).await;
+    let (fits, frames) = measured(3).await;
+    d.check(
+        clicked && opened == ["https://example.org/mill"],
+        &format!("\"The mill\" clicked in part 1's frame opens https://example.org/mill in the browser ({opened:?})"),
+    );
+    d.check(
+        shell().main().reader.preview.shown() == before && fits && shown_text().contains("The mill"),
+        &format!("and the page stays, its three frames showing their parts ({frames:?})"),
+    );
 }
 
 /// Details is reached by Tab and by its access key
@@ -687,6 +713,21 @@ async fn previews_window(d: &Driver, inbox: i64) {
     wait_until(15, || window.reader.has_view()).await;
     pause(1500).await;
     d.shot(&window.window, "secure-14d-attachment-previews-window").await;
+    // dark messages off and on: the pane and the window each ask for the message again at once
+    for on in [false, true] {
+        crate::preferences::set_dark_messages(on);
+        pause(1500).await;
+        wait_until(15, || main.reader.has_view() && window.reader.has_view()).await;
+    }
+    let readers = [&main.reader, &window.reader];
+    d.check(
+        shell().core.dark_messages()
+            && readers
+                .iter()
+                .all(|reader| reader.has_view() && !reader.says_not_shown() && reader.security.shown().is_some()),
+        "dark messages turned off and on with the message in a window too: neither the pane nor the window says \
+         the message could not be shown",
+    );
     let _ = WidgetExt::activate_action(&window.window, "window.close", None);
     wait_until(10, || crate::message_window::windows().is_empty()).await;
     // the window's view asked for at the same time as nothing here: the reading pane still shows the message
@@ -695,6 +736,35 @@ async fn previews_window(d: &Driver, inbox: i64) {
         main.reader.has_view() && bar().is_some() && measured(2).await.0,
         "the reading pane still shows the message the window opened, its bar and its frames",
     );
+}
+
+/// The strip of the message with a picture in each part: the encrypted part's file with a lock, in the blue of its
+/// part's label, and each file saying its part in its tooltip and to screen readers
+async fn strip_parts(d: &Driver) {
+    let main = shell().main();
+    let shown = wait_for(10, || Some(main.reader.strip.shown()).filter(|s| s.len() == 2))
+        .await
+        .unwrap_or_default();
+    let file = |name: &str| shown.iter().find(|f| f.name == name);
+    let plan = file("floor-plan.png");
+    let harbour = file("harbour.png");
+    d.check(
+        plan.is_some_and(|f| {
+            f.lock.as_deref() == Some("good")
+                && f.tooltip.ends_with("From part 2: Encrypted. Not signed")
+                && f.description == "From part 2: Encrypted. Not signed"
+        }),
+        &format!("floor-plan.png has the lock, in its part's blue, and says \"From part 2: Encrypted. Not signed\" ({plan:?})"),
+    );
+    d.check(
+        harbour.is_some_and(|f| {
+            f.lock.is_none()
+                && f.tooltip.ends_with("From part 1: Not signed")
+                && f.description == "From part 1: Not signed"
+        }),
+        &format!("harbour.png has no lock and says \"From part 1: Not signed\" ({harbour:?})"),
+    );
+    d.shot(main.window(), "secure-15-strip-parts").await;
 }
 
 /// The printout in a print view of its own, its end shown: both pictures, each named with its part
@@ -800,9 +870,11 @@ pub(super) async fn attachment_previews(d: &Driver) {
     wait_until(15, || main.reader.has_view()).await;
     let bar = wait_for(10, bar).await.unwrap_or_default();
     d.check(
-        bar.0.contains("2 parts"),
-        &format!("the bar counts the plain part and the encrypted one ({})", bar.0),
+        bar.0
+            .contains("This message has 2 parts: 1 encrypted, 1 without a confirmed signature"),
+        &format!("the bar counts the encrypted part and the plain one ({})", bar.0),
     );
+    strip_parts(d).await;
     let page = main.reader.preview.shown();
     d.check(
         !page.contains("/pv/") && !page.contains("pe-att-"),
@@ -870,18 +942,23 @@ pub(super) async fn attachment_previews(d: &Driver) {
     .await;
     let printed = crate::reader::printing().unwrap_or_default();
     let text = document_text(&printed);
-    let order = ["for your eyes only", "Part 1: harbour.png", "Part 2: floor-plan.png"]
-        .iter()
-        .map(|words| text.find(words))
-        .collect::<Option<Vec<usize>>>();
+    let order = [
+        "as promised",
+        "Part 1: harbour.png",
+        "for your eyes only",
+        "Part 2: floor-plan.png",
+    ]
+    .iter()
+    .map(|words| text.find(words))
+    .collect::<Option<Vec<usize>>>();
     d.check(
         dialog.is_some()
             && order.as_ref().is_some_and(|at| at.is_sorted())
             && printed.matches("<img src=\"data:image/").count() == 2
             && !printed.contains("/pv/"),
         &format!(
-            "Print gives both pictures after all the text, captioned \"Part 1: harbour.png\" and \"Part 2: \
-             floor-plan.png\" ({order:?})"
+            "Print gives each part's picture after that part's text, captioned \"Part 1: harbour.png\" and \
+             \"Part 2: floor-plan.png\" ({order:?})"
         ),
     );
     if let Some(dialog) = dialog {
@@ -903,6 +980,11 @@ pub(super) async fn attachment_previews(d: &Driver) {
     previews::run_script(&view, BOUNDARY).await;
     pause(300).await;
     d.shot(main.window(), "secure-14c-attachment-previews-dark").await;
+    d.check(
+        main.reader.strip.widget.has_css_class("dark"),
+        "in dark mode the strip's lock takes the dark colour of its tone",
+    );
+    d.shot(main.window(), "secure-15b-strip-parts-dark").await;
     styles.set_color_scheme(adw::ColorScheme::Default);
     wait_until(5, || !styles.is_dark()).await;
 
