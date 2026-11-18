@@ -1,25 +1,24 @@
-<!--review--><h1>Üzenet aláírása és titkosítása</h1>
-<p class="summary">Írja alá az üzenetet, hogy a címzettek tudják, hogy Öntől jött, és titkosítsa, hogy csak ők olvashassák.</p>
-<p>Az aláírt üzenet igazolja, hogy Ön írta, és hogy útközben senki nem módosította. A titkosított üzenetet csak a címzettjei és Ön olvashatják, és mindig alá is van írva. Mindkettőhöz saját kulcsra van szükség.</p>
+<h1>Üzenet aláírása és titkosítása</h1>
+<p class="summary">Védje az üzenet tartalmát digitális aláírással és titkosítással.</p>
+<p>A digitális aláírással ellenőrizhető, hogy az üzenet tartalma az aláírás óta változatlan. A kulcs tulajdonosát külön kell ellenőrizni. A titkosított tartalmat csak a címzettek és a feladó olvashatják. A titkosítva elküldött üzenet mindig digitális aláírást is kap. Az aláíráshoz és a titkosításhoz saját kulcsra van szükség.</p>
 <p>Üzenet aláírása vagy titkosítása:</p>
 <ol>
-    <li>Az üzenet ablakában kattintson erre: <b data-text="ui-tb-sign"></b> vagy <b data-text="ui-tb-encrypt"></b>, vagy válassza ezt: <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> vagy <b data-text="cmd-compose-encrypt"></b>. Ezt is megnyomhatja: <kbd data-command="compose_sign"></kbd> vagy <kbd data-command="compose_encrypt"></kbd>. Ha még nincs kulcsa, az Inbox Classic felajánlja, hogy létrehoz egyet.</li>
-    <li>Kattintson erre: <b data-text="ui-tb-send"></b>.</li>
+    <li>Az üzenet ablakában kattintson az <b data-text="ui-tb-sign"></b> vagy a <b data-text="ui-tb-encrypt"></b> gombra, vagy válassza a következő menüpontok egyikét: <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> vagy <b data-text="cmd-compose-encrypt"></b>. A következő billentyűkombinációkat is használhatja: <kbd data-command="compose_sign"></kbd> vagy <kbd data-command="compose_encrypt"></kbd>. Ha a feladó címéhez még nincs saját kulcsa, az Inbox Classic felajánlja egy kulcs létrehozását.</li>
+    <li>Kattintson a <b data-text="ui-tb-send"></b> gombra.</li>
 </ol>
-<p>Amíg ez be van kapcsolva: <b data-text="ui-tb-encrypt"></b>, a tárgy alatti sor minden címzettet egy lakattal mutat, és az Inbox Classic megkeresi azokat a kulcsokat, amelyek még nincsenek meg neki:</p>
+<p>Ha a <b data-text="ui-tb-encrypt"></b> be van kapcsolva, a tárgy alatti sorban szín és ikon jelzi az egyes címzettek kulcsának állapotát. Az Inbox Classic automatikusan megkeresi a hiányzó kulcsokat:</p>
 <table>
-    <tr><th>Lakat</th><th>Jelentése</th></tr>
-    <tr><td>Zöld</td><td>Ön ellenőrizte a címzett kulcsát.</td></tr>
-    <tr><td>Kék</td><td>Megvan a címzett kulcsa, de nem ellenőrizte.</td></tr>
+    <tr><th>Szín</th><th>Jelentése</th></tr>
+    <tr><td>Zöld</td><td>Ellenőrizte, hogy a kulcs a címzetthez tartozik.</td></tr>
+    <tr><td>Kék</td><td>Megvan a címzett kulcsa, de a tulajdonosa még nincs ellenőrizve. A saját kulcsot is kék szín jelöli.</td></tr>
     <tr><td>Szürke</td><td>Az Inbox Classic keresi a címzett kulcsát.</td></tr>
-    <tr><td>Borostyánsárga</td><td>A címzetthez nem található kulcs.</td></tr>
+    <tr><td>Borostyánsárga</td><td>Nincs használható kulcs a címzetthez.</td></tr>
 </table>
-<h2>Ha egy címzettnek nincs kulcsa</h2>
-<p>A titkosított üzenet csak akkor megy el, ha minden címzettnek van kulcsa. Ha valamelyiknek nincs, a <b data-text="ui-tb-send"></b> gomb megnyitja ezt az ablakot: <b data-text="ui-recipient-keys-title"></b>. Itt újra kereshet (<b data-text="ui-recipient-find-key"></b>), kihagyhatja az illetőt (<b data-text="ui-recipient-remove"></b>), vagy választhatja ezt: <b data-text="ui-send-unencrypted"></b>. Azt is megteheti, hogy elkéri tőle a nyilvános kulcsát, és importálja.</p>
+<h2>Ha hiányzik egy használható kulcs</h2>
+<p>A titkosított üzenet elküldéséhez minden címzetthez használható kulcs szükséges. Ha valamelyik hiányzik, a <b data-text="ui-tb-send"></b> gombra kattintva megnyílik a <b data-text="ui-recipient-keys-title"></b> ablak. A <b data-text="ui-recipient-find-key"></b> gombbal megismételheti a keresést, az <b data-text="ui-recipient-remove"></b> gombbal pedig eltávolíthatja a címzettet az üzenetből. A <b data-text="ui-send-unencrypted"></b> lehetőség csak akkor használható, ha az üzenet már nem tartalmaz titkosított üzenetből származó szöveget, képet vagy mellékletet. A címzettől is elkérheti a nyilvános kulcsát, majd importálhatja.</p>
 <h2>Válasz titkosított levelekre</h2>
-<p>Egy titkosított üzenetre adott válasz vagy annak továbbítása bekapcsolt titkosítással indul (<b data-text="ui-tb-encrypt"></b>), és az Inbox Classic rákérdez, mielőtt kikapcsolná. Amíg az üzenet még idézi a titkosított szöveget, vagy tartalmazza annak mellékleteit, csak titkosítva küldhető el.</p>
-<p>A titkosított üzenet piszkozatai titkosítva lesznek mentve, és ugyanígy a másolata is ebben a mappában: <b data-text="folder-sent"></b>.</p>
+<p>Titkosított üzenet megválaszolásakor vagy továbbításakor a <b data-text="ui-tb-encrypt"></b> kezdetben be van kapcsolva. Az Inbox Classic megerősítést kér a kikapcsolás előtt. Titkosítás nélkül csak akkor küldhető el az üzenet, ha eltávolítja belőle a titkosított üzenetből származó szöveget, képeket és mellékleteket.</p>
+<p>Bekapcsolt titkosítás mellett a piszkozatok csak a feladó saját kulcsával titkosítva, digitális aláírás nélkül lesznek mentve. A titkosított üzenetből származó szöveget, képet vagy mellékletet tartalmazó piszkozat a titkosítás kikapcsolása után is titkosítva marad. Az elküldött titkosított üzenet másolata az <b data-text="folder-sent"></b> mappában is titkosítva marad.</p>
 <h2>A nyilvános kulcs megosztása</h2>
-<p>Ha azt szeretné, hogy valaki titkosított levelet küldhessen Önnek, válassza ezt: <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. A nyilvános kulcsa fájlként csatolódik az üzenethez.</p>
+<p>Ha titkosított leveleket szeretne fogadni, válassza a következő menüpontot: <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. A kiválasztott feladócím nyilvános kulcsa fájlként kerül az üzenet mellékletei közé.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->
