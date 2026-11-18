@@ -1056,6 +1056,16 @@ void Reader::ShowInMessage(size_t index, bool show) {
     }
 }
 
+void Reader::PreviewsPrepared(const std::string& token) {
+    // the files that were "Preparing..." in the view shown are described now: it is built again with their previews,
+    // its text where it was (as after Show in Message); another view's (another window's, or one no longer shown) is
+    // not this one's
+    const PeMessageInfo* info = Info();
+    if (info && info->preview_token && *info->preview_token && token == info->preview_token) {
+        StartView();
+    }
+}
+
 // the strip's own keys: Enter opens the file chosen (not the window's default button), the menu key and Shift+F10
 // its menu, as a right-click does (the list view sends WM_CONTEXTMENU to itself after NM_RCLICK); the result of an
 // open, and the busy look of one that takes a while
@@ -1548,6 +1558,9 @@ void Reader::OnEvent(const UiEvent& event) {
         if (viewRequest_ && event.uid == viewRequest_) {
             ShowView();
         }
+        break;
+    case PE_EVENT_KIND_PREVIEWS_PREPARED:
+        PreviewsPrepared(event.detail);
         break;
     case PE_EVENT_KIND_LOGO_READY:
     case PE_EVENT_KIND_PICTURE_READY:
