@@ -68,6 +68,17 @@ fn each_case_reads_as_the_ui_tests_expect() {
     assert_eq!(tone, Tone::Neutral);
     assert!(text.contains("3 parts"), "{text}");
     assert_eq!(view.document.matches("<iframe").count(), 3);
+    // a link clicked in a part navigates the top page (a click only), which the apps cancel and open in the browser
+    assert_eq!(
+        view.document
+            .matches("sandbox=\"allow-same-origin allow-top-navigation-by-user-activation\"")
+            .count(),
+        3
+    );
+    assert!(!view.document.contains("<base"));
+    for document in view.part_documents.iter().filter(|d| !d.is_empty()) {
+        assert!(document.contains("<base target=\"_top\">"), "{document}");
+    }
     let (tone, text, _) = bar("secure-bad.eml");
     assert_eq!(tone, Tone::Warning);
     assert!(text.contains("does not match"), "{text}");

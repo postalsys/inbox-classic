@@ -65,6 +65,10 @@ pub struct RenderOptions {
     /// Lets the CSP allow images from http(s), after the user clicked the blocked-pictures bar. The WebView2 request
     /// filter of the app has to allow them too.
     pub allow_remote_images: bool,
+    /// The document is a part of a signed or encrypted message, shown in a frame of [`secure_page`]: its links open
+    /// in the top page (`<base target="_top">`), whose navigation the apps cancel and open in the browser. A link
+    /// that navigated the frame would be refused by the page's `frame-src` before the app is asked, and never open
+    pub in_frame: bool,
 }
 
 /// The most bytes the `data:` URIs of embedded images add to a message, so a small image referenced a million times
@@ -286,6 +290,7 @@ pub fn print_document_with(parts: &PrintParts, items: &[PrintItem]) -> String {
         .collect();
     let options = RenderOptions {
         allow_remote_images: parts.allow_remote_images,
+        ..Default::default()
     };
     let section = previews::print_section(items);
     wrap(&parts.body, &options, &header, &parts.card, After::Printed(&section)).0
@@ -525,6 +530,8 @@ fn wrap(
             )
         })
         .collect();
+    // a part's frame: its links navigate the top page (the frame's sandbox lets a click do that, nothing else)
+    let base = if options.in_frame { "<base target=\"_top\">" } else { "" };
     let printed = if printed.is_empty() {
         String::new()
     } else {
@@ -533,7 +540,7 @@ fn wrap(
     let document = format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
-         <meta name=\"color-scheme\" content=\"{scheme}\">\
+         <meta name=\"color-scheme\" content=\"{scheme}\">{base}\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
          div.pe-plain{{max-width:46em}}\
          details.pe-fold{{margin:6px 0}}\
@@ -605,6 +612,33 @@ mod tests {
         }
         assert!(clean.contains("<style>p{color:red}</style>"), "{clean}");
         assert!(clean.contains("<p>body</p>"), "{clean}");
+    }
+
+    /// A part's document (in a frame of the page of a signed or encrypted message) sends its links to the top page,
+    /// whose navigation the apps cancel and open in the browser; any other document has no base, and a message's own
+    /// base or target is never kept
+    #[test]
+    fn a_part_in_a_frame_opens_its_links_from_the_top_page() {
+        let html =
+            "<base href=\"https://evil.example/\" target=\"x\"><a href=\"https://example.org/\" target=\"_self\">x</a>";
+        let framed = render_view(
+            html,
+            &RenderOptions {
+                in_frame: true,
+                ..Default::default()
+            },
+            &[],
+            &[],
+        )
+        .document;
+        assert_eq!(framed.matches("<base").count(), 1, "{framed}");
+        assert!(framed.contains("<base target=\"_top\">"), "{framed}");
+        assert!(
+            !framed.contains("evil.example") && !framed.contains("_self"),
+            "{framed}"
+        );
+        let top = render_view(html, &RenderOptions::default(), &[], &[]).document;
+        assert!(!top.contains("<base") && !top.contains("target="), "{top}");
     }
 
     /// The "..." of a folded quote has its dots in the middle of its pill, as the editor's button has them: a 17 pixel
@@ -871,6 +905,7 @@ mod tests {
             "<p>hi</p>",
             &RenderOptions {
                 allow_remote_images: true,
+                ..Default::default()
             },
             &[],
             &[],
@@ -1036,6 +1071,7 @@ mod tests {
             "x",
             &RenderOptions {
                 allow_remote_images: true,
+                ..Default::default()
             },
         );
         assert!(allowed.contains("img-src data: http: https:;"));

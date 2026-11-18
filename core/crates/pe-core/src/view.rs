@@ -243,7 +243,10 @@ pub(crate) fn build_unless(
     let message = match parser::parse(source) {
         Ok(message) => message,
         Err(error) => {
-            let options = RenderOptions { allow_remote_images };
+            let options = RenderOptions {
+                allow_remote_images,
+                ..Default::default()
+            };
             let text = pe_i18n::tr_args(
                 pe_i18n::Text::ReaderUnreadable,
                 &[("error", (&error.to_string()).into())],
@@ -273,7 +276,10 @@ pub(crate) fn build_unless(
             return Some(view);
         }
     }
-    let options = RenderOptions { allow_remote_images };
+    let options = RenderOptions {
+        allow_remote_images,
+        ..Default::default()
+    };
     let images = crate::compose::inline_images(&message);
     if dropped() {
         return None;
@@ -454,8 +460,10 @@ fn render_part(part: &parser::Message, allow: bool, first: usize, previews: Opti
         previews: planned.as_ref().map(|planned| &planned.section),
         ..Default::default()
     };
+    // its links open from the top page (the frame's own navigation is refused before the app is asked)
     let options = RenderOptions {
         allow_remote_images: allow,
+        in_frame: true,
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &[], &cards);
     let mut attachments: Vec<AttachmentView> = listed(&part.attachments).map(AttachmentView::of).collect();

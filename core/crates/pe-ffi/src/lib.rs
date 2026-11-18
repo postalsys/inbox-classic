@@ -87,7 +87,10 @@ pub unsafe extern "C" fn pe_html_render(html: *const u8, len: usize, allow_remot
         (false, _) => unsafe { std::slice::from_raw_parts(html, len) },
     };
     guard(|| {
-        let options = pe_html::RenderOptions { allow_remote_images };
+        let options = pe_html::RenderOptions {
+            allow_remote_images,
+            ..Default::default()
+        };
         into_c_string(pe_html::render_document(&String::from_utf8_lossy(bytes), &options))
     })
     .unwrap_or(null_mut())
