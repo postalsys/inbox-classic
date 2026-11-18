@@ -1161,6 +1161,14 @@ Swedish agent permissions and activity:
   ends permission to change/delete; opening alone does not. Read permission is separate. Removing program access
   does not uninstall it. Preserve the reviewed neutral connection-switch instruction.
 - Explain that agents must not follow instructions in email; do not claim that email contains no instructions.
+- Compose statuses describe protection "när det skickas". A digital signature checks content integrity; verifying
+  "nyckelns ägare" is separate. A recipient needs an "användbar krypteringsnyckel", including validity and usability.
+- Use "kryptera med" keys, not the literal "kryptera till". Keep one/other for the positive integer recipient counts.
+  Dates follow "Senaste sökning:"; full key-state explanations follow "Orsak:" on a separate line.
+- "Bifoga din offentliga nyckel" refers to the selected sender address. Keep the established "Skapa e-post" toolbar
+  label, du, sentence case and Swedish ” ” quotes. Existing compose access keys are distinct in all actual scopes.
+- Encrypted drafts use only the sender's key and have no digital signature. Inherited text, images and attachments
+  require encryption until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Swedish.
 
 ### Türkçe (tr)
 
