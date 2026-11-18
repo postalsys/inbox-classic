@@ -169,6 +169,18 @@ extension UITest {
               "three frames, each with its own label (\(page.labels))")
         check(page.fits, "each as tall as its document (\(page.heights) for \(page.needed))")
         await shot(main.window, "secure-4-mixed-parts")
+        // a link in a part's frame goes to the browser, through the top page; the page stays
+        var browsed: [URL] = []
+        TestHooks.openURL = { browsed.append($0) }
+        _ = await main.mailbox.reader.pageAnswer("[...document.querySelectorAll('iframe.pe-d')[0].contentDocument.links]"
+            + ".find(a=>a.textContent=='The mill').click()")
+        check(await waitUntil(10) { !browsed.isEmpty } && browsed.map(\.absoluteString) == ["https://example.org/mill"],
+              "\"The mill\" in part 1's frame opens https://example.org/mill in the browser (\(browsed))")
+        TestHooks.openURL = nil
+        await pause(0.5)
+        let stayed = await securePage()
+        check(stayed.labels == page.labels && stayed.texts.first?.contains("The mill") == true,
+              "and the page stays as it was (\(stayed.labels))")
         await checkPrinted(page)
         await removeFixture(uid)
 
@@ -460,6 +472,187 @@ extension UITest {
         for uid in [encrypted, signed, protected, plain] {
             await removeFixture(uid)
         }
+    }
+
+    /// What the previews of a signed or encrypted message's page are: the page's own, and each frame's pictures
+    /// (loaded or not, where they are in the reading pane) and captions
+    struct PartPreviews {
+        var onPage = 0
+        var frames: [(captions: [String], loaded: [Bool], rects: [NSRect])] = []
+        var loaded: Bool { !frames.isEmpty && frames.allSatisfy { !$0.loaded.isEmpty && !$0.loaded.contains(false) } }
+    }
+
+    func partPreviews() async -> PartPreviews {
+        let script = "(()=>{const pv=d=>[...d.images].filter(i=>(i.getAttribute('src')||'').startsWith('/pv/'));"
+            + "return JSON.stringify({page:pv(document).length+document.querySelectorAll('section[class^=pe-att]').length,"
+            + "frames:[...document.querySelectorAll('iframe.pe-d')].map(f=>{const d=f.contentDocument;if(!d)return {c:[],l:[],r:[]};"
+            + "const o=f.getBoundingClientRect();return {c:[...d.querySelectorAll('figcaption')].map(e=>e.textContent),"
+            + "l:pv(d).map(i=>i.complete&&i.naturalWidth>0),r:pv(d).map(i=>{const b=i.getBoundingClientRect();"
+            + "return [o.left+b.left,o.top+b.top,b.width,b.height]})}})})})()"
+        let answer = await main.mailbox.reader.pageAnswer(script)
+        guard let object = try? JSONSerialization.jsonObject(with: Data(answer.utf8)) as? [String: Any] else {
+            return PartPreviews()
+        }
+        var shown = PartPreviews()
+        shown.onPage = object["page"] as? Int ?? -1
+        for frame in object["frames"] as? [[String: Any]] ?? [] {
+            let rects = (frame["r"] as? [[NSNumber]] ?? []).filter { $0.count == 4 }.map {
+                NSRect(x: $0[0].doubleValue, y: $0[1].doubleValue, width: $0[2].doubleValue, height: $0[3].doubleValue)
+            }
+            shown.frames.append((frame["c"] as? [String] ?? [], frame["l"] as? [Bool] ?? [], rects))
+        }
+        return shown
+    }
+
+    /// previews in signed and encrypted mail (after the encrypted message's attachment, whose note is shown once): a
+    /// plain part's picture and an encrypted part's, each in its part's frame, which is as tall as its part; the
+    /// encrypted one opens decrypted; both printed after the text, named with their parts
+    func securePreviews() async throws {
+        step("previews in signed and encrypted mail")
+        let reader = main.mailbox.reader
+        let uid = try await showFixture("secure-previews.eml")
+        guard let web = readerWeb else { throw Failed(description: "no reading pane") }
+        _ = await waitUntil(20) {
+            let now = await self.partPreviews()
+            return now.loaded && now.frames.count == 2
+        }
+        let shown = await partPreviews()
+        check(shown.onPage == 0, "the page itself has no preview (\(shown.onPage))")
+        check(shown.frames.count == 2 && shown.frames[0].loaded == [true] && shown.frames[1].loaded == [true],
+              "each of the two frames shows its picture (\(shown.frames.map(\.loaded)))")
+        check(shown.frames.first?.captions.first?.hasPrefix("harbour.png") == true
+              && shown.frames.last?.captions.first?.hasPrefix("floor-plan.png") == true,
+              "frame 1 (the plain part) harbour.png, frame 2 (the encrypted part) floor-plan.png (\(shown.frames.map(\.captions)))")
+        check(reader.strip.files.map(\.name) == ["harbour.png", "floor-plan.png"], "the strip lists both (\(reader.strip.files.map(\.name)))")
+        check(securityBar.said.contains("2 parts: 1 encrypted, 1 without a confirmed signature"),
+              "the bar counts 2 parts: 1 encrypted, 1 without a confirmed signature (\(securityBar.said))")
+        // the strip says each file's part: the floor plan of the encrypted part with the lock, the harbour without
+        let tiles = reader.strip.tiles
+        let partOf = { (tile: AttachmentTile) in (tile.showsLock, tile.accessibilityHelp() ?? "", tile.toolTip ?? "") }
+        if tiles.count == 2 {
+            let (harbourLock, harbourHelp, harbourTip) = partOf(tiles[0])
+            let (floorLock, floorHelp, floorTip) = partOf(tiles[1])
+            check(floorLock && floorHelp.hasSuffix("From part 2: Encrypted. Not signed")
+                  && floorTip.hasSuffix("From part 2: Encrypted. Not signed"),
+                  "floor-plan.png has the lock, its tooltip and accessible help end \"From part 2: Encrypted. Not signed\" (\(floorHelp))")
+            check(!harbourLock && harbourHelp.hasSuffix("From part 1: Not signed") && harbourTip.hasSuffix("From part 1: Not signed"),
+                  "harbour.png has no lock, \"From part 1: Not signed\" (\(harbourHelp))")
+        } else {
+            check(false, "two tiles in the strip (\(tiles.count))")
+        }
+        await shot(main.window, "secure-15-strip-parts")
+        _ = await waitUntil(5) {
+            let page = await self.securePage()
+            return page.fits && page.heights.count == 2
+        }
+        let page = await securePage()
+        check(page.fits && page.heights.count == 2,
+              "each frame as tall as its part once the pictures are there (\(page.heights) for \(page.needed))")
+        // the pictures are the parts' own: the harbour's sky in frame 1, the floor plan's shaded room in frame 2
+        var colours: [NSColor?] = []
+        for index in shown.frames.indices {
+            await inPage(web, "document.querySelectorAll('iframe.pe-d')[\(index)].scrollIntoView({block:'center'})")
+            await pause(0.3)
+            let now = await partPreviews()
+            guard index < now.frames.count, let at = now.frames[index].rects.first else { continue }
+            // the shaded room and the sky are both at 90, 75 of 240 by 150
+            colours.append(await webPixel(web, NSPoint(x: at.minX + at.width * 0.375, y: at.minY + at.height * 0.5 - (index == 0 ? at.height * 0.25 : 0))))
+        }
+        let sky = colours.first.flatMap { $0 }, room = colours.last.flatMap { $0 }
+        check(colours.count == 2 && sky.map { $0.blueComponent > $0.redComponent + 0.2 } == true
+              && room.map { $0.redComponent > 0.75 && $0.blueComponent > $0.redComponent + 0.05 } == true,
+              "frame 1 draws the harbour's sky, frame 2 the floor plan's shaded room (\(colours))")
+        // the encrypted part in view, its label and its picture, under the end of the plain one
+        await inPage(web, "document.querySelectorAll('iframe.pe-d')[1].scrollIntoView({block:'end'})")
+        await pause(0.3)
+        await shot(main.window, "secure-14-attachment-previews")
+
+        // a click on the floor plan in frame 2 opens it, decrypted; the note was shown once already (attach-4)
+        var opened: [URL] = []
+        TestHooks.openFile = { opened.append($0) }
+        defer { TestHooks.openFile = nil }
+        _ = await reader.pageAnswer("document.querySelectorAll('iframe.pe-d')[1].contentDocument.querySelector('section[class^=pe-att] a').click()")
+        var noted = false
+        if let note = await waitWindow("alert", 3) {
+            noted = true
+            answer(note, "OK")
+        }
+        check(await waitUntil(10) { opened.count == 1 }, "clicking the floor plan in frame 2 opens it")
+        check(!noted, "without the decrypted-file note, shown once already (attach-4)")
+        // its pixels as they are in the file (no colour matching): the shaded room at 90, 75 of 240 by 150
+        let floor = opened.last.flatMap { try? Data(contentsOf: $0) }.flatMap { NSBitmapImageRep(data: $0) }
+        var pixel = [Int](repeating: 0, count: 4)
+        floor?.getPixel(&pixel, atX: 90, y: 75)
+        check(opened.last?.lastPathComponent == "floor-plan.png" && floor?.pixelsWide == 240 && floor?.pixelsHigh == 150
+              && pixel.prefix(3) == [214, 228, 247],
+              "decrypted, the floor plan as it was sealed (\(opened.last?.lastPathComponent ?? "none"), \(pixel.prefix(3)))")
+        checkPrivate(opened.last, "from a private folder")
+        _ = await reader.pageAnswer("document.querySelectorAll('iframe.pe-d')[0].contentDocument.querySelector('section[class^=pe-att] a').click()")
+        check(await waitUntil(10) { opened.count == 2 } && opened.last?.lastPathComponent == "harbour.png",
+              "the harbour in frame 1 opens the harbour (\(opened.last?.lastPathComponent ?? "none"))")
+
+        // Print: both pictures after the text, each named with its part
+        let pdf = out.appendingPathComponent("secure-previews-print.pdf")
+        try? FileManager.default.removeItem(at: pdf)
+        var printed = false
+        var document = ""
+        TestHooks.printTo = pdf
+        TestHooks.printed = { printed = $0 }
+        TestHooks.printDocument = { document = $0 }
+        reader.print()
+        _ = await waitUntil(40) { printed }
+        TestHooks.printTo = nil
+        TestHooks.printed = nil
+        TestHooks.printDocument = nil
+        let paper = (PDFDocument(url: pdf)?.string ?? "").replacingOccurrences(of: "\n", with: " ")
+        say("   printed: \(paper.prefix(300))")
+        let order = ["as promised", "Part 1: harbour.png", "for your eyes only", "Part 2: floor-plan.png"].map {
+            paper.range(of: $0)?.lowerBound
+        }
+        check(printed && !order.contains(nil) && zip(order, order.dropFirst()).allSatisfy { $0! < $1! },
+              "Print gives each part's picture after that part's text, \"Part 1: harbour.png\" before part 2's text")
+        check(document.components(separatedBy: "src=\"data:image/").count == 3 && !document.contains("/pv/"),
+              "the printout carries both pictures from memory, nothing from the preview path")
+
+        try await twoReaders()
+
+        // dark: the frames and the bar as they are at night
+        let before = NSApp.appearance
+        onMain { NSApp.appearance = NSAppearance(named: .darkAqua) }
+        await pause(0.8)
+        await shot(main.window, "secure-14-attachment-previews-dark")
+        onMain { NSApp.appearance = before }
+        await removeFixture(uid)
+    }
+
+    /// the message shown in the reading pane and in a window of its own; dark messages turned off and on again make
+    /// both again, and each gets its view: neither says the message could not be shown
+    func twoReaders() async throws {
+        let notShown = Text.uiNotShown.text
+        main.window.makeFirstResponder(list)
+        let enter = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: main.window.windowNumber,
+                                     context: nil, characters: "\r", charactersIgnoringModifiers: "\r", isARepeat: false, keyCode: 36)
+        onMain { if let enter { self.list.keyDown(with: enter) } }
+        guard let window = await waitWindow("message", 10), let own = MessageWindow.open.last else {
+            check(false, "Enter opens the message in a window of its own")
+            return
+        }
+        let readers = [main.mailbox.reader, own.reader]
+        let headers = [main.window, window].map { find("reader.header", in: $0) as NSTextField? }
+        _ = await waitUntil(15) { readers.allSatisfy { $0.messageView != nil } }
+        for dark in [false, true] {
+            main.core.darkMessages = dark
+            Preview.dark = dark
+            AppDelegate.shared?.main?.reloadMessagesShown()
+            let both = await waitUntil(15) {
+                readers.allSatisfy { $0.messageView != nil && !$0.waitingForView }
+            }
+            let said = headers.map { $0?.stringValue ?? "" }
+            check(both && !said.contains { $0.contains(notShown) },
+                  "dark messages \(dark ? "on" : "off"): the pane and the window each show the message (\(said.map { $0.prefix(40) }))")
+        }
+        onMain { window.performClose(nil) }
+        _ = await waitUntil(10) { !window.isVisible }
     }
 
     /// Print of the message shown: every part's text on the paper

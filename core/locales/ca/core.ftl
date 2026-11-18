@@ -753,6 +753,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Falten claus utilitzables per a { $count } destinataris. Cerqueu les claus o traieu aquests destinataris del missatge. Només podeu enviar-lo sense xifrar si ja no conté text, imatges ni fitxers adjunts de missatges xifrats.
 }
 pgp-details-part = Part { $number }: { $label }
+# review: new
+attachment-from-part = De la part { $number }: { $label }
 pgp-details-signed = Data de la signatura: { $when }. Clau: { $key }
 pgp-details-unknown-key = Signat amb la clau { $key }, que no teniu
 pgp-details-opened = Desxifrat amb la vostra clau { $key }
@@ -763,9 +765,20 @@ pgp-bar-count-verified = { $count ->
     [one] 1 verificada
    *[other] { $count } verificades
 }
-pgp-bar-count-good = { $count ->
-    [one] 1 signada o xifrada
-   *[other] { $count } signades o xifrades
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 xifrada i signada
+   *[other] { $count } xifrades i signades
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 xifrada
+   *[other] { $count } xifrades
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 signada
+   *[other] { $count } signades
 }
 pgp-bar-count-warning = { $count ->
     [one] 1 requereix atenció
@@ -966,6 +979,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = S’està baixant…
+# review: new
+preview-tile-preparing = S’està preparant…
 # review: new
 preview-tile-format = Les imatges { $format } encara no es mostren
 # review: new

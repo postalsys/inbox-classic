@@ -7,9 +7,9 @@ MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="mix"
 
 --mix
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/html; charset=utf-8
 
-A note added on the way, not signed.
+<p>A note added on the way, not signed. <a href="https://example.org/mill">The mill</a></p>
 --mix
 Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s"
 

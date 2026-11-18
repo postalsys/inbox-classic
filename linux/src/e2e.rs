@@ -1035,6 +1035,7 @@ async fn scenario(d: Rc<Driver>) {
     compose_keys::signing_and_encrypting(&d).await;
     attach::opening_attachments(&d).await;
     previews::previews(&d).await;
+    secure::attachment_previews(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;

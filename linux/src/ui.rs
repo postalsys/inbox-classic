@@ -40,6 +40,7 @@ const STYLE: &str = "
 .attachment-strip flowbox { padding: 0 6px 6px; }
 flowboxchild.attachment-file { padding: 4px 10px 4px 4px; border-radius: 6px; }
 flowboxchild.attachment-file:hover { background-color: alpha(currentColor, 0.07); }
+.attachment-lock { background-color: @headerbar_bg_color; border-radius: 999px; padding: 1px; margin: 0 -2px -2px 0; }
 .status-bar { padding: 3px 10px; font-size: 0.9em; border-top: 1px solid alpha(@borders, 0.6); }
 .empty-list .title { font-weight: bold; opacity: 0.6; }
 .empty-list .more { opacity: 0.6; }
@@ -1088,7 +1089,25 @@ pub fn open_externally(uri: &str, parent: Option<&gtk::Window>) {
     if !is_link(uri) {
         return;
     }
+    #[cfg(feature = "e2e")]
+    {
+        let _ = parent;
+        OPENED_LINKS.with(|opened| opened.borrow_mut().push(uri.to_string()));
+    }
+    #[cfg(not(feature = "e2e"))]
     gtk::UriLauncher::new(uri).launch(parent, gio::Cancellable::NONE, |_| {});
+}
+
+#[cfg(feature = "e2e")]
+thread_local! {
+    /// The links a test run opened, in place of the browser
+    static OPENED_LINKS: std::cell::RefCell<Vec<String>> = std::cell::RefCell::default();
+}
+
+/// The links opened in a test run, taken
+#[cfg(feature = "e2e")]
+pub fn take_opened_links() -> Vec<String> {
+    OPENED_LINKS.with(|opened| std::mem::take(&mut *opened.borrow_mut()))
 }
 
 /// The window a widget is in

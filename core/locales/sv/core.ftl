@@ -1080,6 +1080,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new
+attachment-from-part = Från del { $number }: { $label }
+# review: new
 pgp-details-signed = Signerad { $when } med nyckeln { $key }
 # review: new
 pgp-details-unknown-key = Signerad med nyckeln { $key }, som du inte har
@@ -1094,9 +1096,19 @@ pgp-bar-parts = Meddelandet har { $count } delar: { $list }. Varje del anger hur
 # review: new
 pgp-bar-count-verified = { $count } verifierade
 # review: new
-pgp-bar-count-good = { $count ->
-    [one] { $count } signerad eller krypterad
-   *[other] { $count } signerade eller krypterade
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } krypterad och signerad
+   *[other] { $count } krypterade och signerade
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } krypterad
+   *[other] { $count } krypterade
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } signerad
+   *[other] { $count } signerade
 }
 # review: new
 pgp-bar-count-warning = { $count ->
@@ -1367,6 +1379,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Hämtar…
+# review: new
+preview-tile-preparing = Förbereder…
 # review: new
 preview-tile-format = { $format }-bilder visas inte ännu
 # review: new

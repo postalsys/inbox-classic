@@ -2,21 +2,31 @@
 //! read as the apps will show them: each one's bar, its colour and its parts. The UI tests check the same words.
 
 use std::path::PathBuf;
+use std::sync::Mutex;
+use std::sync::mpsc::{self, Receiver};
 
 use pe_core::keys::KeySource;
 use pe_core::protect::Tone;
-use pe_core::{Core, Options, PasswordStore};
+use pe_core::{Core, Event, Options, PasswordStore, Protection};
+
+mod support;
 
 fn fixtures() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/ui-e2e/pgp")
 }
 
-fn core(dir: &pe_testkit::TempDir) -> Core {
+/// A core with the test keys, and its events
+fn core(dir: &pe_testkit::TempDir) -> (Core, Receiver<Event>) {
     let options = Options {
         passwords: PasswordStore::Memory,
         ..Default::default()
     };
-    let core = Core::open_with(dir.path().join("store.db"), options, |_| {}).unwrap();
+    let (sender, events) = mpsc::channel();
+    let sender = Mutex::new(sender);
+    let core = Core::open_with(dir.path().join("store.db"), options, move |event| {
+        let _ = sender.lock().unwrap().send(event);
+    })
+    .unwrap();
     let read = |name: &str| std::fs::read(fixtures().join(name)).unwrap();
     let passphrase = String::from_utf8(read("me.passphrase")).unwrap();
     core.pgp_import(&read("me.asc"), Some(passphrase.trim()), KeySource::File)
@@ -24,7 +34,7 @@ fn core(dir: &pe_testkit::TempDir) -> Core {
     for name in ["alice.asc", "mallory.asc"] {
         core.pgp_import(&read(name), None, KeySource::File).unwrap();
     }
-    core
+    (core, events)
 }
 
 /// All that is shown of a view: its page and every part's document
@@ -36,16 +46,17 @@ fn shown(view: &pe_core::MessageView) -> String {
     all
 }
 
-fn view(core: &Core, name: &str) -> pe_core::MessageView {
-    core.file_view(&fixtures().join(name), false).unwrap()
+/// A message file's view, once its previews' files are all described
+fn view(core: &Core, events: &Receiver<Event>, name: &str) -> pe_core::MessageView {
+    support::settled(core, events, || core.file_view(&fixtures().join(name), false).unwrap())
 }
 
 #[test]
 fn each_case_reads_as_the_ui_tests_expect() {
     let dir = pe_testkit::TempDir::new("ui-fixtures");
-    let core = core(&dir);
+    let (core, events) = core(&dir);
     let bar = |name: &str| {
-        let view = view(&core, name);
+        let view = view(&core, &events, name);
         let protection = view.protection.clone().unwrap_or_else(|| panic!("{name}: no bar"));
         (protection.tone, protection.text, view)
     };
@@ -68,6 +79,23 @@ fn each_case_reads_as_the_ui_tests_expect() {
     assert_eq!(tone, Tone::Neutral);
     assert!(text.contains("3 parts"), "{text}");
     assert_eq!(view.document.matches("<iframe").count(), 3);
+    // a link clicked in a part navigates the top page (a click only), which the apps cancel and open in the browser
+    assert_eq!(
+        view.document
+            .matches("sandbox=\"allow-same-origin allow-top-navigation-by-user-activation\"")
+            .count(),
+        3
+    );
+    assert!(!view.document.contains("<base"));
+    for document in view.part_documents.iter().filter(|d| !d.is_empty()) {
+        assert!(document.contains("<base target=\"_top\">"), "{document}");
+    }
+    // the unsigned part's link, which the UI tests click in its frame
+    assert!(
+        view.part_documents[0].contains("href=\"https://example.org/mill\""),
+        "{}",
+        view.part_documents[0]
+    );
     let (tone, text, _) = bar("secure-bad.eml");
     assert_eq!(tone, Tone::Warning);
     assert!(text.contains("does not match"), "{text}");
@@ -103,4 +131,41 @@ fn each_case_reads_as_the_ui_tests_expect() {
     assert!(print.contains(&text) && print.contains("Part 2") && !print.contains("<iframe"));
     let (_, _, view) = bar("secure-long.eml");
     assert!(shown(&view).contains("Line 40 of the long part"));
+    // a picture in each of two parts, the second encrypted: each previewed in its own part's document
+    let (_, text, view) = bar("secure-previews.eml");
+    assert!(text.contains("2 parts"), "{text}");
+    assert!(!view.document.contains("/pv/"));
+    assert!(view.part_documents[0].contains("alt=\"harbour.png\""));
+    assert!(view.part_documents[1].contains("alt=\"floor-plan.png\""));
+    assert!(shown(&view).contains("for your eyes only"));
+    // the bar counts the encrypted part as encrypted, not as "signed or encrypted"
+    assert!(
+        text.contains("2 parts: 1 encrypted, 1 without a confirmed signature"),
+        "{text}"
+    );
+    // each file says which part it came from; the encrypted part's is marked
+    let rows: Vec<_> = view
+        .attachments
+        .iter()
+        .map(|a| (a.filename.as_str(), a.part, a.protection, a.part_text.as_str()))
+        .collect();
+    assert_eq!(
+        rows,
+        [
+            ("harbour.png", Some(0), Protection::None, "From part 1: Not signed"),
+            (
+                "floor-plan.png",
+                Some(1),
+                Protection::Encrypted,
+                "From part 2: Encrypted. Not signed"
+            ),
+        ]
+    );
+    assert!(
+        view.attachments[1]
+            .tooltip
+            .ends_with("\nFrom part 2: Encrypted. Not signed"),
+        "{}",
+        view.attachments[1].tooltip
+    );
 }

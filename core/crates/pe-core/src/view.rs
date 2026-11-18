@@ -23,6 +23,26 @@ pub struct AttachmentView {
     pub refusal: Option<String>,
     /// The strip's Show in Message for it: none, checked, unchecked or greyed
     pub show_in_message: crate::previews::ShowInMessage,
+    /// The part of a message with signed or encrypted parts it came from (its place among
+    /// [`ProtectionView::parts`]); None in any other message
+    pub part: Option<usize>,
+    /// How that part was protected, for a mark on the file in the strip; [`Protection::None`] in any other message
+    pub protection: Protection,
+    /// What the strip says of that part, in the tooltip's last line and for screen readers ("From part 2: Encrypted.
+    /// Signed by alice@example.org (key not verified)"); empty in any other message
+    pub part_text: String,
+}
+
+/// How the part a file came from was protected: the strip marks a file of an encrypted part with a lock
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Protection {
+    /// Not from a signed or encrypted part, or from one whose signature could not be confirmed
+    #[default]
+    None,
+    /// From a part whose signature was confirmed (signed by the sender's key, verified or not), not encrypted
+    Signed,
+    /// From a part that was encrypted (and decrypted to be shown), signed or not
+    Encrypted,
 }
 
 impl AttachmentView {
@@ -42,14 +62,38 @@ impl AttachmentView {
             size,
             size_text,
             show_in_message: Default::default(),
+            part: None,
+            protection: Protection::None,
+            part_text: String::new(),
         }
+    }
+
+    /// The strip's tooltip: the full name and size, why it does not open when it does not, and the part it came from
+    fn make_tooltip(&self) -> String {
+        let tooltip = crate::opening::tooltip(&self.filename, &self.size_text, self.kind);
+        if self.part_text.is_empty() {
+            tooltip
+        } else {
+            format!("{tooltip}\n{}", self.part_text)
+        }
+    }
+
+    /// From `part` (its place and what it is) of a message with signed or encrypted parts
+    fn set_part(&mut self, index: usize, part: &PartView) {
+        self.part = Some(index);
+        self.protection = part.protection();
+        self.part_text = pe_i18n::tr_args(
+            pe_i18n::Text::AttachmentFromPart,
+            &[("number", (index + 1).into()), ("label", (&part.label).into())],
+        );
+        self.tooltip = self.make_tooltip();
     }
 
     /// Its size as told apart from its content (a large message's text first, whose attachments are not here yet)
     pub(crate) fn set_size(&mut self, size: u64) {
         self.size = size;
         self.size_text = crate::format_size(size);
-        self.tooltip = crate::opening::tooltip(&self.filename, &self.size_text, self.kind);
+        self.tooltip = self.make_tooltip();
     }
 }
 
@@ -108,14 +152,22 @@ pub struct MessageView {
     pub(crate) decrypted_source: Option<(Vec<u8>, Option<String>)>,
     /// The token of the previews of its attachments after its text: the addresses of their pictures and their links
     /// carry it, and the core answers them while the view is shown ([`crate::Core::preview_ask`]). None when the
-    /// document shows no previews
+    /// document shows no previews. A message with signed or encrypted parts has a token of its own for each part's
+    /// document (its addresses carry that one); this one then names the view only, as the apps name it
     pub preview_token: Option<String>,
-    /// The attachments the document shows after the text, drawn or as tiles
-    pub(crate) preview_files: Vec<pe_html::PreviewFile>,
+    /// The documents with previews after their text and the attachments each shows, drawn or as tiles: the message's
+    /// one, or each part's
+    pub(crate) preview_documents: Vec<crate::previews::PreviewDocument>,
     /// What its printout is made of again with the pictures drawn ([`crate::Core::print_start`])
     pub(crate) preview_print: Option<pe_html::PrintParts>,
     /// Where those files are read from when their pictures are asked for
     pub(crate) preview_source: Option<crate::previews::PreviewSource>,
+    /// Some of the files it shows were not described in time and are "Preparing…" tiles:
+    /// [`crate::Event::PreviewsPrepared`] with its `preview_token` follows once they are, and the window builds the
+    /// view again
+    pub preparing: bool,
+    /// Those files, and what came of them since
+    pub(crate) preview_preparing: Option<std::sync::Arc<crate::previews::Preparing>>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -153,6 +205,21 @@ pub struct PartView {
     pub label: String,
     /// What Details says of it beyond its label
     pub details: Vec<String>,
+    /// It was encrypted (and decrypted to be shown)
+    pub encrypted: bool,
+    /// Its signature was confirmed: signed by the sender's key, verified or not
+    pub signed: bool,
+}
+
+impl PartView {
+    /// What the strip marks its files with: encrypted first, as a lock says more than a seal
+    pub fn protection(&self) -> Protection {
+        match (self.encrypted, self.signed) {
+            (true, _) => Protection::Encrypted,
+            (false, true) => Protection::Signed,
+            (false, false) => Protection::None,
+        }
+    }
 }
 
 /// Whose word counts for a message: the domains whose Authentication-Results verdicts the account's provider gives,
@@ -241,7 +308,10 @@ pub(crate) fn build_unless(
     let message = match parser::parse(source) {
         Ok(message) => message,
         Err(error) => {
-            let options = RenderOptions { allow_remote_images };
+            let options = RenderOptions {
+                allow_remote_images,
+                ..Default::default()
+            };
             let text = pe_i18n::tr_args(
                 pe_i18n::Text::ReaderUnreadable,
                 &[("error", (&error.to_string()).into())],
@@ -271,16 +341,17 @@ pub(crate) fn build_unless(
             return Some(view);
         }
     }
-    let options = RenderOptions { allow_remote_images };
+    let options = RenderOptions {
+        allow_remote_images,
+        ..Default::default()
+    };
     let images = crate::compose::inline_images(&message);
     if dropped() {
         return None;
     }
-    // the pictures and PDF files attached, shown after the text: never of signed or encrypted mail (yet)
-    let planned = trust
-        .previews
-        .filter(|_| !may_be_signed_or_encrypted(source))
-        .map(|plan| crate::previews::section(&message, plan));
+    // the pictures and PDF files attached, shown after the text (signed or encrypted mail shows each part's in the
+    // part's own document, protected_view)
+    let planned = trust.previews.map(|plan| crate::previews::section(&message, plan));
     if dropped() {
         return None;
     }
@@ -348,8 +419,18 @@ pub(crate) fn build_unless(
     let rendered = pe_html::render_view_cards(&body, &options, &images, &header, &cards);
     let mut attachments: Vec<AttachmentView> = listed(&message.attachments).map(AttachmentView::of).collect();
     let (preview_token, preview_files) = planned
-        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments))
+        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments, 0))
         .unwrap_or_default();
+    // the message's one document carries the view's token
+    let preview_documents = preview_token
+        .clone()
+        .map(|token| crate::previews::PreviewDocument {
+            token,
+            part: None,
+            files: preview_files,
+        })
+        .into_iter()
+        .collect();
     Some(MessageView {
         subject,
         from,
@@ -377,22 +458,27 @@ pub(crate) fn build_unless(
         decrypted: None,
         decrypted_source: None,
         preview_token,
-        preview_files,
+        preview_documents,
         preview_print: rendered.print,
         preview_source: None,
+        preparing: false,
+        preview_preparing: None,
     })
 }
 
 /// The files the document shows after the text (not those its HTML shows already) under the token of their
-/// addresses, and Show in Message of each attachment; no token for a message with no picture or PDF file
+/// addresses, and Show in Message of each attachment (`attachments`, those of the document, the first at `first` in
+/// the strip); no token for a document with no picture or PDF file
 fn shown_previews(
     planned: crate::previews::Planned,
     previewed: &[usize],
     attachments: &mut [AttachmentView],
+    first: usize,
 ) -> (Option<String>, Vec<pe_html::PreviewFile>) {
     use crate::previews::ShowInMessage;
     let section = planned.section;
     for (index, (attachment, state)) in attachments.iter_mut().zip(planned.states).enumerate() {
+        let index = first + index;
         // a file of the section the HTML shows already is not the strip's to show again
         let in_text = section.files.iter().any(|f| f.attachment == index) && !previewed.contains(&index);
         attachment.show_in_message = if in_text { ShowInMessage::None } else { state };
@@ -408,16 +494,56 @@ fn shown_previews(
     (Some(section.token), files)
 }
 
-/// Whether a message may have signed or encrypted parts, OpenPGP or S/MIME: such mail gets no previews of its
-/// attachments yet (docs/attachment-preview-plan.md, PR 4), so nothing of an encrypted part can show in another
-fn may_be_signed_or_encrypted(source: &[u8]) -> bool {
-    crate::protect::may_be_protected(source)
-        || pe_mime::outline::outline(source).parts.iter().any(|part| {
-            matches!(
-                part.content_type.as_str(),
-                "multipart/signed" | "multipart/encrypted" | "application/pkcs7-mime" | "application/x-pkcs7-mime"
-            )
-        })
+/// One part of a message with signed or encrypted parts, rendered as a document of its own
+struct RenderedPart {
+    document: String,
+    remote_images: bool,
+    attachments: Vec<AttachmentView>,
+    /// The token of its previews and the files its document shows; None without a picture or PDF file
+    previews: Option<(String, Vec<pe_html::PreviewFile>)>,
+    /// Its words, for the printout
+    text: String,
+}
+
+/// What the parts of a view share for their previews: the plan, the view's budget, and whether their files'
+/// descriptions may be kept (nothing of the message was decrypted)
+struct PartPreviews<'a, 'p> {
+    plan: &'a crate::previews::PreviewPlan<'p>,
+    budget: crate::previews::Budget,
+    keep: bool,
+}
+
+/// A part rendered as any message is (`allow`: its pictures from the internet load), its attachments the strip's
+/// from `first` on, and the previews of its pictures and PDF files after its text, in its own document under a
+/// token of its own: one part's previews never show, or answer, in another part's document
+fn render_part(part: &parser::Message, allow: bool, first: usize, previews: Option<&mut PartPreviews>) -> RenderedPart {
+    let body = crate::fold::body(part);
+    let images = crate::compose::inline_images(part);
+    let planned = previews.map(|p| {
+        let among = crate::previews::Among { first, keep: p.keep };
+        crate::previews::part_section(part, p.plan, &mut p.budget, among)
+    });
+    let cards = pe_html::Cards {
+        previews: planned.as_ref().map(|planned| &planned.section),
+        ..Default::default()
+    };
+    // its links open from the top page (the frame's own navigation is refused before the app is asked)
+    let options = RenderOptions {
+        allow_remote_images: allow,
+        in_frame: true,
+    };
+    let rendered = pe_html::render_view_cards(&body, &options, &images, &[], &cards);
+    let mut attachments: Vec<AttachmentView> = listed(&part.attachments).map(AttachmentView::of).collect();
+    let previews = planned
+        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments, first))
+        .and_then(|(token, files)| Some((token?, files)));
+    RenderedPart {
+        document: rendered.document,
+        remote_images: rendered.remote_images,
+        attachments,
+        previews,
+        text: parser::html_to_text(&body),
+    }
 }
 
 /// The view of a message with signed or encrypted parts: the page of its sections ([`pe_html::secure_page`]), each
@@ -442,6 +568,13 @@ fn protected_view(
     // the printout: every part's text in one document (a printer prints no frames), under the labels as words
     // each part's words (no markup of the message: one part's styles could hide another on the paper), by its place
     let mut print_texts: Vec<(usize, String)> = Vec::new();
+    // the previews of each part's pictures and PDF files, in its own document under a token of its own
+    let mut previews = trust.previews.map(|plan| PartPreviews {
+        plan,
+        budget: crate::previews::Budget::new(),
+        keep: !protected.decrypted(),
+    });
+    let mut preview_documents = Vec::new();
     // parsed first: the printout's pictures borrow from them
     let parsed: Vec<Option<parser::Message>> = protected
         .sections
@@ -463,29 +596,38 @@ fn protected_view(
             || vec![pe_i18n::tr(pe_i18n::Text::PgpDetailsPlain)],
             crate::protect::Verdict::details,
         );
+        let first = attachments.len();
         let document = part.as_ref().map(|part| {
-            let body = crate::fold::body(part);
-            let images = crate::compose::inline_images(part);
-            let rendered = pe_html::render_view_cards(
-                &body,
-                &RenderOptions {
-                    allow_remote_images: allow,
-                },
-                &images,
-                &[],
-                &pe_html::Cards::default(),
-            );
+            let rendered = render_part(part, allow, first, previews.as_mut());
             remote_images |= rendered.remote_images;
             blocked |= rendered.remote_images && !allow;
             if encrypted && allow && rendered.remote_images {
                 label = pe_i18n::tr_args(pe_i18n::Text::PgpPartPicturesLoaded, &[("label", (&label).into())]);
             }
-            attachments.extend(listed(&part.attachments).map(AttachmentView::of));
-            print_texts.push((parts.len(), parser::html_to_text(&body)));
+            attachments.extend(rendered.attachments);
+            if let Some((token, files)) = rendered.previews {
+                let part = Some(parts.len());
+                preview_documents.push(crate::previews::PreviewDocument { token, part, files });
+            }
+            print_texts.push((parts.len(), rendered.text));
             rendered.document
         });
         documents.push(document);
-        parts.push(PartView { tone, label, details });
+        let part = PartView {
+            tone,
+            label,
+            details,
+            encrypted: section.verdict.as_ref().is_some_and(crate::protect::Verdict::opened),
+            signed: section
+                .verdict
+                .as_ref()
+                .is_some_and(crate::protect::Verdict::signature_confirmed),
+        };
+        // each file of the part says where it came from, the strip marking an encrypted part's
+        for attachment in &mut attachments[first..] {
+            attachment.set_part(parts.len(), &part);
+        }
+        parts.push(part);
     }
     let page_parts: Vec<pe_html::SecurePart> = parts
         .iter()
@@ -521,7 +663,10 @@ fn protected_view(
         .sections
         .iter()
         .any(|section| section.verdict.as_ref().is_some_and(|verdict| verdict.encrypted));
-    let print_document = print_document(message, &text, &parts, &print_texts);
+    let print = print_parts(message, &text, &parts, &print_texts);
+    let print_document = pe_html::print_document_with(&print, &[]);
+    // the view's token names it only: no document carries it, each part's carries its own
+    let preview_token = (!preview_documents.is_empty()).then(pe_html::preview_token);
     let subject = protected
         .subject
         .clone()
@@ -543,6 +688,9 @@ fn protected_view(
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         part_documents: documents.into_iter().map(Option::unwrap_or_default).collect(),
         print_document: Some(print_document),
+        preview_print: preview_token.is_some().then_some(print),
+        preview_token,
+        preview_documents,
         protection: Some(ProtectionView {
             tone,
             text,
@@ -554,8 +702,15 @@ fn protected_view(
 }
 
 /// The printout of a message with signed or encrypted parts: the header a printout has, then the bar's words and each
-/// part's label (in the header, where the message's styles can not reach them), then each part's text, in order
-fn print_document(message: &parser::Message, bar: &str, parts: &[PartView], texts: &[(usize, String)]) -> String {
+/// part's label (in the header, where the message's styles can not reach them), then each part's text, in order; the
+/// pictures of each part's previews come right after that part's text ([`crate::Core::print_start`]), each named with
+/// its part
+fn print_parts(
+    message: &parser::Message,
+    bar: &str,
+    parts: &[PartView],
+    texts: &[(usize, String)],
+) -> pe_html::PrintParts {
     use pe_i18n::{Text, tr, tr_args};
     let date = message
         .timestamp
@@ -577,25 +732,19 @@ fn print_document(message: &parser::Message, bar: &str, parts: &[PartView], text
         .iter()
         .map(|(name, value)| (name.as_str(), value.as_str()))
         .collect();
-    // each part as plain text under its label in bold: no part has markup, so the bold labels can only be ours
-    let body: String = texts
+    // each part as plain text under its label in bold: no part has markup, so the bold labels can only be ours; each
+    // part's pictures come after its own text
+    let body: Vec<(usize, String)> = texts
         .iter()
         .map(|(index, text)| {
             let label = format!("{}: {}", part_name(*index), parts[*index].label);
-            format!("<p><b>{}</b></p>{}", escape_html(&label), text_to_html(text))
+            (
+                *index,
+                format!("<p><b>{}</b></p>{}", escape_html(&label), text_to_html(text)),
+            )
         })
-        .collect::<Vec<_>>()
-        .join("<hr>");
-    pe_html::render_view_cards(
-        &body,
-        &RenderOptions {
-            allow_remote_images: false,
-        },
-        &[],
-        &header,
-        &pe_html::Cards::default(),
-    )
-    .document
+        .collect();
+    pe_html::print_parts(&body, &header)
 }
 
 /// Text as HTML text
@@ -606,20 +755,31 @@ fn escape_html(text: &str) -> String {
         .replace('"', "&quot;")
 }
 
-/// The bar of a message whose parts differ: how many parts, and how many of each tone
+/// The bar of a message whose parts differ: how many parts, and how many of each kind: encrypted and signed,
+/// encrypted, signed with a verified key, signed, needing attention, without a confirmed signature
 fn counted(parts: &[PartView]) -> String {
     use crate::protect::Tone;
     use pe_i18n::Text;
+    let kind = |part: &PartView| match part.tone {
+        Tone::Warning => Text::PgpBarCountWarning,
+        Tone::Neutral => Text::PgpBarCountNeutral,
+        _ if part.encrypted && part.signed => Text::PgpBarCountEncryptedSigned,
+        _ if part.encrypted => Text::PgpBarCountEncrypted,
+        Tone::Verified => Text::PgpBarCountVerified,
+        Tone::Good => Text::PgpBarCountSigned,
+    };
     let kinds = [
-        (Tone::Verified, Text::PgpBarCountVerified),
-        (Tone::Good, Text::PgpBarCountGood),
-        (Tone::Warning, Text::PgpBarCountWarning),
-        (Tone::Neutral, Text::PgpBarCountNeutral),
+        Text::PgpBarCountEncryptedSigned,
+        Text::PgpBarCountEncrypted,
+        Text::PgpBarCountVerified,
+        Text::PgpBarCountSigned,
+        Text::PgpBarCountWarning,
+        Text::PgpBarCountNeutral,
     ];
     let list: Vec<String> = kinds
         .iter()
-        .filter_map(|(tone, text)| {
-            let count = parts.iter().filter(|part| part.tone == *tone).count();
+        .filter_map(|text| {
+            let count = parts.iter().filter(|part| kind(part) == *text).count();
             (count > 0).then(|| pe_i18n::tr_args(*text, &[("count", count.into())]))
         })
         .collect();
@@ -874,6 +1034,9 @@ mod tests {
                 tooltip: format!("../../report.pdf ({})", crate::format_size(4)),
                 refusal: None,
                 show_in_message: Default::default(),
+                part: None,
+                protection: Protection::None,
+                part_text: String::new(),
             }]
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));
@@ -890,6 +1053,47 @@ mod tests {
         assert_eq!(taken.content, b"%PDF");
         assert!(take_attachment(MESSAGE, 1).is_none());
         assert_eq!(attachment(MESSAGE, 1), None);
+    }
+
+    /// The bar of a message whose parts differ counts encrypted and signed parts apart, a part both encrypted and
+    /// signed as one of each, and a file of a part takes the part's protection: encrypted first
+    #[test]
+    fn the_bar_counts_encrypted_and_signed_parts_apart() {
+        use crate::protect::Tone;
+        let part = |tone, encrypted, signed| PartView {
+            tone,
+            label: String::new(),
+            details: Vec::new(),
+            encrypted,
+            signed,
+        };
+        let parts = [
+            part(Tone::Good, true, true),
+            part(Tone::Verified, true, true),
+            part(Tone::Good, true, false),
+            part(Tone::Good, false, true),
+            part(Tone::Verified, false, true),
+            part(Tone::Warning, false, false),
+            part(Tone::Neutral, false, false),
+        ];
+        assert_eq!(
+            counted(&parts),
+            "This message has 7 parts: 2 encrypted and signed, 1 encrypted, 1 verified, 1 signed, 1 needs attention, \
+             1 without a confirmed signature. Each part says how it is protected."
+        );
+        let marks: Vec<Protection> = parts.iter().map(PartView::protection).collect();
+        assert_eq!(
+            marks,
+            [
+                Protection::Encrypted,
+                Protection::Encrypted,
+                Protection::Encrypted,
+                Protection::Signed,
+                Protection::Signed,
+                Protection::None,
+                Protection::None
+            ]
+        );
     }
 
     #[test]

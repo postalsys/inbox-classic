@@ -771,6 +771,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Δεν υπάρχουν κατάλληλα κλειδιά για { $count } παραλήπτες. Βρείτε τα κλειδιά τους ή αφαιρέστε τους από το μήνυμα. Η αποστολή χωρίς κρυπτογράφηση επιτρέπεται μόνο αν το μήνυμα δεν περιέχει κείμενο, εικόνες ή συνημμένα από κρυπτογραφημένα μηνύματα.
 }
 pgp-details-part = Τμήμα { $number }: { $label }
+# review: new
+attachment-from-part = Από το τμήμα { $number }: { $label }
 pgp-details-signed = Υπογράφηκε { $when } με το κλειδί { $key }
 pgp-details-unknown-key = Υπογράφηκε με το κλειδί { $key }, που δεν έχετε
 pgp-details-opened = Αποκρυπτογραφήθηκε με το κλειδί σας { $key }
@@ -778,9 +780,20 @@ pgp-details-for = Κρυπτογραφημένο για { $keys }
 pgp-details-plain = Χωρίς υπογραφή και χωρίς κρυπτογράφηση
 pgp-bar-parts = Αυτό το μήνυμα έχει { $count } τμήματα: { $list }. Κάθε τμήμα δείχνει πώς προστατεύεται.
 pgp-bar-count-verified = { $count } με επαληθευμένο κάτοχο κλειδιού
-pgp-bar-count-good = { $count ->
-    [one] { $count } υπογεγραμμένο ή κρυπτογραφημένο
-   *[other] { $count } υπογεγραμμένα ή κρυπτογραφημένα
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } κρυπτογραφημένο και υπογεγραμμένο
+   *[other] { $count } κρυπτογραφημένα και υπογεγραμμένα
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } κρυπτογραφημένο
+   *[other] { $count } κρυπτογραφημένα
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } υπογεγραμμένο
+   *[other] { $count } υπογεγραμμένα
 }
 pgp-bar-count-warning = { $count ->
     [one] { $count } χρειάζεται προσοχή
@@ -981,6 +994,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Γίνεται λήψη…
+# review: new
+preview-tile-preparing = Προετοιμασία…
 # review: new
 preview-tile-format = Οι εικόνες { $format } δεν εμφανίζονται ακόμη
 # review: new

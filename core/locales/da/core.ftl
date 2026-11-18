@@ -753,6 +753,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Der mangler brugbare nøgler til { $count } modtagere. Find deres nøgler, eller fjern modtagerne fra meddelelsen. Du kan kun sende uden kryptering, hvis meddelelsen ikke indeholder tekst, billeder eller vedhæftede filer fra krypterede meddelelser.
 }
 pgp-details-part = Del { $number }: { $label }
+# review: new
+attachment-from-part = Fra del { $number }: { $label }
 pgp-details-signed = Signeret { $when } med nøglen { $key }
 pgp-details-unknown-key = Signeret med nøglen { $key }, som du ikke har
 pgp-details-opened = Dekrypteret med din nøgle { $key }
@@ -760,9 +762,20 @@ pgp-details-for = Krypteret til { $keys }
 pgp-details-plain = Hverken digitalt signeret eller krypteret
 pgp-bar-parts = Denne meddelelse har { $count } dele: { $list }. Hver del viser, hvordan den er beskyttet.
 pgp-bar-count-verified = { $count } med bekræftet nøgle
-pgp-bar-count-good = { $count ->
-    [one] 1 signeret eller krypteret
-   *[other] { $count } signerede eller krypterede
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 krypteret og signeret
+   *[other] { $count } krypterede og signerede
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 krypteret
+   *[other] { $count } krypterede
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 signeret
+   *[other] { $count } signerede
 }
 pgp-bar-count-warning = { $count ->
     [one] 1 kræver opmærksomhed
@@ -963,6 +976,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Henter…
+# review: new
+preview-tile-preparing = Forbereder…
 # review: new
 preview-tile-format = { $format }-billeder vises ikke endnu
 # review: new

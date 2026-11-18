@@ -767,6 +767,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Não há chaves utilizáveis para { $count } destinatários. Procure as chaves ou remova esses destinatários da mensagem. Você só pode enviar sem criptografia se a mensagem não contiver mais texto, imagens ou anexos de mensagens criptografadas.
 }
 pgp-details-part = Parte { $number }: { $label }
+# review: new
+attachment-from-part = Da parte { $number }: { $label }
 pgp-details-signed = Data da assinatura: { $when }. Chave: { $key }
 pgp-details-unknown-key = Assinada com a chave { $key }, que você não tem
 pgp-details-opened = Descriptografada com sua chave { $key }
@@ -777,9 +779,20 @@ pgp-bar-count-verified = { $count ->
     [one] { $count } verificada
    *[other] { $count } verificadas
 }
-pgp-bar-count-good = { $count ->
-    [one] { $count } assinada ou criptografada
-   *[other] { $count } assinadas ou criptografadas
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } criptografada e assinada
+   *[other] { $count } criptografadas e assinadas
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } criptografada
+   *[other] { $count } criptografadas
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } assinada
+   *[other] { $count } assinadas
 }
 pgp-bar-count-warning = { $count ->
     [one] { $count } requer atenção
@@ -990,6 +1003,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Baixando…
+# review: new
+preview-tile-preparing = Preparando…
 # review: new
 preview-tile-format = Imagens { $format } ainda não são mostradas
 # review: new

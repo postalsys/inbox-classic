@@ -1137,6 +1137,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new
+attachment-from-part = Iz dela { $number }: { $label }
+# review: new
 pgp-details-signed = Podpisano { $when } s ključem { $key }
 # review: new
 pgp-details-unknown-key = Podpisano s ključem { $key }, ki ga nimate
@@ -1151,9 +1153,11 @@ pgp-bar-parts = To sporočilo ima več delov ({ $count }): { $list }. Pri vsakem
 # review: new
 pgp-bar-count-verified = Preverjeni: { $count }
 # review: new
-pgp-bar-count-good = { $count ->
-   *[other] Podpisani ali šifrirani: { $count }
-}
+pgp-bar-count-encrypted-signed = Šifrirani in podpisani: { $count }
+# review: new
+pgp-bar-count-encrypted = Šifrirani: { $count }
+# review: new
+pgp-bar-count-signed = Podpisani: { $count }
 # review: new
 pgp-bar-count-warning = { $count ->
    *[other] Zahtevajo pozornost: { $count }
@@ -1493,6 +1497,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Prenašanje…
+# review: new
+preview-tile-preparing = Pripravljanje…
 # review: new
 preview-tile-format = Slike { $format } se še ne prikazujejo
 # review: new

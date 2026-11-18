@@ -313,6 +313,21 @@ public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr par
     return found;
 }
 '@
+# what a screen reader is told of a control's item (its accessible description, MSAA)
+Add-Type -ReferencedAssemblies Accessibility -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class AccLook {
+    [DllImport("oleacc.dll")] static extern int AccessibleObjectFromWindow(IntPtr hwnd, uint id, ref Guid iid, [MarshalAs(UnmanagedType.Interface)] out Accessibility.IAccessible acc);
+    // item `child` (from 1) of the client of `hwnd` (OBJID_CLIENT), or null
+    public static string Description(IntPtr hwnd, int child) {
+        Guid iid = new Guid("618736E0-3C3D-11CF-810C-00AA00389B71");
+        Accessibility.IAccessible acc;
+        if (AccessibleObjectFromWindow(hwnd, 0xFFFFFFFC, ref iid, out acc) != 0 || acc == null) { return null; }
+        try { return acc.get_accDescription(child); } catch { return null; }
+    }
+}
+'@
 [void][Native.Win]::SetProcessDPIAware()
 
 $WM_SETTEXT = 0x000C; $WM_GETTEXT = 0x000D; $WM_CLOSE = 0x0010; $WM_COMMAND = 0x0111; $WM_KEYDOWN = 0x0100
@@ -726,9 +741,18 @@ try {
     # page to a file, where the test opens it as the browser would
     $signInPage = Join-Path $Out 'sign-in-page.txt'
     Remove-Item -Force -ErrorAction SilentlyContinue $signInPage
-    # an attachment opened is written to a file in place of being opened, so nothing is started
+    # an attachment opened is written to a file in place of being opened, so nothing is started; a link the browser
+    # would open too
     $openedLog = Join-Path $Out 'opened-files.txt'
     Remove-Item -Force -ErrorAction SilentlyContinue $openedLog
+    # the files and links the app opened (--opened-files-log), a path or an address a line
+    # read sharing the file with the app, which may be writing a line
+    function OpenedFiles {
+        if (-not (Test-Path $openedLog)) { return @() }
+        $stream = [IO.File]::Open($openedLog, 'Open', 'Read', 'ReadWrite')
+        try { $text = (New-Object IO.StreamReader($stream)).ReadToEnd() } finally { $stream.Dispose() }
+        @($text -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    }
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"",
         '--sign-in-page-file', "`"$signInPage`"", '--opened-files-log', "`"$openedLog`"", '--test-hooks',
         '--key-server', "http://127.0.0.1:$($ports.pgp)")
@@ -2436,6 +2460,25 @@ public static class Dragger {
     Check ($null -ne (FramesFit 3)) "three frames, each as tall as its part ($(Frames))"
     Check ((BarFill) -eq $fills.neutral) "grey, as its least part ($(BarFill))"
     Shot $main 'secure-4-mixed-parts'
+    # a link in part 1's frame ("The mill"): the click goes to the browser (the part's <base target="_top"> navigates
+    # the page, which the app cancels and follows), and the page stays as it was
+    $kTestPreviews = 0x50565753
+    $before = (OpenedFiles).Count
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    # asked twice: scrolled into view by the first look, where it is told by the second
+    [void](WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, 'partlink:1'); if ($v -ge 0) { "$v" } } 5)
+    Start-Sleep -Milliseconds 300
+    $p = WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, 'partlink:1'); if ($v -gt 0) { "$v" } } 5
+    Check ($null -ne $p) 'the link of part 1 is on the screen'
+    if ($p) {
+        $p = [int64]$p
+        [Native.Win]::MouseClick([int][Math]::Floor($p / 100000), [int]($p % 100000))
+    }
+    $link = WaitFor { $o = @(OpenedFiles); if ($o.Count -gt $before) { $o[-1] } } 10
+    Check ($link -eq 'https://example.org/mill') "a link clicked in a part's frame opens in the browser ($link)"
+    Start-Sleep -Milliseconds 500
+    Check ($null -ne (FramesFit 3) -and (WindowText $securityBar) -eq $words) "and the message stays as it was, its three frames and its bar ($(Frames))"
     # Details names each part, the signed one with its key
     Click $securityBar $IDC_SECURITY_DETAILS
     $details = DetailsText 'secure-9-details'
@@ -2957,14 +3000,6 @@ public static class Dragger {
     $IDC_ATTACHMENT_STRIP = 242; $IDC_ATTACHMENT_FRAME = 243; $WM_LBUTTONDOWN = 0x0201; $WM_LBUTTONUP = 0x0202; $WM_LBUTTONDBLCLK = 0x0203
     function StripOf([IntPtr]$window) { [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($window, $IDC_ATTACHMENT_FRAME), $IDC_ATTACHMENT_STRIP) }
     $strip = StripOf $main
-    # the files the app opened (--opened-files-log), a path a line
-    # read sharing the file with the app, which may be writing a line
-    function OpenedFiles {
-        if (-not (Test-Path $openedLog)) { return @() }
-        $stream = [IO.File]::Open($openedLog, 'Open', 'Read', 'ReadWrite')
-        try { $text = (New-Object IO.StreamReader($stream)).ReadToEnd() } finally { $stream.Dispose() }
-        @($text -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-    }
     # where the core writes the files it opens: a folder of its own in the user's temporary folder
     $privateRoot = (Join-Path ([IO.Path]::GetFullPath([IO.Path]::GetTempPath())) 'InboxClassic').ToLowerInvariant()
     # the files opened after the first `before`, once there is a new one (the newest), or $null
@@ -3291,6 +3326,69 @@ public static class Dragger {
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($previewWindow) } 10)) 'Esc closes it'
     }
 
+    # signed and encrypted mail: each part's pictures in the part's own frame, the plain part's harbour in frame 1 and
+    # the encrypted part's floor plan in frame 2, none in the page around them (SCENARIO.md 19i)
+    $words = ShowSecure 'secure-previews.eml' 'Two pictures, one sealed'
+    Check ($words -match '2 parts: 1 encrypted, 1 without a confirmed signature') "a message of a plain and an encrypted part has the bar, counting them ($words)"
+    # the strip: the floor plan, from the encrypted part, with the lock over its icon (overlay 1, LVM_GETITEMSTATE) and
+    # its part for a screen reader; the harbour, from the plain part, without it
+    $LVM_GETITEMSTATE = 0x102C
+    function StripOverlay([int]$item) { ([int][Native.Win]::SendMessage($strip, $LVM_GETITEMSTATE, [IntPtr]$item, [IntPtr]0x0F00) -shr 8) }
+    $texts = & $stripTexts $strip
+    Check ($texts.Count -eq 2 -and $texts[0] -like 'harbour.png (*)' -and $texts[1] -like 'floor-plan.png (*)') "the strip lists both files ($($texts -join ' | '))"
+    Check ((StripOverlay 1) -eq 1 -and (StripOverlay 0) -eq 0) "the floor plan has the lock, the harbour not ($(StripOverlay 0), $(StripOverlay 1))"
+    $described = @(0, 1 | ForEach-Object { [AccLook]::Description($strip, $_ + 1) })
+    Check ("$($described[1])" -like '*From part 2: Encrypted. Not signed' -and "$($described[0])" -like '*From part 1: Not signed') "each file says its part to a screen reader ($($described -join ' | '))"
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 500
+    Shot $main 'secure-15-strip-parts'
+    # a frame's pictures: how many, how many loaded, its file the one named (part:N:name in preview.cpp)
+    function PartLook([int]$n, [string]$name) { WaitFor { $v = PreviewsLook "part:$($n):$name"; if ($v -eq 111) { $v } } 20 }
+    Check ($null -ne (PartLook 1 'harbour.png')) "frame 1 shows harbour.png, loaded ($(PreviewsLook 'part:1:harbour.png'))"
+    Check ($null -ne (PartLook 2 'floor-plan.png')) "frame 2 shows floor-plan.png, loaded ($(PreviewsLook 'part:2:floor-plan.png'))"
+    # (asked twice: a look answers with the one before it)
+    [void](PreviewsState)
+    Check ((PreviewsState).Total -eq 0) "the page around the frames shows no preview ($(PreviewsState))"
+    $sealed = FramesFit 2
+    Check ($null -ne $sealed -and $sealed.Height -ge 300) "two frames, each as tall as its part with its picture, no scroll bar inside ($(Frames))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'secure-14a-plain-part'
+    # scrolled to the encrypted part: its label over its text and the floor plan
+    [void](PreviewsLook 'partframe:2'); [void](PreviewsLook 'partframe:2')
+    Start-Sleep -Milliseconds 500
+    Shot $main 'secure-14-attachment-previews'
+    # a click on the floor plan in its frame opens the decrypted file, without the note: it is given once ever, and
+    # the encrypted file of 'opening an attachment' gave it already
+    $before = (OpenedFiles).Count
+    Check (ClickPreview 'partpoint:2') 'the floor plan is on the screen'
+    $note = WaitWindow '#32770' 'Opening this file' 3
+    if ($note) { Click $note 2 }
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'floor-plan.png' -and (InPrivateFolder $opened)) "clicking the floor plan in frame 2 opens it ($opened)"
+    Check ($null -eq $note) 'without the decrypted-file note again, which was given once already'
+    $before = (OpenedFiles).Count
+    Check (ClickPreview 'partpoint:1') 'the harbour is on the screen'
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'harbour.png') "and the harbour in frame 1 opens its file ($opened)"
+    # Print: each part's picture after that part's text, named with its part
+    $kTestPrint = 0x50524E54
+    $printed = "The harbour, as promised.`nPart 1: harbour.png`nThe floor plan, for your eyes only.`nPart 2: floor-plan.png"
+    Command $main $IDM_PRINT
+    $print = WaitWindow 'InboxClassicPrint' $null 20
+    Check ($null -ne $print) 'Print opens the print preview'
+    if ($print) {
+        $looked = WaitFor { $v = [Native.Win]::SendText($main, $kTestPrint, $printed); if ($v -eq 21) { $v } } 20
+        Check ($null -ne $looked) "the printout has each picture after its part's text, captioned with its part ($([Native.Win]::SendText($main, $kTestPrint, $printed)))"
+        Start-Sleep -Seconds 3
+        Shot $print 'secure-14b-print-previews'
+        [void][Native.Win]::PostMessage($print, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($print) } 10)
+    }
+    RemoveSecure 'secure-previews.eml' 'Two pictures, one sealed'
+    # the photo and the invoice shown again, for the settings
+    Check (SelectPreviews $photoSubject) 'the message with a photo and an invoice is selected again'
+    [void](PreviewsShown 4 3)
+
     # Options, Reading: both settings, on, the PDF one under the other; off, the message shows no previews
     function PreviewsCheck([IntPtr]$o, [int]$id) { [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $id), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 }
     function PreviewsSet([IntPtr]$o, [int]$id, [bool]$on) {
@@ -3301,6 +3399,13 @@ public static class Dragger {
         Click $o $IDC_OPTIONS_APPLY
         [void](WaitFor { -not [Native.Win]::IsWindowEnabled($apply) } 5)
     }
+    # two readers of one message, the pane and a window of its own, both built again when the setting changes (as
+    # dark messages does on the Mac and Linux): neither says the message could not be shown
+    [void][Native.Win]::SetForegroundWindow($main)
+    Key $list $VK_RETURN
+    $twoReaders = WaitShown 'InboxClassicMessage' 10
+    Check ($null -ne $twoReaders -and $null -ne (PreviewsShown 4 3 $false 'window:')) "the message in a window of its own beside the pane ($(PreviewsState 'window:'))"
+    function NotShown([IntPtr]$w) { (Statics $w) -match 'could not be shown' }
     Command $main $IDM_OPTIONS
     $o = WaitShown 'InboxClassicOptions' 10
     Check ($null -ne $o) 'Tools > Options opens'
@@ -3318,12 +3423,20 @@ public static class Dragger {
         Check ($null -ne (WaitFor { $s = PreviewsState; if ($s.Total -eq 0) { $s } } 20)) "and the message shows no previews ($(PreviewsState))"
         PreviewsSet $o $IDC_OPTIONS_PREVIEWS $true
         Check ($null -ne (PreviewsShown 4 3)) "on again, they are back ($(PreviewsState))"
+        if ($twoReaders) {
+            Check ($null -ne (PreviewsShown 4 3 $false 'window:')) "in the message's own window too ($(PreviewsState 'window:'))"
+            Check (-not (NotShown $main) -and -not (NotShown $twoReaders)) 'neither the pane nor the window says the message could not be shown'
+        }
         PreviewsSet $o $IDC_OPTIONS_PDF_PREVIEWS $false
         Check ($null -ne (PreviewsShown 1 0)) "PDF files off: the photo shows, the invoice not, and nothing says why ($(PreviewsState))"
         PreviewsSet $o $IDC_OPTIONS_PDF_PREVIEWS $true
         Check ($null -ne (PreviewsShown 4 3)) "on again, the invoice is back ($(PreviewsState))"
         Click $o 1
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+    }
+    if ($twoReaders) {
+        Key $twoReaders $VK_ESCAPE
+        [void](WaitFor { -not [Native.Win]::IsWindow($twoReaders) } 10)
     }
 
     # PDF previews off as after a PDF file ended the app: the photo, and the notice naming the setting

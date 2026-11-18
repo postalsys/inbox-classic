@@ -1,9 +1,11 @@
 #include "webview.h"
 
+#include <cstdio>
 #include <vector>
 
 #include "core.h"
 
+#include <share.h>
 #include <shellapi.h>
 #include <shlobj.h>
 #include <shlwapi.h>
@@ -14,6 +16,13 @@ using Microsoft::WRL::ComPtr;
 namespace webview {
 
 namespace {
+
+// every document served from memory: never kept in the web view's cache on disk (a part's document, the page and the
+// printout can carry what was decrypted)
+const wchar_t* kDocumentHeaders = L"Content-Type: text/html; charset=utf-8\r\nCache-Control: no-store";
+
+// the links of a test run (SetOpenedLinksLog), written there in place of opening them
+std::wstring g_openedLinksLog;
 
 std::wstring UserDataFolder() {
     PWSTR local = nullptr;
@@ -46,9 +55,23 @@ bool IsLinkScheme(const wchar_t* uri) {
 }
 
 void OpenExternally(const wchar_t* uri) {
-    if (IsLinkScheme(uri)) {
-        ShellExecuteW(nullptr, L"open", uri, nullptr, nullptr, SW_SHOWNORMAL);
+    if (!IsLinkScheme(uri)) {
+        return;
     }
+    if (g_openedLinksLog.empty()) {
+        ShellExecuteW(nullptr, L"open", uri, nullptr, nullptr, SW_SHOWNORMAL);
+        return;
+    }
+    // shared, so the test can read it while a line is written
+    if (FILE* log = _wfsopen(g_openedLinksLog.c_str(), L"ab", _SH_DENYNO)) {
+        std::string line = Utf8(uri) + "\n";
+        fwrite(line.data(), 1, line.size(), log);
+        fclose(log);
+    }
+}
+
+void SetOpenedLinksLog(const std::wstring& path) {
+    g_openedLinksLog = path;
 }
 
 bool IsOwnPage(const wchar_t* uri, const wchar_t* url) {
@@ -187,13 +210,13 @@ void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, 
                 } else {
                     ComPtr<IStream> stream;
                     stream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(partDocument.data()), static_cast<UINT>(partDocument.size())));
-                    env->CreateWebResourceResponse(stream.Get(), 200, L"OK", L"Content-Type: text/html; charset=utf-8", &response);
+                    env->CreateWebResourceResponse(stream.Get(), 200, L"OK", kDocumentHeaders, &response);
                 }
             } else if (context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT && IsOwnPage(uri, page.c_str()) && !StartsWith(uri, L"about:")) {
                 std::string body = Utf8(serve());
                 ComPtr<IStream> stream;
                 stream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(body.data()), static_cast<UINT>(body.size())));
-                env->CreateWebResourceResponse(stream.Get(), 200, L"OK", L"Content-Type: text/html; charset=utf-8", &response);
+                env->CreateWebResourceResponse(stream.Get(), 200, L"OK", kDocumentHeaders, &response);
             } else if (!allow(uri, context) && (StartsWith(uri, L"http://") || StartsWith(uri, L"https://") || StartsWith(uri, L"ftp://") ||
                                                 StartsWith(uri, L"file:"))) {
                 env->CreateWebResourceResponse(nullptr, 403, L"Blocked", L"", &response);

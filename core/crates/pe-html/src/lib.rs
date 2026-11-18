@@ -65,6 +65,10 @@ pub struct RenderOptions {
     /// Lets the CSP allow images from http(s), after the user clicked the blocked-pictures bar. The WebView2 request
     /// filter of the app has to allow them too.
     pub allow_remote_images: bool,
+    /// The document is a part of a signed or encrypted message, shown in a frame of [`secure_page`]: its links open
+    /// in the top page (`<base target="_top">`), whose navigation the apps cancel and open in the browser. A link
+    /// that navigated the frame would be refused by the page's `frame-src` before the app is asked, and never open
+    pub in_frame: bool,
 }
 
 /// The most bytes the `data:` URIs of embedded images add to a message, so a small image referenced a million times
@@ -272,13 +276,17 @@ pub struct PrintParts {
     allow_remote_images: bool,
     header: Vec<(String, String)>,
     card: String,
+    /// The parts of a message with signed or encrypted parts ([`print_parts`]), each sanitized on its own with its
+    /// place among them: each part's pictures are printed after its own text. Empty for any other message (`body`)
+    parts: Vec<(usize, String)>,
 }
 
 /// A printout of a message with previews of its attachments, its pictures put after its text as `data:` addresses
 /// of the core's own encodes (the print windows serve nothing but the page), and a line for each file that is not
-/// printed (a PDF file, printed from its own program). The CSP lets pictures come from `data:` only, as any document
-/// of [`render_view`]
-pub fn print_document_with(parts: &PrintParts, items: &[PrintItem]) -> String {
+/// printed (a PDF file, printed from its own program). Each item names the part of a message with signed or encrypted
+/// parts it belongs to: it is printed right after that part's text; one of no part ([`None`], any other message) after
+/// all of it. The CSP lets pictures come from `data:` only, as any document of [`render_view`]
+pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintItem)]) -> String {
     let header: Vec<(&str, &str)> = parts
         .header
         .iter()
@@ -286,9 +294,57 @@ pub fn print_document_with(parts: &PrintParts, items: &[PrintItem]) -> String {
         .collect();
     let options = RenderOptions {
         allow_remote_images: parts.allow_remote_images,
+        ..Default::default()
     };
-    let section = previews::print_section(items);
-    wrap(&parts.body, &options, &header, &parts.card, After::Printed(&section)).0
+    // the section of the items whose part `pick` takes
+    let section_of = |pick: &dyn Fn(Option<usize>) -> bool| {
+        let picked: Vec<PrintItem> = items
+            .iter()
+            .filter(|(part, _)| pick(*part))
+            .map(|(_, item)| *item)
+            .collect();
+        previews::print_section(&picked)
+    };
+    if parts.parts.is_empty() {
+        let section = section_of(&|_| true);
+        return wrap(&parts.body, &options, &header, &parts.card, After::Printed(&section)).0;
+    }
+    // the look of the text alone, as without pictures: the sections' own rules are not the message's
+    let text: Vec<&str> = parts.parts.iter().map(|(_, html)| html.as_str()).collect();
+    let look = dark::look(&text.join(PART_RULE));
+    let body: Vec<String> = parts
+        .parts
+        .iter()
+        .map(|(part, html)| format!("{html}{}", section_of(&|of| of == Some(*part))))
+        .collect();
+    // the items of no part printed come after all of it
+    let known = |part: Option<usize>| part.is_some_and(|part| parts.parts.iter().any(|(at, _)| *at == part));
+    let section = section_of(&|part| !known(part));
+    let after = After::Printed(&section);
+    wrap_as(&body.join(PART_RULE), look, &options, &header, &parts.card, after).0
+}
+
+/// What is printed between two parts of a message with signed or encrypted parts
+const PART_RULE: &str = "<hr>";
+
+/// What a printout of a message with signed or encrypted parts is wrapped from: each part's html (the core's own
+/// markup: its words under its label), with its place among the parts, sanitized as any message, with no pictures
+/// from the internet; with [`print_document_with`] it prints with each part's pictures after that part's text, or
+/// with none
+pub fn print_parts(parts: &[(usize, String)], header: &[(&str, &str)]) -> PrintParts {
+    PrintParts {
+        body: String::new(),
+        allow_remote_images: false,
+        header: header
+            .iter()
+            .map(|(name, value)| (name.to_string(), value.to_string()))
+            .collect(),
+        card: String::new(),
+        parts: parts
+            .iter()
+            .map(|(part, html)| (*part, builder_noting(&[], None, None).clean(html).to_string()))
+            .collect(),
+    }
 }
 
 /// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows (on
@@ -365,6 +421,7 @@ pub fn render_view_cards(
             .collect(),
         card: card.clone(),
         body: body.clone(),
+        parts: Vec::new(),
     });
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
@@ -456,6 +513,18 @@ fn wrap(
     card: &str,
     after: After,
 ) -> (String, Vec<usize>) {
+    wrap_as(body, dark::look(body), options, header, card, after)
+}
+
+/// [`wrap`] with the look decided already (a printout's, from its text without the pictures between its parts)
+fn wrap_as(
+    body: &str,
+    look: dark::Look,
+    options: &RenderOptions,
+    header: &[(&str, &str)],
+    card: &str,
+    after: After,
+) -> (String, Vec<usize>) {
     let mut image_sources = if options.allow_remote_images {
         "data: http: https:".to_string()
     } else {
@@ -467,7 +536,6 @@ fn wrap(
     // the message's too. (The header the window shows is outside the message and can not be touched.)
     let class = format!("pe-print-{}", editor::nonce());
     // in a dark window: written mail dark (its own too dark colors lightened), designed mail light as it was made
-    let look = dark::look(body);
     let marked;
     let body = match look {
         dark::Look::Dark { adapt: true } => {
@@ -510,6 +578,8 @@ fn wrap(
             )
         })
         .collect();
+    // a part's frame: its links navigate the top page (the frame's sandbox lets a click do that, nothing else)
+    let base = if options.in_frame { "<base target=\"_top\">" } else { "" };
     let printed = if printed.is_empty() {
         String::new()
     } else {
@@ -518,7 +588,7 @@ fn wrap(
     let document = format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
-         <meta name=\"color-scheme\" content=\"{scheme}\">\
+         <meta name=\"color-scheme\" content=\"{scheme}\">{base}\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
          div.pe-plain{{max-width:46em}}\
          details.pe-fold{{margin:6px 0}}\
@@ -590,6 +660,33 @@ mod tests {
         }
         assert!(clean.contains("<style>p{color:red}</style>"), "{clean}");
         assert!(clean.contains("<p>body</p>"), "{clean}");
+    }
+
+    /// A part's document (in a frame of the page of a signed or encrypted message) sends its links to the top page,
+    /// whose navigation the apps cancel and open in the browser; any other document has no base, and a message's own
+    /// base or target is never kept
+    #[test]
+    fn a_part_in_a_frame_opens_its_links_from_the_top_page() {
+        let html =
+            "<base href=\"https://evil.example/\" target=\"x\"><a href=\"https://example.org/\" target=\"_self\">x</a>";
+        let framed = render_view(
+            html,
+            &RenderOptions {
+                in_frame: true,
+                ..Default::default()
+            },
+            &[],
+            &[],
+        )
+        .document;
+        assert_eq!(framed.matches("<base").count(), 1, "{framed}");
+        assert!(framed.contains("<base target=\"_top\">"), "{framed}");
+        assert!(
+            !framed.contains("evil.example") && !framed.contains("_self"),
+            "{framed}"
+        );
+        let top = render_view(html, &RenderOptions::default(), &[], &[]).document;
+        assert!(!top.contains("<base") && !top.contains("target="), "{top}");
     }
 
     /// The "..." of a folded quote has its dots in the middle of its pill, as the editor's button has them: a 17 pixel
@@ -856,6 +953,7 @@ mod tests {
             "<p>hi</p>",
             &RenderOptions {
                 allow_remote_images: true,
+                ..Default::default()
             },
             &[],
             &[],
@@ -931,12 +1029,18 @@ mod tests {
         let rendered = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &header, &cards);
         let parts = rendered.print.clone().unwrap();
         let items = [
-            PrintItem::Picture {
-                name: "red.png",
-                mime: "image/png",
-                bytes: b"\x89PNG",
-            },
-            PrintItem::Line("invoice.pdf (1 page, 3 KB) is not printed. Open it to print it."),
+            (
+                None,
+                PrintItem::Picture {
+                    name: "red.png",
+                    mime: "image/png",
+                    bytes: b"\x89PNG",
+                },
+            ),
+            (
+                None,
+                PrintItem::Line("invoice.pdf (1 page, 3 KB) is not printed. Open it to print it."),
+            ),
         ];
         let printed = print_document_with(&parts, &items);
         assert!(printed.contains("<p>hi</p>"), "{printed}");
@@ -1021,8 +1125,76 @@ mod tests {
             "x",
             &RenderOptions {
                 allow_remote_images: true,
+                ..Default::default()
             },
         );
         assert!(allowed.contains("img-src data: http: https:;"));
+    }
+
+    /// The core's own printout (a message with signed or encrypted parts): its markup sanitized, its header and
+    /// pictures as any printout's, and with none the same document as before
+    #[test]
+    fn print_parts_wrap_the_core_s_own_markup() {
+        let parts = print_parts(
+            &[(
+                0,
+                "<p><b>Part 1: Signed</b></p><p>Hi</p><script>x()</script>".to_string(),
+            )],
+            &[("From", "Ann")],
+        );
+        let plain = print_document_with(&parts, &[]);
+        assert!(
+            plain.contains("<b>Part 1: Signed</b>") && !plain.contains("<script"),
+            "{plain}"
+        );
+        assert!(
+            plain.contains("img-src data:;") && plain.contains(":</span> Ann</div>"),
+            "{plain}"
+        );
+        let items = [(
+            Some(1),
+            PrintItem::Picture {
+                name: "Part 2: a.png",
+                mime: "image/png",
+                bytes: b"\x89PNG",
+            },
+        )];
+        let printed = print_document_with(&parts, &items);
+        assert!(
+            printed.contains("<img src=\"data:image/png;base64,iVBORw==\""),
+            "{printed}"
+        );
+        assert!(printed.contains("Part 2: a.png"), "{printed}");
+    }
+
+    /// Each part's pictures are printed right after that part's text, not after all of it: part 1's picture before
+    /// part 2's words, part 2's after them
+    #[test]
+    fn each_part_prints_its_pictures_after_its_text() {
+        let parts = print_parts(
+            &[
+                (0, "<p><b>Part 1: Not signed</b></p><p>FIRST</p>".to_string()),
+                (1, "<p><b>Part 2: Encrypted</b></p><p>SECOND</p>".to_string()),
+            ],
+            &[],
+        );
+        let picture = |name| PrintItem::Picture {
+            name,
+            mime: "image/png",
+            bytes: b"\x89PNG",
+        };
+        let items = [
+            (Some(1), picture("Part 2: plan.png")),
+            (Some(0), picture("Part 1: harbour.png")),
+            (None, PrintItem::Line("LOOSE")),
+        ];
+        let printed = print_document_with(&parts, &items);
+        let at = |text: &str| printed.find(text).unwrap_or_else(|| panic!("{text} in {printed}"));
+        assert!(at("FIRST") < at("Part 1: harbour.png"));
+        assert!(at("Part 1: harbour.png") < at("<hr>"));
+        assert!(at("<hr>") < at("SECOND"));
+        assert!(at("SECOND") < at("Part 2: plan.png"));
+        assert!(at("Part 2: plan.png") < at("LOOSE"));
+        assert_eq!(printed.matches("<img").count(), 2);
     }
 }

@@ -735,6 +735,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } alıcı için kullanılabilir anahtar yok. Anahtarlarını bulun veya bu alıcıları iletiden kaldırın. İletide şifreli iletilerden alınan metin, resim veya ek varsa şifrelemeden gönderemezsiniz.
 }
 pgp-details-part = Bölüm { $number }: { $label }
+# review: new
+attachment-from-part = Bölüm { $number } içinden: { $label }
 pgp-details-signed = İmzalandı: { $when }, anahtar: { $key }
 pgp-details-unknown-key = Sizde olmayan bir anahtarla imzalandı: { $key }
 pgp-details-opened = Şifreyi çözmek için kullanılan anahtarınız: { $key }
@@ -742,10 +744,12 @@ pgp-details-for = Şifrelendiği anahtarlar: { $keys }
 pgp-details-plain = İmzalı değil ve şifreli değil
 pgp-bar-parts = Bu iletinin { $count } bölümü var: { $list }. Her bölüm nasıl korunduğunu gösterir.
 pgp-bar-count-verified = Doğrulanmış: { $count }
-pgp-bar-count-good = { $count ->
-    [one] 1 imzalı veya şifreli
-   *[other] { $count } imzalı veya şifreli
-}
+# review: new
+pgp-bar-count-encrypted-signed = { $count } şifreli ve imzalı
+# review: new
+pgp-bar-count-encrypted = { $count } şifreli
+# review: new
+pgp-bar-count-signed = { $count } imzalı
 pgp-bar-count-warning = { $count ->
     [one] 1 bölüm dikkat gerektiriyor
    *[other] { $count } bölüm dikkat gerektiriyor
@@ -945,6 +949,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = İndiriliyor…
+# review: new
+preview-tile-preparing = Hazırlanıyor…
 # review: new
 preview-tile-format = { $format } resimleri henüz gösterilmiyor
 # review: new

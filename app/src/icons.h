@@ -107,6 +107,7 @@ enum FileIcon : int {
     KIND_MAIL = 12,
     KIND_WINDOW_SHIELD = 13,
     KIND_DOCUMENT = 14,
+    KIND_LOCK_BADGE = 15,
 };
 
 enum SecureIcon : int {

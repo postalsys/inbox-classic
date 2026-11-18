@@ -62,6 +62,10 @@ bool IsLinkScheme(const wchar_t* uri);
 // a link opened in the default browser or mail program: http, https and mailto only, anything else is ignored
 void OpenExternally(const wchar_t* uri);
 
+// test runs (--opened-files-log): a link OpenExternally takes is written to this file, a line of its address, not
+// opened
+void SetOpenedLinksLog(const std::wstring& path);
+
 // whether `uri` is the page itself (`url`, with or without a query, or a folder of it named by a number, `url` 12/)
 // or one of the documents a page has of its own (about:blank)
 bool IsOwnPage(const wchar_t* uri, const wchar_t* url);

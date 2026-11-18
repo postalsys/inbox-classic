@@ -95,7 +95,7 @@ pub use text::{
     folder_kind, folder_name, format_size, initials, list_counts, messages, protection_words, quoted_subject,
     reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence,
 };
-pub use view::{AttachmentView, MessageView, PartView, ProtectionView};
+pub use view::{AttachmentView, MessageView, PartView, Protection, ProtectionView};
 use worker::{Command, Role, Worker};
 
 /// The stack of each of the core's worker threads
@@ -253,6 +253,12 @@ pub enum Event {
     /// The printout of a message with previews is made ([`Core::print_start`]): [`Core::print_result`] gives it
     PrintReady {
         request: u64,
+    },
+    /// The files a view showed as "Preparing…" (not described in time, [`MessageView::preparing`]) are described now:
+    /// the window showing the view whose `preview_token` is `token` builds it again, keeping its scroll as after
+    /// [`Core::preview_show`]. Said once a view, never for one whose previews ended ([`Core::previews_end`])
+    PreviewsPrepared {
+        token: String,
     },
     /// The app ended while a file's preview was drawn (it may have been a hostile file), so PDF previews are now off:
     /// [`Core::previews_notice`] says why and how to turn them on again
@@ -524,8 +530,6 @@ pub struct Core {
     logo_downloads: LogoDownloads,
     /// Message views built off the window thread: parsing, folding and sanitizing a large message takes a while
     views: Requests<Option<MessageView>>,
-    /// The view request the reading pane waits for; an older one gives up
-    newest_view: Arc<std::sync::atomic::AtomicU64>,
     /// The connection the views built in the background look up and mark bounces with, opened by the first that
     /// needs it
     /// Sign-ins in the browser: the provider and the refresh token, or why not
@@ -633,7 +637,6 @@ impl Core {
             pictures: Requests::default(),
             logo_downloads: Arc::default(),
             views: Requests::default(),
-            newest_view: Arc::default(),
             sign_ins: Requests::default(),
             checks: Requests::default(),
             discoveries: Discoveries::default(),
@@ -1562,15 +1565,15 @@ impl Core {
 
     /// Builds the view of a message in the background: [`Event::ViewReady`] follows with the request this returns.
     /// Its source is read off the window thread too, on a store connection of the core's own; parsing, folding and
-    /// sanitizing it follow there. A view started after it, or [`Core::message_view_cancel`], makes it give up between
-    /// those steps: one is shown at a time.
+    /// sanitizing it follow there. Only [`Core::message_view_cancel`] of this request makes it give up between those
+    /// steps: each reader (the reading pane, every message window) cancels its own view before it asks for another,
+    /// so two readers of one message (dark messages turned on reloads both at once) each get theirs.
     pub fn message_view_start(self: &Arc<Self>, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
-        self.newest_view.store(request, Ordering::Relaxed);
-        let newest = self.newest_view.clone();
         let events = self.events.clone();
         let work = self.in_background(Connection::Reads, move |core| {
-            let dropped = move || newest.load(Ordering::Relaxed) != request;
+            // listed as running from before the work starts until it is cancelled
+            let dropped = || !core.views.is_running(request);
             if dropped() {
                 return None;
             }
@@ -1604,11 +1607,9 @@ impl Core {
         self.views.take(request).flatten().map(|view| self.learned(view))
     }
 
-    /// Drops a view no longer waited for (another message was selected)
+    /// Drops a view no longer waited for (its reader shows another message, or closed); another reader's view of
+    /// the same message is built on
     pub fn message_view_cancel(&self, request: u64) {
-        let _ = self
-            .newest_view
-            .compare_exchange(request, 0, Ordering::Relaxed, Ordering::Relaxed);
         self.views.cancel(request);
     }
 
@@ -2062,6 +2063,7 @@ impl Core {
             view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
         if view.preview_token.is_some() {
             view.preview_source = Some(preview_source);
+            plan.preparing_of(&mut view);
         }
         self.remember_file_attachments(path, &view);
         Ok(self.learned(view))
@@ -3055,6 +3057,9 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
             folder: found.folder,
             uid: found.uid,
         });
+        if let Some(plan) = &previews {
+            plan.preparing_of(&mut view);
+        }
     }
     decrypted_for_view(found, &mut view, &store);
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the

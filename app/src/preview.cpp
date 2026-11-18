@@ -48,6 +48,35 @@ std::wstring PreviewsPoint(const wchar_t* element) {
            L"return Math.round((r.left+r.width/2)*d)*100000+Math.round((r.top+r.height/2)*d)})()";
 }
 
+// the same looks in the frame of part `n` (from 1) of a signed or encrypted message: its pictures (how many, how many
+// loaded, whether its first file is named `name`), or the middle of its first picture, in pixels of the pane
+std::wstring PartPreviews(int n, const std::wstring& name) {
+    return L"(()=>{const f=document.querySelectorAll('iframe.pe-d')[" + std::to_wstring(n - 1) +
+           L"];const d=f&&f.contentDocument;if(!d)return 0;const a=[...d.images].filter(i=>i.src.includes('/pv/'));"
+           L"const l=a.filter(i=>i.complete&&i.naturalWidth>0).length,c=d.querySelector('figure .n');"
+           L"return a.length*100+l*10+(c&&c.textContent==='" +
+           name + L"'?1:0)})()";
+}
+// (or of its first link to the web, `link`)
+std::wstring PartPreviewPoint(int n, bool link = false) {
+    return L"(()=>{const f=document.querySelectorAll('iframe.pe-d')[" + std::to_wstring(n - 1) +
+           L"];const e=f&&f.contentDocument&&f.contentDocument.querySelector('" +
+           (link ? L"a[href^=\"http\"]" : L"figure img") + L"');if(!e)return 0;"
+           L"e.scrollIntoView({block:'center'});const o=f.getBoundingClientRect(),r=e.getBoundingClientRect(),d=devicePixelRatio;"
+           L"return Math.round((o.left+f.clientLeft+r.left+r.width/2)*d)*100000+Math.round((o.top+f.clientTop+r.top+r.height/2)*d)})()";
+}
+
+// the letters of a file's name in a look, nothing that would end the script's string
+std::wstring NameOnly(const std::wstring& text) {
+    std::wstring name;
+    for (wchar_t c : text) {
+        if (iswalnum(c) || c == L' ' || c == L'.' || c == L'-' || c == L'_') {
+            name += c;
+        }
+    }
+    return name;
+}
+
 // the UI test's look at a page of parts: how many frames, whether each is as tall as its document, their heights
 const wchar_t* kFramesCheck =
     L"(()=>{let n=0,fit=100,sum=0;for(const f of document.querySelectorAll('iframe')){n++;const d=f.contentDocument;"
@@ -143,11 +172,14 @@ void Preview::Configure() {
             return S_OK;
         }).Get(),
         nullptr);
-    // a part's frame (a signed or encrypted message's) loads its document beside the page, by the page's doing only;
-    // a link clicked in it leaves the frame where it is and opens in the browser, never as one of the page's own links,
-    // which only the page's labels are
+    // a part's frame (a signed or encrypted message's) loads its document beside the page, by the page's doing only.
+    // A link clicked in it navigates the top page (the part's <base target="_top">), which NavigationStarting above
+    // cancels and follows: a link to the browser, a preview to its file. Should a navigation of the frame itself come,
+    // it leaves the frame where it is: a preview of the part's files opens its file (the core takes only a link whose
+    // token is that part's), any other link opens in the browser, never as one of the page's own links, which only the
+    // page's labels are
     view_->add_FrameNavigationStarting(
-        Callback<ICoreWebView2NavigationStartingEventHandler>([](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
+        Callback<ICoreWebView2NavigationStartingEventHandler>([this](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
             LPWSTR uri = nullptr;
             args->get_Uri(&uri);
             BOOL user = FALSE;
@@ -155,7 +187,9 @@ void Preview::Configure() {
             bool part = !user && StartsWith(uri, kPageUrl) && pe_part_document(core::Narrow(uri).c_str()) >= 0;
             if (!part && !StartsWith(uri, L"about:")) {
                 args->put_Cancel(TRUE);
-                if (user) {
+                if (user && uri && pe_reader_link(core::Narrow(uri).c_str()) == PE_READER_LINK_ATTACHMENT) {
+                    Follow(uri);
+                } else if (user) {
                     OpenExternally(uri);
                 }
             }
@@ -384,6 +418,17 @@ int64_t Preview::TestPreviews(const std::wstring& query) {
         // the files shown as tiles, times 100, plus how many of them say why
         script = L"(()=>{const t=[...document.querySelectorAll('section[class^=\"pe-att-\"] a.t')];"
                  L"return t.length*100+t.filter(a=>(a.querySelector('.r')||{}).textContent).length})()";
+    } else if (query.starts_with(L"part:") && query.size() > 7) {
+        // "part:N:name", the pictures of part N's frame and whether its file is that one
+        script = PartPreviews(query[5] - L'0', NameOnly(query.substr(7)));
+    } else if (query.starts_with(L"partpoint:") && query.size() == 11) {
+        script = PartPreviewPoint(query[10] - L'0');
+    } else if (query.starts_with(L"partlink:") && query.size() == 10) {
+        script = PartPreviewPoint(query[9] - L'0', true);
+    } else if (query.starts_with(L"partframe:") && query.size() == 11) {
+        // part N's label and frame scrolled to the top of the pane
+        script = L"(()=>{const f=document.querySelectorAll('iframe.pe-d')[" + std::to_wstring(query[10] - L'1') +
+                 L"];if(!f)return 0;f.parentElement.scrollIntoView({block:'start'});return 1})()";
     } else if (query.starts_with(L"text:")) {
         // whether the document's text has the words after the colon: 2, else 1
         std::wstring words;
@@ -411,7 +456,8 @@ int64_t Preview::TestPreviews(const std::wstring& query) {
     }
     // a point in the pane, on the screen
     if (answer > 0 && query != L"state" && query != L"overflow" && query != L"tiles" && !query.starts_with(L"scroll") &&
-        !query.starts_with(L"text:")) {
+        !query.starts_with(L"text:") && !query.starts_with(L"part:") &&
+        !query.starts_with(L"partframe:")) {
         POINT origin = {bounds_.left, bounds_.top};
         ClientToScreen(parent_, &origin);
         answer = (origin.x + answer / 100000) * 100000 + origin.y + answer % 100000;

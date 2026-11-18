@@ -71,12 +71,13 @@ impl Markers {
         Ok((markers, set))
     }
 
-    /// Writes the marker of `key`, a `kind` file (`about` says what it is), and returns the guard that removes it
-    /// when the render ends
-    pub fn begin(&self, key: &Key, kind: Kind, about: &str) -> Marker {
+    /// Writes the marker of `key`, a `kind` file (`about` says what it is; None for a decrypted part's file, whose
+    /// type is not written either), and returns the guard that removes it when the render ends
+    pub fn begin(&self, key: &Key, kind: Option<Kind>, about: &str) -> Marker {
         let path = self.dir.join(format!("{PREFIX}{}", key.as_str()));
         let about: String = about.chars().filter(|c| !c.is_control()).take(500).collect();
-        let written = std::fs::write(&path, format!("{}\n{kind:?}\n{about}\n", key.as_str())).is_ok();
+        let kind = kind.map_or_else(|| "-".to_string(), |kind| format!("{kind:?}"));
+        let written = std::fs::write(&path, format!("{}\n{kind}\n{about}\n", key.as_str())).is_ok();
         Marker {
             path: written.then_some(path),
         }
@@ -151,7 +152,7 @@ pub(crate) mod tests {
         let (markers, refused) = Markers::open(&dir).unwrap();
         assert!(refused.is_empty());
         let key = crate::key_of(b"file");
-        let marker = markers.begin(&key, Kind::Pdf, "account 1, message 7, part 2");
+        let marker = markers.begin(&key, Some(Kind::Pdf), "account 1, message 7, part 2");
         let path = dir.join(format!("rendering-{}", key.as_str()));
         let text = std::fs::read_to_string(&path).unwrap();
         assert!(text.starts_with(key.as_str()));
@@ -170,7 +171,7 @@ pub(crate) mod tests {
         {
             let (markers, _) = Markers::open(&dir).unwrap();
             // the app ended while drawing it: the guard never ran
-            std::mem::forget(markers.begin(&key, Kind::Pdf, "message 9"));
+            std::mem::forget(markers.begin(&key, Some(Kind::Pdf), "message 9"));
         }
         assert_eq!(left_behind(&dir), 1);
         let (_, refused) = Markers::open(&dir).unwrap();
@@ -189,7 +190,7 @@ pub(crate) mod tests {
         let (markers, _) = Markers::open(&dir).unwrap();
         let key = crate::key_of(b"panics");
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            let _marker = markers.begin(&key, Kind::Picture, "");
+            let _marker = markers.begin(&key, Some(Kind::Picture), "");
             panic!("a decoder's bug");
         }));
         assert!(caught.is_err());

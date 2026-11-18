@@ -282,6 +282,10 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_PDF_PREVIEWS_OFF = 37,
   // The printout `pe_print_start` started (its request in `uid`) is made: `pe_print_result` gives the document
   PE_EVENT_KIND_PRINT_READY = 38,
+  // The files a view showed as "Preparing..." (not described in time) are described now: the window showing
+  // the view whose `preview_token` is `detail` builds it again, keeping its scroll as after `pe_preview_show`.
+  // Once a view, never for one whose previews ended (`pe_previews_end`)
+  PE_EVENT_KIND_PREVIEWS_PREPARED = 39,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -371,7 +375,8 @@ typedef enum PePictureKind {
   PE_PICTURE_KIND_CONTACT = 2,
 } PePictureKind;
 
-// Whether a message is signed or encrypted as a whole
+// Whether a message is signed or encrypted as a whole (a list row), or how the part an attachment came from was
+// protected (`PeAttachment`: signed with a confirmed signature, or encrypted, signed or not)
 typedef enum PeProtection {
   PE_PROTECTION_NONE = 0,
   PE_PROTECTION_SIGNED = 1,
@@ -1095,7 +1100,8 @@ typedef struct PeEvent {
   // `Acted`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
   // notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
   const char *message;
-  // UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
+  // UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`; the view's
+  // `preview_token`, for `PreviewsPrepared`. NULL otherwise
   const char *detail;
   // How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
   // otherwise
@@ -1393,9 +1399,11 @@ typedef struct PeMessageInfo {
   size_t part_count;
   // The token of the previews of its attachments after the text, empty for a message with no picture or PDF file:
   // the document server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the
-  // page's origin), the strip's Show in Message names the view by it (`pe_preview_show`), Print starts the
-  // printout with it (`pe_print_start`), and the window ends them with `pe_previews_end` when it shows another
-  // document or closes
+  // page's origin; the parts of a signed or encrypted message each show their own files' previews in their own
+  // document under a token of their own, served the same way whichever frame asks), the strip's Show in Message
+  // names the view by it (`pe_preview_show`), Print starts the printout with it (`pe_print_start`), a preview's
+  // link is checked against it (`pe_preview_link`, a part's link too), and the window ends them with
+  // `pe_previews_end` when it shows another document or closes
   const char *preview_token;
 } PeMessageInfo;
 
@@ -1419,6 +1427,15 @@ typedef struct PeAttachment {
   const char *refusal;
   // The strip menu's Show in Message for it (`pe_preview_show`): no item, checked, unchecked or greyed
   enum PeShowInMessage show_in_message;
+  // The number of the part of a message with signed or encrypted parts it came from (1 for the first, as the
+  // page's labels and the Details window count them); 0 in any other message
+  uint32_t part;
+  // How that part was protected: the strip marks a file of an encrypted part with a lock; `NONE` in any other
+  // message, and for a part whose signature could not be confirmed
+  enum PeProtection protection;
+  // What the strip says of that part ("From part 2: Encrypted. Signed by ..."), for the accessible description;
+  // `tooltip` ends with it already. Empty in any other message
+  const char *part_text;
 } PeAttachment;
 
 // A picture of a preview, to answer a web view with, owned by its `PePreviewAnswer`
@@ -2985,7 +3002,9 @@ struct PeMessageView *pe_message_view(const struct PeCore *core,
                                       bool allow_remote_images);
 
 // Builds the view of a message whose source is in the store (after `MessageReady`) off the window thread, its source
-// read there too: `ViewReady` with this request in `uid` follows. 0 on failure.
+// read there too: `ViewReady` with this request in `uid` follows. 0 on failure. Each reader (the reading pane, a
+// message window) cancels its own request (`pe_message_view_cancel`) before it asks for another; nothing else drops
+// it, so two readers of one message each get their view.
 //
 // # Safety
 // `core` must be a live handle.
@@ -3002,7 +3021,7 @@ uint64_t pe_message_view_start(const struct PeCore *core,
 struct PeMessageView *pe_message_view_result(const struct PeCore *core,
                                              uint64_t request);
 
-// Drops a view request no longer waited for
+// Drops a view request no longer waited for (its reader shows another message or closed)
 //
 // # Safety
 // `core` must be a live handle.
@@ -3064,9 +3083,10 @@ const struct PePreviewPicture *pe_preview_answer_picture(const struct PePreviewA
 void pe_preview_answer_free(struct PePreviewAnswer *answer);
 
 // The attachment (its index in the view's list) a preview's link opens, after `pe_reader_link` said
-// `PE_READER_LINK_ATTACHMENT`; `token` is the `preview_token` of the view the reader shows. -1 when the link is not
-// of that view (another view's, even one still shown, or none). The window opens it as a double-click in the strip
-// does.
+// `PE_READER_LINK_ATTACHMENT`, also one clicked in a part's frame of a signed or encrypted message; `token` is the
+// `preview_token` of the view the reader shows. -1 when the link is not of that view (another view's, even one still
+// shown, or none), or names a file its document does not show (a part's link names only its part's files). The
+// window opens it as a double-click in the strip does.
 //
 // # Safety
 // `core` must be a live handle; `uri` and `token` NULL or NUL-terminated strings.

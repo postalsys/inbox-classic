@@ -753,6 +753,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Aucune clé utilisable pour { $count } destinataires. Recherchez leurs clés ou retirez-les du message. Vous pouvez envoyer le message sans chiffrement s’il ne contient plus de texte, d’images ni de pièces jointes provenant de messages chiffrés.
 }
 pgp-details-part = Partie { $number } : { $label }
+# review: new
+attachment-from-part = De la partie { $number } : { $label }
 pgp-details-signed = Signé le { $when } avec la clé { $key }
 pgp-details-unknown-key = Signé avec la clé { $key }, absente de cet ordinateur
 pgp-details-opened = Déchiffré avec votre clé { $key }
@@ -763,9 +765,20 @@ pgp-bar-count-verified = { $count ->
     [one] { $count } vérifiée
    *[other] { $count } vérifiées
 }
-pgp-bar-count-good = { $count ->
-    [one] { $count } signée ou chiffrée
-   *[other] { $count } signées ou chiffrées
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } chiffrée et signée
+   *[other] { $count } chiffrées et signées
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } chiffrée
+   *[other] { $count } chiffrées
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } signée
+   *[other] { $count } signées
 }
 pgp-bar-count-warning = { $count ->
     [one] { $count } avec avertissement
@@ -965,6 +978,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Téléchargement…
+# review: new
+preview-tile-preparing = Préparation…
 # review: new
 preview-tile-format = Les images { $format } ne sont pas encore affichées
 # review: new

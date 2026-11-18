@@ -1134,6 +1134,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = Część { $number }: { $label }
 # review: new
+attachment-from-part = Z części { $number }: { $label }
+# review: new
 pgp-details-signed = Podpisane { $when } kluczem { $key }
 # review: new
 pgp-details-unknown-key = Podpisane kluczem { $key }, którego nie masz
@@ -1148,11 +1150,25 @@ pgp-bar-parts = Ta wiadomość ma kilka części ({ $count }): { $list }. Każda
 # review: new
 pgp-bar-count-verified = zweryfikowane: { $count }
 # review: new
-pgp-bar-count-good = { $count ->
-    [one] 1 podpisana lub zaszyfrowana
-    [few] { $count } podpisane lub zaszyfrowane
-    [many] { $count } podpisanych lub zaszyfrowanych
-   *[other] { $count } podpisanych lub zaszyfrowanych
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 zaszyfrowana i podpisana
+    [few] { $count } zaszyfrowane i podpisane
+    [many] { $count } zaszyfrowanych i podpisanych
+   *[other] { $count } zaszyfrowanych i podpisanych
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 zaszyfrowana
+    [few] { $count } zaszyfrowane
+    [many] { $count } zaszyfrowanych
+   *[other] { $count } zaszyfrowanych
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 podpisana
+    [few] { $count } podpisane
+    [many] { $count } podpisanych
+   *[other] { $count } podpisanych
 }
 # review: new
 pgp-bar-count-warning = { $count ->
@@ -1491,6 +1507,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Pobieranie…
+# review: new
+preview-tile-preparing = Przygotowywanie…
 # review: new
 preview-tile-format = Obrazy { $format } nie są jeszcze pokazywane
 # review: new

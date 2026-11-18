@@ -26,7 +26,7 @@ mod service;
 pub mod streams;
 
 pub use engine::{Engine, Real, Step};
-pub use service::{Outcome, Previewer, Request, Settings, What};
+pub use service::{Later, Outcome, Previewer, Request, Settings, What};
 
 use std::sync::Arc;
 
@@ -181,7 +181,15 @@ pub fn key_of(bytes: &[u8]) -> Key {
     Key(Arc::from(hex))
 }
 
-/// A file's key ([`key_of`])
+/// The key of a decrypted part's file ([`Request::keep`] false): SHA-256 of where it is (`about`: its message and
+/// attachment, as the core names them), never of its bytes. A hash of the bytes in a crash marker or the refused list
+/// would let anyone who reads the app's folder confirm a guess of what was encrypted; where the file is says nothing
+/// the store does not say already, and still names the same file at the next start
+pub fn key_of_place(about: &str) -> Key {
+    key_of(format!("pe-preview place\0{about}").as_bytes())
+}
+
+/// A file's key ([`key_of`], [`key_of_place`])
 #[derive(Debug, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Key(Arc<str>);
 

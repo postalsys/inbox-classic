@@ -1180,6 +1180,9 @@ struct Arguments {
     // asks which notification was shown (kTestNotification); messages are downloaded only when opened, which the test's
     // steps expect (its step of Options checks the choices)
     bool testHooks = false;
+    // --opened-files-log <path>: with --test-hooks only, the files and links the app would open are written there
+    // in place of opening them
+    std::wstring openedFilesLog;
     // --key-server <url>: keys are looked up on this server on this computer (the UI test's harness), never on the
     // internet
     std::wstring keyServer;
@@ -1272,8 +1275,8 @@ void ReadArguments() {
             keep(argv[++i]);
             SetSignInPageFile(argv[i]);
         } else if (arg == L"--opened-files-log" && i + 1 < count) {
-            keep(argv[++i]);
-            SetOpenedFilesLog(argv[i]);
+            g_arguments.openedFilesLog = argv[++i];
+            keep(g_arguments.openedFilesLog);
         } else if (arg == L"--memory-passwords") {
             g_arguments.memoryPasswords = true;
         } else if (arg == L"--version") {
@@ -1287,6 +1290,10 @@ void ReadArguments() {
         }
     }
     LocalFree(argv);
+    // a release start never logs the links of its messages: only the UI test's, which passes both
+    if (g_arguments.testHooks && !g_arguments.openedFilesLog.empty()) {
+        SetOpenedFilesLog(g_arguments.openedFilesLog);
+    }
 }
 
 bool OpenCore(HWND hwnd) {

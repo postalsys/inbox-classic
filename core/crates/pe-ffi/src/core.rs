@@ -178,6 +178,10 @@ pub enum PeEventKind {
     PdfPreviewsOff = 37,
     /// The printout `pe_print_start` started (its request in `uid`) is made: `pe_print_result` gives the document
     PrintReady = 38,
+    /// The files a view showed as "Preparing..." (not described in time) are described now: the window showing
+    /// the view whose `preview_token` is `detail` builds it again, keeping its scroll as after `pe_preview_show`.
+    /// Once a view, never for one whose previews ended (`pe_previews_end`)
+    PreviewsPrepared = 39,
 }
 
 #[repr(C)]
@@ -227,7 +231,8 @@ pub struct PeEvent {
     /// `Acted`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
     /// notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
     pub message: *const c_char,
-    /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
+    /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`; the view's
+    /// `preview_token`, for `PreviewsPrepared`. NULL otherwise
     pub detail: *const c_char,
     /// How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
     /// otherwise
@@ -273,6 +278,7 @@ impl Callback {
             Event::PreviewAnswered { ask } => (PeEventKind::PreviewAnswered, 0, 0, *ask),
             Event::PdfPreviewsOff => (PeEventKind::PdfPreviewsOff, 0, 0, 0),
             Event::PrintReady { request } => (PeEventKind::PrintReady, 0, 0, *request),
+            Event::PreviewsPrepared { .. } => (PeEventKind::PreviewsPrepared, 0, 0, 0),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
             Event::NewMail {
                 account, folder, uid, ..
@@ -311,6 +317,7 @@ impl Callback {
                 message_id, problem, ..
             } => (PeFailureKind::None, problem.map(c_string), Some(c_string(message_id))),
             Event::NewMail { title, text, .. } => (PeFailureKind::None, Some(c_string(title)), Some(c_string(text))),
+            Event::PreviewsPrepared { token } => (PeFailureKind::None, None, Some(c_string(token))),
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
             Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
@@ -1689,7 +1696,8 @@ pub struct PeMessage {
     pub snippet_is_state: bool,
 }
 
-/// Whether a message is signed or encrypted as a whole
+/// Whether a message is signed or encrypted as a whole (a list row), or how the part an attachment came from was
+/// protected (`PeAttachment`: signed with a confirmed signature, or encrypted, signed or not)
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PeProtection {
@@ -1997,6 +2005,25 @@ pub struct PeAttachment {
     pub refusal: *const c_char,
     /// The strip menu's Show in Message for it (`pe_preview_show`): no item, checked, unchecked or greyed
     pub show_in_message: PeShowInMessage,
+    /// The number of the part of a message with signed or encrypted parts it came from (1 for the first, as the
+    /// page's labels and the Details window count them); 0 in any other message
+    pub part: u32,
+    /// How that part was protected: the strip marks a file of an encrypted part with a lock; `NONE` in any other
+    /// message, and for a part whose signature could not be confirmed
+    pub protection: PeProtection,
+    /// What the strip says of that part ("From part 2: Encrypted. Signed by ..."), for the accessible description;
+    /// `tooltip` ends with it already. Empty in any other message
+    pub part_text: *const c_char,
+}
+
+impl From<pe_core::Protection> for PeProtection {
+    fn from(protection: pe_core::Protection) -> Self {
+        match protection {
+            pe_core::Protection::None => PeProtection::None,
+            pe_core::Protection::Signed => PeProtection::Signed,
+            pe_core::Protection::Encrypted => PeProtection::Encrypted,
+        }
+    }
 }
 
 /// What the strip menu's Show in Message says of a file
@@ -2184,9 +2211,11 @@ pub struct PeMessageInfo {
     pub part_count: usize,
     /// The token of the previews of its attachments after the text, empty for a message with no picture or PDF file:
     /// the document server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the
-    /// page's origin), the strip's Show in Message names the view by it (`pe_preview_show`), Print starts the
-    /// printout with it (`pe_print_start`), and the window ends them with `pe_previews_end` when it shows another
-    /// document or closes
+    /// page's origin; the parts of a signed or encrypted message each show their own files' previews in their own
+    /// document under a token of their own, served the same way whichever frame asks), the strip's Show in Message
+    /// names the view by it (`pe_preview_show`), Print starts the printout with it (`pe_print_start`), a preview's
+    /// link is checked against it (`pe_preview_link`, a part's link too), and the window ends them with
+    /// `pe_previews_end` when it shows another document or closes
     pub preview_token: *const c_char,
 }
 
@@ -2242,6 +2271,9 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             tooltip: strings.add(&a.tooltip),
             refusal: strings.add(a.refusal.as_deref().unwrap_or_default()),
             show_in_message: a.show_in_message.into(),
+            part: a.part.map_or(0, |part| part as u32 + 1),
+            protection: a.protection.into(),
+            part_text: strings.add(&a.part_text),
         })
         .collect();
     let invitation = view.invitation.as_ref().map(|event| {
@@ -2505,7 +2537,9 @@ pub unsafe extern "C" fn pe_message_view(
 }
 
 /// Builds the view of a message whose source is in the store (after `MessageReady`) off the window thread, its source
-/// read there too: `ViewReady` with this request in `uid` follows. 0 on failure.
+/// read there too: `ViewReady` with this request in `uid` follows. 0 on failure. Each reader (the reading pane, a
+/// message window) cancels its own request (`pe_message_view_cancel`) before it asks for another; nothing else drops
+/// it, so two readers of one message each get their view.
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -2539,7 +2573,7 @@ pub unsafe extern "C" fn pe_message_view_result(core: *const PeCore, request: u6
     }
 }
 
-/// Drops a view request no longer waited for
+/// Drops a view request no longer waited for (its reader shows another message or closed)
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -2675,9 +2709,10 @@ pub unsafe extern "C" fn pe_preview_answer_free(answer: *mut PePreviewAnswer) {
 }
 
 /// The attachment (its index in the view's list) a preview's link opens, after `pe_reader_link` said
-/// `PE_READER_LINK_ATTACHMENT`; `token` is the `preview_token` of the view the reader shows. -1 when the link is not
-/// of that view (another view's, even one still shown, or none). The window opens it as a double-click in the strip
-/// does.
+/// `PE_READER_LINK_ATTACHMENT`, also one clicked in a part's frame of a signed or encrypted message; `token` is the
+/// `preview_token` of the view the reader shows. -1 when the link is not of that view (another view's, even one still
+/// shown, or none), or names a file its document does not show (a part's link names only its part's files). The
+/// window opens it as a double-click in the strip does.
 ///
 /// # Safety
 /// `core` must be a live handle; `uri` and `token` NULL or NUL-terminated strings.

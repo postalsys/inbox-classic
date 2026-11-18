@@ -792,6 +792,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } primalaca nema upotrebljiv ključ. Pronađite ključeve ili uklonite te primaoce iz poruke. Slanje bez šifrovanja je moguće samo ako poruka ne sadrži tekst, slike ili priloge iz šifrovanih poruka.
 }
 pgp-details-part = Deo { $number }: { $label }
+# review: new
+attachment-from-part = Iz dela { $number }: { $label }
 pgp-details-signed = Potpisano { $when } ključem { $key }
 pgp-details-unknown-key = Potpisano ključem { $key }, koji nemate
 pgp-details-opened = Dešifrovano vašim ključem { $key }
@@ -799,10 +801,23 @@ pgp-details-for = Šifrovano za { $keys }
 pgp-details-plain = Nije potpisano ni šifrovano
 pgp-bar-parts = Ova poruka ima više delova ({ $count }): { $list }. Za svaki deo je navedeno kako je zaštićen.
 pgp-bar-count-verified = Provereno: { $count }
-pgp-bar-count-good = { $count ->
-    [one] { $count } potpisan ili šifrovan deo
-    [few] { $count } potpisana ili šifrovana dela
-   *[other] { $count } potpisanih ili šifrovanih delova
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } šifrovan i potpisan deo
+    [few] { $count } šifrovana i potpisana dela
+   *[other] { $count } šifrovanih i potpisanih delova
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } šifrovan deo
+    [few] { $count } šifrovana dela
+   *[other] { $count } šifrovanih delova
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } potpisan deo
+    [few] { $count } potpisana dela
+   *[other] { $count } potpisanih delova
 }
 pgp-bar-count-warning = { $count ->
     [one] { $count } traži pažnju
@@ -1033,6 +1048,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Preuzimanje…
+# review: new
+preview-tile-preparing = Priprema se…
 # review: new
 preview-tile-format = { $format } slike se još ne prikazuju
 # review: new

@@ -3,7 +3,9 @@
 // its tooltip) and its size, wrapping into rows and scrolling past three. A double-click, Return or Enter opens the
 // file chosen; a right-click, Shift+F10 or the menu key offers Open, Save As and Save All. The core says what each file
 // is, its size in words, whether it may be opened, its tooltip and what to say when it may not: a file that can run
-// programs looks the same, says why in its tooltip, and is never opened.
+// programs looks the same, says why in its tooltip, and is never opened. A file of a message's encrypted part has a
+// small lock on its icon's corner, in the blue of the encrypted part's label, as the bar's lock is: it came from that
+// part (it is shown decrypted); its tooltip and its accessible help say which part and how it was protected.
 import AppKit
 import CInboxClassic
 
@@ -237,6 +239,8 @@ final class AttachmentTile: NSView {
     let file: Attachment
     let index: Int
     private let icon = NSImageView()
+    /// the lock on the icon of a file of an encrypted part
+    private let lock = NSImageView()
     private let name = NSTextField(labelWithString: "")
     private let size = NSTextField(labelWithString: "")
     private var hovering = false
@@ -248,6 +252,7 @@ final class AttachmentTile: NSView {
     private static let nameFont = NSFont.systemFont(ofSize: 12)
     private static let sizeFont = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
     private static let iconSide: CGFloat = 24
+    private static let lockSide: CGFloat = 14
     private static let padding: CGFloat = 8
     private static let widest: CGFloat = 220
     private static let narrowest: CGFloat = 96
@@ -271,13 +276,18 @@ final class AttachmentTile: NSView {
             label.isSelectable = false
             label.refusesFirstResponder = true
         }
-        [icon, name, size].forEach(addSubview)
+        lock.imageScaling = .scaleProportionallyDown
+        lock.isHidden = file.protection != PE_PROTECTION_ENCRYPTED
+        lock.setAccessibilityElement(false)
+        [icon, lock, name, size].forEach(addSubview)
         // the core's: the whole name and size, and why a program is not opened
         toolTip = file.tooltip
         setAccessibilityElement(true)
         setAccessibilityRole(.button)
         setAccessibilityLabel("\(file.name), \(file.sizeText)")
-        setAccessibilityHelp(file.canOpen ? nil : file.refusal)
+        // why it is not opened, and the part it came from ("From part 2: Encrypted. Not signed")
+        let help = [file.canOpen ? "" : file.refusal, file.partText].filter { !$0.isEmpty }
+        setAccessibilityHelp(help.isEmpty ? nil : help.joined(separator: "\n"))
         setAccessibilityIdentifier("reader.attachment.\(index)")
         addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
                                        owner: self, userInfo: nil))
@@ -289,10 +299,16 @@ final class AttachmentTile: NSView {
 
     var isSelected: Bool { strip?.selected == index }
 
+    /// whether its icon has the lock of a file of an encrypted part
+    var showsLock: Bool { !lock.isHidden && lock.image != nil }
+
     override func layout() {
         super.layout()
         let side = Self.iconSide
         icon.frame = NSRect(x: Self.padding, y: (bounds.height - side) / 2, width: side, height: side)
+        // on the icon's lower right corner, a little past it, as the system badges a file's icon
+        let badge = Self.lockSide
+        lock.frame = NSRect(x: icon.frame.maxX - badge + 4, y: icon.frame.maxY - badge + 3, width: badge, height: badge)
         let left = icon.frame.maxX + 6
         let width = max(bounds.width - left - Self.padding, 0)
         name.frame = NSRect(x: left, y: 4, width: width, height: 16)
@@ -313,6 +329,9 @@ final class AttachmentTile: NSView {
         name.textColor = emphasized ? .alternateSelectedControlTextColor : .labelColor
         size.textColor = emphasized ? .alternateSelectedControlTextColor.withAlphaComponent(0.85) : .secondaryLabelColor
         icon.image = Self.icon(file.kind, color: emphasized ? .white : nil)
+        if !lock.isHidden {
+            lock.image = Self.lockBadge(emphasized: emphasized)
+        }
         needsDisplay = true
     }
 
@@ -378,6 +397,21 @@ final class AttachmentTile: NSView {
     }
 
     private static var cache: [String: NSImage] = [:]
+
+    /// the lock of a file of an encrypted part: a disc in the blue of the encrypted part's label and border, the lock on
+    /// it in that label's fill (secure.rs, `ToneColors`: light on dark blue, dark on light blue at night), readable over
+    /// any icon; chosen, a white disc with the lock in the accent, as the icon turns white on it
+    static func lockBadge(emphasized: Bool) -> NSImage? {
+        let key = "lock@\(emphasized)"
+        if let image = cache[key] { return image }
+        let blue = ToneColors.of(PE_PROTECTION_TONE_GOOD)
+        let colors: [NSColor] = emphasized ? [.selectedContentBackgroundColor, .white] : [blue.fill, blue.border]
+        let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .semibold)
+            .applying(NSImage.SymbolConfiguration(paletteColors: colors))
+        let image = NSImage(systemSymbolName: "lock.circle.fill", accessibilityDescription: nil)?.withSymbolConfiguration(config)
+        cache[key] = image
+        return image
+    }
 
     static func icon(_ kind: PeFileKind, color: NSColor? = nil) -> NSImage? {
         let key = "\(kind.rawValue)@\(color == nil ? "own" : "white")"

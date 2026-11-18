@@ -151,6 +151,8 @@ private:
     void StripMenu(POINT screen);
     // Show in Message chosen for file `index`: drawn in the message (`show`) or taken out, the view built again
     void ShowInMessage(size_t index, bool show);
+    // PreviewsPrepared of the view with this `preview_token`: built again, when it is the one shown
+    void PreviewsPrepared(const std::string& token);
     // the printout started by Print is made (PrintReady): printed in the Print window, when it is this reader's
     void PrintReady(uint64_t request);
     // the printout waited for is not any more (another message shown, the pane closing)

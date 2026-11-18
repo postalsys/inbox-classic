@@ -748,6 +748,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] За { $count } получатели няма използваеми ключове. Намерете ключовете им или премахнете тези получатели от съобщението. Можете да изпратите без шифроване само ако в съобщението няма текст, изображения или прикачени файлове от шифровани съобщения.
 }
 pgp-details-part = Част { $number }: { $label }
+# review: new
+attachment-from-part = От част { $number }: { $label }
 pgp-details-signed = Подписано на { $when } с ключа { $key }
 pgp-details-unknown-key = Подписано с ключа { $key }, който нямате
 pgp-details-opened = Дешифрирано с вашия ключ { $key }
@@ -755,9 +757,20 @@ pgp-details-for = Шифровано за { $keys }
 pgp-details-plain = Нито подписано, нито шифровано
 pgp-bar-parts = Това съобщение има { $count } части: { $list }. Всяка част показва как е защитена.
 pgp-bar-count-verified = потвърдени: { $count }
-pgp-bar-count-good = { $count ->
-    [one] 1 подписана или шифрована
-   *[other] { $count } подписани или шифровани
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 шифрована и подписана
+   *[other] { $count } шифровани и подписани
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 шифрована
+   *[other] { $count } шифровани
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 подписана
+   *[other] { $count } подписани
 }
 pgp-bar-count-warning = { $count ->
     [one] 1 изисква внимание
@@ -958,6 +971,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Изтегля се…
+# review: new
+preview-tile-preparing = Подготвя се…
 # review: new
 preview-tile-format = Изображенията { $format } все още не се показват
 # review: new

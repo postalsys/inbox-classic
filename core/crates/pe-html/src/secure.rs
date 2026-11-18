@@ -2,11 +2,18 @@
 //!
 //! The labels say what each part is ("Signed by Alice, key verified"), so nothing a sender writes may reach them.
 //! This page holds no markup of the message: each part is a complete document of [`crate::render_view_cards`] in an
-//! `iframe` of its own, sandboxed (no scripts, forms, popups or navigation of the page around it). A document can not
-//! draw outside its frame or style another document, which CSS rules of ours could only try to prevent. The apps serve
+//! `iframe` of its own, sandboxed (no scripts, forms or popups; the page around it navigated by a click only). A
+//! document can not draw outside its frame or style another document, which CSS rules of ours could only try to
+//! prevent. The apps serve
 //! the page at an address that ends in `/` and each part at `part-N` beside it ([`part_document`]), out of memory as
 //! they serve the page (not `srcdoc`, which WebKit drops while page scripts are off). `allow-same-origin` lets the app
 //! (never the message: it runs no script) measure each part's height and size its frame to it ([`MEASURE_SCRIPT`]).
+//! A link clicked in a part (the mail's own, or a preview's `inboxclassic:attachment-...`) navigates the top page,
+//! never the frame: the part's document has `<base target="_top">` ([`crate::RenderOptions::in_frame`]) and its
+//! frame's sandbox `allow-top-navigation-by-user-activation`, so only a click does it (the part runs no script). The
+//! apps' handler of the top page's navigation cancels it, as for any message, and opens the link in the browser or
+//! the file (the core checks a preview link's token). A navigation of the frame itself would be refused by the page's
+//! `frame-src 'self'` before the app is asked, and nothing would open. No navigation loads anything remote.
 
 use crate::editor;
 
@@ -97,7 +104,7 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
         ));
         if part.shown {
             body.push_str(&format!(
-                "<iframe class=\"pe-d\" sandbox=\"allow-same-origin\" title=\"{}\" src=\"{PART_DOCUMENT}{index}\"></iframe>",
+                "<iframe class=\"pe-d\" sandbox=\"allow-same-origin allow-top-navigation-by-user-activation\" title=\"{}\" src=\"{PART_DOCUMENT}{index}\"></iframe>",
                 attribute(part.label),
             ));
         }
@@ -151,10 +158,13 @@ mod tests {
         );
         // the label escaped as text, the part a document of its own at its address, nothing of it in the page
         assert!(page.contains("Signed by Alice &lt;a@x.org&gt;"));
-        assert!(page.contains("sandbox=\"allow-same-origin\""));
-        assert!(!page.contains("allow-scripts"));
+        assert!(page.contains("sandbox=\"allow-same-origin allow-top-navigation-by-user-activation\""));
+        // never scripts, popups, forms or a navigation of the top page without the user's click
+        for flag in ["allow-scripts", "allow-popups", "allow-forms", "allow-top-navigation\""] {
+            assert!(!page.contains(flag), "{flag}");
+        }
         assert!(page.contains("src=\"part-0\""));
-        assert!(page.contains("frame-src 'self'"));
+        assert!(page.contains("frame-src 'self';"));
         assert_eq!(page.matches("<iframe").count(), 1);
         assert!(page.contains(&format!("href=\"{PART_LINK}1\"")));
         assert!(page.contains("img-src data:;"));

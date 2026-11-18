@@ -726,6 +726,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Für { $count } Empfänger fehlt ein verwendbarer Schlüssel. Suchen Sie nach den Schlüsseln oder entfernen Sie die Empfänger aus der Nachricht. Unverschlüsselt senden können Sie nur ohne übernommene Inhalte aus verschlüsselten Nachrichten.
 }
 pgp-details-part = Teil { $number }: { $label }
+# review: new
+attachment-from-part = Aus Teil { $number }: { $label }
 pgp-details-signed = Am { $when } mit Schlüssel { $key } signiert
 pgp-details-unknown-key = Mit Schlüssel { $key } signiert; dieser Schlüssel ist hier nicht vorhanden
 pgp-details-opened = Mit Ihrem Schlüssel { $key } entschlüsselt
@@ -733,7 +735,12 @@ pgp-details-for = Verschlüsselt mit folgenden Schlüsseln: { $keys }
 pgp-details-plain = Weder signiert noch verschlüsselt
 pgp-bar-parts = Diese Nachricht besteht aus { $count } Teilen: { $list }. Der Schutzstatus steht jeweils über dem betreffenden Teil.
 pgp-bar-count-verified = { $count } überprüft
-pgp-bar-count-good = { $count } signiert oder verschlüsselt
+# review: new
+pgp-bar-count-encrypted-signed = { $count } verschlüsselt und signiert
+# review: new
+pgp-bar-count-encrypted = { $count } verschlüsselt
+# review: new
+pgp-bar-count-signed = { $count } signiert
 pgp-bar-count-warning = { $count ->
     [one] 1 mit Warnhinweis
    *[other] { $count } mit Warnhinweis
@@ -932,6 +939,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Wird heruntergeladen…
+# review: new
+preview-tile-preparing = Wird vorbereitet…
 # review: new
 preview-tile-format = { $format }-Bilder werden noch nicht angezeigt
 # review: new

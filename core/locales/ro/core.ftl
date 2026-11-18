@@ -1132,6 +1132,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = Partea { $number }: { $label }
 # review: new
+attachment-from-part = Din partea { $number }: { $label }
+# review: new
 pgp-details-signed = Semnat { $when } cu cheia { $key }
 # review: new
 pgp-details-unknown-key = Semnat cu cheia { $key }, pe care nu o aveți
@@ -1146,10 +1148,22 @@ pgp-bar-parts = Acest mesaj are { $count } părți: { $list }. Fiecare parte ara
 # review: new
 pgp-bar-count-verified = Verificate: { $count }
 # review: new
-pgp-bar-count-good = { $count ->
-    [one] 1 semnată sau criptată
-    [few] { $count } semnate sau criptate
-   *[other] { $count } de semnate sau criptate
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 criptată și semnată
+    [few] { $count } criptate și semnate
+   *[other] { $count } de criptate și semnate
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 criptată
+    [few] { $count } criptate
+   *[other] { $count } de criptate
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 semnată
+    [few] { $count } semnate
+   *[other] { $count } de semnate
 }
 # review: new
 pgp-bar-count-warning = { $count ->
@@ -1448,6 +1462,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Se descarcă…
+# review: new
+preview-tile-preparing = Se pregătește…
 # review: new
 preview-tile-format = Imaginile { $format } nu sunt încă afișate
 # review: new

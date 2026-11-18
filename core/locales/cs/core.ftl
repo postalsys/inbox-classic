@@ -768,6 +768,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Pro { $count } příjemců chybí použitelné klíče. Najděte jejich klíče nebo tyto příjemce odeberte ze zprávy. Bez šifrování lze odeslat jen zprávu, která neobsahuje text, obrázky ani přílohy ze šifrovaných zpráv.
 }
 pgp-details-part = Část { $number }: { $label }
+# review: new
+attachment-from-part = Z části { $number }: { $label }
 pgp-details-signed = Digitálně podepsáno: { $when }. Klíč: { $key }
 pgp-details-unknown-key = Podepsáno klíčem { $key }, který nemáte
 pgp-details-opened = Dešifrováno vaším klíčem { $key }
@@ -775,10 +777,23 @@ pgp-details-for = Šifrováno pro klíče: { $keys }
 pgp-details-plain = Bez digitálního podpisu a šifrování
 pgp-bar-parts = Tato zpráva má více částí ({ $count }): { $list }. U každé části je uvedeno, jak je chráněna.
 pgp-bar-count-verified = ověřené: { $count }
-pgp-bar-count-good = { $count ->
-    [one] 1 podepsaná nebo šifrovaná
-    [few] { $count } podepsané nebo šifrované
-   *[other] { $count } podepsaných nebo šifrovaných
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 šifrovaná a podepsaná
+    [few] { $count } šifrované a podepsané
+   *[other] { $count } šifrovaných a podepsaných
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 šifrovaná
+    [few] { $count } šifrované
+   *[other] { $count } šifrovaných
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 podepsaná
+    [few] { $count } podepsané
+   *[other] { $count } podepsaných
 }
 pgp-bar-count-warning = { $count ->
     [one] 1 vyžaduje pozornost
@@ -1014,6 +1029,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Stahování…
+# review: new
+preview-tile-preparing = Připravuje se…
 # review: new
 preview-tile-format = Obrázky { $format } se zatím nezobrazují
 # review: new

@@ -505,12 +505,12 @@ void KeyboardLink(HWND label) {
     SetWindowSubclass(label, KeyboardLinkProc, 0, 0);
 }
 
-void SetAccessibleDescription(HWND control, const std::wstring& text) {
+void SetAccessibleDescription(HWND control, const std::wstring& text, long child) {
     // PROPID_ACC_DESCRIPTION of oleacc.h, which only declares it
     constexpr GUID kDescription = {0x4d48dfe4, 0xbd3f, 0x491f, {0xa6, 0x48, 0x49, 0x2d, 0x6f, 0x20, 0xc5, 0x88}};
     Microsoft::WRL::ComPtr<IAccPropServices> services;
     if (SUCCEEDED(CoCreateInstance(__uuidof(CAccPropServices), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&services)))) {
-        services->SetHwndPropStr(control, static_cast<DWORD>(OBJID_CLIENT), CHILDID_SELF, kDescription, text.c_str());
+        services->SetHwndPropStr(control, static_cast<DWORD>(OBJID_CLIENT), static_cast<DWORD>(child), kDescription, text.c_str());
     }
 }
 

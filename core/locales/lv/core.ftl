@@ -1130,6 +1130,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = { $number }. daļa: { $label }
 # review: new
+attachment-from-part = No { $number }. daļas: { $label }
+# review: new
 pgp-details-signed = Parakstīts { $when } ar atslēgu { $key }
 # review: new
 pgp-details-unknown-key = Parakstīts ar atslēgu { $key }, kuras jums nav
@@ -1144,9 +1146,19 @@ pgp-bar-parts = Šim ziņojumam ir vairākas daļas ({ $count }): { $list }. Kat
 # review: new
 pgp-bar-count-verified = Pārbaudītas: { $count }
 # review: new
-pgp-bar-count-good = { $count ->
-    [one] { $count } parakstīta vai šifrēta
-   *[other] { $count } parakstītas vai šifrētas
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } šifrēta un parakstīta
+   *[other] { $count } šifrētas un parakstītas
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } šifrēta
+   *[other] { $count } šifrētas
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } parakstīta
+   *[other] { $count } parakstītas
 }
 # review: new
 pgp-bar-count-warning = { $count ->
@@ -1426,6 +1438,8 @@ preview-more-files = { $count ->
 }
 # review: new
 preview-tile-downloading = Notiek lejupielāde…
+# review: new
+preview-tile-preparing = Notiek sagatavošana…
 # review: new
 preview-tile-format = { $format } attēli vēl netiek rādīti
 # review: new

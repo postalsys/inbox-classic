@@ -337,7 +337,7 @@ fn parts_signed_apart() {
     assert!(
         protection
             .text
-            .contains("3 parts: 1 signed or encrypted, 2 without a confirmed signature"),
+            .contains("3 parts: 1 signed, 2 without a confirmed signature"),
         "{}",
         protection.text
     );

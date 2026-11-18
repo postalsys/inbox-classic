@@ -81,6 +81,9 @@ pub struct Reader {
     opening: Cell<bool>,
     /// Its view once the core built it, with its pictures from the internet when `remote_images`
     view: RefCell<Option<MessageView>>,
+    /// The view shown was made of the message's text while the rest of it was still coming: the message's arrival
+    /// makes it again
+    text_first: Cell<bool>,
     remote_images: Cell<bool>,
     /// The view and the logo being made for it, and the one-click unsubscribe on the way; 0 for none
     view_request: Cell<u64>,
@@ -270,6 +273,7 @@ impl Reader {
             size: Cell::default(),
             file: RefCell::default(),
             view: RefCell::default(),
+            text_first: Cell::new(false),
             remote_images: Cell::new(false),
             view_request: Cell::new(0),
             logo_request: Cell::new(0),
@@ -580,7 +584,11 @@ impl Reader {
     pub fn on_event(self: &Rc<Self>, event: &Event) -> Option<Loaded> {
         let shown = |folder: i64, uid: u64| uid != 0 && folder == self.folder.get() && uid == self.uid.get();
         match event {
-            Event::MessageReady { folder, uid } if shown(*folder, *uid) => {
+            // another window may have asked for the same message: a view shown whole stays, as the core makes only
+            // the newest view asked for, and one made here at the same time would leave the other window without its
+            Event::MessageReady { folder, uid }
+                if shown(*folder, *uid) && (!self.has_view() || self.text_first.get()) =>
+            {
                 self.stop_downloading_note();
                 self.start_view();
                 Some(Loaded::Fetched)
@@ -597,6 +605,11 @@ impl Reader {
             // a view for a message no longer shown was cancelled, its event is not this one
             Event::ViewReady { request } if self.view_request.get() != 0 && *request == self.view_request.get() => {
                 self.show_view().then_some(Loaded::Shown)
+            }
+            // the files still "Preparing..." in the view shown are described: the view built again, where it was
+            Event::PreviewsPrepared { token } if self.shows_previews(token) => {
+                self.view_again();
+                None
             }
             // the account is back: a message it could not give is tried again
             Event::SyncFinished { account, failure: None }
@@ -626,6 +639,11 @@ impl Reader {
         }
     }
 
+    /// Whether the view shown is the one whose previews `token` names
+    fn shows_previews(&self, token: &str) -> bool {
+        self.view.borrow().as_ref().and_then(|v| v.preview_token.as_deref()) == Some(token)
+    }
+
     /// The view of the message asked for, built on a worker; [`Reader::show_view`] shows it when it comes
     fn start_view(&self) {
         let core = &shell().core;
@@ -649,6 +667,8 @@ impl Reader {
             return false;
         };
         self.show(&view, self.remote_images.get());
+        self.text_first
+            .set(core.message_downloading(self.folder.get(), self.uid.get()));
         self.hide_logo();
         if view.has_logo {
             let request = core
@@ -909,6 +929,12 @@ impl Reader {
         self.retry.is_visible()
     }
 
+    /// Whether it says the message could not be shown (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn says_not_shown(&self) -> bool {
+        self.note.is_visible() && self.note.text() == t!(UiNotShown)
+    }
+
     pub fn failed(&self) {
         self.stop_downloading_note();
         self.header.set_visible(true);
@@ -1001,7 +1027,11 @@ impl Reader {
     /// name the sender gave, its size), then all of them into a folder
     fn show_attachments(&self, view: &MessageView) {
         let count = view.attachments.len();
-        self.strip.show(&view.attachments);
+        let parts = view
+            .protection
+            .as_ref()
+            .map_or(&[][..], |protection| &protection.parts[..]);
+        self.strip.show(&view.attachments, parts);
         ui::set_class(&self.header, "with-files", count > 0);
         self.attachments.set_visible(count > 0);
         if count == 0 {

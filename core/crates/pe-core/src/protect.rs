@@ -82,6 +82,16 @@ pub struct Verdict {
 }
 
 impl Verdict {
+    /// Its signature was confirmed (signed by the sender's key, verified or not) and it was not left sealed
+    pub(crate) fn signature_confirmed(&self) -> bool {
+        self.sealed.is_none() && matches!(self.signature, Signature::Verified { .. } | Signature::Signed { .. })
+    }
+
+    /// It was encrypted and opened to be shown
+    pub(crate) fn opened(&self) -> bool {
+        self.encrypted && self.sealed.is_none()
+    }
+
     /// Opened, its signature not checked here (inline blocks: their signatures are not read)
     fn not_checked(encrypted: bool) -> Verdict {
         Verdict {
@@ -200,6 +210,16 @@ pub struct Protected {
     pub subject: Option<String>,
     /// The other recipients' keys the sender gossiped inside the encryption (Autocrypt)
     pub gossip: Vec<(String, Vec<u8>)>,
+}
+
+impl Protected {
+    /// Whether something of it was decrypted to be shown: its previews and what is opened from it are then kept
+    /// nowhere but under the view
+    pub(crate) fn decrypted(&self) -> bool {
+        self.sections
+            .iter()
+            .any(|section| section.entity.is_some() && section.verdict.as_ref().is_some_and(|v| v.encrypted))
+    }
 }
 
 /// Whether a message may be protected at all: the cheap look before the real one
@@ -325,10 +345,7 @@ pub(crate) fn decrypted_for_index(raw: &[u8], protected: &Protected) -> Option<(
 
 /// [`shown_decrypted`] of a message already read
 fn shown_of(raw: &[u8], protected: &Protected) -> Option<(Vec<u8>, bool)> {
-    let decrypted = protected
-        .sections
-        .iter()
-        .any(|section| section.entity.is_some() && section.verdict.as_ref().is_some_and(|v| v.encrypted));
+    let decrypted = protected.decrypted();
     let entities: Vec<&[u8]> = protected
         .sections
         .iter()

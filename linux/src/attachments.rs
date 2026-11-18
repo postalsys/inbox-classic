@@ -2,8 +2,10 @@
 //! file, its icon by the kind the core gave it, its name and its size. Double-click or Enter opens a file (the reader
 //! asks the core for it and opens what the core wrote with the system's program); a right-click or the menu key offers
 //! Open, Save As... and Save All... through the reader's actions. A file that can run programs looks the same, says so
-//! in its tooltip, and its Open is greyed. Nothing here reads mail data: the names, sizes, kinds, tooltips and the
-//! words refusing a file are the core's.
+//! in its tooltip, and its Open is greyed. A file of an encrypted part of a message whose parts differ has a small lock
+//! on its icon, in the colour of its part's label (the file came from there, decrypted to be shown), and says its part
+//! in its tooltip and to screen readers. Nothing here reads mail data: the names, sizes, kinds, tooltips, the words
+//! refusing a file and the part a file came from are the core's.
 
 use std::cell::RefCell;
 use std::path::Path;
@@ -11,12 +13,16 @@ use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::AttachmentView;
 use pe_core::opening::FileKind;
 use pe_core::previews::ShowInMessage;
+use pe_core::protect::Tone;
+use pe_core::{AttachmentView, PartView, Protection};
 
 /// The pixels of a file's icon
 const ICON_SIZE: i32 = 32;
+
+/// The pixels of the lock on the icon of a file of an encrypted part
+const LOCK_SIZE: i32 = 12;
 
 /// How many rows of files the strip shows before it scrolls
 const ROWS_SHOWN: i32 = 3;
@@ -51,6 +57,8 @@ pub struct Strip {
     pub flow: gtk::FlowBox,
     /// The files shown, as the core described them
     files: RefCell<Vec<AttachmentView>>,
+    /// The tone of each file's lock (its part's), None for a file without one
+    locks: RefCell<Vec<Option<Tone>>>,
     /// Show in Message chosen in a file's menu: its index and what the item said when chosen
     show_in_message: RefCell<Option<ShowChosen>>,
     /// The Show in Message of the menu open last, None when it had none (the UI test reads it)
@@ -78,10 +86,13 @@ impl Strip {
         widget.set_child(Some(&flow));
         widget.add_css_class("attachment-strip");
         widget.set_visible(false);
+        // the locks in the dark colours of their tones while the windows are dark
+        crate::security::follow_dark(&widget);
         let strip = Rc::new(Strip {
             widget,
             flow,
             files: RefCell::default(),
+            locks: RefCell::default(),
             show_in_message: RefCell::default(),
             #[cfg(feature = "e2e")]
             menu_action: RefCell::default(),
@@ -90,20 +101,22 @@ impl Strip {
         strip
     }
 
-    /// The files of a message: one item each, the strip hidden when there are none. The same files as shown (the
-    /// message shown again, with its pictures, or a file taken out of it with Show in Message) keep their items, and
-    /// the one chosen
-    pub fn show(&self, attachments: &[AttachmentView]) {
+    /// The files of a message: one item each, the strip hidden when there are none; `parts` the message's parts when
+    /// they differ, whose labels' tones colour the locks. The same files as shown (the message shown again, with its
+    /// pictures, or a file taken out of it with Show in Message) keep their items, and the one chosen
+    pub fn show(&self, attachments: &[AttachmentView], parts: &[PartView]) {
         self.widget.set_visible(!attachments.is_empty());
-        if same_items(&self.files.borrow(), attachments) {
+        let locks: Vec<Option<Tone>> = attachments.iter().map(|file| lock_tone(file, parts)).collect();
+        if same_items(&self.files.borrow(), attachments) && *self.locks.borrow() == locks {
             *self.files.borrow_mut() = attachments.to_vec();
             return;
         }
         self.flow.remove_all();
-        for (index, file) in attachments.iter().enumerate() {
-            self.flow.append(&item(index, file));
+        for (index, (file, lock)) in attachments.iter().zip(&locks).enumerate() {
+            self.flow.append(&item(index, file, *lock));
         }
         *self.files.borrow_mut() = attachments.to_vec();
+        *self.locks.borrow_mut() = locks;
         self.fit_height();
     }
 
@@ -342,11 +355,29 @@ impl Strip {
                 .and_downcast::<gio::ThemedIcon>()
                 .and_then(|icon| icon.names().first().map(|n| n.to_string()))
                 .unwrap_or_default();
+            let lock = crate::e2e::descendants::<gtk::Image>(child.upcast_ref())
+                .into_iter()
+                .find(|image| image.widget_name() == "attachment-lock" && image.is_visible())
+                .map(|image| {
+                    ["verified", "good", "warning", "neutral"]
+                        .into_iter()
+                        .find(|tone| image.has_css_class(&format!("security-{tone}")))
+                        .unwrap_or_default()
+                        .to_string()
+                });
+            let description = self
+                .files
+                .borrow()
+                .get(index as usize - 1)
+                .and_then(description)
+                .unwrap_or_default();
             found.push(Shown {
                 name: text("attachment-name"),
                 size: text("attachment-size"),
                 icon,
                 tooltip: child.tooltip_text().map(|t| t.to_string()).unwrap_or_default(),
+                lock,
+                description,
             });
         }
         found
@@ -361,6 +392,10 @@ pub struct Shown {
     pub size: String,
     pub icon: String,
     pub tooltip: String,
+    /// The tone of the lock on its icon, None without one
+    pub lock: Option<String>,
+    /// What it says to screen readers beyond its name and size
+    pub description: String,
 }
 
 /// Whether `shown` and `files` are the same files, but for what Show in Message says of them
@@ -375,10 +410,59 @@ fn same_items(shown: &[AttachmentView], files: &[AttachmentView]) -> bool {
         })
 }
 
-/// The item of file `index`: its icon, its name (shortened in the middle, the whole of it in the tooltip) and its size
-fn item(index: usize, file: &AttachmentView) -> gtk::FlowBoxChild {
-    let icon = gtk::Image::from_gicon(&gio::ThemedIcon::from_names(icon_names(file.kind)));
+/// The tone of the lock of `file`: its part's, when that part was encrypted; None for any other file
+fn lock_tone(file: &AttachmentView, parts: &[PartView]) -> Option<Tone> {
+    if file.protection != Protection::Encrypted {
+        return None;
+    }
+    Some(
+        file.part
+            .and_then(|part| parts.get(part))
+            .map_or(Tone::Good, |part| part.tone),
+    )
+}
+
+/// What a file says to screen readers beyond its name and size: why it does not open, and the part it came from
+fn description(file: &AttachmentView) -> Option<String> {
+    let lines: Vec<&str> = [file.refusal.as_deref().unwrap_or_default(), file.part_text.as_str()]
+        .into_iter()
+        .filter(|line| !line.is_empty())
+        .collect();
+    (!lines.is_empty()).then(|| lines.join("\n"))
+}
+
+/// The icon of a file, with a lock in the corner in `lock`'s colour for a file of an encrypted part: on a disc of the
+/// strip's background, so it reads as a mark on the file rather than a part of its picture
+fn file_icon(kind: FileKind, lock: Option<Tone>) -> gtk::Widget {
+    let icon = gtk::Image::from_gicon(&gio::ThemedIcon::from_names(icon_names(kind)));
     icon.set_pixel_size(ICON_SIZE);
+    let Some(tone) = lock else {
+        return icon.upcast();
+    };
+    // filled, to read at its size; the outline the bar has where the theme has no filled one
+    let badge = gtk::Image::from_gicon(&gio::ThemedIcon::from_names(&[
+        "ic-lock-closed-filled-symbolic",
+        "ic-lock-closed-symbolic",
+    ]));
+    badge.set_widget_name("attachment-lock");
+    badge.set_pixel_size(LOCK_SIZE);
+    badge.set_halign(gtk::Align::End);
+    badge.set_valign(gtk::Align::End);
+    badge.add_css_class("attachment-lock");
+    crate::security::set_tone(&badge, tone);
+    badge.add_css_class("security-tint");
+    // the tooltip and the description say it
+    badge.set_accessible_role(gtk::AccessibleRole::Presentation);
+    let overlay = gtk::Overlay::new();
+    overlay.set_child(Some(&icon));
+    overlay.add_overlay(&badge);
+    overlay.upcast()
+}
+
+/// The item of file `index`: its icon (with a lock for a file of an encrypted part, `lock` its tone), its name
+/// (shortened in the middle, the whole of it in the tooltip) and its size
+fn item(index: usize, file: &AttachmentView, lock: Option<Tone>) -> gtk::FlowBoxChild {
+    let icon = file_icon(file.kind, lock);
     let name = gtk::Label::new(Some(&file.filename));
     name.set_widget_name("attachment-name");
     name.set_xalign(0.0);
@@ -401,14 +485,14 @@ fn item(index: usize, file: &AttachmentView) -> gtk::FlowBoxChild {
     child.set_child(Some(&content));
     child.add_css_class("attachment-file");
     child.set_widget_name(&format!("attachment-{index}"));
-    // the core's: the whole name and size, and why a file that can run programs does not open
+    // the core's: the whole name and size, why a file that can run programs does not open, the part it came from
     child.set_tooltip_text(Some(&file.tooltip));
     child.update_property(&[gtk::accessible::Property::Label(&format!(
         "{}, {}",
         file.filename, file.size_text
     ))]);
-    if let Some(refusal) = &file.refusal {
-        child.update_property(&[gtk::accessible::Property::Description(refusal)]);
+    if let Some(description) = description(file) {
+        child.update_property(&[gtk::accessible::Property::Description(&description)]);
     }
     child
 }
@@ -469,5 +553,71 @@ mod tests {
         ] {
             assert!(!icon_names(kind).is_empty(), "{kind:?}");
         }
+    }
+
+    fn file(protection: Protection, part: Option<usize>, part_text: &str) -> AttachmentView {
+        AttachmentView {
+            protection,
+            part,
+            part_text: part_text.into(),
+            safe_filename: "floor-plan.png".into(),
+            filename: "floor-plan.png".into(),
+            mime_type: "image/png".into(),
+            size: 628,
+            size_text: "628 bytes".into(),
+            kind: FileKind::Image,
+            tooltip: String::new(),
+            refusal: None,
+            show_in_message: ShowInMessage::None,
+        }
+    }
+
+    fn part(tone: Tone) -> PartView {
+        PartView {
+            tone,
+            label: String::new(),
+            details: Vec::new(),
+            encrypted: true,
+            signed: tone == Tone::Verified,
+        }
+    }
+
+    /// Only a file of an encrypted part has a lock, in its part's tone
+    #[test]
+    fn a_lock_only_on_files_of_encrypted_parts() {
+        let parts = [part(Tone::Neutral), part(Tone::Verified)];
+        assert_eq!(
+            lock_tone(&file(Protection::Encrypted, Some(1), "x"), &parts),
+            Some(Tone::Verified)
+        );
+        assert_eq!(
+            lock_tone(&file(Protection::Encrypted, Some(0), "x"), &parts),
+            Some(Tone::Neutral)
+        );
+        assert_eq!(
+            lock_tone(&file(Protection::Encrypted, Some(5), "x"), &parts),
+            Some(Tone::Good)
+        );
+        assert_eq!(lock_tone(&file(Protection::Signed, Some(1), "x"), &parts), None);
+        assert_eq!(lock_tone(&file(Protection::None, None, ""), &parts), None);
+    }
+
+    /// Screen readers hear why a file does not open and the part it came from
+    #[test]
+    fn the_description_says_the_part() {
+        assert_eq!(description(&file(Protection::None, None, "")), None);
+        let from = file(Protection::Encrypted, Some(1), "From part 2: Encrypted. Not signed");
+        assert_eq!(
+            description(&from).as_deref(),
+            Some("From part 2: Encrypted. Not signed")
+        );
+        let refused = AttachmentView {
+            refusal: Some("It can run programs".into()),
+            ..from
+        };
+        assert_eq!(
+            description(&refused).as_deref(),
+            Some("It can run programs\nFrom part 2: Encrypted. Not signed")
+        );
     }
 }

@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 
 use pe_i18n::{Text, tr_args};
 
-use super::{Files, PreviewFile, lock, lock_shown, unpoisoned};
+use super::{Files, PreviewDocument, PreviewFile, lock, lock_shown, unpoisoned};
 use crate::connections::Connection;
 use crate::{Core, Event};
 
@@ -21,7 +21,8 @@ const PRINT_WAIT: Duration = Duration::from_secs(30);
 /// What a printout is made of, taken from the view while it is shown
 struct Printout {
     parts: pe_html::PrintParts,
-    files: Vec<pe_html::PreviewFile>,
+    /// The files shown, each with the part whose document shows it (None for a message's one document)
+    files: Vec<(Option<usize>, pe_html::PreviewFile)>,
     /// The request drawing the pictures; None when the document has none
     request: Option<u64>,
 }
@@ -30,9 +31,10 @@ struct Printout {
 /// way to newer ones, so none is kept until the app quits
 const PRINTOUTS_KEPT: usize = 8;
 
-/// Keeps a printout for its window, dropping the oldest past [`PRINTOUTS_KEPT`] (requests only grow)
-fn keep_printout(prints: &mut HashMap<u64, String>, request: u64, document: String) {
-    prints.insert(request, document);
+/// Keeps a printout of the view `token` for its window, dropping the oldest past [`PRINTOUTS_KEPT`] (requests only
+/// grow); one whose view ended is dropped then
+fn keep_printout(prints: &mut HashMap<u64, (String, String)>, request: u64, token: String, document: String) {
+    prints.insert(request, (token, document));
     while prints.len() > PRINTOUTS_KEPT {
         let Some(oldest) = prints.keys().min().copied() else {
             break;
@@ -50,17 +52,18 @@ impl Core {
             let mut shown = lock_shown(&self.previews.shown);
             let view = shown.iter_mut().find(|shown| shown.token == token)?;
             let parts = view.print.clone()?;
-            let pictures = view.files.iter().any(is_printed_picture);
+            let pictures = view.files().any(is_printed_picture);
             Printout {
                 parts,
-                files: view.files.clone(),
+                files: view.documents.iter().flat_map(printed_files).collect(),
                 request: if pictures { self.shown_request(view) } else { None },
             }
         };
         let print = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let token = token.to_string();
         let work = self.in_background(Connection::Reads, move |core| {
             let document = printed(&core.previews.files, &printout);
-            keep_printout(&mut unpoisoned(&core.previews.prints), print, document);
+            keep_printout(&mut unpoisoned(&core.previews.prints), print, token, document);
             let _ = core.post(Event::PrintReady { request: print });
         });
         self.runtime().ok()?.spawn(work);
@@ -69,8 +72,23 @@ impl Core {
 
     /// The document of a printout [`Core::print_start`] made, once, after its [`Event::PrintReady`]
     pub fn print_result(&self, request: u64) -> Option<String> {
-        unpoisoned(&self.previews.prints).remove(&request)
+        unpoisoned(&self.previews.prints)
+            .remove(&request)
+            .map(|(_, document)| document)
     }
+}
+
+/// A document's files as the printout names them: a part's under its part's name ("Part 2: photo.jpg"), as every
+/// part's text is printed in one document
+fn printed_files(document: &PreviewDocument) -> Vec<(Option<usize>, pe_html::PreviewFile)> {
+    let mut files = document.files.clone();
+    if let Some(part) = document.part {
+        let name = tr_args(Text::HeaderPart, &[("number", (part + 1).into())]);
+        for file in &mut files {
+            file.name = format!("{name}: {}", file.name);
+        }
+    }
+    files.into_iter().map(|file| (document.part, file)).collect()
 }
 
 /// A file the printout shows as a picture: a picture drawn in the document (not a PDF file's page, not a tile)
@@ -78,53 +96,57 @@ fn is_printed_picture(file: &pe_html::PreviewFile) -> bool {
     !file.paper && file.tile.is_none() && !file.pages.is_empty()
 }
 
-/// The document to print: the message, then each picture drawn and a line for every other file shown
+/// The document to print: the message, then each picture drawn and a line for every other file shown; in a message
+/// with signed or encrypted parts each part's after that part's text
 fn printed(files: &Files, printout: &Printout) -> String {
     let drawn = match printout.request {
-        Some(request) => wait_drawn(files, request, &printout.files, Instant::now() + PRINT_WAIT),
+        Some(request) => {
+            let shown = printout.files.iter().map(|(_, file)| file);
+            wait_drawn(files, request, shown, Instant::now() + PRINT_WAIT)
+        }
         None => HashMap::new(),
     };
     let lines: Vec<String> = printout
         .files
         .iter()
-        .map(|file| {
+        .map(|(_, file)| {
             tr_args(
                 Text::PreviewNotPrinted,
                 &[("name", (&file.name).into()), ("details", (&file.details).into())],
             )
         })
         .collect();
-    let items: Vec<pe_html::PrintItem> = printout
+    let items: Vec<(Option<usize>, pe_html::PrintItem)> = printout
         .files
         .iter()
         .zip(&lines)
-        .map(|(file, line)| {
+        .map(|((part, file), line)| {
             // only the printed pictures were waited for
             let picture = drawn
                 .get(&file.attachment)
                 .and_then(|drawn| drawn.pages.get(&0)?.as_ref().ok());
-            match picture {
+            let item = match picture {
                 Some(picture) => pe_html::PrintItem::Picture {
                     name: &file.name,
                     mime: picture.mime.as_str(),
                     bytes: &picture.bytes,
                 },
                 None => pe_html::PrintItem::Line(line),
-            }
+            };
+            (*part, item)
         })
         .collect();
     pe_html::print_document_with(&printout.parts, &items)
 }
 
 /// The pictures of `shown` that `request` drew by `until`: each file once it is done, or as far as it came
-fn wait_drawn(
+fn wait_drawn<'a>(
     files: &Files,
     request: u64,
-    shown: &[pe_html::PreviewFile],
+    shown: impl Iterator<Item = &'a pe_html::PreviewFile>,
     until: Instant,
 ) -> HashMap<usize, PreviewFile> {
     let wanted: Vec<usize> = shown
-        .iter()
         .filter(|file| is_printed_picture(file))
         .map(|file| file.attachment)
         .collect();
@@ -157,7 +179,7 @@ mod keep_tests {
     fn printouts_nobody_takes_give_way_to_newer_ones() {
         let mut prints = HashMap::new();
         for request in 1..=(PRINTOUTS_KEPT as u64 + 3) {
-            keep_printout(&mut prints, request, format!("doc {request}"));
+            keep_printout(&mut prints, request, "t".into(), format!("doc {request}"));
         }
         assert_eq!(prints.len(), PRINTOUTS_KEPT);
         assert!(!prints.contains_key(&3) && prints.contains_key(&4));

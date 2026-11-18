@@ -9,7 +9,8 @@ use std::time::{Duration, Instant};
 use pe_i18n::{Text, tr, tr_args};
 use pe_preview::limits::{MAX_FILE, MAX_PREVIEWS};
 
-use super::{DESCRIBE, PREVIEW_PAGES, PreviewDescription, PreviewRefusal};
+use super::preparing::{Described, Late};
+use super::{DESCRIBE, PREVIEW_PAGES, Preparing, PreviewDescription, PreviewRefusal};
 use crate::Core;
 use crate::opening::FileKind;
 use crate::view;
@@ -26,7 +27,7 @@ pub enum ShowInMessage {
     /// choosing it draws the file in the message
     Off,
     /// A tile that can not be drawn (a HEIC picture, a PDF file with a password, a file too large, one still
-    /// downloading): the command is greyed
+    /// downloading or being prepared): the command is greyed
     Unavailable,
 }
 
@@ -42,6 +43,9 @@ pub(crate) struct Choices {
 pub(crate) struct PreviewPlan<'a> {
     /// The core whose render thread reads the files' descriptions
     pub core: &'a Core,
+    /// Where the message is, as a crash marker names it (`PreviewSource::about`): a decrypted part's file is named by
+    /// it, never by its bytes ([`pe_preview::key_of_place`])
+    pub about: String,
     /// Options' "Show attachments in messages": files drawn without the user asking
     pub auto: bool,
     /// PDF files are drawn
@@ -52,6 +56,18 @@ pub(crate) struct PreviewPlan<'a> {
     pub choices: Choices,
     /// A large message's text shown first: its files are not here yet; their sizes, in the strip's order
     pub downloading: Option<Vec<u64>>,
+    /// What came of the files an earlier view of the message did not have described in time
+    pub late: Late,
+    /// The files of this view not described in time, shown as "Preparing…" until they are
+    pub preparing: Arc<Preparing>,
+}
+
+impl PreviewPlan<'_> {
+    /// Gives `view` (built with this plan) its files not described in time, for the window to be told of them
+    pub(crate) fn preparing_of(&self, view: &mut crate::MessageView) {
+        view.preparing = self.preparing.has_missed();
+        view.preview_preparing = Some(self.preparing.clone());
+    }
 }
 
 /// What the view takes of the plan: the section for pe-html, and Show in Message for each listed attachment
@@ -70,31 +86,70 @@ enum Fate {
     Shown(pe_html::PreviewFile, ShowInMessage),
 }
 
-/// The files of a message the view goes through, with the time left to read their sizes and the pictures left
-struct Walk<'a, 'p> {
-    plan: &'a PreviewPlan<'p>,
+/// What the documents of one view share as the plan goes through them, one after another: the time left to read
+/// their files' sizes and the pictures left
+pub(crate) struct Budget {
     until: Instant,
     left: usize,
+}
+
+impl Budget {
+    /// A view's: at most [`DESCRIBE`] for the sizes of all its files, [`MAX_PREVIEWS`] pictures
+    pub(crate) fn new() -> Budget {
+        Budget {
+            until: Instant::now() + DESCRIBE,
+            left: MAX_PREVIEWS,
+        }
+    }
+}
+
+/// Where one document's files are among the message's attachments
+#[derive(Debug, Clone, Copy)]
+pub(crate) struct Among {
+    /// The place of its first file in the strip (the files of the parts before it come first)
+    pub first: usize,
+    /// Its files' descriptions may be kept in the cache: false for a message something of which was decrypted
+    pub keep: bool,
+}
+
+/// The files of a document the view goes through, with the budget of the whole view
+struct Walk<'a, 'p> {
+    plan: &'a PreviewPlan<'p>,
+    budget: &'a mut Budget,
+    among: Among,
     /// A PDF file was left out because PDF files are off
     pdf_off: bool,
 }
 
 /// The previews of a message's listed attachments, in the order of the strip: each picture, and the first pages of
-/// each PDF file, with the sizes read before the document is shown (at most [`DESCRIBE`] for them all), at most
-/// [`MAX_PREVIEWS`] pictures in all unless the user asked for more; a tile for a file that is not drawn, and a line
-/// for those past the budget
+/// each PDF file, with the sizes read before the document is shown (at most [`DESCRIBE`] for them all: a file not
+/// described by then is a "Preparing…" tile until it is), at most [`MAX_PREVIEWS`] pictures in all unless the user
+/// asked for more; a tile for a file that is not drawn, and a line for those past the budget
 pub(crate) fn section(message: &pe_mime::parser::Message, plan: &PreviewPlan) -> Planned {
+    let among = Among { first: 0, keep: true };
+    part_section(message, plan, &mut Budget::new(), among)
+}
+
+/// [`section`] of one part of a message with signed or encrypted parts, `part` that part's message: its files
+/// numbered by their place in the strip (`among`), under a token of the part's own; `budget` the view's, shared by
+/// its parts in their order
+pub(crate) fn part_section(
+    part: &pe_mime::parser::Message,
+    plan: &PreviewPlan,
+    budget: &mut Budget,
+    among: Among,
+) -> Planned {
     let mut walk = Walk {
         plan,
-        until: Instant::now() + DESCRIBE,
-        left: MAX_PREVIEWS,
+        budget,
+        among,
         pdf_off: false,
     };
     let mut files = Vec::new();
     let mut states = Vec::new();
     let mut more = 0;
-    for (index, attachment) in view::listed(&message.attachments).enumerate() {
-        let state = match walk.fate(index, attachment) {
+    for (index, attachment) in view::listed(&part.attachments).enumerate() {
+        let state = match walk.fate(among.first + index, attachment) {
             Fate::Left(state) => state,
             Fate::More => {
                 more += 1;
@@ -147,9 +202,9 @@ impl Walk<'_, '_> {
         // a file asked for has a wait and a budget of its own
         let wait = match asked {
             true => DESCRIBE,
-            false => self.until.saturating_duration_since(Instant::now()),
+            false => self.budget.until.saturating_duration_since(Instant::now()),
         };
-        if !asked && (self.left == 0 || wait.is_zero()) {
+        if !asked && self.budget.left == 0 {
             return Fate::More;
         }
         self.drawn(index, attachment, kind, asked, wait)
@@ -164,15 +219,18 @@ impl Walk<'_, '_> {
         asked: bool,
         wait: Duration,
     ) -> Fate {
-        let file = Arc::new(attachment.content.clone());
         let size = attachment.content.len() as u64;
-        let description = self.plan.core.preview_describe(self.plan.pdfs, file, wait, asked);
+        let Some(description) = self.describe(index, attachment, asked, wait) else {
+            // read on in the background: the window is told when it is, and builds the view again
+            let tile = tile(index, attachment, kind, size, tr(Text::PreviewTilePreparing));
+            return Fate::Shown(tile, ShowInMessage::Unavailable);
+        };
         let pdf = kind == FileKind::Pdf;
-        let left = if asked { MAX_PREVIEWS } else { self.left };
+        let left = if asked { MAX_PREVIEWS } else { self.budget.left };
         match description.map(|d| preview_file(index, attachment, pdf, &d, left)) {
             Ok(Some(file)) => {
                 if !asked {
-                    self.left -= file.pages.len();
+                    self.budget.left -= file.pages.len();
                 }
                 Fate::Shown(file, ShowInMessage::On)
             }
@@ -189,6 +247,48 @@ impl Walk<'_, '_> {
                 Fate::Shown(tile(index, attachment, kind, size, tile_words(&reason)), state)
             }
         }
+    }
+
+    /// What came of attachment `index` after an earlier view's wait, when it was read from these very bytes (another
+    /// view of the message, decrypted or not, may have other files at that place); read again when it was refused by
+    /// a setting that may have changed since
+    fn late(&self, index: usize, attachment: &pe_mime::parser::Attachment) -> Option<Described> {
+        let late = &self.plan.late;
+        // the key only for a file described late at that place
+        late.keys().find(|(at, _)| *at == index)?;
+        let late = late.get(&(index, pe_preview::key_of(&attachment.content)))?;
+        match late {
+            Err(PreviewRefusal::Disabled | PreviewRefusal::Off) => None,
+            late => Some(late.clone()),
+        }
+    }
+
+    /// The description of a file: what came of it after an earlier view's wait, or read now, waiting at most `wait`;
+    /// None when it did not come in time
+    fn describe(
+        &mut self,
+        index: usize,
+        attachment: &pe_mime::parser::Attachment,
+        asked: bool,
+        wait: Duration,
+    ) -> Option<Described> {
+        if let Some(late) = self.late(index, attachment) {
+            return Some(late);
+        }
+        let file = Arc::new(attachment.content.clone());
+        let about = format!("{}, attachment {index}", self.plan.about);
+        let (pdfs, keep) = (self.plan.pdfs, self.among.keep);
+        let preparing = &self.plan.preparing;
+        let later = preparing.expect(index, file.clone());
+        let described = self
+            .plan
+            .core
+            .preview_describe(pdfs, file, about, wait, asked, keep, later);
+        match described.is_some() {
+            true => preparing.answered(),
+            false => preparing.missed(),
+        }
+        described
     }
 }
 
