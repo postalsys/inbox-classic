@@ -22,7 +22,6 @@ menu-sort-by = &Sortuj według
 menu-text-size = &Rozmiar tekstu
 # review: new
 menu-folder = &Folder
-# review: new
 menu-insert = Ws&taw
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -185,12 +184,9 @@ cmd-export-address-book = &Eksportuj książkę adresową...
 cmd-export-setup = Eksportuj u&stawienia i konta...
 # review: new
 cmd-import-setup = Im&portuj ustawienia i konta...
-# review: new
 cmd-compose-sign = &Podpisz cyfrowo
-# review: new
 cmd-compose-encrypt = &Szyfruj
-# review: new
-cmd-attach-my-key = Załącz mój klucz &publiczny
+cmd-attach-my-key = Załącz swój klucz &publiczny
 
 ## The tray icon's menu
 
@@ -415,11 +411,8 @@ ui-tb-send = Wyślij
 ui-tb-save = Zapisz
 # review: new
 ui-tb-attach = Załącz
-# review: new
 ui-tb-sign = Podpisz
-# review: new
 ui-tb-encrypt = Szyfruj
-# review: new
 ui-field-keys = Klucze:
 # review: new
 ui-field-from = Od:
@@ -1367,25 +1360,15 @@ ui-contact-key-none = Brak klucza
 ui-contact-key-use-new = Użyj &nowego klucza
 # review: new
 ui-contact-key-keep = &Zachowaj bieżący
-# review: new
 ui-recipient-keys-title = Klucze odbiorców
-# review: new
 ui-recipient-col-recipient = Odbiorca
-# review: new
 ui-recipient-col-key = Klucz
-# review: new
-ui-recipient-find-key = &Znajdź klucz
-# review: new
+ui-recipient-find-key = Znajdź &klucz
 ui-recipient-remove = &Usuń z wiadomości
-# review: new
 ui-send-unencrypted = Wyślij &bez szyfrowania
-# review: new
 ui-compose-make-key = &Utwórz klucz...
-# review: new
 ui-compose-show-keys = &Klucze szyfrowania...
-# review: new
 ui-compose-encrypt-off = &Wyłącz szyfrowanie
-# review: new
 ui-compose-keep-encrypted = &Zachowaj szyfrowanie
 # review: new
 ui-setup-export-title = Eksportuj ustawienia i konta
