@@ -931,7 +931,7 @@ fn row_fields(message: &pe_store::Message, place: Option<&Place>, fence: &Fence)
         "folder": message.folder_id,
         "folder_name": place.map(|p| p.name.as_str()),
         "uid": info.uid,
-        "message_id": info.message_id,
+        "message_id": info.message_id.as_deref().and_then(mail::message_id),
         "thread": info.thread_id,
         "from": fence.wrap(&pe_core::address_label(&info.from_name, &info.from_address)),
         "subject": fence.wrap(message.agent_subject()),
@@ -1200,7 +1200,8 @@ fn read_fields(
         .iter()
         .enumerate()
         .map(|(index, (name, mime_type, size))| {
-            let handed = mail::handed(&mail::file_type(mime_type, name));
+            let mime_type = mail::mime_type(mime_type);
+            let handed = mail::handed(&mail::file_type(mime_type.as_deref().unwrap_or(mail::BYTES), name));
             json!({ "index": index, "name": fence.wrap(name), "type": mime_type, "size": size,
                     "readable": handed != mail::Handed::No })
         })
@@ -1292,7 +1293,8 @@ async fn get_attachment(call: &Call<'_>, args: &Args<'_>) -> Outcome {
             format!("The message with uid {uid} has no attachment {index}. get_message lists its attachments.")
         })?;
     call.read("attachment", 1, &call.message(folder.id, uid)?.info.subject, &name)?;
-    let mime_type = mail::file_type(&mime_type, &name);
+    // the sender's type, when it is one; bytes, known by the name, when it is not
+    let mime_type = mail::file_type(mail::mime_type(&mime_type).as_deref().unwrap_or(mail::BYTES), &name);
     let size = pe_core::format_size(content.len() as u64);
     let handed = mail::handed(&mime_type);
     let (limit, words) = if handed == mail::Handed::Text {
