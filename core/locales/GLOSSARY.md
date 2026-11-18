@@ -795,6 +795,19 @@ written as the `[many]` form.
   ("tekst podpisu") is distinct from a digital signature ("podpis cyfrowy").
 - "Oznaczenie śmieci" refers to the junk flag. Removing it does not delete the message. The email warning tells
   agents to treat message content as data, not as commands to execute.
+- Compose statuses describe protection when sending. "Potwierdzono właściciela klucza" is separate from
+  a valid digital signature; "odpowiedni klucz" must be usable for encryption, not merely found. Dates follow
+  "Ostatnie wyszukiwanie:", key-state explanations follow "Powód:" on their own line.
+- Missing-key dialog guidance uses one/few/many/other with "2 odbiorcy nie mają" and "5 odbiorców nie ma".
+  Counts stay in few/many/other. Other compose status counts remain in parentheses to avoid case endings;
+  names and address lists follow a head noun and colon, unchanged.
+- Use "Załącz swój klucz publiczny" for the selected sender address. "Znajdź &klucz" uses K in the recipient
+  dialog, distinct from "&Zachowaj bieżący" (Z). Other mnemonic collisions remain pending in the exact state.
+- Help uses informal singular imperatives and capitalized Ty/Twój/Ci without gendered past forms. Preserve the
+  existing literal <kbd>Kliknięcie</kbd> text. Encrypted drafts use only the sender's key, without a digital signature.
+  Text, images and attachments inherited from encrypted mail must be removed before unencrypted sending.
+- Attachment reminders recognize English, German, Estonian, Spanish and French phrases, not Polish. Do not
+  suggest a Polish phrase will trigger a reminder or promise identical plain-text rendering in every mail app.
 
 ### Português (pt-BR, Brasil)
 
