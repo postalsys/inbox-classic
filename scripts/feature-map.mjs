@@ -596,6 +596,26 @@ const sections = [
                 checked: ['The notice shows with the photo', 'Turning the setting on brings the pages back']
             },
             {
+                shot: 'read-32-previews-tiles',
+                name: 'Files not drawn, and Show in Message',
+                what: 'A picture or PDF file the core does not draw (HEIC, AVIF and JPEG XL pictures, a PDF file with a password, a file too large or not what its name says, one still downloading) is a tile after the text instead: its type, name, size and why, the same size whatever it says, opening the file as the strip does. Show in Message in the strip menu of a file takes it out of the message or draws it, also with the previews turned off; the text stays where it was.',
+                how: 'Right-click a file in the strip (Shift+F10) and choose Show in Message.',
+                checked: [
+                    'The HEIC picture and the protected PDF file are tiles that say why',
+                    'Tab and Enter on a tile open the file',
+                    'Show in Message is checked for a file shown, greyed for a tile',
+                    'Choosing it takes the file out and back without the text moving',
+                    'With the previews off it draws one file'
+                ]
+            },
+            {
+                shot: 'read-33-previews-print',
+                name: 'Printing a message with its pictures',
+                what: 'Print puts the pictures after the text on the paper, drawn by the core if the pane had not yet, and a line for each PDF file and tile that says it is not printed and to open it to print it.',
+                how: 'Print a message with a picture and a PDF file.',
+                checked: ['The photo is on the paper', 'A line names the invoice, which is not printed']
+            },
+            {
                 shot: 'read-4-save',
                 name: 'Saving an attachment',
                 what: 'The standard Save dialog, suggesting the safe name, starting in Downloads (after that, where you saved last).',

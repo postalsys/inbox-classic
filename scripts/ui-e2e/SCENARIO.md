@@ -118,6 +118,15 @@ taken away after: `photo-and-pdf.eml`, a photo (`lake.jpg`) and a three-page inv
   switch): the message shows the photo and the notice that a PDF file closed Inbox Classic, naming "Show PDF files in
   messages" (`read-31-previews-pdf-off`); the setting shows it off; turned on, the notice is gone and the pages are back
 - on the Mac and Linux in dark mode: the photo as it is, the pages still on white, the names in the dark colours
+- `tiles.eml` (a HEIC picture, a photo and a PDF file with a password): the photo shows, the HEIC picture and the PDF
+  file are tiles of the same size with their type, name, size and why they are not shown; Tab and Enter on a tile
+  opens its file (`read-32-previews-tiles`)
+- the strip menu of the invoice of `photo-and-pdf.eml` has Show in Message, checked; choosing it takes the invoice out
+  of the message and the text stays where it was scrolled to; choosing it again brings the invoice back. On the HEIC
+  picture the item is greyed
+- with "Show attachments in messages" off, Show in Message on the invoice draws it alone; the setting on again
+- Print of `photo-and-pdf.eml`: the printout has the photo and a line naming the invoice, which is not printed (the
+  print document, or the print preview where the platform's print steps check that) (`read-33-previews-print`)
 
 ## 9. Marking unread and read
 
