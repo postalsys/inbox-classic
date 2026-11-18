@@ -1316,6 +1316,16 @@ Plurals: `[one]` 1, 21, 31...; `[few]` 2 to 4, 22 to 24...; `[many]` 0, 5 to 20,
 - Only the agent's own drafts not yet saved by the user can be permanently removed. Saving, including autosave,
   or sending ends access; merely opening does not. Removing a program's access does not uninstall the program.
   Use "отключите" for the connection control, since Linux has a switch and the other platforms use checkboxes.
+- Compose status describes protection "при отправке". "Владелец ключа подтвержден" is separate from a valid
+  digital signature. A "подходящий ключ" must be usable for encryption, not merely present.
+- Retain exact [1] plus counted one/few/many/other branches: 21 is not a single recipient. Names and addresses
+  stay uninflected after a head noun or colon. Use "Последний поиск:" for dates and "Причина:" for key-state text.
+- Use "Вложить свой открытый ключ" for the selected sender address. Recipient removal affects the message,
+  not the address book. Retain the Cyrillic compose access keys, lowercase вы, guillemets and е without ё.
+- Help keeps literal <kbd>Щелчок</kbd>. Encrypted drafts use only the sender's key and no digital signature.
+  Inherited text, images and attachments require encryption until removed, even with the toggle off in a draft.
+- Attachment reminders recognize English, German, Estonian, Spanish and French expressions, not Russian.
+  Help describes the actual account selection and formatting behavior without promising identical rendering.
 
 ### Українська (uk)
 
