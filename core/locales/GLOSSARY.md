@@ -634,6 +634,17 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   Shared message/folder menu keys were checked together, including read/unread and junk/not-junk variants.
 - Insert Picture accepts PNG, JPEG, GIF and WebP up to 10 MB. Its error describes insertion failure and those
   supported types; the English list omits WebP even though the core accepts it.
+- Unsubscribe uses "prašymas atsisakyti prenumeratos". A successful direct request reports acceptance only;
+  an HTTP success response does not establish that future mail will stop. A mail request still requires sending.
+- Calendar floating times say "laiko juosta nenustatyta": a missing or unusable zone is not necessarily the
+  sender's actual zone. Opening an invitation can fail even when a calendar app is installed.
+- Provider guidance keeps app-password availability conditional and directs Outlook.com/Microsoft 365 accounts
+  to browser sign-in in this client. The disabled-choice placeholder is a full button label, so it follows
+  "parinktis" in quotes; built-in app names instead follow "Programa".
+- Removing an account removes local mail and saved sign-in credentials. Mail already on the server remains;
+  mail present only locally is lost. Do not describe every local message as a recoverable server copy.
+- The attachment warning explains that opening is disabled here, not impossible everywhere. Picture blocking
+  reduces tracking opportunities without promising the sender cannot identify the computer.
 
 ### Magyar (hu)
 
