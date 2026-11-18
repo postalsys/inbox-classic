@@ -1,7 +1,8 @@
 //! The files of a view not described in time ([`super::DESCRIBE`]): shown as "Preparing…" tiles while the render
 //! thread goes on reading them, and the window told once they all are ([`Event::PreviewsPrepared`]), to build the view
 //! again with their previews. What came of them stays with the view while a window shows it, for the next view of the
-//! message to take (never in the store, nor in the cache for a decrypted part's file).
+//! message to take (never in the store, nor in the cache for a decrypted part's file), each under its file's key: a
+//! view takes a description only for the very bytes it was read from, whatever place the file has in it.
 
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex};
@@ -11,6 +12,10 @@ use crate::{Event, EventSink};
 
 /// What came of describing one file: its description, or why it has none
 pub(crate) type Described = std::result::Result<Arc<PreviewDescription>, PreviewRefusal>;
+
+/// What came of the files described late, by attachment (its place in the strip) and the key of its bytes
+/// ([`pe_preview::key_of`], kept in memory only)
+pub(crate) type Late = BTreeMap<(usize, pe_preview::Key), Described>;
 
 /// The files of one view still being described
 pub(crate) struct Preparing {
@@ -24,8 +29,8 @@ struct State {
     waiting: usize,
     /// A file was not described in time: the view shows it as "Preparing…"
     missed: bool,
-    /// What came after the view was built, by attachment (its place in the strip)
-    described: BTreeMap<usize, Described>,
+    /// What came after the view was built
+    described: Late,
     /// The view's token, once a window took it
     token: Option<String>,
     /// The window was told, or the view ended: nothing more is said
@@ -55,13 +60,13 @@ impl Preparing {
         })
     }
 
-    /// A description of attachment `attachment` is asked for: what to call with it when it comes after the wait
-    /// (given to [`pe_preview::Previewer::describe_or_later`]); [`Preparing::answered`] or [`Preparing::missed`]
-    /// follows when the wait is over
-    pub(crate) fn expect(self: &Arc<Self>, attachment: usize) -> pe_preview::Later {
+    /// A description of attachment `attachment` (`file` its bytes) is asked for: what to call with it when it comes
+    /// after the wait (given to [`pe_preview::Previewer::describe_or_later`]); [`Preparing::answered`] or
+    /// [`Preparing::missed`] follows when the wait is over
+    pub(crate) fn expect(self: &Arc<Self>, attachment: usize, file: Arc<Vec<u8>>) -> pe_preview::Later {
         unpoisoned(&self.state).waiting += 1;
         let preparing = self.clone();
-        Box::new(move |described| preparing.arrived(attachment, described))
+        Box::new(move |described| preparing.arrived((attachment, pe_preview::key_of(&file)), described))
     }
 
     /// The description asked for came in time
@@ -81,7 +86,7 @@ impl Preparing {
     }
 
     /// What came after the view was built, for the next view of the message
-    pub(crate) fn described(&self) -> BTreeMap<usize, Described> {
+    pub(crate) fn described(&self) -> Late {
         unpoisoned(&self.state).described.clone()
     }
 
@@ -99,12 +104,12 @@ impl Preparing {
         state.described.clear();
     }
 
-    /// The description of attachment `attachment` came after the wait, on the render thread's dispatcher
-    fn arrived(&self, attachment: usize, described: Described) {
+    /// The description of a file (its attachment and key) came after the wait, on the render thread's dispatcher
+    fn arrived(&self, file: (usize, pe_preview::Key), described: Described) {
         let mut state = unpoisoned(&self.state);
         state.waiting = state.waiting.saturating_sub(1);
         if !state.over {
-            state.described.insert(attachment, described);
+            state.described.insert(file, described);
         }
         self.tell(state);
     }

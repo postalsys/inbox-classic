@@ -459,10 +459,12 @@ impl Core {
         }
     }
 
-    /// What came of the files of the message `source` that the views a window shows did not have in time
-    fn preview_late(&self, source: &PreviewSource) -> BTreeMap<usize, preparing::Described> {
+    /// What came of the files of the message `source` that the views a window shows did not have in time, each under
+    /// the key of the bytes it was read from: a view that read the message decrypted and one that read it as it is
+    /// never take each other's
+    fn preview_late(&self, source: &PreviewSource) -> preparing::Late {
         let shown = lock_shown(&self.previews.shown);
-        let mut late = BTreeMap::new();
+        let mut late = preparing::Late::new();
         for preparing in shown
             .iter()
             .filter(|shown| shown.source == *source)

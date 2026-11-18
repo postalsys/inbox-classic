@@ -2,14 +2,14 @@
 //! as a tile that says why not, counted in the line of files left out, or not at all; and what the strip's Show in
 //! Message says of each.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use pe_i18n::{Text, tr, tr_args};
 use pe_preview::limits::{MAX_FILE, MAX_PREVIEWS};
 
-use super::preparing::Described;
+use super::preparing::{Described, Late};
 use super::{DESCRIBE, PREVIEW_PAGES, Preparing, PreviewDescription, PreviewRefusal};
 use crate::Core;
 use crate::opening::FileKind;
@@ -56,8 +56,8 @@ pub(crate) struct PreviewPlan<'a> {
     pub choices: Choices,
     /// A large message's text shown first: its files are not here yet; their sizes, in the strip's order
     pub downloading: Option<Vec<u64>>,
-    /// What came of the files an earlier view of the message did not have described in time, by attachment
-    pub late: BTreeMap<usize, Described>,
+    /// What came of the files an earlier view of the message did not have described in time
+    pub late: Late,
     /// The files of this view not described in time, shown as "Preparing…" until they are
     pub preparing: Arc<Preparing>,
 }
@@ -249,6 +249,20 @@ impl Walk<'_, '_> {
         }
     }
 
+    /// What came of attachment `index` after an earlier view's wait, when it was read from these very bytes (another
+    /// view of the message, decrypted or not, may have other files at that place); read again when it was refused by
+    /// a setting that may have changed since
+    fn late(&self, index: usize, attachment: &pe_mime::parser::Attachment) -> Option<Described> {
+        let late = &self.plan.late;
+        // the key only for a file described late at that place
+        late.keys().find(|(at, _)| *at == index)?;
+        let late = late.get(&(index, pe_preview::key_of(&attachment.content)))?;
+        match late {
+            Err(PreviewRefusal::Disabled | PreviewRefusal::Off) => None,
+            late => Some(late.clone()),
+        }
+    }
+
     /// The description of a file: what came of it after an earlier view's wait, or read now, waiting at most `wait`;
     /// None when it did not come in time
     fn describe(
@@ -258,20 +272,14 @@ impl Walk<'_, '_> {
         asked: bool,
         wait: Duration,
     ) -> Option<Described> {
-        // read again when it was refused by a setting that may have changed since
-        let late = self
-            .plan
-            .late
-            .get(&index)
-            .filter(|late| !matches!(late, Err(PreviewRefusal::Disabled | PreviewRefusal::Off)));
-        if let Some(late) = late {
-            return Some(late.clone());
+        if let Some(late) = self.late(index, attachment) {
+            return Some(late);
         }
         let file = Arc::new(attachment.content.clone());
         let about = format!("{}, attachment {index}", self.plan.about);
         let (pdfs, keep) = (self.plan.pdfs, self.among.keep);
         let preparing = &self.plan.preparing;
-        let later = preparing.expect(index);
+        let later = preparing.expect(index, file.clone());
         let described = self
             .plan
             .core

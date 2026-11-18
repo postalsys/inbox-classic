@@ -157,3 +157,43 @@ fn a_message_file_s_view_is_told_too() {
     assert!(!again.preparing);
     assert!(again.document.contains(&format!("/pv/{new}-1-0")), "{}", again.document);
 }
+
+/// A PNG picture of `width` by `height`, base64 as a message carries it
+fn png_base64(width: u32, height: u32) -> String {
+    use base64::Engine;
+    let picture = image::RgbImage::from_pixel(width, height, image::Rgb([200, 30, 30]));
+    let mut bytes = Vec::new();
+    image::DynamicImage::ImageRgb8(picture)
+        .write_to(&mut std::io::Cursor::new(&mut bytes), image::ImageFormat::Png)
+        .unwrap();
+    base64::engine::general_purpose::STANDARD.encode(bytes)
+}
+
+/// What a view had described late is taken by another view of the message only for the same bytes: a view with
+/// another file at that place (the message read decrypted rather than as it is, or changed) reads its own
+#[test]
+fn a_late_description_is_taken_only_for_its_own_file() {
+    let dir = pe_testkit::TempDir::new("core-previews-preparing-own");
+    let (core, inbox, events, gate) = gated(&dir);
+    let view = core.message_view(inbox, 1, false).unwrap().unwrap();
+    assert!(view.preparing);
+    let token = view.preview_token.clone().unwrap();
+    gate.open();
+    super::tests::prepared(&events, &token);
+    // still shown, its late descriptions kept; the next view has another picture first
+    let message = String::from_utf8(super::tests::message()).unwrap();
+    let other = message.replace(&png_base64(64, 32), &png_base64(48, 24));
+    assert_ne!(other, message);
+    core.store().set_source(inbox, 1, other.as_bytes()).unwrap();
+    let again = core.message_view(inbox, 1, false).unwrap().unwrap();
+    let new = again.preview_token.clone().unwrap();
+    assert!(
+        again
+            .document
+            .contains(&format!("src=\"/pv/{new}-0-0\" width=\"48\" height=\"24\"")),
+        "{}",
+        again.document
+    );
+    core.previews_end(&token);
+    core.previews_end(&new);
+}
