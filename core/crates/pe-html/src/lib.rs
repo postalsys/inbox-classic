@@ -337,10 +337,12 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
             .collect();
         previews::print_section(&picked)
     };
+    // the card is ours, the message's words in it escaped; made printable all the same
+    let card = inline::printable(&parts.card);
     if parts.parts.is_empty() {
         let section = section_of(&|_| true);
         let body = printed_inline(parts, items);
-        return wrap(&body, &options, &header, &parts.card, After::Printed(&section), false).0;
+        return wrap(&body, &options, &header, &card, After::Printed(&section), false).0;
     }
     // the look of the text alone, as without pictures: the sections' own rules are not the message's
     let text: Vec<&str> = parts.parts.iter().map(|(_, html)| html.as_str()).collect();
@@ -348,30 +350,23 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
     let body: Vec<String> = parts
         .parts
         .iter()
-        .map(|(part, html)| format!("{html}{}", section_of(&|of| of == Some(*part))))
+        .map(|(part, html)| format!("{}{}", inline::printable(html), section_of(&|of| of == Some(*part))))
         .collect();
     // the items of no part printed come after all of it
     let known = |part: Option<usize>| part.is_some_and(|part| parts.parts.iter().any(|(at, _)| *at == part));
     let section = section_of(&|part| !known(part));
     let after = After::Printed(&section);
-    wrap_as(
-        &body.join(PART_RULE),
-        look,
-        &options,
-        &header,
-        &parts.card,
-        after,
-        false,
-    )
-    .0
+    wrap_as(&body.join(PART_RULE), look, &options, &header, &card, after, false).0
 }
 
 /// The text of a printout with each picture of it as a `data:` address of the core's encode ([`PrintItem::Inline`]),
 /// or of an empty picture for one not drawn: the print windows load nothing but the page. The addresses replaced are
 /// the router's, whose token the sender does not know
 fn printed_inline(parts: &PrintParts, items: &[(Option<usize>, PrintItem)]) -> String {
+    // no data: address of the sender's: the only ones are those put in here
+    let body = inline::printable(&parts.body);
     let Some((prefix, numbers)) = &parts.inline else {
-        return parts.body.clone();
+        return body;
     };
     // each picture's address by its number as the router wrote it: the first drawing of it, or the empty picture
     let mut addresses: HashMap<String, String> = HashMap::new();
@@ -390,8 +385,8 @@ fn printed_inline(parts: &PrintParts, items: &[(Option<usize>, PrintItem)]) -> S
     }
     // one pass over the text: `"<prefix><number>-0"` each
     let start = format!("\"{prefix}");
-    let mut out = String::with_capacity(parts.body.len());
-    let mut rest = parts.body.as_str();
+    let mut out = String::with_capacity(body.len());
+    let mut rest = body.as_str();
     while let Some(at) = rest.find(&start) {
         out.push_str(&rest[..at]);
         let after = &rest[at + start.len()..];
@@ -1081,6 +1076,56 @@ mod tests {
 
     /// The printout of a message with pictures in its text has them where the text shows them, as `data:` addresses
     /// of the core's encodes (an empty picture for one not drawn); no preview address is left
+    /// Whatever a message hides in its markup or its CSS, the only `data:` addresses of its printout (whose CSP allows
+    /// them) are the core's: its encodes and the empty picture
+    #[test]
+    fn a_printout_has_no_data_address_but_the_core_s() {
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: b"sender's bytes",
+        };
+        let html = "<style>p{background:image-set('da\tta:image/png;base64,AA' 1x)}\
+                    q{background:image-set('da\\9 ta:x' 1x, '\\1 data:x' 2x)}\
+                    b{background:url(\"https://a/\" /*(*/), image-set(\"data:image/png;base64,AA\" 1x) /*)*/}\
+                    i{background:u\\72l(d\\61t\\61\\3a x)}</style>\
+                    <img src=\"da&#9;ta:image/gif;base64,R0lGODlh\"><img src=\"&#1;data:image/gif;base64,R0lGODlh\">\
+                    <table background=\"da&#9;ta:image/png;base64,AAAA\"></table>\
+                    <div style=\"background:image-set('d&#9;ata:x' 1x)\">x</div>\
+                    <p title=\"da&#10;ta:x\">Metadata: kept</p><img src=\"cid:a@x\">";
+        let rendered = routed(html, &[png]);
+        let items = [(
+            None,
+            PrintItem::Inline {
+                number: INLINE_BASE + 1,
+                mime: "image/png",
+                bytes: b"\x89PNG",
+            },
+        )];
+        let printed = print_document_with(&rendered.print.clone().unwrap(), &items);
+        // read as a URL parser and CSS read it: tabs and newlines out, escapes decoded
+        let body = &printed[printed.find("<body>").unwrap()..];
+        let squeezed: String = body
+            .replace("\\61", "a")
+            .replace("\\3a", ":")
+            .chars()
+            .filter(|c| !matches!(c, '\t' | '\n' | '\r'))
+            .collect::<String>()
+            .to_ascii_lowercase();
+        let ours = [
+            "data:image/png;base64,iVBORw==",
+            &NOT_PRINTED_PICTURE.to_ascii_lowercase(),
+        ];
+        let total = squeezed.matches("data:").count() - squeezed.matches("metadata:").count();
+        let core: usize = ours
+            .iter()
+            .map(|address| squeezed.matches(&address.to_ascii_lowercase()).count())
+            .sum();
+        assert_eq!(total, core, "{printed}");
+        assert!(core >= 2, "{printed}");
+        assert!(printed.contains("Metadata: kept"), "{printed}");
+    }
+
     #[test]
     fn a_printout_has_the_pictures_of_the_text_as_data() {
         let png = InlineImage {

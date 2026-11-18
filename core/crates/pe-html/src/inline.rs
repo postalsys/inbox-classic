@@ -9,6 +9,7 @@
 //! other by the picture's proportions. A picture the core can not draw (HEIC, a broken file) is answered with a plain
 //! placeholder, never the sender's bytes.
 
+use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
 
@@ -263,35 +264,114 @@ fn percent_decoded(text: &str) -> Vec<u8> {
 ///
 /// The body is the sanitizer's own serialization: tags and attribute names in lowercase, every value in double quotes
 /// (a quote in it escaped), `<` in text escaped, and the only element whose text is not escaped is `style`.
-pub(crate) fn sized(body: &str, prefix: &str, size: &dyn Fn(usize) -> Option<(u32, u32)>) -> String {
+pub(crate) fn sized<'a>(body: &'a str, prefix: &str, size: &dyn Fn(usize) -> Option<(u32, u32)>) -> String {
+    let tag = |tag: &'a str| {
+        if tag.starts_with("<img") {
+            Cow::Owned(sized_img(tag, prefix, size))
+        } else {
+            Cow::Borrowed(tag)
+        }
+    };
+    markup(body, &tag, &Cow::Borrowed)
+}
+
+/// A sanitized body (as [`sized`] reads it) for a printout, whose CSP lets pictures come from `data:` for the core's
+/// own encodes: no `data:` address is left in a tag or a style element's text, however it is written (tabs and
+/// newlines in it, CSS escapes), so the only ones are those the core puts in after this. Text is left as it is.
+pub(crate) fn printable(body: &str) -> String {
+    markup(body, &without_data, &without_data)
+}
+
+/// `body` with each tag passed through `tag` and the text of each style element through `style`
+fn markup<'a>(body: &'a str, tag: &dyn Fn(&'a str) -> Cow<'a, str>, style: &dyn Fn(&'a str) -> Cow<'a, str>) -> String {
     let mut out = String::with_capacity(body.len() + 64);
     let mut rest = body;
     while let Some(at) = rest.find('<') {
         out.push_str(&rest[..at]);
         rest = &rest[at..];
-        if rest.starts_with("<style") {
-            // the style element's text as it is, up to its end
-            let end = rest.find("</style").unwrap_or(rest.len());
-            out.push_str(&rest[..end]);
-            rest = &rest[end..];
-            if rest.is_empty() {
-                break;
-            }
-            out.push('<');
-            rest = &rest[1..];
-            continue;
-        }
         let end = tag_end(rest);
-        let tag = &rest[..end];
-        if rest.starts_with("<img") {
-            out.push_str(&sized_img(tag, prefix, size));
-        } else {
-            out.push_str(tag);
-        }
+        out.push_str(&tag(&rest[..end]));
+        let opens_style = rest.starts_with("<style");
         rest = &rest[end..];
+        if opens_style {
+            // the style element's text, up to its end
+            let end = rest.find("</style").unwrap_or(rest.len());
+            out.push_str(&style(&rest[..end]));
+            rest = &rest[end..];
+        }
     }
     out.push_str(rest);
     out
+}
+
+/// What a `data:` address becomes in a printout
+const NO_DATA: &str = "x-removed:";
+
+/// `text` with every `data:` in it, as a URL parser or CSS reads one, made [`NO_DATA`]
+fn without_data(text: &str) -> Cow<'_, str> {
+    let bytes = text.as_bytes();
+    let mut out = String::new();
+    let mut copied = 0;
+    let mut at = 0;
+    while at < bytes.len() {
+        if matches!(bytes[at], b'd' | b'D' | b'\\')
+            && let Some(length) = data_at(&bytes[at..])
+        {
+            out.push_str(&text[copied..at]);
+            out.push_str(NO_DATA);
+            at += length;
+            copied = at;
+        } else {
+            at += 1;
+        }
+    }
+    if copied == 0 {
+        return Cow::Borrowed(text);
+    }
+    out.push_str(&text[copied..]);
+    Cow::Owned(out)
+}
+
+/// The length of the `data:` that `text` starts with: each character as itself in any case or as a CSS escape (`\61`,
+/// `\:`), tabs and newlines between them (which a URL parser drops); all of it ASCII
+fn data_at(text: &[u8]) -> Option<usize> {
+    let mut at = 0;
+    for (n, &want) in b"data:".iter().enumerate() {
+        if n > 0 {
+            while matches!(text.get(at), Some(b'\t' | b'\n' | b'\r')) {
+                at += 1;
+            }
+        }
+        if text.get(at)?.eq_ignore_ascii_case(&want) {
+            at += 1;
+            continue;
+        }
+        if text[at] != b'\\' {
+            return None;
+        }
+        at += 1;
+        let hex = text[at..].iter().take(6).take_while(|b| b.is_ascii_hexdigit()).count();
+        if hex == 0 {
+            if !text.get(at)?.eq_ignore_ascii_case(&want) {
+                return None;
+            }
+            at += 1;
+            continue;
+        }
+        let digits = std::str::from_utf8(&text[at..at + hex]).ok()?;
+        let value = u32::from_str_radix(digits, 16).ok()?;
+        if !u8::try_from(value).is_ok_and(|byte| byte.eq_ignore_ascii_case(&want)) {
+            return None;
+        }
+        at += hex;
+        // the one white space that ends an escape
+        if text[at..].starts_with(b"\r\n") {
+            at += 2;
+        } else if matches!(text.get(at), Some(b' ' | b'\t' | b'\n' | b'\r' | b'\x0c')) {
+            at += 1;
+        }
+    }
+    Some(at)
 }
 
 /// The length of the tag `text` starts with, through its `>`: quoted values may hold one
@@ -450,6 +530,22 @@ mod tests {
             )),
             "{out}"
         );
+    }
+
+    /// A printout's markup and CSS keep no `data:` however it is written; its text keeps the word
+    #[test]
+    fn a_printout_keeps_no_data_address() {
+        let body = "<img src=\"da\tta:x\" alt=\"DATA:\"><style>p{background:url(d\\61 t\\41\\:x)}\
+                    q{background:url(\\64\r\nata:x)}</style><p>metadata: yes</p>";
+        let out = printable(body);
+        assert_eq!(
+            out,
+            "<img src=\"x-removed:x\" alt=\"x-removed:\"><style>p{background:url(x-removed:x)}\
+             q{background:url(x-removed:x)}</style><p>metadata: yes</p>"
+        );
+        for kept in ["<p>dat a:</p>", "<i title=\"\\64 x\">", "<b title=\"da\\\">"] {
+            assert_eq!(printable(kept), kept);
+        }
     }
 
     #[test]
