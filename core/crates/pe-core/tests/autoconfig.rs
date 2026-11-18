@@ -2,7 +2,6 @@
 //! finishes with nothing, and each lookup reports its own request
 
 use std::sync::mpsc::channel;
-use std::time::Duration;
 
 use pe_core::{Core, Event, Options, PasswordStore};
 use pe_testkit::TempDir;
@@ -24,7 +23,7 @@ fn lookups_report_their_request() {
     assert_ne!(first, second);
     let mut done = Vec::new();
     while done.len() < 2 {
-        match events.recv_timeout(Duration::from_secs(10)).unwrap() {
+        match events.recv_timeout(pe_testkit::patience()).unwrap() {
             Event::AutoconfigDone { request } => done.push(request),
             other => panic!("{other:?}"),
         }
@@ -36,8 +35,8 @@ fn lookups_report_their_request() {
     // taken once
     assert_eq!(core.autoconfig_result(42), None);
 
-    // a cancelled lookup is forgotten, its event or not
-    let cancelled = core.autoconfig("someone@example.invalid", None).unwrap();
+    // a cancelled lookup is forgotten, its event or not (a domain without a dot: no lookup over the internet)
+    let cancelled = core.autoconfig("someone@nowhere", None).unwrap();
     core.autoconfig_cancel(cancelled);
     assert_eq!(core.autoconfig_result(cancelled), None);
 }

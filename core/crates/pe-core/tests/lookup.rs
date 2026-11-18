@@ -6,7 +6,6 @@ use std::io::{Read, Write};
 use std::net::TcpListener;
 use std::sync::mpsc::{Receiver, channel};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 
 use pe_core::keys::KeySource;
 use pe_core::{Core, Event, Options, PasswordStore};
@@ -96,7 +95,7 @@ fn world(name: &str) -> World {
 impl World {
     fn result(&self, request: u64) -> pe_core::FindOutcome {
         loop {
-            let event = self.events.recv_timeout(Duration::from_secs(10)).expect("KeysFound");
+            let event = self.events.recv_timeout(pe_testkit::patience()).expect("KeysFound");
             if event == (Event::KeysFound { request }) {
                 return self.core.pgp_find_result(request).unwrap();
             }
@@ -232,7 +231,7 @@ fn publishing() {
     );
     let request = w.core.pgp_publish(&me.fingerprint()).unwrap();
     loop {
-        let event = w.events.recv_timeout(Duration::from_secs(10)).unwrap();
+        let event = w.events.recv_timeout(pe_testkit::patience()).unwrap();
         if event == (Event::KeyPublished { request }) {
             break;
         }
