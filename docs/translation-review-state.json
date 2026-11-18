@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review eight Hungarian reading/search/organization help topics: read-messages, find-messages, search-words, conversations, organize-mail, folders, delete-and-undo and all-inboxes. Then continue the remaining Hungarian help, new agent/preview drafts and broader catalogs/help across all 28 languages. The compose/security and Linux-menu followups are complete in all 28 languages. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak, Slovenian, Swedish and Ukrainian each have 50. Broader mnemonic collision records remain pending, including 20 Ukrainian groups, and the Romanian gray flag lacks an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review six Hungarian writing/contact help topics: reply-forward, attachments, drafts-outbox, signatures, address-book and save-print-import. Hungarian now has 38 pending help topics and 55 pending catalog entries. Then continue its remaining help, new agent/preview drafts and broader catalogs/help across all 28 languages. Audit the newly recorded search/date/negation, folder-order and conversation-notification context findings in other languages, reopening only affected passages after comparison. The compose/security and Linux-menu followups remain complete. Review the 56 merged inline-picture/font passages and watch incoming MCP phase3 revisions. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -21447,24 +21447,19 @@
         "address-book.html",
         "agents-connect.html",
         "agents-permissions.html",
-        "all-inboxes.html",
         "attachments.html",
         "brand-logos.html",
         "certificate-errors.html",
         "command-line.html",
         "connections.html",
-        "conversations.html",
         "data-storage.html",
         "default-mail-program.html",
-        "delete-and-undo.html",
         "delivery-problems.html",
         "download-ahead.html",
         "drafts-outbox.html",
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "find-messages.html",
-        "folders.html",
         "invitations.html",
         "keyboard-shortcuts.html",
         "links-scripts.html",
@@ -21475,14 +21470,11 @@
         "new-mail.html",
         "no-connection.html",
         "options-language.html",
-        "organize-mail.html",
         "password-not-accepted.html",
         "pictures-tracking.html",
-        "read-messages.html",
         "removing.html",
         "reply-forward.html",
         "save-print-import.html",
-        "search-words.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
         "signatures.html",
@@ -23569,6 +23561,124 @@
             "source-audit.json": "/private/tmp/inbox-hu-compose-20261118-source-audit.json",
             "screenshots.json": "/private/tmp/inbox-hu-compose-20261118-screenshots.json",
             "html.log": "/private/tmp/inbox-hu-compose-20261118-html.log"
+          }
+        },
+        {
+          "id": "hu-reading-search-organize-help-20261118",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "read-messages.html",
+            "find-messages.html",
+            "search-words.html",
+            "conversations.html",
+            "organize-mail.html",
+            "folders.html",
+            "delete-and-undo.html",
+            "all-inboxes.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hu/read-messages.html": "41c8f804e9fbf32c8529512f07394c8e94bc6c0cc1214128568f87bd535daa03",
+            "core/crates/pe-html/help/hu/find-messages.html": "7233ff1b725439afb8c938b164d19690ae29c76a14a8de564d1a136005a4cfde",
+            "core/crates/pe-html/help/hu/search-words.html": "40a0127b0ddf4bc741743e20e1e5003c44fbd44f6a651d8f609ff9f945517dd3",
+            "core/crates/pe-html/help/hu/conversations.html": "c84794cb32db1138e599bb3053d10eaf947f75786989e3d2f6491d3e548b9fde",
+            "core/crates/pe-html/help/hu/organize-mail.html": "291e5e83434809f20520895fc42349fe4357d6247716c745878cb3fa422ba279",
+            "core/crates/pe-html/help/hu/folders.html": "eaa008d0d8d0b27666cafcd2f81a76a959fc37769e56384dc5b3d2a9ec4787d4",
+            "core/crates/pe-html/help/hu/delete-and-undo.html": "dee81f1433b6e32ba46856db6ae4eb690c15576af382daac22cf7f26adde13b2",
+            "core/crates/pe-html/help/hu/all-inboxes.html": "5917e343757971eb32856fa738e40bd0fdcf34c3e8c20f30812fbe69f15973cb"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/read-messages.html": "3f282016d2b207ce987b6b72887f6301c68d7048ab9f9aad41dc4e9433c25072",
+            "core/crates/pe-html/help/en/find-messages.html": "3cde4173761e98f4e4af66ff67cc8be4b045346c6a741ee17bf6588d8dce6e73",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080",
+            "core/crates/pe-html/help/en/conversations.html": "20c0db95c0a1d3c2d78dfe78d538f79b01812cec20cbd5eb1b57136378d18a1a",
+            "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8",
+            "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+            "core/crates/pe-html/help/en/delete-and-undo.html": "f09e57859af81af8ceb953242a5284529e5613a585fc32e6e50111ce3dd07fb5",
+            "core/crates/pe-html/help/en/all-inboxes.html": "4c79d7df5307fffeb3316cf05acae6e4f8005d7a220d242268a8d233b138eb70"
+          },
+          "validation": "Hungarian structural checks pass with 1,416 expected mark-only diagnostics. Exact before/after reconstruction verifies eight complete help topics and 72 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keyboard contents and all code examples are preserved. Static Windows/Mac/Linux sentence joins include inserted settings paths and correct a/az articles. Twenty-four runtime/layout/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,526 unmarked entries and 11,678 help lines; since-start 1,910 entries/477 passages match the queue. Source checkpoint covers 204 refs/6 worktrees, and upstream has no changed review inputs. Search/date/negation, folder-order and notification discrepancies in English help are recorded for maintainers and targeted cross-language audit; English/app code unchanged. Incoming MCP translations remain queued separately; merged preview-cid passages remain in the active queue. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed eight full Hungarian reading/search/organization help topics against current search parser/store, tree/selection and platform code. Improved fluent instructions and article/control joins. Corrected one-letter matching, after inclusive UTC date, 30/365-day periods, recipient aliases, supported negation, indexing versus read state, local decrypted index, date-dependent conversation sorting, notification setting, combined-folder order and permanent deletion without Trash. Preserved all markup, attributes, controls, code examples and literal keyboard contents.",
+          "help_wording_lines_changed": 72,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/hu/read-messages.html": 15,
+            "core/crates/pe-html/help/hu/find-messages.html": 7,
+            "core/crates/pe-html/help/hu/search-words.html": 17,
+            "core/crates/pe-html/help/hu/conversations.html": 8,
+            "core/crates/pe-html/help/hu/organize-mail.html": 8,
+            "core/crates/pe-html/help/hu/folders.html": 4,
+            "core/crates/pe-html/help/hu/delete-and-undo.html": 5,
+            "core/crates/pe-html/help/hu/all-inboxes.html": 8
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-html/src/dark.rs": "70aeb710c70bbd13cb038f9a4f41de0e7e8c5dbc1de359bc4710ff6dae13dc5d",
+            "core/crates/pe-core/src/search.rs": "c72488f2132326a415b77a1aef19d418f08b76a932c1375698369c64d0861cbb",
+            "core/crates/pe-core/src/list_view.rs": "29986dcee1d1cd06c71832a8b8b54a3766157811e14c522dd0ac1c2341c878b3",
+            "core/crates/pe-core/src/tree.rs": "446b96a3d5ee1ed88b1379a0c98747403206ef2af10430e76e6571dfcb81f958",
+            "core/crates/pe-core/src/lib.rs": "e335529ecfdf749a044ea64db2b467881d13bea93ccf6760caf2f1decb36beac",
+            "core/crates/pe-core/src/selection.rs": "2f6e3b7fcb3cec45d9c64b4bd6674cb27839960d9624c4aeb2ad1966b56c6280",
+            "core/crates/pe-core/src/worker.rs": "f5c1c28f0117606cf9b544a1d75736e84c88ad9bc53f26c7d7dda6985db8c28b",
+            "core/crates/pe-store/src/search.rs": "d7a490ff3e0c47caee741766f4fa578afbd4648c3e0786801aefb45f24d54a0a",
+            "core/crates/pe-store/src/query.rs": "7ff2dd5e9c4b7d876cf54a3f5a878df17ebf98fce474468aca5dd4aee0117d4c",
+            "core/crates/pe-store/src/messages.rs": "369124b29f2ae394e8916d0578c0a1b950d9b4d16278f754699a79d832e4c114",
+            "core/crates/pe-store/src/threads.rs": "eb93e2bb7132e8c620ce910f90ef7c0dcb040230b77c9a8395b0952800e0186c",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "linux/src/folders.rs": "b7de49c1a55459767160f818d1ddfa914e4ed0d4f59e5d7170a1aaa4d29b8687",
+            "linux/src/reader.rs": "18773f6639887286b42e22b2e9a92e269f3d0b0b71761c4e62f3a7b145f385f8",
+            "app/src/mailbox.cpp": "47a345c703529fd0ad35e28f673c6e1a5a64ffd8549cb79e0bf10da9825f150b",
+            "app/src/reader.cpp": "e4b54775476bc93a3c29f9e42adf16b4ebab72eba5f9bb58d0cf69e3bed1405e",
+            "app/src/main.cpp": "86654a505ca1bfa2e00049f0bfb312dbbc2c324e1d6957bd707716dc96f92c8c",
+            "mac/Sources/InboxClassic/MainWindow.swift": "92ec176fc30d9249871f9d61d28171a10a9ebe7b46eda61203623175e54667b6",
+            "mac/Sources/InboxClassic/Reader.swift": "d8c17c4c5b479ec87edce1995502d1340570caf0d713cdec127a2ac7c4c466d1",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-store/src/pgp.rs": "c6d9f72c5ddfe0c51530928770925ccd5ff0b666f7102ac8ac0e1a3884599c96"
+          },
+          "catalog_dependencies": {
+            "core/locales/hu/mac.ftl": "ccfdfd4bb00809d2e36c35135443102555a0350bf8f2b12f1a50f049ad7d0aaa",
+            "core/locales/hu/linux.ftl": "4ee069a706d1647d0ca4f8315b1400b638b6e1251a1217718191c422f8f2f9b1",
+            "core/locales/hu/app.ftl": "3123a1db5bf792eb97ee5583c39513826fab1a59b62dece366d9577288171e3c",
+            "core/locales/hu/core.ftl": "52e9ec5a8afb207a4b4380156c46045a9845e03470190a7daa8a82ad3fb36d23",
+            "core/locales/hu/windows.ftl": "c04c8213db225027ead1c06b307c2db093fe31f68adc6ae905c1f65b7717f377",
+            "core/locales/hu/help.ftl": "22bf1437995d992179c920e30b4c01dced3cf535af44c5d478b2a3226e13b0ce"
+          },
+          "source_context_findings": {
+            "status": "Source discrepancies recorded for maintainers; Hungarian corrected against verified behavior. English/app code unchanged.",
+            "issues": [
+              {
+                "source": "core/crates/pe-html/help/en/find-messages.html",
+                "evidence": "core/crates/pe-store/src/search.rs::fts_word",
+                "finding": "Prefix matching needs at least two characters; a one-character term matches a whole word."
+              },
+              {
+                "source": "core/crates/pe-html/help/en/search-words.html",
+                "evidence": "core/crates/pe-store/src/query.rs::term/date/age and pe-store/src/search.rs::condition_with",
+                "finding": "after: includes its UTC start date; months/years are fixed 30/365 days. Negation is not implemented for all date/age/size operators, so minus must not be promised for every search term. to:/cc:/bcc: all search the full recipient index."
+              },
+              {
+                "source": "core/crates/pe-html/help/en/organize-mail.html",
+                "evidence": "core/crates/pe-core/src/tree.rs::several_accounts",
+                "finding": "With several accounts, Flagged follows All Inboxes, All Sent and All Drafts; it is not immediately after All Inboxes."
+              },
+              {
+                "source": "core/crates/pe-html/help/en/conversations.html",
+                "evidence": "core/crates/pe-store/src/threads.rs::groups; mac/Sources/InboxClassic/MainWindow.swift::notifyNewMail",
+                "finding": "Newest-message order applies to date/received sorts; other columns use the first message. Watched conversations still require notifications enabled."
+              }
+            ]
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-hu-reading-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-hu-reading-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-hu-reading-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-hu-reading-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-hu-reading-20261118-joins.log",
+            "source-audit.json": "/private/tmp/inbox-hu-reading-20261118-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-hu-reading-20261118-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-hu-reading-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-hu-reading-20261118-html.log"
           }
         }
       ]
@@ -76100,7 +76210,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Ukrainian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 21 changed values (20 wording improvements and one mnemonic-only fix), 19 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Exact [1] plus one/few/many/other and numeric placeholders are retained; follow-up instructions at 21/101 do not imply a single person. Static CLDR examples cover 1/2/4/5/11/21/22/25/101; no Fluent bundle execution is claimed. All 53 mnemonic scopes were inspected: all seven compose scopes pass after moving Find Key to К, separate from Keep Current on З. Reviewed access keys remain Cyrillic. 20 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts, polite lowercase ви and guillemets. Nineteen runtime/layout files match the evidence. No Ukrainian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,526 unmarked entries and 11,552 help lines; since-start 1,910 entries/480 passages match the queue. Source checkpoint covers 203 refs/6 worktrees, and upstream has no changed review inputs. The final compose closure independently reconciles 1,120 reviewed IDs and 56 unmarked topics across all 28 languages, with seven compose mnemonic scopes passing in each. Unmerged MCP feature sources remain queued separately; merged preview-cid passages are in the active queue. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Hungarian structural checks pass with 1,416 expected mark-only diagnostics. Exact before/after reconstruction verifies eight complete help topics and 72 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keyboard contents and all code examples are preserved. Static Windows/Mac/Linux sentence joins include inserted settings paths and correct a/az articles. Twenty-four runtime/layout/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,526 unmarked entries and 11,678 help lines; since-start 1,910 entries/477 passages match the queue. Source checkpoint covers 204 refs/6 worktrees, and upstream has no changed review inputs. Search/date/negation, folder-order and notification discrepancies in English help are recorded for maintainers and targeted cross-language audit; English/app code unchanged. Incoming MCP translations remain queued separately; merged preview-cid passages remain in the active queue. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -136916,7 +137026,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review eight Hungarian reading/search/organization help topics: read-messages, find-messages, search-words, conversations, organize-mail, folders, delete-and-undo and all-inboxes. Then continue the remaining Hungarian help, new agent/preview drafts and broader catalogs/help across all 28 languages. The compose/security and Linux-menu followups are complete in all 28 languages. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak, Slovenian, Swedish and Ukrainian each have 50. Broader mnemonic collision records remain pending, including 20 Ukrainian groups, and the Romanian gray flag lacks an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. Publish each validated batch promptly; no local test suites."
+      "next": "Review six Hungarian writing/contact help topics: reply-forward, attachments, drafts-outbox, signatures, address-book and save-print-import. Hungarian now has 38 pending help topics and 55 pending catalog entries. Then continue its remaining help, new agent/preview drafts and broader catalogs/help across all 28 languages. Audit the newly recorded search/date/negation, folder-order and conversation-notification context findings in other languages, reopening only affected passages after comparison. The compose/security and Linux-menu followups remain complete. Review the 56 merged inline-picture/font passages and watch incoming MCP phase3 revisions. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -139836,7 +139946,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review eight Hungarian reading/search/organization help topics: read-messages, find-messages, search-words, conversations, organize-mail, folders, delete-and-undo and all-inboxes. Then continue the remaining Hungarian help, new agent/preview drafts and broader catalogs/help across all 28 languages. The compose/security and Linux-menu followups are complete in all 28 languages. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak, Slovenian, Swedish and Ukrainian each have 50. Broader mnemonic collision records remain pending, including 20 Ukrainian groups, and the Romanian gray flag lacks an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review six Hungarian writing/contact help topics: reply-forward, attachments, drafts-outbox, signatures, address-book and save-print-import. Hungarian now has 38 pending help topics and 55 pending catalog entries. Then continue its remaining help, new agent/preview drafts and broader catalogs/help across all 28 languages. Audit the newly recorded search/date/negation, folder-order and conversation-notification context findings in other languages, reopening only affected passages after comparison. The compose/security and Linux-menu followups remain complete. Review the 56 merged inline-picture/font passages and watch incoming MCP phase3 revisions. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -141607,7 +141717,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review eight Hungarian reading/search/organization help topics: read-messages, find-messages, search-words, conversations, organize-mail, folders, delete-and-undo and all-inboxes. Then continue the remaining Hungarian help, new agent/preview drafts and broader catalogs/help across all 28 languages. The compose/security and Linux-menu followups are complete in all 28 languages. Hungarian has 46 pending help topics; Lithuanian, Latvian, Polish, Romanian, Russian, Slovak, Slovenian, Swedish and Ukrainian each have 50. Broader mnemonic collision records remain pending, including 20 Ukrainian groups, and the Romanian gray flag lacks an automatic mnemonic. Review the 56 merged inline-picture/font help passages in the active queue. Recheck current runtime for each feature batch and watch MCP phase3 sources for committed or merged additions. Publish each validated batch promptly; no local test suites.",
+      "next": "Review six Hungarian writing/contact help topics: reply-forward, attachments, drafts-outbox, signatures, address-book and save-print-import. Hungarian now has 38 pending help topics and 55 pending catalog entries. Then continue its remaining help, new agent/preview drafts and broader catalogs/help across all 28 languages. Audit the newly recorded search/date/negation, folder-order and conversation-notification context findings in other languages, reopening only affected passages after comparison. The compose/security and Linux-menu followups remain complete. Review the 56 merged inline-picture/font passages and watch incoming MCP phase3 revisions. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -143455,6 +143565,18 @@
         "merge_commit": "cdb1e852845082d4e03c5f65402de0893a481911",
         "merged_at": "2026-11-18T20:16:47Z",
         "verified_master": "cdb1e852845082d4e03c5f65402de0893a481911",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "uk-compose-sign-encrypt-20261118",
+        "pr": 176,
+        "url": "https://github.com/postalsys/inbox-classic/pull/176",
+        "review_commit": "5a0d866eee1f333656c401a166b0d61287921781",
+        "merge_commit": "710990dcff73a2339356819a6fd2bb1b77387684",
+        "merged_at": "2026-11-18T20:25:04Z",
+        "verified_master": "710990dcff73a2339356819a6fd2bb1b77387684",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
@@ -153895,7 +154017,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "446e7b8666afb7d0b339b384d01745b1240806881223f6fca05f3d713a393342",
+      "core/locales/GLOSSARY.md": "059f6c6a98b06c11780dfb05116f1dc38c3a67c8061335444861ccd2908d32cd",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -153997,7 +154119,15 @@
       "core/locales/uk/app.ftl": "b5c2260a7ab956c26ada357f9bd175111b7f833bb651d19b360c58049f46e9e8",
       "core/locales/uk/core.ftl": "d5b6ad96fe3c8c0ac4b4e065802c4341e74507b27a37db90f63c1064e055bddd",
       "core/crates/pe-html/help/uk/sign-and-encrypt.html": "be48c03f575f4bb5f97ac33a645dc9ed21a588e32d20d814422f03b2275a8e45",
-      "core/crates/pe-html/help/uk/write-message.html": "446cc0dad50515ea8ebfd4273586b091d42bda25895aa9b65004a1ac3b7dac9b"
+      "core/crates/pe-html/help/uk/write-message.html": "446cc0dad50515ea8ebfd4273586b091d42bda25895aa9b65004a1ac3b7dac9b",
+      "core/crates/pe-html/help/hu/read-messages.html": "41c8f804e9fbf32c8529512f07394c8e94bc6c0cc1214128568f87bd535daa03",
+      "core/crates/pe-html/help/hu/find-messages.html": "7233ff1b725439afb8c938b164d19690ae29c76a14a8de564d1a136005a4cfde",
+      "core/crates/pe-html/help/hu/search-words.html": "40a0127b0ddf4bc741743e20e1e5003c44fbd44f6a651d8f609ff9f945517dd3",
+      "core/crates/pe-html/help/hu/conversations.html": "c84794cb32db1138e599bb3053d10eaf947f75786989e3d2f6491d3e548b9fde",
+      "core/crates/pe-html/help/hu/organize-mail.html": "291e5e83434809f20520895fc42349fe4357d6247716c745878cb3fa422ba279",
+      "core/crates/pe-html/help/hu/folders.html": "eaa008d0d8d0b27666cafcd2f81a76a959fc37769e56384dc5b3d2a9ec4787d4",
+      "core/crates/pe-html/help/hu/delete-and-undo.html": "dee81f1433b6e32ba46856db6ae4eb690c15576af382daac22cf7f26adde13b2",
+      "core/crates/pe-html/help/hu/all-inboxes.html": "5917e343757971eb32856fa738e40bd0fdcf34c3e8c20f30812fbe69f15973cb"
     },
     "resumed_review_checkpoints": [
       {
@@ -166198,6 +166328,97 @@
           "/private/tmp/inbox-uk-compose-20261118-edit.py": "40dda6b399ca79da4ef6147da996878867ce4fdb7ad6631654ce5cba042cd337",
           "/private/tmp/inbox-uk-compose-20261118-finalize.py": "f9b6d6a8aa22569a5a5313ef82cff7ce7a9629686f80957c793bfe4b4b1bf845"
         }
+      },
+      {
+        "batch": "hu-reading-search-organize-help-20261118",
+        "review_parent": "710990dcff73a2339356819a6fd2bb1b77387684",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 13132,
+          "pending_help": 629,
+          "completed_catalog": 22492,
+          "completed_help": 747
+        },
+        "validation": "Hungarian structural checks pass with 1,416 expected mark-only diagnostics. Exact before/after reconstruction verifies eight complete help topics and 72 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keyboard contents and all code examples are preserved. Static Windows/Mac/Linux sentence joins include inserted settings paths and correct a/az articles. Twenty-four runtime/layout/source files and six catalog dependencies match the review evidence. No Hungarian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,526 unmarked entries and 11,678 help lines; since-start 1,910 entries/477 passages match the queue. Source checkpoint covers 204 refs/6 worktrees, and upstream has no changed review inputs. Search/date/negation, folder-order and notification discrepancies in English help are recorded for maintainers and targeted cross-language audit; English/app code unchanged. Incoming MCP translations remain queued separately; merged preview-cid passages remain in the active queue. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 204,
+          "worktree_count": 6,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "710990dcff73a2339356819a6fd2bb1b77387684",
+            "refs/remotes/origin/HEAD": "710990dcff73a2339356819a6fd2bb1b77387684",
+            "refs/remotes/origin/fix/mac-print-pictures": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+            "refs/remotes/origin/i18n/review-resume-20261118": "5a0d866eee1f333656c401a166b0d61287921781",
+            "refs/remotes/origin/master": "710990dcff73a2339356819a6fd2bb1b77387684",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "f7590ff373883e2b66da181ad19fadb874647d71"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "3baf8a41703a6b941bb61c08b688e62813c79456",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "795059923d9e39c46231685e9dff3d533c60dc7e",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "710990dcff73a2339356819a6fd2bb1b77387684",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/hu/all-inboxes.html\n M core/crates/pe-html/help/hu/conversations.html\n M core/crates/pe-html/help/hu/delete-and-undo.html\n M core/crates/pe-html/help/hu/find-messages.html\n M core/crates/pe-html/help/hu/folders.html\n M core/crates/pe-html/help/hu/organize-mail.html\n M core/crates/pe-html/help/hu/read-messages.html\n M core/crates/pe-html/help/hu/search-words.html\n M core/locales/GLOSSARY.md",
+              "translation_hashes": {
+                "core/crates/pe-html/help/hu/all-inboxes.html": "5917e343757971eb32856fa738e40bd0fdcf34c3e8c20f30812fbe69f15973cb",
+                "core/crates/pe-html/help/hu/conversations.html": "c84794cb32db1138e599bb3053d10eaf947f75786989e3d2f6491d3e548b9fde",
+                "core/crates/pe-html/help/hu/delete-and-undo.html": "dee81f1433b6e32ba46856db6ae4eb690c15576af382daac22cf7f26adde13b2",
+                "core/crates/pe-html/help/hu/find-messages.html": "7233ff1b725439afb8c938b164d19690ae29c76a14a8de564d1a136005a4cfde",
+                "core/crates/pe-html/help/hu/folders.html": "eaa008d0d8d0b27666cafcd2f81a76a959fc37769e56384dc5b3d2a9ec4787d4",
+                "core/crates/pe-html/help/hu/organize-mail.html": "291e5e83434809f20520895fc42349fe4357d6247716c745878cb3fa422ba279",
+                "core/crates/pe-html/help/hu/read-messages.html": "41c8f804e9fbf32c8529512f07394c8e94bc6c0cc1214128568f87bd535daa03",
+                "core/crates/pe-html/help/hu/search-words.html": "40a0127b0ddf4bc741743e20e1e5003c44fbd44f6a651d8f609ff9f945517dd3",
+                "core/locales/GLOSSARY.md": "059f6c6a98b06c11780dfb05116f1dc38c3a67c8061335444861ccd2908d32cd"
+              }
+            }
+          ],
+          "master": "710990dcff73a2339356819a6fd2bb1b77387684",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "710990dcff73a2339356819a6fd2bb1b77387684",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-hu-reading-20261118-edit.py": "ad321f66b9209650eb64c705cb5c91fd683b8e2c9f721072a9e0b2a68d8fd4cd",
+          "/private/tmp/inbox-hu-reading-20261118-finalize.py": "c4b9e8e9106d0000f1cdcb56f4ece13953f6c880dbe5876b42b580d232ea3a03",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -167091,6 +167312,74 @@
         "new_pending_topics": 36,
         "reopened_completed_topics": 32,
         "new_round_scope_topics": 4
+      }
+    ],
+    "context_audit_queue": [
+      {
+        "id": "reading-search-behavior-context-20261118",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "710990dcff73a2339356819a6fd2bb1b77387684",
+        "completed_languages": [
+          "hu"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "it",
+          "lt",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "find-messages.html",
+          "search-words.html",
+          "conversations.html",
+          "organize-mail.html"
+        ],
+        "issues": [
+          {
+            "source": "core/crates/pe-html/help/en/find-messages.html",
+            "evidence": "core/crates/pe-store/src/search.rs::fts_word",
+            "finding": "Prefix matching needs at least two characters; a one-character term matches a whole word."
+          },
+          {
+            "source": "core/crates/pe-html/help/en/search-words.html",
+            "evidence": "core/crates/pe-store/src/query.rs::term/date/age and pe-store/src/search.rs::condition_with",
+            "finding": "after: includes its UTC start date; months/years are fixed 30/365 days. Negation is not implemented for all date/age/size operators, so minus must not be promised for every search term. to:/cc:/bcc: all search the full recipient index."
+          },
+          {
+            "source": "core/crates/pe-html/help/en/organize-mail.html",
+            "evidence": "core/crates/pe-core/src/tree.rs::several_accounts",
+            "finding": "With several accounts, Flagged follows All Inboxes, All Sent and All Drafts; it is not immediately after All Inboxes."
+          },
+          {
+            "source": "core/crates/pe-html/help/en/conversations.html",
+            "evidence": "core/crates/pe-store/src/threads.rs::groups; mac/Sources/InboxClassic/MainWindow.swift::notifyNewMail",
+            "finding": "Newest-message order applies to date/received sorts; other columns use the first message. Watched conversations still require notifications enabled."
+          }
+        ],
+        "instruction": "Compare exact current language passages against verified behavior. Reopen only passages that require correction. This audit queue adds no mark inventory or review credit until the affected passages are identified. English/app code changes remain outside translation-editor scope."
       }
     ]
   },

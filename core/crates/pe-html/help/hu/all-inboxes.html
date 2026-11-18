@@ -1,17 +1,17 @@
-<!--review--><h1>Összes beérkezett üzenet</h1>
-<p class="summary">Két vagy több fiók esetén olvassa az összes Beérkezett üzenetek mappa leveleit egy listában, vagy egyszerre egy fiókét.</p>
-<p>Ha két vagy több fiókja van, a mappalista tetején ez az elem látható: <b data-text="ui-all-inboxes"></b>. Minden fiók Beérkezett üzenetek mappájának leveleit felsorolja, a legújabbal kezdve. Hogy melyik üzenet melyik fiókhoz tartozik, ez az oszlop mutatja: <b data-text="ui-col-account"></b>.</p>
+<h1>Összes beérkezett üzenet</h1>
+<p class="summary">Két vagy több fiók beérkezett leveleit egy közös listában vagy fiókonként külön is olvashatja.</p>
+<p>Két vagy több fióknál a mappalista tetején jelenik meg az <b data-text="ui-all-inboxes"></b> nézet. Alapértelmezés szerint a legújabb üzeneteket mutatja elöl. A <b data-text="ui-col-account"></b> oszlop jelzi, melyik fiókhoz tartozik az üzenet.</p>
 <img src="picture:all-inboxes-3-accounts" alt="Az Összes beérkezett üzenet elem a mappalistában, alatta egy-egy sor minden fiók Beérkezett üzenetek mappájához">
 <ul>
     <li>A válasz, a továbbítás, az áthelyezés és a törlés az üzenet saját fiókjában történik.</li>
-    <li>Az új üzenet a kijelölt üzenet fiókjából indul.</li>
-    <li><b data-text="cmd-mark-all-read"></b>: ezen az elemen (<b data-text="ui-all-inboxes"></b>) minden Beérkezett üzenetek mappát olvasottként jelöl meg. Ez az egyetlen parancs az elem helyi menüjében, mivel nem egyetlen fiók mappája.</li>
+    <li>Új üzenet írásakor a kijelölt üzenet fiókja lesz a kiinduló fiók.</li>
+    <li>Az <b data-text="cmd-mark-all-read"></b> parancs az <b data-text="ui-all-inboxes"></b> nézeten az összes fiók beérkezett üzeneteit olvasottként jelöli meg. Ez az egyetlen parancs a nézet helyi menüjében, mert a nézet nem egyetlen fiók mappája.</li>
 </ul>
 <h2>Az egyes fiókok Beérkezett üzenetek mappája</h2>
-<p>Ez alatt: <b data-text="ui-all-inboxes"></b>, minden fiók Beérkezett üzenetek mappájának saját sora van, a fiók nevével és az olvasatlan üzenetek számával. Jelöljön ki egy sort, ha csak azt a mappát szeretné látni. Itt található minden fiók Beérkezett üzenetek mappája: lejjebb maga a fiók a többi mappáját sorolja fel.</p>
+<p>Az <b data-text="ui-all-inboxes"></b> alatt minden fiók Beérkezett üzenetek mappája külön sorban jelenik meg, a fiók nevével és az olvasatlan üzenetek számával. Egy sor kijelölésével csak az adott fiók beérkezett leveleit láthatja. Ezek a mappák itt érhetők el; a lejjebb látható fióknevek alatt a többi mappa szerepel.</p>
 <p>A sorok a fiókok sorrendjét követik. A sorrend módosításához húzzon egy sort egy másik fölé vagy alá. Lásd: <a href="topic:manage-accounts"></a>.</p>
-<p>A mappalista megjegyzi, hogy kinyitotta vagy becsukta-e ezt: <b data-text="ui-all-inboxes"></b>. Ha csak egy fiók marad, eltűnik.</p>
+<p>A mappalista megjegyzi az <b data-text="ui-all-inboxes"></b> kibontott vagy összecsukott állapotát. A közös nézet eltűnik, ha csak egy fiók marad.</p>
 <h2>Összes elküldött és összes piszkozat</h2>
-<p>Ezután (<b data-text="ui-all-inboxes"></b>) két további elem következik: <b data-text="ui-all-sent"></b> és <b data-text="ui-all-drafts"></b>. Felsorolják, amit az egyes fiókok elküldtek, illetve az összes fiók piszkozatait, a fiók oszlopával (<b data-text="ui-col-account"></b>) és azzal, hogy kinek ment az egyes üzenet. A nyilával nyissa ki valamelyiket, és fiókonként egy-egy sort kap, így megnézheti egyetlen fiók Elküldött elemek vagy Piszkozatok mappáját. A lejjebb lévő fiókok már nem sorolják fel ezt a két mappát.</p>
-<p>Az innen megnyitott piszkozat: <b data-text="ui-all-drafts"></b>, abból a fiókból nyílik meg, amelyben mentették. Mindkettő becsukva indul, és a mappalista megjegyzi, hogy kinyitotta-e őket.</p>
-<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:add-account"></a> <a href="topic:main-window"></a></nav><!--/review-->
+<p>Az <b data-text="ui-all-inboxes"></b> után az <b data-text="ui-all-sent"></b> és az <b data-text="ui-all-drafts"></b> nézet következik. Ezek az összes fiók elküldött üzeneteit, illetve piszkozatait gyűjtik össze. A <b data-text="ui-col-account"></b> oszlop a fiókot jelzi; a listában a címzettek is láthatók. A nézet melletti nyíllal kibontva fiókonként külön sort kap. Így egyetlen fiók Elküldött elemek vagy Piszkozatok mappáját is megnyithatja. A lejjebb látható fióknevek alatt ez a két mappa már nem szerepel.</p>
+<p>Az <b data-text="ui-all-drafts"></b> nézetből megnyitott piszkozat ahhoz a fiókhoz tartozik, amelyben elmentette. A két közös nézet kezdetben összecsukva jelenik meg; a mappalista később megjegyzi az állapotukat.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:add-account"></a> <a href="topic:main-window"></a></nav>
