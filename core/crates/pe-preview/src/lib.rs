@@ -4,6 +4,7 @@
 //! - [`picture`] reads JPEG, PNG, GIF (its first frame), WebP, BMP, ICO and TIFF with the `image` crate under its
 //!   [`image::Limits`], turns the picture upright as its EXIF says, scales it to at most [`limits::MAX_SIDE`] pixels
 //!   and writes it without its EXIF (its ICC profile kept).
+//! - [`svg`] draws an SVG picture of a message's text with resvg, to a PNG (never an attached SVG file).
 //! - [`pdf`] reads a PDF file with hayro (Rust, its own crates without unsafe code): the page count and title, and
 //!   the first [`limits::MAX_PAGES`] pages drawn on white, each measured first ([`streams`]) so that a bomb is not
 //!   inflated.
@@ -24,6 +25,7 @@ pub mod pdf;
 pub mod picture;
 mod service;
 pub mod streams;
+pub mod svg;
 
 pub use engine::{Engine, Real, Step};
 pub use service::{Later, Outcome, Previewer, Request, Settings, What};
@@ -83,6 +85,12 @@ pub fn kind_of(bytes: &[u8]) -> Option<Kind> {
         return Some(Kind::Pdf);
     }
     picture::format_of(bytes).map(|_| Kind::Picture)
+}
+
+/// The kind of a picture in a message's text (`cid:` or `data:`, [`Request::inline`]): a picture, SVG among them
+/// (drawn by resvg to a raster), never a PDF file
+pub fn inline_kind_of(bytes: &[u8]) -> Option<Kind> {
+    (picture::format_of(bytes).is_some() || svg::is_svg(bytes)).then_some(Kind::Picture)
 }
 
 /// The picture formats this crate knows but does not draw (docs/attachment-preview-plan.md, decision 3): their name

@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" vmewBox="0 0 30 10">url(#g)"/><use href="#d" x="10" filter="url(#f)"/><filter id="f"><feGaussianBlur stdDeviation="2"/></filter><path d="M0 0L30 10Q152 0 01 0z" stroke="green"/></svg>

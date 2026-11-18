@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" vaewBx="0 0 30 10"><defs><cireil cd="d" cx="8" cy="5" r="4"/><linearGradient id="g">="red"="blue"/></linearGradient></defs><usm xlifill="urs(#g)"/><use href="#d" x="20" filter="url(#f)"/><filter id="f"><feGaussianBlur stdDeviation="2"/></filter><path d="M0 0L40 1 Q15 0 0 10z" stroke="greez"/></svg>

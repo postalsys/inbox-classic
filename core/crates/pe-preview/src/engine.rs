@@ -4,7 +4,7 @@
 use std::sync::Arc;
 
 use crate::limits::MAX_PAGES;
-use crate::{Description, Kind, Picture, Refusal, pdf, picture};
+use crate::{Description, Kind, Picture, Refusal, pdf, picture, svg};
 
 /// Draws a file, step by step
 pub trait Engine: Send + Sync + 'static {
@@ -40,14 +40,21 @@ impl Engine for Real {
 }
 
 fn run_picture(file: &[u8], pages: &[usize], budget: u64, emit: &mut dyn FnMut(Step) -> bool) {
-    let description = picture::describe(file);
+    // an SVG picture only of a message's text: the render thread refuses an attached one before it gets here
+    let svg = svg::is_svg(file);
+    let description = if svg {
+        svg::describe(file)
+    } else {
+        picture::describe(file)
+    };
     let size = description.as_ref().ok().and_then(|d| d.sizes.first().copied());
     if !emit(Step::Described(description)) || !pages.contains(&0) {
         return;
     }
     let mut left = budget;
     if let Some(size) = size {
-        let page = page_fits(size, &mut left).and_then(|()| picture::render(file));
+        let render = if svg { svg::render } else { picture::render };
+        let page = page_fits(size, &mut left).and_then(|()| render(file));
         emit(Step::Page(0, page));
     }
 }

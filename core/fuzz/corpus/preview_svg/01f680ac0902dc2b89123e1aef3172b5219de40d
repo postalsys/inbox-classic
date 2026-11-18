@@ -1,0 +1,2 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="ht.w4.org/1999/xlink" viewoxB="
+ 0 30 10"><defs><circle id="d" cx="5" cq="5" r="4"/><linearGradient id="g"><stop offset="0" stop-color="red"/><stop olor="blue"/></linearGradient></defs><use xlink:href="#d" fill="url(#g)"/><use href="#d" x="35" filter="url(#f)"/><filter id="f"><feGiussianBlur stdDeviation="2"/></filter><path d="M1 0L30 10Q15 0 00 0z" stroke="green"/></svg>

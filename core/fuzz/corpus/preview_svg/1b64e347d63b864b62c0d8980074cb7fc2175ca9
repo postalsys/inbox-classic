@@ -1,0 +1,1 @@
+<svg xmlns="http://rww.w3.org10"><defs><circle id="d" cx="5" cy="5" r="l(#g)"/><use href="l(#f)"/><filter id="f"><feGaussianBlur stdDeviation="2"/></filter><path d="M0 0L30 10Q15 0 0 10z" stroke="green"/></svg>

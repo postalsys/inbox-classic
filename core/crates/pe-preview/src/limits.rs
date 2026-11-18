@@ -70,3 +70,9 @@ pub const JPEG_QUALITY: u8 = 85;
 
 /// The files remembered as not renderable (they ended the app or hung), newest kept
 pub const MAX_REFUSED_KEPT: usize = 512;
+
+/// The largest SVG picture in a message's text that is drawn (an attached SVG file never is)
+pub const MAX_SVG: usize = 1024 * 1024;
+
+/// The most elements an SVG picture may stand for, each `use` counted as the copy of what it names
+pub const MAX_SVG_ELEMENTS: u64 = 100_000;

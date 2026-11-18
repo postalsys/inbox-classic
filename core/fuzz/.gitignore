@@ -9,6 +9,7 @@ corpus/*
 !corpus/pgp_unwrap/
 !corpus/preview_picture/
 !corpus/preview_pdf/
+!corpus/preview_svg/
 artifacts/
 coverage/
 logs/
