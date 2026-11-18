@@ -61,6 +61,8 @@ mod compose_keys;
 
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
+/// Step 4, continued: the pictures in a message's text drawn by the core
+mod inline_pictures;
 /// Step 8b: the files not drawn, Show in Message and printing
 mod preview_tiles;
 /// Step 8b: pictures and PDF files in the message
@@ -442,7 +444,7 @@ fn seed(driver: &Driver) -> Result<(), String> {
         &[],
     )?;
     let html = "<div style=\"font-family:Georgia,serif;max-width:560px;color:#222\">\
-        <p><img src=\"cid:banner@example.com\" width=\"560\" height=\"110\" alt=\"Trail Notes\"></p>\
+        <p><a href=\"https://example.com/trail-notes\"><img src=\"cid:banner@example.com\" width=\"560\" height=\"110\" alt=\"Trail Notes\"></a></p>\
         <h2 style=\"color:#1f4d3a;margin:18px 0 6px\">Five autumn walks worth the drive</h2>\
         <p>The larches are turning gold and the summer crowds have gone home. This month we picked five routes for short \
         October days, each under four hours, with a warm cafe at the end.</p>\
@@ -1280,6 +1282,7 @@ async fn reading(d: &Driver) {
     );
     pause(1500).await;
     d.shot(&main, "read-1-html").await;
+    inline_pictures::pictures_in_text(d).await;
 
     d.step("message properties");
     command(Command::Properties);

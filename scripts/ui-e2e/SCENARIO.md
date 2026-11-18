@@ -1010,6 +1010,7 @@ Three messages added to the Inbox (read, dated before the others): a plain one, 
 - the plain message is shown on a dark background, its document carrying both looks (`color-scheme: light dark`), so a change of the system's appearance needs no reload
 - the written message is dark too: its two too dark text colors are marked (`data-pe-dark`) and lightened, the red one is not, and its quote is folded under the dark "..." button
 - the receipt stays light, as it was designed (`color-scheme: light`, a white background)
+- the newsletter of step 4 in the dark window: its banner drawn by Inbox Classic in its place (Linux, `dark-3b-pictures`)
 - the delivery report of 34f shows its card dark, Details open
 - a reply to the written message is written in a dark editor, and what is written carries no colors
 - the switch turned off in Settings, Reading pane: the written message shown is made again, light on white in the dark window, its colors as sent
