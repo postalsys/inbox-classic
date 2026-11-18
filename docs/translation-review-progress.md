@@ -8,25 +8,25 @@ Commit completed batches regularly and preserve an exact resume point.
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`; branch `i18n/review-resume-20261118`.
   Created from GitHub master `45f519ae` on November 18 after the main worker merged the available translations.
   The old `build/i18n-wave1` worktree no longer exists. All older checkout references below are historical.
-- **Next: Review Croatian compose additions, then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.**
+- **Next: Review Hungarian compose additions, then lt/lv/pl/ro/ru/sk/sl/sv/uk compose, the 46 original Hungarian help topics, new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.**
 - Current scope: 35,624 catalog entries and 1,372 help topics.
-  Completed: 22,051 entries and 749 full topics;
-  pending: 13,573 entries and 623 topics.
+  Completed: 22,091 entries and 751 full topics;
+  pending: 13,533 entries and 621 topics.
   All 28 language directories are inventoried; no new languages were added at this source checkpoint.
 - Resumed source audit: 250 translated files changed since `31f89fa7`, with every changed value/passage marked.
   Merged agent read-log/terminal/organize additions and preview tiles/protected-part additions are now in the exact queue.
   English source fixes `22e156ab` / `8a4a143f` are incorporated; older runtime/source-issue notes below are historical.
   Recheck current behavior before reviewing those new drafts, especially protected attachment previews and agent access.
-- Linux compose-menu paths are reviewed in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi.
+- Linux compose-menu paths are reviewed in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr.
   The preceding menu followup restored 16 full topics after reviewing 32 reopened passages. Three wording lines improved;
-  other good wording retained. Finnish compose additions are now complete too; the remaining 11 full compose topics stay pending.
+  other good wording retained. Finnish and Croatian compose additions are now complete too; the remaining ten full compose topics stay pending.
 - Scope totals are rebuilt from exact completed/pending ID and topic unions. Earlier summary arithmetic omitted
   four recorded catalog entries and twelve recorded help topics; correcting that discrepancy adds no review credit.
-- Source discovery now covers 195 refs and six worktrees. `feat/preview-cid` at `6a37b3de` has 56 new translated
+- Source discovery now covers 196 refs and 6 worktrees. `feat/preview-cid` at `6a37b3de` has 56 new translated
   help passages. MCP phase3 translations were committed during the Finnish batch; the exact source commit and
   added/changed IDs are recorded in `resumed_incoming_source_queue`. Both sources remain queued separately.
   Recheck their latest tips and integration status at the next checkpoint.
-- Initial resumption checks covered all 28 languages; the latest Finnish batch checks and counts are recorded below.
+- Initial resumption checks covered all 28 languages; the latest Croatian batch checks and counts are recorded below.
 - The generated review report is `/Users/andris/Projects/PostalExpress/build/i18n-review.html`, regenerated from this checkout.
 - Review guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`, unchanged SHA-256 `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`.
   Starting commit remains `e99f7e59248bed137903150db7ef417e27755d18` and review baseline remains `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
@@ -37,8 +37,8 @@ Commit completed batches regularly and preserve an exact resume point.
 - Standing publication authorization: push and merge each validated batch into GitHub master, then fetch and
   fast-forward this clean review branch. No local test suites and no manually launched CI runs.
 
-- Latest batch: Finnish, 40 catalog entries and two help targets reviewed; 17 values and 14 help wording lines improved. Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables, plural branches and all prior writing-help prose are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.
-- Publication checkpoint: [PR #160](https://github.com/postalsys/inbox-classic/pull/160) merged the resumed queue and 16-language menu followup as `cc54e353`; this worktree was synchronized before Finnish.
+- Latest batch: Croatian, 40 catalog entries and two help targets reviewed; 16 values and 14 help wording lines improved. Croatian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 16 improved values, 24 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Croatian compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,125 unmarked entries and 11,192 help lines; since-start 2,310 entries/454 passages match the queue. Source checkpoint covers 196 refs/6 worktrees; previously recorded preview-cid and MCP phase3 sources remain queued separately. No local test suites or builds; REVIEWED unchanged.
+- Publication checkpoint: [PR #161](https://github.com/postalsys/inbox-classic/pull/161) merged Finnish as `016b1f8f`; this worktree was synchronized before Croatian.
 
 ## Review and checkpoint rules
 
@@ -2669,10 +2669,22 @@ Completed: 22,011 catalog entries and 747 full topics. Pending: 13,613 entries a
 
 Reviewed all 40 compose additions and both help targets. Improved 17 core values while retaining all 17 app labels and six good core values. Corrected protection timing, signature integrity versus verified key ownership, usable-key guidance, encrypted replies/attachments, and keys used to encrypt content. Help now covers platform menus, status colors, disabled unencrypted sending, sender-only encrypted drafts and encrypted sent copies. The writing-help insertion explicitly says digital signing; earlier prose is unchanged. Finnish terminology is recorded in the glossary.
 
-Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables, plural branches and all prior writing-help prose are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.
+Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.
 
 Publication checkpoint: [PR #160](https://github.com/postalsys/inbox-classic/pull/160) merged as `cc54e353` on November 18 at 13:49 UTC; the review worktree was synchronized before this batch.
 
 Completed: 22,051 catalog entries and 749 full topics. Pending: 13,573 entries and 623 topics. Historical catalog improvements: 4210.
 
 Review Croatian compose additions, then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, followed by new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.
+
+### Croatian compose signing, encryption and recipient keys
+
+Reviewed all 40 compose additions and both help targets. Improved 16 core values, retaining all 17 app labels and seven good core values. Corrected protection timing, signature integrity versus verified key ownership, usable-key guidance and content copied from encrypted mail. Help explains current platform menus, recipient status colors, restricted unencrypted sending, sender-only encrypted drafts and encrypted sent copies. Exact [1] retains a single named recipient; added counted one/few variants make 21 and 2-4 read naturally. All prior writing-help prose is retained. Croatian terms and register are recorded in the glossary.
+
+Croatian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 16 improved values, 24 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Croatian compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,125 unmarked entries and 11,192 help lines; since-start 2,310 entries/454 passages match the queue. Source checkpoint covers 196 refs/6 worktrees; previously recorded preview-cid and MCP phase3 sources remain queued separately. No local test suites or builds; REVIEWED unchanged.
+
+Publication checkpoint: [PR #161](https://github.com/postalsys/inbox-classic/pull/161) merged Finnish as `016b1f8f` on November 18 at 14:04 UTC; the review branch was synchronized before Croatian.
+
+Completed: 22,091 catalog entries and 751 full topics. Pending: 13,533 entries and 621 topics. Historical catalog improvements: 4226.
+
+Review Hungarian compose additions, then lt/lv/pl/ro/ru/sk/sl/sv/uk compose, the 46 original Hungarian help topics, new agent/preview drafts and remaining broader catalogs/help. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.
