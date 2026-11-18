@@ -7,7 +7,7 @@
 // every second until it has the answer. After the send it saves a draft in Markdown, then waits for the file OUT.unsubscribe, which the test makes once it has looked at the Outbox and the
 // AI Agents window, and then asks to unsubscribe from the two mailing lists the test added. Then it waits for the file
 // OUT.bulk, which the test makes once it has added two unread messages "Club newsletter" and an invitation "Invitation:
-// Planning meeting": it accepts the invitation (the Send question, answered Send), marks the two read with one change
+// Roadmap review": it accepts the invitation (the Send question, answered Send), marks the two read with one change
 // of many messages (a dry run, then its token), takes that back, and makes the same change again, which the test
 // leaves for Undo Since in the AI Agents window.
 //   APP=<executable> STORE=<store> OUT=<file> "My AI agent" agent.mjs
@@ -108,7 +108,7 @@ try {
         await new Promise(resolve => setTimeout(resolve, 200));
     }
     // the invitation answered through the Send question; the user's status changes only once it was sent
-    const invitations = await call('search_messages', { query: 'subject:"Planning meeting"' });
+    const invitations = await call('search_messages', { query: 'subject:"Roadmap review"' });
     const invitation = invitations.messages[0];
     let accepted = await call('respond_to_invitation', { folder: invitation.folder, uid: invitation.uid, response: 'accept' });
     for (let waited = 0; accepted.status === 'waiting'; waited += 1000) {

@@ -555,7 +555,7 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
   from Terminal" (the Mac) or "Programs started from a terminal (Terminal)", which share what is allowed, and told
   that `--name` gives one an access of its own
 - the list of programs names it so
-- the test adds two unread "Club newsletter" messages and an invitation "Invitation: Planning meeting", then lets the
+- the test adds two unread "Club newsletter" messages and an invitation "Invitation: Roadmap review", then lets the
   agent go on (the file `OUT.bulk`)
 - the agent answers the invitation: the Send question shows the line of what it answers, above the text
 - and has no Edit First; Don't Send is the default
