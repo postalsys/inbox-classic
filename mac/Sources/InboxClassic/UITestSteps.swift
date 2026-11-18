@@ -3348,15 +3348,21 @@ extension UITest {
         let send = await waitWindow("agent.send", 30)
         check(send != nil, "the agent's answer to the invitation is shown to the user first")
         if let send {
+            // Send's state first, before anything else takes time: off unless the test came after the wait was over
+            let button: NSButton? = find("agent.sendButton", in: send)
+            let sendOn = button?.isEnabled == true
+            let shownFor = Modal.openedAt[ObjectIdentifier(send)].map { Date().timeIntervalSince($0) } ?? 0
+            check(button != nil && (!sendOn || shownFor >= holdBackSeconds),
+                  "Send waits a moment before it can be pressed (on: \(sendOn), shown \(String(format: "%.2f", shownFor)) s)")
             let line: NSTextField? = find("agent.invitation", in: send)
             check(line?.stringValue.hasPrefix("This message accepts the invitation “Roadmap review”") == true
                   && line?.stringValue.contains("changes only once the message has been sent") == true,
                   "the Send question says what it answers, above the text (\(line?.stringValue ?? "none"))")
             let compose: NSButton? = find("agent.compose", in: send)
             let dont: NSButton? = find("agent.dontSend", in: send)
-            let button: NSButton? = find("agent.sendButton", in: send)
-            check(compose == nil && dont?.keyEquivalent == "\r" && button?.isEnabled == false,
-                  "it has no Edit First, Don't Send is the default and Send waits a moment")
+            check(compose == nil && dont != nil, "it has no Edit First")
+            check(dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell,
+                  "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"))")
             checkQuestionFits(send, "the invitation's Send question")
             onMain {
                 NSApp.activate()

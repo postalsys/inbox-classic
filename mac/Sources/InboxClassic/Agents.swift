@@ -344,13 +344,16 @@ private func sendQuestion(core: Core, request: UInt64) {
     }
 }
 
+/// How long `holdBack` keeps an answer off
+let holdBackSeconds: TimeInterval = 1.5
+
 /// An answer that can not be taken back comes on only after a moment, so a click or a key meant for another window
 /// does not give it
 @MainActor
 private func holdBack(_ button: NSButton) {
     button.isEnabled = false
     // in the common modes: the window runs modally, where a timer of the default mode never fires
-    let timer = Timer(timeInterval: 1.5, repeats: false) { _ in
+    let timer = Timer(timeInterval: holdBackSeconds, repeats: false) { _ in
         MainActor.assumeIsolated { button.isEnabled = true }
     }
     RunLoop.main.add(timer, forMode: .common)
