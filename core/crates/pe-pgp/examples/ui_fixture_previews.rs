@@ -5,9 +5,13 @@
 //! The first part is not protected and carries `harbour.png`; the second is encrypted to the test account's key and
 //! carries `floor-plan.png`. Each part's previews show in its own document under a token of its own: the plain part,
 //! which anyone on the way could have added, can not show or ask for the encrypted part's picture. The pictures are
-//! drawn here (no one's real file) and written as PNG without compression, so nothing but std is needed.
+//! drawn here (no one's real file) and written as PNG with flate2.
 
+use std::io::Write;
 use std::path::Path;
+
+use flate2::Compression;
+use flate2::write::ZlibEncoder;
 
 use pe_pgp::{encrypt, read_secret_keys};
 
@@ -30,15 +34,6 @@ fn crc32(bytes: &[u8]) -> u32 {
     !crc
 }
 
-fn adler32(bytes: &[u8]) -> u32 {
-    let (mut a, mut b) = (1u32, 0u32);
-    for &byte in bytes {
-        a = (a + u32::from(byte)) % 65_521;
-        b = (b + a) % 65_521;
-    }
-    (b << 16) | a
-}
-
 fn chunk(out: &mut Vec<u8>, kind: &[u8], data: &[u8]) {
     out.extend_from_slice(&(data.len() as u32).to_be_bytes());
     let mut body = kind.to_vec();
@@ -47,7 +42,7 @@ fn chunk(out: &mut Vec<u8>, kind: &[u8], data: &[u8]) {
     out.extend_from_slice(&crc32(&body).to_be_bytes());
 }
 
-/// An RGB picture as PNG, its deflate stream of stored blocks
+/// An RGB picture as PNG, compressed
 fn png(width: u32, height: u32, pixel: impl Fn(u32, u32) -> [u8; 3]) -> Vec<u8> {
     let mut raw = Vec::new();
     for y in 0..height {
@@ -56,16 +51,9 @@ fn png(width: u32, height: u32, pixel: impl Fn(u32, u32) -> [u8; 3]) -> Vec<u8> 
             raw.extend_from_slice(&pixel(x, y));
         }
     }
-    let mut zlib = vec![0x78, 0x01];
-    let blocks: Vec<&[u8]> = raw.chunks(65_535).collect();
-    for (index, block) in blocks.iter().enumerate() {
-        zlib.push(u8::from(index + 1 == blocks.len()));
-        let length = block.len() as u16;
-        zlib.extend_from_slice(&length.to_le_bytes());
-        zlib.extend_from_slice(&(!length).to_le_bytes());
-        zlib.extend_from_slice(block);
-    }
-    zlib.extend_from_slice(&adler32(&raw).to_be_bytes());
+    let mut zlib = ZlibEncoder::new(Vec::new(), Compression::best());
+    zlib.write_all(&raw).expect("compressed");
+    let zlib = zlib.finish().expect("compressed");
     let mut header = width.to_be_bytes().to_vec();
     header.extend_from_slice(&height.to_be_bytes());
     header.extend_from_slice(&[8, 2, 0, 0, 0]);
