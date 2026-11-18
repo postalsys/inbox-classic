@@ -586,7 +586,7 @@ fn an_agent_works_on_the_mailbox() {
         // logged at the yes, and what the refusing list answered written into its entry
         let summaries: Vec<String> = core.agent_log(2).unwrap().iter().map(said).collect();
         assert!(
-            summaries.contains(&"Unsubscribed from the list of \u{201c}News of Weekly\u{201d}".to_string()),
+            summaries.contains(&"You agreed to unsubscribe from the list of \u{201c}News of Weekly\u{201d}".to_string()),
             "{summaries:?}"
         );
         assert!(

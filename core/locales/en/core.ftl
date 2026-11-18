@@ -417,7 +417,7 @@ day-sunday = Sunday
 
 ## AI agents
 
-agent-level-read = Read mail: folders, the message list, search and messages
+agent-level-read = Read mail: folders, the message list, conversations, search, messages and their files, your message rules and the people you write to
 agent-level-organize = Organize mail: read state, flags and their colors, junk, moving, archiving, creating and renaming folders, watching and ignoring conversations, deleting to Deleted Items, and leaving mailing lists after you say yes
 agent-level-drafts = Write drafts for you to send
 agent-level-send = Send mail, each message only after you say yes
@@ -442,7 +442,7 @@ agent-undo-refused-why = It can not be taken back: { $reason }.
 agent-undo-impossible = this can not be taken back
 agent-undo-not-in-folder = the message is no longer in that folder
 agent-undo-not-arrived = the message is not in the folder it went to (yet)
-agent-undo-sent = the message was sent already
+agent-undo-sent = the message is no longer in the Outbox
 agent-original-not-downloaded = the original message has not been downloaded yet. Open it first
 agent-turned-away = Turned away
 agent-can-nothing = Nothing
@@ -467,7 +467,7 @@ agent-too-many-reads = Too many reads in the last 30 days: this agent has read a
 list-encrypted = Encrypted message
 agent-log-composed = Opened “{ $subject }” in a new message for you to finish
 agent-log-refused = You did not send “{ $subject }”
-agent-log-sent = Sent “{ $subject }” to { $to }
+agent-log-sent = Put “{ $subject }” in the Outbox for { $to }
 agent-log-draft = Saved the draft “{ $subject }”
 agent-log-draft-replaced = Replaced the draft “{ $subject }”
 agent-log-draft-discarded = Discarded the draft “{ $subject }”
@@ -482,7 +482,8 @@ agent-log-junk = Marked “{ $subject }” as junk
 agent-log-not-junk = Marked “{ $subject }” as not junk
 agent-log-archived = Archived “{ $subject }”
 agent-log-folder = Made the folder “{ $name }”
-agent-log-unsubscribed = Unsubscribed from the list of “{ $subject }”
+# written at the user's yes, before the list is asked; a list that fails replaces it with agent-log-unsubscribe-failed
+agent-log-unsubscribed = You agreed to unsubscribe from the list of “{ $subject }”
 agent-log-unsubscribe-failed = Could not unsubscribe from the list of “{ $subject }”: { $reason }
 # "You did not unsubscribe from news@shop.example, deals@example.com": the lists' addresses, never their names
 agent-log-unsubscribe-refused = You did not unsubscribe from { $senders }
@@ -897,8 +898,8 @@ undone-flags = { $count ->
 preview-pdf-option = Show PDF files in messages
 # the tile of a PDF file while PDF previews are off
 preview-pdf-off = PDF files are not shown in messages.
-# the note where previews are, after a PDF file ended the app: { $option } is the option's name
-preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in { $settings }.
+# the note where previews are, after the app ended while it was drawing a file of a message: { $option } is the option's name
+preview-pdf-off-crashed = Inbox Classic closed while it was showing a file in a message, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in { $settings }.
 # under the pages of a PDF file shown in a message: its page count and size ("3 pages, 84 KB")
 preview-pdf-details = { $count ->
     [one] 1 page, { $size }

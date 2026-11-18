@@ -434,6 +434,7 @@ day-sunday = diumenge
 
 ## Agents d’IA
 
+# review: changed
 agent-level-read = Llegir el correu: accedir a carpetes, llistes de missatges, cerques i contingut dels missatges
 # review: changed
 agent-level-organize = Organitzar el correu: canviar l’estat de lectura, les banderes i els seus colors, gestionar el correu brossa, moure i arxivar missatges, crear i canviar el nom de carpetes, seguir i ignorar converses, suprimir missatges (movent-los a Elements suprimits) i cancel·lar subscripcions a llistes de correu amb la vostra autorització

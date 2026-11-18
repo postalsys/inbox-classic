@@ -400,6 +400,7 @@ day-sunday = pühapäeval
 
 ## AI agents
 
+# review: changed
 agent-level-read = Lugeda e-posti: vaadata kaustu ja kirju ning kasutada otsingut
 # review: changed
 agent-level-organize = Hallata e-posti: muuta kirjade lugemisolekut, lippe ja nende värve, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta Kustutatud kirjad, luua ja ümber nimetada kaustu, jälgida ja eirata vestlusi ning teie nõusolekul loobuda meililistide tellimustest
@@ -451,6 +452,7 @@ agent-too-many-reads = Viimase 30 päeva jooksul liiga palju lugemist: see agent
 list-encrypted = Krüpteeritud kiri
 agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite selle valmis kirjutada
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
+# review: changed
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
 agent-log-draft = Mustand „{ $subject }“ salvestati
 agent-log-draft-replaced = Mustand „{ $subject }“ asendati

@@ -4,18 +4,18 @@
 <ul>
     <li>read mail: folders, the message list, conversations, search and messages with their PDF, Office and picture files up to 10 MB, and look up your message rules and the people you write to</li>
     <li>organize mail: read state, flags and their colors, junk, moving, archiving, new folders, renaming your own folders, watching and ignoring conversations, and deleting to <b data-text="folder-deleted"></b>, and leaving mailing lists after you say yes</li>
-    <li>write drafts for you to send, and change or remove the drafts it wrote until you change them</li>
+    <li>write drafts for you to send, and change or remove the drafts it wrote until you save or send them yourself</li>
     <li>send mail, each message only after you say yes</li>
 </ul>
 <p>Then choose the accounts it may see, and click <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> turns the program away, and you are not asked about it again.</p>
-<p>An agent never deletes anything for good and never changes your account settings. It can read and try out your message rules, but never create, change or delete one. It never reads what an encrypted message says or carries. Reading a message does not mark it read. What it changes shows in the windows at once.</p>
+<p>An agent never changes your account settings, and it deletes nothing for good but its own drafts: when it discards a draft it wrote that you have not saved, the draft is removed at once, without going to <b data-text="folder-deleted"></b>. It can read and try out your message rules, but never create, change or delete one. It never reads what an encrypted message says or carries. Reading a message does not mark it read. What it changes shows in the windows at once.</p>
 <h2>Leave mailing lists</h2>
 <p>An agent that may organize mail can ask to unsubscribe you from mailing lists. Inbox Classic first asks you once, listing each list by its sender:</p>
 <ul>
     <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> asks each list to stop sending to you.</li>
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, the default, leaves them as they are.</li>
 </ul>
-<p>An agent cannot unsubscribe you from messages in <b data-text="folder-junk"></b>, and from at most 30 lists a day.</p>
+<p>An agent cannot unsubscribe you from messages in <b data-text="folder-junk"></b>. Each program can unsubscribe you from at most 30 lists in 24 hours. Every list you said yes to counts, even one that could not be left.</p>
 <h2>See and change access</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> lists the programs you let in or turned away, and everything agents did, newest first.</p>
 <p>What an agent reads shows as one row for each program and hour, such as “Read 14 messages and searched 3 times”. <!--os:windows-->Select the row<!--/os--><!--os:mac,linux-->Open the row with its arrow<!--/os--> to see the subjects it read and what it searched for, never the text of the messages. The log keeps 30 days. Clearing it does not change how many messages an agent may still send.</p>

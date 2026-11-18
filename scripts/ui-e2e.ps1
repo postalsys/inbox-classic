@@ -3966,7 +3966,7 @@ public static class Dragger {
         # after the send the agent saved a draft (opened below)
         [void](WaitFor { (& $logged 0) -match '^Saved the draft' } 20)
         Check ((& $logged 0) -match "^Saved the draft $([char]0x201C)Agenda for Friday$([char]0x201D)" -and
-               (& $logged 1) -match "^Sent $([char]0x201C)Lunch on Friday\?$([char]0x201D) to pat@example.net" -and (& $logged 4) -match '^Marked read') "and what its agent did, newest first ($(@(0..4 | ForEach-Object { & $logged $_ }) -join '; '))"
+               (& $logged 1) -match "^Put $([char]0x201C)Lunch on Friday\?$([char]0x201D) in the Outbox for pat@example.net" -and (& $logged 4) -match '^Marked read') "and what its agent did, newest first ($(@(0..4 | ForEach-Object { & $logged $_ }) -join '; '))"
         # the colour of a flag and a conversation watched, by the agent
         Check ((& $logged 2) -match "^Watched the conversation $([char]0x201C)" -and (& $logged 3) -match "^Flagged $([char]0x201C).+$([char]0x201D) blue$") "a flag's colour and a watched conversation are listed ($(& $logged 2); $(& $logged 3))"
         Shot $agents 'agents-6-window'

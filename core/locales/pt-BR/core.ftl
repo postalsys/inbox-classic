@@ -445,6 +445,7 @@ day-sunday = domingo
 
 ## AI agents
 
+# review: changed
 agent-level-read = Ler os e-mails: pastas, lista de mensagens, pesquisa e mensagens
 # review: changed
 agent-level-organize = Organizar e-mails: alterar o status de leitura, os sinalizadores e suas cores, gerenciar o lixo eletrônico, mover e arquivar mensagens, criar e renomear pastas, acompanhar e ignorar conversas, excluir mensagens (movendo-as para Itens Excluídos) e cancelar inscrições em listas de e-mails com sua autorização

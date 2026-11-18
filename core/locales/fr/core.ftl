@@ -440,6 +440,7 @@ day-sunday = dimanche
 
 ## AI agents
 
+# review: changed
 agent-level-read = Lire le courrier : consulter les dossiers et les messages, et effectuer des recherches
 # review: changed
 agent-level-organize = Gérer le courrier : modifier l'état lu ou non lu, les indicateurs et leurs couleurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer et renommer des dossiers, suivre et ignorer des conversations, et vous désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans Éléments supprimés.
@@ -491,7 +492,8 @@ agent-too-many-reads = Trop de lectures au cours des 30 derniers jours : cet age
 list-encrypted = Message chiffré
 agent-log-composed = « { $subject } » ouvert dans un nouveau message à compléter
 agent-log-refused = Vous n'avez pas envoyé « { $subject } »
-agent-log-sent = « { $subject } » envoyé à { $to }
+# review: changed
+agent-log-sent = « { $subject } » placé dans la Boîte d’envoi pour { $to }
 agent-log-draft = Brouillon « { $subject } » enregistré
 agent-log-draft-replaced = Brouillon « { $subject } » remplacé
 agent-log-draft-discarded = Brouillon « { $subject } » supprimé

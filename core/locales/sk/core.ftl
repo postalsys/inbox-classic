@@ -699,6 +699,7 @@ day-sunday = nedeľa
 
 ## AI agents
 
+# review: changed
 agent-level-read = Čítať poštu: zobrazovať priečinky, zoznam správ a obsah správ, vyhľadávať
 # review: changed
 agent-level-organize = Spravovať poštu: meniť stav prečítania, príznaky a ich farby, označovať nevyžiadanú poštu, presúvať a archivovať správy, vytvárať a premenúvať priečinky, sledovať a ignorovať konverzácie, odstraňovať správy do priečinka Odstránená pošta a s vaším súhlasom odhlasovať odber zoznamov adresátov

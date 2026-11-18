@@ -114,9 +114,9 @@ taken away after: `photo-and-pdf.eml`, a photo (`lake.jpg`) and a three-page inv
   Linux) and keeps its value; on again, the previews are back
 - "Show PDF files in messages" off: the photo shows, the invoice does not, and nothing says why (the user chose it);
   on again
-- PDF previews turned off as after a PDF file closed the app (`pe_pdf_previews_crashed_for_tests`, with the test
-  switch): the message shows the photo and the notice that a PDF file closed Inbox Classic, naming "Show PDF files in
-  messages" (`read-31-previews-pdf-off`); the setting shows it off; turned on, the notice is gone and the pages are back
+- PDF previews turned off as after the app closed while drawing a file (`pe_pdf_previews_crashed_for_tests`, with the
+  test switch): the message shows the photo and the notice that Inbox Classic closed while showing a file, naming "Show
+  PDF files in messages" (`read-31-previews-pdf-off`); the setting shows it off; turned on, the notice is gone and the pages are back
 - on the Mac and Linux in dark mode: the photo as it is, the pages still on white, the names in the dark colours
 - `tiles.eml` (a HEIC picture, a photo and a PDF file with a password): the photo shows, the HEIC picture and the PDF
   file are tiles of the same size with their type, name, size and why they are not shown; Tab and Enter on a tile

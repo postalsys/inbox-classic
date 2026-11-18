@@ -417,6 +417,7 @@ day-sunday = søndag
 
 ## AI agents
 
+# review: changed
 agent-level-read = Lese e-post: mapper, meldingslisten, søk og meldinger
 # review: changed
 agent-level-organize = Organisere e-post: merke meldinger som lest eller ulest, endre flagg og fargene deres, håndtere søppelpost, flytte og arkivere meldinger, opprette og gi nytt navn til mapper, følge og ignorere samtaler, slette meldinger (flytte dem til Slettede elementer) og melde deg av e-postlister med din godkjenning

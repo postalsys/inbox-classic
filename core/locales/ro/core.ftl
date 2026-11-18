@@ -685,6 +685,7 @@ day-sunday = duminică
 
 ## AI agents
 
+# review: changed
 agent-level-read = Citirea mesajelor: foldere, lista de mesaje, căutare și conținutul mesajelor
 # review: changed
 agent-level-organize = Organizarea mesajelor: marcare ca citite sau necitite, semnalizare și culorile semnalizărilor, marcare ca nedorite, mutare, arhivare, creare și redenumire de foldere, urmărirea și ignorarea conversațiilor, mutare în Elemente șterse și dezabonare de la liste de corespondență cu acordul dvs.

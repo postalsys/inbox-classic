@@ -119,8 +119,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Next >
-gtk-provider-sign-in = Sign in to { $address } on { $provider }’s website. Your password is not shared with Inbox Classic. You can also use an app password created in your account’s security settings.
-gtk-provider-sign-in-apps = Sign in to { $address } on { $provider }’s website using one of your sign-in apps (More sign-in options). You can also use an app password created in your account’s security settings.
+gtk-provider-sign-in = Sign in to { $address } on { $provider }’s website. Your password is not shared with Inbox Classic. If your account allows app passwords for mail, you can also use one created in its security settings. Outlook.com and Microsoft 365 take only the browser sign-in.
+gtk-provider-sign-in-apps = Sign in to { $address } on { $provider }’s website using one of your sign-in apps (More sign-in options). If your account allows app passwords for mail, you can also use one created in its security settings. Outlook.com and Microsoft 365 take only the browser sign-in.
 gtk-accounts-add = Add...
 gtk-accounts-properties = Properties...
 gtk-accounts-signature = Signature...

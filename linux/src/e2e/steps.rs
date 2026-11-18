@@ -568,7 +568,7 @@ pub async fn agent(d: &Driver) {
             let said = |index: usize, start: &str| entries.get(index).is_some_and(|(what, _)| what.starts_with(start));
             d.check(
                 said(0, "Saved the draft \u{201c}Agenda for Friday\u{201d}")
-                    && said(1, "Sent \u{201c}Lunch on Friday?\u{201d} to pat@example.net")
+                    && said(1, "Put \u{201c}Lunch on Friday?\u{201d} in the Outbox for pat@example.net")
                     && said(2, "Watched the conversation \u{201c}")
                     && said(3, "Flagged \u{201c}")
                     && entries.get(3).is_some_and(|(what, _)| what.ends_with("\u{201d} blue"))
@@ -579,7 +579,7 @@ pub async fn agent(d: &Driver) {
             // the message sent, under the draft
             let sent_row = descendants::<adw::ActionRow>(agents.upcast_ref())
                 .into_iter()
-                .find(|row| row.widget_name() == "agents-entry" && row.title().starts_with("Sent "));
+                .find(|row| row.widget_name() == "agents-entry" && row.title().starts_with("Put "));
             if let Some(row) = sent_row
                 && let Some(log) = row.parent().and_downcast::<gtk::ListBox>()
             {

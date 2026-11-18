@@ -413,6 +413,7 @@ day-sunday = Sonntag
 
 ## AI agents
 
+# review: changed
 agent-level-read = E-Mails lesen: Ordner und Nachrichten anzeigen und durchsuchen
 # review: changed
 agent-level-organize = E-Mails verwalten: Lesestatus, Kennzeichnungen und ihre Farben ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen und umbenennen, Unterhaltungen beobachten und ignorieren und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
@@ -464,7 +465,8 @@ agent-too-many-reads = Zu viele Lesezugriffe in den letzten 30 Tagen: Dieser Age
 list-encrypted = Verschlüsselte Nachricht
 agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster geöffnet
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
-agent-log-sent = „{ $subject }“ an { $to } gesendet
+# review: changed
+agent-log-sent = „{ $subject }“ für { $to } in den Postausgang gestellt
 agent-log-draft = Entwurf „{ $subject }“ gespeichert
 agent-log-draft-replaced = Entwurf „{ $subject }“ ersetzt
 agent-log-draft-discarded = Entwurf „{ $subject }“ verworfen
