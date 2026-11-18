@@ -602,6 +602,12 @@ final class Reader: NSObject {
                 var length = 0
                 showLogo(takenBytes(pe_picture_result(core.handle, event.uid, &length), length), round: true)
             }
+        case PE_EVENT_KIND_PREVIEWS_PREPARED:
+            // the files of the view shown that were "Preparing..." are described: the view made again where it was
+            // scrolled to; another window's view is not this one
+            if showsPrepared(event.detail) {
+                rebuild()
+            }
         case PE_EVENT_KIND_SYNC_FINISHED:
             // the account is back: a message it could not give is tried again
             if event.failure == PE_FAILURE_KIND_NONE, showsFailure, account == event.account {
@@ -610,6 +616,12 @@ final class Reader: NSObject {
         default:
             break
         }
+    }
+
+    /// whether the view shown is the one a PreviewsPrepared event's token names
+    func showsPrepared(_ token: String) -> Bool {
+        guard showsMessage, !token.isEmpty, let info = messageView?.info else { return false }
+        return text(info.pointee.preview_token) == token
     }
 
     /// a link clicked in the message: true when it is one of the document's own cards, which this follows (the bounce

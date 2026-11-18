@@ -64,7 +64,8 @@ struct CoreEvent {
     let uid: UInt64
     let failure: PeFailureKind
     let message: String
-    /// the Message-ID of a draft, for DraftSaved; the notification's text, for NewMail (`message` its title)
+    /// the Message-ID of a draft, for DraftSaved; the notification's text, for NewMail (`message` its title); the
+    /// view's preview token, for PreviewsPrepared
     let detail: String
     /// how many messages, for NewMail
     let count: UInt64
