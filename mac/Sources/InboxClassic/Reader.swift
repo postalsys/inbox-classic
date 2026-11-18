@@ -44,6 +44,13 @@ final class Reader: NSObject {
     /// without a logo, the sender's picture from the Address Book drawn for the logo's place
     private var pictureRequest: UInt64 = 0
     private var unsubscribeRequest: UInt64 = 0
+    /// the printout with the pictures being made (`pe_print_start`), and what says so meanwhile
+    private var printRequest: UInt64 = 0
+    private var printIdle: () -> Void = {}
+    /// the next document shown is the same message made again: shown where the one before was scrolled to
+    private var keepScroll = false
+    /// the view shown is a large message's text, the rest still downloading
+    private var textFirst = false
     private let preview = Preview()
     /// Find in This Message: a bar over the message, as Safari and Mail have
     private let findBar = FindBar()
@@ -278,7 +285,11 @@ final class Reader: NSObject {
         security.show(info)
         // the parts of a signed or encrypted message are documents of their own, in frames the app sizes to them
         let parts = info.part_count > 0 ? { [view] (index: Int) in view.part(index) } : nil
-        preview.show(text(info.document), pictures: allowed, parts: parts, previews: text(info.preview_token))
+        preview.show(text(info.document), pictures: allowed, parts: parts, previews: text(info.preview_token),
+                     keepScroll: keepScroll)
+        keepScroll = false
+        // a large message's text before the rest of it: made again when the rest is here
+        textFirst = file == nil && pe_message_downloading(core.handle, folder, uid)
         // offered only for a message with pictures on the internet, until they are shown
         picturesOffered = info.remote_images && !allowed
         pictures.isHidden = !picturesOffered
@@ -429,6 +440,9 @@ final class Reader: NSObject {
         remoteImages = false
         messageView = nil
         file = nil
+        keepScroll = false
+        textFirst = false
+        endPrint()
         logoRequest = 0
         pictureRequest = 0
         clearView(loading: loading)
@@ -464,6 +478,21 @@ final class Reader: NSObject {
     }
 
     var picturesBlocked: Bool { showsMessage && !remoteImages && picturesOffered }
+
+    /// the same message made again, shown where it was scrolled to: Show in Message chosen, or the whole of a large
+    /// message here after its text
+    func rebuild() {
+        keepScroll = true
+        reload()
+    }
+
+    /// the whole of a large message whose text is shown is here: its view made again, the tiles that said its files
+    /// were on their way now the previews
+    private func wholeMessageHere() {
+        guard textFirst, file == nil, !waiting, !pe_message_downloading(core.handle, folder, uid) else { return }
+        textFirst = false
+        rebuild()
+    }
 
     /// the message shown made again: Settings' pictures or trusted senders changed
     func reload() {
@@ -538,6 +567,15 @@ final class Reader: NSObject {
                 arrived()
                 arrivedHandler()
                 makeView()
+            } else if event.folder == folder && event.uid == uid {
+                wholeMessageHere()
+            }
+        case PE_EVENT_KIND_TRANSFERRING:
+            // how far a large message is, then that it is all here (stored by then)
+            wholeMessageHere()
+        case PE_EVENT_KIND_PRINT_READY:
+            if printRequest != 0 && event.uid == printRequest {
+                printReady()
             }
         case PE_EVENT_KIND_MESSAGE_FAILED:
             if waiting && event.folder == folder && event.uid == uid {
@@ -655,9 +693,39 @@ final class Reader: NSObject {
 
     /// the message as it is shown, with the pictures it shows
     func print() {
-        guard showsMessage, let info = messageView?.info else { return }
-        // the core's printout: for a protected message one document of every part's text, as no frame prints
-        Printer.print(text(info.pointee.print_document), pictures: info.pointee.pictures_loaded || remoteImages,
+        guard showsMessage, let info = messageView?.info, printRequest == 0 else { return }
+        // a message with pictures or PDF files after its text: the core draws them if it has not, off the window
+        // thread, and PrintReady says the printout is made
+        let token = text(info.pointee.preview_token)
+        if !token.isEmpty {
+            printRequest = token.withCString { pe_print_start(core.handle, $0) }
+            if printRequest != 0 {
+                printIdle = Pending.busy(status)
+                return
+            }
+        }
+        printDocument(text(info.pointee.print_document))
+    }
+
+    /// the printout of the core's PrintReady: the message with its pictures, or as it is should the printout be gone
+    private func printReady() {
+        let request = printRequest
+        endPrint()
+        guard let info = messageView?.info else { return }
+        printDocument(taken(pe_print_result(core.handle, request)) ?? text(info.pointee.print_document))
+    }
+
+    private func endPrint() {
+        printRequest = 0
+        printIdle()
+        printIdle = {}
+    }
+
+    /// the core's printout: for a protected message one document of every part's text, as no frame prints
+    private func printDocument(_ document: String) {
+        guard let info = messageView?.info else { return }
+        TestHooks.printDocument?(document)
+        Printer.print(document, pictures: info.pointee.pictures_loaded || remoteImages,
                       title: text(info.pointee.subject), owner: view.window)
     }
 
@@ -831,11 +899,37 @@ final class Reader: NSObject {
         menu.addItem(.separator())
         menu.addItem(withTitle: Text.uiAttachmentSaveAs.opens, action: #selector(saveAttachment(_:)), keyEquivalent: "")
         menu.addItem(withTitle: Text.uiAttachmentSaveAll.opens, action: #selector(saveAllAttachments), keyEquivalent: "")
+        // a picture or PDF file: drawn after the text (checked), not drawn (unchecked), or one that can not be (greyed)
+        let state = messageView?.showInMessage(index) ?? PE_SHOW_IN_MESSAGE_NONE
+        if state != PE_SHOW_IN_MESSAGE_NONE {
+            menu.addItem(.separator())
+            let show = menu.addItem(withTitle: Text.uiAttachmentShowInMessage.text, action: #selector(showInMessageChosen(_:)),
+                                    keyEquivalent: "")
+            show.state = state == PE_SHOW_IN_MESSAGE_ON ? .on : .off
+            show.isEnabled = state != PE_SHOW_IN_MESSAGE_UNAVAILABLE
+            show.identifier = NSUserInterfaceItemIdentifier("attachment.showInMessage")
+        }
         for item in menu.items where !item.isSeparatorItem {
             item.target = self
             item.tag = index
         }
         return menu
+    }
+
+    /// Show in Message: the file drawn after the text, or taken out of it; the message made again where it was
+    /// scrolled to
+    @objc private func showInMessageChosen(_ sender: NSMenuItem) {
+        showInMessage(sender.tag)
+    }
+
+    func showInMessage(_ index: Int) {
+        guard showsMessage, let view = messageView, let info = view.info else { return }
+        let token = text(info.pointee.preview_token)
+        let state = view.showInMessage(index)
+        guard !token.isEmpty, state == PE_SHOW_IN_MESSAGE_ON || state == PE_SHOW_IN_MESSAGE_OFF else { return }
+        if token.withCString({ pe_preview_show(core.handle, $0, index, state != PE_SHOW_IN_MESSAGE_ON) }) {
+            rebuild()
+        }
     }
 
     @objc private func openChosen(_ sender: NSMenuItem) {

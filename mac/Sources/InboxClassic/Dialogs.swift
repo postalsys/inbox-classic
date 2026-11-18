@@ -452,6 +452,8 @@ enum TestHooks {
     /// a file to print to in place of the Print panel, and whether printing ended well
     static var printTo: URL?
     static var printed: ((Bool) -> Void)?
+    /// the document a message is printed from, as it goes to the print view
+    static var printDocument: ((String) -> Void)?
     /// a file the system would open with its program (an attachment), handed to the test instead: nothing launches
     static var openFile: ((URL) -> Void)?
     /// the context menu of a message's web view as it opens, after the app took out what it does not offer

@@ -132,8 +132,8 @@ extension UITest {
         // the menu: Open, Save As, Save All; a program's Open greyed
         let menu = strip.menu(for: strip.tiles[0])
         let titles = menu.items.filter { !$0.isSeparatorItem }.map(\.title)
-        check(titles == ["Open", "Save As\u{2026}", "Save All\u{2026}"] && menu.items[0].isEnabled,
-              "a right-click offers Open, Save As\u{2026} and Save All\u{2026} (\(titles))")
+        check(titles == ["Open", "Save As\u{2026}", "Save All\u{2026}", Text.uiAttachmentShowInMessage.text] && menu.items[0].isEnabled,
+              "a right-click offers Open, Save As\u{2026} and Save All\u{2026}, and Show in Message for the PDF file (\(titles))")
         await menuShot(strip, "attach-2-menu")
         let programMenu = strip.menu(for: strip.tiles[1])
         check(programMenu.items.first?.isEnabled == false && programMenu.items.dropFirst().allSatisfy { $0.isSeparatorItem || $0.isEnabled },
@@ -244,7 +244,7 @@ extension UITest {
     }
 
     /// the menu of the file chosen, as it pops up under it, drawn into a picture of the window
-    func menuShot(_ strip: AttachmentStrip, _ name: String) async {
+    func menuShot(_ strip: AttachmentStrip, _ name: String, file index: Int = 0) async {
         let window = strip.window ?? main.window
         var shown: NSWindow?
         let opens = NotificationCenter.default.addObserver(forName: NSMenu.didBeginTrackingNotification, object: nil, queue: nil) { _ in
@@ -254,7 +254,7 @@ extension UITest {
         }
         defer { NotificationCenter.default.removeObserver(opens) }
         window.makeFirstResponder(strip)
-        strip.select(0)
+        strip.select(index)
         // should the test not run while the menu tracks, the menu closes by itself
         let closing = Timer(timeInterval: 4, repeats: false) { _ in MainActor.assumeIsolated { strip.shownMenu?.cancelTracking() } }
         RunLoop.main.add(closing, forMode: .common)

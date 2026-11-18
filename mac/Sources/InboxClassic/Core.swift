@@ -1069,6 +1069,11 @@ final class MessageView {
                           refusal: text(attachment.refusal))
     }
 
+    /// what the strip menu's Show in Message says of file `index`: no item, checked, unchecked or greyed
+    func showInMessage(_ index: Int) -> PeShowInMessage {
+        pe_message_view_attachment(handle, index)?.pointee.show_in_message ?? PE_SHOW_IN_MESSAGE_NONE
+    }
+
     /// every attached file, in order
     var attachments: [Attachment] {
         (0..<(info?.pointee.attachment_count ?? 0)).compactMap { attachment($0) }

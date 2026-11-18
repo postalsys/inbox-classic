@@ -268,6 +268,10 @@ final class Preview: NSObject {
     }
     /// the preview token of the document shown (`preview_token`), ended when another document replaces it
     private var previewToken = ""
+    /// how many documents were asked for: a scroll position read for one replaced meanwhile is dropped
+    private var loads = 0
+    /// where to scroll the document being loaded once it is there (`keepScroll`)
+    private var scrollTo: Double?
 
     override init() {
         view = ReadingView(frame: .zero, configuration: lockedConfiguration(server: server, scripts: false))
@@ -309,17 +313,38 @@ final class Preview: NSObject {
     /// message's page has `parts`, the document of each of its frames: they are served beside it, and the frames are
     /// sized to their documents once it loaded, and again every 400 ms while it is shown. `previews` is the view's
     /// preview token (empty for none): the previews of the document before are ended.
-    func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil, previews: String = "") {
+    /// `keepScroll`: the same message made again, shown where the document before was scrolled to.
+    func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil, previews: String = "",
+              keepScroll: Bool = false) {
         stopMeasuring()
         if previews != previewToken {
             endPreviews()
             previewToken = previews
         }
+        // a document asked for later wins over one still waiting for the scroll position
+        loads += 1
+        scrollTo = nil
         guard ready else {
             pending = (document, pictures, parts)
             return
         }
         pending = nil
+        guard keepScroll else {
+            load(document, pictures: pictures, parts: parts)
+            return
+        }
+        let asked = loads
+        view.evaluateJavaScript(Self.scrollScript, in: nil, in: .defaultClient) { [weak self] result in
+            guard let self, asked == loads else { return }
+            let y = ((try? result.get()) as? NSNumber)?.doubleValue ?? 0
+            self.load(document, pictures: pictures, parts: parts)
+            scrollTo = y > 0 ? y : nil
+        }
+    }
+
+    static let scrollScript = String(cString: pe_scroll_script())
+
+    private func load(_ document: String, pictures: Bool, parts: ((Int) -> String?)?) {
         measuring = parts != nil
         ContentRules.apply(to: view.configuration.userContentController, pictures: pictures)
         // a new address for each document, so it is loaded again rather than taken from history
@@ -331,6 +356,12 @@ final class Preview: NSObject {
     // ---- the frames of a message's parts ----
 
     private func pageLoaded() {
+        // the message made again: its text where it was (every picture's size is in the markup, so the same offset
+        // shows the same text)
+        if let y = scrollTo {
+            scrollTo = nil
+            view.evaluateJavaScript(taken(pe_scroll_to_script(y)) ?? "", in: nil, in: .defaultClient) { _ in }
+        }
         guard measuring else { return }
         measure()
         let timer = Timer(timeInterval: 0.4, repeats: true) { [weak self] timer in
