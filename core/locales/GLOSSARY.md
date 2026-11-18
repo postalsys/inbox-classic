@@ -623,8 +623,17 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   for warning status. Encrypted drafts use only the sender's key, without a digital signature. Inherited encrypted
   text, images and attachments must be removed before sending unencrypted.
 - The attachment reminder recognizes English, German, Estonian, Spanish and French phrases, not Lithuanian.
-  Do not promise identical plain-text rendering in every mail app. Other catalog mnemonic collisions stay pending
-  for the broader Lithuanian review; the exact collision inventory is in the review state.
+  Do not promise identical plain-text rendering in every mail app.
+- Reviewed menus use "skaitytas" consistently for the read flag. Sending/receiving all means all accounts.
+  Search covers sender/recipient names and addresses; describe these fields rather than searching "in senders".
+- Notification senders and account names use labels or an inflected head noun, never an inflected placeable.
+  Outbox subjects arrive already quoted. The agent wait time is the earliest sending time, not promised delivery.
+  "Įtraukimo laikas" is the queue timestamp; combined search scopes use "Paieškos vieta".
+- The signature editor and its account-list button say "Parašo tekstas". The Windows button uses T and the
+  shared Remove button uses Š, distinct across account, agent, contact, recipient and key dialogs.
+  Shared message/folder menu keys were checked together, including read/unread and junk/not-junk variants.
+- Insert Picture accepts PNG, JPEG, GIF and WebP up to 10 MB. Its error describes insertion failure and those
+  supported types; the English list omits WebP even though the core accepts it.
 
 ### Magyar (hu)
 
