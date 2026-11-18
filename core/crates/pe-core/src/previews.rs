@@ -152,6 +152,11 @@ fn lock_shown(shown: &Mutex<VecDeque<Shown>>) -> MutexGuard<'_, VecDeque<Shown>>
     shown.lock().unwrap_or_else(|p| p.into_inner())
 }
 
+/// A lock that a thread which panicked while holding it does not keep from the others
+fn unpoisoned<T>(mutex: &Mutex<T>) -> MutexGuard<'_, T> {
+    mutex.lock().unwrap_or_else(|p| p.into_inner())
+}
+
 fn lock(files: &Files) -> MutexGuard<'_, HashMap<(u64, usize), PreviewFile>> {
     files.map.lock().unwrap_or_else(|p| p.into_inner())
 }
@@ -363,8 +368,7 @@ impl Core {
 
     /// What the user chose with Show in Message for the message `source`, while a window shows it
     fn preview_choices(&self, source: &PreviewSource) -> Choices {
-        let choices = self.previews.choices.lock().unwrap_or_else(|p| p.into_inner());
-        choices
+        unpoisoned(&self.previews.choices)
             .iter()
             .find(|(of, _)| of == source)
             .map(|(_, choices)| choices.clone())
@@ -400,7 +404,7 @@ impl Core {
             }
             view.source.clone()
         };
-        let mut all = self.previews.choices.lock().unwrap_or_else(|p| p.into_inner());
+        let mut all = unpoisoned(&self.previews.choices);
         let at = match all.iter().position(|(of, _)| *of == source) {
             Some(at) => at,
             None => {
@@ -488,8 +492,7 @@ impl Core {
             .iter()
             .any(|shown| shown.source == *source);
         if !still {
-            let mut choices = self.previews.choices.lock().unwrap_or_else(|p| p.into_inner());
-            choices.retain(|(of, _)| of != source);
+            unpoisoned(&self.previews.choices).retain(|(of, _)| of != source);
         }
     }
 

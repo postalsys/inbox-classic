@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 
 use pe_i18n::{Text, tr_args};
 
-use super::{Files, PreviewFile, lock, lock_shown};
+use super::{Files, PreviewFile, lock, lock_shown, unpoisoned};
 use crate::connections::Connection;
 use crate::{Core, Event};
 
@@ -45,9 +45,7 @@ impl Core {
         let print = self.next_request.fetch_add(1, Ordering::Relaxed);
         let work = self.in_background(Connection::Reads, move |core| {
             let document = printed(&core.previews.files, &printout);
-            let mut prints = core.previews.prints.lock().unwrap_or_else(|p| p.into_inner());
-            prints.insert(print, document);
-            drop(prints);
+            unpoisoned(&core.previews.prints).insert(print, document);
             let _ = core.post(Event::PrintReady { request: print });
         });
         self.runtime().ok()?.spawn(work);
@@ -56,8 +54,7 @@ impl Core {
 
     /// The document of a printout [`Core::print_start`] made, once, after its [`Event::PrintReady`]
     pub fn print_result(&self, request: u64) -> Option<String> {
-        let mut prints = self.previews.prints.lock().unwrap_or_else(|p| p.into_inner());
-        prints.remove(&request)
+        unpoisoned(&self.previews.prints).remove(&request)
     }
 }
 
@@ -87,9 +84,9 @@ fn printed(files: &Files, printout: &Printout) -> String {
         .iter()
         .zip(&lines)
         .map(|(file, line)| {
+            // only the printed pictures were waited for
             let picture = drawn
                 .get(&file.attachment)
-                .filter(|_| is_printed_picture(file))
                 .and_then(|drawn| drawn.pages.get(&0)?.as_ref().ok());
             match picture {
                 Some(picture) => pe_html::PrintItem::Picture {

@@ -9,7 +9,7 @@ use std::time::{Duration, Instant};
 use pe_i18n::{Text, tr, tr_args};
 use pe_preview::limits::{MAX_FILE, MAX_PREVIEWS};
 
-use super::{DESCRIBE, PREVIEW_PAGES, PreviewDescription, PreviewRefusal, refusal_text};
+use super::{DESCRIBE, PREVIEW_PAGES, PreviewDescription, PreviewRefusal};
 use crate::Core;
 use crate::opening::FileKind;
 use crate::view;
@@ -129,8 +129,9 @@ impl Walk<'_, '_> {
             let tile = tile(index, attachment, kind, size, tr(Text::PreviewTileDownloading));
             return Fate::Shown(tile, ShowInMessage::Unavailable);
         }
+        let size = attachment.content.len() as u64;
         if let Some(reason) = never_drawn(attachment, kind) {
-            let tile = tile(index, attachment, kind, attachment.content.len() as u64, reason);
+            let tile = tile(index, attachment, kind, size, reason);
             return Fate::Shown(tile, ShowInMessage::Unavailable);
         }
         let choices = &self.plan.choices;
@@ -140,8 +141,7 @@ impl Walk<'_, '_> {
         }
         if kind == FileKind::Pdf && !self.plan.pdfs && !asked {
             self.pdf_off = true;
-            let reason = refusal_text(&PreviewRefusal::Disabled).unwrap_or_default();
-            let tile = tile(index, attachment, kind, attachment.content.len() as u64, reason);
+            let tile = tile(index, attachment, kind, size, tile_words(&PreviewRefusal::Disabled));
             return Fate::Shown(tile, ShowInMessage::Off);
         }
         // a file asked for has a wait and a budget of its own
