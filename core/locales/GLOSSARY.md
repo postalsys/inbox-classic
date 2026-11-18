@@ -1038,6 +1038,12 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
   the request, not completed cancellation. Logs label the subject as "Viesti:" and addresses as "Lähettäjät:".
 - Keep "hylätä luonnos" and explain permanent removal of agent-owned drafts. Saving, including autosave,
   ends agent access; opening alone does not. "Allekirjoitusteksti" distinguishes the optional account footer.
+- Compose protection is applied "lähetettäessä". Digital signatures check integrity; verified key ownership
+  is a separate check ("Avaimen haltija vahvistettu"). Use "käyttökelpoinen avain" for usable encryption keys.
+- Encrypt with keys ("avaimella"), not to them ("avaimelle"). Key-state explanations follow "Syy:" on a separate
+  line; dates follow "Viimeisin haku:". Names and address lists remain uninflected, with a head noun or colon.
+- Unencrypted sending requires removing inherited text, images and attachments. Encrypted drafts use only
+  the sender's own key without signing; sent copies retain encryption. Use "Oranssi" consistently for warnings.
 
 ### Svenska (sv)
 

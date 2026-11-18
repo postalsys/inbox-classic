@@ -704,60 +704,42 @@ pgp-publish-done = Avaimesi on julkaistu palvelussa keys.openpgp.org. Sähköpos
 pgp-publish-failed = Avainta ei voitu julkaista: { $error }
 pgp-keyserver-off = Avainten haku palvelusta keys.openpgp.org on poistettu käytöstä kohdassa { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Salattu ja allekirjoitettu: vain sinä ja { $addresses } voitte lukea sen.
-   *[other] Salattu ja allekirjoitettu: vain sinä ja sen { $count } vastaanottajaa voitte lukea sen.
+    [one] Viesti salataan ja allekirjoitetaan lähetettäessä. Vain sinä ja vastaanottaja { $addresses } voitte lukea sen sisällön.
+   *[other] Viesti salataan ja allekirjoitetaan lähetettäessä. Vain sinä ja viestin { $count } vastaanottajaa voitte lukea sen sisällön.
 }
-# review: new
-pgp-compose-encrypt-ready = Viesti salataan ja allekirjoitetaan. Lisää vastaanottajia, joiden avaimet sinulla on.
-# review: new
+pgp-compose-encrypt-ready = Viesti salataan ja allekirjoitetaan lähetettäessä. Lisää vastaanottajia, joiden avaimet sinulla on.
 pgp-compose-missing = { $count ->
-    [one] Vastaanottajalla { $addresses } ei ole avainta, joten viestiä ei voi vielä salata.
-   *[other] { $count } vastaanottajalla ei ole avainta, joten viestiä ei voi vielä salata: { $addresses }.
+    [one] Viestiä ei voi vielä salata. Käyttökelpoinen avain puuttuu vastaanottajalta: { $addresses }.
+   *[other] Viestiä ei voi vielä salata. Käyttökelpoinen avain puuttuu { $count } vastaanottajalta: { $addresses }.
 }
-# review: new
 pgp-compose-looking = Haetaan avaimia: { $addresses }...
-# review: new
-pgp-compose-signed = Allekirjoitettu: vastaanottajat voivat tarkistaa, että viesti on sinulta eikä sitä ole muutettu.
-# review: new
-pgp-compose-reply-clear = Ei salattu, vaikka viesti, johon se vastaa tai jonka se välittää, oli salattu.
-# review: new
-pgp-compose-encrypted-files = Viestiin on liitetty salatun viestin tiedostoja, joten sen voi lähettää vain salattuna. Ota Salaa käyttöön tai poista nämä tiedostot.
-# review: new
-pgp-compose-sign-tip = Allekirjoita viesti avaimellasi, niin vastaanottajat voivat tarkistaa, että se on sinulta eikä sitä ole muutettu
-# review: new
-pgp-compose-sign-tip-encrypted = Salattu viesti allekirjoitetaan aina
-# review: new
-pgp-compose-encrypt-tip = Salaa viesti, niin vain sinä ja sen vastaanottajat voitte lukea sen
-# review: new
+pgp-compose-signed = Viesti allekirjoitetaan digitaalisesti lähetettäessä. Vastaanottajat voivat tarkistaa, ettei sisältöä ole muutettu.
+pgp-compose-reply-clear = Viesti lähetetään salaamattomana, vaikka alkuperäinen viesti oli salattu.
+pgp-compose-encrypted-files = Viestissä on salatusta viestistä peräisin olevia liitteitä, joten sen voi lähettää vain salattuna. Ota Salaa-toiminto käyttöön tai poista nämä liitteet.
+pgp-compose-sign-tip = Allekirjoita viesti digitaalisesti omalla avaimellasi, jotta vastaanottajat voivat tarkistaa, ettei sisältöä ole muutettu
+pgp-compose-sign-tip-encrypted = Salattuna lähetettävä viesti allekirjoitetaan aina
+pgp-compose-encrypt-tip = Salaa viestin sisältö, niin vain sinä ja viestin vastaanottajat voitte lukea sen
 pgp-compose-make-key = Sinulla ei ole vielä avainta osoitteelle { $address }. Luodaanko avain nyt? Sen avulla viestisi voidaan allekirjoittaa ja salata.
-# review: new
-pgp-compose-key-unusable = Avaintasi osoitteelle { $address } ei voi käyttää ({ $state }). Avaa Salausavaimet ja tuo sen varmuuskopio tai luo uusi avain.
-# review: new
-pgp-compose-encrypt-off-quote = Tämä viesti lainaa tai välittää salatun viestin. Ilman salausta sitä ei voi lähettää, ennen kuin poistat lainatun sisällön. Poistetaanko salaus silti käytöstä?
-# review: new
-pgp-compose-encrypt-off-reply = Tämä viesti vastaa salattuun viestiin tai välittää sen. Ilman salausta kuka tahansa, joka käsittelee viestiäsi matkalla, voi lukea sen. Poistetaanko salaus käytöstä?
-# review: new
-pgp-recipient-verified = Avain vahvistettu
-# review: new
-pgp-recipient-found = Avainta ei ole vahvistettu
-# review: new
+pgp-compose-key-unusable =
+    Osoitteen { $address } avainta ei voi käyttää.
+
+    Syy: { $state }
+
+    Avaa Salausavaimet ja tuo avaimen varmuuskopio tai luo uusi avain.
+pgp-compose-encrypt-off-quote = Tässä viestissä on salatusta viestistä lainattua tai välitettyä sisältöä. Viestiä ei voi lähettää salaamattomana, ennen kuin olet poistanut alkuperäisestä viestistä peräisin olevan tekstin, kuvat ja liitteet. Poistetaanko salaus silti käytöstä?
+pgp-compose-encrypt-off-reply = Olet vastaamassa salattuun viestiin tai välittämässä sitä. Ilman salausta viestiäsi välittävät palvelimet voivat lukea sen sisällön. Poistetaanko salaus käytöstä?
+pgp-recipient-verified = Avaimen haltija vahvistettu
+pgp-recipient-found = Avaimen haltijaa ei ole vahvistettu
 pgp-recipient-own = Oma avaimesi
-# review: new
 pgp-recipient-looking = Haetaan avainta...
-# review: new
 pgp-recipient-missing = Ei avainta
-# review: new
-pgp-recipient-not-found = Ei avainta: avainta ei löytynyt { $date }
-# review: new
+pgp-recipient-not-found = Avainta ei löytynyt. Viimeisin haku: { $date }
 pgp-recipient-unusable = Avainta ei voi käyttää: { $state }
-# review: new
-pgp-recipients-intro = Viesti salataan jokaisen vastaanottajan avaimelle ja omallesi.
-# review: new
+pgp-recipients-intro = Viesti salataan kunkin vastaanottajan avaimella sekä omalla avaimellasi.
 pgp-recipients-intro-missing = { $count ->
-    [one] Yhdellä vastaanottajalla ei ole avainta, jolle salata. Etsi hänen avaimensa, poista hänet viestistä tai lähetä viesti ilman salausta.
-   *[other] { $count } vastaanottajalla ei ole avainta, jolle salata. Etsi heidän avaimensa, poista heidät viestistä tai lähetä viesti ilman salausta.
+    [one] Yhdeltä vastaanottajalta puuttuu käyttökelpoinen salausavain. Etsi avain, poista vastaanottaja viestistä tai lähetä viesti ilman salausta.
+   *[other] Käyttökelpoinen salausavain puuttuu { $count } vastaanottajalta. Etsi puuttuvat avaimet, poista kyseiset vastaanottajat viestistä tai lähetä viesti ilman salausta.
 }
 pgp-details-part = Osa { $number }: { $label }
 # review: new
