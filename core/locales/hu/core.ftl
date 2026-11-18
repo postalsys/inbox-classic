@@ -616,7 +616,7 @@ pgp-key-expired = Lejárt: { $date }
 pgp-key-revoked = Visszavonva
 pgp-key-revoked-why = Visszavonva: { $reason }
 pgp-key-not-valid = Érvénytelen
-pgp-key-locked = A titkos kulcs nem használható, mert hiányzik a védelméhez szükséges kulcs. Tároló: { $store }. Importálja újra a titkos kulcs biztonsági másolatát.
+pgp-key-locked = A titkos kulcs helyi védelmét nem sikerült feloldani. Tároló: { $store }. Ellenőrizze, hogy a tároló elérhető-e. Ha a védelmi kulcs elveszett, importálja újra a titkos kulcs biztonsági másolatát.
 pgp-source-own = Az Inbox Classicban készült
 pgp-source-file = Fájlból importálva
 pgp-source-paste = Beillesztve
@@ -722,8 +722,7 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } címzetthez nincs használható titkosítási kulcs. Keresse meg a kulcsukat, távolítsa el ezeket a címzetteket az üzenetből, vagy küldje el az üzenetet titkosítás nélkül.
 }
 pgp-details-part = { $number }. rész: { $label }
-# review: new
-attachment-from-part = A(z) { $number }. részből: { $label }
+attachment-from-part = Forrás: { $number }. rész. { $label }
 pgp-details-signed = Aláírva, időpont: { $when }, kulcs: { $key }
 pgp-details-unknown-key = Az aláíráshoz használt kulcs nem érhető el: { $key }
 pgp-details-opened = Visszafejtve a következő saját kulccsal: { $key }
@@ -731,11 +730,8 @@ pgp-details-for = Titkosítva ezekre a kulcsokra: { $keys }
 pgp-details-plain = Nincs aláírva és nincs titkosítva
 pgp-bar-parts = Az üzenet részei ({ $count }): { $list }. Minden résznél külön látható a védelmi állapot.
 pgp-bar-count-verified = { $count } ellenőrzött
-# review: new
 pgp-bar-count-encrypted-signed = { $count } titkosított és aláírt
-# review: new
 pgp-bar-count-encrypted = { $count } titkosított
-# review: new
 pgp-bar-count-signed = { $count } aláírt
 pgp-bar-count-warning = { $count ->
     [one] 1 figyelmet igényel

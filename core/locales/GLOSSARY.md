@@ -704,6 +704,14 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   recovery restores the latest saved state. Name "nyomtatási ablak" across platforms, without promising a preview.
 - Contacts are "névjegyek", their pictures "névjegyképek". A provider-confirmed sender domain is not verified personal
   identity. Import skips cards only when all their email addresses are already present, rather than matching names.
+- Key verification checks ownership: compare the complete "ujjlenyomat" and every listed address. Valid signatures
+  establish unchanged content; only valid sender signatures use the green/blue verified/unverified distinction.
+- A locked key means its local protection could not be opened, including an inaccessible system password store.
+  Check store availability before assuming its protection key was lost; reimport the private-key backup if needed.
+- Protection counts are parts, not messages; compact "3 titkosított és aláírt" fits the bar's introductory "részei".
+  Attachment tooltips use "Forrás: 2. rész" without an article tied to an unknown number or inflecting its status label.
+- STARTTLS failure stops the connection attempt, not the app. SMTP encryption-required errors do not prove a password
+  correct; standard TLS ports are examples subject to provider support. A local network is not itself encryption.
 
 ### Nederlands (nl)
 
