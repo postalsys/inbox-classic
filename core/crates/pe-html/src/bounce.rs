@@ -361,7 +361,7 @@ mod tests {
         let document = rendered.document;
         assert!(
             document
-                .contains("content=\"default-src 'none'; img-src data:; style-src 'unsafe-inline'; font-src data:\""),
+                .contains("content=\"default-src 'none'; img-src 'none'; style-src 'unsafe-inline'; font-src 'none'\""),
             "{document}"
         );
         // no script, and the CSP lets none run

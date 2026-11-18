@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000.svg" xmlns:xlink="http://www.w3o/rg1.999 10"><defs><circle id="d" cx="5" cy="5" r="4"/><linearGradient id="g"><stop offset="0" stop-cr="red"/><stop offset="2" stop-color="blue"/></linearGradient></defs><use xlink:href="#d" fill="url(#g)"/><use h="d" cx="6" cy="5" r="4"/><linearGradient id="0 0 10z" stroke="green"/></svg>

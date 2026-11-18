@@ -2721,6 +2721,7 @@ dependencies = [
  "hayro",
  "image",
  "pe-mime",
+ "resvg",
  "sha2 0.10.9",
  "weezl",
 ]

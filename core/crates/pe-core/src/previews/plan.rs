@@ -3,7 +3,7 @@
 //! Message says of each.
 
 use std::collections::BTreeSet;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::{Duration, Instant};
 
 use pe_i18n::{Text, tr, tr_args};
@@ -60,13 +60,52 @@ pub(crate) struct PreviewPlan<'a> {
     pub late: Late,
     /// The files of this view not described in time, shown as "Preparing…" until they are
     pub preparing: Arc<Preparing>,
+    /// Until when the sizes of the pictures of the text are waited for: [`INLINE_WAIT`] from the first one asked
+    pub inline_until: OnceLock<Instant>,
 }
+
+/// How long a view waits for the sizes of the pictures of its text, all of them together: as for its files
+/// ([`DESCRIBE`]), longer in the core's own tests, which check the sizes put in (an unoptimized build on a busy
+/// runner may start the render thread slowly)
+const INLINE_WAIT: Duration = if cfg!(test) { Duration::from_secs(60) } else { DESCRIBE };
 
 impl PreviewPlan<'_> {
     /// Gives `view` (built with this plan) its files not described in time, for the window to be told of them
     pub(crate) fn preparing_of(&self, view: &mut crate::MessageView) {
         view.preparing = self.preparing.has_missed();
         view.preview_preparing = Some(self.preparing.clone());
+    }
+
+    /// Where a picture of the text is, as its crash marker names it (a decrypted one by this, never its bytes): its
+    /// message, the part whose document shows it, and its number
+    pub(crate) fn inline_about(&self, part: Option<usize>, number: usize) -> String {
+        match part {
+            Some(part) => format!("{}, part {part}, picture {number}", self.about),
+            None => format!("{}, picture {number}", self.about),
+        }
+    }
+
+    /// The size of the preview of a picture of the text, read on the render thread while the view is built, for an
+    /// `img` that says none: so the text does not move when the picture comes. All of a view's pictures share one
+    /// wait ([`INLINE_WAIT`]); one not read by then has none (it is drawn all the same, and takes its place when it
+    /// comes).
+    /// `keep` false for a decrypted part's (not kept in the cache)
+    pub(crate) fn inline_size(
+        &self,
+        about: String,
+        picture: &pe_html::InlinePicture,
+        keep: bool,
+    ) -> Option<(u32, u32)> {
+        let until = *self.inline_until.get_or_init(|| Instant::now() + INLINE_WAIT);
+        let wait = until.saturating_duration_since(Instant::now());
+        if wait.is_zero() {
+            return None;
+        }
+        let description = self
+            .core
+            .inline_describe(picture.bytes.clone(), about, wait, keep)
+            .ok()?;
+        description.sizes.first().copied().flatten()
     }
 }
 

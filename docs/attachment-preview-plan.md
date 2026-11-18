@@ -859,3 +859,68 @@ ui_fixture_previews -- ../scripts/ui-e2e/pgp` with the committed key): each part
   abandon a PDF file. `previews/preparing_tests.rs` holds the render thread behind a gate.
 - **The apps** handle `PreviewsPrepared`: the reader (or message window) whose shown view's `preview_token` is the
   event's token builds its view again, as after `pe_preview_show` returned true.
+
+## As built (PR 5, pictures in the text, 2026-11-18)
+
+Decision 8: no picture a sender wrote into a message's text reaches a web view's decoders as it came.
+
+- **Before**: `pe-html` embedded every `cid:` picture of the HTML (an `img` src or a `background`) as a `data:`
+  address of the sender's bytes (`Embedder`, 64 MB a document), and kept `data:` pictures of an `img` as they were;
+  the CSP of every document allowed `img-src data:`, so a `data:` picture in the message's CSS loaded too. SVG went to
+  the web view as SVG. No app served `cid:` (the WebKit content rules let `^cid:` through, but nothing loaded it).
+- **Routed** (`pe-html/src/inline.rs`): the reading pane's sanitizer turns a `cid:` picture of an `img` or a
+  `background`, and a `data:` picture (`image/*`) of an `img`, into a preview address of the document,
+  `/pv/<token>-<number>-0`, under the token its files' previews use (a part's own in signed or encrypted mail). The
+  numbers start at `pe_html::INLINE_BASE` (500,000, far above any file's place in the strip) and run on across a
+  view's part documents, so no two documents of a view share one; each picture once however often it is shown, at most
+  `MAX_INLINE` (200) a document and `MAX_INLINE_BYTES` (32 MB of the sender's bytes); past them, or without a core to
+  answer (no preview plan), the picture shows nothing. Any other `data:` address is taken out, a `cid:` of nothing is
+  left (nothing loads it). `Rendered::inline` hands the core each picture's bytes with its number.
+- **Drawn** by `pe-preview` as the files are: `Request::inline` marks a picture of the text, which may be SVG
+  (`pe_preview::inline_kind_of`) and never a PDF file, and whose pixels have a budget of their own beside the
+  attached files' (a newsletter's pictures do not leave the files without theirs). The same render thread, limits,
+  watchdog, crash marker and memory cache; never kept for a message something of which was decrypted (`keep` false,
+  named by its place: "folder F, message U, part P, picture N"). The core holds each document's pictures
+  (`PreviewDocument::inline`) while the view is shown, so nothing is read again, and queues them first when the
+  first picture is asked for: the text is above the files.
+- **What can not be drawn** (HEIC, AVIF, a broken file, a PDF file named as a picture) is answered with the light
+  gray placeholder of a page not drawn, never the bytes. GIFs show their first frame, as attached ones.
+- **SVG** (`pe-preview/src/svg.rs`): drawn by resvg (already in the core for BIMI logos; no text, no pictures it
+  names, nothing read from outside the file) to a PNG, at its size up to 2,048 pixels. Refused before resvg: over 1 MB,
+  compressed (svgz), a DTD, more than 400,000 XML nodes, or `use` copies that multiply past 100,000 elements (counted
+  with each `use` standing for what it names; a self reference refused), or a blur, shadow or morphology radius past
+  1,000 units (or past twice the picture's size once its transforms apply: fuzzing found resvg 0.49's box blur
+  overflowing on a huge standard deviation). An attached SVG file is still never drawn. Fuzz target `preview_svg`.
+- **Sizes**: an `img` that says neither its width nor its height gets the picture's own (its preview's, read by the
+  render thread while the view is built, all of a view's pictures sharing one wait of `DESCRIBE_WAIT`); one that says
+  one in pixels gets the other by the picture's proportions. A picture not read in time has none and takes its place
+  when it comes; the "Preparing…" rebuild is not used for it.
+- **CSP**: a document on screen never allows `data:` pictures: `img-src` is the preview path when the document has
+  previews or pictures in its text, `http: https:` after Download Pictures, and `'none'` with neither. A `data:`
+  picture in the message's CSS no longer loads (as one from the internet does not). `font-src data:` is unchanged. A
+  printout (`print_document_with`) keeps `img-src data:`.
+- **Print**: `Core::print_start` works for a view with pictures in its text only, and puts each where the text shows
+  it as a `data:` address of the core's encode (`PrintItem::Inline`), an empty picture for one not drawn. A message
+  with signed or encrypted parts prints its parts as their words, as before, without them.
+- **Links**: `preview_link` never takes a picture of the text's number: a link opens a file of the strip only.
+- **WebKit content rules**: `^cid:` is no longer let through.
+- **The apps** serve the addresses as they serve previews (`pe_preview_ask`, `PreviewAnswered`); a view whose only
+  pictures are in its text now has a `preview_token`, so its pictures are answered and ended as any.
+- **The message's own CSS** (`pe-html/src/css.rs`, read as CSS reads it: comments, strings, escapes): every `url()`
+  that is not an address on the internet becomes `none` (a `data:` background, list marker, border image or
+  `content`), a string naming a `data:` address (`image-set("data:...")`) becomes empty, and `@font-face` rules are
+  taken out, in style attributes and style elements alike; what is taken out never leaves a `</` behind. So a
+  printout's `img-src data:` only ever serves the core's encodes. Pictures on the internet stay for Download
+  Pictures.
+- **Fonts**: every message document (the reading pane's, a message window's, a part's, the page of the parts, a
+  printout) has `font-src 'none'`: no sender's font reaches the system's font parsers. No document of the app relies
+  on a font of its own.
+- **Not done**: the compose editor (a reply's or forward's quote, a draft opened again) still shows the quoted
+  message's `cid:` pictures as `data:` addresses of their bytes, as the message sent carries them; animated GIFs show
+  their first frame.
+- Tests: `pe-html` (routing, limits, sizes, style text left alone, the CSP, the printout), `pe-preview` (SVG, the
+  inline requests and their budget), `pe-core/src/previews/inline_tests.rs` (a newsletter with a PNG, a JPEG, a GIF,
+  a broken PNG, a HEIC, an SVG and a `data:` PNG: every answer the core's encode, the placeholder for what is not
+  drawn, the sizes, another message's view, the printout, a listed picture the text shows), and
+  `pe-core/tests/pgp_previews.rs` (a picture in the text of a plain and of an encrypted part: neither token reaches the
+  other's, nothing of the decrypted picture on disk).

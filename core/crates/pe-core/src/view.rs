@@ -410,16 +410,29 @@ pub(crate) fn build_unless(
     let invitation = calendar_part(&message.attachments)
         .and_then(|part| crate::calendar::invitation(&String::from_utf8_lossy(&part.content), part.method.as_deref()));
     let event_card = invitation.as_ref().map(crate::calendar::card);
+    // the pictures of its text from the document's preview addresses, under the same token as its files' previews
+    let token = planned.as_ref().map(|planned| planned.section.token.clone());
+    let size = |picture: &pe_html::InlinePicture| {
+        let plan = trust.previews?;
+        plan.inline_size(plan.inline_about(None, picture.number), picture, true)
+    };
+    let inline = token.as_deref().map(|token| pe_html::InlineOptions {
+        token,
+        first: pe_html::INLINE_BASE,
+        size: &size,
+    });
     let cards = pe_html::Cards {
         otp: otp_card.as_ref(),
         event: event_card.as_ref(),
         bounce: card.as_ref(),
         previews: planned.as_ref().map(|planned| &planned.section),
+        inline: inline.as_ref(),
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &header, &cards);
+    let inline = inline_files(trust.previews, None, &rendered.inline);
     let mut attachments: Vec<AttachmentView> = listed(&message.attachments).map(AttachmentView::of).collect();
     let (preview_token, preview_files) = planned
-        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments, 0))
+        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments, 0, !inline.is_empty()))
         .unwrap_or_default();
     // the message's one document carries the view's token
     let preview_documents = preview_token
@@ -428,6 +441,8 @@ pub(crate) fn build_unless(
             token,
             part: None,
             files: preview_files,
+            inline,
+            keep: true,
         })
         .into_iter()
         .collect();
@@ -466,14 +481,34 @@ pub(crate) fn build_unless(
     })
 }
 
+/// The pictures of a document's text as the core keeps them while the view is shown, each named by where it is
+/// (the message, `part`, its number); none without a plan (no core draws them)
+fn inline_files(
+    plan: Option<&crate::previews::PreviewPlan>,
+    part: Option<usize>,
+    pictures: &[pe_html::InlinePicture],
+) -> Vec<crate::previews::InlineFile> {
+    let Some(plan) = plan else {
+        return Vec::new();
+    };
+    pictures
+        .iter()
+        .map(|picture| crate::previews::InlineFile {
+            picture: picture.clone(),
+            about: plan.inline_about(part, picture.number),
+        })
+        .collect()
+}
+
 /// The files the document shows after the text (not those its HTML shows already) under the token of their
 /// addresses, and Show in Message of each attachment (`attachments`, those of the document, the first at `first` in
-/// the strip); no token for a document with no picture or PDF file
+/// the strip); no token for a document with no picture or PDF file, nor pictures in its text (`inline`)
 fn shown_previews(
     planned: crate::previews::Planned,
     previewed: &[usize],
     attachments: &mut [AttachmentView],
     first: usize,
+    inline: bool,
 ) -> (Option<String>, Vec<pe_html::PreviewFile>) {
     use crate::previews::ShowInMessage;
     let section = planned.section;
@@ -483,7 +518,7 @@ fn shown_previews(
         let in_text = section.files.iter().any(|f| f.attachment == index) && !previewed.contains(&index);
         attachment.show_in_message = if in_text { ShowInMessage::None } else { state };
     }
-    if attachments.iter().all(|a| a.show_in_message == ShowInMessage::None) {
+    if !inline && attachments.iter().all(|a| a.show_in_message == ShowInMessage::None) {
         return (None, Vec::new());
     }
     let files = section
@@ -499,8 +534,9 @@ struct RenderedPart {
     document: String,
     remote_images: bool,
     attachments: Vec<AttachmentView>,
-    /// The token of its previews and the files its document shows; None without a picture or PDF file
-    previews: Option<(String, Vec<pe_html::PreviewFile>)>,
+    /// The token of its previews, the files its document shows and the pictures of its text; None without a picture
+    /// or PDF file, or pictures in its text
+    previews: Option<(String, Vec<pe_html::PreviewFile>, Vec<crate::previews::InlineFile>)>,
     /// Its words, for the printout
     text: String,
 }
@@ -511,20 +547,45 @@ struct PartPreviews<'a, 'p> {
     plan: &'a crate::previews::PreviewPlan<'p>,
     budget: crate::previews::Budget,
     keep: bool,
+    /// The number of the next picture of a part's text: each part's pictures follow those of the parts before it,
+    /// so no two documents of the view share one
+    next_inline: usize,
 }
 
 /// A part rendered as any message is (`allow`: its pictures from the internet load), its attachments the strip's
 /// from `first` on, and the previews of its pictures and PDF files after its text, in its own document under a
-/// token of its own: one part's previews never show, or answer, in another part's document
-fn render_part(part: &parser::Message, allow: bool, first: usize, previews: Option<&mut PartPreviews>) -> RenderedPart {
+/// token of its own, the pictures of its text too: one part's previews never show, or answer, in another part's
+/// document. `index`: its place among the parts
+fn render_part(
+    part: &parser::Message,
+    allow: bool,
+    first: usize,
+    index: usize,
+    mut previews: Option<&mut PartPreviews>,
+) -> RenderedPart {
     let body = crate::fold::body(part);
     let images = crate::compose::inline_images(part);
-    let planned = previews.map(|p| {
+    let planned = previews.as_mut().map(|p| {
         let among = crate::previews::Among { first, keep: p.keep };
         crate::previews::part_section(part, p.plan, &mut p.budget, among)
     });
+    let plan = previews.as_ref().map(|p| p.plan);
+    let keep = previews.as_ref().is_some_and(|p| p.keep);
+    let size = |picture: &pe_html::InlinePicture| {
+        let plan = plan?;
+        plan.inline_size(plan.inline_about(Some(index), picture.number), picture, keep)
+    };
+    let inline = planned
+        .as_ref()
+        .zip(previews.as_ref())
+        .map(|(planned, p)| pe_html::InlineOptions {
+            token: &planned.section.token,
+            first: p.next_inline,
+            size: &size,
+        });
     let cards = pe_html::Cards {
         previews: planned.as_ref().map(|planned| &planned.section),
+        inline: inline.as_ref(),
         ..Default::default()
     };
     // its links open from the top page (the frame's own navigation is refused before the app is asked)
@@ -533,10 +594,15 @@ fn render_part(part: &parser::Message, allow: bool, first: usize, previews: Opti
         in_frame: true,
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &[], &cards);
+    let inline = inline_files(plan, Some(index), &rendered.inline);
+    if let Some(p) = previews.as_mut() {
+        p.next_inline += inline.len();
+    }
     let mut attachments: Vec<AttachmentView> = listed(&part.attachments).map(AttachmentView::of).collect();
+    let has_inline = !inline.is_empty();
     let previews = planned
-        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments, first))
-        .and_then(|(token, files)| Some((token?, files)));
+        .map(|planned| shown_previews(planned, &rendered.previewed, &mut attachments, first, has_inline))
+        .and_then(|(token, files)| Some((token?, files, inline)));
     RenderedPart {
         document: rendered.document,
         remote_images: rendered.remote_images,
@@ -569,10 +635,12 @@ fn protected_view(
     // each part's words (no markup of the message: one part's styles could hide another on the paper), by its place
     let mut print_texts: Vec<(usize, String)> = Vec::new();
     // the previews of each part's pictures and PDF files, in its own document under a token of its own
+    let keep = !protected.decrypted();
     let mut previews = trust.previews.map(|plan| PartPreviews {
         plan,
         budget: crate::previews::Budget::new(),
-        keep: !protected.decrypted(),
+        keep,
+        next_inline: pe_html::INLINE_BASE,
     });
     let mut preview_documents = Vec::new();
     // parsed first: the printout's pictures borrow from them
@@ -598,16 +666,22 @@ fn protected_view(
         );
         let first = attachments.len();
         let document = part.as_ref().map(|part| {
-            let rendered = render_part(part, allow, first, previews.as_mut());
+            let rendered = render_part(part, allow, first, parts.len(), previews.as_mut());
             remote_images |= rendered.remote_images;
             blocked |= rendered.remote_images && !allow;
             if encrypted && allow && rendered.remote_images {
                 label = pe_i18n::tr_args(pe_i18n::Text::PgpPartPicturesLoaded, &[("label", (&label).into())]);
             }
             attachments.extend(rendered.attachments);
-            if let Some((token, files)) = rendered.previews {
+            if let Some((token, files, inline)) = rendered.previews {
                 let part = Some(parts.len());
-                preview_documents.push(crate::previews::PreviewDocument { token, part, files });
+                preview_documents.push(crate::previews::PreviewDocument {
+                    token,
+                    part,
+                    files,
+                    inline,
+                    keep,
+                });
             }
             print_texts.push((parts.len(), rendered.text));
             rendered.document
@@ -1009,8 +1083,9 @@ mod tests {
             "{}",
             view.document
         );
+        // its picture is never the sender's bytes: without a core to draw it (no preview plan), it shows nothing
         assert!(
-            view.document.contains("data:image/png;base64,iVBORw=="),
+            !view.document.contains("iVBORw==") && !view.document.contains("data:image"),
             "{}",
             view.document
         );

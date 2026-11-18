@@ -24,6 +24,11 @@ fn fixture() -> Vec<u8> {
 
 /// A core with the test account's key (to decrypt) and the message as UID 1 of its Inbox; its events
 fn world(dir: &pe_testkit::TempDir) -> (Arc<Core>, pe_store::FolderId, Receiver<Event>) {
+    world_with(dir, &fixture())
+}
+
+/// [`world`] with `source` as UID 1
+fn world_with(dir: &pe_testkit::TempDir, source: &[u8]) -> (Arc<Core>, pe_store::FolderId, Receiver<Event>) {
     let path = dir.path().join("store.db");
     let folder = {
         let store = Store::open(&path).unwrap();
@@ -56,7 +61,7 @@ fn world(dir: &pe_testkit::TempDir) -> (Arc<Core>, pe_store::FolderId, Receiver<
             ..Default::default()
         };
         store.add_messages(folder, &[info]).unwrap();
-        store.set_source(folder, 1, &fixture()).unwrap();
+        store.set_source(folder, 1, source).unwrap();
         folder
     };
     let (sender, events) = mpsc::channel();
@@ -341,4 +346,115 @@ fn leak(files: &[PathBuf], needles: &[Vec<u8>], hashes: &[pe_preview::Key]) -> O
         }
     }
     None
+}
+
+/// A picture of one colour with a pattern in it, as PNG: its pixel data is not any other file's
+fn patterned(colour: [u8; 3]) -> Vec<u8> {
+    let picture = image::RgbImage::from_fn(120, 80, |x, y| {
+        image::Rgb([
+            colour[0] ^ (x * 7 % 16) as u8,
+            colour[1] ^ (y * 5 % 16) as u8,
+            colour[2],
+        ])
+    });
+    let mut bytes = Vec::new();
+    image::DynamicImage::ImageRgb8(picture)
+        .write_to(&mut std::io::Cursor::new(&mut bytes), image::ImageFormat::Png)
+        .unwrap();
+    bytes
+}
+
+/// An HTML part that shows a picture by `cid:`, the picture beside it (multipart/related)
+fn related(boundary: &str, words: &str, id: &str, picture: &[u8]) -> String {
+    use base64::Engine;
+    format!(
+        "Content-Type: multipart/related; boundary=\"{boundary}\"\r\n\r\n--{boundary}\r\n\
+         Content-Type: text/html; charset=utf-8\r\n\r\n<p>{words}</p><img src=\"cid:{id}\">\r\n--{boundary}\r\n\
+         Content-Type: image/png\r\nContent-ID: <{id}>\r\nContent-Transfer-Encoding: base64\r\n\r\n{}\r\n\
+         --{boundary}--\r\n",
+        base64::engine::general_purpose::STANDARD.encode(picture)
+    )
+}
+
+/// A message of two parts, each with a picture in its text: the first not protected, the second encrypted to the
+/// test account's key
+fn pictures_in_text(plain: &[u8], secret: &[u8]) -> Vec<u8> {
+    let read = |name: &str| std::fs::read(fixtures().join(name)).unwrap();
+    let passphrase = String::from_utf8(read("me.passphrase")).unwrap();
+    let me = pe_pgp::read_secret_keys(&read("me.asc"), passphrase.trim())
+        .unwrap()
+        .remove(0);
+    let inner = related("i", "For your eyes only.", "plan@x", secret);
+    let armored = pe_pgp::encrypt(inner.into_bytes(), &[me.cert()], &[], None, 1_793_527_200).unwrap();
+    format!(
+        "From: Alice Example <alice@example.org>\r\nTo: Alex Morgan <testuser@inboxclassic.test>\r\n\
+         Subject: Two pictures in the text\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=\"mix\"\r\n\r\n\
+         --mix\r\n{}\r\n--mix\r\n\
+         Content-Type: multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=\"e\"\r\n\r\n\
+         --e\r\nContent-Type: application/pgp-encrypted\r\n\r\nVersion: 1\r\n--e\r\n\
+         Content-Type: application/octet-stream\r\n\r\n{armored}\r\n--e--\r\n--mix--\r\n",
+        related("p", "The harbour.", "harbour@x", plain)
+    )
+    .into_bytes()
+}
+
+/// The pictures of the text of signed and encrypted parts (`cid:`): each part's under its own token and a number of
+/// its own, never answered in the other part's document; the encrypted part's drawn from what was decrypted, in memory
+/// only, never written to disk, nor named on disk by its hash
+#[test]
+fn an_encrypted_part_s_pictures_in_its_text_stay_in_its_document_and_in_memory() {
+    let since = SystemTime::now() - Duration::from_secs(2);
+    let dir = pe_testkit::TempDir::new("pgp-inline-pictures");
+    let (plain, secret) = (patterned([20, 120, 220]), patterned([230, 40, 40]));
+    let (core, folder, events) = world_with(&dir, &pictures_in_text(&plain, &secret));
+    let view = support::settled(&core, &events, || core.message_view(folder, 1, false).unwrap().unwrap());
+    assert_eq!(view.protection.as_ref().unwrap().parts.len(), 2);
+    let token = view.preview_token.clone().unwrap();
+    let (first, second) = (&view.part_documents[0], &view.part_documents[1]);
+    assert!(second.contains("For your eyes only."), "{second}");
+    let (a, b) = (tokens(first).remove(0), tokens(second).remove(0));
+    let base = pe_html::INLINE_BASE;
+    // a number of its own in each part's document (its size, read within the view's wait, is the unit tests' to check)
+    assert!(first.contains(&format!("src=\"/pv/{a}-{base}-0\"")), "{first}");
+    assert!(second.contains(&format!("src=\"/pv/{b}-{}-0\"", base + 1)), "{second}");
+    assert!(!second.contains("data:image") && !first.contains("data:image"));
+    // neither part's token reaches the other's picture, the view's none
+    for address in [
+        format!("/pv/{a}-{}-0", base + 1),
+        format!("/pv/{b}-{base}-0"),
+        format!("/pv/{token}-{base}-0"),
+        format!("/pv/{token}-{}-0", base + 1),
+    ] {
+        assert_eq!(core.preview_ask(&address), None, "{address}");
+    }
+    let ask = core.preview_ask(&format!("/pv/{b}-{}-0", base + 1)).unwrap();
+    let preview = answered(&core, &events, ask).unwrap();
+    assert_ne!(preview.bytes, secret);
+    let drawn = image::load_from_memory(&preview.bytes).unwrap().to_rgb8();
+    assert_eq!(drawn.get_pixel(0, 0).0, [230, 40, 40]);
+    let ask = core.preview_ask(&format!("/pv/{a}-{base}-0")).unwrap();
+    let harbour = image::load_from_memory(&answered(&core, &events, ask).unwrap().bytes)
+        .unwrap()
+        .to_rgb8();
+    assert_eq!(harbour.get_pixel(0, 0).0, [20, 120, 220]);
+    core.previews_end(&token);
+    assert_eq!(core.preview_ask(&format!("/pv/{b}-{}-0", base + 1)), None);
+    drop(core);
+
+    let mut files = Vec::new();
+    files_under(dir.path(), SystemTime::UNIX_EPOCH, 4, &mut files);
+    files_under(&std::env::temp_dir(), since, 4, &mut files);
+    assert!(files.iter().any(|f| f.ends_with("store.db")), "the store was scanned");
+    let stretches = |bytes: &[u8]| -> Vec<Vec<u8>> {
+        let step = (bytes.len() - 96) / 8;
+        (0..8).map(|n| bytes[64 + n * step..96 + n * step].to_vec()).collect()
+    };
+    let mut needles = stretches(&secret);
+    needles.extend(stretches(&preview.bytes));
+    let hashes = [pe_preview::key_of(&secret), pe_preview::key_of(&preview.bytes)];
+    let control = dir.path().join("control");
+    std::fs::write(&control, &secret).unwrap();
+    assert!(leak(std::slice::from_ref(&control), &needles, &hashes).is_some());
+    std::fs::remove_file(control).unwrap();
+    assert_eq!(leak(&files, &needles, &hashes), None);
 }

@@ -158,6 +158,15 @@ pub(super) async fn dark_messages(d: &Driver) {
     );
     d.shot(main.window(), "dark-3-newsletter").await;
 
+    // the pictures in a message's text, drawn by the core, in their places in the dark too
+    open_shown(inbox, super::NEWSLETTER).await;
+    let banner = super::inline_pictures::banner(&main.reader.preview.view).await;
+    d.check(
+        banner.first().is_some_and(|src| src.starts_with("/pv/")) && banner.get(1).is_some_and(|l| l == "true"),
+        &format!("the banner drawn by the core shows in a dark window ({banner:?})"),
+    );
+    d.shot(main.window(), "dark-3b-pictures").await;
+
     let code = open_shown(inbox, CODE).await;
     let card = wait_for(15, || {
         let shown = main.reader.preview.shown();

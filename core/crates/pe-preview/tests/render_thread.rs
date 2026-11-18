@@ -32,6 +32,7 @@ fn request(owner: u64, attachment: usize, file: Arc<Vec<u8>>) -> Request {
         pages: 5,
         keep: true,
         asked: false,
+        inline: false,
     }
 }
 
@@ -224,6 +225,7 @@ fn the_cache_answers_a_file_drawn_before() {
     let private = || Request {
         keep: false,
         asked: false,
+        inline: false,
         ..request(3, 0, file(PNG, "private"))
     };
     previewer.request(private());
@@ -365,6 +367,7 @@ fn the_message_budget_counts_every_preview() {
     // a file the user asked to see (Show in Message) has a budget of its own, not the message's spent one
     previewer.request(Request {
         asked: true,
+        inline: false,
         ..request(1, 3, file(PDF, "asked"))
     });
     assert_eq!(pages(&until_done(&outcomes, 1, 3)).len(), 4);
@@ -539,6 +542,7 @@ fn pdfs_off_by_the_setting_are_disabled_and_come_back_on() {
     );
     previewer.request(Request {
         asked: true,
+        inline: false,
         ..request(1, 3, file(PDF, "c"))
     });
     assert_eq!(pages(&until_done(&outcomes, 1, 3)), [0]);
@@ -623,4 +627,71 @@ fn a_decrypted_file_s_description_is_not_kept() {
         );
     }
     assert_eq!(fake.runs.load(Ordering::SeqCst), 3);
+}
+
+/// A picture of a message's text (`cid:`, `data:`): an SVG picture is drawn (by resvg, to a PNG) where an attached
+/// SVG file is refused; a PDF file named as a picture is not drawn in the text
+#[test]
+fn a_picture_of_the_text_may_be_svg_never_a_pdf() {
+    let (previewer, outcomes) = start(Settings::default());
+    let svg = Arc::new(
+        b"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"12\"><rect width=\"24\" height=\"12\"/></svg>"
+            .to_vec(),
+    );
+    let inline = |attachment, file| Request {
+        inline: true,
+        pages: 1,
+        ..request(1, attachment, file)
+    };
+    previewer.request(inline(0, svg.clone()));
+    let seen = until_done(&outcomes, 1, 0);
+    let Some(What::Page(_, picture)) = seen.iter().map(|o| &o.what).find(|w| matches!(w, What::Page(..))) else {
+        panic!("{seen:?}");
+    };
+    assert_eq!((picture.width, picture.height, picture.mime), (24, 12, Mime::Png));
+    assert!(picture.bytes.starts_with(b"\x89PNG"));
+    // the same bytes attached: no preview
+    previewer.request(request(1, 1, svg.clone()));
+    assert_eq!(
+        refusal(&until_done(&outcomes, 1, 1)),
+        Some((None, Refusal::Unsupported))
+    );
+    let pdf = std::fs::read(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/files/invoice.pdf")).unwrap();
+    previewer.request(inline(2, Arc::new(pdf)));
+    assert_eq!(
+        refusal(&until_done(&outcomes, 1, 2)),
+        Some((None, Refusal::Unsupported))
+    );
+    // its size read ahead of the queue
+    let described = previewer.describe_inline(svg, "message 1, picture 0".into(), Duration::from_secs(5), true);
+    assert_eq!(described.unwrap().sizes, [Some((24, 12))]);
+}
+
+/// The pictures of a message's text have a budget of their own: a newsletter's pictures do not leave the files
+/// attached to it without theirs, nor the other way round
+#[test]
+fn the_text_s_pictures_have_a_budget_of_their_own() {
+    let side = 4096;
+    let fake = Arc::new(Fake {
+        size: (side as u32, side as u32),
+        pages: 5,
+        ..Arc::into_inner(Fake::new()).unwrap()
+    });
+    let (previewer, outcomes) = start(settings(fake, None));
+    previewer.request(request(1, 0, file(PDF, "big")));
+    assert_eq!(pages(&until_done(&outcomes, 1, 0)).len(), 4);
+    let inline = |attachment, tag| Request {
+        inline: true,
+        pages: 1,
+        ..request(1, attachment, file(PNG, tag))
+    };
+    for attachment in 1..=4 {
+        previewer.request(inline(attachment, "text"));
+        assert_eq!(pages(&until_done(&outcomes, 1, attachment)), [0], "{attachment}");
+    }
+    previewer.request(inline(5, "text"));
+    assert_eq!(
+        refusal(&until_done(&outcomes, 1, 5)),
+        Some((Some(0), Refusal::OverBudget))
+    );
 }

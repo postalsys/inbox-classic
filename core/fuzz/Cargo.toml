@@ -109,6 +109,13 @@ doc = false
 bench = false
 
 [[bin]]
+name = "preview_svg"
+path = "fuzz_targets/preview_svg.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
 name = "preview_pdf"
 path = "fuzz_targets/preview_pdf.rs"
 test = false

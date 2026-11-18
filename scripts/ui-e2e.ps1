@@ -87,6 +87,10 @@ public static void Mouse(int x, int y, uint button) {
 public static void MouseClick(int x, int y) {
     foreach (uint button in new uint[] { 0, 0x0002, 0x0004 }) { Mouse(x, y, button); }
 }
+// a click of the right mouse button at (x, y)
+public static void MouseRightClick(int x, int y) {
+    foreach (uint button in new uint[] { 0, 0x0008, 0x0010 }) { Mouse(x, y, button); }
+}
 // from (x, y) with the button pressed, a few steps at a time, to (toX, toY), where it stays pressed
 public static void MouseDragTo(int x, int y, int toX, int toY) {
     Mouse(x, y, 0);
@@ -713,7 +717,7 @@ AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.te
     "the photos from Saturday are in the shared album. The one from the lake came out best.`r`n`r`nAnn`r`n")
 $newsletter = 'October newsletter'
 $html = '<div style="font-family:Georgia,serif;max-width:560px;color:#222">' +
-    '<p><img src="cid:banner@example.com" width="560" height="110" alt="Trail Notes"></p>' +
+    '<p><a href="https://example.com/trail-notes"><img src="cid:banner@example.com" width="560" height="110" alt="Trail Notes"></a></p>' +
     '<h2 style="color:#1f4d3a;margin:18px 0 6px">Five autumn walks worth the drive</h2>' +
     '<p>The larches are turning gold and the summer crowds have gone home. This month we picked five routes for short ' +
     'October days, each under four hours, with a warm cafe at the end.</p>' +
@@ -998,6 +1002,41 @@ try {
     $title = WindowText $main
     Check ($title -eq 'Inbox - Inbox Classic') "the title names the folder, as the folder bar does ($title)"
     Shot $main 'read-1-html'
+    # the banner sent inside the message is drawn by the core and served from /pv/, as the previews are: no picture of
+    # the document has a data: or cid: address (Preview::TestPreviews "inline", each look answering the one before)
+    $kTestPreviews = 0x50565753
+    $inline = WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, 'inline'); if ($v -eq 10560) { $v } } 20
+    Check ($null -ne $inline) "the banner is drawn by Inbox Classic, served from /pv/ and loaded, 560 pixels wide, and no picture has a data: or cid: address ($([Native.Win]::SendText($main, $kTestPreviews, 'inline')))"
+    # a right click on the banner, a link to the web: Copy Link stays, as Copy Image does, while Save Image As goes
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    [void](WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, 'banner'); if ($v -ge 0) { "$v" } } 5)
+    Start-Sleep -Milliseconds 300
+    $p = WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, 'banner'); if ($v -gt 0) { "$v" } } 5
+    Check ($null -ne $p) 'the banner is on the screen'
+    if ($p) {
+        $p = [int64]$p
+        [Native.Win]::MouseRightClick([int][Math]::Floor($p / 100000), [int]($p % 100000))
+        $menuItems = WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, 'menu'); if ($v -ge 1000) { $v } } 5
+        Start-Sleep -Milliseconds 500
+        Shot $main 'read-1b-picture-menu'
+        [Native.Win]::keybd_event($VK_ESCAPE, 0, 0, [IntPtr]::Zero); [Native.Win]::keybd_event($VK_ESCAPE, 0, 2, [IntPtr]::Zero)
+        Check ($menuItems -eq 1110) "right-clicking the linked banner offers Copy Link and Copy Image, and nothing that saves the picture ($menuItems)"
+    }
+    # the newsletter printed: its banner, drawn by the core, in the page as a data: picture (TestPrint: the pictures
+    # loaded times 10, plus 1 for the text); the photo on the internet stays blocked
+    $kTestPrint = 0x50524E54
+    Command $main $IDM_PRINT
+    $print = WaitWindow 'InboxClassicPrint' $null 20
+    Check ($null -ne $print) 'Print of the newsletter opens the print preview'
+    if ($print) {
+        $looked = WaitFor { $v = [Native.Win]::SendText($main, $kTestPrint, 'Five autumn walks worth the drive'); if ($v -eq 11) { $v } } 20
+        Check ($null -ne $looked) "the printout has the banner as a picture of its own, loaded ($([Native.Win]::SendText($main, $kTestPrint, 'Five autumn walks worth the drive')))"
+        Start-Sleep -Seconds 2
+        Shot $print 'read-1c-print-newsletter'
+        [void][Native.Win]::PostMessage($print, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($print) } 10)
+    }
 
     Step 'message properties'
     Command $main $IDM_PROPERTIES

@@ -7,17 +7,19 @@ use std::borrow::Cow;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, OnceLock};
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
 
 mod bounce;
 mod card;
+mod css;
 mod dark;
 mod editor;
 mod event;
 mod help;
+mod inline;
 mod markdown;
 mod otp;
 mod platform;
@@ -37,6 +39,7 @@ pub use help::{
     HELP_TOPIC_SCHEME, HelpSection, HelpTarget, HelpTopic, help_contents, help_context, help_export, help_link_topic,
     help_search, help_topic, settings_words,
 };
+pub use inline::{INLINE_BASE, InlineOptions, InlinePicture, MAX_INLINE, MAX_INLINE_BYTES};
 pub use markdown::markdown_html;
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};
@@ -111,61 +114,86 @@ pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
     builder
 }
 
-/// The sanitizer for a message with `images`. Mail layout lives in inline styles, style elements and old presentational
-/// attributes. CSS can not run code, and what it could load from the network is refused by the CSP and by the WebView2
-/// request filter.
+/// The sanitizer of what the editor shows (a quote, a draft, a signature) with `images`, its `cid:` pictures as
+/// `data:` URIs: the editor's page, and the message sent from it, carry them as they are. Mail layout lives in inline
+/// styles, style elements and old presentational attributes. CSS can not run code, and what it could load from the
+/// network is refused by the CSP and by the WebView2 request filter.
 pub(crate) fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
-    builder_noting(images, None, None)
-}
-
-/// The Content-IDs (lowercase, without brackets) a message's HTML showed by `cid:`
-type Embedded = Arc<Mutex<HashSet<String>>>;
-
-/// [`builder`], setting `remote` when an attribute loads a picture from the network: an `img` src, a `background`,
-/// or a CSS `url()` / `image-set()` in a style attribute (decoded, as the sanitizer hands it over), and noting in
-/// `embedded` the pictures it shows by `cid:`
-fn builder_noting(
-    images: &[InlineImage],
-    remote: Option<Arc<AtomicBool>>,
-    embedded: Option<Embedded>,
-) -> ammonia::Builder<'static> {
-    let mut embedder = Embedder::new(images);
-    embedder.noted = embedded;
+    let embedder = Embedder::new(images);
     let mut builder = mail_builder();
     builder.attribute_filter(move |element, attribute, value| {
         let img_src = element == "img" && attribute == "src";
-        if let Some(remote) = &remote {
-            let loads = match attribute {
-                "style" => css_loads_remote(value),
-                "background" => is_remote(value),
-                _ => img_src && is_remote(value),
-            };
-            if loads {
-                remote.store(true, Ordering::Relaxed);
-            }
-        }
-        let scheme = value
-            .trim_start()
-            .get(..5)
-            .map(str::to_ascii_lowercase)
-            .unwrap_or_default();
-        if scheme == "data:" && !img_src {
+        let address = url_text(value);
+        match scheme_of(&address).as_str() {
             // data: is for images only, a data: link could open a document of its own
-            return None;
+            "data:" if !img_src => None,
+            scheme if scheme.starts_with("cid:") && (img_src || attribute == "background") => {
+                Some(embedder.embed(&address).map_or(Cow::Borrowed(value), Cow::Owned))
+            }
+            _ => Some(Cow::Borrowed(value)),
         }
-        if scheme.starts_with("cid:")
-            && (img_src || attribute == "background")
-            && let Some(uri) = embedder.embed(value)
-        {
-            return Some(Cow::Owned(uri));
-        }
-        Some(Cow::Borrowed(value))
     });
     builder
 }
 
-/// Turns `cid:` URLs into `data:` URIs of the images they name. Only images: anything else stays a `cid:` the preview
-/// can not load. The sanitizer wants a callback that owns its data, so the images are copied in.
+/// An attribute's address as a URL parser reads it: without the controls and spaces around it, and without tabs and
+/// newlines anywhere (`da&#9;ta:` is `data:`)
+fn url_text(value: &str) -> Cow<'_, str> {
+    let value = value.trim_matches(|c: char| c <= ' ');
+    if value.contains(['\t', '\n', '\r']) {
+        Cow::Owned(value.chars().filter(|c| !matches!(c, '\t' | '\n' | '\r')).collect())
+    } else {
+        Cow::Borrowed(value)
+    }
+}
+
+/// The first five characters of an address ([`url_text`]), lowercased: its scheme when it is `data:` or `cid:`
+fn scheme_of(address: &str) -> String {
+    address.get(..5).map(str::to_ascii_lowercase).unwrap_or_default()
+}
+
+/// The sanitizer of a message shown in the reading pane: as [`builder`], but no picture of the message's text reaches
+/// the web view as the sender wrote it. A `cid:` picture (of an `img` or a `background`) and a `data:` picture of an
+/// `img` become preview addresses of the document, routed by `router` ([`inline`]), which the core answers with its
+/// own encode; past the limits, or in a document without preview addresses, they show nothing. Sets `remote` when an
+/// attribute loads a picture from the network: an `img` src, a `background`, or a CSS `url()` / `image-set()` in a
+/// style attribute (decoded, as the sanitizer hands it over)
+fn reading_builder(router: Arc<inline::Router>, remote: Arc<AtomicBool>) -> ammonia::Builder<'static> {
+    let mut builder = mail_builder();
+    builder.attribute_filter(move |element, attribute, value| {
+        let img_src = element == "img" && attribute == "src";
+        let address = url_text(value);
+        let loads = match attribute {
+            "style" => css_loads_remote(value),
+            "background" => is_remote(&address),
+            _ => img_src && is_remote(&address),
+        };
+        if loads {
+            remote.store(true, Ordering::Relaxed);
+        }
+        // the message's own CSS: no picture of its own (only those on the internet, which the CSP and the apps
+        // block until allowed), no font
+        if attribute == "style" {
+            return Some(css::clean(value));
+        }
+        let route = match scheme_of(&address).as_str() {
+            "data:" if img_src => router.data(&address),
+            "data:" => inline::Route::Drop,
+            scheme if scheme.starts_with("cid:") && (img_src || attribute == "background") => router.part(&address),
+            _ => inline::Route::Keep,
+        };
+        match route {
+            inline::Route::To(address) => Some(Cow::Owned(address)),
+            inline::Route::Keep => Some(Cow::Borrowed(value)),
+            inline::Route::Drop => None,
+        }
+    });
+    builder
+}
+
+/// Turns `cid:` URLs into `data:` URIs of the images they name, for the editor ([`builder`]). Only images: anything
+/// else stays a `cid:` the editor can not load. The sanitizer wants a callback that owns its data, so the images are
+/// copied in.
 struct Embedder {
     /// Content-ID, lowercased, to the image; the first image of an ID wins
     by_id: HashMap<String, usize>,
@@ -173,8 +201,6 @@ struct Embedder {
     /// Each image encoded once, when it is first referenced
     uris: Vec<OnceLock<String>>,
     embedded: AtomicUsize,
-    /// Where the IDs of the pictures referenced are noted
-    noted: Option<Embedded>,
 }
 
 impl Embedder {
@@ -192,7 +218,6 @@ impl Embedder {
             uris: owned.iter().map(|_| OnceLock::new()).collect(),
             images: owned,
             embedded: AtomicUsize::new(0),
-            noted: None,
         }
     }
 
@@ -200,9 +225,6 @@ impl Embedder {
     fn embed(&self, url: &str) -> Option<String> {
         let id = content_id(&url.trim_start()[4..]).to_lowercase();
         let index = *self.by_id.get(&id)?;
-        if let Some(noted) = &self.noted {
-            noted.lock().unwrap_or_else(|p| p.into_inner()).insert(id);
-        }
         let uri = self.uris[index].get_or_init(|| {
             let (mime_type, data) = &self.images[index];
             format!("data:{mime_type};base64,{}", STANDARD.encode(data))
@@ -213,9 +235,10 @@ impl Embedder {
 }
 
 /// Removes everything from `html` that is not plain markup: scripts, event handlers, `javascript:` URLs, forms,
-/// frames, `meta` and `base`. Returns a body fragment.
+/// frames, `meta` and `base`. Returns a body fragment, whose pictures of its own (`cid:`, `data:`) show nothing.
 pub fn sanitize(html: &str) -> String {
-    builder(&[]).clean(html).to_string()
+    let router = Arc::new(inline::Router::new(&[], None));
+    css::clean_style_elements(&reading_builder(router, Arc::default()).clean(html).to_string())
 }
 
 /// Sanitizes `html` and wraps it in a complete document with a Content-Security-Policy, ready for the preview.
@@ -244,10 +267,13 @@ fn content_id(value: &str) -> String {
         out.push(bytes[i]);
         i += 1;
     }
-    String::from_utf8_lossy(&out).into_owned()
+    // brackets written as escapes (`cid:%3Cid%3E`)
+    let id = String::from_utf8_lossy(&out);
+    id.trim().trim_start_matches('<').trim_end_matches('>').to_string()
 }
 
-/// A message for the preview: sanitized, its `cid:` images embedded, in a document with a CSP
+/// A message for the preview: sanitized, in a document with a CSP; its pictures of its own (`cid:`, `data:`) show
+/// nothing without preview addresses ([`render_view_cards`] with [`Cards::inline`])
 pub fn render_message(html: &str, options: &RenderOptions, images: &[InlineImage]) -> String {
     render_view(html, options, images, &[]).document
 }
@@ -263,9 +289,12 @@ pub struct Rendered {
     /// The document to print when this one shows previews: the same message wrapped again with none (the print
     /// windows serve none of their pictures; PDF pages are printed from their own program). None when it shows none
     pub print_document: Option<String>,
-    /// What the printout of a document with previews is made of again once their pictures are drawn
-    /// ([`print_document_with`]); None when it shows none
+    /// What the printout of a document with previews or pictures in its text is made of again once their pictures
+    /// are drawn ([`print_document_with`]); None when it shows none
     pub print: Option<PrintParts>,
+    /// The pictures of its text ([`Cards::inline`]), each under the number of its preview address: the core answers
+    /// them with its own encodes
+    pub inline: Vec<InlinePicture>,
 }
 
 /// A sanitized message as [`render_view_cards`] wrapped it, kept to wrap it again for a printout with the pictures
@@ -279,6 +308,9 @@ pub struct PrintParts {
     /// The parts of a message with signed or encrypted parts ([`print_parts`]), each sanitized on its own with its
     /// place among them: each part's pictures are printed after its own text. Empty for any other message (`body`)
     parts: Vec<(usize, String)>,
+    /// The start of the preview addresses of the pictures of `body`'s text (`/pv/<token>-`) and their numbers: the
+    /// printout puts the core's encodes in their place ([`PrintItem::Inline`])
+    inline: Option<(String, Vec<usize>)>,
 }
 
 /// A printout of a message with previews of its attachments, its pictures put after its text as `data:` addresses
@@ -305,9 +337,12 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
             .collect();
         previews::print_section(&picked)
     };
+    // the card is ours, the message's words in it escaped; made printable all the same
+    let card = inline::printable(&parts.card);
     if parts.parts.is_empty() {
         let section = section_of(&|_| true);
-        return wrap(&parts.body, &options, &header, &parts.card, After::Printed(&section)).0;
+        let body = printed_inline(parts, items);
+        return wrap(&body, &options, &header, &card, After::Printed(&section), false).0;
     }
     // the look of the text alone, as without pictures: the sections' own rules are not the message's
     let text: Vec<&str> = parts.parts.iter().map(|(_, html)| html.as_str()).collect();
@@ -315,14 +350,64 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
     let body: Vec<String> = parts
         .parts
         .iter()
-        .map(|(part, html)| format!("{html}{}", section_of(&|of| of == Some(*part))))
+        .map(|(part, html)| format!("{}{}", inline::printable(html), section_of(&|of| of == Some(*part))))
         .collect();
     // the items of no part printed come after all of it
     let known = |part: Option<usize>| part.is_some_and(|part| parts.parts.iter().any(|(at, _)| *at == part));
     let section = section_of(&|part| !known(part));
     let after = After::Printed(&section);
-    wrap_as(&body.join(PART_RULE), look, &options, &header, &parts.card, after).0
+    wrap_as(&body.join(PART_RULE), look, &options, &header, &card, after, false).0
 }
+
+/// The text of a printout with each picture of it as a `data:` address of the core's encode ([`PrintItem::Inline`]),
+/// or of an empty picture for one not drawn: the print windows load nothing but the page. The addresses replaced are
+/// the router's, whose token the sender does not know
+fn printed_inline(parts: &PrintParts, items: &[(Option<usize>, PrintItem)]) -> String {
+    // no data: address of the sender's: the only ones are those put in here
+    let body = inline::printable(&parts.body);
+    let Some((prefix, numbers)) = &parts.inline else {
+        return body;
+    };
+    // each picture's address by its number as the router wrote it: the first drawing of it, or the empty picture
+    let mut addresses: HashMap<String, String> = HashMap::new();
+    for (_, item) in items {
+        if let PrintItem::Inline { number, mime, bytes } = *item
+            && matches!(mime, "image/png" | "image/jpeg")
+            && numbers.contains(&number)
+        {
+            let address = || format!("data:{mime};base64,{}", STANDARD.encode(bytes));
+            addresses.entry(number.to_string()).or_insert_with(address);
+        }
+    }
+    for number in numbers {
+        let empty = || NOT_PRINTED_PICTURE.to_string();
+        addresses.entry(number.to_string()).or_insert_with(empty);
+    }
+    // one pass over the text: `"<prefix><number>-0"` each
+    let start = format!("\"{prefix}");
+    let mut out = String::with_capacity(body.len());
+    let mut rest = body.as_str();
+    while let Some(at) = rest.find(&start) {
+        out.push_str(&rest[..at]);
+        let after = &rest[at + start.len()..];
+        let digits = after.bytes().take_while(u8::is_ascii_digit).count();
+        match addresses.get(&after[..digits]) {
+            Some(address) if after[digits..].starts_with("-0\"") => {
+                out.push_str(&format!("\"{address}\""));
+                rest = &after[digits + 3..];
+            }
+            _ => {
+                out.push_str(&start);
+                rest = after;
+            }
+        }
+    }
+    out.push_str(rest);
+    out
+}
+
+/// An empty picture (a transparent GIF of one pixel) where a picture of the text was not drawn
+const NOT_PRINTED_PICTURE: &str = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 /// What is printed between two parts of a message with signed or encrypted parts
 const PART_RULE: &str = "<hr>";
@@ -342,8 +427,9 @@ pub fn print_parts(parts: &[(usize, String)], header: &[(&str, &str)]) -> PrintP
         card: String::new(),
         parts: parts
             .iter()
-            .map(|(part, html)| (*part, builder_noting(&[], None, None).clean(html).to_string()))
+            .map(|(part, html)| (*part, builder(&[]).clean(html).to_string()))
             .collect(),
+        inline: None,
     }
 }
 
@@ -381,6 +467,8 @@ pub struct Cards<'a> {
     pub event: Option<&'a EventCard>,
     pub bounce: Option<&'a BounceCard>,
     pub previews: Option<&'a PreviewSection>,
+    /// The preview addresses of the pictures of its text; None: they show nothing
+    pub inline: Option<&'a InlineOptions<'a>>,
 }
 
 /// [`render_view`] with the cards of the app above the message
@@ -392,10 +480,27 @@ pub fn render_view_cards(
     cards: &Cards,
 ) -> Rendered {
     let remote = Arc::new(AtomicBool::new(false));
-    let embedded = Embedded::default();
-    let body = builder_noting(images, Some(remote.clone()), Some(embedded.clone()))
-        .clean(html)
-        .to_string();
+    let router = Arc::new(inline::Router::new(images, cards.inline));
+    let body = reading_builder(router.clone(), remote.clone()).clean(html).to_string();
+    // the style elements' text, which is no attribute: as the style attributes, without pictures or fonts of its own
+    let body = css::clean_style_elements(&body);
+    let (pictures, embedded) = router.finish(images);
+    // the options and the start of the preview addresses of the pictures of the text, when it has any
+    let routed = cards
+        .inline
+        .filter(|_| !pictures.is_empty())
+        .map(|options| (options, format!("{PREVIEW_PATH}{}-", options.token)));
+    // the size of each picture of the text where its img says none, so the text does not move when it comes
+    let body = match &routed {
+        Some((options, prefix)) => {
+            let size = |number: usize| {
+                let picture = pictures.iter().find(|picture| picture.number == number)?;
+                (options.size)(picture)
+            };
+            inline::sized(&body, prefix, &size)
+        }
+        None => body,
+    };
     let card = [
         cards.otp.map(otp_card),
         cards.event.map(event_card),
@@ -404,16 +509,17 @@ pub fn render_view_cards(
     .into_iter()
     .flatten()
     .collect::<String>();
-    let embedded = embedded.lock().unwrap_or_else(|p| p.into_inner());
     let previews = cards.previews.map(|previews| Previews {
         section: previews,
         embedded: &embedded,
     });
     let after = previews.map_or(After::Nothing, After::Previews);
-    let (document, previewed) = wrap(&body, options, header, &card, after);
+    let (document, previewed) = wrap(&body, options, header, &card, after, routed.is_some());
     // built from the same parts, never cut out of the document: the message's own style text may forge any marker
-    let print_document = (!previewed.is_empty()).then(|| wrap(&body, options, header, &card, After::Nothing).0);
-    let print = (!previewed.is_empty()).then(|| PrintParts {
+    let print_document =
+        (!previewed.is_empty()).then(|| wrap(&body, options, header, &card, After::Nothing, routed.is_some()).0);
+    let inline = routed.map(|(_, prefix)| (prefix, pictures.iter().map(|picture| picture.number).collect()));
+    let print = (!previewed.is_empty() || inline.is_some()).then(|| PrintParts {
         allow_remote_images: options.allow_remote_images,
         header: header
             .iter()
@@ -422,6 +528,7 @@ pub fn render_view_cards(
         card: card.clone(),
         body: body.clone(),
         parts: Vec::new(),
+        inline,
     });
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
@@ -430,6 +537,7 @@ pub fn render_view_cards(
         previewed,
         print_document,
         print,
+        inline: pictures,
     }
 }
 
@@ -505,15 +613,17 @@ pub fn print_page(document: &str) -> Option<String> {
 }
 
 /// The preview document around a sanitized body, with `card` (markup of ours, [`bounce_card`]) above it and the
-/// previews of its attachments after it; with the attachments it shows previews of
+/// previews of its attachments after it; with the attachments it shows previews of. `routed`: the body's pictures
+/// load from the document's preview addresses ([`inline`])
 fn wrap(
     body: &str,
     options: &RenderOptions,
     header: &[(&str, &str)],
     card: &str,
     after: After,
+    routed: bool,
 ) -> (String, Vec<usize>) {
-    wrap_as(body, dark::look(body), options, header, card, after)
+    wrap_as(body, dark::look(body), options, header, card, after, routed)
 }
 
 /// [`wrap`] with the look decided already (a printout's, from its text without the pictures between its parts)
@@ -524,12 +634,19 @@ fn wrap_as(
     header: &[(&str, &str)],
     card: &str,
     after: After,
+    routed: bool,
 ) -> (String, Vec<usize>) {
-    let mut image_sources = if options.allow_remote_images {
-        "data: http: https:".to_string()
-    } else {
-        "data:".to_string()
-    };
+    // pictures from `data:` only in a printout, whose pictures are the core's encodes put in by the core; a document
+    // on screen gets the message's own pictures from its preview addresses, never from `data:`, which would hand the
+    // sender's bytes (a `data:` address in its CSS) to the web view's decoders
+    let printed = matches!(after, After::Printed(_));
+    let mut image_sources: Vec<String> = Vec::new();
+    if printed {
+        image_sources.push("data:".into());
+    }
+    if options.allow_remote_images {
+        image_sources.push("http: https:".into());
+    }
     // the header of a printout, under a class and in a cascade layer the message can not guess: an important rule
     // of the first layer beats any important rule of the message's own style elements, whatever their selector, and
     // a message can not add rules to a layer it can not name. Its lines have inline important styles, which beat
@@ -561,10 +678,14 @@ fn wrap_as(
         },
     };
     let (section, previewed) = (ours.html, ours.files);
-    if ours.pictures {
-        image_sources.push(' ');
-        image_sources.push_str(&previews::preview_source());
+    if (ours.pictures || routed) && !printed {
+        image_sources.push(previews::preview_source());
     }
+    let image_sources = if image_sources.is_empty() {
+        "'none'".to_string()
+    } else {
+        image_sources.join(" ")
+    };
     let shown = "display:block!important;visibility:visible!important;opacity:1!important;position:static!important;\
                  color:#000!important;font:10pt Arial,sans-serif!important";
     let printed: String = header
@@ -587,7 +708,7 @@ fn wrap_as(
     };
     let document = format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
+         <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src 'none'\">\
          <meta name=\"color-scheme\" content=\"{scheme}\">{base}\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
          div.pe-plain{{max-width:46em}}\
@@ -719,7 +840,7 @@ mod tests {
         let nonce = page.split("'nonce-").nth(1).unwrap().split('\'').next().unwrap();
         assert_eq!(nonce.len(), 32);
         assert!(
-            page.contains(&format!("script-src 'nonce-{nonce}'; img-src data:")),
+            page.contains(&format!("script-src 'nonce-{nonce}'; img-src 'none'")),
             "{page}"
         );
         // one script, ours, at the end of the body; the message's own is gone as in the preview
@@ -762,8 +883,27 @@ mod tests {
         }
     }
 
+    const TOKEN: &str = "0123456789abcdef0123456789abcdef";
+
+    /// [`render_view_cards`] with the pictures of the text routed under [`TOKEN`], each 600 by 200
+    fn routed(html: &str, images: &[InlineImage]) -> Rendered {
+        let size = |_: &InlinePicture| Some((600, 200));
+        let inline = InlineOptions {
+            token: TOKEN,
+            first: INLINE_BASE,
+            size: &size,
+        };
+        let cards = Cards {
+            inline: Some(&inline),
+            ..Default::default()
+        };
+        render_view_cards(html, &RenderOptions::default(), images, &[], &cards)
+    }
+
+    /// A `cid:` picture is shown from a preview address of the document, never as the bytes the sender wrote; its
+    /// size is put in where its img says none; a part that is no picture, or a Content-ID of nothing, loads nothing
     #[test]
-    fn embeds_inline_images() {
+    fn a_cid_picture_is_routed_to_a_preview_address() {
         let png = InlineImage {
             content_id: "<logo@x>",
             mime_type: "image/png",
@@ -774,46 +914,250 @@ mod tests {
             mime_type: "text/html",
             data: b"<script>",
         };
-        let out = render_message(
-            "<img src=\"cid:logo@x\"><img src=\"CID:%3Cpage@x%3E\"><table background=\"cid:missing\"></table>",
-            &RenderOptions::default(),
+        let rendered = routed(
+            "<img src=\"cid:logo@x\"><img src=\"CID:%3Cpage@x%3E\"><table background=\"cid:missing\"></table>\
+             <table background=\"CID:LOGO@X\"></table><a href=\"cid:logo@x\">x</a>",
             &[png, html_part],
         );
-        assert!(out.contains("<img src=\"data:image/png;base64,iVBORw==\">"), "{out}");
-        // not an image: left as a cid: the preview can not load
+        let out = &rendered.document;
+        let address = format!("/pv/{TOKEN}-{INLINE_BASE}-0");
+        assert!(
+            out.contains(&format!("<img src=\"{address}\" width=\"600\" height=\"200\">")),
+            "{out}"
+        );
+        // one picture, once, however often it is shown
+        assert!(out.contains(&format!("background=\"{address}\"")), "{out}");
+        assert_eq!(rendered.inline.len(), 1);
+        assert_eq!(rendered.inline[0].number, INLINE_BASE);
+        assert_eq!(*rendered.inline[0].bytes, b"\x89PNG");
+        // nothing of the bytes in the document, nothing of the other part
+        assert!(!out.contains("iVBOR") && !out.contains("data:image"), "{out}");
         assert!(!out.contains("text/html") && !out.contains("PHNjcmlwdD4"));
         assert!(out.contains("background=\"cid:missing\""));
-    }
+        assert!(out.contains("href=\"cid:logo@x\""), "{out}");
+        // pictures from the document's preview path, never from data:
+        let csp = out[out.find(CSP_START).unwrap()..].split('>').next().unwrap();
+        assert!(csp.contains(&format!("img-src {}/pv/;", preview_origin())), "{csp}");
 
-    #[test]
-    fn embeds_only_image_urls_within_the_budget() {
-        let png = InlineImage {
-            content_id: "a@x",
-            mime_type: "image/png",
-            data: &[0; 30],
-        };
+        // without preview addresses (no core to answer them), the picture shows nothing
         let out = render_message(
-            "<a href=\"cid:a@x\">x</a><table background=\"cid:A@X\"></table>",
+            "<img src=\"cid:logo@x\" alt=\"Logo\">",
             &RenderOptions::default(),
             &[png],
         );
-        assert!(out.contains("href=\"cid:a@x\""), "{out}");
-        assert!(out.contains("background=\"data:image/png;base64,AAAA"), "{out}");
+        assert!(out.contains("<img alt=\"Logo\">"), "{out}");
+        assert!(out.contains("img-src 'none';"), "{out}");
+    }
 
-        let big = vec![0; 1024 * 1024];
+    /// An address is read as a URL parser reads it: a tab or a newline in its scheme, or controls before it, hide no
+    /// `data:` (or `cid:`) address from the sanitizer, on screen or in the editor
+    #[test]
+    fn a_data_address_is_found_however_it_is_written() {
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: b"\x89PNG",
+        };
+        let rendered = routed(
+            "<img src=\"da&#9;ta:image/gif;base64,R0lGODlh\"><img src=\"&#1;data:image/gif;base64,R0lGODlh\">\
+             <img src=\" c&#10;id:a@x\"><table background=\"da&#9;ta:image/png;base64,AAAA\"></table>\
+             <a href=\"da&#13;ta:text/html,x\">y</a>",
+            &[png],
+        );
+        let out = &rendered.document;
+        // the two data: pictures are one picture, the cid: one another
+        assert_eq!(rendered.inline.len(), 2, "{out}");
+        assert_eq!(out.matches(&format!("src=\"/pv/{TOKEN}-")).count(), 3, "{out}");
+        let squeezed: String = out.chars().filter(|c| !c.is_control()).collect();
+        assert!(!squeezed.to_ascii_lowercase().contains("data:"), "{out}");
+        assert!(!out.contains("background=") && !out.contains("href="), "{out}");
+        // the editor's sanitizer: a data: link is taken out, a cid: picture embedded
+        let edited = builder(&[png])
+            .clean("<a href=\"da&#9;ta:text/html,x\">y</a><img src=\"&#1;cid:a@x\">")
+            .to_string();
+        assert!(!edited.contains("href"), "{edited}");
+        assert!(edited.contains("src=\"data:image/png;base64,iVBORw==\""), "{edited}");
+    }
+
+    /// A `data:` picture of an img is routed as a `cid:` one is; anywhere else a `data:` address is taken out, and the
+    /// CSP of a document on screen never lets a picture come from `data:` (a message's CSS may name one)
+    #[test]
+    fn a_data_picture_never_reaches_the_web_view() {
+        let rendered = routed(
+            "<img src=\"data:image/gif;base64,R0lGODlh\" width=\"30\"><img src=\"data:text/html;base64,PHA+\">\
+             <table background=\"data:image/png;base64,AAAA\"></table>\
+             <div style=\"background:url(data:image/png;base64,AAAA)\">x</div>",
+            &[],
+        );
+        let out = &rendered.document;
+        assert!(
+            out.contains(&format!(
+                "<img src=\"/pv/{TOKEN}-{INLINE_BASE}-0\" width=\"30\" height=\"10\">"
+            )),
+            "{out}"
+        );
+        assert_eq!(rendered.inline.len(), 1);
+        assert_eq!(*rendered.inline[0].bytes, b"GIF89a");
+        assert!(!out.contains("PHA+") && !out.contains("background=\"data:"), "{out}");
+        let csp = out[out.find(CSP_START).unwrap()..].split('>').next().unwrap();
+        assert!(!csp.contains("data: ") && !csp.contains("data:;"), "{csp}");
+        assert!(csp.contains("font-src 'none'"), "{csp}");
+        // sanitized alone: nothing to route it to, so nothing
+        let out = sanitize("<img src=\"data:image/png;base64,AAAA\">");
+        assert!(!out.contains("data:"), "{out}");
+    }
+
+    /// The message's own CSS names no picture or font of its own, on screen or in the printout (whose CSP allows
+    /// `data:` for the core's encodes), and no document allows a font from anywhere
+    #[test]
+    fn the_message_s_css_brings_no_picture_or_font_of_its_own() {
+        let html = "<style>@font-face{font-family:X;src:url(data:font/woff2;base64,AAAA)}\
+                    body{background:url(data:image/png;base64,AAAA)}li{list-style:u\\72l('d\\61ta:image/gif;base64,R0lG')}\
+                    h1{background:url(https://example.com/h.png)}</style>\
+                    <div style=\"background-image:url(data:image/png;base64,AAAA);border-image:url(&quot;data:x&quot;) 3\">x</div>\
+                    <p style=\"content:image-set('data:image/png;base64,AA' 1x)\">y</p><img src=\"cid:a@x\">";
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: b"\x89PNG",
+        };
+        let rendered = routed(html, &[png]);
+        let printed = print_document_with(&rendered.print.clone().unwrap(), &[]);
+        for document in [&rendered.document, &printed] {
+            let lower = document.to_ascii_lowercase();
+            let body = &lower[lower.find("<body>").unwrap()..];
+            // the only data: left is the printout's own placeholder for the picture not drawn
+            assert_eq!(
+                body.matches("data:").count(),
+                body.matches(&NOT_PRINTED_PICTURE.to_ascii_lowercase()).count(),
+                "{document}"
+            );
+            assert!(
+                !lower.contains("@font-face") && !lower.contains("@f\\6fnt"),
+                "{document}"
+            );
+            assert!(!body.contains("d\\61ta"), "{document}");
+            assert!(lower.contains("font-src 'none'"), "{document}");
+            assert!(!lower.contains("font-src data:"), "{document}");
+            // a picture on the internet stays, for Download Pictures
+            assert!(document.contains("url(https://example.com/h.png)"), "{document}");
+        }
+        assert!(rendered.remote_images);
+        assert!(rendered.document.contains("background:none"), "{}", rendered.document);
+    }
+
+    /// Past [`MAX_INLINE`] pictures (or [`MAX_INLINE_BYTES`] of them) the rest show nothing
+    #[test]
+    fn the_pictures_of_the_text_stop_at_the_limits() {
+        let html: String = (0..MAX_INLINE + 5)
+            .map(|n| {
+                format!(
+                    "<img src=\"data:image/png;base64,{}\">",
+                    STANDARD.encode(format!("picture {n}"))
+                )
+            })
+            .collect();
+        let rendered = routed(&html, &[]);
+        assert_eq!(rendered.inline.len(), MAX_INLINE);
+        assert_eq!(rendered.document.matches(&format!("/pv/{TOKEN}-")).count(), MAX_INLINE);
+        let big = vec![7; MAX_INLINE_BYTES / 2 + 1];
         let image = InlineImage {
             content_id: "big@x",
             mime_type: "image/png",
             data: &big,
         };
-        let out = render_message(
-            &"<img src=\"cid:big@x\">".repeat(100),
-            &RenderOptions::default(),
-            &[image],
+        let other = InlineImage {
+            content_id: "other@x",
+            ..image
+        };
+        let rendered = routed("<img src=\"cid:big@x\"><img src=\"cid:other@x\">", &[image, other]);
+        assert_eq!(rendered.inline.len(), 1);
+    }
+
+    /// The printout of a message with pictures in its text has them where the text shows them, as `data:` addresses
+    /// of the core's encodes (an empty picture for one not drawn); no preview address is left
+    /// Whatever a message hides in its markup or its CSS, the only `data:` addresses of its printout (whose CSP allows
+    /// them) are the core's: its encodes and the empty picture
+    #[test]
+    fn a_printout_has_no_data_address_but_the_core_s() {
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: b"sender's bytes",
+        };
+        let html = "<style>p{background:image-set('da\tta:image/png;base64,AA' 1x)}\
+                    q{background:image-set('da\\9 ta:x' 1x, '\\1 data:x' 2x)}\
+                    b{background:url(\"https://a/\" /*(*/), image-set(\"data:image/png;base64,AA\" 1x) /*)*/}\
+                    i{background:u\\72l(d\\61t\\61\\3a x)}</style>\
+                    <img src=\"da&#9;ta:image/gif;base64,R0lGODlh\"><img src=\"&#1;data:image/gif;base64,R0lGODlh\">\
+                    <table background=\"da&#9;ta:image/png;base64,AAAA\"></table>\
+                    <div style=\"background:image-set('d&#9;ata:x' 1x)\">x</div>\
+                    <p title=\"da&#10;ta:x\">Metadata: kept</p><img src=\"cid:a@x\">";
+        let rendered = routed(html, &[png]);
+        let items = [(
+            None,
+            PrintItem::Inline {
+                number: INLINE_BASE + 1,
+                mime: "image/png",
+                bytes: b"\x89PNG",
+            },
+        )];
+        let printed = print_document_with(&rendered.print.clone().unwrap(), &items);
+        // read as a URL parser and CSS read it: tabs and newlines out, escapes decoded
+        let body = &printed[printed.find("<body>").unwrap()..];
+        let squeezed: String = body
+            .replace("\\61", "a")
+            .replace("\\3a", ":")
+            .chars()
+            .filter(|c| !matches!(c, '\t' | '\n' | '\r'))
+            .collect::<String>()
+            .to_ascii_lowercase();
+        let ours = [
+            "data:image/png;base64,iVBORw==",
+            &NOT_PRINTED_PICTURE.to_ascii_lowercase(),
+        ];
+        let total = squeezed.matches("data:").count() - squeezed.matches("metadata:").count();
+        let core: usize = ours
+            .iter()
+            .map(|address| squeezed.matches(&address.to_ascii_lowercase()).count())
+            .sum();
+        assert_eq!(total, core, "{printed}");
+        assert!(core >= 2, "{printed}");
+        assert!(printed.contains("Metadata: kept"), "{printed}");
+    }
+
+    #[test]
+    fn a_printout_has_the_pictures_of_the_text_as_data() {
+        let png = InlineImage {
+            content_id: "a@x",
+            mime_type: "image/png",
+            data: b"sender's bytes",
+        };
+        let other = InlineImage {
+            content_id: "b@x",
+            ..png
+        };
+        let rendered = routed(
+            "<p>hi</p><img src=\"cid:a@x\"><img src=\"cid:b@x\"><p>bye</p>",
+            &[png, other],
         );
-        let embedded = out.matches("data:image/png").count();
-        assert!(embedded > 0 && embedded < 100, "{embedded}");
-        assert!(out.len() < 2 * MAX_EMBEDDED_BYTES);
+        assert_eq!(rendered.print_document, None);
+        let parts = rendered.print.unwrap();
+        let items = [(
+            None,
+            PrintItem::Inline {
+                number: INLINE_BASE,
+                mime: "image/png",
+                bytes: b"\x89PNG",
+            },
+        )];
+        let printed = print_document_with(&parts, &items);
+        let at = |text: &str| printed.find(text).unwrap_or_else(|| panic!("{text} in {printed}"));
+        assert!(at("<p>hi</p>") < at("data:image/png;base64,iVBORw==") && at("iVBORw==") < at("<p>bye</p>"));
+        assert!(printed.contains(NOT_PRINTED_PICTURE), "{printed}");
+        assert!(!printed.contains("/pv/") && !printed.contains(TOKEN), "{printed}");
+        assert!(!printed.contains("pe-prt-"), "{printed}");
+        assert!(printed.contains("img-src data:;"), "{printed}");
     }
 
     #[test]
@@ -831,12 +1175,6 @@ mod tests {
         let out = sanitize("<a href=\"javascript:alert(1)\">a</a><a href=\" DATA:text/html,<b>x</b>\">b</a>");
         assert!(!out.contains("javascript"));
         assert!(!out.to_ascii_lowercase().contains("data:"));
-    }
-
-    #[test]
-    fn keeps_embedded_images() {
-        let out = sanitize("<img src=\"data:image/png;base64,AAAA\">");
-        assert!(out.contains("src=\"data:image/png;base64,AAAA\""));
     }
 
     #[test]
@@ -926,10 +1264,7 @@ mod tests {
         let document = &rendered.document;
         assert_eq!(rendered.previewed, [0, 1]);
         let csp = document[document.find(CSP_START).unwrap()..].split('>').next().unwrap();
-        assert!(
-            csp.contains(&format!("img-src data: {}/pv/;", preview_origin())),
-            "{csp}"
-        );
+        assert!(csp.contains(&format!("img-src {}/pv/;", preview_origin())), "{csp}");
         assert!(!csp.contains("'self'"), "{csp}");
         // the message's own section is gone (its words stay); ours is the last thing in the body
         assert!(!document.contains("pe-att-x"), "{document}");
@@ -947,7 +1282,7 @@ mod tests {
         let plain = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &Cards::default());
         assert!(plain.previewed.is_empty());
         assert!(!plain.document.contains("/pv/"), "{}", plain.document);
-        assert!(plain.document.contains("img-src data:;"));
+        assert!(plain.document.contains("img-src 'none';"));
         // with pictures from the internet allowed, both
         let remote = render_view_cards(
             "<p>hi</p>",
@@ -962,7 +1297,7 @@ mod tests {
         assert!(
             remote
                 .document
-                .contains(&format!("img-src data: http: https: {}/pv/;", preview_origin())),
+                .contains(&format!("img-src http: https: {}/pv/;", preview_origin())),
             "{}",
             remote.document
         );
@@ -1120,7 +1455,7 @@ mod tests {
     #[test]
     fn csp_follows_remote_images() {
         let blocked = render_document("x", &RenderOptions::default());
-        assert!(blocked.contains("img-src data:;"));
+        assert!(blocked.contains("img-src 'none';"));
         let allowed = render_document(
             "x",
             &RenderOptions {
@@ -1128,7 +1463,7 @@ mod tests {
                 ..Default::default()
             },
         );
-        assert!(allowed.contains("img-src data: http: https:;"));
+        assert!(allowed.contains("img-src http: https:;"));
     }
 
     /// The core's own printout (a message with signed or encrypted parts): its markup sanitized, its header and

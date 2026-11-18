@@ -509,6 +509,18 @@ const sections = [
                 ]
             },
             {
+                shot: 'read-1-html',
+                name: 'Pictures in a message drawn by Inbox Classic',
+                what: "No picture a sender put into a message reaches the web view as it came. Pictures sent inside the message (cid:), written into it (data:) and SVG pictures are decoded and drawn again by Inbox Classic's own core, in Rust, and the web view shows only that copy; what cannot be drawn shows a plain gray box. The message's own style sheet loses its pictures and fonts that are not on the internet, so no sender's font reaches the system's font parsers. Printing puts the same copies on paper.",
+                how: 'Automatic.',
+                checked: [
+                    "The banner's address is a preview address, and it loads at its size",
+                    'No picture of the document has a data: or cid: address',
+                    'The printout has the banner in it',
+                    'Right-clicking the linked banner still offers Copy Link'
+                ]
+            },
+            {
                 shot: 'read-6-folded',
                 name: 'Earlier messages folded away',
                 what: 'A reply usually carries the messages before it. They fold behind a ••• button under what the sender wrote, so the new part is what you see; click to open them. Which part is history is decided by a Rust port of email-content: only what is clearly an earlier message or a forward is folded, anything uncertain stays in view.',
