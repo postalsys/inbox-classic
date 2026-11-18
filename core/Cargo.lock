@@ -2644,6 +2644,7 @@ dependencies = [
 name = "pe-mcp"
 version = "0.18.0"
 dependencies = [
+ "base64",
  "pe-core",
  "pe-i18n",
  "pe-mime",

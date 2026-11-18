@@ -395,11 +395,7 @@ impl Core {
                 Action::Read(on) => self.set_flag_many(folder, chunk, "\\Seen", on)?,
                 Action::Flag(true) => self.set_flag_many(folder, chunk, "\\Flagged", true)?,
                 // the colour goes with the flag
-                Action::Flag(false) => {
-                    let mut remove = vec!["\\Flagged"];
-                    remove.extend(FLAG_COLOR_BITS);
-                    self.change_flags_many(folder, chunk, &[], &remove)?
-                }
+                Action::Flag(false) => self.set_flag_color_many(folder, chunk, None)?,
                 Action::FlagColor(color) => self.set_flag_color_many(folder, chunk, Some(color))?,
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
@@ -646,7 +642,7 @@ impl Core {
 
 /// The flags of a message flagged in `color` (`\\Flagged` and its `$MailFlagBit` keywords), as added and removed;
 /// None takes the flag away with its colour
-pub(crate) fn color_flags(color: Option<FlagColor>) -> (Vec<&'static str>, Vec<&'static str>) {
+fn color_flags(color: Option<FlagColor>) -> (Vec<&'static str>, Vec<&'static str>) {
     let Some(color) = color else {
         let mut remove = vec!["\\Flagged"];
         remove.extend(FLAG_COLOR_BITS);

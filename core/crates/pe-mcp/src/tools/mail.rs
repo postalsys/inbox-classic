@@ -77,24 +77,26 @@ fn host_of(url: &str) -> &str {
 /// `text` with each web link as its domain, `[link: example.com]`; how many it shortened
 pub(crate) fn links_by_domain(text: &str) -> (String, usize) {
     let mut out = String::with_capacity(text.len());
-    let mut rest = text;
+    // lowercased once: ASCII lowercasing keeps every byte where it was
+    let lower = text.to_ascii_lowercase();
+    let mut start = 0;
     let mut count = 0;
     loop {
-        let lower = rest.to_ascii_lowercase();
-        let Some(at) = [lower.find("https://"), lower.find("http://")]
+        let rest = &lower[start..];
+        let Some(at) = [rest.find("https://"), rest.find("http://")]
             .into_iter()
             .flatten()
             .min()
         else {
-            out.push_str(rest);
+            out.push_str(&text[start..]);
             return (out, count);
         };
-        out.push_str(&rest[..at]);
-        let url_len = rest[at..].find(link_end).unwrap_or(rest.len() - at);
-        let url = &rest[at..at + url_len];
-        out.push_str(&format!("[link: {}]", host_of(url)));
+        let at = start + at;
+        out.push_str(&text[start..at]);
+        let end = text[at..].find(link_end).map_or(text.len(), |len| at + len);
+        out.push_str(&format!("[link: {}]", host_of(&text[at..end])));
         count += 1;
-        rest = &rest[at + url_len..];
+        start = end;
     }
 }
 
@@ -255,23 +257,9 @@ pub(crate) fn handed(mime_type: &str) -> Handed {
 }
 
 /// `bytes` in base64 (RFC 4648, with padding)
-pub(crate) fn base64(bytes: &[u8]) -> String {
-    const ALPHABET: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
-    for chunk in bytes.chunks(3) {
-        let n = chunk
-            .iter()
-            .enumerate()
-            .fold(0u32, |n, (i, b)| n | u32::from(*b) << (16 - 8 * i));
-        for i in 0..4 {
-            if i <= chunk.len() {
-                out.push(ALPHABET[(n >> (18 - 6 * i)) as usize & 63] as char);
-            } else {
-                out.push('=');
-            }
-        }
-    }
-    out
+fn base64(bytes: &[u8]) -> String {
+    use base64::Engine;
+    base64::engine::general_purpose::STANDARD.encode(bytes)
 }
 
 /// The content item that hands an agent a file: an image, or an embedded resource named by `uri`
@@ -330,9 +318,5 @@ mod tests {
         assert_eq!(handed("text/csv"), Handed::Text);
         assert_eq!(handed("application/zip"), Handed::No);
         assert_eq!(handed(&file_type("application/octet-stream", "a.exe")), Handed::No);
-        assert_eq!(base64(b"Man"), "TWFu");
-        assert_eq!(base64(b"Ma"), "TWE=");
-        assert_eq!(base64(b"M"), "TQ==");
-        assert_eq!(base64(b""), "");
     }
 }

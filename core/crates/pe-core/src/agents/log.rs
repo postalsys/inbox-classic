@@ -211,9 +211,13 @@ impl Core {
         let mut rows: Vec<LogRow> = entries.iter().map(LogRow::of_entry).collect();
         rows.extend(summaries.iter().map(LogRow::of_reads));
         // each program as the list of programs names it
+        let labels: std::collections::HashMap<AgentHostId, String> = hosts
+            .iter()
+            .map(|h| (h.id, super::host_label(&h.name, &h.path)))
+            .collect();
         for row in &mut rows {
-            if let Some(host) = hosts.iter().find(|h| h.id == row.host) {
-                row.host_name = super::host_label(&host.name, &host.path);
+            if let Some(label) = labels.get(&row.host) {
+                row.host_name.clone_from(label);
             }
         }
         rows.sort_by(|a, b| b.at.cmp(&a.at).then(b.id.cmp(&a.id)));

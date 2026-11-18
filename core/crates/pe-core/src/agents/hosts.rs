@@ -100,20 +100,22 @@ fn terminal_words(many: bool) -> Text {
     }
 }
 
-/// A program as the list of programs names it: "Programs started from Terminal" for a terminal's, its name otherwise
-pub fn host_label(name: &str, path: &str) -> String {
+/// The program `name` at `path` in words: a terminal's as all its programs (`many`) or one of them, its name otherwise
+fn label(name: &str, path: &str, many: bool) -> String {
     match terminal_of(path) {
-        Some(terminal) => tr_args(terminal_words(true), &[("terminal", (&terminal).into())]),
+        Some(terminal) => tr_args(terminal_words(many), &[("terminal", (&terminal).into())]),
         None => name.to_string(),
     }
 }
 
+/// A program as the list of programs names it: "Programs started from Terminal" for a terminal's, its name otherwise
+pub fn host_label(name: &str, path: &str) -> String {
+    label(name, path, true)
+}
+
 /// A program as a question names it when it asks for something: "A program started from Terminal" for a terminal's
 pub fn host_one(host: &AgentHost) -> String {
-    match terminal_of(&host.path) {
-        Some(terminal) => tr_args(terminal_words(false), &[("terminal", (&terminal).into())]),
-        None => host.name.clone(),
-    }
+    label(&host.name, &host.path, false)
 }
 
 /// The question and the words under it when `host` connects for the first time

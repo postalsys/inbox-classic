@@ -1316,9 +1316,7 @@ impl Core {
                 }
                 if flag == "\\Flagged" && !was {
                     // a flag taken away takes its colour along
-                    let mut remove = vec!["\\Flagged"];
-                    remove.extend(pe_store::FLAG_COLOR_BITS);
-                    self.change_flags_many(folder, &[uid], &[], &remove)?;
+                    self.set_flag_color_many(folder, &[uid], None)?;
                 } else {
                     self.set_flag_many(folder, &[uid], flag, was)?;
                 }
