@@ -157,6 +157,10 @@ win-change = &Ändra...
 # review: new
 win-what-agents-did = Agent&aktivitet:
 # review: new
+win-agent-reads = Vad som lästes från { $from } till { $to }:
+# review: new
+win-agent-reads-hint = Markera en rad med läsningar ovan för att se vad som lästes.
+# review: new
 win-how-to-connect = Så ansluter du en agent
 
 ## Sign-in apps

@@ -1536,6 +1536,9 @@ enum AgentControlId : WORD {
     IDC_AGENTS_UNDO,
     IDC_AGENTS_CLEAR,
     IDC_AGENTS_SETUP,
+    // under the log: what the selected row of reads covers, and its words
+    IDC_AGENTS_READS,
+    IDC_AGENTS_READS_LABEL,
 };
 
 // the controls of Tools > Options (options.cpp), which the UI test finds by them

@@ -446,7 +446,8 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Ler os e-mails: pastas, lista de mensagens, pesquisa e mensagens
-agent-level-organize = Organizar e-mails: alterar o status de leitura e os sinalizadores, gerenciar o lixo eletrônico, mover e arquivar mensagens, criar pastas, excluir mensagens (movendo-as para Itens Excluídos) e cancelar inscrições em listas de e-mails com sua autorização
+# review: changed
+agent-level-organize = Organizar e-mails: alterar o status de leitura, os sinalizadores e suas cores, gerenciar o lixo eletrônico, mover e arquivar mensagens, criar e renomear pastas, acompanhar e ignorar conversas, excluir mensagens (movendo-as para Itens Excluídos) e cancelar inscrições em listas de e-mails com sua autorização
 agent-level-drafts = Escrever rascunhos para você enviar
 agent-level-send = Enviar e-mails, com sua confirmação para cada mensagem
 agent-connect-title = { $program } quer acessar seus e-mails
@@ -490,6 +491,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Não é possível ler esta mensagem.
 agent-encrypted-original = Esta mensagem está criptografada: um agente não pode respondê-la nem encaminhá-la, porque não consegue criptografar.
 agent-encrypted = Esta mensagem está criptografada. Os agentes de IA não podem ler seu conteúdo. O usuário deve abri-la no Inbox Classic.
+# review: new
+agent-too-many-changes = Alterações demais nos últimos 30 dias: este agente fez tantas quantas o Inbox Classic guarda no registro para um programa. Ele poderá fazer mais quando as mais antigas tiverem 30 dias.
+# review: new
+agent-too-many-reads = Leituras demais nos últimos 30 dias: este agente leu tanto quanto o Inbox Classic guarda no registro para um programa. Ele poderá ler mais quando as leituras mais antigas tiverem 30 dias.
 list-encrypted = Mensagem criptografada
 agent-log-composed = Abriu “{ $subject }” na janela de escrita para você concluir
 agent-log-refused = Você não enviou “{ $subject }”
@@ -519,6 +524,90 @@ agent-unsubscribe-detail = { $count ->
     [1] O Inbox Classic pede à lista de e-mails abaixo que pare de enviar mensagens para você, usando a opção de cancelamento com um clique. Nada mais é enviado. As mensagens existentes não são alteradas nem movidas.
    *[other] O Inbox Classic pede a cada lista de e-mails abaixo que pare de enviar mensagens para você, usando a opção de cancelamento com um clique. Nada mais é enviado. As mensagens existentes não são alteradas nem movidas.
 }
+# review: new
+agent-log-flag-color = Sinalizador { $color ->
+    [red] vermelho
+    [orange] laranja
+    [yellow] amarelo
+    [green] verde
+    [blue] azul
+    [purple] roxo
+   *[gray] cinza
+} aplicado a “{ $subject }”
+# review: new
+agent-log-renamed = Renomeou a pasta “{ $old }” para “{ $name }”
+# review: new
+agent-log-watched = Começou a acompanhar a conversa “{ $subject }”
+# review: new
+agent-log-ignored = Começou a ignorar a conversa “{ $subject }”
+# review: new
+agent-log-unmarked = Deixou de acompanhar ou ignorar a conversa “{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] leu 1 mensagem
+   *[other] leu { $count } mensagens
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] abriu 1 anexo
+   *[other] abriu { $count } anexos
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] pesquisou uma vez
+   *[other] pesquisou { $count } vezes
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] consultou uma lista de mensagens uma vez
+   *[other] consultou listas de mensagens { $count } vezes
+}
+# each read under that row
+# review: new
+agent-read-message = Leu “{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [one] Leu a conversa “{ $subject }” (1 mensagem)
+   *[other] Leu a conversa “{ $subject }” ({ $count } mensagens)
+}
+# review: new
+agent-read-attachment = Abriu “{ $name }” de “{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [one] Pesquisou “{ $query }”: 1 mensagem
+   *[other] Pesquisou “{ $query }”: { $count } mensagens
+}
+# review: new
+agent-read-people = Procurou contatos que começam com “{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [one] Consultou 1 mensagem em { $folder }
+   *[other] Consultou { $count } mensagens em { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Consultou 1 mensagem nova
+   *[other] Consultou { $count } mensagens novas
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programas iniciados a partir de { $terminal }
+# review: new
+agent-terminal-programs-windows = Programas iniciados a partir de um terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programas iniciados a partir de um terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Um programa iniciado a partir de { $terminal }
+# review: new
+agent-terminal-program-windows = Um programa iniciado a partir de um terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Um programa iniciado a partir de um terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } querem acessar seus e-mails
+# review: new
+agent-connect-terminal-detail = Todos os agentes de IA que você iniciar neste terminal compartilham o acesso que você permitir aqui. Para dar a um agente seu próprio acesso, adicione --name e um nome de sua escolha aos argumentos dele nas configurações de MCP do agente.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

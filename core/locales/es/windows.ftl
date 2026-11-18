@@ -100,6 +100,10 @@ win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los c
 win-agent-programs = P&rogramas cuyos agentes pidieron usar su correo:
 win-change = &Cambiar...
 win-what-agents-did = &Historial de los agentes:
+# review: new
+win-agent-reads = Lo que se leyó de { $from } a { $to }:
+# review: new
+win-agent-reads-hint = Seleccione arriba una fila de lecturas para ver lo que se leyó.
 win-how-to-connect = Cómo conectar un agente
 
 ## Aplicaciones de inicio de sesión

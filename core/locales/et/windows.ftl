@@ -99,6 +99,10 @@ win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agenti
 win-agent-programs = &Programmid, mille agendid on taotlenud juurdepääsu teie e-postile:
 win-change = &Muuda...
 win-what-agents-did = &Agentide tegevusajalugu:
+# review: new
+win-agent-reads = Loetud kella { $from } ja { $to } vahel:
+# review: new
+win-agent-reads-hint = Valige ülalt lugemiste rida, et näha, mida loeti.
 win-how-to-connect = Kuidas agenti ühendada
 
 ## Sisselogimisrakendused

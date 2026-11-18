@@ -687,7 +687,8 @@ day-sunday = svētdiena
 ## AI agents
 
 agent-level-read = Lasīt pastu: skatīt mapes, ziņojumus un sarunas, meklēt ziņojumus un kontaktus, kā arī skatīt ziņojumu kārtulas
-agent-level-organize = Kārtot pastu: atzīmēt ziņojumus kā lasītus vai nelasītus, mainīt karodziņus un nevēlamā pasta atzīmes, pārvietot un arhivēt ziņojumus, veidot mapes, dzēst ziņojumus, pārvietojot tos uz mapi „Izdzēstie vienumi”, un ar jūsu piekrišanu atteikties no adresātu sarakstu abonēšanas
+# review: changed
+agent-level-organize = Kārtot pastu: atzīmēt ziņojumus kā lasītus vai nelasītus, mainīt karodziņus, to krāsas un nevēlamā pasta atzīmes, pārvietot un arhivēt ziņojumus, veidot un pārdēvēt mapes, sekot sarunām un ignorēt tās, dzēst ziņojumus, pārvietojot tos uz mapi „Izdzēstie vienumi”, un ar jūsu piekrišanu atteikties no adresātu sarakstu abonēšanas
 agent-level-drafts = Rakstīt melnrakstus, kurus varat nosūtīt
 agent-level-send = Sūtīt pastu, katru ziņojumu tikai pēc jūsu piekrišanas
 agent-connect-title = { $program } vēlas izmantot jūsu pastu
@@ -733,6 +734,10 @@ agent-unreadable = Šo ziņojumu nevar nolasīt.
 agent-encrypted-original = Šis ziņojums ir šifrēts: aģents nevar uz to atbildēt vai to pārsūtīt, jo nevar šifrēt.
 agent-encrypted = Šis ziņojums ir šifrēts. Aģents nevar izlasīt tā saturu. Ziņojums jāatver lietotājam lietotnē Inbox Classic.
 # review: new
+agent-too-many-changes = Pārāk daudz izmaiņu pēdējās 30 dienās: šis aģents ir veicis tik daudz, cik Inbox Classic vienai programmai glabā žurnālā. Vairāk varēs veikt, kad vecākās būs 30 dienas vecas.
+# review: new
+agent-too-many-reads = Pārāk daudz lasīts pēdējās 30 dienās: šis aģents ir lasījis tik daudz, cik Inbox Classic vienai programmai glabā žurnālā. Vairāk varēs lasīt, kad vecākās lasīšanas reizes būs 30 dienas vecas.
+# review: new
 list-encrypted = Šifrēts ziņojums
 agent-log-composed = Atvēra jaunu ziņojumu „{ $subject }”, kuru varat pabeigt rakstīt
 agent-log-refused = Noraidījāt pieprasījumu nosūtīt ziņojumu „{ $subject }”
@@ -763,6 +768,100 @@ agent-unsubscribe-detail = { $count ->
     [1] Pēc jūsu apstiprinājuma Inbox Classic lūgs tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot tā piedāvāto atteikšanos ar vienu klikšķi. Netiek sūtīti e-pasta ziņojumi, un jūsu esošie ziņojumi paliek nemainīti savās vietās.
    *[other] Pēc jūsu apstiprinājuma Inbox Classic lūgs katram tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot saraksta piedāvāto atteikšanos ar vienu klikšķi. Netiek sūtīti e-pasta ziņojumi, un jūsu esošie ziņojumi paliek nemainīti savās vietās.
 }
+# review: new
+agent-log-flag-color = Atzīmēja „{ $subject }” ar { $color ->
+    [red] sarkanu
+    [orange] oranžu
+    [yellow] dzeltenu
+    [green] zaļu
+    [blue] zilu
+    [purple] violetu
+   *[gray] pelēku
+} karodziņu
+# review: new
+agent-log-renamed = Pārdēvēja mapi „{ $old }” par „{ $name }”
+# review: new
+agent-log-watched = Sāka vērot sarunu „{ $subject }”
+# review: new
+agent-log-ignored = Sāka ignorēt sarunu „{ $subject }”
+# review: new
+agent-log-unmarked = Pārtrauca vērot vai ignorēt sarunu „{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [zero] izlasīja { $count } ziņojumu
+    [one] izlasīja { $count } ziņojumu
+   *[other] izlasīja { $count } ziņojumus
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [zero] atvēra { $count } pielikumu
+    [one] atvēra { $count } pielikumu
+   *[other] atvēra { $count } pielikumus
+}
+# review: new
+agent-reads-searches = { $count ->
+    [1] meklēja vienu reizi
+    [zero] meklēja { $count } reižu
+    [one] meklēja { $count } reizi
+   *[other] meklēja { $count } reizes
+}
+# review: new
+agent-reads-lists = { $count ->
+    [1] skatīja ziņojumu sarakstu vienu reizi
+    [zero] skatīja ziņojumu sarakstus { $count } reižu
+    [one] skatīja ziņojumu sarakstus { $count } reizi
+   *[other] skatīja ziņojumu sarakstus { $count } reizes
+}
+# each read under that row
+# review: new
+agent-read-message = Izlasīja ziņojumu „{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [zero] Izlasīja sarunu „{ $subject }” ({ $count } ziņojumu)
+    [one] Izlasīja sarunu „{ $subject }” ({ $count } ziņojums)
+   *[other] Izlasīja sarunu „{ $subject }” ({ $count } ziņojumi)
+}
+# review: new
+agent-read-attachment = Atvēra pielikumu „{ $name }” ziņojumā „{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [zero] Meklēja „{ $query }”: { $count } ziņojumu
+    [one] Meklēja „{ $query }”: { $count } ziņojums
+   *[other] Meklēja „{ $query }”: { $count } ziņojumi
+}
+# review: new
+agent-read-people = Meklēja kontaktus, kuru vārds vai adrese sākas ar „{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [zero] Skatīja { $count } ziņojumu mapē „{ $folder }”
+    [one] Skatīja { $count } ziņojumu mapē „{ $folder }”
+   *[other] Skatīja { $count } ziņojumus mapē „{ $folder }”
+}
+# review: new
+agent-read-changes = { $count ->
+    [zero] Skatīja { $count } jaunu ziņojumu
+    [one] Skatīja { $count } jaunu ziņojumu
+   *[other] Skatīja { $count } jaunus ziņojumus
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = No lietotnes { $terminal } palaistās programmas
+# review: new
+agent-terminal-programs-windows = No termināļa ({ $terminal }) palaistās programmas
+# review: new
+agent-terminal-programs-linux = No termināļa ({ $terminal }) palaistās programmas
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = No lietotnes { $terminal } palaista programma
+# review: new
+agent-terminal-program-windows = No termināļa ({ $terminal }) palaista programma
+# review: new
+agent-terminal-program-linux = No termināļa ({ $terminal }) palaista programma
+# review: new
+agent-connect-title-terminal = { $programs } vēlas izmantot jūsu pastu
+# review: new
+agent-connect-terminal-detail = Visi MI aģenti, ko palaižat no šī termināļa, kopīgi izmanto šeit atļauto piekļuvi. Lai aģentam piešķirtu atsevišķu piekļuvi, aģenta MCP iestatījumos pievienojiet tā argumentiem --name un paša izvēlētu nosaukumu.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

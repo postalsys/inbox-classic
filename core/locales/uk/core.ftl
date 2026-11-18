@@ -697,7 +697,8 @@ day-sunday = неділя
 ## AI agents
 
 agent-level-read = Читати пошту: папки, список повідомлень, пошук і повідомлення
-agent-level-organize = Упорядковувати пошту: змінювати стан прочитання, прапорці й позначки небажаної пошти, переміщувати й архівувати повідомлення, створювати папки, переміщувати повідомлення до папки «Видалені» та скасовувати підписки на розсилки з вашої згоди
+# review: changed
+agent-level-organize = Упорядковувати пошту: змінювати стан прочитання, прапорці та їхні кольори й позначки небажаної пошти, переміщувати й архівувати повідомлення, створювати й перейменовувати папки, стежити за розмовами та ігнорувати їх, переміщувати повідомлення до папки «Видалені» та скасовувати підписки на розсилки з вашої згоди
 agent-level-drafts = Писати чернетки, які ви можете надіслати
 agent-level-send = Надсилати пошту лише після вашого схвалення кожного повідомлення
 agent-connect-title = { $program } запитує доступ до вашої пошти
@@ -744,6 +745,10 @@ agent-unreadable = Це повідомлення неможливо прочит
 agent-encrypted-original = Це повідомлення зашифроване. Агент не може відповісти на нього чи переслати його, оскільки не підтримує шифрування.
 agent-encrypted = Це повідомлення зашифроване, тому агент не може прочитати його вміст. Ви можете відкрити його в Inbox Classic.
 # review: new
+agent-too-many-changes = Забагато змін за останні 30 днів: цей агент зробив стільки, скільки Inbox Classic зберігає в журналі для однієї програми. Нові стануть можливими, коли найстарішим виповниться 30 днів.
+# review: new
+agent-too-many-reads = Забагато читання за останні 30 днів: цей агент прочитав стільки, скільки Inbox Classic зберігає в журналі для однієї програми. Читати знову можна буде, коли найстарішим читанням виповниться 30 днів.
+# review: new
 list-encrypted = Зашифроване повідомлення
 agent-log-composed = Відкрито нове повідомлення для редагування. Тема: «{ $subject }»
 agent-log-refused = Ви відхилили запит на надсилання повідомлення «{ $subject }»
@@ -776,6 +781,108 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic надішле розсилці нижче запит через її функцію скасування підписки одним клацанням. Електронний лист не надсилатиметься, а ваші наявні повідомлення не зміняться.
    *[other] Inbox Classic надішле кожній розсилці нижче запит через її функцію скасування підписки одним клацанням. Електронний лист не надсилатиметься, а ваші наявні повідомлення не зміняться.
 }
+# review: new
+agent-log-flag-color = Позначено прапорцем «{ $subject }», колір: { $color ->
+    [red] червоний
+    [orange] помаранчевий
+    [yellow] жовтий
+    [green] зелений
+    [blue] синій
+    [purple] фіолетовий
+   *[gray] сірий
+}
+# review: new
+agent-log-renamed = Перейменовано папку «{ $old }» на «{ $name }»
+# review: new
+agent-log-watched = Увімкнено відстеження розмови «{ $subject }»
+# review: new
+agent-log-ignored = Увімкнено ігнорування розмови «{ $subject }»
+# review: new
+agent-log-unmarked = Скасовано відстеження чи ігнорування розмови «{ $subject }»
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] прочитано { $count } повідомлення
+    [few] прочитано { $count } повідомлення
+    [many] прочитано { $count } повідомлень
+   *[other] прочитано { $count } повідомлення
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] відкрито { $count } вкладення
+    [few] відкрито { $count } вкладення
+    [many] відкрито { $count } вкладень
+   *[other] відкрито { $count } вкладення
+}
+# review: new
+agent-reads-searches = { $count ->
+    [1] виконано пошук один раз
+    [one] виконано пошук { $count } раз
+    [few] виконано пошук { $count } рази
+    [many] виконано пошук { $count } разів
+   *[other] виконано пошук { $count } разу
+}
+# review: new
+agent-reads-lists = { $count ->
+    [1] переглянуто список повідомлень один раз
+    [one] переглянуто списки повідомлень { $count } раз
+    [few] переглянуто списки повідомлень { $count } рази
+    [many] переглянуто списки повідомлень { $count } разів
+   *[other] переглянуто списки повідомлень { $count } разу
+}
+# each read under that row
+# review: new
+agent-read-message = Прочитано «{ $subject }»
+# review: new
+agent-read-conversation = { $count ->
+    [one] Прочитано розмову «{ $subject }» ({ $count } повідомлення)
+    [few] Прочитано розмову «{ $subject }» ({ $count } повідомлення)
+    [many] Прочитано розмову «{ $subject }» ({ $count } повідомлень)
+   *[other] Прочитано розмову «{ $subject }» ({ $count } повідомлення)
+}
+# review: new
+agent-read-attachment = Відкрито вкладення «{ $name }» з повідомлення «{ $subject }»
+# review: new
+agent-read-search = { $count ->
+    [one] Пошук «{ $query }»: { $count } повідомлення
+    [few] Пошук «{ $query }»: { $count } повідомлення
+    [many] Пошук «{ $query }»: { $count } повідомлень
+   *[other] Пошук «{ $query }»: { $count } повідомлення
+}
+# review: new
+agent-read-people = Пошук людей за першими літерами «{ $query }»
+# review: new
+agent-read-list = { $count ->
+    [one] Переглянуто { $count } повідомлення в папці «{ $folder }»
+    [few] Переглянуто { $count } повідомлення в папці «{ $folder }»
+    [many] Переглянуто { $count } повідомлень у папці «{ $folder }»
+   *[other] Переглянуто { $count } повідомлення в папці «{ $folder }»
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Переглянуто { $count } нове повідомлення
+    [few] Переглянуто { $count } нові повідомлення
+    [many] Переглянуто { $count } нових повідомлень
+   *[other] Переглянуто { $count } нового повідомлення
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Програми, запущені з { $terminal }
+# review: new
+agent-terminal-programs-windows = Програми, запущені з термінала ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Програми, запущені з термінала ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Програма, запущена з { $terminal }
+# review: new
+agent-terminal-program-windows = Програма, запущена з термінала ({ $terminal })
+# review: new
+agent-terminal-program-linux = Програма, запущена з термінала ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } запитують доступ до вашої пошти
+# review: new
+agent-connect-terminal-detail = Усі ШІ-агенти, яких ви запускаєте з цього термінала, спільно використовують доступ, який ви дозволите тут. Щоб надати агенту окремий доступ, додайте --name та будь-яке ім’я до його аргументів у налаштуваннях MCP агента.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

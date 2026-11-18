@@ -100,6 +100,7 @@ extension UITest {
         check(folder(ofAccount: 0, named: "Posteingang") != 0 && folder(ofAccount: 0, named: "Archiv") != 0,
               "the special folders are in German, Archive among them")
         await shot(main.window, "lang-1-german")
+        try await agentsInLanguage("de")
         // the sign-in buttons say it in the language, French's words the longest
         for (language, name) in [("de", "lang-1b-german-form"), ("fr", "lang-1c-french-form")] {
             if language != "de" { await startIn(language) }
@@ -151,6 +152,7 @@ extension UITest {
         } else {
             check(false, "Settings opens")
         }
+        try await agentsInLanguage("qps")
         command(.exportSetup)
         if let export = await waitWindow("setup.export", 10) {
             checkCatalogWords(in: export, "the Export Settings and Accounts window")
@@ -171,6 +173,45 @@ extension UITest {
         step("back in English")
         await startIn("en")
         check(main.window.toolbar?.items.contains { $0.label == "Reply" } == true, "the windows are in English again")
+    }
+
+    /// the AI Agents window and the question for programs started from a terminal in `language`: the log's rows,
+    /// written in English, in the language now; the question's words in full
+    private func agentsInLanguage(_ language: String) async throws {
+        command(.aiAgents)
+        if let agents = await waitWindow("agents", 10) {
+            let log: NSTableView? = find("agents.log", in: agents)
+            let rows = (0..<(log?.numberOfRows ?? 0)).map {
+                (log?.view(atColumn: 2, row: $0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
+            }
+            if language == "de" {
+                check(rows.contains { $0.hasPrefix("Sie haben folgende Mailinglisten nicht abbestellt:") }
+                      && rows.contains { $0.contains("gelesen") },
+                      "the AI Agents log shows what agents did and read in German, the rows written before too (\(rows))")
+            } else {
+                check(!rows.isEmpty && rows.allSatisfy { $0.contains("[") }, "the AI Agents log is in the pseudo-language (\(rows))")
+                checkCatalogWords(in: agents, "the AI Agents window")
+            }
+            NSApp.stopModal()
+            _ = await waitUntil { !agents.isVisible }
+        } else {
+            check(false, "Tools > AI Agents opens")
+        }
+        let ask = try await terminalAgentAsks()
+        check(ask != nil, "an agent started from a terminal is asked about")
+        guard let ask else { return }
+        let heading = (find("agent.heading", in: ask) as NSTextField?)?.stringValue ?? ""
+        if language == "de" {
+            check(heading == "Aus Terminal gestartete Programme möchten auf Ihre E-Mails zugreifen", "the question in German (\(heading))")
+        } else {
+            checkCatalogWords(in: ask, "the question for programs started from a terminal")
+        }
+        checkQuestionFits(ask, "the question for programs started from a terminal in \(language)")
+        await pause(0.5)
+        await shot(ask, language == "de" ? "agents-10b-terminal-german" : "agents-10c-terminal-pseudo")
+        press(find("agent.deny", in: ask))
+        _ = await waitUntil(10) { !ask.isVisible }
+        forgetTerminal()
     }
 
     /// `page` of Settings shown, as its toolbar item shows it

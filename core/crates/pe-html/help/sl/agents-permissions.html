@@ -2,8 +2,8 @@
 <p class="summary">Nastavite dovoljenja agentov UI, preglejte zgodovino njihovih dejanj in po potrebi razveljavite spremembe.</p>
 <p>Ob prvi povezavi agenta Inbox Classic prikaže ime njegovega programa in zahteva vaše soglasje. Izberite dovoljena dejanja:</p>
 <ul>
-    <li>branje pošte: pregled map, sporočil in pogovorov, iskanje sporočil, pregled pravil ter iskanje stikov</li>
-    <li>urejanje pošte: spreminjanje prebranosti in zastavic, označevanje neželene pošte, premikanje in arhiviranje sporočil, ustvarjanje map, brisanje v mapo <b data-text="folder-deleted"></b> ter odjava s poštnih seznamov po vaši potrditvi</li>
+    <!--review--><li>branje pošte: pregled map, sporočil in pogovorov skupaj z njihovimi datotekami PDF, Office in slikami do 10 MB, iskanje sporočil, pregled pravil ter iskanje stikov</li><!--/review-->
+    <!--review--><li>urejanje pošte: spreminjanje prebranosti, zastavic in njihovih barv, označevanje neželene pošte, premikanje in arhiviranje sporočil, ustvarjanje map, preimenovanje vaših lastnih map, spremljanje in preziranje pogovorov, brisanje v mapo <b data-text="folder-deleted"></b> ter odjava s poštnih seznamov po vaši potrditvi</li><!--/review-->
     <li>pisanje osnutkov, ki jih pošljete sami, ter spreminjanje in trajno brisanje lastnih osnutkov, dokler jih sami ne shranite ali pošljete</li>
     <li>pošiljanje pošte samo z vašo potrditvijo vsakega sporočila</li>
 </ul>
@@ -18,10 +18,11 @@
 <p>Agent ne more zahtevati odjave na podlagi sporočil iz mape <b data-text="folder-junk"></b>. Omejitev za vsak program je 30 odobrenih zahtev v zadnjih 24 urah, po ena za vsak seznam. Štejejo tudi odobrene zahteve, ki se končajo z napako.</p>
 <h2>Pregled in sprememba dostopa</h2>
 <p>Okno <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> prikazuje programe, ki ste jim dovolili ali zavrnili dostop, in zgodovino dejanj njihovih agentov. Najnovejši zapisi so na vrhu.</p>
+<!--review--><p>Kar agent prebere, je prikazano kot ena vrstica za vsak program in uro, na primer »Prebral 14 sporočil in iskal 3-krat«. <!--os:windows-->Izberite vrstico<!--/os--><!--os:mac,linux-->Odprite vrstico z njeno puščico<!--/os-->, da vidite zadeve prebranih sporočil in iskane izraze, nikoli pa besedila sporočil. Zgodovina se hrani 30 dni. Če jo počistite, se ne spremeni, koliko sporočil sme agent še poslati.</p><!--/review-->
 <ul>
     <li>Gumb <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> omogoča spremembo dovoljenj programa.</li>
     <li>Gumb <b data-text="ui-remove"></b> odstrani zapis o programu, njegova dovoljenja in zgodovino dejanj. Samega programa ne odstrani iz računalnika. Ob naslednji povezavi vas Inbox Classic znova vpraša za soglasje.</li>
-    <li>Gumb <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> razveljavi spremembo prebranosti, zastavice ali oznake neželene pošte, premik, arhiviranje ali brisanje. Prekliče tudi pošiljanje sporočila, dokler je to še v mapi Odpošiljanje. Že poslanega sporočila ni mogoče priklicati nazaj.</li>
+    <!--review--><li>Gumb <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> razveljavi spremembo prebranosti, zastavice ali njene barve, oznake neželene pošte, premik, arhiviranje ali brisanje. Prekliče tudi pošiljanje sporočila, dokler je to še v mapi Odpošiljanje. Že poslanega sporočila ni mogoče priklicati nazaj.</li><!--/review-->
 </ul>
 <aside class="warning">Tuja sporočila lahko vsebujejo navodila, namenjena zavajanju agenta, na primer zahtevo za posredovanje ali brisanje vaše pošte. Inbox Classic pred agenti skrije besedilo, ki vam ga sporočilo ne prikaže, in jih opozori, naj vsebine pošte ne obravnavajo kot navodil za dejanja. Agenta je kljub temu mogoče preslepiti. Dovolite le potrebna dejanja.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

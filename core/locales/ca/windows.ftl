@@ -100,6 +100,10 @@ win-clear-log-ask = Voleu esborrar l’historial d’activitat dels agents? Aix�
 win-agent-programs = Pro&grames que han demanat accés al vostre correu mitjançant agents:
 win-change = &Canvia...
 win-what-agents-did = &Activitat dels agents:
+# review: new
+win-agent-reads = Què s’ha llegit de { $from } a { $to }:
+# review: new
+win-agent-reads-hint = Seleccioneu a dalt una fila de lectures per veure què s’ha llegit.
 win-how-to-connect = Com connectar un agent
 
 ## Aplicacions d’inici de sessió

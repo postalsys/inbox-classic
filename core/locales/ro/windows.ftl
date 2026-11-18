@@ -166,6 +166,10 @@ win-change = &Modificare...
 # review: new
 win-what-agents-did = &Activitatea agenților:
 # review: new
+win-agent-reads = Ce s-a citit între { $from } și { $to }:
+# review: new
+win-agent-reads-hint = Selectați mai sus un rând cu citiri pentru a vedea ce s-a citit.
+# review: new
 win-how-to-connect = Cum se conectează un agent
 
 ## Sign-in apps

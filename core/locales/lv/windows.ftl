@@ -164,6 +164,10 @@ win-change = &Mainīt...
 # review: new
 win-what-agents-did = Aģentu &darbības:
 # review: new
+win-agent-reads = Kas lasīts no { $from } līdz { $to }:
+# review: new
+win-agent-reads-hint = Augšā atlasiet rindu ar lasīto, lai redzētu, kas tika lasīts.
+# review: new
 win-how-to-connect = Kā pieslēgt aģentu
 
 ## Sign-in apps

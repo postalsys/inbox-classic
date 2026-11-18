@@ -675,7 +675,8 @@ day-sunday = sekmadienis
 ## AI agents
 
 agent-level-read = Skaityti paštą: peržiūrėti aplankus, laiškus ir pokalbius, ieškoti laiškų bei kontaktų ir peržiūrėti laiškų taisykles
-agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti aplankus, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
+# review: changed
+agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles, jų spalvas ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti ir pervadinti aplankus, stebėti ir ignoruoti pokalbius, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
 agent-level-drafts = Rašyti juodraščius, kuriuos galėsite išsiųsti
 agent-level-send = Siųsti laiškus, kiekvieną tik jums sutikus
 agent-connect-title = { $program } nori naudotis jūsų paštu
@@ -721,6 +722,10 @@ agent-unreadable = Šio laiško perskaityti negalima.
 agent-encrypted-original = Šis laiškas užšifruotas: agentas negali į jį atsakyti ar jo persiųsti, nes negali šifruoti.
 agent-encrypted = Šis laiškas užšifruotas. Agentas negali perskaityti jo turinio. Laišką turi atidaryti naudotojas programoje Inbox Classic.
 # review: new
+agent-too-many-changes = Per daug pakeitimų per pastarąsias 30 dienų: šis agentas jų atliko tiek, kiek Inbox Classic vienai programai saugo žurnale. Daugiau galės atlikti, kai seniausiems sukaks 30 dienų.
+# review: new
+agent-too-many-reads = Per daug skaityta per pastarąsias 30 dienų: šis agentas perskaitė tiek, kiek Inbox Classic vienai programai saugo žurnale. Daugiau galės skaityti, kai seniausiems skaitymams sukaks 30 dienų.
+# review: new
 list-encrypted = Užšifruotas laiškas
 agent-log-composed = Atidarytas naujas laiškas „{ $subject }“, kurį galite baigti rašyti
 agent-log-refused = Atmetėte prašymą išsiųsti laišką „{ $subject }“
@@ -751,6 +756,98 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic paprašo toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
    *[other] Inbox Classic paprašo kiekvieno toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama kiekvieno sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
 }
+# review: new
+agent-log-flag-color = Pažymėtas { $color ->
+    [red] raudona vėliavėle
+    [orange] oranžine vėliavėle
+    [yellow] geltona vėliavėle
+    [green] žalia vėliavėle
+    [blue] mėlyna vėliavėle
+    [purple] violetine vėliavėle
+   *[gray] pilka vėliavėle
+}: „{ $subject }“
+# review: new
+agent-log-renamed = Aplankas „{ $old }“ pervardytas į „{ $name }“
+# review: new
+agent-log-watched = Pradėtas stebėti pokalbis „{ $subject }“
+# review: new
+agent-log-ignored = Pradėtas ignoruoti pokalbis „{ $subject }“
+# review: new
+agent-log-unmarked = Nebestebimas ir nebeignoruojamas pokalbis „{ $subject }“
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] perskaitytas { $count } laiškas
+    [few] perskaityti { $count } laiškai
+   *[other] perskaityta { $count } laiškų
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] atidarytas { $count } priedas
+    [few] atidaryti { $count } priedai
+   *[other] atidaryta { $count } priedų
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] ieškota { $count } kartą
+    [few] ieškota { $count } kartus
+   *[other] ieškota { $count } kartų
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] laiškų sąrašai peržiūrėti { $count } kartą
+    [few] laiškų sąrašai peržiūrėti { $count } kartus
+   *[other] laiškų sąrašai peržiūrėti { $count } kartų
+}
+# each read under that row
+# review: new
+agent-read-message = Perskaitytas laiškas „{ $subject }“
+# review: new
+agent-read-conversation = { $count ->
+    [one] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškas)
+    [few] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškai)
+   *[other] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškų)
+}
+# review: new
+agent-read-attachment = Atidarytas laiško „{ $subject }“ priedas „{ $name }“
+# review: new
+agent-read-search = { $count ->
+    [one] Ieškota „{ $query }“: rastas { $count } laiškas
+    [few] Ieškota „{ $query }“: rasti { $count } laiškai
+   *[other] Ieškota „{ $query }“: rasta { $count } laiškų
+}
+# review: new
+agent-read-people = Ieškota kontaktų, kurių vardas ar adresas prasideda „{ $query }“
+# review: new
+agent-read-list = { $count ->
+    [one] Peržiūrėtas { $count } laiškas aplanke „{ $folder }“
+    [few] Peržiūrėti { $count } laiškai aplanke „{ $folder }“
+   *[other] Peržiūrėta { $count } laiškų aplanke „{ $folder }“
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Peržiūrėtas { $count } naujas laiškas
+    [few] Peržiūrėti { $count } nauji laiškai
+   *[other] Peržiūrėta { $count } naujų laiškų
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Iš programėlės { $terminal } paleistos programos
+# review: new
+agent-terminal-programs-windows = Iš terminalo ({ $terminal }) paleistos programos
+# review: new
+agent-terminal-programs-linux = Iš terminalo ({ $terminal }) paleistos programos
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Iš programėlės { $terminal } paleista programa
+# review: new
+agent-terminal-program-windows = Iš terminalo ({ $terminal }) paleista programa
+# review: new
+agent-terminal-program-linux = Iš terminalo ({ $terminal }) paleista programa
+# review: new
+agent-connect-title-terminal = { $programs } nori naudotis jūsų paštu
+# review: new
+agent-connect-terminal-detail = Visi DI agentai, kuriuos paleidžiate iš šio terminalo, bendrai naudojasi čia suteikta prieiga. Norėdami suteikti agentui atskirą prieigą, agento MCP nustatymuose į jo argumentus įtraukite --name ir savo pasirinktą pavadinimą.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

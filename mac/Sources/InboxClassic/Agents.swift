@@ -149,9 +149,9 @@ private func note(_ string: String, color: NSColor = .secondaryLabelColor) -> NS
 /// what a program may do: the four levels and the accounts, for the first question and for Change
 @MainActor
 private final class AccessForm: NSObject {
-    /// the levels the core offers, with their words
-    private static let levels: [(UInt32, String)] = (0..<Int(PE_AGENT_LEVEL_COUNT)).map {
-        (pe_agent_level_bit($0), text(pe_agent_level_label($0)))
+    /// the levels the core offers, with their words in the language in use
+    private static var levels: [(UInt32, String)] {
+        (0..<Int(PE_AGENT_LEVEL_COUNT)).map { (pe_agent_level_bit($0), text(pe_agent_level_label($0))) }
     }
     let view: NSView
     private var levelBoxes: [NSButton] = []
@@ -428,7 +428,8 @@ private func listRow(_ list: PeAgentList, index: Int, width: CGFloat) -> NSStack
 // ---- Tools > AI Agents ----
 
 @MainActor
-final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
+final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate, NSOutlineViewDataSource,
+    NSOutlineViewDelegate {
     private struct Host {
         let id: Int64
         let name: String
@@ -441,12 +442,59 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         let changeDetail: String
     }
 
-    private struct Entry {
+    /// A row of the log: something an agent did, a summary of what a program read in an hour (which opens to each
+    /// read, fetched as it opens), or one of those reads
+    private final class Entry: NSObject {
         let id: Int64
         let at: Int64
         let host: String
         let summary: String
         let canUndo: Bool
+        /// a summary's program and hour, for `pe_agent_reads`
+        let reads: (host: Int64, hour: Int64)?
+        let isRead: Bool
+        private var opened: [Entry]?
+
+        init(_ entry: PeAgentLogEntry) {
+            id = entry.id
+            at = entry.at
+            host = text(entry.host)
+            summary = text(entry.summary)
+            canUndo = entry.can_undo
+            reads = entry.reads ? (entry.host_id, entry.reads_hour) : nil
+            isRead = false
+        }
+
+        init(read: PeAgentRead) {
+            id = 0
+            at = read.at
+            host = ""
+            summary = text(read.text)
+            canUndo = false
+            reads = nil
+            isRead = true
+        }
+
+        /// the summary's program and hour, which keeps it open across a refresh
+        var key: String? {
+            reads.map { "\($0.host):\($0.hour)" }
+        }
+
+        /// the reads under a summary, in the order they were made
+        func children(_ core: Core) -> [Entry] {
+            if let opened { return opened }
+            var rows: [Entry] = []
+            if let reads, let list = pe_agent_reads(core.handle, reads.host, reads.hour) {
+                defer { pe_agent_reads_free(list) }
+                for index in 0..<pe_agent_reads_count(list) {
+                    if let read = pe_agent_reads_get(list, index)?.pointee {
+                        rows.append(Entry(read: read))
+                    }
+                }
+            }
+            opened = rows
+            return rows
+        }
     }
 
     private static var open: AgentsWindow?
@@ -454,7 +502,8 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     private let core: Core
     private let enabled = NSButton(checkboxWithTitle: Text.uiLetAgentsConnect.text, target: nil, action: nil)
     private let hostTable = NSTableView()
-    private let logTable = NSTableView()
+    /// what agents did, newest first; a summary of reads opens to them
+    private let logTable = NSOutlineView()
     private let change = NSButton(title: Text.uiChangeButton.text, target: nil, action: nil)
     private let remove = NSButton(title: Text.uiRemove.text, target: nil, action: nil)
     private let undo = NSButton(title: Text.uiUndoButton.text, target: nil, action: nil)
@@ -493,12 +542,18 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
                               columns: [("at", Text.uiColWhen.text, 150), ("host", Text.uiColProgram.text, 120),
                                         ("what", Text.uiColWhat.text, 400)])
         hostTable.doubleAction = #selector(changeHost)
+        // the triangle in the first column, as Finder's lists have it; double-clicking a summary opens it too
+        logTable.outlineTableColumn = logTable.tableColumns.first
+        logTable.autoresizesOutlineColumn = false
+        logTable.target = self
+        logTable.doubleAction = #selector(toggleReads)
         for (button, action, id) in [(change, #selector(changeHost), "agents.change"), (remove, #selector(removeHost), "agents.remove"),
                                      (undo, #selector(undoEntry), "agents.undo"), (clear, #selector(clearLog), "agents.clear")] {
             button.target = self
             button.action = action
             button.setAccessibilityIdentifier(id)
-            button.widthAnchor.constraint(equalToConstant: 110).isActive = true
+            // as wide as the longest word needs, 110 at least
+            button.widthAnchor.constraint(greaterThanOrEqualToConstant: 110).isActive = true
         }
         let setup = NSButton(title: Text.uiHowToConnect.text, target: self, action: #selector(showSetup))
         setup.setAccessibilityIdentifier("agents.setup")
@@ -508,7 +563,8 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
         func side(_ buttons: [NSButton]) -> NSStackView {
             let stack = NSStackView(views: buttons + [NSView()])
             stack.orientation = .vertical
-            stack.alignment = .leading
+            // the buttons of a column one width
+            stack.alignment = .width
             return stack
         }
         func section(_ title: String, _ scroll: NSScrollView, _ buttons: [NSButton]) -> NSStackView {
@@ -546,8 +602,13 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
             item.width = width
             table.addTableColumn(item)
         }
-        table.dataSource = self
-        table.delegate = self
+        if let outline = table as? NSOutlineView {
+            outline.dataSource = self
+            outline.delegate = self
+        } else {
+            table.dataSource = self
+            table.delegate = self
+        }
         table.usesAlternatingRowBackgroundColors = true
         table.columnAutoresizingStyle = .lastColumnOnlyAutoresizingStyle
         table.setAccessibilityIdentifier(id)
@@ -576,22 +637,27 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
                 accountsOfHost[host.id] = { accounts.contains($0) }
             }
         }
+        // the summaries open now stay open, with what was read since
+        let open = Set(entries.filter { logTable.isItemExpanded($0) }.compactMap(\.key))
         entries = []
         if let log = pe_agent_log(core.handle, 500) {
             defer { pe_agent_log_free(log) }
             for index in 0..<pe_agent_log_count(log) {
-                guard let entry = pe_agent_log_get(log, index)?.pointee else { continue }
-                entries.append(Entry(id: entry.id, at: entry.at, host: text(entry.host), summary: text(entry.summary),
-                                     canUndo: entry.can_undo))
+                if let entry = pe_agent_log_get(log, index)?.pointee {
+                    entries.append(Entry(entry))
+                }
             }
         }
         hostTable.reloadData()
         logTable.reloadData()
+        for entry in entries where entry.key.map(open.contains) == true {
+            logTable.expandItem(entry)
+        }
         if !hosts.isEmpty {
             hostTable.selectRowIndexes(IndexSet(integer: min(hostRow, hosts.count - 1)), byExtendingSelection: false)
         }
-        if !entries.isEmpty {
-            logTable.selectRowIndexes(IndexSet(integer: min(logRow, entries.count - 1)), byExtendingSelection: false)
+        if logTable.numberOfRows > 0 {
+            logTable.selectRowIndexes(IndexSet(integer: min(logRow, logTable.numberOfRows - 1)), byExtendingSelection: false)
         }
         updateButtons()
     }
@@ -599,30 +665,25 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     private func updateButtons() {
         change.isEnabled = hosts.indices.contains(hostTable.selectedRow)
         remove.isEnabled = change.isEnabled
-        undo.isEnabled = entries.indices.contains(logTable.selectedRow) && entries[logTable.selectedRow].canUndo
+        undo.isEnabled = selectedEntry?.canUndo == true
         clear.isEnabled = !entries.isEmpty
     }
 
+    private var selectedEntry: Entry? {
+        logTable.item(atRow: logTable.selectedRow) as? Entry
+    }
+
     func numberOfRows(in tableView: NSTableView) -> Int {
-        tableView === hostTable ? hosts.count : entries.count
+        hosts.count
     }
 
     func tableView(_ tableView: NSTableView, viewFor column: NSTableColumn?, row: Int) -> NSView? {
+        let host = hosts[row]
         let value: String
-        if tableView === hostTable {
-            let host = hosts[row]
-            switch column?.identifier.rawValue {
-            case "name": value = host.name
-            case "access": value = host.access
-            default: value = host.lastUsed == 0 ? Text.uiNever.text : formatDate(host.lastUsed)
-            }
-        } else {
-            let entry = entries[row]
-            switch column?.identifier.rawValue {
-            case "at": value = formatDate(entry.at)
-            case "host": value = entry.host
-            default: value = entry.summary
-            }
+        switch column?.identifier.rawValue {
+        case "name": value = host.name
+        case "access": value = host.access
+        default: value = host.lastUsed == 0 ? Text.uiNever.text : formatDate(host.lastUsed)
         }
         let cell = listCell(tableView, value)
         cell.toolTip = value
@@ -631,6 +692,46 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
 
     func tableViewSelectionDidChange(_ notification: Notification) {
         updateButtons()
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
+        (item as? Entry)?.children(core).count ?? entries.count
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
+        (item as? Entry)?.children(core)[index] ?? entries[index]
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
+        (item as? Entry)?.reads != nil
+    }
+
+    func outlineView(_ outlineView: NSOutlineView, viewFor column: NSTableColumn?, item: Any) -> NSView? {
+        guard let entry = item as? Entry else { return nil }
+        let value: String
+        switch column?.identifier.rawValue {
+        // a read under its summary: the time, the day and the program being the summary's
+        case "at": value = entry.isRead ? timeOfDay(entry.at) : formatDate(entry.at)
+        case "host": value = entry.host
+        default: value = entry.summary
+        }
+        let cell = listCell(outlineView, value, secondary: entry.isRead)
+        cell.toolTip = value.isEmpty ? nil : value
+        return cell
+    }
+
+    func outlineViewSelectionDidChange(_ notification: Notification) {
+        updateButtons()
+    }
+
+    /// a summary of reads opened or closed by a double click, as its triangle does
+    @objc private func toggleReads() {
+        guard let entry = logTable.item(atRow: logTable.clickedRow) as? Entry, entry.reads != nil else { return }
+        if logTable.isItemExpanded(entry) {
+            logTable.collapseItem(entry)
+        } else {
+            logTable.expandItem(entry)
+        }
     }
 
     @objc private func toggleEnabled() {
@@ -668,8 +769,8 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate {
     }
 
     @objc private func undoEntry() {
-        guard entries.indices.contains(logTable.selectedRow) else { return }
-        if let why = taken(pe_agent_undo(core.handle, entries[logTable.selectedRow].id)) {
+        guard let entry = selectedEntry, entry.canUndo else { return }
+        if let why = taken(pe_agent_undo(core.handle, entry.id)) {
             inform(why, title: Text.uiAiAgents.text)
         }
         fill()

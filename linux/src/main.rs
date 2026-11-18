@@ -65,9 +65,9 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// The command line. Options for test runs: --store <file> uses another mail store, --memory-passwords keeps passwords
 /// for this run only, --pin-certificate <file> trusts only that server certificate, --sign-in-page-file <file> writes
 /// the page of a browser sign-in there for the test to open instead of the browser, --key-server <url> looks keys up on
-/// the test's own server. A mailto: link (and what follows
-/// it) is a new message to write; a message file (.eml) opens in a window of its own, another file is a message to put
-/// into the selected folder.
+/// the test's own server. --mcp relays an AI agent (--name <name> gives it an access of its own). A mailto: link (and
+/// what follows it) is a new message to write; a message file (.eml) opens in a window of its own, another file is a
+/// message to put into the selected folder.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Arguments {
     pub store: Option<PathBuf>,
@@ -112,6 +112,10 @@ impl Arguments {
                 "--version" => parsed.version = true,
                 "--mcp" => parsed.mcp = true,
                 "--background" => parsed.background = true,
+                // the name an agent gives itself for an access of its own: the relay reads it (pe-mcp), never a file
+                "--name" => {
+                    rest.next();
+                }
                 file if !file.starts_with("--") => parsed.files.push(file_path(file)),
                 _ => {}
             }
@@ -298,6 +302,9 @@ mod tests {
             Some("MAILTO:bob@example.com")
         );
         assert!(Arguments::parse(&["--version"]).version);
+        // an agent's --name is no file to open
+        let named = Arguments::parse(&["--mcp", "--name", "Claude Code"]);
+        assert!(named.mcp && named.files.is_empty());
         assert_eq!(
             Arguments::parse(&["/tmp/a.eml"]).files,
             vec![PathBuf::from("/tmp/a.eml")]

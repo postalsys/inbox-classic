@@ -14,8 +14,8 @@
 // What an agent may do, bits for `levels`: read mail
 #define PE_AGENT_READ 1
 
-// Organize it: read state, flags, junk, moves, archiving, new folders, deletes to Deleted Items, and leaving
-// mailing lists after the user says yes
+// Organize it: read state, flags and their colours, junk, moves, archiving, new and renamed folders, Watch and Ignore
+// Conversation, deletes to Deleted Items, and leaving mailing lists after the user says yes
 #define PE_AGENT_ORGANIZE 2
 
 // Write drafts
@@ -666,6 +666,8 @@ typedef struct PeAgentHostList PeAgentHostList;
 
 typedef struct PeAgentLog PeAgentLog;
 
+typedef struct PeAgentReads PeAgentReads;
+
 typedef struct PeAgentSendInfo PeAgentSendInfo;
 
 typedef struct PeAgentUnsubscribeInfo PeAgentUnsubscribeInfo;
@@ -863,20 +865,36 @@ typedef struct PeAgentHost {
   const char *change_detail;
 } PeAgentHost;
 
-// What an agent did
+// A row of the log: what an agent did, or a summary of what a program read in an hour
 typedef struct PeAgentLogEntry {
+  // The entry, for `pe_agent_undo`; 0 for a summary of reads
   int64_t id;
   // The program
   const char *host;
-  // Seconds since the Unix epoch
+  // Seconds since the Unix epoch: when it was done, a summary's last read
   int64_t at;
-  // `Moved "Invoice 12" to Archive`, with "(taken back)" once it was
+  // `Moved "Invoice 12" to Archive`, with "(taken back)" once it was; "Read 14 messages and searched 3 times" for
+  // a summary. In the language in use, whatever it was when the agent did it
   const char *summary;
   // `pe_agent_undo` can take it back
   bool can_undo;
   // It was taken back
   bool undone;
+  // The agent's request it came from (its JSON-RPC id), empty when not known: entries of one call share it
+  const char *call_id;
+  // A summary of what program `host_id` read in the hour that starts at `reads_hour`: the row opens to each read
+  // (`pe_agent_reads`)
+  bool reads;
+  int64_t host_id;
+  int64_t reads_hour;
 } PeAgentLogEntry;
+
+// One read of a summary row: when, and what (a subject, a query, a folder; never what a message says)
+typedef struct PeAgentRead {
+  int64_t at;
+  // "Read “Lunch”", "Searched for “invoice”: 4 messages", in the language in use
+  const char *text;
+} PeAgentRead;
 
 // A person of the address book as its list shows them
 typedef struct PeCardRow {
@@ -2059,11 +2077,13 @@ bool pe_agent_host_update(const struct PeCore *core,
 // `core` must be a live handle.
 bool pe_agent_host_remove(const struct PeCore *core, int64_t id);
 
-// The newest `limit` entries of what agents did, newest first. Free with `pe_agent_log_free`.
+// The newest `limit` rows of the log, newest first: what agents did and, for each program and hour, what it read.
+// Free with `pe_agent_log_free`.
 //
 // # Safety
 // `core` must be a live handle.
-struct PeAgentLog *pe_agent_log(const struct PeCore *core, uint64_t limit);
+struct PeAgentLog *pe_agent_log(const struct PeCore *core,
+                                uint64_t limit);
 
 // # Safety
 // `log` must be NULL or live.
@@ -2077,13 +2097,35 @@ const struct PeAgentLogEntry *pe_agent_log_get(const struct PeAgentLog *log, siz
 // `log` must be NULL or not freed yet.
 void pe_agent_log_free(struct PeAgentLog *log);
 
+// What program `host_id` read in the hour that starts at `hour` (a summary row's `host_id` and `reads_hour`), in the
+// order it read. Free with `pe_agent_reads_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAgentReads *pe_agent_reads(const struct PeCore *core,
+                                    int64_t host_id,
+                                    int64_t hour);
+
+// # Safety
+// `reads` must be NULL or live.
+size_t pe_agent_reads_count(const struct PeAgentReads *reads);
+
+// # Safety
+// `reads` must be NULL or live.
+const struct PeAgentRead *pe_agent_reads_get(const struct PeAgentReads *reads, size_t index);
+
+// # Safety
+// `reads` must be NULL or not freed yet.
+void pe_agent_reads_free(struct PeAgentReads *reads);
+
 // Takes back what log entry `id` did: NULL when it was, else why not (free with `pe_string_free`)
 //
 // # Safety
 // `core` must be a live handle.
 char *pe_agent_undo(const struct PeCore *core, int64_t id);
 
-// Forgets what agents did
+// Clears the log from the window: what agents read is forgotten, what they did hidden (the limits of what an agent may
+// send still count it until it is 30 days old)
 //
 // # Safety
 // `core` must be a live handle.

@@ -101,6 +101,10 @@ win-clear-log-ask = Да се изчисти ли историята на дей
 win-agent-programs = &Програми, чиито агенти са поискали достъп до пощата ви:
 win-change = Пром&яна...
 win-what-agents-did = &Действия на агентите:
+# review: new
+win-agent-reads = Прочетено от { $from } до { $to }:
+# review: new
+win-agent-reads-hint = Изберете по-горе ред с прочетеното, за да видите какво е прочетено.
 win-how-to-connect = Как да свържете агент
 
 ## Sign-in apps

@@ -101,6 +101,10 @@ win-clear-log-ask = Tyhjennetäänkö agenttien toimintahistoria? Tämä ei kumo
 win-agent-programs = &Ohjelmat, joiden agentit ovat pyytäneet pääsyä postiisi:
 win-change = &Muuta...
 win-what-agents-did = Agenttien &toiminta:
+# review: new
+win-agent-reads = Luettu kello { $from } ja { $to } välillä:
+# review: new
+win-agent-reads-hint = Valitse yläpuolelta lukemisten rivi nähdäksesi, mitä luettiin.
 win-how-to-connect = Agentin yhdistäminen
 
 ## Sign-in apps

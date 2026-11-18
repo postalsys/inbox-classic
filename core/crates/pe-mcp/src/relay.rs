@@ -83,7 +83,22 @@ pub fn relay_for_store(
             .spawn()
             .map(|_| ())
     };
-    relay(&Endpoint::for_store(store), host, start)
+    let host = named_by_arguments(host.clone(), std::env::args().skip(1));
+    relay(&Endpoint::for_store(store), &host, start)
+}
+
+/// The program as `--name <name>` among the relay's `arguments` names it, for an access of its own (decision 9 of the
+/// MCP plan); as it is without one
+pub fn named_by_arguments(host: HostInfo, arguments: impl IntoIterator<Item = String>) -> HostInfo {
+    let mut arguments = arguments.into_iter();
+    while let Some(argument) = arguments.next() {
+        if argument == "--name"
+            && let Some(name) = arguments.next()
+        {
+            return pe_core::agents::named(host, &name);
+        }
+    }
+    host
 }
 
 /// Passes `input` to `stream` after the hello line, and what comes back to `output`, until either closes
@@ -182,6 +197,20 @@ impl<T: AsyncRead + AsyncWrite + Unpin + Send> Stream for T {}
 #[cfg(all(test, unix))]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_name_gives_a_program_its_own_access() {
+        let host = HostInfo {
+            path: "/bin/zsh".into(),
+            name: "zsh".into(),
+        };
+        let args = |list: &[&str]| list.iter().map(|a| a.to_string()).collect::<Vec<_>>();
+        let named = named_by_arguments(host.clone(), args(&["--mcp", "--name", "Claude Code"]));
+        assert_eq!(named.name, "Claude Code");
+        assert!(named.path.starts_with("/bin/zsh") && named.path != host.path);
+        assert_eq!(named_by_arguments(host.clone(), args(&["--mcp", "--name"])), host);
+        assert_eq!(named_by_arguments(host.clone(), args(&["--mcp"])), host);
+    }
 
     #[tokio::test]
     async fn the_relay_connects_to_this_users_app_only() {

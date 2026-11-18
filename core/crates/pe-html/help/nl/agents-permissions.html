@@ -2,13 +2,13 @@
 <p class="summary">Bepaal welke toegang AI-agents krijgen, bekijk hun acties en maak wijzigingen ongedaan.</p>
 <p>Als de agent van een programma voor het eerst verbinding maakt, toont Inbox Classic de programmanaam en vraagt om toestemming. Kies welke acties je toestaat:</p>
 <ul>
-    <li>e-mail lezen: mappen, berichten en gesprekken bekijken, berichten doorzoeken, berichtregels bekijken en namen of e-mailadressen opzoeken</li>
-    <li>e-mail ordenen: leesstatus en markeringen wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar <b data-text="folder-deleted"></b>), mappen maken en je na jouw toestemming afmelden voor mailinglijsten</li>
+    <!--review--><li>e-mail lezen: mappen, berichten en gesprekken bekijken, ook PDF-, Office- en afbeeldingsbestanden tot 10 MB in berichten, berichten doorzoeken, berichtregels bekijken en namen of e-mailadressen opzoeken</li><!--/review-->
+    <!--review--><li>e-mail ordenen: leesstatus, markeringen en hun kleuren wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar <b data-text="folder-deleted"></b>), mappen maken, je eigen mappen hernoemen, gesprekken volgen en negeren, en je na jouw toestemming afmelden voor mailinglijsten</li><!--/review-->
     <li>concepten schrijven die jij verzendt, en zelfgeschreven concepten wijzigen of verwijderen totdat jij ze opslaat</li>
     <li>e-mail verzenden, met jouw toestemming voor elk bericht</li>
 </ul>
 <p>Kies daarna de accounts waartoe het programma toegang mag krijgen en klik op <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> weigert het programma. Daarna vraagt Inbox Classic niet opnieuw om toestemming.</p>
-<p>Een agent verwijdert je berichten niet definitief, behalve concepten die hij zelf heeft gemaakt en die jij nog niet hebt opgeslagen. Hij wijzigt je accountinstellingen niet. Hij kan berichtregels bekijken en nagaan op welke berichten ze van toepassing zouden zijn, zonder die berichten te wijzigen. Hij kan geen regels maken, wijzigen of verwijderen. Als hij een bericht leest, wordt het niet als gelezen gemarkeerd. Wat hij wijzigt, zie je meteen in de vensters.</p>
+<!--review--><p>Een agent verwijdert je berichten niet definitief, behalve concepten die hij zelf heeft gemaakt en die jij nog niet hebt opgeslagen. Hij wijzigt je accountinstellingen niet. Hij kan berichtregels bekijken en nagaan op welke berichten ze van toepassing zouden zijn, zonder die berichten te wijzigen. Hij kan geen regels maken, wijzigen of verwijderen. Hij leest nooit wat een versleuteld bericht bevat of meestuurt. Als hij een bericht leest, wordt het niet als gelezen gemarkeerd. Wat hij wijzigt, zie je meteen in de vensters.</p><!--/review-->
 <h2>Afmelden voor mailinglijsten</h2>
 <p>Een agent die e-mail mag ordenen, kan voorstellen om je af te melden voor mailinglijsten. Inbox Classic toont de adressen van de afzenders en vraagt één keer toestemming voor alle geselecteerde lijsten:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>Een agent kan je niet afmelden op basis van berichten in de map <b data-text="folder-junk"></b>. Per programma geldt een limiet van 30 goedgekeurde afmeldverzoeken in de afgelopen 24 uur. Ook verzoeken die mislukken tellen mee.</p>
 <h2>Toegang bekijken en wijzigen</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> toont de programma’s die je toegang gaf of weigerde, en de acties van agents, met de nieuwste bovenaan.</p>
+<!--review--><p>Wat een agent leest, verschijnt als één rij per programma en uur, zoals “14 berichten gelezen en 3 keer gezocht”. <!--os:windows-->Selecteer de rij<!--/os--><!--os:mac,linux-->Open de rij met het pijltje<!--/os--> om de onderwerpen te zien die hij heeft gelezen en waarnaar hij heeft gezocht, maar nooit de tekst van de berichten. Het logboek wordt 30 dagen bewaard. Als je het wist, verandert dat niets aan het aantal berichten dat een agent nog mag verzenden.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> wijzigt wat een programma mag doen.</li>
     <li><b data-text="ui-remove"></b> verwijdert de opgeslagen machtigingen van een programma. Bij de volgende verbinding wordt opnieuw om toestemming gevraagd.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> maakt wijzigingen in de leesstatus en markeringen ongedaan, evenals het markeren als ongewenste e-mail, verplaatsen, archiveren en verwijderen. Je kunt hiermee ook de verzending annuleren van een bericht dat nog in Postvak UIT staat.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> maakt wijzigingen in de leesstatus, markeringen en hun kleur ongedaan, evenals het markeren als ongewenste e-mail, verplaatsen, archiveren en verwijderen. Je kunt hiermee ook de verzending annuleren van een bericht dat nog in Postvak UIT staat.</li><!--/review-->
 </ul>
 <aside class="warning">E-mail van anderen kan instructies bevatten die een agent proberen te misleiden, bijvoorbeeld om berichten door te sturen of te verwijderen. Inbox Classic verbergt tekst die ook voor jou verborgen is en geeft aan dat berichtinhoud geen instructie is. Toch kan een agent worden misleid. Geef alleen de toegang die nodig is.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

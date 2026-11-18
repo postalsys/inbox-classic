@@ -2,13 +2,13 @@
 <p class="summary">Her yapay zeka aracısının izinlerini belirleyin, etkinliğini inceleyin ve yaptığı değişiklikleri geri alın.</p>
 <p>Bir aracı ilk kez bağlandığında Inbox Classic programın adını gösterip izninizi ister. Neler yapabileceğini seçin:</p>
 <ul>
-    <li>postayı okuma: klasörleri, iletileri ve konuşmaları görüntüleme, iletilerde arama yapma, ileti kurallarını inceleme ve kişi arama</li>
-    <li>postayı düzenleme: okundu durumunu ve bayrakları değiştirme, gereksiz postayı yönetme, iletileri taşıma ve arşivleme, klasör oluşturma, iletileri <b data-text="folder-deleted"></b> klasörüne taşıyarak silme ve onayınızla posta listelerinden çıkma</li>
+    <!--review--><li>postayı okuma: klasörleri, iletileri ve konuşmaları, 10 MB'a kadar PDF, Office ve resim ekleriyle birlikte görüntüleme, iletilerde arama yapma, ileti kurallarını inceleme ve kişi arama</li><!--/review-->
+    <!--review--><li>postayı düzenleme: okundu durumunu, bayrakları ve bayrak renklerini değiştirme, gereksiz postayı yönetme, iletileri taşıma ve arşivleme, klasör oluşturma, kendi klasörlerinizi yeniden adlandırma, konuşmaları izleme ve yoksayma, iletileri <b data-text="folder-deleted"></b> klasörüne taşıyarak silme ve onayınızla posta listelerinden çıkma</li><!--/review-->
     <li>sizin göndermeniz için taslak yazma ve siz kaydedene kadar kendi oluşturduğu taslakları değiştirme veya silme</li>
     <li>posta gönderme, her ileti için ancak siz onay verdikten sonra</li>
 </ul>
 <p>Ardından görebileceği hesapları seçin ve <b data-text="ui-allow"></b> düğmesine tıklayın. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> düğmesi programın erişimini reddeder ve bu kararınızı kaydeder.</p>
-<p>Aracı yalnızca kendi oluşturduğu ve sizin henüz kaydetmediğiniz taslakları kalıcı olarak silebilir. Hesap ayarlarınızı değiştiremez. İleti kurallarını inceleyebilir ve hangi iletilere uygulanacaklarını, iletilerde değişiklik yapmadan görebilir. Kural oluşturamaz, değiştiremez veya silemez. Aracının bir iletiyi okuması, iletiyi okundu olarak işaretlemez. Yaptığı değişiklikler uygulamada hemen görünür.</p>
+<p>Aracı yalnızca kendi oluşturduğu ve sizin henüz kaydetmediğiniz taslakları kalıcı olarak silebilir. Hesap ayarlarınızı değiştiremez. İleti kurallarını inceleyebilir ve hangi iletilere uygulanacaklarını, iletilerde değişiklik yapmadan görebilir. Kural oluşturamaz, değiştiremez veya silemez. <!--review-->Şifreli bir iletinin içeriğini ve eklerini hiçbir zaman okumaz.<!--/review--> Aracının bir iletiyi okuması, iletiyi okundu olarak işaretlemez. Yaptığı değişiklikler uygulamada hemen görünür.</p>
 <h2>Posta listelerinden çıkma</h2>
 <p>Postayı düzenleme izni olan bir aracı, posta listelerinden çıkmanızı önerebilir. Inbox Classic gönderen adreslerini gösterir ve seçilen tüm listeler için tek bir onay ister:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>Aracı, <b data-text="folder-junk"></b> klasöründeki iletileri abonelikten çıkmak için kullanamaz. Her program için son 24 saat içinde onayladığınız abonelikten çıkma isteklerinin sayısı en fazla 30 olabilir. Başarısız olan istekler de bu sınıra dahildir.</p>
 <h2>Erişimi görme ve değiştirme</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> penceresi, erişimine izin verdiğiniz veya erişimini reddettiğiniz programları ve aracı etkinliğini en yeniden başlayarak listeler.</p>
+<!--review--><p>Bir aracının okudukları, her program ve her saat için tek bir satırda gösterilir, örneğin “14 ileti okudu ve 3 kez arama yaptı”. Okuduğu iletilerin konularını ve neleri aradığını görmek için <!--os:windows-->satırı seçin<!--/os--><!--os:mac,linux-->satırı okuyla açın<!--/os-->. İletilerin metni hiçbir zaman gösterilmez. Günlük 30 gün saklanır. Günlüğü temizlemek, bir aracının daha kaç ileti gönderebileceğini değiştirmez.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> bir programın yapabileceklerini değiştirir.</li>
     <li><b data-text="ui-remove"></b> program için kayıtlı izinleri kaldırır. Program yeniden bağlandığında izniniz tekrar istenir.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> düğmesi; okundu durumu, bayrak ve gereksiz posta işaretlerindeki değişiklikleri, iletileri taşıma, arşivleme ve silme işlemlerini geri alır. Hâlâ Giden Kutusu'nda bekleyen bir iletinin gönderimini de iptal edebilir.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> düğmesi; okundu durumu, bayrak, bayrak rengi ve gereksiz posta işaretlerindeki değişiklikleri, iletileri taşıma, arşivleme ve silme işlemlerini geri alır. Hâlâ Giden Kutusu'nda bekleyen bir iletinin gönderimini de iptal edebilir.</li><!--/review-->
 </ul>
 <aside class="warning">Gelen iletiler, aracıyı postanızı başkasına iletmeye veya silmeye yönlendiren talimatlar içerebilir. Inbox Classic iletinin gizli metnini aracıya aktardığı içerikten çıkarır ve ileti içeriğinin talimat olarak ele alınmaması gerektiğini belirtir. Yine de bir aracı kandırılabilir. Yalnızca ihtiyacınız olana izin verin.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

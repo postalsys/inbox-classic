@@ -101,6 +101,10 @@ win-clear-log-ask = Limpar o histórico de atividade dos agentes? Isto não anul
 win-agent-programs = Pro&gramas cujos agentes pediram acesso ao seu correio:
 win-change = Alt&erar...
 win-what-agents-did = A&tividade dos agentes:
+# review: new
+win-agent-reads = O que foi lido das { $from } às { $to }:
+# review: new
+win-agent-reads-hint = Selecione acima uma linha de leituras para ver o que foi lido.
 win-how-to-connect = Como ligar um agente
 
 ## Sign-in apps

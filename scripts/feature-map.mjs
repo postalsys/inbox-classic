@@ -1300,9 +1300,29 @@ const sections = [
             {
                 shot: 'agents-6-window',
                 name: 'Tools > AI Agents',
-                what: "Turn agents off altogether, see the programs let in or turned away and change what each may do, and see everything agents did, newest first, with Undo for read state, flags, moves and deletes, and for a message still in the Outbox. How to Connect an Agent gives the settings to paste into an agent's configuration.",
+                what: "Turn agents off altogether, see the programs let in or turned away and change what each may do, and see everything agents did, newest first, in the language the app is in: read state, flags and their colours, Watch and Ignore Conversation, moves and deletes, with Undo for them and for a message still in the Outbox. Clear empties the log, but what an agent sent still counts against what it may send. How to Connect an Agent gives the settings to paste into an agent's configuration.",
                 how: 'Tools > AI Agents.',
-                checked: ['It lists the program and what it may do', 'And what its agent did, newest first', 'Undo takes the message back']
+                checked: [
+                    'It lists the program and what it may do',
+                    'And what its agent did, newest first, a flag colour and a watched conversation among it',
+                    'Undo takes the message back',
+                    'Clear empties the log, and the send still counts against the limit',
+                    'Switched to German, the rows written before are in German'
+                ]
+            },
+            {
+                shot: 'agents-9-reads',
+                name: 'What an agent read',
+                what: 'What an agent reads is one row of its program for each hour, such as "Read 14 messages and searched 3 times", so the log is not flooded. Opened (a disclosure triangle on the Mac, an expander arrow on Linux, selecting the row on Windows), it lists the subject of each message read, each search and each list looked at, with the time; never what a message says. It has no Undo, as reading changes nothing.',
+                how: 'Tools > AI Agents.',
+                checked: ['What the agent read is one row of its program', 'Opened, it lists each subject it read and the lists it looked at', 'It has no Undo']
+            },
+            {
+                shot: 'agents-10-terminal',
+                name: 'Agents started from a terminal',
+                what: 'Agents started by hand in a terminal (Claude Code and the like) all reach Inbox Classic through the terminal, so they are one program to it: the question asks about "Programs started from Terminal", which share what you allow, and says that --name and a name in an agent\'s MCP settings gives it an access of its own, asked about by that name.',
+                how: 'Shown when the first agent started from a terminal connects.',
+                checked: ['Asked about as the programs started from Terminal', '--name gives one an access of its own', 'The list of programs names them so', 'In German and the pseudo-language nothing is cut off']
             },
             {
                 shot: 'agents-7-unsubscribe',

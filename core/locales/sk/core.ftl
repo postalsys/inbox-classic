@@ -700,7 +700,8 @@ day-sunday = nedeľa
 ## AI agents
 
 agent-level-read = Čítať poštu: zobrazovať priečinky, zoznam správ a obsah správ, vyhľadávať
-agent-level-organize = Spravovať poštu: meniť stav prečítania a príznaky, označovať nevyžiadanú poštu, presúvať a archivovať správy, vytvárať priečinky, odstraňovať správy do priečinka Odstránená pošta a s vaším súhlasom odhlasovať odber zoznamov adresátov
+# review: changed
+agent-level-organize = Spravovať poštu: meniť stav prečítania, príznaky a ich farby, označovať nevyžiadanú poštu, presúvať a archivovať správy, vytvárať a premenúvať priečinky, sledovať a ignorovať konverzácie, odstraňovať správy do priečinka Odstránená pošta a s vaším súhlasom odhlasovať odber zoznamov adresátov
 agent-level-drafts = Písať koncepty, ktoré odošlete vy
 agent-level-send = Odosielať poštu, každú správu až po vašom súhlase
 agent-connect-title = { $program } chce pracovať s vašou poštou
@@ -746,6 +747,10 @@ agent-unreadable = Túto správu nemožno prečítať.
 agent-encrypted-original = Táto správa je šifrovaná: agent na ňu nemôže odpovedať ani ju preposlať, pretože nevie šifrovať.
 agent-encrypted = Táto správa je šifrovaná a agent nemá prístup k jej obsahu. Otvoriť ju môžete v aplikácii Inbox Classic.
 # review: new
+agent-too-many-changes = Príliš veľa zmien za posledných 30 dní: tento agent ich urobil toľko, koľko Inbox Classic pre jeden program uchováva v denníku. Ďalšie bude môcť urobiť, keď budú najstaršie staré 30 dní.
+# review: new
+agent-too-many-reads = Príliš veľa čítania za posledných 30 dní: tento agent prečítal toľko, koľko Inbox Classic pre jeden program uchováva v denníku. Ďalej bude môcť čítať, keď budú najstaršie čítania staré 30 dní.
+# review: new
 list-encrypted = Šifrovaná správa
 agent-log-composed = Otvorená nová správa na úpravu. Predmet: „{ $subject }“
 agent-log-refused = Nepovolili ste odoslanie správy „{ $subject }“
@@ -776,6 +781,98 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic odošle nižšie uvedenému zoznamu adresátov žiadosť o odhlásenie odberu. Použije na to odhlásenie jedným kliknutím, ktoré tento zoznam ponúka. Žiadny e-mail sa neodošle a prijaté správy sa nezmenia.
    *[other] Inbox Classic odošle každému z nižšie uvedených zoznamov adresátov žiadosť o odhlásenie odberu. Použije na to odhlásenie jedným kliknutím, ktoré daný zoznam ponúka. Žiadny e-mail sa neodošle a prijaté správy sa nezmenia.
 }
+# review: new
+agent-log-flag-color = Správa „{ $subject }“ označená { $color ->
+    [red] červeným príznakom
+    [orange] oranžovým príznakom
+    [yellow] žltým príznakom
+    [green] zeleným príznakom
+    [blue] modrým príznakom
+    [purple] fialovým príznakom
+   *[gray] sivým príznakom
+}
+# review: new
+agent-log-renamed = Priečinok „{ $old }“ premenovaný na „{ $name }“
+# review: new
+agent-log-watched = Zapnuté sledovanie konverzácie „{ $subject }“
+# review: new
+agent-log-ignored = Zapnuté ignorovanie konverzácie „{ $subject }“
+# review: new
+agent-log-unmarked = Zrušené sledovanie alebo ignorovanie konverzácie „{ $subject }“
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] prečítaná 1 správa
+    [few] prečítané { $count } správy
+   *[other] prečítaných { $count } správ
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] otvorená 1 príloha
+    [few] otvorené { $count } prílohy
+   *[other] otvorených { $count } príloh
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] 1 vyhľadávanie
+    [few] { $count } vyhľadávania
+   *[other] { $count } vyhľadávaní
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] 1 zobrazenie zoznamu správ
+    [few] { $count } zobrazenia zoznamov správ
+   *[other] { $count } zobrazení zoznamov správ
+}
+# each read under that row
+# review: new
+agent-read-message = Prečítaná správa „{ $subject }“
+# review: new
+agent-read-conversation = { $count ->
+    [one] Prečítaná konverzácia „{ $subject }“ (1 správa)
+    [few] Prečítaná konverzácia „{ $subject }“ ({ $count } správy)
+   *[other] Prečítaná konverzácia „{ $subject }“ ({ $count } správ)
+}
+# review: new
+agent-read-attachment = Otvorená príloha „{ $name }“ zo správy „{ $subject }“
+# review: new
+agent-read-search = { $count ->
+    [one] Vyhľadávanie „{ $query }“: 1 správa
+    [few] Vyhľadávanie „{ $query }“: { $count } správy
+   *[other] Vyhľadávanie „{ $query }“: { $count } správ
+}
+# review: new
+agent-read-people = Vyhľadané kontakty začínajúce na „{ $query }“
+# review: new
+agent-read-list = { $count ->
+    [one] Zobrazená 1 správa v priečinku { $folder }
+    [few] Zobrazené { $count } správy v priečinku { $folder }
+   *[other] Zobrazených { $count } správ v priečinku { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Zobrazená 1 nová správa
+    [few] Zobrazené { $count } nové správy
+   *[other] Zobrazených { $count } nových správ
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programy spustené z aplikácie { $terminal }
+# review: new
+agent-terminal-programs-windows = Programy spustené z terminálu ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programy spustené z terminálu ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Program spustený z aplikácie { $terminal }
+# review: new
+agent-terminal-program-windows = Program spustený z terminálu ({ $terminal })
+# review: new
+agent-terminal-program-linux = Program spustený z terminálu ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } chcú pracovať s vašou poštou
+# review: new
+agent-connect-terminal-detail = Všetci AI agenti, ktorých spustíte z tohto terminálu, zdieľajú prístup, ktorý tu povolíte. Ak chcete niektorému z nich dať vlastný prístup, pridajte v nastaveniach MCP agenta do jeho argumentov --name a ľubovoľný názov.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -100,6 +100,10 @@ win-clear-log-ask = Effacer l'historique des agents ? Les modifications effectu�
 win-agent-programs = &Programmes dont les agents ont demandé à utiliser votre courrier :
 win-change = &Modifier...
 win-what-agents-did = &Historique des agents :
+# review: new
+win-agent-reads = Ce qui a été lu de { $from } à { $to } :
+# review: new
+win-agent-reads-hint = Sélectionnez ci-dessus une ligne de lectures pour voir ce qui a été lu.
 win-how-to-connect = Comment connecter un agent
 
 ## Applications de connexion

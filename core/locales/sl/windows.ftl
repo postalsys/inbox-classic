@@ -167,6 +167,10 @@ win-change = &Spremeni...
 # review: new
 win-what-agents-did = &Dejavnost agentov:
 # review: new
+win-agent-reads = Kaj je bilo prebrano od { $from } do { $to }:
+# review: new
+win-agent-reads-hint = Zgoraj izberite vrstico z branjem, da vidite, kaj je bilo prebrano.
+# review: new
 win-how-to-connect = Kako povezati agenta
 
 ## Sign-in apps

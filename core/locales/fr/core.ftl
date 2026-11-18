@@ -441,7 +441,8 @@ day-sunday = dimanche
 ## AI agents
 
 agent-level-read = Lire le courrier : consulter les dossiers et les messages, et effectuer des recherches
-agent-level-organize = Gérer le courrier : modifier l'état lu ou non lu et les indicateurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer des dossiers et vous désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans Éléments supprimés.
+# review: changed
+agent-level-organize = Gérer le courrier : modifier l'état lu ou non lu, les indicateurs et leurs couleurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer et renommer des dossiers, suivre et ignorer des conversations, et vous désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans Éléments supprimés.
 agent-level-drafts = Rédiger des brouillons que vous enverrez vous-même
 agent-level-send = Envoyer du courrier, chaque message seulement après votre accord
 agent-connect-title = { $program } souhaite utiliser votre messagerie
@@ -483,6 +484,10 @@ agent-access = { $can } ; { $accounts }
 agent-unreadable = Ce message ne peut pas être lu.
 agent-encrypted-original = Les agents ne peuvent ni répondre à ce message chiffré ni le transférer, car ils ne peuvent pas chiffrer de messages.
 agent-encrypted = Ce message est chiffré. Les agents d’IA n’ont pas accès à son contenu. L’utilisateur doit l’ouvrir lui-même dans Inbox Classic.
+# review: new
+agent-too-many-changes = Trop de modifications au cours des 30 derniers jours : cet agent en a fait autant qu’Inbox Classic en conserve dans son journal pour un programme. Il pourra en faire d’autres lorsque les plus anciennes auront 30 jours.
+# review: new
+agent-too-many-reads = Trop de lectures au cours des 30 derniers jours : cet agent a lu autant qu’Inbox Classic en conserve dans son journal pour un programme. Il pourra lire davantage lorsque les plus anciennes lectures auront 30 jours.
 list-encrypted = Message chiffré
 agent-log-composed = « { $subject } » ouvert dans un nouveau message à compléter
 agent-log-refused = Vous n'avez pas envoyé « { $subject } »
@@ -512,6 +517,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic demande à la liste ci-dessous de ne plus vous envoyer de messages, en utilisant sa fonction de désabonnement en un clic. Seule cette demande est envoyée. Vos messages existants restent inchangés.
    *[other] Inbox Classic demande à chaque liste ci-dessous de ne plus vous envoyer de messages, en utilisant sa fonction de désabonnement en un clic. Seules ces demandes sont envoyées. Vos messages existants restent inchangés.
 }
+# review: new
+agent-log-flag-color = Indicateur { $color ->
+    [red] rouge
+    [orange] orange
+    [yellow] jaune
+    [green] vert
+    [blue] bleu
+    [purple] violet
+   *[gray] gris
+} ajouté à « { $subject } »
+# review: new
+agent-log-renamed = Dossier « { $old } » renommé en « { $name } »
+# review: new
+agent-log-watched = Conversation « { $subject } » surveillée
+# review: new
+agent-log-ignored = Conversation « { $subject } » ignorée
+# review: new
+agent-log-unmarked = La conversation « { $subject } » n'est plus surveillée ni ignorée
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] lu 1 message
+   *[other] lu { $count } messages
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] ouvert 1 pièce jointe
+   *[other] ouvert { $count } pièces jointes
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] effectué 1 recherche
+   *[other] effectué { $count } recherches
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] consulté une liste de messages 1 fois
+   *[other] consulté des listes de messages { $count } fois
+}
+# each read under that row
+# review: new
+agent-read-message = « { $subject } » lu
+# review: new
+agent-read-conversation = { $count ->
+    [one] Conversation « { $subject } » lue (1 message)
+   *[other] Conversation « { $subject } » lue ({ $count } messages)
+}
+# review: new
+agent-read-attachment = Pièce jointe « { $name } » de « { $subject } » ouverte
+# review: new
+agent-read-search = { $count ->
+    [one] Recherche de « { $query } » : 1 message
+   *[other] Recherche de « { $query } » : { $count } messages
+}
+# review: new
+agent-read-people = Recherche des contacts commençant par « { $query } »
+# review: new
+agent-read-list = { $count ->
+    [one] 1 message consulté dans { $folder }
+   *[other] { $count } messages consultés dans { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] 1 nouveau message consulté
+   *[other] { $count } nouveaux messages consultés
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programmes lancés depuis { $terminal }
+# review: new
+agent-terminal-programs-windows = Programmes lancés depuis un terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programmes lancés depuis un terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Un programme lancé depuis { $terminal }
+# review: new
+agent-terminal-program-windows = Un programme lancé depuis un terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Un programme lancé depuis un terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } souhaitent utiliser votre messagerie
+# review: new
+agent-connect-terminal-detail = Tous les agents d'IA que vous lancez depuis ce terminal partagent l'accès que vous autorisez ici. Pour donner à un agent son propre accès, ajoutez --name et le nom de votre choix à ses arguments dans les paramètres MCP de l'agent.
 
 ## Keys
 

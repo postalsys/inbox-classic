@@ -234,6 +234,19 @@ fn pseudo_is_longer_and_bracketed() {
 }
 
 #[test]
+fn pseudo_keeps_command_line_options() {
+    let text = pseudo("add --name and a name");
+    assert!(text.contains(" --name ") && text.contains("áñd"), "{text}");
+    // a lone dash is a word like any other
+    assert!(pseudo("one - and").contains("áñd"));
+    assert!(
+        pseudo("--name at the start").starts_with("[--name "),
+        "{}",
+        pseudo("--name at the start")
+    );
+}
+
+#[test]
 fn words_in_the_language_set() {
     // one test changes the language, so they run in one go
     set_language("en");
@@ -274,6 +287,12 @@ fn words_in_the_language_set() {
         localized_picture("brands/google-sign-in.png"),
         "brands/google-sign-in.png"
     );
+    // a value that chooses the words still chooses them
+    let flagged = tr_args(
+        Text::AgentLogFlagColor,
+        &[("subject", "Lunch".into()), ("color", "blue".into())],
+    );
+    assert!(flagged.contains("Lunch") && flagged.contains("blüé"), "{flagged}");
     // the dots off a title before the pseudo-language's padding too
     let options = title(Text::CmdOptions);
     assert!(

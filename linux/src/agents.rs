@@ -411,6 +411,8 @@ struct AgentsDialog {
     log: gtk::ListBox,
     host_ids: RefCell<Vec<i64>>,
     entries: RefCell<Vec<(i64, bool)>>,
+    /// The summaries of reads open, by program and hour, so showing the log again keeps them open
+    expanded: Rc<RefCell<std::collections::HashSet<(i64, i64)>>>,
     change: gtk::Button,
     remove: gtk::Button,
     undo: gtk::Button,
@@ -429,26 +431,26 @@ impl AgentsDialog {
             let used = host
                 .last_used
                 .map_or(t!(GtkNeverUsed), |at| t!(GtkLastUsed, date = &ui::format_date(at)));
-            let row = plain_row(&host.name, &format!("{}  \u{00B7}  {used}", agents::access_text(host)));
+            let name = agents::host_label(&host.name, &host.path);
+            let row = plain_row(&name, &format!("{}  \u{00B7}  {used}", agents::access_text(host)));
             row.set_widget_name("agents-host");
             self.hosts.append(&row);
         }
         *self.host_ids.borrow_mut() = hosts.iter().map(|h| h.id).collect();
         self.log.remove_all();
-        let log = core.agent_log(500).unwrap_or_default();
+        let log = core.agent_log_rows(500).unwrap_or_default();
         for entry in &log {
-            let summary = agents::log_text(entry);
-            let row = plain_row(
-                &summary,
-                &format!("{}  \u{00B7}  {}", ui::format_date(entry.at), entry.host_name),
-            );
-            row.set_widget_name("agents-entry");
-            self.log.append(&row);
+            let when = format!("{}  \u{00B7}  {}", ui::format_date(entry.at), entry.host_name);
+            match entry.reads_hour {
+                Some(hour) => self.log.append(&self.reads_row(entry, hour, &when)),
+                None => {
+                    let row = plain_row(&entry.text, &when);
+                    row.set_widget_name("agents-entry");
+                    self.log.append(&row);
+                }
+            }
         }
-        *self.entries.borrow_mut() = log
-            .iter()
-            .map(|e| (e.id, e.entry.undo.is_some() && !e.undone))
-            .collect();
+        *self.entries.borrow_mut() = log.iter().map(|e| (e.id, e.can_undo)).collect();
         if !hosts.is_empty() {
             self.hosts
                 .select_row(self.hosts.row_at_index(host_row.min(hosts.len() as i32 - 1)).as_ref());
@@ -458,6 +460,54 @@ impl AgentsDialog {
                 .select_row(self.log.row_at_index(log_row.min(log.len() as i32 - 1)).as_ref());
         }
         self.update_buttons();
+    }
+
+    /// A row of what a program read in an hour: its summary, opened to each read (subjects and queries, never what
+    /// the messages say) with its time. Read from the store when first opened; kept open when the log is shown again
+    fn reads_row(&self, entry: &agents::LogRow, hour: i64, when: &str) -> adw::ExpanderRow {
+        let row = adw::ExpanderRow::new();
+        // nothing a subject says is markup
+        row.set_use_markup(false);
+        row.set_title(&entry.text);
+        row.set_subtitle(when);
+        row.set_widget_name("agents-reads");
+        let key = (entry.host, hour);
+        let filled = std::cell::Cell::new(false);
+        let expanded = self.expanded.clone();
+        let log = self.log.downgrade();
+        row.connect_expanded_notify(move |row| {
+            if row.is_expanded() {
+                expanded.borrow_mut().insert(key);
+                // opened is selected: the window's buttons follow it (no Undo for reading); not when kept open on
+                // showing the log again, which selects the row it had
+                if let Some(log) = log.upgrade()
+                    && row.parent().as_ref() == Some(log.upcast_ref())
+                {
+                    log.select_row(Some(row));
+                }
+            } else {
+                expanded.borrow_mut().remove(&key);
+            }
+            if !row.is_expanded() || filled.replace(true) {
+                return;
+            }
+            for (at, text) in shell().core.agent_reads_of_hour(key.0, key.1).unwrap_or_default() {
+                let read = adw::ActionRow::new();
+                read.set_use_markup(false);
+                read.set_title(&text);
+                read.set_activatable(false);
+                read.set_widget_name("agents-read");
+                let time = gtk::Label::new(Some(&ui::format_time(at)));
+                time.add_css_class("dim-label");
+                time.add_css_class("numeric");
+                read.add_suffix(&time);
+                row.add_row(&read);
+            }
+        });
+        if self.expanded.borrow().contains(&key) {
+            row.set_expanded(true);
+        }
+        row
     }
 
     fn update_buttons(&self) {
@@ -542,7 +592,8 @@ impl AgentsDialog {
     }
 }
 
-fn section(title: &str, list: &gtk::ListBox, buttons: &[&gtk::Button], height: i32) -> gtk::Box {
+/// A titled list with its buttons beside it; `grow` takes the height the window has left
+fn section(title: &str, list: &gtk::ListBox, buttons: &[&gtk::Button], height: i32, grow: bool) -> gtk::Box {
     let label = gtk::Label::new(Some(title));
     label.set_xalign(0.0);
     label.add_css_class("heading");
@@ -550,6 +601,7 @@ fn section(title: &str, list: &gtk::ListBox, buttons: &[&gtk::Button], height: i
         .child(list)
         .min_content_height(height)
         .hexpand(true)
+        .vexpand(grow)
         .hscrollbar_policy(gtk::PolicyType::Never)
         .build();
     let side = gtk::Box::new(gtk::Orientation::Vertical, 6);
@@ -602,6 +654,7 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         log: list("agents-log", &t!(GtkNothingYet)),
         host_ids: RefCell::default(),
         entries: RefCell::default(),
+        expanded: Rc::default(),
         change: button(&t!(UiChangeButton), "agents-change"),
         remove: button(&crate::words::plain(crate::words::Text::UiRemove), "agents-remove"),
         undo: button(&t!(UiUndoButton), "agents-undo"),
@@ -621,12 +674,14 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         &agents.hosts,
         &[&agents.change, &agents.remove],
         120,
+        false,
     ));
     content.append(&section(
         &t!(UiWhatAgentsDid),
         &agents.log,
         &[&agents.undo, &agents.clear],
         220,
+        true,
     ));
     content.append(&setup);
     ui::tab_leaves(&agents.hosts, &agents.enabled, &agents.change);

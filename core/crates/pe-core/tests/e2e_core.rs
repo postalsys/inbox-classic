@@ -2932,7 +2932,7 @@ fn an_agent_draft_is_the_users_once_they_save_it() {
         s.core
             .agent_replace_draft(&d.host, &d.id, &agent_written(account, "Overwrite")),
     );
-    theirs(s.core.agent_discard_draft(&d.host, &d.id));
+    theirs(s.core.agent_discard_draft(&d.host, &d.id, None));
 
     // the user's version is in Drafts, alone, and stays once the copies are synced
     let users = || {
@@ -2948,7 +2948,7 @@ fn an_agent_draft_is_the_users_once_they_save_it() {
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     assert!(users(), "{:?}", s.server.messages("Drafts"));
     assert!(!pe_testkit::raw_text(&s.server.messages("Drafts")[0]).contains("X-Inbox-Classic-Agent"));
-    theirs(s.core.agent_discard_draft(&d.host, &d.id));
+    theirs(s.core.agent_discard_draft(&d.host, &d.id, None));
 }
 
 /// An AI agent's draft the user sends without saving it is theirs too: the agent can not put a copy back in Drafts
@@ -2976,7 +2976,7 @@ fn an_agent_draft_is_the_users_once_they_send_it() {
         s.core
             .agent_replace_draft(&d.host, &d.id, &agent_written(account, "Overwrite")),
     );
-    theirs(s.core.agent_discard_draft(&d.host, &d.id));
+    theirs(s.core.agent_discard_draft(&d.host, &d.id, None));
 
     // sent, and no copy of it left in Drafts once synced
     s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));

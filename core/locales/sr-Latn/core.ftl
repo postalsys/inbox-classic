@@ -452,7 +452,8 @@ day-sunday = nedelja
 ## AI agents
 
 agent-level-read = Čitanje pošte: fascikle, lista poruka, pretraga i poruke
-agent-level-organize = Organizovanje pošte: promena stanja pročitanosti i zastavica, upravljanje neželjenom poštom, premeštanje i arhiviranje poruka, pravljenje fascikli, brisanje poruka premeštanjem u Izbrisane stavke i otkazivanje pretplata uz vaše odobrenje
+# review: changed
+agent-level-organize = Organizovanje pošte: promena stanja pročitanosti, zastavica i njihovih boja, upravljanje neželjenom poštom, premeštanje i arhiviranje poruka, pravljenje i preimenovanje fascikli, praćenje i ignorisanje razgovora, brisanje poruka premeštanjem u Izbrisane stavke i otkazivanje pretplata uz vaše odobrenje
 agent-level-drafts = Pisanje radnih verzija koje ćete vi poslati
 agent-level-send = Slanje pošte, svake poruke tek nakon vašeg odobrenja
 agent-connect-title = { $program } želi da koristi vašu poštu
@@ -497,6 +498,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Ova poruka ne može da se pročita.
 agent-encrypted-original = Ova poruka je šifrovana: agent ne može na nju da odgovori niti da je prosledi jer ne može da šifruje.
 agent-encrypted = Ova poruka je šifrovana. AI agenti ne mogu da pročitaju njen sadržaj. Korisnik treba da je otvori u aplikaciji Inbox Classic.
+# review: new
+agent-too-many-changes = Previše promena u poslednjih 30 dana: ovaj agent ih je napravio onoliko koliko Inbox Classic za jedan program čuva u dnevniku. Moći će da napravi još kada najstarije budu stare 30 dana.
+# review: new
+agent-too-many-reads = Previše čitanja u poslednjih 30 dana: ovaj agent je pročitao onoliko koliko Inbox Classic za jedan program čuva u dnevniku. Moći će da čita još kada najstarija čitanja budu stara 30 dana.
 list-encrypted = Šifrovana poruka
 agent-log-composed = Poruka „{ $subject }“ je otvorena za uređivanje da biste je dovršili
 agent-log-refused = Odbili ste slanje poruke „{ $subject }“
@@ -528,6 +533,98 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic šalje zahtev da vam sa navedene liste više ne stižu poruke, koristeći opciju za otkazivanje pretplate jednim klikom. Ništa drugo se ne šalje. Postojeće poruke se ne menjaju niti premeštaju.
    *[other] Inbox Classic šalje zahtev da vam sa svake od navedenih lista više ne stižu poruke, koristeći opciju za otkazivanje pretplate jednim klikom. Ništa drugo se ne šalje. Postojeće poruke se ne menjaju niti premeštaju.
 }
+# review: new
+agent-log-flag-color = Označeno zastavicom: „{ $subject }“, boja: { $color ->
+    [red] crvena
+    [orange] narandžasta
+    [yellow] žuta
+    [green] zelena
+    [blue] plava
+    [purple] ljubičasta
+   *[gray] siva
+}
+# review: new
+agent-log-renamed = Fascikla „{ $old }“ je preimenovana u „{ $name }“
+# review: new
+agent-log-watched = Uključeno praćenje razgovora: „{ $subject }“
+# review: new
+agent-log-ignored = Uključeno zanemarivanje razgovora: „{ $subject }“
+# review: new
+agent-log-unmarked = Isključeno praćenje ili zanemarivanje razgovora: „{ $subject }“
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] pročitana { $count } poruka
+    [few] pročitane { $count } poruke
+   *[other] pročitano { $count } poruka
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] otvoren { $count } prilog
+    [few] otvorena { $count } priloga
+   *[other] otvoreno { $count } priloga
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] { $count } pretraga
+    [few] { $count } pretrage
+   *[other] { $count } pretraga
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] { $count } pregled liste poruka
+    [few] { $count } pregleda liste poruka
+   *[other] { $count } pregleda liste poruka
+}
+# each read under that row
+# review: new
+agent-read-message = Pročitano: „{ $subject }“
+# review: new
+agent-read-conversation = { $count ->
+    [one] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
+    [few] Pročitan razgovor „{ $subject }“ ({ $count } poruke)
+   *[other] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
+}
+# review: new
+agent-read-attachment = Otvoren prilog „{ $name }“ iz poruke „{ $subject }“
+# review: new
+agent-read-search = { $count ->
+    [one] Pretraga za „{ $query }“: { $count } poruka
+    [few] Pretraga za „{ $query }“: { $count } poruke
+   *[other] Pretraga za „{ $query }“: { $count } poruka
+}
+# review: new
+agent-read-people = Potraženi kontakti čije ime počinje sa „{ $query }“
+# review: new
+agent-read-list = { $count ->
+    [one] Pregledana { $count } poruka u fascikli { $folder }
+    [few] Pregledane { $count } poruke u fascikli { $folder }
+   *[other] Pregledano { $count } poruka u fascikli { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Pregledana { $count } nova poruka
+    [few] Pregledane { $count } nove poruke
+   *[other] Pregledano { $count } novih poruka
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programi pokrenuti iz aplikacije { $terminal }
+# review: new
+agent-terminal-programs-windows = Programi pokrenuti iz terminala ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programi pokrenuti iz terminala ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Program pokrenut iz aplikacije { $terminal }
+# review: new
+agent-terminal-program-windows = Program pokrenut iz terminala ({ $terminal })
+# review: new
+agent-terminal-program-linux = Program pokrenut iz terminala ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } žele da koriste vašu poštu
+# review: new
+agent-connect-terminal-detail = Svi AI agenti koje pokrenete iz ovog terminala dele pristup koji ovde dozvolite. Da biste nekom od njih dali zaseban pristup, u MCP podešavanjima agenta dodajte među njegove argumente --name i naziv po izboru.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

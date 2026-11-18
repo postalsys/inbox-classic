@@ -169,6 +169,10 @@ win-change = &Змінити...
 # review: new
 win-what-agents-did = &Дії агентів:
 # review: new
+win-agent-reads = Що прочитано з { $from } до { $to }:
+# review: new
+win-agent-reads-hint = Виберіть вище рядок із прочитаним, щоб побачити, що було прочитано.
+# review: new
 win-how-to-connect = Як під’єднати агента
 
 ## Sign-in apps

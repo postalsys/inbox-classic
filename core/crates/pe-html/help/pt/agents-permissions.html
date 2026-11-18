@@ -2,13 +2,13 @@
 <p class="summary">Escolha o que cada agente de IA pode fazer com o seu correio, e veja e anule o que fez.</p>
 <p>Na primeira ligação de um agente, o Inbox Classic pede autorização e identifica o programa. Escolha o que o agente pode fazer:</p>
 <ul>
-    <li>ler o correio: consultar pastas, mensagens e conversas, pesquisar mensagens, consultar regras de mensagens e procurar contactos</li>
-    <li>organizar o correio: alterar o estado de leitura e os sinalizadores, gerir o lixo eletrónico, mover e arquivar mensagens, criar pastas, eliminar mensagens (movendo-as para <b data-text="folder-deleted"></b>) e cancelar subscrições de listas de correio com a sua autorização</li>
+    <!--review--><li>ler o correio: consultar pastas, mensagens e conversas, incluindo os ficheiros PDF, do Office e imagens até 10 MB, pesquisar mensagens, consultar regras de mensagens e procurar contactos</li><!--/review-->
+    <!--review--><li>organizar o correio: alterar o estado de leitura, os sinalizadores e as respetivas cores, gerir o lixo eletrónico, mover e arquivar mensagens, criar pastas, mudar o nome das suas próprias pastas, seguir e ignorar conversas, eliminar mensagens (movendo-as para <b data-text="folder-deleted"></b>) e cancelar subscrições de listas de correio com a sua autorização</li><!--/review-->
     <li>escrever rascunhos para que os possa enviar e alterar ou eliminar os rascunhos criados pelo próprio agente, enquanto não os guardar</li>
     <li>enviar correio, com a sua confirmação para cada mensagem</li>
 </ul>
 <p>Depois escolha as contas a que o agente pode aceder e clique em <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> recusa o acesso ao programa e guarda essa decisão.</p>
-<p>Um agente só pode eliminar permanentemente os rascunhos que criou e que ainda não foram guardados por si. Não altera as definições das suas contas. Pode consultar as regras de mensagens e ver a que mensagens se aplicariam, sem alterar essas mensagens. Não pode criar, alterar ou eliminar regras. A leitura de uma mensagem pelo agente não a marca como lida. As alterações feitas pelo agente aparecem de imediato na aplicação.</p>
+<!--review--><p>Um agente só pode eliminar permanentemente os rascunhos que criou e que ainda não foram guardados por si. Não altera as definições das suas contas. Pode consultar as regras de mensagens e ver a que mensagens se aplicariam, sem alterar essas mensagens. Não pode criar, alterar ou eliminar regras. Nunca lê o conteúdo nem os anexos de uma mensagem encriptada. A leitura de uma mensagem pelo agente não a marca como lida. As alterações feitas pelo agente aparecem de imediato na aplicação.</p><!--/review-->
 <h2>Cancelar subscrições de listas de correio</h2>
 <p>Um agente autorizado a organizar o correio pode propor o cancelamento de subscrições de listas de correio. O Inbox Classic mostra os endereços dos remetentes e pede uma única confirmação para todas as listas selecionadas:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>Um agente não pode usar mensagens da pasta <b data-text="folder-junk"></b> para cancelar subscrições. O limite é de 30 pedidos de cancelamento autorizados por programa nas últimas 24 horas. Os pedidos que falham também contam para este limite.</p>
 <h2>Ver e alterar o acesso</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> mostra os programas cujo acesso autorizou ou recusou, e tudo o que os agentes fizeram, do mais recente para o mais antigo.</p>
+<!--review--><p>O que um agente lê aparece numa linha por programa e por hora, por exemplo «Leu 14 mensagens e pesquisou 3 vezes». <!--os:windows-->Selecione a linha<!--/os--><!--os:mac,linux-->Abra a linha com a sua seta<!--/os--> para ver os assuntos que leu e o que pesquisou, nunca o texto das mensagens. O registo guarda 30 dias. Limpá-lo não altera quantas mensagens um agente ainda pode enviar.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> altera o que um programa pode fazer.</li>
     <li><b data-text="ui-remove"></b> remove a decisão guardada para um programa. Na próxima ligação, voltará a ser pedida autorização.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> anula alterações do estado de leitura, dos sinalizadores e da classificação como lixo eletrónico, bem como a movimentação, o arquivamento e a eliminação de mensagens. Também permite cancelar o envio de uma mensagem que ainda esteja na Caixa de Saída.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> anula alterações do estado de leitura, dos sinalizadores e respetivas cores, da classificação como lixo eletrónico, bem como a movimentação, o arquivamento e a eliminação de mensagens. Também permite cancelar o envio de uma mensagem que ainda esteja na Caixa de Saída.</li><!--/review-->
 </ul>
 <aside class="warning">O correio é escrito por outras pessoas, e uma mensagem pode tentar convencer um agente a reencaminhar ou eliminar o seu correio. O Inbox Classic oculta dos agentes o texto que não é visível na mensagem e indica-lhes que o conteúdo do correio não deve ser tratado como instruções. Mesmo assim, um agente pode ser enganado. Conceda apenas as permissões necessárias.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

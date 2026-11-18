@@ -5,13 +5,30 @@
 use pe_i18n::{Text, tr_args};
 use pe_store::{AccountId, FolderId, NewLogEntry};
 
-use super::{AgentHost, DRAFTS_PER_HOUR, Written, now, remember};
+use super::{AgentHost, DRAFTS_PER_HOUR, Written, log_entry, now, remember};
 use crate::{Core, Draft, Error, Result};
 
 /// What the compose window says of a draft an AI agent wrote, None for the user's own
 pub fn draft_note(draft: &Draft) -> Option<String> {
     let program = draft.agent.as_deref()?;
     Some(tr_args(Text::AgentDraftNote, &[("program", program.into())]))
+}
+
+/// The log's entry of a draft `message_id` an agent saved from what it wrote (`written`), saying `text`
+fn draft_entry(
+    host: &AgentHost,
+    what: &str,
+    written: &Written,
+    message_id: &str,
+    text: Text,
+    subject: &str,
+) -> NewLogEntry {
+    NewLogEntry {
+        account: Some(written.account),
+        message_id: Some(message_id.to_string()),
+        call_id: written.call_id.clone(),
+        ..log_entry(host.id, what, text, &[("subject", subject.into())])
+    }
 }
 
 /// The words for an agent whose draft the user took over
@@ -43,14 +60,14 @@ impl Core {
             return Ok(saved.clone());
         }
         let (message_id, subject) = self.agent_draft_saved(host, written, None)?;
-        self.log_agent(&[NewLogEntry {
-            host: host.id,
-            what: "save_draft".into(),
-            account: Some(written.account),
-            message_id: Some(message_id.clone()),
-            summary: tr_args(Text::AgentLogDraft, &[("subject", (&subject).into())]),
-            ..Default::default()
-        }])?;
+        self.log_agent(&[draft_entry(
+            host,
+            "save_draft",
+            written,
+            &message_id,
+            Text::AgentLogDraft,
+            &subject,
+        )])?;
         if let Some(keyed) = keyed {
             remember(&mut asks.drafts, keyed, message_id.clone());
         }
@@ -68,19 +85,19 @@ impl Core {
         }
         self.agent_draft_unchanged(host, draft_id, &own)?;
         let (_, subject) = self.agent_draft_saved(host, written, Some(draft_id.to_string()))?;
-        self.log_agent(&[NewLogEntry {
-            host: host.id,
-            what: "replace_draft".into(),
-            account: Some(own.account),
-            message_id: Some(draft_id.to_string()),
-            summary: tr_args(Text::AgentLogDraftReplaced, &[("subject", (&subject).into())]),
-            ..Default::default()
-        }])
+        self.log_agent(&[draft_entry(
+            host,
+            "replace_draft",
+            written,
+            draft_id,
+            Text::AgentLogDraftReplaced,
+            &subject,
+        )])
     }
 
     /// Removes an agent's draft `draft_id` from Drafts ([`Core::agent_own_draft`] says when it may); logged, after
     /// which it is no longer the agent's to change
-    pub fn agent_discard_draft(&self, host: &AgentHost, draft_id: &str) -> Result<()> {
+    pub fn agent_discard_draft(&self, host: &AgentHost, draft_id: &str, call_id: Option<&str>) -> Result<()> {
         let own = self.agent_own_draft(host, draft_id)?;
         self.agent_draft_unchanged(host, draft_id, &own)?;
         let subject = self
@@ -90,12 +107,15 @@ impl Core {
             .unwrap_or_default();
         self.remove_draft(own.account, draft_id, true)?;
         self.log_agent(&[NewLogEntry {
-            host: host.id,
-            what: "discard_draft".into(),
             account: Some(own.account),
             message_id: Some(draft_id.to_string()),
-            summary: tr_args(Text::AgentLogDraftDiscarded, &[("subject", (&subject).into())]),
-            ..Default::default()
+            call_id: call_id.map(str::to_string),
+            ..log_entry(
+                host.id,
+                "discard_draft",
+                Text::AgentLogDraftDiscarded,
+                &[("subject", (&subject).into())],
+            )
         }])
     }
 

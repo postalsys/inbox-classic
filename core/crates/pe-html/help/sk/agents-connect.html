@@ -8,5 +8,6 @@
     <li>Spustite agenta. Pri prvom pripojení vás Inbox Classic požiada o výber povolených činností a dostupných kont.</li>
 </ol>
 <p>Ak aplikácia Inbox Classic nie je spustená, agent ju spustí na pozadí. Pripojiť sa môžu iba programy spustené pod vaším používateľským účtom v tomto počítači.</p>
+<!--review--><p>Agenti, ktorých spúšťate z terminálu, napríklad Claude Code, sú pre Inbox Classic jeden program. Inbox Classic sa raz opýta na <!--os:mac-->programy spustené z aplikácie Terminal<!--/os--><!--os:windows,linux-->programy spustené z terminálu<!--/os--> a tie potom zdieľajú to, čo povolíte. Ak chcete agentovi dať vlastný prístup, pridajte v jeho nastaveniach za <code>--mcp</code> prepínač <code>--name</code> a ľubovoľný názov, napríklad <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic sa potom na neho bude pýtať pod týmto názvom.</p><!--/review-->
 <p>Ak chcete všetkým agentom zakázať prístup, vypnite možnosť <b data-text="ui-let-agents-connect"></b> v ponuke <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>

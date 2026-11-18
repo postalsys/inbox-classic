@@ -508,7 +508,7 @@ Screenshot: `folders-6-one-account`
 
 ## 28. An AI agent
 
-Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`, `agents-8-draft`
+Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`, `agents-8-draft`, `agents-9-reads`, `agents-10-terminal`
 
 The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named "My AI agent": it starts the app's `--mcp` relay as an agent host would, and runs one conversation through it. Two new unread messages are added first.
 
@@ -529,9 +529,15 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
 - it waits in the Outbox, where it can still be deleted
 - Tools > AI Agents opens
 - it lists the program and what it may do
-- and what its agent did, newest first
+- and what its agent did, newest first: the flag's colour and the watched conversation among it
+- what it read is one row of its program for the hour ("Read 1 message and looked at message lists once"), with no Undo
+- opened (selected on Windows, a disclosure triangle on the Mac, an expander row on Linux), it lists each subject it read and each list it looked
+  at, never what a message says
 - Undo takes the message back
 - and the Outbox is empty
+- Clear asks first and empties the log (Windows: at the end of the pseudo-language's step, after the rows were checked in
+  German and in the pseudo-language)
+- the cleared send still counts against what the agent may send (the store's log keeps it, hidden)
 - the agent writes a draft in Markdown
 - opened, it says which agent wrote it and asks to check the recipients and the text
 - its Markdown is formatted
@@ -539,6 +545,11 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
 - each list shows its sender's address first and whole, the name apart, so a name can not hide it
 - Don't Unsubscribe is the default
 - the agent learns the user said no, and no list was asked
+- an agent started from a terminal (a program called Terminal starting the relay; on Windows a copy of Node.js called
+  WindowsTerminal) is asked about as "Programs started
+  from Terminal" (the Mac) or "Programs started from a terminal (Terminal)", which share what is allowed, and told
+  that `--name` gives one an access of its own
+- the list of programs names it so
 
 ## 29. Marking all read
 
@@ -1086,6 +1097,9 @@ Screenshots: `options-1-language` (the General page), `options-2-reading` (the R
 - Add Mail Account in German (and French on the Mac): the Google and Microsoft sign-in buttons say it in the language, the form as wide as they are
 - started in the pseudo-language, nothing in the main window, the compose window and the account form is left in English
 - and nothing is cut off
+- the AI Agents log, written in English, shows its rows in German, and the question for programs started from a
+  terminal is in German and in the pseudo-language with nothing cut off (`agents-10b-terminal-german`,
+  `agents-10c-terminal-pseudo`, not features)
 - in each language of `pe_i18n::LANGUAGES` but English, the main window, a new message, Add Mail Account, the accounts and each page of Preferences, nothing cut off in them: `tour-<language>-<n>-<view>` (Linux)
 - started in the pseudo-language, each page of Options (Windows) and Settings (the Mac) fits its longer words: long
   check box labels wrap, the window does not grow wider than its fixed content width

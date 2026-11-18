@@ -2,13 +2,13 @@
 <p class="summary">Scegli le autorizzazioni di ogni agente IA, consulta le sue attività e annulla le modifiche.</p>
 <p>La prima volta che l’agente di un programma si collega, Inbox Classic chiede il tuo consenso e mostra il nome del programma. Scegli che cosa può fare:</p>
 <ul>
-    <li>leggere la posta: consultare cartelle, messaggi e conversazioni, cercare messaggi, consultare le regole per i messaggi e cercare contatti</li>
-    <li>organizzare la posta: cambiare lo stato di lettura e i contrassegni, gestire la posta indesiderata, spostare, archiviare ed eliminare messaggi (in <b data-text="folder-deleted"></b>), creare cartelle e annullare l’iscrizione alle mailing list con il tuo consenso</li>
+    <!--review--><li>leggere la posta: consultare cartelle, messaggi e conversazioni, compresi i file PDF, Office e le immagini allegati fino a 10 MB, cercare messaggi, consultare le regole per i messaggi e cercare contatti</li><!--/review-->
+    <!--review--><li>organizzare la posta: cambiare lo stato di lettura, i contrassegni e i loro colori, gestire la posta indesiderata, spostare, archiviare ed eliminare messaggi (in <b data-text="folder-deleted"></b>), creare cartelle, rinominare le tue cartelle, seguire e ignorare conversazioni e annullare l’iscrizione alle mailing list con il tuo consenso</li><!--/review-->
     <li>scrivere bozze che invierai tu e modificare o eliminare quelle create dall’agente, finché non le salvi tu</li>
     <li>inviare posta, con la tua conferma per ogni messaggio</li>
 </ul>
 <p>Poi scegli gli account che può vedere e fai clic su <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> nega l’accesso al programma senza ripetere la richiesta di autorizzazione.</p>
-<p>Un agente non elimina definitivamente i tuoi messaggi, tranne le bozze che ha creato e che non hai ancora salvato. Non modifica le impostazioni dei tuoi account. Può consultare le regole per i messaggi e verificare a quali messaggi si applicherebbero, senza modificarli. Non può creare, modificare o eliminare regole. Leggere un messaggio non lo segna come letto. Le modifiche dell’agente sono subito visibili nell’app.</p>
+<!--review--><p>Un agente non elimina definitivamente i tuoi messaggi, tranne le bozze che ha creato e che non hai ancora salvato. Non modifica le impostazioni dei tuoi account. Può consultare le regole per i messaggi e verificare a quali messaggi si applicherebbero, senza modificarli. Non può creare, modificare o eliminare regole. Non legge mai il contenuto né gli allegati di un messaggio crittografato. Leggere un messaggio non lo segna come letto. Le modifiche dell’agente sono subito visibili nell’app.</p><!--/review-->
 <h2>Annullare l’iscrizione alle mailing list</h2>
 <p>Un agente autorizzato a organizzare la posta può proporti di annullare l’iscrizione alle mailing list. Inbox Classic mostra gli indirizzi dei mittenti e chiede un’unica conferma per tutte le liste selezionate:</p>
 <ul>
@@ -18,10 +18,11 @@
 <p>Un agente non può usare i messaggi della cartella <b data-text="folder-junk"></b> per annullare un’iscrizione. Il limite è di 30 richieste di annullamento autorizzate per programma nelle ultime 24 ore. Contano anche le richieste non riuscite.</p>
 <h2>Vedere e cambiare l’accesso</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> elenca i programmi autorizzati o bloccati e le attività degli agenti, dalla più recente.</p>
+<!--review--><p>Ciò che un agente legge appare in una riga per programma e per ora, ad esempio “Letti 14 messaggi e cercato 3 volte”. <!--os:windows-->Seleziona la riga<!--/os--><!--os:mac,linux-->Apri la riga con la sua freccia<!--/os--> per vedere gli oggetti dei messaggi letti e cosa ha cercato, mai il testo dei messaggi. Il registro conserva gli ultimi 30 giorni. Cancellarlo non cambia quanti messaggi un agente può ancora inviare.</p><!--/review-->
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> permette di modificare le autorizzazioni di un programma.</li>
     <li><b data-text="ui-remove"></b> rimuove un programma e le sue autorizzazioni. Al collegamento successivo ti verrà chiesto di autorizzarlo di nuovo.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> annulla le modifiche allo stato di lettura e ai contrassegni, la classificazione come posta indesiderata, gli spostamenti, le archiviazioni e le eliminazioni. Può anche annullare l’invio di un messaggio ancora in Posta in uscita.</li>
+    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> annulla le modifiche allo stato di lettura, ai contrassegni e ai loro colori, la classificazione come posta indesiderata, gli spostamenti, le archiviazioni e le eliminazioni. Può anche annullare l’invio di un messaggio ancora in Posta in uscita.</li><!--/review-->
 </ul>
 <aside class="warning">Un messaggio può contenere istruzioni ingannevoli per indurre un agente a inoltrare o eliminare la tua posta. Inbox Classic esclude il testo nascosto anche dalla versione mostrata agli agenti e li avvisa di non trattare la posta come istruzioni. Un agente può comunque essere ingannato: concedi solo le autorizzazioni necessarie.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

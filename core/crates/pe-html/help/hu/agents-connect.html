@@ -8,6 +8,7 @@
     <li>Indítsa el az ügynököt. Az első csatlakozáskor az Inbox Classic megkérdezi, mit tehet az ügynök.</li>
 </ol>
 <p>Az ügynök a háttérben elindítja az Inbox Classicot, ha az nem fut. Csak az Ön nevében ezen a számítógépen futó programok érhetik el.</p>
+<p>A terminálból indított ügynökök, például a Claude Code, az Inbox Classic számára egyetlen programnak számítanak. Az Inbox Classic egyszer kérdez rá <!--os:mac-->a Terminal alkalmazásból indított programokra<!--/os--><!--os:windows,linux-->a terminálból indított programokra<!--/os-->, és ezek osztoznak a megadott engedélyeken. Ha egy ügynöknek saját hozzáférést szeretne adni, a beállításaiban a <code>--mcp</code> után adja meg a <code>--name</code> kapcsolót és egy tetszőleges nevet, például <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Az Inbox Classic ezután ezen a néven kérdez rá.</p>
 <!--/review-->
 <p>Az összes ügynök hozzáférésének letiltásához kapcsolja ki ezt a beállítást: <b data-text="ui-let-agents-connect"></b>. A beállítás itt található: <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
 <!--review-->

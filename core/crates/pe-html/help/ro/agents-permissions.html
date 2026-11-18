@@ -2,8 +2,8 @@
 <p class="summary">Stabiliți ce poate face fiecare agent IA cu mesajele dvs., consultați istoricul și anulați acțiuni.</p>
 <p>La prima conectare a agentului unui program, Inbox Classic afișează numele programului și vă cere acordul. Alegeți ce îi permiteți:</p>
 <ul>
-    <li>citirea mesajelor: consultarea folderelor, listelor de mesaje și conversațiilor, căutarea și citirea mesajelor, consultarea regulilor și căutarea persoanelor de contact</li>
-    <li>organizarea mesajelor: marcare ca citite sau necitite, semnalizare, marcare ca nedorite, mutare, arhivare, creare de foldere, mutare în <b data-text="folder-deleted"></b> și dezabonare de la liste de corespondență cu acordul dvs.</li>
+    <!--review--><li>citirea mesajelor: consultarea folderelor, listelor de mesaje și conversațiilor, căutarea și citirea mesajelor, inclusiv a fișierelor PDF, Office și a imaginilor atașate de până la 10 MB, consultarea regulilor și căutarea persoanelor de contact</li><!--/review-->
+    <!--review--><li>organizarea mesajelor: marcare ca citite sau necitite, semnalizare și alegerea culorii semnalizării, marcare ca nedorite, mutare, arhivare, creare de foldere, redenumirea folderelor proprii, urmărirea și ignorarea conversațiilor, mutare în <b data-text="folder-deleted"></b> și dezabonare de la liste de corespondență cu acordul dvs.</li><!--/review-->
     <li>crearea de schițe pentru dvs. și modificarea sau ștergerea definitivă a propriilor schițe, până când le salvați în editor</li>
     <li>trimiterea mesajelor, numai cu aprobarea dvs. pentru fiecare mesaj</li>
 </ul>
@@ -18,10 +18,11 @@
 <p>Agentul nu poate cere dezabonarea folosind mesaje din <b data-text="folder-junk"></b>. Se iau în calcul cererile aprobate în ultimele 24 de ore, inclusiv cele care au eșuat. Limita este de 30 pentru fiecare program, câte o cerere pentru fiecare listă.</p>
 <h2>Consultarea și modificarea accesului</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> afișează programele cărora le-ați permis sau refuzat accesul și istoricul acțiunilor agenților, de la cele mai recente.</p>
+<!--review--><p>Ce citește un agent apare pe un singur rând pentru fiecare program și oră, de exemplu „A citit 14 mesaje și a căutat de 3 ori”. <!--os:windows-->Selectați rândul<!--/os--><!--os:mac,linux-->Deschideți rândul cu săgeata lui<!--/os--> pentru a vedea subiectele citite și ce a căutat, niciodată textul mesajelor. Jurnalul păstrează ultimele 30 de zile. Ștergerea lui nu schimbă numărul de mesaje pe care un agent le mai poate trimite.</p><!--/review-->
 <ul>
     <li>Cu <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> schimbați permisiunile unui program.</li>
     <li>Cu <b data-text="ui-remove"></b> eliminați programul din listă, împreună cu permisiunile și istoricul său. Programul nu este dezinstalat. La următoarea conectare, Inbox Classic vă cere din nou acordul.</li>
-    <li>Cu <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> anulați modificări precum marcarea ca citit, semnalizarea, mutarea, marcarea ca nedorit, arhivarea sau ștergerea. Puteți anula și trimiterea unui mesaj care se află încă în Mesaje de trimis, dar nu puteți retrage un mesaj deja trimis.</li>
+    <!--review--><li>Cu <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> anulați modificări precum marcarea ca citit, semnalizarea sau culoarea ei, mutarea, marcarea ca nedorit, arhivarea sau ștergerea. Puteți anula și trimiterea unui mesaj care se află încă în Mesaje de trimis, dar nu puteți retrage un mesaj deja trimis.</li><!--/review-->
 </ul>
 <aside class="warning">Mesajele altor persoane pot conține instrucțiuni menite să păcălească un agent, de exemplu să vă redirecționeze sau să vă șteargă mesajele. Inbox Classic ascunde de agenți textul care nu vă este afișat și le cere să trateze mesajele ca date, nu ca instrucțiuni de urmat. Un agent poate fi totuși păcălit. Acordați numai permisiunile necesare.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

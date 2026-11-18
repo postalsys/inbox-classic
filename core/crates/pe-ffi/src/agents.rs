@@ -14,8 +14,8 @@ use crate::{PeDraft, guard, ids, into_c_string};
 
 /// What an agent may do, bits for `levels`: read mail
 pub const PE_AGENT_READ: u32 = 1;
-/// Organize it: read state, flags, junk, moves, archiving, new folders, deletes to Deleted Items, and leaving
-/// mailing lists after the user says yes
+/// Organize it: read state, flags and their colours, junk, moves, archiving, new and renamed folders, Watch and Ignore
+/// Conversation, deletes to Deleted Items, and leaving mailing lists after the user says yes
 pub const PE_AGENT_ORGANIZE: u32 = 2;
 /// Write drafts
 pub const PE_AGENT_DRAFTS: u32 = 4;
@@ -622,7 +622,7 @@ pub unsafe extern "C" fn pe_agent_hosts(core: *const PeCore) -> *mut PeAgentHost
                 let (change_title, change_detail) = pe_core::agents::change_text(h);
                 PeAgentHost {
                     id: h.id,
-                    name: strings.add(&h.name),
+                    name: strings.add(&pe_core::agents::host_label(&h.name, &h.path)),
                     path: strings.add(&h.path),
                     allowed: h.allowed,
                     levels: h.levels.0,
@@ -714,25 +714,35 @@ pub unsafe extern "C" fn pe_agent_host_remove(core: *const PeCore, id: i64) -> b
     unsafe { with(core, false, |core| core.remove_agent_host(id).is_ok()) }
 }
 
-/// What an agent did
+/// A row of the log: what an agent did, or a summary of what a program read in an hour
 #[repr(C)]
 pub struct PeAgentLogEntry {
+    /// The entry, for `pe_agent_undo`; 0 for a summary of reads
     pub id: i64,
     /// The program
     pub host: *const c_char,
-    /// Seconds since the Unix epoch
+    /// Seconds since the Unix epoch: when it was done, a summary's last read
     pub at: i64,
-    /// `Moved "Invoice 12" to Archive`, with "(taken back)" once it was
+    /// `Moved "Invoice 12" to Archive`, with "(taken back)" once it was; "Read 14 messages and searched 3 times" for
+    /// a summary. In the language in use, whatever it was when the agent did it
     pub summary: *const c_char,
     /// `pe_agent_undo` can take it back
     pub can_undo: bool,
     /// It was taken back
     pub undone: bool,
+    /// The agent's request it came from (its JSON-RPC id), empty when not known: entries of one call share it
+    pub call_id: *const c_char,
+    /// A summary of what program `host_id` read in the hour that starts at `reads_hour`: the row opens to each read
+    /// (`pe_agent_reads`)
+    pub reads: bool,
+    pub host_id: i64,
+    pub reads_hour: i64,
 }
 
 pub struct PeAgentLog(Rows<PeAgentLogEntry>);
 
-/// The newest `limit` entries of what agents did, newest first. Free with `pe_agent_log_free`.
+/// The newest `limit` rows of the log, newest first: what agents did and, for each program and hour, what it read.
+/// Free with `pe_agent_log_free`.
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -741,16 +751,20 @@ pub unsafe extern "C" fn pe_agent_log(core: *const PeCore, limit: u64) -> *mut P
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(log) = core.agent_log(limit) else {
+            let Ok(log) = core.agent_log_rows(limit) else {
                 return null_mut();
             };
             handed(PeAgentLog(Rows::new(&log, |e, strings| PeAgentLogEntry {
                 id: e.id,
                 host: strings.add(&e.host_name),
                 at: e.at,
-                summary: strings.add(&pe_core::agents::log_text(e)),
-                can_undo: e.entry.undo.is_some() && !e.undone,
+                summary: strings.add(&e.text),
+                can_undo: e.can_undo,
                 undone: e.undone,
+                call_id: strings.add(&e.call_id),
+                reads: e.reads_hour.is_some(),
+                host_id: e.host,
+                reads_hour: e.reads_hour.unwrap_or(0),
             })))
         })
     }
@@ -780,6 +794,61 @@ pub unsafe extern "C" fn pe_agent_log_free(log: *mut PeAgentLog) {
     unsafe { take_back(log) }
 }
 
+/// One read of a summary row: when, and what (a subject, a query, a folder; never what a message says)
+#[repr(C)]
+pub struct PeAgentRead {
+    pub at: i64,
+    /// "Read “Lunch”", "Searched for “invoice”: 4 messages", in the language in use
+    pub text: *const c_char,
+}
+
+pub struct PeAgentReads(Rows<PeAgentRead>);
+
+/// What program `host_id` read in the hour that starts at `hour` (a summary row's `host_id` and `reads_hour`), in the
+/// order it read. Free with `pe_agent_reads_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_reads(core: *const PeCore, host_id: i64, hour: i64) -> *mut PeAgentReads {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(reads) = core.agent_reads_of_hour(host_id, hour) else {
+                return null_mut();
+            };
+            handed(PeAgentReads(Rows::new(&reads, |(at, text), strings| PeAgentRead {
+                at: *at,
+                text: strings.add(text),
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `reads` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_reads_count(reads: *const PeAgentReads) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { reads.as_ref() }.map(|reads| &reads.0))
+}
+
+/// # Safety
+/// `reads` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_reads_get(reads: *const PeAgentReads, index: usize) -> *const PeAgentRead {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { reads.as_ref() }.map(|reads| &reads.0), index)
+}
+
+/// # Safety
+/// `reads` must be NULL or not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_agent_reads_free(reads: *mut PeAgentReads) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(reads) }
+}
+
 /// Takes back what log entry `id` did: NULL when it was, else why not (free with `pe_string_free`)
 ///
 /// # Safety
@@ -795,7 +864,8 @@ pub unsafe extern "C" fn pe_agent_undo(core: *const PeCore, id: i64) -> *mut c_c
     }
 }
 
-/// Forgets what agents did
+/// Clears the log from the window: what agents read is forgotten, what they did hidden (the limits of what an agent may
+/// send still count it until it is 30 days old)
 ///
 /// # Safety
 /// `core` must be a live handle.

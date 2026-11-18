@@ -100,6 +100,10 @@ win-clear-log-ask = Aktivitätsverlauf der Agenten löschen? Die vorgenommenen �
 win-agent-programs = &Programme, deren Agenten Zugriff auf Ihre E-Mails angefordert haben:
 win-change = Ä&ndern...
 win-what-agents-did = &Aktivitätsverlauf der Agenten:
+# review: new
+win-agent-reads = Gelesen von { $from } bis { $to }:
+# review: new
+win-agent-reads-hint = Wählen Sie oben eine Zeile mit Gelesenem aus, um zu sehen, was gelesen wurde.
 win-how-to-connect = So verbinden Sie einen Agenten
 
 ## Anmelde-Apps

@@ -435,7 +435,8 @@ day-sunday = diumenge
 ## Agents d’IA
 
 agent-level-read = Llegir el correu: accedir a carpetes, llistes de missatges, cerques i contingut dels missatges
-agent-level-organize = Organitzar el correu: canviar l’estat de lectura i les banderes, gestionar el correu brossa, moure i arxivar missatges, crear carpetes, suprimir missatges (movent-los a Elements suprimits) i cancel·lar subscripcions a llistes de correu amb la vostra autorització
+# review: changed
+agent-level-organize = Organitzar el correu: canviar l’estat de lectura, les banderes i els seus colors, gestionar el correu brossa, moure i arxivar missatges, crear i canviar el nom de carpetes, seguir i ignorar converses, suprimir missatges (movent-los a Elements suprimits) i cancel·lar subscripcions a llistes de correu amb la vostra autorització
 agent-level-drafts = Escriure esborranys perquè els envieu vós
 agent-level-send = Enviar correu, amb la vostra aprovació per a cada missatge
 agent-connect-title = { $program } vol fer servir el vostre correu
@@ -479,6 +480,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Aquest missatge no es pot llegir.
 agent-encrypted-original = El missatge original està xifrat. Un agent no hi pot respondre ni reenviar-lo perquè no pot xifrar el missatge de sortida.
 agent-encrypted = Aquest missatge està xifrat. Els agents d’IA no poden llegir-ne el contingut. L’usuari ha d’obrir-lo a Inbox Classic.
+# review: new
+agent-too-many-changes = Massa canvis en els últims 30 dies: aquest agent n’ha fet tants com Inbox Classic en desa al registre per a un programa. En podrà fer més quan els més antics tinguin 30 dies.
+# review: new
+agent-too-many-reads = Massa lectures en els últims 30 dies: aquest agent ha llegit tant com Inbox Classic en desa al registre per a un programa. Podrà llegir més quan les lectures més antigues tinguin 30 dies.
 list-encrypted = Missatge xifrat
 agent-log-composed = Ha obert «{ $subject }» en una finestra de composició perquè l’editeu
 agent-log-refused = Heu rebutjat l’enviament de «{ $subject }»
@@ -508,6 +513,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic demana a la llista de correu següent que deixi d’enviar-vos missatges, fent servir l’opció de cancel·lació amb un sol clic. No s’envia res més. Els missatges que ja teniu no es modifiquen ni es mouen.
    *[other] Inbox Classic demana a cadascuna de les llistes de correu següents que deixi d’enviar-vos missatges, fent servir l’opció de cancel·lació amb un sol clic. No s’envia res més. Els missatges que ja teniu no es modifiquen ni es mouen.
 }
+# review: new
+agent-log-flag-color = Ha marcat «{ $subject }» amb bandera { $color ->
+    [red] vermella
+    [orange] taronja
+    [yellow] groga
+    [green] verda
+    [blue] blava
+    [purple] porpra
+   *[gray] grisa
+}
+# review: new
+agent-log-renamed = Ha canviat el nom de la carpeta «{ $old }» a «{ $name }»
+# review: new
+agent-log-watched = Ha començat a seguir la conversa «{ $subject }»
+# review: new
+agent-log-ignored = Ha començat a ignorar la conversa «{ $subject }»
+# review: new
+agent-log-unmarked = Ha deixat de seguir o ignorar la conversa «{ $subject }»
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] ha llegit 1 missatge
+   *[other] ha llegit { $count } missatges
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] ha obert 1 fitxer adjunt
+   *[other] ha obert { $count } fitxers adjunts
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] ha cercat una vegada
+   *[other] ha cercat { $count } vegades
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] ha consultat una llista de missatges una vegada
+   *[other] ha consultat llistes de missatges { $count } vegades
+}
+# each read under that row
+# review: new
+agent-read-message = Ha llegit «{ $subject }»
+# review: new
+agent-read-conversation = { $count ->
+    [one] Ha llegit la conversa «{ $subject }» (1 missatge)
+   *[other] Ha llegit la conversa «{ $subject }» ({ $count } missatges)
+}
+# review: new
+agent-read-attachment = Ha obert «{ $name }» de «{ $subject }»
+# review: new
+agent-read-search = { $count ->
+    [one] Ha cercat «{ $query }»: 1 missatge
+   *[other] Ha cercat «{ $query }»: { $count } missatges
+}
+# review: new
+agent-read-people = Ha cercat persones que comencen per «{ $query }»
+# review: new
+agent-read-list = { $count ->
+    [one] Ha consultat 1 missatge a { $folder }
+   *[other] Ha consultat { $count } missatges a { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Ha consultat 1 missatge nou
+   *[other] Ha consultat { $count } missatges nous
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programes iniciats des de { $terminal }
+# review: new
+agent-terminal-programs-windows = Programes iniciats des d’un terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programes iniciats des d’un terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Un programa iniciat des de { $terminal }
+# review: new
+agent-terminal-program-windows = Un programa iniciat des d’un terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Un programa iniciat des d’un terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } volen fer servir el vostre correu
+# review: new
+agent-connect-terminal-detail = Tots els agents d’IA que inicieu des d’aquest terminal comparteixen l’accés que permeteu aquí. Per donar a un agent el seu propi accés, afegiu --name i un nom que trieu als seus arguments a la configuració MCP de l’agent.
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
 

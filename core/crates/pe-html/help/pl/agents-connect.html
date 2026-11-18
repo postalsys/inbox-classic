@@ -8,6 +8,7 @@
     <li>Uruchom agenta. Przy pierwszym połączeniu Inbox Classic zapyta Cię, co agent może robić.</li>
 </ol>
 <p>Agent uruchamia Inbox Classic w tle, jeśli program nie działa. Dostęp do niego mają tylko programy uruchomione na tym komputerze z Twojego konta.</p>
+<p>Agenci uruchamiani z terminala, na przykład Claude Code, są dla Inbox Classic jednym programem. Inbox Classic pyta raz o <!--os:mac-->programy uruchomione z aplikacji Terminal<!--/os--><!--os:windows,linux-->programy uruchomione z terminala<!--/os-->, a wszystkie one współdzielą to, na co zezwolisz. Aby dać agentowi osobny dostęp, dodaj <code>--name</code> i wybraną przez siebie nazwę po <code>--mcp</code> w jego ustawieniach, na przykład <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic zapyta wtedy o niego pod tą nazwą.</p>
 <!--/review-->
 <p>Aby zablokować dostęp wszystkim agentom, wyłącz opcję <b data-text="ui-let-agents-connect"></b> w oknie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
 <!--review-->

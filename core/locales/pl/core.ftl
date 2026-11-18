@@ -678,7 +678,8 @@ day-sunday = niedziela
 ## AI agents
 
 agent-level-read = Czytanie poczty: przeglądanie folderów, wiadomości i konwersacji, wyszukiwanie wiadomości i kontaktów oraz przeglądanie reguł wiadomości
-agent-level-organize = Porządkowanie poczty: oznaczanie wiadomości jako przeczytane lub nieprzeczytane, zmiana flag i oznaczeń śmieci, przenoszenie i archiwizowanie wiadomości, tworzenie folderów, usuwanie wiadomości przez przeniesienie do folderu Elementy usunięte oraz wypisywanie z list mailingowych za Twoją zgodą
+# review: changed
+agent-level-organize = Porządkowanie poczty: oznaczanie wiadomości jako przeczytane lub nieprzeczytane, zmiana flag, ich kolorów i oznaczeń śmieci, przenoszenie i archiwizowanie wiadomości, tworzenie folderów i zmiana ich nazw, obserwowanie i ignorowanie konwersacji, usuwanie wiadomości przez przeniesienie do folderu Elementy usunięte oraz wypisywanie z list mailingowych za Twoją zgodą
 agent-level-drafts = Pisanie wersji roboczych, które możesz wysłać
 agent-level-send = Wysyłanie poczty, każdej wiadomości dopiero po Twojej zgodzie
 agent-connect-title = { $program } chce korzystać z Twojej poczty
@@ -725,6 +726,10 @@ agent-unreadable = Nie można odczytać tej wiadomości.
 agent-encrypted-original = Ta wiadomość jest zaszyfrowana. Agent nie może na nią odpowiedzieć ani przesłać jej dalej, ponieważ nie może szyfrować wiadomości.
 agent-encrypted = Ta wiadomość jest zaszyfrowana. Agent nie może odczytać jej treści. Użytkownik musi ją otworzyć w programie Inbox Classic.
 # review: new
+agent-too-many-changes = Zbyt wiele zmian w ciągu ostatnich 30 dni: ten agent wprowadził ich tyle, ile Inbox Classic przechowuje w dzienniku dla jednego programu. Będzie mógł wprowadzić kolejne, gdy najstarsze będą miały 30 dni.
+# review: new
+agent-too-many-reads = Zbyt wiele odczytów w ciągu ostatnich 30 dni: ten agent przeczytał tyle, ile Inbox Classic przechowuje w dzienniku dla jednego programu. Będzie mógł czytać dalej, gdy najstarsze odczyty będą miały 30 dni.
+# review: new
 list-encrypted = Zaszyfrowana wiadomość
 agent-log-composed = Otwarto nową wiadomość „{ $subject }”, którą możesz dokończyć
 agent-log-refused = Odrzucono prośbę o wysłanie wiadomości „{ $subject }”
@@ -756,6 +761,106 @@ agent-unsubscribe-detail = { $count ->
     [1] Po zatwierdzeniu Inbox Classic poprosi poniższą listę o zaprzestanie wysyłania Ci wiadomości za pomocą dostępnej funkcji wypisania jednym kliknięciem. Nie są wysyłane wiadomości e-mail. Twoje dotychczasowe wiadomości nie są zmieniane, przenoszone ani usuwane.
    *[other] Po zatwierdzeniu Inbox Classic poprosi każdą z poniższych list o zaprzestanie wysyłania Ci wiadomości za pomocą dostępnej funkcji wypisania jednym kliknięciem. Nie są wysyłane wiadomości e-mail. Twoje dotychczasowe wiadomości nie są zmieniane, przenoszone ani usuwane.
 }
+# review: new
+agent-log-flag-color = Oznaczono „{ $subject }” flagą { $color ->
+    [red] czerwoną
+    [orange] pomarańczową
+    [yellow] żółtą
+    [green] zieloną
+    [blue] niebieską
+    [purple] fioletową
+   *[gray] szarą
+}
+# review: new
+agent-log-renamed = Zmieniono nazwę folderu „{ $old }” na „{ $name }”
+# review: new
+agent-log-watched = Zaczęto obserwować konwersację „{ $subject }”
+# review: new
+agent-log-ignored = Zaczęto ignorować konwersację „{ $subject }”
+# review: new
+agent-log-unmarked = Przestano obserwować lub ignorować konwersację „{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] przeczytano 1 wiadomość
+    [few] przeczytano { $count } wiadomości
+    [many] przeczytano { $count } wiadomości
+   *[other] przeczytano { $count } wiadomości
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] otwarto 1 załącznik
+    [few] otwarto { $count } załączniki
+    [many] otwarto { $count } załączników
+   *[other] otwarto { $count } załączników
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] wyszukiwano raz
+    [few] wyszukiwano { $count } razy
+    [many] wyszukiwano { $count } razy
+   *[other] wyszukiwano { $count } razy
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] przejrzano listę wiadomości raz
+    [few] przeglądano listy wiadomości { $count } razy
+    [many] przeglądano listy wiadomości { $count } razy
+   *[other] przeglądano listy wiadomości { $count } razy
+}
+# each read under that row
+# review: new
+agent-read-message = Przeczytano „{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [one] Przeczytano konwersację „{ $subject }” (1 wiadomość)
+    [few] Przeczytano konwersację „{ $subject }” ({ $count } wiadomości)
+    [many] Przeczytano konwersację „{ $subject }” ({ $count } wiadomości)
+   *[other] Przeczytano konwersację „{ $subject }” ({ $count } wiadomości)
+}
+# review: new
+agent-read-attachment = Otwarto załącznik „{ $name }” z wiadomości „{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [one] Wyszukano „{ $query }”: 1 wiadomość
+    [few] Wyszukano „{ $query }”: { $count } wiadomości
+    [many] Wyszukano „{ $query }”: { $count } wiadomości
+   *[other] Wyszukano „{ $query }”: { $count } wiadomości
+}
+# review: new
+agent-read-people = Wyszukano kontakty zaczynające się od „{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [one] Przejrzano 1 wiadomość w folderze { $folder }
+    [few] Przejrzano { $count } wiadomości w folderze { $folder }
+    [many] Przejrzano { $count } wiadomości w folderze { $folder }
+   *[other] Przejrzano { $count } wiadomości w folderze { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Przejrzano 1 nową wiadomość
+    [few] Przejrzano { $count } nowe wiadomości
+    [many] Przejrzano { $count } nowych wiadomości
+   *[other] Przejrzano { $count } nowych wiadomości
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programy uruchomione z aplikacji { $terminal }
+# review: new
+agent-terminal-programs-windows = Programy uruchomione z terminala ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programy uruchomione z terminala ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Program uruchomiony z aplikacji { $terminal }
+# review: new
+agent-terminal-program-windows = Program uruchomiony z terminala ({ $terminal })
+# review: new
+agent-terminal-program-linux = Program uruchomiony z terminala ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } chcą korzystać z Twojej poczty
+# review: new
+agent-connect-terminal-detail = Wszyscy agenci AI uruchamiani z tego terminala współdzielą dostęp, na który tu zezwolisz. Aby dać jednemu z nich osobny dostęp, dodaj --name i wybraną przez siebie nazwę do jego argumentów w ustawieniach MCP agenta.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -100,6 +100,10 @@ win-clear-log-ask = Cancellare la cronologia delle attività degli agenti? Le mo
 win-agent-programs = &Programmi i cui agenti hanno chiesto l’accesso alla tua posta:
 win-change = &Modifica...
 win-what-agents-did = At&tività degli agenti:
+# review: new
+win-agent-reads = Cosa è stato letto dalle { $from } alle { $to }:
+# review: new
+win-agent-reads-hint = Seleziona sopra una riga di letture per vedere cosa è stato letto.
 win-how-to-connect = Come connettere un agente
 
 ## Sign-in apps

@@ -651,7 +651,8 @@ day-sunday = söndag
 ## AI agents
 
 agent-level-read = Läsa e-post: visa mappar, meddelandelistan och meddelanden samt söka i e-posten
-agent-level-organize = Hantera e-post: ändra lästmarkeringar, flaggor och skräppostmarkeringar, flytta och arkivera meddelanden, skapa mappar, flytta meddelanden till Borttaget och avsluta prenumerationer på e-postlistor med ditt godkännande
+# review: changed
+agent-level-organize = Hantera e-post: ändra lästmarkeringar, flaggor och deras färger samt skräppostmarkeringar, flytta och arkivera meddelanden, skapa och byta namn på mappar, bevaka och ignorera konversationer, flytta meddelanden till Borttaget och avsluta prenumerationer på e-postlistor med ditt godkännande
 agent-level-drafts = Skriva utkast som du kan skicka själv
 agent-level-send = Skicka e-post när du har godkänt varje meddelande
 agent-connect-title = { $program } vill ha åtkomst till din e-post
@@ -696,6 +697,10 @@ agent-unreadable = Det här meddelandet kan inte läsas.
 agent-encrypted-original = Det här meddelandet är krypterat: en agent kan inte svara på det eller vidarebefordra det, eftersom den inte kan kryptera.
 agent-encrypted = Det här meddelandet är krypterat och agenten kan inte läsa innehållet. Du kan öppna det i Inbox Classic.
 # review: new
+agent-too-many-changes = För många ändringar de senaste 30 dagarna: den här agenten har gjort så många som Inbox Classic sparar i loggen för ett program. Den kan göra fler när de äldsta är 30 dagar gamla.
+# review: new
+agent-too-many-reads = För mycket läst de senaste 30 dagarna: den här agenten har läst så mycket som Inbox Classic sparar i loggen för ett program. Den kan läsa mer när de äldsta läsningarna är 30 dagar gamla.
+# review: new
 list-encrypted = Krypterat meddelande
 agent-log-composed = Öppnade ett nytt meddelande för redigering. Ämne: ”{ $subject }”
 agent-log-refused = Du avböjde att skicka meddelandet ”{ $subject }”
@@ -725,6 +730,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic ber e-postlistan nedan att avsluta din prenumeration via listans funktion för avanmälan med ett klick. Inget e-postmeddelande skickas och dina befintliga meddelanden ändras inte.
    *[other] Inbox Classic ber varje e-postlista nedan att avsluta din prenumeration via listans funktion för avanmälan med ett klick. Inget e-postmeddelande skickas och dina befintliga meddelanden ändras inte.
 }
+# review: new
+agent-log-flag-color = Gav ”{ $subject }” { $color ->
+    [red] röd
+    [orange] orange
+    [yellow] gul
+    [green] grön
+    [blue] blå
+    [purple] lila
+   *[gray] grå
+} flagga
+# review: new
+agent-log-renamed = Bytte namn på mappen ”{ $old }” till ”{ $name }”
+# review: new
+agent-log-watched = Började bevaka konversationen ”{ $subject }”
+# review: new
+agent-log-ignored = Började ignorera konversationen ”{ $subject }”
+# review: new
+agent-log-unmarked = Slutade bevaka eller ignorera konversationen ”{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] läste 1 meddelande
+   *[other] läste { $count } meddelanden
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] öppnade 1 bilaga
+   *[other] öppnade { $count } bilagor
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] sökte en gång
+   *[other] sökte { $count } gånger
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] tittade på en meddelandelista en gång
+   *[other] tittade på meddelandelistor { $count } gånger
+}
+# each read under that row
+# review: new
+agent-read-message = Läste ”{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [one] Läste konversationen ”{ $subject }” (1 meddelande)
+   *[other] Läste konversationen ”{ $subject }” ({ $count } meddelanden)
+}
+# review: new
+agent-read-attachment = Öppnade ”{ $name }” i ”{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [one] Sökte efter ”{ $query }”: 1 meddelande
+   *[other] Sökte efter ”{ $query }”: { $count } meddelanden
+}
+# review: new
+agent-read-people = Slog upp personer som börjar med ”{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [one] Tittade på 1 meddelande i mappen ”{ $folder }”
+   *[other] Tittade på { $count } meddelanden i mappen ”{ $folder }”
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Tittade på 1 nytt meddelande
+   *[other] Tittade på { $count } nya meddelanden
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Program som startats från { $terminal }
+# review: new
+agent-terminal-programs-windows = Program som startats från en terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Program som startats från en terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Ett program som startats från { $terminal }
+# review: new
+agent-terminal-program-windows = Ett program som startats från en terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Ett program som startats från en terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } vill ha åtkomst till din e-post
+# review: new
+agent-connect-terminal-detail = Alla AI-agenter som du startar från den här terminalen delar den åtkomst du tillåter här. Om du vill ge en agent egen åtkomst lägger du till --name och ett valfritt namn bland dess argument i agentens MCP-inställningar.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

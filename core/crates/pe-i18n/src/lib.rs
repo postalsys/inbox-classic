@@ -339,10 +339,13 @@ fn pseudo_args(bundle: &Bundle, text: Text, args: &[(&str, Arg)]) -> String {
     let markers: Vec<String> = (0..args.len())
         .map(|index| format!("\u{E000}{index}\u{E001}"))
         .collect();
+    // a value that chooses the words (`{ $color -> [red] ...}`) goes in as it is, or every choice would be the default
+    let selectors = selectors(bundle, text.id());
     let stand_ins: Vec<(&str, Arg)> = args
         .iter()
         .zip(&markers)
         .map(|((name, value), marker)| match value {
+            Arg::Str(_) if selectors.iter().any(|s| s == name) => (*name, value.clone()),
             Arg::Str(_) => (*name, Arg::Str(marker)),
             Arg::Num(n) => (*name, Arg::Num(*n)),
         })
@@ -355,6 +358,32 @@ fn pseudo_args(bundle: &Bundle, text: Text, args: &[(&str, Arg)]) -> String {
         if let Arg::Str(value) = value {
             out = out.replace(marker.as_str(), value);
         }
+    }
+    out
+}
+
+/// The variables a message chooses its words by (`{ $color -> ...}`), in the language's catalog or else English
+fn selectors(bundle: &Bundle, id: &str) -> Vec<String> {
+    use fluent_syntax::ast::{Expression, InlineExpression, Pattern, PatternElement};
+    fn walk(pattern: &Pattern<&str>, out: &mut Vec<String>) {
+        for element in &pattern.elements {
+            if let PatternElement::Placeable {
+                expression: Expression::Select { selector, variants },
+            } = element
+            {
+                if let InlineExpression::VariableReference { id } = selector {
+                    out.push(id.name.to_string());
+                }
+                for variant in variants {
+                    walk(&variant.value, out);
+                }
+            }
+        }
+    }
+    let mut out = Vec::new();
+    let message = bundle.get_message(id).or_else(|| english().get_message(id));
+    if let Some(pattern) = message.and_then(|m| m.value()) {
+        walk(pattern, &mut out);
     }
     out
 }
@@ -378,7 +407,21 @@ fn format(bundle: &Bundle, id: &str, args: &[(&str, Arg)]) -> Option<String> {
 pub fn pseudo(text: &str) -> String {
     let mut out = String::with_capacity(text.len() * 2);
     out.push('[');
-    for c in text.chars() {
+    // a command line option (`--name`) is typed as it is, so it stays as it is
+    let mut option = false;
+    let mut previous = ' ';
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c.is_whitespace() {
+            option = false;
+        } else if c == '-' && previous.is_whitespace() && chars.peek() == Some(&'-') {
+            option = true;
+        }
+        previous = c;
+        if option {
+            out.push(c);
+            continue;
+        }
         out.push(match c {
             'a' => 'á',
             'e' => 'é',

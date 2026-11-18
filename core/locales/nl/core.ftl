@@ -421,7 +421,8 @@ day-sunday = zondag
 ## AI agents
 
 agent-level-read = E-mail lezen: mappen en berichten bekijken en doorzoeken
-agent-level-organize = E-mail ordenen: leesstatus en markeringen wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar Verwijderde items), mappen maken en je na jouw toestemming afmelden voor mailinglijsten
+# review: changed
+agent-level-organize = E-mail ordenen: leesstatus, markeringen en hun kleuren wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar Verwijderde items), mappen maken en hernoemen, gesprekken volgen en negeren en je na jouw toestemming afmelden voor mailinglijsten
 agent-level-drafts = Concepten schrijven die jij verzendt
 agent-level-send = E-mail verzenden, met jouw toestemming voor elk bericht
 agent-connect-title = { $program } wil je e-mail gebruiken
@@ -465,6 +466,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Dit bericht kan niet worden gelezen.
 agent-encrypted-original = Dit bericht is versleuteld: een agent kan het niet beantwoorden of doorsturen, omdat hij niet kan versleutelen.
 agent-encrypted = Dit bericht is versleuteld. AI-agents kunnen de inhoud niet lezen. De gebruiker moet het in Inbox Classic openen.
+# review: new
+agent-too-many-changes = Te veel wijzigingen in de afgelopen 30 dagen: deze agent heeft er zoveel gedaan als Inbox Classic voor één programma in het logboek bewaart. Er kunnen er meer bij zodra de oudste 30 dagen oud zijn.
+# review: new
+agent-too-many-reads = Te veel gelezen in de afgelopen 30 dagen: deze agent heeft zoveel gelezen als Inbox Classic voor één programma in het logboek bewaart. Er kan meer worden gelezen zodra de oudste leesacties 30 dagen oud zijn.
 list-encrypted = Versleuteld bericht
 agent-log-composed = “{ $subject }” geopend als nieuw bericht dat je zelf kunt afmaken
 agent-log-refused = Je hebt “{ $subject }” niet verzonden
@@ -494,6 +499,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Via de afmeldfunctie met één klik vraagt Inbox Classic de onderstaande mailinglijst om je geen berichten meer te sturen. Er wordt verder niets verzonden. Je bestaande berichten blijven ongewijzigd.
    *[other] Via de afmeldfunctie met één klik vraagt Inbox Classic elke onderstaande mailinglijst om je geen berichten meer te sturen. Er wordt verder niets verzonden. Je bestaande berichten blijven ongewijzigd.
 }
+# review: new
+agent-log-flag-color = “{ $subject }” { $color ->
+    [red] rood
+    [orange] oranje
+    [yellow] geel
+    [green] groen
+    [blue] blauw
+    [purple] paars
+   *[gray] grijs
+} gemarkeerd
+# review: new
+agent-log-renamed = De map “{ $old }” hernoemd naar “{ $name }”
+# review: new
+agent-log-watched = Volgen ingeschakeld voor het gesprek “{ $subject }”
+# review: new
+agent-log-ignored = Negeren ingeschakeld voor het gesprek “{ $subject }”
+# review: new
+agent-log-unmarked = Volgen of negeren uitgeschakeld voor het gesprek “{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] 1 bericht gelezen
+   *[other] { $count } berichten gelezen
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] 1 bijlage geopend
+   *[other] { $count } bijlagen geopend
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] één keer gezocht
+   *[other] { $count } keer gezocht
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] één keer een berichtenlijst bekeken
+   *[other] { $count } keer berichtenlijsten bekeken
+}
+# each read under that row
+# review: new
+agent-read-message = “{ $subject }” gelezen
+# review: new
+agent-read-conversation = { $count ->
+    [one] Het gesprek “{ $subject }” gelezen (1 bericht)
+   *[other] Het gesprek “{ $subject }” gelezen ({ $count } berichten)
+}
+# review: new
+agent-read-attachment = De bijlage “{ $name }” van “{ $subject }” geopend
+# review: new
+agent-read-search = { $count ->
+    [one] Gezocht naar “{ $query }”: 1 bericht
+   *[other] Gezocht naar “{ $query }”: { $count } berichten
+}
+# review: new
+agent-read-people = Personen opgezocht die beginnen met “{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [one] 1 bericht bekeken in { $folder }
+   *[other] { $count } berichten bekeken in { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] 1 nieuw bericht bekeken
+   *[other] { $count } nieuwe berichten bekeken
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Programma’s gestart vanuit { $terminal }
+# review: new
+agent-terminal-programs-windows = Programma’s gestart vanuit een terminal ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Programma’s gestart vanuit een terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Een programma gestart vanuit { $terminal }
+# review: new
+agent-terminal-program-windows = Een programma gestart vanuit een terminal ({ $terminal })
+# review: new
+agent-terminal-program-linux = Een programma gestart vanuit een terminal ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } willen je e-mail gebruiken
+# review: new
+agent-connect-terminal-detail = Alle AI-agents die je vanuit deze terminal start, delen de toegang die je hier geeft. Wil je een agent eigen toegang geven, voeg dan --name en een naam naar keuze toe aan zijn argumenten in de MCP-instellingen van de agent.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

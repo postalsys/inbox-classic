@@ -1250,6 +1250,12 @@ void ReadArguments() {
             g_arguments.language = argv[++i];
             continue;
         }
+        // --mcp --name <name>: the name an agent's settings give it for an access of its own, which the relay reads
+        // (pe-mcp); not a file to open
+        if (arg == L"--name" && i + 1 < count) {
+            i++;
+            continue;
+        }
         if (arg != L"--background") {
             keep(arg);
         }

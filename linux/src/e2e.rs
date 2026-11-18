@@ -68,6 +68,9 @@ mod previews;
 /// Step 45a: settings and accounts to another computer
 mod setup;
 
+/// Step 28, continued: the AI Agents log of reads, its language and Clear Log, and programs started from a terminal
+mod agent_log;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";

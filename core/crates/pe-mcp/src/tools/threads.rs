@@ -67,9 +67,17 @@ pub(super) fn list_messages(call: &Call, args: &Args) -> Outcome {
             conversation_rows(call, &search, &rows, &places)?,
         )
     } else {
-        let listed = rows.iter().map(|m| row(m, places.get(&m.folder_id))).collect();
+        let listed = rows
+            .iter()
+            .map(|m| row(m, places.get(&m.folder_id), call.fence))
+            .collect();
         (messages, "messages", listed)
     };
+    let named = match scope {
+        Scope::Folder(folder) => places.get(&folder).map(|p| p.name.clone()),
+        _ => args.0.get("scope").and_then(Value::as_str).map(str::to_string),
+    };
+    call.read("list", rows.len() as u64, &named.unwrap_or_default(), "")?;
     let mut result = json!({
         "total": total,
         "unread": unread,
@@ -104,7 +112,7 @@ fn conversation_rows(
     Ok(rows
         .iter()
         .map(|message| {
-            let mut fields = row(message, places.get(&message.folder_id));
+            let mut fields = row(message, places.get(&message.folder_id), call.fence);
             let place = message.thread.unwrap_or_default();
             let people: Vec<String> = senders
                 .get(&place.thread)
@@ -117,7 +125,7 @@ fn conversation_rows(
                 .unwrap_or_default();
             fields["count"] = json!(place.count.max(1));
             fields["unread_count"] = json!(place.unread);
-            fields["participants"] = json!(people);
+            fields["participants"] = call.fence.wrap_all(&people);
             fields["latest_date"] = fields["date"].take();
             fields
         })
@@ -161,6 +169,10 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
         }
     }
     let places = call.places(&call.host.accounts)?;
+    let first = messages
+        .first()
+        .map(|m| m.agent_subject().to_string())
+        .unwrap_or_default();
     // the newest first while the text lasts, so the oldest are the ones left without
     let mut budget = CONVERSATION_TEXT;
     let mut read: Vec<Value> = Vec::with_capacity(messages.len());
@@ -172,24 +184,26 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
             .agent_message(summary.folder_id, summary.info.uid)
             .map_err(engine)?
         else {
-            let mut fields = super::row_fields(&summary, place);
+            let mut fields = super::row_fields(&summary, place, call.fence);
             fields.insert("text_not_downloaded".into(), json!(true));
             read.push(Value::Object(fields));
             continue;
         };
-        let mut fields = read_fields(&summary, place, &message);
-        let (text, more) = part(&message.written, 0, budget);
+        let mut fields = read_fields(&summary, place, &message, call.fence);
+        let written = call.fence.links(&message.written);
+        let (text, more) = part(&written, 0, budget);
         budget -= text.chars().count();
         if more.is_some() {
             fields.insert("text_cut".into(), json!(true));
         }
-        fields.insert("text".into(), json!(text));
+        fields.insert("text".into(), call.fence.wrap(&text));
         if !message.earlier.is_empty() {
             fields.insert("earlier_messages_left_out".into(), json!(true));
         }
         read.push(Value::Object(fields));
     }
     read.reverse();
+    call.read("conversation", read.len() as u64, &first, "")?;
     Ok(json!({
         "thread": thread,
         "notice": UNTRUSTED,
@@ -217,6 +231,9 @@ pub(super) fn list_changes(call: &Call, args: &Args) -> Outcome {
     let mut rows = call.core.stored_since(&search, since, limit + 1).map_err(engine)?;
     let has_more = rows.len() as u64 > limit;
     rows.truncate(limit as usize);
+    if !rows.is_empty() {
+        call.read("changes", rows.len() as u64, "", "")?;
+    }
     let next = match rows.last() {
         Some(last) if has_more => last.id,
         _ => newest.max(since),
@@ -224,6 +241,6 @@ pub(super) fn list_changes(call: &Call, args: &Args) -> Outcome {
     Ok(json!({
         "next_cursor": next,
         "has_more": has_more,
-        "messages": rows.iter().map(|m| row(m, places.get(&m.folder_id))).collect::<Vec<_>>(),
+        "messages": rows.iter().map(|m| row(m, places.get(&m.folder_id), call.fence)).collect::<Vec<_>>(),
     }))
 }

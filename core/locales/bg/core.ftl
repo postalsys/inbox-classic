@@ -430,7 +430,8 @@ day-sunday = неделя
 ## AI agents
 
 agent-level-read = Четене на поща: преглед на папки и съобщения, търсене
-agent-level-organize = Подреждане на поща: маркиране като прочетено или непрочетено, промяна на флагове, обработка на нежелана поща, преместване и архивиране, създаване на папки, изтриване чрез преместване в „Изтрити“ и отписване от пощенски списъци с ваше одобрение
+# review: changed
+agent-level-organize = Подреждане на поща: маркиране като прочетено или непрочетено, промяна на флагове и техните цветове, обработка на нежелана поща, преместване и архивиране, създаване и преименуване на папки, следене и игнориране на разговори, изтриване чрез преместване в „Изтрити“ и отписване от пощенски списъци с ваше одобрение
 agent-level-drafts = Писане на чернови, които вие изпращате
 agent-level-send = Изпращане на поща: всяко съобщение изисква вашето потвърждение
 agent-connect-title = { $program } иска да използва пощата ви
@@ -474,6 +475,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Това съобщение не може да бъде прочетено.
 agent-encrypted-original = Това съобщение е шифровано: агент не може да отговори на него или да го препрати, тъй като не може да шифрова.
 agent-encrypted = Това съобщение е шифровано. Агентите с ИИ не могат да прочетат съдържанието му. Потребителят трябва да го отвори в Inbox Classic.
+# review: new
+agent-too-many-changes = Твърде много промени през последните 30 дни: този агент е направил толкова, колкото Inbox Classic пази в дневника за една програма. Ще може да направи още, когато най-старите станат на 30 дни.
+# review: new
+agent-too-many-reads = Твърде много четене през последните 30 дни: този агент е прочел толкова, колкото Inbox Classic пази в дневника за една програма. Ще може да чете още, когато най-старите четения станат на 30 дни.
 list-encrypted = Шифровано съобщение
 agent-log-composed = Отворено за довършване: „{ $subject }“
 agent-log-refused = Отказано изпращане: „{ $subject }“
@@ -503,6 +508,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic изпраща заявка за отписване до списъка по-долу чрез предлаганата от него възможност за отписване с едно щракване. Нищо друго не се изпраща. Съществуващите съобщения не се променят и не се преместват.
    *[other] Inbox Classic изпраща заявка за отписване до всеки от списъците по-долу чрез предлаганата от съответния списък възможност за отписване с едно щракване. Нищо друго не се изпраща. Съществуващите съобщения не се променят и не се преместват.
 }
+# review: new
+agent-log-flag-color = Маркирано с флаг: „{ $subject }“, цвят: { $color ->
+    [red] червен
+    [orange] оранжев
+    [yellow] жълт
+    [green] зелен
+    [blue] син
+    [purple] лилав
+   *[gray] сив
+}
+# review: new
+agent-log-renamed = Папката „{ $old }“ е преименувана на „{ $name }“
+# review: new
+agent-log-watched = Разговорът „{ $subject }“ се следи
+# review: new
+agent-log-ignored = Разговорът „{ $subject }“ се пренебрегва
+# review: new
+agent-log-unmarked = Разговорът „{ $subject }“ вече не се следи и не се пренебрегва
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] прочете 1 съобщение
+   *[other] прочете { $count } съобщения
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] отвори 1 прикачен файл
+   *[other] отвори { $count } прикачени файла
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] потърси веднъж
+   *[other] потърси { $count } пъти
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] прегледа списък със съобщения веднъж
+   *[other] прегледа списъци със съобщения { $count } пъти
+}
+# each read under that row
+# review: new
+agent-read-message = Прочете „{ $subject }“
+# review: new
+agent-read-conversation = { $count ->
+    [one] Прочете разговора „{ $subject }“ (1 съобщение)
+   *[other] Прочете разговора „{ $subject }“ ({ $count } съобщения)
+}
+# review: new
+agent-read-attachment = Отвори „{ $name }“ от „{ $subject }“
+# review: new
+agent-read-search = { $count ->
+    [one] Потърси „{ $query }“: 1 съобщение
+   *[other] Потърси „{ $query }“: { $count } съобщения
+}
+# review: new
+agent-read-people = Потърси хора по първите букви „{ $query }“
+# review: new
+agent-read-list = { $count ->
+    [one] Прегледа 1 съобщение в „{ $folder }“
+   *[other] Прегледа { $count } съобщения в „{ $folder }“
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Прегледа 1 ново съобщение
+   *[other] Прегледа { $count } нови съобщения
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Програми, стартирани от { $terminal }
+# review: new
+agent-terminal-programs-windows = Програми, стартирани от терминал ({ $terminal })
+# review: new
+agent-terminal-programs-linux = Програми, стартирани от терминал ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Програма, стартирана от { $terminal }
+# review: new
+agent-terminal-program-windows = Програма, стартирана от терминал ({ $terminal })
+# review: new
+agent-terminal-program-linux = Програма, стартирана от терминал ({ $terminal })
+# review: new
+agent-connect-title-terminal = { $programs } искат да използват пощата ви
+# review: new
+agent-connect-terminal-detail = Всеки ИИ агент, който стартирате от този терминал, споделя достъпа, който разрешите тук. За да има агентът собствен достъп, добавете --name и избрано от вас име към аргументите му в MCP настройките на агента.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

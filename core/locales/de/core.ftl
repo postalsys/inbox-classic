@@ -414,7 +414,8 @@ day-sunday = Sonntag
 ## AI agents
 
 agent-level-read = E-Mails lesen: Ordner und Nachrichten anzeigen und durchsuchen
-agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
+# review: changed
+agent-level-organize = E-Mails verwalten: Lesestatus, Kennzeichnungen und ihre Farben ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen und umbenennen, Unterhaltungen beobachten und ignorieren und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
 agent-level-drafts = Entwürfe erstellen, die Sie selbst senden
 agent-level-send = E-Mail senden, jede Nachricht erst nach Ihrer Zustimmung
 agent-connect-title = { $program } möchte auf Ihre E-Mails zugreifen
@@ -456,6 +457,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Diese Nachricht kann nicht gelesen werden.
 agent-encrypted-original = Agenten können diese verschlüsselte Nachricht weder beantworten noch weiterleiten, da sie keine Nachrichten verschlüsseln können.
 agent-encrypted = Diese Nachricht ist verschlüsselt. KI-Agenten können ihren Inhalt nicht lesen. Der Benutzer muss sie selbst in Inbox Classic öffnen.
+# review: new
+agent-too-many-changes = Zu viele Änderungen in den letzten 30 Tagen: Dieser Agent hat so viele vorgenommen, wie Inbox Classic für ein Programm im Protokoll aufbewahrt. Weitere sind möglich, sobald die ältesten 30 Tage alt sind.
+# review: new
+agent-too-many-reads = Zu viele Lesezugriffe in den letzten 30 Tagen: Dieser Agent hat so viel gelesen, wie Inbox Classic für ein Programm im Protokoll aufbewahrt. Weiteres Lesen ist möglich, sobald die ältesten Zugriffe 30 Tage alt sind.
 list-encrypted = Verschlüsselte Nachricht
 agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster geöffnet
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
@@ -485,6 +490,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic fordert die unten aufgeführte Mailingliste über deren Ein-Klick-Abmeldung auf, Ihnen keine weiteren Nachrichten zu senden. Es wird nur diese Abmeldeanfrage gesendet. Ihre vorhandenen Nachrichten bleiben unverändert.
    *[other] Inbox Classic fordert die unten aufgeführten Mailinglisten über deren Ein-Klick-Abmeldung auf, Ihnen keine weiteren Nachrichten zu senden. Es werden nur diese Abmeldeanfragen gesendet. Ihre vorhandenen Nachrichten bleiben unverändert.
 }
+# review: new
+agent-log-flag-color = „{ $subject }“ { $color ->
+    [red] rot
+    [orange] orange
+    [yellow] gelb
+    [green] grün
+    [blue] blau
+    [purple] lila
+   *[gray] grau
+} gekennzeichnet
+# review: new
+agent-log-renamed = Ordner „{ $old }“ in „{ $name }“ umbenannt
+# review: new
+agent-log-watched = Unterhaltung „{ $subject }“ beobachtet
+# review: new
+agent-log-ignored = Unterhaltung „{ $subject }“ ignoriert
+# review: new
+agent-log-unmarked = Unterhaltung „{ $subject }“ nicht mehr beobachtet oder ignoriert
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] 1 Nachricht gelesen
+   *[other] { $count } Nachrichten gelesen
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] 1 Anlage geöffnet
+   *[other] { $count } Anlagen geöffnet
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] einmal gesucht
+   *[other] { $count }-mal gesucht
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] einmal eine Nachrichtenliste angesehen
+   *[other] { $count }-mal Nachrichtenlisten angesehen
+}
+# each read under that row
+# review: new
+agent-read-message = „{ $subject }“ gelesen
+# review: new
+agent-read-conversation = { $count ->
+    [one] Unterhaltung „{ $subject }“ gelesen (1 Nachricht)
+   *[other] Unterhaltung „{ $subject }“ gelesen ({ $count } Nachrichten)
+}
+# review: new
+agent-read-attachment = „{ $name }“ aus „{ $subject }“ geöffnet
+# review: new
+agent-read-search = { $count ->
+    [one] Nach „{ $query }“ gesucht: 1 Nachricht
+   *[other] Nach „{ $query }“ gesucht: { $count } Nachrichten
+}
+# review: new
+agent-read-people = Personen nachgeschlagen, die mit „{ $query }“ beginnen
+# review: new
+agent-read-list = { $count ->
+    [one] 1 Nachricht in { $folder } angesehen
+   *[other] { $count } Nachrichten in { $folder } angesehen
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] 1 neue Nachricht angesehen
+   *[other] { $count } neue Nachrichten angesehen
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Aus { $terminal } gestartete Programme
+# review: new
+agent-terminal-programs-windows = Aus einem Terminal ({ $terminal }) gestartete Programme
+# review: new
+agent-terminal-programs-linux = Aus einem Terminal ({ $terminal }) gestartete Programme
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Ein aus { $terminal } gestartetes Programm
+# review: new
+agent-terminal-program-windows = Ein aus einem Terminal ({ $terminal }) gestartetes Programm
+# review: new
+agent-terminal-program-linux = Ein aus einem Terminal ({ $terminal }) gestartetes Programm
+# review: new
+agent-connect-title-terminal = { $programs } möchten auf Ihre E-Mails zugreifen
+# review: new
+agent-connect-terminal-detail = Alle KI-Agenten, die Sie aus diesem Terminal starten, teilen sich den Zugriff, den Sie hier erlauben. Um einem Agenten eigenen Zugriff zu geben, fügen Sie in seinen MCP-Einstellungen --name und einen Namen Ihrer Wahl zu seinen Argumenten hinzu.
 
 ## Keys
 

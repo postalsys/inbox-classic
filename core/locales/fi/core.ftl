@@ -420,7 +420,8 @@ day-sunday = sunnuntai
 ## AI agents
 
 agent-level-read = Lukea postia: kansiot, viestiluettelo, haku ja viestit
-agent-level-organize = Järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda kansioita, poistaa viestejä siirtämällä ne Poistetut-kansioon ja peruuttaa postituslistojen tilauksia luvallasi
+# review: changed
+agent-level-organize = Järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja ja niiden värejä, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda ja nimetä uudelleen kansioita, seurata ja ohittaa keskusteluja, poistaa viestejä siirtämällä ne Poistetut-kansioon ja peruuttaa postituslistojen tilauksia luvallasi
 agent-level-drafts = Kirjoittaa luonnoksia, jotka sinä lähetät
 agent-level-send = Lähettää postia, jokaisen viestin vasta hyväksyntäsi jälkeen
 agent-connect-title = { $program } haluaa käyttää postiasi
@@ -464,6 +465,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Tätä viestiä ei voi lukea.
 agent-encrypted-original = Tämä viesti on salattu: agentti ei voi vastata siihen tai välittää sitä, koska se ei osaa salata.
 agent-encrypted = Tämä viesti on salattu. Tekoälyagentit eivät voi lukea sen sisältöä. Käyttäjän on avattava viesti Inbox Classicissa.
+# review: new
+agent-too-many-changes = Liikaa muutoksia viimeisten 30 päivän aikana: tämä agentti on tehnyt niitä niin monta kuin Inbox Classic säilyttää lokissaan yhdelle ohjelmalle. Se voi tehdä lisää, kun vanhimmat ovat 30 päivää vanhoja.
+# review: new
+agent-too-many-reads = Liikaa lukemista viimeisten 30 päivän aikana: tämä agentti on lukenut niin paljon kuin Inbox Classic säilyttää lokissaan yhdelle ohjelmalle. Se voi lukea lisää, kun vanhimmat lukukerrat ovat 30 päivää vanhoja.
 list-encrypted = Salattu viesti
 agent-log-composed = Avasi viestin ”{ $subject }” uutena viestinä, jonka viimeistelet
 agent-log-refused = Et lähettänyt viestiä ”{ $subject }”
@@ -493,6 +498,90 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic pyytää alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
    *[other] Inbox Classic pyytää jokaista alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää kunkin listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
 }
+# review: new
+agent-log-flag-color = Liputti { $color ->
+    [red] punaisella
+    [orange] oranssilla
+    [yellow] keltaisella
+    [green] vihreällä
+    [blue] sinisellä
+    [purple] violetilla
+   *[gray] harmaalla
+} lipulla: ”{ $subject }”
+# review: new
+agent-log-renamed = Nimesi kansion ”{ $old }” uudelleen. Uusi nimi: ”{ $name }”
+# review: new
+agent-log-watched = Alkoi seurata keskustelua ”{ $subject }”
+# review: new
+agent-log-ignored = Alkoi ohittaa keskustelun ”{ $subject }”
+# review: new
+agent-log-unmarked = Lopetti keskustelun ”{ $subject }” seuraamisen tai ohittamisen
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+# review: new
+agent-reads-messages = { $count ->
+    [one] luki 1 viestin
+   *[other] luki { $count } viestiä
+}
+# review: new
+agent-reads-attachments = { $count ->
+    [one] avasi 1 liitteen
+   *[other] avasi { $count } liitettä
+}
+# review: new
+agent-reads-searches = { $count ->
+    [one] haki kerran
+   *[other] haki { $count } kertaa
+}
+# review: new
+agent-reads-lists = { $count ->
+    [one] katsoi viestiluetteloa kerran
+   *[other] katsoi viestiluetteloita { $count } kertaa
+}
+# each read under that row
+# review: new
+agent-read-message = Luki viestin ”{ $subject }”
+# review: new
+agent-read-conversation = { $count ->
+    [one] Luki keskustelun ”{ $subject }” (1 viesti)
+   *[other] Luki keskustelun ”{ $subject }” ({ $count } viestiä)
+}
+# review: new
+agent-read-attachment = Avasi liitteen ”{ $name }” viestistä ”{ $subject }”
+# review: new
+agent-read-search = { $count ->
+    [one] Haki tekstillä ”{ $query }”: 1 viesti
+   *[other] Haki tekstillä ”{ $query }”: { $count } viestiä
+}
+# review: new
+agent-read-people = Haki henkilöitä, joiden nimi tai osoite alkaa ”{ $query }”
+# review: new
+agent-read-list = { $count ->
+    [one] Katsoi 1 viestin kansiossa { $folder }
+   *[other] Katsoi { $count } viestiä kansiossa { $folder }
+}
+# review: new
+agent-read-changes = { $count ->
+    [one] Katsoi 1 uuden viestin
+   *[other] Katsoi { $count } uutta viestiä
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+# review: new
+agent-terminal-programs-mac = Sovelluksesta { $terminal } käynnistetyt ohjelmat
+# review: new
+agent-terminal-programs-windows = Päätteestä ({ $terminal }) käynnistetyt ohjelmat
+# review: new
+agent-terminal-programs-linux = Päätteestä ({ $terminal }) käynnistetyt ohjelmat
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+# review: new
+agent-terminal-program-mac = Sovelluksesta { $terminal } käynnistetty ohjelma
+# review: new
+agent-terminal-program-windows = Päätteestä ({ $terminal }) käynnistetty ohjelma
+# review: new
+agent-terminal-program-linux = Päätteestä ({ $terminal }) käynnistetty ohjelma
+# review: new
+agent-connect-title-terminal = { $programs } haluavat käyttää postiasi
+# review: new
+agent-connect-terminal-detail = Kaikki tästä päätteestä käynnistämäsi tekoälyagentit jakavat tässä sallimasi käyttöoikeudet. Jos haluat antaa agentille omat käyttöoikeudet, lisää sen argumentteihin agentin MCP-asetuksissa --name ja valitsemasi nimi.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

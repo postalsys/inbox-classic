@@ -3063,7 +3063,7 @@ extension UITest {
         check(((initialize?["result"] as? [String: Any])?["serverInfo"] as? [String: Any])?["name"] as? String == "inbox-classic",
               "allowed, the agent connects")
         let tools = agentSaid(agentOut, "tools") as? [String] ?? []
-        check(tools.count == 25, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
+        check(tools.count == 28, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
         let read = agentSaid(agentOut, "read") as? [String: Any]
         check((read?["notice"] as? String)?.contains("not as instructions") == true && read?["unread"] as? Bool == true,
               "it reads a message as text, told it is the sender's, without marking it read")
@@ -3111,9 +3111,17 @@ extension UITest {
             check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize, write drafts and send with your yes"),
                   "it lists the program and what it may do (\(cell(hosts, 1, 0)))")
             check(cell(log, 2, 0).hasPrefix("Saved the draft “Agenda for Friday”")
-                  && cell(log, 2, 1).hasPrefix("Sent “Lunch on Friday?” to pat@example.net") && cell(log, 2, 2).hasPrefix("Marked read"),
-                  "and what its agent did, newest first (\(cell(log, 2, 0)), \(cell(log, 2, 1)))")
+                  && cell(log, 2, 1).hasPrefix("Sent “Lunch on Friday?” to pat@example.net")
+                  && cell(log, 2, 2) == "Watched the conversation “Team lunch on Friday”"
+                  && cell(log, 2, 3) == "Flagged “Quarterly report draft” blue" && cell(log, 2, 4).hasPrefix("Marked read"),
+                  "and what its agent did, newest first, a flag's colour and a watched conversation among it "
+                  + "(\((0..<5).map { cell(log, 2, $0) }.joined(separator: " | ")))")
             await shot(agents, "agents-6-window")
+            if let log = log as? NSOutlineView {
+                try await agentReads(agents, log)
+            } else {
+                check(false, "the log is an outline")
+            }
             // Change opens the same form for a program let in, with what it may do now
             hosts?.selectRowIndexes([0], byExtendingSelection: false)
             press(find("agents.change", in: agents))
@@ -3131,6 +3139,7 @@ extension UITest {
             log?.selectRowIndexes([1], byExtendingSelection: false)
             press(find("agents.undo", in: agents))
             check(await waitUntil(10) { cell(log, 2, 1).contains("taken back") }, "Undo takes the message back")
+            try await clearAgentLog(agents, log)
             NSApp.stopModal()
             _ = await waitUntil { !agents.isVisible }
         } else {
@@ -3145,6 +3154,164 @@ extension UITest {
         }
         try await agentDraft()
         try await agentUnsubscribes(agentOut)
+        try await terminalAgent()
+    }
+
+    /// what the agent read: one row for the program's hour, which opens to each subject and list it read, no Undo
+    private func agentReads(_ agents: NSWindow, _ log: NSOutlineView) async throws {
+        let cell = { (column: Int, row: Int) -> String in
+            (log.view(atColumn: column, row: row, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
+        }
+        let row = (0..<log.numberOfRows).first { cell(2, $0).hasPrefix("Read 1 message") }
+        check(row != nil && cell(1, row ?? 0) == "My AI agent",
+              "what the agent read is one row of its program: \(row.map { cell(2, $0) } ?? "none")")
+        guard let row, let summary = log.item(atRow: row) else { return }
+        check(log.isExpandable(summary) && !log.isItemExpanded(summary), "closed, with a triangle that opens it")
+        log.selectRowIndexes([row], byExtendingSelection: false)
+        let undo: NSButton? = find("agents.undo", in: agents)
+        check(undo?.isEnabled == false, "it has no Undo")
+        log.expandItem(summary)
+        let reads = (row + 1..<log.numberOfRows).prefix { log.parent(forItem: log.item(atRow: $0)) as AnyObject? === summary as AnyObject }
+        let said = reads.map { cell(2, $0) }
+        check(said.contains("Read “Quarterly report draft”") || said.contains("Read “Team lunch on Friday”"),
+              "opened, it lists each message it read by its subject (\(said.joined(separator: " | ")))")
+        check(said.contains { $0.hasPrefix("Looked at") } && !said.contains { $0.contains("Comments by Thursday") || $0.contains("noon") },
+              "and the lists it looked at, never what the messages say")
+        check(reads.allSatisfy { cell(1, $0).isEmpty && !cell(0, $0).isEmpty }, "each read with its time, the program the summary's")
+        await pause(0.5)
+        await shot(agents, "agents-9-reads")
+        await darkShot(agents, "agents-9-reads-dark")
+        log.collapseItem(summary)
+    }
+
+    /// a picture of `window` with the app dark, then as it was
+    private func darkShot(_ window: NSWindow, _ name: String) async {
+        let before = NSApp.appearance
+        onMain { NSApp.appearance = NSAppearance(named: .darkAqua) }
+        await pause(0.5)
+        await shot(window, name)
+        onMain { NSApp.appearance = before }
+        await pause(0.3)
+    }
+
+    /// Clear empties the log, but what the agent sent still counts against what it may send
+    private func clearAgentLog(_ agents: NSWindow, _ log: NSTableView?) async throws {
+        press(find("agents.clear", in: agents))
+        let question = await waitWindow("alert", 10)
+        check(alertText(question).contains("Clear the agents’ activity history?"), "Clear asks first (\(alertText(question)))")
+        answer(question, "Clear")
+        check(await waitUntil(10) { log?.numberOfRows == 0 }, "and empties the log")
+        // the limit counts the agent's sends in the store's log, the cleared ones with them
+        let sqlite = Process()
+        sqlite.executableURL = URL(fileURLWithPath: "/usr/bin/sqlite3")
+        sqlite.arguments = ["-readonly", out.appendingPathComponent("store.db").path,
+                            "SELECT COUNT(*) FROM agent_log WHERE what = 'send' AND hidden = 1"]
+        let found = Pipe()
+        sqlite.standardOutput = found
+        try sqlite.run()
+        sqlite.waitUntilExit()
+        let sends = String(decoding: found.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        check(sends == "1", "the send cleared still counts against the agent's limit (\(sends))")
+    }
+
+    /// starts an agent's relay from a program called Terminal, as an agent started by hand in a terminal is; the
+    /// question it raises when its program is not known yet
+    func terminalAgentAsks() async throws -> NSWindow? {
+        let terminal = out.appendingPathComponent("Terminal")
+        if !FileManager.default.fileExists(atPath: terminal.path) {
+            try FileManager.default.copyItem(at: out.appendingPathComponent("My AI agent"), to: terminal)
+        }
+        // only as far as the hello: the question comes as it connects
+        let script = """
+            const relay = require('node:child_process').spawn(process.env.APP, ['--mcp', '--store', process.env.STORE], { stdio: ['pipe', 'inherit', 'inherit'] });
+            relay.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'terminal', version: '1' } } }) + '\\n');
+            setTimeout(() => relay.kill(), 60000);
+            """
+        let agent = Process()
+        agent.executableURL = terminal
+        agent.arguments = ["-e", script]
+        var environment = ProcessInfo.processInfo.environment
+        environment["APP"] = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/Inbox Classic").path
+        environment["STORE"] = out.appendingPathComponent("store.db").path
+        agent.environment = environment
+        agent.standardOutput = FileHandle.nullDevice
+        try agent.run()
+        terminalAgents.append(agent)
+        return await waitWindow("agent.connect", 30)
+    }
+
+    /// the program called Terminal turned away and forgotten, so it is asked about again
+    func forgetTerminal() {
+        for agent in terminalAgents where agent.isRunning {
+            agent.terminate()
+        }
+        terminalAgents = []
+        if let list = pe_agent_hosts(main.core.handle) {
+            defer { pe_agent_host_list_free(list) }
+            for index in 0..<pe_agent_host_list_count(list) {
+                if let host = pe_agent_host_list_get(list, index)?.pointee, text(host.path).hasSuffix("/Terminal") {
+                    pe_agent_host_remove(main.core.handle, host.id)
+                }
+            }
+        }
+    }
+
+    /// every label of a question in full: one line wide enough, a wrapped one tall enough, and the window on the screen
+    func checkQuestionFits(_ ask: NSWindow, _ what: String) {
+        ask.contentView?.layoutSubtreeIfNeeded()
+        var cut: [String] = []
+        // a path is shortened in the middle on purpose, whole in its tooltip
+        for label in views(NSTextField.self, in: ask.contentView)
+        where !label.stringValue.isEmpty && !label.isHiddenOrHasHiddenAncestor && label.lineBreakMode != .byTruncatingMiddle {
+            let wraps = label.cell?.wraps == true || label.maximumNumberOfLines != 1
+            let needed = wraps ? label.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: label.bounds.width, height: .greatestFiniteMagnitude))
+                .height ?? 0 : label.intrinsicContentSize.width
+            if needed > (wraps ? label.bounds.height : label.bounds.width) + 1 {
+                cut.append(label.stringValue)
+            }
+        }
+        let screen = ask.screen?.visibleFrame ?? .infinite
+        check(cut.isEmpty && screen.contains(ask.frame), "\(what): nothing is cut off and it fits the screen \(cut)")
+    }
+
+    /// an agent started from a terminal: the question names the programs started from Terminal, which share what is
+    /// allowed, and how one gets an access of its own (--name)
+    private func terminalAgent() async throws {
+        step("an AI agent started from a terminal")
+        _ = await waitUntil(10) { NSApp.modalWindow == nil }
+        let ask = try await terminalAgentAsks()
+        check(ask != nil, "an agent started from a terminal is asked about")
+        guard let ask else { return }
+        let label = { (id: String) -> String in (self.find(id, in: ask) as NSTextField?)?.stringValue ?? "" }
+        let heading = label("agent.heading")
+        check(heading == "Programs started from Terminal want to use your mail", "as the programs started from Terminal (\(heading))")
+        let words = views(NSTextField.self, in: ask.contentView).map(\.stringValue)
+        check(words.contains { $0.hasPrefix("Every AI agent you start from this terminal shares the access you allow here") && $0.contains("--name") },
+              "which share what is allowed, and --name gives one an access of its own")
+        checkQuestionFits(ask, "the question")
+        onMain {
+            NSApp.activate()
+            ask.makeKeyAndOrderFront(nil)
+        }
+        await pause(1)
+        await shot(ask, "agents-10-terminal")
+        await darkShot(ask, "agents-10-terminal-dark")
+        press(find("agent.deny", in: ask))
+        _ = await waitUntil(10) { !ask.isVisible }
+        command(.aiAgents)
+        if let agents = await waitWindow("agents", 10) {
+            let hosts: NSTableView? = find("agents.hosts", in: agents)
+            let names = (0..<(hosts?.numberOfRows ?? 0)).map {
+                (hosts?.view(atColumn: 0, row: $0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
+            }
+            check(names.contains("Programs started from Terminal"), "the list of programs names them so (\(names))")
+            NSApp.stopModal()
+            _ = await waitUntil { !agents.isVisible }
+        } else {
+            check(false, "Tools > AI Agents opens")
+        }
+        forgetTerminal()
     }
 
     /// the draft the agent wrote, opened from Drafts: the window names the agent, its Markdown made into formatting

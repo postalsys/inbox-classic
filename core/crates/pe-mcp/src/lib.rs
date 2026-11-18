@@ -23,5 +23,5 @@ pub use host::launching_program;
 pub use host::pick as host_of;
 #[cfg(windows)]
 pub use relay::set_pipe_check;
-pub use relay::{RelayError, relay, relay_for_store};
+pub use relay::{RelayError, named_by_arguments, relay, relay_for_store};
 pub use server::{Listener, McpServer, serve};

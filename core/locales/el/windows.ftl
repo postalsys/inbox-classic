@@ -101,6 +101,10 @@ win-clear-log-ask = Να διαγραφεί το ιστορικό δραστηρ
 win-agent-programs = &Προγράμματα των οποίων οι πράκτορες ζήτησαν πρόσβαση στην αλληλογραφία σας:
 win-change = &Αλλαγή...
 win-what-agents-did = &Δραστηριότητα πρακτόρων:
+# review: new
+win-agent-reads = Τι διαβάστηκε από { $from } έως { $to }:
+# review: new
+win-agent-reads-hint = Επιλέξτε παραπάνω μια γραμμή αναγνώσεων για να δείτε τι διαβάστηκε.
 win-how-to-connect = Πώς να συνδέσετε έναν πράκτορα
 
 ## Sign-in apps

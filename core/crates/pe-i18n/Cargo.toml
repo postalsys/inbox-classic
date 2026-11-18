@@ -9,7 +9,6 @@ license.workspace = true
 
 [dependencies]
 fluent-bundle = "0.16"
+fluent-syntax = "0.12"
 unic-langid = "0.9"
 
-[dev-dependencies]
-fluent-syntax = "0.12"

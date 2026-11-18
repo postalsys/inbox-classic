@@ -106,6 +106,7 @@ pub(super) fn test_rule(call: &Call, args: &Args) -> Outcome {
         ..everywhere(&call.host)
     };
     let (matches, _) = call.core.count_search(&search).map_err(engine)?;
+    call.read("search", matches, &query, "")?;
     let samples = call
         .core
         .search(&search, Sort::default(), 0, RULE_SAMPLES)
@@ -114,7 +115,7 @@ pub(super) fn test_rule(call: &Call, args: &Args) -> Outcome {
     Ok(json!({
         "query": query,
         "matches": matches,
-        "samples": samples.iter().map(|m| row(m, places.get(&m.folder_id))).collect::<Vec<_>>(),
+        "samples": samples.iter().map(|m| row(m, places.get(&m.folder_id), call.fence)).collect::<Vec<_>>(),
         "note": "Nothing was changed: this is what a rule with this query would find in the Inbox now."
     }))
 }
@@ -126,12 +127,13 @@ pub(super) fn find_contacts(call: &Call, args: &Args) -> Outcome {
     }
     let limit = args.size("limit", 10)?.clamp(1, MAX_PEOPLE);
     let (people, every) = call.core.agent_people(&call.host, &query, limit).map_err(engine)?;
+    call.read("people", people.len() as u64, &query, "")?;
     let listed: Vec<Value> = people
         .iter()
         .map(|p| {
             json!({
-                "name": p.name,
-                "address": p.address,
+                "name": call.fence.wrap(&p.name),
+                "address": super::mail::address(&p.address),
                 "in_address_book": p.in_book,
                 "messages_sent": p.sent,
                 "messages_received": p.received,

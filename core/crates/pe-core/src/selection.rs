@@ -395,22 +395,8 @@ impl Core {
                 Action::Read(on) => self.set_flag_many(folder, chunk, "\\Seen", on)?,
                 Action::Flag(true) => self.set_flag_many(folder, chunk, "\\Flagged", true)?,
                 // the colour goes with the flag
-                Action::Flag(false) => {
-                    let mut remove = vec!["\\Flagged"];
-                    remove.extend(FLAG_COLOR_BITS);
-                    self.change_flags_many(folder, chunk, &[], &remove)?
-                }
-                Action::FlagColor(color) => {
-                    let (mut add, mut remove) = (vec!["\\Flagged"], Vec::new());
-                    for (i, bit) in FLAG_COLOR_BITS.iter().enumerate() {
-                        if color.bits() & (1 << i) != 0 {
-                            add.push(*bit);
-                        } else {
-                            remove.push(*bit);
-                        }
-                    }
-                    self.change_flags_many(folder, chunk, &add, &remove)?
-                }
+                Action::Flag(false) => self.set_flag_color_many(folder, chunk, None)?,
+                Action::FlagColor(color) => self.set_flag_color_many(folder, chunk, Some(color))?,
                 Action::Junk(junk) => self.mark_junk_many(folder, chunk, junk)?,
                 Action::Delete => self.delete_messages(folder, chunk)?,
                 Action::Archive => self.archive_messages(folder, chunk)?,
@@ -651,6 +637,33 @@ impl Core {
             (core.events)(crate::Event::Acted { request, said });
         }))?;
         Ok(request)
+    }
+}
+
+/// The flags of a message flagged in `color` (`\\Flagged` and its `$MailFlagBit` keywords), as added and removed;
+/// None takes the flag away with its colour
+fn color_flags(color: Option<FlagColor>) -> (Vec<&'static str>, Vec<&'static str>) {
+    let Some(color) = color else {
+        let mut remove = vec!["\\Flagged"];
+        remove.extend(FLAG_COLOR_BITS);
+        return (Vec::new(), remove);
+    };
+    let (mut add, mut remove) = (vec!["\\Flagged"], Vec::new());
+    for (i, bit) in FLAG_COLOR_BITS.iter().enumerate() {
+        if color.bits() & (1 << i) != 0 {
+            add.push(*bit);
+        } else {
+            remove.push(*bit);
+        }
+    }
+    (add, remove)
+}
+
+impl Core {
+    /// Flags messages `uids` of `folder` in `color`, or takes their flag away with its colour (None)
+    pub fn set_flag_color_many(&self, folder: FolderId, uids: &[u64], color: Option<FlagColor>) -> Result<()> {
+        let (add, remove) = color_flags(color);
+        self.change_flags_many(folder, uids, &add, &remove)
     }
 }
 
