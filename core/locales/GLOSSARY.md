@@ -598,6 +598,19 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   Reply/forward headings put an inflected "laiškas" before the untouched quoted subject. The number of new
   recipient addresses follows "skaičius:". Access summaries capitalize the first permission at runtime.
   Agent encrypted-message errors describe inaccessible content, without promising the user can decrypt it.
+- Compose statuses describe protection when sending, not protection already applied to the draft. Keep
+  "Rakto savininkas patikrintas" separate from signature validity. A "tinkamas raktas" must be usable for encryption.
+- Encrypted recipient status and missing-key guidance use exact [1] for one named recipient or singular instructions,
+  then counted one/few/other forms. The one category also covers 21/101; subsequent instructions address multiple
+  recipients there. Missing-key status retains the count in every category. No endings are attached to placeables.
+- Use "Pridėti savo viešąjį raktą" and "Palikti šifravimą" for compose actions. In the recipient-key dialog,
+  "Siųsti neši&fruotą" uses F, distinct from the pending replacement action "Naudoti &naująjį raktą" (N).
+- Help keeps quoted labels after an inflected head noun (mygtuką, parinktį, lange, aplanke) and "Gintarinė"
+  for warning status. Encrypted drafts use only the sender's key, without a digital signature. Inherited encrypted
+  text, images and attachments must be removed before sending unencrypted.
+- The attachment reminder recognizes English, German, Estonian, Spanish and French phrases, not Lithuanian.
+  Do not promise identical plain-text rendering in every mail app. Other catalog mnemonic collisions stay pending
+  for the broader Lithuanian review; the exact collision inventory is in the review state.
 
 ### Magyar (hu)
 

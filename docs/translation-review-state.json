@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Lithuanian compose additions, then lv/pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian currently has 46 pending help topics. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -26482,7 +26482,6 @@
           "menu-sort-by",
           "menu-text-size",
           "menu-folder",
-          "menu-insert",
           "cmd-new-account",
           "cmd-exit",
           "cmd-sync",
@@ -26562,9 +26561,6 @@
           "cmd-export-address-book",
           "cmd-export-setup",
           "cmd-import-setup",
-          "cmd-compose-sign",
-          "cmd-compose-encrypt",
-          "cmd-attach-my-key",
           "tray-check",
           "tray-no-accounts",
           "ui-tb-create-mail",
@@ -26668,9 +26664,6 @@
           "ui-tb-send",
           "ui-tb-save",
           "ui-tb-attach",
-          "ui-tb-sign",
-          "ui-tb-encrypt",
-          "ui-field-keys",
           "ui-field-from",
           "ui-field-to",
           "ui-field-cc",
@@ -27117,16 +27110,6 @@
           "ui-contact-key-none",
           "ui-contact-key-use-new",
           "ui-contact-key-keep",
-          "ui-recipient-keys-title",
-          "ui-recipient-col-recipient",
-          "ui-recipient-col-key",
-          "ui-recipient-find-key",
-          "ui-recipient-remove",
-          "ui-send-unencrypted",
-          "ui-compose-make-key",
-          "ui-compose-show-keys",
-          "ui-compose-encrypt-off",
-          "ui-compose-keep-encrypted",
           "ui-setup-export-title",
           "ui-setup-import-title",
           "ui-setup-export-intro",
@@ -27488,29 +27471,6 @@
           "pgp-publish-done",
           "pgp-publish-failed",
           "pgp-keyserver-off",
-          "pgp-compose-encrypted",
-          "pgp-compose-encrypt-ready",
-          "pgp-compose-missing",
-          "pgp-compose-looking",
-          "pgp-compose-signed",
-          "pgp-compose-reply-clear",
-          "pgp-compose-encrypted-files",
-          "pgp-compose-sign-tip",
-          "pgp-compose-sign-tip-encrypted",
-          "pgp-compose-encrypt-tip",
-          "pgp-compose-make-key",
-          "pgp-compose-key-unusable",
-          "pgp-compose-encrypt-off-quote",
-          "pgp-compose-encrypt-off-reply",
-          "pgp-recipient-verified",
-          "pgp-recipient-found",
-          "pgp-recipient-own",
-          "pgp-recipient-looking",
-          "pgp-recipient-missing",
-          "pgp-recipient-not-found",
-          "pgp-recipient-unusable",
-          "pgp-recipients-intro",
-          "pgp-recipients-intro-missing",
           "pgp-details-part",
           "attachment-from-part",
           "pgp-details-signed",
@@ -27912,14 +27872,12 @@
         "reply-forward.html",
         "save-print-import.html",
         "search-words.html",
-        "sign-and-encrypt.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
         "signatures.html",
         "unsubscribe.html",
         "updates.html",
-        "verify-a-key.html",
-        "write-message.html"
+        "verify-a-key.html"
       ],
       "completed_batches": [
         {
@@ -28559,8 +28517,982 @@
             "since.log": "/private/tmp/inbox-agent-toggle-since.log",
             "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
+        },
+        {
+          "id": "lt-compose-sign-encrypt-20261118",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-insert",
+              "cmd-compose-sign",
+              "cmd-compose-encrypt",
+              "cmd-attach-my-key",
+              "ui-tb-sign",
+              "ui-tb-encrypt",
+              "ui-field-keys",
+              "ui-recipient-keys-title",
+              "ui-recipient-col-recipient",
+              "ui-recipient-col-key",
+              "ui-recipient-find-key",
+              "ui-recipient-remove",
+              "ui-send-unencrypted",
+              "ui-compose-make-key",
+              "ui-compose-show-keys",
+              "ui-compose-encrypt-off",
+              "ui-compose-keep-encrypted"
+            ],
+            "core.ftl": [
+              "pgp-compose-encrypted",
+              "pgp-compose-encrypt-ready",
+              "pgp-compose-missing",
+              "pgp-compose-looking",
+              "pgp-compose-signed",
+              "pgp-compose-reply-clear",
+              "pgp-compose-encrypted-files",
+              "pgp-compose-sign-tip",
+              "pgp-compose-sign-tip-encrypted",
+              "pgp-compose-encrypt-tip",
+              "pgp-compose-make-key",
+              "pgp-compose-key-unusable",
+              "pgp-compose-encrypt-off-quote",
+              "pgp-compose-encrypt-off-reply",
+              "pgp-recipient-verified",
+              "pgp-recipient-found",
+              "pgp-recipient-own",
+              "pgp-recipient-looking",
+              "pgp-recipient-missing",
+              "pgp-recipient-not-found",
+              "pgp-recipient-unusable",
+              "pgp-recipients-intro",
+              "pgp-recipients-intro-missing"
+            ]
+          },
+          "reviewed_help": [
+            "sign-and-encrypt.html",
+            "write-message.html"
+          ],
+          "changed_values": 19,
+          "files": {
+            "core/locales/lt/app.ftl": "4fd94d26751396a3db103af8db60c1b37aa92a90705d2c0aea38cfe450b8f2cd",
+            "core/locales/lt/core.ftl": "f3c1f5c8abf3253b5224ac96bd0831e3bc930c3f05eba3aebd81938182917878",
+            "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
+            "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "f36bda20f41e7f878ba2568967b08c12650036cf0d0a815c1ab19a0f5b4a0fbc",
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5",
+            "core/crates/pe-html/help/en/sign-and-encrypt.html": "731c63934f9692a0ee3e803bfbdc5abeeac7fa8f7f9e1f988b96b9f77c00aaa4",
+            "core/crates/pe-html/help/en/write-message.html": "d161c1a2aeffb7539b2e8086d1a7ee6ea4bc39d5f702d93e362d8d10bfe8ff42"
+          },
+          "validation": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed 40 compose entries and both full help topics against current runtime. Improved protection timing, verified ownership, usable keys, inherited encrypted content and draft/sent-copy protection. Added exact [1] to encrypted status and missing-key dialog guidance; one/few/other retain counts, with plural instructions for 21/101. Fixed the recipient-key dialog F/N collision. Controls use infinitives; help uses polite plural, quoted labels and natural inflected head nouns. Full writing help now explains actual completion, Cc/Bcc, sending accounts, formatting and supported reminder languages. Other unchanged mnemonic collisions remain explicitly pending.",
+          "help_wording_lines_changed": 28,
+          "mnemonic_scopes_checked": 53,
+          "compose_mnemonic_scopes_passed": 7,
+          "mnemonic_only_changes": 1,
+          "wording_values_changed": 18,
+          "plural_changes": [
+            "pgp-compose-encrypted",
+            "pgp-recipients-intro-missing"
+          ],
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/crates/pe-core/src/compose_keys.rs": "c0bddbece71f214ae35769d95fbe10e6b9522422b3845741b928148e90bd4c6e",
+            "core/crates/pe-core/src/protect_out.rs": "f25706aab875e7bba611f8c7a3b5711b92e779e6f8744519d0bfa0536f3cf452",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+            "app/src/recipientkeys.cpp": "9f7d8d5f7419aefc712f2c3d8bc39b128695db4950a952f0bfa00f3928f9739d",
+            "linux/src/compose_keys.rs": "265c55610665a3c67b570f9cba06a3073f4e5e97bdccf246b36450ed5ecaa136",
+            "mac/Sources/InboxClassic/ComposeSecurity.swift": "159ae2355e185812acc76494fa88e7e892d2ecffd533a5a75b4325bf5bfb7a40",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234",
+            "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+            "app/src/securitybar.cpp": "cb486603a6b0f4b7061118c4ed92898729ff8fd22faf399e1a611d885f3edd41",
+            "mac/Sources/InboxClassic/SecurityBar.swift": "9c1b60e76a67a53a6a84935d45e896566575e1b9b8eb068a98a40193939491b9",
+            "linux/src/security.rs": "eb38b0cb5cbe0e83150ea53c7a13d9628f9f28d41d1d5a47336638cded5bb61b",
+            "core/crates/pe-core/src/compose.rs": "3ec708f28386f8b09bc84a2ab295a1e032c269bc8c330a688ca4eb756d53b66f",
+            "core/crates/pe-core/src/attachment_words.rs": "77ba5c35a7b2e7af56920cbf0784170596ed0e4604677fb5d21c7800669b56da",
+            "linux/src/compose.rs": "cbf30207811e2b753be8e5f58f65c6a3616909a48b740b27413b2982de6f2260",
+            "linux/src/complete.rs": "3c6423fd914cee91cf4e672ba5097ffdd44c3d78a296cf755397802ce1da2f56",
+            "core/crates/pe-html/src/editor.rs": "70e8f1f9601743d6678e0a1fd355536d974bca04203214adfd6d769dcef56755"
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-compose-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-lt-compose-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-compose-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-compose-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-lt-compose-20261118-joins.log",
+            "source-audit.json": "/private/tmp/inbox-lt-compose-20261118-source-audit.json",
+            "screenshots.json": "/private/tmp/inbox-lt-compose-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-compose-20261118-html.log",
+            "counts.json": "/private/tmp/inbox-lt-compose-20261118-counts.json",
+            "mnemonics-before.json": "/private/tmp/inbox-lt-compose-20261118-mnemonics-before.json",
+            "mnemonics-after.json": "/private/tmp/inbox-lt-compose-20261118-mnemonics-after.json"
+          }
         }
-      ]
+      ],
+      "pending_mnemonic_collisions": {
+        "checkpoint": "lt-compose-sign-encrypt-20261118",
+        "status": "Outside this compose batch; each collision group still includes pending catalog entries. Resolve across actual scopes during the broader Lithuanian catalog review.",
+        "collisions": [
+          {
+            "scope": 10,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "l",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "s",
+            "ids": [
+              "cmd-watch-conversation",
+              "cmd-print",
+              "cmd-mark-read"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-watch-conversation",
+              "cmd-print",
+              "cmd-mark-read"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "t",
+            "ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "l",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "s",
+            "ids": [
+              "cmd-watch-conversation",
+              "cmd-print",
+              "cmd-mark-read"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-watch-conversation",
+              "cmd-print",
+              "cmd-mark-read"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "t",
+            "ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "cmd-not-junk"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "cmd-not-junk"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-open",
+              "cmd-reply"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "l",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "s",
+            "ids": [
+              "cmd-watch-conversation",
+              "cmd-print"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-watch-conversation",
+              "cmd-print"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "t",
+            "ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "win-delete-button"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "l",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-add-sender-to-book"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "s",
+            "ids": [
+              "cmd-watch-conversation",
+              "cmd-print"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-watch-conversation",
+              "cmd-print"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "t",
+            "ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-create-rule-from-message",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "k",
+            "ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "cmd-not-junk"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-copy",
+              "win-save-as-button",
+              "cmd-not-junk"
+            ]
+          },
+          {
+            "scope": 22,
+            "key": "p",
+            "ids": [
+              "win-agent-programs",
+              "ui-remove"
+            ],
+            "scope_ids": [
+              "ui-let-agents-connect",
+              "win-agent-programs",
+              "win-change",
+              "ui-remove",
+              "win-what-agents-did",
+              "cmd-undo",
+              "ui-clear-button"
+            ],
+            "pending_ids": [
+              "win-agent-programs",
+              "ui-remove"
+            ]
+          },
+          {
+            "scope": 28,
+            "key": "p",
+            "ids": [
+              "ui-contact-add",
+              "ui-remove"
+            ],
+            "scope_ids": [
+              "ui-contact-add",
+              "ui-contact-set-default",
+              "ui-remove",
+              "ui-card-picture-choose"
+            ],
+            "pending_ids": [
+              "ui-contact-add",
+              "ui-remove"
+            ]
+          },
+          {
+            "scope": 29,
+            "key": "p",
+            "ids": [
+              "ui-contact-add",
+              "ui-remove"
+            ],
+            "scope_ids": [
+              "ui-group-select-members",
+              "ui-contact-add",
+              "ui-remove"
+            ],
+            "pending_ids": [
+              "ui-contact-add",
+              "ui-remove"
+            ]
+          },
+          {
+            "scope": 32,
+            "key": "p",
+            "ids": [
+              "win-add",
+              "ui-remove"
+            ],
+            "scope_ids": [
+              "win-add",
+              "win-properties-button",
+              "win-signature-button",
+              "ui-remove",
+              "win-sign-in-apps-button",
+              "ui-close"
+            ],
+            "pending_ids": [
+              "win-add",
+              "ui-remove"
+            ]
+          },
+          {
+            "scope": 35,
+            "key": "p",
+            "ids": [
+              "win-add",
+              "ui-remove"
+            ],
+            "scope_ids": [
+              "win-add",
+              "win-edit",
+              "ui-remove",
+              "ui-close"
+            ],
+            "pending_ids": [
+              "win-add",
+              "ui-remove"
+            ]
+          },
+          {
+            "scope": 36,
+            "key": "v",
+            "ids": [
+              "cmd-mark-all-read",
+              "win-rename"
+            ],
+            "scope_ids": [
+              "cmd-mark-all-read",
+              "cmd-new-folder",
+              "win-rename",
+              "win-delete-button",
+              "cmd-empty-folder"
+            ],
+            "pending_ids": [
+              "cmd-mark-all-read",
+              "win-rename"
+            ]
+          },
+          {
+            "scope": 37,
+            "key": "v",
+            "ids": [
+              "cmd-mark-all-read",
+              "win-rename"
+            ],
+            "scope_ids": [
+              "cmd-mark-all-read",
+              "cmd-new-folder",
+              "win-rename",
+              "win-delete-button",
+              "ui-account-move-up",
+              "ui-account-move-down"
+            ],
+            "pending_ids": [
+              "cmd-mark-all-read",
+              "win-rename"
+            ]
+          }
+        ]
+      }
     },
     "lv": {
       "pending_catalogs": {
@@ -69245,7 +70177,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Hungarian structural checks pass with 1,408 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two complete help topics with 25 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts, including Hungarian articles. Nineteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. An English completion screenshot was inspected; no Hungarian screenshots were found, so no Hungarian GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,165 unmarked entries and 11,228 help lines; since-start 2,270 entries/452 passages match the queue. Source checkpoint covers 196 refs/5 worktrees; incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -130061,7 +130993,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Lithuanian compose additions, then lv/pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian currently has 46 pending help topics. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites."
+      "next": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -132981,7 +133913,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Lithuanian compose additions, then lv/pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian currently has 46 pending help topics. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -134752,7 +135684,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Lithuanian compose additions, then lv/pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian currently has 46 pending help topics. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+      "next": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -136487,6 +137419,25 @@
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
+      },
+      {
+        "batch": "hu-compose-sign-encrypt-20261118",
+        "pr": 164,
+        "url": "https://github.com/postalsys/inbox-classic/pull/164",
+        "review_commit": "3bc622f9bd526584c2df45fcb35df92fc0e60318",
+        "merge_commit": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+        "merged_at": "2026-11-18T14:26:11Z",
+        "verified_master": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true,
+        "upstream_integration": {
+          "head": "3bc622f9bd526584c2df45fcb35df92fc0e60318",
+          "base": "b884d94b7cc961f5d7f37a490564aa4777c4f2d9",
+          "pre_rebase_commit": "13c28cdeeb0a5da68c342ee0ac5240822ec16506",
+          "validated_files_identical": true,
+          "clean_worktree": true
+        }
       }
     ],
     "source_audit_helper_sha256": "187b1c07319c962244f6e3cb8c94de80aa00b92e79a80b1c788b8d3517681664",
@@ -146924,7 +147875,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "4d985872db91e4e2114b59994a2112b0120bdd15402497111da0377e3f4c16f1",
+      "core/locales/GLOSSARY.md": "9a6e8f4bc352897003be66b29d42dda9661b5dd8235713735001316484042985",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -146934,7 +147885,11 @@
       "core/locales/hu/app.ftl": "3123a1db5bf792eb97ee5583c39513826fab1a59b62dece366d9577288171e3c",
       "core/locales/hu/core.ftl": "52e9ec5a8afb207a4b4380156c46045a9845e03470190a7daa8a82ad3fb36d23",
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
-      "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83"
+      "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
+      "core/locales/lt/app.ftl": "4fd94d26751396a3db103af8db60c1b37aa92a90705d2c0aea38cfe450b8f2cd",
+      "core/locales/lt/core.ftl": "f3c1f5c8abf3253b5224ac96bd0831e3bc930c3f05eba3aebd81938182917878",
+      "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
+      "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e"
     },
     "resumed_review_checkpoints": [
       {
@@ -150350,6 +151305,84 @@
           "translation_paths_changed": [],
           "review_runtime_paths_changed": [],
           "action": "Synchronize this unpublished batch with upstream before pushing. PR #158 changes Linux icons and UI-test diagnostics, not review content or the 19 recorded runtime files."
+        }
+      },
+      {
+        "batch": "lt-compose-sign-encrypt-20261118",
+        "review_parent": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1372,
+          "pending_catalog": 13453,
+          "pending_help": 617,
+          "completed_catalog": 22171,
+          "completed_help": 755
+        },
+        "validation": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 196,
+          "worktree_count": 5,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+            "refs/remotes/origin/HEAD": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+            "refs/remotes/origin/i18n/review-resume-20261118": "3bc622f9bd526584c2df45fcb35df92fc0e60318",
+            "refs/remotes/origin/master": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "73f60c9e28b3d5be9921f450353e8b1885f3d8e5"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "b884d94b7cc961f5d7f37a490564aa4777c4f2d9",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "7a4dbfda4a78d741d12b1b066970b006614a6b76",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-preview5",
+              "HEAD": "6a37b3deb94645868ae06fdb4b0c0ab7ffbfb730",
+              "branch": "refs/heads/feat/preview-cid",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-windialog",
+              "HEAD": "a4b1cdd147e0f7b9425b87c719ed55089771d545",
+              "branch": "refs/heads/test/win-file-dialogs",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lt/sign-and-encrypt.html\n M core/crates/pe-html/help/lt/write-message.html\n M core/locales/GLOSSARY.md\n M core/locales/lt/app.ftl\n M core/locales/lt/core.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
+                "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e",
+                "core/locales/GLOSSARY.md": "9a6e8f4bc352897003be66b29d42dda9661b5dd8235713735001316484042985",
+                "core/locales/lt/app.ftl": "4fd94d26751396a3db103af8db60c1b37aa92a90705d2c0aea38cfe450b8f2cd",
+                "core/locales/lt/core.ftl": "f3c1f5c8abf3253b5224ac96bd0831e3bc930c3f05eba3aebd81938182917878"
+              }
+            }
+          ],
+          "master": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+          "new_unmerged_source_deltas": [],
+          "note": "Earlier preview-cid help remains pending on its unchanged branch. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "ee2fdd7a1bfc4faf9f5d27d519eb9163046fb9fb",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-compose-20261118-edit.py": "1960309be704e1d0318d0cc7f95840ea11f44119303befaa7a80ddad06c80467",
+          "/private/tmp/inbox-lt-compose-20261118-finalize.py": "24ab773424acdf8d5fdb85d6cf0b3d26eec54828e85aa0fe44074ed417fa991e"
         }
       }
     ],
@@ -159181,7 +160214,6 @@
         "sign-and-encrypt.html"
       ],
       "pending_languages": [
-        "lt",
         "lv",
         "pl",
         "ro",
@@ -159210,7 +160242,8 @@
         "el",
         "fi",
         "hr",
-        "hu"
+        "hu",
+        "lt"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/write-message.html": {
@@ -159368,7 +160401,8 @@
         "el": "Greek structural checker has 1,456 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies 40 catalog reviews, 17 improved core values, 23 retained values and two complete help targets with 15 changed wording lines. All earlier writing-help prose is retained. Tags, attributes, platform branch boundaries, controls, literal keys, variables and plural branches are unchanged. All 53 mnemonic scopes pass; explicit compose letters remain unaccented Greek letters. The recorded generated Windows Flag-menu accent issue is unchanged. Platform sentence joins include actual labels, topic titles and command shortcuts (Ctrl+Shift+D/E; Mac Option+Command+Y/X). No relevant Greek screenshots found; source layouts/wrapping and 11 captured runtime files inspected. No GUI run or visual fit claim. Exactly 30 navigation passages in 15 other languages receive review marks only; every other byte and review remains preserved. Global reconciliation accounts for 22,109 unmarked entries, 11,254 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All 28 inventories and since-start 1,056 entries/269 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. Master 79332925 adds only the inspected PDF settings-placeholder fix; it changes no translation or compose context. HTML refreshed; git diff --check passes. No local test suites or builds; REVIEWED unchanged.",
         "fi": "Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "hr": "Croatian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 16 improved values, 24 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Croatian compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,125 unmarked entries and 11,192 help lines; since-start 2,310 entries/454 passages match the queue. Source checkpoint covers 196 refs/6 worktrees; previously recorded preview-cid and MCP phase3 sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
-        "hu": "Hungarian structural checks pass with 1,408 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two complete help topics with 25 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts, including Hungarian articles. Nineteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. An English completion screenshot was inspected; no Hungarian screenshots were found, so no Hungarian GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,165 unmarked entries and 11,228 help lines; since-start 2,270 entries/452 passages match the queue. Source checkpoint covers 196 refs/5 worktrees; incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
+        "hu": "Hungarian structural checks pass with 1,408 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two complete help topics with 25 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts, including Hungarian articles. Nineteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. An English completion screenshot was inspected; no Hungarian screenshots were found, so no Hungarian GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,165 unmarked entries and 11,228 help lines; since-start 2,270 entries/452 passages match the queue. Source checkpoint covers 196 refs/5 worktrees; incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "lt": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
       }
     },
     {
@@ -164640,10 +165674,10 @@
         "da",
         "fi",
         "hr",
-        "hu"
+        "hu",
+        "lt"
       ],
       "pending_languages": [
-        "lt",
         "lv",
         "pl",
         "ro",
@@ -164844,7 +165878,8 @@
         "da": "All 28 current language structural checks have only expected missing/full-page review-mark diagnostics; all 16 changed languages were checked again after editing. Exact reconstruction verifies 32 reviewed passages in 16 topics, three wording lines improved, and unchanged tags, attributes, platform branches, controls, shortcuts and surrounding prose. All catalog and English files match the resumed source snapshot. Global --check reports 22045 unmarked entries and 11152 help lines, all accounted for by existing reviews and the recorded source delta. Pending marks, full IDs, variables, help inventories and file hashes reconcile. Static platform sentence joins inspected. Old German Linux and Mac compose screenshots lack the current protection controls and do not verify current menu layout; current source constructs establish the menu paths. No test suites, builds or GUI runs. REVIEWED unchanged.",
         "fi": "Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "hr": "Croatian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 16 improved values, 24 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Croatian compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,125 unmarked entries and 11,192 help lines; since-start 2,310 entries/454 passages match the queue. Source checkpoint covers 196 refs/6 worktrees; previously recorded preview-cid and MCP phase3 sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
-        "hu": "Hungarian structural checks pass with 1,408 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two complete help topics with 25 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts, including Hungarian articles. Nineteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. An English completion screenshot was inspected; no Hungarian screenshots were found, so no Hungarian GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,165 unmarked entries and 11,228 help lines; since-start 2,270 entries/452 passages match the queue. Source checkpoint covers 196 refs/5 worktrees; incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
+        "hu": "Hungarian structural checks pass with 1,408 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two complete help topics with 25 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts, including Hungarian articles. Nineteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. An English completion screenshot was inspected; no Hungarian screenshots were found, so no Hungarian GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,165 unmarked entries and 11,228 help lines; since-start 2,270 entries/452 passages match the queue. Source checkpoint covers 196 refs/5 worktrees; incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "lt": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
       },
       "note": "Fifteen complete topics reopen only the signing/menu step and public-key menu paragraph. The twelve other languages already have the full topic pending. All catalog reviews and other help prose remain valid. Greek is corrected in el-compose-sign-encrypt-round2. No English or app code edited.",
       "reopen_validation": "Exact reconstruction verifies only two new review-mark pairs per topic in 15 languages. Unchanged outside prose equals bfff91d8 byte-for-byte; inventories and latest hashes updated without adding scope.",
