@@ -435,7 +435,8 @@ day-sunday = diumenge
 ## Agents d’IA
 
 agent-level-read = Llegir el correu: accedir a carpetes, llistes de missatges, cerques i contingut dels missatges
-agent-level-organize = Organitzar el correu: canviar l’estat de lectura i les banderes, gestionar el correu brossa, moure i arxivar missatges, crear carpetes, suprimir missatges (movent-los a Elements suprimits) i cancel·lar subscripcions a llistes de correu amb la vostra autorització
+# review: changed
+agent-level-organize = Organitzar el correu: canviar l’estat de lectura, les banderes i els seus colors, gestionar el correu brossa, moure i arxivar missatges, crear i canviar el nom de carpetes, seguir i ignorar converses, suprimir missatges (movent-los a Elements suprimits) i cancel·lar subscripcions a llistes de correu amb la vostra autorització
 agent-level-drafts = Escriure esborranys perquè els envieu vós
 agent-level-send = Enviar correu, amb la vostra aprovació per a cada missatge
 agent-connect-title = { $program } vol fer servir el vostre correu

@@ -686,7 +686,8 @@ day-sunday = duminică
 ## AI agents
 
 agent-level-read = Citirea mesajelor: foldere, lista de mesaje, căutare și conținutul mesajelor
-agent-level-organize = Organizarea mesajelor: marcare ca citite sau necitite, semnalizare, marcare ca nedorite, mutare, arhivare, creare de foldere, mutare în Elemente șterse și dezabonare de la liste de corespondență cu acordul dvs.
+# review: changed
+agent-level-organize = Organizarea mesajelor: marcare ca citite sau necitite, semnalizare și culorile semnalizărilor, marcare ca nedorite, mutare, arhivare, creare și redenumire de foldere, urmărirea și ignorarea conversațiilor, mutare în Elemente șterse și dezabonare de la liste de corespondență cu acordul dvs.
 agent-level-drafts = Crearea de schițe pe care să le trimiteți dvs.
 agent-level-send = Trimiterea mesajelor, numai cu aprobarea dvs. pentru fiecare mesaj
 agent-connect-title = { $program } solicită acces la mesajele dvs.

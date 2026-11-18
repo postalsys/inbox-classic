@@ -447,7 +447,8 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Ler o correio: pastas, lista de mensagens, pesquisa e mensagens
-agent-level-organize = Organizar o correio: alterar o estado de leitura e os sinalizadores, gerir o lixo eletrónico, mover e arquivar mensagens, criar pastas, eliminar mensagens (movendo-as para Itens Eliminados) e cancelar subscrições de listas de correio com a sua autorização
+# review: changed
+agent-level-organize = Organizar o correio: alterar o estado de leitura, os sinalizadores e as suas cores, gerir o lixo eletrónico, mover e arquivar mensagens, criar e mudar o nome de pastas, acompanhar e ignorar conversas, eliminar mensagens (movendo-as para Itens Eliminados) e cancelar subscrições de listas de correio com a sua autorização
 agent-level-drafts = Escrever rascunhos para que os possa enviar
 agent-level-send = Enviar correio, com a sua confirmação para cada mensagem
 agent-connect-title = { $program } quer usar o seu correio

@@ -687,7 +687,8 @@ day-sunday = svētdiena
 ## AI agents
 
 agent-level-read = Lasīt pastu: skatīt mapes, ziņojumus un sarunas, meklēt ziņojumus un kontaktus, kā arī skatīt ziņojumu kārtulas
-agent-level-organize = Kārtot pastu: atzīmēt ziņojumus kā lasītus vai nelasītus, mainīt karodziņus un nevēlamā pasta atzīmes, pārvietot un arhivēt ziņojumus, veidot mapes, dzēst ziņojumus, pārvietojot tos uz mapi „Izdzēstie vienumi”, un ar jūsu piekrišanu atteikties no adresātu sarakstu abonēšanas
+# review: changed
+agent-level-organize = Kārtot pastu: atzīmēt ziņojumus kā lasītus vai nelasītus, mainīt karodziņus, to krāsas un nevēlamā pasta atzīmes, pārvietot un arhivēt ziņojumus, veidot un pārdēvēt mapes, sekot sarunām un ignorēt tās, dzēst ziņojumus, pārvietojot tos uz mapi „Izdzēstie vienumi”, un ar jūsu piekrišanu atteikties no adresātu sarakstu abonēšanas
 agent-level-drafts = Rakstīt melnrakstus, kurus varat nosūtīt
 agent-level-send = Sūtīt pastu, katru ziņojumu tikai pēc jūsu piekrišanas
 agent-connect-title = { $program } vēlas izmantot jūsu pastu

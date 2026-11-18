@@ -440,7 +440,8 @@ day-sunday = neděle
 ## AI agents
 
 agent-level-read = Číst poštu: prohlížet složky a zprávy a vyhledávat v nich
-agent-level-organize = Uspořádat poštu: měnit stav přečtení a příznaky, spravovat nevyžádanou poštu, přesouvat a archivovat zprávy, vytvářet složky, odstraňovat zprávy přesunem do složky Odstraněná pošta a s vaším souhlasem odhlašovat odběr zpráv
+# review: changed
+agent-level-organize = Uspořádat poštu: měnit stav přečtení, příznaky a jejich barvy, spravovat nevyžádanou poštu, přesouvat a archivovat zprávy, vytvářet a přejmenovávat složky, sledovat a ignorovat konverzace, odstraňovat zprávy přesunem do složky Odstraněná pošta a s vaším souhlasem odhlašovat odběr zpráv
 agent-level-drafts = Psát koncepty, které odešlete vy
 agent-level-send = Odesílat poštu, každou zprávu až po vašem souhlasu
 agent-connect-title = { $program } chce používat vaši poštu

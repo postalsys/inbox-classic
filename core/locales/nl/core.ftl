@@ -421,7 +421,8 @@ day-sunday = zondag
 ## AI agents
 
 agent-level-read = E-mail lezen: mappen en berichten bekijken en doorzoeken
-agent-level-organize = E-mail ordenen: leesstatus en markeringen wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar Verwijderde items), mappen maken en je na jouw toestemming afmelden voor mailinglijsten
+# review: changed
+agent-level-organize = E-mail ordenen: leesstatus, markeringen en hun kleuren wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar Verwijderde items), mappen maken en hernoemen, gesprekken volgen en negeren en je na jouw toestemming afmelden voor mailinglijsten
 agent-level-drafts = Concepten schrijven die jij verzendt
 agent-level-send = E-mail verzenden, met jouw toestemming voor elk bericht
 agent-connect-title = { $program } wil je e-mail gebruiken

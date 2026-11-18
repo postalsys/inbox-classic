@@ -675,7 +675,8 @@ day-sunday = sekmadienis
 ## AI agents
 
 agent-level-read = Skaityti paštą: peržiūrėti aplankus, laiškus ir pokalbius, ieškoti laiškų bei kontaktų ir peržiūrėti laiškų taisykles
-agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti aplankus, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
+# review: changed
+agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles, jų spalvas ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti ir pervadinti aplankus, stebėti ir ignoruoti pokalbius, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
 agent-level-drafts = Rašyti juodraščius, kuriuos galėsite išsiųsti
 agent-level-send = Siųsti laiškus, kiekvieną tik jums sutikus
 agent-connect-title = { $program } nori naudotis jūsų paštu

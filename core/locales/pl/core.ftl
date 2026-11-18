@@ -678,7 +678,8 @@ day-sunday = niedziela
 ## AI agents
 
 agent-level-read = Czytanie poczty: przeglądanie folderów, wiadomości i konwersacji, wyszukiwanie wiadomości i kontaktów oraz przeglądanie reguł wiadomości
-agent-level-organize = Porządkowanie poczty: oznaczanie wiadomości jako przeczytane lub nieprzeczytane, zmiana flag i oznaczeń śmieci, przenoszenie i archiwizowanie wiadomości, tworzenie folderów, usuwanie wiadomości przez przeniesienie do folderu Elementy usunięte oraz wypisywanie z list mailingowych za Twoją zgodą
+# review: changed
+agent-level-organize = Porządkowanie poczty: oznaczanie wiadomości jako przeczytane lub nieprzeczytane, zmiana flag, ich kolorów i oznaczeń śmieci, przenoszenie i archiwizowanie wiadomości, tworzenie folderów i zmiana ich nazw, obserwowanie i ignorowanie konwersacji, usuwanie wiadomości przez przeniesienie do folderu Elementy usunięte oraz wypisywanie z list mailingowych za Twoją zgodą
 agent-level-drafts = Pisanie wersji roboczych, które możesz wysłać
 agent-level-send = Wysyłanie poczty, każdej wiadomości dopiero po Twojej zgodzie
 agent-connect-title = { $program } chce korzystać z Twojej poczty

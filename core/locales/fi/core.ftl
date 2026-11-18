@@ -420,7 +420,8 @@ day-sunday = sunnuntai
 ## AI agents
 
 agent-level-read = Lukea postia: kansiot, viestiluettelo, haku ja viestit
-agent-level-organize = Järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda kansioita, poistaa viestejä siirtämällä ne Poistetut-kansioon ja peruuttaa postituslistojen tilauksia luvallasi
+# review: changed
+agent-level-organize = Järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja ja niiden värejä, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda ja nimetä uudelleen kansioita, seurata ja ohittaa keskusteluja, poistaa viestejä siirtämällä ne Poistetut-kansioon ja peruuttaa postituslistojen tilauksia luvallasi
 agent-level-drafts = Kirjoittaa luonnoksia, jotka sinä lähetät
 agent-level-send = Lähettää postia, jokaisen viestin vasta hyväksyntäsi jälkeen
 agent-connect-title = { $program } haluaa käyttää postiasi

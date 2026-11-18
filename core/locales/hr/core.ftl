@@ -427,7 +427,8 @@ day-sunday = nedjelja
 ## AI agents
 
 agent-level-read = Čitanje pošte: mape, popis poruka, pretraživanje i poruke
-agent-level-organize = Organiziranje pošte: označavanje poruka kao pročitanih ili nepročitanih, mijenjanje zastavica i oznaka neželjene pošte, premještanje i arhiviranje poruka, stvaranje mapa, brisanje premještanjem u mapu Izbrisane stavke te otkazivanje pretplata na liste e-pošte uz vaše odobrenje
+# review: changed
+agent-level-organize = Organiziranje pošte: označavanje poruka kao pročitanih ili nepročitanih, mijenjanje zastavica i njihovih boja te oznaka neželjene pošte, premještanje i arhiviranje poruka, stvaranje i preimenovanje mapa, praćenje i zanemarivanje razgovora, brisanje premještanjem u mapu Izbrisane stavke te otkazivanje pretplata na liste e-pošte uz vaše odobrenje
 agent-level-drafts = Pisanje skica koje ćete vi poslati
 agent-level-send = Slanje pošte, svake poruke tek nakon vašeg odobrenja
 agent-connect-title = { $program } želi koristiti vašu poštu

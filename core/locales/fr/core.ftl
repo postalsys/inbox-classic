@@ -441,7 +441,8 @@ day-sunday = dimanche
 ## AI agents
 
 agent-level-read = Lire le courrier : consulter les dossiers et les messages, et effectuer des recherches
-agent-level-organize = Gérer le courrier : modifier l'état lu ou non lu et les indicateurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer des dossiers et vous désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans Éléments supprimés.
+# review: changed
+agent-level-organize = Gérer le courrier : modifier l'état lu ou non lu, les indicateurs et leurs couleurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer et renommer des dossiers, suivre et ignorer des conversations, et vous désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans Éléments supprimés.
 agent-level-drafts = Rédiger des brouillons que vous enverrez vous-même
 agent-level-send = Envoyer du courrier, chaque message seulement après votre accord
 agent-connect-title = { $program } souhaite utiliser votre messagerie

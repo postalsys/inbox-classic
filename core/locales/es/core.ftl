@@ -425,7 +425,8 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Leer el correo: consultar carpetas y mensajes, y realizar búsquedas
-agent-level-organize = Organizar el correo: cambiar el estado de lectura y las marcas, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a Elementos eliminados, crear carpetas y cancelar suscripciones a listas de correo con su autorización
+# review: changed
+agent-level-organize = Organizar el correo: cambiar el estado de lectura, las marcas y sus colores, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a Elementos eliminados, crear carpetas y cambiarles el nombre, seguir e ignorar conversaciones y cancelar suscripciones a listas de correo con su autorización
 agent-level-drafts = Escribir borradores para que usted los envíe
 agent-level-send = Enviar correo, cada mensaje solo después de que usted lo apruebe
 agent-connect-title = { $program } solicita acceso a su correo

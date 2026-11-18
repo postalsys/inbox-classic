@@ -414,7 +414,8 @@ day-sunday = Sonntag
 ## AI agents
 
 agent-level-read = E-Mails lesen: Ordner und Nachrichten anzeigen und durchsuchen
-agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
+# review: changed
+agent-level-organize = E-Mails verwalten: Lesestatus, Kennzeichnungen und ihre Farben ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen und umbenennen, Unterhaltungen beobachten und ignorieren und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.
 agent-level-drafts = Entwürfe erstellen, die Sie selbst senden
 agent-level-send = E-Mail senden, jede Nachricht erst nach Ihrer Zustimmung
 agent-connect-title = { $program } möchte auf Ihre E-Mails zugreifen

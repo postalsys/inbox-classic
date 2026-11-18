@@ -401,7 +401,8 @@ day-sunday = vasárnap
 ## AI agents
 
 agent-level-read = Levelek olvasása: mappák, az üzenetlista, a keresés és az üzenetek
-agent-level-organize = Levelek kezelése: olvasottnak vagy olvasatlannak jelölés, jelölők és levélszemét-jelölések módosítása, áthelyezés, archiválás, mappák létrehozása, törlés a Törölt elemek mappába való áthelyezéssel, valamint leiratkozás levelezőlistákról külön jóváhagyással
+# review: changed
+agent-level-organize = Levelek kezelése: olvasottnak vagy olvasatlannak jelölés, jelölők és színeik, valamint levélszemét-jelölések módosítása, áthelyezés, archiválás, mappák létrehozása és átnevezése, beszélgetések figyelése és mellőzése, törlés a Törölt elemek mappába való áthelyezéssel, valamint leiratkozás levelezőlistákról külön jóváhagyással
 agent-level-drafts = Piszkozatok írása, amelyeket később elküldhet
 agent-level-send = Levélküldés, minden üzenet külön jóváhagyásával
 agent-connect-title = { $program } hozzá szeretne férni a leveleihez

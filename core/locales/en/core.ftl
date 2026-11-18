@@ -418,7 +418,7 @@ day-sunday = Sunday
 ## AI agents
 
 agent-level-read = Read mail: folders, the message list, search and messages
-agent-level-organize = Organize mail: read state, flags, junk, moving, archiving, new folders, deleting to Deleted Items, and leaving mailing lists after you say yes
+agent-level-organize = Organize mail: read state, flags and their colors, junk, moving, archiving, creating and renaming folders, watching and ignoring conversations, deleting to Deleted Items, and leaving mailing lists after you say yes
 agent-level-drafts = Write drafts for you to send
 agent-level-send = Send mail, each message only after you say yes
 agent-connect-title = { $program } wants to use your mail

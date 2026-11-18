@@ -418,7 +418,8 @@ day-sunday = søndag
 ## AI agents
 
 agent-level-read = Lese e-post: mapper, meldingslisten, søk og meldinger
-agent-level-organize = Organisere e-post: merke meldinger som lest eller ulest, endre flagg, håndtere søppelpost, flytte og arkivere meldinger, opprette mapper, slette meldinger (flytte dem til Slettede elementer) og melde deg av e-postlister med din godkjenning
+# review: changed
+agent-level-organize = Organisere e-post: merke meldinger som lest eller ulest, endre flagg og fargene deres, håndtere søppelpost, flytte og arkivere meldinger, opprette og gi nytt navn til mapper, følge og ignorere samtaler, slette meldinger (flytte dem til Slettede elementer) og melde deg av e-postlister med din godkjenning
 agent-level-drafts = Skrive utkast som du sender selv
 agent-level-send = Sende e-post etter at du har godkjent hver melding
 agent-connect-title = { $program } vil bruke e-posten din

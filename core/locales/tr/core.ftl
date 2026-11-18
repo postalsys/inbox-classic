@@ -417,7 +417,8 @@ day-sunday = Pazar
 ## Yapay zeka aracıları
 
 agent-level-read = Postayı okuma: klasörleri, ileti listelerini ve içeriklerini görüntüleme, arama yapma
-agent-level-organize = Postayı düzenleme: okundu durumunu ve bayrakları değiştirme, gereksiz postayı yönetme, iletileri taşıma ve arşivleme, klasör oluşturma, iletileri Silinmiş Öğeler'e taşıyarak silme ve onayınızla posta listelerinden çıkma
+# review: changed
+agent-level-organize = Postayı düzenleme: okundu durumunu, bayrakları ve renklerini değiştirme, gereksiz postayı yönetme, iletileri taşıma ve arşivleme, klasör oluşturma ve yeniden adlandırma, konuşmaları izleme ve yok sayma, iletileri Silinmiş Öğeler'e taşıyarak silme ve onayınızla posta listelerinden çıkma
 agent-level-drafts = Göndermeniz için taslak yazma
 agent-level-send = Posta gönderme, her iletiyi ancak siz onayladıktan sonra
 agent-connect-title = { $program } postanıza erişmek istiyor

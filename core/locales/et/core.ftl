@@ -401,7 +401,8 @@ day-sunday = pühapäeval
 ## AI agents
 
 agent-level-read = Lugeda e-posti: vaadata kaustu ja kirju ning kasutada otsingut
-agent-level-organize = Hallata e-posti: muuta kirjade lugemisolekut ja lippe, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta Kustutatud kirjad, luua kaustu ning teie nõusolekul loobuda meililistide tellimustest
+# review: changed
+agent-level-organize = Hallata e-posti: muuta kirjade lugemisolekut, lippe ja nende värve, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta Kustutatud kirjad, luua ja ümber nimetada kaustu, jälgida ja eirata vestlusi ning teie nõusolekul loobuda meililistide tellimustest
 agent-level-drafts = Koostada mustandeid, mille saadate ise
 agent-level-send = Saata kirju, küsides iga kirja jaoks teie nõusolekut
 agent-connect-title = { $program } soovib kasutada teie e-posti
