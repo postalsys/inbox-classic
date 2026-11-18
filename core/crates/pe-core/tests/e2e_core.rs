@@ -2432,7 +2432,10 @@ fn a_message_sent_waits_and_can_be_taken_back() {
     s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
     assert_eq!(s.server.subjects("INBOX"), ["Let go"]);
     let (taken, said) = s.core.undo_send().unwrap();
-    assert!(taken.is_none() && said == "“Let go” was already sent.", "{said}");
+    assert!(
+        taken.is_none() && said == "Sending “Let go” can no longer be undone.",
+        "{said}"
+    );
     assert!(s.core.send_waiting_text().is_none());
 
     // one more that waits

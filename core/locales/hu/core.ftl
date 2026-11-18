@@ -400,6 +400,7 @@ day-sunday = vasárnap
 
 ## AI agents
 
+# review: changed
 agent-level-read = Levelek olvasása: mappák, az üzenetlista, a keresés és az üzenetek
 # review: changed
 agent-level-organize = Levelek kezelése: olvasottnak vagy olvasatlannak jelölés, jelölők és színeik, valamint levélszemét-jelölések módosítása, áthelyezés, archiválás, mappák létrehozása és átnevezése, beszélgetések figyelése és mellőzése, törlés a Törölt elemek mappába való áthelyezéssel, valamint leiratkozás levelezőlistákról külön jóváhagyással

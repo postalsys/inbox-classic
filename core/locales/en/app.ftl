@@ -326,8 +326,8 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com and Microsoft 365: sign in
 ui-start-intro-apps = Sign in through the browser with one of your sign-in apps (More sign-in options), or add any e-mail account with your name and address below.
 ui-use-app-password = Use App Password
 ui-the-provider = the provider
-ui-provider-intro = Sign in to { $email } on { $provider }’s website. Your password is not shared with Inbox Classic. You can also use an app password created in your account’s security settings.
-ui-provider-intro-apps = Sign in to { $email } on { $provider }’s website using one of your sign-in apps (More sign-in options). You can also use an app password created in your account’s security settings.
+ui-provider-intro = Sign in to { $email } on { $provider }’s website. Your password is not shared with Inbox Classic. If your account allows app passwords for mail, you can also use one created in its security settings. Outlook.com and Microsoft 365 take only the browser sign-in.
+ui-provider-intro-apps = Sign in to { $email } on { $provider }’s website using one of your sign-in apps (More sign-in options). If your account allows app passwords for mail, you can also use one created in its security settings. Outlook.com and Microsoft 365 take only the browser sign-in.
 ui-finish = Finish
 ui-logon = Logon
 ui-enter-password = Enter the password of { $account }.
@@ -601,7 +601,7 @@ ui-sending-in = Sending { $subject } in { $count ->
    *[other] { $count } seconds
 }
 ui-send-undone = { $subject } was not sent. The message has reopened for editing.
-ui-send-too-late = { $subject } was already sent.
+ui-send-too-late = Sending { $subject } can no longer be undone.
 ui-outbox-status-undo = Sends at { $time }
 ui-download-note = Messages downloaded in advance open immediately. When the storage limit is exceeded, the oldest local copies are removed and downloaded again when you open them.
 ui-attachment-downloading = This message has not finished downloading. Try again when the download is complete.

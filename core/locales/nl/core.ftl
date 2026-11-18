@@ -420,6 +420,7 @@ day-sunday = zondag
 
 ## AI agents
 
+# review: changed
 agent-level-read = E-mail lezen: mappen en berichten bekijken en doorzoeken
 # review: changed
 agent-level-organize = E-mail ordenen: leesstatus, markeringen en hun kleuren wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar Verwijderde items), mappen maken en hernoemen, gesprekken volgen en negeren en je na jouw toestemming afmelden voor mailinglijsten

@@ -3111,7 +3111,7 @@ extension UITest {
             check(cell(hosts, 0, 0) == "My AI agent" && cell(hosts, 1, 0).hasPrefix("Read, organize, write drafts and send with your yes"),
                   "it lists the program and what it may do (\(cell(hosts, 1, 0)))")
             check(cell(log, 2, 0).hasPrefix("Saved the draft “Agenda for Friday”")
-                  && cell(log, 2, 1).hasPrefix("Sent “Lunch on Friday?” to pat@example.net")
+                  && cell(log, 2, 1).hasPrefix("Put “Lunch on Friday?” in the Outbox for pat@example.net")
                   && cell(log, 2, 2) == "Watched the conversation “Team lunch on Friday”"
                   && cell(log, 2, 3) == "Flagged “Quarterly report draft” blue" && cell(log, 2, 4).hasPrefix("Marked read"),
                   "and what its agent did, newest first, a flag's colour and a watched conversation among it "

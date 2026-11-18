@@ -438,6 +438,7 @@ day-sunday = domenica
 
 ## AI agents
 
+# review: changed
 agent-level-read = Leggere la posta: consultare cartelle e messaggi ed eseguire ricerche
 # review: changed
 agent-level-organize = Organizzare la posta: cambiare lo stato di lettura, i contrassegni e i loro colori, gestire la posta indesiderata, spostare, archiviare ed eliminare messaggi (in Posta eliminata), creare e rinominare cartelle, seguire e ignorare conversazioni e annullare l’iscrizione alle mailing list con il tuo consenso

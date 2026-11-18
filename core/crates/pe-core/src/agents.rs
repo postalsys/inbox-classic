@@ -1296,7 +1296,7 @@ impl Core {
     }
 
     /// Takes back what entry `id` of the log did. Refused with the reason when that can no longer be (a message that
-    /// was sent already, one that is not where it went).
+    /// is no longer in the Outbox, one that is not where it went).
     pub fn agent_undo(&self, id: i64) -> Result<()> {
         let entry = self.store().agent_log_entry(id)?.ok_or(Error::NotFound)?;
         if entry.undone {
@@ -1536,8 +1536,8 @@ mod tests {
         entry.undone = true;
         assert_eq!(log_text(&entry), "Moved \"A\" to Archive (taken back)");
         assert_eq!(
-            undo_refusal(&Error::Unavailable("the message was sent already".into())),
-            "It can not be taken back: the message was sent already."
+            undo_refusal(&Error::Unavailable("the message is no longer in the Outbox".into())),
+            "It can not be taken back: the message is no longer in the Outbox."
         );
         assert_eq!(undo_refusal(&Error::NotFound), "It can not be taken back.");
         let (heading, detail) = connect_text(&HostInfo {

@@ -419,6 +419,7 @@ day-sunday = sunnuntai
 
 ## AI agents
 
+# review: changed
 agent-level-read = Lukea postia: kansiot, viestiluettelo, haku ja viestit
 # review: changed
 agent-level-organize = Järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja ja niiden värejä, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda ja nimetä uudelleen kansioita, seurata ja ohittaa keskusteluja, poistaa viestejä siirtämällä ne Poistetut-kansioon ja peruuttaa postituslistojen tilauksia luvallasi

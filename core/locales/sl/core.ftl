@@ -677,6 +677,7 @@ day-sunday = nedelja
 
 ## AI agents
 
+# review: changed
 agent-level-read = Branje pošte: pregled map, seznama sporočil in vsebine sporočil ter iskanje
 # review: changed
 agent-level-organize = Urejanje pošte: spreminjanje prebranosti, zastavic in njihovih barv, označevanje neželene pošte, premikanje in arhiviranje sporočil, ustvarjanje in preimenovanje map, spremljanje in prezrtje pogovorov, brisanje v mapo Izbrisano ter odjava s poštnih seznamov po vaši potrditvi

@@ -416,6 +416,7 @@ day-sunday = Pazar
 
 ## Yapay zeka aracıları
 
+# review: changed
 agent-level-read = Postayı okuma: klasörleri, ileti listelerini ve içeriklerini görüntüleme, arama yapma
 # review: changed
 agent-level-organize = Postayı düzenleme: okundu durumunu, bayrakları ve renklerini değiştirme, gereksiz postayı yönetme, iletileri taşıma ve arşivleme, klasör oluşturma ve yeniden adlandırma, konuşmaları izleme ve yok sayma, iletileri Silinmiş Öğeler'e taşıyarak silme ve onayınızla posta listelerinden çıkma

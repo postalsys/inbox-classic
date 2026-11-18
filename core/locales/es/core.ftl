@@ -424,6 +424,7 @@ day-sunday = domingo
 
 ## AI agents
 
+# review: changed
 agent-level-read = Leer el correo: consultar carpetas y mensajes, y realizar búsquedas
 # review: changed
 agent-level-organize = Organizar el correo: cambiar el estado de lectura, las marcas y sus colores, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a Elementos eliminados, crear carpetas y cambiarles el nombre, seguir e ignorar conversaciones y cancelar suscripciones a listas de correo con su autorización
@@ -475,7 +476,8 @@ agent-too-many-reads = Demasiadas lecturas en los últimos 30 días: este agente
 list-encrypted = Mensaje cifrado
 agent-log-composed = Se abrió «{ $subject }» en la ventana de redacción para que termine de escribirlo
 agent-log-refused = No envió «{ $subject }»
-agent-log-sent = Se envió «{ $subject }» a { $to }
+# review: changed
+agent-log-sent = Se puso «{ $subject }» en la Bandeja de salida para { $to }
 agent-log-draft = Se guardó el borrador «{ $subject }»
 agent-log-draft-replaced = Se reemplazó el borrador «{ $subject }»
 agent-log-draft-discarded = Se descartó el borrador «{ $subject }»

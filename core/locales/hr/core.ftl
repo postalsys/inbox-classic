@@ -426,6 +426,7 @@ day-sunday = nedjelja
 
 ## AI agents
 
+# review: changed
 agent-level-read = Čitanje pošte: mape, popis poruka, pretraživanje i poruke
 # review: changed
 agent-level-organize = Organiziranje pošte: označavanje poruka kao pročitanih ili nepročitanih, mijenjanje zastavica i njihovih boja te oznaka neželjene pošte, premještanje i arhiviranje poruka, stvaranje i preimenovanje mapa, praćenje i zanemarivanje razgovora, brisanje premještanjem u mapu Izbrisane stavke te otkazivanje pretplata na liste e-pošte uz vaše odobrenje

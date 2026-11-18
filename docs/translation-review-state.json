@@ -1,6 +1,7 @@
 {
   "round": 2,
-  "status": "active",
+  "status": "stopped",
+  "status_note": "The reviewer stopped on 2026-11-18. The English source issues they recorded (source_issues and source_issue fields) were fixed in the English catalogs and help in the fix/english-source pull request; translations that still stated the old meaning were marked for review.",
   "starting_commit": "e99f7e59248bed137903150db7ef417e27755d18",
   "starting_review_baseline": "7c0b1672581c9bd7a33c226f35da16cedca4b528",
   "guide": "/Users/andris/Downloads/inbox-classic-translation-guide.md",
