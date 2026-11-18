@@ -431,6 +431,13 @@ impl MailChange {
             _ => None,
         }
     }
+
+    /// The account whose mail changed
+    pub fn account(self) -> AccountId {
+        match self {
+            MailChange::Folders(account) | MailChange::Folder(account, _) => account,
+        }
+    }
 }
 
 /// The OAuth providers the engine signs in with: the built-in ones (with the client IDs of this build), or the

@@ -3,10 +3,13 @@
 //!
 //! The relay names it in its hello, and the app finds it again itself: from the process at the other end of the
 //! connection, which the system tells (the peer of the Unix socket, the client of the named pipe), and that process's
-//! parents. What the app found is what counts, so one program cannot say it is another and use the access the user
-//! gave that one; the hello only adds the name `--name` gives. A program of the same user can still start the relay
-//! through another program it can drive (a terminal, so those share one access, decision 9 of the MCP plan), and could
-//! read the mail store itself: the check keeps programs apart, it is no wall against the user's own programs.
+//! parents. What the app found is what counts, so a relay's hello can no longer claim the access the user gave
+//! another program; the hello only adds the name `--name` gives. The program is known by the executable of the first
+//! ancestor that is not a launcher, so a program of the same user can still run a granted program's executable with
+//! its own code (`ELECTRON_RUN_AS_NODE` on an Electron host, `LD_PRELOAD` on Linux, a spoofed parent on Windows) or
+//! start the relay through a program it can drive (a terminal, so those share one access, decision 9 of the MCP
+//! plan), and such a program could read the mail store itself anyway. Access keeps cooperating programs apart; it is
+//! no wall against hostile ones running as the same user.
 
 use std::sync::OnceLock;
 
@@ -138,28 +141,25 @@ pub fn launching_program() -> HostInfo {
     pick(&parents)
 }
 
-/// A file's name, the way two runs of one program are told alike: Linux names a file replaced while it runs
+/// A path the way two runs of one program are told alike: Linux names a file replaced while it runs
 /// "... (deleted)", and Windows does not mind case
-fn file_name(path: &str) -> String {
+fn normal(path: &str) -> String {
     let path = path.strip_suffix(" (deleted)").unwrap_or(path);
-    let file = path.rsplit(['/', '\\']).next().unwrap_or(path);
     if cfg!(windows) {
-        file.to_lowercase()
+        path.to_lowercase()
     } else {
-        file.to_string()
+        path.to_string()
     }
 }
 
-/// Whether two programs' files are one, as [`file_name`] tells them apart
+/// A file's name, as [`normal`] tells them alike
+fn file_name(path: &str) -> String {
+    let path = normal(path);
+    path.rsplit(['/', '\\']).next().unwrap_or_default().to_string()
+}
+
+/// Whether two programs' files are one, as [`normal`] tells them alike
 pub(crate) fn same_file(one: &str, other: &str) -> bool {
-    let normal = |path: &str| {
-        let path = path.strip_suffix(" (deleted)").unwrap_or(path);
-        if cfg!(windows) {
-            path.to_lowercase()
-        } else {
-            path.to_string()
-        }
-    };
     normal(one) == normal(other)
 }
 

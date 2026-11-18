@@ -46,6 +46,11 @@ impl Resource {
         }
     }
 
+    /// The resource a request's `uri` names
+    pub(crate) fn of(params: &Value) -> Option<Resource> {
+        params.get("uri").and_then(Value::as_str).and_then(Resource::parse)
+    }
+
     pub(crate) fn uri(&self) -> String {
         match self {
             Resource::Inbox => format!("{SCHEME}inbox"),
@@ -76,9 +81,7 @@ impl Resource {
     /// Whether `change` changes what a read of it gives (`inbox` whether the folder changed is an Inbox)
     pub(crate) fn changed_by(&self, change: MailChange, inbox: impl Fn(i64) -> bool) -> bool {
         match (self, change) {
-            (Resource::Account(account), MailChange::Folders(changed) | MailChange::Folder(changed, _)) => {
-                *account == changed
-            }
+            (Resource::Account(account), change) => *account == change.account(),
             (Resource::Inbox, MailChange::Folder(_, folder)) => inbox(folder),
             (_, MailChange::Folder(_, folder)) => self.folder() == Some(folder),
             _ => false,
@@ -87,7 +90,7 @@ impl Resource {
 }
 
 /// The program now, when it may read mail: what lists and subscriptions go by
-fn reader(core: &Core, host: i64) -> Option<AgentHost> {
+pub(crate) fn reader(core: &Core, host: i64) -> Option<AgentHost> {
     match core.agent_host_now(host).ok()? {
         HostNow::Allowed(host) if host.levels.has(AgentLevels::READ) => Some(host),
         _ => None,
@@ -96,9 +99,11 @@ fn reader(core: &Core, host: i64) -> Option<AgentHost> {
 
 /// Whether the program `host` may read `resource` now: an account it may use, a folder of one
 pub(crate) fn allowed(core: &Core, host: i64, resource: &Resource) -> bool {
-    let Some(host) = reader(core, host) else {
-        return false;
-    };
+    reader(core, host).is_some_and(|host| may_read(core, &host, resource))
+}
+
+/// Whether `host`, a [`reader`], may read `resource`
+pub(crate) fn may_read(core: &Core, host: &AgentHost, resource: &Resource) -> bool {
     match resource {
         Resource::Inbox => true,
         Resource::Account(account) => host.accounts.contains(account),

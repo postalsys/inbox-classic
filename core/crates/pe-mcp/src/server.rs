@@ -442,11 +442,12 @@ fn start(
 /// what the hello said it was when that is another program
 fn identity(verified: HostInfo, hello: &HostInfo) -> HostInfo {
     let (claimed, name) = pe_core::agents::split_named(&hello.path);
+    let another = !claimed.is_empty() && !crate::host::same_file(claimed, &verified.path);
     let mut host = match name {
-        Some(name) => pe_core::agents::named(verified.clone(), name),
-        None => verified.clone(),
+        Some(name) => pe_core::agents::named(verified, name),
+        None => verified,
     };
-    if !claimed.is_empty() && !crate::host::same_file(claimed, &verified.path) {
+    if another {
         host.claimed = pe_core::agents::program_name(claimed);
     }
     host
@@ -490,6 +491,11 @@ impl Session {
         }
     }
 
+    /// Whether the program may read mail now: the prompts are offered to it then, as the tools they name
+    fn reads(&self) -> bool {
+        self.now().0.has(AgentLevels::READ)
+    }
+
     /// What the program may do now, kept as what it was told: the tools it is given go by it
     fn tell(&self) -> AgentLevels {
         let now = self.now();
@@ -504,9 +510,8 @@ impl Session {
         if self.state().allowed.is_none() {
             return Vec::new();
         }
-        let before = self.state().told.clone();
-        self.tell();
-        let now = self.state().told.clone();
+        let now = self.now();
+        let before = std::mem::replace(&mut self.state().told, now.clone());
         let mut told = Vec::new();
         if now.0 != before.0 {
             told.push(json!({ "jsonrpc": "2.0", "method": TOOLS_CHANGED }));
@@ -528,11 +533,10 @@ impl Session {
             return;
         }
         // nothing of an account the program may not use, not even that something changed there
-        let account = match change {
-            Some(MailChange::Folders(account) | MailChange::Folder(account, _)) => Some(account),
-            None => None,
-        };
-        if account.is_some_and(|account| !self.now().1.contains(&account)) {
+        if change
+            .map(MailChange::account)
+            .is_some_and(|account| !self.now().1.contains(&account))
+        {
             return;
         }
         let hit: Vec<Resource> = match change {
@@ -561,10 +565,18 @@ impl Session {
         let Some(host) = self.state().allowed else {
             return Vec::new();
         };
+        // the program looked up once for all of them
+        let reader = resources::reader(&self.core, host);
+        let subscribed = self.state().subscribed.clone();
         let mut told: Vec<Value> = resources
             .into_iter()
             // still subscribed, and still the program's to read
-            .filter(|r| self.state().subscribed.contains(r) && resources::allowed(&self.core, host, r))
+            .filter(|r| {
+                subscribed.contains(r)
+                    && reader
+                        .as_ref()
+                        .is_some_and(|host| resources::may_read(&self.core, host, r))
+            })
             .map(|r| json!({ "jsonrpc": "2.0", "method": RESOURCE_UPDATED, "params": { "uri": r.uri() } }))
             .collect();
         if list {
@@ -576,7 +588,7 @@ impl Session {
     /// `resources/subscribe` and `resources/unsubscribe`
     fn subscribe(&self, id: &Value, params: &Value, on: bool) -> Value {
         let host = self.state().allowed.unwrap_or_default();
-        let Some(resource) = params.get("uri").and_then(Value::as_str).and_then(Resource::parse) else {
+        let Some(resource) = Resource::of(params) else {
             return protocol::error(
                 id,
                 INVALID_PARAMS,
@@ -637,7 +649,7 @@ impl Session {
             ),
             "resources/templates/list" => protocol::result(id, json!({ "resourceTemplates": resources::templates() })),
             "resources/read" => {
-                let Some(resource) = params.get("uri").and_then(Value::as_str).and_then(Resource::parse) else {
+                let Some(resource) = Resource::of(params) else {
                     return protocol::error(id, NOT_FOUND, "There is no such resource: resources/list lists them.");
                 };
                 let host = allowed.unwrap_or_default();
@@ -650,7 +662,7 @@ impl Session {
             "resources/unsubscribe" => self.subscribe(id, params, false),
             // offered to a program that may read mail, as the tools they name
             "prompts/list" => {
-                let prompts = if self.now().0.has(AgentLevels::READ) {
+                let prompts = if self.reads() {
                     crate::prompts::list()
                 } else {
                     Vec::new()
@@ -659,7 +671,7 @@ impl Session {
             }
             "prompts/get" => {
                 let name = params.get("name").and_then(Value::as_str).unwrap_or_default();
-                match crate::prompts::get(name).filter(|_| self.now().0.has(AgentLevels::READ)) {
+                match crate::prompts::get(name).filter(|_| self.reads()) {
                     Some(prompt) => protocol::result(id, prompt),
                     None => protocol::error(id, INVALID_PARAMS, "There is no such prompt: prompts/list lists them."),
                 }
