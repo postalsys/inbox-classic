@@ -2206,6 +2206,9 @@ fn an_agent_changes_many_messages_at_once() {
         assert!(report.whole());
         assert_eq!(report.text(), "Took back 2 changes.");
         assert!(eventually(20, || server.subjects("INBOX").len() == 5));
+        // moved back, they are in the store's Inbox once the sync of it brings them (a move takes them out of the
+        // folder they leave at once, and into the one they go to as the server has them there)
+        assert!(eventually(30, || subjects_in(&core, inbox).len() == 5));
         assert!(eventually(10, || !server
             .flags("INBOX", keep)
             .iter()
