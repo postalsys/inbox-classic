@@ -532,6 +532,17 @@ impl Reader {
         self.uid.get() != 0 || self.file.borrow().is_some()
     }
 
+    /// Whether the message `uid` of `folder` is what the pane shows, and its page has loaded: the message itself, or
+    /// why it is not there (it could not be downloaded or shown), not the moment between (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn shows(&self, folder: i64, uid: u64) -> bool {
+        self.folder.get() == folder
+            && self.uid.get() == uid
+            && self.view_request.get() == 0
+            && (self.has_view() || self.shows_failure() || self.note.is_visible())
+            && self.preview.loaded()
+    }
+
     /// Whether the message is on screen, not only asked for
     pub fn has_view(&self) -> bool {
         self.view.borrow().is_some()

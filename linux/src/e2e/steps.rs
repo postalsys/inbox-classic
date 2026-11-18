@@ -4,12 +4,21 @@
 //! address, and closing the app.
 
 use super::*;
+use pe_core::i18n::Text;
 
 /// Finds one message with the search, and shows it
 async fn show_found(query: &str) -> bool {
     search(query).await;
     let one = wait_until(20, || rows() == 1).await;
     select_row(0).await;
+    one
+}
+
+/// Finds one message with the search and asks the reading pane for it, without waiting for it to come
+async fn ask_found(query: &str) -> bool {
+    search(query).await;
+    let one = wait_until(20, || rows() == 1).await;
+    select_row_asked(0).await;
     one
 }
 
@@ -980,9 +989,8 @@ pub async fn several_messages(d: &Driver) {
     select_row(1).await;
     main.list.selection.select_item(2, false);
     main.list.selection.select_item(3, false);
-    pause(500).await;
     d.check(
-        main.list.selected_count() == 3,
+        wait_until(5, || main.list.selected_count() == 3).await,
         "Ctrl+click adds two more messages: three are selected",
     );
     let refs = main.selected_refs();
@@ -1039,13 +1047,18 @@ pub async fn several_messages(d: &Driver) {
         &format!("Move to Folder moves the three to Archive ({})", subjects.join(", ")),
     );
     d.check(wait_until(10, || rows() == listed - 3).await, "and out of the list");
-    let status = main.status_texts().0;
+    let moved = done_words(Text::DoneMoved, 3, "Archive");
+    let said = wait_until(10, || main.status_texts().0 == moved).await;
     d.check(
-        status == "Moved 3 messages to Archive",
-        &format!("the status bar says they were moved to Archive ({status})"),
+        said,
+        &format!(
+            "the status bar says they were moved to Archive ({})",
+            main.status_texts().0
+        ),
     );
     run_command(Command::Undo);
-    let back = wait_until(10, || main.status_texts().0 == "Moved 3 messages back to Inbox").await;
+    let moved_back = done_words(Text::DoneMovedBack, 3, "Inbox");
+    let back = wait_until(10, || main.status_texts().0 == moved_back).await;
     d.check(
         back,
         &format!(
@@ -1080,9 +1093,8 @@ pub async fn several_messages(d: &Driver) {
     pause(500).await;
     d.shot(main.window(), "select-2-undo").await;
     run_command(Command::SelectAll);
-    pause(300).await;
     d.check(
-        main.list.selected_count() == u64::from(rows()),
+        wait_until(5, || main.list.selected_count() == u64::from(rows())).await,
         &format!(
             "Select All selects every message of the list ({} of {})",
             main.list.selected_count(),
@@ -1210,7 +1222,8 @@ pub async fn messages_as_files(d: &Driver) {
     }
     FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![dir.clone()]));
     run_command(Command::SaveAs);
-    let said = wait_until(30, || main.status_texts().0 == "Saved 3 messages to saved-several").await;
+    let saved = done_words(Text::SavedTo, 3, "saved-several");
+    let said = wait_until(30, || main.status_texts().0 == saved).await;
     let in_dir = std::fs::read_dir(&dir).map(|e| e.count()).unwrap_or(0);
     let kept = names
         .first()
@@ -1304,10 +1317,14 @@ pub async fn messages_as_files(d: &Driver) {
         .await,
         ".eml files dropped onto Archive in the folder tree are put in it, on the server",
     );
-    let said = main.status_texts().0;
+    let put = done_words(Text::ImportPut, 3, "Archive");
+    let said = wait_until(10, || main.status_texts().0 == put).await;
     d.check(
-        said == "Put 3 messages in Archive",
-        &format!("the status bar says they were put in Archive ({said})"),
+        said,
+        &format!(
+            "the status bar says they were put in Archive ({})",
+            main.status_texts().0
+        ),
     );
     select_folder("Archive");
     wait_until(20, || rows() >= 3).await;
@@ -1426,8 +1443,12 @@ pub async fn flag_colors(d: &Driver) {
             flags_of(&orange).join(" ")
         ),
     );
+    let orange_said = pe_core::i18n::tr_args(
+        Text::DoneFlaggedColor,
+        &[("messages", (&pe_core::messages(1)).into()), ("color", "orange".into())],
+    );
     d.check(
-        main.status_texts().0 == "Flagged 1 message orange",
+        wait_until(10, || main.status_texts().0 == orange_said).await,
         &format!("the status bar says so ({})", main.status_texts().0),
     );
     d.check(
@@ -1589,7 +1610,8 @@ async fn archive(d: &Driver) {
         wait_until(10, || d.find("INBOX", "Subject: Copy me").is_none()).await,
         "and out of the Inbox",
     );
-    let said = wait_until(10, || main.status_texts().0.starts_with("Archived 1 message")).await;
+    let archived = done_words(Text::DoneArchived, 1, "");
+    let said = wait_until(10, || main.status_texts().0 == archived).await;
     d.check(
         said,
         &format!("the status bar says it was archived ({})", main.status_texts().0),
@@ -2136,25 +2158,19 @@ pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
         // read from, and mail that comes meanwhile (a sync) moves the rows under it. The list's own rows as it shows
         // them: grouped by conversation, a row is not a message's place in the folder
         let selected = wait_for(10, || {
-            let at = main
-                .list
-                .shown_messages(500)
+            let shown = main.list.shown_messages(500);
+            let at = shown
                 .iter()
                 .position(|m| m.folder_id == folder && m.info.subject == subject)?;
             main.list.select(u32::try_from(at).ok()?);
-            Some(())
+            Some(shown[at].info.uid)
         })
         .await;
-        if selected.is_none() {
+        let Some(uid) = selected else {
             return false;
-        }
-        pause(1500).await;
+        };
         // the list read again between the two would have shown another message: selected again
-        if wait_until(15, || {
-            main.reader.has_view() && main.reader.subject().as_deref() == Some(subject)
-        })
-        .await
-        {
+        if wait_until(15, || main.reader.shows(folder, uid)).await {
             return true;
         }
     }
@@ -2377,8 +2393,9 @@ pub async fn closing_a_message(d: &Driver) {
         answer(&ask, "No");
     }
     d.check(wait_until(10, || !c.window.is_visible()).await, "No closes it");
-    pause(1000).await;
-    d.check(d.find("Drafts", "Never mind").is_none(), "without saving it");
+    // a save would be on the server in a moment: it does not come
+    let saved = wait_until(3, || d.find("Drafts", "Never mind").is_some()).await;
+    d.check(!saved, "without saving it");
 }
 
 pub async fn mailto(d: &Driver) {
@@ -2656,7 +2673,7 @@ pub async fn closing(d: &Driver) {
     if let Some(ask) = ask {
         d.shot(&ask, "write-12-close-app").await;
         answer(&ask, "Cancel");
-        pause(1000).await;
+        wait_until(5, || alert().is_none()).await;
         let kept = shell().main().window().is_visible() && c.window.is_visible();
         d.check(kept, "Cancel keeps the app and the message open");
     }
@@ -2713,7 +2730,7 @@ pub async fn not_downloaded(d: &Driver) {
     // a server that takes the connection and says nothing: the download waits
     let silent = SilentServer::start();
     set_port(d, "form-6", &silent.port.to_string()).await;
-    show_found("subject:\"Waiting on the server\"").await;
+    ask_found("subject:\"Waiting on the server\"").await;
     let reader = &shell().main().reader;
     let header = reader.header_text();
     d.check(
@@ -2780,7 +2797,15 @@ pub async fn large_message(d: &Driver) {
     run_command(Command::Sync);
     select_folder("Archive");
     wait_for(20, || d.find("Archive", "Subject: The quarterly report")).await;
-    pause(1000).await;
+    // synced into the store, where the search looks
+    if let Some(archive) = folder_id("Archive") {
+        wait_until(30, || {
+            listed_in_folder(archive, 0, 500)
+                .iter()
+                .any(|m| m.info.subject == "The quarterly report")
+        })
+        .await;
+    }
     show_found("subject:\"The quarterly report\"").await;
     let reader = &shell().main().reader;
     d.check(
@@ -3302,16 +3327,17 @@ pub async fn reorder_accounts(d: &Driver) {
     // its menu: Move Up turned off, first as it is; Move Down puts it back
     let tree: gtk::Widget = main.folders.view.clone().upcast();
     main.account_menu(&tree, 120.0, 40.0, second_account);
-    pause(300).await;
-    let popover: Option<gtk::Widget> = main.folder_popover.borrow().clone().map(|p| p.upcast());
-    // an item is turned off with its action: its label is then insensitive
-    let enabled = |text: &str| {
-        popover
+    let popover = || -> Option<gtk::Widget> { main.folder_popover.borrow().clone().map(|p| p.upcast()) };
+    let label = |text: &str| {
+        popover()
             .iter()
             .flat_map(descendants::<gtk::Label>)
             .find(|label| label.text() == text)
-            .is_some_and(|label| label.is_sensitive())
     };
+    // the menu built: its items drawn
+    wait_until(5, || label("Move Up").is_some() && label("Move Down").is_some()).await;
+    // an item is turned off with its action: its label is then insensitive
+    let enabled = |text: &str| label(text).is_some_and(|label| label.is_sensitive());
     d.check(
         !enabled("Move Up") && enabled("Move Down"),
         &format!(
@@ -3759,7 +3785,8 @@ pub async fn between_accounts(d: &Driver) {
         wait_until(10, || rows() == in_inbox - 1).await,
         "a message of the first account moved to the second account's Archive leaves the list at once",
     );
-    let done = wait_until(30, || main.status_texts().0 == "Moved 1 message to Archive").await;
+    let moved = done_words(Text::DoneMoved, 1, "Archive");
+    let done = wait_until(30, || main.status_texts().0 == moved).await;
     d.check(
         done,
         &format!(
@@ -3787,7 +3814,7 @@ pub async fn between_accounts(d: &Driver) {
     select_row(0).await;
     d.shot(&main_window(), "move-2-accounts").await;
     select_folder("Inbox");
-    pause(500).await;
+    wait_list_settled().await;
 
     run_command(Command::Undo);
     d.check(
@@ -3957,7 +3984,10 @@ fn preferences_pages(d: &Driver, dialog: &adw::Dialog) {
 pub(super) async fn in_language(language: &str) {
     pe_core::i18n::set_language(language);
     shell().remake_main();
-    pause(1000).await;
+    wait_until(10, || {
+        shell().main().window().is_mapped() && shell().main().folders.rows() > 0
+    })
+    .await;
     select_folder(&pe_core::i18n::tr(pe_core::i18n::Text::FolderInbox));
     wait_until(10, || rows() >= 1).await;
     select_row(0).await;
@@ -4037,9 +4067,9 @@ pub async fn languages(d: &Driver) {
     );
     // back to the system's, which takes the setting out
     row.set_selected(0);
-    pause(300).await;
+    let cleared = wait_until(5, || shell().settings.text(crate::settings::LANGUAGE).is_none()).await;
     d.check(
-        shell().settings.text(crate::settings::LANGUAGE).is_none() && alert().is_none(),
+        cleared && alert().is_none(),
         "System default, the language in use already, asks nothing",
     );
     dialog.close();
@@ -4061,8 +4091,9 @@ pub async fn languages(d: &Driver) {
     let menu = named_in(&main, "primary-menu").and_downcast::<gtk::MenuButton>();
     if let Some(menu) = &menu {
         menu.popup();
-        pause(500).await;
-        let labels = menu_labels(menu.popover().and_downcast::<gtk::PopoverMenu>().as_ref());
+        let popover = || menu.popover().and_downcast::<gtk::PopoverMenu>();
+        wait_until(5, || !menu_labels(popover().as_ref()).is_empty()).await;
+        let labels = menu_labels(popover().as_ref());
         d.check(
             labels.iter().any(|l| l == "Datei") && labels.iter().any(|l| l == "Einstellungen"),
             &format!("the main menu is in German ({labels:?})"),
@@ -4303,18 +4334,20 @@ pub async fn one_time_codes(d: &Driver) {
         copied == "482913",
         &format!("Copy puts the code on the clipboard ({copied})"),
     );
+    let copied_said = t!(UiCodeCopied);
     let said = main.status_texts().0;
-    d.check(
-        said == "Copied the code",
-        &format!("and the status bar says so ({said})"),
-    );
+    d.check(said == copied_said, &format!("and the status bar says so ({said})"));
     // a sync in the background (the timer's) ends with Done, which must not take the place of the user's answer
+    let (finished, accounts) = (
+        shell().syncs_finished.get(),
+        shell().core.accounts().map_or(1, |a| a.len() as u64),
+    );
     shell().sync_all();
-    pause(3000).await;
+    let ended = wait_until(30, || shell().syncs_finished.get() >= finished + accounts).await;
     let said = main.status_texts().0;
     d.check(
-        said == "Copied the code",
-        &format!("a sync in the background leaves those words ({said})"),
+        ended && said == copied_said,
+        &format!("a sync in the background, once it has ended, leaves those words ({said})"),
     );
 
     open_by_subject(inbox, by_header).await;

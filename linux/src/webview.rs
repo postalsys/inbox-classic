@@ -250,6 +250,9 @@ pub struct DocumentView {
     asked: Rc<Cell<u64>>,
     /// The app's script that scrolls the document being loaded to where the one before was, until it has loaded
     scroll_back: Rc<RefCell<Option<(String, webkit::UserScript)>>>,
+    /// The URI of the document that loaded last, for the UI test to wait on
+    #[cfg(feature = "e2e")]
+    finished: Rc<RefCell<String>>,
 }
 
 /// Asked of a link clicked in a document before the browser opens it: true when the owner took it (the bounce card's)
@@ -332,10 +335,16 @@ impl DocumentView {
         let scroll_back: Rc<RefCell<Option<(String, webkit::UserScript)>>> = Rc::default();
         let scrolled = scroll_back.clone();
         let scripts = manager.clone();
+        #[cfg(feature = "e2e")]
+        let finished: Rc<RefCell<String>> = Rc::default();
+        #[cfg(feature = "e2e")]
+        let loaded = finished.clone();
         view.connect_load_changed(move |view, event| {
             if event != webkit::LoadEvent::Finished {
                 return;
             }
+            #[cfg(feature = "e2e")]
+            loaded.replace(view.uri().map(String::from).unwrap_or_default());
             if measure.get() {
                 size_frames(view);
             }
@@ -359,7 +368,16 @@ impl DocumentView {
             measure_timer: Rc::default(),
             asked: Rc::default(),
             scroll_back,
+            #[cfg(feature = "e2e")]
+            finished,
         }
+    }
+
+    /// Whether the document asked for last has loaded (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn loaded(&self) -> bool {
+        let current = self.current.borrow();
+        !current.is_empty() && *self.finished.borrow() == *current && !self.view.is_loading()
     }
 
     /// The frames of the document shown (a signed or encrypted message's parts) sized to their documents with the
