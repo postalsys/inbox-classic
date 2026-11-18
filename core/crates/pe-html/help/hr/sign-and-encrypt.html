@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Potpisivanje i šifriranje poruke</h1>
-<p class="summary">Potpišite poruku kako bi primatelji znali da je od vas i šifrirajte je kako bi je mogli pročitati samo oni.</p>
-<p>Potpisana poruka pokazuje da ste je vi napisali i da je nitko nije promijenio na putu. Šifriranu poruku mogu pročitati samo njezini primatelji i vi, a uvijek je i potpisana. Za oboje vam treba vlastiti ključ.</p>
+<p class="summary">Digitalno potpišite i šifrirajte poruku kako biste zaštitili njezin sadržaj.</p>
+<p>Digitalnim potpisom možete provjeriti je li sadržaj poruke ostao nepromijenjen nakon potpisivanja. Vlasništvo ključa potvrđuje se zasebno. Šifrirani sadržaj mogu pročitati samo primatelji i vi. Poruke koje šaljete šifrirane ujedno se i potpisuju. Za potpisivanje i šifriranje potreban vam je vlastiti ključ.</p>
 <p>Da biste potpisali ili šifrirali poruku:</p>
 <ol>
-    <li>U prozoru poruke kliknite <b data-text="ui-tb-sign"></b> ili <b data-text="ui-tb-encrypt"></b> ili odaberite <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> ili <b data-text="cmd-compose-encrypt"></b>. Možete i pritisnuti <kbd data-command="compose_sign"></kbd> ili <kbd data-command="compose_encrypt"></kbd>. Ako još nemate ključ, Inbox Classic ponudit će da ga stvori.</li>
+    <li>U prozoru poruke kliknite <b data-text="ui-tb-sign"></b> ili <b data-text="ui-tb-encrypt"></b> ili odaberite <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> ili <b data-text="cmd-compose-encrypt"></b>. Možete i pritisnuti <kbd data-command="compose_sign"></kbd> ili <kbd data-command="compose_encrypt"></kbd>. Ako za adresu pošiljatelja nemate vlastiti ključ, Inbox Classic ponudit će vam da ga stvorite.</li>
     <li>Kliknite <b data-text="ui-tb-send"></b>.</li>
 </ol>
-<p>Dok je <b data-text="ui-tb-encrypt"></b> uključeno, redak ispod predmeta prikazuje svakog primatelja s lokotom, a Inbox Classic traži ključeve koje još nema:</p>
+<p>Kad je uključena mogućnost „<b data-text="ui-tb-encrypt"></b>“, ispod predmeta prikazuje se status ključa svakog primatelja, označen bojom i ikonom. Inbox Classic automatski traži ključeve koji nedostaju:</p>
 <table>
-    <tr><th>Boja lokota</th><th>Značenje</th></tr>
-    <tr><td>Zelena</td><td>Provjerili ste ključ primatelja.</td></tr>
-    <tr><td>Plava</td><td>Imate ključ primatelja, ali ga niste provjerili.</td></tr>
+    <tr><th>Boja</th><th>Značenje</th></tr>
+    <tr><td>Zelena</td><td>Potvrdili ste da ključ pripada primatelju.</td></tr>
+    <tr><td>Plava</td><td>Imate ključ primatelja, ali njegovo vlasništvo još nije potvrđeno. Plava može označavati i vaš vlastiti ključ.</td></tr>
     <tr><td>Siva</td><td>Inbox Classic traži ključ primatelja.</td></tr>
-    <tr><td>Jantarna</td><td>Za primatelja nije pronađen nijedan ključ.</td></tr>
+    <tr><td>Jantarna</td><td>Nema upotrebljivog ključa za primatelja.</td></tr>
 </table>
-<h2>Ako primatelj nema ključ</h2>
-<p>Šifrirana poruka šalje se samo ako svaki primatelj ima ključ. Ako ga neki nema, <b data-text="ui-tb-send"></b> otvara prozor <b data-text="ui-recipient-keys-title"></b>. Ondje možete kliknuti <b data-text="ui-recipient-find-key"></b> da biste ponovno potražili ključ, <b data-text="ui-recipient-remove"></b> da biste izostavili tu osobu ili <b data-text="ui-send-unencrypted"></b>. Primatelja možete i zamoliti za njegov javni ključ pa ga uvesti.</p>
+<h2>Ako nedostaje upotrebljiv ključ</h2>
+<p>Za slanje šifrirane poruke potreban je upotrebljiv ključ za svakog primatelja. Ako takav ključ nedostaje, klikom na gumb <b data-text="ui-tb-send"></b> otvarate prozor <b data-text="ui-recipient-keys-title"></b>. Kliknite <b data-text="ui-recipient-find-key"></b> da biste ponovili pretragu ili <b data-text="ui-recipient-remove"></b> da biste uklonili primatelja iz poruke. Mogućnost „<b data-text="ui-send-unencrypted"></b>“ dostupna je samo ako poruka više ne sadrži tekst, slike ni privitke iz šifrirane poruke. Primatelja možete i zamoliti za njegov javni ključ pa ga uvesti.</p>
 <h2>Odgovori na šifriranu poštu</h2>
-<p>Odgovor na šifriranu poruku ili njezino prosljeđivanje počinje s uključenim <b data-text="ui-tb-encrypt"></b>, a Inbox Classic pita prije nego što ga isključite. Dok poruka još citira šifrirani tekst ili sadrži privitke šifrirane poruke, može se poslati samo šifrirana.</p>
-<p>Skice šifrirane poruke spremaju se šifrirane, kao i njezina kopija u mapi <b data-text="folder-sent"></b>.</p>
+<p>Kad odgovarate na šifriranu poruku ili je prosljeđujete, mogućnost „<b data-text="ui-tb-encrypt"></b>“ uključena je na početku. Inbox Classic traži potvrdu prije isključivanja šifriranja. Poruka se može poslati bez šifriranja tek kada iz nje uklonite tekst, slike i privitke koji potječu iz šifrirane poruke.</p>
+<p>Dok je šifriranje uključeno, skice se spremaju šifrirane samo vašim ključem, bez digitalnog potpisa. Ako u skici još ima teksta, slika ili privitaka iz šifrirane poruke, ostaje šifrirana čak i kad isključite šifriranje. Kopija šifrirane poruke u mapi <b data-text="folder-sent"></b> također ostaje šifrirana.</p>
 <h2>Dijeljenje javnog ključa</h2>
-<p>Da bi vam drugi mogli slati šifriranu poštu, odaberite <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Vaš javni ključ prilaže se poruci kao datoteka.</p>
+<p>Da bi vam drugi mogli slati šifriranu poštu, odaberite <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Poruci se kao datoteka prilaže javni ključ odabrane adrese pošiljatelja.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

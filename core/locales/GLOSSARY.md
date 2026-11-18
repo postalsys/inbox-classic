@@ -500,6 +500,14 @@ Review notes (round 2):
 - Use "odbaciti skicu" for discarding an agent-owned draft, with permanent removal explained in help.
   Saving, including autosave, ends the agent's access; opening alone does not. The account footer is
   "tekst potpisa", separate from a digital signature. Permission descriptions name all allowed actions.
+- Compose protection is applied "pri slanju". Keep digital signature validity separate from confirmed
+  key ownership ("Vlasništvo ključa potvrđeno"). Use "upotrebljiv ključ" when an encryption key must be usable.
+- The encrypted status uses [1] only for a single named recipient, then one/few/other with the count
+  ("21 primatelj", "2 primatelja", "5 primatelja"). After "za", all plural counts take "primatelja".
+- Complete key-state reasons follow "Razlog:" on a separate line, dates "Posljednja pretraga:". Names and address
+  lists remain uninflected after a head noun or colon. Short controls keep singular commands; help keeps formal plural.
+- Keep "Jantarna" for warning status, matching the reading-security help. Unencrypted sending requires removal
+  of inherited text, images and attachments. Encrypted drafts use the sender's key without a digital signature.
 
 ### Italiano (it)
 
