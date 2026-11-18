@@ -378,7 +378,21 @@ fn format(bundle: &Bundle, id: &str, args: &[(&str, Arg)]) -> Option<String> {
 pub fn pseudo(text: &str) -> String {
     let mut out = String::with_capacity(text.len() * 2);
     out.push('[');
-    for c in text.chars() {
+    // a command line option (`--name`) is typed as it is, so it stays as it is
+    let mut option = false;
+    let mut previous = ' ';
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c.is_whitespace() {
+            option = false;
+        } else if c == '-' && previous.is_whitespace() && chars.peek() == Some(&'-') {
+            option = true;
+        }
+        previous = c;
+        if option {
+            out.push(c);
+            continue;
+        }
         out.push(match c {
             'a' => 'á',
             'e' => 'é',

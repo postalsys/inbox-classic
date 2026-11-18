@@ -234,6 +234,19 @@ fn pseudo_is_longer_and_bracketed() {
 }
 
 #[test]
+fn pseudo_keeps_command_line_options() {
+    let text = pseudo("add --name and a name");
+    assert!(text.contains(" --name ") && text.contains("áñd"), "{text}");
+    // a lone dash is a word like any other
+    assert!(pseudo("one - and").contains("áñd"));
+    assert!(
+        pseudo("--name at the start").starts_with("[--name "),
+        "{}",
+        pseudo("--name at the start")
+    );
+}
+
+#[test]
 fn words_in_the_language_set() {
     // one test changes the language, so they run in one go
     set_language("en");
