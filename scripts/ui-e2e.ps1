@@ -1243,14 +1243,18 @@ try {
     # a row of the list, reached with the keys as a user would: once it is selected and the reading pane shows its
     # message (a row that shows none, of a message not downloaded or of several, is waited for a few seconds)
     function SelectRow([int]$row) {
+        # a list still loading (a search, a folder) takes the selection away when it comes
+        Settled
         # a click into the first row gives the list the keyboard, as it does for a user
         $point = [IntPtr]((28 -shl 16) -bor 60)
         [void][Native.Win]::PostMessage($list, 0x0201, [IntPtr]1, $point)
         [void][Native.Win]::PostMessage($list, 0x0202, [IntPtr]::Zero, $point)
         [void](WaitFor { [Native.Win]::FocusOf($list) -eq $list } 3)
-        # the click taken first (it selects the first row), so a row selected before is not taken for the one asked
-        # for: the keys posted after it come after it
-        if ($row -ne 0) { [void](WaitFor { (SelectedRow) -eq 0 } 3) }
+        # the click taken first: it selects the top row shown (LVM_GETTOPINDEX), whose message the pane then shows, so
+        # the row asked for is opened again even when it was the one selected (its message shown anew: a key verified
+        # since, say), and a row selected before is not taken for it. The keys posted after the click come after it
+        $first = [int][Native.Win]::SendMessage($list, 0x1027, [IntPtr]::Zero, [IntPtr]::Zero)
+        if ($row -ne $first) { [void](WaitFor { (SelectedRow) -eq $first -and (Shown) } 3) }
         Key $list $VK_HOME
         for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
         if (WaitFor { (SelectedRow) -eq $row } 5) {
@@ -4180,8 +4184,9 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Quarterly planning"')
     [void](WaitFor { (Rows) -eq 1 } 20)
     SelectRow 0
-    # the event is a card in the message, in the blue of the app's information
-    Check ([bool](WaitFor { $null -ne (& $cardPoint 15 95 179) } 15)) 'a message with an invitation shows the event in a card above the text'
+    # the event is a card in the message, in the blue of the app's information (selected again while the search's
+    # last reload may still take the selection away)
+    Check ([bool](WaitFor { if ((SelectedRow) -ne 0) { SelectRow 0 }; $null -ne (& $cardPoint 15 95 179) } 15)) 'a message with an invitation shows the event in a card above the text'
     Shot $main 'read-10-invitation'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
@@ -4455,10 +4460,7 @@ public static class Dragger {
             Shot $compose 'agents-8b-draft-narrow'
             [void][Native.Win]::SetWindowPos($compose, [IntPtr]::Zero, 0, 0, $wide.Right - $wide.Left, $wide.Bottom - $wide.Top, 0x16)
             # closed without saving: the draft stays the agent's
-            [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
-            $ask = BoxOf $compose 10
-            if ($ask) { Click $ask 7 }
-            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) } 10)) 'closed without saving'
+            Check (CloseCompose $compose) 'closed without saving'
             Start-Sleep -Seconds 1
             $kept = Find 'Drafts' 'Subject: Agenda for Friday'
             Check ($kept -and (RawText $kept) -eq $draftSource -and $draftSource -match 'X-Inbox-Classic-Agent: My AI agent') 'the draft stays the agent''s, unchanged'
@@ -4773,7 +4775,7 @@ public static class Dragger {
         flags = @() } | ConvertTo-Json)
     Command $main $IDM_SYNC
     SelectFolder 0
-    [void](WaitFor { (Rows) -ge 3 -and [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -eq $notOpened } 30)
+    [void](WaitFor { (Rows) -ge 3 -and @(0..2 | Where-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) -eq $notOpened }).Count -eq 1 } 30)
     # the newest three, the one not downloaded among them
     SelectRow 0
     [void][Native.Win]::SetForegroundWindow($main)
@@ -6118,7 +6120,8 @@ public static class Dragger {
     # found with the search, as other messages of the test are newer
     $findBox = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Signed in the UI test"')
-    [void](WaitFor { (Rows) -eq 1 } 20)
+    # the search's rows: the message, and its copy in Sent Items when the search has every folder
+    [void](WaitFor { $n = Rows; $n -ge 1 -and @(SubjectRows 'Signed in the UI test').Count -eq $n } 20)
     SelectRow 0
     $compose = WaitCompose { Command $main $IDM_REPLY }
     if ($compose) {
@@ -7002,10 +7005,14 @@ public static class Dragger {
     }
     # a row selected with the keys, from the first
     function KeyToRow([IntPtr]$list, [int]$row) {
-        Key $list $VK_HOME
-        for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
-        # once the list has it selected (LVM_GETNEXTITEM, LVNI_SELECTED): the buttons act on the selected row
-        [void](WaitFor { [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) -eq $row } 5)
+        # keys before the rows are there are lost: the list filled first (it is filled again after a change)
+        [void](WaitFor { (ListCount $list) -gt $row } 5)
+        for ($try = 0; $try -lt 2; $try++) {
+            Key $list $VK_HOME
+            for ($i = 0; $i -lt $row; $i++) { Key $list $VK_DOWN }
+            # once the list has it selected (LVM_GETNEXTITEM, LVNI_SELECTED): the buttons act on the selected row
+            if (WaitFor { [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2) -eq $row } 5) { break }
+        }
         Start-Sleep -Milliseconds 200
     }
     function OpenSignInApps {
@@ -7771,7 +7778,6 @@ public static bool HasIcon(IntPtr window) {
         $left = @(AppWindows | Where-Object { $_ -ne $window })
         if ($left.Count) {
             Write-Host "   (windows left open before File > Exit ($what): $(@($left | ForEach-Object { Describe $_ }) -join '; '))"
-            Annotate 'warning' "windows left open before File > Exit ($what)"
             CloseStrays "before File > Exit ($what)" -Writing
         }
         Command $window $IDM_EXIT
