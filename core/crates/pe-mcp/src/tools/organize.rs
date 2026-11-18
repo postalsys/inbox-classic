@@ -59,8 +59,8 @@ pub(super) fn set_flag_color(call: &Call, args: &Args) -> Outcome {
             }
         })
         .collect();
-    call.log(&entries)?;
-    Ok(json!({ "done": true, "messages": uids.len() }))
+    let ids = call.log(&entries)?;
+    Ok(json!({ "done": true, "messages": uids.len(), "change_ids": ids }))
 }
 
 pub(super) fn set_conversation_mark(call: &Call, args: &Args) -> Outcome {
