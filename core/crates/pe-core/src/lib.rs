@@ -524,8 +524,6 @@ pub struct Core {
     logo_downloads: LogoDownloads,
     /// Message views built off the window thread: parsing, folding and sanitizing a large message takes a while
     views: Requests<Option<MessageView>>,
-    /// The view request the reading pane waits for; an older one gives up
-    newest_view: Arc<std::sync::atomic::AtomicU64>,
     /// The connection the views built in the background look up and mark bounces with, opened by the first that
     /// needs it
     /// Sign-ins in the browser: the provider and the refresh token, or why not
@@ -633,7 +631,6 @@ impl Core {
             pictures: Requests::default(),
             logo_downloads: Arc::default(),
             views: Requests::default(),
-            newest_view: Arc::default(),
             sign_ins: Requests::default(),
             checks: Requests::default(),
             discoveries: Discoveries::default(),
@@ -1562,15 +1559,15 @@ impl Core {
 
     /// Builds the view of a message in the background: [`Event::ViewReady`] follows with the request this returns.
     /// Its source is read off the window thread too, on a store connection of the core's own; parsing, folding and
-    /// sanitizing it follow there. A view started after it, or [`Core::message_view_cancel`], makes it give up between
-    /// those steps: one is shown at a time.
+    /// sanitizing it follow there. Only [`Core::message_view_cancel`] of this request makes it give up between those
+    /// steps: each reader (the reading pane, every message window) cancels its own view before it asks for another,
+    /// so two readers of one message (dark messages turned on reloads both at once) each get theirs.
     pub fn message_view_start(self: &Arc<Self>, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
-        self.newest_view.store(request, Ordering::Relaxed);
-        let newest = self.newest_view.clone();
         let events = self.events.clone();
         let work = self.in_background(Connection::Reads, move |core| {
-            let dropped = move || newest.load(Ordering::Relaxed) != request;
+            // listed as running from before the work starts until it is cancelled
+            let dropped = || !core.views.is_running(request);
             if dropped() {
                 return None;
             }
@@ -1604,11 +1601,9 @@ impl Core {
         self.views.take(request).flatten().map(|view| self.learned(view))
     }
 
-    /// Drops a view no longer waited for (another message was selected)
+    /// Drops a view no longer waited for (its reader shows another message, or closed); another reader's view of
+    /// the same message is built on
     pub fn message_view_cancel(&self, request: u64) {
-        let _ = self
-            .newest_view
-            .compare_exchange(request, 0, Ordering::Relaxed, Ordering::Relaxed);
         self.views.cancel(request);
     }
 

@@ -2987,7 +2987,9 @@ struct PeMessageView *pe_message_view(const struct PeCore *core,
                                       bool allow_remote_images);
 
 // Builds the view of a message whose source is in the store (after `MessageReady`) off the window thread, its source
-// read there too: `ViewReady` with this request in `uid` follows. 0 on failure.
+// read there too: `ViewReady` with this request in `uid` follows. 0 on failure. Each reader (the reading pane, a
+// message window) cancels its own request (`pe_message_view_cancel`) before it asks for another; nothing else drops
+// it, so two readers of one message each get their view.
 //
 // # Safety
 // `core` must be a live handle.
@@ -3004,7 +3006,7 @@ uint64_t pe_message_view_start(const struct PeCore *core,
 struct PeMessageView *pe_message_view_result(const struct PeCore *core,
                                              uint64_t request);
 
-// Drops a view request no longer waited for
+// Drops a view request no longer waited for (its reader shows another message or closed)
 //
 // # Safety
 // `core` must be a live handle.

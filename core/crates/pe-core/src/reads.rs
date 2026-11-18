@@ -202,4 +202,28 @@ the notes\r\n--b--\r\n";
         assert_eq!(std::fs::read(&written.path).unwrap(), b"the notes");
         assert_eq!(core.draft_result(missing), None, "no source");
     }
+
+    /// The reading pane and a message window asking for one message at once (turning dark messages on reloads both)
+    /// each get their view; only a reader's own cancel drops its view
+    #[test]
+    fn two_readers_of_one_message_each_get_a_view() {
+        let dir = pe_testkit::TempDir::new("core-two-readers");
+        let (core, inbox, events) = opened(&dir, 1);
+        core.store().set_source(inbox, 1, SOURCE).unwrap();
+        // held, so all three are asked for before any is built
+        let held = crate::connections::open(&core.connections.reads, &dir.path().join("store.db")).unwrap();
+        let pane = core.message_view_start(inbox, 1, false).unwrap();
+        let window = core.message_view_start(inbox, 1, false).unwrap();
+        let cancelled = core.message_view_start(inbox, 1, false).unwrap();
+        core.message_view_cancel(cancelled);
+        drop(held);
+        let mut seen = [done(&events), done(&events)];
+        seen.sort();
+        assert_eq!(seen, [pane, window]);
+        for request in [pane, window] {
+            let view = core.message_view_result(request).expect("each reader's view");
+            assert!(view.document.contains("See the notes."));
+        }
+        assert!(core.message_view_result(cancelled).is_none());
+    }
 }
