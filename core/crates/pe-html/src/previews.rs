@@ -23,10 +23,9 @@ pub const PREVIEW_PATH: &str = "/pv/";
 /// views cancel every navigation) and open as a double-click in the strip does
 pub const PREVIEW_LINK: &str = "inboxclassic:attachment-";
 
-/// The start of the section's style element, just before it
-const STYLE_START: &str = "<style>@layer pe-att-";
-
-/// The start of the section's markup, which no message can write (the sanitizer keeps no class but its own)
+/// The start of the section's markup, for the tests to find it (a message's style text may hold the same words, so
+/// nothing finds or cuts the section by them)
+#[cfg(test)]
 pub(crate) const SECTION_START: &str = "<section class=\"pe-att-";
 
 /// The origin of the reading pane's documents on this platform: WebView2 answers an https origin of the app's own,
@@ -293,27 +292,6 @@ pub fn is_preview_link(uri: &str) -> bool {
     parse_preview_link(uri).is_some()
 }
 
-/// A document of the reading pane without its previews, None for one without: what is printed (the print windows
-/// serve no previews; PDF pages are printed from their own program)
-pub fn without_previews(document: &str) -> Option<String> {
-    document.contains(SECTION_START).then(|| without_section(document))
-}
-
-/// A document without its previews, their style element and the CSP's preview path: what is printed (the print
-/// window serves no previews)
-pub(crate) fn without_section(document: &str) -> String {
-    let Some(start) = document.find(SECTION_START) else {
-        return document.to_string();
-    };
-    let end = document[start..]
-        .find("</section>")
-        .map_or(document.len(), |end| start + end + "</section>".len());
-    // the section's style element is just before it
-    let start = document[..start].rfind(STYLE_START).unwrap_or(start);
-    let source = format!(" {}", preview_source());
-    format!("{}{}", &document[..start], &document[end..]).replacen(&source, "", 1)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -455,19 +433,5 @@ mod tests {
         // nothing at all: no section
         let (html, shown) = section(&previews, &|_| true, false);
         assert!(html.is_empty() && shown.is_empty());
-    }
-
-    #[test]
-    fn the_section_comes_out_of_a_printout() {
-        let document = format!(
-            "<meta content=\"img-src data: {};\"><body><p>hi</p>{STYLE_START}x{{}}</style>{SECTION_START}x\"><img>\
-             </section></body></html>",
-            preview_source()
-        );
-        assert_eq!(
-            without_section(&document),
-            "<meta content=\"img-src data:;\"><body><p>hi</p></body></html>"
-        );
-        assert_eq!(without_section("<p>no</p>"), "<p>no</p>");
     }
 }

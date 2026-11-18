@@ -42,7 +42,7 @@ pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};
 pub use previews::{
     PREVIEW_LINK, PREVIEW_PATH, PreviewFile, PreviewPage, PreviewSection, is_preview_link, parse_preview_address,
-    parse_preview_link, preview_address, preview_origin, preview_token, without_previews,
+    parse_preview_link, preview_address, preview_origin, preview_token,
 };
 pub use secure::{
     MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, part_document, part_link, secure_page,
@@ -255,6 +255,9 @@ pub struct Rendered {
     pub remote_images: bool,
     /// The attachments whose previews the document shows after the text ([`Cards::previews`]), in order
     pub previewed: Vec<usize>,
+    /// The document to print when this one shows previews: the same message wrapped again with none (the print
+    /// windows serve none of their pictures; PDF pages are printed from their own program). None when it shows none
+    pub print_document: Option<String>,
 }
 
 /// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows (on
@@ -320,11 +323,14 @@ pub fn render_view_cards(
         embedded: &embedded,
     });
     let (document, previewed) = wrap(&body, options, header, &card, previews);
+    // built from the same parts, never cut out of the document: the message's own style text may forge any marker
+    let print_document = (!previewed.is_empty()).then(|| wrap(&body, options, header, &card, None).0);
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
         remote_images: remote.load(Ordering::Relaxed) || style_elements_load_remote(&body),
         document,
         previewed,
+        print_document,
     }
 }
 
@@ -376,10 +382,9 @@ const PRINT_SCRIPT: &str = "addEventListener('afterprint',()=>chrome.webview.pos
 
 /// A document of [`render_view`] made into the page of the Print window: the same sanitized message, plus one script
 /// of ours, allowed by a nonce in the CSP (nothing else can run, the message has no scripts of its own), that says
-/// when the print preview is closed. None for a document that is not one of ours.
+/// when the print preview is closed. None for a document that is not one of ours. A document with previews is
+/// printed from its [`Rendered::print_document`].
 pub fn print_page(document: &str) -> Option<String> {
-    // the previews are not printed: the print window serves none of their pictures
-    let document = &previews::without_section(document);
     let at = document.find(CSP_START)? + CSP_START.len();
     let end = document.rfind(DOCUMENT_END)?;
     let nonce = editor::nonce();
@@ -839,10 +844,73 @@ mod tests {
             previews: Some(&section),
             ..Default::default()
         };
-        let document = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &cards).document;
-        let page = print_page(&document).unwrap();
-        assert!(!page.contains(&format!("/pv/{token}")), "{page}");
+        let rendered = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &cards);
+        assert!(rendered.document.contains(&format!("/pv/{token}")));
+        let printed = rendered.print_document.unwrap();
+        assert!(!printed.contains(&format!("/pv/{token}")), "{printed}");
+        assert!(!printed.contains("pe-att-"), "{printed}");
+        assert!(!printed.contains(&previews::preview_source()), "{printed}");
+        let page = print_page(&printed).unwrap();
         assert!(page.contains("<p>hi</p>"));
+        // a document without previews is printed as it is
+        let plain = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &Cards::default());
+        assert_eq!(plain.print_document, None);
+    }
+
+    /// The markup of a document outside its style elements
+    fn outside_styles(document: &str) -> String {
+        let mut out = String::new();
+        let mut rest = document;
+        while let Some(start) = rest.find("<style") {
+            out.push_str(&rest[..start]);
+            rest = &rest[start..];
+            rest = &rest[rest.find("</style>").map_or(rest.len(), |end| end + "</style>".len())..];
+        }
+        out.push_str(rest);
+        out
+    }
+
+    /// The previews' markers forged in a message's own style element stay style text in the shown and the printed
+    /// document: nothing is ever cut out of a finished document by them
+    #[test]
+    fn forged_preview_markers_stay_style_text() {
+        let html = "<p>hi</p><style>@layer pe-att-x{}<section class=\"pe-att-y\"></section>\
+                    <img src=x onerror=alert(1)><iframe srcdoc=x></iframe>\
+                    <form action=https://e.example/><input name=p></form></style>";
+        let token = preview_token();
+        let section = previews(&token);
+        let cards = Cards {
+            previews: Some(&section),
+            ..Default::default()
+        };
+        let rendered = render_view_cards(html, &RenderOptions::default(), &[], &[], &cards);
+        let printed = rendered.print_document.clone().unwrap();
+        let page = print_page(&printed).unwrap();
+        for document in [&rendered.document, &printed, &page] {
+            let markup = outside_styles(document);
+            for tag in ["<iframe", "<form", "<input", "onerror"] {
+                assert!(!markup.contains(tag), "{tag} in {document}");
+            }
+            // the forged text is still there, inside a style element
+            assert!(document.contains("onerror=alert(1)"), "{document}");
+        }
+        // the shown document's pictures are its previews' only; the printed ones have none
+        let shown = outside_styles(&rendered.document);
+        assert_eq!(
+            shown.matches("<img").count(),
+            shown.matches("src=\"/pv/").count(),
+            "{shown}"
+        );
+        assert!(!outside_styles(&printed).contains("<img"), "{printed}");
+        assert!(!outside_styles(&page).contains("<img"), "{page}");
+        // the plain print path (no previews) keeps it as style text too
+        let plain = render_view_cards(html, &RenderOptions::default(), &[], &[], &Cards::default());
+        assert_eq!(plain.print_document, None);
+        let page = print_page(&plain.document).unwrap();
+        let markup = outside_styles(&page);
+        for tag in ["<img", "<iframe", "<form", "onerror"] {
+            assert!(!markup.contains(tag), "{tag} in {page}");
+        }
     }
 
     #[test]

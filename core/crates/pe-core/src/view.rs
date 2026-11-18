@@ -354,8 +354,6 @@ pub(crate) fn build_unless(
         ),
         _ => (None, Vec::new()),
     };
-    // the previews are not printed (the print windows serve none of their pictures)
-    let print_document = pe_html::without_previews(&rendered.document);
     Some(MessageView {
         subject,
         from,
@@ -377,7 +375,8 @@ pub(crate) fn build_unless(
         protection: None,
         autocrypt: crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now()),
         part_documents: Vec::new(),
-        print_document,
+        // the previews are not printed (the print windows serve none of their pictures)
+        print_document: rendered.print_document,
         decrypted: None,
         decrypted_source: None,
         preview_token,
