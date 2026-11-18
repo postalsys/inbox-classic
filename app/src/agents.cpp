@@ -584,18 +584,21 @@ void FitHostColumns(AgentsState* state) {
     }
 }
 
-// the widest that the Program and Permissions columns need for the programs there are now, so the window can be made
-// that wide ("Programs started from a terminal (WindowsTerminal)" is a long name)
+// the widest that the programs' three columns need for the programs there are now, so the window can be made that
+// wide ("Programs started from a terminal (WindowsTerminal)" is a long name), with room for a scroll bar
 int HostColumnsWidth(PeCore* core) {
     int program = std::max(Scale(120) - Scale(16), static_cast<int>(MeasureText(core::T(PE_TEXT_UI_COL_PROGRAM)).cx));
     int access = static_cast<int>(MeasureText(core::T(PE_TEXT_UI_COL_MAY)).cx);
+    int used = std::max(Scale(110) - Scale(16), static_cast<int>(MeasureText(core::T(PE_TEXT_UI_COL_LAST_USED)).cx));
     core::AgentHostList hosts(pe_agent_hosts(core));
     for (size_t i = 0; i < pe_agent_host_list_count(hosts.get()); i++) {
         const PeAgentHost* host = pe_agent_host_list_get(hosts.get(), i);
         program = std::max(program, static_cast<int>(MeasureText(Text(host->name)).cx));
         access = std::max(access, static_cast<int>(MeasureText(Text(host->access)).cx));
+        std::wstring last = host->last_used ? FormatDate(host->last_used) : core::T(PE_TEXT_UI_NEVER);
+        used = std::max(used, static_cast<int>(MeasureText(last).cx));
     }
-    return program + access + 2 * Scale(16);
+    return program + access + used + 3 * Scale(16) + GetSystemMetrics(SM_CXVSCROLL);
 }
 
 void FillAgents(AgentsState* state) {
@@ -820,7 +823,7 @@ void AgentsDialog(HWND owner, PeCore* core) {
     // wide enough for what each program may do beside its name and when it was last used, within the screen
     RECT screen = {};
     SystemParametersInfoW(SPI_GETWORKAREA, 0, &screen, 0);
-    int wanted = 2 * pad + button + Scale(10) + Scale(4) + HostColumnsWidth(core) + Scale(110);
+    int wanted = 2 * pad + button + Scale(10) + Scale(4) + HostColumnsWidth(core);
     int width = std::clamp(wanted, Scale(680), std::max(Scale(680), static_cast<int>(screen.right - screen.left) - Scale(40)));
     int height = Scale(620);
     HWND dialog = CreateModalWindow(owner, kAgentsClass, core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), width, height);
