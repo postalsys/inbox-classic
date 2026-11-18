@@ -1004,6 +1004,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Baixando…
 # review: new
+preview-tile-preparing = Preparando…
+# review: new
 preview-tile-format = Imagens { $format } ainda não são mostradas
 # review: new
 preview-tile-password = Protegido por senha: abra para digitar a senha

@@ -45,7 +45,8 @@ fn picture(width: u32, height: u32) -> Picture {
 }
 
 /// A fake engine: a file whose bytes end in "hang" never finishes (until released), "panic" panics, "broken" has a
-/// page 1 that can not be read, anything else gives a description and one page per `pages` of `size`
+/// page 1 that can not be read, "slow" is described after 150 ms, anything else gives a description and one page per
+/// `pages` of `size`
 struct Fake {
     runs: AtomicUsize,
     /// The pages each run was asked for
@@ -82,6 +83,9 @@ impl Engine for Fake {
         }
         if file.ends_with(b"panic") {
             panic!("a decoder's bug");
+        }
+        if file.ends_with(b"slow") {
+            std::thread::sleep(Duration::from_millis(150));
         }
         if file.ends_with(b"password") {
             emit(Step::Described(Err(Refusal::Password)));
@@ -384,6 +388,62 @@ fn describe_goes_ahead_of_the_queue_and_gives_up_in_time() {
     assert!(started.elapsed() < Duration::from_secs(1));
     fake.release.store(true, Ordering::SeqCst);
     drop(outcomes);
+}
+
+/// A description not read in the window's wait goes on: what comes of it is handed to what the window left, once,
+/// and kept in the cache for the next view of the file
+#[test]
+fn a_description_after_the_wait_is_told_later() {
+    let fake = Fake::new();
+    let (previewer, _outcomes) = start(settings(fake.clone(), None));
+    for keep in [true, false] {
+        let (told, later) = mpsc::channel();
+        let slow = file(PNG, &format!("{keep} slow"));
+        let answer = previewer.describe_or_later(
+            slow.clone(),
+            "message 1, attachment 0".into(),
+            Duration::from_millis(10),
+            false,
+            keep,
+            Box::new(move |result| told.send(result).unwrap()),
+        );
+        assert_eq!(answer, None);
+        let result = later.recv_timeout(Duration::from_secs(10)).expect("told later");
+        assert_eq!(result.unwrap().sizes, [Some((100, 50))]);
+        // once
+        assert!(later.recv_timeout(Duration::from_millis(300)).is_err());
+        // kept for the next view (a decrypted part's file is not)
+        let runs = fake.runs.load(Ordering::SeqCst);
+        let again = previewer.describe(slow, "message 1, attachment 0".into(), Duration::from_secs(5));
+        assert!(again.is_ok());
+        assert_eq!(fake.runs.load(Ordering::SeqCst) - runs, usize::from(!keep));
+    }
+    // answered in time: `later` is not called
+    let (told, later) = mpsc::channel();
+    let answer = previewer.describe_or_later(
+        file(PNG, "quick"),
+        String::new(),
+        Duration::from_secs(5),
+        false,
+        true,
+        Box::new(move |result| told.send(result).unwrap()),
+    );
+    assert!(matches!(answer, Some(Ok(_))), "{answer:?}");
+    assert!(later.recv_timeout(Duration::from_millis(200)).is_err());
+    // a render abandoned after the wait: told as refused
+    let (told, later) = mpsc::channel();
+    let answer = previewer.describe_or_later(
+        file(PNG, "hang"),
+        String::new(),
+        Duration::from_millis(10),
+        false,
+        true,
+        Box::new(move |result| told.send(result).unwrap()),
+    );
+    assert_eq!(answer, None);
+    let result = later.recv_timeout(Duration::from_secs(10)).expect("told later");
+    assert_eq!(result.unwrap_err(), Refusal::TimedOut);
+    fake.release.store(true, Ordering::SeqCst);
 }
 
 #[test]

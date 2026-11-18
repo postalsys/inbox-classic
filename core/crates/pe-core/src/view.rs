@@ -162,6 +162,12 @@ pub struct MessageView {
     pub(crate) preview_print: Option<pe_html::PrintParts>,
     /// Where those files are read from when their pictures are asked for
     pub(crate) preview_source: Option<crate::previews::PreviewSource>,
+    /// Some of the files it shows were not described in time and are "Preparing…" tiles:
+    /// [`crate::Event::PreviewsPrepared`] with its `preview_token` follows once they are, and the window builds the
+    /// view again
+    pub preparing: bool,
+    /// Those files, and what came of them since
+    pub(crate) preview_preparing: Option<std::sync::Arc<crate::previews::Preparing>>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -455,6 +461,8 @@ pub(crate) fn build_unless(
         preview_documents,
         preview_print: rendered.print,
         preview_source: None,
+        preparing: false,
+        preview_preparing: None,
     })
 }
 

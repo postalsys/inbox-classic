@@ -1463,6 +1463,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Se descarcă…
 # review: new
+preview-tile-preparing = Se pregătește…
+# review: new
 preview-tile-format = Imaginile { $format } nu sunt încă afișate
 # review: new
 preview-tile-password = Protejat cu parolă: deschideți-l pentru a introduce parola

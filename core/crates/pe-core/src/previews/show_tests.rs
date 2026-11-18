@@ -41,8 +41,9 @@ fn message(files: &[(&str, &str, &[u8])]) -> Vec<u8> {
     out.into_bytes()
 }
 
-fn shown(core: &Core, inbox: FolderId) -> crate::MessageView {
-    core.message_view(inbox, 1, false).unwrap().unwrap()
+/// Message 1 as a window shows it once its files are all described
+fn shown(core: &Core, events: &Receiver<Event>, inbox: FolderId) -> crate::MessageView {
+    super::tests::settled(core, events, || core.message_view(inbox, 1, false).unwrap().unwrap())
 }
 
 fn states(view: &crate::MessageView) -> Vec<ShowInMessage> {
@@ -82,7 +83,7 @@ fn show_in_message_lasts_while_the_message_is_shown() {
     core.set_show_previews(false).unwrap();
     // PDF files off too: a PDF file asked for is drawn all the same
     core.set_pdf_previews(false).unwrap();
-    let first = shown(&core, inbox);
+    let first = shown(&core, &events, inbox);
     let token = first.preview_token.clone().unwrap();
     assert_eq!(
         states(&first),
@@ -96,7 +97,7 @@ fn show_in_message_lasts_while_the_message_is_shown() {
 
     assert!(core.preview_show(&token, 1, true));
     // the window builds the view again, then ends the one it showed
-    let second = shown(&core, inbox);
+    let second = shown(&core, &events, inbox);
     core.previews_end(&token);
     let token = second.preview_token.clone().unwrap();
     assert!(
@@ -116,7 +117,7 @@ fn show_in_message_lasts_while_the_message_is_shown() {
     // taken out again
     assert!(!core.preview_show(&token, 1, true));
     assert!(core.preview_show(&token, 1, false));
-    let third = shown(&core, inbox);
+    let third = shown(&core, &events, inbox);
     core.previews_end(&token);
     let token = third.preview_token.clone().unwrap();
     assert!(!third.document.contains("/pv/"), "{}", third.document);
@@ -125,7 +126,7 @@ fn show_in_message_lasts_while_the_message_is_shown() {
     // shown, then the message is left: shown again later, it is as the setting says
     assert!(core.preview_show(&token, 0, true));
     core.previews_end(&token);
-    let later = shown(&core, inbox);
+    let later = shown(&core, &events, inbox);
     assert!(!later.document.contains("/pv/"), "{}", later.document);
 }
 
@@ -133,14 +134,14 @@ fn show_in_message_lasts_while_the_message_is_shown() {
 #[test]
 fn a_file_taken_out_leaves_the_message() {
     let dir = pe_testkit::TempDir::new("core-previews-hide");
-    let (core, inbox, _events) = opened(&dir, 2);
+    let (core, inbox, events) = opened(&dir, 2);
     core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
     core.store().set_source(inbox, 2, &super::tests::message()).unwrap();
-    let view = shown(&core, inbox);
+    let view = shown(&core, &events, inbox);
     let token = view.preview_token.clone().unwrap();
     assert_eq!(states(&view)[..2], [ShowInMessage::On, ShowInMessage::On]);
     assert!(core.preview_show(&token, 0, false));
-    let again = shown(&core, inbox);
+    let again = shown(&core, &events, inbox);
     let new = again.preview_token.clone().unwrap();
     assert!(
         !again.document.contains(&format!("/pv/{new}-0-0")),
@@ -154,7 +155,7 @@ fn a_file_taken_out_leaves_the_message() {
         None
     );
     // the other message is as the setting says
-    let other = core.message_view(inbox, 2, false).unwrap().unwrap();
+    let other = super::tests::settled(&core, &events, || core.message_view(inbox, 2, false).unwrap().unwrap());
     let other_token = other.preview_token.clone().unwrap();
     assert!(other.document.contains(&format!("/pv/{other_token}-0-0")));
 }
@@ -163,7 +164,7 @@ fn a_file_taken_out_leaves_the_message() {
 #[test]
 fn files_that_are_not_drawn_are_tiles() {
     let dir = pe_testkit::TempDir::new("core-previews-tiles");
-    let (core, inbox, _events) = opened(&dir, 1);
+    let (core, inbox, events) = opened(&dir, 1);
     let heic = file("photo.heic");
     let locked = file("encrypted-password.pdf");
     let source = message(&[
@@ -174,7 +175,7 @@ fn files_that_are_not_drawn_are_tiles() {
         ("red.png", "image/png", &png(8, 8)),
     ]);
     core.store().set_source(inbox, 1, &source).unwrap();
-    let view = shown(&core, inbox);
+    let view = shown(&core, &events, inbox);
     let token = view.preview_token.clone().unwrap();
     let document = &view.document;
     for words in [
@@ -219,7 +220,7 @@ fn files_past_the_budget_are_counted_and_can_be_shown() {
         .map(|name| (name.as_str(), "image/png", picture.as_slice()))
         .collect();
     core.store().set_source(inbox, 1, &message(&files)).unwrap();
-    let view = shown(&core, inbox);
+    let view = shown(&core, &events, inbox);
     let token = view.preview_token.clone().unwrap();
     assert_eq!(view.document.matches("<img").count(), MAX_PREVIEWS);
     assert!(
@@ -232,7 +233,7 @@ fn files_past_the_budget_are_counted_and_can_be_shown() {
     assert_eq!(states(&view)[0], ShowInMessage::On);
 
     assert!(core.preview_show(&token, last, true));
-    let again = shown(&core, inbox);
+    let again = shown(&core, &events, inbox);
     core.previews_end(&token);
     let token = again.preview_token.clone().unwrap();
     assert_eq!(again.document.matches("<img").count(), MAX_PREVIEWS + 1);
@@ -252,7 +253,7 @@ fn files_past_the_budget_are_counted_and_can_be_shown() {
 #[test]
 fn a_message_still_downloading_has_tiles_until_it_is_here() {
     let dir = pe_testkit::TempDir::new("core-previews-downloading");
-    let (core, inbox, _events) = opened(&dir, 1);
+    let (core, inbox, events) = opened(&dir, 1);
     let whole = super::tests::message();
     // the text first: the files without their content
     let first = message(&[
@@ -268,7 +269,7 @@ fn a_message_still_downloading_has_tiles_until_it_is_here() {
             sizes: vec![2_400_000, 3_100_000, 12],
         },
     );
-    let view = shown(&core, inbox);
+    let view = shown(&core, &events, inbox);
     let token = view.preview_token.clone().unwrap();
     let document = &view.document;
     assert_eq!(document.matches("Downloading…").count(), 2, "{document}");
@@ -287,7 +288,7 @@ fn a_message_still_downloading_has_tiles_until_it_is_here() {
 
     // here: the same text, then the previews
     core.store().set_source(inbox, 1, &whole).unwrap();
-    let view = shown(&core, inbox);
+    let view = shown(&core, &events, inbox);
     let token = view.preview_token.clone().unwrap();
     assert!(view.document.contains(&format!("/pv/{token}-0-0")), "{}", view.document);
     assert!(!view.document.contains("Downloading…"));
@@ -302,7 +303,7 @@ fn the_printout_has_the_pictures_and_names_the_pdf_file() {
     let dir = pe_testkit::TempDir::new("core-previews-print");
     let (core, inbox, events) = opened(&dir, 1);
     core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
-    let view = shown(&core, inbox);
+    let view = shown(&core, &events, inbox);
     let token = view.preview_token.clone().unwrap();
     // the pictures are drawn for the printout even when the reading pane never asked for them
     let request = core.print_start(&token).unwrap();
@@ -325,6 +326,6 @@ fn the_printout_has_the_pictures_and_names_the_pdf_file() {
     // no previews: nothing to start, the view's own document is printed
     assert_eq!(core.print_start("0123456789abcdef0123456789abcdef"), None);
     core.set_show_previews(false).unwrap();
-    let plain = shown(&core, inbox);
+    let plain = shown(&core, &events, inbox);
     assert_eq!(core.print_start(&plain.preview_token.unwrap()), None);
 }

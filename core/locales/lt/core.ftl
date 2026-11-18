@@ -1450,6 +1450,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Atsisiunčiama…
 # review: new
+preview-tile-preparing = Ruošiama…
+# review: new
 preview-tile-format = { $format } paveikslėliai kol kas nerodomi
 # review: new
 preview-tile-password = Apsaugota slaptažodžiu: atidarykite, kad įvestumėte slaptažodį

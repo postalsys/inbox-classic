@@ -12,6 +12,8 @@ use pe_core::keys::KeySource;
 use pe_core::{Core, Event, Options, PasswordStore};
 use pe_store::{AccountSettings, Auth, Security, Store};
 
+mod support;
+
 fn fixtures() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/ui-e2e/pgp")
 }
@@ -111,7 +113,7 @@ fn colour(picture: &pe_core::previews::Picture) -> [u8; 3] {
 fn each_part_shows_its_own_previews_under_its_own_token() {
     let dir = pe_testkit::TempDir::new("pgp-previews-parts");
     let (core, folder, events) = world(&dir);
-    let view = core.message_view(folder, 1, false).unwrap().unwrap();
+    let view = support::settled(&core, &events, || core.message_view(folder, 1, false).unwrap().unwrap());
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.parts.len(), 2);
     let names: Vec<&str> = view.attachments.iter().map(|a| a.filename.as_str()).collect();
@@ -187,7 +189,9 @@ fn each_part_shows_its_own_previews_under_its_own_token() {
 fn a_message_file_shows_each_part_s_previews() {
     let dir = pe_testkit::TempDir::new("pgp-previews-file");
     let (core, _folder, events) = world(&dir);
-    let view = core.file_view(&fixtures().join("secure-previews.eml"), false).unwrap();
+    let view = support::settled(&core, &events, || {
+        core.file_view(&fixtures().join("secure-previews.eml"), false).unwrap()
+    });
     let b = tokens(&view.part_documents[1]).remove(0);
     assert_eq!(core.preview_ask(&format!("/pv/{b}-0-0")), None);
     let ask = core.preview_ask(&format!("/pv/{b}-1-0")).unwrap();
@@ -201,7 +205,7 @@ fn a_message_file_shows_each_part_s_previews() {
 fn the_printout_names_each_picture_s_part() {
     let dir = pe_testkit::TempDir::new("pgp-previews-print");
     let (core, folder, events) = world(&dir);
-    let view = core.message_view(folder, 1, false).unwrap().unwrap();
+    let view = support::settled(&core, &events, || core.message_view(folder, 1, false).unwrap().unwrap());
     // printed as it is shown before the pictures are there: no preview address
     let plain = view.print_document.as_deref().unwrap();
     assert!(
@@ -237,8 +241,8 @@ fn the_printout_names_each_picture_s_part() {
 #[test]
 fn agents_never_get_decrypted_previews() {
     let dir = pe_testkit::TempDir::new("pgp-previews-agent");
-    let (core, folder, _events) = world(&dir);
-    let view = core.message_view(folder, 1, false).unwrap().unwrap();
+    let (core, folder, events) = world(&dir);
+    let view = support::settled(&core, &events, || core.message_view(folder, 1, false).unwrap().unwrap());
     assert!(view.preview_token.is_some());
     let agent = core.agent_message(folder, 1).unwrap().unwrap();
     assert!(agent.attachments.is_empty(), "{:?}", agent.attachments);
@@ -275,7 +279,7 @@ fn nothing_decrypted_is_written_to_disk() {
     let since = SystemTime::now() - Duration::from_secs(2);
     let dir = pe_testkit::TempDir::new("pgp-previews-disk");
     let (core, folder, events) = world(&dir);
-    let view = core.message_view(folder, 1, false).unwrap().unwrap();
+    let view = support::settled(&core, &events, || core.message_view(folder, 1, false).unwrap().unwrap());
     let token = view.preview_token.clone().unwrap();
     let b = tokens(&view.part_documents[1]).remove(0);
     let ask = core.preview_ask(&format!("/pv/{b}-1-0")).unwrap();

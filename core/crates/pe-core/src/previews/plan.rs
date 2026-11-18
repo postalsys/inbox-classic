@@ -2,14 +2,15 @@
 //! as a tile that says why not, counted in the line of files left out, or not at all; and what the strip's Show in
 //! Message says of each.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use pe_i18n::{Text, tr, tr_args};
 use pe_preview::limits::{MAX_FILE, MAX_PREVIEWS};
 
-use super::{DESCRIBE, PREVIEW_PAGES, PreviewDescription, PreviewRefusal};
+use super::preparing::Described;
+use super::{DESCRIBE, PREVIEW_PAGES, Preparing, PreviewDescription, PreviewRefusal};
 use crate::Core;
 use crate::opening::FileKind;
 use crate::view;
@@ -26,7 +27,7 @@ pub enum ShowInMessage {
     /// choosing it draws the file in the message
     Off,
     /// A tile that can not be drawn (a HEIC picture, a PDF file with a password, a file too large, one still
-    /// downloading): the command is greyed
+    /// downloading or being prepared): the command is greyed
     Unavailable,
 }
 
@@ -55,6 +56,18 @@ pub(crate) struct PreviewPlan<'a> {
     pub choices: Choices,
     /// A large message's text shown first: its files are not here yet; their sizes, in the strip's order
     pub downloading: Option<Vec<u64>>,
+    /// What came of the files an earlier view of the message did not have described in time, by attachment
+    pub late: BTreeMap<usize, Described>,
+    /// The files of this view not described in time, shown as "Preparing…" until they are
+    pub preparing: Arc<Preparing>,
+}
+
+impl PreviewPlan<'_> {
+    /// Gives `view` (built with this plan) its files not described in time, for the window to be told of them
+    pub(crate) fn preparing_of(&self, view: &mut crate::MessageView) {
+        view.preparing = self.preparing.has_missed();
+        view.preview_preparing = Some(self.preparing.clone());
+    }
 }
 
 /// What the view takes of the plan: the section for pe-html, and Show in Message for each listed attachment
@@ -109,9 +122,9 @@ struct Walk<'a, 'p> {
 }
 
 /// The previews of a message's listed attachments, in the order of the strip: each picture, and the first pages of
-/// each PDF file, with the sizes read before the document is shown (at most [`DESCRIBE`] for them all), at most
-/// [`MAX_PREVIEWS`] pictures in all unless the user asked for more; a tile for a file that is not drawn, and a line
-/// for those past the budget
+/// each PDF file, with the sizes read before the document is shown (at most [`DESCRIBE`] for them all: a file not
+/// described by then is a "Preparing…" tile until it is), at most [`MAX_PREVIEWS`] pictures in all unless the user
+/// asked for more; a tile for a file that is not drawn, and a line for those past the budget
 pub(crate) fn section(message: &pe_mime::parser::Message, plan: &PreviewPlan) -> Planned {
     let among = Among { first: 0, keep: true };
     part_section(message, plan, &mut Budget::new(), among)
@@ -191,7 +204,7 @@ impl Walk<'_, '_> {
             true => DESCRIBE,
             false => self.budget.until.saturating_duration_since(Instant::now()),
         };
-        if !asked && (self.budget.left == 0 || wait.is_zero()) {
+        if !asked && self.budget.left == 0 {
             return Fate::More;
         }
         self.drawn(index, attachment, kind, asked, wait)
@@ -206,11 +219,12 @@ impl Walk<'_, '_> {
         asked: bool,
         wait: Duration,
     ) -> Fate {
-        let file = Arc::new(attachment.content.clone());
         let size = attachment.content.len() as u64;
-        let about = format!("{}, attachment {index}", self.plan.about);
-        let (pdfs, keep) = (self.plan.pdfs, self.among.keep);
-        let description = self.plan.core.preview_describe(pdfs, file, about, wait, asked, keep);
+        let Some(description) = self.describe(index, attachment, asked, wait) else {
+            // read on in the background: the window is told when it is, and builds the view again
+            let tile = tile(index, attachment, kind, size, tr(Text::PreviewTilePreparing));
+            return Fate::Shown(tile, ShowInMessage::Unavailable);
+        };
         let pdf = kind == FileKind::Pdf;
         let left = if asked { MAX_PREVIEWS } else { self.budget.left };
         match description.map(|d| preview_file(index, attachment, pdf, &d, left)) {
@@ -233,6 +247,42 @@ impl Walk<'_, '_> {
                 Fate::Shown(tile(index, attachment, kind, size, tile_words(&reason)), state)
             }
         }
+    }
+}
+
+impl Walk<'_, '_> {
+    /// The description of a file: what came of it after an earlier view's wait, or read now, waiting at most `wait`;
+    /// None when it did not come in time
+    fn describe(
+        &mut self,
+        index: usize,
+        attachment: &pe_mime::parser::Attachment,
+        asked: bool,
+        wait: Duration,
+    ) -> Option<Described> {
+        // read again when it was refused by a setting that may have changed since
+        let late = self
+            .plan
+            .late
+            .get(&index)
+            .filter(|late| !matches!(late, Err(PreviewRefusal::Disabled | PreviewRefusal::Off)));
+        if let Some(late) = late {
+            return Some(late.clone());
+        }
+        let file = Arc::new(attachment.content.clone());
+        let about = format!("{}, attachment {index}", self.plan.about);
+        let (pdfs, keep) = (self.plan.pdfs, self.among.keep);
+        let preparing = &self.plan.preparing;
+        let later = preparing.expect(index);
+        let described = self
+            .plan
+            .core
+            .preview_describe(pdfs, file, about, wait, asked, keep, later);
+        match described.is_some() {
+            true => preparing.answered(),
+            false => preparing.missed(),
+        }
+        described
     }
 }
 

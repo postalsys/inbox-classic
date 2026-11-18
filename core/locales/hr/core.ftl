@@ -1049,6 +1049,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Preuzimanje…
 # review: new
+preview-tile-preparing = Priprema se…
+# review: new
 preview-tile-format = { $format } slike još se ne prikazuju
 # review: new
 preview-tile-password = Zaštićeno lozinkom: otvorite ga da biste unijeli lozinku

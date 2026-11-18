@@ -1380,6 +1380,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Hämtar…
 # review: new
+preview-tile-preparing = Förbereder…
+# review: new
 preview-tile-format = { $format }-bilder visas inte ännu
 # review: new
 preview-tile-password = Skyddad med lösenord: öppna den för att ange lösenordet

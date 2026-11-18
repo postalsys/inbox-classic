@@ -10,7 +10,8 @@
 //! for a picture and answer the web view when [`Event::PreviewAnswered`] says it is there.
 //!
 //! What the section shows of each file is decided in [`plan`]: drawn, a tile that says why not (a format not drawn,
-//! a password, a file too large, one still downloading), or counted in the line of files past the budget; the
+//! a password, a file too large, one still downloading, one not described in time: "Preparing…", the window told
+//! when it is, [`preparing`]), or counted in the line of files past the budget; the
 //! strip's Show in Message draws or takes out one file while the message is shown ([`Core::preview_show`], never
 //! kept). The printout puts the pictures in its document as `data:` addresses ([`print`], [`Core::print_start`]).
 //!
@@ -38,10 +39,12 @@ use crate::connections::Connection;
 use crate::{Core, Event, EventSink, Result, view};
 
 mod plan;
+mod preparing;
 mod print;
 
 pub(crate) use plan::{Among, Budget, Choices, Planned, PreviewPlan, part_section, section};
 pub use plan::{ShowInMessage, tile_words};
+pub(crate) use preparing::Preparing;
 
 /// What came of one file's previews so far
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -79,14 +82,22 @@ pub(crate) struct Previews {
     choices: Mutex<Vec<(PreviewSource, Choices)>>,
     /// The printouts made ([`Core::print_start`]), by request with the token of their view, until they are taken
     prints: Mutex<HashMap<u64, (String, String)>>,
+    /// The tests' engine in place of pe-preview's own, set before the first preview
+    #[cfg(test)]
+    pub(crate) engine: OnceLock<Arc<dyn pe_preview::Engine>>,
 }
 
-/// How long a view waits for its files' sizes ([`DESCRIBE_WAIT`]); the tests wait longer, as an unoptimized build
-/// on a busy runner reads a PDF file's page tree slowly
-pub(crate) const DESCRIBE: Duration = if cfg!(test) {
-    Duration::from_secs(20)
+/// How long a view waits for its files' sizes ([`DESCRIBE_WAIT`]), the tests' too: a file not described by then is
+/// "Preparing…" until it is ([`Event::PreviewsPrepared`])
+pub(crate) const DESCRIBE: Duration = DESCRIBE_WAIT;
+
+/// The longest a render step may take before it is abandoned: the app's limits, and longer in the tests, as an
+/// unoptimized build on a busy runner reads a PDF file's page tree slowly (abandoned, a PDF file would turn PDF
+/// previews off for the rest of the test)
+const RENDER_TIMES: (Duration, Duration) = if cfg!(test) {
+    (Duration::from_secs(60), Duration::from_secs(60))
 } else {
-    DESCRIBE_WAIT
+    (pe_preview::limits::PICTURE_TIME, pe_preview::limits::PAGE_TIME)
 };
 
 /// The most views whose previews are answered at once: a window that never ends a view's previews does not keep
@@ -154,6 +165,8 @@ struct Shown {
     request: Option<u64>,
     /// Its documents are a message's signed or encrypted parts
     protected: bool,
+    /// Its files not described in time, and what came of them since
+    preparing: Option<Arc<Preparing>>,
 }
 
 impl Shown {
@@ -400,11 +413,19 @@ impl Core {
             let files = self.previews.files.clone();
             let asks = self.previews.asks.clone();
             let events = self.events.clone();
-            let settings = Settings {
+            let (picture_time, page_time) = RENDER_TIMES;
+            #[allow(unused_mut)]
+            let mut settings = Settings {
                 dir: markers_dir(&self.path),
                 pdfs,
+                picture_time,
+                page_time,
                 ..Settings::default()
             };
+            #[cfg(test)]
+            if let Some(engine) = self.previews.engine.get() {
+                settings.engine = engine.clone();
+            }
             Previewer::new(settings, move |outcome| record(&files, &asks, &events, outcome))
         })
     }
@@ -430,7 +451,23 @@ impl Core {
             notice: self.previews_notice(),
             choices: self.preview_choices(source),
             downloading: None,
+            late: self.preview_late(source),
+            preparing: Preparing::new(self.events.clone()),
         }
+    }
+
+    /// What came of the files of the message `source` that the views a window shows did not have in time
+    fn preview_late(&self, source: &PreviewSource) -> BTreeMap<usize, preparing::Described> {
+        let shown = lock_shown(&self.previews.shown);
+        let mut late = BTreeMap::new();
+        for preparing in shown
+            .iter()
+            .filter(|shown| shown.source == *source)
+            .filter_map(|shown| shown.preparing.as_ref())
+        {
+            late.extend(preparing.described());
+        }
+        late
     }
 
     /// What the user chose with Show in Message for the message `source`, while a window shows it
@@ -444,7 +481,8 @@ impl Core {
 
     /// A file's description for the view, read on the render thread ahead of the files waiting; `asked` for a file
     /// the user asked to see (drawn while PDF files are off), `keep` false for a decrypted one (not kept, and named
-    /// by `about`, where it is)
+    /// by `about`, where it is). None when it did not come in `wait`: `later` is called with it when it does
+    #[allow(clippy::too_many_arguments)]
     fn preview_describe(
         &self,
         pdfs: bool,
@@ -453,8 +491,10 @@ impl Core {
         wait: Duration,
         asked: bool,
         keep: bool,
-    ) -> std::result::Result<Arc<PreviewDescription>, PreviewRefusal> {
-        self.previewer(pdfs).describe_file(file, about, wait, asked, keep)
+        later: pe_preview::Later,
+    ) -> Option<preparing::Described> {
+        self.previewer(pdfs)
+            .describe_or_later(file, about, wait, asked, keep, later)
     }
 
     /// Show in Message chosen in the strip for attachment `attachment` of the view `token` (`show`: draw it in the
@@ -500,22 +540,28 @@ impl Core {
         let documents = std::mem::take(&mut view.preview_documents);
         let states = view.attachments.iter().map(|a| a.show_in_message).collect();
         let print = view.preview_print.take();
+        let preparing = view.preview_preparing.take();
         let gone = {
             let mut shown = lock_shown(&self.previews.shown);
             shown.push_back(Shown {
-                token,
+                token: token.clone(),
                 source,
                 documents,
                 states,
                 print,
                 request: None,
                 protected: view.protection.is_some(),
+                preparing: preparing.clone(),
             });
             let over = shown.len().saturating_sub(MAX_SHOWN);
             shown.drain(..over).collect::<Vec<_>>()
         };
         for shown in gone {
             self.forget_shown(shown);
+        }
+        // told from now on, when its files not described in time are (it may be so already)
+        if let Some(preparing) = preparing {
+            preparing.shown(&token);
         }
     }
 
@@ -535,6 +581,9 @@ impl Core {
     /// A view's previews gone: what was drawn for it, its answers not taken and its printouts not taken are dropped
     /// (a decrypted part's pictures are kept nowhere else), and its asks still waiting answered with none
     fn forget_shown(&self, shown: Shown) {
+        if let Some(preparing) = &shown.preparing {
+            preparing.end();
+        }
         self.forget_choices(&shown.source);
         unpoisoned(&self.previews.prints).retain(|_, (token, _)| *token != shown.token);
         let Some(request) = shown.request else {
@@ -788,6 +837,37 @@ mod tests {
         .into_bytes()
     }
 
+    /// The view `build` makes as a window shows it once its files are all described: while it has "Preparing…"
+    /// tiles, built again when the core says they are ([`Event::PreviewsPrepared`]), as the windows do, the view
+    /// before it then ended. The tests wait for that, never on how long a file takes to describe
+    pub(crate) fn settled(
+        core: &Core,
+        events: &Receiver<Event>,
+        build: impl Fn() -> crate::MessageView,
+    ) -> crate::MessageView {
+        let mut view = build();
+        while view.preparing {
+            let token = view.preview_token.clone().expect("a view with previews has a token");
+            prepared(events, &token);
+            let again = build();
+            core.previews_end(&token);
+            view = again;
+        }
+        view
+    }
+
+    /// Waits for [`Event::PreviewsPrepared`] of the view `token`
+    pub(crate) fn prepared(events: &Receiver<Event>, token: &str) {
+        let until = Instant::now() + Duration::from_secs(120);
+        loop {
+            match events.recv_timeout(until.saturating_duration_since(Instant::now())) {
+                Ok(Event::PreviewsPrepared { token: of }) if of == token => return,
+                Ok(_) => {}
+                Err(error) => panic!("the files of view {token} not prepared: {error}"),
+            }
+        }
+    }
+
     /// The files of `request` once each is done
     pub(super) fn finished(
         core: &Core,
@@ -882,8 +962,8 @@ mod view_tests {
         }
     }
 
-    fn shown(core: &Core, inbox: FolderId) -> crate::MessageView {
-        core.message_view(inbox, 1, false).unwrap().unwrap()
+    fn shown(core: &Core, events: &Receiver<Event>, inbox: FolderId) -> crate::MessageView {
+        super::tests::settled(core, events, || core.message_view(inbox, 1, false).unwrap().unwrap())
     }
 
     /// The previews' token as the document's addresses carry it
@@ -897,9 +977,9 @@ mod view_tests {
     #[test]
     fn a_view_shows_its_pictures_and_pdf_pages_after_the_text() {
         let dir = pe_testkit::TempDir::new("core-previews-view");
-        let (core, inbox, _events) = opened(&dir, 1);
+        let (core, inbox, events) = opened(&dir, 1);
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         let token = token(&view);
         let document = &view.document;
         // the picture at its size, the PDF's page at half its pixels, the text file not at all
@@ -935,7 +1015,7 @@ mod view_tests {
         let dir = pe_testkit::TempDir::new("core-previews-serve");
         let (core, inbox, events) = opened(&dir, 1);
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         let token = token(&view);
 
         // the whole URL on the page's origin, or its path
@@ -983,9 +1063,9 @@ mod view_tests {
     #[test]
     fn a_link_names_an_attachment_of_a_view_shown() {
         let dir = pe_testkit::TempDir::new("core-previews-link");
-        let (core, inbox, _events) = opened(&dir, 1);
+        let (core, inbox, events) = opened(&dir, 1);
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         let token = token(&view);
         assert_eq!(
             core.preview_link(&format!("inboxclassic:attachment-{token}-1"), &token),
@@ -1002,7 +1082,7 @@ mod view_tests {
         );
         assert_eq!(core.preview_link("https://example.com/", &token), None);
         // another view still shown (another window's) does not open from this reader
-        let other = shown(&core, inbox).preview_token.unwrap();
+        let other = shown(&core, &events, inbox).preview_token.unwrap();
         assert_ne!(other, token);
         assert_eq!(
             core.preview_link(&format!("inboxclassic:attachment-{other}-1"), &token),
@@ -1027,10 +1107,10 @@ mod view_tests {
     #[test]
     fn tokens_expire_with_their_views() {
         let dir = pe_testkit::TempDir::new("core-previews-expire");
-        let (core, inbox, _events) = opened(&dir, 1);
+        let (core, inbox, events) = opened(&dir, 1);
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
-        let first = token(&shown(&core, inbox));
-        let tokens: Vec<String> = (0..MAX_SHOWN).map(|_| token(&shown(&core, inbox))).collect();
+        let first = token(&shown(&core, &events, inbox));
+        let tokens: Vec<String> = (0..MAX_SHOWN).map(|_| token(&shown(&core, &events, inbox))).collect();
         assert!(!tokens.contains(&first));
         assert_eq!(
             core.preview_link(&format!("inboxclassic:attachment-{first}-0"), &first),
@@ -1052,7 +1132,7 @@ mod view_tests {
         let dir = pe_testkit::TempDir::new("core-previews-ended");
         let (core, inbox, events) = opened(&dir, 1);
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
-        let token = token(&shown(&core, inbox));
+        let token = token(&shown(&core, &events, inbox));
         let ask = core.preview_ask(&format!("/pv/{token}-1-0")).unwrap();
         core.previews_end(&token);
         // drawn before the end, or not: either way an answer comes, and nothing after the end
@@ -1063,14 +1143,14 @@ mod view_tests {
     #[test]
     fn the_setting_turns_previews_off_and_pdf_files_can_stay_out() {
         let dir = pe_testkit::TempDir::new("core-previews-setting");
-        let (core, inbox, _events) = opened(&dir, 1);
+        let (core, inbox, events) = opened(&dir, 1);
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
         assert!(core.show_previews());
 
         // PDF files turned off by the user: the picture drawn, the PDF file a tile that says so (and opens it), and
         // no notice
         core.set_pdf_previews(false).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         let token = token(&view);
         assert!(view.document.contains(&format!("/pv/{token}-0-0")));
         assert!(!view.document.contains(&format!("/pv/{token}-1-")));
@@ -1086,7 +1166,7 @@ mod view_tests {
 
         // turned off by the core after a PDF file ended the app: the notice says so where the PDF file would be
         core.store().set_pdf_previews_crashed(true).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         let notice = core.previews_notice().unwrap();
         assert!(view.document.contains(&pe_html_text(&notice)), "{}", view.document);
         core.set_pdf_previews(true).unwrap();
@@ -1094,7 +1174,7 @@ mod view_tests {
         // previews off: none at all, and the CSP as before; the strip's Show in Message still draws one
         core.set_show_previews(false).unwrap();
         assert!(!core.show_previews());
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         assert!(view.preview_token.is_some());
         assert!(
             !view.document.contains("/pv/") && !view.document.contains("<section"),
@@ -1107,7 +1187,7 @@ mod view_tests {
         assert_eq!(states, [ShowInMessage::Off, ShowInMessage::Off, ShowInMessage::None]);
         // a message with no picture or PDF file has no token
         core.store().set_source(inbox, 1, b"Subject: x\r\n\r\nhi\r\n").unwrap();
-        assert_eq!(shown(&core, inbox).preview_token, None);
+        assert_eq!(shown(&core, &events, inbox).preview_token, None);
     }
 
     /// The notice as the document writes it
@@ -1146,7 +1226,7 @@ mod view_tests {
             "Content-Type: application/pgp-signature\r\n\r\n-----BEGIN PGP SIGNATURE-----\r\nAAAA\r\n-----END PGP SIGNATURE-----\r\n",
         );
         core.store().set_source(inbox, 1, pgp.as_bytes()).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         assert!(view.protection.is_some());
         let token = token(&view);
         // the page of the parts holds no preview, the part's document does, under its own token
@@ -1178,7 +1258,7 @@ mod view_tests {
             "Content-Type: application/pkcs7-signature; name=smime.p7s\r\nContent-Transfer-Encoding: base64\r\n\r\nAAAA\r\n",
         );
         core.store().set_source(inbox, 1, smime.as_bytes()).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         assert!(view.protection.is_none());
         let smime_token = super::view_tests::token(&view);
         assert!(
@@ -1195,7 +1275,7 @@ mod view_tests {
         let (core, _inbox, events) = opened(&dir, 1);
         let path = dir.path().join("photos.eml");
         std::fs::write(&path, super::tests::message()).unwrap();
-        let view = core.file_view(&path, false).unwrap();
+        let view = super::tests::settled(&core, &events, || core.file_view(&path, false).unwrap());
         let token = token(&view);
         let ask = core.preview_ask(&format!("/pv/{token}-0-0")).unwrap();
         assert_eq!(answered(&core, &events, ask).unwrap().width, 64);
@@ -1207,7 +1287,7 @@ mod view_tests {
     fn a_long_pdf_file_and_many_pictures_are_cut_short() {
         use base64::Engine;
         let dir = pe_testkit::TempDir::new("core-previews-many");
-        let (core, inbox, _events) = opened(&dir, 1);
+        let (core, inbox, events) = opened(&dir, 1);
         let manual = include_bytes!("../../pe-preview/tests/files/manual-40-pages.pdf");
         let png = {
             let mut bytes = Vec::new();
@@ -1234,7 +1314,7 @@ mod view_tests {
         }
         message.push_str("--b--\r\n");
         core.store().set_source(inbox, 1, message.as_bytes()).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         let token = token(&view);
         assert_eq!(view.document.matches("<img").count(), MAX_PREVIEWS, "{}", view.document);
         assert!(view.document.contains(&format!("/pv/{token}-0-4")));
@@ -1262,7 +1342,7 @@ mod view_tests {
                 include_bytes!("../../../../scripts/ui-e2e/previews/photo-and-pdf.eml"),
             )
             .unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         let token = token(&view);
         assert_eq!(view.document.matches("<img").count(), 4, "{}", view.document);
         assert!(
@@ -1283,7 +1363,7 @@ mod view_tests {
                 include_bytes!("../../../../scripts/ui-e2e/previews/long-pdf.eml"),
             )
             .unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         assert_eq!(view.document.matches("<img").count(), PREVIEW_PAGES);
         assert!(view.document.contains("Open to see all 12 pages"), "{}", view.document);
     }
@@ -1292,14 +1372,14 @@ mod view_tests {
     #[test]
     fn a_message_can_not_reach_the_previews() {
         let dir = pe_testkit::TempDir::new("core-previews-guess");
-        let (core, inbox, _events) = opened(&dir, 1);
+        let (core, inbox, events) = opened(&dir, 1);
         let message = String::from_utf8(super::tests::message()).unwrap().replace(
             "Content-Type: text/plain\r\n\r\nSee them.",
             "Content-Type: text/html\r\n\r\n<p>See them.</p><img src=\"/pv/00000000000000000000000000000000-0-0\">\
                  <a href=\"inboxclassic:attachment-00000000000000000000000000000000-0\">open</a>",
         );
         core.store().set_source(inbox, 1, message.as_bytes()).unwrap();
-        let view = shown(&core, inbox);
+        let view = shown(&core, &events, inbox);
         token(&view);
         assert_eq!(core.preview_ask("/pv/00000000000000000000000000000000-0-0"), None);
         assert_eq!(
@@ -1314,6 +1394,9 @@ mod view_tests {
 
 #[cfg(test)]
 mod show_tests;
+
+#[cfg(test)]
+mod preparing_tests;
 
 #[cfg(test)]
 mod crash_tests {

@@ -254,6 +254,12 @@ pub enum Event {
     PrintReady {
         request: u64,
     },
+    /// The files a view showed as "Preparing…" (not described in time, [`MessageView::preparing`]) are described now:
+    /// the window showing the view whose `preview_token` is `token` builds it again, keeping its scroll as after
+    /// [`Core::preview_show`]. Said once a view, never for one whose previews ended ([`Core::previews_end`])
+    PreviewsPrepared {
+        token: String,
+    },
     /// The app ended while a file's preview was drawn (it may have been a hostile file), so PDF previews are now off:
     /// [`Core::previews_notice`] says why and how to turn them on again
     PdfPreviewsOff,
@@ -2057,6 +2063,7 @@ impl Core {
             view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
         if view.preview_token.is_some() {
             view.preview_source = Some(preview_source);
+            plan.preparing_of(&mut view);
         }
         self.remember_file_attachments(path, &view);
         Ok(self.learned(view))
@@ -3050,6 +3057,9 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
             folder: found.folder,
             uid: found.uid,
         });
+        if let Some(plan) = &previews {
+            plan.preparing_of(&mut view);
+        }
     }
     decrypted_for_view(found, &mut view, &store);
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the

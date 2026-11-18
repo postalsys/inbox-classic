@@ -950,6 +950,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = İndiriliyor…
 # review: new
+preview-tile-preparing = Hazırlanıyor…
+# review: new
 preview-tile-format = { $format } resimleri henüz gösterilmiyor
 # review: new
 preview-tile-password = Parolayla korunuyor: parolayı girmek için açın

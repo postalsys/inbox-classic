@@ -920,6 +920,9 @@ preview-more-files = { $count ->
 }
 # the tile of a picture or PDF file of a message still downloading (the ellipsis as in reader-downloading)
 preview-tile-downloading = Downloading…
+# the tile of a picture or PDF file whose size was not read in time when the message was shown: its preview
+# comes in its place in a moment (the ellipsis as in reader-downloading)
+preview-tile-preparing = Preparing…
 # the tile of a picture in a format not shown yet: { $format } is its name (HEIC, AVIF, JPEG XL)
 preview-tile-format = { $format } pictures are not shown yet
 # the tile of a PDF file that wants a password to open

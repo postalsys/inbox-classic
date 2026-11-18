@@ -1508,6 +1508,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Pobieranie…
 # review: new
+preview-tile-preparing = Przygotowywanie…
+# review: new
 preview-tile-format = Obrazy { $format } nie są jeszcze pokazywane
 # review: new
 preview-tile-password = Chroniony hasłem: otwórz go, aby wpisać hasło

@@ -1498,6 +1498,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Prenašanje…
 # review: new
+preview-tile-preparing = Pripravljanje…
+# review: new
 preview-tile-format = Slike { $format } se še ne prikazujejo
 # review: new
 preview-tile-password = Zaščiteno z geslom: odprite ga, da vnesete geslo

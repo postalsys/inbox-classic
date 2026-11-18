@@ -955,6 +955,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Letöltés…
 # review: new
+preview-tile-preparing = Előkészítés…
+# review: new
 preview-tile-format = A(z) { $format } képek még nem jelennek meg
 # review: new
 preview-tile-password = Jelszóval védett: nyissa meg a jelszó megadásához

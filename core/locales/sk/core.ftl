@@ -1484,6 +1484,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Sťahuje sa…
 # review: new
+preview-tile-preparing = Pripravuje sa…
+# review: new
 preview-tile-format = Obrázky { $format } sa zatiaľ nezobrazujú
 # review: new
 preview-tile-password = Chránené heslom: otvorte ho a zadajte heslo

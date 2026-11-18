@@ -282,6 +282,10 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_PDF_PREVIEWS_OFF = 37,
   // The printout `pe_print_start` started (its request in `uid`) is made: `pe_print_result` gives the document
   PE_EVENT_KIND_PRINT_READY = 38,
+  // The files a view showed as "Preparing..." (not described in time) are described now: the window showing
+  // the view whose `preview_token` is `detail` builds it again, keeping its scroll as after `pe_preview_show`.
+  // Once a view, never for one whose previews ended (`pe_previews_end`)
+  PE_EVENT_KIND_PREVIEWS_PREPARED = 39,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -1096,7 +1100,8 @@ typedef struct PeEvent {
   // `Acted`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
   // notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
   const char *message;
-  // UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
+  // UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`; the view's
+  // `preview_token`, for `PreviewsPrepared`. NULL otherwise
   const char *detail;
   // How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
   // otherwise

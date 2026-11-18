@@ -2,21 +2,31 @@
 //! read as the apps will show them: each one's bar, its colour and its parts. The UI tests check the same words.
 
 use std::path::PathBuf;
+use std::sync::Mutex;
+use std::sync::mpsc::{self, Receiver};
 
 use pe_core::keys::KeySource;
 use pe_core::protect::Tone;
-use pe_core::{Core, Options, PasswordStore, Protection};
+use pe_core::{Core, Event, Options, PasswordStore, Protection};
+
+mod support;
 
 fn fixtures() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/ui-e2e/pgp")
 }
 
-fn core(dir: &pe_testkit::TempDir) -> Core {
+/// A core with the test keys, and its events
+fn core(dir: &pe_testkit::TempDir) -> (Core, Receiver<Event>) {
     let options = Options {
         passwords: PasswordStore::Memory,
         ..Default::default()
     };
-    let core = Core::open_with(dir.path().join("store.db"), options, |_| {}).unwrap();
+    let (sender, events) = mpsc::channel();
+    let sender = Mutex::new(sender);
+    let core = Core::open_with(dir.path().join("store.db"), options, move |event| {
+        let _ = sender.lock().unwrap().send(event);
+    })
+    .unwrap();
     let read = |name: &str| std::fs::read(fixtures().join(name)).unwrap();
     let passphrase = String::from_utf8(read("me.passphrase")).unwrap();
     core.pgp_import(&read("me.asc"), Some(passphrase.trim()), KeySource::File)
@@ -24,7 +34,7 @@ fn core(dir: &pe_testkit::TempDir) -> Core {
     for name in ["alice.asc", "mallory.asc"] {
         core.pgp_import(&read(name), None, KeySource::File).unwrap();
     }
-    core
+    (core, events)
 }
 
 /// All that is shown of a view: its page and every part's document
@@ -36,16 +46,17 @@ fn shown(view: &pe_core::MessageView) -> String {
     all
 }
 
-fn view(core: &Core, name: &str) -> pe_core::MessageView {
-    core.file_view(&fixtures().join(name), false).unwrap()
+/// A message file's view, once its previews' files are all described
+fn view(core: &Core, events: &Receiver<Event>, name: &str) -> pe_core::MessageView {
+    support::settled(core, events, || core.file_view(&fixtures().join(name), false).unwrap())
 }
 
 #[test]
 fn each_case_reads_as_the_ui_tests_expect() {
     let dir = pe_testkit::TempDir::new("ui-fixtures");
-    let core = core(&dir);
+    let (core, events) = core(&dir);
     let bar = |name: &str| {
-        let view = view(&core, name);
+        let view = view(&core, &events, name);
         let protection = view.protection.clone().unwrap_or_else(|| panic!("{name}: no bar"));
         (protection.tone, protection.text, view)
     };

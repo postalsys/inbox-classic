@@ -1485,6 +1485,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Загрузка…
 # review: new
+preview-tile-preparing = Подготовка…
+# review: new
 preview-tile-format = Изображения { $format } пока не показываются
 # review: new
 preview-tile-password = Защищён паролем: откройте файл, чтобы ввести пароль

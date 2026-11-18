@@ -924,6 +924,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Laaditakse alla…
 # review: new
+preview-tile-preparing = Valmistatakse ette…
+# review: new
 preview-tile-format = { $format }-pilte veel ei näidata
 # review: new
 preview-tile-password = Kaitstud parooliga: avage see parooli sisestamiseks

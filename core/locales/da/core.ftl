@@ -977,6 +977,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Henter…
 # review: new
+preview-tile-preparing = Forbereder…
+# review: new
 preview-tile-format = { $format }-billeder vises ikke endnu
 # review: new
 preview-tile-password = Beskyttet med adgangskode: åbn den for at indtaste adgangskoden

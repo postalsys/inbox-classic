@@ -954,6 +954,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Downloaden…
 # review: new
+preview-tile-preparing = Voorbereiden…
+# review: new
 preview-tile-format = { $format }-afbeeldingen worden nog niet getoond
 # review: new
 preview-tile-password = Beveiligd met een wachtwoord: open het om het wachtwoord in te voeren

@@ -839,3 +839,23 @@ ui_fixture_previews -- ../scripts/ui-e2e/pgp` with the committed key): each part
   `protection` (none, signed, encrypted: the apps draw a lock for encrypted) and `part_text` ("From part 2:
   Encrypted. Not signed", also the tooltip's last line). The bar counts "encrypted and signed", "encrypted", "verified",
   "signed", "need attention" and "without a confirmed signature".
+
+## As built (files not described in time, 2026-11-18)
+
+- **"Preparing…"**: a picture or PDF file whose description did not come within the view's wait (`DESCRIBE_WAIT`,
+  250 ms for all its files, the tests' too) is a tile that says so (`preview-tile-preparing`, greyed in the strip), no
+  longer counted in "N more files". The render thread goes on with it (`Previewer::describe_or_later`: the window's
+  wait ends, what comes of the file is handed to the view's `previews::Preparing`, and kept in the cache as any
+  description, unless it was decrypted).
+- **The window told once**: when every such file of a view is described, and a window shows the view,
+  `Event::PreviewsPrepared { token }` (`PE_EVENT_KIND_PREVIEWS_PREPARED`, the view's `preview_token` in `detail`) says
+  to build it again, keeping the scroll as after Show in Message; never for a view whose previews ended. The view built
+  again takes the descriptions from the view still shown (`Core::preview_late`), so a decrypted file is not read again
+  and the next view does not wait. A message file's view is told the same way. `MessageView::preparing` says a view
+  has such tiles.
+- **Tests**: views are built as the windows show them (`previews::tests::settled`, `tests/support`, the C API test):
+  built again on the event while they have "Preparing…" tiles, never relying on how long a file takes to describe. In
+  the core's unit tests the render steps' limits are 60 seconds, so a slow unoptimized build on a busy runner does not
+  abandon a PDF file. `previews/preparing_tests.rs` holds the render thread behind a gate.
+- **The apps** handle `PreviewsPrepared`: the reader (or message window) whose shown view's `preview_token` is the
+  event's token builds its view again, as after `pe_preview_show` returned true.

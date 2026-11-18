@@ -32,8 +32,8 @@ pub const MAX_PICTURE_ALLOC: u64 = 448 * 1024 * 1024;
 pub const MAX_PREVIEWS: usize = 20;
 
 /// How long the reading pane waits for the sizes of a message's files before it shows the message: the files not
-/// described by then have no previews in it (an ordinary file is described in a few milliseconds; the wait is for a
-/// hostile one, or a render thread busy with the page of a message shown before)
+/// described by then are "Preparing…" until they are, and the view is built again (an ordinary file is described in a
+/// few milliseconds; the wait is for a hostile one, or a render thread busy with the page of a message shown before)
 pub const DESCRIBE_WAIT: Duration = Duration::from_millis(250);
 
 /// The pixels of all the previews of one message together: about 20 pictures of 2048 by 1536

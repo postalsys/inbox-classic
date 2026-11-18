@@ -984,6 +984,8 @@ preview-more-files = { $count ->
 # review: new
 preview-tile-downloading = Ladataan…
 # review: new
+preview-tile-preparing = Valmistellaan…
+# review: new
 preview-tile-format = { $format }-kuvia ei vielä näytetä
 # review: new
 preview-tile-password = Suojattu salasanalla: avaa se ja anna salasana

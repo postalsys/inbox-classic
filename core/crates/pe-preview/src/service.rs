@@ -100,10 +100,45 @@ pub enum What {
 
 type Sink = Arc<dyn Fn(Outcome) + Send + Sync>;
 
+/// What is called with a description that came after its wait ([`Previewer::describe_or_later`]), on the
+/// dispatcher's thread
+pub type Later = Box<dyn FnOnce(Result<Arc<Description>, Refusal>) + Send>;
+
+/// Where a description asked for by a window goes: to the window waiting for it, or, once its wait is over, to what
+/// it left to be called with it
+enum Answer {
+    Waiting(Sender<Outcome>),
+    Later(Later),
+    Told,
+}
+
+type Reply = Arc<Mutex<Answer>>;
+
+fn lock_answer(reply: &Reply) -> MutexGuard<'_, Answer> {
+    reply.lock().unwrap_or_else(|p| p.into_inner())
+}
+
+/// The description, or the refusal of the whole file, that `what` is; None for anything else
+fn described(what: &What) -> Option<Result<Arc<Description>, Refusal>> {
+    match what {
+        What::Described(description) => Some(Ok(description.clone())),
+        What::Refused { page: None, reason } => Some(Err(reason.clone())),
+        _ => None,
+    }
+}
+
+/// What a description asked for comes to: [`described`], or [`Refusal::Unreadable`] for a file done without either
+fn finished(what: &What) -> Option<Result<Arc<Description>, Refusal>> {
+    match what {
+        What::Done => Some(Err(Refusal::Unreadable)),
+        what => described(what),
+    }
+}
+
 struct Job {
     request: Request,
     /// Where its outcomes go in place of the sink ([`Previewer::describe`])
-    reply: Option<Sender<Outcome>>,
+    reply: Option<Reply>,
 }
 
 impl Job {
@@ -114,9 +149,7 @@ impl Job {
             what,
         };
         match &self.reply {
-            Some(reply) => {
-                let _ = reply.send(outcome);
-            }
+            Some(reply) => answer(reply, outcome),
             None => sink(outcome),
         }
     }
@@ -126,6 +159,28 @@ impl Job {
         self.tell(sink, What::Refused { page: None, reason });
         self.tell(sink, What::Done);
     }
+}
+
+/// Gives an outcome of a description to the window waiting for it, or to what it left once it stopped waiting: that
+/// is called once, with what the description [`finished`] as
+fn answer(reply: &Reply, outcome: Outcome) {
+    let mut answer = lock_answer(reply);
+    let result = match &*answer {
+        Answer::Waiting(window) => {
+            let _ = window.send(outcome);
+            return;
+        }
+        Answer::Told => return,
+        Answer::Later(_) => match finished(&outcome.what) {
+            Some(result) => result,
+            None => return,
+        },
+    };
+    let Answer::Later(later) = std::mem::replace(&mut *answer, Answer::Told) else {
+        return;
+    };
+    drop(answer);
+    later(result);
 }
 
 #[derive(Default)]
@@ -228,11 +283,29 @@ impl Previewer {
         asked: bool,
         keep: bool,
     ) -> Result<Arc<Description>, Refusal> {
-        let (reply, answers) = mpsc::channel();
+        self.describe_or_later(file, about, wait, asked, keep, Box::new(|_| {}))
+            .unwrap_or(Err(Refusal::TimedOut))
+    }
+
+    /// [`Previewer::describe_file`] that does not give up on a file not read in time: None then, and `later` is
+    /// called with what comes of it (once, on the dispatcher's thread), while the render thread goes on with it under
+    /// its own limits; a description it reads is kept in the cache as any is (unless `keep` is false). `later` is not
+    /// called when the answer is returned
+    pub fn describe_or_later(
+        &self,
+        file: Arc<Vec<u8>>,
+        about: String,
+        wait: Duration,
+        asked: bool,
+        keep: bool,
+        later: Later,
+    ) -> Option<Result<Arc<Description>, Refusal>> {
+        let (window, answers) = mpsc::channel();
+        let reply: Reply = Arc::new(Mutex::new(Answer::Waiting(window)));
         {
             let mut queue = self.shared.queue();
             if queue.closed {
-                return Err(Refusal::Off);
+                return Some(Err(Refusal::Off));
             }
             let request = Request {
                 owner: 0,
@@ -245,23 +318,32 @@ impl Previewer {
             };
             queue.jobs.push_front(Job {
                 request,
-                reply: Some(reply),
+                reply: Some(reply.clone()),
             });
         }
         self.shared.wake.notify_one();
         let until = Instant::now() + wait;
         loop {
-            match answers
-                .recv_timeout(until.saturating_duration_since(Instant::now()))
-                .map(|o| o.what)
-            {
-                Ok(What::Described(description)) => return Ok(description),
-                Ok(What::Refused { page: None, reason }) => return Err(reason),
-                Ok(_) => {}
-                Err(RecvTimeoutError::Timeout) => return Err(Refusal::TimedOut),
-                Err(RecvTimeoutError::Disconnected) => return Err(Refusal::Unreadable),
+            match answers.recv_timeout(until.saturating_duration_since(Instant::now())) {
+                Ok(outcome) => {
+                    if let Some(result) = finished(&outcome.what) {
+                        return Some(result);
+                    }
+                }
+                Err(RecvTimeoutError::Timeout) => break,
+                Err(RecvTimeoutError::Disconnected) => return Some(Err(Refusal::Unreadable)),
             }
         }
+        // what comes from now on goes to `later`: the dispatcher tells nothing while the answer is locked, so what
+        // it told as the wait ended is still taken here
+        let mut answer = lock_answer(&reply);
+        while let Ok(outcome) = answers.try_recv() {
+            if let Some(result) = finished(&outcome.what) {
+                return Some(result);
+            }
+        }
+        *answer = Answer::Later(later);
+        None
     }
 
     /// Drops what `owner` asked for and still waits, stops its file being drawn after the page under way, and

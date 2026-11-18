@@ -26,7 +26,7 @@ mod service;
 pub mod streams;
 
 pub use engine::{Engine, Real, Step};
-pub use service::{Outcome, Previewer, Request, Settings, What};
+pub use service::{Later, Outcome, Previewer, Request, Settings, What};
 
 use std::sync::Arc;
 

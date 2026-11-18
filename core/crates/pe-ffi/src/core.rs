@@ -178,6 +178,10 @@ pub enum PeEventKind {
     PdfPreviewsOff = 37,
     /// The printout `pe_print_start` started (its request in `uid`) is made: `pe_print_result` gives the document
     PrintReady = 38,
+    /// The files a view showed as "Preparing..." (not described in time) are described now: the window showing
+    /// the view whose `preview_token` is `detail` builds it again, keeping its scroll as after `pe_preview_show`.
+    /// Once a view, never for one whose previews ended (`pe_previews_end`)
+    PreviewsPrepared = 39,
 }
 
 #[repr(C)]
@@ -227,7 +231,8 @@ pub struct PeEvent {
     /// `Acted`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
     /// notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
     pub message: *const c_char,
-    /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
+    /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`; the view's
+    /// `preview_token`, for `PreviewsPrepared`. NULL otherwise
     pub detail: *const c_char,
     /// How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
     /// otherwise
@@ -273,6 +278,7 @@ impl Callback {
             Event::PreviewAnswered { ask } => (PeEventKind::PreviewAnswered, 0, 0, *ask),
             Event::PdfPreviewsOff => (PeEventKind::PdfPreviewsOff, 0, 0, 0),
             Event::PrintReady { request } => (PeEventKind::PrintReady, 0, 0, *request),
+            Event::PreviewsPrepared { .. } => (PeEventKind::PreviewsPrepared, 0, 0, 0),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
             Event::NewMail {
                 account, folder, uid, ..
@@ -311,6 +317,7 @@ impl Callback {
                 message_id, problem, ..
             } => (PeFailureKind::None, problem.map(c_string), Some(c_string(message_id))),
             Event::NewMail { title, text, .. } => (PeFailureKind::None, Some(c_string(title)), Some(c_string(text))),
+            Event::PreviewsPrepared { token } => (PeFailureKind::None, None, Some(c_string(token))),
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
             Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
