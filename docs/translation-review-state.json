@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+  "next_batch": "Review Polish compose additions, then ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian and Latvian each have 50, plus broader catalogs and recorded mnemonic collisions (29 Lithuanian groups, 20 Latvian). Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -29507,7 +29507,6 @@
           "menu-sort-by",
           "menu-text-size",
           "menu-folder",
-          "menu-insert",
           "cmd-new-account",
           "cmd-exit",
           "cmd-sync",
@@ -29587,9 +29586,6 @@
           "cmd-export-address-book",
           "cmd-export-setup",
           "cmd-import-setup",
-          "cmd-compose-sign",
-          "cmd-compose-encrypt",
-          "cmd-attach-my-key",
           "tray-check",
           "tray-no-accounts",
           "ui-tb-create-mail",
@@ -29693,9 +29689,6 @@
           "ui-tb-send",
           "ui-tb-save",
           "ui-tb-attach",
-          "ui-tb-sign",
-          "ui-tb-encrypt",
-          "ui-field-keys",
           "ui-field-from",
           "ui-field-to",
           "ui-field-cc",
@@ -30141,16 +30134,6 @@
           "ui-contact-key-none",
           "ui-contact-key-use-new",
           "ui-contact-key-keep",
-          "ui-recipient-keys-title",
-          "ui-recipient-col-recipient",
-          "ui-recipient-col-key",
-          "ui-recipient-find-key",
-          "ui-recipient-remove",
-          "ui-send-unencrypted",
-          "ui-compose-make-key",
-          "ui-compose-show-keys",
-          "ui-compose-encrypt-off",
-          "ui-compose-keep-encrypted",
           "ui-setup-export-title",
           "ui-setup-import-title",
           "ui-setup-export-intro",
@@ -30512,29 +30495,6 @@
           "pgp-publish-done",
           "pgp-publish-failed",
           "pgp-keyserver-off",
-          "pgp-compose-encrypted",
-          "pgp-compose-encrypt-ready",
-          "pgp-compose-missing",
-          "pgp-compose-looking",
-          "pgp-compose-signed",
-          "pgp-compose-reply-clear",
-          "pgp-compose-encrypted-files",
-          "pgp-compose-sign-tip",
-          "pgp-compose-sign-tip-encrypted",
-          "pgp-compose-encrypt-tip",
-          "pgp-compose-make-key",
-          "pgp-compose-key-unusable",
-          "pgp-compose-encrypt-off-quote",
-          "pgp-compose-encrypt-off-reply",
-          "pgp-recipient-verified",
-          "pgp-recipient-found",
-          "pgp-recipient-own",
-          "pgp-recipient-looking",
-          "pgp-recipient-missing",
-          "pgp-recipient-not-found",
-          "pgp-recipient-unusable",
-          "pgp-recipients-intro",
-          "pgp-recipients-intro-missing",
           "pgp-details-part",
           "attachment-from-part",
           "pgp-details-signed",
@@ -30936,14 +30896,12 @@
         "reply-forward.html",
         "save-print-import.html",
         "search-words.html",
-        "sign-and-encrypt.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
         "signatures.html",
         "unsubscribe.html",
         "updates.html",
-        "verify-a-key.html",
-        "write-message.html"
+        "verify-a-key.html"
       ],
       "completed_batches": [
         {
@@ -31561,8 +31519,693 @@
             "since.log": "/private/tmp/inbox-agent-toggle-since.log",
             "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
+        },
+        {
+          "id": "lv-compose-sign-encrypt-20261118",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-insert",
+              "cmd-compose-sign",
+              "cmd-compose-encrypt",
+              "cmd-attach-my-key",
+              "ui-tb-sign",
+              "ui-tb-encrypt",
+              "ui-field-keys",
+              "ui-recipient-keys-title",
+              "ui-recipient-col-recipient",
+              "ui-recipient-col-key",
+              "ui-recipient-find-key",
+              "ui-recipient-remove",
+              "ui-send-unencrypted",
+              "ui-compose-make-key",
+              "ui-compose-show-keys",
+              "ui-compose-encrypt-off",
+              "ui-compose-keep-encrypted"
+            ],
+            "core.ftl": [
+              "pgp-compose-encrypted",
+              "pgp-compose-encrypt-ready",
+              "pgp-compose-missing",
+              "pgp-compose-looking",
+              "pgp-compose-signed",
+              "pgp-compose-reply-clear",
+              "pgp-compose-encrypted-files",
+              "pgp-compose-sign-tip",
+              "pgp-compose-sign-tip-encrypted",
+              "pgp-compose-encrypt-tip",
+              "pgp-compose-make-key",
+              "pgp-compose-key-unusable",
+              "pgp-compose-encrypt-off-quote",
+              "pgp-compose-encrypt-off-reply",
+              "pgp-recipient-verified",
+              "pgp-recipient-found",
+              "pgp-recipient-own",
+              "pgp-recipient-looking",
+              "pgp-recipient-missing",
+              "pgp-recipient-not-found",
+              "pgp-recipient-unusable",
+              "pgp-recipients-intro",
+              "pgp-recipients-intro-missing"
+            ]
+          },
+          "reviewed_help": [
+            "sign-and-encrypt.html",
+            "write-message.html"
+          ],
+          "changed_values": 18,
+          "files": {
+            "core/locales/lv/app.ftl": "3310cec05b61d52c666cad3c51afce9fba308b9dfdae2d251a6705c6d09741d1",
+            "core/locales/lv/core.ftl": "9192d4ad4f30d03cbceb5864afde98aefbb795d975db4ab38acc3937a0c230e2",
+            "core/crates/pe-html/help/lv/sign-and-encrypt.html": "04da683f0f514c5bf330f883f2ffd542e7738ab5386a841f031f7663938d579f",
+            "core/crates/pe-html/help/lv/write-message.html": "95cb710cef6abf3207ee9d820dc4c4f5b5e7036db9e02e20d14bf3c3f4055be7"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "f36bda20f41e7f878ba2568967b08c12650036cf0d0a815c1ab19a0f5b4a0fbc",
+            "core/locales/en/core.ftl": "475884e39e5eb099a69f39b7f23c3b89d262f56b004febc5db5b763158ca24d5",
+            "core/crates/pe-html/help/en/sign-and-encrypt.html": "731c63934f9692a0ee3e803bfbdc5abeeac7fa8f7f9e1f988b96b9f77c00aaa4",
+            "core/crates/pe-html/help/en/write-message.html": "d161c1a2aeffb7539b2e8086d1a7ee6ea4bc39d5f702d93e362d8d10bfe8ff42"
+          },
+          "validation": "Latvian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Three selectors add counted Latvian forms while retaining exact [1]; all other plural branches are preserved. Static examples cover 1/2/9/10/11/19/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass and reviewed access keys are ASCII; 20 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Latvian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,245 unmarked entries and 11,300 help lines; since-start 2,190 entries/448 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed 40 compose entries and both full help topics against current runtime. Corrected protection timing, verified key ownership, usable keys, inherited encrypted content and drafts/sent copies. Expanded three selectors for natural counted Latvian forms while retaining exact [1]. Controls use infinitives and ASCII access keys; the encryption confirmation retains distinct I/A keys. Help uses polite plural, quoted controls and natural head nouns. Full writing help explains actual completion, Bcc, sending accounts, formatting and supported reminder languages. Other unchanged mnemonic collisions remain explicitly pending.",
+          "help_wording_lines_changed": 28,
+          "mnemonic_scopes_checked": 53,
+          "compose_mnemonic_scopes_passed": 7,
+          "wording_values_changed": 18,
+          "plural_changes": [
+            "pgp-compose-encrypted",
+            "pgp-compose-missing",
+            "pgp-recipients-intro-missing"
+          ],
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/crates/pe-core/src/compose_keys.rs": "c0bddbece71f214ae35769d95fbe10e6b9522422b3845741b928148e90bd4c6e",
+            "core/crates/pe-core/src/protect_out.rs": "f25706aab875e7bba611f8c7a3b5711b92e779e6f8744519d0bfa0536f3cf452",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+            "app/src/recipientkeys.cpp": "9f7d8d5f7419aefc712f2c3d8bc39b128695db4950a952f0bfa00f3928f9739d",
+            "linux/src/compose_keys.rs": "265c55610665a3c67b570f9cba06a3073f4e5e97bdccf246b36450ed5ecaa136",
+            "mac/Sources/InboxClassic/ComposeSecurity.swift": "159ae2355e185812acc76494fa88e7e892d2ecffd533a5a75b4325bf5bfb7a40",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234",
+            "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+            "app/src/securitybar.cpp": "cb486603a6b0f4b7061118c4ed92898729ff8fd22faf399e1a611d885f3edd41",
+            "mac/Sources/InboxClassic/SecurityBar.swift": "9c1b60e76a67a53a6a84935d45e896566575e1b9b8eb068a98a40193939491b9",
+            "linux/src/security.rs": "eb38b0cb5cbe0e83150ea53c7a13d9628f9f28d41d1d5a47336638cded5bb61b",
+            "core/crates/pe-core/src/compose.rs": "3ec708f28386f8b09bc84a2ab295a1e032c269bc8c330a688ca4eb756d53b66f",
+            "core/crates/pe-core/src/attachment_words.rs": "77ba5c35a7b2e7af56920cbf0784170596ed0e4604677fb5d21c7800669b56da",
+            "linux/src/compose.rs": "cbf30207811e2b753be8e5f58f65c6a3616909a48b740b27413b2982de6f2260",
+            "linux/src/complete.rs": "3c6423fd914cee91cf4e672ba5097ffdd44c3d78a296cf755397802ce1da2f56",
+            "core/crates/pe-html/src/editor.rs": "70e8f1f9601743d6678e0a1fd355536d974bca04203214adfd6d769dcef56755"
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lv-compose-20261118-edits.json",
+            "check.log": "/private/tmp/inbox-lv-compose-20261118-check.log",
+            "global-check.log": "/private/tmp/inbox-lv-compose-20261118-global-check.log",
+            "since.log": "/private/tmp/inbox-lv-compose-20261118-since.log",
+            "joins.log": "/private/tmp/inbox-lv-compose-20261118-joins.log",
+            "source-audit.json": "/private/tmp/inbox-lv-compose-20261118-source-audit.json",
+            "screenshots.json": "/private/tmp/inbox-lv-compose-20261118-screenshots.json",
+            "html.log": "/private/tmp/inbox-lv-compose-20261118-html.log",
+            "counts.json": "/private/tmp/inbox-lv-compose-20261118-counts.json",
+            "mnemonics-before.json": "/private/tmp/inbox-lv-compose-20261118-mnemonics-before.json",
+            "mnemonics-after.json": "/private/tmp/inbox-lv-compose-20261118-mnemonics-after.json"
+          }
         }
-      ]
+      ],
+      "pending_mnemonic_collisions": {
+        "checkpoint": "lv-compose-sign-encrypt-20261118",
+        "status": "Outside this compose batch; each collision group still includes pending catalog entries. Resolve across actual scopes during the broader Latvian catalog review.",
+        "collisions": [
+          {
+            "scope": 3,
+            "key": "k",
+            "ids": [
+              "cmd-flag",
+              "ui-menu-flag"
+            ],
+            "scope_ids": [
+              "cmd-new-mail",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "cmd-flag",
+              "ui-menu-flag",
+              "cmd-archive",
+              "cmd-junk",
+              "cmd-not-junk",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-create-rule-from-message"
+            ],
+            "pending_ids": [
+              "cmd-flag",
+              "ui-menu-flag"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "cmd-archive"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-open",
+              "cmd-archive"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 10,
+            "key": "k",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "k",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 11,
+            "key": "l",
+            "ids": [
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-mark-read",
+              "cmd-not-junk"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "a",
+            "ids": [
+              "ui-menu-open",
+              "cmd-archive"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-open",
+              "cmd-archive"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "k",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 12,
+            "key": "n",
+            "ids": [
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "scope_ids": [
+              "ui-menu-open",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-junk"
+            ],
+            "pending_ids": [
+              "cmd-mark-unread",
+              "cmd-junk"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "p",
+            "ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "cmd-forward",
+              "cmd-move",
+              "ui-menu-view-source"
+            ]
+          },
+          {
+            "scope": 13,
+            "key": "k",
+            "ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ],
+            "scope_ids": [
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "ui-menu-flag",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-archive",
+              "cmd-create-rule-from-message",
+              "cmd-move",
+              "cmd-copy",
+              "win-delete-button",
+              "win-save-as-button",
+              "cmd-print",
+              "cmd-add-sender-to-book",
+              "ui-menu-view-source",
+              "ui-properties",
+              "cmd-mark-unread",
+              "cmd-not-junk"
+            ],
+            "pending_ids": [
+              "ui-menu-flag",
+              "cmd-copy",
+              "win-save-as-button"
+            ]
+          },
+          {
+            "scope": 22,
+            "key": "m",
+            "ids": [
+              "ui-let-agents-connect",
+              "win-change"
+            ],
+            "scope_ids": [
+              "ui-let-agents-connect",
+              "win-agent-programs",
+              "win-change",
+              "ui-remove",
+              "win-what-agents-did",
+              "cmd-undo",
+              "ui-clear-button"
+            ],
+            "pending_ids": [
+              "ui-let-agents-connect",
+              "win-change"
+            ]
+          },
+          {
+            "scope": 22,
+            "key": "n",
+            "ids": [
+              "ui-remove",
+              "ui-clear-button"
+            ],
+            "scope_ids": [
+              "ui-let-agents-connect",
+              "win-agent-programs",
+              "win-change",
+              "ui-remove",
+              "win-what-agents-did",
+              "cmd-undo",
+              "ui-clear-button"
+            ],
+            "pending_ids": [
+              "ui-remove",
+              "ui-clear-button"
+            ]
+          },
+          {
+            "scope": 28,
+            "key": "n",
+            "ids": [
+              "ui-contact-set-default",
+              "ui-remove"
+            ],
+            "scope_ids": [
+              "ui-contact-add",
+              "ui-contact-set-default",
+              "ui-remove",
+              "ui-card-picture-choose"
+            ],
+            "pending_ids": [
+              "ui-contact-set-default",
+              "ui-remove"
+            ]
+          },
+          {
+            "scope": 36,
+            "key": "t",
+            "ids": [
+              "cmd-mark-all-read",
+              "cmd-empty-folder"
+            ],
+            "scope_ids": [
+              "cmd-mark-all-read",
+              "cmd-new-folder",
+              "win-rename",
+              "win-delete-button",
+              "cmd-empty-folder"
+            ],
+            "pending_ids": [
+              "cmd-mark-all-read",
+              "cmd-empty-folder"
+            ]
+          },
+          {
+            "scope": 38,
+            "key": "m",
+            "ids": [
+              "ui-account-sync",
+              "cmd-new-folder"
+            ],
+            "scope_ids": [
+              "ui-account-sync",
+              "cmd-mark-all-read",
+              "cmd-new-folder",
+              "ui-account-move-up",
+              "ui-account-move-down",
+              "ui-account-properties"
+            ],
+            "pending_ids": [
+              "ui-account-sync",
+              "cmd-new-folder"
+            ]
+          },
+          {
+            "scope": 39,
+            "key": "m",
+            "ids": [
+              "win-find-label",
+              "cmd-new-folder"
+            ],
+            "scope_ids": [
+              "win-find-label",
+              "cmd-new-folder",
+              "ui-button-move",
+              "ui-cancel"
+            ],
+            "pending_ids": [
+              "win-find-label",
+              "cmd-new-folder"
+            ]
+          },
+          {
+            "scope": 40,
+            "key": "m",
+            "ids": [
+              "win-find-label",
+              "cmd-new-folder"
+            ],
+            "scope_ids": [
+              "win-find-label",
+              "cmd-new-folder",
+              "ui-button-copy",
+              "ui-cancel"
+            ],
+            "pending_ids": [
+              "win-find-label",
+              "cmd-new-folder"
+            ]
+          }
+        ]
+      }
     },
     "nl": {
       "pending_catalogs": {
@@ -70177,7 +70820,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+    "latest_source_audit": "Latvian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Three selectors add counted Latvian forms while retaining exact [1]; all other plural branches are preserved. Static examples cover 1/2/9/10/11/19/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass and reviewed access keys are ASCII; 20 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Latvian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,245 unmarked entries and 11,300 help lines; since-start 2,190 entries/448 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -130993,7 +131636,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites."
+      "next": "Review Polish compose additions, then ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian and Latvian each have 50, plus broader catalogs and recorded mnemonic collisions (29 Lithuanian groups, 20 Latvian). Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -133913,7 +134556,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+    "pending_phase2_resume": "Review Polish compose additions, then ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian and Latvian each have 50, plus broader catalogs and recorded mnemonic collisions (29 Lithuanian groups, 20 Latvian). Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -135684,7 +136327,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Latvian compose additions, then pl/ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian has 50, plus its broader catalog and 29 recorded mnemonic collision groups. Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
+      "next": "Review Polish compose additions, then ro/ru/sk/sl/sv/uk compose, the remaining Hungarian help, new agent/preview drafts and broader catalogs/help. Hungarian has 46 pending help topics; Lithuanian and Latvian each have 50, plus broader catalogs and recorded mnemonic collisions (29 Lithuanian groups, 20 Latvian). Recheck current runtime for each feature batch and watch preview-cid/MCP phase3 sources for committed or merged additions. All 28 languages still have pending content. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -137438,6 +138081,18 @@
           "validated_files_identical": true,
           "clean_worktree": true
         }
+      },
+      {
+        "batch": "lt-compose-sign-encrypt-20261118",
+        "pr": 165,
+        "url": "https://github.com/postalsys/inbox-classic/pull/165",
+        "review_commit": "edb0a4fddc5b9836ed8608948189ee79fb02932b",
+        "merge_commit": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+        "merged_at": "2026-11-18T14:34:07Z",
+        "verified_master": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
       }
     ],
     "source_audit_helper_sha256": "187b1c07319c962244f6e3cb8c94de80aa00b92e79a80b1c788b8d3517681664",
@@ -147875,7 +148530,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "9a6e8f4bc352897003be66b29d42dda9661b5dd8235713735001316484042985",
+      "core/locales/GLOSSARY.md": "29b9d45b745553eeaa5cba616ed3f3c1b60639b964bcc13a047dc91a300addf3",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -147889,7 +148544,11 @@
       "core/locales/lt/app.ftl": "4fd94d26751396a3db103af8db60c1b37aa92a90705d2c0aea38cfe450b8f2cd",
       "core/locales/lt/core.ftl": "f3c1f5c8abf3253b5224ac96bd0831e3bc930c3f05eba3aebd81938182917878",
       "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
-      "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e"
+      "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e",
+      "core/locales/lv/app.ftl": "3310cec05b61d52c666cad3c51afce9fba308b9dfdae2d251a6705c6d09741d1",
+      "core/locales/lv/core.ftl": "9192d4ad4f30d03cbceb5864afde98aefbb795d975db4ab38acc3937a0c230e2",
+      "core/crates/pe-html/help/lv/sign-and-encrypt.html": "04da683f0f514c5bf330f883f2ffd542e7738ab5386a841f031f7663938d579f",
+      "core/crates/pe-html/help/lv/write-message.html": "95cb710cef6abf3207ee9d820dc4c4f5b5e7036db9e02e20d14bf3c3f4055be7"
     },
     "resumed_review_checkpoints": [
       {
@@ -151383,6 +152042,83 @@
         "helpers": {
           "/private/tmp/inbox-lt-compose-20261118-edit.py": "1960309be704e1d0318d0cc7f95840ea11f44119303befaa7a80ddad06c80467",
           "/private/tmp/inbox-lt-compose-20261118-finalize.py": "24ab773424acdf8d5fdb85d6cf0b3d26eec54828e85aa0fe44074ed417fa991e"
+        }
+      },
+      {
+        "batch": "lv-compose-sign-encrypt-20261118",
+        "review_parent": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1372,
+          "pending_catalog": 13413,
+          "pending_help": 615,
+          "completed_catalog": 22211,
+          "completed_help": 757
+        },
+        "validation": "Latvian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Three selectors add counted Latvian forms while retaining exact [1]; all other plural branches are preserved. Static examples cover 1/2/9/10/11/19/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass and reviewed access keys are ASCII; 20 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Latvian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,245 unmarked entries and 11,300 help lines; since-start 2,190 entries/448 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 196,
+          "worktree_count": 5,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+            "refs/remotes/origin/HEAD": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+            "refs/remotes/origin/i18n/review-resume-20261118": "edb0a4fddc5b9836ed8608948189ee79fb02932b",
+            "refs/remotes/origin/master": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "b884d94b7cc961f5d7f37a490564aa4777c4f2d9",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "7a4dbfda4a78d741d12b1b066970b006614a6b76",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-preview5",
+              "HEAD": "6a37b3deb94645868ae06fdb4b0c0ab7ffbfb730",
+              "branch": "refs/heads/feat/preview-cid",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-windialog",
+              "HEAD": "a4b1cdd147e0f7b9425b87c719ed55089771d545",
+              "branch": "refs/heads/test/win-file-dialogs",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lv/sign-and-encrypt.html\n M core/crates/pe-html/help/lv/write-message.html\n M core/locales/GLOSSARY.md\n M core/locales/lv/app.ftl\n M core/locales/lv/core.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lv/sign-and-encrypt.html": "04da683f0f514c5bf330f883f2ffd542e7738ab5386a841f031f7663938d579f",
+                "core/crates/pe-html/help/lv/write-message.html": "95cb710cef6abf3207ee9d820dc4c4f5b5e7036db9e02e20d14bf3c3f4055be7",
+                "core/locales/GLOSSARY.md": "8594b77cf4a004bd48ab0cb8835538f2a9da4783229e29c50719eb579f29563a",
+                "core/locales/lv/app.ftl": "3310cec05b61d52c666cad3c51afce9fba308b9dfdae2d251a6705c6d09741d1",
+                "core/locales/lv/core.ftl": "966396513d9ecf7413b9f74c0e01094e68f012ffca4ccdeac2fa1616851158c2"
+              }
+            }
+          ],
+          "master": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+          "new_unmerged_source_deltas": [],
+          "note": "Earlier preview-cid help remains pending on its unchanged branch. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "736b1c1a2e6640375c3a459c3dfda7e97a2c64a6",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lv-compose-20261118-edit.py": "08505e19c90f2501857739784ffc32dd13accc7588d96cb9c1cdf3e476d1281f",
+          "/private/tmp/inbox-lv-compose-20261118-finalize.py": "217b29c5f5592b1b03d1612953fc7e792229fc6a8bdfb23fb21ae593c14a2e37"
         }
       }
     ],
@@ -160214,7 +160950,6 @@
         "sign-and-encrypt.html"
       ],
       "pending_languages": [
-        "lv",
         "pl",
         "ro",
         "ru",
@@ -160243,7 +160978,8 @@
         "fi",
         "hr",
         "hu",
-        "lt"
+        "lt",
+        "lv"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/write-message.html": {
@@ -160402,7 +161138,8 @@
         "fi": "Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "hr": "Croatian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 16 improved values, 24 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Croatian compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,125 unmarked entries and 11,192 help lines; since-start 2,310 entries/454 passages match the queue. Source checkpoint covers 196 refs/6 worktrees; previously recorded preview-cid and MCP phase3 sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "hu": "Hungarian structural checks pass with 1,408 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two complete help topics with 25 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts, including Hungarian articles. Nineteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. An English completion screenshot was inspected; no Hungarian screenshots were found, so no Hungarian GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,165 unmarked entries and 11,228 help lines; since-start 2,270 entries/452 passages match the queue. Source checkpoint covers 196 refs/5 worktrees; incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
-        "lt": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
+        "lt": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "lv": "Latvian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Three selectors add counted Latvian forms while retaining exact [1]; all other plural branches are preserved. Static examples cover 1/2/9/10/11/19/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass and reviewed access keys are ASCII; 20 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Latvian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,245 unmarked entries and 11,300 help lines; since-start 2,190 entries/448 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
       }
     },
     {
@@ -165675,10 +166412,10 @@
         "fi",
         "hr",
         "hu",
-        "lt"
+        "lt",
+        "lv"
       ],
       "pending_languages": [
-        "lv",
         "pl",
         "ro",
         "ru",
@@ -165879,7 +166616,8 @@
         "fi": "Finnish structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Finnish compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,085 unmarked entries and 11,172 help lines; since-start 2,350 entries/456 passages match the queue. Source checkpoint covers 195 refs/6 worktrees; preview-cid help and newly committed MCP phase3 drafts remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "hr": "Croatian structural checks pass with 1,453 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 16 improved values, 24 retained values and two completed help targets with 14 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and all prior writing-help prose are preserved. The encrypted status adds counted one/few variants for Croatian; all other plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts. Fourteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. No Croatian compose screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,125 unmarked entries and 11,192 help lines; since-start 2,310 entries/454 passages match the queue. Source checkpoint covers 196 refs/6 worktrees; previously recorded preview-cid and MCP phase3 sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
         "hu": "Hungarian structural checks pass with 1,408 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 17 improved values, 23 retained values and two complete help topics with 25 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts, variables and plural branches are preserved. All 53 mnemonic scopes pass. Static sentence joins inspected with current platform labels and shortcuts, including Hungarian articles. Nineteen runtime/layout files match the evidence; current status bars wrap text on all three platforms. An English completion screenshot was inspected; no Hungarian screenshots were found, so no Hungarian GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,165 unmarked entries and 11,228 help lines; since-start 2,270 entries/452 passages match the queue. Source checkpoint covers 196 refs/5 worktrees; incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
-        "lt": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
+        "lt": "Lithuanian structural checks pass with 116 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 19 changed values (18 wording improvements and one mnemonic-only change), 21 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Two selectors add exact [1] before counted one/few/other; all other plural branches are preserved. Static examples cover 1/2/9/10/11/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass after fixing the recipient-dialog F/N collision; 29 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Lithuanian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,205 unmarked entries and 11,264 help lines; since-start 2,230 entries/450 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged.",
+        "lv": "Latvian structural checks pass with 117 expected mark-only diagnostics. Exact reconstruction verifies 40 reviewed entries, 18 improved values, 22 retained values and two complete help topics with 28 improved wording lines. Tags, attributes, controls, platform branches, literal shortcuts and variables are preserved. Three selectors add counted Latvian forms while retaining exact [1]; all other plural branches are preserved. Static examples cover 1/2/9/10/11/19/20/21/22/101/111. All 53 mnemonic scopes were inspected: all seven compose scopes pass and reviewed access keys are ASCII; 20 unchanged collision groups outside this batch remain recorded for broader review. Static platform sentence joins inspected with current labels and shortcuts. Nineteen runtime/layout files match the evidence. No Latvian screenshots found, so no GUI fit claim. All 28 full inventories, variables, pending marks and latest file/source hashes reconcile. Global diagnostics account for 22,245 unmarked entries and 11,300 help lines; since-start 2,190 entries/448 passages match the queue. Source checkpoint covers 196 refs/5 worktrees, and upstream has no changed review inputs. Incoming feature sources remain queued separately. No local test suites or builds; REVIEWED unchanged."
       },
       "note": "Fifteen complete topics reopen only the signing/menu step and public-key menu paragraph. The twelve other languages already have the full topic pending. All catalog reviews and other help prose remain valid. Greek is corrected in el-compose-sign-encrypt-round2. No English or app code edited.",
       "reopen_validation": "Exact reconstruction verifies only two new review-mark pairs per topic in 15 languages. Unchanged outside prose equals bfff91d8 byte-for-byte; inventories and latest hashes updated without adding scope.",

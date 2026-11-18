@@ -564,6 +564,20 @@ where the singular reads better ("Pārvietot ziņojumu").
   opening alone does not. "Paraksta teksts" is the optional account footer, distinct from "digitālais paraksts".
 - The email warning says that message content is data, not instructions to follow. The unsubscribe quota counts
   user-approved list requests per program over the preceding 24 hours, including failed attempts.
+- Compose statuses describe protection of the sent message ("Ziņojums tiks nosūtīts ..."). Keep "Atslēgas piederība apstiprināta"
+  separate from signature integrity. "Izmantojama atslēga" must be usable, not merely found. Dates follow
+  "Pēdējā meklēšana:", full key-state reasons follow "Iemesls:" on a separate line.
+- Encrypted status has exact [1], then counted zero/one/other: "11 adresātu", "21 adresāts", "2 adresāti".
+  Missing-key text uses dative forms: exact [1], counted one ("21 adresātam") and other ("11 adresātiem").
+  Instructions after counted one address multiple recipients; placeholders remain uninflected after a colon.
+- Use "Pievienot savu publisko atslēgu" for the sender's selected address. The encryption confirmation uses
+  "&Atstāt ieslēgtu" (A), distinct from "&Izslēgt šifrēšanu" (I); all access keys stay ASCII.
+- Help uses quoted controls after pogas/opcija/logs/mapē and avoids gendered user participles. Keep "Dzintara"
+  for warning color. Encrypted drafts use only the sender's key without a digital signature. Inherited encrypted
+  text, images and attachments must be removed before unencrypted sending.
+- Attachment reminders recognize English, German, Estonian, Spanish and French phrases, not Latvian. Avoid
+  a Latvian trigger example or a claim that plain text looks identical in every mail app. Unrelated catalog
+  mnemonic collisions remain pending in the exact review state.
 
 ### Lietuvių (lt)
 
