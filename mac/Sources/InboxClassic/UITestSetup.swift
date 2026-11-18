@@ -10,7 +10,7 @@ extension UITest {
     /// the form comes back: the form shown now
     func firstRunImport(_ start: NSWindow) async throws -> NSWindow {
         let link: NSButton? = find("account.import", in: start)
-        check(link?.title.hasPrefix("Import settings and accounts from another computer") == true,
+        check(link?.title.hasPrefix(Text.uiSetupFirstRun.title) == true,
               "before the first account, Add Mail Account offers to import settings and accounts (\(link?.title ?? ""))")
         await shot(start, "setup-5-first-run")
         var asked: String?
@@ -21,7 +21,7 @@ extension UITest {
         press(link)
         _ = await waitUntil(10) { asked != nil }
         TestHooks.open = nil
-        check(asked == "Import Settings and Accounts", "the link opens the import's file panel (\(asked ?? "none"))")
+        check(asked == Text.uiSetupImportTitle.text, "the link opens the import's file panel (\(asked ?? "none"))")
         guard let again = await waitFor(10, { window("account.start").flatMap { $0 === start ? nil : $0 } }) else {
             throw Failed(description: "no account form after the import was cancelled")
         }
@@ -72,17 +72,17 @@ extension UITest {
         _ = await waitUntil(5) { field(0)?.isEnabled == true }
         type("short", into: field(0))
         let early = words("setup.passphrase.problem", in: export)
-        check(early.contains("at least 8") && ok?.isEnabled == false, "a short one is said to be short at once (\(early))")
+        check(early.contains(Text.uiKeysPassphraseShort.text) && ok?.isEnabled == false, "a short one is said to be short at once (\(early))")
         type("short", into: field(1))
         let short = words("setup.passphrase.problem", in: export)
-        check(short.contains("at least 8") && ok?.isEnabled == false, "a short passphrase is refused (\(short))")
+        check(short.contains(Text.uiKeysPassphraseShort.text) && ok?.isEnabled == false, "a short passphrase is refused (\(short))")
         type("correct horse battery", into: field(0))
         type("correct horse batter", into: field(1))
         check(words("setup.passphrase.problem", in: export).isEmpty && ok?.isEnabled == false,
               "the second, still being typed, is not refused yet, Export stays greyed")
         type("correct horse batteries", into: field(1))
         let differ = words("setup.passphrase.problem", in: export)
-        check(differ.contains("not the same") && ok?.isEnabled == false, "two different ones are refused (\(differ))")
+        check(differ.contains(Text.uiKeysPassphraseDiffer.text) && ok?.isEnabled == false, "two different ones are refused (\(differ))")
         await shot(export, "setup-2-passphrase")
         type("correct horse battery", into: field(1))
         check(words("setup.passphrase.problem", in: export).isEmpty && ok?.isEnabled == true,
@@ -117,7 +117,7 @@ extension UITest {
         _ = await waitUntil(20) { !self.words("setup.passphrase.problem", in: ask).isEmpty }
         let wrong = words("setup.passphrase.problem", in: ask)
         let askField: NSSecureTextField? = find("setup.passphrase.field.0", in: ask)
-        check(wrong.contains("not the passphrase") && ask.isVisible && askField?.isEnabled == true
+        check(wrong.contains(Text.setupErrorWrongPassphrase.text) && ask.isVisible && askField?.isEnabled == true
               && askField?.stringValue.isEmpty == true,
               "a wrong one is refused in the window, which asks again (\(wrong))")
         type("correct horse battery", into: askField)

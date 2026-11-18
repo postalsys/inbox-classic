@@ -105,7 +105,7 @@ extension UITest {
               "its document has only the light look")
         await shot(main.window, "dark-3-newsletter")
 
-        check(await showDark("Undelivered Mail Returned to Sender", "Your message was not delivered"),
+        check(await showDark("Undelivered Mail Returned to Sender", Text.bounceFailed.text),
               "the delivery report is shown with its card")
         _ = try? await readerWeb?.evaluateJavaScript("document.querySelector('details').open = true")
         check(await waitUntil(5) { await self.readerBackground() == dark }, "around the dark card")

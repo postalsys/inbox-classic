@@ -57,6 +57,7 @@ final class UITest {
     func start() {
         NSApplication.shared.setActivationPolicy(.regular)
         TestHooks.testing = true
+        TestHooks.modalOpened = { [weak self] window in self?.modalOpened(window) }
         // an exception AppKit would swallow ends the test where it is thrown, not in a later layout pass
         UserDefaults.standard.set(true, forKey: "NSApplicationCrashOnExceptions")
         Task { @MainActor in
@@ -92,7 +93,14 @@ final class UITest {
 
     func check(_ ok: Bool, _ what: String) {
         say((ok ? "ok   " : "FAIL ") + what)
-        if !ok { failures += 1 }
+        guard !ok else { return }
+        failures += 1
+        // GitHub Actions lists it among the run's annotations, so a failure is seen without reading the log
+        if ProcessInfo.processInfo.environment["GITHUB_ACTIONS"] == "true" {
+            print("::error title=Mac UI test::" + what.replacingOccurrences(of: "%", with: "%25")
+                .replacingOccurrences(of: "\r", with: "%0D").replacingOccurrences(of: "\n", with: "%0A"))
+            fflush(stdout)
+        }
     }
 
     struct Failed: Error, CustomStringConvertible {
@@ -202,6 +210,62 @@ final class UITest {
         check(reached == Array(ids.dropFirst()), "\(what) (\(reached.joined(separator: ", ")))")
     }
 
+    /// a key (by its code: 36 Return, 53 Esc, 76 keypad Enter, 48 Tab) pressed while `window` is in front, posted to
+    /// the event queue as the keyboard posts it: it reaches what watches the keys (a question's monitor) as well as the
+    /// window. What it did is checked by its outcome, never by which button holds the key.
+    func pressKey(_ window: NSWindow, _ keyCode: UInt16) {
+        let characters = [36: "\r", 53: "\u{1b}", 76: "\u{3}", 48: "\t"][Int(keyCode)] ?? ""
+        let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
+                                     windowNumber: window.windowNumber, context: nil, characters: characters,
+                                     charactersIgnoringModifiers: characters, isARepeat: false, keyCode: keyCode)
+        event.map { event in onMain { NSApp.postEvent(event, atStart: false) } }
+    }
+
+    // ---- modal windows as they opened ----
+
+    /// each modal window as it was about to run, by its identifier (the last of each): when, and which of its
+    /// buttons (by their identifiers) were on
+    var modalsOpened: [String: (at: Date, enabled: [String: Bool])] = [:]
+
+    func modalOpened(_ window: NSWindow) {
+        guard let id = window.identifier?.rawValue else { return }
+        var enabled: [String: Bool] = [:]
+        for button in views(NSButton.self, in: window.contentView) where !button.accessibilityIdentifier().isEmpty {
+            enabled[button.accessibilityIdentifier()] = button.isEnabled
+        }
+        modalsOpened[id] = (Date(), enabled)
+    }
+
+    /// The button `buttonID` of the question `window` held back, as the user meets it: off as the window opened, a
+    /// click on it while it is off does nothing (the question stays, `answered` gives nothing), and it comes on by
+    /// itself after about 1.5 s (Agents.swift holdBack), not before
+    func checkHeldBack(_ window: NSWindow, _ buttonID: String, _ what: String, answered: () -> Bool) async {
+        let id = window.identifier?.rawValue ?? ""
+        guard let opened = modalsOpened[id], let button: NSButton = find(buttonID, in: window) else {
+            return check(false, "\(what) (no \(buttonID) in \(id))")
+        }
+        let offAtFirst = opened.enabled[buttonID] == false
+        // clicked while it is still off, as a click meant for another window would be
+        var clicked = "too late to click"
+        if !button.isEnabled {
+            button.performClick(nil)
+            await pause(0.3)
+            clicked = window.isVisible && !answered() ? "a click did nothing" : "a click answered"
+        }
+        let on = await waitUntil(10) { button.isEnabled }
+        let after = Date().timeIntervalSince(opened.at)
+        check(offAtFirst && on && after >= 1.4 && clicked != "a click answered",
+              "\(what) (off as it opened: \(offAtFirst), \(clicked), on after \(String(format: "%.1f", after)) s)")
+    }
+
+    /// `window` brought to the front, as the user clicks it: the app is made active when the system lets it (it does
+    /// not while the user works in another app), and the window goes in front of the app's others either way
+    func bringToFront(_ window: NSWindow) {
+        NSApp.activate()
+        window.makeKeyAndOrderFront(nil)
+        window.orderFrontRegardless()
+    }
+
     func pressTab(_ window: NSWindow) {
         let tab = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0, windowNumber: window.windowNumber,
                                    context: nil, characters: "\t", charactersIgnoringModifiers: "\t", isARepeat: false, keyCode: 48)
@@ -224,6 +288,14 @@ final class UITest {
         let button: NSButton? = views(NSButton.self, in: window?.contentView).first { $0.title == title }
         check(button != nil, "the alert has \(title)")
         press(button)
+    }
+
+    /// the words of the catalog's `text` before its first placeable, for a check on a sentence filled in with what
+    /// the test can not know (a time, a date)
+    func lead(_ text: Text) -> String {
+        let words = text.text
+        let before = words.range(of: "{").map { String(words[..<$0.lowerBound]) } ?? words
+        return before.trimmingCharacters(in: CharacterSet.whitespaces.union(CharacterSet(charactersIn: "\u{201C}\u{2068}")))
     }
 
     /// the text of an alert
@@ -620,7 +692,7 @@ final class UITest {
             await shot(wait, "account-2-lookup")
         }
         // the lookup finds nothing for this domain: the second form comes with the usual names to correct
-        guard let second = await waitFor(40, { window("form").flatMap { $0.title == "Add Mail Account" ? $0 : nil } }) else {
+        guard let second = await waitFor(40, { window("form").flatMap { $0.title == Text.uiAddAccountTitle.text ? $0 : nil } }) else {
             throw Failed(description: "no server settings form")
         }
         check(true, "the server settings form follows the lookup")
@@ -644,7 +716,7 @@ final class UITest {
         let warning = await waitWindow("alert")
         check(warning != nil, "a connection without encryption is warned about")
         await shot(warning, "account-4-warning")
-        answer(warning, "Yes")
+        answer(warning, Text.uiYes.text)
     }
 
     func reading() async throws {
@@ -689,9 +761,9 @@ final class UITest {
         step("the message list menu and the message source")
         let messageMenu = main.mailbox.messageMenu()
         let labels = messageMenu?.items.map(\.title) ?? []
-        check(labels.contains("Reply to Sender") && labels.contains("Mark as Unread") && labels.contains("Move to Folder\u{2026}")
-            && labels.contains("View Source") && labels.contains("Properties"), "the message list has a right-click menu with the message's actions (\(labels.joined(separator: ", ")))")
-        check(!labels.contains("Mark as Read"), "a read message offers Mark as Unread, not Mark as Read")
+        check(labels.contains(Command.reply.label) && labels.contains(Command.markUnread.label) && labels.contains(Command.move.label)
+            && labels.contains(Text.uiMenuViewSource.text) && labels.contains(Command.properties.label), "the message list has a right-click menu with the message's actions (\(labels.joined(separator: ", ")))")
+        check(!labels.contains(Command.markRead.label), "a read message offers Mark as Unread, not Mark as Read")
         if let messageMenu, let index = labels.firstIndex(of: "View Source") {
             onMain { messageMenu.performActionForItem(at: index) }
         }
@@ -869,7 +941,7 @@ final class UITest {
         let problem = await waitWindow("alert", 10)
         check(problem != nil, "a mistyped address is pointed out before sending")
         await shot(problem, "write-4-bad-address")
-        answer(problem, "OK")
+        answer(problem, Text.uiOk.text)
         check(await waitUntil { compose.isVisible && window("alert") == nil }, "and the message stays open to fix it")
         type("Dave <dave@example.com>", into: field("compose.to", compose))
         let file = out.appendingPathComponent("trail-map.txt")
