@@ -3291,6 +3291,57 @@ public static class Dragger {
         Check ([bool](WaitFor { -not [Native.Win]::IsWindow($previewWindow) } 10)) 'Esc closes it'
     }
 
+    # signed and encrypted mail: each part's pictures in the part's own frame, the plain part's harbour in frame 1 and
+    # the encrypted part's floor plan in frame 2, none in the page around them (SCENARIO.md 19i)
+    $words = ShowSecure 'secure-previews.eml' 'Two pictures, one sealed'
+    Check ($words -match 'Encrypted' -or $words -match 'part') "a message of a plain and an encrypted part has the bar ($words)"
+    # a frame's pictures: how many, how many loaded, its file the one named (part:N:name in preview.cpp)
+    function PartLook([int]$n, [string]$name) { WaitFor { $v = PreviewsLook "part:$($n):$name"; if ($v -eq 111) { $v } } 20 }
+    Check ($null -ne (PartLook 1 'harbour.png')) "frame 1 shows harbour.png, loaded ($(PreviewsLook 'part:1:harbour.png'))"
+    Check ($null -ne (PartLook 2 'floor-plan.png')) "frame 2 shows floor-plan.png, loaded ($(PreviewsLook 'part:2:floor-plan.png'))"
+    # (asked twice: a look answers with the one before it)
+    [void](PreviewsState)
+    Check ((PreviewsState).Total -eq 0) "the page around the frames shows no preview ($(PreviewsState))"
+    $sealed = FramesFit 2
+    Check ($null -ne $sealed -and $sealed.Height -ge 300) "two frames, each as tall as its part with its picture, no scroll bar inside ($(Frames))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'secure-14a-plain-part'
+    # scrolled to the encrypted part: its label over its text and the floor plan
+    [void](PreviewsLook 'partframe:2'); [void](PreviewsLook 'partframe:2')
+    Start-Sleep -Milliseconds 500
+    Shot $main 'secure-14-attachment-previews'
+    # a click on the floor plan in its frame opens the decrypted file, without the note: it is given once ever, and
+    # the encrypted file of 'opening an attachment' gave it already
+    $before = (OpenedFiles).Count
+    Check (ClickPreview 'partpoint:2') 'the floor plan is on the screen'
+    $note = WaitWindow '#32770' 'Opening this file' 3
+    if ($note) { Click $note 2 }
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'floor-plan.png' -and (InPrivateFolder $opened)) "clicking the floor plan in frame 2 opens it ($opened)"
+    Check ($null -eq $note) 'without the decrypted-file note again, which was given once already'
+    $before = (OpenedFiles).Count
+    Check (ClickPreview 'partpoint:1') 'the harbour is on the screen'
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'harbour.png') "and the harbour in frame 1 opens its file ($opened)"
+    # Print: both pictures after all the text, each named with its part
+    $kTestPrint = 0x50524E54
+    $printed = "The harbour, as promised.`nThe floor plan, for your eyes only.`nPart 1: harbour.png`nPart 2: floor-plan.png"
+    Command $main $IDM_PRINT
+    $print = WaitWindow 'InboxClassicPrint' $null 20
+    Check ($null -ne $print) 'Print opens the print preview'
+    if ($print) {
+        $looked = WaitFor { $v = [Native.Win]::SendText($main, $kTestPrint, $printed); if ($v -eq 21) { $v } } 20
+        Check ($null -ne $looked) "the printout has both pictures after the text, captioned with their parts ($([Native.Win]::SendText($main, $kTestPrint, $printed)))"
+        Start-Sleep -Seconds 3
+        Shot $print 'secure-14b-print-previews'
+        [void][Native.Win]::PostMessage($print, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($print) } 10)
+    }
+    RemoveSecure 'secure-previews.eml' 'Two pictures, one sealed'
+    # the photo and the invoice shown again, for the settings
+    Check (SelectPreviews $photoSubject) 'the message with a photo and an invoice is selected again'
+    [void](PreviewsShown 4 3)
+
     # Options, Reading: both settings, on, the PDF one under the other; off, the message shows no previews
     function PreviewsCheck([IntPtr]$o, [int]$id) { [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $id), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 }
     function PreviewsSet([IntPtr]$o, [int]$id, [bool]$on) {

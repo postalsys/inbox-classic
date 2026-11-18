@@ -15,6 +15,10 @@ namespace webview {
 
 namespace {
 
+// every document served from memory: never kept in the web view's cache on disk (a part's document, the page and the
+// printout can carry what was decrypted)
+const wchar_t* kDocumentHeaders = L"Content-Type: text/html; charset=utf-8\r\nCache-Control: no-store";
+
 std::wstring UserDataFolder() {
     PWSTR local = nullptr;
     std::wstring folder;
@@ -187,13 +191,13 @@ void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, 
                 } else {
                     ComPtr<IStream> stream;
                     stream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(partDocument.data()), static_cast<UINT>(partDocument.size())));
-                    env->CreateWebResourceResponse(stream.Get(), 200, L"OK", L"Content-Type: text/html; charset=utf-8", &response);
+                    env->CreateWebResourceResponse(stream.Get(), 200, L"OK", kDocumentHeaders, &response);
                 }
             } else if (context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT && IsOwnPage(uri, page.c_str()) && !StartsWith(uri, L"about:")) {
                 std::string body = Utf8(serve());
                 ComPtr<IStream> stream;
                 stream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(body.data()), static_cast<UINT>(body.size())));
-                env->CreateWebResourceResponse(stream.Get(), 200, L"OK", L"Content-Type: text/html; charset=utf-8", &response);
+                env->CreateWebResourceResponse(stream.Get(), 200, L"OK", kDocumentHeaders, &response);
             } else if (!allow(uri, context) && (StartsWith(uri, L"http://") || StartsWith(uri, L"https://") || StartsWith(uri, L"ftp://") ||
                                                 StartsWith(uri, L"file:"))) {
                 env->CreateWebResourceResponse(nullptr, 403, L"Blocked", L"", &response);

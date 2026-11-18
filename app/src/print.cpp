@@ -3,6 +3,8 @@
 // sanitized document with one script of the core's, allowed by a nonce, that says "done" once the preview is closed,
 // printed or cancelled, which closes the window. The reading pane's own preview would only fill the pane, and the
 // Windows Print dialog of Windows 11 has no preview for it.
+#include <algorithm>
+
 #include "app.h"
 #include "webview.h"
 
@@ -168,6 +170,14 @@ int64_t TestPrint(const std::wstring& text) {
     if (pictures < 0) {
         return -1;
     }
-    bool found = !text.empty() && state->page.find(text) != std::wstring::npos;
+    // the text, or its lines each after the one before
+    bool found = !text.empty();
+    size_t at = 0;
+    for (size_t start = 0; found && start <= text.size();) {
+        size_t end = std::min(text.find(L'\n', start), text.size());
+        at = state->page.find(text.substr(start, end - start), at);
+        found = at != std::wstring::npos;
+        start = end + 1;
+    }
     return pictures * 10 + (found ? 1 : 0);
 }
