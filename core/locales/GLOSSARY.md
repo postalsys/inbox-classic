@@ -645,6 +645,22 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   mail present only locally is lost. Do not describe every local message as a recoverable server copy.
 - The attachment warning explains that opening is disabled here, not impossible everywhere. Picture blocking
   reduces tracking opportunities without promising the sender cannot identify the computer.
+- Contact deletion keeps the count in one/few/other, including 21/101. Key verification uses exact [1] for one
+  address and plural instructions otherwise. Import counts agree independently; file names follow "Failas:".
+- "Kontrolinis kodas" is the key fingerprint. Verification labels explicitly describe the key's owner;
+  removing a key prevents decryption/use of that key, not access to already decrypted text or every alternate key.
+  Memory-only password storage makes current private keys unusable after restart unless restored.
+- Send countdowns describe planned sending, not completed delivery. Too Late means Undo Send is unavailable;
+  it does not prove delivery. Subjects are already quoted by the core.
+- Download limits apply to cached message copies; drafts and messages opened since startup are spared.
+  Encrypted search stores decrypted content only when decryption succeeds. The index is unencrypted, and agents
+  cannot search that decrypted content; they can still search ordinary mail. Turning it off removes derived text.
+- Picture menus label arbitrary sender/domain names. Domain confirmation is not personal identity verification.
+  Logos are cached and refreshed; do not promise a single download forever. Previews do not run file scripts.
+  Address lookup tries the domain first; key-server lookup can also use a fingerprint without an email address.
+- Setup files contain no mail. Only server-held messages can be downloaded on the new computer. Protected exports
+  include accessible saved credentials and private keys; unprotected exports require signing in again, including
+  browser sign-in where used. Shared Address Book/layout guidance avoids a Windows-only menu path.
 
 ### Magyar (hu)
 
