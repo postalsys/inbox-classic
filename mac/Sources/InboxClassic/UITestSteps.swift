@@ -3180,7 +3180,18 @@ extension UITest {
         check(reads.allSatisfy { cell(1, $0).isEmpty && !cell(0, $0).isEmpty }, "each read with its time, the program the summary's")
         await pause(0.5)
         await shot(agents, "agents-9-reads")
+        await darkShot(agents, "agents-9-reads-dark")
         log.collapseItem(summary)
+    }
+
+    /// a picture of `window` with the app dark, then as it was
+    private func darkShot(_ window: NSWindow, _ name: String) async {
+        let before = NSApp.appearance
+        onMain { NSApp.appearance = NSAppearance(named: .darkAqua) }
+        await pause(0.5)
+        await shot(window, name)
+        onMain { NSApp.appearance = before }
+        await pause(0.3)
     }
 
     /// Clear empties the log, but what the agent sent still counts against what it may send
@@ -3285,6 +3296,7 @@ extension UITest {
         }
         await pause(1)
         await shot(ask, "agents-10-terminal")
+        await darkShot(ask, "agents-10-terminal-dark")
         press(find("agent.deny", in: ask))
         _ = await waitUntil(10) { !ask.isVisible }
         command(.aiAgents)
