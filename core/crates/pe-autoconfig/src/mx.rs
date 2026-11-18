@@ -40,18 +40,22 @@ fn aws_region(exchange: &str) -> Option<&str> {
     (valid && labels[at + 2..] == ["amazonaws", "com"]).then_some(region)
 }
 
-fn fixed(imap: (&str, u16, ServerSecurity), smtp: (&str, u16, ServerSecurity), oauth2: bool) -> Delegate {
+fn servers(imap: (&str, u16, ServerSecurity), smtp: (&str, u16, ServerSecurity), oauth2: bool) -> Discovered {
     let server = |(host, port, security): (&str, u16, ServerSecurity)| Server {
         host: host.to_string(),
         port,
         security,
     };
-    Delegate::Servers(Discovered {
+    Discovered {
         imap: Some(server(imap)),
         smtp: Some(server(smtp)),
         username: None,
         oauth2,
-    })
+    }
+}
+
+fn fixed(imap: (&str, u16, ServerSecurity), smtp: (&str, u16, ServerSecurity), oauth2: bool) -> Delegate {
+    Delegate::Servers(servers(imap, smtp, oauth2))
 }
 
 /// A provider whose servers are the same for every domain it receives mail for
@@ -160,6 +164,33 @@ pub fn delegate(exchange: &str) -> Option<Delegate> {
     }
     let entry = FIXED.iter().find(|entry| (entry.matches)(ex))?;
     Some(fixed(entry.imap, entry.smtp, entry.oauth2))
+}
+
+/// The big providers' own domains and the exchange each publishes as its MX: their servers are known without a
+/// lookup, which is faster and needs no DNS-over-HTTPS. The exchange is the one the MX lookup finds, so the servers
+/// and the app password hint are those the lookup gives.
+const KNOWN_DOMAINS: &[(&str, &str)] = &[
+    ("gmail.com", "gmail-smtp-in.l.google.com"),
+    ("googlemail.com", "gmail-smtp-in.l.google.com"),
+    ("outlook.com", "outlook-com.olc.protection.outlook.com"),
+    ("hotmail.com", "hotmail-com.olc.protection.outlook.com"),
+    ("live.com", "live-com.olc.protection.outlook.com"),
+    ("msn.com", "msn-com.olc.protection.outlook.com"),
+];
+
+/// The exchange and the servers of `domain` (lowercase, ASCII) when it is one of [`KNOWN_DOMAINS`]
+pub(crate) fn known_domain(domain: &str) -> Option<(&'static str, Discovered)> {
+    let (_, exchange) = KNOWN_DOMAINS.iter().find(|(known, _)| *known == domain)?;
+    let found = match delegate(exchange)? {
+        Delegate::Servers(found) => found,
+        // what the SRV records of gmail.com name: `_imaps` imap.gmail.com:993 and `_submission` smtp.gmail.com:587
+        Delegate::Srv {
+            domain: "gmail.com",
+            oauth2,
+        } => servers(("imap.gmail.com", 993, Tls), ("smtp.gmail.com", 587, StartTls), oauth2),
+        _ => return None,
+    };
+    Some((exchange, found))
 }
 
 #[cfg(test)]
@@ -277,6 +308,38 @@ mod tests {
         }
         assert_eq!(delegate("mx.yandex.net"), Some(Delegate::Autoconfig("yandex.ru")));
         assert_eq!(delegate("mx.zonemx.eu"), Some(Delegate::Autoconfig("zone.ee")));
+    }
+
+    #[test]
+    fn known_domains_need_no_lookup() {
+        for domain in ["gmail.com", "googlemail.com"] {
+            let (exchange, found) = known_domain(domain).unwrap();
+            assert_eq!(
+                delegate(exchange),
+                Some(Delegate::Srv {
+                    domain: "gmail.com",
+                    oauth2: true
+                })
+            );
+            assert_eq!(
+                Delegate::Servers(found),
+                fixed(("imap.gmail.com", 993, Tls), ("smtp.gmail.com", 587, StartTls), true)
+            );
+        }
+        for domain in ["outlook.com", "hotmail.com", "live.com", "msn.com"] {
+            let (exchange, found) = known_domain(domain).unwrap();
+            assert_eq!(delegate(exchange), Some(Delegate::Servers(found.clone())), "{domain}");
+            assert_eq!(found.imap.unwrap().host, "outlook.office365.com", "{domain}");
+        }
+        for other in [
+            "example.com",
+            "gmail.com.evil.net",
+            "mail.gmail.com",
+            "workspace.example",
+            "gmail.co",
+        ] {
+            assert!(known_domain(other).is_none(), "{other}");
+        }
     }
 
     #[test]

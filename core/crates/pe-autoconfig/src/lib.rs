@@ -49,7 +49,7 @@ pub enum Source {
     Ispdb,
     /// `imap.<domain>` and `smtp.<domain>`: nothing was found, these are the usual names
     Guess,
-    /// The mail exchange of the domain is a known provider's
+    /// The mail exchange of the domain is a known provider's, or the domain is a big provider's own (gmail.com)
     Mx,
     /// The SRV records of the domain (RFC 6186)
     Srv,
@@ -477,7 +477,7 @@ mod tests {
             .with_mx(&[(10, "gmail-smtp-in.l.google.com")])
             .with_srv("_imaps._tcp.gmail.com", "imap.gmail.com", 993)
             .with_srv("_submissions._tcp.gmail.com", "smtp.gmail.com", 465);
-        let gmail = find("user@gmail.com", &net).await;
+        let gmail = find("user@workspace.example", &net).await;
         assert_eq!(gmail.source, Source::Mx);
         assert_eq!(gmail.imap, at("imap.gmail.com", 993, ServerSecurity::Tls));
         assert_eq!(gmail.smtp, at("smtp.gmail.com", 465, ServerSecurity::Tls));
@@ -489,7 +489,7 @@ mod tests {
             .with_mx(&[(10, "alt.l.google.com")])
             .with_srv("_imap._tcp.gmail.com", "imap.legacy.gmail.com", 143)
             .with_srv("_submission._tcp.gmail.com", "smtp.legacy.gmail.com", 465);
-        let legacy = find("user@gmail.com", &net).await;
+        let legacy = find("user@workspace.example", &net).await;
         assert_eq!(legacy.imap, at("imap.legacy.gmail.com", 143, ServerSecurity::StartTls));
         assert_eq!(legacy.smtp, at("smtp.legacy.gmail.com", 465, ServerSecurity::Tls));
         let net = Net::nothing().with_mx(&[(10, "alt.l.google.com")]).with_srv(
@@ -498,9 +498,31 @@ mod tests {
             587,
         );
         assert_eq!(
-            find("user@gmail.com", &net).await.smtp.security,
+            find("user@workspace.example", &net).await.smtp.security,
             ServerSecurity::StartTls
         );
+    }
+
+    #[tokio::test]
+    async fn big_providers_own_domains_without_a_lookup() {
+        // no DNS and no web at all: the servers of Gmail and Outlook.com are known by the domain
+        let offline = Net::new(|_| Reply::Stall);
+        let gmail = find("User@GMail.com", &offline).await;
+        assert_eq!(gmail.source, Source::Mx);
+        assert_eq!(gmail.imap, at("imap.gmail.com", 993, ServerSecurity::Tls));
+        assert_eq!(gmail.smtp, at("smtp.gmail.com", 587, ServerSecurity::StartTls));
+        assert_eq!(gmail.username, "User@GMail.com");
+        assert!(gmail.oauth2);
+        assert_eq!(gmail.app_password.unwrap().provider, "Gmail");
+        assert_eq!(find("user@googlemail.com", &offline).await.imap.host, "imap.gmail.com");
+        let outlook = find("user@hotmail.com", &offline).await;
+        assert_eq!(outlook.source, Source::Mx);
+        assert_eq!(outlook.imap, at("outlook.office365.com", 993, ServerSecurity::Tls));
+        assert_eq!(outlook.smtp, at("smtp.office365.com", 587, ServerSecurity::StartTls));
+        assert!(outlook.oauth2);
+        assert!(outlook.app_password.unwrap().warning.is_some());
+        assert!(offline.calls.lock().unwrap().is_empty());
+        assert!(offline.srv_asked.lock().unwrap().is_empty());
     }
 
     #[tokio::test]

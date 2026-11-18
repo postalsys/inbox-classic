@@ -7,7 +7,7 @@ use std::time::Duration;
 use crate::autodiscover;
 use crate::config::parse_partial;
 use crate::io::{BoxFuture, HttpRequest, Io, first_some};
-use crate::mx::{Delegate, delegate};
+use crate::mx::{Delegate, delegate, known_domain};
 use crate::{Credentials, Discovered, Server, ServerSecurity, Source, lookup_urls, provider_url};
 
 /// The servers of the SRV records of `domain` (RFC 6186): `_imaps`, else `_imap`; `_submissions`, else
@@ -72,13 +72,17 @@ async fn from_exchange<I: Io>(io: &I, email: &str, exchange: &str) -> Option<Dis
     }
 }
 
-/// The lowest exchange of `domain`, and the servers it says, within `budget`
+/// The lowest exchange of `domain`, and the servers it says, within `budget`; a big provider's own domain without
+/// a lookup
 pub(crate) async fn by_mx<I: Io>(
     io: &I,
     email: &str,
     domain: &str,
     budget: Duration,
 ) -> (Option<String>, Option<Discovered>) {
+    if let Some((exchange, found)) = known_domain(domain) {
+        return (Some(exchange.to_string()), Some(found));
+    }
     let started = tokio::time::Instant::now();
     let Ok(records) = tokio::time::timeout(budget, io.mx(domain)).await else {
         return (None, None);
