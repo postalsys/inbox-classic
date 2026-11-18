@@ -12,6 +12,7 @@ use std::sync::Arc;
 use pe_i18n::{Arg, Text};
 use pe_store::{AccountId, AgentHostId, FlagColor, FolderId, MessageRef, NewLogEntry, Picked, Search, Sort};
 
+use super::undo::color_now;
 use super::{AgentHost, Undo, everywhere, log_entry, now};
 use crate::selection::Action;
 use crate::{Core, Error, Result};
@@ -83,6 +84,8 @@ impl BulkAction {
 /// What a folder is to a change of many: where junk and Deleted Items go from it, whether it is junk, archivable
 struct Place {
     account: AccountId,
+    /// Gmail's All Mail, which holds a copy of every message of the other folders
+    all_mail: bool,
     junk: bool,
     archivable: bool,
     trash: Option<FolderId>,
@@ -105,6 +108,7 @@ impl Core {
         let junk_folder = store.special_folder(account, "\\Junk")?.map(|f| f.id);
         Ok(Place {
             account,
+            all_mail: info.special_use.as_deref() == Some("\\All"),
             junk: junk_folder == Some(folder),
             archivable: crate::archivable(&info),
             trash: crate::trash_in(&store, folder)?,
@@ -147,12 +151,14 @@ fn undo_of(action: BulkAction, p: &Picked, place: &Place) -> Option<Undo> {
         BulkAction::Unflag => p.flagged().then(|| Undo::Color {
             folder,
             uid,
-            was: p.flag_color(),
+            was: color_now(p),
+            set: Some(None),
         }),
-        BulkAction::Color(color) => (p.flag_color() != Some(color)).then(|| Undo::Color {
+        BulkAction::Color(color) => (color_now(p) != Some(color)).then(|| Undo::Color {
             folder,
             uid,
-            was: p.flag_color(),
+            was: color_now(p),
+            set: Some(Some(color)),
         }),
         BulkAction::Move(to) if to != folder => moved(to),
         BulkAction::Move(_) => None,
@@ -166,6 +172,31 @@ fn undo_of(action: BulkAction, p: &Picked, place: &Place) -> Option<Undo> {
         BulkAction::NotJunk if place.junk => junk(false, place.inbox?),
         BulkAction::Junk | BulkAction::NotJunk => None,
     }
+}
+
+/// Each message of `picked` once: on Gmail a message is in each of its labels' folders and in All Mail, so copies with
+/// the same Message-ID in one account are one message, the copy outside All Mail kept (where the search found it in a
+/// label). The store keeps no X-GM-MSGID, so the Message-ID is what tells them apart; one without is kept as it is.
+/// `place` gives a folder's account and whether it is All Mail.
+fn one_copy_each(picked: Vec<Picked>, place: impl Fn(FolderId) -> (AccountId, bool)) -> Vec<Picked> {
+    let mut kept: Vec<Picked> = Vec::with_capacity(picked.len());
+    let mut seen: HashMap<(AccountId, String), usize> = HashMap::new();
+    for p in picked {
+        let (account, all_mail) = place(p.at.folder);
+        let Some(id) = p.message_id.clone() else {
+            kept.push(p);
+            continue;
+        };
+        match seen.get(&(account, id.clone())) {
+            Some(&at) if place(kept[at].at.folder).1 && !all_mail => kept[at] = p,
+            Some(_) => {}
+            None => {
+                seen.insert((account, id), kept.len());
+                kept.push(p);
+            }
+        }
+    }
+    kept
 }
 
 /// A dry run's ticket: what one call of apply_to_search may change
@@ -244,12 +275,20 @@ impl Core {
     fn changes_of(&self, search: &Search, action: BulkAction) -> Result<(Vec<(MessageRef, Undo)>, u64)> {
         let refs = self.refs_in_ranges(search, Sort::default(), &[(0, BULK_SCAN)])?;
         let picked = self.store().picked(&refs)?;
+        let mut places: HashMap<FolderId, Place> = HashMap::new();
+        for p in &picked {
+            self.place_in(&mut places, p.at.folder)?;
+        }
+        let picked = one_copy_each(picked, |folder| {
+            places
+                .get(&folder)
+                .map_or((0, false), |place| (place.account, place.all_mail))
+        });
         // a move goes within the account of the folder it goes to
         let target = match action {
             BulkAction::Move(to) => Some(self.store().folder(to)?.account_id),
             _ => None,
         };
-        let mut places: HashMap<FolderId, Place> = HashMap::new();
         let mut changes = Vec::new();
         for p in &picked {
             let place = self.place_in(&mut places, p.at.folder)?;
@@ -457,12 +496,38 @@ mod tests {
     fn place(junk: bool, trash: Option<FolderId>) -> Place {
         Place {
             account: 1,
+            all_mail: false,
             junk,
             archivable: !junk,
             trash,
             junk_target: Some(5),
             inbox: Some(1),
         }
+    }
+
+    #[test]
+    fn a_message_in_several_gmail_folders_counts_once() {
+        let at = |folder, uid, id: Option<&str>| Picked {
+            at: MessageRef { folder, uid },
+            message_id: id.map(str::to_string),
+            ..picked(&[], None)
+        };
+        // folder 9 is All Mail, 3 a label, 5 of another account
+        let place = |folder| (if folder == 5 { 2 } else { 1 }, folder == 9);
+        let kept = one_copy_each(
+            vec![
+                at(9, 1, Some("<a@x>")),
+                at(3, 7, Some("<a@x>")),
+                at(9, 2, Some("<b@x>")),
+                at(5, 4, Some("<a@x>")),
+                at(9, 3, None),
+                at(3, 8, None),
+            ],
+            place,
+        );
+        let refs: Vec<(FolderId, u64)> = kept.iter().map(|p| (p.at.folder, p.at.uid)).collect();
+        // the label's copy in place of All Mail's, another account's its own, those without a Message-ID each
+        assert_eq!(refs, [(3, 7), (9, 2), (5, 4), (9, 3), (3, 8)]);
     }
 
     #[test]
@@ -499,7 +564,8 @@ mod tests {
             Some(Undo::Color {
                 folder: 1,
                 uid: 7,
-                was: Some(FlagColor::Purple)
+                was: Some(FlagColor::Purple),
+                set: Some(None)
             })
         );
         assert_eq!(undo_of(BulkAction::Color(FlagColor::Purple), &purple, &inbox), None);

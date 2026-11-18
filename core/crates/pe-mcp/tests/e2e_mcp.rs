@@ -1822,6 +1822,27 @@ fn an_agent_organizes_folders_and_conversations() {
         assert_eq!(core.agent_log(1).unwrap()[0].id, flagged.id);
         core.agent_undo(flagged.id).unwrap();
         assert!(eventually(10, || !has("\\Flagged") && !has("$MailFlagBit0")));
+        // a colour the user changed since is left as it is
+        agent
+            .call(
+                "set_flag_color",
+                json!({ "folder": inbox, "uids": [plans], "color": "green" }),
+            )
+            .await
+            .unwrap();
+        let green = core.agent_log(1).unwrap()[0].id;
+        core.set_flag_color_many(inbox, &[plans], Some(pe_store::FlagColor::Blue))
+            .unwrap();
+        let left = core.agent_undo(green).unwrap_err();
+        assert!(
+            pe_core::agents::undo_refusal(&left).contains("changed since"),
+            "{left:?}"
+        );
+        assert_eq!(
+            core.message(inbox, plans).unwrap().unwrap().info.flag_color(),
+            Some(pe_store::FlagColor::Blue)
+        );
+        core.set_flag_color_many(inbox, &[plans], None).unwrap();
         let wrong = agent
             .call(
                 "set_flag_color",

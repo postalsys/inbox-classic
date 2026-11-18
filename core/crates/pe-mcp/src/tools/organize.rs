@@ -46,6 +46,7 @@ pub(super) fn set_flag_color(call: &Call, args: &Args) -> Outcome {
                 folder: folder.id,
                 uid: message.info.uid,
                 was,
+                set: Some(color),
             };
             match color {
                 Some(color) => call.message_entry(

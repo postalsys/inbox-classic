@@ -39,11 +39,13 @@ pub enum Undo {
         junk: bool,
         message_id: String,
     },
-    /// The message in `folder` was flagged in colour `was`, or not flagged (None)
+    /// The message in `folder` was flagged in colour `was`, or not flagged (None), and the change left it `set`
+    /// (None for entries written before it was kept, which are not checked)
     Color {
         folder: FolderId,
         uid: u64,
         was: Option<FlagColor>,
+        set: Option<Option<FlagColor>>,
     },
     /// One change of many messages (apply_to_search): each message's own, taken back together (Undo All)
     Many(Vec<Undo>),
@@ -76,8 +78,12 @@ impl Undo {
                 junk,
                 message_id,
             } => format!("junk {from} {to} {} {message_id}", u8::from(*junk)),
-            Undo::Color { folder, uid, was } => {
-                format!("color {folder} {uid} {}", was.map_or("none", FlagColor::id))
+            Undo::Color { folder, uid, was, set } => {
+                let color = |c: Option<FlagColor>| c.map_or("none", FlagColor::id);
+                match set {
+                    Some(set) => format!("color {folder} {uid} {} {}", color(*was), color(*set)),
+                    None => format!("color {folder} {uid} {}", color(*was)),
+                }
             }
             // never one inside another
             Undo::Many(_) => String::new(),
@@ -134,14 +140,24 @@ impl Undo {
                 }),
                 _ => None,
             },
-            "color" => match words(4)[..] {
-                [_, folder, uid, was] => Some(Undo::Color {
-                    folder: folder.parse().ok()?,
-                    uid: uid.parse().ok()?,
-                    was: FlagColor::ALL.into_iter().find(|c| c.id() == was),
-                }),
-                _ => None,
-            },
+            "color" => {
+                let color = |id: &str| FlagColor::ALL.into_iter().find(|c| c.id() == id);
+                match text.split(' ').collect::<Vec<_>>()[..] {
+                    [_, folder, uid, was] => Some(Undo::Color {
+                        folder: folder.parse().ok()?,
+                        uid: uid.parse().ok()?,
+                        was: color(was),
+                        set: None,
+                    }),
+                    [_, folder, uid, was, set] => Some(Undo::Color {
+                        folder: folder.parse().ok()?,
+                        uid: uid.parse().ok()?,
+                        was: color(was),
+                        set: Some(color(set)),
+                    }),
+                    _ => None,
+                }
+            }
             "unsend" => match words(3)[..] {
                 [_, account, message_id] => Some(Undo::Unsend {
                     account: account.parse().ok()?,
@@ -277,16 +293,24 @@ pub fn undo_since_question(host: &AgentHost, count: u64) -> (String, String) {
     )
 }
 
+/// The colour a message is flagged in now, red for a flag without one; None when it is not flagged
+pub(crate) fn color_now(p: &pe_store::Picked) -> Option<FlagColor> {
+    p.flagged().then(|| p.flag_color().unwrap_or(FlagColor::Red))
+}
+
 /// `item` under `key` in `groups`
 fn group<K: Ord, V>(groups: &mut BTreeMap<K, Vec<V>>, key: K, item: V) {
     groups.entry(key).or_default().push(item);
 }
 
+/// Colour undos together: the folder, the colour before and the colour the change set (when known)
+type ColorKey = (FolderId, Option<FlagColor>, Option<Option<FlagColor>>);
+
 /// The undos of messages put together the way they are taken back: a command for each folder's
 #[derive(Default)]
 struct Groups {
     flags: BTreeMap<(FolderId, String, bool), Vec<u64>>,
-    colors: BTreeMap<(FolderId, Option<FlagColor>), Vec<u64>>,
+    colors: BTreeMap<ColorKey, Vec<u64>>,
     /// (from, to, junk keyword taken away first)
     moves: BTreeMap<(FolderId, FolderId, Option<bool>), Vec<String>>,
     archives: BTreeMap<FolderId, Vec<String>>,
@@ -299,7 +323,7 @@ impl Groups {
         for item in items {
             match item {
                 Undo::Flag { folder, uid, flag, was } => group(&mut groups.flags, (folder, flag, was), uid),
-                Undo::Color { folder, uid, was } => group(&mut groups.colors, (folder, was), uid),
+                Undo::Color { folder, uid, was, set } => group(&mut groups.colors, (folder, was, set), uid),
                 Undo::Move { from, to, message_id } => group(&mut groups.moves, (from, to, None), message_id),
                 Undo::Junk {
                     from,
@@ -353,17 +377,16 @@ impl Core {
     }
 
     /// Puts the flag colour of messages `uids` of `folder` back to `was`
-    fn undo_colors(
-        &self,
-        (folder, was): (FolderId, Option<FlagColor>),
-        uids: &[u64],
-        report: &mut UndoReport,
-    ) -> Result<()> {
-        let there: Vec<u64> = self.still_there(folder, uids)?.iter().map(|p| p.at.uid).collect();
+    fn undo_colors(&self, (folder, was, set): ColorKey, uids: &[u64], report: &mut UndoReport) -> Result<()> {
+        let there = self.still_there(folder, uids)?;
         report.left(Text::AgentUndoNotInFolder, (uids.len() - there.len()) as u64);
-        if !there.is_empty() {
-            self.set_flag_color_many(folder, &there, was)?;
-            report.undone += there.len() as u64;
+        // only those still in the colour the change gave them
+        let (back, changed): (Vec<_>, Vec<_>) = there.iter().partition(|p| set.is_none_or(|set| color_now(p) == set));
+        report.left(Text::AgentUndoChanged, changed.len() as u64);
+        let back: Vec<u64> = back.iter().map(|p| p.at.uid).collect();
+        if !back.is_empty() {
+            self.set_flag_color_many(folder, &back, was)?;
+            report.undone += back.len() as u64;
         }
         Ok(())
     }
@@ -556,11 +579,13 @@ mod tests {
                 folder: 2,
                 uid: 9,
                 was: Some(FlagColor::Purple),
+                set: Some(None),
             },
             Undo::Color {
                 folder: 2,
                 uid: 9,
                 was: None,
+                set: Some(Some(FlagColor::Blue)),
             },
         ];
         for undo in each.clone() {
@@ -572,6 +597,16 @@ mod tests {
         assert_eq!(Undo::read(&many.write()), Some(many));
         assert_eq!(Undo::read("many"), Some(Undo::Many(Vec::new())));
         assert_eq!(Undo::read("other 1 2"), None);
+        // an entry written before the colour it set was kept
+        assert_eq!(
+            Undo::read("color 2 9 red"),
+            Some(Undo::Color {
+                folder: 2,
+                uid: 9,
+                was: Some(FlagColor::Red),
+                set: None
+            })
+        );
         assert_eq!(Undo::read("many\nflag 1 2 0 \\Seen\nother 1"), None);
         assert_eq!(Undo::read("manyx 1"), None);
         // a line break in a Message-ID can not start another line
