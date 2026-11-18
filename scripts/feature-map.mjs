@@ -597,26 +597,6 @@ const sections = [
             },
             {
                 shot: 'read-32-previews-tiles',
-                name: 'Tiles, and Show in Message',
-                what: "A picture or PDF file that is not drawn shows as a tile in its place: its type, name and size, and why (a HEIC, AVIF or JPEG XL picture, a PDF file with a password, one too large, still downloading). A tile opens its file like a preview. Show in Message in a file's menu in the strip takes a preview out of the message or puts it in, also with the setting off, for as long as the message is shown; the text stays where it was scrolled to.",
-                how: "Click a tile, or Tab to it and press Enter. Right-click a file in the strip and choose Show in Message.",
-                checked: [
-                    'The HEIC picture and the protected PDF file are tiles that say why',
-                    'Tab and Enter on a tile open its file',
-                    'Show in Message is checked for a preview, greyed for a tile',
-                    'Choosing it takes the file out and back, the text not moving',
-                    'With the setting off it shows one file'
-                ]
-            },
-            {
-                shot: 'read-33-previews-print',
-                name: 'Printing a message with previews',
-                what: "Print puts the message's pictures in the printout, after its text, and a line for each PDF file or tile that is not printed, naming it, to open and print on its own.",
-                how: 'Print a message with a picture and a PDF file.',
-                checked: ['The photo is in the printout', 'A line names the invoice, which is not printed']
-            },
-            {
-                shot: 'read-32-previews-tiles',
                 name: 'Files not drawn, and Show in Message',
                 what: 'A picture or PDF file the core does not draw (HEIC, AVIF and JPEG XL pictures, a PDF file with a password, a file too large or not what its name says, one still downloading) is a tile after the text instead: its type, name, size and why, the same size whatever it says, opening the file as the strip does. Show in Message in the strip menu of a file takes it out of the message or draws it, also with the previews turned off; the text stays where it was.',
                 how: 'Right-click a file in the strip (Shift+F10) and choose Show in Message.',
