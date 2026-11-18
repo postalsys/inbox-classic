@@ -531,7 +531,7 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
 - it lists the program and what it may do
 - and what its agent did, newest first: the flag's colour and the watched conversation among it
 - what it read is one row of its program for the hour ("Read 1 message and looked at message lists once"), with no Undo
-- opened (selected on Windows, a disclosure triangle on the Mac), it lists each subject it read and each list it looked
+- opened (selected on Windows, a disclosure triangle on the Mac, an expander row on Linux), it lists each subject it read and each list it looked
   at, never what a message says
 - Undo takes the message back
 - and the Outbox is empty

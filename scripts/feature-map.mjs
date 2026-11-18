@@ -1313,7 +1313,7 @@ const sections = [
             {
                 shot: 'agents-9-reads',
                 name: 'What an agent read',
-                what: 'What an agent reads is one row of its program for each hour, such as "Read 14 messages and searched 3 times", so the log is not flooded. Opened (a disclosure triangle on the Mac, selecting the row on Windows and Linux), it lists the subject of each message read, each search and each list looked at, with the time; never what a message says. It has no Undo, as reading changes nothing.',
+                what: 'What an agent reads is one row of its program for each hour, such as "Read 14 messages and searched 3 times", so the log is not flooded. Opened (a disclosure triangle on the Mac, an expander arrow on Linux, selecting the row on Windows), it lists the subject of each message read, each search and each list looked at, with the time; never what a message says. It has no Undo, as reading changes nothing.',
                 how: 'Tools > AI Agents.',
                 checked: ['What the agent read is one row of its program', 'Opened, it lists each subject it read and the lists it looked at', 'It has no Undo']
             },
