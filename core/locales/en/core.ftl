@@ -492,6 +492,66 @@ agent-unsubscribe-detail = { $count ->
     [one] Inbox Classic asks the list below to stop sending to you, the one-click way it offers. Nothing else is sent, and the messages you have stay where they are.
    *[other] Inbox Classic asks each list below to stop sending to you, the one-click way the list offers. Nothing else is sent, and the messages you have stay where they are.
 }
+agent-log-flag-color = Flagged “{ $subject }” { $color ->
+    [red] red
+    [orange] orange
+    [yellow] yellow
+    [green] green
+    [blue] blue
+    [purple] purple
+   *[gray] gray
+}
+agent-log-renamed = Renamed the folder “{ $old }” to “{ $name }”
+agent-log-watched = Watched the conversation “{ $subject }”
+agent-log-ignored = Ignored the conversation “{ $subject }”
+agent-log-unmarked = Stopped watching or ignoring the conversation “{ $subject }”
+# what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
+agent-reads-messages = { $count ->
+    [one] read 1 message
+   *[other] read { $count } messages
+}
+agent-reads-attachments = { $count ->
+    [one] opened 1 attachment
+   *[other] opened { $count } attachments
+}
+agent-reads-searches = { $count ->
+    [one] searched once
+   *[other] searched { $count } times
+}
+agent-reads-lists = { $count ->
+    [one] looked at a message list once
+   *[other] looked at message lists { $count } times
+}
+# each read under that row
+agent-read-message = Read “{ $subject }”
+agent-read-conversation = { $count ->
+    [one] Read the conversation “{ $subject }” (1 message)
+   *[other] Read the conversation “{ $subject }” ({ $count } messages)
+}
+agent-read-attachment = Opened “{ $name }” of “{ $subject }”
+agent-read-search = { $count ->
+    [one] Searched for “{ $query }”: 1 message
+   *[other] Searched for “{ $query }”: { $count } messages
+}
+agent-read-people = Looked up people starting with “{ $query }”
+agent-read-list = { $count ->
+    [one] Looked at 1 message in { $folder }
+   *[other] Looked at { $count } messages in { $folder }
+}
+agent-read-changes = { $count ->
+    [one] Looked at 1 new message
+   *[other] Looked at { $count } new messages
+}
+# the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
+agent-terminal-programs-mac = Programs started from { $terminal }
+agent-terminal-programs-windows = Programs started from a terminal ({ $terminal })
+agent-terminal-programs-linux = Programs started from a terminal ({ $terminal })
+# one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
+agent-terminal-program-mac = A program started from { $terminal }
+agent-terminal-program-windows = A program started from a terminal ({ $terminal })
+agent-terminal-program-linux = A program started from a terminal ({ $terminal })
+agent-connect-title-terminal = { $programs } want to use your mail
+agent-connect-terminal-detail = Every AI agent you start from this terminal shares the access you allow here. To give one its own, add --name and a name of your choice to its arguments in the agent’s MCP settings.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -408,7 +408,8 @@ impl Session {
                 };
                 let arguments = params.get("arguments").cloned().unwrap_or(Value::Null);
                 let host = allowed.unwrap_or_default();
-                let answer = match crate::tools::call(&self.core, host, name, &arguments, progress).await {
+                let call_id = id.to_string();
+                let answer = match crate::tools::call(&self.core, host, name, &arguments, progress, &call_id).await {
                     // the same as compact JSON text, for clients that read only the text
                     Ok(result) => json!({
                         "content": [{ "type": "text", "text": result.to_string() }],

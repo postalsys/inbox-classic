@@ -70,6 +70,11 @@ pub(super) fn list_messages(call: &Call, args: &Args) -> Outcome {
         let listed = rows.iter().map(|m| row(m, places.get(&m.folder_id))).collect();
         (messages, "messages", listed)
     };
+    let named = match scope {
+        Scope::Folder(folder) => places.get(&folder).map(|p| p.name.clone()),
+        _ => args.0.get("scope").and_then(Value::as_str).map(str::to_string),
+    };
+    call.read("list", rows.len() as u64, &named.unwrap_or_default(), "")?;
     let mut result = json!({
         "total": total,
         "unread": unread,
@@ -190,6 +195,8 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
         read.push(Value::Object(fields));
     }
     read.reverse();
+    let first = read.first().and_then(|m| m["subject"].as_str()).unwrap_or_default();
+    call.read("conversation", read.len() as u64, first, "")?;
     Ok(json!({
         "thread": thread,
         "notice": UNTRUSTED,
@@ -217,6 +224,9 @@ pub(super) fn list_changes(call: &Call, args: &Args) -> Outcome {
     let mut rows = call.core.stored_since(&search, since, limit + 1).map_err(engine)?;
     let has_more = rows.len() as u64 > limit;
     rows.truncate(limit as usize);
+    if !rows.is_empty() {
+        call.read("changes", rows.len() as u64, "", "")?;
+    }
     let next = match rows.last() {
         Some(last) if has_more => last.id,
         _ => newest.max(since),

@@ -180,6 +180,11 @@ fn list_message(sender: &str, port: u16, path: &str) -> String {
     )
 }
 
+/// What a log entry says, as the window shows it
+fn said(entry: &pe_core::agents::AgentLogEntry) -> String {
+    pe_core::agents::log_text(entry)
+}
+
 /// Waits up to `seconds` for `condition`
 fn eventually(seconds: u64, condition: impl Fn() -> bool) -> bool {
     let deadline = Instant::now() + Duration::from_secs(seconds);
@@ -419,6 +424,18 @@ fn an_agent_works_on_the_mailbox() {
             text
         );
         assert_eq!(length as usize, text.chars().count());
+        // what it read is in the log as a summary of the hour, which opens to the subjects, never the text
+        let rows = core.agent_log_rows(50).unwrap();
+        let reads = rows.iter().find(|r| r.reads_hour.is_some()).expect("a summary of reads");
+        assert_eq!(
+            reads.text, "Read 3 messages, searched 2 times and looked at message lists 2 times",
+            "{rows:?}"
+        );
+        let each = core.agent_reads_of_hour(reads.host, reads.reads_hour.unwrap()).unwrap();
+        let each: Vec<&str> = each.iter().map(|(_, text)| text.as_str()).collect();
+        assert!(each.contains(&"Read \u{201c}Your invoice\u{201d}"), "{each:?}");
+        assert!(each.contains(&"Searched for \u{201c}subject:invoice\u{201d}: 1 message"), "{each:?}");
+        assert!(!each.iter().any(|t| t.contains("attached")), "{each:?}");
         // what is not there is named
         let missing = agent.call("get_message", json!({ "folder": inbox, "uid": 9999 })).await;
         assert!(missing.as_ref().unwrap_err().contains("uid 9999"), "{missing:?}");
@@ -432,7 +449,9 @@ fn an_agent_works_on_the_mailbox() {
             .unwrap();
         assert!(eventually(10, || server.flags("INBOX", lunch).iter().any(|f| f == "\\Seen")));
         let log = core.agent_log(10).unwrap();
-        assert_eq!(log[0].entry.summary, "Marked read \u{201c}Lunch\u{201d}");
+        assert_eq!(said(&log[0]), "Marked read \u{201c}Lunch\u{201d}");
+        // the agent's request it came from
+        assert_eq!(log[0].entry.call_id, Some(agent.next.to_string()));
         core.agent_undo(log[0].id).unwrap();
         assert!(eventually(10, || !server.flags("INBOX", lunch).iter().any(|f| f == "\\Seen")));
         // the name of before still answers
@@ -445,7 +464,7 @@ fn an_agent_works_on_the_mailbox() {
             .unwrap();
         assert!(eventually(10, || server.subjects("Junk").contains(&"Offer".to_string())));
         let marked = core.agent_log(1).unwrap()[0].clone();
-        assert_eq!(marked.entry.summary, "Marked \u{201c}Offer\u{201d} as junk");
+        assert_eq!(said(&marked), "Marked \u{201c}Offer\u{201d} as junk");
         assert!(eventually(10, || core.agent_undo(marked.id).is_ok()));
         assert!(eventually(10, || server.subjects("INBOX").contains(&"Offer".to_string())));
 
@@ -481,7 +500,7 @@ fn an_agent_works_on_the_mailbox() {
             .await
             .unwrap();
         assert!(eventually(10, || server.subjects("Archive").contains(&"News".to_string())));
-        assert_eq!(core.agent_log(1).unwrap()[0].entry.summary, "Archived \u{201c}News\u{201d}");
+        assert_eq!(said(&core.agent_log(1).unwrap()[0]), "Archived \u{201c}News\u{201d}");
         let archived = core.agent_log(1).unwrap()[0].id;
         core.agent_undo(archived).unwrap();
         assert!(eventually(10, || server.subjects("INBOX").contains(&"News".to_string())));
@@ -531,7 +550,7 @@ fn an_agent_works_on_the_mailbox() {
         asked.sort();
         assert_eq!(asked, ["POST /u/fail", "POST /u/ok"]);
         // logged at the yes, and what the refusing list answered written into its entry
-        let summaries: Vec<String> = core.agent_log(2).unwrap().into_iter().map(|e| e.entry.summary).collect();
+        let summaries: Vec<String> = core.agent_log(2).unwrap().iter().map(said).collect();
         assert!(
             summaries.contains(&"Unsubscribed from the list of \u{201c}News of Weekly\u{201d}".to_string()),
             "{summaries:?}"
@@ -548,7 +567,7 @@ fn an_agent_works_on_the_mailbox() {
             .await
             .unwrap();
         assert_eq!(kept_on["unsubscribed"], false, "{kept_on}");
-        assert!(core.agent_log(1).unwrap()[0].entry.summary.starts_with("You did not unsubscribe from news@list.example.com"));
+        assert!(said(&core.agent_log(1).unwrap()[0]).starts_with("You did not unsubscribe from news@list.example.com"));
         // 30 lists a day, each counted from the user's yes, not from when its list answers
         let earlier: Vec<pe_store::NewLogEntry> = (0..27)
             .map(|_| pe_store::NewLogEntry {
@@ -575,7 +594,7 @@ fn an_agent_works_on_the_mailbox() {
                 core.agent_log(1)
                     .unwrap()
                     .first()
-                    .is_some_and(|e| e.entry.summary.contains("News of Slow"))
+                    .is_some_and(|e| said(e).contains("News of Slow"))
             })
             .await
         );
@@ -1223,7 +1242,7 @@ fn an_agent_reads_lists_and_keeps_its_drafts() {
         assert!(eventually_async(20, || !server.subjects("Drafts").contains(&"Agenda v2".to_string())).await);
         let gone = agent.call("replace_draft", json!({ "draft_id": draft_id, "text": "x" })).await;
         assert!(gone.unwrap_err().contains("no draft"));
-        assert!(core.agent_log(1).unwrap()[0].entry.summary.starts_with("Discarded the draft"));
+        assert!(said(&core.agent_log(1).unwrap()[0]).starts_with("Discarded the draft"));
 
         // with no account allowed, the scopes are empty: filtered in the store
         core.update_agent_host(host.id, true, AgentLevels(15), &[]).unwrap();

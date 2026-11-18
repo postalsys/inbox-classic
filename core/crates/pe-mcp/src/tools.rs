@@ -2,14 +2,14 @@
 //! user let the program do at the time of the call, so a change in the AI Agents window counts at once. Everything
 //! goes through the engine's own methods, so the windows show every change as it happens.
 
-use pe_i18n::{Text, tr_args};
+use pe_i18n::{Arg, Text};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use pe_core::agents::{AgentHost, AgentLevels, HostNow, TextFormat, Undo, Unsubscribed, Written};
+use pe_core::agents::{AgentHost, AgentLevels, HostNow, TextFormat, Undo, Unsubscribed, Written, log_entry};
 use pe_core::{Core, DraftKind, Outgoing};
-use pe_store::{AccountId, FolderId, NewLogEntry, Scope, Search, Show, Sort};
+use pe_store::{AccountId, FolderId, NewLogEntry, NewRead, Scope, Search, Show, Sort};
 use serde_json::{Map, Value, json};
 
 use crate::server::Progress;
@@ -714,6 +714,8 @@ struct Call<'a> {
     name: &'static str,
     /// Where it tells how a long wait goes
     progress: &'a Progress,
+    /// The agent's request (its JSON-RPC id), for the log
+    call_id: &'a str,
 }
 
 impl Call<'_> {
@@ -767,25 +769,46 @@ impl Call<'_> {
         Ok(places)
     }
 
-    /// A log entry of this call, for this program
-    fn entry(&self, account: AccountId, summary: String) -> NewLogEntry {
+    /// A log entry of this call, for this program, saying `text` with `args`
+    fn entry(&self, account: AccountId, text: Text, args: &[(&str, Arg)]) -> NewLogEntry {
         NewLogEntry {
-            host: self.host.id,
-            what: self.name.into(),
             account: Some(account),
-            summary,
-            ..Default::default()
+            call_id: Some(self.call_id.to_string()),
+            ..log_entry(self.host.id, self.name, text, args)
         }
     }
 
-    /// A log entry of this call about message `uid` of `folder`
-    fn message_entry(&self, folder: &pe_store::Folder, uid: u64, summary: String, undo: Option<Undo>) -> NewLogEntry {
+    /// A log entry of this call about `message` of `folder`, saying `text` of its subject (and `args`)
+    fn message_entry(
+        &self,
+        folder: &pe_store::Folder,
+        message: &pe_store::Message,
+        text: Text,
+        args: &[(&str, Arg)],
+        undo: Option<Undo>,
+    ) -> NewLogEntry {
+        let mut all = vec![("subject", Arg::from(subject(&message.info)))];
+        all.extend_from_slice(args);
         NewLogEntry {
             folder: Some(folder.id),
-            uid: Some(uid),
+            uid: Some(message.info.uid),
             undo: undo.map(|undo| undo.write()),
-            ..self.entry(folder.account_id, summary)
+            ..self.entry(folder.account_id, text, &all)
         }
+    }
+
+    /// Writes in the log what this call read: `count` messages (or found), named by `subject` (the subject read, the
+    /// query, the folder) and `detail` (an attachment's name)
+    fn read(&self, what: &str, count: u64, subject: &str, detail: &str) -> Result<(), String> {
+        let read = NewRead {
+            host: self.host.id,
+            what: what.into(),
+            count,
+            subject: subject.into(),
+            detail: detail.into(),
+            call_id: Some(self.call_id.to_string()),
+        };
+        self.core.log_agent_reads(&[read]).map_err(engine)
     }
 
     /// Writes what this call did in the log, all at once
@@ -895,8 +918,9 @@ pub(crate) async fn call(
     name: &str,
     arguments: &Value,
     progress: &Progress,
+    call_id: &str,
 ) -> Outcome {
-    run(core, host_id, name, arguments, progress)
+    run(core, host_id, name, arguments, progress, call_id)
         .await
         .map(compact)
         .map_err(|why| sentence(&why))
@@ -911,7 +935,14 @@ fn tool(name: &str) -> Option<&'static Tool> {
     TOOLS.iter().find(|tool| tool.name == name)
 }
 
-async fn run(core: &Arc<Core>, host_id: i64, name: &str, arguments: &Value, progress: &Progress) -> Outcome {
+async fn run(
+    core: &Arc<Core>,
+    host_id: i64,
+    name: &str,
+    arguments: &Value,
+    progress: &Progress,
+    call_id: &str,
+) -> Outcome {
     // read for every call, never kept from the one before: a change in the AI Agents window counts at once, even
     // for a call that comes while the session is still waiting on another
     let host = match core.agent_host_now(host_id).map_err(engine)? {
@@ -940,6 +971,7 @@ async fn run(core: &Arc<Core>, host_id: i64, name: &str, arguments: &Value, prog
         host,
         name: tool.name,
         progress,
+        call_id,
     };
     match tool.name {
         "list_accounts" => list_accounts(&call),
@@ -1028,6 +1060,7 @@ fn search_messages(call: &Call, args: &Args) -> Outcome {
         .search(&search, Sort::default(), offset, limit)
         .map_err(engine)?;
     let (total, _) = call.core.count_search(&search).map_err(engine)?;
+    call.read("search", total, &search.text, "")?;
     let mut result = json!({
         "total": total,
         "offset": offset,
@@ -1109,6 +1142,7 @@ async fn get_message(call: &Call<'_>, args: &Args<'_>) -> Outcome {
         .agent_message(folder.id, uid)
         .map_err(engine)?
         .ok_or_else(|| format!("There is no message with uid {uid} in folder {}.", folder.id))?;
+    call.read("message", 1, &summary.info.subject, "")?;
     let (text, next) = part(&message.written, offset, max);
     let mut fields = read_fields(&summary, Some(&Place::of(&folder)), &message);
     for (key, value) in [
@@ -1147,6 +1181,7 @@ async fn get_attachment(call: &Call<'_>, args: &Args<'_>) -> Outcome {
             mime_type.as_str(),
             "application/json" | "application/xml" | "application/ics"
         );
+    call.read("attachment", 1, &call.message(folder.id, uid)?.info.subject, &name)?;
     if !textual || content.len() > MAX_ATTACHMENT {
         return Err(format!(
             "{name} is {mime_type}, {}: only text files up to 256 KB can be read",
@@ -1178,8 +1213,7 @@ fn set_flag(call: &Call, args: &Args, flag: &'static str, on: bool) -> Outcome {
                 flag: flag.into(),
                 was: !on,
             };
-            let summary = tr_args(done, &[("subject", subject(&message.info).into())]);
-            call.message_entry(&folder, message.info.uid, summary, Some(undo))
+            call.message_entry(&folder, message, done, &[], Some(undo))
         })
         .collect();
     call.log(&entries)?;
@@ -1216,14 +1250,10 @@ fn move_messages(call: &Call, args: &Args, trash: bool) -> Outcome {
     let entries: Vec<NewLogEntry> = messages
         .iter()
         .map(|message| {
-            let named = subject(&message.info);
-            let summary = if trash {
-                tr_args(Text::AgentLogDeleted, &[("subject", named.into())])
+            let (text, args) = if trash {
+                (Text::AgentLogDeleted, vec![])
             } else {
-                tr_args(
-                    Text::AgentLogMoved,
-                    &[("subject", named.into()), ("folder", (&target).into())],
-                )
+                (Text::AgentLogMoved, vec![("folder", Arg::from(&target))])
             };
             let undo = message.info.message_id.clone().map(|message_id| Undo::Move {
                 from: folder.id,
@@ -1232,7 +1262,7 @@ fn move_messages(call: &Call, args: &Args, trash: bool) -> Outcome {
             });
             NewLogEntry {
                 message_id: message.info.message_id.clone(),
-                ..call.message_entry(&folder, message.info.uid, summary, undo)
+                ..call.message_entry(&folder, message, text, &args, undo)
             }
         })
         .collect();
@@ -1255,7 +1285,6 @@ fn mark_junk(call: &Call, args: &Args) -> Outcome {
             } else {
                 Text::AgentLogNotJunk
             };
-            let summary = tr_args(text, &[("subject", subject(&message.info).into())]);
             let undo = message.info.message_id.clone().map(|message_id| Undo::Junk {
                 from: folder.id,
                 to,
@@ -1264,7 +1293,7 @@ fn mark_junk(call: &Call, args: &Args) -> Outcome {
             });
             NewLogEntry {
                 message_id: message.info.message_id.clone(),
-                ..call.message_entry(&folder, message.info.uid, summary, undo)
+                ..call.message_entry(&folder, message, text, &[], undo)
             }
         })
         .collect();
@@ -1291,14 +1320,13 @@ fn archive_messages(call: &Call, args: &Args) -> Outcome {
     let entries: Vec<NewLogEntry> = messages
         .iter()
         .map(|message| {
-            let summary = tr_args(Text::AgentLogArchived, &[("subject", subject(&message.info).into())]);
             let undo = message.info.message_id.clone().map(|message_id| Undo::Archive {
                 from: folder.id,
                 message_id,
             });
             NewLogEntry {
                 message_id: message.info.message_id.clone(),
-                ..call.message_entry(&folder, message.info.uid, summary, undo)
+                ..call.message_entry(&folder, message, Text::AgentLogArchived, &[], undo)
             }
         })
         .collect();
@@ -1315,7 +1343,7 @@ fn create_folder(call: &Call, args: &Args) -> Outcome {
     };
     let name = args.string("name");
     call.core.create_folder(account, parent, &name).map_err(engine)?;
-    call.log(&[call.entry(account, tr_args(Text::AgentLogFolder, &[("name", (&name).into())]))])?;
+    call.log(&[call.entry(account, Text::AgentLogFolder, &[("name", (&name).into())])])?;
     Ok(json!({ "done": true, "note": "The folder shows in list_folders once the server made it." }))
 }
 
@@ -1328,7 +1356,10 @@ async fn unsubscribe(call: &Call<'_>, args: &Args<'_>) -> Outcome {
         vec![args.uid()?]
     };
     // refused for what it would do (from Junk E-mail), then for what is not there, named
-    let outcome = match call.core.agent_ask_unsubscribe(&call.host, folder.id, &uids) {
+    let outcome = match call
+        .core
+        .agent_ask_unsubscribe(&call.host, folder.id, &uids, Some(call.call_id))
+    {
         Ok(outcome) => outcome,
         Err(error) if missing(&error) => {
             call.messages(folder.id, &uids)?;
@@ -1412,6 +1443,7 @@ fn written(call: &Call, args: &Args, account: AccountId) -> Result<Written, Stri
         text,
         format,
         signature: args.flag("include_signature", true),
+        call_id: Some(call.call_id.to_string()),
     })
 }
 

@@ -43,7 +43,10 @@ use std::path::Path;
 use rusqlite::OptionalExtension;
 
 pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_provider};
-pub use agents::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry, NewLogEntry};
+pub use agents::{
+    AgentHost, AgentHostId, AgentLevels, AgentLogEntry, AgentRead, LOG_ENTRIES, LOG_KEPT, LOG_READS, NewLogEntry,
+    NewRead, ReadSummary,
+};
 pub use cards::{Card, CardId, Group, GroupId, Member, MemberRow, display_name};
 pub use contacts::{Contact, Person};
 pub use counts::AccountCounts;

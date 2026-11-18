@@ -106,6 +106,7 @@ pub(super) fn test_rule(call: &Call, args: &Args) -> Outcome {
         ..everywhere(&call.host)
     };
     let (matches, _) = call.core.count_search(&search).map_err(engine)?;
+    call.read("search", matches, &query, "")?;
     let samples = call
         .core
         .search(&search, Sort::default(), 0, RULE_SAMPLES)
@@ -126,6 +127,7 @@ pub(super) fn find_contacts(call: &Call, args: &Args) -> Outcome {
     }
     let limit = args.size("limit", 10)?.clamp(1, MAX_PEOPLE);
     let (people, every) = call.core.agent_people(&call.host, &query, limit).map_err(engine)?;
+    call.read("people", people.len() as u64, &query, "")?;
     let listed: Vec<Value> = people
         .iter()
         .map(|p| {

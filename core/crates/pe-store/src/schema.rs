@@ -738,6 +738,32 @@ CREATE INDEX messages_to_decrypt ON messages (folder_id) WHERE protection = 2 AN
     r#"
 CREATE TABLE drafts_taken (message_id TEXT PRIMARY KEY) WITHOUT ROWID;
 "#,
+    // the AI Agents log as data (agents.rs): what an entry says by its catalog id and its values, put into words in
+    // the language in use when it is shown (the summary of older entries stays their fallback); the request of the
+    // agent it came from; and entries the user cleared, kept out of the window but counted by the limits until they
+    // age out. What agents read, one row a read, shown as a summary an hour (decision 6 of the MCP plan).
+    r#"
+ALTER TABLE agent_log ADD COLUMN kind TEXT;
+ALTER TABLE agent_log ADD COLUMN args TEXT;
+ALTER TABLE agent_log ADD COLUMN call_id TEXT;
+ALTER TABLE agent_log ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0;
+CREATE TABLE agent_reads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    host_id INTEGER NOT NULL REFERENCES agent_hosts(id) ON DELETE CASCADE,
+    at INTEGER NOT NULL,
+    -- message, conversation, attachment, search, people, list, changes
+    what TEXT NOT NULL,
+    -- the messages it read or listed, or found
+    count INTEGER NOT NULL DEFAULT 1,
+    -- the subject read, the query searched or the folder listed; never a message's text
+    subject TEXT NOT NULL DEFAULT '',
+    -- an attachment's name
+    detail TEXT NOT NULL DEFAULT '',
+    call_id TEXT
+);
+CREATE INDEX agent_reads_by_host ON agent_reads (host_id, at);
+CREATE INDEX agent_reads_by_time ON agent_reads (at);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

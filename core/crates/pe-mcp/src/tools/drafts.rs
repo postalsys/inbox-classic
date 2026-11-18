@@ -44,7 +44,9 @@ pub(super) async fn replace_draft(call: &Call<'_>, args: &Args<'_>) -> Outcome {
 
 pub(super) async fn discard_draft(call: &Call<'_>, args: &Args<'_>) -> Outcome {
     let (draft_id, _) = own_draft(call, args).await?;
-    call.core.agent_discard_draft(&call.host, &draft_id).map_err(engine)?;
+    call.core
+        .agent_discard_draft(&call.host, &draft_id, Some(call.call_id))
+        .map_err(engine)?;
     Ok(json!({ "discarded": true, "note": "The draft goes from Drafts." }))
 }
 

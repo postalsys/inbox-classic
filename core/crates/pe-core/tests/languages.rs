@@ -13,6 +13,24 @@ fn the_core_speaks_the_language_set() {
     assert_eq!(pe_core::list_counts(1, 0, 1, false), "1 message, 0 unread");
     assert_eq!(pe_core::format_size(2_621_440), "2.5 MB");
 
+    // the AI Agents log keeps what was done, not its words: an entry reads in the language in use when it is shown
+    let moved = pe_core::agents::AgentLogEntry {
+        id: 1,
+        host_name: "Agent".into(),
+        at: 0,
+        entry: pe_core::agents::log_entry(
+            1,
+            "move_messages",
+            i18n::Text::AgentLogMoved,
+            &[("subject", "Plans".into()), ("folder", "Archive".into())],
+        ),
+        undone: false,
+    };
+    assert_eq!(
+        pe_core::agents::log_text(&moved),
+        "Moved \u{201c}Plans\u{201d} to Archive"
+    );
+
     assert_eq!(i18n::set_language("de-DE"), "de");
     assert_eq!(
         pe_core::list_counts(12, 3, 2, false),
@@ -31,6 +49,8 @@ fn the_core_speaks_the_language_set() {
         name: "Claude".into(),
     });
     assert_eq!(title, "Claude möchte auf Ihre E-Mails zugreifen");
+    let moved = pe_core::agents::log_text(&moved);
+    assert!(moved.contains("Plans") && moved.contains("verschoben"), "{moved}");
     assert!(detail.contains("ändern.\n\nAgenten lesen"), "{detail}");
 
     // what came with several messages, moves and files

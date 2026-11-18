@@ -20,10 +20,12 @@ use pe_i18n::{Text, tr, tr_args};
 use crate::{Core, Draft, DraftKind, Error, Event, Outgoing, Result};
 
 mod drafts;
+mod log;
 mod reads;
 
 pub use drafts::OwnDraft;
 pub use drafts::draft_note;
+pub use log::{LogRow, log_entry, log_text, read_summary_text, read_text};
 pub use reads::{AccountOverview, everywhere};
 
 /// How long a message an agent sent waits in the Outbox, where the user can still delete it
@@ -100,6 +102,8 @@ pub struct SendAsk {
     pub attachments: Vec<(String, u64)>,
     pub(crate) outgoing: Outgoing,
     pub(crate) draft: Draft,
+    /// The agent's request that asked
+    pub(crate) call_id: Option<String>,
 }
 
 /// A mailing list an agent wants to leave, as the question lists it
@@ -135,6 +139,8 @@ pub struct UnsubscribeAsk {
     /// The log's entries of the lists, written at the user's yes (they count against [`UNSUBSCRIBES_PER_DAY`] from
     /// then on), in the order of `lists`: what each list answered is written into them after
     pub(crate) logged: std::sync::Arc<std::sync::Mutex<Vec<i64>>>,
+    /// The agent's request that asked
+    pub(crate) call_id: Option<String>,
 }
 
 /// What became of an agent's unsubscribe
@@ -192,6 +198,8 @@ pub struct Written {
     pub format: TextFormat,
     /// The account's signature under the text, as the user's own messages have it
     pub signature: bool,
+    /// The agent's request it came with (MCP's request id), for the log
+    pub call_id: Option<String>,
 }
 
 impl Written {
@@ -305,6 +313,17 @@ pub enum Connect {
     Asked(oneshot::Receiver<AgentAnswer>),
 }
 
+impl SendAsk {
+    /// The log's entry of the user's answer to it, saying `text`
+    fn entry(&self, what: &str, text: Text) -> NewLogEntry {
+        NewLogEntry {
+            account: Some(self.account),
+            call_id: self.call_id.clone(),
+            ..log_entry(self.host.id, what, text, &[("subject", (&self.subject).into())])
+        }
+    }
+}
+
 /// What a message answers or forwards, and the subject of that message
 type Answered = Option<(DraftKind, String)>;
 
@@ -371,11 +390,14 @@ fn unsubscribe_entries(ask: &UnsubscribeAsk) -> Vec<NewLogEntry> {
     ask.lists
         .iter()
         .map(|list| NewLogEntry {
-            host: ask.host.id,
-            what: "unsubscribe".into(),
             account: Some(ask.account),
-            summary: tr_args(Text::AgentLogUnsubscribed, &[("subject", (&list.subject).into())]),
-            ..Default::default()
+            call_id: ask.call_id.clone(),
+            ..log_entry(
+                ask.host.id,
+                "unsubscribe",
+                Text::AgentLogUnsubscribed,
+                &[("subject", (&list.subject).into())],
+            )
         })
         .collect()
 }
@@ -465,15 +487,6 @@ pub fn change_text(host: &AgentHost) -> (String, String) {
         tr_args(Text::AgentChangeTitle, &[("program", (&host.name).into())]),
         detail,
     )
-}
-
-/// An entry of the log as the AI Agents window lists it
-pub fn log_text(entry: &AgentLogEntry) -> String {
-    if entry.undone {
-        tr_args(Text::AgentLogTakenBack, &[("entry", (&entry.entry.summary).into())])
-    } else {
-        entry.entry.summary.clone()
-    }
 }
 
 /// The files of a message an agent wants to send, as one line ("Files: a.pdf (13 KB)"); empty without any
@@ -892,24 +905,10 @@ impl Core {
             }
             (AgentAsk::Send(ask), AgentAnswer::Send) => self.send_for_agent(ask)?,
             (AgentAsk::Send(ask), AgentAnswer::Compose) => {
-                self.log_agent(&[NewLogEntry {
-                    host: ask.host.id,
-                    what: "compose".into(),
-                    account: Some(ask.account),
-                    summary: tr_args(Text::AgentLogComposed, &[("subject", (&ask.subject).into())]),
-                    ..Default::default()
-                }])?;
+                self.log_agent(&[ask.entry("compose", Text::AgentLogComposed)])?;
                 compose = Some(ask.draft.clone());
             }
-            (AgentAsk::Send(ask), _) => {
-                self.log_agent(&[NewLogEntry {
-                    host: ask.host.id,
-                    what: "refused".into(),
-                    account: Some(ask.account),
-                    summary: tr_args(Text::AgentLogRefused, &[("subject", (&ask.subject).into())]),
-                    ..Default::default()
-                }])?;
-            }
+            (AgentAsk::Send(ask), _) => self.log_agent(&[ask.entry("refused", Text::AgentLogRefused)])?,
             // counted from the yes; the lists are asked by the task that waits for this answer
             // (Core::agent_ask_unsubscribe), which writes what each answered into these entries
             (AgentAsk::Unsubscribe(ask), AgentAnswer::Unsubscribe) => {
@@ -921,14 +920,14 @@ impl Core {
                 // by their addresses only, as a name could pass for another sender's
                 let senders: Vec<&str> = ask.lists.iter().map(|l| l.address.as_str()).collect();
                 self.log_agent(&[NewLogEntry {
-                    host: ask.host.id,
-                    what: "unsubscribe_refused".into(),
                     account: Some(ask.account),
-                    summary: tr_args(
+                    call_id: ask.call_id.clone(),
+                    ..log_entry(
+                        ask.host.id,
+                        "unsubscribe_refused",
                         Text::AgentLogUnsubscribeRefused,
                         &[("senders", (&senders.join(", ")).into())],
-                    ),
-                    ..Default::default()
+                    )
                 }])?;
             }
         }
@@ -967,14 +966,9 @@ impl Core {
         )?;
         let to: Vec<&str> = ask.recipients.iter().map(|r| r.address.as_str()).collect();
         self.log_agent(&[NewLogEntry {
-            host: ask.host.id,
-            what: "send".into(),
             account: Some(ask.account),
             message_id: Some(message_id.clone()),
-            summary: tr_args(
-                Text::AgentLogSent,
-                &[("subject", (&ask.subject).into()), ("to", (&to.join(", ")).into())],
-            ),
+            call_id: ask.call_id.clone(),
             undo: Some(
                 Undo::Unsend {
                     account: ask.account,
@@ -982,7 +976,12 @@ impl Core {
                 }
                 .write(),
             ),
-            ..Default::default()
+            ..log_entry(
+                ask.host.id,
+                "send",
+                Text::AgentLogSent,
+                &[("subject", (&ask.subject).into()), ("to", (&to.join(", ")).into())],
+            )
         }])?;
         Ok(())
     }
@@ -1099,6 +1098,7 @@ impl Core {
             attachments,
             outgoing,
             draft,
+            call_id: written.call_id.clone(),
         }));
         // the hour's sends counted with the question put up: a yes logs its send under the same lock
         self.ask_unless(ask, key, |asks| {
@@ -1162,6 +1162,7 @@ impl Core {
         host: &AgentHost,
         folder: FolderId,
         uids: &[u64],
+        call_id: Option<&str>,
     ) -> Result<(UnsubscribeAsk, oneshot::Receiver<AgentAnswer>)> {
         let found = self.store().folder(folder)?;
         if found.info.special_use.as_deref() == Some("\\Junk") {
@@ -1176,6 +1177,7 @@ impl Core {
             account: found.account_id,
             lists: self.lists_of(folder, uids)?,
             logged: Default::default(),
+            call_id: call_id.map(str::to_string),
         };
         let count = ask.lists.len() as u64;
         let answer = self.ask_unless(AgentAsk::Unsubscribe(Box::new(ask.clone())), None, |asks| {
@@ -1199,14 +1201,15 @@ impl Core {
     /// Asks the user whether an agent may unsubscribe from the mailing lists of messages `uids` of `folder`, in one
     /// question listing their senders ([`Core::ask_lists`] says when it is refused). On a yes the lists are asked in
     /// the background, whatever becomes of the agent; the receiver gets what each answered, or
-    /// [`Unsubscribed::Refused`].
+    /// [`Unsubscribed::Refused`]. `call_id` is the agent's request, for the log.
     pub fn agent_ask_unsubscribe(
         self: &std::sync::Arc<Self>,
         host: &AgentHost,
         folder: FolderId,
         uids: &[u64],
+        call_id: Option<&str>,
     ) -> Result<oneshot::Receiver<Unsubscribed>> {
-        let (ask, answer) = self.ask_lists(host, folder, uids)?;
+        let (ask, answer) = self.ask_lists(host, folder, uids, call_id)?;
         let (done, outcome) = oneshot::channel();
         let core = std::sync::Arc::downgrade(self);
         self.runtime()?.spawn(async move {
@@ -1242,11 +1245,9 @@ impl Core {
         let mut changed = false;
         for ((list, id), (_, problem)) in ask.lists.iter().zip(ids).zip(outcome) {
             if let Some(why) = problem {
-                let summary = tr_args(
-                    Text::AgentLogUnsubscribeFailed,
-                    &[("subject", (&list.subject).into()), ("reason", why.into())],
-                );
-                changed |= self.store().set_agent_log_summary(*id, &summary).is_ok();
+                let args = log::encode_args(&[("subject", (&list.subject).into()), ("reason", why.into())]);
+                let kind = Text::AgentLogUnsubscribeFailed.id();
+                changed |= self.store().set_agent_log_kind(*id, kind, &args).is_ok();
             }
         }
         if changed {
@@ -1254,7 +1255,8 @@ impl Core {
         }
     }
 
-    /// Writes what an agent did in its log, all of it at once (the windows hear of it once)
+    /// Writes what an agent did in its log, all of it at once (the windows hear of it once). Each entry says what it
+    /// did as [`log_entry`] writes it, put into words when it is shown.
     pub fn log_agent(&self, entries: &[NewLogEntry]) -> Result<()> {
         if entries.is_empty() {
             return Ok(());
