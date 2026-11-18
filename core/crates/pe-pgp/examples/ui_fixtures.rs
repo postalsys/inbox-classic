@@ -113,7 +113,8 @@ fn main() {
             "Parts signed apart",
             "mixed",
             &mixed(&[
-                text("A note added on the way, not signed."),
+                // a link in a part, which opens in the browser from the part's frame
+                html("<p>A note added on the way, not signed. <a href=\"https://example.org/mill\">The mill</a></p>"),
                 signed(&text("The signed paragraph."), &alice, "s"),
                 text("-- \r\nSent through the example list"),
             ]),

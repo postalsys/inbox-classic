@@ -79,6 +79,12 @@ fn each_case_reads_as_the_ui_tests_expect() {
     for document in view.part_documents.iter().filter(|d| !d.is_empty()) {
         assert!(document.contains("<base target=\"_top\">"), "{document}");
     }
+    // the unsigned part's link, which the UI tests click in its frame
+    assert!(
+        view.part_documents[0].contains("href=\"https://example.org/mill\""),
+        "{}",
+        view.part_documents[0]
+    );
     let (tone, text, _) = bar("secure-bad.eml");
     assert_eq!(tone, Tone::Warning);
     assert!(text.contains("does not match"), "{text}");
