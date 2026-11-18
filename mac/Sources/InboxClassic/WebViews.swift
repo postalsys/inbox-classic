@@ -12,11 +12,21 @@ import WebKit
 let documentScheme = "inboxclassic"
 
 /// Serves the documents of a web view from memory, by the path of their address; the page of a signed or encrypted
-/// message also its parts, each its frame's document (`part-N` beside the page's address), from the message's view
+/// message also its parts, each its frame's document (`part-N` beside the page's address), from the message's view;
+/// and, with a core, the pictures of the previews after a message's text (`/pv/...`), which the core draws off the
+/// main thread: their requests wait under their ask until its PreviewAnswered (`answered`)
 final class DocumentServer: NSObject, WKURLSchemeHandler {
     private var documents: [String: Data] = [:]
     /// the parts of the page served last: under which path, and the document of part N (nil or empty for none)
     private var parts: (path: String, document: (Int) -> String?)?
+    /// the core whose previews it serves (the reading pane's and a message window's); nil for none (printing)
+    weak var core: Core? {
+        didSet { Self.servers.add(self) }
+    }
+    /// the requests of preview pictures waiting for their answer, by ask; one WebKit stopped is taken out
+    private var asks: [UInt64: WKURLSchemeTask] = [:]
+    /// every server with a core, to find the one an answer is for
+    private static let servers = NSHashTable<DocumentServer>.weakObjects()
 
     /// `html` at inboxclassic://<host>/<path>; its address. With `parts` the address ends in "/", and the page's
     /// frames ask for the parts beside it.
@@ -45,6 +55,14 @@ final class DocumentServer: NSObject, WKURLSchemeHandler {
             task.didFailWithError(URLError(.fileDoesNotExist))
             return
         }
+        // a preview's picture: the core only notes the ask here (quick), and draws it on a thread of its own
+        if let core {
+            let ask = url.absoluteString.withCString { pe_preview_ask(core.handle, $0) }
+            if ask != 0 {
+                asks[ask] = task
+                return
+            }
+        }
         let key = host + "/" + url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         guard let data = documents[key] ?? part(url, key: key) else {
             task.didFailWithError(URLError(.fileDoesNotExist))
@@ -57,7 +75,32 @@ final class DocumentServer: NSObject, WKURLSchemeHandler {
         task.didFinish()
     }
 
-    func webView(_ webView: WKWebView, stop task: WKURLSchemeTask) {}
+    /// WebKit gave up a request (the document replaced, the window closed): its answer, should it come, is dropped, as
+    /// WebKit raises on an answer to a stopped task
+    func webView(_ webView: WKWebView, stop task: WKURLSchemeTask) {
+        if let ask = asks.first(where: { $0.value === task })?.key {
+            asks[ask] = nil
+        }
+    }
+
+    /// PreviewAnswered for `ask`, on the main thread: the picture the core drew written to the request waiting for it,
+    /// or "not found" (the view's previews ended); taken from the core all the same when no request waits anymore
+    static func answered(_ ask: UInt64, core: Core) {
+        let answer = pe_preview_answer(core.handle, ask)
+        defer { pe_preview_answer_free(answer) }
+        guard let server = servers.allObjects.first(where: { $0.asks[ask] != nil }),
+              let task = server.asks.removeValue(forKey: ask) else { return }
+        guard let picture = pe_preview_answer_picture(answer)?.pointee, let bytes = picture.bytes,
+              let url = task.request.url else {
+            task.didFailWithError(URLError(.fileDoesNotExist))
+            return
+        }
+        let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1",
+                                       headerFields: ["Content-Type": text(picture.mime_type), "Cache-Control": "no-store"])!
+        task.didReceive(response)
+        task.didReceive(Data(bytes: bytes, count: picture.length))
+        task.didFinish()
+    }
 }
 
 /// The core's content rules, compiled once: everything blocked, or the pictures of a message allowed too
@@ -133,6 +176,15 @@ final class StayOnPage: NSObject, WKNavigationDelegate, WKUIDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         let scheme = action.request.url?.scheme?.lowercased() ?? ""
+        // an inboxclassic: link of the document's own, which is no document's address (those have a host), should
+        // one come other than as a click: never loaded; a preview's opens its file (its token checked)
+        if scheme == documentScheme, action.navigationType != .linkActivated, let url = action.request.url, url.host == nil {
+            decisionHandler(.cancel)
+            if pe_reader_link(url.absoluteString) == PE_READER_LINK_ATTACHMENT {
+                _ = links?(url.absoluteString)
+            }
+            return
+        }
         // the document itself, and about:blank or about:srcdoc of its frames
         if (scheme == documentScheme && action.navigationType == .other) || scheme == "about" {
             decisionHandler(.allow)
@@ -209,8 +261,16 @@ final class Preview: NSObject {
         set { navigation.links = newValue }
     }
 
+    /// the core whose previews the documents show (pictures and PDF files after a message's text)
+    weak var core: Core? {
+        get { server.core }
+        set { server.core = newValue }
+    }
+    /// the preview token of the document shown (`preview_token`), ended when another document replaces it
+    private var previewToken = ""
+
     override init() {
-        view = WKWebView(frame: .zero, configuration: lockedConfiguration(server: server, scripts: false))
+        view = ReadingView(frame: .zero, configuration: lockedConfiguration(server: server, scripts: false))
         super.init()
         view.navigationDelegate = navigation
         view.uiDelegate = navigation
@@ -223,7 +283,7 @@ final class Preview: NSObject {
             guard let self else { return }
             ready = true
             if let pending {
-                show(pending.document, pictures: pending.pictures, parts: pending.parts)
+                show(pending.document, pictures: pending.pictures, parts: pending.parts, previews: previewToken)
             } else {
                 clear()
             }
@@ -232,13 +292,29 @@ final class Preview: NSObject {
 
     deinit {
         measureTimer?.invalidate()
+        if let core = server.core, !previewToken.isEmpty {
+            previewToken.withCString { pe_previews_end(core.handle, $0) }
+        }
+    }
+
+    /// the previews of the document shown given up: the core draws and answers none of them anymore
+    private func endPreviews() {
+        if let core, !previewToken.isEmpty {
+            previewToken.withCString { pe_previews_end(core.handle, $0) }
+        }
+        previewToken = ""
     }
 
     /// a document of the core; with `pictures` its pictures from the internet are let through. A signed or encrypted
     /// message's page has `parts`, the document of each of its frames: they are served beside it, and the frames are
-    /// sized to their documents once it loaded, and again every 400 ms while it is shown.
-    func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil) {
+    /// sized to their documents once it loaded, and again every 400 ms while it is shown. `previews` is the view's
+    /// preview token (empty for none): the previews of the document before are ended.
+    func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil, previews: String = "") {
         stopMeasuring()
+        if previews != previewToken {
+            endPreviews()
+            previewToken = previews
+        }
         guard ready else {
             pending = (document, pictures, parts)
             return
@@ -311,6 +387,26 @@ final class Preview: NSObject {
             show("<!doctype html><html><head><meta name=\"color-scheme\" content=\"\(scheme)\">"
                 + "<style>html{background:#fff}\(dark)</style></head><body></body></html>")
         }
+    }
+}
+
+/// The web view of the reading pane and a message's window: its context menu without what would open a window or
+/// download, which a message's web view never does. A preview's picture is the core's copy, not the file, so its
+/// Download Image or Open Image would not be the file either; its link opens the file, as Open Link does.
+final class ReadingView: WKWebView {
+    /// WebKit's names of the items taken out
+    static let notOffered = ["DownloadImage", "OpenImageInNewWindow", "OpenLinkInNewWindow", "DownloadLinkedFile",
+                               "OpenFrameInNewWindow"]
+
+    override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        for item in menu.items.reversed() {
+            let name = item.identifier?.rawValue ?? ""
+            if Self.notOffered.contains(where: { name.contains($0) }) {
+                menu.removeItem(item)
+            }
+        }
+        TestHooks.webMenu?(menu)
+        super.willOpenMenu(menu, with: event)
     }
 }
 

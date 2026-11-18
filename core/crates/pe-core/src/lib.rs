@@ -245,6 +245,11 @@ pub enum Event {
         request: u64,
         attachment: usize,
     },
+    /// The picture a document server asked for ([`Core::preview_ask`]) is there, or will not be: answer the web view
+    /// with [`Core::preview_answer`]
+    PreviewAnswered {
+        ask: u64,
+    },
     /// The app ended while a file's preview was drawn (it may have been a hostile file), so PDF previews are now off:
     /// [`Core::previews_notice`] says why and how to turn them on again
     PdfPreviewsOff,
@@ -1521,6 +1526,7 @@ impl Core {
             &|event| {
                 let _ = self.post(event);
             },
+            self.preview_plan(),
         );
         if let Some(view) = &view {
             self.remember_attachments(folder, uid, view);
@@ -1528,8 +1534,10 @@ impl Core {
         Ok(view.map(|view| self.learned(view)))
     }
 
-    /// A view taken by its window: what it said for Autocrypt learned now, with the key book at hand
+    /// A view taken by its window: what it said for Autocrypt learned now, with the key book at hand; its previews
+    /// answered from now on
     fn learned(&self, mut view: MessageView) -> MessageView {
+        self.previews_shown(&mut view);
         if let Some(seen) = view.autocrypt.take() {
             let _ = self.learn_autocrypt(&seen);
         }
@@ -1563,7 +1571,14 @@ impl Core {
                 return None;
             }
             let found = core.view_source(folder, uid).ok().flatten()?;
-            let view = finish_view(&found, allow_remote_images, &dropped, || Some(core.store()), &*events);
+            let view = finish_view(
+                &found,
+                allow_remote_images,
+                &dropped,
+                || Some(core.store()),
+                &*events,
+                core.preview_plan(),
+            );
             core.timings
                 .view_built(found.folder, found.uid, std::time::Instant::now());
             if let Some(view) = &view {
@@ -2027,15 +2042,21 @@ impl Core {
         let (source, _) = read_message_file(path)?;
         let always = self.store().always_load_pictures()?;
         let ring = self.ring_for(&self.store(), &source);
+        let plan = self.preview_plan();
         let trust = view::Trust {
             pictures: pictures::Rules {
                 always,
                 ..Default::default()
             },
             ring: ring.as_deref(),
+            previews: plan.as_ref(),
             ..Default::default()
         };
-        let view = view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
+        let mut view =
+            view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
+        if view.preview_token.is_some() {
+            view.preview_source = Some(previews::PreviewSource::File(Arc::new(source)));
+        }
         self.remember_file_attachments(path, &view);
         Ok(self.learned(view))
     }
@@ -2989,13 +3010,15 @@ fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
 
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
 /// give up. `store` gives the store a bounce needs: the message it returns is looked up there, and a bounce the list
-/// did not mark yet (one found by the heuristics) is marked, with `events` told the folder changed.
+/// did not mark yet (one found by the heuristics) is marked, with `events` told the folder changed. `previews` shows
+/// its pictures and PDF files after the text ([`Core::preview_plan`]).
 fn finish_view<S: std::ops::Deref<Target = Store>>(
     found: &ViewSource,
     allow_remote_images: bool,
     dropped: &dyn Fn() -> bool,
     store: impl Fn() -> Option<S>,
     events: &dyn Fn(Event),
+    previews: Option<previews::PreviewPlan>,
 ) -> Option<MessageView> {
     let find = |message_id: &str| {
         store()?
@@ -3014,8 +3037,15 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
             senders: &found.trusted_senders,
         },
         ring: found.ring.as_deref(),
+        previews: previews.as_ref(),
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
+    if view.preview_token.is_some() {
+        view.preview_source = Some(previews::PreviewSource::Stored {
+            folder: found.folder,
+            uid: found.uid,
+        });
+    }
     decrypted_for_view(found, &mut view, &store);
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the
     // same rules

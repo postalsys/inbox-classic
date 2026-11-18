@@ -306,6 +306,11 @@ impl Shell {
     // ---- the core's events ----
 
     fn on_event(&self, event: Event) {
+        // a preview a web view waits for, many to a message: answered, nothing else to update
+        if let Event::PreviewAnswered { ask } = event {
+            crate::webview::preview_answered(ask);
+            return;
+        }
         let main = self.main();
         match &event {
             Event::SyncStarted { account } => {
@@ -387,6 +392,8 @@ impl Shell {
                 crate::compose_keys::refresh_all();
             }
             Event::KeysFound { request } => crate::compose_keys::keys_found(*request),
+            // a PDF file ended the app last time: the documents say so, Preferences shows the switch off
+            Event::PdfPreviewsOff => crate::preferences::pdf_previews_off(),
             Event::RulesApplied { count, .. } => {
                 let said = t!(UiRulesApplied, count = *count);
                 main.set_sync_status(&said, true);

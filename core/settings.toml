@@ -135,6 +135,18 @@ label = "ui-dark-messages"
 platforms = ["mac", "linux"]
 
 [[page.group.setting]]
+id = "show_previews"
+kind = "switch"
+label = "ui-preview-show"
+note = "ui-preview-show-note"
+
+[[page.group.setting]]
+id = "pdf_previews"
+kind = "switch"
+label = "ui-preview-pdfs"
+depends_on = "show_previews"
+
+[[page.group.setting]]
 id = "pictures_always"
 kind = "switch"
 label = "ui-pictures-always-option"

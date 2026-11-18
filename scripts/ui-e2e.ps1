@@ -3109,6 +3109,222 @@ public static class Dragger {
     Check ($null -eq $again -and $null -ne (NewlyOpened $before)) 'the second time it opens without the note'
     RemoveSecure 'secure-attachment.eml' 'An encrypted file'
 
+    # ---- pictures and PDF files in the message ----
+
+    Step 'pictures and PDF files in the message'
+    # the reading pane's looks at its previews (main.cpp kTestPreviews: "state", or the middle of a file's first
+    # picture on the screen; "window:" first for a message window's), the test switch of a PDF file that ended the app,
+    # and the Reading page's two settings (app.h)
+    $kTestPreviews = 0x50565753; $kTestPdfCrashed = 0x50444643
+    $IDM_OPTIONS = 137; $IDC_OPTIONS_APPLY = 681; $IDC_OPTIONS_PREVIEWS = 687; $IDC_OPTIONS_PREVIEWS_NOTE = 688; $IDC_OPTIONS_PDF_PREVIEWS = 689
+    $BM_GETCHECK = 0x00F0; $BM_SETCHECK = 0x00F1
+    $previewFiles = Resolve-Path (Join-Path $PSScriptRoot 'ui-e2e\previews')
+    $photoSubject = 'Photos and the invoice'; $manualSubject = "The kettle's manual"
+    # a look of the pane, once it answered one (each look answers the one before); -1 for none
+    function PreviewsLook([string]$query) {
+        $v = WaitFor { $a = [Native.Win]::SendText($main, $kTestPreviews, $query); if ($a -ge 0) { "$a" } } 5
+        if ($v) { [int64]$v } else { -1 }
+    }
+    # the pictures of the message shown: how many, how many have loaded, how many are PDF pages, and the notice
+    function PreviewsState([string]$window = '') {
+        $v = PreviewsLook "$($window)state"
+        if ($v -lt 0) { return [pscustomobject]@{ Total = -1; Loaded = -1; Pages = -1; Notice = $false } }
+        [pscustomobject]@{ Total = [int][Math]::Floor($v / 1000000); Loaded = [int]([Math]::Floor($v / 10000) % 100)
+            Pages = [int]([Math]::Floor($v / 100) % 100); Notice = ($v % 100) -eq 1 }
+    }
+    # the state once it is $total pictures, all loaded, $pages of them PDF pages, with or without the notice
+    function PreviewsShown([int]$total, [int]$pages, [bool]$notice = $false, [string]$window = '') {
+        WaitFor { $s = PreviewsState $window; if ($s.Total -eq $total -and $s.Loaded -eq $total -and $s.Pages -eq $pages -and $s.Notice -eq $notice) { $s } } 20
+    }
+    # a click of the mouse on a file's first picture ("photo", "second") or on the link to all of a PDF file's pages
+    function ClickPreview([string]$which) {
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 300
+        # asked twice: scrolled into view by the first look, where it is told by the second
+        [void](PreviewsLook $which)
+        Start-Sleep -Milliseconds 300
+        $p = WaitFor { $v = [Native.Win]::SendText($main, $kTestPreviews, $which); if ($v -gt 0) { "$v" } } 5
+        if (-not $p) { return $false }
+        $p = [int64]$p
+        [Native.Win]::MouseClick([int][Math]::Floor($p / 100000), [int]($p % 100000))
+        $true
+    }
+    # a file of a message of scripts/ui-e2e/previews as sent, in base64 (arrays of bytes do not leave a function whole)
+    function SentBase64([string]$file, [string]$name) {
+        $raw = [IO.File]::ReadAllText((Join-Path $previewFiles $file))
+        if ($raw -notmatch "filename=`"$([regex]::Escape($name))`"\r?\n(?:[^\r\n]+\r?\n)*\r?\n([A-Za-z0-9+/=\r\n]+)") { return $null }
+        [Convert]::ToBase64String([Convert]::FromBase64String(($Matches[1] -replace '\s', '')))
+    }
+    # the file opened is byte for byte the one sent (read once nothing else has it open: an antivirus may look first)
+    function SameBytes([string]$path, [string]$sent) {
+        [bool](WaitFor { try { $sent -and [Convert]::ToBase64String([IO.File]::ReadAllBytes($path)) -eq $sent } catch { $false } } 10)
+    }
+    function SelectPreviews([string]$subject) {
+        $row = WaitFor { $r = @(SubjectRows $subject); if ($r.Count -gt 0) { "$($r[0])" } } 30
+        if ($null -ne $row) { SelectRow ([int]$row) }
+        $null -ne $row
+    }
+    foreach ($file in 'photo-and-pdf.eml', 'long-pdf.eml') { AddMessage ([IO.File]::ReadAllText((Join-Path $previewFiles $file))) @('\Seen') }
+    Command $main $IDM_SYNC
+    SelectFolder 0
+
+    # the photo and the invoice's three pages after the text, every picture loaded
+    Check (SelectPreviews $photoSubject) 'the message with a photo and an invoice is in the Inbox'
+    $state = PreviewsShown 4 3
+    Check ($null -ne $state) "the photo and the invoice's three pages show after the text, each loaded ($(PreviewsState))"
+    $texts = & $stripTexts $strip
+    Check ((ListCount $strip) -eq 2 -and $texts[0] -like 'lake.jpg (*)' -and $texts[1] -like 'invoice-2026-118.pdf (*)') "the strip still lists both files ($($texts -join ' | '))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'read-30-previews'
+
+    # a click on the photo opens it as a double-click in the strip does: the file sent, from the private folder
+    $before = (OpenedFiles).Count
+    Check (ClickPreview 'photo') 'the photo is on the screen'
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'lake.jpg' -and (InPrivateFolder $opened)) "clicking the photo opens it ($opened)"
+    if ($opened) { Check (SameBytes $opened (SentBase64 'photo-and-pdf.eml' 'lake.jpg')) 'byte for byte what was sent' }
+    # the click left the keyboard on the photo's link: Tab goes on to the invoice's, Enter opens it
+    $before = (OpenedFiles).Count
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    [Native.Win]::keybd_event(0x09, 0, 0, [IntPtr]::Zero); [Native.Win]::keybd_event(0x09, 0, 2, [IntPtr]::Zero)
+    Start-Sleep -Milliseconds 300
+    Shot $main 'read-30b-previews-focus'
+    [Native.Win]::keybd_event($VK_RETURN, 0, 0, [IntPtr]::Zero); [Native.Win]::keybd_event($VK_RETURN, 0, 2, [IntPtr]::Zero)
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'invoice-2026-118.pdf') "Tab reaches the invoice, and Enter opens it ($opened)"
+    if ($opened) { Check (SameBytes $opened (SentBase64 'photo-and-pdf.eml' 'invoice-2026-118.pdf')) 'the invoice as it was sent' }
+
+    # the manual: its first five pages, and the link to all twelve, which opens it
+    Check (SelectPreviews $manualSubject) 'the message with a long manual is in the Inbox'
+    Check ($null -ne (PreviewsShown 5 5)) "a long PDF file shows its first five pages ($(PreviewsState))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'read-30c-previews-long'
+    $before = (OpenedFiles).Count
+    Check (ClickPreview 'more') 'the link to all its pages is there'
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -eq 'kettle-manual.pdf') "and opens the file ($opened)"
+    Shot $main 'read-30d-previews-long-end'
+
+    # many pictures: twenty previews in the strip's order, the rest in the strip only; a long name wraps; nothing is
+    # wider than the pane, also a narrow one
+    $manySubject = 'Twenty-four pictures from the walk'
+    $parts = ''
+    for ($i = 1; $i -le 24; $i++) {
+        $bitmap = New-Object System.Drawing.Bitmap 480, 320
+        $g = [System.Drawing.Graphics]::FromImage($bitmap)
+        $g.Clear([System.Drawing.Color]::FromArgb(40 + $i * 8, 110, 200 - $i * 5))
+        $g.DrawString("$i", (New-Object System.Drawing.Font 'Segoe UI', 48), [System.Drawing.Brushes]::White, 20, 20)
+        $g.Dispose()
+        $stream = New-Object IO.MemoryStream
+        $bitmap.Save($stream, [System.Drawing.Imaging.ImageFormat]::Png); $bitmap.Dispose()
+        $name = if ($i -eq 2) { 'A very long name of a picture from the autumn walk around the lake, the view from the hill at sunset.png' } else { "walk-$i.png" }
+        $parts += "--m`r`nContent-Type: image/png; name=`"$name`"`r`nContent-Disposition: attachment; filename=`"$name`"`r`n" +
+            "Content-Transfer-Encoding: base64`r`n`r`n" + [Convert]::ToBase64String($stream.ToArray(), 'InsertLineBreaks') + "`r`n"
+    }
+    AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $manySubject`r`n" +
+        "Message-ID: <previews-3@example.com>`r`nDate: Mon, 16 Nov 2026 11:00:00 +0000`r`nMIME-Version: 1.0`r`n" +
+        "Content-Type: multipart/mixed; boundary=`"m`"`r`n`r`n--m`r`nContent-Type: text/plain; charset=utf-8`r`n`r`n" +
+        "All the pictures of the walk.`r`n" + $parts + "--m--`r`n") @('\Seen')
+    Command $main $IDM_SYNC
+    Check (SelectPreviews $manySubject) 'a message with twenty-four pictures is in the Inbox'
+    Check ($null -ne (PreviewsShown 20 0)) "the first twenty show, every one loaded ($(PreviewsState))"
+    Check ((ListCount $strip) -eq 24) "the strip lists all twenty-four ($(ListCount $strip))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'read-30g-previews-many'
+    [void](PreviewsLook 'last'); [void](PreviewsLook 'last')
+    Start-Sleep -Milliseconds 500
+    Check ((PreviewsLook 'overflow') -eq 0 -and (PreviewsLook 'overflow') -eq 0) 'nothing is wider than the pane'
+    Shot $main 'read-30h-previews-many-end'
+    $box = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($main, [ref]$box)
+    [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, 760, $box.Bottom - $box.Top, 0x16)
+    Start-Sleep -Seconds 1
+    [void](PreviewsLook 'overflow')
+    Check ((PreviewsLook 'overflow') -eq 0) 'nor in a narrow window'
+    Shot $main 'read-30i-previews-narrow'
+    [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, $box.Right - $box.Left, $box.Bottom - $box.Top, 0x16)
+    $added = Find 'INBOX' 'previews-3@example\.com'
+    if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    Command $main $IDM_SYNC
+
+    # in a message window of its own, the previews are there too
+    [void](SelectPreviews $photoSubject)
+    [void][Native.Win]::SetForegroundWindow($main)
+    Key $list $VK_RETURN
+    $previewWindow = WaitShown 'InboxClassicMessage' 10
+    Check ($null -ne $previewWindow) 'Enter opens the message in a window of its own'
+    if ($previewWindow) {
+        Check ($null -ne (PreviewsShown 4 3 $false 'window:')) "with its previews ($(PreviewsState 'window:'))"
+        Start-Sleep -Milliseconds 500
+        Shot $previewWindow 'read-30e-previews-window'
+        Key $previewWindow $VK_ESCAPE
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($previewWindow) } 10)) 'Esc closes it'
+    }
+
+    # Options, Reading: both settings, on, the PDF one under the other; off, the message shows no previews
+    function PreviewsCheck([IntPtr]$o, [int]$id) { [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $id), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 }
+    function PreviewsSet([IntPtr]$o, [int]$id, [bool]$on) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $id), $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
+        Click $o $id
+        $apply = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_APPLY)
+        [void](WaitFor { [Native.Win]::IsWindowEnabled($apply) } 5)
+        Click $o $IDC_OPTIONS_APPLY
+        [void](WaitFor { -not [Native.Win]::IsWindowEnabled($apply) } 5)
+    }
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    Check ($null -ne $o) 'Tools > Options opens'
+    if ($o) {
+        OptionsPage $o 1
+        $show = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PREVIEWS); $pdfs = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PDF_PREVIEWS)
+        Check (((WindowText $show) -replace '&', '') -eq 'Show attachments in messages' -and (PreviewsCheck $o $IDC_OPTIONS_PREVIEWS) -and (Visible $o $IDC_OPTIONS_PREVIEWS_NOTE)) "Reading has $(WindowText $show), on, with its note"
+        Check (((WindowText $pdfs) -replace '&', '') -eq 'Show PDF files in messages' -and (PreviewsCheck $o $IDC_OPTIONS_PDF_PREVIEWS) -and [Native.Win]::IsWindowEnabled($pdfs)) "and $(WindowText $pdfs) under it, on"
+        $a = New-Object Native.Win+RECT; $b = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($show, [ref]$a); [void][Native.Win]::GetWindowRect($pdfs, [ref]$b)
+        Check ($b.Left -gt $a.Left -and $b.Top -gt $a.Top) 'the PDF setting is under the other, indented'
+        Shot $o 'read-30f-previews-options'
+        PreviewsSet $o $IDC_OPTIONS_PREVIEWS $false
+        Check (-not [Native.Win]::IsWindowEnabled($pdfs) -and (PreviewsCheck $o $IDC_OPTIONS_PDF_PREVIEWS)) 'off, the PDF setting is disabled and keeps its value'
+        Check ($null -ne (WaitFor { $s = PreviewsState; if ($s.Total -eq 0) { $s } } 20)) "and the message shows no previews ($(PreviewsState))"
+        PreviewsSet $o $IDC_OPTIONS_PREVIEWS $true
+        Check ($null -ne (PreviewsShown 4 3)) "on again, they are back ($(PreviewsState))"
+        PreviewsSet $o $IDC_OPTIONS_PDF_PREVIEWS $false
+        Check ($null -ne (PreviewsShown 1 0)) "PDF files off: the photo shows, the invoice not, and nothing says why ($(PreviewsState))"
+        PreviewsSet $o $IDC_OPTIONS_PDF_PREVIEWS $true
+        Check ($null -ne (PreviewsShown 4 3)) "on again, the invoice is back ($(PreviewsState))"
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+    }
+
+    # PDF previews off as after a PDF file ended the app: the photo, and the notice naming the setting
+    Check ([Native.Win]::SendText($main, $kTestPdfCrashed, '') -eq 1) 'PDF previews turned off as after a crash'
+    [void](SelectPreviews $manualSubject)
+    [void](SelectPreviews $photoSubject)
+    Check ($null -ne (PreviewsShown 1 0 $true)) "opened again, the photo shows with the notice ($(PreviewsState))"
+    Start-Sleep -Milliseconds 500
+    Shot $main 'read-31-previews-pdf-off'
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        OptionsPage $o 1
+        Check (-not (PreviewsCheck $o $IDC_OPTIONS_PDF_PREVIEWS)) 'Options shows PDF files off'
+        Shot $o 'read-31b-previews-pdf-off-options'
+        $pdfs = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PDF_PREVIEWS)
+        [void][Native.Win]::SendMessage($pdfs, $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Click $o $IDC_OPTIONS_PDF_PREVIEWS
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+    }
+    Check ($null -ne (PreviewsShown 4 3)) "turned on, the notice is gone and the pages are back ($(PreviewsState))"
+
+    foreach ($id in 'previews-1', 'previews-2') {
+        $added = Find 'INBOX' "$id@example\.com"
+        if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { @(SubjectRows $photoSubject).Count -eq 0 -and @(SubjectRows $manualSubject).Count -eq 0 } 20)
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'
@@ -6924,6 +7140,29 @@ public static bool HasIcon(IntPtr window) {
         Command $window $IDM_EXIT
         Check ($script:app.WaitForExit(15000)) "File > Exit ends the app ($what)"
     }
+    # the message with a photo and an invoice in the language of this start, for the review: opened as a message file
+    # in a window of its own (`$prefix-previews`; this start has no passwords, and its sign-in prompt stays, as the
+    # steps after expect), with Options' Reading page when `$options` (`$prefix-previews-options`)
+    function PreviewsInLanguage([IntPtr]$window, [string]$prefix, [bool]$options) {
+        [void][Native.Win]::SendText($window, 2, (Join-Path $previewFiles 'photo-and-pdf.eml'))
+        $opened = WaitShown 'InboxClassicMessage' 20
+        if (-not $opened) { Check $false "the message file opens ($prefix)"; return }
+        Check ($null -ne (PreviewsShown 4 3 $false 'window:')) "the photo and the invoice show after the text ($prefix, $(PreviewsState 'window:'))"
+        Start-Sleep -Milliseconds 500
+        Shot $opened "$prefix-previews"
+        Key $opened $VK_ESCAPE
+        [void](WaitFor { -not [Native.Win]::IsWindow($opened) } 10)
+        if ($options) {
+            Command $window $IDM_OPTIONS
+            $o = WaitShown 'InboxClassicOptions' 10
+            if ($o) {
+                OptionsPage $o 1
+                Shot $o "$prefix-previews-options"
+                Click $o 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+            }
+        }
+    }
     # the toolbar of the main window and the words of its buttons
     function ToolbarText([IntPtr]$window, [int]$id) {
         foreach ($bar in [Native.Win]::FindDescendants($window, 'ToolbarWindow32')) {
@@ -7095,6 +7334,7 @@ public static bool HasIcon(IntPtr window) {
         $status = [Native.Win]::FindDescendants($main, 'msctls_statusbar32') | Select-Object -First 1
         Write-Host "   status bar: $(StatusPart $status 0) | $(StatusPart $status 1)"
         Shot $main 'lang-1-german'
+        PreviewsInLanguage $main 'lang-de' $true
         # the sign-in buttons say it in German, and the form is as wide as they are
         Command $main $IDM_NEW_ACCOUNT
         $form = WaitShown 'InboxClassicAccountStart' 10
@@ -7214,6 +7454,8 @@ public static bool HasIcon(IntPtr window) {
             Shot $options 'lang-4c-pseudo-options-downloading'
             Click $options 2
         }
+        [void](WaitFor { -not [Native.Win]::IsWindow($options) } 10)
+        PreviewsInLanguage $main 'lang-pseudo' $false
 
         # the key windows' longer words: Encryption Keys (with the two own keys of its step) and New Key
         Command $main 172

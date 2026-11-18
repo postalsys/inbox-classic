@@ -299,6 +299,9 @@ struct OptionsState {
     int comboHeight = 0;
 };
 
+// Options while it is open, for what the core changes meanwhile
+OptionsState* g_openOptions = nullptr;
+
 // the place of the language chosen in Options in the list (0: System default)
 int LanguageIndex(const std::vector<Language>& languages) {
     std::wstring chosen = GetTextPreference(kLanguagePreference);
@@ -327,6 +330,10 @@ int CurrentValue(const OptionsState& state, PeSetting setting, const WindowOptio
         return window.threads;
     case PE_SETTING_LIST_PICTURES:
         return window.listPictures;
+    case PE_SETTING_SHOW_PREVIEWS:
+        return window.previews;
+    case PE_SETTING_PDF_PREVIEWS:
+        return window.pdfPreviews;
     case PE_SETTING_PICTURES_ALWAYS:
         return pe_always_load_pictures(state.core);
     case PE_SETTING_SEARCH_ENCRYPTED:
@@ -366,6 +373,12 @@ void StoreValue(PeCore* core, PeSetting setting, int value, WindowOptions& windo
         return;
     case PE_SETTING_LIST_PICTURES:
         window.listPictures = value != 0;
+        return;
+    case PE_SETTING_SHOW_PREVIEWS:
+        window.previews = value != 0;
+        return;
+    case PE_SETTING_PDF_PREVIEWS:
+        window.pdfPreviews = value != 0;
         return;
     case PE_SETTING_PICTURES_ALWAYS:
         pe_set_always_load_pictures(core, value != 0);
@@ -507,6 +520,8 @@ std::vector<std::wstring> ChoiceItems(const OptionsState& state, PeSetting setti
     case PE_SETTING_EML_DEFAULT:
     case PE_SETTING_GROUP_BY_CONVERSATION:
     case PE_SETTING_LIST_PICTURES:
+    case PE_SETTING_SHOW_PREVIEWS:
+    case PE_SETTING_PDF_PREVIEWS:
     case PE_SETTING_PICTURES_ALWAYS:
     case PE_SETTING_TRUSTED_SENDERS:
     case PE_SETTING_SEARCH_ENCRYPTED:
@@ -543,6 +558,10 @@ SettingIds Ids(PeSetting setting) {
         return {IDC_OPTIONS_THREADS};
     case PE_SETTING_LIST_PICTURES:
         return {IDC_OPTIONS_LIST_PICTURES, IDC_OPTIONS_LIST_PICTURES_NOTE};
+    case PE_SETTING_SHOW_PREVIEWS:
+        return {IDC_OPTIONS_PREVIEWS, IDC_OPTIONS_PREVIEWS_NOTE};
+    case PE_SETTING_PDF_PREVIEWS:
+        return {IDC_OPTIONS_PDF_PREVIEWS};
     case PE_SETTING_PICTURES_ALWAYS:
         return {IDC_OPTIONS_PICTURES, IDC_OPTIONS_PICTURES_NOTE};
     case PE_SETTING_TRUSTED_SENDERS:
@@ -918,7 +937,9 @@ bool OptionsDialog(HWND owner, PeCore* core, const WindowOptions& window, const 
     state.dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), Scale(kOptionsWidth), Scale(400));
     BuildOptions(state);
     SetWindowLongPtrW(state.dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    g_openOptions = &state;
     RunModal(state.dialog, state.tabs, state.done);
+    g_openOptions = nullptr;
     if (state.restart) {
         return true;
     }
@@ -939,6 +960,16 @@ bool ChooseLanguage(HWND owner, const std::wstring& code) {
     std::vector<Language> languages = Languages();
     auto found = std::find_if(languages.begin(), languages.end(), [&](const Language& l) { return l.code == next; });
     return AskRestart(owner, found != languages.end() ? found->name : next);
+}
+
+void OptionsPdfPreviewsOff() {
+    if (!g_openOptions) {
+        return;
+    }
+    // off as set, so OK and Apply do not turn it on again unasked
+    g_openOptions->applied[PE_SETTING_PDF_PREVIEWS] = 0;
+    Button_SetCheck(g_openOptions->controls[PE_SETTING_PDF_PREVIEWS], BST_UNCHECKED);
+    UpdateOptions(*g_openOptions);
 }
 
 void MakeDefaultMailApp(HWND owner) {

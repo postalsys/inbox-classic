@@ -196,6 +196,17 @@ final class Core {
         set { _ = pe_set_dark_messages(handle, newValue) }
     }
 
+    /// Settings' "Show attachments in messages", and under it "Show PDF files in messages"
+    var showPreviews: Bool {
+        get { pe_show_previews(handle) }
+        set { _ = pe_set_show_previews(handle, newValue) }
+    }
+
+    var pdfPreviews: Bool {
+        get { pe_pdf_previews(handle) }
+        set { _ = pe_set_pdf_previews(handle, newValue) }
+    }
+
     /// Settings' "Download messages ahead"
     var downloadAhead: PeDownloadAhead {
         get { pe_download_ahead(handle) }

@@ -454,6 +454,8 @@ enum TestHooks {
     static var printed: ((Bool) -> Void)?
     /// a file the system would open with its program (an attachment), handed to the test instead: nothing launches
     static var openFile: ((URL) -> Void)?
+    /// the context menu of a message's web view as it opens, after the app took out what it does not offer
+    static var webMenu: ((NSMenu) -> Void)?
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled

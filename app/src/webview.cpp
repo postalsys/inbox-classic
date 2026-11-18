@@ -161,17 +161,22 @@ void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebV
 
 void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, const wchar_t* url,
                     std::function<const std::wstring&()> serve, std::function<bool(const wchar_t*, COREWEBVIEW2_WEB_RESOURCE_CONTEXT)> allow,
-                    std::function<bool(const wchar_t* uri, std::string& document)> part) {
+                    std::function<bool(const wchar_t* uri, std::string& document)> part,
+                    std::function<bool(const wchar_t* uri, ICoreWebView2WebResourceRequestedEventArgs* args)> later) {
     ComPtr<ICoreWebView2Environment> env = environment;
     std::wstring page = url;
     view->AddWebResourceRequestedFilter(L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
     view->add_WebResourceRequested(
-        Callback<ICoreWebView2WebResourceRequestedEventHandler>([env, page, serve, allow, part](ICoreWebView2*,
-                                                                                              ICoreWebView2WebResourceRequestedEventArgs* args) {
+        Callback<ICoreWebView2WebResourceRequestedEventHandler>([env, page, serve, allow, part, later](ICoreWebView2*,
+                                                                                                     ICoreWebView2WebResourceRequestedEventArgs* args) {
             ComPtr<ICoreWebView2WebResourceRequest> request;
             args->get_Request(&request);
             LPWSTR uri = nullptr;
             request->get_Uri(&uri);
+            if (later && uri && later(uri, args)) {
+                CoTaskMemFree(uri);
+                return S_OK;
+            }
             COREWEBVIEW2_WEB_RESOURCE_CONTEXT context = COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL;
             args->get_ResourceContext(&context);
             ComPtr<ICoreWebView2WebResourceResponse> response;

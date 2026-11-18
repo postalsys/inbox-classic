@@ -49,6 +49,9 @@ public:
     const PeMessageInfo* Info() const;
     // its pictures from the internet loaded, once asked
     void LoadPictures();
+    // the views of the messages `readers` show built again, after a setting they follow changed (the previews of their
+    // files): one after the other, as the core builds one view at a time and drops one started before the newest
+    static void Rebuild(std::vector<Reader*> readers);
     // whether the message shown shows its pictures from the internet: asked for, or loaded by themselves (Options'
     // setting, a trusted sender the provider confirmed)
     bool PicturesShown() const;
@@ -82,6 +85,7 @@ public:
     // the UI test's look at the parts' frames of the message shown and its requests to the internet (preview.h)
     int64_t TestFrames() { return preview_.TestFrames(); }
     int RemoteRequests() const { return preview_.RemoteRequests(); }
+    int64_t TestPreviews(const std::wstring& query) { return preview_.TestPreviews(query); }
 
     void OnEvent(const UiEvent& event);
     bool OnCommand(WORD id, WORD code);
@@ -132,6 +136,8 @@ private:
     int PlaceStrip(int left, int top, int width);
     // the attachment of item `item` of the strip, NULL for none; its place in the message in `index`
     const PeAttachment* StripAttachment(int item, size_t* index = nullptr) const;
+    // the item of the strip of file `index` of the message, -1 for none
+    int StripItemOf(int64_t index) const;
     // why a file of the message is not here: it is still being downloaded, or could not be read
     void SayNotHere();
     // the file of an item of the strip opened with the system's program, from the private folder the core wrote it
@@ -209,6 +215,11 @@ private:
     core::MessageView view_;
     // the view being built, 0 for none
     uint64_t viewRequest_ = 0;
+    // its view is built again (Rebuild): the next reader's is started once it is shown
+    bool rebuilding_ = false;
+    static void RebuildNext();
+    // the file of the message whose preview was clicked, opened once the WebView2's event is over; -1 for none
+    int64_t previewOpen_ = -1;
     // the words of the last Find in This Message
     std::wstring findWords_;
 };

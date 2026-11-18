@@ -274,6 +274,12 @@ typedef enum PeEventKind {
   // The action `uid` of `pe_selection_act_start` or `pe_mark_read_start` is done in the store and handed to the
   // server: `message` is what the status bar says; with `failure` `Other` it was refused, and `message` says why
   PE_EVENT_KIND_ACTED = 35,
+  // The picture of a preview the document server asked for (`pe_preview_ask`, the ask in `uid`) is there, or will
+  // not be: `pe_preview_answer` gives what to answer the web view with
+  PE_EVENT_KIND_PREVIEW_ANSWERED = 36,
+  // A PDF file ended the app while it was drawn, so PDF previews are now off (`pe_pdf_previews`); the documents
+  // built from now on say so where the previews are
+  PE_EVENT_KIND_PDF_PREVIEWS_OFF = 37,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -384,6 +390,9 @@ typedef enum PeReaderLink {
   PE_READER_LINK_OPEN_CALENDAR = 3,
   // The label of a signed or encrypted part: the Details window of the message (`protection_details`)
   PE_READER_LINK_PART = 4,
+  // A preview of an attachment after the text: open the attachment `pe_preview_link` names, as a double-click in
+  // the strip does
+  PE_READER_LINK_ATTACHMENT = 5,
 } PeReaderLink;
 
 // How a message lets its reader leave its mailing list
@@ -709,6 +718,9 @@ typedef struct PeOutbox PeOutbox;
 
 // Positions in a list; free with `pe_positions_free`
 typedef struct PePositions PePositions;
+
+// The answer to an ask: its picture (`pe_preview_answer_picture`); free with `pe_preview_answer_free`
+typedef struct PePreviewAnswer PePreviewAnswer;
 
 // The messages that were being written when Inbox Classic last ended without closing their windows; free with
 // `pe_recovered_free`
@@ -1345,6 +1357,10 @@ typedef struct PeMessageInfo {
   // memory as the page is; `pe_part_document` says which part an address asks for), whose document
   // `pe_message_view_part` gives
   size_t part_count;
+  // The token of the previews of its attachments after the text, empty when `document` shows none: the document
+  // server asks for their pictures with `pe_preview_ask` (their addresses are under `/pv/` of the page's origin),
+  // and the window ends them with `pe_previews_end` when it shows another document or closes
+  const char *preview_token;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -1366,6 +1382,14 @@ typedef struct PeAttachment {
   // What to say when it is opened while `can_open` is false, naming it (empty when it opens)
   const char *refusal;
 } PeAttachment;
+
+// A picture of a preview, to answer a web view with, owned by its `PePreviewAnswer`
+typedef struct PePreviewPicture {
+  // `image/png` or `image/jpeg` (the core's own encode, never the sender's bytes)
+  const char *mime_type;
+  const uint8_t *bytes;
+  size_t length;
+} PePreviewPicture;
 
 // A choice of the From list: an account, or one of its other addresses
 typedef struct PeFromChoice {
@@ -2857,6 +2881,13 @@ void pe_set_codes_in_notifications(bool on);
 // shows a logo the test serves itself. The apps call it only with their test switch (--test-hooks, the UI test)
 void pe_allow_loopback_logos_for_tests(bool on);
 
+// The UI tests only (with the apps' test switch): PDF previews off as after a PDF file ended the app, the notice in
+// the documents built from now on, and `PdfPreviewsOff` sent, without ending the app
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pdf_previews_crashed_for_tests(const struct PeCore *core);
+
 // What `pe_set_codes_in_notifications` set last, for the UI tests
 bool pe_codes_in_notifications(void);
 
@@ -2939,6 +2970,80 @@ const char *pe_message_view_part(const struct PeMessageView *view,
 // # Safety
 // `address` must be NULL or a NUL-terminated string.
 int64_t pe_part_document(const char *address);
+
+// The document server of the reading pane (or a message's window) was asked for `address`, the whole URL or its
+// path: when it is a preview's picture of a view shown, the ask to wait for (keep the request, WebView2's deferral,
+// the `WKURLSchemeTask` or the `WebKitURISchemeRequest`, under it): `PreviewAnswered` with it in `uid` follows on a
+// worker thread, never on this one. 0 for any other address: answer "not found" now. Quick, for the window thread:
+// the message is read and the picture drawn off it.
+//
+// # Safety
+// `core` must be a live handle; `address` NULL or a NUL-terminated string.
+uint64_t pe_preview_ask(const struct PeCore *core,
+                        const char *address);
+
+// The answer to `ask`, once, after its `PreviewAnswered`: the picture, or NULL to answer "not found" (the view's
+// previews ended, or the ask is unknown). A request the web view stopped meanwhile is not answered; free the answer
+// all the same.
+//
+// # Safety
+// `core` must be a live handle.
+struct PePreviewAnswer *pe_preview_answer(const struct PeCore *core,
+                                          uint64_t ask);
+
+// The picture of an answer, owned by it; NULL for a NULL answer
+//
+// # Safety
+// `answer` must be NULL or live.
+const struct PePreviewPicture *pe_preview_answer_picture(const struct PePreviewAnswer *answer);
+
+// # Safety
+// `answer` must be NULL or from `pe_preview_answer`, freed once.
+void pe_preview_answer_free(struct PePreviewAnswer *answer);
+
+// The attachment (its index in the view's list) a preview's link opens, after `pe_reader_link` said
+// `PE_READER_LINK_ATTACHMENT`; `token` is the `preview_token` of the view the reader shows. -1 when the link is not
+// of that view (another view's, even one still shown, or none). The window opens it as a double-click in the strip
+// does.
+//
+// # Safety
+// `core` must be a live handle; `uri` and `token` NULL or NUL-terminated strings.
+int64_t pe_preview_link(const struct PeCore *core,
+                        const char *uri,
+                        const char *token);
+
+// The window no longer shows the document of the view with this `preview_token` (it shows another, or closed): its
+// pictures are not drawn or answered anymore, and an ask still waiting is answered with none
+//
+// # Safety
+// `core` must be a live handle; `token` NULL or a NUL-terminated string.
+void pe_previews_end(const struct PeCore *core,
+                     const char *token);
+
+// Settings' "Show attachments in messages": pictures and PDF files after a message's text
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_show_previews(const struct PeCore *core);
+
+// Turns previews on or off, for the documents built from now on
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_set_show_previews(const struct PeCore *core, bool on);
+
+// Settings' "Show PDF files in messages", under "Show attachments in messages": off when the user turned it off, or
+// when the core did after a PDF file ended the app (`PdfPreviewsOff`)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pdf_previews(const struct PeCore *core);
+
+// Turns PDF previews on or off; on again, the note that a PDF file ended the app is gone
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_set_pdf_previews(const struct PeCore *core, bool on);
 
 // # Safety
 // `view` must be NULL or a view that was not freed yet.

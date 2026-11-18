@@ -85,7 +85,7 @@ enum SettingsGroup {
         case .defaultApps: return [.defaultMailApp, .emlDefault]
         case .updates: return [.checkForUpdates]
         case .messageList: return [.layout, .groupByConversation, .listPictures]
-        case .messages: return [.darkMessages, .picturesAlways, .trustedSenders]
+        case .messages: return [.darkMessages, .showPreviews, .pdfPreviews, .picturesAlways, .trustedSenders]
         case .encryption: return [.searchEncrypted, .keyserver]
         case .downloading: return [.downloadAhead, .downloadLimit]
         }
@@ -110,6 +110,8 @@ enum Setting {
     case groupByConversation
     case listPictures
     case darkMessages
+    case showPreviews
+    case pdfPreviews
     case picturesAlways
     case trustedSenders
     case searchEncrypted
@@ -130,6 +132,8 @@ enum Setting {
         case .groupByConversation: return .toggle
         case .listPictures: return .toggle
         case .darkMessages: return .toggle
+        case .showPreviews: return .toggle
+        case .pdfPreviews: return .toggle
         case .picturesAlways: return .toggle
         case .trustedSenders: return .button
         case .searchEncrypted: return .toggle
@@ -153,6 +157,8 @@ enum Setting {
         case .groupByConversation: return .uiGroupByConversation
         case .listPictures: return .uiListPictures
         case .darkMessages: return .uiDarkMessages
+        case .showPreviews: return .uiPreviewShow
+        case .pdfPreviews: return .uiPreviewPdfs
         case .picturesAlways: return .uiPicturesAlwaysOption
         case .trustedSenders: return .uiTrustedSendersButton
         case .searchEncrypted: return .uiSearchEncrypted
@@ -176,6 +182,8 @@ enum Setting {
         case .groupByConversation: return nil
         case .listPictures: return .uiListPicturesNote
         case .darkMessages: return nil
+        case .showPreviews: return .uiPreviewShowNote
+        case .pdfPreviews: return nil
         case .picturesAlways: return .uiPicturesAlwaysWarning
         case .trustedSenders: return nil
         case .searchEncrypted: return .uiSearchEncryptedNote
@@ -199,6 +207,8 @@ enum Setting {
         case .groupByConversation: return nil
         case .listPictures: return nil
         case .darkMessages: return nil
+        case .showPreviews: return nil
+        case .pdfPreviews: return .showPreviews
         case .picturesAlways: return nil
         case .trustedSenders: return nil
         case .searchEncrypted: return nil

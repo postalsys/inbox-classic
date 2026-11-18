@@ -101,6 +101,8 @@ fn row_of(setting: Setting) -> gtk::Widget {
         Setting::GroupByConversation => group_row(setting).upcast(),
         Setting::ListPictures => list_pictures_row(setting).upcast(),
         Setting::DarkMessages => dark_messages_row(setting).upcast(),
+        Setting::ShowPreviews => show_previews_row(setting).upcast(),
+        Setting::PdfPreviews => pdf_previews_row(setting).upcast(),
         Setting::PicturesAlways => pictures_always_row(setting).upcast(),
         Setting::TrustedSenders => trusted_senders_row(setting).upcast(),
         Setting::SearchEncrypted => search_encrypted_row(setting).upcast(),
@@ -177,6 +179,39 @@ fn dark_messages_row(setting: Setting) -> adw::SwitchRow {
             set_dark_messages(on);
         }
     })
+}
+
+/// Pictures and PDF files after a message's text: the messages shown made again with them or without
+fn show_previews_row(setting: Setting) -> adw::SwitchRow {
+    switch_row(setting, shell().core.show_previews(), |on| {
+        if shell().core.show_previews() != on && shell().core.set_show_previews(on).is_ok() {
+            reload_messages();
+        }
+    })
+}
+
+thread_local! {
+    /// The PDF switch of the Preferences open, which a PDF file that ended the app turns off
+    static PDF_ROW: glib::WeakRef<adw::SwitchRow> = glib::WeakRef::new();
+}
+
+/// PDF files after a message's text (under the switch of all previews, insensitive while it is off)
+fn pdf_previews_row(setting: Setting) -> adw::SwitchRow {
+    let on = shell().core.pdf_previews().unwrap_or(true);
+    let row = switch_row(setting, on, |on| {
+        if shell().core.pdf_previews().ok() != Some(on) && shell().core.set_pdf_previews(on).is_ok() {
+            reload_messages();
+        }
+    });
+    PDF_ROW.with(|weak| weak.set(Some(&row)));
+    row
+}
+
+/// The core turned PDF previews off at start (a PDF file ended the app): the switch of the Preferences open shows it
+pub fn pdf_previews_off() {
+    if let Some(row) = PDF_ROW.with(|weak| weak.upgrade()) {
+        row.set_active(false);
+    }
 }
 
 /// Pictures always downloaded, from every sender
@@ -318,6 +353,11 @@ pub fn set_dark_messages(on: bool) {
 /// Messages on a dark background turned on or off (here or by an import): every message view shows it
 pub fn dark_messages_changed() {
     crate::webview::update_backgrounds();
+    reload_messages();
+}
+
+/// The message of the reading pane and those of the message windows made again, for a change in how they look
+fn reload_messages() {
     shell().main().reader.reload();
     for window in crate::message_window::windows() {
         window.reader.reload();

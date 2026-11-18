@@ -16,6 +16,9 @@
 
 namespace {
 
+// the readers whose views are built again one after the other (Reader::Rebuild), the core building one at a time
+std::vector<Reader*> g_rebuilds;
+
 constexpr int kHeaderLines = 4;
 
 // the header's lines (Cc, when there is one, beside To), from a message's view or its row in the list
@@ -282,6 +285,7 @@ void Reader::Create(HWND parent, PeCore* core) {
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN | WS_TABSTOP, 0, {});
     SetWindowSubclass(previewHost_, BodyHostProc, 0, reinterpret_cast<DWORD_PTR>(&preview_));
     preview_.TakeMnemonics();
+    preview_.ServePreviews(core);
     preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); }, parent,
                     TIMER_FIND_SETTLED);
     preview_.SetLinks([this](const wchar_t* uri) { return FollowLink(uri); });
@@ -297,6 +301,11 @@ void Reader::Create(HWND parent, PeCore* core) {
 }
 
 void Reader::Destroy() {
+    // not built again after it is gone; the next one waiting is, should this one have been built
+    std::erase(g_rebuilds, this);
+    if (std::exchange(rebuilding_, false)) {
+        RebuildNext();
+    }
     KillTimer(parent_, TIMER_MEASURE);
     StopOpening();
     CancelReads();
@@ -333,6 +342,16 @@ bool Reader::FollowLink(const wchar_t* uri) {
         const wchar_t* number = wcsrchr(uri, L'-');
         detailsPart_ = number ? _wtoi(number + 1) : -1;
         PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_SECURITY_DETAILS, 0), 0);
+        return true;
+    }
+    case PE_READER_LINK_ATTACHMENT: {
+        // a preview of the view this reader shows (its token): its file opened as a double-click in the strip opens
+        // it, once the WebView2's event is over (a file that can not open says why in a message box)
+        const PeMessageInfo* info = Info();
+        previewOpen_ = info ? pe_preview_link(core_, core::Narrow(uri).c_str(), info->preview_token) : -1;
+        if (previewOpen_ >= 0) {
+            PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_OPEN_PREVIEW, 0), 0);
+        }
         return true;
     }
     case PE_READER_LINK_COPY_CODE:
@@ -524,6 +543,10 @@ void Reader::Clear(bool loading) {
         pe_message_view_cancel(core_, viewRequest_);
         viewRequest_ = 0;
     }
+    // a view built again that is not waited for any more: the next reader's
+    if (std::exchange(rebuilding_, false)) {
+        RebuildNext();
+    }
     uid_ = 0;
     folder_ = 0;
     account_ = 0;
@@ -613,9 +636,16 @@ void Reader::StartView() {
 }
 
 void Reader::ShowView() {
-    view_.reset(pe_message_view_result(core_, viewRequest_));
-    viewRequest_ = 0;
-    ShowInfo();
+    core::MessageView view(pe_message_view_result(core_, std::exchange(viewRequest_, 0)));
+    // none, as the core builds one view at a time and dropped this one for a newer one (another window's of the same
+    // message): the view shown stays
+    if (view || !view_) {
+        view_ = std::move(view);
+        ShowInfo();
+    }
+    if (std::exchange(rebuilding_, false)) {
+        RebuildNext();
+    }
 }
 
 void Reader::ShowInfo() {
@@ -645,7 +675,7 @@ void Reader::ShowInfo() {
         parts.emplace_back(part ? part : "");
     }
     bool measured = !parts.empty();
-    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_, std::move(parts));
+    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_, std::move(parts), info->preview_token);
     if (measured) {
         SetTimer(parent_, TIMER_MEASURE, 400, nullptr);
     } else {
@@ -775,6 +805,19 @@ const PeAttachment* Reader::StripAttachment(int item, size_t* index) const {
         *index = static_cast<size_t>(row.lParam);
     }
     return pe_message_view_attachment(view_.get(), static_cast<size_t>(row.lParam));
+}
+
+int Reader::StripItemOf(int64_t index) const {
+    int count = ListView_GetItemCount(strip_);
+    for (int item = 0; index >= 0 && item < count; item++) {
+        LVITEMW row = {};
+        row.mask = LVIF_PARAM;
+        row.iItem = item;
+        if (ListView_GetItem(strip_, &row) && row.lParam == static_cast<LPARAM>(index)) {
+            return item;
+        }
+    }
+    return -1;
 }
 
 void Reader::SayNotHere() {
@@ -1060,6 +1103,27 @@ void Reader::FindInMessage(HWND owner, bool again) {
     });
 }
 
+void Reader::Rebuild(std::vector<Reader*> readers) {
+    g_rebuilds = std::move(readers);
+    RebuildNext();
+}
+
+void Reader::RebuildNext() {
+    while (!g_rebuilds.empty()) {
+        Reader* reader = g_rebuilds.front();
+        g_rebuilds.erase(g_rebuilds.begin());
+        if ((reader->uid_ || !reader->file_.empty()) && reader->view_) {
+            // a message file's view is built right here, a folder's message's on a worker (ShowView goes on)
+            reader->rebuilding_ = reader->file_.empty();
+            reader->StartView();
+            reader->rebuilding_ = reader->rebuilding_ && reader->viewRequest_;
+            if (reader->rebuilding_) {
+                return;
+            }
+        }
+    }
+}
+
 void Reader::LoadPictures() {
     if ((uid_ || !file_.empty()) && view_ && !remoteImages_) {
         remoteImages_ = true;
@@ -1308,6 +1372,9 @@ bool Reader::OnCommand(WORD id, WORD) {
         return true;
     case IDC_SECURITY_DETAILS:
         ShowSecurityDetails(std::exchange(detailsPart_, -1));
+        return true;
+    case IDC_OPEN_PREVIEW:
+        OpenAttachment(StripItemOf(std::exchange(previewOpen_, -1)));
         return true;
     case IDC_BOUNCED_MESSAGE:
         if (const PeMessageInfo* info = Info(); info && info->has_bounced_message && onBouncedMessage) {
