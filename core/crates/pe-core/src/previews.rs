@@ -136,6 +136,19 @@ pub(crate) struct PreviewDocument {
     pub part: Option<usize>,
     /// The attachments it shows, drawn or as tiles, in its order (numbered by their place in the strip)
     pub files: Vec<pe_html::PreviewFile>,
+    /// The pictures of its text (`cid:`, `data:`), each under its number ([`pe_html::INLINE_BASE`] and on, unique in
+    /// the view), with where it is for its crash marker: drawn from these bytes, held while the view is shown
+    pub inline: Vec<InlineFile>,
+    /// Its pictures may be kept in the cache: nothing of the message was decrypted
+    pub keep: bool,
+}
+
+/// A picture of a document's text
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct InlineFile {
+    pub picture: pe_html::InlinePicture,
+    /// Where it is, as its crash marker names it ([`PreviewPlan::inline_about`])
+    pub about: String,
 }
 
 /// How a request reads the files of a message
@@ -170,8 +183,17 @@ struct Shown {
 }
 
 impl Shown {
-    /// The pictures of attachment `attachment` in the document of `token`, None for one that document does not show
+    /// The pictures of attachment `attachment` in the document of `token`, or 1 for a picture of its text by its
+    /// number; None for one that document does not show
     fn pages(&self, token: &str, attachment: usize) -> Option<usize> {
+        let document = self.documents.iter().find(|document| document.token == token)?;
+        let inline = document.inline.iter().any(|inline| inline.picture.number == attachment);
+        self.file_pages(token, attachment).or(inline.then_some(1))
+    }
+
+    /// The pictures of attachment `attachment` in the document of `token`, None for one that document does not show
+    /// (a picture of its text is none: a link names a file of the strip only)
+    fn file_pages(&self, token: &str, attachment: usize) -> Option<usize> {
         self.documents
             .iter()
             .find(|document| document.token == token)?
@@ -270,17 +292,32 @@ impl Core {
         read: Read,
     ) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        self.previews_start_as(request, source, attachments, read)?;
+        Ok(request)
+    }
+
+    /// [`Core::previews_start_from`] under `request`
+    fn previews_start_as(
+        self: &Arc<Self>,
+        request: u64,
+        source: PreviewSource,
+        attachments: Vec<(usize, bool)>,
+        read: Read,
+    ) -> Result<()> {
         {
             let mut files = lock(&self.previews.files);
             for &(attachment, _) in &attachments {
                 files.insert((request, attachment), PreviewFile::default());
             }
         }
+        if attachments.is_empty() {
+            return Ok(());
+        }
         let work = self.in_background(Connection::Reads, move |core| {
             core.request_previews(request, &source, &attachments, read)
         });
         self.runtime()?.spawn(work);
-        Ok(request)
+        Ok(())
     }
 
     /// What came of attachment `attachment` of the previews `request` so far; None for a request cancelled, or an
@@ -401,6 +438,7 @@ impl Core {
                     pages: PREVIEW_PAGES,
                     keep,
                     asked,
+                    inline: false,
                 }),
                 None => not_drawn(&files, &asks, &events, request, attachment),
             }
@@ -456,6 +494,7 @@ impl Core {
             downloading: None,
             late: self.preview_late(source),
             preparing: Preparing::new(self.events.clone()),
+            inline_until: OnceLock::new(),
         }
     }
 
@@ -500,6 +539,19 @@ impl Core {
     ) -> Option<preparing::Described> {
         self.previewer(pdfs)
             .describe_or_later(file, about, wait, asked, keep, later)
+    }
+
+    /// The description of a picture of a message's text ([`pe_preview::Request::inline`]), read on the render thread
+    /// ahead of the files waiting, waiting at most `wait`; `keep` false for a decrypted part's
+    fn inline_describe(
+        &self,
+        file: Arc<Vec<u8>>,
+        about: String,
+        wait: Duration,
+        keep: bool,
+    ) -> std::result::Result<Arc<PreviewDescription>, PreviewRefusal> {
+        let pdfs = self.pdf_previews().unwrap_or(true);
+        self.previewer(pdfs).describe_inline(file, about, wait, keep)
     }
 
     /// Show in Message chosen in the strip for attachment `attachment` of the view `token` (`show`: draw it in the
@@ -637,9 +689,54 @@ impl Core {
             .map(|file| (file.attachment, choices.shown.contains(&file.attachment)))
             .collect();
         let read = if view.protected { Read::Protected } else { Read::Raw };
-        let request = self.previews_start_from(view.source.clone(), attachments, read).ok()?;
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        // the pictures of the text first: the text is above the files
+        self.request_inline(request, &view.documents);
+        if self
+            .previews_start_as(request, view.source.clone(), attachments, read)
+            .is_err()
+        {
+            self.previews_cancel(request);
+            return None;
+        }
         view.request = Some(request);
         Some(request)
+    }
+
+    /// Hands the pictures of the text of `documents` to the render thread under `request`: their bytes are the
+    /// view's, nothing is read again
+    fn request_inline(&self, request: u64, documents: &[PreviewDocument]) {
+        let inline: Vec<(&InlineFile, bool)> = documents
+            .iter()
+            .flat_map(|document| document.inline.iter().map(|inline| (inline, document.keep)))
+            .collect();
+        if inline.is_empty() {
+            return;
+        }
+        {
+            let mut files = lock(&self.previews.files);
+            for (inline, _) in &inline {
+                files.insert((request, inline.picture.number), PreviewFile::default());
+            }
+        }
+        // started already: the view read its pictures' sizes with it (the store is not read here, under the lock of the
+        // views shown)
+        let previewer = match self.previews.previewer.get() {
+            Some(previewer) => previewer,
+            None => self.previewer(self.pdf_previews().unwrap_or(true)),
+        };
+        for (inline, keep) in inline {
+            previewer.request(Request {
+                owner: request,
+                attachment: inline.picture.number,
+                file: inline.picture.bytes.clone(),
+                about: inline.about.clone(),
+                pages: 1,
+                keep,
+                asked: false,
+                inline: true,
+            });
+        }
     }
 
     /// A document server asks for the picture at `address` (`/pv/<token>-<attachment>-<page>`, or the whole URL on the
@@ -696,7 +793,7 @@ impl Core {
         let (token, attachment) = pe_html::parse_preview_link(uri)?;
         let shown = lock_shown(&self.previews.shown);
         let view = shown.iter().find(|shown| shown.token == expected)?;
-        view.pages(token, attachment).map(|_| attachment)
+        view.file_pages(token, attachment).map(|_| attachment)
     }
 }
 
@@ -1007,7 +1104,7 @@ mod view_tests {
         assert!(document.find("See them.").unwrap() < document.find("<section").unwrap());
         // the CSP lets pictures load from the preview path only
         assert!(
-            document.contains(&format!("img-src data: {}/pv/;", pe_html::preview_origin())),
+            document.contains(&format!("img-src {}/pv/;", pe_html::preview_origin())),
             "{document}"
         );
         // the printout has none of it
@@ -1186,7 +1283,7 @@ mod view_tests {
             "{}",
             view.document
         );
-        assert!(view.document.contains("img-src data:;"));
+        assert!(view.document.contains("img-src 'none';"));
         assert_eq!(view.print_document, None);
         let states: Vec<_> = view.attachments.iter().map(|a| a.show_in_message).collect();
         assert_eq!(states, [ShowInMessage::Off, ShowInMessage::Off, ShowInMessage::None]);
@@ -1241,7 +1338,7 @@ mod view_tests {
         assert_ne!(own, token);
         assert!(part.contains(&format!("src=\"/pv/{own}-0-0\" width=\"64\"")), "{part}");
         assert!(
-            part.contains(&format!("img-src data: {}/pv/;", pe_html::preview_origin())),
+            part.contains(&format!("img-src {}/pv/;", pe_html::preview_origin())),
             "{part}"
         );
         // answered by the part's token; the view's names no document
@@ -1402,6 +1499,9 @@ mod show_tests;
 
 #[cfg(test)]
 mod preparing_tests;
+
+#[cfg(test)]
+mod inline_tests;
 
 #[cfg(test)]
 mod crash_tests {

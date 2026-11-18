@@ -68,13 +68,23 @@ pub struct Request {
     /// The user asked to see this file (Show in Message): a PDF file is drawn while PDF files are off by the setting
     /// ([`Refusal::Disabled`]), and its pictures have a budget of their own, not its owner's
     pub asked: bool,
+    /// A picture of the message's text (`cid:` or `data:`), not an attached file: a picture only (SVG among them,
+    /// [`crate::inline_kind_of`]), never a PDF file; the pictures of the text share a budget of their own, so they do
+    /// not take the attached files'
+    pub inline: bool,
 }
 
 /// Whose pixel budget a request's pictures are counted on: its owner's, or a file asked for its own
 type Purse = (u64, Option<usize>);
 
+/// The purse of an owner's pictures of the text ([`Request::inline`])
+const INLINE_PURSE: usize = usize::MAX;
+
 fn purse(request: &Request) -> Purse {
-    (request.owner, request.asked.then_some(request.attachment))
+    match request.inline {
+        true => (request.owner, Some(INLINE_PURSE)),
+        false => (request.owner, request.asked.then_some(request.attachment)),
+    }
 }
 
 /// What came of a request, told to the sink of the [`Previewer`] as it comes: [`What::Described`] first (or a
@@ -287,6 +297,29 @@ impl Previewer {
             .unwrap_or(Err(Refusal::TimedOut))
     }
 
+    /// [`Previewer::describe_file`] of a picture of a message's text ([`Request::inline`]): an SVG picture is read,
+    /// a PDF file is not
+    pub fn describe_inline(
+        &self,
+        file: Arc<Vec<u8>>,
+        about: String,
+        wait: Duration,
+        keep: bool,
+    ) -> Result<Arc<Description>, Refusal> {
+        let request = Request {
+            owner: 0,
+            attachment: 0,
+            file,
+            about,
+            pages: 0,
+            keep,
+            asked: false,
+            inline: true,
+        };
+        self.describe_request(request, wait, Box::new(|_| {}))
+            .unwrap_or(Err(Refusal::TimedOut))
+    }
+
     /// [`Previewer::describe_file`] that does not give up on a file not read in time: None then, and `later` is
     /// called with what comes of it (once, on the dispatcher's thread), while the render thread goes on with it under
     /// its own limits; a description it reads is kept in the cache as any is (unless `keep` is false). `later` is not
@@ -300,6 +333,27 @@ impl Previewer {
         keep: bool,
         later: Later,
     ) -> Option<Result<Arc<Description>, Refusal>> {
+        let request = Request {
+            owner: 0,
+            attachment: 0,
+            file,
+            about,
+            pages: 0,
+            keep,
+            asked,
+            inline: false,
+        };
+        self.describe_request(request, wait, later)
+    }
+
+    /// A description asked for by a window ([`Previewer::describe_or_later`]): `request` read ahead of every file
+    /// waiting, waited for at most `wait`
+    fn describe_request(
+        &self,
+        request: Request,
+        wait: Duration,
+        later: Later,
+    ) -> Option<Result<Arc<Description>, Refusal>> {
         let (window, answers) = mpsc::channel();
         let reply: Reply = Arc::new(Mutex::new(Answer::Waiting(window)));
         {
@@ -307,15 +361,6 @@ impl Previewer {
             if queue.closed {
                 return Some(Err(Refusal::Off));
             }
-            let request = Request {
-                owner: 0,
-                attachment: 0,
-                file,
-                about,
-                pages: 0,
-                keep,
-                asked,
-            };
             queue.jobs.push_front(Job {
                 request,
                 reply: Some(reply.clone()),
@@ -461,7 +506,11 @@ impl Dispatcher {
         if self.abandoned >= MAX_ABANDONED {
             return Err(Refusal::Off);
         }
-        let kind = crate::kind_of(&request.file).ok_or(Refusal::Unsupported)?;
+        let kind = match request.inline {
+            true => crate::inline_kind_of(&request.file),
+            false => crate::kind_of(&request.file),
+        };
+        let kind = kind.ok_or(Refusal::Unsupported)?;
         if request.file.len() > MAX_FILE {
             return Err(Refusal::TooLarge);
         }

@@ -1,6 +1,7 @@
 //! The printout of a message with previews (docs/attachment-preview-plan.md, decision 5): its pictures print, put in
 //! the print document as `data:` addresses of the core's own encodes (the print windows serve nothing but the page);
-//! a PDF file, or a file shown as a tile, is not printed and a line names it. The pictures are drawn first, if the
+//! a PDF file, or a file shown as a tile, is not printed and a line names it. The pictures of its text (`cid:`,
+//! `data:`, decision 8) print where the text shows them, the core's encodes too. The pictures are drawn first, if the
 //! reading pane has not had them drawn already, off the window thread; [`Event::PrintReady`] says when the document
 //! is there.
 
@@ -23,6 +24,9 @@ struct Printout {
     parts: pe_html::PrintParts,
     /// The files shown, each with the part whose document shows it (None for a message's one document)
     files: Vec<(Option<usize>, pe_html::PreviewFile)>,
+    /// The numbers of the pictures of the message's text; none for a message with signed or encrypted parts, whose
+    /// parts print as their words
+    inline: Vec<usize>,
     /// The request drawing the pictures; None when the document has none
     request: Option<u64>,
 }
@@ -52,10 +56,17 @@ impl Core {
             let mut shown = lock_shown(&self.previews.shown);
             let view = shown.iter_mut().find(|shown| shown.token == token)?;
             let parts = view.print.clone()?;
-            let pictures = view.files().any(is_printed_picture);
+            let inline: Vec<usize> = view
+                .documents
+                .iter()
+                .filter(|document| document.part.is_none())
+                .flat_map(|document| document.inline.iter().map(|inline| inline.picture.number))
+                .collect();
+            let pictures = view.files().any(is_printed_picture) || !inline.is_empty();
             Printout {
                 parts,
                 files: view.documents.iter().flat_map(printed_files).collect(),
+                inline,
                 request: if pictures { self.shown_request(view) } else { None },
             }
         };
@@ -101,8 +112,15 @@ fn is_printed_picture(file: &pe_html::PreviewFile) -> bool {
 fn printed(files: &Files, printout: &Printout) -> String {
     let drawn = match printout.request {
         Some(request) => {
-            let shown = printout.files.iter().map(|(_, file)| file);
-            wait_drawn(files, request, shown, Instant::now() + PRINT_WAIT)
+            let wanted: Vec<usize> = printout
+                .files
+                .iter()
+                .map(|(_, file)| file)
+                .filter(|file| is_printed_picture(file))
+                .map(|file| file.attachment)
+                .chain(printout.inline.iter().copied())
+                .collect();
+            wait_drawn(files, request, &wanted, Instant::now() + PRINT_WAIT)
         }
         None => HashMap::new(),
     };
@@ -116,15 +134,23 @@ fn printed(files: &Files, printout: &Printout) -> String {
             )
         })
         .collect();
+    let first_page = |number: usize| drawn.get(&number).and_then(|drawn| drawn.pages.get(&0)?.as_ref().ok());
+    let inline = printout.inline.iter().filter_map(|&number| {
+        let picture = first_page(number)?;
+        let item = pe_html::PrintItem::Inline {
+            number,
+            mime: picture.mime.as_str(),
+            bytes: &picture.bytes,
+        };
+        Some((None, item))
+    });
     let items: Vec<(Option<usize>, pe_html::PrintItem)> = printout
         .files
         .iter()
         .zip(&lines)
         .map(|((part, file), line)| {
             // only the printed pictures were waited for
-            let picture = drawn
-                .get(&file.attachment)
-                .and_then(|drawn| drawn.pages.get(&0)?.as_ref().ok());
+            let picture = first_page(file.attachment);
             let item = match picture {
                 Some(picture) => pe_html::PrintItem::Picture {
                     name: &file.name,
@@ -135,21 +161,14 @@ fn printed(files: &Files, printout: &Printout) -> String {
             };
             (*part, item)
         })
+        .chain(inline)
         .collect();
     pe_html::print_document_with(&printout.parts, &items)
 }
 
-/// The pictures of `shown` that `request` drew by `until`: each file once it is done, or as far as it came
-fn wait_drawn<'a>(
-    files: &Files,
-    request: u64,
-    shown: impl Iterator<Item = &'a pe_html::PreviewFile>,
-    until: Instant,
-) -> HashMap<usize, PreviewFile> {
-    let wanted: Vec<usize> = shown
-        .filter(|file| is_printed_picture(file))
-        .map(|file| file.attachment)
-        .collect();
+/// What `request` drew of the files `wanted` (attachments, pictures of the text) by `until`: each file once it is
+/// done, or as far as it came
+fn wait_drawn(files: &Files, request: u64, wanted: &[usize], until: Instant) -> HashMap<usize, PreviewFile> {
     let mut map = lock(files);
     loop {
         let done = wanted.iter().all(|attachment| {

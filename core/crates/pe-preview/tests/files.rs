@@ -170,6 +170,7 @@ fn a_pdf_that_never_finishes_is_abandoned() {
         pages: 5,
         keep: true,
         asked: false,
+        inline: false,
     };
     let wait = |attachment| {
         let mut refused = None;

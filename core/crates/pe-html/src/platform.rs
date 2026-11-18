@@ -80,14 +80,13 @@ pub(crate) fn filter_platform(html: &str, platform: Platform) -> String {
 pub const DOCUMENT_SCHEME: &str = "inboxclassic";
 
 /// The WebKit content rules of a web view (the JSON of WKContentRuleList and WebKitUserContentFilter): every load is
-/// blocked but the app's own documents, the `cid:` parts of the message and `data:`, and with `allow_remote_images`
-/// the pictures of the message from the internet (images only, nothing else from there). A second wall behind the
-/// documents' own CSP.
+/// blocked but the app's own documents (the pictures of a message's text among them, from its preview addresses) and
+/// `data:` (a printout's pictures, the fonts of a message), and with `allow_remote_images` the pictures of the message
+/// from the internet (images only, nothing else from there). A second wall behind the documents' own CSP.
 pub fn webkit_content_rules(allow_remote_images: bool) -> String {
     let mut rules = vec![
         r#"{"trigger":{"url-filter":".*"},"action":{"type":"block"}}"#.to_string(),
         format!(r#"{{"trigger":{{"url-filter":"^{DOCUMENT_SCHEME}:"}},"action":{{"type":"ignore-previous-rules"}}}}"#),
-        r#"{"trigger":{"url-filter":"^cid:"},"action":{"type":"ignore-previous-rules"}}"#.to_string(),
         r#"{"trigger":{"url-filter":"^data:"},"action":{"type":"ignore-previous-rules"}}"#.to_string(),
     ];
     if allow_remote_images {
@@ -154,7 +153,7 @@ mod tests {
                 rule["trigger"]["url-filter"].as_str().unwrap()
             })
             .collect();
-        assert_eq!(allowed, ["^inboxclassic:", "^cid:", "^data:"]);
+        assert_eq!(allowed, ["^inboxclassic:", "^data:"]);
         let with_pictures: Vec<serde_json::Value> = serde_json::from_str(&webkit_content_rules(true)).unwrap();
         let last = with_pictures.last().unwrap();
         assert_eq!(last["trigger"]["url-filter"], "^https?://");

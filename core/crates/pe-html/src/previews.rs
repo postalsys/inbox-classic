@@ -358,6 +358,13 @@ pub enum PrintItem<'a> {
     },
     /// A file that is not printed: a line that names it
     Line(&'a str),
+    /// A picture of the message's text as the core encoded it, put where the text shows it (`number`: of its preview
+    /// address, [`crate::InlinePicture`]); not in the section after the text
+    Inline {
+        number: usize,
+        mime: &'a str,
+        bytes: &'a [u8],
+    },
 }
 
 /// The rules of a printout's section, `C` its class: its own look whatever the message's styles say
@@ -398,7 +405,7 @@ pub(crate) fn print_section(items: &[PrintItem]) -> String {
                     shown(name, MAX_VALUE)
                 ));
             }
-            PrintItem::Picture { .. } => {}
+            PrintItem::Picture { .. } | PrintItem::Inline { .. } => {}
             PrintItem::Line(line) => body.push_str(&format!("<p>{}</p>", shown(line, 1000))),
         }
     }
