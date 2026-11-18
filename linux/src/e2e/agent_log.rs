@@ -200,8 +200,7 @@ pub(super) async fn terminal_programs(d: &Driver) {
                 let body = ask.body().to_string();
                 let programs = pe_core::agents::host_label(program, &format!("/x/{program}"));
                 d.check(
-                    heading.contains(&programs)
-                        && body.contains(if language == "qps" { "--ñámé" } else { "--name" }),
+                    heading.contains(&programs) && body.contains("--name"),
                     &format!(
                         "{language}: the question is for the programs started from the terminal, and tells about \
                          --name ({heading}; {body})"

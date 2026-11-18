@@ -3273,9 +3273,12 @@ public static class Dragger {
     $added = Find 'INBOX' 'previews-3@example\.com'
     if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
     Command $main $IDM_SYNC
+    # gone from the list before a row is chosen, or its row going would leave another message selected
+    [void](WaitFor { @(SubjectRows $manySubject).Count -eq 0 } 20)
 
     # in a message window of its own, the previews are there too
     [void](SelectPreviews $photoSubject)
+    [void](PreviewsShown 4 3)
     [void][Native.Win]::SetForegroundWindow($main)
     Key $list $VK_RETURN
     $previewWindow = WaitShown 'InboxClassicMessage' 10
@@ -4108,22 +4111,28 @@ public static class Dragger {
         [void](WaitFor { -not @(Messages 'INBOX' | Where-Object { $_.flags -contains '\Flagged' -and (RawText $_) -match 'Subject: Quarterly report draft' }).Count } 10)
     }
 
-    # an agent started from a terminal: the relay's parent is the terminal's program (here a copy of cmd.exe under the
-    # name of Windows Terminal's, `$terminal`.exe), so every agent started there would share one access. The question
-    # says so in the language in use, with how to give one an access of its own (--name), nothing cut off (shot `$shot`;
-    # with `$pseudo` nothing left in English). Answered `$answer`: Don't Allow (7), or closed (2), which decides nothing.
+    # an agent started from a terminal: the relay's parent is the terminal's program (here a copy of Node.js under the
+    # name of Windows Terminal's, `$terminal`.exe, running ui-e2e\terminal.mjs, which starts the relay as its child and
+    # sends the first request; a copy of cmd.exe asked nothing on the CI runner), so every agent started there would
+    # share one access. The question says so in the language in use, with how to give one an access of its own
+    # (--name), nothing cut off (shot `$shot`; with `$pseudo` nothing left in English). Answered `$answer`: Don't Allow
+    # (7), or closed (2), which decides nothing.
     function TerminalQuestion([string]$terminal, [string]$shot, [int]$answer, [bool]$pseudo) {
         $terminalExe = Join-Path $Out "$terminal.exe"
-        Copy-Item -Force (Join-Path $env:SystemRoot 'System32\cmd.exe') $terminalExe
+        $relayErrors = Join-Path $Out "$terminal-relay.txt"
+        Copy-Item -Force (Get-Command node).Source $terminalExe
         $start = New-Object System.Diagnostics.ProcessStartInfo $terminalExe
-        $start.Arguments = "/d /c `"`"$((Resolve-Path $Exe).Path)`" --mcp --store `"$store`"`""
-        $start.UseShellExecute = $false; $start.RedirectStandardInput = $true; $start.RedirectStandardOutput = $true; $start.CreateNoWindow = $true
+        $start.Arguments = "`"$(Join-Path $PSScriptRoot 'ui-e2e\terminal.mjs')`""
+        $start.EnvironmentVariables['APP'] = (Resolve-Path $Exe).Path
+        $start.EnvironmentVariables['STORE'] = $store
+        $start.EnvironmentVariables['ERR'] = $relayErrors
+        $start.UseShellExecute = $false; $start.RedirectStandardInput = $true; $start.CreateNoWindow = $true
         $shell = [System.Diagnostics.Process]::Start($start)
         # the question comes with the agent's first request
-        $shell.StandardInput.WriteLine('{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"ui-test","version":"1"}}}')
-        $shell.StandardInput.Flush()
         $ask = WaitShown 'InboxClassicAgentAccess' 30
-        Check ($null -ne $ask) "an agent started from a terminal is asked about ($shot)"
+        $said = if (Test-Path $relayErrors) { (Get-Content -Raw $relayErrors) -replace '\s+', ' ' } else { '' }
+        $ended = if ($shell.HasExited) { "terminal ended with $($shell.ExitCode)" } else { 'terminal running' }
+        Check ($null -ne $ask) "an agent started from a terminal is asked about ($shot$(if (-not $ask) { "; $ended; relay: $said" }))"
         if ($ask) {
             $texts = @([Native.Win]::FindDescendants($ask, 'Static') | ForEach-Object { WindowText $_ })
             if (-not $pseudo) {

@@ -545,7 +545,7 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
 - each list shows its sender's address first and whole, the name apart, so a name can not hide it
 - Don't Unsubscribe is the default
 - the agent learns the user said no, and no list was asked
-- an agent started from a terminal (a program called Terminal starting the relay; on Windows a copy of cmd.exe called
+- an agent started from a terminal (a program called Terminal starting the relay; on Windows a copy of Node.js called
   WindowsTerminal) is asked about as "Programs started
   from Terminal" (the Mac) or "Programs started from a terminal (Terminal)", which share what is allowed, and told
   that `--name` gives one an access of its own
