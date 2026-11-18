@@ -2358,6 +2358,13 @@ fn an_agent_answers_an_invitation_through_the_send_question() {
             .await
             .unwrap();
         assert_eq!(status(&message), "accepted", "{message}");
+        // gone from the Outbox, the answer is no longer offered to take back: not by its row, nor by Undo Since
+        let host = core.agent_hosts().unwrap()[0].id;
+        assert_eq!(core.agent_undoable_since(host, 0).unwrap(), 0);
+        let row = core.agent_log_rows(10).unwrap().into_iter().find(|r| r.text.starts_with("Put")).unwrap();
+        assert!(!row.can_undo, "{row:?}");
+        let report = core.agent_undo_since(host, 0).unwrap();
+        assert_eq!((report.entries, report.sent), (0, 0), "{report:?}");
     });
     mcp.stop();
 }

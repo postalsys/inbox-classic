@@ -525,13 +525,46 @@ impl Core {
 
     /// How many changes of program `host` since `since` can still be taken back
     pub fn agent_undoable_since(&self, host: AgentHostId, since: i64) -> Result<u64> {
-        Ok(self.store().agent_undoable_since(host, since)?.len() as u64)
+        Ok(self.still_undoable_since(host, since)?.len() as u64)
+    }
+
+    /// Whether anything of `entry` can still be taken back: not taken back already, with an undo the core reads, and
+    /// not only messages that have left the Outbox since (an agent's sends, its answers to invitations)
+    pub(crate) fn can_still_undo(&self, entry: &AgentLogEntry) -> Result<bool> {
+        if entry.undone {
+            return Ok(false);
+        }
+        let Some(undo) = entry.entry.undo.as_deref().and_then(Undo::read) else {
+            return Ok(false);
+        };
+        for item in undo.items() {
+            let Undo::Unsend { account, message_id } = item else {
+                return Ok(true);
+            };
+            if self.store().outbox_with_message_id(account, &message_id)?.is_some() {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    /// The entries of program `host` since `since` of which something can still be taken back, newest first
+    fn still_undoable_since(&self, host: AgentHostId, since: i64) -> Result<Vec<AgentLogEntry>> {
+        let entries = self.store().agent_undoable_since(host, since.min(now()))?;
+        let mut kept = Vec::with_capacity(entries.len());
+        for entry in entries {
+            if self.can_still_undo(&entry)? {
+                kept.push(entry);
+            }
+        }
+        Ok(kept)
     }
 
     /// Takes back everything program `host` did since `since` that can be, newest first, so a message moved and then
-    /// flagged is unflagged where it went before it goes back. What could not be taken back is in the report.
+    /// flagged is unflagged where it went before it goes back. What could not be taken back is in the report: what
+    /// changed while it ran (a message that left the Outbox meanwhile); what could not be before is not counted.
     pub fn agent_undo_since(&self, host: AgentHostId, since: i64) -> Result<UndoReport> {
-        let entries = self.store().agent_undoable_since(host, since.min(now()))?;
+        let entries = self.still_undoable_since(host, since)?;
         let mut report = UndoReport::default();
         for entry in &entries {
             self.undo_entry(entry, &mut report)?;
