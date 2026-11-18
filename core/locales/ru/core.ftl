@@ -1137,6 +1137,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = Часть { $number }: { $label }
 # review: new
+attachment-from-part = Из части { $number }: { $label }
+# review: new
 pgp-details-signed = Подписано { $when } ключом { $key }
 # review: new
 pgp-details-unknown-key = Подписано ключом { $key }, которого у вас нет
@@ -1151,9 +1153,11 @@ pgp-bar-parts = В этом сообщении есть части ({ $count }):
 # review: new
 pgp-bar-count-verified = проверено: { $count }
 # review: new
-pgp-bar-count-good = { $count ->
-   *[other] подписано или зашифровано: { $count }
-}
+pgp-bar-count-encrypted-signed = зашифровано и подписано: { $count }
+# review: new
+pgp-bar-count-encrypted = зашифровано: { $count }
+# review: new
+pgp-bar-count-signed = подписано: { $count }
 # review: new
 pgp-bar-count-warning = { $count ->
    *[other] требует внимания: { $count }

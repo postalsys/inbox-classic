@@ -780,6 +780,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } primatelja nema ključ za šifriranje. Pronađite njihove ključeve, uklonite ih iz ove poruke ili je pošaljite bez šifriranja.
 }
 pgp-details-part = Dio { $number }: { $label }
+# review: new
+attachment-from-part = Iz dijela { $number }: { $label }
 pgp-details-signed = Potpisano { $when } ključem { $key }
 pgp-details-unknown-key = Potpisano ključem { $key }, koji nemate
 pgp-details-opened = Dešifrirano vašim ključem { $key }
@@ -787,10 +789,23 @@ pgp-details-for = Ključevi za koje je poruka šifrirana: { $keys }
 pgp-details-plain = Nije digitalno potpisano ni šifrirano
 pgp-bar-parts = Ova poruka ima više dijelova ({ $count }): { $list }. Za svaki je dio navedeno kako je zaštićen.
 pgp-bar-count-verified = Potvrđeno vlasništvo ključa: { $count }
-pgp-bar-count-good = { $count ->
-    [one] { $count } potpisan ili šifriran
-    [few] { $count } potpisana ili šifrirana
-   *[other] { $count } potpisanih ili šifriranih
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } šifriran i potpisan
+    [few] { $count } šifrirana i potpisana
+   *[other] { $count } šifriranih i potpisanih
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } šifriran
+    [few] { $count } šifrirana
+   *[other] { $count } šifriranih
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } potpisan
+    [few] { $count } potpisana
+   *[other] { $count } potpisanih
 }
 pgp-bar-count-warning = { $count ->
     [one] { $count } dio treba provjeriti

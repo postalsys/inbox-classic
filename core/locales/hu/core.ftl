@@ -740,6 +740,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } címzettnek nincs kulcsa a titkosításhoz. Keresse meg a kulcsaikat, távolítsa el őket ebből az üzenetből, vagy küldje el az üzenetet titkosítás nélkül.
 }
 pgp-details-part = { $number }. rész: { $label }
+# review: new
+attachment-from-part = A(z) { $number }. részből: { $label }
 pgp-details-signed = Aláírva, időpont: { $when }, kulcs: { $key }
 pgp-details-unknown-key = Az aláíráshoz használt kulcs nem érhető el: { $key }
 pgp-details-opened = Visszafejtve a következő saját kulccsal: { $key }
@@ -747,10 +749,12 @@ pgp-details-for = Titkosítva ezekre a kulcsokra: { $keys }
 pgp-details-plain = Nincs aláírva és nincs titkosítva
 pgp-bar-parts = Az üzenet részei ({ $count }): { $list }. Minden résznél külön látható a védelmi állapot.
 pgp-bar-count-verified = { $count } ellenőrzött
-pgp-bar-count-good = { $count ->
-    [one] 1 aláírt vagy titkosított
-   *[other] { $count } aláírt vagy titkosított
-}
+# review: new
+pgp-bar-count-encrypted-signed = { $count } titkosított és aláírt
+# review: new
+pgp-bar-count-encrypted = { $count } titkosított
+# review: new
+pgp-bar-count-signed = { $count } aláírt
 pgp-bar-count-warning = { $count ->
     [one] 1 figyelmet igényel
    *[other] { $count } figyelmet igényel

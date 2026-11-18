@@ -737,6 +737,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] No hay una clave utilizable para { $count } destinatarios. Busque sus claves o quite a esos destinatarios del mensaje. Solo puede enviarlo sin cifrar si no contiene texto, imágenes ni archivos adjuntos de mensajes cifrados.
 }
 pgp-details-part = Parte { $number }: { $label }
+# review: new
+attachment-from-part = De la parte { $number }: { $label }
 pgp-details-signed = Firmado el { $when } con la clave { $key }
 pgp-details-unknown-key = Firmado con la clave { $key }, que no está disponible en este equipo
 pgp-details-opened = Descifrado con su clave { $key }
@@ -747,9 +749,20 @@ pgp-bar-count-verified = { $count ->
     [one] 1 verificada
    *[other] { $count } verificadas
 }
-pgp-bar-count-good = { $count ->
-    [one] 1 firmada o cifrada
-   *[other] { $count } firmadas o cifradas
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 cifrada y firmada
+   *[other] { $count } cifradas y firmadas
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 cifrada
+   *[other] { $count } cifradas
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 firmada
+   *[other] { $count } firmadas
 }
 pgp-bar-count-warning = { $count ->
     [one] 1 con advertencias

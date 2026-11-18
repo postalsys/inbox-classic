@@ -1144,6 +1144,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = Časť { $number }: { $label }
 # review: new
+attachment-from-part = Z časti { $number }: { $label }
+# review: new
 pgp-details-signed = Podpísané { $when } kľúčom { $key }
 # review: new
 pgp-details-unknown-key = Podpísané kľúčom { $key }, ktorý nemáte
@@ -1158,10 +1160,22 @@ pgp-bar-parts = Táto správa má viac častí ({ $count }): { $list }. Každá 
 # review: new
 pgp-bar-count-verified = overené: { $count }
 # review: new
-pgp-bar-count-good = { $count ->
-    [one] 1 podpísaná alebo šifrovaná
-    [few] { $count } podpísané alebo šifrované
-   *[other] { $count } podpísaných alebo šifrovaných
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 šifrovaná a podpísaná
+    [few] { $count } šifrované a podpísané
+   *[other] { $count } šifrovaných a podpísaných
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 šifrovaná
+    [few] { $count } šifrované
+   *[other] { $count } šifrovaných
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 podpísaná
+    [few] { $count } podpísané
+   *[other] { $count } podpísaných
 }
 # review: new
 pgp-bar-count-warning = { $count ->

@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use pe_core::keys::KeySource;
 use pe_core::protect::Tone;
-use pe_core::{Core, Options, PasswordStore};
+use pe_core::{Core, Options, PasswordStore, Protection};
 
 fn fixtures() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/ui-e2e/pgp")
@@ -121,4 +121,34 @@ fn each_case_reads_as_the_ui_tests_expect() {
     assert!(view.part_documents[0].contains("alt=\"harbour.png\""));
     assert!(view.part_documents[1].contains("alt=\"floor-plan.png\""));
     assert!(shown(&view).contains("for your eyes only"));
+    // the bar counts the encrypted part as encrypted, not as "signed or encrypted"
+    assert!(
+        text.contains("2 parts: 1 encrypted, 1 without a confirmed signature"),
+        "{text}"
+    );
+    // each file says which part it came from; the encrypted part's is marked
+    let rows: Vec<_> = view
+        .attachments
+        .iter()
+        .map(|a| (a.filename.as_str(), a.part, a.protection, a.part_text.as_str()))
+        .collect();
+    assert_eq!(
+        rows,
+        [
+            ("harbour.png", Some(0), Protection::None, "From part 1: Not signed"),
+            (
+                "floor-plan.png",
+                Some(1),
+                Protection::Encrypted,
+                "From part 2: Encrypted. Not signed"
+            ),
+        ]
+    );
+    assert!(
+        view.attachments[1]
+            .tooltip
+            .ends_with("\nFrom part 2: Encrypted. Not signed"),
+        "{}",
+        view.attachments[1].tooltip
+    );
 }

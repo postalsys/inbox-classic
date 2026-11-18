@@ -713,6 +713,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } saaja jaoks puudub kasutatav võti. Otsige nende võtmeid või eemaldage need saajad kirjast. Krüpteerimata saab kirja saata ainult siis, kui selles pole enam krüpteeritud kirjadest pärit teksti, pilte ega manuseid.
 }
 pgp-details-part = Osa { $number }: { $label }
+# review: new
+attachment-from-part = Osast { $number }: { $label }
 pgp-details-signed = Allkirjastatud { $when } võtmega { $key }
 pgp-details-unknown-key = Allkirjastatud võtmega { $key }, mida teil pole
 pgp-details-opened = Dekrüpteeritud teie võtmega { $key }
@@ -720,7 +722,12 @@ pgp-details-for = Krüpteerimiseks kasutatud võtmed: { $keys }
 pgp-details-plain = Allkirjastamata ja krüpteerimata
 pgp-bar-parts = Kirjal on { $count } osa: { $list }. Iga osa juures on näha selle kaitse olek.
 pgp-bar-count-verified = { $count } kontrollitud
-pgp-bar-count-good = { $count } allkirjastatud või krüpteeritud
+# review: new
+pgp-bar-count-encrypted-signed = { $count } krüpteeritud ja allkirjastatud
+# review: new
+pgp-bar-count-encrypted = { $count } krüpteeritud
+# review: new
+pgp-bar-count-signed = { $count } allkirjastatud
 pgp-bar-count-warning = { $count } vajab tähelepanu
 pgp-bar-count-neutral = { $count } kinnitatud allkirjata
 # the setup file: settings, accounts, contacts and keys carried to another computer

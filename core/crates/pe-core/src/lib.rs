@@ -95,7 +95,7 @@ pub use text::{
     folder_kind, folder_name, format_size, initials, list_counts, messages, protection_words, quoted_subject,
     reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence,
 };
-pub use view::{AttachmentView, MessageView, PartView, ProtectionView};
+pub use view::{AttachmentView, MessageView, PartView, Protection, ProtectionView};
 use worker::{Command, Role, Worker};
 
 /// The stack of each of the core's worker threads

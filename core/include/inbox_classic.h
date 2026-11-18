@@ -371,7 +371,8 @@ typedef enum PePictureKind {
   PE_PICTURE_KIND_CONTACT = 2,
 } PePictureKind;
 
-// Whether a message is signed or encrypted as a whole
+// Whether a message is signed or encrypted as a whole (a list row), or how the part an attachment came from was
+// protected (`PeAttachment`: signed with a confirmed signature, or encrypted, signed or not)
 typedef enum PeProtection {
   PE_PROTECTION_NONE = 0,
   PE_PROTECTION_SIGNED = 1,
@@ -1421,6 +1422,15 @@ typedef struct PeAttachment {
   const char *refusal;
   // The strip menu's Show in Message for it (`pe_preview_show`): no item, checked, unchecked or greyed
   enum PeShowInMessage show_in_message;
+  // The number of the part of a message with signed or encrypted parts it came from (1 for the first, as the
+  // page's labels and the Details window count them); 0 in any other message
+  uint32_t part;
+  // How that part was protected: the strip marks a file of an encrypted part with a lock; `NONE` in any other
+  // message, and for a part whose signature could not be confirmed
+  enum PeProtection protection;
+  // What the strip says of that part ("From part 2: Encrypted. Signed by ..."), for the accessible description;
+  // `tooltip` ends with it already. Empty in any other message
+  const char *part_text;
 } PeAttachment;
 
 // A picture of a preview, to answer a web view with, owned by its `PePreviewAnswer`

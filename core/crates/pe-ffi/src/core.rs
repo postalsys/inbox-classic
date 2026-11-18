@@ -1689,7 +1689,8 @@ pub struct PeMessage {
     pub snippet_is_state: bool,
 }
 
-/// Whether a message is signed or encrypted as a whole
+/// Whether a message is signed or encrypted as a whole (a list row), or how the part an attachment came from was
+/// protected (`PeAttachment`: signed with a confirmed signature, or encrypted, signed or not)
 #[repr(C)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PeProtection {
@@ -1997,6 +1998,25 @@ pub struct PeAttachment {
     pub refusal: *const c_char,
     /// The strip menu's Show in Message for it (`pe_preview_show`): no item, checked, unchecked or greyed
     pub show_in_message: PeShowInMessage,
+    /// The number of the part of a message with signed or encrypted parts it came from (1 for the first, as the
+    /// page's labels and the Details window count them); 0 in any other message
+    pub part: u32,
+    /// How that part was protected: the strip marks a file of an encrypted part with a lock; `NONE` in any other
+    /// message, and for a part whose signature could not be confirmed
+    pub protection: PeProtection,
+    /// What the strip says of that part ("From part 2: Encrypted. Signed by ..."), for the accessible description;
+    /// `tooltip` ends with it already. Empty in any other message
+    pub part_text: *const c_char,
+}
+
+impl From<pe_core::Protection> for PeProtection {
+    fn from(protection: pe_core::Protection) -> Self {
+        match protection {
+            pe_core::Protection::None => PeProtection::None,
+            pe_core::Protection::Signed => PeProtection::Signed,
+            pe_core::Protection::Encrypted => PeProtection::Encrypted,
+        }
+    }
 }
 
 /// What the strip menu's Show in Message says of a file
@@ -2244,6 +2264,9 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             tooltip: strings.add(&a.tooltip),
             refusal: strings.add(a.refusal.as_deref().unwrap_or_default()),
             show_in_message: a.show_in_message.into(),
+            part: a.part.map_or(0, |part| part as u32 + 1),
+            protection: a.protection.into(),
+            part_text: strings.add(&a.part_text),
         })
         .collect();
     let invitation = view.invitation.as_ref().map(|event| {

@@ -736,6 +736,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } mottakere mangler brukbare nøkler. Finn nøklene eller fjern mottakerne fra meldingen. Du kan bare sende uten kryptering når meldingen ikke inneholder tekst, bilder eller vedlegg fra krypterte meldinger.
 }
 pgp-details-part = Del { $number }: { $label }
+# review: new
+attachment-from-part = Fra del { $number }: { $label }
 pgp-details-signed = Signert { $when } med nøkkelen { $key }
 pgp-details-unknown-key = Signert med nøkkelen { $key }, som du ikke har
 pgp-details-opened = Dekryptert med nøkkelen din { $key }
@@ -743,9 +745,20 @@ pgp-details-for = Kryptert til { $keys }
 pgp-details-plain = Ikke signert og ikke kryptert
 pgp-bar-parts = Denne meldingen har { $count } deler: { $list }. Hver del viser hvordan den er beskyttet.
 pgp-bar-count-verified = { $count } med bekreftet nøkkel
-pgp-bar-count-good = { $count ->
-    [one] { $count } signert eller kryptert del
-   *[other] { $count } signerte eller krypterte deler
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } kryptert og signert del
+   *[other] { $count } krypterte og signerte deler
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } kryptert del
+   *[other] { $count } krypterte deler
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } signert del
+   *[other] { $count } signerte deler
 }
 pgp-bar-count-warning = { $count ->
     [one] { $count } trenger oppmerksomhet

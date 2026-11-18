@@ -709,6 +709,7 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } recipients have no key to encrypt to. Find their keys, remove them from this message, or send it without encryption.
 }
 pgp-details-part = Part { $number }: { $label }
+attachment-from-part = From part { $number }: { $label }
 pgp-details-signed = Signed { $when } with the key { $key }
 pgp-details-unknown-key = Signed with the key { $key }, which you do not have
 pgp-details-opened = Decrypted with your key { $key }
@@ -716,10 +717,9 @@ pgp-details-for = Encrypted to { $keys }
 pgp-details-plain = Not signed and not encrypted
 pgp-bar-parts = This message has { $count } parts: { $list }. Each part says how it is protected.
 pgp-bar-count-verified = { $count } verified
-pgp-bar-count-good = { $count ->
-    [one] 1 signed or encrypted
-   *[other] { $count } signed or encrypted
-}
+pgp-bar-count-encrypted-signed = { $count } encrypted and signed
+pgp-bar-count-encrypted = { $count } encrypted
+pgp-bar-count-signed = { $count } signed
 pgp-bar-count-warning = { $count ->
     [one] 1 needs attention
    *[other] { $count } need attention

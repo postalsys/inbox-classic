@@ -1120,6 +1120,8 @@ pgp-recipients-intro-missing = { $count ->
 # review: new
 pgp-details-part = { $number } dalis: { $label }
 # review: new
+attachment-from-part = Iš { $number } dalies: { $label }
+# review: new
 pgp-details-signed = Pasirašyta { $when } raktu { $key }
 # review: new
 pgp-details-unknown-key = Pasirašyta raktu { $key }, kurio neturite
@@ -1134,10 +1136,22 @@ pgp-bar-parts = Šio laiško dalys ({ $count }): { $list }. Kiekviena dalis nuro
 # review: new
 pgp-bar-count-verified = patikrinta: { $count }
 # review: new
-pgp-bar-count-good = { $count ->
-    [one] { $count } pasirašyta arba užšifruota
-    [few] { $count } pasirašytos arba užšifruotos
-   *[other] { $count } pasirašytų arba užšifruotų
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] { $count } užšifruota ir pasirašyta
+    [few] { $count } užšifruotos ir pasirašytos
+   *[other] { $count } užšifruotų ir pasirašytų
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] { $count } užšifruota
+    [few] { $count } užšifruotos
+   *[other] { $count } užšifruotų
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] { $count } pasirašyta
+    [few] { $count } pasirašytos
+   *[other] { $count } pasirašytų
 }
 # review: new
 pgp-bar-count-warning = reikia dėmesio: { $count }

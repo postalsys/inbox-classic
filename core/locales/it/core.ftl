@@ -757,6 +757,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Mancano chiavi utilizzabili per { $count } destinatari. Cerca le loro chiavi o rimuovi quei destinatari dal messaggio. Puoi inviare il messaggio senza crittografia solo se non contiene più testo, immagini o allegati provenienti da messaggi crittografati.
 }
 pgp-details-part = Parte { $number }: { $label }
+# review: new
+attachment-from-part = Dalla parte { $number }: { $label }
 pgp-details-signed = Firmato il { $when } con la chiave { $key }
 pgp-details-unknown-key = Firmato con la chiave { $key }, che non hai
 pgp-details-opened = Decrittografato con la tua chiave { $key }
@@ -767,9 +769,20 @@ pgp-bar-count-verified = { $count ->
     [one] { $count } verificata
    *[other] { $count } verificate
 }
-pgp-bar-count-good = { $count ->
-    [one] 1 firmata o crittografata
-   *[other] { $count } firmate o crittografate
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 crittografata e firmata
+   *[other] { $count } crittografate e firmate
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 crittografata
+   *[other] { $count } crittografate
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 firmata
+   *[other] { $count } firmate
 }
 pgp-bar-count-warning = { $count ->
     [one] 1 richiede attenzione

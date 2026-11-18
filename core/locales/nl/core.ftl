@@ -739,6 +739,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Voor { $count } ontvangers ontbreken bruikbare sleutels. Zoek hun sleutels of verwijder deze ontvangers uit het bericht. Je kunt het bericht alleen onversleuteld verzenden als het geen tekst, afbeeldingen of bijlagen uit versleutelde berichten meer bevat.
 }
 pgp-details-part = Deel { $number }: { $label }
+# review: new
+attachment-from-part = Uit deel { $number }: { $label }
 pgp-details-signed = Ondertekend op { $when } met de sleutel { $key }
 pgp-details-unknown-key = Ondertekend met de sleutel { $key }, die je niet hebt
 pgp-details-opened = Ontsleuteld met je sleutel { $key }
@@ -746,10 +748,12 @@ pgp-details-for = Versleuteld voor { $keys }
 pgp-details-plain = Niet ondertekend en niet versleuteld
 pgp-bar-parts = Dit bericht heeft { $count } delen: { $list }. Bij elk deel staat hoe het is beschermd.
 pgp-bar-count-verified = { $count } geverifieerd
-pgp-bar-count-good = { $count ->
-    [one] { $count } ondertekend of versleuteld
-   *[other] { $count } ondertekend of versleuteld
-}
+# review: new
+pgp-bar-count-encrypted-signed = { $count } versleuteld en ondertekend
+# review: new
+pgp-bar-count-encrypted = { $count } versleuteld
+# review: new
+pgp-bar-count-signed = { $count } ondertekend
 pgp-bar-count-warning = { $count ->
     [one] { $count } vraagt aandacht
    *[other] { $count } vragen aandacht

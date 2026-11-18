@@ -23,6 +23,26 @@ pub struct AttachmentView {
     pub refusal: Option<String>,
     /// The strip's Show in Message for it: none, checked, unchecked or greyed
     pub show_in_message: crate::previews::ShowInMessage,
+    /// The part of a message with signed or encrypted parts it came from (its place among
+    /// [`ProtectionView::parts`]); None in any other message
+    pub part: Option<usize>,
+    /// How that part was protected, for a mark on the file in the strip; [`Protection::None`] in any other message
+    pub protection: Protection,
+    /// What the strip says of that part, in the tooltip's last line and for screen readers ("From part 2: Encrypted.
+    /// Signed by alice@example.org (key not verified)"); empty in any other message
+    pub part_text: String,
+}
+
+/// How the part a file came from was protected: the strip marks a file of an encrypted part with a lock
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Protection {
+    /// Not from a signed or encrypted part, or from one whose signature could not be confirmed
+    #[default]
+    None,
+    /// From a part whose signature was confirmed (signed by the sender's key, verified or not), not encrypted
+    Signed,
+    /// From a part that was encrypted (and decrypted to be shown), signed or not
+    Encrypted,
 }
 
 impl AttachmentView {
@@ -42,14 +62,38 @@ impl AttachmentView {
             size,
             size_text,
             show_in_message: Default::default(),
+            part: None,
+            protection: Protection::None,
+            part_text: String::new(),
         }
+    }
+
+    /// The strip's tooltip: the full name and size, why it does not open when it does not, and the part it came from
+    fn make_tooltip(&self) -> String {
+        let tooltip = crate::opening::tooltip(&self.filename, &self.size_text, self.kind);
+        if self.part_text.is_empty() {
+            tooltip
+        } else {
+            format!("{tooltip}\n{}", self.part_text)
+        }
+    }
+
+    /// From `part` (its place and what it is) of a message with signed or encrypted parts
+    fn set_part(&mut self, index: usize, part: &PartView) {
+        self.part = Some(index);
+        self.protection = part.protection();
+        self.part_text = pe_i18n::tr_args(
+            pe_i18n::Text::AttachmentFromPart,
+            &[("number", (index + 1).into()), ("label", (&part.label).into())],
+        );
+        self.tooltip = self.make_tooltip();
     }
 
     /// Its size as told apart from its content (a large message's text first, whose attachments are not here yet)
     pub(crate) fn set_size(&mut self, size: u64) {
         self.size = size;
         self.size_text = crate::format_size(size);
-        self.tooltip = crate::opening::tooltip(&self.filename, &self.size_text, self.kind);
+        self.tooltip = self.make_tooltip();
     }
 }
 
@@ -155,6 +199,21 @@ pub struct PartView {
     pub label: String,
     /// What Details says of it beyond its label
     pub details: Vec<String>,
+    /// It was encrypted (and decrypted to be shown)
+    pub encrypted: bool,
+    /// Its signature was confirmed: signed by the sender's key, verified or not
+    pub signed: bool,
+}
+
+impl PartView {
+    /// What the strip marks its files with: encrypted first, as a lock says more than a seal
+    pub fn protection(&self) -> Protection {
+        match (self.encrypted, self.signed) {
+            (true, _) => Protection::Encrypted,
+            (false, true) => Protection::Signed,
+            (false, false) => Protection::None,
+        }
+    }
 }
 
 /// Whose word counts for a message: the domains whose Authentication-Results verdicts the account's provider gives,
@@ -538,6 +597,15 @@ fn protected_view(
             || vec![pe_i18n::tr(pe_i18n::Text::PgpDetailsPlain)],
             crate::protect::Verdict::details,
         );
+        let signed = section.verdict.as_ref().is_some_and(|verdict| {
+            verdict.sealed.is_none()
+                && matches!(
+                    verdict.signature,
+                    crate::protect::Signature::Verified { .. } | crate::protect::Signature::Signed { .. }
+                )
+        });
+        let opened = encrypted && section.verdict.as_ref().is_some_and(|verdict| verdict.sealed.is_none());
+        let first = attachments.len();
         let document = part.as_ref().map(|part| {
             let rendered = render_part(part, allow, attachments.len(), previews.as_mut());
             remote_images |= rendered.remote_images;
@@ -554,7 +622,18 @@ fn protected_view(
             rendered.document
         });
         documents.push(document);
-        parts.push(PartView { tone, label, details });
+        let part = PartView {
+            tone,
+            label,
+            details,
+            encrypted: opened,
+            signed,
+        };
+        // each file of the part says where it came from, the strip marking an encrypted part's
+        for attachment in &mut attachments[first..] {
+            attachment.set_part(parts.len(), &part);
+        }
+        parts.push(part);
     }
     let page_parts: Vec<pe_html::SecurePart> = parts
         .iter()
@@ -678,20 +757,31 @@ fn escape_html(text: &str) -> String {
         .replace('"', "&quot;")
 }
 
-/// The bar of a message whose parts differ: how many parts, and how many of each tone
+/// The bar of a message whose parts differ: how many parts, and how many of each kind: encrypted and signed,
+/// encrypted, signed with a verified key, signed, needing attention, without a confirmed signature
 fn counted(parts: &[PartView]) -> String {
     use crate::protect::Tone;
     use pe_i18n::Text;
+    let kind = |part: &PartView| match part.tone {
+        Tone::Warning => Text::PgpBarCountWarning,
+        Tone::Neutral => Text::PgpBarCountNeutral,
+        _ if part.encrypted && part.signed => Text::PgpBarCountEncryptedSigned,
+        _ if part.encrypted => Text::PgpBarCountEncrypted,
+        Tone::Verified => Text::PgpBarCountVerified,
+        Tone::Good => Text::PgpBarCountSigned,
+    };
     let kinds = [
-        (Tone::Verified, Text::PgpBarCountVerified),
-        (Tone::Good, Text::PgpBarCountGood),
-        (Tone::Warning, Text::PgpBarCountWarning),
-        (Tone::Neutral, Text::PgpBarCountNeutral),
+        Text::PgpBarCountEncryptedSigned,
+        Text::PgpBarCountEncrypted,
+        Text::PgpBarCountVerified,
+        Text::PgpBarCountSigned,
+        Text::PgpBarCountWarning,
+        Text::PgpBarCountNeutral,
     ];
     let list: Vec<String> = kinds
         .iter()
-        .filter_map(|(tone, text)| {
-            let count = parts.iter().filter(|part| part.tone == *tone).count();
+        .filter_map(|text| {
+            let count = parts.iter().filter(|part| kind(part) == *text).count();
             (count > 0).then(|| pe_i18n::tr_args(*text, &[("count", count.into())]))
         })
         .collect();
@@ -946,6 +1036,9 @@ mod tests {
                 tooltip: format!("../../report.pdf ({})", crate::format_size(4)),
                 refusal: None,
                 show_in_message: Default::default(),
+                part: None,
+                protection: Protection::None,
+                part_text: String::new(),
             }]
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));
@@ -962,6 +1055,47 @@ mod tests {
         assert_eq!(taken.content, b"%PDF");
         assert!(take_attachment(MESSAGE, 1).is_none());
         assert_eq!(attachment(MESSAGE, 1), None);
+    }
+
+    /// The bar of a message whose parts differ counts encrypted and signed parts apart, a part both encrypted and
+    /// signed as one of each, and a file of a part takes the part's protection: encrypted first
+    #[test]
+    fn the_bar_counts_encrypted_and_signed_parts_apart() {
+        use crate::protect::Tone;
+        let part = |tone, encrypted, signed| PartView {
+            tone,
+            label: String::new(),
+            details: Vec::new(),
+            encrypted,
+            signed,
+        };
+        let parts = [
+            part(Tone::Good, true, true),
+            part(Tone::Verified, true, true),
+            part(Tone::Good, true, false),
+            part(Tone::Good, false, true),
+            part(Tone::Verified, false, true),
+            part(Tone::Warning, false, false),
+            part(Tone::Neutral, false, false),
+        ];
+        assert_eq!(
+            counted(&parts),
+            "This message has 7 parts: 2 encrypted and signed, 1 encrypted, 1 verified, 1 signed, 1 needs attention, \
+             1 without a confirmed signature. Each part says how it is protected."
+        );
+        let marks: Vec<Protection> = parts.iter().map(PartView::protection).collect();
+        assert_eq!(
+            marks,
+            [
+                Protection::Encrypted,
+                Protection::Encrypted,
+                Protection::Encrypted,
+                Protection::Signed,
+                Protection::Signed,
+                Protection::None,
+                Protection::None
+            ]
+        );
     }
 
     #[test]

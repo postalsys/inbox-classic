@@ -760,6 +760,8 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } vastaanottajalla ei ole avainta, jolle salata. Etsi heidän avaimensa, poista heidät viestistä tai lähetä viesti ilman salausta.
 }
 pgp-details-part = Osa { $number }: { $label }
+# review: new
+attachment-from-part = Osasta { $number }: { $label }
 pgp-details-signed = Allekirjoitettu { $when } avaimella { $key }
 pgp-details-unknown-key = Allekirjoitettu avaimella { $key }, jota sinulla ei ole
 pgp-details-opened = Salaus purettu avaimella { $key }
@@ -767,9 +769,20 @@ pgp-details-for = Salattu avaimille { $keys }
 pgp-details-plain = Ei allekirjoitettu eikä salattu
 pgp-bar-parts = Tässä viestissä on { $count } osaa: { $list }. Kunkin osan kohdalla näkyy, miten se on suojattu.
 pgp-bar-count-verified = vahvistettuja { $count }
-pgp-bar-count-good = { $count ->
-    [one] 1 allekirjoitettu tai salattu
-   *[other] { $count } allekirjoitettua tai salattua
+# review: new
+pgp-bar-count-encrypted-signed = { $count ->
+    [one] 1 salattu ja allekirjoitettu
+   *[other] { $count } salattua ja allekirjoitettua
+}
+# review: new
+pgp-bar-count-encrypted = { $count ->
+    [one] 1 salattu
+   *[other] { $count } salattua
+}
+# review: new
+pgp-bar-count-signed = { $count ->
+    [one] 1 allekirjoitettu
+   *[other] { $count } allekirjoitettua
 }
 pgp-bar-count-warning = { $count ->
     [one] 1 vaatii huomiota
