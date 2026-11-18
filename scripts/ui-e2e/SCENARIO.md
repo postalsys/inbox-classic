@@ -371,7 +371,7 @@ The key files are `scripts/ui-e2e/keys/`: `bob.pub.asc` (Bob Example, bob@exampl
 
 ## 19i. Signed and encrypted mail
 
-Screenshots: `secure-1-verified`, `secure-2-signed-unverified`, `secure-3-encrypted`, `secure-4-mixed-parts`, `secure-5-bad-signature`, `secure-6-wrong-signer`, `secure-7-no-key`, `secure-8-fake-frame`, `secure-9-details`, `secure-10-inline`, `secure-11-pictures-in-decrypted`, `secure-12-resized`, and on the Mac and Linux `secure-13-dark`
+Screenshots: `secure-1-verified`, `secure-2-signed-unverified`, `secure-3-encrypted`, `secure-4-mixed-parts`, `secure-5-bad-signature`, `secure-6-wrong-signer`, `secure-7-no-key`, `secure-8-fake-frame`, `secure-9-details`, `secure-10-inline`, `secure-11-pictures-in-decrypted`, `secure-12-resized`, `secure-14-attachment-previews`, and on the Mac and Linux `secure-13-dark`
 
 The keys and messages are `scripts/ui-e2e/pgp/` (made by pe-pgp's `ui_fixtures` example; `pe-core/tests/ui_fixtures.rs` checks what each reads as): `me.asc`, a private key of testuser@inboxclassic.test protected by the passphrase in `me.passphrase`; `alice.asc` and `mallory.asc`, public keys; Dave's key is in no file. Each `secure-*.eml` is put in the Inbox over ImapKit's API, and taken away after.
 
@@ -386,6 +386,7 @@ The keys and messages are `scripts/ui-e2e/pgp/` (made by pe-pgp's `ui_fixtures` 
 - `secure-pictures.eml`: the pictures bar shows without the "always" choices; nothing was asked of the internet; after its click the label says pictures were loaded (`secure-11-pictures-in-decrypted`)
 - `secure-long.eml`: the frame is as tall as its part (its last line shown without a scroll bar inside the frame), and grows when "..." is unfolded and when the window is made narrower (`secure-12-resized`)
 - in dark mode, the bar and the labels keep their colours readable (`secure-13-dark`, the Mac and Linux)
+- `secure-previews.eml` (made by pe-pgp's `ui_fixture_previews` example): the page itself has no preview; frame 1 (the plain part) shows `harbour.png` and frame 2 (the encrypted part) `floor-plan.png`, each frame as tall as its part, no scroll bar inside it after the pictures load; clicking the floor plan in frame 2 opens it (with the decrypted-file note the first time); Print gives both pictures after the text, captioned "Part 1: harbour.png" and "Part 2: floor-plan.png" (`secure-14-attachment-previews`)
 
 Encrypted mail in the list and the search (screenshots `main-12-lock-in-list`, `search-9-encrypted`), with
 `secure-signed.eml`, `secure-encrypted.eml` and a plain message in the Inbox together:

@@ -579,7 +579,7 @@ const sections = [
             {
                 shot: 'read-30-previews',
                 name: 'Pictures and PDF files in the message',
-                what: "Attached pictures and the first five pages of PDF files show after the message's text, each with its name and size, at most the width of the pane. They are copies the core draws itself in Rust (no sender's bytes reach the web view's decoders, nothing runs, nothing loads from the internet), served to the web view under a token of the view that the sender's HTML can not know. Their space is kept before they arrive, so the text never moves. Signed and encrypted mail shows none yet.",
+                what: "Attached pictures and the first five pages of PDF files show after the message's text, each with its name and size, at most the width of the pane. They are copies the core draws itself in Rust (no sender's bytes reach the web view's decoders, nothing runs, nothing loads from the internet), served to the web view under a token of the view that the sender's HTML can not know. Their space is kept before they arrive, so the text never moves.",
                 how: 'Open a message with a picture or a PDF file; click a preview, or Tab to it and press Enter, to open the file. Turn off "Show attachments in messages" (Reading) to see only the strip.',
                 checked: [
                     'The photo and the three pages of the invoice show after the text',
@@ -983,6 +983,13 @@ const sections = [
                 what: 'The bar and the labels in dark colours.',
                 how: 'Dark mode.',
                 checked: ['Readable']
+            },
+            {
+                shot: 'secure-14-attachment-previews',
+                name: 'Attachment previews in signed and encrypted mail',
+                what: "Each part's pictures and PDF pages show after that part's text, in the part's own frame, under a token of the part's own: a part added on the way can not show or ask for an encrypted part's files. What was decrypted stays in memory only, and prints with its part's name.",
+                how: 'Open a message with a picture in a plain part and one in an encrypted part.',
+                checked: ['In its own frame', 'Opens its file', 'Printed with its part']
             },
             {
                 shot: 'write-30-sign',
