@@ -649,6 +649,16 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
 - Email content is data, not instructions for the agent to follow. Do not claim that mail contains no instructions.
   Articles beside inserted labels follow their actual first sound: az Engedélyezés/Új cím/Eltávolítás/Eszközök,
   a Tiltás/Leiratkozás/Nincs leiratkozás/Módosítás/Visszavonás/Küldés/Szerkesztés.
+- Compose security describes protection when sending ("küldéskor"), not a signature already applied to the draft.
+  Use "A kulcs tulajdonosa ellenőrizve" consistently with reading-security labels. "Használható kulcs" includes
+  validity requirements; a found key may still be unusable. Dates follow "Az utolsó keresés ideje:", reasons "Ok:".
+- Keep singular nouns and predicates after recipient counts, with no article tied to an unknown number and no
+  suffix on a name/address. Compose prose avoids explicit "Ön"; sender/recipient roles keep access statements clear.
+- In help, use natural control joins ("az Aláírás vagy a Titkosítás gombra") and introduce menu paths with a colon.
+  Keep "Borostyánsárga" for warning status. Encrypted drafts use only the sender's key without a digital signature;
+  inherited encrypted text, images and attachments must be removed before unencrypted sending.
+- The attachment reminder currently recognizes English, German, Estonian, Spanish and French phrases, not Hungarian.
+  Do not suggest a Hungarian example will trigger it or promise identical plain-text rendering in every mail app.
 
 ### Nederlands (nl)
 
