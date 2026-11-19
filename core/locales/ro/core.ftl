@@ -412,7 +412,6 @@ done-flagged-color = Pentru { $messages } s-a pus semnalizarea { $color ->
    *[gray] gri
 }
 # the Flag menu: the colours of Apple Mail's flags
-# review: new
 flag-color = { $color ->
     [red] Roșu
     [orange] Portocaliu
@@ -420,7 +419,7 @@ flag-color = { $color ->
     [green] Verde
     [blue] Albastru
     [purple] Violet
-   *[gray] Gri
+   *[gray] Cenușiu
 }
 
 ## The Move and Copy window
