@@ -238,7 +238,7 @@ final class UITest {
 
     /// The button `buttonID` of the question `window` held back, as the user meets it: off as the window opened, a
     /// click on it while it is off does nothing (the question stays, `answered` gives nothing), and it comes on by
-    /// itself after about 1.5 s (Agents.swift holdBack), not before
+    /// itself after `holdBackSeconds` (Agents.swift holdBack), not before
     func checkHeldBack(_ window: NSWindow, _ buttonID: String, _ what: String, answered: () -> Bool) async {
         let id = window.identifier?.rawValue ?? ""
         guard let opened = modalsOpened[id], let button: NSButton = find(buttonID, in: window) else {
@@ -254,7 +254,7 @@ final class UITest {
         }
         let on = await waitUntil(10) { button.isEnabled }
         let after = Date().timeIntervalSince(opened.at)
-        check(offAtFirst && on && after >= 1.4 && clicked != "a click answered",
+        check(offAtFirst && on && after >= holdBackSeconds - 0.1 && clicked != "a click answered",
               "\(what) (off as it opened: \(offAtFirst), \(clicked), on after \(String(format: "%.1f", after)) s)")
     }
 

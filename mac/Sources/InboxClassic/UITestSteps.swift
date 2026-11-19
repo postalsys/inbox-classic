@@ -3364,18 +3364,17 @@ extension UITest {
             (0..<self.list.numberOfRows).filter { self.main.mailbox.row($0)?.subject.hasPrefix("Club newsletter") == true }.count == 2
                 && (0..<self.list.numberOfRows).contains { self.main.mailbox.row($0)?.subject == "Invitation: Roadmap review" }
         }, "the two newsletters and the invitation are in the Inbox")
+        // asked twice: the first answered with Return, the second with Send
+        try Data().write(to: URL(fileURLWithPath: agentOut.path + ".invitation-twice"))
         try Data().write(to: URL(fileURLWithPath: agentOut.path + ".bulk"))
 
         // the invitation's answer: what it answers above the text, Send and Don't Send only
         let send = await waitWindow("agent.send", 30)
         check(send != nil, "the agent's answer to the invitation is shown to the user first")
         if let send {
-            // Send's state first, before anything else takes time: off unless the test came after the wait was over
-            let button: NSButton? = find("agent.sendButton", in: send)
-            let sendOn = button?.isEnabled == true
-            let shownFor = Modal.openedAt[ObjectIdentifier(send)].map { Date().timeIntervalSince($0) } ?? 0
-            check(button != nil && (!sendOn || shownFor >= holdBackSeconds),
-                  "Send waits a moment before it can be pressed (on: \(sendOn), shown \(String(format: "%.2f", shownFor)) s)")
+            await checkHeldBack(send, "agent.sendButton", "Send waits a moment before it can be pressed") {
+                agentSaid(agentOut, "invitation-first") != nil
+            }
             let line: NSTextField? = find("agent.invitation", in: send)
             check(line?.stringValue.hasPrefix("This message accepts the invitation “Roadmap review”") == true
                   && line?.stringValue.contains("changes only once the message has been sent") == true,
@@ -3384,19 +3383,21 @@ extension UITest {
             let dont: NSButton? = find("agent.dontSend", in: send)
             check(compose == nil && dont != nil, "it has no Edit First")
             checkQuestionFits(send, "the invitation's Send question")
-            onMain {
-                NSApp.activate()
-                send.makeKeyAndOrderFront(nil)
-            }
-            // a question raised while the app is in the background has its default button back once it is key (macOS
-            // takes the key from it until then), so this is checked when the user can press Return
-            _ = await waitUntil(5) { send.isKeyWindow }
-            let isDefault = await waitUntil(5) { dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell }
-            check(isDefault, "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"), "
-                  + "default \(send.defaultButtonCell === dont?.cell), key window \(send.isKeyWindow))")
-            await pause(2)
+            onMain { self.bringToFront(send) }
             await shot(send, "agents-13-invitation")
             await darkShot(send, "agents-13-invitation-dark")
+            // Return, with Send on: the safe answer, Don't Send, is what it gives
+            pressKey(send, 36)
+            let first = await waitFor(20) { agentSaid(agentOut, "invitation-first") as? [String: Any] }
+            check(first?["status"] as? String == "not_sent" && !send.isVisible,
+                  "Don't Send is the default: Return answers it, and the agent learns it was not sent (\(first ?? [:]))")
+        }
+        // asked again, answered Send
+        let secondAsk = await waitFor(30) { self.window("agent.send").flatMap { $0 === send ? nil : $0 } }
+        check(secondAsk != nil, "the agent asks again")
+        if let secondAsk {
+            let button: NSButton? = find("agent.sendButton", in: secondAsk)
+            _ = await waitUntil(10) { button?.isEnabled == true }
             press(button)
         }
         let answered = await waitFor(30) { agentSaid(agentOut, "invitation") as? [String: Any] }
@@ -3471,20 +3472,47 @@ extension UITest {
         let asked = heading()
         check(asked.range(of: "^Take back the \\d+ changes My AI agent made in this time\\?$", options: .regularExpression) != nil,
               "a span picked, it asks with the count of the changes (\(asked))")
-        check(takeBack?.isHidden == false && takeBack?.hasDestructiveAction == true && cancel?.title == "Cancel"
-              && cancel?.keyEquivalent == "\r" && takeBack?.keyEquivalent == "" && ask.defaultButtonCell === cancel?.cell,
-              "Take Back is marked destructive and Cancel is the default")
+        check(takeBack?.isHidden == false && takeBack?.hasDestructiveAction == true && cancel?.title == Text.uiCancel.text,
+              "Take Back is marked destructive, beside Cancel")
         checkQuestionFits(ask, "Undo Since")
-        await pause(0.5)
         await shot(ask, "agents-12-undo-since")
         await darkShot(ask, "agents-12-undo-since-dark")
-        press(takeBack)
+        // Esc and Return answer Cancel: nothing is taken back
+        for key: UInt16 in [53, 36] {
+            let name = key == 53 ? "Esc" : "Return"
+            if key == 36 {
+                press(undoSince)
+                guard let reopened = await waitWindow("agents.undoSinceWindow", 10) else {
+                    check(false, "Undo Since asks again")
+                    break
+                }
+                choose(find("undoSince.span", in: reopened), 1)
+                pressKey(reopened, key)
+                _ = await waitUntil(5) { !reopened.isVisible }
+            } else {
+                pressKey(ask, key)
+                _ = await waitUntil(5) { !ask.isVisible }
+            }
+            let takenBack = await waitUntil(2) { cell(log, 2, 0).contains("taken back") }
+            let stillRead = await self.seen("Subject: Club newsletter 2")
+            check(window("agents.undoSinceWindow") == nil && !takenBack && stillRead,
+                  "\(name) answers Cancel: the question closes and nothing is taken back (\(cell(log, 2, 0)))")
+        }
+        // asked again, and Take Back pressed
+        press(undoSince)
+        guard let confirm = await waitWindow("agents.undoSinceWindow", 10) else {
+            check(false, "Undo Since asks again")
+            NSApp.stopModal()
+            return
+        }
+        choose(find("undoSince.span", in: confirm), 1)
+        press(find("undoSince.takeBack", in: confirm))
         let report = await waitWindow("alert", 10)
         let said = alertText(report)
         check(said.range(of: "Took back \\d+ changes", options: .regularExpression) != nil
               && said.contains("1 message was changed since, by you or on the server, and was left as it is."),
               "Take Back says what it took back and what it left (\(said))")
-        answer(report, "OK")
+        answer(report, Text.uiOk.text)
         check(await waitUntil(20) {
             let first = await self.seen("Subject: Club newsletter 1")
             let second = await self.seen("Subject: Club newsletter 2")

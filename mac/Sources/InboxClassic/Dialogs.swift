@@ -113,18 +113,14 @@ private func run(_ alert: NSAlert) -> NSApplication.ModalResponse {
 @MainActor
 enum Modal {
     static private(set) var windows: [NSWindow] = []
-    /// when each of them opened, so the test can tell a wait it came too late to see from one that was never there
-    static private(set) var openedAt: [ObjectIdentifier: Date] = [:]
 
     static func opened(_ window: NSWindow) {
         windows.append(window)
         TestHooks.modalOpened?(window)
-        openedAt[ObjectIdentifier(window)] = Date()
     }
 
     static func closed(_ window: NSWindow) {
         windows.removeAll { $0 === window }
-        openedAt[ObjectIdentifier(window)] = nil
     }
 }
 
