@@ -1,21 +1,19 @@
-<!--review-->
 <h1>Šifravimo raktai</h1>
-<p class="summary">Sukurkite raktą laiškams pasirašyti ir užšifruotiems laiškams gauti, laikykite savo kontaktų raktus.</p>
-<p>Inbox Classic pasirašo ir šifruoja laiškus OpenPGP raktais. Jūsų raktas turi dvi dalis: viešąjį raktą, kurį duodate kitiems, ir privatųjį raktą, kuris lieka jūsų kompiuteryje. Kontaktų raktais galite tikrinti jų parašus ir šifruoti jiems siunčiamus laiškus.</p>
+<p class="summary">Sukurkite savo raktą laiškams pasirašyti ir užšifruotiems laiškams gauti, taip pat pridėkite kontaktų viešuosius raktus.</p>
+<p>Inbox Classic laiškams pasirašyti ir šifruoti naudoja OpenPGP raktus. Savo viešąjį raktą perduodate kitiems, o privatųjį laikote paslaptyje. Kontaktų viešieji raktai naudojami jų skaitmeniniams parašams tikrinti ir jiems siunčiamiems laiškams šifruoti.</p>
 <p>Norėdami sukurti savo raktą:</p>
 <ol>
-    <li>Pasirinkite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, tada spustelėkite <b data-text="ui-keys-new"></b>.</li>
-    <li>Pasirinkite paskyrą ir spustelėkite <b data-text="ui-keys-new-make"></b>. Raktas naudojamas paskyros adresui ir kitiems jos adresams.</li>
-    <li>Spustelėkite <b data-text="ui-keys-backup-now"></b> ir pasirinkite slaptafrazę. Laikykite failą ir slaptafrazę skirtingose saugiose vietose.</li>
+    <li>Pasirinkite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, tada spustelėkite mygtuką „<b data-text="ui-keys-new"></b>“.</li>
+    <li>Pasirinkite paskyrą ir spustelėkite mygtuką „<b data-text="ui-keys-new-make"></b>“. Raktas priskiriamas pagrindiniam paskyros adresui ir jos papildomiems adresams.</li>
+    <li>Spustelėkite mygtuką „<b data-text="ui-keys-backup-now"></b>“ ir sukurkite slaptafrazę. Atsarginės kopijos failą ir slaptafrazę laikykite skirtingose saugiose vietose.</li>
 </ol>
-<aside class="warning">Be atsarginės kopijos, praradus ar atkūrus šį kompiuterį, jūsų rakto atkurti nebus galima, o juo užšifruotų laiškų nebebus galima perskaityti.</aside>
-<h2>Raktai apsaugoti ir be slaptafrazių</h2>
-<p>Jūsų privačiuosius raktus saugo raktas, laikomas <!--os:windows-->kredencialų tvarkytuvėje<!--/os--><!--os:mac-->raktinėje<!--/os--><!--os:linux-->sistemos raktinėje<!--/os-->, todėl norint juos naudoti slaptafrazės įvesti niekada nereikia. Slaptafrazę pasirenkate tik atsarginei kopijai. Jei jūsų raktas rodomas kaip užrakintas, ta apsauga buvo atkurta iš naujo: spustelėkite <b data-text="ui-keys-import"></b> ir pasirinkite jo atsarginę kopiją.</p>
+<aside class="warning">Praradę vienintelę privačiojo rakto kopiją, jo atkurti nebegalėsite. Taip pat nebegalėsite iššifruoti laiškų, kuriems reikia šio rakto. Atsarginę kopiją laikykite atskirai nuo kompiuterio.</aside>
+<h2>Privačiųjų raktų apsauga</h2>
+<p>Pagal numatytuosius nustatymus jūsų privatūs raktai apsaugoti atskiru raktu, laikomu <!--os:windows-->Windows saugykloje „Kredencialų tvarkytuvas“<!--/os--><!--os:mac-->prisijungimo raktinėje<!--/os--><!--os:linux-->sistemos raktinėje<!--/os-->. Įprastai naudojant raktus, jų slaptafrazės įvesti nereikia; ją pasirenkate atsarginei kopijai apsaugoti. Jei raktas užrakintas, pirmiausia patikrinkite, ar prieinama sistemos saugykla. Jei apsaugos raktas prarastas, spustelėkite mygtuką „<b data-text="ui-keys-import"></b>“ ir importuokite privačiojo rakto atsarginę kopiją. Pasirinkus saugojimą tik atmintyje, apsaugos raktas neišsaugomas kitam programos paleidimui.</p>
 <h2>Raktų pridėjimas</h2>
-<p>Spustelėkite <b data-text="ui-keys-import"></b>, kad pridėtumėte raktą iš failo, pavyzdžiui, kontakto atsiųstą arba savo atsarginę kopiją. Slaptafraze apsaugoto privačiojo rakto slaptafrazės paklausiama vieną kartą. Tada Inbox Classic paklausia, ar naudoti importuotą jūsų raktą jūsų adresams.</p>
-<p>Nuo tada kontakto raktas naudojamas jo adresui. Jei vėliau atsiranda kitas to paties adreso raktas, naudojamas dabartinis, kol kontakto ypatybėse nepasirinksite naujojo.</p>
-<p>Norėdami pasidalinti savo viešuoju raktu, pažymėkite jį ir spustelėkite <b data-text="ui-keys-export"></b>. Paskyros raktą taip pat galite pasirinkti jos ypatybių skirtuke <b data-text="ui-account-security"></b>.</p>
-<p>Kai šifruojate tam, kurio rakto neturite, Inbox Classic jo klausia jo adreso domeno, o paskui keys.openpgp.org. Siunčiamas tik adresas. Kad keys.openpgp.org niekada nebūtų klausiama, išjunkite <b data-text="ui-pgp-keyserver"></b> skiltyje <b data-settings="reading"></b>.</p>
-<p>Raktai keliauja ir su paštu. Laiškai iš adreso, turinčio raktą, neša jo viešąjį raktą, kad kitos programos galėtų jums šifruoti, o Inbox Classic tokiu pat būdu sužino kontakto raktą iš jo laiškų. Jei nebenorite siųsti savojo, išjunkite <b data-text="ui-account-autocrypt"></b> paskyros skirtuke <b data-text="ui-account-security"></b>.</p>
+<p>Mygtuku „<b data-text="ui-keys-import"></b>“ importuokite raktą iš failo, pavyzdžiui, kontakto atsiųstą viešąjį raktą arba savo privačiojo rakto atsarginę kopiją. Jei privatusis raktas apsaugotas slaptafraze, ją reikės įvesti importuojant. Inbox Classic taip pat gali paklausti, ar priskirti importuotą jūsų raktą jūsų adresams.</p>
+<p>Jei tam adresui rakto dar nėra, importuotas kontakto raktas priskiriamas adresui. Jei vėliau gaunamas kitas to paties adreso raktas, ankstesnis lieka pasirinktas, kol kontakto ypatybėse nepasirinksite naujojo.</p>
+<p>Norėdami perduoti savo viešąjį raktą kitiems, pasirinkite jį ir spustelėkite mygtuką „<b data-text="ui-keys-export"></b>“. Paskyrai naudojamą raktą galite pasirinkti jos ypatybių skirtuke „<b data-text="ui-account-security"></b>“.</p>
+<p>Jei norite užšifruoti laišką gavėjui, kurio rakto neturite, Inbox Classic pirmiausia jo ieško gavėjo adreso domene, o paskui, jei leidžiama, keys.openpgp.org. Ieškant pagal adresą, šiai svetainei perduodamas gavėjo el. pašto adresas. Kitais atvejais rakto gali būti ieškoma pagal kontrolinį kodą ar rakto identifikatorių. Norėdami išjungti užklausas keys.openpgp.org, išjunkite parinktį „<b data-text="ui-pgp-keyserver"></b>“ čia: <b data-settings="reading"></b>.</p>
+<p>Viešaisiais raktais galima keistis ir kartu su laiškais. Pagal numatytuosius nustatymus iš adreso, kuriam priskirtas raktas, siunčiamuose laiškuose pateikiamas viešasis raktas. Jį atpažįstančios programos gali naudoti šį raktą jums siunčiamiems laiškams šifruoti. Atidariusi laišką su siuntėjo raktu, Inbox Classic gali jį įsiminti, tačiau jo savininkas lieka nepatikrintas. Jei adresui jau pasirinktas kitas raktas, naujasis laukia jūsų sprendimo. Norėdami nebesiųsti savo viešojo rakto, išjunkite parinktį „<b data-text="ui-account-autocrypt"></b>“ paskyros skirtuke „<b data-text="ui-account-security"></b>“.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->
