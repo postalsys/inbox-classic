@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 HOMEPAGE=${HOMEPAGE:-../inboxclassic.com}
 # the screenshots the page shows
-SHOTS=(read-1-html account-1-form find-2-every-folder all-inboxes-3-accounts pictures-4-list write-5-new agents-4-send bounce-1-failed otp-1-card)
+SHOTS=(read-1-html account-1-form find-2-every-folder all-inboxes-3-accounts pictures-4-list write-5-new write-31-encrypt agents-4-send bounce-1-failed otp-1-card)
 platforms=("$@")
 [ ${#platforms[@]} -gt 0 ] || platforms=(windows mac linux)
 
@@ -33,19 +33,19 @@ for platform in "${platforms[@]}"; do
                 size=$(magick identify -format '%wx%h' "$source")
                 width=$((${size%x*} - 14))
                 height=$((${size#*x} - 7))
-                [ "$shot" = write-5-new ] && height=400
+                { [ "$shot" = write-5-new ] || [ "$shot" = write-31-encrypt ]; } && height=400
                 magick "$source" -crop "${width}x${height}+7+0" +repage -strip "$target"
                 ;;
             mac)
                 # the compose window, as on Windows, down to its fields and the start of the text
                 crop=""
-                [ "$shot" = write-5-new ] && crop="-crop x400+0+0 +repage"
+                { [ "$shot" = write-5-new ] || [ "$shot" = write-31-encrypt ]; } && crop="-crop x400+0+0 +repage"
                 # the Retina pictures are 16 bits a channel, the page needs 8
                 magick "$source" -resize 50% $crop -depth 8 -strip "$target"
                 ;;
             linux)
                 crop=""
-                [ "$shot" = write-5-new ] && crop="-crop x400+0+0 +repage"
+                { [ "$shot" = write-5-new ] || [ "$shot" = write-31-encrypt ]; } && crop="-crop x400+0+0 +repage"
                 # the account form is a dialog over the main window: the dialog, where it is in a window of 1190x750
                 [ "$shot" = account-1-form ] && crop="-crop 551x459+320+146 +repage"
                 # the send confirmation is a dialog over the main window too
