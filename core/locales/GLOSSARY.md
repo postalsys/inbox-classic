@@ -744,8 +744,8 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   account also removes its local unsent mail. Mark All Read applies to messages, not folders as read objects.
 - App-password guidance is conditional on provider/account support; Outlook.com/Microsoft 365 instructions use
   browser sign-in. Google’s built-in button starts disabled; do not assert the live verification status of its client.
-- "Kredencialų tvarkytuvas" is now applied in sign-in-apps and account-security. Data-storage and encryption-keys
-  remain pending. Client secrets are hidden when revisiting the editor; the secret store is the default, not universal.
+- "Kredencialų tvarkytuvas" is now applied in sign-in-apps, account-security and encryption-keys. Data-storage
+  remains pending. Client secrets are hidden when revisiting the editor; the secret store is the default, not universal.
 - Error quotations match current catalogs; low-level English diagnostics remain literal and get a Lithuanian
   explanation. STARTTLS failure ends the connection attempt, not the whole program. Local networks are not encryption.
 - The sign-in app Check button validates issuer configuration, not permission to read mail. The app-password
@@ -763,6 +763,16 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
 - Invitation replies use "Preliminariai priimta". Local response status changes only after successful sending;
   do not promise the organizer's calendar accepted it. Generated invitation replies have no signature text or Edit First.
   Calendar help distinguishes local times from floating times and installed apps from successful file opening.
+- Encryption help distinguishes a valid digital signature from a checked key owner. Verification requires the
+  whole fingerprint and every listed address; a mismatch means a different key, not proof it belongs to an impostor.
+  A locked private key can mean unavailable system storage. Its backup protects against losing the only private copy.
+- Decrypted attachment previews stay in memory; opened/saved copies and the optional search index can be on disk.
+  Encrypted list snippets/subjects depend on decrypted indexing. New-mail notifications still hide encrypted subjects.
+- Privacy help describes external attachment opening on request, blocked active formats and provider-confirmed domains.
+  Mail scripts are stripped; it does not claim the whole app executes no code or uses no system image decoders.
+  Remote images are blocked by default; encrypted parts always need a click. Logos may also require a network request.
+- STARTTLS errors end the connection attempt before credentials, not the app. An encryption-required SMTP response
+  does not establish that a password is correct. Suggested ports depend on the provider; a local network is not encryption.
 
 ### Magyar (hu)
 

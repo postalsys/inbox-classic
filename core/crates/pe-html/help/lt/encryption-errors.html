@@ -1,17 +1,15 @@
-<!--review-->
 <h1>Šifravimo klaidos</h1>
-<p class="summary">Ką daryti, kai serveris nesiūlo šifravimo arba jo reikalauja, kai jis išjungtas.</p>
-<h2>„the server does not offer STARTTLS“</h2>
-<p>Paskyrai nustatytas STARTTLS, bet serveris nepasiūlė šifravimo. Inbox Classic sustojo, todėl jūsų slaptažodis nebuvo išsiųstas.</p>
+<p class="summary">Ką daryti, kai nepavyksta užmegzti šifruoto ryšio su pašto serveriu arba serveris nepriima nešifruoto prisijungimo.</p>
+<h2>„the server does not offer STARTTLS“ (serveris nesiūlo STARTTLS)</h2>
+<p>Paskyros nustatymuose pasirinktas STARTTLS, tačiau serveris jo nepasiūlė. Inbox Classic nutraukė šį bandymą prisijungti prieš siųsdama prisijungimo duomenis.</p>
 <ol>
     <li>Atidarykite paskyros ypatybes per <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Nustatykite saugą SSL/TLS su prievadu 993 gaunamiesiems arba 465 siunčiamiesiems laiškams.</li>
-    <li>Spustelėkite <b data-text="ui-ok"></b>.</li>
+    <li>Patikrinkite serverio vardą, saugos režimą ir prievadą pagal paslaugų teikėjo nurodymus. Jei palaikomas SSL/TLS, gaunamiesiems laiškams paprastai naudojamas prievadas 993, o siunčiamiesiems 465.</li>
+    <li>Spustelėkite mygtuką „<b data-text="ui-ok"></b>“.</li>
 </ol>
-<p>Jei niekas kita nepadeda, serverio saugiai naudoti negalima.</p>
-<h2>„the server takes the password only over an encrypted connection“</h2>
-<p>Siunčiamųjų laiškų serveriui nustatyta <b data-text="ui-security-none"></b>. Jūsų slaptažodis tinkamas. Pakeiskite <b data-text="ui-field-smtp-security"></b> į STARTTLS su prievadu 587 arba į SSL/TLS su prievadu 465.</p>
-<h2>Įspėjimas apie ryšį be šifravimo</h2>
-<p>Pasirinkus <b data-text="ui-security-none"></b>, Inbox Classic įspėja, kad bet kas, perimantis jūsų tinklo srautą, gali perskaityti jūsų slaptažodį ir laiškus. Tęskite tik tada, jei serveris yra jūsų kompiuteryje arba vietiniame tinkle.</p>
+<p>Jei su teikėjo nurodytais nustatymais šifruoto ryšio užmegzti nepavyksta, kreipkitės į paslaugų teikėją. Neišjunkite šifravimo vien tam, kad išvengtumėte šios klaidos.</p>
+<h2>„the server takes the password only over an encrypted connection“ (slaptažodis priimamas tik šifruotu ryšiu)</h2>
+<p>Siunčiamųjų laiškų serveriui pasirinkta parinktis „<b data-text="ui-security-none"></b>“, tačiau serveris reikalauja šifruoto ryšio. Šis pranešimas nepatvirtina, kad slaptažodis teisingas. Lauke „<b data-text="ui-field-smtp-security"></b>“ pasirinkite teikėjo nurodytą saugos režimą: paprastai STARTTLS su prievadu 587 arba SSL/TLS su prievadu 465.</p>
+<h2>Įspėjimas apie nešifruotą ryšį</h2>
+<p>Pasirinkus parinktį „<b data-text="ui-security-none"></b>“, Inbox Classic įspėja, kad tinklo srautą stebintys asmenys gali perskaityti slaptažodį ir laiškus. Nešifruotą ryšį naudokite tik tada, kai jis tikrai būtinas, pavyzdžiui, su bandomuoju serveriu savo kompiuteryje. Vien vietinis tinklas ryšio neapsaugo.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

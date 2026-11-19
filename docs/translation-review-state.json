@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Review Lithuanian mail diagnostics, rules and unsubscribe help: message-not-shown, delivery-problems, message-rules and unsubscribe. All current Lithuanian catalogs are reviewed; 16 help topics remain. Finish its mail/delivery behavior comparison, then storage/transfer/platform and remaining general/agent help. Apply the Windows credential-store term in data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -28273,21 +28273,15 @@
         "data-storage.html",
         "default-mail-program.html",
         "delivery-problems.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-errors.html",
-        "encryption-keys.html",
         "keyboard-shortcuts.html",
-        "links-scripts.html",
         "message-not-shown.html",
         "message-rules.html",
         "move-computer.html",
         "options-language.html",
-        "pictures-tracking.html",
         "removing.html",
         "sign-in-codes.html",
         "unsubscribe.html",
-        "updates.html",
-        "verify-a-key.html"
+        "updates.html"
       ],
       "completed_batches": [
         {
@@ -32894,6 +32888,218 @@
             "source-notes.json": "/private/tmp/inbox-lt-mcp3a-20261119-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-lt-mcp3a-20261119-screenshots.json",
             "html.log": "/private/tmp/inbox-lt-mcp3a-20261119-html.log"
+          }
+        },
+        {
+          "id": "lt-encryption-privacy-help-20261119",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "verify-a-key.html",
+            "encryption-errors.html",
+            "pictures-tracking.html",
+            "links-scripts.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/lt/encrypted-and-signed-mail.html": "22c0f6a6b884bcc784eea9be5f3379b5528750285417db284c15b0bfdca9d105",
+            "core/crates/pe-html/help/lt/encryption-keys.html": "6df7a3663f4d41d69fe0123e455c5bda2df5e8591b10604b66c69dcdd5d5ab95",
+            "core/crates/pe-html/help/lt/verify-a-key.html": "e5c65e9eab89a29f68fda18abeef5c708e169efb3e85385c07c45989deeb7fb5",
+            "core/crates/pe-html/help/lt/encryption-errors.html": "0f064d7a7366fbf19a2b4871dfceb7a682d80d0137b4df9f7b718456e84355ab",
+            "core/crates/pe-html/help/lt/pictures-tracking.html": "3abd7a92cb072c60326529417e35a84d974cc23d9868c5bad4477f475977e41d",
+            "core/crates/pe-html/help/lt/links-scripts.html": "33dbe6577223dac3ad717cdd2de429d31f40fd0ed4211041c38e1bbb13ddfa04"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "3c6789b9843b8e9c319a498798c43830dc597cf52f2ef948665abb86e0a6dfb1",
+            "core/crates/pe-html/help/en/encryption-keys.html": "88e116192bb0df60bfdbf9e5e10be090a2401bebeb575320b8556304109510b5",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153",
+            "core/crates/pe-html/help/en/encryption-errors.html": "a5a998593987b3275e7f6cf44f81d459ff641215dda884f275cbf9d8d0d710f1",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "12d2fe255a61675a9eb26253e177c94264f4522e0adb46fac00ef7ec08e34353",
+            "core/crates/pe-html/help/en/links-scripts.html": "88850a56321ad291a4db09fe9e82d9f2429e735b2989c35a60eb42d1dafb3a2c"
+          },
+          "validation": "Lithuanian structural checks pass with 1,519 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 68 improved wording lines. Catalog values are unchanged, including the three key-lock/preview-status messages compared against existing context findings. Tags, attributes, controls, platform branches, literal keys and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels and settings paths. Thirty-three runtime/source files and six catalog dependencies match the evidence. Existing English Windows/Mac picture and Linux trusted-sender captures were inspected alongside native source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,674 help lines; since-start 2,489 entries/631 passages match the queue. Source checkpoint covers 193 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or other translation worktree edits. Existing encryption/privacy context comparisons are complete for Lithuanian; the additional encrypted-list/notification distinction is queued for targeted comparison elsewhere. MCP phase3b remains separately queued. No local test suites, builds or manual CI; REVIEWED unchanged.",
+          "notes": "Reviewed six complete Lithuanian encryption/privacy help topics against signature verdicts, key verification/storage/import, encrypted previews and indexing, STARTTLS, image trust, external attachment opening and link handling. Corrected identity, key-lock, no-disk/no-open, notification and decoder claims; preserved tags, platform branches and literal controls. No local test suites.",
+          "help_wording_lines_changed": 68,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/lt/encrypted-and-signed-mail.html": 14,
+            "core/crates/pe-html/help/lt/encryption-keys.html": 13,
+            "core/crates/pe-html/help/lt/verify-a-key.html": 10,
+            "core/crates/pe-html/help/lt/encryption-errors.html": 10,
+            "core/crates/pe-html/help/lt/pictures-tracking.html": 12,
+            "core/crates/pe-html/help/lt/links-scripts.html": 9
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-html/src/lib.rs": "7a15a2aecf233a4f138788a4a83805c969a01db9582aa4b150221b9a1fdacca9",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-core/src/secrets.rs": "f5aae6a69f175cd3837c86c816cfa767b9667073ccc52d7c59fed224a81fca6e",
+            "core/crates/pe-core/src/protect.rs": "402d75886280eb50d23da4e0f9330aed5b602f2bbfd96ed4b9d2cf0a3a91d353",
+            "core/crates/pe-core/src/view.rs": "f6d5f36337c27cb17ba34e46c5cb672d25b68201b56f3d77641d8988318666b2",
+            "core/crates/pe-core/src/lib.rs": "7e3272206c202e960aa6be5d3619ae5dd95d75bc8cb7f54f7180bc5022e22c9b",
+            "core/crates/pe-core/src/worker.rs": "f2cde26a672eb37091081b91eb057262433a22325f690df9e2974c7c72398191",
+            "core/crates/pe-core/src/search.rs": "c72488f2132326a415b77a1aef19d418f08b76a932c1375698369c64d0861cbb",
+            "core/crates/pe-core/src/previews.rs": "1557b86ba9dc25f5e38ee30b3080e20032228d58a06ea5510675fbfd5e0443df",
+            "core/crates/pe-core/src/previews/plan.rs": "8507c6e71c134d19960d2c34282d798fa37070ccc0cb06785366e595a5bce9a6",
+            "core/crates/pe-core/src/pictures.rs": "b71999c78a2caaa5b18ba7a66676b9f3b6d6b9aca7d37b541d59c28665d60053",
+            "core/crates/pe-core/src/opening.rs": "deaed51a590dbfa66c848553085ea0e34710008472e6ae32d564c589d159931f",
+            "core/crates/pe-core/src/autocrypt.rs": "a7946c2fb9149e4603199eb358e895f9016b5158181e8812293caa12903c6285",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-core/src/otp.rs": "99ed04f0777e21204105cf7f16225e74cb80b85027208de695908f91285566c3",
+            "core/crates/pe-store/src/pgp.rs": "c6d9f72c5ddfe0c51530928770925ccd5ff0b666f7102ac8ac0e1a3884599c96",
+            "core/crates/pe-store/src/search.rs": "d7a490ff3e0c47caee741766f4fa578afbd4648c3e0786801aefb45f24d54a0a",
+            "core/crates/pe-smtp/src/client.rs": "773e7d3f5b7f8eb6d6d4c89484bb5625d38bbaa4322afd39c2e134510deca7dc",
+            "core/crates/pe-imap/src/client/mod.rs": "7f79a9453da917bf8e1585976e1de1b8e47b265b140e132c4352d1e5dd7bf29f",
+            "app/src/keys.cpp": "e38795145cb1843a0bf5b6afb0f89c1d34f5e4b9ff00f536415d0f1cd2206869",
+            "app/src/reader.cpp": "66e417314a347c852e997b6cb0e84c4400df6ebc30e335af0b42b1ba488e42e1",
+            "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+            "linux/src/keys.rs": "2cbbd8417329eb0a49f6f37f9c4ec5533d36d45c72fbf0c1f37cf6271c6b0596",
+            "linux/src/reader.rs": "18773f6639887286b42e22b2e9a92e269f3d0b0b71761c4e62f3a7b145f385f8",
+            "linux/src/compose.rs": "e4e84b79dbb54a6db7e89a41460ea354d165514d0077bcb8e750652e80d29233",
+            "mac/Sources/InboxClassic/Keys.swift": "cb5c1713fe9f648aacc09e1cbec26833a45398b99971c14e2b95c9e332a708fd",
+            "mac/Sources/InboxClassic/Reader.swift": "d8c17c4c5b479ec87edce1995502d1340570caf0d713cdec127a2ac7c4c466d1",
+            "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+            "core/crates/pe-core/src/bimi.rs": "91cf358f5addda07ddc44f5b2b8e2a3b9db7d03f487938540ff2cfdd74e050c4",
+            "core/crates/pe-preview/src/lib.rs": "aa2733a3f60005790ea183abeb6f779be0dbffdd2d8a2f2c525073605fa120b1"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "8a676c1f434730809c37789d26bc30b64e33bd1ef159dccf2e8320f598a1f0fb",
+            "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
+            "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
+            "core/locales/lt/core.ftl": "f139ad6c02a63ff43df8159e9b4b537fecff536a49843a7e1ddeab8676cab043",
+            "core/locales/lt/windows.ftl": "18fa93d839edfa594938f39e9f473c7121ccf6bf4bcab6350e98f3cd63882688",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "topics": [
+                  "encrypted-and-signed-mail.html",
+                  "verify-a-key.html"
+                ],
+                "finding": "A valid signature establishes unchanged signed content, not personal identity. Green/blue signer claims require a valid signature tied to the From address and chosen key. Verified is green; signed unverified is blue; encrypted unsigned/not-yet-checked is blue; missing verification key is gray, including on encrypted mail. Bad/other-person/sealed parts warn. Verification marks every listed address, so all fingerprint groups and addresses must be checked. Different fingerprints establish different keys, not necessarily a malicious owner.",
+                "sources": [
+                  "core/crates/pe-core/src/protect.rs",
+                  "core/crates/pe-core/src/keys.rs",
+                  "app/src/keys.cpp",
+                  "linux/src/keys.rs",
+                  "mac/Sources/InboxClassic/Keys.swift"
+                ]
+              },
+              {
+                "topics": [
+                  "encryption-keys.html"
+                ],
+                "catalog_ids": [
+                  "pgp-key-locked"
+                ],
+                "finding": "The private key is wrapped using a master key in the configured secret backend. Locked can mean missing/reset protection or an unavailable, refused or locked store. Check availability before importing the backup. Memory-only storage does not retain the master key between app runs. Import may request a passphrase and address assignment. Learned keys are unverified and do not replace a chosen different key automatically. Address lookups use the domain first and optionally keys.openpgp.org; handle lookups can send a fingerprint/key ID.",
+                "sources": [
+                  "core/crates/pe-core/src/keys.rs",
+                  "core/crates/pe-core/src/secrets.rs",
+                  "core/crates/pe-core/src/lookup.rs",
+                  "core/crates/pe-core/src/autocrypt.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "encrypted-and-signed-mail.html"
+                ],
+                "finding": "Decrypted previews remain in memory; external attachment opening writes an unencrypted temporary file and saving writes a chosen copy. Optional decrypted indexing stores text and protected subject locally and unencrypted. List snippets/protected subject depend on indexing, not merely successful viewing; disabling indexing removes derived data and restores outer subjects. New-mail notifications use ListEncrypted regardless of whether decrypted text was indexed.",
+                "sources": [
+                  "core/crates/pe-core/src/view.rs",
+                  "core/crates/pe-core/src/opening.rs",
+                  "core/crates/pe-core/src/lib.rs",
+                  "core/crates/pe-core/src/search.rs",
+                  "core/crates/pe-core/src/worker.rs",
+                  "core/crates/pe-store/src/search.rs",
+                  "core/crates/pe-store/src/pgp.rs",
+                  "core/crates/pe-core/src/previews.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "encryption-errors.html"
+                ],
+                "finding": "STARTTLS refusal ends the connection attempt before authentication. SMTP 538 establishes an encryption requirement, not a correct password. Alternate ports/settings require provider support; a local network alone is not encrypted. English diagnostic text remains literal with Lithuanian explanation.",
+                "sources": [
+                  "core/crates/pe-smtp/src/client.rs",
+                  "core/crates/pe-imap/src/client/mod.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "pictures-tracking.html",
+                  "links-scripts.html"
+                ],
+                "finding": "Trusted image rules require provider-confirmed sender domain, unlike the separate Always setting. Junk blocks automatic image loading and encrypted parts always require a click. Logos may use a network request. Embedded/attached picture previews are re-encoded; allowed remote images take the web-view path, so blanket no-system-decoder claims are inaccurate. Mail-supplied scripts/active markup are stripped, not all app scripts disabled. Attachments can open in an external program on user request; recognized executable/active formats are refused. Website links and mailto links differ. OTP confirmation concerns a signed domain, not individual identity.",
+                "sources": [
+                  "core/crates/pe-core/src/pictures.rs",
+                  "core/crates/pe-core/src/view.rs",
+                  "core/crates/pe-core/src/bimi.rs",
+                  "core/crates/pe-html/src/lib.rs",
+                  "core/crates/pe-preview/src/lib.rs",
+                  "core/crates/pe-core/src/opening.rs",
+                  "core/crates/pe-core/src/otp.rs",
+                  "app/src/reader.cpp",
+                  "linux/src/reader.rs",
+                  "mac/Sources/InboxClassic/Reader.swift"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "preview-pdf-off-crashed",
+                  "preview-tile-crashed"
+                ],
+                "finding": "Current Lithuanian catalog values already describe an interrupted preview and an earlier failure without blaming a specific PDF. Startup detects a leftover marker and disables PDF previews. Retained unchanged after comparison with the pending privacy-context finding.",
+                "sources": [
+                  "core/crates/pe-core/src/previews.rs",
+                  "core/crates/pe-core/src/previews/plan.rs"
+                ]
+              }
+            ],
+            "reference_screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/read-2-pictures.png",
+                "sha256": "dd56fa3d4c1210293c1f47194850dcb41fce1f61c8012ed1d5cf46cd8b0d0a27",
+                "locale": "English",
+                "observation": "Historical English Windows message view; current source governs picture-bar controls."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-mac/pictures-2-unconfirmed.png",
+                "sha256": "e4ea3db217988b12166e0f393f0aec91baa56417696caa9dbffb27310c857278",
+                "locale": "English",
+                "observation": "English Mac blocked-picture bar, download button and arrow."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/pictures-3-options.png",
+                "sha256": "b1034da9071508c0f659fcb3d8946dcf95607dc803166682321773134a0305f1",
+                "locale": "English",
+                "observation": "English Linux trusted-sender list and domain-based guidance."
+              }
+            ],
+            "limits": "No local test suites, builds or localized GUI-fit claim. Static help joins use current catalog labels and settings paths; source verifies actual behavior."
+          },
+          "context_compared_ids": {
+            "core.ftl": [
+              "pgp-key-locked",
+              "preview-pdf-off-crashed",
+              "preview-tile-crashed"
+            ]
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-privacy-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-privacy-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-privacy-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-privacy-20261119-since.log",
+            "joins.log": "/private/tmp/inbox-lt-privacy-20261119-joins.log",
+            "joins-summary.log": "/private/tmp/inbox-lt-privacy-20261119-joins-summary.log",
+            "source-audit.json": "/private/tmp/inbox-lt-privacy-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-privacy-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-privacy-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-privacy-20261119-html.log"
           }
         }
       ],
@@ -79922,7 +80128,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 1,513 expected mark-only diagnostics. Exact reconstruction verifies 27 catalog entries, with 18 improved values and nine retained, plus three full help topics and 22 improved wording lines. IDs, variables, selector branches, access-key counts, ellipses, comments, tags, attributes, platform branches and literal keys/code are preserved. Static inspection covers 20 selector messages with 239 count/enum samples and 58 substitutions; three Windows dialog scopes are collision-free, and Mac/Linux action/Cancel labels are distinct. Static Windows/Mac/Linux help joins were inspected. Nineteen runtime/source files and six catalog dependencies match the evidence. Existing English Windows consent and Mac event-card captures were inspected with Linux mailbox context; current source supplies new controls. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,592 help lines; since-start 2,489 entries/635 passages match the queue. Source checkpoint covers 193 refs/10 worktrees; current upstream review inputs and other translation worktree edits are unchanged. MCP phase3b is refreshed separately: one new catalog ID and one help topic per language remain after phase3a integration. No local test suites, builds or manual CI; REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,519 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 68 improved wording lines. Catalog values are unchanged, including the three key-lock/preview-status messages compared against existing context findings. Tags, attributes, controls, platform branches, literal keys and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels and settings paths. Thirty-three runtime/source files and six catalog dependencies match the evidence. Existing English Windows/Mac picture and Linux trusted-sender captures were inspected alongside native source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,674 help lines; since-start 2,489 entries/631 passages match the queue. Source checkpoint covers 193 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or other translation worktree edits. Existing encryption/privacy context comparisons are complete for Lithuanian; the additional encrypted-list/notification distinction is queued for targeted comparison elsewhere. MCP phase3b remains separately queued. No local test suites, builds or manual CI; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -140738,7 +140944,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Review Lithuanian mail diagnostics, rules and unsubscribe help: message-not-shown, delivery-problems, message-rules and unsubscribe. All current Lithuanian catalogs are reviewed; 16 help topics remain. Finish its mail/delivery behavior comparison, then storage/transfer/platform and remaining general/agent help. Apply the Windows credential-store term in data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -143658,7 +143864,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Review Lithuanian mail diagnostics, rules and unsubscribe help: message-not-shown, delivery-problems, message-rules and unsubscribe. All current Lithuanian catalogs are reviewed; 16 help topics remain. Finish its mail/delivery behavior comparison, then storage/transfer/platform and remaining general/agent help. Apply the Windows credential-store term in data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -145429,7 +145635,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Review Lithuanian mail diagnostics, rules and unsubscribe help: message-not-shown, delivery-problems, message-rules and unsubscribe. All current Lithuanian catalogs are reviewed; 16 help topics remain. Finish its mail/delivery behavior comparison, then storage/transfer/platform and remaining general/agent help. Apply the Windows credential-store term in data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -147626,6 +147832,18 @@
         },
         "latest_release_branch": "2d2e5a4bb",
         "release_branch_translation_delta": []
+      },
+      {
+        "batch": "lt-mcp3a-agents-invitations-20261119",
+        "pr": 204,
+        "url": "https://github.com/postalsys/inbox-classic/pull/204",
+        "review_commit": "d3152c4ce8e5c465259787760ff5718bc55b961e",
+        "merge_commit": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+        "merged_at": "2026-11-19T02:10:13Z",
+        "verified_master": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
       }
     ],
     "source_audit_helper_sha256": "187b1c07319c962244f6e3cb8c94de80aa00b92e79a80b1c788b8d3517681664",
@@ -158063,7 +158281,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "08b732d3b284defb985632d120178ad2bcbbb6332ac87b173674fa91f7e4dcf8",
       "core/locales/fi/core.ftl": "0561156334918cb5bbf707dcf5bae96e9fc7c1c04b732280841a4de238ade91f",
-      "core/locales/GLOSSARY.md": "15794c8b05ba8bdac4005fcb2ce93a5e6cb1275b088a5ffe8cdf169bc61e9383",
+      "core/locales/GLOSSARY.md": "624fc1d1f0f021d22d2451695b73722a52024093fc7d15bf54618c3c71d420ca",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "62ab48e44fd7d41da8088de4be5eb3b9225b8821e334511083e7a090c6ef91c7",
@@ -158108,8 +158326,8 @@
       "core/crates/pe-html/help/hu/pictures-tracking.html": "4dea7d5aaa85052dadd77551273d99058d0feb1495977f512b59f5541efb7090",
       "core/crates/pe-html/help/it/links-scripts.html": "f682b7c9a0ff988c80e4ef14e2b80b948a5889ee8a559c384e3475281782fdd4",
       "core/crates/pe-html/help/it/pictures-tracking.html": "069176cb68a7a24e2150f83a85c0b091a4ed6f220031d056bedc04103c6d8cb8",
-      "core/crates/pe-html/help/lt/links-scripts.html": "072466f39ed2bc548f6179287d6f3ad1667c056d8cac526e431204c1aa8d4803",
-      "core/crates/pe-html/help/lt/pictures-tracking.html": "647c6c7d87202be62ff199f3ab28b0a156fe27e312687bc015b4f4374b31ed95",
+      "core/crates/pe-html/help/lt/links-scripts.html": "33dbe6577223dac3ad717cdd2de429d31f40fd0ed4211041c38e1bbb13ddfa04",
+      "core/crates/pe-html/help/lt/pictures-tracking.html": "3abd7a92cb072c60326529417e35a84d974cc23d9868c5bad4477f475977e41d",
       "core/crates/pe-html/help/lv/links-scripts.html": "69a949546185018061e33e9e21aeb290856df743f0588b3d04c1ea2c641445e7",
       "core/crates/pe-html/help/lv/pictures-tracking.html": "8eeecc9b4215560ab47c1b7831a3c08053b48e2bac462e462fdef84ea3245818",
       "core/crates/pe-html/help/nb/links-scripts.html": "e78bd0ebc2a9959e841c52a76af53c11835376ef1e3c865674c7fbf501d7adee",
@@ -158382,7 +158600,11 @@
       "core/locales/tr/app.ftl": "c26b9f54793de25cfbb212d7e1762ba859e89e7fdad681353c5167bdcfe112b1",
       "core/locales/tr/core.ftl": "f640fb84073e969900c9aa765d07cd50858d3676da0b6a13068507efcdb560d8",
       "core/locales/tr/windows.ftl": "29a77cccbaa4bebdd186f177e78b2ad96b48400d13e544289dc3da4f5d1b70eb",
-      "core/locales/uk/windows.ftl": "e3446ba3c2bdaf873ec71e3cac094245e96ffca80fa163cc28c79ab3dd65279e"
+      "core/locales/uk/windows.ftl": "e3446ba3c2bdaf873ec71e3cac094245e96ffca80fa163cc28c79ab3dd65279e",
+      "core/crates/pe-html/help/lt/encrypted-and-signed-mail.html": "22c0f6a6b884bcc784eea9be5f3379b5528750285417db284c15b0bfdca9d105",
+      "core/crates/pe-html/help/lt/encryption-keys.html": "6df7a3663f4d41d69fe0123e455c5bda2df5e8591b10604b66c69dcdd5d5ab95",
+      "core/crates/pe-html/help/lt/verify-a-key.html": "e5c65e9eab89a29f68fda18abeef5c708e169efb3e85385c07c45989deeb7fb5",
+      "core/crates/pe-html/help/lt/encryption-errors.html": "0f064d7a7366fbf19a2b4871dfceb7a682d80d0137b4df9f7b718456e84355ab"
     },
     "resumed_review_checkpoints": [
       {
@@ -183182,6 +183404,124 @@
           "/private/tmp/inbox-lt-mcp3a-20261119-finalize.py": "7049a24412a0b4d278021f2a332e8f027c3e8cb41d2dd69fdc0f1994b1540a7e",
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
         }
+      },
+      {
+        "batch": "lt-encryption-privacy-help-20261119",
+        "review_parent": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+        "counts": {
+          "catalog_scope": 36380,
+          "help_scope": 1380,
+          "pending_catalog": 12463,
+          "pending_help": 604,
+          "completed_catalog": 23917,
+          "completed_help": 776
+        },
+        "validation": "Lithuanian structural checks pass with 1,519 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 68 improved wording lines. Catalog values are unchanged, including the three key-lock/preview-status messages compared against existing context findings. Tags, attributes, controls, platform branches, literal keys and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels and settings paths. Thirty-three runtime/source files and six catalog dependencies match the evidence. Existing English Windows/Mac picture and Linux trusted-sender captures were inspected alongside native source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,674 help lines; since-start 2,489 entries/631 passages match the queue. Source checkpoint covers 193 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or other translation worktree edits. Existing encryption/privacy context comparisons are complete for Lithuanian; the additional encrypted-list/notification distinction is queued for targeted comparison elsewhere. MCP phase3b remains separately queued. No local test suites, builds or manual CI; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 193,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+            "refs/heads/test/steady-linux": "4ac424cb12f55c2e18c6ecbde2b9a2e7e310bb87",
+            "refs/remotes/origin/HEAD": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+            "refs/remotes/origin/i18n/review-resume-20261118": "d3152c4ce8e5c465259787760ff5718bc55b961e",
+            "refs/remotes/origin/master": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+            "refs/remotes/origin/test/steady-linux": "4ac424cb12f55c2e18c6ecbde2b9a2e7e310bb87"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "4ac424cb12f55c2e18c6ecbde2b9a2e7e310bb87",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "b427a0670e73f5b4477490857fc9d038cfeaab92",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "dfdfbc336f054369336831f948930aad18f4f759",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lt/encrypted-and-signed-mail.html\n M core/crates/pe-html/help/lt/encryption-errors.html\n M core/crates/pe-html/help/lt/encryption-keys.html\n M core/crates/pe-html/help/lt/links-scripts.html\n M core/crates/pe-html/help/lt/pictures-tracking.html\n M core/crates/pe-html/help/lt/verify-a-key.html\n M core/locales/GLOSSARY.md",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lt/encrypted-and-signed-mail.html": "22c0f6a6b884bcc784eea9be5f3379b5528750285417db284c15b0bfdca9d105",
+                "core/crates/pe-html/help/lt/encryption-errors.html": "0f064d7a7366fbf19a2b4871dfceb7a682d80d0137b4df9f7b718456e84355ab",
+                "core/crates/pe-html/help/lt/encryption-keys.html": "6df7a3663f4d41d69fe0123e455c5bda2df5e8591b10604b66c69dcdd5d5ab95",
+                "core/crates/pe-html/help/lt/links-scripts.html": "33dbe6577223dac3ad717cdd2de429d31f40fd0ed4211041c38e1bbb13ddfa04",
+                "core/crates/pe-html/help/lt/pictures-tracking.html": "3abd7a92cb072c60326529417e35a84d974cc23d9868c5bad4477f475977e41d",
+                "core/crates/pe-html/help/lt/verify-a-key.html": "e5c65e9eab89a29f68fda18abeef5c708e169efb3e85385c07c45989deeb7fb5",
+                "core/locales/GLOSSARY.md": "624fc1d1f0f021d22d2451695b73722a52024093fc7d15bf54618c3c71d420ca"
+              }
+            }
+          ],
+          "master": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+          "new_unmerged_source_deltas": [],
+          "note": "Current upstream review inputs, incoming translation deltas and other translation worktree edits unchanged. MCP phase3a is active and phase3b remains separately queued at its refreshed one-ID/one-topic-per-language scope. Root and other worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-privacy-20261119-edit.py": "aab9c3426845a1bcaa2adec176655d156a21db919c53e06b4472344f80a4fd64",
+          "/private/tmp/inbox-lt-privacy-20261119-polish.py": "512683b86e30db686e6979a8fbccc9a65817d1f6c9f2ddbcff3774d7b9f929de",
+          "/private/tmp/inbox-lt-privacy-20261119-finalize.py": "edfebf71b54b005e928e4b733246731657ca09571889ec7a1bf9547bfc3c01d0",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -184616,7 +184956,11 @@
       "core/crates/pe-html/help/en/invitations.html": "b0a936d0191b6ff38e8219f482b1e3095593eb50072577a22c9cdf4acd94aa9f",
       "core/locales/en/app.ftl": "5352e20b4b7d46a9efbb149010aeb0370aa702da9e806336eed2028028fc06f0",
       "core/locales/en/core.ftl": "8b1ad2109015727b94afc42ac5ddc6c5dfce54f436dffbc01eb25bc4380ff962",
-      "core/locales/en/windows.ftl": "b857759344cb409a8621815f03909aa55ba7902e36a1a85118c794aa5775a674"
+      "core/locales/en/windows.ftl": "b857759344cb409a8621815f03909aa55ba7902e36a1a85118c794aa5775a674",
+      "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "3c6789b9843b8e9c319a498798c43830dc597cf52f2ef948665abb86e0a6dfb1",
+      "core/crates/pe-html/help/en/encryption-keys.html": "88e116192bb0df60bfdbf9e5e10be090a2401bebeb575320b8556304109510b5",
+      "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153",
+      "core/crates/pe-html/help/en/encryption-errors.html": "a5a998593987b3275e7f6cf44f81d459ff641215dda884f275cbf9d8d0d710f1"
     },
     "resumed_source_integrations": [
       {
@@ -189752,7 +190096,8 @@
         "status": "pending targeted comparison",
         "source_checkpoint": "3d58cc8899bd1d59084b4c60c8bec25455912379",
         "completed_languages": [
-          "hu"
+          "hu",
+          "lt"
         ],
         "pending_languages": [
           "bg",
@@ -189766,7 +190111,6 @@
           "fr",
           "hr",
           "it",
-          "lt",
           "lv",
           "nl",
           "pl",
@@ -189830,14 +190174,32 @@
             "finding": "Learning a key does not verify its owner or automatically replace the chosen key. Address lookup first asks the domain and optionally keys.openpgp.org; handle lookup sends an identifier instead. Keep these qualifications where omitted or mistranslated."
           }
         ],
-        "instruction": "Compare exact current passages and the key-lock message against verified behavior; retain accurate existing wording. Reopen only affected text. This comparison queue adds no scope or review credit before affected passages are identified. English/app code remain outside this review."
+        "instruction": "Compare exact current passages and the key-lock message against verified behavior; retain accurate existing wording. Reopen only affected text. This comparison queue adds no scope or review credit before affected passages are identified. English/app code remain outside this review.",
+        "completed_language_reviews": {
+          "lt": {
+            "batch": "lt-encryption-privacy-help-20261119",
+            "reviewed_topics": [
+              "encrypted-and-signed-mail.html",
+              "encryption-keys.html",
+              "verify-a-key.html",
+              "encryption-errors.html"
+            ],
+            "catalog_compared_unchanged": {
+              "core.ftl": [
+                "pgp-key-locked"
+              ]
+            },
+            "note": "Complete comparison during full help review. Three already-reviewed catalog values retained unchanged; no duplicate review credit."
+          }
+        }
       },
       {
         "id": "previews-privacy-behavior-context-20261118",
         "status": "pending targeted comparison",
         "source_checkpoint": "4c7c358839d46e69eaa32a6312dbee77feca56a1",
         "completed_languages": [
-          "hu"
+          "hu",
+          "lt"
         ],
         "pending_languages": [
           "bg",
@@ -189851,7 +190213,6 @@
           "fr",
           "hr",
           "it",
-          "lt",
           "lv",
           "nl",
           "pl",
@@ -189933,7 +190294,23 @@
             ]
           }
         ],
-        "instruction": "Source findings recorded; English/app code unchanged. Compare other languages, retain accurate text and reopen only affected passages. Do not add scope credit for a comparison task."
+        "instruction": "Source findings recorded; English/app code unchanged. Compare other languages, retain accurate text and reopen only affected passages. Do not add scope credit for a comparison task.",
+        "completed_language_reviews": {
+          "lt": {
+            "batch": "lt-encryption-privacy-help-20261119",
+            "reviewed_topics": [
+              "pictures-tracking.html",
+              "links-scripts.html"
+            ],
+            "catalog_compared_unchanged": {
+              "core.ftl": [
+                "preview-pdf-off-crashed",
+                "preview-tile-crashed"
+              ]
+            },
+            "note": "Complete comparison during full help review. Three already-reviewed catalog values retained unchanged; no duplicate review credit."
+          }
+        }
       },
       {
         "id": "agent-logs-permissions-context-20261118",
@@ -192254,6 +192631,65 @@
           }
         ],
         "instruction": "Apply these findings while reviewing the already pending MCP phase3a additions. Compare only affected surrounding prose; reopen only affected content, without duplicate scope credit. The existing agent-log and calendar audits overlap and should be closed together when all their items are compared. English and app code unchanged."
+      },
+      {
+        "id": "encrypted-list-notification-context-20261119",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "3d583ec14b542f1fdacc87e055996cae99daa6c0",
+        "completed_languages": [
+          "lt"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "hu",
+          "it",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "encrypted-and-signed-mail.html"
+        ],
+        "issues": [
+          {
+            "topics": [
+              "encrypted-and-signed-mail.html"
+            ],
+            "finding": "Decrypted previews remain in memory; external attachment opening writes an unencrypted temporary file and saving writes a chosen copy. Optional decrypted indexing stores text and protected subject locally and unencrypted. List snippets/protected subject depend on indexing, not merely successful viewing; disabling indexing removes derived data and restores outer subjects. New-mail notifications use ListEncrypted regardless of whether decrypted text was indexed.",
+            "sources": [
+              "core/crates/pe-core/src/view.rs",
+              "core/crates/pe-core/src/opening.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/search.rs",
+              "core/crates/pe-core/src/worker.rs",
+              "core/crates/pe-store/src/search.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/crates/pe-core/src/previews.rs"
+            ]
+          }
+        ],
+        "instruction": "Compare only claims about encrypted list snippets, protected subjects, notification text and decrypted-index storage. Reuse existing encryption/privacy findings; reopen only affected passages, without duplicate scope credit. English and app code unchanged."
       }
     ],
     "completed_source_followups": [
