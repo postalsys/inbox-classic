@@ -11,11 +11,11 @@ extension UITest {
     func encryptionSettings(_ shown: SettingsWindow) async throws {
         let labelled = views(NSTextField.self, in: shown.window.contentView).map(\.stringValue)
         check(labelled.contains("Encryption:"), "Reading has the Encryption group, its title in the label column")
-        check(shown.searchEncrypted.title == "Search in encrypted messages" && shown.keyserver.title == "Look up keys on keys.openpgp.org",
+        check(shown.searchEncrypted.title == Text.uiSearchEncrypted.text && shown.keyserver.title == Text.uiPgpKeyserver.text,
               "with Search in encrypted messages and Look up keys on keys.openpgp.org (\(shown.searchEncrypted.title), \(shown.keyserver.title))")
         check(shown.searchEncrypted.state == .on && shown.keyserver.state == .on, "both on at first")
-        check(labelled.contains { $0.contains("The index is not encrypted, and AI agents never search it") }
-              && labelled.contains { $0.contains("the address looked up is sent to keys.openpgp.org") },
+        check(labelled.contains { $0 == Text.uiSearchEncryptedNote.text }
+              && labelled.contains { $0 == Text.uiPgpKeyserverNote.text },
               "each with its note: the index is not encrypted and agents never search it; only the address is sent")
         let below = { (view: NSView) in view.convert(view.bounds, to: nil).minY }
         check(below(shown.keyserver) < below(shown.searchEncrypted) && below(shown.searchEncrypted) < below(shown.pictures),
@@ -43,35 +43,35 @@ extension UITest {
         let names = Languages.all.map(\.name)
         check(Array(titles.dropFirst()) == names && names.first == "English" && names.contains("Deutsch"),
               "then the languages by their own names (\(titles.dropFirst().joined(separator: ", ")))")
-        check(shown.notify.title == "Notify me when new mail arrives", "Notify of New Mail is there too")
+        check(shown.notify.title == Text.uiNotifyNewMail.text, "Notify of New Mail is there too")
         let panes = settings.toolbar?.items.map(\.label) ?? []
-        check(panes == ["General", "Reading", "Downloading"], "the toolbar has the panes General, Reading and Downloading (\(panes))")
+        check(panes == [Text.uiSettingsGeneral.text, Text.uiSettingsReading.text, Text.uiDownloadHeading.text], "the toolbar has the panes General, Reading and Downloading (\(panes))")
         // the pane chosen last is the dark messages step's Reading
-        check(shown.pane == .reading && settings.title == "Reading", "it opens on the pane chosen last, titled by it (\(settings.title))")
+        check(shown.pane == .reading && settings.title == Text.uiSettingsReading.text, "it opens on the pane chosen last, titled by it (\(settings.title))")
         await showPane(shown, .general)
-        check(settings.title == "General", "General titles the window General (\(settings.title))")
-        check(shown.checkUpdates.title == "Check for updates automatically" && !shown.checkUpdates.isEnabled,
+        check(settings.title == Text.uiSettingsGeneral.text, "General titles the window General (\(settings.title))")
+        check(shown.checkUpdates.title == Text.macCheckUpdatesAutomatically.text && !shown.checkUpdates.isEnabled,
               "General has Check for updates automatically, disabled in a build without updates")
         let deutsch = titles.firstIndex(of: "Deutsch") ?? 2
         onMain { self.choose(popup, deutsch) }
         let question = await waitWindow("alert", 10)
-        check(alertText(question).contains("Inbox Classic shows Deutsch once it restarts. Restart now?"),
+        check(alertText(question).contains(Text.uiRestartAsk.text(["language": "Deutsch"])),
               "choosing Deutsch asks to start again (\(alertText(question)))")
         let buttons = views(NSButton.self, in: question?.contentView).map(\.title)
-        check(buttons.contains("Restart Now") && buttons.contains("Later"), "with Restart Now and Later")
-        answer(question, "Later")
+        check(buttons.contains(Text.uiRestartNow.text) && buttons.contains(Text.uiRestartLater.text), "with Restart Now and Later")
+        answer(question, Text.uiRestartLater.text)
         _ = await waitUntil { !(question?.isVisible ?? false) }
         await pause(0.3)
         await shot(settings, "options-1-language")
         await showPane(shown, .reading)
-        check(settings.title == "Reading", "the Reading pane titles the window Reading (\(settings.title))")
+        check(settings.title == Text.uiSettingsReading.text, "the Reading pane titles the window Reading (\(settings.title))")
         await shot(settings, "options-2-reading")
         try await encryptionSettings(shown)
         settings.close()
         _ = await waitUntil { SettingsWindow.current == nil }
         command(.options)
         if let again = await waitFor(10, { SettingsWindow.current }) {
-            check(again.pane == .reading && again.window.title == "Reading", "closed on Reading and opened again, it opens on Reading")
+            check(again.pane == .reading && again.window.title == Text.uiSettingsReading.text, "closed on Reading and opened again, it opens on Reading")
             check(again.searchEncrypted.state == .off && again.keyserver.state == .off && !main.core.searchEncrypted
                   && !main.core.keyserver, "Search in encrypted messages and Look up keys turned off stay off")
             onMain {
@@ -172,7 +172,7 @@ extension UITest {
 
         step("back in English")
         await startIn("en")
-        check(main.window.toolbar?.items.contains { $0.label == "Reply" } == true, "the windows are in English again")
+        check(main.window.toolbar?.items.contains { $0.label == Text.uiTbReply.text } == true, "the windows are in English again")
     }
 
     /// the AI Agents window and the question for programs started from a terminal in `language`: the log's rows,

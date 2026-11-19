@@ -145,9 +145,9 @@ extension UITest {
             doubleClick(strip, page)
             if let refused = await waitWindow("alert", 10) {
                 let words = alertText(refused)
-                check(words.contains("\u{201C}\(name)\u{201D}") && words.contains("can run programs"),
+                check(words.contains(Text.attachmentRunsPrograms.text(["name": name])),
                       "opening \(name) is refused, naming it (\(words))")
-                answer(refused, "OK")
+                answer(refused, Text.uiOk.text)
                 _ = await waitUntil(5) { self.window("alert") == nil }
             } else {
                 check(false, "opening \(name) says why")
@@ -171,9 +171,9 @@ extension UITest {
         doubleClick(strip, 1)
         if let refused = await waitWindow("alert", 10) {
             let words = alertText(refused)
-            check(words.contains("can run programs") && words.contains("setup.exe"), "trying to open the program says it can run programs (\(words))")
+            check(words.contains(Text.attachmentRunsPrograms.text(["name": "setup.exe"])), "trying to open the program says it can run programs (\(words))")
             await shot(refused, "attach-3-refused")
-            answer(refused, "OK")
+            answer(refused, Text.uiOk.text)
             _ = await waitUntil(5) { self.window("alert") == nil }
         } else {
             check(false, "trying to open the program says why")
@@ -322,7 +322,7 @@ extension UITest {
                   "the first time the localized attachment warning is shown (\(words))")
             check(opened.isEmpty, "shown before the file is opened")
             await shot(note, "attach-4-encrypted-note")
-            answer(note, "OK")
+            answer(note, Text.uiOk.text)
         } else {
             check(false, "the first time a note says it is stored decrypted")
         }

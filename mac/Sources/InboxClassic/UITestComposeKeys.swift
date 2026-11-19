@@ -40,6 +40,11 @@ extension UITest {
     func newMessage(to: String, subject: String, words: String) async throws -> (NSWindow, ComposeWindow) {
         command(.newMail)
         guard let compose = await waitCompose(), let window = composer(compose) else { throw Failed(description: "no compose window") }
+        // the window in front, as one being written in is: the menus' Sign and Encrypt are those of the key window
+        onMain { self.bringToFront(compose) }
+        let inFront = await waitUntil(5) { ComposeWindow.key === window }
+        check(inFront, "the new message's window is the one in front" + (inFront ? "" : " (active \(NSApp.isActive), in front "
+            + "\(NSApp.orderedWindows.prefix(3).map { $0.identifier?.rawValue ?? $0.className }))"))
         type(to, into: field("compose.to", compose))
         window.recipientsChanged()
         type(subject, into: field("compose.subject", compose))
@@ -55,15 +60,21 @@ extension UITest {
     /// the key of `command` pressed in `compose` with the cursor in the text, as the keyboard sends it
     func pressKey(_ command: Command, in compose: NSWindow) async {
         guard let (key, modifiers) = command.key, let editor: EditorView = views(EditorView.self, in: compose.contentView).first else { return }
-        NSApp.activate()
-        compose.makeKeyAndOrderFront(nil)
+        bringToFront(compose)
         compose.makeFirstResponder(editor)
         await pause(0.3)
         let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: modifiers, timestamp: ProcessInfo.processInfo.systemUptime,
                                      windowNumber: compose.windowNumber, context: nil, characters: key, charactersIgnoringModifiers: key,
                                      isARepeat: false, keyCode: key == "y" ? 16 : 7)
-        if let event {
-            onMain { NSApp.sendEvent(event) }
+        guard let event else { return }
+        onMain {
+            if NSApp.keyWindow === compose {
+                NSApp.sendEvent(event)
+            } else if !compose.performKeyEquivalent(with: event) {
+                // the app in the background (another app holds the front): the key goes the way AppKit sends a key
+                // equivalent, the window with the cursor in the text first, then the menu bar
+                _ = NSApp.mainMenu?.performKeyEquivalent(with: event)
+            }
         }
         await pause(0.5)
     }
@@ -131,7 +142,7 @@ extension UITest {
         press(window.encryptButton)
         check(await waitUntil(5) { window.security.encrypt }, "Encrypt on the toolbar turns encryption on")
         check(window.signButton?.state == .on && window.signButton?.isEnabled == false, "Sign shows on and greyed")
-        check(window.signButton?.superview?.toolTip == "An encrypted message is always signed",
+        check(window.signButton?.superview?.toolTip == Text.pgpComposeSignTipEncrypted.text,
               "its tooltip, on the item: \"An encrypted message is always signed\" (\(window.signButton?.superview?.toolTip ?? ""))")
         check(!menuEnabled(.composeSign) && menuItem(.composeSign)?.state == .on
               && menuItem(.composeEncrypt)?.state == .on, "Tools: Digitally Sign checked and greyed, Encrypt checked")
@@ -168,7 +179,7 @@ extension UITest {
         check(dave()?.key == PE_RECIPIENT_KEY_LOOKING || dave()?.key == PE_RECIPIENT_KEY_MISSING,
               "Dave's lock is grey while his key is looked up (\(dave()?.text ?? ""))")
         check(await waitUntil(15) { dave()?.key == PE_RECIPIENT_KEY_MISSING }, "then amber: no key (\(dave()?.text ?? ""))")
-        check(dave()?.text.hasPrefix("No key: none was found on") == true && dave()?.tone == PE_PROTECTION_TONE_WARNING,
+        check(dave()?.text.hasPrefix(lead(.pgpRecipientNotFound)) == true && dave()?.tone == PE_PROTECTION_TONE_WARNING,
               "\"No key: none was found on\" today (\(dave()?.text ?? ""))")
         check(window.keysRow.chips.last?.recipient?.symbol == "exclamationmark.triangle.fill", "his chip has the warning sign")
         check(window.securityLine.tone == PE_PROTECTION_TONE_WARNING && window.securityLine.said.contains("Dave"),
@@ -180,7 +191,7 @@ extension UITest {
         check(true, "Send opens Recipients' Keys instead of sending")
         let intro: NSTextField? = find("recipient.keys.intro", in: sheetWindow)
         check(intro?.stringValue.hasPrefix("One recipient has no key to encrypt to") == true, "it says \"One recipient has no key...\" (\(intro?.stringValue ?? ""))")
-        check(sheet.rows.map(\.text).first == "Key verified" && sheet.rows.last?.text.hasPrefix("No key") == true,
+        check(sheet.rows.map(\.text).first == Text.pgpRecipientVerified.text && sheet.rows.last?.text.hasPrefix(Text.pgpRecipientMissing.text) == true,
               "Alice (Key verified) and Dave (No key) with their locks (\(sheet.rows.map(\.text)))")
         if let row = sheet.rows.firstIndex(where: { $0.address == "dave@example.com" }) {
             sheet.table.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
@@ -220,44 +231,40 @@ extension UITest {
         check(window.keysRow.chips.first?.recipient?.tone == PE_PROTECTION_TONE_VERIFIED, "Alice's lock green")
         press(window.encryptButton)
         if let question = await waitWindow("alert", 10) {
-            check(alertText(question).contains("This message quotes or forwards an encrypted message"),
+            check(alertText(question).contains(Text.pgpComposeEncryptOffQuote.text),
                   "Encrypt clicked off asks first (\(alertText(question)))")
             let buttons = views(NSButton.self, in: question.contentView)
-            let off = buttons.first { $0.title == "Turn Encryption Off" }
-            let keep = buttons.first { $0.title == "Keep It Encrypted" }
+            let off = buttons.first { $0.title == Text.uiComposeEncryptOff.text }
+            let keep = buttons.first { $0.title == Text.uiComposeKeepEncrypted.text }
             check(off?.hasDestructiveAction == true && keep != nil && keep?.hasDestructiveAction == false,
                   "with Turn Encryption Off, marked destructive, and Keep It Encrypted")
             await shot(question, "write-33-reply-encrypted")
             // Return answers with the default: Keep It Encrypted
-            let enter = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
-                                         windowNumber: question.windowNumber, context: nil, characters: "\r", charactersIgnoringModifiers: "\r",
-                                         isARepeat: false, keyCode: 36)
-            // posted to the queue as a key pressed is, so it reaches what watches keys as well as the window
-            enter.map { event in onMain { NSApp.postEvent(event, atStart: false) } }
-            if !(await waitUntil(5) { !question.isVisible }) {
-                check(false, "Return answers Keep It Encrypted (\(buttons.map { "\($0.title)=\($0.keyEquivalent.debugDescription)" }))")
-                answer(question, "Keep It Encrypted")
+            pressKey(question, 36)
+            let answered = await waitUntil(5) { !question.isVisible }
+            check(answered && window.security.encrypt, "Return, the default Keep It Encrypted, answers and leaves it on")
+            if !answered {
+                answer(question, Text.uiComposeKeepEncrypted.text)
                 _ = await waitUntil(5) { !question.isVisible }
             }
-            check(window.security.encrypt, "Return, the default Keep It Encrypted, leaves it on")
         } else {
             check(false, "Encrypt clicked off asks first")
         }
         press(window.encryptButton)
         if let question = await waitWindow("alert", 10) {
-            answer(question, "Turn Encryption Off")
+            answer(question, Text.uiComposeEncryptOff.text)
             _ = await waitUntil(5) { !question.isVisible }
         }
         check(await waitUntil(5) { !window.security.encrypt }, "Turn Encryption Off turns it off")
         check(window.securityLine.tone == PE_PROTECTION_TONE_WARNING
-              && window.securityLine.said.hasPrefix("This message quotes or forwards an encrypted message, so it can only be sent encrypted"),
+              && window.securityLine.said == Text.pgpErrorEncryptedQuote.text,
               "the line is amber: it can only be sent encrypted (\(window.securityLine.said))")
         check(window.keysRow.isHiddenOrHasHiddenAncestor, "and the Keys row is gone")
         await shot(compose, "write-34-quote-in-clear")
         send(compose)
         if let refusal = await waitWindow("alert", 10) {
-            check(alertText(refusal).contains("can only be sent encrypted"), "Send is refused with the same words (\(alertText(refusal)))")
-            answer(refusal, "OK")
+            check(alertText(refusal).contains(Text.pgpErrorEncryptedQuote.text), "Send is refused with the same words (\(alertText(refusal)))")
+            answer(refusal, Text.uiOk.text)
             _ = await waitUntil(5) { !refusal.isVisible }
         } else {
             check(false, "Send is refused")
@@ -269,7 +276,7 @@ extension UITest {
                 + "document.querySelector('#body > div.quoted').remove();document.getElementById('body').dispatchEvent(new Event('input'));true")
         }
         check(await waitUntil(15) { window.security.block == PE_COMPOSE_BLOCK_NONE
-                  && window.securityLine.said == "Not encrypted, although the message it answers or forwards was." },
+                  && window.securityLine.said == Text.pgpComposeReplyClear.text },
               "the quote unfolded and deleted, the line says it is not encrypted (\(window.securityLine.said))")
         check(window.securityLine.tone == PE_PROTECTION_TONE_WARNING && window.securityLine.pictures.mark == SecurityBar.symbol(PE_PROTECTION_TONE_WARNING),
               "in amber with the warning sign")
@@ -320,9 +327,10 @@ extension UITest {
             let (compose, window) = try await newMessage(to: many, subject: "Review \(language)", words: "Review.")
             command(.composeEncrypt)
             _ = await waitUntil(15) { window.security.encrypt && !window.security.looking }
-            compose.contentView?.layoutSubtreeIfNeeded()
-            await pause(0.5)
-            check(window.keysRow.shown < 10 && window.keysRow.shown > 0, "\(language): ten recipients fit the Keys row, the rest counted (\(window.keysRow.shown))")
+            check(await waitUntil(5) {
+                compose.contentView?.layoutSubtreeIfNeeded()
+                return window.keysRow.shown < 10 && window.keysRow.shown > 0
+            }, "\(language): ten recipients fit the Keys row, the rest counted (\(window.keysRow.shown))")
             let line: NSTextField? = find("compose.security.words", in: compose)
             check((line?.intrinsicContentSize.height ?? 0) <= (line?.bounds.height ?? 0) + 1,
                   "\(language): the line's words are not cut off")

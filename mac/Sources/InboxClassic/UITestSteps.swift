@@ -20,14 +20,14 @@ extension UITest {
         command(.accounts)
         guard let accounts = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
         press(find("accounts.properties", in: accounts))
-        guard let form = await waitFor(10, { window("form").flatMap { $0.title == "Properties" ? $0 : nil } }) else {
+        guard let form = await waitFor(10, { window("form").flatMap { $0.title == Text.uiProperties.text ? $0 : nil } }) else {
             throw Failed(description: "no Properties form")
         }
         type(port, into: find("form.field.\(index)", in: form))
         press(find("form.ok", in: form))
         // a question about a connection without encryption: Yes
         if let ask = await waitWindow("alert", 5) {
-            answer(ask, "Yes")
+            answer(ask, Text.uiYes.text)
         }
         _ = await waitUntil(10) { !form.isVisible }
         press(find("accounts.close", in: accounts))
@@ -59,14 +59,14 @@ extension UITest {
         let header: NSTextField? = find("reader.header", in: main.window)
         check(header?.stringValue.contains("Waiting on the server") == true && header?.stringValue.contains("Hal Example") == true,
               "the header shows the message's sender and subject at once (\(header?.stringValue ?? ""))")
-        check(await waitUntil(10) { await readerText().contains("Downloading the message") }, "the pane says the message is being downloaded")
+        check(await waitUntil(10) { await readerText().contains(Text.readerDownloading.text) }, "the pane says the message is being downloaded")
         check(await readerText().contains("The message is"), "and how large it is")
         await shot(main.window, "read-13-downloading")
         // the server gone: why, and Try Again
         silent.stop()
         let retry: InfoBar? = find("reader.retry", in: main.window)
         check(await waitUntil(20) { retry?.isHidden == false }, "a message that can not be downloaded has Try Again")
-        check(await waitUntil(5) { await readerText().contains("could not be downloaded") }, "and the pane says why")
+        check(await waitUntil(5) { await readerText().contains(Text.readerFailed.text) }, "and the pane says why")
         await shot(main.window, "read-12-not-downloaded")
         // the server back: the account syncs, and the message is tried again by itself
         try await setPort(field: 6, port("imap"))
@@ -187,7 +187,7 @@ extension UITest {
         let ask = await waitWindow("alert", 10)
         check(ask != nil, "closing a written message asks to save it")
         await shot(ask, "write-8-save-draft")
-        answer(ask, "Save")
+        answer(ask, Text.uiTbSave.text)
         check(await waitUntil { !compose.isVisible }, "Save saves it and closes the window")
         let saved = await waitFor(30) { await findMessage("Drafts", "Subject: Draft from the UI test") }
         check(saved != nil, "the draft is in Drafts on the server")
@@ -211,7 +211,7 @@ extension UITest {
             return drafts.count == 1 && raw(drafts[0]).contains("Now finished")
         }, "Save replaces the draft")
         let composeStatus: NSTextField? = find("compose.status", in: compose)
-        check(await waitUntil(30) { composeStatus?.stringValue.hasPrefix("Saved in Drafts at") == true }, "the window says when the draft is saved")
+        check(await waitUntil(30) { composeStatus?.stringValue.hasPrefix(lead(.uiComposeSavedAt)) == true }, "the window says when the draft is saved")
         await shot(compose, "write-10-draft-saved")
         send(compose)
         let finished = await waitFor(30) { await findMessage("INBOX", "Subject: Draft from the UI test") }
@@ -237,7 +237,7 @@ extension UITest {
         type("Saved by itself in the UI test", into: field("compose.subject", compose))
         _ = await typeInEditor(compose, "Not saved by hand.")
         let status: NSTextField? = find("compose.status", in: compose)
-        check(await waitUntil(30) { status?.stringValue.hasPrefix("Saved in Drafts at") == true },
+        check(await waitUntil(30) { status?.stringValue.hasPrefix(lead(.uiComposeSavedAt)) == true },
               "a message being written is saved in Drafts once typing stops")
         let saved = await waitFor(30) { await findMessage("Drafts", "Subject: Saved by itself") }
         check(saved.map { raw($0).contains("Not saved by hand") } == true, "the draft is in Drafts on the server")
@@ -246,7 +246,7 @@ extension UITest {
         onMain { compose.performClose(nil) }
         let ask = await waitWindow("alert", 10)
         check(ask != nil, "closing a message saved only automatically asks whether to keep it")
-        answer(ask, "Don’t Save")
+        answer(ask, Text.macDontSave.text)
         check(await waitUntil { !compose.isVisible }, "Don't Save closes the window")
         check(await waitUntil(30) { await findMessage("Drafts", "Subject: Saved by itself") == nil },
               "and removes the copy saved automatically from Drafts")
@@ -259,7 +259,7 @@ extension UITest {
         type("Written when it crashed", into: field("compose.subject", compose))
         _ = await typeInEditor(compose, "Kept for a crash.")
         let writtenStatus: NSTextField? = find("compose.status", in: compose)
-        check(await waitUntil(30) { writtenStatus?.stringValue.hasPrefix("Saved in Drafts at") == true }, "saved by itself")
+        check(await waitUntil(30) { writtenStatus?.stringValue.hasPrefix(lead(.uiComposeSavedAt)) == true }, "saved by itself")
         // the window gone as a crash takes it, without closing
         onMain { ComposeWindow.open.first { $0.window === compose }?.abandon() }
         _ = await waitUntil { !compose.isVisible }
@@ -268,12 +268,12 @@ extension UITest {
         else { throw Failed(description: "the message was not opened again") }
         check(field("compose.to", restored)?.stringValue.contains("hal@example.com") == true, "it opens again with its recipient")
         let restoredStatus: NSTextField? = find("compose.status", in: restored)
-        check(restoredStatus?.stringValue.hasPrefix("Restored") == true, "and says it was restored")
+        check(restoredStatus?.stringValue.hasPrefix(Text.uiComposeRestored.text) == true, "and says it was restored")
         await shot(restored, "write-21-restored")
         onMain { restored.performClose(nil) }
         let again = await waitWindow("alert", 10)
         check(again != nil, "closing it asks whether to keep it")
-        answer(again, "Don’t Save")
+        answer(again, Text.macDontSave.text)
         check(await waitUntil { !restored.isVisible }, "Don't Save closes it")
         check(await findMessage("Drafts", "Subject: Written when it crashed") != nil,
               "and leaves its draft in Drafts, as it may be one the user kept")
@@ -289,8 +289,8 @@ extension UITest {
             throw Failed(description: "Settings did not open")
         }
         await showPane(options, .general)
-        check(options.sendDelay.titleOfSelectedItem == "Off", "Delay before sending is in Settings, General (\(options.sendDelay.titleOfSelectedItem ?? ""))")
-        check(options.sendDelay.itemTitles == ["Off", "5 seconds", "10 seconds", "20 seconds", "30 seconds"],
+        check(options.sendDelay.titleOfSelectedItem == Text.sendDelayOff.text, "Delay before sending is in Settings, General (\(options.sendDelay.titleOfSelectedItem ?? ""))")
+        check(options.sendDelay.itemTitles == [Text.sendDelayOff.text, "5 seconds", "10 seconds", "20 seconds", "30 seconds"],
               "with the waits it offers (\(options.sendDelay.itemTitles))")
         onMain { options.sendDelay.selectItem(at: 2); options.sendDelayChosen() }
         check(await waitUntil(5) { pe_send_delay_index(self.main.core.handle) == 2 }, "10 seconds chosen")
@@ -309,7 +309,7 @@ extension UITest {
         check(await waitUntil(5) { outgoing?.stringValue.hasPrefix("Sending “Taken back in the UI test” in") == true },
               "the status bar counts down to sending (\(outgoing?.stringValue ?? ""))")
         check(undoButton?.isHidden == false, "with an Undo button")
-        check(main.core.undoLabel == "Undo Send", "Edit names Undo Send (\(main.core.undoLabel ?? "nothing"))")
+        check(main.core.undoLabel == Text.undoSend.text, "Edit names Undo Send (\(main.core.undoLabel ?? "nothing"))")
         await shot(main.window, "write-22-undo-send")
         press(undoButton)
         guard let undone = await waitFor(10, { ComposeWindow.open.last.flatMap { $0.window.title == "Taken back in the UI test" ? $0.window : nil } })
@@ -343,12 +343,12 @@ extension UITest {
         check(ask != nil, "a message that says a file is attached, with none, asks first")
         check(alertText(ask).contains("You wrote “attached”"), "naming the word (\(alertText(ask)))")
         await shot(ask, "write-25-attachment-reminder")
-        answer(ask, "Go Back")
+        answer(ask, Text.uiGoBack.text)
         _ = await waitUntil(2) { false }
         check(compose.isVisible, "Go Back keeps the message open")
         send(compose)
         let again = await waitWindow("alert", 10)
-        answer(again, "Send Anyway")
+        answer(again, Text.uiSendAnyway.text)
         check(await waitFor(30) { await findMessage("INBOX", "Subject: Forgot the file in the UI test") } != nil,
               "Send Anyway sends it")
     }
@@ -404,7 +404,7 @@ extension UITest {
               "Flagged lists the flagged messages of every folder (\(self.list.numberOfRows))")
         check((0..<list.numberOfRows).contains { main.mailbox.row($0)?.subject == subject }, "the one from Archive among them")
         let folderColumn = list.tableColumns.first { $0.identifier.rawValue == "folder" }
-        check(folderColumn?.title == "Folder", "with the Folder each is in (\(folderColumn?.title ?? "none"))")
+        check(folderColumn?.title == Text.uiColFolder.text, "with the Folder each is in (\(folderColumn?.title ?? "none"))")
         check(main.window.title.hasPrefix("Flagged"), "the window is named Flagged (\(main.window.title))")
         await shot(main.window, "main-10-flagged")
         // unflagged in its own folder: it goes from Flagged
@@ -421,13 +421,13 @@ extension UITest {
         command(.accounts)
         guard let accounts = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
         press(find("accounts.properties", in: accounts))
-        guard let form = await waitFor(10, { window("form").flatMap { $0.title == "Properties" ? $0 : nil } }) else {
+        guard let form = await waitFor(10, { window("form").flatMap { $0.title == Text.uiProperties.text ? $0 : nil } }) else {
             throw Failed(description: "no Properties form")
         }
         type(text, into: find("form.field.11", in: form))
         if let shot { await self.shot(form, shot) }
         press(find("form.ok", in: form))
-        if let ask = await waitWindow("alert", 3) { answer(ask, "Yes") }
+        if let ask = await waitWindow("alert", 3) { answer(ask, Text.uiYes.text) }
         _ = await waitUntil(10) { !form.isVisible }
         press(find("accounts.close", in: accounts))
         _ = await waitUntil(10) { !accounts.isVisible }
@@ -468,7 +468,7 @@ extension UITest {
               "a reply to a message sent to it goes from it (\(replyFrom?.titleOfSelectedItem ?? ""))")
         await shot(reply, "write-27-reply-from-alias")
         onMain { reply.performClose(nil) }
-        if let ask = await waitWindow("alert", 5) { answer(ask, "Don’t Save") }
+        if let ask = await waitWindow("alert", 5) { answer(ask, Text.macDontSave.text) }
         _ = await waitUntil(5) { !reply.isVisible }
         selectFolder(named: "Inbox")
         try await setOtherAddresses("")
@@ -568,7 +568,7 @@ extension UITest {
             let text = alertText(alert)
             check(text.contains("folder") || text.contains("date"), "a query naming a folder is refused, saying why (\(text))")
             await shot(alert, "rules-6-bad-query")
-            answer(alert, "OK")
+            answer(alert, Text.uiOk.text)
             _ = await waitUntil(5) { !alert.isVisible }
         } else {
             check(false, "a query naming a folder is refused")
@@ -821,11 +821,11 @@ extension UITest {
         check(!alertText(sure).contains("e-mail") && hyphensKept("no e-mail") == "no e\u{2011}mail",
               "a word with a hyphen is not wrapped at it")
         await shot(sure, "read-9-unsubscribe-ask")
-        answer(sure, "Yes")
+        answer(sure, Text.uiYes.text)
         check(await waitUntil(15) { server.received.hasPrefix("POST /u/42 ") && server.received.contains("List-Unsubscribe=One-Click") },
               "Yes posts List-Unsubscribe=One-Click to the list")
         let status: NSTextField? = find("status.text", in: main.window)
-        check(await waitUntil(10) { status?.stringValue.contains("Unsubscribe request accepted") == true }, "and the status bar says it is done")
+        check(await waitUntil(10) { status?.stringValue.contains(Text.uiUnsubscribed.text) == true }, "and the status bar says it is done")
         await search("")
         step("a calendar invitation")
         try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Invitation: Quarterly planning\r\n"
@@ -842,7 +842,7 @@ extension UITest {
         await selectRow(0)
         check(await waitUntil(15) {
             let text = await readerText()
-            return text.contains("Invitation: Quarterly planning") && text.contains("Open in Calendar") && text.contains("Room 2")
+            return text.contains("Invitation: Quarterly planning") && text.contains(Text.uiOpenInCalendar.text) && text.contains("Room 2")
         }, "a message with an invitation shows the event in a card above the text, with Open in Calendar")
         let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
         let link = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:open-calendar\"]') !== null")
@@ -977,7 +977,7 @@ extension UITest {
         let goOn = await waitWindow("alert", 10)
         check(alertText(goOn).contains("no more unread messages in Inbox"),
               "with none left in the folder it asks to go on to the next folder with unread mail (\(alertText(goOn)))")
-        answer(goOn, "Yes")
+        answer(goOn, Text.uiYes.text)
         check(await waitUntil(10) { main.mailbox.selectedName == "Archive" && main.mailbox.selectedRow?.subject == "Unread in the archive" },
               "and Yes goes there, its unread message selected (\(main.mailbox.selectedName): \(main.mailbox.selectedRow?.subject ?? "none"))")
 
@@ -988,7 +988,7 @@ extension UITest {
         let everyFolder = await waitUntil(10) {
             !moveRows(goTo).contains { $0.kind == .account } && moveRows(goTo).contains { $0.name == "Sent Items" }
         }
-        check(goTo.title == "Go to Folder" && everyFolder, "Go to Folder shows the account's folders, with no row for the account (\(goTo.title))")
+        check(goTo.title == Text.cmdGoToFolder.title && everyFolder, "Go to Folder shows the account's folders, with no row for the account (\(goTo.title))")
         if let filter: NSSearchField = find("move.filter", in: goTo) {
             filter.stringValue = "sent"
             (goTo.delegate as? MoveWindow)?.controlTextDidChange(Notification(name: NSControl.textDidChangeNotification))
@@ -1117,10 +1117,13 @@ extension UITest {
         check(opened.map(\.index) == [tripHead.index, tripHead.index + 1, tripHead.index + 2]
               && opened.dropFirst().allSatisfy { $0.message.threadDepth == 1 && $0.message.subject == "Re: Plans for the trip" },
               "right under it, oldest first")
-        // the rows' cells are laid out on the next pass: wait for them
-        let left = { (row: Int) in self.subjectCell(row)?.textField?.frame.minX ?? 0 }
-        let indented = await waitUntil(5) { left(tripHead.index + 1) > left(tripHead.index) }
-        check(indented, "indented (\(left(tripHead.index)) and \(left(tripHead.index + 1)))")
+        // where the subjects start, as the cells lay them out now (a cell made for the check has had no pass yet)
+        let left = { (row: Int) -> CGFloat in
+            guard let cell = self.subjectCell(row) else { return 0 }
+            cell.layoutSubtreeIfNeeded()
+            return cell.textField?.frame.minX ?? 0
+        }
+        check(left(tripHead.index + 1) > left(tripHead.index), "indented (\(left(tripHead.index)) and \(left(tripHead.index + 1)))")
         check(subjectCell(tripHead.index)?.textField?.font?.fontDescriptor.symbolicTraits.contains(.bold) == false,
               "the open conversation's first row in bold only when it is unread itself")
         await selectRow(tripHead.index + 1)
@@ -1441,7 +1444,7 @@ extension UITest {
         let card = await readerText()
         check(card.contains("482913") && card.contains("Enter it only on a page of example.com"),
               "with the code, and the domain to enter it on")
-        check(card.contains("probably expired"), "a message older than an hour says the code has probably expired")
+        check(card.contains(Text.otpOld.text), "a message older than an hour says the code has probably expired")
         await shot(main.window, "otp-1-card")
         NSPasteboard.general.clearContents()
         let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
@@ -1449,11 +1452,11 @@ extension UITest {
         let status: NSTextField? = find("status.text", in: main.window)
         check(await waitUntil(5) { NSPasteboard.general.string(forType: .string) == "482913" },
               "Copy puts the code on the clipboard (\(NSPasteboard.general.string(forType: .string) ?? "nothing"))")
-        check(status?.stringValue == "Copied the code", "and the status bar says so (\(status?.stringValue ?? ""))")
+        check(status?.stringValue == Text.uiCodeCopied.text, "and the status bar says so (\(status?.stringValue ?? ""))")
         // a sync in the background (the timer's) replaces only its own words, never the answer to what the user did
         main.core.syncAll()
         await pause(3)
-        check(status?.stringValue == "Copied the code",
+        check(status?.stringValue == Text.uiCodeCopied.text,
               "a sync in the background leaves those words (\(status?.stringValue ?? ""))")
 
         if let header = listIndex(subject: byHeader) {
@@ -1467,7 +1470,7 @@ extension UITest {
             await selectRow(plain)
         }
         check(await waitUntil(15) { (await readerText()).contains("771204") }, "the unsigned message is shown")
-        check(!(await readerText()).contains("Code from"), "without a card: the provider did not say the domain signed it")
+        check(!(await readerText()).contains(lead(.otpHeading)), "without a card: the provider did not say the domain signed it")
     }
 
     /// the delivery report of a message sent to an address that does not exist, as Postfix writes one, and a notice
@@ -1527,11 +1530,11 @@ extension UITest {
               "the report's row has the undelivered mark in the attachment column's place")
         list.scrollRowToVisible(failedRow)
         await selectRow(failedRow)
-        check(await waitUntil(15) { (await readerText()).contains("Your message was not delivered") },
+        check(await waitUntil(15) { (await readerText()).contains(Text.bounceFailed.text) },
               "opening it shows the card above the message: not delivered")
         let failedCard = await readerText()
-        check(failedCard.contains("robin.nobody@example.org") && failedCard.contains("The address does not exist")
-              && failedCard.contains("What you can do"),
+        check(failedCard.contains("robin.nobody@example.org") && failedCard.contains(Text.bounceUserUnknown.text)
+              && failedCard.contains(Text.bounceWhatToDo.text),
               "the card names the recipient, why and what to do")
         let preview = views(WKWebView.self, in: main.mailbox.reader.view).first
         _ = try? await preview?.evaluateJavaScript("document.querySelector('details').open = true")
@@ -1550,9 +1553,9 @@ extension UITest {
         }
         list.scrollRowToVisible(delayedRow)
         await selectRow(delayedRow)
-        check(await waitUntil(15) { (await readerText()).contains("Your message has not been delivered yet") },
+        check(await waitUntil(15) { (await readerText()).contains(Text.bounceDelayed.text) },
               "a delay notice shows the amber card")
-        check((await readerText()).contains("still trying"), "saying it is still being tried")
+        check((await readerText()).contains(Text.bounceDelayedNote.text), "saying it is still being tried")
         await shot(main.window, "bounce-2-delayed")
 
         await search("is:bounce")
@@ -1625,8 +1628,7 @@ extension UITest {
         await selectRow(0)
         // Command+click adds two more
         list.selectRowIndexes(IndexSet([1, 2]), byExtendingSelection: true)
-        await pause(1)
-        check(main.mailbox.selectedCount == 3, "Command+click adds two more messages: three are selected")
+        check(await waitUntil(5) { main.mailbox.selectedCount == 3 }, "Command+click adds two more messages: three are selected")
         let subjects = (0..<3).compactMap { main.mailbox.row($0)?.subject }
         let patterns = subjects.map { "Subject: \(NSRegularExpression.escapedPattern(for: $0))" }
         // unread, so the pane has something to count
@@ -1668,7 +1670,7 @@ extension UITest {
         check(await waitUntil(10) { list.numberOfRows == listed - 3 }, "and out of the list")
         let status: NSTextField? = find("status.text", in: main.window)
         check(status?.stringValue == "Moved 3 messages to Archive", "the status bar says they were moved to Archive (\(status?.stringValue ?? ""))")
-        check(main.core.undoLabel == "Undo Move", "Edit names Undo Move (\(main.core.undoLabel ?? "nothing"))")
+        check(main.core.undoLabel == Text.undoMove.text, "Edit names Undo Move (\(main.core.undoLabel ?? "nothing"))")
         command(.undo)
         check(await waitUntil(10) { list.numberOfRows == listed }, "Edit > Undo Move brings them back to the Inbox")
         check(await waitUntil(20) {
@@ -1692,8 +1694,8 @@ extension UITest {
         await shot(main.window, "select-2-undo")
 
         command(.selectAll)
-        await pause(0.5)
-        check(main.mailbox.selectedCount == list.numberOfRows && list.numberOfRows > 0, "Select All selects every message of the list")
+        check(await waitUntil(5) { main.mailbox.selectedCount == list.numberOfRows && list.numberOfRows > 0 },
+              "Select All selects every message of the list")
         await selectRow(0)
         let header: NSTextField? = find("reader.header", in: main.window)
         check(!main.mailbox.reader.showsSummary && header?.stringValue.isEmpty == false,
@@ -1832,7 +1834,7 @@ extension UITest {
         let menu = AppDelegate.shared.flagMenu().submenu
         let colors = menu?.items.filter { $0.action == #selector(AppDelegate.flagColor(_:)) }.map(\.title) ?? []
         check(colors == ["Red", "Orange", "Yellow", "Green", "Blue", "Purple", "Gray"]
-              && menu?.items.last?.title == "Clear Flag",
+              && menu?.items.last?.title == Text.uiClearFlag.text,
               "Message > Flag has the seven colours of Apple Mail and Clear Flag (\(colors))")
         func index(_ subject: String) -> Int? {
             (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == subject }
@@ -1856,8 +1858,8 @@ extension UITest {
         guard subjects.count >= 3 else { return check(false, "three other messages to flag") }
         if let row = index(subjects[0]) { await selectRow(row) }
         let rightClick = main.mailbox.messageMenu()?.items ?? []
-        check(rightClick.contains { $0.title == "Flag" && $0.submenu != nil }
-              && !rightClick.contains { $0.title == "Flag Message" || $0.title == "Clear Flag" },
+        check(rightClick.contains { $0.title == Text.uiMenuFlag.text && $0.submenu != nil }
+              && !rightClick.contains { $0.title == Command.flag.label || $0.title == Text.uiClearFlag.text },
               "the right-click menu has the Flag submenu, and Clear Flag only in it")
         choose(2)
         check(await waitUntil(20) { let f = await serverFlags(subjects[0]); return f.contains("\\Flagged") && f.contains("$MailFlagBit0") },
@@ -1909,10 +1911,13 @@ extension UITest {
             "From: Petra Holm <petra@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Ferry times\r\n"
                 + "Message-ID: <ferry@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nThe ferry leaves at nine.\r\n")
         command(.sync)
-        _ = await waitUntil { list.numberOfRows > before }
-        await selectRow(0)
+        _ = await waitUntil { list.numberOfRows > before && !main.mailbox.listLoading }
+        // the three newest selected as they are, none of them opened by the test: the new one is not downloaded
+        let ferry = await waitFor(10) { (0..<self.list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Ferry times" } }
+        check(ferry == 0, "the new message is the newest (\(ferry.map(String.init) ?? "not listed"))")
+        list.window?.makeFirstResponder(list)
         list.selectRowIndexes(IndexSet([0, 1, 2]), byExtendingSelection: false)
-        await pause(0.5)
+        _ = await waitUntil(5) { list.selectedRowIndexes == IndexSet([0, 1, 2]) }
         let picked = (0..<3).compactMap { main.mailbox.row($0) }
         let subjects = picked.map(\.subject)
         let selection = newSelection(picked.map { ($0.folder, $0.uid) })
@@ -1987,7 +1992,7 @@ extension UITest {
         onMain { [main] in main.mailbox.dropFiles(drop, into: archive) }
         let turnedAway = await waitWindow("alert", 10)
         check(alertText(turnedAway).contains("notes.txt"), "a file that is not a message is turned away")
-        answer(turnedAway, "OK")
+        answer(turnedAway, Text.uiOk.text)
         check(await waitUntil(30) {
             for name in ["Harbour plan", "Boat repairs", "Winter berths"] where await findMessage("Archive", "Subject: \(name)") == nil {
                 return false
@@ -2174,7 +2179,7 @@ extension UITest {
         await shot(main.window, "folders-6-one-account")
 
         let titles = treeMenu(0)?.items.filter { !$0.isSeparatorItem }.map(\.title) ?? []
-        check(titles.contains(Command.newFolder.label) && !titles.contains("Send and Receive") && !titles.contains { $0.hasPrefix("Properties") },
+        check(titles.contains(Command.newFolder.label) && !titles.contains(Text.uiAccountSync.text) && !titles.contains { $0.hasPrefix(Text.uiAccountProperties.text.replacingOccurrences(of: "...", with: "")) },
               "right-clicking the Inbox gives the folder's menu, without the account's commands (\(titles))")
 
         tree.selectRowIndexes(IndexSet(integer: 1), byExtendingSelection: false)
@@ -2298,7 +2303,7 @@ extension UITest {
         let editor = await waitWindow("signature", 20)
         check(editor != nil, "Signature opens the signature editor of the account")
         if let editor {
-            check(editor.title.hasPrefix("Signature - "), "titled with the account (\(editor.title))")
+            check(editor.title.hasPrefix(lead(.uiSignatureOf)), "titled with the account (\(editor.title))")
             check(await typeInEditor(editor, "Ann, signed by the UI test"), "the signature editor takes typing")
             await shot(editor, "signature-1-editor")
             press(find("signature.ok", in: editor))
@@ -2339,8 +2344,8 @@ extension UITest {
         check(hint != nil, "without it, Gmail wants an app password, and that is said")
         check(window("account.start") == nil, "with Google turned off, a Gmail address goes to the app password way")
         await shot(hint, "account-5-app-password")
-        answer(hint, "No")
-        let servers = await waitFor(20) { window("form").flatMap { $0.title == "Add Mail Account" ? $0 : nil } }
+        answer(hint, Text.uiNo.text)
+        let servers = await waitFor(20) { window("form").flatMap { $0.title == Text.uiAddAccountTitle.text ? $0 : nil } }
         let imap = servers.flatMap { (find("form.field.5", in: $0) as NSTextField?)?.stringValue }
         let smtp = servers.flatMap { (find("form.field.8", in: $0) as NSTextField?)?.stringValue }
         let gmailName = servers.flatMap { (find("form.field.0", in: $0) as NSTextField?)?.stringValue }
@@ -2358,7 +2363,7 @@ extension UITest {
         type("Work", into: find("account.name", in: start))
         type("testuser2@inboxclassic.test", into: find("account.email", in: start))
         press(find("account.next", in: start))
-        guard let second = await waitFor(40, { window("form").flatMap { $0.title == "Add Mail Account" ? $0 : nil } }) else {
+        guard let second = await waitFor(40, { window("form").flatMap { $0.title == Text.uiAddAccountTitle.text ? $0 : nil } }) else {
             throw Failed(description: "no server settings form")
         }
         let field = { (index: Int) -> NSTextField? in self.find("form.field.\(index)", in: second) }
@@ -2374,9 +2379,9 @@ extension UITest {
         (find("form.field.10", in: second) as NSPopUpButton?)?.selectItem(at: 1)
         press(find("form.ok", in: second))
         if let warning = await waitWindow("alert", 10) {
-            answer(warning, "Yes")
+            answer(warning, Text.uiYes.text)
         }
-        let logon = await waitFor(30) { window("form").flatMap { $0.title == "Logon" ? $0 : nil } }
+        let logon = await waitFor(30) { window("form").flatMap { $0.title == Text.uiLogon.text ? $0 : nil } }
         check(logon != nil, "a refused password is asked for again")
         let status: NSTextField? = find("status.text", in: main.window)
         check(status?.stringValue.lowercased().contains("authentication") == true, "the status bar says why (\(status?.stringValue ?? ""))")
@@ -2577,7 +2582,7 @@ extension UITest {
         let table: NSTableView? = find("accounts.list", in: window)
         table?.selectRowIndexes(IndexSet(integer: 1), byExtendingSelection: false)
         press(find("accounts.properties", in: window))
-        guard let form = await waitFor(10, { self.window("form").flatMap { $0.title == "Properties" ? $0 : nil } }) else {
+        guard let form = await waitFor(10, { self.window("form").flatMap { $0.title == Text.uiProperties.text ? $0 : nil } }) else {
             throw Failed(description: "no Properties form")
         }
         let name: NSTextField? = find("form.field.0", in: form)
@@ -2585,7 +2590,7 @@ extension UITest {
         type("Second", into: name)
         press(find("form.ok", in: form))
         if let ask = await waitWindow("alert", 3) {
-            answer(ask, "Yes")
+            answer(ask, Text.uiYes.text)
         }
         _ = await waitUntil(10) { !form.isVisible }
         press(find("accounts.close", in: window))
@@ -2598,10 +2603,10 @@ extension UITest {
         step("the account's menu")
         let menu = main.mailbox.accountMenu(accounts[0].id)
         let titles = menu.items.filter { !$0.isSeparatorItem }.map(\.title)
-        check(titles == ["Send and Receive", "Mark All Read", "New Folder…", "Move Up", "Move Down", "Properties…"]
+        check(titles == [Text.uiAccountSync.text, Command.markAllRead.label, Command.newFolder.label, Text.uiAccountMoveUp.text, Text.uiAccountMoveDown.text, Text.uiAccountProperties.opens]
               && menu.items.filter(\.isSeparatorItem).count == 3,
               "the first account's right-click menu has Send and Receive, Mark All Read, New Folder, Move Up, Move Down and Properties (\(titles))")
-        check(menu.items.first { $0.title == "Mark All Read" }?.isEnabled == true, "Mark All Read is on, with unread mail in the account")
+        check(menu.items.first { $0.title == Command.markAllRead.label }?.isEnabled == true, "Mark All Read is on, with unread mail in the account")
         let markRead = menu.indexOfItem(withTitle: "Mark All Read")
         if markRead >= 0 {
             onMain { menu.performActionForItem(at: markRead) }
@@ -2612,12 +2617,12 @@ extension UITest {
             return inbox == 0 && archived == 0
         }, "its Mark All Read marks every folder of the first account read on the server")
         check(await unreadOnServer(at: secondRest) >= 1, "the second account's mail stays unread")
-        check(await waitUntil(10) { !main.mailbox.accountMenu(accounts[0].id).items.contains { $0.title == "Mark All Read" && $0.isEnabled } },
+        check(await waitUntil(10) { !main.mailbox.accountMenu(accounts[0].id).items.contains { $0.title == Command.markAllRead.label && $0.isEnabled } },
               "with nothing unread, the account's Mark All Read is off")
         await shot(main.window, "account-menu")
         let properties = main.mailbox.accountMenu(accounts[0].id)
-        onMain { properties.performActionForItem(at: properties.indexOfItem(withTitle: "Properties…")) }
-        let own = await waitFor(10) { self.window("form").flatMap { $0.title == "Properties" ? $0 : nil } }
+        onMain { properties.performActionForItem(at: properties.indexOfItem(withTitle: Text.uiAccountProperties.opens)) }
+        let own = await waitFor(10) { self.window("form").flatMap { $0.title == Text.uiProperties.text ? $0 : nil } }
         let ownName = own.flatMap { (find("form.field.0", in: $0) as NSTextField?)?.stringValue }
         check(own != nil && ownName == accounts[0].accountName,
               "its Properties opens that account's Properties (\(ownName ?? ""))")
@@ -2649,8 +2654,8 @@ extension UITest {
         func accountItem(_ account: Int64, _ title: String) -> NSMenuItem? {
             main.mailbox.accountMenu(account).items.first { $0.title == title }
         }
-        check(accountItem(ids[0], "Move Up")?.isEnabled == false && accountItem(ids[0], "Move Down")?.isEnabled == true
-              && accountItem(ids[1], "Move Down")?.isEnabled == false,
+        check(accountItem(ids[0], Text.uiAccountMoveUp.text)?.isEnabled == false && accountItem(ids[0], Text.uiAccountMoveDown.text)?.isEnabled == true
+              && accountItem(ids[1], Text.uiAccountMoveDown.text)?.isEnabled == false,
               "Move Up is off for the first account, Move Down for the last")
         let secondRow = treeRow(PE_TREE_ROW_KIND_ACCOUNT_INBOX, account: ids[1]) ?? -1
         tree.selectRowIndexes(IndexSet(integer: secondRow), byExtendingSelection: false)
@@ -2683,7 +2688,7 @@ extension UITest {
         await shot(main.window, "all-inboxes-4-reorder")
 
         let menu = main.mailbox.accountMenu(ids[1])
-        check(accountItem(ids[1], "Move Up")?.isEnabled == false, "first now, its Move Up is off")
+        check(accountItem(ids[1], Text.uiAccountMoveUp.text)?.isEnabled == false, "first now, its Move Up is off")
         let down = menu.indexOfItem(withTitle: "Move Down")
         if down >= 0 {
             onMain { menu.performActionForItem(at: down) }
@@ -2743,7 +2748,7 @@ extension UITest {
         }
         check(top.map(\.kind) == [PE_TREE_ROW_KIND_ALL_INBOXES, PE_TREE_ROW_KIND_ALL_SENT, PE_TREE_ROW_KIND_ALL_DRAFTS,
                                   PE_TREE_ROW_KIND_FLAGGED, PE_TREE_ROW_KIND_ACCOUNT, PE_TREE_ROW_KIND_ACCOUNT]
-              && shownSent.row.label == "All Sent" && shownDrafts.row.label == "All Drafts",
+              && shownSent.row.label == Text.uiAllSent.text && shownDrafts.row.label == Text.uiAllDrafts.text,
               "All Sent and All Drafts follow All Inboxes, before Flagged (\(top.map(\.row.label)))")
         check(!tree.isItemExpanded(shownSent) && !tree.isItemExpanded(shownDrafts), "both start closed")
         await shot(main.window, "all-sent-0-closed")
@@ -2809,7 +2814,7 @@ extension UITest {
               "it names whom each message went to, in the To column (\(column("from")?.title ?? ""): \(newest.first?.recipients ?? ""))")
         check(column("folder")?.title == "Account" && cell?.textField?.stringValue == accounts[1].title,
               "the Account column names the account of each (\(column("folder")?.title ?? ""): \(cell?.textField?.stringValue ?? ""))")
-        check(main.mailbox.selectedName == "All Sent" && main.window.title == "All Sent",
+        check(main.mailbox.selectedName == Text.uiAllSent.text && main.window.title == Text.uiAllSent.text,
               "the title says All Sent (\(main.window.title))")
         check(treeMenu(tree.row(forItem: allSent)) == nil && treeMenu(tree.row(forItem: allDrafts)) == nil,
               "All Sent and All Drafts have no right-click menu")
@@ -2833,7 +2838,7 @@ extension UITest {
         step("All Drafts")
         tree.selectRowIndexes(IndexSet(integer: tree.row(forItem: allDrafts)), byExtendingSelection: false)
         let draftRow = { (0..<self.list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Trip plans" } }
-        check(await waitUntil(10) { draftRow() != nil && main.mailbox.selectedName == "All Drafts" },
+        check(await waitUntil(10) { draftRow() != nil && main.mailbox.selectedName == Text.uiAllDrafts.text },
               "All Drafts lists the draft (\(main.mailbox.total) messages)")
         guard let row = draftRow() else { return }
         await selectRow(row)
@@ -2907,7 +2912,7 @@ extension UITest {
         check(current?.choosable == false && current?.name == "Inbox (current)",
               "the folder the message is in is shown but can not be chosen (\(current?.name ?? ""))")
         let ok: NSButton? = find("move.ok", in: move)
-        check(ok?.title == "Move", "the button says Move (\(ok?.title ?? ""))")
+        check(ok?.title == Text.uiButtonMove.text, "the button says Move (\(ok?.title ?? ""))")
         check(rows.contains { $0.kind == .recent && $0.folder == archive }, "the folder used last is under Recent")
         move?.makeKeyAndOrderFront(nil)
         _ = await waitUntil(2) { move?.isKeyWindow == true }
@@ -3016,8 +3021,15 @@ extension UITest {
         }
         command(.sync)
         _ = await waitUntil { list.numberOfRows >= rowsBefore + 4 }
-        let unreadBefore = await unreadOnServer()
-        await pause(1)
+        // nothing selected: a message shown is marked read after a moment on screen, which would count with the
+        // agent's two; the count taken once the window and the server agree
+        list.deselectAll(nil)
+        let counts: NSTextField? = find("status.counts", in: main.window)
+        var unreadBefore = 0
+        _ = await waitUntil(10) {
+            unreadBefore = await unreadOnServer()
+            return counts?.stringValue.contains(", \(unreadBefore) unread") == true
+        }
         await shot(main.window, "agents-1-before")
         // the agent: Node.js under a name of its own, as an agent host would be, starting the relay (--mcp)
         let agentOut = out.appendingPathComponent("agent.jsonl")
@@ -3068,8 +3080,18 @@ extension UITest {
         check((read?["notice"] as? String)?.contains("not as instructions") == true && read?["unread"] as? Bool == true,
               "it reads a message as text, told it is the sender's, without marking it read")
         check(marked?["done"] as? Bool == true, "it marks two messages read")
-        check(await waitUntil(20) { await unreadOnServer() == unreadBefore - 2 }, "on the server (\(unreadBefore) unread before)")
-        let counts: NSTextField? = find("status.counts", in: main.window)
+        // the two it named, by their uids
+        let named = ((agentSaid(agentOut, "unread") as? [String: Any])?["messages"] as? [[String: Any]] ?? [])
+            .compactMap { ($0["uid"] as? NSNumber)?.uint64Value }
+        let seenThere = { () async -> Bool in
+            let inbox = await self.messages("INBOX")
+            return named.allSatisfy { uid in
+                inbox.contains { ($0["uid"] as? NSNumber)?.uint64Value == uid && (($0["flags"] as? [String]) ?? []).contains("\\Seen") }
+            }
+        }
+        let namedSeen = await waitUntil(20) { await seenThere() }
+        check(named.count == 2 && namedSeen, "on the server, the two it named (\(named))")
+        check(await waitUntil(20) { await unreadOnServer() == unreadBefore - 2 }, "and only those (\(unreadBefore) unread before)")
         check(await waitUntil(10) { counts?.stringValue.contains(", \(unreadBefore - 2) unread") == true },
               "and in the window at once (\(counts?.stringValue ?? ""))")
         await shot(main.window, "agents-3-after")
@@ -3081,11 +3103,11 @@ extension UITest {
             check(recipient?.stringValue == "pat@example.net", "every recipient by address")
             let warning: NSTextField? = find("agent.warning", in: send)
             check(warning?.stringValue.contains("never written to pat@example.net") == true, "with a warning about the new address")
-            let button: NSButton? = find("agent.sendButton", in: send)
-            check(button?.isEnabled == false, "Send waits a moment before it can be pressed")
-            await pause(2)
+            await checkHeldBack(send, "agent.sendButton", "Send waits a moment before it can be pressed") {
+                agentSaid(agentOut, "sent") != nil
+            }
             await shot(send, "agents-4-send")
-            press(button)
+            press(find("agent.sendButton", in: send))
         }
         let sent = await waitFor(20) { agentSaid(agentOut, "sent") as? [String: Any] }
         check(sent?["sent"] as? Bool == true, "the agent learns the user said yes")
@@ -3096,7 +3118,7 @@ extension UITest {
         if let outbox = await waitWindow("outbox", 10) {
             let table: NSTableView? = find("outbox.list", in: outbox)
             let status = (table?.view(atColumn: 3, row: 0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
-            check(status.hasPrefix("Queued by an AI agent; sends at"), "it waits in the Outbox, where it can still be deleted (\(status))")
+            check(status.hasPrefix(lead(.uiOutboxStatusAgent)), "it waits in the Outbox, where it can still be deleted (\(status))")
             await shot(outbox, "agents-5-outbox")
             NSApp.stopModal()
             _ = await waitUntil { !outbox.isVisible }
@@ -3113,7 +3135,7 @@ extension UITest {
             check(cell(log, 2, 0).hasPrefix("Saved the draft “Agenda for Friday”")
                   && cell(log, 2, 1).hasPrefix("Put “Lunch on Friday?” in the Outbox for pat@example.net")
                   && cell(log, 2, 2) == "Watched the conversation “Team lunch on Friday”"
-                  && cell(log, 2, 3) == "Flagged “Quarterly report draft” blue" && cell(log, 2, 4).hasPrefix("Marked read"),
+                  && cell(log, 2, 3) == "Flagged “Quarterly report draft” blue" && cell(log, 2, 4).hasPrefix(lead(.agentLogRead)),
                   "and what its agent did, newest first, a flag's colour and a watched conversation among it "
                   + "(\((0..<5).map { cell(log, 2, $0) }.joined(separator: " | ")))")
             await shot(agents, "agents-6-window")
@@ -3199,8 +3221,8 @@ extension UITest {
     private func clearAgentLog(_ agents: NSWindow, _ log: NSTableView?) async throws {
         press(find("agents.clear", in: agents))
         let question = await waitWindow("alert", 10)
-        check(alertText(question).contains("Clear the agents’ activity history?"), "Clear asks first (\(alertText(question)))")
-        answer(question, "Clear")
+        check(alertText(question).contains(Text.uiClearAgentLog.text), "Clear asks first (\(alertText(question)))")
+        answer(question, Text.uiClearButton.text)
         check(await waitUntil(10) { log?.numberOfRows == 0 }, "and empties the log")
         // the limit counts the agent's sends in the store's log, the cleared ones with them
         let sqlite = Process()
@@ -3288,7 +3310,7 @@ extension UITest {
         let heading = label("agent.heading")
         check(heading == "Programs started from Terminal want to use your mail", "as the programs started from Terminal (\(heading))")
         let words = views(NSTextField.self, in: ask.contentView).map(\.stringValue)
-        check(words.contains { $0.hasPrefix("Every AI agent you start from this terminal shares the access you allow here") && $0.contains("--name") },
+        check(words.contains { $0.hasPrefix(lead(.agentConnectTerminalDetail)) && $0.contains("--name") },
               "which share what is allowed, and --name gives one an access of its own")
         checkQuestionFits(ask, "the question")
         onMain {
@@ -3342,18 +3364,17 @@ extension UITest {
             (0..<self.list.numberOfRows).filter { self.main.mailbox.row($0)?.subject.hasPrefix("Club newsletter") == true }.count == 2
                 && (0..<self.list.numberOfRows).contains { self.main.mailbox.row($0)?.subject == "Invitation: Roadmap review" }
         }, "the two newsletters and the invitation are in the Inbox")
+        // asked twice: the first answered with Return, the second with Send
+        try Data().write(to: URL(fileURLWithPath: agentOut.path + ".invitation-twice"))
         try Data().write(to: URL(fileURLWithPath: agentOut.path + ".bulk"))
 
         // the invitation's answer: what it answers above the text, Send and Don't Send only
         let send = await waitWindow("agent.send", 30)
         check(send != nil, "the agent's answer to the invitation is shown to the user first")
         if let send {
-            // Send's state first, before anything else takes time: off unless the test came after the wait was over
-            let button: NSButton? = find("agent.sendButton", in: send)
-            let sendOn = button?.isEnabled == true
-            let shownFor = Modal.openedAt[ObjectIdentifier(send)].map { Date().timeIntervalSince($0) } ?? 0
-            check(button != nil && (!sendOn || shownFor >= holdBackSeconds),
-                  "Send waits a moment before it can be pressed (on: \(sendOn), shown \(String(format: "%.2f", shownFor)) s)")
+            await checkHeldBack(send, "agent.sendButton", "Send waits a moment before it can be pressed") {
+                agentSaid(agentOut, "invitation-first") != nil
+            }
             let line: NSTextField? = find("agent.invitation", in: send)
             check(line?.stringValue.hasPrefix("This message accepts the invitation “Roadmap review”") == true
                   && line?.stringValue.contains("changes only once the message has been sent") == true,
@@ -3362,19 +3383,21 @@ extension UITest {
             let dont: NSButton? = find("agent.dontSend", in: send)
             check(compose == nil && dont != nil, "it has no Edit First")
             checkQuestionFits(send, "the invitation's Send question")
-            onMain {
-                NSApp.activate()
-                send.makeKeyAndOrderFront(nil)
-            }
-            // a question raised while the app is in the background has its default button back once it is key (macOS
-            // takes the key from it until then), so this is checked when the user can press Return
-            _ = await waitUntil(5) { send.isKeyWindow }
-            let isDefault = await waitUntil(5) { dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell }
-            check(isDefault, "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"), "
-                  + "default \(send.defaultButtonCell === dont?.cell), key window \(send.isKeyWindow))")
-            await pause(2)
+            onMain { self.bringToFront(send) }
             await shot(send, "agents-13-invitation")
             await darkShot(send, "agents-13-invitation-dark")
+            // Return, with Send on: the safe answer, Don't Send, is what it gives
+            pressKey(send, 36)
+            let first = await waitFor(20) { agentSaid(agentOut, "invitation-first") as? [String: Any] }
+            check(first?["status"] as? String == "not_sent" && !send.isVisible,
+                  "Don't Send is the default: Return answers it, and the agent learns it was not sent (\(first ?? [:]))")
+        }
+        // asked again, answered Send
+        let secondAsk = await waitFor(30) { self.window("agent.send").flatMap { $0 === send ? nil : $0 } }
+        check(secondAsk != nil, "the agent asks again")
+        if let secondAsk {
+            let button: NSButton? = find("agent.sendButton", in: secondAsk)
+            _ = await waitUntil(10) { button?.isEnabled == true }
             press(button)
         }
         let answered = await waitFor(30) { agentSaid(agentOut, "invitation") as? [String: Any] }
@@ -3449,20 +3472,47 @@ extension UITest {
         let asked = heading()
         check(asked.range(of: "^Take back the \\d+ changes My AI agent made in this time\\?$", options: .regularExpression) != nil,
               "a span picked, it asks with the count of the changes (\(asked))")
-        check(takeBack?.isHidden == false && takeBack?.hasDestructiveAction == true && cancel?.title == "Cancel"
-              && cancel?.keyEquivalent == "\r" && takeBack?.keyEquivalent == "" && ask.defaultButtonCell === cancel?.cell,
-              "Take Back is marked destructive and Cancel is the default")
+        check(takeBack?.isHidden == false && takeBack?.hasDestructiveAction == true && cancel?.title == Text.uiCancel.text,
+              "Take Back is marked destructive, beside Cancel")
         checkQuestionFits(ask, "Undo Since")
-        await pause(0.5)
         await shot(ask, "agents-12-undo-since")
         await darkShot(ask, "agents-12-undo-since-dark")
-        press(takeBack)
+        // Esc and Return answer Cancel: nothing is taken back
+        for key: UInt16 in [53, 36] {
+            let name = key == 53 ? "Esc" : "Return"
+            if key == 36 {
+                press(undoSince)
+                guard let reopened = await waitWindow("agents.undoSinceWindow", 10) else {
+                    check(false, "Undo Since asks again")
+                    break
+                }
+                choose(find("undoSince.span", in: reopened), 1)
+                pressKey(reopened, key)
+                _ = await waitUntil(5) { !reopened.isVisible }
+            } else {
+                pressKey(ask, key)
+                _ = await waitUntil(5) { !ask.isVisible }
+            }
+            let takenBack = await waitUntil(2) { cell(log, 2, 0).contains("taken back") }
+            let stillRead = await self.seen("Subject: Club newsletter 2")
+            check(window("agents.undoSinceWindow") == nil && !takenBack && stillRead,
+                  "\(name) answers Cancel: the question closes and nothing is taken back (\(cell(log, 2, 0)))")
+        }
+        // asked again, and Take Back pressed
+        press(undoSince)
+        guard let confirm = await waitWindow("agents.undoSinceWindow", 10) else {
+            check(false, "Undo Since asks again")
+            NSApp.stopModal()
+            return
+        }
+        choose(find("undoSince.span", in: confirm), 1)
+        press(find("undoSince.takeBack", in: confirm))
         let report = await waitWindow("alert", 10)
         let said = alertText(report)
         check(said.range(of: "Took back \\d+ changes", options: .regularExpression) != nil
               && said.contains("1 message was changed since, by you or on the server, and was left as it is."),
               "Take Back says what it took back and what it left (\(said))")
-        answer(report, "OK")
+        answer(report, Text.uiOk.text)
         check(await waitUntil(20) {
             let first = await self.seen("Subject: Club newsletter 1")
             let second = await self.seen("Subject: Club newsletter 2")
@@ -3503,7 +3553,7 @@ extension UITest {
         else { throw Failed(description: "the agent's draft did not open") }
         let note: NSTextField? = find("compose.agentNote", in: compose)
         let said = note?.stringValue ?? ""
-        check(said.hasPrefix("My AI agent, an AI agent, wrote this draft") && said.contains("Check the recipients and the text")
+        check(said == Text.agentDraftNote.text(["program": "My AI agent"])
               && note?.isHiddenOrHasHiddenAncestor == false,
               "opened, it says which agent wrote it and asks to check the recipients and the text (\(said))")
         // window coordinates, which grow upwards
@@ -3541,33 +3591,28 @@ extension UITest {
         check(Set(senders) == ["digest@list.example.com | Weekly Digest", "offers@list.example.com | Monthly Offers"]
               && label("agent.list.0.target") == "→ list.example.com" && label("agent.list.1.target") == "→ list.example.com",
               "one question lists both senders and where the requests go, each address first and whole, the name apart (\(senders))")
-        let unsubscribe: NSButton? = find("agent.unsubscribe", in: ask)
-        let dont: NSButton? = find("agent.dontUnsubscribe", in: ask)
-        check(unsubscribe?.isEnabled == false, "Unsubscribe waits a moment before it can be pressed")
+        await checkHeldBack(ask, "agent.unsubscribe", "Unsubscribe waits a moment before it can be pressed") {
+            agentSaid(agentOut, "unsubscribe") != nil
+        }
         // as the user comes to it: the app in front, the question key
         onMain {
             NSApp.activate()
             ask.makeKeyAndOrderFront(nil)
         }
         _ = await waitUntil(5) { ask.isKeyWindow }
-        await pause(2)
         await shot(ask, "agents-7-unsubscribe")
-        check(dont?.keyEquivalent == "\r" && unsubscribe?.keyEquivalent == "" && ask.defaultButtonCell === dont?.cell,
-              "Don’t Unsubscribe is the default, for Return and Esc")
-        // Return, posted to the queue as a key pressed is
-        let enter = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
-                                     windowNumber: ask.windowNumber, context: nil, characters: "\r", charactersIgnoringModifiers: "\r",
-                                     isARepeat: false, keyCode: 36)
-        enter.map { event in onMain { NSApp.postEvent(event, atStart: false) } }
+        // Return, with Unsubscribe on: the safe answer, Don't Unsubscribe, is what it gives
+        pressKey(ask, 36)
         let said = await waitFor(20) { agentSaid(agentOut, "unsubscribe") as? [String: Any] }
-        check(said?["unsubscribed"] as? Bool == false, "Return answers no, and the agent learns the user said no")
+        check(said?["unsubscribed"] as? Bool == false && !ask.isVisible,
+              "Don’t Unsubscribe is the default: Return answers no, and the agent learns the user said no")
         command(.aiAgents)
         if let agents = await waitWindow("agents", 10) {
             let log: NSTableView? = find("agents.log", in: agents)
             let cell = { (log?.view(atColumn: 2, row: 0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? "" }
-            _ = await waitUntil(10) { cell().hasPrefix("You did not unsubscribe from") }
+            _ = await waitUntil(10) { cell().hasPrefix(lead(.agentLogUnsubscribeRefused)) }
             let first = cell()
-            check(first.hasPrefix("You did not unsubscribe from") && first.contains("digest@list.example.com"),
+            check(first.hasPrefix(lead(.agentLogUnsubscribeRefused)) && first.contains("digest@list.example.com"),
                   "and the AI Agents window says no list was asked (\(first))")
             NSApp.stopModal()
             _ = await waitUntil { !agents.isVisible }
@@ -3602,7 +3647,7 @@ extension UITest {
         // a contact with two addresses
         onMain { book.newContact() }
         guard let person = await waitWindow("contact", 10) else { throw Failed(description: "no Contact Properties") }
-        check(person.title == "New Contact", "New Contact opens Contact Properties (\(person.title))")
+        check(person.title == Text.uiNewContactTitle.text, "New Contact opens Contact Properties (\(person.title))")
         type("Mary", into: find("contact.first", in: person))
         type("Smith", into: find("contact.last", in: person))
         check((find("contact.display", in: person) as NSTextField?)?.stringValue == "Mary Smith", "the name shown follows the first and last name")
@@ -3637,11 +3682,11 @@ extension UITest {
         // a group of her and a typed address
         onMain { book.newGroup() }
         guard let groupSheet = await waitWindow("group", 10) else { throw Failed(description: "no Group Properties") }
-        check(groupSheet.title == "New Group", "New Group opens Group Properties")
+        check(groupSheet.title == Text.uiNewGroupTitle.text, "New Group opens Group Properties")
         type("Team", into: find("group.name", in: groupSheet))
         press(find("group.select", in: groupSheet))
         guard let members = await waitWindow("pick", 10) else { throw Failed(description: "no Select Group Members") }
-        check(members.title == "Select Group Members", "Select Members opens the book's people")
+        check(members.title == Text.uiSelectMembers.text, "Select Members opens the book's people")
         let memberSource: NSTableView? = find("pick.list", in: members)
         memberSource?.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
         press(find("pick.add", in: members))
@@ -3673,7 +3718,7 @@ extension UITest {
         check(pickTo != nil, "the To label of a message is a button")
         press(pickTo)
         guard let picker = await waitWindow("pick", 10) else { throw Failed(description: "no Select Recipients") }
-        check(picker.title == "Select Recipients", "To opens Select Recipients")
+        check(picker.title == Text.uiSelectRecipients.text, "To opens Select Recipients")
         let pickSource: NSTableView? = find("pick.list", in: picker)
         let pickerNames = (0..<(pickSource?.numberOfRows ?? 0)).compactMap {
             ((pickSource?.view(atColumn: 0, row: $0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue)
@@ -3717,7 +3762,7 @@ extension UITest {
         let senderName = sender?.from ?? ""
         let senderAddress = sender?.fromAddress ?? ""
         let rightClick = main.mailbox.messageMenu()?.items.map(\.title) ?? []
-        check(rightClick.contains("Add Sender to Address Book"), "the message list's right-click menu has Add Sender to Address Book")
+        check(rightClick.contains(Command.addSenderToBook.label), "the message list's right-click menu has Add Sender to Address Book")
         command(.addSenderToBook)
         let statusLabel: NSTextField? = find("status.text", in: main.window)
         check(await waitUntil(5) { statusLabel?.stringValue.hasSuffix("was added to the Address Book.") == true },
@@ -3739,13 +3784,13 @@ extension UITest {
         let importedText = alertText(imported)
         check(importedText.contains("Added 1 contact, skipped 1 already in the Address Book."),
               "File > Import Address Book adds 1 and skips 1 (\(importedText))")
-        answer(imported, "OK")
+        answer(imported, Text.uiOk.text)
         TestHooks.open = nil
         _ = await waitUntil(5) { window("alert") == nil }
         command(.addressBook)
         _ = await waitUntil(5) { bookWindow.isVisible }
         onMain { book.groupList.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false) }
-        await pause(0.5)
+        _ = await waitUntil(5) { self.bookNames(book).contains("John Doe") }
         let afterImport = bookNames(book)
         check(afterImport.contains("John Doe") && afterImport.contains("Mary Smith") && afterImport.contains(senderName),
               "and the book lists John Doe beside Mary Smith and \(senderName) (\(afterImport))")
@@ -3765,7 +3810,7 @@ extension UITest {
         let exportText = alertText(exportSaid)
         check(exportName == "Address Book.vcf" && exportText.contains("3 contacts saved to exported.vcf"),
               "File > Export Address Book writes a vCard file (\(exportText))")
-        answer(exportSaid, "OK")
+        answer(exportSaid, Text.uiOk.text)
         TestHooks.save = nil
         let card = (try? String(contentsOf: exported, encoding: .utf8)) ?? ""
         check(card.contains("Mary Smith") && card.contains("John Doe") && card.contains(senderAddress),

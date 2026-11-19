@@ -59,6 +59,34 @@ async fn mx_and_srv_over_dns_over_https() {
     assert!(postalsys.oauth2);
     assert_eq!(postalsys.app_password.unwrap().provider, "Gmail");
 
+    // the big providers' own domains, known without a lookup (mx.rs KNOWN_DOMAINS), still publish what it says
+    for (domain, exchange) in [
+        ("gmail.com", ".l.google.com"),
+        ("googlemail.com", ".l.google.com"),
+        ("outlook.com", ".protection.outlook.com"),
+        ("hotmail.com", ".protection.outlook.com"),
+        ("live.com", ".protection.outlook.com"),
+        ("msn.com", ".protection.outlook.com"),
+    ] {
+        let mx = io.mx(domain).await;
+        assert!(
+            mx.iter().any(|record| record.exchange.ends_with(exchange)),
+            "{domain}: {mx:?}"
+        );
+    }
+    let gmail_imap = io.srv("_imaps._tcp.gmail.com").await;
+    assert_eq!(
+        (gmail_imap[0].target.as_str(), gmail_imap[0].port),
+        ("imap.gmail.com", 993),
+        "{gmail_imap:?}"
+    );
+    let gmail_smtp = io.srv("_submission._tcp.gmail.com").await;
+    assert_eq!(
+        (gmail_smtp[0].target.as_str(), gmail_smtp[0].port),
+        ("smtp.gmail.com", 587),
+        "{gmail_smtp:?}"
+    );
+
     // RFC 6186 records
     let imaps = io.srv("_imaps._tcp.fastmail.com").await;
     assert_eq!(
