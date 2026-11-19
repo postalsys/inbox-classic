@@ -720,6 +720,8 @@ agent-terminal-program-windows = Iš terminalo ({ $terminal }) paleista programa
 agent-terminal-program-linux = Iš terminalo ({ $terminal }) paleista programa
 agent-connect-title-terminal = { $programs } nori naudotis jūsų paštu
 agent-connect-terminal-detail = Visi DI agentai, kuriuos paleidžiate iš šio terminalo, bendrai naudojasi čia suteikta prieiga. Norėdami suteikti agentui atskirą prieigą, agento MCP nustatymuose į jo argumentus įtraukite --name ir savo pasirinktą pavadinimą.
+# review: new
+agent-connect-claimed = Programa prisistatė kaip { $claimed }. Inbox Classic patikrino, kuri programa ją paleido: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

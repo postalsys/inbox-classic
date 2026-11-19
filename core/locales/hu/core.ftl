@@ -665,6 +665,8 @@ agent-terminal-program-windows = Egy terminálból ({ $terminal }) indított pro
 agent-terminal-program-linux = Egy terminálból ({ $terminal }) indított program
 agent-connect-title-terminal = Hozzáférést kérnek a leveleihez: { $programs }
 agent-connect-terminal-detail = Az ugyanebből a terminálprogramból indított, külön név nélküli MI-ügynökök közös jogosultságokat kapnak. Egy ügynök külön kezeléséhez adja meg a --name kapcsolót és egy tetszőleges nevet az MCP-beállításaiban, az indítási argumentumok között.
+# review: new
+agent-connect-claimed = A program { $claimed } néven mutatkozott be. Az Inbox Classic ellenőrizte, melyik program indította el: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

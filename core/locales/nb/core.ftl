@@ -710,6 +710,8 @@ agent-terminal-program-linux = Et program startet fra en terminal ({ $terminal }
 agent-connect-title-terminal = { $programs } vil bruke e-posten din
 # review: new
 agent-connect-terminal-detail = Alle KI-agenter du starter fra denne terminalen, deler tilgangen du gir her. Vil du gi en agent egen tilgang, legger du til --name og et navn du velger, blant argumentene i MCP-innstillingene til agenten.
+# review: new
+agent-connect-claimed = Programmet oppga at det var { $claimed }. Inbox Classic har sjekket hvilket program som startet det: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

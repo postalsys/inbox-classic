@@ -1005,6 +1005,8 @@ agent-terminal-program-linux = Un program pornit dintr-un terminal ({ $terminal 
 agent-connect-title-terminal = { $programs } solicită acces la mesajele dvs.
 # review: new
 agent-connect-terminal-detail = Toți agenții IA pe care îi porniți din acest terminal folosesc accesul pe care îl permiteți aici. Pentru ca un agent să aibă propriul acces, adăugați --name și un nume ales de dvs. la argumentele sale din setările MCP ale agentului.
+# review: new
+agent-connect-claimed = Programul s-a prezentat ca { $claimed }. Inbox Classic a verificat ce program l-a pornit: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

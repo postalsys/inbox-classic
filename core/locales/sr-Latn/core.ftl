@@ -771,6 +771,8 @@ agent-terminal-program-linux = Program pokrenut iz terminala ({ $terminal })
 agent-connect-title-terminal = { $programs } žele da koriste vašu poštu
 # review: new
 agent-connect-terminal-detail = Svi AI agenti koje pokrenete iz ovog terminala dele pristup koji ovde dozvolite. Da biste nekom od njih dali zaseban pristup, u MCP podešavanjima agenta dodajte među njegove argumente --name i naziv po izboru.
+# review: new
+agent-connect-claimed = Program se predstavio kao { $claimed }. Inbox Classic je proverio koji ga je program pokrenuo: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

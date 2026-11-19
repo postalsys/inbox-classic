@@ -727,6 +727,8 @@ agent-terminal-program-linux = Un programa iniciat des d’un terminal ({ $termi
 agent-connect-title-terminal = { $programs } volen fer servir el vostre correu
 # review: new
 agent-connect-terminal-detail = Tots els agents d’IA que inicieu des d’aquest terminal comparteixen l’accés que permeteu aquí. Per donar a un agent el seu propi accés, afegiu --name i un nom que trieu als seus arguments a la configuració MCP de l’agent.
+# review: new
+agent-connect-claimed = Ha dit que era { $claimed }. Inbox Classic ha comprovat quin programa l’ha iniciat: { $program }.
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
 

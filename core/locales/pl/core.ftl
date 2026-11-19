@@ -1022,6 +1022,8 @@ agent-terminal-program-linux = Program uruchomiony z terminala ({ $terminal })
 agent-connect-title-terminal = { $programs } chcą korzystać z Twojej poczty
 # review: new
 agent-connect-terminal-detail = Wszyscy agenci AI uruchamiani z tego terminala współdzielą dostęp, na który tu zezwolisz. Aby dać jednemu z nich osobny dostęp, dodaj --name i wybraną przez siebie nazwę do jego argumentów w ustawieniach MCP agenta.
+# review: new
+agent-connect-claimed = Program przedstawił się jako { $claimed }. Inbox Classic sprawdził, który program go uruchomił: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

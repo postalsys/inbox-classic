@@ -712,6 +712,8 @@ agent-terminal-program-linux = Päätteestä ({ $terminal }) käynnistetty ohjel
 agent-connect-title-terminal = { $programs } haluavat käyttää postiasi
 # review: new
 agent-connect-terminal-detail = Kaikki tästä päätteestä käynnistämäsi tekoälyagentit jakavat tässä sallimasi käyttöoikeudet. Jos haluat antaa agentille omat käyttöoikeudet, lisää sen argumentteihin agentin MCP-asetuksissa --name ja valitsemasi nimi.
+# review: new
+agent-connect-claimed = Ohjelma kertoi olevansa { $claimed }. Inbox Classic tarkisti, mikä ohjelma sen käynnisti: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

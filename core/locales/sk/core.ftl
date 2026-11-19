@@ -1019,6 +1019,8 @@ agent-terminal-program-linux = Program spustený z terminálu ({ $terminal })
 agent-connect-title-terminal = { $programs } chcú pracovať s vašou poštou
 # review: new
 agent-connect-terminal-detail = Všetci AI agenti, ktorých spustíte z tohto terminálu, zdieľajú prístup, ktorý tu povolíte. Ak chcete niektorému z nich dať vlastný prístup, pridajte v nastaveniach MCP agenta do jeho argumentov --name a ľubovoľný názov.
+# review: new
+agent-connect-claimed = Program sa predstavil ako { $claimed }. Aplikácia Inbox Classic overila, ktorý program ho spustil: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

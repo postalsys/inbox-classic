@@ -3036,7 +3036,7 @@ extension UITest {
         agent.executableURL = host
         agent.arguments = [repo.appendingPathComponent("scripts/ui-e2e/agent.mjs").path]
         var environment = ProcessInfo.processInfo.environment
-        environment["APP"] = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/Inbox Classic").path
+        environment["APP"] = Bundle.main.executablePath ?? ""
         environment["STORE"] = out.appendingPathComponent("store.db").path
         environment["OUT"] = agentOut.path
         agent.environment = environment
@@ -3233,7 +3233,7 @@ extension UITest {
         agent.executableURL = terminal
         agent.arguments = ["-e", script]
         var environment = ProcessInfo.processInfo.environment
-        environment["APP"] = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/Inbox Classic").path
+        environment["APP"] = Bundle.main.executablePath ?? ""
         environment["STORE"] = out.appendingPathComponent("store.db").path
         agent.environment = environment
         agent.standardOutput = FileHandle.nullDevice
