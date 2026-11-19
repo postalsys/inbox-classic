@@ -50,6 +50,7 @@ pub fn render(bytes: &[u8]) -> Result<Picture, Refusal> {
     let bounds = tree.size();
     let transform =
         resvg::tiny_skia::Transform::from_scale(width as f32 / bounds.width(), height as f32 / bounds.height());
+    check_extent(&tree, transform)?;
     resvg::render(&tree, transform, &mut pixmap.as_mut());
     let mut pixels = Vec::with_capacity(pixmap.data().len());
     for pixel in pixmap.pixels() {
@@ -129,6 +130,24 @@ fn check_filters(tree: &resvg::usvg::Tree) -> Result<(), Refusal> {
             })
     }
     walk(tree.root()).then_some(()).ok_or(Refusal::TooLarge)
+}
+
+/// How far from the preview, in its pixels, anything of the picture may reach: tiny-skia keeps edges in 16.16 fixed
+/// point, and a path out at millions of pixels breaks its scanning (found by fuzzing), while nothing that far is seen
+const MAX_EXTENT: f32 = 8.0 * crate::limits::MAX_SIDE as f32;
+
+/// Refuses a picture any of whose shapes, their strokes included, reach further than [`MAX_EXTENT`] from the preview
+/// once drawn with `transform`. Whatever else draws a sender's SVG with resvg (brand logos) checks it too.
+pub fn check_extent(tree: &resvg::usvg::Tree, transform: resvg::tiny_skia::Transform) -> Result<(), Refusal> {
+    let reach = tree.root().abs_stroke_bounding_box();
+    let (left, top) = (reach.left() * transform.sx, reach.top() * transform.sy);
+    let (right, bottom) = (reach.right() * transform.sx, reach.bottom() * transform.sy);
+    let near = |n: f32| n.is_finite() && n.abs() <= MAX_EXTENT;
+    [left, top, right, bottom]
+        .into_iter()
+        .all(near)
+        .then_some(())
+        .ok_or(Refusal::TooLarge)
 }
 
 /// The preview's size: the picture's own, scaled to fit, at least a pixel a side
@@ -305,5 +324,19 @@ mod tests {
         let entity = b"<?xml version=\"1.0\"?><!DOCTYPE svg [<!ENTITY x SYSTEM \"file:///etc/passwd\">]>\
             <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10\" height=\"10\"><text>&x;</text></svg>";
         assert!(describe(entity).is_err());
+    }
+
+    #[test]
+    fn a_shape_out_at_millions_of_pixels_is_refused_before_it_is_drawn() {
+        // found by fuzzing: a path out at -6.7e15 broke tiny-skia's scanning
+        let far = b"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"1 6 30 11\">\
+            <path d=\"M0 0L30 10Q15 0 6-6666666666666660 1010Q15 0 0 10z\" stroke=\"green\"/></svg>";
+        assert_eq!(render(far).err(), Some(Refusal::TooLarge));
+        let found = include_bytes!("../../../fuzz/corpus/preview_svg/crash-db2a1c38e904cd30309b60c285393183ed5547f7");
+        assert!(render(found).is_err());
+        // a shape that goes some way past the picture's edge is drawn
+        let past = b"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"20\">\
+            <path d=\"M-500 -500L540 520\" stroke=\"green\" stroke-width=\"4\"/></svg>";
+        assert!(render(past).is_ok());
     }
 }
