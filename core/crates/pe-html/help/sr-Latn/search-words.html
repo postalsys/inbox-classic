@@ -5,7 +5,7 @@
     <tr><th>Otkucajte</th><th>Pronalazi</th></tr>
     <tr><td><code>budžet</code></td><td>Poruke sa rečju koja počinje sa <i>budžet</i>, bilo gde u njima</td></tr>
     <tr><td><code>"tačan izraz"</code></td><td>Ove reči, ovim redosledom</td></tr>
-    <tr><td><code>-reč</code></td><td>Poruke bez te reči. Znak minus možete da koristite i uz neke uslove pretrage, na primer <code>-is:unread</code></td></tr>
+    <tr><td><code>-reč</code></td><td>Poruke bez te reči. Znak minus možete da koristite i uz neke uslove pretrage, na primer <code>-is:unread</code>. Minus se zanemaruje kod uslova za datum, starost i veličinu</td></tr>
     <tr><td><code>ovo OR ono</code></td><td>Poruke sa bilo kojom od tih reči. <code>OR</code> pišite velikim slovima</td></tr>
     <tr><td><code>from:ana</code></td><td>Pošta od Ane</td></tr>
     <tr><td><code>to:ana</code>, <code>cc:</code>, <code>bcc:</code></td><td>Pošta za Anu, u bilo kom redu primalaca</td></tr>
@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Samo ta fascikla, u svim nalozima</td></tr>
     <tr><td><code>in:projekti</code></td><td>Samo fascikla sa tim nazivom</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Sve fascikle</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Pošta pre ili posle određenog dana. Radi i <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Pošta starija ili novija od datog broja dana (<code>d</code>), meseci (<code>m</code>) ili godina (<code>y</code>)</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Pošta pre ponoći po UTC-u datuma navedenog uz before, odnosno od ponoći po UTC-u datuma navedenog uz after. Radi i <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Pošta starija ili novija od datog broja dana (<code>d</code>), meseci (<code>m</code>) ili godina (<code>y</code>). Mesec se računa kao 30 dana, a godina kao 365 dana</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Pošta veća ili manja od date veličine, u bajtovima ili sa <code>K</code>, <code>M</code> ili <code>G</code></td></tr>
 </table>
-<p>Pretraga ne razlikuje velika i mala slova ni dijakritičke znakove. Nepoznat izraz za pretragu tretira se kao obična reč.</p>
-<p>Šifrovane poruke možete da pronađete po pošiljaocu, primaocima i temi. Kada je opcija <b data-text="ui-search-encrypted"></b> uključena u podešavanjima <b data-settings="reading"></b>, možete da pretražujete i tekst poruka nakon dešifrovanja.</p>
+<p>Pretraga ne razlikuje velika i mala slova ni dijakritičke znakove. Nepoznat izraz za pretragu tretira se kao obična reč. Prefiks mora da ima najmanje dva znaka; jedan znak samostalno nalazi samo celu reč.</p>
+<p>Šifrovane poruke možete da pronađete po pošiljaocu, primaocima i temi. Kada je opcija <b data-text="ui-search-encrypted"></b> uključena u podešavanjima <b data-settings="reading"></b>, možete da pretražujete i tekst poruka nakon dešifrovanja i indeksiranja. Taj tekst i zaštićene teme tada se čuvaju bez šifrovanja u lokalnom indeksu pretrage.</p>
 <p>Lista poruka nema kolonu sa veličinom poruke. Da biste videli koliko je poruka velika, izaberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

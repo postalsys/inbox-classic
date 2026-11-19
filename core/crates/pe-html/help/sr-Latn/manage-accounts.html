@@ -11,7 +11,7 @@
     <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> je ime koje vide osobe kojima pišete.</li>
     <li>Da biste zadržali lozinku, ostavite polje <b data-text="ui-field-password"></b> prazno.</li>
     <li>Nalog koji se prijavljuje preko pregledača navodi koju aplikaciju za prijavljivanje koristi.</li>
-    <li><b data-text="ui-field-other-addresses"></b> sadrži dodatne adrese za slanje sa ovog naloga, na primer pseudonime. Odvojite ih zarezima i unesite u obliku <code>Prodaja &lt;prodaja@example.com&gt;</code> ili unesite samo adresu. Polje <b data-text="ui-field-from"></b> tada nudi svaku od njih ispod naloga.</li>
+    <li>Polje <b data-text="ui-field-other-addresses"></b> sadrži dodatne adrese za slanje sa ovog naloga, na primer pseudonime. Odvojite ih zarezima i unesite u obliku <code>Prodaja &lt;prodaja@example.com&gt;</code> ili unesite samo adresu. Polje <b data-text="ui-field-from"></b> tada nudi svaku od njih ispod naloga.</li>
 </ul>
 <p><!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os--> u istom prozoru dodaje još jedan nalog.</p>
 <h2>Redosled naloga</h2>
@@ -24,11 +24,11 @@
     <li><b data-text="cmd-new-folder"></b>, <b data-text="ui-account-properties"></b>, <b data-text="ui-account-move-up"></b> i <b data-text="ui-account-move-down"></b>.</li>
 </ul>
 <h2>Uklanjanje naloga</h2>
-<aside class="note">Uklanjanjem naloga sa ovog računara brišu se lokalne kopije njegovih poruka i sačuvani podaci za prijavu. Pošta na serveru ostaje.</aside>
+<aside class="note">Uklanjanjem naloga brišu se njegove lokalne poruke, radne verzije, red za slanje i podaci za prijavu sa ovog računara. Pošta na serveru ostaje. Poruke koje postoje samo lokalno ne mogu ponovo da se preuzmu sa servera.</aside>
 <p>Da biste uklonili nalog:</p>
 <ol>
     <li>Izaberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Izaberite nalog i kliknite na <b data-text="ui-remove"></b> ili pritisnite <kbd>Delete</kbd>.</li>
+    <li>Izaberite nalog i kliknite na <b data-text="ui-remove"></b><!--os:windows--> ili pritisnite <kbd>Delete</kbd><!--/os-->.</li>
     <li>Potvrdite. Nalog se uklanja iz liste fascikli.</li>
 </ol>
 <nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav>

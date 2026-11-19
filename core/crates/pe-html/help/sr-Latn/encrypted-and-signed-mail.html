@@ -6,15 +6,15 @@
     <tr><th>Boja</th><th>Značenje</th></tr>
     <tr><td>Zelena</td><td>Potpis pošiljaoca je ispravan, a njegov ključ ste proverili.</td></tr>
     <tr><td>Plava</td><td>Potpis pošiljaoca je ispravan, ali njegov ključ niste proverili, ili je poruka šifrovana bez potpisa.</td></tr>
-    <tr><td>Žutonarandžasta</td><td>Nešto nije u redu: potpis se ne poklapa, potpisao ju je neko drugi a ne pošiljalac, ili neki deo nije mogao da se pročita.</td></tr>
+    <tr><td>Žutonarandžasta</td><td>Nešto nije u redu: potpis se ne poklapa, ključ potpisa nije mogao da se poveže sa navedenim pošiljaocem, ili neki deo nije mogao da se pročita.</td></tr>
     <tr><td>Siva</td><td>Nema potpisa, ključ potpisnika nije dostupan ili potpis nije proveren.</td></tr>
 </table>
 <p>Poruka čiji su delovi različito zaštićeni prikazuje svaki deo u posebnom okviru, sa sopstvenom oznakom. Traka tada broji delove svake vrste. Kliknite na oznaku ili na <b data-text="ui-protection-details"></b> na traci da biste videli podatke o potpisu i šifrovanju svakog dela, uključujući korišćene ključeve i vreme potpisivanja.</p>
 <aside class="warning">Samo traku i oznake iznad okvira prikazuje sam Inbox Classic. Pošiljalac u svojoj poruci može da nacrta bilo šta, pa i nešto što liči na oznaku. Gledajte traku.</aside>
 <p>Za učitavanje slika sa interneta u šifrovanom delu morate da date dozvolu svaki put kada otvorite poruku, klikom na traku za slike. Oznaka tada navodi da su slike učitane.</p>
-<!--review--><p>Slike i PDF datoteke priložene delu prikazuju se u okviru tog dela, nikad u okviru drugog. Datoteke šifrovanog dela čuvaju se samo u memoriji, nikad na disku.</p><!--/review-->
-<!--review--><p>Na listi priloženih datoteka katanac označava svaku datoteku šifrovanog dela. Pokažite na datoteku da biste videli iz kog dela potiče.</p><!--/review-->
+<p>Slike i PDF datoteke priložene delu prikazuju se u okviru tog dela, nikad u okviru drugog. Podaci tih pregleda ostaju u memoriji. Otvaranje u drugom programu ipak pravi nešifrovanu privremenu datoteku, a pretraga može da sačuva dešifrovan tekst kako je opisano ispod.</p>
+<p>Na listi priloženih datoteka katanac označava svaku datoteku šifrovanog dela. Pokažite na datoteku da biste videli iz kog dela potiče.</p>
 <p>Kad odgovarate ili prosleđujete, citira se samo ono što je bilo prikazano.</p>
-<p>Na listi poruka katanac označava šifrovanu poruku, a pečat potpisanu. Ako je pretraga šifrovanih poruka uključena i odgovarajući privatni ključ je dostupan, Inbox Classic može da dešifruje poruke posle preuzimanja ili kada ih otvorite. Lista tada prikazuje početak teksta i temu iz šifrovanog dela, ako je tamo navedena. Ako nema dešifrovanog teksta za prikaz, piše <b data-text="list-encrypted"></b>. Obaveštenja o novim šifrovanim porukama uvek koriste taj tekst.</p>
-<p>Opcija <b data-text="ui-search-encrypted"></b> u podešavanjima <b data-settings="reading"></b> omogućava da pretražujete i tekst dešifrovanih poruka. AI agenti ne mogu da čitaju sadržaj ni priloge šifrovanih poruka, niti da pretražuju njihov sadržaj.</p>
+<p>Na listi poruka katanac označava šifrovanu poruku, a pečat potpisanu. Te oznake ne potvrđuju ispravnost potpisa ni vlasništvo nad ključem. Ako je pretraga šifrovanih poruka uključena i odgovarajući privatni ključ je dostupan, Inbox Classic može da dešifruje poruke posle preuzimanja ili kada ih otvorite. Posle uspešnog indeksiranja lista prikazuje početak teksta i temu iz šifrovanog dela, ako je tamo navedena. Ako nema dešifrovanog teksta za prikaz, piše <b data-text="list-encrypted"></b>. Obaveštenja o novim šifrovanim porukama uvek koriste taj tekst.</p>
+<p>Opcija <b data-text="ui-search-encrypted"></b> u podešavanjima <b data-settings="reading"></b> omogućava pretragu teksta nakon uspešnog dešifrovanja i indeksiranja sa dostupnim ključem. Tekst i zaštićene teme čuvaju se nešifrovano u lokalnom indeksu. Isključivanje opcije uklanja te podatke i vraća spoljne teme. AI agenti vide samo spoljne podatke; ne mogu da čitaju niti pretražuju dešifrovan tekst, zaštićene teme ili priloge.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

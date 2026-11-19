@@ -4,16 +4,16 @@
 <p>De balk boven het bericht vat de beveiliging van het hele bericht samen:</p>
 <table>
     <tr><th>Kleur</th><th>Wat het betekent</th></tr>
-    <tr><td>Groen</td><td>Ondertekend door de afzender, met een sleutel die je hebt geverifieerd.</td></tr>
-    <tr><td>Blauw</td><td>Ondertekend door de afzender met een sleutel die je niet hebt geverifieerd, of versleuteld voor jou.</td></tr>
+    <tr><td>Groen</td><td>Geldige digitale handtekening van de afzender, met geverifieerde sleuteleigenaar.</td></tr>
+    <tr><td>Blauw</td><td>Geldige digitale handtekening van de afzender, met niet-geverifieerde sleuteleigenaar, of voor jou versleuteld zonder handtekening.</td></tr>
     <tr><td>Oranje</td><td>Er klopt iets niet: de handtekening komt niet overeen, iemand anders dan de afzender heeft ondertekend, of een deel kon niet worden gelezen.</td></tr>
     <tr><td>Grijs</td><td>Niet ondertekend, of de handtekening kon niet worden gecontroleerd, bijvoorbeeld doordat de sleutel ontbreekt.</td></tr>
 </table>
 <p>Als de delen van een bericht verschillend zijn beveiligd, krijgt elk deel een eigen kader en label. De balk telt dan hoeveel delen er van elke soort zijn. Klik op een label, of op <b data-text="ui-protection-details"></b> in de balk, om te zien wie elk deel heeft ondertekend, met welke sleutel en wanneer.</p>
 <aside class="warning">Alleen de balk en de labels boven de kaders komen van Inbox Classic. Een afzender kan de inhoud van het bericht opmaken zoals die wil, ook met nagemaakte beveiligingslabels. Controleer daarom de balk van Inbox Classic.</aside>
 <p>Afbeeldingen van internet in een versleuteld deel worden alleen geladen als je op de afbeeldingenbalk klikt, elke keer opnieuw. Het label vermeldt vervolgens dat er afbeeldingen zijn geladen.</p>
-<!--review--><p>Afbeeldingen en PDF-bestanden bij een deel verschijnen in het kader van dat deel, nooit in dat van een ander. Die van een versleuteld deel blijven alleen in het geheugen, nooit op de schijf.</p><!--/review-->
-<!--review--><p>In de lijst met bijgevoegde bestanden markeert een slotje elk bestand van een versleuteld deel. Wijs een bestand aan om te zien uit welk deel het komt.</p><!--/review-->
+<p>Voorbeelden van afbeeldingen en PDF-bestanden verschijnen in het kader van het bijbehorende deel. Ontsleutelde gegevens voor deze voorbeelden blijven in het geheugen; openen of opslaan van een bijlage maakt wel een onversleutelde kopie op de schijf.</p>
+<p>In de lijst met bijgevoegde bestanden markeert een slotje elk bestand van een versleuteld deel. Wijs een bestand aan om te zien uit welk deel het komt.</p>
 <p>Als je beantwoordt of doorstuurt, wordt alleen geciteerd wat werd getoond.</p>
 <p>Een hangslot in de berichtenlijst duidt op een versleuteld bericht, een zegel op een ondertekend bericht. Als zoeken in versleutelde berichten aanstaat en de juiste privésleutel beschikbaar is, kan Inbox Classic berichten na het downloaden of bij het openen ontsleutelen. De lijst toont dan een tekstvoorbeeld en, indien aanwezig, het onderwerp uit het versleutelde deel. Zonder ontsleuteld tekstvoorbeeld staat er <b data-text="list-encrypted"></b>. Meldingen van nieuwe versleutelde berichten gebruiken altijd deze aanduiding.</p>
 <p>Met de optie <b data-text="ui-search-encrypted"></b> bij <b data-settings="reading"></b> kun je ook zoeken in de tekst van ontsleutelde berichten. AI-agents kunnen de inhoud en bijlagen van versleutelde berichten niet lezen en kunnen die inhoud ook niet doorzoeken.</p>

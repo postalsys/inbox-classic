@@ -5,18 +5,16 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`; branch `i18n/review-resume-20261118`.
-- **Scope fixed by the user:** finish translations already on master `8757ab1c234bf3549979c06fdca14980fd3f9b80`. Do not discover unmerged translation branches or wait for additions.
-- **Publication authorized:** push and merge major updates as ready. **Do not check CI**; failures will be handled separately. No local test suites or manually triggered workflows. Historical CI-hold notes are superseded.
-- **Cadence:** parallel review; major commits only. Root owns shared records, generation and publication.
-- **Next: Publish the validated Spanish/Italian/Finnish update, then continue Portuguese (pt) and Brazilian Portuguese (pt-BR). Workers review French/Catalan, Dutch/Turkish and Norwegian Bokmål/Serbian Latin. No local test suites or CI queries; major commits only.**
-- Scope: **36,408 catalog entries / 1,380 full help topics**. Completed locally: **35,743 entries / 1,301 topics**. Pending: **665 entries / 79 topics**, across 8 languages. All 28 languages inventoried.
-- Spanish, Italian and Finnish have no pending marks or context items. The combined update adds 250 reviewed catalog entries and 30 full topics, with 214 catalog-value and 456 cumulative help-line corrections.
-- Active workers: French/Catalan; Dutch/Turkish; Norwegian Bokmål/Serbian Latin. Root handles Portuguese variants. Worker milestones remain immutable.
-- Three immutable Spanish, Italian and Finnish checkpoints verified: 250 newly reviewed catalog entries and 30 full help topics, with 214 catalog-value corrections and 456 cumulative help wording-line corrections including reopened context. All 28 language inventories, latest translation/English hashes, variables and help filenames reconcile. Checkers report only expected draft-mark diagnostics and zero structural findings. Source-derived menu/dialog scopes and static platform joins checked; Finnish Drafts Open/Junk exclusion verified against actual callers. Offline pe-ffi generation passed in 7.90s using the isolated translation target; 21 installer, 9 desktop and 18 metainfo values verified, other language bytes unchanged. Global diagnostics reconcile 35,927 known reviewed catalog entries and 19,094 help lines; since-start report reconciles 665 pending entries and 184 passages in 79 topics. HTML refreshed; REVIEWED unchanged. No test suites, native GUI runs, manual workflows or CI queries.
-- Latest published checkpoint: [PR #218](https://github.com/postalsys/inbox-classic/pull/218), merged as `518d2e171`. Fetched master equals the root parent. This major update is validated locally and ready to publish.
-- Exact inventories, commits, before/after ledgers and source/generation evidence are in `translation-review-state.json`. Do not replay successful helpers or mutate active worker branches.
-- Guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`, SHA-256 `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`. Round start: `e99f7e59248bed137903150db7ef417e27755d18`; REVIEWED remains `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
+- **Round 2 is complete.** All 28 target languages are reviewed. No catalog entries, help topics, context items or checked mnemonic collisions remain pending.
+- **Completed fixed scope:** 36,408 catalog entries and 1,380 full help topics. The complete current inventory contains 41,524 catalog entries and 1,484 topics across the 28 target languages; previously reviewed content is outside this round's credit.
+- **Reviewed baseline:** `core/locales/REVIEWED` points to `a82e74e57cb2a7c282c7955d60e1adfe732a9a4c`, the fully reviewed content commit. The final checker reports **0 pending messages, 0 pending help passages and 0 unmarked changes**.
+- **Final update:** the remaining 665 entries and 79 topics in Catalan, French, Norwegian Bokmål, Dutch, European Portuguese, Brazilian Portuguese, Serbian Latin and Turkish are complete. There are 558 distinct catalog-value changes and 1,214 help wording-line corrections, including the Italian sentence join and final Danish/Swedish shortcut fixes.
+- **Validation:** all 28 structural checks and 65 source-derived mnemonic scopes per language pass. Exact inventories and source/translation hashes reconcile; installer/Linux metadata regenerated and 128 values verified. No native GUI execution or native-speaker certification.
+- **User constraints honored:** fixed master scope `8757ab1c234bf3549979c06fdca14980fd3f9b80`; no unmerged-source discovery, local test suites, manually triggered workflows or CI queries. Publication/merge of this major update is authorized.
+- **Archive:** `docs/translation-review-round2-state.json` and `docs/translation-review-round2-progress.md`. Future requested changes should start a new round from this baseline. The historical batches below preserve the review record.
+- Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`, branch `i18n/review-resume-20261118`. Audited publication parent: `509821e926cef9a690c2d1d70db402bb6521483e`. The user's main checkout is untouched.
+- Durable evidence and final publication metadata: `/Users/andris/Projects/PostalExpress/build/i18n-review-completed-20261119`.
+- Guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`, SHA-256 `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`. Round start: `e99f7e59248bed137903150db7ef417e27755d18`.
 
 ## Review and checkpoint rules
 
@@ -3298,3 +3296,59 @@ Three immutable worker checkpoints integrated: 250 newly reviewed catalog entrie
 ### Spanish, Italian and Finnish update validated
 
 Three immutable Spanish, Italian and Finnish checkpoints verified: 250 newly reviewed catalog entries and 30 full help topics, with 214 catalog-value corrections and 456 cumulative help wording-line corrections including reopened context. All 28 language inventories, latest translation/English hashes, variables and help filenames reconcile. Checkers report only expected draft-mark diagnostics and zero structural findings. Source-derived menu/dialog scopes and static platform joins checked; Finnish Drafts Open/Junk exclusion verified against actual callers. Offline pe-ffi generation passed in 7.90s using the isolated translation target; 21 installer, 9 desktop and 18 metainfo values verified, other language bytes unchanged. Global diagnostics reconcile 35,927 known reviewed catalog entries and 19,094 help lines; since-start report reconciles 665 pending entries and 184 passages in 79 topics. HTML refreshed; REVIEWED unchanged. No test suites, native GUI runs, manual workflows or CI queries.
+
+### Paused for reboot after PR219
+
+User requested stop and save. All worker review activity stopped; existing commits and WIP retained. Durable snapshot includes root records, artifact archive, worker notes and dirty-file copies. Spanish/Italian/Finnish are merged; Dutch is immutable and awaiting integration. No test suites or CI queries.
+
+### Resumed after reboot
+
+Saved root records and worker WIP preserved. Review branch fast-forwarded to PR219 merge 509821e92, with no source-file changes. French/Catalan, Norwegian/Serbian Latin and Turkish workers resumed; root handles Portuguese variants and integrates immutable milestones. No tests or CI queries.
+
+### Dutch completion recovered after reboot
+
+Dutch immutable checkpoint integrated: 83 newly reviewed catalog entries and nine full help topics, with 59 catalog-value corrections and 133 help wording-line corrections. Dutch has no pending marks or context items. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### French and Norwegian completion after reboot
+
+Two immutable worker checkpoints integrated: 167 newly reviewed catalog entries and 20 full help topics, with 150 catalog-value corrections and 327 help wording-line corrections. French and Norwegian have no pending marks or context items. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### European Portuguese final context review
+
+Reviewed 83 pending catalog entries and ten pending help topics, comparing all 53 full topics and 358 selected catalog entries. Corrected 87 catalog values and 162 help wording lines. All original markup and literal keys/code preserved. Exact reconstruction, variable inventory and 65 actual mnemonic scopes pass; structural checker reports only 1,536 expected draft-mark diagnostics. No tests or CI queries. Combined metadata generation and publication remain pending.
+
+### Turkish completion after reboot
+
+Turkish immutable checkpoint integrated: 83 newly reviewed catalog entries and ten full help topics, with 57 catalog-value corrections and 136 help wording-line corrections. Turkish has no pending marks or context items. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### Saved Italian/Greek followups reconciled
+
+Corrected one Italian sign-in-apps sentence join and attached the preserved Greek signatures join evidence. No additional catalog/help completion credit. Dutch, French, Norwegian, Portuguese and Turkish are integrated locally; Catalan, Serbian Latin and Brazilian Portuguese remain. No tests or CI queries.
+
+### Catalan completion after reboot
+
+Catalan immutable checkpoint integrated: 83 newly reviewed catalog entries and ten full help topics, with 77 catalog-value corrections and 183 help wording-line corrections. Catalan has no pending marks or context items. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### Serbian Latin completion after reboot
+
+Serbian Latin immutable checkpoint integrated: 83 newly reviewed catalog entries and ten full help topics, with 73 catalog-value corrections and 162 help wording-line corrections. Serbian Latin has no pending marks or context items. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### French rule-import clarification
+
+French followup corrects one previously reviewed rule-import message to cover either a missing filter account or a missing destination-folder account. Exact original major ledgers remain immutable; zero additional scope credit. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### Brazilian Portuguese completion after reboot
+
+Brazilian Portuguese immutable checkpoint integrated: 83 newly reviewed catalog entries and ten full help topics, with 53 catalog-value corrections and 110 help wording-line corrections. Brazilian Portuguese has no pending marks or context items. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### Danish and Swedish mnemonic followups
+
+Danish and Swedish each move the Check access key from K to T to avoid Copy in the Windows sign-in-app editor. Visible wording and resolved help joins are unchanged. All 65 scopes pass for each language; zero additional scope credit. Combined static checks and metadata generation follow; no tests or CI queries.
+
+### Complete fixed-scope audit after reboot
+
+The fixed review scope is fully reviewed: 36,408 catalog entries and 1,380 full help topics across 28 target languages, with zero pending marks and zero pending context languages. The current complete inventory contains 1,483 entries and 53 help topics per target language (41,524 entries and 1,484 topics); the round scope excludes previously reviewed content. This resumed update completes the final 665 entries and 79 topics in ca/fr/nb/nl/pt/pt-BR/sr-Latn/tr. It changes 558 distinct catalog values (559 cumulative corrections including the French followup) and 1,214 help wording lines, including the saved Italian sentence join. The final sweep also fixes Danish and Swedish Check/Copy mnemonic collisions. All 65 checked source-derived menu/dialog scopes pass for every target language, with no unassigned generated keys. All catalog IDs, variable/access-key counts, command ellipses, help filenames and latest translation/English hashes reconcile. The structural checkers report exactly the known 1,483 catalog and 53 help draft-mark notices per language and zero structural findings. The old-baseline global report accounts for 36,636 reviewed entries and 19,437 changed help lines; the since-start report has zero pending messages or passages. The review HTML is regenerated. Offline pe-ffi generation passed in 7.64s; all 56 installer, 24 desktop and 48 metainfo values for the eight completed languages match the catalogs, with other-language bytes unchanged. The fixed English source matches master 8757ab1c234bf3549979c06fdca14980fd3f9b80 and fetched origin/master equals publication parent 509821e926cef9a690c2d1d70db402bb6521483e. No local test suites, native GUI runs, manually triggered workflows or CI queries were performed. This is a source-context translation review, not native-speaker or release certification.
+
+### Round 2 completed and baseline advanced
+
+The fully reviewed content commit is `a82e74e57cb2a7c282c7955d60e1adfe732a9a4c`. REVIEWED points to this commit, and the final checker exits successfully with zero pending messages, zero pending help passages and zero unmarked changes. The completed round is archived alongside the active records. No test suites, CI queries or manual workflows were run.

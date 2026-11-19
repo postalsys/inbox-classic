@@ -205,7 +205,7 @@ ui-hyperlink = Köprü
 ui-hyperlink-intro = Seçili metne eklemek istediğiniz bağlantının adresini girin.
 ui-edit-hyperlink = Köprüyü Düzenle
 ui-edit-hyperlink-intro = Bağlantının hedef adresi. Bağlantıyı kaldırıp metni korumak için adresi silin.
-ui-not-a-picture = Bu dosya PNG, JPEG veya GIF resmi değil ya da 10 MB'tan büyük.
+ui-not-a-picture = Bu dosya okunamadı, desteklenen bir PNG, JPEG, GIF veya WebP resmi değil ya da 10 MB'tan büyük.
 ui-format-color = Yazı Tipi Rengi
 ui-format-numbers = Numaralı Liste
 ui-format-bullets = Madde İşaretli Liste
@@ -269,7 +269,7 @@ ui-invitation-answer = Davete yanıt: { $title }
 ui-no-title = (başlık yok)
 ui-organizer = Düzenleyen: { $name }
 ui-invitation-not-read = Davet okunamadı.
-ui-no-calendar = Bu bilgisayarda davetleri (.ics dosyaları) açacak bir takvim uygulaması yok.
+ui-no-calendar = Davet (.ics dosyası) takvim uygulamasında açılamadı. Bu dosya türünü açan varsayılan uygulamayı denetleyin.
 ui-messages-not-changed = İletiler değiştirilemedi.
 ui-new-folder-in-selected = Yeni klasör, seçili klasörün içinde oluşturulacak.
 ui-new-folder-at-top = Yeni klasör, hesabın en üst düzeyinde oluşturulacak.
@@ -296,7 +296,7 @@ ui-found-mx = Inbox Classic e-posta sağlayıcınızı tanıdı ve sunucu ayarla
 ui-found-srv = Bu ayarlar, etki alanınızın DNS kayıtlarında bulundu.
 ui-found-autodiscover = Bu ayarlar Microsoft Otomatik Bulma (Exchange) ile bulundu.
 ui-found-other = Bu adresin hesap ayarları bulundu.
-ui-app-password-needed = { $provider }: E-posta uygulamalarında normal parolanız kabul edilmiyor. Hesabınızın güvenlik ayarlarından bir uygulama parolası oluşturup sonraki ekrandaki Parola alanına girin.
+ui-app-password-needed = { $provider } normal parolanızı e-posta uygulamalarında kabul etmeyebilir. Hesabınız destekliyorsa güvenlik ayarlarında bir uygulama parolası oluşturup sonraki formun Parola alanına girin. Microsoft hesaplarında tarayıcıda oturum açmanız gerekir.
 ui-app-password-open = { $provider } için yönergeler tarayıcınızda açılsın mı?
 ui-plain-warning = Şifreleme olmadan, ağ trafiğinizi ele geçiren herkes parolanızı ve iletilerinizi okuyabilir. Bu bağlantıyı yalnızca kendi bilgisayarınızdaki veya yerel ağınızdaki bir sunucuyla kullanın.
 ui-continue-ask = Devam edilsin mi?
@@ -326,15 +326,15 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com ve Microsoft 365 hesaplar�
 ui-start-intro-apps = Oturum açma uygulamalarınızdan biriyle tarayıcı üzerinden oturum açın (Diğer oturum açma seçenekleri) veya aşağıya adınızı ve adresinizi yazarak herhangi bir e-posta hesabı ekleyin.
 ui-use-app-password = Uygulama Parolası Kullan
 ui-the-provider = sağlayıcı
-ui-provider-intro = Tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $email }. Parolanız Inbox Classic ile paylaşılmaz. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz.
-ui-provider-intro-apps = Diğer oturum açma seçenekleri bölümünden bir uygulama seçerek tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $email }. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz.
+ui-provider-intro = Tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $email }. Parolanız Inbox Classic ile paylaşılmaz. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz. Outlook.com ve Microsoft 365 için yalnızca tarayıcıda oturum açma kullanılabilir.
+ui-provider-intro-apps = Diğer oturum açma seçenekleri bölümünden bir uygulama seçerek tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $email }. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz. Outlook.com ve Microsoft 365 için yalnızca tarayıcıda oturum açma kullanılabilir.
 ui-finish = Son
 ui-logon = Oturum Aç
 ui-enter-password = Parolayı girin. Hesap: { $account }
 ui-signs-in-with = Oturum açma uygulaması: { $app }. Oturum tarayıcıda açılır ve hesap bu uygulamanın sunucularını kullanır.
 ui-keep-password = Geçerli parolanızı korumak için parola alanını boş bırakın.
 ui-remove-account = Hesabı Kaldır
-ui-remove-account-ask = Bu hesap Inbox Classic'ten kaldırılsın mı? Sunucudaki postanız korunur. Bu bilgisayardaki ileti kopyaları ve kayıtlı oturum açma bilgileri silinir.
+ui-remove-account-ask = Bu hesap Inbox Classic'ten kaldırılsın mı? Sunucudaki postanız korunur. Bu bilgisayardaki ileti kopyaları, yalnızca burada saklanan taslaklar ve Giden Kutusu'nda bekleyen iletiler ile kayıtlı oturum açma bilgileri silinir.
 ui-col-email = E-posta adresi
 ui-col-incoming = Gelen posta sunucusu
 ui-type-email = E-posta adresinizi girin (ör. ad@example.com).
@@ -417,7 +417,6 @@ ui-save-attachments = Ekleri Kaydet
 ui-attachment-open = Aç
 ui-attachment-save-as = Farklı Kaydet...
 ui-attachment-save-all = Tümünü Kaydet...
-# review: new
 ui-attachment-show-in-message = İletide Göster
 ui-attachments-strip = Ekler
 ui-attachment-note-title = Dosyayı Açarken
@@ -449,11 +448,8 @@ ui-let-agents-connect = Yapay zeka aracılarının Inbox Classic'e &bağlanması
 ui-change-button = Değiştir…
 ui-undo-button = Geri Al
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Süre Seçerek Geri Al…
-# review: new
 ui-undo-since-span = Bu programın yaptıklarını geri al:
-# review: new
 ui-take-back = Geri Al
 ui-rules-title = İleti Kuralları
 ui-rules-intro = Kurallar, Inbox Classic çalışırken Gelen Kutusu'na gelen yeni iletileri işler. İletiyle eşleşen kurallar sırayla uygulanır. Bir kural iletiyi Gelen Kutusu'ndan taşıdığında diğer kurallar o iletiye uygulanmaz.
@@ -588,18 +584,15 @@ ui-protection-details = &Ayrıntılar...
 ui-protection-details-title = Güvenlik Ayrıntıları
 ui-download-heading = İndirme
 ui-download-ahead = İletileri ön&ceden indir:
-ui-download-ahead-recent = Boyutu 1 MB veya daha az olan son iletiler
+ui-download-ahead-recent = Son 30 günde gelen, boyutu en fazla 1 MB olan iletiler
 ui-download-ahead-all = Tüm iletiler
 ui-download-ahead-never = Yalnızca açıldığında
 ui-download-limit = &Hesap başına depolama sınırı:
 ui-send-delay = &Göndermeden önce bekleme:
 ui-send-delay-note = Bir ileti gönderilmeyi beklerken Geri Al ile gönderimi iptal edebilirsiniz.
 ui-dark-messages = Sistem karanlık moddayken iletileri koyu arka planda göster
-# review: new
 ui-preview-show = İletilerde &ekleri göster
-# review: new
-ui-preview-show-note = İletinin metninden sonra resimleri ve PDF dosyalarının ilk sayfalarını gösterir. Bu önizlemeleri Inbox Classic kendisi oluşturur, bu yüzden bir dosyadaki hiçbir şey çalışamaz.
-# review: new
+ui-preview-show-note = İleti metninden sonra resimleri ve PDF dosyalarının ilk sayfalarını gösterir. Inbox Classic, önizlemeleri dosyanın betiklerini çalıştırmadan kendisi oluşturur.
 ui-preview-pdfs = İletilerde &PDF dosyalarını göster
 ui-sending-in = Gönderim için kalan süre ({ $subject }): { $count ->
     [one] 1 saniye
@@ -608,7 +601,7 @@ ui-sending-in = Gönderim için kalan süre ({ $subject }): { $count ->
 ui-send-undone = Gönderim iptal edildi: { $subject }. İleti düzenlemek üzere yeniden açıldı.
 ui-send-too-late = Gönderim artık geri alınamaz: { $subject }.
 ui-outbox-status-undo = Gönderim saati { $time }
-ui-download-note = Önceden indirilen iletiler hemen açılır. Depolama sınırı aşıldığında en eski yerel kopyalar kaldırılır ve açtığınızda yeniden indirilir.
+ui-download-note = Önceden indirilen iletiler hemen açılır. İleti önbelleği sınırı aşıldığında eski yerel içerikler kaldırılabilir ve gerektiğinde yeniden indirilir. Taslaklar ve bu çalıştırma sırasında açtığınız iletiler korunur.
 ui-attachment-downloading = Bu iletinin indirilmesi bitmedi. İndirme tamamlandığında yeniden deneyin.
 ui-trusted-senders-button = G&üvenilen Gönderenler...
 ui-trusted-senders-title = Güvenilen gönderenler
@@ -639,7 +632,7 @@ ui-list-pictures = İleti listesinde gönderenlerin &resimlerini göster
 ui-list-pictures-note = Sütun yerleşiminde, gönderenin etki alanı doğrulandığında marka logosunu veya Adres Defteri'ndeki resmini gösterir. Resim yoksa baş harfler kullanılır. İndirilen logolar kaydedilir ve farklı iletilerde yeniden kullanılır.
 ui-card-picture = Resim:
 ui-card-picture-choose = &Seç...
-ui-picture-not-picture = Bu dosya PNG veya JPEG resmi değil.
+ui-picture-not-picture = Bu dosya desteklenen bir PNG veya JPEG resmi değil ya da resim verileri okunamıyor.
 ui-picture-too-large = Resim çok büyük. Dosya boyutu en fazla 10 MB, genişliği ve yüksekliği en fazla 8000 piksel olan bir resim seçin.
 
 ## Şifreleme anahtarları (Araçlar > Şifreleme Anahtarları, Hesap Özellikleri > Güvenlik, bir kişinin anahtarı)
@@ -662,7 +655,7 @@ ui-keys-new-title = Yeni Anahtar
 ui-keys-new-for = Anahtarın oluşturulacağı hesap:
 ui-keys-new-make = Anahtar &Oluştur
 ui-keys-no-account = Önce bir posta hesabı ekleyin: anahtar, bir hesabın adresleri için oluşturulur.
-ui-keys-memory-only = Parolalar yalnızca bellekte tutuluyor, bu nedenle şimdi oluşturulan veya içe aktarılan gizli anahtar Inbox Classic kapandıktan sonra kullanılamaz.
+ui-keys-memory-only = Oturum açma bilgileri yalnızca bellekte tutuluyor. Şimdi oluşturulan veya içe aktarılan gizli anahtarı koruyan anahtar, Inbox Classic kapandığında kaybolur. Gizli anahtarın kullanılabilir bir yedeğini saklayın.
 ui-keys-backup-offer = Yeni anahtarınız hazır. Şimdi bir yedek kaydetmek ister misiniz? Bilgisayar kaybolur veya sıfırlanırsa anahtar ancak yedekten geri yüklenebilir.
 ui-keys-backup-now = Yedek &Kaydet...
 ui-keys-later = &Sonra
@@ -679,7 +672,7 @@ ui-keys-file-filter = OpenPGP anahtarları
 ui-keys-use-for = Bu anahtar şu adreslerle kullanılsın mı: { $addresses }? Bu adreslerden gönderdiğiniz iletiler bu anahtarla imzalanır. Bu anahtarla şifrelenmiş iletiler de burada okunabilir.
 ui-keys-use = &Kullan
 ui-keys-not-now = Şimdi &Değil
-ui-keys-remove-own = Anahtarınız kaldırılsın mı? Parmak izi: { $fingerprint }. Gizli anahtarın yedeğini yeniden içe aktarana kadar bu anahtarla şifrelenmiş iletileri burada okuyamazsınız.
+ui-keys-remove-own = Anahtarınız kaldırılsın mı? Parmak izi: { $fingerprint }. Bu anahtar şifre çözmek için kullanılamaz; yeniden kullanmak için gizli anahtarın yedeğini içe aktarmanız gerekir. Daha önce şifresi çözülmüş içerik arama dizininde kalabilir.
 ui-keys-remove-contact = Bu anahtar kaldırılsın mı ({ $name })? Anahtarı yeniden ekleyene kadar onunla oluşturulmuş imzaları denetleyemez ve sahibine bu anahtarla şifreli posta gönderemezsiniz.
 ui-key-properties-title = Anahtar Özellikleri
 ui-key-names = Adlar:
@@ -697,6 +690,7 @@ ui-verify-title = Anahtarı Doğrula
 ui-verify-intro = Doğrulanacak anahtar: { $name }. Anahtarın sahibinden kendi uygulamasında görünen parmak izini yüz yüze veya telefonda size okumasını isteyin. E-postayla gönderilen bir parmak iziyle karşılaştırmayın: anahtarı değiştirebilen biri parmak izini de değiştirebilir.
 ui-verify-fingerprint = Sizdeki anahtarın parmak izi:
 ui-verify-marks = { $count ->
+    [0] Bu anahtarda e-posta adresi yok. Parmak izini karşılaştırabilirsiniz, ancak anahtarın sahibine ilişkin doğrulama kaydedilemez.
     [one] Parmak izleri eşleşiyorsa ve şu adres bu kişiye aitse Eşleşiyor düğmesine tıklayın: { $addresses }. Adres bu kişiye ait değilse Eşleşmiyor düğmesini kullanın.
    *[other] Parmak izleri eşleşiyorsa ve şu adreslerin tümü bu kişiye aitse Eşleşiyor düğmesine tıklayın: { $addresses }. Adreslerden biri bile bu kişiye ait değilse Eşleşmiyor düğmesini kullanın.
 }
@@ -726,9 +720,9 @@ ui-compose-encrypt-off = Şifrelemeyi &Kapat
 ui-compose-keep-encrypted = Şifreli &Tut
 ui-setup-export-title = Ayarları ve Hesapları Dışa Aktar
 ui-setup-import-title = Ayarları ve Hesapları İçe Aktar
-ui-setup-export-intro = Başka bir bilgisayara neyi taşıyacağınızı seçin. Dosyada ileti yoktur: iletiler orada yeniden indirilir.
+ui-setup-export-intro = Başka bir bilgisayara neyi taşıyacağınızı seçin. Dosya ileti içermez. Sunucuda bulunan iletiler orada yeniden indirilebilir; yalnızca bu bilgisayarda bulunan iletiler taşınmaz.
 ui-setup-use-passphrase = Dosyayı bir anahtar parolasıyla &koru
-ui-setup-passphrase-note = Anahtar parolası kullanırsanız dosya şifrelenir; kayıtlı parolalar, oturum açma bilgileri ve gizli anahtarlar da dosyaya eklenir. Koruma kullanmazsanız diğer bilgisayarda hesaplarınıza parolayla veya tarayıcı üzerinden yeniden giriş yapmanız gerekir.
+ui-setup-passphrase-note = Anahtar parolası kullanırsanız dosya şifrelenir. Seçtiğiniz bölümlerin erişilebilen kayıtlı parolaları, oturum açma bilgileri ve gizli anahtarları da eklenir. Koruma kullanmazsanız diğer bilgisayarda hesaplarınıza yeniden giriş yapmanız gerekir.
 ui-setup-export-button = &Dışa Aktar...
 ui-setup-file-filter = Inbox Classic ayarları ve hesapları
 ui-setup-ask-passphrase = Bu dosya bir anahtar parolasıyla korunuyor. Dosyanın içeriğini görmek için parolayı yazın:

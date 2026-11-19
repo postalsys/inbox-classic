@@ -31,10 +31,9 @@ gtk-unsubscribe-one-click =
     Vil du melde deg av denne e-postlisten?
 
     Inbox Classic sender en forespørsel om avmelding til { $target }. Ingen nettside åpnes, og ingen e-post sendes.
-gtk-unsubscribe-mail =
-    Vil du melde deg av denne e-postlisten?
+gtk-unsubscribe-mail = Vil du melde deg av denne e-postlisten?
 
-    For å melde deg av sender du en e-post til { $target }. Inbox Classic gjør den klar for deg. Send meldingen for å bekrefte.
+    Inbox Classic gjør klar en avmeldingsforespørsel til { $target }. Kontroller meldingen og send den for å be om avmelding.
 gtk-unsubscribe-web =
     Vil du melde deg av denne e-postlisten?
 
@@ -156,7 +155,7 @@ gtk-agent-it-may = Tillatte handlinger
 gtk-agent-accounts = Tillatte kontoer
 gtk-never-used = Aldri brukt
 gtk-last-used = Sist brukt { $date }
-gtk-forget-program = Vil du fjerne dette programmet?
+gtk-forget-program = Vil du fjerne tillatelsene til dette programmet?
 gtk-forget-program-detail = Tillatelsene til programmet og aktivitetsloggen til agentene slettes. Du blir spurt om tillatelse igjen neste gang det kobler til.
 gtk-no-agents-yet = Ingen agenter har bedt om tilgang til e-posten din ennå.
 gtk-nothing-yet = Ingenting ennå.
@@ -179,4 +178,4 @@ gtk-metainfo-description = Inbox Classic er et e-postprogram med mappene til ven
 gtk-metainfo-feature-sanitized = Meldinger vises uten skript og annet usikkert innhold. Bilder fra internett lastes bare ned med din tillatelse
 gtk-metainfo-feature-search = Søk i emne, avsendere, mottakere, vedleggsnavn og meldingstekst med søkeoperatorer som i Gmail
 gtk-metainfo-feature-replies = Siterte meldinger foldes sammen i svar og kan utvides når du vil lese dem
-gtk-metainfo-feature-offline = Les nedlastet e-post uten nett. Passord lagres i systemets nøkkelring
+gtk-metainfo-feature-offline = Les nedlastet e-post uten nett. Passord lagres som standard i systemets nøkkelring

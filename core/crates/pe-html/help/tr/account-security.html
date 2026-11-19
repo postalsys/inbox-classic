@@ -4,10 +4,10 @@
 <table>
     <tr><th>Ayar</th><th>Anlamı</th></tr>
     <tr><td>SSL/TLS</td><td>Bağlantı baştan itibaren şifrelidir. Gelen posta için genellikle 993, giden posta için 465 numaralı bağlantı noktası.</td></tr>
-    <tr><td>STARTTLS</td><td>Bağlantı açıldıktan hemen sonra şifrelenir. Gelen posta için genellikle 143, giden posta için 587 numaralı bağlantı noktası. Sunucu şifrelemeyi desteklemiyorsa Inbox Classic bağlantıyı sonlandırır.</td></tr>
+    <tr><td>STARTTLS</td><td>Oturum açma bilgileriniz gönderilmeden önce bağlantı şifrelenir. Gelen posta için genellikle 143, giden posta için 587 numaralı bağlantı noktası. Sunucu şifrelemeyi desteklemiyorsa Inbox Classic bağlantıyı sonlandırır.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Parolanız ve iletileriniz şifrelenmeden gönderilir. Ağ trafiğini ele geçiren biri bunları okuyabilir.</td></tr>
 </table>
-<aside class="warning"><b data-text="ui-security-none"></b> ayarını yalnızca kendi bilgisayarınızdaki veya yerel ağınızdaki bir sunucu için kullanın. Inbox Classic bunu kullanmadan önce sizi uyarır.</aside>
-<p>Inbox Classic, sisteminizin güvendiği sertifikaları kullanarak sunucunun kimliğini denetler. Sertifika denetimi kapatılamaz.</p>
-<p>Parolanız posta deposunda değil, <!--os:windows-->Windows Kimlik Bilgileri Yöneticisi'nde<!--/os--><!--os:mac-->oturum açma anahtar zincirinizde<!--/os--><!--os:linux-->anahtarlığınızda<!--/os--> saklanır. Tarayıcı üzerinden oturum açılan hesaplarda parolanız yerine erişimi yenilemek için gereken oturum açma bilgileri saklanır.</p>
+<aside class="warning"><b data-text="ui-security-none"></b> ayarını seçmek, ağ trafiğini görebilen kişilerin postanıza erişmesine yol açabilir. Yerel ağ da kendiliğinden güvenli değildir. Inbox Classic bu ayarı kullanmadan önce sizi uyarır.</aside>
+<p>Inbox Classic, sisteminizin güvendiği sertifikaları kullanarak sunucunun kimliğini denetler. Sertifika denetimi kapatılamaz; komut satırında belirtilen bir sertifika güven için kullanılabilir.</p>
+<p>Varsayılan olarak parolanız posta deposunda değil, <!--os:windows-->Windows Kimlik Bilgileri Yöneticisi'nde<!--/os--><!--os:mac-->oturum açma anahtar zincirinizde<!--/os--><!--os:linux-->anahtarlığınızda<!--/os--> saklanır. Tarayıcı üzerinden oturum açılan hesaplarda parolanız yerine erişimi yenilemek için gereken oturum açma bilgileri saklanır. Yalnızca bellekte tutma modu seçilmişse veya kullanılabilir bir depo yoksa bilgiler uygulama kapandığında kaybolur.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>

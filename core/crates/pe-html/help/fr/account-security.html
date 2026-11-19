@@ -4,10 +4,10 @@
 <table>
     <tr><th>Paramètre</th><th>Signification</th></tr>
     <tr><td>SSL/TLS</td><td>La connexion est chiffrée dès le début. Généralement le port 993 pour le courrier entrant et 465 pour le courrier sortant.</td></tr>
-    <tr><td>STARTTLS</td><td>La connexion est chiffrée juste après son ouverture. Généralement le port 143 pour le courrier entrant et 587 pour le courrier sortant. Inbox Classic s'arrête si le serveur ne propose pas de chiffrement.</td></tr>
+    <tr><td>STARTTLS</td><td>La connexion est chiffrée juste après son ouverture. Généralement le port 143 pour le courrier entrant et 587 pour le courrier sortant. Inbox Classic interrompt la connexion si le serveur ne propose pas de chiffrement.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Votre mot de passe et votre courrier circulent en clair, lisibles par n'importe qui sur le réseau.</td></tr>
 </table>
-<aside class="warning">N'utilisez <b data-text="ui-security-none"></b> que pour un serveur installé sur votre propre ordinateur ou votre réseau local. Inbox Classic vous avertit avant de l'utiliser.</aside>
+<aside class="warning">N'utilisez <b data-text="ui-security-none"></b> que si la connexion est protégée par un autre moyen. Un réseau local ne garantit pas le chiffrement. Inbox Classic vous avertit avant de l'utiliser.</aside>
 <p>Inbox Classic vérifie que chaque serveur est bien celui qu'il prétend être, d'après les certificats auxquels votre système fait confiance. Aucun réglage ne permet d'accepter n'importe quel certificat.</p>
-<p>Votre mot de passe est conservé dans <!--os:windows-->le Gestionnaire d'identification Windows<!--/os--><!--os:mac-->votre trousseau de session<!--/os--><!--os:linux-->votre trousseau<!--/os-->, jamais dans le stockage du courrier. Un compte qui se connecte via le navigateur ne conserve aucun mot de passe.</p>
+<p>Votre mot de passe est normalement conservé dans <!--os:windows-->le Gestionnaire d'identification Windows<!--/os--><!--os:mac-->votre trousseau de session<!--/os--><!--os:linux-->votre trousseau<!--/os-->, jamais dans le stockage du courrier. Le mode de stockage en mémoire et les défaillances du gestionnaire peuvent limiter la conservation à l’exécution en cours. Une connexion via le navigateur conserve des jetons d’accès plutôt que le mot de passe du compte.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>

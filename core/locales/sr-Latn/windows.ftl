@@ -103,20 +103,16 @@ win-send = &Pošalji
 win-dont-send = &Nemoj poslati
 win-unsubscribe = &Otkaži pretplatu
 win-dont-unsubscribe = &Nemoj otkazati pretplatu
-win-forget-program-ask = Da li želite da uklonite ovaj program, njegove dozvole i istoriju aktivnosti njegovih agenata? Pri sledećem povezivanju ponovo će se tražiti vaša dozvola.
+win-forget-program-ask = Da li želite da uklonite dozvole ovog programa i istoriju aktivnosti njegovih agenata? Pri sledećem povezivanju ponovo će se tražiti vaša dozvola.
 win-clear-log-ask = Da li želite da obrišete istoriju aktivnosti agenata? Time se neće opozvati promene koje su agenti napravili.
 win-agent-programs = &Programi čiji su agenti zatražili pristup vašoj pošti:
 win-change = Pro&meni...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = Opozovi &za period...
-# review: new
 win-take-back = &Opozovi
 win-what-agents-did = &Aktivnost agenata:
-# review: new
-win-agent-reads = Šta je pročitano od { $from } do { $to }:
-# review: new
-win-agent-reads-hint = Izaberite gore red sa čitanjima da vidite šta je pročitano.
+win-agent-reads = Čitanje u periodu od { $from } do { $to }:
+win-agent-reads-hint = Izaberite stavku dnevnika čitanja iznad da biste videli detalje.
 win-how-to-connect = Kako povezati agenta
 
 ## Sign-in apps
@@ -149,4 +145,4 @@ win-installer-welcome-update =
     Ako je pokrenut, najpre će biti zatvoren. Vaši nalozi i preuzeta pošta biće sačuvani.
 win-installer-older-ask = Instaliran je Inbox Classic { $installed }, koji je noviji od verzije { $version }. Da li ipak želite da instalirate stariju verziju?
 win-installer-still-running = Inbox Classic je još uvek pokrenut. Zatvorite ga i pokušajte ponovo.
-win-installer-remove-mail-ask = Da li želite da uklonite i naloge i lokalne kopije poruka sa ovog računara? Pošta ostaje na serverima.
+win-installer-remove-mail-ask = Da li želite da uklonite sve lokalne podatke programa Inbox Classic, uključujući naloge, poruke, radne verzije, red za slanje, kontakte, podešavanja i ključeve? Pošta na serverima i podaci u sistemskom skladištu akreditiva ostaju.

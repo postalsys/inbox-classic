@@ -78,9 +78,9 @@ mac-files-not-saved =
     { $count ->
        *[other] Fitxers no desats: { $failed } de { $count }.
     }
-mac-no-calendar-app = En aquest Mac no hi ha cap aplicació de calendari per obrir invitacions (fitxers .ics).
+mac-no-calendar-app = No s’ha pogut obrir la invitació (fitxer .ics). Comproveu que al Mac hi hagi una aplicació de calendari associada a aquest tipus de fitxer.
 mac-file-not-saved = No s’ha pogut desar el fitxer.
-mac-unsubscribing = S’està cancel·lant la subscripció a { $target }…
+mac-unsubscribing = S’està enviant la sol·licitud de baixa a { $target }…
 mac-loading-list = S’està carregant…
 
 ## La finestra de redacció

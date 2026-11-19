@@ -6,12 +6,12 @@
     <li>Kliknite na <b data-text="ui-unsubscribe"></b>. Inbox Classic objašnjava šta će se desiti i najpre vas pita.</li>
     <li>Potvrdite. U zavisnosti od liste, sledi jedan od tri postupka:
         <ul>
-            <li>Inbox Classic traži od liste da prestane sa slanjem. Ne otvara se nijedna stranica i ne šalje se nijedna poruka.</li>
-            <li>Inbox Classic priprema poruku za odjavu koju lista zahteva. Kliknite na <b data-text="ui-tb-send"></b> da biste je poslali.</li>
+            <li>Inbox Classic traži od liste da prestane sa slanjem. Ne otvara se stranica i ne šalje se e-pošta.</li>
+            <li>Inbox Classic priprema poruku za odjavu sa podrazumevanog naloga, sa tekstom potpisa tog naloga. Kliknite na <b data-text="ui-tb-send"></b> da biste je poslali.</li>
             <li>Stranica liste se otvara u pregledaču, gde završavate postupak.</li>
         </ul>
     </li>
 </ol>
-<p>Statusna traka javlja kada server liste prihvati zahtev. To ne znači da će slanje poruka odmah prestati.</p>
-<aside class="note">Inbox Classic šalje neposredan zahtev za odjavu samo kada provera potpisa domena poruke to dozvoljava. Time se sprečava da lažirana poruka navede program da pošalje takav zahtev drugoj strani.</aside>
+<p>Statusna traka javlja kada server prihvati neposredan zahtev. To ne potvrđuje da će slanje budućih poruka prestati.</p>
+<aside class="note">Inbox Classic šalje neposredan zahtev za odjavu samo kada pružalac usluge potvrdi važeći DKIM potpis koji obuhvata oba potrebna zaglavlja za odjavu. Zahtev se šalje tek nakon vaše potvrde.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

@@ -1,5 +1,5 @@
 <h1>Sair de uma lista de e-mails</h1>
-<p class="summary">Pare de receber as mensagens de uma lista de e-mails com o botão Cancelar inscrição.</p>
+<p class="summary">Solicite o cancelamento da inscrição em uma lista de e-mails com o botão Cancelar inscrição.</p>
 <p>Se uma mensagem inclui instruções para sair da lista de e-mails, ela mostra o botão <b data-text="ui-unsubscribe"></b> à direita do cabeçalho.</p>
 <p>Para sair da lista:</p>
 <ol>
@@ -7,11 +7,11 @@
     <li>Confirme. Dependendo da lista, acontece uma de três coisas:
         <ul>
             <li>O Inbox Classic envia uma solicitação direta de cancelamento. Nenhuma página é aberta e nenhum e-mail é enviado.</li>
-            <li>O Inbox Classic prepara o e-mail exigido pela lista para cancelar a inscrição. Clique em <b data-text="ui-tb-send"></b> para enviá-la.</li>
+            <li>O Inbox Classic prepara o e-mail exigido pela lista para cancelar a inscrição, usando a conta padrão. Confira o remetente e o texto, que pode incluir a assinatura da conta. Clique em <b data-text="ui-tb-send"></b> para enviá-lo.</li>
             <li>A página da lista abre no seu navegador, onde você conclui o cancelamento.</li>
         </ul>
     </li>
 </ol>
-<p>A barra de status indica quando a lista aceitou o pedido.</p>
-<aside class="note">O Inbox Classic só envia a solicitação direta de cancelamento quando a lista assinou a mensagem com DKIM. Isso ajuda a impedir que mensagens falsificadas usem esse recurso para enviar solicitações indevidas.</aside>
+<p>Na solicitação direta, a barra de status informa quando o servidor da lista aceita o pedido. Isso não garante que todas as mensagens futuras parem.</p>
+<aside class="note">O Inbox Classic só envia a solicitação direta de cancelamento quando uma assinatura DKIM aceita pelo seu servidor cobre os dois cabeçalhos de cancelamento de inscrição. Isso ajuda a impedir que mensagens falsificadas usem esse recurso para enviar solicitações indevidas.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

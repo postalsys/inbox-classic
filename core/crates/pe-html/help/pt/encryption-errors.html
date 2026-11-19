@@ -4,12 +4,12 @@
 <p>A conta está definida para STARTTLS, mas o servidor não ofereceu encriptação. O Inbox Classic interrompeu a ligação, por isso a sua palavra-passe não foi enviada.</p>
 <ol>
     <li>Abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Defina a segurança como SSL/TLS, com a porta 993 para o correio recebido ou 465 para o correio enviado.</li>
+    <li>Se o fornecedor o suportar, use SSL/TLS com a porta 993 para receção ou 465 para envio. Confirme sempre as portas e os modos indicados pelo fornecedor.</li>
     <li>Clique em <b data-text="ui-ok"></b>.</li>
 </ol>
 <p>Se nada mais funcionar, o servidor não pode ser usado em segurança.</p>
 <h2>«the server takes the password only over an encrypted connection»</h2>
-<p>A ligação ao servidor de envio está configurada como <b data-text="ui-security-none"></b>. Esta resposta não indica se a palavra-passe está correta; o servidor exige primeiro uma ligação encriptada. Mude <b data-text="ui-field-smtp-security"></b> para STARTTLS com a porta 587, ou SSL/TLS com a porta 465.</p>
+<p>A ligação ao servidor de envio está configurada como <b data-text="ui-security-none"></b>. Esta resposta não indica se a palavra-passe está correta; o servidor exige primeiro uma ligação encriptada. Configure <b data-text="ui-field-smtp-security"></b> conforme o fornecedor indicar, por exemplo STARTTLS na porta 587 ou SSL/TLS na porta 465, se esses modos forem suportados.</p>
 <h2>O aviso sobre uma ligação sem encriptação</h2>
-<p>Quando escolhe <b data-text="ui-security-none"></b>, o Inbox Classic avisa que qualquer pessoa que intercete o seu tráfego de rede pode ler a sua palavra-passe e as suas mensagens. Continue apenas para um servidor no seu próprio computador ou na sua rede local.</p>
+<p>Quando escolhe <b data-text="ui-security-none"></b>, o Inbox Classic avisa que qualquer pessoa que intercete o seu tráfego de rede pode ler a sua palavra-passe e as suas mensagens. Continue apenas se compreender e aceitar o risco. Uma rede local, por si só, não encripta a ligação.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>

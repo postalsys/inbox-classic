@@ -4,13 +4,13 @@
 <table>
     <tr><th>Alternativ</th><th>Gjør</th></tr>
     <tr><td><code>--store &lt;fil&gt;</code></td><td>Bruker en annen databasefil for e-post, for eksempel til testing</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>Beholder passord bare under denne kjøringen, aldri i passordlageret til systemet</td></tr>
-    <tr><td><code>--pin-certificate &lt;fil&gt;</code></td><td>Godtar bare serversertifikatet i denne filen (PEM eller DER), for en testserver med et selvsignert sertifikat</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Beholder påloggingsopplysninger bare i minnet under denne kjøringen, ikke i systemets lager</td></tr>
+    <tr><td><code>--pin-certificate &lt;fil&gt;</code></td><td>Godtar bare sertifikater fra denne filen, for eksempel for en testserver med selvsignert sertifikat. En PEM-fil kan inneholde flere sertifikater; en DER-fil inneholder ett</td></tr>
     <tr><td><code>--sign-in-page-file &lt;fil&gt;</code></td><td>Skriver nettadressen til påloggingssiden i denne filen i stedet for å åpne nettleseren</td></tr>
     <tr><td><code>--language &lt;kode&gt;</code></td><td>Viser vinduene på dette språket under denne kjøringen, for eksempel <code>nb</code></td></tr>
     <tr><td><code>--background</code></td><td>Starter i bakgrunnen uten å åpne hovedvinduet</td></tr>
     <tr><td><code>--mcp</code></td><td>Kobler en KI-agent til Inbox Classic. Agentprogrammet bruker dette alternativet for å opprette tilkoblingen</td></tr>
     <tr><td><code>--version</code></td><td>Skriver ut versjonen og avslutter</td></tr>
 </table>
-<p>En <code>mailto:</code>-lenke som gis som argument, åpner en ny melding, slik en e-postlenke gjør.</p>
+<p>En <code>mailto:</code>-lenke som gis som argument, åpner en ny melding hvis du har lagt til en konto. Ellers må du først legge til en konto og deretter åpne lenken igjen.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>

@@ -90,7 +90,7 @@ gtk-files = { $count ->
     [one] { $count } fitxer
    *[other] { $count } fitxers
 }
-gtk-pictures-blocked = S’han bloquejat algunes imatges per ajudar a impedir que el remitent identifiqui el vostre ordinador.
+gtk-pictures-blocked = S’han bloquejat algunes imatges per limitar el seguiment de la vostra lectura pel remitent.
 gtk-download-pictures = Baixa les imatges
 gtk-save-attachments-menu = Desa els fitxers adjunts...
 
@@ -175,8 +175,8 @@ gtk-desktop-generic-name = Client de correu
 gtk-desktop-comment = Llegiu i escriviu correu electrònic: un programa de correu ràpid i senzill
 gtk-desktop-keywords = correu;correu electrònic;missatge;safata d’entrada;
 gtk-metainfo-summary = Un programa de correu ràpid i senzill
-gtk-metainfo-description = Inbox Classic permet llegir i escriure correu electrònic amb una disposició familiar: carpetes a l’esquerra, llista de missatges a dalt i contingut del missatge seleccionat a sota. Funciona amb qualsevol compte IMAP i SMTP i permet iniciar la sessió a Outlook.com i Microsoft 365 a través del navegador.
-gtk-metainfo-feature-sanitized = Els missatges es mostren sense scripts ni altres continguts potencialment perillosos; les imatges d’internet només es carreguen amb la vostra autorització
-gtk-metainfo-feature-search = Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb els operadors del Gmail
+gtk-metainfo-description = Inbox Classic permet llegir i escriure correu electrònic amb una disposició configurable. La disposició clàssica mostra les carpetes a l’esquerra, els missatges a dalt i el contingut seleccionat a sota. Funciona amb comptes IMAP i SMTP i permet iniciar la sessió a Outlook.com i Microsoft 365 a través del navegador.
+gtk-metainfo-feature-sanitized = Els missatges es mostren sense executar-ne els scripts; les imatges d’internet només es carreguen amb la vostra autorització
+gtk-metainfo-feature-search = Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb operadors inspirats en els del Gmail
 gtk-metainfo-feature-replies = El text de missatges anteriors citat a les respostes queda plegat i es pot desplegar quan calgui
-gtk-metainfo-feature-offline = El correu ja baixat es pot llegir sense connexió; les contrasenyes es desen a l’anell de claus del sistema
+gtk-metainfo-feature-offline = El correu ja baixat es pot llegir sense connexió; les contrasenyes es desen normalment a l’anell de claus del sistema

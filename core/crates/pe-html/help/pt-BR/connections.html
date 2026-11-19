@@ -6,7 +6,7 @@
     <li><b>Login pelo navegador</b>, com OAuth 2.0 e PKCE, no Google, na Microsoft ou no provedor do seu aplicativo de login. O navegador volta para o Inbox Classic apenas neste computador.</li>
     <li><b>Logotipos de marcas</b> (BIMI), a partir do endereço HTTPS da marca quando a mensagem não inclui o logotipo e não é possível reutilizar uma cópia salva. Os logotipos baixados são salvos e reutilizados, mesmo depois que o aplicativo é reiniciado. Isso só acontece quando o seu servidor de e-mail aprovou a verificação DMARC da mensagem e o logotipo.</li>
     <li><b>Imagens da internet</b>, quando você autoriza o carregamento, inclusive pelas opções de remetentes confiáveis ou carregamento automático.</li>
-    <li><b>Cancelar inscrição</b>, só quando você clica nesse botão. Uma solicitação com um clique (RFC 8058) só é enviada quando a lista assinou a mensagem com DKIM.</li>
+    <li><b>Cancelar inscrição</b>, só quando você clica nesse botão. Uma solicitação com um clique (RFC 8058) exige uma assinatura DKIM aceita pelo seu servidor e que cubra os dois cabeçalhos de cancelamento de inscrição.</li>
     <li><b>As chaves de criptografia</b> são procuradas quando falta a chave de um destinatário para criptografar uma mensagem ou quando você inicia uma busca de chaves. Em uma busca por endereço de e-mail, o Inbox Classic consulta primeiro o domínio desse endereço (Web Key Directory). Se necessário, envia o endereço para keys.openpgp.org, desde que essa busca esteja ativada. Em uma busca por impressão digital ou ID da chave, envia esse identificador para keys.openpgp.org em vez de um endereço de e-mail.</li>
     <!--os:mac--><li><b>Atualizações</b>, a partir de inboxclassic.com, para ver se saiu uma versão nova.</li><!--/os-->
 </ul>

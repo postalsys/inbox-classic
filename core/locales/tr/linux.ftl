@@ -119,8 +119,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = İleri >
-gtk-provider-sign-in = Tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $address }. Parolanız Inbox Classic ile paylaşılmaz. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz.
-gtk-provider-sign-in-apps = Diğer oturum açma seçenekleri bölümünden bir uygulama seçerek tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $address }. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz.
+gtk-provider-sign-in = Tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $address }. Parolanız Inbox Classic ile paylaşılmaz. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz. Outlook.com ve Microsoft 365 için yalnızca tarayıcıda oturum açma kullanılabilir.
+gtk-provider-sign-in-apps = Diğer oturum açma seçenekleri bölümünden bir uygulama seçerek tarayıcıda oturum açın. Sağlayıcı: { $provider }. Hesap: { $address }. Hesabınız destekliyorsa güvenlik ayarlarından oluşturduğunuz bir uygulama parolasını da kullanabilirsiniz. Outlook.com ve Microsoft 365 için yalnızca tarayıcıda oturum açma kullanılabilir.
 gtk-accounts-add = Ekle...
 gtk-accounts-properties = Özellikler...
 gtk-accounts-signature = İmza...
@@ -174,8 +174,8 @@ gtk-desktop-generic-name = Posta İstemcisi
 gtk-desktop-comment = E-posta okuyun ve yazın: hızlı, basit bir posta programı
 gtk-desktop-keywords = posta;eposta;e-posta;ileti;gelen kutusu;mektup;
 gtk-metainfo-summary = Hızlı, basit bir posta programı
-gtk-metainfo-description = Inbox Classic, alışılmış e-posta düzenini sunar: solda klasörler, üstte ileti listesi, altta okuma bölmesi. IMAP ve SMTP hesaplarıyla çalışır; Outlook.com ve Microsoft 365 hesaplarında tarayıcı üzerinden oturum açmayı destekler.
-gtk-metainfo-feature-sanitized = İletiler, betikler ve güvenli olmayan içerikler temizlenerek gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir
+gtk-metainfo-description = Inbox Classic, solda klasörler, üstte ileti listesi, altta okuma bölmesi bulunan klasik düzeni veya yan yana sütunları sunar. IMAP ve SMTP hesaplarıyla çalışır; Outlook.com ve Microsoft 365 hesaplarında tarayıcı üzerinden oturum açmayı destekler.
+gtk-metainfo-feature-sanitized = İletiler, betikleri çalıştırılmadan gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir
 gtk-metainfo-feature-search = Konularda, gönderenlerde, alıcılarda, ek adlarında ve ileti metninde arama yapın; Gmail tarzı arama ifadeleriyle sonuçları daraltın
 gtk-metainfo-feature-replies = Yanıtlardaki önceki iletiler, gerektiğinde açılabilecek şekilde gizlenir
-gtk-metainfo-feature-offline = Önceden indirilen iletileri çevrimdışı okuyun. Parolalarınız sistemin güvenli kimlik bilgileri deposunda saklanır
+gtk-metainfo-feature-offline = Yerel kopyası bulunan iletileri çevrimdışı okuyun. Oturum açma bilgileri varsayılan olarak sistem anahtarlığında saklanır

@@ -4,8 +4,8 @@
 <img src="picture:bounce-1-failed" alt="Un avis de non-remise avec une carte indiquant que le message n'a pas été remis, le destinataire, la raison et ce qu'il faut faire">
 <p>La carte liste chaque destinataire, avec la raison en termes simples et ce que vous pouvez faire. <b data-text="bounce-details"></b> affiche les propres termes du serveur de réception.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> sélectionne le message que vous avez envoyé.</li>
-    <li>En cas de retard, <b data-text="bounce-show-delayed"></b> le sélectionne. Votre serveur de messagerie continue d'essayer, vous n'avez donc pas besoin de le renvoyer.</li>
+    <li><b data-text="bounce-show-message"></b> sélectionne le message envoyé s’il peut être retrouvé.</li>
+    <li>En cas de retard, <b data-text="bounce-show-delayed"></b> le sélectionne s’il peut être retrouvé. Si l’avis indique que le serveur continue ses tentatives, vous n’avez pas besoin de renvoyer le message.</li>
 </ul>
 <p>Quelques raisons courantes :</p>
 <table>
@@ -14,7 +14,7 @@
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Renvoyez le message dans quelques jours, ou contactez la personne autrement.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Renvoyez-le sans ce qui ressemble à du courrier indésirable, comme de nombreux liens ou une pièce jointe volumineuse.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Transférez l'avis à votre fournisseur de messagerie. Le message n'est pas en cause.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Rien. Le message est généralement remis dans l'heure.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Attendez tant que le serveur continue ses tentatives. S’il a cessé de réessayer, vous devrez peut-être renvoyer le message.</td></tr>
 </table>
-<p>Pour trouver tous les avis de non-remise, recherchez <code>is:bounce</code>. La raison est déterminée sur votre ordinateur, et rien n'est envoyé nulle part.</p>
+<p>Pour trouver tous les avis de non-remise, recherchez <code>is:bounce</code>. La raison est déterminée sur votre ordinateur, sans transmettre le contenu à un service d’analyse externe.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

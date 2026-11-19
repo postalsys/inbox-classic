@@ -2,16 +2,16 @@
 <p class="summary">Los problemen op met een onbereikbare mailserver.</p>
 <p>Je kunt een van deze meldingen zien in de statusbalk of het leesvenster:</p>
 <ul>
-    <li>“verbindingsfout: …”</li>
-    <li>“de server antwoordde niet op tijd”</li>
+    <li>“connection error: …”</li>
+    <li>“the server did not answer in time”</li>
     <li>“de verbinding met de server is mislukt (…)”</li>
-    <li>“De mailserver kon niet worden bereikt (…).”</li>
+    <li>“De verbinding met de mailserver kon niet worden gemaakt of is verbroken (…).”</li>
 </ul>
 <p>Zo los je het op:</p>
 <ol>
     <li>Controleer je internetverbinding.</li>
     <li>Open de eigenschappen van het account via <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> en controleer de servernamen en poorten.</li>
-    <li>Mislukt het verzenden, gebruik dan poort 465 of 587 voor uitgaande e-mail. Sommige netwerken blokkeren de mailpoorten, vooral poort 25.</li>
+    <li>Mislukt het verzenden, controleer dan de instellingen van je provider: meestal poort 465 met SSL/TLS of 587 met STARTTLS. Sommige netwerken blokkeren de mailpoorten, vooral poort 25.</li>
 </ol>
 <p>Inbox Classic probeert het opnieuw bij de volgende controle op e-mail. Om het nu te proberen, klik je op <b data-text="ui-tb-sync"></b>.</p>
 <p>Een bericht dat je verzendt terwijl er geen verbinding is, blijft in Postvak UIT staan. Inbox Classic probeert het opnieuw te verzenden zodra de server bereikbaar is.</p>

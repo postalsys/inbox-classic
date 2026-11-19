@@ -1,5 +1,5 @@
 <h1>Meld deg av en e-postliste</h1>
-<p class="summary">Stopp meldingene fra en e-postliste med knappen for å melde deg av.</p>
+<p class="summary">Be om å bli fjernet fra en e-postliste med knappen for å melde deg av.</p>
 <p>En melding som inneholder avmeldingsinformasjon, har knappen <b data-text="ui-unsubscribe"></b> til høyre i meldingshodet.</p>
 <p>Slik melder du deg av:</p>
 <ol>
@@ -7,11 +7,11 @@
     <li>Bekreft. Avhengig av listen skjer én av tre ting:
         <ul>
             <li>Inbox Classic sender en avmeldingsforespørsel til listen. Ingen nettside åpnes, og ingen e-post sendes.</li>
-            <li>Inbox Classic klargjør en e-post med avmeldingsforespørselen. Klikk på <b data-text="ui-tb-send"></b> for å sende den.</li>
+            <li>Inbox Classic klargjør en e-post med avmeldingsforespørselen fra standardkontoen, med kontoens signaturtekst. Klikk på <b data-text="ui-tb-send"></b> for å sende den.</li>
             <li>Listens avmeldingsside åpnes i nettleseren, der du fullfører avmeldingen.</li>
         </ul>
     </li>
 </ol>
-<p>Statuslinjen sier fra når listen har godtatt forespørselen.</p>
-<aside class="note">Inbox Classic sender en direkte avmeldingsforespørsel bare når meldingen har den nødvendige DKIM-signaturen. Forespørselen sendes først etter at du har bekreftet.</aside>
+<p>Statuslinjen sier fra når serveren har godtatt en direkte forespørsel. Det er ikke en bekreftelse på at fremtidige meldinger vil stoppe.</p>
+<aside class="note">Inbox Classic sender en direkte avmeldingsforespørsel bare når leverandøren har bekreftet en gyldig DKIM-signatur som dekker begge de nødvendige avmeldingshodene. Forespørselen sendes først etter at du har bekreftet.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

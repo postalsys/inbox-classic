@@ -36,10 +36,9 @@ gtk-unsubscribe-one-click =
     Da li želite da se odjavite sa ove liste za slanje?
 
     Inbox Classic će poslati zahtev za otkazivanje pretplate na { $target }. Neće se otvoriti nijedna veb-stranica niti će biti poslata poruka e-pošte.
-gtk-unsubscribe-mail =
-    Da li želite da se odjavite sa ove liste za slanje?
+gtk-unsubscribe-mail = Da li želite da otkažete pretplatu na ovu listu za slanje pošte?
 
-    Da biste otkazali pretplatu, pošaljite poruku e-pošte na { $target }. Inbox Classic će je pripremiti za vas. Pošaljite poruku kao potvrdu.
+    Inbox Classic će pripremiti zahtev za otkazivanje za adresu { $target }. Proverite poruku i pošaljite je da biste zatražili otkazivanje.
 gtk-unsubscribe-web =
     Da li želite da se odjavite sa ove liste za slanje?
 
@@ -163,7 +162,7 @@ gtk-agent-it-may = Dozvoljene radnje
 gtk-agent-accounts = Dozvoljeni nalozi
 gtk-never-used = Nikad nije korišćeno
 gtk-last-used = Poslednja upotreba: { $date }
-gtk-forget-program = Da li želite da uklonite ovaj program?
+gtk-forget-program = Da li želite da uklonite dozvole ovog programa?
 gtk-forget-program-detail = Dozvole programa i istorija aktivnosti njegovih agenata biće izbrisane. Pri sledećem povezivanju ponovo će se tražiti vaša dozvola.
 gtk-no-agents-yet = Još nijedan agent nije zatražio pristup vašoj pošti.
 gtk-nothing-yet = Zasad ništa.
@@ -186,4 +185,4 @@ gtk-metainfo-description = Inbox Classic je program za e-poštu sa fasciklama le
 gtk-metainfo-feature-sanitized = Poruke se prikazuju bez skripti i drugog nebezbednog sadržaja. Slike sa interneta preuzimaju se samo uz vašu dozvolu
 gtk-metainfo-feature-search = Pretraga tema, pošiljalaca, primalaca, naziva priloga i teksta poruka, uz operatore kao u Gmailu
 gtk-metainfo-feature-replies = Citirane poruke u odgovorima su sažete i mogu da se prošire po potrebi
-gtk-metainfo-feature-offline = Čitajte preuzetu poštu i bez interneta. Lozinke se čuvaju u sistemskom privesku ključeva
+gtk-metainfo-feature-offline = Čitajte preuzetu poštu i bez interneta. Lozinke se podrazumevano čuvaju u sistemskom privesku ključeva

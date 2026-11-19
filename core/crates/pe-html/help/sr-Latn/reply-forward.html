@@ -1,15 +1,15 @@
 <h1>Odgovaranje i prosleđivanje</h1>
 <p class="summary">Odgovorite pošiljaocu ili svima, ili prosledite poruku nekom drugom.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) odgovara pošiljaocu.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) odgovara pošiljaocu i ostalim primaocima.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) odgovara na adresu iz zaglavlja Reply-To ili pošiljaocu ako to zaglavlje ne postoji.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) odgovara na adresu za odgovor i primaocima iz polja Za i Cc, izostavljajući vaše adrese i duplikate.</li>
     <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) prosleđuje poruku. Primaoce unosite sami.</li>
 </ul>
 <p>Odgovori i prosleđene poruke šalju se sa naloga na kom se nalazi izvorna poruka. Ako je ona poslata na neku od dodatnih adresa za slanje tog naloga, koristi se ta adresa.</p>
 <h2>Izvorna poruka</h2>
-<p>U odgovoru je izvorna poruka skrivena iza dugmeta ••• ispod vašeg teksta, pa vidite samo ono što pišete. U svakom slučaju se šalje uz vaš odgovor. Da biste je skratili, kliknite na dugme ili izaberite sve pomoću <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: izvorna poruka tada postaje deo vašeg teksta.</p>
+<p>U odgovoru je izvorna poruka skrivena iza dugmeta ••• ispod vašeg teksta, pa vidite samo ono što pišete. Šalje se uz vaš odgovor ako je ne izbrišete. Da biste je skratili, kliknite na dugme ili izaberite sve pomoću <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: izvorna poruka tada postaje deo vašeg teksta.</p>
 <p>U prosleđenoj poruci izvorna poruka je u tekstu od početka, jer upravo nju šaljete.</p>
 <p>Odgovor prati format izvorne poruke. Odgovor na poruku sa običnim tekstom je takođe običan tekst, a izvorna poruka je citirana znakom <b>&gt;</b>, osim ako u odgovor dodate formatiranje.</p>
 <h2>Prosleđivanje više poruka</h2>
-<p>Izaberite više poruka i kliknite na <b data-text="ui-tb-forward"></b>. Pravi se jedna nova poruka kojoj su sve one priložene kao <code>.eml</code> datoteke. Njena tema je tema prve poruke.</p>
+<p>Izaberite više poruka i kliknite na <b data-text="ui-tb-forward"></b>. Pravi se jedna nova poruka kojoj su sve one priložene kao <code>.eml</code> datoteke. Tema se zasniva na temi prve poruke i dobija prefiks Fw:.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>

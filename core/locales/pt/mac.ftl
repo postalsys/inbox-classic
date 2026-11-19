@@ -78,9 +78,9 @@ mac-files-not-saved =
     { $count ->
        *[other] Ficheiros não guardados: { $failed } de { $count }.
     }
-mac-no-calendar-app = Não há nenhuma aplicação de calendário neste Mac para abrir convites (ficheiros .ics).
+mac-no-calendar-app = Não foi possível abrir o convite numa aplicação de calendário neste Mac (ficheiro .ics).
 mac-file-not-saved = Não foi possível guardar o ficheiro.
-mac-unsubscribing = A cancelar a subscrição de { $target }…
+mac-unsubscribing = A enviar o pedido de cancelamento da subscrição para { $target }…
 mac-loading-list = A carregar…
 
 ## The compose window

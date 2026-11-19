@@ -45,8 +45,8 @@ reader-downloading = S’està baixant el missatge…
 reader-downloading-detail = El missatge apareixerà aquí quan s’acabi de baixar.
 reader-downloading-size = El missatge ocupa { $size }. Apareixerà aquí quan s’hagi baixat.
 reader-failed = No s’ha pogut baixar el missatge
-reader-failed-network = No s’ha pogut connectar amb el servidor de correu ({ $reason }).
-reader-failed-sign-in = El servidor de correu no ha acceptat l’inici de sessió ({ $reason }). Comproveu la contrasenya o torneu a iniciar la sessió a Fitxer > Comptes.
+reader-failed-network = No s’ha pogut accedir al servidor de correu ({ $reason }).
+reader-failed-sign-in = El servidor de correu no ha acceptat l’inici de sessió ({ $reason }). Comproveu la contrasenya o torneu a iniciar la sessió des de les propietats del compte.
 reader-failed-security = No s’ha pogut establir una connexió segura amb el servidor de correu ({ $reason }).
 reader-failed-other = El servidor de correu ha respost: { $reason }.
 reader-retry-note = Es tornarà a provar quan el compte es torni a connectar.
@@ -109,12 +109,12 @@ bounce-mailbox-disabled-why = L’adreça existeix, però la seva bústia s’ha
 bounce-mailbox-disabled-do = Poseu-vos en contacte amb la persona d’una altra manera i demaneu-li una adreça que faci servir ara.
 bounce-mailbox-full = La bústia és plena
 bounce-mailbox-full-why = La bústia del destinatari no té espai per a correu nou.
-bounce-mailbox-full-do = Torneu-lo a enviar d’aquí a uns dies, o aviseu la persona d’una altra manera. Els fitxers adjunts grans són els primers que es refusen.
+bounce-mailbox-full-do = Torneu-lo a enviar d’aquí a uns dies, o aviseu la persona d’una altra manera.
 bounce-spam-blocked = Refusat com a correu brossa
 bounce-spam-blocked-why = El servidor de destinació ha classificat el missatge com a correu brossa.
 bounce-spam-blocked-do = Torneu-lo a enviar sense allò que sembli correu brossa, com ara molts enllaços, enllaços escurçats o un fitxer adjunt gran. Si continua passant, pregunteu al vostre proveïdor de correu.
 bounce-virus-detected = Refusat per un virus
-bounce-virus-detected-why = El servidor de destinació ha trobat un virus o un altre contingut perillós al missatge o als seus fitxers adjunts.
+bounce-virus-detected-why = El servidor de destinació indica que ha trobat un virus o un altre contingut perillós al missatge o als seus fitxers adjunts.
 bounce-virus-detected-do = Comproveu els fitxers adjunts amb un antivirus. Alguns servidors refusen qualsevol programa o arxiu comprimit, així que compartiu aquests fitxers amb un enllaç.
 bounce-ip-blocklisted = El vostre servidor de correu és en una llista de bloqueig
 bounce-ip-blocklisted-why = El servidor de destinació refusa el correu del servidor que ha enviat el vostre, perquè l’adreça d’aquest servidor és en una llista de bloqueig.
@@ -130,7 +130,7 @@ bounce-geo-blocked-why = El servidor de destinació no accepta correu del país 
 bounce-geo-blocked-do = Poseu-vos en contacte amb la persona d’una altra manera, o pregunteu-ho al vostre proveïdor de correu.
 bounce-relay-denied = El servidor no ha retransmès el missatge
 bounce-relay-denied-why = Un servidor s’ha negat a lliurar el missatge, sovint perquè s’ha enviat sense iniciar la sessió o a través d’un servidor que no gestiona el correu d’aquest destinatari.
-bounce-relay-denied-do = A Fitxer > Comptes, comproveu la configuració del servidor de sortida i les dades d’inici de sessió.
+bounce-relay-denied-do = Comproveu el servidor de sortida i les dades d’inici de sessió a les propietats del compte.
 bounce-auth-failure = No s’ha pogut verificar la vostra adreça de remitent
 bounce-auth-failure-why = El servidor de destinació no ha pogut confirmar que el missatge vingués realment del vostre domini (SPF, DKIM o DMARC).
 bounce-auth-failure-do = Reenvieu aquest avís a qui gestioni el correu del vostre domini: cal corregir-ne la configuració. Mentrestant, pot ajudar enviar a través del servidor del vostre proveïdor.
@@ -139,7 +139,7 @@ bounce-rate-limited-why = El servidor de destinació limita temporalment el nomb
 bounce-rate-limited-do = Espereu una estona i torneu-lo a enviar. Quan escriviu a molta gent, envieu-lo a menys persones cada vegada.
 bounce-greylisting = Lliurament ajornat temporalment
 bounce-greylisting-why = El servidor de destinació demana als remitents desconeguts que ho tornin a provar una mica més tard, una comprovació habitual contra el correu brossa.
-bounce-greylisting-do = Espereu. Els servidors de correu ho tornen a provar automàticament, i el missatge sol arribar abans d’una hora.
+bounce-greylisting-do = Espereu mentre el servidor continuï intentant el lliurament. Si ja no ho torna a provar, potser haureu de reenviar el missatge.
 bounce-server-error = El servidor de destinació ha tingut un problema
 bounce-server-error-why = No s’ha pogut connectar amb el servidor de destinació, o no ha pogut acceptar el missatge per un problema propi.
 bounce-server-error-do = Torneu-lo a enviar més tard. Si continua fallant, comproveu que no hi hagi errors d’escriptura a la part de l’adreça que hi ha després de l’@.
@@ -328,8 +328,8 @@ downloading-messages = { $count ->
 }
 # la barra d’estat després de deixar anar fitxers en una carpeta: "Posats a Arxiu: 3 missatges"
 import-put = { $count ->
-    [one] Importat a { $folder }: { $messages }
-   *[other] Importats a { $folder }: { $messages }
+    [one] Importació en cua: { $messages } a { $folder }
+   *[other] Importació en cua: { $messages } a { $folder }
 }
 import-not-put = No s’han pogut importar aquests missatges a la carpeta:
 
@@ -367,8 +367,8 @@ error-import-not-mail = { $path } no és un missatge de correu electrònic
 error-list-answered = el servidor de la llista de correu ha retornat l’estat { $status }
 error-not-built = no s’ha pogut preparar el missatge
 error-outbox-waits = { $count ->
-    [one] el missatge espera a la Safata de sortida i s’enviarà amb el proper Envia/Rep
-   *[other] { $count } missatges esperen a la Safata de sortida i s’enviaran amb el proper Envia/Rep
+    [one] el missatge espera a la Safata de sortida i es tornarà a intentar enviar amb el proper Envia/Rep
+   *[other] { $count } missatges esperen a la Safata de sortida i es tornaran a intentar enviar amb el proper Envia/Rep
 }
 error-draft-not-removed = no s’ha pogut eliminar la versió anterior del missatge de la carpeta Esborranys: { $reason }
 error-sent-but = el missatge s’ha enviat, però { $problem }
@@ -383,12 +383,12 @@ error-in-folder = { $folder }: { $reason }
 
 ## Aplicacions d’inici de sessió
 
-sign-in-off-google = Google encara no ha verificat Inbox Classic, així que només hi deixa iniciar la sessió als usuaris de prova. Feu servir la vostra pròpia aplicació d’inici de sessió de Google o una contrasenya d’aplicació, o activeu-la a Aplicacions d’inici de sessió (Fitxer > Comptes) si sou un usuari de prova.
-sign-in-off-other = Es va desactivar a Aplicacions d’inici de sessió (Fitxer > Comptes). Podeu tornar-la a activar allà.
+sign-in-off-google = L’aplicació Google integrada està configurada per a un accés limitat, com el dels usuaris de prova. Feu servir la vostra pròpia aplicació d’inici de sessió de Google o, si el compte ho permet, una contrasenya d’aplicació. Els usuaris de prova poden activar la integrada a Aplicacions d’inici de sessió.
+sign-in-off-other = Es va desactivar a Aplicacions d’inici de sessió, on podeu tornar-la a activar.
 sign-in-app-no-name = l’aplicació d’inici de sessió necessita un nom
 sign-in-app-no-client = falta l’identificador de client
 sign-in-app-no-scopes = l’aplicació d’inici de sessió necessita els permisos (scopes) que donen accés al correu
-sign-in-app-bad-host = falta l’adreça del servidor { $server } o no és un nom d’amfitrió vàlid
+sign-in-app-bad-host = falta el nom o el port del servidor { $server }, o no és vàlid
 sign-in-app-plain = el servidor { $server } ha d’utilitzar SSL/TLS o STARTTLS
 sign-in-app-not-checked = encara no s’ha comprovat l’emissor
 sign-in-app-issuer-changed = l’emissor ha canviat: torneu a escriure el secret de client, o suprimiu-lo
@@ -434,9 +434,7 @@ day-sunday = diumenge
 
 ## Agents d’IA
 
-# review: changed
-agent-level-read = Llegir el correu: accedir a carpetes, llistes de missatges, cerques i contingut dels missatges
-# review: changed
+agent-level-read = Llegir el correu: consultar carpetes, llistes de missatges, converses, cerques, missatges i fitxers adjunts, les vostres regles de missatge i les persones a qui escriviu
 agent-level-organize = Organitzar el correu: canviar l’estat de lectura, les banderes i els seus colors, gestionar el correu brossa, moure i arxivar missatges, crear i canviar el nom de carpetes, seguir i ignorar converses, suprimir missatges (movent-los a Elements suprimits) i cancel·lar subscripcions a llistes de correu amb la vostra autorització
 agent-level-drafts = Escriure esborranys perquè els envieu vós
 agent-level-send = Enviar correu, amb la vostra aprovació per a cada missatge
@@ -481,17 +479,15 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Aquest missatge no es pot llegir.
 agent-encrypted-original = El missatge original està xifrat. Un agent no hi pot respondre ni reenviar-lo perquè no pot xifrar el missatge de sortida.
 agent-encrypted = Aquest missatge està xifrat. Els agents d’IA no poden llegir-ne el contingut. L’usuari ha d’obrir-lo a Inbox Classic.
-# review: new
-agent-too-many-changes = Massa canvis en els últims 30 dies: aquest agent n’ha fet tants com Inbox Classic en desa al registre per a un programa. En podrà fer més quan els més antics tinguin 30 dies.
-# review: new
-agent-too-many-reads = Massa lectures en els últims 30 dies: aquest agent ha llegit tant com Inbox Classic en desa al registre per a un programa. Podrà llegir més quan les lectures més antigues tinguin 30 dies.
+agent-too-many-changes = S’ha arribat al límit d’entrades del registre de canvis d’aquest programa. Podrà fer més canvis quan caduquin les entrades més antigues, que es conserven un màxim de 30 dies.
+agent-too-many-reads = S’ha arribat al límit d’entrades del registre de lectures d’aquest programa. Podrà fer més lectures quan caduquin les entrades més antigues, que es conserven un màxim de 30 dies.
 list-encrypted = Missatge xifrat
 agent-log-composed = Ha obert «{ $subject }» en una finestra de composició perquè l’editeu
 agent-log-refused = Heu rebutjat l’enviament de «{ $subject }»
 agent-log-sent = Ha posat «{ $subject }» a la cua per enviar-lo a { $to }
 agent-log-draft = Ha desat l’esborrany «{ $subject }»
 agent-log-draft-replaced = Ha substituït l’esborrany «{ $subject }»
-agent-log-draft-discarded = Ha descartat l’esborrany «{ $subject }»
+agent-log-draft-discarded = Ha demanat descartar l’esborrany «{ $subject }»
 agent-draft-note = { $program }, un agent d’IA, ha escrit aquest esborrany. Comproveu els destinataris i el text abans d’enviar-lo.
 agent-log-read = Ha marcat com a llegit «{ $subject }»
 agent-log-unread = Ha marcat com a no llegit «{ $subject }»
@@ -502,7 +498,7 @@ agent-log-moved = Ha mogut «{ $subject }» a { $folder }
 agent-log-junk = Ha marcat «{ $subject }» com a correu brossa
 agent-log-not-junk = Ha marcat «{ $subject }» com a correu legítim
 agent-log-archived = Ha arxivat «{ $subject }»
-agent-log-folder = Ha creat la carpeta «{ $name }»
+agent-log-folder = Ha demanat crear la carpeta «{ $name }»
 agent-log-unsubscribed = Heu autoritzat la sol·licitud de cancel·lació de la subscripció. Missatge: «{ $subject }»
 agent-log-unsubscribe-failed = No s’ha pogut cancel·lar la subscripció a la llista de correu associada al missatge «{ $subject }»: { $reason }
 agent-log-unsubscribe-refused = No heu autoritzat la cancel·lació de subscripcions. Remitents: { $senders }
@@ -514,7 +510,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic demana a la llista de correu següent que deixi d’enviar-vos missatges, fent servir l’opció de cancel·lació amb un sol clic. No s’envia res més. Els missatges que ja teniu no es modifiquen ni es mouen.
    *[other] Inbox Classic demana a cadascuna de les llistes de correu següents que deixi d’enviar-vos missatges, fent servir l’opció de cancel·lació amb un sol clic. No s’envia res més. Els missatges que ja teniu no es modifiquen ni es mouen.
 }
-# review: new
 agent-log-flag-color = Ha marcat «{ $subject }» amb bandera { $color ->
     [red] vermella
     [orange] taronja
@@ -524,39 +519,29 @@ agent-log-flag-color = Ha marcat «{ $subject }» amb bandera { $color ->
     [purple] porpra
    *[gray] grisa
 }
-# review: new
-agent-log-renamed = Ha canviat el nom de la carpeta «{ $old }» a «{ $name }»
-# review: new
+agent-log-renamed = Ha demanat canviar el nom de la carpeta «{ $old }» a «{ $name }»
 agent-log-watched = Ha començat a seguir la conversa «{ $subject }»
-# review: new
 agent-log-ignored = Ha començat a ignorar la conversa «{ $subject }»
-# review: new
 agent-log-unmarked = Ha deixat de seguir o ignorar la conversa «{ $subject }»
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
-agent-undo-changed = el missatge s’ha canviat després
+agent-undo-changed = el missatge s’ha modificat posteriorment
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Ha marcat 1 missatge com a llegit (cerca: { $query })
    *[other] Ha marcat { $count } missatges com a llegits (cerca: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Ha marcat 1 missatge com a no llegit (cerca: { $query })
    *[other] Ha marcat { $count } missatges com a no llegits (cerca: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Ha marcat 1 missatge amb bandera (cerca: { $query })
    *[other] Ha marcat { $count } missatges amb bandera (cerca: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Ha tret la bandera d’1 missatge (cerca: { $query })
    *[other] Ha tret la bandera de { $count } missatges (cerca: { $query })
 }
-# review: new
 agent-log-bulk-color = Ha marcat { $count ->
     [one] 1 missatge
    *[other] { $count } missatges
@@ -569,33 +554,27 @@ agent-log-bulk-color = Ha marcat { $count ->
     [purple] porpra
    *[gray] grisa
 } (cerca: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Ha mogut 1 missatge a { $folder } (cerca: { $query })
    *[other] Ha mogut { $count } missatges a { $folder } (cerca: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Ha arxivat 1 missatge (cerca: { $query })
    *[other] Ha arxivat { $count } missatges (cerca: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Ha marcat 1 missatge com a correu brossa (cerca: { $query })
    *[other] Ha marcat { $count } missatges com a correu brossa (cerca: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Ha marcat 1 missatge com a correu legítim (cerca: { $query })
    *[other] Ha marcat { $count } missatges com a correu legítim (cerca: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Ha suprimit 1 missatge (cerca: { $query })
    *[other] Ha suprimit { $count } missatges (cerca: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] En els últims 15 minuts
     [hour] En l’última hora
@@ -605,129 +584,99 @@ agent-undo-span = { $span ->
    *[all] En els últims 30 dies
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] { $program } no ha fet en aquest temps cap canvi que es pugui desfer.
     [one] Voleu desfer el canvi que { $program } ha fet en aquest temps?
    *[other] Voleu desfer els { $count } canvis que { $program } ha fet en aquest temps?
 }
-# review: new
-agent-undo-since-detail = Els missatges tornen a les carpetes d’on venien, els estats de lectura i les banderes tornen a ser com eren, i els missatges que encara esperen a la Safata de sortida se suprimeixen. El que vós o el servidor hàgiu canviat després es deixa tal com està.
+agent-undo-since-detail = Els missatges tornen a les carpetes anteriors, es restauren els estats de lectura i les banderes, i se suprimeixen els missatges que encara esperen a la Safata de sortida. Alguns canvis no es poden desfer si l’estat necessari ja no coincideix. Les comprovacions depenen de l’operació; per exemple, es pot substituir un color de bandera canviat posteriorment.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] No s’ha desfet res.
     [one] S’ha desfet 1 canvi.
    *[other] S’han desfet { $count } canvis.
 }
-# review: new
 agent-undo-left-gone = { $count ->
     [one] 1 missatge ja no era on l’havia posat el canvi.
    *[other] { $count } missatges ja no eren on els havia posat el canvi.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] 1 missatge s’ha canviat després, per vós o al servidor, i s’ha deixat tal com està.
    *[other] { $count } missatges s’han canviat després, per vós o al servidor, i s’han deixat tal com estan.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] 1 missatge ja havia sortit de la Safata de sortida.
    *[other] { $count } missatges ja havien sortit de la Safata de sortida.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 canvi no es pot desfer.
    *[other] { $count } canvis no es poden desfer.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
     [accept] Aquest missatge accepta la invitació «{ $summary }» ({ $when }).
     [tentative] Aquest missatge accepta provisionalment la invitació «{ $summary }» ({ $when }).
    *[decline] Aquest missatge rebutja la invitació «{ $summary }» ({ $when }).
-} El calendari de l’organitzador el registra. La vostra resposta a la invitació només canvia quan s’hagi enviat el missatge.
+} El missatge s’envia a l’organitzador. La resposta que mostra Inbox Classic només canvia quan l’enviament SMTP s’ha completat, sense confirmar que el calendari de l’organitzador l’hagi registrada.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
-    [accept] Acceptat: { $summary }
-    [tentative] Provisional: { $summary }
-   *[decline] Rebutjat: { $summary }
+    [accept] Acceptada: { $summary }
+    [tentative] Acceptada provisionalment: { $summary }
+   *[decline] Rebutjada: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } ha acceptat aquesta invitació.
     [tentative] { $name } ha acceptat provisionalment aquesta invitació.
    *[decline] { $name } ha rebutjat aquesta invitació.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] ha llegit 1 missatge
    *[other] ha llegit { $count } missatges
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] ha obert 1 fitxer adjunt
-   *[other] ha obert { $count } fitxers adjunts
+    [one] ha llegit 1 fitxer adjunt
+   *[other] ha llegit { $count } fitxers adjunts
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] ha cercat una vegada
    *[other] ha cercat { $count } vegades
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] ha consultat una llista de missatges una vegada
    *[other] ha consultat llistes de missatges { $count } vegades
 }
 # each read under that row
-# review: new
 agent-read-message = Ha llegit «{ $subject }»
-# review: new
 agent-read-conversation = { $count ->
     [one] Ha llegit la conversa «{ $subject }» (1 missatge)
    *[other] Ha llegit la conversa «{ $subject }» ({ $count } missatges)
 }
-# review: new
-agent-read-attachment = Ha obert «{ $name }» de «{ $subject }»
-# review: new
+agent-read-attachment = Ha llegit el fitxer adjunt «{ $name }» del missatge «{ $subject }»
 agent-read-search = { $count ->
     [one] Ha cercat «{ $query }»: 1 missatge
    *[other] Ha cercat «{ $query }»: { $count } missatges
 }
-# review: new
-agent-read-people = Ha cercat persones que comencen per «{ $query }»
-# review: new
+agent-read-people = Ha cercat persones amb un nom o una adreça que comença per «{ $query }»
 agent-read-list = { $count ->
-    [one] Ha consultat 1 missatge a { $folder }
-   *[other] Ha consultat { $count } missatges a { $folder }
+    [one] Ha consultat 1 entrada de la llista: { $folder }
+   *[other] Ha consultat { $count } entrades de la llista: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Ha consultat 1 missatge nou
-   *[other] Ha consultat { $count } missatges nous
+    [one] Ha consultat les dades d’1 missatge nou
+   *[other] Ha consultat les dades de { $count } missatges nous
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Programes iniciats des de { $terminal }
-# review: new
 agent-terminal-programs-windows = Programes iniciats des d’un terminal ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Programes iniciats des d’un terminal ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Un programa iniciat des de { $terminal }
-# review: new
 agent-terminal-program-windows = Un programa iniciat des d’un terminal ({ $terminal })
-# review: new
 agent-terminal-program-linux = Un programa iniciat des d’un terminal ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } volen fer servir el vostre correu
-# review: new
 agent-connect-terminal-detail = Tots els agents d’IA que inicieu des d’aquest terminal comparteixen l’accés que permeteu aquí. Per donar a un agent el seu propi accés, afegiu --name i un nom que trieu als seus arguments a la configuració MCP de l’agent.
-# review: new
 agent-connect-claimed = Ha dit que era { $claimed }. Inbox Classic ha comprovat quin programa l’ha iniciat: { $program }.
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
@@ -749,7 +698,7 @@ secrets-windows = l’Administrador de credencials
 secrets-mac = el clauer
 secrets-linux = l’anell de claus del sistema (Secret Service)
 error-no-such-file = no existeix aquest fitxer
-cards-file-too-big = Aquest fitxer és massa gran per ser una llibreta d’adreces.
+cards-file-too-big = Aquest fitxer és massa gran per importar-lo com a llibreta d’adreces.
 ui-sender-added = S’ha afegit { $name } a la Llibreta d’adreces.
 ui-sender-known = { $name } ja és a la Llibreta d’adreces.
 ui-sender-none = El remitent d’aquest missatge no té cap adreça electrònica per afegir.
@@ -763,8 +712,7 @@ cards-file-failed = { $file }: { $reason }
 otp-heading = Codi per a { $domain }
 otp-copy = Copia
 otp-note = Introduïu-lo només en una pàgina del domini { $domain }.
-otp-old = Aquest codi es va enviar fa més d’una hora i pot haver caducat.
-
+otp-old = Aquest codi es va enviar més d’una hora abans d’obrir el missatge i pot haver caducat.
 # quantes persones estan convidades, a la targeta d’un esdeveniment
 event-attendees =
     { $count ->
@@ -782,7 +730,7 @@ pgp-key-expired = Va caducar el { $date }
 pgp-key-revoked = Revocada
 pgp-key-revoked-why = Revocada: { $reason }
 pgp-key-not-valid = No vàlida
-pgp-key-locked = No es pot fer servir aquesta clau privada: la clau mestra que la protegeix ja no és a l’emmagatzematge segur ({ $store }). Restaureu la clau privada important-ne una còpia de seguretat.
+pgp-key-locked = No es pot accedir a la clau de protecció a l’emmagatzematge segur ({ $store }). Comproveu que estigui disponible i permeti l’accés. Si la clau de protecció ha desaparegut, restaureu la clau privada important-ne una còpia de seguretat.
 pgp-source-own = Creada a Inbox Classic
 pgp-source-file = Importada d’un fitxer
 pgp-source-paste = Enganxada
@@ -795,7 +743,7 @@ pgp-error-no-store = No es pot accedir a l’emmagatzematge segur ({ $store }) p
 pgp-error-wrong-passphrase = La frase de pas no és correcta.
 pgp-error-not-a-key = Això no és una clau OpenPGP.
 pgp-error-too-large = La clau és massa gran.
-pgp-error-unusable = La clau fa servir una criptografia antiga o feble i no es pot utilitzar.
+pgp-error-unusable = La clau no conté els elements criptogràfics utilitzables necessaris per a aquesta operació. Per exemple, pot fer servir algorismes antics o febles.
 pgp-imported-private = { $count ->
     [one] S’ha importat la vostra clau privada.
    *[other] S’han importat { $count } claus privades.
@@ -814,13 +762,13 @@ pgp-pending = El { $date } es va trobar una clau diferent per a { $address }.
 ## Llegir correu signat i xifrat (protect.rs)
 pgp-part-verified = Signat per { $signer }, clau verificada
 pgp-part-signed = Signat per { $signer } (clau no verificada)
-pgp-part-other = Signat per { $signer }, que no és el remitent
+pgp-part-other = Signat per { $signer }; la signatura no s’ha pogut associar a l’adreça del remitent
 pgp-part-unknown-key = Signatura no comprovada: la clau és desconeguda
 pgp-part-not-signed = No signat
 pgp-part-not-checked = Signatura no comprovada
 pgp-part-encrypted = Xifrat. { $signature }
 pgp-part-no-key = Xifrat: no teniu cap clau privada que permeti desxifrar-lo
-pgp-part-changed = La part xifrada s’ha modificat després de xifrar-la i no es mostra
+pgp-part-changed = No s’ha pogut confirmar la integritat de la part xifrada i no es mostra
 pgp-part-unprotected = Xifrat sense protecció contra modificacions, no es mostra
 pgp-part-broken = La part xifrada no es pot llegir
 pgp-why-mismatch = La signatura no correspon a aquest text
@@ -836,8 +784,8 @@ pgp-why-not-key-in-use = Signat amb una clau diferent de la que s’utilitza per
 pgp-part-pictures-loaded = { $label }. S’han carregat imatges d’internet
 pgp-error-no-own-key = No teniu cap clau per a { $address } amb què signar o xifrar. Creeu-ne una a Eines > Claus de xifratge, o desactiveu Signa i Xifra.
 pgp-error-missing-keys = { $count ->
-    [one] Falta la clau pública d’aquest destinatari per xifrar el missatge: { $addresses }.
-   *[other] Falten les claus públiques d’aquests destinataris per xifrar el missatge: { $addresses }.
+    [one] Falta una clau pública utilitzable d’aquest destinatari per xifrar el missatge: { $addresses }.
+   *[other] Falten claus públiques utilitzables d’aquests destinataris per xifrar el missatge: { $addresses }.
 }
 pgp-error-encrypted-quote = Aquest missatge cita o reenvia contingut xifrat i, per tant, només es pot enviar xifrat. Activeu Xifra o suprimiu el contingut citat.
 pgp-error-protect = No s’ha pogut signar ni xifrar el missatge: { $reason }
@@ -868,7 +816,7 @@ pgp-compose-sign-tip-encrypted = Els missatges xifrats sempre se signen en envia
 pgp-compose-encrypt-tip = Xifreu el contingut del missatge en enviar-lo perquè només vós i els destinataris el pugueu llegir
 pgp-compose-make-key = Encara no hi ha cap clau pròpia configurada per a l’adreça { $address }. Voleu crear-ne una ara? Us permetrà signar i xifrar missatges.
 pgp-compose-key-unusable = La vostra clau per a l’adreça { $address } no es pot fer servir. Motiu: { $state }
-    Obriu «Claus de xifratge» per importar una còpia de seguretat d’aquesta clau o crear-ne una de nova.
+    Comproveu primer l’accés a la clau. Si cal, obriu «Claus de xifratge» per importar-ne una còpia de seguretat o crear-ne una de nova.
 pgp-compose-encrypt-off-quote = Aquest missatge encara conté text, imatges o fitxers adjunts provinents d’un missatge xifrat. Traieu-los abans d’enviar-lo sense xifrar. Voleu desactivar el xifratge igualment?
 pgp-compose-encrypt-off-reply = El missatge original estava xifrat. Si envieu la resposta o el missatge reenviat sense xifrar, els servidors de correu en podran llegir el contingut. Voleu desactivar el xifratge?
 pgp-recipient-verified = Clau verificada
@@ -884,7 +832,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Falten claus utilitzables per a { $count } destinataris. Cerqueu les claus o traieu aquests destinataris del missatge. Només podeu enviar-lo sense xifrar si ja no conté text, imatges ni fitxers adjunts de missatges xifrats.
 }
 pgp-details-part = Part { $number }: { $label }
-# review: new
 attachment-from-part = De la part { $number }: { $label }
 pgp-details-signed = Data de la signatura: { $when }. Clau: { $key }
 pgp-details-unknown-key = Signat amb la clau { $key }, que no teniu
@@ -896,17 +843,14 @@ pgp-bar-count-verified = { $count ->
     [one] 1 verificada
    *[other] { $count } verificades
 }
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] 1 xifrada i signada
    *[other] { $count } xifrades i signades
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] 1 xifrada
    *[other] { $count } xifrades
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] 1 signada
    *[other] { $count } signades
@@ -974,17 +918,17 @@ setup-account-signs-in-again = Hi haureu de tornar a iniciar la sessió després
 setup-account-here = Aquest compte ja està configurat aquí i no s’importarà.
 setup-account-no-app = El compte fa servir l’aplicació { $app } per iniciar la sessió, però no està configurada en aquest ordinador. Importeu també les aplicacions d’inici de sessió.
 setup-invalid-address = «{ $address }» no és una adreça electrònica.
-setup-invalid-server = Comproveu el nom i el port del servidor { $server }: falten dades o no són vàlides.
+setup-invalid-server = Comproveu el nom, el port i la seguretat del servidor { $server }: falten dades o no són vàlides.
 setup-invalid-user = Falta el nom d’usuari.
-setup-invalid-sign-in = El compte fa servir un mètode d’inici de sessió que Inbox Classic no reconeix.
+setup-invalid-sign-in = La configuració d’inici de sessió del compte no és vàlida o fa servir un mètode que Inbox Classic no admet.
 setup-error-empty = El fitxer és buit.
-setup-error-too-large = El fitxer és massa gran per ser un fitxer de configuració d’Inbox Classic.
+setup-error-too-large = El fitxer supera la mida màxima permesa per a una exportació o importació de configuració d’Inbox Classic.
 setup-error-not-setup = Aquest no és un fitxer de configuració d’Inbox Classic.
 setup-error-damaged = El fitxer de configuració està malmès i no es pot llegir.
 setup-error-newer = Aquest fitxer de configuració s’ha desat amb una versió més nova d’Inbox Classic ({ $version }). Actualitzeu Inbox Classic i torneu-lo a importar.
 setup-error-needs-passphrase = Aquest fitxer de configuració està protegit amb una frase de pas. Escriviu la frase de pas amb què es va desar.
 setup-error-wrong-passphrase = La frase de pas no és la que es va fer servir per protegir aquest fitxer de configuració.
-setup-error-changed = El fitxer de configuració s’ha modificat o malmès després de desar-lo, així que no es pot importar.
+setup-error-changed = No s’ha pogut comprovar la integritat del fitxer de configuració. Pot haver-se malmès o modificat i no es pot importar.
 setup-error-read = No s’ha pogut llegir el fitxer de configuració: { $error }
 setup-error-write = No s’ha pogut desar el fitxer de configuració: { $error }
 setup-error-no-parts = Trieu almenys una secció.
@@ -1040,12 +984,12 @@ setup-skipped-rules = { $count ->
    *[other] { $count } regles de missatge ja estan configurades aquí.
 }
 setup-skipped-rules-account = { $count ->
-    [one] S’ha omès 1 regla de missatge perquè el seu compte no està configurat aquí.
-   *[other] S’han omès { $count } regles de missatge perquè els seus comptes no estan configurats aquí.
+    [one] S’ha omès 1 regla de missatge perquè falta el compte al qual s’aplica o el de la carpeta de destinació.
+   *[other] S’han omès { $count } regles de missatge perquè falten comptes als quals s’apliquen o comptes de carpetes de destinació.
 }
 setup-rules-waiting = { $count ->
-    [one] La carpeta de destinació d’una regla de missatge s’identificarà després de sincronitzar el compte.
-   *[other] Les carpetes de destinació de { $count } regles de missatge s’identificaran després de sincronitzar els comptes.
+    [one] Encara no s’ha trobat la carpeta de destinació d’una regla de missatge. Inbox Classic intentarà associar-la després de sincronitzar el compte.
+   *[other] Encara no s’han trobat les carpetes de destinació de { $count } regles de missatge. Inbox Classic intentarà associar-les després de sincronitzar els comptes.
 }
 setup-added-trusted-senders = { $count ->
     [one] S’ha afegit 1 remitent de confiança.
@@ -1054,9 +998,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = No s’ha importat res.
 setup-account-servers = { $imap } i { $smtp } ({ $signin })
 setup-file-name = Configuració i comptes d’Inbox Classic
-setup-skipped-unreachable = No s’ha importat l’aplicació { $name }: no s’ha pogut connectar amb el seu servei d’inici de sessió. Torneu-la a afegir a Aplicacions d’inici de sessió.
+setup-skipped-unreachable = S’ha omès { $name }: no s’ha pogut contactar amb el servei d’inici de sessió o validar-lo. Comproveu l’aplicació corresponent a Aplicacions d’inici de sessió i torneu-ho a provar.
 attachment-runs-programs = «{ $name }» pot executar programes. Inbox Classic no permet obrir-lo directament, però podeu desar-lo i obrir-lo manualment si confieu en l’origen.
-attachment-decrypted-note = Aquest fitxer adjunt prové d’un missatge xifrat. Per obrir-lo, Inbox Classic en desa una còpia sense xifrar en una carpeta temporal del vostre compte d’usuari. La còpia hi pot continuar després de tancar el programa que l’ha obert. En iniciar-se, Inbox Classic elimina d’aquesta carpeta les còpies de més d’un dia.
+attachment-decrypted-note = Aquest fitxer adjunt prové d’un missatge xifrat. Per obrir-lo en una altra aplicació, Inbox Classic en desa una còpia sense xifrar en una carpeta temporal del vostre compte d’usuari. La còpia hi pot continuar després de tancar el programa que l’ha obert. En iniciar-se, Inbox Classic intenta eliminar les còpies de més d’un dia.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] El servidor no ha mogut { $messages } a { $folder }, així que torna a ser a { $from }: { $reason }
@@ -1085,46 +1029,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Mostra els fitxers PDF als missatges
-# review: new
 preview-pdf-off = Els fitxers PDF no es mostren als missatges.
-# review: new
-preview-pdf-off-crashed = Un fitxer PDF ha tancat Inbox Classic mentre es mostrava, per això els fitxers PDF ja no es mostren als missatges. Les imatges sí. Per tornar a mostrar els fitxers PDF, activeu { $option } a { $settings }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic s’ha tancat mentre preparava una previsualització. Per això, les previsualitzacions PDF s’han desactivat en reiniciar-se; això no demostra que el fitxer hagi provocat el tancament. Les imatges es continuen mostrant. Per tornar a mostrar els PDF, activeu { $option } a { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 pàgina, { $size }
    *[other] { $count } pàgines, { $size }
 }
-# review: new
 preview-page-alt = { $name }, pàgina { $page } de { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Obriu-lo per veure la pàgina
    *[other] Obriu-lo per veure les { $count } pàgines
 }
-# review: new
 preview-more-files = { $count ->
     [one] 1 fitxer més és a la llista de dalt
    *[other] { $count } fitxers més són a la llista de dalt
 }
-# review: new
 preview-tile-downloading = S’està baixant…
-# review: new
 preview-tile-preparing = S’està preparant…
-# review: new
 preview-tile-format = Les imatges { $format } encara no es mostren
-# review: new
-preview-tile-password = Protegit amb contrasenya: obre'l per introduir-la
-# review: new
+preview-tile-password = Protegit amb contrasenya: obriu el fitxer per introduir-la
 preview-tile-too-large = Massa gran per mostrar-lo
-# review: new
 preview-tile-unreadable = No es pot mostrar
-# review: new
 preview-tile-timed-out = Ha trigat massa a mostrar-se
-# review: new
-preview-tile-crashed = No es mostra: va tancar l’Inbox Classic una vegada
-# review: new
-preview-tile-off = No es mostra fins que l’Inbox Classic es torni a iniciar
-# review: new
+preview-tile-crashed = Previsualització desactivada després d’una interrupció
+preview-tile-off = No es mostra fins que Inbox Classic es torni a iniciar
 preview-not-printed = { $name } ({ $details }) no s’imprimeix. Obriu-lo per imprimir-lo.

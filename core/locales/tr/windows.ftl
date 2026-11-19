@@ -100,14 +100,10 @@ win-clear-log-ask = Aracıların etkinlik geçmişi temizlensin mi? Bu, aracıla
 win-agent-programs = Postanıza erişim isteyen aracıların &programları:
 win-change = &Değiştir...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = &Süre Seçerek Geri Al...
-# review: new
 win-take-back = &Geri Al
 win-what-agents-did = Aracı &etkinliği:
-# review: new
 win-agent-reads = { $from } ile { $to } arasında okunanlar:
-# review: new
 win-agent-reads-hint = Neyin okunduğunu görmek için yukarıdan okumaları özetleyen bir satır seçin.
 win-how-to-connect = Aracı Nasıl Bağlanır
 
@@ -141,4 +137,4 @@ win-installer-welcome-update =
     Uygulama çalışıyorsa önce kapatılır. Hesaplarınız ve postanız korunur.
 win-installer-older-ask = Inbox Classic { $installed } yüklü ve bu sürüm { $version } sürümünden daha yeni. Eski sürüm yine de yüklensin mi?
 win-installer-still-running = Inbox Classic hâlâ çalışıyor. Kapatıp yeniden deneyin.
-win-installer-remove-mail-ask = Inbox Classic'in bu bilgisayarda sakladığı hesap bilgileri ve ileti kopyaları da silinsin mi? Sunuculardaki postanız korunur.
+win-installer-remove-mail-ask = Inbox Classic'in bu bilgisayardaki tüm yerel verileri de silinsin mi? Buna hesaplar, iletiler, taslaklar, bekleyen gönderimler, kişiler, anahtarlar ve ayarlar dahildir. Sunucudaki posta ve sistemin kimlik bilgileri deposundaki kayıtlar korunur.

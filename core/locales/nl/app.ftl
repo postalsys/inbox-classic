@@ -205,7 +205,7 @@ ui-hyperlink = Hyperlink
 ui-hyperlink-intro = Het adres waarnaar de geselecteerde tekst linkt.
 ui-edit-hyperlink = Hyperlink bewerken
 ui-edit-hyperlink-intro = Het adres waarnaar de link verwijst. Wis het adres om de link te verwijderen en de tekst te behouden.
-ui-not-a-picture = Dit bestand is geen PNG-, JPEG- of GIF-afbeelding, of het is groter dan 10 MB.
+ui-not-a-picture = Dit bestand kan niet worden gelezen, is geen PNG-, JPEG-, GIF- of WebP-afbeelding, of is groter dan 10 MB.
 ui-format-color = Tekstkleur
 ui-format-numbers = Genummerde lijst
 ui-format-bullets = Lijst met opsommingstekens
@@ -269,7 +269,7 @@ ui-invitation-answer = Antwoord op een uitnodiging: { $title }
 ui-no-title = (geen titel)
 ui-organizer = Organisator: { $name }
 ui-invitation-not-read = De uitnodiging kon niet worden gelezen.
-ui-no-calendar = Er is op deze computer geen agenda-app om uitnodigingen (.ics-bestanden) mee te openen.
+ui-no-calendar = De uitnodiging kon niet worden geopend. Controleer of er een app is ingesteld voor .ics-bestanden en probeer het opnieuw.
 ui-messages-not-changed = De berichten konden niet worden gewijzigd.
 ui-new-folder-in-selected = De nieuwe map wordt gemaakt in de geselecteerde map.
 ui-new-folder-at-top = De nieuwe map wordt gemaakt op het hoogste niveau van het account.
@@ -334,7 +334,7 @@ ui-enter-password = Typ het wachtwoord van { $account }.
 ui-signs-in-with = Aanmeldapp: { $app }. Je meldt je aan in de browser en het account gebruikt de servers van deze app.
 ui-keep-password = Laat het wachtwoordveld leeg om je huidige wachtwoord te behouden.
 ui-remove-account = Account verwijderen
-ui-remove-account-ask = Dit account verwijderen uit Inbox Classic? De e-mail blijft op de server; de kopie op deze computer en het opgeslagen wachtwoord worden verwijderd.
+ui-remove-account-ask = Dit account verwijderen uit Inbox Classic? De e-mail op de server blijft behouden. De lokale kopie, berichten die nog in Postvak UIT staan en de opgeslagen aanmeldgegevens worden verwijderd.
 ui-col-email = E-mailadres
 ui-col-incoming = Inkomende server
 ui-type-email = Typ je e-mailadres, bijvoorbeeld naam@example.com.
@@ -417,7 +417,6 @@ ui-save-attachments = Bijlagen opslaan
 ui-attachment-open = Openen
 ui-attachment-save-as = Opslaan als...
 ui-attachment-save-all = Alles opslaan...
-# review: new
 ui-attachment-show-in-message = Tonen in bericht
 ui-attachments-strip = Bijlagen
 ui-attachment-note-title = Bijlage openen
@@ -449,11 +448,8 @@ ui-let-agents-connect = AI-agents &verbinding laten maken met Inbox Classic
 ui-change-button = Wijzigen…
 ui-undo-button = Ongedaan maken
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-ui-undo-since-button = Ongedaan maken sinds…
-# review: new
-ui-undo-since-span = Terugdraaien wat dit programma deed:
-# review: new
+ui-undo-since-button = Wijzigingen terugdraaien…
+ui-undo-since-span = Wijzigingen van dit programma terugdraaien uit deze periode:
 ui-take-back = Terugdraaien
 ui-rules-title = Berichtenregels
 ui-rules-intro = Regels verwerken nieuwe berichten in Postvak IN terwijl Inbox Classic actief is. Alle regels die op een bericht van toepassing zijn, worden op volgorde uitgevoerd. Zodra een regel het bericht uit Postvak IN verplaatst, stopt de verwerking voor dat bericht.
@@ -588,18 +584,15 @@ ui-protection-details = &Details...
 ui-protection-details-title = Beveiligingsdetails
 ui-download-heading = Downloaden
 ui-download-ahead = &Berichten vooraf downloaden:
-ui-download-ahead-recent = Recente berichten tot 1 MB per stuk
+ui-download-ahead-recent = Berichten van de afgelopen 30 dagen, tot 1 MB per stuk
 ui-download-ahead-all = Alle berichten
 ui-download-ahead-never = Alleen bij openen
 ui-download-limit = &Opslaglimiet per account:
 ui-send-delay = Wachttijd &voor verzenden:
 ui-send-delay-note = Terwijl een bericht wacht op verzending, kun je het verzenden annuleren met Ongedaan maken.
 ui-dark-messages = Berichten op een donkere achtergrond tonen als het systeem in de donkere modus staat
-# review: new
 ui-preview-show = Bi&jlagen in berichten tonen
-# review: new
-ui-preview-show-note = Toont afbeeldingen en de eerste pagina’s van PDF-bestanden na de tekst van een bericht. Inbox Classic maakt deze voorbeelden zelf, dus niets in een bestand kan worden uitgevoerd.
-# review: new
+ui-preview-show-note = Toont voorbeelden van afbeeldingen en de eerste pagina’s van PDF-bestanden na de berichttekst. Inbox Classic maakt deze voorbeelden zonder scripts of andere actieve inhoud uit het bestand uit te voeren.
 ui-preview-pdfs = P&DF-bestanden in berichten tonen
 ui-sending-in = { $subject } wordt verzonden over { $count ->
     [one] { $count } seconde
@@ -608,7 +601,7 @@ ui-sending-in = { $subject } wordt verzonden over { $count ->
 ui-send-undone = { $subject } is niet verzonden. Het bericht is weer geopend om te bewerken.
 ui-send-too-late = Het verzenden van { $subject } kan niet meer ongedaan worden gemaakt.
 ui-outbox-status-undo = Wordt verzonden om { $time }
-ui-download-note = Vooraf gedownloade berichten openen meteen. Als de opslaglimiet is overschreden, worden de oudste lokale kopieën verwijderd en opnieuw gedownload wanneer je ze opent.
+ui-download-note = Vooraf gedownloade berichten zijn direct leesbaar. Bij overschrijding van de limiet worden de oudste lokale kopieën van berichttekst verwijderd. Concepten en berichten die je sinds het starten van de app hebt geopend, blijven behouden; de limiet kan daardoor worden overschreden. Verwijderde kopieën worden zo nodig opnieuw gedownload.
 ui-attachment-downloading = Dit bericht is nog niet helemaal gedownload. Probeer het opnieuw als het downloaden klaar is.
 ui-trusted-senders-button = &Vertrouwde afzenders...
 ui-trusted-senders-title = Vertrouwde afzenders
@@ -679,8 +672,8 @@ ui-keys-file-filter = OpenPGP-sleutels
 ui-keys-use-for = Deze sleutel gebruiken voor de volgende adressen: { $addresses }? Je ondertekent hiermee berichten die je vanaf deze adressen verstuurt. Je kunt hier ook berichten lezen die met deze sleutel zijn versleuteld.
 ui-keys-use = &Gebruiken
 ui-keys-not-now = &Niet nu
-ui-keys-remove-own = Je sleutel { $fingerprint } verwijderen? Om berichten die met deze sleutel zijn versleuteld hier weer te kunnen lezen, moet je de back-up opnieuw importeren.
-ui-keys-remove-contact = De sleutel van { $name } verwijderen? Totdat je de sleutel opnieuw toevoegt, kun je geen digitale handtekeningen van deze contactpersoon controleren of versleutelde berichten naar deze contactpersoon sturen.
+ui-keys-remove-own = Je sleutel { $fingerprint } verwijderen? Om berichten met deze sleutel opnieuw te ontsleutelen, moet je de back-up importeren. Eerder ontsleutelde tekst in de lokale zoekindex wordt hiermee niet verwijderd.
+ui-keys-remove-contact = Deze sleutel verwijderen: { $name }? Je kunt er dan geen digitale handtekeningen meer mee controleren of berichten mee versleutelen totdat je de sleutel opnieuw toevoegt.
 ui-key-properties-title = Sleuteleigenschappen
 ui-key-names = Namen:
 ui-key-fingerprint = Vingerafdruk:
@@ -694,9 +687,10 @@ ui-key-addresses = Adressen:
 ui-key-address-verified = { $address } (geverifieerd)
 ui-key-address-not-verified = { $address } (niet geverifieerd)
 ui-verify-title = Sleutel verifiëren
-ui-verify-intro = Vergelijk de vingerafdruk met { $name }, bij een ontmoeting of telefonisch. Vraag je contactpersoon de vingerafdruk uit de eigen app voor te lezen. Gebruik geen vingerafdruk die per e-mail is gestuurd: iemand die de sleutel kan vervangen, kan ook die vingerafdruk vervangen.
+ui-verify-intro = Te controleren sleutel: { $name }. Vraag de eigenaar om de vingerafdruk uit de eigen app voor te lezen, bij een ontmoeting of telefonisch. Vergelijk niet met een vingerafdruk uit een e-mail: iemand die de sleutel kan vervangen, kan ook die vingerafdruk vervangen.
 ui-verify-fingerprint = Vingerafdruk van de hier opgeslagen sleutel:
 ui-verify-marks = { $count ->
+    [0] Deze sleutel bevat geen e-mailadressen. Je kunt de vingerafdruk vergelijken, maar Inbox Classic kan de bevestiging van de eigenaar niet opslaan.
     [one] Als de vingerafdrukken overeenkomen, wordt de sleutel als geverifieerd gemarkeerd voor dit adres: { $addresses }. Hoort dit adres niet bij je contactpersoon, klik dan op “Ze verschillen”.
    *[other] Als de vingerafdrukken overeenkomen, wordt de sleutel als geverifieerd gemarkeerd voor deze adressen: { $addresses }. Hoort een van deze adressen niet bij je contactpersoon, klik dan op “Ze verschillen”.
 }
@@ -726,9 +720,9 @@ ui-compose-encrypt-off = Versleuteling &uitzetten
 ui-compose-keep-encrypted = Versleuteld &houden
 ui-setup-export-title = Instellingen en accounts exporteren
 ui-setup-import-title = Instellingen en accounts importeren
-ui-setup-export-intro = Kies welke gegevens je naar een andere computer wilt overzetten. Berichten worden niet in het bestand opgenomen; die worden op de andere computer opnieuw gedownload.
+ui-setup-export-intro = Kies welke gegevens je naar een andere computer wilt overzetten. Het bestand bevat geen berichten, ook niet uit Postvak UIT. Alleen berichten die op de server staan, worden op de andere computer opnieuw gedownload.
 ui-setup-use-passphrase = Het bestand &beveiligen met een wachtwoordzin
-ui-setup-passphrase-note = Met een wachtwoordzin wordt het bestand versleuteld en worden ook opgeslagen wachtwoorden, aanmeldgegevens en privésleutels opgenomen. Zonder wachtwoordzin moet je je op de andere computer opnieuw aanmelden bij je accounts.
+ui-setup-passphrase-note = Een wachtwoordzin versleutelt het bestand en neemt ook opgeslagen aanmeldgegevens en toegankelijke privésleutels op. Zonder wachtwoordzin moet je je op de andere computer opnieuw aanmelden bij je accounts.
 ui-setup-export-button = &Exporteren...
 ui-setup-file-filter = Instellingen en accounts van Inbox Classic
 ui-setup-ask-passphrase = Dit bestand is beveiligd met een wachtwoordzin. Typ die om te zien wat het bestand bevat:

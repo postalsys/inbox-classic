@@ -4,10 +4,10 @@
 <table>
     <tr><th>Configuração</th><th>Significado</th></tr>
     <tr><td>SSL/TLS</td><td>A conexão é criptografada desde o início. Normalmente usa a porta 993 para receber e-mails e a porta 465 para enviar.</td></tr>
-    <tr><td>STARTTLS</td><td>A conexão é criptografada logo depois de ser aberta. Normalmente usa a porta 143 para receber e-mails e a porta 587 para enviar. O Inbox Classic interrompe a conexão se o servidor não oferecer criptografia.</td></tr>
+    <tr><td>STARTTLS</td><td>A conexão começa sem criptografia e passa a usar TLS antes do envio das credenciais. Normalmente usa a porta 143 para receber e-mails e a porta 587 para enviar. O Inbox Classic interrompe a conexão se o servidor não oferecer criptografia.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Sua senha e seus e-mails são transmitidos sem criptografia e podem ser lidos por quem interceptar o tráfego de rede.</td></tr>
 </table>
 <aside class="warning">Use <b data-text="ui-security-none"></b> apenas para um servidor no seu próprio computador ou na sua rede local. O Inbox Classic avisa você antes de usar essa opção.</aside>
 <p>O Inbox Classic verifica a identidade de cada servidor, com base nos certificados em que o seu sistema confia. Não existe nenhuma opção para aceitar qualquer certificado.</p>
-<p>Sua senha fica salva <!--os:windows-->no Gerenciador de Credenciais do Windows<!--/os--><!--os:mac-->no seu chaveiro de login<!--/os--><!--os:linux-->no seu chaveiro<!--/os-->, nunca no armazenamento de e-mails. Uma conta que faz login pelo navegador não armazena sua senha, mas salva um token de login no mesmo local protegido.</p>
+<p>Por padrão, sua senha fica salva <!--os:windows-->no Gerenciador de Credenciais do Windows<!--/os--><!--os:mac-->no seu chaveiro de login<!--/os--><!--os:linux-->no seu chaveiro<!--/os-->, nunca no armazenamento de e-mails. Uma conta que faz login pelo navegador não armazena sua senha, mas salva um token de login no mesmo local protegido. No modo de senhas em memória ou quando o armazenamento protegido não está disponível, essas credenciais podem durar apenas até o aplicativo ser fechado.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>

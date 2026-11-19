@@ -89,7 +89,7 @@ gtk-files = { $count ->
     [one] { $count } fichier
    *[other] { $count } fichiers
 }
-gtk-pictures-blocked = Certaines images ont été bloquées pour empêcher l'expéditeur d'identifier votre ordinateur.
+gtk-pictures-blocked = Certaines images ont été bloquées pour limiter le suivi de votre lecture par l’expéditeur.
 gtk-download-pictures = Télécharger les images
 gtk-save-attachments-menu = Enregistrer les pièces jointes...
 
@@ -173,6 +173,6 @@ gtk-desktop-keywords = courriel;courrier;message;
 gtk-metainfo-summary = Un programme de messagerie rapide et simple
 gtk-metainfo-description = Inbox Classic retrouve la disposition classique des logiciels de messagerie : dossiers à gauche, liste des messages en haut et volet de lecture en dessous. Il prend en charge les comptes IMAP et SMTP et permet de se connecter à Outlook.com et Microsoft 365 dans le navigateur.
 gtk-metainfo-feature-sanitized = Les messages sont affichés sans scripts ; les images provenant d’Internet ne sont chargées qu’avec votre accord
-gtk-metainfo-feature-search = Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec les opérateurs de recherche de Gmail
+gtk-metainfo-feature-search = Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec des opérateurs de recherche inspirés de Gmail
 gtk-metainfo-feature-replies = Les messages cités dans les réponses sont repliés
-gtk-metainfo-feature-offline = Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont enregistrés dans le trousseau du système
+gtk-metainfo-feature-offline = Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont normalement enregistrés dans le trousseau du système

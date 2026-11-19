@@ -1,15 +1,15 @@
 <h1>Problemen met verbindingsbeveiliging</h1>
 <p class="summary">Los problemen op wanneer de mailserver geen versleuteling aanbiedt of een beveiligde verbinding vereist.</p>
-<h2>“de server biedt geen STARTTLS aan”</h2>
+<h2>“the server does not offer STARTTLS”</h2>
 <p>Het account is ingesteld op STARTTLS, maar de server bood geen versleuteling aan. Inbox Classic heeft de verbinding afgebroken zonder je wachtwoord te versturen.</p>
 <ol>
     <li>Open de eigenschappen van het account via <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Stel de beveiliging in op SSL/TLS, met poort 993 voor inkomende e-mail of 465 voor uitgaande e-mail.</li>
+    <li>Stel de beveiliging in op SSL/TLS, met de poort die je provider opgeeft; meestal 993 voor inkomende e-mail of 465 voor uitgaande e-mail.</li>
     <li>Klik op <b data-text="ui-ok"></b>.</li>
 </ol>
 <p>Biedt de server geen werkende versleutelde verbinding aan, dan kun je hem niet veilig gebruiken.</p>
-<h2>“de server accepteert het wachtwoord alleen via een versleutelde verbinding”</h2>
-<p>De server voor uitgaande e-mail staat op <b data-text="ui-security-none"></b>. De server vereist een versleutelde verbinding voordat je je kunt aanmelden. Zet <b data-text="ui-field-smtp-security"></b> op STARTTLS met poort 587, of op SSL/TLS met poort 465.</p>
+<h2>“the server takes the password only over an encrypted connection”</h2>
+<p>De server voor uitgaande e-mail staat op <b data-text="ui-security-none"></b>. De server vereist een versleutelde verbinding voordat je je kunt aanmelden. Dit zegt niet of het wachtwoord klopt. Zet <b data-text="ui-field-smtp-security"></b> op STARTTLS met poort 587, of op SSL/TLS met poort 465.</p>
 <h2>De waarschuwing over een verbinding zonder versleuteling</h2>
-<p>Kies je <b data-text="ui-security-none"></b>, dan waarschuwt Inbox Classic dat iedereen die je netwerkverkeer onderschept je wachtwoord en berichten kan lezen. Ga alleen verder voor een server op je eigen computer of je lokale netwerk.</p>
+<p>Kies je <b data-text="ui-security-none"></b>, dan waarschuwt Inbox Classic dat iedereen die je netwerkverkeer onderschept je wachtwoord en berichten kan lezen. Ga alleen verder in een gecontroleerde omgeving, bijvoorbeeld met een testserver op je eigen computer. Een lokaal netwerk maakt de verbinding niet vanzelf versleuteld.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>

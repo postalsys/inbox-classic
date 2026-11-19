@@ -2,13 +2,13 @@
 <p class="summary">Uma mensagem com um código de login ou de verificação mostra o código em um cartão com a opção de copiá-lo.</p>
 <p>Quando uma mensagem tem um código de uso único, como um código de login, de verificação ou de aprovação, um cartão acima dela mostra:</p>
 <ul>
-    <li>“Código de” e o domínio ao qual o código se destina</li>
-    <li>o código, em letras grandes</li>
+    <li>“Código de” e o domínio de origem autenticado da mensagem, que pode abranger um subdomínio correspondente</li>
+    <li>o código, em tamanho de texto maior</li>
     <li><b data-text="otp-copy"></b>, que coloca o código na área de transferência</li>
 </ul>
 <aside class="warning">Digite um código apenas em uma página do domínio indicado no cartão. Uma mensagem que pede para você digitar um código em outro lugar pode ser uma tentativa de roubar sua conta.</aside>
 <p>O cartão só aparece quando seu provedor de e-mail confirma uma assinatura digital válida para o domínio do código. Mensagens sem essa autenticação não oferecem o código no cartão. A autenticação do domínio não garante a identidade de uma pessoa nem a segurança de todo o conteúdo. Não há cartão em <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ou <b data-text="folder-drafts"></b>, nem quando o provedor não informa o resultado dessa autenticação.</p>
-<p>Se a mensagem tiver sido enviada há mais de uma hora quando você a abrir, o cartão avisa que o código pode ter expirado.</p>
+<p>Se a data informada no cabeçalho da mensagem for de mais de uma hora antes de você abri-la, o cartão avisa que o código pode ter expirado.</p>
 <h2>Códigos nas notificações</h2>
-<p>Para ver o código na notificação de uma mensagem nova, ative <b data-text="ui-codes-in-notifications"></b> em <b data-settings="general"></b>. A opção vem desativada, porque uma notificação pode ser lida com a tela bloqueada.</p>
+<p>Para ver o código na notificação de uma mensagem nova, ative <b data-text="ui-codes-in-notifications"></b> em <b data-settings="general"></b>. A opção vem desativada, porque uma notificação pode ser lida com a tela bloqueada. Ela só vale para mensagens pequenas e recentes, com conteúdo baixado a tempo e um código reconhecido, quando as condições normais de notificação são atendidas.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>

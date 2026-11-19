@@ -45,8 +45,8 @@ reader-downloading = Het bericht wordt gedownload…
 reader-downloading-detail = Het bericht verschijnt hier zodra het downloaden is voltooid.
 reader-downloading-size = Het bericht is { $size }. Het verschijnt hier zodra het is gedownload.
 reader-failed = Het bericht kon niet worden gedownload
-reader-failed-network = De mailserver kon niet worden bereikt ({ $reason }).
-reader-failed-sign-in = De mailserver heeft de aanmelding niet geaccepteerd ({ $reason }). Controleer het wachtwoord of meld je opnieuw aan via Bestand > Accounts.
+reader-failed-network = De verbinding met de mailserver kon niet worden gemaakt of is verbroken ({ $reason }).
+reader-failed-sign-in = De mailserver heeft de aanmelding niet geaccepteerd ({ $reason }). Controleer het wachtwoord of meld je opnieuw aan in de accountinstellingen.
 reader-failed-security = De verbinding met de mailserver kon niet worden beveiligd ({ $reason }).
 reader-failed-other = De mailserver antwoordde: { $reason }.
 reader-retry-note = Het wordt opnieuw geprobeerd wanneer het account weer verbinding maakt.
@@ -109,12 +109,12 @@ bounce-mailbox-disabled-why = Het adres bestaat, maar het postvak is uitgeschake
 bounce-mailbox-disabled-do = Neem op een andere manier contact op met de ontvanger en vraag om een e-mailadres dat nog in gebruik is.
 bounce-mailbox-full = Het postvak is vol
 bounce-mailbox-full-why = Het postvak van de ontvanger heeft geen ruimte voor nieuwe e-mail.
-bounce-mailbox-full-do = Verzend het bericht over een paar dagen opnieuw of laat het de ontvanger op een andere manier weten. Berichten met grote bijlagen worden als eerste geweigerd.
+bounce-mailbox-full-do = Probeer het later opnieuw of neem op een andere manier contact op met de ontvanger.
 bounce-spam-blocked = Geweigerd als spam
 bounce-spam-blocked-why = De ontvangende server zag het bericht aan voor spam.
 bounce-spam-blocked-do = Verwijder inhoud die op spam kan lijken, zoals grote aantallen links, verkorte links of een grote bijlage, en verzend het bericht opnieuw. Neem contact op met je e-mailprovider als dit blijft gebeuren.
 bounce-virus-detected = Geweigerd vanwege een virus
-bounce-virus-detected-why = De ontvangende server heeft een virus of andere schadelijke inhoud gevonden in het bericht of de bijlagen.
+bounce-virus-detected-why = De ontvangende server vermoedt dat het bericht of een bijlage een virus of andere schadelijke inhoud bevat.
 bounce-virus-detected-do = Controleer de bijlagen met een virusscanner. Sommige servers weigeren alle programma’s en archiefbestanden. Deel zulke bestanden in dat geval via een link.
 bounce-ip-blocklisted = Je mailserver staat op een blokkeerlijst
 bounce-ip-blocklisted-why = De ontvangende server weigert e-mail van de server die jouw bericht verzond, omdat het adres van die server op een blokkeerlijst staat.
@@ -139,7 +139,7 @@ bounce-rate-limited-why = De ontvangende server neemt voorlopig minder berichten
 bounce-rate-limited-do = Wacht even en verzend het opnieuw. Als je aan veel mensen schrijft, verzend dan aan minder mensen tegelijk.
 bounce-greylisting = Even tegengehouden
 bounce-greylisting-why = De ontvangende server vraagt onbekende afzenders het iets later opnieuw te proberen, een gangbare controle tegen spam.
-bounce-greylisting-do = Niets. Mailservers proberen het zelf opnieuw, en het bericht wordt meestal binnen het uur bezorgd.
+bounce-greylisting-do = Bij een vertraging probeert de server het opnieuw. Als dit een definitieve foutmelding is, verzend het bericht dan later opnieuw.
 bounce-server-error = De ontvangende server had een probleem
 bounce-server-error-why = De ontvangende server kon niet worden bereikt, of kon het bericht niet aannemen door een eigen probleem.
 bounce-server-error-do = Verzend het later opnieuw. Als het blijft mislukken, controleer dan het deel van het adres na de @ op typefouten.
@@ -315,7 +315,7 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "3 berichten in Archief gezet"
 import-put = { $count ->
-   *[other] { $messages } toegevoegd aan { $folder }
+   *[other] { $messages } in de wachtrij gezet voor importeren in { $folder }
 }
 import-not-put = Deze berichten konden niet aan de map worden toegevoegd:
 
@@ -353,8 +353,8 @@ error-import-not-mail = { $path } is geen e-mailbericht
 error-list-answered = de server van de mailinglijst gaf status { $status }
 error-not-built = het bericht kon niet worden samengesteld
 error-outbox-waits = { $count ->
-    [one] het bericht wacht in Postvak UIT en wordt verzonden bij de volgende keer Verzenden/ontvangen
-   *[other] { $count } berichten wachten in Postvak UIT en worden verzonden bij de volgende keer Verzenden/ontvangen
+    [one] het bericht wacht in Postvak UIT; bij de volgende keer Verzenden/ontvangen wordt opnieuw geprobeerd het te verzenden
+   *[other] { $count } berichten wachten in Postvak UIT; bij de volgende keer Verzenden/ontvangen wordt opnieuw geprobeerd ze te verzenden
 }
 error-draft-not-removed = het eerdere concept van het bericht kon niet uit Concepten worden verwijderd: { $reason }
 error-sent-but = het bericht is verzonden, maar { $problem }
@@ -369,7 +369,7 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google heeft Inbox Classic nog niet geverifieerd, dus alleen testgebruikers kunnen zich ermee aanmelden. Gebruik je eigen Google-aanmeldapp of een app-wachtwoord, of schakel het in bij Aanmeldapps (Bestand > Accounts) als je een testgebruiker bent.
+sign-in-off-google = Aanmelden met Google is standaard uitgeschakeld in Inbox Classic. Gebruik je eigen Google-aanmeldapp of een app-wachtwoord als je account dat ondersteunt. Je kunt de ingebouwde app inschakelen bij Aanmeldapps als je toestemming hebt om die te gebruiken.
 sign-in-off-other = Deze aanmeldapp is uitgeschakeld. Je kunt hem weer inschakelen via Bestand > Accounts > Aanmeldapps.
 sign-in-app-no-name = de aanmeldapp heeft een naam nodig
 sign-in-app-no-client = de client-ID ontbreekt
@@ -420,9 +420,7 @@ day-sunday = zondag
 
 ## AI agents
 
-# review: changed
-agent-level-read = E-mail lezen: mappen en berichten bekijken en doorzoeken
-# review: changed
+agent-level-read = E-mail lezen: mappen, berichtenlijsten, gesprekken, zoekresultaten, berichten en bijlagen, berichtenregels en contactpersonen bekijken
 agent-level-organize = E-mail ordenen: leesstatus, markeringen en hun kleuren wijzigen, ongewenste e-mail markeren, berichten verplaatsen, archiveren en verwijderen (naar Verwijderde items), mappen maken en hernoemen, gesprekken volgen en negeren en je na jouw toestemming afmelden voor mailinglijsten
 agent-level-drafts = Concepten schrijven die jij verzendt
 agent-level-send = E-mail verzenden, met jouw toestemming voor elk bericht
@@ -467,10 +465,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Dit bericht kan niet worden gelezen.
 agent-encrypted-original = Dit bericht is versleuteld: een agent kan het niet beantwoorden of doorsturen, omdat hij niet kan versleutelen.
 agent-encrypted = Dit bericht is versleuteld. AI-agents kunnen de inhoud niet lezen. De gebruiker moet het in Inbox Classic openen.
-# review: new
-agent-too-many-changes = Te veel wijzigingen in de afgelopen 30 dagen: deze agent heeft er zoveel gedaan als Inbox Classic voor één programma in het logboek bewaart. Er kunnen er meer bij zodra de oudste 30 dagen oud zijn.
-# review: new
-agent-too-many-reads = Te veel gelezen in de afgelopen 30 dagen: deze agent heeft zoveel gelezen als Inbox Classic voor één programma in het logboek bewaart. Er kan meer worden gelezen zodra de oudste leesacties 30 dagen oud zijn.
+agent-too-many-changes = De limiet voor wijzigingen in de afgelopen 30 dagen is bereikt. Inbox Classic bewaart per programma een beperkt aantal logboekregels. De agent kan weer wijzigingen maken zodra de oudste regels 30 dagen oud zijn.
+agent-too-many-reads = De limiet voor leesacties in de afgelopen 30 dagen is bereikt. Inbox Classic bewaart per programma een beperkt aantal logboekregels. De agent kan weer lezen zodra de oudste leesacties 30 dagen oud zijn.
 list-encrypted = Versleuteld bericht
 agent-log-composed = “{ $subject }” geopend als nieuw bericht dat je zelf kunt afmaken
 agent-log-refused = Je hebt “{ $subject }” niet verzonden
@@ -488,7 +484,7 @@ agent-log-moved = “{ $subject }” verplaatst naar { $folder }
 agent-log-junk = “{ $subject }” gemarkeerd als ongewenst
 agent-log-not-junk = “{ $subject }” gemarkeerd als gewenst
 agent-log-archived = “{ $subject }” gearchiveerd
-agent-log-folder = De map “{ $name }” gemaakt
+agent-log-folder = Aanmaken van de map “{ $name }” aangevraagd
 agent-log-unsubscribed = Je hebt het afmeldverzoek goedgekeurd. Bericht: “{ $subject }”
 agent-log-unsubscribe-failed = Afmelden voor de mailinglijst bij het bericht “{ $subject }” is mislukt: { $reason }
 agent-log-unsubscribe-refused = Je hebt je niet afgemeld voor deze mailinglijsten: { $senders }
@@ -500,7 +496,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Via de afmeldfunctie met één klik vraagt Inbox Classic de onderstaande mailinglijst om je geen berichten meer te sturen. Er wordt verder niets verzonden. Je bestaande berichten blijven ongewijzigd.
    *[other] Via de afmeldfunctie met één klik vraagt Inbox Classic elke onderstaande mailinglijst om je geen berichten meer te sturen. Er wordt verder niets verzonden. Je bestaande berichten blijven ongewijzigd.
 }
-# review: new
 agent-log-flag-color = “{ $subject }” { $color ->
     [red] rood
     [orange] oranje
@@ -510,39 +505,29 @@ agent-log-flag-color = “{ $subject }” { $color ->
     [purple] paars
    *[gray] grijs
 } gemarkeerd
-# review: new
-agent-log-renamed = De map “{ $old }” hernoemd naar “{ $name }”
-# review: new
+agent-log-renamed = Hernoemen van de map “{ $old }” naar “{ $name }” aangevraagd
 agent-log-watched = Volgen ingeschakeld voor het gesprek “{ $subject }”
-# review: new
 agent-log-ignored = Negeren ingeschakeld voor het gesprek “{ $subject }”
-# review: new
 agent-log-unmarked = Volgen of negeren uitgeschakeld voor het gesprek “{ $subject }”
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = het bericht is sindsdien gewijzigd
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] 1 bericht gemarkeerd als gelezen (zoekopdracht: { $query })
    *[other] { $count } berichten gemarkeerd als gelezen (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] 1 bericht gemarkeerd als ongelezen (zoekopdracht: { $query })
    *[other] { $count } berichten gemarkeerd als ongelezen (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] 1 bericht gemarkeerd (zoekopdracht: { $query })
    *[other] { $count } berichten gemarkeerd (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Markering verwijderd van 1 bericht (zoekopdracht: { $query })
    *[other] Markering verwijderd van { $count } berichten (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] 1 bericht
    *[other] { $count } berichten
@@ -555,33 +540,27 @@ agent-log-bulk-color = { $count ->
     [purple] paars
    *[gray] grijs
 } gemarkeerd (zoekopdracht: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] 1 bericht verplaatst naar { $folder } (zoekopdracht: { $query })
    *[other] { $count } berichten verplaatst naar { $folder } (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] 1 bericht gearchiveerd (zoekopdracht: { $query })
    *[other] { $count } berichten gearchiveerd (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] 1 bericht gemarkeerd als ongewenst (zoekopdracht: { $query })
    *[other] { $count } berichten gemarkeerd als ongewenst (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] 1 bericht gemarkeerd als gewenst (zoekopdracht: { $query })
    *[other] { $count } berichten gemarkeerd als gewenst (zoekopdracht: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] 1 bericht verwijderd (zoekopdracht: { $query })
    *[other] { $count } berichten verwijderd (zoekopdracht: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] In de afgelopen 15 minuten
     [hour] In het afgelopen uur
@@ -591,129 +570,99 @@ agent-undo-span = { $span ->
    *[all] In de afgelopen 30 dagen
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] { $program } heeft in deze periode geen wijzigingen gemaakt die kunnen worden teruggedraaid.
     [one] De wijziging terugdraaien die { $program } in deze periode heeft gemaakt?
    *[other] De { $count } wijzigingen terugdraaien die { $program } in deze periode heeft gemaakt?
 }
-# review: new
-agent-undo-since-detail = Berichten gaan terug naar de mappen waar ze vandaan kwamen, leesstatus en markeringen worden weer zoals ze waren, en berichten die nog in Postvak UIT wachten, worden verwijderd. Wat sindsdien door jou of de server is gewijzigd, blijft zoals het is.
+agent-undo-since-detail = Berichten gaan waar mogelijk terug naar hun vorige map, leesstatus en markeringen worden hersteld en berichten die nog in Postvak UIT staan, worden verwijderd. De app controleert voor elke wijziging of de betrokken eigenschappen sindsdien zijn veranderd. Een deel van de wijzigingen kan daardoor behouden blijven.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Er is niets teruggedraaid.
     [one] 1 wijziging teruggedraaid.
    *[other] { $count } wijzigingen teruggedraaid.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 bericht stond niet meer waar de wijziging het had neergezet.
-   *[other] { $count } berichten stonden niet meer waar de wijziging ze had neergezet.
+    [one] 1 wijziging bleef behouden omdat een bericht niet meer op de verwachte plek stond.
+   *[other] { $count } wijzigingen bleven behouden omdat berichten niet meer op de verwachte plek stonden.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] 1 bericht is sindsdien door jou of op de server gewijzigd en is gelaten zoals het is.
-   *[other] { $count } berichten zijn sindsdien door jou of op de server gewijzigd en zijn gelaten zoals ze zijn.
+    [one] 1 wijziging bleef behouden omdat de betrokken eigenschappen sindsdien zijn veranderd.
+   *[other] { $count } wijzigingen bleven behouden omdat de betrokken eigenschappen sindsdien zijn veranderd.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] 1 bericht had Postvak UIT al verlaten.
-   *[other] { $count } berichten hadden Postvak UIT al verlaten.
+    [one] 1 wijziging kon niet worden teruggedraaid omdat het bericht niet meer in Postvak UIT stond.
+   *[other] { $count } wijzigingen konden niet worden teruggedraaid omdat de berichten niet meer in Postvak UIT stonden.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 wijziging kan niet worden teruggedraaid.
    *[other] { $count } wijzigingen kunnen niet worden teruggedraaid.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Dit bericht accepteert de uitnodiging “{ $summary }” ({ $when }).
-    [tentative] Dit bericht accepteert de uitnodiging “{ $summary }” ({ $when }) voorlopig.
-   *[decline] Dit bericht wijst de uitnodiging “{ $summary }” ({ $when }) af.
-} De agenda van de organisator verwerkt het antwoord. Je antwoord op de uitnodiging verandert pas als het bericht is verzonden.
+    [accept] Met dit bericht accepteer je de uitnodiging “{ $summary }” ({ $when }).
+    [tentative] Met dit bericht accepteer je de uitnodiging “{ $summary }” ({ $when }) voorlopig.
+   *[decline] Met dit bericht weiger je de uitnodiging “{ $summary }” ({ $when }).
+} Het antwoord wordt naar de agenda van de organisator gestuurd. Inbox Classic werkt je antwoord bij zodra de mailserver het bericht heeft geaccepteerd voor verzending.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Geaccepteerd: { $summary }
-    [tentative] Voorlopig: { $summary }
+    [tentative] Voorlopig geaccepteerd: { $summary }
    *[decline] Geweigerd: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } heeft deze uitnodiging geaccepteerd.
     [tentative] { $name } heeft deze uitnodiging voorlopig geaccepteerd.
    *[decline] { $name } heeft deze uitnodiging geweigerd.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] 1 bericht gelezen
    *[other] { $count } berichten gelezen
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] 1 bijlage geopend
-   *[other] { $count } bijlagen geopend
+    [one] 1 bijlage gelezen
+   *[other] { $count } bijlagen gelezen
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] één keer gezocht
    *[other] { $count } keer gezocht
 }
-# review: new
 agent-reads-lists = { $count ->
-    [one] één keer een berichtenlijst bekeken
-   *[other] { $count } keer berichtenlijsten bekeken
+    [one] 1 regel in een berichtenlijst bekeken
+   *[other] { $count } regels in berichtenlijsten bekeken
 }
 # each read under that row
-# review: new
 agent-read-message = “{ $subject }” gelezen
-# review: new
 agent-read-conversation = { $count ->
     [one] Het gesprek “{ $subject }” gelezen (1 bericht)
    *[other] Het gesprek “{ $subject }” gelezen ({ $count } berichten)
 }
-# review: new
-agent-read-attachment = De bijlage “{ $name }” van “{ $subject }” geopend
-# review: new
+agent-read-attachment = De gegevens van de bijlage “{ $name }” van “{ $subject }” gelezen
 agent-read-search = { $count ->
     [one] Gezocht naar “{ $query }”: 1 bericht
    *[other] Gezocht naar “{ $query }”: { $count } berichten
 }
-# review: new
-agent-read-people = Personen opgezocht die beginnen met “{ $query }”
-# review: new
+agent-read-people = Contactpersonen opgezocht met een naam of adres dat begint met “{ $query }”
 agent-read-list = { $count ->
-    [one] 1 bericht bekeken in { $folder }
-   *[other] { $count } berichten bekeken in { $folder }
+    [one] Lijstgegevens van 1 bericht in { $folder } bekeken
+   *[other] Lijstgegevens van { $count } berichten in { $folder } bekeken
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] 1 nieuw bericht bekeken
-   *[other] { $count } nieuwe berichten bekeken
+    [one] Lijstgegevens van 1 nieuw bericht bekeken
+   *[other] Lijstgegevens van { $count } nieuwe berichten bekeken
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Programma’s gestart vanuit { $terminal }
-# review: new
 agent-terminal-programs-windows = Programma’s gestart vanuit een terminal ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Programma’s gestart vanuit een terminal ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Een programma gestart vanuit { $terminal }
-# review: new
 agent-terminal-program-windows = Een programma gestart vanuit een terminal ({ $terminal })
-# review: new
 agent-terminal-program-linux = Een programma gestart vanuit een terminal ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } willen je e-mail gebruiken
-# review: new
 agent-connect-terminal-detail = Alle AI-agents die je vanuit deze terminal start, delen de toegang die je hier geeft. Wil je een agent eigen toegang geven, voeg dan --name en een naam naar keuze toe aan zijn argumenten in de MCP-instellingen van de agent.
-# review: new
 agent-connect-claimed = Het programma gaf aan { $claimed } te zijn. Inbox Classic heeft gecontroleerd welk programma het heeft gestart: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -749,7 +698,7 @@ cards-file-failed = { $file }: { $reason }
 otp-heading = Code van { $domain }
 otp-copy = Kopiëren
 otp-note = Vul deze alleen in op een pagina van { $domain }.
-otp-old = Deze code is meer dan een uur voor het openen van het bericht verzonden en is waarschijnlijk verlopen.
+otp-old = De datum van dit bericht is meer dan een uur oud. De code kan verlopen zijn; Inbox Classic kan niet controleren of die nog geldig is.
 
 # how many are invited, in the card of an event
 event-attendees =
@@ -768,7 +717,7 @@ pgp-key-expired = Verlopen op { $date }
 pgp-key-revoked = Ingetrokken
 pgp-key-revoked-why = Ingetrokken: { $reason }
 pgp-key-not-valid = Niet geldig
-pgp-key-locked = Deze privésleutel kan niet worden gebruikt: de beveiligingssleutel ontbreekt in { $store }. Importeer de back-up van je privésleutel opnieuw.
+pgp-key-locked = De beveiligingssleutel in { $store } is momenteel niet toegankelijk. Controleer of de opslag beschikbaar en ontgrendeld is. Als de beveiligingssleutel verloren is gegaan, importeer dan de back-up van je privésleutel.
 pgp-source-own = Gemaakt in Inbox Classic
 pgp-source-file = Geïmporteerd uit een bestand
 pgp-source-paste = Geplakt
@@ -798,8 +747,8 @@ pgp-file-name-private = Back-up van privésleutel van { $who }.asc
 pgp-pending = Op { $date } is een andere sleutel voor { $address } gevonden.
 
 ## Reading signed and encrypted mail (protect.rs)
-pgp-part-verified = Ondertekend door { $signer }, sleutel geverifieerd
-pgp-part-signed = Ondertekend door { $signer } (sleutel niet geverifieerd)
+pgp-part-verified = Geldige digitale handtekening van { $signer }, eigenaar van de sleutel geverifieerd
+pgp-part-signed = Geldige digitale handtekening van { $signer }, eigenaar van de sleutel niet geverifieerd
 pgp-part-other = Ondertekend door { $signer }, die niet de afzender is
 pgp-part-unknown-key = Ondertekend, maar de sleutel is onbekend
 pgp-part-not-signed = Niet ondertekend
@@ -820,18 +769,18 @@ pgp-why-key-not-valid = Ondertekend met een sleutel die niet geldig is
 pgp-why-not-for-you = Ondertekend voor andere ontvangers en aan jou doorgegeven
 pgp-why-not-key-in-use = Ondertekend met een andere sleutel dan die voor { $address } wordt gebruikt
 pgp-part-pictures-loaded = { $label }. Er zijn afbeeldingen van internet geladen
-pgp-error-no-own-key = Je hebt geen sleutel voor { $address } om mee te ondertekenen of te versleutelen. Maak er een via Extra > Versleutelingssleutels, of zet Ondertekenen en Versleutelen uit.
+pgp-error-no-own-key = Je hebt geen sleutel voor { $address } om mee te ondertekenen of te versleutelen. Open Versleutelingssleutels om er een te maken, of zet Ondertekenen en Versleutelen uit.
 pgp-error-missing-keys = { $count ->
     [one] Er is geen sleutel beschikbaar om het bericht te versleutelen voor: { $addresses }.
    *[other] Er zijn geen sleutels beschikbaar om het bericht te versleutelen voor deze ontvangers: { $addresses }.
 }
-pgp-error-encrypted-quote = Dit bericht citeert of stuurt een versleuteld bericht door, dus het kan alleen versleuteld worden verzonden. Zet Versleutelen aan, of verwijder de geciteerde tekst.
+pgp-error-encrypted-quote = Dit bericht bevat nog tekst, afbeeldingen of bijlagen uit een versleuteld bericht en kan daarom alleen versleuteld worden verzonden. Zet Versleutelen aan of verwijder die inhoud.
 pgp-error-protect = Het bericht kon niet worden ondertekend of versleuteld: { $reason }
 pgp-found-keys = Sleutels gevonden voor: { $addresses }.
 pgp-found-none = Geen sleutel gevonden voor: { $addresses }. Vraag de benodigde openbare sleutels op.
 pgp-found-no-key = Er is geen sleutel gevonden.
 pgp-find-unavailable = De sleutels konden niet worden opgezocht: { $error }
-pgp-publish-pending = keys.openpgp.org heeft een bevestigingslink gestuurd naar deze adressen: { $addresses }. Bevestig elk adres afzonderlijk zodat je sleutel via dat adres kan worden gevonden.
+pgp-publish-pending = Bij keys.openpgp.org is een bevestigingsmail aangevraagd voor: { $addresses }. Bevestig elk adres via de ontvangen link zodat je sleutel op dat adres kan worden gevonden.
 pgp-publish-done = Je sleutel is gepubliceerd op keys.openpgp.org voor { $addresses }.
 pgp-publish-failed = De sleutel kon niet worden gepubliceerd: { $error }
 pgp-keyserver-off = Sleutels zoeken op keys.openpgp.org staat uit bij { $settings }.
@@ -870,7 +819,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Voor { $count } ontvangers ontbreken bruikbare sleutels. Zoek hun sleutels of verwijder deze ontvangers uit het bericht. Je kunt het bericht alleen onversleuteld verzenden als het geen tekst, afbeeldingen of bijlagen uit versleutelde berichten meer bevat.
 }
 pgp-details-part = Deel { $number }: { $label }
-# review: new
 attachment-from-part = Uit deel { $number }: { $label }
 pgp-details-signed = Ondertekend op { $when } met de sleutel { $key }
 pgp-details-unknown-key = Ondertekend met de sleutel { $key }, die je niet hebt
@@ -879,11 +827,8 @@ pgp-details-for = Versleuteld voor { $keys }
 pgp-details-plain = Niet ondertekend en niet versleuteld
 pgp-bar-parts = Dit bericht heeft { $count } delen: { $list }. Bij elk deel staat hoe het is beschermd.
 pgp-bar-count-verified = { $count } geverifieerd
-# review: new
 pgp-bar-count-encrypted-signed = { $count } versleuteld en ondertekend
-# review: new
 pgp-bar-count-encrypted = { $count } versleuteld
-# review: new
 pgp-bar-count-signed = { $count } ondertekend
 pgp-bar-count-warning = { $count ->
     [one] { $count } vraagt aandacht
@@ -1018,8 +963,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } berichtenregels overgeslagen omdat de bijbehorende accounts hier niet zijn ingesteld.
 }
 setup-rules-waiting = { $count ->
-    [one] { $count } berichtenregel verplaatst berichten naar een map die verschijnt zodra het account is gesynchroniseerd.
-   *[other] { $count } berichtenregels verplaatsen berichten naar mappen die verschijnen zodra de accounts zijn gesynchroniseerd.
+    [one] Voor { $count } berichtenregel wordt de doelmap gezocht nadat het account is gesynchroniseerd.
+   *[other] Voor { $count } berichtenregels worden de doelmappen gezocht nadat de accounts zijn gesynchroniseerd.
 }
 setup-added-trusted-senders = { $count ->
     [one] { $count } vertrouwde afzender toegevoegd.
@@ -1028,9 +973,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Er is niets geïmporteerd.
 setup-account-servers = { $imap } en { $smtp } ({ $signin })
 setup-file-name = Instellingen en accounts van Inbox Classic
-setup-skipped-unreachable = De aanmeldapp { $name } is overgeslagen: de bijbehorende aanmeldservice kon niet worden bereikt. Voeg de app opnieuw toe via Aanmeldapps.
+setup-skipped-unreachable = { $name } is overgeslagen omdat de aanmeldservice niet bereikbaar was. Controleer de instellingen bij Aanmeldapps voordat je het opnieuw probeert.
 attachment-runs-programs = “{ $name }” kan programma’s uitvoeren, dus Inbox Classic opent het niet. Sla het op en open het daarna zelf als je vertrouwt waar het vandaan komt.
-attachment-decrypted-note = Deze bijlage komt uit een versleuteld bericht. Om de bijlage te openen, slaat Inbox Classic een onversleutelde kopie op in een tijdelijke map voor jouw gebruikersaccount. Kopieën die ouder zijn dan een dag worden verwijderd wanneer Inbox Classic start.
+attachment-decrypted-note = Deze bijlage komt uit een versleuteld bericht. Bij het openen bewaart Inbox Classic een onversleutelde kopie in een tijdelijke map voor jouw gebruikersaccount. Die kopie blijft na het sluiten bestaan. Bij het starten probeert de app kopieën ouder dan een dag te verwijderen.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] De server heeft { $messages } niet naar { $folder } verplaatst, dus het staat weer in { $from }: { $reason }
@@ -1059,46 +1004,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = PDF-bestanden in berichten tonen
-# review: new
 preview-pdf-off = PDF-bestanden worden niet in berichten getoond.
-# review: new
-preview-pdf-off-crashed = Een PDF-bestand heeft Inbox Classic gesloten terwijl het werd getoond, daarom worden PDF-bestanden niet meer in berichten getoond. Afbeeldingen wel. Schakel { $option } in bij { $settings } om PDF-bestanden weer te tonen.
-# review: new
+preview-pdf-off-crashed = Inbox Classic werd onderbroken tijdens het maken van een bestandsvoorbeeld. PDF-voorbeelden zijn daarom uitgeschakeld; afbeeldingen blijven zichtbaar. Zet { $option } aan bij { $settings } om PDF-voorbeelden weer te tonen.
 preview-pdf-details = { $count ->
     [one] 1 pagina, { $size }
    *[other] { $count } pagina’s, { $size }
 }
-# review: new
 preview-page-alt = { $name }, pagina { $page } van { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Open het bestand om de pagina te zien
    *[other] Open het bestand om alle { $count } pagina’s te zien
 }
-# review: new
 preview-more-files = { $count ->
     [one] Nog 1 bestand staat in de lijst hierboven
    *[other] Nog { $count } bestanden staan in de lijst hierboven
 }
-# review: new
 preview-tile-downloading = Downloaden…
-# review: new
 preview-tile-preparing = Voorbereiden…
-# review: new
 preview-tile-format = { $format }-afbeeldingen worden nog niet getoond
-# review: new
 preview-tile-password = Beveiligd met een wachtwoord: open het om het wachtwoord in te voeren
-# review: new
 preview-tile-too-large = Te groot om te tonen
-# review: new
 preview-tile-unreadable = Kan niet worden getoond
-# review: new
 preview-tile-timed-out = Tonen duurde te lang
-# review: new
-preview-tile-crashed = Niet getoond: dit bestand heeft Inbox Classic een keer afgesloten
-# review: new
+preview-tile-crashed = Niet getoond: Inbox Classic werd bij een eerdere poging onderbroken of reageerde niet meer
 preview-tile-off = Niet getoond tot Inbox Classic opnieuw start
-# review: new
 preview-not-printed = { $name } ({ $details }) wordt niet afgedrukt. Open het om het af te drukken.

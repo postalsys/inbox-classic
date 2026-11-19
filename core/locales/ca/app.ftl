@@ -205,7 +205,7 @@ ui-hyperlink = Hiperenllaç
 ui-hyperlink-intro = Introduïu l’adreça a la qual ha d’enllaçar el text seleccionat.
 ui-edit-hyperlink = Edita l’hiperenllaç
 ui-edit-hyperlink-intro = L’adreça de destinació de l’enllaç. Esborreu l’adreça per eliminar l’enllaç i conservar el text.
-ui-not-a-picture = Aquest fitxer no és una imatge PNG, JPEG o GIF, o ocupa més de 10 MB.
+ui-not-a-picture = No s’ha pogut llegir el fitxer com una imatge PNG, JPEG, GIF o WebP de fins a 10 MB.
 ui-format-color = Color del tipus de lletra
 ui-format-numbers = Llista numerada
 ui-format-bullets = Llista de pics
@@ -247,7 +247,7 @@ ui-no-items = No hi ha cap element en aquesta visualització.
 ui-choose-folder = Trieu una carpeta per veure’n els missatges.
 ui-unsubscribe = Cancel·la la subscripció
 ui-open-in-calendar = Obre al calendari
-ui-pictures-blocked = S’han bloquejat algunes imatges per ajudar a impedir que el remitent identifiqui el vostre ordinador. Feu clic aquí per baixar-les.
+ui-pictures-blocked = S’han bloquejat algunes imatges per limitar el seguiment de la vostra lectura pel remitent. Feu clic aquí per baixar-les.
 ui-not-shown = No s’ha pogut mostrar el missatge.
 ui-attachment-not-read = No s’ha pogut llegir el fitxer adjunt.
 ui-attachment-not-saved = No s’ha pogut desar el fitxer adjunt.
@@ -256,12 +256,12 @@ ui-leave-list = Voleu deixar aquesta llista de correu?
 ui-leave-one-click = Inbox Classic enviarà una sol·licitud de baixa a { $target }. No s’obrirà cap pàgina web ni s’enviarà cap correu electrònic.
 ui-leave-mail = Per donar-vos de baixa, envieu un correu electrònic a { $target }. Inbox Classic us el prepararà. Envieu el missatge per confirmar-ho.
 ui-leave-web = La pàgina de baixa de la llista de correu s’obrirà al navegador ({ $target }).
-ui-unsubscribing = S’està cancel·lant la subscripció a { $target }...
+ui-unsubscribing = S’està enviant la sol·licitud de baixa a { $target }...
 ui-cannot-unsubscribe = Aquest missatge no ofereix cap manera de cancel·lar la subscripció.
-ui-unsubscribed = S’ha acceptat la sol·licitud de baixa. La llista de correu diu que deixarà d’enviar aquests missatges.
+ui-unsubscribed = La llista de correu ha acceptat la sol·licitud de baixa.
 ui-not-unsubscribed = No s’ha pogut cancel·lar la subscripció: { $reason }
 ui-event-span = { $start } fins a { $end }
-ui-event-floating = { $when } (hora del remitent)
+ui-event-floating = { $when } (hora indicada, sense conversió de fus horari)
 ui-invitation = Invitació: { $title }
 ui-invitation-updated = Invitació actualitzada: { $title }
 ui-invitation-canceled = Cancel·lada: { $title }
@@ -269,7 +269,7 @@ ui-invitation-answer = Resposta a una invitació: { $title }
 ui-no-title = (sense títol)
 ui-organizer = Organitzador: { $name }
 ui-invitation-not-read = No s’ha pogut llegir la invitació.
-ui-no-calendar = En aquest ordinador no hi ha cap aplicació de calendari per obrir invitacions (fitxers .ics).
+ui-no-calendar = No s’ha pogut obrir la invitació (fitxer .ics). Comproveu que hi hagi una aplicació de calendari associada a aquest tipus de fitxer.
 ui-messages-not-changed = No s’han pogut canviar els missatges.
 ui-new-folder-in-selected = La carpeta nova es crearà dins de la carpeta seleccionada.
 ui-new-folder-at-top = La carpeta nova es crearà al nivell superior del compte.
@@ -296,12 +296,12 @@ ui-found-mx = Inbox Classic ha reconegut el vostre proveïdor de correu i n’ha
 ui-found-srv = Aquesta configuració s’ha trobat als registres DNS del vostre domini.
 ui-found-autodiscover = Aquesta configuració s’ha trobat amb el descobriment automàtic de Microsoft (Exchange).
 ui-found-other = Aquesta configuració s’ha trobat per a aquesta adreça.
-ui-app-password-needed = { $provider } no accepta la vostra contrasenya habitual als programes de correu. Creeu una contrasenya d’aplicació a la configuració de seguretat del compte i escriviu-la al camp Contrasenya del formulari següent.
+ui-app-password-needed = Proveïdor: { $provider }. Si el compte admet contrasenyes d’aplicació, creeu-ne una a la configuració de seguretat i escriviu-la al camp Contrasenya del formulari següent. Si no les admet, feu servir l’inici de sessió al navegador quan estigui disponible.
 ui-app-password-open = Voleu obrir al navegador les instruccions per crear una contrasenya d’aplicació ({ $provider })?
-ui-plain-warning = Sense xifratge, qualsevol persona que intercepti el trànsit de la xarxa pot llegir la vostra contrasenya i els vostres missatges. Feu servir aquesta connexió només amb un servidor del vostre ordinador o de la vostra xarxa local.
+ui-plain-warning = Sense xifratge, qualsevol persona que intercepti el trànsit de la xarxa pot llegir la vostra contrasenya i els missatges. Continueu només si la connexió està protegida d’una altra manera. Una xarxa local no garanteix aquesta protecció.
 ui-continue-ask = Voleu continuar?
 ui-add-sign-in-app = Afegeix una aplicació d’inici de sessió...
-ui-turned-off = { $name } està desactivat en aquest ordinador.
+ui-turned-off = L’opció «{ $name }» està desactivada en aquest ordinador.
 ui-off-here = Desactivat en aquest ordinador.
 ui-why = Per què?
 ui-more-sign-in = Més opcions d’inici de sessió...
@@ -334,7 +334,7 @@ ui-enter-password = Introduïu la contrasenya del compte { $account }.
 ui-signs-in-with = Aplicació d’inici de sessió: { $app }. La sessió s’inicia al navegador i el compte fa servir els servidors d’aquesta aplicació.
 ui-keep-password = Deixeu buit el camp de la contrasenya per conservar la contrasenya actual.
 ui-remove-account = Elimina el compte
-ui-remove-account-ask = Voleu eliminar aquest compte d’Inbox Classic? Els missatges es conserven al servidor. D’aquest ordinador se n’eliminen les còpies locals i les credencials d’inici de sessió desades.
+ui-remove-account-ask = Voleu eliminar aquest compte d’Inbox Classic? Se n’eliminaran les dades locals, inclosos els missatges pendents de la Safata de sortida i les credencials d’inici de sessió desades. Els missatges que siguin al servidor es conservaran.
 ui-col-email = Adreça electrònica
 ui-col-incoming = Servidor d’entrada
 ui-type-email = Escriviu la vostra adreça electrònica, nom@example.com.
@@ -417,7 +417,6 @@ ui-save-attachments = Desa els fitxers adjunts
 ui-attachment-open = Obre
 ui-attachment-save-as = Desa com a...
 ui-attachment-save-all = Desa-ho tot...
-# review: new
 ui-attachment-show-in-message = Mostra al missatge
 ui-attachments-strip = Adjunts
 ui-attachment-note-title = Obrir un fitxer adjunt
@@ -449,11 +448,8 @@ ui-let-agents-connect = &Permet que els agents d’IA es connectin a Inbox Class
 ui-change-button = Canvia…
 ui-undo-button = Desfés
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Desfés des de…
-# review: new
-ui-undo-since-span = Desfés el que ha fet aquest programa:
-# review: new
+ui-undo-since-span = Canvis d’aquest programa que voleu desfer:
 ui-take-back = Desfés
 ui-rules-title = Regles de missatge
 ui-rules-intro = Les regles processen els missatges nous de la Safata d’entrada mentre Inbox Classic s’executa. Les regles aplicables s’executen per ordre. Quan una regla mou un missatge fora de la Safata d’entrada, les següents ja no s’hi apliquen.
@@ -595,11 +591,8 @@ ui-download-limit = &Límit d’emmagatzematge per compte:
 ui-send-delay = &Temps d’espera abans d’enviar:
 ui-send-delay-note = Mentre un missatge espera per ser enviat, podeu cancel·lar l’enviament amb Desfés.
 ui-dark-messages = Mostra els missatges amb fons fosc quan el sistema és en mode fosc
-# review: new
 ui-preview-show = Mostra els &fitxers adjunts als missatges
-# review: new
-ui-preview-show-note = Mostra les imatges i les primeres pàgines dels fitxers PDF després del text del missatge. Inbox Classic crea aquestes previsualitzacions ell mateix, de manera que res d'un fitxer no es pot executar.
-# review: new
+ui-preview-show-note = Mostra les imatges i les primeres pàgines dels fitxers PDF després del text del missatge. Inbox Classic genera aquestes previsualitzacions sense executar el codi dels fitxers ni carregar-ne recursos externs.
 ui-preview-pdfs = Mostra els fitxers &PDF als missatges
 ui-sending-in = S’enviarà { $subject } d’aquí a { $count ->
     [one] 1 segon
@@ -607,8 +600,8 @@ ui-sending-in = S’enviarà { $subject } d’aquí a { $count ->
 }
 ui-send-undone = No s’ha enviat { $subject }. El missatge s’ha tornat a obrir per editar-lo.
 ui-send-too-late = Ja no es pot desfer l’enviament de { $subject }.
-ui-outbox-status-undo = S’enviarà a les { $time }
-ui-download-note = Els missatges baixats per avançat s’obren immediatament. Quan se supera el límit d’emmagatzematge, s’eliminen les còpies locals més antigues. Els missatges es conserven al servidor i es tornen a baixar quan els obriu.
+ui-outbox-status-undo = Enviament previst a les { $time }
+ui-download-note = Els missatges baixats per avançat s’obren immediatament. El límit afecta les còpies locals del contingut: quan se supera, s’eliminen les més antigues i es poden tornar a baixar en obrir-les. Els esborranys i els missatges oberts des de l’inici de l’aplicació es conserven, encara que se superi el límit.
 ui-attachment-downloading = Aquest missatge no s’ha acabat de baixar. Torneu-ho a provar quan s’hagi completat la baixada.
 ui-trusted-senders-button = Remitents de &confiança...
 ui-trusted-senders-title = Remitents de confiança
@@ -639,7 +632,7 @@ ui-list-pictures = &Mostra les imatges dels remitents a la llista de missatges
 ui-list-pictures-note = A la disposició en columnes, mostra logotips de marques o imatges de la Llibreta d’adreces quan es verifica el domini del remitent. Si no hi ha cap imatge, mostra les inicials. Els logotips baixats es desen i es reutilitzen en diversos missatges.
 ui-card-picture = Imatge:
 ui-card-picture-choose = &Tria...
-ui-picture-not-picture = Aquest fitxer no és una imatge PNG o JPEG.
+ui-picture-not-picture = No s’ha pogut llegir el fitxer com una imatge PNG o JPEG.
 ui-picture-too-large = Aquesta imatge és massa gran. Trieu-ne una de 10 MB com a màxim, amb una amplada i una alçada de 8000 píxels com a màxim.
 
 ## Claus de xifratge (Eines > Claus de xifratge, Propietats del compte > Seguretat, la clau d’un contacte)
@@ -676,11 +669,11 @@ ui-keys-backup-saved = S’ha desat la còpia de seguretat.
 ui-keys-import-title = Importa una clau
 ui-keys-import-passphrase = Aquesta clau privada està protegida amb una frase de pas. Escriviu-la per importar la clau:
 ui-keys-file-filter = Claus OpenPGP
-ui-keys-use-for = Voleu associar aquesta clau a les adreces següents: { $addresses }? Els missatges que envieu des d’aquestes adreces se signaran amb aquesta clau, i podreu llegir aquí el correu xifrat amb la clau pública corresponent.
+ui-keys-use-for = Voleu associar aquesta clau a les adreces següents: { $addresses }? Podreu signar els missatges que envieu des d’aquestes adreces i llegir aquí el correu xifrat amb la clau pública corresponent.
 ui-keys-use = &Fes-la servir
 ui-keys-not-now = A&ra no
-ui-keys-remove-own = Voleu eliminar la vostra clau { $fingerprint }? Per tornar a llegir el correu xifrat amb aquesta clau, haureu de restaurar-ne la clau privada des d’una còpia de seguretat.
-ui-keys-remove-contact = Voleu eliminar la clau del contacte { $name }? No es podran comprovar les seves signatures ni xifrar-li correu fins que torneu a afegir la seva clau.
+ui-keys-remove-own = Voleu eliminar la vostra clau { $fingerprint }? Per tornar a desxifrar el correu protegit amb aquesta clau, haureu de restaurar-ne la còpia de seguretat. Les còpies ja desxifrades no s’eliminen.
+ui-keys-remove-contact = Voleu eliminar la clau associada a { $name }? No podreu comprovar signatures fetes amb aquesta clau ni fer-la servir per xifrar missatges fins que la torneu a afegir.
 ui-key-properties-title = Propietats de la clau
 ui-key-names = Noms:
 ui-key-fingerprint = Empremta digital:
@@ -697,6 +690,7 @@ ui-verify-title = Verifica la clau
 ui-verify-intro = Demaneu al contacte ({ $name }) que us llegeixi l’empremta digital de la seva clau des de l’aplicació que fa servir, en persona o per telèfon. No la compareu amb una empremta enviada per correu electrònic: qui pot substituir la clau també pot substituir l’empremta.
 ui-verify-fingerprint = L’empremta digital de la clau que teniu:
 ui-verify-marks = { $count ->
+    [0] Aquesta clau no conté cap adreça de correu. No se’n pot desar la confirmació del propietari.
     [one] Abans de fer clic a Coincideixen, confirmeu que aquesta adreça pertany al contacte: { $addresses }. Si no és seva, feu clic a No coincideixen.
    *[other] Abans de fer clic a Coincideixen, confirmeu que totes aquestes adreces pertanyen al contacte: { $addresses }. Si alguna no és seva, feu clic a No coincideixen.
 }
@@ -726,9 +720,9 @@ ui-compose-encrypt-off = &Desactiva el xifratge
 ui-compose-keep-encrypted = &Mantén-lo xifrat
 ui-setup-export-title = Exporta la configuració i els comptes
 ui-setup-import-title = Importa la configuració i els comptes
-ui-setup-export-intro = Trieu què voleu transferir a un altre ordinador. El fitxer no conté missatges: es tornaran a baixar al nou ordinador.
+ui-setup-export-intro = Trieu què voleu transferir a un altre ordinador. El fitxer no conté cap missatge, tampoc els de la Safata de sortida. Al nou ordinador només es podran baixar els missatges que siguin al servidor.
 ui-setup-use-passphrase = &Protegeix el fitxer amb una frase de pas
-ui-setup-passphrase-note = Amb una frase de pas, tot el fitxer es xifra i pot incloure contrasenyes, testimonis d’inici de sessió, secrets de client i claus privades. Sense aquesta protecció, no s’hi inclouen aquestes dades i haureu de tornar a iniciar la sessió als comptes al nou ordinador.
+ui-setup-passphrase-note = Amb una frase de pas, tot el fitxer es xifra i pot incloure les contrasenyes, els testimonis d’inici de sessió, els secrets de client i les claus privades disponibles dels elements seleccionats. Sense aquesta protecció, no s’hi inclouen aquestes dades i haureu de tornar a iniciar la sessió als comptes al nou ordinador.
 ui-setup-export-button = &Exporta...
 ui-setup-file-filter = Configuració i comptes d’Inbox Classic
 

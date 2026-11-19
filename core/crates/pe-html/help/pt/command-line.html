@@ -4,8 +4,8 @@
 <table>
     <tr><th>Opção</th><th>Função</th></tr>
     <tr><td><code>--store &lt;file&gt;</code></td><td>Usa outra base de dados de correio, por exemplo para testes</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>Guarda as palavras-passe apenas durante esta execução, nunca no armazenamento de palavras-passe do sistema</td></tr>
-    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Aceita apenas o certificado de servidor deste ficheiro (PEM ou DER), para um servidor de teste com um certificado autoassinado</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Mantém as credenciais apenas durante esta execução, sem as guardar no armazenamento do sistema; as novas chaves privadas precisam de uma cópia de segurança para serem usadas após reiniciar</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Aceita os certificados indicados no ficheiro PEM, ou o certificado único de um ficheiro DER; confirme previamente a origem dos certificados</td></tr>
     <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Guarda neste ficheiro o URL da página de início de sessão, em vez de abrir o browser</td></tr>
     <tr><td><code>--language &lt;code&gt;</code></td><td>Mostra as janelas neste idioma durante esta execução, como <code>de</code></td></tr>
     <tr><td><code>--background</code></td><td>Inicia em segundo plano, sem mostrar a janela principal</td></tr>
