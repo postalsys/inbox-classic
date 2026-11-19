@@ -600,6 +600,21 @@ where the singular reads better ("Pārvietot ziņojumu").
   menu/dialog scopes are collision-free at this checkpoint. Keep "ziņojums" in attachment commands too.
 - The sign-in app secret checkbox starts with its action: "Noņemt saglabāto klienta noslēpumu". A newly entered
   secret takes precedence over removal. Names and identifiers use quoted head nouns or labels, without inflection.
+- Contact import/export reports use active verbs with accusative count forms: counted one "kontaktpersonu",
+  other "kontaktpersonas" (also 0/10/11). Each import count selects independently. Contact deletion retains exact
+  [1] and the numeric placeholder in counted one. Key verification retains exact [1] for a single address.
+  Exact [0] explains that a key without email addresses cannot store an ownership confirmation.
+- Key ownership is "atslēgas piederība apstiprināta", distinct from signature integrity and key usability.
+  Fingerprints remain "pirkstu nospiedums". Verification names may be addresses/fingerprints, so use an explicit
+  key label. Removing a key prevents use of that key, without denying alternate keys or already decrypted text.
+- Send countdowns describe planned sending; failure to Undo Send does not prove delivery. Subjects arrive quoted.
+  Cached-mail limits spare drafts and messages opened since startup. Setup files carry no mail, so only server-held
+  messages can be downloaded on another computer. Unprotected transfers require signing in again, including OAuth.
+- Encrypted search depends on successful decryption. Its index is unencrypted; agents exclude decrypted content
+  but still search ordinary mail. Logos are cached and refreshed; verified domains do not prove personal identity.
+  Preview notes describe not executing scripts. Keep "ziņojums" in PDF/attachment settings.
+- Encrypted search uses ASCII E. All 60 checked menu/dialog scopes are collision-free, including key creation,
+  ownership verification, imports and group-member picking. Shared guidance avoids platform-specific parent menus.
 
 ### Lietuvių (lt)
 
