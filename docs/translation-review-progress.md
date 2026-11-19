@@ -8,10 +8,10 @@ Commit completed batches regularly and preserve an exact resume point.
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`; branch `i18n/review-resume-20261118`.
   Created from GitHub master `45f519ae` on November 18 after the main worker merged the available translations.
   The old `build/i18n-wave1` worktree no longer exists. All older checkout references below are historical.
-- **Next: Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 24 help topics remain. Reading/search, writing/contact and account/connection behavior comparisons are complete. Apply the Windows credential-store term during encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.**
-- Current scope: 35,624 catalog entries and 1,376 help topics.
-  Completed: 23,890 entries and 811 full topics;
-  pending: 11,734 entries and 565 topics.
+- **Next: Review the 27 newly merged Lithuanian MCP catalog entries and current agent/invitation help (agents-permissions, agents-sending, invitations) in actual bulk-action, Undo Since and invitation-consent context. Lithuanian now has 27 catalog entries and 25 help topics pending. Then continue encryption/privacy help and the other language queues. MCP phase3a is now in the active inventory; phase3b remains separately queued. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.**
+- Current scope: 36,380 catalog entries and 1,380 help topics.
+  Completed: 23,890 entries and 767 full topics;
+  pending: 12,490 entries and 613 topics.
   All 28 language directories are inventoried; no new languages were added at this source checkpoint.
 - Resumed source audit: 250 translated files changed since `31f89fa7`, with every changed value/passage marked.
   Merged agent read-log/terminal/organize additions and preview tiles/protected-part additions are now in the exact queue.
@@ -24,7 +24,7 @@ Commit completed batches regularly and preserve an exact resume point.
   four recorded catalog entries and twelve recorded help topics; correcting that discrepancy adds no review credit.
 - Source discovery now covers 192 refs and 10 worktrees. `feat/preview-cid` at `6a37b3de` merged in PR 159; its 56 new translated
   help passages are now in the active queue (32 reopened completed topics and four newly in round scope). MCP phase3 translations were committed during the Finnish batch; the exact source commit and
-  added/changed IDs are recorded in `resumed_incoming_source_queue`. MCP sources remain queued separately; preview-cid is integrated.
+  added/changed IDs are recorded in `resumed_incoming_source_queue`. MCP phase3a is now integrated with exact marked additions; phase3b remains queued separately. Preview-cid is integrated.
   Recheck their latest tips and integration status at the next checkpoint.
 - Initial resumption checks covered all 28 languages; the latest Lithuanian help batch checks and counts are recorded below.
 - The generated review report is `/Users/andris/Projects/PostalExpress/build/i18n-review.html`, regenerated from this checkout.
@@ -37,8 +37,10 @@ Commit completed batches regularly and preserve an exact resume point.
 - Standing publication authorization: push and merge each validated batch into GitHub master, then fetch and
   fast-forward this clean review branch. No local test suites and no manually launched CI runs.
 
-- Latest batch: Eight Lithuanian account/connection help topics reviewed; 82 wording lines improved. Lithuanian structural checks pass with 1,485 expected mark-only diagnostics. Exact before/after reconstruction verifies eight full help topics and 82 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keys and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows setup, Linux properties and Mac account-list captures were inspected alongside current native source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,572 help lines; since-start 1,760 entries/448 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Google/Microsoft primary documentation was checked for app-password and authorization guidance. Account/connection behavior comparison is complete for Lithuanian; platform setup/control differences are recorded for targeted comparison elsewhere. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.
-- Publication checkpoint: [PR #200](https://github.com/postalsys/inbox-classic/pull/200) merged Lithuanian writing/contact help as `ea3364b0` on November 19 at 01:29 UTC; this worktree was synchronized before the account/connection batch.
+- Latest batch: Eight Lithuanian account/connection help topics reviewed, with 82 wording lines improved and published in PR201. Afterward the MCP phase3a merge added 756 catalog entries and changes in 84 translated help files. These are queued, not linguistically reviewed. All 28 structural checks have only expected mark diagnostics. Exact merge delta matches the previously queued MCP phase3a delta for 87 catalog files and 87 help files including English. All preexisting catalog values and unaffected help lines are preserved. Every changed/added translated body line and every new catalog entry is marked; the 28 related-navigation replacements match English. All inventories, variables and latest hashes reconcile. Global unmarked diagnostics: 23924 catalog entries/12571 help lines; since-start 2516 entries/647 passages. No linguistic review credit, test suites, builds or manual CI. The eight reviewed Lithuanian account topics are unchanged; lib.rs/worker.rs changes concern agent tickets and invitation replies only.
+- Publication checkpoint: [PR #201](https://github.com/postalsys/inbox-classic/pull/201) merged as `292c341a` on November 19 at 01:45 UTC. The concurrent MCP phase3a merge from PR168 is included; all eight reviewed topics and their glossary changes are preserved.
+
+- The full-topic completion count fell by 44 because new marked passages reopened previously completed topics. Prior reviewed prose and review history remain intact; four other changed topics entered this round’s scope. All 28 languages now have pending work.
 
 ## Review and checkpoint rules
 
@@ -3092,3 +3094,13 @@ Publication checkpoint: [PR #200](https://github.com/postalsys/inbox-classic/pul
 Completed: 23,890 catalog entries and 811 full topics. Pending: 11,734 entries and 565 topics.
 
 Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 24 help topics remain. Reading/search, writing/contact and account/connection behavior comparisons are complete. Apply the Windows credential-store term during encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.
+
+### MCP phase3a late-arrival integration
+
+PR168 merged the previously queued source `88b0f44e` while the Lithuanian account batch was being published. Exact comparison matches its recorded delta: 27 added catalog IDs per language and three changed help files per language. All new or changed translated prose is marked. Related invitation links now point to agent-sending help. No new languages or unrelated translation changes were found.
+
+All 28 structural checks have only expected mark diagnostics. Exact merge delta matches the previously queued MCP phase3a delta for 87 catalog files and 87 help files including English. All preexisting catalog values and unaffected help lines are preserved. Every changed/added translated body line and every new catalog entry is marked; the 28 related-navigation replacements match English. All inventories, variables and latest hashes reconcile. Global unmarked diagnostics: 23924 catalog entries/12571 help lines; since-start 2516 entries/647 passages. No linguistic review credit, test suites, builds or manual CI. The eight reviewed Lithuanian account topics are unchanged; lib.rs/worker.rs changes concern agent tickets and invitation replies only.
+
+There are 48 additional pending help topics: 44 previously completed topics reopened and four newly in scope. The other 36 changed topics were already pending. Current totals: 36,380 catalog entries/1,380 topics in scope; 23,890 entries/767 full topics completed; 12,490 entries/613 topics pending. Lithuanian has 27 entries/25 topics pending. MCP phase3b stays separate.
+
+Review the 27 newly merged Lithuanian MCP catalog entries and current agent/invitation help (agents-permissions, agents-sending, invitations) in actual bulk-action, Undo Since and invitation-consent context. Lithuanian now has 27 catalog entries and 25 help topics pending. Then continue encryption/privacy help and the other language queues. MCP phase3a is now in the active inventory; phase3b remains separately queued. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.
