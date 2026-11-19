@@ -1637,6 +1637,12 @@ constexpr ULONG_PTR kTestCrashCompose = 0x43524153;
 constexpr ULONG_PTR kTestTextZoom = 0x5A4F4F4D;
 // with --test-hooks only: the reading pane's look at the parts' frames of the message shown (Preview::TestFrames)
 constexpr ULONG_PTR kTestFrames = 0x46524D53;
+// with --test-hooks only: the places the last Find in This Message of the reading pane found, plus 10 (9 before it
+// answered, 8 when it can not find)
+constexpr ULONG_PTR kTestFound = 0x464F554E;
+// with --test-hooks only: 1 when the reading pane shows a message whose subject is the text (when empty: the message of
+// the selected row), its document loaded, else 0
+constexpr ULONG_PTR kTestShown = 0x53484F57;
 // with --test-hooks only: the requests to the internet of the message shown, plus 10
 constexpr ULONG_PTR kTestRemoteRequests = 0x4E455452;
 // with --test-hooks only: whether the last folder clicked was highlighted before its list was read
@@ -2148,6 +2154,12 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestFrames) {
             return static_cast<LRESULT>(g_mailbox.TestFrames());
+        }
+        if (g_arguments.testHooks && data->dwData == kTestFound) {
+            return static_cast<LRESULT>(g_mailbox.TestFound() + 10);
+        }
+        if (g_arguments.testHooks && data->dwData == kTestShown && data->cbData % sizeof(wchar_t) == 0) {
+            return g_mailbox.TestShown(std::wstring(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t)));
         }
         if (g_arguments.testHooks && data->dwData == kTestRemoteRequests) {
             return static_cast<LRESULT>(g_mailbox.TestRemoteRequests() + 10);

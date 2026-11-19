@@ -67,6 +67,9 @@ pub struct NewLogEntry {
     pub args: Option<String>,
     /// The request of the agent it came from (MCP's request id, as JSON)
     pub call_id: Option<String>,
+    /// How many changes it stands for, as the per-program ceiling counts them: the messages one change of many
+    /// changed (apply_to_search), 1 for any other (0 is taken as 1)
+    pub changes: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -154,6 +157,35 @@ fn host_from_row(row: &rusqlite::Row) -> rusqlite::Result<AgentHost> {
 
 fn joined(accounts: &[AccountId]) -> String {
     accounts.iter().map(i64::to_string).collect::<Vec<_>>().join(",")
+}
+
+/// The columns of an entry of the log as [`log_row`] reads them, and the tables they come from
+const LOG_COLUMNS: &str = "l.id, l.host_id, h.name, l.at, l.what, l.account_id, l.folder_id, l.uid, l.message_id, \
+    l.summary, l.undo, l.undone, l.kind, l.args, l.call_id, l.changes FROM agent_log l \
+    JOIN agent_hosts h ON h.id = l.host_id";
+
+/// An entry of the log, from a row of [`LOG_COLUMNS`]
+fn log_row(row: &rusqlite::Row) -> rusqlite::Result<AgentLogEntry> {
+    Ok(AgentLogEntry {
+        id: row.get(0)?,
+        host_name: row.get(2)?,
+        at: row.get(3)?,
+        entry: NewLogEntry {
+            host: row.get(1)?,
+            what: row.get(4)?,
+            account: row.get(5)?,
+            folder: row.get(6)?,
+            uid: row.get(7)?,
+            message_id: row.get(8)?,
+            summary: row.get(9)?,
+            undo: row.get(10)?,
+            kind: row.get(12)?,
+            args: row.get(13)?,
+            call_id: row.get(14)?,
+            changes: row.get(15)?,
+        },
+        undone: row.get(11)?,
+    })
 }
 
 impl Store {
@@ -244,7 +276,7 @@ impl Store {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let mut statement = self.db.prepare_cached(
             "INSERT INTO agent_log (host_id, at, what, account_id, folder_id, uid, message_id, summary, undo, kind, \
-             args, call_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+             args, call_id, changes) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
         )?;
         let mut ids = Vec::with_capacity(entries.len());
         for entry in entries {
@@ -260,7 +292,8 @@ impl Store {
                 entry.undo,
                 entry.kind,
                 entry.args,
-                entry.call_id
+                entry.call_id,
+                entry.changes.max(1)
             ])?;
             ids.push(self.db.last_insert_rowid());
         }
@@ -311,37 +344,23 @@ impl Store {
 
     fn agent_log_where(&self, filter: &str, value: i64, limit: u64) -> Result<Vec<AgentLogEntry>> {
         let mut statement = self.db.prepare(&format!(
-            "SELECT l.id, l.host_id, h.name, l.at, l.what, l.account_id, l.folder_id, l.uid, l.message_id, l.summary, \
-             l.undo, l.undone, l.kind, l.args, l.call_id FROM agent_log l JOIN agent_hosts h ON h.id = l.host_id {filter} \
-             ORDER BY l.at DESC, l.id DESC LIMIT ?2"
+            "SELECT {LOG_COLUMNS} {filter} ORDER BY l.at DESC, l.id DESC LIMIT ?2"
         ))?;
-        statement
-            .query_map(params![value, limit], |row| {
-                Ok(AgentLogEntry {
-                    id: row.get(0)?,
-                    host_name: row.get(2)?,
-                    at: row.get(3)?,
-                    entry: NewLogEntry {
-                        host: row.get(1)?,
-                        what: row.get(4)?,
-                        account: row.get(5)?,
-                        folder: row.get(6)?,
-                        uid: row.get(7)?,
-                        message_id: row.get(8)?,
-                        summary: row.get(9)?,
-                        undo: row.get(10)?,
-                        kind: row.get(12)?,
-                        args: row.get(13)?,
-                        call_id: row.get(14)?,
-                    },
-                    undone: row.get(11)?,
-                })
-            })?
-            .collect()
+        statement.query_map(params![value, limit], log_row)?.collect()
     }
 
     pub fn agent_log_entry(&self, id: i64) -> Result<Option<AgentLogEntry>> {
         Ok(self.agent_log_where("WHERE l.id = ?1", id, 1)?.into_iter().next())
+    }
+
+    /// The entries of host `host` since `since` that can still be taken back, newest first: those the user cleared
+    /// from the window too, as they are still its changes
+    pub fn agent_undoable_since(&self, host: AgentHostId, since: i64) -> Result<Vec<AgentLogEntry>> {
+        let mut statement = self.db.prepare(&format!(
+            "SELECT {LOG_COLUMNS} WHERE l.host_id = ?1 AND l.at >= ?2 AND l.undo IS NOT NULL AND l.undone = 0 \
+             ORDER BY l.at DESC, l.id DESC"
+        ))?;
+        statement.query_map(params![host, since], log_row)?.collect()
     }
 
     pub fn set_agent_log_undone(&self, id: i64) -> Result<()> {
@@ -498,10 +517,11 @@ impl Store {
         )
     }
 
-    /// How many entries a host has in the log of what it did since `since`, and in the log of what it read
+    /// How many changes a host has in the log of what it did since `since` (an entry of many messages counts each),
+    /// and how many entries in the log of what it read
     pub fn agent_log_live(&self, host: AgentHostId, since: i64) -> Result<(u64, u64)> {
         self.db.query_row(
-            "SELECT (SELECT COUNT(*) FROM agent_log WHERE host_id = ?1 AND at >= ?2), \
+            "SELECT (SELECT COALESCE(SUM(changes), 0) FROM agent_log WHERE host_id = ?1 AND at >= ?2), \
              (SELECT COUNT(*) FROM agent_reads WHERE host_id = ?1 AND at >= ?2)",
             params![host, since],
             |row| Ok((row.get(0)?, row.get(1)?)),
@@ -637,6 +657,45 @@ mod tests {
         // 30 days later it is forgotten, when the next entry is written
         store.log_agent(&[entry("send")], 100 + LOG_KEPT + 1).unwrap();
         assert_eq!(store.agent_log_count(host, "send", 0).unwrap(), 1);
+    }
+
+    /// One change of many messages is one entry, counted as its messages; what can be taken back since a moment is
+    /// the program's own, newest first
+    #[test]
+    fn a_change_of_many_counts_its_messages() {
+        let store = Store::open_in_memory().unwrap();
+        let host = store
+            .save_agent_host("/usr/bin/agent", "Agent", true, AgentLevels::DEFAULT, &[], 1)
+            .unwrap();
+        let other = store
+            .save_agent_host("/usr/bin/other", "Other", true, AgentLevels::DEFAULT, &[], 1)
+            .unwrap();
+        let entry = |host, changes, undo: Option<&str>| NewLogEntry {
+            host,
+            what: "apply_to_search".into(),
+            changes,
+            undo: undo.map(str::to_string),
+            ..Default::default()
+        };
+        store.log_agent(&[entry(host, 40, Some("u1"))], 10).unwrap();
+        store.log_agent(&[entry(host, 0, None)], 20).unwrap();
+        store.log_agent(&[entry(host, 1, Some("u2"))], 30).unwrap();
+        store.log_agent(&[entry(other, 1, Some("u3"))], 30).unwrap();
+        assert_eq!(store.agent_log_live(host, 0).unwrap().0, 42);
+        assert_eq!(store.agent_log(1).unwrap()[0].entry.changes, 1);
+        let since = |at| -> Vec<Option<String>> {
+            store
+                .agent_undoable_since(host, at)
+                .unwrap()
+                .into_iter()
+                .map(|e| e.entry.undo)
+                .collect()
+        };
+        assert_eq!(since(0), [Some("u2".into()), Some("u1".into())]);
+        assert_eq!(since(15), [Some("u2".into())]);
+        let newest = store.agent_undoable_since(host, 0).unwrap()[0].id;
+        store.set_agent_log_undone(newest).unwrap();
+        assert_eq!(since(0), [Some("u1".into())]);
     }
 
     #[test]

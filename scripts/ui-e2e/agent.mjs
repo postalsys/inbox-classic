@@ -5,7 +5,11 @@
 // After marking two messages read it flags one blue and watches the other's conversation.
 // A send the user has not answered in about 20 seconds is answered `waiting`: the agent then asks get_send_status
 // every second until it has the answer. After the send it saves a draft in Markdown, then waits for the file OUT.unsubscribe, which the test makes once it has looked at the Outbox and the
-// AI Agents window, and then asks to unsubscribe from the two mailing lists the test added.
+// AI Agents window, and then asks to unsubscribe from the two mailing lists the test added. Then it waits for the file
+// OUT.bulk, which the test makes once it has added two unread messages "Club newsletter" and an invitation "Invitation:
+// Roadmap review": it accepts the invitation (the Send question, answered Send), marks the two read with one change
+// of many messages (a dry run, then its token), takes that back, and makes the same change again, which the test
+// leaves for Undo Since in the AI Agents window.
 //   APP=<executable> STORE=<store> OUT=<file> "My AI agent" agent.mjs
 import { spawn } from 'node:child_process';
 import { appendFileSync, existsSync, rmSync, writeFileSync } from 'node:fs';
@@ -14,6 +18,7 @@ import { createInterface } from 'node:readline';
 const { APP, STORE, OUT } = process.env;
 writeFileSync(OUT, '');
 rmSync(`${OUT}.unsubscribe`, { force: true });
+rmSync(`${OUT}.bulk`, { force: true });
 const record = (step, result) => appendFileSync(OUT, JSON.stringify({ step, result }) + '\n');
 
 const relay = spawn(APP, ['--mcp', '--store', STORE], { stdio: ['pipe', 'pipe', 'inherit'] });
@@ -97,6 +102,32 @@ try {
     for (const message of lists.messages) await call('get_message', { folder: message.folder, uid: message.uid });
     // waits for the user's answer
     record('unsubscribe', await call('unsubscribe_from_list', { folder: inbox, uids: lists.messages.map(message => message.uid) }));
+    // the test's go: the newsletters and the invitation are in the Inbox
+    for (let waited = 0; !existsSync(`${OUT}.bulk`); waited += 200) {
+        if (waited > 180000) throw new Error('the test never added the newsletters');
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    // the invitation answered through the Send question; the user's status changes only once it was sent
+    const invitations = await call('search_messages', { query: 'subject:"Roadmap review"' });
+    const invitation = invitations.messages[0];
+    let accepted = await call('respond_to_invitation', { folder: invitation.folder, uid: invitation.uid, response: 'accept' });
+    for (let waited = 0; accepted.status === 'waiting'; waited += 1000) {
+        if (waited > 180000) throw new Error('the user never answered the invitation');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        accepted = await call('get_send_status', { ask_id: accepted.ask_id });
+    }
+    record('invitation', accepted);
+    record('invitation-status', (await call('get_message', { folder: invitation.folder, uid: invitation.uid })).invitation);
+    // one change of many messages: what it would do, then done with its token, then taken back
+    const bulk = { query: 'subject:"Club newsletter"', action: 'mark_read' };
+    const preview = await call('apply_to_search', { ...bulk, dry_run: true });
+    record('bulk-preview', preview);
+    const changed = await call('apply_to_search', { token: preview.token });
+    record('bulk', changed);
+    record('bulk-undone', await call('undo_my_change', { change_id: changed.change_id }));
+    // the same again, left for the user's Undo Since
+    const again = await call('apply_to_search', { ...bulk, dry_run: true });
+    record('bulk-again', await call('apply_to_search', { token: again.token }));
     record('done', true);
 } catch (error) {
     record('error', String(error));

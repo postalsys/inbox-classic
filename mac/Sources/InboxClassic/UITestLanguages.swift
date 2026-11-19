@@ -192,6 +192,7 @@ extension UITest {
                 check(!rows.isEmpty && rows.allSatisfy { $0.contains("[") }, "the AI Agents log is in the pseudo-language (\(rows))")
                 checkCatalogWords(in: agents, "the AI Agents window")
             }
+            try await undoSinceInLanguage(agents, language)
             NSApp.stopModal()
             _ = await waitUntil { !agents.isVisible }
         } else {
@@ -212,6 +213,33 @@ extension UITest {
         press(find("agent.deny", in: ask))
         _ = await waitUntil(10) { !ask.isVisible }
         forgetTerminal()
+    }
+
+    /// Undo Since's question in `language`, its words in full
+    private func undoSinceInLanguage(_ agents: NSWindow, _ language: String) async throws {
+        let hosts: NSTableView? = find("agents.hosts", in: agents)
+        let program = (0..<(hosts?.numberOfRows ?? 0)).first {
+            (hosts?.view(atColumn: 0, row: $0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue == "My AI agent"
+        }
+        hosts?.selectRowIndexes([program ?? 0], byExtendingSelection: false)
+        press(find("agents.undoSince", in: agents))
+        guard let ask = await waitWindow("agents.undoSinceWindow", 10) else {
+            check(false, "Undo Since asks first in \(language)")
+            return
+        }
+        // the longest span, whose question may count changes
+        choose(find("undoSince.span", in: ask), 5)
+        if language == "de" {
+            let words = views(NSTextField.self, in: ask.contentView).map(\.stringValue)
+            check(words.contains("Rückgängig machen, was dieses Programm getan hat:"), "Undo Since in German (\(words))")
+        } else {
+            checkCatalogWords(in: ask, "Undo Since")
+        }
+        checkQuestionFits(ask, "Undo Since in \(language)")
+        await pause(0.5)
+        await shot(ask, language == "de" ? "agents-12b-undo-since-german" : "agents-12c-undo-since-pseudo")
+        press(find("undoSince.cancel", in: ask))
+        _ = await waitUntil { !ask.isVisible }
     }
 
     /// `page` of Settings shown, as its toolbar item shows it

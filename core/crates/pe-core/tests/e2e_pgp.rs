@@ -48,8 +48,8 @@ impl Setup {
         loop {
             let event = self
                 .events
-                .recv_timeout(Duration::from_secs(20))
-                .expect("an event within 20 seconds");
+                .recv_timeout(pe_testkit::patience())
+                .expect("the event in time");
             if accept(&event) {
                 return event;
             }

@@ -154,6 +154,11 @@ win-clear-log-ask = Rensa agenternas aktivitetshistorik? Det ångrar inte ändri
 win-agent-programs = &Program vars agenter har begärt åtkomst till din e-post:
 # review: new
 win-change = &Ändra...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Ångra allt &sedan...
+# review: new
+win-take-back = &Ångra
 # review: new
 win-what-agents-did = Agent&aktivitet:
 # review: new

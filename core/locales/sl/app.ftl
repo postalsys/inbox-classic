@@ -865,6 +865,13 @@ ui-let-agents-connect = &Dovoli agentom UI povezavo z Inbox Classic
 ui-change-button = Spremeni…
 # review: new
 ui-undo-button = Razveljavi
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Razveljavi za obdobje…
+# review: new
+ui-undo-since-span = Razveljavi, kar je ta program naredil:
+# review: new
+ui-take-back = Razveljavi
 # review: new
 ui-rules-title = Pravila za sporočila
 # review: new

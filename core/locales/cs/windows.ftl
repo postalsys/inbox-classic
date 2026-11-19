@@ -102,6 +102,11 @@ win-forget-program-ask = Odebrat tento program, jeho oprávnění a historii či
 win-clear-log-ask = Vymazat historii činnosti agentů? Změny provedené agenty se tím nevrátí zpět.
 win-agent-programs = Programy, jejic&hž agenti požádali o přístup k vaší poště:
 win-change = Zm&ěnit...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = &Vrátit zpět od...
+# review: new
+win-take-back = &Vrátit zpět
 win-what-agents-did = Či&nnost agentů:
 # review: new
 win-agent-reads = Co bylo přečteno od { $from } do { $to }:

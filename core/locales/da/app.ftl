@@ -448,6 +448,13 @@ ui-clear-agent-log-detail = Det fortryder ikke de ændringer, agenterne har fore
 ui-let-agents-connect = &Lad AI-agenter oprette forbindelse til Inbox Classic
 ui-change-button = Rediger…
 ui-undo-button = Fortryd
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Fortryd siden…
+# review: new
+ui-undo-since-span = Fortryd det, dette program har gjort:
+# review: new
+ui-take-back = Fortryd
 ui-rules-title = Meddelelsesregler
 ui-rules-intro = Regler behandler nye meddelelser i Indbakke, mens Inbox Classic kører. Regler, som meddelelsen opfylder kriterierne for, anvendes i den angivne rækkefølge. Når en regel flytter meddelelsen ud af Indbakke, anvendes ingen flere regler på den.
 ui-rules-none = Ingen regler endnu. Klik på Ny for at oprette en.

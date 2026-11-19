@@ -1,14 +1,14 @@
-<!--review--><h1>Az Inbox Classic kapcsolatai</h1>
-<p class="summary">Hová kapcsolódik az Inbox Classic, és miért, a műszaki részletek iránt érdeklődőknek.</p>
+<h1>Az Inbox Classic hálózati kapcsolatai</h1>
+<p class="summary">Milyen szolgáltatásokhoz kapcsolódik az Inbox Classic, és milyen célból?</p>
 <ul>
-    <li><b>A levelezőkiszolgálói</b>, IMAP-on a levelek olvasásához és SMTP-n a küldésükhöz. A kapcsolatok TLS-sel titkosítottak, és minden kiszolgáló tanúsítványát a rendszer által megbízhatónak tartott tanúsítványokkal veti össze. Az Inbox Classic elutasítja a titkosítás nélküli kiszolgálót, kivéve, ha ezt választja, és megerősíti: <b data-text="ui-security-none"></b>.</li>
-    <li><b>Fiók hozzáadásakor</b>, a kiszolgálók megkereséséhez. Az Inbox Classic a tartománya DNS-rekordjait DNS over HTTPS-en (Cloudflare, majd Google) olvassa, sosem egyszerű DNS-sel. Kipróbálja a szolgáltató autoconfig fájlját és a Thunderbird szolgáltatólistáját (ISPDB) is. Exchange esetén a Microsoft Autodiscovert kérdezi meg, amely csak akkor kapja meg a jelszavát, ha HTTPS-en kéri. Titkosítás nélküli kiszolgálót sosem választ.</li>
-    <li><b>Böngészős bejelentkezés</b>, OAuth 2.0-val és PKCE-vel, a Google-hoz, a Microsofthoz vagy a bejelentkezési alkalmazás szolgáltatójához. A böngésző csak erre a számítógépre, az Inbox Classichoz tér vissza.</li>
-    <li><b>Márkalogók</b> (BIMI), a márka HTTPS-címéről, ha az üzenet nem tartalmazza a logót, az Inbox Classic minden futása során egyszer. Ez csak akkor történik meg, ha a levelezőkiszolgálón az üzenet átment a DMARC-ellenőrzésen, és a kiszolgáló jóváhagyta a logót.</li>
-    <li><b>Képek az internetről</b>, csak ha kéri őket.</li>
-    <li><b>Leiratkozás</b>, csak ha rákattint. Egykattintásos kérést (RFC 8058) csak akkor küld, ha a lista DKIM-mel aláírta az üzenetet.</li>
-    <li><b>Titkosítási kulcsok</b>, csak ha olyasvalakinek titkosít, akinek nincs meg a kulcsa: először a címe saját tartománya (Web Key Directory), majd a keys.openpgp.org, hacsak ki nem kapcsolta. Csak a cím kerül elküldésre.</li>
-    <!--os:mac--><li><b>Frissítések</b>, az inboxclassic.com webhelyről, annak ellenőrzésére, hogy megjelent-e új verzió.</li><!--/os-->
+    <li><b>A levelezőkiszolgálókhoz</b> IMAP-on kapcsolódik az olvasáshoz, SMTP-n a küldéshez. A TLS titkosítja a kapcsolatot; a tanúsítvány ellenőrzése alapértelmezés szerint a rendszer megbízható tanúsítványaira épül. Titkosítatlan kapcsolathoz ezt kell választani és megerősíteni: <b data-text="ui-security-none"></b>.</li>
+    <li><b>Fiók hozzáadásakor</b> megkeresi a kiszolgálók beállításait. Az MX- és SRV-rekordokat DNS over HTTPS használatával kéri le, előbb a Cloudflare, majd szükség esetén a Google szolgáltatásától. Ez nem vonatkozik minden DNS-lekérdezésre. A szolgáltató autoconfig fájlját és a Thunderbird szolgáltatólistáját (ISPDB) is lekéri; egyes kérések az e-mail-címet is tartalmazzák. Az Autodiscover csak HTTPS-en, kifejezett hitelesítési kérésre kap jelszót. Az automatikus beállítás titkosított kapcsolatot választ.</li>
+    <li><b>Böngészős bejelentkezéskor</b> OAuth 2.0 és PKCE használatával kapcsolódik a Google, a Microsoft vagy a hozzáadott bejelentkezési alkalmazás szolgáltatójához. A böngésző a bejelentkezés eredményét ezen a számítógépen adja át az Inbox Classicnak.</li>
+    <li><b>Márkalogókat</b> (BIMI) HTTPS-címről tölt le, ha a logó nincs az üzenetben, és nincs még használható helyi másolata. A letöltött logókat később újra felhasználja. Ehhez a levelezőszolgáltatónak sikeres DMARC-ellenőrzést és jóváhagyott BIMI-logót kell jeleznie.</li>
+    <li><b>Internetes képeket</b> kattintásra tölt le, illetve automatikusan, ha ezt a beállítások vagy a megbízható feladók szabályai engedélyezik. Titkosított üzenetrészekben külön kattintás szükséges.</li>
+    <li><b>Leiratkozási kérelmet</b> megerősítés után küld. Közvetlen kéréshez (RFC 8058) a szolgáltató által ellenőrzött DKIM-aláírásnak a leiratkozási fejléceket is le kell fednie.</li>
+    <li><b>Titkosítási kulcsot</b> titkosításkor vagy külön kérésre keres. Cím alapján előbb a cím tartományának Web Key Directory szolgáltatását, majd az engedélyezett keys.openpgp.org kulcskiszolgálót kérdezi. Ismeretlen aláíró kulcsát ujjlenyomat vagy kulcsazonosító alapján is lekérheti. Közzétételkor a nyilvános kulcsot és a megerősítendő címeket küldi el, a titkos kulcsot nem.</li>
+    <!--os:mac--><li><b>Frissítéseket</b> az inboxclassic.com webhelyen keres, kézi indításra vagy bekapcsolt automatikus frissítéskeresés esetén.</li><!--/os-->
 </ul>
-<p>Bejelentkezési kódot csak akkor ajánl fel, ha a szolgáltató Authentication-Results fejléce szerint a tartomány aláírta az üzenetet (DKIM). Ehhez nem kell külön kapcsolat.</p>
-<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->
+<p>Bejelentkezési kódot csak akkor ajánl fel, ha a megbízható szolgáltatói Authentication-Results fejléc szerint a megfelelő tartomány vagy annak szülőtartománya érvényes DKIM-aláírást adott. A kód felismerése nem indít külön hálózati kérést.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>

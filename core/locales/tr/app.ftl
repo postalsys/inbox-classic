@@ -448,6 +448,13 @@ ui-clear-agent-log-detail = Bu, aracıların yaptığı değişiklikleri geri al
 ui-let-agents-connect = Yapay zeka aracılarının Inbox Classic'e &bağlanmasına izin ver
 ui-change-button = Değiştir…
 ui-undo-button = Geri Al
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Süre Seçerek Geri Al…
+# review: new
+ui-undo-since-span = Bu programın yaptıklarını geri al:
+# review: new
+ui-take-back = Geri Al
 ui-rules-title = İleti Kuralları
 ui-rules-intro = Kurallar, Inbox Classic çalışırken Gelen Kutusu'na gelen yeni iletileri işler. İletiyle eşleşen kurallar sırayla uygulanır. Bir kural iletiyi Gelen Kutusu'ndan taşıdığında diğer kurallar o iletiye uygulanmaz.
 ui-rules-none = Henüz kural yok. Kural oluşturmak için Yeni'ye tıklayın.

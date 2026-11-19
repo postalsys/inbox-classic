@@ -7,27 +7,11 @@ use base64::Engine;
 
 use pe_store::Card;
 
-use crate::contentline::{has_type, split, unescape, unfold};
+use crate::contentline::{escape, folded, has_type, split, unescape, unfold};
 
 /// The most a file of cards may be, and how many cards it may hold: an address book, not anything bigger
 pub const MAX_FILE: usize = 16 * 1024 * 1024;
 pub const MAX_CARDS: usize = 50_000;
-
-/// A value escaped for a vCard line
-fn escape(value: &str) -> String {
-    let mut out = String::with_capacity(value.len());
-    for c in value.chars() {
-        match c {
-            '\\' => out.push_str("\\\\"),
-            ',' => out.push_str("\\,"),
-            ';' => out.push_str("\\;"),
-            '\n' => out.push_str("\\n"),
-            '\r' => {}
-            other => out.push(other),
-        }
-    }
-    out
-}
 
 /// The parts of a structured value (`N:Smith;Mary;;;`), split at `;` not escaped
 fn parts(value: &str) -> Vec<String> {
@@ -172,22 +156,6 @@ pub fn key_line(cert: &[u8]) -> String {
         "KEY;TYPE=PGP;ENCODING=b:{}",
         base64::engine::general_purpose::STANDARD.encode(cert)
     )
-}
-
-/// A vCard line, folded at 75 bytes as the standard has it (a fold never inside a character)
-fn folded(line: &str) -> String {
-    let mut out = String::new();
-    let mut width = 0;
-    for c in line.chars() {
-        if width + c.len_utf8() > 75 {
-            out.push_str("\r\n ");
-            width = 1;
-        }
-        out.push(c);
-        width += c.len_utf8();
-    }
-    out.push_str("\r\n");
-    out
 }
 
 /// Cards as a vCard 3.0 file

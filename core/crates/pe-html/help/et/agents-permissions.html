@@ -3,7 +3,7 @@
 <p>Kui programmi agent esimest korda ühendub, küsib Inbox Classic teilt, nimetades programmi. Valige, mida see teha tohib:</p>
 <ul>
     <!--review--><li>lugeda e-posti: vaadata kaustu, kirju ja vestlusi koos kirjade kuni 10 MB suuruste PDF-, Office’i ja pildifailidega, otsida kirju, vaadata kirjade reegleid ning otsida inimesi nime või e-posti aadressi järgi</li><!--/review-->
-    <!--review--><li>hallata e-posti: muuta kirjade lugemisolekut, lippe ja nende värve, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta <b data-text="folder-deleted"></b>, luua kaustu, muuta oma kaustade nimesid, jälgida ja ignoreerida vestlusi ning teie nõusolekul loobuda meililistide tellimustest</li><!--/review-->
+    <!--review--><li>hallata e-posti: muuta kirjade lugemisolekut, lippe ja nende värve, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta <b data-text="folder-deleted"></b>, luua kaustu, muuta oma kaustade nimesid, jälgida ja ignoreerida vestlusi, kõike seda ka kõigi otsingu leitud kirjadega korraga, ning teie nõusolekul loobuda meililistide tellimustest</li><!--/review-->
     <li>kirjutada mustandeid, mille saadate ise, ning muuta või kustutada enda loodud mustandeid, kuni te pole neid salvestanud</li>
     <li>saata posti, iga kirja alles pärast teie nõusolekut</li>
 </ul>
@@ -16,6 +16,8 @@
     <li>Vaikimisi on valitud nupp <!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->. Selle valimisel ei saadeta tellimusest loobumise taotlusi.</li>
 </ul>
 <p>Kaustas <b data-text="folder-junk"></b> olevate kirjade põhjal ei saa agent tellimusest loobuda. Iga programmi puhul on piiriks 30 viimase 24 tunni jooksul kinnitatud loobumistaotlust. Arvesse lähevad ka ebaõnnestunud taotlused.</p>
+<!--review--><h2>Paljude kirjade muutmine korraga</h2><!--/review-->
+<!--review--><p>E-posti haldamise õigusega agent saab ühe sammuga muuta kõiki otsingu leitud kirju, näiteks märkida kõik uudiskirjad loetuks või teisaldada need kausta. Kõigepealt loeb see kirjad kokku ja näeb mõnda neist. Seejärel muudab see täpselt neid kirju, korraga kuni 1000, ega puuduta kunagi vahepeal saabunud posti. Inbox Classic ei küsi teilt enne luba, sest kõike saab tagasi võtta. Logis kuvatakse see ühe reana, näiteks „37 kirja märgiti loetuks (otsing: from:news)“, ja ühe tagasivõtmisega saab kõik tagasi võtta.</p><!--/review-->
 <h2>Juurdepääsu vaatamine ja muutmine</h2>
 <p>Aken <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> loetleb programmid, mille lubasite või keelasite, ja kõik, mida agendid tegid, uusimad eespool.</p>
 <!--review--><p>Agendi lugemised kuvatakse iga programmi ja tunni kohta ühe reana, näiteks „Loeti 14 kirja ja otsiti 3 korda“. <!--os:windows-->Valige rida<!--/os--><!--os:mac,linux-->Avage rida selle noolega<!--/os-->, et näha loetud kirjade teemasid ja otsitud teksti. Kirjade sisu seal kunagi ei näidata. Logi säilitatakse 30 päeva. Logi tühjendamine ei muuda seda, mitu kirja agent veel saata tohib.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li>Nupp <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> muudab, mida programm teha tohib.</li>
     <li>Nupp <b data-text="ui-remove"></b> unustab programmi, nii et järgmisel ühendumisel küsitakse teilt uuesti.</li>
     <!--review--><li>Nupp <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> võtab tagasi kirjade lugemisoleku, lippude ja nende värvide muutmise, rämpspostiks märkimise, teisaldamise, arhiveerimise või kustutamise. Samuti saab sellega tühistada kirja saatmise, kui kiri ootab veel väljundkaustas.</li><!--/review-->
+    <!--review--><li>Nupp <!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> võtab tagasi kõik, mida valitud programm teie valitud aja jooksul tegi, näiteks viimase tunni jooksul, uusimad kõigepealt.</li><!--/review-->
 </ul>
+<!--review--><p>Kirja, mida teie või server on pärast agenti muutnud, ei puudutata ja Inbox Classic ütleb, mitu neid oli. Agent saab tagasi võtta ka oma muudatusi, kuid mitte kunagi teise programmi omi.</p><!--/review-->
 <aside class="warning">Posti kirjutavad teised inimesed ja kiri võib proovida agenti ära rääkida, et see teie posti edastaks või kustutaks. Inbox Classic peidab agentide eest teksti, mida kiri teie eest peidab, ja ütleb neile, et post ei ole juhised. Agenti võib siiski petta. Lubage ainult seda, mida vajate.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

@@ -515,6 +515,135 @@ agent-log-watched = Begynte å følge samtalen «{ $subject }»
 agent-log-ignored = Begynte å ignorere samtalen «{ $subject }»
 # review: new
 agent-log-unmarked = Sluttet å følge eller ignorere samtalen «{ $subject }»
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = meldingen er endret siden
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Merket 1 melding som lest (søk: { $query })
+   *[other] Merket { $count } meldinger som lest (søk: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Merket 1 melding som ulest (søk: { $query })
+   *[other] Merket { $count } meldinger som ulest (søk: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Satte flagg på 1 melding (søk: { $query })
+   *[other] Satte flagg på { $count } meldinger (søk: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Fjernet flagget fra 1 melding (søk: { $query })
+   *[other] Fjernet flagget fra { $count } meldinger (søk: { $query })
+}
+# review: new
+agent-log-bulk-color = Satte { $color ->
+    [red] rødt
+    [orange] oransje
+    [yellow] gult
+    [green] grønt
+    [blue] blått
+    [purple] lilla
+   *[gray] grått
+} flagg på { $count ->
+    [one] 1 melding
+   *[other] { $count } meldinger
+} (søk: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Flyttet 1 melding til { $folder } (søk: { $query })
+   *[other] Flyttet { $count } meldinger til { $folder } (søk: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arkiverte 1 melding (søk: { $query })
+   *[other] Arkiverte { $count } meldinger (søk: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Merket 1 melding som søppelpost (søk: { $query })
+   *[other] Merket { $count } meldinger som søppelpost (søk: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Merket 1 melding som ikke søppelpost (søk: { $query })
+   *[other] Merket { $count } meldinger som ikke søppelpost (søk: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Slettet 1 melding (søk: { $query })
+   *[other] Slettet { $count } meldinger (søk: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] De siste 15 minuttene
+    [hour] Den siste timen
+    [hours] De siste 4 timene
+    [day] De siste 24 timene
+    [week] De siste 7 dagene
+   *[all] De siste 30 dagene
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } har ikke gjort noen endringer i dette tidsrommet som kan angres.
+    [one] Vil du angre endringen { $program } gjorde i dette tidsrommet?
+   *[other] Vil du angre de { $count } endringene { $program } gjorde i dette tidsrommet?
+}
+# review: new
+agent-undo-since-detail = Meldinger flyttes tilbake til mappene de kom fra, lest-status og flagg blir som de var, og meldinger som fortsatt venter i Utboks, slettes. Det du eller serveren har endret siden, blir som det er.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Ingenting ble angret.
+    [one] Angret 1 endring.
+   *[other] Angret { $count } endringer.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 melding lå ikke lenger der endringen la den.
+   *[other] { $count } meldinger lå ikke lenger der endringen la dem.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 melding var endret siden, av deg eller på serveren, og ble latt være som den var.
+   *[other] { $count } meldinger var endret siden, av deg eller på serveren, og ble latt være som de var.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 melding hadde allerede forlatt Utboks.
+   *[other] { $count } meldinger hadde allerede forlatt Utboks.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 endring kan ikke angres.
+   *[other] { $count } endringer kan ikke angres.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Denne meldingen godtar invitasjonen «{ $summary }» ({ $when }).
+    [tentative] Denne meldingen godtar foreløpig invitasjonen «{ $summary }» ({ $when }).
+   *[decline] Denne meldingen avslår invitasjonen «{ $summary }» ({ $when }).
+} Arrangørens kalender registrerer svaret. Svaret ditt på invitasjonen endres først når meldingen er sendt.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Godtatt: { $summary }
+    [tentative] Foreløpig: { $summary }
+   *[decline] Avslått: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } har godtatt denne invitasjonen.
+    [tentative] { $name } har foreløpig godtatt denne invitasjonen.
+   *[decline] { $name } har avslått denne invitasjonen.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

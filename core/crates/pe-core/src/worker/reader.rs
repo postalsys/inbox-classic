@@ -45,12 +45,14 @@ pub(crate) const LARGE_DOWNLOAD: u64 = 256 * 1024;
 const SPARE_IDLE: Duration = super::IDLE_FOR;
 
 /// The opens under way, which the background work steps aside for (one count for every account: they share the
-/// line), and the accounts whose reader downloads a large message now
+/// line), the accounts whose reader has a large message to download, and the readers waiting with a connection
 #[derive(Default)]
 pub(crate) struct Opening {
     count: std::sync::atomic::AtomicUsize,
     done: tokio::sync::Notify,
-    large: std::sync::Mutex<std::collections::HashSet<AccountId>>,
+    /// The large message each account's reader was given, from the click until the reader is done with it
+    large: std::sync::Mutex<std::collections::HashMap<AccountId, (FolderId, u64)>>,
+    ready: std::sync::Mutex<HashSet<AccountId>>,
 }
 
 impl Opening {
@@ -71,27 +73,52 @@ impl Opening {
         }
     }
 
-    /// Whether the reader of `account` is downloading a message over [`LARGE_DOWNLOAD`]
-    pub(crate) fn large_download(&self, account: AccountId) -> bool {
-        self.large_ones().contains(&account)
+    /// Which reader of `account` an open of `folder`/`uid` goes to, decided when it is clicked: the spare one while
+    /// the reader has a large message to download, else the reader, which a message of `size` over
+    /// [`LARGE_DOWNLOAD`] that is not stored (`stored`) marks busy at once, before it connected or selected, so the
+    /// next click does not queue behind it. Whether it goes to the spare reader.
+    pub(crate) fn to_spare(&self, account: AccountId, folder: FolderId, uid: u64, size: u64, stored: bool) -> bool {
+        let mut large = self.large_ones();
+        if large.contains_key(&account) {
+            return true;
+        }
+        if size > LARGE_DOWNLOAD && !stored {
+            large.insert(account, (folder, uid));
+        }
+        false
     }
 
-    /// The reader of `account` downloads a message of `size`: a large one until what this returns is dropped
-    fn downloading(self: &Arc<Self>, account: AccountId, size: u64) -> Option<LargeDownload> {
-        (size > LARGE_DOWNLOAD && self.large_ones().insert(account)).then(|| LargeDownload(self.clone(), account))
+    /// The reader of `account` is done with the open of `folder`/`uid`: downloaded, failed, handed on or passed over
+    /// for a later click
+    pub(crate) fn opened(&self, account: AccountId, folder: FolderId, uid: u64) {
+        let mut large = self.large_ones();
+        if large.get(&account) == Some(&(folder, uid)) {
+            large.remove(&account);
+        }
     }
 
-    fn large_ones(&self) -> std::sync::MutexGuard<'_, std::collections::HashSet<AccountId>> {
+    /// The reader of `account` stopped: what it was given goes with it
+    pub(crate) fn forget(&self, account: AccountId) {
+        self.large_ones().remove(&account);
+        self.set_ready(account, false);
+    }
+
+    fn large_ones(&self) -> std::sync::MutexGuard<'_, std::collections::HashMap<AccountId, (FolderId, u64)>> {
         self.large.lock().unwrap_or_else(|p| p.into_inner())
     }
-}
 
-/// A large download under way, see [`Opening::downloading`]
-struct LargeDownload(Arc<Opening>, AccountId);
+    /// Whether the reader of `account` waits with a connection of its own, ready for the next open
+    pub(crate) fn reader_ready(&self, account: AccountId) -> bool {
+        self.ready.lock().unwrap_or_else(|p| p.into_inner()).contains(&account)
+    }
 
-impl Drop for LargeDownload {
-    fn drop(&mut self) {
-        self.0.large_ones().remove(&self.1);
+    fn set_ready(&self, account: AccountId, ready: bool) {
+        let mut readers = self.ready.lock().unwrap_or_else(|p| p.into_inner());
+        if ready {
+            readers.insert(account);
+        } else {
+            readers.remove(&account);
+        }
     }
 }
 
@@ -130,6 +157,9 @@ impl Worker {
         let mut first_sync = Some(Box::pin(self.first_sync()));
         loop {
             let connected = self.connection.is_some();
+            if !self.spare {
+                self.ctx.opening.set_ready(self.account, connected);
+            }
             let keep_alive = tokio::time::Instant::from_std(self.last_used + KEEP_ALIVE);
             let first_wait = first_sync.is_some() && warm && !connected;
             let woke = tokio::select! {
@@ -153,17 +183,32 @@ impl Worker {
                 Woke::Command(Some(command)) => {
                     // only the message asked for last: those the user moved past on the way to it are not waited for
                     let mut open = None;
+                    let mut asked_for = Vec::new();
                     let mut next = Some(command);
                     while let Some(command) = next {
                         match command {
-                            Command::FetchSource { folder, uid, asked } => open = Some((folder, uid, asked)),
+                            Command::FetchSource { folder, uid, asked } => {
+                                asked_for.push((folder, uid));
+                                open = Some((folder, uid, asked));
+                            }
                             Command::Connect => warm = true,
                             _ => {}
                         }
                         next = commands.try_recv().ok();
                     }
+                    let mut opened = None;
                     if let Some((folder, uid, asked)) = open
                         && self.read_one(store, folder, uid, asked).await
+                    {
+                        opened = Some((folder, uid));
+                    }
+                    // a large one given to the reader no longer sends the next click to the spare reader
+                    if !self.spare {
+                        for (folder, uid) in asked_for {
+                            self.ctx.opening.opened(self.account, folder, uid);
+                        }
+                    }
+                    if let Some((folder, uid)) = opened
                         && commands.is_empty()
                     {
                         // the next click is most likely Next or Previous; one that comes meanwhile waits for this
@@ -187,6 +232,10 @@ impl Worker {
                 Woke::Slept if warm => self.connect_reader(store).await,
                 Woke::Slept => {}
             }
+        }
+        if !self.spare {
+            // a large one given to it and not reached yet goes with it, so later clicks are not sent to the spare
+            self.ctx.opening.forget(self.account);
         }
         let _ = self.index_all_parsed(store).await;
         self.log_out().await;
@@ -400,12 +449,7 @@ impl Worker {
         }
         pe_sync::select_folder(client, store, folder).await?;
         clock.timing.selected = Some(clock.now());
-        // a click meanwhile on a large one goes to a second reader (Core::open_message)
         let size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
-        let _large = match role == Role::Reader && !self.spare {
-            true => self.ctx.opening.downloading(self.account, size),
-            false => None,
-        };
         let source = if role == Role::Reader && size > super::large::TEXT_FIRST_OVER {
             // its text first, the rest after (large.rs)
             self.download_large(store, folder, uid, size).await?
@@ -547,6 +591,33 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
+    }
+
+    #[test]
+    fn a_large_download_sends_the_next_click_to_the_spare_reader_at_once() {
+        let opening = Opening::default();
+        let large = LARGE_DOWNLOAD + 1;
+        // small, or large but stored: the reader, no mark
+        assert!(!opening.to_spare(1, 10, 1, 100, false));
+        assert!(!opening.to_spare(1, 10, 2, large, true));
+        assert!(!opening.to_spare(1, 10, 3, 100, false));
+        // large and not stored: the reader, marked from the click on, before it connected
+        assert!(!opening.to_spare(1, 10, 4, large, false));
+        assert!(opening.to_spare(1, 10, 5, 100, false));
+        assert!(opening.to_spare(1, 10, 6, large, false), "a second large one too");
+        assert!(
+            !opening.to_spare(2, 20, 1, 100, false),
+            "another account's reader is free"
+        );
+        // the reader done with another message keeps the mark; done with the large one ends it
+        opening.opened(1, 10, 3);
+        assert!(opening.to_spare(1, 10, 5, 100, false));
+        opening.opened(1, 10, 4);
+        assert!(!opening.to_spare(1, 10, 5, 100, false));
+        // a removed account's mark goes with its reader
+        assert!(!opening.to_spare(1, 10, 4, large, false));
+        opening.forget(1);
+        assert!(!opening.to_spare(1, 10, 5, 100, false));
     }
 
     #[tokio::test]

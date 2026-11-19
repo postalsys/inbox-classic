@@ -3,7 +3,7 @@
 <p>Pri prvom povezivanju agenta Inbox Classic prikazuje naziv programa i traži vaše odobrenje. Možete mu dopustiti:</p>
 <ul>
     <!--review--><li>čitanje pošte: pregled mapa, poruka i razgovora zajedno s njihovim PDF i Office datotekama te slikama do 10 MB, pretraživanje poruka i kontakata te pregled pravila za poruke</li><!--/review-->
-    <!--review--><li>organiziranje pošte: označavanje poruka kao pročitanih ili nepročitanih, mijenjanje zastavica i njihovih boja te oznaka neželjene pošte, premještanje i arhiviranje poruka, stvaranje mapa, preimenovanje vaših vlastitih mapa, praćenje i zanemarivanje razgovora, brisanje premještanjem u mapu <b data-text="folder-deleted"></b> te otkazivanje pretplata na liste e-pošte uz vaše odobrenje</li><!--/review-->
+    <!--review--><li>organiziranje pošte: označavanje poruka kao pročitanih ili nepročitanih, mijenjanje zastavica i njihovih boja te oznaka neželjene pošte, premještanje i arhiviranje poruka, stvaranje mapa, preimenovanje vaših vlastitih mapa, praćenje i zanemarivanje razgovora, brisanje premještanjem u mapu <b data-text="folder-deleted"></b>, sve to i odjednom za sve poruke koje pronađe pretraživanje, te otkazivanje pretplata na liste e-pošte uz vaše odobrenje</li><!--/review-->
     <li>pripremu skica koje ćete sami poslati te izmjenu ili odbacivanje vlastitih skica dok ih ne spremite</li>
     <li>slanje pošte uz zasebno odobrenje svake poruke</li>
 </ul>
@@ -16,6 +16,8 @@
     <li>Gumb <!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> zadani je odabir i ne šalje zahtjeve za otkazivanje pretplate.</li>
 </ul>
 <p>Agent ne može koristiti poruke u mapi <b data-text="folder-junk"></b> za otkazivanje pretplata. Za svaki program vrijedi ograničenje od 30 zahtjeva koje ste odobrili u posljednja 24 sata. U taj se broj ubrajaju i neuspjeli zahtjevi.</p>
+<!--review--><h2>Promjena mnogo poruka odjednom</h2><!--/review-->
+<!--review--><p>Agent koji smije organizirati poštu može u jednom koraku promijeniti sve poruke koje pronađe pretraživanje, primjerice označiti sve biltene kao pročitane ili ih premjestiti u mapu. Najprije prebroji poruke i vidi nekoliko njih. Zatim mijenja upravo te poruke, najviše 1000 odjednom, i nikad poštu koja je u međuvremenu stigla. Inbox Classic vas ne pita unaprijed jer se sve može poništiti. Zapisnik to prikazuje kao jedan redak, primjerice „37 poruka označeno je kao pročitano (pretraživanje: from:news)“, a jednim poništavanjem poništava se sve.</p><!--/review-->
 <h2>Pregled i promjena pristupa</h2>
 <p>Otvorite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> za popis programa kojima ste dopustili ili odbili pristup te pregled zabilježenih radnji. Najnovije radnje prikazuju se prve.</p>
 <!--review--><p>Ono što agent čita prikazuje se kao jedan redak za svaki program i sat, primjerice „Pročitano 14 poruka i 3 pretraživanja“. <!--os:windows-->Odaberite redak<!--/os--><!--os:mac,linux-->Otvorite redak njegovom strelicom<!--/os--> da biste vidjeli predmete pročitanih poruka i pojmove koje je tražio, ali nikad tekst poruka. Zapisi se čuvaju 30 dana. Njihovo brisanje ne mijenja broj poruka koje agent još smije poslati.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li>Gumbom <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> mijenjate dozvole programa.</li>
     <li>Gumbom <b data-text="ui-remove"></b> uklanjate zapis o programu, njegove dozvole i povijest radnji. Program ostaje instaliran, a pri sljedećem povezivanju ponovno će se tražiti vaše odobrenje.</li>
     <!--review--><li>Gumbom <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> možete poništiti promjene pročitanosti, zastavica i njihovih boja te oznaka neželjene pošte, premještanje, arhiviranje i brisanje. Možete i otkazati slanje poruke koja još čeka u Izlaznoj pošti. Već poslanu poruku nije moguće povući.</li><!--/review-->
+    <!--review--><li>Gumbom <!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> možete poništiti sve što je odabrani program napravio u razdoblju koje odaberete, primjerice u zadnjih sat vremena, od najnovijeg prema starijem.</li><!--/review-->
 </ul>
+<!--review--><p>Poruka koju ste vi ili poslužitelj promijenili nakon agenta ostaje kakva jest, a Inbox Classic vam kaže koliko je takvih poruka bilo. Agent može poništiti i vlastite promjene, ali nikad promjene drugog programa.</p><!--/review-->
 <aside class="warning">Sadržaj poruke može pokušati navesti agenta da proslijedi ili izbriše vašu poštu. Inbox Classic izostavlja skriveni tekst i upozorava agenta da sadržaj pošte ne smije tretirati kao upute. To ipak ne jamči da će agent prepoznati svaki pokušaj prijevare. Dodijelite mu samo potrebne dozvole.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

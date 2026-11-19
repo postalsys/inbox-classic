@@ -17,6 +17,7 @@ mod counts;
 mod download;
 mod fold;
 mod folders;
+mod invitations;
 #[cfg(test)]
 mod kept_check;
 mod keyset;
