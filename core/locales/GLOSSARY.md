@@ -578,6 +578,16 @@ where the singular reads better ("Pārvietot ziņojumu").
 - Attachment reminders recognize English, German, Estonian, Spanish and French phrases, not Latvian. Avoid
   a Latvian trigger example or a claim that plain text looks identical in every mail app. Unrelated catalog
   mnemonic collisions remain pending in the exact review state.
+- Menus and list columns use "Sūtītājs"; search covers sender/recipient names and addresses, not just names.
+  Use "Meklēšanas vieta" for a scope that can also be a combined view. Empty message lists say "ziņojumi".
+- Notification senders use a label after a colon; account/folder names follow a head noun inside quotes.
+  Outbox status subjects arrive already quoted. The agent queue time is the earliest possible sending time.
+  "Paraksta teksts" also names the signature editor and account button. "Pasta datubāze" names the local mail store.
+- The shared Remove control uses ASCII T and the account signature button uses S. Main, context, tray and sort
+  menu keys are coordinated with the shared dialogs, including read/unread and junk/not-junk variants.
+  The remaining agent-dialog M collision is between two still-pending labels; see the exact review state.
+- The image-insertion error covers file-read failure and lists PNG, JPEG, GIF and WebP, up to 10 MB.
+  English and the Windows picker filter omit WebP although the core accepts it; app code is outside this review.
 
 ### Lietuvių (lt)
 

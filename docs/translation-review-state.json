@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Continue Latvian app.ftl at ui-unsubscribe, reviewing mail actions, folder operations and dialogs in coherent batches. Latvian has 431 app entries, 712 other catalog entries and 51 help topics pending. Resolve the remaining agent-dialog M/M keys during its label review. Finish the existing queues and context comparisons for all 27 remaining languages against translations already on master. Scope is fixed to master 8757ab1c per the November 19 user instruction; do not discover or wait for unmerged/new translation branches. Perform a final completeness audit of this fixed queue, then finish. Publish each validated batch promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -33684,222 +33684,6 @@
     "lv": {
       "pending_catalogs": {
         "app.ftl": [
-          "menu-file",
-          "menu-edit",
-          "menu-view",
-          "menu-tools",
-          "menu-message",
-          "menu-help",
-          "menu-layout",
-          "menu-sort-by",
-          "menu-text-size",
-          "menu-folder",
-          "cmd-new-account",
-          "cmd-exit",
-          "cmd-sync",
-          "cmd-mark-read",
-          "cmd-mark-unread",
-          "cmd-pictures",
-          "cmd-about",
-          "cmd-new-mail",
-          "cmd-reply",
-          "cmd-reply-all",
-          "cmd-forward",
-          "cmd-help",
-          "cmd-delete",
-          "cmd-move",
-          "cmd-flag",
-          "cmd-new-folder",
-          "cmd-rename-folder",
-          "cmd-delete-folder",
-          "cmd-empty-folder",
-          "ui-empty-button",
-          "cmd-accounts",
-          "cmd-find",
-          "cmd-save-as",
-          "cmd-print",
-          "cmd-import",
-          "cmd-outbox",
-          "cmd-properties",
-          "cmd-mark-all-read",
-          "cmd-junk",
-          "cmd-not-junk",
-          "cmd-archive",
-          "cmd-watch-conversation",
-          "cmd-ignore-conversation",
-          "cmd-next-message",
-          "cmd-previous-message",
-          "cmd-next-unread",
-          "cmd-go-to-folder",
-          "cmd-find-in-message",
-          "ui-go-to-prompt",
-          "ui-find-in-message-hint",
-          "ui-find-not-found",
-          "cmd-expand-all-threads",
-          "cmd-collapse-all-threads",
-          "ui-group-by-conversation",
-          "cmd-folder-list",
-          "cmd-layout-automatic",
-          "cmd-layout-classic",
-          "cmd-layout-columns",
-          "cmd-sort-date",
-          "cmd-sort-from",
-          "cmd-sort-subject",
-          "cmd-sort-size",
-          "cmd-sort-ascending",
-          "cmd-sort-descending",
-          "cmd-text-size-largest",
-          "cmd-text-size-larger",
-          "cmd-text-size-medium",
-          "cmd-text-size-smaller",
-          "cmd-text-size-smallest",
-          "cmd-hide-ignored",
-          "cmd-hide-read",
-          "cmd-notify",
-          "cmd-open",
-          "cmd-default-app",
-          "cmd-view-source",
-          "cmd-ai-agents",
-          "cmd-options",
-          "cmd-message-rules",
-          "cmd-encryption-keys",
-          "cmd-create-rule-from-message",
-          "cmd-select-all",
-          "cmd-undo",
-          "cmd-copy",
-          "cmd-address-book",
-          "cmd-add-sender-to-book",
-          "cmd-import-address-book",
-          "cmd-export-address-book",
-          "cmd-export-setup",
-          "cmd-import-setup",
-          "tray-check",
-          "tray-no-accounts",
-          "ui-tb-create-mail",
-          "ui-tb-reply",
-          "ui-tb-reply-all",
-          "ui-tb-forward",
-          "ui-tb-print",
-          "ui-tb-delete",
-          "ui-tb-junk",
-          "ui-tb-not-junk",
-          "ui-tb-archive",
-          "ui-tb-previous",
-          "ui-tb-next",
-          "ui-previous-tip",
-          "ui-next-tip",
-          "ui-tb-sync",
-          "ui-tb-mark-read",
-          "ui-tb-mark-unread",
-          "ui-still-running",
-          "ui-no-subject",
-          "ui-quoted",
-          "ui-newest-from",
-          "ui-new-messages",
-          "ui-outbox-waiting",
-          "ui-outbox-waits",
-          "ui-outbox-sending",
-          "ui-from-account",
-          "ui-sign-in-refused",
-          "ui-sign-in-again-ask",
-          "ui-sign-in-again-failed",
-          "ui-unknown-reason",
-          "ui-checking",
-          "ui-done",
-          "ui-sent-at",
-          "ui-draft-saved",
-          "ui-draft-not-saved",
-          "ui-about-core",
-          "ui-add-account-first",
-          "ui-add-account-first-link",
-          "ui-default-app-is",
-          "ui-select-message-first",
-          "ui-store-not-opened",
-          "ui-store-or-cert-not-opened",
-          "ui-help-title",
-          "ui-help-missing",
-          "ui-ok",
-          "ui-cancel",
-          "ui-close",
-          "ui-col-subject",
-          "ui-col-from",
-          "ui-col-to",
-          "ui-col-received",
-          "ui-watched-conversation",
-          "ui-col-sent",
-          "ui-col-size",
-          "ui-col-folder",
-          "ui-col-account",
-          "ui-col-queued",
-          "ui-col-status",
-          "ui-outbox-title",
-          "ui-outbox-status-waiting",
-          "ui-outbox-status-not-sent",
-          "ui-outbox-status-agent",
-          "ui-outbox-delete-ask",
-          "ui-open-link",
-          "ui-edit-link",
-          "ui-remove-link",
-          "ui-insert-attachment",
-          "ui-insert-picture",
-          "ui-filter-all",
-          "ui-filter-pictures",
-          "ui-filter-messages",
-          "ui-save-attachment-as",
-          "ui-not-sent",
-          "ui-attachment-forgotten",
-          "ui-send-anyway",
-          "ui-go-back",
-          "ui-not-saved",
-          "ui-saving-draft",
-          "ui-compose-saved-at",
-          "ui-compose-restored",
-          "ui-compose-not-saved",
-          "ui-save-changes-ask",
-          "ui-new-message-title",
-          "ui-link-invalid",
-          "ui-link-address",
-          "ui-hyperlink",
-          "ui-hyperlink-intro",
-          "ui-edit-hyperlink",
-          "ui-edit-hyperlink-intro",
-          "ui-not-a-picture",
-          "ui-format-color",
-          "ui-format-numbers",
-          "ui-format-bullets",
-          "ui-format-outdent",
-          "ui-format-indent",
-          "ui-format-left",
-          "ui-format-center",
-          "ui-format-right",
-          "ui-format-line",
-          "ui-tb-send",
-          "ui-tb-save",
-          "ui-tb-attach",
-          "ui-field-from",
-          "ui-field-to",
-          "ui-field-cc",
-          "ui-field-bcc",
-          "ui-field-subject",
-          "ui-field-attach",
-          "ui-signature",
-          "ui-signature-hint",
-          "ui-signature-not-saved",
-          "ui-all-inboxes",
-          "ui-all-sent",
-          "ui-all-drafts",
-          "ui-flagged-folder",
-          "ui-all-folders",
-          "ui-the-account",
-          "ui-folder-name",
-          "ui-find-hint",
-          "ui-find-tip",
-          "ui-clear-search",
-          "ui-no-match",
-          "ui-no-match-all",
-          "ui-no-match-in",
-          "ui-no-items",
-          "ui-choose-folder",
           "ui-open-in-calendar",
           "ui-pictures-blocked",
           "ui-not-shown",
@@ -34059,14 +33843,10 @@
           "ui-new-folder-title",
           "ui-rename-folder-title",
           "ui-delete-folder-question",
-          "ui-properties",
           "ui-account-sync",
           "ui-account-properties",
           "ui-account-move-up",
           "ui-account-move-down",
-          "ui-menu-open",
-          "ui-menu-flag",
-          "ui-menu-view-source",
           "ui-save-attachments",
           "ui-attachment-open",
           "ui-attachment-save-as",
@@ -34084,8 +33864,6 @@
           "ui-yes",
           "ui-no",
           "ui-try-again",
-          "ui-remove",
-          "ui-signature-of",
           "ui-sign-in-with",
           "ui-sign-in-in-browser-yours",
           "ui-browser-sign-in-server",
@@ -35001,9 +34779,7 @@
           "win-no-bodies",
           "win-webview-failed",
           "win-webview-missing",
-          "win-delete-button",
           "win-find-label",
-          "win-save-as-button",
           "win-too-many-files",
           "win-editor-failed",
           "win-ctrl-click-to-open",
@@ -35013,7 +34789,6 @@
           "win-format-link",
           "win-show-cc",
           "win-show-bcc",
-          "win-signature-title",
           "win-search-found-all",
           "win-search-found-in",
           "win-search-indexing",
@@ -35024,7 +34799,6 @@
           "win-files-not-saved",
           "win-new-folder-in-highlighted",
           "win-delete-folder-ask",
-          "win-rename",
           "win-messages-not-saved",
           "win-messages-not-forwarded",
           "win-sign-in-google",
@@ -35034,7 +34808,6 @@
           "win-browser-sign-in",
           "win-add",
           "win-properties-button",
-          "win-signature-button",
           "win-sign-in-apps-button",
           "win-dont-allow",
           "win-col-address",
@@ -35846,578 +35619,426 @@
             "mnemonics-before.json": "/private/tmp/inbox-lv-compose-20261118-mnemonics-before.json",
             "mnemonics-after.json": "/private/tmp/inbox-lv-compose-20261118-mnemonics-after.json"
           }
-        }
-      ],
-      "pending_mnemonic_collisions": {
-        "checkpoint": "lv-compose-sign-encrypt-20261118",
-        "status": "Outside this compose batch; each collision group still includes pending catalog entries. Resolve across actual scopes during the broader Latvian catalog review.",
-        "collisions": [
-          {
-            "scope": 3,
-            "key": "k",
-            "ids": [
-              "cmd-flag",
-              "ui-menu-flag"
-            ],
-            "scope_ids": [
+        },
+        {
+          "id": "lv-menu-compose-status-20261119",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-file",
+              "menu-edit",
+              "menu-view",
+              "menu-tools",
+              "menu-message",
+              "menu-help",
+              "menu-layout",
+              "menu-sort-by",
+              "menu-text-size",
+              "menu-folder",
+              "cmd-new-account",
+              "cmd-exit",
+              "cmd-sync",
+              "cmd-mark-read",
+              "cmd-mark-unread",
+              "cmd-pictures",
+              "cmd-about",
               "cmd-new-mail",
               "cmd-reply",
               "cmd-reply-all",
               "cmd-forward",
+              "cmd-help",
+              "cmd-delete",
+              "cmd-move",
               "cmd-flag",
-              "ui-menu-flag",
-              "cmd-archive",
+              "cmd-new-folder",
+              "cmd-rename-folder",
+              "cmd-delete-folder",
+              "cmd-empty-folder",
+              "ui-empty-button",
+              "cmd-accounts",
+              "cmd-find",
+              "cmd-save-as",
+              "cmd-print",
+              "cmd-import",
+              "cmd-outbox",
+              "cmd-properties",
+              "cmd-mark-all-read",
               "cmd-junk",
               "cmd-not-junk",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-create-rule-from-message"
-            ],
-            "pending_ids": [
-              "cmd-flag",
-              "ui-menu-flag"
-            ]
-          },
-          {
-            "scope": 10,
-            "key": "a",
-            "ids": [
-              "ui-menu-open",
-              "cmd-archive"
-            ],
-            "scope_ids": [
-              "ui-menu-open",
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
               "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-read",
-              "cmd-junk"
-            ],
-            "pending_ids": [
-              "ui-menu-open",
-              "cmd-archive"
-            ]
-          },
-          {
-            "scope": 10,
-            "key": "p",
-            "ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ],
-            "scope_ids": [
-              "ui-menu-open",
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
               "cmd-watch-conversation",
               "cmd-ignore-conversation",
-              "cmd-archive",
+              "cmd-next-message",
+              "cmd-previous-message",
+              "cmd-next-unread",
+              "cmd-go-to-folder",
+              "cmd-find-in-message",
+              "ui-go-to-prompt",
+              "ui-find-in-message-hint",
+              "ui-find-not-found",
+              "cmd-expand-all-threads",
+              "cmd-collapse-all-threads",
+              "ui-group-by-conversation",
+              "cmd-folder-list",
+              "cmd-layout-automatic",
+              "cmd-layout-classic",
+              "cmd-layout-columns",
+              "cmd-sort-date",
+              "cmd-sort-from",
+              "cmd-sort-subject",
+              "cmd-sort-size",
+              "cmd-sort-ascending",
+              "cmd-sort-descending",
+              "cmd-text-size-largest",
+              "cmd-text-size-larger",
+              "cmd-text-size-medium",
+              "cmd-text-size-smaller",
+              "cmd-text-size-smallest",
+              "cmd-hide-ignored",
+              "cmd-hide-read",
+              "cmd-notify",
+              "cmd-open",
+              "cmd-default-app",
+              "cmd-view-source",
+              "cmd-ai-agents",
+              "cmd-options",
+              "cmd-message-rules",
+              "cmd-encryption-keys",
               "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-read",
-              "cmd-junk"
-            ],
-            "pending_ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ]
-          },
-          {
-            "scope": 10,
-            "key": "k",
-            "ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ],
-            "scope_ids": [
-              "ui-menu-open",
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-read",
-              "cmd-junk"
-            ],
-            "pending_ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ]
-          },
-          {
-            "scope": 11,
-            "key": "p",
-            "ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ],
-            "scope_ids": [
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-read",
-              "cmd-not-junk"
-            ],
-            "pending_ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ]
-          },
-          {
-            "scope": 11,
-            "key": "k",
-            "ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ],
-            "scope_ids": [
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-read",
-              "cmd-not-junk"
-            ],
-            "pending_ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ]
-          },
-          {
-            "scope": 11,
-            "key": "l",
-            "ids": [
-              "cmd-mark-read",
-              "cmd-not-junk"
-            ],
-            "scope_ids": [
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-read",
-              "cmd-not-junk"
-            ],
-            "pending_ids": [
-              "cmd-mark-read",
-              "cmd-not-junk"
-            ]
-          },
-          {
-            "scope": 12,
-            "key": "a",
-            "ids": [
-              "ui-menu-open",
-              "cmd-archive"
-            ],
-            "scope_ids": [
-              "ui-menu-open",
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-unread",
-              "cmd-junk"
-            ],
-            "pending_ids": [
-              "ui-menu-open",
-              "cmd-archive"
-            ]
-          },
-          {
-            "scope": 12,
-            "key": "p",
-            "ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ],
-            "scope_ids": [
-              "ui-menu-open",
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-unread",
-              "cmd-junk"
-            ],
-            "pending_ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ]
-          },
-          {
-            "scope": 12,
-            "key": "k",
-            "ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ],
-            "scope_ids": [
-              "ui-menu-open",
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-unread",
-              "cmd-junk"
-            ],
-            "pending_ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ]
-          },
-          {
-            "scope": 12,
-            "key": "n",
-            "ids": [
-              "cmd-mark-unread",
-              "cmd-junk"
-            ],
-            "scope_ids": [
-              "ui-menu-open",
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-unread",
-              "cmd-junk"
-            ],
-            "pending_ids": [
-              "cmd-mark-unread",
-              "cmd-junk"
-            ]
-          },
-          {
-            "scope": 13,
-            "key": "p",
-            "ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ],
-            "scope_ids": [
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-unread",
-              "cmd-not-junk"
-            ],
-            "pending_ids": [
-              "cmd-forward",
-              "cmd-move",
-              "ui-menu-view-source"
-            ]
-          },
-          {
-            "scope": 13,
-            "key": "k",
-            "ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ],
-            "scope_ids": [
-              "cmd-reply",
-              "cmd-reply-all",
-              "cmd-forward",
-              "ui-menu-flag",
-              "cmd-watch-conversation",
-              "cmd-ignore-conversation",
-              "cmd-archive",
-              "cmd-create-rule-from-message",
-              "cmd-move",
-              "cmd-copy",
-              "win-delete-button",
-              "win-save-as-button",
-              "cmd-print",
-              "cmd-add-sender-to-book",
-              "ui-menu-view-source",
-              "ui-properties",
-              "cmd-mark-unread",
-              "cmd-not-junk"
-            ],
-            "pending_ids": [
-              "ui-menu-flag",
-              "cmd-copy",
-              "win-save-as-button"
-            ]
-          },
-          {
-            "scope": 22,
-            "key": "m",
-            "ids": [
-              "ui-let-agents-connect",
-              "win-change"
-            ],
-            "scope_ids": [
-              "ui-let-agents-connect",
-              "win-agent-programs",
-              "win-change",
-              "ui-remove",
-              "win-what-agents-did",
+              "cmd-select-all",
               "cmd-undo",
-              "ui-clear-button"
-            ],
-            "pending_ids": [
-              "ui-let-agents-connect",
-              "win-change"
-            ]
-          },
-          {
-            "scope": 22,
-            "key": "n",
-            "ids": [
+              "cmd-copy",
+              "cmd-address-book",
+              "cmd-add-sender-to-book",
+              "cmd-import-address-book",
+              "cmd-export-address-book",
+              "cmd-export-setup",
+              "cmd-import-setup",
+              "tray-check",
+              "tray-no-accounts",
+              "ui-tb-create-mail",
+              "ui-tb-reply",
+              "ui-tb-reply-all",
+              "ui-tb-forward",
+              "ui-tb-print",
+              "ui-tb-delete",
+              "ui-tb-junk",
+              "ui-tb-not-junk",
+              "ui-tb-archive",
+              "ui-tb-previous",
+              "ui-tb-next",
+              "ui-previous-tip",
+              "ui-next-tip",
+              "ui-tb-sync",
+              "ui-tb-mark-read",
+              "ui-tb-mark-unread",
+              "ui-still-running",
+              "ui-no-subject",
+              "ui-quoted",
+              "ui-newest-from",
+              "ui-new-messages",
+              "ui-outbox-waiting",
+              "ui-outbox-waits",
+              "ui-outbox-sending",
+              "ui-from-account",
+              "ui-sign-in-refused",
+              "ui-sign-in-again-ask",
+              "ui-sign-in-again-failed",
+              "ui-unknown-reason",
+              "ui-checking",
+              "ui-done",
+              "ui-sent-at",
+              "ui-draft-saved",
+              "ui-draft-not-saved",
+              "ui-about-core",
+              "ui-add-account-first",
+              "ui-add-account-first-link",
+              "ui-default-app-is",
+              "ui-select-message-first",
+              "ui-store-not-opened",
+              "ui-store-or-cert-not-opened",
+              "ui-help-title",
+              "ui-help-missing",
+              "ui-ok",
+              "ui-cancel",
+              "ui-close",
+              "ui-col-subject",
+              "ui-col-from",
+              "ui-col-to",
+              "ui-col-received",
+              "ui-watched-conversation",
+              "ui-col-sent",
+              "ui-col-size",
+              "ui-col-folder",
+              "ui-col-account",
+              "ui-col-queued",
+              "ui-col-status",
+              "ui-outbox-title",
+              "ui-outbox-status-waiting",
+              "ui-outbox-status-not-sent",
+              "ui-outbox-status-agent",
+              "ui-outbox-delete-ask",
+              "ui-open-link",
+              "ui-edit-link",
+              "ui-remove-link",
+              "ui-insert-attachment",
+              "ui-insert-picture",
+              "ui-filter-all",
+              "ui-filter-pictures",
+              "ui-filter-messages",
+              "ui-save-attachment-as",
+              "ui-not-sent",
+              "ui-attachment-forgotten",
+              "ui-send-anyway",
+              "ui-go-back",
+              "ui-not-saved",
+              "ui-saving-draft",
+              "ui-compose-saved-at",
+              "ui-compose-restored",
+              "ui-compose-not-saved",
+              "ui-save-changes-ask",
+              "ui-new-message-title",
+              "ui-link-invalid",
+              "ui-link-address",
+              "ui-hyperlink",
+              "ui-hyperlink-intro",
+              "ui-edit-hyperlink",
+              "ui-edit-hyperlink-intro",
+              "ui-not-a-picture",
+              "ui-format-color",
+              "ui-format-numbers",
+              "ui-format-bullets",
+              "ui-format-outdent",
+              "ui-format-indent",
+              "ui-format-left",
+              "ui-format-center",
+              "ui-format-right",
+              "ui-format-line",
+              "ui-tb-send",
+              "ui-tb-save",
+              "ui-tb-attach",
+              "ui-field-from",
+              "ui-field-to",
+              "ui-field-cc",
+              "ui-field-bcc",
+              "ui-field-subject",
+              "ui-field-attach",
+              "ui-signature",
+              "ui-signature-hint",
+              "ui-signature-not-saved",
+              "ui-all-inboxes",
+              "ui-all-sent",
+              "ui-all-drafts",
+              "ui-flagged-folder",
+              "ui-all-folders",
+              "ui-the-account",
+              "ui-folder-name",
+              "ui-find-hint",
+              "ui-find-tip",
+              "ui-clear-search",
+              "ui-no-match",
+              "ui-no-match-all",
+              "ui-no-match-in",
+              "ui-no-items",
+              "ui-choose-folder",
+              "ui-menu-open",
+              "ui-menu-flag",
+              "ui-menu-view-source",
+              "ui-properties",
               "ui-remove",
-              "ui-clear-button"
+              "ui-signature-of"
             ],
-            "scope_ids": [
-              "ui-let-agents-connect",
-              "win-agent-programs",
-              "win-change",
-              "ui-remove",
-              "win-what-agents-did",
-              "cmd-undo",
-              "ui-clear-button"
-            ],
-            "pending_ids": [
-              "ui-remove",
-              "ui-clear-button"
-            ]
-          },
-          {
-            "scope": 28,
-            "key": "n",
-            "ids": [
-              "ui-contact-set-default",
-              "ui-remove"
-            ],
-            "scope_ids": [
-              "ui-contact-add",
-              "ui-contact-set-default",
-              "ui-remove",
-              "ui-card-picture-choose"
-            ],
-            "pending_ids": [
-              "ui-contact-set-default",
-              "ui-remove"
-            ]
-          },
-          {
-            "scope": 36,
-            "key": "t",
-            "ids": [
-              "cmd-mark-all-read",
-              "cmd-empty-folder"
-            ],
-            "scope_ids": [
-              "cmd-mark-all-read",
-              "cmd-new-folder",
+            "windows.ftl": [
+              "win-delete-button",
+              "win-save-as-button",
               "win-rename",
-              "win-delete-button",
-              "cmd-empty-folder"
-            ],
-            "pending_ids": [
-              "cmd-mark-all-read",
-              "cmd-empty-folder"
+              "win-signature-title",
+              "win-signature-button"
             ]
           },
-          {
-            "scope": 38,
-            "key": "m",
-            "ids": [
-              "ui-account-sync",
-              "cmd-new-folder"
+          "reviewed_help": [],
+          "changed_values": 60,
+          "files": {
+            "core/locales/lv/app.ftl": "ddfcef09a053c2ce2ab4ba38d94cb9f6d0b6df2daf19ccec6c9c39fdd8894237",
+            "core/locales/lv/windows.ftl": "25490167effee0fab39db289e2423e68cf585c88e3f2d7d0aca98b1e01e742d9"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "5352e20b4b7d46a9efbb149010aeb0370aa702da9e806336eed2028028fc06f0",
+            "core/locales/en/windows.ftl": "b857759344cb409a8621815f03909aa55ba7902e36a1a85118c794aa5775a674"
+          },
+          "validation": "Latvian structural checks pass with 344 expected mark-only diagnostics. Exact reconstruction verifies 227 catalog entries: 60 improved values and 167 retained. IDs, variables, plural branches, access-key counts, comments and command ellipses are preserved. Static plural inspection covers 26 samples across zero/one/other; 14 placeable substitutions were inspected. No Fluent runtime execution claimed. All collisions involving reviewed labels are resolved in 55 checked menu/dialog scopes, including tray, sort, shared controls and read/unread/junk variants. The remaining M/M collision is between two pending agent-dialog labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows search/compose screenshots supply layout context; no Latvian GUI-fit claim. All 28 inventories, pending marks and latest file/English hashes reconcile. Global diagnostics account for 24,179 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Master-only source comparison has no changed review inputs. Per user instruction, the remaining queue is fixed to translations already on master; unmerged-source discovery is stopped. No local test suites, builds or manual CI; REVIEWED unchanged.",
+          "notes": "Reviewed 222 Latvian app entries and five coupled Windows labels in actual menu, account, compose, notification, search and Outbox contexts. Improved natural wording, sender/account placeholders, earliest-send status, search fields and signature text. Included supported WebP in the insertion error. Retained good wording and zero/one/other counted forms. Resolved every access-key collision involving this batch across 55 checked scopes; the remaining M/M collision involves two pending agent-dialog labels.",
+          "help_wording_lines_changed": 0,
+          "help_changes_by_file": {},
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-core/src/text.rs": "bbf67a3e6029611259f4eb57052fb50744b71c9132f7210ed2c605226274c955",
+            "core/crates/pe-core/src/search.rs": "c72488f2132326a415b77a1aef19d418f08b76a932c1375698369c64d0861cbb",
+            "core/crates/pe-store/src/search.rs": "d7a490ff3e0c47caee741766f4fa578afbd4648c3e0786801aefb45f24d54a0a",
+            "core/crates/pe-html/src/editor.rs": "70e8f1f9601743d6678e0a1fd355536d974bca04203214adfd6d769dcef56755",
+            "core/crates/pe-i18n/src/lib.rs": "ddc9918d5bcae0b14142cd321069da03d1995b94e4caae03de70bcdfe1dea14b",
+            "app/src/main.cpp": "8e0b42ab8d372b03808d37e640ceadcb09b5e4a8bdadddb9b04db386d6df9971",
+            "app/src/mailbox.cpp": "11baddaa5e35e8af4a296c28d04c10192bba8bed3ab220471a0da63b73a5bfcd",
+            "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+            "app/src/outbox.cpp": "be67c7f2beffff02e2baa5757a5290f96ecd2da810983c15758eb307c54c7da4",
+            "app/src/accounts.cpp": "d1965776fefd8a870c0558f5bf3b7d2e40ece8fd9de078a86c514ba554cb3f92",
+            "app/src/agents.cpp": "ece887f91292f4f803e2d56ac4ced6d5b88a7c7f3136762c4c7302be55950ec9",
+            "app/src/keys.cpp": "e38795145cb1843a0bf5b6afb0f89c1d34f5e4b9ff00f536415d0f1cd2206869",
+            "app/src/addressbook.cpp": "5efecb61a6cc613a4d90be2cb0a740c5d65833c9a6f4c618fd0d7d6ae9dfa656",
+            "linux/src/app.rs": "b9be4dc0c21db6d73b4b9794c0f880e5de39a3eeb39796836f6ebdbd017c2e1e",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "linux/src/messages.rs": "082b0dbe21af179dd683e7717a8e85fc132f9824ac2593ccf737619b28df2ff5",
+            "linux/src/compose.rs": "e4e84b79dbb54a6db7e89a41460ea354d165514d0077bcb8e750652e80d29233",
+            "linux/src/words.rs": "dde79753e31d6d89cc5cb0be5e8b200021eeda0faeb34ed2bf6b3242f570a2ef",
+            "mac/Sources/InboxClassic/MainWindow.swift": "92ec176fc30d9249871f9d61d28171a10a9ebe7b46eda61203623175e54667b6",
+            "mac/Sources/InboxClassic/Mailbox.swift": "7a1ad5456e5599398d081cc3fa5274575d6bd4fbdc9104eaa285126e89263892",
+            "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+            "mac/Sources/InboxClassic/Outbox.swift": "6711c64e4ec076ca57bd85af00ae4acc3a026539fc4342048e5895f68eebbc48",
+            "core/crates/pe-ffi/src/lib.rs": "99a16c7943ab2abe323a740cef614a22e5fc61b268937c0fcafe3561866c4da9",
+            "app/src/columnrow.cpp": "8402477b7824486ba6047b045103414920671f497f4f75cb97bfb158e9ad70db"
+          },
+          "catalog_dependencies": {
+            "core/locales/lv/mac.ftl": "0573ae1fcbc70627c2cf2b7e9dba3d8cb8fc57eb399906bf95eb114caa5cf591",
+            "core/locales/lv/linux.ftl": "927dcd6cae9cc5d74b54c58df99249d36c1726ad3b1bca9f9b52c7fd3aa69054",
+            "core/locales/lv/app.ftl": "ddfcef09a053c2ce2ab4ba38d94cb9f6d0b6df2daf19ccec6c9c39fdd8894237",
+            "core/locales/lv/core.ftl": "f0e5a80ca048a12682a97364d934fab03f85ae4b2b14d4a4554f90cf664fbf3e",
+            "core/locales/lv/windows.ftl": "25490167effee0fab39db289e2423e68cf585c88e3f2d7d0aca98b1e01e742d9",
+            "core/locales/lv/help.ftl": "4e4f957c8d6813a008db61726b812fe070572b0b1778f2e37aefede4ef96900b"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "catalog_ids": [
+                  "cmd-sync",
+                  "cmd-sort-from",
+                  "ui-col-from",
+                  "ui-col-to"
+                ],
+                "finding": "SyncAll iterates accounts. Sorting and list headers identify sender or recipients; labels now name those people rather than using prepositions. Native Windows, Mac and Linux command placement compared.",
+                "evidence": [
+                  "core/commands.toml",
+                  "app/src/main.cpp",
+                  "app/src/columnrow.cpp",
+                  "linux/src/mailbox.rs",
+                  "mac/Sources/InboxClassic/MainWindow.swift"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "ui-newest-from",
+                  "ui-outbox-waits",
+                  "ui-outbox-sending",
+                  "ui-sent-at",
+                  "ui-from-account",
+                  "ui-checking",
+                  "ui-sign-in-refused"
+                ],
+                "finding": "Arbitrary sender/account names must remain uninflected. Notifications use a sender label; accounts follow a quoted head noun. Subjects in outgoing/sent statuses arrive already quoted.",
+                "evidence": [
+                  "core/crates/pe-core/src/text.rs",
+                  "app/src/main.cpp",
+                  "linux/src/app.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "ui-outbox-status-agent",
+                  "ui-col-queued"
+                ],
+                "finding": "not_before is the earliest sending threshold, not guaranteed sending or delivery. The already natural queue timestamp Rindā kopš is retained.",
+                "evidence": [
+                  "app/src/outbox.cpp",
+                  "mac/Sources/InboxClassic/Outbox.swift"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "ui-signature",
+                  "ui-signature-hint",
+                  "ui-signature-not-saved",
+                  "ui-signature-of",
+                  "win-signature-title",
+                  "win-signature-button"
+                ],
+                "finding": "These controls edit an account footer, so Paraksta teksts distinguishes them from digital signatures. Shared Remove uses ASCII T and the account button uses S.",
+                "evidence": [
+                  "app/src/compose.cpp",
+                  "app/src/accounts.cpp",
+                  "linux/src/compose.rs",
+                  "mac/Sources/InboxClassic/Compose.swift"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "ui-find-hint",
+                  "ui-find-tip",
+                  "ui-no-match-all",
+                  "ui-no-match-in",
+                  "ui-no-items"
+                ],
+                "finding": "Search indexes sender/recipient names and addresses, subject/body and attachment names. Its scope may be a combined view, so Meklēšanas vieta avoids calling every scope a folder.",
+                "evidence": [
+                  "core/crates/pe-store/src/search.rs",
+                  "core/crates/pe-core/src/search.rs",
+                  "app/src/mailbox.cpp",
+                  "linux/src/mailbox.rs",
+                  "mac/Sources/InboxClassic/Mailbox.swift"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "ui-not-a-picture"
+                ],
+                "finding": "Core picture_type/picture_uri accept PNG, JPEG, GIF and WebP, up to 10 MiB; file-read failure can also reach this error. Latvian covers insertion failure and those formats. English and the Windows picker filter omit WebP; this source discrepancy remains recorded, with no app/English edits.",
+                "evidence": [
+                  "core/crates/pe-html/src/editor.rs",
+                  "core/crates/pe-ffi/src/lib.rs",
+                  "app/src/compose.cpp"
+                ]
+              }
             ],
-            "scope_ids": [
-              "ui-account-sync",
-              "cmd-mark-all-read",
-              "cmd-new-folder",
-              "ui-account-move-up",
-              "ui-account-move-down",
-              "ui-account-properties"
-            ],
-            "pending_ids": [
-              "ui-account-sync",
-              "cmd-new-folder"
+            "limitations": [
+              "Source-based editorial review, not native-speaker certification. No test suites, builds, manual CI or GUI runtime execution."
             ]
           },
+          "mnemonic_scope_count": 55,
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lv-menu-compose-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lv-menu-compose-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lv-menu-compose-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lv-menu-compose-20261119-since.log",
+            "source-audit.json": "/private/tmp/inbox-lv-menu-compose-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lv-menu-compose-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lv-menu-compose-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lv-menu-compose-20261119-html.log",
+            "mnemonics-before.json": "/private/tmp/inbox-lv-menu-compose-20261119-mnemonics-before.json",
+            "mnemonics-after.json": "/private/tmp/inbox-lv-menu-compose-20261119-mnemonics-after.json",
+            "plurals.json": "/private/tmp/inbox-lv-menu-compose-20261119-plurals.json",
+            "substitutions.json": "/private/tmp/inbox-lv-menu-compose-20261119-substitutions.json"
+          }
+        }
+      ],
+      "pending_mnemonic_collisions": {
+        "checkpoint": "lv-menu-compose-status-20261119",
+        "status": "Every collision involving this batch is resolved across 55 checked scopes. The remaining M/M collision is between two pending agent-dialog labels; fix during that coherent dialog review. Source-only checks, no GUI execution.",
+        "collisions": [
           {
-            "scope": 39,
+            "scope": 22,
             "key": "m",
             "ids": [
-              "win-find-label",
-              "cmd-new-folder"
+              "ui-let-agents-connect",
+              "win-change"
             ],
             "scope_ids": [
-              "win-find-label",
-              "cmd-new-folder",
-              "ui-button-move",
-              "ui-cancel"
-            ],
-            "pending_ids": [
-              "win-find-label",
-              "cmd-new-folder"
-            ]
-          },
-          {
-            "scope": 40,
-            "key": "m",
-            "ids": [
-              "win-find-label",
-              "cmd-new-folder"
-            ],
-            "scope_ids": [
-              "win-find-label",
-              "cmd-new-folder",
-              "ui-button-copy",
-              "ui-cancel"
-            ],
-            "pending_ids": [
-              "win-find-label",
-              "cmd-new-folder"
+              "ui-let-agents-connect",
+              "win-agent-programs",
+              "win-change",
+              "ui-remove",
+              "win-what-agents-did",
+              "cmd-undo",
+              "ui-clear-button",
+              "win-undo-since",
+              "win-how-to-connect"
             ]
           }
         ]
@@ -80723,7 +80344,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 1,536 expected mark-only diagnostics. Exact reconstruction verifies one new catalog entry, two corrected previously reviewed log values and six complete help topics with 73 improved lines. Variables, plural branches, tags, attributes, controls, platform branches and literal keys/code are preserved. All three catalog changes are explained by current callers; existing compared values remain unchanged. Static Windows/Mac/Linux joins and current shortcut generation were inspected; historical English screenshots supply layout context. All 28 inventories, variables, marks and latest file/English hashes reconcile. Global diagnostics account for 23,952 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Source audit covers 195 refs/11 worktrees; no new translation source or changed upstream review input. Lithuanian has no pending catalog entries or help topics. Its three outstanding context comparisons are closed. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+    "latest_source_audit": "Latvian structural checks pass with 344 expected mark-only diagnostics. Exact reconstruction verifies 227 catalog entries: 60 improved values and 167 retained. IDs, variables, plural branches, access-key counts, comments and command ellipses are preserved. Static plural inspection covers 26 samples across zero/one/other; 14 placeable substitutions were inspected. No Fluent runtime execution claimed. All collisions involving reviewed labels are resolved in 55 checked menu/dialog scopes, including tray, sort, shared controls and read/unread/junk variants. The remaining M/M collision is between two pending agent-dialog labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows search/compose screenshots supply layout context; no Latvian GUI-fit claim. All 28 inventories, pending marks and latest file/English hashes reconcile. Global diagnostics account for 24,179 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Master-only source comparison has no changed review inputs. Per user instruction, the remaining queue is fixed to translations already on master; unmerged-source discovery is stopped. No local test suites, builds or manual CI; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -141539,7 +141160,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites."
+      "next": "Continue Latvian app.ftl at ui-unsubscribe, reviewing mail actions, folder operations and dialogs in coherent batches. Latvian has 431 app entries, 712 other catalog entries and 51 help topics pending. Resolve the remaining agent-dialog M/M keys during its label review. Finish the existing queues and context comparisons for all 27 remaining languages against translations already on master. Scope is fixed to master 8757ab1c per the November 19 user instruction; do not discover or wait for unmerged/new translation branches. Perform a final completeness audit of this fixed queue, then finish. Publish each validated batch promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -144459,7 +144080,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Continue Latvian app.ftl at ui-unsubscribe, reviewing mail actions, folder operations and dialogs in coherent batches. Latvian has 431 app entries, 712 other catalog entries and 51 help topics pending. Resolve the remaining agent-dialog M/M keys during its label review. Finish the existing queues and context comparisons for all 27 remaining languages against translations already on master. Scope is fixed to master 8757ab1c per the November 19 user instruction; do not discover or wait for unmerged/new translation branches. Perform a final completeness audit of this fixed queue, then finish. Publish each validated batch promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -146230,7 +145851,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.",
+      "next": "Continue Latvian app.ftl at ui-unsubscribe, reviewing mail actions, folder operations and dialogs in coherent batches. Latvian has 431 app entries, 712 other catalog entries and 51 help topics pending. Resolve the remaining agent-dialog M/M keys during its label review. Finish the existing queues and context comparisons for all 27 remaining languages against translations already on master. Scope is fixed to master 8757ab1c per the November 19 user instruction; do not discover or wait for unmerged/new translation branches. Perform a final completeness audit of this fixed queue, then finish. Publish each validated batch promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -148527,6 +148148,28 @@
         },
         "incoming_source": "Previously queued MCP phase3b integrated into active pending inventory. Latest source audit found no additional unmerged translation delta. Postmerge fetch advanced only master.",
         "validation": "All 28 structural checks and exact inventories reconciled; no local test suites, builds or manually launched CI. No linguistic review credit for this integration."
+      },
+      {
+        "batch_id": "lt-final-help-and-agent-context-20261119",
+        "pr": 210,
+        "url": "https://github.com/postalsys/inbox-classic/pull/210",
+        "review_commit": "8f695e813aa0c1a09ac4f2ead204dad35e331e04",
+        "merge_commit": "a3f6a880f0535b54c72c5fd84e9dae5a08d1df92",
+        "merged_at": "2026-11-19T05:07:51Z",
+        "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+        "branch": "i18n/review-resume-20261118",
+        "verified": "MERGED; review commit is an ancestor of master, exact tree equality, clean review worktree synchronized to origin/master",
+        "counts": {
+          "catalog_scope": 36408,
+          "help_scope": 1380,
+          "pending_catalog": 12490,
+          "pending_help": 589,
+          "completed_catalog": 23918,
+          "completed_help": 791
+        },
+        "language_status": "Lithuanian current catalog/help queues and three remaining context comparisons are complete. Other 27 languages remain pending.",
+        "incoming_source": "No additional unmerged translation source at the 195-ref/11-worktree audit. Postmerge fetch advanced only master.",
+        "validation": "Static structural/context/inventory checks; no local test suites, builds or manually launched CI."
       }
     ],
     "source_audit_helper_sha256": "187b1c07319c962244f6e3cb8c94de80aa00b92e79a80b1c788b8d3517681664",
@@ -158964,7 +158607,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "08b732d3b284defb985632d120178ad2bcbbb6332ac87b173674fa91f7e4dcf8",
       "core/locales/fi/core.ftl": "c55d1880e3d16b18db4c2b646240deef4dabee61bd153ec9a90ee4e23d3a3974",
-      "core/locales/GLOSSARY.md": "f89a31f1ced657f67fd2a7a52d9d6cd511859d95ff48a3fd7317178bbce0c644",
+      "core/locales/GLOSSARY.md": "da20db565a09151bfb396a971c8772d007fdc922b38f78f3f62e76223a324153",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "62ab48e44fd7d41da8088de4be5eb3b9225b8821e334511083e7a090c6ef91c7",
@@ -158979,7 +158622,7 @@
       "core/locales/lt/core.ftl": "d03751f0700f10da94a9c57d6d7ded5a22951ee80cd844f409b3d62e4448dd1b",
       "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
       "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e",
-      "core/locales/lv/app.ftl": "b51f23e217af3e53db457b296ad8f5df40fc02254f65448c00883eee79eb6832",
+      "core/locales/lv/app.ftl": "ddfcef09a053c2ce2ab4ba38d94cb9f6d0b6df2daf19ccec6c9c39fdd8894237",
       "core/locales/lv/core.ftl": "f0e5a80ca048a12682a97364d934fab03f85ae4b2b14d4a4554f90cf664fbf3e",
       "core/crates/pe-html/help/lv/sign-and-encrypt.html": "04da683f0f514c5bf330f883f2ffd542e7738ab5386a841f031f7663938d579f",
       "core/crates/pe-html/help/lv/write-message.html": "95cb710cef6abf3207ee9d820dc4c4f5b5e7036db9e02e20d14bf3c3f4055be7",
@@ -159258,7 +158901,7 @@
       "core/locales/it/app.ftl": "55011fc18d4cdeaad0d4e4cddacfdb813b20da79cc5bd1318ef0d72d7228eb5b",
       "core/locales/it/core.ftl": "166f1990a1ab1c7a70683b58fdba6f5c1d30a69a3c5da6c86d1e84b54ed9c2c7",
       "core/locales/it/windows.ftl": "cf3b3d84e58d47c9ee7b5a5a5310851699044c2f4cd98d4f6c2d10468b02a7d3",
-      "core/locales/lv/windows.ftl": "01efb70147c421c0b825b3b865f7bbb7c671b294e2c7638b17c9d5f48dd53e8f",
+      "core/locales/lv/windows.ftl": "25490167effee0fab39db289e2423e68cf585c88e3f2d7d0aca98b1e01e742d9",
       "core/locales/nb/app.ftl": "6cd470cc4e981fc59223a98b4c4ed3b6079f413af4ec0d4293a4e80335880d3b",
       "core/locales/nb/core.ftl": "72cdb8703037f6bac7f1389995ba582718234feca383428a775ef61ebc4cbab2",
       "core/locales/nb/windows.ftl": "dbd2f3fd91253a94eeeaaac9bea46f413053ddbceba47ee907ea90c1e9ba9c8f",
@@ -185579,6 +185222,45 @@
           "/private/tmp/inbox-lt-final-help-20261119-finalize.py": "4fc4fa2401a134db176c7db6582c366a0d211086b9af636f247b0822e3ac5973",
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
         }
+      },
+      {
+        "batch": "lv-menu-compose-status-20261119",
+        "review_parent": "8757ab1c234bf3549979c06fdca14980fd3f9b80",
+        "counts": {
+          "catalog_scope": 36408,
+          "help_scope": 1380,
+          "pending_catalog": 12263,
+          "pending_help": 589,
+          "completed_catalog": 24145,
+          "completed_help": 791
+        },
+        "validation": "Latvian structural checks pass with 344 expected mark-only diagnostics. Exact reconstruction verifies 227 catalog entries: 60 improved values and 167 retained. IDs, variables, plural branches, access-key counts, comments and command ellipses are preserved. Static plural inspection covers 26 samples across zero/one/other; 14 placeable substitutions were inspected. No Fluent runtime execution claimed. All collisions involving reviewed labels are resolved in 55 checked menu/dialog scopes, including tray, sort, shared controls and read/unread/junk variants. The remaining M/M collision is between two pending agent-dialog labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows search/compose screenshots supply layout context; no Latvian GUI-fit claim. All 28 inventories, pending marks and latest file/English hashes reconcile. Global diagnostics account for 24,179 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Master-only source comparison has no changed review inputs. Per user instruction, the remaining queue is fixed to translations already on master; unmerged-source discovery is stopped. No local test suites, builds or manual CI; REVIEWED unchanged.",
+        "source_audit": {
+          "scope": "master only, fixed translation inventory",
+          "master": "8757ab1c234bf3549979c06fdca14980fd3f9b80",
+          "scope_master": "8757ab1c234bf3549979c06fdca14980fd3f9b80",
+          "changed_review_paths": [],
+          "changed_refs": {
+            "refs/remotes/origin/master": "8757ab1c234bf3549979c06fdca14980fd3f9b80"
+          },
+          "unmerged_source_discovery": "Stopped per explicit user instruction on November 19; all requested translations are on master. No feature-branch or other-worktree translation queues are added.",
+          "upstream_since_previous_batch": {
+            "from": "a3f6a880f0535b54c72c5fd84e9dae5a08d1df92",
+            "to": "8757ab1c234bf3549979c06fdca14980fd3f9b80",
+            "translation_delta": [],
+            "note": "PR208 changes SVG preview bounds only; no catalog/help delta."
+          }
+        },
+        "upstream_inputs_check": {
+          "master": "8757ab1c234bf3549979c06fdca14980fd3f9b80",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lv-menu-compose-20261119-edit.py": "62454fbc827879fbcc1a67f5f40847146fcdcc20ef61d6800b9e998e539bca79",
+          "/private/tmp/inbox-lv-menu-compose-20261119-finalize.py": "106e97d8a643ded456b8418af95e1c2c4dc9591c4c2bd671846ce8130e6ba557",
+          "/private/tmp/inbox-lv-menu-compose-20261119-static.py": "c8ecd0972391150401a3062b2d3a521076459355a10244a16363528c1fe36be4",
+          "/private/tmp/inbox-lv-menu-compose-20261119-scopes.py": "0339ff54c9e043ff1db35b0510edfa18635b2caafeb5fca04309e50a66b5bcf4"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -194889,7 +194571,8 @@
         "status": "pending targeted comparison",
         "source_checkpoint": "344832fa51a63041a5afad8f96ca5b9bd9189d3f",
         "completed_languages": [
-          "lt"
+          "lt",
+          "lv"
         ],
         "pending_languages": [
           "bg",
@@ -194904,7 +194587,6 @@
           "hr",
           "hu",
           "it",
-          "lv",
           "nl",
           "pl",
           "pt",
@@ -194938,7 +194620,16 @@
             ]
           }
         ],
-        "instruction": "Compare this insertion error against supported types and file-read failure. Retain accurate wording and reopen only affected entries; no additional scope credit until identified. English/app code remains outside this review."
+        "instruction": "Compare this insertion error against supported types and file-read failure. Retain accurate wording and reopen only affected entries; no additional scope credit until identified. English/app code remains outside this review.",
+        "completed_language_reviews": {
+          "lv": {
+            "batch": "lv-menu-compose-status-20261119",
+            "catalog_ids": [
+              "ui-not-a-picture"
+            ],
+            "note": "Corrected error against accepted formats and insertion/file-read failure. Source discrepancy remains recorded; no additional completion credit."
+          }
+        }
       },
       {
         "id": "reader-account-dialog-context-20261119",
@@ -196761,7 +196452,22 @@
         "requires_gui_validation": false,
         "validation_limit": "No GUI printing was run; this closes only the translation-context integration follow-up."
       }
-    ]
+    ],
+    "review_scope": {
+      "mode": "master_only_fixed_queue",
+      "established_on": "2026-11-19",
+      "master_commit": "8757ab1c234bf3549979c06fdca14980fd3f9b80",
+      "user_instruction": "the main developer has commited all translatable strings to master by now, so no new string should be added, whatever is in master and needs reviewing is what needs to be edited and thats it",
+      "catalog_scope": 36408,
+      "help_scope": 1380,
+      "pending_at_scope_freeze": {
+        "catalog_entries": 12490,
+        "help_topics": 589,
+        "languages": 27
+      },
+      "policy": "Finish this merged translation inventory and existing context corrections; no unmerged-source discovery or open-ended waiting for additions. Keep normal synchronization with master when publishing. Final audit verifies this fixed queue is fully reviewed.",
+      "supersedes": "Earlier instructions to discover new language branches and repeatedly wait for late arrivals."
+    }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [

@@ -6,55 +6,42 @@ Commit completed batches regularly and preserve an exact resume point.
 ## Resume here
 
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`; branch `i18n/review-resume-20261118`.
-  Created from GitHub master `45f519ae` on November 18 after the main worker merged the available translations.
-  The old `build/i18n-wave1` worktree no longer exists. All older checkout references below are historical.
-- **Next: Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.**
+  The old `build/i18n-wave1` worktree no longer exists. Older checkout references below are historical.
+- **Scope fixed by the user on November 19:** all requested translatable strings are already on master.
+  Finish what needs review in master `8757ab1c234bf3549979c06fdca14980fd3f9b80`, then stop.
+  Do not discover unmerged translation branches or wait for further additions. Historical late-arrival rules below
+  are superseded by this instruction. Keep normal master synchronization for publication and a final completeness audit.
+- **Next: Continue Latvian app.ftl at ui-unsubscribe, reviewing mail actions, folder operations and dialogs in coherent batches. Latvian has 431 app entries, 712 other catalog entries and 51 help topics pending. Resolve the remaining agent-dialog M/M keys during its label review. Finish the existing queues and context comparisons for all 27 remaining languages against translations already on master. Scope is fixed to master 8757ab1c per the November 19 user instruction; do not discover or wait for unmerged/new translation branches. Perform a final completeness audit of this fixed queue, then finish. Publish each validated batch promptly; no local test suites.**
 - Current scope: 36,408 catalog entries and 1,380 help topics.
-  Completed: 23,918 entries and 791 full topics;
-  pending: 12,490 entries and 589 topics.
-  All 28 language directories are inventoried; no new languages were added at this source checkpoint.
-- Resumed source audit: 250 translated files changed since `31f89fa7`, with every changed value/passage marked.
-  Merged agent read-log/terminal/organize additions and preview tiles/protected-part additions are now in the exact queue.
-  English source fixes `22e156ab` / `8a4a143f` are incorporated; older runtime/source-issue notes below are historical.
-  Recheck current behavior before reviewing those new drafts, especially protected attachment previews and agent access.
-- Linux compose-menu paths are reviewed in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk.
-  The preceding menu followup restored 16 full topics after reviewing 32 reopened passages. Three wording lines improved;
-  other good wording retained. Compose additions and Linux-menu followups are complete in all 28 languages. The broader round remains active.
-- Scope totals are rebuilt from exact completed/pending ID and topic unions. Earlier summary arithmetic omitted
-  four recorded catalog entries and twelve recorded help topics; correcting that discrepancy adds no review credit.
-- Source discovery now covers 195 refs and 11 worktrees. `feat/preview-cid` at `6a37b3de` merged in PR 159; its 56 new translated
-  help passages are now in the active queue (32 reopened completed topics and four newly in round scope). MCP phase3 translations were committed during the Finnish batch; the exact source commit and
-  added/changed IDs are recorded in `resumed_incoming_source_queue`. MCP phase3a and phase3b are now integrated with exact marked additions. Preview-cid is integrated.
-  Recheck their latest tips and integration status at the next checkpoint.
-- Initial resumption checks covered all 28 languages; the latest Lithuanian help batch checks and counts are recorded below.
-- The generated review report is `/Users/andris/Projects/PostalExpress/build/i18n-review.html`, regenerated from this checkout.
-- Review guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`, unchanged SHA-256 `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`.
-  Starting commit remains `e99f7e59248bed137903150db7ef417e27755d18` and review baseline remains `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
-- Exact source deltas, pending IDs/topics, file/source hashes and source refs are in
-  `translation-review-state.json` under `review_workspace.resume_source_checkpoint`.
-  Historical completed batches and round-1 archives are preserved. Do not use old hardcoded-worktree helpers
-  without redirecting their root and checking their assumptions.
-- Standing publication authorization: push and merge each validated batch into GitHub master, then fetch and
-  fast-forward this clean review branch. No local test suites and no manually launched CI runs.
-
-- Latest batch: Lithuanian final help and agent-context review: one new entry, two corrected older log values, six complete help topics and 73 improved wording lines. Lithuanian structural checks pass with 1,536 expected mark-only diagnostics. Exact reconstruction verifies one new catalog entry, two corrected previously reviewed log values and six complete help topics with 73 improved lines. Variables, plural branches, tags, attributes, controls, platform branches and literal keys/code are preserved. All three catalog changes are explained by current callers; existing compared values remain unchanged. Static Windows/Mac/Linux joins and current shortcut generation were inspected; historical English screenshots supply layout context. All 28 inventories, variables, marks and latest file/English hashes reconcile. Global diagnostics account for 23,952 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Source audit covers 195 refs/11 worktrees; no new translation source or changed upstream review input. Lithuanian has no pending catalog entries or help topics. Its three outstanding context comparisons are closed. No local test suites, builds or manually launched CI; REVIEWED unchanged.
-- Publication checkpoint: [PR #209](https://github.com/postalsys/inbox-classic/pull/209) merged the MCP phase3b queue integration and review-marker fixes as `af5e7b79` on November 19 at 04:54 UTC. This batch started from that clean master checkpoint.
-
-- The full-topic completion count fell by 44 because new marked passages reopened previously completed topics. Prior reviewed prose and review history remain intact; four other changed topics entered this round’s scope. That integration gave all 28 languages pending work; the current Lithuanian queue is now clear.
-
-- Integrated phase3b contains one new string and agents-connect help additions per language. The old cumulative figures included phase3a, which was already in the active queue. Exact deltas and prior queue history are preserved.
-
-- Current late-arrival integration: MCP phase3b is in the active queue, not a separate future addition. The full-topic completion count decreases by one because Hungarian agents-connect gained two pending paragraphs. Its earlier review remains recorded. No newly added languages were found.
-
-- Current language status: Lithuanian has no pending strings, help topics or queued context comparisons. The remaining 27 languages still have work. This is a source-based editorial review, not a native-speaker or localized GUI-fit certification.
+  Completed: 24,145 entries and 791 full topics;
+  pending: 12,263 entries and 589 topics across 27 languages.
+  All 28 language directories are inventoried. Lithuanian has no pending IDs/topics or context comparisons.
+- Latest batch: Latvian menus, compose controls, search and statuses: 227 entries reviewed, 60 improved values.
+  Latvian structural checks pass with 344 expected mark-only diagnostics. Exact reconstruction verifies 227 catalog entries: 60 improved values and 167 retained. IDs, variables, plural branches, access-key counts, comments and command ellipses are preserved. Static plural inspection covers 26 samples across zero/one/other; 14 placeable substitutions were inspected. No Fluent runtime execution claimed. All collisions involving reviewed labels are resolved in 55 checked menu/dialog scopes, including tray, sort, shared controls and read/unread/junk variants. The remaining M/M collision is between two pending agent-dialog labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows search/compose screenshots supply layout context; no Latvian GUI-fit claim. All 28 inventories, pending marks and latest file/English hashes reconcile. Global diagnostics account for 24,179 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Master-only source comparison has no changed review inputs. Per user instruction, the remaining queue is fixed to translations already on master; unmerged-source discovery is stopped. No local test suites, builds or manual CI; REVIEWED unchanged.
+- Latvian now has 1,143 catalog entries and 51 help topics pending. The remaining access-key collision is
+  `ui-let-agents-connect` / `win-change` (M), both pending. Picture-format context comparison is complete for Latvian.
+- Publication checkpoint: [PR #210](https://github.com/postalsys/inbox-classic/pull/210) merged the final Lithuanian batch as `a3f6a880` at 05:07 UTC on November 19. The clean worktree then advanced to master `8757ab1c`; its SVG fix has no translation changes.
+- MCP phase3a, phase3b and preview-CID translations are integrated into the fixed inventory. No separate incoming
+  source remains to merge. Prior source audits and exact deltas remain recorded as history.
+- Exact inventories, completed batches and latest file/source hashes are in `translation-review-state.json`.
+  `review_workspace.review_scope` records the fixed scope and the user's instruction. Reuse helpers only after
+  checking their root and assumptions; older source-audit loops must not reopen unmerged translation queues.
+- Review guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`; SHA-256
+  `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`.
+  Round start remains `e99f7e59248bed137903150db7ef417e27755d18`; review baseline remains
+  `7c0b1672581c9bd7a33c226f35da16cedca4b528` until the fixed queue is complete.
+- Review HTML: `/Users/andris/Projects/PostalExpress/build/i18n-review.html`, regenerated from this checkout.
+- Standing authorization: push and merge each validated batch into GitHub master, then synchronize this clean branch.
+  No local test suites, builds for ordinary catalog/help batches, manually launched CI or releases.
+- Validation is source-based editorial review and structural checks, not native-speaker or localized GUI-fit certification.
 
 ## Review and checkpoint rules
 
 - Check callers, surrounding controls and actual behavior. Preserve variables, appropriate plurals, literal
   keyboard names, control references, links and platform-specific help branches. Keep terminology consistent.
 - Remove marks only for messages/passages actually reviewed. Leave uncertain content marked and explain it.
-- After the current queue is complete, check master, the source feature branch and this worktree for new
-  languages, new strings and later edits, including already reviewed content. Process those before completion.
+- User scope update, November 19: finish the translations already on master at `8757ab1c`. Do not discover
+  unmerged translation branches or wait for additions. Audit this fixed inventory for completeness before finishing.
 - Keep `REVIEWED` unchanged until the full round is complete. During partial review, reconcile the review
   checker's unmarked-change reports with the completed inventory.
 - `scripts/check-language.mjs` now exists but requires every message/help page to remain marked. Its mark-only
@@ -3188,3 +3175,17 @@ The three remaining Lithuanian context comparisons are closed, including unchang
 Completed: 23,918 catalog entries and 791 full help topics. Pending: 12,490 entries and 589 topics.
 
 Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.
+
+### Latvian menus, compose controls and status messages
+
+Reviewed 222 Latvian app entries and five coupled Windows labels. Improved 60 values and retained 167. Clarified search fields and combined scopes, sender/account placeholders, earliest sending time, failure statuses and account signature text. Added supported WebP to the image-insertion error. Coordinated ASCII access keys across main/context/tray/sort menus and shared dialogs; existing counted grammar is retained.
+
+Latvian structural checks pass with 344 expected mark-only diagnostics. Exact reconstruction verifies 227 catalog entries: 60 improved values and 167 retained. IDs, variables, plural branches, access-key counts, comments and command ellipses are preserved. Static plural inspection covers 26 samples across zero/one/other; 14 placeable substitutions were inspected. No Fluent runtime execution claimed. All collisions involving reviewed labels are resolved in 55 checked menu/dialog scopes, including tray, sort, shared controls and read/unread/junk variants. The remaining M/M collision is between two pending agent-dialog labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows search/compose screenshots supply layout context; no Latvian GUI-fit claim. All 28 inventories, pending marks and latest file/English hashes reconcile. Global diagnostics account for 24,179 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Master-only source comparison has no changed review inputs. Per user instruction, the remaining queue is fixed to translations already on master; unmerged-source discovery is stopped. No local test suites, builds or manual CI; REVIEWED unchanged.
+
+The user fixed the task scope to translations already on master. The remaining queue is finite; earlier open-ended source discovery is superseded. The Latvian picture-format context check is closed without duplicate review credit.
+
+Publication checkpoint: [PR #210](https://github.com/postalsys/inbox-classic/pull/210) merged the final Lithuanian batch as `a3f6a880` at 05:07 UTC on November 19. The clean worktree then advanced to master `8757ab1c`; its SVG fix has no translation changes.
+
+Completed: 24,145 catalog entries and 791 full topics. Pending: 12,263 entries and 589 topics.
+
+Continue Latvian app.ftl at ui-unsubscribe, reviewing mail actions, folder operations and dialogs in coherent batches. Latvian has 431 app entries, 712 other catalog entries and 51 help topics pending. Resolve the remaining agent-dialog M/M keys during its label review. Finish the existing queues and context comparisons for all 27 remaining languages against translations already on master. Scope is fixed to master 8757ab1c per the November 19 user instruction; do not discover or wait for unmerged/new translation branches. Perform a final completeness audit of this fixed queue, then finish. Publish each validated batch promptly; no local test suites.

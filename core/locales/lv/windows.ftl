@@ -32,12 +32,10 @@ win-list-loading = Ielādē...
 
 ## Buttons and words used in many windows
 
-# review: new
 win-delete-button = &Dzēst
 # review: new
 win-find-label = &Meklēt:
-# review: new
-win-save-as-button = Saglabāt &kā...
+win-save-as-button = &Saglabāt kā...
 # review: new
 win-too-many-files = Pārāk daudz failu vienlaikus: izvēlieties mazāk.
 
@@ -62,8 +60,7 @@ win-format-link = Hipersaite ({ $ctrl }+K)
 win-show-cc = &Kopija
 # review: new
 win-show-bcc = &Diskrētā kopija
-# review: new
-win-signature-title = Paraksts: { $account }
+win-signature-title = Paraksta teksts: { $account }
 
 ## The folders, the message list and the reading pane
 
@@ -109,7 +106,6 @@ win-files-not-saved = { $failed } no { $count } failiem nevarēja saglabāt.
 win-new-folder-in-highlighted = Jaunā mape tiks izveidota atlasītajā mapē.
 # review: new
 win-delete-folder-ask = Dzēst mapi „{ $folder }” ar tās ziņojumiem un tajā esošajām mapēm? Tā tiek izdzēsta arī serverī.
-# review: new
 win-rename = &Pārdēvēt...
 # review: new
 win-messages-not-saved = Ziņojumus nevarēja saglabāt.
@@ -132,8 +128,7 @@ win-browser-sign-in = (pierakstīšanās pārlūkā)
 win-add = &Pievienot...
 # review: new
 win-properties-button = &Rekvizīti...
-# review: new
-win-signature-button = Parak&sts...
+win-signature-button = Parak&sta teksts...
 # review: new
 win-sign-in-apps-button = Pierakstīšanās &lietotnes...
 
