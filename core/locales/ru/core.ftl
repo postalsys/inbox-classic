@@ -776,6 +776,167 @@ agent-log-watched = Включено отслеживание беседы «{ $
 agent-log-ignored = Включено игнорирование беседы «{ $subject }»
 # review: new
 agent-log-unmarked = Отменено отслеживание или игнорирование беседы «{ $subject }»
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = сообщение с тех пор было изменено
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Отмечено как прочитанное: { $count } сообщение (поиск: { $query })
+    [few] Отмечено как прочитанные: { $count } сообщения (поиск: { $query })
+    [many] Отмечено как прочитанные: { $count } сообщений (поиск: { $query })
+   *[other] Отмечено как прочитанные: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Отмечено как непрочитанное: { $count } сообщение (поиск: { $query })
+    [few] Отмечено как непрочитанные: { $count } сообщения (поиск: { $query })
+    [many] Отмечено как непрочитанные: { $count } сообщений (поиск: { $query })
+   *[other] Отмечено как непрочитанные: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Помечено флажком: { $count } сообщение (поиск: { $query })
+    [few] Помечено флажком: { $count } сообщения (поиск: { $query })
+    [many] Помечено флажком: { $count } сообщений (поиск: { $query })
+   *[other] Помечено флажком: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Флажок снят: { $count } сообщение (поиск: { $query })
+    [few] Флажок снят: { $count } сообщения (поиск: { $query })
+    [many] Флажок снят: { $count } сообщений (поиск: { $query })
+   *[other] Флажок снят: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Помечено флажком: { $count } сообщение
+    [few] Помечено флажком: { $count } сообщения
+    [many] Помечено флажком: { $count } сообщений
+   *[other] Помечено флажком: { $count } сообщения
+}, цвет: { $color ->
+    [red] красный
+    [orange] оранжевый
+    [yellow] желтый
+    [green] зеленый
+    [blue] синий
+    [purple] фиолетовый
+   *[gray] серый
+} (поиск: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Перемещено в папку «{ $folder }»: { $count } сообщение (поиск: { $query })
+    [few] Перемещено в папку «{ $folder }»: { $count } сообщения (поиск: { $query })
+    [many] Перемещено в папку «{ $folder }»: { $count } сообщений (поиск: { $query })
+   *[other] Перемещено в папку «{ $folder }»: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Архивировано: { $count } сообщение (поиск: { $query })
+    [few] Архивировано: { $count } сообщения (поиск: { $query })
+    [many] Архивировано: { $count } сообщений (поиск: { $query })
+   *[other] Архивировано: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Помечено как нежелательное: { $count } сообщение (поиск: { $query })
+    [few] Помечено как нежелательные: { $count } сообщения (поиск: { $query })
+    [many] Помечено как нежелательные: { $count } сообщений (поиск: { $query })
+   *[other] Помечено как нежелательные: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Снята пометка нежелательной почты: { $count } сообщение (поиск: { $query })
+    [few] Снята пометка нежелательной почты: { $count } сообщения (поиск: { $query })
+    [many] Снята пометка нежелательной почты: { $count } сообщений (поиск: { $query })
+   *[other] Снята пометка нежелательной почты: { $count } сообщения (поиск: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Удалено: { $count } сообщение (поиск: { $query })
+    [few] Удалено: { $count } сообщения (поиск: { $query })
+    [many] Удалено: { $count } сообщений (поиск: { $query })
+   *[other] Удалено: { $count } сообщения (поиск: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] За последние 15 минут
+    [hour] За последний час
+    [hours] За последние 4 часа
+    [day] За последние 24 часа
+    [week] За последние 7 дней
+   *[all] За последние 30 дней
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] За это время программа { $program } не внесла изменений, которые можно отменить.
+    [one] Отменить { $count } изменение, внесенное программой { $program } за это время?
+    [few] Отменить { $count } изменения, внесенные программой { $program } за это время?
+    [many] Отменить { $count } изменений, внесенных программой { $program } за это время?
+   *[other] Отменить { $count } изменения, внесенные программой { $program } за это время?
+}
+# review: new
+agent-undo-since-detail = Сообщения вернутся в исходные папки, отметки о прочтении и флажки станут такими, какими были, а сообщения, которые еще ждут в папке «Исходящие», будут удалены. То, что с тех пор изменили вы или сервер, останется как есть.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Ничего не отменено.
+    [one] Отменено { $count } изменение.
+    [few] Отменено { $count } изменения.
+    [many] Отменено { $count } изменений.
+   *[other] Отменено { $count } изменения.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] { $count } сообщение уже находилось не там, куда его поместило изменение.
+    [few] { $count } сообщения уже находились не там, куда их поместило изменение.
+    [many] { $count } сообщений уже находились не там, куда их поместило изменение.
+   *[other] { $count } сообщения уже находились не там, куда их поместило изменение.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] { $count } сообщение с тех пор было изменено вами или на сервере и оставлено как есть.
+    [few] { $count } сообщения с тех пор были изменены вами или на сервере и оставлены как есть.
+    [many] { $count } сообщений с тех пор были изменены вами или на сервере и оставлены как есть.
+   *[other] { $count } сообщения с тех пор были изменены вами или на сервере и оставлены как есть.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] { $count } сообщение уже покинуло папку «Исходящие».
+    [few] { $count } сообщения уже покинули папку «Исходящие».
+    [many] { $count } сообщений уже покинули папку «Исходящие».
+   *[other] { $count } сообщения уже покинули папку «Исходящие».
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] { $count } изменение нельзя отменить.
+    [few] { $count } изменения нельзя отменить.
+    [many] { $count } изменений нельзя отменить.
+   *[other] { $count } изменения нельзя отменить.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Это сообщение принимает приглашение «{ $summary }» ({ $when }).
+    [tentative] Это сообщение предварительно принимает приглашение «{ $summary }» ({ $when }).
+   *[decline] Это сообщение отклоняет приглашение «{ $summary }» ({ $when }).
+} Календарь организатора учтет этот ответ. Ваш ответ на приглашение изменится только после отправки сообщения.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Принято: { $summary }
+    [tentative] Под вопросом: { $summary }
+   *[decline] Отклонено: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } принимает это приглашение.
+    [tentative] { $name } предварительно принимает это приглашение.
+   *[decline] { $name } отклоняет это приглашение.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

@@ -446,6 +446,13 @@ ui-clear-agent-log-detail = Time se neće poništiti promjene koje su agenti nap
 ui-let-agents-connect = &Dopusti AI agentima povezivanje s programom Inbox Classic
 ui-change-button = Promijeni…
 ui-undo-button = Poništi
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Poništi od…
+# review: new
+ui-undo-since-span = Poništi ono što je ovaj program napravio:
+# review: new
+ui-take-back = Poništi
 ui-rules-title = Pravila za poruke
 ui-rules-intro = Pravila obrađuju nove poruke u mapi Ulazna pošta dok Inbox Classic radi. Pravila čije uvjete poruka ispunjava izvršavaju se redoslijedom na popisu. Kad pravilo premjesti poruku iz mape Ulazna pošta, na nju se više ne primjenjuju druga pravila.
 ui-rules-none = Još nema pravila. Kliknite Novo da biste ga stvorili.

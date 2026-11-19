@@ -537,6 +537,135 @@ agent-log-watched = Conversation « { $subject } » surveillée
 agent-log-ignored = Conversation « { $subject } » ignorée
 # review: new
 agent-log-unmarked = La conversation « { $subject } » n'est plus surveillée ni ignorée
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = le message a été modifié depuis
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] { $count } message marqué comme lu (recherche : { $query })
+   *[other] { $count } messages marqués comme lus (recherche : { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] { $count } message marqué comme non lu (recherche : { $query })
+   *[other] { $count } messages marqués comme non lus (recherche : { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Indicateur ajouté à { $count } message (recherche : { $query })
+   *[other] Indicateur ajouté à { $count } messages (recherche : { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Indicateur retiré de { $count } message (recherche : { $query })
+   *[other] Indicateur retiré de { $count } messages (recherche : { $query })
+}
+# review: new
+agent-log-bulk-color = Indicateur { $color ->
+    [red] rouge
+    [orange] orange
+    [yellow] jaune
+    [green] vert
+    [blue] bleu
+    [purple] violet
+   *[gray] gris
+} { $count ->
+    [one] ajouté à { $count } message
+   *[other] ajouté à { $count } messages
+} (recherche : { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] { $count } message déplacé vers { $folder } (recherche : { $query })
+   *[other] { $count } messages déplacés vers { $folder } (recherche : { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] { $count } message archivé (recherche : { $query })
+   *[other] { $count } messages archivés (recherche : { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] { $count } message marqué comme indésirable (recherche : { $query })
+   *[other] { $count } messages marqués comme indésirables (recherche : { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] { $count } message marqué comme non indésirable (recherche : { $query })
+   *[other] { $count } messages marqués comme non indésirables (recherche : { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] { $count } message supprimé (recherche : { $query })
+   *[other] { $count } messages supprimés (recherche : { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Au cours des 15 dernières minutes
+    [hour] Au cours de la dernière heure
+    [hours] Au cours des 4 dernières heures
+    [day] Au cours des dernières 24 heures
+    [week] Au cours des 7 derniers jours
+   *[all] Au cours des 30 derniers jours
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } n’a fait aucune modification pouvant être annulée pendant cette période.
+    [one] Annuler la modification faite par { $program } pendant cette période ?
+   *[other] Annuler les { $count } modifications faites par { $program } pendant cette période ?
+}
+# review: new
+agent-undo-since-detail = Les messages retournent dans les dossiers d’où ils venaient, l’état lu ou non lu et les indicateurs reprennent leur valeur d’avant, et les messages qui attendent encore dans la Boîte d’envoi sont supprimés. Ce que vous ou le serveur avez modifié depuis reste inchangé.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Rien n’a été annulé.
+    [one] { $count } modification annulée.
+   *[other] { $count } modifications annulées.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] { $count } message n’était plus là où la modification l’avait placé.
+   *[other] { $count } messages n’étaient plus là où la modification les avait placés.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] { $count } message a été modifié depuis, par vous ou sur le serveur, et est resté inchangé.
+   *[other] { $count } messages ont été modifiés depuis, par vous ou sur le serveur, et sont restés inchangés.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] { $count } message avait déjà quitté la Boîte d’envoi.
+   *[other] { $count } messages avaient déjà quitté la Boîte d’envoi.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] { $count } modification ne peut pas être annulée.
+   *[other] { $count } modifications ne peuvent pas être annulées.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Ce message accepte l’invitation « { $summary } » ({ $when }).
+    [tentative] Ce message accepte provisoirement l’invitation « { $summary } » ({ $when }).
+   *[decline] Ce message refuse l’invitation « { $summary } » ({ $when }).
+} Le calendrier de l’organisateur l’enregistre. Votre réponse à l’invitation ne change qu’une fois le message envoyé.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Accepté : { $summary }
+    [tentative] Provisoire : { $summary }
+   *[decline] Refusé : { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } a accepté cette invitation.
+    [tentative] { $name } a accepté provisoirement cette invitation.
+   *[decline] { $name } a refusé cette invitation.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

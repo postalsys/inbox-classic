@@ -279,9 +279,22 @@ impl Core {
     /// on the server in the background, as the actions on one message do. Returns what the status bar says, "Moved 3
     /// messages to Archive". A move, delete into Deleted Items or junk becomes what Edit > Undo takes back.
     pub fn act(&self, refs: &[MessageRef], action: Action) -> Result<String> {
+        let (text, undo) = self.act_untracked(refs, action)?;
+        // what moved can be taken back; what is gone for good ends what came before it
+        if let Some(what) = action.undo_name() {
+            self.sent_not_last();
+            *self.undo.lock().unwrap_or_else(|e| e.into_inner()) =
+                (!undo.is_empty()).then_some(Undo { what, moves: undo });
+        }
+        Ok(text)
+    }
+
+    /// [`Core::act`] without making it what Edit > Undo takes back (an AI agent's change has its own Undo, in the
+    /// agents' log): what the status bar says, and the messages that moved
+    pub(crate) fn act_untracked(&self, refs: &[MessageRef], action: Action) -> Result<(String, Vec<UndoMove>)> {
         match action {
-            Action::Watch => return self.mark_conversations(refs, pe_store::ThreadMark::Watch),
-            Action::Ignore => return self.mark_conversations(refs, pe_store::ThreadMark::Ignore),
+            Action::Watch => return Ok((self.mark_conversations(refs, pe_store::ThreadMark::Watch)?, Vec::new())),
+            Action::Ignore => return Ok((self.mark_conversations(refs, pe_store::ThreadMark::Ignore)?, Vec::new())),
             _ => {}
         }
         let picked = self.store().picked(refs)?;
@@ -328,13 +341,7 @@ impl Core {
             }
         }
         let text = self.done_text(action, picked.len() as u64, &undo, crossed)?;
-        // what moved can be taken back; what is gone for good ends what came before it
-        if let Some(what) = undo_name {
-            self.sent_not_last();
-            *self.undo.lock().unwrap_or_else(|e| e.into_inner()) =
-                (!undo.is_empty()).then_some(Undo { what, moves: undo });
-        }
-        Ok(text)
+        Ok((text, undo))
     }
 
     /// Moves (or copies) messages of `folder` to `to`: in their account with one command, to another account through

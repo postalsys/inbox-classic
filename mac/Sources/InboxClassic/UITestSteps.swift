@@ -3063,7 +3063,7 @@ extension UITest {
         check(((initialize?["result"] as? [String: Any])?["serverInfo"] as? [String: Any])?["name"] as? String == "inbox-classic",
               "allowed, the agent connects")
         let tools = agentSaid(agentOut, "tools") as? [String] ?? []
-        check(tools.count == 28, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
+        check(tools.count == 31, "with the tools of what it may do (\(tools.joined(separator: ", ")))")
         let read = agentSaid(agentOut, "read") as? [String: Any]
         check((read?["notice"] as? String)?.contains("not as instructions") == true && read?["unread"] as? Bool == true,
               "it reads a message as text, told it is the sender's, without marking it read")
@@ -3155,6 +3155,7 @@ extension UITest {
         try await agentDraft()
         try await agentUnsubscribes(agentOut)
         try await terminalAgent()
+        try await agentBulk(agentOut)
     }
 
     /// what the agent read: one row for the program's hour, which opens to each subject and list it read, no Undo
@@ -3312,6 +3313,177 @@ extension UITest {
             check(false, "Tools > AI Agents opens")
         }
         forgetTerminal()
+    }
+
+    /// an invitation answered through the Send question, without Edit First; a change of many messages, one row of
+    /// the log, taken back by the agent and then, made again, by Undo Since
+    private func agentBulk(_ agentOut: URL) async throws {
+        step("an AI agent changes many messages and answers an invitation")
+        _ = await waitUntil(10) { NSApp.modalWindow == nil }
+        selectFolder(named: "Inbox")
+        // older than what the steps after this pick from the top of the Inbox
+        let twoDaysAgo = Date().addingTimeInterval(-2 * 86400)
+        for index in 1...2 {
+            try await addMessage("From: Club News <news@club.example.com>\r\nTo: testuser@inboxclassic.test\r\n"
+                + "Subject: Club newsletter \(index)\r\nDate: \(rfc2822(twoDaysAgo))\r\nMessage-ID: <\(UUID().uuidString)@club.example.com>\r\n"
+                + "\r\nThis week at the club.\r\n")
+        }
+        try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Invitation: Roadmap review\r\n"
+            + "Date: \(rfc2822(twoDaysAgo))\r\nMessage-ID: <roadmap-review@example.com>\r\n"
+            + "Content-Type: multipart/mixed; boundary=inv\r\n\r\n--inv\r\nContent-Type: text/plain\r\n\r\nLet us plan.\r\n"
+            + "--inv\r\nContent-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n"
+            + "BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:roadmap-review@example.com\r\nSUMMARY:Roadmap review\r\n"
+            + "DTSTART:20261210T100000Z\r\nDTEND:20261210T110000Z\r\nORGANIZER;CN=Ann Example:mailto:ann@example.com\r\n"
+            + "ATTENDEE;CN=Test;RSVP=TRUE;PARTSTAT=NEEDS-ACTION:mailto:testuser@inboxclassic.test\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--inv--\r\n",
+            flags: ["\\Seen"])
+        command(.sync)
+        _ = await waitFor(30) { await findMessage("INBOX", "Subject: Invitation: Roadmap review") }
+        check(await waitUntil(30) {
+            (0..<self.list.numberOfRows).filter { self.main.mailbox.row($0)?.subject.hasPrefix("Club newsletter") == true }.count == 2
+                && (0..<self.list.numberOfRows).contains { self.main.mailbox.row($0)?.subject == "Invitation: Roadmap review" }
+        }, "the two newsletters and the invitation are in the Inbox")
+        try Data().write(to: URL(fileURLWithPath: agentOut.path + ".bulk"))
+
+        // the invitation's answer: what it answers above the text, Send and Don't Send only
+        let send = await waitWindow("agent.send", 30)
+        check(send != nil, "the agent's answer to the invitation is shown to the user first")
+        if let send {
+            // Send's state first, before anything else takes time: off unless the test came after the wait was over
+            let button: NSButton? = find("agent.sendButton", in: send)
+            let sendOn = button?.isEnabled == true
+            let shownFor = Modal.openedAt[ObjectIdentifier(send)].map { Date().timeIntervalSince($0) } ?? 0
+            check(button != nil && (!sendOn || shownFor >= holdBackSeconds),
+                  "Send waits a moment before it can be pressed (on: \(sendOn), shown \(String(format: "%.2f", shownFor)) s)")
+            let line: NSTextField? = find("agent.invitation", in: send)
+            check(line?.stringValue.hasPrefix("This message accepts the invitation “Roadmap review”") == true
+                  && line?.stringValue.contains("changes only once the message has been sent") == true,
+                  "the Send question says what it answers, above the text (\(line?.stringValue ?? "none"))")
+            let compose: NSButton? = find("agent.compose", in: send)
+            let dont: NSButton? = find("agent.dontSend", in: send)
+            check(compose == nil && dont != nil, "it has no Edit First")
+            checkQuestionFits(send, "the invitation's Send question")
+            onMain {
+                NSApp.activate()
+                send.makeKeyAndOrderFront(nil)
+            }
+            // a question raised while the app is in the background has its default button back once it is key (macOS
+            // takes the key from it until then), so this is checked when the user can press Return
+            _ = await waitUntil(5) { send.isKeyWindow }
+            let isDefault = await waitUntil(5) { dont?.keyEquivalent == "\r" && send.defaultButtonCell === dont?.cell }
+            check(isDefault, "Don't Send is the default (key \(dont?.keyEquivalent.debugDescription ?? "none"), "
+                  + "default \(send.defaultButtonCell === dont?.cell), key window \(send.isKeyWindow))")
+            await pause(2)
+            await shot(send, "agents-13-invitation")
+            await darkShot(send, "agents-13-invitation-dark")
+            press(button)
+        }
+        let answered = await waitFor(30) { agentSaid(agentOut, "invitation") as? [String: Any] }
+        check(answered?["status"] as? String == "sent", "the agent learns it was sent (\(answered ?? [:]))")
+        let status = await waitFor(10) { agentSaid(agentOut, "invitation-status") as? [String: Any] }
+        check(status?["your_status"] as? String != "accepted" && (status?["summary"] as? String)?.contains("Roadmap review") == true,
+              "the invitation's status is unchanged while its answer waits (\(status ?? [:]))")
+
+        // the change of many messages: counted first, done with the token, taken back, done again
+        let preview = await waitFor(30) { agentSaid(agentOut, "bulk-preview") as? [String: Any] }
+        check(preview?["matches"] as? Int == 2 && preview?["token"] is String, "the dry run counts the two newsletters (\(preview ?? [:]))")
+        let undone = await waitFor(30) { agentSaid(agentOut, "bulk-undone") as? [String: Any] }
+        check(undone?["messages_taken_back"] as? Int == 2, "the agent takes its change of both back (\(undone ?? [:]))")
+        let again = await waitFor(30) { agentSaid(agentOut, "bulk-again") as? [String: Any] }
+        check(again?["change_id"] is Int, "and makes it again (\(again ?? [:]))")
+        check(await waitUntil(20) {
+            let first = await self.seen("Subject: Club newsletter 1")
+            let second = await self.seen("Subject: Club newsletter 2")
+            return first && second
+        },
+              "both newsletters are read on the server")
+        check(agentSaid(agentOut, "error") == nil, "the agent ran without an error (\(agentSaid(agentOut, "error") ?? ""))")
+        // one of them marked unread by the user since: Undo Since leaves it as it is, and says so
+        let first = (0..<list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Club newsletter 1" }
+        check(first != nil, "the newsletter is listed")
+        await selectRow(first ?? 0)
+        command(.markUnread)
+        check(await waitUntil(20) { !(await self.seen("Subject: Club newsletter 1")) }, "the user marks one of them unread")
+
+        command(.aiAgents)
+        guard let agents = await waitWindow("agents", 10) else {
+            check(false, "Tools > AI Agents opens")
+            return
+        }
+        let hosts: NSTableView? = find("agents.hosts", in: agents)
+        let log: NSTableView? = find("agents.log", in: agents)
+        let cell = { (table: NSTableView?, column: Int, row: Int) -> String in
+            (table?.view(atColumn: column, row: row, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
+        }
+        let bulkRow = "Marked 2 messages read (search: subject:\"Club newsletter\")"
+        let rows = (0..<(log?.numberOfRows ?? 0)).map { cell(log, 2, $0) }
+        check(rows.first == bulkRow && rows.filter { $0.hasPrefix("Marked 2 messages read") }.count == 2,
+              "each change of the newsletters is one row of the log (\(rows.prefix(4).joined(separator: " | ")))")
+        log?.selectRowIndexes([0], byExtendingSelection: false)
+        let undo: NSButton? = find("agents.undo", in: agents)
+        check(undo?.isEnabled == true, "with one Undo")
+        await pause(0.5)
+        await shot(agents, "agents-11-bulk")
+
+        let program = (0..<(hosts?.numberOfRows ?? 0)).first { cell(hosts, 0, $0) == "My AI agent" }
+        check(program != nil, "the program is listed")
+        hosts?.deselectAll(nil)
+        let undoSince: NSButton? = find("agents.undoSince", in: agents)
+        check(undoSince?.isEnabled == false, "Undo Since is off with no program selected")
+        hosts?.selectRowIndexes([program ?? 0], byExtendingSelection: false)
+        check(undoSince?.isEnabled == true, "and on with one")
+        press(undoSince)
+        guard let ask = await waitWindow("agents.undoSinceWindow", 10) else {
+            check(false, "Undo Since asks first")
+            NSApp.stopModal()
+            return
+        }
+        let span: NSPopUpButton? = find("undoSince.span", in: ask)
+        let heading = { (self.find("undoSince.heading", in: ask) as NSTextField?)?.stringValue ?? "" }
+        let takeBack: NSButton? = find("undoSince.takeBack", in: ask)
+        let cancel: NSButton? = find("undoSince.cancel", in: ask)
+        let words = views(NSTextField.self, in: ask.contentView).map(\.stringValue)
+        check(words.contains("Take back what this program did:") && span?.numberOfItems == 6
+              && span?.itemTitles.first == "In the last 15 minutes" && span?.indexOfSelectedItem == 0,
+              "it asks what to take back over six spans, the last 15 minutes first (\(span?.itemTitles ?? []))")
+        choose(span, 1)
+        let asked = heading()
+        check(asked.range(of: "^Take back the \\d+ changes My AI agent made in this time\\?$", options: .regularExpression) != nil,
+              "a span picked, it asks with the count of the changes (\(asked))")
+        check(takeBack?.isHidden == false && takeBack?.hasDestructiveAction == true && cancel?.title == "Cancel"
+              && cancel?.keyEquivalent == "\r" && takeBack?.keyEquivalent == "" && ask.defaultButtonCell === cancel?.cell,
+              "Take Back is marked destructive and Cancel is the default")
+        checkQuestionFits(ask, "Undo Since")
+        await pause(0.5)
+        await shot(ask, "agents-12-undo-since")
+        await darkShot(ask, "agents-12-undo-since-dark")
+        press(takeBack)
+        let report = await waitWindow("alert", 10)
+        let said = alertText(report)
+        check(said.range(of: "Took back \\d+ changes", options: .regularExpression) != nil
+              && said.contains("1 message was changed since, by you or on the server, and was left as it is."),
+              "Take Back says what it took back and what it left (\(said))")
+        answer(report, "OK")
+        check(await waitUntil(20) {
+            let first = await self.seen("Subject: Club newsletter 1")
+            let second = await self.seen("Subject: Club newsletter 2")
+            return !first && !second
+        },
+              "the newsletters are unread again on the server")
+        check(await waitUntil(10) { cell(log, 2, 0).hasPrefix(bulkRow) && cell(log, 2, 0).contains("taken back") && undo?.isEnabled == false },
+              "the log shows the change taken back (\(cell(log, 2, 0)))")
+        // nothing left in the span: Close alone
+        press(undoSince)
+        if let empty = await waitWindow("agents.undoSinceWindow", 10) {
+            let nothing = (find("undoSince.heading", in: empty) as NSTextField?)?.stringValue ?? ""
+            let takeBack: NSButton? = find("undoSince.takeBack", in: empty)
+            let close: NSButton? = find("undoSince.cancel", in: empty)
+            check(nothing == "My AI agent made no changes in this time that can be taken back." && takeBack?.isHidden == true
+                  && close?.title == "Close", "with nothing left to take back it says so and offers only Close (\(nothing))")
+            press(close)
+            _ = await waitUntil { !empty.isVisible }
+        }
+        NSApp.stopModal()
+        _ = await waitUntil { !agents.isVisible }
     }
 
     /// the draft the agent wrote, opened from Drafts: the window names the agent, its Markdown made into formatting

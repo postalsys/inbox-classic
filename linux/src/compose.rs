@@ -1322,6 +1322,7 @@ impl Compose {
             quote_encrypted: self.protection.quote_encrypted.get(),
             // the user's own: what the window saves is never marked as an agent's
             agent: None,
+            calendar: None,
         }
     }
 

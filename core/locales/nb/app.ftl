@@ -449,6 +449,13 @@ ui-clear-agent-log-detail = Dette angrer ikke endringer som agentene har gjort.
 ui-let-agents-connect = &La KI-agenter koble til Inbox Classic
 ui-change-button = Endre…
 ui-undo-button = Angre
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Angre siden…
+# review: new
+ui-undo-since-span = Angre det dette programmet gjorde:
+# review: new
+ui-take-back = Angre
 ui-rules-title = Meldingsregler
 ui-rules-intro = Regler behandler nye meldinger i innboksen mens Inbox Classic kjører. Reglene brukes i rekkefølge på meldinger som oppfyller kriteriene. Når en regel flytter en melding ut av innboksen, brukes ingen flere regler på den.
 ui-rules-none = Ingen regler ennå. Klikk på Ny for å lage en.

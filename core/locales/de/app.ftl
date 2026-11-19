@@ -443,6 +443,13 @@ ui-clear-agent-log-detail = Die von Agenten vorgenommenen Änderungen werden dad
 ui-let-agents-connect = KI-Agenten die Verbindung mit Inbox Classic &erlauben
 ui-change-button = Ändern…
 ui-undo-button = Rückgängig
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Rückgängig seit…
+# review: new
+ui-undo-since-span = Rückgängig machen, was dieses Programm getan hat:
+# review: new
+ui-take-back = Rückgängig machen
 ui-rules-title = Nachrichtenregeln
 ui-rules-intro = Regeln sortieren neu eingehende Nachrichten, solange Inbox Classic läuft. Passende Regeln werden der Reihe nach angewendet. Sobald eine Regel eine Nachricht aus dem Posteingang verschiebt, werden für diese Nachricht keine weiteren Regeln ausgeführt.
 ui-rules-none = Noch keine Regeln. Klicken Sie auf „Neu“, um eine zu erstellen.

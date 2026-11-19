@@ -513,7 +513,7 @@ Screenshot: `folders-6-one-account`
 
 ## 28. An AI agent
 
-Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`, `agents-8-draft`, `agents-9-reads`, `agents-10-terminal`
+Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`, `agents-8-draft`, `agents-9-reads`, `agents-10-terminal`, `agents-11-bulk`, `agents-12-undo-since`, `agents-13-invitation`
 
 The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named "My AI agent": it starts the app's `--mcp` relay as an agent host would, and runs one conversation through it. Two new unread messages are added first.
 
@@ -555,6 +555,19 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
   from Terminal" (the Mac) or "Programs started from a terminal (Terminal)", which share what is allowed, and told
   that `--name` gives one an access of its own
 - the list of programs names it so
+- the test adds two unread "Club newsletter" messages and an invitation "Invitation: Roadmap review", then lets the
+  agent go on (the file `OUT.bulk`)
+- the agent answers the invitation: the Send question shows the line of what it answers, above the text
+- and has no Edit First; Don't Send is the default
+- answered Send, the agent learns it was sent, and the invitation's status is unchanged until the answer has gone
+- the agent's dry run counts the two newsletters and changes nothing; with its token it marks both read, on the server
+- the agent takes its change back (undo_my_change): both are unread again
+- its second change of the two is one row of the log ("Marked 2 messages read (search: ...)") with one Undo
+- Undo Since, with the program selected, asks "Take back what this program did:" with the spans, In the last 15
+  minutes first
+- a span picked, it asks with the count of the changes it would take back; Cancel is the default
+- Take Back takes them back and says what it did, and what it left, in a message box
+- the log shows the change taken back, and the newsletters are unread again
 
 ## 29. Marking all read
 

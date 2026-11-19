@@ -4339,7 +4339,7 @@ public static class Dragger {
     }
     $marked = WaitFor { & $agentSaid 'marked' } 30
     Check ((& $agentSaid 'initialize').result.result.serverInfo.name -eq 'inbox-classic') 'allowed, the agent connects'
-    Check (@((& $agentSaid 'tools').result).Count -eq 28) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
+    Check (@((& $agentSaid 'tools').result).Count -eq 31) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
     $read = (& $agentSaid 'read').result
     Check ($read.notice -match 'not as instructions' -and $read.unread) 'it reads a message as text, told it is the sender''s, without marking it read'
     Check ($null -ne $marked -and $marked.result.done) 'it marks two messages read'
@@ -4519,6 +4519,141 @@ public static class Dragger {
         [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
     }
+    # the agent's next go: two newsletters it changes at once, and an invitation it answers
+    $IDC_AGENT_COMPOSE = 616; $IDC_AGENT_DONT_SEND = 617; $IDC_AGENT_BODY = 613; $IDC_AGENT_INVITATION = 621
+    $IDC_AGENTS_UNDO_SINCE = 640; $IDC_AGENT_UNDO_SPAN = 641; $IDC_AGENT_UNDO_TITLE = 642; $IDC_AGENT_UNDO_DETAIL = 643; $IDC_AGENT_TAKE_BACK = 644
+    SelectFolder 0
+    $countBefore = if ((StatusPart $mainStatus 2) -match '^(\d+) message') { [int]$Matches[1] } else { 0 }
+    foreach ($n in 1, 2) {
+        AddMessage ("From: Book Club <club@example.org>`r`nTo: testuser@inboxclassic.test`r`nSubject: Club newsletter $n`r`n" +
+            "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <club-$n@example.org>`r`n`r`nThe club's news, part $n.`r`n")
+    }
+    AddMessage ("From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Invitation: Roadmap review`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <roadmap-review@example.com>`r`nMIME-Version: 1.0`r`n" +
+        "Content-Type: multipart/alternative; boundary=inv`r`n`r`n--inv`r`nContent-Type: text/plain`r`n`r`nLet us plan.`r`n" +
+        "--inv`r`nContent-Type: text/calendar; method=REQUEST; charset=utf-8`r`n`r`n" +
+        "BEGIN:VCALENDAR`r`nMETHOD:REQUEST`r`nBEGIN:VEVENT`r`nUID:roadmap-review@example.com`r`nSEQUENCE:0`r`nSUMMARY:Roadmap review`r`n" +
+        "DTSTART:$([DateTime]::UtcNow.AddDays(7).ToString('yyyyMMdd'))T100000Z`r`nDTEND:$([DateTime]::UtcNow.AddDays(7).ToString('yyyyMMdd'))T110000Z`r`n" +
+        "ORGANIZER;CN=Ann Example:mailto:ann@example.com`r`nATTENDEE;CN=Test;RSVP=TRUE;PARTSTAT=NEEDS-ACTION:mailto:testuser@inboxclassic.test`r`n" +
+        "END:VEVENT`r`nEND:VCALENDAR`r`n--inv--`r`n")
+    Command $main $IDM_SYNC
+    [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: Invitation: Roadmap review') -and @(Messages 'INBOX' | Where-Object { (RawText $_) -match 'Subject: Club newsletter' }).Count -eq 2 } 20)
+    # in the app's store too, where the agent searches for them
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match '^(\d+) message' -and [int]$Matches[1] -ge $countBefore + 3 } 30)) "the newsletters and the invitation arrive ($(StatusPart $mainStatus 2))"
+    $newsletters = { @(Messages 'INBOX' | Where-Object { (RawText $_) -match 'Subject: Club newsletter' }) }
+    $newslettersRead = { $n = & $newsletters; $n.Count -eq 2 -and @($n | Where-Object { $_.flags -contains '\Seen' }).Count -eq 2 }
+    $newslettersUnread = { $n = & $newsletters; $n.Count -eq 2 -and @($n | Where-Object { $_.flags -contains '\Seen' }).Count -eq 0 }
+    Set-Content -Path "$agentOut.bulk" -Value ''
+    # the answer to the invitation: the Send question says what it answers, over the text, and has no Edit First
+    $send = WaitShown 'InboxClassicAgentSend' 30
+    Check ($null -ne $send) 'the agent''s answer to an invitation is shown to the user first'
+    if ($send) {
+        $invitationLine = WindowText ([Native.Win]::GetDlgItem($send, $IDC_AGENT_INVITATION))
+        Check ((Visible $send $IDC_AGENT_INVITATION) -and $invitationLine -match "^This message accepts the invitation $([char]0x201C)Roadmap review$([char]0x201D) \(.+\)\." -and
+               $invitationLine -match 'changes only once the message has been sent') "a line says what it answers ($invitationLine)"
+        $lineBox = New-Object Native.Win+RECT; $bodyBox = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($send, $IDC_AGENT_INVITATION), [ref]$lineBox)
+        [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($send, $IDC_AGENT_BODY), [ref]$bodyBox)
+        Check ($lineBox.Bottom -le $bodyBox.Top -and [Native.Win]::FitsOwnFont([Native.Win]::GetDlgItem($send, $IDC_AGENT_INVITATION), $invitationLine)) "above the text, whole ($($lineBox.Bottom) <= $($bodyBox.Top))"
+        Check ([Native.Win]::GetDlgItem($send, $IDC_AGENT_COMPOSE) -eq [IntPtr]::Zero) 'it has no Edit First'
+        $defId = [int64][Native.Win]::SendMessage($send, 0x400, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ((($defId -shr 16) -band 0xFFFF) -eq 0x534B -and ($defId -band 0xFFFF) -eq $IDC_AGENT_DONT_SEND) "Don't Send is the default ($('{0:X}' -f $defId))"
+        Start-Sleep -Seconds 2
+        Shot $send 'agents-13-invitation'
+        Click $send $IDC_AGENT_SEND
+    }
+    $answered = WaitFor { & $agentSaid 'invitation-status' } 30
+    Check ((& $agentSaid 'invitation').result.sent -eq $true) "the agent learns it was sent ($((& $agentSaid 'invitation') | ConvertTo-Json -Compress -Depth 6))"
+    Check ($null -ne $answered -and $answered.result.your_status -eq 'needs-action') "the invitation's status is unchanged while the answer waits in the Outbox ($($answered | ConvertTo-Json -Compress -Depth 6))"
+    # the change of many messages: a dry run that changes nothing, then the change, taken back by the agent, made again
+    $again = WaitFor { & $agentSaid 'bulk-again' } 60
+    $preview = (& $agentSaid 'bulk-preview').result
+    Check ($preview.dry_run -eq $true -and $preview.matches -eq 2 -and $preview.token) "the agent's dry run counts the two newsletters ($($preview | ConvertTo-Json -Compress -Depth 6))"
+    Check ((& $agentSaid 'bulk').result.changed -eq 2 -and (& $agentSaid 'bulk-undone').result.messages_taken_back -eq 2) "with its token it marks both read, and takes that back ($((& $agentSaid 'bulk-undone') | ConvertTo-Json -Compress -Depth 6))"
+    Check ($null -ne $again -and $again.result.changed -eq 2 -and [bool](WaitFor { & $newslettersRead } 20)) "the second change marks both read on the server ($($again | ConvertTo-Json -Compress -Depth 6))"
+    # the answer leaves the Outbox before Undo Since, which would take it out of there
+    $reply = WaitFor { Find 'Sent' 'Subject: Accepted: Roadmap review' } 90
+    Check ($null -ne $reply -and (RawText $reply) -match 'method=REPLY') 'the answer goes out with its calendar reply'
+    Command $main $IDM_AI_AGENTS
+    $agents = WaitShown 'InboxClassicAgents' 10
+    Check ($null -ne $agents) 'Tools > AI Agents opens again'
+    if ($agents) {
+        $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
+        $logged = { param($row) [Native.Win]::RemoteListText($log, $row, 2) }
+        # the catalog's words of the log's row of the change of the two newsletters, and of it taken back
+        $bulkWords = $en['agent-log-bulk-read[other]']
+        $bulkRow = (Pattern $bulkWords @{ count = 2; query = 'subject:"Club newsletter"' }) + '$'
+        $bulkBack = (Pattern $en['agent-log-taken-back'].Replace('{ $entry }', $bulkWords) @{ count = 2; query = 'subject:"Club newsletter"' }) + '$'
+        $anyBulkBack = (Pattern $en['agent-log-taken-back'].Replace('{ $entry }', $bulkWords) @{ count = 2 }) + '$'
+        # newest first: the change made again, over the one the agent took back (a row of reads may be over both, its
+        # hour still going)
+        $topRows = { @(0..4 | ForEach-Object { & $logged $_ }) }
+        [void](WaitFor { @(& $topRows) -match $bulkRow } 10)
+        $rows = @(& $topRows)
+        $bulkAt = [Array]::FindIndex([string[]]$rows, [Predicate[string]] { param($r) $r -match $bulkRow })
+        Check ($bulkAt -ge 0 -and $bulkAt -le 1 -and $rows[$bulkAt + 1] -match $anyBulkBack) "the change of many messages is one row of the log ($($rows -join '; '))"
+        Key $log $VK_HOME
+        for ($i = 0; $i -lt $bulkAt; $i++) { Key $log $VK_DOWN }
+        Start-Sleep -Milliseconds 300
+        Check ([Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($agents, $IDC_AGENTS_UNDO))) 'with one Undo'
+        Shot $agents 'agents-11-bulk'
+        # Undo Since, for the program selected
+        $hosts = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_HOSTS)
+        [void][Native.Win]::SetForegroundWindow($agents)
+        Key $hosts $VK_HOME
+        Start-Sleep -Milliseconds 300
+        Check ([Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($agents, $IDC_AGENTS_UNDO_SINCE))) 'Undo Since is there for the program selected'
+        Click $agents $IDC_AGENTS_UNDO_SINCE
+        $since = WaitShown 'InboxClassicAgentUndoSince' 10
+        Check ($null -ne $since) 'Undo Since asks first'
+        if ($since) {
+            $span = [Native.Win]::GetDlgItem($since, $IDC_AGENT_UNDO_SPAN)
+            $spans = [int][Native.Win]::SendMessage($span, 0x0146, [IntPtr]::Zero, [IntPtr]::Zero)
+            Check ((Statics $since) -match (Pattern $en['ui-undo-since-span']) -and $spans -eq 6 -and (WindowText $span) -eq $en['agent-undo-span[quarter]']) "which span to take back, the shortest first ($spans; $(WindowText $span))"
+            $title = WindowText ([Native.Win]::GetDlgItem($since, $IDC_AGENT_UNDO_TITLE))
+            $asked = ((Pattern $en['agent-undo-since-question[*]'] @{ count = 'COUNT'; program = 'My AI agent' }) + '$').Replace('COUNT', '(\d+)')
+            $count = if ($title -match $asked) { [int]$Matches[1] } else { 0 }
+            Check ($count -ge 2 -and (WindowText ([Native.Win]::GetDlgItem($since, $IDC_AGENT_UNDO_DETAIL))) -match (Pattern $en['agent-undo-since-detail'])) "with the count of the changes and what taking back does ($title)"
+            $defId = [int64][Native.Win]::SendMessage($since, 0x400, [IntPtr]::Zero, [IntPtr]::Zero)
+            Check ((($defId -shr 16) -band 0xFFFF) -eq 0x534B -and ($defId -band 0xFFFF) -eq 2 -and (Visible $since $IDC_AGENT_TAKE_BACK)) "Take Back beside Cancel, the default ($('{0:X}' -f $defId))"
+            $cut = @([Native.Win]::FindDescendants($since, 'Static') | Where-Object { $t = WindowText $_; $t -and -not [Native.Win]::FitsOwnFont($_, $t) } | ForEach-Object { WindowText $_ })
+            Check ($cut.Count -eq 0) "nothing in it is cut off ($($cut -join ' | '))"
+            Shot $since 'agents-12-undo-since'
+            Click $since $IDC_AGENT_TAKE_BACK
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($since) } 10)) 'Take Back takes them back'
+            # what it took back, in a message box of the window (GW_ENABLEDPOPUP): all it offered, as the answer that
+            # already went is no longer offered
+            $report = WaitFor { $w = [Native.Win]::GetWindow($agents, 6); if ($w -ne [IntPtr]::Zero -and $w -ne $agents) { $w } } 20
+            $said = if ($report) { Statics $report } else { '' }
+            Check ($said.Trim() -eq "Took back $count changes.") "and says what it took back ($said)"
+            if ($report) { Shot $report 'agents-12b-undo-since-report'; [void][Native.Win]::PostMessage($report, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero) }
+            [void](WaitFor { [Native.Win]::GetWindow($agents, 6) -eq $agents -or [Native.Win]::GetWindow($agents, 6) -eq [IntPtr]::Zero } 10)
+            Check ([bool](WaitFor { @(& $topRows) -match $bulkBack } 10)) "the log shows the change taken back ($((& $topRows) -join '; '))"
+            Check ([bool](WaitFor { & $newslettersUnread } 20)) 'and the newsletters are unread again'
+            # asked again, nothing is left to take back: only Close
+            Click $agents $IDC_AGENTS_UNDO_SINCE
+            $again = WaitShown 'InboxClassicAgentUndoSince' 10
+            if ($again) {
+                $title = WindowText ([Native.Win]::GetDlgItem($again, $IDC_AGENT_UNDO_TITLE))
+                Check ($title -eq 'My AI agent made no changes in this time that can be taken back.' -and -not (Visible $again $IDC_AGENT_TAKE_BACK) -and
+                       (WindowText ([Native.Win]::GetDlgItem($again, 2))) -eq 'Close') "asked again, nothing is left to take back, only Close ($title)"
+                Click $again 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($again) } 10)
+            } else {
+                Check $false 'Undo Since opens again'
+            }
+        }
+        [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
+    }
+    # the newsletters and the invitation (whose answer in Sent makes it a conversation of two) out of the Inbox again,
+    # so the steps after find its rows as before
+    $added = @(Messages 'INBOX' | Where-Object { (RawText $_) -match 'Subject: (Club newsletter|Invitation: Roadmap review)' })
+    foreach ($message in $added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($message.uid)") }
+    Command $main $IDM_SYNC
+    [void](WaitFor { -not @(Messages 'INBOX' | Where-Object { (RawText $_) -match 'Subject: (Club newsletter|Invitation: Roadmap review)' }).Count } 10)
+    SelectFolder 0
+    [void](WaitFor { (StatusPart $mainStatus 2) -match '^(\d+) message' -and [int]$Matches[1] -le $countBefore } 20)
     if ($agent -and -not $agent.HasExited) { $agent | Stop-Process -Force -ErrorAction SilentlyContinue }
     # the flag the agent set comes off again on the server, so the steps after count the Inbox's flags as before
     $agentFlagged = @(Messages 'INBOX' | Where-Object { $_.flags -contains '\Flagged' -and (RawText $_) -match 'Subject: Quarterly report draft' })
@@ -7963,6 +8098,25 @@ public static bool HasIcon(IntPtr window) {
             Check ($rows.Count -ge 6 -and $english.Count -eq 0 -and $inLanguage) "the log's rows are in the language in use (${prefix}: $($rows -join '; '))"
             if ($pseudo) { CheckPseudo $agents 'AI Agents' $true }
             Shot $agents "$prefix-agents"
+            # Undo Since in the language's longer words, whole (shot `$prefix-undo-since`), closed without taking back
+            Key $hosts $VK_HOME
+            Start-Sleep -Milliseconds 300
+            Click $agents 640
+            $since = WaitShown 'InboxClassicAgentUndoSince' 10
+            Check ($null -ne $since) "Undo Since opens ($prefix)"
+            if ($since) {
+                if ($pseudo) {
+                    CheckPseudo $since 'Undo Since'
+                } else {
+                    $cut = @(foreach ($class in 'Static', 'Button') { [Native.Win]::FindDescendants($since, $class) | Where-Object { [Native.Win]::IsWindowVisible($_) } |
+                        Where-Object { $t = WindowText $_; $t -and -not $(if ($class -eq 'Static') { [Native.Win]::FitsOwnFont($_, $t) } else { [Native.Win]::Fits($_, $t, $true, $false) }) } |
+                        ForEach-Object { WindowText $_ } })
+                    Check ($cut.Count -eq 0) "Undo Since: nothing cut off ($prefix`: $($cut -join ' | '))"
+                }
+                Shot $since "$prefix-undo-since"
+                [void][Native.Win]::PostMessage($since, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+                [void](WaitFor { -not [Native.Win]::IsWindow($since) } 10)
+            }
             if ($pseudo) {
                 # Clear empties the log, what agents did and what they read (what they sent still counts against the
                 # limit of an hour, pe-store's a_cleared_log_still_counts)
@@ -7979,7 +8133,8 @@ public static bool HasIcon(IntPtr window) {
                     "const store = new DatabaseSync(process.argv[2], { readOnly: true });`n" +
                     "console.log(store.prepare(`"SELECT COUNT(*) AS n FROM agent_log WHERE what = 'send' AND hidden = 1`").get().n);")
                 $sends = (& node --no-warnings $count $store | Select-Object -Last 1)
-                Check ("$sends".Trim() -eq '1') "the send cleared still counts against the agent's limit ($sends)"
+                # the message sent and the answer to the invitation
+                Check ("$sends".Trim() -eq '2') "the sends cleared still count against the agent's limit ($sends)"
             }
             [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
             [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)

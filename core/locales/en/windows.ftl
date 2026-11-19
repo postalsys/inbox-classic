@@ -99,6 +99,9 @@ win-forget-program-ask = Remove this program, its permissions and its agents’ 
 win-clear-log-ask = Clear the agents’ activity history? This will not undo changes made by the agents.
 win-agent-programs = &Programs whose agents have requested access to your mail:
 win-change = &Change...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+win-undo-since = Undo &Since...
+win-take-back = &Take Back
 win-what-agents-did = Agent &activity:
 # under the log of Tools > AI Agents: what the selected row of reads covers (the start and end of its hour), or how to see it
 win-agent-reads = What was read from { $from } to { $to }:

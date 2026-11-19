@@ -100,6 +100,11 @@ win-forget-program-ask = Искате ли да премахнете тази п
 win-clear-log-ask = Да се изчисти ли историята на действията на агентите? Това няма да отмени промените, направени от агентите.
 win-agent-programs = &Програми, чиито агенти са поискали достъп до пощата ви:
 win-change = Пром&яна...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Отмяна &за период...
+# review: new
+win-take-back = &Отмяна
 win-what-agents-did = &Действия на агентите:
 # review: new
 win-agent-reads = Прочетено от { $from } до { $to }:

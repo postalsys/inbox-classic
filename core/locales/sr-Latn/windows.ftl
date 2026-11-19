@@ -107,6 +107,11 @@ win-forget-program-ask = Da li želite da uklonite ovaj program, njegove dozvole
 win-clear-log-ask = Da li želite da obrišete istoriju aktivnosti agenata? Time se neće opozvati promene koje su agenti napravili.
 win-agent-programs = &Programi čiji su agenti zatražili pristup vašoj pošti:
 win-change = Pro&meni...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Opozovi &za period...
+# review: new
+win-take-back = &Opozovi
 win-what-agents-did = &Aktivnost agenata:
 # review: new
 win-agent-reads = Šta je pročitano od { $from } do { $to }:

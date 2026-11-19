@@ -163,6 +163,11 @@ win-clear-log-ask = Ștergeți istoricul activității agenților? Modificările
 win-agent-programs = &Programe ai căror agenți au cerut acces la e-mailul dvs.:
 # review: new
 win-change = &Modificare...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Anulare pe &interval...
+# review: new
+win-take-back = &Anulare
 # review: new
 win-what-agents-did = &Activitatea agenților:
 # review: new

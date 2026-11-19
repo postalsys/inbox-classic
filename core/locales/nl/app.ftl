@@ -448,6 +448,13 @@ ui-clear-agent-log-detail = Wijzigingen die de agents hebben gemaakt, worden hie
 ui-let-agents-connect = AI-agents &verbinding laten maken met Inbox Classic
 ui-change-button = Wijzigen…
 ui-undo-button = Ongedaan maken
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Ongedaan maken sinds…
+# review: new
+ui-undo-since-span = Terugdraaien wat dit programma deed:
+# review: new
+ui-take-back = Terugdraaien
 ui-rules-title = Berichtenregels
 ui-rules-intro = Regels verwerken nieuwe berichten in Postvak IN terwijl Inbox Classic actief is. Alle regels die op een bericht van toepassing zijn, worden op volgorde uitgevoerd. Zodra een regel het bericht uit Postvak IN verplaatst, stopt de verwerking voor dat bericht.
 ui-rules-none = Nog geen regels. Klik op Nieuw om er een te maken.

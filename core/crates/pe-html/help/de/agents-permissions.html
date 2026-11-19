@@ -3,7 +3,7 @@
 <p>Wenn sich der Agent eines Programms zum ersten Mal verbindet, fragt Inbox Classic Sie und nennt dabei das Programm. Wählen Sie, was er tun darf:</p>
 <ul>
     <!--review--><li>E-Mails lesen: Ordner, Nachrichten und Unterhaltungen anzeigen und durchsuchen, auch die PDF-, Office- und Bilddateien der Nachrichten bis 10 MB, sowie Nachrichtenregeln, Namen und E-Mail-Adressen nachschlagen</li><!--/review-->
-    <!--review--><li>E-Mails verwalten: Lesestatus, Kennzeichnungen und ihre Farben ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen, eigene Ordner umbenennen, Unterhaltungen beobachten und ignorieren und nach Ihrer Zustimmung Mailinglisten abbestellen. Beim Löschen werden Nachrichten in den Ordner <b data-text="folder-deleted"></b> verschoben.</li><!--/review-->
+    <!--review--><li>E-Mails verwalten: Lesestatus, Kennzeichnungen und ihre Farben ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen, eigene Ordner umbenennen, Unterhaltungen beobachten und ignorieren, all das auch auf einmal für alle Nachrichten, die eine Suche findet, und nach Ihrer Zustimmung Mailinglisten abbestellen. Beim Löschen werden Nachrichten in den Ordner <b data-text="folder-deleted"></b> verschoben.</li><!--/review-->
     <li>Entwürfe schreiben, die Sie selbst senden, und eigene Entwürfe ändern oder verwerfen, solange Sie diese noch nicht gespeichert haben</li>
     <li>E-Mails senden, jede Nachricht erst nach Ihrer Zustimmung</li>
 </ul>
@@ -16,6 +16,8 @@
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> ist vorausgewählt und bricht die Abmeldung ab.</li>
 </ul>
 <p>Nachrichten im Ordner <b data-text="folder-junk"></b> können nicht für eine Abmeldung durch einen Agenten verwendet werden. Für jedes Programm gilt eine Grenze von 30 bestätigten Abmeldeanfragen in den letzten 24 Stunden. Auch fehlgeschlagene Anfragen zählen mit.</p>
+<!--review--><h2>Viele Nachrichten auf einmal ändern</h2><!--/review-->
+<!--review--><p>Ein Agent, der E-Mails verwalten darf, kann alle Nachrichten, die eine Suche findet, in einem Schritt ändern, etwa alle Newsletter als gelesen markieren oder in einen Ordner verschieben. Zuerst zählt er die Nachrichten und sieht einige davon. Dann ändert er genau diese, höchstens 1.000 auf einmal, und nie E-Mails, die seitdem eingetroffen sind. Inbox Classic fragt Sie vorher nicht, da sich alles rückgängig machen lässt. Das Protokoll zeigt es als eine Zeile, etwa „37 Nachrichten als gelesen markiert (Suche: from:news)“, und ein einziges Rückgängig macht alles rückgängig.</p><!--/review-->
 <h2>Zugriff ansehen und ändern</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> listet die Programme auf, die Sie zugelassen oder abgewiesen haben, und alles, was Agenten getan haben, das Neueste zuerst.</p>
 <!--review--><p>Was ein Agent liest, erscheint als eine Zeile je Programm und Stunde, etwa „14 Nachrichten gelesen und 3-mal gesucht“. <!--os:windows-->Wählen Sie die Zeile aus<!--/os--><!--os:mac,linux-->Öffnen Sie die Zeile mit ihrem Pfeil<!--/os-->, um die Betreffe der gelesenen Nachrichten und seine Suchbegriffe zu sehen, nie aber den Text der Nachrichten. Das Protokoll wird 30 Tage aufbewahrt. Wenn Sie es löschen, ändert das nichts daran, wie viele Nachrichten ein Agent noch senden darf.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ändert, was ein Programm tun darf.</li>
     <li><b data-text="ui-remove"></b> vergisst ein Programm, sodass Sie bei seiner nächsten Verbindung erneut gefragt werden.</li>
     <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> macht Änderungen am Lesestatus, an Kennzeichnungen und ihren Farben rückgängig, ebenso Junk-Markierungen, Verschieben, Archivieren und Löschen. Damit können Sie auch das Senden einer Nachricht abbrechen, solange diese noch im Postausgang liegt.</li><!--/review-->
+    <!--review--><li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> macht alles rückgängig, was das ausgewählte Programm in der gewählten Zeit getan hat, etwa in der letzten Stunde, das Neueste zuerst.</li><!--/review-->
 </ul>
+<!--review--><p>Eine Nachricht, die Sie oder der Server nach dem Agenten geändert haben, bleibt, wie sie ist, und Inbox Classic sagt Ihnen, wie viele es waren. Ein Agent kann seine eigenen Änderungen auch selbst rückgängig machen, nie aber die eines anderen Programms.</p><!--/review-->
 <aside class="warning">E-Mails werden von anderen Menschen geschrieben, und eine Nachricht kann versuchen, einen Agenten dazu zu bringen, Ihre E-Mails weiterzuleiten oder zu löschen. Inbox Classic verbirgt vor Agenten den Text, den eine Nachricht vor Ihnen verbirgt, und teilt ihnen mit, dass E-Mails keine Anweisungen sind. Ein Agent kann sich dennoch täuschen lassen. Erlauben Sie nur, was Sie brauchen.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

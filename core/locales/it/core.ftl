@@ -536,6 +536,135 @@ agent-log-watched = Seguita la conversazione “{ $subject }”
 agent-log-ignored = Ignorata la conversazione “{ $subject }”
 # review: new
 agent-log-unmarked = La conversazione “{ $subject }” non è più seguita né ignorata
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = il messaggio è stato modificato nel frattempo
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Segnato come letto 1 messaggio (ricerca: { $query })
+   *[other] Segnati come letti { $count } messaggi (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Segnato come da leggere 1 messaggio (ricerca: { $query })
+   *[other] Segnati come da leggere { $count } messaggi (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Contrassegnato 1 messaggio (ricerca: { $query })
+   *[other] Contrassegnati { $count } messaggi (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Rimosso il contrassegno da 1 messaggio (ricerca: { $query })
+   *[other] Rimosso il contrassegno da { $count } messaggi (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-color = Contrassegno { $color ->
+    [red] rosso
+    [orange] arancione
+    [yellow] giallo
+    [green] verde
+    [blue] blu
+    [purple] viola
+   *[gray] grigio
+} aggiunto a { $count ->
+    [one] 1 messaggio
+   *[other] { $count } messaggi
+} (ricerca: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Spostato 1 messaggio in { $folder } (ricerca: { $query })
+   *[other] Spostati { $count } messaggi in { $folder } (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Archiviato 1 messaggio (ricerca: { $query })
+   *[other] Archiviati { $count } messaggi (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Segnato 1 messaggio come posta indesiderata (ricerca: { $query })
+   *[other] Segnati { $count } messaggi come posta indesiderata (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Segnato 1 messaggio come posta desiderata (ricerca: { $query })
+   *[other] Segnati { $count } messaggi come posta desiderata (ricerca: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Eliminato 1 messaggio (ricerca: { $query })
+   *[other] Eliminati { $count } messaggi (ricerca: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Negli ultimi 15 minuti
+    [hour] Nell’ultima ora
+    [hours] Nelle ultime 4 ore
+    [day] Nelle ultime 24 ore
+    [week] Negli ultimi 7 giorni
+   *[all] Negli ultimi 30 giorni
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } non ha fatto modifiche annullabili in questo periodo.
+    [one] Annullare la modifica fatta da { $program } in questo periodo?
+   *[other] Annullare le { $count } modifiche fatte da { $program } in questo periodo?
+}
+# review: new
+agent-undo-since-detail = I messaggi tornano nelle cartelle da cui provenivano, lo stato di lettura e i contrassegni tornano com’erano e i messaggi ancora in attesa in Posta in uscita vengono eliminati. Ciò che tu o il server avete modificato nel frattempo resta com’è.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Non è stato annullato nulla.
+    [one] Annullata 1 modifica.
+   *[other] Annullate { $count } modifiche.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 messaggio non era più dove la modifica l’aveva messo.
+   *[other] { $count } messaggi non erano più dove la modifica li aveva messi.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 messaggio è stato modificato nel frattempo, da te o sul server, ed è rimasto com’era.
+   *[other] { $count } messaggi sono stati modificati nel frattempo, da te o sul server, e sono rimasti com’erano.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 messaggio aveva già lasciato Posta in uscita.
+   *[other] { $count } messaggi avevano già lasciato Posta in uscita.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 modifica non può essere annullata.
+   *[other] { $count } modifiche non possono essere annullate.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Questo messaggio accetta l’invito “{ $summary }” ({ $when }).
+    [tentative] Questo messaggio accetta l’invito “{ $summary }” ({ $when }) con riserva.
+   *[decline] Questo messaggio rifiuta l’invito “{ $summary }” ({ $when }).
+} Il calendario dell’organizzatore lo registra. La tua risposta all’invito cambia solo dopo l’invio del messaggio.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Accettato: { $summary }
+    [tentative] Provvisorio: { $summary }
+   *[decline] Rifiutato: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } ha accettato questo invito.
+    [tentative] { $name } ha accettato questo invito con riserva.
+   *[decline] { $name } ha rifiutato questo invito.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

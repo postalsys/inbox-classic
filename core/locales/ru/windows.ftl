@@ -158,6 +158,11 @@ win-clear-log-ask = Очистить журнал действий агенто�
 win-agent-programs = &Программы, агенты которых запросили доступ к вашей почте:
 # review: new
 win-change = &Изменить...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Отменить &за период...
+# review: new
+win-take-back = &Отменить
 # review: new
 win-what-agents-did = &Действия агентов:
 # review: new

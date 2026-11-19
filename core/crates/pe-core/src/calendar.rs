@@ -294,11 +294,7 @@ pub fn invitation(calendar: &str, method: Option<&str>) -> Option<Invitation> {
             "DTEND" => invitation.end = instant(params, value),
             "DURATION" => duration = Some(value.as_str()),
             "ORGANIZER" => {
-                let address = value.trim();
-                let address = address
-                    .get(..7)
-                    .filter(|p| p.eq_ignore_ascii_case("mailto:"))
-                    .map_or(address, |_| &address[7..]);
+                let address = crate::contentline::mailto_address(value);
                 invitation.organizer = param(params, "CN").map_or(address.to_string(), str::to_string);
             }
             "ATTENDEE" => invitation.attendees += 1,
@@ -328,12 +324,8 @@ pub(crate) fn attendee_status(calendar: &str, addresses: &[String]) -> Option<St
             ("BEGIN", "VEVENT") => in_event = true,
             ("END", "VEVENT") => return None,
             ("ATTENDEE", _) if in_event => {
-                let address = value.trim();
-                let address = address
-                    .get(..7)
-                    .filter(|p| p.eq_ignore_ascii_case("mailto:"))
-                    .map_or(address, |_| &address[7..]);
-                if addresses.iter().any(|own| own.eq_ignore_ascii_case(address.trim())) {
+                let address = crate::contentline::mailto_address(value);
+                if addresses.iter().any(|own| own.eq_ignore_ascii_case(address)) {
                     let status = param(params, "PARTSTAT").unwrap_or("NEEDS-ACTION");
                     return Some(status.trim().to_ascii_lowercase());
                 }

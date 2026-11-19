@@ -863,6 +863,13 @@ ui-let-agents-connect = &Låt AI-agenter ansluta till Inbox Classic
 ui-change-button = Ändra…
 # review: new
 ui-undo-button = Ångra
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Ångra allt sedan…
+# review: new
+ui-undo-since-span = Ångra det som det här programmet gjorde:
+# review: new
+ui-take-back = Ångra
 # review: new
 ui-rules-title = Meddelanderegler
 # review: new

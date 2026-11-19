@@ -164,6 +164,11 @@ win-clear-log-ask = Želite počistiti zgodovino dejavnosti agentov? S tem ne bo
 win-agent-programs = &Programi, katerih agenti so zahtevali dostop do vaše pošte:
 # review: new
 win-change = &Spremeni...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Razveljavi za o&bdobje...
+# review: new
+win-take-back = &Razveljavi
 # review: new
 win-what-agents-did = &Dejavnost agentov:
 # review: new

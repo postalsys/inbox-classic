@@ -3,10 +3,14 @@
 
 use std::time::Instant;
 
-use pe_core::agents::{AgentAnswer, Asked, SendStatus};
+use pe_core::agents::{AgentAnswer, Asked, InvitationReply, SendStatus};
+use pe_core::calendar_reply::Response;
 use serde_json::{Value, json};
 
 use super::{Args, Call, Outcome, PROGRESS_EVERY, SEND_WAIT, downloaded, engine, idempotency_key, written};
+
+/// The longest line an agent may add above the words of an answer to an invitation
+const MAX_COMMENT: usize = 2000;
 
 pub(super) fn save_draft(call: &Call, args: &Args) -> Outcome {
     let written = written(call, args, args.int("account")?)?;
@@ -85,6 +89,11 @@ pub(super) async fn send_message(call: &Call<'_>, args: &Args<'_>) -> Outcome {
         .core
         .agent_ask_send(&call.host, &written, key.as_deref())
         .map_err(engine)?;
+    answer_of(call, asked).await
+}
+
+/// What became of the Send question `asked`: the user's answer, or that it still waits after [`SEND_WAIT`]
+async fn answer_of(call: &Call<'_>, asked: Asked) -> Outcome {
     let (ask_id, mut answer) = match asked {
         // asked before with this key: what became of that question
         Asked::Before(ask_id) => return Ok(told(ask_id, &call.core.agent_send_status(call.host.id, ask_id))),
@@ -102,6 +111,38 @@ pub(super) async fn send_message(call: &Call<'_>, args: &Args<'_>) -> Outcome {
             Err(_) => call.progress.report("Waiting for the user to answer in Inbox Classic"),
         }
     }
+}
+
+/// The answer respond_to_invitation names
+fn response(args: &Args) -> Result<Response, String> {
+    Response::from_name(&args.string("response")).ok_or_else(|| "`response` is accept, tentative or decline.".into())
+}
+
+pub(super) async fn respond_to_invitation(call: &Call<'_>, args: &Args<'_>) -> Outcome {
+    let folder = call.folder(args.int("folder")?)?;
+    let uid = args.uid()?;
+    let reply = InvitationReply {
+        folder: folder.id,
+        uid,
+        response: response(args)?,
+        comment: args.string("comment"),
+        call_id: Some(call.call_id.to_string()),
+    };
+    if reply.comment.chars().count() > MAX_COMMENT {
+        return Err(format!("`comment` is at most {MAX_COMMENT} characters."));
+    }
+    call.message(folder.id, uid)?;
+    downloaded(call, folder.id, uid).await?;
+    let key = idempotency_key(args)?;
+    let asked = call
+        .core
+        .agent_ask_invitation_reply(&call.host, &reply, key.as_deref())
+        .map_err(engine)?;
+    let mut answer = answer_of(call, asked).await?;
+    answer["your_status_changes"] = json!(
+        "The user's answer to the invitation (your_status in get_message) changes once the message has left the Outbox."
+    );
+    Ok(answer)
 }
 
 pub(super) fn get_send_status(call: &Call, args: &Args) -> Outcome {

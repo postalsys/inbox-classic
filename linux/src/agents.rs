@@ -148,17 +148,21 @@ pub async fn question(request: u64) {
         Some(AgentAsk::Send(ask)) => {
             let text = agents::send_text(&ask);
             let extra = send_details(&ask, &text);
-            let dialog = question_dialog(
-                &text.title,
-                &text.detail,
-                &extra,
-                &[
-                    ("dont", t!(UiDontSend).as_str()),
-                    ("compose", crate::words::plain(crate::words::Text::UiEditFirst).as_str()),
-                    ("send", t!(UiTbSend).as_str()),
-                ],
-                "agent-send",
+            let (dont, edit, send) = (
+                t!(UiDontSend),
+                crate::words::plain(crate::words::Text::UiEditFirst),
+                t!(UiTbSend),
             );
+            // an answer to an invitation is the calendar file the core wrote: it can not be opened to change
+            let mut answers = vec![
+                ("dont", dont.as_str()),
+                ("compose", edit.as_str()),
+                ("send", send.as_str()),
+            ];
+            if !ask.can_edit() {
+                answers.retain(|(id, _)| *id != "compose");
+            }
+            let dialog = question_dialog(&text.title, &text.detail, &extra, &answers, "agent-send");
             dialog.set_response_appearance("send", adw::ResponseAppearance::Suggested);
             enable_later(&dialog, "send");
             let answer = match dialog.choose_future(Some(&window)).await.as_str() {
@@ -354,6 +358,12 @@ fn send_details(ask: &agents::SendAsk, text: &agents::SendText) -> gtk::Box {
         line("", &[original.upcast()]);
     }
     content.append(&grid);
+    // what an invitation answer answers, when the event is, and that the user's answer changes once it has gone
+    if !text.invitation.is_empty() {
+        let invitation = ui::wrapped_label(&text.invitation);
+        invitation.set_widget_name("agent-invitation");
+        content.append(&invitation);
+    }
     let body = gtk::TextView::new();
     body.set_editable(false);
     body.set_wrap_mode(gtk::WrapMode::WordChar);
@@ -415,6 +425,7 @@ struct AgentsDialog {
     expanded: Rc<RefCell<std::collections::HashSet<(i64, i64)>>>,
     change: gtk::Button,
     remove: gtk::Button,
+    undo_since: gtk::Button,
     undo: gtk::Button,
     clear: gtk::Button,
 }
@@ -514,6 +525,7 @@ impl AgentsDialog {
         let host = self.hosts.selected_row().is_some();
         self.change.set_sensitive(host);
         self.remove.set_sensitive(host);
+        self.undo_since.set_sensitive(host);
         let entry = self.log.selected_row().map(|row| row.index().max(0) as usize);
         self.undo
             .set_sensitive(entry.is_some_and(|index| self.entries.borrow().get(index).is_some_and(|(_, can)| *can)));
@@ -578,8 +590,26 @@ impl AgentsDialog {
         let Some((id, _)) = self.entries.borrow().get(index).copied() else {
             return;
         };
-        if let Err(error) = shell().core.agent_undo(id) {
-            ui::alert(&self.dialog, &t!(UiAiAgents), &agents::undo_refusal(&error)).await;
+        // a change of many messages may be taken back only in part: what was left is told
+        match shell().core.agent_undo_report(id) {
+            Ok(report) if !report.whole() => undo_said(&self.dialog, &report.text()).await,
+            Ok(_) => {}
+            Err(error) => undo_said(&self.dialog, &agents::undo_refusal(&error)).await,
+        }
+        self.fill();
+    }
+
+    /// Undo Since: everything the selected program did in a span it asks for, taken back after a yes
+    async fn undo_since(self: Rc<Self>) {
+        let Some(id) = self.selected_host() else { return };
+        let core = shell().core.clone();
+        let Ok(Some(host)) = core.agent_host(id) else { return };
+        let Some(since) = undo_since_dialog(&self.dialog, &host).await else {
+            return;
+        };
+        match core.agent_undo_since(id, since) {
+            Ok(report) => undo_said(&self.dialog, &report.text()).await,
+            Err(error) => undo_said(&self.dialog, &agents::undo_refusal(&error)).await,
         }
         self.fill();
     }
@@ -590,6 +620,87 @@ impl AgentsDialog {
             self.fill();
         }
     }
+}
+
+/// What taking back did, in a message box: its first line the heading when more lines follow (what was left)
+async fn undo_said(parent: &adw::Dialog, text: &str) {
+    match text.split_once('\n') {
+        Some((done, left)) => ui::alert(parent, done, left).await,
+        None => ui::alert(parent, &t!(UiAiAgents), text).await,
+    }
+}
+
+/// The question of Undo Since: the spans to pick from, and for the one picked how many changes it takes back. The
+/// moment the span picked reaches back to when Take Back is chosen; Cancel (Close when there is nothing to take back)
+/// is the default and Esc
+async fn undo_since_dialog(parent: &adw::Dialog, host: &agents::AgentHost) -> Option<i64> {
+    let heading = t!(UiUndoSinceButton);
+    let heading = heading.trim_end_matches(['\u{2026}', '.']);
+    let dialog = adw::AlertDialog::new(Some(heading), None);
+    dialog.set_widget_name("agent-undo-since");
+    dialog.set_prefer_wide_layout(true);
+    let labels: Vec<String> = (0..agents::UNDO_SPANS.len())
+        .filter_map(agents::undo_span_label)
+        .collect();
+    // the label over a drop-down as wide as the dialog, so neither the label nor a span is cut short
+    let span_label = ui::wrapped_label(&t!(UiUndoSinceSpan));
+    span_label.set_widget_name("agent-undo-span-label");
+    let spans = gtk::DropDown::from_strings(&labels.iter().map(String::as_str).collect::<Vec<_>>());
+    spans.set_widget_name("agent-undo-span");
+    spans.set_hexpand(true);
+    span_label.set_mnemonic_widget(Some(&spans));
+    let question = ui::wrapped_label("");
+    question.add_css_class("heading");
+    question.set_widget_name("agent-undo-question");
+    let detail = ui::wrapped_label("");
+    detail.add_css_class("dim-label");
+    detail.set_widget_name("agent-undo-detail");
+    let content = gtk::Box::new(gtk::Orientation::Vertical, 6);
+    content.set_size_request(420, -1);
+    content.append(&span_label);
+    content.append(&spans);
+    question.set_margin_top(12);
+    content.append(&question);
+    content.append(&detail);
+    dialog.set_extra_child(Some(&content));
+
+    let since = Rc::new(std::cell::Cell::new(0));
+    let show = {
+        // weak: the drop-down this is connected to is the dialog's
+        let (dialog, question, detail, since, host) =
+            (dialog.downgrade(), question, detail, since.clone(), host.clone());
+        move |index: usize| {
+            let (Some(dialog), Some(at)) = (dialog.upgrade(), agents::undo_span_since(index)) else {
+                return;
+            };
+            since.set(at);
+            let count = shell().core.agent_undoable_since(host.id, at).unwrap_or(0);
+            let (title, words) = agents::undo_since_question(&host, count);
+            question.set_text(&title);
+            detail.set_text(&words);
+            detail.set_visible(count > 0);
+            // nothing to take back: only Close; otherwise Cancel, the default, and Take Back in red
+            for id in ["close", "cancel", "take"] {
+                if dialog.has_response(id) {
+                    dialog.remove_response(id);
+                }
+            }
+            if count == 0 {
+                dialog.add_response("close", &t!(UiClose));
+                dialog.set_default_response(Some("close"));
+                dialog.set_close_response("close");
+            } else {
+                dialog.add_response("cancel", &t!(UiCancel));
+                dialog.add_response("take", &t!(UiTakeBack));
+                dialog.set_response_appearance("take", adw::ResponseAppearance::Destructive);
+                dialog.set_default_response(Some("cancel"));
+                dialog.set_close_response("cancel");
+            }
+        }
+    };
+    show(0);
+    spans.connect_selected_notify(move |row| show(row.selected() as usize));
+    (dialog.choose_future(Some(parent)).await == "take").then(|| since.get())
 }
 
 /// A titled list with its buttons beside it; `grow` takes the height the window has left
@@ -657,6 +768,7 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
         expanded: Rc::default(),
         change: button(&t!(UiChangeButton), "agents-change"),
         remove: button(&crate::words::plain(crate::words::Text::UiRemove), "agents-remove"),
+        undo_since: button(&t!(UiUndoSinceButton), "agents-undo-since"),
         undo: button(&t!(UiUndoButton), "agents-undo"),
         clear: button(&crate::words::plain(crate::words::Text::UiClearButton), "agents-clear"),
     });
@@ -672,7 +784,7 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
     content.append(&section(
         &t!(UiAgentPrograms),
         &agents.hosts,
-        &[&agents.change, &agents.remove],
+        &[&agents.change, &agents.remove, &agents.undo_since],
         120,
         false,
     ));
@@ -685,7 +797,7 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
     ));
     content.append(&setup);
     ui::tab_leaves(&agents.hosts, &agents.enabled, &agents.change);
-    ui::tab_leaves(&agents.log, &agents.remove, &agents.undo);
+    ui::tab_leaves(&agents.log, &agents.undo_since, &agents.undo);
     let view = adw::ToolbarView::new();
     view.add_top_bar(&adw::HeaderBar::new());
     view.set_content(Some(&content));
@@ -713,6 +825,7 @@ pub async fn agents_dialog(parent: &impl IsA<gtk::Widget>) {
     };
     on(&agents.change, |a| Box::pin(a.change_host()));
     on(&agents.remove, |a| Box::pin(a.remove_host()));
+    on(&agents.undo_since, |a| Box::pin(a.undo_since()));
     on(&agents.undo, |a| Box::pin(a.undo_entry()));
     on(&agents.clear, |a| Box::pin(a.clear_log()));
     let parent_window = agents.dialog.clone();

@@ -14,6 +14,7 @@ pub mod bimi;
 pub mod book;
 mod bounce;
 pub mod calendar;
+pub mod calendar_reply;
 pub mod card_pictures;
 mod compose;
 pub mod compose_keys;
@@ -510,6 +511,8 @@ pub struct Core {
     closed: Arc<AtomicBool>,
     /// The questions of AI agents waiting for the user (agents.rs)
     agent_asks: Mutex<agents::Asks>,
+    /// The tickets of AI agents' dry runs of changes of many messages, by their ids (agents/bulk.rs)
+    agent_tickets: Mutex<std::collections::HashMap<String, agents::Ticket>>,
     /// Grows each time what programs may do changes (agents.rs `agent_changes`)
     agent_changes: tokio::sync::watch::Sender<u64>,
     /// The attachments of the messages shown lately and the files written to open them (opening.rs)
@@ -626,6 +629,7 @@ impl Core {
             }),
             closed,
             agent_asks: Mutex::default(),
+            agent_tickets: Mutex::default(),
             agent_changes: tokio::sync::watch::Sender::new(0),
             attachment_files: Arc::default(),
             autoconfig: Requests::default(),

@@ -3,7 +3,7 @@
 <p>Første gang en agent opretter forbindelse, viser Inbox Classic programmets navn og beder dig vælge, hvad agenten må:</p>
 <ul>
     <!--review--><li>læse mail: se mapper, meddelelser og samtaler, også PDF-, Office- og billedfiler på op til 10 MB i meddelelser, søge efter meddelelser og kontakter samt se meddelelsesregler</li><!--/review-->
-    <!--review--><li>organisere mail: ændre læst/ulæst-status, flag og flagfarver, håndtere uønsket mail, flytte og arkivere meddelelser, oprette mapper, omdøbe dine egne mapper, følge og ignorere samtaler, slette ved at flytte til <b data-text="folder-deleted"></b> og afmelde mailinglister med din godkendelse</li><!--/review-->
+    <!--review--><li>organisere mail: ændre læst/ulæst-status, flag og flagfarver, håndtere uønsket mail, flytte og arkivere meddelelser, oprette mapper, omdøbe dine egne mapper, følge og ignorere samtaler, slette ved at flytte til <b data-text="folder-deleted"></b>, alt dette også på én gang for alle meddelelser, en søgning finder, og afmelde mailinglister med din godkendelse</li><!--/review-->
     <li>skrive kladder, som du selv sender, og redigere eller kassere sine egne kladder, indtil du gemmer dem</li>
     <li>sende mail, hver meddelelse først når du siger ja</li>
 </ul>
@@ -16,6 +16,8 @@
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> er standardvalget og sender ingen afmeldingsanmodninger.</li>
 </ul>
 <p>En agent kan ikke bruge meddelelser i <b data-text="folder-junk"></b> til at afmelde dig. Grænsen er 30 godkendte afmeldingsanmodninger pr. program inden for de seneste 24 timer. Anmodninger, der mislykkes, tæller også med.</p>
+<!--review--><h2>Ændr mange meddelelser på én gang</h2><!--/review-->
+<!--review--><p>En agent, der må organisere mail, kan ændre alle meddelelser, en søgning finder, i ét trin, fx markere alle nyhedsbreve som læst eller flytte dem til en mappe. Først tæller den meddelelserne og ser nogle af dem. Derefter ændrer den præcis dem, højst 1.000 ad gangen, og aldrig mail, der er kommet siden. Inbox Classic spørger dig ikke først, da det hele kan fortrydes. Loggen viser det som én række, fx »Markerede 37 meddelelser som læst (søgning: from:news)«, og én Fortryd fortryder det hele.</p><!--/review-->
 <h2>Se og ændr adgang</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> viser de programmer, du har givet adgang eller afvist, og alt, hvad agenterne har gjort, med det nyeste først.</p>
 <!--review--><p>Det, en agent læser, vises som én række pr. program og time, fx »Læste 14 meddelelser og søgte 3 gange«. <!--os:windows-->Markér rækken<!--/os--><!--os:mac,linux-->Åbn rækken med dens pil<!--/os--> for at se emnerne på det, den læste, og det, den søgte efter, men aldrig selve teksten i meddelelserne. Loggen gemmes i 30 dage. Hvis du rydder den, ændrer det ikke, hvor mange meddelelser en agent stadig må sende.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ændrer, hvad et program må.</li>
     <li><b data-text="ui-remove"></b> fjerner programmets gemte tilladelser eller afvisning, så du bliver spurgt igen, næste gang det opretter forbindelse.</li>
     <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> fortryder ændringer af læst/ulæst-status, flag og flagfarve og markering som uønsket mail samt flytning, arkivering og sletning af meddelelser. Du kan også annullere en afsendelse, så længe meddelelsen stadig ligger i Udbakke.</li><!--/review-->
+    <!--review--><li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> fortryder alt, hvad det valgte program har gjort i den tid, du vælger, fx den seneste time, nyeste først.</li><!--/review-->
 </ul>
+<!--review--><p>En meddelelse, som du eller serveren har ændret, efter agenten gjorde det, bliver ladt, som den er, og Inbox Classic fortæller dig, hvor mange det gælder. En agent kan også selv fortryde sine egne ændringer, men aldrig et andet programs.</p><!--/review-->
 <aside class="warning">Mail er skrevet af andre, og en meddelelse kan forsøge at overtale en agent til at videresende eller slette din mail. Inbox Classic udelader skjult meddelelsestekst fra det indhold, agenter får, og angiver, at mail skal behandles som indhold, ikke som instruktioner. En agent kan stadig blive narret. Tillad kun det, du har brug for.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

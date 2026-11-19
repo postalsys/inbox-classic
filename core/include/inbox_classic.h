@@ -33,6 +33,9 @@
 // The levels an agent may be given, as the windows offer them: `count` of them
 #define PE_AGENT_LEVEL_COUNT 4
 
+// How many spans "Undo Everything Since" offers (`pe_agent_undo_span_label`)
+#define PE_AGENT_UNDO_SPAN_COUNT 6
+
 // For `pe_core_open_with`: passwords and sign-ins are kept for this run only, not in the Credential Manager
 // (test runs, a shared computer)
 #define PE_OPEN_MEMORY_PASSWORDS 1
@@ -675,6 +678,8 @@ typedef struct PeAgentReads PeAgentReads;
 
 typedef struct PeAgentSendInfo PeAgentSendInfo;
 
+typedef struct PeAgentUndoQuestionInfo PeAgentUndoQuestionInfo;
+
 typedef struct PeAgentUnsubscribeInfo PeAgentUnsubscribeInfo;
 
 // A lookup's result; free with `pe_autoconfig_free`
@@ -819,6 +824,12 @@ typedef struct PeAgentSend {
   const char *warning;
   // The files that go with it, one line ("Files: a.pdf (13 KB)"), empty without any
   const char *files;
+  // An answer to a calendar invitation: what it answers, when the event is, and that the user's answer changes once
+  // it was sent, to show above the text; empty for any other message
+  const char *invitation;
+  // The user may open it to change it first (`PE_AGENT_SEND_ANSWER_COMPOSE`): not an answer to an invitation,
+  // whose calendar file the core wrote. Without it the window offers only Send and Don't Send.
+  bool can_edit;
 } PeAgentSend;
 
 // A recipient of a message an agent wants to send
@@ -900,6 +911,18 @@ typedef struct PeAgentRead {
   // "Read “Lunch”", "Searched for “invoice”: 4 messages", in the language in use
   const char *text;
 } PeAgentRead;
+
+// The question before taking back what a program did in a span
+typedef struct PeAgentUndoQuestion {
+  // The changes it would take back; with none, `title` says so and the window offers only Close
+  uint64_t count;
+  // The moment the span reaches back to, seconds since the Unix epoch: what `pe_agent_undo_since` takes
+  int64_t since;
+  // "Take back the 12 changes Claude made in this time?"
+  const char *title;
+  // What taking back does and leaves
+  const char *detail;
+} PeAgentUndoQuestion;
 
 // A person of the address book as its list shows them
 typedef struct PeCardRow {
@@ -2135,11 +2158,45 @@ const struct PeAgentRead *pe_agent_reads_get(const struct PeAgentReads *reads, s
 // `reads` must be NULL or not freed yet.
 void pe_agent_reads_free(struct PeAgentReads *reads);
 
-// Takes back what log entry `id` did: NULL when it was, else why not (free with `pe_string_free`)
+// Takes back what log entry `id` did, every message of it still as it left it: NULL when all of it was taken back,
+// else what to tell the user (free with `pe_string_free`): why none of it could be, or, for a change of many messages
+// of which some were left, what was taken back and a line for each kind of message left as it is
 //
 // # Safety
 // `core` must be a live handle.
-char *pe_agent_undo(const struct PeCore *core, int64_t id);
+char *pe_agent_undo(const struct PeCore *core,
+                    int64_t id);
+
+// The label of span `index`, "In the last hour", in the language in use (free with `pe_string_free`); NULL past the
+// end
+char *pe_agent_undo_span_label(size_t index);
+
+// The question before taking back what program `host_id` did in span `index` (from now): NULL for no such program or
+// span. Free with `pe_agent_undo_question_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeAgentUndoQuestionInfo *pe_agent_undo_question(const struct PeCore *core,
+                                                       int64_t host_id,
+                                                       size_t index);
+
+// # Safety
+// `info` must be NULL or live.
+const struct PeAgentUndoQuestion *pe_agent_undo_question_get(const struct PeAgentUndoQuestionInfo *info);
+
+// # Safety
+// `info` must be NULL or not freed yet.
+void pe_agent_undo_question_free(struct PeAgentUndoQuestionInfo *info);
+
+// Takes back everything program `host_id` did since `since` (a question's `since`) that can be, newest first: what
+// to tell the user (free with `pe_string_free`), "Took back 12 changes." and a line for each kind of message left as
+// it is (moved or changed since, already sent), or NULL when it could not be done at all
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_agent_undo_since(const struct PeCore *core,
+                          int64_t host_id,
+                          int64_t since);
 
 // Clears the log from the window: what agents read is forgotten, what they did hidden (the limits of what an agent may
 // send still count it until it is 30 days old)

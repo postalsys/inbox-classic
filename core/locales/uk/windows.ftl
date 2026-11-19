@@ -166,6 +166,11 @@ win-clear-log-ask = Очистити історію дій агентів? Це 
 win-agent-programs = &Програми, агенти яких запитували доступ до вашої пошти:
 # review: new
 win-change = &Змінити...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Скасувати з&а період...
+# review: new
+win-take-back = &Скасувати
 # review: new
 win-what-agents-did = &Дії агентів:
 # review: new

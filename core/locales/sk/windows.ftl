@@ -157,6 +157,11 @@ win-clear-log-ask = Vymazať históriu aktivity agentov? Zmeny, ktoré agenti ur
 win-agent-programs = &Programy, ktorých agenti požiadali o prístup k vašej pošte:
 # review: new
 win-change = &Zmeniť...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = &Vrátiť za obdobie...
+# review: new
+win-take-back = &Vrátiť
 # review: new
 win-what-agents-did = &Aktivita agentov:
 # review: new

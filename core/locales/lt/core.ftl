@@ -538,6 +538,155 @@ agent-log-renamed = Paprašyta pervardyti aplanką „{ $old }“ į „{ $name 
 agent-log-watched = Pradėtas stebėti pokalbis „{ $subject }“
 agent-log-ignored = Pradėtas ignoruoti pokalbis „{ $subject }“
 agent-log-unmarked = Nebestebimas ir nebeignoruojamas pokalbis „{ $subject }“
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = laiškas nuo to laiko pakeistas
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Pažymėtas kaip skaitytas { $count } laiškas (paieška: { $query })
+    [few] Pažymėti kaip skaityti { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip skaityta { $count } laiškų (paieška: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Pažymėtas kaip neskaitytas { $count } laiškas (paieška: { $query })
+    [few] Pažymėti kaip neskaityti { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip neskaityta { $count } laiškų (paieška: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Pažymėtas vėliavėle { $count } laiškas (paieška: { $query })
+    [few] Pažymėti vėliavėle { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta vėliavėle { $count } laiškų (paieška: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Nuimta vėliavėlė nuo { $count } laiško (paieška: { $query })
+    [few] Nuimta vėliavėlė nuo { $count } laiškų (paieška: { $query })
+   *[other] Nuimta vėliavėlė nuo { $count } laiškų (paieška: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Pažymėtas
+    [few] Pažymėti
+   *[other] Pažymėta
+} { $color ->
+    [red] raudona vėliavėle
+    [orange] oranžine vėliavėle
+    [yellow] geltona vėliavėle
+    [green] žalia vėliavėle
+    [blue] mėlyna vėliavėle
+    [purple] violetine vėliavėle
+   *[gray] pilka vėliavėle
+} { $count ->
+    [one] { $count } laiškas
+    [few] { $count } laiškai
+   *[other] { $count } laiškų
+} (paieška: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Perkeltas { $count } laiškas (paskirtis: { $folder }; paieška: { $query })
+    [few] Perkelti { $count } laiškai (paskirtis: { $folder }; paieška: { $query })
+   *[other] Perkelta { $count } laiškų (paskirtis: { $folder }; paieška: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Archyvuotas { $count } laiškas (paieška: { $query })
+    [few] Archyvuoti { $count } laiškai (paieška: { $query })
+   *[other] Archyvuota { $count } laiškų (paieška: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Pažymėtas kaip nepageidaujamas { $count } laiškas (paieška: { $query })
+    [few] Pažymėti kaip nepageidaujami { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip nepageidaujami { $count } laiškų (paieška: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Pažymėtas kaip pageidaujamas { $count } laiškas (paieška: { $query })
+    [few] Pažymėti kaip pageidaujami { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip pageidaujami { $count } laiškų (paieška: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Panaikintas { $count } laiškas (paieška: { $query })
+    [few] Panaikinti { $count } laiškai (paieška: { $query })
+   *[other] Panaikinta { $count } laiškų (paieška: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Per pastarąsias 15 minučių
+    [hour] Per pastarąją valandą
+    [hours] Per pastarąsias 4 valandas
+    [day] Per pastarąsias 24 valandas
+    [week] Per pastarąsias 7 dienas
+   *[all] Per pastarąsias 30 dienų
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } per šį laiką neatliko jokių pakeitimų, kuriuos būtų galima atšaukti.
+    [one] Atšaukti { $count } pakeitimą, kurį { $program } atliko per šį laiką?
+    [few] Atšaukti { $count } pakeitimus, kuriuos { $program } atliko per šį laiką?
+   *[other] Atšaukti { $count } pakeitimų, kuriuos { $program } atliko per šį laiką?
+}
+# review: new
+agent-undo-since-detail = Laiškai grąžinami į aplankus, iš kurių buvo perkelti, skaitymo būsenos ir vėliavėlės atkuriamos, o aplanke „Siunčiami laiškai“ dar laukiantys laiškai panaikinami. Tai, ką nuo to laiko pakeitėte jūs ar serveris, paliekama nepakeista.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nieko neatšaukta.
+    [one] Atšauktas { $count } pakeitimas.
+    [few] Atšaukti { $count } pakeitimai.
+   *[other] Atšaukta { $count } pakeitimų.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] { $count } laiško nebebuvo ten, kur jį perkėlė pakeitimas.
+    [few] { $count } laiškų nebebuvo ten, kur juos perkėlė pakeitimas.
+   *[other] { $count } laiškų nebebuvo ten, kur juos perkėlė pakeitimas.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] { $count } laiškas nuo to laiko buvo pakeistas (jūsų ar serveryje), todėl paliktas nepakeistas.
+    [few] { $count } laiškai nuo to laiko buvo pakeisti (jūsų ar serveryje), todėl palikti nepakeisti.
+   *[other] { $count } laiškų nuo to laiko buvo pakeista (jūsų ar serveryje), todėl palikta nepakeista.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] { $count } laiškas jau buvo išėjęs iš aplanko „Siunčiami laiškai“.
+    [few] { $count } laiškai jau buvo išėję iš aplanko „Siunčiami laiškai“.
+   *[other] { $count } laiškų jau buvo išėję iš aplanko „Siunčiami laiškai“.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] { $count } pakeitimo atšaukti negalima.
+    [few] { $count } pakeitimų atšaukti negalima.
+   *[other] { $count } pakeitimų atšaukti negalima.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Šiuo laišku priimamas kvietimas „{ $summary }“ ({ $when }).
+    [tentative] Šiuo laišku preliminariai priimamas kvietimas „{ $summary }“ ({ $when }).
+   *[decline] Šiuo laišku atmetamas kvietimas „{ $summary }“ ({ $when }).
+} Organizatoriaus kalendorius jį užregistruoja. Jūsų atsakymas į kvietimą pasikeis tik tada, kai laiškas bus išsiųstas.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Priimta: { $summary }
+    [tentative] Preliminariai: { $summary }
+   *[decline] Atmesta: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } priėmė šį kvietimą.
+    [tentative] { $name } preliminariai priėmė šį kvietimą.
+   *[decline] { $name } atmetė šį kvietimą.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 agent-reads-messages = { $count ->
     [one] perskaitytas { $count } laiškas

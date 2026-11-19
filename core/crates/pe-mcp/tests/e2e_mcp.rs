@@ -220,6 +220,29 @@ fn said(entry: &pe_core::agents::AgentLogEntry) -> String {
     pe_core::agents::log_text(entry)
 }
 
+/// Ends the test process when a test has not finished in five minutes: a deadlock fails the run rather than
+/// blocking it for hours. Dropped, it stands down.
+struct Watchdog(Option<std::sync::mpsc::Sender<()>>);
+
+fn watchdog() -> Watchdog {
+    let (done, finished) = channel::<()>();
+    std::thread::spawn(move || {
+        if let Err(std::sync::mpsc::RecvTimeoutError::Timeout) = finished.recv_timeout(Duration::from_secs(300)) {
+            eprintln!("a test has not finished in 5 minutes: stuck");
+            std::process::exit(101);
+        }
+    });
+    Watchdog(Some(done))
+}
+
+impl Drop for Watchdog {
+    fn drop(&mut self) {
+        if let Some(done) = self.0.take() {
+            let _ = done.send(());
+        }
+    }
+}
+
 /// Waits up to `seconds`, and at least [`pe_testkit::patience`], for `condition`
 fn eventually(seconds: u64, condition: impl Fn() -> bool) -> bool {
     // at least the patience of the other tests: a busy runner is slow, and the wait ends as soon as it holds
@@ -298,6 +321,7 @@ fn answer_questions(core: Arc<Core>, events: Receiver<Event>, others: std::sync:
 
 #[test]
 fn an_agent_works_on_the_mailbox() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -386,7 +410,7 @@ fn an_agent_works_on_the_mailbox() {
         let host = hosts[0].clone();
         let tools = agent.request("tools/list", json!({})).await;
         let tools = tools["result"]["tools"].as_array().unwrap().clone();
-        assert_eq!(tools.len(), 28);
+        assert_eq!(tools.len(), 31);
         let delete = tools.iter().find(|t| t["name"] == "delete_messages").unwrap();
         assert_eq!(delete["annotations"]["destructiveHint"], true, "{delete}");
         let search = tools.iter().find(|t| t["name"] == "search_messages").unwrap();
@@ -811,6 +835,7 @@ fn pe_core_now() -> i64 {
 /// it was opened), and can not answer it; no tool signs or encrypts
 #[test]
 fn an_agent_never_reads_encrypted_mail() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -976,7 +1001,37 @@ fn an_agent_never_reads_encrypted_mail() {
             "a rule's test never matches what was decrypted: {tested}"
         );
         let overview = agent.call("get_overview", json!({})).await.unwrap();
+        // a change of many finds it by what it came with only, and its samples are its envelope
+        let by_words = agent
+            .call(
+                "apply_to_search",
+                json!({ "query": "mill", "action": "flag", "dry_run": true }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(by_words["matches"], 0, "never by what was decrypted: {by_words}");
+        let bulk = agent
+            .call(
+                "apply_to_search",
+                json!({ "query": "is:encrypted", "action": "flag", "dry_run": true }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(bulk["samples"][0]["subject"], "...", "{bulk}");
+        assert!(bulk["samples"][0].get("snippet").is_none(), "{bulk}");
+        // nor answers what it says, an invitation or not
+        let answer = agent
+            .call(
+                "respond_to_invitation",
+                json!({ "folder": inbox, "uid": sealed, "response": "accept" }),
+            )
+            .await;
+        assert!(
+            answer.as_ref().is_err_and(|why| why.contains("encrypted")),
+            "{answer:?}"
+        );
         for listed in [
+            bulk,
             listed,
             agent
                 .call("get_message", json!({ "folder": inbox, "uid": sealed }))
@@ -1055,6 +1110,7 @@ fn special(folders: &Value, special: &str) -> i64 {
 /// own: replaced and discarded by it alone, marked for the user as an agent's
 #[test]
 fn an_agent_reads_lists_and_keeps_its_drafts() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -1312,6 +1368,7 @@ fn an_agent_reads_lists_and_keeps_its_drafts() {
 /// no second question; a cancelled request gets no answer
 #[test]
 fn requests_are_served_side_by_side() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -1478,6 +1535,7 @@ fn with_file(subject: &str, name: &str, mime_type: &str, content: &[u8]) -> Stri
 /// over as files, up to 10 MB
 #[test]
 fn an_agent_reads_what_the_reading_pane_shows() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -1729,6 +1787,7 @@ fn an_agent_reads_what_the_reading_pane_shows() {
 /// are not renamed
 #[test]
 fn an_agent_organizes_folders_and_conversations() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -1777,6 +1836,27 @@ fn an_agent_organizes_folders_and_conversations() {
         assert_eq!(core.agent_log(1).unwrap()[0].id, flagged.id);
         core.agent_undo(flagged.id).unwrap();
         assert!(eventually(10, || !has("\\Flagged") && !has("$MailFlagBit0")));
+        // a colour the user changed since is left as it is
+        agent
+            .call(
+                "set_flag_color",
+                json!({ "folder": inbox, "uids": [plans], "color": "green" }),
+            )
+            .await
+            .unwrap();
+        let green = core.agent_log(1).unwrap()[0].id;
+        core.set_flag_color_many(inbox, &[plans], Some(pe_store::FlagColor::Blue))
+            .unwrap();
+        let left = core.agent_undo(green).unwrap_err();
+        assert!(
+            pe_core::agents::undo_refusal(&left).contains("changed since"),
+            "{left:?}"
+        );
+        assert_eq!(
+            core.message(inbox, plans).unwrap().unwrap().info.flag_color(),
+            Some(pe_store::FlagColor::Blue)
+        );
+        core.set_flag_color_many(inbox, &[plans], None).unwrap();
         let wrong = agent
             .call(
                 "set_flag_color",
@@ -1874,6 +1954,7 @@ fn an_agent_organizes_folders_and_conversations() {
 /// forgotten to make room: what it did and what it read, each with its own ceiling
 #[test]
 fn a_full_log_refuses_more() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -1944,6 +2025,7 @@ fn a_full_log_refuses_more() {
 /// A person whose address is no plain one (words in a quoted local part) is found by name, without the address
 #[test]
 fn contacts_with_words_for_an_address_are_left_without_it() {
+    let _watchdog = watchdog();
     let Some(server) = ImapKit::start(json!({})) else {
         return;
     };
@@ -1965,6 +2047,341 @@ fn contacts_with_words_for_an_address_are_left_without_it() {
         let mallory = agent.call("find_contacts", json!({ "query": "mal" })).await.unwrap();
         assert_eq!(mallory["people"][0]["name"], "Mallory", "{mallory}");
         assert!(mallory["people"][0].get("address").is_none(), "{mallory}");
+    });
+    mcp.stop();
+}
+
+/// The messages of `folder` the store has, by subject
+fn subjects_in(core: &Core, folder: i64) -> Vec<String> {
+    core.messages(folder, pe_store::Sort::default(), 0, 1000)
+        .unwrap()
+        .into_iter()
+        .map(|m| m.info.subject)
+        .collect()
+}
+
+/// A change of many messages: a dry run with the count, samples and a token bound to that moment, used once by the
+/// program that got it, within its time and accounts, on exactly the messages counted; one entry in the log with one
+/// Undo All, and everything a program did since a moment taken back with what was left said
+#[test]
+fn an_agent_changes_many_messages_at_once() {
+    let _watchdog = watchdog();
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let news = |n: u32| {
+        format!(
+            "From: News <news@example.com>\r\nTo: testuser@example.com\r\nSubject: News {n}\r\n\
+             Message-ID: <news-{n}@example.com>\r\n\r\nThe news.\r\n"
+        )
+    };
+    let uids: Vec<u64> = (1..=3).map(|n| server.add_message("INBOX", &news(n), &[])).collect();
+    let keep = server.add_message("INBOX", &rfc822("Keep", "Mine."), &[]);
+    let dir = TempDir::new("mcp-bulk");
+    let (core, account, mut mcp, socket) = engine_on(&server, &dir);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        agent.initialize().await;
+        let folders = agent.call("list_folders", json!({ "account": account })).await.unwrap();
+        let inbox = special(&folders, "inbox");
+        let archive = folders["folders"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|f| f["name"] == "Archive")
+            .and_then(|f| f["folder"].as_i64())
+            .unwrap();
+        let host = core
+            .agent_hosts()
+            .unwrap()
+            .into_iter()
+            .find(|h| h.path == "/test/bin/agent")
+            .unwrap();
+        let dry_run = json!({ "query": "from:news", "action": "mark_read", "dry_run": true });
+        let seen = |uid: u64| server.flags("INBOX", uid).iter().any(|f| f == "\\Seen");
+
+        // the dry run changes nothing: the count, samples, and the token
+        let preview = agent.call("apply_to_search", dry_run.clone()).await.unwrap();
+        assert_eq!(preview["matches"], 3, "{preview}");
+        assert_eq!(preview["samples"].as_array().unwrap().len(), 3, "{preview}");
+        assert!(
+            preview["samples"][0]["subject"].as_str().unwrap().starts_with("News"),
+            "{preview}"
+        );
+        let token = preview["token"].as_str().unwrap().to_string();
+        assert!(!uids.iter().any(|&uid| seen(uid)));
+        // a token is not another program's to use, nor told apart from one never given
+        let mut other = Client::connect(&socket, "/test/bin/other", "Other Agent").await;
+        other.initialize().await;
+        let stolen = other.call("apply_to_search", json!({ "token": token })).await;
+        assert!(stolen.as_ref().unwrap_err().contains("not known"), "{stolen:?}");
+        let guessed = agent
+            .call("apply_to_search", json!({ "token": "0123456789abcdef" }))
+            .await;
+        assert!(guessed.as_ref().unwrap_err().contains("not known"), "{guessed:?}");
+        let both = agent
+            .call("apply_to_search", json!({ "token": token, "dry_run": true }))
+            .await;
+        assert!(both.is_err(), "{both:?}");
+
+        // mail that arrives after the dry run is not changed by its token
+        let late = server.add_message("INBOX", &news(4), &[]);
+        core.sync(account).unwrap();
+        assert!(eventually(20, || subjects_in(&core, inbox).contains(&"News 4".to_string())));
+        let done = agent.call("apply_to_search", json!({ "token": token })).await.unwrap();
+        assert_eq!(done["changed"], 3, "{done}");
+        let change = done["change_id"].as_i64().unwrap();
+        assert!(eventually(10, || uids.iter().all(|&uid| seen(uid))));
+        assert!(!seen(late) && !seen(keep));
+        // used once
+        let again = agent.call("apply_to_search", json!({ "token": token })).await;
+        assert!(again.as_ref().unwrap_err().contains("not known"), "{again:?}");
+        // one entry in the log, counted as its three changes
+        let entry = core.agent_log(1).unwrap()[0].clone();
+        assert_eq!(entry.id, change);
+        assert_eq!(said(&entry), "Marked 3 messages read (search: from:news)");
+        assert_eq!(entry.entry.changes, 3);
+
+        // the user marks one unread again: the agent's Undo All leaves it, and says so
+        core.set_flag_many(inbox, &[uids[0]], "\\Seen", false).unwrap();
+        let undone = agent
+            .call("undo_my_change", json!({ "change_id": change }))
+            .await
+            .unwrap();
+        assert_eq!(undone["messages_taken_back"], 2, "{undone}");
+        assert_eq!(undone["changed_since"], 1, "{undone}");
+        assert!(eventually(10, || !uids.iter().any(|&uid| seen(uid))));
+        assert!(core.agent_log(10).unwrap().iter().any(|e| e.id == change && e.undone));
+        // another program's change is not the agent's to take back
+        let theirs = other.call("undo_my_change", json!({ "change_id": change })).await;
+        assert!(theirs.as_ref().unwrap_err().contains("no change"), "{theirs:?}");
+
+        // a token expires
+        let preview = agent.call("apply_to_search", dry_run.clone()).await.unwrap();
+        core.agent_tickets_expire();
+        let expired = agent
+            .call("apply_to_search", json!({ "token": preview["token"] }))
+            .await;
+        assert!(expired.as_ref().unwrap_err().contains("expired"), "{expired:?}");
+        // and holds only for the accounts the program could use then
+        let preview = agent.call("apply_to_search", dry_run.clone()).await.unwrap();
+        core.update_agent_host(host.id, true, host.levels, &[account, account + 100])
+            .unwrap();
+        let moved_on = agent
+            .call("apply_to_search", json!({ "token": preview["token"] }))
+            .await;
+        assert!(moved_on.as_ref().unwrap_err().contains("accounts"), "{moved_on:?}");
+        core.update_agent_host(host.id, true, host.levels, &[account]).unwrap();
+        // nothing to change: no token
+        let nothing = agent
+            .call(
+                "apply_to_search",
+                json!({ "query": "from:nobody", "action": "archive", "dry_run": true }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(nothing["matches"], 0, "{nothing}");
+        assert!(nothing.get("token").is_none(), "{nothing}");
+        let wrong = agent
+            .call(
+                "apply_to_search",
+                json!({ "query": "from:news", "action": "destroy", "dry_run": true }),
+            )
+            .await;
+        assert!(wrong.as_ref().unwrap_err().contains("mark_read"), "{wrong:?}");
+
+        // a move of all four, then one flag: everything since then taken back, newest first
+        let since = pe_core_now() - 1;
+        let preview = agent
+            .call(
+                "apply_to_search",
+                json!({ "query": "from:news", "action": "move", "to_folder": archive, "dry_run": true }),
+            )
+            .await
+            .unwrap();
+        assert_eq!(preview["matches"], 4, "{preview}");
+        agent
+            .call("apply_to_search", json!({ "token": preview["token"] }))
+            .await
+            .unwrap();
+        assert!(eventually(20, || server.subjects("Archive").len() == 4));
+        assert!(eventually(20, || subjects_in(&core, archive).len() == 4));
+        agent
+            .call("flag_messages", json!({ "folder": inbox, "uids": [keep] }))
+            .await
+            .unwrap();
+        assert_eq!(core.agent_undoable_since(host.id, since).unwrap(), 2);
+        let report = core.agent_undo_since(host.id, since).unwrap();
+        assert_eq!((report.entries, report.undone), (2, 5), "{report:?}");
+        assert!(report.whole());
+        assert_eq!(report.text(), "Took back 2 changes.");
+        assert!(eventually(20, || server.subjects("INBOX").len() == 5));
+        // moved back, they are in the store's Inbox once the sync of it brings them (a move takes them out of the
+        // folder they leave at once, and into the one they go to as the server has them there)
+        assert!(eventually(30, || subjects_in(&core, inbox).len() == 5));
+        assert!(eventually(10, || !server
+            .flags("INBOX", keep)
+            .iter()
+            .any(|f| f == "\\Flagged")));
+        assert_eq!(core.agent_undoable_since(host.id, since).unwrap(), 0);
+        // what was taken back is not taken back twice
+        assert_eq!(core.agent_undo_since(host.id, since).unwrap().entries, 0);
+
+        // a change of many counts each of its messages against the program's ceiling
+        let store = pe_store::Store::open(dir.path().join("store.db")).unwrap();
+        let (did, _) = store.agent_log_live(host.id, 0).unwrap();
+        let filler: Vec<pe_store::NewLogEntry> = (did..pe_store::LOG_CEILING - 2)
+            .map(|_| pe_store::NewLogEntry {
+                host: host.id,
+                what: "send".into(),
+                ..Default::default()
+            })
+            .collect();
+        store.log_agent(&filler, pe_core_now()).unwrap();
+        let preview = agent.call("apply_to_search", dry_run.clone()).await.unwrap();
+        assert_eq!(preview["matches"], 4, "{preview}");
+        let full = agent
+            .call("apply_to_search", json!({ "token": preview["token"] }))
+            .await;
+        assert!(full.as_ref().unwrap_err().starts_with("Too many changes"), "{full:?}");
+        // nothing of it was done (the messages came back with new uids)
+        let inbox_now = server.messages("INBOX");
+        assert_eq!(inbox_now.len(), 5);
+        assert!(
+            inbox_now.iter().all(|m| !m["flags"].to_string().contains("Seen")),
+            "{inbox_now:?}"
+        );
+    });
+    mcp.stop();
+}
+
+/// An agent answers a calendar invitation only through the Send question: the core writes the answer from the
+/// invitation, the user can not open it to change it, and the user's status changes once it was sent
+#[test]
+fn an_agent_answers_an_invitation_through_the_send_question() {
+    let _watchdog = watchdog();
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let invitation = server.add_message(
+        "INBOX",
+        "From: Ann <ann@example.com>\r\nTo: testuser@example.com\r\nSubject: Invitation: Wait for lunch\r\n\
+         Message-ID: <invite@example.com>\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/alternative; boundary=b\r\n\r\n\
+         --b\r\nContent-Type: text/plain\r\n\r\nLunch on Friday.\r\n\
+         --b\r\nContent-Type: text/calendar; method=REQUEST; charset=utf-8\r\n\r\n\
+         BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nBEGIN:VEVENT\r\nUID:lunch-1@example.com\r\nSEQUENCE:1\r\n\
+         SUMMARY:Wait for lunch\r\nDTSTART:20261120T120000Z\r\nDTEND:20261120T130000Z\r\n\
+         ORGANIZER;CN=Ann:mailto:ann@example.com\r\n\
+         ATTENDEE;CN=Test;RSVP=TRUE;PARTSTAT=NEEDS-ACTION:mailto:testuser@example.com\r\n\
+         END:VEVENT\r\nEND:VCALENDAR\r\n--b--\r\n",
+        &[],
+    );
+    let cancelled = server.add_message(
+        "INBOX",
+        "From: Ann <ann@example.com>\r\nTo: testuser@example.com\r\nSubject: Cancelled\r\n\
+         Message-ID: <cancel@example.com>\r\nContent-Type: text/calendar; method=CANCEL\r\n\r\n\
+         BEGIN:VCALENDAR\r\nMETHOD:CANCEL\r\nBEGIN:VEVENT\r\nUID:x@example.com\r\nSUMMARY:Gone\r\n\
+         ORGANIZER:mailto:ann@example.com\r\nATTENDEE:mailto:testuser@example.com\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n",
+        &[],
+    );
+    let dir = TempDir::new("mcp-invitation");
+    let (core, account, mut mcp, socket) = engine_on(&server, &dir);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        agent.initialize().await;
+        let folders = agent.call("list_folders", json!({ "account": account })).await.unwrap();
+        let inbox = special(&folders, "inbox");
+        let status = |message: &Value| message["invitation"]["your_status"].as_str().unwrap_or_default().to_string();
+        let message = agent
+            .call("get_message", json!({ "folder": inbox, "uid": invitation }))
+            .await
+            .unwrap();
+        assert_eq!(status(&message), "needs-action", "{message}");
+
+        // not a cancellation
+        let refused = agent
+            .call("respond_to_invitation", json!({ "folder": inbox, "uid": cancelled, "response": "accept" }))
+            .await;
+        assert!(refused.as_ref().unwrap_err().contains("not an invitation"), "{refused:?}");
+        let wrong = agent
+            .call("respond_to_invitation", json!({ "folder": inbox, "uid": invitation, "response": "maybe" }))
+            .await;
+        assert!(wrong.is_err(), "{wrong:?}");
+
+        // the question says what it answers; it can not be opened to change, and Edit First sends nothing
+        let answer = |response: &'static str| {
+            let socket = socket.clone();
+            tokio::spawn(async move {
+                let mut asking = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+                asking.initialize().await;
+                asking
+                    .call(
+                        "respond_to_invitation",
+                        json!({ "folder": inbox, "uid": invitation, "response": response, "comment": "See you there." }),
+                    )
+                    .await
+            })
+        };
+        let declining = answer("decline");
+        assert!(eventually_async(20, || !core.agent_asks_waiting().is_empty()).await);
+        let request = core.agent_asks_waiting()[0];
+        let Some(AgentAsk::Send(ask)) = core.agent_ask(request) else {
+            panic!("a Send question");
+        };
+        assert!(!ask.can_edit());
+        assert_eq!(ask.subject, "Declined: Wait for lunch");
+        assert_eq!(ask.recipients[0].address, "ann@example.com");
+        assert!(ask.text.starts_with("See you there.") && ask.text.contains("has declined"), "{}", ask.text);
+        let text = pe_core::agents::send_text(&ask);
+        assert!(text.invitation.starts_with("This message declines the invitation"), "{}", text.invitation);
+        assert!(core.agent_answer(request, AgentAnswer::Compose).unwrap().is_none());
+        assert_eq!(declining.await.unwrap().unwrap()["status"], "not_sent");
+        assert!(core.outbox().unwrap().is_empty());
+
+        // a yes: in the Outbox, the status unchanged until it went
+        let accepting = answer("accept");
+        assert!(eventually_async(20, || !core.agent_asks_waiting().is_empty()).await);
+        core.agent_answer(core.agent_asks_waiting()[0], AgentAnswer::Send).unwrap();
+        let accepted = accepting.await.unwrap().unwrap();
+        assert_eq!(accepted["status"], "sent", "{accepted}");
+        assert!(eventually(10, || core.outbox().unwrap().len() == 1));
+        let message = agent
+            .call("get_message", json!({ "folder": inbox, "uid": invitation }))
+            .await
+            .unwrap();
+        assert_eq!(status(&message), "needs-action", "{message}");
+        core.outbox_send().unwrap();
+        assert!(eventually(20, || core.outbox().unwrap().is_empty()));
+        assert!(eventually(20, || server.subjects("Sent").contains(&"Accepted: Wait for lunch".to_string())));
+        let sent = server
+            .messages("Sent")
+            .into_iter()
+            .map(|m| pe_testkit::raw_text(&m))
+            .find(|raw| raw.contains("Accepted: Wait for lunch"))
+            .unwrap();
+        assert!(sent.contains("text/calendar; charset=utf-8; method=REPLY"), "{sent}");
+        assert!(sent.contains("In-Reply-To: <invite@example.com>"), "{sent}");
+        let message = agent
+            .call("get_message", json!({ "folder": inbox, "uid": invitation }))
+            .await
+            .unwrap();
+        assert_eq!(status(&message), "accepted", "{message}");
+        // gone from the Outbox, the answer is no longer offered to take back: not by its row, nor by Undo Since
+        let host = core.agent_hosts().unwrap()[0].id;
+        assert_eq!(core.agent_undoable_since(host, 0).unwrap(), 0);
+        let row = core.agent_log_rows(10).unwrap().into_iter().find(|r| r.text.starts_with("Put")).unwrap();
+        assert!(!row.can_undo, "{row:?}");
+        let report = core.agent_undo_since(host, 0).unwrap();
+        assert_eq!((report.entries, report.sent), (0, 0), "{report:?}");
     });
     mcp.stop();
 }

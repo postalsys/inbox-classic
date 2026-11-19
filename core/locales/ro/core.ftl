@@ -786,6 +786,151 @@ agent-log-watched = A început să urmărească conversația „{ $subject }”
 agent-log-ignored = A început să ignore conversația „{ $subject }”
 # review: new
 agent-log-unmarked = A oprit urmărirea sau ignorarea conversației „{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = mesajul a fost modificat între timp
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] A marcat 1 mesaj ca citit (căutare: { $query })
+    [few] A marcat { $count } mesaje ca citite (căutare: { $query })
+   *[other] A marcat { $count } de mesaje ca citite (căutare: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] A marcat 1 mesaj ca necitit (căutare: { $query })
+    [few] A marcat { $count } mesaje ca necitite (căutare: { $query })
+   *[other] A marcat { $count } de mesaje ca necitite (căutare: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] A semnalizat 1 mesaj (căutare: { $query })
+    [few] A semnalizat { $count } mesaje (căutare: { $query })
+   *[other] A semnalizat { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] A eliminat semnalizarea pentru 1 mesaj (căutare: { $query })
+    [few] A eliminat semnalizarea pentru { $count } mesaje (căutare: { $query })
+   *[other] A eliminat semnalizarea pentru { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-color = A pus semnalizarea { $color ->
+    [red] roșie
+    [orange] portocalie
+    [yellow] galbenă
+    [green] verde
+    [blue] albastră
+    [purple] violet
+   *[gray] gri
+} pentru { $count ->
+    [one] 1 mesaj
+    [few] { $count } mesaje
+   *[other] { $count } de mesaje
+} (căutare: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] A mutat 1 mesaj în folderul „{ $folder }” (căutare: { $query })
+    [few] A mutat { $count } mesaje în folderul „{ $folder }” (căutare: { $query })
+   *[other] A mutat { $count } de mesaje în folderul „{ $folder }” (căutare: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] A arhivat 1 mesaj (căutare: { $query })
+    [few] A arhivat { $count } mesaje (căutare: { $query })
+   *[other] A arhivat { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] A marcat 1 mesaj ca nedorit (căutare: { $query })
+    [few] A marcat { $count } mesaje ca nedorite (căutare: { $query })
+   *[other] A marcat { $count } de mesaje ca nedorite (căutare: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] A eliminat marcajul de e-mail nedorit pentru 1 mesaj (căutare: { $query })
+    [few] A eliminat marcajul de e-mail nedorit pentru { $count } mesaje (căutare: { $query })
+   *[other] A eliminat marcajul de e-mail nedorit pentru { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] A șters 1 mesaj (căutare: { $query })
+    [few] A șters { $count } mesaje (căutare: { $query })
+   *[other] A șters { $count } de mesaje (căutare: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] În ultimele 15 minute
+    [hour] În ultima oră
+    [hours] În ultimele 4 ore
+    [day] În ultimele 24 de ore
+    [week] În ultimele 7 zile
+   *[all] În ultimele 30 de zile
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } nu a făcut în acest interval nicio modificare care poate fi anulată.
+    [one] Anulați modificarea făcută de { $program } în acest interval?
+    [few] Anulați cele { $count } modificări făcute de { $program } în acest interval?
+   *[other] Anulați cele { $count } de modificări făcute de { $program } în acest interval?
+}
+# review: new
+agent-undo-since-detail = Mesajele revin în folderele din care au venit, starea de citire și semnalizările revin la cum erau, iar mesajele care încă așteaptă în Mesaje de trimis sunt șterse. Ce ați modificat dvs. sau serverul între timp rămâne neschimbat.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nu s-a anulat nimic.
+    [one] S-a anulat 1 modificare.
+    [few] S-au anulat { $count } modificări.
+   *[other] S-au anulat { $count } de modificări.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 mesaj nu mai era acolo unde l-a pus modificarea.
+    [few] { $count } mesaje nu mai erau acolo unde le-a pus modificarea.
+   *[other] { $count } de mesaje nu mai erau acolo unde le-a pus modificarea.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 mesaj a fost modificat între timp, de dvs. sau pe server, și a rămas neschimbat.
+    [few] { $count } mesaje au fost modificate între timp, de dvs. sau pe server, și au rămas neschimbate.
+   *[other] { $count } de mesaje au fost modificate între timp, de dvs. sau pe server, și au rămas neschimbate.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 mesaj ieșise deja din Mesaje de trimis.
+    [few] { $count } mesaje ieșiseră deja din Mesaje de trimis.
+   *[other] { $count } de mesaje ieșiseră deja din Mesaje de trimis.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 modificare nu poate fi anulată.
+    [few] { $count } modificări nu pot fi anulate.
+   *[other] { $count } de modificări nu pot fi anulate.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Acest mesaj acceptă invitația „{ $summary }” ({ $when }).
+    [tentative] Acest mesaj acceptă provizoriu invitația „{ $summary }” ({ $when }).
+   *[decline] Acest mesaj refuză invitația „{ $summary }” ({ $when }).
+} Calendarul organizatorului înregistrează răspunsul. Răspunsul dvs. la invitație se schimbă numai după ce mesajul a fost trimis.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Acceptat: { $summary }
+    [tentative] Provizoriu: { $summary }
+   *[decline] Refuzat: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } a acceptat această invitație.
+    [tentative] { $name } a acceptat provizoriu această invitație.
+   *[decline] { $name } a refuzat această invitație.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
