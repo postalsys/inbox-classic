@@ -719,6 +719,14 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   The Mac sidebar shortcut also requires Control, which the current help formatter omits from the displayed key.
 - Watched-conversation notices require enabled notifications and a background window. Column layout falls back
   to Classic in a very narrow window; snippets normally omit recognized quotes but can fall back to source text.
+- Organization help distinguishes selecting messages (pasirinkimas) from flags (vėliavėlės). A top-level folder
+  is an "aukščiausio lygio aplankas", not a folder positioned at the top of the list. Normal manual deletion
+  is permanent when the account has no deleted-mail folder; this differs from agent/rule deletion safeguards.
+- Notifications and badges concern Inbox mail; watched conversations can also notify from ordinary folders,
+  subject to notification settings. Do not promise notices from every special folder or immediate arrival.
+- The download limit describes storage space, not time. It removes cached copies, spares drafts and messages
+  opened since startup, and can be exceeded. Bulk prefetch exclusions do not forbid every neighboring download.
+  A large message's text appears first only when its structure allows it.
 
 ### Magyar (hu)
 
