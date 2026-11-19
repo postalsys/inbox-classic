@@ -1,33 +1,31 @@
-<!--review-->
 <h1>Paieškos žodžiai</h1>
-<p class="summary">Žodžiai ir ženklai, kuriuos supranta paieškos laukelis, kad rastumėte būtent tuos laiškus, kurių norite.</p>
-<p>Paieškos laukelis priima tuos pačius žodžius kaip Gmail. Derinkite jų kiek norite: laiškas turi atitikti juos visus. Užveskite žymiklį ant paieškos laukelio, kad pamatytumėte trumpą sąrašą.</p>
+<p class="summary">Susiaurinkite paieškos rezultatus naudodami žodžius ir paieškos sąlygas.</p>
+<p>Paieškos laukelyje galite naudoti į Gmail panašias paieškos sąlygas. Derinkite toliau pateiktas sąlygas: laiškas turi atitikti kiekvieną iš jų. Užveskite žymiklį ant paieškos laukelio, kad pamatytumėte trumpą sąrašą.</p>
 <table>
     <tr><th>Įveskite</th><th>Randa</th></tr>
-    <tr><td><code>biudžetas</code></td><td>Laiškus su žodžiu, prasidedančiu <i>biudžetas</i>, bet kurioje jų vietoje</td></tr>
+    <tr><td><code>biudžetas</code></td><td>Laiškus, kurių paieškai naudojamuose laukuose yra žodis, prasidedantis raidėmis „<i>biudžetas</i>“</td></tr>
     <tr><td><code>"tiksli frazė"</code></td><td>Šiuos žodžius šia tvarka</td></tr>
-    <tr><td><code>-žodis</code></td><td>Laiškus be šio žodžio. Minusas veikia prieš bet kurį paieškos žodį, pavyzdžiui, <code>-is:unread</code></td></tr>
+    <tr><td><code>-žodis</code></td><td>Laiškus be nurodyto žodžio. Minuso ženklu taip pat galima atmesti kai kurias sąlygas, pavyzdžiui, <code>-is:unread</code></td></tr>
     <tr><td><code>tas OR anas</code></td><td>Laiškus su bet kuriuo iš žodžių. <code>OR</code> rašykite didžiosiomis raidėmis</td></tr>
     <tr><td><code>from:ona</code></td><td>Laiškus nuo Onos</td></tr>
-    <tr><td><code>to:ona</code>, <code>cc:</code>, <code>bcc:</code></td><td>Laiškus Onai, bet kurioje gavėjų eilutėje</td></tr>
-    <tr><td><code>subject:pietūs</code></td><td>Žodį temoje</td></tr>
-    <tr><td><code>filename:pdf</code></td><td>Žodį pridėto failo pavadinime</td></tr>
-    <tr><td><code>list:news.example.com</code></td><td>Adresatų sąrašo laiškus pagal jo List-Id</td></tr>
-    <tr><td><code>has:attachment</code></td><td>Laiškus su failais</td></tr>
+    <tr><td><code>to:ona</code>, <code>cc:</code>, <code>bcc:</code></td><td>Laiškus, kurių gavėjų varduose arba adresuose yra „ona“. Visos trys sąlygos ieško visuose gavėjų laukuose</td></tr>
+    <tr><td><code>subject:pietūs</code></td><td>Laiškus, kurių temoje yra nurodytas žodis</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>Laiškus, kurių priedo pavadinime yra nurodytas žodis</td></tr>
+    <tr><td><code>list:news.example.com</code></td><td>Adresatų sąrašo laiškus pagal antraštės List-Id tekstą</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Laiškus su priedais</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Neskaitytus arba skaitytus laiškus</td></tr>
     <tr><td><code>is:starred</code> arba <code>is:flagged</code></td><td>Laiškus su vėliavėle</td></tr>
     <tr><td><code>is:answered</code></td><td>Laiškus, į kuriuos atsakėte</td></tr>
     <tr><td><code>is:bounce</code></td><td>Pranešimus apie nepristatytus ar vėluojančius laiškus</td></tr>
-    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Užšifruoti arba pasirašyti laiškai</td></tr>
-    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Tik tą aplanką, kiekvienoje paskyroje</td></tr>
-    <tr><td><code>in:projektai</code></td><td>Tik tokiu pavadinimu pavadintą aplanką</td></tr>
-    <tr><td><code>in:anywhere</code></td><td>Visus aplankus</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Laiškus iki tam tikros dienos arba po jos. Veikia ir <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Laiškus, senesnius ar naujesnius nei dienų (<code>d</code>), mėnesių (<code>m</code>) ar metų (<code>y</code>) skaičius</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Laiškus, didesnius ar mažesnius nei nurodytas dydis, baitais arba su <code>K</code>, <code>M</code> ar <code>G</code></td></tr>
+    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Laiškus, atpažintus kaip užšifruotus arba pasirašytus skaitmeniniu parašu</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Nurodyto tipo aplankų laiškus visose paskyrose</td></tr>
+    <tr><td><code>in:projektai</code></td><td>Laiškus aplankuose, kurių pavadinimas arba kelias atitinka nurodytą reikšmę</td></tr>
+    <tr><td><code>in:anywhere</code></td><td>Laiškus visuose aplankuose</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Laiškus iki pirmosios datos arba nuo antrosios datos imtinai. Dienos pradžia skaičiuojama pagal UTC. Tinka ir formatas <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Laiškus, senesnius arba naujesnius nei nurodytas dienų (<code>d</code>), mėnesių (<code>m</code>) ar metų (<code>y</code>) skaičius. Vienas mėnuo atitinka 30 dienų, o vieni metai 365 dienas</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Laiškus, didesnius arba mažesnius už nurodytą dydį. Dydį rašykite baitais arba su <code>K</code>, <code>M</code> ar <code>G</code></td></tr>
 </table>
-<p>Diakritiniai ženklai ir didžiosios raidės nesvarbūs. Paieškos žodžio, kurio Inbox Classic nežino, ieškoma kaip paprasto žodžio.</p>
-<p>Užšifruotas laiškas randamas pagal siuntėją, gavėjus ir temą, o iššifravus ir pagal jo teksto žodžius, jei <b data-text="ui-search-encrypted"></b> įjungta skiltyje <b data-settings="reading"></b>.</p>
-<p>Sąraše dydžiai nerodomi. Norėdami sužinoti, koks didelis laiškas, pasirinkite <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Didžiosios ir mažosios raidės bei diakritiniai ženklai neskiriami. Neatpažintą paieškos sąlygą Inbox Classic laiko paprastu paieškos tekstu.</p>
+<p>Užšifruotus laiškus galima rasti pagal matomus siuntėjo, gavėjų ir temos duomenis. Iššifruotas tekstas tampa pasiekiamas paieškai, kai laišką pavyksta iššifruoti ir įjungta parinktis „<b data-text="ui-search-encrypted"></b>“ čia: <b data-settings="reading"></b>. Šis tekstas vietiniame paieškos indekse saugomas nešifruotas. Išjungus parinktį, jis pašalinamas iš indekso.</p>
+<p>Laiškų sąraše dydžiai nerodomi. Norėdami sužinoti laiško dydį, pasirinkite <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

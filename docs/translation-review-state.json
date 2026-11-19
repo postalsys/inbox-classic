@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Lithuanian reading and search help: main-window, layouts, read-messages, conversations, find-messages and search-words. All current Lithuanian catalogs are reviewed; 50 help topics remain. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Review Lithuanian organization and delivery help: organize-mail, folders, delete-and-undo, all-inboxes, new-mail and download-ahead. All current Lithuanian catalogs are reviewed; 44 help topics remain. Finish its pending organize-mail comparison in the recorded reading/search context audit. Apply the corrected Windows credential-store term during the four flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -27920,7 +27920,6 @@
         "certificate-errors.html",
         "command-line.html",
         "connections.html",
-        "conversations.html",
         "data-storage.html",
         "default-mail-program.html",
         "delete-and-undo.html",
@@ -27930,14 +27929,11 @@
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "find-messages.html",
         "folders.html",
         "gmail-outlook.html",
         "invitations.html",
         "keyboard-shortcuts.html",
-        "layouts.html",
         "links-scripts.html",
-        "main-window.html",
         "manage-accounts.html",
         "message-not-shown.html",
         "message-rules.html",
@@ -27948,11 +27944,9 @@
         "organize-mail.html",
         "password-not-accepted.html",
         "pictures-tracking.html",
-        "read-messages.html",
         "removing.html",
         "reply-forward.html",
         "save-print-import.html",
-        "search-words.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
         "signatures.html",
@@ -31513,6 +31507,224 @@
             "substitutions.json": "/private/tmp/inbox-lt-platform-20261119-substitutions.json",
             "generated.json": "/private/tmp/inbox-lt-platform-20261119-generated.json",
             "build.log": "/private/tmp/inbox-lt-platform-20261119-build.log"
+          }
+        },
+        {
+          "id": "lt-reading-search-help-20261119",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "main-window.html",
+            "layouts.html",
+            "read-messages.html",
+            "conversations.html",
+            "find-messages.html",
+            "search-words.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/lt/main-window.html": "b4dd9dddf573a5e8a2877794af05018aab458e3edd1ec9dc6ca364c0d2cf75bb",
+            "core/crates/pe-html/help/lt/layouts.html": "b94d0736b79cdf13bddd62f64e26c1c241fce9b1d22de11d3717632b696cfcaa",
+            "core/crates/pe-html/help/lt/read-messages.html": "c93cda9dc6fb5683c12b5f760b71077b36059927f1b217c97c4a9f3ddeb1d528",
+            "core/crates/pe-html/help/lt/conversations.html": "0759620ff9f0eec3266f56713076f88cc9b8d04cd4b7eaa9e88a95421fa4aa6b",
+            "core/crates/pe-html/help/lt/find-messages.html": "0ae8762bdfffccb13d2b080fb02804cf70925bc8fcf9f5c8d62fc5e7a71109ed",
+            "core/crates/pe-html/help/lt/search-words.html": "448c3e92d524a82f3a07d9617f8b81c33404f7f55d3cea28d7f966d34461704c"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+            "core/crates/pe-html/help/en/layouts.html": "7f277333307ece96d1d05ea0d82f0395be12d694266af1e589a7834d13d2e8d7",
+            "core/crates/pe-html/help/en/read-messages.html": "3f282016d2b207ce987b6b72887f6301c68d7048ab9f9aad41dc4e9433c25072",
+            "core/crates/pe-html/help/en/conversations.html": "20c0db95c0a1d3c2d78dfe78d538f79b01812cec20cbd5eb1b57136378d18a1a",
+            "core/crates/pe-html/help/en/find-messages.html": "3cde4173761e98f4e4af66ff67cc8be4b045346c6a741ee17bf6588d8dce6e73",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "Lithuanian structural checks pass with 1,465 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 67 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current catalog labels, settings paths and shortcuts. Thirty runtime/source files and six catalog dependencies match the evidence. Existing English Windows reader and Mac/Linux column-layout captures were inspected; their historical folder ordering is superseded by current source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,282 help lines; since-start 1,760 entries/452 passages match the queue. Inspected and integrated upstream PR 187 with local help edits preserved; download-reader changes do not alter this help. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Source findings include the Mac help formatter omitting Control, narrow-window layout fallback and snippet behavior; other search, folder and notification findings are linked to the existing targeted audit. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+          "notes": "Reviewed six complete Lithuanian reading/search help topics against current menus, tree/list behavior, indexing/search parser and native layouts. Improved fluent prose and inserted-control joins; corrected merged-folder order, collapsed unread totals, Mac Control sidebar shortcut, narrow column fallback, snippet caveat, notification conditions, searchable fields and date/recipient/negation behavior. Preserved tags, attributes, controls, platform branches, literal keyboard contents and code examples.",
+          "help_wording_lines_changed": 67,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/lt/main-window.html": 9,
+            "core/crates/pe-html/help/lt/layouts.html": 7,
+            "core/crates/pe-html/help/lt/read-messages.html": 15,
+            "core/crates/pe-html/help/lt/conversations.html": 9,
+            "core/crates/pe-html/help/lt/find-messages.html": 8,
+            "core/crates/pe-html/help/lt/search-words.html": 19
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-html/src/dark.rs": "70aeb710c70bbd13cb038f9a4f41de0e7e8c5dbc1de359bc4710ff6dae13dc5d",
+            "core/crates/pe-core/src/search.rs": "c72488f2132326a415b77a1aef19d418f08b76a932c1375698369c64d0861cbb",
+            "core/crates/pe-core/src/layout.rs": "cb5fbcc83f31b3a50c13debf59fa6f03bc9616343e9cc808622d71c9ae87eb1f",
+            "core/crates/pe-core/src/snippet.rs": "334d2e0e1d56d3b8f0071d061f86327dd95856c8764e4ebef668c71b0502994a",
+            "core/crates/pe-core/src/list_view.rs": "29986dcee1d1cd06c71832a8b8b54a3766157811e14c522dd0ac1c2341c878b3",
+            "core/crates/pe-core/src/tree.rs": "446b96a3d5ee1ed88b1379a0c98747403206ef2af10430e76e6571dfcb81f958",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-core/src/worker.rs": "f5c1c28f0117606cf9b544a1d75736e84c88ad9bc53f26c7d7dda6985db8c28b",
+            "core/crates/pe-core/src/lib.rs": "cb12b9746d699544ff2ce866bd89b9477de4609458af5ef5d5d8a1750b7a75a7",
+            "core/crates/pe-store/src/query.rs": "7ff2dd5e9c4b7d876cf54a3f5a878df17ebf98fce474468aca5dd4aee0117d4c",
+            "core/crates/pe-store/src/search.rs": "d7a490ff3e0c47caee741766f4fa578afbd4648c3e0786801aefb45f24d54a0a",
+            "core/crates/pe-store/src/fold.rs": "c9d0973e18f2f49a18629c589d8a7edb64ded23342b25a1d0564883fd8c76e38",
+            "core/crates/pe-store/src/messages.rs": "369124b29f2ae394e8916d0578c0a1b950d9b4d16278f754699a79d832e4c114",
+            "core/crates/pe-store/src/threads.rs": "eb93e2bb7132e8c620ce910f90ef7c0dcb040230b77c9a8395b0952800e0186c",
+            "core/crates/pe-store/src/pgp.rs": "c6d9f72c5ddfe0c51530928770925ccd5ff0b666f7102ac8ac0e1a3884599c96",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "linux/src/app.rs": "5337c4a5dbc100fbe7bd3e75efe53739f9743c4980655c8d27db93e168cb777e",
+            "linux/src/reader.rs": "18773f6639887286b42e22b2e9a92e269f3d0b0b71761c4e62f3a7b145f385f8",
+            "app/src/main.cpp": "86654a505ca1bfa2e00049f0bfb312dbbc2c324e1d6957bd707716dc96f92c8c",
+            "app/src/mailbox.cpp": "47a345c703529fd0ad35e28f673c6e1a5a64ffd8549cb79e0bf10da9825f150b",
+            "app/src/reader.cpp": "e4b54775476bc93a3c29f9e42adf16b4ebab72eba5f9bb58d0cf69e3bed1405e",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234",
+            "mac/Sources/InboxClassic/MainWindow.swift": "92ec176fc30d9249871f9d61d28171a10a9ebe7b46eda61203623175e54667b6",
+            "mac/Sources/InboxClassic/Mailbox.swift": "7a1ad5456e5599398d081cc3fa5274575d6bd4fbdc9104eaa285126e89263892",
+            "mac/Sources/InboxClassic/Reader.swift": "d8c17c4c5b479ec87edce1995502d1340570caf0d713cdec127a2ac7c4c466d1",
+            "mac/Sources/InboxClassic/Generated/Commands.swift": "c43e43757e7d13ee6648b9f7dc23420662edf4d84f786bb5a93d6d50468c2a8c",
+            "core/crates/pe-core/src/worker/reader.rs": "e6dc4504b59b4eb8ff5e9a45c77d28d6088315e5c5d718d96dec1ae06be07e30"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "8a676c1f434730809c37789d26bc30b64e33bd1ef159dccf2e8320f598a1f0fb",
+            "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
+            "core/locales/lt/app.ftl": "c704e3afa8bdf7f568ac9f15c8df46d837e3375cf61c3b86f58a48270a987d6c",
+            "core/locales/lt/core.ftl": "24192c43a90ce43611024019f8aa0122f1501fc107b0c30d8a5c9ac701441e4d",
+            "core/locales/lt/windows.ftl": "50e1dc0c1d1efb9d57916bfc5608b11c35d12ea8b38ec63f5633832930a5907a",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "source_context_findings": {
+            "review_parent": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+            "issues": [
+              {
+                "topics": [
+                  "main-window.html"
+                ],
+                "finding": "Current combined order is All Inboxes, All Sent, All Drafts, Flagged, then accounts with remaining folders. Collapsed unread totals exclude junk/deleted folders. Lithuanian draft omitted both later source details.",
+                "evidence": [
+                  "core/crates/pe-core/src/tree.rs::several_accounts/counted/fill_below"
+                ]
+              },
+              {
+                "topics": [
+                  "main-window.html"
+                ],
+                "finding": "Mac folder_list is Ctrl+Mod+S and generated native command uses control+command. pe-html help key_text handles Alt/Shift/Mod but omits Ctrl, displaying only command-S. Lithuanian Mac prose now explicitly requires Control while preserving the data-command and all tags. The source formatter and other languages need targeted followup; source code is unchanged.",
+                "evidence": [
+                  "core/commands.toml::folder_list",
+                  "mac/Sources/InboxClassic/Generated/Commands.swift::folderList",
+                  "core/crates/pe-html/src/help.rs::key_text"
+                ]
+              },
+              {
+                "topics": [
+                  "layouts.html"
+                ],
+                "finding": "Even explicit Columns falls back to Classic below 900 platform units; automatic uses hysteresis at 1200/1320. Snippet extraction normally drops recognized quotes but falls back to unquoted/full text when needed; do not guarantee quote removal. Wording explains narrow-window fallback without internal thresholds.",
+                "evidence": [
+                  "core/crates/pe-core/src/layout.rs::layout_for",
+                  "core/crates/pe-core/src/snippet.rs::of"
+                ]
+              },
+              {
+                "topics": [
+                  "read-messages.html",
+                  "conversations.html"
+                ],
+                "finding": "Native readers mark a displayed message read after a one-second timer. Unread list keeps messages read since entering that list. Date sorting caps dates at arrival. Collapsed conversation actions cover its members in the current list, and newest date orders date/received sorts. Watched notices still require enabled notifications and are suppressed when the main window is foreground; system permission can also prevent display.",
+                "evidence": [
+                  "linux/src/mailbox.rs::message_loaded",
+                  "app/src/mailbox.cpp::TIMER_MARK_READ",
+                  "mac/Sources/InboxClassic/Mailbox.swift::markReadTimer",
+                  "core/crates/pe-store/src/search.rs::condition_with",
+                  "core/crates/pe-store/src/threads.rs::groups/thread_members",
+                  "core/crates/pe-store/src/messages.rs::list_date",
+                  "linux/src/app.rs::notify_new_mail",
+                  "app/src/main.cpp::NotifyNewMail",
+                  "mac/Sources/InboxClassic/MainWindow.swift::notifyNewMail"
+                ]
+              },
+              {
+                "topics": [
+                  "find-messages.html",
+                  "search-words.html"
+                ],
+                "finding": "One-character search terms match whole words, longer terms use prefixes; quoted phrases stay exact. Search fields include sender/recipient names and addresses and attachment filenames. All recipient aliases share the same field. after includes its UTC start date; month/year are 30/365 days. OR joins non-negated text alternatives; date/age/size terms do not support negation. Unknown operators become words. Named folders match name or path.",
+                "evidence": [
+                  "core/crates/pe-store/src/query.rs::parse/term/date/age/place",
+                  "core/crates/pe-store/src/search.rs::fts_word/condition_with"
+                ]
+              },
+              {
+                "topics": [
+                  "find-messages.html",
+                  "search-words.html"
+                ],
+                "finding": "Offline search uses local data and indexing does not mark messages read. Decrypted text enters the local index only after successful decryption and while the setting is enabled; it is unencrypted locally and removed when the setting is switched off.",
+                "evidence": [
+                  "core/crates/pe-core/src/search.rs",
+                  "core/crates/pe-core/src/keys.rs::set_pgp_index_encrypted",
+                  "core/crates/pe-store/src/search.rs::set_indexed_decrypted/forget_decrypted",
+                  "core/crates/pe-store/src/pgp.rs::pgp_index_encrypted"
+                ]
+              }
+            ],
+            "scope_note": "Six full Lithuanian help topics reviewed. English and application code remain unchanged. Existing reading-search audit is only partially satisfied for Lithuanian: organize-mail remains pending. No extra completion credit for context comparisons.",
+            "screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/read-1-html.png",
+                "sha256": "55db4be58e3397f1d9a9b0227a47ecda4781c9e42f5676433168a2cbc01e817c",
+                "use": "English layout/controls reference inspected; historical folder order superseded by current source."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-mac/layout-1-columns.png",
+                "sha256": "878e853a3341b9ce718d9a86c401a3247557f644ebc05a3a93d3ab3f3cace8c0",
+                "use": "English layout/controls reference inspected; historical folder order superseded by current source."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/layout-1-columns.png",
+                "sha256": "2b814fad013f7ca972c54d9b3e4e3c79ee0a827f28299cf0ade472fd02b02df8",
+                "use": "English layout/controls reference inspected; historical folder order superseded by current source."
+              }
+            ],
+            "upstream_integration": {
+              "before": "95883e087eb45c5fd8ef75f485919c187ae4cad3",
+              "after": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+              "upstream_paths": [
+                ".github/workflows/ci.yml",
+                "CLAUDE.md",
+                "core/crates/pe-core/src/lib.rs",
+                "core/crates/pe-core/src/worker/reader.rs",
+                "core/crates/pe-core/tests/autoconfig.rs",
+                "core/crates/pe-core/tests/e2e_core.rs",
+                "core/crates/pe-core/tests/e2e_pgp.rs",
+                "core/crates/pe-core/tests/lookup.rs",
+                "core/crates/pe-core/tests/pgp_mail.rs",
+                "core/crates/pe-ffi/tests/e2e_ffi.rs",
+                "core/crates/pe-mcp/tests/e2e_mcp.rs",
+                "core/crates/pe-testkit/src/lib.rs",
+                "docs/testing.md"
+              ],
+              "preserved_local_hashes": {
+                "core/crates/pe-html/help/lt/conversations.html": "0759620ff9f0eec3266f56713076f88cc9b8d04cd4b7eaa9e88a95421fa4aa6b",
+                "core/crates/pe-html/help/lt/read-messages.html": "c93cda9dc6fb5683c12b5f760b71077b36059927f1b217c97c4a9f3ddeb1d528",
+                "core/crates/pe-html/help/lt/main-window.html": "b4dd9dddf573a5e8a2877794af05018aab458e3edd1ec9dc6ca364c0d2cf75bb",
+                "docs/translation-review-state.json": "b5d0c580938861ea870cc4313ec3b60d26a1fd725f58994ef021bd0595e1d640",
+                "core/crates/pe-html/help/lt/layouts.html": "b94d0736b79cdf13bddd62f64e26c1c241fce9b1d22de11d3717632b696cfcaa",
+                "core/crates/pe-html/help/lt/find-messages.html": "0ae8762bdfffccb13d2b080fb02804cf70925bc8fcf9f5c8d62fc5e7a71109ed",
+                "core/crates/pe-html/help/lt/search-words.html": "448c3e92d524a82f3a07d9617f8b81c33404f7f55d3cea28d7f966d34461704c",
+                "core/locales/GLOSSARY.md": "c419a0b83d978e5b743be87bc736adc4cd6333cbdf6c620698459894648e0dce"
+              },
+              "context_review": "Inspected lib.rs open_message/remove_account and worker/reader.rs changes. Large uncached opens reserve the primary reader at click time; later clicks use the spare reader, with cleanup when work finishes or the reader stops. These do not change current help claims about display, one-second read timers, search or layout. No translation or English/help source changes."
+            }
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-reading-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-reading-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-reading-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-reading-20261119-since.log",
+            "joins.log": "/private/tmp/inbox-lt-reading-20261119-joins.log",
+            "joins-summary.log": "/private/tmp/inbox-lt-reading-20261119-joins-summary.log",
+            "source-audit.json": "/private/tmp/inbox-lt-reading-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-reading-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-reading-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-reading-20261119-html.log",
+            "upstream-integration.json": "/private/tmp/inbox-lt-reading-20261119-upstream-integration.json"
           }
         }
       ],
@@ -78106,7 +78318,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 1,459 expected mark-only diagnostics. Exact reconstruction verifies all 218 remaining platform entries: 87 Linux, 65 Mac and 66 Windows, with 57 improved values and 161 retained. No help prose changed. IDs, variables, selector branches, access-key counts, ellipses and comments are preserved. Static inspection covers all 19 selector messages with 228 count samples and 47 substitutions, including independent save-failure totals, arbitrary account/app names, queued timestamps and version placeholders. All 60 established menu/dialog scopes remain collision-free; GTK Cc/Bcc K/S also fit the unmarked recipient labels and compose menus. Thirty-three runtime/source files and six catalog dependencies match the evidence. Existing English Windows sign-in and Linux account captures were inspected; native actions and other layouts were checked in source. No Lithuanian screenshots found, so no localized GUI-fit claim. The required offline pe-ffi build succeeded in 18.47 seconds in the separate translation target, regenerating only Lithuanian installer/metainfo values. Exact generated-file checks cover seven installer strings and six metainfo values; other-language bytes and desktop/language/resource files remain unchanged. Count examples are static; the metadata build evaluates its strings through the normal Fluent generator. All 28 inventories, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,184 help lines; since-start 1,760 entries/456 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Existing MCP additions remain separately queued. No local test suites or manually launched CI; REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,465 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 67 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current catalog labels, settings paths and shortcuts. Thirty runtime/source files and six catalog dependencies match the evidence. Existing English Windows reader and Mac/Linux column-layout captures were inspected; their historical folder ordering is superseded by current source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,282 help lines; since-start 1,760 entries/452 passages match the queue. Inspected and integrated upstream PR 187 with local help edits preserved; download-reader changes do not alter this help. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Source findings include the Mac help formatter omitting Control, narrow-window layout fallback and snippet behavior; other search, folder and notification findings are linked to the existing targeted audit. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -138922,7 +139134,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Lithuanian reading and search help: main-window, layouts, read-messages, conversations, find-messages and search-words. All current Lithuanian catalogs are reviewed; 50 help topics remain. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Review Lithuanian organization and delivery help: organize-mail, folders, delete-and-undo, all-inboxes, new-mail and download-ahead. All current Lithuanian catalogs are reviewed; 44 help topics remain. Finish its pending organize-mail comparison in the recorded reading/search context audit. Apply the corrected Windows credential-store term during the four flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -141842,7 +142054,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Lithuanian reading and search help: main-window, layouts, read-messages, conversations, find-messages and search-words. All current Lithuanian catalogs are reviewed; 50 help topics remain. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Review Lithuanian organization and delivery help: organize-mail, folders, delete-and-undo, all-inboxes, new-mail and download-ahead. All current Lithuanian catalogs are reviewed; 44 help topics remain. Finish its pending organize-mail comparison in the recorded reading/search context audit. Apply the corrected Windows credential-store term during the four flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -143613,7 +143825,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Lithuanian reading and search help: main-window, layouts, read-messages, conversations, find-messages and search-words. All current Lithuanian catalogs are reviewed; 50 help topics remain. Apply the corrected Windows credential-store term during full review of the four flagged help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Review Lithuanian organization and delivery help: organize-mail, folders, delete-and-undo, all-inboxes, new-mail and download-ahead. All current Lithuanian catalogs are reviewed; 44 help topics remain. Finish its pending organize-mail comparison in the recorded reading/search context audit. Apply the corrected Windows credential-store term during the four flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -145702,6 +145914,24 @@
           "ref": "origin/release-please--branches--master--components--inbox-classic",
           "commit": "4d38bba0eff3fc00a4e482971c49ff9037a66e8b",
           "merge_base": "41388d43ebb02b261d259d817fed0f10aa240b69",
+          "translation_delta_paths": []
+        }
+      },
+      {
+        "batch": "lt-platform-catalogs-20261119",
+        "pr": 197,
+        "url": "https://github.com/postalsys/inbox-classic/pull/197",
+        "review_commit": "1bf2bdbcc938a824b50b446f194e2b6f58bafbbb",
+        "merge_commit": "95883e087eb45c5fd8ef75f485919c187ae4cad3",
+        "merged_at": "2026-11-19T00:48:40Z",
+        "verified_master": "95883e087eb45c5fd8ef75f485919c187ae4cad3",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true,
+        "post_publication_source_check": {
+          "ref": "origin/release-please--branches--master--components--inbox-classic",
+          "commit": "29403eca20944d72e98985a0e7c9426f115bc5ae",
+          "merge_base": "d24f7da2a7d09c181f21f65dd1167a27da13c519",
           "translation_delta_paths": []
         }
       }
@@ -156141,7 +156371,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "33a18d0413f78a085e7a6ccebc3b7b9d03a77249acf596d7db4b1b8f362503a5",
+      "core/locales/GLOSSARY.md": "c419a0b83d978e5b743be87bc736adc4cd6333cbdf6c620698459894648e0dce",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -156294,7 +156524,13 @@
       "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
       "installer/languages.nsh": "27320d51a83097050854c7b70a5b781abea857e62658c3a2462bfe6f365011c2",
       "core/locales/lt/mac.ftl": "8a676c1f434730809c37789d26bc30b64e33bd1ef159dccf2e8320f598a1f0fb",
-      "linux/data/com.inboxclassic.InboxClassic.metainfo.xml": "bacb15845cadabc21e8affd39859b4dc067fdc72b45c7a57c9838183dee435da"
+      "linux/data/com.inboxclassic.InboxClassic.metainfo.xml": "bacb15845cadabc21e8affd39859b4dc067fdc72b45c7a57c9838183dee435da",
+      "core/crates/pe-html/help/lt/main-window.html": "b4dd9dddf573a5e8a2877794af05018aab458e3edd1ec9dc6ca364c0d2cf75bb",
+      "core/crates/pe-html/help/lt/layouts.html": "b94d0736b79cdf13bddd62f64e26c1c241fce9b1d22de11d3717632b696cfcaa",
+      "core/crates/pe-html/help/lt/read-messages.html": "c93cda9dc6fb5683c12b5f760b71077b36059927f1b217c97c4a9f3ddeb1d528",
+      "core/crates/pe-html/help/lt/conversations.html": "0759620ff9f0eec3266f56713076f88cc9b8d04cd4b7eaa9e88a95421fa4aa6b",
+      "core/crates/pe-html/help/lt/find-messages.html": "0ae8762bdfffccb13d2b080fb02804cf70925bc8fcf9f5c8d62fc5e7a71109ed",
+      "core/crates/pe-html/help/lt/search-words.html": "448c3e92d524a82f3a07d9617f8b81c33404f7f55d3cea28d7f966d34461704c"
     },
     "resumed_review_checkpoints": [
       {
@@ -176546,6 +176782,123 @@
           "/private/tmp/inbox-compose-mnemonics.py": "bf1bf1ea6475d997c49b2e606db8b1970628d769f72055f074ae1cc618edeb7b",
           "/private/tmp/inbox-settings-mnemonics.py": "3ea34d18000e86852c799c640b462d7511cb1dcde5e4f7b162a6a9acd07254f1"
         }
+      },
+      {
+        "batch": "lt-reading-search-help-20261119",
+        "review_parent": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 11734,
+          "pending_help": 585,
+          "completed_catalog": 23890,
+          "completed_help": 791
+        },
+        "validation": "Lithuanian structural checks pass with 1,465 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 67 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current catalog labels, settings paths and shortcuts. Thirty runtime/source files and six catalog dependencies match the evidence. Existing English Windows reader and Mac/Linux column-layout captures were inspected; their historical folder ordering is superseded by current source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,282 help lines; since-start 1,760 entries/452 passages match the queue. Inspected and integrated upstream PR 187 with local help edits preserved; download-reader changes do not alter this help. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Source findings include the Mac help formatter omitting Control, narrow-window layout fallback and snippet behavior; other search, folder and notification findings are linked to the existing targeted audit. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 192,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+            "refs/remotes/origin/HEAD": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+            "refs/remotes/origin/i18n/review-resume-20261118": "1bf2bdbcc938a824b50b446f194e2b6f58bafbbb",
+            "refs/remotes/origin/master": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "96b2fad0ad267046136b01a5435ea155a3451607"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "effbbdd527ea9384c0c77557753fecda3d338d41",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "7ac55d1b22af496d1fbb0f68f7b9d034b57ecc38",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "f0a1d2c033a47346911fe7fafde06abfea9144ef",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "dfdfbc336f054369336831f948930aad18f4f759",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lt/conversations.html\n M core/crates/pe-html/help/lt/find-messages.html\n M core/crates/pe-html/help/lt/layouts.html\n M core/crates/pe-html/help/lt/main-window.html\n M core/crates/pe-html/help/lt/read-messages.html\n M core/crates/pe-html/help/lt/search-words.html\n M core/locales/GLOSSARY.md",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lt/conversations.html": "0759620ff9f0eec3266f56713076f88cc9b8d04cd4b7eaa9e88a95421fa4aa6b",
+                "core/crates/pe-html/help/lt/find-messages.html": "0ae8762bdfffccb13d2b080fb02804cf70925bc8fcf9f5c8d62fc5e7a71109ed",
+                "core/crates/pe-html/help/lt/layouts.html": "b94d0736b79cdf13bddd62f64e26c1c241fce9b1d22de11d3717632b696cfcaa",
+                "core/crates/pe-html/help/lt/main-window.html": "b4dd9dddf573a5e8a2877794af05018aab458e3edd1ec9dc6ca364c0d2cf75bb",
+                "core/crates/pe-html/help/lt/read-messages.html": "c93cda9dc6fb5683c12b5f760b71077b36059927f1b217c97c4a9f3ddeb1d528",
+                "core/crates/pe-html/help/lt/search-words.html": "448c3e92d524a82f3a07d9617f8b81c33404f7f55d3cea28d7f966d34461704c",
+                "core/locales/GLOSSARY.md": "c419a0b83d978e5b743be87bc736adc4cd6333cbdf6c620698459894648e0dce"
+              }
+            }
+          ],
+          "master": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-reading-20261119-edit.py": "ea32ce8afa7d42280c167406b7bb5c3b08e9a89556cba005167668b02e5822bf",
+          "/private/tmp/inbox-lt-reading-20261119-polish.py": "2dec636da6328dc22d1ffadff3e693e7c31f044bbf5a90a0acbe5353c2cde1c9",
+          "/private/tmp/inbox-lt-reading-20261119-finalize.py": "efe68521b7f556a785f574a47ce489fe8161d16c9e2ea0e59bf3eec223241434",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -176951,7 +177304,13 @@
     },
     "resumed_review_latest_english_sources": {
       "core/crates/pe-html/help/en/links-scripts.html": "88850a56321ad291a4db09fe9e82d9f2429e735b2989c35a60eb42d1dafb3a2c",
-      "core/crates/pe-html/help/en/pictures-tracking.html": "12d2fe255a61675a9eb26253e177c94264f4522e0adb46fac00ef7ec08e34353"
+      "core/crates/pe-html/help/en/pictures-tracking.html": "12d2fe255a61675a9eb26253e177c94264f4522e0adb46fac00ef7ec08e34353",
+      "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+      "core/crates/pe-html/help/en/layouts.html": "7f277333307ece96d1d05ea0d82f0395be12d694266af1e589a7834d13d2e8d7",
+      "core/crates/pe-html/help/en/read-messages.html": "3f282016d2b207ce987b6b72887f6301c68d7048ab9f9aad41dc4e9433c25072",
+      "core/crates/pe-html/help/en/conversations.html": "20c0db95c0a1d3c2d78dfe78d538f79b01812cec20cbd5eb1b57136378d18a1a",
+      "core/crates/pe-html/help/en/find-messages.html": "3cde4173761e98f4e4af66ff67cc8be4b045346c6a741ee17bf6588d8dce6e73",
+      "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
     },
     "resumed_source_integrations": [
       {
@@ -177508,7 +177867,21 @@
             "finding": "Newest-message order applies to date/received sorts; other columns use the first message. Watched conversations still require notifications enabled."
           }
         ],
-        "instruction": "Compare exact current language passages against verified behavior. Reopen only passages that require correction. This audit queue adds no mark inventory or review credit until the affected passages are identified. English/app code changes remain outside translation-editor scope."
+        "instruction": "Compare exact current language passages against verified behavior. Reopen only passages that require correction. This audit queue adds no mark inventory or review credit until the affected passages are identified. English/app code changes remain outside translation-editor scope.",
+        "partial_language_reviews": {
+          "lt": {
+            "batch": "lt-reading-search-help-20261119",
+            "reviewed_topics": [
+              "find-messages.html",
+              "search-words.html",
+              "conversations.html"
+            ],
+            "pending_topics": [
+              "organize-mail.html"
+            ],
+            "note": "Current source behavior rechecked; full help completion counts already include these topics. Keep Lithuanian pending until organize-mail is also compared."
+          }
+        }
       },
       {
         "id": "writing-contacts-behavior-context-20261118",
@@ -179550,6 +179923,90 @@
           }
         ],
         "instruction": "Compare against caller and language rules, reusing earlier related context work. Retain accurate wording, reopen only affected entries and add no duplicate scope credit. English/app code remains outside this review."
+      },
+      {
+        "id": "reading-layout-shortcut-context-20261119",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "ced7c30fa25f93c49cf76b0fcb8c57a728c89284",
+        "completed_languages": [
+          "lt"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "hu",
+          "it",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "main-window.html",
+          "layouts.html",
+          "conversations.html"
+        ],
+        "issues": [
+          {
+            "topics": [
+              "main-window.html"
+            ],
+            "finding": "Mac folder_list is Ctrl+Mod+S and generated native command uses control+command. pe-html help key_text handles Alt/Shift/Mod but omits Ctrl, displaying only command-S. Lithuanian Mac prose now explicitly requires Control while preserving the data-command and all tags. The source formatter and other languages need targeted followup; source code is unchanged.",
+            "evidence": [
+              "core/commands.toml::folder_list",
+              "mac/Sources/InboxClassic/Generated/Commands.swift::folderList",
+              "core/crates/pe-html/src/help.rs::key_text"
+            ]
+          },
+          {
+            "topics": [
+              "layouts.html"
+            ],
+            "finding": "Even explicit Columns falls back to Classic below 900 platform units; automatic uses hysteresis at 1200/1320. Snippet extraction normally drops recognized quotes but falls back to unquoted/full text when needed; do not guarantee quote removal. Wording explains narrow-window fallback without internal thresholds.",
+            "evidence": [
+              "core/crates/pe-core/src/layout.rs::layout_for",
+              "core/crates/pe-core/src/snippet.rs::of"
+            ]
+          },
+          {
+            "topics": [
+              "read-messages.html",
+              "conversations.html"
+            ],
+            "finding": "Native readers mark a displayed message read after a one-second timer. Unread list keeps messages read since entering that list. Date sorting caps dates at arrival. Collapsed conversation actions cover its members in the current list, and newest date orders date/received sorts. Watched notices still require enabled notifications and are suppressed when the main window is foreground; system permission can also prevent display.",
+            "evidence": [
+              "linux/src/mailbox.rs::message_loaded",
+              "app/src/mailbox.cpp::TIMER_MARK_READ",
+              "mac/Sources/InboxClassic/Mailbox.swift::markReadTimer",
+              "core/crates/pe-store/src/search.rs::condition_with",
+              "core/crates/pe-store/src/threads.rs::groups/thread_members",
+              "core/crates/pe-store/src/messages.rs::list_date",
+              "linux/src/app.rs::notify_new_mail",
+              "app/src/main.cpp::NotifyNewMail",
+              "mac/Sources/InboxClassic/MainWindow.swift::notifyNewMail"
+            ]
+          }
+        ],
+        "instruction": "Compare current language prose with verified source behavior and reuse the existing reading/search audit. In particular the Mac generated help shortcut omits Control, explicit Columns can fall back in narrow windows, and snippet quote removal is not absolute. Reopen only affected passages and add no duplicate scope credit. Source/app changes remain outside translation review."
       }
     ],
     "completed_source_followups": [

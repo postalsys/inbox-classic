@@ -709,6 +709,16 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
 - Installer copy distinguishes the Windows user account from mail accounts and describes removal of the whole
   app data folder. Linux store copy promises offline reading of downloaded messages and describes supported
   search fields. Retain protocol keywords: the generator already prepends the English keyword list.
+- Reading/search help uses "paieškos sąlyga" and "paieškos indeksas". Indexing does not mark mail read; offline
+  search covers locally stored data. Search fields include names and addresses, not only people as such.
+- One-character terms match whole words; longer terms match prefixes. after: includes the UTC start date;
+  relative months and years mean 30 and 365 days. to:/cc:/bcc: share recipient fields. Keep literal code examples.
+- Combined folders and Flagged are "rodiniai". All Sent/All Drafts precede Flagged with several accounts.
+  Collapsed unread totals exclude junk/deleted folders; collapsed conversation actions cover members in the list.
+- Inserted labels follow quoted head nouns (rodinys, parinktis, mygtukas); settings paths follow "čia:".
+  The Mac sidebar shortcut also requires Control, which the current help formatter omits from the displayed key.
+- Watched-conversation notices require enabled notifications and a background window. Column layout falls back
+  to Classic in a very narrow window; snippets normally omit recognized quotes but can fall back to source text.
 
 ### Magyar (hu)
 
