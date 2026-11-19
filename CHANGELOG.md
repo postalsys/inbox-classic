@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.19.1](https://github.com/postalsys/inbox-classic/compare/v0.19.0...v0.19.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **linux:** the message list keeps its rows when GTK reads the whole list ([1879580](https://github.com/postalsys/inbox-classic/commit/1879580535175f508c054a9b5e5aee134b69e967))
+* **linux:** the message list keeps its rows when GTK reads the whole list ([a6e63bf](https://github.com/postalsys/inbox-classic/commit/a6e63bf2d338bc464f202720cbc29d37d738ee94))
+* **mac:** Message Rules, Encryption Keys and Create Rule from Message in the menu bar ([7133091](https://github.com/postalsys/inbox-classic/commit/713309154703012f86acab47a099995d392a7e95))
+* **mac:** Message Rules, Encryption Keys and Create Rule from Message in the menu bar ([01b1341](https://github.com/postalsys/inbox-classic/commit/01b13413dd3bb671c9dccc858cf80dd4ba7010b3))
+* the list blank after Flagged, after quick clicks and after a sync, and its rows opening nothing. ([a6e63bf](https://github.com/postalsys/inbox-classic/commit/a6e63bf2d338bc464f202720cbc29d37d738ee94))
+
 ## [0.19.0](https://github.com/postalsys/inbox-classic/compare/v0.18.0...v0.19.0) (2026-11-19)
 
 
