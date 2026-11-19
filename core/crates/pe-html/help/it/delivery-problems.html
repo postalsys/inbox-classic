@@ -1,10 +1,10 @@
 <h1>Messaggi non recapitati</h1>
 <p class="summary">Quando un messaggio che hai inviato torna indietro o è in ritardo, Inbox Classic spiega perché e che cosa puoi fare.</p>
-<p>Gli avvisi di mancato recapito hanno un’icona dedicata nell’elenco dei messaggi. Quando ne apri uno, una scheda sopra il testo indica se il tuo messaggio non è stato recapitato o è solo in ritardo.</p>
+<p>Gli avvisi di mancato recapito riconosciuti da Inbox Classic hanno un’icona dedicata nell’elenco dei messaggi. Quando ne apri uno, una scheda sopra il testo indica se il tuo messaggio non è stato recapitato o è solo in ritardo.</p>
 <img src="picture:bounce-1-failed" alt="Un avviso di recapito con una scheda che indica che il messaggio non è stato recapitato, il destinatario, il motivo e che cosa fare">
 <p>Per ogni destinatario, la scheda spiega il motivo del problema e suggerisce come intervenire. <b data-text="bounce-details"></b> mostra la risposta originale del server destinatario.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> seleziona il messaggio che hai inviato.</li>
+    <li><b data-text="bounce-show-message"></b> seleziona il messaggio che hai inviato, se Inbox Classic riesce a trovarlo.</li>
     <li>In caso di ritardo, lo seleziona <b data-text="bounce-show-delayed"></b>. Il tuo server di posta sta ancora tentando il recapito, quindi non serve inviarlo di nuovo.</li>
 </ul>
 <p>Alcuni motivi comuni:</p>
@@ -14,7 +14,7 @@
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Invialo di nuovo tra qualche giorno, oppure contatta la persona in un altro modo.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Prova a inviare di nuovo il messaggio riducendo i collegamenti o rimuovendo gli allegati di grandi dimensioni.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Inoltra l’avviso al tuo provider di posta. Il problema non è il messaggio.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Attendi: di solito il messaggio viene recapitato entro un’ora.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Se l’avviso indica un ritardo, attendi il nuovo tentativo del server. Se indica un mancato recapito definitivo, prova a inviare di nuovo il messaggio più tardi.</td></tr>
 </table>
 <p>Per trovare tutti gli avvisi di recapito, cerca <code>is:bounce</code>. Gli avvisi vengono analizzati sul tuo computer, senza inviare dati a servizi esterni.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

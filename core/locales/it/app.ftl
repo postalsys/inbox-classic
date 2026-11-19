@@ -205,7 +205,7 @@ ui-hyperlink = Collegamento ipertestuale
 ui-hyperlink-intro = L’indirizzo a cui rimanda il testo selezionato.
 ui-edit-hyperlink = Modifica collegamento ipertestuale
 ui-edit-hyperlink-intro = L’indirizzo di destinazione del link. Cancella l’indirizzo per rimuovere il link e mantenere il testo.
-ui-not-a-picture = Questo file non è un’immagine PNG, JPEG o GIF, oppure è più grande di 10 MB.
+ui-not-a-picture = Il file non è leggibile, non è un’immagine PNG, JPEG, GIF o WebP oppure supera 10 MB.
 ui-format-color = Colore carattere
 ui-format-numbers = Elenco numerato
 ui-format-bullets = Elenco puntato
@@ -269,7 +269,7 @@ ui-invitation-answer = Risposta a un invito: { $title }
 ui-no-title = (senza titolo)
 ui-organizer = Organizzatore: { $name }
 ui-invitation-not-read = Impossibile leggere l’invito.
-ui-no-calendar = Su questo computer non c’è nessuna app di calendario per aprire gli inviti (file .ics).
+ui-no-calendar = Impossibile aprire l’invito (file .ics) in un’app di calendario. Controlla che sia installata un’app per questo tipo di file.
 ui-messages-not-changed = Impossibile modificare i messaggi.
 ui-new-folder-in-selected = La nuova cartella verrà creata all’interno della cartella selezionata.
 ui-new-folder-at-top = La nuova cartella verrà creata al livello principale dell’account.
@@ -334,7 +334,7 @@ ui-enter-password = Inserisci la password di { $account }.
 ui-signs-in-with = App di accesso: { $app }. L’accesso avviene nel browser e l’account usa i server di questa app.
 ui-keep-password = Lascia vuoto il campo della password per mantenere quella attuale.
 ui-remove-account = Rimuovi account
-ui-remove-account-ask = Rimuovere questo account da Inbox Classic? La posta resta sul server; la copia su questo computer e la password salvata vengono rimosse.
+ui-remove-account-ask = Rimuovere questo account da Inbox Classic? La posta resta sul server. Verranno rimosse le copie locali, i messaggi dell’account in Posta in uscita e le credenziali di accesso salvate.
 ui-col-email = Indirizzo e-mail
 ui-col-incoming = Server posta in arrivo
 ui-type-email = Digita il tuo indirizzo e-mail, nome@example.com.
@@ -417,7 +417,6 @@ ui-save-attachments = Salva allegati
 ui-attachment-open = Apri
 ui-attachment-save-as = Salva con nome...
 ui-attachment-save-all = Salva tutti...
-# review: new
 ui-attachment-show-in-message = Mostra nel messaggio
 ui-attachments-strip = Allegati
 ui-attachment-note-title = Apertura del file
@@ -449,12 +448,9 @@ ui-let-agents-connect = &Consenti agli agenti IA di collegarsi a Inbox Classic
 ui-change-button = Modifica…
 ui-undo-button = Annulla
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-ui-undo-since-button = Annulla da…
-# review: new
+ui-undo-since-button = Annulla modifiche del periodo…
 ui-undo-since-span = Annulla ciò che questo programma ha fatto:
-# review: new
-ui-take-back = Annulla
+ui-take-back = Annulla modifiche
 ui-rules-title = Regole per i messaggi
 ui-rules-intro = Le regole elaborano i nuovi messaggi di Posta in arrivo mentre Inbox Classic è in esecuzione. Vengono applicate nell’ordine dell’elenco ai messaggi che soddisfano i criteri. Quando una regola sposta un messaggio fuori da Posta in arrivo, le regole successive non vengono più applicate a quel messaggio.
 ui-rules-none = Ancora nessuna regola. Fai clic su Nuova per crearne una.
@@ -588,18 +584,15 @@ ui-protection-details = &Dettagli...
 ui-protection-details-title = Dettagli di sicurezza
 ui-download-heading = Download
 ui-download-ahead = &Scarica i messaggi in anticipo:
-ui-download-ahead-recent = Messaggi recenti fino a 1 MB ciascuno
+ui-download-ahead-recent = Messaggi degli ultimi 30 giorni fino a 1 MB ciascuno
 ui-download-ahead-all = Tutti i messaggi
 ui-download-ahead-never = Solo quando vengono aperti
 ui-download-limit = &Limite di spazio per account:
 ui-send-delay = Attesa pr&ima dell’invio:
 ui-send-delay-note = Mentre un messaggio è in attesa di essere inviato, puoi annullarne l’invio con Annulla.
 ui-dark-messages = Mostra i messaggi su sfondo scuro quando il sistema è in modalità scura
-# review: new
 ui-preview-show = Mostra gli alle&gati nei messaggi
-# review: new
-ui-preview-show-note = Mostra le immagini e le prime pagine dei file PDF dopo il testo del messaggio. Inbox Classic crea da sé queste anteprime, quindi niente in un file può essere eseguito.
-# review: new
+ui-preview-show-note = Mostra le immagini e le prime pagine dei PDF dopo il testo del messaggio. Inbox Classic crea le anteprime senza eseguire script o altri contenuti attivi dei file.
 ui-preview-pdfs = Mostra i &file PDF nei messaggi
 ui-sending-in = Invio di { $subject } tra { $count ->
     [one] { $count } secondo
@@ -608,7 +601,7 @@ ui-sending-in = Invio di { $subject } tra { $count ->
 ui-send-undone = { $subject } non è stato inviato. Il messaggio è stato riaperto per la modifica.
 ui-send-too-late = Non è più possibile annullare l’invio di { $subject }.
 ui-outbox-status-undo = Invio alle { $time }
-ui-download-note = I messaggi scaricati in anticipo si aprono subito. Quando si supera il limite di spazio, le copie locali più vecchie vengono rimosse e scaricate di nuovo quando le apri.
+ui-download-note = I messaggi scaricati in anticipo si aprono subito. Quando si supera il limite di spazio, vengono rimosse le copie locali più vecchie del testo dei messaggi. Restano le bozze e i messaggi aperti dall’avvio dell’app. I messaggi ancora sul server possono essere scaricati di nuovo quando li apri.
 ui-attachment-downloading = Il download di questo messaggio non è terminato. Riprova quando il download è completo.
 ui-trusted-senders-button = Mittenti &attendibili...
 ui-trusted-senders-title = Mittenti attendibili
@@ -679,8 +672,8 @@ ui-keys-file-filter = Chiavi OpenPGP
 ui-keys-use-for = Usare questa chiave per i seguenti indirizzi: { $addresses }? I messaggi inviati da questi indirizzi verranno firmati con questa chiave. Potrai anche leggere qui la posta crittografata con la chiave corrispondente.
 ui-keys-use = &Usa chiave
 ui-keys-not-now = &Non ora
-ui-keys-remove-own = Rimuovere la tua chiave { $fingerprint }? La posta crittografata per questa chiave non potrà più essere letta qui, a meno che tu non ne importi di nuovo il backup.
-ui-keys-remove-contact = Rimuovere la chiave di { $name }? Finché non la aggiungi di nuovo, non potrai verificare le firme digitali di questo contatto né crittografare i messaggi destinati a questo contatto.
+ui-keys-remove-own = Rimuovere la tua chiave { $fingerprint }? Per decrittografare di nuovo la posta protetta con questa chiave dovrai importare un backup della chiave privata. Il contenuto già decrittografato nell’indice di ricerca non verrà eliminato.
+ui-keys-remove-contact = Rimuovere la chiave { $name }? Non potrai più usarla per verificare firme digitali o crittografare messaggi finché non la aggiungi di nuovo.
 ui-key-properties-title = Proprietà della chiave
 ui-key-names = Nomi:
 ui-key-fingerprint = Impronta digitale:
@@ -694,9 +687,10 @@ ui-key-addresses = Indirizzi:
 ui-key-address-verified = { $address } (verificato)
 ui-key-address-not-verified = { $address } (non verificato)
 ui-verify-title = Verifica chiave
-ui-verify-intro = Chiedi a { $name } di leggere l’impronta digitale della chiave dalla propria app, di persona o al telefono. Non confrontarla con un’impronta ricevuta per e-mail: chi può sostituire la chiave potrebbe sostituire anche l’impronta.
+ui-verify-intro = Chiedi al proprietario della chiave { $name } di leggere l’impronta digitale dalla propria app, di persona o al telefono. Non confrontarla con un’impronta ricevuta per e-mail: chi può sostituire la chiave potrebbe sostituire anche l’impronta.
 ui-verify-fingerprint = L’impronta digitale della chiave che hai:
 ui-verify-marks = { $count ->
+    [0] Questa chiave non contiene indirizzi e-mail. Puoi confrontare le impronte, ma la conferma del proprietario non può essere salvata.
     [one] Confermando, verifichi che la chiave appartenga al contatto per questo indirizzo: { $addresses }. Prima di scegliere Coincidono, controlla che anche l’indirizzo sia del contatto. In caso contrario, scegli Non coincidono.
    *[other] Confermando, verifichi che la chiave appartenga al contatto per questi indirizzi: { $addresses }. Prima di scegliere Coincidono, controlla che tutti gli indirizzi siano del contatto. In caso contrario, scegli Non coincidono.
 }
@@ -726,9 +720,9 @@ ui-compose-encrypt-off = &Disattiva la crittografia
 ui-compose-keep-encrypted = &Mantieni la crittografia
 ui-setup-export-title = Esporta impostazioni e account
 ui-setup-import-title = Importa impostazioni e account
-ui-setup-export-intro = Scegli cosa trasferire su un altro computer. Il file non contiene messaggi: verranno scaricati di nuovo dal server.
+ui-setup-export-intro = Scegli cosa trasferire su un altro computer. Il file non contiene messaggi, nemmeno quelli in Posta in uscita. Sull’altro computer potrai scaricare solo i messaggi ancora presenti sul server.
 ui-setup-use-passphrase = P&roteggi il file con una passphrase
-ui-setup-passphrase-note = Con una passphrase, il file viene crittografato e include anche password salvate, credenziali di accesso e chiavi private. Senza passphrase, dovrai accedere di nuovo ai tuoi account sull’altro computer.
+ui-setup-passphrase-note = Una passphrase crittografa il file e permette di includere le credenziali salvate e le chiavi private selezionate a cui l’app può accedere. Senza passphrase dovrai accedere di nuovo agli account sull’altro computer.
 ui-setup-export-button = &Esporta...
 ui-setup-file-filter = Impostazioni e account di Inbox Classic
 ui-setup-ask-passphrase = Questo file è protetto da una passphrase. Digitala per vedere cosa contiene il file:

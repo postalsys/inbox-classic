@@ -78,7 +78,7 @@ mac-files-not-saved =
     { $count ->
        *[other] File non salvati: { $failed } su { $count }.
     }
-mac-no-calendar-app = Su questo Mac non c’è un’app di calendario per aprire gli inviti (file .ics).
+mac-no-calendar-app = Impossibile aprire l’invito (file .ics) in un’app di calendario. Controlla che sia installata un’app per questo tipo di file.
 mac-file-not-saved = Non è stato possibile salvare il file.
 mac-unsubscribing = Annullamento dell’iscrizione: { $target }…
 mac-loading-list = Caricamento…
@@ -116,7 +116,7 @@ mac-sign-in-apps-button = App di accesso…
 
 ## AI agents
 
-mac-forget-program = Rimuovere questo programma e la cronologia delle attività dei suoi agenti?
+mac-forget-program = Rimuovere questo programma dall’elenco e cancellare la cronologia delle attività dei suoi agenti?
 mac-forget-program-detail = Le autorizzazioni del programma verranno eliminate. Alla prossima connessione ti verrà chiesta di nuovo l’autorizzazione.
 
 ## Sign-in apps

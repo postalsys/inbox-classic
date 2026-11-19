@@ -4,10 +4,10 @@
 <ol>
     <li>Elija <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Seleccione los datos que desea transferir: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> y <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Para incluir las contraseñas guardadas, los datos de acceso y las claves privadas, active <b data-text="ui-setup-use-passphrase"></b>. Introduzca dos veces la misma contraseña, de al menos 8 caracteres.</li>
+    <li>Para incluir las contraseñas guardadas, los datos de acceso y las claves privadas disponibles de las categorías seleccionadas, active <b data-text="ui-setup-use-passphrase"></b>. Introduzca dos veces la misma contraseña, de al menos 8 caracteres.</li>
     <li>Haga clic en <b data-text="ui-setup-export-button"></b> y elija dónde guardar el archivo.</li>
 </ol>
-<p>Los mensajes no se exportan: se descargarán de nuevo desde el servidor en el otro equipo. Si usa una contraseña, se cifra todo el archivo. Sin ella, no se incluyen las contraseñas guardadas, los datos de acceso ni las claves privadas. En ese caso, deberá volver a iniciar sesión en sus cuentas.</p>
+<p>El archivo no incluye mensajes, ni siquiera los pendientes en la Bandeja de salida. En el otro equipo se descargarán los mensajes que conserve el servidor. Las claves privadas bloqueadas o inaccesibles no se incluyen, aunque proteja el archivo con contraseña. Si usa una contraseña, se cifra todo el archivo. Sin ella, no se incluyen las contraseñas guardadas, los datos de acceso ni las claves privadas. En ese caso, deberá volver a iniciar sesión en sus cuentas.</p>
 <aside class="warning">Guarde el archivo y su contraseña por separado y borre el archivo después de importarlo. Quien tenga ambos podrá acceder a su correo.</aside>
 <h2>Importar los datos</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Seleccione el archivo e introduzca su contraseña si está protegido.</li>
     <li>Revise el contenido del archivo. Seleccione las categorías y cuentas que desea importar y haga clic en <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Las cuentas ya configuradas no se modifican. Los contactos se añaden a la libreta de direcciones; la configuración y las preferencias de las ventanas se reemplazan. Las carpetas de destino que falten en las reglas se asignarán tras sincronizar las cuentas. Si un contacto ya tiene una clave, deberá elegir la nueva en sus propiedades para sustituirla.</p>
+<p>Las cuentas ya configuradas no se modifican. Los contactos se añaden a la libreta de direcciones; la configuración y las preferencias de las ventanas se reemplazan. Después de sincronizar las cuentas, Inbox Classic intenta encontrar las carpetas de destino que falten en las reglas. Si no las encuentra, tendrá que seleccionarlas usted. Las cuentas o aplicaciones de inicio de sesión que no se puedan validar pueden omitirse; revise el resultado de la importación. Si un contacto ya tiene una clave, deberá elegir la nueva en sus propiedades para sustituirla.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

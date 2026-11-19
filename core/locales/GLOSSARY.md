@@ -295,6 +295,13 @@ Notes for translators:
 
 Each new language's key terms and the rules its draft follows, for its reviewer.
 
+- Use polite usted consistently, infinitive action labels, and Spanish «quotation marks».
+- Use datos de acceso for credentials, contraseña for protected backups and huella digital for fingerprints.
+- Distinguish firma de texto from firma digital and queued solicitudes from completed server operations.
+- Use permissions/permisos for OAuth scopes; preserve code examples exactly.
+- Cc/Bcc labels are CC/CCO and actual Spanish shortcuts Alt+C/Alt+O; explain retained English literal shortcut example in prose.
+- Describe body cache exemptions, unavailable key storage, zero-address verification, persistent logo caches and conditional system associations precisely.
+
 ### Català (ca)
 
 Terms: Safata d’entrada; Safata de sortida; Elements enviats; Elements suprimits; Esborranys; Correu brossa; Arxiu;
@@ -556,6 +563,10 @@ account (masculine, invariable); allegato; contrassegno (contrassegnare); Rispon
   is a request, not a guarantee. "Testo della firma" is the optional account footer, distinct from "firma digitale".
 - Draft removal uses "eliminare". Agents can permanently remove only their own unchanged drafts. Saving, including
   autosave, ends their access; opening a draft alone does not.
+
+- Use Annulla modifiche for agent Take Back, distinct from Annulla in Cancel controls; Annulla modifiche del periodo for Undo Since.
+- Prefer anteprima and riquadro for inline attachment previews; firma digitale valida and proprietario della chiave verificato distinguish signature integrity from ownership.
+- Describe pending server operations as requests, and credential-store failures as temporary unavailability unless loss is established.
 
 ### Latviešu (lv)
 
@@ -1563,6 +1574,10 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
   line; dates follow "Viimeisin haku:". Names and address lists remain uninflected, with a head noun or colon.
 - Unencrypted sending requires removing inherited text, images and attachments. Encrypted drafts use only
   the sender's own key without signing; sent copies retain encryption. Use "Oranssi" consistently for warnings.
+
+- Retain Finnish liite, salalause, kirjautumistiedot and käyttökelpoinen avain; distinguish digitaalinen allekirjoitus from allekirjoitusteksti.
+- Locked private key recovery first checks whether system secret storage is accessible and unlocked; backup import is the remedy if the wrapping key is missing, not the only possible recovery step.
+- Preserve literal keyboard examples and explain localized Alt+K/Alt+P in surrounding Finnish prose.
 
 ### Svenska (sv)
 

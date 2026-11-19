@@ -5,7 +5,7 @@
     <tr><th>Kirjoita</th><th>Löytää</th></tr>
     <tr><td><code>budjetti</code></td><td>Viestit, joiden haettavissa tiedoissa on merkkijonolla <i>budjetti</i> alkava sana</td></tr>
     <tr><td><code>"tarkka ilmaus"</code></td><td>Nämä sanat tässä järjestyksessä</td></tr>
-    <tr><td><code>-sana</code></td><td>Viestit, joissa sanaa ei ole. Miinusmerkkiä voi käyttää myös joidenkin hakuehtojen kanssa, esimerkiksi <code>-is:unread</code></td></tr>
+    <tr><td><code>-sana</code></td><td>Viestit, joissa sanaa ei ole. Miinusmerkkiä voi käyttää myös joidenkin hakuehtojen kanssa, esimerkiksi <code>-is:unread</code>. Päivämäärä-, ikä- ja kokoehtojen edessä miinusmerkki jätetään huomiotta</td></tr>
     <tr><td><code>tämä OR tuo</code></td><td>Viestit, joissa on jompikumpi sana. Kirjoita <code>OR</code> isoin kirjaimin</td></tr>
     <tr><td><code>from:anna</code></td><td>Viestit, joiden lähettäjän tiedoissa on Anna</td></tr>
     <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>Viestit, joiden vastaanottajatiedoissa on Anna. Kaikki kolme hakuehtoa etsivät kaikista vastaanottajakentistä</td></tr>
@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Viestit kyseisestä kansiosta kaikilta tileiltä</td></tr>
     <tr><td><code>in:projektit</code></td><td>Viestit tämännimisestä kansiosta</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Kaikki kansiot</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Ennen annettua päivää tai annetusta päivästä alkaen päivätyt viestit. Myös muoto <code>2025-01-31</code> käy</td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Annettua ajanjaksoa vanhemmat tai uudemmat viestit. Yksiköt ovat päivät (<code>d</code>), kuukaudet (<code>m</code>) ja vuodet (<code>y</code>)</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Ennen annettua päivää tai annetusta päivästä alkaen päivätyt viestit. Päivän raja lasketaan UTC-ajassa. Myös muoto <code>2025-01-31</code> käy</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Annettua ajanjaksoa vanhemmat tai uudemmat viestit. Yksiköt ovat päivät (<code>d</code>), kuukaudet (<code>m</code>) ja vuodet (<code>y</code>); kuukausi tarkoittaa 30:tä ja vuosi 365:tä päivää</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Annettua kokoa suuremmat tai pienemmät viestit. Ilmoita koko tavuina tai käytä tunnusta <code>K</code>, <code>M</code> tai <code>G</code></td></tr>
 </table>
-<p>Kirjainten koolla ja tarkemerkeillä ei ole merkitystä. Tunnistamattomat hakuehdot käsitellään tavallisina hakusanoina.</p>
-<p>Voit löytää salattuja viestejä lähettäjän, vastaanottajien ja aiheen perusteella. Kun asetus <b data-text="ui-search-encrypted"></b> on käytössä kohdassa <b data-settings="reading"></b>, voit hakea myös viestien tekstistä salauksen purkamisen jälkeen.</p>
+<p>Kirjainten koolla ja tarkemerkeillä ei ole merkitystä. Tunnistamattomat hakuehdot käsitellään tavallisina hakusanoina. Vähintään kaksi merkkiä vastaa myös sanan alkua, mutta yksittäinen merkki vastaa vain kokonaista sanaa.</p>
+<p>Voit löytää salattuja viestejä lähettäjän, vastaanottajien ja aiheen perusteella. Kun asetus <b data-text="ui-search-encrypted"></b> on käytössä kohdassa <b data-settings="reading"></b>, voit hakea myös viestien tekstistä ja suojatuista aiheista onnistuneen salauksen purkamisen ja indeksoinnin jälkeen. Nämä tiedot tallennetaan salaamattomina paikalliseen hakuindeksiin, josta ne poistetaan, kun asetus poistetaan käytöstä. Tekoälyagentit eivät voi hakea näistä salauksen purkamisen jälkeen tallennetuista tiedoista.</p>
 <p>Viestiluettelossa ei näytetä viestien kokoja. Näet viestin koon valitsemalla <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

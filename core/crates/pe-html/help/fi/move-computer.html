@@ -4,10 +4,10 @@
 <ol>
     <li>Valitse <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Valitse, mitä viet: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> ja <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Jos haluat viedä myös tallennetut salasanat, muut kirjautumistiedot ja yksityiset avaimet, valitse <b data-text="ui-setup-use-passphrase"></b> ja kirjoita vähintään 8 merkin salalause kahdesti.</li>
+    <li>Jos haluat viedä myös valittujen osien tallennetut salasanat, muut kirjautumistiedot ja yksityiset avaimet, joihin sovellus pääsee käsiksi, valitse <b data-text="ui-setup-use-passphrase"></b> ja kirjoita vähintään 8 merkin salalause kahdesti.</li>
     <li>Napsauta <b data-text="ui-setup-export-button"></b> ja valitse, minne tiedosto tallennetaan.</li>
 </ol>
-<p>Tiedosto ei sisällä viestejä, vaan ne ladataan palvelimelta uudelleen toiselle tietokoneelle. Salalause suojaa koko tiedoston salauksella. Ilman salalausetta tallennetut salasanat, muut kirjautumistiedot ja yksityiset avaimet jätetään pois. Tällöin tileille on kirjauduttava uudelleen salasanalla tai selaimessa.</p>
+<p>Tiedosto ei sisällä viestejä. Palvelimella oleva posti voidaan ladata uudelleen toiselle tietokoneelle, mutta pelkästään tässä tietokoneessa olevat luonnokset ja lähetysjonon viestit eivät siirry mukana. Salalause suojaa koko vientitiedoston salauksella. Ilman salalausetta tallennetut salasanat, muut kirjautumistiedot ja yksityiset avaimet jätetään pois. Tällöin tileille on kirjauduttava uudelleen salasanalla tai selaimessa.</p>
 <aside class="warning">Säilytä tiedosto ja sen salalause erillään ja poista tiedosto tuonnin jälkeen. Kuka tahansa, jolla on molemmat, voi lukea postisi.</aside>
 <h2>Tuonti</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Valitse tiedosto ja kirjoita salalause, jos tiedosto on salattu.</li>
     <li>Ikkuna näyttää, mitä tiedostossa on. Valitse tuotavat osat ja tilit ja napsauta <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Tietokoneelle jo määritetyt tilit säilyvät ennallaan. Yhteystiedot lisätään osoitekirjaan. Asetukset ja ikkuna-asetukset korvataan tuoduilla arvoilla. Sääntöjen puuttuvat kohdekansiot yhdistetään oikeisiin kansioihin tilien synkronoinnin jälkeen. Yhteystiedon uusi avain korvaa aiemman vasta, kun valitset sen yhteystiedon ominaisuuksissa.</p>
+<p>Tietokoneelle jo määritetyt tilit säilyvät ennallaan. Yhteystiedot yhdistetään osoitekirjan tietoihin. Vain valittujen asetusten ja ikkuna-asetusten arvot korvataan tuoduilla arvoilla. Sääntöjen puuttuvat kohdekansiot jäävät odottamaan, kunnes synkronoinnissa löytyy vastaava kansio. Yhteystiedon uusi avain korvaa aiemman vasta, kun valitset sen yhteystiedon ominaisuuksissa.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

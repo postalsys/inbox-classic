@@ -206,7 +206,7 @@ ui-hyperlink = Hyperlinkki
 ui-hyperlink-intro = Kirjoita osoite, johon valittu teksti linkitetään.
 ui-edit-hyperlink = Muokkaa hyperlinkkiä
 ui-edit-hyperlink-intro = Linkin kohdeosoite. Tyhjennä osoite, jos haluat poistaa linkin ja säilyttää tekstin.
-ui-not-a-picture = Tämä tiedosto ei ole PNG-, JPEG- tai GIF-kuva, tai se on suurempi kuin 10 Mt.
+ui-not-a-picture = Kuvaa ei voitu lisätä. Tuettuja ovat luettavissa olevat PNG-, JPEG-, GIF- ja WebP-tiedostot, joiden koko on enintään 10 Mt.
 ui-format-color = Fontin väri
 ui-format-numbers = Numeroitu luettelo
 ui-format-bullets = Luettelomerkit
@@ -255,14 +255,14 @@ ui-attachment-not-saved = Liitettä ei voitu tallentaa.
 ui-not-downloaded = Viestiä ei ole vielä ladattu.
 ui-leave-list = Erotaanko tältä postituslistalta?
 ui-leave-one-click = Inbox Classic lähettää tilauksen peruutuspyynnön osoitteeseen { $target }. Mitään verkkosivua ei avata eikä sähköpostia lähetetä.
-ui-leave-mail = Peruuta tilaus lähettämällä sähköposti osoitteeseen { $target }. Inbox Classic valmistelee sen puolestasi. Vahvista lähettämällä viesti.
+ui-leave-mail = Tilauksen peruuttamista varten on lähetettävä sähköposti osoitteeseen { $target }. Inbox Classic valmistelee viestin puolestasi. Lähetä viesti toimittaaksesi peruutuspyynnön.
 ui-leave-web = Postituslistan tilauksen peruutussivu avautuu selaimeesi ({ $target }).
-ui-unsubscribing = Peruutetaan tilausta: { $target }...
+ui-unsubscribing = Lähetetään tilauksen peruutuspyyntöä: { $target }...
 ui-cannot-unsubscribe = Tässä viestissä ei ole tilauksen peruutusmahdollisuutta.
-ui-unsubscribed = Tilauksen peruutuspyyntö hyväksyttiin. Postituslista ilmoittaa lopettavansa näiden viestien lähettämisen.
+ui-unsubscribed = Tilauksen peruutuspyyntö hyväksyttiin.
 ui-not-unsubscribed = Tilausta ei voitu peruuttaa: { $reason }
 ui-event-span = { $start } - { $end }
-ui-event-floating = { $when } (lähettäjän aikaa)
+ui-event-floating = { $when } (aikavyöhykettä muuntamatta)
 ui-invitation = Kutsu: { $title }
 ui-invitation-updated = Päivitetty kutsu: { $title }
 ui-invitation-canceled = Peruttu: { $title }
@@ -270,7 +270,7 @@ ui-invitation-answer = Vastaus kutsuun: { $title }
 ui-no-title = (ei otsikkoa)
 ui-organizer = Järjestäjä: { $name }
 ui-invitation-not-read = Kutsua ei voitu lukea.
-ui-no-calendar = Tässä tietokoneessa ei ole kalenterisovellusta kutsujen (.ics-tiedostojen) avaamiseen.
+ui-no-calendar = Kutsua (.ics-tiedostoa) ei voitu avata kalenterisovelluksessa. Tarkista, että kalenterisovellus on asennettu ja asetettu avaamaan tämä tiedostotyyppi.
 ui-messages-not-changed = Viestejä ei voitu muuttaa.
 ui-new-folder-in-selected = Uusi kansio luodaan valitun kansion sisään.
 ui-new-folder-at-top = Uusi kansio luodaan tilin ylimmälle tasolle.
@@ -297,12 +297,12 @@ ui-found-mx = Inbox Classic tunnisti sähköpostipalveluntarjoajasi ja täytti s
 ui-found-srv = Nämä asetukset löytyivät verkkotunnuksesi DNS-tietueista.
 ui-found-autodiscover = Nämä asetukset löytyivät Microsoft Autodiscoverin (Exchange) avulla.
 ui-found-other = Nämä asetukset löytyivät tälle osoitteelle.
-ui-app-password-needed = { $provider }: tavallista salasanaa ei voi käyttää sähköpostiohjelmissa. Luo tilillesi sovellussalasana ja kirjoita se seuraavan lomakkeen Salasana-kenttään.
+ui-app-password-needed = { $provider }: tavallista salasanaa ei voi käyttää tässä. Jos tilisi tukee sähköpostin sovellussalasanoja, luo sellainen palveluntarjoajan tiliasetuksissa ja kirjoita se seuraavan lomakkeen Salasana-kenttään. Outlook.com- ja Microsoft 365 -tileille kirjaudutaan selaimen kautta.
 ui-app-password-open = { $provider }: avataanko ohjeet selaimessa?
 ui-plain-warning = Ilman salausta kuka tahansa, joka sieppaa verkkoliikenteesi, voi lukea salasanasi ja viestisi. Käytä tätä yhteyttä vain oman tietokoneesi tai lähiverkkosi palvelimen kanssa.
 ui-continue-ask = Jatketaanko?
 ui-add-sign-in-app = Lisää kirjautumissovellus...
-ui-turned-off = { $name } on poistettu käytöstä tässä tietokoneessa.
+ui-turned-off = Asetus ”{ $name }” on poistettu käytöstä tässä tietokoneessa.
 ui-off-here = Poistettu käytöstä tässä tietokoneessa.
 ui-why = Miksi?
 ui-more-sign-in = Lisää kirjautumisvaihtoehtoja...
@@ -335,7 +335,7 @@ ui-enter-password = { $account }: anna salasana.
 ui-signs-in-with = Kirjautumissovellus: { $app }. Kirjautuminen tapahtuu selaimessa, ja tili käyttää tämän sovelluksen palvelimia.
 ui-keep-password = Jätä salasanakenttä tyhjäksi, jos haluat säilyttää nykyisen salasanasi.
 ui-remove-account = Poista tili
-ui-remove-account-ask = Poistetaanko tämä tili Inbox Classicista? Viestit säilyvät palvelimella. Niiden paikalliset kopiot ja tilin tallennetut kirjautumistiedot poistetaan tästä tietokoneesta.
+ui-remove-account-ask = Poistetaanko tämä tili Inbox Classicista? Tilin paikalliset tiedot, viestit ja tallennetut kirjautumistiedot poistetaan. Palvelimella olevat viestit säilyvät. Vain tässä tietokoneessa olevat viestit menetetään.
 ui-col-email = Sähköpostiosoite
 ui-col-incoming = Saapuvan postin palvelin
 ui-type-email = Kirjoita sähköpostiosoitteesi, nimi@example.com.
@@ -418,7 +418,6 @@ ui-save-attachments = Tallenna liitteet
 ui-attachment-open = Avaa
 ui-attachment-save-as = Tallenna nimellä...
 ui-attachment-save-all = Tallenna kaikki...
-# review: new
 ui-attachment-show-in-message = Näytä viestissä
 ui-attachments-strip = Liitteet
 ui-attachment-note-title = Tämän tiedoston avaaminen
@@ -450,12 +449,9 @@ ui-let-agents-connect = &Salli tekoälyagenttien muodostaa yhteys Inbox Classici
 ui-change-button = Muuta…
 ui-undo-button = Kumoa
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Kumoa ajalta…
-# review: new
-ui-undo-since-span = Peru, mitä tämä ohjelma teki:
-# review: new
-ui-take-back = Peru
+ui-undo-since-span = Kumoa tämän ohjelman muutokset:
+ui-take-back = Kumoa
 ui-rules-title = Viestisäännöt
 ui-rules-intro = Säännöt käsittelevät uusia Saapuneet-kansion viestejä, kun Inbox Classic on käynnissä. Ne suoritetaan luettelon järjestyksessä, jos viesti täyttää niiden ehdot. Kun sääntö siirtää viestin pois Saapuneet-kansiosta, muita sääntöjä ei enää sovelleta siihen.
 ui-rules-none = Ei vielä sääntöjä. Luo sääntö valitsemalla Uusi.
@@ -594,13 +590,10 @@ ui-download-ahead-all = Kaikki viestit
 ui-download-ahead-never = Vain avattaessa
 ui-download-limit = &Tallennustilan raja tiliä kohden:
 ui-send-delay = &Viive ennen lähettämistä:
-ui-send-delay-note = Kun viesti odottaa lähtöä, voit perua lähetyksen Kumoa-toiminnolla.
+ui-send-delay-note = Voit perua lähetyksen Kumoa-toiminnolla määritetyn viiveen aikana. Viiveen päättyminen ei vahvista viestin perillemenoa.
 ui-dark-messages = Näytä viestit tummalla taustalla, kun järjestelmä on tummassa tilassa
-# review: new
 ui-preview-show = Näytä l&iitteet viesteissä
-# review: new
-ui-preview-show-note = Näyttää kuvat ja PDF-tiedostojen ensimmäiset sivut viestin tekstin jälkeen. Inbox Classic tekee nämä esikatselut itse, joten mikään tiedostossa ei voi käynnistyä.
-# review: new
+ui-preview-show-note = Näyttää kuvat ja PDF-liitteiden ensimmäiset sivut viestin tekstin jälkeen. Inbox Classic muodostaa esikatselukuvat suorittamatta tiedostojen skriptejä.
 ui-preview-pdfs = Näytä &PDF-tiedostot viesteissä
 ui-sending-in = Lähetetään { $subject }, { $count ->
     [one] 1 sekunti jäljellä
@@ -609,11 +602,11 @@ ui-sending-in = Lähetetään { $subject }, { $count ->
 ui-send-undone = Viestiä { $subject } ei lähetetty. Viesti avattiin uudelleen muokattavaksi.
 ui-send-too-late = Lähettämistä ei voi enää perua: { $subject }.
 ui-outbox-status-undo = Lähetetään klo { $time }
-ui-download-note = Etukäteen ladatut viestit avautuvat heti. Kun tallennustilan raja ylittyy, vanhimmat paikalliset kopiot poistetaan ja ladataan uudelleen, kun avaat ne.
+ui-download-note = Etukäteen ladatut viestit avautuvat heti. Kun tallennustilan raja ylittyy, vanhimmat välimuistissa olevat viestisisällöt poistetaan ja ladataan tarvittaessa uudelleen. Luonnoksia ja ohjelman käynnistämisen jälkeen avattuja viestejä ei poisteta, joten raja voi ylittyä.
 ui-attachment-downloading = Tämän viestin lataus on kesken. Yritä uudelleen, kun lataus on valmis.
 ui-trusted-senders-button = L&uotetut lähettäjät...
 ui-trusted-senders-title = Luotetut lähettäjät
-ui-trusted-senders-note = Näiden lähettäjien viestien kuvat ladataan automaattisesti, kun postipalveluntarjoajasi vahvistaa lähettäjän verkkotunnuksen.
+ui-trusted-senders-note = Näiden lähettäjien viestien ulkoiset kuvat ladataan automaattisesti, kun postipalveluntarjoaja vahvistaa lähettäjän verkkotunnuksen. Salatun sisällön kuvien lataaminen vaatii aina erillisen luvan.
 ui-trusted-everyone-at = Kaikki verkkotunnuksessa { $domain }
 ui-trusted-senders-empty = Luotettuja lähettäjiä ei ole vielä lisätty.
 ui-search-encrypted = Hae &salatuista viesteistä
@@ -640,7 +633,7 @@ ui-list-pictures = &Näytä lähettäjien kuvat viestiluettelossa
 ui-list-pictures-note = Näyttää sarakeasettelussa tuotemerkkien logot tai osoitekirjan kuvat, kun lähettäjän verkkotunnus on vahvistettu. Jos kuvaa ei ole, näytetään nimikirjaimet. Logot tallennetaan ja niitä käytetään uudelleen eri viesteissä.
 ui-card-picture = Kuva:
 ui-card-picture-choose = &Valitse...
-ui-picture-not-picture = Tämä tiedosto ei ole PNG- tai JPEG-kuva.
+ui-picture-not-picture = Kuvaa ei voitu lukea. Valitse kelvollinen PNG- tai JPEG-tiedosto.
 ui-picture-too-large = Kuva on liian suuri. Valitse kuva, joka on enintään 10 Mt ja jonka leveys ja korkeus ovat enintään 8000 pikseliä.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
@@ -677,11 +670,11 @@ ui-keys-backup-saved = Varmuuskopio tallennettiin.
 ui-keys-import-title = Tuo avain
 ui-keys-import-passphrase = Tämä yksityinen avain on suojattu salalauseella. Kirjoita se, niin avain tuodaan:
 ui-keys-file-filter = OpenPGP-avaimet
-ui-keys-use-for = Otetaanko tämä avain käyttöön seuraaville sähköpostiosoitteille: { $addresses }? Näistä osoitteista lähtevät viestit allekirjoitetaan digitaalisesti tällä avaimella, ja voit lukea sille salatut viestit täällä.
+ui-keys-use-for = Otetaanko tämä avain käyttöön seuraaville osoitteille: { $addresses }? Voit allekirjoittaa näistä osoitteista lähtevät viestit digitaalisesti tällä avaimella ja avata sillä salattuja viestejä täällä.
 ui-keys-use = &Käytä
 ui-keys-not-now = &Ei nyt
-ui-keys-remove-own = Poistetaanko oma avaimesi { $fingerprint }? Sille salattua postia ei voi enää lukea täällä, ellet tuo sen varmuuskopiota uudelleen.
-ui-keys-remove-contact = Poistetaanko avain ({ $name })? Sillä tehtyjä digitaalisia allekirjoituksia ei voi tarkistaa eikä sen haltijalle voi salata viestejä, ennen kuin lisäät avaimen uudelleen.
+ui-keys-remove-own = Poistetaanko oma avaimesi { $fingerprint }? Ilman sitä tällä avaimella salattujen viestien salausta ei voi purkaa täällä. Voit tuoda avaimen uudelleen sen varmuuskopiosta.
+ui-keys-remove-contact = Poistetaanko avain ({ $name })? Tällä avaimella ei voi enää tarkistaa digitaalisia allekirjoituksia tai salata viestejä, ennen kuin lisäät sen uudelleen.
 ui-key-properties-title = Avaimen ominaisuudet
 ui-key-names = Nimet:
 ui-key-fingerprint = Sormenjälki:
@@ -698,6 +691,7 @@ ui-verify-title = Vahvista avain
 ui-verify-intro = Vahvistettava avain: { $name }. Pyydä avaimen haltijaa lukemaan sen sormenjälki omasta sovelluksestaan kasvotusten tai puhelussa. Älä vertaa sitä sähköpostilla lähetettyyn sormenjälkeen: avainta väärentävä voi väärentää myös sähköpostiviestin.
 ui-verify-fingerprint = Sinulla olevan avaimen sormenjälki:
 ui-verify-marks = { $count ->
+    [0] Avaimessa ei ole sähköpostiosoitteita, joten avaimen haltijan vahvistusta ei voi tallentaa.
     [one] Ennen kuin valitset Täsmäävät, tarkista, että sormenjäljet ovat samat ja osoite { $addresses } kuuluu avaimen haltijalle. Muussa tapauksessa valitse Eroavat.
    *[other] Ennen kuin valitset Täsmäävät, tarkista, että sormenjäljet ovat samat ja kaikki seuraavat osoitteet kuuluvat avaimen haltijalle: { $addresses }. Muussa tapauksessa valitse Eroavat.
 }
@@ -727,9 +721,9 @@ ui-compose-encrypt-off = Poista salaus &käytöstä
 ui-compose-keep-encrypted = Pidä &salattuna
 ui-setup-export-title = Vie asetukset ja tilit
 ui-setup-import-title = Tuo asetukset ja tilit
-ui-setup-export-intro = Valitse, mitä viet toiseen tietokoneeseen. Tiedosto ei sisällä viestejä: ne ladataan toisessa tietokoneessa uudelleen palvelimelta.
+ui-setup-export-intro = Valitse, mitä viet toiseen tietokoneeseen. Tiedosto ei sisällä viestejä. Vain palvelimella edelleen olevat viestit voidaan ladata toisessa tietokoneessa uudelleen.
 ui-setup-use-passphrase = Suoj&aa tiedosto salalauseella
-ui-setup-passphrase-note = Salalauseella suojattu tiedosto salataan, ja se sisältää myös salasanat, muut kirjautumistiedot ja yksityiset avaimet. Ilman suojausta tileille on kirjauduttava uudelleen toisessa tietokoneessa salasanalla tai selaimen kautta.
+ui-setup-passphrase-note = Salalauseella suojattu tiedosto salataan. Siihen voidaan sisällyttää valittuihin tietoihin liittyvät tallennetut kirjautumistiedot ja käytettävissä olevat yksityiset avaimet. Ilman suojausta tileille on kirjauduttava uudelleen toisessa tietokoneessa.
 ui-setup-export-button = &Vie...
 ui-setup-file-filter = Inbox Classicin asetukset ja tilit
 ui-setup-ask-passphrase = Tämä tiedosto on suojattu salalauseella. Kirjoita se, niin näet tiedoston sisällön:

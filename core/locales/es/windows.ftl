@@ -100,14 +100,10 @@ win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los c
 win-agent-programs = P&rogramas cuyos agentes pidieron usar su correo:
 win-change = &Cambiar...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = Deshacer de&sde...
-# review: new
 win-take-back = &Deshacer
 win-what-agents-did = &Historial de los agentes:
-# review: new
 win-agent-reads = Lo que se leyó de { $from } a { $to }:
-# review: new
 win-agent-reads-hint = Seleccione arriba una fila de lecturas para ver lo que se leyó.
 win-how-to-connect = Cómo conectar un agente
 
@@ -139,4 +135,4 @@ win-installer-welcome-update =
     Si el programa está abierto, se cerrará antes de continuar. Sus cuentas y mensajes se conservarán.
 win-installer-older-ask = Está instalado Inbox Classic { $installed }, que es más reciente que { $version }. ¿Instalar de todos modos la versión anterior?
 win-installer-still-running = Inbox Classic sigue abierto. Ciérrelo y vuelva a intentarlo.
-win-installer-remove-mail-ask = ¿Desea eliminar también las cuentas y los mensajes que Inbox Classic guarda en este equipo? Los mensajes de los servidores se conservarán.
+win-installer-remove-mail-ask = ¿Desea eliminar también los datos locales de Inbox Classic, incluidas las cuentas, la configuración y los mensajes pendientes de envío? Los mensajes de los servidores se conservarán.

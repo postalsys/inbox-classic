@@ -1,5 +1,5 @@
 <h1>Cuando un agente envía correo</h1>
-<p class="summary">Cada mensaje que un agente de IA quiere enviar se le muestra antes a usted, y espera en la Bandeja de salida antes de salir.</p>
+<p class="summary">Revise cada mensaje que un agente de IA quiera enviar y autorícelo antes de que pase a la Bandeja de salida.</p>
 <p>Un agente solo puede enviar correo si usted se lo permitió, y cada mensaje solo después de que usted lo confirme.</p>
 <img src="picture:agents-4-send" alt="La ventana que pregunta si se envía un mensaje que escribió un agente, con cada destinatario y una dirección nueva señalada">
 <p>Cuando el agente quiere enviar, Inbox Classic muestra el mensaje con cada destinatario por su dirección. Las direcciones a las que nunca ha escrito se señalan con <b data-text="ui-new-address"></b>.</p>
@@ -7,16 +7,16 @@
     <li>Lea los destinatarios y el texto.</li>
     <li>Elija una opción:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> lo envía. Se activa tras un momento, para que no pueda pulsarlo por accidente.</li>
+            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> autoriza el envío y añade el mensaje a la Bandeja de salida. Se activa tras una breve pausa para reducir las pulsaciones accidentales.</li>
             <li><b data-text="ui-edit-first"></b> lo abre en un mensaje nuevo para que usted lo cambie.</li>
             <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, la opción predeterminada, no lo envía.</li>
         </ul>
     </li>
 </ol>
 <p>Cada programa solo puede tener un mensaje pendiente de su confirmación. Si no responde enseguida, se informa al agente de que aún no ha tomado una decisión. El agente puede consultarla más tarde. Los mensajes y borradores de un agente incluyen de forma predeterminada la firma de texto de su cuenta. El agente puede omitirla.</p>
-<p>Un mensaje que usted envía espera 30 segundos en la Bandeja de salida. Hasta que sale, puede eliminarlo allí o hacer clic en <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> en <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<!--review--><h2>Respuestas a invitaciones</h2><!--/review-->
-<!--review--><p>Un agente que puede enviar correo puede aceptar, aceptar provisionalmente o rechazar una invitación de calendario por usted, mediante la misma pregunta. Encima del texto, la pregunta indica a qué invitación responde el mensaje y cuándo es el evento. Inbox Classic escribe la respuesta al organizador a partir de la propia invitación, por lo que el mensaje no se puede abrir antes para cambiarlo. Su respuesta a la invitación solo cambia cuando el mensaje se ha enviado.</p><!--/review-->
+<p>Tras su autorización, el mensaje del agente espera al menos 30 segundos en la Bandeja de salida. Hasta que sale, puede eliminarlo allí o hacer clic en <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> en <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<h2>Respuestas a invitaciones</h2>
+<p>Un agente que puede enviar correo puede aceptar, aceptar provisionalmente o rechazar una invitación de calendario por usted, mediante la misma pregunta. Encima del texto, la pregunta indica a qué invitación responde el mensaje y cuándo es el evento. Inbox Classic escribe la respuesta al organizador a partir de la propia invitación, por lo que el mensaje no se puede abrir antes para cambiarlo. El estado local de la invitación cambia cuando el servidor acepta el mensaje para su envío. No se confirma que el calendario del organizador haya procesado la respuesta.</p>
 <h2>Borradores que escribe un agente</h2>
 <p>Cuando abre un borrador creado por un agente, el nombre del agente aparece encima del texto del mensaje. Compruebe los destinatarios y el texto antes de enviarlo.</p>
 <img src="picture:agents-8-draft" alt="Borrador escrito por un agente de IA, abierto en una ventana independiente. El nombre del agente aparece encima del texto del mensaje.">
