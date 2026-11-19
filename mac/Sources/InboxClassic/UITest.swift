@@ -283,6 +283,22 @@ final class UITest {
         onMain { AppDelegate.shared.perform(command) }
     }
 
+    /// `command` chosen in the menu bar, as a click on its item does; false (nothing run) when no menu has it
+    func fromMenu(_ command: Command) -> Bool {
+        func search(_ menu: NSMenu?) -> (NSMenu, Int)? {
+            for (index, item) in (menu?.items ?? []).enumerated() {
+                if item.action == #selector(AppDelegate.runCommand(_:)) && item.tag == command.rawValue, let menu {
+                    return (menu, index)
+                }
+                if let found = search(item.submenu) { return found }
+            }
+            return nil
+        }
+        guard let (menu, index) = search(NSApp.mainMenu) else { return false }
+        onMain { menu.performActionForItem(at: index) }
+        return true
+    }
+
     /// the button of an alert (the first is the default)
     func answer(_ window: NSWindow?, _ title: String) {
         let button: NSButton? = views(NSButton.self, in: window?.contentView).first { $0.title == title }

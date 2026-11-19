@@ -345,7 +345,7 @@ Screenshots: `account-12-other-addresses`, `write-26-from-alias`, `write-27-repl
 
 Screenshots: `rules-1-list`, `rules-2-editor`, `rules-5-applied`, `rules-6-bad-query`, `rules-3-from-search`, `rules-4-from-message`
 
-- Tools > Message Rules opens, empty
+- Tools > Message Rules, chosen in the menu bar, opens, empty
 - a new rule: Newsletters, `from:news@example.com`, moved to Archive and marked read; it is listed
 - a message from news@example.com arriving lands in Archive, not the Inbox, and the status bar says the rules sorted it
 - a query with `in:` is refused with the reason
@@ -359,7 +359,7 @@ Screenshots: `keys-1-empty`, `keys-2-new-key`, `keys-3-backup-offer`, `keys-4-ba
 
 The key files are `scripts/ui-e2e/keys/`: `bob.pub.asc` (Bob Example, bob@example.net, a public key) and `carol.sec.asc` (Carol Example, carol@example.org, a private key protected by the passphrase `correct horse battery`). The account's address is added to Carol's key for the "Use this key" question: the test imports Carol's key after adding `carol@example.org` as another address of the account, and takes it away after.
 
-- Tools > Encryption Keys opens with no keys: the empty words, New Key, Import; Export, Back Up, Verify, Properties and Remove greyed (`keys-1-empty`)
+- Tools > Encryption Keys, chosen in the menu bar, opens with no keys: the empty words, New Key, Import; Export, Back Up, Verify, Properties and Remove greyed (`keys-1-empty`)
 - New Key: the window names the account the key is for (the only one, chosen) and says that passwords are kept in memory only (the tests run with `--memory-passwords`) (`keys-2-new-key`); Make Key makes it, and the backup is offered at once (`keys-3-backup-offer`)
 - Save a Backup asks for a passphrase twice (`keys-4-backup`): two different ones are refused, a short one is refused, then a good one saves the file (the system's save panel answered by the test); the file read back is an armored private key that asks for that passphrase
 - (Linux) In a window lower than the backup window, as on a small screen or a tiled window, it scrolls and its OK stays in reach (`keys-4b-backup-low`)

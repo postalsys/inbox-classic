@@ -477,13 +477,22 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         ]
         _ = submenu(Text.menuEdit.text, edit)
         _ = submenu(Text.menuView.text, viewItems(commands("view")))
-        _ = submenu(Text.menuMessage.text, [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
-                                separator(), item(for: .flag), flagMenu(), separator(), item(for: .watchConversation),
-                                item(for: .ignoreConversation), separator(), item(for: .archive), item(for: .junk),
-                                item(for: .notJunk)])
-        _ = submenu(Text.menuTools.text, [item(for: .sync), item(for: .outbox), separator(), item(for: .addressBook),
-                                                  item(for: .addSenderToBook), separator(), item(for: .aiAgents), separator(), item(for: .notify),
-                              item(for: .defaultApp), separator(), item(for: .composeSign), item(for: .composeEncrypt)])
+        let messageItems: [NSMenuItem] = [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll),
+                                          item(for: .forward), separator(), item(for: .flag), flagMenu(), separator(),
+                                          item(for: .watchConversation), item(for: .ignoreConversation), separator(),
+                                          item(for: .archive), item(for: .junk), item(for: .notJunk), separator(),
+                                          item(for: .createRuleFromMessage)]
+        assert(commands("message").allSatisfy { command in messageItems.contains { $0.tag == command.rawValue } })
+        _ = submenu(Text.menuMessage.text, messageItems)
+        // Settings is in the app's menu, as on every Mac
+        let toolItems: [NSMenuItem] = [item(for: .sync), item(for: .outbox), separator(), item(for: .addressBook),
+                                       item(for: .addSenderToBook), item(for: .messageRules), item(for: .encryptionKeys),
+                                       separator(), item(for: .aiAgents), separator(), item(for: .notify),
+                                       item(for: .defaultApp), separator(), item(for: .composeSign),
+                                       item(for: .composeEncrypt)]
+        assert(commands("tools").filter { $0 != .options }
+            .allSatisfy { command in toolItems.contains { $0.tag == command.rawValue } })
+        _ = submenu(Text.menuTools.text, toolItems)
         let window = submenu(Text.macMenuWindow.text, [
             NSMenuItem(title: Text.macMinimize.text, action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"),
             NSMenuItem(title: Text.macZoom.text, action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""),
