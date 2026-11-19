@@ -891,6 +891,7 @@ impl Core {
                 task.abort();
             }
         }
+        self.opening.forget(id);
         self.tokens.lock().unwrap_or_else(|p| p.into_inner()).remove(&id);
         self.store().remove_account(id)?;
         self.secrets.remove(id);
@@ -1435,13 +1436,18 @@ impl Core {
     /// so it does not wait for a sync. [`Event::MessageReady`] follows, right away when it is cached, or
     /// [`Event::MessageFailed`] when it can not be downloaded
     pub fn open_message(&self, folder: FolderId, uid: u64) -> Result<()> {
-        let (account, _) = self.store().folder_info(folder)?;
-        // a large download under way is not waited for: the click goes to a second reader
-        let reader = match self.opening.large_download(account) {
+        let (account, size, stored) = {
+            let store = self.store();
+            let (account, _) = store.folder_info(folder)?;
+            let size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
+            (account, size, store.has_source(folder, uid)?)
+        };
+        // a large download given to the reader is not waited for: the click goes to a second reader
+        let reader = match self.opening.to_spare(account, folder, uid, size, stored) {
             true => Kind::Spare,
             false => Kind::Reader,
         };
-        self.send_to(
+        let sent = self.send_to(
             reader,
             account,
             Command::FetchSource {
@@ -1449,7 +1455,17 @@ impl Core {
                 uid,
                 asked: std::time::Instant::now(),
             },
-        )
+        );
+        // not handed on: the reader was never given it
+        if sent.is_err() && reader == Kind::Reader {
+            self.opening.opened(account, folder, uid);
+        }
+        sent
+    }
+
+    /// Whether the reader of `account` waits with a connection of its own, so the next open needs no new one
+    pub fn reader_ready(&self, account: AccountId) -> bool {
+        self.opening.reader_ready(account)
     }
 
     /// Whether the last message opened came from the store, with no connection used: downloaded ahead

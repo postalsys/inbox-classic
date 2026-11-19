@@ -731,6 +731,10 @@ public:
     bool TestLink(const std::wstring& uri) { return reader_.FollowLink(uri.c_str()); }
     // the UI test's look at the parts of a signed or encrypted message shown (Reader::TestFrames)
     int64_t TestFrames() { return reader_.TestFrames(); }
+    // the UI test's look at the last Find in This Message (Reader::TestFound), and at the message shown: 1 when it has
+    // loaded with this subject, or with none given when it is the message of the selected row (Reader::TestShown)
+    int TestFound() const { return reader_.TestFound(); }
+    int TestShown(const std::wstring& subject);
     // the UI test's count of requests of the message shown to the internet (Preview::RemoteRequests)
     int TestRemoteRequests() const { return reader_.RemoteRequests(); }
     // the UI test's look at the previews of the message shown (Preview::TestPreviews)

@@ -645,6 +645,80 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   mail present only locally is lost. Do not describe every local message as a recoverable server copy.
 - The attachment warning explains that opening is disabled here, not impossible everywhere. Picture blocking
   reduces tracking opportunities without promising the sender cannot identify the computer.
+- Contact deletion keeps the count in one/few/other, including 21/101. Key verification uses exact [1] for one
+  address and plural instructions otherwise. Import counts agree independently; file names follow "Failas:".
+- "Kontrolinis kodas" is the key fingerprint. Verification labels explicitly describe the key's owner;
+  removing a key prevents decryption/use of that key, not access to already decrypted text or every alternate key.
+  Memory-only password storage makes current private keys unusable after restart unless restored.
+- Send countdowns describe planned sending, not completed delivery. Too Late means Undo Send is unavailable;
+  it does not prove delivery. Subjects are already quoted by the core.
+- Download limits apply to cached message copies; drafts and messages opened since startup are spared.
+  Encrypted search stores decrypted content only when decryption succeeds. The index is unencrypted, and agents
+  cannot search that decrypted content; they can still search ordinary mail. Turning it off removes derived text.
+- Picture menus label arbitrary sender/domain names. Domain confirmation is not personal identity verification.
+  Logos are cached and refreshed; do not promise a single download forever. Previews do not run file scripts.
+  Address lookup tries the domain first; key-server lookup can also use a fingerprint without an email address.
+- Setup files contain no mail. Only server-held messages can be downloaded on the new computer. Protected exports
+  include accessible saved credentials and private keys; unprotected exports require signing in again, including
+  browser sign-in where used. Shared Address Book/layout guidance avoids a Windows-only menu path.
+- Conversation statuses and Move/Copy dialogs retain numeric counts in one/few/other; empty-folder warnings
+  use exact [1] for singular prose. Transfer progress names the current message number, not a completed count.
+  Already-counted message/size phrases follow labels ("iš viso:"), never the preposition "iš".
+- Message import status says "Importuojama" while the server command is queued. Outbox failure notes describe
+  another sending attempt, not assured delivery. Shared authentication/relay advice names account controls
+  without a Windows-only menu path; paths and provider identifiers follow an inflected head noun or a colon.
+- Bounce explanations report what the remote server said. Greylisting advice distinguishes a delay from a final
+  failure; do not promise a retry after a final notice or assert that large attachments are always rejected first.
+- Sign-in guidance keeps exact provider scope/URI values and uses shared account-window names. App passwords
+  are conditional on account support. Invalid server settings can mean a bad port as well as a bad host name.
+- Agent folder-rename logs describe the queued request. Read-list/change logs describe list entries, not full
+  message reads, and attachment logs describe data access, not launching a file. Limits count program log entries.
+- Windows uses the official title "Kredencialų tvarkytuvas"; wrap system-store names with "saugykla" so differing
+  genders fit. Apply this term when reviewing the still-pending sign-in-apps, data-storage, account-security and
+  encryption-keys help. Those topics remain marked; no full-help review is claimed here.
+- Private keys are wrapped by a key in the system store, not stored there directly. A locked key may reflect an
+  inaccessible store as well as a missing protection key; recovery advice must distinguish those cases.
+- "Iššifruota" means decrypted. Signature labels distinguish verified ownership, a valid signature, and inability
+  to match a unique From address. Integrity failure does not establish when or by whom data changed.
+- Key lookup messages list addresses, not keys. Publication confirms every email address separately before
+  address lookup works. Missing-recipient-key instructions use exact [1], so 21/101 get plural instructions.
+- Setup account notes say "prisijungimo duomenys" for saved OAuth credentials; import summaries introduce
+  addresses with "paskyra" and sign-in app names with "prisijungimo programa". The shared discovery-failure
+  message uses "Neimportuota:" because its name can identify either an app or an account.
+- Setup server validation includes the security setting, and its size limit applies on export and import.
+  Rule summaries cover both filter and destination accounts. A missing destination remains pending until found;
+  do not guarantee that synchronization will create it. Keep independent setup counts separately inflected.
+- Opening a decrypted attachment writes an unencrypted temporary copy. Cleanup runs at startup for copies older
+  than a day; do not promise deletion exactly one day later. Preview failures can be hangs or stale crash markers,
+  and size refusal can be a combined preview limit. Describe the observed state without blaming a file for a crash.
+- "Atidarykite failą" opens the complete attachment. PDF page instructions use exact [1] and a parenthesized
+  total for all other counts, avoiding "visus 10 puslapių". Print notices identify the file and distinguish it
+  from the message being printed. Settings placeholders contain a complete platform-specific path.
+- Help uses "Papildomos laiškų funkcijos", "Išplėstinės funkcijos" and "Spartieji klavišai" for their respective
+  sections and shortcut-table column. Reviewing these labels does not complete the pending help prose.
+- Platform search guidance names sender/recipient names and addresses. File-save failure totals use labels
+  ("Nepavyko įrašyti failų:", "Iš viso:") so independent counts, including one, fit. Search indexing is distinct
+  from downloading; more results may appear but are not promised.
+- Linux browser-sign-in guidance matches the shared app copy, including conditional app passwords. Mailing-list
+  questions use "atsisakyti prenumeratos"; the direct-request target is a server host, and the mail path still
+  requires sending the prepared request. Picture blocking reduces tracking without guaranteeing anonymity.
+- The Mac and Linux account buttons use "Parašo tekstas". Agent removal says "iš sąrašo" and removes stored
+  permissions/history rather than uninstalling an external program. Agent read details describe accessed data.
+- Mac Window > Zoom is "Keisti lango dydį", distinct from text scaling. Hide Others/Show All refer to programs;
+  Redo restores an undone edit. Link hints use a key plus "pelės spustelėjimas"; preserve the actual key symbols.
+- Installer copy distinguishes the Windows user account from mail accounts and describes removal of the whole
+  app data folder. Linux store copy promises offline reading of downloaded messages and describes supported
+  search fields. Retain protocol keywords: the generator already prepends the English keyword list.
+- Reading/search help uses "paieškos sąlyga" and "paieškos indeksas". Indexing does not mark mail read; offline
+  search covers locally stored data. Search fields include names and addresses, not only people as such.
+- One-character terms match whole words; longer terms match prefixes. after: includes the UTC start date;
+  relative months and years mean 30 and 365 days. to:/cc:/bcc: share recipient fields. Keep literal code examples.
+- Combined folders and Flagged are "rodiniai". All Sent/All Drafts precede Flagged with several accounts.
+  Collapsed unread totals exclude junk/deleted folders; collapsed conversation actions cover members in the list.
+- Inserted labels follow quoted head nouns (rodinys, parinktis, mygtukas); settings paths follow "čia:".
+  The Mac sidebar shortcut also requires Control, which the current help formatter omits from the displayed key.
+- Watched-conversation notices require enabled notifications and a background window. Column layout falls back
+  to Classic in a very narrow window; snippets normally omit recognized quotes but can fall back to source text.
 
 ### Magyar (hu)
 

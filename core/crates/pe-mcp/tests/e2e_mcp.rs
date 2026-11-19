@@ -10,6 +10,7 @@ use std::sync::mpsc::{Receiver, channel};
 use std::time::{Duration, Instant};
 
 use pe_core::agents::{AgentAnswer, AgentAsk, AgentLevels};
+use pe_core::i18n::{Text, tr, tr_args};
 use pe_core::{Core, Event};
 use pe_mcp::McpServer;
 use pe_testkit::{ImapKit, PASSWORD, TempDir, rfc822};
@@ -242,9 +243,10 @@ impl Drop for Watchdog {
     }
 }
 
-/// Waits up to `seconds` for `condition`
+/// Waits up to `seconds`, and at least [`pe_testkit::patience`], for `condition`
 fn eventually(seconds: u64, condition: impl Fn() -> bool) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(seconds);
+    // at least the patience of the other tests: a busy runner is slow, and the wait ends as soon as it holds
+    let deadline = Instant::now() + Duration::from_secs(seconds).max(pe_testkit::patience());
     while Instant::now() < deadline {
         if condition() {
             return true;
@@ -286,7 +288,11 @@ fn answer_questions(core: Arc<Core>, events: Receiver<Event>, others: std::sync:
                     // the user sees every list by its sender, and where the request goes
                     assert!(ask.lists.iter().all(|l| l.target == "127.0.0.1"), "{ask:?}");
                     let (title, detail) = pe_core::agents::unsubscribe_text(&ask);
-                    assert!(title.starts_with("Test Agent wants to unsubscribe you"), "{title}");
+                    let expected = tr_args(
+                        Text::AgentUnsubscribeTitle,
+                        &[("program", "Test Agent".into()), ("count", ask.lists.len().into())],
+                    );
+                    assert_eq!(title, expected);
                     // the address and the name apart, so the windows can show the address whole
                     assert!(
                         ask.lists
@@ -374,7 +380,7 @@ fn an_agent_works_on_the_mailbox() {
     answer_questions(core.clone(), events, others);
     core.sync(account).unwrap();
     let synced = |rest: &Receiver<Event>| loop {
-        match rest.recv_timeout(Duration::from_secs(20)).expect("the sync finishes") {
+        match rest.recv_timeout(pe_testkit::patience()).expect("the sync finishes") {
             Event::SyncFinished { failure: None, .. } => break,
             Event::Failed { message, .. } => panic!("{message}"),
             _ => {}
@@ -507,7 +513,7 @@ fn an_agent_works_on_the_mailbox() {
             .unwrap();
         assert!(eventually(10, || server.flags("INBOX", lunch).iter().any(|f| f == "\\Seen")));
         let log = core.agent_log(10).unwrap();
-        assert_eq!(said(&log[0]), "Marked read \u{201c}Lunch\u{201d}");
+        assert_eq!(said(&log[0]), tr_args(Text::AgentLogRead, &[("subject", "Lunch".into())]));
         // the agent's request it came from
         assert_eq!(log[0].entry.call_id, Some(agent.next.to_string()));
         core.agent_undo(log[0].id).unwrap();
@@ -539,7 +545,8 @@ fn an_agent_works_on_the_mailbox() {
         // archived (into Archive here; on Gmail its labels would go), and taken back from the log
         // once the store has it back in the Inbox too, not only the server
         let mut news_now = None;
-        for _ in 0..200 {
+        let until = Instant::now() + pe_testkit::patience();
+        while Instant::now() < until {
             let back = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
             news_now = back["messages"]
                 .as_array()
@@ -616,7 +623,10 @@ fn an_agent_works_on_the_mailbox() {
         assert!(
             summaries
                 .iter()
-                .any(|s| s.starts_with("Could not unsubscribe from the list of \u{201c}News of Monthly\u{201d}")),
+                .any(|s| s.starts_with(&words_before_mark(
+                    Text::AgentLogUnsubscribeFailed,
+                    &[("subject", "News of Monthly".into()), ("reason", MARK.into())]
+                ))),
             "{summaries:?}"
         );
         // a no asks no list (the list server took its two requests and is gone)
@@ -625,7 +635,8 @@ fn an_agent_works_on_the_mailbox() {
             .await
             .unwrap();
         assert_eq!(kept_on["unsubscribed"], false, "{kept_on}");
-        assert!(said(&core.agent_log(1).unwrap()[0]).starts_with("You did not unsubscribe from news@list.example.com"));
+        let refused = tr_args(Text::AgentLogUnsubscribeRefused, &[("senders", "news@list.example.com".into())]);
+        assert!(said(&core.agent_log(1).unwrap()[0]).starts_with(&refused));
         // 30 lists a day, each counted from the user's yes, not from when its list answers
         let earlier: Vec<pe_store::NewLogEntry> = (0..27)
             .map(|_| pe_store::NewLogEntry {
@@ -801,7 +812,8 @@ fn an_agent_works_on_the_mailbox() {
 
 /// [`eventually`] without holding up the runtime the server's answers come from
 async fn eventually_async(seconds: u64, condition: impl Fn() -> bool) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(seconds);
+    // at least the patience of the other tests: a busy runner is slow, and the wait ends as soon as it holds
+    let deadline = Instant::now() + Duration::from_secs(seconds).max(pe_testkit::patience());
     while Instant::now() < deadline {
         if condition() {
             return true;
@@ -870,7 +882,7 @@ fn an_agent_never_reads_encrypted_mail() {
     answer_questions(core.clone(), events, others);
     core.sync(account).unwrap();
     loop {
-        match rest.recv_timeout(Duration::from_secs(20)).expect("the sync finishes") {
+        match rest.recv_timeout(pe_testkit::patience()).expect("the sync finishes") {
             Event::SyncFinished { failure: None, .. } => break,
             Event::Failed { message, .. } => panic!("{message}"),
             _ => {}
@@ -1070,7 +1082,7 @@ fn engine_on(server: &ImapKit, dir: &TempDir) -> (Arc<Core>, i64, McpServer, std
     answer_questions(core.clone(), events, others);
     core.sync(account).unwrap();
     loop {
-        match rest.recv_timeout(Duration::from_secs(20)).expect("the sync finishes") {
+        match rest.recv_timeout(pe_testkit::patience()).expect("the sync finishes") {
             Event::SyncFinished { failure: None, .. } => break,
             Event::Failed { message, .. } => panic!("{message}"),
             _ => {}
@@ -1198,7 +1210,8 @@ fn an_agent_reads_lists_and_keeps_its_drafts() {
         server.add_message("INBOX", &rfc822("Later", "It came later."), &[]);
         core.sync(account).unwrap();
         let mut came = Value::Null;
-        for _ in 0..200 {
+        let until = Instant::now() + pe_testkit::patience();
+        while Instant::now() < until {
             came = agent.call("list_changes", json!({ "since": cursor })).await.unwrap();
             if came.get("messages").is_some() {
                 break;
@@ -1290,7 +1303,7 @@ fn an_agent_reads_lists_and_keeps_its_drafts() {
         let opened = core.reopen_draft(drafts, stored().unwrap()).unwrap().unwrap();
         assert_eq!(opened.agent.as_deref(), Some("Test Agent"));
         let note = pe_core::agents::draft_note(&opened).unwrap();
-        assert!(note.starts_with("Test Agent, an AI agent, wrote this draft"), "{note}");
+        assert_eq!(note, tr_args(Text::AgentDraftNote, &[("program", "Test Agent".into())]));
 
         // replaced in its place, by its draft_id
         let replaced = agent
@@ -1336,7 +1349,8 @@ fn an_agent_reads_lists_and_keeps_its_drafts() {
         assert!(eventually_async(20, || !server.subjects("Drafts").contains(&"Agenda v2".to_string())).await);
         let gone = agent.call("replace_draft", json!({ "draft_id": draft_id, "text": "x" })).await;
         assert!(gone.unwrap_err().contains("no draft"));
-        assert!(said(&core.agent_log(1).unwrap()[0]).starts_with("Discarded the draft"));
+        let discarded = words_before_mark(Text::AgentLogDraftDiscarded, &[("subject", MARK.into())]);
+        assert!(said(&core.agent_log(1).unwrap()[0]).starts_with(&discarded));
 
         // with no account allowed, the scopes are empty: filtered in the store
         core.update_agent_host(host.id, true, AgentLevels(15), &[]).unwrap();
@@ -1928,7 +1942,7 @@ fn an_agent_organizes_folders_and_conversations() {
         assert!(
             labels
                 .iter()
-                .any(|l| l.starts_with("Programs started from") && l.contains("zsh")),
+                .any(|l| l.starts_with(&terminal_programs()) && l.contains("zsh")),
             "{labels:?}"
         );
         assert!(labels.contains(&"Claude Code".to_string()), "{labels:?}");
@@ -1978,7 +1992,7 @@ fn a_full_log_refuses_more() {
             .call("mark_messages_read", json!({ "folder": inbox, "uids": [hi] }))
             .await
             .unwrap_err();
-        assert!(refused.starts_with("Too many changes in the last 30 days"), "{refused}");
+        assert!(refused.contains(&tr(Text::AgentTooManyChanges)), "{refused}");
         assert_eq!(store.agent_log_live(host, 0).unwrap().0, pe_store::LOG_CEILING);
         assert!(!server.flags("INBOX", hi).iter().any(|f| f == "\\Seen"));
         // reading is not a change
@@ -2002,7 +2016,7 @@ fn a_full_log_refuses_more() {
             .call("get_message", json!({ "folder": inbox, "uid": hi }))
             .await
             .unwrap_err();
-        assert!(refused.starts_with("Too many reads in the last 30 days"), "{refused}");
+        assert!(refused.contains(&tr(Text::AgentTooManyReads)), "{refused}");
         assert_eq!(store.agent_log_live(host, 0).unwrap().1, before);
     });
     mcp.stop();
@@ -2370,4 +2384,25 @@ fn an_agent_answers_an_invitation_through_the_send_question() {
         assert_eq!((report.entries, report.sent), (0, 0), "{report:?}");
     });
     mcp.stop();
+}
+
+/// Stands for an argument of a catalog text the test can not know (a server's reason)
+const MARK: &str = "\u{1}";
+
+/// The words of a catalog text before its first argument given as [`MARK`]
+fn words_before_mark(text: Text, args: &[(&str, pe_core::i18n::Arg)]) -> String {
+    let words = tr_args(text, args);
+    words.split(MARK).next().unwrap_or_default().to_string()
+}
+
+/// How the agents' window names programs started from a terminal on this platform, up to the terminal's name
+fn terminal_programs() -> String {
+    let text = if cfg!(target_os = "macos") {
+        Text::AgentTerminalProgramsMac
+    } else if cfg!(windows) {
+        Text::AgentTerminalProgramsWindows
+    } else {
+        Text::AgentTerminalProgramsLinux
+    };
+    words_before_mark(text, &[("terminal", MARK.into())])
 }

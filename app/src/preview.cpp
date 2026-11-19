@@ -199,6 +199,14 @@ void Preview::Configure() {
         nullptr);
     // the frames of a page of parts sized once it loaded, its frames' documents with it
     view_->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>([this](ICoreWebView2*, ICoreWebView2NavigationCompletedEventArgs*) {
+                                       // the newest document's own load done, not one it replaced (Loaded)
+                                       LPWSTR source = nullptr;
+                                       if (SUCCEEDED(view_->get_Source(&source)) && source) {
+                                           if (std::wstring(kPageUrl) + std::to_wstring(shown_) + L"/" == source) {
+                                               loaded_ = shown_;
+                                           }
+                                           CoTaskMemFree(source);
+                                       }
                                        Measure();
                                        return S_OK;
                                    }).Get(),

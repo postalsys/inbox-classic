@@ -490,425 +490,233 @@ ui-rules-applied = { $count ->
 }
 ui-col-rule-matches = Kriterijai
 ui-clear-button = &Išvalyti
-# review: new
 ui-how-to-connect = Kaip prijungti agentą…
-# review: new
 ui-agent-programs = Programos, kurių agentai paprašė prieigos prie jūsų pašto
-# review: new
 ui-what-agents-did = Agentų veikla
-# review: new
 ui-restart-now = &Paleisti iš naujo dabar
-# review: new
 ui-restart-later = &Vėliau
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Naujas kontaktas
-# review: new
 ui-tb-new-group = Nauja grupė
-# review: new
 ui-tb-properties = Ypatybės
-# review: new
 ui-tb-write-to = Rašyti
-# review: new
 ui-menu-new-contact = Naujas &kontaktas...
-# review: new
 ui-menu-new-group = Nauja &grupė...
-# review: new
 ui-menu-write-to = &Rašyti
-# review: new
 ui-menu-delete = &Panaikinti
-# review: new
 ui-book-find-hint = Įveskite vardą arba el. pašto adresą
-# review: new
 ui-book-all-contacts = Visi kontaktai
-# review: new
 ui-col-phone = Telefonas
-# review: new
-ui-book-empty = Adresų knygelė tuščia. Spustelėkite „Naujas kontaktas“, kad ką nors pridėtumėte, arba importuokite vCard ar CSV failą per meniu „Failas“.
-# review: new
+ui-book-empty = Adresų knygelė tuščia. Spustelėkite mygtuką „Naujas kontaktas“ arba importuokite kontaktus iš vCard ar CSV failo.
 ui-book-no-match = Nėra kontaktų, atitinkančių „{ $words }“.
-# review: new
 ui-book-delete-ask = { $count ->
-    [one] Panaikinti šį kontaktą iš adresų knygelės?
-   *[other] Panaikinti šiuos kontaktus ({ $count }) iš adresų knygelės?
+    [one] Panaikinti { $count } kontaktą iš adresų knygelės?
+    [few] Panaikinti { $count } kontaktus iš adresų knygelės?
+   *[other] Panaikinti { $count } kontaktų iš adresų knygelės?
 }
-# review: new
 ui-group-delete-ask = Panaikinti grupę „{ $name }“? Jos nariai lieka adresų knygelėje.
-# review: new
-ui-book-no-address = { $name } neturi el. pašto adreso.
-# review: new
+ui-book-no-address = El. pašto adresas nenurodytas: { $name }.
 ui-new-contact-title = Naujas kontaktas
-# review: new
 ui-contact-title = Ypatybės: { $name }
-# review: new
 ui-contact-first = Vardas:
-# review: new
 ui-contact-last = Pavardė:
-# review: new
 ui-contact-display = Rodomas vardas:
-# review: new
 ui-contact-nickname = Slapyvardis:
-# review: new
 ui-contact-company = Įmonė:
-# review: new
 ui-contact-addresses = El. pašto adresai:
-# review: new
 ui-contact-address-hint = Įveskite el. pašto adresą
-# review: new
 ui-contact-add = &Pridėti
-# review: new
 ui-contact-set-default = Nustatyti kaip &numatytąjį
-# review: new
 ui-contact-default = { $address } (numatytasis)
-# review: new
 ui-contact-phones = Telefono numeriai:
-# review: new
 ui-phone-home = Namų
-# review: new
 ui-phone-work = Darbo
-# review: new
 ui-phone-mobile = Mobilusis
-# review: new
 ui-phone-other = Kitas
-# review: new
 ui-contact-notes = Pastabos:
-# review: new
 ui-contact-name-needed = Įveskite kontakto vardą arba el. pašto adresą.
-# review: new
 ui-contact-address-invalid = „{ $address }“ nėra tinkamas el. pašto adresas.
-# review: new
 ui-contact-not-saved = Kontakto įrašyti nepavyko: { $reason }
-# review: new
 ui-new-group-title = Nauja grupė
-# review: new
 ui-group-title = Ypatybės: { $name }
-# review: new
 ui-group-name = Grupės pavadinimas:
-# review: new
 ui-group-members = Nariai:
-# review: new
 ui-group-select-members = Pa&sirinkti narius...
-# review: new
 ui-group-new-member = Pridėti el. pašto adresą, kurio nėra adresų knygelėje:
-# review: new
 ui-group-name-needed = Įveskite grupės pavadinimą.
-# review: new
 ui-group-not-saved = Grupės įrašyti nepavyko: { $reason }
-# review: new
 ui-group-members-count = { $count ->
     [one] { $count } narys
     [few] { $count } nariai
    *[other] { $count } narių
 }
-# review: new
 ui-select-recipients = Pasirinkti gavėjus
-# review: new
 ui-select-members = Pasirinkti grupės narius
-# review: new
 ui-pick-intro = Įveskite vardą arba pasirinkite jį iš sąrašo:
-# review: new
 ui-pick-recipients = Laiško gavėjai:
-# review: new
 ui-pick-members = Grupės nariai:
-# review: new
 ui-pick-to = &Kam →
-# review: new
 ui-pick-cc = K&opija →
-# review: new
 ui-pick-bcc = &Slapta kopija →
-# review: new
 ui-pick-add = &Pridėti →
-# review: new
 ui-pick-tip = Pasirinkti gavėjus iš adresų knygelės
-# review: new
 ui-filter-address-books = Adresų knygelės (vCard, CSV)
-# review: new
 ui-filter-vcard = vCard failai
-# review: new
 ui-book-export-name = Adresų knygelė
-# review: new
-ui-book-imported = { $added ->
-    [one] Pridėtas { $added } kontaktas
-    [few] Pridėti { $added } kontaktai
-   *[other] Pridėta kontaktų: { $added }
-}, { $skipped ->
-    [one] praleistas { $skipped }, jau esantis adresų knygelėje.
-    [few] praleisti { $skipped }, jau esantys adresų knygelėje.
-   *[other] praleista jau esančių adresų knygelėje: { $skipped }.
+ui-book-imported = Pridėta: { $added ->
+    [one] { $added } kontaktas
+    [few] { $added } kontaktai
+   *[other] { $added } kontaktų
+}. Praleista, nes jau yra adresų knygelėje: { $skipped ->
+    [one] { $skipped } kontaktas.
+    [few] { $skipped } kontaktai.
+   *[other] { $skipped } kontaktų.
 }
-# review: new
 ui-book-not-imported = Adresų knygelės importuoti nepavyko: { $reason }
-# review: new
 ui-book-exported = { $count ->
-    [one] { $count } kontaktas įrašytas į { $file }.
-    [few] { $count } kontaktai įrašyti į { $file }.
-   *[other] Į { $file } įrašyta kontaktų: { $count }.
+    [one] Įrašytas { $count } kontaktas. Failas: { $file }.
+    [few] Įrašyti { $count } kontaktai. Failas: { $file }.
+   *[other] Įrašyta { $count } kontaktų. Failas: { $file }.
 }
-# review: new
 ui-book-not-exported = Adresų knygelės įrašyti nepavyko: { $reason }
-# review: new
 ui-code-copied = Kodas nukopijuotas
-# review: changed
 ui-codes-in-notifications = &Rodyti prisijungimo kodus pranešimuose apie naujus laiškus
-# review: new
 ui-tool-unread-only = Neskaityti
-# review: new
 ui-no-unread = Čia neskaitytų laiškų nėra.
-# review: new
-ui-pictures-always-sender = Visada atsisiųsti paveikslėlius iš { $sender }
-# review: new
-ui-pictures-always-domain = Visada atsisiųsti paveikslėlius iš visų { $domain } siuntėjų
-# review: new
+ui-pictures-always-sender = Visada atsisiųsti šio siuntėjo paveikslėlius: { $sender }
+ui-pictures-always-domain = Visada atsisiųsti visų šio domeno siuntėjų paveikslėlius: { $domain }
 ui-pictures-unconfirmed = Siuntėjo domeno ({ $domain }) patvirtinti nepavyko, todėl šio laiško paveikslėliai automatiškai neatsisiunčiami.
-# review: changed
 ui-pictures-always-option = &Atsisiųsti paveikslėlius visuose laiškuose
-# review: new
-ui-pictures-always-warning = Tada siuntėjai galės matyti, kada skaitote jų laiškus.
-# review: new
+ui-pictures-always-warning = Atsisiunčiant paveikslėlius, siuntėjai gali sužinoti, kada atveriate jų laiškus.
 ui-protection-details = &Išsamiau...
-# review: new
 ui-protection-details-title = Saugos informacija
-# review: new
 ui-download-heading = Atsisiuntimas
-# review: changed
 ui-download-ahead = &Atsisiųsti laiškus iš anksto:
-# review: new
-ui-download-ahead-recent = Naujausius laiškus, kurių kiekvienas iki 1 MB
-# review: new
+ui-download-ahead-recent = Naujausius laiškus, ne didesnius kaip 1 MB
 ui-download-ahead-all = Visus laiškus
-# review: new
 ui-download-ahead-never = Tik atidarant
-# review: changed
 ui-download-limit = &Saugyklos riba kiekvienai paskyrai:
-# review: changed
 ui-send-delay = &Delsa prieš siunčiant:
-# review: new
 ui-send-delay-note = Kol laiškas laukia išsiuntimo, siuntimą galite atšaukti komanda „Atšaukti“.
-# review: new
 ui-dark-messages = Rodyti laiškus tamsiame fone, kai sistemoje įjungtas tamsusis režimas
-# review: new
 ui-preview-show = Rodyti prie&dus laiškuose
-# review: new
-ui-preview-show-note = Po laiško tekstu rodo paveikslėlius ir pirmuosius PDF failų puslapius. Šias peržiūras Inbox Classic sukuria pati, todėl niekas faile negali būti paleista.
-# review: new
+ui-preview-show-note = Po laiško tekstu rodomi paveikslėliai ir pirmieji PDF failų puslapiai. Inbox Classic parengia šias peržiūras nevykdydama failuose esančių scenarijų.
 ui-preview-pdfs = Rodyti PDF &failus laiškuose
-# review: new
-ui-sending-in = { $subject } bus išsiųstas po { $count ->
+ui-sending-in = Laiškas { $subject } bus siunčiamas po { $count ->
     [one] { $count } sekundės
    *[other] { $count } sekundžių
 }
-# review: new
-ui-send-undone = { $subject } neišsiųstas. Laiškas vėl atidarytas redaguoti.
-# review: new
-ui-send-too-late = { $subject } jau išsiųstas.
-# review: new
-ui-outbox-status-undo = Bus išsiųsta { $time }
-# review: new
-ui-download-note = Iš anksto atsisiųsti laiškai atsidaro iš karto. Viršijus saugyklos ribą, seniausios vietinės kopijos pašalinamos ir vėl atsisiunčiamos, kai jas atidarote.
-# review: new
+ui-send-undone = Laiškas { $subject } neišsiųstas. Jis vėl atidarytas redaguoti.
+ui-send-too-late = Laiško { $subject } siuntimo atšaukti nebegalima.
+ui-outbox-status-undo = Siuntimas nuo { $time }
+ui-download-note = Iš anksto atsisiųsti laiškai atsidaro greičiau. Viršijus ribą, seniausios atsisiųstų laiškų kopijos gali būti pašalintos. Atidarius tokį laišką, jį reikia atsisiųsti iš serverio dar kartą. Juodraščiai ir nuo paskutinio Inbox Classic paleidimo atidaryti laiškai nešalinami.
 ui-attachment-downloading = Šis laiškas dar neatsisiųstas iki galo. Bandykite dar kartą, kai atsisiuntimas baigsis.
-# review: changed
 ui-trusted-senders-button = &Patikimi siuntėjai...
-# review: new
 ui-trusted-senders-title = Patikimi siuntėjai
-# review: new
 ui-trusted-senders-note = Šių siuntėjų laiškų paveikslėliai atsisiunčiami automatiškai, kai jūsų pašto paslaugų teikėjas patvirtina siuntėjo domeną.
-# review: new
-ui-trusted-everyone-at = Visi iš { $domain }
-# review: new
+ui-trusted-everyone-at = Visi šio domeno siuntėjai: { $domain }
 ui-trusted-senders-empty = Patikimų siuntėjų dar nepridėta.
-# review: new
 ui-search-encrypted = Ieškoti &užšifruotuose laiškuose
-# review: new
-ui-search-encrypted-note = Užšifruoti laiškai šiame kompiuteryje iššifruojami juos atsisiuntus ar atidarius, kad būtų galima rasti jų žodžius, o sąraše būtų rodoma jų tikroji tema. Indeksas nėra šifruotas, o DI agentai jame niekada neieško. Išjunkite, kad jie būtų pašalinti iš indekso.
-# review: new
+ui-search-encrypted-note = Kai atsisiųstą ar atidarytą laišką pavyksta iššifruoti šiame kompiuteryje, galima ieškoti jo teksto, o sąraše rodoma tikroji tema. Paieškos indeksas nešifruotas. DI agentai iššifruoto turinio neieško. Išjungus šią parinktį, iššifruotas turinys pašalinamas iš indekso.
 ui-pgp-keyserver = I&eškoti raktų keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Kai šifruojate laišką arba ieškote rakto, ieškomas adresas siunčiamas į keys.openpgp.org. Pirmiausia klausiama paties adreso domeno.
-# review: changed
+ui-pgp-keyserver-note = Ieškant rakto pagal el. pašto adresą, pirmiausia kreipiamasi į to adreso domeną. Jei rakto nerandama, el. pašto adresas perduodamas keys.openpgp.org. Šioje svetainėje taip pat ieškoma raktų pagal jų kontrolinį kodą.
 ui-eml-default = &Atidaryti .eml failus su Inbox Classic
-# review: new
 ui-eml-default-done = Dabar .eml failus atidaro Inbox Classic.
-# review: new
 ui-eml-default-failed = Nepavyko nustatyti Inbox Classic kaip numatytosios .eml failų programos: { $reason }
-# review: new
 ui-folders = Aplankai
-# review: new
 ui-sorted-by = Rikiuota pagal: { $field }
-# review: changed
 ui-layout-label = &Išdėstymas:
-# review: new
-ui-columns-note = Langas pakankamai platus stulpelių išdėstymui. Išdėstymą galite pakeisti per Rodinys > Išdėstymas.
-# review: new
+ui-columns-note = Langas pakankamai platus stulpelių išdėstymui. Kitą išdėstymą galite pasirinkti meniu „Išdėstymas“.
 ui-row-unread = Neskaitytas
-# review: new
 ui-row-flagged = Su vėliavėle
-# review: new
 ui-row-attachments = Yra priedų
-# review: new
 ui-row-encrypted = Užšifruotas
-# review: new
 ui-row-signed = Pasirašytas
-# review: new
 ui-row-messages = { $count ->
     [one] { $count } laiškas
     [few] { $count } laiškai
    *[other] { $count } laiškų
 }
-# review: changed
 ui-list-pictures = &Rodyti siuntėjų paveikslėlius laiškų sąraše
-# review: changed
-ui-list-pictures-note = Patvirtintiems siuntėjams rodomi prekių ženklų logotipai arba adresų knygelės paveikslėliai, o kai paveikslėlio nėra, inicialai. Logotipai atsisiunčiami vieną kartą kiekvienam prekės ženklui, o ne kiekvienam laiškui.
-# review: new
+ui-list-pictures-note = Kai pašto paslaugų teikėjas patvirtina siuntėjo domeną, stulpelių išdėstyme rodomi logotipai arba adresų knygelės paveikslėliai. Jei paveikslėlio nėra, rodomi inicialai. Atsisiųsti logotipai saugomi ir naudojami kituose laiškuose; prireikus jie atnaujinami.
 ui-card-picture = Paveikslėlis:
-# review: new
 ui-card-picture-choose = Pa&sirinkti...
-# review: new
-ui-picture-not-picture = Šis failas nėra PNG ar JPEG paveikslėlis.
-# review: new
-ui-picture-too-large = Šis paveikslėlis per didelis. Pasirinkite ne didesnį nei 10 MB, kurio plotis ir aukštis ne didesni nei 8000 taškų.
+ui-picture-not-picture = Nepavyko perskaityti paveikslėlio. Pasirinkite tinkamą PNG arba JPEG failą.
+ui-picture-too-large = Šis paveikslėlis per didelis. Pasirinkite ne didesnį kaip 10 MB paveikslėlį, kurio plotis ir aukštis neviršija 8000 pikselių.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Šifravimo raktai
-# review: new
-ui-keys-intro = Jūsų raktai pasirašo jūsų laiškus ir atveria jums užšifruotus laiškus. Kontaktų raktai tikrina jų parašus ir šifruoja jiems siunčiamus laiškus.
-# review: new
-ui-keys-empty = Raktų dar nėra. Spustelėkite „Naujas raktas“, kad sukurtumėte savo raktą, arba „Importuoti“, kad pridėtumėte jau turimą raktą.
-# review: new
+ui-keys-intro = Savo raktais galite pasirašyti laiškus ir skaityti jums užšifruotus laiškus. Kontaktų raktais galima tikrinti jų parašus ir šifruoti jiems siunčiamus laiškus.
+ui-keys-empty = Raktų dar nėra. Spustelėkite mygtuką „Naujas raktas“, kad sukurtumėte savo raktą, arba mygtuką „Importuoti“, kad pridėtumėte jau turimą raktą.
 ui-keys-col-name = Vardas
-# review: new
 ui-keys-col-address = Adresas
-# review: new
 ui-keys-col-kind = Rūšis
-# review: new
 ui-keys-col-status = Būsena
-# review: new
 ui-keys-kind-own = Jūsų raktas
-# review: new
 ui-keys-kind-contact = Kontaktas
-# review: new
-ui-keys-status-verified = { $status }, patikrintas
-# review: new
+ui-keys-status-verified = { $status }, savininkas patikrintas
 ui-keys-new = &Naujas raktas...
-# review: new
 ui-keys-import = &Importuoti...
-# review: new
 ui-keys-export = &Eksportuoti...
-# review: new
 ui-keys-backup = &Atsarginė kopija...
-# review: new
 ui-keys-verify = Pa&tikrinti...
-# review: new
 ui-keys-new-title = Naujas raktas
-# review: new
 ui-keys-new-for = Sukurti raktą:
-# review: new
 ui-keys-new-make = &Sukurti raktą
-# review: new
 ui-keys-no-account = Pirmiausia pridėkite pašto paskyrą: raktas kuriamas paskyros adresams.
-# review: new
-ui-keys-memory-only = Slaptažodžiai laikomi tik atmintyje, todėl dabar sukurto ar importuoto privačiojo rakto nebus galima naudoti uždarius Inbox Classic.
-# review: new
-ui-keys-backup-offer = Jūsų naujas raktas paruoštas. Įrašyti jo atsarginę kopiją dabar? Jei šis kompiuteris bus prarastas ar atkurtas, raktą bus galima susigrąžinti tik iš atsarginės kopijos.
-# review: new
+ui-keys-memory-only = Slaptažodžiai laikomi tik atmintyje. Iš naujo paleidus Inbox Classic, dabar sukurto ar importuoto privačiojo rakto naudoti nebebus galima.
+ui-keys-backup-offer = Jūsų naujas raktas paruoštas. Įrašyti jo atsarginę kopiją dabar? Jei prarasite kompiuterį arba jo duomenis, raktą galėsite atkurti iš atsarginės kopijos.
 ui-keys-backup-now = Į&rašyti atsarginę kopiją...
-# review: new
 ui-keys-later = &Vėliau
-# review: new
 ui-keys-backup-title = Rakto atsarginė kopija
-# review: new
 ui-keys-backup-intro = Atsarginė kopija apsaugota slaptafraze. Laikykite failą ir slaptafrazę skirtingose saugiose vietose: raktui susigrąžinti reikės abiejų.
-# review: new
 ui-keys-passphrase = &Slaptafrazė:
-# review: new
 ui-keys-passphrase-again = Įveskite &dar kartą:
-# review: new
 ui-keys-passphrase-differ = Slaptafrazės nesutampa.
-# review: new
 ui-keys-passphrase-short = Naudokite bent 8 simbolių slaptafrazę.
-# review: new
 ui-keys-backup-saved = Atsarginė kopija įrašyta.
-# review: new
 ui-keys-import-title = Importuoti raktą
-# review: new
 ui-keys-import-passphrase = Šis privatusis raktas apsaugotas slaptafraze. Įveskite ją, kad importuotumėte raktą:
-# review: new
 ui-keys-file-filter = OpenPGP raktai
-# review: new
-ui-keys-use-for = Naudoti šį raktą adresams { $addresses }? Jūsų laiškai iš jų bus juo pasirašomi, o šiuo raktu užšifruotus laiškus bus galima skaityti čia.
-# review: new
+ui-keys-use-for = Naudoti šį raktą šiems adresams: { $addresses }? Juo galėsite pasirašyti iš šių adresų siunčiamus laiškus ir skaityti šiuo raktu užšifruotus laiškus.
 ui-keys-use = &Naudoti
-# review: new
 ui-keys-not-now = Ne &dabar
-# review: new
-ui-keys-remove-own = Pašalinti savo raktą { $fingerprint }? Juo užšifruotų laiškų čia nebebus galima skaityti, nebent vėl importuosite jo atsarginę kopiją.
-# review: new
-ui-keys-remove-contact = Pašalinti kontakto { $name } raktą? Jo parašų nebus galima patikrinti ir jam siunčiamų laiškų užšifruoti, kol vėl pridėsite jo raktą.
-# review: new
+ui-keys-remove-own = Pašalinti savo raktą { $fingerprint }? Be jo nebegalėsite iššifruoti šiuo raktu užšifruotų laiškų, nebent atkursite raktą iš atsarginės kopijos.
+ui-keys-remove-contact = Pašalinti raktą „{ $name }“? Šis raktas nebebus naudojamas parašams tikrinti ar laiškams šifruoti. Prireikus jį galėsite pridėti iš naujo.
 ui-key-properties-title = Rakto ypatybės
-# review: new
 ui-key-names = Vardai:
-# review: new
 ui-key-fingerprint = Kontrolinis kodas:
-# review: new
 ui-key-status = Būsena:
-# review: new
 ui-key-created = Sukurtas:
-# review: new
 ui-key-expires = Galioja iki:
-# review: new
 ui-key-never = Neribotai
-# review: new
 ui-key-algorithm = Algoritmas:
-# review: new
 ui-key-source = Šaltinis:
-# review: new
 ui-key-addresses = Adresai:
-# review: new
-ui-key-address-verified = { $address } (patikrintas)
-# review: new
-ui-key-address-not-verified = { $address } (nepatikrintas)
-# review: new
+ui-key-address-verified = { $address } (rakto savininkas patikrintas)
+ui-key-address-not-verified = { $address } (rakto savininkas nepatikrintas)
 ui-verify-title = Patikrinti raktą
-# review: new
-ui-verify-intro = Paprašykite, kad { $name } perskaitytų jums savo rakto kontrolinį kodą iš savo programos, susitikus asmeniškai arba skambučio metu. Nelyginkite jo su atsiųstu el. paštu: kas galėjo pakeisti raktą, galėjo pakeisti ir jį.
-# review: new
+ui-verify-intro = Paprašykite, kad { $name } perskaitytų savo rakto kontrolinį kodą iš savo programos. Palyginkite kodus susitikę asmeniškai arba kalbėdamiesi telefonu. Nelyginkite su el. paštu atsiųstu kodu: galintis pakeisti raktą asmuo galėtų pakeisti ir atsiųstą kodą.
 ui-verify-fingerprint = Jūsų turimo rakto kontrolinis kodas:
-# review: new
 ui-verify-marks = { $count ->
-    [one] Jei jie sutampa, raktas pažymimas kaip šio žmogaus raktas adresui { $addresses }. Jei tas adresas ne jo, spustelėkite „Nesutampa“.
-   *[other] Jei jie sutampa, raktas pažymimas kaip šio žmogaus raktas adresams { $addresses }. Jei kuris nors iš šių adresų ne jo, spustelėkite „Nesutampa“.
+    [1] Jei kontroliniai kodai sutampa, raktas bus pažymėtas kaip priklausantis šiam asmeniui. Adresas: { $addresses }. Jei adresas nepriklauso tam asmeniui, spustelėkite mygtuką „Nesutampa“.
+   *[other] Jei kontroliniai kodai sutampa, raktas bus pažymėtas kaip priklausantis šiam asmeniui. Adresai: { $addresses }. Jei bent vienas adresas nepriklauso tam asmeniui, spustelėkite mygtuką „Nesutampa“.
 }
-# review: new
 ui-verify-match = &Sutampa
-# review: new
 ui-verify-differ = &Nesutampa
-# review: new
 ui-verify-differs = Jūsų turimas raktas nėra tas, kurį turi { $name }. Pašalinkite jį ir dar kartą paprašykite rakto.
-# review: new
-ui-verify-unmark = Žymėti kaip nepa&tikrintą
-# review: new
+ui-verify-unmark = Atšaukti pa&tikrinimą
 ui-account-security = Sauga
-# review: new
 ui-account-security-intro = Turint raktą, jūsų laiškus galima pasirašyti, o žmonės gali siųsti jums užšifruotus laiškus.
-# review: new
 ui-account-key = Šios paskyros &raktas:
-# review: new
 ui-account-key-none = Nėra
-# review: new
 ui-account-key-new = &Naujas raktas...
-# review: new
 ui-account-autocrypt = &Siųsti savo viešąjį raktą su laiškais (Autocrypt)
-# review: new
 ui-contact-key = Šifravimo raktas:
-# review: new
 ui-contact-key-none = Rakto nėra
-# review: new
 ui-contact-key-use-new = Naudoti &naująjį raktą
-# review: new
 ui-contact-key-keep = &Palikti dabartinį
 ui-recipient-keys-title = Gavėjų raktai
 ui-recipient-col-recipient = Gavėjas
@@ -920,29 +728,16 @@ ui-compose-make-key = &Sukurti raktą...
 ui-compose-show-keys = Šifravimo ra&ktai...
 ui-compose-encrypt-off = &Išjungti šifravimą
 ui-compose-keep-encrypted = &Palikti šifravimą
-# review: new
 ui-setup-export-title = Eksportuoti nustatymus ir paskyras
-# review: new
 ui-setup-import-title = Importuoti nustatymus ir paskyras
-# review: new
-ui-setup-export-intro = Pasirinkite, ką perkelti į kitą kompiuterį. Faile laiškų nėra: ten jie bus atsisiųsti iš naujo.
-# review: new
+ui-setup-export-intro = Pasirinkite, ką perkelti į kitą kompiuterį. Laiškai į šį failą neįtraukiami. Kitame kompiuteryje bus galima atsisiųsti tik serveryje esančius laiškus.
 ui-setup-use-passphrase = &Apsaugoti failą slaptafraze
-# review: new
-ui-setup-passphrase-note = Su slaptafraze failas užšifruojamas ir jame taip pat saugomi jūsų slaptažodžiai, prisijungimai ir privatieji raktai. Be jos kiekviena paskyra kitame kompiuteryje paprašys slaptažodžio.
-# review: new
+ui-setup-passphrase-note = Slaptafraze failas užšifruojamas; į jį įtraukiami prieinami išsaugoti slaptažodžiai, kiti prisijungimo duomenys ir privatieji raktai. Neapsaugoję failo, kitame kompiuteryje prie paskyrų turėsite prisijungti iš naujo.
 ui-setup-export-button = &Eksportuoti...
-# review: new
 ui-setup-file-filter = Inbox Classic nustatymai ir paskyros
-# review: new
 ui-setup-ask-passphrase = Šis failas apsaugotas slaptafraze. Įveskite ją, kad pamatytumėte, kas yra faile:
-# review: new
-ui-setup-import-intro = Pasirinkite, ką importuoti. Šiame kompiuteryje jau esančios paskyros paliekamos tokios, kokios yra.
-# review: new
+ui-setup-import-intro = Pasirinkite, ką importuoti. Šiame kompiuteryje jau esančios paskyros nekeičiamos.
 ui-setup-from = Įrašė Inbox Classic { $version }, { $date }.
-# review: new
 ui-setup-import-button = &Importuoti
-# review: new
 ui-setup-done = Atlikta
-# review: new
 ui-setup-first-run = Importuoti nustatymus ir paskyras iš kito kompiuterio...
