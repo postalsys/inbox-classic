@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Lithuanian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Lithuanian catalogs are reviewed; 12 help topics remain. Apply the Windows credential-store term in data-storage and finish the storage/transfer/platform behavior comparison. Then review the six remaining general/agent topics and continue other language queues and context comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Review the six remaining Lithuanian help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. All current Lithuanian catalogs are reviewed; six help topics remain. Close their existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -28269,15 +28269,9 @@
         "agents-connect.html",
         "brand-logos.html",
         "command-line.html",
-        "connections.html",
-        "data-storage.html",
-        "default-mail-program.html",
         "keyboard-shortcuts.html",
-        "move-computer.html",
         "options-language.html",
-        "removing.html",
-        "sign-in-codes.html",
-        "updates.html"
+        "sign-in-codes.html"
       ],
       "completed_batches": [
         {
@@ -33270,6 +33264,225 @@
             "source-notes.json": "/private/tmp/inbox-lt-diagnostics-20261119-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-lt-diagnostics-20261119-screenshots.json",
             "html.log": "/private/tmp/inbox-lt-diagnostics-20261119-html.log"
+          }
+        },
+        {
+          "id": "lt-storage-transfer-platform-help-20261119",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "data-storage.html",
+            "connections.html",
+            "move-computer.html",
+            "removing.html",
+            "updates.html",
+            "default-mail-program.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/lt/data-storage.html": "4c3a11229fdc818624e1a0006b70ec4e1a44a39266bd8b1b79265f16769aaf18",
+            "core/crates/pe-html/help/lt/connections.html": "f30fe144b04685d70d4c67b6dcb85597e92179bce0533f68a3aff6db10d26d01",
+            "core/crates/pe-html/help/lt/move-computer.html": "32a40918a95e85e533b6a5e80f86c77a149cf807a661fa9b6f10ed35e3854ee1",
+            "core/crates/pe-html/help/lt/removing.html": "a35cf157170b33d80e48b63a63cbc531334f2c237a15ade03cdffaeaf7cd53e1",
+            "core/crates/pe-html/help/lt/updates.html": "5a2e96bc1e8ea999cbb8fe9a8a2ac47fa85a126fcbd32d8732c653f707745ee3",
+            "core/crates/pe-html/help/lt/default-mail-program.html": "428d916b5c745e9dd4acf782594670c445f62d2a86c56f1800824bc92654e709"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+            "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+            "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59",
+            "core/crates/pe-html/help/en/default-mail-program.html": "bbf56849460a56e424aad0d96f55b684807776aaab66bbbdc07daa0b8cf9382e"
+          },
+          "validation": "Lithuanian structural checks pass with 1,529 expected mark-only diagnostics. Exact reconstruction verifies six complete help topics and 48 improved wording lines. Catalog values are unchanged, including secrets-windows compared for terminology. Tags, attributes, controls, platform branches and literal paths/commands/keys are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels and settings paths. Thirty-eight runtime/source files and six catalog dependencies match the evidence. Existing English Mac/Linux settings and Windows About captures were inspected, with current native implementations for newer controls and setup dialogs. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,780 help lines; since-start 2,489 entries/628 passages match the queue. Source checkpoint covers 193 refs/10 worktrees, with no changed upstream review inputs or other translation worktree edits. The release-bot update has no translation delta. MCP phase3b advanced to b42800ab with identical translation files: all queued hashes and exact deltas are verified, and only its source tip is refreshed. Lithuanian storage/transfer/platform behavior comparison and the Windows credential-store terminology followup are complete. MCP phase3b remains separately queued. No local test suites, builds or manual CI; REVIEWED unchanged.",
+          "notes": "Reviewed six full Lithuanian storage/transfer/platform topics against current data/secret stores, setup import/export, removal, network requests, updater settings and default-app associations. Corrected blanket guarantees and literal phrasing; preserved markup, literal paths/commands and platform branches. No local test suites.",
+          "help_wording_lines_changed": 48,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/lt/data-storage.html": 7,
+            "core/crates/pe-html/help/lt/connections.html": 10,
+            "core/crates/pe-html/help/lt/move-computer.html": 11,
+            "core/crates/pe-html/help/lt/removing.html": 6,
+            "core/crates/pe-html/help/lt/updates.html": 7,
+            "core/crates/pe-html/help/lt/default-mail-program.html": 7
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-core/src/lib.rs": "7e3272206c202e960aa6be5d3619ae5dd95d75bc8cb7f54f7180bc5022e22c9b",
+            "core/crates/pe-core/src/secrets.rs": "f5aae6a69f175cd3837c86c816cfa767b9667073ccc52d7c59fed224a81fca6e",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-core/src/setup/export.rs": "5bf89e9575c36513fc2afb593d35cc06e553057fc10ccfd5648254c2e81cc0ea",
+            "core/crates/pe-core/src/setup/import.rs": "1a67289f5fa474a397c568292878fe01098bc26922ab9c00272ab8c91b3390ad",
+            "core/crates/pe-core/src/setup/file.rs": "e719f3a1073825064d90aab391e5968d57f5757bc8d9b7c214755f354a245967",
+            "core/crates/pe-core/src/bimi.rs": "91cf358f5addda07ddc44f5b2b8e2a3b9db7d03f487938540ff2cfdd74e050c4",
+            "core/crates/pe-core/src/pictures.rs": "b71999c78a2caaa5b18ba7a66676b9f3b6d6b9aca7d37b541d59c28665d60053",
+            "core/crates/pe-core/src/view.rs": "f6d5f36337c27cb17ba34e46c5cb672d25b68201b56f3d77641d8988318666b2",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-core/src/unsubscribe.rs": "f4b48ffe97b6b93a7c8bb22a72bb4bb7436cdacb61a8b426a5caa0ffcca72bb8",
+            "core/crates/pe-core/src/otp.rs": "99ed04f0777e21204105cf7f16225e74cb80b85027208de695908f91285566c3",
+            "core/crates/pe-core/src/mailto.rs": "fa9c77f1a2676d5b1399475864ed6c4b8b0920644913dd3e2acf36ff12dd9298",
+            "core/crates/pe-store/src/lib.rs": "e716b37b2f3b4a0a8444f03e9cd7080b504d58414d53b9173002f04fc600e791",
+            "core/crates/pe-store/src/senders.rs": "41651a5728f91e48cbef660a22df5cf6a30f72cd5e48bdb44d14167c7059f2a3",
+            "core/crates/pe-autoconfig/src/lib.rs": "0c9fc12441b8e47b07b33404f6420ee267502b5f3aaba7c9243d20d904b0c0f7",
+            "core/crates/pe-autoconfig/src/dns.rs": "a529fcf3cb9c68e5e4792e5d98cd7f3d126ccbb5f2ff24190c43904c1abb4b43",
+            "core/crates/pe-autoconfig/src/autodiscover.rs": "48560762e56a1a98801f0d9e56239516e09efbc6d93c01b442470ff7976aaf96",
+            "core/crates/pe-net/src/stream.rs": "5a90bc2fef1c9b12587ae587cacc27f79d71bb5734f9cf0cba04711e99ffc79a",
+            "core/crates/pe-net/src/tls.rs": "30b345868ca678c57306858765129790b6b8b8959b8aaecb2dddce8e8d9f130d",
+            "core/crates/pe-oauth/src/lib.rs": "9c1068f6c61ac833d6c61eeb0f98411f47b77c4c2d13de10b3bdfa90ada38123",
+            "core/crates/pe-oauth/src/redirect.rs": "50d9b6a261c48b7bea0247ff0cd00eed213ca39d1bf2fa382301704e2de6e491",
+            "app/src/main.cpp": "8e0b42ab8d372b03808d37e640ceadcb09b5e4a8bdadddb9b04db386d6df9971",
+            "app/src/options.cpp": "5204d767e2f09bfffaeb64ebeb13ef566cdcc5540cb774126a24771856b91a09",
+            "app/src/setup.cpp": "b457feb33bd4dc051d2ad83361249d915a751a7ccdd353aaf8e9f6fbbe6342fd",
+            "installer/inbox-classic.nsi": "157a867c40055428fc3388c5d1f26755b199ec7aead144ccb97987aa06d4229e",
+            "linux/src/main.rs": "dfa5deb4a064fc1c4289c30f4c9aa9f2dedfbc7eeb27a5fe3a635a244a525f0c",
+            "linux/src/app.rs": "5337c4a5dbc100fbe7bd3e75efe53739f9743c4980655c8d27db93e168cb777e",
+            "linux/src/preferences.rs": "110319b0d23078a5222c7b908a39e2e098115d3994143e1e0e0d2cd675bd049f",
+            "linux/src/setup.rs": "8de4e6075bb63c96a4bdef7ee8481dfb3ba20557ad472d2597a0fb3ca54b0cf4",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234",
+            "mac/Sources/InboxClassic/MainWindow.swift": "92ec176fc30d9249871f9d61d28171a10a9ebe7b46eda61203623175e54667b6",
+            "mac/Sources/InboxClassic/Settings.swift": "8c50dbffdf76b69cf63ea158bf39f0b608a43e0a42cef1b631a1f802dc79c3e2",
+            "mac/Sources/InboxClassic/Setup.swift": "9b965806d90f53d40d42ae9b96b8509b3dd1e0f2f3764ba009320b446edc947c",
+            "mac/Resources/Info.plist": "d967a087eaca8383fd803aafc91748366b97687d6ddd30f1b6398830b71e7312"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "8a676c1f434730809c37789d26bc30b64e33bd1ef159dccf2e8320f598a1f0fb",
+            "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
+            "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
+            "core/locales/lt/core.ftl": "f139ad6c02a63ff43df8159e9b4b537fecff536a49843a7e1ddeab8676cab043",
+            "core/locales/lt/windows.ftl": "18fa93d839edfa594938f39e9f473c7121ccf6bf4bcab6350e98f3cd63882688",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "topic": "data-storage.html",
+                "finding": "Paths describe defaults: --store and Linux data-directory settings can override them. The mail database itself is not encrypted. Account passwords, OAuth refresh tokens and application client secrets use the system secret store by default; unavailable or memory-only storage must not be described as guaranteed persistence. Linux uses a Secret Service provider, not exclusively GNOME Keyring. Private OpenPGP keys are encrypted in the database with a separate protection key. Local analysis does not mean the entire application makes no network requests.",
+                "sources": [
+                  "core/crates/pe-core/src/secrets.rs",
+                  "core/crates/pe-core/src/keys.rs",
+                  "app/src/main.cpp",
+                  "linux/src/main.rs",
+                  "mac/Sources/InboxClassic/App.swift"
+                ],
+                "current_review": "Applied the correct Windows credential-store name; conditional persistence and separate private-key protection now match current code. The Linux data-directory qualifier stays inside its platform branch. Account/agent scope and decrypted-content exclusion remain explicit."
+              },
+              {
+                "topic": "connections.html",
+                "finding": "DNS over HTTPS applies to configuration MX/SRV lookups; ordinary server hostname resolution uses the system resolver. Provider autoconfig requests can include an email address. Autodiscover sends a password only after a HTTPS Basic challenge. Logos use persistent cached SVG data, not a fresh download on every app run: source retention is 30 days, failed requests wait 24 hours. External pictures can be enabled by settings/trusted-sender rules; encrypted parts still require a click. Direct unsubscribe requires confirmation and trusted DKIM coverage of the unsubscribe headers. Key discovery includes manual lookup and fingerprint/key-ID requests; publishing sends public key data and confirmation addresses. OTP detection uses a trusted provider verdict for the relevant origin/From domain or a parent, not any DKIM signature. Mac automatic update checking is optional.",
+                "sources": [
+                  "core/crates/pe-autoconfig/src/dns.rs",
+                  "core/crates/pe-autoconfig/src/lib.rs",
+                  "core/crates/pe-autoconfig/src/config.rs",
+                  "core/crates/pe-autoconfig/src/autodiscover.rs",
+                  "core/crates/pe-net/src/stream.rs",
+                  "core/crates/pe-core/src/lib.rs",
+                  "core/crates/pe-core/src/bimi.rs",
+                  "core/crates/pe-store/src/senders.rs",
+                  "core/crates/pe-core/src/lookup.rs",
+                  "core/crates/pe-core/src/unsubscribe.rs",
+                  "core/crates/pe-core/src/otp.rs",
+                  "mac/Sources/InboxClassic/Settings.swift"
+                ],
+                "current_review": "Current TLS guidance includes explicitly accepted certificates. Logo downloads can recur when a stored copy is stale. Manual lookup and key publication are distinguished from automatic address lookup; all request conditions are checked against current source."
+              },
+              {
+                "topic": "move-computer.html",
+                "finding": "The passphrase must match and contain at least eight Unicode characters. Only protected exports can contain saved account/app secrets and own private keys. Private keys that cannot be opened locally are skipped. Setup exports contain no messages, so only server-held mail can download on the other machine; local outgoing mail is not transferred. An unprotected export requires fresh sign-in, potentially through the browser. Existing accounts are kept, selected contained settings applied, contacts merged, pending rule folders resolved after sync and replacement contact keys left for user selection.",
+                "sources": [
+                  "core/crates/pe-core/src/keys.rs",
+                  "core/crates/pe-core/src/setup/export.rs",
+                  "core/crates/pe-core/src/setup/import.rs",
+                  "core/crates/pe-core/src/setup/file.rs"
+                ],
+                "current_review": "Export labels match current catalogs, including sign-in credentials. Only selected parts transfer; protected files may omit inaccessible credentials/private keys. Missing rule targets must actually be found, and local unsent mail is outside the file."
+              },
+              {
+                "topic": "removing.html",
+                "finding": "The Windows uninstaller's remove-mail confirmation deletes the full local data directory, including settings, contacts, keys and queued mail; WebView cache is removed separately. Mac/Linux data-folder removal also affects these local records. This does not delete server mail. Removing an account requests removal of its account credential, not every application/PGP secret. The Windows uninstaller explicitly leaves system credential-store entries, and uninstalling must not be represented as clearing all secrets. Preserve literal package commands without executing them.",
+                "sources": [
+                  "installer/inbox-classic.nsi",
+                  "core/crates/pe-core/src/lib.rs",
+                  "core/crates/pe-core/src/secrets.rs",
+                  "app/src/main.cpp",
+                  "linux/src/main.rs",
+                  "mac/Sources/InboxClassic/App.swift"
+                ],
+                "current_review": "Literal removal commands and paths are preserved, not executed. The text names all local data affected and describes account-credential removal as an attempt; other credential-store entries can remain."
+              },
+              {
+                "topic": "updates.html",
+                "finding": "Mac Sparkle checks are enabled by default but controlled by settings; the help must not promise unconditional automatic updating or a prompt before every possible installation. Describe following updater instructions. Linux repository/package instructions are conditional on installation method, without an unconditional claim about a particular distribution's update service. Installer paths preserve the existing local data.",
+                "sources": [
+                  "mac/Resources/Info.plist",
+                  "mac/Sources/InboxClassic/App.swift",
+                  "mac/Sources/InboxClassic/Settings.swift",
+                  "installer/inbox-classic.nsi"
+                ],
+                "current_review": "Mac automatic checks are conditional on settings. The Arch command needs a package filename, retained outside the literal code element. Omarchy guidance depends on the installation source rather than guaranteeing an update-service result."
+              },
+              {
+                "topic": "default-mail-program.html",
+                "finding": "Windows opens system association settings for installed copies when the association is not already set. Mac/Linux attempt system association changes and report failure; success is not unconditional. Mailto and .eml associations are separate. Mailto parsing accepts addresses, subject and body, not attachments or arbitrary fields. All three frontends require an existing account and ask the user to click the link again after adding one.",
+                "sources": [
+                  "app/src/main.cpp",
+                  "app/src/options.cpp",
+                  "linux/src/app.rs",
+                  "linux/src/preferences.rs",
+                  "mac/Sources/InboxClassic/MainWindow.swift",
+                  "mac/Sources/InboxClassic/Settings.swift",
+                  "core/crates/pe-core/src/mailto.rs"
+                ],
+                "current_review": "Mailto and .eml associations are separate; Mac/Linux failure paths are reflected. Windows requires an installed copy and opens settings only when the association is not already set. Mailto addresses/subject/body are supported, attachments are not."
+              }
+            ],
+            "reference_screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-mac/options-1-language.png",
+                "sha256": "2ba40b34bbd9fe96f240cc9d3eae76de2e15cbebd0c21528980d0b558c0acd4d",
+                "locale": "English",
+                "observation": "Historical English Mac settings with the .eml association button; current source governs layout and update controls."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/options-1-language.png",
+                "sha256": "b43ff7bfd5ca648ad1332a27d21d5ab857acb04a75e88784ed6ae1edc3f5652b",
+                "locale": "English",
+                "observation": "Historical English Linux preferences and picture controls; current source governs newer association controls."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/help-1-about.png",
+                "sha256": "32e76e08e6f488b2c13ad6da6295a1405393656f04531be36e747c278680f384",
+                "locale": "English",
+                "observation": "Historical English Windows About dialog showing app/core version placement; no claim about the current version."
+              }
+            ],
+            "limits": "No local test suites, builds or localized GUI-fit claim. Static help joins use current labels and settings paths; current native/core source verifies behavior. No setup-dialog screenshots were found; native implementations supply context."
+          },
+          "context_compared_ids": {
+            "core.ftl": [
+              "secrets-windows"
+            ]
+          },
+          "terminology_followup_completed": {
+            "term": "Kredencialų tvarkytuvas",
+            "topics": [
+              "sign-in-apps.html",
+              "account-security.html",
+              "encryption-keys.html",
+              "data-storage.html"
+            ]
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-storage-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-storage-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-storage-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-storage-20261119-since.log",
+            "joins.log": "/private/tmp/inbox-lt-storage-20261119-joins.log",
+            "joins-summary.log": "/private/tmp/inbox-lt-storage-20261119-joins-summary.log",
+            "source-audit.json": "/private/tmp/inbox-lt-storage-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-storage-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-storage-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-storage-20261119-html.log"
           }
         }
       ],
@@ -80298,7 +80511,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 1,523 expected mark-only diagnostics. Exact reconstruction verifies four complete help topics and 38 improved wording lines. Catalog values are unchanged; ui-unsubscribed already describes request acceptance. Tags, attributes, controls, platform branches and literal keys/code are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels. Eighteen runtime/source files and six catalog dependencies match the evidence. Existing English Windows delivery-card, Linux rule-editor and Mac unsubscribe-confirmation captures were inspected. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,725 help lines; since-start 2,489 entries/631 passages match the queue. Source checkpoint covers 193 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or other translation worktree edits. Lithuanian mail/delivery behavior comparison is complete. The rule Show scope/unsaved-change finding is queued for targeted comparison elsewhere. MCP phase3b remains separately queued. No local test suites, builds or manual CI; REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,529 expected mark-only diagnostics. Exact reconstruction verifies six complete help topics and 48 improved wording lines. Catalog values are unchanged, including secrets-windows compared for terminology. Tags, attributes, controls, platform branches and literal paths/commands/keys are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels and settings paths. Thirty-eight runtime/source files and six catalog dependencies match the evidence. Existing English Mac/Linux settings and Windows About captures were inspected, with current native implementations for newer controls and setup dialogs. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,780 help lines; since-start 2,489 entries/628 passages match the queue. Source checkpoint covers 193 refs/10 worktrees, with no changed upstream review inputs or other translation worktree edits. The release-bot update has no translation delta. MCP phase3b advanced to b42800ab with identical translation files: all queued hashes and exact deltas are verified, and only its source tip is refreshed. Lithuanian storage/transfer/platform behavior comparison and the Windows credential-store terminology followup are complete. MCP phase3b remains separately queued. No local test suites, builds or manual CI; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -141114,7 +141327,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Lithuanian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Lithuanian catalogs are reviewed; 12 help topics remain. Apply the Windows credential-store term in data-storage and finish the storage/transfer/platform behavior comparison. Then review the six remaining general/agent topics and continue other language queues and context comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Review the six remaining Lithuanian help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. All current Lithuanian catalogs are reviewed; six help topics remain. Close their existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -144034,7 +144247,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Lithuanian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Lithuanian catalogs are reviewed; 12 help topics remain. Apply the Windows credential-store term in data-storage and finish the storage/transfer/platform behavior comparison. Then review the six remaining general/agent topics and continue other language queues and context comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Review the six remaining Lithuanian help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. All current Lithuanian catalogs are reviewed; six help topics remain. Close their existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -145805,7 +146018,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Lithuanian storage, transfer and platform help: data-storage, connections, move-computer, removing, updates and default-mail-program. All current Lithuanian catalogs are reviewed; 12 help topics remain. Apply the Windows credential-store term in data-storage and finish the storage/transfer/platform behavior comparison. Then review the six remaining general/agent topics and continue other language queues and context comparisons. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Review the six remaining Lithuanian help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. All current Lithuanian catalogs are reviewed; six help topics remain. Close their existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b remains separately queued at one new ID and agents-connect additions per language. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -148032,6 +148245,32 @@
           "pending_help": 604,
           "completed_catalog": 23917,
           "completed_help": 776
+        },
+        "validation": "Static structural/context/inventory checks; no local test suites, builds or manually launched CI."
+      },
+      {
+        "batch_id": "lt-mail-diagnostics-help-20261119",
+        "pr": 206,
+        "url": "https://github.com/postalsys/inbox-classic/pull/206",
+        "review_commit": "7c8d0adb646f9a850e6376a0c3d2511b9794c5b6",
+        "merge_commit": "e212128d253a83867b8998a0658879a3a37501f1",
+        "merged_at": "2026-11-19T02:34:56Z",
+        "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+        "branch": "i18n/review-resume-20261118",
+        "verified": "MERGED; review is an ancestor of master, exact tree equality, clean review worktree synchronized to origin/master",
+        "counts": {
+          "catalog_scope": 36380,
+          "help_scope": 1380,
+          "pending_catalog": 12463,
+          "pending_help": 600,
+          "completed_catalog": 23917,
+          "completed_help": 780
+        },
+        "post_merge_source_check": {
+          "changed_ref": "origin/release-please--branches--master--components--inbox-classic",
+          "tip": "7420620371c297fc632d2287ac89f519f155b790",
+          "merge_base": "dc2e768bc55ba7e3ae29c4314144761115dbfd1e",
+          "translation_delta": []
         },
         "validation": "Static structural/context/inventory checks; no local test suites, builds or manually launched CI."
       }
@@ -158471,7 +158710,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "08b732d3b284defb985632d120178ad2bcbbb6332ac87b173674fa91f7e4dcf8",
       "core/locales/fi/core.ftl": "0561156334918cb5bbf707dcf5bae96e9fc7c1c04b732280841a4de238ade91f",
-      "core/locales/GLOSSARY.md": "9caf89a019ef498c5a5f75f66c67e8a96b260e72c78f6e882b1f9afbbd3b0b90",
+      "core/locales/GLOSSARY.md": "8c8553a1960ee994d2ce76ee2647b5c78bec34d11cdaecab9b0826850fa6f9e2",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "62ab48e44fd7d41da8088de4be5eb3b9225b8821e334511083e7a090c6ef91c7",
@@ -158798,7 +159037,13 @@
       "core/crates/pe-html/help/lt/message-not-shown.html": "b23b9967a6ffddf25fa4c820c58c2a1f52dc2b35cb25133e8b9abce754ad9ca4",
       "core/crates/pe-html/help/lt/delivery-problems.html": "bfa5a660a117e653404b4e4090a79ff43cc6434be95ac57ab88d69091d4689c5",
       "core/crates/pe-html/help/lt/message-rules.html": "3f573208917ccc26f47b87f9834213b18fa2ea572323628aea3b0837501d5da1",
-      "core/crates/pe-html/help/lt/unsubscribe.html": "02f7792e4726bfbceab046f3ee37527d022da82a2ed2a6a3163a6a01f11dc6a0"
+      "core/crates/pe-html/help/lt/unsubscribe.html": "02f7792e4726bfbceab046f3ee37527d022da82a2ed2a6a3163a6a01f11dc6a0",
+      "core/crates/pe-html/help/lt/data-storage.html": "4c3a11229fdc818624e1a0006b70ec4e1a44a39266bd8b1b79265f16769aaf18",
+      "core/crates/pe-html/help/lt/connections.html": "f30fe144b04685d70d4c67b6dcb85597e92179bce0533f68a3aff6db10d26d01",
+      "core/crates/pe-html/help/lt/move-computer.html": "32a40918a95e85e533b6a5e80f86c77a149cf807a661fa9b6f10ed35e3854ee1",
+      "core/crates/pe-html/help/lt/removing.html": "a35cf157170b33d80e48b63a63cbc531334f2c237a15ade03cdffaeaf7cd53e1",
+      "core/crates/pe-html/help/lt/updates.html": "5a2e96bc1e8ea999cbb8fe9a8a2ac47fa85a126fcbd32d8732c653f707745ee3",
+      "core/crates/pe-html/help/lt/default-mail-program.html": "428d916b5c745e9dd4acf782594670c445f62d2a86c56f1800824bc92654e709"
     },
     "resumed_review_checkpoints": [
       {
@@ -183830,6 +184075,912 @@
           "/private/tmp/inbox-lt-diagnostics-20261119-finalize.py": "7a12b74e5a16c6f758e531951511e8ef1efa696911fc6a31bc07701a407a984f",
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
         }
+      },
+      {
+        "batch": "lt-storage-transfer-platform-help-20261119",
+        "review_parent": "e212128d253a83867b8998a0658879a3a37501f1",
+        "counts": {
+          "catalog_scope": 36380,
+          "help_scope": 1380,
+          "pending_catalog": 12463,
+          "pending_help": 594,
+          "completed_catalog": 23917,
+          "completed_help": 786
+        },
+        "validation": "Lithuanian structural checks pass with 1,529 expected mark-only diagnostics. Exact reconstruction verifies six complete help topics and 48 improved wording lines. Catalog values are unchanged, including secrets-windows compared for terminology. Tags, attributes, controls, platform branches and literal paths/commands/keys are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels and settings paths. Thirty-eight runtime/source files and six catalog dependencies match the evidence. Existing English Mac/Linux settings and Windows About captures were inspected, with current native implementations for newer controls and setup dialogs. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,780 help lines; since-start 2,489 entries/628 passages match the queue. Source checkpoint covers 193 refs/10 worktrees, with no changed upstream review inputs or other translation worktree edits. The release-bot update has no translation delta. MCP phase3b advanced to b42800ab with identical translation files: all queued hashes and exact deltas are verified, and only its source tip is refreshed. Lithuanian storage/transfer/platform behavior comparison and the Windows credential-store terminology followup are complete. MCP phase3b remains separately queued. No local test suites, builds or manual CI; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 193,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/feat/mcp-phase3b": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
+            "refs/heads/i18n/review-resume-20261118": "e212128d253a83867b8998a0658879a3a37501f1",
+            "refs/remotes/origin/HEAD": "e212128d253a83867b8998a0658879a3a37501f1",
+            "refs/remotes/origin/feat/mcp-phase3b": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
+            "refs/remotes/origin/i18n/review-resume-20261118": "7c8d0adb646f9a850e6376a0c3d2511b9794c5b6",
+            "refs/remotes/origin/master": "e212128d253a83867b8998a0658879a3a37501f1",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "7420620371c297fc632d2287ac89f519f155b790"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "4ac424cb12f55c2e18c6ecbde2b9a2e7e310bb87",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "b427a0670e73f5b4477490857fc9d038cfeaab92",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "dfdfbc336f054369336831f948930aad18f4f759",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "e212128d253a83867b8998a0658879a3a37501f1",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lt/connections.html\n M core/crates/pe-html/help/lt/data-storage.html\n M core/crates/pe-html/help/lt/default-mail-program.html\n M core/crates/pe-html/help/lt/move-computer.html\n M core/crates/pe-html/help/lt/removing.html\n M core/crates/pe-html/help/lt/updates.html\n M core/locales/GLOSSARY.md",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lt/connections.html": "f30fe144b04685d70d4c67b6dcb85597e92179bce0533f68a3aff6db10d26d01",
+                "core/crates/pe-html/help/lt/data-storage.html": "4c3a11229fdc818624e1a0006b70ec4e1a44a39266bd8b1b79265f16769aaf18",
+                "core/crates/pe-html/help/lt/default-mail-program.html": "428d916b5c745e9dd4acf782594670c445f62d2a86c56f1800824bc92654e709",
+                "core/crates/pe-html/help/lt/move-computer.html": "32a40918a95e85e533b6a5e80f86c77a149cf807a661fa9b6f10ed35e3854ee1",
+                "core/crates/pe-html/help/lt/removing.html": "a35cf157170b33d80e48b63a63cbc531334f2c237a15ade03cdffaeaf7cd53e1",
+                "core/crates/pe-html/help/lt/updates.html": "5a2e96bc1e8ea999cbb8fe9a8a2ac47fa85a126fcbd32d8732c653f707745ee3",
+                "core/locales/GLOSSARY.md": "8c8553a1960ee994d2ce76ee2647b5c78bec34d11cdaecab9b0826850fa6f9e2"
+              }
+            }
+          ],
+          "master": "e212128d253a83867b8998a0658879a3a37501f1",
+          "new_unmerged_source_deltas": [
+            {
+              "ref": "refs/heads/feat/mcp-phase3b",
+              "commit": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
+              "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+              "paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html",
+                "core/locales/bg/core.ftl",
+                "core/locales/ca/core.ftl",
+                "core/locales/cs/core.ftl",
+                "core/locales/da/core.ftl",
+                "core/locales/de/core.ftl",
+                "core/locales/el/core.ftl",
+                "core/locales/en/core.ftl",
+                "core/locales/es/core.ftl",
+                "core/locales/et/core.ftl",
+                "core/locales/fi/core.ftl",
+                "core/locales/fr/core.ftl",
+                "core/locales/hr/core.ftl",
+                "core/locales/hu/core.ftl",
+                "core/locales/it/core.ftl",
+                "core/locales/lt/core.ftl",
+                "core/locales/lv/core.ftl",
+                "core/locales/nb/core.ftl",
+                "core/locales/nl/core.ftl",
+                "core/locales/pl/core.ftl",
+                "core/locales/pt-BR/core.ftl",
+                "core/locales/pt/core.ftl",
+                "core/locales/ro/core.ftl",
+                "core/locales/ru/core.ftl",
+                "core/locales/sk/core.ftl",
+                "core/locales/sl/core.ftl",
+                "core/locales/sr-Latn/core.ftl",
+                "core/locales/sv/core.ftl",
+                "core/locales/tr/core.ftl",
+                "core/locales/uk/core.ftl"
+              ],
+              "catalog_delta": {
+                "core/locales/bg/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/ca/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/cs/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/da/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/de/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/el/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/en/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/es/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/et/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/fi/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/fr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/hr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/hu/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/it/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/lt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/lv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/nb/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/nl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/pl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/pt-BR/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/pt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/ro/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/ru/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sr-Latn/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/tr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/uk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                }
+              },
+              "help_paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html"
+              ]
+            },
+            {
+              "ref": "refs/remotes/origin/feat/mcp-phase3b",
+              "commit": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
+              "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+              "paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html",
+                "core/locales/bg/core.ftl",
+                "core/locales/ca/core.ftl",
+                "core/locales/cs/core.ftl",
+                "core/locales/da/core.ftl",
+                "core/locales/de/core.ftl",
+                "core/locales/el/core.ftl",
+                "core/locales/en/core.ftl",
+                "core/locales/es/core.ftl",
+                "core/locales/et/core.ftl",
+                "core/locales/fi/core.ftl",
+                "core/locales/fr/core.ftl",
+                "core/locales/hr/core.ftl",
+                "core/locales/hu/core.ftl",
+                "core/locales/it/core.ftl",
+                "core/locales/lt/core.ftl",
+                "core/locales/lv/core.ftl",
+                "core/locales/nb/core.ftl",
+                "core/locales/nl/core.ftl",
+                "core/locales/pl/core.ftl",
+                "core/locales/pt-BR/core.ftl",
+                "core/locales/pt/core.ftl",
+                "core/locales/ro/core.ftl",
+                "core/locales/ru/core.ftl",
+                "core/locales/sk/core.ftl",
+                "core/locales/sl/core.ftl",
+                "core/locales/sr-Latn/core.ftl",
+                "core/locales/sv/core.ftl",
+                "core/locales/tr/core.ftl",
+                "core/locales/uk/core.ftl"
+              ],
+              "catalog_delta": {
+                "core/locales/bg/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/ca/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/cs/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/da/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/de/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/el/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/en/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/es/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/et/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/fi/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/fr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/hr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/hu/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/it/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/lt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/lv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/nb/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/nl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/pl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/pt-BR/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/pt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/ro/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/ru/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sr-Latn/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/sv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/tr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                },
+                "core/locales/uk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [],
+                  "removed": [],
+                  "raw_entry_whitespace_only": [
+                    "agent-connect-terminal-detail"
+                  ]
+                }
+              },
+              "help_paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html"
+              ]
+            }
+          ],
+          "note": "Current upstream review inputs and other translation worktree edits unchanged. The updated release-bot ref has no translation delta against its own merge base. MCP phase3b advanced to b42800ab with identical translation files; queue hashes and exact deltas verified and source tip refreshed. Its one new ID and one changed help topic per language remain separately queued. Root and other worktrees remain untouched.",
+          "incoming_source_refresh": {
+            "previous_commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+            "current_commit": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
+            "translation_files_changed": [],
+            "source_files_verified": 58,
+            "raw_entry_whitespace_only": [
+              "en/core.ftl:agent-connect-terminal-detail"
+            ],
+            "active_scope_added": 0
+          }
+        },
+        "upstream_inputs_check": {
+          "master": "e212128d253a83867b8998a0658879a3a37501f1",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-storage-20261119-edit.py": "63f6616040c1ddea57d57c93bb6aae90cd1cdc0176b08ab369cf415891b679ad",
+          "/private/tmp/inbox-lt-storage-20261119-polish.py": "a1c19a90d9600b955ff4a50637c426bdb0cfd948d038496071aa78a40025c1ed",
+          "/private/tmp/inbox-lt-storage-20261119-finalize.py": "9cca54f58acee5e6b6234ec63d43b30353952eba3b5a3d9268e742f3430c84ac",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -183838,9 +184989,9 @@
       "sources": [
         {
           "ref": "refs/heads/feat/mcp-phase3b",
-          "commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+          "commit": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
           "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
-          "status": "Unmerged phase3b only. Phase3a is already integrated. One new catalog ID and two new agents-connect paragraphs per language; no additional active scope or completion credit.",
+          "status": "Unmerged phase3b only; PR203 remains open. New source tip has identical translation files to 6e68b743. One new catalog ID and two new agents-connect paragraphs per language; no additional active scope or completion credit.",
           "catalog_additions_by_language": {
             "bg": 1,
             "ca": 1,
@@ -183965,8 +185116,8 @@
             "tr": 1,
             "uk": 1
           },
-          "previous_commit": "42bed14a89cf27acbf180469a0cf78310a20d07a",
-          "latest_exact_delta_batch": "lt-mcp3a-agents-invitations-20261119",
+          "previous_commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+          "latest_exact_delta_batch": "lt-storage-transfer-platform-help-20261119",
           "exact_delta": {
             "core/crates/pe-html/help/bg/agents-connect.html": {
               "hunks": [
@@ -184823,7 +185974,7 @@
       ],
       "other_pending_source": "preview-cid at 6a37b3de merged in PR 159 and integrated at 3baf8a41. Its 56 translated help additions are now in the active pending inventory; exact changes are in resumed_source_integrations.",
       "latest_integration": "mcp-phase3a-merged-after-lt-accounts-20261119",
-      "remaining_source": "MCP phase3b at 6e68b743 remains separate: 28 translated agent-connect-claimed additions and agents-connect help changes in 28 languages. Do not merge unrelated feature code merely to review drafts.",
+      "remaining_source": "MCP phase3b at b42800ab remains separate: 28 translated agent-connect-claimed additions and agents-connect help changes in 28 languages. Exact delta unchanged from 6e68b743; do not merge unrelated feature code merely to review drafts.",
       "refresh_history": [
         {
           "batch": "lt-mcp3a-agents-invitations-20261119",
@@ -185226,9 +186377,731 @@
             }
           ],
           "reason": "Refresh phase3b from its current merge base, removing phase3a additions already integrated into the active queue; also synchronize the phase3a remote alias status."
+        },
+        {
+          "batch": "lt-storage-transfer-platform-help-20261119",
+          "previous_sources": [
+            {
+              "ref": "refs/heads/feat/mcp-phase3b",
+              "commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+              "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+              "status": "Unmerged phase3b only. Phase3a is already integrated. One new catalog ID and two new agents-connect paragraphs per language; no additional active scope or completion credit.",
+              "catalog_additions_by_language": {
+                "bg": 1,
+                "ca": 1,
+                "cs": 1,
+                "da": 1,
+                "de": 1,
+                "el": 1,
+                "en": 1,
+                "es": 1,
+                "et": 1,
+                "fi": 1,
+                "fr": 1,
+                "hr": 1,
+                "hu": 1,
+                "it": 1,
+                "lt": 1,
+                "lv": 1,
+                "nb": 1,
+                "nl": 1,
+                "pl": 1,
+                "pt": 1,
+                "pt-BR": 1,
+                "ro": 1,
+                "ru": 1,
+                "sk": 1,
+                "sl": 1,
+                "sr-Latn": 1,
+                "sv": 1,
+                "tr": 1,
+                "uk": 1
+              },
+              "catalog_changes_by_language": {
+                "bg": 0,
+                "ca": 0,
+                "cs": 0,
+                "da": 0,
+                "de": 0,
+                "el": 0,
+                "en": 0,
+                "es": 0,
+                "et": 0,
+                "fi": 0,
+                "fr": 0,
+                "hr": 0,
+                "hu": 0,
+                "it": 0,
+                "lt": 0,
+                "lv": 0,
+                "nb": 0,
+                "nl": 0,
+                "pl": 0,
+                "pt": 0,
+                "pt-BR": 0,
+                "ro": 0,
+                "ru": 0,
+                "sk": 0,
+                "sl": 0,
+                "sr-Latn": 0,
+                "sv": 0,
+                "tr": 0,
+                "uk": 0
+              },
+              "catalog_removals_by_language": {
+                "bg": 0,
+                "ca": 0,
+                "cs": 0,
+                "da": 0,
+                "de": 0,
+                "el": 0,
+                "en": 0,
+                "es": 0,
+                "et": 0,
+                "fi": 0,
+                "fr": 0,
+                "hr": 0,
+                "hu": 0,
+                "it": 0,
+                "lt": 0,
+                "lv": 0,
+                "nb": 0,
+                "nl": 0,
+                "pl": 0,
+                "pt": 0,
+                "pt-BR": 0,
+                "ro": 0,
+                "ru": 0,
+                "sk": 0,
+                "sl": 0,
+                "sr-Latn": 0,
+                "sv": 0,
+                "tr": 0,
+                "uk": 0
+              },
+              "help_topics_by_language": {
+                "bg": 1,
+                "ca": 1,
+                "cs": 1,
+                "da": 1,
+                "de": 1,
+                "el": 1,
+                "en": 1,
+                "es": 1,
+                "et": 1,
+                "fi": 1,
+                "fr": 1,
+                "hr": 1,
+                "hu": 1,
+                "it": 1,
+                "lt": 1,
+                "lv": 1,
+                "nb": 1,
+                "nl": 1,
+                "pl": 1,
+                "pt": 1,
+                "pt-BR": 1,
+                "ro": 1,
+                "ru": 1,
+                "sk": 1,
+                "sl": 1,
+                "sr-Latn": 1,
+                "sv": 1,
+                "tr": 1,
+                "uk": 1
+              },
+              "previous_commit": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "latest_exact_delta_batch": "lt-mcp3a-agents-invitations-20261119",
+              "exact_delta": {
+                "core/crates/pe-html/help/bg/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic пита системата коя програма е стартирала агента, вместо да вярва на думите на агента, така че една програма не може да използва достъпа, който сте дали на друга. Ако агентът твърди, че е друга програма, въпросът ще ви уведоми за това.</p>",
+                        "<p>Агентът може също да следи папката „Входящи“, акаунт или папка и да получава известие, когато пощата в тях се промени, както и да предлага две готови заявки, „Triage my inbox“ и „Summarize unread“. И двете спазват това, което разрешите на агента, а прочетеното по този начин се показва в историята му като всичко друго, което чете.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/ca/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic pregunta al sistema quin programa ha iniciat l’agent, en lloc de creure el que diu l’agent, de manera que un programa no pot fer servir l’accés que heu donat a un altre. Si un agent diu que és un programa diferent, la pregunta us ho indica.</p>",
+                        "<p>Un agent també pot tenir a la vista la vostra Safata d’entrada, un compte o una carpeta i rebre un avís quan hi canvia el correu, i pot oferir dues peticions ja preparades, «Triage my inbox» i «Summarize unread». Totes dues segueixen el que permeteu a l’agent, i el que llegeix d’aquesta manera apareix al seu registre com tot el que llegeix.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/cs/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic se ptá systému, který program agenta spustil, místo aby věřil tomu, co agent tvrdí, takže jeden program nemůže využít přístup, který jste dali jinému. Pokud agent tvrdí, že je jiný program, dotaz vás na to upozorní.</p>",
+                        "<p>Agent může také sledovat vaši složku Doručená pošta, účet nebo složku a dostávat upozornění, když se v nich pošta změní. Může také nabídnout dva připravené požadavky, „Triage my inbox“ a „Summarize unread“. Oba se řídí tím, co agentovi povolíte, a co takto přečte, se zobrazí v jeho záznamu jako vše ostatní, co čte.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/da/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic spørger systemet, hvilket program der startede agenten, i stedet for at tage agentens ord for gode varer, så ét program ikke kan bruge den adgang, du har givet et andet. Hvis en agent siger, at den er et andet program, fortæller spørgsmålet dig det.</p>",
+                        "<p>En agent kan også holde øje med din Indbakke, en konto eller en mappe og få besked, når mailen der ændrer sig, og den kan tilbyde to færdige forespørgsler, »Triage my inbox« og »Summarize unread«. Begge følger det, du tillader agenten, og det, den læser på denne måde, vises i dens log ligesom alt andet, den læser.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/de/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic fragt das System, welches Programm den Agenten gestartet hat, statt sich auf die Angaben des Agenten zu verlassen. So kann ein Programm nicht den Zugriff nutzen, den Sie einem anderen gegeben haben. Gibt sich ein Agent als ein anderes Programm aus, sagt Ihnen das die Abfrage.</p>",
+                        "<p>Ein Agent kann außerdem Ihren Posteingang, ein Konto oder einen Ordner im Blick behalten und erfährt, wenn sich die E-Mails darin ändern. Er kann zwei fertige Anfragen anbieten, „Triage my inbox“ und „Summarize unread“. Beide halten sich an das, was Sie dem Agenten erlauben, und was er so liest, erscheint wie alles andere, was er liest, in seinem Protokoll.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/el/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Το Inbox Classic ρωτά το σύστημα ποιο πρόγραμμα ξεκίνησε τον πράκτορα, αντί να βασίζεται σε ό,τι δηλώνει ο πράκτορας, ώστε ένα πρόγραμμα να μην μπορεί να χρησιμοποιήσει την πρόσβαση που δώσατε σε άλλο. Αν ένας πράκτορας δηλώνει ότι είναι διαφορετικό πρόγραμμα, η ερώτηση σάς το επισημαίνει.</p>",
+                        "<p>Ένας πράκτορας μπορεί επίσης να παρακολουθεί τα Εισερχόμενά σας, έναν λογαριασμό ή έναν φάκελο και να ειδοποιείται όταν αλλάζει η αλληλογραφία τους, και μπορεί να προσφέρει δύο έτοιμα αιτήματα, «Triage my inbox» και «Summarize unread». Και τα δύο ακολουθούν ό,τι επιτρέπετε στον πράκτορα, και ό,τι διαβάζει με αυτόν τον τρόπο εμφανίζεται στο ιστορικό του όπως όλα όσα διαβάζει.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/en/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic asks the system which program started the agent, rather than taking the agent’s word for it, so an agent cannot get the access you gave another program just by saying it is that program. If an agent says it is a different program, the question tells you. This keeps your agents apart; it does not protect you from a harmful program running as you, which could read your mail anyway.</p>",
+                        "<p>An agent can also keep your Inbox, an account or a folder in view and be told when its mail changes, and it can offer two ready-made requests, “Triage my inbox” and “Summarize unread”. Both follow what you allow the agent, and what it reads this way shows in its log like everything else it reads.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/es/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic pregunta al sistema qué programa inició el agente, en lugar de fiarse de lo que dice el agente, de modo que un programa no puede usar el acceso que usted dio a otro. Si un agente dice ser un programa distinto, la pregunta se lo indica.</p>",
+                        "<p>Un agente también puede vigilar su Bandeja de entrada, una cuenta o una carpeta y recibir un aviso cuando cambia su correo, y puede ofrecer dos peticiones ya preparadas, «Triage my inbox» y «Summarize unread». Ambas respetan lo que usted permita al agente, y lo que lee de esta forma aparece en su registro como todo lo demás que lee.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/et/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic küsib süsteemilt, milline programm agendi käivitas, selle asemel et agendi sõna uskuda, nii et üks programm ei saa kasutada juurdepääsu, mille andsite teisele. Kui agent väidab end olevat mõni teine programm, ütleb küsimus teile seda.</p>",
+                        "<p>Agent saab ka jälgida teie Sisendkausta, kontot või kausta ja saada teate, kui nende kirjad muutuvad, ning pakkuda kahte valmis päringut, „Triage my inbox“ ja „Summarize unread“. Mõlemad järgivad seda, mida agendil lubate, ja see, mida agent nii loeb, kuvatakse tema logis nagu kõik muu, mida ta loeb.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/fi/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic kysyy järjestelmältä, mikä ohjelma käynnisti agentin, eikä luota agentin omaan sanaan, joten yksi ohjelma ei voi käyttää toiselle antamiasi käyttöoikeuksia. Jos agentti sanoo olevansa eri ohjelma, kysymys kertoo sen sinulle.</p>",
+                        "<p>Agentti voi myös pitää Saapuneet-kansiosi, tilin tai kansion silmällä ja saada tiedon, kun sen posti muuttuu, ja se voi tarjota kaksi valmista pyyntöä, ”Triage my inbox” ja ”Summarize unread”. Molemmat noudattavat sitä, mitä sallit agentille, ja mitä se lukee tällä tavalla, näkyy sen lokissa kuten kaikki muukin, mitä se lukee.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/fr/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic demande au système quel programme a lancé l'agent, plutôt que de croire l'agent sur parole, afin qu'un programme ne puisse pas utiliser l'accès que vous avez donné à un autre. Si un agent prétend être un autre programme, la question vous le signale.</p>",
+                        "<p>Un agent peut aussi garder un œil sur votre Boîte de réception, un compte ou un dossier et être averti quand son courrier change, et il peut proposer deux demandes toutes faites, « Triage my inbox » et « Summarize unread ». Toutes deux respectent ce que vous autorisez à l'agent, et ce qu'il lit ainsi apparaît dans son journal comme tout ce qu'il lit.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/hr/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic pita sustav koji je program pokrenuo agenta, umjesto da vjeruje agentu na riječ, pa jedan program ne može koristiti pristup koji ste dali drugome. Ako agent tvrdi da je neki drugi program, upit će vam to reći.</p>",
+                        "<p>Agent može i pratiti vašu mapu Ulazna pošta, račun ili mapu te dobiti obavijest kad se pošta u njima promijeni, a može ponuditi i dva gotova zahtjeva, „Triage my inbox“ i „Summarize unread“. Oba poštuju ono što agentu dopustite, a ono što na taj način pročita prikazuje se u njegovim zapisima kao i sve ostalo što čita.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/hu/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Az Inbox Classic a rendszertől kérdezi meg, melyik program indította el az ügynököt, ahelyett hogy az ügynök szavára hagyatkozna, így egy program nem használhatja azt a hozzáférést, amelyet Ön egy másiknak adott. Ha egy ügynök azt állítja, hogy másik program, a kérdés ezt jelzi Önnek.</p>",
+                        "<p>Az ügynök figyelemmel kísérheti a Beérkezett üzenetek mappát, egy fiókot vagy egy mappát is, és értesítést kaphat, ha a bennük lévő levelek megváltoznak, továbbá felkínálhat két előre elkészített kérést: „Triage my inbox” és „Summarize unread”. Mindkettő ahhoz igazodik, amit Ön engedélyez az ügynöknek, és amit így elolvas, az ugyanúgy megjelenik a naplójában, mint minden más, amit olvas.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/it/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic chiede al sistema quale programma ha avviato l’agente, invece di fidarsi di ciò che dice l’agente, così un programma non può usare l’accesso che hai dato a un altro. Se un agente dice di essere un programma diverso, la richiesta te lo segnala.</p>",
+                        "<p>Un agente può anche tenere d’occhio la tua Posta in arrivo, un account o una cartella ed essere avvisato quando la posta cambia, e può offrire due richieste già pronte, “Triage my inbox” e “Summarize unread”. Entrambe seguono ciò che consenti all’agente, e ciò che legge in questo modo compare nel suo registro come tutto il resto che legge.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/lt/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic klausia sistemos, kuri programa paleido agentą, o ne tiki agento žodžiais, todėl viena programa negali naudotis prieiga, kurią suteikėte kitai. Jei agentas teigia esąs kita programa, klausimas jums tai parodys.</p>",
+                        "<p>Agentas taip pat gali stebėti jūsų aplanką „Gauti laiškai“, paskyrą ar aplanką ir gauti pranešimą, kai juose pasikeičia paštas, be to, jis gali pasiūlyti dvi paruoštas užklausas, „Triage my inbox“ ir „Summarize unread“. Abi laikosi to, ką leidžiate agentui, o tai, ką jis taip perskaito, rodoma jo žurnale kaip ir visa kita, ką jis skaito.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/lv/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic jautā sistēmai, kura programma palaida aģentu, nevis paļaujas uz aģenta vārdiem, tāpēc viena programma nevar izmantot piekļuvi, ko piešķīrāt citai. Ja aģents apgalvo, ka ir cita programma, jautājumā tas tiek norādīts.</p>",
+                        "<p>Aģents var arī sekot jūsu Iesūtnei, kontam vai mapei un saņemt ziņu, kad tajos mainās pasts, kā arī piedāvāt divus gatavus pieprasījumus: „Triage my inbox” un „Summarize unread”. Abi ievēro to, ko atļaujat aģentam, un tas, ko aģents šādi izlasa, tiek rādīts tā žurnālā tāpat kā viss pārējais, ko tas lasa.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/nb/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic spør systemet hvilket program som startet agenten, i stedet for å ta agenten på ordet, slik at ett program ikke kan bruke tilgangen du har gitt et annet. Hvis en agent sier at den er et annet program, sier spørsmålet deg fra.</p>",
+                        "<p>En agent kan også holde øye med Innboks-mappen din, en konto eller en mappe og få beskjed når e-posten der endres, og den kan tilby to ferdige forespørsler, «Triage my inbox» og «Summarize unread». Begge følger det du tillater agenten, og det den leser på denne måten, vises i loggen dens som alt annet den leser.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/nl/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic vraagt het systeem welk programma de agent heeft gestart, in plaats van de agent op zijn woord te geloven, zodat een programma niet de toegang kan gebruiken die je aan een ander hebt gegeven. Zegt een agent dat hij een ander programma is, dan vertelt de vraag je dat.</p>",
+                        "<p>Een agent kan ook je Postvak IN, een account of een map in de gaten houden en een melding krijgen als de e-mail daarin verandert, en hij kan twee kant-en-klare verzoeken aanbieden, “Triage my inbox” en “Summarize unread”. Beide volgen wat je de agent toestaat, en wat hij zo leest, verschijnt in zijn logboek net als alles wat hij verder leest.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/pl/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic pyta system, który program uruchomił agenta, zamiast wierzyć agentowi na słowo, dzięki czemu jeden program nie może korzystać z dostępu przyznanego innemu. Jeśli agent podaje się za inny program, pytanie o zgodę to pokaże.</p>",
+                        "<p>Agent może też obserwować Skrzynkę odbiorczą, konto lub folder i dostawać powiadomienie, gdy zmieni się w nich poczta, a także zaproponować dwa gotowe polecenia, „Triage my inbox” i „Summarize unread”. Oba przestrzegają tego, na co zezwolisz agentowi, a to, co agent w ten sposób odczyta, widać w jego dzienniku tak jak wszystko inne, co odczytuje.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/pt-BR/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>O Inbox Classic pergunta ao sistema qual programa iniciou o agente, em vez de acreditar no que o agente diz, para que um programa não possa usar o acesso que você deu a outro. Se um agente disser que é um programa diferente, a pergunta avisa você.</p>",
+                        "<p>Um agente também pode acompanhar sua Caixa de Entrada, uma conta ou uma pasta e ser avisado quando os e-mails nela mudam, e pode oferecer dois pedidos prontos, “Triage my inbox” e “Summarize unread”. Ambos seguem o que você permitir ao agente, e o que ele lê dessa forma aparece no registro dele como tudo o mais que ele lê.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/pt/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>O Inbox Classic pergunta ao sistema que programa iniciou o agente, em vez de acreditar no que o agente diz, para que um programa não possa usar o acesso que deu a outro. Se um agente disser que é um programa diferente, a pergunta informa-o disso.</p>",
+                        "<p>Um agente também pode acompanhar a sua Caixa de Entrada, uma conta ou uma pasta e ser avisado quando o correio aí muda, e pode oferecer dois pedidos já preparados, «Triage my inbox» e «Summarize unread». Ambos seguem o que autorizar ao agente, e o que ele lê desta forma aparece no registo dele como tudo o resto que lê.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/ro/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic întreabă sistemul ce program a pornit agentul, în loc să se bazeze pe ce spune agentul, astfel încât un program să nu poată folosi accesul pe care l-ați dat altuia. Dacă un agent spune că este alt program, întrebarea vă arată acest lucru.</p>",
+                        "<p>Un agent poate, de asemenea, să urmărească folderul Mesaje primite, un cont sau un folder și să fie anunțat când se schimbă mesajele din ele, și poate oferi două solicitări gata pregătite, „Triage my inbox” și „Summarize unread”. Ambele respectă ce îi permiteți agentului, iar ce citește astfel apare în jurnalul său ca tot restul a ceea ce citește.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/ru/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic спрашивает у системы, какая программа запустила агента, а не верит агенту на слово, поэтому одна программа не может воспользоваться доступом, который вы дали другой. Если агент называет себя другой программой, в запросе на доступ это будет указано.</p>",
+                        "<p>Агент также может следить за папкой «Входящие», учетной записью или папкой и получать уведомления, когда в них меняется почта, а также предлагать два готовых запроса: «Triage my inbox» и «Summarize unread». Оба подчиняются тому, что вы разрешите агенту, а все, что он прочитает таким образом, показывается в его журнале, как и все остальное, что он читает.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/sk/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic sa pýta systému, ktorý program agenta spustil, namiesto toho, aby veril tomu, čo agent tvrdí, takže jeden program nemôže využiť prístup, ktorý ste dali inému. Ak agent tvrdí, že je iný program, otázka vás na to upozorní.</p>",
+                        "<p>Agent môže tiež sledovať váš priečinok Doručená pošta, účet alebo priečinok a dostávať upozornenie, keď sa v nich pošta zmení. Môže tiež ponúknuť dve pripravené požiadavky, „Triage my inbox“ a „Summarize unread“. Obe sa riadia tým, čo agentovi povolíte, a čo takto prečíta, sa zobrazí v jeho zázname rovnako ako všetko ostatné, čo číta.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/sl/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic sistem vpraša, kateri program je zagnal agenta, namesto da bi verjel agentu na besedo, zato en program ne more uporabiti dostopa, ki ste ga dali drugemu. Če agent trdi, da je drug program, vam to pove vprašanje.</p>",
+                        "<p>Agent lahko spremlja tudi vašo mapo Prejeto, račun ali mapo in prejme obvestilo, ko se pošta v njih spremeni, ponudi pa lahko tudi dve pripravljeni zahtevi, »Triage my inbox« in »Summarize unread«. Obe upoštevata, kar dovolite agentu, in kar na ta način prebere, je prikazano v njegovi zgodovini kot vse drugo, kar prebere.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic pita sistem koji je program pokrenuo agenta, umesto da veruje agentu na reč, pa jedan program ne može da koristi pristup koji ste dali drugom. Ako agent tvrdi da je neki drugi program, upit će vam to reći.</p>",
+                        "<p>Agent može i da prati vaše Prijemno sanduče, nalog ili fasciklu i da dobije obaveštenje kada se pošta u njima promeni, a može da ponudi i dva gotova zahteva, „Triage my inbox“ i „Summarize unread“. Oba poštuju ono što dozvolite agentu, a ono što na ovaj način pročita prikazuje se u njegovoj evidenciji kao i sve ostalo što čita.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/sv/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic frågar systemet vilket program som startade agenten i stället för att lita på vad agenten säger, så att ett program inte kan använda den åtkomst du gav ett annat. Om en agent säger att den är ett annat program, visar frågan dig det.</p>",
+                        "<p>En agent kan också hålla koll på Inkorgen, ett konto eller en mapp och få veta när e-posten där ändras, och den kan erbjuda två färdiga förfrågningar, ”Triage my inbox” och ”Summarize unread”. Båda följer det du tillåter agenten, och det den läser på det här sättet visas i dess logg precis som allt annat den läser.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/tr/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic, aracının sözüne güvenmek yerine aracıyı hangi programın başlattığını sisteme sorar. Böylece bir program, başka bir programa verdiğiniz erişimi kullanamaz. Bir aracı farklı bir program olduğunu söylerse bunu izin sorusunda görürsünüz.</p>",
+                        "<p>Bir aracı ayrıca Gelen Kutunuzu, bir hesabı veya bir klasörü izleyebilir ve buradaki postalar değiştiğinde haberdar edilebilir. İki hazır istek de sunabilir: “Triage my inbox” ve “Summarize unread”. İkisi de aracıya verdiğiniz izinlere uyar ve aracının bu yolla okudukları, okuduğu diğer her şey gibi günlüğünde görünür.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/crates/pe-html/help/uk/agents-connect.html": {
+                  "hunks": [
+                    {
+                      "old": [],
+                      "new": [
+                        "<p>Inbox Classic запитує в системи, яка програма запустила агента, а не вірить агенту на слово, тож одна програма не може скористатися доступом, який ви надали іншій. Якщо агент називає себе іншою програмою, у запиті на дозвіл це буде вказано.</p>",
+                        "<p>Агент також може стежити за папкою «Вхідні», обліковим записом або папкою й отримувати сповіщення, коли в них змінюється пошта, а також пропонувати два готові запити: «Triage my inbox» і «Summarize unread». Обидва підкоряються тому, що ви дозволите агенту, а все, що він прочитає таким чином, показується в його журналі, як і все інше, що він читає.</p>"
+                      ]
+                    }
+                  ]
+                },
+                "core/locales/bg/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Програмата се представи като { $claimed }. Inbox Classic провери коя програма я е стартирала: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/ca/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Ha dit que era { $claimed }. Inbox Classic ha comprovat quin programa l’ha iniciat: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/cs/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Program se představil jako { $claimed }. Inbox Classic ověřil, který program ho spustil: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/da/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Programmet oplyste, at det var { $claimed }. Inbox Classic har tjekket, hvilket program der startede det: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/de/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Das Programm gab sich als { $claimed } aus. Inbox Classic hat geprüft, welches Programm es gestartet hat: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/el/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Το πρόγραμμα δήλωσε ότι είναι το { $claimed }. Το Inbox Classic έλεγξε ποιο πρόγραμμα το ξεκίνησε: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/en/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "It said it was { $claimed }. Inbox Classic checked which program started it: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/es/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Se presentó como { $claimed }. Inbox Classic comprobó qué programa lo inició: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/et/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Programm väitis, et see on { $claimed }. Inbox Classic kontrollis, milline programm selle käivitas: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/fi/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Ohjelma kertoi olevansa { $claimed }. Inbox Classic tarkisti, mikä ohjelma sen käynnisti: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/fr/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Le programme s'est présenté comme { $claimed }. Inbox Classic a vérifié quel programme l'a lancé : { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/hr/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Program se predstavio kao { $claimed }. Inbox Classic provjerio je koji ga je program pokrenuo: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/hu/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "A program { $claimed } néven mutatkozott be. Az Inbox Classic ellenőrizte, melyik program indította el: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/it/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Ha dichiarato di essere { $claimed }. Inbox Classic ha verificato quale programma lo ha avviato: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/lt/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Programa prisistatė kaip { $claimed }. Inbox Classic patikrino, kuri programa ją paleido: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/lv/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Programma norādīja, ka tā ir { $claimed }. Inbox Classic pārbaudīja, kura programma to palaida: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/nb/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Programmet oppga at det var { $claimed }. Inbox Classic har sjekket hvilket program som startet det: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/nl/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Het programma gaf aan { $claimed } te zijn. Inbox Classic heeft gecontroleerd welk programma het heeft gestart: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/pl/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Program przedstawił się jako { $claimed }. Inbox Classic sprawdził, który program go uruchomił: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/pt-BR/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "O programa se apresentou como { $claimed }. O Inbox Classic verificou qual programa o iniciou: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/pt/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "O programa apresentou-se como { $claimed }. O Inbox Classic verificou que programa o iniciou: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/ro/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Programul s-a prezentat ca { $claimed }. Inbox Classic a verificat ce program l-a pornit: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/ru/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Программа представилась как { $claimed }. Inbox Classic проверила, какая программа ее запустила: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/sk/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Program sa predstavil ako { $claimed }. Aplikácia Inbox Classic overila, ktorý program ho spustil: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/sl/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Program se je predstavil kot { $claimed }. Inbox Classic je preveril, kateri program ga je zagnal: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/sr-Latn/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Program se predstavio kao { $claimed }. Inbox Classic je proverio koji ga je program pokrenuo: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/sv/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Programmet uppgav att det var { $claimed }. Inbox Classic har kontrollerat vilket program som startade det: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/tr/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Program kendini { $claimed } olarak tanıttı. Inbox Classic, onu hangi programın başlattığını kontrol etti: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                },
+                "core/locales/uk/core.ftl": {
+                  "added": {
+                    "agent-connect-claimed": "Програма представилася як { $claimed }. Inbox Classic перевірив, яка програма її запустила: { $program }."
+                  },
+                  "changed": {},
+                  "removed": {}
+                }
+              },
+              "source_files": {
+                "core/crates/pe-html/help/bg/agents-connect.html": "515cbb6957bb1effd28804031c7b3c004f11a0aa85d298f014dc08c57e7b8a0f",
+                "core/crates/pe-html/help/ca/agents-connect.html": "77ded19dca4474e9939e2b64bc94693b5f88e88f81e0be784fbb2b14c1983540",
+                "core/crates/pe-html/help/cs/agents-connect.html": "87b007e131a24780b4c7533fe332f94ddd882656b7e89c0e8282a7e9795d3af2",
+                "core/crates/pe-html/help/da/agents-connect.html": "dbb330b59a85153d51b3e64242b464731f451e942727556acd2073c68a2d6911",
+                "core/crates/pe-html/help/de/agents-connect.html": "8529992b5847cc1991709b70bcc3965e3f19291aa25dcf433235705d3f2f221f",
+                "core/crates/pe-html/help/el/agents-connect.html": "5d1fbca87728eba916f3c9eda8371b75c338a085e4d3b5aac6a070b8b1e2795b",
+                "core/crates/pe-html/help/en/agents-connect.html": "9ad51eaa2a465684ac5cfcf8dd68bab8e1ad07749b3c2f8ffd0353e5779fffc2",
+                "core/crates/pe-html/help/es/agents-connect.html": "85e0dadd059cb8c1d828a4d1726787fba3226a531c552bf3b61f5774ddebb237",
+                "core/crates/pe-html/help/et/agents-connect.html": "a314848e76ad04b37e7a2c0971550fb970fe068d5afc7c339bb9924392d147d9",
+                "core/crates/pe-html/help/fi/agents-connect.html": "58d5c3937f9bb0b8b2e093708d886b0f300cc7b22204e44a2561839afcd4f2a9",
+                "core/crates/pe-html/help/fr/agents-connect.html": "0709ed6b279551b2e297e3142943770141ca92affeba76608afdf65bfb716ff4",
+                "core/crates/pe-html/help/hr/agents-connect.html": "e78c16b1593d2ed17c00e26bbeea583709e5ff324fa074e5630514d05071ed75",
+                "core/crates/pe-html/help/hu/agents-connect.html": "026877eb3b78afcc10d0c7b4036ff3918649006af634934e3362d06c3d2f3f12",
+                "core/crates/pe-html/help/it/agents-connect.html": "0a67b0517ac4fa70dd6d8b31b7e37df9adb739e0d2fee1190136087876af8c0d",
+                "core/crates/pe-html/help/lt/agents-connect.html": "f64affdac6fc3c8388df03734c97978d7df28a9cf57f3833d7302daad4c877ff",
+                "core/crates/pe-html/help/lv/agents-connect.html": "c413fc03e5188c63edc640365ead7d58b208f375e975ad614fdd774867bcf70a",
+                "core/crates/pe-html/help/nb/agents-connect.html": "a9f5d55dd7f333786bbd19a4f11cf7701df6990a31e8342dbadde7fe0cded267",
+                "core/crates/pe-html/help/nl/agents-connect.html": "eb5f956ed625b8a75af5c5b902cf847f0d77a8b6274650239c2281e14c03e55a",
+                "core/crates/pe-html/help/pl/agents-connect.html": "787695aa4694c7d1045765d3e0cb67e4c818857bff78193cfff4bc178df2544e",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html": "3bc431e00e2b08a3ec97fb1bbe5227a5172631db887646bffe10557d529ec555",
+                "core/crates/pe-html/help/pt/agents-connect.html": "e037f9d50dad8214b5ebe08748e29c24a84a1e951912362141ff7c06133da470",
+                "core/crates/pe-html/help/ro/agents-connect.html": "35a387a00774df56343b63dd1caa37e586a03127c9b9e214f358f16797318aa5",
+                "core/crates/pe-html/help/ru/agents-connect.html": "815f6d004a7d0b405952dc9fc0d9c5a8470ae8c4c546002e5788bd2e6905a142",
+                "core/crates/pe-html/help/sk/agents-connect.html": "07a2789a588a0c510aaaac73e693bd0433a41024d3a1fdda7897c3e8de771e31",
+                "core/crates/pe-html/help/sl/agents-connect.html": "165ac5ab5b0a4eb5ce22683e41b4e8b698301a9f25baa8720f3cd6ffe23f921d",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html": "4c8d408bf3eb96e23b192e8ac96919e42908ee3e6b7fda7df0d4c03ea71afe86",
+                "core/crates/pe-html/help/sv/agents-connect.html": "e7261b2a894af620c8cb14f96bddad487323f5da551748b3ff0b899cd0a23aec",
+                "core/crates/pe-html/help/tr/agents-connect.html": "175b2dc56c6846a0a2e3a4e522e2d5d8c2496d152164e3ca29d5ca5bd5763914",
+                "core/crates/pe-html/help/uk/agents-connect.html": "7ed40419eeb84cd2458af089fbc6960435f5a35e0c9131161319a264b1276821",
+                "core/locales/bg/core.ftl": "a72e7ce4b51130982e2dd296fc2b3beb84f6f447527cfd5425a6f3b6f40a401c",
+                "core/locales/ca/core.ftl": "45f674f35486378aba90f791ed5a5b32645c9119bd492f739301a5c90d3a748e",
+                "core/locales/cs/core.ftl": "43e9aa2b6a90e82c4b9c6be439167e181e53d83dde423df9f0064b2983d40176",
+                "core/locales/da/core.ftl": "f0aacca4a8008901bbdc3dc9a49d5639ccd390643270a82a736eda57479350dd",
+                "core/locales/de/core.ftl": "8dabfca8b22c55e6cdbf2bab1056a32afdde0e101463ca1bf058bbcee05165ea",
+                "core/locales/el/core.ftl": "9a0611f23ad10420a7d1bc81e39d5394d36f3bd805b1ea2df7fc2d4a6c7a1ae5",
+                "core/locales/en/core.ftl": "d1bdc168030651ca31b65ef4ff80d8a459c5404691c569f8b094416da88609a0",
+                "core/locales/es/core.ftl": "c0e819581c37ab3e5019f581634e03e4733223f187ca6127d33c748ca3b1552a",
+                "core/locales/et/core.ftl": "6258e4622814ca3f3d527aaa51c2c9bc665027c4cdb3913a2d76110e53d0325f",
+                "core/locales/fi/core.ftl": "c55d1880e3d16b18db4c2b646240deef4dabee61bd153ec9a90ee4e23d3a3974",
+                "core/locales/fr/core.ftl": "a6b3c791ac946248e0344b66de2a54cf368b6e5343838d1fc32ebb846532f5dc",
+                "core/locales/hr/core.ftl": "4dfc50f5c777988f1ce41a1c353cb62b474d5f98a926cb654cafa386598609f5",
+                "core/locales/hu/core.ftl": "f55c84b5979906b7e01548a2462bcf806d03ccc283d5cbb0e85c8a06a0316099",
+                "core/locales/it/core.ftl": "166f1990a1ab1c7a70683b58fdba6f5c1d30a69a3c5da6c86d1e84b54ed9c2c7",
+                "core/locales/lt/core.ftl": "316c35dcdd47ea9f002c68f182b1f2e1abadf19a8c0fef3bc2826078b32b1f87",
+                "core/locales/lv/core.ftl": "f0e5a80ca048a12682a97364d934fab03f85ae4b2b14d4a4554f90cf664fbf3e",
+                "core/locales/nb/core.ftl": "72cdb8703037f6bac7f1389995ba582718234feca383428a775ef61ebc4cbab2",
+                "core/locales/nl/core.ftl": "4139ea11946f3cf566ba37f90dd62fc1fb1391f1dd1560ba0d9a022ce3b15e46",
+                "core/locales/pl/core.ftl": "3fe987ea50cf94aee161132e0fadba92ec4dbeb58a2f7f4953c4b5726b8824c3",
+                "core/locales/pt-BR/core.ftl": "bf1a5203ebca93067be169fa759543f433244c3beb162e255246866930ad4b4b",
+                "core/locales/pt/core.ftl": "709ec2e388bb85bed6ba78dda338429d6c344882fbdab190dc1af6f8e869a714",
+                "core/locales/ro/core.ftl": "3bbd418e4aa0cdf2b0faaef95cb6f75718c124e36a9d767067a615e41af9188b",
+                "core/locales/ru/core.ftl": "5add4d6dfe57104cc3b148bf391fb43c05df262ea488c209efb89998576d2d06",
+                "core/locales/sk/core.ftl": "c8419541cb8617253bcab92dbb4de9447752d0ec28572748c4956297f86b26e4",
+                "core/locales/sl/core.ftl": "297a7d621d4af0f1fa43a2c71012bd48b8cc5fc52780aecce989786a191d189f",
+                "core/locales/sr-Latn/core.ftl": "86bdc3807a72d0db5b84c41146e3b7e2f7a9f5220edf7a2c772a51deda2baba4",
+                "core/locales/sv/core.ftl": "ea63b15374b04c3b6745bc3908e02d5903094b993f76db9c0a404166859c1721",
+                "core/locales/tr/core.ftl": "56f2f2216487cd273d21664abcb16619cf8f6d0727f001a4912f904aa40cac22",
+                "core/locales/uk/core.ftl": "bf236daa1b89c4d009a9141bf06690846156e636a470661477cade0afc485574"
+              }
+            }
+          ],
+          "reason": "MCP phase3b advanced with no translation-file changes. All queued source hashes and exact deltas are unchanged; update the source commit without adding scope or credit."
         }
       ],
-      "latest_refresh": "lt-mcp3a-agents-invitations-20261119"
+      "latest_refresh": "lt-storage-transfer-platform-help-20261119"
     },
     "resumed_review_latest_english_sources": {
       "core/crates/pe-html/help/en/links-scripts.html": "88850a56321ad291a4db09fe9e82d9f2429e735b2989c35a60eb42d1dafb3a2c",
@@ -185272,7 +187145,13 @@
       "core/crates/pe-html/help/en/message-not-shown.html": "85e732ccaedb1c1eb60f30ddcef9992d7f1ee4820bb4ceaa6a59e5200a4bef0d",
       "core/crates/pe-html/help/en/delivery-problems.html": "b01b4f074dce1c3bce5c63f2c5a5bd05a7613153eb558c179ed1f4fcbfae1c0e",
       "core/crates/pe-html/help/en/message-rules.html": "50f114b3f1de58156b49d24f24c6b1c13f6ddd25d386b0f5ed10e30f0ed4f41d",
-      "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c"
+      "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c",
+      "core/crates/pe-html/help/en/data-storage.html": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6",
+      "core/crates/pe-html/help/en/connections.html": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b",
+      "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+      "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+      "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59",
+      "core/crates/pe-html/help/en/default-mail-program.html": "bbf56849460a56e424aad0d96f55b684807776aaab66bbbdc07daa0b8cf9382e"
     },
     "resumed_source_integrations": [
       {
@@ -191052,7 +192931,8 @@
         "status": "pending targeted comparison",
         "source_checkpoint": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
         "completed_languages": [
-          "hu"
+          "hu",
+          "lt"
         ],
         "pending_languages": [
           "bg",
@@ -191066,7 +192946,6 @@
           "fr",
           "hr",
           "it",
-          "lt",
           "lv",
           "nl",
           "pl",
@@ -191167,7 +193046,26 @@
             ]
           }
         ],
-        "instruction": "Compare current passages against verified behavior, retaining accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review."
+        "instruction": "Compare current passages against verified behavior, retaining accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review.",
+        "completed_language_reviews": {
+          "lt": {
+            "batch": "lt-storage-transfer-platform-help-20261119",
+            "reviewed_topics": [
+              "data-storage.html",
+              "connections.html",
+              "move-computer.html",
+              "removing.html",
+              "updates.html",
+              "default-mail-program.html"
+            ],
+            "catalog_compared_unchanged": {
+              "core.ftl": [
+                "secrets-windows"
+              ]
+            },
+            "note": "Complete comparison during full help review; credential-store terminology applied throughout the four affected Lithuanian topics. No duplicate review credit."
+          }
+        }
       },
       {
         "id": "logos-cli-calendar-shortcuts-options-codes-context-20261119",

@@ -1,16 +1,14 @@
-<!--review-->
 <h1>Inbox Classic užmezgami ryšiai</h1>
-<p class="summary">Kur ir kodėl jungiasi Inbox Classic, besidomintiems technine puse.</p>
+<p class="summary">Su kokiais serveriais susisiekia Inbox Classic ir kam šie ryšiai reikalingi.</p>
 <ul>
-    <li><b>Jūsų pašto serveriai</b>, per IMAP laiškams skaityti ir per SMTP jiems siųsti. Ryšiai šifruojami TLS, o kiekvieno serverio sertifikatas tikrinamas pagal tuos, kuriais pasitiki jūsų sistema. Inbox Classic atmeta serverį be šifravimo, nebent pasirinksite <b data-text="ui-security-none"></b> ir tai patvirtinsite.</li>
-    <li><b>Pridedant paskyrą</b>, jos serveriams surasti. Inbox Classic skaito jūsų domeno DNS įrašus per DNS over HTTPS (Cloudflare, tada Google), niekada per paprastą DNS. Ji taip pat bando jūsų paslaugų teikėjo autoconfig failą ir Thunderbird paslaugų teikėjų sąrašą (ISPDB). Exchange atveju ji klausia Microsoft Autodiscover, kuris gauna jūsų slaptažodį tik tada, kai jo paprašo per HTTPS. Serveris be šifravimo niekada nepasirenkamas.</li>
-    <li><b>Prisijungimas naršyklėje</b>, naudojant OAuth 2.0 ir PKCE, prie Google, Microsoft arba jūsų prisijungimo programos paslaugų teikėjo. Naršyklė grįžta tik į šiame kompiuteryje veikiančią Inbox Classic.</li>
-    <li><b>Prekių ženklų logotipai</b> (BIMI), iš prekės ženklo HTTPS adreso, kai laiške logotipo nėra, vieną kartą kiekvieno Inbox Classic paleidimo metu. Tai vyksta tik tada, kai jūsų pašto serveris patvirtino laiško DMARC patikrą ir logotipą.</li>
-    <li><b>Paveikslėliai iš interneto</b>, tik kai jų paprašote.</li>
-    <li><b>Prenumeratos atsisakymas</b>, tik kai jį spustelėjate. Vieno spustelėjimo užklausa (RFC 8058) siunčiama tik tada, kai sąrašas pasirašė laišką DKIM.</li>
-    <li><b>Šifravimo raktai</b>, tik kai šifruojate kam nors, kurio rakto neturite: pirmiausia jo adreso domenas (Web Key Directory), tada keys.openpgp.org, nebent tai išjungėte. Siunčiamas tik adresas.</li>
-    <!--os:mac--><li><b>Naujinimai</b>, iš inboxclassic.com, siekiant sužinoti, ar išleista nauja versija.</li><!--/os-->
+    <li><b>Jūsų pašto serveriai.</b> Laiškams skaityti naudojamas IMAP, siųsti SMTP. Naudojant TLS, serverio sertifikatas tikrinamas pagal sistemos pasitikėjimo nustatymus arba jūsų patvirtintą sertifikatą. Nešifruotam ryšiui reikia pasirinkti parinktį „<b data-text="ui-security-none"></b>“ ir patvirtinti pasirinkimą.</li>
+    <li><b>Serverių paieška pridedant paskyrą.</b> Domeno MX ir SRV įrašų ieškoma per DNS over HTTPS: pirmiausia naudojama Cloudflare paslauga, prireikus Google. Įprastus serverių vardus į IP adresus verčia sistemos DNS tarnyba. Taip pat tikrinami teikėjo autoconfig duomenys, Thunderbird ISPDB ir Autodiscover. Teikėjo užklausose gali būti jūsų el. pašto adresas. Slaptažodis Autodiscover siunčiamas tik per HTTPS, serveriui pareikalavus Basic autentifikavimo. Automatiškai parenkami šifruoto ryšio nustatymai.</li>
+    <li><b>Prisijungimas naršyklėje.</b> Prie Google, Microsoft ar jūsų prisijungimo programos teikėjo jungiamasi naudojant OAuth 2.0 ir PKCE. Prisijungimo atsakymą naršyklė perduoda tik šiame kompiuteryje veikiančiai Inbox Classic.</li>
+    <li><b>Prekių ženklų logotipai</b> (BIMI) atsisiunčiami HTTPS ryšiu, jei jų nėra laiške, o vietinės kopijos nėra arba ją reikia atnaujinti. Tam pašto teikėjas turi patvirtinti DMARC ir BIMI patikras. Išsaugoti logotipai naudojami ir kitą kartą paleidus programą, o vėliau atnaujinami.</li>
+    <li><b>Paveikslėliai iš interneto</b> atsisiunčiami jums leidus konkrečiame laiške arba pagal automatinio atsisiuntimo nustatymus ir patikimų siuntėjų sąrašą. Užšifruotose laiško dalyse kiekvieną kartą reikia atskiro spustelėjimo.</li>
+    <li><b>Prenumeratos atsisakymas.</b> Tiesioginis prašymas (RFC 8058) siunčiamas tik jums sutikus. Jis siūlomas tik tada, kai pašto teikėjas patvirtina DKIM parašą, apimantį abi prenumeratos atsisakymo antraštes.</li>
+    <li><b>Šifravimo raktai.</b> Jų ieškoma šifruojant laišką arba jums pasirinkus rakto paiešką. Pagal adresą pirmiausia tikrinamas jo domeno Web Key Directory, paskui, jei leidžiama, keys.openpgp.org. Užklausoje gali būti el. pašto adresas, rakto kontrolinis kodas arba identifikatorius. Skelbiant savo raktą, serveriui siunčiama viešoji jo dalis ir patvirtintini adresai.</li>
+    <!--os:mac--><li><b>Naujinimai.</b> Su inboxclassic.com susisiekiama jums pasirinkus ieškoti naujinių arba įjungus automatinę jų paiešką.</li><!--/os-->
 </ul>
-<p>Prisijungimo kodai siūlomi tik tada, kai jūsų paslaugų teikėjo Authentication-Results antraštė nurodo, kad domenas pasirašė laišką (DKIM). Tam atskiro ryšio nereikia.</p>
+<p>Prisijungimo kodui parodyti reikia patikimo pašto teikėjo patvirtinimo, kad laišką pasirašė su kodu susijęs domenas arba jo aukštesnio lygio domenas. Vertinami Authentication-Results duomenys apie DKIM. Pačiam kodo aptikimui atskiro tinklo ryšio nereikia.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->
