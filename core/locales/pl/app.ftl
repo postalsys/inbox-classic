@@ -2,187 +2,98 @@
 
 ## The menus
 
-# review: new
 menu-file = &Plik
-# review: new
 menu-edit = &Edycja
-# review: new
 menu-view = &Widok
-# review: new
 menu-tools = &Narzędzia
-# review: new
 menu-message = Wi&adomość
-# review: new
 menu-help = Pomo&c
-# review: new
 menu-layout = &Układ
-# review: new
 menu-sort-by = &Sortuj według
-# review: new
 menu-text-size = &Rozmiar tekstu
-# review: new
 menu-folder = &Folder
 menu-insert = Ws&taw
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
-# review: new
 cmd-new-account = Nowe &konto...
-# review: new
 cmd-exit = &Zakończ
-# review: new
-cmd-sync = Wyślij i odbierz &wszystko
-# review: new
-cmd-mark-read = Oznacz jako &przeczytane
-# review: new
+cmd-sync = Wyśl&ij i odbierz na wszystkich kontach
+cmd-mark-read = O&znacz jako przeczytane
 cmd-mark-unread = Oznacz jako &nieprzeczytane
-# review: new
 cmd-pictures = Pobierz &obrazy
-# review: new
 cmd-about = &O programie Inbox Classic
-# review: new
 cmd-new-mail = &Nowa wiadomość
-# review: new
-cmd-reply = &Odpowiedz nadawcy
-# review: new
-cmd-reply-all = Odpowiedz &wszystkim
-# review: new
+cmd-reply = Odpowiedz nadawc&y
+cmd-reply-all = Odpowiedz w&szystkim
 cmd-forward = &Prześlij dalej
-# review: new
 cmd-help = &Spis treści
-# review: new
 cmd-delete = &Usuń wiadomość
-# review: new
-cmd-move = P&rzenieś do folderu...
-# review: new
+cmd-move = Przenieś do &folderu...
 cmd-flag = Oznacz &flagą
-# review: new
 cmd-new-folder = &Nowy folder...
-# review: new
 cmd-rename-folder = Zmień nazwę &folderu...
-# review: new
 cmd-delete-folder = &Usuń folder
-# review: new
 cmd-empty-folder = &Opróżnij folder
-# review: new
 ui-empty-button = Opróżnij
-# review: new
 cmd-accounts = Kon&ta...
-# review: new
-cmd-find = &Znajdź wiadomość
-# review: new
+cmd-find = Zn&ajdź wiadomość
 cmd-save-as = Zapisz &jako...
-# review: new
 cmd-print = &Drukuj...
-# review: new
 cmd-import = &Importuj wiadomości...
-# review: new
 cmd-outbox = Skrzynka &nadawcza...
-# review: new
 cmd-properties = &Właściwości
-# review: new
 cmd-mark-all-read = Oznacz wszystkie jako prz&eczytane
-# review: new
 cmd-junk = Oznacz jako ś&mieci
-# review: new
-cmd-not-junk = Oznacz jako ni&e śmieci
-# review: new
+cmd-not-junk = Usuń oznacz&enie śmieci
 cmd-archive = &Archiwizuj
-# review: new
 cmd-watch-conversation = O&bserwuj konwersację
-# review: new
 cmd-ignore-conversation = &Ignoruj konwersację
-# review: new
 cmd-next-message = &Następna wiadomość
-# review: new
 cmd-previous-message = &Poprzednia wiadomość
-# review: new
 cmd-next-unread = Następna nieprzeczy&tana wiadomość
-# review: new
 cmd-go-to-folder = Przejdź &do folderu...
-# review: new
 cmd-find-in-message = Znajdź w &tej wiadomości...
-# review: new
 ui-go-to-prompt = Przejdź do folderu:
-# review: new
 ui-find-in-message-hint = Znajdź w tej wiadomości
-# review: new
 ui-find-not-found = W tej wiadomości nie ma „{ $words }”
-# review: new
 cmd-expand-all-threads = Rozwiń wszystkie &konwersacje
-# review: new
 cmd-collapse-all-threads = &Zwiń wszystkie konwersacje
-# review: new
 ui-group-by-conversation = &Grupuj wiadomości według konwersacji
-# review: new
 cmd-folder-list = Lista &folderów
-# review: new
 cmd-layout-automatic = &Automatyczny
-# review: new
 cmd-layout-classic = &Klasyczny
-# review: new
 cmd-layout-columns = K&olumny
-# review: new
 cmd-sort-date = &Data
-# review: new
-cmd-sort-from = &Od
-# review: new
+cmd-sort-from = &Nadawca
 cmd-sort-subject = &Temat
-# review: new
 cmd-sort-size = &Rozmiar
-# review: new
 cmd-sort-ascending = Sortuj ro&snąco
-# review: new
 cmd-sort-descending = Sortuj &malejąco
-# review: new
 cmd-text-size-largest = &Największy
-# review: new
 cmd-text-size-larger = &Większy
-# review: new
 cmd-text-size-medium = Ś&redni
-# review: new
 cmd-text-size-smaller = &Mniejszy
-# review: new
 cmd-text-size-smallest = Najmn&iejszy
-# review: new
 cmd-hide-ignored = Ukryj &ignorowane konwersacje
-# review: new
 cmd-hide-read = Ukryj prz&eczytane wiadomości
-# review: new
 cmd-notify = &Powiadamiaj o nowej poczcie
-# review: new
 cmd-open = &Otwórz Inbox Classic
-# review: new
 cmd-default-app = Ustaw jako &domyślny program pocztowy...
-# review: new
 cmd-view-source = Źródło &wiadomości
-# review: new
 cmd-ai-agents = &Agenci AI...
-# review: new
 cmd-options = &Opcje...
-# review: new
 cmd-message-rules = &Reguły wiadomości...
-# review: new
 cmd-encryption-keys = Klucze &szyfrowania...
-# review: new
 cmd-create-rule-from-message = U&twórz regułę z wiadomości...
-# review: new
 cmd-select-all = Zaznacz &wszystko
-# review: new
 cmd-undo = &Cofnij
-# review: new
 cmd-copy = &Kopiuj do folderu...
-# review: new
 cmd-address-book = &Książka adresowa...
-# review: new
-cmd-add-sender-to-book = Dodaj nadawcę do książki adr&esowej
-# review: new
+cmd-add-sender-to-book = Dodaj nada&wcę do książki adresowej
 cmd-import-address-book = Importuj książkę &adresową...
-# review: new
 cmd-export-address-book = &Eksportuj książkę adresową...
-# review: new
 cmd-export-setup = Eksportuj u&stawienia i konta...
-# review: new
 cmd-import-setup = Im&portuj ustawienia i konta...
 cmd-compose-sign = &Podpisz cyfrowo
 cmd-compose-encrypt = &Szyfruj
@@ -190,277 +101,150 @@ cmd-attach-my-key = Załącz swój klucz &publiczny
 
 ## The tray icon's menu
 
-# review: new
 tray-check = &Sprawdź nową pocztę
-# review: new
 tray-no-accounts = Nie ma jeszcze kont
 
 ## Words the windows of more than one platform share
 
-# review: new
 ui-tb-create-mail = Utwórz wiadomość
-# review: new
 ui-tb-reply = Odpowiedz
-# review: new
 ui-tb-reply-all = Odpowiedz wszystkim
-# review: new
 ui-tb-forward = Prześlij dalej
-# review: new
 ui-tb-print = Drukuj
-# review: new
 ui-tb-delete = Usuń
-# review: new
 ui-tb-junk = Śmieci
-# review: new
-ui-tb-not-junk = Nie śmieci
-# review: new
+ui-tb-not-junk = To nie śmieci
 ui-tb-archive = Archiwizuj
-# review: new
 ui-tb-previous = Poprzednia
-# review: new
 ui-tb-next = Następna
-# review: new
 ui-previous-tip = Poprzednia wiadomość
-# review: new
 ui-next-tip = Następna wiadomość
-# review: new
 ui-tb-sync = Wyślij/Odbierz
-# review: new
 ui-tb-mark-read = Przeczytane
-# review: new
 ui-tb-mark-unread = Nieprzeczytane
-# review: new
 ui-still-running = Inbox Classic nadal działa
-# review: new
 ui-no-subject = (bez tematu)
-# review: new
 ui-quoted = „{ $subject }”
-# review: new
-ui-newest-from = Najnowsza wiadomość od { $sender }: { $subject }
-# review: new
+ui-newest-from = Najnowsza wiadomość: { $subject } (nadawca: { $sender })
 ui-new-messages = { $count ->
     [one] { $count } nowa wiadomość
     [few] { $count } nowe wiadomości
     [many] { $count } nowych wiadomości
    *[other] { $count } nowych wiadomości
 }
-# review: new
 ui-outbox-waiting = { $count ->
     [one] 1 wiadomość w Skrzynce nadawczej
     [few] { $count } wiadomości w Skrzynce nadawczej
     [many] { $count } wiadomości w Skrzynce nadawczej
    *[other] { $count } wiadomości w Skrzynce nadawczej
 }
-# review: new
 ui-outbox-waits = { $subject } czeka w Skrzynce nadawczej
-# review: new
 ui-outbox-sending = Wysyłanie: { $subject }...
-# review: new
-ui-from-account = Z konta { $account }
-# review: new
-ui-sign-in-refused = Logowanie do konta { $account } zostało odrzucone lub sesja wygasła.
-# review: new
+ui-from-account = Z konta „{ $account }”
+ui-sign-in-refused = Logowanie do konta „{ $account }” zostało odrzucone lub sesja wygasła.
 ui-sign-in-again-ask = Zalogować się ponownie w przeglądarce?
-# review: new
 ui-sign-in-again-failed = Nie udało się zalogować ponownie: { $reason }
-# review: new
 ui-unknown-reason = nieznana przyczyna
-# review: new
-ui-checking = Sprawdzanie nowych wiadomości na koncie { $account }...
-# review: new
+ui-checking = Sprawdzanie poczty na koncie „{ $account }”...
 ui-done = Gotowe
-# review: new
 ui-sent-at = Wysłano { $subject } o { $time }
-# review: new
 ui-draft-saved = Wiadomość zapisano w folderze Wersje robocze
-# review: new
 ui-draft-not-saved = Wiadomości nie zapisano w folderze Wersje robocze: { $reason }
-# review: new
-ui-about-core = Rdzeń { $version }
-# review: new
+ui-about-core = Silnik programu: { $version }
 ui-add-account-first = Najpierw dodaj konto pocztowe.
-# review: new
 ui-add-account-first-link = Najpierw dodaj konto pocztowe, a potem ponownie kliknij link e-mail.
-# review: new
 ui-default-app-is = Inbox Classic jest Twoim domyślnym programem pocztowym: linki e-mail otwierają tutaj nową wiadomość.
-# review: new
 ui-select-message-first = Najpierw zaznacz wiadomość.
-# review: new
-ui-store-not-opened = Nie udało się otworzyć magazynu poczty.
-# review: new
-ui-store-or-cert-not-opened = Nie udało się otworzyć magazynu poczty lub pliku certyfikatu.
-# review: new
+ui-store-not-opened = Nie udało się otworzyć lokalnej bazy poczty.
+ui-store-or-cert-not-opened = Nie udało się otworzyć lokalnej bazy poczty lub pliku certyfikatu.
 ui-help-title = Pomoc Inbox Classic
-# review: new
 ui-help-missing = W tej kopii Inbox Classic brakuje pomocy.
-# review: new
 ui-ok = OK
-# review: new
 ui-cancel = Anuluj
-# review: new
 ui-close = Zamknij
-# review: new
 ui-col-subject = Temat
-# review: new
-ui-col-from = Od
-# review: new
-ui-col-to = Do
-# review: new
+ui-col-from = Nadawca
+ui-col-to = Odbiorcy
 ui-col-received = Odebrano
 # a notification of new mail in a watched conversation, over who it is from
-# review: new
 ui-watched-conversation = Obserwowana konwersacja
-# review: new
 ui-col-sent = Wysłano
-# review: new
 ui-col-size = Rozmiar
-# review: new
 ui-col-folder = Folder
-# review: new
 ui-col-account = Konto
-# review: new
 ui-col-queued = W kolejce od
-# review: new
 ui-col-status = Stan
-# review: new
 ui-outbox-title = Skrzynka nadawcza
-# review: new
 ui-outbox-status-waiting = Oczekuje
-# review: new
 ui-outbox-status-not-sent = Nie wysłano: { $reason }
 # This message is still queued, during the grace period before an agent’s send.
-# review: new
-ui-outbox-status-agent = W kolejce od agenta AI; wysyłka o { $time }
-# review: new
+ui-outbox-status-agent = Agent AI dodał do kolejki; wysyłka najwcześniej o { $time }
 ui-outbox-delete-ask = Usunąć tę wiadomość bez wysyłania?
-# review: new
 ui-open-link = Otwórz link
-# review: new
 ui-edit-link = Edytuj link...
-# review: new
 ui-remove-link = Usuń link
-# review: new
 ui-insert-attachment = Wstaw załącznik
-# review: new
 ui-insert-picture = Wstaw obraz
-# review: new
 ui-filter-all = Wszystkie pliki
-# review: new
 ui-filter-pictures = Obrazy
-# review: new
 ui-filter-messages = Wiadomości e-mail
-# review: new
 ui-save-attachment-as = Zapisz załącznik jako
-# review: new
 ui-not-sent = Nie udało się wysłać wiadomości.
-# review: new
-ui-attachment-forgotten = Napisano „{ $word }”, ale nie załączono żadnego pliku. Wysłać wiadomość mimo to?
-# review: new
+ui-attachment-forgotten = W wiadomości pojawia się „{ $word }”, ale nie ma załącznika. Wysłać ją mimo to?
 ui-send-anyway = Wyślij mimo to
-# review: new
 ui-go-back = Wróć
-# review: new
 ui-not-saved = Nie udało się zapisać wiadomości.
-# review: new
 ui-saving-draft = Zapisywanie w folderze Wersje robocze...
-# review: new
 ui-compose-saved-at = Zapisano w folderze Wersje robocze o { $time }
-# review: new
 ui-compose-restored = Przywrócono po nieoczekiwanym zamknięciu Inbox Classic
-# review: new
 ui-compose-not-saved = Nie zapisano w folderze Wersje robocze: { $reason }
-# review: new
-ui-save-changes-ask = Czy zapisać zmiany tej wiadomości w folderze Wersje robocze?
-# review: new
+ui-save-changes-ask = Zapisać zmienioną wiadomość w folderze Wersje robocze?
 ui-new-message-title = Nowa wiadomość
-# review: new
 ui-link-invalid = Wpisz adres strony (https://...) lub link e-mail (mailto:...).
-# review: new
 ui-link-address = Adres:
-# review: new
 ui-hyperlink = Hiperłącze
-# review: new
 ui-hyperlink-intro = Adres, do którego prowadzi zaznaczony tekst.
-# review: new
 ui-edit-hyperlink = Edytuj hiperłącze
-# review: new
 ui-edit-hyperlink-intro = Adres docelowy linku. Wyczyść adres, aby usunąć link i zachować tekst.
-# review: new
-ui-not-a-picture = Ten plik nie jest obrazem PNG, JPEG ani GIF albo jest większy niż 10 MB.
-# review: new
+ui-not-a-picture = Nie udało się wstawić obrazu. Wybierz plik PNG, JPEG, GIF lub WebP o rozmiarze nie większym niż 10 MB.
 ui-format-color = Kolor czcionki
-# review: new
 ui-format-numbers = Lista numerowana
-# review: new
 ui-format-bullets = Lista punktowana
-# review: new
 ui-format-outdent = Zmniejsz wcięcie
-# review: new
 ui-format-indent = Zwiększ wcięcie
-# review: new
 ui-format-left = Wyrównaj do lewej
-# review: new
 ui-format-center = Wyśrodkuj
-# review: new
 ui-format-right = Wyrównaj do prawej
-# review: new
 ui-format-line = Wstaw linię poziomą
-# review: new
 ui-tb-send = Wyślij
-# review: new
 ui-tb-save = Zapisz
-# review: new
 ui-tb-attach = Załącz
 ui-tb-sign = Podpisz
 ui-tb-encrypt = Szyfruj
 ui-field-keys = Klucze:
-# review: new
 ui-field-from = Od:
-# review: new
 ui-field-to = Do:
-# review: new
 ui-field-cc = DW:
-# review: new
 ui-field-bcc = UDW:
-# review: new
 ui-field-subject = Temat:
-# review: new
 ui-field-attach = Załączniki:
-# review: new
-ui-signature = Podpis
-# review: new
-ui-signature-hint = Dodawany do nowych wiadomości, odpowiedzi i przekazywanych wiadomości z tego konta.
-# review: new
-ui-signature-not-saved = Nie udało się zapisać podpisu.
-# review: new
+ui-signature = Tekst podpisu
+ui-signature-hint = Dodawany do nowych wiadomości, odpowiedzi i wiadomości przesyłanych dalej z tego konta.
+ui-signature-not-saved = Nie udało się zapisać tekstu podpisu.
 ui-all-inboxes = Wszystkie skrzynki odbiorcze
-# review: new
 ui-all-sent = Wszystkie wysłane
-# review: new
 ui-all-drafts = Wszystkie wersje robocze
-# review: new
 ui-flagged-folder = Z flagą
-# review: new
 ui-all-folders = Wszystkie foldery
-# review: new
 ui-the-account = konto
-# review: new
 ui-folder-name = Nazwa folderu:
-# review: new
 ui-find-hint = Szukaj w poczcie
-# review: new
 ui-find-tip = Przeszukuje tematy, nadawców, odbiorców, nazwy załączników i treść wiadomości.
-# review: new
 ui-clear-search = Wyczyść wyszukiwanie
-# review: new
 ui-no-match = Żadna wiadomość nie pasuje do „{ $words }”.
-# review: new
 ui-no-match-all = Wyszukiwanie obejmuje tematy, nadawców, odbiorców, nazwy załączników i treść wiadomości we wszystkich folderach. Sprawdź pisownię lub wpisz mniej słów.
-# review: new
-ui-no-match-in = Wyszukiwanie w folderze { $folder } obejmuje tematy, nadawców, odbiorców, nazwy załączników i treść wiadomości. Sprawdź pisownię lub wpisz mniej słów.
-# review: new
+ui-no-match-in = Zakres wyszukiwania: „{ $folder }”. Przeszukiwane są tematy, dane nadawców i odbiorców, nazwy załączników oraz treść wiadomości. Sprawdź pisownię lub wpisz mniej słów.
 ui-no-items = W tym widoku nie ma żadnych elementów.
-# review: new
 ui-choose-folder = Wybierz folder, aby zobaczyć jego wiadomości.
 ui-unsubscribe = Wypisz się
 # review: new
@@ -781,7 +565,6 @@ ui-new-folder-title = Nowy folder
 ui-rename-folder-title = Zmień nazwę folderu
 # review: new
 ui-delete-folder-question = Usunąć folder „{ $folder }” razem z jego wiadomościami i folderami, które zawiera? Zostanie usunięty także na serwerze.
-# review: new
 ui-properties = Właś&ciwości
 # review: new
 ui-account-sync = Wyślij i o&dbierz
@@ -791,11 +574,8 @@ ui-account-properties = &Właściwości...
 ui-account-move-up = Przenieś w &górę
 # review: new
 ui-account-move-down = Przenieś w &dół
-# review: new
 ui-menu-open = &Otwórz
-# review: new
 ui-menu-flag = Fla&ga
-# review: new
 ui-menu-view-source = Pokaż ź&ródło
 # review: new
 ui-save-attachments = Zapisz załączniki
@@ -831,10 +611,8 @@ ui-yes = Tak
 ui-no = Nie
 # review: new
 ui-try-again = Spróbuj ponownie
-# review: new
-ui-remove = &Usuń
-# review: new
-ui-signature-of = Podpis: { $account }
+ui-remove = U&suń
+ui-signature-of = Tekst podpisu: { $account }
 # review: new
 ui-sign-in-with = Zaloguj się przez { $provider }
 # review: new

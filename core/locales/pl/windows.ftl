@@ -31,11 +31,9 @@ win-list-loading = Wczytywanie...
 
 ## Buttons and words used in many windows
 
-# review: new
 win-delete-button = &Usuń
 # review: new
 win-find-label = &Znajdź:
-# review: new
 win-save-as-button = Zapisz &jako...
 # review: new
 win-too-many-files = Za dużo plików naraz: wybierz mniej.
@@ -61,8 +59,7 @@ win-format-link = Hiperłącze ({ $ctrl }+K)
 win-show-cc = &DW
 # review: new
 win-show-bcc = &UDW
-# review: new
-win-signature-title = Podpis: { $account }
+win-signature-title = Tekst podpisu: { $account }
 
 ## The folders, the message list and the reading pane
 
@@ -113,8 +110,7 @@ win-files-not-saved = Nie udało się zapisać { $failed } z { $count } plików.
 win-new-folder-in-highlighted = Nowy folder zostanie utworzony wewnątrz zaznaczonego folderu.
 # review: new
 win-delete-folder-ask = Usunąć folder „{ $folder }” razem z jego wiadomościami i folderami, które zawiera? Zostanie usunięty także na serwerze.
-# review: new
-win-rename = Zmień &nazwę...
+win-rename = &Zmień nazwę...
 # review: new
 win-messages-not-saved = Nie udało się zapisać wiadomości.
 # review: new
@@ -136,8 +132,7 @@ win-browser-sign-in = (logowanie w przeglądarce)
 win-add = &Dodaj...
 # review: new
 win-properties-button = &Właściwości...
-# review: new
-win-signature-button = &Podpis...
+win-signature-button = Tekst &podpisu...
 # review: new
 win-sign-in-apps-button = &Aplikacje logowania...
 
