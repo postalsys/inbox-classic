@@ -512,7 +512,7 @@ agent-log-moved = „{ $subject }“ perkeltas (paskirtis: { $folder })
 agent-log-junk = Pažymėtas kaip nepageidaujamas: „{ $subject }“
 agent-log-not-junk = Pažymėtas kaip pageidaujamas: „{ $subject }“
 agent-log-archived = Archyvuotas „{ $subject }“
-agent-log-folder = Sukurtas aplankas „{ $name }“
+agent-log-folder = Paprašyta sukurti aplanką „{ $name }“
 agent-log-unsubscribed = Patvirtinote prašymą atsisakyti prenumeratos. Laiškas: „{ $subject }“
 agent-log-unsubscribe-failed = Nepavyko atsisakyti prenumeratos. Laiškas: „{ $subject }“. Priežastis: { $reason }
 agent-log-unsubscribe-refused = Nepatvirtinote prašymo atsisakyti prenumeratos. Siuntėjai: { $senders }
@@ -701,9 +701,9 @@ agent-read-search = { $count ->
 }
 agent-read-people = Ieškota kontaktų, kurių vardas ar adresas prasideda „{ $query }“
 agent-read-list = { $count ->
-    [one] Peržiūrėtas { $count } laiškų sąrašo įrašas. Aplankas: „{ $folder }“.
-    [few] Peržiūrėti { $count } laiškų sąrašo įrašai. Aplankas: „{ $folder }“.
-   *[other] Peržiūrėta { $count } laiškų sąrašo įrašų. Aplankas: „{ $folder }“.
+    [one] Peržiūrėtas { $count } laiškų sąrašo įrašas. Sąrašas: „{ $folder }“.
+    [few] Peržiūrėti { $count } laiškų sąrašo įrašai. Sąrašas: „{ $folder }“.
+   *[other] Peržiūrėta { $count } laiškų sąrašo įrašų. Sąrašas: „{ $folder }“.
 }
 agent-read-changes = { $count ->
     [one] Peržiūrėtas { $count } naujų laiškų sąrašo įrašas.
@@ -720,8 +720,7 @@ agent-terminal-program-windows = Iš terminalo ({ $terminal }) paleista programa
 agent-terminal-program-linux = Iš terminalo ({ $terminal }) paleista programa
 agent-connect-title-terminal = { $programs } nori naudotis jūsų paštu
 agent-connect-terminal-detail = Visi DI agentai, kuriuos paleidžiate iš šio terminalo, bendrai naudojasi čia suteikta prieiga. Norėdami suteikti agentui atskirą prieigą, agento MCP nustatymuose į jo argumentus įtraukite --name ir savo pasirinktą pavadinimą.
-# review: new
-agent-connect-claimed = Programa prisistatė kaip { $claimed }. Inbox Classic patikrino, kuri programa ją paleido: { $program }.
+agent-connect-claimed = Agentas nurodė, kad jį paleido programa „{ $claimed }“. Inbox Classic patikrino: jį paleido programa „{ $program }“.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
