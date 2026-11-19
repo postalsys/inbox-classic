@@ -2,56 +2,35 @@
 
 ## The app and its menus
 
-# review: new
 mac-quit = Завершить Inbox Classic
-# review: new
 mac-settings = Настройки…
-# review: new
 mac-services = Службы
-# review: new
 mac-hide = Скрыть Inbox Classic
-# review: new
 mac-hide-others = Скрыть остальные
-# review: new
 mac-show-all = Показать все
-# review: new
 mac-check-updates = Проверить обновления…
-# review: new
 mac-close-window = Закрыть окно
-# review: new
 mac-redo = Повторить
-# review: new
 mac-cut = Вырезать
-# review: new
 mac-paste = Вставить
-# review: new
 mac-menu-window = Окно
-# review: new
 mac-minimize = Свернуть
-# review: new
 mac-zoom = Изменить масштаб
-# review: new
 mac-no-updates = Эта версия Inbox Classic не поддерживает автоматические обновления. Загрузите последнюю версию с inboxclassic.com.
 
 ## Settings
 
-# review: new
 mac-settings-title = Настройки
-# review: new
 mac-check-updates-automatically = Автоматически проверять наличие обновлений
-# review: new
 mac-settings-updates = Обновления
 
 ## Dialogs
 
-# review: new
 mac-choose = Выбрать
 
 ## The main window
 
-# review: new
-mac-still-running-detail = Inbox Classic продолжает проверять новую почту в фоновом режиме. Нажмите значок программы в Dock, чтобы открыть ее.
-# review: new
+mac-still-running-detail = Inbox Classic продолжает проверять почту в фоновом режиме. Нажмите значок программы в Dock, чтобы открыть ее.
 mac-outbox-waiting =
     { $count ->
         [one] { $count } сообщение в папке «Исходящие»
@@ -59,28 +38,20 @@ mac-outbox-waiting =
         [many] { $count } сообщений в папке «Исходящие»
        *[other] { $count } сообщения в папке «Исходящие»
     }
-# review: new
 mac-sending = Отправка { $subject }…
-# review: new
-mac-checking = Проверка новых сообщений в { $account }…
-# review: new
+mac-checking = Проверка новой почты в учетной записи «{ $account }»…
 mac-account-said = { $account }: { $message }
-# review: new
-mac-not-bundle = Эта копия Inbox Classic не является пакетом приложения, поэтому не может быть почтовой программой по умолчанию.
-# review: new
-mac-not-made-default = Inbox Classic не стала почтовой программой по умолчанию: { $reason }
-# review: new
+mac-not-bundle = Эта копия Inbox Classic запущена не из пакета приложения (.app), поэтому ее нельзя выбрать почтовой программой по умолчанию.
+mac-not-made-default = Не удалось сделать Inbox Classic почтовой программой по умолчанию: { $reason }
 mac-tool-search = Поиск
 
 ## The folders and the message list
 
-# review: new
 mac-still-indexing-more =
     { $count ->
-        [one] Текст { $count } сообщения еще индексируется, поэтому скоро может найтись больше.
-       *[other] Текст { $count } сообщений еще индексируется, поэтому скоро может найтись больше.
+        [one] Текст { $count } сообщения еще индексируется, поэтому вскоре могут появиться новые результаты.
+       *[other] Текст { $count } сообщений еще индексируется, поэтому вскоре могут появиться новые результаты.
     }
-# review: new
 mac-results-everywhere =
     { $count ->
         [0] Нет результатов по запросу «{ $words }» во всех папках
@@ -89,62 +60,44 @@ mac-results-everywhere =
         [many] { $count } результатов по запросу «{ $words }» во всех папках
        *[other] { $count } результата по запросу «{ $words }» во всех папках
     }
-# review: new
 mac-results-in =
     { $count ->
-        [0] Нет результатов по запросу «{ $words }» в папке «{ $folder }»
-        [one] { $count } результат по запросу «{ $words }» в папке «{ $folder }»
-        [few] { $count } результата по запросу «{ $words }» в папке «{ $folder }»
-        [many] { $count } результатов по запросу «{ $words }» в папке «{ $folder }»
-       *[other] { $count } результата по запросу «{ $words }» в папке «{ $folder }»
+        [0] Нет результатов по запросу «{ $words }» в «{ $folder }»
+        [one] { $count } результат по запросу «{ $words }» в «{ $folder }»
+        [few] { $count } результата по запросу «{ $words }» в «{ $folder }»
+        [many] { $count } результатов по запросу «{ $words }» в «{ $folder }»
+       *[other] { $count } результата по запросу «{ $words }» в «{ $folder }»
     }
-# review: new
 mac-still-indexing =
     { $count ->
         [one] еще индексируется текст { $count } сообщения
        *[other] еще индексируется текст { $count } сообщений
     }
-# review: new
 mac-folder-unread = { $folder }, непрочитанных: { $count }
-# review: new
 mac-import-messages = Импорт сообщений
-# review: new
 mac-save-messages = Сохранить сообщения
-# review: new
 mac-save-attachments-menu = Сохранить вложения…
-# review: new
 mac-files-not-saved =
     { $count ->
        *[other] Не удалось сохранить { $failed } из { $count } файлов.
     }
-# review: new
-mac-no-calendar-app = На этом Mac нет программы календаря, чтобы открывать приглашения (файлы .ics).
-# review: new
+mac-no-calendar-app = Не удалось открыть приглашение в календаре. Проверьте, установлена ли на этом Mac программа для открытия файлов .ics.
 mac-file-not-saved = Не удалось сохранить файл.
-# review: new
-mac-unsubscribing = Отписка от { $target }…
+mac-unsubscribing = Отправка запроса на отписку: { $target }…
 mac-loading-list = Загрузка…
 
 ## The compose window
 
-# review: new
-mac-bold = Жирный
-# review: new
+mac-bold = Полужирный
 mac-italic = Курсив
-# review: new
 mac-underline = Подчеркнутый
-# review: new
-mac-bcc = Скрытая копия
-# review: new
-mac-command-click-to-open = ⌘-нажатие, чтобы открыть
-# review: new
+mac-bcc = Скрытая
+mac-command-click-to-open = Нажмите ⌘ и щелкните, чтобы открыть
 mac-saving-to-drafts = Сохранение в папку «Черновики»…
-# review: new
 mac-dont-save = Не сохранять
 
 ## The reading pane
 
-# review: new
 mac-files =
     { $count ->
         [one] { $count } файл
@@ -155,48 +108,30 @@ mac-files =
 
 ## Accounts
 
-# review: new
 mac-next = Далее
-# review: new
 mac-name-placeholder = Анна Смирнова
-# review: new
 mac-more-sign-in-options = Другие способы входа…
-# review: new
 mac-add-sign-in-app = Добавить приложение для входа…
-# review: new
 mac-looking-up = Поиск параметров для { $domain }…
-# review: new
 mac-add-button = Добавить…
-# review: new
 mac-properties-button = Свойства…
-# review: new
-mac-signature-button = Подпись…
-# review: new
+mac-signature-button = Текстовая подпись…
 mac-security-button = Безопасность…
-# review: new
 mac-sign-in-apps-button = Приложения для входа…
 
 ## AI agents
 
-# review: new
-mac-forget-program = Удалить эту программу и журнал действий ее агентов?
-# review: new
+mac-forget-program = Удалить запись об этой программе и журнал действий ее агентов?
 mac-forget-program-detail = Разрешения программы будут удалены. При следующем подключении она снова запросит разрешение.
 
 ## Sign-in apps
 
-# review: new
-mac-checking-issuer = Проверка { $issuer }…
-# review: new
+mac-checking-issuer = Проверка сервера авторизации: { $issuer }…
 mac-edit-button = Изменить…
-# review: new
-mac-use-for-new-accounts = Использовать { $name } для новых учетных записей
-# review: new
+mac-use-for-new-accounts = Предлагать приложение «{ $name }» для новых учетных записей
 mac-built-in = { $name } (встроенное)
 
 ## Other windows
 
-# review: new
 mac-new-folder-button = Новая папка…
-# review: new
 mac-edit-link = Изменить ссылку…
