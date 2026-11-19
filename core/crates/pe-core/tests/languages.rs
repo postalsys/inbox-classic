@@ -70,7 +70,7 @@ fn the_core_speaks_the_language_set() {
     );
     assert_eq!(
         pe_core::saved_text(3, std::path::Path::new("/tmp/Desktop")),
-        "3 Nachrichten in Desktop gespeichert"
+        "Gespeichert: 3 Nachrichten. Ziel: Desktop"
     );
     assert_eq!(pe_core::color_name(pe_core::FlagColor::Purple), "Lila");
     // a flag sentence takes the colour's form of the language, not the English name lowercased

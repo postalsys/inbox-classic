@@ -1970,7 +1970,7 @@ fn an_agent_organizes_folders_and_conversations() {
         }));
         assert_eq!(
             said(&core.agent_log(1).unwrap()[0]),
-            "Renamed the folder \u{201c}Projects\u{201d} to \u{201c}Clients\u{201d}"
+            "Requested renaming the folder \u{201c}Projects\u{201d} to \u{201c}Clients\u{201d}"
         );
         for fixed in [inbox, sent] {
             let refused = agent
@@ -2292,7 +2292,7 @@ fn an_agent_changes_many_messages_at_once() {
         let report = core.agent_undo_since(host.id, since).unwrap();
         assert_eq!((report.entries, report.undone), (2, 5), "{report:?}");
         assert!(report.whole());
-        assert_eq!(report.text(), "Took back 2 changes.");
+        assert_eq!(report.text(), "Took back 2 recorded changes, wholly or in part.");
         assert!(eventually(20, || server.subjects("INBOX").len() == 5));
         // moved back, they are in the store's Inbox once the sync of it brings them (a move takes them out of the
         // folder they leave at once, and into the one they go to as the server has them there)

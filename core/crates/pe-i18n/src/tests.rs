@@ -89,7 +89,7 @@ fn a_message_a_catalog_lacks_is_in_english() {
     assert_eq!(or_english(&partial, "menu-file", &[]).as_deref(), Some("&Datei"));
     assert_eq!(
         or_english(&partial, "cmd-mark-read", &[]).as_deref(),
-        Some("Mark as &Read")
+        Some("&Mark as Read")
     );
     assert_eq!(
         or_english(&partial, "messages", &[("count", 2u64.into())]).as_deref(),
@@ -309,7 +309,7 @@ fn a_message_by_its_id_in_a_language() {
         message_in("de", "cmd-mark-read").as_deref(),
         Some("Als &gelesen markieren")
     );
-    assert_eq!(message_in("xx", "cmd-mark-read").as_deref(), Some("Mark as &Read"));
+    assert_eq!(message_in("xx", "cmd-mark-read").as_deref(), Some("&Mark as Read"));
     assert_eq!(message_in("en", "no-such-message"), None);
 }
 

@@ -123,7 +123,7 @@ fn a_new_message_has_neither_and_turning_one_on_asks_for_a_key_first() {
     let shown = core.compose_security(account, &signed).unwrap();
     assert!(shown.sign && shown.sign_enabled && shown.has_own_key);
     assert_eq!(shown.tone, Some(Tone::Good));
-    assert!(shown.text.starts_with("Signed"), "{}", shown.text);
+    assert!(shown.text.starts_with("Will be signed"), "{}", shown.text);
     assert!(shown.recipients.iter().all(|r| r.key == RecipientKey::Missing));
     assert_eq!(shown.block, Block::None, "signing needs no recipient's key");
 }
@@ -203,10 +203,12 @@ fn each_recipient_shows_its_key_and_encrypt_stops_on_one_without() {
     assert_eq!(shown.tone, Some(Tone::Warning));
     assert_eq!(
         shown.text,
-        "dave@example.org has no key, so the message can not be encrypted yet."
+        "No usable key is available for dave@example.org, so the message cannot be encrypted yet."
     );
     assert!(
-        shown.keys_intro.starts_with("One recipient has no key"),
+        shown
+            .keys_intro
+            .starts_with("One recipient has no usable encryption key"),
         "{}",
         shown.keys_intro
     );
@@ -231,10 +233,7 @@ fn each_recipient_shows_its_key_and_encrypt_stops_on_one_without() {
         "every recipient has a key: Send is the default"
     );
     assert_eq!(shown.tone, Some(Tone::Good), "Bob's key is not verified");
-    assert_eq!(
-        shown.text,
-        "Encrypted and signed: only you and its 3 recipients can read it."
-    );
+    assert_eq!(shown.text, "Will be encrypted and signed for you and its 3 recipients.");
     assert!(shown.keys_intro.starts_with("The message is encrypted to each"));
     // all of them verified: green
     let only_carol = Outgoing {
@@ -247,7 +246,7 @@ fn each_recipient_shows_its_key_and_encrypt_stops_on_one_without() {
     assert_eq!(shown.tone, Some(Tone::Verified));
     assert_eq!(
         shown.text,
-        "Encrypted and signed: only you and carol@example.org can read it."
+        "Will be encrypted and signed for you and carol@example.org."
     );
 }
 
@@ -305,7 +304,7 @@ fn a_reply_to_encrypted_mail_asks_before_encrypt_goes_off_and_its_quote_stays_en
     assert!(
         shown
             .unencrypted_text
-            .contains("quotes or forwards an encrypted message")
+            .contains("contains text, pictures or attachments from encrypted mail")
     );
     // turning it off asks first, and the switches stay
     let toggled = core
@@ -314,7 +313,7 @@ fn a_reply_to_encrypted_mail_asks_before_encrypt_goes_off_and_its_quote_stays_en
     assert_eq!(toggled.question, Question::TurnOffEncrypt);
     assert!(toggled.encrypt);
     assert!(
-        toggled.text.contains("until you remove what it quotes"),
+        toggled.text.contains("until you remove all that content"),
         "{}",
         toggled.text
     );

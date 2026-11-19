@@ -119,7 +119,7 @@ extension UITest {
         await pressKey(.composeSign, in: compose)
         check(window.signButton?.state == .on && menuItem(.composeSign)?.state == .on,
               "Option-Command-Y in the text turns Sign on: the button pressed, the menu item checked")
-        let signedLine = "Signed: recipients can check that it comes from you and was not changed."
+        let signedLine = "Will be signed: recipients can check that the signed content has not changed. They must also verify who owns your key."
         check(!window.securityLine.isHidden && window.securityLine.said == signedLine && window.securityLine.tone == PE_PROTECTION_TONE_GOOD,
               "the line says \"\(signedLine)\" in blue (\(window.securityLine.said))")
         check(window.securityLine.pictures.mark == SecurityBar.symbol(PE_PROTECTION_TONE_GOOD) && !window.securityLine.pictures.lock,
@@ -150,7 +150,7 @@ extension UITest {
         check(!window.keysRow.isHiddenOrHasHiddenAncestor && window.keysRow.chips.count == 1 && alice?.recipient?.label == "Alice Example"
               && alice?.recipient?.tone == PE_PROTECTION_TONE_VERIFIED,
               "the Keys row shows Alice with a green lock (\(alice?.recipient?.text ?? ""))")
-        let encryptedLine = "Encrypted and signed: only you and Alice Example can read it."
+        let encryptedLine = "Will be encrypted and signed for you and Alice Example."
         check(window.securityLine.said == encryptedLine && window.securityLine.tone == PE_PROTECTION_TONE_VERIFIED
               && window.securityLine.pictures.lock, "the line says \"\(encryptedLine)\" in green with the lock (\(window.securityLine.said))")
         check(!window.securityLine.detailsButton.isHidden, "with Details")
@@ -190,7 +190,7 @@ extension UITest {
         }
         check(true, "Send opens Recipients' Keys instead of sending")
         let intro: NSTextField? = find("recipient.keys.intro", in: sheetWindow)
-        check(intro?.stringValue.hasPrefix("One recipient has no key to encrypt to") == true, "it says \"One recipient has no key...\" (\(intro?.stringValue ?? ""))")
+        check(intro?.stringValue.hasPrefix("One recipient has no usable encryption key") == true, "it says \"One recipient has no usable encryption key...\" (\(intro?.stringValue ?? ""))")
         check(sheet.rows.map(\.text).first == Text.pgpRecipientVerified.text && sheet.rows.last?.text.hasPrefix(Text.pgpRecipientMissing.text) == true,
               "Alice (Key verified) and Dave (No key) with their locks (\(sheet.rows.map(\.text)))")
         if let row = sheet.rows.firstIndex(where: { $0.address == "dave@example.com" }) {

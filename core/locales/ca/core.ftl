@@ -762,6 +762,7 @@ pgp-pending = El { $date } es va trobar una clau diferent per a { $address }.
 ## Llegir correu signat i xifrat (protect.rs)
 pgp-part-verified = Signat per { $signer }, clau verificada
 pgp-part-signed = Signat per { $signer } (clau no verificada)
+# review: changed
 pgp-part-other = Signat per { $signer }; la signatura no s’ha pogut associar a l’adreça del remitent
 pgp-part-unknown-key = Signatura no comprovada: la clau és desconeguda
 pgp-part-not-signed = No signat

@@ -722,6 +722,7 @@ pgp-pending = Aadressile { $address } leiti { $date } uus võti, mis erineb seni
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Allkirjastaja: { $signer }, võtme omanik kinnitatud
 pgp-part-signed = Allkirjastaja: { $signer }, võtme omanik kinnitamata
+# review: changed
 pgp-part-other = Allkirjastaja: { $signer }. Allkirja ei saa üheselt kirja saatjaga seostada
 pgp-part-unknown-key = Allkirjastatud, kuid võti pole teada
 pgp-part-not-signed = Allkirjastamata

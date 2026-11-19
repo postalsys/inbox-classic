@@ -174,8 +174,10 @@ bool Ask(HWND owner, const std::wstring& title, const std::wstring& text, const 
          bool safeDefault) {
     RegisterDialogClass(kAskClass, SimpleProc<AskState>);
     int pad = Scale(12), icon = GetSystemMetrics(SM_CXICON);
-    int textWidth = Scale(330);
-    int textHeight = static_cast<int>(MeasureText(text, textWidth).cy);
+    // wider when a word is longer than the line, as a static control would cut it
+    SIZE measured = MeasureText(text, Scale(330));
+    int textWidth = std::max(Scale(330), static_cast<int>(measured.cx));
+    int textHeight = static_cast<int>(measured.cy);
     int buttonWidth = ButtonWidth({yes, no});
     int width = std::max(pad + icon + pad + textWidth + pad, Scale(10) + 2 * buttonWidth + Scale(6) + Scale(10));
     int height = pad + std::max(icon, textHeight) + Scale(20) + Scale(25) + Scale(10);

@@ -226,7 +226,7 @@ impl UndoReport {
         (self.undone == 0).then(|| tr(self.first.unwrap_or(Text::AgentUndoImpossible)))
     }
 
-    /// What was taken back, in a sentence: "Took back 3 changes."
+    /// What was taken back, in a sentence: "Took back 3 recorded changes, wholly or in part."
     pub fn summary(&self) -> String {
         tr_args(Text::AgentUndoDone, &[("count", self.entries.into())])
     }
@@ -667,7 +667,7 @@ mod tests {
             ..Default::default()
         };
         assert!(report.whole());
-        assert_eq!(report.text(), "Took back 2 changes.");
+        assert_eq!(report.text(), "Took back 2 recorded changes, wholly or in part.");
         report.left(Text::AgentUndoNotArrived, 3);
         report.left(Text::AgentUndoChanged, 1);
         report.left(Text::AgentUndoSent, 0);

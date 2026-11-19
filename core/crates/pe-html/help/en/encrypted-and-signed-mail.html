@@ -6,7 +6,7 @@
     <tr><th>Color</th><th>What it means</th></tr>
     <tr><td>Green</td><td>Signed by the sender, with a key you verified.</td></tr>
     <tr><td>Blue</td><td>Signed by the sender with a key you have not verified, or encrypted to you.</td></tr>
-    <tr><td>Amber</td><td>Something is not right: the signature does not match, the signing key could not be matched to the sender, or a part could not be read.</td></tr>
+    <tr><td>Amber</td><td>Something is not right: the signature does not match, someone other than the sender signed, or a part could not be read.</td></tr>
     <tr><td>Gray</td><td>Not signed, or the signature could not be checked, for example because its key is missing.</td></tr>
 </table>
 <p>A message whose parts are protected differently shows each part in a frame of its own, with its own label. The bar then counts the parts of each kind. Click a label, or <b data-text="ui-protection-details"></b> on the bar, to see who signed each part, with which key and when.</p>

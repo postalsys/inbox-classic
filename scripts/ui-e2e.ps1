@@ -2168,7 +2168,7 @@ public static class Dragger {
     Check ($null -ne $sorted) 'the rule moves new mail it matches to Archive'
     Check ($sorted -and $sorted.flags -contains '\Seen') 'and marks it read'
     Check ($null -eq (Find 'INBOX' 'Subject: Weekly news in the UI test')) 'it is not left in the Inbox'
-    $said = WaitFor { $t = StatusPart $rulesStatus 0; if ($t -like '*sorted by your rules') { $t } } 15
+    $said = WaitFor { $t = StatusPart $rulesStatus 0; if ($t -like '*processed by your rules') { $t } } 15
     Check ($null -ne $said) "the status bar says the rules sorted it ($(StatusPart $rulesStatus 0))"
     SelectFolder 3
     [void](WaitFor { @(SubjectRows 'Weekly news in the UI test').Count -gt 0 } 10)
@@ -2443,7 +2443,7 @@ public static class Dragger {
         Check ($null -ne $verify) 'Verify opens'
         if ($verify) {
             Check ((Statics $verify) -match 'Ask Bob Example') "the intro names Bob ($(Statics $verify))"
-            Check ((Statics $verify) -match 'marked as theirs for bob@example\.net') "and the addresses They Match marks ($(Statics $verify))"
+            Check ((Statics $verify) -match 'this address belongs to the contact: bob@example\.net') "and the addresses They Match marks ($(Statics $verify))"
             $large = GetText $verify $IDC_KEY_FINGERPRINT
             Check ($large -match '^([0-9A-F]{4} ){4}[0-9A-F]{4}\r\n([0-9A-F]{4} ){4}[0-9A-F]{4}$') "the fingerprint in two lines of five groups ($($large -replace "`r`n", ' / '))"
             Check ((GetText $verify $IDC_VERIFY_MATCH) -match 'Match' -and (GetText $verify $IDC_VERIFY_DIFFER) -match 'Differ') 'They Match and They Differ'
@@ -3158,7 +3158,7 @@ public static class Dragger {
         [System.Windows.Forms.SendKeys]::SendWait('^+d')
         Check ([bool](WaitFor { (BarPressed $compose $IDM_COMPOSE_SIGN) -and (MenuChecked $compose $IDM_COMPOSE_SIGN) } 10)) 'Ctrl+Shift+D in the text presses Sign and checks Tools > Digitally Sign'
         $line = WaitFor { $t = SecurityLine $compose; if ($t) { $t } } 10
-        Check ($line -eq 'Signed: recipients can check that it comes from you and was not changed.') "the line says it is signed ($line)"
+        Check ($line -eq 'Will be signed: recipients can check that the signed content has not changed. They must also verify who owns your key.') "the line says it is signed ($line)"
         Check ((LineFill $compose) -eq $fills.good) "in blue ($(LineFill $compose))"
         Shot $compose 'write-30-sign'
         $before = NewestUid
@@ -3181,7 +3181,7 @@ public static class Dragger {
         $row = WaitFor { $t = KeysRow $compose; if ($t -match 'Alice Example, Key verified') { $t } } 10
         Check ($null -ne $row) "the Keys row shows Alice with her key verified ($(KeysRow $compose))"
         $line = WaitFor { $t = SecurityLine $compose; if ($t -match '^Encrypted') { $t } } 10
-        Check ($line -eq 'Encrypted and signed: only you and Alice Example can read it.') "the line says who can read it ($line)"
+        Check ($line -eq 'Will be encrypted and signed for you and Alice Example.') "the line says who can read it ($line)"
         Check ((LineFill $compose) -eq $fills.verified) "in green ($(LineFill $compose))"
         Shot $compose 'write-31-encrypt'
         $before = NewestUid
@@ -3200,7 +3200,7 @@ public static class Dragger {
         $row = WaitFor { $t = KeysRow $compose; if ($t -match 'Dave, No key: none was found on') { $t } } 20
         Check ($null -ne $row) "Dave's lock says no key was found ($(KeysRow $compose))"
         $line = SecurityLine $compose
-        Check ($line -match '^(Dave|dave@example\.com) has no key') "the line names him ($line)"
+        Check ($line -match '^No usable key is available for (Dave|dave@example\.com)') "the line names him ($line)"
         Check ((LineFill $compose) -eq $fills.warning) "in amber ($(LineFill $compose))"
         $status = [Native.Win]::FindWindowEx($compose, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
         Write-Host "   the status bar after the lookup: $(StatusPart $status 0)"
@@ -3243,7 +3243,7 @@ public static class Dragger {
         $ask = WaitShown 'InboxClassicAsk' 10
         Check ($null -ne $ask) 'Encrypt off asks first'
         if ($ask) {
-            Check ((Statics $ask) -match 'quotes or forwards an encrypted message') "naming the encrypted quote ($(Statics $ask))"
+            Check ((Statics $ask) -match 'contains text, pictures or attachments from encrypted mail') "naming the encrypted quote ($(Statics $ask))"
             Check ((GetText $ask 1) -eq '&Turn Encryption Off' -and (GetText $ask 2) -eq '&Keep It Encrypted') "with Turn Encryption Off and Keep It Encrypted ($(GetText $ask 1) / $(GetText $ask 2))"
             Check (([Native.Win]::GetWindowLong([Native.Win]::GetDlgItem($ask, 2), -16) -band 0xF) -eq 1) 'Keep It Encrypted is the default'
             Shot $reply 'write-33-reply-encrypted' $ask
@@ -4136,7 +4136,7 @@ public static class Dragger {
     $listServer.Stop()
     Check ($sent -match '^POST /u/42 ' -and $sent -match 'List-Unsubscribe=One-Click') "Yes posts List-Unsubscribe=One-Click to the list ($(($sent -split "`r`n")[0]))"
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
-    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'Unsubscribe request accepted' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'The mailing list has accepted the unsubscribe request' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
     Step 'a calendar invitation'
@@ -4550,7 +4550,7 @@ public static class Dragger {
     if ($send) {
         $invitationLine = WindowText ([Native.Win]::GetDlgItem($send, $IDC_AGENT_INVITATION))
         Check ((Visible $send $IDC_AGENT_INVITATION) -and $invitationLine -match "^This message accepts the invitation $([char]0x201C)Roadmap review$([char]0x201D) \(.+\)\." -and
-               $invitationLine -match 'changes only once the message has been sent') "a line says what it answers ($invitationLine)"
+               $invitationLine -match 'once the mail server accepts the message') "a line says what it answers ($invitationLine)"
         $lineBox = New-Object Native.Win+RECT; $bodyBox = New-Object Native.Win+RECT
         [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($send, $IDC_AGENT_INVITATION), [ref]$lineBox)
         [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($send, $IDC_AGENT_BODY), [ref]$bodyBox)
@@ -4625,7 +4625,7 @@ public static class Dragger {
             # already went is no longer offered
             $report = WaitFor { $w = [Native.Win]::GetWindow($agents, 6); if ($w -ne [IntPtr]::Zero -and $w -ne $agents) { $w } } 20
             $said = if ($report) { Statics $report } else { '' }
-            Check ($said.Trim() -eq "Took back $count changes.") "and says what it took back ($said)"
+            Check ($said.Trim() -eq "Took back $count recorded changes, wholly or in part.") "and says what it took back ($said)"
             if ($report) { Shot $report 'agents-12b-undo-since-report'; [void][Native.Win]::PostMessage($report, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero) }
             [void](WaitFor { [Native.Win]::GetWindow($agents, 6) -eq $agents -or [Native.Win]::GetWindow($agents, 6) -eq [IntPtr]::Zero } 10)
             Check ([bool](WaitFor { @(& $topRows) -match $bulkBack } 10)) "the log shows the change taken back ($((& $topRows) -join '; '))"
@@ -4635,7 +4635,7 @@ public static class Dragger {
             $again = WaitShown 'InboxClassicAgentUndoSince' 10
             if ($again) {
                 $title = WindowText ([Native.Win]::GetDlgItem($again, $IDC_AGENT_UNDO_TITLE))
-                Check ($title -eq 'My AI agent made no changes in this time that can be taken back.' -and -not (Visible $again $IDC_AGENT_TAKE_BACK) -and
+                Check ($title -eq 'My AI agent has no changes in this period that can be taken back.' -and -not (Visible $again $IDC_AGENT_TAKE_BACK) -and
                        (WindowText ([Native.Win]::GetDlgItem($again, 2))) -eq 'Close') "asked again, nothing is left to take back, only Close ($title)"
                 Click $again 2
                 [void](WaitFor { -not [Native.Win]::IsWindow($again) } 10)
@@ -7530,7 +7530,7 @@ public static class Dragger {
         Check ((Visible $options $IDC_OPTIONS_KEYSERVER) -and (& $boxOn $options $IDC_OPTIONS_KEYSERVER)) 'and Look up keys on keys.openpgp.org, on'
         $searchNote = GetText $options $IDC_OPTIONS_SEARCH_ENCRYPTED_NOTE
         $keyserverNote = GetText $options $IDC_OPTIONS_KEYSERVER_NOTE
-        Check ($searchNote -match 'not encrypted' -and $searchNote -match 'AI agents never search') "its note says the index is not encrypted and AI agents never search it ($searchNote)"
+        Check ($searchNote -match 'not encrypted' -and $searchNote -match 'AI agents cannot search') "its note says the index is not encrypted and AI agents never search it ($searchNote)"
         Check ($keyserverNote -match 'address') "the keyserver's note says what is sent ($keyserverNote)"
         Shot $options 'options-4-encryption'
         # each off, with Apply, kept when Options opens again; then on again

@@ -513,7 +513,7 @@ pub(super) async fn encryption_keys(d: &Driver) {
         match wait_alert(10).await {
             Some(sure) => {
                 d.check(
-                    alert_text(&sure).contains("Remove the key of Bob Example?"),
+                    alert_text(&sure).contains("Remove the key associated with Bob Example?"),
                     "Remove asks first",
                 );
                 answer(&sure, "Yes");

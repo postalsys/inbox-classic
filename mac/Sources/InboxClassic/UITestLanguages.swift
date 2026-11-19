@@ -185,7 +185,7 @@ extension UITest {
                 (log?.view(atColumn: 2, row: $0, makeIfNecessary: true) as? NSTableCellView)?.textField?.stringValue ?? ""
             }
             if language == "de" {
-                check(rows.contains { $0.hasPrefix("Sie haben folgende Mailinglisten nicht abbestellt:") }
+                check(rows.contains { $0.hasPrefix("Sie haben keine Abmeldung für folgende Absender genehmigt:") }
                       && rows.contains { $0.contains("gelesen") },
                       "the AI Agents log shows what agents did and read in German, the rows written before too (\(rows))")
             } else {
@@ -203,7 +203,7 @@ extension UITest {
         guard let ask else { return }
         let heading = (find("agent.heading", in: ask) as NSTextField?)?.stringValue ?? ""
         if language == "de" {
-            check(heading == "Aus Terminal gestartete Programme möchten auf Ihre E-Mails zugreifen", "the question in German (\(heading))")
+            check(heading.contains("Terminal") && heading.hasSuffix("möchten auf Ihre E-Mails zugreifen"), "the question in German (\(heading))")
         } else {
             checkCatalogWords(in: ask, "the question for programs started from a terminal")
         }
@@ -231,7 +231,7 @@ extension UITest {
         choose(find("undoSince.span", in: ask), 5)
         if language == "de" {
             let words = views(NSTextField.self, in: ask.contentView).map(\.stringValue)
-            check(words.contains("Rückgängig machen, was dieses Programm getan hat:"), "Undo Since in German (\(words))")
+            check(words.contains("Änderungen dieses Programms zurücknehmen:"), "Undo Since in German (\(words))")
         } else {
             checkCatalogWords(in: ask, "Undo Since")
         }

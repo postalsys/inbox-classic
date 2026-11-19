@@ -285,7 +285,7 @@ mod tests {
         };
         assert_eq!(
             read_summary_text(&one),
-            "Read 1 message, opened 1 attachment and looked at message lists 2 times"
+            "Read 1 message, requested 1 attachment and looked at message lists 2 times"
         );
         let read = |what: &str, count: u64, subject: &str| NewRead {
             what: what.into(),
@@ -302,7 +302,7 @@ mod tests {
         );
         assert_eq!(
             read_text(&read("attachment", 1, "Plans")),
-            "Opened \u{201c}plan.pdf\u{201d} of \u{201c}Plans\u{201d}"
+            "Requested the attachment \u{201c}plan.pdf\u{201d} from \u{201c}Plans\u{201d}"
         );
     }
 }

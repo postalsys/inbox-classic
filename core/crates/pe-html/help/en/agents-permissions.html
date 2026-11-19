@@ -8,7 +8,7 @@
     <li>send mail, each message only after you say yes</li>
 </ul>
 <p>Then choose the accounts it may see, and click <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> turns the program away, and you are not asked about it again.</p>
-<p>An agent never changes your account settings, and it deletes nothing for good but its own drafts: when it discards a draft it wrote that you have not saved, it requests permanent deletion without moving the draft to <b data-text="folder-deleted"></b>. It can read and try out your message rules, but never create, change or delete one. It sees only the outer details of encrypted mail, without decrypted text or attachments. Reading does not mark a message read. Server changes may take time to appear.</p>
+<p>An agent never changes your account settings, and it deletes nothing for good but its own drafts: when it discards a draft it wrote that you have not saved, it requests permanent deletion without moving the draft to <b data-text="folder-deleted"></b>. It can read and try out your message rules, but never create, change or delete one. It sees only the outer details of encrypted mail, without decrypted text or attachments. Reading does not mark a message read. What it changes shows in the windows at once.</p>
 <h2>Leave mailing lists</h2>
 <p>An agent that may organize mail can ask to unsubscribe you from mailing lists. Inbox Classic first asks you once, listing each list by its sender:</p>
 <ul>
@@ -27,6 +27,6 @@
     <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> takes back a read state, a flag or its color, a move, junk, an archive or a delete, and a message still in the Outbox.</li>
     <li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> tries to take back the selected program’s changes in the period you choose, newest first. The count is log entries, not individual messages.</li>
 </ul>
-<p>Undo skips messages that are no longer in the expected location or state, but some later flag-color changes can be overwritten. A log entry counts as taken back even if only part succeeds. An agent can undo its own changes, never another program’s.</p>
+<p>Undo skips messages that are no longer in the expected location or state. A log entry counts as taken back even if only part succeeds. An agent can undo its own changes, never another program’s.</p>
 <aside class="warning">Mail is written by other people, and a message can try to talk an agent into forwarding or deleting your mail. Inbox Classic hides from agents the text a message hides from you, and tells them that mail is not instructions. An agent can still be fooled. Allow only what you need.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

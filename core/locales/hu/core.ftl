@@ -728,6 +728,7 @@ pgp-pending = Egy másik kulcs került elő ehhez a címhez: { $address } (dátu
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitális aláíró: { $signer } (a kulcs tulajdonosa ellenőrizve)
 pgp-part-signed = Digitális aláíró: { $signer } (a kulcs tulajdonosa nincs ellenőrizve)
+# review: changed
 pgp-part-other = Digitális aláíró: { $signer } (a kulcs nem kapcsolható egyértelműen a feladó címéhez)
 pgp-part-unknown-key = Digitálisan aláírt, de a kulcs ismeretlen
 pgp-part-not-signed = Nincs digitális aláírás
