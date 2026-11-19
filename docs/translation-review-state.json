@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the 27 newly merged Lithuanian MCP catalog entries and current agent/invitation help (agents-permissions, agents-sending, invitations) in actual bulk-action, Undo Since and invitation-consent context. Lithuanian now has 27 catalog entries and 25 help topics pending. Then continue encryption/privacy help and the other language queues. MCP phase3a is now in the active inventory; phase3b remains separately queued. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -28264,45 +28264,9 @@
       ]
     },
     "lt": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-undo-since-button",
-          "ui-undo-since-span",
-          "ui-take-back"
-        ],
-        "core.ftl": [
-          "agent-undo-changed",
-          "agent-log-bulk-read",
-          "agent-log-bulk-unread",
-          "agent-log-bulk-flagged",
-          "agent-log-bulk-unflagged",
-          "agent-log-bulk-color",
-          "agent-log-bulk-moved",
-          "agent-log-bulk-archived",
-          "agent-log-bulk-junk",
-          "agent-log-bulk-not-junk",
-          "agent-log-bulk-deleted",
-          "agent-undo-span",
-          "agent-undo-since-question",
-          "agent-undo-since-detail",
-          "agent-undo-done",
-          "agent-undo-left-gone",
-          "agent-undo-left-changed",
-          "agent-undo-left-sent",
-          "agent-undo-left-impossible",
-          "agent-invitation-reply",
-          "invitation-reply-subject",
-          "invitation-reply-text"
-        ],
-        "windows.ftl": [
-          "win-undo-since",
-          "win-take-back"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [
         "agents-connect.html",
-        "agents-permissions.html",
-        "agents-sending.html",
         "brand-logos.html",
         "command-line.html",
         "connections.html",
@@ -28312,7 +28276,6 @@
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "invitations.html",
         "keyboard-shortcuts.html",
         "links-scripts.html",
         "message-not-shown.html",
@@ -32683,6 +32646,254 @@
             "source-notes.json": "/private/tmp/inbox-lt-accounts-20261119-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-lt-accounts-20261119-screenshots.json",
             "html.log": "/private/tmp/inbox-lt-accounts-20261119-html.log"
+          }
+        },
+        {
+          "id": "lt-mcp3a-agents-invitations-20261119",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-undo-since-button",
+              "ui-undo-since-span",
+              "ui-take-back"
+            ],
+            "core.ftl": [
+              "agent-undo-changed",
+              "agent-log-bulk-read",
+              "agent-log-bulk-unread",
+              "agent-log-bulk-flagged",
+              "agent-log-bulk-unflagged",
+              "agent-log-bulk-color",
+              "agent-log-bulk-moved",
+              "agent-log-bulk-archived",
+              "agent-log-bulk-junk",
+              "agent-log-bulk-not-junk",
+              "agent-log-bulk-deleted",
+              "agent-undo-span",
+              "agent-undo-since-question",
+              "agent-undo-since-detail",
+              "agent-undo-done",
+              "agent-undo-left-gone",
+              "agent-undo-left-changed",
+              "agent-undo-left-sent",
+              "agent-undo-left-impossible",
+              "agent-invitation-reply",
+              "invitation-reply-subject",
+              "invitation-reply-text"
+            ],
+            "windows.ftl": [
+              "win-undo-since",
+              "win-take-back"
+            ]
+          },
+          "reviewed_help": [
+            "agents-permissions.html",
+            "agents-sending.html",
+            "invitations.html"
+          ],
+          "changed_values": 18,
+          "files": {
+            "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
+            "core/locales/lt/core.ftl": "f139ad6c02a63ff43df8159e9b4b537fecff536a49843a7e1ddeab8676cab043",
+            "core/locales/lt/windows.ftl": "18fa93d839edfa594938f39e9f473c7121ccf6bf4bcab6350e98f3cd63882688",
+            "core/crates/pe-html/help/lt/agents-permissions.html": "b7d4ad072668e8ef80cd7cc1f3a6fcbe7a08583bb5a2ec9cbcecb93b6323ae54",
+            "core/crates/pe-html/help/lt/agents-sending.html": "f441b2536650daabf3c1469e6722e8dae42e194aeb9c5f44d21e3a510f2c28f5",
+            "core/crates/pe-html/help/lt/invitations.html": "7fdea601205ace76b567faed8c4037edaffb7512252230e1024d832e32e1ed99"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "5352e20b4b7d46a9efbb149010aeb0370aa702da9e806336eed2028028fc06f0",
+            "core/locales/en/core.ftl": "8b1ad2109015727b94afc42ac5ddc6c5dfce54f436dffbc01eb25bc4380ff962",
+            "core/locales/en/windows.ftl": "b857759344cb409a8621815f03909aa55ba7902e36a1a85118c794aa5775a674",
+            "core/crates/pe-html/help/en/agents-permissions.html": "4810f1b5cfeecadc42028efaa2ac175aa6954262fe9b1b43d9b56818777bd8d5",
+            "core/crates/pe-html/help/en/agents-sending.html": "081e96e5370a167fcfa689c5814d86dc0f896b393185b5ebd7605680c7f44474",
+            "core/crates/pe-html/help/en/invitations.html": "b0a936d0191b6ff38e8219f482b1e3095593eb50072577a22c9cdf4acd94aa9f"
+          },
+          "validation": "Lithuanian structural checks pass with 1,513 expected mark-only diagnostics. Exact reconstruction verifies 27 catalog entries, with 18 improved values and nine retained, plus three full help topics and 22 improved wording lines. IDs, variables, selector branches, access-key counts, ellipses, comments, tags, attributes, platform branches and literal keys/code are preserved. Static inspection covers 20 selector messages with 239 count/enum samples and 58 substitutions; three Windows dialog scopes are collision-free, and Mac/Linux action/Cancel labels are distinct. Static Windows/Mac/Linux help joins were inspected. Nineteen runtime/source files and six catalog dependencies match the evidence. Existing English Windows consent and Mac event-card captures were inspected with Linux mailbox context; current source supplies new controls. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,592 help lines; since-start 2,489 entries/635 passages match the queue. Source checkpoint covers 193 refs/10 worktrees; current upstream review inputs and other translation worktree edits are unchanged. MCP phase3b is refreshed separately: one new catalog ID and one help topic per language remain after phase3a integration. No local test suites, builds or manual CI; REVIEWED unchanged.",
+          "notes": "Reviewed all 27 new Lithuanian MCP catalog messages and three complete agent/invitation help topics against bulk snapshots, undo reports, native consent dialogs, invitation generation/status and calendar opening. Distinct action/cancel buttons; natural count agreement; accurate partial undo, queued server actions and invitation consent. Preserved markup, variables, selector branches and literal keys/code. No local test suites.",
+          "help_wording_lines_changed": 22,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/lt/agents-permissions.html": 9,
+            "core/crates/pe-html/help/lt/agents-sending.html": 4,
+            "core/crates/pe-html/help/lt/invitations.html": 9
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-core/src/lib.rs": "7e3272206c202e960aa6be5d3619ae5dd95d75bc8cb7f54f7180bc5022e22c9b",
+            "core/crates/pe-core/src/worker.rs": "f2cde26a672eb37091081b91eb057262433a22325f690df9e2974c7c72398191",
+            "core/crates/pe-core/src/agents.rs": "2922e77994b9a4b1bae373223a72ea68f6aafc95cc2c3094ca41068f4b741a92",
+            "core/crates/pe-core/src/agents/bulk.rs": "4496bfa32f3b4cd7ca4788a136eab5ad3cadceff7381696f130f0151c5b5bc12",
+            "core/crates/pe-core/src/agents/undo.rs": "d3c18f1649b401c7c6cae2f2d8b093e20658dc98f024254a815a5fa54f1dcccb",
+            "core/crates/pe-core/src/agents/invitations.rs": "84c525d37e7ca724aed7a4eaa4611a78c18e2812064d520de015d4c12532c809",
+            "core/crates/pe-core/src/agents/log.rs": "2b3958e8fc1a18d030c587d70715575f17e71d15c33e71f7fc76a5feb33b7351",
+            "core/crates/pe-core/src/selection.rs": "bfe52028d2500ad3e97e0cc7b511b8e97287712bc3a974ea4c5056f08dcaac4c",
+            "core/crates/pe-core/src/calendar.rs": "b81cae9dcd802e28c7af4c898a9d816288d324dd19e9da9525fddf7077544fcf",
+            "core/crates/pe-core/src/calendar_reply.rs": "34740a85cb9a48babedefa287f423c58efc427d51efa37cd89ac146b03ee82a7",
+            "core/crates/pe-store/src/agents.rs": "8c3e0ed6b852f3e813eec7d8ead5e3ce526c20cdc4d7bc5d12019e55d1ea5771",
+            "core/crates/pe-store/src/invitations.rs": "b17f65ae1b0dd41e5ca1693d0dac5de8e194071eda63e63aaf824ee932eb157e",
+            "core/crates/pe-mcp/src/tools.rs": "10f794016eb6ef1918eaf41f209ca81384d5fc4c79719a3ca672182103b106ee",
+            "core/crates/pe-mcp/src/tools/mail.rs": "3951280b67c89402996123d228cf8df391325f763a6b6caa323d84bbf5196081",
+            "app/src/agents.cpp": "ece887f91292f4f803e2d56ac4ced6d5b88a7c7f3136762c4c7302be55950ec9",
+            "linux/src/agents.rs": "2c50c8638161cabc29dccc1bcafcac8e2164fc8a6ec4774b814030274b5423d5",
+            "mac/Sources/InboxClassic/Agents.swift": "f08e796fa598ca4b0d17636c0aed0ab6fb5c6359406f01bcd23fc1d902cb0adf"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "8a676c1f434730809c37789d26bc30b64e33bd1ef159dccf2e8320f598a1f0fb",
+            "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
+            "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
+            "core/locales/lt/core.ftl": "f139ad6c02a63ff43df8159e9b4b537fecff536a49843a7e1ddeab8676cab043",
+            "core/locales/lt/windows.ftl": "18fa93d839edfa594938f39e9f473c7121ccf6bf4bcab6350e98f3cd63882688",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "source_context_findings": {
+            "issues": [
+              {
+                "catalog_ids": [
+                  "ui-undo-since-button",
+                  "ui-undo-since-span",
+                  "ui-take-back",
+                  "win-undo-since",
+                  "win-take-back"
+                ],
+                "topics": [
+                  "agents-permissions.html"
+                ],
+                "finding": "Take Back and Cancel previously displayed the same Lithuanian word. The destructive action now names changes; the ellipsis command opens a time-span chooser. Windows T in the agent list and A in the separate confirmation fit actual scopes. Mac/Linux action and Cancel are distinct; defaults remain controlled by source.",
+                "sources": [
+                  "app/src/agents.cpp",
+                  "mac/Sources/InboxClassic/Agents.swift",
+                  "linux/src/agents.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "agent-log-bulk-read",
+                  "agent-log-bulk-unread",
+                  "agent-log-bulk-flagged",
+                  "agent-log-bulk-unflagged",
+                  "agent-log-bulk-color",
+                  "agent-log-bulk-moved",
+                  "agent-log-bulk-archived",
+                  "agent-log-bulk-junk",
+                  "agent-log-bulk-not-junk",
+                  "agent-log-bulk-deleted"
+                ],
+                "topics": [
+                  "agents-permissions.html"
+                ],
+                "finding": "Bulk preview freezes eligible message refs; apply rechecks the relevant state, excludes later arrivals and skips ineligible rows. More than 1000 eligible messages or a scan beyond 10000 refuses instead of silently truncating. Supported actions are read/unread, flag/color, move/archive, junk/not-junk and trash. Other organize permissions are not bulk actions. Existing organize permission authorizes the change. The log is written after local dispatch while server work may still be pending.",
+                "sources": [
+                  "core/crates/pe-core/src/agents/bulk.rs",
+                  "core/crates/pe-core/src/selection.rs",
+                  "core/crates/pe-core/src/lib.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "agent-undo-changed",
+                  "agent-undo-span",
+                  "agent-undo-since-question",
+                  "agent-undo-since-detail",
+                  "agent-undo-done",
+                  "agent-undo-left-gone",
+                  "agent-undo-left-changed",
+                  "agent-undo-left-sent",
+                  "agent-undo-left-impossible"
+                ],
+                "topics": [
+                  "agents-permissions.html",
+                  "agents-sending.html"
+                ],
+                "finding": "Undo Since counts eligible log rows, not messages; a row becomes undone after any of its messages are processed, so success can be partial. Moves require a message in the expected destination; flags compare only their relevant state, and colors compare a stored target when available. Flag removal can also remove a subsequently changed color: do not promise preservation of every later user/server change. Archive reversal is queued. Missing Outbox mail may have been removed manually and does not prove sending/delivery. Agent-log Undo can remove a still-queued message beyond the ordinary Undo Send countdown. Span choices are 15 minutes, 1/4/24 hours and 7/30 days. Counts are integers, with zero only in summary/question and positive detail counts.",
+                "sources": [
+                  "core/crates/pe-core/src/agents/undo.rs",
+                  "core/crates/pe-store/src/agents.rs",
+                  "core/crates/pe-core/src/lib.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "agents-permissions.html"
+                ],
+                "finding": "Text attachments are limited to 256 KB; supported PDF/Office and PNG/JPEG/GIF/WebP files to 10 MB. Encrypted content is not handed over. Read summaries group by program/hour and hold subjects, filenames and queries, not bodies. Expiry runs on insertion; ordinary entries can be pruned early. Clearing history does not reset sending or unsubscribe limits. Saved/auto-saved user drafts cease to be agent-owned.",
+                "sources": [
+                  "core/crates/pe-mcp/src/tools.rs",
+                  "core/crates/pe-mcp/src/tools/mail.rs",
+                  "core/crates/pe-core/src/agents/log.rs",
+                  "core/crates/pe-store/src/agents.rs",
+                  "core/crates/pe-core/src/agents.rs"
+                ]
+              },
+              {
+                "catalog_ids": [
+                  "agent-invitation-reply",
+                  "invitation-reply-subject",
+                  "invitation-reply-text"
+                ],
+                "topics": [
+                  "agents-sending.html",
+                  "invitations.html"
+                ],
+                "finding": "Invitation replies use organizer and attendee data from the invitation, include a calendar reply and need individual sending consent. Edit First is unavailable and account signature text is empty. The local invitation status updates only after SMTP sending succeeds, without confirmation from the organizer calendar. The name may be an address; do not inflect it. Tentative subject means tentatively accepted.",
+                "sources": [
+                  "core/crates/pe-core/src/agents/invitations.rs",
+                  "core/crates/pe-core/src/calendar_reply.rs",
+                  "core/crates/pe-core/src/agents.rs",
+                  "core/crates/pe-core/src/worker.rs",
+                  "core/crates/pe-store/src/invitations.rs",
+                  "app/src/agents.cpp",
+                  "mac/Sources/InboxClassic/Agents.swift",
+                  "linux/src/agents.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "invitations.html"
+                ],
+                "finding": "Calendar details depend on available fields. Defined zones convert to local time; floating times remain as written and all-day events show dates. Opening uses an external calendar app; failure does not establish that none is installed.",
+                "sources": [
+                  "core/crates/pe-core/src/calendar.rs",
+                  "app/src/reader.cpp",
+                  "linux/src/reader.rs",
+                  "mac/Sources/InboxClassic/Reader.swift"
+                ]
+              }
+            ],
+            "reference_screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/agents-4-send.png",
+                "sha256": "d77873c3b2cd4351cd9d986e14461c371336a8c2c99707c5cd4efa6e1e862027",
+                "locale": "English",
+                "observation": "English Windows consent layout; historical capture, current native source governs invitation controls."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/agents-1-before.png",
+                "sha256": "24ef1f7da8fc7dcefd36ae5dd575d248c4f34aad2a03097b62e1dff05bdcf227",
+                "locale": "English",
+                "observation": "English Linux mailbox context before agent actions; not an Undo Since capture."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-mac/read-10-invitation.png",
+                "sha256": "d5ab424322ac1f0904b99f9862f5e0de555779e1455b38bd1e216a9128373616",
+                "locale": "English",
+                "observation": "English Mac event card and calendar button."
+              }
+            ],
+            "limits": "No local test suites, builds, Fluent runtime execution or localized GUI-fit claim. Count/selector samples and help joins are static. Current native source supplies new dialog behavior."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-mcp3a-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-mcp3a-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-mcp3a-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-mcp3a-20261119-since.log",
+            "joins.log": "/private/tmp/inbox-lt-mcp3a-20261119-joins.log",
+            "joins-summary.log": "/private/tmp/inbox-lt-mcp3a-20261119-joins-summary.log",
+            "plurals.json": "/private/tmp/inbox-lt-mcp3a-20261119-plurals.json",
+            "substitutions.json": "/private/tmp/inbox-lt-mcp3a-20261119-substitutions.json",
+            "mnemonics.json": "/private/tmp/inbox-lt-mcp3a-20261119-mnemonics.json",
+            "source-audit.json": "/private/tmp/inbox-lt-mcp3a-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-mcp3a-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-mcp3a-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-mcp3a-20261119-html.log"
           }
         }
       ],
@@ -79711,7 +79922,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "All 28 structural checks have only expected mark diagnostics. Exact merge delta matches the previously queued MCP phase3a delta for 87 catalog files and 87 help files including English. All preexisting catalog values and unaffected help lines are preserved. Every changed/added translated body line and every new catalog entry is marked; the 28 related-navigation replacements match English. All inventories, variables and latest hashes reconcile. Global unmarked diagnostics: 23924 catalog entries/12571 help lines; since-start 2516 entries/647 passages. No linguistic review credit, test suites, builds or manual CI. The eight reviewed Lithuanian account topics are unchanged; lib.rs/worker.rs changes concern agent tickets and invitation replies only.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,513 expected mark-only diagnostics. Exact reconstruction verifies 27 catalog entries, with 18 improved values and nine retained, plus three full help topics and 22 improved wording lines. IDs, variables, selector branches, access-key counts, ellipses, comments, tags, attributes, platform branches and literal keys/code are preserved. Static inspection covers 20 selector messages with 239 count/enum samples and 58 substitutions; three Windows dialog scopes are collision-free, and Mac/Linux action/Cancel labels are distinct. Static Windows/Mac/Linux help joins were inspected. Nineteen runtime/source files and six catalog dependencies match the evidence. Existing English Windows consent and Mac event-card captures were inspected with Linux mailbox context; current source supplies new controls. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,592 help lines; since-start 2,489 entries/635 passages match the queue. Source checkpoint covers 193 refs/10 worktrees; current upstream review inputs and other translation worktree edits are unchanged. MCP phase3b is refreshed separately: one new catalog ID and one help topic per language remain after phase3a integration. No local test suites, builds or manual CI; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -140527,7 +140738,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review the 27 newly merged Lithuanian MCP catalog entries and current agent/invitation help (agents-permissions, agents-sending, invitations) in actual bulk-action, Undo Since and invitation-consent context. Lithuanian now has 27 catalog entries and 25 help topics pending. Then continue encryption/privacy help and the other language queues. MCP phase3a is now in the active inventory; phase3b remains separately queued. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -143447,7 +143658,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review the 27 newly merged Lithuanian MCP catalog entries and current agent/invitation help (agents-permissions, agents-sending, invitations) in actual bulk-action, Undo Since and invitation-consent context. Lithuanian now has 27 catalog entries and 25 help topics pending. Then continue encryption/privacy help and the other language queues. MCP phase3a is now in the active inventory; phase3b remains separately queued. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -145218,7 +145429,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review the 27 newly merged Lithuanian MCP catalog entries and current agent/invitation help (agents-permissions, agents-sending, invitations) in actual bulk-action, Undo Since and invitation-consent context. Lithuanian now has 27 catalog entries and 25 help topics pending. Then continue encryption/privacy help and the other language queues. MCP phase3a is now in the active inventory; phase3b remains separately queued. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 22 help topics remain, including agents-connect. Apply the Windows credential-store term in encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons. MCP phase3b at 6e68b743 remains separate, with one new catalog ID and agents-connect additions per language; do not double-count already integrated phase3a. Inspect latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -147393,6 +147604,28 @@
         ],
         "concurrent_source_merge": "MCP phase3a merged as a3e96423f before PR201. All eight reviewed topics and glossary are identical; account/security runtime paths unchanged. Exact new translation delta is being integrated separately.",
         "no_local_test_suites": true
+      },
+      {
+        "batch": "mcp-phase3a-merged-after-lt-accounts-20261119",
+        "pr": 202,
+        "url": "https://github.com/postalsys/inbox-classic/pull/202",
+        "review_commit": "99cf5918e201ffd006cbfabdf66143d93e2491f7",
+        "merge_commit": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+        "merged_at": "2026-11-19T01:52:13Z",
+        "verified_master": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true,
+        "counts": {
+          "catalog_scope": 36380,
+          "help_scope": 1380,
+          "pending_catalog": 12490,
+          "pending_help": 613,
+          "completed_catalog": 23890,
+          "completed_help": 767
+        },
+        "latest_release_branch": "2d2e5a4bb",
+        "release_branch_translation_delta": []
       }
     ],
     "source_audit_helper_sha256": "187b1c07319c962244f6e3cb8c94de80aa00b92e79a80b1c788b8d3517681664",
@@ -157830,7 +158063,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "08b732d3b284defb985632d120178ad2bcbbb6332ac87b173674fa91f7e4dcf8",
       "core/locales/fi/core.ftl": "0561156334918cb5bbf707dcf5bae96e9fc7c1c04b732280841a4de238ade91f",
-      "core/locales/GLOSSARY.md": "76dc0e685eb411266ed674804fac0a6acc645a3d2b6510d078e39d82b3e13d79",
+      "core/locales/GLOSSARY.md": "15794c8b05ba8bdac4005fcb2ce93a5e6cb1275b088a5ffe8cdf169bc61e9383",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "62ab48e44fd7d41da8088de4be5eb3b9225b8821e334511083e7a090c6ef91c7",
@@ -157841,8 +158074,8 @@
       "core/locales/hu/core.ftl": "21bf33484869647de36d581f48112dc55d383d2cb8dd3e1909db2ba94055ddec",
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
       "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
-      "core/locales/lt/app.ftl": "b676f1acc2130c826f7b2f9bf5c36ff34a16bc668bc8419b439579174e7d5b30",
-      "core/locales/lt/core.ftl": "e6551d727b3a02ed14fc69fcb493c47212c4fc132aabf680e6c6ac7804d914db",
+      "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
+      "core/locales/lt/core.ftl": "f139ad6c02a63ff43df8159e9b4b537fecff536a49843a7e1ddeab8676cab043",
       "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
       "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e",
       "core/locales/lv/app.ftl": "b51f23e217af3e53db457b296ad8f5df40fc02254f65448c00883eee79eb6832",
@@ -157978,7 +158211,7 @@
       "core/crates/pe-html/help/hu/keyboard-shortcuts.html": "13e1f8ad90dae0ab1f8148bafbcd11cd66297781f2ff697fa002ece906c379db",
       "core/crates/pe-html/help/hu/options-language.html": "99c4d467f549cca78245341e2d27b53a40fc3d4ba864026fa816aec04f6a3d55",
       "core/crates/pe-html/help/hu/sign-in-codes.html": "4d12bf47cd850b1b45a35ffc1387c2ba0b98ea5711168de45c607cb4ab750190",
-      "core/locales/lt/windows.ftl": "eb1838d9b9544b58344f0f7ea36fd3d87cb5b3700472059306cae24908138435",
+      "core/locales/lt/windows.ftl": "18fa93d839edfa594938f39e9f473c7121ccf6bf4bcab6350e98f3cd63882688",
       "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa",
       "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
       "installer/languages.nsh": "27320d51a83097050854c7b70a5b781abea857e62658c3a2462bfe6f365011c2",
@@ -158047,9 +158280,9 @@
       "core/crates/pe-html/help/it/agents-permissions.html": "be69963ad3761b8330dc9961aa599a818a6c77219134068afdc9ed3a17e7baf4",
       "core/crates/pe-html/help/it/agents-sending.html": "36df01d675878fa6e8628e0f80957c1cb380cfe52487db24107a5a55e2a9a15d",
       "core/crates/pe-html/help/it/invitations.html": "d508c1178099f38923a2cea7bc0d3abed25ecec2476c2a765a28f7edd6c4f5cb",
-      "core/crates/pe-html/help/lt/agents-permissions.html": "83ee6940595d35ef9c9d0519484070b94291339a8898ca12e367ca825792ccdd",
-      "core/crates/pe-html/help/lt/agents-sending.html": "47c4ebd592edc2c781ded46a90e5bb70790eefa3781478db5c422a0ae182061e",
-      "core/crates/pe-html/help/lt/invitations.html": "cf998f868fdbe8f3f472672cb3ac83ab934293887b7f68b834a476ef3598d6c9",
+      "core/crates/pe-html/help/lt/agents-permissions.html": "b7d4ad072668e8ef80cd7cc1f3a6fcbe7a08583bb5a2ec9cbcecb93b6323ae54",
+      "core/crates/pe-html/help/lt/agents-sending.html": "f441b2536650daabf3c1469e6722e8dae42e194aeb9c5f44d21e3a510f2c28f5",
+      "core/crates/pe-html/help/lt/invitations.html": "7fdea601205ace76b567faed8c4037edaffb7512252230e1024d832e32e1ed99",
       "core/crates/pe-html/help/lv/agents-permissions.html": "14649533559bcc0a56dcb7c1dcddd063e1e8ff3ae269a3166247227596716d1d",
       "core/crates/pe-html/help/lv/agents-sending.html": "93785443348876fdd92e778bc8a0e8f8a96ff8e0b814049a1a001baf148373e3",
       "core/crates/pe-html/help/lv/invitations.html": "40b69f1b33ab2635162931c01a0b8cd6b061d0713e709f78a3dad12e9a5c27b2",
@@ -182038,6 +182271,917 @@
           "/private/tmp/inbox-lt-accounts-20261119-finalize.py": "76cc3254345df9fa8bdb68ba3df5e2de2d80568c8ef04172da9a919449f4fbd5",
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
         }
+      },
+      {
+        "batch": "lt-mcp3a-agents-invitations-20261119",
+        "review_parent": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+        "counts": {
+          "catalog_scope": 36380,
+          "help_scope": 1380,
+          "pending_catalog": 12463,
+          "pending_help": 610,
+          "completed_catalog": 23917,
+          "completed_help": 770
+        },
+        "validation": "Lithuanian structural checks pass with 1,513 expected mark-only diagnostics. Exact reconstruction verifies 27 catalog entries, with 18 improved values and nine retained, plus three full help topics and 22 improved wording lines. IDs, variables, selector branches, access-key counts, ellipses, comments, tags, attributes, platform branches and literal keys/code are preserved. Static inspection covers 20 selector messages with 239 count/enum samples and 58 substitutions; three Windows dialog scopes are collision-free, and Mac/Linux action/Cancel labels are distinct. Static Windows/Mac/Linux help joins were inspected. Nineteen runtime/source files and six catalog dependencies match the evidence. Existing English Windows consent and Mac event-card captures were inspected with Linux mailbox context; current source supplies new controls. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, marks and latest translation/English hashes reconcile. Global diagnostics account for 23,951 unmarked entries and 12,592 help lines; since-start 2,489 entries/635 passages match the queue. Source checkpoint covers 193 refs/10 worktrees; current upstream review inputs and other translation worktree edits are unchanged. MCP phase3b is refreshed separately: one new catalog ID and one help topic per language remain after phase3a integration. No local test suites, builds or manual CI; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 193,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/feat/mcp-phase3b": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+            "refs/heads/i18n/review-resume-20261118": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+            "refs/heads/test/steady-linux": "a6a1f77150e1cb52097394fa009d7e2c2c9f7d12",
+            "refs/heads/test/steady-mac": "b427a0670e73f5b4477490857fc9d038cfeaab92",
+            "refs/remotes/origin/HEAD": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+            "refs/remotes/origin/feat/mcp-phase3b": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+            "refs/remotes/origin/i18n/review-resume-20261118": "99cf5918e201ffd006cbfabdf66143d93e2491f7",
+            "refs/remotes/origin/master": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "5caf85e109f21d9189d988ae4a284a321c3fdc01",
+            "refs/remotes/origin/test/steady-linux": "a6a1f77150e1cb52097394fa009d7e2c2c9f7d12",
+            "refs/remotes/origin/test/steady-mac": "b427a0670e73f5b4477490857fc9d038cfeaab92"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "a6a1f77150e1cb52097394fa009d7e2c2c9f7d12",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "b427a0670e73f5b4477490857fc9d038cfeaab92",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "dfdfbc336f054369336831f948930aad18f4f759",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lt/agents-permissions.html\n M core/crates/pe-html/help/lt/agents-sending.html\n M core/crates/pe-html/help/lt/invitations.html\n M core/locales/GLOSSARY.md\n M core/locales/lt/app.ftl\n M core/locales/lt/core.ftl\n M core/locales/lt/windows.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lt/agents-permissions.html": "b7d4ad072668e8ef80cd7cc1f3a6fcbe7a08583bb5a2ec9cbcecb93b6323ae54",
+                "core/crates/pe-html/help/lt/agents-sending.html": "f441b2536650daabf3c1469e6722e8dae42e194aeb9c5f44d21e3a510f2c28f5",
+                "core/crates/pe-html/help/lt/invitations.html": "7fdea601205ace76b567faed8c4037edaffb7512252230e1024d832e32e1ed99",
+                "core/locales/GLOSSARY.md": "15794c8b05ba8bdac4005fcb2ce93a5e6cb1275b088a5ffe8cdf169bc61e9383",
+                "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
+                "core/locales/lt/core.ftl": "f139ad6c02a63ff43df8159e9b4b537fecff536a49843a7e1ddeab8676cab043",
+                "core/locales/lt/windows.ftl": "18fa93d839edfa594938f39e9f473c7121ccf6bf4bcab6350e98f3cd63882688"
+              }
+            }
+          ],
+          "master": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+          "new_unmerged_source_deltas": [
+            {
+              "ref": "refs/heads/feat/mcp-phase3b",
+              "commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+              "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+              "paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html",
+                "core/locales/bg/core.ftl",
+                "core/locales/ca/core.ftl",
+                "core/locales/cs/core.ftl",
+                "core/locales/da/core.ftl",
+                "core/locales/de/core.ftl",
+                "core/locales/el/core.ftl",
+                "core/locales/en/core.ftl",
+                "core/locales/es/core.ftl",
+                "core/locales/et/core.ftl",
+                "core/locales/fi/core.ftl",
+                "core/locales/fr/core.ftl",
+                "core/locales/hr/core.ftl",
+                "core/locales/hu/core.ftl",
+                "core/locales/it/core.ftl",
+                "core/locales/lt/core.ftl",
+                "core/locales/lv/core.ftl",
+                "core/locales/nb/core.ftl",
+                "core/locales/nl/core.ftl",
+                "core/locales/pl/core.ftl",
+                "core/locales/pt-BR/core.ftl",
+                "core/locales/pt/core.ftl",
+                "core/locales/ro/core.ftl",
+                "core/locales/ru/core.ftl",
+                "core/locales/sk/core.ftl",
+                "core/locales/sl/core.ftl",
+                "core/locales/sr-Latn/core.ftl",
+                "core/locales/sv/core.ftl",
+                "core/locales/tr/core.ftl",
+                "core/locales/uk/core.ftl"
+              ],
+              "catalog_delta": {
+                "core/locales/bg/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/ca/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/cs/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/da/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/de/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/el/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/en/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/es/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/et/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/fi/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/fr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/hr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/hu/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/it/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/lt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/lv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/nb/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/nl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/pl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/pt-BR/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/pt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/ro/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/ru/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/tr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/uk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                }
+              },
+              "help_paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html"
+              ]
+            },
+            {
+              "ref": "refs/remotes/origin/feat/mcp-phase3b",
+              "commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+              "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+              "paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html",
+                "core/locales/bg/core.ftl",
+                "core/locales/ca/core.ftl",
+                "core/locales/cs/core.ftl",
+                "core/locales/da/core.ftl",
+                "core/locales/de/core.ftl",
+                "core/locales/el/core.ftl",
+                "core/locales/en/core.ftl",
+                "core/locales/es/core.ftl",
+                "core/locales/et/core.ftl",
+                "core/locales/fi/core.ftl",
+                "core/locales/fr/core.ftl",
+                "core/locales/hr/core.ftl",
+                "core/locales/hu/core.ftl",
+                "core/locales/it/core.ftl",
+                "core/locales/lt/core.ftl",
+                "core/locales/lv/core.ftl",
+                "core/locales/nb/core.ftl",
+                "core/locales/nl/core.ftl",
+                "core/locales/pl/core.ftl",
+                "core/locales/pt-BR/core.ftl",
+                "core/locales/pt/core.ftl",
+                "core/locales/ro/core.ftl",
+                "core/locales/ru/core.ftl",
+                "core/locales/sk/core.ftl",
+                "core/locales/sl/core.ftl",
+                "core/locales/sr-Latn/core.ftl",
+                "core/locales/sv/core.ftl",
+                "core/locales/tr/core.ftl",
+                "core/locales/uk/core.ftl"
+              ],
+              "catalog_delta": {
+                "core/locales/bg/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/ca/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/cs/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/da/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/de/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/el/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/en/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/es/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/et/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/fi/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/fr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/hr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/hu/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/it/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/lt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/lv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/nb/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/nl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/pl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/pt-BR/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/pt/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/ro/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/ru/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sl/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sr-Latn/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/sv/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/tr/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                },
+                "core/locales/uk/core.ftl": {
+                  "added": [
+                    "agent-connect-claimed"
+                  ],
+                  "changed": [
+                    "agent-connect-terminal-detail"
+                  ],
+                  "removed": []
+                }
+              },
+              "help_paths": [
+                "core/crates/pe-html/help/bg/agents-connect.html",
+                "core/crates/pe-html/help/ca/agents-connect.html",
+                "core/crates/pe-html/help/cs/agents-connect.html",
+                "core/crates/pe-html/help/da/agents-connect.html",
+                "core/crates/pe-html/help/de/agents-connect.html",
+                "core/crates/pe-html/help/el/agents-connect.html",
+                "core/crates/pe-html/help/en/agents-connect.html",
+                "core/crates/pe-html/help/es/agents-connect.html",
+                "core/crates/pe-html/help/et/agents-connect.html",
+                "core/crates/pe-html/help/fi/agents-connect.html",
+                "core/crates/pe-html/help/fr/agents-connect.html",
+                "core/crates/pe-html/help/hr/agents-connect.html",
+                "core/crates/pe-html/help/hu/agents-connect.html",
+                "core/crates/pe-html/help/it/agents-connect.html",
+                "core/crates/pe-html/help/lt/agents-connect.html",
+                "core/crates/pe-html/help/lv/agents-connect.html",
+                "core/crates/pe-html/help/nb/agents-connect.html",
+                "core/crates/pe-html/help/nl/agents-connect.html",
+                "core/crates/pe-html/help/pl/agents-connect.html",
+                "core/crates/pe-html/help/pt-BR/agents-connect.html",
+                "core/crates/pe-html/help/pt/agents-connect.html",
+                "core/crates/pe-html/help/ro/agents-connect.html",
+                "core/crates/pe-html/help/ru/agents-connect.html",
+                "core/crates/pe-html/help/sk/agents-connect.html",
+                "core/crates/pe-html/help/sl/agents-connect.html",
+                "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+                "core/crates/pe-html/help/sv/agents-connect.html",
+                "core/crates/pe-html/help/tr/agents-connect.html",
+                "core/crates/pe-html/help/uk/agents-connect.html"
+              ]
+            }
+          ],
+          "note": "Current master review inputs unchanged. MCP phase3a is integrated. MCP phase3b was refreshed against its current merge base and remains separate. New release-bot ref has no translation delta. Other worktrees are read only.",
+          "incoming_phase3b_refresh": {
+            "source_commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+            "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+            "catalog_additions_per_language": 1,
+            "changed_catalog_entries_per_language": 0,
+            "help_topics_per_language": 1,
+            "translation_languages": 28,
+            "source_files": {
+              "core/crates/pe-html/help/bg/agents-connect.html": "515cbb6957bb1effd28804031c7b3c004f11a0aa85d298f014dc08c57e7b8a0f",
+              "core/crates/pe-html/help/ca/agents-connect.html": "77ded19dca4474e9939e2b64bc94693b5f88e88f81e0be784fbb2b14c1983540",
+              "core/crates/pe-html/help/cs/agents-connect.html": "87b007e131a24780b4c7533fe332f94ddd882656b7e89c0e8282a7e9795d3af2",
+              "core/crates/pe-html/help/da/agents-connect.html": "dbb330b59a85153d51b3e64242b464731f451e942727556acd2073c68a2d6911",
+              "core/crates/pe-html/help/de/agents-connect.html": "8529992b5847cc1991709b70bcc3965e3f19291aa25dcf433235705d3f2f221f",
+              "core/crates/pe-html/help/el/agents-connect.html": "5d1fbca87728eba916f3c9eda8371b75c338a085e4d3b5aac6a070b8b1e2795b",
+              "core/crates/pe-html/help/en/agents-connect.html": "9ad51eaa2a465684ac5cfcf8dd68bab8e1ad07749b3c2f8ffd0353e5779fffc2",
+              "core/crates/pe-html/help/es/agents-connect.html": "85e0dadd059cb8c1d828a4d1726787fba3226a531c552bf3b61f5774ddebb237",
+              "core/crates/pe-html/help/et/agents-connect.html": "a314848e76ad04b37e7a2c0971550fb970fe068d5afc7c339bb9924392d147d9",
+              "core/crates/pe-html/help/fi/agents-connect.html": "58d5c3937f9bb0b8b2e093708d886b0f300cc7b22204e44a2561839afcd4f2a9",
+              "core/crates/pe-html/help/fr/agents-connect.html": "0709ed6b279551b2e297e3142943770141ca92affeba76608afdf65bfb716ff4",
+              "core/crates/pe-html/help/hr/agents-connect.html": "e78c16b1593d2ed17c00e26bbeea583709e5ff324fa074e5630514d05071ed75",
+              "core/crates/pe-html/help/hu/agents-connect.html": "026877eb3b78afcc10d0c7b4036ff3918649006af634934e3362d06c3d2f3f12",
+              "core/crates/pe-html/help/it/agents-connect.html": "0a67b0517ac4fa70dd6d8b31b7e37df9adb739e0d2fee1190136087876af8c0d",
+              "core/crates/pe-html/help/lt/agents-connect.html": "f64affdac6fc3c8388df03734c97978d7df28a9cf57f3833d7302daad4c877ff",
+              "core/crates/pe-html/help/lv/agents-connect.html": "c413fc03e5188c63edc640365ead7d58b208f375e975ad614fdd774867bcf70a",
+              "core/crates/pe-html/help/nb/agents-connect.html": "a9f5d55dd7f333786bbd19a4f11cf7701df6990a31e8342dbadde7fe0cded267",
+              "core/crates/pe-html/help/nl/agents-connect.html": "eb5f956ed625b8a75af5c5b902cf847f0d77a8b6274650239c2281e14c03e55a",
+              "core/crates/pe-html/help/pl/agents-connect.html": "787695aa4694c7d1045765d3e0cb67e4c818857bff78193cfff4bc178df2544e",
+              "core/crates/pe-html/help/pt-BR/agents-connect.html": "3bc431e00e2b08a3ec97fb1bbe5227a5172631db887646bffe10557d529ec555",
+              "core/crates/pe-html/help/pt/agents-connect.html": "e037f9d50dad8214b5ebe08748e29c24a84a1e951912362141ff7c06133da470",
+              "core/crates/pe-html/help/ro/agents-connect.html": "35a387a00774df56343b63dd1caa37e586a03127c9b9e214f358f16797318aa5",
+              "core/crates/pe-html/help/ru/agents-connect.html": "815f6d004a7d0b405952dc9fc0d9c5a8470ae8c4c546002e5788bd2e6905a142",
+              "core/crates/pe-html/help/sk/agents-connect.html": "07a2789a588a0c510aaaac73e693bd0433a41024d3a1fdda7897c3e8de771e31",
+              "core/crates/pe-html/help/sl/agents-connect.html": "165ac5ab5b0a4eb5ce22683e41b4e8b698301a9f25baa8720f3cd6ffe23f921d",
+              "core/crates/pe-html/help/sr-Latn/agents-connect.html": "4c8d408bf3eb96e23b192e8ac96919e42908ee3e6b7fda7df0d4c03ea71afe86",
+              "core/crates/pe-html/help/sv/agents-connect.html": "e7261b2a894af620c8cb14f96bddad487323f5da551748b3ff0b899cd0a23aec",
+              "core/crates/pe-html/help/tr/agents-connect.html": "175b2dc56c6846a0a2e3a4e522e2d5d8c2496d152164e3ca29d5ca5bd5763914",
+              "core/crates/pe-html/help/uk/agents-connect.html": "7ed40419eeb84cd2458af089fbc6960435f5a35e0c9131161319a264b1276821",
+              "core/locales/bg/core.ftl": "a72e7ce4b51130982e2dd296fc2b3beb84f6f447527cfd5425a6f3b6f40a401c",
+              "core/locales/ca/core.ftl": "45f674f35486378aba90f791ed5a5b32645c9119bd492f739301a5c90d3a748e",
+              "core/locales/cs/core.ftl": "43e9aa2b6a90e82c4b9c6be439167e181e53d83dde423df9f0064b2983d40176",
+              "core/locales/da/core.ftl": "f0aacca4a8008901bbdc3dc9a49d5639ccd390643270a82a736eda57479350dd",
+              "core/locales/de/core.ftl": "8dabfca8b22c55e6cdbf2bab1056a32afdde0e101463ca1bf058bbcee05165ea",
+              "core/locales/el/core.ftl": "9a0611f23ad10420a7d1bc81e39d5394d36f3bd805b1ea2df7fc2d4a6c7a1ae5",
+              "core/locales/en/core.ftl": "d1bdc168030651ca31b65ef4ff80d8a459c5404691c569f8b094416da88609a0",
+              "core/locales/es/core.ftl": "c0e819581c37ab3e5019f581634e03e4733223f187ca6127d33c748ca3b1552a",
+              "core/locales/et/core.ftl": "6258e4622814ca3f3d527aaa51c2c9bc665027c4cdb3913a2d76110e53d0325f",
+              "core/locales/fi/core.ftl": "c55d1880e3d16b18db4c2b646240deef4dabee61bd153ec9a90ee4e23d3a3974",
+              "core/locales/fr/core.ftl": "a6b3c791ac946248e0344b66de2a54cf368b6e5343838d1fc32ebb846532f5dc",
+              "core/locales/hr/core.ftl": "4dfc50f5c777988f1ce41a1c353cb62b474d5f98a926cb654cafa386598609f5",
+              "core/locales/hu/core.ftl": "f55c84b5979906b7e01548a2462bcf806d03ccc283d5cbb0e85c8a06a0316099",
+              "core/locales/it/core.ftl": "166f1990a1ab1c7a70683b58fdba6f5c1d30a69a3c5da6c86d1e84b54ed9c2c7",
+              "core/locales/lt/core.ftl": "316c35dcdd47ea9f002c68f182b1f2e1abadf19a8c0fef3bc2826078b32b1f87",
+              "core/locales/lv/core.ftl": "f0e5a80ca048a12682a97364d934fab03f85ae4b2b14d4a4554f90cf664fbf3e",
+              "core/locales/nb/core.ftl": "72cdb8703037f6bac7f1389995ba582718234feca383428a775ef61ebc4cbab2",
+              "core/locales/nl/core.ftl": "4139ea11946f3cf566ba37f90dd62fc1fb1391f1dd1560ba0d9a022ce3b15e46",
+              "core/locales/pl/core.ftl": "3fe987ea50cf94aee161132e0fadba92ec4dbeb58a2f7f4953c4b5726b8824c3",
+              "core/locales/pt-BR/core.ftl": "bf1a5203ebca93067be169fa759543f433244c3beb162e255246866930ad4b4b",
+              "core/locales/pt/core.ftl": "709ec2e388bb85bed6ba78dda338429d6c344882fbdab190dc1af6f8e869a714",
+              "core/locales/ro/core.ftl": "3bbd418e4aa0cdf2b0faaef95cb6f75718c124e36a9d767067a615e41af9188b",
+              "core/locales/ru/core.ftl": "5add4d6dfe57104cc3b148bf391fb43c05df262ea488c209efb89998576d2d06",
+              "core/locales/sk/core.ftl": "c8419541cb8617253bcab92dbb4de9447752d0ec28572748c4956297f86b26e4",
+              "core/locales/sl/core.ftl": "297a7d621d4af0f1fa43a2c71012bd48b8cc5fc52780aecce989786a191d189f",
+              "core/locales/sr-Latn/core.ftl": "86bdc3807a72d0db5b84c41146e3b7e2f7a9f5220edf7a2c772a51deda2baba4",
+              "core/locales/sv/core.ftl": "ea63b15374b04c3b6745bc3908e02d5903094b993f76db9c0a404166859c1721",
+              "core/locales/tr/core.ftl": "56f2f2216487cd273d21664abcb16619cf8f6d0727f001a4912f904aa40cac22",
+              "core/locales/uk/core.ftl": "bf236daa1b89c4d009a9141bf06690846156e636a470661477cade0afc485574"
+            },
+            "note": "The old cumulative queue included phase3a. Comparing the current feature branch against its own merge base leaves agent-connect-claimed and two paragraphs in agents-connect per language. Phase3a is already active; no duplicate scope credit. English contains a same-user malicious-program limitation missing from the translated paragraph; resolve during contextual review."
+          }
+        },
+        "upstream_inputs_check": {
+          "master": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-mcp3a-20261119-edit.py": "75222579fabc75ad27071335269d678d1fc390bf33ceb880680074026754d7b4",
+          "/private/tmp/inbox-lt-mcp3a-20261119-proofs.py": "7265b9a33cec836f62613c161944802c260be0014008a06390dd5d9475674312",
+          "/private/tmp/inbox-lt-mcp3a-20261119-finalize.py": "7049a24412a0b4d278021f2a332e8f027c3e8cb41d2dd69fdc0f1994b1540a7e",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -182046,41 +183190,10 @@
       "sources": [
         {
           "ref": "refs/heads/feat/mcp-phase3b",
-          "commit": "42bed14a89cf27acbf180469a0cf78310a20d07a",
-          "merge_base": "3baf8a41703a6b941bb61c08b688e62813c79456",
-          "status": "Unmerged incoming source. Exact added/changed/removed catalog IDs and help paths are recorded in this checkpoint; recheck integration before importing.",
+          "commit": "6e68b743144aa6a52de36e4a2afa55d5e8d6aae7",
+          "merge_base": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+          "status": "Unmerged phase3b only. Phase3a is already integrated. One new catalog ID and two new agents-connect paragraphs per language; no additional active scope or completion credit.",
           "catalog_additions_by_language": {
-            "bg": 28,
-            "ca": 28,
-            "cs": 28,
-            "da": 28,
-            "de": 28,
-            "el": 28,
-            "en": 28,
-            "es": 28,
-            "et": 28,
-            "fi": 28,
-            "fr": 28,
-            "hr": 28,
-            "hu": 28,
-            "it": 28,
-            "lt": 28,
-            "lv": 28,
-            "nb": 28,
-            "nl": 28,
-            "pl": 28,
-            "pt-BR": 28,
-            "pt": 28,
-            "ro": 28,
-            "ru": 28,
-            "sk": 28,
-            "sl": 28,
-            "sr-Latn": 28,
-            "sv": 28,
-            "tr": 28,
-            "uk": 28
-          },
-          "catalog_changes_by_language": {
             "bg": 1,
             "ca": 1,
             "cs": 1,
@@ -182100,8 +183213,8 @@
             "nb": 1,
             "nl": 1,
             "pl": 1,
-            "pt-BR": 1,
             "pt": 1,
+            "pt-BR": 1,
             "ro": 1,
             "ru": 1,
             "sk": 1,
@@ -182110,6 +183223,37 @@
             "sv": 1,
             "tr": 1,
             "uk": 1
+          },
+          "catalog_changes_by_language": {
+            "bg": 0,
+            "ca": 0,
+            "cs": 0,
+            "da": 0,
+            "de": 0,
+            "el": 0,
+            "en": 0,
+            "es": 0,
+            "et": 0,
+            "fi": 0,
+            "fr": 0,
+            "hr": 0,
+            "hu": 0,
+            "it": 0,
+            "lt": 0,
+            "lv": 0,
+            "nb": 0,
+            "nl": 0,
+            "pl": 0,
+            "pt": 0,
+            "pt-BR": 0,
+            "ro": 0,
+            "ru": 0,
+            "sk": 0,
+            "sl": 0,
+            "sr-Latn": 0,
+            "sv": 0,
+            "tr": 0,
+            "uk": 0
           },
           "catalog_removals_by_language": {
             "bg": 0,
@@ -182131,8 +183275,8 @@
             "nb": 0,
             "nl": 0,
             "pl": 0,
-            "pt-BR": 0,
             "pt": 0,
+            "pt-BR": 0,
             "ro": 0,
             "ru": 0,
             "sk": 0,
@@ -182143,35 +183287,621 @@
             "uk": 0
           },
           "help_topics_by_language": {
-            "bg": 4,
-            "ca": 4,
-            "cs": 4,
-            "da": 4,
-            "de": 4,
-            "el": 4,
-            "en": 4,
-            "es": 4,
-            "et": 4,
-            "fi": 4,
-            "fr": 4,
-            "hr": 4,
-            "hu": 4,
-            "it": 4,
-            "lt": 4,
-            "lv": 4,
-            "nb": 4,
-            "nl": 4,
-            "pl": 4,
-            "pt-BR": 4,
-            "pt": 4,
-            "ro": 4,
-            "ru": 4,
-            "sk": 4,
-            "sl": 4,
-            "sr-Latn": 4,
-            "sv": 4,
-            "tr": 4,
-            "uk": 4
+            "bg": 1,
+            "ca": 1,
+            "cs": 1,
+            "da": 1,
+            "de": 1,
+            "el": 1,
+            "en": 1,
+            "es": 1,
+            "et": 1,
+            "fi": 1,
+            "fr": 1,
+            "hr": 1,
+            "hu": 1,
+            "it": 1,
+            "lt": 1,
+            "lv": 1,
+            "nb": 1,
+            "nl": 1,
+            "pl": 1,
+            "pt": 1,
+            "pt-BR": 1,
+            "ro": 1,
+            "ru": 1,
+            "sk": 1,
+            "sl": 1,
+            "sr-Latn": 1,
+            "sv": 1,
+            "tr": 1,
+            "uk": 1
+          },
+          "previous_commit": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+          "latest_exact_delta_batch": "lt-mcp3a-agents-invitations-20261119",
+          "exact_delta": {
+            "core/crates/pe-html/help/bg/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic пита системата коя програма е стартирала агента, вместо да вярва на думите на агента, така че една програма не може да използва достъпа, който сте дали на друга. Ако агентът твърди, че е друга програма, въпросът ще ви уведоми за това.</p>",
+                    "<p>Агентът може също да следи папката „Входящи“, акаунт или папка и да получава известие, когато пощата в тях се промени, както и да предлага две готови заявки, „Triage my inbox“ и „Summarize unread“. И двете спазват това, което разрешите на агента, а прочетеното по този начин се показва в историята му като всичко друго, което чете.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/ca/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic pregunta al sistema quin programa ha iniciat l’agent, en lloc de creure el que diu l’agent, de manera que un programa no pot fer servir l’accés que heu donat a un altre. Si un agent diu que és un programa diferent, la pregunta us ho indica.</p>",
+                    "<p>Un agent també pot tenir a la vista la vostra Safata d’entrada, un compte o una carpeta i rebre un avís quan hi canvia el correu, i pot oferir dues peticions ja preparades, «Triage my inbox» i «Summarize unread». Totes dues segueixen el que permeteu a l’agent, i el que llegeix d’aquesta manera apareix al seu registre com tot el que llegeix.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/cs/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic se ptá systému, který program agenta spustil, místo aby věřil tomu, co agent tvrdí, takže jeden program nemůže využít přístup, který jste dali jinému. Pokud agent tvrdí, že je jiný program, dotaz vás na to upozorní.</p>",
+                    "<p>Agent může také sledovat vaši složku Doručená pošta, účet nebo složku a dostávat upozornění, když se v nich pošta změní. Může také nabídnout dva připravené požadavky, „Triage my inbox“ a „Summarize unread“. Oba se řídí tím, co agentovi povolíte, a co takto přečte, se zobrazí v jeho záznamu jako vše ostatní, co čte.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/da/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic spørger systemet, hvilket program der startede agenten, i stedet for at tage agentens ord for gode varer, så ét program ikke kan bruge den adgang, du har givet et andet. Hvis en agent siger, at den er et andet program, fortæller spørgsmålet dig det.</p>",
+                    "<p>En agent kan også holde øje med din Indbakke, en konto eller en mappe og få besked, når mailen der ændrer sig, og den kan tilbyde to færdige forespørgsler, »Triage my inbox« og »Summarize unread«. Begge følger det, du tillader agenten, og det, den læser på denne måde, vises i dens log ligesom alt andet, den læser.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/de/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic fragt das System, welches Programm den Agenten gestartet hat, statt sich auf die Angaben des Agenten zu verlassen. So kann ein Programm nicht den Zugriff nutzen, den Sie einem anderen gegeben haben. Gibt sich ein Agent als ein anderes Programm aus, sagt Ihnen das die Abfrage.</p>",
+                    "<p>Ein Agent kann außerdem Ihren Posteingang, ein Konto oder einen Ordner im Blick behalten und erfährt, wenn sich die E-Mails darin ändern. Er kann zwei fertige Anfragen anbieten, „Triage my inbox“ und „Summarize unread“. Beide halten sich an das, was Sie dem Agenten erlauben, und was er so liest, erscheint wie alles andere, was er liest, in seinem Protokoll.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/el/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Το Inbox Classic ρωτά το σύστημα ποιο πρόγραμμα ξεκίνησε τον πράκτορα, αντί να βασίζεται σε ό,τι δηλώνει ο πράκτορας, ώστε ένα πρόγραμμα να μην μπορεί να χρησιμοποιήσει την πρόσβαση που δώσατε σε άλλο. Αν ένας πράκτορας δηλώνει ότι είναι διαφορετικό πρόγραμμα, η ερώτηση σάς το επισημαίνει.</p>",
+                    "<p>Ένας πράκτορας μπορεί επίσης να παρακολουθεί τα Εισερχόμενά σας, έναν λογαριασμό ή έναν φάκελο και να ειδοποιείται όταν αλλάζει η αλληλογραφία τους, και μπορεί να προσφέρει δύο έτοιμα αιτήματα, «Triage my inbox» και «Summarize unread». Και τα δύο ακολουθούν ό,τι επιτρέπετε στον πράκτορα, και ό,τι διαβάζει με αυτόν τον τρόπο εμφανίζεται στο ιστορικό του όπως όλα όσα διαβάζει.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/en/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic asks the system which program started the agent, rather than taking the agent’s word for it, so an agent cannot get the access you gave another program just by saying it is that program. If an agent says it is a different program, the question tells you. This keeps your agents apart; it does not protect you from a harmful program running as you, which could read your mail anyway.</p>",
+                    "<p>An agent can also keep your Inbox, an account or a folder in view and be told when its mail changes, and it can offer two ready-made requests, “Triage my inbox” and “Summarize unread”. Both follow what you allow the agent, and what it reads this way shows in its log like everything else it reads.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/es/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic pregunta al sistema qué programa inició el agente, en lugar de fiarse de lo que dice el agente, de modo que un programa no puede usar el acceso que usted dio a otro. Si un agente dice ser un programa distinto, la pregunta se lo indica.</p>",
+                    "<p>Un agente también puede vigilar su Bandeja de entrada, una cuenta o una carpeta y recibir un aviso cuando cambia su correo, y puede ofrecer dos peticiones ya preparadas, «Triage my inbox» y «Summarize unread». Ambas respetan lo que usted permita al agente, y lo que lee de esta forma aparece en su registro como todo lo demás que lee.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/et/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic küsib süsteemilt, milline programm agendi käivitas, selle asemel et agendi sõna uskuda, nii et üks programm ei saa kasutada juurdepääsu, mille andsite teisele. Kui agent väidab end olevat mõni teine programm, ütleb küsimus teile seda.</p>",
+                    "<p>Agent saab ka jälgida teie Sisendkausta, kontot või kausta ja saada teate, kui nende kirjad muutuvad, ning pakkuda kahte valmis päringut, „Triage my inbox“ ja „Summarize unread“. Mõlemad järgivad seda, mida agendil lubate, ja see, mida agent nii loeb, kuvatakse tema logis nagu kõik muu, mida ta loeb.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/fi/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic kysyy järjestelmältä, mikä ohjelma käynnisti agentin, eikä luota agentin omaan sanaan, joten yksi ohjelma ei voi käyttää toiselle antamiasi käyttöoikeuksia. Jos agentti sanoo olevansa eri ohjelma, kysymys kertoo sen sinulle.</p>",
+                    "<p>Agentti voi myös pitää Saapuneet-kansiosi, tilin tai kansion silmällä ja saada tiedon, kun sen posti muuttuu, ja se voi tarjota kaksi valmista pyyntöä, ”Triage my inbox” ja ”Summarize unread”. Molemmat noudattavat sitä, mitä sallit agentille, ja mitä se lukee tällä tavalla, näkyy sen lokissa kuten kaikki muukin, mitä se lukee.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/fr/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic demande au système quel programme a lancé l'agent, plutôt que de croire l'agent sur parole, afin qu'un programme ne puisse pas utiliser l'accès que vous avez donné à un autre. Si un agent prétend être un autre programme, la question vous le signale.</p>",
+                    "<p>Un agent peut aussi garder un œil sur votre Boîte de réception, un compte ou un dossier et être averti quand son courrier change, et il peut proposer deux demandes toutes faites, « Triage my inbox » et « Summarize unread ». Toutes deux respectent ce que vous autorisez à l'agent, et ce qu'il lit ainsi apparaît dans son journal comme tout ce qu'il lit.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/hr/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic pita sustav koji je program pokrenuo agenta, umjesto da vjeruje agentu na riječ, pa jedan program ne može koristiti pristup koji ste dali drugome. Ako agent tvrdi da je neki drugi program, upit će vam to reći.</p>",
+                    "<p>Agent može i pratiti vašu mapu Ulazna pošta, račun ili mapu te dobiti obavijest kad se pošta u njima promijeni, a može ponuditi i dva gotova zahtjeva, „Triage my inbox“ i „Summarize unread“. Oba poštuju ono što agentu dopustite, a ono što na taj način pročita prikazuje se u njegovim zapisima kao i sve ostalo što čita.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/hu/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Az Inbox Classic a rendszertől kérdezi meg, melyik program indította el az ügynököt, ahelyett hogy az ügynök szavára hagyatkozna, így egy program nem használhatja azt a hozzáférést, amelyet Ön egy másiknak adott. Ha egy ügynök azt állítja, hogy másik program, a kérdés ezt jelzi Önnek.</p>",
+                    "<p>Az ügynök figyelemmel kísérheti a Beérkezett üzenetek mappát, egy fiókot vagy egy mappát is, és értesítést kaphat, ha a bennük lévő levelek megváltoznak, továbbá felkínálhat két előre elkészített kérést: „Triage my inbox” és „Summarize unread”. Mindkettő ahhoz igazodik, amit Ön engedélyez az ügynöknek, és amit így elolvas, az ugyanúgy megjelenik a naplójában, mint minden más, amit olvas.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/it/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic chiede al sistema quale programma ha avviato l’agente, invece di fidarsi di ciò che dice l’agente, così un programma non può usare l’accesso che hai dato a un altro. Se un agente dice di essere un programma diverso, la richiesta te lo segnala.</p>",
+                    "<p>Un agente può anche tenere d’occhio la tua Posta in arrivo, un account o una cartella ed essere avvisato quando la posta cambia, e può offrire due richieste già pronte, “Triage my inbox” e “Summarize unread”. Entrambe seguono ciò che consenti all’agente, e ciò che legge in questo modo compare nel suo registro come tutto il resto che legge.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/lt/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic klausia sistemos, kuri programa paleido agentą, o ne tiki agento žodžiais, todėl viena programa negali naudotis prieiga, kurią suteikėte kitai. Jei agentas teigia esąs kita programa, klausimas jums tai parodys.</p>",
+                    "<p>Agentas taip pat gali stebėti jūsų aplanką „Gauti laiškai“, paskyrą ar aplanką ir gauti pranešimą, kai juose pasikeičia paštas, be to, jis gali pasiūlyti dvi paruoštas užklausas, „Triage my inbox“ ir „Summarize unread“. Abi laikosi to, ką leidžiate agentui, o tai, ką jis taip perskaito, rodoma jo žurnale kaip ir visa kita, ką jis skaito.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/lv/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic jautā sistēmai, kura programma palaida aģentu, nevis paļaujas uz aģenta vārdiem, tāpēc viena programma nevar izmantot piekļuvi, ko piešķīrāt citai. Ja aģents apgalvo, ka ir cita programma, jautājumā tas tiek norādīts.</p>",
+                    "<p>Aģents var arī sekot jūsu Iesūtnei, kontam vai mapei un saņemt ziņu, kad tajos mainās pasts, kā arī piedāvāt divus gatavus pieprasījumus: „Triage my inbox” un „Summarize unread”. Abi ievēro to, ko atļaujat aģentam, un tas, ko aģents šādi izlasa, tiek rādīts tā žurnālā tāpat kā viss pārējais, ko tas lasa.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/nb/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic spør systemet hvilket program som startet agenten, i stedet for å ta agenten på ordet, slik at ett program ikke kan bruke tilgangen du har gitt et annet. Hvis en agent sier at den er et annet program, sier spørsmålet deg fra.</p>",
+                    "<p>En agent kan også holde øye med Innboks-mappen din, en konto eller en mappe og få beskjed når e-posten der endres, og den kan tilby to ferdige forespørsler, «Triage my inbox» og «Summarize unread». Begge følger det du tillater agenten, og det den leser på denne måten, vises i loggen dens som alt annet den leser.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/nl/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic vraagt het systeem welk programma de agent heeft gestart, in plaats van de agent op zijn woord te geloven, zodat een programma niet de toegang kan gebruiken die je aan een ander hebt gegeven. Zegt een agent dat hij een ander programma is, dan vertelt de vraag je dat.</p>",
+                    "<p>Een agent kan ook je Postvak IN, een account of een map in de gaten houden en een melding krijgen als de e-mail daarin verandert, en hij kan twee kant-en-klare verzoeken aanbieden, “Triage my inbox” en “Summarize unread”. Beide volgen wat je de agent toestaat, en wat hij zo leest, verschijnt in zijn logboek net als alles wat hij verder leest.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/pl/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic pyta system, który program uruchomił agenta, zamiast wierzyć agentowi na słowo, dzięki czemu jeden program nie może korzystać z dostępu przyznanego innemu. Jeśli agent podaje się za inny program, pytanie o zgodę to pokaże.</p>",
+                    "<p>Agent może też obserwować Skrzynkę odbiorczą, konto lub folder i dostawać powiadomienie, gdy zmieni się w nich poczta, a także zaproponować dwa gotowe polecenia, „Triage my inbox” i „Summarize unread”. Oba przestrzegają tego, na co zezwolisz agentowi, a to, co agent w ten sposób odczyta, widać w jego dzienniku tak jak wszystko inne, co odczytuje.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/pt-BR/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>O Inbox Classic pergunta ao sistema qual programa iniciou o agente, em vez de acreditar no que o agente diz, para que um programa não possa usar o acesso que você deu a outro. Se um agente disser que é um programa diferente, a pergunta avisa você.</p>",
+                    "<p>Um agente também pode acompanhar sua Caixa de Entrada, uma conta ou uma pasta e ser avisado quando os e-mails nela mudam, e pode oferecer dois pedidos prontos, “Triage my inbox” e “Summarize unread”. Ambos seguem o que você permitir ao agente, e o que ele lê dessa forma aparece no registro dele como tudo o mais que ele lê.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/pt/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>O Inbox Classic pergunta ao sistema que programa iniciou o agente, em vez de acreditar no que o agente diz, para que um programa não possa usar o acesso que deu a outro. Se um agente disser que é um programa diferente, a pergunta informa-o disso.</p>",
+                    "<p>Um agente também pode acompanhar a sua Caixa de Entrada, uma conta ou uma pasta e ser avisado quando o correio aí muda, e pode oferecer dois pedidos já preparados, «Triage my inbox» e «Summarize unread». Ambos seguem o que autorizar ao agente, e o que ele lê desta forma aparece no registo dele como tudo o resto que lê.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/ro/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic întreabă sistemul ce program a pornit agentul, în loc să se bazeze pe ce spune agentul, astfel încât un program să nu poată folosi accesul pe care l-ați dat altuia. Dacă un agent spune că este alt program, întrebarea vă arată acest lucru.</p>",
+                    "<p>Un agent poate, de asemenea, să urmărească folderul Mesaje primite, un cont sau un folder și să fie anunțat când se schimbă mesajele din ele, și poate oferi două solicitări gata pregătite, „Triage my inbox” și „Summarize unread”. Ambele respectă ce îi permiteți agentului, iar ce citește astfel apare în jurnalul său ca tot restul a ceea ce citește.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/ru/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic спрашивает у системы, какая программа запустила агента, а не верит агенту на слово, поэтому одна программа не может воспользоваться доступом, который вы дали другой. Если агент называет себя другой программой, в запросе на доступ это будет указано.</p>",
+                    "<p>Агент также может следить за папкой «Входящие», учетной записью или папкой и получать уведомления, когда в них меняется почта, а также предлагать два готовых запроса: «Triage my inbox» и «Summarize unread». Оба подчиняются тому, что вы разрешите агенту, а все, что он прочитает таким образом, показывается в его журнале, как и все остальное, что он читает.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/sk/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic sa pýta systému, ktorý program agenta spustil, namiesto toho, aby veril tomu, čo agent tvrdí, takže jeden program nemôže využiť prístup, ktorý ste dali inému. Ak agent tvrdí, že je iný program, otázka vás na to upozorní.</p>",
+                    "<p>Agent môže tiež sledovať váš priečinok Doručená pošta, účet alebo priečinok a dostávať upozornenie, keď sa v nich pošta zmení. Môže tiež ponúknuť dve pripravené požiadavky, „Triage my inbox“ a „Summarize unread“. Obe sa riadia tým, čo agentovi povolíte, a čo takto prečíta, sa zobrazí v jeho zázname rovnako ako všetko ostatné, čo číta.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/sl/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic sistem vpraša, kateri program je zagnal agenta, namesto da bi verjel agentu na besedo, zato en program ne more uporabiti dostopa, ki ste ga dali drugemu. Če agent trdi, da je drug program, vam to pove vprašanje.</p>",
+                    "<p>Agent lahko spremlja tudi vašo mapo Prejeto, račun ali mapo in prejme obvestilo, ko se pošta v njih spremeni, ponudi pa lahko tudi dve pripravljeni zahtevi, »Triage my inbox« in »Summarize unread«. Obe upoštevata, kar dovolite agentu, in kar na ta način prebere, je prikazano v njegovi zgodovini kot vse drugo, kar prebere.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/sr-Latn/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic pita sistem koji je program pokrenuo agenta, umesto da veruje agentu na reč, pa jedan program ne može da koristi pristup koji ste dali drugom. Ako agent tvrdi da je neki drugi program, upit će vam to reći.</p>",
+                    "<p>Agent može i da prati vaše Prijemno sanduče, nalog ili fasciklu i da dobije obaveštenje kada se pošta u njima promeni, a može da ponudi i dva gotova zahteva, „Triage my inbox“ i „Summarize unread“. Oba poštuju ono što dozvolite agentu, a ono što na ovaj način pročita prikazuje se u njegovoj evidenciji kao i sve ostalo što čita.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/sv/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic frågar systemet vilket program som startade agenten i stället för att lita på vad agenten säger, så att ett program inte kan använda den åtkomst du gav ett annat. Om en agent säger att den är ett annat program, visar frågan dig det.</p>",
+                    "<p>En agent kan också hålla koll på Inkorgen, ett konto eller en mapp och få veta när e-posten där ändras, och den kan erbjuda två färdiga förfrågningar, ”Triage my inbox” och ”Summarize unread”. Båda följer det du tillåter agenten, och det den läser på det här sättet visas i dess logg precis som allt annat den läser.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/tr/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic, aracının sözüne güvenmek yerine aracıyı hangi programın başlattığını sisteme sorar. Böylece bir program, başka bir programa verdiğiniz erişimi kullanamaz. Bir aracı farklı bir program olduğunu söylerse bunu izin sorusunda görürsünüz.</p>",
+                    "<p>Bir aracı ayrıca Gelen Kutunuzu, bir hesabı veya bir klasörü izleyebilir ve buradaki postalar değiştiğinde haberdar edilebilir. İki hazır istek de sunabilir: “Triage my inbox” ve “Summarize unread”. İkisi de aracıya verdiğiniz izinlere uyar ve aracının bu yolla okudukları, okuduğu diğer her şey gibi günlüğünde görünür.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/crates/pe-html/help/uk/agents-connect.html": {
+              "hunks": [
+                {
+                  "old": [],
+                  "new": [
+                    "<p>Inbox Classic запитує в системи, яка програма запустила агента, а не вірить агенту на слово, тож одна програма не може скористатися доступом, який ви надали іншій. Якщо агент називає себе іншою програмою, у запиті на дозвіл це буде вказано.</p>",
+                    "<p>Агент також може стежити за папкою «Вхідні», обліковим записом або папкою й отримувати сповіщення, коли в них змінюється пошта, а також пропонувати два готові запити: «Triage my inbox» і «Summarize unread». Обидва підкоряються тому, що ви дозволите агенту, а все, що він прочитає таким чином, показується в його журналі, як і все інше, що він читає.</p>"
+                  ]
+                }
+              ]
+            },
+            "core/locales/bg/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Програмата се представи като { $claimed }. Inbox Classic провери коя програма я е стартирала: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/ca/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Ha dit que era { $claimed }. Inbox Classic ha comprovat quin programa l’ha iniciat: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/cs/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Program se představil jako { $claimed }. Inbox Classic ověřil, který program ho spustil: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/da/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Programmet oplyste, at det var { $claimed }. Inbox Classic har tjekket, hvilket program der startede det: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/de/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Das Programm gab sich als { $claimed } aus. Inbox Classic hat geprüft, welches Programm es gestartet hat: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/el/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Το πρόγραμμα δήλωσε ότι είναι το { $claimed }. Το Inbox Classic έλεγξε ποιο πρόγραμμα το ξεκίνησε: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/en/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "It said it was { $claimed }. Inbox Classic checked which program started it: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/es/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Se presentó como { $claimed }. Inbox Classic comprobó qué programa lo inició: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/et/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Programm väitis, et see on { $claimed }. Inbox Classic kontrollis, milline programm selle käivitas: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/fi/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Ohjelma kertoi olevansa { $claimed }. Inbox Classic tarkisti, mikä ohjelma sen käynnisti: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/fr/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Le programme s'est présenté comme { $claimed }. Inbox Classic a vérifié quel programme l'a lancé : { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/hr/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Program se predstavio kao { $claimed }. Inbox Classic provjerio je koji ga je program pokrenuo: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/hu/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "A program { $claimed } néven mutatkozott be. Az Inbox Classic ellenőrizte, melyik program indította el: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/it/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Ha dichiarato di essere { $claimed }. Inbox Classic ha verificato quale programma lo ha avviato: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/lt/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Programa prisistatė kaip { $claimed }. Inbox Classic patikrino, kuri programa ją paleido: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/lv/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Programma norādīja, ka tā ir { $claimed }. Inbox Classic pārbaudīja, kura programma to palaida: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/nb/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Programmet oppga at det var { $claimed }. Inbox Classic har sjekket hvilket program som startet det: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/nl/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Het programma gaf aan { $claimed } te zijn. Inbox Classic heeft gecontroleerd welk programma het heeft gestart: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/pl/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Program przedstawił się jako { $claimed }. Inbox Classic sprawdził, który program go uruchomił: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/pt-BR/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "O programa se apresentou como { $claimed }. O Inbox Classic verificou qual programa o iniciou: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/pt/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "O programa apresentou-se como { $claimed }. O Inbox Classic verificou que programa o iniciou: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/ro/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Programul s-a prezentat ca { $claimed }. Inbox Classic a verificat ce program l-a pornit: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/ru/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Программа представилась как { $claimed }. Inbox Classic проверила, какая программа ее запустила: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/sk/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Program sa predstavil ako { $claimed }. Aplikácia Inbox Classic overila, ktorý program ho spustil: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/sl/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Program se je predstavil kot { $claimed }. Inbox Classic je preveril, kateri program ga je zagnal: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/sr-Latn/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Program se predstavio kao { $claimed }. Inbox Classic je proverio koji ga je program pokrenuo: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/sv/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Programmet uppgav att det var { $claimed }. Inbox Classic har kontrollerat vilket program som startade det: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/tr/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Program kendini { $claimed } olarak tanıttı. Inbox Classic, onu hangi programın başlattığını kontrol etti: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            },
+            "core/locales/uk/core.ftl": {
+              "added": {
+                "agent-connect-claimed": "Програма представилася як { $claimed }. Inbox Classic перевірив, яка програма її запустила: { $program }."
+              },
+              "changed": {},
+              "removed": {}
+            }
+          },
+          "source_files": {
+            "core/crates/pe-html/help/bg/agents-connect.html": "515cbb6957bb1effd28804031c7b3c004f11a0aa85d298f014dc08c57e7b8a0f",
+            "core/crates/pe-html/help/ca/agents-connect.html": "77ded19dca4474e9939e2b64bc94693b5f88e88f81e0be784fbb2b14c1983540",
+            "core/crates/pe-html/help/cs/agents-connect.html": "87b007e131a24780b4c7533fe332f94ddd882656b7e89c0e8282a7e9795d3af2",
+            "core/crates/pe-html/help/da/agents-connect.html": "dbb330b59a85153d51b3e64242b464731f451e942727556acd2073c68a2d6911",
+            "core/crates/pe-html/help/de/agents-connect.html": "8529992b5847cc1991709b70bcc3965e3f19291aa25dcf433235705d3f2f221f",
+            "core/crates/pe-html/help/el/agents-connect.html": "5d1fbca87728eba916f3c9eda8371b75c338a085e4d3b5aac6a070b8b1e2795b",
+            "core/crates/pe-html/help/en/agents-connect.html": "9ad51eaa2a465684ac5cfcf8dd68bab8e1ad07749b3c2f8ffd0353e5779fffc2",
+            "core/crates/pe-html/help/es/agents-connect.html": "85e0dadd059cb8c1d828a4d1726787fba3226a531c552bf3b61f5774ddebb237",
+            "core/crates/pe-html/help/et/agents-connect.html": "a314848e76ad04b37e7a2c0971550fb970fe068d5afc7c339bb9924392d147d9",
+            "core/crates/pe-html/help/fi/agents-connect.html": "58d5c3937f9bb0b8b2e093708d886b0f300cc7b22204e44a2561839afcd4f2a9",
+            "core/crates/pe-html/help/fr/agents-connect.html": "0709ed6b279551b2e297e3142943770141ca92affeba76608afdf65bfb716ff4",
+            "core/crates/pe-html/help/hr/agents-connect.html": "e78c16b1593d2ed17c00e26bbeea583709e5ff324fa074e5630514d05071ed75",
+            "core/crates/pe-html/help/hu/agents-connect.html": "026877eb3b78afcc10d0c7b4036ff3918649006af634934e3362d06c3d2f3f12",
+            "core/crates/pe-html/help/it/agents-connect.html": "0a67b0517ac4fa70dd6d8b31b7e37df9adb739e0d2fee1190136087876af8c0d",
+            "core/crates/pe-html/help/lt/agents-connect.html": "f64affdac6fc3c8388df03734c97978d7df28a9cf57f3833d7302daad4c877ff",
+            "core/crates/pe-html/help/lv/agents-connect.html": "c413fc03e5188c63edc640365ead7d58b208f375e975ad614fdd774867bcf70a",
+            "core/crates/pe-html/help/nb/agents-connect.html": "a9f5d55dd7f333786bbd19a4f11cf7701df6990a31e8342dbadde7fe0cded267",
+            "core/crates/pe-html/help/nl/agents-connect.html": "eb5f956ed625b8a75af5c5b902cf847f0d77a8b6274650239c2281e14c03e55a",
+            "core/crates/pe-html/help/pl/agents-connect.html": "787695aa4694c7d1045765d3e0cb67e4c818857bff78193cfff4bc178df2544e",
+            "core/crates/pe-html/help/pt-BR/agents-connect.html": "3bc431e00e2b08a3ec97fb1bbe5227a5172631db887646bffe10557d529ec555",
+            "core/crates/pe-html/help/pt/agents-connect.html": "e037f9d50dad8214b5ebe08748e29c24a84a1e951912362141ff7c06133da470",
+            "core/crates/pe-html/help/ro/agents-connect.html": "35a387a00774df56343b63dd1caa37e586a03127c9b9e214f358f16797318aa5",
+            "core/crates/pe-html/help/ru/agents-connect.html": "815f6d004a7d0b405952dc9fc0d9c5a8470ae8c4c546002e5788bd2e6905a142",
+            "core/crates/pe-html/help/sk/agents-connect.html": "07a2789a588a0c510aaaac73e693bd0433a41024d3a1fdda7897c3e8de771e31",
+            "core/crates/pe-html/help/sl/agents-connect.html": "165ac5ab5b0a4eb5ce22683e41b4e8b698301a9f25baa8720f3cd6ffe23f921d",
+            "core/crates/pe-html/help/sr-Latn/agents-connect.html": "4c8d408bf3eb96e23b192e8ac96919e42908ee3e6b7fda7df0d4c03ea71afe86",
+            "core/crates/pe-html/help/sv/agents-connect.html": "e7261b2a894af620c8cb14f96bddad487323f5da551748b3ff0b899cd0a23aec",
+            "core/crates/pe-html/help/tr/agents-connect.html": "175b2dc56c6846a0a2e3a4e522e2d5d8c2496d152164e3ca29d5ca5bd5763914",
+            "core/crates/pe-html/help/uk/agents-connect.html": "7ed40419eeb84cd2458af089fbc6960435f5a35e0c9131161319a264b1276821",
+            "core/locales/bg/core.ftl": "a72e7ce4b51130982e2dd296fc2b3beb84f6f447527cfd5425a6f3b6f40a401c",
+            "core/locales/ca/core.ftl": "45f674f35486378aba90f791ed5a5b32645c9119bd492f739301a5c90d3a748e",
+            "core/locales/cs/core.ftl": "43e9aa2b6a90e82c4b9c6be439167e181e53d83dde423df9f0064b2983d40176",
+            "core/locales/da/core.ftl": "f0aacca4a8008901bbdc3dc9a49d5639ccd390643270a82a736eda57479350dd",
+            "core/locales/de/core.ftl": "8dabfca8b22c55e6cdbf2bab1056a32afdde0e101463ca1bf058bbcee05165ea",
+            "core/locales/el/core.ftl": "9a0611f23ad10420a7d1bc81e39d5394d36f3bd805b1ea2df7fc2d4a6c7a1ae5",
+            "core/locales/en/core.ftl": "d1bdc168030651ca31b65ef4ff80d8a459c5404691c569f8b094416da88609a0",
+            "core/locales/es/core.ftl": "c0e819581c37ab3e5019f581634e03e4733223f187ca6127d33c748ca3b1552a",
+            "core/locales/et/core.ftl": "6258e4622814ca3f3d527aaa51c2c9bc665027c4cdb3913a2d76110e53d0325f",
+            "core/locales/fi/core.ftl": "c55d1880e3d16b18db4c2b646240deef4dabee61bd153ec9a90ee4e23d3a3974",
+            "core/locales/fr/core.ftl": "a6b3c791ac946248e0344b66de2a54cf368b6e5343838d1fc32ebb846532f5dc",
+            "core/locales/hr/core.ftl": "4dfc50f5c777988f1ce41a1c353cb62b474d5f98a926cb654cafa386598609f5",
+            "core/locales/hu/core.ftl": "f55c84b5979906b7e01548a2462bcf806d03ccc283d5cbb0e85c8a06a0316099",
+            "core/locales/it/core.ftl": "166f1990a1ab1c7a70683b58fdba6f5c1d30a69a3c5da6c86d1e84b54ed9c2c7",
+            "core/locales/lt/core.ftl": "316c35dcdd47ea9f002c68f182b1f2e1abadf19a8c0fef3bc2826078b32b1f87",
+            "core/locales/lv/core.ftl": "f0e5a80ca048a12682a97364d934fab03f85ae4b2b14d4a4554f90cf664fbf3e",
+            "core/locales/nb/core.ftl": "72cdb8703037f6bac7f1389995ba582718234feca383428a775ef61ebc4cbab2",
+            "core/locales/nl/core.ftl": "4139ea11946f3cf566ba37f90dd62fc1fb1391f1dd1560ba0d9a022ce3b15e46",
+            "core/locales/pl/core.ftl": "3fe987ea50cf94aee161132e0fadba92ec4dbeb58a2f7f4953c4b5726b8824c3",
+            "core/locales/pt-BR/core.ftl": "bf1a5203ebca93067be169fa759543f433244c3beb162e255246866930ad4b4b",
+            "core/locales/pt/core.ftl": "709ec2e388bb85bed6ba78dda338429d6c344882fbdab190dc1af6f8e869a714",
+            "core/locales/ro/core.ftl": "3bbd418e4aa0cdf2b0faaef95cb6f75718c124e36a9d767067a615e41af9188b",
+            "core/locales/ru/core.ftl": "5add4d6dfe57104cc3b148bf391fb43c05df262ea488c209efb89998576d2d06",
+            "core/locales/sk/core.ftl": "c8419541cb8617253bcab92dbb4de9447752d0ec28572748c4956297f86b26e4",
+            "core/locales/sl/core.ftl": "297a7d621d4af0f1fa43a2c71012bd48b8cc5fc52780aecce989786a191d189f",
+            "core/locales/sr-Latn/core.ftl": "86bdc3807a72d0db5b84c41146e3b7e2f7a9f5220edf7a2c772a51deda2baba4",
+            "core/locales/sv/core.ftl": "ea63b15374b04c3b6745bc3908e02d5903094b993f76db9c0a404166859c1721",
+            "core/locales/tr/core.ftl": "56f2f2216487cd273d21664abcb16619cf8f6d0727f001a4912f904aa40cac22",
+            "core/locales/uk/core.ftl": "bf236daa1b89c4d009a9141bf06690846156e636a470661477cade0afc485574"
           }
         },
         {
@@ -182312,7 +184042,7 @@
           "ref": "refs/remotes/origin/feat/mcp-phase3a",
           "commit": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
           "merge_base": "af1725fd15629343ec17d6d3beee8e00c60c5773",
-          "status": "Unmerged incoming source refreshed after merging current master. All 87 catalog file deltas and 87 help file deltas remain exact after accounting for review wrappers. The 27 added IDs per language and three help paths remain separately pending; no extra active scope or completion credit.",
+          "status": "Merged in PR168 and imported into the active marked queue at 292c341a. Exact additions and reopened passages recorded in resumed_source_integrations; no linguistic review credit.",
           "catalog_additions_by_language": {
             "bg": 27,
             "ca": 27,
@@ -182438,12 +184168,419 @@
             "uk": 3
           },
           "previous_commit": "effbbdd527ea9384c0c77557753fecda3d338d41",
-          "latest_exact_delta_batch": "lt-organize-delivery-help-20261119"
+          "latest_exact_delta_batch": "lt-organize-delivery-help-20261119",
+          "integrated_at": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+          "integration_record": "mcp-phase3a-merged-after-lt-accounts-20261119"
         }
       ],
       "other_pending_source": "preview-cid at 6a37b3de merged in PR 159 and integrated at 3baf8a41. Its 56 translated help additions are now in the active pending inventory; exact changes are in resumed_source_integrations.",
       "latest_integration": "mcp-phase3a-merged-after-lt-accounts-20261119",
-      "remaining_source": "MCP phase3b at 42bed14a remains separately queued; do not merge unrelated feature code merely to review its drafts."
+      "remaining_source": "MCP phase3b at 6e68b743 remains separate: 28 translated agent-connect-claimed additions and agents-connect help changes in 28 languages. Do not merge unrelated feature code merely to review drafts.",
+      "refresh_history": [
+        {
+          "batch": "lt-mcp3a-agents-invitations-20261119",
+          "previous_sources": [
+            {
+              "ref": "refs/heads/feat/mcp-phase3b",
+              "commit": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "merge_base": "3baf8a41703a6b941bb61c08b688e62813c79456",
+              "status": "Unmerged incoming source. Exact added/changed/removed catalog IDs and help paths are recorded in this checkpoint; recheck integration before importing.",
+              "catalog_additions_by_language": {
+                "bg": 28,
+                "ca": 28,
+                "cs": 28,
+                "da": 28,
+                "de": 28,
+                "el": 28,
+                "en": 28,
+                "es": 28,
+                "et": 28,
+                "fi": 28,
+                "fr": 28,
+                "hr": 28,
+                "hu": 28,
+                "it": 28,
+                "lt": 28,
+                "lv": 28,
+                "nb": 28,
+                "nl": 28,
+                "pl": 28,
+                "pt-BR": 28,
+                "pt": 28,
+                "ro": 28,
+                "ru": 28,
+                "sk": 28,
+                "sl": 28,
+                "sr-Latn": 28,
+                "sv": 28,
+                "tr": 28,
+                "uk": 28
+              },
+              "catalog_changes_by_language": {
+                "bg": 1,
+                "ca": 1,
+                "cs": 1,
+                "da": 1,
+                "de": 1,
+                "el": 1,
+                "en": 1,
+                "es": 1,
+                "et": 1,
+                "fi": 1,
+                "fr": 1,
+                "hr": 1,
+                "hu": 1,
+                "it": 1,
+                "lt": 1,
+                "lv": 1,
+                "nb": 1,
+                "nl": 1,
+                "pl": 1,
+                "pt-BR": 1,
+                "pt": 1,
+                "ro": 1,
+                "ru": 1,
+                "sk": 1,
+                "sl": 1,
+                "sr-Latn": 1,
+                "sv": 1,
+                "tr": 1,
+                "uk": 1
+              },
+              "catalog_removals_by_language": {
+                "bg": 0,
+                "ca": 0,
+                "cs": 0,
+                "da": 0,
+                "de": 0,
+                "el": 0,
+                "en": 0,
+                "es": 0,
+                "et": 0,
+                "fi": 0,
+                "fr": 0,
+                "hr": 0,
+                "hu": 0,
+                "it": 0,
+                "lt": 0,
+                "lv": 0,
+                "nb": 0,
+                "nl": 0,
+                "pl": 0,
+                "pt-BR": 0,
+                "pt": 0,
+                "ro": 0,
+                "ru": 0,
+                "sk": 0,
+                "sl": 0,
+                "sr-Latn": 0,
+                "sv": 0,
+                "tr": 0,
+                "uk": 0
+              },
+              "help_topics_by_language": {
+                "bg": 4,
+                "ca": 4,
+                "cs": 4,
+                "da": 4,
+                "de": 4,
+                "el": 4,
+                "en": 4,
+                "es": 4,
+                "et": 4,
+                "fi": 4,
+                "fr": 4,
+                "hr": 4,
+                "hu": 4,
+                "it": 4,
+                "lt": 4,
+                "lv": 4,
+                "nb": 4,
+                "nl": 4,
+                "pl": 4,
+                "pt-BR": 4,
+                "pt": 4,
+                "ro": 4,
+                "ru": 4,
+                "sk": 4,
+                "sl": 4,
+                "sr-Latn": 4,
+                "sv": 4,
+                "tr": 4,
+                "uk": 4
+              }
+            },
+            {
+              "ref": "refs/heads/feat/mcp-phase3a",
+              "commit": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
+              "merge_base": "af1725fd15629343ec17d6d3beee8e00c60c5773",
+              "status": "Merged in PR168 and imported into the active marked queue at 292c341a. Exact additions and reopened passages recorded in resumed_source_integrations; no linguistic review credit.",
+              "catalog_additions_by_language": {
+                "bg": 27,
+                "ca": 27,
+                "cs": 27,
+                "da": 27,
+                "de": 27,
+                "el": 27,
+                "en": 27,
+                "es": 27,
+                "et": 27,
+                "fi": 27,
+                "fr": 27,
+                "hr": 27,
+                "hu": 27,
+                "it": 27,
+                "lt": 27,
+                "lv": 27,
+                "nb": 27,
+                "nl": 27,
+                "pl": 27,
+                "pt-BR": 27,
+                "pt": 27,
+                "ro": 27,
+                "ru": 27,
+                "sk": 27,
+                "sl": 27,
+                "sr-Latn": 27,
+                "sv": 27,
+                "tr": 27,
+                "uk": 27
+              },
+              "catalog_changes_by_language": {
+                "bg": 0,
+                "ca": 0,
+                "cs": 0,
+                "da": 0,
+                "de": 0,
+                "el": 0,
+                "en": 0,
+                "es": 0,
+                "et": 0,
+                "fi": 0,
+                "fr": 0,
+                "hr": 0,
+                "hu": 0,
+                "it": 0,
+                "lt": 0,
+                "lv": 0,
+                "nb": 0,
+                "nl": 0,
+                "pl": 0,
+                "pt-BR": 0,
+                "pt": 0,
+                "ro": 0,
+                "ru": 0,
+                "sk": 0,
+                "sl": 0,
+                "sr-Latn": 0,
+                "sv": 0,
+                "tr": 0,
+                "uk": 0
+              },
+              "catalog_removals_by_language": {
+                "bg": 0,
+                "ca": 0,
+                "cs": 0,
+                "da": 0,
+                "de": 0,
+                "el": 0,
+                "en": 0,
+                "es": 0,
+                "et": 0,
+                "fi": 0,
+                "fr": 0,
+                "hr": 0,
+                "hu": 0,
+                "it": 0,
+                "lt": 0,
+                "lv": 0,
+                "nb": 0,
+                "nl": 0,
+                "pl": 0,
+                "pt-BR": 0,
+                "pt": 0,
+                "ro": 0,
+                "ru": 0,
+                "sk": 0,
+                "sl": 0,
+                "sr-Latn": 0,
+                "sv": 0,
+                "tr": 0,
+                "uk": 0
+              },
+              "help_topics_by_language": {
+                "bg": 3,
+                "ca": 3,
+                "cs": 3,
+                "da": 3,
+                "de": 3,
+                "el": 3,
+                "en": 3,
+                "es": 3,
+                "et": 3,
+                "fi": 3,
+                "fr": 3,
+                "hr": 3,
+                "hu": 3,
+                "it": 3,
+                "lt": 3,
+                "lv": 3,
+                "nb": 3,
+                "nl": 3,
+                "pl": 3,
+                "pt-BR": 3,
+                "pt": 3,
+                "ro": 3,
+                "ru": 3,
+                "sk": 3,
+                "sl": 3,
+                "sr-Latn": 3,
+                "sv": 3,
+                "tr": 3,
+                "uk": 3
+              },
+              "previous_commit": "effbbdd527ea9384c0c77557753fecda3d338d41",
+              "latest_exact_delta_batch": "lt-organize-delivery-help-20261119",
+              "integrated_at": "292c341a649c723e7c90fd239e5c73ed557c88ec",
+              "integration_record": "mcp-phase3a-merged-after-lt-accounts-20261119"
+            },
+            {
+              "ref": "refs/remotes/origin/feat/mcp-phase3a",
+              "commit": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
+              "merge_base": "af1725fd15629343ec17d6d3beee8e00c60c5773",
+              "status": "Unmerged incoming source refreshed after merging current master. All 87 catalog file deltas and 87 help file deltas remain exact after accounting for review wrappers. The 27 added IDs per language and three help paths remain separately pending; no extra active scope or completion credit.",
+              "catalog_additions_by_language": {
+                "bg": 27,
+                "ca": 27,
+                "cs": 27,
+                "da": 27,
+                "de": 27,
+                "el": 27,
+                "en": 27,
+                "es": 27,
+                "et": 27,
+                "fi": 27,
+                "fr": 27,
+                "hr": 27,
+                "hu": 27,
+                "it": 27,
+                "lt": 27,
+                "lv": 27,
+                "nb": 27,
+                "nl": 27,
+                "pl": 27,
+                "pt-BR": 27,
+                "pt": 27,
+                "ro": 27,
+                "ru": 27,
+                "sk": 27,
+                "sl": 27,
+                "sr-Latn": 27,
+                "sv": 27,
+                "tr": 27,
+                "uk": 27
+              },
+              "catalog_changes_by_language": {
+                "bg": 0,
+                "ca": 0,
+                "cs": 0,
+                "da": 0,
+                "de": 0,
+                "el": 0,
+                "en": 0,
+                "es": 0,
+                "et": 0,
+                "fi": 0,
+                "fr": 0,
+                "hr": 0,
+                "hu": 0,
+                "it": 0,
+                "lt": 0,
+                "lv": 0,
+                "nb": 0,
+                "nl": 0,
+                "pl": 0,
+                "pt-BR": 0,
+                "pt": 0,
+                "ro": 0,
+                "ru": 0,
+                "sk": 0,
+                "sl": 0,
+                "sr-Latn": 0,
+                "sv": 0,
+                "tr": 0,
+                "uk": 0
+              },
+              "catalog_removals_by_language": {
+                "bg": 0,
+                "ca": 0,
+                "cs": 0,
+                "da": 0,
+                "de": 0,
+                "el": 0,
+                "en": 0,
+                "es": 0,
+                "et": 0,
+                "fi": 0,
+                "fr": 0,
+                "hr": 0,
+                "hu": 0,
+                "it": 0,
+                "lt": 0,
+                "lv": 0,
+                "nb": 0,
+                "nl": 0,
+                "pl": 0,
+                "pt-BR": 0,
+                "pt": 0,
+                "ro": 0,
+                "ru": 0,
+                "sk": 0,
+                "sl": 0,
+                "sr-Latn": 0,
+                "sv": 0,
+                "tr": 0,
+                "uk": 0
+              },
+              "help_topics_by_language": {
+                "bg": 3,
+                "ca": 3,
+                "cs": 3,
+                "da": 3,
+                "de": 3,
+                "el": 3,
+                "en": 3,
+                "es": 3,
+                "et": 3,
+                "fi": 3,
+                "fr": 3,
+                "hr": 3,
+                "hu": 3,
+                "it": 3,
+                "lt": 3,
+                "lv": 3,
+                "nb": 3,
+                "nl": 3,
+                "pl": 3,
+                "pt-BR": 3,
+                "pt": 3,
+                "ro": 3,
+                "ru": 3,
+                "sk": 3,
+                "sl": 3,
+                "sr-Latn": 3,
+                "sv": 3,
+                "tr": 3,
+                "uk": 3
+              },
+              "previous_commit": "effbbdd527ea9384c0c77557753fecda3d338d41",
+              "latest_exact_delta_batch": "lt-organize-delivery-help-20261119"
+            }
+          ],
+          "reason": "Refresh phase3b from its current merge base, removing phase3a additions already integrated into the active queue; also synchronize the phase3a remote alias status."
+        }
+      ],
+      "latest_refresh": "lt-mcp3a-agents-invitations-20261119"
     },
     "resumed_review_latest_english_sources": {
       "core/crates/pe-html/help/en/links-scripts.html": "88850a56321ad291a4db09fe9e82d9f2429e735b2989c35a60eb42d1dafb3a2c",
@@ -187925,7 +190062,18 @@
             ]
           }
         ],
-        "instruction": "English and app code unchanged. Compare affected current passages elsewhere; retain accurate wording and reopen only affected content. Comparison tasks add no review credit."
+        "instruction": "English and app code unchanged. Compare affected current passages elsewhere; retain accurate wording and reopen only affected content. Comparison tasks add no review credit.",
+        "partial_language_reviews": {
+          "lt": [
+            {
+              "batch": "lt-mcp3a-agents-invitations-20261119",
+              "reviewed_topics": [
+                "agents-permissions.html"
+              ],
+              "note": "Full topic review against current source. Other listed topics remain pending; no duplicate scope credit."
+            }
+          ]
+        }
       },
       {
         "id": "accounts-connections-behavior-context-20261118",
@@ -188447,7 +190595,18 @@
             ]
           }
         ],
-        "instruction": "Compare current passages against verified behavior, retaining accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review."
+        "instruction": "Compare current passages against verified behavior, retaining accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review.",
+        "partial_language_reviews": {
+          "lt": [
+            {
+              "batch": "lt-mcp3a-agents-invitations-20261119",
+              "reviewed_topics": [
+                "invitations.html"
+              ],
+              "note": "Full topic review against current source. Other listed topics remain pending; no duplicate scope credit."
+            }
+          ]
+        }
       },
       {
         "id": "picture-insertion-supported-formats-context-20261119",
@@ -189904,6 +192063,197 @@
           }
         ],
         "instruction": "Compare only affected lookup-cancellation, app-password-choice and account-list shortcut claims. Reuse the account/connection comparison; reopen only affected passages without duplicate scope credit. Do not edit English/app code."
+      },
+      {
+        "id": "agent-bulk-undo-invitation-context-20261119",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "fad4804ba9cc0c359759ef16c5e81df343eae839",
+        "completed_languages": [
+          "lt"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "hu",
+          "it",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "agents-permissions.html",
+          "agents-sending.html",
+          "invitations.html"
+        ],
+        "catalog_ids": {
+          "app.ftl": [
+            "ui-undo-since-button",
+            "ui-undo-since-span",
+            "ui-take-back"
+          ],
+          "core.ftl": [
+            "agent-undo-changed",
+            "agent-log-bulk-read",
+            "agent-log-bulk-unread",
+            "agent-log-bulk-flagged",
+            "agent-log-bulk-unflagged",
+            "agent-log-bulk-color",
+            "agent-log-bulk-moved",
+            "agent-log-bulk-archived",
+            "agent-log-bulk-junk",
+            "agent-log-bulk-not-junk",
+            "agent-log-bulk-deleted",
+            "agent-undo-span",
+            "agent-undo-since-question",
+            "agent-undo-since-detail",
+            "agent-undo-done",
+            "agent-undo-left-gone",
+            "agent-undo-left-changed",
+            "agent-undo-left-sent",
+            "agent-undo-left-impossible",
+            "agent-invitation-reply",
+            "invitation-reply-subject",
+            "invitation-reply-text"
+          ],
+          "windows.ftl": [
+            "win-undo-since",
+            "win-take-back"
+          ]
+        },
+        "issues": [
+          {
+            "catalog_ids": [
+              "ui-undo-since-button",
+              "ui-undo-since-span",
+              "ui-take-back",
+              "win-undo-since",
+              "win-take-back"
+            ],
+            "topics": [
+              "agents-permissions.html"
+            ],
+            "finding": "Take Back and Cancel previously displayed the same Lithuanian word. The destructive action now names changes; the ellipsis command opens a time-span chooser. Windows T in the agent list and A in the separate confirmation fit actual scopes. Mac/Linux action and Cancel are distinct; defaults remain controlled by source.",
+            "sources": [
+              "app/src/agents.cpp",
+              "mac/Sources/InboxClassic/Agents.swift",
+              "linux/src/agents.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "agent-log-bulk-read",
+              "agent-log-bulk-unread",
+              "agent-log-bulk-flagged",
+              "agent-log-bulk-unflagged",
+              "agent-log-bulk-color",
+              "agent-log-bulk-moved",
+              "agent-log-bulk-archived",
+              "agent-log-bulk-junk",
+              "agent-log-bulk-not-junk",
+              "agent-log-bulk-deleted"
+            ],
+            "topics": [
+              "agents-permissions.html"
+            ],
+            "finding": "Bulk preview freezes eligible message refs; apply rechecks the relevant state, excludes later arrivals and skips ineligible rows. More than 1000 eligible messages or a scan beyond 10000 refuses instead of silently truncating. Supported actions are read/unread, flag/color, move/archive, junk/not-junk and trash. Other organize permissions are not bulk actions. Existing organize permission authorizes the change. The log is written after local dispatch while server work may still be pending.",
+            "sources": [
+              "core/crates/pe-core/src/agents/bulk.rs",
+              "core/crates/pe-core/src/selection.rs",
+              "core/crates/pe-core/src/lib.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "agent-undo-changed",
+              "agent-undo-span",
+              "agent-undo-since-question",
+              "agent-undo-since-detail",
+              "agent-undo-done",
+              "agent-undo-left-gone",
+              "agent-undo-left-changed",
+              "agent-undo-left-sent",
+              "agent-undo-left-impossible"
+            ],
+            "topics": [
+              "agents-permissions.html",
+              "agents-sending.html"
+            ],
+            "finding": "Undo Since counts eligible log rows, not messages; a row becomes undone after any of its messages are processed, so success can be partial. Moves require a message in the expected destination; flags compare only their relevant state, and colors compare a stored target when available. Flag removal can also remove a subsequently changed color: do not promise preservation of every later user/server change. Archive reversal is queued. Missing Outbox mail may have been removed manually and does not prove sending/delivery. Agent-log Undo can remove a still-queued message beyond the ordinary Undo Send countdown. Span choices are 15 minutes, 1/4/24 hours and 7/30 days. Counts are integers, with zero only in summary/question and positive detail counts.",
+            "sources": [
+              "core/crates/pe-core/src/agents/undo.rs",
+              "core/crates/pe-store/src/agents.rs",
+              "core/crates/pe-core/src/lib.rs"
+            ]
+          },
+          {
+            "topics": [
+              "agents-permissions.html"
+            ],
+            "finding": "Text attachments are limited to 256 KB; supported PDF/Office and PNG/JPEG/GIF/WebP files to 10 MB. Encrypted content is not handed over. Read summaries group by program/hour and hold subjects, filenames and queries, not bodies. Expiry runs on insertion; ordinary entries can be pruned early. Clearing history does not reset sending or unsubscribe limits. Saved/auto-saved user drafts cease to be agent-owned.",
+            "sources": [
+              "core/crates/pe-mcp/src/tools.rs",
+              "core/crates/pe-mcp/src/tools/mail.rs",
+              "core/crates/pe-core/src/agents/log.rs",
+              "core/crates/pe-store/src/agents.rs",
+              "core/crates/pe-core/src/agents.rs"
+            ]
+          },
+          {
+            "catalog_ids": [
+              "agent-invitation-reply",
+              "invitation-reply-subject",
+              "invitation-reply-text"
+            ],
+            "topics": [
+              "agents-sending.html",
+              "invitations.html"
+            ],
+            "finding": "Invitation replies use organizer and attendee data from the invitation, include a calendar reply and need individual sending consent. Edit First is unavailable and account signature text is empty. The local invitation status updates only after SMTP sending succeeds, without confirmation from the organizer calendar. The name may be an address; do not inflect it. Tentative subject means tentatively accepted.",
+            "sources": [
+              "core/crates/pe-core/src/agents/invitations.rs",
+              "core/crates/pe-core/src/calendar_reply.rs",
+              "core/crates/pe-core/src/agents.rs",
+              "core/crates/pe-core/src/worker.rs",
+              "core/crates/pe-store/src/invitations.rs",
+              "app/src/agents.cpp",
+              "mac/Sources/InboxClassic/Agents.swift",
+              "linux/src/agents.rs"
+            ]
+          },
+          {
+            "topics": [
+              "invitations.html"
+            ],
+            "finding": "Calendar details depend on available fields. Defined zones convert to local time; floating times remain as written and all-day events show dates. Opening uses an external calendar app; failure does not establish that none is installed.",
+            "sources": [
+              "core/crates/pe-core/src/calendar.rs",
+              "app/src/reader.cpp",
+              "linux/src/reader.rs",
+              "mac/Sources/InboxClassic/Reader.swift"
+            ]
+          }
+        ],
+        "instruction": "Apply these findings while reviewing the already pending MCP phase3a additions. Compare only affected surrounding prose; reopen only affected content, without duplicate scope credit. The existing agent-log and calendar audits overlap and should be closed together when all their items are compared. English and app code unchanged."
       }
     ],
     "completed_source_followups": [

@@ -103,10 +103,8 @@ win-clear-log-ask = Išvalyti agentų veiklos istoriją? Agentų atlikti pakeiti
 win-agent-programs = &Programos, kurių agentai paprašė prieigos prie jūsų pašto:
 win-change = &Keisti...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Atšaukti &nuo...
-# review: new
-win-take-back = &Atšaukti
+win-undo-since = Atšaukti pakei&timus...
+win-take-back = &Atšaukti pakeitimus
 win-what-agents-did = Agentų &veikla:
 win-agent-reads = Pasiekti duomenys nuo { $from } iki { $to }:
 win-agent-reads-hint = Viršuje pasirinkite skaitymo veiklos įrašą, kad pamatytumėte, kokie duomenys buvo pasiekti.

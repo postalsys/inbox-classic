@@ -752,6 +752,17 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   choice only appears when sign-in alternatives are offered. Lookup cancellation ends lookup; on Mac it also exits setup.
 - The account-list Delete shortcut is documented only for Windows; the current Mac and Linux dialogs expose
   removal through their button. Linux File/Tools paths are valid submenus of the primary menu.
+- Agent Undo Since opens "Atšaukti pakeitimus…"; its confirmation action is "Atšaukti pakeitimus", distinct
+  from Cancel ("Atšaukti"). Windows uses T in the agent list and A in the separate confirmation dialog.
+- Bulk read/unread/junk logs put the count after a colon, matching the existing message-action statuses.
+  Undo counts log entries, including partially undone batches; no blanket promise of complete restoration or
+  preservation of every later change. Absence from Outbox does not prove delivery. Server work may still be pending.
+- Agent attachments distinguish text files up to 256 KB from supported PDF/Office/picture files up to 10 MB.
+  Bulk search changes cover supported message actions only. More than 1000 eligible messages refuses the request;
+  later arrivals are excluded. Existing organize permission authorizes the action without a new confirmation.
+- Invitation replies use "Preliminariai priimta". Local response status changes only after successful sending;
+  do not promise the organizer's calendar accepted it. Generated invitation replies have no signature text or Edit First.
+  Calendar help distinguishes local times from floating times and installed apps from successful file opening.
 
 ### Magyar (hu)
 
