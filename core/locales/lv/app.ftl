@@ -5,187 +5,98 @@
 
 ## The menus
 
-# review: new
 menu-file = &Fails
-# review: new
 menu-edit = &Rediģēt
-# review: new
 menu-view = &Skats
-# review: new
 menu-tools = Rī&ki
-# review: new
 menu-message = &Ziņojums
-# review: new
 menu-help = &Palīdzība
-# review: new
 menu-layout = &Izkārtojums
-# review: new
 menu-sort-by = &Kārtot pēc
-# review: new
 menu-text-size = &Teksta lielums
-# review: new
 menu-folder = &Mape
 menu-insert = &Ievietot
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
-# review: new
 cmd-new-account = &Jauns konts...
-# review: new
 cmd-exit = I&ziet
-# review: new
-cmd-sync = Sūtīt un saņemt &visu
-# review: new
+cmd-sync = Sūtīt un saņemt &visos kontos
 cmd-mark-read = Atzīmēt kā &lasītu
-# review: new
 cmd-mark-unread = Atzīmēt kā &nelasītu
-# review: new
 cmd-pictures = Lejupielādēt &attēlus
-# review: new
 cmd-about = &Par Inbox Classic
-# review: new
 cmd-new-mail = &Jauns ziņojums
-# review: new
-cmd-reply = Atbildēt &sūtītājam
-# review: new
+cmd-reply = At&bildēt sūtītājam
 cmd-reply-all = Atbildēt &visiem
-# review: new
 cmd-forward = &Pārsūtīt
-# review: new
 cmd-help = &Saturs
-# review: new
 cmd-delete = &Dzēst ziņojumu
-# review: new
-cmd-move = &Pārvietot uz mapi...
-# review: new
-cmd-flag = Atzīmēt ar &karodziņu
-# review: new
-cmd-new-folder = Jauna &mape...
-# review: new
+cmd-move = Pārviet&ot uz mapi...
+cmd-flag = &Atzīmēt ar karodziņu
+cmd-new-folder = &Jauna mape...
 cmd-rename-folder = Pā&rdēvēt mapi...
-# review: new
 cmd-delete-folder = &Dzēst mapi
-# review: new
-cmd-empty-folder = Iztukšo&t mapi
-# review: new
+cmd-empty-folder = &Iztukšot mapi
 ui-empty-button = Iztukšot
-# review: new
 cmd-accounts = &Konti...
-# review: new
-cmd-find = &Meklēt ziņojumu
-# review: new
+cmd-find = Meklēt &ziņojumu
 cmd-save-as = &Saglabāt kā...
-# review: new
 cmd-print = Dr&ukāt...
-# review: new
 cmd-import = &Importēt ziņojumus...
-# review: new
 cmd-outbox = &Izsūtne...
-# review: new
 cmd-properties = R&ekvizīti
-# review: new
 cmd-mark-all-read = Atzīmēt visus kā lasī&tus
-# review: new
-cmd-junk = Atzīmēt kā &nevēlamu
-# review: new
-cmd-not-junk = Atzīmēt kā vē&lamu
-# review: new
-cmd-archive = &Arhivēt
-# review: new
+cmd-junk = A&tzīmēt kā nevēlamu
+cmd-not-junk = At&celt nevēlama pasta atzīmi
+cmd-archive = Ar&hivēt
 cmd-watch-conversation = Vērot sa&runu
-# review: new
-cmd-ignore-conversation = &Ignorēt sarunu
-# review: new
+cmd-ignore-conversation = I&gnorēt sarunu
 cmd-next-message = &Nākamais ziņojums
-# review: new
 cmd-previous-message = Ie&priekšējais ziņojums
-# review: new
 cmd-next-unread = Nākamais nelasītais &ziņojums
-# review: new
 cmd-go-to-folder = Pā&riet uz mapi...
-# review: new
-cmd-find-in-message = Meklēt šajā &ziņojumā...
-# review: new
+cmd-find-in-message = M&eklēt šajā ziņojumā...
 ui-go-to-prompt = Pāriet uz mapi:
-# review: new
 ui-find-in-message-hint = Meklēt šajā ziņojumā
-# review: new
 ui-find-not-found = Šajā ziņojumā nav „{ $words }”
-# review: new
 cmd-expand-all-threads = Izvērst visas &sarunas
-# review: new
 cmd-collapse-all-threads = Sakļaut visas sar&unas
-# review: new
 ui-group-by-conversation = &Grupēt ziņojumus pēc sarunām
-# review: new
 cmd-folder-list = &Mapju saraksts
-# review: new
 cmd-layout-automatic = &Automātisks
-# review: new
 cmd-layout-classic = &Klasisks
-# review: new
 cmd-layout-columns = K&olonnas
-# review: new
 cmd-sort-date = &Datums
-# review: new
-cmd-sort-from = &No
-# review: new
+cmd-sort-from = &Sūtītājs
 cmd-sort-subject = &Tēma
-# review: new
 cmd-sort-size = &Lielums
-# review: new
 cmd-sort-ascending = &Augošā secībā
-# review: new
 cmd-sort-descending = D&ilstošā secībā
-# review: new
 cmd-text-size-largest = &Vislielākais
-# review: new
 cmd-text-size-larger = &Lielāks
-# review: new
 cmd-text-size-medium = Vi&dējs
-# review: new
 cmd-text-size-smaller = &Mazāks
-# review: new
 cmd-text-size-smallest = Vism&azākais
-# review: new
 cmd-hide-ignored = Slēpt ign&orētās sarunas
-# review: new
 cmd-hide-read = Slēpt &lasītos ziņojumus
-# review: new
-cmd-notify = &Paziņot par jaunu pastu
-# review: new
+cmd-notify = &Paziņot par jauniem ziņojumiem
 cmd-open = &Atvērt Inbox Classic
-# review: new
-cmd-default-app = Padarīt par &noklusējuma pasta lietotni...
-# review: new
+cmd-default-app = Iestatīt kā &noklusējuma pasta lietotni...
 cmd-view-source = Ziņojuma pirmko&ds
-# review: new
 cmd-ai-agents = &MI aģenti...
-# review: new
 cmd-options = &Opcijas...
-# review: new
 cmd-message-rules = Ziņojumu &kārtulas...
-# review: new
 cmd-encryption-keys = Šifrēšanas &atslēgas...
-# review: new
-cmd-create-rule-from-message = Izveid&ot kārtulu no ziņojuma...
-# review: new
+cmd-create-rule-from-message = I&zveidot kārtulu no ziņojuma...
 cmd-select-all = Atlasīt &visu
-# review: new
 cmd-undo = &Atsaukt
-# review: new
-cmd-copy = &Kopēt uz mapi...
-# review: new
+cmd-copy = Kopēt uz &mapi...
 cmd-address-book = A&drešu grāmata...
-# review: new
-cmd-add-sender-to-book = Pievienot sūtītāju adrešu &grāmatai
-# review: new
+cmd-add-sender-to-book = Pievienot sūtītā&ju adrešu grāmatai
 cmd-import-address-book = Importēt &adrešu grāmatu...
-# review: new
 cmd-export-address-book = Eksportēt adrešu &grāmatu...
-# review: new
 cmd-export-setup = Eksportēt iestatījumus un k&ontus...
-# review: new
 cmd-import-setup = Importēt iestatījumus u&n kontus...
 cmd-compose-sign = &Digitāli parakstīt
 cmd-compose-encrypt = Šif&rēt
@@ -193,276 +104,149 @@ cmd-attach-my-key = Pievienot savu &publisko atslēgu
 
 ## The tray icon's menu
 
-# review: new
-tray-check = &Pārbaudīt, vai ir jauns pasts
-# review: new
+tray-check = Pārbaudīt, &vai ir jauni ziņojumi
 tray-no-accounts = Vēl nav kontu
 
 ## Words the windows of more than one platform share
 
-# review: new
 ui-tb-create-mail = Jauns ziņojums
-# review: new
 ui-tb-reply = Atbildēt
-# review: new
 ui-tb-reply-all = Atbildēt visiem
-# review: new
 ui-tb-forward = Pārsūtīt
-# review: new
 ui-tb-print = Drukāt
-# review: new
 ui-tb-delete = Dzēst
-# review: new
 ui-tb-junk = Nevēlams
-# review: new
-ui-tb-not-junk = Vēlams
-# review: new
+ui-tb-not-junk = Nav nevēlams
 ui-tb-archive = Arhivēt
-# review: new
 ui-tb-previous = Iepriekšējais
-# review: new
 ui-tb-next = Nākamais
-# review: new
 ui-previous-tip = Iepriekšējais ziņojums
-# review: new
 ui-next-tip = Nākamais ziņojums
-# review: new
 ui-tb-sync = Sūtīt/saņemt
-# review: new
 ui-tb-mark-read = Lasīts
-# review: new
 ui-tb-mark-unread = Nelasīts
-# review: new
 ui-still-running = Inbox Classic joprojām darbojas
-# review: new
 ui-no-subject = (bez tēmas)
-# review: new
 ui-quoted = „{ $subject }”
-# review: new
-ui-newest-from = Jaunākais ziņojums no { $sender }: { $subject }
-# review: new
+ui-newest-from = Jaunākais ziņojums: { $subject } (sūtītājs: { $sender })
 ui-new-messages = { $count ->
     [zero] { $count } jaunu ziņojumu
     [one] { $count } jauns ziņojums
    *[other] { $count } jauni ziņojumi
 }
-# review: new
 ui-outbox-waiting = { $count ->
-    [zero] Mapē Izsūtne ir { $count } ziņojumu
-    [one] Mapē Izsūtne ir { $count } ziņojums
-   *[other] Mapē Izsūtne ir { $count } ziņojumi
+    [zero] Mapē „Izsūtne” ir { $count } ziņojumu
+    [one] Mapē „Izsūtne” ir { $count } ziņojums
+   *[other] Mapē „Izsūtne” ir { $count } ziņojumi
 }
-# review: new
-ui-outbox-waits = { $subject } gaida mapē Izsūtne
-# review: new
-ui-outbox-sending = Sūta { $subject }...
-# review: new
-ui-from-account = No konta { $account }
-# review: new
-ui-sign-in-refused = Pierakstīšanās kontā { $account } tika noraidīta, vai sesijas derīgums ir beidzies.
-# review: new
+ui-outbox-waits = Ziņojums { $subject } gaida mapē „Izsūtne”
+ui-outbox-sending = Nosūta ziņojumu { $subject }...
+ui-from-account = No konta „{ $account }”
+ui-sign-in-refused = Pierakstīšanās kontā „{ $account }” ir noraidīta vai sesija ir beigusies.
 ui-sign-in-again-ask = Vai pierakstīties vēlreiz pārlūkprogrammā?
-# review: new
 ui-sign-in-again-failed = Neizdevās pierakstīties vēlreiz: { $reason }
-# review: new
 ui-unknown-reason = nezināms iemesls
-# review: new
-ui-checking = Pārbauda, vai kontā { $account } ir jauni ziņojumi...
-# review: new
+ui-checking = Pārbauda, vai kontā „{ $account }” ir jauni ziņojumi...
 ui-done = Gatavs
-# review: new
-ui-sent-at = { $subject } nosūtīts plkst. { $time }
-# review: new
-ui-draft-saved = Ziņojums saglabāts mapē Melnraksti
-# review: new
-ui-draft-not-saved = Ziņojums netika saglabāts mapē Melnraksti: { $reason }
-# review: new
+ui-sent-at = Ziņojums { $subject } nosūtīts plkst. { $time }
+ui-draft-saved = Ziņojums saglabāts mapē „Melnraksti”
+ui-draft-not-saved = Neizdevās saglabāt ziņojumu mapē „Melnraksti”: { $reason }
 ui-about-core = Kodols { $version }
-# review: new
 ui-add-account-first = Vispirms pievienojiet pasta kontu.
-# review: new
 ui-add-account-first-link = Vispirms pievienojiet pasta kontu, pēc tam vēlreiz noklikšķiniet uz e-pasta saites.
-# review: new
-ui-default-app-is = Inbox Classic ir jūsu noklusējuma pasta lietotne: e-pasta saites atver jaunu ziņojumu šeit.
-# review: new
+ui-default-app-is = Inbox Classic ir jūsu noklusējuma pasta lietotne. Noklikšķinot uz e-pasta saites, tajā tiek atvērts jauna ziņojuma logs.
 ui-select-message-first = Vispirms atlasiet ziņojumu.
-# review: new
-ui-store-not-opened = Pasta krātuvi nevarēja atvērt.
-# review: new
-ui-store-or-cert-not-opened = Pasta krātuvi vai sertifikāta failu nevarēja atvērt.
-# review: new
+ui-store-not-opened = Neizdevās atvērt pasta datubāzi.
+ui-store-or-cert-not-opened = Neizdevās atvērt pasta datubāzi vai sertifikāta failu.
 ui-help-title = Inbox Classic palīdzība
-# review: new
-ui-help-missing = Šajā Inbox Classic kopijā nav palīdzības.
-# review: new
+ui-help-missing = Šajā Inbox Classic kopijā nav palīdzības failu.
 ui-ok = Labi
-# review: new
 ui-cancel = Atcelt
-# review: new
 ui-close = Aizvērt
-# review: new
 ui-col-subject = Tēma
-# review: new
-ui-col-from = No
-# review: new
-ui-col-to = Kam
-# review: new
+ui-col-from = Sūtītājs
+ui-col-to = Adresāti
 ui-col-received = Saņemts
 # the column of the glasses of a watched conversation (and the sign of an ignored one)
 # a notification of new mail in a watched conversation, over who it is from
-# review: new
 ui-watched-conversation = Vērota saruna
-# review: new
 ui-col-sent = Nosūtīts
-# review: new
 ui-col-size = Lielums
-# review: new
 ui-col-folder = Mape
-# review: new
 ui-col-account = Konts
-# review: new
 ui-col-queued = Rindā kopš
-# review: new
 ui-col-status = Statuss
-# review: new
 ui-outbox-title = Izsūtne
-# review: new
 ui-outbox-status-waiting = Gaida
-# review: new
 ui-outbox-status-not-sent = Nav nosūtīts: { $reason }
 # This message is still queued, during the grace period before an agent’s send.
-# review: new
-ui-outbox-status-agent = Rindā ielicis MI aģents; tiks nosūtīts plkst. { $time }
-# review: new
+ui-outbox-status-agent = MI aģenta ziņojums rindā; sūtīšana ne agrāk kā plkst. { $time }
 ui-outbox-delete-ask = Vai dzēst šo ziņojumu, to nenosūtot?
-# review: new
 ui-open-link = Atvērt saiti
-# review: new
 ui-edit-link = Rediģēt saiti...
-# review: new
 ui-remove-link = Noņemt saiti
-# review: new
 ui-insert-attachment = Ievietot pielikumu
-# review: new
 ui-insert-picture = Ievietot attēlu
-# review: new
 ui-filter-all = Visi faili
-# review: new
 ui-filter-pictures = Attēli
-# review: new
 ui-filter-messages = Pasta ziņojumi
-# review: new
 ui-save-attachment-as = Saglabāt pielikumu kā
-# review: new
-ui-not-sent = Ziņojumu nevarēja nosūtīt.
-# review: new
+ui-not-sent = Neizdevās nosūtīt ziņojumu.
 ui-attachment-forgotten = Jūs uzrakstījāt „{ $word }”, bet neviens fails nav pievienots. Vai tomēr nosūtīt ziņojumu?
-# review: new
 ui-send-anyway = Tomēr nosūtīt
-# review: new
 ui-go-back = Atgriezties
-# review: new
-ui-not-saved = Ziņojumu nevarēja saglabāt.
-# review: new
-ui-saving-draft = Saglabā mapē Melnraksti...
-# review: new
-ui-compose-saved-at = Saglabāts mapē Melnraksti plkst. { $time }
-# review: new
-ui-compose-restored = Atjaunots pēc negaidītas Inbox Classic aizvēršanās
-# review: new
-ui-compose-not-saved = Nav saglabāts mapē Melnraksti: { $reason }
-# review: new
-ui-save-changes-ask = Vai saglabāt šī ziņojuma izmaiņas mapē Melnraksti?
-# review: new
+ui-not-saved = Neizdevās saglabāt ziņojumu.
+ui-saving-draft = Saglabā mapē „Melnraksti”...
+ui-compose-saved-at = Saglabāts mapē „Melnraksti” plkst. { $time }
+ui-compose-restored = Ziņojums atjaunots pēc negaidītas Inbox Classic aizvēršanās
+ui-compose-not-saved = Neizdevās saglabāt mapē „Melnraksti”: { $reason }
+ui-save-changes-ask = Vai saglabāt šī ziņojuma izmaiņas mapē „Melnraksti”?
 ui-new-message-title = Jauns ziņojums
-# review: new
 ui-link-invalid = Ierakstiet tīmekļa adresi (https://...) vai e-pasta saiti (mailto:...).
-# review: new
 ui-link-address = Adrese:
-# review: new
 ui-hyperlink = Hipersaite
-# review: new
 ui-hyperlink-intro = Adrese, uz kuru ved atlasītais teksts.
-# review: new
 ui-edit-hyperlink = Rediģēt hipersaiti
-# review: new
-ui-edit-hyperlink-intro = Saites mērķa adrese. Notīriet adresi, lai noņemtu saiti un paturētu tekstu.
-# review: new
-ui-not-a-picture = Šis fails nav PNG, JPEG vai GIF attēls, vai arī tas ir lielāks par 10 MB.
-# review: new
+ui-edit-hyperlink-intro = Saites mērķa adrese. Izdzēsiet adresi, lai noņemtu saiti, saglabājot tekstu.
+ui-not-a-picture = Neizdevās ievietot attēlu. Izvēlieties PNG, JPEG, GIF vai WebP failu, kas nav lielāks par 10 MB.
 ui-format-color = Fonta krāsa
-# review: new
 ui-format-numbers = Numurēts saraksts
-# review: new
 ui-format-bullets = Aizzīmēts saraksts
-# review: new
 ui-format-outdent = Samazināt atkāpi
-# review: new
 ui-format-indent = Palielināt atkāpi
-# review: new
 ui-format-left = Līdzināt pa kreisi
-# review: new
 ui-format-center = Centrēt
-# review: new
 ui-format-right = Līdzināt pa labi
-# review: new
 ui-format-line = Ievietot horizontālu līniju
-# review: new
 ui-tb-send = Sūtīt
-# review: new
 ui-tb-save = Saglabāt
-# review: new
 ui-tb-attach = Pievienot
 ui-tb-sign = Parakstīt
 ui-tb-encrypt = Šifrēt
 ui-field-keys = Atslēgas:
-# review: new
 ui-field-from = No:
-# review: new
 ui-field-to = Kam:
-# review: new
 ui-field-cc = Kopija:
-# review: new
 ui-field-bcc = Diskrētā kopija:
-# review: new
 ui-field-subject = Tēma:
-# review: new
 ui-field-attach = Pielikumi:
-# review: new
-ui-signature = Paraksts
-# review: new
-ui-signature-hint = Tiek pievienots šī konta jauniem ziņojumiem, atbildēm un pārsūtītajiem ziņojumiem.
-# review: new
-ui-signature-not-saved = Parakstu nevarēja saglabāt.
-# review: new
+ui-signature = Paraksta teksts
+ui-signature-hint = Šo tekstu pievieno jaunajiem ziņojumiem, atbildēm un pārsūtītajiem ziņojumiem, ko sūtāt no šī konta.
+ui-signature-not-saved = Neizdevās saglabāt paraksta tekstu.
 ui-all-inboxes = Visas iesūtnes
-# review: new
 ui-all-sent = Visi nosūtītie
-# review: new
 ui-all-drafts = Visi melnraksti
-# review: new
 ui-flagged-folder = Ar karodziņu
-# review: new
 ui-all-folders = Visas mapes
-# review: new
 ui-the-account = konts
-# review: new
 ui-folder-name = Mapes nosaukums:
-# review: new
-ui-find-hint = Meklēt pastā
-# review: new
-ui-find-tip = Meklē ziņojumu tēmās, sūtītājos, adresātos, pielikumu nosaukumos un ziņojumu tekstā.
-# review: new
+ui-find-hint = Meklēt ziņojumus
+ui-find-tip = Meklē ziņojumu tēmās un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos.
 ui-clear-search = Notīrīt meklēšanu
-# review: new
 ui-no-match = Neviens ziņojums neatbilst „{ $words }”.
-# review: new
-ui-no-match-all = Meklēšana aptver tēmas, sūtītājus, adresātus, pielikumu nosaukumus un ziņojumu tekstu visās mapēs. Pārbaudiet pareizrakstību vai mēģiniet ar mazāk vārdiem.
-# review: new
-ui-no-match-in = Meklēšana mapē { $folder } aptver tēmas, sūtītājus, adresātus, pielikumu nosaukumus un ziņojumu tekstu. Pārbaudiet pareizrakstību vai mēģiniet ar mazāk vārdiem.
-# review: new
-ui-no-items = Šajā skatā nav neviena vienuma.
-# review: new
+ui-no-match-all = Visās mapēs meklē ziņojumu tēmās un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos. Pārbaudiet pareizrakstību vai ievadiet mazāk vārdu.
+ui-no-match-in = Meklēšanas vieta: „{ $folder }”. Meklē ziņojumu tēmās un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos. Pārbaudiet pareizrakstību vai ievadiet mazāk vārdu.
+ui-no-items = Šajā skatā nav ziņojumu.
 ui-choose-folder = Izvēlieties mapi, lai redzētu tās ziņojumus.
 ui-unsubscribe = Atteikties no abonēšanas
 # review: new
@@ -783,7 +567,6 @@ ui-new-folder-title = Jauna mape
 ui-rename-folder-title = Pārdēvēt mapi
 # review: new
 ui-delete-folder-question = Vai dzēst mapi „{ $folder }” ar tās ziņojumiem un tajā esošajām mapēm? Tā tiks izdzēsta arī serverī.
-# review: new
 ui-properties = R&ekvizīti
 # review: new
 ui-account-sync = Sūtīt un saņe&mt
@@ -793,12 +576,9 @@ ui-account-properties = &Rekvizīti...
 ui-account-move-up = Pārvietot &augšup
 # review: new
 ui-account-move-down = Pārvietot l&ejup
-# review: new
 ui-menu-open = &Atvērt
-# review: new
 ui-menu-flag = &Karodziņš
-# review: new
-ui-menu-view-source = Skatīt &pirmkodu
+ui-menu-view-source = Skatīt p&irmkodu
 # review: new
 ui-save-attachments = Saglabāt pielikumus
 # review: new
@@ -833,10 +613,8 @@ ui-yes = Jā
 ui-no = Nē
 # review: new
 ui-try-again = Mēģināt vēlreiz
-# review: new
-ui-remove = &Noņemt
-# review: new
-ui-signature-of = Paraksts: { $account }
+ui-remove = Noņem&t
+ui-signature-of = Paraksta teksts: { $account }
 # review: new
 ui-sign-in-with = Pierakstīties ar { $provider }
 # review: new
