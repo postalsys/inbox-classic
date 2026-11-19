@@ -782,8 +782,7 @@ pgp-pending = Drugi ključ za { $address } pronađen je { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitalno potpisano: { $signer } (vlasništvo ključa potvrđeno)
 pgp-part-signed = Digitalno potpisano: { $signer } (vlasništvo ključa nije potvrđeno)
-# review: changed
-pgp-part-other = Digitalni potpis: { $signer }. Potpis nije moguće jednoznačno povezati s pošiljateljem
+pgp-part-other = Digitalni potpis: { $signer } (nije pošiljatelj)
 pgp-part-unknown-key = Digitalno potpisano, ali ključ nije poznat
 pgp-part-not-signed = Nije digitalno potpisano
 pgp-part-not-checked = Digitalni potpis nije provjeren

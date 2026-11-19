@@ -742,8 +742,7 @@ pgp-pending = En annan nyckel för { $address } hittades { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Signerad av { $signer }, nyckelns ägare verifierad
 pgp-part-signed = Signerad av { $signer } (nyckelns ägare inte verifierad)
-# review: changed
-pgp-part-other = Signerad av { $signer }; kopplingen till avsändaren är inte bekräftad
+pgp-part-other = Signerad av { $signer }, som inte är avsändaren
 pgp-part-unknown-key = Signerad, men nyckeln är okänd
 pgp-part-not-signed = Inte signerad
 pgp-part-not-checked = Signaturen har inte kontrollerats

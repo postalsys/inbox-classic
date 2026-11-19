@@ -823,8 +823,7 @@ pgp-pending = Našiel sa iný kľúč pre adresu { $address }. Dátum nájdenia:
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitálny podpis: { $signer }; vlastník kľúča je overený
 pgp-part-signed = Digitálny podpis: { $signer } (vlastník kľúča nie je overený)
-# review: changed
-pgp-part-other = Digitálny podpis: { $signer }; súvislosť s adresou odosielateľa sa nepotvrdila
+pgp-part-other = Digitálny podpis: { $signer } (iná osoba než odosielateľ)
 pgp-part-unknown-key = Digitálne podpísané, ale kľúč nie je známy
 pgp-part-not-signed = Bez digitálneho podpisu
 pgp-part-not-checked = Digitálny podpis nebol skontrolovaný

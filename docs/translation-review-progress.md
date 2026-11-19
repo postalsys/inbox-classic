@@ -1,25 +1,35 @@
-# English and translation review, round 3
+# Developer-correction re-review, round 4
 
 ## Resume here
 
-- Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-english-originals-20261119`; branch `i18n/english-originals-20261119`.
-- All 1,483 English catalog entries and 53 English help topics have been read against their app context. All affected meanings were compared across the 28 translations. The exact coverage and retained-content decisions are in the state and sealed review artifacts.
-- Corrected 93 English catalog values and 51 English help topics; corrected 469 translated catalog values and 609 translated help topics (980 changed help lines).
-- Three English MCP response literals now distinguish eligibility checks and partial Undo from guaranteed restoration. No runtime logic or schema keys changed.
-- Review complete. REVIEWED is `bf44141a12811e63e7e9f3c8302345c7a16d57cc`; baseline check reports zero pending messages, help passages or unmarked changes. Publication/merge is authorized and pending. Starting source: `c00d1cb0560ed3e54324208d04f36ba671ac3fa1`; freshly fetched master matches it.
+- Authoritative worktree: `/Users/andris/Projects/PostalExpress/build/i18n-developer-followup-20261119`, branch `i18n/developer-followup-20261119`.
+- Source and final upstream checkpoint: `a3ac000103b217077a4a054697cbe67db05e1d68` (PR #222). No upstream additions arrived during the review. No unmerged-source discovery was performed.
+- All requested content is reviewed and statically validated. Next: commit it, advance REVIEWED to that concrete commit, verify the final baseline, archive this round and publish under existing authorization.
+- Previous completed round 3 is preserved in `translation-review-round3-state.json` and `translation-review-round3-progress.md`.
 
-## Validation and limits
+## Coverage and result
 
-All 1,711 catalog/help file hashes match their parent snapshots and final review receipts. All 174 catalogs parse without syntax errors. The 28 language checkers report only their expected 1,536 draft-marker notices each; no structural findings remain. All 65 mnemonic scopes pass in each of the 29 languages, including English. Help tags, attributes and literal keys/code are preserved, except the recorded English Mac Control qualifier needed for the actual shortcut.
+- Rechecked the changed English message `pgp-part-other` and 12 affected English help passages across 11 topics against current callers. This is a targeted follow-up to the earlier full English review.
+- Reviewed 28 translated catalog entries and 336 marked help passages across 308 translated topics in all 28 target languages. All marks were removed only after the exact passages were reviewed.
+- Changed all 28 catalog values and 288 help passages across 261 translated topics; retained 48 already accurate help passages. Corrected one additional English help line. Mark removal alone is not counted as a wording change.
+- Signature identity, encrypted-draft scope, unsubscribe account selection, print behavior, ignored-message handling, folder error feedback and shortcut instructions now match the verified actions.
+- The Mac renderer now includes Control, so obsolete manual Control additions were removed. Print instructions have Windows preview and Mac/Linux print-dialog branches. Notification instructions include the four localized special-folder labels.
+- Additional English defect fixed: Properties displays Internet headers, not message size, on all three platforms. The translated instructions now say so too.
+- Preserved supported manual attachment preview actions and the accurate MCP bulk-flag Undo caveat. Their omission from simplified English help does not establish that those actions are impossible.
 
-The required offline pe-ffi build passed, including pe-mcp. Generated installer and Linux store metadata were checked against all catalog values; the desktop file and sign-in resources did not change. The MCP file passes rustfmt for the repository's 2024 edition. No local test suites, CI queries, manually triggered workflows or release actions were performed, as requested. This is a context and structural review, not native-speaker approval or GUI layout certification.
+## Validation
 
-## Material corrections
+- Reconciled all 1,711 catalog/help file hashes against the frozen source snapshot and four disjoint review ledgers. All changes are accounted for; translated bytes outside the original marked passages are unchanged.
+- All 174 Fluent catalogs parse. All 28 language checkers have zero structural findings after separating their 1,536 expected draft-marker notices per language.
+- All 65 mnemonic scopes in each of 29 locales are clear. Changed HTML balances on Windows, Mac and Linux; literal keys/code, IDs, placeholders and unrelated markup are preserved. Intentional markup changes are recorded.
+- Offline `cargo build -p pe-ffi --offline` passed, including pe-mcp. No tracked generated outputs changed. `git diff --check` passed.
+- The pre-baseline `--since` audit finds no additional waiting content; its 316 unmarked changes correspond exactly to the 28 changed catalog values and 288 changed translated help lines.
+- No local test suites, CI queries or manually triggered workflows. No GUI fit or native-speaker certification is claimed.
 
-Requests, scheduled operations and confirmed results now remain distinct. Corrections cover partial Undo, unsubscribing, attachment requests, draft removal on queueing, provider sign-in guidance, local-data removal, encryption and identity claims, cache and preview limits, search behavior, platform instructions and image permissions. Good translations that already included the relevant qualifications were retained.
+## Separate runtime follow-up
 
-Round 2 remains archived in `translation-review-round2-state.json` and `translation-review-round2-progress.md`. Its English findings were historical evidence: this round rechecked them against current source rather than assuming they still applied. In particular, the current English delete-and-undo topic already included the absent-Trash condition and was retained.
+On Mac and Linux, a mailto unsubscribe opened from a separate message window can use the main window's current account if that window has switched accounts. The normal message-reader path uses the containing account, and Windows passes the separate message's account explicitly. This is a static caller finding, not a GUI reproduction. Runtime code was not changed in this translation round. Evidence: Mac `MessageWindow.swift:144` and `MainWindow.swift:479`; Linux `reader.rs:1352`, `app.rs:570` and `mailbox.rs:960`; Windows `messagewindow.cpp:231`.
 
-## Completion evidence
+## Evidence
 
-The exact review receipts and validation artifacts are preserved at `/Users/andris/Projects/PostalExpress/build/i18n-english-originals-completed-20261119`. The active state and progress are also archived as `translation-review-round3-state.json` and `translation-review-round3-progress.md`.
+Frozen ledgers and the full source snapshot are in `/private/tmp/inbox-developer-followup-20261119-*`. The final verified archive will be at `/Users/andris/Projects/PostalExpress/build/i18n-developer-followup-completed-20261119`. State records contain exact per-file coverage, before/after hashes, validation and the previous-round links.

@@ -746,8 +746,7 @@ pgp-pending = Se encontró otra clave para { $address } el { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Firmado por { $signer }, clave verificada
 pgp-part-signed = Firmado por { $signer } (clave sin verificar)
-# review: changed
-pgp-part-other = Firmado por { $signer }; no se pudo vincular la firma al remitente
+pgp-part-other = Firmado por { $signer }, que no es el remitente
 pgp-part-unknown-key = Firmado, pero no se conoce la clave
 pgp-part-not-signed = Sin firmar
 pgp-part-not-checked = Firma no comprobada

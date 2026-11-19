@@ -820,8 +820,7 @@ pgp-pending = Adresei { $address } { $date } tika atrasta cita atslēga.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Parakstītājs: { $signer }; atslēgas piederība apstiprināta
 pgp-part-signed = Parakstītājs: { $signer } (atslēgas piederība nav apstiprināta)
-# review: changed
-pgp-part-other = Parakstītājs: { $signer }; parakstu nevar sasaistīt ar ziņojuma sūtītāju
+pgp-part-other = Parakstītājs: { $signer } (nav ziņojuma sūtītājs)
 pgp-part-unknown-key = Parakstīts, bet atslēga nav zināma
 pgp-part-not-signed = Nav parakstīts
 pgp-part-not-checked = Paraksts nav pārbaudīts

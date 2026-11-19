@@ -784,8 +784,7 @@ pgp-pending = Βρέθηκε διαφορετικό κλειδί για τη δ�
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Υπογραφή από { $signer }, επαληθευμένος κάτοχος κλειδιού
 pgp-part-signed = Υπογραφή από { $signer } (χωρίς επαλήθευση κατόχου κλειδιού)
-# review: changed
-pgp-part-other = Υπογραφή από { $signer }· το κλειδί δεν ήταν δυνατό να συσχετιστεί με τον αποστολέα
+pgp-part-other = Υπογραφή από { $signer }, που δεν είναι ο αποστολέας
 pgp-part-unknown-key = Υπογεγραμμένο, αλλά το κλειδί δεν είναι γνωστό
 pgp-part-not-signed = Χωρίς υπογραφή
 pgp-part-not-checked = Η υπογραφή δεν ελέγχθηκε

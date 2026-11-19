@@ -748,8 +748,7 @@ pgp-pending = Osoitteelle { $address } löytyi eri avain { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Allekirjoittaja: { $signer }, avaimen haltija vahvistettu
 pgp-part-signed = Allekirjoittaja: { $signer } (avaimen haltijaa ei ole vahvistettu)
-# review: changed
-pgp-part-other = Allekirjoittaja: { $signer }. Allekirjoitusta ei voida yksiselitteisesti yhdistää lähettäjään
+pgp-part-other = Allekirjoittaja: { $signer }, joka ei ole lähettäjä
 pgp-part-unknown-key = Allekirjoitettu digitaalisesti, mutta avain on tuntematon
 pgp-part-not-signed = Ei digitaalista allekirjoitusta
 pgp-part-not-checked = Digitaalista allekirjoitusta ei tarkistettu

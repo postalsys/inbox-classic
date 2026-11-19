@@ -749,8 +749,7 @@ pgp-pending = Op { $date } is een andere sleutel voor { $address } gevonden.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Geldige digitale handtekening van { $signer }, eigenaar van de sleutel geverifieerd
 pgp-part-signed = Geldige digitale handtekening van { $signer }, eigenaar van de sleutel niet geverifieerd
-# review: changed
-pgp-part-other = Ondertekend door { $signer }; de handtekening kon niet eenduidig aan de afzender worden gekoppeld
+pgp-part-other = Ondertekend door { $signer }, die niet de afzender is
 pgp-part-unknown-key = Ondertekend, maar de sleutel is onbekend
 pgp-part-not-signed = Niet ondertekend
 pgp-part-not-checked = Handtekening niet gecontroleerd
