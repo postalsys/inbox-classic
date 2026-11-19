@@ -245,473 +245,248 @@ ui-no-match-in = Область поиска: «{ $folder }». Поиск вып
 ui-no-items = Здесь нет сообщений.
 ui-choose-folder = Выберите папку, чтобы просмотреть сообщения в ней.
 ui-unsubscribe = Отписаться
-# review: new
 ui-open-in-calendar = Открыть в календаре
-# review: new
-ui-pictures-blocked = Некоторые изображения заблокированы, чтобы отправитель не смог распознать ваш компьютер. Щелкните здесь, чтобы загрузить изображения.
-# review: new
-ui-not-shown = Не удалось показать сообщение.
-# review: new
+ui-pictures-blocked = Некоторые изображения заблокированы для защиты от отслеживания отправителем. Щелкните здесь, чтобы загрузить изображения.
+ui-not-shown = Не удалось отобразить сообщение.
 ui-attachment-not-read = Не удалось прочитать вложение.
-# review: new
 ui-attachment-not-saved = Не удалось сохранить вложение.
-# review: new
 ui-not-downloaded = Сообщение еще не загружено.
-# review: new
 ui-leave-list = Отписаться от этой рассылки?
-# review: new
-ui-leave-one-click = Inbox Classic отправит запрос на отписку на { $target }. Веб-страница не откроется, и письмо не будет отправлено.
-# review: new
-ui-leave-mail = Чтобы отписаться, отправьте письмо на { $target }. Inbox Classic подготовит его за вас. Отправьте сообщение, чтобы подтвердить.
-# review: new
+ui-leave-one-click = Inbox Classic отправит запрос на отписку по адресу { $target }. Веб-страница не откроется, и сообщение по электронной почте отправлено не будет.
+ui-leave-mail = Чтобы отписаться, отправьте сообщение по адресу { $target }. Inbox Classic подготовит его для вас. Отправьте это сообщение, чтобы подтвердить отписку.
 ui-leave-web = Страница отписки от рассылки откроется в браузере ({ $target }).
-# review: new
-ui-unsubscribing = Отписка от { $target }...
-# review: new
-ui-cannot-unsubscribe = В этом сообщении нет возможности отписаться.
-# review: new
-ui-unsubscribed = Запрос на отписку принят. Рассылка сообщает, что больше не будет присылать эти сообщения.
-# review: new
+ui-unsubscribing = Отправка запроса на отписку: { $target }...
+ui-cannot-unsubscribe = В этом сообщении нет ссылки или адреса для отписки.
+ui-unsubscribed = Запрос на отписку принят.
 ui-not-unsubscribed = Не удалось отписаться: { $reason }
-# review: new
 ui-event-span = с { $start } до { $end }
-# review: new
-ui-event-floating = { $when } (по времени отправителя)
-# review: new
+ui-event-floating = { $when } (время из приглашения, без пересчета в ваш часовой пояс)
 ui-invitation = Приглашение: { $title }
-# review: new
 ui-invitation-updated = Обновленное приглашение: { $title }
-# review: new
 ui-invitation-canceled = Отменено: { $title }
-# review: new
 ui-invitation-answer = Ответ на приглашение: { $title }
-# review: new
 ui-no-title = (без названия)
-# review: new
 ui-organizer = Организатор: { $name }
-# review: new
 ui-invitation-not-read = Не удалось прочитать приглашение.
-# review: new
-ui-no-calendar = На этом компьютере нет программы календаря, чтобы открывать приглашения (файлы .ics).
-# review: new
+ui-no-calendar = Не удалось открыть приглашение в календаре. Проверьте, установлена ли программа для открытия файлов .ics.
 ui-messages-not-changed = Не удалось изменить сообщения.
-# review: new
 ui-new-folder-in-selected = Новая папка будет создана внутри выбранной папки.
-# review: new
 ui-new-folder-at-top = Новая папка будет создана на верхнем уровне учетной записи.
-# review: new
 ui-folder-not-created = Не удалось создать папку.
-# review: new
 ui-folder-not-renamed = Не удалось переименовать папку.
-# review: new
 ui-folder-not-deleted = Не удалось удалить папку.
-# review: new
 ui-rename-folder-intro = Введите новое имя для папки «{ $folder }».
-# review: new
 ui-properties-of = Свойства: { $subject }
-# review: new
-ui-internet-headers = Интернет-заголовки этого сообщения:
-# review: new
-ui-save-messages-in = Сохранить сообщения в
-# review: new
+ui-internet-headers = Служебные заголовки сообщения:
+ui-save-messages-in = Папка для сохранения сообщений
 ui-save-message-as = Сохранить сообщение как
-# review: new
 ui-import-choose-folder = Сначала выберите папку, в которую нужно импортировать сообщения.
-# review: new
-ui-add-account-title = Добавить учетную запись почты
-# review: new
+ui-add-account-title = Добавить почтовую учетную запись
 ui-accounts-title = Учетные записи
-# review: new
 ui-security-none = Нет (без шифрования)
-# review: new
-ui-field-required = Поле «{ $field }» обязательно.
-# review: new
+ui-field-required = Заполните поле «{ $field }».
 ui-email-invalid = Недопустимый адрес электронной почты.
-# review: new
 ui-ports-invalid = Порт задается числом от 1 до 65535.
-# review: new
 ui-looking-up = Поиск параметров для { $domain }...
-# review: new
 ui-found-none = Введите данные учетной записи, предоставленные вашим почтовым провайдером.
-# review: new
 ui-found-change = Измените эти параметры, если провайдер указал другие.
-# review: new
-ui-found-guess = Для этого адреса параметры не найдены. Предложенные имена серверов являются догадками. Уточните их у провайдера.
-# review: new
+ui-found-guess = Для этого адреса не удалось найти параметры. Имена серверов подобраны автоматически и могут быть неверными. Уточните их у провайдера.
 ui-found-mx = Inbox Classic распознала вашего почтового провайдера и заполнила параметры его серверов.
-# review: new
 ui-found-srv = Эти параметры найдены в записях DNS вашего домена.
-# review: new
 ui-found-autodiscover = Эти параметры найдены с помощью Microsoft Autodiscover (Exchange).
-# review: new
 ui-found-other = Для этого адреса найдены эти параметры.
-# review: new
 ui-app-password-needed = { $provider } не принимает ваш обычный пароль в почтовых программах. Создайте пароль приложения в своей учетной записи { $provider } и введите его в поле «Пароль» в следующей форме.
-# review: new
 ui-app-password-open = Открыть инструкции { $provider } в браузере?
-# review: new
 ui-plain-warning = Без шифрования любой, кто перехватывает ваш сетевой трафик, может прочитать ваш пароль и сообщения. Используйте такое подключение только с сервером на вашем компьютере или в вашей локальной сети.
-# review: new
 ui-continue-ask = Продолжить?
-# review: new
 ui-add-sign-in-app = Добавить приложение для входа...
-# review: new
-ui-turned-off = { $name }: отключено на этом компьютере.
-# review: new
+ui-turned-off = Способ входа «{ $name }» отключен на этом компьютере.
 ui-off-here = Отключено на этом компьютере.
-# review: new
 ui-why = Почему?
-# review: new
 ui-more-sign-in = Другие способы входа...
-# review: new
-ui-other-account = Чтобы добавить другую учетную запись электронной почты, введите свой адрес и имя, которое будут видеть получатели. Затем будут найдены параметры серверов.
-# review: new
+ui-other-account = Чтобы добавить другую почтовую учетную запись, введите свой адрес и имя, которое будут видеть получатели. Затем Inbox Classic попробует найти параметры серверов.
 ui-field-account-name = Имя учетной записи:
-# review: new
 ui-field-name = Отображаемое имя:
-# review: new
 ui-field-email = Адрес электронной почты:
-# review: new
 ui-field-user = Имя пользователя:
-# review: new
 ui-field-password = Пароль:
-# review: new
 ui-field-imap-host = Сервер входящей почты (IMAP):
-# review: new
 ui-field-imap-port = Порт IMAP:
-# review: new
-ui-field-imap-security = Безопасность IMAP:
-# review: new
+ui-field-imap-security = Защита подключения IMAP:
 ui-field-smtp-host = Сервер исходящей почты (SMTP):
-# review: new
 ui-field-smtp-port = Порт SMTP:
-# review: new
-ui-field-smtp-security = Безопасность SMTP:
-# review: new
-ui-field-other-addresses = Другие адреса, с которых вы отправляете:
-# review: new
+ui-field-smtp-security = Защита подключения SMTP:
+ui-field-other-addresses = Другие адреса для отправки сообщений:
 ui-sign-in-not-started = Не удалось начать вход через браузер.
-# review: new
 ui-sign-in-in-browser = Войдите в { $account } в открывшемся окне браузера, затем вернитесь сюда.
-# review: new
 ui-sign-in-failed = Не удалось войти: { $reason }
-# review: new
 ui-account-not-saved = Не удалось сохранить учетную запись.
-# review: new
-ui-start-intro = Gmail, Google Workspace, Outlook.com и Microsoft 365: войдите на собственной странице Google или Microsoft. Пароль вводится там, а не в Inbox Classic.
-# review: new
-ui-start-intro-apps = Войдите через браузер с одним из ваших приложений для входа (Другие способы входа) или добавьте любую учетную запись электронной почты, указав ниже имя и адрес.
-# review: new
+ui-start-intro = Gmail, Google Workspace, Outlook.com и Microsoft 365: войдите на странице Google или Microsoft. Пароль вы вводите на сайте провайдера, а не в Inbox Classic.
+ui-start-intro-apps = Войдите через браузер с помощью приложения для входа («Другие способы входа») или добавьте почтовую учетную запись, указав ниже имя и адрес.
 ui-use-app-password = Использовать пароль приложения
-# review: new
 ui-the-provider = провайдера
-# review: new
-ui-provider-intro = Войдите в { $email } на сайте { $provider }. Ваш пароль не передается Inbox Classic. Можно также использовать пароль приложения, созданный в настройках безопасности вашей учетной записи.
-# review: new
-ui-provider-intro-apps = Войдите в { $email } на сайте { $provider } с одним из ваших приложений для входа (Другие способы входа). Можно также использовать пароль приложения, созданный в настройках безопасности вашей учетной записи.
-# review: new
+ui-provider-intro = Войдите в учетную запись { $email } на сайте { $provider }. Ваш пароль не передается Inbox Classic. Если учетная запись поддерживает пароли приложений для почты, можно использовать такой пароль, созданный в ее настройках безопасности. Для Outlook.com и Microsoft 365 доступен только вход через браузер.
+ui-provider-intro-apps = Войдите в учетную запись { $email } на сайте { $provider } с помощью приложения для входа («Другие способы входа»). Если учетная запись поддерживает пароли приложений для почты, можно использовать такой пароль, созданный в ее настройках безопасности. Для Outlook.com и Microsoft 365 доступен только вход через браузер.
 ui-finish = Готово
-# review: new
 ui-logon = Вход
-# review: new
-ui-enter-password = Введите пароль для { $account }.
-# review: new
+ui-enter-password = Введите пароль учетной записи «{ $account }».
 ui-signs-in-with = Приложение для входа: { $app }. Вход выполняется в браузере, и учетная запись использует серверы этого приложения.
-# review: new
 ui-keep-password = Оставьте поле пароля пустым, чтобы сохранить текущий пароль.
-# review: new
 ui-remove-account = Удалить учетную запись
-# review: new
-ui-remove-account-ask = Удалить эту учетную запись из Inbox Classic? Почта останется на сервере; копия на этом компьютере и сохраненный пароль будут удалены.
-# review: new
+ui-remove-account-ask = Удалить эту учетную запись из Inbox Classic? Сообщения на сервере останутся. Данные учетной записи на этом компьютере, включая сообщения и сохраненный пароль, будут удалены.
 ui-col-email = Адрес электронной почты
-# review: new
 ui-col-incoming = Сервер входящей почты
-# review: new
 ui-type-email = Введите адрес электронной почты, например name@example.com.
-# review: new
 ui-ai-agent = ИИ-агент
-# review: new
 ui-ai-agent-access = Доступ ИИ-агента
-# review: new
 ui-ai-agents = ИИ-агенты
-# review: new
 ui-program-path = Программа: { $path }
-# review: new
 ui-it-may = Разрешенные действия:
-# review: new
 ui-accounts-it-may-use = Разрешенные учетные записи:
-# review: new
 ui-send-message-ask = Отправить сообщение?
-# review: new
 ui-col-name = Имя
-# review: new
 ui-never = Никогда
-# review: new
 ui-connect-agent = Подключение ИИ-агента
-# review: new
-ui-connect-agent-intro = Добавьте это в список серверов MCP вашего агента (Claude Desktop: Settings > Developer > Edit Config):
-# review: new
+ui-connect-agent-intro = Добавьте эту конфигурацию в список серверов MCP вашего агента (Claude Desktop: Settings > Developer > Edit Config):
 ui-col-program = Программа
-# review: new
 ui-col-may = Разрешения
-# review: new
 ui-col-last-used = Последнее использование
-# review: new
 ui-col-when = Когда
-# review: new
 ui-col-what = Действие
-# review: new
 ui-sign-in-app = Приложение для входа
-# review: new
 ui-sign-in-apps = Приложения для входа
-# review: new
 ui-add-sign-in-app-title = Добавить приложение для входа
-# review: new
-ui-preset-app-name = Приложение для входа { $provider }
-# review: new
-ui-issuer-not-checked = издателя невозможно проверить
-# review: new
-ui-checking-issuer = Проверка { $issuer }...
-# review: new
-ui-issuer-unusable = Этого издателя нельзя использовать: { $reason }
-# review: new
-ui-issuer-usable = Этого издателя можно использовать.
-# review: new
+ui-preset-app-name = Приложение для входа через { $provider }
+ui-issuer-not-checked = не удалось проверить сервер авторизации
+ui-checking-issuer = Проверка сервера авторизации: { $issuer }...
+ui-issuer-unusable = Нельзя использовать этот сервер авторизации: { $reason }
+ui-issuer-usable = Сервер авторизации можно использовать для входа.
 ui-sign-in-app-not-saved = Не удалось сохранить приложение для входа: { $reason }
-# review: new
 ui-check = &Проверить
-# review: new
 ui-fill-in-for = Параметры для:
-# review: new
 ui-app-name = Имя:
-# review: new
-ui-issuer = Издатель:
-# review: new
+ui-issuer = Сервер авторизации:
 ui-client-id = Идентификатор клиента:
-# review: new
 ui-client-secret = Секрет клиента:
-# review: new
 ui-scopes = Области доступа (scopes):
-# review: new
 ui-imap-server = Сервер IMAP:
-# review: new
 ui-smtp-server = Сервер SMTP:
-# review: new
 ui-redirect-uri = URI перенаправления:
-# review: new
-ui-sign-in-app-intro = Приложение для входа является клиентом OAuth, который вы регистрируете у провайдера, чтобы входить через браузер. Выберите провайдера, чтобы заполнить его параметры, затем добавьте идентификатор клиента и секрет клиента, если провайдер его выдал.
-# review: new
-ui-remove-secret = Секрет клиента сохранен. Введите новый, чтобы заменить его, или удалите сохраненный секрет
-# review: new
+ui-sign-in-app-intro = Приложение для входа позволяет входить через браузер. Для этого зарегистрируйте клиент OAuth у своего провайдера. Выберите провайдера, чтобы заполнить параметры, затем укажите идентификатор клиента и секрет, если провайдер его выдал.
+ui-remove-secret = Удалить сохраненный секрет клиента. Чтобы заменить его, введите новый секрет в поле выше
 ui-register-it = Зарегистрируйте приложение у провайдера
-# review: new
-ui-built-in-note = { $name } встроено. Можно только выбрать, предлагать ли его для новых учетных записей.
-# review: new
-ui-client-with-secret = Идентификатор клиента: { $client }, с секретом клиента.
-# review: new
-ui-client-public = Идентификатор клиента: { $client }, общедоступный клиент (без секрета).
-# review: new
+ui-built-in-note = Приложение «{ $name }» встроено в Inbox Classic. Можно только выбрать, предлагать ли его для новых учетных записей.
+ui-client-with-secret = Идентификатор клиента: { $client }. Секрет клиента сохранен.
+ui-client-public = Идентификатор клиента: { $client }. Публичный клиент (без секрета).
 ui-no-accounts = Нет учетных записей
-# review: new
 ui-remove-sign-in-app = Удалить приложение для входа
-# review: new
-ui-remove-sign-in-app-ask = Удалить приложение для входа { $name } и его сохраненный секрет клиента?
-# review: new
+ui-remove-sign-in-app-ask = Удалить приложение для входа «{ $name }» и сохраненный секрет клиента?
 ui-sign-in-app-not-removed = Приложение для входа не удалено. { $reason }
-# review: new
-ui-sign-in-apps-intro = Приложения для входа позволяют учетным записям входить через браузер. Приложение без флажка не предлагается для новых учетных записей; учетные записи, которые уже его используют, продолжают работать.
-# review: new
-ui-col-issuer = Издатель
-# review: new
-ui-col-used-by = Используется
-# review: new
+ui-sign-in-apps-intro = Приложения для входа позволяют входить в почтовые учетные записи через браузер. Если снять флажок рядом с приложением, оно не будет предлагаться для новых учетных записей. Учетные записи, которые уже используют его, продолжат работать.
+ui-col-issuer = Сервер авторизации
+ui-col-used-by = Учетные записи
 ui-options-system-default = Как в системе ({ $language })
-# review: new
 ui-settings-general = Общие
-# review: new
 ui-settings-reading = Чтение
-# review: new
 ui-settings-new-mail = Новая почта
-# review: new
 ui-settings-sending = Отправка
-# review: new
 ui-settings-default-apps = Приложения по умолчанию
-# review: new
 ui-settings-message-list = Список сообщений
-# review: new
 ui-settings-messages = Сообщения
-# review: new
 ui-settings-encryption = Шифрование
-# review: new
 ui-settings-language = Язык
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = &Применить
-# review: new
 ui-language-label = &Язык:
-# review: new
 ui-restart-note = Чтобы сменить язык, перезапустите Inbox Classic.
-# review: new
 ui-restart-ask = Inbox Classic перейдет на язык «{ $language }» после перезапуска. Перезапустить сейчас?
-# review: new
 ui-notify-new-mail = &Уведомлять о новой почте
-# review: new
 ui-new-folder-title = Новая папка
-# review: new
 ui-rename-folder-title = Переименование папки
-# review: new
 ui-delete-folder-question = Удалить папку «{ $folder }» вместе с ее сообщениями и вложенными папками? Она будет удалена и на сервере.
 ui-properties = Сво&йства
-# review: new
 ui-account-sync = Отправить и &получить
-# review: new
 ui-account-properties = &Свойства...
-# review: new
 ui-account-move-up = &Вверх
-# review: new
 ui-account-move-down = В&низ
 ui-menu-open = &Открыть
 ui-menu-flag = &Флажок
 ui-menu-view-source = Ис&ходный текст
-# review: new
 ui-save-attachments = Сохранить вложения
-# review: new
 ui-attachment-open = Открыть
-# review: new
 ui-attachment-save-as = Сохранить как...
-# review: new
 ui-attachment-save-all = Сохранить все...
-# review: new
-ui-attachment-show-in-message = Показать в письме
-# review: new
+ui-attachment-show-in-message = Показать в сообщении
 ui-attachments-strip = Вложения
-# review: new
 ui-attachment-note-title = Открытие этого файла
-# review: new
-ui-attachment-program-tip = Команда «Открыть» недоступна для файлов этого типа: они могут запускать программы. Сохраните файл и откройте его сами.
-# review: new
-ui-clear-flag = &Снять флажок
-# review: new
+ui-attachment-program-tip = Команда «Открыть» недоступна: файлы этого типа могут запускать программы. Чтобы открыть файл самостоятельно, сначала сохраните его.
+ui-clear-flag = С&нять флажок
 ui-button-move = &Переместить
-# review: new
 ui-button-copy = &Копировать
-# review: new
 ui-find-folder = Найти папку
-# review: new
 ui-new-folder-in = Новая папка будет создана в папке «{ $folder }».
-# review: new
 ui-outbox-send-all = &Отправить все сейчас
-# review: new
 ui-yes = Да
-# review: new
 ui-no = Нет
-# review: new
 ui-try-again = Повторить
 ui-remove = &Удалить
 ui-signature-of = Текстовая подпись: { $account }
-# review: new
 ui-sign-in-with = Войти через { $provider }
-# review: new
 ui-sign-in-in-browser-yours = Войдите в свою учетную запись в открывшемся окне браузера, затем вернитесь сюда.
-# review: new
 ui-browser-sign-in-server = { $server } (вход через браузер)
-# review: new
 ui-dont-allow = Не разрешать
-# review: new
 ui-allow = &Разрешить
-# review: new
 ui-dont-send = Не отправлять
 ui-dont-unsubscribe = Не отписываться
-# review: new
 ui-edit-first = &Сначала изменить
-# review: new
 ui-new-address = Новый адрес
-# review: new
 ui-turn-away = &Отклонить
-# review: new
 ui-clear-agent-log = Очистить журнал действий агентов?
-# review: new
 ui-clear-agent-log-detail = Изменения, сделанные агентами, не будут отменены.
-# review: new
 ui-let-agents-connect = &Разрешить ИИ-агентам подключаться к Inbox Classic
-# review: new
 ui-change-button = Изменить…
-# review: new
 ui-undo-button = Отменить
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Отменить за период…
-# review: new
-ui-undo-since-span = Отменить то, что сделала эта программа:
-# review: new
-ui-take-back = Отменить
-# review: new
+ui-undo-since-span = Отменить действия этой программы за период:
+ui-take-back = Отменить действия
 ui-rules-title = Правила для сообщений
-# review: new
-ui-rules-intro = Правила сортируют новые сообщения в папке «Входящие», пока Inbox Classic работает. Подходящие правила выполняются по порядку. Как только правило перемещает сообщение из папки «Входящие», следующие правила к нему не применяются.
-# review: new
-ui-rules-none = Правил пока нет. Нажмите «Создать», чтобы создать правило.
-# review: new
+ui-rules-intro = Правила обрабатывают новые сообщения в папке «Входящие», пока Inbox Classic работает. Подходящие правила применяются по порядку. Если правило перемещает сообщение из папки «Входящие», следующие правила к нему не применяются.
+ui-rules-none = Правил пока нет. Чтобы добавить правило, нажмите «Создать».
 ui-rule-new = &Создать...
-# review: new
 ui-rule-edit = &Изменить...
-# review: new
 ui-rule-delete-button = &Удалить
-# review: new
 ui-rule-title = Правило для сообщений
-# review: new
-ui-rule-name = Имя:
-# review: new
+ui-rule-name = Название:
 ui-rule-account = Учетная запись:
-# review: new
 ui-rule-all-accounts = Все учетные записи
-# review: new
 ui-rule-query = Условия поиска:
-# review: new
 ui-rule-query-hint = Используйте условия поиска, например from:ann@example.com, subject:счет или list:news.example.com, так же как в поле поиска.
-# review: new
 ui-rule-count = { $count ->
     [one] Сейчас этим условиям соответствует { $count } сообщение в папке «Входящие».
     [few] Сейчас этим условиям соответствуют { $count } сообщения в папке «Входящие».
     [many] Сейчас этим условиям соответствуют { $count } сообщений в папке «Входящие».
-   *[other] Сейчас этим условиям соответствуют { $count } сообщения в папке «Входящие».
+   *[other] Сейчас этим условиям соответствует { $count } сообщения в папке «Входящие».
 }
-# review: new
 ui-rule-show = Пока&зать
-# review: new
 ui-rule-actions = Действия:
-# review: new
 ui-rule-move = &Переместить в:
-# review: new
 ui-rule-mark-read = Пометить как прочи&танное
-# review: new
 ui-rule-flag = Пометить &флажком
-# review: new
 ui-rule-archive = &Архивировать
-# review: new
 ui-rule-junk = Переместить в папку «&Нежелательная почта»
-# review: new
 ui-rule-delete = У&далить
-# review: new
-ui-rule-quiet = Не &уведомлять меня о нем
-# review: new
+ui-rule-quiet = Не &уведомлять о сообщении
 ui-rule-apply-now = Применить также к сообщениям, которые уже есть в папке «&Входящие»
-# review: new
 ui-rule-delete-ask = Удалить правило «{ $name }»?
-# review: new
 ui-create-rule = Создать правило...
-# review: new
 ui-rules-applied = { $count ->
-    [one] Ваши правила отсортировали { $count } сообщение
-    [few] Ваши правила отсортировали { $count } сообщения
-    [many] Ваши правила отсортировали { $count } сообщений
-   *[other] Ваши правила отсортировали { $count } сообщения
+    [one] По правилам обработано { $count } сообщение
+    [few] По правилам обработано { $count } сообщения
+    [many] По правилам обработано { $count } сообщений
+   *[other] По правилам обработано { $count } сообщения
 }
-# review: new
 ui-col-rule-matches = Условия
-# review: new
 ui-clear-button = &Очистить
 # review: new
 ui-how-to-connect = Как подключить агента…
