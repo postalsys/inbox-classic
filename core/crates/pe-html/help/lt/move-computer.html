@@ -1,21 +1,19 @@
-<!--review-->
-<h1>Perėjimas į kitą kompiuterį</h1>
-<p class="summary">Perkelkite savo paskyras, nustatymus, kontaktus, raktus ir taisykles į kitą kompiuterį viename faile.</p>
+<h1>Duomenų perkėlimas į kitą kompiuterį</h1>
+<p class="summary">Perkelkite paskyras, nustatymus, kontaktus, raktus ir taisykles į kitą kompiuterį naudodami vieną failą.</p>
 <h2>Eksportavimas</h2>
 <ol>
     <li>Pasirinkite <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
-    <li>Pasirinkite, ką perkelti: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> ir <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Norėdami perkelti ir slaptažodžius bei privačiuosius raktus, įjunkite <b data-text="ui-setup-use-passphrase"></b> ir du kartus įveskite bent 8 simbolių slaptafrazę.</li>
-    <li>Spustelėkite <b data-text="ui-setup-export-button"></b> ir pasirinkite, kur įrašyti failą.</li>
+    <li>Pasirinkite eksportuojamas dalis: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> ir <b data-text="setup-part-trusted-senders"></b>.</li>
+    <li>Norėdami įtraukti išsaugotus prisijungimo duomenis ir privačiuosius raktus, pažymėkite parinktį „<b data-text="ui-setup-use-passphrase"></b>“. Du kartus įveskite tą pačią bent 8 ženklų slaptafrazę.</li>
+    <li>Spustelėkite mygtuką „<b data-text="ui-setup-export-button"></b>“ ir pasirinkite, kur įrašyti failą.</li>
 </ol>
-<p>Faile laiškų nėra: kitame kompiuteryje jie atsisiunčiami iš naujo. Su slaptafraze visas failas užšifruojamas. Be jos faile nėra slaptažodžių ir privačiųjų raktų, o kiekviena paskyra kitame kompiuteryje vieną kartą paprašo slaptažodžio.</p>
-<aside class="warning">Laikykite failą ir jo slaptafrazę atskirai, o importavę failą jį ištrinkite. Kas turi abu, gali skaityti jūsų laiškus.</aside>
+<p>Faile laiškų nėra. Kitame kompiuteryje galima atsisiųsti tik serveryje likusius laiškus; vietiniai neišsiųsti laiškai neperkeliami. Slaptafrazė užšifruoja visą failą. Be jos išsaugoti prisijungimo duomenys ir privatieji raktai neįtraukiami, todėl reikės prisijungti iš naujo, prireikus naršyklėje. Net apsaugotame faile gali nebūti prisijungimo duomenų ar privačiųjų raktų, kurių programai nepavyko pasiekti.</p>
+<aside class="warning">Failą ir jo slaptafrazę laikykite atskirai. Importavę patikrinkite, ar perkelti reikalingi duomenys, ir pašalinkite nebereikalingą eksporto failą. Jame esantys prisijungimo duomenys ir privatieji raktai gali suteikti prieigą prie jūsų pašto.</aside>
 <h2>Importavimas</h2>
 <ol>
-    <li>Kitame kompiuteryje pasirinkite <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Kol nepridėjote pirmos paskyros, tam skirta nuoroda yra ir lange <b data-text="ui-add-account-title"></b>.</li>
-    <li>Pasirinkite failą ir, jei jis turi slaptafrazę, ją įveskite.</li>
-    <li>Langas parodo, kas yra faile. Pasirinkite importuojamas dalis ir paskyras, tada spustelėkite <b data-text="ui-setup-import-button"></b>.</li>
+    <li>Kitame kompiuteryje pasirinkite <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Jei paskyrų dar nėra, importavimo nuorodą rasite ir lange „<b data-text="ui-add-account-title"></b>“.</li>
+    <li>Pasirinkite failą ir, jei jis užšifruotas, įveskite slaptafrazę.</li>
+    <li>Peržiūrėkite failo turinį, pasirinkite importuojamas dalis bei paskyras ir spustelėkite mygtuką „<b data-text="ui-setup-import-button"></b>“.</li>
 </ol>
-<p>Šiame kompiuteryje jau esanti paskyra paliekama tokia, kokia yra. Kontaktai pridedami į jūsų adresų knygelę, nustatymai ir langų nuostatos pakeičiami, o taisyklė, kurios aplanko dar nėra, laukia, kol paskyra bus sinchronizuota. Kitas kurio nors jūsų kontakto raktas laukia jūsų sprendimo, kaip ir importuotas raktas.</p>
+<p>Esamos paskyros nekeičiamos. Pasirinkti kontaktai ir grupės sujungiami su adresų knygelės duomenimis, o pasirinktos nustatymų ir langų nuostatų reikšmės pritaikomos iš failo. Taisyklių paskirties aplankai susiejami, kai sinchronizuojant jie randami paskyroje. Jei kontaktui jau pasirinktas raktas, kitas importuotas raktas jį pakeičia tik jums pasirinkus naująjį kontakto ypatybėse.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

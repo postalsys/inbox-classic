@@ -1,10 +1,8 @@
-<!--review-->
 <h1>Inbox Classic šalinimas</h1>
-<p class="summary">Pašalinkite Inbox Classic iš kompiuterio kartu su jos atsisiųstais laiškais arba be jų.</p>
-<!--os:windows--><p>Pašalinkite Inbox Classic per <i>Parametrai &gt; Programos &gt; Įdiegtos programos</i>. Ji paklausia, ar pašalinti ir jos atsisiųstus laiškus.</p><!--/os-->
-<!--os:mac--><p>Išeikite iš Inbox Classic ir perkelkite ją iš aplanko „Programos“ į šiukšlinę. Jos atsisiųsti laiškai lieka <code>~/Library/Application Support/Inbox Classic</code>, kol neištrinsite ir to aplanko.</p><!--/os-->
-<!--os:linux--><p>Pašalinkite paketą komanda <code>sudo apt remove inbox-classic</code> arba, Arch Linux ir Omarchy sistemose, <code>sudo pacman -R inbox-classic</code>. Jos atsisiųsti laiškai lieka <code>~/.local/share/inbox-classic</code>, kol neištrinsite ir to aplanko.</p><!--/os-->
-<p>Laiškai jūsų serveriuose niekada nepašalinami.</p>
-<p>Norėdami pašalinti įrašytus slaptažodžius, pirmiausia pašalinkite kiekvieną paskyrą per <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Norėdami pašalinti tik vieną paskyrą, žr. <a href="topic:manage-accounts"></a>.</p>
+<p class="summary">Pašalinkite Inbox Classic, palikdami jos vietinius duomenis arba pašalindami ir juos.</p>
+<!--os:windows--><p>Pašalinkite Inbox Classic per <i>Parametrai &gt; Programos &gt; Įdiegtos programos</i>. Šalinimo programa paklaus, ar pašalinti ir vietinius duomenis. Sutikus pašalinami ne tik atsisiųsti laiškai, bet ir nustatymai, kontaktai, raktai bei vietiniai neišsiųsti laiškai.</p><!--/os-->
+<!--os:mac--><p>Baikite Inbox Classic darbą ir perkelkite programą iš aplanko „Programos“ į šiukšlinę. Jos vietiniai duomenys lieka numatytajame aplanke <code>~/Library/Application Support/Inbox Classic</code>. Jei norite pašalinti ir juos, pirmiausia išsaugokite reikalingus duomenis, tada ištrinkite šį aplanką.</p><!--/os-->
+<!--os:linux--><p>Baikite Inbox Classic darbą. Jei naudojate apt, paketą pašalinkite komanda <code>sudo apt remove inbox-classic</code>; Arch Linux ir Omarchy sistemose naudokite <code>sudo pacman -R inbox-classic</code>. Vietiniai duomenys lieka numatytajame aplanke <code>~/.local/share/inbox-classic</code>. Norėdami pašalinti ir juos, pirmiausia išsaugokite reikalingus duomenis, tada ištrinkite šį aplanką.</p><!--/os-->
+<p>Programos ar jos vietinių duomenų pašalinimas neištrina laiškų iš pašto serverių. Duomenų aplanke yra ir nustatymai, kontaktai, raktai bei vietiniai neišsiųsti laiškai. Jei naudojote kitą duomenų vietą, ją tvarkykite atskirai.</p>
+<p>Jei norite pašalinti išsaugotus paskyrų prisijungimo duomenis, prieš šalindami programą pašalinkite paskyras per <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Programa taip pat bando pašalinti jų įrašus sistemos saugykloje. Kiti Inbox Classic įrašai, pavyzdžiui, prisijungimo programų klientų paslaptys, gali likti. Vien programos pašalinimas jų neišvalo. Apie vienos paskyros pašalinimą žr. <a href="topic:manage-accounts"></a>.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

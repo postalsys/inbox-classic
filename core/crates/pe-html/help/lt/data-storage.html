@@ -1,12 +1,10 @@
-<!--review-->
-<h1>Kur laikomi jūsų laiškai ir slaptažodžiai</h1>
-<p class="summary">Ką Inbox Classic laiko jūsų kompiuteryje ir kur.</p>
+<h1>Kur saugomi laiškai ir prisijungimo duomenys</h1>
+<p class="summary">Kokius duomenis Inbox Classic saugo šiame kompiuteryje ir kur juos rasti.</p>
 <ul>
-    <li><b>Atsisiųsti laiškai ir paskyrų nustatymai</b> yra <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Jūsų laiškai lieka ir serveryje. Čia esanti kopija skirta greitam skaitymui, skaitymui neprisijungus ir paieškai.</li>
-    <li><b>Slaptažodžiai</b>, prisijungimai naršyklėje ir prisijungimo programų paslaptys laikomi <!--os:windows-->Windows kredencialų tvarkytuvėje, įraše <i>InboxClassic</i>, užšifruoti jūsų Windows paskyrai.<!--/os--><!--os:mac-->jūsų prisijungimo raktinėje, įraše <i>InboxClassic</i>, užšifruoti jūsų Mac paskyrai. Juos rodo programa „Raktinė“.<!--/os--><!--os:linux-->jūsų raktinėje (GNOME Keyring), įraše <i>InboxClassic</i>, užšifruoti jūsų prisijungimui. Jei raktinės nėra, jie laikomi tik iki Inbox Classic darbo pabaigos.<!--/os--> Pašto saugykloje jų niekada nėra.</li>
-    <li><b>Šifravimo raktai</b> laikomi kartu su atsisiųstais laiškais. Jūsų privatieji raktai ten užšifruoti raktu, laikomu šalia jūsų slaptažodžių, todėl vien pašto failas jų atverti negali.</li>
+    <li><b>Atsisiųsti laiškai ir paskyrų nustatymai</b> pagal numatytuosius nustatymus saugomi faile <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code> (vieta priklauso ir nuo sistemos duomenų aplanko nustatymų)<!--/os-->. Vietą galima pakeisti paleidimo parametrais. Ši duomenų bazė nešifruota. Vietinės laiškų kopijos skirtos skaitymui neprisijungus ir paieškai. Atsisiuntus laišką, jo kopija serveryje nepašalinama.</li>
+    <li><b>Slaptažodžiai</b>, prisijungimo naršyklėje duomenys ir prisijungimo programų klientų paslaptys pagal numatytuosius nustatymus saugomi <!--os:windows-->Windows saugykloje „Kredencialų tvarkytuvas“, įrašuose <i>InboxClassic</i>. Juos saugo jūsų Windows naudotojo paskyra.<!--/os--><!--os:mac-->prisijungimo raktinėje, įrašuose <i>InboxClassic</i>. Juos galite peržiūrėti sistemos raktinės tvarkymo programoje.<!--/os--><!--os:linux-->sistemos Secret Service saugykloje, pavyzdžiui, GNOME Keyring, įrašuose <i>InboxClassic</i>.<!--/os--> Pasirinkus saugojimą tik atmintyje arba jei saugykla nepasiekiama, įvesti duomenys gali likti tik iki programos uždarymo. Pašto duomenų bazėje šie prisijungimo duomenys nesaugomi.</li>
+    <li><b>Šifravimo raktai</b> saugomi pašto duomenų bazėje. Privatieji raktai joje užšifruoti atskiru apsaugos raktu, pagal numatytuosius nustatymus laikomu sistemos prisijungimo duomenų saugykloje. Vien duomenų bazės kopijos privatiesiems raktams atkurti nepakanka.</li>
 </ul>
-<p>Paieška, nepristatytų laiškų paaiškinimas, grupavimas į pokalbius ir prisijungimo kodų paieška vyksta jūsų kompiuteryje. Dėl jų niekas iš jūsų laiškų niekur nesiunčiama.</p>
-<p>DI agentai mato jūsų laiškus tik tada, kai juos įsileidžiate, ir tik jūsų pasirinktų paskyrų. Žr. <a href="topic:agents-permissions"></a>.</p>
+<p>Paieška, pristatymo pranešimų analizė, laiškų grupavimas į pokalbius ir prisijungimo kodų aptikimas vyksta šiame kompiuteryje. Šiems veiksmams laiškai neperduodami išorinei analizės paslaugai.</p>
+<p>DI agentai gali pasiekti tik jūsų leistų paskyrų duomenis ir atlikti tik leistus veiksmus. Iššifruotas laiškų turinys jiems neperduodamas. Žr. <a href="topic:agents-permissions"></a>.</p>
 <nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav>
-<!--/review-->
