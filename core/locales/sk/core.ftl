@@ -800,6 +800,151 @@ agent-log-watched = Zapnuté sledovanie konverzácie „{ $subject }“
 agent-log-ignored = Zapnuté ignorovanie konverzácie „{ $subject }“
 # review: new
 agent-log-unmarked = Zrušené sledovanie alebo ignorovanie konverzácie „{ $subject }“
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = správa bola odvtedy zmenená
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] 1 správa označená ako prečítaná (vyhľadávanie: { $query })
+    [few] { $count } správy označené ako prečítané (vyhľadávanie: { $query })
+   *[other] { $count } správ označených ako prečítané (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] 1 správa označená ako neprečítaná (vyhľadávanie: { $query })
+    [few] { $count } správy označené ako neprečítané (vyhľadávanie: { $query })
+   *[other] { $count } správ označených ako neprečítané (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] 1 správa označená príznakom (vyhľadávanie: { $query })
+    [few] { $count } správy označené príznakom (vyhľadávanie: { $query })
+   *[other] { $count } správ označených príznakom (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Z 1 správy bol odstránený príznak (vyhľadávanie: { $query })
+    [few] Z { $count } správ bol odstránený príznak (vyhľadávanie: { $query })
+   *[other] Z { $count } správ bol odstránený príznak (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] 1 správa označená
+    [few] { $count } správy označené
+   *[other] { $count } správ označených
+} { $color ->
+    [red] červeným príznakom
+    [orange] oranžovým príznakom
+    [yellow] žltým príznakom
+    [green] zeleným príznakom
+    [blue] modrým príznakom
+    [purple] fialovým príznakom
+   *[gray] sivým príznakom
+} (vyhľadávanie: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] 1 správa presunutá do priečinka „{ $folder }“ (vyhľadávanie: { $query })
+    [few] { $count } správy presunuté do priečinka „{ $folder }“ (vyhľadávanie: { $query })
+   *[other] { $count } správ presunutých do priečinka „{ $folder }“ (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] 1 správa archivovaná (vyhľadávanie: { $query })
+    [few] { $count } správy archivované (vyhľadávanie: { $query })
+   *[other] { $count } správ archivovaných (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] 1 správa označená ako nevyžiadaná (vyhľadávanie: { $query })
+    [few] { $count } správy označené ako nevyžiadané (vyhľadávanie: { $query })
+   *[other] { $count } správ označených ako nevyžiadané (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Pri 1 správe zrušené označenie ako nevyžiadanej (vyhľadávanie: { $query })
+    [few] Pri { $count } správach zrušené označenie ako nevyžiadaných (vyhľadávanie: { $query })
+   *[other] Pri { $count } správach zrušené označenie ako nevyžiadaných (vyhľadávanie: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] 1 správa odstránená (vyhľadávanie: { $query })
+    [few] { $count } správy odstránené (vyhľadávanie: { $query })
+   *[other] { $count } správ odstránených (vyhľadávanie: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Za posledných 15 minút
+    [hour] Za poslednú hodinu
+    [hours] Za posledné 4 hodiny
+    [day] Za posledných 24 hodín
+    [week] Za posledných 7 dní
+   *[all] Za posledných 30 dní
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] Program { $program } za tento čas neurobil žiadne zmeny, ktoré by sa dali vrátiť.
+    [one] Vrátiť zmenu, ktorú program { $program } urobil za tento čas?
+    [few] Vrátiť { $count } zmeny, ktoré program { $program } urobil za tento čas?
+   *[other] Vrátiť { $count } zmien, ktoré program { $program } urobil za tento čas?
+}
+# review: new
+agent-undo-since-detail = Správy sa vrátia do priečinkov, z ktorých prišli, stav prečítania a príznaky budú také ako predtým a správy, ktoré ešte čakajú v priečinku Pošta na odoslanie, sa odstránia. Čo ste odvtedy zmenili vy alebo server, zostane bez zmeny.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nič sa nevrátilo.
+    [one] Vrátená 1 zmena.
+    [few] Vrátené { $count } zmeny.
+   *[other] Vrátených { $count } zmien.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 správa už nebola tam, kam ju zmena umiestnila.
+    [few] { $count } správy už neboli tam, kam ich zmena umiestnila.
+   *[other] { $count } správ už nebolo tam, kam ich zmena umiestnila.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 správa bola odvtedy zmenená, vami alebo na serveri, a zostala bez zmeny.
+    [few] { $count } správy boli odvtedy zmenené, vami alebo na serveri, a zostali bez zmeny.
+   *[other] { $count } správ bolo odvtedy zmenených, vami alebo na serveri, a zostalo bez zmeny.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 správa už opustila priečinok Pošta na odoslanie.
+    [few] { $count } správy už opustili priečinok Pošta na odoslanie.
+   *[other] { $count } správ už opustilo priečinok Pošta na odoslanie.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 zmenu nemožno vrátiť.
+    [few] { $count } zmeny nemožno vrátiť.
+   *[other] { $count } zmien nemožno vrátiť.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Táto správa prijíma pozvánku „{ $summary }“ ({ $when }).
+    [tentative] Táto správa predbežne prijíma pozvánku „{ $summary }“ ({ $when }).
+   *[decline] Táto správa odmieta pozvánku „{ $summary }“ ({ $when }).
+} Kalendár organizátora odpoveď zaznamená. Vaša odpoveď na pozvánku sa zmení až po odoslaní správy.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Prijaté: { $summary }
+    [tentative] Predbežne: { $summary }
+   *[decline] Odmietnuté: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } prijíma túto pozvánku.
+    [tentative] { $name } predbežne prijíma túto pozvánku.
+   *[decline] { $name } odmieta túto pozvánku.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -874,6 +1019,8 @@ agent-terminal-program-linux = Program spustený z terminálu ({ $terminal })
 agent-connect-title-terminal = { $programs } chcú pracovať s vašou poštou
 # review: new
 agent-connect-terminal-detail = Všetci AI agenti, ktorých spustíte z tohto terminálu, zdieľajú prístup, ktorý tu povolíte. Ak chcete niektorému z nich dať vlastný prístup, pridajte v nastaveniach MCP agenta do jeho argumentov --name a ľubovoľný názov.
+# review: new
+agent-connect-claimed = Program sa predstavil ako { $claimed }. Aplikácia Inbox Classic overila, ktorý program ho spustil: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1085,61 +1232,43 @@ pgp-publish-failed = Kľúč sa nepodarilo zverejniť: { $error }
 # review: changed
 pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Šifrované a podpísané: prečítať ju môžete iba vy a { $addresses }.
-   *[other] Šifrované a podpísané: prečítať ju môžete iba vy a jej príjemcovia ({ $count }).
+    [one] Správa bude pri odoslaní zašifrovaná a digitálne podpísaná. Jej obsah si budete môcť prečítať iba vy a { $addresses }.
+   *[other] Správa bude pri odoslaní zašifrovaná a digitálne podpísaná. Obsah bude dostupný iba vám a príjemcom ({ $count }).
 }
-# review: new
-pgp-compose-encrypt-ready = Bude zašifrovaná a podpísaná. Pridajte príjemcov, ktorých kľúče máte.
-# review: new
+pgp-compose-encrypt-ready = Správa bude pri odoslaní zašifrovaná a digitálne podpísaná. Pridajte príjemcov, ktorých kľúče máte.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } nemá kľúč, preto správu zatiaľ nemožno zašifrovať.
-   *[other] Príjemcovia bez kľúča ({ $count }): { $addresses }. Správu preto zatiaľ nemožno zašifrovať.
+    [one] Príjemca bez použiteľného kľúča: { $addresses }. Správu zatiaľ nemožno zašifrovať.
+   *[other] Príjemcovia bez použiteľných kľúčov ({ $count }): { $addresses }. Správu zatiaľ nemožno zašifrovať.
 }
-# review: new
-pgp-compose-looking = Hľadajú sa kľúče pre { $addresses }...
-# review: new
-pgp-compose-signed = Podpísané: príjemcovia si môžu overiť, že je od vás a nebola zmenená.
-# review: new
-pgp-compose-reply-clear = Nešifrované, hoci správa, na ktorú odpovedá alebo ktorú preposiela, šifrovaná bola.
-# review: new
-pgp-compose-encrypted-files = Sú priložené súbory šifrovanej správy, preto túto správu možno odoslať iba šifrovanú. Zapnite Šifrovať alebo tieto súbory odstráňte.
-# review: new
-pgp-compose-sign-tip = Podpísať správu vaším kľúčom, aby si príjemcovia mohli overiť, že je od vás a nebola zmenená
-# review: new
-pgp-compose-sign-tip-encrypted = Šifrovaná správa je vždy podpísaná
-# review: new
-pgp-compose-encrypt-tip = Zašifrovať správu, aby ju mohli prečítať iba vy a jej príjemcovia
-# review: new
-pgp-compose-make-key = Pre { $address } zatiaľ nemáte kľúč. Vytvoriť ho teraz? S ním možno vaše správy podpisovať a šifrovať.
-# review: new
-pgp-compose-key-unusable = Váš kľúč pre { $address } nemožno použiť ({ $state }). Otvorte Šifrovacie kľúče a importujte jeho zálohu alebo vytvorte nový kľúč.
-# review: new
-pgp-compose-encrypt-off-quote = Táto správa cituje alebo preposiela šifrovanú správu. Bez šifrovania ju nemožno odoslať, kým neodstránite citovaný obsah. Napriek tomu vypnúť šifrovanie?
-# review: new
-pgp-compose-encrypt-off-reply = Táto správa odpovedá na šifrovanú správu alebo ju preposiela. Bez šifrovania si vašu správu môže prečítať ktokoľvek, kto s ňou cestou pracuje. Vypnúť šifrovanie?
-# review: new
-pgp-recipient-verified = Kľúč overený
-# review: new
-pgp-recipient-found = Kľúč neoverený
-# review: new
+pgp-compose-looking = Hľadajú sa kľúče príjemcov: { $addresses }...
+pgp-compose-signed = Správa bude pri odoslaní digitálne podpísaná. Príjemcovia si budú môcť overiť, či sa jej obsah po podpísaní nezmenil.
+pgp-compose-reply-clear = Správa sa odošle bez šifrovania, hoci pôvodná správa bola zašifrovaná.
+pgp-compose-encrypted-files = Správa obsahuje prílohy zo zašifrovanej správy, preto ju možno odoslať iba zašifrovanú. Zapnite možnosť „Šifrovať“ alebo tieto prílohy odstráňte.
+pgp-compose-sign-tip = Digitálne podpísať správu vlastným kľúčom, aby si príjemcovia mohli overiť, či sa jej obsah po podpísaní nezmenil
+pgp-compose-sign-tip-encrypted = Správa odoslaná v zašifrovanej podobe je vždy aj digitálne podpísaná
+pgp-compose-encrypt-tip = Zašifrovať obsah správy, aby bol dostupný iba vám a jej príjemcom
+pgp-compose-make-key = Pre adresu { $address } zatiaľ nemáte vlastný kľúč. Vytvoriť ho teraz? Umožní vám digitálne podpisovať a šifrovať správy.
+pgp-compose-key-unusable =
+    Váš kľúč pre adresu { $address } nemožno použiť.
+
+    Dôvod: { $state }
+
+    Otvorte okno „Šifrovacie kľúče“ a importujte zálohu tohto kľúča alebo vytvorte nový kľúč.
+pgp-compose-encrypt-off-quote = Správa obsahuje text, obrázky alebo prílohy zo zašifrovanej správy. Bez šifrovania ju možno odoslať až po odstránení tohto obsahu. Napriek tomu vypnúť šifrovanie?
+pgp-compose-encrypt-off-reply = Odpovedáte na zašifrovanú správu alebo ju preposielate. Bez šifrovania môžu obsah vašej správy čítať aj servery, cez ktoré prechádza. Vypnúť šifrovanie?
+pgp-recipient-verified = Vlastník kľúča je overený
+pgp-recipient-found = Vlastník kľúča nie je overený
 pgp-recipient-own = Váš kľúč
-# review: new
 pgp-recipient-looking = Hľadá sa kľúč...
-# review: new
 pgp-recipient-missing = Žiadny kľúč
-# review: new
-pgp-recipient-not-found = Žiadny kľúč: { $date } sa nenašiel žiadny
-# review: new
+pgp-recipient-not-found = Kľúč sa nenašiel. Posledné vyhľadávanie: { $date }
 pgp-recipient-unusable = Kľúč nemožno použiť: { $state }
-# review: new
-pgp-recipients-intro = Správa sa šifruje pre kľúč každého príjemcu a pre váš.
-# review: new
+pgp-recipients-intro = Správa sa šifruje kľúčom každého príjemcu aj vaším kľúčom.
 pgp-recipients-intro-missing = { $count ->
-    [one] Jeden príjemca nemá kľúč na šifrovanie. Nájdite jeho kľúč, odstráňte ho z tejto správy alebo ju odošlite bez šifrovania.
-    [few] { $count } príjemcovia nemajú kľúč na šifrovanie. Nájdite ich kľúče, odstráňte ich z tejto správy alebo ju odošlite bez šifrovania.
-   *[other] { $count } príjemcov nemá kľúč na šifrovanie. Nájdite ich kľúče, odstráňte ich z tejto správy alebo ju odošlite bez šifrovania.
+    [one] Jeden príjemca nemá použiteľný kľúč na šifrovanie. Nájdite jeho kľúč, odstráňte príjemcu zo správy alebo správu odošlite bez šifrovania.
+    [few] { $count } príjemcovia nemajú použiteľné kľúče na šifrovanie. Nájdite ich kľúče, odstráňte týchto príjemcov zo správy alebo správu odošlite bez šifrovania.
+   *[other] { $count } príjemcov nemá použiteľné kľúče na šifrovanie. Nájdite ich kľúče, odstráňte týchto príjemcov zo správy alebo správu odošlite bez šifrovania.
 }
 # review: new
 pgp-details-part = Časť { $number }: { $label }

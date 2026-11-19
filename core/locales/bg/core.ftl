@@ -527,6 +527,135 @@ agent-log-watched = Разговорът „{ $subject }“ се следи
 agent-log-ignored = Разговорът „{ $subject }“ се пренебрегва
 # review: new
 agent-log-unmarked = Разговорът „{ $subject }“ вече не се следи и не се пренебрегва
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = съобщението е променено след това
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Маркирано като прочетено: 1 съобщение (търсене: { $query })
+   *[other] Маркирани като прочетени: { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Маркирано като непрочетено: 1 съобщение (търсене: { $query })
+   *[other] Маркирани като непрочетени: { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Маркирано с флаг: 1 съобщение (търсене: { $query })
+   *[other] Маркирани с флаг: { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Флагът е премахнат от 1 съобщение (търсене: { $query })
+   *[other] Флагът е премахнат от { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Маркирано с флаг: 1 съобщение
+   *[other] Маркирани с флаг: { $count } съобщения
+}, цвят: { $color ->
+    [red] червен
+    [orange] оранжев
+    [yellow] жълт
+    [green] зелен
+    [blue] син
+    [purple] лилав
+   *[gray] сив
+} (търсене: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Преместено в „{ $folder }“: 1 съобщение (търсене: { $query })
+   *[other] Преместени в „{ $folder }“: { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Архивирано: 1 съобщение (търсене: { $query })
+   *[other] Архивирани: { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Маркирано като нежелана поща: 1 съобщение (търсене: { $query })
+   *[other] Маркирани като нежелана поща: { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Маркирано като желана поща: 1 съобщение (търсене: { $query })
+   *[other] Маркирани като желана поща: { $count } съобщения (търсене: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Преместено в „Изтрити“: 1 съобщение (търсене: { $query })
+   *[other] Преместени в „Изтрити“: { $count } съобщения (търсене: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] През последните 15 минути
+    [hour] През последния час
+    [hours] През последните 4 часа
+    [day] През последните 24 часа
+    [week] През последните 7 дни
+   *[all] През последните 30 дни
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] През този период няма промени от { $program }, които могат да бъдат отменени.
+    [one] Да се отмени ли промяната, направена от { $program } през този период?
+   *[other] Да се отменят ли { $count } промени, направени от { $program } през този период?
+}
+# review: new
+agent-undo-since-detail = Съобщенията се връщат в папките, от които са дошли, състоянието прочетено/непрочетено и флаговете стават каквито са били, а съобщенията, които още чакат в „Изходящи“, се изтриват. Това, което вие или сървърът сте променили след това, остава непроменено.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Нищо не беше отменено.
+    [one] Отменена е 1 промяна.
+   *[other] Отменени са { $count } промени.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 съобщение вече не беше там, където го беше поставила промяната.
+   *[other] { $count } съобщения вече не бяха там, където ги беше поставила промяната.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 съобщение е променено след това от вас или на сървъра и е оставено непроменено.
+   *[other] { $count } съобщения са променени след това от вас или на сървъра и са оставени непроменени.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 съобщение вече беше излязло от „Изходящи“.
+   *[other] { $count } съобщения вече бяха излезли от „Изходящи“.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 промяна не може да бъде отменена.
+   *[other] { $count } промени не могат да бъдат отменени.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Това съобщение приема поканата „{ $summary }“ ({ $when }).
+    [tentative] Това съобщение приема условно поканата „{ $summary }“ ({ $when }).
+   *[decline] Това съобщение отказва поканата „{ $summary }“ ({ $when }).
+} Календарът на организатора я отразява. Отговорът ви на поканата се променя едва след като съобщението бъде изпратено.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Прието: { $summary }
+    [tentative] Условно прието: { $summary }
+   *[decline] Отказано: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } прие тази покана.
+    [tentative] { $name } прие условно тази покана.
+   *[decline] { $name } отказа тази покана.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -593,6 +722,8 @@ agent-terminal-program-linux = Програма, стартирана от те�
 agent-connect-title-terminal = { $programs } искат да използват пощата ви
 # review: new
 agent-connect-terminal-detail = Всеки ИИ агент, който стартирате от този терминал, споделя достъпа, който разрешите тук. За да има агентът собствен достъп, добавете --name и избрано от вас име към аргументите му в MCP настройките на агента.
+# review: new
+agent-connect-claimed = Програмата се представи като { $claimed }. Inbox Classic провери коя програма я е стартирала: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

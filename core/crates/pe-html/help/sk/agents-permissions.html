@@ -3,7 +3,7 @@
 <p>Pri prvom pripojení agenta Inbox Classic zobrazí názov jeho programu a vyžiada si váš súhlas. Vyberte, čo smie agent robiť:</p>
 <ul>
     <!--review--><li>čítať poštu: prezerať priečinky, správy a konverzácie vrátane ich súborov PDF, Office a obrázkov do 10 MB, vyhľadávať správy, zobrazovať pravidlá a vyhľadávať kontakty</li><!--/review-->
-    <!--review--><li>spravovať poštu: meniť stav prečítania, príznaky a ich farby, označovať nevyžiadanú poštu, presúvať a archivovať správy, vytvárať priečinky, premenovávať vaše vlastné priečinky, sledovať a ignorovať konverzácie, odstraňovať správy do priečinka <b data-text="folder-deleted"></b> a s vaším súhlasom odhlasovať odber zoznamov adresátov</li><!--/review-->
+    <!--review--><li>spravovať poštu: meniť stav prečítania, príznaky a ich farby, označovať nevyžiadanú poštu, presúvať a archivovať správy, vytvárať priečinky, premenovávať vaše vlastné priečinky, sledovať a ignorovať konverzácie, odstraňovať správy do priečinka <b data-text="folder-deleted"></b>, to všetko aj naraz pre všetky správy, ktoré nájde vyhľadávanie, a s vaším súhlasom odhlasovať odber zoznamov adresátov</li><!--/review-->
     <li>písať koncepty, ktoré odošlete vy, a meniť alebo natrvalo odstraňovať vlastné koncepty, kým ich sami neuložíte alebo neodošlete</li>
     <li>odosielať poštu, každú správu až po vašom súhlase</li>
 </ul>
@@ -16,6 +16,8 @@
     <li>Tlačidlo <!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, ktoré je predvolené, žiadosť odmietne a odbery ponechá nezmenené.</li>
 </ul>
 <p>Agent nemôže žiadať o odhlásenie na základe správ z priečinka <b data-text="folder-junk"></b>. Pre každý program je povolených najviac 30 schválených žiadostí za posledných 24 hodín, po jednej na zoznam. Započítavajú sa aj schválené žiadosti, ktoré zlyhali.</p>
+<!--review--><h2>Zmena mnohých správ naraz</h2><!--/review-->
+<!--review--><p>Agent, ktorý smie spravovať poštu, môže v jednom kroku zmeniť všetky správy, ktoré nájde vyhľadávanie, napríklad označiť všetky bulletiny ako prečítané alebo ich presunúť do priečinka. Najprv správy spočíta a pozrie si niekoľko z nich. Potom zmení presne tie, najviac 1 000 naraz, a nikdy nie poštu, ktorá prišla medzitým. Inbox Classic sa vás vopred nepýta, pretože všetko sa dá vrátiť. Záznam to zobrazí ako jeden riadok, napríklad „37 správ označených ako prečítané (vyhľadávanie: from:news)“, a jedno vrátenie späť vráti všetko.</p><!--/review-->
 <h2>Zobrazenie a zmena prístupu</h2>
 <p>V okne <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> nájdete programy, ktorým ste povolili alebo odmietli prístup, a históriu činnosti ich agentov. Najnovšie záznamy sú na začiatku.</p>
 <!--review--><p>To, čo agent číta, sa zobrazuje ako jeden riadok za každý program a hodinu, napríklad „Prečítaných 14 správ a 3 vyhľadávania“. <!--os:windows-->Po výbere riadka<!--/os--><!--os:mac,linux-->Po otvorení riadka šípkou<!--/os--> uvidíte predmety prečítaných správ a hľadané výrazy, nikdy nie text správ. Záznam sa uchováva 30 dní. Jeho vymazanie nezmení, koľko správ smie agent ešte odoslať.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li>Tlačidlo <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> umožňuje zmeniť oprávnenia programu.</li>
     <li>Tlačidlo <b data-text="ui-remove"></b> odstráni záznam o programe, jeho oprávnenia a históriu činnosti. Samotný program sa neodinštaluje. Pri ďalšom pripojení si Inbox Classic znova vyžiada váš súhlas.</li>
     <!--review--><li>Tlačidlo <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> vráti zmenu stavu prečítania, príznaku alebo jeho farby, označenia nevyžiadanej pošty, presunutie, archivovanie alebo odstránenie. Zruší aj odoslanie správy, kým je ešte v priečinku Pošta na odoslanie. Už odoslanú správu nemožno vziať späť.</li><!--/review-->
+    <!--review--><li>Tlačidlo <!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> vráti všetko, čo vybraný program urobil v čase, ktorý zvolíte, napríklad za poslednú hodinu, od najnovšieho.</li><!--/review-->
 </ul>
+<!--review--><p>Správa, ktorú ste vy alebo server zmenili po agentovi, zostane bez zmeny a Inbox Classic vám povie, koľko takých správ bolo. Agent môže vrátiť aj svoje vlastné zmeny, nikdy nie zmeny iného programu.</p><!--/review-->
 <aside class="warning">Cudzie správy môžu obsahovať pokyny určené na oklamanie agenta, napríklad žiadosť o preposlanie alebo odstránenie vašej pošty. Inbox Classic pred agentmi skrýva text, ktorý vám správa nezobrazuje, a upozorňuje ich, aby obsah pošty nepovažovali za pokyny na vykonanie. Agenta však možno aj tak oklamať. Povoľte iba potrebné činnosti.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

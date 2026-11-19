@@ -445,6 +445,13 @@ ui-clear-agent-log-detail = Změny provedené agenty se tím nevrátí zpět.
 ui-let-agents-connect = &Povolit agentům AI připojení k Inbox Classic
 ui-change-button = Změnit…
 ui-undo-button = Zpět
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Vrátit zpět od…
+# review: new
+ui-undo-since-span = Vrátit zpět, co tento program provedl:
+# review: new
+ui-take-back = Vrátit zpět
 ui-rules-title = Pravidla zpráv
 ui-rules-intro = Pravidla zpracovávají nové zprávy v Doručené poště, když je Inbox Classic spuštěný. Pravidla, jejichž podmínky zpráva splňuje, se použijí v uvedeném pořadí. Jakmile některé přesune zprávu z Doručené pošty, další se už nepoužijí.
 ui-rules-none = Zatím nemáte žádná pravidla. Vytvořte první kliknutím na Nové.

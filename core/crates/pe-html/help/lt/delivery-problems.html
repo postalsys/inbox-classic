@@ -1,22 +1,20 @@
-<!--review-->
 <h1>Nepristatyti laiškai</h1>
-<p class="summary">Kai jūsų išsiųstas laiškas grąžinamas ar vėluoja, Inbox Classic paaiškina kodėl ir ką galite padaryti.</p>
-<p>Pristatymo pranešimas laiškų sąraše pažymėtas nepristatymo ženklu. Jį atidarius, virš jo esanti kortelė nurodo, ar jūsų laiškas nepristatytas, ar tik vėluoja.</p>
+<p class="summary">Gavusi pranešimą apie nepristatytą ar vėluojantį laišką, Inbox Classic padeda suprasti priežastį ir pasirinkti tolesnį veiksmą.</p>
+<p>Atpažintas pristatymo pranešimas laiškų sąraše turi nepristatymo žymę. Jį atidarius, virš laiško rodoma kortelė su informacija apie nepristatytus ar vėluojančius laiškus.</p>
 <img src="picture:bounce-1-failed" alt="Pristatymo pranešimas su kortele, kurioje nurodyta, kad laiškas nepristatytas, gavėjas, priežastis ir ką daryti">
-<p>Kortelėje išvardytas kiekvienas gavėjas su paprastais žodžiais paaiškinta priežastimi ir tuo, ką galite padaryti. <b data-text="bounce-details"></b> rodo paties gaunančiojo serverio žodžius.</p>
+<p>Kortelėje nurodomi gavėjai, paaiškinamos pranešime rastos priežastys ir siūloma, ką daryti. Skiltyje „<b data-text="bounce-details"></b>“ pateikiami serverio atsakymo duomenys ir tekstas.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> pažymi jūsų išsiųstą laišką.</li>
-    <li>Vėlavimo atveju jį pažymi <b data-text="bounce-show-delayed"></b>. Jūsų pašto serveris vis dar bando, todėl siųsti laiško dar kartą nereikia.</li>
+    <li>Spustelėję nuorodą „<b data-text="bounce-show-message"></b>“, sąraše pamatysite pradinį laišką, jei programa jį rado jūsų paskyroje.</li>
+    <li>Jei pristatymas vėluoja, rodoma nuoroda „<b data-text="bounce-show-delayed"></b>“. Pagal gautą pranešimą serveris dar bando pristatyti laišką, todėl kol kas nesiųskite jo pakartotinai.</li>
 </ul>
 <p>Kelios dažnos priežastys:</p>
 <table>
     <tr><th>Kortelėje parašyta</th><th>Ką daryti</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Patikrinkite, ar adresas parašytas teisingai, arba paklauskite žmogaus, kokiu adresu jis dabar naudojasi.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Išsiųskite laišką dar kartą po kelių dienų arba susisiekite su žmogumi kitu būdu.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Išsiųskite laišką dar kartą be to, kas atrodo kaip brukalas, pavyzdžiui, be daugybės nuorodų ar didelio priedo.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Persiųskite pranešimą savo pašto paslaugų teikėjui. Problema ne laiške.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Nieko. Paprastai laiškas pristatomas per valandą.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Jei gavote galutinį nepristatymo pranešimą, pabandykite išsiųsti laišką vėliau arba susisiekite su gavėju kitu būdu.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Peržiūrėkite serverio atsakymą. Jei laiškas galutinai atmestas, pašalinkite nereikalingas nuorodas ar kitą galimą blokavimo priežastį ir bandykite siųsti dar kartą.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Pranešime nurodytas pašto serverio IP adreso blokavimas. Persiųskite pranešimą savo pašto paslaugų teikėjui.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Jei laiškas dar laukia pristatymo, leiskite serveriui bandyti dar kartą. Jei gavote galutinį nepristatymo pranešimą, pabandykite išsiųsti vėliau. Pristatymo laikas nėra garantuotas.</td></tr>
 </table>
-<p>Norėdami rasti visus pristatymo pranešimus, ieškokite <code>is:bounce</code>. Priežastis nustatoma jūsų kompiuteryje, ir niekas niekur nesiunčiama.</p>
+<p>Atpažintų pristatymo pranešimų ieškokite pagal <code>is:bounce</code>. Jų priežastys analizuojamos šiame kompiuteryje, neperduodant pranešimo išorinei analizės paslaugai.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

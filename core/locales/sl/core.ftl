@@ -781,6 +781,167 @@ agent-log-watched = Začel spremljati pogovor »{ $subject }«
 agent-log-ignored = Prezrl pogovor »{ $subject }«
 # review: new
 agent-log-unmarked = Prenehal spremljati ali prezirati pogovor »{ $subject }«
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = sporočilo je bilo medtem spremenjeno
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Označil { $count } sporočilo kot prebrano (iskanje: { $query })
+    [two] Označil { $count } sporočili kot prebrani (iskanje: { $query })
+    [few] Označil { $count } sporočila kot prebrana (iskanje: { $query })
+   *[other] Označil { $count } sporočil kot prebrana (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Označil { $count } sporočilo kot neprebrano (iskanje: { $query })
+    [two] Označil { $count } sporočili kot neprebrani (iskanje: { $query })
+    [few] Označil { $count } sporočila kot neprebrana (iskanje: { $query })
+   *[other] Označil { $count } sporočil kot neprebrana (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Označil { $count } sporočilo z zastavico (iskanje: { $query })
+    [two] Označil { $count } sporočili z zastavico (iskanje: { $query })
+    [few] Označil { $count } sporočila z zastavico (iskanje: { $query })
+   *[other] Označil { $count } sporočil z zastavico (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Odstranil zastavico pri { $count } sporočilu (iskanje: { $query })
+    [two] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
+    [few] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
+   *[other] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Označil { $count } sporočilo
+    [two] Označil { $count } sporočili
+    [few] Označil { $count } sporočila
+   *[other] Označil { $count } sporočil
+} { $color ->
+    [red] z rdečo zastavico
+    [orange] z oranžno zastavico
+    [yellow] z rumeno zastavico
+    [green] z zeleno zastavico
+    [blue] z modro zastavico
+    [purple] z vijolično zastavico
+   *[gray] s sivo zastavico
+} (iskanje: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Premaknil { $count } sporočilo v mapo »{ $folder }« (iskanje: { $query })
+    [two] Premaknil { $count } sporočili v mapo »{ $folder }« (iskanje: { $query })
+    [few] Premaknil { $count } sporočila v mapo »{ $folder }« (iskanje: { $query })
+   *[other] Premaknil { $count } sporočil v mapo »{ $folder }« (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arhiviral { $count } sporočilo (iskanje: { $query })
+    [two] Arhiviral { $count } sporočili (iskanje: { $query })
+    [few] Arhiviral { $count } sporočila (iskanje: { $query })
+   *[other] Arhiviral { $count } sporočil (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Označil { $count } sporočilo kot neželeno (iskanje: { $query })
+    [two] Označil { $count } sporočili kot neželeni (iskanje: { $query })
+    [few] Označil { $count } sporočila kot neželena (iskanje: { $query })
+   *[other] Označil { $count } sporočil kot neželena (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Odstranil oznako neželene pošte pri { $count } sporočilu (iskanje: { $query })
+    [two] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
+    [few] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
+   *[other] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Izbrisal { $count } sporočilo (iskanje: { $query })
+    [two] Izbrisal { $count } sporočili (iskanje: { $query })
+    [few] Izbrisal { $count } sporočila (iskanje: { $query })
+   *[other] Izbrisal { $count } sporočil (iskanje: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] V zadnjih 15 minutah
+    [hour] V zadnji uri
+    [hours] V zadnjih 4 urah
+    [day] V zadnjih 24 urah
+    [week] V zadnjih 7 dneh
+   *[all] V zadnjih 30 dneh
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] Program { $program } v tem času ni naredil sprememb, ki bi jih bilo mogoče razveljaviti.
+    [one] Želite razveljaviti { $count } spremembo, ki jo je program { $program } naredil v tem času?
+    [two] Želite razveljaviti { $count } spremembi, ki ju je program { $program } naredil v tem času?
+    [few] Želite razveljaviti { $count } spremembe, ki jih je program { $program } naredil v tem času?
+   *[other] Želite razveljaviti { $count } sprememb, ki jih je program { $program } naredil v tem času?
+}
+# review: new
+agent-undo-since-detail = Sporočila se vrnejo v mape, iz katerih so prišla, prebranost in zastavice se vrnejo v prejšnje stanje, sporočila, ki še čakajo v mapi Odpošiljanje, pa se izbrišejo. Kar ste medtem spremenili vi ali strežnik, ostane, kot je.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nič ni bilo razveljavljeno.
+    [one] Razveljavljena { $count } sprememba.
+    [two] Razveljavljeni { $count } spremembi.
+    [few] Razveljavljene { $count } spremembe.
+   *[other] Razveljavljenih { $count } sprememb.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] { $count } sporočilo ni bilo več tam, kamor ga je postavila sprememba.
+    [two] { $count } sporočili nista bili več tam, kamor ju je postavila sprememba.
+    [few] { $count } sporočila niso bila več tam, kamor jih je postavila sprememba.
+   *[other] { $count } sporočil ni bilo več tam, kamor jih je postavila sprememba.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] { $count } sporočilo je bilo medtem spremenjeno, z vaše strani ali na strežniku, in je ostalo, kot je.
+    [two] { $count } sporočili sta bili medtem spremenjeni, z vaše strani ali na strežniku, in sta ostali, kot sta.
+    [few] { $count } sporočila so bila medtem spremenjena, z vaše strani ali na strežniku, in so ostala, kot so.
+   *[other] { $count } sporočil je bilo medtem spremenjenih, z vaše strani ali na strežniku, in je ostalo, kot je.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] { $count } sporočilo je že zapustilo mapo Odpošiljanje.
+    [two] { $count } sporočili sta že zapustili mapo Odpošiljanje.
+    [few] { $count } sporočila so že zapustila mapo Odpošiljanje.
+   *[other] { $count } sporočil je že zapustilo mapo Odpošiljanje.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] { $count } spremembe ni mogoče razveljaviti.
+    [two] { $count } spremembi ni mogoče razveljaviti.
+    [few] { $count } spremembe ni mogoče razveljaviti.
+   *[other] { $count } sprememb ni mogoče razveljaviti.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] To sporočilo sprejme povabilo »{ $summary }« ({ $when }).
+    [tentative] To sporočilo pogojno sprejme povabilo »{ $summary }« ({ $when }).
+   *[decline] To sporočilo zavrne povabilo »{ $summary }« ({ $when }).
+} Koledar organizatorja odgovor upošteva. Vaš odgovor na povabilo se spremeni šele, ko je sporočilo poslano.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Sprejeto: { $summary }
+    [tentative] Pogojno sprejeto: { $summary }
+   *[decline] Zavrnjeno: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } sprejema to povabilo.
+    [tentative] { $name } pogojno sprejema to povabilo.
+   *[decline] { $name } zavrača to povabilo.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -863,6 +1024,8 @@ agent-terminal-program-linux = Iz terminala ({ $terminal }) zagnan program
 agent-connect-title-terminal = { $programs } želijo dostop do vaše pošte
 # review: new
 agent-connect-terminal-detail = Vsi agenti UI, ki jih zaženete iz tega terminala, si delijo dostop, ki ga dovolite tukaj. Če želite enemu od njih dati lasten dostop, v agentovih nastavitvah MCP med njegove argumente dodajte --name in poljubno ime.
+# review: new
+agent-connect-claimed = Program se je predstavil kot { $claimed }. Inbox Classic je preveril, kateri program ga je zagnal: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1077,62 +1240,52 @@ pgp-publish-failed = Ključa ni bilo mogoče objaviti: { $error }
 # review: changed
 pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno v { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [1] Šifrirano in podpisano: prebrati ga lahko samo vi in { $addresses }.
-   *[other] Šifrirano in podpisano: prebrati ga lahko samo vi in njegovi prejemniki ({ $count }).
+    [1] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $addresses }.
+    [one] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemnik.
+    [two] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemnika.
+    [few] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemniki.
+   *[other] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $count } prejemnikov.
 }
-# review: new
-pgp-compose-encrypt-ready = Sporočilo bo šifrirano in podpisano. Dodajte prejemnike, katerih ključe imate.
-# review: new
+pgp-compose-encrypt-ready = Ob pošiljanju bo sporočilo šifrirano in digitalno podpisano. Dodajte prejemnike, katerih ključe imate.
 pgp-compose-missing = { $count ->
-    [1] { $addresses } nima ključa, zato sporočila še ni mogoče šifrirati.
-   *[other] Prejemniki brez ključa ({ $count }): { $addresses }. Zato sporočila še ni mogoče šifrirati.
+    [1] Prejemnik nima uporabnega ključa: { $addresses }. Sporočila še ni mogoče šifrirati.
+    [one] { $count } prejemnik nima uporabnega ključa: { $addresses }. Sporočila še ni mogoče šifrirati.
+    [two] { $count } prejemnika nimata uporabnih ključev: { $addresses }. Sporočila še ni mogoče šifrirati.
+    [few] { $count } prejemniki nimajo uporabnih ključev: { $addresses }. Sporočila še ni mogoče šifrirati.
+   *[other] { $count } prejemnikov nima uporabnih ključev: { $addresses }. Sporočila še ni mogoče šifrirati.
 }
-# review: new
-pgp-compose-looking = Iskanje ključev za { $addresses }...
-# review: new
-pgp-compose-signed = Podpisano: prejemniki lahko preverijo, da je od vas in da ni bilo spremenjeno.
-# review: new
-pgp-compose-reply-clear = Ni šifrirano, čeprav je bilo sporočilo, na katero odgovarja ali ki ga posreduje, šifrirano.
-# review: new
-pgp-compose-encrypted-files = Pripete so datoteke šifriranega sporočila, zato je to sporočilo mogoče poslati samo šifrirano. Vklopite Šifriraj ali odstranite te datoteke.
-# review: new
-pgp-compose-sign-tip = Podpišite sporočilo s svojim ključem, da lahko prejemniki preverijo, da je od vas in da ni bilo spremenjeno
-# review: new
-pgp-compose-sign-tip-encrypted = Šifrirano sporočilo je vedno podpisano
-# review: new
-pgp-compose-encrypt-tip = Šifrirajte sporočilo, da ga lahko preberete samo vi in njegovi prejemniki
-# review: new
-pgp-compose-make-key = Za { $address } še nimate ključa. Ga želite ustvariti zdaj? Z njim lahko svoja sporočila podpisujete in šifrirate.
-# review: new
-pgp-compose-key-unusable = Vašega ključa za { $address } ni mogoče uporabiti ({ $state }). Odprite okno Šifrirni ključi, da uvozite njegovo varnostno kopijo ali ustvarite nov ključ.
-# review: new
-pgp-compose-encrypt-off-quote = To sporočilo navaja ali posreduje šifrirano sporočilo. Brez šifriranja ga ni mogoče poslati, dokler ne odstranite navedenega. Ali želite kljub temu izklopiti šifriranje?
-# review: new
-pgp-compose-encrypt-off-reply = To sporočilo odgovarja na šifrirano sporočilo ali ga posreduje. Brez šifriranja lahko vaše sporočilo prebere vsak, ki ga obravnava na poti. Ali želite izklopiti šifriranje?
-# review: new
-pgp-recipient-verified = Ključ preverjen
-# review: new
-pgp-recipient-found = Ključ ni preverjen
-# review: new
+pgp-compose-looking = Iskanje ključev prejemnikov: { $addresses }...
+pgp-compose-signed = Sporočilo bo ob pošiljanju digitalno podpisano. Prejemniki bodo lahko preverili, ali se je vsebina po podpisu spremenila.
+pgp-compose-reply-clear = Sporočilo bo poslano brez šifriranja, čeprav je bilo izvirno sporočilo šifrirano.
+pgp-compose-encrypted-files = Sporočilo vsebuje priponke iz šifriranega sporočila, zato ga ni mogoče poslati brez šifriranja. Vklopite možnost »Šifriraj« ali odstranite te priponke.
+pgp-compose-sign-tip = Digitalno podpišite sporočilo s svojim ključem, da bodo prejemniki lahko preverili, ali se je njegova vsebina po podpisu spremenila
+pgp-compose-sign-tip-encrypted = Sporočila, poslana v šifrirani obliki, so tudi digitalno podpisana
+pgp-compose-encrypt-tip = Šifrirajte vsebino sporočila, da bo dostopna le vam in prejemnikom
+pgp-compose-make-key = Za naslov { $address } še nimate lastnega ključa. Ga želite ustvariti zdaj? Z njim boste lahko digitalno podpisovali in šifrirali sporočila.
+pgp-compose-key-unusable =
+    Vašega ključa za naslov { $address } ni mogoče uporabiti.
+
+    Razlog: { $state }
+
+    Odprite okno »Šifrirni ključi«, da uvozite varnostno kopijo tega ključa ali ustvarite nov ključ.
+pgp-compose-encrypt-off-quote = Sporočilo vsebuje besedilo, slike ali priponke iz šifriranega sporočila. Brez šifriranja ga lahko pošljete šele, ko odstranite to vsebino. Ali želite kljub temu izklopiti šifriranje?
+pgp-compose-encrypt-off-reply = Odgovarjate na šifrirano sporočilo ali ga posredujete. Brez šifriranja lahko vsebino vašega sporočila preberejo tudi strežniki, prek katerih potuje. Ali želite izklopiti šifriranje?
+pgp-recipient-verified = Lastnik ključa je potrjen
+pgp-recipient-found = Lastnik ključa ni potrjen
 pgp-recipient-own = Vaš ključ
-# review: new
 pgp-recipient-looking = Iskanje ključa...
-# review: new
 pgp-recipient-missing = Ni ključa
-# review: new
-pgp-recipient-not-found = Ni ključa: { $date } ni bil najden noben
-# review: new
+pgp-recipient-not-found = Ključ ni bil najden. Zadnje iskanje: { $date }
 pgp-recipient-unusable = Ključa ni mogoče uporabiti: { $state }
-# review: new
-pgp-recipients-intro = Sporočilo je šifrirano s ključem vsakega prejemnika in z vašim.
-# review: new
+pgp-recipients-intro = Ob pošiljanju se sporočilo šifrira s ključi prejemnikov in z vašim ključem.
 pgp-recipients-intro-missing = { $count ->
-    [one] { $count } prejemnik nima ključa za šifriranje. Poiščite njegov ključ, ga odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
-    [two] { $count } prejemnika nimata ključa za šifriranje. Poiščite njuna ključa, ju odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
-    [few] { $count } prejemniki nimajo ključa za šifriranje. Poiščite njihove ključe, jih odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
-   *[other] { $count } prejemnikov nima ključa za šifriranje. Poiščite njihove ključe, jih odstranite iz tega sporočila ali sporočilo pošljite brez šifriranja.
+    [1] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite njegov ključ, odstranite prejemnika iz sporočila ali sporočilo pošljite brez šifriranja.
+    [2] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite njuna ključa, odstranite oba prejemnika iz sporočila ali sporočilo pošljite brez šifriranja.
+    [one] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
+    [two] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
+    [few] { $count } prejemniki nimajo uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
+   *[other] { $count } prejemnikov nima uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
 }
 # review: new
 pgp-details-part = Del { $number }: { $label }

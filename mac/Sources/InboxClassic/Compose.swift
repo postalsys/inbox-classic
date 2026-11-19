@@ -217,8 +217,16 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// the frontmost window when it is one
     static var key: ComposeWindow? {
         if let key = open.first(where: { $0.window.isKeyWindow }) { return key }
-        guard !NSApp.isActive, let front = NSApp.orderedWindows.first else { return nil }
+        guard !NSApp.isActive, let front = frontWindow else { return nil }
         return open.first { $0.window === front }
+    }
+
+    /// the app's window in front of its others, by the window server's order of every Space: `orderedWindows` keeps
+    /// an old order while the app is in the background and not on the Space in use (another app full screen)
+    private static var frontWindow: NSWindow? {
+        let numbers = NSWindow.windowNumbers(options: [.allSpaces]) ?? []
+        return numbers.lazy.compactMap { NSApp.window(withWindowNumber: $0.intValue) }
+            .first { $0.isVisible && $0.canBecomeKey }
     }
 
     let window: NSWindow

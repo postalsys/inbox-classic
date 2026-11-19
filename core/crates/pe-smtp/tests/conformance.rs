@@ -9,7 +9,7 @@ use pe_mime::Address;
 use pe_mime::parser::{ParsedAddress, parse_addresses};
 use pe_smtp::address::format_addresses;
 use pe_smtp::encoding::*;
-use pe_smtp::{Attachment, Message, build_with};
+use pe_smtp::{Attachment, IcalEvent, Message, build_with};
 use serde_json::Value;
 
 static CASES: LazyLock<Value> =
@@ -211,6 +211,10 @@ fn messages() {
                 .unwrap_or_default(),
             date: 1_759_744_800,
             message_id: "<fixed@example.com>".into(),
+            ical_event: mail["icalEvent"].as_object().map(|event| IcalEvent {
+                method: event["method"].as_str().unwrap_or_default().into(),
+                content: event["content"].as_str().unwrap_or_default().into(),
+            }),
             ..Default::default()
         };
         let ours = build_with(&message, "b0b0b0b0b0b0b0b0");

@@ -142,7 +142,7 @@ extension UITest {
         main.mailbox.reader.reload()
         _ = await waitUntil(15) { shownProtection?.tone == PE_PROTECTION_TONE_VERIFIED }
         checkBar(PE_PROTECTION_TONE_VERIFIED, encrypted: false, "the same message then shows green with the shield")
-        check(securityBar.said.contains("key verified"), "\"key verified\" (\(securityBar.said))")
+        check(securityBar.said.contains(Text.pgpPartVerified.text(["signer": "alice@example.org"])), "\"key verified\" (\(securityBar.said))")
         _ = await waitUntil(5) { (await securePage()).labels.first?.contains("verified") == true }
         await shot(main.window, "secure-1-verified")
         await removeFixture(uid)
@@ -151,7 +151,7 @@ extension UITest {
         uid = try await showFixture("secure-encrypted.eml")
         page = await securePage()
         checkBar(PE_PROTECTION_TONE_VERIFIED, encrypted: true, "an encrypted message: the bar has the lock")
-        check(securityBar.said.hasPrefix("Encrypted. Signed by alice@example.org") && securityBar.said.contains("key verified"),
+        check(securityBar.said.hasPrefix("Encrypted. " + Text.pgpPartVerified.text(["signer": "alice@example.org"])),
               "and says \"Encrypted. Signed by alice@example.org, key verified\" (\(securityBar.said))")
         check(page.texts.contains { $0.contains("old mill") }, "the text is shown: \"old mill\"")
         check(page.fits, "its frame as tall as its document (\(page.heights) for \(page.needed))")
@@ -164,8 +164,8 @@ extension UITest {
         checkBar(PE_PROTECTION_TONE_NEUTRAL, encrypted: false, "parts signed apart: the bar is grey, with no picture")
         check(securityBar.said.contains("3 parts: 1 verified, 2 without a confirmed signature"),
               "and counts them: 3 parts, 1 verified, 2 without a confirmed signature (\(securityBar.said))")
-        check(page.heights.count == 3 && page.labels.count == 3 && page.labels[0] == "Not signed"
-              && page.labels[1].contains("alice@example.org") && page.labels[2] == "Not signed",
+        check(page.heights.count == 3 && page.labels.count == 3 && page.labels[0] == Text.pgpPartNotSigned.text
+              && page.labels[1].contains("alice@example.org") && page.labels[2] == Text.pgpPartNotSigned.text,
               "three frames, each with its own label (\(page.labels))")
         check(page.fits, "each as tall as its document (\(page.heights) for \(page.needed))")
         await shot(main.window, "secure-4-mixed-parts")
@@ -187,18 +187,18 @@ extension UITest {
         // what is not right: amber with the warning sign; a key not known: grey
         uid = try await showFixture("secure-bad.eml")
         checkBar(PE_PROTECTION_TONE_WARNING, encrypted: false, "a changed text: amber with the warning sign")
-        check(securityBar.said.contains("does not match"), "\"does not match\" (\(securityBar.said))")
+        check(securityBar.said.contains(Text.pgpWhyMismatch.text), "\"does not match\" (\(securityBar.said))")
         await shot(main.window, "secure-5-bad-signature")
         await removeFixture(uid)
         uid = try await showFixture("secure-wrong-signer.eml")
         checkBar(PE_PROTECTION_TONE_WARNING, encrypted: false, "signed by someone else: amber with the warning sign")
-        check(securityBar.said.contains("mallory@example.net") && securityBar.said.contains("not the sender"),
+        check(securityBar.said.contains(Text.pgpPartOther.text(["signer": "mallory@example.net"])),
               "names mallory@example.net, \"who is not the sender\" (\(securityBar.said))")
         await shot(main.window, "secure-6-wrong-signer")
         await removeFixture(uid)
         uid = try await showFixture("secure-no-key.eml")
         checkBar(PE_PROTECTION_TONE_NEUTRAL, encrypted: false, "a key not known: grey, no picture")
-        check(securityBar.said == "Signed, but the key is not known", "\"Signed, but the key is not known\" (\(securityBar.said))")
+        check(securityBar.said == Text.pgpPartUnknownKey.text, "\"Signed, but the key is not known\" (\(securityBar.said))")
         await shot(main.window, "secure-7-no-key")
         await removeFixture(uid)
 
@@ -206,7 +206,7 @@ extension UITest {
         uid = try await showFixture("secure-fake-frame.eml")
         page = await securePage()
         check(securityBar.said.contains("2 parts"), "a painted label: the bar counts 2 parts (\(securityBar.said))")
-        check(page.labels.count == 2 && page.labels[0] == "Not signed" && page.labels[1].contains("alice@example.org"),
+        check(page.labels.count == 2 && page.labels[0] == Text.pgpPartNotSigned.text && page.labels[1].contains("alice@example.org"),
               "the real labels are both there (\(page.labels))")
         let shown = await main.mailbox.reader.pageAnswer("[...document.querySelectorAll('a.pe-l')].every(a=>{const r=a.getBoundingClientRect();"
             + "return getComputedStyle(a).display!='none'&&r.height>0&&document.elementFromPoint(r.left+4,r.top+r.height/2)===a})")
@@ -575,7 +575,7 @@ extension UITest {
         var noted = false
         if let note = await waitWindow("alert", 3) {
             noted = true
-            answer(note, "OK")
+            answer(note, Text.uiOk.text)
         }
         check(await waitUntil(10) { opened.count == 1 }, "clicking the floor plan in frame 2 opens it")
         check(!noted, "without the decrypted-file note, shown once already (attach-4)")

@@ -1,19 +1,18 @@
-<!--review--><h1>Üzenetek mentése, nyomtatása és importálása</h1>
-<p class="summary">Mentse fájlba az üzeneteket, nyisson meg és hozzon be üzenetfájlokat, nyomtasson ki egy üzenetet, és nézze meg a fejléceit és a forrását.</p>
+<h1>Üzenetek mentése, nyomtatása és importálása</h1>
+<p class="summary">Mentse fájlba, importálja vagy nyomtassa ki az üzeneteket, és tekintse meg a fejlécüket vagy a forrásukat.</p>
 <h2>Üzenetek mentése fájlba</h2>
-<p>A <b data-text="menu-file"></b> &gt; <b data-text="cmd-save-as"></b><!--os:mac--> (<kbd data-command="save_as"></kbd>)<!--/os--> paranccsal a megjelenített üzenetet <code>.eml</code> fájlba mentheti, amelyet más levelezőprogramok is megnyitnak. Ha több üzenet van kijelölve, egy mappát kér, és mindegyiket oda menti, a tárgyáról elnevezve. A már ott lévő fájlt sosem írja felül.</p>
+<p>A megjelenített üzenetet ezzel mentheti fájlba: <b data-text="menu-file"></b> &gt; <b data-text="cmd-save-as"></b><!--os:mac--> (<kbd data-command="save_as"></kbd>)<!--/os-->. Az <code>.eml</code> fájlt más levelezőprogramok is megnyitják. Több kijelölt üzenetnél a program célmappát kér, és minden üzenetet külön fájlba ment, a tárgya alapján elnevezve. Ilyenkor a meglévő fájlokat nem írja felül.</p>
 <p>Az üzeneteket a listából az asztalra vagy <!--os:windows-->a Fájlkezelő<!--/os--><!--os:mac-->a Finder<!--/os--><!--os:linux-->a fájlkezelő<!--/os--> egy mappájába is húzhatja.</p>
 <h2>Üzenetfájlok importálása</h2>
-<p>Jelöljön ki egy mappát, és válassza a <b data-text="menu-file"></b> &gt; <b data-text="cmd-import"></b> parancsot, vagy húzzon <code>.eml</code> fájlokat a mappalista egy mappájára. Az üzenetek abba a mappába kerülnek, a kiszolgálón is. Az üzenetnek nem minősülő fájlt nem importálja.</p>
+<p>Jelöljön ki egy mappát, majd válassza ezt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-import"></b>. Az <code>.eml</code> fájlokat a mappalistában lévő mappára is húzhatja. Az üzenetek a választott mappába kerülnek, a kiszolgálón is. A program az üzenetként fel nem ismert fájlokat kihagyja.</p>
 <h2>Üzenetfájlok megnyitása</h2>
-<p>Kattintson duplán egy <code>.eml</code> fájlra <!--os:windows-->a Fájlkezelőben<!--/os--><!--os:mac-->a Finderben<!--/os--><!--os:linux-->a fájlkezelőben<!--/os-->, vagy kattintson rá a jobb gombbal, és nyissa meg az Inbox Classickal. Egy üzenetablakban nyílik meg, ezekkel a gombokkal: <b data-text="ui-tb-reply"></b>, <b data-text="ui-tb-reply-all"></b>, <b data-text="ui-tb-forward"></b>, <b data-text="ui-tb-print"></b> és <b data-text="cmd-save-as"></b>. Ha más alkalmazás nyitja meg, lásd: <a href="topic:default-mail-program"></a>.</p>
+<p>Kattintson duplán egy <code>.eml</code> fájlra <!--os:windows-->a Fájlkezelőben<!--/os--><!--os:mac-->a Finderben<!--/os--><!--os:linux-->a fájlkezelőben<!--/os-->, vagy a helyi menüből válassza a megnyitást az Inbox Classickal. Az üzenet külön ablakban jelenik meg, ahol ezek a parancsok érhetők el: <b data-text="ui-tb-reply"></b>, <b data-text="ui-tb-reply-all"></b>, <b data-text="ui-tb-forward"></b>, <b data-text="ui-tb-print"></b> és <b data-text="cmd-save-as"></b>. Ha a fájlt más alkalmazás nyitja meg, lásd: <a href="topic:default-mail-program"></a>.</p>
 <h2>Nyomtatás</h2>
 <ol>
-    <li>Válassza a <b data-text="menu-file"></b> &gt; <b data-text="cmd-print"></b> (<kbd data-command="print"></kbd>) parancsot. Megnyílik a nyomtatási kép.</li>
-    <li>Válassza ki a nyomtatót, a példányszámot és az oldalakat, vagy mentse PDF-be.</li>
+    <li>Válassza ezt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-print"></b> (<kbd data-command="print"></kbd>). Megnyílik a nyomtatási ablak.</li>
+    <li>Válassza ki a nyomtatót, a példányszámot és a nyomtatandó oldalakat, vagy válassza a PDF-be mentést.</li>
     <li>Kattintson a nyomtatás gombra. Az üzenet a feladójával, a dátumával, a címzettjeivel és a tárgyával együtt nyomtatódik ki.</li>
 </ol>
 <h2>Fejlécek és forrás</h2>
-<p>A <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> (<kbd data-command="properties"></kbd>) parancs az üzenet internetes fejléceit mutatja: ki küldte, mely kiszolgálókon át és mikor. A <b data-text="menu-view"></b> &gt; <b data-text="cmd-view-source"></b><!--os:windows,linux--> (<kbd data-command="view_source"></kbd>)<!--/os--> parancs a teljes üzenetet szövegként mutatja. Abban az ablakban a <b data-text="cmd-save-as"></b> parancs <code>.eml</code> fájlba menti.</p>
+<p>Az üzenet fejléceit itt tekintheti meg: <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> (<kbd data-command="properties"></kbd>). Ezekből többek között kiderül, ki és mikor küldte az üzenetet, illetve mely kiszolgálókon haladt át. A teljes üzenetforrás megtekintéséhez válassza ezt: <b data-text="menu-view"></b> &gt; <b data-text="cmd-view-source"></b><!--os:windows,linux--> (<kbd data-command="view_source"></kbd>)<!--/os-->. Az ottani <b data-text="cmd-save-as"></b> paranccsal az üzenetet <code>.eml</code> fájlba mentheti.</p>
 <nav class="related"><a href="topic:attachments"></a> <a href="topic:folders"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

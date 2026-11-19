@@ -31,12 +31,10 @@ win-list-loading = Se încarcă...
 
 ## Buttons and words used in many windows
 
-# review: new
 win-delete-button = Șt&ergere
 # review: new
 win-find-label = &Căutare:
-# review: new
-win-save-as-button = Salvare c&a...
+win-save-as-button = &Salvare ca...
 # review: new
 win-too-many-files = Prea multe fișiere deodată: alegeți mai puține.
 
@@ -61,8 +59,7 @@ win-format-link = Hyperlink ({ $ctrl }+K)
 win-show-cc = &Cc
 # review: new
 win-show-bcc = &Bcc
-# review: new
-win-signature-title = Semnătură: { $account }
+win-signature-title = Textul semnăturii: { $account }
 
 ## The folders, the message list and the reading pane
 
@@ -111,7 +108,6 @@ win-files-not-saved = { $count ->
 win-new-folder-in-highlighted = Folderul nou va fi creat în folderul selectat.
 # review: new
 win-delete-folder-ask = Ștergeți folderul „{ $folder }” cu mesajele și folderele din el? Este șters și de pe server.
-# review: new
 win-rename = &Redenumire...
 # review: new
 win-messages-not-saved = Mesajele nu au putut fi salvate.
@@ -134,8 +130,7 @@ win-browser-sign-in = (conectare prin browser)
 win-add = &Adăugare...
 # review: new
 win-properties-button = &Proprietăți...
-# review: new
-win-signature-button = Se&mnătură...
+win-signature-button = Textul se&mnăturii...
 # review: new
 win-sign-in-apps-button = Aplicații de &conectare...
 
@@ -163,6 +158,10 @@ win-clear-log-ask = Ștergeți istoricul activității agenților? Modificările
 win-agent-programs = &Programe ai căror agenți au cerut acces la e-mailul dvs.:
 # review: new
 win-change = &Modificare...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Anulare pe &interval...
+win-take-back = &Anulare modificări
 # review: new
 win-what-agents-did = &Activitatea agenților:
 # review: new

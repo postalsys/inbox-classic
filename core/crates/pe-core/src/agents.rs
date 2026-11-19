@@ -19,18 +19,25 @@ use pe_i18n::{Text, tr, tr_args};
 
 use crate::{Core, Draft, DraftKind, Error, Event, Outgoing, Result};
 
+mod bulk;
 mod drafts;
 mod facts;
 mod hosts;
+mod invitations;
 mod log;
 mod reads;
+mod undo;
 
+pub(crate) use bulk::Ticket;
+pub use bulk::{BULK_MAX, BulkAction, BulkDone, BulkPreview, TICKET_SECONDS};
 pub use drafts::OwnDraft;
 pub use drafts::draft_note;
 pub use facts::{AgentBounce, AgentInvitation, AgentSignature, BouncedRecipient, Facts};
-pub use hosts::{connect_text, host_label, host_one, named, program_name};
+pub use hosts::{connect_text, host_label, host_one, named, program_name, split_named};
+pub use invitations::{InvitationAnswer, InvitationReply};
 pub use log::{LogRow, log_entry, log_text, read_summary_text, read_text};
 pub use reads::{AccountOverview, everywhere};
+pub use undo::{UNDO_SPANS, Undo, UndoReport, flag_name, undo_since_question, undo_span_label, undo_span_since};
 
 /// How long a message an agent sent waits in the Outbox, where the user can still delete it
 pub const SEND_DELAY: i64 = 30;
@@ -76,6 +83,9 @@ pub struct HostInfo {
     pub path: String,
     /// What it is called, from its file (`Claude`), for the windows
     pub name: String,
+    /// What the relay said the program was, by its name, when the system found another one (empty when it said
+    /// the same): the question to let it in tells the user
+    pub claimed: String,
 }
 
 /// A recipient of a message an agent wants to send, as the confirmation shows it
@@ -108,6 +118,16 @@ pub struct SendAsk {
     pub(crate) draft: Draft,
     /// The agent's request that asked
     pub(crate) call_id: Option<String>,
+    /// It answers a calendar invitation: the user's status of the event changes once it was sent. It can not be
+    /// opened to change, as the answer is the calendar file the core wrote.
+    pub invitation: Option<InvitationAnswer>,
+}
+
+impl SendAsk {
+    /// Whether the user may open it in a window to change before it goes (not an answer to an invitation)
+    pub fn can_edit(&self) -> bool {
+        self.invitation.is_none()
+    }
 }
 
 /// A mailing list an agent wants to leave, as the question lists it
@@ -371,11 +391,36 @@ impl Asks {
 
 /// A message, its draft for a window that writes it, what it answers, and the account's signature it carries (sanitized
 /// HTML, empty for none)
-struct Made {
+pub(crate) struct Made {
     outgoing: Outgoing,
     draft: Draft,
     answered: Answered,
     signature: String,
+}
+
+/// A message an agent wants to send, made, with what its Send question shows
+pub(crate) struct Asking {
+    account: AccountId,
+    made: Made,
+    /// What goes, as text
+    text: String,
+    call_id: Option<String>,
+    invitation: Option<InvitationAnswer>,
+}
+
+/// The files of a message to send: names and sizes
+fn attachment_sizes(outgoing: &Outgoing) -> Vec<(String, u64)> {
+    outgoing
+        .attachments
+        .iter()
+        .map(|path| {
+            let name = path
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            (name, std::fs::metadata(path).map_or(0, |m| m.len()))
+        })
+        .collect()
 }
 
 /// What an agent wrote as the send question shows it: its text, and the signature that goes under it
@@ -434,6 +479,9 @@ pub struct SendText {
     pub original: String,
     /// The recipients never written to, empty when there are none
     pub warning: String,
+    /// For an answer to a calendar invitation: what it answers, when the event is, and that the user's answer changes
+    /// once it was sent; empty for any other message
+    pub invitation: String,
 }
 
 /// The words of the confirmation of `ask`
@@ -460,6 +508,7 @@ pub fn send_text(ask: &SendAsk) -> SendText {
         detail: tr_args(Text::AgentSendDetail, &[("seconds", SEND_DELAY.into())]),
         original,
         warning,
+        invitation: ask.invitation.as_ref().map(|i| i.line.clone()).unwrap_or_default(),
     }
 }
 
@@ -668,127 +717,6 @@ pub(crate) fn agent_attachment(source: &[u8], index: usize) -> Result<Option<(St
     Ok(crate::view::agent_attachment(&message, index))
 }
 
-/// How a change of an agent is taken back, as the log keeps it
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Undo {
-    /// The flag of the message in `folder` was `was` before
-    Flag {
-        folder: FolderId,
-        uid: u64,
-        flag: String,
-        was: bool,
-    },
-    /// The message with `message_id` went from `from` to `to`
-    Move {
-        from: FolderId,
-        to: FolderId,
-        message_id: String,
-    },
-    /// The message with `message_id` waits in the Outbox of `account`
-    Unsend { account: AccountId, message_id: String },
-    /// The message with `message_id` was archived from `from` (into the Archive folder, or off its Gmail labels)
-    Archive { from: FolderId, message_id: String },
-    /// The message with `message_id` was marked junk (or not junk) in `from` and went to `to` (the same folder when
-    /// it was there already)
-    Junk {
-        from: FolderId,
-        to: FolderId,
-        junk: bool,
-        message_id: String,
-    },
-    /// The message in `folder` was flagged in colour `was`, or not flagged (None)
-    Color {
-        folder: FolderId,
-        uid: u64,
-        was: Option<pe_store::FlagColor>,
-    },
-}
-
-impl Undo {
-    pub fn write(&self) -> String {
-        match self {
-            Undo::Flag { folder, uid, flag, was } => format!("flag {folder} {uid} {} {flag}", u8::from(*was)),
-            Undo::Move { from, to, message_id } => format!("move {from} {to} {message_id}"),
-            Undo::Unsend { account, message_id } => format!("unsend {account} {message_id}"),
-            Undo::Archive { from, message_id } => format!("archive {from} {message_id}"),
-            Undo::Junk {
-                from,
-                to,
-                junk,
-                message_id,
-            } => format!("junk {from} {to} {} {message_id}", u8::from(*junk)),
-            Undo::Color { folder, uid, was } => {
-                format!("color {folder} {uid} {}", was.map_or("none", pe_store::FlagColor::id))
-            }
-        }
-    }
-
-    fn read(text: &str) -> Option<Undo> {
-        // words, the last one (a flag, a Message-ID) being the rest of the line
-        let words = |count: usize| -> Vec<&str> { text.splitn(count, ' ').collect() };
-        match text.split(' ').next()? {
-            "flag" => match words(5)[..] {
-                [_, folder, uid, was, flag] => Some(Undo::Flag {
-                    folder: folder.parse().ok()?,
-                    uid: uid.parse().ok()?,
-                    was: was == "1",
-                    flag: flag.to_string(),
-                }),
-                _ => None,
-            },
-            "move" => match words(4)[..] {
-                [_, from, to, message_id] => Some(Undo::Move {
-                    from: from.parse().ok()?,
-                    to: to.parse().ok()?,
-                    message_id: message_id.to_string(),
-                }),
-                _ => None,
-            },
-            "archive" => match words(3)[..] {
-                [_, from, message_id] => Some(Undo::Archive {
-                    from: from.parse().ok()?,
-                    message_id: message_id.to_string(),
-                }),
-                _ => None,
-            },
-            "junk" => match words(5)[..] {
-                [_, from, to, junk, message_id] => Some(Undo::Junk {
-                    from: from.parse().ok()?,
-                    to: to.parse().ok()?,
-                    junk: junk == "1",
-                    message_id: message_id.to_string(),
-                }),
-                _ => None,
-            },
-            "color" => match words(4)[..] {
-                [_, folder, uid, was] => Some(Undo::Color {
-                    folder: folder.parse().ok()?,
-                    uid: uid.parse().ok()?,
-                    was: pe_store::FlagColor::ALL.into_iter().find(|c| c.id() == was),
-                }),
-                _ => None,
-            },
-            "unsend" => match words(3)[..] {
-                [_, account, message_id] => Some(Undo::Unsend {
-                    account: account.parse().ok()?,
-                    message_id: message_id.to_string(),
-                }),
-                _ => None,
-            },
-            _ => None,
-        }
-    }
-}
-
-/// The flags a change of an agent can set, as the store names them
-pub fn flag_name(flag: &str) -> Option<&'static str> {
-    match flag {
-        "\\Seen" => Some("\\Seen"),
-        "\\Flagged" => Some("\\Flagged"),
-        _ => None,
-    }
-}
-
 impl Core {
     fn asks(&self) -> std::sync::MutexGuard<'_, Asks> {
         self.agent_asks.lock().unwrap_or_else(|p| p.into_inner())
@@ -860,6 +788,12 @@ impl Core {
         self.agent_changes.subscribe()
     }
 
+    /// The folders whose mail changes from now on, as the windows are told: what an agent subscribed to
+    /// (`resources/subscribe`) is told to read again. One that falls far behind is told it missed some (`Lagged`).
+    pub fn mail_changes(&self) -> tokio::sync::broadcast::Receiver<crate::MailChange> {
+        self.mail_changes.subscribe()
+    }
+
     fn agents_changed(&self) {
         self.agent_changes.send_modify(|n| *n += 1);
     }
@@ -912,6 +846,11 @@ impl Core {
         // held until what the answer does is logged: a limit checked under it ([`Core::ask_unless`]) counts this yes
         let mut asks = self.asks();
         let (ask, sender) = asks.waiting.remove(&request).ok_or(Error::NotFound)?;
+        // an answer to an invitation is the core's calendar file: not opened to change, so not sent
+        let answer = match (&ask, answer) {
+            (AgentAsk::Send(send), AgentAnswer::Compose) if !send.can_edit() => AgentAnswer::DontSend,
+            (_, answer) => answer,
+        };
         let mut compose = None;
         match (&ask, &answer) {
             // allowed to do nothing is turned away
@@ -984,6 +923,15 @@ impl Core {
                 keys: None,
             },
         )?;
+        if let Some(invitation) = &ask.invitation {
+            // the user's status changes once it went (worker.rs, the Outbox)
+            self.store().note_invitation_reply(
+                ask.account,
+                &invitation.uid,
+                invitation.response.status(),
+                &message_id,
+            )?;
+        }
         let to: Vec<&str> = ask.recipients.iter().map(|r| r.address.as_str()).collect();
         self.log_agent(&[NewLogEntry {
             account: Some(ask.account),
@@ -1072,53 +1020,60 @@ impl Core {
     /// when it can not be sent as it is, the agent sent too much, or one of its messages waits for the user already.
     /// With `key`, an idempotency key the program asked with before gives that question again ([`Asked::Before`]).
     pub fn agent_ask_send(&self, host: &AgentHost, written: &Written, key: Option<&str>) -> Result<Asked> {
-        let account = written.account;
+        let made = self.agent_outgoing(written)?;
+        let asking = Asking {
+            account: written.account,
+            text: shown_text(&written.plain_text(), &made.signature),
+            made,
+            call_id: written.call_id.clone(),
+            invitation: None,
+        };
+        self.ask_to_send(host, asking, key)
+    }
+
+    /// The account as From shows it (the other address of it a message goes from, when it does), and the recipients
+    /// of `outgoing` with those the user never wrote to marked
+    fn ask_recipients(&self, account: AccountId, outgoing: &Outgoing) -> Result<(String, Vec<AskRecipient>)> {
+        let store = self.store();
+        let settings = crate::compose::sender_of(&store, account, outgoing.from.as_deref())?;
+        let mut recipients = Vec::new();
+        for (field, list) in [("To", &outgoing.to), ("Cc", &outgoing.cc), ("Bcc", &outgoing.bcc)] {
+            for address in parse_addresses(list).iter().flat_map(|a| a.mailboxes()) {
+                recipients.push(AskRecipient {
+                    field,
+                    name: address.name.clone(),
+                    new: !store.written_to(&address.address)?,
+                    address: address.address.clone(),
+                });
+            }
+        }
+        Ok((crate::account_label(&settings.name, &settings.email), recipients))
+    }
+
+    /// Puts the Send question of `asking` to the user. Refused now when it can not be sent as it is, the agent sent
+    /// too much, or one of its messages waits for the user already.
+    fn ask_to_send(&self, host: &AgentHost, asking: Asking, key: Option<&str>) -> Result<Asked> {
         let Made {
             outgoing,
             draft,
             answered,
-            signature,
-        } = self.agent_outgoing(written)?;
+            ..
+        } = asking.made;
         crate::compose::check(&outgoing).map_err(Error::Compose)?;
-        let (from, recipients) = {
-            let store = self.store();
-            let settings = store.account(account)?.settings;
-            let mut recipients = Vec::new();
-            for (field, list) in [("To", &outgoing.to), ("Cc", &outgoing.cc), ("Bcc", &outgoing.bcc)] {
-                for address in parse_addresses(list).iter().flat_map(|a| a.mailboxes()) {
-                    recipients.push(AskRecipient {
-                        field,
-                        name: address.name.clone(),
-                        new: !store.written_to(&address.address)?,
-                        address: address.address.clone(),
-                    });
-                }
-            }
-            (crate::account_label(&settings.name, &settings.email), recipients)
-        };
-        let attachments = outgoing
-            .attachments
-            .iter()
-            .map(|path| {
-                let name = path
-                    .file_name()
-                    .map(|n| n.to_string_lossy().into_owned())
-                    .unwrap_or_default();
-                (name, std::fs::metadata(path).map_or(0, |m| m.len()))
-            })
-            .collect();
+        let (from, recipients) = self.ask_recipients(asking.account, &outgoing)?;
         let ask = AgentAsk::Send(Box::new(SendAsk {
             host: host.clone(),
-            account,
+            account: asking.account,
             from,
             recipients,
             subject: outgoing.subject.clone(),
-            text: shown_text(&written.plain_text(), &signature),
+            text: asking.text,
             original: answered,
-            attachments,
+            attachments: attachment_sizes(&outgoing),
             outgoing,
             draft,
-            call_id: written.call_id.clone(),
+            call_id: asking.call_id,
+            invitation: asking.invitation,
         }));
         // the hour's sends counted with the question put up: a yes logs its send under the same lock
         self.ask_unless(ask, key, |asks| {
@@ -1278,11 +1233,17 @@ impl Core {
     /// Writes what an agent did in its log, all of it at once (the windows hear of it once). Each entry says what it
     /// did as [`log_entry`] writes it, put into words when it is shown.
     pub fn log_agent(&self, entries: &[NewLogEntry]) -> Result<()> {
+        self.log_agent_ids(entries).map(|_| ())
+    }
+
+    /// [`Core::log_agent`], giving the entries' ids (an agent names its changes by them, `undo_my_change`)
+    pub fn log_agent_ids(&self, entries: &[NewLogEntry]) -> Result<Vec<i64>> {
         if entries.is_empty() {
-            return Ok(());
+            return Ok(Vec::new());
         }
-        self.store().log_agent(entries, now())?;
-        self.post(Event::AgentLogChanged)
+        let ids = self.store().log_agent(entries, now())?;
+        self.post(Event::AgentLogChanged)?;
+        Ok(ids)
     }
 
     /// The newest `limit` entries of what agents did, newest first
@@ -1292,89 +1253,6 @@ impl Core {
 
     pub fn clear_agent_log(&self) -> Result<()> {
         self.store().clear_agent_log()?;
-        self.post(Event::AgentLogChanged)
-    }
-
-    /// Takes back what entry `id` of the log did. Refused with the reason when that can no longer be (a message that
-    /// is no longer in the Outbox, one that is not where it went).
-    pub fn agent_undo(&self, id: i64) -> Result<()> {
-        let entry = self.store().agent_log_entry(id)?.ok_or(Error::NotFound)?;
-        if entry.undone {
-            return Ok(());
-        }
-        let undo = entry
-            .entry
-            .undo
-            .as_deref()
-            .and_then(Undo::read)
-            .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoImpossible)))?;
-        match undo {
-            Undo::Flag { folder, uid, flag, was } => {
-                let flag = flag_name(&flag).ok_or(Error::NotFound)?;
-                if self.store().message(folder, uid)?.is_none() {
-                    return Err(Error::Unavailable(tr(Text::AgentUndoNotInFolder)));
-                }
-                if flag == "\\Flagged" && !was {
-                    // a flag taken away takes its colour along
-                    self.set_flag_color_many(folder, &[uid], None)?;
-                } else {
-                    self.set_flag_many(folder, &[uid], flag, was)?;
-                }
-            }
-            Undo::Color { folder, uid, was } => {
-                if self.store().message(folder, uid)?.is_none() {
-                    return Err(Error::Unavailable(tr(Text::AgentUndoNotInFolder)));
-                }
-                self.set_flag_color_many(folder, &[uid], was)?;
-            }
-            Undo::Move { from, to, message_id } => {
-                let uid = self
-                    .store()
-                    .uid_of_message_id(to, &message_id)?
-                    .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoNotArrived)))?;
-                self.move_messages(to, &[uid], from)?;
-            }
-            Undo::Archive { from, message_id } => {
-                let account = self.store().folder(from)?.account_id;
-                self.send_command(
-                    account,
-                    crate::worker::Command::UndoMoves {
-                        moves: vec![crate::selection::UndoMove {
-                            from,
-                            to: from,
-                            message_ids: vec![message_id],
-                            flag: None,
-                            archived: true,
-                        }],
-                    },
-                )?;
-            }
-            Undo::Junk {
-                from,
-                to,
-                junk,
-                message_id,
-            } => {
-                let uid = self
-                    .store()
-                    .uid_of_message_id(to, &message_id)?
-                    .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoNotArrived)))?;
-                // the keyword it was given goes, and the message goes back where it was
-                let (given, _) = crate::junk_keywords(junk);
-                self.set_flag_many(to, &[uid], given, false)?;
-                if to != from {
-                    self.move_messages(to, &[uid], from)?;
-                }
-            }
-            Undo::Unsend { account, message_id } => {
-                let queued = self
-                    .store()
-                    .outbox_with_message_id(account, &message_id)?
-                    .ok_or_else(|| Error::Unavailable(tr(Text::AgentUndoSent)))?;
-                self.outbox_delete(queued)?;
-            }
-        }
-        self.store().set_agent_log_undone(id)?;
         self.post(Event::AgentLogChanged)
     }
 
@@ -1456,7 +1334,7 @@ impl Core {
 
     /// A message as an agent reads it, None when its source is not here yet ([`Core::open_message`] fetches it)
     pub fn agent_message(&self, folder: FolderId, uid: u64) -> Result<Option<AgentMessage>> {
-        let (source, trusted, own, ring) = {
+        let (source, trusted, own, ring, replies) = {
             let store = self.store();
             let Some(source) = store.source(folder, uid)? else {
                 return Ok(None);
@@ -1466,14 +1344,16 @@ impl Core {
             (
                 source,
                 crate::authres::trusted(&account.settings),
-                vec![account.settings.email],
+                crate::own_addresses(&store, account.id)?,
                 ring,
+                store.invitation_replies(account.id)?,
             )
         };
         let context = facts::Context {
             trusted: &trusted,
             own: &own,
             ring: ring.as_deref(),
+            replies: &replies,
         };
         Ok(Some(agent_message(&source, &context)))
     }
@@ -1558,50 +1438,6 @@ mod tests {
         assert_eq!(normalized(AgentLevels(15 | 64)), AgentLevels(15));
         assert_eq!(normalized(AgentLevels::DEFAULT), AgentLevels::DEFAULT);
         assert_eq!(LEVEL_BITS.iter().sum::<u32>(), 15);
-    }
-
-    #[test]
-    fn undo_is_kept_as_text() {
-        for undo in [
-            Undo::Flag {
-                folder: 3,
-                uid: 7,
-                flag: "\\Seen".into(),
-                was: false,
-            },
-            Undo::Move {
-                from: 1,
-                to: 2,
-                message_id: "<a b@c>".into(),
-            },
-            Undo::Archive {
-                from: 3,
-                message_id: "<a b@c>".into(),
-            },
-            Undo::Unsend {
-                account: 4,
-                message_id: "<x@y>".into(),
-            },
-            Undo::Junk {
-                from: 1,
-                to: 5,
-                junk: true,
-                message_id: "<a b@c>".into(),
-            },
-            Undo::Color {
-                folder: 2,
-                uid: 9,
-                was: Some(pe_store::FlagColor::Purple),
-            },
-            Undo::Color {
-                folder: 2,
-                uid: 9,
-                was: None,
-            },
-        ] {
-            assert_eq!(Undo::read(&undo.write()), Some(undo));
-        }
-        assert_eq!(Undo::read("other 1 2"), None);
     }
 
     #[test]

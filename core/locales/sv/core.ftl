@@ -749,6 +749,135 @@ agent-log-watched = Började bevaka konversationen ”{ $subject }”
 agent-log-ignored = Började ignorera konversationen ”{ $subject }”
 # review: new
 agent-log-unmarked = Slutade bevaka eller ignorera konversationen ”{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = meddelandet har ändrats sedan dess
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Markerade 1 meddelande som läst (sökning: { $query })
+   *[other] Markerade { $count } meddelanden som lästa (sökning: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Markerade 1 meddelande som oläst (sökning: { $query })
+   *[other] Markerade { $count } meddelanden som olästa (sökning: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Flaggade 1 meddelande (sökning: { $query })
+   *[other] Flaggade { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Tog bort flaggan från 1 meddelande (sökning: { $query })
+   *[other] Tog bort flaggan från { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Gav 1 meddelande
+   *[other] Gav { $count } meddelanden
+} { $color ->
+    [red] röd
+    [orange] orange
+    [yellow] gul
+    [green] grön
+    [blue] blå
+    [purple] lila
+   *[gray] grå
+} flagga (sökning: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Flyttade 1 meddelande till mappen ”{ $folder }” (sökning: { $query })
+   *[other] Flyttade { $count } meddelanden till mappen ”{ $folder }” (sökning: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arkiverade 1 meddelande (sökning: { $query })
+   *[other] Arkiverade { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Markerade 1 meddelande som skräppost (sökning: { $query })
+   *[other] Markerade { $count } meddelanden som skräppost (sökning: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Tog bort skräppostmarkeringen från 1 meddelande (sökning: { $query })
+   *[other] Tog bort skräppostmarkeringen från { $count } meddelanden (sökning: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Tog bort 1 meddelande (sökning: { $query })
+   *[other] Tog bort { $count } meddelanden (sökning: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Under de senaste 15 minuterna
+    [hour] Under den senaste timmen
+    [hours] Under de senaste 4 timmarna
+    [day] Under de senaste 24 timmarna
+    [week] Under de senaste 7 dagarna
+   *[all] Under de senaste 30 dagarna
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } gjorde inga ändringar under den här tiden som kan ångras.
+    [one] Vill du ångra ändringen som { $program } gjorde under den här tiden?
+   *[other] Vill du ångra de { $count } ändringar som { $program } gjorde under den här tiden?
+}
+# review: new
+agent-undo-since-detail = Meddelanden flyttas tillbaka till mapparna de kom från, lästmarkeringar och flaggor återställs och meddelanden som fortfarande väntar i Utkorgen tas bort. Det som du eller servern har ändrat sedan dess lämnas som det är.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Ingenting ångrades.
+    [one] Ångrade 1 ändring.
+   *[other] Ångrade { $count } ändringar.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 meddelande fanns inte längre där ändringen lade det.
+   *[other] { $count } meddelanden fanns inte längre där ändringen lade dem.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 meddelande har ändrats sedan dess, av dig eller på servern, och lämnades som det är.
+   *[other] { $count } meddelanden har ändrats sedan dess, av dig eller på servern, och lämnades som de är.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 meddelande hade redan lämnat Utkorgen.
+   *[other] { $count } meddelanden hade redan lämnat Utkorgen.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 ändring kan inte ångras.
+   *[other] { $count } ändringar kan inte ångras.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Det här meddelandet tackar ja till inbjudan ”{ $summary }” ({ $when }).
+    [tentative] Det här meddelandet tackar preliminärt ja till inbjudan ”{ $summary }” ({ $when }).
+   *[decline] Det här meddelandet tackar nej till inbjudan ”{ $summary }” ({ $when }).
+} Organisatörens kalender tar emot svaret. Ditt svar på inbjudan ändras först när meddelandet har skickats.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Accepterat: { $summary }
+    [tentative] Preliminärt: { $summary }
+   *[decline] Avböjt: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } har accepterat den här inbjudan.
+    [tentative] { $name } har preliminärt accepterat den här inbjudan.
+   *[decline] { $name } har avböjt den här inbjudan.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -815,6 +944,8 @@ agent-terminal-program-linux = Ett program som startats från en terminal ({ $te
 agent-connect-title-terminal = { $programs } vill ha åtkomst till din e-post
 # review: new
 agent-connect-terminal-detail = Alla AI-agenter som du startar från den här terminalen delar den åtkomst du tillåter här. Om du vill ge en agent egen åtkomst lägger du till --name och ett valfritt namn bland dess argument i agentens MCP-inställningar.
+# review: new
+agent-connect-claimed = Programmet uppgav att det var { $claimed }. Inbox Classic har kontrollerat vilket program som startade det: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1022,60 +1153,42 @@ pgp-publish-failed = Nyckeln kunde inte publiceras: { $error }
 # review: changed
 pgp-keyserver-off = Sökning efter nycklar på keys.openpgp.org är avstängd under { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Krypterat och signerat: bara du och { $addresses } kan läsa det.
-   *[other] Krypterat och signerat: bara du och dess { $count } mottagare kan läsa det.
+    [one] Meddelandet krypteras och signeras digitalt när det skickas. Bara du och { $addresses } kan läsa innehållet.
+   *[other] Meddelandet krypteras och signeras digitalt när det skickas. Bara du och de { $count } mottagarna kan läsa innehållet.
 }
-# review: new
-pgp-compose-encrypt-ready = Det krypteras och signeras. Lägg till mottagare vars nycklar du har.
-# review: new
+pgp-compose-encrypt-ready = Meddelandet krypteras och signeras digitalt när det skickas. Lägg till mottagare vars nycklar du har.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } har ingen nyckel, så meddelandet kan inte krypteras ännu.
-   *[other] { $count } mottagare har ingen nyckel, så meddelandet kan inte krypteras ännu: { $addresses }.
+    [one] En användbar krypteringsnyckel saknas för { $addresses }. Meddelandet kan ännu inte krypteras.
+   *[other] { $count } mottagare saknar användbara krypteringsnycklar: { $addresses }. Meddelandet kan ännu inte krypteras.
 }
-# review: new
-pgp-compose-looking = Söker efter nycklarna för { $addresses }...
-# review: new
-pgp-compose-signed = Signerat: mottagarna kan kontrollera att det kommer från dig och inte har ändrats.
-# review: new
-pgp-compose-reply-clear = Inte krypterat, fast meddelandet som det svarar på eller vidarebefordrar var det.
-# review: new
-pgp-compose-encrypted-files = Filer från ett krypterat meddelande är bifogade, så det här meddelandet kan bara skickas krypterat. Slå på Kryptera eller ta bort de filerna.
-# review: new
-pgp-compose-sign-tip = Signera meddelandet med din nyckel, så att mottagarna kan kontrollera att det kommer från dig och inte har ändrats
-# review: new
-pgp-compose-sign-tip-encrypted = Ett krypterat meddelande signeras alltid
-# review: new
-pgp-compose-encrypt-tip = Kryptera meddelandet, så att bara du och dess mottagare kan läsa det
-# review: new
-pgp-compose-make-key = Du har ingen nyckel för { $address } ännu. Vill du skapa en nu? Med den kan dina meddelanden signeras och krypteras.
-# review: new
-pgp-compose-key-unusable = Din nyckel för { $address } kan inte användas ({ $state }). Öppna Krypteringsnycklar för att importera säkerhetskopian eller skapa en ny nyckel.
-# review: new
-pgp-compose-encrypt-off-quote = Det här meddelandet citerar eller vidarebefordrar ett krypterat meddelande. Utan kryptering kan det inte skickas förrän du tar bort det som citeras. Vill du stänga av krypteringen ändå?
-# review: new
-pgp-compose-encrypt-off-reply = Det här meddelandet svarar på eller vidarebefordrar ett krypterat meddelande. Utan kryptering kan alla som hanterar ditt meddelande på vägen läsa det. Vill du stänga av krypteringen?
-# review: new
-pgp-recipient-verified = Nyckeln verifierad
-# review: new
-pgp-recipient-found = Nyckeln inte verifierad
-# review: new
+pgp-compose-looking = Söker efter nycklar för { $addresses }...
+pgp-compose-signed = Meddelandet signeras digitalt när det skickas. Mottagarna kan kontrollera om innehållet har ändrats efter signeringen.
+pgp-compose-reply-clear = Meddelandet skickas utan kryptering, trots att det ursprungliga meddelandet var krypterat.
+pgp-compose-encrypted-files = Meddelandet innehåller bilagor från ett krypterat meddelande och kan därför bara skickas krypterat. Aktivera ”Kryptera” eller ta bort bilagorna.
+pgp-compose-sign-tip = Signera meddelandet digitalt med din nyckel så att mottagarna kan kontrollera om innehållet har ändrats efter signeringen
+pgp-compose-sign-tip-encrypted = Meddelanden som skickas krypterade signeras också digitalt
+pgp-compose-encrypt-tip = Kryptera innehållet så att bara du och mottagarna kan läsa det
+pgp-compose-make-key = Du har ännu ingen egen nyckel för adressen { $address }. Vill du skapa en nu? Med den kan du signera och kryptera meddelanden.
+pgp-compose-key-unusable =
+    Din nyckel för adressen { $address } kan inte användas.
+
+    Orsak: { $state }
+
+    Öppna ”Krypteringsnycklar” för att importera en säkerhetskopia av nyckeln eller skapa en ny nyckel.
+pgp-compose-encrypt-off-quote = Meddelandet innehåller text, bilder eller bilagor från ett krypterat meddelande. Du måste ta bort det innehållet innan du kan skicka utan kryptering. Vill du ändå stänga av krypteringen?
+pgp-compose-encrypt-off-reply = Du svarar på eller vidarebefordrar ett krypterat meddelande. Utan kryptering kan även servrar som förmedlar ditt meddelande läsa innehållet. Vill du stänga av krypteringen?
+pgp-recipient-verified = Nyckelns ägare är verifierad
+pgp-recipient-found = Nyckelns ägare är inte verifierad
 pgp-recipient-own = Din egen nyckel
-# review: new
 pgp-recipient-looking = Söker efter en nyckel...
-# review: new
 pgp-recipient-missing = Ingen nyckel
-# review: new
-pgp-recipient-not-found = Ingen nyckel: ingen hittades { $date }
-# review: new
+pgp-recipient-not-found = Ingen nyckel hittades. Senaste sökning: { $date }
 pgp-recipient-unusable = Nyckeln kan inte användas: { $state }
-# review: new
-pgp-recipients-intro = Meddelandet krypteras till varje mottagares nyckel och till din.
-# review: new
+pgp-recipients-intro = När meddelandet skickas krypteras det med mottagarnas nycklar och din egen nyckel.
 pgp-recipients-intro-missing = { $count ->
-    [one] En mottagare har ingen nyckel att kryptera till. Sök efter mottagarens nyckel, ta bort mottagaren från meddelandet eller skicka det utan kryptering.
-   *[other] { $count } mottagare har ingen nyckel att kryptera till. Sök efter deras nycklar, ta bort dem från meddelandet eller skicka det utan kryptering.
+    [one] En mottagare saknar en användbar krypteringsnyckel. Sök efter mottagarens nyckel, ta bort mottagaren från meddelandet eller skicka det utan kryptering.
+   *[other] { $count } mottagare saknar användbara krypteringsnycklar. Sök efter deras nycklar, ta bort mottagarna från meddelandet eller skicka det utan kryptering.
 }
 # review: new
 pgp-details-part = Del { $number }: { $label }

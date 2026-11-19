@@ -514,6 +514,135 @@ agent-log-watched = Konuşma izlemeye alındı: “{ $subject }”
 agent-log-ignored = Konuşma yoksayıldı: “{ $subject }”
 # review: new
 agent-log-unmarked = Konuşmanın izlenmesi veya yoksayılması kaldırıldı: “{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = ileti o zamandan beri değiştirildi
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Okundu olarak işaretlendi: 1 ileti (arama: { $query })
+   *[other] Okundu olarak işaretlendi: { $count } ileti (arama: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Okunmadı olarak işaretlendi: 1 ileti (arama: { $query })
+   *[other] Okunmadı olarak işaretlendi: { $count } ileti (arama: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Bayrak kondu: 1 ileti (arama: { $query })
+   *[other] Bayrak kondu: { $count } ileti (arama: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Bayrak kaldırıldı: 1 ileti (arama: { $query })
+   *[other] Bayrak kaldırıldı: { $count } ileti (arama: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Bayrak kondu: 1 ileti
+   *[other] Bayrak kondu: { $count } ileti
+}, { $color ->
+    [red] kırmızı
+    [orange] turuncu
+    [yellow] sarı
+    [green] yeşil
+    [blue] mavi
+    [purple] mor
+   *[gray] gri
+} (arama: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Taşındı: 1 ileti. Hedef: { $folder } (arama: { $query })
+   *[other] Taşındı: { $count } ileti. Hedef: { $folder } (arama: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arşivlendi: 1 ileti (arama: { $query })
+   *[other] Arşivlendi: { $count } ileti (arama: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Gereksiz olarak işaretlendi: 1 ileti (arama: { $query })
+   *[other] Gereksiz olarak işaretlendi: { $count } ileti (arama: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Gereksiz değil olarak işaretlendi: 1 ileti (arama: { $query })
+   *[other] Gereksiz değil olarak işaretlendi: { $count } ileti (arama: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Silinmiş Öğeler'e taşındı: 1 ileti (arama: { $query })
+   *[other] Silinmiş Öğeler'e taşındı: { $count } ileti (arama: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Son 15 dakikada
+    [hour] Son 1 saatte
+    [hours] Son 4 saatte
+    [day] Son 24 saatte
+    [week] Son 7 günde
+   *[all] Son 30 günde
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } programı bu sürede geri alınabilecek bir değişiklik yapmadı.
+    [one] { $program } programının bu sürede yaptığı değişiklik geri alınsın mı?
+   *[other] { $program } programının bu sürede yaptığı { $count } değişiklik geri alınsın mı?
+}
+# review: new
+agent-undo-since-detail = İletiler geldikleri klasörlere döner, okundu durumları ve bayraklar eski hâline gelir, hâlâ Giden Kutusu'nda bekleyen iletiler silinir. Sizin veya sunucunun o zamandan beri değiştirdikleri olduğu gibi bırakılır.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Hiçbir şey geri alınmadı.
+    [one] 1 değişiklik geri alındı.
+   *[other] { $count } değişiklik geri alındı.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 ileti artık değişikliğin koyduğu yerde değildi.
+   *[other] { $count } ileti artık değişikliğin koyduğu yerde değildi.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 ileti o zamandan beri sizin tarafınızdan veya sunucuda değiştirildiği için olduğu gibi bırakıldı.
+   *[other] { $count } ileti o zamandan beri sizin tarafınızdan veya sunucuda değiştirildiği için olduğu gibi bırakıldı.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 ileti Giden Kutusu'ndan çoktan çıkmıştı.
+   *[other] { $count } ileti Giden Kutusu'ndan çoktan çıkmıştı.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 değişiklik geri alınamaz.
+   *[other] { $count } değişiklik geri alınamaz.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Bu ileti “{ $summary }” davetini ({ $when }) kabul ediyor.
+    [tentative] Bu ileti “{ $summary }” davetini ({ $when }) geçici olarak kabul ediyor.
+   *[decline] Bu ileti “{ $summary }” davetini ({ $when }) reddediyor.
+} Düzenleyenin takvimi bu yanıtı işler. Davete verdiğiniz yanıt yalnızca ileti gönderildikten sonra değişir.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Kabul Edildi: { $summary }
+    [tentative] Kesin Değil: { $summary }
+   *[decline] Reddedildi: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } bu daveti kabul etti.
+    [tentative] { $name } bu daveti geçici olarak kabul etti.
+   *[decline] { $name } bu daveti reddetti.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -580,6 +709,8 @@ agent-terminal-program-linux = Bir terminalden ({ $terminal }) başlatılan bir 
 agent-connect-title-terminal = { $programs } postanıza erişmek istiyor
 # review: new
 agent-connect-terminal-detail = Bu terminalden başlattığınız her yapay zeka aracısı, burada izin verdiğiniz erişimi paylaşır. Bir aracıya ayrı erişim vermek için aracının MCP ayarlarında bağımsız değişkenlerine --name ve seçtiğiniz bir ad ekleyin.
+# review: new
+agent-connect-claimed = Program kendini { $claimed } olarak tanıttı. Inbox Classic, onu hangi programın başlattığını kontrol etti: { $program }.
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
 

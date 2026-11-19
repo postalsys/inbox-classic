@@ -6,10 +6,11 @@
 use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
+use pe_core::i18n::{Text, tr, tr_args};
 use pe_core::timing::{Link, Served};
 use pe_core::{Action, Core, Event, FailureKind, MessageRef, Scope, Search};
 use pe_store::{AccountSettings, Sort, SortField};
-use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
+use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, eventually, patience, rfc822};
 use serde_json::json;
 
 struct Setup {
@@ -58,19 +59,70 @@ fn settings(server: &ImapKit) -> AccountSettings {
 }
 
 impl Setup {
-    /// Waits for an event `accept` takes, failing on a Failed event it does not take
+    /// Waits up to [`patience`] for an event `accept` takes, failing on a Failed event it does not take. An event of
+    /// a kind that comes again and again (FolderChanged, RulesApplied) may be one of an earlier step: wait for what
+    /// the step changes with [`Setup::wait_until`] instead, or [`Setup::drain`] before the step.
     fn wait(&self, accept: impl Fn(&Event) -> bool) -> Event {
+        let until = std::time::Instant::now() + patience();
         loop {
-            let event = self
-                .events
-                .recv_timeout(Duration::from_secs(10))
-                .expect("an event within 10 seconds");
+            let left = until.saturating_duration_since(std::time::Instant::now());
+            let event = self.events.recv_timeout(left).expect("the event in time");
             if accept(&event) {
                 return event;
             }
             assert!(!matches!(event, Event::Failed { .. }), "{event:?}");
         }
     }
+
+    /// Discards the events told so far, so none of them can answer a wait for what the next step does
+    fn drain(&self) {
+        while self.events.try_recv().is_ok() {}
+    }
+
+    /// Waits up to [`patience`] until `done` holds, looking again after every event (and every 100 ms), failing on a
+    /// Failed event: for what a step changes, which an event of an earlier step can not fake
+    fn wait_until(&self, done: impl Fn() -> bool, what: &str) {
+        let until = std::time::Instant::now() + patience();
+        while !done() {
+            assert!(std::time::Instant::now() < until, "did not get there: {what}");
+            if let Ok(event) = self.events.recv_timeout(Duration::from_millis(100)) {
+                assert!(!matches!(event, Event::Failed { .. }), "{event:?}");
+            }
+        }
+    }
+}
+
+/// What the core says of `count` messages with `text` ("Moved { $messages } to { $folder }"), in `folder` when
+/// there is one, as the catalog words it
+fn said(text: Text, count: u64, folder: Option<Text>) -> String {
+    let messages = pe_core::messages(count);
+    let folder = folder.map(tr).unwrap_or_default();
+    tr_args(
+        text,
+        &[
+            ("count", count.into()),
+            ("messages", (&messages).into()),
+            ("folder", (&folder).into()),
+        ],
+    )
+}
+
+/// Stands for an argument of a catalog text the test can not know (a server's reason, a path as shown)
+const MARK: &str = "\u{1}";
+
+/// The words of a catalog text around its arguments given as [`MARK`]: what core text with other values in their
+/// place has to contain
+fn words_of(text: Text, args: &[(&str, pe_core::i18n::Arg)]) -> Vec<String> {
+    tr_args(text, args)
+        .split(MARK)
+        .filter(|part| !part.is_empty())
+        .map(str::to_string)
+        .collect()
+}
+
+/// Whether `told` has every word of `text` around its unknown arguments ([`words_of`])
+fn has_words(told: &str, text: Text, args: &[(&str, pe_core::i18n::Arg)]) -> bool {
+    words_of(text, args).iter().all(|words| told.contains(words.as_str()))
 }
 
 #[test]
@@ -188,13 +240,7 @@ fn reads_mail_like_the_windows_do() {
                 .iter()
                 .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen")))
     };
-    for _ in 0..200 {
-        if all_seen(&s) {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    assert!(all_seen(&s), "{:?}", s.server.messages("INBOX"));
+    eventually(|| all_seen(&s), "every message read on the server");
     s.core.sync(account).unwrap();
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     assert_eq!(unread(&s), 0, "the sync keeps them read");
@@ -293,17 +339,6 @@ fn sent_items_and_drafts_list_the_recipients() {
     assert_eq!(listed, ["Adam", "Zoe"]);
 }
 
-/// Waits up to 10 seconds for `done`
-fn eventually(done: impl Fn() -> bool, what: &str) {
-    for _ in 0..400 {
-        if done() {
-            return;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    panic!("did not get there: {what}");
-}
-
 #[test]
 fn archives_into_an_archive_folder_made_for_it() {
     // no Archive folder on the server
@@ -331,7 +366,10 @@ fn archives_into_an_archive_folder_made_for_it() {
         .core
         .refs_in_ranges(&Search::folder(inbox), Sort::default(), &[(0, 2)])
         .unwrap();
-    assert_eq!(s.core.act(&all, Action::Archive).unwrap(), "Archived 2 messages");
+    assert_eq!(
+        s.core.act(&all, Action::Archive).unwrap(),
+        said(Text::DoneArchived, 2, None)
+    );
     assert!(
         s.core.messages(inbox, Sort::default(), 0, 10).unwrap().is_empty(),
         "out of the list at once"
@@ -352,7 +390,7 @@ fn archives_into_an_archive_folder_made_for_it() {
     );
     assert!(s.server.subjects("INBOX").is_empty());
 
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Archive"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoArchive)));
     s.core.undo().unwrap();
     eventually(|| s.server.subjects("INBOX").len() == 2, "back in the Inbox with Undo");
     assert!(s.server.subjects("Archive").is_empty());
@@ -492,12 +530,15 @@ fn empties_deleted_items_and_junk() {
     assert!(!s.core.can_empty(inbox).unwrap());
     assert_eq!(
         s.core.empty_folder_question(trash).unwrap().as_deref(),
-        Some("Empty Deleted Items?\n\nThe 2 messages in it are deleted for good. They can not be brought back.")
+        Some(said(Text::EmptyQuestion, 2, Some(Text::FolderDeleted)).as_str())
     );
     assert_eq!(s.core.empty_folder_question(inbox).unwrap(), None);
     assert!(s.core.empty_folder(inbox).is_err(), "the Inbox is not emptied");
 
-    assert_eq!(s.core.empty_folder(trash).unwrap(), "Deleted 2 messages for good");
+    assert_eq!(
+        s.core.empty_folder(trash).unwrap(),
+        said(Text::DoneDeletedForGood, 2, None)
+    );
     assert!(
         s.core.messages(trash, Sort::default(), 0, 10).unwrap().is_empty(),
         "out of the list at once"
@@ -547,7 +588,10 @@ fn archives_on_gmail_by_taking_every_label_off() {
     assert!(labels().contains(&"\\Inbox".to_string()), "{:?}", labels());
 
     let picked = [MessageRef { folder: inbox, uid }];
-    assert_eq!(s.core.act(&picked, Action::Archive).unwrap(), "Archived 1 message");
+    assert_eq!(
+        s.core.act(&picked, Action::Archive).unwrap(),
+        said(Text::DoneArchived, 1, None)
+    );
     assert!(
         s.core.messages(inbox, Sort::default(), 0, 10).unwrap().is_empty(),
         "out of the list at once"
@@ -799,7 +843,7 @@ fn all_inboxes_list_and_mark_every_account() {
     let rows = inboxes(&s.core);
     assert_eq!(
         (rows[0].label.as_str(), rows[0].title.as_str()),
-        ("Work", "Inbox - Work")
+        ("Work", format!("{} - Work", tr(Text::FolderInbox)).as_str())
     );
     // the second account dragged first: the accounts and All Inboxes' rows in that order; then back
     s.core.move_account(second, 0).unwrap();
@@ -813,12 +857,8 @@ fn all_inboxes_list_and_mark_every_account() {
     // mail arriving in the second account's Inbox is listed, newest first, and opens the window
     let newest = other_server.add_message("INBOX", &dated("Second's", "Tue, 7 Oct 2025 10:00:00 +0000"), &[]);
     s.core.sync(second).unwrap();
-    s.wait(|e| {
-        *e == Event::FolderChanged {
-            account: second,
-            folder: inbox2,
-        }
-    });
+    // the message in the list, not a FolderChanged of that Inbox, which the first sync or IDLE may have told before
+    s.wait_until(|| subjects().len() == 2, "the new message listed");
     assert_eq!(subjects(), ["Second's", "First's"]);
     assert_eq!(s.core.count_search(&all).unwrap(), (2, 2));
     let start = pe_core::Start {
@@ -837,25 +877,20 @@ fn all_inboxes_list_and_mark_every_account() {
             .iter()
             .all(|m| m["flags"].as_array().unwrap().contains(&json!("\\Seen")))
     };
-    for _ in 0..200 {
-        if all_seen(&s.server) && all_seen(&other_server) {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    assert!(all_seen(&s.server) && all_seen(&other_server));
+    eventually(
+        || all_seen(&s.server) && all_seen(&other_server),
+        "both Inboxes read on their servers",
+    );
     assert_eq!(s.server.messages("Archive")[0]["flags"], json!([]), "only the Inboxes");
 
     // the account's Mark All Read: every folder of that account, no other account's
     other_server.add_message("INBOX", &dated("Second's again", "Wed, 8 Oct 2025 11:00:00 +0000"), &[]);
     s.core.sync(second).unwrap();
     // the message itself in the store, not just a change of that Inbox (the marking above makes some too)
-    for _ in 0..400 {
-        if s.core.count_search(&all).unwrap() == (3, 1) {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
+    s.wait_until(
+        || s.core.count_search(&all).unwrap() == (3, 1),
+        "the second new message stored",
+    );
     s.core.mark_account_read(first).unwrap();
     let archive_seen = || {
         s.server.messages("Archive")[0]["flags"]
@@ -863,13 +898,7 @@ fn all_inboxes_list_and_mark_every_account() {
             .unwrap()
             .contains(&json!("\\Seen"))
     };
-    for _ in 0..200 {
-        if archive_seen() {
-            break;
-        }
-        std::thread::sleep(Duration::from_millis(25));
-    }
-    assert!(archive_seen(), "the first account's Archive is read");
+    eventually(archive_seen, "the first account's Archive read on its server");
     assert_eq!(
         s.core.count_search(&all).unwrap(),
         (3, 1),
@@ -1017,7 +1046,10 @@ fn sends_replies_and_keeps_a_copy() {
         raw.contains("Content-Type: text/html") && raw.contains("Content-Type: text/plain"),
         "{raw}"
     );
-    assert!(raw.contains("<b>six</b>") && raw.contains("Original Message"), "{raw}");
+    assert!(
+        raw.contains("<b>six</b>") && raw.contains(&tr(Text::QuoteOriginal)),
+        "{raw}"
+    );
 
     // a recipient that is no address: nothing is sent
     let bad = pe_core::Outgoing {
@@ -1026,7 +1058,8 @@ fn sends_replies_and_keeps_a_copy() {
         ..Default::default()
     };
     let refused = s.core.send(account, bad).unwrap_err();
-    assert!(refused.to_string().contains("not an e-mail address"), "{refused}");
+    let bad_address = tr_args(Text::ErrorBadAddress, &[("address", "not an address".into())]);
+    assert!(refused.to_string().contains(&bad_address), "{refused}");
     assert_eq!(s.server.messages("INBOX").len(), 2);
 }
 
@@ -1070,7 +1103,7 @@ fn signs_in_with_oauth() {
     // a message sent goes at once, as in the other tests
     core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
-        let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
+        let event = events.recv_timeout(patience()).expect("an event");
         if accept(&event) {
             return event;
         }
@@ -1138,7 +1171,11 @@ fn signs_in_with_oauth() {
     let (refused, _) = sign_in(USER, "wrong-code");
     assert!(core.sign_in_result(refused).unwrap_err().contains("invalid_grant"));
     // told once, then forgotten
-    assert!(core.sign_in_result(refused).unwrap_err().contains("not finished"));
+    assert!(
+        core.sign_in_result(refused)
+            .unwrap_err()
+            .contains(&tr(Text::SignInNotFinished))
+    );
 
     // a cancelled sign-in is forgotten
     let (cancelled, _) = core.sign_in_begin(google, USER).unwrap();
@@ -1180,7 +1217,7 @@ fn signs_in_with_a_sign_in_app() {
     // a message sent goes at once, as in the other tests
     core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
-        let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
+        let event = events.recv_timeout(patience()).expect("an event");
         if accept(&event) {
             return event;
         }
@@ -1302,7 +1339,10 @@ fn signs_in_with_a_sign_in_app() {
         unreachable!()
     };
     assert_eq!(kind, FailureKind::Authentication);
-    assert!(message.contains("check that the app\u{2019}s scopes"), "{message}");
+    assert!(
+        has_words(&message, Text::ErrorAppScopes, &[("reason", MARK.into())]),
+        "{message}"
+    );
 
     // removed once nothing uses it, and its account goes first
     core.remove_account(bob).unwrap();
@@ -1377,7 +1417,7 @@ fn searches_the_local_index() {
     assert_eq!(s.core.count_search(&search).unwrap(), (2, 0));
     // the text of every message, fetched in the background after the sync (only the text parts, without marking
     // anything read or downloading the messages)
-    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    let deadline = std::time::Instant::now() + patience();
     while s.core.unindexed_count().unwrap() > 0 {
         assert!(std::time::Instant::now() < deadline, "the texts were not indexed");
         std::thread::sleep(Duration::from_millis(100));
@@ -1441,15 +1481,7 @@ fn flags_moves_and_deletes_messages() {
         subjects
     };
     // waits for the server to have what `done` checks
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..200 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("the server did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "the server did not get there");
 
     // a flag: in the store at once, on the server soon
     s.core.set_flag_many(inbox, &[flag], "\\Flagged", true).unwrap();
@@ -1541,15 +1573,7 @@ fn acts_on_selected_messages_and_undoes() {
     let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
     let (inbox, archive, trash, junk) = (id("INBOX"), id("Archive"), id("Trash"), id("Junk"));
     let at = |folder, uid| MessageRef { folder, uid };
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..400 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "did not get there");
     let in_store = |folder| -> Vec<String> {
         let mut subjects: Vec<String> = s
             .core
@@ -1573,15 +1597,21 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!((summary.count, summary.unread, summary.flagged), (3, 3, 0));
     assert_eq!((summary.accounts, summary.folders, summary.for_good), (1, 1, 0));
     assert!(!summary.in_junk);
-    assert_eq!(summary.title(), "3 messages selected");
-    assert_eq!(summary.move_title(false), "Move 3 Messages");
-    assert_eq!(summary.move_prompt(true), "Copy the 3 selected messages to:");
-    assert_eq!(summary.detail(), "3 unread");
+    assert_eq!(summary.title(), tr_args(Text::SelectionTitle, &[("count", 3.into())]));
+    assert_eq!(
+        summary.move_title(false),
+        tr_args(Text::MoveWindowTitleMove, &[("count", 3.into())])
+    );
+    assert_eq!(
+        summary.move_prompt(true),
+        tr_args(Text::MoveWindowPromptCopy, &[("count", 3.into())])
+    );
+    assert_eq!(summary.detail(), tr_args(Text::SelectionUnread, &[("count", 3.into())]));
 
     // read and flagged, with one command each
     assert_eq!(
         s.core.act(&three, Action::Read(true)).unwrap(),
-        "Marked 3 messages as read"
+        said(Text::DoneRead, 3, None)
     );
     s.core.act(&three[..2], Action::Flag(true)).unwrap();
     let summary = s.core.summary(&three).unwrap();
@@ -1603,12 +1633,15 @@ fn acts_on_selected_messages_and_undoes() {
     // moved together, then back with Undo
     assert_eq!(
         s.core.act(&three, Action::Move(archive)).unwrap(),
-        "Moved 3 messages to Archive"
+        said(Text::DoneMoved, 3, Some(Text::FolderArchive))
     );
     assert_eq!(in_store(inbox), ["Four"]);
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Move"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoMove)));
     // at once, before the folder they went to has shown them: the worker takes it back after the move
-    assert_eq!(s.core.undo().unwrap(), "Moved 3 messages back to Inbox");
+    assert_eq!(
+        s.core.undo().unwrap(),
+        said(Text::DoneMovedBack, 3, Some(Text::FolderInbox))
+    );
     assert_eq!(s.core.undo_label(), None);
     eventually(&|| in_store(inbox).len() == 4 && in_store(archive).is_empty());
     // the window selects them once they are back; then they are forgotten
@@ -1625,9 +1658,9 @@ fn acts_on_selected_messages_and_undoes() {
     assert_eq!(s.core.summary(&all).unwrap().delete_question(), None);
     assert_eq!(
         s.core.act(&all[..2], Action::Delete).unwrap(),
-        "Moved 2 messages to Deleted Items"
+        said(Text::DoneMoved, 2, Some(Text::FolderDeleted))
     );
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Delete"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoDelete)));
     eventually(&|| in_store(trash).len() == 2);
     s.core.undo().unwrap();
     eventually(&|| in_store(inbox).len() == 4 && s.server.subjects("Trash").is_empty());
@@ -1636,10 +1669,10 @@ fn acts_on_selected_messages_and_undoes() {
     let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
     assert_eq!(
         s.core.act(&all[..1], Action::Junk(true)).unwrap(),
-        "Moved 1 message to Junk E-mail"
+        said(Text::DoneMoved, 1, Some(Text::FolderJunk))
     );
     eventually(&|| in_store(junk).len() == 1);
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Mark as Junk"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoJunk)));
     s.core.undo().unwrap();
     eventually(&|| in_store(inbox).len() == 4 && s.server.subjects("Junk").is_empty());
     eventually(&|| {
@@ -1653,7 +1686,7 @@ fn acts_on_selected_messages_and_undoes() {
     let all: Vec<MessageRef> = s.core.refs_in_ranges(&list, Sort::default(), &[(0, 4)]).unwrap();
     assert_eq!(
         s.core.act(&all[..2], Action::Copy(archive)).unwrap(),
-        "Copied 2 messages to Archive"
+        said(Text::DoneCopied, 2, Some(Text::FolderArchive))
     );
     eventually(&|| in_store(archive).len() == 2);
     assert_eq!(in_store(inbox).len(), 4);
@@ -1670,15 +1703,15 @@ fn acts_on_selected_messages_and_undoes() {
     let mixed = [in_trash[0], all[0]];
     assert_eq!(
         s.core.summary(&mixed).unwrap().delete_question().as_deref(),
-        Some("1 of the 2 messages will be deleted for good. Delete the messages?")
+        Some(tr_args(Text::DeleteForGoodSome, &[("count", 1.into()), ("total", 2.into())]).as_str())
     );
     assert_eq!(
         s.core.summary(&in_trash).unwrap().delete_question().as_deref(),
-        Some("These 2 messages will be deleted for good. Delete them?")
+        Some(tr_args(Text::DeleteForGoodAll, &[("count", 2.into())]).as_str())
     );
     assert_eq!(
         s.core.act(&in_trash, Action::Delete).unwrap(),
-        "Deleted 2 messages for good"
+        said(Text::DoneDeletedForGood, 2, None)
     );
     assert_eq!(s.core.undo_label(), None, "for good is not undone");
     eventually(&|| s.server.subjects("Trash").is_empty());
@@ -1724,15 +1757,7 @@ fn moves_and_copies_between_accounts() {
     };
     let (inbox, archive2) = (folder(first, "INBOX"), folder(second, "Archive"));
     let at = |folder, uid| MessageRef { folder, uid };
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..400 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "did not get there");
     let in_store = |folder| -> Vec<String> {
         let mut subjects: Vec<String> = s
             .core
@@ -1765,12 +1790,19 @@ fn moves_and_copies_between_accounts() {
     let rows = s.core.move_targets(Some(inbox), "").unwrap();
     assert_eq!(rows[0].kind, pe_core::TargetKind::Heading);
     assert_eq!((rows[1].kind, rows[1].folder), (pe_core::TargetKind::Recent, archive2));
-    assert!(rows[1].label.starts_with("Archive ("), "{}", rows[1].label);
+    assert!(
+        rows[1].label.starts_with(&format!("{} (", tr(Text::FolderArchive))),
+        "{}",
+        rows[1].label
+    );
     let current = rows
         .iter()
         .find(|r| r.kind == pe_core::TargetKind::Folder && r.folder == inbox)
         .unwrap();
-    assert_eq!(current.label, "Inbox (current)");
+    assert_eq!(
+        current.label,
+        tr_args(Text::TargetCurrent, &[("folder", (&tr(Text::FolderInbox)).into())])
+    );
     assert!(!current.choosable);
     assert_eq!(
         rows.iter().filter(|r| r.kind == pe_core::TargetKind::Account).count(),
@@ -1796,7 +1828,7 @@ fn moves_and_copies_between_accounts() {
     assert_eq!(s.server.subjects("INBOX"), ["Copy me"]);
 
     // Undo takes the move back, across the accounts again
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Move"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoMove)));
     s.core.undo().unwrap();
     eventually(&|| s.server.subjects("INBOX").len() == 2);
     eventually(&|| other_server.subjects("Archive") == ["Copy me"]);
@@ -1810,7 +1842,7 @@ fn moves_and_copies_between_accounts() {
         .refs_in_ranges(&Search::folder(inbox), Sort::default(), &[(0, 2)])
         .unwrap();
     s.core.act(&back[..1], Action::Move(gone)).unwrap();
-    s.wait(|e| matches!(e, Event::Failed { account, message, .. } if *account == first && message.contains("could not be moved")));
+    s.wait(|e| matches!(e, Event::Failed { account, message, .. } if *account == first && has_words(message, Text::TransferNotMoved, &[("count", 1.into()), ("messages", (&pe_core::messages(1)).into()), ("reason", MARK.into())])));
     eventually(&|| in_store(inbox).len() == 2);
     assert_eq!(s.server.subjects("INBOX").len(), 2);
 }
@@ -1910,7 +1942,7 @@ fn messages_become_files() {
     );
     // none was opened: they are downloaded for the files, and kept
     assert!(!s.core.all_downloaded(&refs).unwrap());
-    let files = s.core.export_messages(&refs, Duration::from_secs(20)).unwrap();
+    let files = s.core.export_messages(&refs, patience()).unwrap();
     assert_eq!(files.len(), 3);
     let body = |f: &pe_core::Exported| String::from_utf8(f.source.clone().unwrap()).unwrap();
     assert!(body(&files[0]).contains("first") && body(&files[1]).contains("second"));
@@ -1919,10 +1951,7 @@ fn messages_become_files() {
     // saved into a folder, never over a file there
     let dir = TempDir::new("export");
     std::fs::write(dir.path().join("Other.eml"), "mine").unwrap();
-    let written = s
-        .core
-        .save_messages(&refs, dir.path(), Duration::from_secs(20))
-        .unwrap();
+    let written = s.core.save_messages(&refs, dir.path(), patience()).unwrap();
     let mut names: Vec<String> = written
         .iter()
         .map(|p| p.file_name().unwrap().to_string_lossy().into_owned())
@@ -1932,10 +1961,7 @@ fn messages_become_files() {
     assert_eq!(std::fs::read_to_string(dir.path().join("Other.eml")).unwrap(), "mine");
 
     // forwarded as attachments, the subject the first one's
-    let draft = s
-        .core
-        .forward_as_attachments(&refs[1..], Duration::from_secs(20))
-        .unwrap();
+    let draft = s.core.forward_as_attachments(&refs[1..], patience()).unwrap();
     assert_eq!(draft.subject, "Fw: Lunch");
     assert_eq!(draft.attachments.len(), 2);
     assert!(
@@ -1945,7 +1971,7 @@ fn messages_become_files() {
     );
 
     // for a drag: written into a folder of the user's own
-    let dragged = s.core.drag_files(&refs[..2], Duration::from_secs(20)).unwrap();
+    let dragged = s.core.drag_files(&refs[..2], patience()).unwrap();
     assert_eq!(dragged.len(), 2);
     assert!(std::fs::read_to_string(&dragged[1]).unwrap().contains("second"));
     // a file a drag promised: never over one there
@@ -1966,7 +1992,7 @@ fn messages_become_files() {
         .core
         .import_files(inbox, &[written[0].clone(), notes.clone()])
         .unwrap();
-    assert_eq!(said, "Put 1 message in Inbox");
+    assert_eq!(said, self::said(Text::ImportPut, 1, Some(Text::FolderInbox)));
     let report = report.unwrap();
     assert!(report.contains("notes.txt") && !report.contains("Lunch"), "{report}");
     assert!(pe_core::is_message_file(&written[0]) && !pe_core::is_message_file(&notes));
@@ -1990,7 +2016,7 @@ fn messages_become_files() {
                 },
                 refs[2],
             ],
-            Duration::from_secs(20),
+            patience(),
         )
         .unwrap();
     assert!(files[0].source.is_err());
@@ -2019,15 +2045,7 @@ fn flags_in_colors_as_apple_mail_does() {
         .id;
     let at = |uid| MessageRef { folder: inbox, uid };
     let color = |uid| s.core.message(inbox, uid).unwrap().unwrap().info.flag_color();
-    let eventually = |done: &dyn Fn() -> bool| {
-        for _ in 0..400 {
-            if done() {
-                return;
-            }
-            std::thread::sleep(Duration::from_millis(25));
-        }
-        panic!("did not get there");
-    };
+    let eventually = |done: &dyn Fn() -> bool| pe_testkit::eventually(done, "did not get there");
     let has = |uid, flag: &str| s.server.flags("INBOX", uid).iter().any(|f| f == flag);
 
     // one flagged blue by Apple Mail reads as blue
@@ -2097,7 +2115,7 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     let mut seen = Vec::new();
     while failures < 2 || changes < 4 {
         let event = events
-            .recv_timeout(Duration::from_secs(60))
+            .recv_timeout(patience())
             .unwrap_or_else(|_| panic!("no more events after {seen:#?}"));
         seen.push((started.elapsed(), event.clone()));
         match event {
@@ -2173,7 +2191,7 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
     let mut said = None;
     let mut undone = None;
     while said.is_none() || undone.is_none() {
-        match s.events.recv_timeout(Duration::from_secs(30)).expect("events") {
+        match s.events.recv_timeout(patience()).expect("events") {
             Event::Acted { request: r, said: done } if r == request => said = Some(done),
             Event::ActionUndone {
                 account: a,
@@ -2188,10 +2206,24 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
             _ => {}
         }
     }
-    assert_eq!(said.unwrap().unwrap(), "Moved 2 messages to Archive");
+    assert_eq!(
+        said.unwrap().unwrap(),
+        self::said(Text::DoneMoved, 2, Some(Text::FolderArchive))
+    );
     let undone = undone.unwrap();
     assert!(
-        undone.starts_with("The server did not move 2 messages to Archive, so they are back in Inbox: "),
+        undone.starts_with(
+            &words_of(
+                Text::UndoneMove,
+                &[
+                    ("count", 2.into()),
+                    ("messages", (&pe_core::messages(2)).into()),
+                    ("folder", (&tr(Text::FolderArchive)).into()),
+                    ("from", (&tr(Text::FolderInbox)).into()),
+                    ("reason", MARK.into()),
+                ]
+            )[0]
+        ),
         "{undone}"
     );
     assert_eq!(uids(inbox), [first, second], "back as they were");
@@ -2207,15 +2239,22 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
     let mut said = None;
     let mut undone = None;
     while said.is_none() || undone.is_none() {
-        match s.events.recv_timeout(Duration::from_secs(30)).expect("events") {
+        match s.events.recv_timeout(patience()).expect("events") {
             Event::Acted { request: r, said: done } if r == request => said = Some(done),
             Event::ActionUndone { folder, text, .. } if folder == trash => undone = Some(text),
             Event::Failed { message, .. } => panic!("told as a bar, not as a failure: {message}"),
             _ => {}
         }
     }
-    assert_eq!(said.unwrap().unwrap(), "Marked 1 message as read");
-    assert!(undone.unwrap().contains("so it is unread again"));
+    assert_eq!(said.unwrap().unwrap(), self::said(Text::DoneRead, 1, None));
+    let undone = undone.unwrap();
+    let one = pe_core::messages(1);
+    let args = [
+        ("count", 1.into()),
+        ("messages", (&one).into()),
+        ("reason", MARK.into()),
+    ];
+    assert!(has_words(&undone, Text::UndoneRead, &args), "{undone}");
     let message = s.core.message(trash, trashed).unwrap().unwrap();
     assert!(!message.info.flags.iter().any(|f| f == "\\Seen"), "unread again");
 }
@@ -2306,7 +2345,10 @@ fn saves_and_imports_messages_as_files() {
     let text = dir.path().join("notes.txt");
     std::fs::write(&text, "just some notes\nnothing else\n").unwrap();
     let refused = s.core.import_message(archive, &text).unwrap_err();
-    assert!(refused.to_string().contains("not an e-mail message"), "{refused}");
+    assert!(
+        has_words(&refused.to_string(), Text::ErrorImportNotMail, &[("path", MARK.into())]),
+        "{refused}"
+    );
     assert!(s.core.import_message(archive, &dir.path().join("missing.eml")).is_err());
 }
 
@@ -2330,7 +2372,7 @@ fn the_outbox_keeps_what_did_not_go() {
     };
     // what a send that did not go says, once it waits in the Outbox
     let failure = || loop {
-        if let Event::Failed { message, .. } = s.events.recv_timeout(Duration::from_secs(20)).expect("an event") {
+        if let Event::Failed { message, .. } = s.events.recv_timeout(patience()).expect("an event") {
             break message;
         }
     };
@@ -2338,7 +2380,10 @@ fn the_outbox_keeps_what_did_not_go() {
     // a send that can not go waits in the Outbox with the reason, not lost
     s.core.send(account, message("Waiting")).unwrap();
     let failed = failure();
-    assert!(failed.contains("waits in the Outbox"), "{failed}");
+    assert!(
+        failed.contains(&tr_args(Text::ErrorOutboxWaits, &[("count", 1.into())])),
+        "{failed}"
+    );
     let queued = s.core.outbox().unwrap();
     assert_eq!(queued.len(), 1);
     assert_eq!(queued[0].subject, "Waiting");
@@ -2397,16 +2442,27 @@ fn a_message_sent_waits_and_can_be_taken_back() {
         "the message waits in the Outbox",
     );
     assert!(s.core.undo_is_send());
-    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Send"));
+    assert_eq!(s.core.undo_label(), Some(tr(Text::UndoSend)));
     assert!(
-        s.core
-            .send_waiting_text()
-            .unwrap()
-            .starts_with("Sending “Taken back” in "),
+        s.core.send_waiting_text().unwrap().starts_with(
+            &words_of(
+                Text::UiSendingIn,
+                &[
+                    ("subject", (&pe_core::quoted_subject("Taken back")).into()),
+                    ("count", MARK.into())
+                ]
+            )[0]
+        ),
         "the status bar counts down"
     );
     let (taken, said) = s.core.undo_send().unwrap();
-    assert_eq!(said, "“Taken back” was not sent. The message has reopened for editing.");
+    assert_eq!(
+        said,
+        tr_args(
+            Text::UiSendUndone,
+            &[("subject", (&pe_core::quoted_subject("Taken back")).into())]
+        )
+    );
     let (from, draft) = taken.unwrap();
     assert_eq!(from, account);
     assert_eq!(
@@ -2433,7 +2489,12 @@ fn a_message_sent_waits_and_can_be_taken_back() {
     assert_eq!(s.server.subjects("INBOX"), ["Let go"]);
     let (taken, said) = s.core.undo_send().unwrap();
     assert!(
-        taken.is_none() && said == "Sending “Let go” can no longer be undone.",
+        taken.is_none()
+            && said
+                == tr_args(
+                    Text::UiSendTooLate,
+                    &[("subject", (&pe_core::quoted_subject("Let go")).into())]
+                ),
         "{said}"
     );
     assert!(s.core.send_waiting_text().is_none());
@@ -2611,18 +2672,10 @@ fn message_rules_sort_new_mail() {
         &[],
     );
     s.core.sync(account).unwrap();
-    // in one sync or two: IDLE can see the first delivery before the second is made
-    let applied = std::cell::Cell::new(0);
-    s.wait(|e| {
-        if let Event::RulesApplied { account: a, count } = e
-            && *a == account
-        {
-            applied.set(applied.get() + count);
-        }
-        applied.get() == 2
-    });
+    // in one sync or two (IDLE can see the first delivery before the second is made), each telling RulesApplied with
+    // its own count: what the rules did is waited for, not a sum of events
     // the newsletter moved to Archive, read; Ann's message flagged for a word of its text, and for its sender
-    eventually(
+    s.wait_until(
         || s.server.subjects("Archive").contains(&"This week".to_string()),
         "the newsletter in Archive",
     );
@@ -2649,6 +2702,8 @@ fn message_rules_sort_new_mail() {
             ..rule("Read Ann", "from:ann")
         })
         .unwrap();
+    // what the syncs told before is not what this run tells
+    s.drain();
     s.core.apply_rule_now(id_read).unwrap();
     s.wait(|e| matches!(e, Event::RulesApplied { account: a, count: 1 } if *a == account));
     eventually(
@@ -3058,9 +3113,7 @@ fn a_draft_follows_from_to_another_account() {
     outgoing.draft_account = Some(second);
     core.save_draft(first, outgoing.clone()).unwrap();
     loop {
-        let event = events
-            .recv_timeout(Duration::from_secs(20))
-            .expect("the failed save is told");
+        let event = events.recv_timeout(patience()).expect("the failed save is told");
         if matches!(event, Event::Failed { account, .. } if account == first) {
             break;
         }
@@ -3105,13 +3158,13 @@ fn new_mail_names_its_code_when_asked() {
         &[],
     );
     let text = text_of(s.wait(|e| matches!(e, Event::NewMail { .. })));
-    assert!(
-        text.starts_with("482913 is your code for accounts.example.com\n"),
-        "{text}"
-    );
+    assert!(text.starts_with(&format!("{}\n", otp_words("482913"))), "{text}");
     s.server.add_message("INBOX", &code_mail("", "771204"), &[]);
     let text = text_of(s.wait(|e| matches!(e, Event::NewMail { .. })));
-    assert!(!text.contains("771204") && !text.contains("is your code"), "{text}");
+    assert!(
+        !text.contains("771204") && !text.contains(&otp_words("771204")),
+        "{text}"
+    );
     pe_core::otp::set_in_notifications(false);
 }
 
@@ -3288,7 +3341,7 @@ fn ignored_conversations_arrive_read_and_watched_ones_are_announced() {
     };
     assert_eq!((folder, subject.as_str(), watched), (lists, "Re: Release plan", true));
     // the notification's words, made by the core for every app
-    assert_eq!(title, "Watched conversation");
+    assert_eq!(title, tr(Text::UiWatchedConversation));
     assert!(text.ends_with("\nRe: Release plan"), "{text}");
 
     // hidden from a list that hides ignored conversations
@@ -3631,7 +3684,7 @@ fn rows_of_a_confirmed_contact_get_its_picture() {
             .unwrap()
     };
     // the background worker reads the verdicts after the sync
-    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    let deadline = std::time::Instant::now() + patience();
     while row("Confirmed").sender_auth == 0 {
         assert!(std::time::Instant::now() < deadline, "no verdict on the row");
         std::thread::sleep(Duration::from_millis(100));
@@ -3732,7 +3785,10 @@ fn a_message_that_can_not_be_downloaded_says_why() {
     );
     assert!(!message.is_empty());
     let page = pe_core::reader_page(pe_core::ReaderState::Failed { kind, reason: &message });
-    assert!(page.contains("could not be reached"), "{page}");
+    assert!(
+        has_words(&page, Text::ReaderFailedNetwork, &[("reason", MARK.into())]),
+        "{page}"
+    );
 
     // a sync that can not reach the server says so as it finishes: the windows do not try the message again yet
     s.core.sync(account).unwrap();
@@ -3885,7 +3941,7 @@ fn bounces_are_marked_and_explained() {
         })
     );
     assert!(
-        view.document.contains("The address does not exist"),
+        view.document.contains(&tr(Text::BounceUserUnknown)),
         "{}",
         view.document
     );
@@ -3904,7 +3960,11 @@ fn bounces_are_marked_and_explained() {
     s.wait(|e| *e == Event::ViewReady { request });
     let view = s.core.message_view_result(request).unwrap();
     assert!(view.bounce);
-    assert!(view.document.contains("The mailbox is full"), "{}", view.document);
+    assert!(
+        view.document.contains(&tr(Text::BounceMailboxFull)),
+        "{}",
+        view.document
+    );
     // it names no message of the account
     assert_eq!(view.bounced_message, None);
     assert_eq!(marked("is:bounce"), [report, plain]);
@@ -4004,18 +4064,6 @@ fn sessions(server: &ImapKit) -> Vec<(u64, String)> {
         .collect()
 }
 
-/// The reader's session, once the three workers are connected and done: the main worker's and the background
-/// worker's have a folder selected, the reader's not before its first open
-fn reader_session(server: &ImapKit) -> Option<u64> {
-    let now = sessions(server);
-    let waiting: Vec<u64> = now
-        .iter()
-        .filter(|(_, state)| state == "Authenticated")
-        .map(|(number, _)| *number)
-        .collect();
-    (now.len() == 3 && waiting.len() == 1).then(|| waiting[0])
-}
-
 /// An account synced once, with these messages in its Inbox: (account, Inbox, their UIDs)
 fn synced_with(s: &Setup, subjects: &[&str]) -> (pe_store::AccountId, pe_store::FolderId, Vec<u64>) {
     let uids = subjects
@@ -4044,9 +4092,9 @@ fn open(s: &Setup, folder: pe_store::FolderId, uid: u64) {
 #[test]
 fn the_reader_is_connected_before_the_first_open() {
     let Some(s) = setup() else { return };
-    let (_, inbox, uids) = synced_with(&s, &["One"]);
+    let (account, inbox, uids) = synced_with(&s, &["One"]);
     eventually(
-        || reader_session(&s.server).is_some(),
+        || s.core.reader_ready(account),
         "the reader connects after the first sync",
     );
     open(&s, inbox, uids[0]);
@@ -4082,7 +4130,7 @@ fn a_dead_reader_connection_is_replaced_within_seconds() {
     s.core.open_message(inbox, uids[1]).unwrap();
     // the answer limit and a new connection: more than the 10 seconds of Setup::wait on a slow machine
     loop {
-        let event = s.events.recv_timeout(Duration::from_secs(20)).expect("the message");
+        let event = s.events.recv_timeout(patience()).expect("the message");
         if event
             == (Event::MessageReady {
                 folder: inbox,
@@ -4154,19 +4202,25 @@ fn finds(s: &Setup, folder: pe_store::FolderId, word: &str) -> bool {
 
 #[test]
 fn new_mail_shows_while_the_search_text_is_downloaded() {
-    // the text of the mail comes slowly: seconds for each batch
+    // the text of the mail comes slowly: many seconds for each batch
     let Some(s) = setup_with(json!({ "script": {
-        "on": "command", "match": "BODY\\.PEEK\\[1\\]", "delay": 3000
+        "on": "command", "match": "BODY\\.PEEK\\[1\\]", "delay": 10000
     } })) else {
         return;
     };
-    let (account, inbox, _) = synced_with(&s, &["One", "Two"]);
+    let (_, inbox, _) = synced_with(&s, &["One", "Two"]);
     // the main worker is on the Inbox meanwhile, not in the batch
     std::thread::sleep(Duration::from_millis(300));
     s.server.add_message("INBOX", &rfc822("Three", "x"), &[]);
-    let started = std::time::Instant::now();
-    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
-    assert!(started.elapsed() < Duration::from_secs(2), "{:?}", started.elapsed());
+    let listed = || {
+        s.core
+            .messages(inbox, Sort::default(), 0, 10)
+            .unwrap()
+            .iter()
+            .any(|m| m.info.subject == "Three")
+    };
+    s.wait_until(listed, "the new message listed");
+    assert!(!finds(&s, inbox, "Hello"), "the new mail waited for the search text");
     eventually(|| finds(&s, inbox, "Hello"), "the search text comes after");
 }
 
@@ -4326,8 +4380,8 @@ fn an_archived_message_keeps_its_downloaded_source() {
 
 #[test]
 fn a_draft_is_uploaded_on_a_connection_of_its_own() {
-    // the server takes its time with every upload
-    let Some(s) = setup_with(json!({ "script": { "on": "command", "command": "APPEND", "delay": 3000 } })) else {
+    // the server takes its time with every upload, far longer than a flag takes
+    let Some(s) = setup_with(json!({ "script": { "on": "command", "command": "APPEND", "delay": 8000 } })) else {
         return;
     };
     let (account, inbox, uids) = synced_with(&s, &["One"]);
@@ -4344,15 +4398,18 @@ fn a_draft_is_uploaded_on_a_connection_of_its_own() {
         ..outgoing
     };
     s.core.save_draft(account, again).unwrap();
-    // meanwhile the main worker does what the user asks at once
+    // meanwhile the main worker does what the user asks at once: read on the server before the first upload is done
     std::thread::sleep(Duration::from_millis(500));
-    let started = std::time::Instant::now();
     s.core.set_seen(inbox, uids[0], true).unwrap();
-    eventually(
-        || s.server.flags("INBOX", uids[0]).contains(&"\\Seen".to_string()),
-        "read on the server",
-    );
-    assert!(started.elapsed() < Duration::from_secs(2), "{:?}", started.elapsed());
+    let mut saved = Vec::new();
+    let until = std::time::Instant::now() + patience();
+    while !s.server.flags("INBOX", uids[0]).contains(&"\\Seen".to_string()) {
+        assert!(std::time::Instant::now() < until, "not read on the server");
+        if let Ok(event @ Event::DraftSaved { .. }) = s.events.recv_timeout(Duration::from_millis(100)) {
+            saved.push(event);
+        }
+    }
+    assert!(saved.is_empty(), "the flag waited for an upload: {saved:?}");
     for _ in 0..2 {
         let saved = s.wait(|e| matches!(e, Event::DraftSaved { .. }));
         assert!(matches!(saved, Event::DraftSaved { problem: None, .. }), "{saved:?}");
@@ -4363,29 +4420,30 @@ fn a_draft_is_uploaded_on_a_connection_of_its_own() {
 
 #[test]
 fn a_click_during_a_large_download_is_answered_first() {
-    // the first download of the whole message waits at the server
-    let Some(s) = setup_with(json!({ "script": {
-        "on": "command", "match": "BODY\\.PEEK\\[\\]", "delay": 4000, "times": 1
-    } })) else {
-        return;
-    };
+    let Some(s) = setup() else { return };
     let big = s
         .server
         .add_message("INBOX", &rfc822("Big", &"x".repeat(600 * 1024)), &[]);
     let (_, inbox, uids) = synced_with(&s, &["Small"]);
-    eventually(|| reader_session(&s.server).is_some(), "the reader connects");
+    // the download of the large one waits at the server, far longer than a new connection takes; aimed at its UID,
+    // as which download reaches the server first is not known
+    s.server.request(
+        "POST",
+        "/v1/script/rules",
+        Some(json!({
+            "on": "command", "command": "UID FETCH", "match": format!("UID FETCH {big} .*BODY\\.PEEK\\[\\]"),
+            "delay": 15000, "times": 1
+        })),
+    );
+    // the click on the large one marks the reader busy at once, whether it is connected yet or not: the next click
+    // goes to the spare reader and is answered while the large one still waits at the server
     s.core.open_message(inbox, big).unwrap();
-    std::thread::sleep(Duration::from_millis(500));
-    let started = std::time::Instant::now();
-    open(&s, inbox, uids[0]);
-    assert!(started.elapsed() < Duration::from_secs(3), "{:?}", started.elapsed());
+    s.core.open_message(inbox, uids[0]).unwrap();
+    let ready = |uid| Event::MessageReady { folder: inbox, uid };
+    let first = s.wait(|e| *e == ready(uids[0]) || *e == ready(big));
+    assert_eq!(first, ready(uids[0]), "the small one first");
     // and the large one still comes
-    s.wait(|e| {
-        *e == Event::MessageReady {
-            folder: inbox,
-            uid: big,
-        }
-    });
+    s.wait(|e| *e == ready(big));
 }
 
 // ---- large messages show their text first (phase 5) ----
@@ -4435,14 +4493,11 @@ fn a_large_message_shows_its_text_before_its_attachment() {
     // how far it is, then that it is all here, without another MessageReady: the window has its text
     let progress = s.wait(|e| matches!(e, Event::Transferring { .. }));
     assert!(
-        matches!(&progress, Event::Transferring { text } if text.starts_with("Downloading")),
+        matches!(&progress, Event::Transferring { text } if text.starts_with(&words_of(Text::DownloadProgress, &[("done", MARK.into()), ("total", MARK.into())])[0])),
         "{progress:?}"
     );
     loop {
-        let event = s
-            .events
-            .recv_timeout(Duration::from_secs(20))
-            .expect("the whole message");
+        let event = s.events.recv_timeout(patience()).expect("the whole message");
         assert_ne!(
             event,
             Event::MessageReady {
@@ -4450,7 +4505,8 @@ fn a_large_message_shows_its_text_before_its_attachment() {
                 uid: big
             }
         );
-        if matches!(&event, Event::Transferring { text } if text.starts_with("Downloaded")) {
+        if matches!(&event, Event::Transferring { text } if text.starts_with(&words_of(Text::DownloadDone, &[("size", MARK.into())])[0]))
+        {
             break;
         }
     }
@@ -4568,9 +4624,7 @@ fn core_trusting(dir: &TempDir, servers: &[&ImapKit]) -> (Core, Receiver<Event>)
 fn wait_synced(events: &Receiver<Event>, accounts: &[i64]) {
     let mut left: Vec<i64> = accounts.to_vec();
     while !left.is_empty() {
-        let event = events
-            .recv_timeout(Duration::from_secs(15))
-            .expect("a sync within 15 seconds");
+        let event = events.recv_timeout(patience()).expect("a sync in time");
         if let Event::SyncFinished { account, failure } = event {
             assert_eq!(failure, None, "account {account}");
             left.retain(|a| *a != account);
@@ -4637,9 +4691,7 @@ fn a_setup_moves_two_accounts_to_an_empty_store() {
         };
         b.send(account, outgoing).unwrap();
         loop {
-            let event = events_b
-                .recv_timeout(Duration::from_secs(15))
-                .expect("sent within 15 seconds");
+            let event = events_b.recv_timeout(patience()).expect("sent in time");
             assert!(
                 !matches!(event, Event::Failed { account: a, .. } if a == account),
                 "{event:?}"
@@ -4654,4 +4706,12 @@ fn a_setup_moves_two_accounts_to_an_empty_store() {
             "delivered by its own server"
         );
     }
+}
+
+/// The notification's words for a one-time `code` of the test account's sign-in service
+fn otp_words(code: &str) -> String {
+    tr_args(
+        Text::OtpNotification,
+        &[("code", code.into()), ("domain", "accounts.example.com".into())],
+    )
 }

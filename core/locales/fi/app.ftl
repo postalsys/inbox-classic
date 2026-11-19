@@ -449,6 +449,13 @@ ui-clear-agent-log-detail = Tämä ei kumoa agenttien tekemiä muutoksia.
 ui-let-agents-connect = &Salli tekoälyagenttien muodostaa yhteys Inbox Classiciin
 ui-change-button = Muuta…
 ui-undo-button = Kumoa
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Kumoa ajalta…
+# review: new
+ui-undo-since-span = Peru, mitä tämä ohjelma teki:
+# review: new
+ui-take-back = Peru
 ui-rules-title = Viestisäännöt
 ui-rules-intro = Säännöt käsittelevät uusia Saapuneet-kansion viestejä, kun Inbox Classic on käynnissä. Ne suoritetaan luettelon järjestyksessä, jos viesti täyttää niiden ehdot. Kun sääntö siirtää viestin pois Saapuneet-kansiosta, muita sääntöjä ei enää sovelleta siihen.
 ui-rules-none = Ei vielä sääntöjä. Luo sääntö valitsemalla Uusi.

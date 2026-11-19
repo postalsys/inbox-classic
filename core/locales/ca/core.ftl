@@ -532,6 +532,135 @@ agent-log-watched = Ha començat a seguir la conversa «{ $subject }»
 agent-log-ignored = Ha començat a ignorar la conversa «{ $subject }»
 # review: new
 agent-log-unmarked = Ha deixat de seguir o ignorar la conversa «{ $subject }»
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = el missatge s’ha canviat després
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Ha marcat 1 missatge com a llegit (cerca: { $query })
+   *[other] Ha marcat { $count } missatges com a llegits (cerca: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Ha marcat 1 missatge com a no llegit (cerca: { $query })
+   *[other] Ha marcat { $count } missatges com a no llegits (cerca: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Ha marcat 1 missatge amb bandera (cerca: { $query })
+   *[other] Ha marcat { $count } missatges amb bandera (cerca: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Ha tret la bandera d’1 missatge (cerca: { $query })
+   *[other] Ha tret la bandera de { $count } missatges (cerca: { $query })
+}
+# review: new
+agent-log-bulk-color = Ha marcat { $count ->
+    [one] 1 missatge
+   *[other] { $count } missatges
+} amb bandera { $color ->
+    [red] vermella
+    [orange] taronja
+    [yellow] groga
+    [green] verda
+    [blue] blava
+    [purple] porpra
+   *[gray] grisa
+} (cerca: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Ha mogut 1 missatge a { $folder } (cerca: { $query })
+   *[other] Ha mogut { $count } missatges a { $folder } (cerca: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Ha arxivat 1 missatge (cerca: { $query })
+   *[other] Ha arxivat { $count } missatges (cerca: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Ha marcat 1 missatge com a correu brossa (cerca: { $query })
+   *[other] Ha marcat { $count } missatges com a correu brossa (cerca: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Ha marcat 1 missatge com a correu legítim (cerca: { $query })
+   *[other] Ha marcat { $count } missatges com a correu legítim (cerca: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Ha suprimit 1 missatge (cerca: { $query })
+   *[other] Ha suprimit { $count } missatges (cerca: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] En els últims 15 minuts
+    [hour] En l’última hora
+    [hours] En les últimes 4 hores
+    [day] En les últimes 24 hores
+    [week] En els últims 7 dies
+   *[all] En els últims 30 dies
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } no ha fet en aquest temps cap canvi que es pugui desfer.
+    [one] Voleu desfer el canvi que { $program } ha fet en aquest temps?
+   *[other] Voleu desfer els { $count } canvis que { $program } ha fet en aquest temps?
+}
+# review: new
+agent-undo-since-detail = Els missatges tornen a les carpetes d’on venien, els estats de lectura i les banderes tornen a ser com eren, i els missatges que encara esperen a la Safata de sortida se suprimeixen. El que vós o el servidor hàgiu canviat després es deixa tal com està.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] No s’ha desfet res.
+    [one] S’ha desfet 1 canvi.
+   *[other] S’han desfet { $count } canvis.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 missatge ja no era on l’havia posat el canvi.
+   *[other] { $count } missatges ja no eren on els havia posat el canvi.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 missatge s’ha canviat després, per vós o al servidor, i s’ha deixat tal com està.
+   *[other] { $count } missatges s’han canviat després, per vós o al servidor, i s’han deixat tal com estan.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 missatge ja havia sortit de la Safata de sortida.
+   *[other] { $count } missatges ja havien sortit de la Safata de sortida.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 canvi no es pot desfer.
+   *[other] { $count } canvis no es poden desfer.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Aquest missatge accepta la invitació «{ $summary }» ({ $when }).
+    [tentative] Aquest missatge accepta provisionalment la invitació «{ $summary }» ({ $when }).
+   *[decline] Aquest missatge rebutja la invitació «{ $summary }» ({ $when }).
+} El calendari de l’organitzador el registra. La vostra resposta a la invitació només canvia quan s’hagi enviat el missatge.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Acceptat: { $summary }
+    [tentative] Provisional: { $summary }
+   *[decline] Rebutjat: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } ha acceptat aquesta invitació.
+    [tentative] { $name } ha acceptat provisionalment aquesta invitació.
+   *[decline] { $name } ha rebutjat aquesta invitació.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -598,6 +727,8 @@ agent-terminal-program-linux = Un programa iniciat des d’un terminal ({ $termi
 agent-connect-title-terminal = { $programs } volen fer servir el vostre correu
 # review: new
 agent-connect-terminal-detail = Tots els agents d’IA que inicieu des d’aquest terminal comparteixen l’accés que permeteu aquí. Per donar a un agent el seu propi accés, afegiu --name i un nom que trieu als seus arguments a la configuració MCP de l’agent.
+# review: new
+agent-connect-claimed = Ha dit que era { $claimed }. Inbox Classic ha comprovat quin programa l’ha iniciat: { $program }.
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
 

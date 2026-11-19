@@ -412,7 +412,6 @@ done-flagged-color = Pentru { $messages } s-a pus semnalizarea { $color ->
    *[gray] gri
 }
 # the Flag menu: the colours of Apple Mail's flags
-# review: new
 flag-color = { $color ->
     [red] Roșu
     [orange] Portocaliu
@@ -420,7 +419,7 @@ flag-color = { $color ->
     [green] Verde
     [blue] Albastru
     [purple] Violet
-   *[gray] Gri
+   *[gray] Cenușiu
 }
 
 ## The Move and Copy window
@@ -786,6 +785,151 @@ agent-log-watched = A început să urmărească conversația „{ $subject }”
 agent-log-ignored = A început să ignore conversația „{ $subject }”
 # review: new
 agent-log-unmarked = A oprit urmărirea sau ignorarea conversației „{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = mesajul a fost modificat între timp
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] A marcat 1 mesaj ca citit (căutare: { $query })
+    [few] A marcat { $count } mesaje ca citite (căutare: { $query })
+   *[other] A marcat { $count } de mesaje ca citite (căutare: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] A marcat 1 mesaj ca necitit (căutare: { $query })
+    [few] A marcat { $count } mesaje ca necitite (căutare: { $query })
+   *[other] A marcat { $count } de mesaje ca necitite (căutare: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] A semnalizat 1 mesaj (căutare: { $query })
+    [few] A semnalizat { $count } mesaje (căutare: { $query })
+   *[other] A semnalizat { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] A eliminat semnalizarea pentru 1 mesaj (căutare: { $query })
+    [few] A eliminat semnalizarea pentru { $count } mesaje (căutare: { $query })
+   *[other] A eliminat semnalizarea pentru { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-color = A pus semnalizarea { $color ->
+    [red] roșie
+    [orange] portocalie
+    [yellow] galbenă
+    [green] verde
+    [blue] albastră
+    [purple] violet
+   *[gray] gri
+} pentru { $count ->
+    [one] 1 mesaj
+    [few] { $count } mesaje
+   *[other] { $count } de mesaje
+} (căutare: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] A mutat 1 mesaj în folderul „{ $folder }” (căutare: { $query })
+    [few] A mutat { $count } mesaje în folderul „{ $folder }” (căutare: { $query })
+   *[other] A mutat { $count } de mesaje în folderul „{ $folder }” (căutare: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] A arhivat 1 mesaj (căutare: { $query })
+    [few] A arhivat { $count } mesaje (căutare: { $query })
+   *[other] A arhivat { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] A marcat 1 mesaj ca nedorit (căutare: { $query })
+    [few] A marcat { $count } mesaje ca nedorite (căutare: { $query })
+   *[other] A marcat { $count } de mesaje ca nedorite (căutare: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] A eliminat marcajul de e-mail nedorit pentru 1 mesaj (căutare: { $query })
+    [few] A eliminat marcajul de e-mail nedorit pentru { $count } mesaje (căutare: { $query })
+   *[other] A eliminat marcajul de e-mail nedorit pentru { $count } de mesaje (căutare: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] A șters 1 mesaj (căutare: { $query })
+    [few] A șters { $count } mesaje (căutare: { $query })
+   *[other] A șters { $count } de mesaje (căutare: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] În ultimele 15 minute
+    [hour] În ultima oră
+    [hours] În ultimele 4 ore
+    [day] În ultimele 24 de ore
+    [week] În ultimele 7 zile
+   *[all] În ultimele 30 de zile
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } nu a făcut în acest interval nicio modificare care poate fi anulată.
+    [one] Anulați modificarea făcută de { $program } în acest interval?
+    [few] Anulați cele { $count } modificări făcute de { $program } în acest interval?
+   *[other] Anulați cele { $count } de modificări făcute de { $program } în acest interval?
+}
+# review: new
+agent-undo-since-detail = Mesajele revin în folderele din care au venit, starea de citire și semnalizările revin la cum erau, iar mesajele care încă așteaptă în Mesaje de trimis sunt șterse. Ce ați modificat dvs. sau serverul între timp rămâne neschimbat.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nu s-a anulat nimic.
+    [one] S-a anulat 1 modificare.
+    [few] S-au anulat { $count } modificări.
+   *[other] S-au anulat { $count } de modificări.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 mesaj nu mai era acolo unde l-a pus modificarea.
+    [few] { $count } mesaje nu mai erau acolo unde le-a pus modificarea.
+   *[other] { $count } de mesaje nu mai erau acolo unde le-a pus modificarea.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 mesaj a fost modificat între timp, de dvs. sau pe server, și a rămas neschimbat.
+    [few] { $count } mesaje au fost modificate între timp, de dvs. sau pe server, și au rămas neschimbate.
+   *[other] { $count } de mesaje au fost modificate între timp, de dvs. sau pe server, și au rămas neschimbate.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 mesaj ieșise deja din Mesaje de trimis.
+    [few] { $count } mesaje ieșiseră deja din Mesaje de trimis.
+   *[other] { $count } de mesaje ieșiseră deja din Mesaje de trimis.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 modificare nu poate fi anulată.
+    [few] { $count } modificări nu pot fi anulate.
+   *[other] { $count } de modificări nu pot fi anulate.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Acest mesaj acceptă invitația „{ $summary }” ({ $when }).
+    [tentative] Acest mesaj acceptă provizoriu invitația „{ $summary }” ({ $when }).
+   *[decline] Acest mesaj refuză invitația „{ $summary }” ({ $when }).
+} Calendarul organizatorului înregistrează răspunsul. Răspunsul dvs. la invitație se schimbă numai după ce mesajul a fost trimis.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Acceptat: { $summary }
+    [tentative] Provizoriu: { $summary }
+   *[decline] Refuzat: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } a acceptat această invitație.
+    [tentative] { $name } a acceptat provizoriu această invitație.
+   *[decline] { $name } a refuzat această invitație.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -860,6 +1004,8 @@ agent-terminal-program-linux = Un program pornit dintr-un terminal ({ $terminal 
 agent-connect-title-terminal = { $programs } solicită acces la mesajele dvs.
 # review: new
 agent-connect-terminal-detail = Toți agenții IA pe care îi porniți din acest terminal folosesc accesul pe care îl permiteți aici. Pentru ca un agent să aibă propriul acces, adăugați --name și un nume ales de dvs. la argumentele sale din setările MCP ale agentului.
+# review: new
+agent-connect-claimed = Programul s-a prezentat ca { $claimed }. Inbox Classic a verificat ce program l-a pornit: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
@@ -1071,63 +1217,45 @@ pgp-publish-failed = Cheia nu a putut fi publicată: { $error }
 # review: changed
 pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Criptat și semnat: doar dvs. și { $addresses } îl puteți citi.
-    [few] Criptat și semnat: doar dvs. și cei { $count } destinatari ai săi îl puteți citi.
-   *[other] Criptat și semnat: doar dvs. și cei { $count } de destinatari ai săi îl puteți citi.
+    [one] Mesajul va fi criptat și semnat digital la trimitere. Numai dvs. și { $addresses } veți putea citi conținutul.
+    [few] Mesajul va fi criptat și semnat digital la trimitere. Numai dvs. și cei { $count } destinatari veți putea citi conținutul.
+   *[other] Mesajul va fi criptat și semnat digital la trimitere. Numai dvs. și cei { $count } de destinatari veți putea citi conținutul.
 }
-# review: new
-pgp-compose-encrypt-ready = Va fi criptat și semnat. Adăugați destinatari ale căror chei le aveți.
-# review: new
+pgp-compose-encrypt-ready = Mesajul va fi criptat și semnat digital la trimitere. Adăugați destinatari pentru care aveți chei.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } nu are o cheie, deci mesajul nu poate fi criptat încă.
-    [few] { $count } destinatari nu au o cheie, deci mesajul nu poate fi criptat încă: { $addresses }.
-   *[other] { $count } de destinatari nu au o cheie, deci mesajul nu poate fi criptat încă: { $addresses }.
+    [one] Destinatar fără cheie utilizabilă: { $addresses }. Mesajul nu poate fi criptat încă.
+    [few] { $count } destinatari fără chei utilizabile: { $addresses }. Mesajul nu poate fi criptat încă.
+   *[other] { $count } de destinatari fără chei utilizabile: { $addresses }. Mesajul nu poate fi criptat încă.
 }
-# review: new
 pgp-compose-looking = Se caută cheile pentru { $addresses }...
-# review: new
-pgp-compose-signed = Semnat: destinatarii pot verifica faptul că provine de la dvs. și nu a fost modificat.
-# review: new
-pgp-compose-reply-clear = Necriptat, deși mesajul la care răspunde sau pe care îl redirecționează era criptat.
-# review: new
-pgp-compose-encrypted-files = Sunt atașate fișiere ale unui mesaj criptat, deci acest mesaj poate fi trimis doar criptat. Activați Criptare sau eliminați acele fișiere.
-# review: new
-pgp-compose-sign-tip = Semnați mesajul cu cheia dvs., ca destinatarii să poată verifica faptul că provine de la dvs. și nu a fost modificat
-# review: new
-pgp-compose-sign-tip-encrypted = Un mesaj criptat este întotdeauna și semnat
-# review: new
-pgp-compose-encrypt-tip = Criptați mesajul, ca doar dvs. și destinatarii lui să îl poată citi
-# review: new
-pgp-compose-make-key = Nu aveți încă o cheie pentru { $address }. Creați una acum? Cu ea, mesajele dvs. pot fi semnate și criptate.
-# review: new
-pgp-compose-key-unusable = Cheia dvs. pentru { $address } nu poate fi folosită ({ $state }). Deschideți Chei de criptare pentru a importa copia ei de rezervă sau pentru a crea o cheie nouă.
-# review: new
-pgp-compose-encrypt-off-quote = Acest mesaj citează sau redirecționează un mesaj criptat. Fără criptare, nu poate fi trimis până nu eliminați textul citat. Dezactivați totuși criptarea?
-# review: new
-pgp-compose-encrypt-off-reply = Acest mesaj răspunde la un mesaj criptat sau îl redirecționează. Fără criptare, oricine vă gestionează mesajul pe drum îl poate citi. Dezactivați criptarea?
-# review: new
-pgp-recipient-verified = Cheie verificată
-# review: new
-pgp-recipient-found = Cheie neverificată
-# review: new
+pgp-compose-signed = Mesajul va fi semnat digital la trimitere. Destinatarii vor putea verifica dacă a fost modificat după semnare.
+pgp-compose-reply-clear = Mesajul va fi trimis fără criptare, deși mesajul original era criptat.
+pgp-compose-encrypted-files = Mesajul conține atașări dintr-un mesaj criptat și poate fi trimis doar criptat. Activați opțiunea „Criptare” sau eliminați aceste atașări.
+pgp-compose-sign-tip = Semnați digital mesajul cu cheia dvs., pentru ca destinatarii să poată verifica dacă a fost modificat după semnare
+pgp-compose-sign-tip-encrypted = Mesajele trimise în formă criptată sunt și semnate digital
+pgp-compose-encrypt-tip = Criptați conținutul mesajului, astfel încât să poată fi citit doar de dvs. și de destinatari
+pgp-compose-make-key = Nu aveți încă o cheie pentru adresa { $address }. Doriți să creați una acum? O puteți folosi pentru a semna digital și a cripta mesaje.
+pgp-compose-key-unusable =
+    Cheia dvs. pentru adresa { $address } nu poate fi folosită.
+
+    Motiv: { $state }
+
+    Deschideți fereastra „Chei de criptare” pentru a importa copia de rezervă a acestei chei sau pentru a crea o cheie nouă.
+pgp-compose-encrypt-off-quote = Mesajul conține text, imagini sau atașări dintr-un mesaj criptat. Îl puteți trimite fără criptare doar după ce eliminați acest conținut. Dezactivați totuși criptarea?
+pgp-compose-encrypt-off-reply = Răspundeți la un mesaj criptat sau îl redirecționați. Fără criptare, conținutul mesajului dvs. poate fi citit și de serverele prin care trece. Dezactivați criptarea?
+pgp-recipient-verified = Proprietarul cheii a fost confirmat
+pgp-recipient-found = Proprietarul cheii nu a fost confirmat
 pgp-recipient-own = Cheia dvs.
-# review: new
 pgp-recipient-looking = Se caută o cheie...
-# review: new
 pgp-recipient-missing = Nicio cheie
-# review: new
-pgp-recipient-not-found = Nicio cheie: nu s-a găsit niciuna la { $date }
-# review: new
+pgp-recipient-not-found = Nu s-a găsit nicio cheie. Ultima căutare: { $date }
 pgp-recipient-unusable = Cheia nu poate fi folosită: { $state }
-# review: new
-pgp-recipients-intro = Mesajul este criptat pentru cheia fiecărui destinatar și pentru a dvs.
-# review: new
+pgp-recipients-intro = Mesajul este criptat cu cheia fiecărui destinatar și cu cheia dvs.
 pgp-recipients-intro-missing = { $count ->
-    [one] Un destinatar nu are o cheie pentru criptare. Găsiți-i cheia, eliminați-l din acest mesaj sau trimiteți mesajul fără criptare.
-    [few] { $count } destinatari nu au o cheie pentru criptare. Găsiți-le cheile, eliminați-i din acest mesaj sau trimiteți mesajul fără criptare.
-   *[other] { $count } de destinatari nu au o cheie pentru criptare. Găsiți-le cheile, eliminați-i din acest mesaj sau trimiteți mesajul fără criptare.
+    [one] Un destinatar nu are o cheie utilizabilă pentru criptare. Căutați cheia lui, eliminați destinatarul din mesaj sau trimiteți mesajul fără criptare.
+    [few] { $count } destinatari nu au chei utilizabile pentru criptare. Căutați cheile lor, eliminați acești destinatari din mesaj sau trimiteți mesajul fără criptare.
+   *[other] { $count } de destinatari nu au chei utilizabile pentru criptare. Căutați cheile lor, eliminați acești destinatari din mesaj sau trimiteți mesajul fără criptare.
 }
 # review: new
 pgp-details-part = Partea { $number }: { $label }

@@ -451,6 +451,10 @@ ui-clear-agent-log-detail = This will not undo changes made by the agents.
 ui-let-agents-connect = &Let AI agents connect to Inbox Classic
 ui-change-button = Change…
 ui-undo-button = Undo
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+ui-undo-since-button = Undo Since…
+ui-undo-since-span = Take back what this program did:
+ui-take-back = Take Back
 ui-rules-title = Message Rules
 ui-rules-intro = Rules sort new Inbox messages while Inbox Classic is running. Matching rules run in order. Once a rule moves a message out of the Inbox, no further rules apply to it.
 ui-rules-none = No rules yet. Click New to make one.

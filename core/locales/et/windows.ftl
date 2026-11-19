@@ -98,6 +98,11 @@ win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide te
 win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.
 win-agent-programs = &Programmid, mille agendid on taotlenud juurdepääsu teie e-postile:
 win-change = &Muuda...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Võta tagasi a&lates...
+# review: new
+win-take-back = &Võta tagasi
 win-what-agents-did = &Agentide tegevusajalugu:
 # review: new
 win-agent-reads = Loetud kella { $from } ja { $to } vahel:

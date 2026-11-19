@@ -92,6 +92,7 @@ using AgentUnsubscribe = std::unique_ptr<PeAgentUnsubscribeInfo, Deleter<pe_agen
 using AgentHostList = std::unique_ptr<PeAgentHostList, Deleter<pe_agent_host_list_free>>;
 using AgentLog = std::unique_ptr<PeAgentLog, Deleter<pe_agent_log_free>>;
 using AgentReads = std::unique_ptr<PeAgentReads, Deleter<pe_agent_reads_free>>;
+using AgentUndoQuestion = std::unique_ptr<PeAgentUndoQuestionInfo, Deleter<pe_agent_undo_question_free>>;
 using Selection = std::unique_ptr<PeSelection, Deleter<pe_selection_free>>;
 using Positions = std::unique_ptr<PePositions, Deleter<pe_positions_free>>;
 using ListLoad = std::unique_ptr<PeListLoad, Deleter<pe_list_load_free>>;

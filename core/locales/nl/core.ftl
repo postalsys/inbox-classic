@@ -518,6 +518,135 @@ agent-log-watched = Volgen ingeschakeld voor het gesprek “{ $subject }”
 agent-log-ignored = Negeren ingeschakeld voor het gesprek “{ $subject }”
 # review: new
 agent-log-unmarked = Volgen of negeren uitgeschakeld voor het gesprek “{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = het bericht is sindsdien gewijzigd
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] 1 bericht gemarkeerd als gelezen (zoekopdracht: { $query })
+   *[other] { $count } berichten gemarkeerd als gelezen (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] 1 bericht gemarkeerd als ongelezen (zoekopdracht: { $query })
+   *[other] { $count } berichten gemarkeerd als ongelezen (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] 1 bericht gemarkeerd (zoekopdracht: { $query })
+   *[other] { $count } berichten gemarkeerd (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Markering verwijderd van 1 bericht (zoekopdracht: { $query })
+   *[other] Markering verwijderd van { $count } berichten (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] 1 bericht
+   *[other] { $count } berichten
+} { $color ->
+    [red] rood
+    [orange] oranje
+    [yellow] geel
+    [green] groen
+    [blue] blauw
+    [purple] paars
+   *[gray] grijs
+} gemarkeerd (zoekopdracht: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] 1 bericht verplaatst naar { $folder } (zoekopdracht: { $query })
+   *[other] { $count } berichten verplaatst naar { $folder } (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] 1 bericht gearchiveerd (zoekopdracht: { $query })
+   *[other] { $count } berichten gearchiveerd (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] 1 bericht gemarkeerd als ongewenst (zoekopdracht: { $query })
+   *[other] { $count } berichten gemarkeerd als ongewenst (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] 1 bericht gemarkeerd als gewenst (zoekopdracht: { $query })
+   *[other] { $count } berichten gemarkeerd als gewenst (zoekopdracht: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] 1 bericht verwijderd (zoekopdracht: { $query })
+   *[other] { $count } berichten verwijderd (zoekopdracht: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] In de afgelopen 15 minuten
+    [hour] In het afgelopen uur
+    [hours] In de afgelopen 4 uur
+    [day] In de afgelopen 24 uur
+    [week] In de afgelopen 7 dagen
+   *[all] In de afgelopen 30 dagen
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } heeft in deze periode geen wijzigingen gemaakt die kunnen worden teruggedraaid.
+    [one] De wijziging terugdraaien die { $program } in deze periode heeft gemaakt?
+   *[other] De { $count } wijzigingen terugdraaien die { $program } in deze periode heeft gemaakt?
+}
+# review: new
+agent-undo-since-detail = Berichten gaan terug naar de mappen waar ze vandaan kwamen, leesstatus en markeringen worden weer zoals ze waren, en berichten die nog in Postvak UIT wachten, worden verwijderd. Wat sindsdien door jou of de server is gewijzigd, blijft zoals het is.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Er is niets teruggedraaid.
+    [one] 1 wijziging teruggedraaid.
+   *[other] { $count } wijzigingen teruggedraaid.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 bericht stond niet meer waar de wijziging het had neergezet.
+   *[other] { $count } berichten stonden niet meer waar de wijziging ze had neergezet.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 bericht is sindsdien door jou of op de server gewijzigd en is gelaten zoals het is.
+   *[other] { $count } berichten zijn sindsdien door jou of op de server gewijzigd en zijn gelaten zoals ze zijn.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 bericht had Postvak UIT al verlaten.
+   *[other] { $count } berichten hadden Postvak UIT al verlaten.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 wijziging kan niet worden teruggedraaid.
+   *[other] { $count } wijzigingen kunnen niet worden teruggedraaid.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Dit bericht accepteert de uitnodiging “{ $summary }” ({ $when }).
+    [tentative] Dit bericht accepteert de uitnodiging “{ $summary }” ({ $when }) voorlopig.
+   *[decline] Dit bericht wijst de uitnodiging “{ $summary }” ({ $when }) af.
+} De agenda van de organisator verwerkt het antwoord. Je antwoord op de uitnodiging verandert pas als het bericht is verzonden.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Geaccepteerd: { $summary }
+    [tentative] Voorlopig: { $summary }
+   *[decline] Geweigerd: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } heeft deze uitnodiging geaccepteerd.
+    [tentative] { $name } heeft deze uitnodiging voorlopig geaccepteerd.
+   *[decline] { $name } heeft deze uitnodiging geweigerd.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -584,6 +713,8 @@ agent-terminal-program-linux = Een programma gestart vanuit een terminal ({ $ter
 agent-connect-title-terminal = { $programs } willen je e-mail gebruiken
 # review: new
 agent-connect-terminal-detail = Alle AI-agents die je vanuit deze terminal start, delen de toegang die je hier geeft. Wil je een agent eigen toegang geven, voeg dan --name en een naam naar keuze toe aan zijn argumenten in de MCP-instellingen van de agent.
+# review: new
+agent-connect-claimed = Het programma gaf aan { $claimed } te zijn. Inbox Classic heeft gecontroleerd welk programma het heeft gestart: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

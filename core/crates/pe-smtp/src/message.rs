@@ -22,6 +22,25 @@ pub struct Attachment {
     pub content_id: Option<String>,
 }
 
+/// A calendar event the message carries (nodemailer's `icalEvent`): a `text/calendar` alternative with its method, and
+/// the same file attached as `invite.ics`, as calendar programs look for one or the other
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct IcalEvent {
+    /// `REQUEST`, `REPLY`, `CANCEL`... (`PUBLISH` when empty)
+    pub method: String,
+    /// The iCalendar file
+    pub content: String,
+}
+
+impl IcalEvent {
+    fn method(&self) -> String {
+        match self.method.trim() {
+            "" => "PUBLISH".into(),
+            method => method.to_ascii_uppercase(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Message {
     pub from: Address,
@@ -46,6 +65,8 @@ pub struct Message {
     /// quoted-printable, which writes that space as `=20`: relays strip it, and a changed byte breaks the signature
     /// (RFC 3156 section 3)
     pub signed: bool,
+    /// A calendar event, as an alternative after the text and HTML and as an attachment after the others
+    pub ical_event: Option<IcalEvent>,
 }
 
 /// Whether text has what relays change: white space before a line break
@@ -148,6 +169,8 @@ struct Composer<'a> {
     /// The text and HTML with CRLF line breaks
     text: Option<&'a str>,
     html: Option<&'a str>,
+    /// The calendar event's method and its file with CRLF line breaks
+    event: Option<(String, &'a str)>,
     next_id: usize,
 }
 
@@ -182,6 +205,25 @@ impl<'a> Composer<'a> {
         node
     }
 
+    /// The calendar alternative: `text/calendar` with its method, as nodemailer's icalEvent makes it
+    fn event_node(&mut self) -> Option<Node<'a>> {
+        let (method, content) = self.event.clone()?;
+        let mut node = self.node("text/calendar", &[("charset", "utf-8"), ("method", &method)]);
+        node.content = Some(content.as_bytes());
+        Some(node)
+    }
+
+    /// The calendar file attached, `invite.ics`: its disposition before its encoding, as nodemailer sets them
+    fn event_attachment_node(&mut self) -> Option<Node<'a>> {
+        let (_, content) = self.event.clone()?;
+        let mut node = self.node("application/ics", &[]);
+        node.filename = Some("invite.ics".into());
+        node.set_header("Content-Disposition", "attachment".into());
+        node.set_header("Content-Transfer-Encoding", "base64".into());
+        node.content = Some(content.as_bytes());
+        Some(node)
+    }
+
     fn alternatives(&mut self) -> Vec<Node<'a>> {
         let mut nodes = Vec::new();
         if let Some(text) = self.text {
@@ -190,6 +232,7 @@ impl<'a> Composer<'a> {
         if let Some(html) = self.html {
             nodes.push(self.text_node("text/html", html));
         }
+        nodes.extend(self.event_node());
         nodes
     }
 
@@ -201,10 +244,13 @@ impl<'a> Composer<'a> {
             .attachments
             .iter()
             .partition(|a| has_html && a.content_id.is_some());
-        let alternatives = usize::from(self.text.is_some()) + usize::from(has_html);
+        let has_event = self.event.is_some();
+        let alternatives = usize::from(self.text.is_some()) + usize::from(has_html) + usize::from(has_event);
+        // the event's file is attached after the others
+        let attached_count = attached.len() + usize::from(has_event);
         let use_related = has_html && !related.is_empty();
         let use_alternative = alternatives > 1;
-        let use_mixed = attached.len() > 1 || (alternatives > 0 && attached.len() == 1);
+        let use_mixed = attached_count > 1 || (alternatives > 0 && attached_count == 1);
 
         if use_mixed {
             let mut mixed = self.node("multipart/mixed", &[]);
@@ -222,6 +268,7 @@ impl<'a> Composer<'a> {
                 let node = self.attachment_node(attachment);
                 mixed.children.push(node);
             }
+            mixed.children.extend(self.event_attachment_node());
             mixed
         } else if use_alternative {
             self.alternative(&related, use_related)
@@ -253,6 +300,7 @@ impl<'a> Composer<'a> {
                 node.children.push(html);
             }
         }
+        node.children.extend(self.event_node());
         node
     }
 
@@ -461,6 +509,7 @@ fn crlf(text: &str) -> String {
 pub fn build_with(message: &Message, boundary_base: &str) -> Built {
     let text = message.text.as_deref().map(crlf);
     let html = message.html.as_deref().map(crlf);
+    let event = message.ical_event.as_ref().map(|e| (e.method(), crlf(&e.content)));
     let from = normalize_address(&message.from.address);
     let message_id = if message.message_id.trim().is_empty() {
         new_message_id(&from)
@@ -472,6 +521,9 @@ pub fn build_with(message: &Message, boundary_base: &str) -> Built {
         message,
         text: text.as_deref(),
         html: html.as_deref(),
+        event: event
+            .as_ref()
+            .map(|(method, content)| (method.clone(), content.as_str())),
         next_id: 0,
     }
     .compose();

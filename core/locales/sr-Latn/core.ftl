@@ -552,6 +552,151 @@ agent-log-watched = Uključeno praćenje razgovora: „{ $subject }“
 agent-log-ignored = Uključeno zanemarivanje razgovora: „{ $subject }“
 # review: new
 agent-log-unmarked = Isključeno praćenje ili zanemarivanje razgovora: „{ $subject }“
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = poruka je u međuvremenu promenjena
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Označeno kao pročitano: { $count } poruka (pretraga: { $query })
+    [few] Označeno kao pročitano: { $count } poruke (pretraga: { $query })
+   *[other] Označeno kao pročitano: { $count } poruka (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Označeno kao nepročitano: { $count } poruka (pretraga: { $query })
+    [few] Označeno kao nepročitano: { $count } poruke (pretraga: { $query })
+   *[other] Označeno kao nepročitano: { $count } poruka (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Označeno zastavicom: { $count } poruka (pretraga: { $query })
+    [few] Označeno zastavicom: { $count } poruke (pretraga: { $query })
+   *[other] Označeno zastavicom: { $count } poruka (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Uklonjena zastavica: { $count } poruka (pretraga: { $query })
+    [few] Uklonjena zastavica: { $count } poruke (pretraga: { $query })
+   *[other] Uklonjena zastavica: { $count } poruka (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Označeno zastavicom: { $count } poruka
+    [few] Označeno zastavicom: { $count } poruke
+   *[other] Označeno zastavicom: { $count } poruka
+}, boja: { $color ->
+    [red] crvena
+    [orange] narandžasta
+    [yellow] žuta
+    [green] zelena
+    [blue] plava
+    [purple] ljubičasta
+   *[gray] siva
+} (pretraga: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Premešteno: { $count } poruka, odredište: { $folder } (pretraga: { $query })
+    [few] Premešteno: { $count } poruke, odredište: { $folder } (pretraga: { $query })
+   *[other] Premešteno: { $count } poruka, odredište: { $folder } (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arhivirano: { $count } poruka (pretraga: { $query })
+    [few] Arhivirano: { $count } poruke (pretraga: { $query })
+   *[other] Arhivirano: { $count } poruka (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Označeno kao neželjena pošta: { $count } poruka (pretraga: { $query })
+    [few] Označeno kao neželjena pošta: { $count } poruke (pretraga: { $query })
+   *[other] Označeno kao neželjena pošta: { $count } poruka (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Označeno kao poželjna pošta: { $count } poruka (pretraga: { $query })
+    [few] Označeno kao poželjna pošta: { $count } poruke (pretraga: { $query })
+   *[other] Označeno kao poželjna pošta: { $count } poruka (pretraga: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Premešteno u fasciklu Izbrisane stavke: { $count } poruka (pretraga: { $query })
+    [few] Premešteno u fasciklu Izbrisane stavke: { $count } poruke (pretraga: { $query })
+   *[other] Premešteno u fasciklu Izbrisane stavke: { $count } poruka (pretraga: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] U poslednjih 15 minuta
+    [hour] U poslednjih sat vremena
+    [hours] U poslednja 4 sata
+    [day] U poslednja 24 sata
+    [week] U poslednjih 7 dana
+   *[all] U poslednjih 30 dana
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] Program { $program } u ovom periodu nije napravio promene koje mogu da se opozovu.
+    [one] Da li želite da opozovete { $count } promenu koju je program { $program } napravio u ovom periodu?
+    [few] Da li želite da opozovete { $count } promene koje je program { $program } napravio u ovom periodu?
+   *[other] Da li želite da opozovete { $count } promena koje je program { $program } napravio u ovom periodu?
+}
+# review: new
+agent-undo-since-detail = Poruke se vraćaju u fascikle iz kojih su došle, stanje pročitanosti i zastavice vraćaju se na ono što su bili, a poruke koje još čekaju u fascikli Izlazno sanduče brišu se. Ono što ste u međuvremenu promenili vi ili server ostaje kakvo jeste.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Ništa nije opozvano.
+    [one] Opozvana je { $count } promena.
+    [few] Opozvane su { $count } promene.
+   *[other] Opozvano je { $count } promena.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] { $count } poruka više nije bila tamo gde ju je promena stavila.
+    [few] { $count } poruke više nisu bile tamo gde ih je promena stavila.
+   *[other] { $count } poruka više nije bilo tamo gde ih je promena stavila.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] { $count } poruka je u međuvremenu promenjena na vašem računaru ili na serveru, pa je ostavljena kakva jeste.
+    [few] { $count } poruke su u međuvremenu promenjene na vašem računaru ili na serveru, pa su ostavljene kakve jesu.
+   *[other] { $count } poruka je u međuvremenu promenjeno na vašem računaru ili na serveru, pa su ostavljene kakve jesu.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] { $count } poruka je već napustila fasciklu Izlazno sanduče.
+    [few] { $count } poruke su već napustile fasciklu Izlazno sanduče.
+   *[other] { $count } poruka je već napustilo fasciklu Izlazno sanduče.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] { $count } promena ne može da se opozove.
+    [few] { $count } promene ne mogu da se opozovu.
+   *[other] { $count } promena ne može da se opozove.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Ova poruka prihvata pozivnicu „{ $summary }“ ({ $when }).
+    [tentative] Ova poruka uslovno prihvata pozivnicu „{ $summary }“ ({ $when }).
+   *[decline] Ova poruka odbija pozivnicu „{ $summary }“ ({ $when }).
+} Kalendar organizatora će je uzeti u obzir. Vaš odgovor na pozivnicu menja se tek kada poruka bude poslata.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Prihvaćeno: { $summary }
+    [tentative] Uslovno prihvaćeno: { $summary }
+   *[decline] Odbijeno: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } prihvata ovu pozivnicu.
+    [tentative] { $name } uslovno prihvata ovu pozivnicu.
+   *[decline] { $name } odbija ovu pozivnicu.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -626,6 +771,8 @@ agent-terminal-program-linux = Program pokrenut iz terminala ({ $terminal })
 agent-connect-title-terminal = { $programs } žele da koriste vašu poštu
 # review: new
 agent-connect-terminal-detail = Svi AI agenti koje pokrenete iz ovog terminala dele pristup koji ovde dozvolite. Da biste nekom od njih dali zaseban pristup, u MCP podešavanjima agenta dodajte među njegove argumente --name i naziv po izboru.
+# review: new
+agent-connect-claimed = Program se predstavio kao { $claimed }. Inbox Classic je proverio koji ga je program pokrenuo: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

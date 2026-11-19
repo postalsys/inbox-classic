@@ -143,19 +143,32 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
     wait_until(10, || main.list.rows_view.is_mapped()).await;
     // the fixtures are older than the rest: their rows scrolled to
     select_signed().await;
-    let locks = row_icons("ic-lock-closed-symbolic");
-    let ribbons = row_icons("ic-ribbon-symbolic");
+    // the rows scrolled to drawn
+    let marked = || {
+        let locks = row_icons("ic-lock-closed-symbolic");
+        locks.len() == 2 && locks.iter().all(|t| t == "Encrypted") && row_icons("ic-ribbon-symbolic") == ["Signed"]
+    };
+    let drawn = wait_until(10, marked).await;
+    let (locks, ribbons) = (row_icons("ic-lock-closed-symbolic"), row_icons("ic-ribbon-symbolic"));
     d.check(
-        locks.len() == 2 && locks.iter().all(|t| t == "Encrypted") && ribbons == ["Signed"],
+        drawn,
         &format!("the Columns rows have the lock and the ribbon among their marks ({locks:?}, {ribbons:?})"),
     );
-    let snippets: Vec<String> = layout::rows_on_screen()
-        .into_iter()
-        .filter(|(_, subject, _, _)| subject == OUTER)
-        .map(|(_, _, snippet, _)| snippet)
-        .collect();
+    let snippets = || -> Vec<String> {
+        layout::rows_on_screen()
+            .into_iter()
+            .filter(|(_, subject, _, _)| subject == OUTER)
+            .map(|(_, _, snippet, _)| snippet)
+            .collect()
+    };
+    let first_words = wait_until(10, || {
+        let snippets = snippets();
+        snippets.len() == 2 && snippets.iter().all(|s| s == "Encrypted message")
+    })
+    .await;
+    let snippets = snippets();
     d.check(
-        snippets.len() == 2 && snippets.iter().all(|s| s == "Encrypted message"),
+        first_words,
         &format!("their line of first words says \"Encrypted message\" ({snippets:?})"),
     );
     d.shot(main.window(), "main-12-lock-in-list-columns").await;

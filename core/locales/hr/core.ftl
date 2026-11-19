@@ -526,6 +526,151 @@ agent-log-watched = Razgovor „{ $subject }“ sada se prati
 agent-log-ignored = Razgovor „{ $subject }“ sada se zanemaruje
 # review: new
 agent-log-unmarked = Razgovor „{ $subject }“ više se ne prati niti zanemaruje
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = poruka je u međuvremenu promijenjena
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] { $count } poruka označena je kao pročitana (pretraživanje: { $query })
+    [few] { $count } poruke označene su kao pročitane (pretraživanje: { $query })
+   *[other] { $count } poruka označeno je kao pročitano (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] { $count } poruka označena je kao nepročitana (pretraživanje: { $query })
+    [few] { $count } poruke označene su kao nepročitane (pretraživanje: { $query })
+   *[other] { $count } poruka označeno je kao nepročitano (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] { $count } poruka označena je zastavicom (pretraživanje: { $query })
+    [few] { $count } poruke označene su zastavicom (pretraživanje: { $query })
+   *[other] { $count } poruka označeno je zastavicom (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Zastavica je uklonjena s { $count } poruke (pretraživanje: { $query })
+    [few] Zastavica je uklonjena s { $count } poruke (pretraživanje: { $query })
+   *[other] Zastavica je uklonjena s { $count } poruka (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] { $count } poruka označena je
+    [few] { $count } poruke označene su
+   *[other] { $count } poruka označeno je
+} { $color ->
+    [red] crvenom zastavicom
+    [orange] narančastom zastavicom
+    [yellow] žutom zastavicom
+    [green] zelenom zastavicom
+    [blue] plavom zastavicom
+    [purple] ljubičastom zastavicom
+   *[gray] sivom zastavicom
+} (pretraživanje: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] { $count } poruka premještena je u mapu { $folder } (pretraživanje: { $query })
+    [few] { $count } poruke premještene su u mapu { $folder } (pretraživanje: { $query })
+   *[other] { $count } poruka premješteno je u mapu { $folder } (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] { $count } poruka je arhivirana (pretraživanje: { $query })
+    [few] { $count } poruke su arhivirane (pretraživanje: { $query })
+   *[other] { $count } poruka je arhivirano (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] { $count } poruka označena je kao neželjena pošta (pretraživanje: { $query })
+    [few] { $count } poruke označene su kao neželjena pošta (pretraživanje: { $query })
+   *[other] { $count } poruka označeno je kao neželjena pošta (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] { $count } poruka označena je kao poželjna pošta (pretraživanje: { $query })
+    [few] { $count } poruke označene su kao poželjna pošta (pretraživanje: { $query })
+   *[other] { $count } poruka označeno je kao poželjna pošta (pretraživanje: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] { $count } poruka je izbrisana (pretraživanje: { $query })
+    [few] { $count } poruke su izbrisane (pretraživanje: { $query })
+   *[other] { $count } poruka je izbrisano (pretraživanje: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] U zadnjih 15 minuta
+    [hour] U zadnjih sat vremena
+    [hours] U zadnja 4 sata
+    [day] U zadnja 24 sata
+    [week] U zadnjih 7 dana
+   *[all] U zadnjih 30 dana
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } u tom razdoblju nije napravio nijednu promjenu koja se može poništiti.
+    [one] Poništiti { $count } promjenu koju je { $program } napravio u tom razdoblju?
+    [few] Poništiti { $count } promjene koje je { $program } napravio u tom razdoblju?
+   *[other] Poništiti { $count } promjena koje je { $program } napravio u tom razdoblju?
+}
+# review: new
+agent-undo-since-detail = Poruke se vraćaju u mape iz kojih su došle, oznake pročitanosti i zastavice vraćaju se na ono što su bile, a poruke koje još čekaju u mapi Izlazna pošta brišu se. Ono što ste vi ili poslužitelj u međuvremenu promijenili ostaje kako jest.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Ništa nije poništeno.
+    [one] Poništena je { $count } promjena.
+    [few] Poništene su { $count } promjene.
+   *[other] Poništeno je { $count } promjena.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] { $count } poruka više nije bila ondje kamo ju je promjena stavila.
+    [few] { $count } poruke više nisu bile ondje kamo ih je promjena stavila.
+   *[other] { $count } poruka više nije bilo ondje kamo ih je promjena stavila.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] { $count } poruka u međuvremenu je promijenjena, vi ste je promijenili ili je promijenjena na poslužitelju, pa je ostala kako jest.
+    [few] { $count } poruke u međuvremenu su promijenjene, vi ste ih promijenili ili su promijenjene na poslužitelju, pa su ostale kako jesu.
+   *[other] { $count } poruka u međuvremenu je promijenjeno, vi ste ih promijenili ili su promijenjene na poslužitelju, pa su ostale kako jesu.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] { $count } poruka već je bila otišla iz mape Izlazna pošta.
+    [few] { $count } poruke već su bile otišle iz mape Izlazna pošta.
+   *[other] { $count } poruka već je bilo otišlo iz mape Izlazna pošta.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] { $count } promjena ne može se poništiti.
+    [few] { $count } promjene ne mogu se poništiti.
+   *[other] { $count } promjena ne može se poništiti.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Ova poruka prihvaća pozivnicu „{ $summary }“ ({ $when }).
+    [tentative] Ova poruka uvjetno prihvaća pozivnicu „{ $summary }“ ({ $when }).
+   *[decline] Ova poruka odbija pozivnicu „{ $summary }“ ({ $when }).
+} Kalendar organizatora preuzima je. Vaš se odgovor na pozivnicu mijenja tek kad je poruka poslana.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Prihvaćeno: { $summary }
+    [tentative] Uvjetno prihvaćeno: { $summary }
+   *[decline] Odbijeno: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } prihvaća ovu pozivnicu.
+    [tentative] { $name } uvjetno prihvaća ovu pozivnicu.
+   *[decline] { $name } odbija ovu pozivnicu.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -600,6 +745,8 @@ agent-terminal-program-linux = Program pokrenut iz terminala ({ $terminal })
 agent-connect-title-terminal = { $programs } žele koristiti vašu poštu
 # review: new
 agent-connect-terminal-detail = Svi AI agenti koje pokrenete iz ovog terminala dijele pristup koji ovdje dopustite. Da biste jednom od njih dali zaseban pristup, u MCP postavkama agenta dodajte među njegove argumente --name i naziv po izboru.
+# review: new
+agent-connect-claimed = Program se predstavio kao { $claimed }. Inbox Classic provjerio je koji ga je program pokrenuo: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -1317,6 +1317,17 @@ const sections = [
                 ]
             },
             {
+                shot: 'agents-13-invitation',
+                name: 'Answering an invitation asks you first',
+                what: "An agent can answer a calendar invitation (accept, tentative or decline), but only through the same Send question: a line above the text says what it answers and when the event is. Inbox Classic writes the answer from the invitation itself, so there is no Edit First; Don't Send stays the default. Your answer to the invitation changes only once the message has gone.",
+                how: 'Shown when an agent answers an invitation; only for a program allowed to send.',
+                checked: [
+                    'The Send question shows what it answers, above the text',
+                    'It has no Edit First',
+                    "The invitation's status is unchanged until the answer has gone"
+                ]
+            },
+            {
                 shot: 'agents-5-outbox',
                 name: 'Sent messages wait 30 seconds',
                 what: 'What you let an agent send waits 30 seconds in the Outbox, where it can still be deleted, or taken back with Undo in Tools > AI Agents.',
@@ -1334,6 +1345,28 @@ const sections = [
                     'Undo takes the message back',
                     'Clear empties the log, and the send still counts against the limit',
                     'Switched to German, the rows written before are in German'
+                ]
+            },
+            {
+                shot: 'agents-11-bulk',
+                name: 'Change many messages at once',
+                what: 'An agent can change every message a search finds in one go (mark read or unread, flag, archive, move, junk, delete): it first asks what the change would do and gets the count and a few of the messages, and only that answer lets it go ahead, for those messages only. The change is one row of the log, "Marked 37 messages read (search: from:news)", with one Undo for all of them; a message you changed since is left as it is, and Undo says so.',
+                how: 'Tools > AI Agents.',
+                checked: [
+                    'The dry run counts the messages and changes nothing',
+                    'The change is one row of the log, with one Undo',
+                    'The agent can take its own change back'
+                ]
+            },
+            {
+                shot: 'agents-12-undo-since',
+                name: 'Undo Since',
+                what: 'Undo Since takes back everything a program did in the last 15 minutes, hour, 4 hours, 24 hours, 7 days or 30 days, newest first: messages go back to their folders, read states and flags to what they were, and what still waits in the Outbox is deleted. It asks first with the count, Cancel the default, and then says what it took back and what it left, as a message you or the server changed since is left alone.',
+                how: 'Tools > AI Agents, select the program, Undo Since.',
+                checked: [
+                    'It asks with the count of the changes, Cancel the default',
+                    'Take Back says what it took back and what it left',
+                    'The log shows the change taken back'
                 ]
             },
             {

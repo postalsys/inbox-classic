@@ -13,6 +13,7 @@ const wchar_t* kAccessClass = L"InboxClassicAgentAccess";
 const wchar_t* kSendClass = L"InboxClassicAgentSend";
 const wchar_t* kUnsubscribeClass = L"InboxClassicAgentUnsubscribe";
 const wchar_t* kAgentsClass = L"InboxClassicAgents";
+const wchar_t* kUndoSinceClass = L"InboxClassicAgentUndoSince";
 
 // the dialog's heading: the message font, larger and bold
 HFONT HeadingFont() {
@@ -353,11 +354,15 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
     std::wstring warning = Text(send->warning);
     std::wstring original = Text(send->original);
     std::wstring files = Text(send->files);
+    // an answer to a calendar invitation: what it answers and when the answer counts, over the text
+    std::wstring invitation = Text(send->invitation);
     int detailHeight = TextHeight(owner, detail, inner);
+    int invitationHeight = invitation.empty() ? 0 : TextHeight(owner, invitation, inner) + Scale(6);
     int recipients = static_cast<int>(pe_agent_send_recipient_count(info.get()));
     int listHeight = Scale(26) + std::min(recipients, 5) * Scale(18);
     int height = pad + Scale(24) + detailHeight + Scale(8) + (warning.empty() ? 0 : Scale(22)) + Scale(20) + listHeight + Scale(8) +
-                 Scale(20) * (original.empty() ? 1 : 2) + Scale(4) + Scale(200) + (files.empty() ? 0 : Scale(22)) + Scale(14) + Scale(25) + pad;
+                 Scale(20) * (original.empty() ? 1 : 2) + Scale(4) + invitationHeight + Scale(200) + (files.empty() ? 0 : Scale(22)) + Scale(14) +
+                 Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kSendClass, core::Plain(PE_TEXT_UI_SEND_MESSAGE_ASK).c_str(), width, height);
     QuestionState state;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
@@ -390,6 +395,10 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
         HeaderLine(dialog, pad, y, width, labelWidth, L"", original);
     }
     y += Scale(4);
+    if (!invitation.empty()) {
+        CreateChild(dialog, L"STATIC", invitation.c_str(), SS_LEFT | SS_NOPREFIX, IDC_AGENT_INVITATION, {pad, y, width - pad, y + invitationHeight - Scale(6)});
+        y += invitationHeight;
+    }
     CreateChild(dialog, L"EDIT", WithCrlf(Text(send->text)).c_str(), WS_TABSTOP | WS_VSCROLL | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL, IDC_AGENT_BODY,
                 {pad, y, width - pad, y + Scale(200)}, WS_EX_CLIENTEDGE);
     y += Scale(200);
@@ -399,10 +408,13 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
         y += Scale(16);
     }
     y += Scale(14);
-    HWND dontSend = AnswerButtons(dialog, state, pad, width, y,
-                                  {{core::T(PE_TEXT_WIN_SEND), IDC_AGENT_SEND},
-                                   {core::T(PE_TEXT_UI_EDIT_FIRST), IDC_AGENT_COMPOSE},
-                                   {core::T(PE_TEXT_WIN_DONT_SEND), IDC_AGENT_DONT_SEND}});
+    // an invitation's answer has no Edit First: its calendar file is the core's
+    std::vector<std::pair<std::wstring, int>> answers = {{core::T(PE_TEXT_WIN_SEND), IDC_AGENT_SEND}};
+    if (send->can_edit) {
+        answers.push_back({core::T(PE_TEXT_UI_EDIT_FIRST), IDC_AGENT_COMPOSE});
+    }
+    answers.push_back({core::T(PE_TEXT_WIN_DONT_SEND), IDC_AGENT_DONT_SEND});
+    HWND dontSend = AnswerButtons(dialog, state, pad, width, y, answers);
     int64_t account = send->account;
     RunModal(dialog, dontSend, state.done);
     PeAgentSendAnswer answer = state.answer == IDC_AGENT_SEND      ? PE_AGENT_SEND_ANSWER_SEND
@@ -485,6 +497,7 @@ struct AgentsState {
     HWND hosts = nullptr;
     HWND change = nullptr;
     HWND remove = nullptr;
+    HWND undoSince = nullptr;
     HWND log = nullptr;
     HWND undo = nullptr;
     HWND clear = nullptr;
@@ -511,6 +524,7 @@ void UpdateButtons(AgentsState* state) {
     int host = Selected(state->hosts);
     EnableWindow(state->change, host >= 0);
     EnableWindow(state->remove, host >= 0);
+    EnableWindow(state->undoSince, host >= 0);
     int entry = Selected(state->log);
     EnableWindow(state->undo, entry >= 0 && static_cast<size_t>(entry) < state->entries.size() && state->entries[entry].canUndo);
     EnableWindow(state->clear, !state->entries.empty());
@@ -691,6 +705,142 @@ void UndoEntry(HWND hwnd, AgentsState* state) {
     FillAgents(state);
 }
 
+// ---- Undo Since: take back what a program did in a span ----
+
+struct UndoSinceState {
+    PeCore* core;
+    int64_t host;
+    HWND span = nullptr;
+    HWND title = nullptr;
+    HWND detail = nullptr;
+    HWND takeBack = nullptr;
+    HWND cancel = nullptr;
+    // the moment the question shown reaches back to, and how many changes it takes back
+    int64_t since = 0;
+    uint64_t count = 0;
+    bool taken = false;
+    bool done = false;
+};
+
+// the question of the span picked: with changes, Take Back beside Cancel; without, only Close
+void ShowUndoQuestion(UndoSinceState& state) {
+    int index = static_cast<int>(SendMessageW(state.span, CB_GETCURSEL, 0, 0));
+    core::AgentUndoQuestion info(pe_agent_undo_question(state.core, state.host, static_cast<size_t>(std::max(0, index))));
+    const PeAgentUndoQuestion* question = pe_agent_undo_question_get(info.get());
+    state.count = question ? question->count : 0;
+    state.since = question ? question->since : 0;
+    SetWindowTextW(state.title, question ? Text(question->title).c_str() : L"");
+    // what taking back does, only when there is something to take back
+    SetWindowTextW(state.detail, question && state.count ? Text(question->detail).c_str() : L"");
+    ShowWindow(state.takeBack, state.count ? SW_SHOW : SW_HIDE);
+    SetWindowTextW(state.cancel, core::T(state.count ? PE_TEXT_UI_CANCEL : PE_TEXT_UI_CLOSE).c_str());
+}
+
+LRESULT CALLBACK UndoSinceProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<UndoSinceState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+    if (!state) {
+        return DefWindowProcW(hwnd, message, wParam, lParam);
+    }
+    switch (message) {
+    case WM_COMMAND:
+        switch (LOWORD(wParam)) {
+        case IDC_AGENT_UNDO_SPAN:
+            if (HIWORD(wParam) == CBN_SELCHANGE) {
+                ShowUndoQuestion(*state);
+            }
+            return 0;
+        case IDC_AGENT_TAKE_BACK:
+            state->taken = state->count > 0;
+            state->done = true;
+            return 0;
+        case IDCANCEL:
+            state->done = true;
+            return 0;
+        }
+        return 0;
+    case WM_CLOSE:
+        state->done = true;
+        return 0;
+    case WM_CTLCOLORSTATIC:
+        return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
+    }
+    return DefWindowProcW(hwnd, message, wParam, lParam);
+}
+
+// asks which span to take back, shows how many changes that is, and takes them back on Take Back: the report then in
+// a message box over the log, refreshed
+void UndoSince(HWND hwnd, AgentsState* state) {
+    int selected = Selected(state->hosts);
+    if (selected < 0 || static_cast<size_t>(selected) >= state->hostIds.size()) {
+        return;
+    }
+    RegisterDialogClass(kUndoSinceClass, UndoSinceProc);
+    UndoSinceState undo{state->core, state->hostIds[selected]};
+    int pad = Scale(12);
+    int width = Scale(480);
+    int inner = width - 2 * pad;
+    std::wstring label = core::T(PE_TEXT_UI_UNDO_SINCE_SPAN);
+    // the heading as tall as the longest of the spans' questions (the program's name, the count), the words under it
+    // as tall as they are
+    std::vector<std::wstring> spans;
+    int titleHeight = Scale(22);
+    std::wstring detail;
+    for (size_t i = 0; i < PE_AGENT_UNDO_SPAN_COUNT; i++) {
+        spans.push_back(Text(core::String(pe_agent_undo_span_label(i)).get()));
+        core::AgentUndoQuestion info(pe_agent_undo_question(state->core, undo.host, i));
+        if (const PeAgentUndoQuestion* question = pe_agent_undo_question_get(info.get())) {
+            titleHeight = std::max(titleHeight, TextHeight(hwnd, Text(question->title), inner, HeadingFont()));
+            detail = Text(question->detail);
+        }
+    }
+    int labelHeight = TextHeight(hwnd, label, inner);
+    // a word longer than a line broken, as SS_EDITCONTROL breaks it
+    int detailHeight = TextHeight(hwnd, detail, inner, nullptr, true);
+    std::wstring takeBack = core::T(PE_TEXT_WIN_TAKE_BACK), cancel = core::T(PE_TEXT_UI_CANCEL), close = core::T(PE_TEXT_UI_CLOSE);
+    int button = ButtonWidth({takeBack, cancel, close}, 100);
+    int height = pad + labelHeight + Scale(4) + Scale(24) + Scale(16) + titleHeight + Scale(6) + detailHeight + Scale(18) + Scale(25) + pad;
+    std::wstring windowTitle = core::Plain(PE_TEXT_WIN_UNDO_SINCE);
+    // the command's name without the dots that say it asks first (in the pseudo-language before its padding)
+    for (const std::wstring dots : {L"...", L"…"}) {
+        if (size_t at = windowTitle.find(dots); at != std::wstring::npos) {
+            windowTitle.erase(at, dots.size());
+        }
+    }
+    HWND dialog = CreateModalWindow(hwnd, kUndoSinceClass, windowTitle.c_str(), width, height);
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&undo));
+    int y = pad;
+    CreateChild(dialog, L"STATIC", label.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + labelHeight});
+    y += labelHeight + Scale(4);
+    int spanWidth = std::min(inner, LabelWidth(spans, 160, 40));
+    undo.span = CreateChild(dialog, L"COMBOBOX", nullptr, WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, IDC_AGENT_UNDO_SPAN,
+                            {pad, y, pad + spanWidth, y + Scale(200)});
+    for (const std::wstring& span : spans) {
+        SendMessageW(undo.span, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(span.c_str()));
+    }
+    // the shortest span first: the least it can take back
+    SendMessageW(undo.span, CB_SETCURSEL, 0, 0);
+    y += Scale(24) + Scale(16);
+    undo.title = Heading(dialog, L"", {pad, y, width - pad, y + titleHeight}, true);
+    SetWindowLongPtrW(undo.title, GWLP_ID, IDC_AGENT_UNDO_TITLE);
+    y += titleHeight + Scale(6);
+    undo.detail = CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_EDITCONTROL, IDC_AGENT_UNDO_DETAIL, {pad, y, width - pad, y + detailHeight});
+    y = height - pad - Scale(25);
+    // Cancel the default, as for anything that changes many messages at once
+    undo.takeBack = CreateChild(dialog, L"BUTTON", takeBack.c_str(), WS_TABSTOP, IDC_AGENT_TAKE_BACK,
+                                {width - pad - 2 * button - Scale(8), y, width - pad - button - Scale(8), y + Scale(25)});
+    undo.cancel = CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDCANCEL, {width - pad - button, y, width - pad, y + Scale(25)});
+    ShowUndoQuestion(undo);
+    RunModal(dialog, undo.span, undo.done);
+    if (!undo.taken) {
+        return;
+    }
+    core::String report(pe_agent_undo_since(state->core, undo.host, undo.since));
+    FillAgents(state);
+    if (report) {
+        MessageBoxW(hwnd, Text(report.get()).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_OK | MB_ICONINFORMATION);
+    }
+}
+
 void ShowSetup(HWND hwnd, PeCore* core);
 
 LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -712,6 +862,9 @@ LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
             return 0;
         case IDC_AGENTS_UNDO:
             UndoEntry(hwnd, state);
+            return 0;
+        case IDC_AGENTS_UNDO_SINCE:
+            UndoSince(hwnd, state);
             return 0;
         case IDC_AGENTS_CLEAR:
             if (MessageBoxW(hwnd, core::T(PE_TEXT_WIN_CLEAR_LOG_ASK).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(),
@@ -819,7 +972,8 @@ void AgentsDialog(HWND owner, PeCore* core) {
     int pad = Scale(12);
     std::wstring change = core::T(PE_TEXT_WIN_CHANGE), remove = core::T(PE_TEXT_UI_REMOVE), undo = core::T(PE_TEXT_CMD_UNDO);
     std::wstring clear = core::T(PE_TEXT_UI_CLEAR_BUTTON), close = core::T(PE_TEXT_UI_CLOSE), setup = core::T(PE_TEXT_WIN_HOW_TO_CONNECT);
-    int button = ButtonWidth({change, remove, undo, clear, close}, 100);
+    std::wstring undoSince = core::T(PE_TEXT_WIN_UNDO_SINCE);
+    int button = ButtonWidth({change, remove, undoSince, undo, clear, close}, 100);
     // wide enough for what each program may do beside its name and when it was last used, within the screen
     RECT screen = {};
     SystemParametersInfoW(SPI_GETWORKAREA, 0, &screen, 0);
@@ -844,6 +998,9 @@ void AgentsDialog(HWND owner, PeCore* core) {
     state.change = CreateChild(dialog, L"BUTTON", change.c_str(), WS_TABSTOP, IDC_AGENTS_CHANGE, {width - pad - button, y, width - pad, y + Scale(25)});
     state.remove = CreateChild(dialog, L"BUTTON", remove.c_str(), WS_TABSTOP, IDC_AGENTS_REMOVE,
                                {width - pad - button, y + Scale(31), width - pad, y + Scale(56)});
+    // what the selected program did in a span, taken back at once (the log's Undo takes back one row)
+    state.undoSince = CreateChild(dialog, L"BUTTON", undoSince.c_str(), WS_TABSTOP, IDC_AGENTS_UNDO_SINCE,
+                                  {width - pad - button, y + Scale(62), width - pad, y + Scale(87)});
     y += Scale(120) + Scale(14);
     CreateChild(dialog, L"STATIC", core::T(PE_TEXT_WIN_WHAT_AGENTS_DID).c_str(), SS_LEFT, 0, {pad, y, listRight, y + Scale(16)});
     y += Scale(18);

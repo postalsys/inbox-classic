@@ -2,6 +2,7 @@
 //! page the parts are drawn on, and the published attacks on mail clients (EFAIL's direct exfiltration, signature
 //! wrapping, hidden parts, a painted frame), each made here with real keys.
 
+use pe_core::i18n::{Text, tr, tr_args};
 use pe_core::keys::KeySource;
 use pe_core::protect::Tone;
 use pe_core::{Core, Options, PasswordStore};
@@ -175,7 +176,9 @@ fn signed_by_the_sender() {
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.tone, Tone::Good, "{protection:?}");
     assert!(
-        protection.text.contains("Signed by Alice Example"),
+        protection
+            .text
+            .contains(&signed_by(Text::PgpPartSigned, "Alice Example")),
         "{}",
         protection.text
     );
@@ -195,7 +198,13 @@ fn signed_by_someone_who_is_not_the_sender() {
     let raw = message("Bob <bob@example.org>", &signed_part(&text("Hello"), &w.alice, "s"));
     let protection = w.view(&raw).protection.unwrap();
     assert_eq!(protection.tone, Tone::Warning);
-    assert!(protection.text.contains("not the sender"), "{}", protection.text);
+    assert!(
+        protection
+            .text
+            .contains(&signed_by(Text::PgpPartOther, "Alice Example")),
+        "{}",
+        protection.text
+    );
     // two From addresses: nobody is the sender
     let two = raw.replacen(
         "From: Bob <bob@example.org>",
@@ -215,7 +224,11 @@ fn changed_text_does_not_match() {
     let changed = raw.replacen("Pay Bob 10 euros", "Pay Bob 99 euros", 1);
     let protection = w.view(&changed).protection.unwrap();
     assert_eq!(protection.tone, Tone::Warning);
-    assert!(protection.text.contains("does not match"), "{}", protection.text);
+    assert!(
+        protection.text.contains(&tr(Text::PgpWhyMismatch)),
+        "{}",
+        protection.text
+    );
 }
 
 #[test]
@@ -233,7 +246,8 @@ fn a_key_that_is_not_the_one_in_use_does_not_sign_for_the_sender() {
     );
     let protection = w.view(&raw).protection.unwrap();
     assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
-    assert!(protection.text.contains("another key"), "{}", protection.text);
+    let not_in_use = tr_args(Text::PgpWhyNotKeyInUse, &[("address", "alice@example.org".into())]);
+    assert!(protection.text.contains(&not_in_use), "{}", protection.text);
     w.core.pgp_decide("alice@example.org", false).unwrap();
     assert_eq!(w.view(&raw).protection.unwrap().tone, Tone::Warning);
     // Alice's own key still signs for her
@@ -267,7 +281,11 @@ fn an_unknown_key() {
     let raw = message("mallory@example.net", &signed_part(&text("Hi"), &w.mallory, "s"));
     let protection = w.view(&raw).protection.unwrap();
     assert_eq!(protection.tone, Tone::Neutral);
-    assert!(protection.text.contains("not known"), "{}", protection.text);
+    assert!(
+        protection.text.contains(&tr(Text::PgpPartUnknownKey)),
+        "{}",
+        protection.text
+    );
 }
 
 #[test]
@@ -298,7 +316,7 @@ fn encrypted_to_someone_else() {
     let view = w.view(&raw);
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.tone, Tone::Warning);
-    assert!(protection.text.contains("do not have"), "{}", protection.text);
+    assert!(protection.text.contains(&tr(Text::PgpPartNoKey)), "{}", protection.text);
     assert!(!shown(&view).contains("Not for you"));
 }
 
@@ -335,17 +353,36 @@ fn parts_signed_apart() {
     assert_eq!(tones(&view), [Tone::Neutral, Tone::Good, Tone::Neutral]);
     let protection = view.protection.as_ref().unwrap();
     assert!(
-        protection
-            .text
-            .contains("3 parts: 1 signed, 2 without a confirmed signature"),
+        protection.text.contains(&tr_args(
+            Text::PgpBarParts,
+            &[
+                ("count", 3.into()),
+                (
+                    "list",
+                    (&format!(
+                        "{}, {}",
+                        tr_args(Text::PgpBarCountSigned, &[("count", 1.into())]),
+                        tr_args(Text::PgpBarCountNeutral, &[("count", 2.into())])
+                    ))
+                        .into()
+                )
+            ]
+        )),
         "{}",
         protection.text
     );
     // Details: each part, the signed one with its key and time
     let details = protection.details();
-    assert!(details.contains("Part 2: Signed by Alice Example"), "{details}");
+    let part = tr_args(
+        Text::PgpDetailsPart,
+        &[
+            ("number", 2.into()),
+            ("label", (&signed_by(Text::PgpPartSigned, "Alice Example")).into()),
+        ],
+    );
+    assert!(details.contains(&part), "{details}");
     assert!(details.contains(&pe_pgp::grouped(&w.alice.fingerprint())), "{details}");
-    assert_eq!(protection.parts[0].label, "Not signed");
+    assert_eq!(protection.parts[0].label, tr(Text::PgpPartNotSigned));
     // three documents, each its own frame
     assert_eq!(view.document.matches("<iframe").count(), 3);
 }
@@ -388,7 +425,7 @@ fn a_signed_part_wrapped_in_someone_elses_message() {
     assert!(
         view.protection.as_ref().unwrap().parts[1]
             .label
-            .contains("not the sender")
+            .contains(&signed_by(Text::PgpPartOther, "Alice Example"))
     );
 }
 
@@ -436,7 +473,7 @@ fn inline_encrypted_and_inline_signed() {
     let view = w.view(&raw);
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.parts.len(), 3, "{protection:?}");
-    assert!(protection.parts[1].label.contains("Signature not checked"));
+    assert!(protection.parts[1].label.contains(&tr(Text::PgpPartNotChecked)));
     assert!(shown(&view).contains("Inline secret"));
 }
 
@@ -540,7 +577,8 @@ fn a_key_name_never_reaches_the_label() {
     let view = w.view(&raw);
     let text = &view.protection.as_ref().unwrap().text;
     assert!(
-        text.contains("mallory@example.net") && !text.contains("key verified)"),
+        text.contains("mallory@example.net")
+            && !text.contains(&signed_by(Text::PgpPartVerified, "mallory@example.net")),
         "{text}"
     );
 }
@@ -721,12 +759,15 @@ fn attachments_open_from_a_private_folder() {
     assert_eq!(pdf.tooltip, format!("Contract.pdf ({})", pdf.size_text));
     assert!(pdf.refusal.is_none());
     let program = &view.attachments[1];
-    assert!(program.tooltip.starts_with("setup.exe (") && program.tooltip.contains("\nOpen is off"));
     assert!(
-        program
-            .refusal
-            .as_deref()
-            .is_some_and(|r| r.contains("setup.exe") && r.contains("run programs"))
+        program.tooltip.starts_with("setup.exe (")
+            && program
+                .tooltip
+                .ends_with(&format!("\n{}", tr(Text::UiAttachmentProgramTip)))
+    );
+    assert_eq!(
+        program.refusal,
+        Some(tr_args(Text::AttachmentRunsPrograms, &[("name", "setup.exe".into())]))
     );
 
     let opened = w.core.open_attachment(folder, 1, 0).unwrap().unwrap();
@@ -759,7 +800,10 @@ fn attachments_open_from_a_private_folder() {
         .unwrap();
     match w.core.open_attachment(folder, 1, 1) {
         Err(pe_core::Error::Unavailable(why)) => {
-            assert!(why.contains("setup.exe") && why.contains("run programs"), "{why}")
+            assert_eq!(
+                why,
+                tr_args(Text::AttachmentRunsPrograms, &[("name", "setup.exe".into())])
+            )
         }
         other => panic!("{other:?}"),
     }
@@ -960,4 +1004,9 @@ fn the_list_shows_the_protected_subject_once_opened() {
     assert_eq!(subject(), "The real subject");
     w.core.set_pgp_index_encrypted(false).unwrap();
     assert_eq!(subject(), "...");
+}
+
+/// A part's label naming who signed it, as the catalog words it
+fn signed_by(text: Text, signer: &str) -> String {
+    tr_args(text, &[("signer", signer.into())])
 }

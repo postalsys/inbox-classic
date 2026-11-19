@@ -208,7 +208,14 @@ impl Core {
                 store.agent_hosts()?,
             )
         };
-        let mut rows: Vec<LogRow> = entries.iter().map(LogRow::of_entry).collect();
+        let mut rows = Vec::with_capacity(entries.len() + summaries.len());
+        for entry in &entries {
+            let mut row = LogRow::of_entry(entry);
+            // a message that has left the Outbox since is no longer taken back
+            let unsend = entry.entry.undo.as_deref().is_some_and(|u| u.starts_with("unsend"));
+            row.can_undo = row.can_undo && (!unsend || self.can_still_undo(entry)?);
+            rows.push(row);
+        }
         rows.extend(summaries.iter().map(LogRow::of_reads));
         // each program as the list of programs names it
         let labels: std::collections::HashMap<AgentHostId, String> = hosts

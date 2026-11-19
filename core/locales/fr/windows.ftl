@@ -99,6 +99,11 @@ win-forget-program-ask = Supprimer ce programme, ses autorisations et l'historiq
 win-clear-log-ask = Effacer l'historique des agents ? Les modifications effectuées ne seront pas annulées.
 win-agent-programs = &Programmes dont les agents ont demandé à utiliser votre courrier :
 win-change = &Modifier...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Annuler &depuis...
+# review: new
+win-take-back = &Annuler
 win-what-agents-did = &Historique des agents :
 # review: new
 win-agent-reads = Ce qui a été lu de { $from } à { $to } :

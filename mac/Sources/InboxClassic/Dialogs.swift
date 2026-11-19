@@ -116,6 +116,7 @@ enum Modal {
 
     static func opened(_ window: NSWindow) {
         windows.append(window)
+        TestHooks.modalOpened?(window)
     }
 
     static func closed(_ window: NSWindow) {
@@ -460,6 +461,8 @@ enum TestHooks {
     static var openURL: ((URL) -> Void)?
     /// the context menu of a message's web view as it opens, after the app took out what it does not offer
     static var webMenu: ((NSMenu) -> Void)?
+    /// a modal window as it is about to run, its buttons as they start
+    static var modalOpened: ((NSWindow) -> Void)?
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled

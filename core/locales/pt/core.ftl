@@ -544,6 +544,135 @@ agent-log-watched = Começou a seguir a conversa «{ $subject }»
 agent-log-ignored = Começou a ignorar a conversa «{ $subject }»
 # review: new
 agent-log-unmarked = Deixou de seguir ou ignorar a conversa «{ $subject }»
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = a mensagem foi alterada entretanto
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Marcou 1 mensagem como lida (pesquisa: { $query })
+   *[other] Marcou { $count } mensagens como lidas (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Marcou 1 mensagem como não lida (pesquisa: { $query })
+   *[other] Marcou { $count } mensagens como não lidas (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Sinalizou 1 mensagem (pesquisa: { $query })
+   *[other] Sinalizou { $count } mensagens (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Removeu o sinalizador de 1 mensagem (pesquisa: { $query })
+   *[other] Removeu o sinalizador de { $count } mensagens (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-color = Sinalizador { $color ->
+    [red] vermelho
+    [orange] laranja
+    [yellow] amarelo
+    [green] verde
+    [blue] azul
+    [purple] roxo
+   *[gray] cinzento
+} aplicado a { $count ->
+    [one] 1 mensagem
+   *[other] { $count } mensagens
+} (pesquisa: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Moveu 1 mensagem para { $folder } (pesquisa: { $query })
+   *[other] Moveu { $count } mensagens para { $folder } (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arquivou 1 mensagem (pesquisa: { $query })
+   *[other] Arquivou { $count } mensagens (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Marcou 1 mensagem como lixo eletrónico (pesquisa: { $query })
+   *[other] Marcou { $count } mensagens como lixo eletrónico (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Marcou 1 mensagem como correio legítimo (pesquisa: { $query })
+   *[other] Marcou { $count } mensagens como correio legítimo (pesquisa: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Eliminou 1 mensagem (pesquisa: { $query })
+   *[other] Eliminou { $count } mensagens (pesquisa: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Nos últimos 15 minutos
+    [hour] Na última hora
+    [hours] Nas últimas 4 horas
+    [day] Nas últimas 24 horas
+    [week] Nos últimos 7 dias
+   *[all] Nos últimos 30 dias
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } não fez neste período alterações que possam ser anuladas.
+    [one] Anular a alteração que { $program } fez neste período?
+   *[other] Anular as { $count } alterações que { $program } fez neste período?
+}
+# review: new
+agent-undo-since-detail = As mensagens regressam às pastas de onde vieram, o estado de leitura e os sinalizadores voltam a ser o que eram, e as mensagens que ainda aguardam na Caixa de Saída são eliminadas. O que alterou entretanto, ou o que o servidor alterou, fica como está.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nada foi anulado.
+    [one] Foi anulada 1 alteração.
+   *[other] Foram anuladas { $count } alterações.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 mensagem já não estava onde a alteração a colocou.
+   *[other] { $count } mensagens já não estavam onde a alteração as colocou.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 mensagem foi alterada entretanto, por si ou no servidor, e ficou como estava.
+   *[other] { $count } mensagens foram alteradas entretanto, por si ou no servidor, e ficaram como estavam.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 mensagem já tinha saído da Caixa de Saída.
+   *[other] { $count } mensagens já tinham saído da Caixa de Saída.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 alteração não pode ser anulada.
+   *[other] { $count } alterações não podem ser anuladas.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Esta mensagem aceita o convite «{ $summary }» ({ $when }).
+    [tentative] Esta mensagem aceita provisoriamente o convite «{ $summary }» ({ $when }).
+   *[decline] Esta mensagem recusa o convite «{ $summary }» ({ $when }).
+} O calendário do organizador regista a resposta. A sua resposta ao convite só muda depois de a mensagem ser enviada.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Aceite: { $summary }
+    [tentative] Provisório: { $summary }
+   *[decline] Recusado: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } aceitou este convite.
+    [tentative] { $name } aceitou provisoriamente este convite.
+   *[decline] { $name } recusou este convite.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -610,6 +739,8 @@ agent-terminal-program-linux = Um programa iniciado a partir de um terminal ({ $
 agent-connect-title-terminal = { $programs } querem usar o seu correio
 # review: new
 agent-connect-terminal-detail = Todos os agentes de IA que iniciar a partir deste terminal partilham o acesso que autorizar aqui. Para dar a um agente o seu próprio acesso, adicione --name e um nome à sua escolha aos argumentos dele nas definições MCP do agente.
+# review: new
+agent-connect-claimed = O programa apresentou-se como { $claimed }. O Inbox Classic verificou que programa o iniciou: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

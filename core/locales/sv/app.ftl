@@ -24,7 +24,6 @@ menu-sort-by = &Sortera efter
 menu-text-size = &Textstorlek
 # review: new
 menu-folder = &Mapp
-# review: new
 menu-insert = &Infoga
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -187,12 +186,9 @@ cmd-export-address-book = E&xportera adressbok...
 cmd-export-setup = Exportera inställnin&gar och konton...
 # review: new
 cmd-import-setup = Importera inställningar och k&onton...
-# review: new
 cmd-compose-sign = &Signera digitalt
-# review: new
 cmd-compose-encrypt = &Kryptera
-# review: new
-cmd-attach-my-key = Bifoga min &offentliga nyckel
+cmd-attach-my-key = Bifoga din &offentliga nyckel
 
 ## The tray icon's menu
 
@@ -414,11 +410,8 @@ ui-tb-send = Skicka
 ui-tb-save = Spara
 # review: new
 ui-tb-attach = Bifoga
-# review: new
 ui-tb-sign = Signera
-# review: new
 ui-tb-encrypt = Kryptera
-# review: new
 ui-field-keys = Nycklar:
 # review: new
 ui-field-from = Från:
@@ -870,6 +863,13 @@ ui-let-agents-connect = &Låt AI-agenter ansluta till Inbox Classic
 ui-change-button = Ändra…
 # review: new
 ui-undo-button = Ångra
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Ångra allt sedan…
+# review: new
+ui-undo-since-span = Ångra det som det här programmet gjorde:
+# review: new
+ui-take-back = Ångra
 # review: new
 ui-rules-title = Meddelanderegler
 # review: new
@@ -1347,25 +1347,15 @@ ui-contact-key-none = Ingen nyckel
 ui-contact-key-use-new = Använd den &nya nyckeln
 # review: new
 ui-contact-key-keep = &Behåll den nuvarande
-# review: new
 ui-recipient-keys-title = Mottagarnas nycklar
-# review: new
 ui-recipient-col-recipient = Mottagare
-# review: new
 ui-recipient-col-key = Nyckel
-# review: new
 ui-recipient-find-key = &Sök nyckel
-# review: new
 ui-recipient-remove = &Ta bort från meddelandet
-# review: new
 ui-send-unencrypted = Skicka &utan kryptering
-# review: new
 ui-compose-make-key = &Skapa en nyckel...
-# review: new
 ui-compose-show-keys = &Krypteringsnycklar...
-# review: new
 ui-compose-encrypt-off = &Stäng av kryptering
-# review: new
 ui-compose-keep-encrypted = &Behåll krypteringen
 # review: new
 ui-setup-export-title = Exportera inställningar och konton

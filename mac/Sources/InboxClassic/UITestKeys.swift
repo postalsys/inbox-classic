@@ -50,7 +50,7 @@ extension UITest {
         // empty, the buttons of a key greyed
         var (keys, table) = try await openKeys()
         let none: NSTextField? = find("keys.none", in: keys)
-        check(table?.numberOfRows == 0 && none?.isHidden == false && none?.stringValue.hasPrefix("No keys yet") == true,
+        check(table?.numberOfRows == 0 && none?.isHidden == false && none?.stringValue.hasPrefix(Text.uiKeysEmpty.text) == true,
               "Tools > Encryption Keys opens with no keys, saying what to do")
         let greyed = ["keys.export", "keys.backup", "keys.verify", "keys.properties", "keys.remove"].filter {
             (find($0, in: keys) as NSButton?)?.isEnabled != false
@@ -66,11 +66,11 @@ extension UITest {
         let chosen: NSPopUpButton? = find("key.new.account", in: newKey)
         check(chosen?.titleOfSelectedItem == account.label, "New Key names the account it is for (\(chosen?.titleOfSelectedItem ?? ""))")
         let memory: NSTextField? = find("key.new.memory", in: newKey)
-        check(memory?.stringValue.contains("memory only") == true, "and says that passwords are kept in memory only")
+        check(memory?.stringValue.contains(Text.uiKeysMemoryOnly.text) == true, "and says that passwords are kept in memory only")
         await shot(newKey, "keys-2-new-key")
         press(find("key.new.make", in: newKey))
         guard let offer = await waitWindow("alert", 20) else { throw Failed(description: "no backup offer") }
-        check(alertText(offer).contains("Save a backup") && views(NSButton.self, in: offer.contentView).map(\.title) == ["Save a Backup…", "Later"],
+        check(alertText(offer).contains(Text.uiKeysBackupOffer.text) && views(NSButton.self, in: offer.contentView).map(\.title) == [Text.uiKeysBackupNow.opens, Text.uiKeysLater.text],
               "Make Key makes it and offers a backup at once, Save a Backup or Later (\(alertText(offer)))")
         await shot(offer, "keys-3-backup-offer")
         let backupFile = out.appendingPathComponent("keys-backup.asc")
@@ -80,7 +80,7 @@ extension UITest {
             backupName = name
             return backupFile
         }
-        answer(offer, "Save a Backup…")
+        answer(offer, Text.uiKeysBackupNow.opens)
 
         // Back Up Key: two passphrases that differ, a short one, then a good one
         guard let backup = await waitWindow("key.backup", 10) else { throw Failed(description: "no Back Up Key window") }
@@ -88,17 +88,17 @@ extension UITest {
         let said = { self.words("key.backup.problem", in: backup) }
         let backupOk: NSButton? = find("key.backup.ok", in: backup)
         typeBackup(backup, "correct horse battery", "correct horse batteries")
-        check(said().contains("not the same") && backupOk?.isEnabled == false,
+        check(said().contains(Text.uiKeysPassphraseDiffer.text) && backupOk?.isEnabled == false,
               "two different passphrases are refused (\(said()))")
         typeBackup(backup, "short", "short")
-        check(said().contains("at least 8") && backupOk?.isEnabled == false, "a short one is refused (\(said()))")
+        check(said().contains(Text.uiKeysPassphraseShort.text) && backupOk?.isEnabled == false, "a short one is refused (\(said()))")
         typeBackup(backup, "correct horse battery", "correct horse battery")
         check(said().isEmpty && backupOk?.isEnabled == true, "the same good one twice can be used")
         await shot(backup, "keys-4-backup")
         press(find("key.backup.ok", in: backup))
         if let saved = await waitWindow("alert", 20) {
-            check(alertText(saved).contains("The backup was saved"), "a good one saves the backup (\(alertText(saved)))")
-            answer(saved, "OK")
+            check(alertText(saved).contains(Text.uiKeysBackupSaved.text), "a good one saves the backup (\(alertText(saved)))")
+            answer(saved, Text.uiOk.text)
             _ = await waitUntil(5) { !saved.isVisible }
         } else {
             check(false, "the backup is saved")
@@ -113,7 +113,7 @@ extension UITest {
         // the new key listed: the account's name and address, Your key, Valid
         _ = await waitUntil(5) { table?.numberOfRows == 1 }
         check(table?.numberOfRows == 1 && keyCell(table, 0, 0) == account.name && keyCell(table, 0, 1) == account.email
-              && keyCell(table, 0, 2) == "Your key" && keyCell(table, 0, 3) == "Valid",
+              && keyCell(table, 0, 2) == Text.uiKeysKindOwn.text && keyCell(table, 0, 3) == Text.pgpKeyValid.text,
               "the list shows the new key: \(account.name), \(account.email), Your key, Valid (\((0..<4).map { keyCell(table, 0, $0) }))")
         check((find("keys.backup", in: keys) as NSButton?)?.isEnabled == true && (find("keys.verify", in: keys) as NSButton?)?.isEnabled == false,
               "Back Up applies to it, Verify does not")
@@ -127,13 +127,13 @@ extension UITest {
         press(find("keys.import", in: keys))
         if let said = await waitWindow("alert", 10) {
             check(!alertText(said).isEmpty, "importing bob.pub.asc says what was imported (\(alertText(said)))")
-            answer(said, "OK")
+            answer(said, Text.uiOk.text)
             _ = await waitUntil(5) { !said.isVisible }
         } else {
             check(false, "importing bob.pub.asc says what was imported")
         }
         let bob = await waitFor(5) { keyRow(table, "Bob Example") }
-        check(bob.map { keyCell(table, $0, 2) == "Contact" && keyCell(table, $0, 3) == "Valid" } == true,
+        check(bob.map { keyCell(table, $0, 2) == Text.uiKeysKindContact.text && keyCell(table, $0, 3) == Text.pgpKeyValid.text } == true,
               "Bob's key is listed as Contact, Valid")
 
         // Carol's private key: its passphrase asked, a wrong one said, then the address offered
@@ -158,13 +158,13 @@ extension UITest {
         }
         if let said = await waitWindow("alert", 10) {
             check(!alertText(said).isEmpty, "the right one imports it (\(alertText(said)))")
-            answer(said, "OK")
+            answer(said, Text.uiOk.text)
             _ = await waitUntil(5) { !said.isVisible }
         }
-        if let useFor = await waitWindow("alert", 10), alertText(useFor).contains("Use this key for") {
+        if let useFor = await waitWindow("alert", 10), alertText(useFor).contains(lead(.uiKeysUseFor)) {
             check(alertText(useFor).contains("carol@example.org"), "then asks to use it for carol@example.org (\(alertText(useFor)))")
             await shot(useFor, "keys-7-use-for")
-            answer(useFor, "Use It")
+            answer(useFor, Text.uiKeysUse.text)
             _ = await waitUntil(5) { !useFor.isVisible }
         } else {
             check(false, "the import asks to use the key for carol@example.org")
@@ -183,8 +183,8 @@ extension UITest {
             let value = { (id: String) in (self.find("key.properties.\(id)", in: properties) as NSTextField?)?.stringValue ?? "" }
             check(value("names").contains("Bob Example <bob@example.net>") && value("fingerprint").replacingOccurrences(of: "\n", with: " ") == bobKey.grouped
                   && value("fingerprint").split(whereSeparator: \.isWhitespace).allSatisfy { $0.count == 4 }, "Properties names Bob, the fingerprint in groups of four")
-            check(value("status") == "Valid" && !value("created").isEmpty && value("expires") == "Never" && value("algorithm") == "Ed25519"
-                  && value("source") == "Imported from a file" && value("addresses") == "bob@example.net (not verified)",
+            check(value("status") == Text.pgpKeyValid.text && !value("created").isEmpty && value("expires") == "Never" && value("algorithm") == "Ed25519"
+                  && value("source") == Text.pgpSourceFile.text && value("addresses") == "bob@example.net (not verified)",
                   "Valid, created, expires Never, Ed25519, Imported from a file, bob@example.net (not verified) "
                   + "(\(["status", "created", "expires", "algorithm", "source", "addresses"].map(value)))")
             check((find("key.properties.verify", in: properties) as NSButton?) != nil, "with Verify for a contact's key")
@@ -205,7 +205,7 @@ extension UITest {
             check(marks?.stringValue.contains("bob@example.net") == true, "and the addresses They Match marks (\(marks?.stringValue ?? "none"))")
             check(large?.stringValue.replacingOccurrences(of: "\n", with: " ") == bobKey.grouped
                   && (large?.font?.pointSize ?? 0) >= NSFont.systemFontSize * 2, "the fingerprint large, in two lines of groups")
-            check(views(NSButton.self, in: verify.contentView).map(\.title).suffix(3) == ["Cancel", "They Differ", "They Match"],
+            check(views(NSButton.self, in: verify.contentView).map(\.title).suffix(3) == [Text.uiCancel.text, Text.uiVerifyDiffer.text, Text.uiVerifyMatch.text],
                   "with They Match and They Differ")
             await shot(verify, "keys-9-verify")
             press(find("key.verify.match", in: verify))
@@ -240,7 +240,7 @@ extension UITest {
                 let key: NSPopUpButton? = find("account.security.key", in: security)
                 let autocrypt: NSButton? = find("account.security.autocrypt", in: security)
                 check(key?.titleOfSelectedItem == own?.choice, "Security names the account's key (\(key?.titleOfSelectedItem ?? ""))")
-                check(key?.itemTitles.first == "None" && key?.itemTitles.contains(carol?.choice ?? "-") == true,
+                check(key?.itemTitles.first == Text.uiAccountKeyNone.text && key?.itemTitles.contains(carol?.choice ?? "-") == true,
                       "and offers None and the other own keys (\(key?.itemTitles ?? []))")
                 check((find("account.security.new", in: security) as NSButton?) != nil && autocrypt?.state == .on,
                       "New Key, and Send my public key with my messages on")
@@ -293,7 +293,7 @@ extension UITest {
         press(find("keys.remove", in: keys))
         if let sure = await waitWindow("alert", 10) {
             check(alertText(sure).contains("Remove the key of Bob Example?"), "Remove asks first (\(alertText(sure)))")
-            answer(sure, "Remove")
+            answer(sure, Text.uiRemove.text)
         } else {
             check(false, "Remove asks first")
         }

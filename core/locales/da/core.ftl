@@ -532,6 +532,135 @@ agent-log-watched = Begyndte at følge samtalen »{ $subject }«
 agent-log-ignored = Begyndte at ignorere samtalen »{ $subject }«
 # review: new
 agent-log-unmarked = Holdt op med at følge eller ignorere samtalen »{ $subject }«
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = meddelelsen er ændret siden
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Markerede 1 meddelelse som læst (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som læst (søgning: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Markerede 1 meddelelse som ulæst (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som ulæst (søgning: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Satte flag på 1 meddelelse (søgning: { $query })
+   *[other] Satte flag på { $count } meddelelser (søgning: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Fjernede flaget fra 1 meddelelse (søgning: { $query })
+   *[other] Fjernede flaget fra { $count } meddelelser (søgning: { $query })
+}
+# review: new
+agent-log-bulk-color = Satte { $color ->
+    [red] rødt
+    [orange] orange
+    [yellow] gult
+    [green] grønt
+    [blue] blåt
+    [purple] lilla
+   *[gray] gråt
+} flag på { $count ->
+    [one] 1 meddelelse
+   *[other] { $count } meddelelser
+} (søgning: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Flyttede 1 meddelelse til { $folder } (søgning: { $query })
+   *[other] Flyttede { $count } meddelelser til { $folder } (søgning: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arkiverede 1 meddelelse (søgning: { $query })
+   *[other] Arkiverede { $count } meddelelser (søgning: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Markerede 1 meddelelse som uønsket (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som uønsket (søgning: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Markerede 1 meddelelse som ikke uønsket (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som ikke uønsket (søgning: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Slettede 1 meddelelse (søgning: { $query })
+   *[other] Slettede { $count } meddelelser (søgning: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Inden for de seneste 15 minutter
+    [hour] Inden for den seneste time
+    [hours] Inden for de seneste 4 timer
+    [day] Inden for de seneste 24 timer
+    [week] Inden for de seneste 7 dage
+   *[all] Inden for de seneste 30 dage
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } har ikke foretaget ændringer i dette tidsrum, som kan fortrydes.
+    [one] Vil du fortryde den ændring, { $program } foretog i dette tidsrum?
+   *[other] Vil du fortryde de { $count } ændringer, { $program } foretog i dette tidsrum?
+}
+# review: new
+agent-undo-since-detail = Meddelelser kommer tilbage i de mapper, de kom fra, læst/ulæst-status og flag bliver, som de var, og meddelelser, der stadig venter i Udbakke, slettes. Det, du eller serveren har ændret siden, bliver, som det er.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Intet blev fortrudt.
+    [one] Fortrød 1 ændring.
+   *[other] Fortrød { $count } ændringer.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 meddelelse var ikke længere, hvor ændringen havde lagt den.
+   *[other] { $count } meddelelser var ikke længere, hvor ændringen havde lagt dem.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 meddelelse er ændret siden, af dig eller på serveren, og blev ladt, som den er.
+   *[other] { $count } meddelelser er ændret siden, af dig eller på serveren, og blev ladt, som de er.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 meddelelse havde allerede forladt Udbakke.
+   *[other] { $count } meddelelser havde allerede forladt Udbakke.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 ændring kan ikke fortrydes.
+   *[other] { $count } ændringer kan ikke fortrydes.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Denne meddelelse accepterer invitationen »{ $summary }« ({ $when }).
+    [tentative] Denne meddelelse accepterer foreløbigt invitationen »{ $summary }« ({ $when }).
+   *[decline] Denne meddelelse afslår invitationen »{ $summary }« ({ $when }).
+} Arrangørens kalender registrerer den. Dit svar på invitationen ændres først, når meddelelsen er sendt.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Accepteret: { $summary }
+    [tentative] Foreløbig: { $summary }
+   *[decline] Afvist: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } har accepteret denne invitation.
+    [tentative] { $name } har foreløbigt accepteret denne invitation.
+   *[decline] { $name } har afslået denne invitation.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -598,6 +727,8 @@ agent-terminal-program-linux = Et program startet fra en terminal ({ $terminal }
 agent-connect-title-terminal = { $programs } vil bruge din mail
 # review: new
 agent-connect-terminal-detail = Alle AI-agenter, du starter fra denne terminal, deler den adgang, du giver her. Hvis en agent skal have sin egen adgang, skal du føje --name og et navn efter eget valg til dens argumenter i agentens MCP-indstillinger.
+# review: new
+agent-connect-claimed = Programmet oplyste, at det var { $claimed }. Inbox Classic har tjekket, hvilket program der startede det: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

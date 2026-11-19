@@ -3,7 +3,7 @@
 <p>Kun agentti muodostaa yhteyden ensimmäisen kerran, Inbox Classic näyttää sen ohjelman nimen ja pyytää käyttöoikeuksia. Valitse sallitut toiminnot:</p>
 <ul>
     <!--review--><li>lukea postia: tarkastella kansioita, viestejä ja keskusteluja sekä viestien enintään 10 Mt:n PDF-, Office- ja kuvatiedostoja, hakea viestejä ja yhteystietoja sekä tarkastella viestisääntöjä</li><!--/review-->
-    <!--review--><li>järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja ja niiden värejä, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda kansioita, nimetä omia kansioitasi uudelleen, seurata ja ohittaa keskusteluja, poistaa viestejä siirtämällä ne kansioon <b data-text="folder-deleted"></b> ja peruuttaa postituslistojen tilauksia luvallasi</li><!--/review-->
+    <!--review--><li>järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja ja niiden värejä, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda kansioita, nimetä omia kansioitasi uudelleen, seurata ja ohittaa keskusteluja, poistaa viestejä siirtämällä ne kansioon <b data-text="folder-deleted"></b>, kaikki nämä myös kerralla kaikille haun löytämille viesteille, sekä peruuttaa postituslistojen tilauksia luvallasi</li><!--/review-->
     <li>kirjoittaa luonnoksia, jotka sinä lähetät, sekä muokata tai hylätä itse luomiaan luonnoksia, kunnes tallennat ne</li>
     <li>lähettää viestejä, joista jokainen edellyttää erillistä hyväksyntääsi</li>
 </ul>
@@ -16,6 +16,8 @@
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> on oletusvalinta eikä lähetä peruutuspyyntöjä.</li>
 </ul>
 <p>Agentti ei voi käyttää kansiossa <b data-text="folder-junk"></b> olevia viestejä tilausten peruuttamiseen. Ohjelmakohtainen raja on 30 hyväksymääsi peruutuspyyntöä viimeisten 24 tunnin aikana. Myös epäonnistuneet pyynnöt lasketaan mukaan.</p>
+<!--review--><h2>Monen viestin muuttaminen kerralla</h2><!--/review-->
+<!--review--><p>Agentti, jolla on oikeus järjestellä postia, voi muuttaa kaikki haun löytämät viestit yhdellä kertaa, esimerkiksi merkitä kaikki uutiskirjeet luetuiksi tai siirtää ne kansioon. Ensin se laskee viestit ja näkee niistä muutaman. Sitten se muuttaa juuri ne viestit, enintään 1 000 kerrallaan, eikä koskaan sen jälkeen saapunutta postia. Inbox Classic ei kysy sinulta ensin, koska kaiken voi perua. Lokissa muutos näkyy yhtenä rivinä, esimerkiksi ”Merkitsi 37 viestiä luetuiksi (haku: from:news)”, ja yksi kumoaminen peruu sen kokonaan.</p><!--/review-->
 <h2>Käyttöoikeuksien tarkastelu ja muuttaminen</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> näyttää ohjelmat, joille olet sallinut tai estänyt yhteyden, sekä agenttien toimet uusimmasta alkaen.</p>
 <!--review--><p>Agentin lukemat tiedot näkyvät yhtenä rivinä kutakin ohjelmaa ja tuntia kohden, esimerkiksi ”Luki 14 viestiä ja haki 3 kertaa”. <!--os:windows-->Valitse rivi<!--/os--><!--os:mac,linux-->Avaa rivi sen nuolella<!--/os-->, niin näet luettujen viestien aiheet ja agentin hakemat tekstit, mutta et koskaan viestien tekstiä. Lokia säilytetään 30 päivää. Sen tyhjentäminen ei muuta sitä, montako viestiä agentti saa vielä lähettää.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> avaa ohjelman käyttöoikeudet muokattaviksi.</li>
     <li><b data-text="ui-remove"></b> poistaa ohjelman tallennetun lupapäätöksen. Käyttöoikeuksia kysytään uudelleen, kun ohjelma seuraavan kerran muodostaa yhteyden.</li>
     <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> kumoaa luettu/lukematon-merkintöjen, lippujen ja niiden värien sekä roskapostimerkintöjen muutokset sekä viestien siirrot, arkistoinnit ja poistot. Sillä voi myös perua lähettämisen, jos viesti odottaa vielä Lähtevät-kansiossa.</li><!--/review-->
+    <!--review--><li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> peruu kaiken, mitä valittu ohjelma teki valitsemanasi aikana, esimerkiksi viimeisen tunnin aikana, uusimmasta alkaen.</li><!--/review-->
 </ul>
+<!--review--><p>Viesti, jota sinä tai palvelin olette muuttaneet agentin jälkeen, jätetään ennalleen, ja Inbox Classic kertoo, montako tällaista viestiä oli. Agentti voi myös perua omat muutoksensa, mutta ei koskaan toisen ohjelman muutoksia.</p><!--/review-->
 <aside class="warning">Viestin sisältö voi yrittää ohjata agenttia välittämään tai poistamaan postiasi. Inbox Classic jättää agenteille annetusta tekstistä pois viestissä piilotetun sisällön ja ohjeistaa käsittelemään postia tietona, ei toimintaohjeina. Agenttia voidaan silti huijata. Myönnä vain tarvitsemasi oikeudet.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

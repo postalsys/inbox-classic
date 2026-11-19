@@ -549,6 +549,135 @@ agent-log-watched = Ξεκίνησε η παρακολούθηση της συζ
 agent-log-ignored = Αγνοήθηκε η συζήτηση «{ $subject }»
 # review: new
 agent-log-unmarked = Σταμάτησε η παρακολούθηση ή η αγνόηση της συζήτησης «{ $subject }»
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = το μήνυμα άλλαξε στο μεταξύ
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Επισημάνθηκε ως αναγνωσμένο 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Επισημάνθηκαν ως αναγνωσμένα { $count } μηνύματα (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Επισημάνθηκε ως αδιάβαστο 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Επισημάνθηκαν ως αδιάβαστα { $count } μηνύματα (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Προστέθηκε σημαία σε 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Προστέθηκε σημαία σε { $count } μηνύματα (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Αφαιρέθηκε η σημαία από 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Αφαιρέθηκε η σημαία από { $count } μηνύματα (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-color = Προστέθηκε σημαία σε { $count ->
+    [one] 1 μήνυμα
+   *[other] { $count } μηνύματα
+}, χρώμα: { $color ->
+    [red] κόκκινο
+    [orange] πορτοκαλί
+    [yellow] κίτρινο
+    [green] πράσινο
+    [blue] μπλε
+    [purple] μωβ
+   *[gray] γκρι
+} (αναζήτηση: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Μετακινήθηκε 1 μήνυμα στον φάκελο «{ $folder }» (αναζήτηση: { $query })
+   *[other] Μετακινήθηκαν { $count } μηνύματα στον φάκελο «{ $folder }» (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Αρχειοθετήθηκε 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Αρχειοθετήθηκαν { $count } μηνύματα (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Επισημάνθηκε ως ανεπιθύμητο 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Επισημάνθηκαν ως ανεπιθύμητα { $count } μηνύματα (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Επισημάνθηκε ως μη ανεπιθύμητο 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Επισημάνθηκαν ως μη ανεπιθύμητα { $count } μηνύματα (αναζήτηση: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Διαγράφηκε 1 μήνυμα (αναζήτηση: { $query })
+   *[other] Διαγράφηκαν { $count } μηνύματα (αναζήτηση: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Τα τελευταία 15 λεπτά
+    [hour] Την τελευταία ώρα
+    [hours] Τις τελευταίες 4 ώρες
+    [day] Τις τελευταίες 24 ώρες
+    [week] Τις τελευταίες 7 ημέρες
+   *[all] Τις τελευταίες 30 ημέρες
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] Το πρόγραμμα { $program } δεν έκανε σε αυτό το διάστημα αλλαγές που μπορούν να αναιρεθούν.
+    [one] Να αναιρεθεί η αλλαγή που έκανε το πρόγραμμα { $program } σε αυτό το διάστημα;
+   *[other] Να αναιρεθούν οι { $count } αλλαγές που έκανε το πρόγραμμα { $program } σε αυτό το διάστημα;
+}
+# review: new
+agent-undo-since-detail = Τα μηνύματα επιστρέφουν στους φακέλους από όπου ήρθαν, η κατάσταση ανάγνωσης και οι σημαίες γίνονται όπως ήταν, και τα μηνύματα που περιμένουν ακόμη στα Εξερχόμενα διαγράφονται. Ό,τι αλλάξατε εσείς ή ο διακομιστής στο μεταξύ μένει ως έχει.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Δεν αναιρέθηκε τίποτα.
+    [one] Αναιρέθηκε 1 αλλαγή.
+   *[other] Αναιρέθηκαν { $count } αλλαγές.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 μήνυμα δεν βρισκόταν πια εκεί όπου το είχε βάλει η αλλαγή.
+   *[other] { $count } μηνύματα δεν βρίσκονταν πια εκεί όπου τα είχε βάλει η αλλαγή.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 μήνυμα άλλαξε στο μεταξύ, από εσάς ή στον διακομιστή, και έμεινε ως έχει.
+   *[other] { $count } μηνύματα άλλαξαν στο μεταξύ, από εσάς ή στον διακομιστή, και έμειναν ως έχουν.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 μήνυμα είχε ήδη φύγει από τα Εξερχόμενα.
+   *[other] { $count } μηνύματα είχαν ήδη φύγει από τα Εξερχόμενα.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 αλλαγή δεν μπορεί να αναιρεθεί.
+   *[other] { $count } αλλαγές δεν μπορούν να αναιρεθούν.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Αυτό το μήνυμα αποδέχεται την πρόσκληση «{ $summary }» ({ $when }).
+    [tentative] Αυτό το μήνυμα αποδέχεται με επιφύλαξη την πρόσκληση «{ $summary }» ({ $when }).
+   *[decline] Αυτό το μήνυμα απορρίπτει την πρόσκληση «{ $summary }» ({ $when }).
+} Το ημερολόγιο του διοργανωτή την καταχωρεί. Η απάντησή σας στην πρόσκληση αλλάζει μόνο αφού σταλεί το μήνυμα.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Αποδοχή: { $summary }
+    [tentative] Αποδοχή με επιφύλαξη: { $summary }
+   *[decline] Απόρριψη: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } αποδέχτηκε αυτήν την πρόσκληση.
+    [tentative] { $name } αποδέχτηκε με επιφύλαξη αυτήν την πρόσκληση.
+   *[decline] { $name } απέρριψε αυτήν την πρόσκληση.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -616,6 +745,8 @@ agent-terminal-program-linux = που εκκινήθηκε από τερματι
 agent-connect-title-terminal = { $programs } ζητούν πρόσβαση στην αλληλογραφία σας
 # review: new
 agent-connect-terminal-detail = Κάθε πράκτορας ΤΝ που ξεκινάτε από αυτό το τερματικό μοιράζεται την πρόσβαση που επιτρέπετε εδώ. Για να έχει ένας πράκτορας δική του πρόσβαση, προσθέστε το --name και ένα όνομα της επιλογής σας στα ορίσματά του, στις ρυθμίσεις MCP του πράκτορα.
+# review: new
+agent-connect-claimed = Το πρόγραμμα δήλωσε ότι είναι το { $claimed }. Το Inbox Classic έλεγξε ποιο πρόγραμμα το ξεκίνησε: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

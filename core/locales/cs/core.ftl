@@ -537,6 +537,151 @@ agent-log-watched = Zahájeno sledování konverzace „{ $subject }“
 agent-log-ignored = Zahájeno ignorování konverzace „{ $subject }“
 # review: new
 agent-log-unmarked = Ukončeno sledování nebo ignorování konverzace „{ $subject }“
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = zpráva byla mezitím změněna
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Označeno jako přečtené: 1 zpráva (hledání: { $query })
+    [few] Označeno jako přečtené: { $count } zprávy (hledání: { $query })
+   *[other] Označeno jako přečtené: { $count } zpráv (hledání: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Označeno jako nepřečtené: 1 zpráva (hledání: { $query })
+    [few] Označeno jako nepřečtené: { $count } zprávy (hledání: { $query })
+   *[other] Označeno jako nepřečtené: { $count } zpráv (hledání: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Označeno příznakem: 1 zpráva (hledání: { $query })
+    [few] Označeno příznakem: { $count } zprávy (hledání: { $query })
+   *[other] Označeno příznakem: { $count } zpráv (hledání: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Zrušen příznak: 1 zpráva (hledání: { $query })
+    [few] Zrušen příznak: { $count } zprávy (hledání: { $query })
+   *[other] Zrušen příznak: { $count } zpráv (hledání: { $query })
+}
+# review: new
+agent-log-bulk-color = Označeno příznakem: { $count ->
+    [one] 1 zpráva
+    [few] { $count } zprávy
+   *[other] { $count } zpráv
+} (hledání: { $query }). Barva: { $color ->
+    [red] červená
+    [orange] oranžová
+    [yellow] žlutá
+    [green] zelená
+    [blue] modrá
+    [purple] fialová
+   *[gray] šedá
+}
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Přesunuto: 1 zpráva (cíl: { $folder }, hledání: { $query })
+    [few] Přesunuto: { $count } zprávy (cíl: { $folder }, hledání: { $query })
+   *[other] Přesunuto: { $count } zpráv (cíl: { $folder }, hledání: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Archivováno: 1 zpráva (hledání: { $query })
+    [few] Archivováno: { $count } zprávy (hledání: { $query })
+   *[other] Archivováno: { $count } zpráv (hledání: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Označeno jako nevyžádané: 1 zpráva (hledání: { $query })
+    [few] Označeno jako nevyžádané: { $count } zprávy (hledání: { $query })
+   *[other] Označeno jako nevyžádané: { $count } zpráv (hledání: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Označeno jako vyžádané: 1 zpráva (hledání: { $query })
+    [few] Označeno jako vyžádané: { $count } zprávy (hledání: { $query })
+   *[other] Označeno jako vyžádané: { $count } zpráv (hledání: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Odstraněno: 1 zpráva (hledání: { $query })
+    [few] Odstraněno: { $count } zprávy (hledání: { $query })
+   *[other] Odstraněno: { $count } zpráv (hledání: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Za posledních 15 minut
+    [hour] Za poslední hodinu
+    [hours] Za poslední 4 hodiny
+    [day] Za posledních 24 hodin
+    [week] Za posledních 7 dní
+   *[all] Za posledních 30 dní
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] Program { $program } v této době neprovedl žádné změny, které lze vrátit zpět.
+    [one] Vrátit zpět změnu, kterou program { $program } v této době provedl?
+    [few] Vrátit zpět { $count } změny, které program { $program } v této době provedl?
+   *[other] Vrátit zpět { $count } změn, které program { $program } v této době provedl?
+}
+# review: new
+agent-undo-since-detail = Zprávy se vrátí do složek, odkud přišly, stav přečtení a příznaky budou jako dřív a zprávy, které dosud čekají ve složce Pošta k odeslání, se odstraní. Co jste mezitím změnili vy nebo server, zůstane beze změny.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nic nebylo vráceno zpět.
+    [one] Vrácena zpět 1 změna.
+    [few] Vráceny zpět { $count } změny.
+   *[other] Vráceno zpět { $count } změn.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 zpráva už nebyla tam, kam ji změna přesunula.
+    [few] { $count } zprávy už nebyly tam, kam je změna přesunula.
+   *[other] { $count } zpráv už nebylo tam, kam je změna přesunula.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 zpráva byla mezitím změněna, vámi nebo na serveru, a zůstala beze změny.
+    [few] { $count } zprávy byly mezitím změněny, vámi nebo na serveru, a zůstaly beze změny.
+   *[other] { $count } zpráv bylo mezitím změněno, vámi nebo na serveru, a zůstalo beze změny.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 zpráva už opustila složku Pošta k odeslání.
+    [few] { $count } zprávy už opustily složku Pošta k odeslání.
+   *[other] { $count } zpráv už opustilo složku Pošta k odeslání.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 změnu nelze vrátit zpět.
+    [few] { $count } změny nelze vrátit zpět.
+   *[other] { $count } změn nelze vrátit zpět.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Tato zpráva přijímá pozvánku „{ $summary }“ ({ $when }).
+    [tentative] Tato zpráva předběžně přijímá pozvánku „{ $summary }“ ({ $when }).
+   *[decline] Tato zpráva odmítá pozvánku „{ $summary }“ ({ $when }).
+} Kalendář organizátora ji zaznamená. Vaše odpověď na pozvánku se změní až po odeslání zprávy.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Přijato: { $summary }
+    [tentative] Předběžně přijato: { $summary }
+   *[decline] Odmítnuto: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name }: tato pozvánka byla přijata.
+    [tentative] { $name }: tato pozvánka byla předběžně přijata.
+   *[decline] { $name }: tato pozvánka byla odmítnuta.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
@@ -611,6 +756,8 @@ agent-terminal-program-linux = Program spuštěný z terminálu ({ $terminal })
 agent-connect-title-terminal = { $programs } chtějí používat vaši poštu
 # review: new
 agent-connect-terminal-detail = Všichni agenti AI, které spustíte z tohoto terminálu, sdílejí přístup, který zde povolíte. Chcete-li některému z nich dát vlastní přístup, přidejte v nastavení MCP agenta do jeho argumentů --name a název podle svého výběru.
+# review: new
+agent-connect-claimed = Program se představil jako { $claimed }. Inbox Classic ověřil, který program ho spustil: { $program }.
 
 ## Keys
 
