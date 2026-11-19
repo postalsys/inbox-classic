@@ -249,469 +249,245 @@ ui-no-match-in = Meklēšanas vieta: „{ $folder }”. Meklē ziņojumu tēmās
 ui-no-items = Šajā skatā nav ziņojumu.
 ui-choose-folder = Izvēlieties mapi, lai redzētu tās ziņojumus.
 ui-unsubscribe = Atteikties no abonēšanas
-# review: new
 ui-open-in-calendar = Atvērt kalendārā
-# review: new
-ui-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājs nevarētu identificēt jūsu datoru. Noklikšķiniet šeit, lai lejupielādētu attēlus.
-# review: new
-ui-not-shown = Ziņojumu nevarēja parādīt.
-# review: new
-ui-attachment-not-read = Pielikumu nevarēja nolasīt.
-# review: new
-ui-attachment-not-saved = Pielikumu nevarēja saglabāt.
-# review: new
+ui-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājam būtu grūtāk izsekot, kad lasāt ziņojumu. Noklikšķiniet šeit, lai tos lejupielādētu.
+ui-not-shown = Neizdevās parādīt ziņojumu.
+ui-attachment-not-read = Neizdevās nolasīt pielikumu.
+ui-attachment-not-saved = Neizdevās saglabāt pielikumu.
 ui-not-downloaded = Ziņojums vēl nav lejupielādēts.
-# review: new
-ui-leave-list = Vai atteikties no šī adresātu saraksta?
-# review: new
-ui-leave-one-click = Inbox Classic nosūtīs atteikšanās pieprasījumu uz { $target }. Netiks atvērta neviena tīmekļa lapa un netiks nosūtīts neviens e-pasta ziņojums.
-# review: new
-ui-leave-mail = Lai atteiktos, nosūtiet e-pasta ziņojumu uz { $target }. Inbox Classic to sagatavos jūsu vietā. Nosūtiet ziņojumu, lai apstiprinātu.
-# review: new
+ui-leave-list = Vai atteikties no šī adresātu saraksta abonēšanas?
+ui-leave-one-click = Inbox Classic nosūtīs atteikšanās pieprasījumu vietnei „{ $target }”. Tīmekļa lapa netiks atvērta un e-pasta ziņojums netiks nosūtīts.
+ui-leave-mail = Inbox Classic sagatavos ziņojumu ar pieprasījumu atteikties no abonēšanas. Saņēmējs: { $target }. Nosūtiet šo ziņojumu, lai iesniegtu pieprasījumu.
 ui-leave-web = Adresātu saraksta atteikšanās lapa tiks atvērta jūsu pārlūkprogrammā ({ $target }).
-# review: new
-ui-unsubscribing = Atsakās no { $target }...
-# review: new
+ui-unsubscribing = Nosūta atteikšanās pieprasījumu vietnei „{ $target }”...
 ui-cannot-unsubscribe = Šajā ziņojumā nav iespējas atteikties no abonēšanas.
-# review: new
-ui-unsubscribed = Atteikšanās pieprasījums pieņemts. Adresātu saraksts paziņo, ka pārtrauks sūtīt šos ziņojumus.
-# review: new
+ui-unsubscribed = Atteikšanās pieprasījums pieņemts.
 ui-not-unsubscribed = Neizdevās atteikties no abonēšanas: { $reason }
-# review: new
 ui-event-span = { $start } līdz { $end }
-# review: new
-ui-event-floating = { $when } (sūtītāja laiks)
-# review: new
+ui-event-floating = { $when } (laika josla nav noteikta)
 ui-invitation = Uzaicinājums: { $title }
-# review: new
 ui-invitation-updated = Atjaunināts uzaicinājums: { $title }
-# review: new
 ui-invitation-canceled = Atcelts: { $title }
-# review: new
 ui-invitation-answer = Atbilde uz uzaicinājumu: { $title }
-# review: new
 ui-no-title = (bez nosaukuma)
-# review: new
 ui-organizer = Organizators: { $name }
-# review: new
-ui-invitation-not-read = Uzaicinājumu nevarēja nolasīt.
-# review: new
-ui-no-calendar = Šajā datorā nav kalendāra lietotnes, ar ko atvērt uzaicinājumus (.ics failus).
-# review: new
-ui-messages-not-changed = Ziņojumus nevarēja mainīt.
-# review: new
+ui-invitation-not-read = Neizdevās nolasīt uzaicinājumu.
+ui-no-calendar = Neizdevās atvērt uzaicinājumu kalendāra lietotnē. Pārbaudiet, vai datorā ir lietotne .ics failu atvēršanai.
+ui-messages-not-changed = Neizdevās mainīt ziņojumus.
 ui-new-folder-in-selected = Jaunā mape tiks izveidota atlasītajā mapē.
-# review: new
 ui-new-folder-at-top = Jaunā mape tiks izveidota konta augšējā līmenī.
-# review: new
-ui-folder-not-created = Mapi nevarēja izveidot.
-# review: new
-ui-folder-not-renamed = Mapi nevarēja pārdēvēt.
-# review: new
-ui-folder-not-deleted = Mapi nevarēja izdzēst.
-# review: new
+ui-folder-not-created = Neizdevās izveidot mapi.
+ui-folder-not-renamed = Neizdevās pārdēvēt mapi.
+ui-folder-not-deleted = Neizdevās izdzēst mapi.
 ui-rename-folder-intro = Ievadiet jaunu nosaukumu mapei „{ $folder }”.
-# review: new
 ui-properties-of = { $subject }: rekvizīti
-# review: new
-ui-internet-headers = Šī ziņojuma interneta galvenes:
-# review: new
-ui-save-messages-in = Saglabāt ziņojumus mapē
-# review: new
+ui-internet-headers = Šī ziņojuma galvenes:
+ui-save-messages-in = Izvēlieties mapi ziņojumu saglabāšanai
 ui-save-message-as = Saglabāt ziņojumu kā
-# review: new
 ui-import-choose-folder = Vispirms izvēlieties mapi, kurā importēt ziņojumus.
-# review: new
 ui-add-account-title = Pievienot pasta kontu
-# review: new
 ui-accounts-title = Konti
-# review: new
 ui-security-none = Nav (nešifrēts)
-# review: new
 ui-field-required = Aizpildiet lauku „{ $field }”.
-# review: new
 ui-email-invalid = E-pasta adrese nav derīga.
-# review: new
-ui-ports-invalid = Porti ir skaitļi no 1 līdz 65535.
-# review: new
-ui-looking-up = Meklē domēna { $domain } iestatījumus...
-# review: new
+ui-ports-invalid = Portu numuriem jābūt skaitļiem no 1 līdz 65535.
+ui-looking-up = Meklē domēna „{ $domain }” iestatījumus...
 ui-found-none = Ievadiet konta datus, ko norādījis jūsu e-pasta pakalpojumu sniedzējs.
-# review: new
 ui-found-change = Mainiet šos iestatījumus, ja jūsu pakalpojumu sniedzējs ir norādījis citus.
-# review: new
-ui-found-guess = Šai adresei iestatījumi netika atrasti. Ieteiktie serveru nosaukumi ir minējumi. Pārbaudiet tos pie sava pakalpojumu sniedzēja.
-# review: new
-ui-found-mx = Inbox Classic atpazina jūsu e-pasta pakalpojumu sniedzēju un aizpildīja tā servera iestatījumus.
-# review: new
+ui-found-guess = Šai adresei iestatījumi netika atrasti. Ieteiktie serveru nosaukumi ir tikai minējumi. Salīdziniet tos ar pakalpojumu sniedzēja norādījumiem.
+ui-found-mx = Inbox Classic atpazina jūsu e-pasta pakalpojumu sniedzēju un ievadīja tā serveru iestatījumus.
 ui-found-srv = Šie iestatījumi tika atrasti jūsu domēna DNS ierakstos.
-# review: new
-ui-found-autodiscover = Šos iestatījumus atrada Microsoft Autodiscover (Exchange).
-# review: new
+ui-found-autodiscover = Šie iestatījumi atrasti, izmantojot Microsoft Autodiscover (Exchange).
 ui-found-other = Šai adresei tika atrasti šie iestatījumi.
-# review: new
-ui-app-password-needed = { $provider } nepieņem jūsu parasto paroli pasta programmās. Izveidojiet lietotnes paroli savā { $provider } kontā un ierakstiet to nākamās veidlapas laukā Parole.
-# review: new
-ui-app-password-open = Vai atvērt { $provider } norādījumus pārlūkprogrammā?
-# review: new
+ui-app-password-needed = { $provider } pasta programmās nepieņem jūsu parasto konta paroli. Atveriet sava pakalpojumu sniedzēja vietni un konta iestatījumos izveidojiet lietotnes paroli. Ievadiet to nākamās veidlapas laukā „Parole”.
+ui-app-password-open = Vai pārlūkprogrammā atvērt norādījumus, ko sniedz { $provider }?
 ui-plain-warning = Bez šifrēšanas ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Izmantojiet šo savienojumu tikai ar serveri jūsu datorā vai lokālajā tīklā.
-# review: new
 ui-continue-ask = Vai turpināt?
-# review: new
 ui-add-sign-in-app = Pievienot pierakstīšanās lietotni...
-# review: new
-ui-turned-off = { $name } šajā datorā ir izslēgta.
-# review: new
+ui-turned-off = Iespēja „{ $name }” šajā datorā ir izslēgta.
 ui-off-here = Šajā datorā izslēgta.
-# review: new
 ui-why = Kāpēc?
-# review: new
 ui-more-sign-in = Citas pierakstīšanās iespējas...
-# review: new
 ui-other-account = Lai pievienotu citu e-pasta kontu, ievadiet savu e-pasta adresi un vārdu, ko redzēs adresāti. Pēc tam tiks meklēti servera iestatījumi.
-# review: new
 ui-field-account-name = Konta nosaukums:
-# review: new
 ui-field-name = Parādāmais vārds:
-# review: new
 ui-field-email = E-pasta adrese:
-# review: new
 ui-field-user = Lietotājvārds:
-# review: new
 ui-field-password = Parole:
-# review: new
 ui-field-imap-host = Ienākošā pasta (IMAP) serveris:
-# review: new
 ui-field-imap-port = IMAP ports:
-# review: new
 ui-field-imap-security = IMAP drošība:
-# review: new
 ui-field-smtp-host = Izejošā pasta (SMTP) serveris:
-# review: new
 ui-field-smtp-port = SMTP ports:
-# review: new
 ui-field-smtp-security = SMTP drošība:
-# review: new
 ui-field-other-addresses = Citas adreses, no kurām sūtāt:
-# review: new
-ui-sign-in-not-started = Pierakstīšanos pārlūkprogrammā nevarēja sākt.
-# review: new
-ui-sign-in-in-browser = Pierakstieties kontā { $account } atvērtajā pārlūkprogrammas logā, pēc tam atgriezieties šeit.
-# review: new
+ui-sign-in-not-started = Neizdevās sākt pierakstīšanos pārlūkprogrammā.
+ui-sign-in-in-browser = Atvērtajā pārlūkprogrammas logā pierakstieties kontā „{ $account }”, pēc tam atgriezieties šeit.
 ui-sign-in-failed = Neizdevās pierakstīties: { $reason }
-# review: new
-ui-account-not-saved = Kontu nevarēja saglabāt.
-# review: new
-ui-start-intro = Gmail, Google Workspace, Outlook.com un Microsoft 365: pierakstieties Google vai Microsoft lapā. Paroli ierakstāt tur, nekad ne Inbox Classic.
-# review: new
-ui-start-intro-apps = Pierakstieties pārlūkprogrammā ar kādu no savām pierakstīšanās lietotnēm (Citas pierakstīšanās iespējas) vai pievienojiet jebkuru e-pasta kontu ar savu vārdu un adresi tālāk.
-# review: new
+ui-account-not-saved = Neizdevās saglabāt kontu.
+ui-start-intro = Lai pievienotu Gmail, Google Workspace, Outlook.com vai Microsoft 365 kontu, pierakstieties Google vai Microsoft vietnē. Paroli ievadīsiet tur; Inbox Classic to nesaņems.
+ui-start-intro-apps = Pierakstieties pārlūkprogrammā, izmantojot kādu no savām pierakstīšanās lietotnēm (izvēle „Citas pierakstīšanās iespējas”), vai pievienojiet e-pasta kontu, tālāk ievadot savu vārdu un adresi.
 ui-use-app-password = Izmantot lietotnes paroli
-# review: new
 ui-the-provider = pakalpojumu sniedzējs
-# review: new
-ui-provider-intro = Pierakstieties kontā { $email } pakalpojumu sniedzēja vietnē ({ $provider }). Jūsu parole netiek kopīgota ar Inbox Classic. Varat arī izmantot lietotnes paroli, kas izveidota jūsu konta drošības iestatījumos.
-# review: new
-ui-provider-intro-apps = Pierakstieties kontā { $email } pakalpojumu sniedzēja vietnē ({ $provider }), izmantojot kādu no savām pierakstīšanās lietotnēm (Citas pierakstīšanās iespējas). Varat arī izmantot lietotnes paroli, kas izveidota jūsu konta drošības iestatījumos.
-# review: new
+ui-provider-intro = Pierakstieties kontā „{ $email }” vietnē, ko pārvalda { $provider }. Inbox Classic nesaņem jūsu paroli. Ja kontā ir atļautas lietotņu paroles e-pastam, varat izmantot paroli, kas izveidota konta drošības iestatījumos. Outlook.com un Microsoft 365 kontiem šeit jāizmanto pierakstīšanās pārlūkprogrammā.
+ui-provider-intro-apps = Pierakstieties kontā „{ $email }” vietnē, ko pārvalda { $provider }. Izmantojiet kādu no savām pierakstīšanās lietotnēm (izvēle „Citas pierakstīšanās iespējas”). Ja kontā ir atļautas lietotņu paroles e-pastam, varat izmantot paroli, kas izveidota konta drošības iestatījumos. Outlook.com un Microsoft 365 kontiem šeit jāizmanto pierakstīšanās pārlūkprogrammā.
 ui-finish = Pabeigt
-# review: new
 ui-logon = Pierakstīšanās
-# review: new
-ui-enter-password = Ievadiet konta { $account } paroli.
-# review: new
+ui-enter-password = Ievadiet konta „{ $account }” paroli.
 ui-signs-in-with = Pierakstīšanās lietotne: { $app }. Pierakstīšanās notiek pārlūkprogrammā, un konts izmanto šīs lietotnes serverus.
-# review: new
-ui-keep-password = Atstājiet paroles lauku tukšu, lai paturētu pašreizējo paroli.
-# review: new
+ui-keep-password = Atstājiet paroles lauku tukšu, lai saglabātu pašreizējo paroli.
 ui-remove-account = Noņemt kontu
-# review: new
-ui-remove-account-ask = Vai noņemt šo kontu no Inbox Classic? Tā pasts paliek serverī; kopija šajā datorā un saglabātā parole tiek noņemta.
-# review: new
+ui-remove-account-ask = Vai noņemt šo kontu no Inbox Classic? Tiks dzēsti tā ziņojumi šajā datorā un saglabātie pierakstīšanās dati. Ziņojumi serverī paliks, taču ziņojumi, kas glabājas tikai šajā datorā, tiks zaudēti.
 ui-col-email = E-pasta adrese
-# review: new
 ui-col-incoming = Ienākošā pasta serveris
-# review: new
 ui-type-email = Ierakstiet savu e-pasta adresi, vards@example.com.
-# review: new
 ui-ai-agent = MI aģents
-# review: new
 ui-ai-agent-access = MI aģenta piekļuve
-# review: new
 ui-ai-agents = MI aģenti
-# review: new
 ui-program-path = Programma: { $path }
-# review: new
 ui-it-may = Atļautās darbības:
-# review: new
 ui-accounts-it-may-use = Atļautie konti:
-# review: new
 ui-send-message-ask = Vai nosūtīt ziņojumu?
-# review: new
 ui-col-name = Nosaukums
-# review: new
 ui-never = Nekad
-# review: new
 ui-connect-agent = Pievienot MI aģentu
-# review: new
-ui-connect-agent-intro = Pievienojiet šo sava aģenta MCP serveriem (Claude Desktop: Settings > Developer > Edit Config):
-# review: new
+ui-connect-agent-intro = Pievienojiet šīs rindas sava aģenta MCP serveru iestatījumiem (Claude Desktop: Settings > Developer > Edit Config):
 ui-col-program = Programma
-# review: new
 ui-col-may = Atļaujas
-# review: new
-ui-col-last-used = Pēdējoreiz izmantots
-# review: new
+ui-col-last-used = Pēdējā lietošana
 ui-col-when = Kad
-# review: new
 ui-col-what = Darbība
-# review: new
 ui-sign-in-app = Pierakstīšanās lietotne
-# review: new
 ui-sign-in-apps = Pierakstīšanās lietotnes
-# review: new
 ui-add-sign-in-app-title = Pievienot pierakstīšanās lietotni
-# review: new
-ui-preset-app-name = { $provider } pierakstīšanās lietotne
-# review: new
+ui-preset-app-name = Pierakstīšanās lietotne: { $provider }
 ui-issuer-not-checked = izdevēju nevar pārbaudīt
-# review: new
-ui-checking-issuer = Pārbauda { $issuer }...
-# review: new
+ui-checking-issuer = Pārbauda izdevēju: { $issuer }...
 ui-issuer-unusable = Izdevēju nevar izmantot: { $reason }
-# review: new
 ui-issuer-usable = Izdevēju var izmantot.
-# review: new
-ui-sign-in-app-not-saved = Pierakstīšanās lietotni nevarēja saglabāt: { $reason }
-# review: new
+ui-sign-in-app-not-saved = Neizdevās saglabāt pierakstīšanās lietotni: { $reason }
 ui-check = &Pārbaudīt
-# review: new
 ui-fill-in-for = Izmantot iestatījumus:
-# review: new
 ui-app-name = Nosaukums:
-# review: new
 ui-issuer = Izdevējs:
-# review: new
 ui-client-id = Klienta ID:
-# review: new
 ui-client-secret = Klienta noslēpums:
-# review: new
 ui-scopes = Atļaujas (scopes):
-# review: new
 ui-imap-server = IMAP serveris:
-# review: new
 ui-smtp-server = SMTP serveris:
-# review: new
 ui-redirect-uri = Novirzīšanas URI:
-# review: new
-ui-sign-in-app-intro = Pierakstīšanās lietotne ir OAuth klients, ko reģistrējat pie sava pakalpojumu sniedzēja, lai pierakstītos pārlūkprogrammā. Izvēlieties pakalpojumu sniedzēju, lai aizpildītu tā iestatījumus, pēc tam pievienojiet klienta ID un klienta noslēpumu, ja pakalpojumu sniedzējs tādu deva.
-# review: new
-ui-remove-secret = Klienta noslēpums ir saglabāts. Ievadiet jaunu, lai to aizstātu, vai noņemiet saglabāto noslēpumu
-# review: new
+ui-sign-in-app-intro = Pierakstīšanās lietotne ir OAuth klients, ko reģistrējat pie sava pakalpojumu sniedzēja, lai pierakstītos pārlūkprogrammā. Izvēlieties pakalpojumu sniedzēju, lai ievadītu tā iestatījumus, pēc tam pievienojiet klienta ID un klienta noslēpumu, ja pakalpojumu sniedzējs to ir izsniedzis.
+ui-remove-secret = Noņemt saglabāto klienta noslēpumu. Lai to aizstātu, ievadiet jaunu.
 ui-register-it = Reģistrējiet lietotni pie sava pakalpojumu sniedzēja
-# review: new
-ui-built-in-note = { $name } ir iebūvēta. Varat mainīt tikai to, vai tā tiek piedāvāta jauniem kontiem.
-# review: new
-ui-client-with-secret = Klienta ID: { $client }, ar klienta noslēpumu.
-# review: new
-ui-client-public = Klienta ID: { $client }, publisks klients (bez noslēpuma).
-# review: new
+ui-built-in-note = Lietotne „{ $name }” ir iebūvēta Inbox Classic. Varat mainīt tikai to, vai tā tiek piedāvāta jauniem kontiem.
+ui-client-with-secret = Klienta ID: { $client }. Klienta noslēpums ir saglabāts.
+ui-client-public = Publisks klients bez noslēpuma. Klienta ID: { $client }.
 ui-no-accounts = Nav kontu
-# review: new
 ui-remove-sign-in-app = Noņemt pierakstīšanās lietotni
-# review: new
-ui-remove-sign-in-app-ask = Vai noņemt pierakstīšanās lietotni { $name } un tās saglabāto klienta noslēpumu?
-# review: new
-ui-sign-in-app-not-removed = Pierakstīšanās lietotne netika noņemta. { $reason }
-# review: new
+ui-remove-sign-in-app-ask = Vai noņemt pierakstīšanās lietotni „{ $name }” un tās saglabāto klienta noslēpumu?
+ui-sign-in-app-not-removed = Neizdevās noņemt pierakstīšanās lietotni. { $reason }
 ui-sign-in-apps-intro = Pierakstīšanās lietotnes ļauj kontiem pierakstīties pārlūkprogrammā. Lietotne, kas nav atzīmēta, netiek piedāvāta jauniem kontiem; konti, kas to jau izmanto, turpina darboties.
-# review: new
 ui-col-issuer = Izdevējs
-# review: new
 ui-col-used-by = Izmanto
-# review: new
-ui-options-system-default = Sistēmas noklusējums ({ $language })
-# review: new
+ui-options-system-default = Sistēmas valoda ({ $language })
 ui-settings-general = Vispārīgi
-# review: new
 ui-settings-reading = Lasīšana
-# review: new
-ui-settings-new-mail = Jauns pasts
-# review: new
+ui-settings-new-mail = Jauni ziņojumi
 ui-settings-sending = Sūtīšana
-# review: new
 ui-settings-default-apps = Noklusējuma lietotnes
-# review: new
 ui-settings-message-list = Ziņojumu saraksts
-# review: new
 ui-settings-messages = Ziņojumi
-# review: new
 ui-settings-encryption = Šifrēšana
-# review: new
 ui-settings-language = Valoda
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = &Lietot
-# review: new
 ui-language-label = &Valoda:
-# review: new
 ui-restart-note = Restartējiet Inbox Classic, lai mainītu valodu.
-# review: new
 ui-restart-ask = Pēc restartēšanas Inbox Classic būs šajā valodā: { $language }. Restartēt tūlīt?
-# review: new
-ui-notify-new-mail = &Paziņot, kad pienāk jauns pasts
-# review: new
+ui-notify-new-mail = &Paziņot par jauniem ziņojumiem
 ui-new-folder-title = Jauna mape
-# review: new
 ui-rename-folder-title = Pārdēvēt mapi
-# review: new
 ui-delete-folder-question = Vai dzēst mapi „{ $folder }” ar tās ziņojumiem un tajā esošajām mapēm? Tā tiks izdzēsta arī serverī.
 ui-properties = R&ekvizīti
-# review: new
 ui-account-sync = Sūtīt un saņe&mt
-# review: new
 ui-account-properties = &Rekvizīti...
-# review: new
 ui-account-move-up = Pārvietot &augšup
-# review: new
 ui-account-move-down = Pārvietot l&ejup
 ui-menu-open = &Atvērt
 ui-menu-flag = &Karodziņš
 ui-menu-view-source = Skatīt p&irmkodu
-# review: new
 ui-save-attachments = Saglabāt pielikumus
-# review: new
 ui-attachment-open = Atvērt
-# review: new
 ui-attachment-save-as = Saglabāt kā...
-# review: new
 ui-attachment-save-all = Saglabāt visus...
-# review: new
-ui-attachment-show-in-message = Rādīt vēstulē
-# review: new
+ui-attachment-show-in-message = Rādīt ziņojumā
 ui-attachments-strip = Pielikumi
-# review: new
 ui-attachment-note-title = Šī faila atvēršana
-# review: new
-ui-attachment-program-tip = Šāda veida failiem atvēršana ir izslēgta: tie var palaist programmas. Saglabājiet failu, lai to atvērtu paši.
-# review: new
-ui-clear-flag = &Notīrīt karodziņu
-# review: new
+ui-attachment-program-tip = Šeit nevar atvērt šāda veida failus, jo tie var palaist programmas. Lai failu atvērtu paši, vispirms to saglabājiet.
+ui-clear-flag = &Noņemt karodziņu
 ui-button-move = &Pārvietot
-# review: new
 ui-button-copy = &Kopēt
-# review: new
 ui-find-folder = Meklēt mapi
-# review: new
-ui-new-folder-in = Jaunā mape tiks izveidota mapē { $folder }.
-# review: new
+ui-new-folder-in = Jaunā mape tiks izveidota mapē „{ $folder }”.
 ui-outbox-send-all = &Sūtīt visus tagad
-# review: new
 ui-yes = Jā
-# review: new
 ui-no = Nē
-# review: new
 ui-try-again = Mēģināt vēlreiz
 ui-remove = Noņem&t
 ui-signature-of = Paraksta teksts: { $account }
-# review: new
 ui-sign-in-with = Pierakstīties ar { $provider }
-# review: new
 ui-sign-in-in-browser-yours = Pierakstieties savā kontā atvērtajā pārlūkprogrammas logā, pēc tam atgriezieties šeit.
-# review: new
 ui-browser-sign-in-server = { $server } (pierakstīšanās pārlūkprogrammā)
-# review: new
 ui-dont-allow = Neatļaut
-# review: new
 ui-allow = &Atļaut
-# review: new
 ui-dont-send = Nesūtīt
 ui-dont-unsubscribe = Neatteikties
-# review: new
 ui-edit-first = &Vispirms rediģēt
-# review: new
 ui-new-address = Jauna adrese
-# review: new
 ui-turn-away = A&traidīt
-# review: new
 ui-clear-agent-log = Vai notīrīt aģentu darbību vēsturi?
-# review: new
 ui-clear-agent-log-detail = Tas neatsauks aģentu veiktās izmaiņas.
-# review: new
-ui-let-agents-connect = Ļaut &MI aģentiem pieslēgties Inbox Classic
-# review: new
+ui-let-agents-connect = Ļa&ut MI aģentiem pieslēgties Inbox Classic
 ui-change-button = Mainīt…
-# review: new
 ui-undo-button = Atsaukt
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Atsaukt kopš…
-# review: new
-ui-undo-since-span = Atsaukt, ko šī programma darīja:
-# review: new
+ui-undo-since-span = Atsaukt šīs programmas darbības:
 ui-take-back = Atsaukt
-# review: new
 ui-rules-title = Ziņojumu kārtulas
-# review: new
-ui-rules-intro = Kārtulas kārto jaunos iesūtnes ziņojumus, kamēr Inbox Classic darbojas. Atbilstošās kārtulas tiek izpildītas pēc kārtas. Kad kārtula pārvieto ziņojumu ārpus iesūtnes, citas kārtulas tam vairs netiek piemērotas.
-# review: new
-ui-rules-none = Vēl nav kārtulu. Noklikšķiniet uz Jauna, lai to izveidotu.
-# review: new
+ui-rules-intro = Kamēr Inbox Classic darbojas, jaunajiem ziņojumiem mapē „Iesūtne” tiek piemērotas kārtulas. Ziņojumam atbilstošās kārtulas tiek izpildītas pēc kārtas. Ja kāda kārtula pārvieto ziņojumu ārpus šīs mapes, pārējās kārtulas tam vairs netiek piemērotas.
+ui-rules-none = Vēl nav kārtulu. Noklikšķiniet uz pogas „Jauna”, lai izveidotu kārtulu.
 ui-rule-new = &Jauna...
-# review: new
 ui-rule-edit = &Rediģēt...
-# review: new
 ui-rule-delete-button = &Dzēst
-# review: new
 ui-rule-title = Ziņojumu kārtula
-# review: new
 ui-rule-name = Nosaukums:
-# review: new
 ui-rule-account = Konts:
-# review: new
 ui-rule-all-accounts = Visi konti
-# review: new
 ui-rule-query = Meklēšanas kritēriji:
-# review: new
 ui-rule-query-hint = Izmantojiet meklēšanas vārdus, piemēram, from:ann@example.com, subject:rēķins vai list:news.example.com, tāpat kā meklēšanas lodziņā.
-# review: new
 ui-rule-count = { $count ->
-    [one] Pašlaik šiem kritērijiem atbilst { $count } iesūtnes ziņojums.
-   *[other] Pašlaik šiem kritērijiem atbilst { $count } iesūtnes ziņojumi.
+    [zero] Pašlaik šiem kritērijiem atbilst { $count } ziņojumu mapē „Iesūtne”.
+    [one] Pašlaik šiem kritērijiem atbilst { $count } ziņojums mapē „Iesūtne”.
+   *[other] Pašlaik šiem kritērijiem atbilst { $count } ziņojumi mapē „Iesūtne”.
 }
-# review: new
 ui-rule-show = &Rādīt
-# review: new
 ui-rule-actions = Darbības:
-# review: new
 ui-rule-move = &Pārvietot uz:
-# review: new
 ui-rule-mark-read = Atzīmēt kā &lasītu
-# review: new
 ui-rule-flag = Atzīmēt ar &karodziņu
-# review: new
 ui-rule-archive = &Arhivēt
-# review: new
-ui-rule-junk = Pārvietot uz mapi &Nevēlamais e-pasts
-# review: new
+ui-rule-junk = Pārvietot uz mapi „&Nevēlamais e-pasts”
 ui-rule-delete = &Dzēst
-# review: new
-ui-rule-quiet = Ne&ziņot man par to
-# review: new
-ui-rule-apply-now = Piemērot arī ziņojumiem, kas jau ir &iesūtnē
-# review: new
+ui-rule-quiet = Nerādīt pa&ziņojumu
+ui-rule-apply-now = Piemērot arī ziņojumiem, kas jau ir mapē „&Iesūtne”
 ui-rule-delete-ask = Vai dzēst kārtulu „{ $name }”?
-# review: new
 ui-create-rule = Izveidot kārtulu...
-# review: new
 ui-rules-applied = { $count ->
-    [one] Jūsu kārtulas sakārtoja { $count } ziņojumu
-   *[other] Jūsu kārtulas sakārtoja { $count } ziņojumus
+    [one] Jūsu kārtulas apstrādāja { $count } ziņojumu
+   *[other] Jūsu kārtulas apstrādāja { $count } ziņojumus
 }
-# review: new
 ui-col-rule-matches = Kritēriji
-# review: new
 ui-clear-button = &Notīrīt
 # review: new
 ui-how-to-connect = Kā pievienot aģentu…
