@@ -166,8 +166,8 @@ pub struct Mailbox {
     pub list_load: Rc<ListLoad>,
     /// The load of the list asked of the core, drawn when its `ListReady` comes
     loading: RefCell<Option<Pending>>,
-    /// The pages of the list drawn asked of the core
-    page_requests: RefCell<HashSet<u64>>,
+    /// The pages of the list drawn asked of the core: each request's offset
+    page_requests: RefCell<HashMap<u64, u64>>,
     /// Select All: every message of the list, counted and not listed; None when the selection is the rows'
     all: RefCell<Option<Selected>>,
     /// The summary of Select All being counted off the window thread, 0 for none
@@ -545,11 +545,8 @@ impl Mailbox {
             glib::Propagation::Stop
         });
         let weak = Rc::downgrade(self);
-        self.list.connect_page_wanted(move |offset| {
-            if let Some(this) = weak.upgrade() {
-                this.ask_page(offset);
-            }
-        });
+        self.list
+            .connect_page_wanted(move |offset| weak.upgrade().is_some_and(|this| this.ask_page(offset)));
         // the window gone: what it waits for is not read
         let weak = Rc::downgrade(self);
         self.window.connect_destroy(move |_| {
@@ -1227,23 +1224,26 @@ impl Mailbox {
     }
 
     /// A page of the list shown asked of the core, as its rows are drawn; not while another list is being read (its
-    /// rows are not those shown)
-    fn ask_page(&self, offset: u64) {
+    /// rows are not those shown). False when it was not asked.
+    fn ask_page(&self, offset: u64) -> bool {
         if self.loading.borrow().is_some() {
-            return;
+            return false;
         }
-        let asked = shell().core.list_load_page(&self.list.view(), offset);
-        if let Ok(request) = asked {
-            self.page_requests.borrow_mut().insert(request);
-        }
+        let Ok(request) = shell().core.list_load_page(&self.list.view(), offset) else {
+            return false;
+        };
+        self.page_requests.borrow_mut().insert(request, offset);
+        true
     }
 
     /// A page of the list read off the window thread: drawn in place of its blank lines when it is of the list shown
     fn page_ready(&self, request: u64) {
-        if !self.page_requests.borrow_mut().remove(&request) {
+        let Some(offset) = self.page_requests.borrow_mut().remove(&request) else {
             return;
-        }
+        };
         let Some(Ok(page)) = shell().core.list_load_result(request) else {
+            // not read: asked for again when its rows are drawn
+            self.list.page_not_read(offset);
             return;
         };
         if self.loading.borrow().is_some() {
@@ -1262,7 +1262,7 @@ impl Mailbox {
     /// The pages asked for and not here dropped
     fn cancel_pages(&self) {
         let core = &shell().core;
-        for request in self.page_requests.take() {
+        for request in self.page_requests.take().into_keys() {
             core.list_load_cancel(request);
         }
     }

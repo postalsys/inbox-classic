@@ -29,8 +29,11 @@ const FOLDER_WIDTH: i32 = 130;
 /// The least the Folder column of a search leaves the Subject column
 const MIN_SUBJECT_WIDTH: i32 = 90;
 
-/// Asks the core for the page of the list at an offset
-type AskPage = Rc<dyn Fn(u64)>;
+/// Asks the core for the page of the list at an offset; false when the window can not ask now (another list is being
+/// read, which takes the place of this one)
+type AskPage = Rc<dyn Fn(u64) -> bool>;
+/// Whether the page at an offset is on screen or next to it
+type InSight = Rc<dyn Fn(u32) -> bool>;
 
 mod imp {
     use super::*;
@@ -53,15 +56,18 @@ mod imp {
         /// The view the rows are read through
         pub view: RefCell<pe_core::ListView>,
         pub total: Cell<u32>,
-        /// The pages here, the least recently used first: read rows, or blank ones while their page is asked for
+        /// The pages read, the least recently used first (a row of a page not here is a blank line until it comes)
         pub pages: RefCell<Vec<(u32, Vec<super::MessageRow>)>>,
-        /// The offsets of the pages asked for since the list was drawn
+        /// The offsets of the pages asked of the core and not here yet: a page here again, or dropped from the pages
+        /// kept, is asked for again when a row of it is drawn
         pub asked: RefCell<HashSet<u32>>,
         /// Pages a row drawn wants, asked for once the drawing is done
         pub wanted: RefCell<Vec<u32>>,
         pub asking: Cell<bool>,
         /// Asks the core for the page at an offset (`ListPageReady` brings it)
         pub ask: RefCell<Option<AskPage>>,
+        /// Whether the page at an offset is on screen or next to it; None: every page wanted is asked for
+        pub in_sight: RefCell<Option<InSight>>,
     }
 
     #[glib::object_subclass]
@@ -82,44 +88,34 @@ mod imp {
             self.total.get()
         }
 
-        /// The row at `position` from the pages here; a page not here is blank lines of the row's height, and is
-        /// asked of the core with the page after it (no query here: GTK asks while it draws)
+        /// The row at `position` from the pages here. A row of a page not here is a blank line of the row's height,
+        /// not kept, and its page is wanted with the page after it (no query here: GTK asks while it draws, and on a
+        /// change of the whole list it reads every row, so a row read must neither push a page read out of those
+        /// kept nor ask for a page nobody sees)
         fn item(&self, position: u32) -> Option<glib::Object> {
             let total = self.total.get();
             if position >= total {
                 return None;
             }
             let offset = position / PAGE * PAGE;
-            let mut pages = self.pages.borrow_mut();
-            let found = pages.iter().position(|(at, _)| *at == offset);
-            let index = match found {
-                Some(index) => {
+            {
+                let mut pages = self.pages.borrow_mut();
+                if let Some(index) = pages.iter().position(|(at, _)| *at == offset) {
                     // the most recently used page goes last
                     let page = pages.remove(index);
                     pages.push(page);
-                    pages.len() - 1
+                    let row = pages
+                        .last()
+                        .and_then(|(_, rows)| rows.get((position - offset) as usize).cloned());
+                    // a page shorter than the list said has blank lines at its end
+                    return Some(row.unwrap_or_else(super::MessageRow::blank).upcast());
                 }
-                None => {
-                    if pages.len() >= PAGES_KEPT {
-                        pages.remove(0);
-                    }
-                    let rows = (offset..total.min(offset + PAGE))
-                        .map(|_| super::MessageRow::blank())
-                        .collect();
-                    pages.push((offset, rows));
-                    drop(pages);
-                    self.want(offset);
-                    if offset + PAGE < total {
-                        self.want(offset + PAGE);
-                    }
-                    pages = self.pages.borrow_mut();
-                    pages.len() - 1
-                }
-            };
-            pages[index]
-                .1
-                .get((position - offset) as usize)
-                .map(|row| row.clone().upcast())
+            }
+            self.want(offset);
+            if offset + PAGE < total {
+                self.want(offset + PAGE);
+            }
+            Some(super::MessageRow::blank().upcast())
         }
     }
 
@@ -140,9 +136,13 @@ mod imp {
                 imp.asking.set(false);
                 let wanted = std::mem::take(&mut *imp.wanted.borrow_mut());
                 let ask = imp.ask.borrow().clone();
-                if let Some(ask) = ask {
-                    for offset in wanted {
-                        ask(u64::from(offset));
+                let in_sight = imp.in_sight.borrow().clone();
+                for offset in wanted {
+                    // only the pages on screen or next to it; one not asked is asked for when its rows are drawn
+                    let needed = in_sight.as_ref().is_none_or(|in_sight| in_sight(offset));
+                    let asked = needed && ask.as_ref().is_some_and(|ask| ask(u64::from(offset)));
+                    if !asked {
+                        imp.asked.borrow_mut().remove(&offset);
                     }
                 }
             });
@@ -189,7 +189,6 @@ impl MessageModel {
             && let Ok(offset) = u32::try_from(offset)
         {
             pages.push((offset, rows.into_iter().map(MessageRow::new).collect()));
-            imp.asked.borrow_mut().insert(offset);
         }
         drop(pages);
         let now = u32::try_from(total).unwrap_or(u32::MAX);
@@ -202,7 +201,9 @@ impl MessageModel {
     fn fill(&self, offset: u64, rows: Vec<Message>) -> Option<(u32, u32)> {
         let imp = self.imp();
         let total = imp.total.get();
-        let offset = u32::try_from(offset).ok().filter(|o| *o < total && o % PAGE == 0)?;
+        let offset = u32::try_from(offset).ok()?;
+        imp.asked.borrow_mut().remove(&offset);
+        let offset = Some(offset).filter(|o| *o < total && o % PAGE == 0)?;
         let count = total.min(offset + PAGE) - offset;
         let mut rows: Vec<MessageRow> = rows.into_iter().take(count as usize).map(MessageRow::new).collect();
         // a page shorter than the list says (it changed since it was counted): blank to the end, until it is read again
@@ -321,6 +322,7 @@ impl MessageList {
         rows_view.add_controller(file_drop_target());
         let sort_button = sort_button();
         let widget = list_stack(&view, &rows_view, &sort_button);
+        *model.imp().in_sight.borrow_mut() = Some(in_sight(&model, &widget, &view, &rows_view));
         Rc::new(MessageList {
             view,
             rows_view,
@@ -588,8 +590,24 @@ impl MessageList {
     }
 
     /// What asks the core for a page of the list, when a row of one not here is drawn
-    pub fn connect_page_wanted(&self, ask: impl Fn(u64) + 'static) {
+    pub fn connect_page_wanted(&self, ask: impl Fn(u64) -> bool + 'static) {
         *self.model.imp().ask.borrow_mut() = Some(Rc::new(ask));
+    }
+
+    /// The message of row `position` as the list has it now: None while its page is not here (the e2e driver)
+    #[cfg(feature = "e2e")]
+    pub fn message_at(&self, position: u32) -> Option<Message> {
+        self.model
+            .item(position)
+            .and_downcast::<MessageRow>()?
+            .with(Message::clone)
+    }
+
+    /// The page at `offset` was asked for and not read: asked for again when its rows are drawn
+    pub fn page_not_read(&self, offset: u64) {
+        if let Ok(offset) = u32::try_from(offset) {
+            self.model.imp().asked.borrow_mut().remove(&offset);
+        }
     }
 
     /// A page of the list read at `offset`, drawn in place of its blank lines with the selection kept
@@ -798,6 +816,33 @@ fn sort_button() -> gtk::MenuButton {
     button.add_css_class("sort-button");
     button.set_widget_name("sort-button");
     button
+}
+
+/// Whether the page at an offset is among the rows of the list shown on screen, or a page next to them: those asked
+/// of the core. Every page while the list has no size yet.
+fn in_sight(model: &MessageModel, stack: &gtk::Stack, view: &gtk::ColumnView, rows: &gtk::ListView) -> InSight {
+    let model = model.downgrade();
+    let (stack, view, rows) = (stack.clone(), view.clone(), rows.clone());
+    Rc::new(move |offset| {
+        let Some(model) = model.upgrade() else {
+            return false;
+        };
+        let adjustment = if stack.visible_child_name().as_deref() == Some("columns") {
+            rows.vadjustment()
+        } else {
+            view.vadjustment()
+        };
+        let total = model.n_items();
+        let Some(adjustment) = adjustment.filter(|a| a.upper() > 0.0 && total > 0) else {
+            return true;
+        };
+        let row = adjustment.upper() / f64::from(total);
+        let first = (adjustment.value() / row) as u32;
+        let last = ((adjustment.value() + adjustment.page_size()) / row) as u32;
+        let from = (first / PAGE * PAGE).saturating_sub(PAGE);
+        let to = last / PAGE * PAGE + PAGE;
+        (from..=to).contains(&offset)
+    })
 }
 
 /// The two lists in a stack: the Classic one, and the Columns one under its Sorted by button
@@ -1237,4 +1282,144 @@ fn file_drop_target() -> gtk::DropTarget {
         true
     });
     target
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn message(uid: u64) -> Message {
+        Message {
+            id: uid as i64,
+            folder_id: 1,
+            info: pe_store::MessageInfo {
+                uid,
+                ..Default::default()
+            },
+            cached: false,
+            thread: None,
+            mark: Default::default(),
+            snippet: None,
+            sender_auth: 0,
+            logo: None,
+            contact: None,
+            snippet_is_state: false,
+        }
+    }
+
+    fn page(offset: u32) -> Vec<Message> {
+        (offset..offset + PAGE).map(|at| message(u64::from(at) + 1)).collect()
+    }
+
+    /// The model of a list of `total` rows with its first page, and the offsets it asks for (`refuse`: the window
+    /// can not ask now)
+    fn model(total: u64, refuse: Rc<Cell<bool>>) -> (MessageModel, Rc<RefCell<Vec<u64>>>) {
+        let model: MessageModel = glib::Object::new();
+        let asked: Rc<RefCell<Vec<u64>>> = Rc::default();
+        let into = asked.clone();
+        *model.imp().ask.borrow_mut() = Some(Rc::new(move |offset| {
+            if refuse.get() {
+                return false;
+            }
+            into.borrow_mut().push(offset);
+            true
+        }));
+        model.reset(total, Some((0, page(0))));
+        (model, asked)
+    }
+
+    /// The idle callbacks run: the pages wanted are asked for
+    fn idle() {
+        let context = glib::MainContext::default();
+        while context.iteration(false) {}
+    }
+
+    /// `test` owning GLib's default context, where the model's idle callbacks go, one test at a time
+    fn with_context(test: impl FnOnce()) {
+        static ONE_AT_A_TIME: std::sync::Mutex<()> = std::sync::Mutex::new(());
+        let _turn = ONE_AT_A_TIME.lock().unwrap_or_else(|e| e.into_inner());
+        let context = glib::MainContext::default();
+        let _owner = context.acquire().expect("the default context");
+        test();
+    }
+
+    fn uid(model: &MessageModel, position: u32) -> Option<u64> {
+        model.item(position).and_downcast::<MessageRow>()?.with(|m| m.info.uid)
+    }
+
+    /// The pages asked for come, as the core answers them
+    fn answer(model: &MessageModel, asked: &RefCell<Vec<u64>>) {
+        for offset in asked.take() {
+            model.fill(offset, page(offset as u32));
+        }
+    }
+
+    /// Rows read far down the list (an accessibility client, a long scroll) drop the first page from the pages kept:
+    /// its rows read again are blank at first, then asked for and filled, never blank for good, which left the Inbox
+    /// blank on Omarchy with rows a click could not open
+    #[test]
+    fn a_page_dropped_from_those_kept_is_asked_for_again() {
+        with_context(|| {
+            let (model, asked) = model(3065, Rc::default());
+            assert_eq!(uid(&model, 0), Some(1));
+            for at in 1..=PAGES_KEPT as u32 + 1 {
+                let _ = model.item(at * PAGE);
+                idle();
+                answer(&model, &asked);
+            }
+            assert_eq!(
+                uid(&model, 0),
+                None,
+                "the first page was dropped: its rows are blank for now"
+            );
+            idle();
+            assert!(
+                asked.borrow().contains(&0),
+                "and asked for again ({:?})",
+                asked.borrow()
+            );
+            answer(&model, &asked);
+            assert_eq!(uid(&model, 0), Some(1));
+            assert_eq!(uid(&model, 99), Some(100));
+        });
+    }
+
+    /// GTK reads every row when the whole list changes: the first page stays, and only the pages on screen or next to
+    /// it are asked of the core, not every page of the list
+    #[test]
+    fn reading_every_row_asks_only_for_the_pages_in_sight() {
+        with_context(|| {
+            let (model, asked) = model(3065, Rc::default());
+            *model.imp().in_sight.borrow_mut() = Some(Rc::new(|offset| offset < 200));
+            for position in 0..3065 {
+                let _ = model.item(position);
+            }
+            idle();
+            assert_eq!(
+                *asked.borrow(),
+                vec![100],
+                "the page after the first, nothing further down"
+            );
+            assert_eq!(uid(&model, 0), Some(1), "the first page is still here");
+            assert_eq!(uid(&model, 99), Some(100));
+        });
+    }
+
+    /// A page the window did not ask for (another list was being read) is asked for when its rows are drawn again
+    #[test]
+    fn a_page_not_asked_for_is_asked_for_later() {
+        with_context(|| {
+            let refuse = Rc::new(Cell::new(true));
+            let (model, asked) = model(3065, refuse.clone());
+            assert_eq!(uid(&model, 250), None);
+            idle();
+            assert!(asked.borrow().is_empty());
+            refuse.set(false);
+            assert_eq!(uid(&model, 250), None, "blank until its page comes");
+            idle();
+            assert!(asked.borrow().contains(&200), "asked for now ({:?})", asked.borrow());
+            answer(&model, &asked);
+            assert_eq!(uid(&model, 250), Some(251));
+        });
+    }
 }

@@ -511,6 +511,19 @@ Screenshot: `folders-6-one-account`
 - New Folder with Flagged selected makes the folder at the top of the list
 - Flagged has no right-click menu: its messages are of every folder
 
+## 27a. A folder of many pages (Linux)
+
+Screenshot: `many-1-pages`
+
+A folder Many of 950 messages, more pages than the list keeps; three of its oldest flagged. GTK reads every row of a list drawn again, which once pushed its first page out for good (a blank list whose rows opened nothing).
+
+- from Flagged, with a message of it read, back to Many: as many rows as the core lists, the first ones filled
+- its top row selected opens its message
+- folders clicked in a row before their lists come, then Many: the same
+- after a sync reads the list again: the same
+- row 930, scrolled to, gets its page and opens its message
+- Many is deleted again
+
 ## 28. An AI agent
 
 Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`, `agents-8-draft`, `agents-9-reads`, `agents-10-terminal`, `agents-11-bulk`, `agents-12-undo-since`, `agents-13-invitation`
