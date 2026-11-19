@@ -4,6 +4,7 @@
 
 use super::steps::{agent_said, date_now, folder_id};
 use super::*;
+use pe_core::i18n::Text;
 
 const NEWSLETTER_SUBJECT: &str = "Club newsletter";
 
@@ -184,12 +185,14 @@ async fn undo_since(d: &Driver) {
     };
     let rows = entry_rows(&agents);
     let titles: Vec<String> = rows.iter().map(|row| row.title().to_string()).collect();
-    let bulk = "Marked 2 messages read (search: subject:\"Club newsletter\")";
+    // the catalog's words of the change of the two newsletters, and of it taken back
+    let bulk = pe_core::i18n::tr_args(
+        Text::AgentLogBulkRead,
+        &[("count", 2u64.into()), ("query", "subject:\"Club newsletter\"".into())],
+    );
+    let bulk_back = pe_core::i18n::tr_args(Text::AgentLogTakenBack, &[("entry", (&bulk).into())]);
     let first = rows.iter().position(|row| row.title() == bulk);
-    let taken_back = titles
-        .iter()
-        .filter(|t| t.starts_with(bulk) && t.contains("taken back"))
-        .count();
+    let taken_back = titles.iter().filter(|t| **t == bulk_back).count();
     d.check(
         first.is_some() && taken_back == 1,
         &format!("the change of many messages is one row of the log, the one taken back marked so ({titles:?})"),
@@ -243,10 +246,10 @@ async fn undo_since(d: &Driver) {
         .unwrap_or_default();
     d.check(
         spans.as_ref().is_some_and(|s| s.selected() == 0)
-            && label_of(&root, "agent-undo-span-label") == "Take back what this program did:"
+            && label_of(&root, "agent-undo-span-label") == crate::words::plain(Text::UiUndoSinceSpan)
             && labels.len() == 6
-            && labels.first().is_some_and(|l| l == "In the last 15 minutes")
-            && labels.last().is_some_and(|l| l == "In the last 30 days"),
+            && labels.first() == pe_core::agents::undo_span_label(0).as_ref()
+            && labels.last() == pe_core::agents::undo_span_label(5).as_ref(),
         &format!("it asks what to take back, in spans, In the last 15 minutes first ({labels:?})"),
     );
     let host_id = shell()
@@ -265,10 +268,14 @@ async fn undo_since(d: &Driver) {
         })
         .unwrap_or(0);
     let question = label_of(&root, "agent-undo-question");
+    let asked = pe_core::i18n::tr_args(
+        Text::AgentUndoSinceQuestion,
+        &[("program", "My AI agent".into()), ("count", count.into())],
+    );
     d.check(
         count >= 1
-            && question == format!("Take back the {count} changes My AI agent made in this time?")
-            && label_of(&root, "agent-undo-detail").starts_with("Messages go back to the folders they came from"),
+            && question == asked
+            && label_of(&root, "agent-undo-detail") == pe_core::i18n::tr(Text::AgentUndoSinceDetail),
         &format!("with the count of the changes it would take back ({question})"),
     );
     d.check(
@@ -291,8 +298,20 @@ async fn undo_since(d: &Driver) {
         spans.set_selected(5);
     }
     let longer = label_of(&root, "agent-undo-question");
+    let longer_count = host_id
+        .and_then(|id| {
+            shell()
+                .core
+                .agent_undoable_since(id, pe_core::agents::undo_span_since(5)?)
+                .ok()
+        })
+        .unwrap_or(0);
+    let longer_asked = pe_core::i18n::tr_args(
+        Text::AgentUndoSinceQuestion,
+        &[("program", "My AI agent".into()), ("count", longer_count.into())],
+    );
     d.check(
-        longer.starts_with("Take back the ") && ask.has_response("take"),
+        longer == longer_asked && ask.has_response("take"),
         &format!("another span asks again ({longer})"),
     );
     answer(&ask, "Take Back");
@@ -302,7 +321,7 @@ async fn undo_since(d: &Driver) {
     .await;
     let said = report.as_ref().map(alert_text).unwrap_or_default();
     d.check(
-        said.contains("Took back "),
+        said.lines().next().is_some_and(|first| first != pe_core::i18n::tr_args(Text::AgentUndoDone, &[("count", 0u64.into())])),
         &format!("Take Back says what it took back, and what it left ({said})"),
     );
     if let Some(report) = &report {
@@ -312,7 +331,7 @@ async fn undo_since(d: &Driver) {
         wait_until(10, || {
             entry_rows(&agents)
                 .iter()
-                .filter(|row| row.title().starts_with(bulk) && row.title().contains("taken back"))
+                .filter(|row| row.title() == bulk_back)
                 .count()
                 == 2
         })
