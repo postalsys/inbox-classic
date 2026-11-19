@@ -2,187 +2,98 @@
 
 ## The menus
 
-# review: new
 menu-file = &Файл
-# review: new
 menu-edit = &Правка
-# review: new
 menu-view = &Вид
-# review: new
 menu-tools = С&ервис
-# review: new
 menu-message = &Сообщение
-# review: new
 menu-help = Спр&авка
-# review: new
 menu-layout = &Макет
-# review: new
 menu-sort-by = &Сортировка
-# review: new
 menu-text-size = &Размер текста
-# review: new
 menu-folder = Пап&ка
 menu-insert = Вс&тавка
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
-# review: new
 cmd-new-account = &Новая учетная запись...
-# review: new
 cmd-exit = &Выход
-# review: new
-cmd-sync = &Отправить и получить все
-# review: new
-cmd-mark-read = Пометить как &прочитанное
-# review: new
+cmd-sync = &Отправить и получить для всех учетных записей
+cmd-mark-read = Пом&етить как прочитанное
 cmd-mark-unread = Пометить как &непрочитанное
-# review: new
 cmd-pictures = Загрузить изо&бражения
-# review: new
 cmd-about = &О программе Inbox Classic
-# review: new
 cmd-new-mail = &Создать сообщение
-# review: new
-cmd-reply = &Ответить
-# review: new
-cmd-reply-all = Ответить &всем
-# review: new
+cmd-reply = Ответить отп&равителю
+cmd-reply-all = О&тветить всем
 cmd-forward = &Переслать
-# review: new
 cmd-help = &Содержание
-# review: new
 cmd-delete = &Удалить сообщение
-# review: new
 cmd-move = Пере&местить в папку...
-# review: new
-cmd-flag = Пометить &флажком
-# review: new
-cmd-new-folder = Новая &папка...
-# review: new
+cmd-flag = П&ометить флажком
+cmd-new-folder = Н&овая папка...
 cmd-rename-folder = Переи&меновать папку...
-# review: new
 cmd-delete-folder = &Удалить папку
-# review: new
 cmd-empty-folder = О&чистить папку
-# review: new
 ui-empty-button = Очистить
-# review: new
 cmd-accounts = Учетные &записи...
-# review: new
 cmd-find = Н&айти сообщение
-# review: new
-cmd-save-as = Сохранить &как...
-# review: new
+cmd-save-as = С&охранить как...
 cmd-print = Печ&ать...
-# review: new
 cmd-import = &Импорт сообщений...
-# review: new
 cmd-outbox = &Исходящие...
-# review: new
 cmd-properties = &Свойства
-# review: new
-cmd-mark-all-read = Пометить &все как прочитанные
-# review: new
-cmd-junk = Пометить как &нежелательное
-# review: new
+cmd-mark-all-read = Помет&ить все как прочитанные
+cmd-junk = Помет&ить как нежелательное
 cmd-not-junk = Пометить как о&бычное
-# review: new
-cmd-archive = В &архив
-# review: new
+cmd-archive = &В архив
 cmd-watch-conversation = С&ледить за беседой
-# review: new
-cmd-ignore-conversation = &Игнорировать беседу
-# review: new
+cmd-ignore-conversation = И&гнорировать беседу
 cmd-next-message = С&ледующее сообщение
-# review: new
 cmd-previous-message = Пр&едыдущее сообщение
-# review: new
 cmd-next-unread = Следующее &непрочитанное
-# review: new
 cmd-go-to-folder = Пере&йти в папку...
-# review: new
 cmd-find-in-message = Найти в &этом сообщении...
-# review: new
 ui-go-to-prompt = Перейти в папку:
-# review: new
 ui-find-in-message-hint = Найти в этом сообщении
-# review: new
 ui-find-not-found = «{ $words }» нет в этом сообщении
-# review: new
 cmd-expand-all-threads = Ра&звернуть все беседы
-# review: new
 cmd-collapse-all-threads = Сверну&ть все беседы
-# review: new
 ui-group-by-conversation = &Группировать сообщения по беседам
-# review: new
 cmd-folder-list = Список &папок
-# review: new
 cmd-layout-automatic = &Автоматический
-# review: new
 cmd-layout-classic = &Классический
-# review: new
-cmd-layout-columns = &Столбцы
-# review: new
+cmd-layout-columns = В &столбцах
 cmd-sort-date = &Дата
-# review: new
 cmd-sort-from = &Отправитель
-# review: new
 cmd-sort-subject = &Тема
-# review: new
 cmd-sort-size = &Размер
-# review: new
 cmd-sort-ascending = По &возрастанию
-# review: new
 cmd-sort-descending = По &убыванию
-# review: new
 cmd-text-size-largest = &Самый крупный
-# review: new
 cmd-text-size-larger = &Крупный
-# review: new
 cmd-text-size-medium = С&редний
-# review: new
 cmd-text-size-smaller = &Мелкий
-# review: new
 cmd-text-size-smallest = Самый ме&лкий
-# review: new
 cmd-hide-ignored = Скрыть &игнорируемые беседы
-# review: new
 cmd-hide-read = Скрыть пр&очитанные сообщения
-# review: new
 cmd-notify = &Уведомлять о новой почте
-# review: new
 cmd-open = О&ткрыть Inbox Classic
-# review: new
 cmd-default-app = Сделать почтовой программой по умол&чанию...
-# review: new
 cmd-view-source = Ис&ходный текст сообщения
-# review: new
 cmd-ai-agents = ИИ-а&генты...
-# review: new
 cmd-options = Пара&метры...
-# review: new
 cmd-message-rules = &Правила для сообщений...
-# review: new
 cmd-encryption-keys = &Ключи шифрования...
-# review: new
-cmd-create-rule-from-message = Создать п&равило из сообщения...
-# review: new
+cmd-create-rule-from-message = Со&здать правило из сообщения...
 cmd-select-all = В&ыделить все
-# review: new
-cmd-undo = &Отменить
-# review: new
+cmd-undo = О&тменить
 cmd-copy = &Копировать в папку...
-# review: new
 cmd-address-book = &Адресная книга...
-# review: new
-cmd-add-sender-to-book = Добавить отправителя в адре&сную книгу
-# review: new
+cmd-add-sender-to-book = &Добавить отправителя в адресную книгу
 cmd-import-address-book = Импорт адресной кни&ги...
-# review: new
 cmd-export-address-book = &Экспорт адресной книги...
-# review: new
 cmd-export-setup = Экспорт нас&троек и учетных записей...
-# review: new
 cmd-import-setup = Импорт наст&роек и учетных записей...
 cmd-compose-sign = &Подписать цифровой подписью
 cmd-compose-encrypt = &Зашифровать
@@ -190,276 +101,149 @@ cmd-attach-my-key = Вложить свой &открытый ключ
 
 ## The tray icon's menu
 
-# review: new
-tray-check = &Проверить новую почту
-# review: new
+tray-check = &Проверить почту
 tray-no-accounts = Учетных записей пока нет
 
 ## Words the windows of more than one platform share
 
-# review: new
 ui-tb-create-mail = Создать сообщение
-# review: new
 ui-tb-reply = Ответить
-# review: new
 ui-tb-reply-all = Ответить всем
-# review: new
 ui-tb-forward = Переслать
-# review: new
 ui-tb-print = Печать
-# review: new
 ui-tb-delete = Удалить
-# review: new
 ui-tb-junk = Нежелательное
-# review: new
 ui-tb-not-junk = Обычное
-# review: new
 ui-tb-archive = В архив
-# review: new
 ui-tb-previous = Назад
-# review: new
 ui-tb-next = Далее
-# review: new
 ui-previous-tip = Предыдущее сообщение
-# review: new
 ui-next-tip = Следующее сообщение
-# review: new
 ui-tb-sync = Отправить/получить
-# review: new
 ui-tb-mark-read = Прочитано
-# review: new
 ui-tb-mark-unread = Не прочитано
-# review: new
 ui-still-running = Inbox Classic продолжает работать
-# review: new
 ui-no-subject = (без темы)
-# review: new
 ui-quoted = «{ $subject }»
-# review: new
-ui-newest-from = Последнее сообщение от { $sender }: { $subject }
-# review: new
+ui-newest-from = Последнее сообщение: { $subject } (отправитель: { $sender })
 ui-new-messages = { $count ->
     [one] { $count } новое сообщение
     [few] { $count } новых сообщения
     [many] { $count } новых сообщений
    *[other] { $count } нового сообщения
 }
-# review: new
 ui-outbox-waiting = { $count ->
     [one] { $count } сообщение в папке «Исходящие»
     [few] { $count } сообщения в папке «Исходящие»
     [many] { $count } сообщений в папке «Исходящие»
    *[other] { $count } сообщения в папке «Исходящие»
 }
-# review: new
-ui-outbox-waits = { $subject } ожидает в папке «Исходящие»
-# review: new
+ui-outbox-waits = Ожидает отправки в папке «Исходящие»: { $subject }
 ui-outbox-sending = Отправка { $subject }...
-# review: new
-ui-from-account = От { $account }
-# review: new
-ui-sign-in-refused = Вход в { $account } отклонен, или срок действия сеанса истек.
-# review: new
+ui-from-account = С учетной записи «{ $account }»
+ui-sign-in-refused = Вход в учетную запись «{ $account }» отклонен или срок действия сеанса истек.
 ui-sign-in-again-ask = Войти снова через браузер?
-# review: new
 ui-sign-in-again-failed = Не удалось войти снова: { $reason }
-# review: new
 ui-unknown-reason = неизвестная причина
-# review: new
-ui-checking = Проверка новых сообщений в { $account }...
-# review: new
+ui-checking = Проверка новой почты в учетной записи «{ $account }»...
 ui-done = Готово
-# review: new
-ui-sent-at = { $subject } отправлено в { $time }
-# review: new
+ui-sent-at = Отправлено в { $time }: { $subject }
 ui-draft-saved = Сообщение сохранено в папке «Черновики»
-# review: new
 ui-draft-not-saved = Сообщение не сохранено в папке «Черновики»: { $reason }
-# review: new
 ui-about-core = Ядро { $version }
-# review: new
-ui-add-account-first = Сначала добавьте учетную запись почты.
-# review: new
-ui-add-account-first-link = Сначала добавьте учетную запись почты, затем снова щелкните ссылку на адрес электронной почты.
-# review: new
-ui-default-app-is = Inbox Classic является вашей почтовой программой по умолчанию: ссылки на адреса электронной почты открывают здесь новое сообщение.
-# review: new
+ui-add-account-first = Сначала добавьте почтовую учетную запись.
+ui-add-account-first-link = Сначала добавьте почтовую учетную запись, затем снова щелкните ссылку на адрес электронной почты.
+ui-default-app-is = Inbox Classic используется для почты по умолчанию: при нажатии на ссылку с адресом электронной почты здесь открывается новое сообщение.
 ui-select-message-first = Сначала выберите сообщение.
-# review: new
 ui-store-not-opened = Не удалось открыть хранилище почты.
-# review: new
 ui-store-or-cert-not-opened = Не удалось открыть хранилище почты или файл сертификата.
-# review: new
 ui-help-title = Справка Inbox Classic
-# review: new
 ui-help-missing = В этой копии Inbox Classic нет справки.
-# review: new
 ui-ok = ОК
-# review: new
 ui-cancel = Отмена
-# review: new
 ui-close = Закрыть
-# review: new
 ui-col-subject = Тема
-# review: new
-ui-col-from = От
-# review: new
+ui-col-from = Отправитель
 ui-col-to = Кому
-# review: new
 ui-col-received = Получено
-# review: new
 ui-watched-conversation = Отслеживаемая беседа
-# review: new
 ui-col-sent = Отправлено
-# review: new
 ui-col-size = Размер
-# review: new
 ui-col-folder = Папка
-# review: new
 ui-col-account = Учетная запись
-# review: new
 ui-col-queued = В очереди с
-# review: new
 ui-col-status = Состояние
-# review: new
 ui-outbox-title = Исходящие
-# review: new
 ui-outbox-status-waiting = Ожидает
-# review: new
 ui-outbox-status-not-sent = Не отправлено: { $reason }
-# review: new
-ui-outbox-status-agent = В очереди от ИИ-агента; будет отправлено в { $time }
-# review: new
+ui-outbox-status-agent = Поставлено в очередь ИИ-агентом; отправка не раньше { $time }
 ui-outbox-delete-ask = Удалить это сообщение, не отправляя его?
-# review: new
 ui-open-link = Открыть ссылку
-# review: new
 ui-edit-link = Изменить ссылку...
-# review: new
 ui-remove-link = Удалить ссылку
-# review: new
-ui-insert-attachment = Вставить вложение
-# review: new
+ui-insert-attachment = Вложить файл
 ui-insert-picture = Вставить изображение
-# review: new
 ui-filter-all = Все файлы
-# review: new
 ui-filter-pictures = Изображения
-# review: new
 ui-filter-messages = Почтовые сообщения
-# review: new
 ui-save-attachment-as = Сохранить вложение как
-# review: new
 ui-not-sent = Не удалось отправить сообщение.
-# review: new
 ui-attachment-forgotten = Вы написали «{ $word }», но файл не вложен. Все равно отправить сообщение?
-# review: new
 ui-send-anyway = Все равно отправить
-# review: new
 ui-go-back = Вернуться
-# review: new
 ui-not-saved = Не удалось сохранить сообщение.
-# review: new
 ui-saving-draft = Сохранение в папку «Черновики»...
-# review: new
 ui-compose-saved-at = Сохранено в папке «Черновики» в { $time }
-# review: new
 ui-compose-restored = Восстановлено после неожиданного закрытия Inbox Classic
-# review: new
 ui-compose-not-saved = Не сохранено в папке «Черновики»: { $reason }
-# review: new
 ui-save-changes-ask = Сохранить изменения этого сообщения в папке «Черновики»?
-# review: new
 ui-new-message-title = Новое сообщение
-# review: new
 ui-link-invalid = Введите веб-адрес (https://...) или ссылку на адрес электронной почты (mailto:...).
-# review: new
 ui-link-address = Адрес:
-# review: new
 ui-hyperlink = Гиперссылка
-# review: new
 ui-hyperlink-intro = Адрес, на который ссылается выделенный текст.
-# review: new
 ui-edit-hyperlink = Изменить гиперссылку
-# review: new
 ui-edit-hyperlink-intro = Адрес, на который ведет ссылка. Очистите адрес, чтобы удалить ссылку и оставить текст.
-# review: new
-ui-not-a-picture = Этот файл не является изображением PNG, JPEG или GIF, или он больше 10 МБ.
-# review: new
+ui-not-a-picture = Не удалось вставить изображение. Поддерживаются файлы PNG, JPEG, GIF и WebP размером не более 10 МБ.
 ui-format-color = Цвет шрифта
-# review: new
 ui-format-numbers = Нумерованный список
-# review: new
 ui-format-bullets = Маркированный список
-# review: new
 ui-format-outdent = Уменьшить отступ
-# review: new
 ui-format-indent = Увеличить отступ
-# review: new
 ui-format-left = По левому краю
-# review: new
 ui-format-center = По центру
-# review: new
 ui-format-right = По правому краю
-# review: new
 ui-format-line = Вставить горизонтальную линию
-# review: new
 ui-tb-send = Отправить
-# review: new
 ui-tb-save = Сохранить
-# review: new
 ui-tb-attach = Вложить
 ui-tb-sign = Подписать
 ui-tb-encrypt = Зашифровать
 ui-field-keys = Ключи:
-# review: new
 ui-field-from = От:
-# review: new
 ui-field-to = Кому:
-# review: new
 ui-field-cc = Копия:
-# review: new
 ui-field-bcc = Скрытая:
-# review: new
 ui-field-subject = Тема:
-# review: new
 ui-field-attach = Вложения:
-# review: new
-ui-signature = Подпись
-# review: new
-ui-signature-hint = Добавляется к новым сообщениям, ответам и пересылкам из этой учетной записи.
-# review: new
-ui-signature-not-saved = Не удалось сохранить подпись.
-# review: new
+ui-signature = Текстовая подпись
+ui-signature-hint = Добавляется к новым сообщениям, ответам и пересылкам с этой учетной записи.
+ui-signature-not-saved = Не удалось сохранить текстовую подпись.
 ui-all-inboxes = Все входящие
-# review: new
 ui-all-sent = Все отправленные
-# review: new
 ui-all-drafts = Все черновики
-# review: new
 ui-flagged-folder = С флажком
-# review: new
 ui-all-folders = Все папки
-# review: new
 ui-the-account = учетную запись
-# review: new
 ui-folder-name = Имя папки:
-# review: new
 ui-find-hint = Поиск в почте
-# review: new
-ui-find-tip = Ищет в темах, отправителях, получателях, именах вложений и тексте сообщений.
-# review: new
+ui-find-tip = Поиск по темам и тексту сообщений, именам и адресам отправителей и получателей, а также именам вложений.
 ui-clear-search = Очистить поиск
-# review: new
-ui-no-match = Нет сообщений, соответствующих запросу «{ $words }».
-# review: new
-ui-no-match-all = Поиск охватывает темы, отправителей, получателей, имена вложений и текст сообщений во всех папках. Проверьте написание или введите меньше слов.
-# review: new
-ui-no-match-in = Поиск в папке «{ $folder }» охватывает темы, отправителей, получателей, имена вложений и текст сообщений. Проверьте написание или введите меньше слов.
-# review: new
-ui-no-items = В этом представлении нет элементов.
-# review: new
-ui-choose-folder = Выберите папку, чтобы увидеть ее сообщения.
+ui-no-match = По запросу «{ $words }» сообщений не найдено.
+ui-no-match-all = Поиск выполняется во всех папках по темам и тексту сообщений, именам и адресам отправителей и получателей, а также именам вложений. Проверьте написание или введите меньше слов.
+ui-no-match-in = Область поиска: «{ $folder }». Поиск выполняется по темам и тексту сообщений, именам и адресам отправителей и получателей, а также именам вложений. Проверьте написание или введите меньше слов.
+ui-no-items = Здесь нет сообщений.
+ui-choose-folder = Выберите папку, чтобы просмотреть сообщения в ней.
 ui-unsubscribe = Отписаться
 # review: new
 ui-open-in-calendar = Открыть в календаре
@@ -779,7 +563,6 @@ ui-new-folder-title = Новая папка
 ui-rename-folder-title = Переименование папки
 # review: new
 ui-delete-folder-question = Удалить папку «{ $folder }» вместе с ее сообщениями и вложенными папками? Она будет удалена и на сервере.
-# review: new
 ui-properties = Сво&йства
 # review: new
 ui-account-sync = Отправить и &получить
@@ -789,12 +572,9 @@ ui-account-properties = &Свойства...
 ui-account-move-up = &Вверх
 # review: new
 ui-account-move-down = В&низ
-# review: new
 ui-menu-open = &Открыть
-# review: new
 ui-menu-flag = &Флажок
-# review: new
-ui-menu-view-source = &Исходный текст
+ui-menu-view-source = Ис&ходный текст
 # review: new
 ui-save-attachments = Сохранить вложения
 # review: new
@@ -829,10 +609,8 @@ ui-yes = Да
 ui-no = Нет
 # review: new
 ui-try-again = Повторить
-# review: new
 ui-remove = &Удалить
-# review: new
-ui-signature-of = Подпись: { $account }
+ui-signature-of = Текстовая подпись: { $account }
 # review: new
 ui-sign-in-with = Войти через { $provider }
 # review: new
