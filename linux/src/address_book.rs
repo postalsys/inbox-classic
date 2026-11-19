@@ -120,7 +120,7 @@ fn add_menu(widget: &impl IsA<gtk::Widget>, item: &gtk::ListItem) {
 
 /// A row of the group list: its icon, its name and, for a group, how many are in it
 fn group_row(icon: &str, name: &str, count: Option<usize>, widget_name: &str) -> gtk::ListBoxRow {
-    let image = gtk::Image::from_icon_name(icon);
+    let image = crate::icons::image(icon);
     let title = gtk::Label::new(Some(name));
     title.set_xalign(0.0);
     title.set_ellipsize(gtk::pango::EllipsizeMode::End);
@@ -699,12 +699,14 @@ fn header_bar(find: &gtk::SearchEntry) -> adw::HeaderBar {
         files.append(Some(command.label()), Some(&format!("win.{}", command.name())));
     }
     menu.append_section(None, &files);
-    let menu_button = gtk::MenuButton::builder()
-        .icon_name("open-menu-symbolic")
-        .menu_model(&menu)
-        .primary(true)
-        .tooltip_text(t!(GtkMainMenu))
-        .build();
+    let menu_button = crate::icons::kept(
+        gtk::MenuButton::builder()
+            .icon_name("open-menu-symbolic")
+            .menu_model(&menu)
+            .primary(true)
+            .tooltip_text(t!(GtkMainMenu))
+            .build(),
+    );
     menu_button.set_widget_name("book-menu");
     header.pack_end(&menu_button);
     header.pack_end(find);

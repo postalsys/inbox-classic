@@ -57,7 +57,7 @@ impl SecurityBar {
     /// "compose" under the fields of a message written
     pub fn new(prefix: &str) -> SecurityBar {
         let picture = |name: &str| {
-            let image = gtk::Image::from_icon_name("ic-lock-closed-symbolic");
+            let image = crate::icons::image("ic-lock-closed-symbolic");
             image.set_pixel_size(16);
             image.set_valign(gtk::Align::Center);
             image.set_widget_name(name);
@@ -122,7 +122,7 @@ impl SecurityBar {
         self.lock.set_visible(encrypted);
         match tone_icon(tone) {
             Some(name) => {
-                self.icon.set_icon_name(Some(name));
+                crate::icons::set(&self.icon, Some(name));
                 self.icon.set_visible(true);
             }
             None => self.icon.set_visible(false),
@@ -153,8 +153,7 @@ impl SecurityBar {
         let pictures = [&self.lock, &self.icon]
             .iter()
             .filter(|image| image.is_visible())
-            .filter_map(|image| image.icon_name())
-            .map(|name| name.to_string())
+            .filter_map(|image| crate::icons::name_of(image))
             .collect();
         Some((self.text.text().to_string(), tone, pictures))
     }
@@ -208,7 +207,7 @@ pub fn details_dialog(parent: &impl IsA<gtk::Widget>, view: &MessageView) {
     content.set_margin_bottom(12);
     content.append(&scrolled);
     content.append(&close);
-    let help = gtk::Button::from_icon_name("help-browser-symbolic");
+    let help = crate::icons::kept(gtk::Button::from_icon_name("help-browser-symbolic"));
     help.set_tooltip_text(Some(&crate::words::plain(crate::words::Text::MenuHelp)));
     help.set_widget_name("protection-details-help");
     help.connect_clicked(|_| crate::help::show(HELP_CONTEXT));

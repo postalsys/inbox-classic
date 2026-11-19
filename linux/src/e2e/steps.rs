@@ -1623,6 +1623,11 @@ pub async fn junk(d: &Driver) {
     wait_until(20, || rows() >= 1).await;
     let swapped = wait_until(5, || junk_button() == "win.not-junk").await;
     d.check(swapped, "in Junk E-mail the header bar has Not Junk in its place");
+    let by_name = icons_by_name(main.window().upcast_ref());
+    d.check(
+        by_name.is_empty(),
+        &format!("the icons of the main window, Not Junk's too, are drawn from kept icons ({by_name:?})"),
+    );
     select_row(0).await;
     d.shot(main.window(), "organize-7-junk").await;
     run_command(Command::NotJunk);
@@ -1766,9 +1771,19 @@ pub async fn message_window(d: &Driver) {
     );
     wait_until(15, || window.reader.has_view()).await;
     d.shot(&window.window, "read-16-window").await;
+    let by_name = icons_by_name(window.window.upcast_ref());
+    d.check(
+        by_name.is_empty(),
+        &format!("the message window's icons are drawn from kept icons ({by_name:?})"),
+    );
     click(window.window.upcast_ref(), "message-reply");
     match wait_compose(10).await {
         Some(c) => {
+            let by_name = icons_by_name(c.window.upcast_ref());
+            d.check(
+                by_name.is_empty(),
+                &format!("the compose window's icons are drawn from kept icons ({by_name:?})"),
+            );
             let expected = if first.starts_with("Re: ") {
                 first.clone()
             } else {

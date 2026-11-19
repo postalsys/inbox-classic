@@ -330,7 +330,7 @@ fn trusted_senders_row(setting: Setting) -> adw::ActionRow {
         .title(plain(Text::UiTrustedSendersTitle))
         .activatable(true)
         .build();
-    row.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
+    row.add_suffix(&crate::icons::image("go-next-symbolic"));
     name_row(&row, setting);
     row.connect_activated(|row| {
         if let Some(dialog) = dialog_of(row) {
@@ -483,11 +483,13 @@ fn fill_trusted_senders(group: &adw::PreferencesGroup) {
             .title(glib::markup_escape_text(&pe_core::pictures::trusted_label(&sender)))
             .build();
         row.set_widget_name("trusted-sender");
-        let remove = gtk::Button::builder()
-            .icon_name("user-trash-symbolic")
-            .tooltip_text(plain(Text::UiRemove))
-            .valign(gtk::Align::Center)
-            .build();
+        let remove = crate::icons::kept(
+            gtk::Button::builder()
+                .icon_name("user-trash-symbolic")
+                .tooltip_text(plain(Text::UiRemove))
+                .valign(gtk::Align::Center)
+                .build(),
+        );
         remove.add_css_class("flat");
         remove.set_widget_name("trusted-sender-remove");
         let (id, group_of_row, shown) = (sender.id, group.clone(), row.clone());

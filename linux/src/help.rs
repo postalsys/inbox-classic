@@ -132,10 +132,9 @@ impl Help {
         let list = gtk::ListBox::new();
         list.add_css_class("navigation-sidebar");
         list.set_selection_mode(gtk::SelectionMode::Single);
-        let none = adw::StatusPage::builder()
-            .icon_name("edit-find-symbolic")
-            .title(t!(HelpNoResults))
-            .build();
+        let none = adw::StatusPage::builder().title(t!(HelpNoResults)).build();
+        // a status page's picture is 128 pixels (64 when compact)
+        none.set_paintable(crate::icons::paintable(&["edit-find-symbolic"], 128).as_ref());
         none.add_css_class("compact");
         let lists = gtk::Stack::new();
         lists.add_named(

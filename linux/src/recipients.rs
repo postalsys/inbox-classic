@@ -70,7 +70,7 @@ fn item_row(item: &Item, name: &str) -> gtk::ListBoxRow {
     let content = gtk::Box::new(gtk::Orientation::Horizontal, 8);
     content.set_margin_top(4);
     content.set_margin_bottom(4);
-    content.append(&gtk::Image::from_icon_name(item.icon()));
+    content.append(&crate::icons::image(item.icon()));
     // the name, and the address under it, smaller: the lists on the right are narrow for both side by side
     let words = gtk::Box::new(gtk::Orientation::Vertical, 0);
     words.set_valign(gtk::Align::Center);

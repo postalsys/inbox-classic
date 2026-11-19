@@ -123,7 +123,7 @@ async fn new_key(parent: &impl IsA<gtk::Widget>) -> Option<String> {
 
 /// The word that private keys made or imported now are gone once the app closes, with a warning sign
 fn memory_only() -> gtk::Box {
-    let icon = gtk::Image::from_icon_name("dialog-warning-symbolic");
+    let icon = crate::icons::image("dialog-warning-symbolic");
     icon.set_valign(gtk::Align::Start);
     icon.add_css_class("warning");
     let label = ui::wrapped_label(&t!(UiKeysMemoryOnly));
@@ -860,7 +860,7 @@ fn pending_row(index: usize, address: &str, text: &str, redo: Rc<dyn Fn()>) -> a
         .title_lines(0)
         .build();
     row.set_widget_name(&format!("contact-key-pending-{index}"));
-    let icon = gtk::Image::from_icon_name("dialog-warning-symbolic");
+    let icon = crate::icons::image("dialog-warning-symbolic");
     icon.add_css_class("warning");
     row.add_prefix(&icon);
     let buttons = gtk::Box::new(gtk::Orientation::Vertical, 6);

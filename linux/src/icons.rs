@@ -7,13 +7,19 @@
 //! reference to an icon being finalized (GLib's "object_ref: assertion '!object_already_finalized' failed") and the
 //! app crashes later (GTK 4.22 and 4.24 alike; the UI test met it on Arch Linux as the folder tree was built again).
 //! An icon kept here is never finalized, and an image drawing a paintable looks nothing up.
+//!
+//! So no image of the app is given an icon's name: [`image`] makes one, and [`keep`] turns the image a button made
+//! for its icon name (`set_icon_name`, `icon-name` on a button, menu button or split button) into one drawing the
+//! kept icon, before it is drawn. What the toolkit draws inside its own widgets (the arrows, the Find box's
+//! magnifier, the password eye, the window buttons, a preferences page's icon in its view switcher) it looks up itself.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
 
 use gtk::gdk;
 #[cfg(feature = "e2e")]
-use gtk::{gio, prelude::*};
+use gtk::gio;
+use gtk::prelude::*;
 
 /// The pixels of an icon whose image has no size of its own, as GTK draws it
 pub const NORMAL_SIZE: i32 = 16;
@@ -62,6 +68,35 @@ pub fn show(image: &gtk::Image, names: &[&str]) {
 /// `image` shows icon `name`, nothing for None
 pub fn set(image: &gtk::Image, name: Option<&str>) {
     show(image, name.as_slice());
+}
+
+/// A new image showing icon `name`
+pub fn image(name: &str) -> gtk::Image {
+    let image = gtk::Image::new();
+    set(&image, Some(name));
+    image
+}
+
+/// Every image in `widget` (itself and all inside it) that shows an icon by its name draws the kept icon instead: for
+/// the image a button makes of an icon name, called right after the name is set, before the image is drawn
+pub fn keep(widget: &impl IsA<gtk::Widget>) {
+    let widget = widget.as_ref();
+    if let Some(image) = widget.downcast_ref::<gtk::Image>()
+        && let Some(name) = image.icon_name()
+    {
+        show(image, &[&name]);
+    }
+    let mut child = widget.first_child();
+    while let Some(at) = child {
+        keep(&at);
+        child = at.next_sibling();
+    }
+}
+
+/// `widget`, after [`keep`]: for a button built with an icon name
+pub fn kept<W: IsA<gtk::Widget>>(widget: W) -> W {
+    keep(&widget);
+    widget
 }
 
 /// The name of the icon `image` shows, as it was asked for: the first of the names of an icon kept here, the name of

@@ -143,7 +143,7 @@ async fn summary(parent: &impl IsA<gtk::Widget>, title: &str, heading: &str, row
         if !subtitle.is_empty() {
             row.set_subtitle(&subtitle);
         }
-        let image = gtk::Image::from_icon_name(icon);
+        let image = crate::icons::image(icon);
         image.set_valign(gtk::Align::Center);
         row.add_prefix(&image);
         group.add(&row);

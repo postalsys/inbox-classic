@@ -219,7 +219,7 @@ impl Mailbox {
         });
         let search_bar = gtk::Box::new(gtk::Orientation::Horizontal, 8);
         search_bar.add_css_class("info-bar");
-        search_bar.append(&gtk::Image::from_icon_name("ic-search-symbolic"));
+        search_bar.append(&crate::icons::image("ic-search-symbolic"));
         search_bar.append(&search_summary);
         search_bar.append(&create_rule);
         search_bar.append(&clear);
@@ -1874,6 +1874,7 @@ impl Mailbox {
         } else {
             "ic-mail-prohibited-symbolic"
         });
+        crate::icons::keep(&self.junk);
         self.junk.set_tooltip_text(Some(&label));
     }
 
@@ -3278,18 +3279,22 @@ fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts 
         button.set_widget_name(command.name());
         button
     };
-    let create_mail = adw::SplitButton::builder()
-        .icon_name("ic-mail-add-symbolic")
-        .tooltip_text(t!(UiTbCreateMail))
-        .dropdown_tooltip(t!(GtkToolbarCreateMailMenu))
-        .action_name(action(Command::NewMail))
-        .build();
-    let send_receive = adw::SplitButton::builder()
-        .icon_name("ic-arrow-sync-symbolic")
-        .tooltip_text(t!(UiTbSync))
-        .dropdown_tooltip(t!(GtkToolbarSendRecvMenu))
-        .action_name(action(Command::Sync))
-        .build();
+    let create_mail = crate::icons::kept(
+        adw::SplitButton::builder()
+            .icon_name("ic-mail-add-symbolic")
+            .tooltip_text(t!(UiTbCreateMail))
+            .dropdown_tooltip(t!(GtkToolbarCreateMailMenu))
+            .action_name(action(Command::NewMail))
+            .build(),
+    );
+    let send_receive = crate::icons::kept(
+        adw::SplitButton::builder()
+            .icon_name("ic-arrow-sync-symbolic")
+            .tooltip_text(t!(UiTbSync))
+            .dropdown_tooltip(t!(GtkToolbarSendRecvMenu))
+            .action_name(action(Command::Sync))
+            .build(),
+    );
     let junk = button("ic-mail-prohibited-symbolic", &t!(UiTbJunk), Command::Junk);
     junk.set_widget_name("junk");
     let reply_all = button("ic-arrow-reply-all-symbolic", &t!(UiTbReplyAll), Command::ReplyAll);
@@ -3334,12 +3339,14 @@ fn header_bar(title: &adw::WindowTitle, find: &gtk::SearchEntry) -> HeaderParts 
     // the screen's edge after it was placed, and a window manager that does not place it again (Hyprland) cuts it off
     let popover = gtk::PopoverMenu::from_model_full(&primary, gtk::PopoverMenuFlags::NESTED);
     flag_rows(&popover);
-    let menu = gtk::MenuButton::builder()
-        .icon_name("open-menu-symbolic")
-        .popover(&popover)
-        .primary(true)
-        .tooltip_text(t!(GtkMainMenu))
-        .build();
+    let menu = crate::icons::kept(
+        gtk::MenuButton::builder()
+            .icon_name("open-menu-symbolic")
+            .popover(&popover)
+            .primary(true)
+            .tooltip_text(t!(GtkMainMenu))
+            .build(),
+    );
     menu.set_widget_name("primary-menu");
     header.pack_end(&menu);
     header.pack_end(find);
@@ -3389,8 +3396,10 @@ fn unread_only_button() -> gtk::ToggleButton {
 /// A header bar button that turns a toggle of the menus on and off (the same action, so the two follow each other),
 /// with the first of `icons` the theme has
 fn command_toggle(icons: &[&str], label: &str, command: Command, name: &str) -> gtk::ToggleButton {
+    let image = gtk::Image::new();
+    crate::icons::show(&image, icons);
     let button = gtk::ToggleButton::builder()
-        .child(&gtk::Image::from_gicon(&gio::ThemedIcon::from_names(icons)))
+        .child(&image)
         .tooltip_text(label)
         .action_name(format!("win.{}", command.name()))
         .build();
@@ -3592,7 +3601,7 @@ fn folder_chooser(title: &adw::WindowTitle) -> (gtk::MenuButton, gtk::Label) {
         .build();
     title.bind_property("title", &name, "label").sync_create().build();
     let content = gtk::Box::new(gtk::Orientation::Horizontal, 6);
-    content.append(&gtk::Image::from_icon_name("ic-folder-symbolic"));
+    content.append(&crate::icons::image("ic-folder-symbolic"));
     content.append(&name);
     let popover = gtk::Popover::new();
     popover.set_widget_name("folder-list-popover");
@@ -3624,11 +3633,13 @@ fn narrow_search(find: &gtk::SearchEntry) -> (gtk::ToggleButton, gtk::SearchBar)
     let bar = gtk::SearchBar::builder().child(&entry).show_close_button(true).build();
     bar.connect_entry(&entry);
     bar.set_widget_name("find-narrow-bar");
-    let button = gtk::ToggleButton::builder()
-        .icon_name("ic-search-symbolic")
-        .tooltip_text(t!(UiFindHint))
-        .visible(false)
-        .build();
+    let button = crate::icons::kept(
+        gtk::ToggleButton::builder()
+            .icon_name("ic-search-symbolic")
+            .tooltip_text(t!(UiFindHint))
+            .visible(false)
+            .build(),
+    );
     button.set_widget_name("find-narrow-button");
     button
         .bind_property("active", &bar, "search-mode-enabled")
@@ -3742,7 +3753,7 @@ fn flag_rows(popover: &gtk::PopoverMenu) {
 
 /// A colour of the Flag menu: the mark when the selected messages have it, its flag, its name
 fn flag_row(color: FlagColor) -> gtk::Button {
-    let check = gtk::Image::from_icon_name("object-select-symbolic");
+    let check = crate::icons::image("object-select-symbolic");
     let swatch = gtk::DrawingArea::new();
     swatch.set_content_width(16);
     swatch.set_content_height(16);
@@ -3838,7 +3849,7 @@ fn undone_bar() -> (gtk::Box, gtk::Label) {
     text.set_wrap(true);
     text.set_wrap_mode(gtk::pango::WrapMode::WordChar);
     text.set_widget_name("undone-text");
-    let dismiss = gtk::Button::from_icon_name("ic-dismiss-symbolic");
+    let dismiss = crate::icons::kept(gtk::Button::from_icon_name("ic-dismiss-symbolic"));
     dismiss.add_css_class("flat");
     dismiss.set_valign(gtk::Align::Center);
     dismiss.set_tooltip_text(Some(&t!(UiClose)));
@@ -3848,7 +3859,7 @@ fn undone_bar() -> (gtk::Box, gtk::Label) {
     bar.add_css_class("info-bar");
     bar.add_css_class("undone-bar");
     bar.set_widget_name("undone-bar");
-    let icon = gtk::Image::from_icon_name("ic-warning-symbolic");
+    let icon = crate::icons::image("ic-warning-symbolic");
     icon.set_valign(gtk::Align::Center);
     bar.append(&icon);
     bar.append(&text);

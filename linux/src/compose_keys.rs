@@ -41,7 +41,7 @@ fn key_icon(key: RecipientKey) -> Option<&'static str> {
 fn key_picture(key: RecipientKey) -> gtk::Widget {
     match key_icon(key) {
         Some(name) => {
-            let image = gtk::Image::from_icon_name(name);
+            let image = crate::icons::image(name);
             image.set_pixel_size(16);
             image.set_accessible_role(gtk::AccessibleRole::Presentation);
             image.upcast()
@@ -114,7 +114,7 @@ fn action_name(command: Command) -> String {
 impl Protection {
     pub fn new() -> Protection {
         let toggle = |icon: &str, label: &str, name: &str| {
-            let button = gtk::ToggleButton::builder().icon_name(icon).build();
+            let button = crate::icons::kept(gtk::ToggleButton::builder().icon_name(icon).build());
             button.set_widget_name(name);
             button.update_property(&[gtk::accessible::Property::Label(label)]);
             button
@@ -147,12 +147,14 @@ impl Protection {
             Some(&action_name(Command::AttachMyKey)),
         );
         menu.append_section(None, &insert);
-        let menu_button = gtk::MenuButton::builder()
-            .icon_name("open-menu-symbolic")
-            .menu_model(&menu)
-            .primary(true)
-            .tooltip_text(t!(GtkMainMenu))
-            .build();
+        let menu_button = crate::icons::kept(
+            gtk::MenuButton::builder()
+                .icon_name("open-menu-symbolic")
+                .menu_model(&menu)
+                .primary(true)
+                .tooltip_text(t!(GtkMainMenu))
+                .build(),
+        );
         menu_button.set_widget_name("compose-menu");
         let keys = gtk::FlowBox::new();
         keys.set_selection_mode(gtk::SelectionMode::None);
@@ -299,7 +301,7 @@ impl Protection {
                 let picture = content
                     .and_then(|c| c.first_child())
                     .map(|first| match first.downcast::<gtk::Image>() {
-                        Ok(image) => image.icon_name().map(|n| n.to_string()).unwrap_or_default(),
+                        Ok(image) => crate::icons::name_of(&image).unwrap_or_default(),
                         Err(other) if other.is::<adw::Spinner>() => "spinner".into(),
                         Err(_) => String::new(),
                     })
@@ -788,7 +790,7 @@ impl RecipientKeys {
             find.connect_clicked(move |_| act(RowAction::Find(address.clone())));
             row.add_suffix(&find);
         }
-        let remove = gtk::Button::from_icon_name("ic-dismiss-symbolic");
+        let remove = crate::icons::kept(gtk::Button::from_icon_name("ic-dismiss-symbolic"));
         remove.add_css_class("flat");
         remove.set_valign(gtk::Align::Center);
         let remove_label = without_mnemonic(&t!(UiRecipientRemove));
@@ -811,7 +813,7 @@ impl RecipientKeys {
             .title_lines(0)
             .build();
         row.set_widget_name(&format!("recipient-key-pending-{index}"));
-        let icon = gtk::Image::from_icon_name("ic-warning-symbolic");
+        let icon = crate::icons::image("ic-warning-symbolic");
         icon.add_css_class("warning");
         row.add_prefix(&icon);
         let buttons = gtk::Box::new(gtk::Orientation::Vertical, 6);
