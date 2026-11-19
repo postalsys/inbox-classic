@@ -180,13 +180,8 @@ gtk-desktop-generic-name = Client de e-mail
 gtk-desktop-comment = Citiți și scrieți e-mailuri: un program de e-mail rapid și simplu
 gtk-desktop-keywords = poștă;email;e-mail;mesaje;corespondență;
 gtk-metainfo-summary = Un program de e-mail rapid și simplu
-# review: new
-gtk-metainfo-description = Inbox Classic citește și scrie e-mailuri cu folderele în stânga, mesajele sus și mesajul dedesubt, ca programele de e-mail de odinioară. Funcționează cu orice cont IMAP și SMTP și se conectează la Outlook.com și Microsoft 365 prin browser.
-# review: new
-gtk-metainfo-feature-sanitized = Fiecare mesaj este afișat curățat, fără scripturi, iar imaginile de pe internet doar când le permiteți
-# review: new
-gtk-metainfo-feature-search = O căutare care găsește cuvinte în subiect, în expeditori și destinatari, în numele fișierelor și în text, cu operatorii din Gmail
-# review: new
-gtk-metainfo-feature-replies = Răspunsurile pliază mesajele anterioare pe care le citează
-# review: new
-gtk-metainfo-feature-offline = E-mailurile rămân de citit și offline; parolele sunt păstrate în portcheiul dvs.
+gtk-metainfo-description = Inbox Classic este un program de e-mail cu o interfață clasică: folderele în stânga, lista mesajelor sus și mesajul selectat dedesubt. Funcționează cu orice cont IMAP și SMTP și se conectează la Outlook.com și Microsoft 365 prin browser.
+gtk-metainfo-feature-sanitized = Mesajele sunt afișate fără scripturi sau alte elemente active, iar imaginile de pe internet sunt încărcate doar cu acordul dvs.
+gtk-metainfo-feature-search = Căutare în subiecte, numele și adresele expeditorilor și destinatarilor, numele fișierelor și textul mesajelor, cu operatori de căutare ca în Gmail
+gtk-metainfo-feature-replies = În răspunsuri, mesajele anterioare citate sunt restrânse
+gtk-metainfo-feature-offline = Mesajele pot fi citite și offline, iar parolele sunt păstrate în portchei
