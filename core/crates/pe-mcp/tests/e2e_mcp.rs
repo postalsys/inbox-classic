@@ -2539,7 +2539,8 @@ fn an_agent_reads_and_watches_resources() {
             .find(|r| r.reads_hour.is_some())
             .expect("a summary of reads");
         let each = core.agent_reads_of_hour(reads.host, reads.reads_hour.unwrap()).unwrap();
-        assert!(each.iter().any(|(_, t)| t == "Read \u{201c}Hello\u{201d}"), "{each:?}");
+        let read_hello = tr_args(Text::AgentReadMessage, &[("subject", "Hello".into())]);
+        assert!(each.iter().any(|(_, t)| *t == read_hello), "{each:?}");
 
         // what is not there, or not this program's, is refused alike
         for wrong in [
