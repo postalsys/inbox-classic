@@ -1,7 +1,7 @@
 {
   "round": 2,
-  "status": "in_progress",
-  "status_note": "All fixed-scope linguistic review and static validation are complete. The reviewed-content commit and final REVIEWED/archive commit remain before publication.",
+  "status": "complete",
+  "status_note": "Round 2 is complete against the user-fixed master scope. All 28 target languages are reviewed; current inventory, context queues, static invariants, source-derived mnemonics, generated metadata and final baseline check are complete. Tests and CI were skipped as instructed.",
   "starting_commit": "e99f7e59248bed137903150db7ef417e27755d18",
   "starting_review_baseline": "7c0b1672581c9bd7a33c226f35da16cedca4b528",
   "guide": "/Users/andris/Downloads/inbox-classic-translation-guide.md",
@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Commit the fully reviewed translation state, advance REVIEWED to that concrete commit, verify zero pending/unmarked changes, archive round 2 and publish/merge under existing authorization. No test suites or CI queries.",
+  "next_batch": "No remaining review work in round 2. Future requested translation changes should start a new round from this reviewed baseline; retain the completed round-2 archive.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -105955,7 +105955,7 @@
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
     "branch": "i18n/review-resume-20261118",
-    "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
+    "note": "Round 2 complete in the authoritative isolated review checkout. The main user checkout was preserved.",
     "merge_commit": "d432ebac",
     "latest_source_audit": "The fixed review scope is fully reviewed: 36,408 catalog entries and 1,380 full help topics across 28 target languages, with zero pending marks and zero pending context languages. The current complete inventory contains 1,483 entries and 53 help topics per target language (41,524 entries and 1,484 topics); the round scope excludes previously reviewed content. This resumed update completes the final 665 entries and 79 topics in ca/fr/nb/nl/pt/pt-BR/sr-Latn/tr. It changes 558 distinct catalog values (559 cumulative corrections including the French followup) and 1,214 help wording lines, including the saved Italian sentence join. The final sweep also fixes Danish and Swedish Check/Copy mnemonic collisions. All 65 checked source-derived menu/dialog scopes pass for every target language, with no unassigned generated keys. All catalog IDs, variable/access-key counts, command ellipses, help filenames and latest translation/English hashes reconcile. The structural checkers report exactly the known 1,483 catalog and 53 help draft-mark notices per language and zero structural findings. The old-baseline global report accounts for 36,636 reviewed entries and 19,437 changed help lines; the since-start report has zero pending messages or passages. The review HTML is regenerated. Offline pe-ffi generation passed in 7.64s; all 56 installer, 24 desktop and 48 metainfo values for the eight completed languages match the catalogs, with other-language bytes unchanged. The fixed English source matches master 8757ab1c234bf3549979c06fdca14980fd3f9b80 and fetched origin/master equals publication parent 509821e926cef9a690c2d1d70db402bb6521483e. No local test suites, native GUI runs, manually triggered workflows or CI queries were performed. This is a source-context translation review, not native-speaker or release certification.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
@@ -169693,7 +169693,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Commit the fully reviewed translation state, advance REVIEWED to that concrete commit, verify zero pending/unmarked changes, archive round 2 and publish/merge under existing authorization. No test suites or CI queries.",
+    "pending_phase2_resume": "No remaining review work in round 2. Future requested translation changes should start a new round from this reviewed baseline; retain the completed round-2 archive.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -229380,7 +229380,7 @@
           }
         }
       ],
-      "coordination": "Workers return immutable locale-only major commits and exact ledgers. Root integrates, updates shared records and generates metadata. No test suites, manually triggered workflows or CI queries. Publish major validated updates per standing authorization.",
+      "coordination": "All worker assignments are complete and immutable locale milestones are integrated; no active review work remains.",
       "integrated_batches": [
         {
           "language": "pl",
@@ -230883,8 +230883,17 @@
         "/private/tmp/inbox-resumed-final-20261119-check-ro.log": "2ccc7d397c4cd13828b6a8bc0e65f0f950b96230cf19f1c89d74c1fe82f9e9be",
         "/private/tmp/inbox-resumed-final-20261119-content-proof-initial.json": "f8d354a278e87f547fd4e5c2285e69bcafba4b9f492473fcacd8f821474f5165"
       },
-      "content_commit": null,
-      "durable_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-review-completed-20261119"
+      "content_commit": "a82e74e57cb2a7c282c7955d60e1adfe732a9a4c",
+      "durable_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-review-completed-20261119",
+      "final_review_baseline": "a82e74e57cb2a7c282c7955d60e1adfe732a9a4c",
+      "baseline_check": {
+        "log": "/private/tmp/inbox-resumed-final-20261119-baseline-check.log",
+        "sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398",
+        "exit_code": 0,
+        "pending_messages": 0,
+        "pending_help_passages": 0,
+        "unmarked_changes": 0
+      }
     }
   },
   "completion_audit": "Final audit follows the explicit fixed-master scope: reconcile all 28 current target languages, exact completed inventories, English/translation hashes and context closures against master 8757ab1c234bf3549979c06fdca14980fd3f9b80 and the publication parent. Do not discover unmerged branches or add new scope; static checks and metadata generation only, with no suites or CI queries.",
@@ -249185,5 +249194,52 @@
     "remaining_scope": "This closes only the compose/security and Linux-menu followups. Broader catalogs/help and late-arrival audits remain active.",
     "current_final_status": "All 28 languages now pass the final 65-scope static audit; earlier broader-collision counts are historical and resolved."
   },
-  "ci_validation_policy": "Do not query CI status or investigate test failures, per latest explicit user instruction. Local test suites remain disabled."
+  "ci_validation_policy": "Do not query CI status or investigate test failures, per latest explicit user instruction. Local test suites remain disabled.",
+  "completion": {
+    "completed_at_utc": "2026-11-19T13:05:18.276962+00:00",
+    "fixed_scope_master": "8757ab1c234bf3549979c06fdca14980fd3f9b80",
+    "audited_publication_parent": "509821e926cef9a690c2d1d70db402bb6521483e",
+    "reviewed_content_commit": "a82e74e57cb2a7c282c7955d60e1adfe732a9a4c",
+    "review_baseline": "a82e74e57cb2a7c282c7955d60e1adfe732a9a4c",
+    "reviewed_languages": [
+      "bg",
+      "ca",
+      "cs",
+      "da",
+      "de",
+      "el",
+      "es",
+      "et",
+      "fi",
+      "fr",
+      "hr",
+      "hu",
+      "it",
+      "lt",
+      "lv",
+      "nb",
+      "nl",
+      "pl",
+      "pt",
+      "pt-BR",
+      "ro",
+      "ru",
+      "sk",
+      "sl",
+      "sr-Latn",
+      "sv",
+      "tr",
+      "uk"
+    ],
+    "reviewed_catalog_entries": 36408,
+    "reviewed_help_topics": 1380,
+    "pending_catalog_entries": 0,
+    "pending_help_topics": 0,
+    "archive_state": "docs/translation-review-round2-state.json",
+    "archive_progress": "docs/translation-review-round2-progress.md",
+    "tests_run": false,
+    "CI_checked": false,
+    "publication_branch": "i18n/review-resume-20261118",
+    "publication_authorization": "Push and merge this major completed update under the existing explicit user instruction. Final publication metadata is recorded in the durable local checkpoint."
+  }
 }
