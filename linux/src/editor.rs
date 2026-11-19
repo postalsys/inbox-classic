@@ -310,8 +310,8 @@ impl Editor {
     }
 }
 
-/// The picture file at `path` as a `data:` URI for Insert Picture, None when it can not be read or is not a PNG, JPEG
-/// or GIF picture (by its content, not its name). A file dropped on the text may be anything: its size and first
+/// The picture file at `path` as a `data:` URI for Insert Picture, None when it can not be read or is not a PNG, JPEG,
+/// GIF or WebP picture (by its content, not its name). A file dropped on the text may be anything: its size and first
 /// bytes are looked at before it is read
 pub fn picture_uri(path: &std::path::Path) -> Option<String> {
     use std::io::Read;

@@ -292,7 +292,7 @@ extension UITest {
         selectKey(table, "Bob Example")
         press(find("keys.remove", in: keys))
         if let sure = await waitWindow("alert", 10) {
-            check(alertText(sure).contains("Remove the key of Bob Example?"), "Remove asks first (\(alertText(sure)))")
+            check(alertText(sure).contains("Remove the key associated with Bob Example?"), "Remove asks first (\(alertText(sure)))")
             answer(sure, Text.uiRemove.text)
         } else {
             check(false, "Remove asks first")

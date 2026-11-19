@@ -853,6 +853,7 @@ pgp-pending = Знайдено інший ключ для адреси { $addres
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Підписано: { $signer }. Власника ключа підтверджено
 pgp-part-signed = Підписано: { $signer } (власника ключа не підтверджено)
+# review: changed
 pgp-part-other = Підписано: { $signer }. Відповідність відправнику не підтверджено
 pgp-part-unknown-key = Підписано, але ключ невідомий
 pgp-part-not-signed = Не підписано

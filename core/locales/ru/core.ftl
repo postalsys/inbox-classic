@@ -829,6 +829,7 @@ pgp-pending = Обнаружен другой ключ для адреса { $ad
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Подписано: { $signer }; владелец ключа подтвержден
 pgp-part-signed = Подписано: { $signer } (владелец ключа не подтвержден)
+# review: changed
 pgp-part-other = Подписано: { $signer }. Соответствие отправителю не подтверждено
 pgp-part-unknown-key = Подписано, но ключ неизвестен
 pgp-part-not-signed = Не подписано

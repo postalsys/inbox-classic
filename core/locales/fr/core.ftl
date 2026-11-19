@@ -762,6 +762,7 @@ pgp-pending = Une autre clé pour { $address } a été trouvée le { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Signé par { $signer }, clé vérifiée
 pgp-part-signed = Signé par { $signer } (clé non vérifiée)
+# review: changed
 pgp-part-other = Signé par { $signer } ; la signature n’a pas pu être associée à l’adresse de l’expéditeur
 pgp-part-unknown-key = Signé, mais la clé n'est pas connue
 pgp-part-not-signed = Non signé

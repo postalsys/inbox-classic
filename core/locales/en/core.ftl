@@ -749,7 +749,7 @@ pgp-pending = A different key for { $address } was found on { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Signed by { $signer }, key verified
 pgp-part-signed = Signed by { $signer } (key not verified)
-pgp-part-other = Signed by { $signer }; the key could not be matched to the sender
+pgp-part-other = Signed by { $signer }, who is not the sender
 pgp-part-unknown-key = Signed, but the key is not known
 pgp-part-not-signed = Not signed
 pgp-part-not-checked = Signature not checked

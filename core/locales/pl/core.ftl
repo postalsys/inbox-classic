@@ -834,6 +834,7 @@ pgp-pending = { $date } znaleziono inny klucz dla { $address }.
 
 pgp-part-verified = Poprawny podpis cyfrowy: { $signer }; potwierdzono właściciela klucza
 pgp-part-signed = Poprawny podpis cyfrowy: { $signer } (nie potwierdzono właściciela klucza)
+# review: changed
 pgp-part-other = Poprawny podpis cyfrowy: { $signer }; nie potwierdza zgodności z nadawcą wiadomości
 pgp-part-unknown-key = Podpis cyfrowy niesprawdzony: nieznany klucz
 pgp-part-not-signed = Bez podpisu cyfrowego

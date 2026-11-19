@@ -533,7 +533,7 @@ extension UITest {
         var said = ""
         command(.sync)
         let sorted = await waitUntil(30) {
-            if let text = status?.stringValue, text.contains("sorted by your rules") { said = text }
+            if let text = status?.stringValue, text.contains("processed by your rules") { said = text }
             return await findMessage("Archive", "Subject: Weekly news in the UI test") != nil
         }
         check(sorted, "a rule moves new mail from news@example.com to Archive")
@@ -541,10 +541,10 @@ extension UITest {
         check(((await findMessage("Archive", "Subject: Weekly news in the UI test"))?["flags"] as? [String])?.contains("\\Seen") == true,
               "and it is marked as read")
         _ = await waitUntil(10) {
-            if let text = status?.stringValue, text.contains("sorted by your rules") { said = text }
+            if let text = status?.stringValue, text.contains("processed by your rules") { said = text }
             return !said.isEmpty
         }
-        check(said.contains("1 message sorted by your rules"), "the status bar says what the rules did (\(said))")
+        check(said.contains("1 message processed by your rules"), "the status bar says what the rules did (\(said))")
         // Archive, with the message the rule put there, the status bar still saying so
         selectFolder(named: "Archive")
         if let row = await waitFor(10, { (0..<self.list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Weekly news in the UI test" } }) {
@@ -2001,7 +2001,7 @@ extension UITest {
         }, ".eml files dropped onto Archive in the folder tree are put in it, on the server")
         check(await findMessage("Archive", "not a message") == nil, "and the other file is not")
         let put: NSTextField? = find("status.text", in: main.window)
-        check(put?.stringValue == "Put 3 messages in Archive", "the status bar says what was put where (\(put?.stringValue ?? ""))")
+        check(put?.stringValue == "Queued 3 messages for import into Archive", "the status bar says what was put where (\(put?.stringValue ?? ""))")
         selectFolder(named: "Archive")
         _ = await waitUntil(20) { (0..<self.list.numberOfRows).compactMap { self.main.mailbox.row($0)?.subject }.contains("Winter berths") }
         await selectRow(0)
@@ -3377,7 +3377,7 @@ extension UITest {
             }
             let line: NSTextField? = find("agent.invitation", in: send)
             check(line?.stringValue.hasPrefix("This message accepts the invitation “Roadmap review”") == true
-                  && line?.stringValue.contains("changes only once the message has been sent") == true,
+                  && line?.stringValue.contains("once the mail server accepts the message") == true,
                   "the Send question says what it answers, above the text (\(line?.stringValue ?? "none"))")
             let compose: NSButton? = find("agent.compose", in: send)
             let dont: NSButton? = find("agent.dontSend", in: send)
@@ -3470,7 +3470,7 @@ extension UITest {
               "it asks what to take back over six spans, the last 15 minutes first (\(span?.itemTitles ?? []))")
         choose(span, 1)
         let asked = heading()
-        check(asked.range(of: "^Take back the \\d+ changes My AI agent made in this time\\?$", options: .regularExpression) != nil,
+        check(asked.range(of: "^Try to take back the \\d+ recorded changes for My AI agent in this period\\?$", options: .regularExpression) != nil,
               "a span picked, it asks with the count of the changes (\(asked))")
         check(takeBack?.isHidden == false && takeBack?.hasDestructiveAction == true && cancel?.title == Text.uiCancel.text,
               "Take Back is marked destructive, beside Cancel")
@@ -3509,7 +3509,7 @@ extension UITest {
         press(find("undoSince.takeBack", in: confirm))
         let report = await waitWindow("alert", 10)
         let said = alertText(report)
-        check(said.range(of: "Took back \\d+ changes", options: .regularExpression) != nil
+        check(said.range(of: "Took back \\d+ recorded change", options: .regularExpression) != nil
               && said.contains("1 message was changed since, by you or on the server, and was left as it is."),
               "Take Back says what it took back and what it left (\(said))")
         answer(report, Text.uiOk.text)
@@ -3527,7 +3527,7 @@ extension UITest {
             let nothing = (find("undoSince.heading", in: empty) as NSTextField?)?.stringValue ?? ""
             let takeBack: NSButton? = find("undoSince.takeBack", in: empty)
             let close: NSButton? = find("undoSince.cancel", in: empty)
-            check(nothing == "My AI agent made no changes in this time that can be taken back." && takeBack?.isHidden == true
+            check(nothing == "My AI agent has no changes in this period that can be taken back." && takeBack?.isHidden == true
                   && close?.title == "Close", "with nothing left to take back it says so and offers only Close (\(nothing))")
             press(close)
             _ = await waitUntil { !empty.isVisible }

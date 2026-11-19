@@ -813,6 +813,7 @@ pgp-pending = Pe { $date } s-a găsit o altă cheie pentru { $address }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Semnat de { $signer }; proprietarul cheii a fost confirmat
 pgp-part-signed = Semnat de { $signer } (proprietarul cheii nu a fost confirmat)
+# review: changed
 pgp-part-other = Semnat de { $signer }; semnătura nu a fost asociată expeditorului mesajului
 pgp-part-unknown-key = Semnat, dar cheia nu este cunoscută
 pgp-part-not-signed = Nesemnat

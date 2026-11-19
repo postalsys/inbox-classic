@@ -766,6 +766,7 @@ pgp-pending = Der blev fundet en anden nøgle til { $address } den { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitalt signeret af { $signer }, nøglens ejerskab er bekræftet
 pgp-part-signed = Digitalt signeret af { $signer } (nøglens ejerskab er ikke bekræftet)
+# review: changed
 pgp-part-other = Digitalt signeret af { $signer }; nøglen kunne ikke knyttes til afsenderen
 pgp-part-unknown-key = Digitalt signeret, men nøglen er ukendt
 pgp-part-not-signed = Ikke digitalt signeret

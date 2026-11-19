@@ -109,7 +109,7 @@ pub(super) async fn message_rules(d: &Driver) {
         "The newsletter lands in Archive, not the Inbox",
     );
     let main = shell().main();
-    let sorted = wait_until(20, || main.status_texts().0.contains("sorted by your rules")).await;
+    let sorted = wait_until(20, || main.status_texts().0.contains("processed by your rules")).await;
     d.check(
         sorted,
         &format!("The status bar says it was sorted ({})", main.status_texts().0),

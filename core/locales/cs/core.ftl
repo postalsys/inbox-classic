@@ -789,6 +789,7 @@ pgp-pending = Pro { $address } byl { $date } nalezen jiný klíč.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitální podpis: { $signer }, vlastnictví klíče ověřeno
 pgp-part-signed = Digitální podpis: { $signer } (vlastnictví klíče neověřeno)
+# review: changed
 pgp-part-other = Digitální podpis: { $signer }, podpis nepotvrzuje uvedeného odesílatele
 pgp-part-unknown-key = Digitálně podepsáno, ale podpisový klíč není známý
 pgp-part-not-signed = Bez digitálního podpisu

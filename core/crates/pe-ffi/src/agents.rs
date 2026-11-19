@@ -900,7 +900,7 @@ pub struct PeAgentUndoQuestion {
     pub count: u64,
     /// The moment the span reaches back to, seconds since the Unix epoch: what `pe_agent_undo_since` takes
     pub since: i64,
-    /// "Take back the 12 changes Claude made in this time?"
+    /// "Try to take back the 12 recorded changes for Claude in this period?"
     pub title: *const c_char,
     /// What taking back does and leaves
     pub detail: *const c_char,
@@ -966,8 +966,8 @@ pub unsafe extern "C" fn pe_agent_undo_question_free(info: *mut PeAgentUndoQuest
 }
 
 /// Takes back everything program `host_id` did since `since` (a question's `since`) that can be, newest first: what
-/// to tell the user (free with `pe_string_free`), "Took back 12 changes." and a line for each kind of message left as
-/// it is (moved or changed since, already sent), or NULL when it could not be done at all
+/// to tell the user (free with `pe_string_free`), "Took back 12 recorded changes, wholly or in part." and a line for
+/// each kind of message left as it is (moved or changed since, already sent), or NULL when it could not be done at all
 ///
 /// # Safety
 /// `core` must be a live handle.

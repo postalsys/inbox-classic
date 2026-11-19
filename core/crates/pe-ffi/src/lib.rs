@@ -199,7 +199,7 @@ pub unsafe extern "C" fn pe_editor_document(quote: *const c_char, folded: bool, 
 }
 
 /// The picture file at `path` (UTF-8) as a `data:` URI for the editor's Insert Picture, NULL when it can not be
-/// read or is not a PNG, JPEG or GIF picture (by its content, not its name). Free with `pe_string_free`.
+/// read or is not a PNG, JPEG, GIF or WebP picture (by its content, not its name). Free with `pe_string_free`.
 ///
 /// # Safety
 /// `path` must be NULL or a NUL-terminated string.

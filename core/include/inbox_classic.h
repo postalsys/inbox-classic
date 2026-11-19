@@ -918,7 +918,7 @@ typedef struct PeAgentUndoQuestion {
   uint64_t count;
   // The moment the span reaches back to, seconds since the Unix epoch: what `pe_agent_undo_since` takes
   int64_t since;
-  // "Take back the 12 changes Claude made in this time?"
+  // "Try to take back the 12 recorded changes for Claude in this period?"
   const char *title;
   // What taking back does and leaves
   const char *detail;
@@ -1915,7 +1915,7 @@ char *pe_editor_document(const char *quote,
                          const char *body);
 
 // The picture file at `path` (UTF-8) as a `data:` URI for the editor's Insert Picture, NULL when it can not be
-// read or is not a PNG, JPEG or GIF picture (by its content, not its name). Free with `pe_string_free`.
+// read or is not a PNG, JPEG, GIF or WebP picture (by its content, not its name). Free with `pe_string_free`.
 //
 // # Safety
 // `path` must be NULL or a NUL-terminated string.
@@ -2189,8 +2189,8 @@ const struct PeAgentUndoQuestion *pe_agent_undo_question_get(const struct PeAgen
 void pe_agent_undo_question_free(struct PeAgentUndoQuestionInfo *info);
 
 // Takes back everything program `host_id` did since `since` (a question's `since`) that can be, newest first: what
-// to tell the user (free with `pe_string_free`), "Took back 12 changes." and a line for each kind of message left as
-// it is (moved or changed since, already sent), or NULL when it could not be done at all
+// to tell the user (free with `pe_string_free`), "Took back 12 recorded changes, wholly or in part." and a line for
+// each kind of message left as it is (moved or changed since, already sent), or NULL when it could not be done at all
 //
 // # Safety
 // `core` must be a live handle.

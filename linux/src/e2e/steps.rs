@@ -185,7 +185,11 @@ pub async fn unsubscribing(d: &Driver) {
         &format!("Yes posts List-Unsubscribe=One-Click to the list ({first})"),
     );
     let done = wait_until(10, || {
-        shell().main().status_texts().0.contains("Unsubscribe request accepted")
+        shell()
+            .main()
+            .status_texts()
+            .0
+            .contains("The mailing list has accepted the unsubscribe request")
     })
     .await;
     d.check(
@@ -613,7 +617,7 @@ pub async fn agent(d: &Driver) {
         let rows = subtitles(&outbox, "");
         d.check(
             rows.first()
-                .is_some_and(|(_, subtitle)| subtitle.contains("Queued by an AI agent; sends at")),
+                .is_some_and(|(_, subtitle)| subtitle.contains("Queued by an AI agent; scheduled for")),
             "it waits in the Outbox, where it can still be deleted",
         );
         d.shot(&outbox, "agents-5-outbox").await;
@@ -813,7 +817,7 @@ async fn agent_unsubscribes(d: &Driver, out: &std::path::Path) {
         d.check(
             entries
                 .first()
-                .is_some_and(|e| e.starts_with("You did not unsubscribe from digest@list.example.com"))
+                .is_some_and(|e| e.starts_with("You did not approve unsubscribe requests for digest@list.example.com"))
                 && !undo,
             &format!("and the AI Agents log says so, with nothing to undo ({entries:?})"),
         );

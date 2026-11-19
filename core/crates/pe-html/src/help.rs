@@ -403,7 +403,11 @@ fn key_text(spec: &str, platform: Platform, language: &str) -> String {
         let has = |name: &str| modifiers.contains(&name);
         // ⇧/ is ?, as the Mac's menus write it
         let shifted_slash = has("Shift") && *key == "/";
+        // in the Mac's order: Control, Option, Shift, Command
         let mut text = String::new();
+        if has("Ctrl") {
+            text.push('\u{2303}');
+        }
         if has("Alt") {
             text.push('\u{2325}');
         }
@@ -721,6 +725,11 @@ mod tests {
         assert_eq!(
             key_text("Mod+Delete", Platform::Mac, "en"),
             "<kbd>\u{2318}\u{232B}</kbd>"
+        );
+        // Control too, as View > Folder List has it
+        assert_eq!(
+            key_text("Ctrl+Mod+S", Platform::Mac, "en"),
+            "<kbd>\u{2303}\u{2318}S</kbd>"
         );
         assert_eq!(key_text("", Platform::Windows, "en"), "");
     }

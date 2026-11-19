@@ -785,6 +785,7 @@ pgp-pending = Uma chave diferente para { $address } foi encontrada em { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Assinada por { $signer }, chave verificada
 pgp-part-signed = Assinada por { $signer } (chave não verificada)
+# review: changed
 pgp-part-other = Assinada por { $signer }; não foi possível associar a assinatura ao remetente com certeza
 pgp-part-unknown-key = Assinada, mas a chave necessária para verificar a assinatura não está disponível
 pgp-part-not-signed = Não assinada

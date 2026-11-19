@@ -190,7 +190,7 @@ async fn signing(d: &Driver) {
         "Ctrl+Shift+D in the text turns Sign on: the button pressed, the menu item checked",
     );
     d.check(
-        text == "Signed: recipients can check that it comes from you and was not changed."
+        text == "Will be signed: recipients can check that the signed content has not changed. They must also verify who owns your key."
             && tone == "good"
             && icon == ["ic-ribbon-symbolic"],
         &format!("the line says it is signed, in blue with the ribbon ({tone}, {icon:?}: {text})"),
@@ -244,7 +244,7 @@ async fn encrypting(d: &Driver) {
     );
     let (text, tone, icon) = line(&c);
     d.check(
-        text == "Encrypted and signed: only you and Alice Example can read it."
+        text == "Will be encrypted and signed for you and Alice Example."
             && tone == "verified"
             && icon == ["ic-lock-closed-symbolic", "ic-shield-checkmark-symbolic"],
         &format!("the line says who can read it, in green with the lock and the shield ({tone}, {icon:?}: {text})"),
@@ -342,7 +342,7 @@ async fn missing_key(d: &Driver) {
     let (alice, dave) = (key_row(&dialog, 0), key_row(&dialog, 1));
     d.check(
         dialog.title() == "Recipients’ Keys"
-            && intro.starts_with("One recipient has no key to encrypt to")
+            && intro.starts_with("One recipient has no usable encryption key")
             && alice.0 == "Alice Example"
             && alice.1.contains("Key verified")
             && dave.0 == "dave@example.com"
@@ -440,7 +440,7 @@ async fn reply_to_encrypted(d: &Driver) {
     };
     let text = alert_text(&question);
     d.check(
-        text.contains("This message quotes or forwards an encrypted message")
+        text.contains("This message contains text, pictures or attachments from encrypted mail")
             && question.response_label("yes") == "Turn Encryption Off"
             && question.response_label("no") == "Keep It Encrypted"
             && question.default_response().as_deref() == Some("no")

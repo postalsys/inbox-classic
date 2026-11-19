@@ -363,7 +363,7 @@ async fn undo_since(d: &Driver) {
             .unwrap_or(u64::MAX);
         let question = label_of(&root, "agent-undo-question");
         let answers = if left == 0 {
-            question.contains("made no changes in this time")
+            question.contains("has no changes in this period")
                 && again.has_response("close")
                 && !again.has_response("take")
         } else {
