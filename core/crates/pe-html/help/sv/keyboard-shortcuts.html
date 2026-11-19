@@ -1,21 +1,21 @@
-<!--review--><h1>Kortkommandon</h1>
-<p class="summary">Tangenterna för varje kommando, och tangenterna som fungerar i listor, redigeraren och Adressboken.</p>
-<p>Den första tabellen visar varje kommando som har en tangent, meny för meny. Tabellerna efter den visar tangenter som bara fungerar på ett ställe.</p>
+<h1>Kortkommandon</h1>
+<p class="summary">Kortkommandon för menyer, listor, meddelanderedigering och Adressboken.</p>
+<p>Den första tabellen visar menykommandon som har kortkommandon, meny för meny. De följande tabellerna visar kortkommandon som gäller i olika delar av programmet. På Mac kräver kommandot för mapplistan även Control tillsammans med de angivna tangenterna.</p>
 <div data-generate="shortcuts"></div>
 <h2>I meddelandelistan</h2>
 <table>
     <tr><th>Tangenter</th><th>Gör</th></tr>
     <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Markera meddelandet ovanför eller nedanför</td></tr>
-    <tr><td><kbd>Shift</kbd>+<kbd>↑</kbd> <kbd>Shift</kbd>+<kbd>↓</kbd></td><td>Lägg till meddelandet ovanför eller nedanför i markeringen</td></tr>
+    <tr><td><kbd>Shift</kbd>+<kbd>↑</kbd> <kbd>Shift</kbd>+<kbd>↓</kbd></td><td>Utöka eller minska markeringen med meddelandet ovanför eller nedanför</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>Click</kbd><!--/os--><!--os:mac--><kbd>⌘</kbd>+<kbd>Click</kbd><!--/os--></td><td>Lägg till ett meddelande i markeringen, eller ta bort det ur den</td></tr>
     <tr><td><kbd>Shift</kbd>+<kbd>Click</kbd></td><td>Markera alla meddelanden från det markerade till det här</td></tr>
-    <tr><td><!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--></td><td>Öppna meddelandet i ett eget fönster</td></tr>
+    <tr><td><!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--></td><td>Öppna meddelandet i ett eget fönster, eller ett utkast i redigeraren</td></tr>
     <tr><td><kbd>→</kbd> <kbd>←</kbd></td><td>Visa eller dölj de andra meddelandena i en konversation</td></tr>
     <tr><td><kbd>N</kbd></td><td>Gå till nästa olästa meddelande</td></tr>
     <tr><td><kbd>A</kbd></td><td>Arkivera meddelandet</td></tr>
     <tr><td><kbd>W</kbd></td><td>Bevaka konversationen</td></tr>
     <tr><td><kbd>K</kbd></td><td>Ignorera konversationen</td></tr>
-    <tr><td><kbd>Tab</kbd></td><td>Flytta mellan mapplistan, meddelandelistan och läsfönstret</td></tr>
+    <tr><td><kbd>Tab</kbd></td><td>Flytta fokus mellan fönstrets kontroller, bland annat mapplistan, meddelandelistan och läsfönstret</td></tr>
     <!--os:windows,linux--><tr><td><kbd>Menu</kbd></td><td>Öppna högerklicksmenyn för det markerade meddelandet</td></tr><!--/os-->
     <tr><td><kbd>Esc</kbd></td><td>Avsluta en sökning och visa mappen igen</td></tr>
 </table>
@@ -30,21 +30,20 @@
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os--></td><td>Markera allt, även det hopfällda ursprungliga meddelandet i ett svar</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os--></td><td>Spara meddelandet i Utkast</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>⌘Return</kbd><!--/os--></td><td>Skicka meddelandet</td></tr>
-    <!--os:windows,linux--><tr><td><kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd></td><td>Visa raden Kopia eller Hemlig kopia</td></tr><!--/os-->
+    <!--os:windows,linux--><tr><td><kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd></td><td>Visa raden Kopia eller Hemlig kopia. I det svenska gränssnittet används Alt+K respektive Alt+H; tangenterna till vänster gäller engelska</td></tr><!--/os-->
 </table>
 <h2>I adresslistan medan du skriver</h2>
 <table>
     <tr><th>Tangenter</th><th>Gör</th></tr>
-    <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Välj en person</td></tr>
-    <tr><td><!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--> eller <kbd>Tab</kbd></td><td>Använd den valda personen</td></tr>
+    <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Markera en kontakt eller grupp</td></tr>
+    <tr><td><!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--> eller <kbd>Tab</kbd></td><td>Infoga den markerade kontakten eller gruppen</td></tr>
     <tr><td><kbd>Esc</kbd></td><td>Stäng listan</td></tr>
-    <!--os:windows,linux--><tr><td><kbd>Shift</kbd>+<kbd>Delete</kbd></td><td>Ta bort den valda personen ur listan för gott</td></tr><!--/os-->
+    <!--os:windows,linux--><tr><td><kbd>Shift</kbd>+<kbd>Delete</kbd></td><td>Dölj den markerade ihågkomna adressen bland förslagen. Kontakten tas inte bort ur Adressboken</td></tr><!--/os-->
 </table>
 <h2>I Adressboken</h2>
 <table>
     <tr><th>Tangenter</th><th>Gör</th></tr>
-    <tr><td><kbd>Delete</kbd></td><td>Ta bort de markerade kontakterna, eller den markerade gruppen, efter en fråga</td></tr>
+    <tr><td><kbd>Delete</kbd></td><td>Ta bort de markerade kontakterna, eller den markerade gruppen, efter bekräftelse</td></tr>
     <tr><td><kbd>Esc</kbd></td><td>Stäng en kontakt eller grupp utan att spara</td></tr>
 </table>
 <nav class="related"><a href="topic:search-words"></a> <a href="topic:read-messages"></a> <a href="topic:write-message"></a></nav>
-<!--/review-->

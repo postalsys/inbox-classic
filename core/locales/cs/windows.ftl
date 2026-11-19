@@ -103,15 +103,11 @@ win-clear-log-ask = Vymazat historii činnosti agentů? Změny provedené agenty
 win-agent-programs = Programy, jejic&hž agenti požádali o přístup k vaší poště:
 win-change = Zm&ěnit...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = &Vrátit zpět od...
-# review: new
-win-take-back = &Vrátit zpět
+win-undo-since = V&rátit změny za období...
+win-take-back = &Vrátit změny
 win-what-agents-did = Či&nnost agentů:
-# review: new
 win-agent-reads = Co bylo přečteno od { $from } do { $to }:
-# review: new
-win-agent-reads-hint = Vyberte výše řádek s přečteným a uvidíte, co bylo přečteno.
+win-agent-reads-hint = Výběrem záznamu o čtení výše zobrazíte podrobnosti.
 win-how-to-connect = Jak připojit agenta
 
 ## Sign-in apps
@@ -139,4 +135,4 @@ win-installer-welcome-update = Inbox Classic { $installed } se aktualizuje na ve
     Pokud je aplikace spuštěná, nejprve se ukončí. Vaše účty a pošta zůstanou zachovány.
 win-installer-older-ask = Je nainstalován Inbox Classic { $installed }, který je novější než { $version }. Přesto nainstalovat starší verzi?
 win-installer-still-running = Inbox Classic stále běží. Ukončete ho a zkuste to znovu.
-win-installer-remove-mail-ask = Odstranit také účty a místní kopie pošty, které Inbox Classic uchovává v tomto počítači? Pošta na serverech zůstane zachována.
+win-installer-remove-mail-ask = Odstranit také místní data Inbox Classic, včetně účtů, pošty, čekajících zpráv, nastavení, kontaktů a klíčů? Pošta na serverech a záznamy v systémovém úložišti přihlašovacích údajů zůstanou zachovány.

@@ -131,6 +131,9 @@ the localized combinations beside them.
   with a colon. "Textsignatur" distinguishes the account footer from a digital signature; agents include it
   by default but can omit it. Keep the quota per program over the preceding 24 hours, counting approvals.
 
+- Use Anlage consistently for attachments, including the preview setting; retain digital signieren for cryptographic protection and Textsignatur for account footers.
+- Use Änderungen zurücknehmen for the time-range agent undo action, with a separate period selector; keep ordinary Rückgängig command unchanged.
+
 ### Estonian encryption and settings transfer
 
 - Use the polite plural in explanations and questions; short commands stay imperative ("Impordi", "Kontrolli").
@@ -379,6 +382,10 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
   subject as "Zpráva:" and refusal logs use "Odesílatelé:" before the address list; placeholders stay uninflected.
 - Keep "zahodit koncept" for discarding an agent-owned draft and explain permanent removal in help. Saving,
   including autosave, ends agent access; opening alone does not. "Textový podpis" distinguishes the account footer.
+
+- Keep formal Czech instructions and infinitive controls. Use Vrátit změny za období for Undo Since and Vrátit změny for Take Back; access key R avoids Vymazat in the agent window.
+- Use counted Czech participles with integer one/few/other forms; distinguish digitální podpis from textový podpis and ověření vlastníka from signature validity.
+- Requested server folder creation/renaming is phrased as Požadováno rather than completed. Nedostupné úložiště klíčů does not necessarily imply lost keys; saved/decrypted temporary attachments may remain after closing.
 
 ### Dansk (da)
 
@@ -874,6 +881,8 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   the age warning uses the message date. Notifications require enabled settings and timely eligible mail.
 
 - For a public key without email addresses, exact [0] explains that the owner-verification result cannot be saved. Keep patikrintas for verified ownership, distinct from signature validity.
+
+- Notification suppression refers to the main window being active. Search text and protected subjects are stored unencrypted in the local index; switching encrypted search off restores outer subjects. Explain signature-to-sender uncertainty without asserting another person signed.
 
 ### Magyar (hu)
 
@@ -1575,6 +1584,21 @@ Swedish agent permissions and activity:
 - Encrypted drafts use only the sender's key and have no digital signature. Inherited text, images and attachments
   require encryption until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Swedish.
 
+- Textsignatur is the account footer; digital signature remains digital signatur/signera digitalt. Key ownership is nyckelns ägare verifierad, separate from key validity/usability.
+- Queued create/rename/draft discard uses Begärde; imports use har köats för import. Accepted unsubscribe request does not establish completed removal.
+- Count summaries may use Olästa/Markerade labels; agent list results count rader i meddelandelistan and arbitrary scope uses Område.
+- Recurrence uses Med {interval} dagars/veckors/månaders/års mellanrum, without endings on placeholders; count uses antal tillfällen when input may be raw text.
+- Engångskoder covers one-time codes beyond only sign-in. Sender-domain verification does not prove a person identity. Logos are cached across runs.
+- Flaggfärg is the color submenu; Flagga meddelande toggles a flag. Native Swedish Unicode mnemonic letters are allowed. Compose Insert/Tools/Cc/Bcc now I/T/K/H; GTK K/H.
+
+- Use textsignatur for the account footer and digital signatur for cryptographic signatures; domain confirmation does not prove personal identity.
+- One-time codes are engångskoder, not necessarily only inloggningskoder.
+- Use lagrade innehållskopior/meddelandekroppar for the download limit; other database data and protected cache entries are outside the limit.
+- Search after includes its UTC date; month/year age means 30/365 days; do not promise negation for date/age/size filters.
+- Queued server operations and accepted unsubscribe requests must not imply completion. Agent undo/log summaries count entries, not necessarily messages.
+- Swedish Cc/Bcc shortcuts are Alt+K/Alt+H; retain fixed literal help shortcuts and explain localized letters nearby. Key export action uses Exportera, consistent with other export buttons.
+- Windows credential storage is Autentiseringshanteraren i Windows.
+
 ### Türkçe (tr)
 
 Terms (Outlook / Outlook Express Turkish): Gelen Kutusu; Giden Kutusu; Gönderilmiş Öğeler; Silinmiş Öğeler; Taslaklar;
@@ -1720,6 +1744,9 @@ keep the normal plural.
   including autosave, ends agent access; opening alone does not. "Текстът на подписа" is the optional account footer.
   Quote folder names in prose, including the rendered "Изтрити" and "Нежелана поща" controls.
 
+- Use Отмяна на промените for Take Back, distinct from Отказ. Describe queued server operations with Поискано е, and ownership as притежателят на ключа е потвърден.
+- Describe previews as locally created прегледи, with каре for a file tile; do not blame PDFs for interrupted rendering or imply external opened copies stay off disk.
+
 ### Русский (ru)
 
 Terms: Входящие; Исходящие; Отправленные; Удаленные; Черновики; Нежелательная почта; сообщение; папка; учетная запись;
@@ -1847,3 +1874,6 @@ Ukrainian agent permissions and activity:
 - Use В’язка ключів on macOS and Системне сховище ключів (Secret Service) on Linux; avoid branded GNOME assumptions.
 - Retain established Сервіс for Tools; use сервер авторизації for issuer, області доступу (scopes), публічний клієнт for OAuth.
 - Use curly U+2019 apostrophes consistently, e.g. п’ятниця, під’єднати.
+
+- Help headings use Текстові підписи for footers and Підтвердження власника ключа for ownership confirmation, distinct from cryptographic signature checking.
+- Use параметр/кнопка/команда before dynamically inserted nominative labels, and розділ before full settings paths to preserve Ukrainian grammar.

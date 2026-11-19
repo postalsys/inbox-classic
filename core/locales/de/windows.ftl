@@ -95,20 +95,16 @@ win-send = &Senden
 win-dont-send = &Nicht senden
 win-unsubscribe = &Abbestellen
 win-dont-unsubscribe = &Nicht abbestellen
-win-forget-program-ask = Dieses Programm mit seinen Berechtigungen und dem Aktivitätsverlauf seiner Agenten entfernen? Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
+win-forget-program-ask = Gespeicherte Zugriffsrechte dieses Programms und den Aktivitätsverlauf seiner Agenten entfernen? Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt. Das Programm selbst bleibt installiert.
 win-clear-log-ask = Aktivitätsverlauf der Agenten löschen? Die vorgenommenen Änderungen werden dadurch nicht rückgängig gemacht.
 win-agent-programs = &Programme, deren Agenten Zugriff auf Ihre E-Mails angefordert haben:
 win-change = Ä&ndern...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Rückgängig &seit...
-# review: new
-win-take-back = &Rückgängig machen
+win-undo-since = Änderungen &zurücknehmen...
+win-take-back = &Zurücknehmen
 win-what-agents-did = &Aktivitätsverlauf der Agenten:
-# review: new
-win-agent-reads = Gelesen von { $from } bis { $to }:
-# review: new
-win-agent-reads-hint = Wählen Sie oben eine Zeile mit Gelesenem aus, um zu sehen, was gelesen wurde.
+win-agent-reads = Lesezugriffe von { $from } bis { $to }:
+win-agent-reads-hint = Wählen Sie oben einen Eintrag mit Lesezugriffen aus, um die Details anzuzeigen.
 win-how-to-connect = So verbinden Sie einen Agenten
 
 ## Anmelde-Apps
@@ -139,4 +135,4 @@ win-installer-welcome-update =
     Falls das Programm geöffnet ist, wird es vorher geschlossen. Ihre Konten und E-Mails bleiben erhalten.
 win-installer-older-ask = Inbox Classic { $installed } ist installiert und neuer als { $version }. Die ältere Version trotzdem installieren?
 win-installer-still-running = Inbox Classic läuft noch. Schließen Sie es und versuchen Sie es erneut.
-win-installer-remove-mail-ask = Möchten Sie auch die Konten und lokal gespeicherten E-Mails von Inbox Classic entfernen? Die E-Mails auf den Servern bleiben erhalten.
+win-installer-remove-mail-ask = Auch alle lokalen Daten von Inbox Classic entfernen, einschließlich Konten, Nachrichten, Einstellungen, Kontakte und Schlüssel? Nachrichten auf den Servern und Einträge in der Windows-Anmeldeinformationsverwaltung bleiben erhalten.

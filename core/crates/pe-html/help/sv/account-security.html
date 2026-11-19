@@ -1,14 +1,13 @@
-<!--review--><h1>Säkerhetsinställningar för konton</h1>
+<h1>Säkerhetsinställningar för konton</h1>
 <p class="summary">Säkerhetsinställningarna för ett kontos servrar, och vad var och en betyder.</p>
 <p>Varje konto har <b data-text="ui-field-imap-security"></b> för den inkommande servern och <b data-text="ui-field-smtp-security"></b> för den utgående. Inbox Classic fyller i dem när det hittar leverantörens inställningar. Om du vill ändra dem öppnar du kontots egenskaper i <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Inställning</th><th>Betydelse</th></tr>
     <tr><td>SSL/TLS</td><td>Anslutningen är krypterad från början. Oftast port 993 för inkommande e-post och 465 för utgående e-post.</td></tr>
-    <tr><td>STARTTLS</td><td>Anslutningen krypteras direkt efter att den öppnats. Oftast port 143 för inkommande e-post och 587 för utgående e-post. Inbox Classic avbryter om servern inte erbjuder kryptering.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>Ditt lösenord och din e-post skickas läsbara för alla i nätverket.</td></tr>
+    <tr><td>STARTTLS</td><td>Anslutningen krypteras direkt efter att den öppnats. Oftast port 143 för inkommande e-post och 587 för utgående e-post. Inbox Classic avbryter anslutningen före inloggning om kryptering inte kan upprättas.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Den som avlyssnar anslutningen kan läsa ditt lösenord och dina meddelanden.</td></tr>
 </table>
-<aside class="warning">Använd <b data-text="ui-security-none"></b> bara för en server på din egen dator eller ditt lokala nätverk. Inbox Classic varnar dig innan det används.</aside>
-<p>Inbox Classic kontrollerar att varje server är den den utger sig för att vara, mot de certifikat som systemet litar på. Det finns ingen inställning för att godta vilket certifikat som helst.</p>
-<p>Ditt lösenord sparas i <!--os:windows-->Windows Autentiseringshanteraren<!--/os--><!--os:mac-->din inloggningsnyckelring<!--/os--><!--os:linux-->din nyckelring<!--/os-->, aldrig i e-postlagret. Ett konto som loggar in via webbläsaren sparar inget lösenord alls.</p>
+<aside class="warning">Använd <b data-text="ui-security-none"></b> bara om anslutningen skyddas på annat sätt. Ett lokalt nätverk garanterar inte kryptering. Inbox Classic varnar innan en okrypterad anslutning används.</aside>
+<p>Välj portar och säkerhetsmetod enligt leverantörens anvisningar; portarna ovan är vanliga exempel. Inbox Classic kontrollerar normalt servernamnet och certifikatet mot systemets betrodda certifikat. Det finns ingen inställning för att godta vilket certifikat som helst.</p>
+<p>Ditt lösenord sparas normalt i <!--os:windows-->Autentiseringshanteraren i Windows<!--/os--><!--os:mac-->din inloggningsnyckelring<!--/os--><!--os:linux-->din nyckelring<!--/os-->, inte i e-postdatabasen. Om uppgifter bara lagras i minnet eller lagret inte är tillgängligt kan de behöva anges igen nästa gång. Ett konto med webbläsarinloggning sparar en förnyelsetoken i systemets lager i stället för ditt lösenord.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

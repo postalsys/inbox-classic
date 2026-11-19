@@ -1,20 +1,19 @@
-<!--review--><h1>Bilder och spårning</h1>
+<h1>Bilder och spårning</h1>
 <p class="summary">Varför bilder från internet blockeras, och hur du visar dem för ett meddelande eller en avsändare du litar på.</p>
-<p>Ett meddelande kan visa bilder som avsändaren har på internet. När en sådan bild hämtas får avsändaren veta att du öppnade meddelandet, när och varifrån. Därför hämtar Inbox Classic dem inte.</p>
-<p>Bilder som skickas i själva meddelandet visas, eftersom de inte berättar något för avsändaren.</p>
-<p>Inbox Classic ritar dessa bilder själv, som det gör med bifogade bilder, så inget i dem körs. En bild som det inte kan rita (till exempel HEIC) visas som tomt utrymme. Animerade bilder visar sin första bildruta. Teckensnitt som skickas med ett meddelande används inte.</p>
+<p>Ett meddelande kan visa bilder som avsändaren har på internet. När en sådan bild hämtas kan avsändaren få veta när och varifrån du öppnade meddelandet. Därför blockeras hämtningen som standard.</p>
+<p>Bilder som ingår i själva meddelandet kan visas utan att hämtas från avsändarens webbserver.</p>
+<p>Inbox Classic bearbetar och kodar om bilderna innan de visas, precis som bifogade bilder. Innehållet körs inte som program. En bild som inte kan bearbetas (till exempel HEIC) visas som tomt utrymme. Animerade bilder visar sin första bildruta. Teckensnitt som skickas med ett meddelande används inte.</p>
 <p>När ett meddelande har bilder från internet visas ett fält över det som säger att vissa bilder har blockerats. Så här ser du dem i ett meddelande du litar på:</p>
 <ul>
     <li><!--os:windows,mac-->Klicka på fältet.<!--/os--><!--os:linux-->Klicka på <b data-text="gtk-download-pictures"></b> i fältet.<!--/os--></li>
     <li>Eller välj <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Då visas bara bilderna i det meddelandet. Nästa meddelande är blockerat igen.</p>
+<p>Då visas bara bilderna i det meddelandet. Nästa meddelande följer de inställningar du har valt.</p>
 <h2>Avsändare du litar på</h2>
 <p>Om du vill få en avsändares bilder varje gång <!--os:windows-->klickar du på pilen längst till höger i fältet<!--/os--><!--os:mac-->klickar du på pilen bredvid <b data-text="cmd-pictures"></b> i fältet<!--/os--><!--os:linux-->klickar du på pilen bredvid <b data-text="gtk-download-pictures"></b> i fältet<!--/os-->. Välj att alltid hämta bilder från den avsändaren, eller från alla på samma domän.</p>
-<p>Deras bilder läses sedan in av sig själva, men bara när din e-postleverantör bekräftar att meddelandet verkligen kommer från den domänen. Ett meddelande som bara låtsas komma från dem frågar fortfarande, och fältet säger att avsändaren inte kunde bekräftas. I <b data-text="folder-junk"></b> läses bilder aldrig in av sig själva.</p>
+<p>Deras bilder läses sedan in av sig själva, men bara när din e-postleverantör bekräftar att meddelandet verkligen kommer från den domänen. Om domänen inte kan bekräftas krävs ditt tillstånd och fältet förklarar varför. Domänkontrollen bekräftar inte en viss persons identitet. I <b data-text="folder-junk"></b> hämtas bilder inte automatiskt. Krypterade delar kräver också alltid ditt uttryckliga tillstånd.</p>
 <p>Om du vill ta bort en avsändare från listan använder du <b data-text="ui-trusted-senders-button"></b> i <b data-settings="reading"></b>.</p>
 <h2>Bilder i alla meddelanden</h2>
-<p><b data-text="ui-pictures-always-option"></b> i <b data-settings="reading"></b> hämtar bilderna i alla meddelanden, utom i <b data-text="folder-junk"></b>. Det är avstängt från början, eftersom avsändare då kan se när du läser deras meddelanden.</p>
-<p>En varumärkeslogotyp bredvid huvudet är ingen spårningsbild. Den är godkänd av din e-postserver och kommer från varumärket, inte från avsändarens bilder.</p>
+<p><b data-text="ui-pictures-always-option"></b> i <b data-settings="reading"></b> tillåter automatisk hämtning av bilder, utom i krypterade delar och i <b data-text="folder-junk"></b>. Det är avstängt från början, eftersom avsändare då kan se när du läser deras meddelanden.</p>
+<p>Varumärkeslogotyper hanteras separat från bilder i meddelandet och återanvänds från ett lokalt lager. När en logotyp behöver hämtas eller uppdateras kan webbservern ändå se anslutningen.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

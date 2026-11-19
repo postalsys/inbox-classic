@@ -46,8 +46,8 @@ reader-downloading = Съобщението се изтегля…
 reader-downloading-detail = Съобщението ще се покаже тук, когато изтеглянето завърши.
 reader-downloading-size = Размер на съобщението: { $size }. То ще се покаже тук, когато бъде изтеглено.
 reader-failed = Съобщението не можа да бъде изтеглено
-reader-failed-network = Пощенският сървър е недостъпен ({ $reason }).
-reader-failed-sign-in = Пощенският сървър не прие влизането ({ $reason }). Проверете паролата или влезте отново от Файл > Акаунти.
+reader-failed-network = Връзката с пощенския сървър не можа да се установи или е прекъсната ({ $reason }).
+reader-failed-sign-in = Пощенският сървър не прие влизането ({ $reason }). Отворете настройките на акаунта и проверете паролата или влезте отново.
 reader-failed-security = Не можа да се установи защитена връзка с пощенския сървър ({ $reason }).
 reader-failed-other = Пощенският сървър отговори: { $reason }.
 reader-retry-note = Ще бъде направен нов опит, когато акаунтът се свърже отново.
@@ -115,7 +115,7 @@ bounce-spam-blocked = Отказано като спам
 bounce-spam-blocked-why = Сървърът на получателя прие съобщението за спам.
 bounce-spam-blocked-do = Опитайте да изпратите съобщението без многобройните или съкратените връзки и големите прикачени файлове, заради които може да е определено като спам. Ако отказът се повтаря, обърнете се към доставчика на пощата си.
 bounce-virus-detected = Отказано заради вирус
-bounce-virus-detected-why = Сървърът на получателя откри вирус или друго вредно съдържание в съобщението или в прикачените му файлове.
+bounce-virus-detected-why = Сървърът на получателя съобщава, че е открил вирус или друго вредно съдържание в съобщението или прикачените му файлове.
 bounce-virus-detected-do = Проверете прикачените файлове с антивирусна програма. Някои сървъри отказват всяка програма или архив, затова споделяйте такива файлове като връзка.
 bounce-ip-blocklisted = Пощенският ви сървър е в черен списък
 bounce-ip-blocklisted-why = Сървърът на получателя отказва поща от вашия пощенски сървър, защото неговият IP адрес е в черен списък.
@@ -131,7 +131,7 @@ bounce-geo-blocked-why = Сървърът на получателя не при�
 bounce-geo-blocked-do = Свържете се с човека по друг начин или попитайте доставчика на пощата си.
 bounce-relay-denied = Сървърът отказа да препрати съобщението
 bounce-relay-denied-why = Сървърът отказа да препрати съобщението. Често това означава, че не сте удостоверени пред него или че той не обслужва този получател.
-bounce-relay-denied-do = Проверете изходящия сървър на акаунта във Файл > Акаунти и дали той изисква влизане.
+bounce-relay-denied-do = В настройките на акаунта проверете изходящия сървър и данните за влизане в него.
 bounce-auth-failure = Домейнът на подателя не можа да бъде потвърден
 bounce-auth-failure-why = Сървърът на получателя не можа да потвърди, че съобщението наистина идва от вашия домейн (SPF, DKIM или DMARC).
 bounce-auth-failure-do = Препратете това известие на администратора на пощата за вашия домейн, за да коригира настройките. Междувременно опитайте да изпратите съобщението през пощенския сървър на доставчика си.
@@ -140,7 +140,7 @@ bounce-rate-limited-why = Сървърът на получателя засег�
 bounce-rate-limited-do = Изчакайте малко и изпратете съобщението отново. Ако пишете на много хора, разделете получателите на по-малки групи.
 bounce-greylisting = Временно отложено
 bounce-greylisting-why = Сървърът на получателя моли непознатите податели да опитат отново малко по-късно, което е често срещана защита от спам.
-bounce-greylisting-do = Изчакайте. Пощенските сървъри опитват отново автоматично и обикновено съобщението се доставя до един час.
+bounce-greylisting-do = При временно отлагане изпращащият сървър обикновено опитва отново. Ако известието съобщава окончателен неуспех, може да се наложи да изпратите съобщението отново по-късно.
 bounce-server-error = Сървърът на получателя имаше проблем
 bounce-server-error-why = Сървърът на получателя беше недостъпен или не можа да приеме съобщението заради собствен проблем.
 bounce-server-error-do = Изпратете съобщението отново по-късно. Ако отново не успее, проверете за грешки в домейна след @.
@@ -323,8 +323,8 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Put 3 messages in Archive"
 import-put = { $count ->
-    [one] { $messages } е поставено в { $folder }
-   *[other] { $messages } са поставени в { $folder }
+    [one] Добавянето на { $messages } в { $folder } е поставено на опашка
+   *[other] Добавянето на { $messages } в { $folder } е поставено на опашка
 }
 import-not-put = Неуспешно импортиране в папката:
 
@@ -339,7 +339,7 @@ error-other-account = в браузъра влязохте в { $email }, а н�
 # a password or sign-in the mail server refused, with the server's words
 failure-authentication = сървърът не прие влизането ({ $reason })
 # the mail server could not be reached or the connection broke, with the reason
-failure-network = връзката със сървъра не успя ({ $reason })
+failure-network = връзката със сървъра не можа да се установи или е прекъсната ({ $reason })
 error-in-use = приложението не може да бъде премахнато, защото тези акаунти го използват за влизане: { $accounts }
 error-turned-off = това приложение за влизане е изключено за нови акаунти
 error-folder-name = името на папката трябва да е от 1 до 200 знака и не може да съдържа управляващи знаци
@@ -362,8 +362,8 @@ error-import-not-mail = { $path } не е имейл съобщение
 error-list-answered = сървърът на пощенския списък върна състояние { $status }
 error-not-built = съобщението не можа да бъде съставено
 error-outbox-waits = { $count ->
-    [one] съобщението чака в „Изходящи“ и ще бъде изпратено при следващото изпращане и получаване
-   *[other] { $count } съобщения чакат в „Изходящи“ и ще бъдат изпратени при следващото изпращане и получаване
+    [one] съобщението остава в „Изходящи“; при следващото изпращане и получаване ще има нов опит за изпращане
+   *[other] { $count } съобщения остават в „Изходящи“; при следващото изпращане и получаване ще има нов опит за изпращане
 }
 error-draft-not-removed = предишната чернова на съобщението не можа да бъде премахната от „Чернови“: { $reason }
 error-sent-but = съобщението беше изпратено, но { $problem }
@@ -378,18 +378,18 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google все още не е одобрил Inbox Classic за влизане, затова достъп имат само тестови потребители. Използвайте собствено приложение за влизане в Google или парола за приложение, ако акаунтът ви поддържа такава. Ако сте тестов потребител, можете да включите вграденото приложение в „Приложения за влизане“ (Файл > Акаунти).
-sign-in-off-other = Приложението е изключено в „Приложения за влизане“ (Файл > Акаунти). Можете да го включите отново там.
+sign-in-off-google = Вграденото приложение за влизане в Google е изключено. Използвайте собствено приложение за влизане или парола за приложение, ако акаунтът ви поддържа такава. Ако имате достъп като тестов потребител, можете да го включите в „Приложения за влизане“ от прозореца „Акаунти“.
+sign-in-off-other = Приложението е изключено в „Приложения за влизане“ от прозореца „Акаунти“. Можете да го включите отново там.
 sign-in-app-no-name = приложението за влизане трябва да има име
 sign-in-app-no-client = липсва ИД на клиента
 sign-in-app-no-scopes = приложението за влизане трябва да има обхватите, които дават достъп до пощата
-sign-in-app-bad-host = адресът на сървъра { $server } липсва или не е валидно име на хост
+sign-in-app-bad-host = настройките на сървъра { $server } не съдържат валидно име на хост и порт
 sign-in-app-plain = сървърът { $server } трябва да използва SSL/TLS или STARTTLS
 sign-in-app-not-checked = издателят все още не е проверен
 sign-in-app-issuer-changed = издателят е променен: въведете отново тайната на клиента или я премахнете
 sign-in-register-google = В Google Cloud Console създайте OAuth клиент от типа Desktop app с обхвата https://mail.google.com/ на екрана му за съгласие. Докато приложението е в тестов режим, в него могат да влизат само тестовите му потребители.
 sign-in-register-microsoft = В Microsoft Entra регистрирайте приложение с платформата Mobile and desktop applications, URI за пренасочване http://localhost, разрешени потоци за публичен клиент и делегираните разрешения IMAP.AccessAsUser.All, SMTP.Send и offline_access. За достъп само от вашата организация използвайте https://login.microsoftonline.com/<ИД на организацията (tenant)>/v2.0 като издател.
-sign-in-register-other = Регистрирайте собствен публичен клиент с посочения по-долу URI за пренасочване. Доставчикът трябва да допуска произволен порт за този URI (RFC 8252). Добавете необходимия обхват за достъп до пощата.
+sign-in-register-other = Регистрирайте нативен публичен клиент с посочения по-долу URI за пренасочване. Доставчикът трябва да допуска произволен порт за този URI (RFC 8252). Добавете необходимия обхват за достъп до пощата.
 
 ## Calendar invitations
 
@@ -429,10 +429,8 @@ day-sunday = неделя
 
 ## AI agents
 
-# review: changed
-agent-level-read = Четене на поща: преглед на папки и съобщения, търсене
-# review: changed
-agent-level-organize = Подреждане на поща: маркиране като прочетено или непрочетено, промяна на флагове и техните цветове, обработка на нежелана поща, преместване и архивиране, създаване и преименуване на папки, следене и игнориране на разговори, изтриване чрез преместване в „Изтрити“ и отписване от пощенски списъци с ваше одобрение
+agent-level-read = Четене на поща: папки, списъци със съобщения, разговори, търсене, съобщения и прикачените им файлове, правила за съобщения и търсене на контакти
+agent-level-organize = Подреждане на поща: маркиране като прочетено или непрочетено, промяна на флагове и техните цветове, обработка на нежелана поща, преместване и архивиране, създаване и преименуване на папки, следене и пренебрегване на разговори, преместване в „Изтрити“ и отписване от пощенски списъци с ваше одобрение
 agent-level-drafts = Писане на чернови, които вие изпращате
 agent-level-send = Изпращане на поща: всяко съобщение изисква вашето потвърждение
 agent-connect-title = { $program } иска да използва пощата ви
@@ -476,10 +474,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Това съобщение не може да бъде прочетено.
 agent-encrypted-original = Това съобщение е шифровано: агент не може да отговори на него или да го препрати, тъй като не може да шифрова.
 agent-encrypted = Това съобщение е шифровано. Агентите с ИИ не могат да прочетат съдържанието му. Потребителят трябва да го отвори в Inbox Classic.
-# review: new
-agent-too-many-changes = Твърде много промени през последните 30 дни: този агент е направил толкова, колкото Inbox Classic пази в дневника за една програма. Ще може да направи още, когато най-старите станат на 30 дни.
-# review: new
-agent-too-many-reads = Твърде много четене през последните 30 дни: този агент е прочел толкова, колкото Inbox Classic пази в дневника за една програма. Ще може да чете още, когато най-старите четения станат на 30 дни.
+agent-too-many-changes = Достигнат е лимитът на записите за промени от тази програма през последните 30 дни. Тя ще може да прави нови промени, когато най-старите записи станат на 30 дни.
+agent-too-many-reads = Достигнат е лимитът на записите за четене от тази програма през последните 30 дни. Тя ще може да чете отново, когато най-старите записи станат на 30 дни.
 list-encrypted = Шифровано съобщение
 agent-log-composed = Отворено за довършване: „{ $subject }“
 agent-log-refused = Отказано изпращане: „{ $subject }“
@@ -497,7 +493,7 @@ agent-log-moved = Преместено в „{ $folder }“: „{ $subject }“
 agent-log-junk = Маркирано като нежелана поща: „{ $subject }“
 agent-log-not-junk = Маркирано като желана поща: „{ $subject }“
 agent-log-archived = Архивирано: „{ $subject }“
-agent-log-folder = Създадена е папката „{ $name }“
+agent-log-folder = Поискано е създаване на папката „{ $name }“
 agent-log-unsubscribed = Одобрихте заявката за отписване. Съобщение: „{ $subject }“
 agent-log-unsubscribe-failed = Отписването от списъка, от който е получено съобщението „{ $subject }“, не успя: { $reason }
 agent-log-unsubscribe-refused = Не одобрихте отписването. Податели: { $senders }
@@ -509,7 +505,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic изпраща заявка за отписване до списъка по-долу чрез предлаганата от него възможност за отписване с едно щракване. Нищо друго не се изпраща. Съществуващите съобщения не се променят и не се преместват.
    *[other] Inbox Classic изпраща заявка за отписване до всеки от списъците по-долу чрез предлаганата от съответния списък възможност за отписване с едно щракване. Нищо друго не се изпраща. Съществуващите съобщения не се променят и не се преместват.
 }
-# review: new
 agent-log-flag-color = Маркирано с флаг: „{ $subject }“, цвят: { $color ->
     [red] червен
     [orange] оранжев
@@ -519,39 +514,29 @@ agent-log-flag-color = Маркирано с флаг: „{ $subject }“, цв�
     [purple] лилав
    *[gray] сив
 }
-# review: new
-agent-log-renamed = Папката „{ $old }“ е преименувана на „{ $name }“
-# review: new
+agent-log-renamed = Поискано е преименуване на папката „{ $old }“ на „{ $name }“
 agent-log-watched = Разговорът „{ $subject }“ се следи
-# review: new
 agent-log-ignored = Разговорът „{ $subject }“ се пренебрегва
-# review: new
 agent-log-unmarked = Разговорът „{ $subject }“ вече не се следи и не се пренебрегва
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = съобщението е променено след това
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Маркирано като прочетено: 1 съобщение (търсене: { $query })
    *[other] Маркирани като прочетени: { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Маркирано като непрочетено: 1 съобщение (търсене: { $query })
    *[other] Маркирани като непрочетени: { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Маркирано с флаг: 1 съобщение (търсене: { $query })
    *[other] Маркирани с флаг: { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Флагът е премахнат от 1 съобщение (търсене: { $query })
    *[other] Флагът е премахнат от { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] Маркирано с флаг: 1 съобщение
    *[other] Маркирани с флаг: { $count } съобщения
@@ -564,33 +549,27 @@ agent-log-bulk-color = { $count ->
     [purple] лилав
    *[gray] сив
 } (търсене: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Преместено в „{ $folder }“: 1 съобщение (търсене: { $query })
    *[other] Преместени в „{ $folder }“: { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Архивирано: 1 съобщение (търсене: { $query })
    *[other] Архивирани: { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Маркирано като нежелана поща: 1 съобщение (търсене: { $query })
    *[other] Маркирани като нежелана поща: { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Маркирано като желана поща: 1 съобщение (търсене: { $query })
    *[other] Маркирани като желана поща: { $count } съобщения (търсене: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Преместено в „Изтрити“: 1 съобщение (търсене: { $query })
    *[other] Преместени в „Изтрити“: { $count } съобщения (търсене: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] През последните 15 минути
     [hour] През последния час
@@ -600,129 +579,99 @@ agent-undo-span = { $span ->
    *[all] През последните 30 дни
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] През този период няма промени от { $program }, които могат да бъдат отменени.
     [one] Да се отмени ли промяната, направена от { $program } през този период?
    *[other] Да се отменят ли { $count } промени, направени от { $program } през този период?
 }
-# review: new
-agent-undo-since-detail = Съобщенията се връщат в папките, от които са дошли, състоянието прочетено/непрочетено и флаговете стават каквито са били, а съобщенията, които още чакат в „Изходящи“, се изтриват. Това, което вие или сървърът сте променили след това, остава непроменено.
+agent-undo-since-detail = Когато състоянието им позволява, съобщенията се връщат в предишните папки, възстановяват се състоянието прочетено/непрочетено и флаговете, а чакащите съобщения в „Изходящи“ се изтриват. Някои по-късни промени пречат на отмяната. Премахването на флаг може да премахне и цвят, променен след това.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Нищо не беше отменено.
     [one] Отменена е 1 промяна.
    *[other] Отменени са { $count } промени.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 съобщение вече не беше там, където го беше поставила промяната.
-   *[other] { $count } съобщения вече не бяха там, където ги беше поставила промяната.
+    [one] 1 съобщение вече не беше в папката, в която е преместено.
+   *[other] { $count } съобщения вече не бяха в папките, в които са преместени.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] 1 съобщение е променено след това от вас или на сървъра и е оставено непроменено.
    *[other] { $count } съобщения са променени след това от вас или на сървъра и са оставени непроменени.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] 1 съобщение вече беше излязло от „Изходящи“.
-   *[other] { $count } съобщения вече бяха излезли от „Изходящи“.
+    [one] 1 съобщение вече не беше в „Изходящи“.
+   *[other] { $count } съобщения вече не бяха в „Изходящи“.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 промяна не може да бъде отменена.
    *[other] { $count } промени не могат да бъдат отменени.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Това съобщение приема поканата „{ $summary }“ ({ $when }).
-    [tentative] Това съобщение приема условно поканата „{ $summary }“ ({ $when }).
-   *[decline] Това съобщение отказва поканата „{ $summary }“ ({ $when }).
-} Календарът на организатора я отразява. Отговорът ви на поканата се променя едва след като съобщението бъде изпратено.
+    [accept] С това съобщение приемате поканата „{ $summary }“ ({ $when }).
+    [tentative] С това съобщение приемате условно поканата „{ $summary }“ ({ $when }).
+   *[decline] С това съобщение отказвате поканата „{ $summary }“ ({ $when }).
+} Отговорът е предназначен за календара на организатора. Състоянието на поканата в Inbox Classic се променя след успешно изпращане, без потвърждение от календара на организатора.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Прието: { $summary }
     [tentative] Условно прието: { $summary }
    *[decline] Отказано: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } прие тази покана.
     [tentative] { $name } прие условно тази покана.
    *[decline] { $name } отказа тази покана.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] прочете 1 съобщение
    *[other] прочете { $count } съобщения
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] отвори 1 прикачен файл
-   *[other] отвори { $count } прикачени файла
+    [one] прочете 1 прикачен файл
+   *[other] прочете { $count } прикачени файла
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] потърси веднъж
    *[other] потърси { $count } пъти
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] прегледа списък със съобщения веднъж
    *[other] прегледа списъци със съобщения { $count } пъти
 }
 # each read under that row
-# review: new
 agent-read-message = Прочете „{ $subject }“
-# review: new
 agent-read-conversation = { $count ->
     [one] Прочете разговора „{ $subject }“ (1 съобщение)
    *[other] Прочете разговора „{ $subject }“ ({ $count } съобщения)
 }
-# review: new
-agent-read-attachment = Отвори „{ $name }“ от „{ $subject }“
-# review: new
+agent-read-attachment = Прочете прикачения файл „{ $name }“ от съобщението „{ $subject }“
 agent-read-search = { $count ->
     [one] Потърси „{ $query }“: 1 съобщение
    *[other] Потърси „{ $query }“: { $count } съобщения
 }
-# review: new
 agent-read-people = Потърси хора по първите букви „{ $query }“
-# review: new
 agent-read-list = { $count ->
-    [one] Прегледа 1 съобщение в „{ $folder }“
-   *[other] Прегледа { $count } съобщения в „{ $folder }“
+    [one] Прегледа 1 запис в списъка „{ $folder }“
+   *[other] Прегледа { $count } записа в списъка „{ $folder }“
 }
-# review: new
 agent-read-changes = { $count ->
     [one] Прегледа 1 ново съобщение
    *[other] Прегледа { $count } нови съобщения
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Програми, стартирани от { $terminal }
-# review: new
 agent-terminal-programs-windows = Програми, стартирани от терминал ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Програми, стартирани от терминал ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Програма, стартирана от { $terminal }
-# review: new
 agent-terminal-program-windows = Програма, стартирана от терминал ({ $terminal })
-# review: new
 agent-terminal-program-linux = Програма, стартирана от терминал ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } искат да използват пощата ви
-# review: new
-agent-connect-terminal-detail = Всеки ИИ агент, който стартирате от този терминал, споделя достъпа, който разрешите тук. За да има агентът собствен достъп, добавете --name и избрано от вас име към аргументите му в MCP настройките на агента.
-# review: new
+agent-connect-terminal-detail = Агентите, стартирани от тази разпозната терминална програма, споделят разрешенията, които дадете тук. За отделни разрешения добавете --name и избрано име към аргументите на Inbox Classic в MCP настройките на агента. Това име не удостоверява самоличността на програмата.
 agent-connect-claimed = Програмата се представи като { $claimed }. Inbox Classic провери коя програма я е стартирала: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -744,7 +693,7 @@ secrets-windows = Диспечер на идентификационни дан�
 secrets-mac = Ключодържател
 secrets-linux = Системен ключодържател (Secret Service)
 error-no-such-file = няма такъв файл
-cards-file-too-big = Този файл е твърде голям, за да бъде адресна книга.
+cards-file-too-big = Файлът надхвърля допустимия размер за импортиране на адресна книга.
 ui-sender-added = Добавено в адресната книга: { $name }.
 ui-sender-known = { $name } вече е в адресната книга.
 ui-sender-none = Подателят на това съобщение няма имейл адрес, който да бъде добавен.
@@ -777,7 +726,7 @@ pgp-key-expired = Изтекъл на { $date }
 pgp-key-revoked = Отменен
 pgp-key-revoked-why = Отменен: { $reason }
 pgp-key-not-valid = Невалиден
-pgp-key-locked = Този частен ключ не може да се използва, защото защитният ключ вече липсва от { $store }. Възстановете частния ключ от резервното му копие.
+pgp-key-locked = Частният ключ не може да се отвори, защото защитният ключ е недостъпен в { $store }. Първо проверете дали системното хранилище е достъпно и отключено. Ако защитният ключ е изгубен, възстановете частния ключ от резервно копие.
 pgp-source-own = Създаден в Inbox Classic
 pgp-source-file = Импортиран от файл
 pgp-source-paste = Поставен от клипборда
@@ -790,7 +739,7 @@ pgp-error-no-store = Хранилището { $store } е необходимо �
 pgp-error-wrong-passphrase = Фразата за достъп е грешна.
 pgp-error-not-a-key = Това не е OpenPGP ключ.
 pgp-error-too-large = Ключът е твърде голям.
-pgp-error-unusable = Ключът използва стара или слаба криптография и не може да бъде използван.
+pgp-error-unusable = Ключът не може да се използва: липсва подходящ ключ за подписване или шифроване или криптографията му не се поддържа.
 pgp-imported-private = { $count ->
     [one] Частният ви ключ е импортиран.
    *[other] Импортирани са { $count } частни ключа.
@@ -807,15 +756,15 @@ pgp-file-name-private = Резервно копие на частния ключ
 pgp-pending = На { $date } беше намерен друг ключ за { $address }.
 
 ## Reading signed and encrypted mail (protect.rs)
-pgp-part-verified = Подписано от { $signer }, ключът е потвърден
-pgp-part-signed = Подписано от { $signer } (ключът не е потвърден)
-pgp-part-other = Подписано от лице, различно от подателя: { $signer }
+pgp-part-verified = Подписано от { $signer }, притежателят на ключа е потвърден
+pgp-part-signed = Подписано от { $signer } (притежателят на ключа не е потвърден)
+pgp-part-other = Подписано от { $signer }, но подписът не потвърждава посочения подател
 pgp-part-unknown-key = Подписано, но ключът не е известен
 pgp-part-not-signed = Не е подписано
 pgp-part-not-checked = Подписът не е проверен
 pgp-part-encrypted = Шифровано. { $signature }
 pgp-part-no-key = Липсва частен ключ за дешифриране
-pgp-part-changed = Шифрованата част е променена при пренасянето и не се показва
+pgp-part-changed = Целостта на шифрованата част не може да се потвърди и тя не се показва
 pgp-part-unprotected = Шифровано без защита срещу промени, не се показва
 pgp-part-broken = Шифрованата част не може да бъде прочетена
 pgp-why-mismatch = Подписът не съответства на този текст
@@ -834,7 +783,7 @@ pgp-error-missing-keys = { $count ->
     [one] Липсва ключ за шифроване за получателя: { $addresses }.
    *[other] Липсват ключове за шифроване за получателите: { $addresses }.
 }
-pgp-error-encrypted-quote = Това съобщение цитира или препраща шифровано съобщение, затова може да бъде изпратено само шифровано. Включете „Шифроване“ или премахнете цитирания текст.
+pgp-error-encrypted-quote = Съобщението съдържа текст, изображения или прикачени файлове от шифровано съобщение и може да бъде изпратено само шифровано. Включете „Шифроване“ или премахнете това съдържание.
 pgp-error-protect = Съобщението не можа да бъде подписано или шифровано: { $reason }
 pgp-found-keys = Намерени ключове за: { $addresses }.
 pgp-found-none = Не са намерени ключове за: { $addresses }. Поискайте публичен ключ за всеки адрес.
@@ -863,11 +812,11 @@ pgp-compose-sign-tip-encrypted = Шифрованите съобщения ви�
 pgp-compose-encrypt-tip = Шифроване на съдържанието при изпращане, така че само вие и получателите да можете да го прочетете
 pgp-compose-make-key = Все още не сте настроили собствен ключ за адреса { $address }. Искате ли да създадете ключ сега? С него можете да подписвате и шифровате съобщения.
 pgp-compose-key-unusable = Ключът ви за адреса { $address } не може да се използва. Причина: { $state }
-    Отворете „Ключове за шифроване“, за да импортирате резервно копие на този ключ или да създадете нов.
+    Отворете „Ключове за шифроване“, за да проверите състоянието му. При нужда импортирайте резервно копие или създайте нов ключ.
 pgp-compose-encrypt-off-quote = В съобщението все още има текст, изображения или прикачени файлове от шифровано съобщение. Премахнете ги, за да го изпратите без шифроване. Искате ли въпреки това да изключите шифроването?
 pgp-compose-encrypt-off-reply = Оригиналното съобщение е било шифровано. Ако изпратите отговора или препратеното съобщение без шифроване, пощенските сървъри ще могат да прочетат съдържанието. Искате ли да изключите шифроването?
-pgp-recipient-verified = Ключът е потвърден
-pgp-recipient-found = Ключът не е потвърден
+pgp-recipient-verified = Притежателят на ключа е потвърден
+pgp-recipient-found = Притежателят на ключа не е потвърден
 pgp-recipient-own = Вашият собствен ключ
 pgp-recipient-looking = Търсене на ключ...
 pgp-recipient-missing = Няма ключ
@@ -879,7 +828,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] За { $count } получатели няма използваеми ключове. Намерете ключовете им или премахнете тези получатели от съобщението. Можете да изпратите без шифроване само ако в съобщението няма текст, изображения или прикачени файлове от шифровани съобщения.
 }
 pgp-details-part = Част { $number }: { $label }
-# review: new
 attachment-from-part = От част { $number }: { $label }
 pgp-details-signed = Подписано на { $when } с ключа { $key }
 pgp-details-unknown-key = Подписано с ключа { $key }, който нямате
@@ -888,17 +836,14 @@ pgp-details-for = Шифровано за { $keys }
 pgp-details-plain = Нито подписано, нито шифровано
 pgp-bar-parts = Това съобщение има { $count } части: { $list }. Всяка част показва как е защитена.
 pgp-bar-count-verified = потвърдени: { $count }
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] 1 шифрована и подписана
    *[other] { $count } шифровани и подписани
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] 1 шифрована
    *[other] { $count } шифровани
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] 1 подписана
    *[other] { $count } подписани
@@ -966,17 +911,17 @@ setup-account-signs-in-again = След импортирането ще тряб
 setup-account-here = Вече е настроен тук, затова се пропуска.
 setup-account-no-app = За влизане се използва приложението { $app }, което не е настроено тук. Импортирайте и приложенията за влизане.
 setup-invalid-address = „{ $address }“ не е имейл адрес.
-setup-invalid-server = Невалидно име или порт на сървъра { $server }.
+setup-invalid-server = Невалидно име, порт или настройка за защита на сървъра { $server }.
 setup-invalid-user = Няма потребителско име.
-setup-invalid-sign-in = Акаунтът използва начин за влизане, който Inbox Classic не поддържа.
+setup-invalid-sign-in = Настройките за влизане не могат да се използват от Inbox Classic.
 setup-error-empty = Файлът е празен.
-setup-error-too-large = Файлът е твърде голям, за да бъде файл с настройки и акаунти на Inbox Classic.
+setup-error-too-large = Файлът с настройки надхвърля допустимия размер.
 setup-error-not-setup = Това не е файл с настройки и акаунти на Inbox Classic.
 setup-error-damaged = Файлът с настройките е повреден и не може да бъде прочетен.
 setup-error-newer = Тези настройки са запазени от по-нова версия на Inbox Classic ({ $version }). Обновете Inbox Classic и ги импортирайте отново.
 setup-error-needs-passphrase = Файлът с настройки е защитен с фраза за достъп. Въведете фразата, използвана при запазването му.
 setup-error-wrong-passphrase = Фразата за достъп не съвпада с използваната при запазването на файла.
-setup-error-changed = Файлът с настройките е бил променен или повреден след запазването, затова не може да бъде импортиран.
+setup-error-changed = Целостта на файла с настройки не може да се потвърди. Той може да е променен или повреден и не може да бъде импортиран.
 setup-error-read = Файлът с настройките не можа да бъде прочетен: { $error }
 setup-error-write = Настройките не можаха да бъдат запазени: { $error }
 setup-error-no-parts = Изберете поне една категория.
@@ -1032,12 +977,12 @@ setup-skipped-rules = { $count ->
    *[other] { $count } правила за съобщения вече са тук.
 }
 setup-skipped-rules-account = { $count ->
-    [one] 1 правило за съобщения е за акаунт, който не е тук, затова беше пропуснато.
-   *[other] { $count } правила за съобщения са за акаунти, които не са тук, затова бяха пропуснати.
+    [one] Пропуснато е 1 правило, защото използва акаунт, който не е настроен тук.
+   *[other] Пропуснати са { $count } правила, защото използват акаунти, които не са настроени тук.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 правило за съобщения премества съобщения в папка, която ще се появи, когато акаунтът ѝ се синхронизира.
-   *[other] { $count } правила за съобщения преместват съобщения в папки, които ще се появят, когато акаунтите им се синхронизират.
+    [one] 1 правило чака целевата му папка да бъде намерена при синхронизиране на акаунта.
+   *[other] { $count } правила чакат целевите им папки да бъдат намерени при синхронизиране на акаунтите.
 }
 setup-added-trusted-senders = { $count ->
     [one] Добавен е 1 доверен подател.
@@ -1046,7 +991,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Нищо не беше импортирано.
 setup-account-servers = { $imap } и { $smtp } ({ $signin })
 setup-file-name = Настройки и акаунти на Inbox Classic
-setup-skipped-unreachable = Приложението { $name } е пропуснато, защото услугата му за влизане е недостъпна. Добавете го отново в „Приложения за влизане“.
+setup-skipped-unreachable = Пропуснат запис: { $name }. Услугата за влизане не можа да бъде проверена. Настройте необходимото приложение в „Приложения за влизане“ и опитайте отново.
 attachment-runs-programs = Файлът „{ $name }“ може да изпълнява програмен код, затова Inbox Classic не го отваря. Можете да го запазите и да го отворите сами, ако имате доверие на източника му.
 attachment-decrypted-note = Този прикачен файл е от шифровано съобщение. За да го отвори с друга програма, Inbox Classic запазва нешифровано копие във временна папка за вашия потребителски акаунт. При стартиране на Inbox Classic се изтриват копията, по-стари от един ден.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1077,46 +1022,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Показване на PDF файлове в съобщенията
-# review: new
 preview-pdf-off = PDF файловете не се показват в съобщенията.
-# review: new
-preview-pdf-off-crashed = PDF файл затвори Inbox Classic, докато се показваше, затова PDF файловете вече не се показват в съобщенията. Изображенията все още се показват. За да показвате отново PDF файлове, включете { $option } в { $settings }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic е затворена по време на създаване на преглед на файл, затова PDF файловете вече не се показват в съобщенията. Изображенията продължават да се показват. За да включите отново PDF прегледите, включете { $option } в { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 страница, { $size }
    *[other] { $count } страници, { $size }
 }
-# review: new
 preview-page-alt = { $name }, страница { $page } от { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Отворете, за да видите страницата
    *[other] Отворете, за да видите всички { $count } страници
 }
-# review: new
 preview-more-files = { $count ->
     [one] Още 1 файл е в списъка по-горе
    *[other] Още { $count } файла са в списъка по-горе
 }
-# review: new
 preview-tile-downloading = Изтегля се…
-# review: new
 preview-tile-preparing = Подготвя се…
-# review: new
-preview-tile-format = Изображенията { $format } все още не се показват
-# review: new
+preview-tile-format = Изображенията във формат { $format } все още не се показват
 preview-tile-password = Защитен с парола: отворете го, за да я въведете
-# review: new
-preview-tile-too-large = Твърде голям за показване
-# review: new
+preview-tile-too-large = Надхвърля ограниченията за преглед
 preview-tile-unreadable = Не може да се покаже
-# review: new
 preview-tile-timed-out = Показването отне твърде много време
-# review: new
-preview-tile-crashed = Не се показва: този файл веднъж затвори Inbox Classic
-# review: new
+preview-tile-crashed = Не се показва: предишният опит за преглед е прекъснал или блокирал
 preview-tile-off = Не се показва, докато Inbox Classic не се стартира отново
-# review: new
 preview-not-printed = { $name } ({ $details }) не се отпечатва. Отворете го, за да го отпечатате.

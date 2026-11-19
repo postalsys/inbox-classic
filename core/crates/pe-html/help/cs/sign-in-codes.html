@@ -7,8 +7,8 @@
     <li>tlačítko <b data-text="otp-copy"></b> pro zkopírování kódu do schránky</li>
 </ul>
 <aside class="warning">Kód zadávejte jen na stránce domény, kterou panel uvádí. Zpráva, která vás žádá o zadání kódu jinde, může být pokusem o převzetí vašeho účtu.</aside>
-<p>Panel se zobrazí jen tehdy, když poskytovatel pošty potvrdí platný digitální podpis odpovídající doméně, pro kterou je kód určen. Tím se nepotvrzuje totožnost osoby, která zprávu napsala, ani důvěryhodnost jejího obsahu. Panel se nezobrazuje ve složkách <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> a <b data-text="folder-drafts"></b>, ani když váš poskytovatel neuvádí výsledek ověření podpisu domény.</p>
-<p>Pokud byl kód odeslán více než hodinu před otevřením zprávy, jeho platnost už pravděpodobně vypršela. Panel na to upozorní.</p>
+<p>Panel se zobrazí jen tehdy, když poskytovatel pošty potvrdí platný podpis DKIM domény kódu nebo její nadřazené domény. Tím se nepotvrzuje totožnost osoby, která zprávu napsala, ani důvěryhodnost jejího obsahu. Panel se nezobrazuje ve složkách <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> a <b data-text="folder-drafts"></b>, ani když váš poskytovatel neuvádí výsledek ověření podpisu domény.</p>
+<p>Pokud byl kód odeslán více než hodinu před otevřením zprávy, jeho platnost už pravděpodobně vypršela. Panel na to upozorní podle data zprávy, bez ověření platnosti u vydavatele kódu.</p>
 <h2>Kódy v oznámeních</h2>
-<p>Chcete-li vidět kód v oznámení o nové zprávě, zapněte <b data-text="ui-codes-in-notifications"></b> na stránce <b data-settings="general"></b>. Ve výchozím nastavení je tato volba vypnutá, protože oznámení lze přečíst i na zamčené obrazovce.</p>
+<p>Chcete-li vidět kód v oznámení o nové zprávě, zapněte <b data-text="ui-codes-in-notifications"></b> na stránce <b data-settings="general"></b>. Ve výchozím nastavení je tato volba vypnutá, protože oznámení lze přečíst i na zamčené obrazovce. Oznámení musí být povolená a hlavní okno nesmí být v popředí. Kód se do oznámení získává pouze z nedávné, dostatečně malé zprávy, kterou se podaří včas stáhnout.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>

@@ -1,15 +1,14 @@
-<!--review--><h1>Anslutningarna Inbox Classic gör</h1>
-<p class="summary">Vart Inbox Classic ansluter, och varför, för den tekniskt nyfikne.</p>
+<h1>Inbox Classics nätverksanslutningar</h1>
+<p class="summary">Vart Inbox Classic ansluter och varför, för dig som vill veta mer om tekniken.</p>
 <ul>
-    <li><b>Dina e-postservrar</b>, via IMAP för att läsa e-post och SMTP för att skicka den. Anslutningarna krypteras med TLS, och varje servers certifikat kontrolleras mot dem som ditt system litar på. Inbox Classic vägrar en server utan kryptering, om du inte väljer <b data-text="ui-security-none"></b> och bekräftar.</li>
-    <li><b>När du lägger till ett konto</b>, för att hitta dess servrar. Inbox Classic läser domänens DNS-poster via DNS över HTTPS (Cloudflare, sedan Google), aldrig vanlig DNS. Det provar också leverantörens autoconfig-fil och Thunderbirds lista över leverantörer (ISPDB). För Exchange frågar det Microsoft Autodiscover, som bara får ditt lösenord när det ber om det via HTTPS. En server utan kryptering väljs aldrig.</li>
+    <li><b>Dina e-postservrar</b>, via IMAP för att läsa e-post och SMTP för att skicka den. Anslutningarna krypteras med TLS, och varje servers certifikat kontrolleras mot dem som ditt system litar på. Inbox Classic ansluter inte utan kryptering, om du inte väljer <b data-text="ui-security-none"></b> och bekräftar.</li>
+    <li><b>När du lägger till ett konto</b>, för att hitta dess servrar. Inbox Classic läser domänens DNS-poster via DNS över HTTPS (Cloudflare, sedan Google), utan att använda vanlig DNS för dessa uppslagningar. Det provar också leverantörens autoconfig-fil och Thunderbirds lista över leverantörer (ISPDB). För Exchange frågar det Microsoft Autodiscover, som bara får ditt lösenord när det ber om det via HTTPS. En server utan kryptering väljs aldrig.</li>
     <li><b>Inloggning i webbläsaren</b>, med OAuth 2.0 och PKCE, hos Google, Microsoft eller leverantören av din inloggningsapp. Webbläsaren återvänder bara till Inbox Classic på den här datorn.</li>
-    <li><b>Varumärkeslogotyper</b> (BIMI), från varumärkets HTTPS-adress när meddelandet inte har med logotypen, en gång varje gång Inbox Classic körs. Det sker bara när din e-postserver har godkänt meddelandets DMARC-kontroll och logotypen.</li>
-    <li><b>Bilder från internet</b>, bara när du ber om dem.</li>
-    <li><b>Avsluta prenumeration</b>, bara när du klickar på det. En begäran med ett klick (RFC 8058) skickas bara när listan har signerat meddelandet med DKIM.</li>
-    <li><b>Krypteringsnycklar</b>, bara när du krypterar till någon vars nyckel du inte har: först adressens egen domän (Web Key Directory), sedan keys.openpgp.org om du inte har stängt av det. Bara adressen skickas.</li>
-    <!--os:mac--><li><b>Uppdateringar</b>, från inboxclassic.com, för att se om en ny version finns.</li><!--/os-->
+    <li><b>Varumärkeslogotyper</b> (BIMI), från varumärkets HTTPS-adress när meddelandet inte har med logotypen, med en lokal cache som behålls mellan körningar. Logotyper kan lagras i 30 dagar; misslyckade hämtningar kan försökas igen efter en dag. Det sker bara när din e-postserver har godkänt meddelandets DMARC-kontroll och logotypen.</li>
+    <li><b>Bilder från internet</b>, när du väljer att visa dem eller har tillåtit dem automatiskt för betrodda avsändare. Skräppost och krypterade meddelandedelar undantas från automatisk hämtning.</li>
+    <li><b>Avsluta prenumeration</b>, efter din bekräftelse. En direkt begäran (RFC 8058) skickas bara när e-postleverantören har godkänt en DKIM-signatur som omfattar uppgifterna för avregistrering.</li>
+    <li><b>Krypteringsnycklar</b>, vid nyckelsökning, till exempel när du ska kryptera till någon vars nyckel saknas. Vid adressökning används först adressens domän (Web Key Directory) och sedan keys.openpgp.org om du har tillåtit det. En adress eller nyckelidentifierare skickas, beroende på sökningen.</li>
+    <!--os:mac--><li><b>Uppdateringar</b>, från inboxclassic.com, om du tillåter automatiska kontroller eller själv söker efter en ny version.</li><!--/os-->
 </ul>
-<p>Inloggningskoder erbjuds bara när leverantörens huvud Authentication-Results säger att domänen har signerat meddelandet (DKIM). Det kräver ingen egen anslutning.</p>
+<p>Engångskoder visas bara när e-postleverantörens Authentication-Results-fält anger en godkänd DKIM-signatur för avsändarens domän. Det identifierar inte personen bakom adressen. Själva kodidentifieringen kräver ingen separat anslutning.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

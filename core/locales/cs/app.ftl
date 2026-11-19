@@ -202,7 +202,7 @@ ui-hyperlink = Hypertextový odkaz
 ui-hyperlink-intro = Adresa, na kterou vybraný text odkazuje.
 ui-edit-hyperlink = Upravit hypertextový odkaz
 ui-edit-hyperlink-intro = Cílová adresa odkazu. Smažte adresu, chcete-li odkaz odebrat a text ponechat.
-ui-not-a-picture = Tento soubor není obrázek PNG, JPEG ani GIF, nebo je větší než 10 MB.
+ui-not-a-picture = Obrázek nelze vložit. Vyberte čitelný soubor PNG, JPEG, GIF nebo WebP o velikosti nejvýše 10 MB.
 ui-format-color = Barva písma
 ui-format-numbers = Číslovaný seznam
 ui-format-bullets = Seznam s odrážkami
@@ -255,10 +255,10 @@ ui-leave-mail = K odhlášení je třeba poslat e-mail na { $target }. Inbox Cla
 ui-leave-web = V prohlížeči se otevře stránka pro odhlášení odběru ({ $target }).
 ui-unsubscribing = Odesílání žádosti o odhlášení odběru: { $target }...
 ui-cannot-unsubscribe = Tato zpráva nenabízí možnost odhlášení.
-ui-unsubscribed = Žádost o odhlášení odběru byla přijata. Podle potvrzení už tyto zprávy nebudete dostávat.
+ui-unsubscribed = Žádost o odhlášení odběru byla přijata. To ještě nepotvrzuje, že zasílání zpráv skončilo.
 ui-not-unsubscribed = Odhlášení se nezdařilo: { $reason }
 ui-event-span = { $start } až { $end }
-ui-event-floating = { $when } (čas odesílatele)
+ui-event-floating = { $when } (bez převodu časového pásma)
 ui-invitation = Pozvánka: { $title }
 ui-invitation-updated = Aktualizovaná pozvánka: { $title }
 ui-invitation-canceled = Zrušeno: { $title }
@@ -266,7 +266,7 @@ ui-invitation-answer = Odpověď na pozvánku: { $title }
 ui-no-title = (bez názvu)
 ui-organizer = Organizátor: { $name }
 ui-invitation-not-read = Pozvánku nelze přečíst.
-ui-no-calendar = V tomto počítači není k dispozici žádná kalendářová aplikace, která by otevřela pozvánky (soubory .ics).
+ui-no-calendar = Pozvánku (soubor .ics) se nepodařilo otevřít v kalendáři. Zkontrolujte, zda je nainstalovaná kalendářová aplikace a zda otevírá soubory .ics.
 ui-messages-not-changed = Zprávy nelze změnit.
 ui-new-folder-in-selected = Nová složka bude vytvořena uvnitř vybrané složky.
 ui-new-folder-at-top = Nová složka bude vytvořena na nejvyšší úrovni účtu.
@@ -276,7 +276,7 @@ ui-folder-not-deleted = Složku nelze odstranit.
 ui-rename-folder-intro = Zadejte nový název složky „{ $folder }“.
 ui-properties-of = Vlastnosti: { $subject }
 ui-internet-headers = Internetové hlavičky této zprávy:
-ui-save-messages-in = Uložit zprávy do
+ui-save-messages-in = Vybrat složku pro uložení zpráv
 ui-save-message-as = Uložit zprávu jako
 ui-import-choose-folder = Nejdřív vyberte složku, do které se mají zprávy importovat.
 ui-add-account-title = Přidat poštovní účet
@@ -298,7 +298,7 @@ ui-app-password-open = Otevřít v prohlížeči pokyny poskytovatele { $provide
 ui-plain-warning = Bez šifrování může kdokoli, kdo zachytí váš síťový provoz, přečíst vaše heslo i zprávy. Toto spojení používejte jen se serverem ve vlastním počítači nebo v místní síti.
 ui-continue-ask = Pokračovat?
 ui-add-sign-in-app = Přidat přihlašovací aplikaci...
-ui-turned-off = Přihlašovací aplikace { $name } je v tomto počítači vypnutá.
+ui-turned-off = Možnost „{ $name }“ je v tomto počítači vypnutá.
 ui-off-here = V tomto počítači vypnuto.
 ui-why = Proč?
 ui-more-sign-in = Další možnosti přihlášení...
@@ -331,7 +331,7 @@ ui-enter-password = Zadejte heslo k účtu { $account }.
 ui-signs-in-with = Přihlašovací aplikace: { $app }. Přihlášení probíhá v prohlížeči a účet používá servery této aplikace.
 ui-keep-password = Chcete-li zachovat současné heslo, ponechte pole hesla prázdné.
 ui-remove-account = Odebrat účet
-ui-remove-account-ask = Odebrat tento účet z aplikace Inbox Classic? Pošta zůstane na serveru. Její místní kopie a uložené přihlašovací údaje se z tohoto počítače odstraní.
+ui-remove-account-ask = Odebrat tento účet z aplikace Inbox Classic? Odstraní se jeho místní data, včetně čekajících zpráv ve složce Pošta k odeslání a uložených přihlašovacích údajů. Pošta na serveru se nezmění.
 ui-col-email = E-mailová adresa
 ui-col-incoming = Server příchozí pošty
 ui-type-email = Zadejte svou e-mailovou adresu, jmeno@example.com.
@@ -414,7 +414,6 @@ ui-save-attachments = Uložit přílohy
 ui-attachment-open = Otevřít
 ui-attachment-save-as = Uložit jako...
 ui-attachment-save-all = Uložit vše...
-# review: new
 ui-attachment-show-in-message = Zobrazit ve zprávě
 ui-attachments-strip = Přílohy
 ui-attachment-note-title = Otevření tohoto souboru
@@ -446,12 +445,9 @@ ui-let-agents-connect = &Povolit agentům AI připojení k Inbox Classic
 ui-change-button = Změnit…
 ui-undo-button = Zpět
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-ui-undo-since-button = Vrátit zpět od…
-# review: new
-ui-undo-since-span = Vrátit zpět, co tento program provedl:
-# review: new
-ui-take-back = Vrátit zpět
+ui-undo-since-button = Vrátit změny za období…
+ui-undo-since-span = Vrátit změny tohoto programu:
+ui-take-back = Vrátit změny
 ui-rules-title = Pravidla zpráv
 ui-rules-intro = Pravidla zpracovávají nové zprávy v Doručené poště, když je Inbox Classic spuštěný. Pravidla, jejichž podmínky zpráva splňuje, se použijí v uvedeném pořadí. Jakmile některé přesune zprávu z Doručené pošty, další se už nepoužijí.
 ui-rules-none = Zatím nemáte žádná pravidla. Vytvořte první kliknutím na Nové.
@@ -598,21 +594,18 @@ ui-download-limit = &Limit místa pro každý účet:
 ui-send-delay = Pr&odleva před odesláním:
 ui-send-delay-note = Dokud zpráva čeká na odeslání, můžete odeslání zrušit příkazem Zpět.
 ui-dark-messages = Zobrazovat zprávy na tmavém pozadí, když je systém v tmavém režimu
-# review: new
 ui-preview-show = Zobrazovat pří&lohy ve zprávách
-# review: new
-ui-preview-show-note = Zobrazí obrázky a první stránky souborů PDF pod textem zprávy. Inbox Classic tyto náhledy vytváří sám, takže nic v souboru se nemůže spustit.
-# review: new
+ui-preview-show-note = Zobrazuje obrázky a první stránky souborů PDF pod textem zprávy. Inbox Classic vytváří tyto náhledy sám, bez spouštění skriptů nebo jiného aktivního obsahu souborů.
 ui-preview-pdfs = Zobrazovat soubory PD&F ve zprávách
 ui-sending-in = { $subject } se odešle za { $count ->
     [one] 1 sekundu
     [few] { $count } sekundy
    *[other] { $count } sekund
 }
-ui-send-undone = Zpráva „{ $subject }“ nebyla odeslána. Je znovu otevřená k úpravám.
+ui-send-undone = Odeslání bylo zrušeno: { $subject }. Zpráva je znovu otevřená k úpravám.
 ui-send-too-late = Odeslání už nelze zrušit: { $subject }.
-ui-outbox-status-undo = Odešle se v { $time }
-ui-download-note = Zprávy stažené předem se otevřou okamžitě. Po překročení limitu úložiště se nejstarší místní kopie odeberou a stáhnou se znovu, až je otevřete.
+ui-outbox-status-undo = Odeslání nejdříve v { $time }
+ui-download-note = Zprávy stažené předem se otevřou okamžitě. Po překročení limitu se nejstarší obsah z mezipaměti odstraní a při otevření zprávy znovu stáhne. Koncepty a zprávy otevřené od spuštění aplikace zůstávají zachovány, takže velikost může limit překročit.
 ui-attachment-downloading = Stahování této zprávy ještě neskončilo. Zkuste to znovu po dokončení stahování.
 ui-trusted-senders-button = &Důvěryhodní odesílatelé...
 ui-trusted-senders-title = Důvěryhodní odesílatelé
@@ -644,7 +637,7 @@ ui-list-pictures = &Zobrazovat obrázky odesílatelů v seznamu zpráv
 ui-list-pictures-note = V rozložení do sloupců zobrazuje loga značek nebo obrázky z Adresáře, pokud je doména odesílatele ověřená. Není-li obrázek dostupný, zobrazí iniciály. Stažená loga se ukládají a používají znovu pro více zpráv.
 ui-card-picture = Obrázek:
 ui-card-picture-choose = Vyb&rat...
-ui-picture-not-picture = Tento soubor není obrázek PNG ani JPEG.
+ui-picture-not-picture = Soubor nelze přečíst jako obrázek PNG nebo JPEG.
 ui-picture-too-large = Tento obrázek je příliš velký. Vyberte obrázek o velikosti nejvýše 10 MB a šířce i výšce nejvýše 8000 pixelů.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
@@ -657,7 +650,7 @@ ui-keys-col-kind = Druh
 ui-keys-col-status = Stav
 ui-keys-kind-own = Váš klíč
 ui-keys-kind-contact = Kontakt
-ui-keys-status-verified = { $status }, ověřený
+ui-keys-status-verified = { $status }, vlastnictví ověřeno
 ui-keys-new = &Nový klíč...
 ui-keys-import = &Importovat...
 ui-keys-export = &Exportovat...
@@ -667,7 +660,7 @@ ui-keys-new-title = Nový klíč
 ui-keys-new-for = Vytvořit klíč pro:
 ui-keys-new-make = &Vytvořit klíč
 ui-keys-no-account = Nejdřív přidejte poštovní účet: klíč se vytváří pro adresy účtu.
-ui-keys-memory-only = Hesla se uchovávají jen v paměti, takže soukromý klíč vytvořený nebo importovaný teď nebude možné použít po zavření Inbox Classic.
+ui-keys-memory-only = Přihlašovací údaje a ochranný klíč se uchovávají jen v paměti. Soukromý klíč vytvořený nebo importovaný nyní proto po zavření Inbox Classic nepůjde použít.
 ui-keys-backup-offer = Váš nový klíč je připravený. Uložit teď jeho zálohu? Při ztrátě počítače nebo obnovení jeho výchozího stavu lze klíč obnovit jen ze zálohy.
 ui-keys-backup-now = &Uložit zálohu...
 ui-keys-later = &Později
@@ -681,11 +674,11 @@ ui-keys-backup-saved = Záloha byla uložena.
 ui-keys-import-title = Importovat klíč
 ui-keys-import-passphrase = Tento soukromý klíč je chráněn heslovou frází. Zadejte ji, abyste klíč mohli importovat:
 ui-keys-file-filter = Klíče OpenPGP
-ui-keys-use-for = Používat tento klíč pro: { $addresses }? Zprávy odeslané z uvedených adres se budou tímto klíčem digitálně podepisovat. Zároveň zde budete moci číst poštu šifrovanou pro tento klíč.
+ui-keys-use-for = Používat tento klíč pro adresy { $addresses }? Budete jím moci digitálně podepisovat zprávy z těchto adres a číst zde poštu šifrovanou pro tento klíč.
 ui-keys-use = &Použít
 ui-keys-not-now = &Teď ne
-ui-keys-remove-own = Odebrat váš klíč { $fingerprint }? Poštu šifrovanou pro něj zde už nepůjde přečíst, dokud znovu neimportujete jeho zálohu.
-ui-keys-remove-contact = Odebrat tento klíč ({ $name })? Dokud jej znovu nepřidáte, nebude možné ověřovat digitální podpisy jeho vlastníka ani mu posílat šifrované zprávy.
+ui-keys-remove-own = Odebrat váš klíč { $fingerprint }? Dokud neimportujete jeho zálohu, nepůjde jím dešifrovat další poštu. Již dešifrovaný obsah se tím neodstraní.
+ui-keys-remove-contact = Odebrat tento klíč ({ $name })? Dokud jej znovu nepřidáte, nepůjde jím ověřovat digitální podpisy ani šifrovat zprávy.
 ui-key-properties-title = Vlastnosti klíče
 ui-key-names = Jména:
 ui-key-fingerprint = Otisk:
@@ -702,6 +695,7 @@ ui-verify-title = Ověřit klíč
 ui-verify-intro = Ověřujete klíč: { $name }. Požádejte jeho vlastníka, aby vám osobně nebo po telefonu přečetl otisk ze své aplikace. Neporovnávejte jej s otiskem poslaným e-mailem: kdo by mohl pozměnit klíč, mohl by pozměnit i tento otisk.
 ui-verify-fingerprint = Otisk klíče, který máte:
 ui-verify-marks = { $count ->
+    [0] Tento klíč neobsahuje žádné e-mailové adresy. Otisk můžete porovnat, ale ověření vlastnictví nelze uložit.
     [one] Než kliknete na Shodují se, ověřte také, že dotyčné osobě patří adresa { $addresses }. Poté bude klíč pro tuto adresu označen jako ověřený. Pokud adresa dané osobě nepatří, klikněte na Liší se.
    *[other] Než kliknete na Shodují se, ověřte také, že dotyčné osobě patří všechny uvedené adresy: { $addresses }. Poté bude klíč pro tyto adresy označen jako ověřený. Pokud některá adresa dané osobě nepatří, klikněte na Liší se.
 }
@@ -731,9 +725,9 @@ ui-compose-encrypt-off = &Vypnout šifrování
 ui-compose-keep-encrypted = &Ponechat šifrování
 ui-setup-export-title = Exportovat nastavení a účty
 ui-setup-import-title = Importovat nastavení a účty
-ui-setup-export-intro = Zvolte, co chcete přenést do jiného počítače. Soubor neobsahuje zprávy. Ty se v druhém počítači znovu stáhnou.
+ui-setup-export-intro = Zvolte, co chcete přenést do jiného počítače. Soubor neobsahuje zprávy. Na druhém počítači lze znovu stáhnout jen poštu, která zůstala na serveru.
 ui-setup-use-passphrase = &Chránit soubor heslovou frází
-ui-setup-passphrase-note = S heslovou frází je soubor šifrovaný a obsahuje uložená hesla, další přihlašovací údaje a soukromé klíče. Bez ní se na druhém počítači budete muset znovu přihlásit k účtům heslem nebo přes prohlížeč.
+ui-setup-passphrase-note = S heslovou frází je soubor šifrovaný a může obsahovat uložené přihlašovací údaje a dostupné soukromé klíče z vybraných částí. Bez ní se na druhém počítači budete muset k účtům znovu přihlásit heslem nebo přes prohlížeč.
 ui-setup-export-button = &Exportovat...
 ui-setup-file-filter = Nastavení a účty Inbox Classic
 ui-setup-ask-passphrase = Tento soubor je chráněn heslovou frází. Zadejte ji, abyste viděli, co soubor obsahuje:

@@ -1,15 +1,14 @@
-<!--review--><h1>Verifiera en kontakts nyckel</h1>
-<p class="summary">Jämför en nyckels fingeravtryck med ägaren för att vara säker på att nyckeln verkligen är deras.</p>
+<h1>Verifiera en kontakts nyckel</h1>
+<p class="summary">Jämför nyckelns fingeravtryck med ägaren för att bekräfta att nyckeln tillhör personen.</p>
 <p>En nyckel kan komma varifrån som helst: ett meddelande, en nyckelserver, en fil. Vem som helst kan skapa en nyckel med din kontakts namn och adress. Verifieringen bekräftar att nyckeln du har är den som din kontakt har.</p>
 <p>Så här verifierar du en nyckel:</p>
 <ol>
     <li>Välj <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, markera kontaktens nyckel och klicka på <b data-text="ui-keys-verify"></b>. Du kan också klicka på den i kontaktens egenskaper i Adressboken.</li>
-    <li>Be din kontakt läsa upp fingeravtrycket för sin nyckel från sin egen app, på plats eller i ett samtal.</li>
-    <li>Om varje grupp om fyra tecken är likadan klickar du på <b data-text="ui-verify-match"></b>. Nyckeln visas som verifierad.</li>
+    <li>Be din kontakt läsa upp fingeravtrycket för sin nyckel från sin egen app, när ni ses eller i ett samtal. Kontrollera också att alla angivna adresser tillhör personen.</li>
+    <li>Om alla grupper om fyra tecken stämmer överens och alla adresser tillhör kontakten klickar du på <b data-text="ui-verify-match"></b>. Nyckelns ägare markeras som verifierad för de adresserna. Om nyckeln saknar e-postadresser går det inte att spara en sådan bekräftelse.</li>
     <li>Fönstret visar de adresser som markeras. En nyckel kan ange vilken adress som helst, så om någon av dem inte är din kontakts klickar du på <b data-text="ui-verify-differ"></b> i stället.</li>
 </ol>
 <aside class="warning">Jämför inte fingeravtrycket med ett som skickats med e-post. Den som kan ändra nyckeln i ett meddelande kan också ändra fingeravtrycket.</aside>
-<p>Om fingeravtrycken skiljer sig åt klickar du på <b data-text="ui-verify-differ"></b>. Nyckeln du har är inte din kontakts: ta bort den och be din kontakt att skicka sin nyckel igen.</p>
-<p>Signaturer som gjorts med en verifierad nyckel visas i grönt. En nyckel som du inte har verifierat fungerar ändå för kryptering, och dess signaturer visas i blått.</p>
+<p>Om fingeravtrycken skiljer sig åt klickar du på <b data-text="ui-verify-differ"></b>. Du har en annan nyckel än den som kontakten läste upp. Bekräfta inte ägaren; ta bort nyckeln och be om den rätta.</p>
+<p>Giltiga signaturer från avsändaren visas i grönt när nyckelns ägare har verifierats, annars i blått. En användbar nyckel kan användas för kryptering även om ägaren inte har verifierats.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

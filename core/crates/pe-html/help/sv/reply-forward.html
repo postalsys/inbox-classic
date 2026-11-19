@@ -1,16 +1,15 @@
-<!--review--><h1>Svara och vidarebefordra</h1>
-<p class="summary">Svara avsändaren eller alla, eller skicka ett meddelande vidare till någon annan.</p>
+<h1>Svara och vidarebefordra</h1>
+<p class="summary">Svara på ett meddelande, svara alla eller vidarebefordra det till någon annan.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) svarar avsändaren.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) svarar alla som meddelandet gick till.</li>
-    <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) skickar meddelandet vidare. Du skriver in mottagarna.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) förbereder ett svar till Reply-To-adressen om den finns, annars till avsändaren.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) förbereder ett svar till Reply-To-adressen eller avsändaren och till mottagarna i Till och Kopia. Dina egna adresser utelämnas.</li>
+    <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) förbereder en vidarebefordran. Du anger mottagarna och skickar sedan meddelandet.</li>
 </ul>
 <p>Ett svar eller en vidarebefordran skickas från kontot där originalmeddelandet finns, och från adressen det skickades till när den är en av kontots andra adresser.</p>
 <h2>Originalmeddelandet</h2>
-<p>I ett svar är originalmeddelandet hopfällt bakom en knapp med ••• under din text, så att du bara ser det du skriver. Det skickas med ditt svar i alla fall. Om du vill korta det klickar du på knappen, eller markerar allt med <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: originalet blir då en del av din text.</p>
+<p>I ett svar är originalmeddelandet hopfällt bakom en knapp med ••• under din text, så att du bara ser det du skriver. Det följer med svaret även när det är hopfällt, om du inte redigerar eller tar bort det. Om du vill korta det klickar du på knappen, eller markerar allt med <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: den citerade texten fälls ut så att du kan redigera eller ta bort den.</p>
 <p>I en vidarebefordran finns originalet i texten från början, eftersom det är det du skickar.</p>
 <p>Ett svar följer originalets format. Ett svar på ett meddelande i oformaterad text är oformaterad text, med originalet citerat med <b>&gt;</b>, om du inte formaterar något.</p>
 <h2>Vidarebefordra flera meddelanden</h2>
-<p>Markera flera meddelanden och klicka på <b data-text="ui-tb-forward"></b>. Ett nytt meddelande skapas med alla bifogade som <code>.eml</code>-filer. Ämnet blir det första meddelandets.</p>
+<p>Markera flera meddelanden och klicka på <b data-text="ui-tb-forward"></b>. Ett nytt meddelande skapas med alla bifogade som <code>.eml</code>-filer. Ämnet utgår från det första markerade meddelandet och får prefixet Fw:.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>
-<!--/review-->

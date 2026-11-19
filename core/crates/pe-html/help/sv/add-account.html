@@ -1,4 +1,4 @@
-<!--review--><h1>Lägga till ett e-postkonto</h1>
+<h1>Lägga till ett e-postkonto</h1>
 <p class="summary">Lägg till ditt första konto, eller ett till, genom att logga in via webbläsaren eller med din adress och ditt lösenord.</p>
 <p>Första gången Inbox Classic startar öppnas <b data-text="ui-add-account-title"></b>. Om du vill lägga till ett konto till senare väljer du <b data-text="menu-file"></b> &gt; <b data-text="cmd-new-account"></b>.</p>
 <img src="picture:account-1-form" alt="Fönstret för att lägga till ett e-postkonto, med inloggningsknapparna för Google och Microsoft ovanför fälten för namn och adress">
@@ -14,13 +14,12 @@
 <ol>
     <li>Skriv ditt namn som andra ska se det i <!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os-->.</li>
     <li>Skriv din adress i <b data-text="ui-field-email"></b>.</li>
-    <li>Klicka på <!--os:windows--><b data-text="win-next"></b><!--/os--><!--os:mac--><b data-text="mac-next"></b><!--/os--><!--os:linux--><b data-text="gtk-next"></b><!--/os-->. Inbox Classic letar upp leverantörens inställningar, vilket tar några sekunder. <b data-text="ui-cancel"></b> hoppar över sökningen.</li>
+    <li>Klicka på <!--os:windows--><b data-text="win-next"></b><!--/os--><!--os:mac--><b data-text="mac-next"></b><!--/os--><!--os:linux--><b data-text="gtk-next"></b><!--/os-->. Inbox Classic letar upp leverantörens inställningar, vilket tar några sekunder. <b data-text="ui-cancel"></b> hoppar över sökningen i Windows och Linux. På Mac avbryts hela kontoregistreringen.</li>
     <li>Skriv ditt lösenord i <b data-text="ui-field-password"></b>.</li>
     <li>Kontrollera serverinställningarna och klicka sedan på <b data-text="ui-finish"></b>. Inbox Classic loggar in och hämtar dina mappar.</li>
 </ol>
-<p>Om leverantören vill ha ett applösenord i stället för ditt vanliga lösenord säger Inbox Classic det och erbjuder sig att öppna leverantörens instruktioner.</p>
-<aside class="note">När inga inställningar hittas är servernamnen gissningar: <code>imap.</code> och <code>smtp.</code> följt av din domän. Jämför dem med det som leverantören uppger.</aside>
+<p>För vissa leverantörer visar Inbox Classic råd om applösenord och kan öppna leverantörens instruktioner. Kontot måste stödja applösenord. Outlook.com och Microsoft 365 kräver inloggning via webbläsaren.</p>
+<aside class="note">När inga inställningar hittas kan serverfälten vara tomma eller innehålla förslag, till exempel <code>imap.</code> och <code>smtp.</code> följt av din domän. Kontrollera alltid uppgifterna med det som leverantören uppger.</aside>
 <p><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os--> är vad mapplistan kallar kontot, till exempel <i>Jobb</i>. Ett nytt konto får först leverantörens namn eller domänen. Du kan ändra det när som helst i kontots egenskaper.</p>
 <p>Om du vill logga in med en egen inloggningsapp klickar du på <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> på första sidan och väljer den.</p>
 <nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:manage-accounts"></a> <a href="topic:account-security"></a></nav>
-<!--/review-->

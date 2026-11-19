@@ -1,18 +1,17 @@
-<!--review--><h1>Lämna en e-postlista</h1>
-<p class="summary">Stoppa meddelandena från en e-postlista med knappen för att avsluta prenumerationen.</p>
-<p>Ett meddelande från en e-postlista som talar om hur du lämnar den har <b data-text="ui-unsubscribe"></b> till höger i huvudet.</p>
+<h1>Lämna en e-postlista</h1>
+<p class="summary">Avsluta prenumerationen på en e-postlista med knappen för att avsluta prenumerationen.</p>
+<p>Ett meddelande från en e-postlista som innehåller uppgifter om hur du avslutar prenumerationen visar knappen <b data-text="ui-unsubscribe"></b> till höger i meddelandehuvudet.</p>
 <p>Så här lämnar du listan:</p>
 <ol>
     <li>Klicka på <b data-text="ui-unsubscribe"></b>. Inbox Classic talar om vad som kommer att hända och frågar först.</li>
     <li>Bekräfta. Beroende på listan händer en av tre saker:
         <ul>
-            <li>Inbox Classic ber listan att sluta. Ingen sida öppnas och inget meddelande skickas.</li>
+            <li>Inbox Classic skickar en begäran om avregistrering till listans server. Ingen webbsida öppnas och inget e-postmeddelande skickas.</li>
             <li>Inbox Classic skriver det meddelande som listan vill ha. Klicka på <b data-text="ui-tb-send"></b> för att skicka det.</li>
-            <li>Listans sida öppnas i webbläsaren, där du gör klart.</li>
+            <li>Listans sida öppnas i webbläsaren, där du slutför avregistreringen.</li>
         </ul>
     </li>
 </ol>
-<p>Statusfältet visar när listan har tagit emot begäran.</p>
-<aside class="note">Inbox Classic ber listan att sluta av sig självt bara när listans server har signerat meddelandet. Ett påhittat meddelande kan inte använda det för att nå någon annan.</aside>
+<p>När begäran skickas direkt till listans server visar statusfältet om servern har godtagit den. Det bekräftar inte i sig att adressen har tagits bort.</p>
+<aside class="note">Inbox Classic skickar en sådan begäran direkt först efter din bekräftelse, och bara när e-postleverantören har godkänt en domänsignatur som även omfattar uppgifterna för avregistrering.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->
