@@ -6,7 +6,7 @@
 - All 1,483 English catalog entries and 53 English help topics have been read against their app context. All affected meanings were compared across the 28 translations. The exact coverage and retained-content decisions are in the state and sealed review artifacts.
 - Corrected 93 English catalog values and 51 English help topics; corrected 469 translated catalog values and 609 translated help topics (980 changed help lines).
 - Three English MCP response literals now distinguish eligibility checks and partial Undo from guaranteed restoration. No runtime logic or schema keys changed.
-- Content review is complete. Next: commit content, set REVIEWED to that commit, verify zero pending/unmarked changes, archive and publish. Starting source: `c00d1cb0560ed3e54324208d04f36ba671ac3fa1`; freshly fetched master matches it.
+- Review complete. REVIEWED is `bf44141a12811e63e7e9f3c8302345c7a16d57cc`; baseline check reports zero pending messages, help passages or unmarked changes. Publication/merge is authorized and pending. Starting source: `c00d1cb0560ed3e54324208d04f36ba671ac3fa1`; freshly fetched master matches it.
 
 ## Validation and limits
 
@@ -19,3 +19,7 @@ The required offline pe-ffi build passed, including pe-mcp. Generated installer 
 Requests, scheduled operations and confirmed results now remain distinct. Corrections cover partial Undo, unsubscribing, attachment requests, draft removal on queueing, provider sign-in guidance, local-data removal, encryption and identity claims, cache and preview limits, search behavior, platform instructions and image permissions. Good translations that already included the relevant qualifications were retained.
 
 Round 2 remains archived in `translation-review-round2-state.json` and `translation-review-round2-progress.md`. Its English findings were historical evidence: this round rechecked them against current source rather than assuming they still applied. In particular, the current English delete-and-undo topic already included the absent-Trash condition and was retained.
+
+## Completion evidence
+
+The exact review receipts and validation artifacts are preserved at `/Users/andris/Projects/PostalExpress/build/i18n-english-originals-completed-20261119`. The active state and progress are also archived as `translation-review-round3-state.json` and `translation-review-round3-progress.md`.

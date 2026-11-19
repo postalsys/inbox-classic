@@ -1,6 +1,6 @@
 {
   "round": 3,
-  "status": "content_review_complete_pending_baseline",
+  "status": "complete",
   "status_note": "User requested an English-originals review and a second check for remaining issues after completed round2. English edits are authorized. No local test suites or CI queries.",
   "starting_commit": "c00d1cb0560ed3e54324208d04f36ba671ac3fa1",
   "starting_review_baseline": "a82e74e57cb2a7c282c7955d60e1adfe732a9a4c",
@@ -5339,7 +5339,7 @@
     "core/crates/pe-html/help/uk/removing.html": "5722431007b51dc11aa386ed6e62cd08b46968b2f060a63c70f1bd67188c0aad"
   },
   "validation_policy": "Static structural checks, source-derived mnemonics, exact inventory/hash reconciliation, help joins, required metadata generation and git diff --check only. No local test suites, native GUI runs, manually triggered workflows or CI queries.",
-  "next_batch": "Commit reviewed content, advance REVIEWED to that concrete commit, verify zero pending/unmarked changes, archive round3 and publish/merge under existing authorization.",
+  "next_batch": "None in the reviewed source. Future English or translation changes require an affected-entry review. Publication of the completed branch is authorized and pending.",
   "review_receipts": {
     "ui": {
       "artifact": "inbox-english-originals-20261119-ui-ledger.json",
@@ -14686,10 +14686,27 @@
         "sha256": "a6d17976774d4bc8a0a767fbe55b79288a044fe2623781690d96bbaacd962a11"
       }
     },
-    "late_refinements_note": "The final second-look addendum confirmed five domain corrections and identified a remaining Turkish heading description. Root then checked all28 heading descriptions and corrected Turkish, Brazilian Portuguese, Romanian and Slovenian. All are included in the root receipt and final static hashes."
+    "late_refinements_note": "The final second-look addendum confirmed five domain corrections and identified a remaining Turkish heading description. Root then checked all28 heading descriptions and corrected Turkish, Brazilian Portuguese, Romanian and Slovenian. All are included in the root receipt and final static hashes.",
+    "baseline_check": {
+      "exit_code": 0,
+      "messages": 0,
+      "help_passages": 0,
+      "unmarked_changes": 0,
+      "log_sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398"
+    }
   },
   "final_source_audit": {
     "origin_master": "c00d1cb0560ed3e54324208d04f36ba671ac3fa1",
     "scope": "Fresh master only; no unmerged source discovery per user instruction."
+  },
+  "content_commit": "bf44141a12811e63e7e9f3c8302345c7a16d57cc",
+  "reviewed_baseline": "bf44141a12811e63e7e9f3c8302345c7a16d57cc",
+  "pending_catalog_entries": 0,
+  "pending_help_topics": 0,
+  "evidence_checkpoint": {
+    "path": "/Users/andris/Projects/PostalExpress/build/i18n-english-originals-completed-20261119",
+    "archive": "review-evidence.tar.gz",
+    "manifest": "manifest.json",
+    "note": "All sealed review ledgers, source snapshots, edits, helper scripts and validation logs; manifest verifies archive members. Publication receipt will be added after merge."
   }
 }
