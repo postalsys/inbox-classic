@@ -321,7 +321,11 @@ async fn undo_since(d: &Driver) {
     .await;
     let said = report.as_ref().map(alert_text).unwrap_or_default();
     d.check(
-        said.lines().next().is_some_and(|first| first != pe_core::i18n::tr_args(Text::AgentUndoDone, &[("count", 0u64.into())])),
+        longer_count > 0
+            && said.contains(&pe_core::i18n::tr_args(
+                Text::AgentUndoDone,
+                &[("count", longer_count.into())],
+            )),
         &format!("Take Back says what it took back, and what it left ({said})"),
     );
     if let Some(report) = &report {
