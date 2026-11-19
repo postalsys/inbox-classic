@@ -3,73 +3,55 @@
 
 ## The main window
 
-# review: new
-gtk-search-looks-in = Căutarea în { $place } acoperă subiectele, expeditorii, destinatarii, numele atașărilor și textul mesajelor. Verificați ortografia sau încercați mai puține cuvinte.
-# review: new
+gtk-search-looks-in = În „{ $place }”, se caută în subiectele și textul mesajelor, în numele și adresele expeditorilor și destinatarilor, precum și în numele atașărilor. Verificați ortografia sau încercați mai puține cuvinte.
 gtk-search-still-indexing = { $count ->
     [one] Textul unui mesaj este încă în curs de indexare. În curând pot apărea mai multe rezultate.
     [few] Textul a { $count } mesaje este încă în curs de indexare. În curând pot apărea mai multe rezultate.
    *[other] Textul a { $count } de mesaje este încă în curs de indexare. În curând pot apărea mai multe rezultate.
 }
-# review: new
 gtk-search-results-everywhere = { $count ->
     [0] Niciun rezultat
     [one] 1 rezultat
     [few] { $count } rezultate
    *[other] { $count } de rezultate
 } pentru „{ $words }” în toate folderele
-# review: new
 gtk-search-results-in = { $count ->
     [0] Niciun rezultat
     [one] 1 rezultat
     [few] { $count } rezultate
    *[other] { $count } de rezultate
-} pentru „{ $words }” în { $place }
-# review: new
+} pentru „{ $words }” în „{ $place }”
 gtk-search-indexing = { $count ->
     [one] se indexează încă textul unui mesaj
     [few] se indexează încă textul a { $count } mesaje
    *[other] se indexează încă textul a { $count } de mesaje
 }
 gtk-list-loading = Se încarcă...
-# review: new
 gtk-menu-rename = Redenumire...
-# review: new
-gtk-import-one-question = Importați mesajul { $file } în { $folder }?
-# review: new
-gtk-files-not-saved = { $failed } din cele { $total } fișiere nu au putut fi salvate.
-# review: new
+gtk-import-one-question = Importați mesajul din fișierul „{ $file }” în „{ $folder }”?
+gtk-files-not-saved = Fișiere care nu au putut fi salvate: { $failed } din { $total }.
 gtk-unsubscribe-one-click =
-    Părăsiți această listă de corespondență?
+    Vă dezabonați de la această listă de corespondență?
 
     Inbox Classic va trimite o cerere de dezabonare către { $target }. Nu se va deschide nicio pagină web și nu se va trimite niciun e-mail.
-# review: new
 gtk-unsubscribe-mail =
-    Părăsiți această listă de corespondență?
+    Vă dezabonați de la această listă de corespondență?
 
     Pentru dezabonare, trimiteți un e-mail la { $target }. Inbox Classic îl pregătește pentru dvs. Trimiteți mesajul pentru a confirma.
-# review: new
 gtk-unsubscribe-web =
-    Părăsiți această listă de corespondență?
+    Vă dezabonați de la această listă de corespondență?
 
     Pagina de dezabonare a listei de corespondență se va deschide în browser ({ $target }).
-# review: new
 gtk-unsubscribe-failed = Dezabonarea nu a reușit: { $problem }
-# review: new
-gtk-toolbar-create-mail-menu = Scrieți dintr-un anumit cont
-# review: new
-gtk-toolbar-send-recv-menu = Trimiteți și primiți e-mail pentru un anumit cont
-# review: new
+gtk-toolbar-create-mail-menu = Compuneți un mesaj dintr-un anumit cont
+gtk-toolbar-send-recv-menu = Trimiteți și primiți mesaje într-un anumit cont
 gtk-main-menu = Meniu principal
-# review: new
 gtk-folder-list = Listă de foldere
-# review: new
 gtk-quit = Ieșire
 
 ## The Move and Copy window
 
-# review: new
-gtk-new-folder-at-top-of = Folderul nou va fi la nivelul de sus al contului { $account }.
+gtk-new-folder-at-top-of = Folderul nou va fi creat la nivelul principal al contului „{ $account }”.
 
 ## The message list
 
@@ -77,7 +59,6 @@ gtk-new-folder-at-top-of = Folderul nou va fi la nivelul de sus al contului { $a
 
 ## Notifications and the tray
 
-# review: new
 gtk-unread-messages = { $count ->
     [0] Niciun mesaj necitit
     [one] 1 mesaj necitit
@@ -89,164 +70,105 @@ gtk-unread-messages = { $count ->
 
 ## The Outbox
 
-# review: new
 gtk-outbox-empty = Niciun mesaj nu așteaptă să fie trimis.
-# review: new
 gtk-outbox-row = Către: { $to }  ·  În așteptare din { $queued }  ·  { $status }
 
 ## The app
 
-# review: new
-gtk-still-running-detail = Inbox Classic caută în continuare e-mailuri noi în fundal. Folosiți pictograma lui din bara de sus pentru a deschide aplicația sau a ieși din ea.
-# review: new
+gtk-still-running-detail = Inbox Classic caută în continuare mesaje noi în fundal. Folosiți pictograma aplicației din bara de sus pentru a o deschide sau a ieși din ea.
 gtk-sign-in-again-ask =
-    Conectarea la { $account } a fost refuzată sau sesiunea a expirat.
+    Conectarea la contul „{ $account }” a fost refuzată sau sesiunea a expirat.
 
-    Vă conectați din nou în browser?
-# review: new
-gtk-default-app-not-installed = Această copie a Inbox Classic nu a fost instalată, așa că sistemul nu o afișează ca aplicație de e-mail. Instalați-o pentru a o putea alege.
-# review: new
+    Doriți să vă conectați din nou în browser?
+gtk-default-app-not-installed = Această copie a aplicației Inbox Classic nu a fost instalată, așa că sistemul nu o afișează în lista aplicațiilor de e-mail. Instalați-o pentru a o putea alege.
 gtk-default-app-now = Inbox Classic este acum aplicația dvs. de e-mail implicită: linkurile de e-mail deschid aici un mesaj nou.
-# review: new
 gtk-default-app-failed = Inbox Classic nu a putut fi setat ca aplicație de e-mail implicită.
 
 ## Buttons and words used in many windows
 
 ## The reading pane
 
-# review: new
 gtk-reader-date = Dată:
-# review: new
 gtk-reader-files = Atașările mesajului
-# review: new
 gtk-files = { $count ->
     [one] { $count } fișier
     [few] { $count } fișiere
    *[other] { $count } de fișiere
 }
-# review: new
 gtk-pictures-blocked = Unele imagini au fost blocate, ca expeditorul să nu vă poată identifica computerul.
-# review: new
 gtk-download-pictures = Descărcare imagini
-# review: new
 gtk-save-attachments-menu = Salvare atașări...
 
 ## The compose window
 
-# review: new
 gtk-format-bold = Aldin (Ctrl+B)
-# review: new
 gtk-format-italic = Cursiv (Ctrl+I)
-# review: new
 gtk-format-underline = Subliniat (Ctrl+U)
-# review: new
 gtk-format-hyperlink = Hyperlink (Ctrl+K)
-# review: new
 gtk-font = Font
-# review: new
 gtk-show-cc = _Cc
-# review: new
 gtk-show-bcc = _Bcc
-# review: new
 gtk-save-tip = Salvare (Ctrl+S)
-# review: new
 gtk-link-status = { $link }    (Ctrl+clic pentru deschidere)
 
 ## Accounts
 
-# review: new
 gtk-plain-warning =
     Fără criptare, oricine interceptează traficul de rețea vă poate citi parola și mesajele. Folosiți această conexiune doar cu un server de pe propriul computer sau din rețeaua locală.
 
     Continuați?
-# review: new
 gtk-account-name-title = Nume cont
-# review: new
 gtk-display-name-title = Nume afișat
-# review: new
 gtk-turned-off-why = Opțiunea „{ $button }” este dezactivată pe acest computer. { $reason }
-# review: new
 gtk-turned-off-why-long =
     Opțiunea „{ $button }” este dezactivată pe acest computer.
 
     { $reason }
-# review: new
 gtk-next = Următorul >
-# review: new
-gtk-provider-sign-in = Conectați-vă la { $address } pe site-ul web al furnizorului ({ $provider }). Parola nu este partajată cu Inbox Classic. Puteți folosi și o parolă de aplicație creată în setările de securitate ale contului.
-# review: new
-gtk-provider-sign-in-apps = Conectați-vă la { $address } pe site-ul web al furnizorului ({ $provider }) folosind una dintre aplicațiile dvs. de conectare (Mai multe opțiuni de conectare). Puteți folosi și o parolă de aplicație creată în setările de securitate ale contului.
-# review: new
+gtk-provider-sign-in = Conectați-vă la contul „{ $address }” pe site-ul furnizorului ({ $provider }). Inbox Classic nu primește parola dvs. Dacă acest cont permite folosirea parolelor de aplicație pentru e-mail, puteți folosi o astfel de parolă creată în setările de securitate ale contului. Outlook.com și Microsoft 365 permit numai conectarea prin browser.
+gtk-provider-sign-in-apps = Conectați-vă la contul „{ $address }” pe site-ul furnizorului ({ $provider }), folosind una dintre aplicațiile dvs. de conectare din „Mai multe opțiuni de conectare”. Dacă acest cont permite folosirea parolelor de aplicație pentru e-mail, puteți folosi o astfel de parolă creată în setările de securitate ale contului. Outlook.com și Microsoft 365 permit numai conectarea prin browser.
 gtk-accounts-add = Adăugare...
-# review: new
 gtk-accounts-properties = Proprietăți...
-# review: new
-gtk-accounts-signature = Semnătură...
-# review: new
+gtk-accounts-signature = Textul semnăturii...
 gtk-accounts-sign-in-apps = Aplicații de conectare...
 
 ## Sign-in apps
 
-# review: new
 gtk-app-server = Server { $kind }
-# review: new
 gtk-app-port = Port { $kind }
-# review: new
 gtk-app-security = Securitate { $kind }
-# review: new
 gtk-issuer-found =
     Pagina de conectare: { $page }
     Endpoint pentru token: { $endpoint }
-# review: new
 gtk-client-id = ID client
-# review: new
 gtk-client-secret = Secret client
-# review: new
 gtk-scopes = Permisiuni (scopes)
-# review: new
 gtk-redirect-uri = URI de redirecționare
-# review: new
 gtk-issuer-usable =
     Emitentul poate fi folosit.
 
     { $found }
-# review: new
-gtk-app-built-in = { $app } este integrată. Puteți schimba doar dacă este oferită pentru conturile noi. { $reason }
-# review: new
+gtk-app-built-in = Aplicația „{ $app }” este integrată în Inbox Classic. Puteți schimba doar dacă apare printre opțiunile de conectare pentru conturi noi. { $reason }
 gtk-built-in = { $app } (integrată)
-# review: new
 gtk-offered-for-new = Oferită pentru conturile noi
-# review: new
 gtk-edit-button = Editare...
-# review: new
-gtk-remove-app-ask = Eliminați aplicația de conectare { $app } și secretul client salvat?
-# review: new
-gtk-sign-in-apps-intro = Aplicațiile de conectare permit conturilor să se conecteze prin browser. Una dezactivată nu este oferită pentru conturile noi; conturile care o folosesc deja funcționează în continuare.
+gtk-remove-app-ask = Eliminați aplicația de conectare „{ $app }” și secretul client salvat pentru aceasta?
+gtk-sign-in-apps-intro = Aplicațiile de conectare vă permit să vă conectați la conturi prin browser. Dacă o aplicație este dezactivată, nu apare printre opțiunile de conectare pentru conturi noi. Conturile care o folosesc deja continuă să funcționeze.
 
 ## AI agents
 
-# review: new
 gtk-agent-it-may = Acțiuni permise
-# review: new
 gtk-agent-accounts = Conturi permise
-# review: new
 gtk-never-used = Nefolosit niciodată
-# review: new
-gtk-last-used = Folosit ultima dată { $date }
-# review: new
-gtk-forget-program = Eliminați acest program?
-# review: new
-gtk-forget-program-detail = Permisiunile programului și istoricul activității agenților lui vor fi șterse. Vi se va cere din nou permisiunea data viitoare când se conectează.
-# review: new
-gtk-no-agents-yet = Niciun agent nu a cerut încă să vă folosească e-mailul.
-# review: new
+gtk-last-used = Ultima utilizare: { $date }
+gtk-forget-program = Eliminați programul din această listă?
+gtk-forget-program-detail = Permisiunile programului și istoricul activității agenților săi vor fi șterse. Vi se va cere din nou permisiunea la următoarea conectare.
+gtk-no-agents-yet = Niciun agent nu a cerut încă acces la mesajele dvs.
 gtk-nothing-yet = Nimic încă.
 
 ## Preferences
 
-# review: new
 gtk-preferences = Preferințe
-# review: changed
 gtk-notify-subtitle = Doar cât timp Inbox Classic este în fundal
 
 ## The desktop entry and the page of the software stores
@@ -254,13 +176,9 @@ gtk-notify-subtitle = Doar cât timp Inbox Classic este în fundal
 # linux/data/com.inboxclassic.InboxClassic.desktop and .metainfo.xml, made by the build. The keywords are the words a
 # search of the applications finds Inbox Classic by, each ended by a semicolon, in your language only: the English
 # ones are added before them
-# review: new
 gtk-desktop-generic-name = Client de e-mail
-# review: new
 gtk-desktop-comment = Citiți și scrieți e-mailuri: un program de e-mail rapid și simplu
-# review: new
 gtk-desktop-keywords = poștă;email;e-mail;mesaje;corespondență;
-# review: new
 gtk-metainfo-summary = Un program de e-mail rapid și simplu
 # review: new
 gtk-metainfo-description = Inbox Classic citește și scrie e-mailuri cu folderele în stânga, mesajele sus și mesajul dedesubt, ca programele de e-mail de odinioară. Funcționează cu orice cont IMAP și SMTP și se conectează la Outlook.com și Microsoft 365 prin browser.
