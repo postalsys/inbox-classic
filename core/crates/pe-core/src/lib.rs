@@ -411,6 +411,35 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 pub(crate) type EventSink = Arc<dyn Fn(Event) + Send + Sync>;
 
+/// How many changes of folders a listener that falls behind may miss before it is told it missed some
+const MAIL_CHANGES: usize = 256;
+
+/// A change of the mail of an account, as [`Core::mail_changes`] tells it
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MailChange {
+    /// The folder list of an account changed
+    Folders(AccountId),
+    /// The messages of a folder of an account, or their flags, changed
+    Folder(AccountId, FolderId),
+}
+
+impl MailChange {
+    fn of(event: &Event) -> Option<MailChange> {
+        match event {
+            Event::FoldersChanged { account } => Some(MailChange::Folders(*account)),
+            Event::FolderChanged { account, folder } => Some(MailChange::Folder(*account, *folder)),
+            _ => None,
+        }
+    }
+
+    /// The account whose mail changed
+    pub fn account(self) -> AccountId {
+        match self {
+            MailChange::Folders(account) | MailChange::Folder(account, _) => account,
+        }
+    }
+}
+
 /// The OAuth providers the engine signs in with: the built-in ones (with the client IDs of this build), or the
 /// ones of [`Options::oauth_providers`] in their place
 #[derive(Clone, Default)]
@@ -515,6 +544,8 @@ pub struct Core {
     agent_tickets: Mutex<std::collections::HashMap<String, agents::Ticket>>,
     /// Grows each time what programs may do changes (agents.rs `agent_changes`)
     agent_changes: tokio::sync::watch::Sender<u64>,
+    /// The folders whose mail changed, as the events tell the windows (agents' subscriptions, [`Core::mail_changes`])
+    mail_changes: tokio::sync::broadcast::Sender<MailChange>,
     /// The attachments of the messages shown lately and the files written to open them (opening.rs)
     attachment_files: Arc<opening::Files>,
     /// Lookups of servers; None when the address has no domain
@@ -603,6 +634,8 @@ impl Core {
         let pdfs_turned_off = previews::check_crash_markers(&path, &store);
         let closed = Arc::new(AtomicBool::new(false));
         let open = closed.clone();
+        let (mail_changes, _) = tokio::sync::broadcast::channel(MAIL_CHANGES);
+        let changed = mail_changes.clone();
         let core = Core {
             wake,
             synced: Arc::new(worker::Synced::new(Default::default())),
@@ -624,6 +657,10 @@ impl Core {
             trust,
             events: Arc::new(move |event| {
                 if !open.load(Ordering::Acquire) {
+                    if let Some(change) = MailChange::of(&event) {
+                        // nobody listening is no failure
+                        let _ = changed.send(change);
+                    }
                     events(event);
                 }
             }),
@@ -631,6 +668,7 @@ impl Core {
             agent_asks: Mutex::default(),
             agent_tickets: Mutex::default(),
             agent_changes: tokio::sync::watch::Sender::new(0),
+            mail_changes,
             attachment_files: Arc::default(),
             autoconfig: Requests::default(),
             pgp_lookups: Requests::default(),

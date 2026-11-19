@@ -203,6 +203,7 @@ mod tests {
         let host = HostInfo {
             path: "/bin/zsh".into(),
             name: "zsh".into(),
+            ..Default::default()
         };
         let args = |list: &[&str]| list.iter().map(|a| a.to_string()).collect::<Vec<_>>();
         let named = named_by_arguments(host.clone(), args(&["--mcp", "--name", "Claude Code"]));

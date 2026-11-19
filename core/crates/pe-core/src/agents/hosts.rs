@@ -85,6 +85,15 @@ pub fn named(host: HostInfo, name: &str) -> HostInfo {
     HostInfo {
         path: format!("{}{NAMED}{name}", host.path),
         name: name.to_string(),
+        ..host
+    }
+}
+
+/// A program's path apart: its file, and the name `--name` gave it ([`named`]) when it has one
+pub fn split_named(path: &str) -> (&str, Option<&str>) {
+    match path.split_once(NAMED) {
+        Some((file, name)) => (file, Some(name)),
+        None => (path, None),
     }
 }
 
@@ -118,8 +127,22 @@ pub fn host_one(host: &AgentHost) -> String {
     label(&host.name, &host.path, false)
 }
 
-/// The question and the words under it when `host` connects for the first time
+/// The question and the words under it when `host` connects for the first time; when the relay said the program
+/// was another one, the words start by saying so
 pub fn connect_text(host: &HostInfo) -> (String, String) {
+    let (title, detail) = asked(host);
+    if host.claimed.is_empty() {
+        return (title, detail);
+    }
+    let found = program_name(split_named(&host.path).0);
+    let claimed = tr_args(
+        Text::AgentConnectClaimed,
+        &[("claimed", (&host.claimed).into()), ("program", (&found).into())],
+    );
+    (title, format!("{claimed}\n\n{detail}"))
+}
+
+fn asked(host: &HostInfo) -> (String, String) {
     let detail = pe_i18n::tr(Text::AgentConnectDetail);
     let Some(terminal) = terminal_of(&host.path) else {
         return (
@@ -149,10 +172,32 @@ mod tests {
     }
 
     #[test]
+    fn a_program_that_said_it_was_another_is_named_so() {
+        let found = HostInfo {
+            path: "/usr/bin/python3".into(),
+            name: "python3".into(),
+            claimed: "Claude".into(),
+        };
+        let (title, detail) = connect_text(&found);
+        assert_eq!(title, "python3 wants to use your mail");
+        assert!(
+            detail.starts_with("It said it was Claude. Inbox Classic checked which program started it: python3.\n\n"),
+            "{detail}"
+        );
+        // named, the name its own and the program found told
+        let named = named(found, "Helper");
+        assert_eq!(named.claimed, "Claude");
+        let (title, detail) = connect_text(&named);
+        assert_eq!(title, "Helper wants to use your mail");
+        assert!(detail.contains("started it: python3."), "{detail}");
+    }
+
+    #[test]
     fn a_terminals_programs_share_one_access_unless_named() {
         let terminal = HostInfo {
             path: "/System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal".into(),
             name: "Terminal".into(),
+            ..Default::default()
         };
         let (title, detail) = connect_text(&terminal);
         assert!(
@@ -177,6 +222,8 @@ mod tests {
         assert_eq!(host_label(&named.name, &named.path), "Claude Code");
         // nothing given changes nothing
         assert_eq!(super::named(terminal.clone(), " "), terminal);
+        assert_eq!(split_named(&named.path), (terminal.path.as_str(), Some("Claude Code")));
+        assert_eq!(split_named(&terminal.path), (terminal.path.as_str(), None));
         let host = AgentHost {
             id: 1,
             path: terminal.path.clone(),

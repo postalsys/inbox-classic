@@ -539,34 +539,28 @@ agent-log-watched = Pradėtas stebėti pokalbis „{ $subject }“
 agent-log-ignored = Pradėtas ignoruoti pokalbis „{ $subject }“
 agent-log-unmarked = Nebestebimas ir nebeignoruojamas pokalbis „{ $subject }“
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
-agent-undo-changed = laiškas nuo to laiko pakeistas
+agent-undo-changed = laiško žymėjimas nuo to laiko pasikeitė
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
-    [one] Pažymėtas kaip skaitytas { $count } laiškas (paieška: { $query })
-    [few] Pažymėti kaip skaityti { $count } laiškai (paieška: { $query })
-   *[other] Pažymėta kaip skaityta { $count } laiškų (paieška: { $query })
+    [one] Pažymėta kaip skaityti: { $count } laiškas (paieška: { $query })
+    [few] Pažymėta kaip skaityti: { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip skaityti: { $count } laiškų (paieška: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
-    [one] Pažymėtas kaip neskaitytas { $count } laiškas (paieška: { $query })
-    [few] Pažymėti kaip neskaityti { $count } laiškai (paieška: { $query })
-   *[other] Pažymėta kaip neskaityta { $count } laiškų (paieška: { $query })
+    [one] Pažymėta kaip neskaityti: { $count } laiškas (paieška: { $query })
+    [few] Pažymėta kaip neskaityti: { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip neskaityti: { $count } laiškų (paieška: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Pažymėtas vėliavėle { $count } laiškas (paieška: { $query })
     [few] Pažymėti vėliavėle { $count } laiškai (paieška: { $query })
    *[other] Pažymėta vėliavėle { $count } laiškų (paieška: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Nuimta vėliavėlė nuo { $count } laiško (paieška: { $query })
     [few] Nuimta vėliavėlė nuo { $count } laiškų (paieška: { $query })
    *[other] Nuimta vėliavėlė nuo { $count } laiškų (paieška: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] Pažymėtas
     [few] Pažymėti
@@ -584,38 +578,32 @@ agent-log-bulk-color = { $count ->
     [few] { $count } laiškai
    *[other] { $count } laiškų
 } (paieška: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Perkeltas { $count } laiškas (paskirtis: { $folder }; paieška: { $query })
     [few] Perkelti { $count } laiškai (paskirtis: { $folder }; paieška: { $query })
    *[other] Perkelta { $count } laiškų (paskirtis: { $folder }; paieška: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Archyvuotas { $count } laiškas (paieška: { $query })
     [few] Archyvuoti { $count } laiškai (paieška: { $query })
    *[other] Archyvuota { $count } laiškų (paieška: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
-    [one] Pažymėtas kaip nepageidaujamas { $count } laiškas (paieška: { $query })
-    [few] Pažymėti kaip nepageidaujami { $count } laiškai (paieška: { $query })
-   *[other] Pažymėta kaip nepageidaujami { $count } laiškų (paieška: { $query })
+    [one] Pažymėta kaip nepageidaujami: { $count } laiškas (paieška: { $query })
+    [few] Pažymėta kaip nepageidaujami: { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip nepageidaujami: { $count } laiškų (paieška: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
-    [one] Pažymėtas kaip pageidaujamas { $count } laiškas (paieška: { $query })
-    [few] Pažymėti kaip pageidaujami { $count } laiškai (paieška: { $query })
-   *[other] Pažymėta kaip pageidaujami { $count } laiškų (paieška: { $query })
+    [one] Pažymėta kaip pageidaujami: { $count } laiškas (paieška: { $query })
+    [few] Pažymėta kaip pageidaujami: { $count } laiškai (paieška: { $query })
+   *[other] Pažymėta kaip pageidaujami: { $count } laiškų (paieška: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Panaikintas { $count } laiškas (paieška: { $query })
     [few] Panaikinti { $count } laiškai (paieška: { $query })
    *[other] Panaikinta { $count } laiškų (paieška: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Per pastarąsias 15 minučių
     [hour] Per pastarąją valandą
@@ -625,63 +613,53 @@ agent-undo-span = { $span ->
    *[all] Per pastarąsias 30 dienų
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
-    [0] { $program } per šį laiką neatliko jokių pakeitimų, kuriuos būtų galima atšaukti.
-    [one] Atšaukti { $count } pakeitimą, kurį { $program } atliko per šį laiką?
-    [few] Atšaukti { $count } pakeitimus, kuriuos { $program } atliko per šį laiką?
-   *[other] Atšaukti { $count } pakeitimų, kuriuos { $program } atliko per šį laiką?
+    [0] Nėra šio laikotarpio programos „{ $program }“ pakeitimų, kuriuos dabar būtų galima atšaukti.
+    [one] Atšaukti { $count } pakeitimą, kurį { $program } atliko per pasirinktą laikotarpį?
+    [few] Atšaukti { $count } pakeitimus, kuriuos { $program } atliko per pasirinktą laikotarpį?
+   *[other] Atšaukti { $count } pakeitimų, kuriuos { $program } atliko per pasirinktą laikotarpį?
 }
-# review: new
-agent-undo-since-detail = Laiškai grąžinami į aplankus, iš kurių buvo perkelti, skaitymo būsenos ir vėliavėlės atkuriamos, o aplanke „Siunčiami laiškai“ dar laukiantys laiškai panaikinami. Tai, ką nuo to laiko pakeitėte jūs ar serveris, paliekama nepakeista.
+agent-undo-since-detail = Programa bando grąžinti laiškus į ankstesnius aplankus ir atkurti jų skaitymo būseną bei vėliavėles. Aplanke „Siunčiami laiškai“ dar esantys laiškai panaikinami. Nerasti laiškai ir pakeitimai, kurių nebegalima atšaukti, praleidžiami.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Nieko neatšaukta.
-    [one] Atšauktas { $count } pakeitimas.
-    [few] Atšaukti { $count } pakeitimai.
-   *[other] Atšaukta { $count } pakeitimų.
+    [one] Visiškai ar iš dalies atšauktas { $count } pakeitimas.
+    [few] Visiškai ar iš dalies atšaukti { $count } pakeitimai.
+   *[other] Visiškai ar iš dalies atšaukta { $count } pakeitimų.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] { $count } laiško nebebuvo ten, kur jį perkėlė pakeitimas.
-    [few] { $count } laiškų nebebuvo ten, kur juos perkėlė pakeitimas.
-   *[other] { $count } laiškų nebebuvo ten, kur juos perkėlė pakeitimas.
+    [one] Numatytoje vietoje nebėra { $count } laiško.
+    [few] Numatytoje vietoje nebėra { $count } laiškų.
+   *[other] Numatytoje vietoje nebėra { $count } laiškų.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] { $count } laiškas nuo to laiko buvo pakeistas (jūsų ar serveryje), todėl paliktas nepakeistas.
-    [few] { $count } laiškai nuo to laiko buvo pakeisti (jūsų ar serveryje), todėl palikti nepakeisti.
-   *[other] { $count } laiškų nuo to laiko buvo pakeista (jūsų ar serveryje), todėl palikta nepakeista.
+    [one] Praleistas { $count } laiškas: skaitymo būsena arba vėliavėlė nuo to laiko pasikeitė.
+    [few] Praleisti { $count } laiškai: skaitymo būsena arba vėliavėlė nuo to laiko pasikeitė.
+   *[other] Praleista { $count } laiškų: skaitymo būsena arba vėliavėlė nuo to laiko pasikeitė.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] { $count } laiškas jau buvo išėjęs iš aplanko „Siunčiami laiškai“.
-    [few] { $count } laiškai jau buvo išėję iš aplanko „Siunčiami laiškai“.
-   *[other] { $count } laiškų jau buvo išėję iš aplanko „Siunčiami laiškai“.
+    [one] Aplanke „Siunčiami laiškai“ nebėra { $count } laiško.
+    [few] Aplanke „Siunčiami laiškai“ nebėra { $count } laiškų.
+   *[other] Aplanke „Siunčiami laiškai“ nebėra { $count } laiškų.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] { $count } pakeitimo atšaukti negalima.
     [few] { $count } pakeitimų atšaukti negalima.
    *[other] { $count } pakeitimų atšaukti negalima.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
     [accept] Šiuo laišku priimamas kvietimas „{ $summary }“ ({ $when }).
     [tentative] Šiuo laišku preliminariai priimamas kvietimas „{ $summary }“ ({ $when }).
    *[decline] Šiuo laišku atmetamas kvietimas „{ $summary }“ ({ $when }).
-} Organizatoriaus kalendorius jį užregistruoja. Jūsų atsakymas į kvietimą pasikeis tik tada, kai laiškas bus išsiųstas.
+} Laiške bus atsakymas organizatoriaus kalendoriaus programai. Inbox Classic jūsų atsakymą į kvietimą atnaujins tik išsiuntusi laišką.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Priimta: { $summary }
-    [tentative] Preliminariai: { $summary }
+    [tentative] Preliminariai priimta: { $summary }
    *[decline] Atmesta: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } priėmė šį kvietimą.
     [tentative] { $name } preliminariai priėmė šį kvietimą.
@@ -742,6 +720,8 @@ agent-terminal-program-windows = Iš terminalo ({ $terminal }) paleista programa
 agent-terminal-program-linux = Iš terminalo ({ $terminal }) paleista programa
 agent-connect-title-terminal = { $programs } nori naudotis jūsų paštu
 agent-connect-terminal-detail = Visi DI agentai, kuriuos paleidžiate iš šio terminalo, bendrai naudojasi čia suteikta prieiga. Norėdami suteikti agentui atskirą prieigą, agento MCP nustatymuose į jo argumentus įtraukite --name ir savo pasirinktą pavadinimą.
+# review: new
+agent-connect-claimed = Programa prisistatė kaip { $claimed }. Inbox Classic patikrino, kuri programa ją paleido: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -709,6 +709,8 @@ agent-terminal-program-linux = Bir terminalden ({ $terminal }) başlatılan bir 
 agent-connect-title-terminal = { $programs } postanıza erişmek istiyor
 # review: new
 agent-connect-terminal-detail = Bu terminalden başlattığınız her yapay zeka aracısı, burada izin verdiğiniz erişimi paylaşır. Bir aracıya ayrı erişim vermek için aracının MCP ayarlarında bağımsız değişkenlerine --name ve seçtiğiniz bir ad ekleyin.
+# review: new
+agent-connect-claimed = Program kendini { $claimed } olarak tanıttı. Inbox Classic, onu hangi programın başlattığını kontrol etti: { $program }.
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
 

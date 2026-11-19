@@ -11,7 +11,10 @@ cd "$(dirname "$0")/.."
 BASE=${1:?the base ref, e.g. origin/master}
 LABELS=${2:-}
 changed=$(git diff --name-only "$BASE"...HEAD)
-shared=$(grep -E '^(core/include/|core/(commands|settings)\.toml$|scripts/feature-map\.mjs$)' <<< "$changed" || true)
+# texts.h and languages.tsv list every message of the catalogs: a message the core alone writes (the apps show its
+# words as they are) is no change to what the apps share, and one an app writes changes that app anyway
+shared=$(grep -E '^(core/include/|core/(commands|settings)\.toml$|scripts/feature-map\.mjs$)' <<< "$changed" \
+    | grep -vE '^core/include/(texts\.h|languages\.tsv)$' || true)
 if [ -z "$shared" ]; then
     echo "Nothing all three apps share changed"
     exit 0

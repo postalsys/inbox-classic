@@ -692,6 +692,8 @@ agent-terminal-program-linux = Terminalist ({ $terminal }) käivitatud programm
 agent-connect-title-terminal = { $programs } soovivad kasutada teie e-posti
 # review: new
 agent-connect-terminal-detail = Kõik tehisintellekti agendid, mille sellest terminalist käivitate, jagavad siin antud juurdepääsu. Kui soovite anda agendile eraldi juurdepääsu, lisage agendi MCP-sätetes selle argumentidele --name ja enda valitud nimi.
+# review: new
+agent-connect-claimed = Programm väitis, et see on { $claimed }. Inbox Classic kontrollis, milline programm selle käivitas: { $program }.
 
 ## Keys
 

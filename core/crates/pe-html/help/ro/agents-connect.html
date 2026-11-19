@@ -8,6 +8,8 @@
     <li>Porniți agentul. Prima dată când se conectează, Inbox Classic vă întreabă ce poate face.</li>
 </ol>
 <p>Agentul pornește Inbox Classic în fundal dacă nu rulează. Doar programele care rulează sub utilizatorul dvs. pe acest computer pot ajunge la el.</p>
+<!--review--><p>Inbox Classic întreabă sistemul ce program a pornit agentul, în loc să se bazeze pe ce spune agentul, astfel încât un program să nu poată folosi accesul pe care l-ați dat altuia. Dacă un agent spune că este alt program, întrebarea vă arată acest lucru.</p><!--/review-->
+<!--review--><p>Un agent poate, de asemenea, să urmărească folderul Mesaje primite, un cont sau un folder și să fie anunțat când se schimbă mesajele din ele, și poate oferi două solicitări gata pregătite, „Triage my inbox” și „Summarize unread”. Ambele respectă ce îi permiteți agentului, iar ce citește astfel apare în jurnalul său ca tot restul a ceea ce citește.</p><!--/review-->
 <p>Agenții pe care îi porniți dintr-un terminal, cum ar fi Claude Code, sunt un singur program pentru Inbox Classic. Aplicația întreabă o singură dată pentru <!--os:mac-->programele pornite din Terminal<!--/os--><!--os:windows,linux-->programele pornite dintr-un terminal<!--/os-->, iar acestea au în comun ce permiteți. Pentru ca un agent să aibă propriul acces, adăugați <code>--name</code> și un nume ales de dvs. după <code>--mcp</code> în setările sale, de exemplu <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic vă întreabă apoi despre el sub acest nume.</p>
 <!--/review-->
 <p>Pentru a bloca accesul tuturor agenților, dezactivați opțiunea <b data-text="ui-let-agents-connect"></b> din <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>

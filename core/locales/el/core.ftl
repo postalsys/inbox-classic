@@ -745,6 +745,8 @@ agent-terminal-program-linux = που εκκινήθηκε από τερματι
 agent-connect-title-terminal = { $programs } ζητούν πρόσβαση στην αλληλογραφία σας
 # review: new
 agent-connect-terminal-detail = Κάθε πράκτορας ΤΝ που ξεκινάτε από αυτό το τερματικό μοιράζεται την πρόσβαση που επιτρέπετε εδώ. Για να έχει ένας πράκτορας δική του πρόσβαση, προσθέστε το --name και ένα όνομα της επιλογής σας στα ορίσματά του, στις ρυθμίσεις MCP του πράκτορα.
+# review: new
+agent-connect-claimed = Το πρόγραμμα δήλωσε ότι είναι το { $claimed }. Το Inbox Classic έλεγξε ποιο πρόγραμμα το ξεκίνησε: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

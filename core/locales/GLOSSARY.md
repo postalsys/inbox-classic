@@ -674,8 +674,7 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
 - Agent folder-rename logs describe the queued request. Read-list/change logs describe list entries, not full
   message reads, and attachment logs describe data access, not launching a file. Limits count program log entries.
 - Windows uses the official title "Kredencialų tvarkytuvas"; wrap system-store names with "saugykla" so differing
-  genders fit. Apply this term when reviewing the still-pending sign-in-apps, data-storage, account-security and
-  encryption-keys help. Those topics remain marked; no full-help review is claimed here.
+  genders fit. The terminology followup is complete in sign-in-apps, data-storage, account-security and encryption-keys.
 - Private keys are wrapped by a key in the system store, not stored there directly. A locked key may reflect an
   inaccessible store as well as a missing protection key; recovery advice must distinguish those cases.
 - "Iššifruota" means decrypted. Signature labels distinguish verified ownership, a valid signature, and inability
@@ -744,14 +743,55 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   account also removes its local unsent mail. Mark All Read applies to messages, not folders as read objects.
 - App-password guidance is conditional on provider/account support; Outlook.com/Microsoft 365 instructions use
   browser sign-in. Google’s built-in button starts disabled; do not assert the live verification status of its client.
-- "Kredencialų tvarkytuvas" is now applied in sign-in-apps and account-security. Data-storage and encryption-keys
-  remain pending. Client secrets are hidden when revisiting the editor; the secret store is the default, not universal.
+- "Kredencialų tvarkytuvas" is applied throughout the reviewed account, security and storage help. Client secrets
+  are hidden when revisiting the editor; the system secret store is the default, not universal.
 - Error quotations match current catalogs; low-level English diagnostics remain literal and get a Lithuanian
   explanation. STARTTLS failure ends the connection attempt, not the whole program. Local networks are not encryption.
 - The sign-in app Check button validates issuer configuration, not permission to read mail. The app-password
   choice only appears when sign-in alternatives are offered. Lookup cancellation ends lookup; on Mac it also exits setup.
 - The account-list Delete shortcut is documented only for Windows; the current Mac and Linux dialogs expose
   removal through their button. Linux File/Tools paths are valid submenus of the primary menu.
+- Agent Undo Since opens "Atšaukti pakeitimus…"; its confirmation action is "Atšaukti pakeitimus", distinct
+  from Cancel ("Atšaukti"). Windows uses T in the agent list and A in the separate confirmation dialog.
+- Bulk read/unread/junk logs put the count after a colon, matching the existing message-action statuses.
+  Undo counts log entries, including partially undone batches; no blanket promise of complete restoration or
+  preservation of every later change. Absence from Outbox does not prove delivery. Server work may still be pending.
+- Agent attachments distinguish text files up to 256 KB from supported PDF/Office/picture files up to 10 MB.
+  Bulk search changes cover supported message actions only. More than 1000 eligible messages refuses the request;
+  later arrivals are excluded. Existing organize permission authorizes the action without a new confirmation.
+- Invitation replies use "Preliminariai priimta". Local response status changes only after successful sending;
+  do not promise the organizer's calendar accepted it. Generated invitation replies have no signature text or Edit First.
+  Calendar help distinguishes local times from floating times and installed apps from successful file opening.
+- Encryption help distinguishes a valid digital signature from a checked key owner. Verification requires the
+  whole fingerprint and every listed address; a mismatch means a different key, not proof it belongs to an impostor.
+  A locked private key can mean unavailable system storage. Its backup protects against losing the only private copy.
+- Decrypted attachment previews stay in memory; opened/saved copies and the optional search index can be on disk.
+  Encrypted list snippets/subjects depend on decrypted indexing. New-mail notifications still hide encrypted subjects.
+- Privacy help describes external attachment opening on request, blocked active formats and provider-confirmed domains.
+  Mail scripts are stripped; it does not claim the whole app executes no code or uses no system image decoders.
+  Remote images are blocked by default; encrypted parts always need a click. Logos may also require a network request.
+- STARTTLS errors end the connection attempt before credentials, not the app. An encryption-required SMTP response
+  does not establish that a password is correct. Suggested ports depend on the provider; a local network is not encryption.
+- Troubleshooting help describes a failed attempt by Inbox Classic, not failure in every mail program. Automatic
+  retry applies to a still-open failed message after account synchronization; source-view text may be shortened.
+- Delivery cards interpret recognized reports locally. Original-message links depend on finding that message;
+  delayed reports do not guarantee delivery or a time. Retry advice distinguishes delays from final failures.
+- Rule help uses "paieškos sąlygos" in prose around the existing "Paieškos kriterijai" control. Matching counts
+  respect the account choice; Show searches all Inboxes and closes the editor without saving changes.
+  Apply Now runs after saving. A missing deleted-mail folder does not allow a rule to delete permanently.
+- Unsubscribe help says "prašymas atsisakyti prenumeratos": direct server acceptance is not proof mail will stop.
+  The mail path prepares a draft for the user to send; the website path finishes in the browser. Domain signatures
+  cover the unsubscribe data, not a person's identity, and direct requests still require confirmation.
+- Storage help names default paths and the unencrypted mail database. Saved browser-sign-in data are broader
+  than passwords; Linux can use any supported Secret Service store. Private keys use a separate protection key.
+- Setup files transfer selected configuration, not mail or local unsent messages. Protected exports include only
+  accessible credentials/private keys. Existing accounts remain; rule targets must actually be found after sync.
+- Removing the data folder also removes settings, contacts, keys and local unsent mail. Account removal attempts
+  to remove its credential; uninstalling does not clear every system-store entry or revoke provider authorization.
+- Connection guidance limits DoH to configuration MX/SRV queries, names ordinary system DNS, and includes manual
+  key lookup/publication. Logos persist across runs. Remote pictures can load under settings/trusted-sender rules.
+- Updates follow the installed package/source; Mac automatic checks can be disabled. Default-app changes depend
+  on system acceptance, and mailto links and .eml files have separate associations.
 
 ### Magyar (hu)
 

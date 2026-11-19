@@ -2569,6 +2569,7 @@ version = "0.18.0"
 dependencies = [
  "base64",
  "cbindgen",
+ "libc",
  "pe-autoconfig",
  "pe-core",
  "pe-html",

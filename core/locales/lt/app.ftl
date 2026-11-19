@@ -448,12 +448,9 @@ ui-let-agents-connect = &Leisti DI agentams jungtis prie Inbox Classic
 ui-change-button = Keisti…
 ui-undo-button = Atšaukti
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-ui-undo-since-button = Atšaukti nuo…
-# review: new
-ui-undo-since-span = Atšaukti, ką ši programa atliko:
-# review: new
-ui-take-back = Atšaukti
+ui-undo-since-button = Atšaukti pakeitimus…
+ui-undo-since-span = Atšaukti šios programos pakeitimus:
+ui-take-back = Atšaukti pakeitimus
 ui-rules-title = Laiškų taisyklės
 ui-rules-intro = Kol Inbox Classic veikia, taisyklės taikomos naujiems laiškams aplanke „Gauti laiškai“. Laišką atitinkančios taisyklės vykdomos iš eilės. Jei taisyklė perkelia laišką iš šio aplanko, kitos taisyklės jam nebetaikomos.
 ui-rules-none = Taisyklių dar nėra. Norėdami sukurti taisyklę, spustelėkite mygtuką „Nauja“.

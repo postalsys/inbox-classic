@@ -70,6 +70,7 @@ pub unsafe extern "C" fn pe_mcp_start(core: *const PeCore) -> bool {
         return false;
     };
     guard(|| {
+        look_up_processes();
         let mut mcp = handle.mcp.lock().unwrap_or_else(|p| p.into_inner());
         if mcp.is_none() {
             #[cfg(unix)]
@@ -86,6 +87,15 @@ pub unsafe extern "C" fn pe_mcp_start(core: *const PeCore) -> bool {
     .unwrap_or(false)
 }
 
+/// Sets how pe-mcp looks processes up where the system's calls take unsafe code (Windows, the Mac): the program
+/// at the other end of an agent's connection is found by what the system says it is
+fn look_up_processes() {
+    #[cfg(windows)]
+    pe_mcp::set_process_lookup(crate::windows::process);
+    #[cfg(target_os = "macos")]
+    pe_mcp::set_process_lookup(crate::mac::process);
+}
+
 /// `--mcp`: relays stdin and stdout to the app that has the store at `store` open, for the program that started
 /// this process, until either side closes; the process should then end. When the app is not running it is started
 /// with `--background` (and `--store store_argument` when that is not NULL). 0 when the relay ran, 1 when the app could
@@ -100,12 +110,9 @@ pub unsafe extern "C" fn pe_mcp_relay(store: *const c_char, store_argument: *con
         return 1;
     };
     guard(|| {
+        look_up_processes();
         #[cfg(windows)]
-        let host = {
-            pe_mcp::set_pipe_check(crate::windows::pipe_server_is_mine);
-            crate::windows::launching_program()
-        };
-        #[cfg(not(windows))]
+        pe_mcp::set_pipe_check(crate::windows::pipe_server_is_mine);
         let host = pe_mcp::launching_program();
         match pe_mcp::relay_for_store(std::path::Path::new(store), argument.map(std::path::Path::new), &host) {
             Ok(()) => 0,

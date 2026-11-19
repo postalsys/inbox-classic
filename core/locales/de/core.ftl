@@ -705,6 +705,8 @@ agent-terminal-program-linux = Ein aus einem Terminal ({ $terminal }) gestartete
 agent-connect-title-terminal = { $programs } möchten auf Ihre E-Mails zugreifen
 # review: new
 agent-connect-terminal-detail = Alle KI-Agenten, die Sie aus diesem Terminal starten, teilen sich den Zugriff, den Sie hier erlauben. Um einem Agenten eigenen Zugriff zu geben, fügen Sie in seinen MCP-Einstellungen --name und einen Namen Ihrer Wahl zu seinen Argumenten hinzu.
+# review: new
+agent-connect-claimed = Das Programm gab sich als { $claimed } aus. Inbox Classic hat geprüft, welches Programm es gestartet hat: { $program }.
 
 ## Keys
 

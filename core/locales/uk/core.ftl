@@ -1045,6 +1045,8 @@ agent-terminal-program-linux = Програма, запущена з термі�
 agent-connect-title-terminal = { $programs } запитують доступ до вашої пошти
 # review: new
 agent-connect-terminal-detail = Усі ШІ-агенти, яких ви запускаєте з цього термінала, спільно використовують доступ, який ви дозволите тут. Щоб надати агенту окремий доступ, додайте --name та будь-яке ім’я до його аргументів у налаштуваннях MCP агента.
+# review: new
+agent-connect-claimed = Програма представилася як { $claimed }. Inbox Classic перевірив, яка програма її запустила: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

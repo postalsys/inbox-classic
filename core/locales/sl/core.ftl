@@ -1024,6 +1024,8 @@ agent-terminal-program-linux = Iz terminala ({ $terminal }) zagnan program
 agent-connect-title-terminal = { $programs } želijo dostop do vaše pošte
 # review: new
 agent-connect-terminal-detail = Vsi agenti UI, ki jih zaženete iz tega terminala, si delijo dostop, ki ga dovolite tukaj. Če želite enemu od njih dati lasten dostop, v agentovih nastavitvah MCP med njegove argumente dodajte --name in poljubno ime.
+# review: new
+agent-connect-claimed = Program se je predstavil kot { $claimed }. Inbox Classic je preveril, kateri program ga je zagnal: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
