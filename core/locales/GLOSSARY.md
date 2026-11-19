@@ -773,6 +773,16 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   Remote images are blocked by default; encrypted parts always need a click. Logos may also require a network request.
 - STARTTLS errors end the connection attempt before credentials, not the app. An encryption-required SMTP response
   does not establish that a password is correct. Suggested ports depend on the provider; a local network is not encryption.
+- Troubleshooting help describes a failed attempt by Inbox Classic, not failure in every mail program. Automatic
+  retry applies to a still-open failed message after account synchronization; source-view text may be shortened.
+- Delivery cards interpret recognized reports locally. Original-message links depend on finding that message;
+  delayed reports do not guarantee delivery or a time. Retry advice distinguishes delays from final failures.
+- Rule help uses "paieškos sąlygos" in prose around the existing "Paieškos kriterijai" control. Matching counts
+  respect the account choice; Show searches all Inboxes and closes the editor without saving changes.
+  Apply Now runs after saving. A missing deleted-mail folder does not allow a rule to delete permanently.
+- Unsubscribe help says "prašymas atsisakyti prenumeratos": direct server acceptance is not proof mail will stop.
+  The mail path prepares a draft for the user to send; the website path finishes in the browser. Domain signatures
+  cover the unsubscribe data, not a person's identity, and direct requests still require confirmation.
 
 ### Magyar (hu)
 

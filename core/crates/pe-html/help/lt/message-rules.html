@@ -1,20 +1,18 @@
-<!--review-->
-<h1>Naujų laiškų rūšiavimas taisyklėmis</h1>
-<p class="summary">Automatiškai perkelkite, žymėkite kaip skaitytus, žymėkite vėliavėle arba archyvuokite gaunamus laiškus, atitinkančius jūsų kriterijus.</p>
-<p>Taisyklė sujungia paieškos kriterijus su veiksmais, kurie taikomi atitinkantiems laiškams, kai šie ateina į aplanką „Gauti laiškai“. Pavyzdžiui, taisyklė su <code>from:news@example.com</code> gali perkelti naujienlaiškius iš to adreso į atskirą aplanką ir pažymėti juos kaip skaitytus.</p>
+<h1>Naujų laiškų rūšiavimas pagal taisykles</h1>
+<p class="summary">Pagal nustatytas sąlygas automatiškai perkelkite gaunamus laiškus, žymėkite juos kaip skaitytus ar vėliavėle arba archyvuokite.</p>
+<p>Taisyklėje nurodote, kokius naujus laiškus atrinkti aplanke „Gauti laiškai“ ir ką su jais daryti. Pavyzdžiui, sąlyga <code>from:news@example.com</code> leidžia šio siuntėjo naujienlaiškius perkelti į kitą aplanką ir pažymėti kaip skaitytus.</p>
 <p>Norėdami sukurti taisyklę:</p>
 <ol>
-    <li>Pasirinkite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, tada spustelėkite <b data-text="ui-rule-new"></b>.</li>
-    <li>Įveskite pavadinimą ir užpildykite lauką <b data-text="ui-rule-query"></b> tais pačiais žodžiais kaip paieškos laukelyje, pavyzdžiui, <code>from:</code>, <code>subject:</code> arba <code>list:</code>. Eilutė apačioje rodo, kiek esamų laiškų aplanke „Gauti laiškai“ atitinka šiuos kriterijus.</li>
-    <li>Pasirinkite vieną ar daugiau veiksmų atitinkantiems laiškams: perkelti juos į aplanką, pažymėti kaip skaitytus, pažymėti vėliavėle, archyvuoti, perkelti į aplanką „Nepageidaujami laiškai“, panaikinti arba nerodyti pranešimų.</li>
-    <li>Spustelėkite <b data-text="ui-ok"></b>.</li>
+    <li>Pasirinkite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, tada spustelėkite mygtuką „<b data-text="ui-rule-new"></b>“.</li>
+    <li>Įveskite pavadinimą, pasirinkite paskyrą ir lauke „<b data-text="ui-rule-query"></b>“ įrašykite paieškos sąlygas, pavyzdžiui, <code>from:</code>, <code>subject:</code> arba <code>list:</code>. Žemiau rodomas jas atitinkančių gautų laiškų skaičius pasirinktoje paskyroje arba visose paskyrose.</li>
+    <li>Pasirinkite veiksmus: perkelti į aplanką, pažymėti kaip skaitytus ar vėliavėle, archyvuoti, perkelti į aplanką „Nepageidaujami laiškai“, panaikinti arba nepranešti apie naujus laiškus.</li>
+    <li>Spustelėkite mygtuką „<b data-text="ui-ok"></b>“.</li>
 </ol>
-<p>Taisyklę taip pat galite sukurti iš laiško ar paieškos. Pasirinkite <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>, kad būtų užpildytas pažymėto laiško siuntėjas arba adresatų sąrašas. Spustelėkite <b data-text="ui-create-rule"></b> virš paieškos rezultatų, kad būtų panaudoti dabartiniai paieškos kriterijai.</p>
+<p>Taisyklę galite kurti pagal laišką ar paiešką. Komanda <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> įrašo pasirinkto laiško adresatų sąrašo sąlygą, jei sąrašas nurodytas, arba siuntėjo adresą. Mygtukas „<b data-text="ui-create-rule"></b>“ virš paieškos rezultatų perkelia dabartines paieškos sąlygas į naują taisyklę.</p>
 <h2>Kaip veikia taisyklės</h2>
-<p>Taisyklės apdoroja naujus laiškus aplanke „Gauti laiškai“, kol Inbox Classic veikia, taip pat kai ji sumažinta į pranešimų sritį. Esamiems laiškams jos taikomos tik tada, jei pažymite <b data-text="ui-rule-apply-now"></b>. Atitinkančios taisyklės vykdomos sąraše rodoma tvarka. Kai taisyklė perkelia laišką iš aplanko „Gauti laiškai“, kitos taisyklės tam laiškui nebetaikomos. Išvalykite taisyklės žymimąjį langelį sąraše, kad ją išjungtumėte jos nepanaikinę.</p>
+<p>Taisyklės taikomos naujiems gautiems laiškams, kol Inbox Classic veikia, taip pat fone. Esamiems laiškams taisyklę pritaikysite pažymėję parinktį <b data-text="ui-rule-apply-now"></b> ir išsaugoję taisyklę. Įjungtos taisyklės tikrinamos sąrašo tvarka. Kai laiškui parenkamas perkėlimo iš aplanko „Gauti laiškai“ veiksmas, kitos taisyklės jam nebetaikomos. Norėdami išjungti taisyklę jos nepanaikindami, nuimkite varnelę sąraše.</p>
 <h2>Taisyklių keitimas</h2>
-<p>Norėdami redaguoti taisyklę, pažymėkite ją sąraše ir spustelėkite <b data-text="ui-rule-edit"></b> arba dukart ją spustelėkite. Naudokite <b data-text="ui-account-move-up"></b> ir <b data-text="ui-account-move-down"></b> tvarkai pakeisti arba <b data-text="ui-rule-delete-button"></b> taisyklei panaikinti. Taisyklės rengyklėje spustelėkite <b data-text="ui-rule-show"></b>, kad pagrindiniame lange pamatytumėte šiuo metu atitinkančius laiškus.</p>
-<p>Taisyklės taikomos naujiems laiškams aplanke „Gauti laiškai“, todėl aplanko ir datos filtrai nepalaikomi. Jei naudojate <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> arba <code>newer_than:</code>, pranešimas paaiškina, kodėl šių filtrų naudoti negalima. Taisyklės negali siųsti laiškų ar jų panaikinti visam laikui: <b data-text="ui-rule-delete"></b> perkelia juos į aplanką <b data-text="folder-deleted"></b>.</p>
-<aside class="note">Taisyklės vykdomos šiame kompiuteryje. Norėdami rūšiuoti laiškus, kai jis išjungtas, naudokite savo pašto paslaugų teikėjo filtrus.</aside>
+<p>Pasirinkę taisyklę, spustelėkite mygtuką „<b data-text="ui-rule-edit"></b>“ arba dukart spustelėkite pačią taisyklę. Mygtukais „<b data-text="ui-account-move-up"></b>“ ir „<b data-text="ui-account-move-down"></b>“ keiskite eilės tvarką, o mygtuku „<b data-text="ui-rule-delete-button"></b>“ panaikinkite taisyklę. Mygtukas „<b data-text="ui-rule-show"></b>“ uždaro redagavimo langą neišsaugodamas pakeitimų ir pagrindiniame lange ieško pagal įrašytas sąlygas visų paskyrų gautuose laiškuose.</p>
+<p>Taisyklėse negalima filtruoti pagal aplanką ar datą. Įrašius <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> arba <code>newer_than:</code>, parodomas paaiškinimas. Taisyklės nesiunčia laiškų ir jų nepanaikina visam laikui: veiksmas „<b data-text="ui-rule-delete"></b>“ perkelia į aplanką „<b data-text="folder-deleted"></b>“. Jei paskyroje šio aplanko nėra, taisyklė laiško nepanaikina.</p>
+<aside class="note">Taisyklės veikia šiame kompiuteryje. Jei norite rūšiuoti laiškus ir tada, kai programa neveikia, naudokite pašto paslaugų teikėjo filtrus.</aside>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
-<!--/review-->
