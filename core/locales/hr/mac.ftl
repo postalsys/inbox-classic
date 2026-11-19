@@ -80,7 +80,7 @@ mac-files-not-saved =
     { $count ->
        *[other] Broj datoteka koje nije moguće spremiti: { $failed } od ukupno { $count }.
     }
-mac-no-calendar-app = Na ovom Macu nema aplikacije kalendara koja bi otvorila pozivnice (datoteke .ics).
+mac-no-calendar-app = Pozivnicu (datoteku .ics) nije moguće otvoriti u aplikaciji kalendara. Provjerite je li instalirana aplikacija za tu vrstu datoteke.
 mac-file-not-saved = Datoteku nije moguće spremiti.
 mac-unsubscribing = Otkazivanje pretplate: { $target }…
 mac-loading-list = Učitavanje…

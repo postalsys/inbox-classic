@@ -1,8 +1,8 @@
 <h1>Svar og videresend</h1>
 <p class="summary">Svar afsenderen eller alle, eller send en meddelelse videre til en anden.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) svarer afsenderen.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) svarer afsenderen og de øvrige modtagere.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) svarer adressen i Reply-To, hvis den findes, ellers afsenderen.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) svarer Reply-To eller afsenderen samt adresserne i Til og Cc, med dine egne adresser udeladt.</li>
     <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) sender meddelelsen videre. Du skriver selv modtagerne.</li>
 </ul>
 <p>Svar og videresendelser sendes fra den konto, som indeholder den oprindelige meddelelse. Hvis den blev sendt til en af kontoens øvrige afsenderadresser, bruges denne adresse.</p>
@@ -11,5 +11,5 @@
 <p>Når du videresender, står den oprindelige meddelelse i teksten fra starten, da det er den, du sender.</p>
 <p>Et svar følger den oprindelige meddelelses format. Et svar på en meddelelse i ren tekst er i ren tekst, med den oprindelige meddelelse citeret med <b>&gt;</b>, medmindre du formaterer noget.</p>
 <h2>Videresend flere meddelelser</h2>
-<p>Marker flere meddelelser, og klik på <b data-text="ui-tb-forward"></b>. Der oprettes én ny meddelelse med dem alle vedhæftet som <code>.eml</code>-filer. Den får emnet fra den første meddelelse.</p>
+<p>Marker flere meddelelser, og klik på <b data-text="ui-tb-forward"></b>. Der oprettes én ny meddelelse med dem alle vedhæftet som <code>.eml</code>-filer. Den får emnet fra den første meddelelse med et præfiks for videresendelse.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>

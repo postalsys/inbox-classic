@@ -29,10 +29,9 @@ gtk-unsubscribe-one-click =
     Kas lahkuda sellest meililistist?
 
     Inbox Classic saadab aadressile { $target } tellimusest loobumise taotluse. Veebilehte ei avata ega saadeta e-kirja.
-gtk-unsubscribe-mail =
-    Kas lahkuda sellest meililistist?
+gtk-unsubscribe-mail = Kas lahkuda sellest meililistist?
 
-    Tellimusest loobumiseks tuleb saata kiri aadressile { $target }. Inbox Classic koostab kirja teie eest. Loobumise kinnitamiseks saatke see ära.
+    Tellimusest loobumiseks tuleb saata kiri aadressile { $target }. Inbox Classic koostab kirja teie eest. Taotluse edastamiseks saatke see ära.
 gtk-unsubscribe-web =
     Kas lahkuda sellest meililistist?
 
@@ -88,7 +87,7 @@ gtk-files = { $count ->
     [one] { $count } fail
    *[other] { $count } faili
 }
-gtk-pictures-blocked = Mõned pildid blokeeriti, et saatja ei saaks teie arvutit tuvastada.
+gtk-pictures-blocked = Mõned pildid blokeeriti jälgimise piiramiseks.
 gtk-download-pictures = Laadi pildid alla
 gtk-save-attachments-menu = Salvesta manused...
 
@@ -154,7 +153,7 @@ gtk-agent-it-may = Lubatud tegevused
 gtk-agent-accounts = Lubatud kontod
 gtk-never-used = Pole kasutatud
 gtk-last-used = Viimati kasutatud { $date }
-gtk-forget-program = Kas eemaldada see programm?
+gtk-forget-program = Kas eemaldada selle programmi salvestatud juurdepääsuõigused?
 gtk-forget-program-detail = Programmi õigused ja agentide tegevusajalugu kustutatakse. Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 gtk-no-agents-yet = Ükski agent pole veel taotlenud juurdepääsu teie e-postile.
 gtk-nothing-yet = Veel mitte midagi.
@@ -174,4 +173,4 @@ gtk-metainfo-description = Inbox Classic on tuttava paigutusega meiliprogramm: k
 gtk-metainfo-feature-sanitized = Kirju kuvatakse ilma skriptideta ning veebipilte laaditakse ainult teie loal
 gtk-metainfo-feature-search = Otsige teema, saatjate, adressaatide, manuste nimede ja kirja sisu järgi, kasutades ka Gmaili otsinguoperaatoreid
 gtk-metainfo-feature-replies = Vastustes on varasemate kirjade tsitaadid kokku ahendatud
-gtk-metainfo-feature-offline = Allalaaditud kirju saab lugeda ka võrguühenduseta; paroolid salvestatakse süsteemi paroolihoidlasse
+gtk-metainfo-feature-offline = Allalaaditud kirju saab lugeda ka võrguühenduseta; sisselogimisandmed salvestatakse vaikimisi süsteemi paroolihoidlasse

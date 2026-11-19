@@ -205,7 +205,7 @@ ui-hyperlink = Link
 ui-hyperlink-intro = Den adresse, den markerede tekst linker til.
 ui-edit-hyperlink = Rediger link
 ui-edit-hyperlink-intro = Linkets destinationsadresse. Ryd adressen for at fjerne linket og beholde teksten.
-ui-not-a-picture = Denne fil er ikke et PNG-, JPEG- eller GIF-billede, eller den er større end 10 MB.
+ui-not-a-picture = Filen kunne ikke læses, er ikke et PNG-, JPEG-, GIF- eller WebP-billede eller er større end 10 MB.
 ui-format-color = Skriftfarve
 ui-format-numbers = Nummereret liste
 ui-format-bullets = Punktopstilling
@@ -258,7 +258,7 @@ ui-leave-mail = For at afmelde mailinglisten skal du sende en e-mail til { $targ
 ui-leave-web = Mailinglistens afmeldingsside åbnes i din browser ({ $target }).
 ui-unsubscribing = Sender anmodning om afmelding til { $target }...
 ui-cannot-unsubscribe = Denne meddelelse har ingen mulighed for afmelding.
-ui-unsubscribed = Anmodningen om afmelding er accepteret. Mailinglisten oplyser, at den vil stoppe med at sende disse meddelelser.
+ui-unsubscribed = Anmodningen om afmelding er accepteret. Det kan vare lidt, før mailinglisten holder op med at sende meddelelser.
 ui-not-unsubscribed = Kunne ikke afmelde: { $reason }
 ui-event-span = { $start } til { $end }
 ui-event-floating = { $when } (afsenderens tid)
@@ -269,7 +269,7 @@ ui-invitation-answer = Svar på en invitation: { $title }
 ui-no-title = (ingen titel)
 ui-organizer = Arrangør: { $name }
 ui-invitation-not-read = Invitationen kunne ikke læses.
-ui-no-calendar = Der er intet kalenderprogram på denne computer, som kan åbne invitationer (.ics-filer).
+ui-no-calendar = Invitationen (.ics-filen) kunne ikke åbnes i et kalenderprogram. Kontrollér, at et program til denne filtype er installeret.
 ui-messages-not-changed = Meddelelserne kunne ikke ændres.
 ui-new-folder-in-selected = Den nye mappe oprettes i den markerede mappe.
 ui-new-folder-at-top = Den nye mappe oprettes på kontoens øverste niveau.
@@ -334,7 +334,7 @@ ui-enter-password = Angiv adgangskoden til { $account }.
 ui-signs-in-with = Login-app: { $app }. Der logges på i browseren, og kontoen bruger denne apps servere.
 ui-keep-password = Lad adgangskodefeltet være tomt for at beholde din nuværende adgangskode.
 ui-remove-account = Fjern konto
-ui-remove-account-ask = Vil du fjerne denne konto fra Inbox Classic? Mailen bliver på serveren. De lokale kopier og de gemte loginoplysninger fjernes.
+ui-remove-account-ask = Vil du fjerne denne konto fra Inbox Classic? Mailen bliver på serveren. De lokale kopier, kontoens meddelelser i Udbakke og de gemte loginoplysninger fjernes.
 ui-col-email = E-mailadresse
 ui-col-incoming = Indgående server
 ui-type-email = Skriv din e-mailadresse, navn@eksempel.dk.
@@ -417,7 +417,6 @@ ui-save-attachments = Gem vedhæftede filer
 ui-attachment-open = Åbn
 ui-attachment-save-as = Gem som...
 ui-attachment-save-all = Gem alle...
-# review: new
 ui-attachment-show-in-message = Vis i meddelelsen
 ui-attachments-strip = Vedhæftede filer
 ui-attachment-note-title = Åbning af denne fil
@@ -449,11 +448,8 @@ ui-let-agents-connect = &Lad AI-agenter oprette forbindelse til Inbox Classic
 ui-change-button = Rediger…
 ui-undo-button = Fortryd
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-ui-undo-since-button = Fortryd siden…
-# review: new
+ui-undo-since-button = Fortryd ændringer siden…
 ui-undo-since-span = Fortryd det, dette program har gjort:
-# review: new
 ui-take-back = Fortryd
 ui-rules-title = Meddelelsesregler
 ui-rules-intro = Regler behandler nye meddelelser i Indbakke, mens Inbox Classic kører. Regler, som meddelelsen opfylder kriterierne for, anvendes i den angivne rækkefølge. Når en regel flytter meddelelsen ud af Indbakke, anvendes ingen flere regler på den.
@@ -595,11 +591,8 @@ ui-download-limit = &Lagergrænse pr. konto:
 ui-send-delay = &Forsinkelse før afsendelse:
 ui-send-delay-note = Mens en meddelelse venter på at blive sendt, kan du annullere afsendelsen med Fortryd.
 ui-dark-messages = Vis meddelelser på mørk baggrund, når systemet er i mørk tilstand
-# review: new
 ui-preview-show = Vis v&edhæftede filer i meddelelser
-# review: new
-ui-preview-show-note = Viser billeder og de første sider af PDF-filer efter teksten i en meddelelse. Inbox Classic laver selv disse forhåndsvisninger, så intet i en fil kan køre.
-# review: new
+ui-preview-show-note = Viser billeder og de første sider af PDF-filer efter meddelelsens tekst. Inbox Classic laver selv forhåndsvisningerne uden at køre scripts eller andet aktivt indhold i filerne.
 ui-preview-pdfs = Vis &PDF-filer i meddelelser
 ui-sending-in = Sender { $subject } om { $count ->
     [one] 1 sekund
@@ -608,7 +601,7 @@ ui-sending-in = Sender { $subject } om { $count ->
 ui-send-undone = { $subject } blev ikke sendt. Meddelelsen er åbnet igen, så du kan redigere den.
 ui-send-too-late = Afsendelsen kan ikke længere fortrydes: { $subject }.
 ui-outbox-status-undo = Sendes kl. { $time }
-ui-download-note = Meddelelser, der er hentet på forhånd, kan åbnes med det samme. Når lagergrænsen overskrides, fjernes de ældste lokale kopier. Meddelelserne bliver på serveren og hentes igen, når du åbner dem.
+ui-download-note = Meddelelser, der er hentet på forhånd, kan åbnes med det samme. Når lagergrænsen overskrides, fjernes de ældste lokale kopier af meddelelsestekst. Kladder og meddelelser, du har åbnet siden programstart, beholdes. Meddelelserne på serveren kan hentes igen, når du åbner dem.
 ui-attachment-downloading = Denne meddelelse er ikke færdighentet. Prøv igen, når den er hentet.
 ui-trusted-senders-button = &Betroede afsendere...
 ui-trusted-senders-title = Betroede afsendere
@@ -679,7 +672,7 @@ ui-keys-file-filter = OpenPGP-nøgler
 ui-keys-use-for = Vil du bruge denne nøgle til { $addresses }? Meddelelser fra disse adresser signeres digitalt med nøglen. Du kan også læse mail, der er krypteret med den.
 ui-keys-use = &Brug den
 ui-keys-not-now = &Ikke nu
-ui-keys-remove-own = Vil du fjerne din nøgle { $fingerprint }? Mail, der er krypteret til den, kan så ikke længere læses her, medmindre du importerer sikkerhedskopien af den igen.
+ui-keys-remove-own = Vil du fjerne din nøgle { $fingerprint }? Mail, der er krypteret til den, kan ikke dekrypteres her igen, før du importerer en sikkerhedskopi af den private nøgle. Allerede dekrypteret indhold i søgeindekset slettes ikke.
 ui-keys-remove-contact = Vil du fjerne nøglen { $name }? Den kan så ikke længere bruges til at kontrollere digitale signaturer eller kryptere mail, før du tilføjer den igen.
 ui-key-properties-title = Egenskaber for nøgle
 ui-key-names = Navne:
@@ -697,6 +690,7 @@ ui-verify-title = Bekræft nøgle
 ui-verify-intro = Bed ejeren af nøglen { $name } om at læse nøglens fingeraftryk op fra sit eget program, personligt eller i telefonen. Sammenlign ikke med et fingeraftryk sendt via e-mail. En person, der kan udskifte nøglen, kan også udskifte fingeraftrykket.
 ui-verify-fingerprint = Fingeraftrykket af den nøgle, du har:
 ui-verify-marks = { $count ->
+    [0] Denne nøgle har ingen e-mailadresser. Du kan sammenligne fingeraftrykkene, men bekræftelsen af nøglens ejerskab kan ikke gemmes.
     [one] Hvis fingeraftrykkene stemmer overens, bekræftes nøglens ejerskab for { $addresses }. Klik på De er forskellige, hvis adressen ikke tilhører personen.
    *[other] Hvis fingeraftrykkene stemmer overens, bekræftes nøglens ejerskab for { $addresses }. Klik på De er forskellige, hvis en af adresserne ikke tilhører personen.
 }
@@ -726,9 +720,9 @@ ui-compose-encrypt-off = &Slå kryptering fra
 ui-compose-keep-encrypted = &Behold krypteringen
 ui-setup-export-title = Eksporter indstillinger og konti
 ui-setup-import-title = Importer indstillinger og konti
-ui-setup-export-intro = Vælg, hvad du vil overføre til en anden computer. Filen indeholder ingen meddelelser. De hentes fra serveren på den anden computer.
+ui-setup-export-intro = Vælg, hvad du vil overføre til en anden computer. Filen indeholder ingen meddelelser, heller ikke fra Udbakke. Kun meddelelser, der stadig ligger på serveren, kan hentes på den anden computer.
 ui-setup-use-passphrase = &Beskyt filen med en adgangsfrase
-ui-setup-passphrase-note = Med en adgangsfrase krypteres filen og indeholder også gemte adgangskoder, andre loginoplysninger og private nøgler. Uden en adgangsfrase skal du logge på kontiene igen på den anden computer.
+ui-setup-passphrase-note = Med en adgangsfrase krypteres filen og kan også indeholde gemte loginoplysninger og de valgte private nøgler, som programmet har adgang til. Uden en adgangsfrase skal du logge på kontiene igen på den anden computer.
 ui-setup-export-button = &Eksporter...
 ui-setup-file-filter = Inbox Classic-indstillinger og -konti
 ui-setup-ask-passphrase = Denne fil er beskyttet af en adgangsfrase. Skriv den for at se, hvad filen indeholder:

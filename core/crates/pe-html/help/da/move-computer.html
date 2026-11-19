@@ -7,7 +7,7 @@
     <li>Hvis du også vil overføre gemte adgangskoder, andre loginoplysninger og private nøgler, skal du slå <b data-text="ui-setup-use-passphrase"></b> til og skrive en adgangsfrase på mindst 8 tegn to gange.</li>
     <li>Klik på <b data-text="ui-setup-export-button"></b>, og vælg, hvor filen skal gemmes.</li>
 </ol>
-<p>Filen indeholder ingen meddelelser. De hentes fra serveren på den anden computer. En adgangsfrase krypterer hele filen. Uden en adgangsfrase udelades adgangskoder, andre loginoplysninger og private nøgler. Du skal da logge på kontiene igen med adgangskode eller via browseren.</p>
+<p>Filen indeholder ingen meddelelser, heller ikke fra den lokale Udbakke. Kun meddelelser, der stadig ligger på serveren, kan hentes på den anden computer. En adgangsfrase krypterer hele filen. Kun de valgte private nøgler, som programmet har adgang til, kan eksporteres. Uden en adgangsfrase udelades adgangskoder, andre loginoplysninger og private nøgler. Du skal da logge på kontiene igen med adgangskode eller via browseren.</p>
 <aside class="warning">Opbevar filen og dens adgangsfrase hver for sig, og slet filen, når du har importeret den. Alle, der har begge dele, kan læse din mail.</aside>
 <h2>Importer indstillinger og konti</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Vælg filen, og skriv dens adgangsfrase, hvis den har en.</li>
     <li>Vinduet viser, hvad filen indeholder. Vælg de dele og konti, du vil importere, og klik på <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Konti, der allerede er konfigureret på computeren, ændres ikke. Kontakter føjes til adressekartoteket; indstillinger og vinduesindstillinger erstattes. Manglende destinationsmapper til regler findes, når kontienes mapper er synkroniseret. En ny nøgle til en kontakt erstatter først den eksisterende, når du vælger den i kontaktens egenskaber.</p>
+<p>Konti, der allerede er konfigureret på computeren, ændres ikke. Kontakter og grupper flettes ind i Adressekartotek; indstillinger og vinduesindstillinger erstattes. Efter synkroniseringen forsøger programmet at finde reglernes destinationsmapper blandt kontienes mapper; importen opretter ikke de manglende mapper. En ny nøgle til en kontakt erstatter først den eksisterende, når du vælger den i kontaktens egenskaber.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

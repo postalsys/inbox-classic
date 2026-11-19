@@ -1,8 +1,8 @@
 <h1>Odgovaranje i prosljeđivanje</h1>
 <p class="summary">Odgovorite pošiljatelju, odgovorite svima ili proslijedite poruku nekom drugom.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) otvara odgovor pošiljatelju.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) otvara odgovor pošiljatelju i ostalim primateljima iz polja Za i Kopija.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) otvara odgovor na adresu Reply-To ako postoji, a inače pošiljatelju.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) otvara odgovor na adresu Reply-To ili pošiljatelju te ostalim primateljima iz polja Za i Kopija, bez vaših vlastitih adresa.</li>
     <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) otvara poruku za prosljeđivanje. Primatelje upisujete sami.</li>
 </ul>
 <p>Odgovor ili proslijeđena poruka šalje se s računa u kojem se nalazi izvorna poruka. Ako je izvorna poruka poslana na jednu od dodatnih adresa tog računa, ta se adresa koristi za slanje.</p>
@@ -11,5 +11,5 @@
 <p>Pri prosljeđivanju izvorna je poruka vidljiva u tekstu od početka jer prosljeđujete njezin sadržaj.</p>
 <p>Odgovor preuzima oblikovanje izvorne poruke. Odgovor na poruku u običnom tekstu također se šalje kao običan tekst, a citirani retci počinju znakom <b>&gt;</b>, osim ako sami dodate oblikovanje.</p>
 <h2>Prosljeđivanje više poruka</h2>
-<p>Odaberite više poruka i kliknite <b data-text="ui-tb-forward"></b>. Otvara se jedna nova poruka sa svim odabranim porukama priloženima kao datoteke <code>.eml</code>. Predmet se preuzima iz prve poruke.</p>
+<p>Odaberite više poruka i kliknite <b data-text="ui-tb-forward"></b>. Otvara se jedna nova poruka sa svim odabranim porukama priloženima kao datoteke <code>.eml</code>. Predmet se preuzima iz prve poruke uz dodan prefiks za prosljeđivanje.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>

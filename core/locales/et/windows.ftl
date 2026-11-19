@@ -94,20 +94,16 @@ win-send = &Saada
 win-dont-send = Ä&ra saada
 win-unsubscribe = &Loobu tellimusest
 win-dont-unsubscribe = Ä&ra loobu tellimusest
-win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide tegevusajalooga? Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
+win-forget-program-ask = Kas eemaldada selle programmi salvestatud juurdepääsuõigused ja agentide tegevusajalugu? Järgmisel ühendumisel küsitakse luba uuesti. Programmi ennast ei desinstallita.
 win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.
 win-agent-programs = &Programmid, mille agendid on taotlenud juurdepääsu teie e-postile:
 win-change = &Muuda...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Võta tagasi a&lates...
-# review: new
+win-undo-since = Võta ta&gasi alates...
 win-take-back = &Võta tagasi
 win-what-agents-did = &Agentide tegevusajalugu:
-# review: new
-win-agent-reads = Loetud kella { $from } ja { $to } vahel:
-# review: new
-win-agent-reads-hint = Valige ülalt lugemiste rida, et näha, mida loeti.
+win-agent-reads = Lugemised ajavahemikus { $from } kuni { $to }:
+win-agent-reads-hint = Valige ülalt lugemiste kirje, et vaadata üksikasju.
 win-how-to-connect = Kuidas agenti ühendada
 
 ## Sisselogimisrakendused
@@ -138,4 +134,4 @@ win-installer-welcome-update =
     Kui programm on avatud, suletakse see enne uuendamist. Teie kontod ja kirjad säilivad.
 win-installer-older-ask = Installitud on Inbox Classic { $installed }, mis on uuem kui { $version }. Kas installida vanem versioon siiski?
 win-installer-still-running = Inbox Classic töötab endiselt. Sulgege see ja proovige uuesti.
-win-installer-remove-mail-ask = Kas eemaldada sellest arvutist ka Inbox Classicu kontod ja salvestatud kirjad? Serverites olevad kirjad jäävad alles.
+win-installer-remove-mail-ask = Kas eemaldada ka kõik Inbox Classicu kohalikud andmed, sealhulgas kontod, kirjad, seaded, kontaktid ja võtmed? Serverites olevad kirjad ning Windowsi mandaadihalduri kirjed säilivad.

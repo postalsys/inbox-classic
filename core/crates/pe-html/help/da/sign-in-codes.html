@@ -7,8 +7,8 @@
     <li>knappen <b data-text="otp-copy"></b>, som lægger koden i udklipsholderen</li>
 </ul>
 <aside class="warning">Indtast kun en kode på en side fra det domæne, kortet nævner. En meddelelse, der beder dig skrive en kode et andet sted, kan være et forsøg på at overtage din konto.</aside>
-<p>Kortet vises kun, når din mailudbyder bekræfter en gyldig digital signatur, der passer til det domæne, koden gælder for. Det beviser ikke, hvem der har skrevet meddelelsen, eller at indholdet er troværdigt. Kortet vises ikke i mapperne <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> og <b data-text="folder-drafts"></b>, eller når din udbyder ikke oplyser resultatet af kontrollen af domænets signatur.</p>
-<p>Hvis meddelelsen er over en time gammel, når du åbner den, advarer kortet om, at koden sandsynligvis er udløbet.</p>
+<p>Kortet vises kun, når din mailudbyder bekræfter en gyldig DKIM-signatur fra det relevante domæne eller et overordnet domæne. Det beviser ikke, hvem der har skrevet meddelelsen, eller at indholdet er troværdigt. Kortet vises ikke i mapperne <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> og <b data-text="folder-drafts"></b>, eller når din udbyder ikke oplyser resultatet af kontrollen af domænets signatur.</p>
+<p>Hvis meddelelsens dato ligger mere end en time før åbningstidspunktet, advarer kortet om, at koden kan være udløbet. Inbox Classic kontrollerer ikke kodens faktiske gyldighed.</p>
 <h2>Koder i notifikationer</h2>
-<p>Hvis du vil se koden i notifikationen om en ny meddelelse, skal du slå <b data-text="ui-codes-in-notifications"></b> til under <b data-settings="general"></b>. Indstillingen er som udgangspunkt slået fra, fordi notifikationer kan være synlige på en låst skærm.</p>
+<p>Hvis du vil se koden i notifikationen om en ny meddelelse, skal du slå <b data-text="ui-codes-in-notifications"></b> til under <b data-settings="general"></b>. Indstillingen er som udgangspunkt slået fra, fordi notifikationer kan være synlige på en låst skærm. Koden vises kun, hvis en ny, tilstrækkelig lille meddelelse kan hentes og genkendes hurtigt nok, og de almindelige betingelser for notifikationer er opfyldt.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>

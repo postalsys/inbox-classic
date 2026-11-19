@@ -5,10 +5,10 @@
     <tr><th>Keresés</th><th>Találat</th></tr>
     <tr><td><code>költségvetés</code></td><td>Üzenetek, amelyek valamelyik kereshető mezőjében <i>költségvetés</i> kezdetű szó szerepel</td></tr>
     <tr><td><code>"pontos kifejezés"</code></td><td>Ezek a szavak, ebben a sorrendben</td></tr>
-    <tr><td><code>-szó</code></td><td>Üzenetek, amelyek nem tartalmazzák a keresett szót. Egyes feltételek is kizárhatók, például: <code>-is:unread</code></td></tr>
+    <tr><td><code>-szó</code></td><td>Üzenetek, amelyek nem tartalmazzák a keresett szót. Egyes feltételek is kizárhatók, például: <code>-is:unread</code>. Dátum-, kor- és méretfeltételeknél a mínuszjel nem használható kizárásra</td></tr>
     <tr><td><code>ez OR az</code></td><td>Üzenetek, amelyekben a két szó bármelyike szerepel. Az <code>OR</code> szót nagybetűvel írja</td></tr>
-    <tr><td><code>from:anna</code></td><td>Annától érkezett levelek</td></tr>
-    <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>Anna neve vagy címe szerepel a címzettek között. Mindhárom feltétel az összes címzettmezőben keres</td></tr>
+    <tr><td><code>from:anna</code></td><td>Üzenetek, amelyek feladójának nevében vagy címében anna kezdetű szó szerepel</td></tr>
+    <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>A címzettek nevében vagy címében anna kezdetű szó szerepel. Mindhárom feltétel az összes címzettmezőben keres</td></tr>
     <tr><td><code>subject:ebéd</code></td><td>Az adott szó a tárgyban szerepel</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Az adott szó egy melléklet fájlnevében szerepel</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>Levelezőlista üzenetei, a List-Id fejléc szövege alapján</td></tr>
@@ -26,6 +26,6 @@
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Adott méretnél nagyobb vagy kisebb levelek, bájtban vagy <code>K</code>, <code>M</code>, <code>G</code> egységgel</td></tr>
 </table>
 <p>Az ékezetek és a kis- és nagybetűk nem számítanak. Az Inbox Classic által nem ismert keresőszót közönséges szóként keresi.</p>
-<p>A titkosított üzenetek a látható feladó-, címzett- és tárgyadatok alapján is megtalálhatók. A visszafejtett szöveg akkor kereshető, ha rendelkezésre áll a megfelelő kulcs, és be van kapcsolva a <b data-text="ui-search-encrypted"></b> beállítás itt: <b data-settings="reading"></b>. A visszafejtett szöveg titkosítás nélkül kerül a helyi keresési indexbe. A beállítás kikapcsolása eltávolítja ezt a szöveget az indexből.</p>
+<p>A titkosított üzenetek a látható feladó-, címzett- és tárgyadatok alapján is megtalálhatók. A visszafejtett szöveg akkor kereshető, ha az üzenetet sikerült visszafejteni, és be van kapcsolva a <b data-text="ui-search-encrypted"></b> beállítás itt: <b data-settings="reading"></b>. A visszafejtett szöveg titkosítás nélkül kerül a helyi keresési indexbe. A beállítás kikapcsolása eltávolítja ezt a szöveget az indexből.</p>
 <p>Az üzenetlista nem mutatja a méretet. Egy üzenet méretét itt nézheti meg: <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

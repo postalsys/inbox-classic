@@ -195,7 +195,7 @@
       <li xml:lang="da">Meddelelser renses for scripts og andet aktivt indhold. Billeder fra internettet hentes kun med din tilladelse</li>
       <li xml:lang="da">Søg i emner, afsendere, modtagere, navne på vedhæftede filer og meddelelsestekst med søgeoperatorer som i Gmail</li>
       <li xml:lang="da">Citerede tidligere meddelelser foldes sammen i svar</li>
-      <li xml:lang="da">Hentede meddelelser kan læses uden internetforbindelse. Adgangskoder gemmes i din nøglering</li>
+      <li xml:lang="da">Hentede meddelelser kan læses uden internetforbindelse. Loginoplysninger gemmes som udgangspunkt i systemets lager til hemmeligheder</li>
       <li xml:lang="de">Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen</li>
       <li xml:lang="de">Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail</li>
       <li xml:lang="de">Zitierte Nachrichten in Antworten werden eingeklappt</li>
@@ -203,7 +203,7 @@
       <li xml:lang="et">Kirju kuvatakse ilma skriptideta ning veebipilte laaditakse ainult teie loal</li>
       <li xml:lang="et">Otsige teema, saatjate, adressaatide, manuste nimede ja kirja sisu järgi, kasutades ka Gmaili otsinguoperaatoreid</li>
       <li xml:lang="et">Vastustes on varasemate kirjade tsitaadid kokku ahendatud</li>
-      <li xml:lang="et">Allalaaditud kirju saab lugeda ka võrguühenduseta; paroolid salvestatakse süsteemi paroolihoidlasse</li>
+      <li xml:lang="et">Allalaaditud kirju saab lugeda ka võrguühenduseta; sisselogimisandmed salvestatakse vaikimisi süsteemi paroolihoidlasse</li>
       <li xml:lang="es">Los mensajes se muestran sin scripts; las imágenes de internet solo se cargan con su permiso</li>
       <li xml:lang="es">Busque en el asunto, los remitentes, los destinatarios, los nombres de los adjuntos y el texto con los operadores de búsqueda de Gmail</li>
       <li xml:lang="es">Los mensajes citados en las respuestas se muestran contraídos</li>
@@ -215,7 +215,7 @@
       <li xml:lang="hr">Skripte u porukama se ne izvršavaju, a vanjske slike preuzimaju se samo uz vaše dopuštenje</li>
       <li xml:lang="hr">Pretraživanje predmeta, pošiljatelja, primatelja, naziva privitaka i teksta poruka, uz operatore pretraživanja iz Gmaila</li>
       <li xml:lang="hr">Citirani tekst ranijih poruka u odgovorima skriven je iza gumba za prikaz</li>
-      <li xml:lang="hr">Preuzete poruke možete čitati i bez interneta, a lozinke su spremljene u sustavskom privjesku ključeva</li>
+      <li xml:lang="hr">Preuzete poruke možete čitati bez interneta. Podaci za prijavu prema zadanim se postavkama čuvaju u sustavskom spremištu tajni</li>
       <li xml:lang="it">I messaggi vengono visualizzati senza script e altri contenuti potenzialmente pericolosi; le immagini da internet vengono caricate solo con il tuo consenso</li>
       <li xml:lang="it">Ricerca nell’oggetto, nei mittenti, nei destinatari, nei nomi degli allegati e nel testo dei messaggi, con il supporto degli operatori di Gmail</li>
       <li xml:lang="it">Il testo dei messaggi precedenti citato nelle risposte viene compresso e può essere espanso quando serve</li>
@@ -231,7 +231,7 @@
       <li xml:lang="hu">Az üzenetekből az alkalmazás eltávolítja a szkripteket, az internetes képeket pedig csak engedéllyel tölti le</li>
       <li xml:lang="hu">Keresés a tárgyban, a feladók és címzettek adataiban, a mellékletnevekben és az üzenetszövegben, a Gmailből ismert keresőoperátorokkal</li>
       <li xml:lang="hu">A válaszokban az alkalmazás elrejti az idézett korábbi üzeneteket</li>
-      <li xml:lang="hu">A letöltött levelek internetkapcsolat nélkül is olvashatók; a jelszavakat a rendszer kulcstartója tárolja</li>
+      <li xml:lang="hu">A letöltött levelek internetkapcsolat nélkül is olvashatók; a bejelentkezési adatokat alapértelmezés szerint a rendszer kulcstartója védi</li>
       <li xml:lang="nl">Berichten worden weergegeven zonder scripts; afbeeldingen van internet worden alleen geladen als je dat toestaat</li>
       <li xml:lang="nl">Zoeken in onderwerp, afzender, ontvangers, bijlagenamen en berichttekst, met de zoekoperatoren van Gmail</li>
       <li xml:lang="nl">Geciteerde eerdere berichten in antwoorden worden ingeklapt</li>

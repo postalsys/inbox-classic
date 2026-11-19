@@ -100,9 +100,7 @@ win-clear-log-ask = Törli az ügynökök tevékenységnaplóját? Ez nem vonja 
 win-agent-programs = &Programok, amelyek ügynökei hozzáférést kértek a leveleihez:
 win-change = &Módosítás...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Visszavonás &időszakra...
-# review: new
+win-undo-since = Módosítások v&isszavonása...
 win-take-back = &Visszavonás
 win-what-agents-did = Ügynöki &tevékenység:
 win-agent-reads = Olvasási műveletek: { $from } - { $to }
@@ -135,4 +133,4 @@ win-installer-welcome-update = A telepítő frissíti az Inbox Classicot. Telep�
     Ha a program fut, a telepítő előbb bezárja. A fiókok és a levelek megmaradnak.
 win-installer-older-ask = Az Inbox Classic telepített verziója ({ $installed }) újabb a telepítőben lévőnél ({ $version }). Mégis telepíti a régebbi verziót?
 win-installer-still-running = Az Inbox Classic még fut. Zárja be, és próbálja újra.
-win-installer-remove-mail-ask = A fiókokat és az Inbox Classic által ezen a számítógépen tárolt leveleket is eltávolítja? A kiszolgálókon lévő levelek megmaradnak.
+win-installer-remove-mail-ask = A fiókokat és az Inbox Classic által ezen a számítógépen tárolt leveleket is eltávolítja? A kiszolgálókon lévő levelek megmaradnak. A Windows Hitelesítőadat-kezelőjében tárolt adatok ettől nem törlődnek.

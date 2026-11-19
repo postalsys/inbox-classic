@@ -102,15 +102,11 @@ win-clear-log-ask = Želite li izbrisati povijest aktivnosti agenata? Time se ne
 win-agent-programs = &Programi čiji su agenti zatražili pristup vašoj pošti:
 win-change = Pro&mijeni...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Poništi &od...
-# review: new
+win-undo-since = Poništi promjene iz &razdoblja...
 win-take-back = &Poništi
 win-what-agents-did = &Aktivnost agenata:
-# review: new
 win-agent-reads = Što je pročitano od { $from } do { $to }:
-# review: new
-win-agent-reads-hint = Odaberite gore redak s čitanjima da vidite što je pročitano.
+win-agent-reads-hint = Odaberite redak u zapisniku čitanja iznad da biste vidjeli što je pročitano.
 win-how-to-connect = Kako povezati agenta
 
 ## Sign-in apps
@@ -141,4 +137,4 @@ win-installer-welcome-update =
     Ako je pokrenut, najprije će se zatvoriti. Vaši računi i pošta ostat će sačuvani.
 win-installer-older-ask = Instalirana verzija programa Inbox Classic ({ $installed }) novija je od verzije { $version }. Želite li ipak instalirati stariju verziju?
 win-installer-still-running = Inbox Classic još je pokrenut. Zatvorite ga i pokušajte ponovno.
-win-installer-remove-mail-ask = Želite li ukloniti i postavke računa te poštu koju Inbox Classic čuva na ovom računalu? Pošta na poslužiteljima ostat će sačuvana.
+win-installer-remove-mail-ask = Želite li ukloniti sve lokalne podatke programa Inbox Classic, uključujući račune, poruke za slanje, preuzetu poštu, kontakte, ključeve i postavke? Pošta na poslužiteljima ostaje sačuvana. Podaci u Upravitelju vjerodajnicama sustava Windows ne brišu se.

@@ -5,14 +5,14 @@
     <li>„connection error: …“</li>
     <li>„the server did not answer in time“</li>
     <li>„ühendus serveriga ebaõnnestus (…)“</li>
-    <li>„Meiliserveriga ei saanud ühendust (…).“</li>
+    <li>„Ühendus meiliserveriga ebaõnnestus või katkes (…).“</li>
 </ul>
 <p>Parandamiseks tehke järgmist.</p>
 <ol>
     <li>Kontrollige oma Interneti-ühendust.</li>
     <li>Avage konto atribuudid menüüst <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> ning kontrollige serverinimesid ja porte.</li>
-    <li>Kui saatmine ebaõnnestub, kasutage väljuva posti jaoks porti 465 või 587. Mõned võrgud blokeerivad meiliporte, eriti porti 25.</li>
+    <li>Kui saatmine ebaõnnestub, kontrollige teenusepakkuja määratud porti ja turvasätet. Väljuval postil kasutatakse sageli SSL/TLS-iga porti 465 või STARTTLS-iga porti 587. Mõned võrgud blokeerivad meiliporte, eriti porti 25.</li>
 </ol>
 <p>Inbox Classic proovib järgmisel posti kontrollimisel uuesti. Kohe proovimiseks klõpsake nuppu <b data-text="ui-tb-sync"></b>.</p>
-<p>Kiri, mille saadate ühenduse puudumisel, ootab väljundkaustas ja läheb, kui serveriga saab taas ühendust. Midagi kirjutatust ei lähe kaduma.</p>
+<p>Kiri, mille saadate ühenduse puudumisel, ootab väljundkaustas ning selle saatmist proovitakse ühenduse taastumisel uuesti.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>

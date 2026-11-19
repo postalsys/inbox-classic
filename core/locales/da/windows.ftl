@@ -104,14 +104,10 @@ win-clear-log-ask = Vil du rydde agenternes aktivitetshistorik? Det fortryder ik
 win-agent-programs = &Programmer, hvis agenter har bedt om adgang til din mail:
 win-change = &Rediger...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Fortryd &siden...
-# review: new
+win-undo-since = Fortryd ændringer &siden...
 win-take-back = &Fortryd
 win-what-agents-did = Agent&aktivitet:
-# review: new
 win-agent-reads = Hvad der blev læst fra { $from } til { $to }:
-# review: new
 win-agent-reads-hint = Marker en række med læsninger ovenfor for at se, hvad der blev læst.
 win-how-to-connect = Sådan tilslutter du en agent
 
@@ -143,4 +139,4 @@ win-installer-welcome-update =
     Programmet lukkes først, hvis det kører. Dine konti og din mail bevares.
 win-installer-older-ask = Inbox Classic { $installed } er installeret, og den er nyere end { $version }. Vil du installere den ældre version alligevel?
 win-installer-still-running = Inbox Classic kører stadig. Luk programmet, og prøv igen.
-win-installer-remove-mail-ask = Vil du også fjerne konti og mail, som Inbox Classic har gemt på denne computer? Mailen på serverne bevares.
+win-installer-remove-mail-ask = Vil du også fjerne alle lokale data fra Inbox Classic, herunder konti, meddelelser i Udbakke, hentet mail, kontakter, nøgler og indstillinger? Mailen på serverne bevares. Gemte oplysninger i Windows Legitimationsstyring fjernes ikke.

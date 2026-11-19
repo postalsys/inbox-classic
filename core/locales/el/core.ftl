@@ -30,7 +30,10 @@ list-counts = { $messages }, { $unread ->
 list-counts-selected = { $messages }, { $unread ->
     [one] { $unread } αδιάβαστο
    *[other] { $unread } αδιάβαστα
-    }, { $selected } επιλεγμένα
+    }, { $selected ->
+    [one] { $selected } επιλεγμένο
+   *[other] { $selected } επιλεγμένα
+}
 # the status bar while searching: "12 βρέθηκαν, 3 αδιάβαστα"
 list-counts-found = { $found ->
     [one] Βρέθηκε { $found } μήνυμα
@@ -158,7 +161,7 @@ bounce-rate-limited-why = Ο διακομιστής του παραλήπτη δ
 bounce-rate-limited-do = Περιμένετε λίγο και στείλτε το ξανά. Όταν γράφετε σε πολλούς, στέλνετε σε λιγότερους κάθε φορά.
 bounce-greylisting = Προσωρινή αναβολή παράδοσης
 bounce-greylisting-why = Ο διακομιστής του παραλήπτη ζητά από άγνωστους αποστολείς να δοκιμάσουν ξανά λίγο αργότερα. Πρόκειται για συνηθισμένο μέτρο κατά της ανεπιθύμητης αλληλογραφίας.
-bounce-greylisting-do = Δεν χρειάζεται να κάνετε κάτι. Οι διακομιστές αλληλογραφίας δοκιμάζουν ξανά αυτόματα και το μήνυμα συνήθως παραδίδεται μέσα σε μία ώρα.
+bounce-greylisting-do = Αν ο διακομιστής συνεχίζει τις προσπάθειες παράδοσης, περιμένετε. Αν τις έχει σταματήσει, δοκιμάστε να στείλετε ξανά το μήνυμα αργότερα.
 bounce-server-error = Ο διακομιστής του παραλήπτη είχε πρόβλημα
 bounce-server-error-why = Ο διακομιστής του παραλήπτη δεν ήταν προσβάσιμος ή δεν μπόρεσε να δεχτεί το μήνυμα λόγω δικού του προβλήματος.
 bounce-server-error-do = Στείλτε το ξανά αργότερα. Αν συνεχίσει να αποτυγχάνει, ελέγξτε το τμήμα της διεύθυνσης μετά το @ για λάθη πληκτρολόγησης.
@@ -345,8 +348,8 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Μπήκαν 3 μηνύματα στην Αρχειοθέτηση"
 import-put = { $count ->
-    [one] Προστέθηκε { $messages } στον φάκελο «{ $folder }»
-   *[other] Προστέθηκαν { $messages } στον φάκελο «{ $folder }»
+    [one] Το { $messages } μπήκε στην ουρά για εισαγωγή στον φάκελο «{ $folder }»
+   *[other] Τα { $messages } μπήκαν στην ουρά για εισαγωγή στον φάκελο «{ $folder }»
 }
 import-not-put = Δεν προστέθηκαν στον φάκελο τα παρακάτω:
 
@@ -400,12 +403,12 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Η Google δεν έχει επαληθεύσει ακόμη το Inbox Classic, οπότε επιτρέπει τη σύνδεση μέσω αυτού μόνο σε χρήστες δοκιμών. Χρησιμοποιήστε τη δική σας εφαρμογή σύνδεσης Google ή έναν κωδικό πρόσβασης εφαρμογής, ή ενεργοποιήστε την στις Εφαρμογές σύνδεσης (Αρχείο > Λογαριασμοί) αν είστε χρήστης δοκιμών.
+sign-in-off-google = Η ενσωματωμένη εφαρμογή σύνδεσης Google προορίζεται για περιορισμένη χρήση, όπως για χρήστες δοκιμών, και είναι αρχικά απενεργοποιημένη. Χρησιμοποιήστε δική σας εφαρμογή σύνδεσης ή κωδικό πρόσβασης εφαρμογής, αν το επιτρέπει ο λογαριασμός σας. Μπορείτε να την ενεργοποιήσετε στις Εφαρμογές σύνδεσης (Αρχείο > Λογαριασμοί).
 sign-in-off-other = Απενεργοποιήθηκε στις Εφαρμογές σύνδεσης (Αρχείο > Λογαριασμοί), όπου μπορεί να ενεργοποιηθεί ξανά.
 sign-in-app-no-name = η εφαρμογή σύνδεσης χρειάζεται όνομα
 sign-in-app-no-client = λείπει το αναγνωριστικό πελάτη
 sign-in-app-no-scopes = η εφαρμογή σύνδεσης χρειάζεται τα δικαιώματα (scopes) που δίνουν πρόσβαση στην αλληλογραφία
-sign-in-app-bad-host = η διεύθυνση του διακομιστή { $server } λείπει ή δεν είναι έγκυρο όνομα κεντρικού υπολογιστή
+sign-in-app-bad-host = ο διακομιστής { $server } δεν έχει έγκυρη διεύθυνση ή θύρα
 sign-in-app-plain = ο διακομιστής { $server } πρέπει να χρησιμοποιεί SSL/TLS ή STARTTLS
 sign-in-app-not-checked = ο εκδότης δεν έχει ελεγχθεί ακόμη
 sign-in-app-issuer-changed = ο εκδότης άλλαξε: πληκτρολογήστε ξανά το μυστικό πελάτη ή καταργήστε το
@@ -451,10 +454,8 @@ day-sunday = Κυριακή
 
 ## AI agents
 
-# review: changed
-agent-level-read = Ανάγνωση αλληλογραφίας: φάκελοι, λίστα μηνυμάτων, αναζήτηση και μηνύματα
-# review: changed
-agent-level-organize = Οργάνωση αλληλογραφίας: αλλαγή κατάστασης ανάγνωσης, σημαιών και των χρωμάτων τους, διαχείριση ανεπιθύμητης αλληλογραφίας, μετακίνηση και αρχειοθέτηση μηνυμάτων, δημιουργία και μετονομασία φακέλων, παρακολούθηση και παράβλεψη συζητήσεων, διαγραφή με μετακίνηση στον φάκελο Διαγραμμένα και κατάργηση εγγραφής από λίστες αλληλογραφίας με την έγκρισή σας
+agent-level-read = Ανάγνωση αλληλογραφίας: φάκελοι, λίστες μηνυμάτων, συζητήσεις, αναζήτηση, μηνύματα και συνημμένα, κανόνες μηνυμάτων και αναζήτηση ατόμων με τα οποία αλληλογραφείτε
+agent-level-organize = Οργάνωση αλληλογραφίας: αλλαγή κατάστασης ανάγνωσης, σημαιών και των χρωμάτων τους, διαχείριση ανεπιθύμητης αλληλογραφίας, μετακίνηση και αρχειοθέτηση μηνυμάτων, δημιουργία και μετονομασία φακέλων, παρακολούθηση και αγνόηση συζητήσεων, διαγραφή με μετακίνηση στον φάκελο Διαγραμμένα και κατάργηση εγγραφής από λίστες αλληλογραφίας με την έγκρισή σας
 agent-level-drafts = Σύνταξη πρόχειρων που στέλνετε εσείς
 agent-level-send = Αποστολή αλληλογραφίας, με ξεχωριστή έγκριση για κάθε μήνυμα
 agent-connect-title = Το πρόγραμμα { $program } ζητά πρόσβαση στην αλληλογραφία σας
@@ -498,17 +499,15 @@ agent-access = { $can }· { $accounts }
 agent-unreadable = Δεν είναι δυνατή η ανάγνωση αυτού του μηνύματος.
 agent-encrypted-original = Αυτό το μήνυμα είναι κρυπτογραφημένο. Ένας πράκτορας δεν μπορεί να απαντήσει ή να το προωθήσει μέσω του Inbox Classic, επειδή δεν υποστηρίζεται κρυπτογράφηση για αποστολή από πράκτορες.
 agent-encrypted = Αυτό το μήνυμα είναι κρυπτογραφημένο. Οι πράκτορες ΤΝ δεν μπορούν να διαβάσουν το περιεχόμενό του. Ο χρήστης πρέπει να το ανοίξει στο Inbox Classic.
-# review: new
-agent-too-many-changes = Πάρα πολλές αλλαγές τις τελευταίες 30 ημέρες: αυτός ο πράκτορας έκανε όσες κρατά το Inbox Classic στο αρχείο καταγραφής για ένα πρόγραμμα. Θα μπορεί να κάνει κι άλλες όταν οι παλαιότερες γίνουν 30 ημερών.
-# review: new
-agent-too-many-reads = Πάρα πολλές αναγνώσεις τις τελευταίες 30 ημέρες: αυτός ο πράκτορας διάβασε όσα κρατά το Inbox Classic στο αρχείο καταγραφής για ένα πρόγραμμα. Θα μπορεί να διαβάσει κι άλλα όταν οι παλαιότερες αναγνώσεις γίνουν 30 ημερών.
+agent-too-many-changes = Συμπληρώθηκε το όριο καταγεγραμμένων αλλαγών των τελευταίων 30 ημερών για αυτό το πρόγραμμα. Ο πράκτορας θα μπορεί να κάνει νέες αλλαγές όταν οι παλαιότερες καταγραφές ξεπεράσουν τις 30 ημέρες.
+agent-too-many-reads = Συμπληρώθηκε το όριο καταγεγραμμένων αναγνώσεων των τελευταίων 30 ημερών για αυτό το πρόγραμμα. Ο πράκτορας θα μπορεί να διαβάσει ξανά όταν οι παλαιότερες καταγραφές ξεπεράσουν τις 30 ημέρες.
 list-encrypted = Κρυπτογραφημένο μήνυμα
 agent-log-composed = Άνοιξε το «{ $subject }» σε νέο μήνυμα για να το ολοκληρώσετε
 agent-log-refused = Δεν στείλατε το «{ $subject }»
 agent-log-sent = Το μήνυμα «{ $subject }» τέθηκε σε αναμονή για αποστολή προς { $to }
 agent-log-draft = Αποθηκεύτηκε το πρόχειρο «{ $subject }»
 agent-log-draft-replaced = Αντικαταστάθηκε το πρόχειρο «{ $subject }»
-agent-log-draft-discarded = Απορρίφθηκε το πρόχειρο «{ $subject }»
+agent-log-draft-discarded = Ζητήθηκε η οριστική διαγραφή του πρόχειρου «{ $subject }»
 agent-draft-note = Ο πράκτορας ΤΝ { $program } έγραψε αυτό το πρόχειρο. Ελέγξτε τους παραλήπτες και το κείμενο πριν το στείλετε.
 agent-log-read = Επισημάνθηκε ως αναγνωσμένο το «{ $subject }»
 agent-log-unread = Επισημάνθηκε ως αδιάβαστο το «{ $subject }»
@@ -519,7 +518,7 @@ agent-log-moved = Μετακινήθηκε το «{ $subject }» στον φάκ
 agent-log-junk = Επισημάνθηκε ως ανεπιθύμητο το «{ $subject }»
 agent-log-not-junk = Επισημάνθηκε ως μη ανεπιθύμητο το «{ $subject }»
 agent-log-archived = Αρχειοθετήθηκε το «{ $subject }»
-agent-log-folder = Δημιουργήθηκε ο φάκελος «{ $name }»
+agent-log-folder = Ζητήθηκε η δημιουργία του φακέλου «{ $name }»
 agent-log-unsubscribed = Εγκρίνατε το αίτημα κατάργησης εγγραφής. Μήνυμα: «{ $subject }»
 agent-log-unsubscribe-failed = Η κατάργηση εγγραφής απέτυχε. Μήνυμα: «{ $subject }». Αιτία: { $reason }
 agent-log-unsubscribe-refused = Δεν εγκρίνατε την κατάργηση εγγραφής. Αποστολείς: { $senders }
@@ -531,7 +530,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Το Inbox Classic ζητά από την παρακάτω λίστα να σταματήσει να σας στέλνει μηνύματα. Χρησιμοποιεί τη δυνατότητα κατάργησης εγγραφής με ένα κλικ που προσφέρει η λίστα. Δεν αποστέλλεται τίποτε άλλο. Τα υπάρχοντα μηνύματα δεν αλλάζουν ούτε μετακινούνται.
    *[other] Το Inbox Classic ζητά από κάθε λίστα παρακάτω να σταματήσει να σας στέλνει μηνύματα. Χρησιμοποιεί τη δυνατότητα κατάργησης εγγραφής με ένα κλικ που προσφέρει κάθε λίστα. Δεν αποστέλλεται τίποτε άλλο. Τα υπάρχοντα μηνύματα δεν αλλάζουν ούτε μετακινούνται.
 }
-# review: new
 agent-log-flag-color = Προστέθηκε σημαία στο «{ $subject }», χρώμα: { $color ->
     [red] κόκκινο
     [orange] πορτοκαλί
@@ -541,39 +539,29 @@ agent-log-flag-color = Προστέθηκε σημαία στο «{ $subject }»
     [purple] μωβ
    *[gray] γκρι
 }
-# review: new
-agent-log-renamed = Ο φάκελος «{ $old }» μετονομάστηκε σε «{ $name }»
-# review: new
+agent-log-renamed = Ζητήθηκε η μετονομασία του φακέλου «{ $old }» σε «{ $name }»
 agent-log-watched = Ξεκίνησε η παρακολούθηση της συζήτησης «{ $subject }»
-# review: new
 agent-log-ignored = Αγνοήθηκε η συζήτηση «{ $subject }»
-# review: new
 agent-log-unmarked = Σταμάτησε η παρακολούθηση ή η αγνόηση της συζήτησης «{ $subject }»
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = το μήνυμα άλλαξε στο μεταξύ
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Επισημάνθηκε ως αναγνωσμένο 1 μήνυμα (αναζήτηση: { $query })
    *[other] Επισημάνθηκαν ως αναγνωσμένα { $count } μηνύματα (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Επισημάνθηκε ως αδιάβαστο 1 μήνυμα (αναζήτηση: { $query })
    *[other] Επισημάνθηκαν ως αδιάβαστα { $count } μηνύματα (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Προστέθηκε σημαία σε 1 μήνυμα (αναζήτηση: { $query })
    *[other] Προστέθηκε σημαία σε { $count } μηνύματα (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Αφαιρέθηκε η σημαία από 1 μήνυμα (αναζήτηση: { $query })
    *[other] Αφαιρέθηκε η σημαία από { $count } μηνύματα (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-color = Προστέθηκε σημαία σε { $count ->
     [one] 1 μήνυμα
    *[other] { $count } μηνύματα
@@ -586,33 +574,27 @@ agent-log-bulk-color = Προστέθηκε σημαία σε { $count ->
     [purple] μωβ
    *[gray] γκρι
 } (αναζήτηση: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Μετακινήθηκε 1 μήνυμα στον φάκελο «{ $folder }» (αναζήτηση: { $query })
    *[other] Μετακινήθηκαν { $count } μηνύματα στον φάκελο «{ $folder }» (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Αρχειοθετήθηκε 1 μήνυμα (αναζήτηση: { $query })
    *[other] Αρχειοθετήθηκαν { $count } μηνύματα (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Επισημάνθηκε ως ανεπιθύμητο 1 μήνυμα (αναζήτηση: { $query })
    *[other] Επισημάνθηκαν ως ανεπιθύμητα { $count } μηνύματα (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Επισημάνθηκε ως μη ανεπιθύμητο 1 μήνυμα (αναζήτηση: { $query })
    *[other] Επισημάνθηκαν ως μη ανεπιθύμητα { $count } μηνύματα (αναζήτηση: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Διαγράφηκε 1 μήνυμα (αναζήτηση: { $query })
    *[other] Διαγράφηκαν { $count } μηνύματα (αναζήτηση: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Τα τελευταία 15 λεπτά
     [hour] Την τελευταία ώρα
@@ -622,130 +604,100 @@ agent-undo-span = { $span ->
    *[all] Τις τελευταίες 30 ημέρες
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] Το πρόγραμμα { $program } δεν έκανε σε αυτό το διάστημα αλλαγές που μπορούν να αναιρεθούν.
     [one] Να αναιρεθεί η αλλαγή που έκανε το πρόγραμμα { $program } σε αυτό το διάστημα;
    *[other] Να αναιρεθούν οι { $count } αλλαγές που έκανε το πρόγραμμα { $program } σε αυτό το διάστημα;
 }
-# review: new
-agent-undo-since-detail = Τα μηνύματα επιστρέφουν στους φακέλους από όπου ήρθαν, η κατάσταση ανάγνωσης και οι σημαίες γίνονται όπως ήταν, και τα μηνύματα που περιμένουν ακόμη στα Εξερχόμενα διαγράφονται. Ό,τι αλλάξατε εσείς ή ο διακομιστής στο μεταξύ μένει ως έχει.
+agent-undo-since-detail = Γίνεται προσπάθεια επαναφοράς των μηνυμάτων στους προηγούμενους φακέλους και της κατάστασης ανάγνωσης και των σημαιών στις προηγούμενες τιμές τους. Μηνύματα που περιμένουν ακόμη στα Εξερχόμενα διαγράφονται. Κάθε αναίρεση ελέγχει τις σχετικές με την ενέργεια αλλαγές· δεν διατηρούνται απαραίτητα όλες οι μεταγενέστερες αλλαγές.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Δεν αναιρέθηκε τίποτα.
     [one] Αναιρέθηκε 1 αλλαγή.
    *[other] Αναιρέθηκαν { $count } αλλαγές.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 μήνυμα δεν βρισκόταν πια εκεί όπου το είχε βάλει η αλλαγή.
-   *[other] { $count } μηνύματα δεν βρίσκονταν πια εκεί όπου τα είχε βάλει η αλλαγή.
+    [one] 1 μήνυμα δεν βρισκόταν πλέον στην αναμενόμενη θέση.
+   *[other] { $count } μηνύματα δεν βρίσκονταν πλέον στην αναμενόμενη θέση.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] 1 μήνυμα άλλαξε στο μεταξύ, από εσάς ή στον διακομιστή, και έμεινε ως έχει.
    *[other] { $count } μηνύματα άλλαξαν στο μεταξύ, από εσάς ή στον διακομιστή, και έμειναν ως έχουν.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] 1 μήνυμα είχε ήδη φύγει από τα Εξερχόμενα.
    *[other] { $count } μηνύματα είχαν ήδη φύγει από τα Εξερχόμενα.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 αλλαγή δεν μπορεί να αναιρεθεί.
    *[other] { $count } αλλαγές δεν μπορούν να αναιρεθούν.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
     [accept] Αυτό το μήνυμα αποδέχεται την πρόσκληση «{ $summary }» ({ $when }).
     [tentative] Αυτό το μήνυμα αποδέχεται με επιφύλαξη την πρόσκληση «{ $summary }» ({ $when }).
    *[decline] Αυτό το μήνυμα απορρίπτει την πρόσκληση «{ $summary }» ({ $when }).
-} Το ημερολόγιο του διοργανωτή την καταχωρεί. Η απάντησή σας στην πρόσκληση αλλάζει μόνο αφού σταλεί το μήνυμα.
+} Το μήνυμα περιέχει απάντηση για το ημερολόγιο του διοργανωτή. Η τοπική κατάσταση της πρόσκλησης ενημερώνεται αφού ο διακομιστής δεχτεί το μήνυμα για αποστολή. Αυτό δεν επιβεβαιώνει ότι ο διοργανωτής επεξεργάστηκε την απάντηση.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Αποδοχή: { $summary }
     [tentative] Αποδοχή με επιφύλαξη: { $summary }
    *[decline] Απόρριψη: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } αποδέχτηκε αυτήν την πρόσκληση.
     [tentative] { $name } αποδέχτηκε με επιφύλαξη αυτήν την πρόσκληση.
    *[decline] { $name } απέρριψε αυτήν την πρόσκληση.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] διάβασε 1 μήνυμα
    *[other] διάβασε { $count } μηνύματα
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] άνοιξε 1 συνημμένο
-   *[other] άνοιξε { $count } συνημμένα
+    [one] διάβασε 1 συνημμένο
+   *[other] διάβασε { $count } συνημμένα
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] έκανε αναζήτηση μία φορά
    *[other] έκανε αναζήτηση { $count } φορές
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] είδε μια λίστα μηνυμάτων μία φορά
    *[other] είδε λίστες μηνυμάτων { $count } φορές
 }
 # each read under that row
-# review: new
 agent-read-message = Διάβασε το «{ $subject }»
-# review: new
 agent-read-conversation = { $count ->
     [one] Διάβασε τη συζήτηση «{ $subject }» (1 μήνυμα)
    *[other] Διάβασε τη συζήτηση «{ $subject }» ({ $count } μηνύματα)
 }
-# review: new
-agent-read-attachment = Άνοιξε το συνημμένο «{ $name }» του μηνύματος «{ $subject }»
-# review: new
+agent-read-attachment = Διάβασε το συνημμένο «{ $name }» του μηνύματος «{ $subject }»
 agent-read-search = { $count ->
     [one] Αναζήτησε «{ $query }»: 1 μήνυμα
    *[other] Αναζήτησε «{ $query }»: { $count } μηνύματα
 }
-# review: new
-agent-read-people = Αναζήτησε άτομα που αρχίζουν από «{ $query }»
-# review: new
+agent-read-people = Αναζήτησε άτομα με όνομα ή διεύθυνση που αρχίζει από «{ $query }»
 agent-read-list = { $count ->
-    [one] Είδε 1 μήνυμα στον φάκελο «{ $folder }»
-   *[other] Είδε { $count } μηνύματα στον φάκελο «{ $folder }»
+    [one] Είδε 1 καταχώριση στη λίστα: { $folder }
+   *[other] Είδε { $count } καταχωρίσεις στη λίστα: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
     [one] Είδε 1 νέο μήνυμα
    *[other] Είδε { $count } νέα μηνύματα
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Προγράμματα που εκκινούνται από το { $terminal }
-# review: new
 agent-terminal-programs-windows = Προγράμματα που εκκινούνται από τερματικό ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Προγράμματα που εκκινούνται από τερματικό ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it. In Greek a relative clause, as those sentences put
 # "Το πρόγραμμα" before { $program }: "Το πρόγραμμα που εκκινήθηκε από το Terminal θέλει να στείλει αυτό το μήνυμα"
-# review: new
 agent-terminal-program-mac = που εκκινήθηκε από το { $terminal }
-# review: new
 agent-terminal-program-windows = που εκκινήθηκε από τερματικό ({ $terminal })
-# review: new
 agent-terminal-program-linux = που εκκινήθηκε από τερματικό ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } ζητούν πρόσβαση στην αλληλογραφία σας
-# review: new
 agent-connect-terminal-detail = Κάθε πράκτορας ΤΝ που ξεκινάτε από αυτό το τερματικό μοιράζεται την πρόσβαση που επιτρέπετε εδώ. Για να έχει ένας πράκτορας δική του πρόσβαση, προσθέστε το --name και ένα όνομα της επιλογής σας στα ορίσματά του, στις ρυθμίσεις MCP του πράκτορα.
-# review: new
 agent-connect-claimed = Το πρόγραμμα δήλωσε ότι είναι το { $claimed }. Το Inbox Classic έλεγξε ποιο πρόγραμμα το ξεκίνησε: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -800,7 +752,7 @@ pgp-key-expired = Έληξε στις { $date }
 pgp-key-revoked = Ανακλήθηκε
 pgp-key-revoked-why = Ανακλήθηκε: { $reason }
 pgp-key-not-valid = Μη έγκυρο
-pgp-key-locked = Το ιδιωτικό κλειδί δεν μπορεί να χρησιμοποιηθεί. Το κλειδί προστασίας του λείπει από την υπηρεσία αποθήκευσης ({ $store }). Εισαγάγετε ξανά το αντίγραφο ασφαλείας του ιδιωτικού κλειδιού.
+pgp-key-locked = Το ιδιωτικό κλειδί δεν μπορεί να ανοίξει. Ελέγξτε την πρόσβαση στην υπηρεσία αποθήκευσης ({ $store }). Αν λείπει το κλειδί προστασίας, εισαγάγετε ξανά αντίγραφο ασφαλείας του ιδιωτικού κλειδιού.
 pgp-source-own = Δημιουργήθηκε στο Inbox Classic
 pgp-source-file = Εισήχθη από αρχείο
 pgp-source-paste = Επικολλήθηκε
@@ -886,7 +838,7 @@ pgp-compose-sign-tip-encrypted = Τα κρυπτογραφημένα μηνύμ�
 pgp-compose-encrypt-tip = Κρυπτογράφηση του περιεχομένου κατά την αποστολή, ώστε να μπορείτε να το διαβάσετε μόνο εσείς και οι παραλήπτες
 pgp-compose-make-key = Δεν έχετε ακόμη κλειδί για τη διεύθυνση { $address }. Θέλετε να δημιουργήσετε ένα τώρα; Με αυτό θα μπορείτε να υπογράφετε και να κρυπτογραφείτε μηνύματα.
 pgp-compose-key-unusable = Το κλειδί σας για τη διεύθυνση { $address } δεν μπορεί να χρησιμοποιηθεί. Αιτία: { $state }
-    Ανοίξτε το παράθυρο «Κλειδιά κρυπτογράφησης» για να εισαγάγετε ένα αντίγραφο ασφαλείας αυτού του κλειδιού ή να δημιουργήσετε νέο.
+    Αν η ασφαλής αποθήκευση είναι κλειδωμένη ή μη διαθέσιμη, ελέγξτε πρώτα την πρόσβαση. Διαφορετικά, ανοίξτε το παράθυρο «Κλειδιά κρυπτογράφησης» για να εισαγάγετε ένα αντίγραφο ασφαλείας αυτού του κλειδιού ή να δημιουργήσετε νέο.
 pgp-compose-encrypt-off-quote = Το μήνυμα περιέχει ακόμη κείμενο, εικόνες ή συνημμένα από κρυπτογραφημένο μήνυμα. Αφαιρέστε τα πριν το στείλετε χωρίς κρυπτογράφηση. Να απενεργοποιηθεί παρ’ όλα αυτά η κρυπτογράφηση;
 pgp-compose-encrypt-off-reply = Το αρχικό μήνυμα ήταν κρυπτογραφημένο. Αν στείλετε την απάντηση ή το προωθημένο μήνυμα χωρίς κρυπτογράφηση, οι διακομιστές αλληλογραφίας θα μπορούν να διαβάσουν το περιεχόμενο. Να απενεργοποιηθεί η κρυπτογράφηση;
 pgp-recipient-verified = Επαληθευμένο κλειδί
@@ -902,7 +854,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Δεν υπάρχουν κατάλληλα κλειδιά για { $count } παραλήπτες. Βρείτε τα κλειδιά τους ή αφαιρέστε τους από το μήνυμα. Η αποστολή χωρίς κρυπτογράφηση επιτρέπεται μόνο αν το μήνυμα δεν περιέχει κείμενο, εικόνες ή συνημμένα από κρυπτογραφημένα μηνύματα.
 }
 pgp-details-part = Τμήμα { $number }: { $label }
-# review: new
 attachment-from-part = Από το τμήμα { $number }: { $label }
 pgp-details-signed = Υπογράφηκε { $when } με το κλειδί { $key }
 pgp-details-unknown-key = Υπογράφηκε με το κλειδί { $key }, που δεν έχετε
@@ -911,17 +862,14 @@ pgp-details-for = Κρυπτογραφημένο για { $keys }
 pgp-details-plain = Χωρίς υπογραφή και χωρίς κρυπτογράφηση
 pgp-bar-parts = Αυτό το μήνυμα έχει { $count } τμήματα: { $list }. Κάθε τμήμα δείχνει πώς προστατεύεται.
 pgp-bar-count-verified = { $count } με επαληθευμένο κάτοχο κλειδιού
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] { $count } κρυπτογραφημένο και υπογεγραμμένο
    *[other] { $count } κρυπτογραφημένα και υπογεγραμμένα
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] { $count } κρυπτογραφημένο
    *[other] { $count } κρυπτογραφημένα
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] { $count } υπογεγραμμένο
    *[other] { $count } υπογεγραμμένα
@@ -1069,9 +1017,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Δεν εισήχθη τίποτα.
 setup-account-servers = { $imap } και { $smtp } ({ $signin })
 setup-file-name = Ρυθμίσεις και λογαριασμοί Inbox Classic
-setup-skipped-unreachable = Η εφαρμογή σύνδεσης { $name } παραλείφθηκε: η υπηρεσία σύνδεσής της δεν ήταν προσβάσιμη. Προσθέστε την ξανά στις Εφαρμογές σύνδεσης.
+setup-skipped-unreachable = Παραλείφθηκε: { $name }. Δεν ήταν δυνατός ο έλεγχος της υπηρεσίας σύνδεσης. Ελέγξτε τις Εφαρμογές σύνδεσης και δοκιμάστε να το προσθέσετε ξανά.
 attachment-runs-programs = Το αρχείο «{ $name }» μπορεί να εκτελέσει προγράμματα, γι’ αυτό το Inbox Classic δεν το ανοίγει. Αποθηκεύστε το και ανοίξτε το μόνοι σας, αν εμπιστεύεστε την προέλευσή του.
-attachment-decrypted-note = Αυτό το συνημμένο προέρχεται από κρυπτογραφημένο μήνυμα. Για να το ανοίξει, το Inbox Classic αποθηκεύει ένα μη κρυπτογραφημένο αντίγραφο σε προσωρινό φάκελο του λογαριασμού χρήστη σας. Κατά την εκκίνηση του προγράμματος αφαιρούνται αντίγραφα παλαιότερα της μίας ημέρας.
+attachment-decrypted-note = Αυτό το συνημμένο προέρχεται από κρυπτογραφημένο μήνυμα. Για να το ανοίξει, το Inbox Classic αποθηκεύει ένα μη κρυπτογραφημένο αντίγραφο σε προσωρινό φάκελο του λογαριασμού χρήστη σας. Κατά την εκκίνηση, το πρόγραμμα προσπαθεί να αφαιρέσει αντίγραφα παλαιότερα της μίας ημέρας.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Ο διακομιστής δεν μετακίνησε { $messages } στον φάκελο «{ $folder }», οπότε βρίσκεται ξανά στον φάκελο «{ $from }»: { $reason }
@@ -1100,46 +1048,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Εμφάνιση αρχείων PDF στα μηνύματα
-# review: new
 preview-pdf-off = Τα αρχεία PDF δεν εμφανίζονται στα μηνύματα.
-# review: new
-preview-pdf-off-crashed = Ένα αρχείο PDF έκλεισε το Inbox Classic ενώ εμφανιζόταν, οπότε τα αρχεία PDF δεν εμφανίζονται πλέον στα μηνύματα. Οι εικόνες εμφανίζονται ακόμα. Για να εμφανίζονται ξανά τα αρχεία PDF, ενεργοποιήστε την επιλογή { $option } στο { $settings }.
-# review: new
+preview-pdf-off-crashed = Το Inbox Classic τερματίστηκε κατά την προεπισκόπηση αρχείου, οπότε απενεργοποιήθηκαν οι προεπισκοπήσεις PDF. Οι εικόνες εξακολουθούν να εμφανίζονται. Για να εμφανίζονται ξανά τα PDF, ενεργοποιήστε την επιλογή { $option } στις ρυθμίσεις { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 σελίδα, { $size }
    *[other] { $count } σελίδες, { $size }
 }
-# review: new
 preview-page-alt = { $name }, σελίδα { $page } από { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Ανοίξτε το για να δείτε τη σελίδα
    *[other] Ανοίξτε το για να δείτε και τις { $count } σελίδες
 }
-# review: new
 preview-more-files = { $count ->
     [one] 1 ακόμη αρχείο βρίσκεται στη λίστα επάνω
    *[other] { $count } ακόμη αρχεία βρίσκονται στη λίστα επάνω
 }
-# review: new
 preview-tile-downloading = Γίνεται λήψη…
-# review: new
 preview-tile-preparing = Προετοιμασία…
-# review: new
 preview-tile-format = Οι εικόνες { $format } δεν εμφανίζονται ακόμη
-# review: new
 preview-tile-password = Προστατεύεται με κωδικό πρόσβασης: ανοίξτε το για να τον εισαγάγετε
-# review: new
 preview-tile-too-large = Πολύ μεγάλο για εμφάνιση
-# review: new
 preview-tile-unreadable = Δεν μπορεί να εμφανιστεί
-# review: new
-preview-tile-timed-out = Η εμφάνιση άργησε πολύ
-# review: new
-preview-tile-crashed = Δεν εμφανίζεται: έκλεισε το Inbox Classic μία φορά
-# review: new
+preview-tile-timed-out = Η προεπισκόπηση υπερέβη το χρονικό όριο
+preview-tile-crashed = Δεν εμφανίζεται: η προηγούμενη προεπισκόπηση διακόπηκε
 preview-tile-off = Δεν εμφανίζεται μέχρι να ξεκινήσει ξανά το Inbox Classic
-# review: new
 preview-not-printed = Το { $name } ({ $details }) δεν εκτυπώνεται. Ανοίξτε το για να το εκτυπώσετε.
