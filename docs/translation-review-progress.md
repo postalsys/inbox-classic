@@ -11,16 +11,16 @@ Commit completed batches regularly and preserve an exact resume point.
   Finish what needs review in master `8757ab1c234bf3549979c06fdca14980fd3f9b80`, then stop.
   Do not discover unmerged translation branches or wait for further additions. Historical late-arrival rules below
   are superseded by this instruction. Keep normal master synchronization for publication and a final completeness audit.
-- **Next: Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue contacts, settings and keys, then their remaining catalogs/help in isolated worktrees. Root integrates each validated immutable worker batch and publishes promptly. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.**
+- **Next: Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue their remaining catalogs/help in isolated worktrees. Root integrates immutable worker batches promptly, including required generated outputs for installer/Linux metadata changes. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.**
 - Current scope: 36,408 catalog entries and 1,380 help topics.
-  Completed: 26,008 entries and 791 full topics;
-  pending: 10,400 entries and 589 topics across 27 languages.
+  Completed: 26,421 entries and 791 full topics;
+  pending: 9,987 entries and 589 topics across 27 languages.
   All 28 language directories are inventoried. Lithuanian has no pending marks but now needs the targeted zero-address key comparison.
-- Latest integration: first two Polish, Romanian and Russian worker batches, 1,432 entries reviewed and 274 improved values.
-  Parent independently reconstructed all six committed worker batches: 1,432 reviewed catalog entries, 274 improved values, selected marks only, no other edits. English/source hashes, IDs, variables, selectors, access keys, comments and ellipses match the evidence. Worker language checks have zero structural findings; expected draft-mark diagnostics are accounted for. Combined inventories and latest file/English hashes reconcile for all 28 languages. Global diagnostics account for 26,042 unmarked entries and 12,883 help lines; since-start 2,390 entries/671 passages match the pending queue. Master is an ancestor of this branch. Review HTML refreshed. No local test suites, builds, manual CI or localized GUI execution; REVIEWED unchanged.
-- Four languages are progressing in parallel: Latvian at root; Polish, Romanian and Russian in isolated worktrees.
-  Polish Windows catalog is fully reviewed. Pending totals: lv 712 catalog/51 topics; pl 843 catalog/51 topics; ro 918 catalog/51 topics; ru 919 catalog/51 topics.
-- Publication checkpoint: [PR #212](https://github.com/postalsys/inbox-classic/pull/212) merged the preceding Latvian account/dialog batch as `52d7e9fa` at 05:35 UTC on November 19.
+- Latest integration: Romanian and Russian contacts, settings, keys and account transfer, 413 entries reviewed and 93 improved values.
+  Parent independently reconstructed 2 committed worker batches: 413 reviewed catalog entries and 93 improved values, selected marks only, no other edits. IDs, variables, access-key counts, comments, ellipses, source hashes and documented selector changes match the evidence. Worker language checks have zero structural findings; expected draft-mark diagnostics are accounted for. Combined inventories and latest file/English hashes reconcile for all 28 languages. Global diagnostics account for 26,455 unmarked entries and 12,883 help lines; since-start 2,350 entries/671 passages match the pending queue. Master is an ancestor of this branch. Review HTML refreshed. No local test suites, builds, manual CI or localized GUI execution; REVIEWED unchanged.
+- Four languages are progressing in parallel. Latvian, Romanian and Russian app catalogs and Polish Windows catalog are reviewed.
+  Pending totals: lv 712 catalog/51 topics; pl 843 catalog/51 topics; ro 711 catalog/51 topics; ru 713 catalog/51 topics.
+- Publication checkpoint: [PR #213](https://github.com/postalsys/inbox-classic/pull/213) merged the preceding review batches as `232f95c1` at 2026-11-19T05:58:27Z.
 - MCP phase3a, phase3b and preview-CID translations are integrated into the fixed inventory. No separate incoming
   source remains to merge. Prior source audits and exact deltas remain recorded as history.
 - Exact inventories, completed batches and latest file/source hashes are in `translation-review-state.json`.
@@ -3225,3 +3225,15 @@ Parent independently reconstructed all six committed worker batches: 1,432 revie
 Completed: 26,008 catalog entries and 791 full topics. Pending: 10,400 entries and 589 topics.
 
 Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue contacts, settings and keys, then their remaining catalogs/help in isolated worktrees. Root integrates each validated immutable worker batch and publishes promptly. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.
+
+### Parallel Romanian and Russian app completion
+
+Reviewed 413 catalog entries and improved 93 values. Corrected contact count grammar, queued-send and cancellation states, decrypted-search scope, key ownership and account-transfer guidance. Both languages now explain why an empty-address key cannot store ownership confirmation. Russian distinguishes exact one from 21 in contact deletion. Romanian gray flag is Cenușiu so every runtime flag menu item can receive a distinct mnemonic. Both app catalogs are fully reviewed.
+
+Parent independently reconstructed 2 committed worker batches: 413 reviewed catalog entries and 93 improved values, selected marks only, no other edits. IDs, variables, access-key counts, comments, ellipses, source hashes and documented selector changes match the evidence. Worker language checks have zero structural findings; expected draft-mark diagnostics are accounted for. Combined inventories and latest file/English hashes reconcile for all 28 languages. Global diagnostics account for 26,455 unmarked entries and 12,883 help lines; since-start 2,350 entries/671 passages match the pending queue. Master is an ancestor of this branch. Review HTML refreshed. No local test suites, builds, manual CI or localized GUI execution; REVIEWED unchanged.
+
+[PR #213](https://github.com/postalsys/inbox-classic/pull/213) merged the preceding review batches as `232f95c1` at 2026-11-19T05:58:27Z.
+
+Completed: 26,421 catalog entries and 791 full topics. Pending: 9,987 entries and 589 topics.
+
+Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue their remaining catalogs/help in isolated worktrees. Root integrates immutable worker batches promptly, including required generated outputs for installer/Linux metadata changes. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.

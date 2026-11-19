@@ -1247,6 +1247,10 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - Use Anulare acțiune for agent Undo and Anulare modificări for Take Back; Cancel remains Anulare, so destructive confirmation and cancellation are distinguishable.
 - Required-field errors use Completați câmpul „{field}” to avoid gender disagreement with substituted display labels.
 
+- Key verification explicitly confirms the key owner; status and address rows use proprietarul cheii a fost confirmat.
+- Take-back failure says trimiterea nu mai poate fi anulată, without asserting delivery.
+- Use atașări and agenți IA consistently in settings.
+
 ### Slovenčina (sk)
 
 Terms: Doručená pošta; Pošta na odoslanie; Odoslaná pošta; Odstránená pošta; Koncepty; Nevyžiadaná pošta; správa;
@@ -1678,6 +1682,13 @@ Plurals: `[one]` 1, 21, 31...; `[few]` 2 to 4, 22 to 24...; `[many]` 0, 5 to 20,
 - Account setup uses «почтовая учетная запись» and «защита подключения»; app-password instructions preserve availability conditions and browser-only provider requirements from the app.
 - Unsubscribe success says only «Запрос на отписку принят». Floating invitation times remain as written without conversion to the reader timezone; calendar launch failure does not prove absence of an installed calendar.
 - Rules «обрабатывают» messages; status «По правилам обработано ...» covers flagging, read status and suppressed notifications as well as moving.
+
+- Key ownership labels consistently say «владелец ключа подтвержден», distinct from key validity or a valid digital signature. The verification action is «Подтвердить владельца», reversal «Снять подтверждение владельца».
+- Use exact [1] for one selected contact and one key address; Russian one also matches 21, so counted plural branches retain the number. An empty-address key cannot save ownership confirmation and uses exact [0].
+- Undo Send failure says sending cannot be cancelled, without claiming successful delivery. Both Outbox scheduled statuses state «Отправка не раньше».
+- Encrypted-search settings distinguish decrypted content from the full index and its remaining ordinary headers; ИИ-агенты cannot search decrypted content.
+- The column-layout name is «В столбцах» in its explanatory notes as well as its menu command. Contact pictures accept PNG/JPEG only, unlike the composer insertion formats.
+- Setup files omit messages; on another computer only mail still on the server can be downloaded. Without a passphrase, users sign in again, rather than necessarily entering passwords.
 
 ### Українська (uk)
 
