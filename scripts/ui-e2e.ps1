@@ -3180,7 +3180,7 @@ public static class Dragger {
         Check ((BarPressed $compose $IDM_COMPOSE_SIGN)) 'a click on Sign leaves it on while Encrypt is'
         $row = WaitFor { $t = KeysRow $compose; if ($t -match 'Alice Example, Key verified') { $t } } 10
         Check ($null -ne $row) "the Keys row shows Alice with her key verified ($(KeysRow $compose))"
-        $line = WaitFor { $t = SecurityLine $compose; if ($t -match '^Encrypted') { $t } } 10
+        $line = WaitFor { $t = SecurityLine $compose; if ($t -match '^Will be encrypted') { $t } } 10
         Check ($line -eq 'Will be encrypted and signed for you and Alice Example.') "the line says who can read it ($line)"
         Check ((LineFill $compose) -eq $fills.verified) "in green ($(LineFill $compose))"
         Shot $compose 'write-31-encrypt'
