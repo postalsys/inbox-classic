@@ -433,6 +433,11 @@ function TimingReport {
         $total = ($kind.Table.Values | Measure-Object -Sum).Sum
         Write-Host ("timing: {0:N0} s in {1}; the most at lines (line<caller):" -f $total, $kind.Name)
         $kind.Table.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 25 | ForEach-Object { Write-Host ("   {0,7:N1} s  {1}" -f $_.Value, $_.Key) }
+        # and by the line of the pause or wait itself, whoever called it (a helper's pause adds up over its callers)
+        $byLine = @{}
+        foreach ($entry in $kind.Table.GetEnumerator()) { $byLine[($entry.Key -split '<')[0]] += $entry.Value }
+        Write-Host '   by the line of the pause or wait itself:'
+        $byLine.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 10 | ForEach-Object { Write-Host ("   {0,7:N1} s  {1}" -f $_.Value, $_.Key) }
     }
 }
 
@@ -7799,7 +7804,8 @@ public static bool HasIcon(IntPtr window) {
         Check ($null -ne (PreviewsShown 4 3 $false 'window:')) "the photo and the invoice show after the text ($prefix, $(PreviewsState 'window:'))"
         Start-Sleep -Milliseconds 500
         Shot $opened "$prefix-previews"
-        Key $opened $VK_ESCAPE
+        # closed with its close box (Esc posted to it is not taken, and it would be left open)
+        [void][Native.Win]::PostMessage($opened, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($opened) } 10)
         if ($options) {
             Command $window $IDM_OPTIONS
