@@ -299,7 +299,7 @@ ui-found-autodiscover = Te ustawienia znaleziono za pomocą Microsoft Autodiscov
 ui-found-other = Dla tego adresu znaleziono te ustawienia.
 ui-app-password-needed = Dostawca: { $provider }. Jeśli Twoje konto obsługuje hasła aplikacji, utwórz takie hasło w jego ustawieniach zabezpieczeń i wpisz je w polu Hasło w następnym formularzu. Outlook.com i Microsoft 365 wymagają logowania przez przeglądarkę.
 ui-app-password-open = Otworzyć w przeglądarce instrukcje dostawcy ({ $provider })?
-ui-plain-warning = Bez szyfrowania każdy, kto przechwyci ruch w Twojej sieci, może odczytać Twoje hasło i wiadomości. Używaj tego połączenia tylko z serwerem na własnym komputerze lub w sieci lokalnej.
+ui-plain-warning = Bez szyfrowania każdy, kto przechwyci ruch w Twojej sieci, może odczytać Twoje hasło i wiadomości. Kontynuuj tylko wtedy, gdy połączenie jest chronione w inny sposób; sama sieć lokalna nie zapewnia szyfrowania.
 ui-continue-ask = Kontynuować?
 ui-add-sign-in-app = Dodaj aplikację logowania...
 ui-turned-off = Opcja „{ $name }” jest wyłączona na tym komputerze.
@@ -483,10 +483,10 @@ ui-rule-apply-now = Zastosuj też do wiadomości, które już są w Skrzynce &od
 ui-rule-delete-ask = Usunąć regułę „{ $name }”?
 ui-create-rule = Utwórz regułę...
 ui-rules-applied = { $count ->
-    [one] 1 wiadomość uporządkowana przez Twoje reguły
-    [few] { $count } wiadomości uporządkowane przez Twoje reguły
-    [many] { $count } wiadomości uporządkowanych przez Twoje reguły
-   *[other] { $count } wiadomości uporządkowanych przez Twoje reguły
+    [one] 1 wiadomość przetworzona przez Twoje reguły
+    [few] { $count } wiadomości przetworzone przez Twoje reguły
+    [many] { $count } wiadomości przetworzonych przez Twoje reguły
+   *[other] { $count } wiadomości przetworzonych przez Twoje reguły
 }
 ui-col-rule-matches = Kryteria
 ui-clear-button = &Wyczyść
@@ -604,7 +604,7 @@ ui-download-ahead-all = Wszystkie wiadomości
 ui-download-ahead-never = Tylko po otwarciu
 ui-download-limit = &Limit miejsca na konto:
 ui-send-delay = &Opóźnienie przed wysłaniem:
-ui-send-delay-note = Gdy wiadomość czeka na wysłanie, możesz anulować wysyłkę poleceniem Cofnij.
+ui-send-delay-note = Podczas odliczania możesz anulować wysyłkę poleceniem Cofnij. Ta możliwość kończy się wraz z odliczaniem, nawet jeśli wiadomość nadal czeka na wysłanie.
 ui-dark-messages = Pokazuj wiadomości na ciemnym tle, gdy system jest w trybie ciemnym
 ui-preview-show = Pokazuj z&ałączniki w wiadomościach
 ui-preview-show-note = Pokazuje obrazy i pierwsze strony plików PDF pod tekstem wiadomości. Inbox Classic sam tworzy podglądy, bez uruchamiania skryptów zawartych w plikach.

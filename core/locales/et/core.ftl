@@ -557,8 +557,8 @@ agent-undo-since-detail = Võimaluse korral viiakse kirjad tagasi varasematesse 
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Midagi ei võetud tagasi.
-    [one] 1 muudatus võeti tagasi.
-   *[other] { $count } muudatust võeti tagasi.
+    [one] 1 muudatus võeti tagasi, täielikult või osaliselt.
+   *[other] { $count } muudatust võeti tagasi, täielikult või osaliselt.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 kirja ei leitud enam eeldatud kaustast.
@@ -600,8 +600,8 @@ agent-reads-messages = { $count ->
    *[other] loeti { $count } kirja
 }
 agent-reads-attachments = { $count ->
-    [one] loeti 1 manus
-   *[other] loeti { $count } manust
+    [one] küsiti 1 manus
+   *[other] küsiti { $count } manust
 }
 agent-reads-searches = { $count ->
     [one] otsiti üks kord
@@ -617,7 +617,7 @@ agent-read-conversation = { $count ->
     [one] Loeti vestlus „{ $subject }“ (1 kiri)
    *[other] Loeti vestlus „{ $subject }“ ({ $count } kirja)
 }
-agent-read-attachment = Loeti kirja „{ $subject }“ manus „{ $name }“
+agent-read-attachment = Küsiti kirja „{ $subject }“ manus „{ $name }“
 agent-read-search = { $count ->
     [one] Otsiti teksti „{ $query }“: leiti 1 kiri
    *[other] Otsiti teksti „{ $query }“: leiti { $count } kirja
@@ -945,7 +945,7 @@ setup-account-servers = { $imap } ja { $smtp } ({ $signin })
 setup-file-name = Inbox Classicu seaded ja kontod
 setup-skipped-unreachable = „{ $name }“ jäeti importimata, sest sisselogimisteenust ei saanud kontrollida. Lisage vajalik sisselogimisrakendus uuesti sisselogimisrakenduste seadetes.
 attachment-runs-programs = Fail „{ $name }“ võib käivitada programme, mistõttu Inbox Classic seda ei ava. Kui usaldate faili päritolu, salvestage see ja avage ise.
-attachment-decrypted-note = See manus on pärit krüpteeritud kirjast. Avamiseks salvestab Inbox Classic sellest krüpteerimata koopia teie ajutisse kausta. Üle päeva vanused koopiad kustutatakse rakenduse käivitamisel.
+attachment-decrypted-note = See manus on pärit krüpteeritud kirjast. Avamiseks salvestab Inbox Classic sellest krüpteerimata koopia teie ajutisse kausta. Rakenduse käivitamisel püütakse üle päeva vanused koopiad kustutada.
 undone-move = { $count ->
     [one] Server ei teisaldanud kirja kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
    *[other] Server ei teisaldanud kirju kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
@@ -995,7 +995,7 @@ preview-tile-format = { $format }-pilte veel ei näidata
 preview-tile-password = Kaitstud parooliga: avage see parooli sisestamiseks
 preview-tile-too-large = Näitamiseks liiga suur
 preview-tile-unreadable = Ei saa näidata
-preview-tile-timed-out = Näitamine võttis liiga kaua aega
+preview-tile-timed-out = Eelvaate ettevalmistamine võttis liiga kaua aega
 preview-tile-crashed = Eelvaadet ei näidata: eelmisel korral sulgus Inbox Classic või lakkas reageerimast
 preview-tile-off = Ei näidata enne, kui Inbox Classic uuesti käivitub
 preview-not-printed = Faili { $name } ({ $details }) ei prindita. Printimiseks avage see.

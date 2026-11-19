@@ -296,9 +296,9 @@ ui-found-mx = Inbox Classic atpažino jūsų el. pašto paslaugų teikėją ir p
 ui-found-srv = Šie nustatymai rasti jūsų domeno DNS įrašuose.
 ui-found-autodiscover = Šie nustatymai rasti naudojant Microsoft Autodiscover (Exchange).
 ui-found-other = Šiam adresui rasti šie nustatymai.
-ui-app-password-needed = { $provider } pašto programose nepriima įprasto paskyros slaptažodžio. Programos slaptažodį sukurkite savo paskyroje svetainėje, kurią valdo { $provider }. Kitame lange įveskite jį į lauką „Slaptažodis“.
+ui-app-password-needed = Paslaugos teikėjas: { $provider }. Jei paskyra palaiko programų slaptažodžius, sukurkite tokį slaptažodį jos saugumo nuostatose ir kitame lange įveskite jį į lauką „Slaptažodis“. Kitu atveju prisijunkite naršyklėje, jei ši galimybė prieinama.
 ui-app-password-open = Atidaryti naršyklėje instrukcijas, kurias pateikia { $provider }?
-ui-plain-warning = Be šifravimo bet kas, perimantis jūsų tinklo srautą, gali perskaityti jūsų slaptažodį ir laiškus. Naudokite šį ryšį tik su serveriu, esančiu jūsų kompiuteryje arba vietiniame tinkle.
+ui-plain-warning = Be šifravimo bet kas, perimantis jūsų tinklo srautą, gali perskaityti jūsų slaptažodį ir laiškus. Tęskite tik jei ryšys apsaugotas kitu būdu; vien vietinis tinklas šifravimo nesuteikia.
 ui-continue-ask = Tęsti?
 ui-add-sign-in-app = Pridėti prisijungimo programą...
 ui-turned-off = Šiame kompiuteryje parinktis „{ $name }“ išjungta.
@@ -481,9 +481,9 @@ ui-rule-apply-now = Taip pat taikyti laiškams, jau esantiems aplanke „&Gauti 
 ui-rule-delete-ask = Panaikinti taisyklę „{ $name }“?
 ui-create-rule = Kurti taisyklę...
 ui-rules-applied = { $count ->
-    [one] Jūsų taisyklės surūšiavo { $count } laišką
-    [few] Jūsų taisyklės surūšiavo { $count } laiškus
-   *[other] Jūsų taisyklės surūšiavo { $count } laiškų
+    [one] Jūsų taisyklės apdorojo { $count } laišką
+    [few] Jūsų taisyklės apdorojo { $count } laiškus
+   *[other] Jūsų taisyklės apdorojo { $count } laiškų
 }
 ui-col-rule-matches = Kriterijai
 ui-clear-button = &Išvalyti

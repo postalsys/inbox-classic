@@ -509,7 +509,7 @@ agent-log-refused = Nu ați aprobat trimiterea mesajului „{ $subject }”
 agent-log-sent = A pus mesajul „{ $subject }” în coada de trimitere. Destinatari: { $to }
 agent-log-draft = A salvat schița „{ $subject }”
 agent-log-draft-replaced = A înlocuit schița „{ $subject }”
-agent-log-draft-discarded = A șters definitiv schița „{ $subject }”
+agent-log-draft-discarded = A cerut ștergerea definitivă a schiței „{ $subject }”
 agent-draft-note = Agentul IA { $program } a redactat această schiță. Verificați destinatarii și textul înainte de a o trimite.
 agent-log-read = A marcat mesajul „{ $subject }” ca citit
 agent-log-unread = A marcat mesajul „{ $subject }” ca necitit
@@ -676,9 +676,9 @@ agent-reads-messages = { $count ->
    *[other] a citit { $count } de mesaje
 }
 agent-reads-attachments = { $count ->
-    [one] a citit 1 atașare
-    [few] a citit { $count } atașări
-   *[other] a citit { $count } de atașări
+    [one] a solicitat 1 atașare
+    [few] a solicitat { $count } atașări
+   *[other] a solicitat { $count } de atașări
 }
 agent-reads-searches = { $count ->
     [one] a căutat o dată
@@ -697,7 +697,7 @@ agent-read-conversation = { $count ->
     [few] A citit conversația „{ $subject }” ({ $count } mesaje)
    *[other] A citit conversația „{ $subject }” ({ $count } de mesaje)
 }
-agent-read-attachment = A citit atașarea „{ $name }” din mesajul „{ $subject }”
+agent-read-attachment = A solicitat atașarea „{ $name }” din mesajul „{ $subject }”
 agent-read-search = { $count ->
     [one] A căutat „{ $query }”: 1 mesaj
     [few] A căutat „{ $query }”: { $count } mesaje
@@ -723,7 +723,7 @@ agent-terminal-program-mac = Un program pornit din { $terminal }
 agent-terminal-program-windows = Un program pornit dintr-un terminal ({ $terminal })
 agent-terminal-program-linux = Un program pornit dintr-un terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } solicită acces la mesajele dvs.
-agent-connect-terminal-detail = Toți agenții IA pe care îi porniți din acest terminal folosesc accesul pe care îl permiteți aici. Pentru ca un agent să aibă propriul acces, adăugați --name și un nume ales de dvs. la argumentele sale din setările MCP ale agentului.
+agent-connect-terminal-detail = Agenții porniți din același program de terminal recunoscut folosesc în comun accesul pe care îl permiteți aici. Pentru a gestiona un agent separat, adăugați --name și un nume ales de dvs. la argumentele sale din setările MCP. Numele nu confirmă identitatea programului.
 agent-connect-claimed = Programul s-a prezentat ca { $claimed }. Inbox Classic a verificat ce program l-a pornit: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -835,8 +835,8 @@ pgp-why-not-key-in-use = Semnat cu o altă cheie decât cea folosită pentru { $
 pgp-part-pictures-loaded = { $label }. Imaginile au fost încărcate de pe internet
 pgp-error-no-own-key = Nu aveți o cheie pentru { $address } cu care să semnați sau să criptați. Creați una în Instrumente > Chei de criptare sau dezactivați Semnare și Criptare.
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } nu are o cheie pentru criptare.
-   *[other] Acești destinatari nu au o cheie pentru criptare: { $addresses }.
+    [one] { $addresses } nu are o cheie utilizabilă pentru criptare.
+   *[other] Acești destinatari nu au o cheie utilizabilă pentru criptare: { $addresses }.
 }
 pgp-error-encrypted-quote = Acest mesaj conține text, imagini sau atașări dintr-un mesaj criptat și poate fi trimis doar criptat. Activați Criptare sau eliminați tot conținutul preluat din mesajul criptat.
 pgp-error-protect = Mesajul nu a putut fi semnat sau criptat: { $reason }
@@ -885,9 +885,9 @@ pgp-recipient-not-found = Nu s-a găsit nicio cheie. Ultima căutare: { $date }
 pgp-recipient-unusable = Cheia nu poate fi folosită: { $state }
 pgp-recipients-intro = Mesajul este criptat cu cheia fiecărui destinatar și cu cheia dvs.
 pgp-recipients-intro-missing = { $count ->
-    [one] Un destinatar nu are o cheie utilizabilă pentru criptare. Căutați cheia lui, eliminați destinatarul din mesaj sau trimiteți mesajul fără criptare.
-    [few] { $count } destinatari nu au chei utilizabile pentru criptare. Căutați cheile lor, eliminați acești destinatari din mesaj sau trimiteți mesajul fără criptare.
-   *[other] { $count } de destinatari nu au chei utilizabile pentru criptare. Căutați cheile lor, eliminați acești destinatari din mesaj sau trimiteți mesajul fără criptare.
+    [one] Un destinatar nu are o cheie utilizabilă pentru criptare. Căutați cheia lui, eliminați destinatarul din mesaj sau trimiteți mesajul fără criptare dacă nu conține text, imagini sau atașări din mesaje criptate.
+    [few] { $count } destinatari nu au chei utilizabile pentru criptare. Căutați cheile lor, eliminați acești destinatari din mesaj sau trimiteți mesajul fără criptare dacă nu conține text, imagini sau atașări din mesaje criptate.
+   *[other] { $count } de destinatari nu au chei utilizabile pentru criptare. Căutați cheile lor, eliminați acești destinatari din mesaj sau trimiteți mesajul fără criptare dacă nu conține text, imagini sau atașări din mesaje criptate.
 }
 pgp-details-part = Partea { $number }: { $label }
 attachment-from-part = Din partea { $number }: { $label }
@@ -1121,7 +1121,7 @@ preview-tile-format = Imaginile { $format } nu sunt încă afișate
 preview-tile-password = Protejat cu parolă: deschideți-l pentru a introduce parola
 preview-tile-too-large = Depășește limita de previzualizare
 preview-tile-unreadable = Nu poate fi afișat
-preview-tile-timed-out = Afișarea a durat prea mult
+preview-tile-timed-out = Pregătirea previzualizării a durat prea mult
 preview-tile-crashed = Previzualizarea anterioară a fost întreruptă sau s-a blocat
 preview-tile-off = Nu este afișat până la repornirea Inbox Classic
 preview-not-printed = Fișierul „{ $name }” ({ $details }) nu este inclus la imprimare. Deschideți-l pentru a-l imprima.

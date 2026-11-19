@@ -1,6 +1,6 @@
 
 <h1>Ziņojumi, kas netika piegādāti</h1>
-<p class="summary">Ja saņemts paziņojums par nepiegādātu vai aizkavētu ziņojumu, Inbox Classic izskaidro tajā norādīto iemeslu un iesaka, kā rīkoties.</p>
+<p class="summary">Inbox Classic izskaidro atpazītus paziņojumus par nepiegādātiem vai aizkavētiem ziņojumiem un iesaka, kā rīkoties.</p>
 <p>Atpazītam piegādes paziņojumam ziņojumu sarakstā ir īpaša atzīme. Kad to atverat, kartīte virs tā parāda, vai jūsu ziņojums netika piegādāts vai tikai aizkavējas.</p>
 <img src="picture:bounce-1-failed" alt="Piegādes paziņojums ar kartīti, kurā teikts, ka ziņojums netika piegādāts, norādīts adresāts, iemesls un ko darīt">
 <p>Kartītē pie katra paziņojumā norādītā adresāta ir iemesla skaidrojums un ieteikums. Poga <b data-text="bounce-details"></b> parāda servera sākotnējo atbildi.</p>
@@ -8,14 +8,14 @@
     <li>Poga „<b data-text="bounce-show-message"></b>” atlasa sākotnējo ziņojumu, ja Inbox Classic to atrod jūsu pastā.</li>
     <li>Aizkaves gadījumā izmantojiet pogu „<b data-text="bounce-show-delayed"></b>”. Paziņojuma nosūtīšanas brīdī pasta serveris vēl mēģināja ziņojumu piegādāt. Nesteidzieties sūtīt to atkārtoti; aizkaves paziņojums vēl neapliecina ne veiksmīgu piegādi, ne galīgu kļūmi.</li>
 </ul>
-<p>Biežākie iemesli:</p>
+<p>Biežākie iemesli un padomi galīgas kļūmes gadījumā. Ja piegāde tikai aizkavējas, pirms atkārtotas sūtīšanas sagaidiet rezultātu:</p>
 <table>
     <tr><th>Kartītē teikts</th><th>Ko darīt</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Pārbaudiet, vai adrese uzrakstīta pareizi, vai pajautājiet cilvēkam adresi, ko viņš tagad izmanto.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Nosūtiet to vēlreiz pēc dažām dienām vai sazinieties ar cilvēku citādi.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Nosūtiet to vēlreiz bez tā, kas izskatās pēc mēstules, piemēram, daudzām saitēm vai liela pielikuma.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Sazinieties ar adresātu citādi un lūdziet atbrīvot vietu, pirms mēģināt vēlreiz.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Izlasiet servera skaidrojumu. Ja tas noraidījis saturu, pirms nākamā mēģinājuma izlabojiet ziņojumu.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Pārsūtiet paziņojumu savam pasta pakalpojuma sniedzējam. Šis iemesls attiecas uz sūtītāja servera adresi, nevis pašu ziņojuma tekstu.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Pagaidiet, kamēr sūtītāja serveris mēģina vēlreiz. Piegādes laiks ir atkarīgs no serveriem.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Saņēmēja serveris lūdz mēģināt vēlāk. Ja paziņojums norāda uz aizkavi, sagaidiet rezultātu; piegādes laiks nav garantēts.</td></tr>
 </table>
 <p>Lai atrastu visus piegādes paziņojumus, meklējiet <code>is:bounce</code>. Paziņojumu analīze notiek jūsu datorā; tās dēļ ziņojuma saturs netiek nosūtīts citam pakalpojumam.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

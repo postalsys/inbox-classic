@@ -178,4 +178,4 @@ gtk-metainfo-description = Med Inbox Classic kan du läsa och skriva e-post i et
 gtk-metainfo-feature-sanitized = Meddelanden visas utan skript. Du bestämmer när bilder från internet får hämtas
 gtk-metainfo-feature-search = Sök i ämnen, avsändare, mottagare, bilagenamn och meddelandetext med sökvillkor som liknar Gmails
 gtk-metainfo-feature-replies = Citerade meddelanden fälls ihop i svar så att din egen text får plats
-gtk-metainfo-feature-offline = Hämtad e-post kan läsas utan internetanslutning. Inloggningsuppgifter sparas normalt i systemets nyckelring
+gtk-metainfo-feature-offline = E-post kan läsas utan internet så länge den lokala kopian finns kvar; inloggningsuppgifter sparas normalt i systemets nyckelring när den är tillgänglig

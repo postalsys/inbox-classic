@@ -177,4 +177,4 @@ gtk-metainfo-description = Inbox Classic yra el. pašto programa su įprastu iš
 gtk-metainfo-feature-sanitized = Prieš rodant iš laiškų pašalinami scenarijai ir kitas neleidžiamas turinys; paveikslėliai iš interneto atsisiunčiami tik jums leidus
 gtk-metainfo-feature-search = Paieška pagal laiškų temas, siuntėjų ir gavėjų vardus bei adresus, priedų pavadinimus ir tekstą, su Gmail stiliaus paieškos operatoriais
 gtk-metainfo-feature-replies = Atsakymuose suskleidžiami ankstesni cituojami laiškai
-gtk-metainfo-feature-offline = Galite skaityti atsisiųstus laiškus be interneto ir saugoti slaptažodžius sistemos raktinėje
+gtk-metainfo-feature-offline = Laiškus galima skaityti be interneto, kol išsaugota vietinė kopija; prisijungimo duomenys paprastai saugomi sistemos raktinėje, jei ji pasiekiama

@@ -95,7 +95,7 @@ win-send = &Enviar
 win-dont-send = &No enviar
 win-unsubscribe = &Cancelar suscripción
 win-dont-unsubscribe = &No cancelar suscripción
-win-forget-program-ask = ¿Quitar este programa, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
+win-forget-program-ask = ¿Quitar este programa de la lista, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
 win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los cambios realizados.
 win-agent-programs = P&rogramas cuyos agentes pidieron usar su correo:
 win-change = &Cambiar...
@@ -135,4 +135,4 @@ win-installer-welcome-update =
     Si el programa está abierto, se cerrará antes de continuar. Sus cuentas y mensajes se conservarán.
 win-installer-older-ask = Está instalado Inbox Classic { $installed }, que es más reciente que { $version }. ¿Instalar de todos modos la versión anterior?
 win-installer-still-running = Inbox Classic sigue abierto. Ciérrelo y vuelva a intentarlo.
-win-installer-remove-mail-ask = ¿Desea eliminar también los datos locales de Inbox Classic, incluidas las cuentas, la configuración y los mensajes pendientes de envío? Los mensajes de los servidores se conservarán.
+win-installer-remove-mail-ask = ¿Desea eliminar también todos los datos locales de Inbox Classic, incluidas las cuentas, los mensajes pendientes de envío, la configuración, los contactos, las reglas y las claves de cifrado? Los mensajes de los servidores y las entradas del almacén de credenciales del sistema se conservarán.

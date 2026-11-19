@@ -489,7 +489,7 @@ agent-log-refused = Odeslání zprávy „{ $subject }“ nebylo schváleno
 agent-log-sent = Zpráva „{ $subject }“ zařazena k odeslání. Příjemci: { $to }
 agent-log-draft = Uložen koncept „{ $subject }“
 agent-log-draft-replaced = Nahrazen koncept „{ $subject }“
-agent-log-draft-discarded = Zahozen koncept „{ $subject }“
+agent-log-draft-discarded = Požádáno o odstranění konceptu „{ $subject }“
 agent-draft-note = Tento koncept napsal agent AI { $program }. Před odesláním zkontrolujte příjemce a text.
 agent-log-read = Označeno jako přečtené: „{ $subject }“
 agent-log-unread = Označeno jako nepřečtené: „{ $subject }“
@@ -607,9 +607,9 @@ agent-undo-since-detail = Pokud to stav zpráv dovolí, vrátí se do původníc
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nic nebylo vráceno zpět.
-    [one] Vrácena zpět 1 změna.
-    [few] Vráceny zpět { $count } změny.
-   *[other] Vráceno zpět { $count } změn.
+    [one] Vrácena zpět 1 změna, zcela nebo částečně.
+    [few] Vráceny zpět { $count } změny, zcela nebo částečně.
+   *[other] Vráceno zpět { $count } změn, zcela nebo částečně.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 zpráva už nebyla tam, kam ji změna přesunula.
@@ -656,9 +656,9 @@ agent-reads-messages = { $count ->
    *[other] přečteno { $count } zpráv
 }
 agent-reads-attachments = { $count ->
-    [one] přečtena 1 příloha
-    [few] přečteny { $count } přílohy
-   *[other] přečteno { $count } příloh
+    [one] vyžádána 1 příloha
+    [few] vyžádány { $count } přílohy
+   *[other] vyžádáno { $count } příloh
 }
 agent-reads-searches = { $count ->
     [one] 1 vyhledávání
@@ -677,22 +677,22 @@ agent-read-conversation = { $count ->
     [few] Přečtena konverzace „{ $subject }“ ({ $count } zprávy)
    *[other] Přečtena konverzace „{ $subject }“ ({ $count } zpráv)
 }
-agent-read-attachment = Přečtena příloha „{ $name }“ ze zprávy „{ $subject }“
+agent-read-attachment = Vyžádána příloha „{ $name }“ ze zprávy „{ $subject }“
 agent-read-search = { $count ->
     [one] Hledáno „{ $query }“: 1 zpráva
     [few] Hledáno „{ $query }“: { $count } zprávy
    *[other] Hledáno „{ $query }“: { $count } zpráv
 }
-agent-read-people = Hledány kontakty začínající na „{ $query }“
+agent-read-people = Hledání osob podle začátku jména nebo adresy: „{ $query }“
 agent-read-list = { $count ->
     [one] Zobrazena 1 položka seznamu „{ $folder }“
     [few] Zobrazeny { $count } položky seznamu „{ $folder }“
    *[other] Zobrazeno { $count } položek seznamu „{ $folder }“
 }
 agent-read-changes = { $count ->
-    [one] Zobrazena 1 nová zpráva
-    [few] Zobrazeny { $count } nové zprávy
-   *[other] Zobrazeno { $count } nových zpráv
+    [one] Zobrazeny údaje o 1 nové zprávě
+    [few] Zobrazeny údaje o { $count } nových zprávách
+   *[other] Zobrazeny údaje o { $count } nových zprávách
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programy spuštěné z aplikace { $terminal }
@@ -811,8 +811,8 @@ pgp-why-not-key-in-use = Podpis používá jiný klíč než ten, který je nast
 pgp-part-pictures-loaded = { $label }. Obrázky byly načteny z internetu
 pgp-error-no-own-key = Pro { $address } nemáte klíč, kterým byste mohli podepisovat nebo šifrovat. Vytvořte si ho v nabídce Nástroje > Šifrovací klíče, nebo vypněte Podepsat a Šifrovat.
 pgp-error-missing-keys = { $count ->
-    [one] Chybí klíč pro šifrování zpráv příjemci: { $addresses }.
-   *[other] Chybějí klíče pro šifrování zpráv těmto příjemcům: { $addresses }.
+    [one] Chybí použitelný klíč pro šifrování zpráv příjemci: { $addresses }.
+   *[other] Chybějí použitelné klíče pro šifrování zpráv těmto příjemcům: { $addresses }.
 }
 pgp-error-encrypted-quote = Zpráva obsahuje text, obrázky nebo přílohy ze šifrované zprávy a lze ji odeslat jen zašifrovanou. Zapněte „Šifrovat“ nebo tento obsah odeberte.
 pgp-error-protect = Zprávu nelze podepsat ani zašifrovat: { $reason }
@@ -1053,7 +1053,7 @@ setup-account-servers = { $imap } a { $smtp } ({ $signin })
 setup-file-name = Nastavení a účty Inbox Classic
 setup-skipped-unreachable = Přeskočená položka: { $name }. Přihlašovací službu se nepodařilo ověřit. Nastavte potřebnou aplikaci v okně Přihlašovací aplikace a zkuste to znovu.
 attachment-runs-programs = Soubor „{ $name }“ může spouštět programy, proto ho Inbox Classic neotevře. Uložte ho a otevřete ho sami, pokud důvěřujete jeho původu.
-attachment-decrypted-note = Tato příloha pochází ze šifrované zprávy. Při otevření uloží Inbox Classic nešifrovanou kopii do dočasné složky vašeho uživatelského účtu. Při spuštění aplikace se odstraní kopie starší než jeden den.
+attachment-decrypted-note = Tato příloha pochází ze šifrované zprávy. Při otevření uloží Inbox Classic nešifrovanou kopii do dočasné složky vašeho uživatelského účtu. Při spuštění se aplikace pokusí odstranit kopie starší než jeden den.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Server nepřesunul zprávu do složky { $folder }, takže { $messages } je zpět ve složce { $from }: { $reason }
@@ -1113,7 +1113,7 @@ preview-tile-format = Obrázky ve formátu { $format } se zatím nezobrazují
 preview-tile-password = Chráněno heslem: otevřete soubor a zadejte heslo
 preview-tile-too-large = Překročen limit pro náhled
 preview-tile-unreadable = Nelze zobrazit
-preview-tile-timed-out = Zobrazení trvalo příliš dlouho
+preview-tile-timed-out = Příprava náhledu trvala příliš dlouho
 preview-tile-crashed = Nezobrazeno: předchozí vytváření náhledu se přerušilo nebo přestalo reagovat
 preview-tile-off = Nezobrazeno do příštího spuštění Inbox Classic
 preview-not-printed = { $name } ({ $details }) se netiskne. Chcete-li jej vytisknout, otevřete jej.

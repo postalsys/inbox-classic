@@ -481,9 +481,9 @@ ui-rule-apply-now = Použiť aj na správy, ktoré už sú v priečinku Doručen
 ui-rule-delete-ask = Odstrániť pravidlo „{ $name }“?
 ui-create-rule = Vytvoriť pravidlo...
 ui-rules-applied = { $count ->
-    [one] 1 správa roztriedená vašimi pravidlami
-    [few] { $count } správy roztriedené vašimi pravidlami
-   *[other] { $count } správ roztriedených vašimi pravidlami
+    [one] 1 správa spracovaná vašimi pravidlami
+    [few] { $count } správy spracované vašimi pravidlami
+   *[other] { $count } správ spracovaných vašimi pravidlami
 }
 ui-col-rule-matches = Kritériá
 ui-clear-button = &Vymazať

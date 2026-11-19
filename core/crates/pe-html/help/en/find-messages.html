@@ -7,8 +7,8 @@
     <li>Select a result to read it. Reply, delete, move and flag work on it in its own folder.</li>
 </ol>
 <p>A bar over the list says how many messages were found for which words.</p>
-<p>The search looks in the subject, the people a message is from and to, the names of its files and its text. Words match where words start, so <code>budg</code> finds <i>budget</i>. Accents and capital letters do not matter.</p>
+<p>The search looks in the subject, the people a message is from and to, the names of its files and its text. Words of at least two characters match the start of a word, so <code>budg</code> finds <i>budget</i>. A single character matches a whole word. Accents and capital letters do not matter.</p>
 <p>To end the search and see the folder again, press <kbd>Esc</kbd>, click <b data-text="ui-clear-search"></b>, empty the search box or choose a folder.</p>
 <p>To search more precisely, such as only unread messages or only mail from one person, use search words like <code>from:</code> and <code>is:unread</code>. Point at the search box to see a list of them.</p>
-<aside class="note">Search looks at the mail on this computer, so it works offline. Inbox Classic reads the text of every message for it in the background, newest first, without marking anything read. Right after you add an account, messages are found by their subject, people and file names at once. Their text is found once it has been read.</aside>
+<aside class="note">Search looks at the mail on this computer, so it works offline. While connected, Inbox Classic indexes message text in the background, newest first, without marking messages read. Subjects, senders, recipients and available file names become searchable after synchronization. Message text becomes searchable after indexing. Encrypted text also requires the encrypted-search setting and usable decryption keys.</aside>
 <nav class="related"><a href="topic:search-words"></a> <a href="topic:conversations"></a> <a href="topic:read-messages"></a></nav>

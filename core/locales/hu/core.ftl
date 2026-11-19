@@ -45,7 +45,7 @@ reader-downloading = Az üzenet letöltése…
 reader-downloading-detail = Az üzenet itt jelenik meg, amint a letöltés befejeződik.
 reader-downloading-size = Az üzenet mérete { $size }. Itt jelenik meg, amint letöltődött.
 reader-failed = Az üzenetet nem sikerült letölteni
-reader-failed-network = Nem sikerült adatot fogadni a levelezőkiszolgálótól ({ $reason }).
+reader-failed-network = Nem sikerült kapcsolódni a levelezőkiszolgálóhoz, vagy a kapcsolat megszakadt ({ $reason }).
 reader-failed-sign-in = A levelezőkiszolgáló nem fogadta el a bejelentkezést ({ $reason }). Ellenőrizze a jelszót, vagy jelentkezzen be újra a fiók beállításaiban.
 reader-failed-security = Nem sikerült biztonságos kapcsolatot létesíteni a levelezőkiszolgálóval ({ $reason }).
 reader-failed-other = A levelezőkiszolgáló válasza: { $reason }.
@@ -444,7 +444,7 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Ez az üzenet nem olvasható.
 agent-encrypted-original = Ez az üzenet titkosított: az ügynök nem válaszolhat rá és nem továbbíthatja, mert nem tud titkosítani.
-agent-encrypted = Ez az üzenet titkosított. Csak a felhasználó olvashatja el, az Inbox Classicban.
+agent-encrypted = Ez az üzenet titkosított. Az MI-ügynökök nem olvashatják a tartalmát. A felhasználónak az Inbox Classicban kell megnyitnia.
 agent-too-many-changes = Túl sok módosítás az elmúlt 30 napban. Az ügynök elérte az egy programhoz megőrizhető naplóbejegyzések számát. Újabb módosításokat akkor végezhet, ha a legrégebbi bejegyzések 30 naposnál régebbiek lesznek.
 agent-too-many-reads = Túl sok olvasási művelet az elmúlt 30 napban. Az ügynök elérte az egy programhoz megőrizhető olvasási naplóbejegyzések számát. Újabb adatokat akkor olvashat, ha a legrégebbi bejegyzések 30 naposnál régebbiek lesznek.
 list-encrypted = Titkosított üzenet
@@ -453,7 +453,7 @@ agent-log-refused = Küldés elutasítva: „{ $subject }”
 agent-log-sent = Küldési sorba helyezve: „{ $subject }”. Címzett: { $to }
 agent-log-draft = Piszkozat mentve: „{ $subject }”
 agent-log-draft-replaced = Piszkozat lecserélve: „{ $subject }”
-agent-log-draft-discarded = Piszkozat elvetve: „{ $subject }”
+agent-log-draft-discarded = Piszkozat elvetése kérve: „{ $subject }”
 agent-draft-note = Ezt a piszkozatot egy MI-ügynök írta: { $program }. Küldés előtt ellenőrizze a címzetteket és a szöveget.
 agent-log-read = Olvasottként megjelölve: „{ $subject }”
 agent-log-unread = Olvasatlanként megjelölve: „{ $subject }”
@@ -559,8 +559,8 @@ agent-undo-since-detail = Az üzenetek visszakerülnek az eredeti mappáikba, ol
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nem történt visszavonás.
-    [one] 1 módosítás visszavonva.
-   *[other] { $count } módosítás visszavonva.
+    [one] 1 módosítás visszavonva, teljesen vagy részben.
+   *[other] { $count } módosítás visszavonva, teljesen vagy részben.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 üzenet már nem található az érintett mappában.
@@ -602,8 +602,8 @@ agent-reads-messages = { $count ->
    *[other] { $count } üzenetet olvasott el
 }
 agent-reads-attachments = { $count ->
-    [one] 1 melléklet tartalmát kérte le
-   *[other] { $count } melléklet tartalmát kérte le
+    [one] 1 melléklet tartalmát kérte
+   *[other] { $count } melléklet tartalmát kérte
 }
 agent-reads-searches = { $count ->
     [one] egyszer keresett
@@ -619,7 +619,7 @@ agent-read-conversation = { $count ->
     [one] Beszélgetés elolvasva: „{ $subject }” (1 üzenet)
    *[other] Beszélgetés elolvasva: „{ $subject }” ({ $count } üzenet)
 }
-agent-read-attachment = Melléklet tartalma lekérve: „{ $name }”. Üzenet: „{ $subject }”
+agent-read-attachment = Melléklet tartalma kérve: „{ $name }”. Üzenet: „{ $subject }”
 agent-read-search = { $count ->
     [one] Keresés: „{ $query }”, eredmény: 1 üzenet
    *[other] Keresés: „{ $query }”, eredmény: { $count } üzenet
@@ -642,7 +642,7 @@ agent-terminal-program-mac = Egy terminálból ({ $terminal }) indított program
 agent-terminal-program-windows = Egy terminálból ({ $terminal }) indított program
 agent-terminal-program-linux = Egy terminálból ({ $terminal }) indított program
 agent-connect-title-terminal = Hozzáférést kérnek a leveleihez: { $programs }
-agent-connect-terminal-detail = Az ugyanebből a terminálprogramból indított, külön név nélküli MI-ügynökök közös jogosultságokat kapnak. Egy ügynök külön kezeléséhez adja meg a --name kapcsolót és egy tetszőleges nevet az MCP-beállításaiban, az indítási argumentumok között.
+agent-connect-terminal-detail = Az ugyanabból a felismert terminálprogramból indított, külön név nélküli MI-ügynökök közös jogosultságokat kapnak. Egy ügynök külön kezeléséhez adja meg a --name kapcsolót és egy tetszőleges nevet az MCP-beállításaiban, az indítási argumentumok között. A név nem igazolja a program kilétét.
 agent-connect-claimed = A program { $claimed } néven mutatkozott be. Az Inbox Classic ellenőrizte, melyik program indította el: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -798,8 +798,8 @@ pgp-recipient-not-found = Nem található kulcs. Az utolsó keresés ideje: { $d
 pgp-recipient-unusable = A kulcs nem használható: { $state }
 pgp-recipients-intro = A titkosítás minden címzett kulcsával és a feladó saját kulcsával történik.
 pgp-recipients-intro-missing = { $count ->
-    [one] Egy címzetthez nincs használható titkosítási kulcs. Keresse meg a kulcsát, távolítsa el a címzettet az üzenetből, vagy küldje el az üzenetet titkosítás nélkül.
-   *[other] { $count } címzetthez nincs használható titkosítási kulcs. Keresse meg a kulcsukat, távolítsa el ezeket a címzetteket az üzenetből, vagy küldje el az üzenetet titkosítás nélkül.
+    [one] Egy címzetthez nincs használható titkosítási kulcs. Keresse meg a kulcsát, távolítsa el a címzettet az üzenetből, vagy küldje el az üzenetet titkosítás nélkül, ha nem tartalmaz titkosított üzenetből származó szöveget, képet vagy mellékletet.
+   *[other] { $count } címzetthez nincs használható titkosítási kulcs. Keresse meg a kulcsukat, távolítsa el ezeket a címzetteket az üzenetből, vagy küldje el az üzenetet titkosítás nélkül, ha nem tartalmaz titkosított üzenetből származó szöveget, képet vagy mellékletet.
 }
 pgp-details-part = { $number }. rész: { $label }
 attachment-from-part = Forrás: { $number }. rész. { $label }

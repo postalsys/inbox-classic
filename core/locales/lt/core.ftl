@@ -332,8 +332,8 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Įdėta: 3 laiškai (paskirtis: Archyvas)"
 import-put = { $count ->
-   *[other] Importuojama: { $messages } (paskirtis: { $folder })
-}
+       *[other] Įtraukta į importavimo eilę: { $messages } (paskirtis: { $folder })
+    }
 import-not-put = Šių failų importuoti nepavyko:
 
     { $problems }
@@ -387,7 +387,7 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google dar nepatvirtino šios Inbox Classic prisijungimo programos, todėl ja gali naudotis tik bandomųjų naudotojų sąraše esančios paskyros. Naudokite savo Google prisijungimo programą arba, jei jūsų paskyrai leidžiama, programos slaptažodį. Jei esate bandomasis naudotojas, lange „Paskyros“ atverkite „Prisijungimo programos“ ir įjunkite šią programą.
+sign-in-off-google = Integruota Google prisijungimo programa skirta nustatytiems bandomiesiems naudotojams ir naujoms paskyroms pagal numatytąsias nuostatas išjungta. Naudokite savo Google prisijungimo programą arba, jei jūsų paskyrai leidžiama, programos slaptažodį. Bandomieji naudotojai gali įjungti integruotą programą paskyrų lango skiltyje „Prisijungimo programos“.
 sign-in-off-other = Ši prisijungimo programa išjungta. Lange „Paskyros“ atverkite „Prisijungimo programos“ ir galėsite ją vėl įjungti.
 sign-in-app-no-name = prisijungimo programai reikia pavadinimo
 sign-in-app-no-client = nenurodytas tinkamas kliento ID
@@ -501,7 +501,7 @@ agent-log-refused = Atmetėte prašymą išsiųsti laišką „{ $subject }“
 agent-log-sent = Laiškas „{ $subject }“ įtrauktas į siuntimo eilę. Gavėjai: { $to }
 agent-log-draft = Įrašytas juodraštis „{ $subject }“
 agent-log-draft-replaced = Pakeistas juodraštis „{ $subject }“
-agent-log-draft-discarded = Atmestas juodraštis „{ $subject }“
+agent-log-draft-discarded = Paprašyta atmesti juodraštį „{ $subject }“
 agent-draft-note = Šį juodraštį parašė DI agentas { $program }. Prieš siųsdami patikrinkite gavėjus ir tekstą.
 agent-log-read = Pažymėtas kaip skaitytas: „{ $subject }“
 agent-log-unread = Pažymėtas kaip neskaitytas: „{ $subject }“
@@ -672,9 +672,9 @@ agent-reads-messages = { $count ->
    *[other] perskaityta { $count } laiškų
 }
 agent-reads-attachments = { $count ->
-    [one] priedų duomenys pasiekti { $count } kartą
-    [few] priedų duomenys pasiekti { $count } kartus
-   *[other] priedų duomenys pasiekti { $count } kartų
+    [one] prašyta priedų duomenų { $count } kartą
+    [few] prašyta priedų duomenų { $count } kartus
+   *[other] prašyta priedų duomenų { $count } kartų
 }
 agent-reads-searches = { $count ->
     [one] ieškota { $count } kartą
@@ -693,7 +693,7 @@ agent-read-conversation = { $count ->
     [few] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškai)
    *[other] Perskaitytas pokalbis „{ $subject }“ ({ $count } laiškų)
 }
-agent-read-attachment = Pasiekti laiško „{ $subject }“ priedo „{ $name }“ duomenys
+agent-read-attachment = Paprašyta laiško „{ $subject }“ priedo „{ $name }“ duomenų
 agent-read-search = { $count ->
     [one] Ieškota „{ $query }“: rastas { $count } laiškas
     [few] Ieškota „{ $query }“: rasti { $count } laiškai
@@ -719,7 +719,7 @@ agent-terminal-program-mac = Iš programos „{ $terminal }“ paleista programa
 agent-terminal-program-windows = Iš terminalo ({ $terminal }) paleista programa
 agent-terminal-program-linux = Iš terminalo ({ $terminal }) paleista programa
 agent-connect-title-terminal = { $programs } nori naudotis jūsų paštu
-agent-connect-terminal-detail = Visi DI agentai, kuriuos paleidžiate iš šio terminalo, bendrai naudojasi čia suteikta prieiga. Norėdami suteikti agentui atskirą prieigą, agento MCP nustatymuose į jo argumentus įtraukite --name ir savo pasirinktą pavadinimą.
+agent-connect-terminal-detail = Iš tos pačios atpažintos terminalo programos paleisti agentai bendrai naudojasi čia suteikta prieiga. Norėdami agentą valdyti atskirai, jo MCP nustatymuose į argumentus įtraukite --name ir pasirinktą pavadinimą. Pavadinimas nepatvirtina programos tapatybės.
 agent-connect-claimed = Agentas nurodė, kad jį paleido programa „{ $claimed }“. Inbox Classic patikrino: jį paleido programa „{ $program }“.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -882,10 +882,10 @@ pgp-recipient-not-found = Rakto nerasta. Paskutinė paieška: { $date }
 pgp-recipient-unusable = Rakto naudoti negalima: { $state }
 pgp-recipients-intro = Laiškas šifruojamas kiekvieno gavėjo raktu ir jūsų raktu.
 pgp-recipients-intro-missing = { $count ->
-    [1] Vienas gavėjas neturi tinkamo šifravimo rakto. Raskite jo raktą, pašalinkite gavėją iš laiško arba išsiųskite laišką nešifruotą.
-    [one] { $count } gavėjas neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
-    [few] { $count } gavėjai neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
-   *[other] { $count } gavėjų neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą.
+    [1] Vienas gavėjas neturi tinkamo šifravimo rakto. Raskite jo raktą, pašalinkite gavėją iš laiško arba išsiųskite laišką nešifruotą, jei jame nėra teksto, paveikslėlių ar priedų iš užšifruotų laiškų.
+    [one] { $count } gavėjas neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą, jei jame nėra teksto, paveikslėlių ar priedų iš užšifruotų laiškų.
+    [few] { $count } gavėjai neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą, jei jame nėra teksto, paveikslėlių ar priedų iš užšifruotų laiškų.
+   *[other] { $count } gavėjų neturi tinkamo šifravimo rakto. Raskite šių gavėjų raktus, pašalinkite gavėjus iš laiško arba išsiųskite laišką nešifruotą, jei jame nėra teksto, paveikslėlių ar priedų iš užšifruotų laiškų.
 }
 pgp-details-part = { $number } dalis: { $label }
 attachment-from-part = Iš { $number } dalies: { $label }
@@ -1077,7 +1077,7 @@ setup-account-servers = { $imap } ir { $smtp } ({ $signin })
 setup-file-name = Inbox Classic nustatymai ir paskyros
 setup-skipped-unreachable = Neimportuota: { $name }. Nepavyko patikrinti prisijungimo paslaugos nustatymų. Reikiamą prisijungimo programą galite pridėti lange „Prisijungimo programos“, tada bandykite importuoti dar kartą.
 attachment-runs-programs = Failas „{ $name }“ gali paleisti programas, todėl Inbox Classic jo neatidaro. Įrašykite jį, tada atidarykite patys, jei pasitikite jo šaltiniu.
-attachment-decrypted-note = Šis priedas yra iš užšifruoto laiško. Kad jį būtų galima atidaryti, Inbox Classic įrašo nešifruotą kopiją į jūsų naudotojo paskyros laikinąjį aplanką. Paleidus programą šalinamos senesnės nei paros kopijos.
+attachment-decrypted-note = Šis priedas yra iš užšifruoto laiško. Kad jį būtų galima atidaryti, Inbox Classic įrašo nešifruotą kopiją į jūsų naudotojo paskyros laikinąjį aplanką. Paleidus programą bandoma pašalinti senesnes nei paros kopijas.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [1] Serveris neperkėlė laiško į aplanką „{ $folder }“, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }

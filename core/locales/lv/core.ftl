@@ -146,7 +146,7 @@ bounce-rate-limited-why = Saņēmēja serveris pagaidām pieņem mazāk ziņojum
 bounce-rate-limited-do = Pagaidiet kādu laiku un nosūtiet to vēlreiz. Rakstot daudziem cilvēkiem, sūtiet mazākam skaitam vienlaikus.
 bounce-greylisting = Uz brīdi aizturēts
 bounce-greylisting-why = Saņēmēja serveris lūdz nezināmiem sūtītājiem mēģināt vēlreiz nedaudz vēlāk; tā ir izplatīta pārbaude pret mēstulēm.
-bounce-greylisting-do = Pagaidiet, kamēr sūtītāja serveris mēģina vēlreiz. Piegādes laiks ir atkarīgs no serveru iestatījumiem.
+bounce-greylisting-do = Ja serveris turpina piegādes mēģinājumus, pagaidiet. Ja paziņojumā norādīta galīga piegādes kļūme, mēģiniet nosūtīt ziņojumu vēlāk vēlreiz.
 bounce-server-error = Saņēmēja serverim radās problēma
 bounce-server-error-why = Ar saņēmēja serveri nevarēja sazināties, vai tas nevarēja pieņemt ziņojumu savas problēmas dēļ.
 bounce-server-error-do = Nosūtiet to vēlreiz vēlāk. Ja tas joprojām neizdodas, pārbaudiet, vai adreses daļā aiz @ nav drukas kļūdu.
@@ -347,9 +347,9 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "3 ziņojumi ievietoti mapē Arhīvs"
 import-put = { $count ->
-    [one] { $messages } ievietots mapē „{ $folder }”
-   *[other] { $messages } ievietoti mapē „{ $folder }”
-}
+        [one] { $messages } pievienots importēšanas rindai mapē „{ $folder }”
+       *[other] { $messages } pievienoti importēšanas rindai mapē „{ $folder }”
+    }
 import-not-put = Mapē neizdevās ievietot šos ziņojumus:
 
     { $problems }
@@ -514,7 +514,7 @@ agent-log-refused = Noraidījāt pieprasījumu nosūtīt ziņojumu „{ $subject
 agent-log-sent = Ievietoja ziņojumu „{ $subject }” nosūtīšanas rindā. Adresāti: { $to }
 agent-log-draft = Saglabāja melnrakstu „{ $subject }”
 agent-log-draft-replaced = Aizstāja melnrakstu „{ $subject }”
-agent-log-draft-discarded = Neatgriezeniski izdzēsa melnrakstu „{ $subject }”
+agent-log-draft-discarded = Pieprasīja dzēst melnrakstu „{ $subject }”
 agent-draft-note = Šo melnrakstu uzrakstīja MI aģents { $program }. Pirms nosūtāt, pārbaudiet adresātus un tekstu.
 agent-log-read = Atzīmēja kā lasītu „{ $subject }”
 agent-log-unread = Atzīmēja kā nelasītu „{ $subject }”
@@ -681,8 +681,8 @@ agent-reads-messages = { $count ->
    *[other] izlasīja { $count } ziņojumus
 }
 agent-reads-attachments = { $count ->
-    [one] nolasīja pielikumus { $count } reizi
-   *[other] nolasīja pielikumus { $count } reizes
+    [one] pieprasīja pielikumus { $count } reizi
+   *[other] pieprasīja pielikumus { $count } reizes
 }
 agent-reads-searches = { $count ->
     [1] meklēja vienu reizi
@@ -703,7 +703,7 @@ agent-read-conversation = { $count ->
     [one] Izlasīja sarunu „{ $subject }” ({ $count } ziņojums)
    *[other] Izlasīja sarunu „{ $subject }” ({ $count } ziņojumi)
 }
-agent-read-attachment = Nolasīja pielikumu „{ $name }” no ziņojuma „{ $subject }”
+agent-read-attachment = Pieprasīja pielikumu „{ $name }” no ziņojuma „{ $subject }”
 agent-read-search = { $count ->
     [zero] Meklēja „{ $query }”: { $count } ziņojumu
     [one] Meklēja „{ $query }”: { $count } ziņojums
@@ -716,9 +716,9 @@ agent-read-list = { $count ->
    *[other] Skatīja { $count } saraksta ierakstus. Saraksts: { $folder }
 }
 agent-read-changes = { $count ->
-    [zero] Skatīja { $count } jaunus ziņojumus
-    [one] Skatīja { $count } jaunu ziņojumu
-   *[other] Skatīja { $count } jaunus ziņojumus
+    [zero] Skatīja { $count } jaunu ziņojumu kopsavilkumus
+    [one] Skatīja { $count } jauna ziņojuma kopsavilkumu
+   *[other] Skatīja { $count } jaunu ziņojumu kopsavilkumus
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = No lietotnes { $terminal } palaistās programmas
@@ -729,7 +729,7 @@ agent-terminal-program-mac = No lietotnes { $terminal } palaista programma
 agent-terminal-program-windows = No termināļa ({ $terminal }) palaista programma
 agent-terminal-program-linux = No termināļa ({ $terminal }) palaista programma
 agent-connect-title-terminal = { $programs } vēlas izmantot jūsu pastu
-agent-connect-terminal-detail = Visi MI aģenti, ko palaižat no šī termināļa, kopīgi izmanto šeit atļauto piekļuvi. Lai aģentam piešķirtu atsevišķu piekļuvi, aģenta MCP iestatījumos pievienojiet tā argumentiem --name un paša izvēlētu nosaukumu.
+agent-connect-terminal-detail = No tās pašas atpazītās termināļa programmas palaistie aģenti kopīgi izmanto šeit atļauto piekļuvi. Lai aģentu pārvaldītu atsevišķi, tā MCP iestatījumos pievienojiet argumentiem --name un paša izvēlētu nosaukumu. Nosaukums neapliecina programmas identitāti.
 agent-connect-claimed = Programma norādīja, ka tā ir { $claimed }. Inbox Classic pārbaudīja, kura programma to palaida: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -798,7 +798,7 @@ pgp-error-no-store = Privātās atslēgas aizsargā { $store }, ko nevar izmanto
 pgp-error-wrong-passphrase = Paroles frāze nav pareiza.
 pgp-error-not-a-key = Šī nav OpenPGP atslēga.
 pgp-error-too-large = Atslēga ir pārāk liela.
-pgp-error-unusable = Atslēgu nevar izmantot: tā neatbilst atbalstītajām kriptogrāfijas prasībām.
+pgp-error-unusable = Atslēgu nevar izmantot šai darbībai. Iespējams, trūkst piemērotas parakstīšanas vai šifrēšanas atslēgas vai izmantotais kriptogrāfijas algoritms nav atbalstīts.
 pgp-imported-private = { $count ->
     [1] Jūsu privātā atslēga tika importēta.
     [zero] Tika importētas { $count } privāto atslēgu.
@@ -842,8 +842,8 @@ pgp-why-not-key-in-use = Parakstīts ar citu atslēgu, nevis to, kas tiek lietot
 pgp-part-pictures-loaded = { $label }. Attēli tika ielādēti no interneta
 pgp-error-no-own-key = Adresei „{ $address }” nav jūsu atslēgas, ko izmantot parakstīšanai vai šifrēšanai. Izveidojiet to logā „Šifrēšanas atslēgas” vai izslēdziet parakstīšanu un šifrēšanu.
 pgp-error-missing-keys = { $count ->
-    [1] Adresātam { $addresses } nav atslēgas, ar ko šifrēt.
-   *[other] Šiem adresātiem nav atslēgas, ar ko šifrēt: { $addresses }.
+    [1] Adresātam { $addresses } nav izmantojamas atslēgas, ar ko šifrēt.
+   *[other] Šiem adresātiem nav izmantojamas atslēgas, ar ko šifrēt: { $addresses }.
 }
 pgp-error-encrypted-quote = Šajā ziņojumā ir citēts vai pārsūtīts šifrēts ziņojums, tāpēc to var nosūtīt tikai šifrētu. Ieslēdziet šifrēšanu vai noņemiet visu no sākotnējā ziņojuma pārņemto tekstu, attēlus un pielikumus.
 pgp-error-protect = Ziņojumu nevarēja parakstīt vai šifrēt: { $reason }
@@ -893,9 +893,9 @@ pgp-recipient-not-found = Atslēga nav atrasta. Pēdējā meklēšana: { $date }
 pgp-recipient-unusable = Atslēgu nevar izmantot: { $state }
 pgp-recipients-intro = Ziņojums tiek šifrēts ar katra adresāta atslēgu un ar jūsējo.
 pgp-recipients-intro-missing = { $count ->
-    [1] Vienam adresātam nav izmantojamas šifrēšanas atslēgas. Atrodiet viņa atslēgu, noņemiet adresātu no ziņojuma vai nosūtiet ziņojumu bez šifrēšanas.
-    [one] { $count } adresātam nav izmantojamas šifrēšanas atslēgas. Atrodiet šo adresātu atslēgas, noņemiet adresātus no ziņojuma vai nosūtiet ziņojumu bez šifrēšanas.
-   *[other] { $count } adresātiem nav izmantojamu šifrēšanas atslēgu. Atrodiet šo adresātu atslēgas, noņemiet adresātus no ziņojuma vai nosūtiet ziņojumu bez šifrēšanas.
+    [1] Vienam adresātam nav izmantojamas šifrēšanas atslēgas. Atrodiet viņa atslēgu, noņemiet adresātu no ziņojuma vai nosūtiet ziņojumu bez šifrēšanas, ja tajā nav teksta, attēlu vai pielikumu no šifrētiem ziņojumiem.
+    [one] { $count } adresātam nav izmantojamas šifrēšanas atslēgas. Atrodiet šo adresātu atslēgas, noņemiet adresātus no ziņojuma vai nosūtiet ziņojumu bez šifrēšanas, ja tajā nav teksta, attēlu vai pielikumu no šifrētiem ziņojumiem.
+   *[other] { $count } adresātiem nav izmantojamu šifrēšanas atslēgu. Atrodiet šo adresātu atslēgas, noņemiet adresātus no ziņojuma vai nosūtiet ziņojumu bez šifrēšanas, ja tajā nav teksta, attēlu vai pielikumu no šifrētiem ziņojumiem.
 }
 pgp-details-part = { $number }. daļa: { $label }
 attachment-from-part = No { $number }. daļas: { $label }
@@ -1140,7 +1140,7 @@ preview-tile-format = { $format } attēli vēl netiek rādīti
 preview-tile-password = Aizsargāts ar paroli: atveriet, lai to ievadītu
 preview-tile-too-large = Pārsniedz priekšskatījuma ierobežojumu
 preview-tile-unreadable = Nevar parādīt
-preview-tile-timed-out = Parādīšana aizņēma pārāk ilgu laiku
+preview-tile-timed-out = Priekšskatījuma sagatavošana aizņēma pārāk ilgu laiku
 preview-tile-crashed = Iepriekšējais priekšskatījums tika pārtraukts vai iestrēga
 preview-tile-off = Netiek rādīts, līdz Inbox Classic tiks palaists no jauna
 preview-not-printed = Fails „{ $name }” ({ $details }) netiek drukāts. Atveriet to, lai izdrukātu.

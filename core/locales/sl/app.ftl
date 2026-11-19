@@ -485,10 +485,10 @@ ui-rule-apply-now = Uporabi ga tudi za sporočila, ki so že v mapi Pr&ejeto
 ui-rule-delete-ask = Želite izbrisati pravilo »{ $name }«?
 ui-create-rule = Ustvari pravilo...
 ui-rules-applied = { $count ->
-    [one] Vaša pravila so razvrstila { $count } sporočilo
-    [two] Vaša pravila so razvrstila { $count } sporočili
-    [few] Vaša pravila so razvrstila { $count } sporočila
-   *[other] Vaša pravila so razvrstila { $count } sporočil
+    [one] Vaša pravila so obdelala { $count } sporočilo
+    [two] Vaša pravila so obdelala { $count } sporočili
+    [few] Vaša pravila so obdelala { $count } sporočila
+   *[other] Vaša pravila so obdelala { $count } sporočil
 }
 ui-col-rule-matches = Pogoji
 ui-clear-button = Po&čisti

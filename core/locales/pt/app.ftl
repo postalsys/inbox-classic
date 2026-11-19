@@ -178,7 +178,7 @@ ui-outbox-title = Caixa de Saída
 ui-outbox-status-waiting = A aguardar
 ui-outbox-status-not-sent = Não enviada: { $reason }
 # This message is still queued, during the grace period before an agent’s send.
-ui-outbox-status-agent = Colocada em espera por um agente de IA; será enviada às { $time }
+ui-outbox-status-agent = Colocada em espera por um agente de IA; envio previsto para as { $time }
 ui-outbox-delete-ask = Eliminar esta mensagem sem a enviar?
 ui-open-link = Abrir ligação
 ui-edit-link = Editar ligação...

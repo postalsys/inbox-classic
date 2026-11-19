@@ -133,4 +133,4 @@ win-installer-welcome-update = A telepítő frissíti az Inbox Classicot. Telep�
     Ha a program fut, a telepítő előbb bezárja. A fiókok és a levelek megmaradnak.
 win-installer-older-ask = Az Inbox Classic telepített verziója ({ $installed }) újabb a telepítőben lévőnél ({ $version }). Mégis telepíti a régebbi verziót?
 win-installer-still-running = Az Inbox Classic még fut. Zárja be, és próbálja újra.
-win-installer-remove-mail-ask = A fiókokat és az Inbox Classic által ezen a számítógépen tárolt leveleket is eltávolítja? A kiszolgálókon lévő levelek megmaradnak. A Windows Hitelesítőadat-kezelőjében tárolt adatok ettől nem törlődnek.
+win-installer-remove-mail-ask = Az Inbox Classic összes helyi adatát is eltávolítja, beleértve a fiókokat, leveleket, elküldésre váró üzeneteket, beállításokat, névjegyeket, szabályokat és titkosítási kulcsokat? A kiszolgálókon lévő levelek és a Windows Hitelesítőadat-kezelőjében tárolt adatok megmaradnak.

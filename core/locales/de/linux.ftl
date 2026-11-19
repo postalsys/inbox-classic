@@ -173,4 +173,4 @@ gtk-metainfo-description = Inbox Classic bietet die klassische E-Mail-Ansicht: O
 gtk-metainfo-feature-sanitized = Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen
 gtk-metainfo-feature-search = Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail
 gtk-metainfo-feature-replies = Zitierte Nachrichten in Antworten werden eingeklappt
-gtk-metainfo-feature-offline = Heruntergeladene E-Mails lassen sich auch offline lesen; Anmeldedaten werden standardmäßig im Systemschlüsselbund gespeichert
+gtk-metainfo-feature-offline = Heruntergeladene E-Mails sind offline lesbar, solange ihre lokale Kopie gespeichert ist; Anmeldedaten liegen normalerweise im verfügbaren Systemschlüsselbund

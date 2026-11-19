@@ -490,7 +490,7 @@ agent-log-refused = Du sendte ikke »{ $subject }«
 agent-log-sent = Satte »{ $subject }« i kø til afsendelse til { $to }
 agent-log-draft = Gemte kladden »{ $subject }«
 agent-log-draft-replaced = Erstattede kladden »{ $subject }«
-agent-log-draft-discarded = Kasserede kladden »{ $subject }«
+agent-log-draft-discarded = Anmodede om at slette kladden »{ $subject }«
 agent-draft-note = AI-agenten { $program } har skrevet denne kladde. Kontrollér modtagerne og teksten, før du sender den.
 agent-log-read = Markerede »{ $subject }« som læst
 agent-log-unread = Markerede »{ $subject }« som ulæst
@@ -592,12 +592,12 @@ agent-undo-since-question = { $count ->
     [one] Vil du fortryde den ændring, { $program } foretog i dette tidsrum?
    *[other] Vil du fortryde de { $count } ændringer, { $program } foretog i dette tidsrum?
 }
-agent-undo-since-detail = Meddelelser flyttes tilbage til deres tidligere mapper, og læst/ulæst-status og flag gendannes. Meddelelser, der stadig venter i Udbakke, slettes. Hvis du eller serveren siden har ændret den relevante status eller placering, bevares den.
+agent-undo-since-detail = Inbox Classic forsøger at gendanne mapper, læst/ulæst-status og flag og slette meddelelser, der stadig venter i Udbakke. Ændringer, der ikke længere kan fortrydes, springes over. Nogle senere ændringer af flagfarver kan blive overskrevet.
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Intet blev fortrudt.
-    [one] Fortrød 1 ændring.
-   *[other] Fortrød { $count } ændringer.
+    [one] Fortrød 1 ændring, helt eller delvist.
+   *[other] Fortrød { $count } ændringer, helt eller delvist.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 meddelelse fandtes ikke længere på den forventede placering.
@@ -639,8 +639,8 @@ agent-reads-messages = { $count ->
    *[other] læste { $count } meddelelser
 }
 agent-reads-attachments = { $count ->
-    [one] læste 1 vedhæftet fil
-   *[other] læste { $count } vedhæftede filer
+    [one] anmodede om 1 vedhæftet fil
+   *[other] anmodede om { $count } vedhæftede filer
 }
 agent-reads-searches = { $count ->
     [one] søgte én gang
@@ -656,15 +656,15 @@ agent-read-conversation = { $count ->
     [one] Læste samtalen »{ $subject }« (1 meddelelse)
    *[other] Læste samtalen »{ $subject }« ({ $count } meddelelser)
 }
-agent-read-attachment = Læste den vedhæftede fil »{ $name }« fra »{ $subject }«
+agent-read-attachment = Anmodede om den vedhæftede fil »{ $name }« fra »{ $subject }«
 agent-read-search = { $count ->
     [one] Søgte efter »{ $query }«: 1 meddelelse
    *[other] Søgte efter »{ $query }«: { $count } meddelelser
 }
 agent-read-people = Søgte efter kontakter med navne eller adresser, der begynder med »{ $query }«
 agent-read-list = { $count ->
-    [one] Så oplysninger om 1 meddelelse i { $folder }
-   *[other] Så oplysninger om { $count } meddelelser i { $folder }
+    [one] Så 1 post i listen (område: { $folder })
+   *[other] Så { $count } poster i listen (område: { $folder })
 }
 agent-read-changes = { $count ->
     [one] Så oplysninger om 1 ny meddelelse
@@ -679,7 +679,7 @@ agent-terminal-program-mac = Et program startet fra { $terminal }
 agent-terminal-program-windows = Et program startet fra en terminal ({ $terminal })
 agent-terminal-program-linux = Et program startet fra en terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } vil bruge din mail
-agent-connect-terminal-detail = Alle AI-agenter, du starter fra denne terminal, deler den adgang, du giver her. Hvis en agent skal have sin egen adgang, skal du føje --name og et navn efter eget valg til dens argumenter i agentens MCP-indstillinger.
+agent-connect-terminal-detail = AI-agenter startet fra det samme genkendte terminalprogram deler den adgang, du giver her. For separat adgang skal du føje --name og et valgfrit navn til argumenterne i agentens MCP-indstillinger. Navnet bekræfter ikke programmets identitet.
 agent-connect-claimed = Programmet oplyste, at det var { $claimed }. Inbox Classic har tjekket, hvilket program der startede det: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -701,7 +701,7 @@ secrets-windows = Legitimationsstyring
 secrets-mac = nøgleringen
 secrets-linux = systemets nøglering (Secret Service)
 error-no-such-file = filen findes ikke
-cards-file-too-big = Denne fil er for stor til at være et adressekartotek.
+cards-file-too-big = Filen overskrider størrelsesgrænsen for import af et adressekartotek.
 ui-sender-added = { $name } blev føjet til adressekartoteket.
 ui-sender-known = { $name } er allerede i adressekartoteket.
 ui-sender-none = Afsenderen af denne meddelelse har ingen e-mailadresse, der kan tilføjes.
@@ -747,7 +747,7 @@ pgp-error-no-store = Private nøgler beskyttes med en nøgle i { $store }, som i
 pgp-error-wrong-passphrase = Adgangsfrasen er forkert.
 pgp-error-not-a-key = Dette er ikke en OpenPGP-nøgle.
 pgp-error-too-large = Nøglen er for stor.
-pgp-error-unusable = Nøglen bruger gammel eller svag kryptografi og kan ikke bruges.
+pgp-error-unusable = Nøglen kan ikke bruges. Den kan mangle en brugbar signerings- eller krypteringsnøgle eller bruge kryptografi, der ikke understøttes.
 pgp-imported-private = { $count ->
     [one] Din private nøgle blev importeret.
    *[other] { $count } private nøgler blev importeret.
@@ -766,13 +766,13 @@ pgp-pending = Der blev fundet en anden nøgle til { $address } den { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitalt signeret af { $signer }, nøglens ejerskab er bekræftet
 pgp-part-signed = Digitalt signeret af { $signer } (nøglens ejerskab er ikke bekræftet)
-pgp-part-other = Digitalt signeret af { $signer }, som ikke er afsenderen
+pgp-part-other = Digitalt signeret af { $signer }; nøglen kunne ikke knyttes til afsenderen
 pgp-part-unknown-key = Digitalt signeret, men nøglen er ukendt
 pgp-part-not-signed = Ikke digitalt signeret
 pgp-part-not-checked = Den digitale signatur er ikke kontrolleret
 pgp-part-encrypted = Krypteret. { $signature }
 pgp-part-no-key = Krypteret med en nøgle, du ikke har den private del af
-pgp-part-changed = Den krypterede del blev ændret undervejs og vises ikke
+pgp-part-changed = Den krypterede dels integritet kunne ikke bekræftes, så den vises ikke
 pgp-part-unprotected = Krypteret uden beskyttelse mod ændringer, vises ikke
 pgp-part-broken = Den krypterede del kan ikke læses
 pgp-why-mismatch = Den digitale signatur stemmer ikke overens med teksten
@@ -788,8 +788,8 @@ pgp-why-not-key-in-use = Signeret med en anden nøgle end den, der bruges til { 
 pgp-part-pictures-loaded = { $label }. Billeder blev hentet fra internettet
 pgp-error-no-own-key = Du har ingen nøgle til { $address } at signere eller kryptere med. Opret en under Krypteringsnøgler, eller slå digital signering og kryptering fra.
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } har ingen nøgle at kryptere til.
-   *[other] Disse modtagere har ingen nøgle at kryptere til: { $addresses }.
+    [one] Der mangler en brugbar krypteringsnøgle til denne modtager: { $addresses }.
+   *[other] Der mangler brugbare krypteringsnøgler til disse modtagere: { $addresses }.
 }
 pgp-error-encrypted-quote = Meddelelsen indeholder stadig tekst, billeder eller vedhæftede filer fra en krypteret meddelelse og kan kun sendes krypteret. Slå Krypter til, eller fjern dette indhold.
 pgp-error-protect = Meddelelsen kunne ikke signeres eller krypteres: { $reason }
@@ -919,17 +919,17 @@ setup-account-signs-in-again = Du skal logge på kontoen igen efter importen.
 setup-account-here = Den er allerede konfigureret her, så den springes over.
 setup-account-no-app = Den logger på med { $app }, som ikke er konfigureret her. Importer også login-apps.
 setup-invalid-address = »{ $address }« er ikke en e-mailadresse.
-setup-invalid-server = Serveren til { $server } har ikke et gyldigt navn eller portnummer.
+setup-invalid-server = Indstillingerne for { $server } har et ugyldigt servernavn, portnummer eller sikkerhedsvalg.
 setup-invalid-user = Den har intet brugernavn.
-setup-invalid-sign-in = Kontoen bruger en loginmetode, som Inbox Classic ikke understøtter.
+setup-invalid-sign-in = Loginmetoden eller dens opsætning understøttes ikke af Inbox Classic.
 setup-error-empty = Filen er tom.
-setup-error-too-large = Filen er for stor til at være en opsætningsfil til Inbox Classic.
+setup-error-too-large = Opsætningsfilen overskrider størrelsesgrænsen.
 setup-error-not-setup = Filen indeholder ikke en opsætning til Inbox Classic.
 setup-error-damaged = Opsætningsfilen er beskadiget og kan ikke læses.
 setup-error-newer = Opsætningen blev gemt med en nyere version af Inbox Classic ({ $version }). Opdater programmet, og prøv at importere igen.
 setup-error-needs-passphrase = Denne opsætning er beskyttet af en adgangsfrase. Skriv den adgangsfrase, den blev gemt med.
 setup-error-wrong-passphrase = Det er ikke den adgangsfrase, opsætningen blev gemt med.
-setup-error-changed = Opsætningsfilen blev ændret eller beskadiget, efter den blev gemt, så den kan ikke importeres.
+setup-error-changed = Opsætningsfilens integritet kunne ikke bekræftes. Den kan være ændret eller beskadiget og kan ikke importeres.
 setup-error-read = Opsætningsfilen kunne ikke læses: { $error }
 setup-error-write = Opsætningen kunne ikke gemmes: { $error }
 setup-error-no-parts = Vælg mindst én del.
@@ -999,7 +999,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Intet blev importeret.
 setup-account-servers = { $imap } og { $smtp } ({ $signin })
 setup-file-name = Inbox Classic-indstillinger og -konti
-setup-skipped-unreachable = Sprang over: { $name }. Logintjenesten kunne ikke nås. Kontrollér opsætningen under Login-apps, og prøv igen.
+setup-skipped-unreachable = Sprang over: { $name }. Logintjenesten kunne ikke nås eller kontrolleres. Kontrollér den nødvendige app under Login-apps, og prøv igen.
 attachment-runs-programs = Filen »{ $name }« kan køre programmer, så Inbox Classic åbner den ikke. Gem den, og åbn den selv, hvis du stoler på, hvor den kommer fra.
 attachment-decrypted-note = Den vedhæftede fil kommer fra en krypteret meddelelse. For at åbne den gemmer Inbox Classic en ukrypteret kopi i en midlertidig mappe til din brugerkonto. Kopien kan blive liggende, efter at du har lukket filen. Ved programstart forsøger Inbox Classic at fjerne kopier, der er over et døgn gamle.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1052,7 +1052,7 @@ preview-tile-format = { $format }-billeder vises ikke endnu
 preview-tile-password = Beskyttet med adgangskode: åbn den for at indtaste adgangskoden
 preview-tile-too-large = For stor til at blive vist
 preview-tile-unreadable = Kan ikke vises
-preview-tile-timed-out = Forhåndsvisningen tog for lang tid
+preview-tile-timed-out = Forhåndsvisningen tog for lang tid at forberede
 preview-tile-crashed = Vises ikke: Inbox Classic gik tidligere ned eller holdt op med at svare under forhåndsvisningen
 preview-tile-off = Vises ikke, før Inbox Classic starter igen
 preview-not-printed = { $name } ({ $details }) udskrives ikke. Åbn filen for at udskrive den.

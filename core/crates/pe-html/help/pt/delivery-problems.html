@@ -1,5 +1,5 @@
 <h1>Mensagens que não foram entregues</h1>
-<p class="summary">Quando uma mensagem que enviou é devolvida ou a entrega se atrasa, o Inbox Classic explica porquê e o que pode fazer.</p>
+<p class="summary">O Inbox Classic explica os avisos de falha ou atraso na entrega que reconhece e sugere o que pode fazer.</p>
 <p>Os avisos de falha ou atraso na entrega são assinalados na lista de mensagens. Ao abrir um aviso, aparece um painel acima da mensagem que indica se a entrega falhou ou está apenas atrasada.</p>
 <img src="picture:bounce-1-failed" alt="Um aviso de entrega com um cartão a dizer que a mensagem não foi entregue, o destinatário, o motivo e o que fazer">
 <p>O painel analisa os dados reconhecidos no aviso, apresenta os destinatários disponíveis e explica o motivo em linguagem simples. As sugestões de reenvio aplicam-se a falhas definitivas. O botão <b data-text="bounce-details"></b> mostra a resposta original do servidor de destino.</p>
@@ -7,13 +7,13 @@
     <li><b data-text="bounce-show-message"></b> seleciona a mensagem enviada, se esta for encontrada na conta.</li>
     <li>Se a entrega estiver atrasada, <b data-text="bounce-show-delayed"></b> seleciona a mensagem, se for encontrada. O aviso indica que o servidor ainda estava a tentar, sem garantir a entrega posterior. Evite reenviar enquanto o atraso não se tornar uma falha definitiva.</li>
 </ul>
-<p>Alguns motivos comuns:</p>
+<p>Motivos comuns e conselhos para uma falha definitiva. Se a entrega estiver apenas atrasada, aguarde o resultado antes de reenviar:</p>
 <table>
     <tr><th>O painel indica</th><th>O que fazer</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Verifique como o endereço está escrito, ou peça à pessoa o endereço que usa agora.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Envie-a novamente daqui a alguns dias, ou contacte a pessoa de outra forma.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Envie-a novamente depois de remover elementos que possam ser classificados como lixo eletrónico, como muitas ligações ou um anexo grande.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Reencaminhe o aviso para o seu fornecedor de correio. O problema não é a mensagem.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Contacte a pessoa de outra forma e peça-lhe para libertar espaço antes de tentar novamente.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Consulte a explicação do servidor. Se o conteúdo foi rejeitado, reveja a mensagem antes de tentar novamente.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Reencaminhe o aviso para o seu fornecedor de correio. Segundo o aviso, o endereço do servidor de envio está bloqueado.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Se o aviso indicar um atraso, aguarde nova tentativa do servidor. Se indicar falha definitiva, tente reenviar mais tarde.</td></tr>
 </table>
 <p>Para encontrar todos os avisos de entrega, pesquise <code>is:bounce</code>. O motivo é analisado no seu computador, sem enviar o conteúdo para serviços externos.</p>

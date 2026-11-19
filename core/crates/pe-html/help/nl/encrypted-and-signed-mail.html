@@ -6,7 +6,7 @@
     <tr><th>Kleur</th><th>Wat het betekent</th></tr>
     <tr><td>Groen</td><td>Geldige digitale handtekening van de afzender, met geverifieerde sleuteleigenaar.</td></tr>
     <tr><td>Blauw</td><td>Geldige digitale handtekening van de afzender, met niet-geverifieerde sleuteleigenaar, of voor jou versleuteld zonder handtekening.</td></tr>
-    <tr><td>Oranje</td><td>Er klopt iets niet: de handtekening komt niet overeen, iemand anders dan de afzender heeft ondertekend, of een deel kon niet worden gelezen.</td></tr>
+    <tr><td>Oranje</td><td>Er klopt iets niet: de handtekening komt niet overeen, de handtekening kon niet aan de afzender worden gekoppeld, of een deel kon niet worden gelezen.</td></tr>
     <tr><td>Grijs</td><td>Niet ondertekend, of de handtekening kon niet worden gecontroleerd, bijvoorbeeld doordat de sleutel ontbreekt.</td></tr>
 </table>
 <p>Als de delen van een bericht verschillend zijn beveiligd, krijgt elk deel een eigen kader en label. De balk telt dan hoeveel delen er van elke soort zijn. Klik op een label, of op <b data-text="ui-protection-details"></b> in de balk, om te zien wie elk deel heeft ondertekend, met welke sleutel en wanneer.</p>
@@ -16,5 +16,5 @@
 <p>In de lijst met bijgevoegde bestanden markeert een slotje elk bestand van een versleuteld deel. Wijs een bestand aan om te zien uit welk deel het komt.</p>
 <p>Als je beantwoordt of doorstuurt, wordt alleen geciteerd wat werd getoond.</p>
 <p>Een hangslot in de berichtenlijst duidt op een versleuteld bericht, een zegel op een ondertekend bericht. Als zoeken in versleutelde berichten aanstaat en de juiste privésleutel beschikbaar is, kan Inbox Classic berichten na het downloaden of bij het openen ontsleutelen. De lijst toont dan een tekstvoorbeeld en, indien aanwezig, het onderwerp uit het versleutelde deel. Zonder ontsleuteld tekstvoorbeeld staat er <b data-text="list-encrypted"></b>. Meldingen van nieuwe versleutelde berichten gebruiken altijd deze aanduiding.</p>
-<p>Met de optie <b data-text="ui-search-encrypted"></b> bij <b data-settings="reading"></b> kun je ook zoeken in de tekst van ontsleutelde berichten. AI-agents kunnen de inhoud en bijlagen van versleutelde berichten niet lezen en kunnen die inhoud ook niet doorzoeken.</p>
+<p>Met de optie <b data-text="ui-search-encrypted"></b> bij <b data-settings="reading"></b> kun je ook zoeken in de tekst van ontsleutelde berichten. De ontsleutelde tekst en beschermde onderwerpen worden onversleuteld in de lokale index opgeslagen. Als je de optie uitzet, worden die gegevens verwijderd en worden de buitenste onderwerpen hersteld. AI-agents kunnen de inhoud en bijlagen van versleutelde berichten niet lezen en kunnen die inhoud ook niet doorzoeken.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

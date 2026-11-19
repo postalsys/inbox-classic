@@ -45,7 +45,7 @@ reader-downloading = S’està baixant el missatge…
 reader-downloading-detail = El missatge apareixerà aquí quan s’acabi de baixar.
 reader-downloading-size = El missatge ocupa { $size }. Apareixerà aquí quan s’hagi baixat.
 reader-failed = No s’ha pogut baixar el missatge
-reader-failed-network = No s’ha pogut accedir al servidor de correu ({ $reason }).
+reader-failed-network = No s’ha pogut establir la connexió amb el servidor de correu o s’ha interromput ({ $reason }).
 reader-failed-sign-in = El servidor de correu no ha acceptat l’inici de sessió ({ $reason }). Comproveu la contrasenya o torneu a iniciar la sessió des de les propietats del compte.
 reader-failed-security = No s’ha pogut establir una connexió segura amb el servidor de correu ({ $reason }).
 reader-failed-other = El servidor de correu ha respost: { $reason }.
@@ -593,8 +593,8 @@ agent-undo-since-detail = Els missatges tornen a les carpetes anteriors, es rest
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] No s’ha desfet res.
-    [one] S’ha desfet 1 canvi.
-   *[other] S’han desfet { $count } canvis.
+    [one] S’ha desfet 1 canvi, del tot o en part.
+   *[other] S’han desfet { $count } canvis, del tot o en part.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 missatge ja no era on l’havia posat el canvi.
@@ -636,8 +636,8 @@ agent-reads-messages = { $count ->
    *[other] ha llegit { $count } missatges
 }
 agent-reads-attachments = { $count ->
-    [one] ha llegit 1 fitxer adjunt
-   *[other] ha llegit { $count } fitxers adjunts
+    [one] ha sol·licitat 1 fitxer adjunt
+   *[other] ha sol·licitat { $count } fitxers adjunts
 }
 agent-reads-searches = { $count ->
     [one] ha cercat una vegada
@@ -653,7 +653,7 @@ agent-read-conversation = { $count ->
     [one] Ha llegit la conversa «{ $subject }» (1 missatge)
    *[other] Ha llegit la conversa «{ $subject }» ({ $count } missatges)
 }
-agent-read-attachment = Ha llegit el fitxer adjunt «{ $name }» del missatge «{ $subject }»
+agent-read-attachment = Ha sol·licitat el fitxer adjunt «{ $name }» del missatge «{ $subject }»
 agent-read-search = { $count ->
     [one] Ha cercat «{ $query }»: 1 missatge
    *[other] Ha cercat «{ $query }»: { $count } missatges
@@ -676,7 +676,7 @@ agent-terminal-program-mac = Un programa iniciat des de { $terminal }
 agent-terminal-program-windows = Un programa iniciat des d’un terminal ({ $terminal })
 agent-terminal-program-linux = Un programa iniciat des d’un terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } volen fer servir el vostre correu
-agent-connect-terminal-detail = Tots els agents d’IA que inicieu des d’aquest terminal comparteixen l’accés que permeteu aquí. Per donar a un agent el seu propi accés, afegiu --name i un nom que trieu als seus arguments a la configuració MCP de l’agent.
+agent-connect-terminal-detail = Els agents d’IA iniciats des del mateix programa de terminal reconegut comparteixen l’accés que permeteu aquí. Per donar accés separat a un agent, afegiu --name i un nom als seus arguments a la configuració MCP. El nom no verifica la identitat del programa.
 agent-connect-claimed = Ha dit que era { $claimed }. Inbox Classic ha comprovat quin programa l’ha iniciat: { $program }.
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
@@ -787,7 +787,7 @@ pgp-error-missing-keys = { $count ->
     [one] Falta una clau pública utilitzable d’aquest destinatari per xifrar el missatge: { $addresses }.
    *[other] Falten claus públiques utilitzables d’aquests destinataris per xifrar el missatge: { $addresses }.
 }
-pgp-error-encrypted-quote = Aquest missatge cita o reenvia contingut xifrat i, per tant, només es pot enviar xifrat. Activeu Xifra o suprimiu el contingut citat.
+pgp-error-encrypted-quote = Aquest missatge conté text, imatges o fitxers adjunts de correu xifrat i només es pot enviar xifrat. Activeu Xifra o suprimiu tot aquest contingut.
 pgp-error-protect = No s’ha pogut signar ni xifrar el missatge: { $reason }
 pgp-found-keys = Adreces per a les quals s’han trobat claus: { $addresses }.
 pgp-found-none = No s’ha trobat cap clau per a: { $addresses }. Demaneu la clau pública als contactes corresponents.
@@ -1051,7 +1051,7 @@ preview-tile-format = Les imatges { $format } encara no es mostren
 preview-tile-password = Protegit amb contrasenya: obriu el fitxer per introduir-la
 preview-tile-too-large = Massa gran per mostrar-lo
 preview-tile-unreadable = No es pot mostrar
-preview-tile-timed-out = Ha trigat massa a mostrar-se
+preview-tile-timed-out = La preparació de la previsualització ha trigat massa
 preview-tile-crashed = Previsualització desactivada després d’una interrupció
 preview-tile-off = No es mostra fins que Inbox Classic es torni a iniciar
 preview-not-printed = { $name } ({ $details }) no s’imprimeix. Obriu-lo per imprimir-lo.

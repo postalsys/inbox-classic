@@ -51,8 +51,8 @@ reader-downloading = Baixando a mensagem…
 reader-downloading-detail = A mensagem aparecerá aqui quando o download terminar.
 reader-downloading-size = A mensagem tem { $size } e aparecerá aqui quando o download terminar.
 reader-failed = Não foi possível baixar a mensagem
-reader-failed-network = Não foi possível contatar o servidor de e-mail ({ $reason }).
-reader-failed-sign-in = O servidor de e-mail não aceitou o login ({ $reason }). Verifique a senha ou faça login novamente em Arquivo > Contas.
+reader-failed-network = Não foi possível conectar ao servidor de e-mail, ou a conexão foi interrompida ({ $reason }).
+reader-failed-sign-in = O servidor de e-mail não aceitou o login ({ $reason }). Verifique a senha ou faça login novamente nas configurações da conta.
 reader-failed-security = Não foi possível tornar segura a conexão com o servidor de e-mail ({ $reason }).
 reader-failed-other = O servidor de e-mail respondeu: { $reason }.
 reader-retry-note = O download será tentado novamente quando a conta se reconectar.
@@ -136,7 +136,7 @@ bounce-geo-blocked-why = O servidor de destino não aceita e-mails do país ou d
 bounce-geo-blocked-do = Entre em contato com o destinatário por outro meio ou peça ajuda ao seu provedor de e-mail.
 bounce-relay-denied = O servidor não a encaminhou
 bounce-relay-denied-why = Um servidor se recusou a entregar a mensagem, muitas vezes porque ela foi enviada sem login ou por um servidor que não atende este destinatário.
-bounce-relay-denied-do = Em Arquivo > Contas, verifique as configurações do servidor de envio e se a autenticação está configurada.
+bounce-relay-denied-do = Nas configurações da conta, verifique o servidor de envio e se a autenticação está configurada.
 bounce-auth-failure = Não foi possível verificar o seu endereço de remetente
 bounce-auth-failure-why = O servidor de destino não conseguiu confirmar que a mensagem veio realmente do seu domínio (SPF, DKIM ou DMARC).
 bounce-auth-failure-do = Encaminhe este aviso para quem gerencia o e-mail do seu domínio: as configurações precisam ser corrigidas. Enquanto isso, enviar pelo servidor do seu provedor pode ajudar.
@@ -145,7 +145,7 @@ bounce-rate-limited-why = O servidor de destino está limitando temporariamente 
 bounce-rate-limited-do = Aguarde um pouco e tente enviar novamente. Se houver muitos destinatários, divida-os em grupos menores.
 bounce-greylisting = Entrega adiada temporariamente
 bounce-greylisting-why = O servidor de destino pede aos remetentes desconhecidos que tentem novamente um pouco mais tarde, uma verificação comum contra o spam.
-bounce-greylisting-do = Aguarde. Os servidores de e-mail tentam novamente de forma automática, e a mensagem costuma ser entregue em até uma hora.
+bounce-greylisting-do = Se o aviso indicar um atraso temporário, aguarde enquanto o servidor tenta novamente. Se indicar uma falha definitiva, tente enviar a mensagem de novo mais tarde.
 bounce-server-error = O servidor de destino teve um problema
 bounce-server-error-why = Não foi possível contatar o servidor de destino, ou ele não conseguiu aceitar a mensagem por causa de um problema próprio.
 bounce-server-error-do = Envie-a novamente mais tarde. Se continuar falhando, procure erros de digitação na parte do endereço depois do @.
@@ -378,8 +378,8 @@ error-import-not-mail = { $path } não é uma mensagem de e-mail
 error-list-answered = o servidor da lista de e-mails retornou o status { $status }
 error-not-built = não foi possível criar a mensagem
 error-outbox-waits = { $count ->
-    [one] a mensagem aguarda na Caixa de Saída e será enviada no próximo Enviar/Receber
-   *[other] { $count } mensagens aguardam na Caixa de Saída e serão enviadas no próximo Enviar/Receber
+    [one] a mensagem aguarda na Caixa de Saída e haverá uma nova tentativa de envio no próximo Enviar/Receber
+   *[other] { $count } mensagens aguardam na Caixa de Saída e haverá uma nova tentativa de envio no próximo Enviar/Receber
 }
 error-draft-not-removed = não foi possível remover o rascunho anterior da mensagem de Rascunhos: { $reason }
 error-sent-but = a mensagem foi enviada, mas { $problem }
@@ -604,8 +604,8 @@ agent-undo-since-detail = O Inbox Classic tenta restaurar as pastas, o status de
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nada foi desfeito.
-    [one] Foi desfeito { $count } registro de alterações.
-   *[other] Foram desfeitos { $count } registros de alterações.
+    [one] Foi desfeito { $count } registro de alterações, total ou parcialmente.
+   *[other] Foram desfeitos { $count } registros de alterações, total ou parcialmente.
 }
 agent-undo-left-gone = { $count ->
     [one] { $count } mensagem não estava mais onde a alteração a colocou.
@@ -648,9 +648,9 @@ agent-reads-messages = { $count ->
    *[other] leu { $count } mensagens
 }
 agent-reads-attachments = { $count ->
-    [0] não leu anexos
-    [one] leu o conteúdo de { $count } anexo
-   *[other] leu o conteúdo de { $count } anexos
+    [0] não solicitou anexos
+    [one] solicitou o conteúdo de { $count } anexo
+   *[other] solicitou o conteúdo de { $count } anexos
 }
 agent-reads-searches = { $count ->
     [0] não fez pesquisas
@@ -669,7 +669,7 @@ agent-read-conversation = { $count ->
     [one] Leu a conversa “{ $subject }” ({ $count } mensagem)
    *[other] Leu a conversa “{ $subject }” ({ $count } mensagens)
 }
-agent-read-attachment = Leu o conteúdo de “{ $name }”, anexo de “{ $subject }”
+agent-read-attachment = Solicitou o conteúdo de “{ $name }”, anexo de “{ $subject }”
 agent-read-search = { $count ->
     [0] Pesquisou “{ $query }”: nenhuma mensagem
     [one] Pesquisou “{ $query }”: { $count } mensagem
@@ -682,9 +682,9 @@ agent-read-list = { $count ->
    *[other] Consultou { $count } itens da lista em { $folder }
 }
 agent-read-changes = { $count ->
-    [0] Não recebeu registros novos ou atualizados
-    [one] Consultou { $count } registro de mensagem novo ou atualizado
-   *[other] Consultou { $count } registros de mensagens novos ou atualizados
+    [0] Não recebeu registros novos
+    [one] Consultou { $count } registro de mensagem novo
+   *[other] Consultou { $count } registros de mensagens novos
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programas iniciados a partir de { $terminal }
@@ -695,7 +695,7 @@ agent-terminal-program-mac = Um programa iniciado a partir de { $terminal }
 agent-terminal-program-windows = Um programa iniciado a partir de um terminal ({ $terminal })
 agent-terminal-program-linux = Um programa iniciado a partir de um terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } querem acessar seus e-mails
-agent-connect-terminal-detail = Todos os agentes de IA que você iniciar neste terminal compartilham o acesso que você permitir aqui. Para dar a um agente seu próprio acesso, adicione --name e um nome de sua escolha aos argumentos dele nas configurações de MCP do agente.
+agent-connect-terminal-detail = Os agentes iniciados pelo mesmo programa de terminal reconhecido compartilham o acesso que você permite aqui. Para gerenciar um agente separadamente, adicione --name e um nome de sua escolha aos argumentos dele nas configurações de MCP. O nome não comprova a identidade do programa.
 agent-connect-claimed = O programa se apresentou como { $claimed }. Segundo as informações do sistema, foi iniciado por { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -717,7 +717,7 @@ secrets-windows = o Gerenciador de Credenciais
 secrets-mac = o chaveiro
 secrets-linux = o chaveiro do sistema (Secret Service)
 error-no-such-file = o arquivo não existe
-cards-file-too-big = Este arquivo é grande demais para ser um catálogo de endereços.
+cards-file-too-big = Este arquivo ultrapassa o limite de tamanho para importar um catálogo de endereços.
 ui-sender-added = O contato { $name } foi adicionado ao Catálogo de Endereços.
 ui-sender-known = { $name } já está no Catálogo de Endereços.
 ui-sender-none = O remetente desta mensagem não tem um endereço de e-mail para adicionar.
@@ -764,7 +764,7 @@ pgp-error-no-store = Não é possível usar { $store }, que protege as chaves pr
 pgp-error-wrong-passphrase = A frase secreta não está correta.
 pgp-error-not-a-key = Isso não é uma chave OpenPGP.
 pgp-error-too-large = A chave é grande demais.
-pgp-error-unusable = A chave usa criptografia antiga ou fraca e não pode ser usada.
+pgp-error-unusable = A chave não pode ser usada para a operação solicitada. Pode faltar uma chave adequada para assinatura ou criptografia, ou o algoritmo usado pode não ser compatível.
 pgp-imported-private = { $count ->
     [0] Nenhuma chave privada foi importada.
     [one] Sua chave privada foi importada.
@@ -785,13 +785,13 @@ pgp-pending = Uma chave diferente para { $address } foi encontrada em { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Assinada por { $signer }, chave verificada
 pgp-part-signed = Assinada por { $signer } (chave não verificada)
-pgp-part-other = Assinada por { $signer }, que não é o remetente
+pgp-part-other = Assinada por { $signer }; não foi possível associar a assinatura ao remetente com certeza
 pgp-part-unknown-key = Assinada, mas a chave necessária para verificar a assinatura não está disponível
 pgp-part-not-signed = Não assinada
 pgp-part-not-checked = Assinatura não verificada
 pgp-part-encrypted = Criptografada. { $signature }
 pgp-part-no-key = Criptografada para uma chave que você não tem
-pgp-part-changed = A parte criptografada foi alterada pelo caminho e não é mostrada
+pgp-part-changed = Não foi possível confirmar a integridade do conteúdo criptografado. O conteúdo não é mostrado
 pgp-part-unprotected = Criptografada sem proteção contra alterações, não é mostrada
 pgp-part-broken = Não é possível ler a parte criptografada
 pgp-why-mismatch = A assinatura não corresponde a este texto
@@ -951,17 +951,17 @@ setup-account-signs-in-again = Você precisará fazer login novamente após a im
 setup-account-here = A conta já está configurada neste computador e não será importada novamente.
 setup-account-no-app = Faz login com { $app }, que não está configurado aqui. Importe também os aplicativos de login.
 setup-invalid-address = “{ $address }” não é um endereço de e-mail.
-setup-invalid-server = Confira o nome e a porta do servidor { $server }: há dados ausentes ou inválidos.
+setup-invalid-server = O nome, a porta ou a configuração de segurança do servidor { $server } não são válidos.
 setup-invalid-user = O nome de usuário não foi informado.
-setup-invalid-sign-in = A conta usa um método de login que o Inbox Classic não reconhece.
+setup-invalid-sign-in = As configurações de login da conta são inválidas.
 setup-error-empty = O arquivo está vazio.
-setup-error-too-large = O arquivo é grande demais para ser um arquivo de configurações do Inbox Classic.
+setup-error-too-large = O arquivo ultrapassa o limite de tamanho para importar configurações e contas.
 setup-error-not-setup = Este não é um arquivo de configurações do Inbox Classic.
 setup-error-damaged = O arquivo de configurações está danificado e não pode ser lido.
 setup-error-newer = Este arquivo foi salvo por uma versão mais recente do Inbox Classic ({ $version }). Atualize o Inbox Classic e tente importá-lo novamente.
 setup-error-needs-passphrase = Este arquivo está protegido por uma frase secreta. Digite a frase usada ao salvá-lo.
 setup-error-wrong-passphrase = Esta não é a frase secreta usada para proteger o arquivo.
-setup-error-changed = O arquivo de configurações foi alterado ou danificado depois de ser salvo e não pode ser importado.
+setup-error-changed = Não foi possível confirmar a integridade do arquivo de configurações. O arquivo não pode ser importado.
 setup-error-read = Não foi possível ler o arquivo de configurações: { $error }
 setup-error-write = Não foi possível salvar o arquivo de configurações: { $error }
 setup-error-no-parts = Selecione pelo menos um item.
@@ -1031,7 +1031,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Nada foi importado.
 setup-account-servers = { $imap } e { $smtp } ({ $signin })
 setup-file-name = Configurações e contas do Inbox Classic
-setup-skipped-unreachable = O aplicativo { $name } não foi importado: não foi possível acessar seu serviço de login. Adicione-o novamente em Aplicativos de login.
+setup-skipped-unreachable = Não foi possível importar { $name }: o serviço de login não pôde ser verificado. Confira o aplicativo necessário em Aplicativos de login e tente novamente.
 attachment-runs-programs = “{ $name }” pode executar programas, por isso o Inbox Classic não o abre. Salve-o e depois abra-o você mesmo, se confiar na origem dele.
 attachment-decrypted-note = Este anexo faz parte de uma mensagem criptografada. Para abri-lo, o Inbox Classic salva uma cópia sem criptografia em uma pasta temporária da sua conta de usuário. Ao iniciar, o aplicativo tenta remover as cópias com mais de um dia.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1084,7 +1084,7 @@ preview-tile-format = Imagens { $format } ainda não são mostradas
 preview-tile-password = Protegido por senha: abra para digitar a senha
 preview-tile-too-large = Grande demais para mostrar
 preview-tile-unreadable = Não é possível mostrar
-preview-tile-timed-out = Demorou demais para mostrar
+preview-tile-timed-out = A preparação da visualização demorou demais
 preview-tile-crashed = Não mostrado: a preparação da visualização foi interrompida anteriormente
 preview-tile-off = Não mostrado até o Inbox Classic ser iniciado de novo
 preview-not-printed = { $name } ({ $details }) não é impresso. Abra-o para imprimi-lo.

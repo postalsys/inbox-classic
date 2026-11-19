@@ -1,5 +1,5 @@
 <h1>Mensagens que não foram entregues</h1>
-<p class="summary">Quando uma mensagem que você enviou é devolvida ou atrasa, o Inbox Classic explica por quê e o que você pode fazer.</p>
+<p class="summary">O Inbox Classic explica os avisos de falha ou atraso na entrega que reconhece e sugere o que você pode fazer.</p>
 <p>Um aviso de entrega reconhecido pelo Inbox Classic aparece com um indicador de falha de entrega na lista de mensagens. Quando você o abre, um cartão acima dele indica se sua mensagem não foi entregue ou se está apenas atrasada.</p>
 <img src="picture:bounce-1-failed" alt="Um aviso de entrega com um cartão dizendo que a mensagem não foi entregue, o destinatário, o motivo e o que fazer">
 <p>Para cada destinatário, o cartão explica o motivo em linguagem simples e sugere o que fazer. <b data-text="bounce-details"></b> mostra a resposta original do servidor de destino.</p>
@@ -7,14 +7,14 @@
     <li><b data-text="bounce-show-message"></b> seleciona a mensagem que você enviou, quando ela é encontrada no aplicativo.</li>
     <li>Se a entrega estiver atrasada, <b data-text="bounce-show-delayed"></b> a seleciona. O aviso informa que o servidor ainda tentará entregar a mensagem; isso não garante a entrega. Em geral, não é necessário reenviá-la enquanto essas tentativas continuam.</li>
 </ul>
-<p>Alguns motivos comuns:</p>
+<p>Motivos comuns e orientações para uma falha definitiva. Se a entrega estiver apenas atrasada, aguarde o resultado antes de reenviar:</p>
 <table>
     <tr><th>O cartão diz</th><th>O que fazer</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Confira se o endereço foi digitado corretamente, ou peça à pessoa o endereço que ela usa agora.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Envie-a novamente daqui a alguns dias, ou entre em contato com a pessoa de outra forma.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Tente enviar novamente, removendo elementos que possam ser interpretados como spam, como muitos links ou um anexo grande.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Encaminhe o aviso para o seu provedor de e-mail. O problema não é a mensagem.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Aguarde a nova tentativa automática. A mensagem costuma ser entregue em até uma hora.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Entre em contato com a pessoa de outra forma e peça que libere espaço antes de tentar novamente.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Leia a explicação do servidor. Se ele rejeitou o conteúdo, revise a mensagem antes de tentar novamente.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Encaminhe o aviso para o seu provedor de e-mail. Segundo o aviso, o endereço do servidor de envio está bloqueado.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>O servidor de destino pediu uma nova tentativa mais tarde. Se o aviso indica atraso, aguarde o resultado; a entrega e seu prazo não são garantidos.</td></tr>
 </table>
 <p>Para encontrar todos os avisos de entrega, pesquise <code>is:bounce</code>. A análise do motivo é feita no seu computador, sem enviar o conteúdo a serviços externos.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

@@ -172,7 +172,7 @@ ui-col-status = Olek
 ui-outbox-title = Väljundkaust
 ui-outbox-status-waiting = Ootab
 ui-outbox-status-not-sent = Saatmata: { $reason }
-ui-outbox-status-agent = Tehisintellekti agendi kiri on järjekorras; saadetakse kell { $time }
+ui-outbox-status-agent = Tehisintellekti agendi kiri on järjekorras; saatmine on kavandatud kellaajale { $time }
 ui-outbox-delete-ask = Kas kustutada see kiri ilma saatmata?
 ui-open-link = Ava link
 ui-edit-link = Muuda linki...
@@ -293,7 +293,7 @@ ui-found-autodiscover = Need sätted leiti Microsoft Autodiscoveri (Exchange) ab
 ui-found-other = Need sätted leiti selle aadressi jaoks.
 ui-app-password-needed = { $provider } ei luba siin kasutada tavalist parooli. Kui teie konto toetab e-posti jaoks rakenduse paroole, looge see oma teenusekontol ja sisestage järgmise sammu parooliväljale. Outlook.comi ja Microsoft 365 puhul logige sisse brauseri kaudu.
 ui-app-password-open = Kas avada teenusepakkuja { $provider } juhised brauseris?
-ui-plain-warning = Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Kasutage seda ainult oma arvutis või kohalikus võrgus oleva serveriga.
+ui-plain-warning = Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Jätkake ainult siis, kui ühendus on muul viisil kaitstud; kohalik võrk ise krüptimist ei taga.
 ui-continue-ask = Kas jätkata?
 ui-add-sign-in-app = Lisa sisselogimisrakendus...
 ui-turned-off = Valik „{ $name }“ on selles arvutis välja lülitatud.
@@ -447,7 +447,7 @@ ui-undo-since-button = Võta tagasi alates…
 ui-undo-since-span = Võta tagasi, mida see programm tegi:
 ui-take-back = Võta tagasi
 ui-rules-title = Kirjade reeglid
-ui-rules-intro = Reeglid sorteerivad sisendkaustadesse saabuvaid kirju, kui Inbox Classic töötab. Sobivaid reegleid rakendatakse loendi järjekorras. Kui reegel teisaldab kirja sisendkaustast mujale, siis sellele kirjale järgmisi reegleid enam ei rakendata.
+ui-rules-intro = Reeglid töötlevad sisendkaustadesse saabuvaid kirju, kui Inbox Classic töötab. Sobivaid reegleid rakendatakse loendi järjekorras. Kui reegel teisaldab kirja sisendkaustast mujale, siis sellele kirjale järgmisi reegleid enam ei rakendata.
 ui-rules-none = Reegleid veel pole. Uue loomiseks klõpsake nuppu Uus.
 ui-rule-new = &Uus...
 ui-rule-edit = &Muuda...
@@ -475,8 +475,8 @@ ui-rule-apply-now = Rakenda ka juba &sisendkaustas olevatele kirjadele
 ui-rule-delete-ask = Kas kustutada reegel „{ $name }“?
 ui-create-rule = Loo reegel...
 ui-rules-applied = { $count ->
-    [one] Reeglite järgi sorditi 1 kiri
-   *[other] Reeglite järgi sorditi { $count } kirja
+    [one] Reeglite järgi töödeldi 1 kiri
+   *[other] Reeglite järgi töödeldi { $count } kirja
 }
 ui-col-rule-matches = Tingimused
 ui-clear-button = &Tühjenda
@@ -596,7 +596,7 @@ ui-sending-in = { $subject } saadetakse { $count ->
 }
 ui-send-undone = { $subject } jäi saatmata. Kiri on taas muutmiseks avatud.
 ui-send-too-late = Saatmist ei saa enam tagasi võtta: { $subject }.
-ui-outbox-status-undo = Saadetakse kell { $time }
+ui-outbox-status-undo = Saatmine on kavandatud kellaajale { $time }
 ui-download-note = Ette alla laaditud kirjad avanevad kohe. Mahupiirangu ületamisel eemaldatakse vanemad vahemällu salvestatud kirjade sisud ja laaditakse vajadusel uuesti alla. Mustandid ja pärast programmi käivitamist avatud kirjad säilitatakse, mistõttu võib maht piirangut ületada.
 ui-attachment-downloading = Kirja allalaadimine on veel pooleli. Proovige uuesti, kui allalaadimine on lõppenud.
 ui-trusted-senders-button = &Usaldusväärsed saatjad...

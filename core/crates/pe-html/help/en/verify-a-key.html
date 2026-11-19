@@ -5,10 +5,10 @@
 <ol>
     <li>Choose <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, select the contact’s key and click <b data-text="ui-keys-verify"></b>. You can also click it in the contact’s properties in the Address Book.</li>
     <li>Ask your contact to read the fingerprint from their own app, in person or on a call. Also check that every listed address belongs to them.</li>
-    <li>If every group of four matches and all the addresses belong to your contact, click <b data-text="ui-verify-match"></b>. The key shows as verified.</li>
+    <li>If every group of four matches and all the addresses belong to your contact, click <b data-text="ui-verify-match"></b>. The key shows as verified for those addresses. If it contains no email addresses, this verification cannot be saved.</li>
     <li>If any listed address does not belong to your contact, even if the fingerprints match, click <b data-text="ui-verify-differ"></b> instead.</li>
 </ol>
 <aside class="warning">Do not compare the fingerprint with one sent by email. Whoever could change the key in a message could change the fingerprint too.</aside>
-<p>If the fingerprints differ, click <b data-text="ui-verify-differ"></b>. The key you have is not your contact’s: remove it, and ask your contact to send their key again.</p>
-<p>Valid signatures from the sender show in green if you have verified their key, or blue if you have not. An unverified key can still be used for encryption.</p>
+<p>If the fingerprints differ, click <b data-text="ui-verify-differ"></b>. The key does not match the one your contact is comparing. Remove it and ask for the correct key.</p>
+<p>Valid signatures from the sender show in green if you have verified their key, or blue if you have not. A usable unverified key can still encrypt mail, but its owner has not been confirmed.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>

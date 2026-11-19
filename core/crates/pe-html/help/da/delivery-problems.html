@@ -1,5 +1,5 @@
 <h1>Meddelelser, der ikke blev leveret</h1>
-<p class="summary">Når en meddelelse, du har sendt, kommer retur eller bliver forsinket, forklarer Inbox Classic hvorfor, og hvad du kan gøre.</p>
+<p class="summary">Inbox Classic forklarer genkendte beskeder om mislykket eller forsinket levering og foreslår, hvad du kan gøre.</p>
 <p>En genkendt leveringsbesked markeres med et særligt ikon på meddelelseslisten. Når du åbner den, viser et kort øverst, om din meddelelse ikke blev leveret eller kun er forsinket.</p>
 <img src="picture:bounce-1-failed" alt="En leveringsbesked med et kort, der viser, at meddelelsen ikke blev leveret, modtageren, årsagen og hvad du kan gøre">
 <p>Kortet forklarer årsagen for hver modtager i et enkelt sprog og foreslår, hvad du kan gøre. <b data-text="bounce-details"></b> viser serverens oprindelige fejlbesked.</p>
@@ -7,13 +7,13 @@
     <li><b data-text="bounce-show-message"></b> markerer den oprindelige meddelelse, hvis den kan findes.</li>
     <li>Ved en forsinkelse markerer <b data-text="bounce-show-delayed"></b> den, hvis den kan findes. En forsinkelsesbesked betyder normalt, at serveren vil prøve igen; undgå at sende en dublet, før du ved, om leveringen er opgivet.</li>
 </ul>
-<p>Nogle almindelige årsager:</p>
+<p>Almindelige årsager og råd ved en endelig leveringsfejl. Hvis leveringen kun er forsinket, skal du afvente resultatet, før du sender igen:</p>
 <table>
     <tr><th>Besked på kortet</th><th>Det kan du gøre</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Kontrollér stavningen af adressen, eller spørg personen, hvilken adresse de bruger nu.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Send den igen om nogle dage, eller kontakt personen på en anden måde.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Send den igen uden det, der ligner spam, fx mange links eller en stor vedhæftet fil.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Videresend beskeden til din mailudbyder. Meddelelsen er ikke problemet.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Kontakt modtageren på en anden måde, og bed om, at der bliver frigjort plads, før du prøver igen.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Læs serverens forklaring. Hvis indholdet blev afvist, skal du rette meddelelsen, før du prøver igen.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Videresend beskeden til din mailudbyder. Ifølge beskeden er den afsendende servers adresse blokeret.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Serveren prøver ofte igen efter en midlertidig afvisning. Hvis beskeden angiver en endelig fejl, skal du selv prøve at sende igen senere.</td></tr>
 </table>
 <p>Søg efter <code>is:bounce</code> for at finde alle leveringsbeskeder. Forklaringen udarbejdes lokalt på din computer. Meddelelsen sendes ikke til en ekstern tjeneste til analyse.</p>

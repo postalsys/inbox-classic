@@ -482,7 +482,7 @@ agent-log-refused = Отказано изпращане: „{ $subject }“
 agent-log-sent = Добавено в опашката за изпращане до { $to }: „{ $subject }“
 agent-log-draft = Черновата „{ $subject }“ е запазена
 agent-log-draft-replaced = Черновата „{ $subject }“ е заменена
-agent-log-draft-discarded = Черновата „{ $subject }“ е премахната
+agent-log-draft-discarded = Поискано е изтриване на черновата „{ $subject }“
 agent-draft-note = { $program }, ИИ агент, написа тази чернова. Проверете получателите и текста, преди да я изпратите.
 agent-log-read = Маркирано като прочетено: „{ $subject }“
 agent-log-unread = Маркирано като непрочетено: „{ $subject }“
@@ -588,8 +588,8 @@ agent-undo-since-detail = Когато състоянието им позвол�
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Нищо не беше отменено.
-    [one] Отменена е 1 промяна.
-   *[other] Отменени са { $count } промени.
+    [one] Отменена е 1 промяна, изцяло или частично.
+   *[other] Отменени са { $count } промени, изцяло или частично.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 съобщение вече не беше в папката, в която е преместено.
@@ -631,8 +631,8 @@ agent-reads-messages = { $count ->
    *[other] прочете { $count } съобщения
 }
 agent-reads-attachments = { $count ->
-    [one] прочете 1 прикачен файл
-   *[other] прочете { $count } прикачени файла
+    [one] поиска 1 прикачен файл
+   *[other] поиска { $count } прикачени файла
 }
 agent-reads-searches = { $count ->
     [one] потърси веднъж
@@ -648,19 +648,19 @@ agent-read-conversation = { $count ->
     [one] Прочете разговора „{ $subject }“ (1 съобщение)
    *[other] Прочете разговора „{ $subject }“ ({ $count } съобщения)
 }
-agent-read-attachment = Прочете прикачения файл „{ $name }“ от съобщението „{ $subject }“
+agent-read-attachment = Поиска прикачения файл „{ $name }“ от съобщението „{ $subject }“
 agent-read-search = { $count ->
     [one] Потърси „{ $query }“: 1 съобщение
    *[other] Потърси „{ $query }“: { $count } съобщения
 }
-agent-read-people = Потърси хора по първите букви „{ $query }“
+agent-read-people = Потърси хора по началото на името или адреса: „{ $query }“
 agent-read-list = { $count ->
     [one] Прегледа 1 запис в списъка „{ $folder }“
    *[other] Прегледа { $count } записа в списъка „{ $folder }“
 }
 agent-read-changes = { $count ->
-    [one] Прегледа 1 ново съобщение
-   *[other] Прегледа { $count } нови съобщения
+    [one] Прегледа данните за 1 ново съобщение
+   *[other] Прегледа данните за { $count } нови съобщения
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Програми, стартирани от { $terminal }
@@ -780,8 +780,8 @@ pgp-why-not-key-in-use = Подписано с ключ, различен от �
 pgp-part-pictures-loaded = { $label }. Изображенията са заредени от интернет
 pgp-error-no-own-key = Нямате ключ за { $address }, с който да подписвате или шифровате. Създайте такъв в Инструменти > Ключове за шифроване или изключете „Подписване“ и „Шифроване“.
 pgp-error-missing-keys = { $count ->
-    [one] Липсва ключ за шифроване за получателя: { $addresses }.
-   *[other] Липсват ключове за шифроване за получателите: { $addresses }.
+    [one] Липсва използваем ключ за шифроване за получателя: { $addresses }.
+   *[other] Липсват използваеми ключове за шифроване за получателите: { $addresses }.
 }
 pgp-error-encrypted-quote = Съобщението съдържа текст, изображения или прикачени файлове от шифровано съобщение и може да бъде изпратено само шифровано. Включете „Шифроване“ или премахнете това съдържание.
 pgp-error-protect = Съобщението не можа да бъде подписано или шифровано: { $reason }
@@ -993,7 +993,7 @@ setup-account-servers = { $imap } и { $smtp } ({ $signin })
 setup-file-name = Настройки и акаунти на Inbox Classic
 setup-skipped-unreachable = Пропуснат запис: { $name }. Услугата за влизане не можа да бъде проверена. Настройте необходимото приложение в „Приложения за влизане“ и опитайте отново.
 attachment-runs-programs = Файлът „{ $name }“ може да изпълнява програмен код, затова Inbox Classic не го отваря. Можете да го запазите и да го отворите сами, ако имате доверие на източника му.
-attachment-decrypted-note = Този прикачен файл е от шифровано съобщение. За да го отвори с друга програма, Inbox Classic запазва нешифровано копие във временна папка за вашия потребителски акаунт. При стартиране на Inbox Classic се изтриват копията, по-стари от един ден.
+attachment-decrypted-note = Този прикачен файл е от шифровано съобщение. За да го отвори с друга програма, Inbox Classic запазва нешифровано копие във временна папка за вашия потребителски акаунт. При стартиране Inbox Classic се опитва да изтрие копията, по-стари от един ден.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Сървърът не премести { $messages } в папка „{ $folder }“, затова съобщението отново е в папка „{ $from }“: { $reason }
@@ -1044,7 +1044,7 @@ preview-tile-format = Изображенията във формат { $format }
 preview-tile-password = Защитен с парола: отворете го, за да я въведете
 preview-tile-too-large = Надхвърля ограниченията за преглед
 preview-tile-unreadable = Не може да се покаже
-preview-tile-timed-out = Показването отне твърде много време
+preview-tile-timed-out = Подготовката на прегледа отне твърде много време
 preview-tile-crashed = Не се показва: предишният опит за преглед е прекъснал или блокирал
 preview-tile-off = Не се показва, докато Inbox Classic не се стартира отново
 preview-not-printed = { $name } ({ $details }) не се отпечатва. Отворете го, за да го отпечатате.

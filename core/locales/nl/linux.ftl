@@ -178,4 +178,4 @@ gtk-metainfo-description = Inbox Classic is een e-mailprogramma met een vertrouw
 gtk-metainfo-feature-sanitized = Berichten worden weergegeven zonder scripts; afbeeldingen van internet worden alleen geladen als je dat toestaat
 gtk-metainfo-feature-search = Zoeken in onderwerp, afzender, ontvangers, bijlagenamen en berichttekst, met de zoekoperatoren van Gmail
 gtk-metainfo-feature-replies = Geciteerde eerdere berichten in antwoorden worden ingeklapt
-gtk-metainfo-feature-offline = Gedownloade e-mail blijft offline leesbaar; aanmeldgegevens worden standaard bewaard in de beveiligde opslag van het systeem
+gtk-metainfo-feature-offline = Lees e-mail offline zolang de lokale kopie bewaard blijft; aanmeldgegevens staan normaal in de beveiligde systeemopslag, als die beschikbaar is

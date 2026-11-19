@@ -177,7 +177,7 @@ ui-outbox-title = Utkorgen
 ui-outbox-status-waiting = Väntar
 ui-outbox-status-not-sent = Inte skickat: { $reason }
 # This message is still queued, during the grace period before an agent’s send.
-ui-outbox-status-agent = Köat av en AI-agent; skickas { $time }
+ui-outbox-status-agent = Köat av en AI-agent; planerad sändning { $time }
 ui-outbox-delete-ask = Ta bort meddelandet utan att skicka det?
 ui-open-link = Öppna länk
 ui-edit-link = Redigera länk...
@@ -261,7 +261,7 @@ ui-cannot-unsubscribe = Det här meddelandet erbjuder inget sätt att avsluta pr
 ui-unsubscribed = Servern tog emot begäran om att avsluta prenumerationen.
 ui-not-unsubscribed = Det gick inte att avsluta prenumerationen: { $reason }
 ui-event-span = { $start } till { $end }
-ui-event-floating = { $when } (avsändarens tid)
+ui-event-floating = { $when } (utan tidszonsomvandling)
 ui-invitation = Inbjudan: { $title }
 ui-invitation-updated = Uppdaterad inbjudan: { $title }
 ui-invitation-canceled = Inställt: { $title }
@@ -480,8 +480,8 @@ ui-rule-apply-now = Tillämpa den också på meddelanden som redan finns i In&ko
 ui-rule-delete-ask = Vill du ta bort regeln ”{ $name }”?
 ui-create-rule = Skapa regel...
 ui-rules-applied = { $count ->
-    [one] { $count } meddelande sorterades av dina regler
-   *[other] { $count } meddelanden sorterades av dina regler
+    [one] { $count } meddelande behandlades av dina regler
+   *[other] { $count } meddelanden behandlades av dina regler
 }
 ui-col-rule-matches = Villkor
 ui-clear-button = &Rensa
@@ -599,7 +599,7 @@ ui-sending-in = Skickar { $subject } om { $count ->
 }
 ui-send-undone = { $subject } skickades inte. Meddelandet har öppnats igen för redigering.
 ui-send-too-late = Det går inte längre att ångra sändningen av { $subject }.
-ui-outbox-status-undo = Skickas { $time }
+ui-outbox-status-undo = Planerad sändning { $time }
 ui-download-note = Meddelanden som hämtats i förväg öppnas direkt. När gränsen överskrids tas de äldsta lokala innehållskopiorna bort, utom utkast och meddelanden som öppnats sedan programmet startade. Därför kan gränsen överskridas. Innehållet hämtas igen vid behov.
 ui-attachment-downloading = Meddelandet har inte hämtats färdigt. Försök igen när hämtningen är klar.
 ui-trusted-senders-button = &Betrodda avsändare...
@@ -668,7 +668,7 @@ ui-keys-backup-saved = Säkerhetskopian sparades.
 ui-keys-import-title = Importera nyckel
 ui-keys-import-passphrase = Den privata nyckeln skyddas med en lösenfras. Skriv den för att importera nyckeln:
 ui-keys-file-filter = OpenPGP-nycklar
-ui-keys-use-for = Vill du använda nyckeln för { $addresses }? Dina meddelanden från de adresserna signeras med den, och e-post som krypterats med den kan läsas här.
+ui-keys-use-for = Vill du använda nyckeln för { $addresses }? Du kan använda den för att signera meddelanden från de adresserna och läsa e-post som krypterats med den.
 ui-keys-use = &Använd den
 ui-keys-not-now = I&nte nu
 ui-keys-remove-own = Vill du ta bort din nyckel { $fingerprint }? Utan den kan Inbox Classic inte dekryptera meddelanden som kräver just den nyckeln. Du kan återställa den genom att importera en säkerhetskopia.

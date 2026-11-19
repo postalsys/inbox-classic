@@ -1,11 +1,11 @@
 <h1>Messages downloaded ahead</h1>
-<p class="summary">New mail is downloaded as it arrives, so it opens at once.</p>
-<p>Inbox Classic downloads new messages in the background, as they arrive. Opening one then shows it at once, also without a connection. When you open a message, the messages above and below it are downloaded too, for the next one you open.</p>
+<p class="summary">Download message contents in advance so they can open quickly and be read offline.</p>
+<p>Depending on your settings, Inbox Classic downloads message contents in the background while connected. Downloaded messages can open quickly, including offline. Opening a message can also download its date-neighbors in the same folder, subject to the size setting.</p>
 <p>To choose what is downloaded ahead, choose <b data-settings="downloading"></b>:</p>
 <ul>
-    <li><b data-text="ui-download-ahead"></b> <b data-text="ui-download-ahead-recent"></b> downloads the messages of the last 30 days, up to 1 MB each. <b data-text="ui-download-ahead-all"></b> downloads every message, as far as the limit below lets it. <b data-text="ui-download-ahead-never"></b> downloads a message only when you open it.</li>
-    <li><b data-text="ui-download-limit"></b> is how much each account keeps. Past it, the oldest messages are removed from this computer, not from the server, and downloaded again when you open them.</li>
+    <li><b data-text="ui-download-ahead"></b>: <b data-text="ui-download-ahead-recent"></b> downloads eligible messages from the last 30 days, up to 1 MB each. <b data-text="ui-download-ahead-all"></b> includes older and larger messages, subject to the limit below. <b data-text="ui-download-ahead-never"></b> disables these advance downloads, including neighboring messages.</li>
+    <li><b data-text="ui-download-limit"></b> controls cached message contents per account. Older downloaded contents can be removed locally and fetched again when needed; messages stay on the server. Drafts and messages opened during this run are kept, so the limit can be exceeded. It does not limit the whole mail database.</li>
 </ul>
-<p>Messages in <b data-text="folder-junk"></b> and <b data-text="folder-deleted"></b>, and Gmail’s All Mail, are downloaded only when you open them.</p>
-<p>A large message, over 1 MB, shows its text first. Its attachments follow, and the status bar says how far they are. They open, and the message can be saved or forwarded, once it is all here.</p>
+<p>Messages in <b data-text="folder-junk"></b> and <b data-text="folder-deleted"></b>, and Gmail’s All Mail, are excluded from bulk advance downloads. Opening a message can still fetch its contents.</p>
+<p>A message over 1 MB can show its text before the full download finishes, if its structure allows this. Its attachments follow, and the status bar says how far they are. They open, and the message can be saved or forwarded, once it is all here.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:read-messages"></a> <a href="topic:options-language"></a></nav>

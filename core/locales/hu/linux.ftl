@@ -174,4 +174,4 @@ gtk-metainfo-description = Az Inbox Classic a hagyományos levelezőprogramok el
 gtk-metainfo-feature-sanitized = Az üzenetekből az alkalmazás eltávolítja a szkripteket, az internetes képeket pedig csak engedéllyel tölti le
 gtk-metainfo-feature-search = Keresés a tárgyban, a feladók és címzettek adataiban, a mellékletnevekben és az üzenetszövegben, a Gmailből ismert keresőoperátorokkal
 gtk-metainfo-feature-replies = A válaszokban az alkalmazás elrejti az idézett korábbi üzeneteket
-gtk-metainfo-feature-offline = A letöltött levelek internetkapcsolat nélkül is olvashatók; a bejelentkezési adatokat alapértelmezés szerint a rendszer kulcstartója védi
+gtk-metainfo-feature-offline = A letöltött levél helyi másolata internet nélkül is olvasható, amíg megmarad; a bejelentkezési adatokat rendszerint a rendszer elérhető kulcstartója tárolja

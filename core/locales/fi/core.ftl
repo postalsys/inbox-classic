@@ -578,8 +578,8 @@ agent-undo-since-detail = Viestit palautetaan mahdollisuuksien mukaan aiempiin k
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Mitään ei kumottu.
-    [one] Kumottiin 1 muutos.
-   *[other] Kumottiin { $count } muutosta.
+    [one] Kumottiin 1 muutos, kokonaan tai osittain.
+   *[other] Kumottiin { $count } muutosta, kokonaan tai osittain.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 viestiä ei löytynyt enää odotetusta kansiosta.
@@ -621,8 +621,8 @@ agent-reads-messages = { $count ->
    *[other] luki { $count } viestiä
 }
 agent-reads-attachments = { $count ->
-    [one] luki 1 liitteen
-   *[other] luki { $count } liitettä
+    [one] pyysi 1 liitteen
+   *[other] pyysi { $count } liitettä
 }
 agent-reads-searches = { $count ->
     [one] haki kerran
@@ -638,7 +638,7 @@ agent-read-conversation = { $count ->
     [one] Luki keskustelun ”{ $subject }” (1 viesti)
    *[other] Luki keskustelun ”{ $subject }” ({ $count } viestiä)
 }
-agent-read-attachment = Luki liitteen ”{ $name }” viestistä ”{ $subject }”
+agent-read-attachment = Pyysi liitteen ”{ $name }” viestistä ”{ $subject }”
 agent-read-search = { $count ->
     [one] Haki tekstillä ”{ $query }”: 1 viesti
    *[other] Haki tekstillä ”{ $query }”: { $count } viestiä
@@ -818,8 +818,8 @@ pgp-recipient-not-found = Avainta ei löytynyt. Viimeisin haku: { $date }
 pgp-recipient-unusable = Avainta ei voi käyttää: { $state }
 pgp-recipients-intro = Viesti salataan kunkin vastaanottajan avaimella sekä omalla avaimellasi.
 pgp-recipients-intro-missing = { $count ->
-    [one] Yhdeltä vastaanottajalta puuttuu käyttökelpoinen salausavain. Etsi avain, poista vastaanottaja viestistä tai lähetä viesti ilman salausta.
-   *[other] Käyttökelpoinen salausavain puuttuu { $count } vastaanottajalta. Etsi puuttuvat avaimet, poista kyseiset vastaanottajat viestistä tai lähetä viesti ilman salausta.
+    [one] Yhdeltä vastaanottajalta puuttuu käyttökelpoinen salausavain. Etsi avain, poista vastaanottaja viestistä tai lähetä viesti ilman salausta, jos siinä ei ole salatuista viesteistä peräisin olevaa tekstiä, kuvia tai liitteitä.
+   *[other] Käyttökelpoinen salausavain puuttuu { $count } vastaanottajalta. Etsi puuttuvat avaimet, poista kyseiset vastaanottajat viestistä tai lähetä viesti ilman salausta, jos siinä ei ole salatuista viesteistä peräisin olevaa tekstiä, kuvia tai liitteitä.
 }
 pgp-details-part = Osa { $number }: { $label }
 attachment-from-part = Osasta { $number }: { $label }
@@ -987,7 +987,7 @@ setup-account-servers = { $imap } ja { $smtp } ({ $signin })
 setup-file-name = Inbox Classicin asetukset ja tilit
 setup-skipped-unreachable = ”{ $name }” ohitettiin, koska kirjautumispalvelua ei voitu tarkistaa. Lisää tarvittava kirjautumissovellus uudelleen Kirjautumissovellukset-kohdassa.
 attachment-runs-programs = ”{ $name }” voi suorittaa ohjelmia, joten Inbox Classic ei avaa sitä. Tallenna se ja avaa se sitten itse, jos luotat sen lähteeseen.
-attachment-decrypted-note = Tämä liite on peräisin salatusta viestistä. Liitteen avaamista varten Inbox Classic tallentaa siitä salaamattoman kopion käyttäjätilisi väliaikaiseen kansioon. Yli vuorokauden vanhat kopiot poistetaan sovelluksen käynnistyessä.
+attachment-decrypted-note = Tämä liite on peräisin salatusta viestistä. Liitteen avaamista varten Inbox Classic tallentaa siitä salaamattoman kopion käyttäjätilisi väliaikaiseen kansioon. Yli vuorokauden vanhat kopiot yritetään poistaa sovelluksen käynnistyessä.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Palvelin ei siirtänyt viestiä kansioon { $folder }, joten { $messages } on taas kansiossa { $from }: { $reason }
@@ -1038,7 +1038,7 @@ preview-tile-format = { $format }-kuvia ei vielä näytetä
 preview-tile-password = Suojattu salasanalla: avaa se ja anna salasana
 preview-tile-too-large = Liian suuri näytettäväksi
 preview-tile-unreadable = Ei voi näyttää
-preview-tile-timed-out = Näyttäminen kesti liian kauan
+preview-tile-timed-out = Esikatselun valmistelu kesti liian kauan
 preview-tile-crashed = Ei esikatselua: Inbox Classic sulkeutui tai lakkasi vastaamasta edellisellä näyttökerralla
 preview-tile-off = Ei näytetä ennen kuin Inbox Classic käynnistetään uudelleen
 preview-not-printed = Tiedostoa { $name } ({ $details }) ei tulosteta. Avaa se tulostaaksesi sen.

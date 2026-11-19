@@ -1,5 +1,5 @@
 <h1>Poruke koje nisu isporučene</h1>
-<p class="summary">Kada se poruka koju ste poslali vrati ili kasni, Inbox Classic objašnjava zašto i šta možete da uradite.</p>
+<p class="summary">Inbox Classic objašnjava prepoznata obaveštenja o neuspešnoj ili odloženoj isporuci i predlaže šta možete da uradite.</p>
 <p>Obaveštenje o neuspešnoj ili odloženoj isporuci ima posebnu oznaku na listi poruka. Kada ga otvorite, kartica iznad teksta pokazuje da li isporuka nije uspela ili još kasni.</p>
 <img src="picture:bounce-1-failed" alt="Obaveštenje o isporuci sa karticom koja kaže da poruka nije isporučena, sa primaocem, razlogom i onim što možete da uradite">
 <p>Kartica za svakog primaoca objašnjava razlog jednostavnim rečima i predlaže šta možete da uradite. <b data-text="bounce-details"></b> prikazuje izvorni odgovor servera primaoca.</p>
@@ -7,13 +7,13 @@
     <li><b data-text="bounce-show-message"></b> bira poruku koju ste poslali, ako postoji u tom nalogu.</li>
     <li>Za poruku čija isporuka kasni koristite <b data-text="bounce-show-delayed"></b>. Server obično nastavlja pokušaje isporuke. Odlaganje nije konačni neuspeh; nemojte slati duplikat samo zbog ovog obaveštenja.</li>
 </ul>
-<p>Neki česti razlozi:</p>
+<p>Česti razlozi i saveti za konačni neuspeh. Ako isporuka samo kasni, sačekajte ishod pre ponovnog slanja:</p>
 <table>
     <tr><th>Na kartici piše</th><th>Šta da uradite</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Proverite da li je adresa tačno napisana ili pitajte osobu koju adresu sada koristi.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Pošaljite je ponovo za nekoliko dana ili se toj osobi javite na drugi način.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Posle konačnog neuspeha pokušajte ponovo bez onoga što liči na neželjenu poštu, na primer mnogo veza ili velikog priloga.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Prosledite obaveštenje pružaocu usluge e-pošte. Problem nije u poruci.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Javite se primaocu na drugi način i zamolite ga da oslobodi prostor pre nego što pokušate ponovo.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Pročitajte objašnjenje servera. Ako je odbio sadržaj, izmenite poruku pre novog pokušaja.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Prosledite obaveštenje pružaocu usluge e-pošte. Prema obaveštenju, adresa servera za slanje je blokirana.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Kod privremenog odlaganja server obično pokušava ponovo. Ako izveštaj pokazuje konačni neuspeh, pokušajte kasnije ponovo da pošaljete poruku.</td></tr>
 </table>
 <p>Da biste pronašli sva obaveštenja o isporuci, potražite <code>is:bounce</code>. Objašnjenje se priprema na vašem računaru, bez slanja sadržaja poruke drugim uslugama.</p>

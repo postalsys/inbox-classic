@@ -501,7 +501,7 @@ agent-log-refused = Niste dovolili pošiljanja sporočila »{ $subject }«
 agent-log-sent = Uvrstil sporočilo »{ $subject }« v čakalno vrsto za pošiljanje. Prejemniki: { $to }
 agent-log-draft = Shranil osnutek »{ $subject }«
 agent-log-draft-replaced = Zamenjal osnutek »{ $subject }«
-agent-log-draft-discarded = Trajno izbrisal osnutek »{ $subject }«
+agent-log-draft-discarded = Zahteval trajni izbris osnutka »{ $subject }«
 agent-draft-note = Ta osnutek je pripravil agent UI programa »{ $program }«. Pred pošiljanjem preverite prejemnike in besedilo.
 agent-log-read = Označil sporočilo »{ $subject }« kot prebrano
 agent-log-unread = Označil sporočilo »{ $subject }« kot neprebrano
@@ -684,10 +684,10 @@ agent-reads-messages = { $count ->
    *[other] prebral { $count } sporočil
 }
 agent-reads-attachments = { $count ->
-    [one] prebral { $count } priponko
-    [two] prebral { $count } priponki
-    [few] prebral { $count } priponke
-   *[other] prebral { $count } priponk
+    [one] zahteval { $count } priponko
+    [two] zahteval { $count } priponki
+    [few] zahteval { $count } priponke
+   *[other] zahteval { $count } priponk
 }
 agent-reads-searches = { $count ->
     [one] iskal { $count }-krat
@@ -709,7 +709,7 @@ agent-read-conversation = { $count ->
     [few] Prebral pogovor »{ $subject }« ({ $count } sporočila)
    *[other] Prebral pogovor »{ $subject }« ({ $count } sporočil)
 }
-agent-read-attachment = Prebral priponko »{ $name }« sporočila »{ $subject }«
+agent-read-attachment = Zahteval priponko »{ $name }« sporočila »{ $subject }«
 agent-read-search = { $count ->
     [one] Iskal »{ $query }«: { $count } sporočilo
     [two] Iskal »{ $query }«: { $count } sporočili
@@ -738,7 +738,7 @@ agent-terminal-program-mac = Iz aplikacije { $terminal } zagnan program
 agent-terminal-program-windows = Iz terminala ({ $terminal }) zagnan program
 agent-terminal-program-linux = Iz terminala ({ $terminal }) zagnan program
 agent-connect-title-terminal = { $programs } želijo dostop do vaše pošte
-agent-connect-terminal-detail = Vsi agenti UI, ki jih zaženete iz tega terminala, si delijo dostop, ki ga dovolite tukaj. Če želite enemu od njih dati lasten dostop, v agentovih nastavitvah MCP med njegove argumente dodajte --name in poljubno ime.
+agent-connect-terminal-detail = Agenti, zagnani iz iste prepoznane terminalske aplikacije, si delijo dostop, ki ga dovolite tukaj. Za ločeno upravljanje agenta v njegovih nastavitvah MCP med argumente dodajte --name in poljubno ime. Ime ne potrjuje identitete programa.
 agent-connect-claimed = Program se je predstavil kot { $claimed }. Inbox Classic je preveril, kateri program ga je zagnal: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -853,8 +853,8 @@ pgp-why-not-key-in-use = Ključ podpisa se razlikuje od ključa, izbranega za na
 pgp-part-pictures-loaded = { $label }. Slike so bile naložene z interneta
 pgp-error-no-own-key = Za { $address } nimate ključa, s katerim bi podpisovali ali šifrirali. Ustvarite ga v meniju Orodja > Šifrirni ključi ali izklopite Podpiši in Šifriraj.
 pgp-error-missing-keys = { $count ->
-    [1] Prejemnik { $addresses } nima ključa za šifriranje.
-   *[other] Ti prejemniki nimajo ključev za šifriranje: { $addresses }.
+    [1] Prejemnik { $addresses } nima uporabnega ključa za šifriranje.
+   *[other] Ti prejemniki nimajo uporabnih ključev za šifriranje: { $addresses }.
 }
 pgp-error-encrypted-quote = To sporočilo vsebuje besedilo, slike ali priponke iz šifriranega sporočila, zato ga lahko pošljete samo šifrirano. Vklopite Šifriraj ali odstranite vso vsebino, prevzeto iz šifriranega sporočila.
 pgp-error-protect = Sporočila ni bilo mogoče podpisati ali šifrirati: { $reason }
@@ -907,12 +907,12 @@ pgp-recipient-not-found = Ključ ni bil najden. Zadnje iskanje: { $date }
 pgp-recipient-unusable = Ključa ni mogoče uporabiti: { $state }
 pgp-recipients-intro = Ob pošiljanju se sporočilo šifrira s ključi prejemnikov in z vašim ključem.
 pgp-recipients-intro-missing = { $count ->
-    [1] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite njegov ključ, odstranite prejemnika iz sporočila ali sporočilo pošljite brez šifriranja.
-    [2] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite njuna ključa, odstranite oba prejemnika iz sporočila ali sporočilo pošljite brez šifriranja.
-    [one] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
-    [two] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
-    [few] { $count } prejemniki nimajo uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
-   *[other] { $count } prejemnikov nima uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
+    [1] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite njegov ključ, odstranite prejemnika iz sporočila ali sporočilo pošljite brez šifriranja, če ne vsebuje besedila, slik ali priponk iz šifriranih sporočil.
+    [2] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite njuna ključa, odstranite oba prejemnika iz sporočila ali sporočilo pošljite brez šifriranja, če ne vsebuje besedila, slik ali priponk iz šifriranih sporočil.
+    [one] { $count } prejemnik nima uporabnega ključa za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja, če ne vsebuje besedila, slik ali priponk iz šifriranih sporočil.
+    [two] { $count } prejemnika nimata uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja, če ne vsebuje besedila, slik ali priponk iz šifriranih sporočil.
+    [few] { $count } prejemniki nimajo uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja, če ne vsebuje besedila, slik ali priponk iz šifriranih sporočil.
+   *[other] { $count } prejemnikov nima uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja, če ne vsebuje besedila, slik ali priponk iz šifriranih sporočil.
 }
 pgp-details-part = Del { $number }: { $label }
 attachment-from-part = Iz dela { $number }: { $label }
@@ -1190,7 +1190,7 @@ preview-tile-format = Slike { $format } se še ne prikazujejo
 preview-tile-password = Zaščiteno z geslom: odprite ga, da vnesete geslo
 preview-tile-too-large = Presežena omejitev za predogled
 preview-tile-unreadable = Ni mogoče prikazati
-preview-tile-timed-out = Prikaz je trajal predolgo
+preview-tile-timed-out = Priprava predogleda je trajala predolgo
 preview-tile-crashed = Prejšnji predogled je bil prekinjen ali je zastal
 preview-tile-off = Ni prikazano, dokler se Inbox Classic znova ne zažene
 preview-not-printed = Datoteka »{ $name }« ({ $details }) ni vključena v izpis. Za tiskanje jo odprite.

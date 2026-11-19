@@ -6,7 +6,7 @@
     <tr><th>Renk</th><th>Anlamı</th></tr>
     <tr><td>Yeşil</td><td>Gönderenin imzası geçerli ve anahtarının sahibini doğrulamışsınız.</td></tr>
     <tr><td>Mavi</td><td>Gönderenin imzası geçerli, ancak anahtarının sahibini doğrulamamışsınız; veya ileti imzasız olarak şifrelenmiş.</td></tr>
-    <tr><td>Kehribar</td><td>Bir sorun var: imza uyuşmuyor, gönderenden başka biri imzalamış veya bir bölüm okunamadı.</td></tr>
+    <tr><td>Kehribar</td><td>Bir sorun var: imza uyuşmuyor, imza gönderenle ilişkilendirilememiş veya bir bölüm okunamadı.</td></tr>
     <tr><td>Gri</td><td>İmza yok, imza anahtarı bulunamıyor veya imza denetlenmemiş.</td></tr>
 </table>
 <p>Bir iletinin bölümleri farklı biçimde korunuyorsa her bölüm ayrı bir çerçevede, kendi etiketiyle gösterilir. Üstteki çubuk, her türden kaç bölüm bulunduğunu gösterir. Bölümlerin imza ve şifreleme ayrıntılarını, kullanılan anahtarları ve imza zamanını görmek için bir etikete veya çubuktaki <b data-text="ui-protection-details"></b> düğmesine tıklayın.</p>
@@ -16,5 +16,5 @@
 <p>Ekli dosyalar listesinde bir kilit, şifreli bir bölümün her dosyasını işaretler. Hangi bölümden geldiğini görmek için bir dosyanın üzerine gelin.</p>
 <p>Yanıtlarken veya iletirken yalnızca gösterilen kısım alıntılanır.</p>
 <p>İleti listesinde kilit şifreli bir iletiyi, mühür ise imzalı bir iletiyi gösterir. Şifreli iletilerde arama açıksa ve uygun gizli anahtar varsa Inbox Classic, indirilen veya açtığınız iletilerin şifresini çözebilir. Listedeki mühür tek başına imzanın geçerli olduğunu veya sahibinin doğrulandığını göstermez. Liste, şifresi çözülen metnin önizlemesini ve varsa şifreli bölümdeki konu bilgisini gösterir. Metin önizlemesi yoksa <b data-text="list-encrypted"></b> yazısı görünür. Şifreli iletiler için yeni posta bildirimlerinde her zaman bu yazı kullanılır.</p>
-<p><b data-settings="reading"></b> bölümündeki <b data-text="ui-search-encrypted"></b> seçeneği, şifresi çözülmüş iletilerin metninde de arama yapmanızı sağlar. Yapay zeka aracıları şifreli iletilerin içeriğini ve eklerini okuyamaz, bu içerikte arama yapamaz.</p>
+<p><b data-settings="reading"></b> bölümündeki <b data-text="ui-search-encrypted"></b> seçeneği, şifresi çözülmüş iletilerin metninde de arama yapmanızı sağlar. Şifresi çözülen metin ve korunan konular yerel dizine şifrelenmeden kaydedilir. Seçeneği kapatmak bu verileri kaldırır ve dış konu bilgilerini geri getirir. Yapay zeka aracıları şifreli iletilerin içeriğini ve eklerini okuyamaz, bu içerikte arama yapamaz.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

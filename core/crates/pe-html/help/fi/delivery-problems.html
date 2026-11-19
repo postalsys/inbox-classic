@@ -1,5 +1,5 @@
 <h1>Viestit, joita ei toimitettu</h1>
-<p class="summary">Kun lähettämäsi viesti palautuu tai viivästyy, Inbox Classic kertoo syyn ja sen, mitä voit tehdä.</p>
+<p class="summary">Inbox Classic selittää tunnistamansa toimitusvirhe- ja viiveilmoitukset ja ehdottaa seuraavia toimia.</p>
 <p>Toimitusvirheestä tai viiveestä kertova ilmoitus merkitään viestiluettelossa erillisellä kuvakkeella. Kun avaat ilmoituksen, sen yläpuolella oleva kortti kertoo, epäonnistuiko toimitus vai viivästyykö se.</p>
 <img src="picture:bounce-1-failed" alt="Toimitusilmoitus, jonka kortti kertoo, ettei viestiä toimitettu, sekä vastaanottajan, syyn ja mitä tehdä">
 <p>Kortti kertoo kunkin vastaanottajan kohdalla ongelman syyn ja toimintaohjeen. <b data-text="bounce-details"></b> näyttää vastaanottavan palvelimen alkuperäisen virheilmoituksen.</p>
@@ -7,13 +7,13 @@
     <li><b data-text="bounce-show-message"></b> valitsee alkuperäisen viestin, jos se löytyy tililtä.</li>
     <li>Jos toimitus on viivästynyt, <b data-text="bounce-show-delayed"></b> valitsee kyseisen viestin. Viive ei tarkoita lopullista virhettä. Lähettävä palvelin yrittää yleensä vielä; älä lähetä viestiä uudelleen pelkän viiveilmoituksen perusteella.</li>
 </ul>
-<p>Joitakin tavallisia syitä:</p>
+<p>Tavallisia syitä ja ohjeita lopulliseen toimitusvirheeseen. Jos toimitus vain viivästyy, odota lopputulosta ennen uutta lähetystä:</p>
 <table>
     <tr><th>Kortissa lukee</th><th>Mitä tehdä</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Tarkista osoitteen kirjoitusasu tai kysy henkilöltä osoitetta, jota hän nyt käyttää.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Lähetä viesti uudelleen muutaman päivän kuluttua tai ota vastaanottajaan yhteyttä muulla tavalla.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Lopullisen virheen jälkeen poista viestistä roskapostilta vaikuttavaa sisältöä, kuten runsaita linkkejä tai suuri liite, ja lähetä viesti uudelleen.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Välitä ilmoitus sähköpostipalveluntarjoajallesi. Vika ei ole viestissä.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Ota vastaanottajaan yhteyttä muulla tavalla ja pyydä häntä vapauttamaan tilaa ennen uutta yritystä.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Lue palvelimen selitys. Jos palvelin hylkäsi sisällön, muokkaa viestiä ennen uutta yritystä.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Välitä ilmoitus sähköpostipalveluntarjoajallesi. Ilmoituksen mukaan lähettävän palvelimen osoite on estetty.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Tilapäisessä viiveessä palvelin yrittää yleensä uudelleen. Jos raportti ilmoittaa lopullisesta virheestä, lähetä viesti myöhemmin uudelleen.</td></tr>
 </table>
 <p>Löydät kaikki toimitusilmoitukset hakemalla <code>is:bounce</code>. Virheilmoitus tulkitaan omalla tietokoneellasi. Viestin sisältöä ei lähetetä tätä varten ulkopuolisiin palveluihin.</p>

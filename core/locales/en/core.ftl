@@ -46,8 +46,8 @@ reader-downloading = Downloading the message…
 reader-downloading-detail = The message will appear here once the download is complete.
 reader-downloading-size = The message is { $size }. It will appear here once it is downloaded.
 reader-failed = The message could not be downloaded
-reader-failed-network = The mail server could not be reached ({ $reason }).
-reader-failed-sign-in = The mail server did not accept the sign-in ({ $reason }). Check the password or sign in again in File > Accounts.
+reader-failed-network = The connection to the mail server could not be made or was interrupted ({ $reason }).
+reader-failed-sign-in = The mail server did not accept the sign-in ({ $reason }). Check the password or sign in again in the account’s settings.
 reader-failed-security = The connection to the mail server could not be made secure ({ $reason }).
 reader-failed-other = The mail server answered: { $reason }.
 reader-retry-note = It will be tried again when the account reconnects.
@@ -110,12 +110,12 @@ bounce-mailbox-disabled-why = The address exists, but its mailbox has been switc
 bounce-mailbox-disabled-do = Reach the person another way and ask for an address they use now.
 bounce-mailbox-full = The mailbox is full
 bounce-mailbox-full-why = The recipient’s mailbox has no room for new mail.
-bounce-mailbox-full-do = Send it again in a few days, or let the person know another way. Large attachments are refused first.
+bounce-mailbox-full-do = Send it again in a few days, or let the person know another way.
 bounce-spam-blocked = Refused as spam
 bounce-spam-blocked-why = The receiving server took the message for spam.
 bounce-spam-blocked-do = Send it again without what looks like spam, such as many links, shortened links or a large attachment. If it keeps happening, ask your mail provider.
 bounce-virus-detected = Refused for a virus
-bounce-virus-detected-why = The receiving server found a virus or other harmful content in the message or its attachments.
+bounce-virus-detected-why = The receiving server reports a virus or other harmful content in the message or its attachments.
 bounce-virus-detected-do = Check the attachments with a virus scanner. Some servers refuse every program or archive, so share such files as a link instead.
 bounce-ip-blocklisted = Your mail server is on a blocklist
 bounce-ip-blocklisted-why = The receiving server refuses mail from the server that sent yours, because that server’s address is on a blocklist.
@@ -131,7 +131,7 @@ bounce-geo-blocked-why = The receiving server does not take mail from the countr
 bounce-geo-blocked-do = Reach the person another way, or ask your mail provider about it.
 bounce-relay-denied = The server would not pass it on
 bounce-relay-denied-why = A server refused to deliver the message onward, often because it was sent without signing in or through a server that does not handle this recipient.
-bounce-relay-denied-do = Check the outgoing server of the account in File > Accounts, and that it signs in.
+bounce-relay-denied-do = Check the outgoing server and sign-in details in the account’s settings.
 bounce-auth-failure = Your sender address could not be verified
 bounce-auth-failure-why = The receiving server could not confirm that the message really came from your domain (SPF, DKIM or DMARC).
 bounce-auth-failure-do = Forward this notice to whoever runs mail for your domain: its settings need fixing. Sending through your provider’s own server may help meanwhile.
@@ -140,7 +140,7 @@ bounce-rate-limited-why = The receiving server takes fewer messages from your ma
 bounce-rate-limited-do = Wait a while and send it again. When writing to many people, send to fewer at a time.
 bounce-greylisting = Held back for a moment
 bounce-greylisting-why = The receiving server asks unknown senders to try again a little later, a common check against spam.
-bounce-greylisting-do = Nothing. Mail servers try again on their own, and the message is usually delivered within the hour.
+bounce-greylisting-do = For a temporary delay, the sending server usually tries again. If this notice reports a final failure, try sending the message again later.
 bounce-server-error = The receiving server had a problem
 bounce-server-error-why = The receiving server could not be reached, or could not take the message because of a problem of its own.
 bounce-server-error-do = Send it again later. If it keeps failing, check the part of the address after the @ for typing mistakes.
@@ -312,7 +312,7 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Put 3 messages in Archive"
 import-put = { $count ->
-   *[other] Put { $messages } in { $folder }
+   *[other] Queued { $messages } for import into { $folder }
 }
 import-not-put = These were not put in the folder:
 
@@ -350,8 +350,8 @@ error-import-not-mail = { $path } is not an e-mail message
 error-list-answered = the mailing list server returned status { $status }
 error-not-built = the message could not be built
 error-outbox-waits = { $count ->
-    [one] the message waits in the Outbox and is sent with the next Send/Recv
-   *[other] { $count } messages wait in the Outbox and are sent with the next Send/Recv
+    [one] the message remains in the Outbox; the next Send/Recv tries to send it again
+   *[other] { $count } messages remain in the Outbox; the next Send/Recv tries to send them again
 }
 error-draft-not-removed = the earlier draft of the message could not be removed from Drafts: { $reason }
 error-sent-but = the message was sent, but { $problem }
@@ -359,15 +359,15 @@ error-sent-still-in-outbox = it is still in the Outbox: { $error }
 error-sent-no-copy = no copy could be saved in Sent: { $reason }
 error-no-password = no password for this account
 error-no-sign-in = no sign-in for this account
-error-provider-missing = this build can not sign in to { $provider }: is its sign-in app removed?
+error-provider-missing = the sign-in app is unavailable in this build (ID: { $provider }). It may have been removed
 error-provider-servers = this account’s servers do not match its sign-in app’s servers
 error-app-scopes = { $reason }. The mail server did not take the sign-in app’s token: check that the app’s scopes give access to mail
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google has not verified Inbox Classic yet, so it lets only test users sign in with it. Use your own Google sign-in app or an app password, or turn it on in Sign-in Apps (File > Accounts) if you are a test user.
-sign-in-off-other = It was turned off in Sign-in Apps (File > Accounts), where it can be turned on again.
+sign-in-off-google = The built-in Google sign-in app is set up for approved test users and is off for new accounts by default. Test users can turn it on in Sign-in Apps (File > Accounts). You can also use your own Google sign-in app, or an app password if your account supports it.
+sign-in-off-other = It is turned off for new accounts. You can turn it on in Sign-in Apps (File > Accounts).
 sign-in-app-no-name = the sign-in app needs a name
 sign-in-app-no-client = the client ID is missing
 sign-in-app-no-scopes = the sign-in app needs the scopes that give mail access
@@ -461,7 +461,7 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = This message can not be read.
 agent-encrypted-original = This message is encrypted: an agent can not reply to it or forward it, as it can not encrypt.
-agent-encrypted = This message is encrypted. Only the user can read it, in Inbox Classic.
+agent-encrypted = This message is encrypted. AI agents cannot read its content. Open it in Inbox Classic to read it yourself.
 agent-too-many-changes = Too many changes in the last 30 days: this agent has made as many as Inbox Classic keeps in its log for one program. It can make more once the oldest are 30 days old.
 agent-too-many-reads = Too many reads in the last 30 days: this agent has read as much as Inbox Classic keeps in its log for one program. It can read more once the oldest reads are 30 days old.
 list-encrypted = Encrypted message
@@ -470,7 +470,7 @@ agent-log-refused = You did not send “{ $subject }”
 agent-log-sent = Put “{ $subject }” in the Outbox for { $to }
 agent-log-draft = Saved the draft “{ $subject }”
 agent-log-draft-replaced = Replaced the draft “{ $subject }”
-agent-log-draft-discarded = Discarded the draft “{ $subject }”
+agent-log-draft-discarded = Requested deletion of the draft “{ $subject }”
 agent-draft-note = { $program }, an AI agent, wrote this draft. Check the recipients and the text before you send it.
 agent-log-read = Marked read “{ $subject }”
 agent-log-unread = Marked unread “{ $subject }”
@@ -481,12 +481,12 @@ agent-log-moved = Moved “{ $subject }” to { $folder }
 agent-log-junk = Marked “{ $subject }” as junk
 agent-log-not-junk = Marked “{ $subject }” as not junk
 agent-log-archived = Archived “{ $subject }”
-agent-log-folder = Made the folder “{ $name }”
+agent-log-folder = Requested creation of the folder “{ $name }”
 # written at the user's yes, before the list is asked; a list that fails replaces it with agent-log-unsubscribe-failed
 agent-log-unsubscribed = You agreed to unsubscribe from the list of “{ $subject }”
 agent-log-unsubscribe-failed = Could not unsubscribe from the list of “{ $subject }”: { $reason }
 # "You did not unsubscribe from news@shop.example, deals@example.com": the lists' addresses, never their names
-agent-log-unsubscribe-refused = You did not unsubscribe from { $senders }
+agent-log-unsubscribe-refused = You did not approve unsubscribe requests for { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } wants to unsubscribe you from a mailing list
    *[other] { $program } wants to unsubscribe you from { $count } mailing lists
@@ -504,7 +504,7 @@ agent-log-flag-color = Flagged “{ $subject }” { $color ->
     [purple] purple
    *[gray] gray
 }
-agent-log-renamed = Renamed the folder “{ $old }” to “{ $name }”
+agent-log-renamed = Requested renaming the folder “{ $old }” to “{ $name }”
 agent-log-watched = Watched the conversation “{ $subject }”
 agent-log-ignored = Ignored the conversation “{ $subject }”
 agent-log-unmarked = Stopped watching or ignoring the conversation “{ $subject }”
@@ -570,16 +570,16 @@ agent-undo-span = { $span ->
 }
 # the question before it takes back what a program did in the span chosen
 agent-undo-since-question = { $count ->
-    [0] { $program } made no changes in this time that can be taken back.
-    [one] Take back the change { $program } made in this time?
-   *[other] Take back the { $count } changes { $program } made in this time?
+    [0] { $program } has no changes in this period that can be taken back.
+    [one] Try to take back the change recorded for { $program } in this period?
+   *[other] Try to take back the { $count } recorded changes for { $program } in this period?
 }
-agent-undo-since-detail = Messages go back to the folders they came from, read states and flags go back to what they were, and messages still waiting in the Outbox are deleted. What you or the server changed since is left as it is.
+agent-undo-since-detail = Inbox Classic tries to restore folders, read states and flags, and delete messages still waiting in the Outbox. Changes that can no longer be undone are skipped. Some later flag-color changes can be overwritten.
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nothing was taken back.
-    [one] Took back 1 change.
-   *[other] Took back { $count } changes.
+    [one] Took back 1 recorded change, wholly or in part.
+   *[other] Took back { $count } recorded changes, wholly or in part.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 message was no longer where the change put it.
@@ -602,7 +602,7 @@ agent-invitation-reply = { $response ->
     [accept] This message accepts the invitation “{ $summary }” ({ $when }).
     [tentative] This message tentatively accepts the invitation “{ $summary }” ({ $when }).
    *[decline] This message declines the invitation “{ $summary }” ({ $when }).
-} The organizer’s calendar takes it in. Your answer to the invitation changes only once the message has been sent.
+} It goes to the organizer named in the invitation. Your local answer changes once the mail server accepts the message, without confirmation from the organizer’s calendar.
 # the subject of an answer to an invitation, as calendar programs write it
 invitation-reply-subject = { $response ->
     [accept] Accepted: { $summary }
@@ -621,8 +621,8 @@ agent-reads-messages = { $count ->
    *[other] read { $count } messages
 }
 agent-reads-attachments = { $count ->
-    [one] opened 1 attachment
-   *[other] opened { $count } attachments
+    [one] requested 1 attachment
+   *[other] requested { $count } attachments
 }
 agent-reads-searches = { $count ->
     [one] searched once
@@ -638,19 +638,19 @@ agent-read-conversation = { $count ->
     [one] Read the conversation “{ $subject }” (1 message)
    *[other] Read the conversation “{ $subject }” ({ $count } messages)
 }
-agent-read-attachment = Opened “{ $name }” of “{ $subject }”
+agent-read-attachment = Requested the attachment “{ $name }” from “{ $subject }”
 agent-read-search = { $count ->
     [one] Searched for “{ $query }”: 1 message
    *[other] Searched for “{ $query }”: { $count } messages
 }
-agent-read-people = Looked up people starting with “{ $query }”
+agent-read-people = Looked up people by the start of their name or address: “{ $query }”
 agent-read-list = { $count ->
-    [one] Looked at 1 message in { $folder }
-   *[other] Looked at { $count } messages in { $folder }
+    [one] Looked at 1 list entry (scope: { $folder })
+   *[other] Looked at { $count } list entries (scope: { $folder })
 }
 agent-read-changes = { $count ->
-    [one] Looked at 1 new message
-   *[other] Looked at { $count } new messages
+    [one] Looked at details of 1 new message
+   *[other] Looked at details of { $count } new messages
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programs started from { $terminal }
@@ -661,7 +661,7 @@ agent-terminal-program-mac = A program started from { $terminal }
 agent-terminal-program-windows = A program started from a terminal ({ $terminal })
 agent-terminal-program-linux = A program started from a terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } want to use your mail
-agent-connect-terminal-detail = Every AI agent you start from this terminal shares the access you allow here. To give one its own, add --name and a name of your choice to its arguments in the agent’s MCP settings.
+agent-connect-terminal-detail = AI agents started from the same recognized terminal program share the access you allow here. To give one separate access, add --name and a name of your choice to its arguments in the agent’s MCP settings. That name does not verify its identity.
 # above the question when a program said it was another one than the system found: "It said it was Claude. Inbox Classic checked which program started it: python3."
 agent-connect-claimed = It said it was { $claimed }. Inbox Classic checked which program started it: { $program }.
 
@@ -684,7 +684,7 @@ secrets-windows = the Credential Manager
 secrets-mac = the keychain
 secrets-linux = the system keyring (Secret Service)
 error-no-such-file = there is no such file
-cards-file-too-big = This file is too big to be an address book.
+cards-file-too-big = This file exceeds the size limit for importing an address book.
 ui-sender-added = { $name } was added to the Address Book.
 ui-sender-known = { $name } is already in the Address Book.
 ui-sender-none = The sender of this message has no e-mail address to add.
@@ -717,7 +717,7 @@ pgp-key-expired = Expired on { $date }
 pgp-key-revoked = Revoked
 pgp-key-revoked-why = Revoked: { $reason }
 pgp-key-not-valid = Not valid
-pgp-key-locked = Can not be used: the key that protects it is no longer in { $store }. Import its backup again.
+pgp-key-locked = Cannot be used: its protection key is unavailable in { $store }. Check that the store is available and unlocked. If the protection key is missing, import the private-key backup.
 pgp-source-own = Made in Inbox Classic
 pgp-source-file = Imported from a file
 pgp-source-paste = Pasted
@@ -726,11 +726,11 @@ pgp-source-vcard = From a contact card
 pgp-source-wkd = From the sender's mail provider
 pgp-source-keyserver = From keys.openpgp.org
 pgp-source-autocrypt = From a message's Autocrypt header
-pgp-error-no-store = Private keys are kept protected by { $store }, which can not be used: { $error }
+pgp-error-no-store = The protection key for your private keys is kept in { $store }, which cannot be used: { $error }
 pgp-error-wrong-passphrase = The passphrase is not right.
 pgp-error-not-a-key = This is not an OpenPGP key.
 pgp-error-too-large = The key is too large.
-pgp-error-unusable = The key uses old or weak cryptography and can not be used.
+pgp-error-unusable = The key cannot be used. It may lack a suitable signing or encryption key, or use unsupported cryptography.
 pgp-imported-private = { $count ->
     [one] Your private key was imported.
    *[other] { $count } private keys were imported.
@@ -749,13 +749,13 @@ pgp-pending = A different key for { $address } was found on { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Signed by { $signer }, key verified
 pgp-part-signed = Signed by { $signer } (key not verified)
-pgp-part-other = Signed by { $signer }, who is not the sender
+pgp-part-other = Signed by { $signer }; the key could not be matched to the sender
 pgp-part-unknown-key = Signed, but the key is not known
 pgp-part-not-signed = Not signed
 pgp-part-not-checked = Signature not checked
 pgp-part-encrypted = Encrypted. { $signature }
 pgp-part-no-key = Encrypted to a key you do not have
-pgp-part-changed = The encrypted part was changed on the way and is not shown
+pgp-part-changed = The encrypted part failed its integrity check and is not shown
 pgp-part-unprotected = Encrypted without protection against changes, not shown
 pgp-part-broken = The encrypted part can not be read
 pgp-why-mismatch = The signature does not match this text
@@ -771,10 +771,10 @@ pgp-why-not-key-in-use = Signed with another key than the one in use for { $addr
 pgp-part-pictures-loaded = { $label }. Pictures were loaded from the internet
 pgp-error-no-own-key = You have no key for { $address } to sign or encrypt with. Make one in Tools > Encryption Keys, or turn Sign and Encrypt off.
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } has no key to encrypt to.
-   *[other] These recipients have no key to encrypt to: { $addresses }.
+    [one] No usable encryption key is available for this recipient: { $addresses }.
+   *[other] No usable encryption keys are available for these recipients: { $addresses }.
 }
-pgp-error-encrypted-quote = This message quotes or forwards an encrypted message, so it can only be sent encrypted. Turn Encrypt on, or remove the quoted text.
+pgp-error-encrypted-quote = This message contains text, pictures or attachments from encrypted mail and can only be sent encrypted. Turn Encrypt on, or remove all that content.
 pgp-error-protect = The message could not be signed or encrypted: { $reason }
 pgp-found-keys = Keys found for: { $addresses }.
 pgp-found-none = No key was found for { $addresses }. Ask them to send you their public key.
@@ -786,24 +786,24 @@ pgp-publish-failed = The key could not be published: { $error }
 pgp-keyserver-off = Looking up keys on keys.openpgp.org is turned off in { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 pgp-compose-encrypted = { $count ->
-    [one] Encrypted and signed: only you and { $addresses } can read it.
-   *[other] Encrypted and signed: only you and its { $count } recipients can read it.
+    [one] Will be encrypted and signed for you and { $addresses }.
+   *[other] Will be encrypted and signed for you and its { $count } recipients.
 }
 pgp-compose-encrypt-ready = It will be encrypted and signed. Add recipients whose keys you have.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } has no key, so the message can not be encrypted yet.
-   *[other] { $count } recipients have no key, so the message can not be encrypted yet: { $addresses }.
+    [one] No usable key is available for { $addresses }, so the message cannot be encrypted yet.
+   *[other] { $count } recipients have no usable key, so the message cannot be encrypted yet: { $addresses }.
 }
 pgp-compose-looking = Looking for the keys of { $addresses }...
-pgp-compose-signed = Signed: recipients can check that it comes from you and was not changed.
+pgp-compose-signed = Will be signed: recipients can check that the signed content has not changed. They must also verify who owns your key.
 pgp-compose-reply-clear = Not encrypted, although the message it answers or forwards was.
 pgp-compose-encrypted-files = Files of an encrypted message are attached, so this message can only be sent encrypted. Turn Encrypt on, or remove those files.
-pgp-compose-sign-tip = Sign the message with your key, so recipients can check that it comes from you and was not changed
+pgp-compose-sign-tip = Sign the message so recipients can check its content. They must also verify who owns your key
 pgp-compose-sign-tip-encrypted = An encrypted message is always signed
 pgp-compose-encrypt-tip = Encrypt the message, so only you and its recipients can read it
 pgp-compose-make-key = You have no key for { $address } yet. Make one now? With it, your messages can be signed and encrypted.
 pgp-compose-key-unusable = Your key for { $address } can not be used ({ $state }). Open Encryption Keys to import its backup or make a new key.
-pgp-compose-encrypt-off-quote = This message quotes or forwards an encrypted message. Without encryption, it can not be sent until you remove what it quotes. Turn encryption off anyway?
+pgp-compose-encrypt-off-quote = This message contains text, pictures or attachments from encrypted mail. Without encryption, it cannot be sent until you remove all that content. Turn encryption off anyway?
 pgp-compose-encrypt-off-reply = This message answers or forwards an encrypted message. Without encryption, anyone who handles your message on the way can read it. Turn encryption off?
 pgp-recipient-verified = Key verified
 pgp-recipient-found = Key not verified
@@ -814,8 +814,8 @@ pgp-recipient-not-found = No key: none was found on { $date }
 pgp-recipient-unusable = Key can not be used: { $state }
 pgp-recipients-intro = The message is encrypted to each recipient’s key, and to yours.
 pgp-recipients-intro-missing = { $count ->
-    [one] One recipient has no key to encrypt to. Find their key, remove them from this message, or send it without encryption.
-   *[other] { $count } recipients have no key to encrypt to. Find their keys, remove them from this message, or send it without encryption.
+    [one] One recipient has no usable encryption key. Find a key or remove the recipient. Sending without encryption is available only after removing any content from encrypted mail.
+   *[other] { $count } recipients have no usable encryption key. Find their keys or remove those recipients. Sending without encryption is available only after removing any content from encrypted mail.
 }
 pgp-details-part = Part { $number }: { $label }
 attachment-from-part = From part { $number }: { $label }
@@ -886,23 +886,23 @@ setup-holds-trusted-senders = { $count ->
 }
 setup-sign-in-password = Password
 setup-account-secret-password = Its password is in the file.
-setup-account-secret-token = Its sign-in is in the file.
+setup-account-secret-token = Its saved sign-in credentials are in the file.
 setup-account-asks-password = It asks for its password after the import.
 setup-account-signs-in-again = You sign in to it again after the import.
 setup-account-here = It is set up here already, so it is skipped.
 setup-account-no-app = It signs in with { $app }, which is not set up here. Import the sign-in apps too.
 setup-invalid-address = "{ $address }" is not an email address.
-setup-invalid-server = The { $server } server has no usable name or port.
+setup-invalid-server = The { $server } settings have an invalid server name, port or security option.
 setup-invalid-user = It has no user name.
-setup-invalid-sign-in = It signs in in a way Inbox Classic does not know.
+setup-invalid-sign-in = Its sign-in method or configuration is not supported.
 setup-error-empty = The file is empty.
-setup-error-too-large = The file is too large to be an Inbox Classic setup.
+setup-error-too-large = The setup file exceeds the size limit.
 setup-error-not-setup = This file is not an Inbox Classic setup.
 setup-error-damaged = The setup file is damaged and can not be read.
 setup-error-newer = This setup was saved by a newer Inbox Classic ({ $version }). Update Inbox Classic, then import it again.
 setup-error-needs-passphrase = This setup is protected by a passphrase. Type the passphrase it was saved with.
 setup-error-wrong-passphrase = That is not the passphrase this setup was saved with.
-setup-error-changed = The setup file was changed or damaged after it was saved, so it can not be imported.
+setup-error-changed = The setup file failed its integrity check. It may be altered or damaged and cannot be imported.
 setup-error-read = The setup file could not be read: { $error }
 setup-error-write = The setup could not be saved: { $error }
 setup-error-no-parts = Choose at least one part.
@@ -962,8 +962,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } message rules are for accounts that are not here, so they were skipped.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 message rule moves messages to a folder that appears once its account syncs.
-   *[other] { $count } message rules move messages to folders that appear once their accounts sync.
+    [one] 1 message rule is waiting for its destination folder to be found during account synchronization.
+   *[other] { $count } message rules are waiting for their destination folders to be found during account synchronization.
 }
 setup-added-trusted-senders = { $count ->
     [one] Added 1 trusted sender.
@@ -972,9 +972,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Nothing was imported.
 setup-account-servers = { $imap } and { $smtp } ({ $signin })
 setup-file-name = Inbox Classic settings and accounts
-setup-skipped-unreachable = { $name } was skipped: its sign-in service could not be reached. Add it again in Sign-in Apps.
+setup-skipped-unreachable = { $name } was skipped: its sign-in service could not be reached or checked. Check the required app in Sign-in Apps before trying again.
 attachment-runs-programs = “{ $name }” can run programs, so Inbox Classic does not open it. Save it, then open it yourself if you trust where it comes from.
-attachment-decrypted-note = This attachment comes from an encrypted message. To open it, Inbox Classic saves an unencrypted copy in a temporary folder for your user account. Copies older than a day are removed when the app starts.
+attachment-decrypted-note = This attachment comes from encrypted mail. To open it in another app, Inbox Classic saves an unencrypted copy in a temporary folder for your user account. At startup, it tries to remove copies older than a day.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] The server did not move { $messages } to { $folder }, so it is back in { $from }: { $reason }
@@ -1041,9 +1041,9 @@ preview-tile-too-large = Too large to show
 # the tile of a file that is broken, or not what its name says
 preview-tile-unreadable = Can not be shown
 # the tile of a file that took too long to draw
-preview-tile-timed-out = Took too long to show
+preview-tile-timed-out = The preview took too long to prepare
 # the tile of a file that closed the app once while it was drawn: never drawn again
-preview-tile-crashed = Not shown: it closed Inbox Classic once
+preview-tile-crashed = Preview unavailable: an earlier attempt was interrupted
 # the tile of a file while previews are paused after a file took too long, until the app starts again
 preview-tile-off = Not shown until Inbox Classic starts again
 # in a printout, for a file shown in the message that is not printed (a PDF file, a tile): { $details } is its size,

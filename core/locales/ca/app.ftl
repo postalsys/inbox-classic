@@ -177,7 +177,7 @@ ui-outbox-title = Safata de sortida
 ui-outbox-status-waiting = En espera
 ui-outbox-status-not-sent = No enviat: { $reason }
 # Aquest missatge encara és a la cua, durant el temps d’espera abans de l’enviament d’un agent.
-ui-outbox-status-agent = Missatge d’un agent d’IA en espera; s’enviarà a les { $time }
+ui-outbox-status-agent = Missatge d’un agent d’IA en espera; enviament previst a les { $time }
 ui-outbox-delete-ask = Voleu suprimir aquest missatge sense enviar-lo?
 ui-open-link = Obre l’enllaç
 ui-edit-link = Edita l’enllaç...
@@ -589,7 +589,7 @@ ui-download-ahead-all = Tots els missatges
 ui-download-ahead-never = Només quan s’obren
 ui-download-limit = &Límit d’emmagatzematge per compte:
 ui-send-delay = &Temps d’espera abans d’enviar:
-ui-send-delay-note = Mentre un missatge espera per ser enviat, podeu cancel·lar l’enviament amb Desfés.
+ui-send-delay-note = Durant el compte enrere, podeu cancel·lar l’enviament amb Desfés. Aquesta opció s’acaba quan acaba el compte enrere, encara que el missatge continuï pendent d’enviament.
 ui-dark-messages = Mostra els missatges amb fons fosc quan el sistema és en mode fosc
 ui-preview-show = Mostra els &fitxers adjunts als missatges
 ui-preview-show-note = Mostra les imatges i les primeres pàgines dels fitxers PDF després del text del missatge. Inbox Classic genera aquestes previsualitzacions sense executar el codi dels fitxers ni carregar-ne recursos externs.

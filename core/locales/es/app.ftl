@@ -172,7 +172,7 @@ ui-col-status = Estado
 ui-outbox-title = Bandeja de salida
 ui-outbox-status-waiting = En espera
 ui-outbox-status-not-sent = No enviado: { $reason }
-ui-outbox-status-agent = Un agente de IA ha puesto el mensaje en cola; se enviará a las { $time }
+ui-outbox-status-agent = Un agente de IA ha puesto el mensaje en cola; envío previsto a las { $time }
 ui-outbox-delete-ask = ¿Eliminar este mensaje sin enviarlo?
 ui-open-link = Abrir enlace
 ui-edit-link = Editar enlace...
@@ -291,9 +291,9 @@ ui-found-mx = Inbox Classic ha identificado su proveedor de correo y ha completa
 ui-found-srv = Esta configuración se encontró en los registros DNS de su dominio.
 ui-found-autodiscover = Esta configuración se encontró mediante Microsoft Autodiscover (Exchange).
 ui-found-other = Esta configuración se encontró para esta dirección.
-ui-app-password-needed = { $provider } no acepta su contraseña normal en los programas de correo. Cree una contraseña de aplicación en su cuenta de { $provider } y escríbala en el campo Contraseña del siguiente formulario.
+ui-app-password-needed = Proveedor: { $provider }. Si su cuenta admite contraseñas de aplicación, cree una en su configuración de seguridad y escríbala en el campo Contraseña del siguiente formulario. De lo contrario, use el inicio de sesión con el navegador si está disponible.
 ui-app-password-open = ¿Abrir las instrucciones de { $provider } en su navegador?
-ui-plain-warning = Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Utilice esta conexión solo con un servidor en su propio equipo o en su red local.
+ui-plain-warning = Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Continúe solo si la conexión está protegida de otra forma; una red local por sí sola no proporciona cifrado.
 ui-continue-ask = ¿Continuar?
 ui-add-sign-in-app = Agregar una aplicación de inicio de sesión...
 ui-turned-off = La opción «{ $name }» está desactivada en este equipo.
@@ -475,8 +475,8 @@ ui-rule-apply-now = Aplicarla también a los mensajes que ya están en la &Bande
 ui-rule-delete-ask = ¿Eliminar la regla «{ $name }»?
 ui-create-rule = Crear regla...
 ui-rules-applied = { $count ->
-    [one] Sus reglas ordenaron 1 mensaje
-   *[other] Sus reglas ordenaron { $count } mensajes
+    [one] Sus reglas procesaron 1 mensaje
+   *[other] Sus reglas procesaron { $count } mensajes
 }
 ui-col-rule-matches = Criterios
 ui-clear-button = &Borrar
@@ -585,7 +585,7 @@ ui-download-ahead-all = Todos los mensajes
 ui-download-ahead-never = Solo al abrirlos
 ui-download-limit = &Espacio máximo por cuenta:
 ui-send-delay = &Retraso antes de enviar:
-ui-send-delay-note = Mientras un mensaje esté pendiente de envío, puede cancelar el envío con Deshacer.
+ui-send-delay-note = Durante la cuenta atrás puede cancelar el envío con Deshacer. Esta opción termina cuando acaba la cuenta atrás, aunque el mensaje siga pendiente de envío.
 ui-dark-messages = Mostrar los mensajes sobre fondo oscuro cuando el sistema esté en modo oscuro
 ui-preview-show = Mostrar los archivos ad&juntos en los mensajes
 ui-preview-show-note = Muestra las imágenes y las primeras páginas de los archivos PDF después del texto del mensaje. Inbox Classic genera estas vistas previas sin ejecutar el código que puedan contener los archivos.
@@ -596,7 +596,7 @@ ui-sending-in = Se enviará { $subject } en { $count ->
 }
 ui-send-undone = { $subject } no se envió. El mensaje se ha vuelto a abrir para editarlo.
 ui-send-too-late = Ya no se puede deshacer el envío de { $subject }.
-ui-outbox-status-undo = Se envía a las { $time }
+ui-outbox-status-undo = Envío previsto a las { $time }
 ui-download-note = Los mensajes descargados con antelación se abren al instante. Cuando se supera el límite, se eliminan las copias de contenido más antiguas y se descargan de nuevo al abrir los mensajes. Se conservan los borradores y los mensajes abiertos desde que inició el programa. El límite no abarca toda la base de datos.
 ui-attachment-downloading = La descarga de este mensaje aún no ha terminado. Vuelva a intentarlo cuando finalice.
 ui-trusted-senders-button = &Remitentes de confianza...

@@ -1,24 +1,24 @@
 <h1>Sign and encrypt a message</h1>
-<p class="summary">Sign a message so its recipients know it is from you, and encrypt it so only they can read it.</p>
-<p>A signed message shows that you wrote it and that nobody changed it on the way. An encrypted message can be read only by its recipients and by you, and it is always signed too. For both, you need a key of your own.</p>
+<p class="summary">Sign a message to protect its integrity, and encrypt its content for you and its recipients.</p>
+<p>A valid signature shows whether the signed content has changed. Recipients must also verify who owns the key. An encrypted message can be read only by its recipients and by you, and it is always signed too. For both, you need a key of your own.</p>
 <p>To sign or encrypt a message:</p>
 <ol>
-    <li>In the message window, click <b data-text="ui-tb-sign"></b> or <b data-text="ui-tb-encrypt"></b>, or choose <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> or <b data-text="cmd-compose-encrypt"></b>. You can also press <kbd data-command="compose_sign"></kbd> or <kbd data-command="compose_encrypt"></kbd>. If you have no key yet, Inbox Classic offers to make one.</li>
+    <li>In the message window, click <b data-text="ui-tb-sign"></b> or <b data-text="ui-tb-encrypt"></b>, or choose <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> or <b data-text="cmd-compose-encrypt"></b>. You can also press <kbd data-command="compose_sign"></kbd> or <kbd data-command="compose_encrypt"></kbd>. If no key is selected for your sending address, Inbox Classic offers to make one.</li>
     <li>Click <b data-text="ui-tb-send"></b>.</li>
 </ol>
 <p>While <b data-text="ui-tb-encrypt"></b> is on, the line under the subject shows each recipient in a color with a picture, and Inbox Classic looks for the keys it does not have yet:</p>
 <table>
     <tr><th>Recipient</th><th>What it means</th></tr>
     <tr><td>Green, with a lock</td><td>You verified the recipient’s key.</td></tr>
-    <tr><td>Blue, with a lock</td><td>You have the recipient’s key, but you have not verified it.</td></tr>
+    <tr><td>Blue, with a lock</td><td>The key is unverified, or it is your own key.</td></tr>
     <tr><td>Gray, with <!--os:windows-->a lock<!--/os--><!--os:mac-->an hourglass<!--/os--><!--os:linux-->a spinning circle<!--/os--></td><td>Inbox Classic is looking for the recipient’s key.</td></tr>
     <tr><td>Amber, with a warning sign</td><td>No key that can be used was found for the recipient.</td></tr>
 </table>
 <h2>If a recipient has no key</h2>
-<p>An encrypted message is sent only when every recipient has a key. If one does not, <b data-text="ui-tb-send"></b> opens <b data-text="ui-recipient-keys-title"></b>. There you can click <b data-text="ui-recipient-find-key"></b> to look again, <b data-text="ui-recipient-remove"></b> to leave that person out, or <b data-text="ui-send-unencrypted"></b>. You can also ask them for their public key and import it.</p>
+<p>Encrypted sending requires a usable key for every recipient. If one does not, <b data-text="ui-tb-send"></b> opens <b data-text="ui-recipient-keys-title"></b>. There you can click <b data-text="ui-recipient-find-key"></b> to look again, <b data-text="ui-recipient-remove"></b> to leave that person out, or <b data-text="ui-send-unencrypted"></b> when no content from encrypted mail remains. You can also ask them for their public key and import it.</p>
 <h2>Replies to encrypted mail</h2>
-<p>A reply to an encrypted message, or a forward of one, starts with <b data-text="ui-tb-encrypt"></b> on, and Inbox Classic asks before you turn it off. While the message still quotes the encrypted text or carries its attachments, it can be sent only encrypted.</p>
-<p>Drafts of an encrypted message are saved encrypted, and so is its copy in <b data-text="folder-sent"></b>.</p>
+<p>A reply to an encrypted message, or a forward of one, starts with <b data-text="ui-tb-encrypt"></b> on, and Inbox Classic asks before you turn it off. While the message contains text, pictures or attachments from encrypted mail, it can be sent only encrypted.</p>
+<p>Drafts are encrypted to your own key without a digital signature. The sent message and its copy in <b data-text="folder-sent"></b> remain encrypted and signed.</p>
 <h2>Share your public key</h2>
 <p>To let someone send you encrypted mail, choose <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Your public key is attached to the message as a file.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>

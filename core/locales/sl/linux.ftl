@@ -181,4 +181,4 @@ gtk-metainfo-description = Inbox Classic je poštni program s klasično razpored
 gtk-metainfo-feature-sanitized = Sporočila se prikažejo brez skriptov in drugih aktivnih elementov, slike z interneta pa se naložijo le z vašim dovoljenjem
 gtk-metainfo-feature-search = Iskanje po zadevah, imenih in naslovih pošiljateljev ter prejemnikov, imenih datotek in besedilu sporočil, z iskalnimi operatorji kot v Gmailu
 gtk-metainfo-feature-replies = V odgovorih so citirana starejša sporočila zložena
-gtk-metainfo-feature-offline = Prenesena sporočila lahko berete brez povezave; gesla se privzeto shranijo v sistemsko shrambo ključev
+gtk-metainfo-feature-offline = Pošto lahko berete brez povezave, dokler je shranjena lokalna kopija; prijavni podatki se običajno hranijo v sistemski shrambi ključev, če je na voljo

@@ -137,4 +137,4 @@ win-installer-welcome-update = Bus atnaujinta Inbox Classic: versija { $installe
     Jei programa veikia, ji pirmiausia bus uždaryta. Jūsų pašto paskyros ir laiškai bus išsaugoti.
 win-installer-older-ask = Jau įdiegta naujesnė Inbox Classic versija ({ $installed }). Vis tiek įdiegti senesnę versiją ({ $version })?
 win-installer-still-running = Inbox Classic vis dar veikia. Uždarykite ją ir bandykite dar kartą.
-win-installer-remove-mail-ask = Taip pat pašalinti Inbox Classic duomenų aplanką, kuriame saugomos pašto paskyros, laiškai ir kiti šios programos duomenys? Laiškai serveriuose liks.
+win-installer-remove-mail-ask = Taip pat pašalinti visus vietinius Inbox Classic duomenis, įskaitant paskyras, laiškus, siuntimo eilę, nuostatas, adresatus, taisykles ir šifravimo raktus? Laiškai serveriuose ir įrašai sistemos prisijungimo duomenų saugykloje liks.

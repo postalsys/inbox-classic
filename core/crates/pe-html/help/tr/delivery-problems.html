@@ -1,5 +1,5 @@
 <h1>Teslim edilemeyen iletiler</h1>
-<p class="summary">Gönderdiğiniz bir ileti geri döndüğünde veya geciktiğinde Inbox Classic nedenini ve ne yapabileceğinizi açıklar.</p>
+<p class="summary">Inbox Classic, tanıdığı teslimat hatası ve gecikme bildirimlerini açıklar ve yapabileceklerinizi gösterir.</p>
 <p>Inbox Classic, tanıyabildiği teslim edilememe veya gecikme bildirimlerini listede özel bir simgeyle gösterir. Bildirimi açtığınızda üstteki kart, teslimatın başarısız mı olduğunu yoksa hâlâ geciktiğini mi belirtir.</p>
 <img src="picture:bounce-1-failed" alt="İletinin teslim edilmediğini, alıcıyı, nedeni ve ne yapılacağını söyleyen kartıyla bir teslim bildirimi">
 <p>Kart, her alıcı için sorunun nedenini sade bir dille açıklar ve yapabileceklerinizi gösterir. <b data-text="bounce-details"></b> alıcı sunucunun özgün yanıtını gösterir.</p>
@@ -7,14 +7,14 @@
     <li><b data-text="bounce-show-message"></b> bağlantısı, özgün ileti bulunabildiyse gönderdiğiniz iletiyi seçer.</li>
     <li>Geciken iletiyi görmek için <b data-text="bounce-show-delayed"></b> düğmesini kullanın. Bildirim, posta sunucunuzun teslimatı yeniden deneyeceğini söyler; yeniden göndermek kopya ileti oluşturabilir.</li>
 </ul>
-<p>Sık görülen bazı nedenler:</p>
+<p>Kesinleşmiş teslimat hataları için yaygın nedenler ve öneriler. Teslimat yalnızca gecikiyorsa yeniden göndermeden önce sonucu bekleyin:</p>
 <table>
     <tr><th>Karttaki açıklama</th><th>Ne yapmalı</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Adresin yazımını kontrol edin veya kişiye şimdi kullandığı adresi sorun.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Birkaç gün sonra yeniden gönderin veya kişiye başka bir yoldan ulaşın.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Çok sayıda bağlantı veya büyük ek gibi istenmeyen posta şüphesi uyandırabilecek içerikleri çıkarıp yeniden gönderin.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Bildirimi posta sağlayıcınıza iletin. Sorun iletide değil.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Sunucunun yeniden denemesini bekleyin. Bu tür retler geçici olabilir, ancak teslimat süresi kesin değildir.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Alıcıya başka bir yoldan ulaşın ve yeniden denemeden önce yer açmasını isteyin.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Sunucunun açıklamasını okuyun. İçeriği reddettiyse yeniden denemeden önce iletiyi düzenleyin.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Bildirimi posta sağlayıcınıza iletin. Bildirime göre gönderen sunucunun adresi engellenmiştir.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Alıcı sunucu daha sonra yeniden denenmesini istedi. Bildirim gecikme belirtiyorsa sonucu bekleyin; teslimatın ne zaman başarılı olacağı kesin değildir.</td></tr>
 </table>
 <p>Tüm teslim bildirimlerini bulmak için <code>is:bounce</code> arayın. Açıklama, ileti içeriği başka bir hizmete gönderilmeden bilgisayarınızda hazırlanır.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

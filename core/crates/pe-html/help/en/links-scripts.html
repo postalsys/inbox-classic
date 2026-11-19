@@ -1,13 +1,13 @@
 <h1>Links, scripts and attachments</h1>
 <p class="summary">How Inbox Classic keeps a message from running code or opening pages on its own.</p>
 <ul>
-    <li><b>Scripts</b> in messages never run. Inbox Classic cleans every message before it shows it, and the reading pane cannot run code.</li>
-    <li><b>Links</b> open in your web browser, never inside Inbox Classic. A message cannot open a page or a window by itself.</li>
-    <li><b>Attachments</b> are saved, never opened from Inbox Classic. Their names are made safe before you save them.</li>
+    <li><b>Scripts</b> in messages never run. Inbox Classic removes message scripts and active markup before displaying it. The app’s own display controls still use scripts.</li>
+    <li><b>Web links</b> open in your browser when you choose them. E-mail links can open a new message. Message content cannot open a page or window on its own.</li>
+    <li><b>Attachments</b> open in an external program only when you ask. Inbox Classic first saves a temporary copy and blocks recognized executable formats. Suggested file names are cleaned before saving.</li>
     <li><b>Unsubscribe</b> asks you first, and says what it will do.</li>
 </ul>
 <aside class="warning">Before you type a password on a page you reached from a message, check the address in your browser. A message can show one address and link to another.</aside>
-<p>When you write a message, the status bar shows where the link at the cursor goes, so you can check it before you send.</p>
-<p>A sign-in code is offered only when your mail provider confirms who sent it. See <a href="topic:sign-in-codes"></a>.</p>
-<p>Pictures and fonts in a message never reach the system’s own decoders.</p>
+<p>When you write a message, the status bar shows the destination of the link under the pointer or at the text cursor, so you can check it before you send.</p>
+<p>A sign-in code is offered only when your mail provider confirms a signature from the relevant domain or its parent. This does not verify an individual sender. See <a href="topic:sign-in-codes"></a>.</p>
+<p>Embedded pictures are converted to static images before display, and fonts supplied by the message are not used. Remote pictures that you allow are displayed by the web view.</p>
 <nav class="related"><a href="topic:pictures-tracking"></a> <a href="topic:attachments"></a> <a href="topic:data-storage"></a></nav>

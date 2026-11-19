@@ -173,4 +173,4 @@ gtk-metainfo-description = Inbox Classic on tuttava paigutusega meiliprogramm: k
 gtk-metainfo-feature-sanitized = Kirju kuvatakse ilma skriptideta ning veebipilte laaditakse ainult teie loal
 gtk-metainfo-feature-search = Otsige teema, saatjate, adressaatide, manuste nimede ja kirja sisu järgi, kasutades ka Gmaili otsinguoperaatoreid
 gtk-metainfo-feature-replies = Vastustes on varasemate kirjade tsitaadid kokku ahendatud
-gtk-metainfo-feature-offline = Allalaaditud kirju saab lugeda ka võrguühenduseta; sisselogimisandmed salvestatakse vaikimisi süsteemi paroolihoidlasse
+gtk-metainfo-feature-offline = Kirju saab võrguühenduseta lugeda, kuni nende kohalik koopia on alles; sisselogimisandmeid hoitakse tavaliselt süsteemi paroolihoidlas, kui see on saadaval
