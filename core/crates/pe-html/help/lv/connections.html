@@ -1,15 +1,14 @@
-<!--review--><h1>Savienojumi, ko veido Inbox Classic</h1>
-<p class="summary">Kur Inbox Classic veido savienojumus un kāpēc, tehniski zinātkārajiem.</p>
+<h1>Savienojumi, ko veido Inbox Classic</h1>
+<p class="summary">Ar kādiem pakalpojumiem Inbox Classic sazinās un kādi dati šiem savienojumiem vajadzīgi.</p>
 <ul>
-    <li><b>Jūsu pasta serveri</b>, ar IMAP pasta lasīšanai un SMTP sūtīšanai. Savienojumi ir šifrēti ar TLS, un katra servera sertifikāts tiek pārbaudīts pret tiem, kuriem uzticas jūsu sistēma. Inbox Classic atsaka serverim bez šifrēšanas, ja vien jūs neizvēlaties <b data-text="ui-security-none"></b> un to neapstiprināt.</li>
-    <li><b>Konta pievienošana</b>, lai atrastu tā serverus. Inbox Classic nolasa jūsu domēna DNS ierakstus, izmantojot DNS over HTTPS (Cloudflare, pēc tam Google), nekad parasto DNS. Tā izmēģina arī jūsu pakalpojumu sniedzēja autoconfig failu un Thunderbird pakalpojumu sniedzēju sarakstu (ISPDB). Exchange gadījumā tā vaicā Microsoft Autodiscover, kas jūsu paroli saņem tikai tad, ja to pieprasa, izmantojot HTTPS. Serveris bez šifrēšanas nekad netiek izvēlēts.</li>
-    <li><b>Pierakstīšanās pārlūkā</b>, ar OAuth 2.0 un PKCE, pie Google, Microsoft vai jūsu pierakstīšanās lietotnes pakalpojumu sniedzēja. Pārlūks atgriežas pie Inbox Classic tikai šajā datorā.</li>
-    <li><b>Zīmolu logotipi</b> (BIMI), no zīmola HTTPS adreses, ja ziņojumā logotipa nav, vienu reizi katrā Inbox Classic darbības reizē. Tas notiek tikai tad, ja jūsu pasta serveris ziņojumam ir izpildījis DMARC pārbaudi un akceptējis logotipu.</li>
-    <li><b>Attēli no interneta</b>, tikai tad, ja jūs tos pieprasāt.</li>
-    <li><b>Atteikšanās no abonēšanas</b>, tikai tad, ja jūs uz tās noklikšķināt. Viena klikšķa pieprasījums (RFC 8058) tiek nosūtīts tikai tad, ja saraksts ziņojumu ir parakstījis ar DKIM.</li>
-    <li><b>Šifrēšanas atslēgas</b>, tikai tad, ja šifrējat kādam, kura atslēgas jums nav: vispirms viņa adreses domēns (Web Key Directory), tad keys.openpgp.org, ja vien neesat to izslēdzis. Tiek nosūtīta tikai adrese.</li>
-    <!--os:mac--><li><b>Atjauninājumi</b>, no inboxclassic.com, lai redzētu, vai ir iznākusi jauna versija.</li><!--/os-->
+    <li><b>Jūsu pasta serveri</b>, ar IMAP pasta lasīšanai un SMTP sūtīšanai. Savienojumi ir šifrēti ar TLS, un servera sertifikāts parasti tiek pārbaudīts, izmantojot sistēmas uzticamos sertifikātus. Komandrindā var norādīt arī atļautos sertifikātus. Savienojums bez šifrēšanas tiek atteikts, ja vien neizvēlaties „<b data-text="ui-security-none"></b>” un neapstiprināt brīdinājumu.</li>
+    <li><b>Konta pievienošana</b>, lai atrastu tā serverus. Konfigurācijas MX un SRV ierakstu meklēšanai izmanto DNS over HTTPS: Cloudflare, pēc tam Google. Serveru parasto resursdatoru nosaukumu atrisināšanu veic sistēma. Lietotne var pieprasīt arī sniedzēja autoconfig datus un Thunderbird sarakstu (ISPDB); daži pieprasījumi ietver e-pasta adresi. Exchange Autodiscover paroli nosūta tikai pēc HTTPS servera Basic autentifikācijas pieprasījuma. Automātiski netiek izvēlēts nešifrēts savienojums.</li>
+    <li><b>Pierakstīšanās pārlūkā</b>, ar OAuth 2.0 un PKCE, pie Google, Microsoft vai jūsu pierakstīšanās lietotnes pakalpojumu sniedzēja. Atbilde no pārlūkprogrammas tiek saņemta šajā datorā.</li>
+    <li><b>Zīmolu logotipi</b> (BIMI) tiek iegūti no zīmola HTTPS adreses, ja tie nav iekļauti ziņojumā. Pasta serverim jāapstiprina DMARC pārbaudes rezultāts un logotips. Iegūtos logotipus glabā kešatmiņā līdz 30 dienām; pēc neveiksmes atkārtotu pieprasījumu atliek uz dienu.</li>
+    <li><b>Attēli no interneta</b> tiek ielādēti pēc jūsu pieprasījuma vai atbilstoši automātiskās ielādes un uzticamo sūtītāju iestatījumiem. Šifrētās daļās ielāde vienmēr jāatļauj ar atsevišķu klikšķi.</li>
+    <li><b>Atteikšanās no abonēšanas</b> vispirms prasa jūsu apstiprinājumu. Tiešo HTTP pieprasījumu (RFC 8058) nosūta tikai tad, ja pakalpojumu sniedzējs apstiprina DKIM parakstu, kas aptver abas atteikšanās galvenes. Citos gadījumos var atvērt e-pasta melnrakstu vai tīmekļa lapu.</li>
+    <li><b>Šifrēšanas atslēgas</b> meklē, gatavojot šifrētu ziņojumu vai pēc manuāla pieprasījuma. Adreses meklēšanai vispirms izmanto tās domēnu (Web Key Directory), pēc tam keys.openpgp.org, ja tas atļauts. Šajā gadījumā nosūta adresi; meklējot pēc pirkstu nospieduma vai atslēgas identifikatora, nosūta šo identifikatoru. Publicēšana nosūta publisko atslēgu un apstiprināmās adreses.</li>
+    <!--os:mac--><li><b>Atjauninājumi</b> tiek pārbaudīti vietnē inboxclassic.com. Automātisko pārbaudi var izslēgt iestatījumos.</li><!--/os-->
 </ul>
-<p>Pierakstīšanās kodi tiek piedāvāti tikai tad, ja jūsu pakalpojumu sniedzēja galvene Authentication-Results norāda, ka domēns ir parakstījis ziņojumu (DKIM). Tam nav vajadzīgs atsevišķs savienojums.</p>
+<p>Pierakstīšanās kodi tiek piedāvāti tikai tad, ja uzticamā pakalpojumu sniedzēja Authentication-Results galvene apstiprina koda domēna vai tā augstāka līmeņa domēna DKIM parakstu. Tam nav vajadzīgs atsevišķs savienojums.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

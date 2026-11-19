@@ -1,19 +1,19 @@
-<!--review--><h1>Šifrirni ključi</h1>
+<h1>Šifrirni ključi</h1>
 <p class="summary">Ustvarite ključ za podpisovanje sporočil in prejemanje šifrirane pošte ter hranite ključe svojih stikov.</p>
-<p>Inbox Classic podpisuje in šifrira pošto s ključi OpenPGP. Vaš ključ ima dve polovici: javni ključ, ki ga daste drugim, in zasebni ključ, ki ostane v vašem računalniku. S ključi stikov preverjate njihove podpise in zanje šifrirate pošto.</p>
+<p>Inbox Classic podpisuje in šifrira pošto s ključi OpenPGP. Vaš ključ sestavljata dva dela: javni ključ, ki ga daste drugim, in zasebni ključ, ki ostane v vašem računalniku. S ključi stikov preverjate njihove podpise in zanje šifrirate pošto.</p>
 <p>Če želite ustvariti svoj ključ:</p>
 <ol>
     <li>Izberite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> in kliknite <b data-text="ui-keys-new"></b>.</li>
     <li>Izberite račun in kliknite <b data-text="ui-keys-new-make"></b>. Ključ se uporablja za naslov računa in njegove druge naslove.</li>
     <li>Kliknite <b data-text="ui-keys-backup-now"></b> in izberite zaščitno geslo. Datoteko in zaščitno geslo hranite na različnih varnih mestih.</li>
 </ol>
-<aside class="warning">Brez varnostne kopije ključa ni mogoče obnoviti, če se ta računalnik izgubi ali ponastavi, pošte, šifrirane zanj, pa ni več mogoče prebrati.</aside>
-<h2>Ključi ostanejo zaščiteni brez zaščitnih gesel</h2>
-<p>Vaše zasebne ključe ščiti ključ, shranjen v <!--os:windows-->Upravitelju poverilnic<!--/os--><!--os:mac-->obesku za ključe<!--/os--><!--os:linux-->sistemski shrambi ključev<!--/os-->, zato za njihovo uporabo nikoli ne vnašate zaščitnega gesla. Zaščitno geslo izberete samo za varnostno kopijo. Če je vaš ključ prikazan kot zaklenjen, je bila ta zaščita ponastavljena: kliknite <b data-text="ui-keys-import"></b> in izberite njegovo varnostno kopijo.</p>
+<aside class="warning">Če izgubite edino kopijo zasebnega ključa, brez varnostne kopije ne boste mogli več dešifrirati pošte, namenjene temu ključu.</aside>
+<h2>Zaščita shranjenih ključev</h2>
+<p>Vaše zasebne ključe privzeto ščiti ključ, shranjen v <!--os:windows-->Upravitelju poverilnic<!--/os--><!--os:mac-->obesku za ključe<!--/os--><!--os:linux-->sistemski shrambi ključev<!--/os-->, zato zaščitnega gesla za redno uporabo ne vnašate. Izberete ga pri varnostnem kopiranju. Zaklenjen ključ lahko pomeni, da sistemska shramba trenutno ni dostopna. Najprej preverite dostop do nje. Če je bil zaščitni ključ izbrisan ali ponastavljen, kliknite <b data-text="ui-keys-import"></b> in izberite varnostno kopijo svojega zasebnega ključa.</p>
 <h2>Dodajanje ključev</h2>
-<p>Kliknite <b data-text="ui-keys-import"></b>, da dodate ključ iz datoteke, na primer ključ, ki vam ga je poslal stik, ali varnostno kopijo svojega. Zasebni ključ, zaščiten z zaščitnim geslom, ga zahteva enkrat. Inbox Classic nato vpraša, ali naj vaš uvoženi ključ uporablja za vaše naslove.</p>
-<p>Ključ stika se od takrat uporablja za njegov naslov. Če se pozneje pojavi drug ključ za isti naslov, ostane v uporabi trenutni, dokler v lastnostih stika ne izberete novega.</p>
+<p>Kliknite <b data-text="ui-keys-import"></b>, da dodate ključ iz datoteke, na primer ključ, ki vam ga je poslal stik, ali varnostno kopijo svojega. Za uvoz zaščitenega zasebnega ključa enkrat vnesete njegovo zaščitno geslo. Inbox Classic nato vpraša, ali naj vaš uvoženi ključ uporablja za vaše naslove.</p>
+<p>Če za naslov še ni izbran drug ključ, se uvoženi ključ stika uporabi zanj. Če se pozneje pojavi drug ključ za isti naslov, ostane v uporabi trenutni, dokler v lastnostih stika ne izberete novega.</p>
 <p>Če želite deliti svoj javni ključ, ga izberite in kliknite <b data-text="ui-keys-export"></b>. Ključ računa lahko izberete tudi v lastnostih računa, na zavihku <b data-text="ui-account-security"></b>.</p>
-<p>Ko šifrirate za nekoga, čigar ključa nimate, ga Inbox Classic zahteva od domene njegovega naslova, nato od keys.openpgp.org. Pošlje se samo naslov. Če keys.openpgp.org ne želite nikoli vprašati, izklopite <b data-text="ui-pgp-keyserver"></b> v <b data-settings="reading"></b>.</p>
-<p>Ključi potujejo tudi s pošto. Sporočila z naslova s ključem nosijo njegov javni ključ, da vam lahko druge aplikacije šifrirajo, Inbox Classic pa se na enak način nauči ključ stika iz njegovih sporočil. Če želite nehati pošiljati svojega, izklopite <b data-text="ui-account-autocrypt"></b> na zavihku <b data-text="ui-account-security"></b> računa.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
+<p>Ko šifrirate sporočilo za prejemnika brez ključa, ga Inbox Classic najprej poišče pri njegovi domeni, nato na keys.openpgp.org. Pri tem pošlje iskani naslov, ne vsebine sporočila. Če keys.openpgp.org ne želite nikoli vprašati, izklopite <b data-text="ui-pgp-keyserver"></b> v <b data-settings="reading"></b>.</p>
+<p>Ključi se lahko prenašajo tudi s pošto. Če je to omogočeno, sporočila vsebujejo vaš javni ključ, da vam lahko drugi pošiljajo šifrirano pošto. Inbox Classic shrani ključ pošiljatelja iz odprtega sporočila, vendar njegovega lastnika ne označi kot potrjenega. Drugačen ključ za isti naslov počaka na vašo izbiro. Če želite nehati pošiljati svojega, izklopite <b data-text="ui-account-autocrypt"></b> na zavihku <b data-text="ui-account-security"></b> računa.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>

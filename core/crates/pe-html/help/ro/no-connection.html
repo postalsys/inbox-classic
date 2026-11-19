@@ -1,19 +1,18 @@
-<!--review--><h1>Inbox Classic nu se poate conecta</h1>
+<h1>Inbox Classic nu se poate conecta</h1>
 <p class="summary">Ce faceți când serverul de e-mail nu poate fi contactat sau nu răspunde.</p>
 <p>Puteți vedea unul dintre aceste mesaje în bara de stare sau în panoul de citire:</p>
 <ul>
     <li>„connection error: …”</li>
     <li>„the server did not answer in time”</li>
-    <li>„conexiunea cu serverul nu a reușit (…)”</li>
-    <li>„Serverul de e-mail nu a putut fi contactat (…).”</li>
+    <li>„conexiunea cu serverul nu a putut fi stabilită sau a fost întreruptă (…)”</li>
+    <li>„Conexiunea cu serverul de e-mail nu a putut fi stabilită sau a fost întreruptă (…).”</li>
 </ul>
-<p>Pentru a remedia:</p>
+<p>Pentru a remedia problema:</p>
 <ol>
     <li>Verificați conexiunea la internet.</li>
     <li>Deschideți proprietățile contului din <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> și verificați numele serverelor și porturile.</li>
-    <li>Dacă trimiterea nu reușește, folosiți portul 465 sau 587 pentru e-mailul trimis. Unele rețele blochează porturile de e-mail, în special portul 25.</li>
+    <li>Dacă trimiterea nu reușește, verificați portul și securitatea cerute de furnizor pentru serverul de trimitere, de obicei SSL/TLS pe 465 sau STARTTLS pe 587. Unele rețele blochează porturile de e-mail, în special portul 25.</li>
 </ol>
 <p>Inbox Classic încearcă din nou la următoarea verificare a e-mailului. Pentru a încerca acum, faceți clic pe <b data-text="ui-tb-sync"></b>.</p>
-<p>Un mesaj pe care îl trimiteți fără conexiune așteaptă în Mesaje de trimis și pleacă după ce serverul poate fi contactat. Nu se pierde nimic din ce ați scris.</p>
+<p>Un mesaj trimis fără conexiune rămâne în Mesaje de trimis. Inbox Classic reîncearcă trimiterea după reconectarea la server. Nu se pierde nimic din ce ați scris.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>
-<!--/review-->

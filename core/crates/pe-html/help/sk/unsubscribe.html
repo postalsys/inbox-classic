@@ -1,19 +1,17 @@
-<!--review-->
-<h1>Odhlásenie zo zoznamu adresátov</h1>
-<p class="summary">Zastavte správy zoznamu adresátov tlačidlom na odhlásenie odberu.</p>
+<h1>Odhlásenie odberu správ</h1>
+<p class="summary">Požiadajte o ukončenie odberu správ pomocou tlačidla na odhlásenie.</p>
 <p>Správa zo zoznamu adresátov, ktorá uvádza, ako sa z neho odhlásiť, má vpravo v hlavičke tlačidlo <b data-text="ui-unsubscribe"></b>.</p>
 <p>Odhlásenie zo zoznamu:</p>
 <ol>
     <li>Kliknite na <b data-text="ui-unsubscribe"></b>. Inbox Classic uvedie, čo sa stane, a najprv sa opýta.</li>
     <li>Potvrďte. Podľa zoznamu sa stane jedna z troch vecí:
         <ul>
-            <li>Inbox Classic požiada zoznam, aby prestal posielať. Neotvorí sa žiadna stránka a neodošle sa žiadna správa.</li>
+            <li>Inbox Classic odošle serveru zoznamu žiadosť o odhlásenie odberu. Neotvorí sa webová stránka a neodošle sa e-mail.</li>
             <li>Inbox Classic napíše správu, ktorú zoznam vyžaduje. Odošlete ju kliknutím na <b data-text="ui-tb-send"></b>.</li>
             <li>Stránka zoznamu sa otvorí v prehliadači, kde odhlásenie dokončíte.</li>
         </ul>
     </li>
 </ol>
-<p>Stavový riadok uvádza, kedy zoznam žiadosť prijal.</p>
-<aside class="note">Inbox Classic požiada zoznam o zastavenie sám, iba keď server zoznamu správu podpísal. Vymyslená správa to nemôže zneužiť na oslovenie niekoho iného.</aside>
+<p>Stavový riadok oznámi prijatie žiadosti serverom. Nezaručuje to, že už nepríde žiadna ďalšia správa.</p>
+<aside class="note">Priame odhlásenie jedným kliknutím sa ponúka iba pri vhodnom overení odosielateľovej domény od poštového servera a podpise DKIM pokrývajúcom obe hlavičky odhlásenia. Aj túto žiadosť musíte najprv schváliť.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

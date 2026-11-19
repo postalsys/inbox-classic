@@ -1,32 +1,31 @@
-<!--review--><h1>Слова поиска</h1>
-<p class="summary">Слова и знаки, которые понимает поле поиска, чтобы найти именно нужные сообщения.</p>
-<p>Поле поиска понимает те же слова, что и Gmail. Сочетайте сколько угодно: сообщение должно соответствовать всем. Наведите указатель на поле поиска, чтобы увидеть краткий список.</p>
+<h1>Поисковые операторы</h1>
+<p class="summary">Уточняйте поиск с помощью специальных слов и знаков, чтобы найти нужные сообщения.</p>
+<p>Поле поиска поддерживает знакомые по Gmail операторы. Их можно сочетать: сообщение должно соответствовать всем указанным условиям. Наведите указатель на поле поиска, чтобы увидеть краткий список.</p>
 <table>
     <tr><th>Введите</th><th>Что находится</th></tr>
     <tr><td><code>бюджет</code></td><td>Сообщения со словом, которое начинается с <i>бюджет</i>, в любом месте</td></tr>
     <tr><td><code>"точная фраза"</code></td><td>Эти слова в этом порядке</td></tr>
-    <tr><td><code>-слово</code></td><td>Сообщения без этого слова. Минус работает перед любым словом поиска, например <code>-is:unread</code></td></tr>
+    <tr><td><code>-слово</code></td><td>Сообщения без этого слова. Минус исключает слово или поддерживаемое условие, например <code>-is:unread</code>. Перед условиями даты, возраста и размера сообщения минус не действует</td></tr>
     <tr><td><code>это OR то</code></td><td>Сообщения с любым из слов. Пишите <code>OR</code> заглавными буквами</td></tr>
-    <tr><td><code>from:ann</code></td><td>Почта от Анны</td></tr>
-    <tr><td><code>to:ann</code>, <code>cc:</code>, <code>bcc:</code></td><td>Почта Анне, в любой строке получателей</td></tr>
+    <tr><td><code>from:ann</code></td><td>Сообщения с ann в начале слова в имени или адресе отправителя</td></tr>
+    <tr><td><code>to:ann</code>, <code>cc:</code>, <code>bcc:</code></td><td>Сообщения с ann в начале слова в имени или адресе получателя. Поиск идет по всем строкам получателей</td></tr>
     <tr><td><code>subject:обед</code></td><td>Слово в теме</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Слово в имени вложенного файла</td></tr>
-    <tr><td><code>list:news.example.com</code></td><td>Почта списка рассылки по его List-Id</td></tr>
+    <tr><td><code>list:news.example.com</code></td><td>Сообщения рассылки с указанным List-Id</td></tr>
     <tr><td><code>has:attachment</code></td><td>Сообщения с файлами</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Непрочитанные или прочитанные сообщения</td></tr>
     <tr><td><code>is:starred</code> или <code>is:flagged</code></td><td>Сообщения с флажком</td></tr>
     <tr><td><code>is:answered</code></td><td>Сообщения, на которые вы ответили</td></tr>
     <tr><td><code>is:bounce</code></td><td>Уведомления о недоставленных или задержанных сообщениях</td></tr>
-    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Зашифрованные или подписанные сообщения</td></tr>
+    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Зашифрованные сообщения или сообщения с цифровой подписью</td></tr>
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Только эта папка во всех учетных записях</td></tr>
     <tr><td><code>in:projects</code></td><td>Только папка с этим именем</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Все папки</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Почта до или после дня. Можно писать и <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Почта старше или новее заданного числа дней (<code>d</code>), месяцев (<code>m</code>) или лет (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Почта больше или меньше заданного размера, в байтах или с <code>K</code>, <code>M</code> или <code>G</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Для before: сообщения до начала указанной даты, для after: начиная с нее включительно. Граница дня определяется по UTC. Можно писать и <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Сообщения старше или новее указанного числа дней (<code>d</code>), месяцев (<code>m</code>) или лет (<code>y</code>). Месяц считается равным 30 дням, год 365 дням</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Сообщения больше или меньше указанного размера. Размер задается в байтах или с суффиксами <code>K</code>, <code>M</code> или <code>G</code></td></tr>
 </table>
-<p>Диакритические знаки и регистр букв не важны. Слово поиска, которое Inbox Classic не знает, ищется как обычное слово.</p>
-<p>Зашифрованное сообщение находится по отправителю, получателям и теме, а после расшифровки и по словам его текста, пока параметр <b data-text="ui-search-encrypted"></b> включен в разделе <b data-settings="reading"></b>.</p>
-<p>В списке размеры не показываются. Чтобы узнать размер сообщения, выберите <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Диакритические знаки и регистр букв не учитываются. Если Inbox Classic не распознает оператор, она ищет его как обычное слово.</p>
+<p>Зашифрованные сообщения можно искать по открытым данным: отправителю, получателям и незашифрованной теме. Поиск по расшифрованному тексту и защищенной теме доступен, если сообщение уже расшифровано и параметр <b data-text="ui-search-encrypted"></b> включен в разделе <b data-settings="reading"></b>.</p>
+<p>Размеры сообщений в списке не показываются. Чтобы узнать размер сообщения, выберите <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

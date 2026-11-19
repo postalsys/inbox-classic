@@ -132,7 +132,7 @@ win-installer-start = Pornire Inbox Classic
 win-installer-welcome-new =
     Se va instala Inbox Classic { $version }, un program de e-mail.
 
-    Nu sunt necesare drepturi de administrator, se instalează doar pentru contul dvs.
+    Nu sunt necesare drepturi de administrator. Aplicația se instalează doar pentru contul dvs. Windows.
 win-installer-welcome-same =
     Inbox Classic { $version } este deja instalat. Se va instala din nou.
 
@@ -143,4 +143,4 @@ win-installer-welcome-update =
     Dacă rulează, mai întâi este închis. Conturile și e-mailurile dvs. se păstrează.
 win-installer-older-ask = Este instalat Inbox Classic { $installed }, mai nou decât { $version }. Instalați totuși versiunea mai veche?
 win-installer-still-running = Inbox Classic rulează încă. Închideți-l și încercați din nou.
-win-installer-remove-mail-ask = Eliminați și conturile și e-mailurile pe care Inbox Classic le păstrează pe acest computer? E-mailurile de pe servere rămân.
+win-installer-remove-mail-ask = Eliminați și datele locale ale Inbox Classic: conturile, mesajele descărcate și cele în așteptarea trimiterii, setările, contactele și cheile? Mesajele de pe servere rămân acolo. Datele din Managerul de acreditări nu sunt șterse.

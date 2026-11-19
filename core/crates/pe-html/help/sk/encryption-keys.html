@@ -1,7 +1,6 @@
-<!--review-->
 <h1>Šifrovacie kľúče</h1>
-<p class="summary">Vytvorte si kľúč na podpisovanie svojich správ a prijímanie šifrovanej pošty a uchovávajte kľúče svojich kontaktov.</p>
-<p>Inbox Classic podpisuje a šifruje poštu kľúčmi OpenPGP. Váš vlastný kľúč má dve polovice: verejný kľúč, ktorý dávate ostatným, a súkromný kľúč, ktorý zostáva vo vašom počítači. Kľúče vašich kontaktov vám umožňujú overovať ich podpisy a šifrovať im poštu.</p>
+<p class="summary">Vytvorte si kľúč na digitálne podpisovanie správ a prijímanie šifrovanej pošty a uchovávajte kľúče svojich kontaktov.</p>
+<p>Inbox Classic digitálne podpisuje a šifruje poštu kľúčmi OpenPGP. Váš vlastný kľúč má dve časti: verejný kľúč, ktorý dávate ostatným, a súkromný kľúč, ktorý zostáva vo vašom počítači. Kľúče vašich kontaktov vám umožňujú kontrolovať ich digitálne podpisy a šifrovať poštu určenú pre nich.</p>
 <p>Vytvorenie kľúča:</p>
 <ol>
     <li>Vyberte <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> a kliknite na <b data-text="ui-keys-new"></b>.</li>
@@ -10,12 +9,11 @@
 </ol>
 <aside class="warning">Bez zálohy nemožno váš kľúč obnoviť, ak tento počítač stratíte alebo ho obnovíte do pôvodného stavu, a poštu šifrovanú pre tento kľúč už nebude možné prečítať.</aside>
 <h2>Kľúče zostávajú chránené bez prístupových fráz</h2>
-<p>Vaše súkromné kľúče chráni kľúč uložený v <!--os:windows-->Správcovi poverení<!--/os--><!--os:mac-->kľúčenke<!--/os--><!--os:linux-->systémovej kľúčenke<!--/os-->, takže na ich použitie nikdy nezadávate prístupovú frázu. Prístupovú frázu volíte iba pre zálohu. Ak sa váš kľúč zobrazuje ako zamknutý, táto ochrana bola obnovená: kliknite na <b data-text="ui-keys-import"></b> a vyberte jeho zálohu.</p>
+<p>Súkromné kľúče sú v miestnej databáze uložené zašifrované. Chráni ich samostatný kľúč uložený v <!--os:windows-->Správcovi poverení<!--/os--><!--os:mac-->kľúčenke<!--/os--><!--os:linux-->systémovej kľúčenke<!--/os-->, takže pri bežnom používaní nezadávate prístupovú frázu ku kľúču. Systém si však môže vyžiadať odomknutie úložiska alebo povolenie prístupu. Prístupovú frázu volíte pre zálohu. Zamknutý kľúč môže znamenať nedostupné úložisko, zamietnutý prístup alebo chýbajúci ochranný kľúč. Najprv skontrolujte prístup k úložisku. Ak ochranný kľúč chýba, kliknite na <b data-text="ui-keys-import"></b> a vyberte zálohu svojho súkromného kľúča.</p>
 <h2>Pridávanie kľúčov</h2>
 <p>Kliknutím na <b data-text="ui-keys-import"></b> pridáte kľúč zo súboru, napríklad kľúč, ktorý vám poslal kontakt, alebo zálohu vlastného kľúča. Súkromný kľúč chránený prístupovou frázou si ju raz vyžiada. Inbox Classic sa potom opýta, či importovaný vlastný kľúč použiť pre vaše adresy.</p>
 <p>Kľúč kontaktu sa odvtedy používa pre jeho adresu. Ak sa neskôr objaví iný kľúč pre tú istú adresu, súčasný sa používa ďalej, kým nevyberiete nový vo vlastnostiach kontaktu.</p>
 <p>Ak chcete zdieľať svoj verejný kľúč, vyberte ho a kliknite na <b data-text="ui-keys-export"></b>. Kľúč konta môžete vybrať aj v jeho vlastnostiach, na karte <b data-text="ui-account-security"></b>.</p>
-<p>Keď šifrujete pre niekoho, koho kľúč nemáte, Inbox Classic sa opýta domény jeho adresy a potom keys.openpgp.org. Odošle sa len adresa. Ak sa nikdy nemá pýtať keys.openpgp.org, vypnite <b data-text="ui-pgp-keyserver"></b> v <b data-settings="reading"></b>.</p>
-<p>Kľúče cestujú aj s poštou. Správy z adresy s kľúčom nesú jej verejný kľúč, aby vám iné aplikácie mohli šifrovať, a Inbox Classic sa rovnako naučí kľúč kontaktu z jeho správ. Ak chcete prestať posielať svoj, vypnite <b data-text="ui-account-autocrypt"></b> na karte <b data-text="ui-account-security"></b> konta.</p>
+<p>Pri hľadaní chýbajúceho kľúča podľa adresy Inbox Classic najprv skúsi doménu adresy. Ak tam vhodný kľúč nenájde a vyhľadávanie na keys.openpgp.org je povolené, pošle adresu aj tejto službe. Pri výslovnom hľadaní podľa identifikátora alebo odtlačku sa odošle tento údaj. Vyhľadávanie na keys.openpgp.org vypnete možnosťou <b data-text="ui-pgp-keyserver"></b> v nastaveniach <b data-settings="reading"></b>.</p>
+<p>Verejné kľúče sa môžu prenášať aj v hlavičke Autocrypt. Pri odosielaní z adresy s kľúčom Inbox Classic pripojí verejný kľúč, aby iné aplikácie mohli šifrovať poštu pre vás. Pri otvorení prijatej správy môže uložiť použiteľný kľúč z hlavičky, ak zodpovedá adrese odosielateľa. Vlastník sa tým neoverí. Ak adresa už má iný kľúč, nový čaká na váš výber. Posielanie vlastného kľúča vypnete možnosťou <b data-text="ui-account-autocrypt"></b> na karte <b data-text="ui-account-security"></b> konta.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

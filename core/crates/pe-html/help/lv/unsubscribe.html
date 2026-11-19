@@ -1,19 +1,18 @@
-<!--review-->
-<h1>Adresātu saraksta pamešana</h1>
-<p class="summary">Pārtrauciet adresātu saraksta ziņojumus ar pogu, kas atsauc abonēšanu.</p>
-<p>Adresātu saraksta ziņojumam, kurā norādīts, kā no saraksta izstāties, galvenes labajā pusē ir <b data-text="ui-unsubscribe"></b>.</p>
-<p>Lai pamestu sarakstu:</p>
+
+<h1>Atteikšanās no adresātu saraksta</h1>
+<p class="summary">Izmantojiet abonēšanas atteikšanas pogu, lai pieprasītu pārtraukt adresātu saraksta ziņojumu sūtīšanu.</p>
+<p>Adresātu saraksta ziņojumam, kurā norādīts, kā no saraksta izstāties, galvenes labajā pusē ir poga <b data-text="ui-unsubscribe"></b>.</p>
+<p>Lai atteiktos no abonēšanas:</p>
 <ol>
-    <li>Noklikšķiniet uz <b data-text="ui-unsubscribe"></b>. Inbox Classic pasaka, kas notiks, un vispirms pajautā.</li>
-    <li>Apstipriniet. Atkarībā no saraksta notiek viena no trim lietām:
+    <li>Noklikšķiniet uz <b data-text="ui-unsubscribe"></b>. Inbox Classic paskaidro, kas notiks, un prasa apstiprinājumu.</li>
+    <li>Apstipriniet. Atkarībā no saraksta tiek izmantots viens no trim veidiem:
         <ul>
-            <li>Inbox Classic lūdz sarakstam pārtraukt sūtīšanu. Netiek atvērta neviena lapa un nosūtīts neviens ziņojums.</li>
-            <li>Inbox Classic uzraksta ziņojumu, ko saraksts prasa. Noklikšķiniet uz <b data-text="ui-tb-send"></b>, lai to nosūtītu.</li>
-            <li>Pārlūkprogrammā atveras saraksta lapa, kurā jūs pabeidzat.</li>
+            <li>Inbox Classic nosūta atteikšanās pieprasījumu saraksta serverim. Pārlūkprogramma netiek atvērta, un e-pasta ziņojums netiek sūtīts.</li>
+            <li>Inbox Classic sagatavo sarakstam vajadzīgo e-pasta ziņojumu. Noklikšķiniet uz <b data-text="ui-tb-send"></b>, lai to nosūtītu.</li>
+            <li>Pārlūkprogrammā atveras saraksta lapa, kur jāpabeidz atteikšanās.</li>
         </ul>
     </li>
 </ol>
-<p>Statusa josla ziņo, kad saraksts pieņēmis pieprasījumu.</p>
-<aside class="note">Inbox Classic pati lūdz sarakstam pārtraukt sūtīšanu tikai tad, ja saraksta serveris ir parakstījis ziņojumu. Viltots ziņojums to nevar izmantot, lai sasniegtu kādu citu.</aside>
+<p>Tieša pieprasījuma gadījumā statusa josla ziņo, kad serveris to ir pieņēmis. Tas vēl negarantē, ka no saraksta vairs nepienāks neviens ziņojums.</p>
+<aside class="note">Tiešu atteikšanās pieprasījumu Inbox Classic piedāvā tikai tad, ja pasta pakalpojuma uzticamais pārbaudes rezultāts apstiprina DKIM parakstu, kas aptver abas atteikšanās galvenes. Pretējā gadījumā var būt pieejama ziņojuma sūtīšana vai tīmekļa lapa.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

@@ -1,16 +1,15 @@
-<!--review--><h1>Răspunsul și redirecționarea</h1>
+<h1>Răspunsul și redirecționarea</h1>
 <p class="summary">Răspundeți expeditorului sau tuturor ori trimiteți un mesaj mai departe altcuiva.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) îi răspunde expeditorului.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) le răspunde tuturor celor cărora le-a fost trimis mesajul.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) răspunde la adresa Reply-To, dacă mesajul o indică, sau la adresa expeditorului.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) răspunde la adresa de răspuns și destinatarilor din Către și Cc, fără a include adresele proprii ale contului.</li>
     <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) trimite mesajul mai departe. Introduceți dvs. destinatarii.</li>
 </ul>
-<p>Un răspuns sau o redirecționare pleacă din contul în care se află mesajul original și de la adresa la care a fost trimis, când aceasta este una dintre celelalte adrese ale contului.</p>
+<p>Răspunsurile și redirecționările se trimit din contul în care se află mesajul original și de la adresa la care a fost trimis, când aceasta este una dintre celelalte adrese ale contului.</p>
 <h2>Mesajul original</h2>
-<p>Într-un răspuns, mesajul original este pliat în spatele unui buton ••• sub textul dvs., așa că vedeți doar ce scrieți. Este trimis oricum împreună cu răspunsul. Pentru a-l scurta, faceți clic pe buton sau selectați tot cu <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: originalul devine atunci parte din textul dvs.</p>
+<p>Într-un răspuns, mesajul original este ascuns sub un buton ••• aflat sub textul dvs., așa că vedeți doar ce scrieți. Este inclus în răspunsul trimis chiar dacă rămâne ascuns în editor. Pentru a-l scurta, faceți clic pe buton sau selectați tot cu <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: originalul devine atunci parte din textul editabil, de unde îl puteți scurta sau elimina.</p>
 <p>Într-o redirecționare, originalul se află în text de la început, deoarece este ceea ce trimiteți.</p>
-<p>Un răspuns urmează formatul originalului. Un răspuns la un mesaj cu text simplu este text simplu, cu originalul citat cu <b>&gt;</b>, dacă nu formatați ceva.</p>
+<p>Răspunsul păstrează formatul mesajului original. Dacă răspundeți la un mesaj în text simplu, răspunsul va fi tot în text simplu, iar textul citat va fi precedat de <b>&gt;</b>, cu excepția cazului în care aplicați formatare în editor.</p>
 <h2>Redirecționarea mai multor mesaje</h2>
-<p>Selectați mai multe mesaje și faceți clic pe <b data-text="ui-tb-forward"></b>. Se creează un singur mesaj nou, cu toate atașate ca fișiere <code>.eml</code>. Subiectul lui este cel al primului mesaj.</p>
+<p>Selectați mai multe mesaje și faceți clic pe <b data-text="ui-tb-forward"></b>. Se creează un singur mesaj nou, cu toate atașate ca fișiere <code>.eml</code>. Subiectul lui este cel al primului mesaj, precedat de Fw:.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>
-<!--/review-->

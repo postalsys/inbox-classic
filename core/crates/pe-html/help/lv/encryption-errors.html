@@ -1,16 +1,15 @@
-<!--review--><h1>Šifrēšanas kļūdas</h1>
+<h1>Šifrēšanas kļūdas</h1>
 <p class="summary">Kā rīkoties, ja serveris nepiedāvā šifrēšanu vai to pieprasa tur, kur tā ir izslēgta.</p>
 <h2>„the server does not offer STARTTLS”</h2>
-<p>Konts ir iestatīts uz STARTTLS, bet serveris nepiedāvāja šifrēšanu. Inbox Classic apstājās, tāpēc jūsu parole netika nosūtīta.</p>
+<p>Konts ir iestatīts uz STARTTLS, bet serveris nepiedāvāja šifrēšanu. Inbox Classic pārtrauca savienojuma mēģinājumu pirms autentifikācijas, tāpēc parole netika nosūtīta.</p>
 <ol>
     <li>Atveriet konta rekvizītus sadaļā <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Iestatiet drošību uz SSL/TLS ar portu 993 ienākošajam pastam vai 465 izejošajam pastam.</li>
+    <li>Ja pakalpojumu sniedzējs to atbalsta, izvēlieties SSL/TLS ar portu 993 ienākošajam pastam vai 465 izejošajam pastam. Izmantojiet sniedzēja norādītos iestatījumus.</li>
     <li>Noklikšķiniet uz <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Ja nekas cits nepalīdz, serveri nevar droši izmantot.</p>
+<p>Ja serveris neatbalsta šifrētu savienojumu, konsultējieties ar pasta pakalpojumu sniedzēju. Neatslēdziet šifrēšanu tikai tāpēc, lai apietu kļūdu.</p>
 <h2>„the server takes the password only over an encrypted connection”</h2>
-<p>Izejošā pasta serverim ir iestatīts <b data-text="ui-security-none"></b>. Jūsu parole ir pareiza. Mainiet <b data-text="ui-field-smtp-security"></b> uz STARTTLS ar portu 587 vai SSL/TLS ar portu 465.</p>
+<p>Izejošā pasta serverim izvēlēts „<b data-text="ui-security-none"></b>”, bet serveris pieprasa šifrētu savienojumu. Šī kļūda neapstiprina paroles pareizību. Laukam „<b data-text="ui-field-smtp-security"></b>” izvēlieties sniedzēja atbalstīto režīmu, piemēram, STARTTLS ar portu 587 vai SSL/TLS ar portu 465.</p>
 <h2>Brīdinājums par savienojumu bez šifrēšanas</h2>
-<p>Kad izvēlaties <b data-text="ui-security-none"></b>, Inbox Classic brīdina, ka ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Turpiniet tikai tad, ja serveris ir jūsu datorā vai lokālajā tīklā.</p>
+<p>Kad izvēlaties <b data-text="ui-security-none"></b>, Inbox Classic brīdina, ka ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Atrašanās lokālajā tīklā pati par sevi neaizsargā savienojumu. Nešifrētu savienojumu izmantojiet tikai tad, ja saprotat risku un videi ir cita atbilstoša aizsardzība.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

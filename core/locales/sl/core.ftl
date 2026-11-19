@@ -10,24 +10,17 @@ messages = { $count ->
    *[other] { $count } sporočil
 }
 # the separator of decimals in sizes: 2,4 MB
-# review: new
 decimal-separator = ,
-# review: new
 size-bytes = { $count ->
     [one] { $count } bajt
     [two] { $count } bajta
     [few] { $count } bajti
    *[other] { $count } bajtov
 }
-# review: new
 size-kb = { $size } KB
-# review: new
 size-mb = { $size } MB
-# review: new
 size-gb = { $size } GB
-# review: new
 send-delay-off = Izklopljeno
-# review: new
 send-delay-seconds = { $count ->
     [one] { $count } sekunda
     [two] { $count } sekundi
@@ -35,127 +28,78 @@ send-delay-seconds = { $count ->
    *[other] { $count } sekund
 }
 # the status bar: "12 messages, 3 unread"
-# review: new
 list-counts = { $messages }, neprebrana: { $unread }
-# review: new
 list-counts-selected = { $messages }, neprebrana: { $unread }, izbrana: { $selected }
 # the status bar while searching: "12 found, 3 unread"
-# review: new
 list-counts-found = Najdena: { $found }, neprebrana: { $unread }
-# review: new
 list-counts-found-selected = Najdena: { $found }, neprebrana: { $unread }, izbrana: { $selected }
-# review: new
 list-counts-none = Ni najdenih sporočil
 
 ## Special folders, as Outlook names them
 
-# review: new
 folder-inbox = Prejeto
-# review: new
 folder-sent = Poslano
-# review: new
 folder-deleted = Izbrisano
-# review: new
 folder-drafts = Osnutki
-# review: new
 folder-junk = Neželena e-pošta
-# review: new
 folder-archive = Arhiv
 
 ## The reading pane
 
-# review: new
 reader-no-message = Nobeno sporočilo ni izbrano.
-# review: new
 reader-downloading = Prenašanje sporočila…
-# review: new
 reader-downloading-detail = Sporočilo bo prikazano tukaj, ko bo prenos končan.
-# review: new
 reader-downloading-size = Sporočilo je veliko { $size }. Prikazano bo tukaj, ko bo preneseno.
-# review: new
 reader-failed = Sporočila ni bilo mogoče prenesti
-# review: new
-reader-failed-network = Poštni strežnik ni dosegljiv ({ $reason }).
-# review: new
-reader-failed-sign-in = Poštni strežnik ni sprejel prijave ({ $reason }). Preverite geslo ali se znova prijavite v meniju Datoteka > Računi.
-# review: new
+reader-failed-network = Povezave s poštnim strežnikom ni bilo mogoče vzpostaviti ali pa je bila prekinjena ({ $reason }).
+reader-failed-sign-in = Poštni strežnik ni sprejel prijave ({ $reason }). Preverite geslo ali se znova prijavite v nastavitvah računa.
 reader-failed-security = Povezave s poštnim strežnikom ni bilo mogoče zavarovati ({ $reason }).
-# review: new
 reader-failed-other = Poštni strežnik je odgovoril: { $reason }.
-# review: new
 reader-retry-note = Poskus se bo ponovil, ko se račun znova poveže.
-# review: new
 reader-unreadable = Tega sporočila ni mogoče prikazati: { $error }
-# review: new
 message-source-title = Izvorna koda sporočila: { $subject }
-# review: new
 message-source-untitled = Izvorna koda sporočila
 
 ## Printing a message, and the header of a message quoted in a reply or forward
 
-# review: new
 header-from = Od
-# review: new
 header-date = Datum
-# review: new
 header-to = Za
-# review: new
 header-cc = Kp
-# review: new
 header-sent = Poslano
-# review: new
 header-subject = Zadeva
-# review: new
 header-security = Varnost
-# review: new
 header-part = Del { $number }
-# review: new
 quote-original = ----- Izvirno sporočilo -----
-# review: new
 fold-show-earlier = Pokaži starejša sporočila
 
 ## Bounces: the card at the top of a notice that a message was not delivered
 
-# review: new
 bounce-failed = Vaše sporočilo ni bilo dostavljeno
-# review: new
 bounce-delayed = Vaše sporočilo še ni bilo dostavljeno
-# review: new
 bounce-delayed-note = Vaš poštni strežnik ga še vedno poskuša dostaviti. Ni ga treba poslati znova.
 # the link to the message the notice is about, in Sent Items or another folder
-# review: new
 bounce-show-message = Pokaži vrnjeno sporočilo
 # the link of a delay's card to the message that is still on its way
-# review: new
 bounce-show-delayed = Pokaži zakasnjeno sporočilo
-# review: new
 bounce-what-to-do = Kaj lahko storite:
 # what to do about a recipient the message is still on its way to: in the card of a delay, and in the card of a failure
-# review: new
 bounce-delayed-do = Zaenkrat nič. Če ga še vedno ne bo mogoče dostaviti, boste prejeli novo obvestilo.
-# review: new
 bounce-delayed-row-do = Zaenkrat nič. Vaš poštni strežnik ga še poskuša dostaviti, in če mu ne bo uspelo, boste prejeli novo obvestilo.
 # folds the receiving server's own words
-# review: new
 bounce-details = Podrobnosti
 # a recipient the notice does not name
-# review: new
 bounce-someone = Prejemnik
 # in Details: the server that refused the message, the status code it gave, and the server that wrote the notice
-# review: new
 bounce-server = Strežnik: { $server }
-# review: new
 bounce-status = Stanje: { $status }
-# review: new
 bounce-reported-by = Sporočil: { $server }
-# review: new
 bounce-retry-minutes = Prejemni strežnik je prosil, naj se pred naslednjim poskusom počaka { $count ->
     [one] { $count } minuto
     [two] { $count } minuti
     [few] { $count } minute
    *[other] { $count } minut
 }.
-# review: new
 bounce-retry-hours = Prejemni strežnik je prosil, naj se pred naslednjim poskusom počaka { $count ->
     [one] { $count } uro
     [two] { $count } uri
@@ -163,233 +107,153 @@ bounce-retry-hours = Prejemni strežnik je prosil, naj se pred naslednjim poskus
    *[other] { $count } ur
 }.
 # the names of the blocklists, "Spamhaus ZEN, Barracuda"
-# review: new
 bounce-blocklist = Črni seznam: { $lists }
-# review: new
 bounce-user-unknown = Naslov ne obstaja
-# review: new
 bounce-user-unknown-why = Prejemni strežnik nima poštnega predala s tem naslovom. Morda je napačno vpisan ali pa ga oseba ne uporablja več.
-# review: new
 bounce-user-unknown-do = Preverite črkovanje naslova ali vprašajte osebo, kateri naslov uporablja zdaj.
-# review: new
 bounce-invalid-address = Naslov ni veljaven
-# review: new
 bounce-invalid-address-why = Naslov ni zapisan v obliki, na katero je mogoče poslati pošto.
-# review: new
 bounce-invalid-address-do = Poiščite tipkarske napake, na primer presledek, manjkajočo črko ali nič za znakom @.
-# review: new
 bounce-mailbox-disabled = Poštni predal je zaprt
-# review: new
 bounce-mailbox-disabled-why = Naslov obstaja, vendar je njegov poštni predal izklopljen ali se ne uporablja več.
-# review: new
-bounce-mailbox-disabled-do = Osebo dosezite drugače in jo vprašajte za naslov, ki ga uporablja zdaj.
-# review: new
+bounce-mailbox-disabled-do = Osebo obvestite po drugi poti in jo prosite za naslov, ki ga uporablja zdaj.
 bounce-mailbox-full = Poštni predal je poln
-# review: new
 bounce-mailbox-full-why = V prejemnikovem poštnem predalu ni prostora za novo pošto.
-# review: new
-bounce-mailbox-full-do = Pošljite ga znova čez nekaj dni ali osebo obvestite drugače. Velike priponke so zavrnjene najprej.
-# review: new
+bounce-mailbox-full-do = Čez nekaj dni poskusite sporočilo poslati znova ali prejemnika obvestite po drugi poti.
 bounce-spam-blocked = Zavrnjeno kot vsiljena pošta
-# review: new
 bounce-spam-blocked-why = Prejemni strežnik je sporočilo prepoznal kot vsiljeno pošto.
-# review: new
-bounce-spam-blocked-do = Pošljite ga znova brez tistega, kar je videti kot vsiljena pošta, na primer veliko povezav, skrajšanih povezav ali velike priponke. Če se to ponavlja, vprašajte svojega ponudnika e-pošte.
-# review: new
+bounce-spam-blocked-do = Poskusite sporočilo poslati brez elementov, ki bi lahko bili videti kot vsiljena pošta, na primer številnih ali skrajšanih povezav oziroma velike priponke. Če se težava ponavlja, se obrnite na ponudnika e-pošte.
 bounce-virus-detected = Zavrnjeno zaradi virusa
-# review: new
-bounce-virus-detected-why = Prejemni strežnik je v sporočilu ali njegovih priponkah našel virus ali drugo škodljivo vsebino.
-# review: new
+bounce-virus-detected-why = Prejemni strežnik je v sporočilu ali priponkah zaznal virus ali drugo škodljivo vsebino in jo navedel kot razlog zavrnitve.
 bounce-virus-detected-do = Priponke preverite s protivirusnim programom. Nekateri strežniki zavrnejo vsak program ali arhiv, zato take datoteke raje delite s povezavo.
-# review: new
 bounce-ip-blocklisted = Vaš poštni strežnik je na črnem seznamu
-# review: new
 bounce-ip-blocklisted-why = Prejemni strežnik zavrača pošto s strežnika, ki je poslal vašo, ker je naslov tega strežnika na črnem seznamu.
-# review: new
 bounce-ip-blocklisted-do = Težava ni v sporočilu. To obvestilo posredujte svojemu ponudniku e-pošte in ga prosite, naj strežnik odstrani s seznama.
-# review: new
 bounce-domain-blocklisted = Domena je na črnem seznamu
-# review: new
 bounce-domain-blocklisted-why = Prejemni strežnik zavrača sporočilo, ker je domena vašega naslova ali domena iz povezav v sporočilu na črnem seznamu.
-# review: new
 bounce-domain-blocklisted-do = Če ima sporočilo povezave, ga poskusite poslati brez njih. Sicer to obvestilo posredujte tistemu, ki skrbi za pošto vaše domene.
-# review: new
 bounce-policy-blocked = Zavrnjeno po pravilih prejemnega strežnika
-# review: new
 bounce-policy-blocked-why = Pravila prejemnega strežnika tega sporočila ne prepustijo, na primer zaradi velikosti, priponk ali pošiljatelja.
-# review: new
-bounce-policy-blocked-do = Razlog pogosto navaja strežnik sam pod Podrobnostmi. Vprašajte prejemnika, ali lahko sprejme takšno pošto.
-# review: new
+bounce-policy-blocked-do = Razlog je pogosto naveden v odgovoru strežnika pod možnostjo Podrobnosti. Prejemnika vprašajte, ali lahko sprejme takšno pošto.
 bounce-geo-blocked = Zavrnjeno zaradi izvora
-# review: new
 bounce-geo-blocked-why = Prejemni strežnik ne sprejema pošte iz države ali omrežja, v katerem je vaš poštni strežnik.
-# review: new
-bounce-geo-blocked-do = Osebo dosezite drugače ali o tem vprašajte svojega ponudnika e-pošte.
-# review: new
+bounce-geo-blocked-do = Osebo obvestite po drugi poti ali se obrnite na ponudnika e-pošte.
 bounce-relay-denied = Strežnik ga ni posredoval naprej
-# review: new
 bounce-relay-denied-why = Strežnik ni hotel posredovati sporočila naprej, pogosto zato, ker je bilo poslano brez prijave ali prek strežnika, ki ne skrbi za tega prejemnika.
-# review: new
-bounce-relay-denied-do = V meniju Datoteka > Računi preverite strežnik za odhodno pošto in ali se ta prijavlja.
-# review: new
+bounce-relay-denied-do = V nastavitvah računa preverite strežnik za odhodno pošto in podatke za prijavo vanj.
 bounce-auth-failure = Vašega naslova pošiljatelja ni bilo mogoče preveriti
-# review: new
 bounce-auth-failure-why = Prejemni strežnik ni mogel potrditi, da je sporočilo res prišlo iz vaše domene (SPF, DKIM ali DMARC).
-# review: new
 bounce-auth-failure-do = To obvestilo posredujte tistemu, ki skrbi za pošto vaše domene: njene nastavitve je treba popraviti. Medtem morda pomaga pošiljanje prek strežnika vašega ponudnika.
-# review: new
 bounce-rate-limited = Preveč pošte naenkrat
-# review: new
 bounce-rate-limited-why = Prejemni strežnik zaenkrat sprejema manj sporočil z vašega poštnega strežnika.
-# review: new
 bounce-rate-limited-do = Malo počakajte in ga pošljite znova. Ko pišete veliko ljudem, pošiljajte manjšemu številu naenkrat.
-# review: new
-bounce-greylisting = Za trenutek zadržano
-# review: new
+bounce-greylisting = Začasno zadržano
 bounce-greylisting-why = Prejemni strežnik neznane pošiljatelje prosi, naj poskusijo malo pozneje, kar je pogosta zaščita pred vsiljeno pošto.
-# review: new
-bounce-greylisting-do = Nič. Poštni strežniki poskusijo znova sami in sporočilo je navadno dostavljeno v eni uri.
-# review: new
+bounce-greylisting-do = Če obvestilo navaja zamudo, lahko strežnik za pošiljanje poskusi znova. Če je dostava dokončno spodletela, poskusite sporočilo poslati pozneje.
 bounce-server-error = Prejemni strežnik je imel težavo
-# review: new
 bounce-server-error-why = Prejemni strežnik ni bil dosegljiv ali zaradi lastne težave ni mogel sprejeti sporočila.
-# review: new
-bounce-server-error-do = Pošljite ga znova pozneje. Če se napaka ponavlja, preverite del naslova za znakom @, ali je pravilno napisan.
-# review: new
+bounce-server-error-do = Poskusite sporočilo poslati pozneje. Če težava ostaja, preverite, ali je del naslova za znakom @ pravilno napisan.
 bounce-unknown = Ni dostavljeno
-# review: new
 bounce-unknown-why = Obvestilo ne pove jasno, zakaj.
-# review: new
-bounce-unknown-do = Več morda povedo besede strežnika pod Podrobnostmi. Če ne pomagajo, to obvestilo posredujte svojemu ponudniku e-pošte.
+bounce-unknown-do = Več informacij je lahko v odgovoru strežnika pod možnostjo Podrobnosti. Če ne pomagajo, obvestilo posredujte ponudniku e-pošte.
 
 ## Several messages selected
 
-# review: new
 selection-title = { $count ->
     [one] { $count } izbrano sporočilo
     [two] { $count } izbrani sporočili
     [few] { $count } izbrana sporočila
    *[other] { $count } izbranih sporočil
 }
-# review: new
 selection-unread = Neprebrana: { $count }
-# review: new
 selection-flagged = Z zastavico: { $count }
-# review: new
 delete-for-good-one = To sporočilo bo trajno izbrisano. Ga želite izbrisati?
-# review: new
 delete-for-good-all = Vsa izbrana sporočila ({ $count }) bodo trajno izbrisana. Jih želite izbrisati?
-# review: new
 delete-for-good-some = Nekatera sporočila ({ $count } od { $total }) bodo trajno izbrisana. Želite izbrisati sporočila?
-# review: new
 done-read = { $count ->
    *[other] Označeno kot prebrano: { $messages }
 }
-# review: new
 done-unread = { $count ->
    *[other] Označeno kot neprebrano: { $messages }
 }
-# review: new
 done-flagged = { $count ->
    *[other] Označeno z zastavico: { $messages }
 }
-# review: new
 done-unflagged = Zastavica odstranjena: { $messages }
-# review: new
 done-deleted-for-good = { $count ->
    *[other] Trajno izbrisano: { $messages }
 }
-# review: new
 done-archived = { $count ->
    *[other] Arhivirano: { $messages }
 }
-# review: new
 done-moved = { $count ->
    *[other] Premaknjeno v { $folder }: { $messages }
 }
-# review: new
 done-copied = { $count ->
    *[other] Kopirano v { $folder }: { $messages }
 }
-# review: new
 done-moving = { $count ->
    *[other] Premikanje v { $folder }: { $messages }...
 }
-# review: new
 done-copying = { $count ->
    *[other] Kopiranje v { $folder }: { $messages }...
 }
-# review: new
 done-moved-back = { $count ->
    *[other] Vrnjeno v { $folder }: { $messages }
 }
 # the status bar after Watch Conversation and Ignore Conversation, and after either again on a marked one
-# review: new
 done-watched = { $count ->
-    [one] Spremljate pogovor
-   *[other] Spremljate pogovore: { $count }
+    [one] Spremljate { $count } pogovor
+    [two] Spremljate { $count } pogovora
+    [few] Spremljate { $count } pogovore
+   *[other] Spremljate { $count } pogovorov
 }
-# review: new
 done-unwatched = { $count ->
-    [one] Pogovora ne spremljate več
-   *[other] Pogovorov ne spremljate več: { $count }
+    [one] Prenehali ste spremljati { $count } pogovor
+    [two] Prenehali ste spremljati { $count } pogovora
+    [few] Prenehali ste spremljati { $count } pogovore
+   *[other] Prenehali ste spremljati { $count } pogovorov
 }
-# review: new
 done-ignored = { $count ->
-    [one] Pogovor je prezrt
-   *[other] Prezrti pogovori: { $count }
+    [one] { $count } pogovor je prezrt
+    [two] { $count } pogovora sta prezrta
+    [few] { $count } pogovori so prezrti
+   *[other] { $count } pogovorov je prezrtih
 }
-# review: new
 done-unignored = { $count ->
-    [one] Pogovor ni več prezrt
-   *[other] Pogovori niso več prezrti: { $count }
+    [one] { $count } pogovor ni več prezrt
+    [two] { $count } pogovora nista več prezrta
+    [few] { $count } pogovori niso več prezrti
+   *[other] { $count } pogovorov ni več prezrtih
 }
-# review: new
 their-folders = njihove mape
-# review: new
 undo-move = Razveljavi premik
-# review: new
 undo-delete = Razveljavi brisanje
-# review: new
 undo-archive = Razveljavi arhiviranje
-# review: new
 undo-junk = Razveljavi označitev kot neželeno
-# review: new
 undo-not-junk = Razveljavi označitev kot želeno
-# review: new
 undo-send = Razveljavi pošiljanje
-# review: new
 nothing-to-undo = Ničesar ni mogoče razveljaviti.
-# review: new
 messages-gone = Sporočil ni več.
 # A non-selectable IMAP folder cannot contain messages; this does not mean it is empty.
-# review: new
 folder-holds-no-messages = Ta mapa ne more vsebovati sporočil.
-# review: new
 not-archived-here = Sporočil v tej mapi ni mogoče arhivirati.
-# review: new
 not-emptied-here = Izprazniti je mogoče samo mapi Izbrisano in Neželena e-pošta.
-# review: new
 next-unread-question = V mapi { $folder } ni več neprebranih sporočil.
 
     Želite odpreti { $next }, naslednjo mapo z neprebranimi sporočili?
-# review: new
 no-unread-left = Ni več neprebranih sporočil.
-# review: new
 empty-question = { $count ->
-    [one] Želite izprazniti mapo { $folder }?
+    [1] Želite izprazniti mapo »{ $folder }«?
 
         Sporočilo v njej bo trajno izbrisano. Ni ga mogoče obnoviti.
-   *[other] Želite izprazniti mapo { $folder }?
+   *[other] Želite izprazniti mapo »{ $folder }«?
 
         Vsebina ({ $messages }) bo trajno izbrisana. Ni je mogoče obnoviti.
 }
-# review: new
 no-junk-folder = Ta račun nima mape Neželena e-pošta, v katero bi lahko premaknili sporočila.
-# review: new
 no-inbox-folder = Ta račun nima mape Prejeto, v katero bi lahko premaknili sporočila.
 # the status bar after a flag in a colour: "Flagged 2 messages blue"
-# review: new
 done-flagged-color = { $color ->
     [red] Označeno z rdečo zastavico: { $messages }
     [orange] Označeno z oranžno zastavico: { $messages }
@@ -400,7 +264,6 @@ done-flagged-color = { $color ->
    *[gray] Označeno s sivo zastavico: { $messages }
 }
 # the Flag menu: the colours of Apple Mail's flags
-# review: new
 flag-color = { $color ->
     [red] Rdeča
     [orange] Oranžna
@@ -413,273 +276,177 @@ flag-color = { $color ->
 
 ## The Move and Copy window
 
-# review: new
 move-window-title-move = { $count ->
-    [one] Premakni sporočilo
+    [one] Premakni { $count } sporočilo
     [two] Premakni { $count } sporočili
     [few] Premakni { $count } sporočila
    *[other] Premakni { $count } sporočil
 }
-# review: new
 move-window-title-copy = { $count ->
-    [one] Kopiraj sporočilo
+    [one] Kopiraj { $count } sporočilo
     [two] Kopiraj { $count } sporočili
     [few] Kopiraj { $count } sporočila
    *[other] Kopiraj { $count } sporočil
 }
-# review: new
 move-window-prompt-move = { $count ->
-    [one] Izbrano sporočilo premakni v:
-    [two] Izbrani sporočili ({ $count }) premakni v:
-    [few] Izbrana sporočila ({ $count }) premakni v:
-   *[other] Izbranih sporočil ({ $count }) premakni v:
+    [one] Premaknite { $count } izbrano sporočilo v:
+    [two] Premaknite { $count } izbrani sporočili v:
+    [few] Premaknite { $count } izbrana sporočila v:
+   *[other] Premaknite { $count } izbranih sporočil v:
 }
-# review: new
 move-window-prompt-copy = { $count ->
-    [one] Izbrano sporočilo kopiraj v:
-    [two] Izbrani sporočili ({ $count }) kopiraj v:
-    [few] Izbrana sporočila ({ $count }) kopiraj v:
-   *[other] Izbranih sporočil ({ $count }) kopiraj v:
+    [one] Kopirajte { $count } izbrano sporočilo v:
+    [two] Kopirajte { $count } izbrani sporočili v:
+    [few] Kopirajte { $count } izbrana sporočila v:
+   *[other] Kopirajte { $count } izbranih sporočil v:
 }
 # the folders used last, over the folder tree
-# review: new
 targets-recent = Nedavno
 # the folder the messages are in, which can not be chosen
-# review: new
 target-current = { $folder } (trenutna)
 # a folder used last, with its account when there are several: "Archive (Work)"
-# review: new
 target-recent = { $folder } ({ $account })
 
 ## Moving and copying to another account
 
-# review: new
-transfer-moving = Premikanje v { $folder }: { $done } od { $messages }...
-# review: new
-transfer-copying = Kopiranje v { $folder }: { $done } od { $messages }...
-# review: new
+transfer-moving = Premikanje v { $folder }: { $messages } (trenutno { $done })...
+transfer-copying = Kopiranje v { $folder }: { $messages } (trenutno { $done })...
 transfer-another-account = drug račun
-# review: new
 transfer-folder-gone = mape, v katero je bilo namenjeno, ni več
-# review: new
 transfer-not-on-server = sporočila ni več na strežniku
-# review: new
 transfer-not-moved = { $count ->
    *[other] Premik v drug račun ni uspel ({ $messages }): { $reason }
 }
-# review: new
 transfer-not-copied = { $count ->
    *[other] Kopiranje v drug račun ni uspelo ({ $messages }): { $reason }
 }
-# review: new
 transfer-none-moved = Nobenega sporočila ni bilo mogoče premakniti
-# review: new
 transfer-none-copied = Nobenega sporočila ni bilo mogoče kopirati
 
 ## Messages as files
 
-# review: new
 export-not-in-time = sporočila ni bilo mogoče pravočasno prenesti
-# review: new
-export-not-saved = Ni bilo mogoče shraniti { $failed } od { $messages } ({ $problems })
-# review: new
+export-not-saved = Shranjevanje ni uspelo: { $failed }; skupaj: { $messages } ({ $problems })
 export-not-attached = sporočil ni bilo mogoče pripeti: { $error }
 # the status bar after Save As with several: "Saved 3 messages to Desktop"
-# review: new
 saved-to = { $count ->
    *[other] Shranjeno v { $folder }: { $messages }
 }
-# review: new
-download-progress = Prenašanje { $done } od { $total }
-# review: new
-download-done = Preneseno { $size }
-# review: new
+download-progress = Prenos: { $done } / { $total }
+download-done = Preneseno: { $size }
 downloading-messages = { $count ->
    *[other] Prenašanje: { $messages }...
 }
 # the status bar after files are dropped on a folder: "Put 3 messages in Archive"
-# review: new
 import-put = { $count ->
-   *[other] Dodano v { $folder }: { $messages }
+   *[other] V čakalni vrsti za uvoz v { $folder }: { $messages }
 }
-# review: new
 import-not-put = Tega ni bilo mogoče dodati v mapo:
 
     { $problems }
 
 ## Problems the windows show
 
-# review: new
 error-store = lokalna shramba: { $error }
-# review: new
 error-not-found = ni najdeno
-# review: new
 error-closed = zapiranje
-# review: new
-error-other-account = brskalnik se je prijavil v { $email }, ne v ta račun
+error-other-account = v brskalniku ste prijavljeni v račun »{ $email }«, ne v ta račun
 # a password or sign-in the mail server refused, with the server's words
-# review: new
 failure-authentication = strežnik ni sprejel prijave ({ $reason })
 # the mail server could not be reached or the connection broke, with the reason
-# review: new
-failure-network = povezava s strežnikom ni uspela ({ $reason })
-# review: new
+failure-network = povezave s strežnikom ni bilo mogoče vzpostaviti ali pa je bila prekinjena ({ $reason })
 error-in-use = ni je mogoče odstraniti, dokler se z njo prijavljajo računi: { $accounts }
-# review: new
 error-turned-off = ta aplikacija za prijavo je za nove račune izklopljena
-# review: new
 error-folder-name = ime mape mora imeti od 1 do 200 znakov in ne sme vsebovati kontrolnih znakov
-# review: new
 error-folder-separator = ime mape na tem strežniku ne sme vsebovati znaka »{ $separator }«
-# review: new
 error-folder-special = mape Prejeto in posebnih map ni mogoče preimenovati ali izbrisati
-# review: new
 error-no-recipients = sporočilo nima prejemnikov
-# review: new
 error-bad-address = »{ $address }« ni e-poštni naslov
-# review: new
 error-not-own-address = { $address } ni med naslovi pošiljatelja tega računa. Dodajte ga v polje »Drugi naslovi, s katerih pošiljate« v lastnostih računa.
-# review: new
 rule-query-refused = Pravila ne morejo filtrirati po mapi ali datumu ({ $words }).
-# review: new
 rule-no-query = Vnesite iskalne pogoje za dohodna sporočila.
-# review: new
 rule-no-action = Izberite vsaj eno dejanje za pravilo.
-# review: new
 error-attachment = Datoteke { $path } ni bilo mogoče prebrati: { $error }
-# review: new
 error-no-drafts = račun nima mape Osnutki, v katero bi lahko shranili sporočilo
-# review: new
 error-draft-attachment = priponke osnutka ni bilo mogoče ohraniti: { $error }
-# review: new
 error-password-not-saved = gesla ni bilo mogoče shraniti za naslednji zagon: { $error }
-# review: new
 error-sign-in-not-saved = novih podatkov za prijavo ni bilo mogoče shraniti za naslednji zagon: { $error }
-# review: new
 error-import-unreadable = Datoteke { $path } ni mogoče prebrati: { $error }
-# review: new
 error-import-too-large = Datoteka { $path } je večja od 50 MB
-# review: new
 error-import-not-mail = Datoteka { $path } ni e-poštno sporočilo
-# review: new
 error-list-answered = strežnik poštnega seznama je vrnil stanje { $status }
-# review: new
 error-not-built = sporočila ni bilo mogoče sestaviti
-# review: new
 error-outbox-waits = { $count ->
-    [one] sporočilo čaka v mapi Odpošiljanje in bo poslano ob naslednjem pošiljanju/prejemanju
-   *[other] sporočila ({ $count }) čakajo v mapi Odpošiljanje in bodo poslana ob naslednjem pošiljanju/prejemanju
+    [one] v mapi Odpošiljanje čaka { $count } sporočilo; ob naslednjem pošiljanju/prejemanju bo program znova poskusil poslati čakajočo pošto
+    [two] v mapi Odpošiljanje čakata { $count } sporočili; ob naslednjem pošiljanju/prejemanju bo program znova poskusil poslati čakajočo pošto
+    [few] v mapi Odpošiljanje čakajo { $count } sporočila; ob naslednjem pošiljanju/prejemanju bo program znova poskusil poslati čakajočo pošto
+   *[other] v mapi Odpošiljanje čaka { $count } sporočil; ob naslednjem pošiljanju/prejemanju bo program znova poskusil poslati čakajočo pošto
 }
-# review: new
 error-draft-not-removed = prejšnjega osnutka sporočila ni bilo mogoče odstraniti iz mape Osnutki: { $reason }
-# review: new
 error-sent-but = sporočilo je bilo poslano, vendar { $problem }
-# review: new
 error-sent-still-in-outbox = je še vedno v mapi Odpošiljanje: { $error }
-# review: new
 error-sent-no-copy = kopije ni bilo mogoče shraniti v mapo Poslano: { $reason }
-# review: new
 error-no-password = za ta račun ni gesla
-# review: new
-error-no-sign-in = za ta račun ni prijave
-# review: new
-error-provider-missing = ta različica se ne more prijaviti pri ponudniku { $provider }: je bila njegova aplikacija za prijavo odstranjena?
-# review: new
+error-no-sign-in = za ta račun ni shranjenih podatkov za prijavo
+error-provider-missing = ta različica ne more uporabiti nastavitev prijave »{ $provider }«. Preverite, ali je bila aplikacija za prijavo odstranjena
 error-provider-servers = strežniki tega računa se ne ujemajo s strežniki njegove aplikacije za prijavo
-# review: new
 error-app-scopes = { $reason }. Poštni strežnik ni sprejel žetona aplikacije za prijavo: preverite, ali dovoljenja (scopes) aplikacije omogočajo dostop do pošte
-# review: new
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-# review: new
-sign-in-off-google = Google programa Inbox Classic še ni preveril, zato se z njim lahko prijavijo samo preizkusni uporabniki. Uporabite svojo aplikacijo za prijavo pri Googlu ali geslo za aplikacije, ali pa jo vklopite v Aplikacijah za prijavo (Datoteka > Računi), če ste preizkusni uporabnik.
-# review: new
-sign-in-off-other = Izklopljena je bila v Aplikacijah za prijavo (Datoteka > Računi), kjer jo lahko znova vklopite.
-# review: new
+sign-in-off-google = Vgrajena Googlova aplikacija za prijavo je v tej različici privzeto izklopljena. Uporabite svojo Googlovo aplikacijo za prijavo ali geslo za aplikacije, če ga račun podpira. Če imate dostop kot preizkusni uporabnik, lahko vgrajeno aplikacijo vklopite v oknu Aplikacije za prijavo, ki ga odprete v oknu Računi.
+sign-in-off-other = Izklopljena je v oknu Aplikacije za prijavo, kjer jo lahko znova vklopite. Do njega pridete prek okna Računi.
 sign-in-app-no-name = aplikacija za prijavo potrebuje ime
-# review: new
 sign-in-app-no-client = manjka ID odjemalca
-# review: new
 sign-in-app-no-scopes = aplikacija za prijavo potrebuje dovoljenja (scopes), ki omogočajo dostop do pošte
-# review: new
-sign-in-app-bad-host = naslov strežnika { $server } manjka ali ni veljavno ime gostitelja
-# review: new
+sign-in-app-bad-host = nastavitve strežnika { $server } niso veljavne ali niso popolne. Preverite ime gostitelja in vrata
 sign-in-app-plain = strežnik { $server } mora uporabljati SSL/TLS ali STARTTLS
-# review: new
 sign-in-app-not-checked = izdajatelj še ni bil preverjen
-# review: new
 sign-in-app-issuer-changed = izdajatelj se je spremenil: znova vnesite skrivnost odjemalca ali jo odstranite
-# review: new
 sign-in-register-google = V konzoli Google Cloud Console ustvarite odjemalca OAuth vrste Desktop app z dovoljenjem https://mail.google.com/ na zaslonu za soglasje. Dokler je aplikacija v preizkušanju, se lahko prijavijo samo njeni preizkusni uporabniki.
-# review: new
 sign-in-register-microsoft = V storitvi Microsoft Entra registrirajte aplikacijo s platformo Mobile and desktop applications, preusmeritvenim URI-jem http://localhost in dovoljenimi tokovi javnega odjemalca ter z delegiranimi dovoljenji IMAP.AccessAsUser.All, SMTP.Send in offline_access. Samo za svojo organizacijo kot izdajatelja uporabite https://login.microsoftonline.com/<tenant ID>/v2.0.
-# review: new
 sign-in-register-other = Registrirajte izvornega (javnega) odjemalca s spodnjim preusmeritvenim URI-jem; ponudnik mora na njem dovoliti katera koli vrata (RFC 8252). Dodajte dovoljenje (scope), s katerim ponudnik omogoča dostop do pošte.
 
 ## Calendar invitations
 
-# review: new
 repeats = Ponavljanje
-# review: new
 repeats-every = { $unit ->
     [day] { $interval ->
-        [one] Vsak dan
-        [two] Vsaka { $interval } dneva
-        [few] Vsake { $interval } dni
-       *[other] Vsakih { $interval } dni
+        [1] Vsak dan
+       *[other] Vsak { $interval }. dan
     }
     [week] { $interval ->
-        [one] Vsak teden
-        [two] Vsaka { $interval } tedna
-        [few] Vsake { $interval } tedne
-       *[other] Vsakih { $interval } tednov
+        [1] Vsak teden
+       *[other] Vsak { $interval }. teden
     }
     [month] { $interval ->
-        [one] Vsak mesec
-        [two] Vsaka { $interval } meseca
-        [few] Vsake { $interval } mesece
-       *[other] Vsakih { $interval } mesecev
+        [1] Vsak mesec
+       *[other] Vsak { $interval }. mesec
     }
    *[year] { $interval ->
-        [one] Vsako leto
-        [two] Vsaki { $interval } leti
-        [few] Vsaka { $interval } leta
-       *[other] Vsakih { $interval } let
+        [1] Vsako leto
+       *[other] Vsako { $interval }. leto
     }
 }
 # "Every week on Monday, Wednesday"
-# review: new
 repeats-on = { $repeats }, ob dnevih: { $days }
 # "Every week, 10 times"
-# review: new
 repeats-times = { $count ->
-    [one] { $repeats }, enkrat
-    [two] { $repeats }, { $count }-krat
-    [few] { $repeats }, { $count }-krat
+    [1] { $repeats }, enkrat
    *[other] { $repeats }, { $count }-krat
 }
-# review: new
 day-monday = ponedeljek
-# review: new
 day-tuesday = torek
-# review: new
 day-wednesday = sreda
-# review: new
 day-thursday = četrtek
-# review: new
 day-friday = petek
-# review: new
 day-saturday = sobota
-# review: new
 day-sunday = nedelja
 
 ## AI agents
 
-# review: changed
-agent-level-read = Branje pošte: pregled map, seznama sporočil in vsebine sporočil ter iskanje
-# review: changed
+agent-level-read = Branje pošte: mape, seznami sporočil, pogovori, iskanje, sporočila in njihove priponke, pravila za sporočila ter stiki
 agent-level-organize = Urejanje pošte: spreminjanje prebranosti, zastavic in njihovih barv, označevanje neželene pošte, premikanje in arhiviranje sporočil, ustvarjanje in preimenovanje map, spremljanje in prezrtje pogovorov, brisanje v mapo Izbrisano ter odjava s poštnih seznamov po vaši potrditvi
 agent-level-drafts = Pisanje osnutkov, ki jih pošljete sami
 agent-level-send = Pošiljanje pošte samo z vašo potrditvijo vsakega sporočila
@@ -697,7 +464,7 @@ agent-send-detail = Preverite prejemnike in vsebino sporočila. Po potrditvi spo
 agent-change-title = Kaj sme početi { $program }
 agent-change-allowed = Izberite, kaj smejo agenti UI tega programa početi z vašo pošto.
 agent-change-refused = Temu programu ste zavrnili dostop. Znova mu ga lahko dovolite, da bodo njegovi agenti lahko delali z vašo pošto.
-agent-log-taken-back = { $entry } (razveljavljeno)
+agent-log-taken-back = { $entry } (vsaj delno razveljavljeno)
 agent-files = Datoteke: { $files }
 agent-undo-refused = Tega dejanja ni mogoče razveljaviti.
 agent-undo-refused-why = Tega dejanja ni mogoče razveljaviti: { $reason }.
@@ -726,11 +493,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Tega sporočila ni mogoče prebrati.
 agent-encrypted-original = To sporočilo je šifrirano: agent nanj ne more odgovoriti ali ga posredovati, ker ne zna šifrirati.
 agent-encrypted = To sporočilo je šifrirano, zato agent ne more prebrati njegove vsebine. Odprete ga lahko v programu Inbox Classic.
-# review: new
 agent-too-many-changes = Preveč sprememb v zadnjih 30 dneh: ta agent jih je naredil toliko, kolikor jih Inbox Classic za en program hrani v dnevniku. Več jih bo lahko naredil, ko bodo najstarejše stare 30 dni.
-# review: new
 agent-too-many-reads = Preveč branja v zadnjih 30 dneh: ta agent je prebral toliko, kolikor Inbox Classic za en program hrani v dnevniku. Več bo lahko bral, ko bodo najstarejša branja stara 30 dni.
-# review: new
 list-encrypted = Šifrirano sporočilo
 agent-log-composed = Odprl novo sporočilo za urejanje. Zadeva: »{ $subject }«
 agent-log-refused = Niste dovolili pošiljanja sporočila »{ $subject }«
@@ -738,7 +502,7 @@ agent-log-sent = Uvrstil sporočilo »{ $subject }« v čakalno vrsto za pošilj
 agent-log-draft = Shranil osnutek »{ $subject }«
 agent-log-draft-replaced = Zamenjal osnutek »{ $subject }«
 agent-log-draft-discarded = Trajno izbrisal osnutek »{ $subject }«
-agent-draft-note = Ta osnutek je napisal agent UI { $program }. Pred pošiljanjem preverite prejemnike in besedilo.
+agent-draft-note = Ta osnutek je pripravil agent UI programa »{ $program }«. Pred pošiljanjem preverite prejemnike in besedilo.
 agent-log-read = Označil sporočilo »{ $subject }« kot prebrano
 agent-log-unread = Označil sporočilo »{ $subject }« kot neprebrano
 agent-log-flagged = Označil sporočilo »{ $subject }« z zastavico
@@ -748,7 +512,7 @@ agent-log-moved = Premaknil sporočilo »{ $subject }« v mapo »{ $folder }«
 agent-log-junk = Označil sporočilo »{ $subject }« kot neželeno
 agent-log-not-junk = Odstranil oznako neželene pošte s sporočila »{ $subject }«
 agent-log-archived = Arhiviral sporočilo »{ $subject }«
-agent-log-folder = Ustvaril mapo »{ $name }«
+agent-log-folder = Zahteval ustvarjanje mape »{ $name }«
 agent-log-unsubscribed = Odobrili ste zahtevo za odjavo s poštnega seznama. Sporočilo: »{ $subject }«
 agent-log-unsubscribe-failed = Zahteva za odjavo ni uspela. Sporočilo: »{ $subject }«. Razlog: { $reason }
 agent-log-unsubscribe-refused = Odjave niste dovolili. Pošiljatelji: { $senders }
@@ -763,7 +527,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic bo spodaj navedenemu poštnemu seznamu poslal zahtevo za odjavo. Uporabil bo možnost odjave z enim klikom, ki jo seznam ponuja. Pri tem se e-pošta ne pošilja, prejeta sporočila pa ostanejo nespremenjena.
    *[other] Inbox Classic bo vsakemu spodaj navedenemu poštnemu seznamu poslal zahtevo za odjavo. Uporabil bo možnost odjave z enim klikom, ki jo ponuja posamezni seznam. Pri tem se e-pošta ne pošilja, prejeta sporočila pa ostanejo nespremenjena.
 }
-# review: new
 agent-log-flag-color = Označil sporočilo »{ $subject }« { $color ->
     [red] z rdečo zastavico
     [orange] z oranžno zastavico
@@ -773,47 +536,37 @@ agent-log-flag-color = Označil sporočilo »{ $subject }« { $color ->
     [purple] z vijolično zastavico
    *[gray] s sivo zastavico
 }
-# review: new
-agent-log-renamed = Preimenoval mapo »{ $old }« v »{ $name }«
-# review: new
+agent-log-renamed = Zahteval preimenovanje mape »{ $old }« v »{ $name }«
 agent-log-watched = Začel spremljati pogovor »{ $subject }«
-# review: new
 agent-log-ignored = Prezrl pogovor »{ $subject }«
-# review: new
-agent-log-unmarked = Prenehal spremljati ali prezirati pogovor »{ $subject }«
+agent-log-unmarked = Odstranil oznako spremljanja ali prezrtja pogovora »{ $subject }«
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = sporočilo je bilo medtem spremenjeno
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Označil { $count } sporočilo kot prebrano (iskanje: { $query })
     [two] Označil { $count } sporočili kot prebrani (iskanje: { $query })
     [few] Označil { $count } sporočila kot prebrana (iskanje: { $query })
    *[other] Označil { $count } sporočil kot prebrana (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Označil { $count } sporočilo kot neprebrano (iskanje: { $query })
     [two] Označil { $count } sporočili kot neprebrani (iskanje: { $query })
     [few] Označil { $count } sporočila kot neprebrana (iskanje: { $query })
    *[other] Označil { $count } sporočil kot neprebrana (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Označil { $count } sporočilo z zastavico (iskanje: { $query })
     [two] Označil { $count } sporočili z zastavico (iskanje: { $query })
     [few] Označil { $count } sporočila z zastavico (iskanje: { $query })
    *[other] Označil { $count } sporočil z zastavico (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Odstranil zastavico pri { $count } sporočilu (iskanje: { $query })
     [two] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
     [few] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
    *[other] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] Označil { $count } sporočilo
     [two] Označil { $count } sporočili
@@ -828,35 +581,30 @@ agent-log-bulk-color = { $count ->
     [purple] z vijolično zastavico
    *[gray] s sivo zastavico
 } (iskanje: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Premaknil { $count } sporočilo v mapo »{ $folder }« (iskanje: { $query })
     [two] Premaknil { $count } sporočili v mapo »{ $folder }« (iskanje: { $query })
     [few] Premaknil { $count } sporočila v mapo »{ $folder }« (iskanje: { $query })
    *[other] Premaknil { $count } sporočil v mapo »{ $folder }« (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Arhiviral { $count } sporočilo (iskanje: { $query })
     [two] Arhiviral { $count } sporočili (iskanje: { $query })
     [few] Arhiviral { $count } sporočila (iskanje: { $query })
    *[other] Arhiviral { $count } sporočil (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Označil { $count } sporočilo kot neželeno (iskanje: { $query })
     [two] Označil { $count } sporočili kot neželeni (iskanje: { $query })
     [few] Označil { $count } sporočila kot neželena (iskanje: { $query })
    *[other] Označil { $count } sporočil kot neželena (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Odstranil oznako neželene pošte pri { $count } sporočilu (iskanje: { $query })
     [two] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
     [few] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
    *[other] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Izbrisal { $count } sporočilo (iskanje: { $query })
     [two] Izbrisal { $count } sporočili (iskanje: { $query })
@@ -864,7 +612,6 @@ agent-log-bulk-deleted = { $count ->
    *[other] Izbrisal { $count } sporočil (iskanje: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] V zadnjih 15 minutah
     [hour] V zadnji uri
@@ -874,7 +621,6 @@ agent-undo-span = { $span ->
    *[all] V zadnjih 30 dneh
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] Program { $program } v tem času ni naredil sprememb, ki bi jih bilo mogoče razveljaviti.
     [one] Želite razveljaviti { $count } spremembo, ki jo je program { $program } naredil v tem času?
@@ -882,89 +628,73 @@ agent-undo-since-question = { $count ->
     [few] Želite razveljaviti { $count } spremembe, ki jih je program { $program } naredil v tem času?
    *[other] Želite razveljaviti { $count } sprememb, ki jih je program { $program } naredil v tem času?
 }
-# review: new
-agent-undo-since-detail = Sporočila se vrnejo v mape, iz katerih so prišla, prebranost in zastavice se vrnejo v prejšnje stanje, sporočila, ki še čakajo v mapi Odpošiljanje, pa se izbrišejo. Kar ste medtem spremenili vi ali strežnik, ostane, kot je.
+agent-undo-since-detail = Program poskusi sporočila vrniti v prejšnje mape ter obnoviti prebranost in zastavice. Sporočila, ki še čakajo v mapi Odpošiljanje, izbriše. Pri tem preveri stanje, povezano s posameznim dejanjem, in preskoči neustrezna sporočila. Odstranitev zastavice lahko odstrani tudi barvo, ki ste jo spremenili pozneje.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Nič ni bilo razveljavljeno.
-    [one] Razveljavljena { $count } sprememba.
-    [two] Razveljavljeni { $count } spremembi.
-    [few] Razveljavljene { $count } spremembe.
-   *[other] Razveljavljenih { $count } sprememb.
+    [one] V celoti ali delno razveljavljeno { $count } dejanje.
+    [two] V celoti ali delno razveljavljeni { $count } dejanji.
+    [few] V celoti ali delno razveljavljena { $count } dejanja.
+   *[other] V celoti ali delno razveljavljenih { $count } dejanj.
 }
-# review: new
 agent-undo-left-gone = { $count ->
     [one] { $count } sporočilo ni bilo več tam, kamor ga je postavila sprememba.
     [two] { $count } sporočili nista bili več tam, kamor ju je postavila sprememba.
     [few] { $count } sporočila niso bila več tam, kamor jih je postavila sprememba.
    *[other] { $count } sporočil ni bilo več tam, kamor jih je postavila sprememba.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] { $count } sporočilo je bilo medtem spremenjeno, z vaše strani ali na strežniku, in je ostalo, kot je.
     [two] { $count } sporočili sta bili medtem spremenjeni, z vaše strani ali na strežniku, in sta ostali, kot sta.
     [few] { $count } sporočila so bila medtem spremenjena, z vaše strani ali na strežniku, in so ostala, kot so.
    *[other] { $count } sporočil je bilo medtem spremenjenih, z vaše strani ali na strežniku, in je ostalo, kot je.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] { $count } sporočilo je že zapustilo mapo Odpošiljanje.
     [two] { $count } sporočili sta že zapustili mapo Odpošiljanje.
     [few] { $count } sporočila so že zapustila mapo Odpošiljanje.
    *[other] { $count } sporočil je že zapustilo mapo Odpošiljanje.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
-    [one] { $count } spremembe ni mogoče razveljaviti.
-    [two] { $count } spremembi ni mogoče razveljaviti.
-    [few] { $count } spremembe ni mogoče razveljaviti.
-   *[other] { $count } sprememb ni mogoče razveljaviti.
+   *[other] Število sprememb, ki jih ni mogoče razveljaviti: { $count }.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] To sporočilo sprejme povabilo »{ $summary }« ({ $when }).
-    [tentative] To sporočilo pogojno sprejme povabilo »{ $summary }« ({ $when }).
-   *[decline] To sporočilo zavrne povabilo »{ $summary }« ({ $when }).
-} Koledar organizatorja odgovor upošteva. Vaš odgovor na povabilo se spremeni šele, ko je sporočilo poslano.
+    [accept] S tem sporočilom sprejmete povabilo »{ $summary }« ({ $when }).
+    [tentative] S tem sporočilom pogojno sprejmete povabilo »{ $summary }« ({ $when }).
+   *[decline] S tem sporočilom zavrnete povabilo »{ $summary }« ({ $when }).
+} Odgovor je namenjen koledarskemu programu organizatorja. Stanje vašega odgovora v programu Inbox Classic se spremeni po uspešnem pošiljanju, ne po potrditvi organizatorja.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Sprejeto: { $summary }
     [tentative] Pogojno sprejeto: { $summary }
    *[decline] Zavrnjeno: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } sprejema to povabilo.
     [tentative] { $name } pogojno sprejema to povabilo.
    *[decline] { $name } zavrača to povabilo.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] prebral { $count } sporočilo
     [two] prebral { $count } sporočili
     [few] prebral { $count } sporočila
    *[other] prebral { $count } sporočil
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] odprl { $count } priponko
-    [two] odprl { $count } priponki
-    [few] odprl { $count } priponke
-   *[other] odprl { $count } priponk
+    [one] prebral { $count } priponko
+    [two] prebral { $count } priponki
+    [few] prebral { $count } priponke
+   *[other] prebral { $count } priponk
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] iskal { $count }-krat
     [two] iskal { $count }-krat
     [few] iskal { $count }-krat
    *[other] iskal { $count }-krat
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] pregledal seznam sporočil { $count }-krat
     [two] pregledal sezname sporočil { $count }-krat
@@ -972,122 +702,81 @@ agent-reads-lists = { $count ->
    *[other] pregledal sezname sporočil { $count }-krat
 }
 # each read under that row
-# review: new
 agent-read-message = Prebral sporočilo »{ $subject }«
-# review: new
 agent-read-conversation = { $count ->
     [one] Prebral pogovor »{ $subject }« ({ $count } sporočilo)
     [two] Prebral pogovor »{ $subject }« ({ $count } sporočili)
     [few] Prebral pogovor »{ $subject }« ({ $count } sporočila)
    *[other] Prebral pogovor »{ $subject }« ({ $count } sporočil)
 }
-# review: new
-agent-read-attachment = Odprl priponko »{ $name }« sporočila »{ $subject }«
-# review: new
+agent-read-attachment = Prebral priponko »{ $name }« sporočila »{ $subject }«
 agent-read-search = { $count ->
     [one] Iskal »{ $query }«: { $count } sporočilo
     [two] Iskal »{ $query }«: { $count } sporočili
     [few] Iskal »{ $query }«: { $count } sporočila
    *[other] Iskal »{ $query }«: { $count } sporočil
 }
-# review: new
-agent-read-people = Poiskal stike, ki se začnejo z »{ $query }«
-# review: new
+agent-read-people = Iskal osebe, katerih ime ali naslov se začne z »{ $query }«
 agent-read-list = { $count ->
-    [one] Pregledal { $count } sporočilo v mapi { $folder }
-    [two] Pregledal { $count } sporočili v mapi { $folder }
-    [few] Pregledal { $count } sporočila v mapi { $folder }
-   *[other] Pregledal { $count } sporočil v mapi { $folder }
+    [one] Pregledal { $count } vrstico na seznamu »{ $folder }«
+    [two] Pregledal { $count } vrstici na seznamu »{ $folder }«
+    [few] Pregledal { $count } vrstice na seznamu »{ $folder }«
+   *[other] Pregledal { $count } vrstic na seznamu »{ $folder }«
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Pregledal { $count } novo sporočilo
-    [two] Pregledal { $count } novi sporočili
-    [few] Pregledal { $count } nova sporočila
-   *[other] Pregledal { $count } novih sporočil
+    [one] Pregledal podatke o { $count } novem sporočilu
+    [two] Pregledal podatke o { $count } novih sporočilih
+    [few] Pregledal podatke o { $count } novih sporočilih
+   *[other] Pregledal podatke o { $count } novih sporočilih
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Iz aplikacije { $terminal } zagnani programi
-# review: new
 agent-terminal-programs-windows = Iz terminala ({ $terminal }) zagnani programi
-# review: new
 agent-terminal-programs-linux = Iz terminala ({ $terminal }) zagnani programi
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Iz aplikacije { $terminal } zagnan program
-# review: new
 agent-terminal-program-windows = Iz terminala ({ $terminal }) zagnan program
-# review: new
 agent-terminal-program-linux = Iz terminala ({ $terminal }) zagnan program
-# review: new
 agent-connect-title-terminal = { $programs } želijo dostop do vaše pošte
-# review: new
 agent-connect-terminal-detail = Vsi agenti UI, ki jih zaženete iz tega terminala, si delijo dostop, ki ga dovolite tukaj. Če želite enemu od njih dati lasten dostop, v agentovih nastavitvah MCP med njegove argumente dodajte --name in poljubno ime.
-# review: new
 agent-connect-claimed = Program se je predstavil kot { $claimed }. Inbox Classic je preveril, kateri program ga je zagnal: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
-# review: new
 key-ctrl = Ctrl
-# review: new
 key-alt = Alt
-# review: new
 key-shift = Shift
-# review: new
 key-del = Del
-# review: new
 key-enter = Enter
 
 ## Signing in and passwords
 
-# review: new
 sign-in-no-refresh = ponudnik ni dal žetona za osvežitev
-# review: new
 sign-in-no-account = ponudnik ni povedal, kateri račun se je prijavil
-# review: new
 sign-in-not-finished = prijava še ni končana
-# review: new
 secrets-unavailable = { $store } ni na voljo
-# review: new
 secrets-unavailable-why = { $store } ni na voljo: { $error }
-# review: new
 secrets-windows = Upravitelj poverilnic
-# review: new
 secrets-mac = Obesek za ključe
-# review: new
 secrets-linux = Sistemska shramba ključev (Secret Service)
-# review: new
 error-no-such-file = take datoteke ni
-# review: new
-cards-file-too-big = Ta datoteka je prevelika, da bi bila imenik.
-# review: new
-ui-sender-added = { $name } je bil dodan v Imenik.
-# review: new
-ui-sender-known = { $name } je že v Imeniku.
-# review: new
+cards-file-too-big = Datoteka presega omejitev velikosti za uvoz imenika.
+ui-sender-added = Stik »{ $name }« je dodan v Imenik.
+ui-sender-known = Stik »{ $name }« je že v Imeniku.
 ui-sender-none = Pošiljatelj tega sporočila nima e-poštnega naslova, ki bi ga lahko dodali.
-# review: new
 card-name-needed = Stik nima imena in nima e-poštnega naslova.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
-# review: new
 cards-file-failed = { $file }: { $reason }
 
 ## One-time codes: the card at the top of a message with a sign-in or verification code
 
 # the domain the code is for, which signed the message
-# review: new
-otp-heading = Koda za { $domain }
-# review: new
+otp-heading = Koda iz domene { $domain }
 otp-copy = Kopiraj
-# review: new
 otp-note = Vnesite jo samo na strani domene { $domain }.
-# review: new
-otp-old = Ta koda je bila poslana več kot eno uro, preden ste jo odprli, in je verjetno že potekla.
+otp-old = Glede na datum sporočila je bila koda poslana več kot eno uro pred odprtjem in je verjetno že potekla.
 
 # how many are invited, in the card of an event
-# review: new
 event-attendees =
     { $count ->
         [one] { $count } udeleženec
@@ -1097,148 +786,86 @@ event-attendees =
     }
 
 # the first line of a new message's notification when it has a code, for a domain that signed it
-# review: new
-otp-notification = { $code } je vaša koda za { $domain }
+otp-notification = Koda iz domene { $domain }: { $code }
 
 ## OpenPGP keys (keys.rs)
-# review: new
 pgp-key-valid = Veljaven
-# review: new
 pgp-key-expires = Veljaven do { $date }
-# review: new
 pgp-key-expired = Potekel { $date }
-# review: new
 pgp-key-revoked = Preklican
-# review: new
 pgp-key-revoked-why = Preklican: { $reason }
-# review: new
 pgp-key-not-valid = Ni veljaven
-# review: new
-pgp-key-locked = Ni ga mogoče uporabiti: ključa, ki ga ščiti, ni več na voljo ({ $store }). Znova uvozite njegovo varnostno kopijo.
-# review: new
+pgp-key-locked = Zasebnega ključa ni mogoče odpreti. Preverite, ali je shramba ({ $store }) dostopna in odklenjena. Če je bil zaščitni ključ izgubljen ali ponastavljen, znova uvozite varnostno kopijo zasebnega ključa.
 pgp-source-own = Ustvarjen v programu Inbox Classic
-# review: new
 pgp-source-file = Uvožen iz datoteke
-# review: new
 pgp-source-paste = Prilepljen
-# review: new
 pgp-source-attachment = Iz sporočila
-# review: new
 pgp-source-vcard = Iz vizitke stika
-# review: new
 pgp-source-wkd = Od ponudnika e-pošte pošiljatelja
-# review: new
 pgp-source-keyserver = S strežnika keys.openpgp.org
-# review: new
 pgp-source-autocrypt = Iz glave Autocrypt sporočila
-# review: new
-pgp-error-no-store = Zasebne ključe ščiti { $store }, ki ga ni mogoče uporabiti: { $error }
-# review: new
+pgp-error-no-store = Zasebnih ključev ni mogoče zaščititi s shrambo { $store }: { $error }
 pgp-error-wrong-passphrase = Zaščitno geslo ni pravilno.
-# review: new
 pgp-error-not-a-key = To ni ključ OpenPGP.
-# review: new
 pgp-error-too-large = Ključ je prevelik.
-# review: new
-pgp-error-unusable = Ključ uporablja staro ali šibko kriptografijo in ga ni mogoče uporabiti.
-# review: new
+pgp-error-unusable = Ključ nima uporabnih delov za zahtevano dejanje ali uporablja nepodprte kriptografske algoritme.
 pgp-imported-private = { $count ->
-    [one] Vaš zasebni ključ je bil uvožen.
+    [one] Uvožen je bil { $count } zasebni ključ.
     [two] Uvožena sta bila { $count } zasebna ključa.
     [few] Uvoženi so bili { $count } zasebni ključi.
    *[other] Uvoženih je bilo { $count } zasebnih ključev.
 }
-# review: new
 pgp-imported-public = { $count ->
     [one] Uvožen je bil { $count } ključ.
     [two] Uvožena sta bila { $count } ključa.
     [few] Uvoženi so bili { $count } ključi.
    *[other] Uvoženih je bilo { $count } ključev.
 }
-# review: new
-pgp-imported-pending = Za { $addresses } se že uporablja drug ključ: novi čaka v stiku, dokler ga ne izberete.
-# review: new
+pgp-imported-pending = Za naslove { $addresses } se že uporablja drug ključ. Novega lahko izberete v lastnostih stika.
 pgp-error-needs-passphrase = Zasebni ključ je zaščiten z zaščitnim geslom. Vnesite ga, da uvozite ključ.
-# review: new
 pgp-error-mismatch = Zasebni ključ ne pripada svojemu javnemu ključu. Morda je bil spremenjen.
-# review: new
 pgp-file-name-public = { $who } javni ključ.asc
-# review: new
 pgp-file-name-private = { $who } varnostna kopija zasebnega ključa.asc
-# review: new
-pgp-pending = { $date } je bil najden drug ključ za { $address }.
+pgp-pending = Za naslov { $address } je bil najden drug ključ. Datum: { $date }.
 
 ## Reading signed and encrypted mail (protect.rs)
-# review: new
-pgp-part-verified = Podpisal { $signer }, ključ preverjen
-# review: new
-pgp-part-signed = Podpisal { $signer } (ključ ni preverjen)
-# review: new
-pgp-part-other = Podpisal { $signer }, ki ni pošiljatelj
-# review: new
+pgp-part-verified = Podpisnik: { $signer }; lastnik ključa je potrjen
+pgp-part-signed = Podpisnik: { $signer } (lastnik ključa ni potrjen)
+pgp-part-other = Podpisnik: { $signer }; podpisa ni bilo mogoče povezati s pošiljateljem sporočila
 pgp-part-unknown-key = Podpisano, vendar ključ ni znan
-# review: new
 pgp-part-not-signed = Ni podpisano
-# review: new
 pgp-part-not-checked = Podpis ni preverjen
-# review: new
 pgp-part-encrypted = Šifrirano. { $signature }
-# review: new
 pgp-part-no-key = Šifrirano za ključ, ki ga nimate
-# review: new
-pgp-part-changed = Šifrirani del je bil med potjo spremenjen in ni prikazan
-# review: new
+pgp-part-changed = Celovitosti šifriranega dela ni bilo mogoče potrditi, zato ni prikazan
 pgp-part-unprotected = Šifrirano brez zaščite pred spremembami, ni prikazano
-# review: new
 pgp-part-broken = Šifriranega dela ni mogoče prebrati
-# review: new
 pgp-why-mismatch = Podpis se ne ujema s tem besedilom
-# review: new
-pgp-why-weak-hash = Podpis uporablja { $hash }, ki ni več varen
-# review: new
+pgp-why-weak-hash = Podpis uporablja zgoščevalni algoritem { $hash }, ki ni več varen
 pgp-why-key-expired = Podpisano po tem, ko je ključ potekel { $date }
-# review: new
 pgp-why-key-revoked = Podpisano s preklicanim ključem
-# review: new
 pgp-why-not-signing-key = Podpisano s ključem, ki ne sme podpisovati
-# review: new
 pgp-why-from-future = Podpis ima datum v prihodnosti
-# review: new
 pgp-why-signature-expired = Podpis je potekel
-# review: new
 pgp-why-key-not-valid = Podpisano z neveljavnim ključem
-# review: new
 pgp-why-not-for-you = Podpisano za druge prejemnike in posredovano vam
 pgp-why-not-key-in-use = Ključ podpisa se razlikuje od ključa, izbranega za naslov { $address }
-# review: new
 pgp-part-pictures-loaded = { $label }. Slike so bile naložene z interneta
-# review: new
 pgp-error-no-own-key = Za { $address } nimate ključa, s katerim bi podpisovali ali šifrirali. Ustvarite ga v meniju Orodja > Šifrirni ključi ali izklopite Podpiši in Šifriraj.
-# review: new
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } nima ključa za šifriranje.
-   *[other] Ti prejemniki nimajo ključa za šifriranje: { $addresses }.
+    [1] Prejemnik { $addresses } nima ključa za šifriranje.
+   *[other] Ti prejemniki nimajo ključev za šifriranje: { $addresses }.
 }
-# review: new
-pgp-error-encrypted-quote = To sporočilo navaja ali posreduje šifrirano sporočilo, zato ga je mogoče poslati samo šifrirano. Vklopite Šifriraj ali odstranite navedeno besedilo.
-# review: new
+pgp-error-encrypted-quote = To sporočilo vsebuje besedilo, slike ali priponke iz šifriranega sporočila, zato ga lahko pošljete samo šifrirano. Vklopite Šifriraj ali odstranite vso vsebino, prevzeto iz šifriranega sporočila.
 pgp-error-protect = Sporočila ni bilo mogoče podpisati ali šifrirati: { $reason }
-# review: new
-pgp-found-keys = Najden ključ za { $addresses }.
-# review: new
-pgp-found-none = Za { $addresses } ni bil najden noben ključ. Prosite, naj vam pošljejo svoj javni ključ.
-# review: new
+pgp-found-keys = Ključi so bili najdeni za naslove: { $addresses }.
+pgp-found-none = Za naslove { $addresses } ni bilo mogoče najti ključev. Prejemnike prosite za njihove javne ključe.
 pgp-found-no-key = Noben ključ ni bil najden.
-# review: new
 pgp-find-unavailable = Ključev zdaj ni bilo mogoče poiskati: { $error }
-# review: new
-pgp-publish-pending = keys.openpgp.org je poslal potrditveno povezavo na { $addresses }. Ko jo kliknete, bo vaš ključ tam objavljen.
-# review: new
+pgp-publish-pending = keys.openpgp.org je poslal potrditveno povezavo na naslednje naslove: { $addresses }. Potrdite vsak naslov posebej, da bo ključ mogoče poiskati po njem.
 pgp-publish-done = Vaš ključ je objavljen na keys.openpgp.org za { $addresses }.
-# review: new
 pgp-publish-failed = Ključa ni bilo mogoče objaviti: { $error }
-# review: changed
-pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno v { $settings }.
+pgp-keyserver-off = Iskanje ključev na keys.openpgp.org je izklopljeno. Mesto nastavitve: { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 pgp-compose-encrypted = { $count ->
     [1] Sporočilo bo ob pošiljanju šifrirano in digitalno podpisano. Vsebino boste lahko prebrali le vi in { $addresses }.
@@ -1256,10 +883,10 @@ pgp-compose-missing = { $count ->
    *[other] { $count } prejemnikov nima uporabnih ključev: { $addresses }. Sporočila še ni mogoče šifrirati.
 }
 pgp-compose-looking = Iskanje ključev prejemnikov: { $addresses }...
-pgp-compose-signed = Sporočilo bo ob pošiljanju digitalno podpisano. Prejemniki bodo lahko preverili, ali se je vsebina po podpisu spremenila.
+pgp-compose-signed = Sporočilo bo ob pošiljanju digitalno podpisano. Prejemniki bodo lahko preverili, s katerim ključem je podpisano in ali se je vsebina po podpisu spremenila.
 pgp-compose-reply-clear = Sporočilo bo poslano brez šifriranja, čeprav je bilo izvirno sporočilo šifrirano.
 pgp-compose-encrypted-files = Sporočilo vsebuje priponke iz šifriranega sporočila, zato ga ni mogoče poslati brez šifriranja. Vklopite možnost »Šifriraj« ali odstranite te priponke.
-pgp-compose-sign-tip = Digitalno podpišite sporočilo s svojim ključem, da bodo prejemniki lahko preverili, ali se je njegova vsebina po podpisu spremenila
+pgp-compose-sign-tip = Digitalno podpišite sporočilo s svojim ključem, da bodo prejemniki lahko preverili uporabljeni ključ in morebitne spremembe vsebine po podpisu
 pgp-compose-sign-tip-encrypted = Sporočila, poslana v šifrirani obliki, so tudi digitalno podpisana
 pgp-compose-encrypt-tip = Šifrirajte vsebino sporočila, da bo dostopna le vam in prejemnikom
 pgp-compose-make-key = Za naslov { $address } še nimate lastnega ključa. Ga želite ustvariti zdaj? Z njim boste lahko digitalno podpisovali in šifrirali sporočila.
@@ -1268,7 +895,7 @@ pgp-compose-key-unusable =
 
     Razlog: { $state }
 
-    Odprite okno »Šifrirni ključi«, da uvozite varnostno kopijo tega ključa ali ustvarite nov ključ.
+    V oknu »Šifrirni ključi« preverite njegovo stanje. Če je zasebni ključ začasno nedostopen, preverite sistemsko shrambo ključev. Po potrebi lahko uvozite varnostno kopijo ključa ali ustvarite nov ključ.
 pgp-compose-encrypt-off-quote = Sporočilo vsebuje besedilo, slike ali priponke iz šifriranega sporočila. Brez šifriranja ga lahko pošljete šele, ko odstranite to vsebino. Ali želite kljub temu izklopiti šifriranje?
 pgp-compose-encrypt-off-reply = Odgovarjate na šifrirano sporočilo ali ga posredujete. Brez šifriranja lahko vsebino vašega sporočila preberejo tudi strežniki, prek katerih potuje. Ali želite izklopiti šifriranje?
 pgp-recipient-verified = Lastnik ključa je potrjen
@@ -1287,293 +914,211 @@ pgp-recipients-intro-missing = { $count ->
     [few] { $count } prejemniki nimajo uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
    *[other] { $count } prejemnikov nima uporabnih ključev za šifriranje. Poiščite manjkajoče ključe, odstranite prejemnike brez uporabnih ključev iz sporočila ali sporočilo pošljite brez šifriranja.
 }
-# review: new
 pgp-details-part = Del { $number }: { $label }
-# review: new
 attachment-from-part = Iz dela { $number }: { $label }
-# review: new
 pgp-details-signed = Podpisano { $when } s ključem { $key }
-# review: new
 pgp-details-unknown-key = Podpisano s ključem { $key }, ki ga nimate
-# review: new
-pgp-details-opened = Šifrirano za vaš ključ { $key }
-# review: new
+pgp-details-opened = Dešifrirano z vašim ključem { $key }
 pgp-details-for = Šifrirano za { $keys }
-# review: new
 pgp-details-plain = Ni podpisano in ni šifrirano
-# review: new
 pgp-bar-parts = To sporočilo ima več delov ({ $count }): { $list }. Pri vsakem delu piše, kako je zaščiten.
-# review: new
-pgp-bar-count-verified = Preverjeni: { $count }
-# review: new
+pgp-bar-count-verified = Podpisani s potrjenim lastnikom ključa: { $count }
 pgp-bar-count-encrypted-signed = Šifrirani in podpisani: { $count }
-# review: new
 pgp-bar-count-encrypted = Šifrirani: { $count }
-# review: new
 pgp-bar-count-signed = Podpisani: { $count }
-# review: new
 pgp-bar-count-warning = { $count ->
    *[other] Zahtevajo pozornost: { $count }
 }
-# review: new
 pgp-bar-count-neutral = Brez potrjenega podpisa: { $count }
 # the setup file: settings, accounts, contacts and keys carried to another computer
-# review: new
 setup-part-settings = Nastavitve
-# review: new
 setup-part-preferences = Nastavitve oken
-# review: new
 setup-part-accounts = Računi
-# review: new
 setup-part-sign-in-apps = Aplikacije za prijavo
-# review: new
 setup-part-contacts = Stiki in skupine
-# review: new
 setup-part-keys = Šifrirni ključi
-# review: new
 setup-part-rules = Pravila za sporočila
-# review: new
 setup-part-trusted-senders = Zaupanja vredni pošiljatelji
-# review: new
 setup-holds-settings = { $count ->
     [one] { $count } nastavitev
     [two] { $count } nastavitvi
     [few] { $count } nastavitve
    *[other] { $count } nastavitev
 }
-# review: new
 setup-holds-preferences = { $count ->
     [one] { $count } nastavitev okna
     [two] { $count } nastavitvi oken
     [few] { $count } nastavitve oken
    *[other] { $count } nastavitev oken
 }
-# review: new
 setup-holds-accounts = { $count ->
     [one] { $count } račun
     [two] { $count } računa
     [few] { $count } računi
    *[other] { $count } računov
 }
-# review: new
 setup-holds-sign-in-apps = { $count ->
     [one] { $count } aplikacija za prijavo
     [two] { $count } aplikaciji za prijavo
     [few] { $count } aplikacije za prijavo
    *[other] { $count } aplikacij za prijavo
 }
-# review: new
 setup-holds-built-in = Katere vgrajene aplikacije za prijavo so vklopljene
-# review: new
 setup-holds-contacts = { $count ->
     [one] { $count } stik
     [two] { $count } stika
     [few] { $count } stiki
    *[other] { $count } stikov
 }
-# review: new
 setup-holds-groups = { $count ->
     [one] { $count } skupina
     [two] { $count } skupini
     [few] { $count } skupine
    *[other] { $count } skupin
 }
-# review: new
 setup-holds-own-keys = { $count ->
     [one] { $count } lastni ključ
     [two] { $count } lastna ključa
     [few] { $count } lastni ključi
    *[other] { $count } lastnih ključev
 }
-# review: new
 setup-holds-contact-keys = { $count ->
     [one] { $count } ključ stika
     [two] { $count } ključa stikov
     [few] { $count } ključi stikov
    *[other] { $count } ključev stikov
 }
-# review: new
 setup-holds-rules = { $count ->
     [one] { $count } pravilo
     [two] { $count } pravili
     [few] { $count } pravila
    *[other] { $count } pravil
 }
-# review: new
 setup-holds-trusted-senders = { $count ->
     [one] { $count } zaupanja vreden pošiljatelj
     [two] { $count } zaupanja vredna pošiljatelja
     [few] { $count } zaupanja vredni pošiljatelji
    *[other] { $count } zaupanja vrednih pošiljateljev
 }
-# review: new
 setup-sign-in-password = Geslo
-# review: new
 setup-account-secret-password = Njegovo geslo je v datoteki.
-# review: new
-setup-account-secret-token = Njegova prijava je v datoteki.
-# review: new
+setup-account-secret-token = Podatki za prijavo v račun so v datoteki.
 setup-account-asks-password = Po uvozu bo zahteval geslo.
-# review: new
 setup-account-signs-in-again = Po uvozu se boste vanj znova prijavili.
-# review: new
 setup-account-here = Tukaj je že nastavljen, zato je preskočen.
-# review: new
 setup-account-no-app = Prijavlja se z aplikacijo { $app }, ki tukaj ni nastavljena. Uvozite tudi aplikacije za prijavo.
-# review: new
 setup-invalid-address = »{ $address }« ni e-poštni naslov.
-# review: new
-setup-invalid-server = Strežnik { $server } nima uporabnega imena ali vrat.
-# review: new
+setup-invalid-server = Nastavitve strežnika { $server } niso veljavne. Preverite ime gostitelja, vrata in način zaščite povezave.
 setup-invalid-user = Nima uporabniškega imena.
-# review: new
-setup-invalid-sign-in = Prijavlja se na način, ki ga Inbox Classic ne pozna.
-# review: new
+setup-invalid-sign-in = Inbox Classic ne more uporabiti teh nastavitev prijave.
 setup-error-empty = Datoteka je prazna.
-# review: new
-setup-error-too-large = Datoteka je prevelika, da bi bila nastavitev programa Inbox Classic.
-# review: new
-setup-error-not-setup = Ta datoteka ni nastavitev programa Inbox Classic.
-# review: new
+setup-error-too-large = Datoteka presega omejitev velikosti za prenos nastavitev programa Inbox Classic.
+setup-error-not-setup = Ta datoteka ne vsebuje nastavitev programa Inbox Classic.
 setup-error-damaged = Datoteka z nastavitvami je poškodovana in je ni mogoče prebrati.
-# review: new
-setup-error-newer = To nastavitev je shranila novejša različica programa Inbox Classic ({ $version }). Posodobite Inbox Classic in jo znova uvozite.
-# review: new
-setup-error-needs-passphrase = Ta nastavitev je zaščitena z zaščitnim geslom. Vnesite zaščitno geslo, s katerim je bila shranjena.
-# review: new
-setup-error-wrong-passphrase = To ni zaščitno geslo, s katerim je bila ta nastavitev shranjena.
-# review: new
-setup-error-changed = Datoteka z nastavitvami je bila po shranjevanju spremenjena ali poškodovana, zato je ni mogoče uvoziti.
-# review: new
+setup-error-newer = Datoteko z nastavitvami je shranila novejša različica programa Inbox Classic ({ $version }). Posodobite program in datoteko znova uvozite.
+setup-error-needs-passphrase = Datoteka z nastavitvami je zaščitena z zaščitnim geslom. Vnesite geslo, s katerim je bila shranjena.
+setup-error-wrong-passphrase = To ni zaščitno geslo, s katerim je bila shranjena datoteka z nastavitvami.
+setup-error-changed = Celovitosti datoteke z nastavitvami ni bilo mogoče potrditi. Morda je spremenjena ali poškodovana, zato je ni mogoče uvoziti.
 setup-error-read = Datoteke z nastavitvami ni bilo mogoče prebrati: { $error }
-# review: new
-setup-error-write = Nastavitve ni bilo mogoče shraniti: { $error }
-# review: new
-setup-error-no-parts = Izberite vsaj en del.
-# review: new
+setup-error-write = Datoteke z nastavitvami ni bilo mogoče shraniti: { $error }
+setup-error-no-parts = Izberite vsaj eno kategorijo podatkov.
 setup-left-out = { $count ->
-    [one] { $count } vnos iz dela { $part } ni uporaben, zato je izpuščen.
-    [two] { $count } vnosa iz dela { $part } nista uporabna, zato sta izpuščena.
-    [few] { $count } vnosi iz dela { $part } niso uporabni, zato so izpuščeni.
-   *[other] { $count } vnosov iz dela { $part } ni uporabnih, zato so izpuščeni.
+    [one] { $count } vnos iz kategorije »{ $part }« ni uporaben, zato je izpuščen.
+    [two] { $count } vnosa iz kategorije »{ $part }« nista uporabna, zato sta izpuščena.
+    [few] { $count } vnosi iz kategorije »{ $part }« niso uporabni, zato so izpuščeni.
+   *[other] { $count } vnosov iz kategorije »{ $part }« ni uporabnih, zato so izpuščeni.
 }
-# review: new
 setup-imported-settings = Nastavitve so bile zamenjane.
-# review: new
 setup-imported-preferences = Nastavitve oken so bile zamenjane.
-# review: new
 setup-added-accounts = { $count ->
     [one] Dodan je { $count } račun.
     [two] Dodana sta { $count } računa.
     [few] Dodani so { $count } računi.
    *[other] Dodanih je { $count } računov.
 }
-# review: new
-setup-skipped-here = { $address } je tukaj že nastavljen, zato je bil preskočen.
-# review: new
-setup-skipped-no-app = { $address } je bil preskočen: prijavlja se z aplikacijo { $app }, ki tukaj ni nastavljena.
-# review: new
-setup-skipped-invalid = { $address } je bil preskočen: { $reason }
-# review: new
-setup-asks-password = { $address } bo ob povezovanju zahteval geslo.
-# review: new
-setup-signs-in-again = { $address } vas bo ob povezovanju prosil, da se znova prijavite.
-# review: new
+setup-skipped-here = Račun »{ $address }« je tukaj že nastavljen, zato je bil preskočen.
+setup-skipped-no-app = Račun »{ $address }« je bil preskočen: uporablja aplikacijo za prijavo »{ $app }«, ki tukaj ni nastavljena.
+setup-skipped-invalid = Račun »{ $address }« je bil preskočen: { $reason }
+setup-asks-password = Ob povezovanju boste morali vnesti geslo za račun »{ $address }«.
+setup-signs-in-again = Ob povezovanju se boste morali znova prijaviti v račun »{ $address }«.
 setup-added-sign-in-apps = { $count ->
     [one] Dodana je { $count } aplikacija za prijavo.
     [two] Dodani sta { $count } aplikaciji za prijavo.
     [few] Dodane so { $count } aplikacije za prijavo.
    *[other] Dodanih je { $count } aplikacij za prijavo.
 }
-# review: new
 setup-skipped-sign-in-apps = { $count ->
     [one] { $count } aplikacija za prijavo je tukaj že nastavljena.
     [two] { $count } aplikaciji za prijavo sta tukaj že nastavljeni.
     [few] { $count } aplikacije za prijavo so tukaj že nastavljene.
    *[other] { $count } aplikacij za prijavo je tukaj že nastavljenih.
 }
-# review: new
 setup-added-contacts = { $count ->
     [one] V imenik je dodan { $count } stik.
     [two] V imenik sta dodana { $count } stika.
     [few] V imenik so dodani { $count } stiki.
    *[other] V imenik je dodanih { $count } stikov.
 }
-# review: new
 setup-skipped-contacts = { $count ->
     [one] { $count } stik je že v imeniku.
     [two] { $count } stika sta že v imeniku.
     [few] { $count } stiki so že v imeniku.
    *[other] { $count } stikov je že v imeniku.
 }
-# review: new
 setup-added-groups = { $count ->
     [one] Dodana ali dopolnjena je { $count } skupina.
     [two] Dodani ali dopolnjeni sta { $count } skupini.
     [few] Dodane ali dopolnjene so { $count } skupine.
    *[other] Dodanih ali dopolnjenih je { $count } skupin.
 }
-# review: new
 setup-added-own-keys = { $count ->
     [one] Dodan je { $count } lastni ključ.
     [two] Dodana sta { $count } lastna ključa.
     [few] Dodani so { $count } lastni ključi.
    *[other] Dodanih je { $count } lastnih ključev.
 }
-# review: new
 setup-added-contact-keys = { $count ->
     [one] Dodan je { $count } ključ stika.
     [two] Dodana sta { $count } ključa stikov.
     [few] Dodani so { $count } ključi stikov.
    *[other] Dodanih je { $count } ključev stikov.
 }
-# review: new
 setup-added-rules = { $count ->
     [one] Dodano je { $count } pravilo za sporočila.
     [two] Dodani sta { $count } pravili za sporočila.
     [few] Dodana so { $count } pravila za sporočila.
    *[other] Dodanih je { $count } pravil za sporočila.
 }
-# review: new
 setup-skipped-rules = { $count ->
     [one] { $count } pravilo za sporočila je tukaj že.
     [two] { $count } pravili za sporočila sta tukaj že.
     [few] { $count } pravila za sporočila so tukaj že.
    *[other] { $count } pravil za sporočila je tukaj že.
 }
-# review: new
 setup-skipped-rules-account = { $count ->
-    [one] { $count } pravilo za sporočila velja za račun, ki ga tukaj ni, zato je bilo preskočeno.
-    [two] { $count } pravili za sporočila veljata za račune, ki jih tukaj ni, zato sta bili preskočeni.
-    [few] { $count } pravila za sporočila veljajo za račune, ki jih tukaj ni, zato so bila preskočena.
-   *[other] { $count } pravil za sporočila velja za račune, ki jih tukaj ni, zato so bila preskočena.
+    [one] { $count } pravilo za sporočila se nanaša na račun, ki ga tukaj ni, zato je bilo preskočeno.
+    [two] { $count } pravili za sporočila se nanašata na račune, ki jih tukaj ni, zato sta bili preskočeni.
+    [few] { $count } pravila za sporočila se nanašajo na račune, ki jih tukaj ni, zato so bila preskočena.
+   *[other] { $count } pravil za sporočila se nanaša na račune, ki jih tukaj ni, zato so bila preskočena.
 }
-# review: new
 setup-rules-waiting = { $count ->
-    [one] { $count } pravilo za sporočila premika sporočila v mapo, ki se bo pojavila, ko se njen račun sinhronizira.
-    [two] { $count } pravili za sporočila premikata sporočila v mape, ki se bodo pojavile, ko se njihovi računi sinhronizirajo.
-    [few] { $count } pravila za sporočila premikajo sporočila v mape, ki se bodo pojavile, ko se njihovi računi sinhronizirajo.
-   *[other] { $count } pravil za sporočila premika sporočila v mape, ki se bodo pojavile, ko se njihovi računi sinhronizirajo.
+    [one] { $count } pravilo za sporočila čaka na prepoznavo ciljne mape po sinhronizaciji računa.
+    [two] { $count } pravili za sporočila čakata na prepoznavo ciljnih map po sinhronizaciji računov.
+    [few] { $count } pravila za sporočila čakajo na prepoznavo ciljnih map po sinhronizaciji računov.
+   *[other] { $count } pravil za sporočila čaka na prepoznavo ciljnih map po sinhronizaciji računov.
 }
-# review: new
 setup-added-trusted-senders = { $count ->
     [one] Dodan je { $count } zaupanja vreden pošiljatelj.
     [two] Dodana sta { $count } zaupanja vredna pošiljatelja.
     [few] Dodani so { $count } zaupanja vredni pošiljatelji.
    *[other] Dodanih je { $count } zaupanja vrednih pošiljateljev.
 }
-# review: new
 setup-nothing = Nič ni bilo uvoženo.
-# review: new
 setup-account-servers = { $imap } in { $smtp } ({ $signin })
-# review: new
 setup-file-name = Nastavitve in računi Inbox Classic
-# review: new
-setup-skipped-unreachable = { $name } je bil preskočen: njegove storitve za prijavo ni bilo mogoče doseči. Znova ga dodajte v Aplikacijah za prijavo.
-# review: new
+setup-skipped-unreachable = Vnos »{ $name }« je bil preskočen: nastavitev storitve za prijavo ni bilo mogoče preveriti. V oknu Aplikacije za prijavo znova dodajte potrebno aplikacijo.
 attachment-runs-programs = Datoteka »{ $name }« lahko zažene programe, zato je Inbox Classic ne odpre. Shranite jo in jo nato odprite sami, če zaupate njenemu izvoru.
-# review: new
-attachment-decrypted-note = Ta priponka je iz šifriranega sporočila. Da jo lahko odpre, jo Inbox Classic shrani dešifrirano v ta računalnik, v vašo mapo, ki jo Inbox Classic po enem dnevu izprazni.
+attachment-decrypted-note = Ta priponka je iz šifriranega sporočila. Za odpiranje Inbox Classic shrani nešifrirano kopijo v začasno mapo vašega uporabniškega računa. Ob zagonu poskusi odstraniti kopije, starejše od enega dne.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [1] Strežnik sporočila ni premaknil v mapo { $folder }, zato je { $messages } spet v mapi { $from }: { $reason }
@@ -1619,52 +1164,33 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Prikaži datoteke PDF v sporočilih
-# review: new
 preview-pdf-off = Datoteke PDF se v sporočilih ne prikazujejo.
-# review: new
-preview-pdf-off-crashed = Datoteka PDF je med prikazovanjem zaprla Inbox Classic, zato se datoteke PDF v sporočilih ne prikazujejo več. Slike se še prikazujejo. Če želite znova prikazovati datoteke PDF, v { $settings } vklopite { $option }.
-# review: new
+preview-pdf-off-crashed = Predogled je bil prekinjen zaradi nepričakovanega zaprtja ali zastoja. Iz previdnosti so predogledi PDF izklopljeni, slike pa se še prikazujejo. Za ponovni prikaz datotek PDF vklopite možnost »{ $option }«. Mesto nastavitve: { $settings }.
 preview-pdf-details = { $count ->
     [one] { $count } stran, { $size }
     [two] { $count } strani, { $size }
     [few] { $count } strani, { $size }
    *[other] { $count } strani, { $size }
 }
-# review: new
 preview-page-alt = { $name }, stran { $page } od { $count }
-# review: new
 preview-more-pages = { $count ->
-    [one] Odprite datoteko za ogled vseh { $count } strani
-    [two] Odprite datoteko za ogled obeh { $count } strani
-    [few] Odprite datoteko za ogled vseh { $count } strani
-   *[other] Odprite datoteko za ogled vseh { $count } strani
+    [1] Odprite datoteko za ogled strani
+   *[other] Odprite datoteko za ogled vseh strani ({ $count })
 }
-# review: new
 preview-more-files = { $count ->
     [one] Še { $count } datoteka je na seznamu zgoraj
     [two] Še { $count } datoteki sta na seznamu zgoraj
     [few] Še { $count } datoteke so na seznamu zgoraj
    *[other] Še { $count } datotek je na seznamu zgoraj
 }
-# review: new
 preview-tile-downloading = Prenašanje…
-# review: new
 preview-tile-preparing = Pripravljanje…
-# review: new
 preview-tile-format = Slike { $format } se še ne prikazujejo
-# review: new
 preview-tile-password = Zaščiteno z geslom: odprite ga, da vnesete geslo
-# review: new
-preview-tile-too-large = Prevelika za prikaz
-# review: new
+preview-tile-too-large = Presežena omejitev za predogled
 preview-tile-unreadable = Ni mogoče prikazati
-# review: new
 preview-tile-timed-out = Prikaz je trajal predolgo
-# review: new
-preview-tile-crashed = Ni prikazano: ta datoteka je enkrat zaprla Inbox Classic
-# review: new
+preview-tile-crashed = Prejšnji predogled je bil prekinjen ali je zastal
 preview-tile-off = Ni prikazano, dokler se Inbox Classic znova ne zažene
-# review: new
-preview-not-printed = { $name } ({ $details }) se ne natisne. Odprite jo, da jo natisnete.
+preview-not-printed = Datoteka »{ $name }« ({ $details }) ni vključena v izpis. Za tiskanje jo odprite.

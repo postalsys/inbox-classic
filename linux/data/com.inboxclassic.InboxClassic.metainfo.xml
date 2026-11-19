@@ -90,8 +90,8 @@
     </p>
     <p xml:lang="lv">
       Inbox Classic ir e-pasta programma ar klasisku izkārtojumu: mapes pa kreisi, ziņojumu saraksts augšā un atlasītā
-      ziņojuma saturs apakšā. Tā darbojas ar jebkuru IMAP un SMTP kontu. Outlook.com un Microsoft 365 kontiem var
-      pierakstīties pārlūkprogrammā.
+      ziņojuma saturs apakšā. Tā atbalsta IMAP un SMTP kontus. Outlook.com un Microsoft 365 kontiem var pierakstīties
+      pārlūkprogrammā.
     </p>
     <p xml:lang="lt">
       Inbox Classic yra el. pašto programa su įprastu išdėstymu: aplankai kairėje, laiškų sąrašas viršuje, o skaitomas
@@ -128,17 +128,16 @@
     </p>
     <p xml:lang="ro">
       Inbox Classic este un program de e-mail cu o interfață clasică: folderele în stânga, lista mesajelor sus și
-      mesajul selectat dedesubt. Funcționează cu orice cont IMAP și SMTP și se conectează la Outlook.com și Microsoft
-      365 prin browser.
+      mesajul selectat dedesubt. Se conectează la conturi IMAP și SMTP, iar pentru Outlook.com și Microsoft 365
+      folosește conectarea prin browser.
     </p>
     <p xml:lang="sk">
-      Inbox Classic číta a píše e-maily s priečinkami vľavo, správami hore a správou pod nimi, ako to poštové programy
-      kedysi robili. Funguje s ľubovoľným kontom IMAP a SMTP a do Outlook.com a Microsoft 365 sa prihlasuje cez
-      prehliadač.
+      Inbox Classic umožňuje čítať a písať e-maily v klasickom rozložení: priečinky vľavo, zoznam správ hore a obsah
+      vybranej správy pod ním. Podporuje kontá IMAP a SMTP aj prihlásenie do Outlook.com a Microsoft 365 cez prehliadač.
     </p>
     <p xml:lang="sl">
-      Inbox Classic bere in piše e-pošto z mapami na levi, sporočili zgoraj in sporočilom spodaj, kot so to nekoč počeli
-      poštni programi. Deluje s katerim koli računom IMAP in SMTP ter se v Outlook.com in Microsoft 365 prijavi prek
+      Inbox Classic je poštni program s klasično razporeditvijo: mape na levi, seznam sporočil zgoraj in izbrano
+      sporočilo spodaj. Povezuje se z računi IMAP in SMTP ter za Outlook.com in Microsoft 365 uporablja prijavo prek
       brskalnika.
     </p>
     <p xml:lang="sr@latin">
@@ -176,8 +175,8 @@
       вход через браузер.
     </p>
     <p xml:lang="uk">
-      Inbox Classic читає й пише електронну пошту так, як це робили класичні поштові програми: папки ліворуч,
-      повідомлення вгорі, а вміст повідомлення під ними. Він працює з будь-яким обліковим записом IMAP і SMTP та входить
+      Inbox Classic дає змогу читати й писати електронну пошту у звичному класичному макеті: папки ліворуч, список
+      повідомлень угорі, а вміст вибраного повідомлення під ним. Програма підтримує облікові записи IMAP і SMTP та вхід
       в Outlook.com і Microsoft 365 через браузер.
     </p>
     <ul>
@@ -222,9 +221,9 @@
       <li xml:lang="it">Il testo dei messaggi precedenti citato nelle risposte viene compresso e può essere espanso quando serve</li>
       <li xml:lang="it">La posta già scaricata si può leggere anche offline; le password vengono conservate nel portachiavi</li>
       <li xml:lang="lv">Ziņojumi tiek attīrīti no nedroša satura un rādīti bez skriptiem; attēli no interneta tiek ielādēti tikai ar jūsu atļauju</li>
-      <li xml:lang="lv">Meklējiet ziņojumu tēmās un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos; atbalstīti Gmail meklēšanas operatori</li>
+      <li xml:lang="lv">Meklējiet ziņojumu tematos un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos; var izmantot Gmail meklēšanai līdzīgus operatorus</li>
       <li xml:lang="lv">Atbildēs citētie iepriekšējie ziņojumi ir sakļauti, un tos var izvērst</li>
-      <li xml:lang="lv">Lejupielādēto pastu var lasīt arī bezsaistē; paroles tiek glabātas sistēmas atslēgu saišķī</li>
+      <li xml:lang="lv">Lejupielādēto pastu var lasīt bezsaistē; paroles pēc noklusējuma glabā sistēmas paroļu krātuvē</li>
       <li xml:lang="lt">Prieš rodant iš laiškų pašalinami scenarijai ir kitas neleidžiamas turinys; paveikslėliai iš interneto atsisiunčiami tik jums leidus</li>
       <li xml:lang="lt">Paieška pagal laiškų temas, siuntėjų ir gavėjų vardus bei adresus, priedų pavadinimus ir tekstą, su Gmail stiliaus paieškos operatoriais</li>
       <li xml:lang="lt">Atsakymuose suskleidžiami ankstesni cituojami laiškai</li>
@@ -256,15 +255,15 @@
       <li xml:lang="ro">Mesajele sunt afișate fără scripturi sau alte elemente active, iar imaginile de pe internet sunt încărcate doar cu acordul dvs.</li>
       <li xml:lang="ro">Căutare în subiecte, numele și adresele expeditorilor și destinatarilor, numele fișierelor și textul mesajelor, cu operatori de căutare ca în Gmail</li>
       <li xml:lang="ro">În răspunsuri, mesajele anterioare citate sunt restrânse</li>
-      <li xml:lang="ro">Mesajele pot fi citite și offline, iar parolele sunt păstrate în portchei</li>
-      <li xml:lang="sk">Každá správa sa zobrazuje očistená, bez skriptov, a obrázky z internetu iba vtedy, keď ich povolíte</li>
-      <li xml:lang="sk">Hľadanie, ktoré nájde slová v predmete, ľuďoch, názvoch súborov aj texte, s operátormi Gmailu</li>
-      <li xml:lang="sk">Odpovede skryjú staršie správy, ktoré citujú</li>
-      <li xml:lang="sk">Pošta zostáva čitateľná aj offline; heslá sa uchovávajú vo vašej kľúčenke</li>
-      <li xml:lang="sl">Vsako sporočilo je prikazano prečiščeno, brez skriptov, slike z interneta pa samo, če jih dovolite</li>
-      <li xml:lang="sl">Iskanje, ki najde besede v zadevi, osebah, imenih datotek in besedilu, z Gmailovimi operatorji</li>
-      <li xml:lang="sl">Odgovori skrijejo starejša sporočila, ki jih navajajo</li>
-      <li xml:lang="sl">Pošta je berljiva tudi brez povezave; gesla so shranjena v vaši shrambi ključev</li>
+      <li xml:lang="ro">Mesajele descărcate pot fi citite offline; parolele sunt păstrate implicit în portcheiul sistemului</li>
+      <li xml:lang="sk">Správy sa zobrazujú bez skriptov a ďalších aktívnych prvkov; obrázky z internetu sa načítajú iba s vaším súhlasom</li>
+      <li xml:lang="sk">Vyhľadávanie v predmetoch, údajoch odosielateľov a príjemcov, názvoch príloh aj texte správ, s operátormi známymi z Gmailu</li>
+      <li xml:lang="sk">Citované staršie správy sú v odpovediach zbalené</li>
+      <li xml:lang="sk">Stiahnutú poštu môžete čítať aj bez internetu; heslá sa predvolene ukladajú v systémovom úložisku prihlasovacích údajov</li>
+      <li xml:lang="sl">Sporočila se prikažejo brez skriptov in drugih aktivnih elementov, slike z interneta pa se naložijo le z vašim dovoljenjem</li>
+      <li xml:lang="sl">Iskanje po zadevah, imenih in naslovih pošiljateljev ter prejemnikov, imenih datotek in besedilu sporočil, z iskalnimi operatorji kot v Gmailu</li>
+      <li xml:lang="sl">V odgovorih so citirana starejša sporočila zložena</li>
+      <li xml:lang="sl">Prenesena sporočila lahko berete brez povezave; gesla se privzeto shranijo v sistemsko shrambo ključev</li>
       <li xml:lang="sr@latin">Poruke se prikazuju bez skripti i drugog nebezbednog sadržaja. Slike sa interneta preuzimaju se samo uz vašu dozvolu</li>
       <li xml:lang="sr@latin">Pretraga tema, pošiljalaca, primalaca, naziva priloga i teksta poruka, uz operatore kao u Gmailu</li>
       <li xml:lang="sr@latin">Citirane poruke u odgovorima su sažete i mogu da se prošire po potrebi</li>
@@ -293,10 +292,10 @@
       <li xml:lang="ru">Поиск по темам и тексту сообщений, именам и адресам отправителей и получателей, а также именам файлов с поддержкой операторов Gmail</li>
       <li xml:lang="ru">Предыдущие сообщения в ответах отображаются в виде свернутых цитат</li>
       <li xml:lang="ru">Загруженные сообщения можно читать без сети; пароли хранятся в системном хранилище ключей</li>
-      <li xml:lang="uk">Кожне повідомлення показується очищеним, без скриптів, а зображення з інтернету лише тоді, коли ви дозволите</li>
-      <li xml:lang="uk">Пошук слів у темі, людях, назвах файлів і тексті, з операторами Gmail</li>
-      <li xml:lang="uk">Відповіді згортають попередні повідомлення, які вони цитують</li>
-      <li xml:lang="uk">Пошта доступна без інтернету; паролі зберігаються у вашій в’язці ключів</li>
+      <li xml:lang="uk">Повідомлення очищуються від сценаріїв, а зображення з інтернету завантажуються з вашого дозволу</li>
+      <li xml:lang="uk">Пошук у темах, іменах та адресах людей, назвах вкладень і тексті повідомлень з операторами, як у Gmail</li>
+      <li xml:lang="uk">Цитований текст попередніх повідомлень у відповіді можна згорнути</li>
+      <li xml:lang="uk">Завантажену пошту можна читати без мережі; паролі за замовчуванням зберігаються в системному сховищі ключів</li>
     </ul>
   </description>
   <launchable type="desktop-id">com.inboxclassic.InboxClassic.desktop</launchable>

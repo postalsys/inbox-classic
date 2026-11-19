@@ -1,22 +1,20 @@
-<!--review-->
-<h1>Šifrovaná a podpísaná pošta</h1>
-<p class="summary">Pruh nad správou uvádza, či ju podpísal jej odosielateľ a či bola zašifrovaná pre vás.</p>
-<p>Podpísaná správa dokazuje, kto ju napísal a že ju cestou nikto nezmenil. Šifrovanú správu možno prečítať iba s vaším kľúčom.</p>
+<h1>Šifrovaná a digitálne podpísaná pošta</h1>
+<p class="summary">Pruh nad správou uvádza stav digitálneho podpisu a šifrovania.</p>
+<p>Platný digitálny podpis potvrdzuje, že sa obsah od podpísania nezmenil. Totožnosť podpisujúcej osoby si treba overiť samostatne potvrdením vlastníka kľúča. Na prečítanie šifrovanej správy je potrebný zodpovedajúci súkromný kľúč.</p>
 <p>Pruh nad správou hodnotí správu ako celok:</p>
 <table>
     <tr><th>Farba</th><th>Čo znamená</th></tr>
-    <tr><td>Zelená</td><td>Podpísal ju odosielateľ kľúčom, ktorý ste overili.</td></tr>
-    <tr><td>Modrá</td><td>Podpísal ju odosielateľ kľúčom, ktorý ste neoverili, alebo je zašifrovaná pre vás.</td></tr>
-    <tr><td>Jantárová</td><td>Niečo nie je v poriadku: podpis nesedí, podpísal ju niekto iný ako odosielateľ alebo niektorú časť nemožno prečítať.</td></tr>
-    <tr><td>Sivá</td><td>Nepodpísaná alebo podpísaná kľúčom, ktorý nemáte.</td></tr>
+    <tr><td>Zelená</td><td>Platný digitálny podpis zodpovedá adrese odosielateľa a vlastník kľúča je overený.</td></tr>
+    <tr><td>Modrá</td><td>Platný digitálny podpis zodpovedá adrese odosielateľa, ale vlastník kľúča nie je overený; prípadne bola správa dešifrovaná vaším kľúčom.</td></tr>
+    <tr><td>Jantárová</td><td>Niečo vyžaduje pozornosť: podpis nezodpovedá obsahu, nepodarilo sa potvrdiť jeho súvislosť s odosielateľom alebo niektorú časť nemožno prečítať.</td></tr>
+    <tr><td>Sivá</td><td>Bez digitálneho podpisu alebo podpis nebol skontrolovaný, napríklad preto, že chýba kľúč.</td></tr>
 </table>
 <p>Správa, ktorej časti sú chránené rôzne, zobrazí každú časť vo vlastnom rámčeku s vlastným označením. Pruh potom spočíta časti každého druhu. Kliknutím na označenie alebo na <b data-text="ui-protection-details"></b> na pruhu uvidíte, kto každú časť podpísal, akým kľúčom a kedy.</p>
-<aside class="warning">Iba pruh a označenia nad rámčekmi píše Inbox Classic. Odosielateľ môže vo vlastnej správe nakresliť čokoľvek, aj niečo, čo vyzerá ako označenie. Riaďte sa pruhom.</aside>
+<aside class="warning">Iba pruh a označenia nad rámčekmi vytvára Inbox Classic. Odosielateľ môže do obsahu správy vložiť aj prvok, ktorý tieto označenia napodobňuje. Riaďte sa pruhom.</aside>
 <p>Obrázky z internetu v šifrovanej časti sa načítajú, iba keď kliknete na pruh obrázkov, a to zakaždým. Jej označenie potom uvádza, že obrázky boli načítané.</p>
-<p>Obrázky a súbory PDF pripojené k časti sa zobrazujú v rámčeku tejto časti, nikdy v rámčeku inej. Súbory šifrovanej časti sa uchovávajú len v pamäti, nikdy na disku.</p>
-<p>V zozname pripojených súborov označuje zámka každý súbor šifrovanej časti. Ukážte na súbor a uvidíte, z ktorej časti pochádza.</p>
+<p>Obrázky a súbory PDF pripojené k časti sa zobrazujú v rámčeku tejto časti, nikdy v rámčeku inej. Dešifrované náhľady sa uchovávajú iba v pamäti. Pri otvorení prílohy v inom programe sa však vytvorí nešifrovaná dočasná kópia; pri uložení sa zapíše do vybratého súboru.</p>
+<p>V zozname príloh označuje zámok každý súbor šifrovanej časti. Ukážte na súbor a uvidíte, z ktorej časti pochádza.</p>
 <p>Keď odpovedáte alebo preposielate, cituje sa iba to, čo sa zobrazilo.</p>
-<p>V zozname správ označuje zámok šifrovanú správu a pečať podpísanú. Keď Inbox Classic šifrovanú správu dešifruje, po stiahnutí alebo otvorení, zoznam ukáže jej vlastný predmet a prvé slová. Dovtedy zoznam a oznámenie o novej pošte zobrazujú <b data-text="list-encrypted"></b>.</p>
-<p>Vyhľadávanie nájde dešifrovanú správu podľa slov jej textu, ak je zapnuté <b data-text="ui-search-encrypted"></b> v <b data-settings="reading"></b>. Agenti AI nikdy neuvidia, čo šifrovaná správa obsahuje, ani jej súbory.</p>
+<p>V zozname správ označuje zámok šifrovanú správu a pečať digitálne podpísanú. Pečať sama nepotvrdzuje platnosť podpisu ani vlastníka kľúča. Chránený predmet a úryvok textu sa zobrazia po úspešnom dešifrovaní a zaradení do povoleného vyhľadávacieho indexu. Bez týchto údajov zoznam používa zástupné označenie. Upozornenia na novú šifrovanú poštu vždy zobrazujú <b data-text="list-encrypted"></b>.</p>
+<p>Ak je zapnutá možnosť <b data-text="ui-search-encrypted"></b> v nastaveniach <b data-settings="reading"></b>, program sa pri stiahnutí alebo otvorení pokúsi správu dešifrovať dostupným kľúčom. Úspešne dešifrovaný text a chránený predmet uloží do miestneho nešifrovaného indexu. Vypnutím tejto možnosti sa odvodené údaje z indexu odstránia a obnovia sa vonkajšie predmety. AI agenti môžu vidieť vonkajšie údaje správy, ale nedostanú jej dešifrovaný obsah ani prílohy.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

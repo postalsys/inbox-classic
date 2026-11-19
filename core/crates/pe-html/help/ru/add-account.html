@@ -1,4 +1,4 @@
-<!--review--><h1>Добавление учетной записи почты</h1>
+<h1>Добавление учетной записи почты</h1>
 <p class="summary">Добавьте первую или еще одну учетную запись, войдя через браузер или указав адрес и пароль.</p>
 <p>При первом запуске Inbox Classic открывает окно <b data-text="ui-add-account-title"></b>. Чтобы позже добавить еще одну учетную запись, выберите <b data-text="menu-file"></b> &gt; <b data-text="cmd-new-account"></b>.</p>
 <img src="picture:account-1-form" alt="Окно добавления учетной записи почты с кнопками входа Google и Microsoft над полями имени и адреса">
@@ -6,21 +6,20 @@
 <p>Чтобы добавить учетную запись через браузер:</p>
 <ol>
     <li>Нажмите <b data-text="win-sign-in-google"></b> или <b data-text="win-sign-in-microsoft"></b>. Браузер откроет страницу входа провайдера.</li>
-    <li>Войдите там и вернитесь в Inbox Classic. Учетная запись добавится, и начнет поступать почта.</li>
+    <li>Войдите там и вернитесь в Inbox Classic. Inbox Classic добавит учетную запись и начнет загружать почту.</li>
 </ol>
-<p>Бледная кнопка отключена на этом компьютере. Нажмите <b data-text="ui-why"></b> под ней, чтобы узнать причину.</p>
+<p>Если кнопка неактивна, этот способ входа отключен на данном компьютере. Нажмите <b data-text="ui-why"></b> под ней, чтобы узнать причину.</p>
 <h2>Любая другая учетная запись</h2>
 <p>Чтобы добавить учетную запись с паролем:</p>
 <ol>
-    <li>Введите свое имя, каким его должны видеть другие, в поле <!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os-->.</li>
+    <li>Введите в поле <!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> имя, которое будут видеть получатели ваших сообщений.</li>
     <li>Введите свой адрес в поле <b data-text="ui-field-email"></b>.</li>
-    <li>Нажмите <!--os:windows--><b data-text="win-next"></b><!--/os--><!--os:mac--><b data-text="mac-next"></b><!--/os--><!--os:linux--><b data-text="gtk-next"></b><!--/os-->. Inbox Classic ищет параметры вашего провайдера, это занимает несколько секунд. Кнопка <b data-text="ui-cancel"></b> пропускает поиск.</li>
+    <li>Нажмите <!--os:windows--><b data-text="win-next"></b><!--/os--><!--os:mac--><b data-text="mac-next"></b><!--/os--><!--os:linux--><b data-text="gtk-next"></b><!--/os-->. Inbox Classic ищет параметры вашего провайдера, это занимает несколько секунд. Кнопка <b data-text="ui-cancel"></b> пропускает поиск в Windows и Linux, а в macOS отменяет добавление учетной записи.</li>
     <li>Введите пароль в поле <b data-text="ui-field-password"></b>.</li>
     <li>Проверьте параметры серверов и нажмите <b data-text="ui-finish"></b>. Inbox Classic выполнит вход и загрузит ваши папки.</li>
 </ol>
 <p>Если провайдер требует пароль приложения вместо обычного пароля, Inbox Classic сообщит об этом и предложит открыть инструкции провайдера.</p>
-<aside class="note">Если параметры не найдены, имена серверов являются догадками: <code>imap.</code> и <code>smtp.</code> с вашим доменом после них. Сверьте их с данными вашего провайдера.</aside>
-<p><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os--> определяет, как учетная запись называется в списке папок, например <i>Работа</i>. Новая учетная запись сначала называется по имени провайдера или по домену. Это имя можно изменить в любое время в свойствах учетной записи.</p>
-<p>Чтобы войти с собственным приложением для входа, нажмите <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> на первой странице и выберите его.</p>
+<aside class="note">Если параметры не найдены, Inbox Classic может предложить предполагаемые имена серверов: <code>imap.</code> и <code>smtp.</code> с добавлением вашего домена. Сверьте их с данными вашего провайдера; пустые поля заполните вручную.</aside>
+<p><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os--> определяет, как учетная запись называется в списке папок, например <i>Работа</i>. Для новой учетной записи используется имя провайдера или домен. Это имя можно изменить в любое время в свойствах учетной записи.</p>
+<p>Чтобы использовать собственное приложение для входа, нажмите <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> на первой странице и выберите его.</p>
 <nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:manage-accounts"></a> <a href="topic:account-security"></a></nav>
-<!--/review-->

@@ -509,7 +509,7 @@ agent-log-moved = Сообщение «{ $subject }» перемещено в п
 agent-log-junk = «{ $subject }» помечено как нежелательное
 agent-log-not-junk = Сообщение «{ $subject }» больше не помечено как нежелательное
 agent-log-archived = Сообщение «{ $subject }» архивировано
-agent-log-folder = Создана папка «{ $name }»
+agent-log-folder = Запрошено создание папки «{ $name }»
 agent-log-unsubscribed = Вы одобрили запрос на отмену подписки. Сообщение: «{ $subject }»
 agent-log-unsubscribe-failed = Ошибка при отписке от рассылки. Сообщение: «{ $subject }». Причина: { $reason }
 agent-log-unsubscribe-refused = Вы не разрешили отписаться от рассылок. Отправители: { $senders }
@@ -533,7 +533,7 @@ agent-log-flag-color = Помечено флажком: «{ $subject }», цве
     [purple] фиолетовый
    *[gray] серый
 }
-agent-log-renamed = Папка «{ $old }» переименована в «{ $name }»
+agent-log-renamed = Запрошено переименование папки «{ $old }» в «{ $name }»
 agent-log-watched = Включено отслеживание беседы «{ $subject }»
 agent-log-ignored = Включено игнорирование беседы «{ $subject }»
 agent-log-unmarked = Отменено отслеживание или игнорирование беседы «{ $subject }»
@@ -684,10 +684,10 @@ agent-reads-messages = { $count ->
    *[other] прочитано { $count } сообщения
 }
 agent-reads-attachments = { $count ->
-    [one] открыто { $count } вложение
-    [few] открыто { $count } вложения
-    [many] открыто { $count } вложений
-   *[other] открыто { $count } вложения
+    [one] прочитано { $count } вложение
+    [few] прочитано { $count } вложения
+    [many] прочитано { $count } вложений
+   *[other] прочитано { $count } вложения
 }
 agent-reads-searches = { $count ->
     [1] поиск выполнен один раз
@@ -711,7 +711,7 @@ agent-read-conversation = { $count ->
     [many] Прочитана беседа «{ $subject }» ({ $count } сообщений)
    *[other] Прочитана беседа «{ $subject }» ({ $count } сообщения)
 }
-agent-read-attachment = Открыто вложение «{ $name }» из сообщения «{ $subject }»
+agent-read-attachment = Прочитано вложение «{ $name }» из сообщения «{ $subject }»
 agent-read-search = { $count ->
     [one] Поиск «{ $query }»: { $count } сообщение
     [few] Поиск «{ $query }»: { $count } сообщения
@@ -720,16 +720,16 @@ agent-read-search = { $count ->
 }
 agent-read-people = Поиск по началу имени или адреса: «{ $query }»
 agent-read-list = { $count ->
-    [one] Просмотрено { $count } сообщение в папке «{ $folder }»
-    [few] Просмотрено { $count } сообщения в папке «{ $folder }»
-    [many] Просмотрено { $count } сообщений в папке «{ $folder }»
-   *[other] Просмотрено { $count } сообщения в папке «{ $folder }»
+    [one] Просмотрена { $count } запись. Список: «{ $folder }»
+    [few] Просмотрены { $count } записи. Список: «{ $folder }»
+    [many] Просмотрено { $count } записей. Список: «{ $folder }»
+   *[other] Просмотрены { $count } записи. Список: «{ $folder }»
 }
 agent-read-changes = { $count ->
-    [one] Просмотрено { $count } новое сообщение
-    [few] Просмотрено { $count } новых сообщения
-    [many] Просмотрено { $count } новых сообщений
-   *[other] Просмотрено { $count } новых сообщения
+    [one] Просмотрена { $count } новая запись
+    [few] Просмотрены { $count } новые записи
+    [many] Просмотрено { $count } новых записей
+   *[other] Просмотрены { $count } новые записи
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Программы, запущенные из терминала «{ $terminal }»
@@ -793,7 +793,7 @@ pgp-key-expired = Срок действия истек: { $date }
 pgp-key-revoked = Отозван
 pgp-key-revoked-why = Отозван: { $reason }
 pgp-key-not-valid = Недействителен
-pgp-key-locked = Нельзя использовать этот ключ: в хранилище паролей ({ $store }) больше нет ключа, который его защищает. Снова импортируйте резервную копию вашего закрытого ключа.
+pgp-key-locked = Нельзя открыть закрытую часть этого ключа. Проверьте доступ к хранилищу паролей ({ $store }). Если защищающий ключ утрачен, снова импортируйте резервную копию закрытого ключа.
 pgp-source-own = Создан в Inbox Classic
 pgp-source-file = Импортирован из файла
 pgp-source-paste = Вставлен
@@ -829,13 +829,13 @@ pgp-pending = Обнаружен другой ключ для адреса { $ad
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Подписано: { $signer }; владелец ключа подтвержден
 pgp-part-signed = Подписано: { $signer } (владелец ключа не подтвержден)
-pgp-part-other = Подписано: { $signer }, это не отправитель
+pgp-part-other = Подписано: { $signer }. Соответствие отправителю не подтверждено
 pgp-part-unknown-key = Подписано, но ключ неизвестен
 pgp-part-not-signed = Не подписано
 pgp-part-not-checked = Подпись не проверена
 pgp-part-encrypted = Зашифровано. { $signature }
 pgp-part-no-key = Зашифровано для ключа, которого у вас нет
-pgp-part-changed = Зашифрованная часть была изменена при передаче и не показана
+pgp-part-changed = Нарушена целостность зашифрованной части, она не показана
 pgp-part-unprotected = Зашифровано без защиты от изменений, не показано
 pgp-part-broken = Зашифрованную часть невозможно прочитать
 pgp-why-mismatch = Подпись не соответствует этому тексту
@@ -1004,9 +1004,9 @@ setup-account-signs-in-again = После импорта в нее нужно б
 setup-account-here = Она уже настроена здесь, поэтому будет пропущена.
 setup-account-no-app = Для входа используется приложение «{ $app }», которое не настроено на этом компьютере. Импортируйте также приложения для входа.
 setup-invalid-address = «{ $address }» не является адресом электронной почты.
-setup-invalid-server = Имя или порт сервера { $server } не указаны или неверны.
+setup-invalid-server = Некорректные параметры сервера { $server }: имя, порт или способ защиты соединения.
 setup-invalid-user = У нее нет имени пользователя.
-setup-invalid-sign-in = Она использует способ входа, неизвестный Inbox Classic.
+setup-invalid-sign-in = Для этой учетной записи указан неподдерживаемый способ входа или некорректные параметры авторизации.
 setup-error-empty = Файл пуст.
 setup-error-too-large = Превышен допустимый размер файла настроек Inbox Classic.
 setup-error-not-setup = Это не файл настроек Inbox Classic.
@@ -1014,7 +1014,7 @@ setup-error-damaged = Файл настроек поврежден, и его н
 setup-error-newer = Эти настройки сохранены более новой версией Inbox Classic ({ $version }). Обновите Inbox Classic и импортируйте их снова.
 setup-error-needs-passphrase = Эти настройки защищены парольной фразой. Введите парольную фразу, с которой они были сохранены.
 setup-error-wrong-passphrase = Это не та парольная фраза, с которой были сохранены настройки.
-setup-error-changed = Файл настроек был изменен или поврежден после сохранения, поэтому его нельзя импортировать.
+setup-error-changed = Нарушена целостность файла настроек: он изменен или поврежден, поэтому его нельзя импортировать.
 setup-error-read = Не удалось прочитать файл настроек: { $error }
 setup-error-write = Не удалось сохранить настройки: { $error }
 setup-error-no-parts = Выберите хотя бы один раздел.
@@ -1098,10 +1098,10 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } правила для сообщений относятся к учетным записям, которых здесь нет, поэтому они пропущены.
 }
 setup-rules-waiting = { $count ->
-    [one] { $count } правило для сообщений перемещает сообщения в папку, которая появится после синхронизации ее учетной записи.
-    [few] { $count } правила для сообщений перемещают сообщения в папки, которые появятся после синхронизации их учетных записей.
-    [many] { $count } правил для сообщений перемещают сообщения в папки, которые появятся после синхронизации их учетных записей.
-   *[other] { $count } правила для сообщений перемещают сообщения в папки, которые появятся после синхронизации их учетных записей.
+    [one] Для { $count } правила не найдена папка назначения. Поиск папки продолжится после синхронизации учетной записи.
+    [few] Для { $count } правил не найдены папки назначения. Поиск папок продолжится после синхронизации учетных записей.
+    [many] Для { $count } правил не найдены папки назначения. Поиск папок продолжится после синхронизации учетных записей.
+   *[other] Для { $count } правила не найдены папки назначения. Поиск папок продолжится после синхронизации учетных записей.
 }
 setup-added-trusted-senders = { $count ->
     [one] Добавлен { $count } надежный отправитель.
@@ -1112,7 +1112,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Ничего не импортировано.
 setup-account-servers = { $imap } и { $smtp } ({ $signin })
 setup-file-name = Настройки и учетные записи Inbox Classic
-setup-skipped-unreachable = Запись «{ $name }» пропущена: не удалось связаться со службой входа. Настройте нужное приложение в окне «Приложения для входа» и повторите импорт.
+setup-skipped-unreachable = Запись «{ $name }» пропущена: не удалось проверить службу входа. Настройте нужное приложение в окне «Приложения для входа» и повторите импорт.
 attachment-runs-programs = «{ $name }» может запускать программы, поэтому Inbox Classic не открывает этот файл. Сохраните его и откройте сами, если доверяете его источнику.
 attachment-decrypted-note = Это вложение из зашифрованного сообщения. Чтобы его открыть, Inbox Classic сохраняет незашифрованную копию во временной папке текущего пользователя. При запуске программа удаляет такие копии старше суток.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again

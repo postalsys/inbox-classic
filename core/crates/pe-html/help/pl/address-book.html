@@ -1,13 +1,13 @@
-<!--review--><h1>Książka adresowa</h1>
-<p class="summary">Przechowuj osoby, do których piszesz, i ich grupy, a także wybieraj spośród nich odbiorców.</p>
-<p>Wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-address-book"></b> (<kbd data-command="address_book"></kbd>). Grupy są po lewej, a osoby po prawej.</p>
+<h1>Książka adresowa</h1>
+<p class="summary">Zapisuj kontakty i grupy w Książce adresowej, aby łatwo wybierać odbiorców wiadomości.</p>
+<p>Wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-address-book"></b> (<kbd data-command="address_book"></kbd>). Grupy są po lewej, a kontakty po prawej.</p>
 <h2>Dodawanie kontaktu</h2>
 <ol>
     <li>Kliknij <b data-text="ui-tb-new-contact"></b>.</li>
-    <li>Wpisz nazwę oraz jeden lub więcej adresów, numerów telefonów i notatki. Wiadomości trafiają na pierwszy adres. Aby użyć innego, zaznacz go i kliknij <b data-text="ui-contact-set-default"></b>.</li>
+    <li>Wpisz nazwę kontaktu, adresy e-mail, numery telefonów i notatki. Wiadomości trafiają na pierwszy adres. Aby użyć innego, zaznacz go i kliknij <b data-text="ui-contact-set-default"></b>.</li>
     <li>Kliknij <b data-text="ui-ok"></b>.</li>
 </ol>
-<p><b data-text="ui-tb-properties"></b> zmienia zaznaczony kontakt, a <b data-text="ui-tb-delete"></b> usuwa go po potwierdzeniu.</p>
+<p><b data-text="ui-tb-properties"></b> otwiera zaznaczony kontakt do edycji, a <b data-text="ui-tb-delete"></b> usuwa go po potwierdzeniu.</p>
 <h2>Tworzenie grupy</h2>
 <ol>
     <li>Kliknij <b data-text="ui-tb-new-group"></b> i wpisz jej nazwę.</li>
@@ -15,10 +15,10 @@
     <li>Kliknij <b data-text="ui-ok"></b>.</li>
 </ol>
 <h2>Zdjęcie kontaktu</h2>
-<p>We właściwościach kontaktu kliknij <b data-text="ui-card-picture-choose"></b> obok zdjęcia i wybierz plik PNG lub JPEG albo przeciągnij go na zdjęcie. <b data-text="ui-remove"></b> je usuwa. Zdjęcie pojawia się obok poczty od kontaktu w układzie kolumnowym i w okienku odczytu, ale tylko wtedy, gdy dostawca poczty potwierdził, że wiadomość pochodzi z domeny tego adresu, więc sfałszowana wiadomość nigdy go nie pokazuje. Logo marki ma pierwszeństwo. Importowane i eksportowane pliki vCard zachowują zdjęcie.</p>
-<h2>Pisanie do osób</h2>
-<p>Zaznacz osoby lub grupę i kliknij <b data-text="ui-tb-write-to"></b>. W wiadomości kliknij <b data-text="ui-field-to"></b>, <b data-text="ui-field-cc"></b> lub <b data-text="ui-field-bcc"></b> na początku wiersza, aby otworzyć okno <b data-text="ui-select-recipients"></b>. Wpisanie nazwy grupy w polu adresu wstawia tam wszystkich jej członków.</p>
+<p>We właściwościach kontaktu kliknij <b data-text="ui-card-picture-choose"></b> obok zdjęcia i wybierz plik PNG lub JPEG albo przeciągnij go na zdjęcie. <b data-text="ui-remove"></b> je usuwa. Zdjęcie pojawia się obok poczty od kontaktu w układzie kolumnowym i w okienku odczytu, ale tylko wtedy, gdy dostawca poczty potwierdził, że wiadomość pochodzi z domeny tego adresu, a przy niepotwierdzonej domenie zdjęcie pozostaje ukryte. Logo marki ma pierwszeństwo. Importowane i eksportowane pliki vCard zachowują zdjęcie.</p>
+<h2>Pisanie do kontaktów</h2>
+<p>Zaznacz kontakty lub grupę i kliknij <b data-text="ui-tb-write-to"></b>. W wiadomości kliknij <b data-text="ui-field-to"></b>, <b data-text="ui-field-cc"></b> lub <b data-text="ui-field-bcc"></b> na początku wiersza, aby otworzyć okno <b data-text="ui-select-recipients"></b>. Wpisanie nazwy grupy w polu adresu wstawia tam wszystkich jej członków.</p>
 <p>Aby dodać nadawcę zaznaczonej wiadomości, wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-add-sender-to-book"></b>; to polecenie jest też w menu wiadomości pod prawym przyciskiem myszy.</p>
 <h2>Import i eksport</h2>
-<p><b data-text="menu-file"></b> &gt; <b data-text="cmd-import-address-book"></b> odczytuje plik vCard (<code>.vcf</code>) lub CSV z większości innych programów. Kontakty, które już są, zostają pominięte. <b data-text="cmd-export-address-book"></b> zapisuje wszystkich do pliku vCard.<!--os:mac--> Aby przenieść kontakty z aplikacji Kontakty, zaznacz je tam, wybierz <i>Plik &gt; Eksportuj &gt; Eksportuj vCard</i> i zaimportuj ten plik.<!--/os--></p>
-<nav class="related"><a href="topic:write-message"></a> <a href="topic:keyboard-shortcuts"></a> <a href="topic:save-print-import"></a></nav><!--/review-->
+<p><b data-text="menu-file"></b> &gt; <b data-text="cmd-import-address-book"></b> odczytuje plik vCard (<code>.vcf</code>) lub CSV z większości innych programów. Kontakt jest pomijany, jeśli zawiera adresy e-mail i wszystkie te adresy są już znane. Sama zgodność nazwy nie wystarcza. <b data-text="cmd-export-address-book"></b> zapisuje wszystkie kontakty w pliku vCard.<!--os:mac--> Aby przenieść kontakty z aplikacji Kontakty, zaznacz je tam, wybierz <i>Plik &gt; Eksportuj &gt; Eksportuj vCard</i> i zaimportuj ten plik.<!--/os--></p>
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:keyboard-shortcuts"></a> <a href="topic:save-print-import"></a></nav>

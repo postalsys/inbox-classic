@@ -1,17 +1,17 @@
-<!--review--><h1>Wypisywanie się z listy mailingowej</h1>
-<p class="summary">Zatrzymaj wiadomości z listy mailingowej przyciskiem Wypisz się.</p>
-<p>Wiadomość z listy mailingowej, która podaje, jak się z niej wypisać, ma po prawej stronie nagłówka przycisk <b data-text="ui-unsubscribe"></b>.</p>
+<h1>Wypisywanie się z listy mailingowej</h1>
+<p class="summary">Poproś o zaprzestanie wysyłania wiadomości z listy mailingowej, używając przycisku Wypisz się.</p>
+<p>Jeśli wiadomość z listy mailingowej zawiera informacje o wypisaniu, po prawej stronie nagłówka pojawia się przycisk <b data-text="ui-unsubscribe"></b>.</p>
 <p>Aby wypisać się z listy:</p>
 <ol>
     <li>Kliknij <b data-text="ui-unsubscribe"></b>. Inbox Classic najpierw powie, co się stanie, i zapyta o zgodę.</li>
     <li>Potwierdź. Zależnie od listy stanie się jedna z trzech rzeczy:
         <ul>
             <li>Inbox Classic poprosi listę o zaprzestanie wysyłki. Nie otworzy się żadna strona i nie zostanie wysłana żadna wiadomość.</li>
-            <li>Inbox Classic napisze wiadomość, której oczekuje lista. Kliknij <b data-text="ui-tb-send"></b>, aby ją wysłać.</li>
+            <li>Inbox Classic przygotuje wiadomość wymaganą przez listę. Kliknij <b data-text="ui-tb-send"></b>, aby ją wysłać.</li>
             <li>W przeglądarce otworzy się strona listy, na której dokończysz wypisywanie.</li>
         </ul>
     </li>
 </ol>
-<p>Pasek stanu poinformuje, gdy lista przyjmie prośbę.</p>
-<aside class="note">Inbox Classic sam prosi listę o zaprzestanie wysyłki tylko wtedy, gdy serwer listy podpisał wiadomość. Sfałszowana wiadomość nie może więc posłużyć do wysłania prośby do kogoś innego.</aside>
-<nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav><!--/review-->
+<p>Przy prośbie wysłanej bezpośrednio do serwera listy pasek stanu informuje o jej przyjęciu. Nie potwierdza to, że lista faktycznie przestanie wysyłać pocztę. Zakończenie wypisywania przez e-mail lub stronę odbywa się poza tą kontrolą.</p>
+<aside class="note">Inbox Classic wysyła prośbę bezpośrednio do serwera listy tylko po Twojej zgodzie i gdy dostawca poczty potwierdzi podpis DKIM obejmujący oba nagłówki wypisywania. Ogranicza to możliwość wykorzystania sfałszowanych wiadomości do wysyłania takich próśb.</aside>
+<nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

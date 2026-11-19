@@ -1,15 +1,13 @@
-<!--review-->
 <h1>Nastavenia zabezpečenia konta</h1>
 <p class="summary">Nastavenia zabezpečenia serverov konta a čo každé z nich znamená.</p>
 <p>Každé konto má <b data-text="ui-field-imap-security"></b> pre server prichádzajúcej pošty a <b data-text="ui-field-smtp-security"></b> pre server odchádzajúcej pošty. Inbox Classic ich vyplní, keď nájde nastavenia vášho poskytovateľa. Ak ich chcete zmeniť, otvorte vlastnosti konta v ponuke <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Nastavenie</th><th>Význam</th></tr>
     <tr><td>SSL/TLS</td><td>Pripojenie je šifrované od začiatku. Zvyčajne port 993 pre prichádzajúcu poštu a 465 pre odchádzajúcu poštu.</td></tr>
-    <tr><td>STARTTLS</td><td>Pripojenie sa zašifruje hneď po otvorení. Zvyčajne port 143 pre prichádzajúcu poštu a 587 pre odchádzajúcu poštu. Ak server šifrovanie neponúkne, Inbox Classic sa zastaví.</td></tr>
+    <tr><td>STARTTLS</td><td>Pripojenie sa zašifruje hneď po otvorení. Zvyčajne port 143 pre prichádzajúcu poštu a 587 pre odchádzajúcu poštu. Ak server šifrovanie neponúkne alebo sa ho nepodarí nadviazať, Inbox Classic ukončí pokus o pripojenie ešte pred odoslaním prihlasovacích údajov.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Vaše heslo a pošta putujú sieťou tak, že ich môže prečítať ktokoľvek.</td></tr>
 </table>
-<aside class="warning">Možnosť <b data-text="ui-security-none"></b> používajte iba pre server vo vlastnom počítači alebo v lokálnej sieti. Inbox Classic vás pred jej použitím upozorní.</aside>
-<p>Inbox Classic overuje, či je každý server tým, za ktorý sa vydáva, podľa certifikátov, ktorým váš systém dôveruje. Neexistuje prepínač, ktorý by prijal akýkoľvek certifikát.</p>
-<p>Vaše heslo sa uchováva v <!--os:windows-->Správcovi poverení systému Windows<!--/os--><!--os:mac-->vašej prihlasovacej kľúčenke<!--/os--><!--os:linux-->vašej kľúčenke<!--/os-->, nikdy nie v úložisku pošty. Konto, ktoré sa prihlasuje cez prehliadač, nemá uložené vôbec žiadne heslo.</p>
+<aside class="warning">Možnosť <b data-text="ui-security-none"></b> necháva pripojenie nešifrované. Používajte ju len tam, kde máte ochranu spojenia zabezpečenú inak; samotná lokálna sieť šifrovanie nezaručuje. Inbox Classic vás pred jej použitím upozorní.</aside>
+<p>Port a spôsob zabezpečenia musia zodpovedať pokynom poskytovateľa; uvedené porty sú bežné príklady. Inbox Classic predvolene overuje názov servera a jeho certifikát pomocou systémových dôveryhodných certifikátov. Neexistuje prepínač, ktorý by prijal akýkoľvek certifikát.</p>
+<p>Vaše heslo sa predvolene uchováva <!--os:windows-->v Správcovi poverení systému Windows<!--/os--><!--os:mac-->vo vašej prihlasovacej kľúčenke<!--/os--><!--os:linux-->vo vašej kľúčenke<!--/os-->, nie v databáze pošty. Pri režime uchovávania iba v pamäti alebo pri nedostupnom úložisku nemusí zostať uložené do ďalšieho spustenia. Konto s prihlásením cez prehliadač neukladá vaše heslo, ale obnovovací token v systémovom úložisku.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

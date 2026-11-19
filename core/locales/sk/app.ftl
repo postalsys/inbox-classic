@@ -2,187 +2,98 @@
 
 ## The menus
 
-# review: new
 menu-file = &Súbor
-# review: new
 menu-edit = Úp&ravy
-# review: new
 menu-view = &Zobraziť
-# review: new
 menu-tools = &Nástroje
-# review: new
 menu-message = Sprá&va
-# review: new
 menu-help = &Pomocník
-# review: new
 menu-layout = &Rozloženie
-# review: new
 menu-sort-by = Zorad&iť podľa
-# review: new
 menu-text-size = &Veľkosť textu
-# review: new
 menu-folder = P&riečinok
 menu-insert = Vl&ožiť
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
-# review: new
 cmd-new-account = Nové &konto...
-# review: new
 cmd-exit = &Ukončiť
-# review: new
 cmd-sync = Odoslať a &prijať všetko
-# review: new
-cmd-mark-read = Označiť ako &prečítané
-# review: new
-cmd-mark-unread = Označiť ako n&eprečítané
-# review: new
+cmd-mark-read = Oz&načiť ako prečítané
+cmd-mark-unread = O&značiť ako neprečítané
 cmd-pictures = S&tiahnuť obrázky
-# review: new
 cmd-about = O &programe Inbox Classic
-# review: new
 cmd-new-mail = &Nová správa
-# review: new
-cmd-reply = &Odpovedať odosielateľovi
-# review: new
-cmd-reply-all = Odpovedať vš&etkým
-# review: new
+cmd-reply = &Odpovedať
+cmd-reply-all = Odpovedať všetký&m
 cmd-forward = &Preposlať
-# review: new
 cmd-help = &Obsah
-# review: new
 cmd-delete = &Odstrániť správu
-# review: new
 cmd-move = P&resunúť do priečinka...
-# review: new
-cmd-flag = Označiť prí&znakom
-# review: new
+cmd-flag = Označiť prízna&kom
 cmd-new-folder = &Nový priečinok...
-# review: new
 cmd-rename-folder = Pr&emenovať priečinok...
-# review: new
 cmd-delete-folder = O&dstrániť priečinok
-# review: new
 cmd-empty-folder = &Vyprázdniť priečinok
-# review: new
 ui-empty-button = Vyprázdniť
-# review: new
 cmd-accounts = K&ontá...
-# review: new
-cmd-find = &Nájsť správu
-# review: new
+cmd-find = Ná&jsť správu
 cmd-save-as = Uložiť &ako...
-# review: new
 cmd-print = &Tlačiť...
-# review: new
 cmd-import = &Importovať správy...
-# review: new
 cmd-outbox = Pošta na &odoslanie...
-# review: new
 cmd-properties = V&lastnosti
-# review: new
 cmd-mark-all-read = Označiť všetko &ako prečítané
-# review: new
-cmd-junk = Označiť ako nevyžia&danú
-# review: new
-cmd-not-junk = Označiť ako &vyžiadanú
-# review: new
-cmd-archive = &Archivovať
-# review: new
-cmd-watch-conversation = &Sledovať konverzáciu
-# review: new
-cmd-ignore-conversation = &Ignorovať konverzáciu
-# review: new
+cmd-junk = Ozn&ačiť ako nevyžiadanú
+cmd-not-junk = Označ&iť ako vyžiadanú
+cmd-archive = Arc&hivovať
+cmd-watch-conversation = Sledovať konverzá&ciu
+cmd-ignore-conversation = I&gnorovať konverzáciu
 cmd-next-message = Ď&alšia správa
-# review: new
 cmd-previous-message = &Predchádzajúca správa
-# review: new
 cmd-next-unread = Ďalšia &neprečítaná správa
-# review: new
 cmd-go-to-folder = Prejsť &do priečinka...
-# review: new
 cmd-find-in-message = Nájsť v &tejto správe...
-# review: new
 ui-go-to-prompt = Prejsť do priečinka:
-# review: new
 ui-find-in-message-hint = Nájsť v tejto správe
-# review: new
 ui-find-not-found = „{ $words }“ sa v tejto správe nenachádza
-# review: new
 cmd-expand-all-threads = R&ozbaliť všetky konverzácie
-# review: new
 cmd-collapse-all-threads = Z&baliť všetky konverzácie
-# review: new
 ui-group-by-conversation = Zoskupovať správy podľa &konverzácií
-# review: new
 cmd-folder-list = &Zoznam priečinkov
-# review: new
 cmd-layout-automatic = &Automatické
-# review: new
 cmd-layout-classic = &Klasické
-# review: new
 cmd-layout-columns = &Stĺpce
-# review: new
 cmd-sort-date = &Dátum
-# review: new
 cmd-sort-from = &Od
-# review: new
 cmd-sort-subject = &Predmet
-# review: new
 cmd-sort-size = Veľ&kosť
-# review: new
 cmd-sort-ascending = Zoradiť v&zostupne
-# review: new
 cmd-sort-descending = Zoradiť zo&stupne
-# review: new
 cmd-text-size-largest = &Najväčšia
-# review: new
 cmd-text-size-larger = &Väčšia
-# review: new
 cmd-text-size-medium = &Stredná
-# review: new
 cmd-text-size-smaller = &Menšia
-# review: new
 cmd-text-size-smallest = Na&jmenšia
-# review: new
 cmd-hide-ignored = Skryť i&gnorované konverzácie
-# review: new
 cmd-hide-read = &Skryť prečítané správy
-# review: new
 cmd-notify = Upozorňovať na &novú poštu
-# review: new
 cmd-open = &Otvoriť Inbox Classic
-# review: new
 cmd-default-app = Nastaviť ako pre&dvolenú poštovú aplikáciu...
-# review: new
 cmd-view-source = Zdro&j správy
-# review: new
 cmd-ai-agents = &AI agenti...
-# review: new
 cmd-options = &Možnosti...
-# review: new
 cmd-message-rules = P&ravidlá správ...
-# review: new
 cmd-encryption-keys = Šifrovacie &kľúče...
-# review: new
-cmd-create-rule-from-message = Vytvoriť pravid&lo zo správy...
-# review: new
+cmd-create-rule-from-message = V&ytvoriť pravidlo zo správy...
 cmd-select-all = &Vybrať všetko
-# review: new
 cmd-undo = &Späť
-# review: new
 cmd-copy = &Kopírovať do priečinka...
-# review: new
 cmd-address-book = Adre&sár...
-# review: new
-cmd-add-sender-to-book = Pr&idať odosielateľa do adresára
-# review: new
-cmd-import-address-book = Importovať adresá&r...
-# review: new
+cmd-add-sender-to-book = Pridať odosi&elateľa do adresára
+cmd-import-address-book = Importovať a&dresár...
 cmd-export-address-book = E&xportovať adresár...
-# review: new
 cmd-export-setup = Exportovať na&stavenia a kontá...
-# review: new
 cmd-import-setup = Im&portovať nastavenia a kontá...
 cmd-compose-sign = &Digitálne podpísať
 cmd-compose-encrypt = Ši&frovať
@@ -190,890 +101,467 @@ cmd-attach-my-key = Priložiť svoj &verejný kľúč
 
 ## The tray icon's menu
 
-# review: new
 tray-check = &Skontrolovať novú poštu
-# review: new
 tray-no-accounts = Zatiaľ žiadne kontá
 
 ## Words the windows of more than one platform share
 
-# review: new
 ui-tb-create-mail = Vytvoriť správu
-# review: new
 ui-tb-reply = Odpovedať
-# review: new
 ui-tb-reply-all = Odpovedať všetkým
-# review: new
 ui-tb-forward = Preposlať
-# review: new
 ui-tb-print = Tlačiť
-# review: new
 ui-tb-delete = Odstrániť
-# review: new
 ui-tb-junk = Nevyžiadaná
-# review: new
 ui-tb-not-junk = Vyžiadaná
-# review: new
 ui-tb-archive = Archivovať
-# review: new
 ui-tb-previous = Predchádzajúca
-# review: new
 ui-tb-next = Ďalšia
-# review: new
 ui-previous-tip = Predchádzajúca správa
-# review: new
 ui-next-tip = Ďalšia správa
-# review: new
 ui-tb-sync = Odoslať/prijať
-# review: new
 ui-tb-mark-read = Prečítané
-# review: new
 ui-tb-mark-unread = Neprečítané
-# review: new
 ui-still-running = Inbox Classic stále beží
-# review: new
 ui-no-subject = (bez predmetu)
-# review: new
 ui-quoted = „{ $subject }“
-# review: new
-ui-newest-from = Najnovšia správa od { $sender }: { $subject }
-# review: new
+ui-newest-from = Najnovšia správa (odosielateľ: { $sender }): { $subject }
 ui-new-messages = { $count ->
     [one] { $count } nová správa
     [few] { $count } nové správy
    *[other] { $count } nových správ
 }
-# review: new
 ui-outbox-waiting = { $count ->
     [one] 1 správa v priečinku Pošta na odoslanie
     [few] { $count } správy v priečinku Pošta na odoslanie
    *[other] { $count } správ v priečinku Pošta na odoslanie
 }
-# review: new
-ui-outbox-waits = { $subject } čaká v priečinku Pošta na odoslanie
-# review: new
-ui-outbox-sending = Odosiela sa { $subject }...
-# review: new
+ui-outbox-waits = Správa { $subject } čaká v priečinku Pošta na odoslanie
+ui-outbox-sending = Odosiela sa správa { $subject }...
 ui-from-account = Z konta { $account }
-# review: new
 ui-sign-in-refused = Prihlásenie do konta { $account } bolo odmietnuté alebo relácia vypršala.
-# review: new
 ui-sign-in-again-ask = Prihlásiť sa znova v prehliadači?
-# review: new
 ui-sign-in-again-failed = Opätovné prihlásenie zlyhalo: { $reason }
-# review: new
 ui-unknown-reason = neznámy dôvod
-# review: new
 ui-checking = Kontrolujú sa nové správy v konte { $account }...
-# review: new
 ui-done = Hotovo
-# review: new
-ui-sent-at = { $subject } odoslané o { $time }
-# review: new
+ui-sent-at = Správa { $subject } bola odoslaná o { $time }
 ui-draft-saved = Správa bola uložená do priečinka Koncepty
-# review: new
 ui-draft-not-saved = Správa sa neuložila do priečinka Koncepty: { $reason }
-# review: new
 ui-about-core = Jadro { $version }
-# review: new
 ui-add-account-first = Najprv pridajte poštové konto.
-# review: new
 ui-add-account-first-link = Najprv pridajte poštové konto a potom znova kliknite na e-mailový odkaz.
-# review: new
 ui-default-app-is = Inbox Classic je vaša predvolená poštová aplikácia: e-mailové odkazy tu otvoria novú správu.
-# review: new
 ui-select-message-first = Najprv vyberte správu.
-# review: new
 ui-store-not-opened = Úložisko pošty sa nepodarilo otvoriť.
-# review: new
 ui-store-or-cert-not-opened = Úložisko pošty alebo súbor certifikátu sa nepodarilo otvoriť.
-# review: new
 ui-help-title = Pomocník Inbox Classic
-# review: new
 ui-help-missing = V tejto kópii Inbox Classic chýba pomocník.
-# review: new
 ui-ok = OK
-# review: new
 ui-cancel = Zrušiť
-# review: new
 ui-close = Zavrieť
-# review: new
 ui-col-subject = Predmet
-# review: new
 ui-col-from = Od
-# review: new
 ui-col-to = Komu
-# review: new
 ui-col-received = Prijaté
 # the column of the glasses of a watched conversation (and the sign of an ignored one)
 # a notification of new mail in a watched conversation, over who it is from
-# review: new
 ui-watched-conversation = Sledovaná konverzácia
-# review: new
 ui-col-sent = Odoslané
-# review: new
 ui-col-size = Veľkosť
-# review: new
 ui-col-folder = Priečinok
-# review: new
 ui-col-account = Konto
-# review: new
 ui-col-queued = Zaradené
-# review: new
 ui-col-status = Stav
-# review: new
 ui-outbox-title = Pošta na odoslanie
-# review: new
 ui-outbox-status-waiting = Čaká
-# review: new
 ui-outbox-status-not-sent = Neodoslané: { $reason }
 # This message is still queued, during the grace period before an agent’s send.
-# review: new
-ui-outbox-status-agent = Zaradil AI agent; odošle sa o { $time }
-# review: new
+ui-outbox-status-agent = Zaradil AI agent; odoslanie najskôr o { $time }
 ui-outbox-delete-ask = Odstrániť túto správu bez odoslania?
-# review: new
 ui-open-link = Otvoriť odkaz
-# review: new
 ui-edit-link = Upraviť odkaz...
-# review: new
 ui-remove-link = Odstrániť odkaz
-# review: new
 ui-insert-attachment = Vložiť prílohu
-# review: new
 ui-insert-picture = Vložiť obrázok
-# review: new
 ui-filter-all = Všetky súbory
-# review: new
 ui-filter-pictures = Obrázky
-# review: new
 ui-filter-messages = E-mailové správy
-# review: new
 ui-save-attachment-as = Uložiť prílohu ako
-# review: new
 ui-not-sent = Správu sa nepodarilo odoslať.
-# review: new
 ui-attachment-forgotten = Napísali ste „{ $word }“, ale nie je priložený žiadny súbor. Odoslať správu aj tak?
-# review: new
 ui-send-anyway = Odoslať aj tak
-# review: new
 ui-go-back = Späť
-# review: new
 ui-not-saved = Správu sa nepodarilo uložiť.
-# review: new
 ui-saving-draft = Ukladá sa do priečinka Koncepty...
-# review: new
 ui-compose-saved-at = Uložené do priečinka Koncepty o { $time }
-# review: new
-ui-compose-restored = Obnovené po neočakávanom zatvorení Inbox Classic
-# review: new
-ui-compose-not-saved = Neuložené do priečinka Koncepty: { $reason }
-# review: new
+ui-compose-restored = Správa bola obnovená po neočakávanom ukončení Inbox Classic
+ui-compose-not-saved = Správu sa nepodarilo uložiť do priečinka Koncepty: { $reason }
 ui-save-changes-ask = Chcete uložiť zmeny tejto správy do priečinka Koncepty?
-# review: new
 ui-new-message-title = Nová správa
-# review: new
 ui-link-invalid = Zadajte webovú adresu (https://...) alebo e-mailový odkaz (mailto:...).
-# review: new
 ui-link-address = Adresa:
-# review: new
 ui-hyperlink = Hypertextový odkaz
-# review: new
 ui-hyperlink-intro = Adresa, na ktorú odkazuje vybratý text.
-# review: new
 ui-edit-hyperlink = Upraviť hypertextový odkaz
-# review: new
 ui-edit-hyperlink-intro = Cieľová adresa odkazu. Vymažte adresu, ak chcete odkaz odstrániť a text ponechať.
-# review: new
-ui-not-a-picture = Tento súbor nie je obrázok PNG, JPEG ani GIF alebo je väčší ako 10 MB.
-# review: new
+ui-not-a-picture = Obrázok sa nepodarilo vložiť. Vyberte čitateľný súbor PNG, JPEG, GIF alebo WebP s veľkosťou najviac 10 MB.
 ui-format-color = Farba písma
-# review: new
 ui-format-numbers = Číslovaný zoznam
-# review: new
 ui-format-bullets = Zoznam s odrážkami
-# review: new
-ui-format-outdent = Zmenšiť zarážku
-# review: new
-ui-format-indent = Zväčšiť zarážku
-# review: new
+ui-format-outdent = Zmenšiť odsadenie
+ui-format-indent = Zväčšiť odsadenie
 ui-format-left = Zarovnať doľava
-# review: new
 ui-format-center = Centrovať
-# review: new
 ui-format-right = Zarovnať doprava
-# review: new
 ui-format-line = Vložiť vodorovnú čiaru
-# review: new
 ui-tb-send = Odoslať
-# review: new
 ui-tb-save = Uložiť
-# review: new
 ui-tb-attach = Priložiť
 ui-tb-sign = Podpísať
 ui-tb-encrypt = Šifrovať
 ui-field-keys = Kľúče:
-# review: new
 ui-field-from = Od:
-# review: new
 ui-field-to = Komu:
-# review: new
 ui-field-cc = Kópia:
-# review: new
 ui-field-bcc = Skrytá kópia:
-# review: new
 ui-field-subject = Predmet:
-# review: new
 ui-field-attach = Prílohy:
-# review: new
-ui-signature = Podpis
-# review: new
+ui-signature = Textový podpis
 ui-signature-hint = Pridáva sa k novým správam, odpovediam a preposlaným správam z tohto konta.
-# review: new
-ui-signature-not-saved = Podpis sa nepodarilo uložiť.
-# review: new
+ui-signature-not-saved = Textový podpis sa nepodarilo uložiť.
 ui-all-inboxes = Všetka doručená pošta
-# review: new
 ui-all-sent = Všetka odoslaná pošta
-# review: new
 ui-all-drafts = Všetky koncepty
-# review: new
 ui-flagged-folder = S príznakom
-# review: new
 ui-all-folders = Všetky priečinky
-# review: new
 ui-the-account = konto
-# review: new
 ui-folder-name = Názov priečinka:
-# review: new
 ui-find-hint = Hľadať v pošte
-# review: new
 ui-find-tip = Prehľadáva predmety, odosielateľov, príjemcov, názvy príloh a text správ.
-# review: new
-ui-clear-search = Vymazať hľadanie
-# review: new
+ui-clear-search = Vymazať vyhľadávanie
 ui-no-match = Výrazu „{ $words }“ nezodpovedajú žiadne správy.
-# review: new
-ui-no-match-all = Hľadanie prehľadáva predmety, odosielateľov, príjemcov, názvy príloh a text správ vo všetkých priečinkoch. Skontrolujte pravopis alebo skúste menej slov.
-# review: new
-ui-no-match-in = Hľadanie v priečinku { $folder } prehľadáva predmety, odosielateľov, príjemcov, názvy príloh a text správ. Skontrolujte pravopis alebo skúste menej slov.
-# review: new
+ui-no-match-all = Vyhľadávanie zahŕňa predmety, mená a adresy odosielateľov a príjemcov, názvy príloh a text správ vo všetkých priečinkoch. Skontrolujte pravopis alebo skúste zadať menej slov.
+ui-no-match-in = Rozsah vyhľadávania: „{ $folder }“. Vyhľadávanie zahŕňa predmety, mená a adresy odosielateľov a príjemcov, názvy príloh a text správ. Skontrolujte pravopis alebo skúste zadať menej slov.
 ui-no-items = V tomto zobrazení nie sú žiadne položky.
-# review: new
 ui-choose-folder = Vyberte priečinok, ak chcete vidieť jeho správy.
 ui-unsubscribe = Odhlásiť odber
-# review: new
 ui-open-in-calendar = Otvoriť v kalendári
-# review: new
-ui-pictures-blocked = Niektoré obrázky boli zablokované, aby odosielateľ nemohol identifikovať váš počítač. Kliknutím sem obrázky stiahnete.
-# review: new
+ui-pictures-blocked = Niektoré obrázky boli zablokované, aby sa obmedzila možnosť sledovania odosielateľom. Kliknutím sem ich stiahnete.
 ui-not-shown = Správu sa nepodarilo zobraziť.
-# review: new
 ui-attachment-not-read = Prílohu sa nepodarilo prečítať.
-# review: new
 ui-attachment-not-saved = Prílohu sa nepodarilo uložiť.
-# review: new
 ui-not-downloaded = Správa ešte nie je stiahnutá.
-# review: new
-ui-leave-list = Odhlásiť sa z tohto zoznamu adresátov?
-# review: new
-ui-leave-one-click = Inbox Classic pošle žiadosť o odhlásenie na { $target }. Neotvorí sa žiadna webová stránka a neodošle sa žiadny e-mail.
-# review: new
-ui-leave-mail = Ak sa chcete odhlásiť, pošlite e-mail na { $target }. Inbox Classic ho pre vás pripraví. Odoslaním správy odhlásenie potvrdíte.
-# review: new
-ui-leave-web = Stránka na odhlásenie zo zoznamu adresátov sa otvorí v prehliadači ({ $target }).
-# review: new
-ui-unsubscribing = Odhlasovanie z { $target }...
-# review: new
-ui-cannot-unsubscribe = Táto správa neposkytuje možnosť odhlásenia.
-# review: new
-ui-unsubscribed = Žiadosť o odhlásenie bola prijatá. Zoznam adresátov uvádza, že tieto správy prestane posielať.
-# review: new
-ui-not-unsubscribed = Odhlásenie zlyhalo: { $reason }
-# review: new
+ui-leave-list = Odhlásiť odber týchto správ?
+ui-leave-one-click = Inbox Classic pošle žiadosť o odhlásenie odberu na server { $target }. Neotvorí sa žiadna webová stránka a neodošle sa žiadny e-mail.
+ui-leave-mail = Ak chcete odhlásiť odber, pošlite e-mail na adresu { $target }. Inbox Classic ho pre vás pripraví. Žiadosť potom odošlite.
+ui-leave-web = V prehliadači sa otvorí stránka na odhlásenie odberu ({ $target }).
+ui-unsubscribing = Odosiela sa žiadosť o odhlásenie odberu: { $target }...
+ui-cannot-unsubscribe = Táto správa neponúka možnosť odhlásiť odber.
+ui-unsubscribed = Žiadosť o odhlásenie odberu bola prijatá.
+ui-not-unsubscribed = Odber sa nepodarilo odhlásiť: { $reason }
 ui-event-span = { $start } až { $end }
-# review: new
-ui-event-floating = { $when } (čas odosielateľa)
-# review: new
+ui-event-floating = { $when } (bez prepočtu časového pásma)
 ui-invitation = Pozvánka: { $title }
-# review: new
 ui-invitation-updated = Aktualizovaná pozvánka: { $title }
-# review: new
 ui-invitation-canceled = Zrušené: { $title }
-# review: new
 ui-invitation-answer = Odpoveď na pozvánku: { $title }
-# review: new
 ui-no-title = (bez názvu)
-# review: new
 ui-organizer = Organizátor: { $name }
-# review: new
 ui-invitation-not-read = Pozvánku sa nepodarilo prečítať.
-# review: new
-ui-no-calendar = V tomto počítači nie je žiadna aplikácia kalendára, ktorá by otvorila pozvánky (súbory .ics).
-# review: new
+ui-no-calendar = Pozvánku sa nepodarilo otvoriť. Skontrolujte, či aplikácia kalendára v tomto počítači podporuje súbory .ics.
 ui-messages-not-changed = Správy sa nepodarilo zmeniť.
-# review: new
 ui-new-folder-in-selected = Nový priečinok sa vytvorí vo vybratom priečinku.
-# review: new
 ui-new-folder-at-top = Nový priečinok sa vytvorí na najvyššej úrovni konta.
-# review: new
 ui-folder-not-created = Priečinok sa nepodarilo vytvoriť.
-# review: new
 ui-folder-not-renamed = Priečinok sa nepodarilo premenovať.
-# review: new
 ui-folder-not-deleted = Priečinok sa nepodarilo odstrániť.
-# review: new
 ui-rename-folder-intro = Zadajte nový názov priečinka „{ $folder }“.
-# review: new
 ui-properties-of = Vlastnosti: { $subject }
-# review: new
 ui-internet-headers = Internetové hlavičky tejto správy:
-# review: new
-ui-save-messages-in = Uložiť správy do
-# review: new
+ui-save-messages-in = Vyberte priečinok na uloženie správ
 ui-save-message-as = Uložiť správu ako
-# review: new
 ui-import-choose-folder = Najprv vyberte priečinok, do ktorého sa majú správy importovať.
-# review: new
 ui-add-account-title = Pridať poštové konto
-# review: new
 ui-accounts-title = Kontá
-# review: new
 ui-security-none = Žiadne (nešifrované)
-# review: new
 ui-field-required = Pole { $field } je povinné.
-# review: new
 ui-email-invalid = E-mailová adresa nie je platná.
-# review: new
 ui-ports-invalid = Porty sú čísla od 1 do 65535.
-# review: new
 ui-looking-up = Hľadajú sa nastavenia domény { $domain }...
-# review: new
 ui-found-none = Zadajte údaje konta od svojho poskytovateľa e-mailu.
-# review: new
-ui-found-change = Ak vám poskytovateľ dal iné nastavenia, zmeňte tieto.
-# review: new
+ui-found-change = Ak vám poskytovateľ uviedol iné nastavenia, upravte ich podľa jeho pokynov.
 ui-found-guess = Pre túto adresu sa nenašli žiadne nastavenia. Navrhnuté názvy serverov sú odhady. Overte ich u svojho poskytovateľa.
-# review: new
 ui-found-mx = Inbox Classic rozpoznal vášho poskytovateľa e-mailu a vyplnil nastavenia jeho serverov.
-# review: new
 ui-found-srv = Tieto nastavenia sa našli v záznamoch DNS vašej domény.
-# review: new
 ui-found-autodiscover = Tieto nastavenia sa našli cez Microsoft Autodiscover (Exchange).
-# review: new
 ui-found-other = Tieto nastavenia sa našli pre túto adresu.
-# review: new
-ui-app-password-needed = { $provider } v poštových programoch neprijíma vaše bežné heslo. Vytvorte si heslo aplikácie vo svojom konte { $provider } a zadajte ho do poľa Heslo v ďalšom formulári.
-# review: new
+ui-app-password-needed = Poskytovateľ: { $provider }. Ak vaše konto podporuje heslá aplikácií, vytvorte si takéto heslo v nastaveniach zabezpečenia konta a zadajte ho do poľa Heslo v ďalšom formulári. Outlook.com a Microsoft 365 vyžadujú prihlásenie cez prehliadač.
 ui-app-password-open = Otvoriť pokyny služby { $provider } v prehliadači?
-# review: new
-ui-plain-warning = Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Toto pripojenie používajte iba so serverom vo vlastnom počítači alebo v lokálnej sieti.
-# review: new
+ui-plain-warning = Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Samotná lokálna sieť neposkytuje šifrovanie. Takéto pripojenie použite len vtedy, keď rozumiete riziku, napríklad so serverom vo vlastnom počítači.
 ui-continue-ask = Pokračovať?
-# review: new
 ui-add-sign-in-app = Pridať prihlasovaciu aplikáciu...
-# review: new
-ui-turned-off = { $name } je v tomto počítači vypnutá.
-# review: new
-ui-off-here = V tomto počítači vypnutá.
-# review: new
+ui-turned-off = Možnosť „{ $name }“ je v tomto počítači vypnutá.
+ui-off-here = V tomto počítači je táto možnosť vypnutá.
 ui-why = Prečo?
-# review: new
 ui-more-sign-in = Ďalšie možnosti prihlásenia...
-# review: new
 ui-other-account = Ak chcete pridať iné e-mailové konto, zadajte svoju e-mailovú adresu a meno, ktoré majú vidieť príjemcovia. Nastavenia serverov sa vyhľadajú potom.
-# review: new
 ui-field-account-name = Názov konta:
-# review: new
 ui-field-name = Zobrazované meno:
-# review: new
 ui-field-email = E-mailová adresa:
-# review: new
 ui-field-user = Meno používateľa:
-# review: new
 ui-field-password = Heslo:
-# review: new
 ui-field-imap-host = Server prichádzajúcej pošty (IMAP):
-# review: new
 ui-field-imap-port = Port IMAP:
-# review: new
 ui-field-imap-security = Zabezpečenie IMAP:
-# review: new
 ui-field-smtp-host = Server odchádzajúcej pošty (SMTP):
-# review: new
 ui-field-smtp-port = Port SMTP:
-# review: new
 ui-field-smtp-security = Zabezpečenie SMTP:
-# review: new
 ui-field-other-addresses = Ďalšie adresy, z ktorých posielate:
-# review: new
 ui-sign-in-not-started = Prihlásenie cez prehliadač sa nepodarilo spustiť.
-# review: new
 ui-sign-in-in-browser = Prihláste sa do konta { $account } v okne prehliadača, ktoré sa otvorilo, a potom sa vráťte sem.
-# review: new
 ui-sign-in-failed = Prihlásenie zlyhalo: { $reason }
-# review: new
 ui-account-not-saved = Konto sa nepodarilo uložiť.
-# review: new
-ui-start-intro = Gmail, Google Workspace, Outlook.com a Microsoft 365: prihláste sa na vlastnej stránke Googlu alebo Microsoftu. Heslo zadávate tam, nikdy nie do Inbox Classic.
-# review: new
-ui-start-intro-apps = Prihláste sa cez prehliadač jednou zo svojich prihlasovacích aplikácií (Ďalšie možnosti prihlásenia) alebo nižšie pridajte ľubovoľné e-mailové konto so svojím menom a adresou.
-# review: new
+ui-start-intro = Gmail, Google Workspace, Outlook.com a Microsoft 365: prihláste sa na stránke Googlu alebo Microsoftu. Heslo zadávate tam, nikdy nie do Inbox Classic.
+ui-start-intro-apps = Prihláste sa cez prehliadač pomocou jednej zo svojich prihlasovacích aplikácií (Ďalšie možnosti prihlásenia) alebo nižšie zadajte meno a adresu a pridajte iné e-mailové konto.
 ui-use-app-password = Použiť heslo aplikácie
-# review: new
 ui-the-provider = poskytovateľa
-# review: new
-ui-provider-intro = Prihláste sa ku kontu { $email } cez { $provider } na jeho webovej stránke. Vaše heslo sa s Inbox Classic nezdieľa. Môžete použiť aj heslo aplikácie vytvorené v nastaveniach zabezpečenia konta.
-# review: new
-ui-provider-intro-apps = Prihláste sa ku kontu { $email } cez { $provider } na jeho webovej stránke pomocou jednej zo svojich prihlasovacích aplikácií (Ďalšie možnosti prihlásenia). Môžete použiť aj heslo aplikácie vytvorené v nastaveniach zabezpečenia konta.
-# review: new
+ui-provider-intro = Prihláste sa ku kontu { $email } cez { $provider } na jeho webovej stránke. Inbox Classic nedostane vaše heslo. Ak konto podporuje heslá aplikácií pre poštové programy, môžete použiť aj takéto heslo vytvorené v nastaveniach zabezpečenia konta. Outlook.com a Microsoft 365 podporujú iba prihlásenie cez prehliadač.
+ui-provider-intro-apps = Prihláste sa ku kontu { $email } cez { $provider } na jeho webovej stránke pomocou jednej zo svojich prihlasovacích aplikácií (Ďalšie možnosti prihlásenia). Ak konto podporuje heslá aplikácií pre poštové programy, môžete použiť aj takéto heslo vytvorené v nastaveniach zabezpečenia konta. Outlook.com a Microsoft 365 podporujú iba prihlásenie cez prehliadač.
 ui-finish = Dokončiť
-# review: new
 ui-logon = Prihlásenie
-# review: new
 ui-enter-password = Zadajte heslo konta { $account }.
-# review: new
 ui-signs-in-with = Prihlasovacia aplikácia: { $app }. Prihlásenie prebieha v prehliadači a konto používa servery tejto aplikácie.
-# review: new
 ui-keep-password = Ak chcete ponechať súčasné heslo, nechajte pole hesla prázdne.
-# review: new
 ui-remove-account = Odstrániť konto
-# review: new
-ui-remove-account-ask = Odstrániť toto konto z Inbox Classic? Jeho pošta zostane na serveri; kópia v tomto počítači a uložené heslo sa odstránia.
-# review: new
+ui-remove-account-ask = Odstrániť toto konto z Inbox Classic? Odstránia sa jeho miestne údaje vrátane správ čakajúcich na odoslanie a uložených prihlasovacích údajov. Pošta uložená na serveri tam zostane. Správy dostupné iba v tomto počítači sa stratia.
 ui-col-email = E-mailová adresa
-# review: new
 ui-col-incoming = Server prichádzajúcej pošty
-# review: new
 ui-type-email = Zadajte svoju e-mailovú adresu, meno@example.com.
-# review: new
 ui-ai-agent = AI agent
-# review: new
 ui-ai-agent-access = Prístup AI agenta
-# review: new
 ui-ai-agents = AI agenti
-# review: new
 ui-program-path = Program: { $path }
-# review: new
 ui-it-may = Povolené akcie:
-# review: new
 ui-accounts-it-may-use = Povolené kontá:
-# review: new
 ui-send-message-ask = Odoslať správu?
-# review: new
 ui-col-name = Názov
-# review: new
 ui-never = Nikdy
-# review: new
 ui-connect-agent = Pripojiť AI agenta
-# review: new
-ui-connect-agent-intro = Pridajte toto medzi servery MCP svojho agenta (Claude Desktop: Settings > Developer > Edit Config):
-# review: new
+ui-connect-agent-intro = Pridajte túto konfiguráciu medzi servery MCP svojho agenta (Claude Desktop: Settings > Developer > Edit Config):
 ui-col-program = Program
-# review: new
 ui-col-may = Oprávnenia
-# review: new
 ui-col-last-used = Naposledy použité
-# review: new
 ui-col-when = Kedy
-# review: new
 ui-col-what = Akcia
-# review: new
 ui-sign-in-app = Prihlasovacia aplikácia
-# review: new
 ui-sign-in-apps = Prihlasovacie aplikácie
-# review: new
 ui-add-sign-in-app-title = Pridať prihlasovaciu aplikáciu
-# review: new
 ui-preset-app-name = Prihlasovacia aplikácia { $provider }
-# review: new
 ui-issuer-not-checked = vydavateľa nemožno overiť
-# review: new
-ui-checking-issuer = Overuje sa { $issuer }...
-# review: new
+ui-checking-issuer = Overuje sa konfigurácia vydavateľa: { $issuer }...
 ui-issuer-unusable = Vydavateľa nemožno použiť: { $reason }
-# review: new
 ui-issuer-usable = Vydavateľa možno použiť.
-# review: new
 ui-sign-in-app-not-saved = Prihlasovaciu aplikáciu sa nepodarilo uložiť: { $reason }
-# review: new
 ui-check = &Overiť
-# review: new
 ui-fill-in-for = Použiť nastavenia pre:
-# review: new
 ui-app-name = Názov:
-# review: new
 ui-issuer = Vydavateľ:
-# review: new
 ui-client-id = ID klienta:
-# review: new
 ui-client-secret = Tajný kód klienta:
-# review: new
-ui-scopes = Oprávnenia (scopes):
-# review: new
+ui-scopes = Rozsahy oprávnení:
 ui-imap-server = Server IMAP:
-# review: new
 ui-smtp-server = Server SMTP:
-# review: new
 ui-redirect-uri = URI presmerovania:
-# review: new
 ui-sign-in-app-intro = Prihlasovacia aplikácia je klient OAuth, ktorého zaregistrujete u svojho poskytovateľa, aby ste sa mohli prihlasovať cez prehliadač. Vyberte poskytovateľa, aby sa vyplnili jeho nastavenia, a potom pridajte ID klienta a tajný kód klienta, ak vám ho poskytovateľ dal.
-# review: new
 ui-remove-secret = Tajný kód klienta je uložený. Zadajte nový, ktorý ho nahradí, alebo uložený tajný kód odstráňte
-# review: new
 ui-register-it = Zaregistrujte aplikáciu u svojho poskytovateľa
-# review: new
-ui-built-in-note = { $name } je vstavaná. Môžete zmeniť iba to, či sa ponúka pre nové kontá.
-# review: new
-ui-client-with-secret = ID klienta: { $client }, s tajným kódom klienta.
-# review: new
-ui-client-public = ID klienta: { $client }, verejný klient (bez tajného kódu).
-# review: new
+ui-built-in-note = Aplikácia „{ $name }“ je vstavaná. Môžete len zmeniť, či sa má ponúkať pri pridávaní kont.
+ui-client-with-secret = ID klienta: { $client }. Tajný kód klienta je uložený.
+ui-client-public = ID klienta: { $client }. Verejný klient bez tajného kódu.
 ui-no-accounts = Žiadne kontá
-# review: new
 ui-remove-sign-in-app = Odstrániť prihlasovaciu aplikáciu
-# review: new
 ui-remove-sign-in-app-ask = Odstrániť prihlasovaciu aplikáciu { $name } aj s jej uloženým tajným kódom klienta?
-# review: new
 ui-sign-in-app-not-removed = Prihlasovacia aplikácia nebola odstránená. { $reason }
-# review: new
 ui-sign-in-apps-intro = Prihlasovacie aplikácie umožňujú kontám prihlasovať sa cez prehliadač. Aplikácia, ktorá nie je začiarknutá, sa pre nové kontá neponúka; kontá, ktoré ju už používajú, fungujú ďalej.
-# review: new
 ui-col-issuer = Vydavateľ
-# review: new
 ui-col-used-by = Používa
-# review: new
-ui-options-system-default = Predvolený systémom ({ $language })
-# review: new
+ui-options-system-default = Podľa systému ({ $language })
 ui-settings-general = Všeobecné
-# review: new
 ui-settings-reading = Čítanie
-# review: new
 ui-settings-new-mail = Nová pošta
-# review: new
 ui-settings-sending = Odosielanie
-# review: new
 ui-settings-default-apps = Predvolené aplikácie
-# review: new
 ui-settings-message-list = Zoznam správ
-# review: new
 ui-settings-messages = Správy
-# review: new
 ui-settings-encryption = Šifrovanie
-# review: new
 ui-settings-language = Jazyk
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = &Použiť
-# review: new
 ui-language-label = &Jazyk:
-# review: new
 ui-restart-note = Jazyk sa zmení po reštartovaní Inbox Classic.
-# review: new
-ui-restart-ask = Inbox Classic sa po reštartovaní zobrazí v jazyku { $language }. Reštartovať teraz?
-# review: new
+ui-restart-ask = Nový jazyk po reštartovaní Inbox Classic: { $language }. Reštartovať teraz?
 ui-notify-new-mail = &Upozorniť ma, keď príde nová pošta
-# review: new
 ui-new-folder-title = Nový priečinok
-# review: new
 ui-rename-folder-title = Premenovať priečinok
-# review: new
-ui-delete-folder-question = Odstrániť priečinok „{ $folder }“ s jeho správami a priečinkami v ňom? Odstráni sa aj na serveri.
-# review: new
-ui-properties = &Vlastnosti
-# review: new
+ui-delete-folder-question = Odstrániť priečinok „{ $folder }“ so všetkými správami a podpriečinkami? Odstráni sa aj zo servera.
+ui-properties = V&lastnosti
 ui-account-sync = Odoslať a &prijať
-# review: new
-ui-account-properties = V&lastnosti...
-# review: new
-ui-account-move-up = Posunúť &nahor
-# review: new
-ui-account-move-down = Posunúť na&dol
-# review: new
-ui-menu-open = &Otvoriť
-# review: new
-ui-menu-flag = Prí&znak
-# review: new
-ui-menu-view-source = Zobraziť &zdroj
-# review: new
+ui-account-properties = &Vlastnosti...
+ui-account-move-up = Posunúť na&hor
+ui-account-move-down = Posunúť nado&l
+ui-menu-open = Ot&voriť
+ui-menu-flag = &Farba príznaku
+ui-menu-view-source = Zo&braziť zdroj
 ui-save-attachments = Uložiť prílohy
-# review: new
 ui-attachment-open = Otvoriť
-# review: new
 ui-attachment-save-as = Uložiť ako...
-# review: new
 ui-attachment-save-all = Uložiť všetky...
-# review: new
 ui-attachment-show-in-message = Zobraziť v správe
-# review: new
 ui-attachments-strip = Prílohy
-# review: new
 ui-attachment-note-title = Otvorenie tohto súboru
-# review: new
-ui-attachment-program-tip = Otvorenie je pre tento typ súboru vypnuté, pretože môže spúšťať programy. Uložte ho a otvorte ho sami.
-# review: new
+ui-attachment-program-tip = Tento typ súboru môže spúšťať programy, preto sa nedá otvoriť priamo. Ak ho chcete otvoriť samostatne, najprv ho uložte.
 ui-clear-flag = Zr&ušiť príznak
-# review: new
 ui-button-move = P&resunúť
-# review: new
 ui-button-copy = &Kopírovať
-# review: new
 ui-find-folder = Nájsť priečinok
-# review: new
 ui-new-folder-in = Nový priečinok bude v priečinku { $folder }.
-# review: new
 ui-outbox-send-all = &Odoslať všetko teraz
-# review: new
 ui-yes = Áno
-# review: new
 ui-no = Nie
-# review: new
 ui-try-again = Skúsiť znova
-# review: new
 ui-remove = &Odstrániť
-# review: new
-ui-signature-of = Podpis: { $account }
-# review: new
+ui-signature-of = Textový podpis: { $account }
 ui-sign-in-with = Prihlásiť sa cez { $provider }
-# review: new
 ui-sign-in-in-browser-yours = Prihláste sa do svojho konta v okne prehliadača, ktoré sa otvorilo, a potom sa vráťte sem.
-# review: new
 ui-browser-sign-in-server = { $server } (prihlásenie cez prehliadač)
-# review: new
 ui-dont-allow = Nepovoliť
-# review: new
 ui-allow = &Povoliť
-# review: new
 ui-dont-send = Neodoslať
 ui-dont-unsubscribe = Neodhlásiť odber
-# review: new
 ui-edit-first = Najprv &upraviť
-# review: new
 ui-new-address = Nová adresa
-# review: new
 ui-turn-away = O&dmietnuť
-# review: new
 ui-clear-agent-log = Vymazať históriu aktivity agentov?
-# review: new
-ui-clear-agent-log-detail = Zmeny, ktoré agenti urobili, sa tým nevrátia.
-# review: new
+ui-clear-agent-log-detail = Týmto sa nevrátia zmeny vykonané agentmi.
 ui-let-agents-connect = &Povoliť AI agentom pripájať sa k Inbox Classic
-# review: new
 ui-change-button = Zmeniť…
-# review: new
 ui-undo-button = Späť
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-ui-undo-since-button = Vrátiť za obdobie…
-# review: new
-ui-undo-since-span = Vrátiť, čo tento program urobil:
-# review: new
-ui-take-back = Vrátiť
-# review: new
+ui-undo-since-button = Vrátiť zmeny za obdobie…
+ui-undo-since-span = Vrátiť zmeny tohto programu za obdobie:
+ui-take-back = Vrátiť zmeny
 ui-rules-title = Pravidlá správ
-# review: new
-ui-rules-intro = Pravidlá triedia nové správy v priečinku Doručená pošta, kým je Inbox Classic spustený. Zodpovedajúce pravidlá sa použijú v poradí. Keď pravidlo presunie správu z priečinka Doručená pošta, ďalšie pravidlá sa na ňu už nepoužijú.
-# review: new
-ui-rules-none = Zatiaľ žiadne pravidlá. Nové vytvoríte kliknutím na Nové.
-# review: new
+ui-rules-intro = Pravidlá spracúvajú nové správy v priečinku Doručená pošta, kým je Inbox Classic spustený. Pravidlá, ktorých podmienky správa spĺňa, sa použijú v poradí. Keď pravidlo určí presunutie správy mimo tohto priečinka, ďalšie pravidlá sa už neuplatnia.
+ui-rules-none = Zatiaľ nemáte žiadne pravidlá. Kliknutím na Nové vytvoríte prvé.
 ui-rule-new = &Nové...
-# review: new
 ui-rule-edit = &Upraviť...
-# review: new
 ui-rule-delete-button = O&dstrániť
-# review: new
 ui-rule-title = Pravidlo správ
-# review: new
 ui-rule-name = Názov:
-# review: new
 ui-rule-account = Konto:
-# review: new
 ui-rule-all-accounts = Všetky kontá
-# review: new
 ui-rule-query = Kritériá vyhľadávania:
-# review: new
-ui-rule-query-hint = Použite hľadané výrazy, napríklad from:ann@example.com, subject:faktúra alebo list:news.example.com, rovnako ako v poli hľadania.
-# review: new
+ui-rule-query-hint = Použite vyhľadávacie výrazy, napríklad from:ann@example.com, subject:faktúra alebo list:news.example.com, rovnako ako v poli vyhľadávania.
 ui-rule-count = { $count ->
     [one] Týmto kritériám teraz zodpovedá 1 správa v priečinku Doručená pošta.
     [few] Týmto kritériám teraz zodpovedajú { $count } správy v priečinku Doručená pošta.
    *[other] Týmto kritériám teraz zodpovedá { $count } správ v priečinku Doručená pošta.
 }
-# review: new
 ui-rule-show = &Zobraziť
-# review: new
 ui-rule-actions = Akcie:
-# review: new
 ui-rule-move = &Presunúť do:
-# review: new
 ui-rule-mark-read = Označiť ako p&rečítanú
-# review: new
 ui-rule-flag = Označiť príznak&om
-# review: new
 ui-rule-archive = &Archivovať
-# review: new
 ui-rule-junk = Presunúť do priečinka &Nevyžiadaná pošta
-# review: new
 ui-rule-delete = O&dstrániť
-# review: new
 ui-rule-quiet = Ne&upozorňovať ma na ňu
-# review: new
 ui-rule-apply-now = Použiť aj na správy, ktoré už sú v priečinku Doručená poš&ta
-# review: new
 ui-rule-delete-ask = Odstrániť pravidlo „{ $name }“?
-# review: new
 ui-create-rule = Vytvoriť pravidlo...
-# review: new
 ui-rules-applied = { $count ->
     [one] 1 správa roztriedená vašimi pravidlami
     [few] { $count } správy roztriedené vašimi pravidlami
    *[other] { $count } správ roztriedených vašimi pravidlami
 }
-# review: new
 ui-col-rule-matches = Kritériá
-# review: new
 ui-clear-button = &Vymazať
-# review: new
 ui-how-to-connect = Ako pripojiť agenta…
-# review: new
 ui-agent-programs = Programy, ktorých agenti požiadali o prístup k vašej pošte
-# review: new
 ui-what-agents-did = Aktivita agentov
-# review: new
 ui-restart-now = &Reštartovať teraz
-# review: new
 ui-restart-later = &Neskôr
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Nový kontakt
-# review: new
 ui-tb-new-group = Nová skupina
-# review: new
 ui-tb-properties = Vlastnosti
-# review: new
 ui-tb-write-to = Napísať
-# review: new
 ui-menu-new-contact = Nový &kontakt...
-# review: new
 ui-menu-new-group = Nová &skupina...
-# review: new
 ui-menu-write-to = &Napísať
-# review: new
 ui-menu-delete = &Odstrániť
-# review: new
 ui-book-find-hint = Zadajte meno alebo e-mailovú adresu
-# review: new
 ui-book-all-contacts = Všetky kontakty
-# review: new
 ui-col-phone = Telefón
-# review: new
 ui-book-empty = Adresár je prázdny. Kliknutím na Nový kontakt niekoho pridáte, alebo importujte súbor vCard či CSV z ponuky Súbor.
-# review: new
 ui-book-no-match = Výrazu „{ $words }“ nezodpovedajú žiadne kontakty.
-# review: new
 ui-book-delete-ask = { $count ->
     [one] Odstrániť tento kontakt z adresára?
     [few] Odstrániť tieto { $count } kontakty z adresára?
    *[other] Odstrániť týchto { $count } kontaktov z adresára?
 }
-# review: new
-ui-group-delete-ask = Odstrániť skupinu „{ $name }“? Ľudia v nej zostanú v adresári.
-# review: new
+ui-group-delete-ask = Odstrániť skupinu „{ $name }“? Jej kontakty zostanú v adresári.
 ui-book-no-address = { $name } nemá e-mailovú adresu.
-# review: new
 ui-new-contact-title = Nový kontakt
-# review: new
 ui-contact-title = Vlastnosti: { $name }
-# review: new
 ui-contact-first = Meno:
-# review: new
 ui-contact-last = Priezvisko:
-# review: new
 ui-contact-display = Zobrazované meno:
-# review: new
 ui-contact-nickname = Prezývka:
-# review: new
 ui-contact-company = Spoločnosť:
-# review: new
 ui-contact-addresses = E-mailové adresy:
-# review: new
 ui-contact-address-hint = Zadajte e-mailovú adresu
-# review: new
 ui-contact-add = &Pridať
-# review: new
 ui-contact-set-default = Nastaviť ako pre&dvolenú
-# review: new
 ui-contact-default = { $address } (predvolená)
-# review: new
 ui-contact-phones = Telefónne čísla:
-# review: new
 ui-phone-home = Domov
-# review: new
 ui-phone-work = Práca
-# review: new
 ui-phone-mobile = Mobil
-# review: new
 ui-phone-other = Iné
-# review: new
 ui-contact-notes = Poznámky:
-# review: new
 ui-contact-name-needed = Zadajte meno alebo e-mailovú adresu kontaktu.
-# review: new
 ui-contact-address-invalid = „{ $address }“ nie je platná e-mailová adresa.
-# review: new
 ui-contact-not-saved = Kontakt sa nepodarilo uložiť: { $reason }
-# review: new
 ui-new-group-title = Nová skupina
-# review: new
 ui-group-title = Vlastnosti: { $name }
-# review: new
 ui-group-name = Názov skupiny:
-# review: new
 ui-group-members = Členovia:
-# review: new
 ui-group-select-members = &Vybrať členov...
-# review: new
 ui-group-new-member = Pridať e-mailovú adresu, ktorá nie je v adresári:
-# review: new
 ui-group-name-needed = Zadajte názov skupiny.
-# review: new
 ui-group-not-saved = Skupinu sa nepodarilo uložiť: { $reason }
-# review: new
 ui-group-members-count = { $count ->
     [one] 1 člen
     [few] { $count } členovia
    *[other] { $count } členov
 }
-# review: new
 ui-select-recipients = Vybrať príjemcov
-# review: new
 ui-select-members = Vybrať členov skupiny
-# review: new
 ui-pick-intro = Zadajte meno alebo ho vyberte zo zoznamu:
-# review: new
 ui-pick-recipients = Príjemcovia správy:
-# review: new
 ui-pick-members = Členovia skupiny:
-# review: new
 ui-pick-to = &Komu →
-# review: new
-ui-pick-cc = K&ópia →
-# review: new
+ui-pick-cc = Kó&pia →
 ui-pick-bcc = &Skrytá kópia →
-# review: new
 ui-pick-add = &Pridať →
-# review: new
 ui-pick-tip = Vybrať príjemcov z adresára
-# review: new
 ui-filter-address-books = Adresáre (vCard, CSV)
-# review: new
 ui-filter-vcard = Súbory vCard
-# review: new
 ui-book-export-name = Adresár
-# review: new
 ui-book-imported = { $added ->
     [one] Pridaný 1 kontakt
     [few] Pridané { $added } kontakty
@@ -1083,278 +571,151 @@ ui-book-imported = { $added ->
     [few] { $skipped } preskočené, už boli v adresári.
    *[other] { $skipped } preskočených, už boli v adresári.
 }
-# review: new
 ui-book-not-imported = Adresár sa nepodarilo importovať: { $reason }
-# review: new
 ui-book-exported = { $count ->
     [one] 1 kontakt uložený do súboru { $file }.
     [few] { $count } kontakty uložené do súboru { $file }.
    *[other] { $count } kontaktov uložených do súboru { $file }.
 }
-# review: new
 ui-book-not-exported = Adresár sa nepodarilo uložiť: { $reason }
-# review: new
 ui-code-copied = Kód bol skopírovaný
-# review: changed
-ui-codes-in-notifications = &Zobrazovať prihlasovacie kódy v upozorneniach na novú poštu
-# review: new
+ui-codes-in-notifications = &Zobrazovať jednorazové kódy v upozorneniach na novú poštu
 ui-tool-unread-only = Neprečítané
-# review: new
 ui-no-unread = Nie sú tu žiadne neprečítané správy.
-# review: new
-ui-pictures-always-sender = Vždy sťahovať obrázky od odosielateľa { $sender }
-# review: new
+ui-pictures-always-sender = Vždy sťahovať obrázky (odosielateľ: { $sender })
 ui-pictures-always-domain = Vždy sťahovať obrázky od všetkých z domény { $domain }
-# review: new
 ui-pictures-unconfirmed = Doménu odosielateľa ({ $domain }) sa nepodarilo overiť, preto sa obrázky v tejto správe nesťahujú automaticky.
-# review: changed
 ui-pictures-always-option = &Sťahovať obrázky vo všetkých správach
-# review: new
-ui-pictures-always-warning = Odosielatelia potom uvidia, kedy čítate ich správy.
-# review: new
+ui-pictures-always-warning = Odosielatelia potom môžu zistiť, kedy čítate ich správy.
 ui-protection-details = &Podrobnosti...
-# review: new
 ui-protection-details-title = Podrobnosti zabezpečenia
-# review: new
 ui-download-heading = Sťahovanie
-# review: changed
 ui-download-ahead = &Sťahovať správy vopred:
-# review: new
-ui-download-ahead-recent = Nedávne správy do 1 MB každá
-# review: new
+ui-download-ahead-recent = Nedávne správy s veľkosťou najviac 1 MB
 ui-download-ahead-all = Všetky správy
-# review: new
 ui-download-ahead-never = Iba pri otvorení
-# review: changed
 ui-download-limit = &Limit úložiska na konto:
-# review: changed
 ui-send-delay = &Oneskorenie pred odoslaním:
-# review: new
-ui-send-delay-note = Kým správa čaká na odoslanie, môžete odoslanie zrušiť príkazom Späť.
-# review: new
+ui-send-delay-note = Počas odpočítavania môžete odoslanie správy zrušiť príkazom Späť.
 ui-dark-messages = Zobrazovať správy na tmavom pozadí, keď je systém v tmavom režime
-# review: new
 ui-preview-show = Zobrazovať prí&lohy v správach
-# review: new
-ui-preview-show-note = Zobrazí obrázky a prvé strany súborov PDF pod textom správy. Inbox Classic tieto náhľady vytvára sám, takže nič v súbore sa nemôže spustiť.
-# review: new
+ui-preview-show-note = Zobrazuje obrázky a prvé strany súborov PDF pod textom správy. Inbox Classic náhľady vytvára sám bez spúšťania skriptov obsiahnutých v súboroch.
 ui-preview-pdfs = Zobrazovať súbory PD&F v správach
-# review: new
-ui-sending-in = { $subject } sa odošle o { $count ->
+ui-sending-in = Odoslanie správy { $subject } o { $count ->
     [one] 1 sekundu
     [few] { $count } sekundy
    *[other] { $count } sekúnd
 }
-# review: new
-ui-send-undone = { $subject } sa neodoslalo. Správa sa znova otvorila na úpravy.
-# review: new
-ui-send-too-late = { $subject } už bolo odoslané.
-# review: new
-ui-outbox-status-undo = Odošle sa o { $time }
-# review: new
-ui-download-note = Správy stiahnuté vopred sa otvárajú okamžite. Keď sa limit úložiska prekročí, najstaršie lokálne kópie sa odstránia a pri otvorení sa stiahnu znova.
-# review: new
+ui-send-undone = Správa { $subject } sa neodoslala. Znova sa otvorila na úpravy.
+ui-send-too-late = Odoslanie správy { $subject } už nemožno zrušiť.
+ui-outbox-status-undo = Odoslanie najskôr o { $time }
+ui-download-note = Správy stiahnuté vopred môžete otvoriť bez čakania na stiahnutie. Po prekročení limitu program odstráni najstaršie stiahnuté kópie obsahu, okrem konceptov a správ otvorených od spustenia programu. Odstránený obsah sa pri otvorení stiahne znova. Limit sa nevzťahuje na všetky údaje aplikácie.
 ui-attachment-downloading = Táto správa sa ešte nestiahla celá. Skúste to znova po dokončení sťahovania.
-# review: changed
 ui-trusted-senders-button = &Dôveryhodní odosielatelia...
-# review: new
 ui-trusted-senders-title = Dôveryhodní odosielatelia
-# review: new
-ui-trusted-senders-note = Obrázky v správach od týchto odosielateľov sa sťahujú automaticky, keď váš poskytovateľ pošty overí doménu odosielateľa.
-# review: new
+ui-trusted-senders-note = Obrázky od týchto odosielateľov sa môžu sťahovať automaticky, ak poskytovateľ pošty overí doménu odosielateľa. Výnimkou sú nevyžiadaná pošta a šifrované časti správ.
 ui-trusted-everyone-at = Všetci z domény { $domain }
-# review: new
 ui-trusted-senders-empty = Zatiaľ neboli pridaní žiadni dôveryhodní odosielatelia.
-# review: new
-ui-search-encrypted = Hľadať v &šifrovaných správach
-# review: new
-ui-search-encrypted-note = Šifrované správy sa v tomto počítači dešifrujú, keď sa stiahnu alebo otvoria, aby bolo možné nájsť ich slová a zoznam ukázal ich vlastný predmet. Index nie je šifrovaný a agenti AI v ňom nikdy nevyhľadávajú. Vypnutím ich z indexu odstránite.
-# review: new
+ui-search-encrypted = Hľadať v š&ifrovaných správach
+ui-search-encrypted-note = Po stiahnutí alebo otvorení správy sa ju program pokúsi dešifrovať dostupným kľúčom. Potom možno prehľadávať jej obsah a v zozname zobraziť chránený predmet. Index sa ukladá v tomto počítači bez šifrovania. AI agenti neprehľadávajú dešifrovaný obsah. Vypnutím tejto možnosti odstránite dešifrované údaje z indexu a obnovíte vonkajšie predmety správ.
 ui-pgp-keyserver = &Hľadať kľúče na keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Keď šifrujete správu alebo hľadáte kľúč, hľadaná adresa sa odošle na keys.openpgp.org. Najprv sa opýta vlastnej domény adresy.
-# review: changed
+ui-pgp-keyserver-note = Pri hľadaní kľúča podľa e-mailovej adresy sa program najprv obráti na doménu adresy. Ak tam kľúč nenájde a táto možnosť je zapnutá, odošle adresu aj na keys.openpgp.org. Pri hľadaní podľa odtlačku alebo identifikátora kľúča sa namiesto adresy odošle tento identifikátor.
 ui-eml-default = Otvárať &súbory .eml v Inbox Classic
-# review: new
 ui-eml-default-done = Inbox Classic teraz otvára súbory .eml.
-# review: new
 ui-eml-default-failed = Inbox Classic sa nepodarilo nastaviť ako predvolenú aplikáciu pre súbory .eml: { $reason }
-# review: new
 ui-folders = Priečinky
-# review: new
 ui-sorted-by = Zoradené podľa: { $field }
-# review: changed
 ui-layout-label = &Rozloženie:
-# review: new
 ui-columns-note = Okno je dosť široké na rozloženie so stĺpcami. Rozloženie môžete zmeniť v ponuke Zobraziť > Rozloženie.
-# review: new
 ui-row-unread = Neprečítaná
-# review: new
 ui-row-flagged = S príznakom
-# review: new
 ui-row-attachments = Obsahuje prílohy
-# review: new
 ui-row-encrypted = Šifrovaná
-# review: new
-ui-row-signed = Podpísaná
-# review: new
+ui-row-signed = Digitálne podpísaná
 ui-row-messages = { $count ->
     [one] { $count } správa
     [few] { $count } správy
    *[other] { $count } správ
 }
-# review: changed
 ui-list-pictures = &Zobrazovať obrázky odosielateľov v zozname správ
-# review: changed
-ui-list-pictures-note = Pri overených odosielateľoch zobrazuje logá značiek alebo obrázky z adresára, a ak obrázok nie je k dispozícii, iniciály. Logá sa sťahujú raz pre každú značku, nie pre každú správu.
-# review: new
+ui-list-pictures-note = V stĺpcovom rozložení zobrazuje logá značiek alebo obrázky z adresára, ak poskytovateľ potvrdí doménu odosielateľa. Inak zobrazuje iniciály. Logá sa uchovávajú v počítači a používajú opakovane; ich stiahnutie alebo obnovenie môže vyžadovať pripojenie na internet.
 ui-card-picture = Obrázok:
-# review: new
 ui-card-picture-choose = &Vybrať...
-# review: new
-ui-picture-not-picture = Tento súbor nie je obrázok PNG ani JPEG.
-# review: new
+ui-picture-not-picture = Tento súbor nie je platný obrázok PNG ani JPEG.
 ui-picture-too-large = Tento obrázok je príliš veľký. Vyberte obrázok s veľkosťou najviac 10 MB, so šírkou a výškou najviac 8000 pixelov.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Šifrovacie kľúče
-# review: new
-ui-keys-intro = Vaše kľúče podpisujú vaše správy a otvárajú poštu šifrovanú pre vás. Kľúče vašich kontaktov overujú ich podpisy a šifrujú poštu pre nich.
-# review: new
+ui-keys-intro = Vaše kľúče slúžia na digitálne podpisovanie správ a dešifrovanie pošty určenej pre vás. Kľúče kontaktov umožňujú kontrolovať ich digitálne podpisy a šifrovať správy pre nich.
 ui-keys-empty = Zatiaľ žiadne kľúče. Kliknutím na Nový kľúč si vytvoríte vlastný, alebo kliknutím na Importovať pridáte kľúč, ktorý už máte.
-# review: new
 ui-keys-col-name = Meno
-# review: new
 ui-keys-col-address = Adresa
-# review: new
 ui-keys-col-kind = Druh
-# review: new
 ui-keys-col-status = Stav
-# review: new
 ui-keys-kind-own = Váš kľúč
-# review: new
 ui-keys-kind-contact = Kontakt
-# review: new
-ui-keys-status-verified = { $status }, overený
-# review: new
+ui-keys-status-verified = { $status }; vlastník kľúča je overený
 ui-keys-new = &Nový kľúč...
-# review: new
 ui-keys-import = &Importovať...
-# review: new
 ui-keys-export = &Exportovať...
-# review: new
 ui-keys-backup = &Zálohovať...
-# review: new
-ui-keys-verify = &Overiť...
-# review: new
+ui-keys-verify = Ove&riť...
 ui-keys-new-title = Nový kľúč
-# review: new
 ui-keys-new-for = Vytvoriť kľúč pre:
-# review: new
 ui-keys-new-make = &Vytvoriť kľúč
-# review: new
 ui-keys-no-account = Najprv pridajte poštové konto: kľúč sa vytvára pre adresy konta.
-# review: new
 ui-keys-memory-only = Heslá sa uchovávajú iba v pamäti, preto súkromný kľúč vytvorený alebo importovaný teraz nebude možné použiť po zatvorení Inbox Classic.
-# review: new
 ui-keys-backup-offer = Váš nový kľúč je pripravený. Uložiť teraz jeho zálohu? Ak tento počítač stratíte alebo ho obnovíte do pôvodného stavu, kľúč možno získať späť iba zo zálohy.
-# review: new
 ui-keys-backup-now = &Uložiť zálohu...
-# review: new
 ui-keys-later = &Neskôr
-# review: new
 ui-keys-backup-title = Zálohovať kľúč
-# review: new
 ui-keys-backup-intro = Záloha je chránená prístupovou frázou. Súbor a prístupovú frázu uchovávajte na rôznych bezpečných miestach: na obnovenie kľúča potrebujete oboje.
-# review: new
 ui-keys-passphrase = &Prístupová fráza:
-# review: new
 ui-keys-passphrase-again = &Zadajte ju znova:
-# review: new
 ui-keys-passphrase-differ = Prístupové frázy sa nezhodujú.
-# review: new
 ui-keys-passphrase-short = Použite prístupovú frázu s aspoň 8 znakmi.
-# review: new
 ui-keys-backup-saved = Záloha bola uložená.
-# review: new
 ui-keys-import-title = Importovať kľúč
-# review: new
 ui-keys-import-passphrase = Tento súkromný kľúč je chránený prístupovou frázou. Zadajte ju, aby sa kľúč importoval:
-# review: new
 ui-keys-file-filter = Kľúče OpenPGP
-# review: new
-ui-keys-use-for = Použiť tento kľúč pre { $addresses }? Vaše správy z týchto adries sa ním budú podpisovať a pošta šifrovaná preň sa tu bude dať prečítať.
-# review: new
+ui-keys-use-for = Priradiť kľúče k adresám: { $addresses }? Budete ich môcť používať na digitálne podpisovanie správ z týchto adries a dešifrovanie pošty pre ne.
 ui-keys-use = &Použiť
-# review: new
 ui-keys-not-now = &Teraz nie
-# review: new
-ui-keys-remove-own = Odstrániť váš kľúč { $fingerprint }? Poštu šifrovanú preň už tu nebude možné prečítať, pokiaľ znova neimportujete jeho zálohu.
-# review: new
-ui-keys-remove-contact = Odstrániť kľúč kontaktu { $name }? Jeho podpisy nebude možné overiť a poštu preň nebude možné šifrovať, kým jeho kľúč znova nepridáte.
-# review: new
+ui-keys-remove-own = Odstrániť váš kľúč { $fingerprint }? Bez opätovného importu jeho zálohy ho nebudete môcť použiť na dešifrovanie pošty. Už dešifrované údaje sa tým neodstránia.
+ui-keys-remove-contact = Odstrániť kľúč kontaktu „{ $name }“? Kým ho znova nepridáte, nebude možné používať tento kľúč na kontrolu digitálnych podpisov ani na šifrovanie pošty.
 ui-key-properties-title = Vlastnosti kľúča
-# review: new
 ui-key-names = Mená:
-# review: new
 ui-key-fingerprint = Odtlačok:
-# review: new
 ui-key-status = Stav:
-# review: new
 ui-key-created = Vytvorený:
-# review: new
 ui-key-expires = Platnosť do:
-# review: new
 ui-key-never = Nikdy
-# review: new
 ui-key-algorithm = Algoritmus:
-# review: new
 ui-key-source = Zdroj:
-# review: new
 ui-key-addresses = Adresy:
-# review: new
-ui-key-address-verified = { $address } (overená)
-# review: new
-ui-key-address-not-verified = { $address } (neoverená)
-# review: new
+ui-key-address-verified = { $address } (vlastník kľúča je overený)
+ui-key-address-not-verified = { $address } (vlastník kľúča nie je overený)
 ui-verify-title = Overiť kľúč
-# review: new
-ui-verify-intro = Požiadajte kontakt { $name }, aby vám osobne alebo počas hovoru prečítal odtlačok svojho kľúča zo svojej aplikácie. Neporovnávajte ho s odtlačkom poslaným e-mailom: kto by mohol zmeniť kľúč, mohol by zmeniť aj ten.
-# review: new
+ui-verify-intro = Kontakt: { $name }. Požiadajte túto osobu, aby vám osobne alebo počas hovoru prečítala odtlačok kľúča zo svojej aplikácie. Neporovnávajte ho s odtlačkom poslaným e-mailom: kto mohol zmeniť kľúč, mohol zmeniť aj správu s odtlačkom.
 ui-verify-fingerprint = Odtlačok kľúča, ktorý máte:
-# review: new
 ui-verify-marks = { $count ->
-    [one] Ak sa zhodujú, kľúč sa označí ako kľúč tohto kontaktu pre { $addresses }. Ak táto adresa tomuto kontaktu nepatrí, kliknite na Líšia sa.
-   *[other] Ak sa zhodujú, kľúč sa označí ako kľúč tohto kontaktu pre { $addresses }. Ak niektorá z týchto adries tomuto kontaktu nepatrí, kliknite na Líšia sa.
+    [0] Tento kľúč neobsahuje e-mailové adresy. Overenie jeho vlastníka sa nedá uložiť.
+    [one] Ak sa odtlačky zhodujú, potvrdíte vlastníka kľúča pre adresu: { $addresses }. Ak táto adresa danej osobe nepatrí, kliknite na Líšia sa.
+   *[other] Ak sa odtlačky zhodujú, potvrdíte vlastníka kľúča pre adresy: { $addresses }. Ak niektorá z nich danej osobe nepatrí, kliknite na Líšia sa.
 }
-# review: new
 ui-verify-match = &Zhodujú sa
-# review: new
 ui-verify-differ = &Líšia sa
-# review: new
 ui-verify-differs = Kľúč, ktorý máte, nie je ten, ktorý má { $name }. Odstráňte ho a požiadajte o kľúč znova.
-# review: new
-ui-verify-unmark = Označiť ako &neoverený
-# review: new
+ui-verify-unmark = Zrušiť overe&nie vlastníka
 ui-account-security = Zabezpečenie
-# review: new
-ui-account-security-intro = S kľúčom môžete svoje správy podpisovať a ľudia vám môžu posielať šifrovanú poštu.
-# review: new
+ui-account-security-intro = S kľúčom môžete správy digitálne podpisovať a ostatní vám môžu posielať šifrovanú poštu.
 ui-account-key = &Kľúč pre toto konto:
-# review: new
 ui-account-key-none = Žiadny
-# review: new
 ui-account-key-new = &Nový kľúč...
-# review: new
 ui-account-autocrypt = &Posielať môj verejný kľúč s mojimi správami (Autocrypt)
-# review: new
 ui-contact-key = Šifrovací kľúč:
-# review: new
 ui-contact-key-none = Žiadny kľúč
-# review: new
 ui-contact-key-use-new = Použiť &nový kľúč
-# review: new
 ui-contact-key-keep = &Ponechať súčasný
 ui-recipient-keys-title = Kľúče príjemcov
 ui-recipient-col-recipient = Príjemca
@@ -1366,29 +727,16 @@ ui-compose-make-key = &Vytvoriť kľúč...
 ui-compose-show-keys = Šifrovacie &kľúče...
 ui-compose-encrypt-off = &Vypnúť šifrovanie
 ui-compose-keep-encrypted = &Ponechať šifrovanie
-# review: new
 ui-setup-export-title = Exportovať nastavenia a kontá
-# review: new
 ui-setup-import-title = Importovať nastavenia a kontá
-# review: new
-ui-setup-export-intro = Vyberte, čo chcete preniesť do iného počítača. Súbor neobsahuje žiadne správy: tam sa stiahnu znova.
-# review: new
+ui-setup-export-intro = Vyberte, čo chcete preniesť do iného počítača. Súbor neobsahuje správy. Na druhom počítači možno znova stiahnuť poštu uloženú na serveri; správy dostupné iba v tomto počítači sa neprenesú.
 ui-setup-use-passphrase = &Chrániť súbor prístupovou frázou
-# review: new
-ui-setup-passphrase-note = S prístupovou frázou je súbor šifrovaný a obsahuje aj vaše heslá, prihlásenia a súkromné kľúče. Bez nej si každé konto v druhom počítači vyžiada heslo.
-# review: new
+ui-setup-passphrase-note = Súbor chránený prístupovou frázou je šifrovaný a môže obsahovať dostupné uložené heslá, prihlasovacie údaje a súkromné kľúče z vybraných častí konfigurácie. Bez prístupovej frázy sa budete musieť na druhom počítači znova prihlásiť do kont, prípadne cez prehliadač.
 ui-setup-export-button = &Exportovať...
-# review: new
 ui-setup-file-filter = Nastavenia a kontá Inbox Classic
-# review: new
 ui-setup-ask-passphrase = Tento súbor je chránený prístupovou frázou. Zadajte ju, ak chcete vidieť, čo súbor obsahuje:
-# review: new
-ui-setup-import-intro = Vyberte, čo chcete importovať. Kontá, ktoré už v tomto počítači sú, zostanú tak, ako sú.
-# review: new
+ui-setup-import-intro = Vyberte, čo chcete importovať. Existujúce kontá v tomto počítači zostanú nezmenené.
 ui-setup-from = Uložil Inbox Classic { $version } dňa { $date }.
-# review: new
 ui-setup-import-button = &Importovať
-# review: new
 ui-setup-done = Hotovo
-# review: new
 ui-setup-first-run = Importovať nastavenia a kontá z iného počítača...

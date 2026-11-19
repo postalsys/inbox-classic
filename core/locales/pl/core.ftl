@@ -49,8 +49,8 @@ reader-downloading = Pobieranie wiadomości…
 reader-downloading-detail = Wiadomość pojawi się tutaj po zakończeniu pobierania.
 reader-downloading-size = Rozmiar wiadomości: { $size }. Pojawi się tutaj po pobraniu.
 reader-failed = Nie udało się pobrać wiadomości
-reader-failed-network = Nie można połączyć się z serwerem poczty ({ $reason }).
-reader-failed-sign-in = Serwer poczty nie zaakceptował logowania ({ $reason }). Sprawdź hasło lub zaloguj się ponownie w menu Plik > Konta.
+reader-failed-network = Nie udało się połączyć z serwerem poczty lub połączenie zostało przerwane ({ $reason }).
+reader-failed-sign-in = Serwer poczty nie zaakceptował logowania ({ $reason }). Sprawdź hasło lub zaloguj się ponownie w ustawieniach konta.
 reader-failed-security = Nie udało się zabezpieczyć połączenia z serwerem poczty ({ $reason }).
 reader-failed-other = Serwer poczty odpowiedział: { $reason }.
 reader-retry-note = Program spróbuje ponownie po nawiązaniu połączenia z kontem.
@@ -110,12 +110,12 @@ bounce-mailbox-disabled-why = Adres istnieje, ale jego skrzynka została wyłąc
 bounce-mailbox-disabled-do = Skontaktuj się z tą osobą w inny sposób i zapytaj o adres, którego teraz używa.
 bounce-mailbox-full = Skrzynka jest pełna
 bounce-mailbox-full-why = W skrzynce odbiorcy nie ma miejsca na nową pocztę.
-bounce-mailbox-full-do = Wyślij ją ponownie za kilka dni albo daj znać tej osobie w inny sposób. Duże załączniki są odrzucane w pierwszej kolejności.
+bounce-mailbox-full-do = Wyślij ją ponownie za kilka dni albo daj znać tej osobie w inny sposób.
 bounce-spam-blocked = Odrzucona jako spam
 bounce-spam-blocked-why = Serwer odbiorcy uznał wiadomość za spam.
 bounce-spam-blocked-do = Wyślij ją ponownie bez tego, co wygląda na spam, na przykład wielu linków, skróconych linków czy dużego załącznika. Jeśli to się powtarza, zapytaj swojego dostawcę poczty.
 bounce-virus-detected = Odrzucona z powodu wirusa
-bounce-virus-detected-why = Serwer odbiorcy znalazł wirusa lub inną szkodliwą zawartość w wiadomości albo w jej załącznikach.
+bounce-virus-detected-why = Serwer odbiorcy zgłosił wirusa lub inną szkodliwą zawartość w wiadomości albo w jej załącznikach.
 bounce-virus-detected-do = Sprawdź załączniki programem antywirusowym. Niektóre serwery odrzucają wszystkie programy i archiwa, więc takie pliki udostępnij jako link.
 bounce-ip-blocklisted = Twój serwer poczty jest na czarnej liście
 bounce-ip-blocklisted-why = Serwer odbiorcy odrzuca pocztę z serwera, który wysłał Twoją wiadomość, bo adres tego serwera jest na czarnej liście.
@@ -131,7 +131,7 @@ bounce-geo-blocked-why = Serwer odbiorcy blokuje pocztę z kraju, w którym znaj
 bounce-geo-blocked-do = Skontaktuj się z tą osobą w inny sposób albo zapytaj o to swojego dostawcę poczty.
 bounce-relay-denied = Serwer nie przekazał jej dalej
 bounce-relay-denied-why = Serwer odmówił przekazania wiadomości dalej, często dlatego, że wysłano ją bez logowania albo przez serwer, który nie obsługuje tego odbiorcy.
-bounce-relay-denied-do = Sprawdź serwer poczty wychodzącej konta w menu Plik > Konta oraz to, czy się na nim loguje.
+bounce-relay-denied-do = W ustawieniach konta sprawdź serwer poczty wychodzącej i wymagane dane logowania.
 bounce-auth-failure = Nie udało się zweryfikować Twojego adresu nadawcy
 bounce-auth-failure-why = Serwer odbiorcy nie mógł potwierdzić, że wiadomość naprawdę pochodzi z Twojej domeny (SPF, DKIM lub DMARC).
 bounce-auth-failure-do = Prześlij to powiadomienie osobie, która obsługuje pocztę Twojej domeny: jej ustawienia trzeba poprawić. Do tego czasu może pomóc wysyłanie przez serwer Twojego dostawcy.
@@ -140,7 +140,7 @@ bounce-rate-limited-why = Serwer odbiorcy przyjmuje na razie mniej wiadomości z
 bounce-rate-limited-do = Odczekaj chwilę i wyślij ją ponownie. Pisząc do wielu osób, wysyłaj do mniejszej liczby naraz.
 bounce-greylisting = Wstrzymana na chwilę
 bounce-greylisting-why = Serwer odbiorcy prosi nieznanych nadawców o ponowną próbę nieco później. To częsty sposób ochrony przed spamem.
-bounce-greylisting-do = Nie musisz nic robić. Serwery poczty same próbują ponownie i wiadomość zwykle dociera w ciągu godziny.
+bounce-greylisting-do = Jeśli raport dotyczy opóźnienia, serwer może ponowić próbę wysłania. Jeśli zgłasza ostateczne niepowodzenie, spróbuj wysłać wiadomość ponownie później.
 bounce-server-error = Serwer odbiorcy miał problem
 bounce-server-error-why = Nie można było połączyć się z serwerem odbiorcy albo nie mógł on przyjąć wiadomości z powodu własnego problemu.
 bounce-server-error-do = Wyślij ją ponownie później. Jeśli nadal się nie uda, sprawdź, czy w części adresu po znaku @ nie ma literówek.
@@ -331,7 +331,7 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Umieszczono 3 wiadomości w folderze Archiwum"
 import-put = { $count ->
-   *[other] Umieszczono { $messages } w folderze { $folder }
+   *[other] Zlecono import. Wiadomości: { $messages }. Folder docelowy: { $folder }
 }
 import-not-put = Tych plików nie umieszczono w folderze:
 
@@ -344,7 +344,7 @@ error-not-found = nie znaleziono
 error-closed = trwa zamykanie
 error-other-account = przeglądarka zalogowała się na konto { $email }, a nie na to konto
 failure-authentication = serwer nie zaakceptował logowania ({ $reason })
-failure-network = połączenie z serwerem nie powiodło się ({ $reason })
+failure-network = nie udało się połączyć z serwerem lub połączenie zostało przerwane ({ $reason })
 error-in-use = nie można usunąć aplikacji, ponieważ jest używana do logowania na kontach: { $accounts }
 error-turned-off = ta aplikacja logowania jest wyłączona dla nowych kont
 error-folder-name = nazwa folderu musi mieć od 1 do 200 znaków i nie może zawierać znaków sterujących
@@ -367,10 +367,10 @@ error-import-not-mail = plik { $path } nie jest wiadomością e-mail
 error-list-answered = serwer listy mailingowej zwrócił kod odpowiedzi { $status }
 error-not-built = nie udało się utworzyć wiadomości
 error-outbox-waits = { $count ->
-    [one] wiadomość czeka w Skrzynce nadawczej i zostanie wysłana przy następnym wysyłaniu/odbieraniu
-    [few] { $count } wiadomości czekają w Skrzynce nadawczej i zostaną wysłane przy następnym wysyłaniu/odbieraniu
-    [many] { $count } wiadomości czeka w Skrzynce nadawczej i zostanie wysłanych przy następnym wysyłaniu/odbieraniu
-   *[other] { $count } wiadomości czeka w Skrzynce nadawczej i zostanie wysłanych przy następnym wysyłaniu/odbieraniu
+    [one] wiadomość czeka w Skrzynce nadawczej; przy następnym wysyłaniu/odbieraniu program ponowi próbę jej wysłania
+    [few] { $count } wiadomości czekają w Skrzynce nadawczej; przy następnym wysyłaniu/odbieraniu program ponowi próbę ich wysłania
+    [many] { $count } wiadomości czeka w Skrzynce nadawczej; przy następnym wysyłaniu/odbieraniu program ponowi próbę ich wysłania
+   *[other] { $count } wiadomości czeka w Skrzynce nadawczej; przy następnym wysyłaniu/odbieraniu program ponowi próbę ich wysłania
 }
 error-draft-not-removed = nie udało się usunąć wcześniejszej wersji roboczej wiadomości z folderu Wersje robocze: { $reason }
 error-sent-but = wiadomość została wysłana, ale { $problem }
@@ -378,19 +378,19 @@ error-sent-still-in-outbox = nadal jest w Skrzynce nadawczej: { $error }
 error-sent-no-copy = nie udało się zapisać kopii w folderze Elementy wysłane: { $reason }
 error-no-password = brak hasła dla tego konta
 error-no-sign-in = brak danych logowania dla tego konta
-error-provider-missing = ta wersja nie może logować się do usługi { $provider }: czy jej aplikacja logowania została usunięta?
+error-provider-missing = ta wersja nie może użyć zapisanej konfiguracji logowania ({ $provider }). Sprawdź, czy jej aplikacja logowania nie została usunięta
 error-provider-servers = serwery tego konta nie zgadzają się z serwerami jego aplikacji logowania
 error-app-scopes = { $reason }. Serwer poczty nie przyjął tokenu aplikacji logowania: sprawdź, czy zakresy uprawnień aplikacji dają dostęp do poczty
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google nie zweryfikował jeszcze Inbox Classic, więc pozwala logować się przez ten program tylko użytkownikom testowym. Użyj własnej aplikacji logowania Google lub hasła aplikacji albo, jeśli jesteś użytkownikiem testowym, włącz ją w oknie Aplikacje logowania (Plik > Konta).
-sign-in-off-other = Została wyłączona w oknie Aplikacje logowania (Plik > Konta), gdzie można ją ponownie włączyć.
+sign-in-off-google = Wbudowana aplikacja logowania Google jest wyłączona. Możesz użyć własnej aplikacji logowania Google lub hasła aplikacji, jeśli konto je obsługuje. Jeśli jesteś użytkownikiem testowym wbudowanej aplikacji, włącz ją w oknie Aplikacje logowania dostępnym z ustawień kont.
+sign-in-off-other = Ta opcja została wyłączona w oknie Aplikacje logowania, dostępnym z ustawień kont. Można ją tam ponownie włączyć.
 sign-in-app-no-name = aplikacja logowania musi mieć nazwę
 sign-in-app-no-client = brak identyfikatora klienta
 sign-in-app-no-scopes = aplikacja logowania potrzebuje zakresów uprawnień, które dają dostęp do poczty
-sign-in-app-bad-host = brak adresu serwera { $server } lub nie jest to prawidłowa nazwa hosta
+sign-in-app-bad-host = konfiguracja serwera { $server } jest nieprawidłowa: sprawdź nazwę hosta i port
 sign-in-app-plain = serwer { $server } musi używać SSL/TLS lub STARTTLS
 sign-in-app-not-checked = wystawca nie został jeszcze sprawdzony
 sign-in-app-issuer-changed = wystawca się zmienił: wpisz ponownie klucz tajny klienta albo go usuń
@@ -446,7 +446,7 @@ day-sunday = niedziela
 
 ## AI agents
 
-agent-level-read = Czytanie poczty: przeglądanie folderów, wiadomości i konwersacji, wyszukiwanie wiadomości i kontaktów oraz przeglądanie reguł wiadomości
+agent-level-read = Czytanie poczty: przeglądanie folderów, list wiadomości, konwersacji, treści i załączników, wyszukiwanie wiadomości i kontaktów oraz przeglądanie reguł wiadomości
 agent-level-organize = Porządkowanie poczty: oznaczanie wiadomości jako przeczytane lub nieprzeczytane, zmiana flag, ich kolorów i oznaczeń śmieci, przenoszenie i archiwizowanie wiadomości, tworzenie folderów i zmiana ich nazw, obserwowanie i ignorowanie konwersacji, usuwanie wiadomości przez przeniesienie do folderu Elementy usunięte oraz wypisywanie z list mailingowych za Twoją zgodą
 agent-level-drafts = Pisanie wersji roboczych, które możesz wysłać
 agent-level-send = Wysyłanie poczty, każdej wiadomości dopiero po Twojej zgodzie
@@ -501,7 +501,7 @@ agent-log-refused = Odrzucono prośbę o wysłanie wiadomości „{ $subject }�
 agent-log-sent = Dodano wiadomość „{ $subject }” do kolejki wysyłania. Odbiorcy: { $to }
 agent-log-draft = Zapisano wersję roboczą „{ $subject }”
 agent-log-draft-replaced = Zastąpiono wersję roboczą „{ $subject }”
-agent-log-draft-discarded = Usunięto wersję roboczą „{ $subject }”
+agent-log-draft-discarded = Zlecono trwałe usunięcie wersji roboczej „{ $subject }”
 agent-draft-note = Tę wersję roboczą napisał agent AI { $program }. Sprawdź odbiorców i tekst, zanim ją wyślesz.
 agent-log-read = Oznaczono jako przeczytaną „{ $subject }”
 agent-log-unread = Oznaczono jako nieprzeczytaną „{ $subject }”
@@ -512,7 +512,7 @@ agent-log-moved = Przeniesiono „{ $subject }” (cel: { $folder })
 agent-log-junk = Oznaczono wiadomość „{ $subject }” jako śmieci
 agent-log-not-junk = Usunięto oznaczenie „śmieci” z wiadomości „{ $subject }”
 agent-log-archived = Zarchiwizowano „{ $subject }”
-agent-log-folder = Utworzono folder „{ $name }”
+agent-log-folder = Zlecono utworzenie folderu „{ $name }”
 agent-log-unsubscribed = Zatwierdzono prośbę o wypisanie z listy mailingowej. Wiadomość: „{ $subject }”
 agent-log-unsubscribe-failed = Nie udało się wypisać z listy mailingowej. Wiadomość: „{ $subject }”. Powód: { $reason }
 agent-log-unsubscribe-refused = Odrzucono prośbę o wypisanie z list mailingowych. Nadawcy: { $senders }
@@ -535,7 +535,7 @@ agent-log-flag-color = Oznaczono wiadomość „{ $subject }” flagą { $color 
     [purple] fioletową
    *[gray] szarą
 }
-agent-log-renamed = Zmieniono nazwę folderu „{ $old }” na „{ $name }”
+agent-log-renamed = Zlecono zmianę nazwy folderu „{ $old }” na „{ $name }”
 agent-log-watched = Zaczęto obserwować konwersację „{ $subject }”
 agent-log-ignored = Zaczęto ignorować konwersację „{ $subject }”
 agent-log-unmarked = Przestano obserwować lub ignorować konwersację „{ $subject }”
@@ -627,7 +627,7 @@ agent-undo-since-question = { $count ->
     [many] Cofnąć { $count } zmian wprowadzonych w tym czasie przez program { $program }?
    *[other] Cofnąć { $count } zmian wprowadzonych w tym czasie przez program { $program }?
 }
-agent-undo-since-detail = Wiadomości wrócą do folderów, z których pochodzą, stan przeczytania i flagi wrócą do poprzedniego stanu, a wiadomości nadal czekające w Skrzynce nadawczej zostaną usunięte. Późniejsze zmiany wprowadzone przez Ciebie lub na serwerze pozostaną bez zmian.
+agent-undo-since-detail = Program spróbuje przywrócić poprzednie foldery, stan przeczytania i flagi oraz usunąć wiadomości nadal czekające w Skrzynce nadawczej. Cofanie zależy od bieżącego stanu wiadomości i może udać się tylko częściowo. Usunięcie flagi może też usunąć jej później zmieniony kolor.
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Niczego nie cofnięto.
@@ -665,7 +665,7 @@ agent-invitation-reply = { $response ->
     [accept] Ta wiadomość zawiera potwierdzenie udziału w wydarzeniu „{ $summary }” ({ $when }).
     [tentative] Ta wiadomość zawiera wstępne potwierdzenie udziału w wydarzeniu „{ $summary }” ({ $when }).
    *[decline] Ta wiadomość zawiera odmowę udziału w wydarzeniu „{ $summary }” ({ $when }).
-} Kalendarz organizatora uwzględni tę odpowiedź. Twoja odpowiedź na zaproszenie zmieni się dopiero po wysłaniu wiadomości.
+} Odpowiedź zostanie wysłana do organizatora w formacie obsługiwanym przez kalendarze. Status zaproszenia w Inbox Classic zmieni się dopiero po wysłaniu wiadomości; nie potwierdza to jej przetworzenia przez kalendarz organizatora.
 # the subject of an answer to an invitation, as calendar programs write it
 invitation-reply-subject = { $response ->
     [accept] Zaakceptowano: { $summary }
@@ -686,10 +686,10 @@ agent-reads-messages = { $count ->
    *[other] przeczytano { $count } wiadomości
 }
 agent-reads-attachments = { $count ->
-    [one] otwarto 1 załącznik
-    [few] otwarto { $count } załączniki
-    [many] otwarto { $count } załączników
-   *[other] otwarto { $count } załączników
+    [one] odczytano zawartość 1 załącznika
+    [few] odczytano zawartość { $count } załączników
+    [many] odczytano zawartość { $count } załączników
+   *[other] odczytano zawartość { $count } załączników
 }
 agent-reads-searches = { $count ->
     [one] wyszukiwano raz
@@ -711,7 +711,7 @@ agent-read-conversation = { $count ->
     [many] Przeczytano konwersację „{ $subject }” ({ $count } wiadomości)
    *[other] Przeczytano konwersację „{ $subject }” ({ $count } wiadomości)
 }
-agent-read-attachment = Otwarto załącznik „{ $name }” z wiadomości „{ $subject }”
+agent-read-attachment = Odczytano zawartość załącznika „{ $name }” z wiadomości „{ $subject }”
 agent-read-search = { $count ->
     [one] Wyszukano „{ $query }”: 1 wiadomość
     [few] Wyszukano „{ $query }”: { $count } wiadomości
@@ -720,16 +720,16 @@ agent-read-search = { $count ->
 }
 agent-read-people = Wyszukano kontakty według początku nazwy lub adresu: „{ $query }”
 agent-read-list = { $count ->
-    [one] Wyświetlono listę wiadomości w folderze „{ $folder }” (1 wiadomość)
-    [few] Wyświetlono listę wiadomości w folderze „{ $folder }” ({ $count } wiadomości)
-    [many] Wyświetlono listę wiadomości w folderze „{ $folder }” ({ $count } wiadomości)
-   *[other] Wyświetlono listę wiadomości w folderze „{ $folder }” ({ $count } wiadomości)
+    [one] Odczytano 1 pozycję listy: { $folder }
+    [few] Odczytano pozycje listy „{ $folder }”: { $count }
+    [many] Odczytano pozycje listy „{ $folder }”: { $count }
+   *[other] Odczytano pozycje listy „{ $folder }”: { $count }
 }
 agent-read-changes = { $count ->
-    [one] Przejrzano 1 nową wiadomość
-    [few] Przejrzano { $count } nowe wiadomości
-    [many] Przejrzano { $count } nowych wiadomości
-   *[other] Przejrzano { $count } nowych wiadomości
+    [one] Odczytano dane 1 nowej wiadomości
+    [few] Odczytano dane { $count } nowych wiadomości
+    [many] Odczytano dane { $count } nowych wiadomości
+   *[other] Odczytano dane { $count } nowych wiadomości
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programy uruchomione z aplikacji { $terminal }
@@ -787,7 +787,7 @@ event-attendees =
     }
 
 # the first line of a new message's notification when it has a code, for a domain that signed it
-otp-notification = { $code } to Twój kod logowania w domenie { $domain }
+otp-notification = { $code } to Twój kod dla domeny { $domain }
 
 ## OpenPGP keys (keys.rs)
 
@@ -797,7 +797,7 @@ pgp-key-expired = Wygasł { $date }
 pgp-key-revoked = Unieważniony
 pgp-key-revoked-why = Unieważniony: { $reason }
 pgp-key-not-valid = Nieważny
-pgp-key-locked = Nie można go użyć: { $store } nie przechowuje już klucza, który go chroni. Zaimportuj ponownie jego kopię zapasową.
+pgp-key-locked = Nie można otworzyć części prywatnej klucza. Sprawdź dostęp do magazynu danych logowania: { $store }. Jeśli klucza chroniącego te dane rzeczywiście brakuje, zaimportuj ponownie kopię zapasową klucza prywatnego.
 pgp-source-own = Utworzony w Inbox Classic
 pgp-source-file = Zaimportowany z pliku
 pgp-source-paste = Wklejony
@@ -810,7 +810,7 @@ pgp-error-no-store = Klucze prywatne są chronione przez { $store }, którego ni
 pgp-error-wrong-passphrase = Hasło jest nieprawidłowe.
 pgp-error-not-a-key = To nie jest klucz OpenPGP.
 pgp-error-too-large = Klucz jest za duży.
-pgp-error-unusable = Klucz używa przestarzałej lub słabej kryptografii i nie można go użyć.
+pgp-error-unusable = Klucz nie nadaje się do wymaganej operacji podpisywania lub szyfrowania. Może nie zawierać odpowiedniego klucza podrzędnego albo używać nieobsługiwanej kryptografii.
 pgp-imported-private = { $count ->
     [one] Zaimportowano Twój klucz prywatny.
     [few] Zaimportowano { $count } klucze prywatne.
@@ -834,7 +834,7 @@ pgp-pending = { $date } znaleziono inny klucz dla { $address }.
 
 pgp-part-verified = Poprawny podpis cyfrowy: { $signer }; potwierdzono właściciela klucza
 pgp-part-signed = Poprawny podpis cyfrowy: { $signer } (nie potwierdzono właściciela klucza)
-pgp-part-other = Podpis cyfrowy: { $signer } (inna osoba niż nadawca)
+pgp-part-other = Poprawny podpis cyfrowy: { $signer }; nie potwierdza zgodności z nadawcą wiadomości
 pgp-part-unknown-key = Podpis cyfrowy niesprawdzony: nieznany klucz
 pgp-part-not-signed = Bez podpisu cyfrowego
 pgp-part-not-checked = Nie sprawdzono podpisu cyfrowego
@@ -892,7 +892,7 @@ pgp-compose-key-unusable =
 
     Powód: { $state }
 
-    Otwórz okno „Klucze szyfrowania” i zaimportuj kopię zapasową tego klucza albo utwórz nowy klucz.
+    Otwórz okno „Klucze szyfrowania” i sprawdź przyczynę. Jeśli nie da się przywrócić dostępu do klucza, zaimportuj jego kopię zapasową albo utwórz nowy klucz.
 pgp-compose-encrypt-off-quote = Wiadomość zawiera tekst, obrazy lub załączniki pochodzące z zaszyfrowanej wiadomości. Można ją wysłać bez szyfrowania dopiero po usunięciu tej zawartości. Mimo to wyłączyć szyfrowanie?
 pgp-compose-encrypt-off-reply = Odpowiadasz na zaszyfrowaną wiadomość lub przesyłasz ją dalej. Bez szyfrowania treść Twojej wiadomości mogą odczytać także serwery, przez które jest przesyłana. Wyłączyć szyfrowanie?
 pgp-recipient-verified = Potwierdzono właściciela klucza
@@ -1021,17 +1021,17 @@ setup-account-signs-in-again = Po imporcie zalogujesz się do niego ponownie.
 setup-account-here = Jest już tutaj skonfigurowane, więc zostanie pominięte.
 setup-account-no-app = Konto korzysta z aplikacji logowania „{ $app }”, której tutaj nie ma. Zaimportuj także aplikacje logowania.
 setup-invalid-address = „{ $address }” nie jest adresem e-mail.
-setup-invalid-server = Nazwa lub port serwera { $server } są nieprawidłowe albo nie zostały podane.
+setup-invalid-server = Nazwa, port lub ustawienie zabezpieczeń serwera { $server } są nieprawidłowe albo nie zostały podane.
 setup-invalid-user = Nie ma nazwy użytkownika.
-setup-invalid-sign-in = To konto używa metody logowania nieobsługiwanej przez Inbox Classic.
+setup-invalid-sign-in = Konfiguracja logowania tego konta jest nieprawidłowa lub nieobsługiwana przez Inbox Classic.
 setup-error-empty = Plik jest pusty.
-setup-error-too-large = Plik jest za duży, aby był konfiguracją Inbox Classic.
+setup-error-too-large = Plik przekracza dopuszczalny rozmiar konfiguracji Inbox Classic.
 setup-error-not-setup = Ten plik nie jest konfiguracją Inbox Classic.
 setup-error-damaged = Plik konfiguracji jest uszkodzony i nie można go odczytać.
 setup-error-newer = Tę konfigurację zapisała nowsza wersja Inbox Classic ({ $version }). Zaktualizuj Inbox Classic i zaimportuj ją ponownie.
 setup-error-needs-passphrase = Ten plik konfiguracji jest zabezpieczony hasłem. Wpisz hasło użyte przy jego zapisywaniu.
 setup-error-wrong-passphrase = To hasło nie pasuje do pliku konfiguracji.
-setup-error-changed = Plik konfiguracji został zmieniony lub uszkodzony po zapisaniu, więc nie można go zaimportować.
+setup-error-changed = Nie można potwierdzić integralności pliku konfiguracji. Mógł zostać zmieniony lub uszkodzony, więc nie można go zaimportować.
 setup-error-read = Nie udało się odczytać pliku konfiguracji: { $error }
 setup-error-write = Nie udało się zapisać konfiguracji: { $error }
 setup-error-no-parts = Wybierz co najmniej jedną część.
@@ -1115,10 +1115,10 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } reguł wiadomości dotyczy kont, których tu nie ma, więc zostały pominięte.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 reguła wiadomości przenosi wiadomości do folderu, który pojawi się po synchronizacji jego konta.
-    [few] { $count } reguły wiadomości przenoszą wiadomości do folderów, które pojawią się po synchronizacji ich kont.
-    [many] { $count } reguł wiadomości przenosi wiadomości do folderów, które pojawią się po synchronizacji ich kont.
-   *[other] { $count } reguł wiadomości przenosi wiadomości do folderów, które pojawią się po synchronizacji ich kont.
+    [one] 1 reguła wiadomości oczekuje na odnalezienie folderu docelowego podczas synchronizacji konta.
+    [few] { $count } reguły wiadomości oczekują na odnalezienie folderów docelowych podczas synchronizacji kont.
+    [many] { $count } reguł wiadomości oczekuje na odnalezienie folderów docelowych podczas synchronizacji kont.
+   *[other] { $count } reguł wiadomości oczekuje na odnalezienie folderów docelowych podczas synchronizacji kont.
 }
 setup-added-trusted-senders = { $count ->
     [one] Dodano 1 zaufanego nadawcę.
@@ -1129,7 +1129,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Nic nie zostało zaimportowane.
 setup-account-servers = { $imap } i { $smtp } ({ $signin })
 setup-file-name = Ustawienia i konta Inbox Classic
-setup-skipped-unreachable = Pominięto: { $name }. Nie udało się połączyć z usługą logowania. Dodaj aplikację ponownie w oknie Aplikacje logowania.
+setup-skipped-unreachable = Pominięto: { $name }. Nie udało się sprawdzić konfiguracji usługi logowania. Dodaj ponownie potrzebną aplikację w oknie Aplikacje logowania.
 attachment-runs-programs = Plik „{ $name }” może uruchamiać programy, więc Inbox Classic go nie otwiera. Zapisz go, a potem otwórz samodzielnie, jeśli ufasz jego źródłu.
 attachment-decrypted-note = Ten załącznik pochodzi z zaszyfrowanej wiadomości. Aby otworzyć go w innym programie, Inbox Classic zapisuje jego niezaszyfrowaną kopię w folderze tymczasowym przeznaczonym dla Ciebie. Przy uruchamianiu programu kopie starsze niż jeden dzień są usuwane.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1198,9 +1198,9 @@ preview-tile-downloading = Pobieranie…
 preview-tile-preparing = Przygotowywanie…
 preview-tile-format = Obrazy { $format } nie są jeszcze pokazywane
 preview-tile-password = Plik jest zabezpieczony hasłem. Otwórz go, aby wpisać hasło
-preview-tile-too-large = Za duży do wyświetlenia
+preview-tile-too-large = Przekroczono limit rozmiaru podglądów
 preview-tile-unreadable = Nie można wyświetlić
 preview-tile-timed-out = Przekroczono czas wyświetlania podglądu
-preview-tile-crashed = Podgląd niedostępny: Inbox Classic zamknął się wcześniej podczas wyświetlania tego pliku
+preview-tile-crashed = Podgląd niedostępny: poprzednia próba wyświetlenia tego pliku nie została zakończona
 preview-tile-off = Podgląd wyłączony do ponownego uruchomienia Inbox Classic
 preview-not-printed = Plik { $name } ({ $details }) nie jest uwzględniany na wydruku. Otwórz go, aby go wydrukować.

@@ -1,14 +1,14 @@
-<!--review--><h1>Povezave, ki jih vzpostavlja Inbox Classic</h1>
-<p class="summary">Kam se Inbox Classic povezuje in zakaj, za tehnično radovedne.</p>
+<h1>Povezave, ki jih vzpostavlja Inbox Classic</h1>
+<p class="summary">Pregled omrežnih povezav in njihovega namena.</p>
 <ul>
     <li><b>Vaši poštni strežniki</b>, prek IMAP za branje pošte in SMTP za pošiljanje. Povezave so šifrirane s TLS, potrdilo vsakega strežnika pa se preveri glede na potrdila, ki jim zaupa vaš sistem. Inbox Classic zavrne strežnik brez šifriranja, razen če izberete <b data-text="ui-security-none"></b> in to potrdite.</li>
-    <li><b>Ko dodate račun</b>, da poišče njegove strežnike. Inbox Classic bere zapise DNS vaše domene prek DNS over HTTPS (Cloudflare, nato Google), nikoli prek navadnega DNS. Poskusi tudi datoteko autoconfig vašega ponudnika in Thunderbirdov seznam ponudnikov (ISPDB). Za Exchange vpraša Microsoft Autodiscover, ki dobi vaše geslo samo, ko ga zahteva prek HTTPS. Strežnik brez šifriranja ni nikoli izbran.</li>
+    <li><b>Dodajanje računa</b>: program poišče poštne strežnike ponudnika. Za iskanje poštnih strežnikov program poizveduje po zapisih MX in SRV prek DNS over HTTPS, najprej pri Cloudflaru, nato pri Googlu. Običajno razreševanje imen pri povezovanju še vedno uporablja sistemski DNS. Preveri lahko tudi ponudnikovo datoteko autoconfig in Thunderbirdov seznam ponudnikov (ISPDB). Pri iskanju nastavitev lahko ponudniku pošlje vaš e-poštni naslov. Za Exchange vpraša Microsoft Autodiscover, ki lahko geslo prejme v prijavi HTTP Basic, vendar le prek HTTPS. Samodejno iskanje ne izbere nešifrirane povezave.</li>
     <li><b>Prijava v brskalniku</b>, z OAuth 2.0 in PKCE, pri Googlu, Microsoftu ali ponudniku vaše aplikacije za prijavo. Brskalnik se vrne samo v Inbox Classic v tem računalniku.</li>
-    <li><b>Logotipi blagovnih znamk</b> (BIMI), z naslova HTTPS blagovne znamke, kadar sporočilo logotipa ne prinese, enkrat ob vsakem zagonu programa Inbox Classic. To se zgodi samo, kadar je sporočilo pri vašem poštnem strežniku prestalo preverjanje DMARC in je strežnik logotip odobril.</li>
-    <li><b>Slike z interneta</b>, samo kadar jih zahtevate.</li>
-    <li><b>Odjava</b>, samo kadar jo kliknete. Zahteva z enim klikom (RFC 8058) se pošlje samo, kadar je seznam sporočilo podpisal z DKIM.</li>
-    <li><b>Šifrirni ključi</b>, samo kadar šifrirate nekomu, čigar ključa nimate: najprej lastna domena njegovega naslova (Web Key Directory), nato keys.openpgp.org, razen če ste to izklopili. Pošlje se samo naslov.</li>
-    <!--os:mac--><li><b>Posodobitve</b>, s strani inboxclassic.com, da preveri, ali je na voljo nova različica.</li><!--/os-->
+    <li><b>Logotipi blagovnih znamk</b> (BIMI), z naslova HTTPS blagovne znamke, če logotipa ni v sporočilu ali trajnem predpomnilniku oziroma je predpomnjena kopija zastarela. To zahteva uspešno preverjanje DMARC in odobritev logotipa pri poštnem strežniku. Kopija je praviloma sveža 30 dni; neuspešen prenos se lahko ponovi po dnevu. Strežnik ob zahtevi vidi naslov IP in čas.</li>
+    <li><b>Slike z interneta</b>, ko jih izrecno dovolite ali dovoljujejo nastavitve zaupanja in samodejnega prenosa. V šifriranih delih morate prenos vedno izrecno dovoliti.</li>
+    <li><b>Odjava</b>, po vaši potrditvi, tudi če jo predlaga agent. Neposredna zahteva (RFC 8058) zahteva potrjen podpis DKIM, ki zajema podatke za odjavo.</li>
+    <li><b>Šifrirni ključi</b>, pri iskanju manjkajočega ključa za šifriranje: najprej domena naslova (Web Key Directory), nato keys.openpgp.org, če je omogočen. Iščete lahko tudi ročno ali poiščete ključ za preverjanje podpisa. Glede na iskanje se pošlje naslov ali identifikator ključa, ne vsebina sporočila. Izrecna objava javnega ključa pošlje ključ in zahteva potrditev za vsak izbrani naslov.</li>
+    <!--os:mac--><li><b>Posodobitve</b>, s strani inboxclassic.com ob ročnem preverjanju ali če je omogočeno samodejno preverjanje.</li><!--/os-->
 </ul>
 <p>Kode za prijavo so ponujene samo, kadar glava Authentication-Results vašega ponudnika pove, da je domena podpisala sporočilo (DKIM). Za to ni potrebna nobena posebna povezava.</p>
-<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>

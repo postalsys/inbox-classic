@@ -1,20 +1,20 @@
-<!--review--><h1>Šifrirana in podpisana pošta</h1>
+<h1>Šifrirana in podpisana pošta</h1>
 <p class="summary">Vrstica nad sporočilom pove, ali ga je podpisal pošiljatelj in ali je bilo šifrirano za vas.</p>
-<p>Podpisano sporočilo dokazuje, kdo ga je napisal in da ga med potjo nihče ni spremenil. Šifrirano sporočilo je mogoče prebrati samo z vašim ključem.</p>
+<p>Veljaven digitalni podpis potrdi, da se podpisana vsebina ni spremenila. Identiteto lastnika ključa morate preveriti posebej. Za dešifriranje potrebujete ustrezen zasebni ključ.</p>
 <p>Vrstica nad sporočilom velja za sporočilo kot celoto:</p>
 <table>
     <tr><th>Barva</th><th>Pomen</th></tr>
-    <tr><td>Zelena</td><td>Podpisal pošiljatelj s ključem, ki ste ga preverili.</td></tr>
-    <tr><td>Modra</td><td>Podpisal pošiljatelj s ključem, ki ga niste preverili, ali šifrirano za vas.</td></tr>
+    <tr><td>Zelena</td><td>Veljaven podpis pošiljatelja s ključem, katerega lastnika ste potrdili.</td></tr>
+    <tr><td>Modra</td><td>Veljaven podpis pošiljatelja s ključem, katerega lastnika še niste potrdili, ali sporočilo, šifrirano za vas.</td></tr>
     <tr><td>Jantarna</td><td>Nekaj ni v redu: podpis se ne ujema, podpisal je nekdo drug kot pošiljatelj ali dela ni bilo mogoče prebrati.</td></tr>
-    <tr><td>Siva</td><td>Ni podpisano ali podpisano s ključem, ki ga nimate.</td></tr>
+    <tr><td>Siva</td><td>Sporočilo ni podpisano ali podpisa ni mogoče preveriti, na primer zaradi manjkajočega ključa.</td></tr>
 </table>
 <p>Sporočilo, katerega deli so zaščiteni različno, prikaže vsak del v svojem okvirju s svojo oznako. Vrstica nato prešteje dele vsake vrste. Kliknite oznako ali <b data-text="ui-protection-details"></b> v vrstici, da vidite, kdo je podpisal posamezni del, s katerim ključem in kdaj.</p>
 <aside class="warning">Samo vrstico in oznake nad okvirji piše Inbox Classic. Pošiljatelj lahko v svojem sporočilu nariše karkoli, tudi nekaj, kar je videti kot oznaka. Glejte vrstico.</aside>
 <p>Slike z interneta v šifriranem delu se naložijo samo, ko kliknete vrstico s slikami, vsakič znova. Njegova oznaka nato pove, da so bile slike naložene.</p>
-<p>Slike in datoteke PDF, priložene delu, so prikazane v okvirju tega dela, nikoli v okvirju drugega. Datoteke šifriranega dela so shranjene samo v pomnilniku, nikoli na disku.</p>
+<p>Slike in datoteke PDF, priložene delu, so prikazane v okvirju tega dela, nikoli v okvirju drugega. Dešifrirani podatki za predoglede ostanejo v pomnilniku. Ko priponko izrecno shranite ali odprete v drugem programu, nastane tudi dešifrirana datoteka na disku.</p>
 <p>Na seznamu priloženih datotek ključavnica označuje vsako datoteko šifriranega dela. Pokažite na datoteko, da vidite, iz katerega dela izvira.</p>
 <p>Ko odgovorite ali posredujete, se navede samo tisto, kar je bilo prikazano.</p>
 <p>Na seznamu sporočil ključavnica označuje šifrirano sporočilo, pečat pa podpisano. Ko Inbox Classic šifrirano sporočilo dešifrira, po prenosu ali odpiranju, seznam prikaže njegovo pravo zadevo in prve besede. Do takrat seznam in obvestilo o novi pošti prikazujeta <b data-text="list-encrypted"></b>.</p>
-<p>Iskanje najde dešifrirano sporočilo po besedah njegovega besedila, dokler je <b data-text="ui-search-encrypted"></b> vklopljeno v <b data-settings="reading"></b>. Agenti UI nikoli ne vidijo, kaj piše v šifriranem sporočilu, niti njegovih datotek.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>Iskanje najde dešifrirano sporočilo po besedah njegovega besedila, dokler je <b data-text="ui-search-encrypted"></b> vklopljeno v <b data-settings="reading"></b>. Iskalni indeks vsebuje dešifrirano besedilo v lokalni zbirki podatkov. Agenti UI do te vsebine in dešifriranih priponk nimajo dostopa, lahko pa vidijo zunanje podatke sporočila, na primer pošiljatelja in datum.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

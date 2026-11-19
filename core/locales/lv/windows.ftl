@@ -110,8 +110,8 @@ win-change = &Mainīt...
 win-undo-since = Atsaukt darbības lai&kposmā...
 win-take-back = &Atsaukt darbības
 win-what-agents-did = Aģentu &darbības:
-win-agent-reads = Nolasītie dati (no { $from } līdz { $to }):
-win-agent-reads-hint = Atlasiet lasīšanas ierakstu augšējā sarakstā, lai redzētu nolasītos datus.
+win-agent-reads = Ziņas par lasīšanu (no { $from } līdz { $to }):
+win-agent-reads-hint = Atlasiet lasīšanas ierakstu augšējā sarakstā, lai skatītu ziņas par to, kas tika lasīts.
 win-how-to-connect = Kā pieslēgt aģentu
 
 ## Sign-in apps
@@ -144,4 +144,4 @@ win-installer-welcome-update =
     Ja programma darbojas, tā vispirms tiks aizvērta. Jūsu konti un pasts tiks saglabāti.
 win-installer-older-ask = Ir instalēta Inbox Classic { $installed }, kas ir jaunāka par { $version }. Tomēr instalēt vecāko versiju?
 win-installer-still-running = Inbox Classic joprojām darbojas. Aizveriet to un mēģiniet vēlreiz.
-win-installer-remove-mail-ask = Vai dzēst arī Inbox Classic kontus un šajā datorā saglabātos programmas datus, tostarp pastu un iestatījumus? Pasts serveros paliks.
+win-installer-remove-mail-ask = Vai dzēst arī Inbox Classic vietējos datus, tostarp pastu, kontu iestatījumus, kontaktpersonas, atslēgas un vēl nenosūtītos ziņojumus? Pasts serveros un sistēmas akreditācijas datu pārvaldnieka ieraksti paliks.

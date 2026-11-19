@@ -1,18 +1,17 @@
-<!--review--><h1>Odjava s poštnega seznama</h1>
-<p class="summary">Ustavite sporočila poštnega seznama z gumbom za odjavo.</p>
+<h1>Odjava s poštnega seznama</h1>
+<p class="summary">Z gumbom za odjavo zahtevajte prenehanje prejemanja pošte s seznama.</p>
 <p>Sporočilo poštnega seznama, ki pove, kako se z njega odjaviti, ima desno v glavi gumb <b data-text="ui-unsubscribe"></b>.</p>
 <p>Če se želite odjaviti s seznama:</p>
 <ol>
     <li>Kliknite <b data-text="ui-unsubscribe"></b>. Inbox Classic pove, kaj se bo zgodilo, in vas najprej vpraša.</li>
     <li>Potrdite. Glede na seznam se zgodi ena od treh stvari:
         <ul>
-            <li>Inbox Classic seznam prosi, naj preneha pošiljati. Nobena stran se ne odpre in nobeno sporočilo ni poslano.</li>
-            <li>Inbox Classic napiše sporočilo, ki ga seznam zahteva. Kliknite <b data-text="ui-tb-send"></b>, da ga pošljete.</li>
+            <li>Inbox Classic pošlje neposredno zahtevo za odjavo. Spletna stran se ne odpre in e-poštno sporočilo se ne pošlje.</li>
+            <li>Inbox Classic pripravi sporočilo za odjavo, ki ga zahteva seznam. Kliknite <b data-text="ui-tb-send"></b>, da ga pošljete.</li>
             <li>V brskalniku se odpre stran seznama, kjer odjavo dokončate.</li>
         </ul>
     </li>
 </ol>
-<p>Vrstica stanja pove, kdaj je seznam sprejel zahtevo.</p>
-<aside class="note">Inbox Classic seznam sam prosi za prenehanje samo, ko je strežnik seznama podpisal sporočilo. Izmišljeno sporočilo tega ne more izkoristiti, da bi doseglo koga drugega.</aside>
+<p>Pri neposredni zahtevi vrstica stanja sporoči, ali jo je strežnik sprejel. To še ne potrjuje, da je seznam odjavo dokončal.</p>
+<aside class="note">Neposredna odjava je na voljo le, če ponudnik računa potrdi podpis, ki zajema podatke za odjavo. Pred pošiljanjem zahteve program vedno vpraša za vašo potrditev.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

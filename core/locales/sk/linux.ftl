@@ -2,70 +2,52 @@
 
 ## The main window
 
-# review: new
-gtk-search-looks-in = Hľadanie v priečinku { $place } prehľadáva predmety, odosielateľov, príjemcov, názvy príloh a text správ. Skontrolujte pravopis alebo skúste menej slov.
-# review: new
+gtk-search-looks-in = Rozsah vyhľadávania: „{ $place }“. Vyhľadávanie zahŕňa predmety, mená a adresy odosielateľov a príjemcov, názvy príloh a text správ. Skontrolujte pravopis alebo skúste zadať menej slov.
 gtk-search-still-indexing = { $count ->
     [one] Text 1 správy sa ešte indexuje. Čoskoro sa môžu objaviť ďalšie výsledky.
    *[other] Text správ ({ $count }) sa ešte indexuje. Čoskoro sa môžu objaviť ďalšie výsledky.
 }
-# review: new
 gtk-search-results-everywhere = { $count ->
     [0] Žiadne výsledky
     [one] 1 výsledok
     [few] { $count } výsledky
    *[other] { $count } výsledkov
 } pre „{ $words }“ vo všetkých priečinkoch
-# review: new
 gtk-search-results-in = { $count ->
     [0] Žiadne výsledky
     [one] 1 výsledok
     [few] { $count } výsledky
    *[other] { $count } výsledkov
-} pre „{ $words }“ v priečinku { $place }
-# review: new
+} pre „{ $words }“ (rozsah: { $place })
 gtk-search-indexing = { $count ->
     [one] text 1 správy sa ešte indexuje
    *[other] text správ ({ $count }) sa ešte indexuje
 }
 gtk-list-loading = Načítava sa...
-# review: new
 gtk-menu-rename = Premenovať...
-# review: new
-gtk-import-one-question = Importovať správu { $file } do priečinka { $folder }?
-# review: new
-gtk-files-not-saved = Nepodarilo sa uložiť { $failed } z { $total } súborov.
-# review: new
+gtk-import-one-question = Importovať správu zo súboru „{ $file }“ do priečinka „{ $folder }“?
+gtk-files-not-saved = Nepodarilo sa uložiť súbory: { $failed } z { $total }.
 gtk-unsubscribe-one-click =
-    Odhlásiť sa z tohto zoznamu adresátov?
+    Odhlásiť odber týchto správ?
 
-    Inbox Classic pošle žiadosť o odhlásenie na { $target }. Neotvorí sa žiadna webová stránka a neodošle sa žiadny e-mail.
-# review: new
+    Inbox Classic pošle žiadosť o odhlásenie odberu na server { $target }. Neotvorí sa žiadna webová stránka a neodošle sa žiadny e-mail.
 gtk-unsubscribe-mail =
-    Odhlásiť sa z tohto zoznamu adresátov?
+    Odhlásiť odber týchto správ?
 
-    Ak sa chcete odhlásiť, pošlite e-mail na { $target }. Inbox Classic ho pre vás pripraví. Odoslaním správy odhlásenie potvrdíte.
-# review: new
+    Ak chcete odhlásiť odber, pošlite e-mail na adresu { $target }. Inbox Classic ho pre vás pripraví. Žiadosť potom odošlite.
 gtk-unsubscribe-web =
-    Odhlásiť sa z tohto zoznamu adresátov?
+    Odhlásiť odber týchto správ?
 
-    Stránka na odhlásenie zo zoznamu adresátov sa otvorí v prehliadači ({ $target }).
-# review: new
-gtk-unsubscribe-failed = Odhlásenie zlyhalo: { $problem }
-# review: new
+    V prehliadači sa otvorí stránka na odhlásenie odberu ({ $target }).
+gtk-unsubscribe-failed = Odber sa nepodarilo odhlásiť: { $problem }
 gtk-toolbar-create-mail-menu = Napísať z konkrétneho konta
-# review: new
 gtk-toolbar-send-recv-menu = Odoslať a prijať poštu konkrétneho konta
-# review: new
 gtk-main-menu = Hlavná ponuka
-# review: new
 gtk-folder-list = Zoznam priečinkov
-# review: new
 gtk-quit = Ukončiť
 
 ## The Move and Copy window
 
-# review: new
 gtk-new-folder-at-top-of = Nový priečinok bude na najvyššej úrovni konta { $account }.
 
 ## The message list
@@ -74,7 +56,6 @@ gtk-new-folder-at-top-of = Nový priečinok bude na najvyššej úrovni konta { 
 
 ## Notifications and the tray
 
-# review: new
 gtk-unread-messages = { $count ->
     [0] Žiadne neprečítané správy
     [one] 1 neprečítaná správa
@@ -86,164 +67,105 @@ gtk-unread-messages = { $count ->
 
 ## The Outbox
 
-# review: new
 gtk-outbox-empty = Na odoslanie nečakajú žiadne správy.
-# review: new
-gtk-outbox-row = Komu: { $to }  ·  Zaradené { $queued }  ·  { $status }
+gtk-outbox-row = Komu: { $to }  ·  Zaradené na odoslanie: { $queued }  ·  { $status }
 
 ## The app
 
-# review: new
 gtk-still-running-detail = Inbox Classic naďalej kontroluje novú poštu na pozadí. Aplikáciu otvoríte alebo ukončíte jej ikonou na hornej lište.
-# review: new
 gtk-sign-in-again-ask =
     Prihlásenie do konta { $account } bolo odmietnuté alebo relácia vypršala.
 
     Prihlásiť sa znova v prehliadači?
-# review: new
 gtk-default-app-not-installed = Táto kópia Inbox Classic nebola nainštalovaná, preto ju systém neuvádza medzi poštovými aplikáciami. Ak ju chcete vybrať, nainštalujte ju.
-# review: new
 gtk-default-app-now = Inbox Classic je teraz vaša predvolená poštová aplikácia: e-mailové odkazy tu otvoria novú správu.
-# review: new
 gtk-default-app-failed = Inbox Classic sa nepodarilo nastaviť ako predvolenú poštovú aplikáciu.
 
 ## Buttons and words used in many windows
 
 ## The reading pane
 
-# review: new
 gtk-reader-date = Dátum:
-# review: new
 gtk-reader-files = Prílohy správy
-# review: new
 gtk-files = { $count ->
     [one] { $count } súbor
     [few] { $count } súbory
    *[other] { $count } súborov
 }
-# review: new
-gtk-pictures-blocked = Niektoré obrázky boli zablokované, aby odosielateľ nemohol identifikovať váš počítač.
-# review: new
+gtk-pictures-blocked = Niektoré obrázky boli zablokované, aby sa obmedzila možnosť sledovania odosielateľom.
 gtk-download-pictures = Stiahnuť obrázky
-# review: new
 gtk-save-attachments-menu = Uložiť prílohy...
 
 ## The compose window
 
-# review: new
 gtk-format-bold = Tučné (Ctrl+B)
-# review: new
 gtk-format-italic = Kurzíva (Ctrl+I)
-# review: new
 gtk-format-underline = Podčiarknuté (Ctrl+U)
-# review: new
 gtk-format-hyperlink = Hypertextový odkaz (Ctrl+K)
-# review: new
 gtk-font = Písmo
-# review: new
 gtk-show-cc = _Kópia
-# review: new
 gtk-show-bcc = _Skrytá kópia
-# review: new
 gtk-save-tip = Uložiť (Ctrl+S)
-# review: new
 gtk-link-status = { $link }    (otvoríte kliknutím so stlačeným Ctrl)
 
 ## Accounts
 
-# review: new
 gtk-plain-warning =
-    Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Toto pripojenie používajte iba so serverom vo vlastnom počítači alebo v lokálnej sieti.
+    Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Samotná lokálna sieť neposkytuje šifrovanie. Takéto pripojenie použite len vtedy, keď rozumiete riziku, napríklad so serverom vo vlastnom počítači.
 
     Pokračovať?
-# review: new
 gtk-account-name-title = Názov konta
-# review: new
 gtk-display-name-title = Zobrazované meno
-# review: new
 gtk-turned-off-why = Možnosť „{ $button }“ je v tomto počítači vypnutá. { $reason }
-# review: new
 gtk-turned-off-why-long =
     Možnosť „{ $button }“ je v tomto počítači vypnutá.
 
     { $reason }
-# review: new
 gtk-next = Ďalej >
-# review: new
-gtk-provider-sign-in = Prihláste sa ku kontu { $address } cez { $provider } na jeho webovej stránke. Vaše heslo sa s Inbox Classic nezdieľa. Môžete použiť aj heslo aplikácie vytvorené v nastaveniach zabezpečenia konta.
-# review: new
-gtk-provider-sign-in-apps = Prihláste sa ku kontu { $address } cez { $provider } na jeho webovej stránke pomocou jednej zo svojich prihlasovacích aplikácií (Ďalšie možnosti prihlásenia). Môžete použiť aj heslo aplikácie vytvorené v nastaveniach zabezpečenia konta.
-# review: new
+gtk-provider-sign-in = Prihláste sa ku kontu { $address } cez { $provider } na jeho webovej stránke. Inbox Classic nedostane vaše heslo. Ak konto podporuje heslá aplikácií pre poštové programy, môžete použiť aj takéto heslo vytvorené v nastaveniach zabezpečenia konta. Outlook.com a Microsoft 365 podporujú iba prihlásenie cez prehliadač.
+gtk-provider-sign-in-apps = Prihláste sa ku kontu { $address } cez { $provider } na jeho webovej stránke pomocou jednej zo svojich prihlasovacích aplikácií (Ďalšie možnosti prihlásenia). Ak konto podporuje heslá aplikácií pre poštové programy, môžete použiť aj takéto heslo vytvorené v nastaveniach zabezpečenia konta. Outlook.com a Microsoft 365 podporujú iba prihlásenie cez prehliadač.
 gtk-accounts-add = Pridať...
-# review: new
 gtk-accounts-properties = Vlastnosti...
-# review: new
-gtk-accounts-signature = Podpis...
-# review: new
+gtk-accounts-signature = Textový podpis...
 gtk-accounts-sign-in-apps = Prihlasovacie aplikácie...
 
 ## Sign-in apps
 
-# review: new
 gtk-app-server = Server { $kind }
-# review: new
 gtk-app-port = Port { $kind }
-# review: new
 gtk-app-security = Zabezpečenie { $kind }
-# review: new
 gtk-issuer-found =
     Prihlasovacia stránka: { $page }
     Koncový bod tokenov: { $endpoint }
-# review: new
 gtk-client-id = ID klienta
-# review: new
 gtk-client-secret = Tajný kód klienta
-# review: new
-gtk-scopes = Oprávnenia (scopes)
-# review: new
+gtk-scopes = Rozsahy oprávnení
 gtk-redirect-uri = URI presmerovania
-# review: new
 gtk-issuer-usable =
     Vydavateľa možno použiť.
 
     { $found }
-# review: new
-gtk-app-built-in = { $app } je vstavaná. Môžete zmeniť iba to, či sa ponúka pre nové kontá. { $reason }
-# review: new
+gtk-app-built-in = Aplikácia „{ $app }“ je vstavaná. Môžete len zmeniť, či sa má ponúkať pri pridávaní kont. { $reason }
 gtk-built-in = { $app } (vstavaná)
-# review: new
 gtk-offered-for-new = Ponúkať pre nové kontá
-# review: new
 gtk-edit-button = Upraviť...
-# review: new
 gtk-remove-app-ask = Odstrániť prihlasovaciu aplikáciu { $app } aj s jej uloženým tajným kódom klienta?
-# review: new
 gtk-sign-in-apps-intro = Prihlasovacie aplikácie umožňujú kontám prihlasovať sa cez prehliadač. Vypnutá aplikácia sa pre nové kontá neponúka; kontá, ktoré ju už používajú, fungujú ďalej.
 
 ## AI agents
 
-# review: new
 gtk-agent-it-may = Povolené akcie
-# review: new
 gtk-agent-accounts = Povolené kontá
-# review: new
-gtk-never-used = Nikdy nepoužité
-# review: new
-gtk-last-used = Naposledy použité { $date }
-# review: new
-gtk-forget-program = Odstrániť tento program?
-# review: new
-gtk-forget-program-detail = Oprávnenia programu a história aktivity jeho agentov sa odstránia. Pri ďalšom pripojení sa vás znova opýta na povolenie.
-# review: new
+gtk-never-used = Zatiaľ nepoužité
+gtk-last-used = Naposledy použité: { $date }
+gtk-forget-program = Odstrániť uložené oprávnenia tohto programu?
+gtk-forget-program-detail = Oprávnenia programu a história aktivity jeho agentov sa odstránia. Pri ďalšom pripojení vás Inbox Classic znova požiada o povolenie.
 gtk-no-agents-yet = Zatiaľ žiadny agent nepožiadal o používanie vašej pošty.
-# review: new
 gtk-nothing-yet = Zatiaľ nič.
 
 ## Preferences
 
-# review: new
 gtk-preferences = Predvoľby
-# review: changed
 gtk-notify-subtitle = Len keď je Inbox Classic na pozadí
 
 ## The desktop entry and the page of the software stores
@@ -251,21 +173,12 @@ gtk-notify-subtitle = Len keď je Inbox Classic na pozadí
 # linux/data/com.inboxclassic.InboxClassic.desktop and .metainfo.xml, made by the build. The keywords are the words a
 # search of the applications finds Inbox Classic by, each ended by a semicolon, in your language only: the English
 # ones are added before them
-# review: new
 gtk-desktop-generic-name = Poštový klient
-# review: new
 gtk-desktop-comment = Čítanie a písanie e-mailov: rýchly a jednoduchý poštový program
-# review: new
 gtk-desktop-keywords = pošta;e-mail;email;správa;správy;doručená pošta;
-# review: new
 gtk-metainfo-summary = Rýchly a jednoduchý poštový program
-# review: new
-gtk-metainfo-description = Inbox Classic číta a píše e-maily s priečinkami vľavo, správami hore a správou pod nimi, ako to poštové programy kedysi robili. Funguje s ľubovoľným kontom IMAP a SMTP a do Outlook.com a Microsoft 365 sa prihlasuje cez prehliadač.
-# review: new
-gtk-metainfo-feature-sanitized = Každá správa sa zobrazuje očistená, bez skriptov, a obrázky z internetu iba vtedy, keď ich povolíte
-# review: new
-gtk-metainfo-feature-search = Hľadanie, ktoré nájde slová v predmete, ľuďoch, názvoch súborov aj texte, s operátormi Gmailu
-# review: new
-gtk-metainfo-feature-replies = Odpovede skryjú staršie správy, ktoré citujú
-# review: new
-gtk-metainfo-feature-offline = Pošta zostáva čitateľná aj offline; heslá sa uchovávajú vo vašej kľúčenke
+gtk-metainfo-description = Inbox Classic umožňuje čítať a písať e-maily v klasickom rozložení: priečinky vľavo, zoznam správ hore a obsah vybranej správy pod ním. Podporuje kontá IMAP a SMTP aj prihlásenie do Outlook.com a Microsoft 365 cez prehliadač.
+gtk-metainfo-feature-sanitized = Správy sa zobrazujú bez skriptov a ďalších aktívnych prvkov; obrázky z internetu sa načítajú iba s vaším súhlasom
+gtk-metainfo-feature-search = Vyhľadávanie v predmetoch, údajoch odosielateľov a príjemcov, názvoch príloh aj texte správ, s operátormi známymi z Gmailu
+gtk-metainfo-feature-replies = Citované staršie správy sú v odpovediach zbalené
+gtk-metainfo-feature-offline = Stiahnutú poštu môžete čítať aj bez internetu; heslá sa predvolene ukladajú v systémovom úložisku prihlasovacích údajov

@@ -7,7 +7,7 @@
     <li>Aby przenieść także zapisane hasła, dane logowania i klucze prywatne, włącz <b data-text="ui-setup-use-passphrase"></b> i dwukrotnie wpisz hasło o długości co najmniej 8 znaków.</li>
     <li>Kliknij <b data-text="ui-setup-export-button"></b> i wybierz, gdzie zapisać plik.</li>
 </ol>
-<p>Plik nie zawiera wiadomości: zostaną one ponownie pobrane z serwera na drugim komputerze. Jeśli ustawisz hasło, cały plik będzie zaszyfrowany. W przeciwnym razie zapisane hasła, dane logowania i klucze prywatne zostaną pominięte. Trzeba będzie ponownie zalogować się do kont.</p>
+<p>Plik nie zawiera wiadomości. Na drugim komputerze można ponownie pobrać pocztę przechowywaną na serwerze. Wiadomości dostępne tylko lokalnie, w tym oczekujące na wysłanie, nie zostaną przeniesione. Jeśli ustawisz hasło, cały plik będzie zaszyfrowany. Obejmuje tylko wybrane części konfiguracji i dostępne dane logowania. Klucze prywatne, których nie można otworzyć na tym komputerze, są pomijane. W przeciwnym razie zapisane hasła, dane logowania i klucze prywatne zostaną pominięte. Trzeba będzie ponownie zalogować się do kont.</p>
 <aside class="warning">Przechowuj plik i jego hasło osobno, a po zaimportowaniu usuń plik. Każdy, kto ma dostęp do obu, może czytać Twoją pocztę.</aside>
 <h2>Import</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Wybierz plik i wpisz hasło, jeśli jest nim zabezpieczony.</li>
     <li>W oknie zobaczysz zawartość pliku. Wybierz elementy i konta do zaimportowania, a potem kliknij <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Konta już skonfigurowane na tym komputerze pozostaną bez zmian. Kontakty zostaną dodane do książki adresowej, a ustawienia programu i okien zostaną zastąpione. Brakujące foldery docelowe reguł zostaną dopasowane po synchronizacji kont. Nowy klucz kontaktu zastąpi bieżący dopiero wtedy, gdy wybierzesz go we właściwościach kontaktu.</p>
+<p>Konta już skonfigurowane na tym komputerze pozostaną bez zmian. Kontakty zostaną dodane do książki adresowej, a wybrane ustawienia programu i okien zostaną zastosowane. Reguły bez folderów docelowych będą czekać na odnalezienie odpowiedniego konta i folderu podczas synchronizacji; nie gwarantuje to utworzenia brakującego folderu. Nowy klucz kontaktu zastąpi bieżący dopiero wtedy, gdy wybierzesz go we właściwościach kontaktu.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

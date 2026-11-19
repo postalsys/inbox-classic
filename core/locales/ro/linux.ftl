@@ -95,7 +95,7 @@ gtk-files = { $count ->
     [few] { $count } fișiere
    *[other] { $count } de fișiere
 }
-gtk-pictures-blocked = Unele imagini au fost blocate, ca expeditorul să nu vă poată identifica computerul.
+gtk-pictures-blocked = Unele imagini au fost blocate pentru a limita urmărirea deschiderii mesajului de către expeditor.
 gtk-download-pictures = Descărcare imagini
 gtk-save-attachments-menu = Salvare atașări...
 
@@ -180,8 +180,8 @@ gtk-desktop-generic-name = Client de e-mail
 gtk-desktop-comment = Citiți și scrieți e-mailuri: un program de e-mail rapid și simplu
 gtk-desktop-keywords = poștă;email;e-mail;mesaje;corespondență;
 gtk-metainfo-summary = Un program de e-mail rapid și simplu
-gtk-metainfo-description = Inbox Classic este un program de e-mail cu o interfață clasică: folderele în stânga, lista mesajelor sus și mesajul selectat dedesubt. Funcționează cu orice cont IMAP și SMTP și se conectează la Outlook.com și Microsoft 365 prin browser.
+gtk-metainfo-description = Inbox Classic este un program de e-mail cu o interfață clasică: folderele în stânga, lista mesajelor sus și mesajul selectat dedesubt. Se conectează la conturi IMAP și SMTP, iar pentru Outlook.com și Microsoft 365 folosește conectarea prin browser.
 gtk-metainfo-feature-sanitized = Mesajele sunt afișate fără scripturi sau alte elemente active, iar imaginile de pe internet sunt încărcate doar cu acordul dvs.
 gtk-metainfo-feature-search = Căutare în subiecte, numele și adresele expeditorilor și destinatarilor, numele fișierelor și textul mesajelor, cu operatori de căutare ca în Gmail
 gtk-metainfo-feature-replies = În răspunsuri, mesajele anterioare citate sunt restrânse
-gtk-metainfo-feature-offline = Mesajele pot fi citite și offline, iar parolele sunt păstrate în portchei
+gtk-metainfo-feature-offline = Mesajele descărcate pot fi citite offline; parolele sunt păstrate implicit în portcheiul sistemului

@@ -1,15 +1,15 @@
-<!--review--><h1>Odpowiadanie i przesyłanie dalej</h1>
+<h1>Odpowiadanie i przesyłanie dalej</h1>
 <p class="summary">Odpowiedz nadawcy lub wszystkim albo prześlij wiadomość komuś innemu.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) odpowiada nadawcy.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) odpowiada wszystkim, do których wysłano wiadomość.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) odpowiada na adres Reply-To, jeśli go podano, a w przeciwnym razie nadawcy.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) odpowiada na adres Reply-To lub adres nadawcy oraz odbiorcom z pól Do i DW, z pominięciem Twoich własnych adresów.</li>
     <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) przesyła wiadomość dalej. Odbiorców wpisujesz samodzielnie.</li>
 </ul>
-<p>Odpowiedź lub przekazana wiadomość wychodzi z konta, w którym jest oryginał, i z adresu, na który oryginał wysłano, jeśli jest to jeden z innych adresów konta.</p>
+<p>Odpowiedź lub wiadomość przesyłana dalej jest wysyłana z konta, na którym znajduje się oryginał. Jeśli oryginał otrzymano na jeden z dodatkowych adresów konta, ten adres zostanie użyty jako adres nadawcy.</p>
 <h2>Oryginalna wiadomość</h2>
-<p>W odpowiedzi oryginalna wiadomość jest zwinięta za przyciskiem ••• pod Twoim tekstem, więc widzisz tylko to, co piszesz. W obu przypadkach jest wysyłana razem z odpowiedzią. Aby ją skrócić, kliknij przycisk albo zaznacz wszystko klawiszami <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: oryginał staje się wtedy częścią Twojego tekstu.</p>
-<p>W przekazywanej wiadomości oryginał jest w tekście od początku, bo to właśnie go wysyłasz.</p>
+<p>W odpowiedzi oryginalna wiadomość jest zwinięta za przyciskiem ••• pod Twoim tekstem, więc widzisz tylko to, co piszesz. Jest wysyłana razem z odpowiedzią niezależnie od tego, czy ją rozwiniesz. Aby ją skrócić, kliknij przycisk albo zaznacz wszystko klawiszami <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: oryginał staje się wtedy częścią Twojego tekstu, którą możesz edytować lub usunąć.</p>
+<p>Przy przesyłaniu dalej oryginał jest od razu widoczny w treści, ponieważ to on jest przesyłany.</p>
 <p>Odpowiedź ma format oryginału. Odpowiedź na wiadomość w zwykłym tekście jest zwykłym tekstem, z oryginałem cytowanym znakiem <b>&gt;</b>, chyba że coś sformatujesz.</p>
 <h2>Przesyłanie dalej kilku wiadomości</h2>
-<p>Zaznacz kilka wiadomości i kliknij <b data-text="ui-tb-forward"></b>. Powstanie jedna nowa wiadomość, do której wszystkie zostaną załączone jako pliki <code>.eml</code>. Jej temat to temat pierwszej wiadomości.</p>
-<nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav><!--/review-->
+<p>Zaznacz kilka wiadomości i kliknij <b data-text="ui-tb-forward"></b>. Powstanie jedna nowa wiadomość, do której wszystkie zostaną załączone jako pliki <code>.eml</code>. Jej temat to temat pierwszej wiadomości z przedrostkiem Fw:.</p>
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>

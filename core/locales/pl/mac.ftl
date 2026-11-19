@@ -87,7 +87,7 @@ mac-files-not-saved =
     { $count ->
        *[other] Nie udało się zapisać plików: { $failed } z { $count }.
     }
-mac-no-calendar-app = Na tym Macu nie ma aplikacji kalendarza obsługującej zaproszenia (pliki .ics).
+mac-no-calendar-app = Nie udało się otworzyć zaproszenia. Sprawdź, czy aplikacja kalendarza na tym Macu obsługuje pliki .ics.
 mac-file-not-saved = Nie udało się zapisać pliku.
 mac-unsubscribing = Wysyłanie prośby o wypisanie: { $target }…
 mac-loading-list = Wczytywanie…
@@ -127,7 +127,7 @@ mac-sign-in-apps-button = Aplikacje logowania…
 
 ## AI agents
 
-mac-forget-program = Usunąć ten program i historię działań jego agentów?
+mac-forget-program = Usunąć uprawnienia programu i historię działań jego agentów?
 mac-forget-program-detail = Uprawnienia programu zostaną usunięte. Przy następnym połączeniu Inbox Classic ponownie poprosi o zgodę.
 
 ## Sign-in apps

@@ -1,4 +1,4 @@
-<!--review-->
+
 <h1>Šifrēšanas atslēgas</h1>
 <p class="summary">Izveidojiet atslēgu, lai parakstītu ziņojumus un saņemtu šifrētu pastu, un glabājiet kontaktpersonu atslēgas.</p>
 <p>Inbox Classic paraksta un šifrē pastu ar OpenPGP atslēgām. Jūsu atslēgai ir divas daļas: publiskā atslēga, ko dodat citiem, un privātā atslēga, kas paliek jūsu datorā. Kontaktpersonu atslēgas ļauj pārbaudīt viņu parakstus un šifrēt viņiem sūtīto pastu.</p>
@@ -8,14 +8,13 @@
     <li>Izvēlieties kontu un noklikšķiniet uz <b data-text="ui-keys-new-make"></b>. Atslēga tiek izmantota konta adresei un tā pārējām adresēm.</li>
     <li>Noklikšķiniet uz <b data-text="ui-keys-backup-now"></b> un izvēlieties paroles frāzi. Glabājiet failu un paroles frāzi dažādās drošās vietās.</li>
 </ol>
-<aside class="warning">Bez rezerves kopijas atslēgu nevar atgūt, ja šis dators tiek pazaudēts vai atiestatīts, un tai šifrēto pastu vairs nevar izlasīt.</aside>
-<h2>Atslēgas ir aizsargātas bez paroles frāzēm</h2>
-<p>Jūsu privātās atslēgas aizsargā atslēga, kas glabājas <!--os:windows-->akreditācijas datu pārvaldniekā<!--/os--><!--os:mac-->atslēgu piekariņā<!--/os--><!--os:linux-->sistēmas atslēgu saišķī<!--/os-->, tāpēc, lai tās izmantotu, paroles frāze nav jāievada. Paroles frāzi izvēlaties tikai rezerves kopijai. Ja jūsu atslēga ir redzama kā bloķēta, šī aizsardzība ir atiestatīta: noklikšķiniet uz <b data-text="ui-keys-import"></b> un izvēlieties tās rezerves kopiju.</p>
+<aside class="warning">Bez rezerves kopijas atslēgu nevar atgūt, ja šis dators tiek pazaudēts vai atiestatīts, un ar šo atslēgu aizsargāto pastu vairs nevar atšifrēt.</aside>
+<h2>Privāto atslēgu glabāšana</h2>
+<p>Jūsu privātās atslēgas aizsargā atslēga, kas glabājas <!--os:windows-->akreditācijas datu pārvaldniekā<!--/os--><!--os:mac-->atslēgu piekariņā<!--/os--><!--os:linux-->sistēmas atslēgu saišķī<!--/os-->, tāpēc parastai izmantošanai paroles frāze nav jāievada. To izvēlaties rezerves kopijai. Bloķētu privāto atslēgu pašlaik nevar atvērt: sistēmas krātuve var būt bloķēta vai nepieejama, vai arī aizsardzības atslēga ir zudusi. Vispirms pārbaudiet piekļuvi sistēmas krātuvei. Ja aizsardzības atslēga ir zudusi, noklikšķiniet uz <b data-text="ui-keys-import"></b> un importējiet privātās atslēgas rezerves kopiju.</p>
 <h2>Atslēgu pievienošana</h2>
 <p>Noklikšķiniet uz <b data-text="ui-keys-import"></b>, lai pievienotu atslēgu no faila, piemēram, tādu, ko jums nosūtījusi kontaktpersona, vai savas atslēgas rezerves kopiju. Ja privātā atslēga ir aizsargāta ar paroles frāzi, tā tiek prasīta vienreiz. Pēc tam Inbox Classic jautā, vai importēto atslēgu izmantot jūsu adresēm.</p>
-<p>Kontaktpersonas atslēga no tā brīža tiek izmantota viņas adresei. Ja vēlāk parādās cita atslēga tai pašai adresei, joprojām tiek izmantota pašreizējā, līdz jūs kontaktpersonas rekvizītos izvēlaties jauno.</p>
+<p>Ja adresei vēl nav izvēlētas atslēgas, tai tiek izmantota pievienotā kontaktpersonas atslēga. Ja vēlāk parādās cita atslēga tai pašai adresei, joprojām tiek izmantota pašreizējā, līdz jūs kontaktpersonas rekvizītos izvēlaties jauno.</p>
 <p>Lai kopīgotu savu publisko atslēgu, atlasiet to un noklikšķiniet uz <b data-text="ui-keys-export"></b>. Konta atslēgu varat izvēlēties arī konta rekvizītos, cilnē <b data-text="ui-account-security"></b>.</p>
-<p>Kad šifrējat kādam, kura atslēgas jums nav, Inbox Classic to vaicā viņa adreses domēnam un pēc tam keys.openpgp.org. Tiek nosūtīta tikai adrese. Lai keys.openpgp.org nekad netiktu vaicāts, izslēdziet <b data-text="ui-pgp-keyserver"></b> sadaļā <b data-settings="reading"></b>.</p>
-<p>Atslēgas ceļo arī kopā ar pastu. Ziņojumi no adreses ar atslēgu nes tās publisko atslēgu, lai citas lietotnes varētu jums šifrēt, un Inbox Classic tāpat uzzina kontaktpersonas atslēgu no tās ziņojumiem. Lai pārtrauktu sūtīt savējo, izslēdziet <b data-text="ui-account-autocrypt"></b> konta cilnē <b data-text="ui-account-security"></b>.</p>
+<p>Meklējot adresāta atslēgu, Inbox Classic vispirms vaicā adreses domēnam, pēc tam, ja atļauts, serverim keys.openpgp.org. Meklēšanu var sākt arī manuāli. Meklējot pēc adreses, tiek nosūtīta adrese; meklējot pēc atslēgas pirkstu nospieduma vai identifikatora, tiek nosūtīts šis identifikators. Lai neizmantotu keys.openpgp.org, izslēdziet opciju „<b data-text="ui-pgp-keyserver"></b>” iestatījumos <b data-settings="reading"></b>.</p>
+<p>Publiskās atslēgas var saņemt arī kopā ar pastu. Sūtot no adreses ar izvēlētu atslēgu, ziņojumam pievieno tās publisko atslēgu, lai citas lietotnes varētu jums sūtīt šifrētu pastu. Atverot ziņojumu ar sūtītāja atslēgu, Inbox Classic to saglabā, bet neapstiprina tās piederību. Ja adresei jau izvēlēta cita atslēga, jaunā gaida jūsu izvēli. Lai pārtrauktu savas atslēgas pievienošanu, izslēdziet opciju „<b data-text="ui-account-autocrypt"></b>” konta cilnē „<b data-text="ui-account-security"></b>”.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

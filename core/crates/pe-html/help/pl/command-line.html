@@ -1,16 +1,16 @@
-<!--review--><h1>Opcje wiersza poleceń</h1>
+<h1>Opcje wiersza poleceń</h1>
 <p class="summary">Opcje uruchamiania Inbox Classic z terminala, do testów i dla agentów AI.</p>
 <p>Uruchom program <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> z tymi opcjami:</p>
 <table>
     <tr><th>Opcja</th><th>Działanie</th></tr>
-    <tr><td><code>--store &lt;plik&gt;</code></td><td>Używa innego magazynu poczty, na przykład testowego</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>Przechowuje hasła tylko na czas tego uruchomienia, nigdy w systemowym magazynie haseł</td></tr>
-    <tr><td><code>--pin-certificate &lt;plik&gt;</code></td><td>Akceptuje tylko certyfikat serwera z tego pliku (PEM lub DER), dla serwera testowego z certyfikatem z podpisem własnym</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;plik&gt;</code></td><td>Zapisuje stronę logowania przez przeglądarkę do tego pliku zamiast otwierać przeglądarkę</td></tr>
+    <tr><td><code>--store &lt;plik&gt;</code></td><td>Używa innej lokalnej bazy poczty, na przykład testowej</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Przechowuje dane logowania tylko na czas tego uruchomienia, zamiast zapisywać je w systemowym magazynie</td></tr>
+    <tr><td><code>--pin-certificate &lt;plik&gt;</code></td><td>Akceptuje certyfikaty serwera wskazane w pliku, na przykład dla serwera testowego z certyfikatem z podpisem własnym. PEM może zawierać kilka certyfikatów, a DER jeden</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;plik&gt;</code></td><td>Zapisuje adres strony logowania w tym pliku zamiast otwierać przeglądarkę</td></tr>
     <tr><td><code>--language &lt;kod&gt;</code></td><td>Pokazuje okna w tym języku na czas tego uruchomienia, na przykład <code>pl</code></td></tr>
     <tr><td><code>--background</code></td><td>Uruchamia program bez okna</td></tr>
-    <tr><td><code>--mcp</code></td><td>Łączy agenta AI z Inbox Classic. Uruchamia to program agenta, nie Ty</td></tr>
+    <tr><td><code>--mcp</code></td><td>Łączy agenta AI z Inbox Classic. Uruchomienie z tą opcją zleca program agenta</td></tr>
     <tr><td><code>--version</code></td><td>Wypisuje wersję i kończy działanie</td></tr>
 </table>
-<p>Link <code>mailto:</code> podany jako argument otwiera nową wiadomość, tak jak link e-mail.</p>
-<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav><!--/review-->
+<p>Link <code>mailto:</code> podany jako argument otwiera nową wiadomość, jeśli konto jest już skonfigurowane, tak jak link e-mail.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>

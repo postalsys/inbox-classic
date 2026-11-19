@@ -1,7 +1,7 @@
-<!--review--><h1>Osnutki in mapa Odpošiljanje</h1>
+<h1>Osnutki in mapa Odpošiljanje</h1>
 <p class="summary">Shranite sporočilo, da ga dokončate pozneje, in poglejte, kaj čaka na pošiljanje.</p>
 <h2>Shranjevanje osnutka</h2>
-<p>Kliknite <b data-text="ui-tb-save"></b> ali pritisnite <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Sporočilo se shrani v mapo <b data-text="folder-drafts"></b> računa, na strežniku. Ponovno shranjevanje zamenja prejšnjo kopijo. Vrstica stanja sporočila pove, kdaj je bilo shranjeno.</p>
+<p>Kliknite <b data-text="ui-tb-save"></b> ali pritisnite <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Sporočilo se shrani lokalno in pošlje v mapo <b data-text="folder-drafts"></b> na strežniku računa, ko je povezava na voljo. Ponovno shranjevanje zamenja prejšnjo kopijo. Vrstica stanja sporočila pove, kdaj je bilo shranjeno.</p>
 <p>Inbox Classic sporočilo shrani tudi samodejno, nekaj sekund po tem, ko nehate tipkati, ali vsakih trideset sekund, medtem ko tipkate. Če se Inbox Classic ali računalnik nepričakovano zapre, se nedokončana sporočila znova odprejo ob naslednjem zagonu programa Inbox Classic.</p>
 <p>Ko zaprete sporočilo s spremembami, vas program vpraša, ali naj jih shrani:</p>
 <ul>
@@ -9,14 +9,13 @@
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os--> zavrže spremembe. Če je bil osnutek shranjen samo samodejno, se odstrani tudi iz mape <b data-text="folder-drafts"></b>.</li>
     <li><b data-text="ui-cancel"></b> vas vrne k sporočilu.</li>
 </ul>
-<p>Če želite nadaljevati s pisanjem, dvokliknite osnutek v mapi <b data-text="folder-drafts"></b>. Odpre se s prejemniki, besedilom in datotekami. Ko je poslan, se osnutek odstrani.</p>
-<p>Sporočilo, ki ga pišete, je samostojno okno, zato lahko berete pošto, medtem ko je odprto. Ko zaprete Inbox Classic, se najprej zaprejo sporočila, ki jih pišete, pri tistih s spremembami pa vas program vpraša, kaj naj stori.</p>
+<p>Če želite nadaljevati s pisanjem, dvokliknite osnutek v mapi <b data-text="folder-drafts"></b>. Odpre se s prejemniki, besedilom in datotekami. Shranjeni osnutek se odstrani že, ko sporočilo uspešno uvrstite v mapo Odpošiljanje, še preden je poslano.</p>
+<p>Sporočilo pišete v samostojnem oknu, zato lahko berete pošto, medtem ko je odprto. Ko zaprete Inbox Classic, se najprej zaprejo sporočila, ki jih pišete, pri tistih s spremembami pa vas program vpraša, kaj naj stori.</p>
 <h2>Mapa Odpošiljanje</h2>
-<p><b data-text="ui-tb-send"></b> postavi sporočilo v mapo Odpošiljanje. Privzeto je poslano po nekaj sekundah. V tem času lahko pošiljanje prekličete (glejte spodaj). Vrstica stanja glavnega okna pove, kdaj je poslano.</p>
-<p>Če sporočila ni mogoče poslati, na primer brez povezave, ostane v mapi Odpošiljanje. Poslano bo ob naslednjem preverjanju pošte, zato se nič, kar ste napisali, ne izgubi.</p>
+<p><b data-text="ui-tb-send"></b> postavi sporočilo v mapo Odpošiljanje. Privzeto program s pošiljanjem počaka nekaj sekund. V tem času lahko pošiljanje prekličete (glejte spodaj). Vrstica stanja glavnega okna pove, kdaj je poslano.</p>
+<p>Če sporočila ni mogoče poslati, na primer brez povezave, ostane v mapi Odpošiljanje. Program poskusi znova ob naslednjem preverjanju pošte. Sporočilo ostane v čakalni vrsti, dokler pošiljanje ne uspe ali ga izbrišete.</p>
 <p>Če želite videti, kaj čaka, izberite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. Tam je navedeno vsako sporočilo z razlogom, zakaj ni bilo poslano. <b data-text="ui-outbox-send-all"></b> takoj poskusi znova, sporočilo pa lahko tam tudi izbrišete.</p>
 <h2>Preklic pošiljanja sporočila</h2>
-<p>Ko kliknete <b data-text="ui-tb-send"></b>, sporočilo privzeto počaka nekaj sekund, preden je poslano. Vrstica stanja prikazuje odštevanje. V tem času kliknite <b data-text="ui-undo-button"></b> ob odštevanju ali izberite <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>, da prekličete pošiljanje. Sporočilo se znova odpre, da ga uredite ali zavržete. Ta možnost je na voljo samo, dokler sporočilo čaka na pošiljanje.</p>
+<p>Ko kliknete <b data-text="ui-tb-send"></b>, sporočilo privzeto počaka nekaj sekund, preden program začne pošiljanje. Vrstica stanja prikazuje odštevanje. V tem času kliknite <b data-text="ui-undo-button"></b> ob odštevanju ali izberite <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>, da prekličete pošiljanje. Sporočilo se znova odpre, da ga uredite ali zavržete. Ta možnost je na voljo le do izteka nastavljene zakasnitve. Pozneje lahko sporočilo, ki je še v mapi Odpošiljanje, odstranite v njenem oknu.</p>
 <p>Če želite spremeniti zakasnitev ali sporočila pošiljati takoj, izberite <b data-settings="general"></b> in prilagodite <b data-text="ui-send-delay"></b>. Če zaprete Inbox Classic, medtem ko sporočilo čaka, ga program poskusi poslati takoj.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

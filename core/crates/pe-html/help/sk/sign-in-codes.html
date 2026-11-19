@@ -1,16 +1,14 @@
-<!--review-->
-<h1>Prihlasovacie kódy</h1>
+<h1>Jednorazové kódy</h1>
 <p class="summary">Správa s prihlasovacím alebo overovacím kódom zobrazuje kód na karte, z ktorej ho môžete skopírovať.</p>
 <p>Keď správa obsahuje jednorazový kód, napríklad prihlasovací, overovací alebo schvaľovací, karta nad ňou zobrazuje:</p>
 <ul>
-    <li>„Kód od“ a doménu, pre ktorú je kód určený</li>
+    <li>„Kód z domény“ a doménu, pre ktorú je kód určený</li>
     <li>kód veľkým písmom</li>
     <li><b data-text="otp-copy"></b>, čo vloží kód do schránky</li>
 </ul>
 <aside class="warning">Kód zadávajte iba na stránke domény, ktorú karta uvádza. Správa, ktorá vás žiada zadať kód niekde inde, môže byť pokusom o prevzatie vášho konta.</aside>
-<p>Karta sa zobrazí, iba keď váš poskytovateľ pošty potvrdí, že doména správu podpísala. Kód v správe, ktorú si niekto vymyslel, sa neponúkne. Karta sa nezobrazuje v priečinkoch <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> a <b data-text="folder-drafts"></b>, ani keď váš poskytovateľ podpisy neoznamuje.</p>
-<p>Kód odoslaný viac ako hodinu pred tým, ako ste ho otvorili, pravdepodobne vypršal, a karta to uvádza.</p>
+<p>Karta sa zobrazí pri vhodnom overení podpisovej domény podľa výsledkov od dôveryhodného poštového poskytovateľa. Podpisová doména musí zodpovedať doméne odosielateľa alebo jej nadradenej doméne. Toto overenie nepotvrdzuje totožnosť konkrétnej osoby. Karta sa nezobrazuje v priečinkoch <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> a <b data-text="folder-drafts"></b>, ani keď váš poskytovateľ podpisy neoznamuje.</p>
+<p>Karta upozorní, ak je dátum správy pri otvorení starší ako hodinu, pretože platnosť kódu už mohla skončiť. Skutočnú platnosť kódu však aplikácia neoveruje.</p>
 <h2>Kódy v upozorneniach</h2>
-<p>Ak chcete vidieť kód v upozornení na novú správu, zapnite <b data-text="ui-codes-in-notifications"></b> v ponuke <b data-settings="general"></b>. Na začiatku je vypnuté, pretože upozornenie možno prečítať aj na zamknutej obrazovke.</p>
+<p>Ak chcete vidieť kód v upozornení na novú správu, zapnite <b data-text="ui-codes-in-notifications"></b> v ponuke <b data-settings="general"></b>. Predvolene je táto možnosť vypnutá, pretože upozornenie možno prečítať aj na zamknutej obrazovke. Kód sa pridá iba pri dostatočne novej a malej správe, ktorej obsah sa stihne stiahnuť pred zobrazením upozornenia. Platia aj všeobecné podmienky upozornení.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

@@ -1,16 +1,15 @@
-<!--review--><h1>Erori de criptare</h1>
-<p class="summary">Ce faceți când un server nu oferă criptare sau o cere acolo unde este dezactivată.</p>
+<h1>Erori de criptare</h1>
+<p class="summary">Ce puteți face dacă serverul nu oferă criptare sau dacă o solicită, dar aceasta este dezactivată în setările contului.</p>
 <h2>„the server does not offer STARTTLS”</h2>
-<p>Contul este setat la STARTTLS, dar serverul nu a oferit criptare. Inbox Classic s-a oprit, așa că parola nu a fost trimisă.</p>
+<p>Contul este setat la STARTTLS, dar serverul nu a oferit criptare. Inbox Classic a întrerupt conectarea, astfel că parola nu a fost transmisă.</p>
 <ol>
     <li>Deschideți proprietățile contului din <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Setați securitatea la SSL/TLS, cu portul 993 pentru e-mailul primit sau 465 pentru cel trimis.</li>
+    <li>Consultați setările furnizorului. Dacă acceptă SSL/TLS, folosiți portul indicat de acesta, de obicei 993 pentru primire sau 465 pentru trimitere.</li>
     <li>Faceți clic pe <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Dacă nimic altceva nu funcționează, serverul nu poate fi folosit în siguranță.</p>
+<p>Dacă nu reușiți să vă conectați, verificați cu furnizorul adresa serverului, portul și metodele de criptare acceptate.</p>
 <h2>„the server takes the password only over an encrypted connection”</h2>
-<p>Serverul de ieșire este setat la <b data-text="ui-security-none"></b>. Parola este în regulă. Schimbați <b data-text="ui-field-smtp-security"></b> în STARTTLS cu portul 587 sau SSL/TLS cu portul 465.</p>
+<p>Serverul de ieșire este setat la <b data-text="ui-security-none"></b>. Serverul cere o conexiune criptată înainte să accepte autentificarea; acest răspuns nu confirmă că parola este corectă. Schimbați <b data-text="ui-field-smtp-security"></b> conform setărilor furnizorului, de obicei în STARTTLS cu portul 587 sau SSL/TLS cu portul 465.</p>
 <h2>Avertismentul despre o conexiune fără criptare</h2>
-<p>Când alegeți <b data-text="ui-security-none"></b>, Inbox Classic vă avertizează că oricine interceptează traficul de rețea vă poate citi parola și mesajele. Continuați doar pentru un server de pe propriul computer sau din rețeaua locală.</p>
+<p>Când alegeți <b data-text="ui-security-none"></b>, Inbox Classic vă avertizează că oricine interceptează traficul de rețea vă poate citi parola și mesajele. Faptul că serverul este în rețeaua locală nu protejează conexiunea. Folosiți o conexiune fără criptare numai dacă înțelegeți și acceptați expunerea datelor, de exemplu pentru un server de pe propriul computer.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->
