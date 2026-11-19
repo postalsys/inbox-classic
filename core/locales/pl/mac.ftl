@@ -4,56 +4,35 @@
 
 ## The app and its menus
 
-# review: new
 mac-quit = Zakończ Inbox Classic
-# review: new
 mac-settings = Ustawienia…
-# review: new
 mac-services = Usługi
-# review: new
 mac-hide = Ukryj Inbox Classic
-# review: new
 mac-hide-others = Ukryj pozostałe
-# review: new
 mac-show-all = Pokaż wszystkie
-# review: new
 mac-check-updates = Sprawdź uaktualnienia…
-# review: new
 mac-close-window = Zamknij okno
-# review: new
 mac-redo = Powtórz
-# review: new
 mac-cut = Wytnij
-# review: new
 mac-paste = Wklej
-# review: new
 mac-menu-window = Okno
-# review: new
 mac-minimize = Minimalizuj
-# review: new
 mac-zoom = Zmień rozmiar
-# review: new
 mac-no-updates = Ta wersja Inbox Classic nie obsługuje automatycznych uaktualnień. Pobierz najnowszą wersję z inboxclassic.com.
 
 ## Settings
 
-# review: new
 mac-settings-title = Ustawienia
-# review: new
 mac-check-updates-automatically = Automatycznie sprawdzaj uaktualnienia
-# review: new
 mac-settings-updates = Uaktualnienia
 
 ## Dialogs
 
-# review: new
 mac-choose = Wybierz
 
 ## The main window
 
-# review: new
-mac-still-running-detail = Inbox Classic nadal sprawdza nową pocztę w tle. Kliknij jego ikonę w Docku, aby otworzyć aplikację.
-# review: new
+mac-still-running-detail = Inbox Classic nadal sprawdza w tle, czy są nowe wiadomości. Kliknij jego ikonę w Docku, aby otworzyć program.
 mac-outbox-waiting =
     { $count ->
         [one] { $count } wiadomość w Skrzynce nadawczej
@@ -61,30 +40,22 @@ mac-outbox-waiting =
         [many] { $count } wiadomości w Skrzynce nadawczej
        *[other] { $count } wiadomości w Skrzynce nadawczej
     }
-# review: new
 mac-sending = Wysyłanie: { $subject }…
-# review: new
-mac-checking = Sprawdzanie nowych wiadomości na koncie { $account }…
-# review: new
+mac-checking = Sprawdzanie poczty na koncie „{ $account }”…
 mac-account-said = { $account }: { $message }
-# review: new
 mac-not-bundle = Ta kopia Inbox Classic nie jest pakietem aplikacji, więc nie może być domyślną aplikacją pocztową.
-# review: new
 mac-not-made-default = Nie ustawiono Inbox Classic jako domyślnej aplikacji pocztowej: { $reason }
-# review: new
 mac-tool-search = Szukaj
 
 ## The folders and the message list
 
-# review: new
 mac-still-indexing-more =
     { $count ->
-        [one] Tekst { $count } wiadomości jest jeszcze indeksowany, więc wkrótce może zostać znalezionych więcej.
-        [few] Tekst { $count } wiadomości jest jeszcze indeksowany, więc wkrótce może zostać znalezionych więcej.
-        [many] Tekst { $count } wiadomości jest jeszcze indeksowany, więc wkrótce może zostać znalezionych więcej.
-       *[other] Tekst { $count } wiadomości jest jeszcze indeksowany, więc wkrótce może zostać znalezionych więcej.
+        [one] Treść { $count } wiadomości jest jeszcze indeksowana. Wkrótce mogą pojawić się kolejne wyniki.
+        [few] Treść { $count } wiadomości jest jeszcze indeksowana. Wkrótce mogą pojawić się kolejne wyniki.
+        [many] Treść { $count } wiadomości jest jeszcze indeksowana. Wkrótce mogą pojawić się kolejne wyniki.
+       *[other] Treść { $count } wiadomości jest jeszcze indeksowana. Wkrótce mogą pojawić się kolejne wyniki.
     }
-# review: new
 mac-results-everywhere =
     { $count ->
         [0] Brak wyników dla „{ $words }” we wszystkich folderach
@@ -93,16 +64,14 @@ mac-results-everywhere =
         [many] { $count } wyników dla „{ $words }” we wszystkich folderach
        *[other] { $count } wyników dla „{ $words }” we wszystkich folderach
     }
-# review: new
 mac-results-in =
     { $count ->
-        [0] Brak wyników dla „{ $words }” w folderze { $folder }
-        [one] { $count } wynik dla „{ $words }” w folderze { $folder }
-        [few] { $count } wyniki dla „{ $words }” w folderze { $folder }
-        [many] { $count } wyników dla „{ $words }” w folderze { $folder }
-       *[other] { $count } wyników dla „{ $words }” w folderze { $folder }
+        [0] Brak wyników dla „{ $words }” (zakres: „{ $folder }”)
+        [one] { $count } wynik dla „{ $words }” (zakres: „{ $folder }”)
+        [few] { $count } wyniki dla „{ $words }” (zakres: „{ $folder }”)
+        [many] { $count } wyników dla „{ $words }” (zakres: „{ $folder }”)
+       *[other] { $count } wyników dla „{ $words }” (zakres: „{ $folder }”)
     }
-# review: new
 mac-still-indexing =
     { $count ->
         [one] trwa indeksowanie tekstu { $count } wiadomości
@@ -110,47 +79,31 @@ mac-still-indexing =
         [many] trwa indeksowanie tekstu { $count } wiadomości
        *[other] trwa indeksowanie tekstu { $count } wiadomości
     }
-# review: new
 mac-folder-unread = { $folder }, nieprzeczytane: { $count }
-# review: new
 mac-import-messages = Importuj wiadomości
-# review: new
 mac-save-messages = Zapisz wiadomości
-# review: new
 mac-save-attachments-menu = Zapisz załączniki…
-# review: new
 mac-files-not-saved =
     { $count ->
-       *[other] Nie udało się zapisać { $failed } z { $count } plików.
+       *[other] Nie udało się zapisać plików: { $failed } z { $count }.
     }
-# review: new
-mac-no-calendar-app = Na tym Macu nie ma aplikacji kalendarza, która otworzy zaproszenia (pliki .ics).
-# review: new
+mac-no-calendar-app = Na tym Macu nie ma aplikacji kalendarza obsługującej zaproszenia (pliki .ics).
 mac-file-not-saved = Nie udało się zapisać pliku.
-# review: new
-mac-unsubscribing = Wypisywanie z { $target }…
+mac-unsubscribing = Wysyłanie prośby o wypisanie: { $target }…
 mac-loading-list = Wczytywanie…
 
 ## The compose window
 
-# review: new
 mac-bold = Pogrubienie
-# review: new
 mac-italic = Kursywa
-# review: new
 mac-underline = Podkreślenie
-# review: new
 mac-bcc = UDW
-# review: new
-mac-command-click-to-open = ⌘-kliknięcie otwiera
-# review: new
+mac-command-click-to-open = ⌘-kliknięcie, aby otworzyć
 mac-saving-to-drafts = Zapisywanie w folderze Wersje robocze…
-# review: new
 mac-dont-save = Nie zachowuj
 
 ## The reading pane
 
-# review: new
 mac-files =
     { $count ->
         [one] { $count } plik
@@ -161,48 +114,30 @@ mac-files =
 
 ## Accounts
 
-# review: new
 mac-next = Dalej
-# review: new
 mac-name-placeholder = Anna Kowalska
-# review: new
 mac-more-sign-in-options = Więcej opcji logowania…
-# review: new
 mac-add-sign-in-app = Dodaj aplikację logowania…
-# review: new
 mac-looking-up = Wyszukiwanie ustawień dla { $domain }…
-# review: new
 mac-add-button = Dodaj…
-# review: new
 mac-properties-button = Właściwości…
-# review: new
-mac-signature-button = Podpis…
-# review: new
+mac-signature-button = Tekst podpisu…
 mac-security-button = Zabezpieczenia…
-# review: new
 mac-sign-in-apps-button = Aplikacje logowania…
 
 ## AI agents
 
-# review: new
 mac-forget-program = Usunąć ten program i historię działań jego agentów?
-# review: new
 mac-forget-program-detail = Uprawnienia programu zostaną usunięte. Przy następnym połączeniu Inbox Classic ponownie poprosi o zgodę.
 
 ## Sign-in apps
 
-# review: new
 mac-checking-issuer = Sprawdzanie { $issuer }…
-# review: new
 mac-edit-button = Edytuj…
-# review: new
-mac-use-for-new-accounts = Używaj { $name } dla nowych kont
-# review: new
+mac-use-for-new-accounts = Proponuj aplikację „{ $name }” przy dodawaniu kont
 mac-built-in = { $name } (wbudowana)
 
 ## Other windows
 
-# review: new
 mac-new-folder-button = Nowy folder…
-# review: new
 mac-edit-link = Edytuj link…
