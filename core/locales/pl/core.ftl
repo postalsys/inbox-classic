@@ -631,10 +631,10 @@ agent-undo-since-detail = Program spróbuje przywrócić poprzednie foldery, sta
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Niczego nie cofnięto.
-    [one] Cofnięto 1 zmianę.
-    [few] Cofnięto { $count } zmiany.
-    [many] Cofnięto { $count } zmian.
-   *[other] Cofnięto { $count } zmian.
+    [one] Cofnięto 1 zmianę, w całości lub częściowo.
+    [few] Cofnięto { $count } zmiany, w całości lub częściowo.
+    [many] Cofnięto { $count } zmian, w całości lub częściowo.
+   *[other] Cofnięto { $count } zmian, w całości lub częściowo.
 }
 agent-undo-left-gone = { $count ->
     [one] Nie znaleziono 1 wiadomości w oczekiwanym miejscu.
@@ -686,10 +686,10 @@ agent-reads-messages = { $count ->
    *[other] przeczytano { $count } wiadomości
 }
 agent-reads-attachments = { $count ->
-    [one] odczytano zawartość 1 załącznika
-    [few] odczytano zawartość { $count } załączników
-    [many] odczytano zawartość { $count } załączników
-   *[other] odczytano zawartość { $count } załączników
+    [one] poproszono o zawartość 1 załącznika
+    [few] poproszono o zawartość { $count } załączników
+    [many] poproszono o zawartość { $count } załączników
+   *[other] poproszono o zawartość { $count } załączników
 }
 agent-reads-searches = { $count ->
     [one] wyszukiwano raz
@@ -711,7 +711,7 @@ agent-read-conversation = { $count ->
     [many] Przeczytano konwersację „{ $subject }” ({ $count } wiadomości)
    *[other] Przeczytano konwersację „{ $subject }” ({ $count } wiadomości)
 }
-agent-read-attachment = Odczytano zawartość załącznika „{ $name }” z wiadomości „{ $subject }”
+agent-read-attachment = Poproszono o zawartość załącznika „{ $name }” z wiadomości „{ $subject }”
 agent-read-search = { $count ->
     [one] Wyszukano „{ $query }”: 1 wiadomość
     [few] Wyszukano „{ $query }”: { $count } wiadomości
@@ -740,7 +740,7 @@ agent-terminal-program-mac = Program uruchomiony z aplikacji { $terminal }
 agent-terminal-program-windows = Program uruchomiony z terminala ({ $terminal })
 agent-terminal-program-linux = Program uruchomiony z terminala ({ $terminal })
 agent-connect-title-terminal = { $programs } chcą korzystać z Twojej poczty
-agent-connect-terminal-detail = Wszyscy agenci AI uruchamiani z tego terminala współdzielą dostęp, na który tu zezwolisz. Aby dać jednemu z nich osobny dostęp, dodaj --name i wybraną przez siebie nazwę do jego argumentów w ustawieniach MCP agenta.
+agent-connect-terminal-detail = Agenci uruchamiani z tego samego rozpoznanego programu terminala współdzielą dostęp, na który tu zezwolisz. Aby zarządzać agentem osobno, dodaj --name i wybraną nazwę do jego argumentów w ustawieniach MCP. Nazwa nie potwierdza tożsamości programu.
 agent-connect-claimed = Program przedstawił się jako { $claimed }. Inbox Classic sprawdził, który program go uruchomił: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -840,7 +840,7 @@ pgp-part-not-signed = Bez podpisu cyfrowego
 pgp-part-not-checked = Nie sprawdzono podpisu cyfrowego
 pgp-part-encrypted = Zaszyfrowana. { $signature }
 pgp-part-no-key = Brak klucza do odszyfrowania tej części
-pgp-part-changed = Wykryto zmianę zaszyfrowanej części. Nie jest wyświetlana
+pgp-part-changed = Nie udało się potwierdzić integralności zaszyfrowanej części. Nie jest wyświetlana
 pgp-part-unprotected = Zaszyfrowana część nie ma ochrony przed zmianami i nie jest wyświetlana
 pgp-part-broken = Nie można odczytać zaszyfrowanej części
 pgp-why-mismatch = Podpis nie pasuje do tego tekstu
@@ -856,10 +856,10 @@ pgp-why-not-key-in-use = Podpisano innym kluczem niż klucz wybrany dla adresu {
 pgp-part-pictures-loaded = { $label }. Obrazy zostały pobrane z internetu
 pgp-error-no-own-key = Nie masz klucza dla { $address }, którym można podpisywać lub szyfrować. Utwórz go w menu Narzędzia > Klucze szyfrowania albo wyłącz Podpisz i Szyfruj.
 pgp-error-missing-keys = { $count ->
-    [one] Brak klucza do szyfrowania wiadomości do odbiorcy: { $addresses }.
-   *[other] Brak kluczy do szyfrowania wiadomości do odbiorców: { $addresses }.
+    [one] Brak odpowiedniego klucza do szyfrowania wiadomości do odbiorcy: { $addresses }.
+   *[other] Brak odpowiednich kluczy do szyfrowania wiadomości do odbiorców: { $addresses }.
 }
-pgp-error-encrypted-quote = Wiadomość zawiera cytowaną lub przekazywaną treść zaszyfrowanej wiadomości, więc można ją wysłać tylko po zaszyfrowaniu. Włącz opcję „Szyfruj” albo usuń tę treść.
+pgp-error-encrypted-quote = Wiadomość zawiera tekst, obrazy lub załączniki z zaszyfrowanej wiadomości, więc można ją wysłać tylko po zaszyfrowaniu. Włącz opcję „Szyfruj” albo usuń całą tę zawartość.
 pgp-error-protect = Nie udało się podpisać ani zaszyfrować wiadomości: { $reason }
 pgp-found-keys = Znaleziono klucze dla adresów: { $addresses }.
 pgp-found-none = Nie znaleziono klucza dla: { $addresses }. Poproś o przesłanie klucza publicznego.
@@ -904,10 +904,10 @@ pgp-recipient-not-found = Nie znaleziono klucza. Ostatnie wyszukiwanie: { $date 
 pgp-recipient-unusable = Nie można użyć klucza: { $state }
 pgp-recipients-intro = Wiadomość jest szyfrowana kluczem każdego odbiorcy oraz Twoim.
 pgp-recipients-intro-missing = { $count ->
-    [one] Jeden odbiorca nie ma odpowiedniego klucza do szyfrowania. Znajdź jego klucz, usuń odbiorcę z wiadomości albo wyślij ją bez szyfrowania.
-    [few] { $count } odbiorcy nie mają odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania.
-    [many] { $count } odbiorców nie ma odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania.
-   *[other] { $count } odbiorców nie ma odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania.
+    [one] Jeden odbiorca nie ma odpowiedniego klucza do szyfrowania. Znajdź jego klucz, usuń odbiorcę z wiadomości albo wyślij ją bez szyfrowania, jeśli nie zawiera tekstu, obrazów ani załączników z zaszyfrowanych wiadomości.
+    [few] { $count } odbiorcy nie mają odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania, jeśli nie zawiera tekstu, obrazów ani załączników z zaszyfrowanych wiadomości.
+    [many] { $count } odbiorców nie ma odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania, jeśli nie zawiera tekstu, obrazów ani załączników z zaszyfrowanych wiadomości.
+   *[other] { $count } odbiorców nie ma odpowiednich kluczy do szyfrowania. Znajdź ich klucze, usuń tych odbiorców z wiadomości albo wyślij ją bez szyfrowania, jeśli nie zawiera tekstu, obrazów ani załączników z zaszyfrowanych wiadomości.
 }
 pgp-details-part = Część { $number }: { $label }
 attachment-from-part = Z części { $number }: { $label }
@@ -1131,7 +1131,7 @@ setup-account-servers = { $imap } i { $smtp } ({ $signin })
 setup-file-name = Ustawienia i konta Inbox Classic
 setup-skipped-unreachable = Pominięto: { $name }. Nie udało się sprawdzić konfiguracji usługi logowania. Dodaj ponownie potrzebną aplikację w oknie Aplikacje logowania.
 attachment-runs-programs = Plik „{ $name }” może uruchamiać programy, więc Inbox Classic go nie otwiera. Zapisz go, a potem otwórz samodzielnie, jeśli ufasz jego źródłu.
-attachment-decrypted-note = Ten załącznik pochodzi z zaszyfrowanej wiadomości. Aby otworzyć go w innym programie, Inbox Classic zapisuje jego niezaszyfrowaną kopię w folderze tymczasowym przeznaczonym dla Ciebie. Przy uruchamianiu programu kopie starsze niż jeden dzień są usuwane.
+attachment-decrypted-note = Ten załącznik pochodzi z zaszyfrowanej wiadomości. Aby otworzyć go w innym programie, Inbox Classic zapisuje jego niezaszyfrowaną kopię w folderze tymczasowym przeznaczonym dla Ciebie. Przy uruchamianiu programu program próbuje usunąć kopie starsze niż jeden dzień.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Serwer nie przeniósł wiadomości do folderu { $folder }, więc { $messages } jest znowu w folderze { $from }: { $reason }
@@ -1200,7 +1200,7 @@ preview-tile-format = Obrazy { $format } nie są jeszcze pokazywane
 preview-tile-password = Plik jest zabezpieczony hasłem. Otwórz go, aby wpisać hasło
 preview-tile-too-large = Przekroczono limit rozmiaru podglądów
 preview-tile-unreadable = Nie można wyświetlić
-preview-tile-timed-out = Przekroczono czas wyświetlania podglądu
+preview-tile-timed-out = Przygotowanie podglądu trwało zbyt długo
 preview-tile-crashed = Podgląd niedostępny: poprzednia próba wyświetlenia tego pliku nie została zakończona
 preview-tile-off = Podgląd wyłączony do ponownego uruchomienia Inbox Classic
 preview-not-printed = Plik { $name } ({ $details }) nie jest uwzględniany na wydruku. Otwórz go, aby go wydrukować.

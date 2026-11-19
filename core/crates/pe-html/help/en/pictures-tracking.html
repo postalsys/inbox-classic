@@ -1,19 +1,19 @@
 <h1>Pictures and tracking</h1>
 <p class="summary">Why pictures from the internet are blocked, and how to show them for a message or a sender you trust.</p>
-<p>A message can show pictures the sender keeps on the internet. Downloading such a picture tells the sender that you opened the message, when, and from where. So Inbox Classic does not download them.</p>
+<p>A message can show pictures the sender keeps on the internet. Downloading such a picture tells the sender that you opened the message, when, and from where. Inbox Classic blocks them by default.</p>
 <p>Pictures sent inside the message are shown, as they tell the sender nothing.</p>
-<p>Inbox Classic draws these pictures itself, as it does attached pictures, so nothing in them runs. A picture it cannot draw (such as HEIC) shows as blank space. Animated pictures show their first frame. Fonts sent with a message are not used.</p>
+<p>Inbox Classic converts supported embedded pictures into static images, as it does for attachment previews. A picture it cannot draw (such as HEIC) shows as blank space. Animated pictures show their first frame. Fonts sent with a message are not used.</p>
 <p>When a message has pictures from the internet, a bar across it says some pictures have been blocked. To see them for a message you trust:</p>
 <ul>
     <li><!--os:windows,mac-->Click the bar.<!--/os--><!--os:linux-->Click <b data-text="gtk-download-pictures"></b> on the bar.<!--/os--></li>
     <li>Or choose <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>This shows the pictures of that message only. The next message starts blocked again.</p>
+<p>This permits pictures for the current message. Other messages follow your automatic-loading and trusted-sender settings.</p>
 <h2>Senders you trust</h2>
 <p>To get a sender’s pictures every time, <!--os:windows-->click the arrow at the right end of the bar<!--/os--><!--os:mac-->click the arrow beside <b data-text="cmd-pictures"></b> on the bar<!--/os--><!--os:linux-->click the arrow beside <b data-text="gtk-download-pictures"></b> on the bar<!--/os-->. Choose to always download pictures from that sender, or from everyone at their domain.</p>
-<p>Their pictures then load by themselves, but only when your mail provider confirms the message really comes from that domain. A message that only pretends to be from them still asks, and the bar says the sender could not be confirmed. In <b data-text="folder-junk"></b>, pictures never load by themselves.</p>
+<p>Their pictures then load by themselves, but only when your mail provider confirms the message really comes from that domain. A message without domain confirmation still asks, and the bar explains that it could not confirm the domain. Domain confirmation does not identify the individual sender. In <b data-text="folder-junk"></b> and encrypted message parts, remote pictures still require an explicit request.</p>
 <p>To take a sender off the list, use <b data-text="ui-trusted-senders-button"></b> in <b data-settings="reading"></b>.</p>
 <h2>Pictures in every message</h2>
-<p><b data-text="ui-pictures-always-option"></b> in <b data-settings="reading"></b> downloads the pictures of every message, except in <b data-text="folder-junk"></b>. It is off at first, because senders can then tell when you read their messages.</p>
-<p>A brand logo beside the header is not a tracking picture. It is approved by your mail server, and it comes from the brand, not from the sender’s pictures.</p>
+<p><b data-text="ui-pictures-always-option"></b> in <b data-settings="reading"></b> allows automatic remote pictures except in <b data-text="folder-junk"></b> and encrypted message parts. It is off at first, because senders can then tell when you read their messages.</p>
+<p>A brand logo beside the header is separate from the message’s remote pictures. Your mail server approves it, and Inbox Classic caches it. A logo download or refresh still contacts its server.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>

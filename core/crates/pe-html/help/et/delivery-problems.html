@@ -1,5 +1,5 @@
 <h1>Kirjad, mida ei toimetatud kohale</h1>
-<p class="summary">Kui teie saadetud kiri tuleb tagasi või viibib, selgitab Inbox Classic, miks, ja mida saate teha.</p>
+<p class="summary">Inbox Classic selgitab tuvastatud kättetoimetamise tõrke- ja viivitusteateid ning soovitab edasisi samme.</p>
 <p>Kättetoimetamise teatel on kirjade loendis kätte toimetamata märk. Selle avamisel ütleb kirja kohal olev kaart, kas teie kirja ei toimetatud kohale või see ainult viibib.</p>
 <img src="picture:bounce-1-failed" alt="Kättetoimetamise teade kaardiga, mis ütleb, et kirja ei toimetatud kohale, ning nimetab adressaadi, põhjuse ja mida teha">
 <p>Kaart loetleb iga adressaadi koos põhjusega lihtsate sõnadega ja selgitab, mida saate teha. Jaotis <b data-text="bounce-details"></b> näitab vastuvõtva serveri enda sõnu.</p>
@@ -7,13 +7,13 @@
     <li>Nupp <b data-text="bounce-show-message"></b> valib algse saadetud kirja, kui Inbox Classic selle leiab.</li>
     <li>Viivituse korral valib selle nupp <b data-text="bounce-show-delayed"></b>. Viivitus ei ole lõplik saatmistõrge. Saatev server proovib tavaliselt veel; ärge saatke kirja pelgalt viivitusteate põhjal uuesti.</li>
 </ul>
-<p>Mõned sagedased põhjused:</p>
+<p>Sagedased põhjused ja juhised lõpliku tõrke korral. Kui kiri ainult viibib, oodake enne uuesti saatmist tulemus ära:</p>
 <table>
     <tr><th>Kaart ütleb</th><th>Mida teha</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Kontrollige aadressi õigekirja või küsige inimeselt aadressi, mida ta praegu kasutab.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Saatke kiri mõne päeva pärast uuesti või võtke inimesega ühendust muul viisil.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Lõpliku tõrketeate korral saatke kiri uuesti ilma selleta, mis näib rämpspostina, näiteks paljude linkide või suure manuseta.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Edastage teade oma meiliteenuse pakkujale. Probleem pole kirjas.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Võtke saajaga muul viisil ühendust ja paluge tal enne uut saatmiskatset postkastis ruumi vabastada.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Lugege serveri selgitust. Kui server lükkas tagasi kirja sisu, muutke seda enne uut saatmiskatset.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Edastage teade oma meiliteenuse pakkujale. Teate kohaselt on saatva serveri aadress blokeeritud.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Ajutise viivituse korral proovib saatev server tavaliselt uuesti. Lõpliku tõrketeate korral saatke kiri hiljem uuesti.</td></tr>
 </table>
 <p>Kõigi kättetoimetamise teadete leidmiseks otsige <code>is:bounce</code>. Põhjus leitakse teie arvutis ja midagi ei saadeta kuhugi.</p>

@@ -66,8 +66,8 @@ fn preview_answer(call: &Call, query: &str, preview: &BulkPreview) -> Result<Val
     }
     let note = match &preview.ticket {
         Some(_) => format!(
-            "Nothing was changed yet. Call apply_to_search again with only this token, within {} minutes, to change \
-             exactly these {} messages (not mail that arrives since). The token works once.",
+            "Nothing was changed yet. Call apply_to_search again with only this token, within {} minutes, to recheck \
+             these {} messages and change those still eligible, excluding later arrivals. The token works once.",
             TICKET_SECONDS / 60,
             preview.count
         ),
@@ -101,8 +101,8 @@ pub(super) async fn apply_to_search(call: &Call<'_>, args: &Args<'_>) -> Outcome
             "changed": done.changed,
             "left_alone": done.left,
             "change_id": done.entry,
-            "note": "The user can take all of it back with one Undo in Inbox Classic, and the agent with undo_my_change \
-                     and this change_id. Messages changed or moved since the dry run were left alone.",
+            "note": "The user can try to undo this entry in Inbox Classic, and the agent with undo_my_change and this \
+                     change_id. Messages that no longer met the action conditions were skipped. Undo can be partial.",
         }));
     }
     let query = args.string("query");
@@ -137,8 +137,9 @@ pub(super) fn undo_my_change(call: &Call, args: &Args) -> Outcome {
         "no_longer_where_left": report.gone,
         "changed_since": report.changed,
         "already_sent": report.sent,
-        "note": "Each message went back only while it was as the change left it: what the user or the server changed \
-                 since was left as it is.",
+        "note": "Undo checks the state relevant to each action and can be partial. Removing a flag can also remove a \
+                 color changed later. For sending entries, already_sent counts messages no longer in the Outbox, \
+                 including messages removed without sending; it does not confirm delivery.",
     }))
 }
 

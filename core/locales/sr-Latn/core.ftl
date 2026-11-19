@@ -140,7 +140,7 @@ bounce-geo-blocked-why = Server primaoca ne prima poštu iz zemlje ili mreže u 
 bounce-geo-blocked-do = Kontaktirajte primaoca na drugi način ili se obratite pružaocu usluge e-pošte.
 bounce-relay-denied = Server je odbio prosleđivanje poruke
 bounce-relay-denied-why = Server je odbio da isporuči poruku dalje, često zato što je poslata bez prijave ili preko servera koji ne opslužuje ovog primaoca.
-bounce-relay-denied-do = Proverite podešavanja servera odlazne pošte u meniju Datoteka > Nalozi. Proverite i da li je uključena prijava na taj server.
+bounce-relay-denied-do = U podešavanjima naloga proverite server odlazne pošte i da li je uključena prijava na taj server.
 bounce-auth-failure = Domen pošiljaoca nije moguće potvrditi
 bounce-auth-failure-why = Server primaoca nije mogao da potvrdi da je poruka zaista stigla sa vašeg domena (SPF, DKIM ili DMARC).
 bounce-auth-failure-do = Prosledite ovo obaveštenje osobi koja upravlja e-poštom vašeg domena da proveri podešavanja. U međuvremenu pokušajte da šaljete preko servera svog pružaoca usluge.
@@ -624,9 +624,9 @@ agent-undo-since-detail = Inbox Classic pokušava da vrati poruke u prethodne fa
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Ništa nije opozvano.
-    [one] Opozvana je { $count } promena.
-    [few] Opozvane su { $count } promene.
-   *[other] Opozvano je { $count } promena.
+    [one] Opozvana je { $count } promena, u potpunosti ili delimično.
+    [few] Opozvane su { $count } promene, u potpunosti ili delimično.
+   *[other] Opozvano je { $count } promena, u potpunosti ili delimično.
 }
 agent-undo-left-gone = { $count ->
     [one] { $count } poruka više nije bila u fascikli u koju je premeštena.
@@ -673,9 +673,9 @@ agent-reads-messages = { $count ->
    *[other] pročitano { $count } poruka
 }
 agent-reads-attachments = { $count ->
-    [one] pročitan { $count } prilog
-    [few] pročitana { $count } priloga
-   *[other] pročitano { $count } priloga
+    [one] zatražen { $count } prilog
+    [few] zatražena { $count } priloga
+   *[other] zatraženo { $count } priloga
 }
 agent-reads-searches = { $count ->
     [one] { $count } pretraga
@@ -694,7 +694,7 @@ agent-read-conversation = { $count ->
     [few] Pročitan razgovor „{ $subject }“ ({ $count } poruke)
    *[other] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
 }
-agent-read-attachment = Pročitan prilog „{ $name }“ iz poruke „{ $subject }“
+agent-read-attachment = Zatražen prilog „{ $name }“ iz poruke „{ $subject }“
 agent-read-search = { $count ->
     [one] Pretraga za „{ $query }“: { $count } poruka
     [few] Pretraga za „{ $query }“: { $count } poruke
@@ -987,7 +987,7 @@ setup-account-no-app = Nalog koristi aplikaciju za prijavljivanje { $app }, koja
 setup-invalid-address = „{ $address }“ nije adresa e-pošte.
 setup-invalid-server = podešavanja za { $server } imaju nevažeći naziv servera, port ili nepoznatu bezbednosnu opciju
 setup-invalid-user = Nalog nema korisničko ime.
-setup-invalid-sign-in = stavka koristi način prijavljivanja koji Inbox Classic ne podržava
+setup-invalid-sign-in = stavka ima nevažeća podešavanja prijavljivanja
 setup-error-empty = Datoteka je prazna.
 setup-error-too-large = Datoteka podešavanja premašuje dozvoljenu veličinu.
 setup-error-not-setup = Ova datoteka nije datoteka podešavanja programa Inbox Classic.

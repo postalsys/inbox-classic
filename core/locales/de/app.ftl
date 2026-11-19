@@ -172,7 +172,7 @@ ui-col-status = Status
 ui-outbox-title = Postausgang
 ui-outbox-status-waiting = Wartet
 ui-outbox-status-not-sent = Nicht gesendet: { $reason }
-ui-outbox-status-agent = Von einem KI-Agenten zum Senden vorgemerkt; wird um { $time } gesendet
+ui-outbox-status-agent = Von einem KI-Agenten zum Senden vorgemerkt; geplanter Versand um { $time }
 ui-outbox-delete-ask = Diese Nachricht löschen, ohne sie zu senden?
 ui-open-link = Link öffnen
 ui-edit-link = Link bearbeiten...
@@ -293,7 +293,7 @@ ui-found-autodiscover = Diese Einstellungen wurden von Microsoft Autodiscover (E
 ui-found-other = Diese Einstellungen wurden für diese Adresse gefunden.
 ui-app-password-needed = { $provider } akzeptiert Ihr normales Passwort hier nicht. Falls Ihr Konto App-Passwörter für E-Mails unterstützt, erstellen Sie eines in den Kontoeinstellungen bei { $provider } und geben Sie es im nächsten Formular ein. Für Outlook.com und Microsoft 365 verwenden Sie die Anmeldung im Browser.
 ui-app-password-open = Die Anleitung von { $provider } im Browser öffnen?
-ui-plain-warning = Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
+ui-plain-warning = Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Fahren Sie nur fort, wenn die Verbindung auf andere Weise geschützt ist; ein lokales Netzwerk allein bietet keine Verschlüsselung.
 ui-continue-ask = Fortfahren?
 ui-add-sign-in-app = Anmelde-App hinzufügen...
 ui-turned-off = Die Option „{ $name }“ ist auf diesem Computer deaktiviert.
@@ -447,7 +447,7 @@ ui-undo-since-button = Änderungen zurücknehmen…
 ui-undo-since-span = Änderungen dieses Programms zurücknehmen:
 ui-take-back = Zurücknehmen
 ui-rules-title = Nachrichtenregeln
-ui-rules-intro = Regeln sortieren neu eingehende Nachrichten, solange Inbox Classic läuft. Passende Regeln werden der Reihe nach angewendet. Sobald eine Regel eine Nachricht aus dem Posteingang verschiebt, werden für diese Nachricht keine weiteren Regeln ausgeführt.
+ui-rules-intro = Regeln verarbeiten neu eingehende Nachrichten, solange Inbox Classic läuft. Passende Regeln werden der Reihe nach angewendet. Sobald eine Regel eine Nachricht aus dem Posteingang verschiebt, werden für diese Nachricht keine weiteren Regeln ausgeführt.
 ui-rules-none = Noch keine Regeln. Klicken Sie auf „Neu“, um eine zu erstellen.
 ui-rule-new = &Neu...
 ui-rule-edit = &Bearbeiten...
@@ -475,8 +475,8 @@ ui-rule-apply-now = Auch auf die Nachrichten anwenden, die schon im &Posteingang
 ui-rule-delete-ask = Die Regel „{ $name }“ löschen?
 ui-create-rule = Regel erstellen...
 ui-rules-applied = { $count ->
-    [one] 1 Nachricht nach Ihren Regeln sortiert
-   *[other] { $count } Nachrichten nach Ihren Regeln sortiert
+    [one] 1 Nachricht nach Ihren Regeln verarbeitet
+   *[other] { $count } Nachrichten nach Ihren Regeln verarbeitet
 }
 ui-col-rule-matches = Kriterien
 ui-clear-button = &Leeren
@@ -596,7 +596,7 @@ ui-sending-in = { $subject } wird in { $count ->
 } gesendet
 ui-send-undone = { $subject } wurde nicht gesendet. Die Nachricht ist wieder zur Bearbeitung geöffnet.
 ui-send-too-late = Das Senden von { $subject } kann nicht mehr rückgängig gemacht werden.
-ui-outbox-status-undo = Wird um { $time } gesendet
+ui-outbox-status-undo = Geplanter Versand um { $time }
 ui-download-note = Vorab heruntergeladene Nachrichten lassen sich sofort öffnen. Bei überschrittenem Speicherlimit werden ältere zwischengespeicherte Nachrichtentexte entfernt und bei Bedarf erneut geladen. Entwürfe und seit dem Programmstart geöffnete Nachrichten sind ausgenommen; das Limit kann daher überschritten werden.
 ui-attachment-downloading = Diese Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald der Download abgeschlossen ist.
 ui-trusted-senders-button = &Vertrauenswürdige Absender...

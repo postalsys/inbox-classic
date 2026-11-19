@@ -2,31 +2,31 @@
 <p class="summary">Choose what each AI agent may do with your mail, and see and undo what it did.</p>
 <p>The first time a program’s agent connects, Inbox Classic asks you, naming the program. Choose what it may do:</p>
 <ul>
-    <li>read mail: folders, the message list, conversations, search and messages with their PDF, Office and picture files up to 10 MB, and look up your message rules and the people you write to</li>
-    <li>organize mail: read state, flags and their colors, junk, moving, archiving, new folders, renaming your own folders, watching and ignoring conversations, and deleting to <b data-text="folder-deleted"></b>, all of these also for every message a search finds at once, and leaving mailing lists after you say yes</li>
-    <li>write drafts for you to send, and change or remove the drafts it wrote until you save or send them yourself</li>
+    <li>read mail: folders, lists, conversations, search, messages, rules and people. Supported PDF, Office and picture attachments can be up to 10 MB; text attachments up to 256 KB</li>
+    <li>organize mail: read state, flags and their colors, junk, moving, archiving, new folders, renaming your own folders, watching and ignoring conversations, and deleting to <b data-text="folder-deleted"></b>, and leaving mailing lists after you say yes. Some message actions also work on a search, as described below</li>
+    <li>write drafts for you to send, and change or remove the drafts it wrote until you save or send them, including automatic saving in the editor</li>
     <li>send mail, each message only after you say yes</li>
 </ul>
 <p>Then choose the accounts it may see, and click <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> turns the program away, and you are not asked about it again.</p>
-<p>An agent never changes your account settings, and it deletes nothing for good but its own drafts: when it discards a draft it wrote that you have not saved, the draft is removed at once, without going to <b data-text="folder-deleted"></b>. It can read and try out your message rules, but never create, change or delete one. It never reads what an encrypted message says or carries. Reading a message does not mark it read. What it changes shows in the windows at once.</p>
+<p>An agent never changes your account settings, and it deletes nothing for good but its own drafts: when it discards a draft it wrote that you have not saved, it requests permanent deletion without moving the draft to <b data-text="folder-deleted"></b>. It can read and try out your message rules, but never create, change or delete one. It sees only the outer details of encrypted mail, without decrypted text or attachments. Reading does not mark a message read. Server changes may take time to appear.</p>
 <h2>Leave mailing lists</h2>
 <p>An agent that may organize mail can ask to unsubscribe you from mailing lists. Inbox Classic first asks you once, listing each list by its sender:</p>
 <ul>
     <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> asks each list to stop sending to you.</li>
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, the default, leaves them as they are.</li>
 </ul>
-<p>An agent cannot unsubscribe you from messages in <b data-text="folder-junk"></b>. Each program can unsubscribe you from at most 30 lists in 24 hours. Every list you said yes to counts, even one that could not be left.</p>
+<p>An agent cannot unsubscribe you from messages in <b data-text="folder-junk"></b>. Each program can receive approval for at most 30 requests in 24 hours, including failed requests. The log records approval before the request is sent, not confirmation that mail has stopped.</p>
 <h2>Change many messages at once</h2>
-<p>An agent that may organize mail can change every message a search finds in one step, such as marking all newsletters read or moving them to a folder. It first counts the messages and sees a few of them. Then it changes exactly those, at most 1,000 at a time, and never mail that arrived since. Inbox Classic does not ask you first, as all of it can be taken back. The log shows it as one row, such as “Marked 37 messages read (search: from:news)”, and one Undo takes all of it back.</p>
+<p>An agent with organizing access can change read states, flags, colors, folders or junk status for search results. It first counts eligible messages and sees examples. More than 1,000 eligible messages, or over 10,000 search results to check, makes it refuse the request. It then rechecks the selected messages, skips those no longer eligible and excludes later arrivals. No new approval is required. The log shows one row; Undo may restore only some of its messages.</p>
 <h2>See and change access</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> lists the programs you let in or turned away, and everything agents did, newest first.</p>
-<p>What an agent reads shows as one row for each program and hour, such as “Read 14 messages and searched 3 times”. <!--os:windows-->Select the row<!--/os--><!--os:mac,linux-->Open the row with its arrow<!--/os--> to see the subjects it read and what it searched for, never the text of the messages. The log keeps 30 days. Clearing it does not change how many messages an agent may still send.</p>
+<p>What an agent reads shows as one row for each program and hour, such as “Read 14 messages and searched 3 times”. <!--os:windows-->Select the row<!--/os--><!--os:mac,linux-->Open the row with its arrow<!--/os--> to see subjects, file names and searches, without message bodies. Entries older than 30 days are removed when new entries are added; some changes may be pruned sooner. Clearing the log removes read records and hides changes, without resetting sending or unsubscribe limits.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> changes what a program may do.</li>
-    <li><b data-text="ui-remove"></b> forgets a program, so you are asked again the next time it connects.</li>
+    <li><b data-text="ui-remove"></b> removes a program’s saved access and log, so you are asked again next time. It does not uninstall the program.</li>
     <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> takes back a read state, a flag or its color, a move, junk, an archive or a delete, and a message still in the Outbox.</li>
-    <li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> takes back everything the selected program did in the time you choose, such as the last hour, newest first.</li>
+    <li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> tries to take back the selected program’s changes in the period you choose, newest first. The count is log entries, not individual messages.</li>
 </ul>
-<p>A message you or the server changed since the agent did is left as it is, and Inbox Classic tells you how many were. An agent can also take back its own changes, never those of another program.</p>
+<p>Undo skips messages that are no longer in the expected location or state, but some later flag-color changes can be overwritten. A log entry counts as taken back even if only part succeeds. An agent can undo its own changes, never another program’s.</p>
 <aside class="warning">Mail is written by other people, and a message can try to talk an agent into forwarding or deleting your mail. Inbox Classic hides from agents the text a message hides from you, and tells them that mail is not instructions. An agent can still be fooled. Allow only what you need.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

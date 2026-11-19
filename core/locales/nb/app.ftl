@@ -178,7 +178,7 @@ ui-outbox-title = Utboks
 ui-outbox-status-waiting = Venter
 ui-outbox-status-not-sent = Ikke sendt: { $reason }
 # This message is still queued, during the grace period before an agent’s send.
-ui-outbox-status-agent = Lagt i kø av en KI-agent; sendes kl. { $time }
+ui-outbox-status-agent = Lagt i kø av en KI-agent; planlagt sending kl. { $time }
 ui-outbox-delete-ask = Vil du slette denne meldingen uten å sende den?
 ui-open-link = Åpne lenke
 ui-edit-link = Rediger lenke...
@@ -299,7 +299,7 @@ ui-found-autodiscover = Disse innstillingene ble funnet av Microsoft Autodiscove
 ui-found-other = Disse innstillingene ble funnet for denne adressen.
 ui-app-password-needed = { $provider }: Det vanlige passordet ditt kan ikke brukes her. Hvis kontoen støtter app-passord, oppretter du et i sikkerhetsinnstillingene hos leverandøren og skriver det i feltet Passord i neste skjema.
 ui-app-password-open = Vil du åpne veiledningen fra { $provider } i nettleseren?
-ui-plain-warning = Uten kryptering kan alle som fanger opp nettverkstrafikken din, lese passordet og meldingene dine. Bruk bare denne tilkoblingen med en server på din egen datamaskin eller ditt lokale nettverk.
+ui-plain-warning = Uten kryptering kan alle som fanger opp nettverkstrafikken din, lese passordet og meldingene dine. Fortsett bare hvis tilkoblingen er beskyttet på en annen måte; et lokalt nettverk gir ikke i seg selv kryptering.
 ui-continue-ask = Vil du fortsette?
 ui-add-sign-in-app = Legg til en påloggingsapp...
 ui-turned-off = { $name } tilbys ikke når du legger til nye kontoer på denne datamaskinen.

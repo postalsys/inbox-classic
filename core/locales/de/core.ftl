@@ -566,8 +566,8 @@ agent-undo-since-detail = Nachrichten werden nach Möglichkeit in ihre vorherige
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nichts wurde rückgängig gemacht.
-    [one] 1 Änderung rückgängig gemacht.
-   *[other] { $count } Änderungen rückgängig gemacht.
+    [one] 1 Änderung rückgängig gemacht, vollständig oder teilweise.
+   *[other] { $count } Änderungen rückgängig gemacht, vollständig oder teilweise.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 Nachricht wurde nicht mehr im erwarteten Ordner gefunden.
@@ -609,8 +609,8 @@ agent-reads-messages = { $count ->
    *[other] { $count } Nachrichten gelesen
 }
 agent-reads-attachments = { $count ->
-    [one] 1 Anlage gelesen
-   *[other] { $count } Anlagen gelesen
+    [one] 1 Anlage angefordert
+   *[other] { $count } Anlagen angefordert
 }
 agent-reads-searches = { $count ->
     [one] einmal gesucht
@@ -626,7 +626,7 @@ agent-read-conversation = { $count ->
     [one] Unterhaltung „{ $subject }“ gelesen (1 Nachricht)
    *[other] Unterhaltung „{ $subject }“ gelesen ({ $count } Nachrichten)
 }
-agent-read-attachment = Anlage „{ $name }“ der Nachricht „{ $subject }“ gelesen
+agent-read-attachment = Anlage „{ $name }“ der Nachricht „{ $subject }“ angefordert
 agent-read-search = { $count ->
     [one] Nach „{ $query }“ gesucht: 1 Nachricht
    *[other] Nach „{ $query }“ gesucht: { $count } Nachrichten
@@ -957,7 +957,7 @@ setup-account-servers = { $imap } und { $smtp } ({ $signin })
 setup-file-name = Inbox Classic - Einstellungen und Konten
 setup-skipped-unreachable = „{ $name }“ wurde übersprungen, weil der Anmeldedienst nicht geprüft werden konnte. Fügen Sie die benötigte Anmelde-App unter „Anmelde-Apps“ erneut hinzu.
 attachment-runs-programs = Die Datei „{ $name }“ kann Programme ausführen. Deshalb öffnet Inbox Classic sie nicht. Wenn Sie der Quelle vertrauen, können Sie die Datei speichern und selbst öffnen.
-attachment-decrypted-note = Diese Anlage stammt aus einer verschlüsselten Nachricht. Zum Öffnen legt Inbox Classic eine unverschlüsselte Kopie in Ihrem temporären Ordner ab. Kopien, die älter als einen Tag sind, werden beim Start der App gelöscht.
+attachment-decrypted-note = Diese Anlage stammt aus einer verschlüsselten Nachricht. Zum Öffnen legt Inbox Classic eine unverschlüsselte Kopie in Ihrem temporären Ordner ab. Beim Start versucht die App, Kopien zu löschen, die älter als einen Tag sind.
 undone-move = { $count ->
     [one] Der Server hat { $messages } nicht in { $folder } verschoben, daher ist sie wieder in { $from }: { $reason }
    *[other] Der Server hat { $messages } nicht in { $folder } verschoben, daher sind sie wieder in { $from }: { $reason }
@@ -1007,7 +1007,7 @@ preview-tile-format = { $format }-Bilder werden noch nicht angezeigt
 preview-tile-password = Mit einem Kennwort geschützt: Öffnen, um das Kennwort einzugeben
 preview-tile-too-large = Zu groß zum Anzeigen
 preview-tile-unreadable = Kann nicht angezeigt werden
-preview-tile-timed-out = Das Anzeigen dauerte zu lange
+preview-tile-timed-out = Die Vorschau konnte nicht rechtzeitig vorbereitet werden
 preview-tile-crashed = Keine Vorschau: Beim letzten Anzeigen wurde Inbox Classic beendet oder reagierte nicht mehr
 preview-tile-off = Nicht angezeigt, bis Inbox Classic neu gestartet wird
 preview-not-printed = { $name } ({ $details }) wird nicht gedruckt. Öffnen Sie die Datei, um sie zu drucken.

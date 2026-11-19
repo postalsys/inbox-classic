@@ -175,4 +175,4 @@ gtk-metainfo-description = Inbox Classic ofrece la distribución clásica del co
 gtk-metainfo-feature-sanitized = Los mensajes se muestran sin scripts; las imágenes de internet solo se cargan con su permiso
 gtk-metainfo-feature-search = Busque en el asunto, los remitentes, los destinatarios, los nombres de los adjuntos y el texto con los operadores de búsqueda de Gmail
 gtk-metainfo-feature-replies = Los mensajes citados en las respuestas se muestran contraídos
-gtk-metainfo-feature-offline = Lea el correo descargado sin conexión; las contraseñas se guardan en el llavero del sistema
+gtk-metainfo-feature-offline = Lea sin conexión los mensajes cuya copia local se conserva; los datos de acceso se guardan normalmente en el llavero del sistema, si está disponible

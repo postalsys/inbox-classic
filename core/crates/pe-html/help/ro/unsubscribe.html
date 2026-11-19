@@ -1,5 +1,5 @@
 <h1>Dezabonarea de la o listă de corespondență</h1>
-<p class="summary">Folosiți butonul Dezabonare pentru a nu mai primi mesaje de la o listă de corespondență.</p>
+<p class="summary">Folosiți butonul Dezabonare pentru a cere oprirea mesajelor de la o listă de corespondență.</p>
 <p>Dacă un mesaj de la o listă de corespondență include instrucțiuni de dezabonare, butonul <b data-text="ui-unsubscribe"></b> apare în dreapta antetului.</p>
 <p>Pentru a vă dezabona:</p>
 <ol>
@@ -7,11 +7,11 @@
     <li>Confirmați. În funcție de listă, dezabonarea se face într-unul dintre următoarele moduri:
         <ul>
             <li>Inbox Classic trimite direct serverului listei o cerere de dezabonare. Nu se deschide nicio pagină și nu se trimite niciun e-mail.</li>
-            <li>Inbox Classic pregătește mesajul de dezabonare cerut de listă. Faceți clic pe <b data-text="ui-tb-send"></b> pentru a-l trimite.</li>
+            <li>Inbox Classic pregătește mesajul de dezabonare din contul implicit, cu textul semnăturii acelui cont. Faceți clic pe <b data-text="ui-tb-send"></b> pentru a-l trimite.</li>
             <li>Pagina listei se deschide în browser, unde finalizați dezabonarea.</li>
         </ul>
     </li>
 </ol>
 <p>Pentru o cerere trimisă direct, bara de stare vă anunță că serverul a acceptat solicitarea; aceasta nu confirmă eliminarea imediată din listă. Inbox Classic nu poate verifica rezultatul dezabonării finalizate prin e-mail sau în browser.</p>
-<aside class="note">Inbox Classic poate trimite cererea direct serverului numai dacă semnătura mesajului confirmă instrucțiunile de dezabonare. Astfel, un mesaj falsificat nu poate folosi această funcție pentru a contacta un alt server.</aside>
+<aside class="note">Cererea directă necesită acordul dvs. și o semnătură DKIM confirmată de furnizor care acoperă ambele anteturi de dezabonare necesare. În celelalte cazuri, se pregătește un e-mail sau se deschide o pagină web.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

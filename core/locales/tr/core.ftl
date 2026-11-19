@@ -109,7 +109,7 @@ bounce-mailbox-disabled-why = Adres var, ancak posta kutusu kapatılmış veya a
 bounce-mailbox-disabled-do = Kişiye başka bir yoldan ulaşın ve şimdi kullandığı adresi sorun.
 bounce-mailbox-full = Posta kutusu dolu
 bounce-mailbox-full-why = Alıcının posta kutusunda yeni posta için yer yok.
-bounce-mailbox-full-do = Birkaç gün sonra yeniden gönderin veya alıcıya başka bir yoldan ulaşın. Posta kutusunda az yer kaldığında büyük ekler içeren iletiler önce reddedilebilir.
+bounce-mailbox-full-do = Birkaç gün sonra yeniden gönderin veya alıcıya başka bir yoldan ulaşın.
 bounce-spam-blocked = İstenmeyen posta olarak reddedildi
 bounce-spam-blocked-why = Alıcı sunucu iletiyi istenmeyen posta olarak değerlendirdi.
 bounce-spam-blocked-do = Çok sayıda bağlantı, kısaltılmış URL veya büyük ek gibi istenmeyen posta şüphesi uyandırabilecek içerikleri çıkarıp yeniden deneyin. Sorun sürerse e-posta sağlayıcınıza başvurun.
@@ -139,7 +139,7 @@ bounce-rate-limited-why = Alıcı sunucu şimdilik posta sunucunuzdan daha az il
 bounce-rate-limited-do = Bir süre bekleyip yeniden gönderin. Çok kişiye yazarken her seferinde daha az kişiye gönderin.
 bounce-greylisting = Kısa bir süre bekletildi
 bounce-greylisting-why = Alıcı sunucu, tanımadığı gönderenlerden biraz sonra yeniden denemelerini istiyor; bu, istenmeyen postaya karşı yaygın bir denetimdir.
-bounce-greylisting-do = Posta sunucusunun yeniden denemesini bekleyin. Bu gecikme genellikle geçicidir, ancak teslimat süresi kesin değildir.
+bounce-greylisting-do = Sunucu teslimatı yeniden deniyorsa bekleyin. Bildirim kesin bir teslimat hatası belirtiyorsa iletiyi daha sonra yeniden göndermeyi deneyin.
 bounce-server-error = Alıcı sunucuda bir sorun oluştu
 bounce-server-error-why = Alıcı sunucuya ulaşılamadı veya sunucu kendi sorunu nedeniyle iletiyi alamadı.
 bounce-server-error-do = Daha sonra yeniden gönderin. Başarısız olmaya devam ederse adresin @ işaretinden sonraki kısmında yazım hatası olup olmadığına bakın.
@@ -575,8 +575,8 @@ agent-undo-since-detail = Geri alınabilen değişiklikler en yeniden başlayara
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Hiçbir şey geri alınmadı.
-    [one] 1 değişiklik geri alındı.
-   *[other] { $count } değişiklik geri alındı.
+    [one] 1 değişiklik tamamen veya kısmen geri alındı.
+   *[other] { $count } değişiklik tamamen veya kısmen geri alındı.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 ileti artık işlemin uygulandığı konumda değildi.
@@ -618,8 +618,8 @@ agent-reads-messages = { $count ->
    *[other] { $count } ileti okudu
 }
 agent-reads-attachments = { $count ->
-    [one] 1 ekin içeriğini okudu
-   *[other] { $count } ekin içeriğini okudu
+    [one] 1 ekin içeriğini istedi
+   *[other] { $count } ekin içeriğini istedi
 }
 agent-reads-searches = { $count ->
     [one] bir kez arama yaptı
@@ -635,7 +635,7 @@ agent-read-conversation = { $count ->
     [one] Konuşmayı okudu: “{ $subject }” (1 ileti)
    *[other] Konuşmayı okudu: “{ $subject }” ({ $count } ileti)
 }
-agent-read-attachment = Ekin içeriğini okudu: “{ $name }”. İleti: “{ $subject }”
+agent-read-attachment = Ekin içeriğini istedi: “{ $name }”. İleti: “{ $subject }”
 agent-read-search = { $count ->
     [one] Arama yaptı: “{ $query }”, 1 ileti
    *[other] Arama yaptı: “{ $query }”, { $count } ileti
@@ -646,8 +646,8 @@ agent-read-list = { $count ->
    *[other] { $count } ileti liste kaydını görüntüledi. Kapsam: { $folder }
 }
 agent-read-changes = { $count ->
-    [one] Yeni veya değişen 1 ileti kaydını görüntüledi
-   *[other] Yeni veya değişen { $count } ileti kaydını görüntüledi
+    [one] Yeni 1 ileti kaydını görüntüledi
+   *[other] Yeni { $count } ileti kaydını görüntüledi
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = { $terminal } uygulamasından başlatılan programlar
@@ -658,7 +658,7 @@ agent-terminal-program-mac = { $terminal } uygulamasından başlatılan bir prog
 agent-terminal-program-windows = Bir terminalden ({ $terminal }) başlatılan bir program
 agent-terminal-program-linux = Bir terminalden ({ $terminal }) başlatılan bir program
 agent-connect-title-terminal = { $programs } postanıza erişmek istiyor
-agent-connect-terminal-detail = Bu terminalden başlattığınız her yapay zeka aracısı, burada izin verdiğiniz erişimi paylaşır. Bir aracıya ayrı erişim vermek için aracının MCP ayarlarında bağımsız değişkenlerine --name ve seçtiğiniz bir ad ekleyin.
+agent-connect-terminal-detail = Aynı tanınan terminal programından başlatılan aracılar burada izin verdiğiniz erişimi paylaşır. Bir aracıyı ayrı yönetmek için MCP ayarlarında bağımsız değişkenlerine --name ve seçtiğiniz bir ad ekleyin. Bu ad programın kimliğini doğrulamaz.
 agent-connect-claimed = Program kendini { $claimed } olarak tanıttı. Inbox Classic, onu hangi programın başlattığını kontrol etti: { $program }.
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
@@ -726,7 +726,7 @@ pgp-error-no-store = Gizli anahtarları korumak için kullanılan depoya erişil
 pgp-error-wrong-passphrase = Anahtar parolası doğru değil.
 pgp-error-not-a-key = Bu bir OpenPGP anahtarı değil.
 pgp-error-too-large = Anahtar çok büyük.
-pgp-error-unusable = Anahtar eski veya zayıf şifreleme kullanıyor ve kullanılamaz.
+pgp-error-unusable = Anahtar bu işlem için kullanılamıyor. Uygun bir imzalama veya şifreleme anahtarı eksik olabilir ya da kullanılan kriptografi desteklenmiyor olabilir.
 pgp-imported-private = { $count ->
     [one] Gizli anahtarınız içe aktarıldı.
    *[other] { $count } gizli anahtar içe aktarıldı.
@@ -745,7 +745,7 @@ pgp-pending = { $date } tarihinde şu adres için farklı bir anahtar bulundu: {
 ## İmzalı ve şifreli postayı okuma (protect.rs)
 pgp-part-verified = İmzalayan: { $signer }, anahtar doğrulandı
 pgp-part-signed = İmzalayan: { $signer } (anahtar doğrulanmadı)
-pgp-part-other = İmzalayan: { $signer }, gönderen değil
+pgp-part-other = İmzalayan: { $signer }; imza gönderenle kesin olarak ilişkilendirilemedi
 pgp-part-unknown-key = İmzalı, ancak anahtar bilinmiyor
 pgp-part-not-signed = İmzalı değil
 pgp-part-not-checked = İmza denetlenmedi
@@ -889,9 +889,9 @@ setup-account-signs-in-again = İçe aktardıktan sonra yeniden oturum açmanız
 setup-account-here = Bu bilgisayarda zaten var; değişiklik yapılmadan atlanır.
 setup-account-no-app = Bu bilgisayarda bulunmayan bir oturum açma uygulaması kullanıyor: { $app }. Oturum açma uygulamalarını da içe aktarın.
 setup-invalid-address = “{ $address }” bir e-posta adresi değil.
-setup-invalid-server = { $server } sunucusunun kullanılabilir bir adı veya bağlantı noktası yok.
+setup-invalid-server = { $server } sunucusunun adı, bağlantı noktası veya güvenlik ayarı geçersiz.
 setup-invalid-user = Kullanıcı adı yok.
-setup-invalid-sign-in = Bu sürümün desteklemediği bir oturum açma yöntemi kullanılıyor.
+setup-invalid-sign-in = Hesabın oturum açma ayarları geçersiz.
 setup-error-empty = Dosya boş.
 setup-error-too-large = Dosya boyutu, ayar ve hesap içe aktarma sınırını aşıyor.
 setup-error-not-setup = Bu dosya, Inbox Classic ayar ve hesap dosyası değil.
@@ -899,7 +899,7 @@ setup-error-damaged = Ayar ve hesap dosyası hasarlı olduğu için okunamıyor.
 setup-error-newer = Bu dosya daha yeni bir Inbox Classic sürümüyle kaydedilmiş ({ $version }). Inbox Classic'i güncelleyip yeniden içe aktarın.
 setup-error-needs-passphrase = Bu dosya bir anahtar parolasıyla korunuyor. Dosya kaydedilirken kullanılan parolayı girin.
 setup-error-wrong-passphrase = Girilen anahtar parolası bu dosyanın parolasıyla eşleşmiyor.
-setup-error-changed = Ayar ve hesap dosyası kaydedildikten sonra değiştirilmiş veya hasar görmüş. İçe aktarılamıyor.
+setup-error-changed = Ayar ve hesap dosyasının bütünlüğü doğrulanamadı. Dosya içe aktarılamıyor.
 setup-error-read = Ayar ve hesap dosyası okunamadı: { $error }
 setup-error-write = Ayar ve hesap dosyası kaydedilemedi: { $error }
 setup-error-no-parts = En az bir bölüm seçin.
@@ -969,7 +969,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Hiçbir şey içe aktarılmadı.
 setup-account-servers = { $imap } ve { $smtp } ({ $signin })
 setup-file-name = Inbox Classic ayarları ve hesapları
-setup-skipped-unreachable = Atlandı: { $name }. Oturum açma hizmetine ulaşılamadı. Oturum Açma Uygulamaları'nda yeniden ekleyin.
+setup-skipped-unreachable = Atlandı: { $name }. Oturum açma hizmeti denetlenemedi. Oturum Açma Uygulamaları bölümünde gereken uygulamayı denetleyip yeniden deneyin.
 attachment-runs-programs = “{ $name }” kod çalıştırabilen bir dosya türünde olduğu için Inbox Classic tarafından doğrudan açılmaz. Kaynağına güveniyorsanız dosyayı kaydedip kendiniz açabilirsiniz.
 attachment-decrypted-note = Bu ek, şifreli bir iletiden geliyor. Açabilmeniz için kullanıcı hesabınıza ait geçici klasöre şifresi çözülmüş bir kopyası kaydedilir. Dosyayı açan programı kapatmanız kopyayı silmez. Inbox Classic her açılışta 24 saatten eski kopyaları temizlemeyi dener.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again

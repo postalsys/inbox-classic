@@ -53,8 +53,8 @@ reader-downloading = Descargando el mensaje…
 reader-downloading-detail = El mensaje se mostrará aquí cuando finalice la descarga.
 reader-downloading-size = El mensaje ocupa { $size }. Aparecerá aquí cuando se haya descargado.
 reader-failed = No se pudo descargar el mensaje
-reader-failed-network = No se pudo conectar con el servidor de correo ({ $reason }).
-reader-failed-sign-in = El servidor de correo no aceptó el inicio de sesión ({ $reason }). Compruebe la contraseña o vuelva a iniciar sesión en Archivo > Cuentas.
+reader-failed-network = No se pudo establecer la conexión con el servidor de correo o se interrumpió ({ $reason }).
+reader-failed-sign-in = El servidor de correo no aceptó el inicio de sesión ({ $reason }). Compruebe la contraseña o vuelva a iniciar sesión en la configuración de la cuenta.
 reader-failed-security = No se pudo establecer una conexión segura con el servidor de correo ({ $reason }).
 reader-failed-other = El servidor de correo respondió: { $reason }.
 reader-retry-note = Se volverá a intentar cuando se restablezca la conexión con la cuenta.
@@ -132,7 +132,7 @@ bounce-geo-blocked-why = El servidor receptor no acepta correo del país o la re
 bounce-geo-blocked-do = Contacte con el destinatario por otro medio o consulte a su proveedor de correo.
 bounce-relay-denied = El servidor rechazó la retransmisión del mensaje
 bounce-relay-denied-why = Un servidor se negó a entregar el mensaje, a menudo porque se envió sin iniciar sesión o por un servidor que no atiende a este destinatario.
-bounce-relay-denied-do = En Archivo > Cuentas, revise la configuración del servidor saliente y compruebe que el inicio de sesión en ese servidor esté configurado.
+bounce-relay-denied-do = En la configuración de la cuenta, revise el servidor saliente y sus datos de acceso.
 bounce-auth-failure = No se pudo verificar su dirección de remitente
 bounce-auth-failure-why = El servidor receptor no pudo confirmar que el mensaje viniera realmente de su dominio (SPF, DKIM o DMARC).
 bounce-auth-failure-do = Reenvíe este aviso a quien gestione el correo de su dominio para que corrija la configuración. Mientras tanto, puede intentar enviar el mensaje a través del servidor de su proveedor.
@@ -489,7 +489,7 @@ agent-log-archived = Se archivó «{ $subject }»
 agent-log-folder = Se solicitó crear la carpeta «{ $name }»
 agent-log-unsubscribed = Ha autorizado la solicitud de cancelación de la suscripción. Mensaje: «{ $subject }»
 agent-log-unsubscribe-failed = No se pudo cancelar la suscripción a la lista que envió «{ $subject }»: { $reason }
-agent-log-unsubscribe-refused = No canceló la suscripción a estas listas: { $senders }
+agent-log-unsubscribe-refused = No autorizó las solicitudes de cancelación de suscripción. Remitentes: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } quiere cancelar su suscripción a una lista de correo
    *[other] { $program } quiere cancelar su suscripción a { $count } listas de correo
@@ -581,8 +581,8 @@ agent-undo-since-detail = Se intenta devolver los mensajes a sus carpetas anteri
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] No se deshizo nada.
-    [one] Se deshizo 1 cambio.
-   *[other] Se deshicieron { $count } cambios.
+    [one] Se deshizo 1 cambio, total o parcialmente.
+   *[other] Se deshicieron { $count } cambios, total o parcialmente.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 mensaje ya no estaba en la ubicación prevista.
@@ -624,8 +624,8 @@ agent-reads-messages = { $count ->
    *[other] leyó { $count } mensajes
 }
 agent-reads-attachments = { $count ->
-    [one] leyó 1 archivo adjunto
-   *[other] leyó { $count } archivos adjuntos
+    [one] solicitó 1 archivo adjunto
+   *[other] solicitó { $count } archivos adjuntos
 }
 agent-reads-searches = { $count ->
     [one] buscó una vez
@@ -641,7 +641,7 @@ agent-read-conversation = { $count ->
     [one] Leyó la conversación «{ $subject }» (1 mensaje)
    *[other] Leyó la conversación «{ $subject }» ({ $count } mensajes)
 }
-agent-read-attachment = Leyó el archivo adjunto «{ $name }» del mensaje «{ $subject }»
+agent-read-attachment = Solicitó el archivo adjunto «{ $name }» del mensaje «{ $subject }»
 agent-read-search = { $count ->
     [one] Buscó «{ $query }»: 1 mensaje
    *[other] Buscó «{ $query }»: { $count } mensajes
@@ -652,8 +652,8 @@ agent-read-list = { $count ->
    *[other] Consultó { $count } entradas en la lista: { $folder }
 }
 agent-read-changes = { $count ->
-    [one] Consultó 1 mensaje nuevo
-   *[other] Consultó { $count } mensajes nuevos
+    [one] Consultó los datos de 1 mensaje nuevo
+   *[other] Consultó los datos de { $count } mensajes nuevos
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programas iniciados desde { $terminal }
@@ -664,7 +664,7 @@ agent-terminal-program-mac = Un programa iniciado desde { $terminal }
 agent-terminal-program-windows = Un programa iniciado desde un terminal ({ $terminal })
 agent-terminal-program-linux = Un programa iniciado desde un terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } solicitan acceso a su correo
-agent-connect-terminal-detail = Todos los agentes de IA que inicie desde este terminal comparten el acceso que permita aquí. Para darle a uno su propio acceso, añada --name y un nombre de su elección a sus argumentos en la configuración MCP del agente.
+agent-connect-terminal-detail = Los agentes de IA iniciados desde el mismo programa de terminal reconocido comparten el acceso que permita aquí. Para dar acceso separado a uno, añada --name y un nombre a sus argumentos en la configuración MCP. El nombre no verifica la identidad del programa.
 agent-connect-claimed = Se presentó como { $claimed }. Inbox Classic comprobó qué programa lo inició: { $program }.
 
 ## Keys
@@ -771,7 +771,7 @@ pgp-error-missing-keys = { $count ->
     [one] Falta la clave necesaria para enviar un mensaje cifrado a { $addresses }.
    *[other] Faltan las claves necesarias para enviar mensajes cifrados a estos destinatarios: { $addresses }.
 }
-pgp-error-encrypted-quote = Este mensaje incluye contenido de un mensaje cifrado. Active la opción Cifrar o quite el contenido citado antes de enviarlo.
+pgp-error-encrypted-quote = Este mensaje contiene texto, imágenes o archivos adjuntos de correo cifrado y solo se puede enviar cifrado. Active Cifrar o quite todo ese contenido.
 pgp-error-protect = No se pudo firmar ni cifrar el mensaje: { $reason }
 pgp-found-keys = Claves encontradas para: { $addresses }.
 pgp-found-none = No se encontró ninguna clave para estas direcciones: { $addresses }. Pida a los destinatarios que le envíen sus claves públicas.
@@ -982,7 +982,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = No se importó nada.
 setup-account-servers = { $imap } y { $smtp } ({ $signin })
 setup-file-name = Configuración y cuentas de Inbox Classic
-setup-skipped-unreachable = Se omitió { $name } porque no se pudo comprobar el servicio de inicio de sesión. Revise «Aplicaciones de inicio de sesión» y vuelva a intentar añadirlo.
+setup-skipped-unreachable = Se omitió { $name } porque no se pudo comprobar el servicio de inicio de sesión. Revise la aplicación necesaria en «Aplicaciones de inicio de sesión» y vuelva a intentarlo.
 attachment-runs-programs = El archivo «{ $name }» puede ejecutar programas, por lo que Inbox Classic no lo abre. Si confía en su origen, puede guardarlo y abrirlo por su cuenta.
 attachment-decrypted-note = Este archivo adjunto procede de un mensaje cifrado. Para abrirlo, Inbox Classic guarda una copia sin cifrar en una carpeta temporal de su cuenta de usuario. Al iniciar la aplicación, se intenta eliminar las copias que tienen más de un día.
 undone-move = { $count ->

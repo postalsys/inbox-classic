@@ -1,5 +1,5 @@
 <h1>Missatges que no s’han lliurat</h1>
-<p class="summary">Quan un missatge que heu enviat és retornat o s’endarrereix, Inbox Classic n’explica el motiu i què hi podeu fer.</p>
+<p class="summary">Inbox Classic explica els avisos de lliurament fallit o retardat que reconeix i suggereix què podeu fer.</p>
 <p>Un avís de lliurament apareix amb un indicador de lliurament fallit a la llista de missatges. Quan l’obriu, una targeta a sobre diu si el vostre missatge no s’ha lliurat o només s’ha endarrerit.</p>
 <img src="picture:bounce-1-failed" alt="Un avís de lliurament amb una targeta que diu que el missatge no s’ha lliurat, el destinatari, el motiu i què cal fer">
 <p>Per a cada destinatari, la targeta explica el motiu amb paraules senzilles i suggereix què podeu fer. <b data-text="bounce-details"></b> mostra la resposta original del servidor de destinació.</p>
@@ -7,13 +7,13 @@
     <li><b data-text="bounce-show-message"></b> selecciona el missatge que heu enviat, si es pot trobar al compte.</li>
     <li>En cas de retard, <b data-text="bounce-show-delayed"></b> el selecciona si es pot trobar. Si l’avís diu que el servidor encara ho està provant, no cal que el torneu a enviar.</li>
 </ul>
-<p>Alguns motius habituals:</p>
+<p>Alguns motius habituals i consells per a un error definitiu. Si el lliurament només s’endarrereix, espereu-ne el resultat abans de tornar a enviar el missatge:</p>
 <table>
     <tr><th>La targeta diu</th><th>Què cal fer</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Comproveu que l’adreça estigui ben escrita o demaneu al destinatari una adreça actual.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Torneu-lo a enviar d’aquí a uns dies, o contacteu amb la persona d’una altra manera.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Torneu-lo a enviar sense allò que sembla correu brossa, com ara molts enllaços o un fitxer adjunt gran.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Reenvieu l’avís al vostre proveïdor de correu. El problema no és el missatge.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Contacteu amb la persona d’una altra manera i demaneu-li que alliberi espai abans de tornar-ho a provar.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Comproveu l’explicació del servidor. Si ha rebutjat el contingut, reviseu el missatge abans de tornar-ho a provar.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Reenvieu l’avís al vostre proveïdor de correu. Segons l’avís, l’adreça del servidor d’enviament està bloquejada.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Espereu mentre el servidor continuï intentant el lliurament. Si ja no ho torna a provar, potser haureu de reenviar el missatge.</td></tr>
 </table>
 <p>Per trobar tots els avisos de lliurament, cerqueu <code>is:bounce</code>. L’anàlisi del motiu es fa a l’ordinador, sense enviar el contingut a serveis externs.</p>

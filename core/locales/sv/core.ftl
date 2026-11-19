@@ -46,8 +46,8 @@ reader-downloading = Hämtar meddelandet…
 reader-downloading-detail = Meddelandet visas här när hämtningen är klar.
 reader-downloading-size = Meddelandet är { $size }. Det visas här när det har hämtats.
 reader-failed = Det gick inte att hämta meddelandet
-reader-failed-network = Det gick inte att nå e-postservern ({ $reason }).
-reader-failed-sign-in = E-postservern godtog inte inloggningen ({ $reason }). Kontrollera lösenordet eller logga in igen i Arkiv > Konton.
+reader-failed-network = Anslutningen till e-postservern misslyckades eller avbröts ({ $reason }).
+reader-failed-sign-in = E-postservern godtog inte inloggningen ({ $reason }). Kontrollera lösenordet eller logga in igen i kontoinställningarna.
 reader-failed-security = Anslutningen till e-postservern kunde inte göras säker ({ $reason }).
 reader-failed-other = E-postservern svarade: { $reason }.
 reader-retry-note = Ett nytt försök görs när kontot ansluter igen.
@@ -131,7 +131,7 @@ bounce-geo-blocked-why = Den mottagande servern tar inte emot e-post från det l
 bounce-geo-blocked-do = Kontakta personen på något annat sätt eller fråga din e-postleverantör om saken.
 bounce-relay-denied = Servern vägrade skicka meddelandet vidare
 bounce-relay-denied-why = En server vägrade att leverera meddelandet vidare, ofta för att det skickades utan inloggning eller via en server som inte hanterar den här mottagaren.
-bounce-relay-denied-do = Kontrollera kontots utgående server och inloggningsinställningar i Arkiv > Konton.
+bounce-relay-denied-do = Kontrollera servern för utgående e-post och inloggningen i kontoinställningarna.
 bounce-auth-failure = Din avsändaradress kunde inte verifieras
 bounce-auth-failure-why = Den mottagande servern kunde inte bekräfta att meddelandet verkligen kom från din domän (SPF, DKIM eller DMARC).
 bounce-auth-failure-do = Vidarebefordra det här meddelandet till den som sköter e-posten för din domän: dess inställningar behöver rättas. Under tiden kan det hjälpa att skicka via din leverantörs egen server.
@@ -573,8 +573,8 @@ agent-undo-since-detail = Meddelanden flyttas tillbaka, lästmarkeringar och fla
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Ingenting ångrades.
-    [one] Ångrade 1 ändring.
-   *[other] Ångrade { $count } ändringar.
+    [one] Ångrade 1 ändring, helt eller delvis.
+   *[other] Ångrade { $count } ändringar, helt eller delvis.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 meddelande fanns inte längre där ändringen lade det.
@@ -616,8 +616,8 @@ agent-reads-messages = { $count ->
    *[other] läste { $count } meddelanden
 }
 agent-reads-attachments = { $count ->
-    [one] läste innehållet i 1 bilaga
-   *[other] läste innehållet i { $count } bilagor
+    [one] begärde innehållet i 1 bilaga
+   *[other] begärde innehållet i { $count } bilagor
 }
 agent-reads-searches = { $count ->
     [one] sökte en gång
@@ -633,7 +633,7 @@ agent-read-conversation = { $count ->
     [one] Läste konversationen ”{ $subject }” (1 meddelande)
    *[other] Läste konversationen ”{ $subject }” ({ $count } meddelanden)
 }
-agent-read-attachment = Läste innehållet i bilagan ”{ $name }” från meddelandet ”{ $subject }”
+agent-read-attachment = Begärde innehållet i bilagan ”{ $name }” från meddelandet ”{ $subject }”
 agent-read-search = { $count ->
     [one] Sökte efter ”{ $query }”: 1 meddelande
    *[other] Sökte efter ”{ $query }”: { $count } meddelanden
@@ -644,8 +644,8 @@ agent-read-list = { $count ->
    *[other] Läste { $count } rader i meddelandelistan. Område: { $folder }
 }
 agent-read-changes = { $count ->
-    [one] Tittade på 1 nytt meddelande
-   *[other] Tittade på { $count } nya meddelanden
+    [one] Hämtade uppgifter om 1 nytt meddelande
+   *[other] Hämtade uppgifter om { $count } nya meddelanden
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Program som startats från { $terminal }
@@ -656,7 +656,7 @@ agent-terminal-program-mac = Ett program som startats från { $terminal }
 agent-terminal-program-windows = Ett program som startats från en terminal ({ $terminal })
 agent-terminal-program-linux = Ett program som startats från en terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } vill ha åtkomst till din e-post
-agent-connect-terminal-detail = Alla AI-agenter som du startar från den här terminalen delar den åtkomst du tillåter här. Om du vill ge en agent egen åtkomst lägger du till --name och ett valfritt namn bland dess argument i agentens MCP-inställningar.
+agent-connect-terminal-detail = Agenter som startas från samma identifierade terminalprogram delar den åtkomst du tillåter här. För att hantera en agent separat lägger du till --name och ett valfritt namn bland argumenten i dess MCP-inställningar. Namnet bekräftar inte vilket program det är.
 agent-connect-claimed = Programmet uppgav att det var { $claimed }. Inbox Classic har kontrollerat vilket program som startade det: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -678,7 +678,7 @@ secrets-windows = Autentiseringshanteraren
 secrets-mac = nyckelringen
 secrets-linux = systemets nyckelring (Secret Service)
 error-no-such-file = filen finns inte
-cards-file-too-big = Filen är för stor för att vara en adressbok.
+cards-file-too-big = Filen överskrider storleksgränsen för import av en adressbok.
 ui-sender-added = { $name } lades till i adressboken.
 ui-sender-known = { $name } finns redan i adressboken.
 ui-sender-none = Avsändaren av det här meddelandet har ingen e-postadress att lägga till.
@@ -723,7 +723,7 @@ pgp-error-no-store = Privata nycklar skyddas av { $store }, som inte kan använd
 pgp-error-wrong-passphrase = Lösenfrasen är inte rätt.
 pgp-error-not-a-key = Det här är inte en OpenPGP-nyckel.
 pgp-error-too-large = Nyckeln är för stor.
-pgp-error-unusable = Nyckeln använder gammal eller svag kryptografi och kan inte användas.
+pgp-error-unusable = Nyckeln kan inte användas för åtgärden. En användbar undernyckel kan saknas, eller så stöds inte kryptografin.
 pgp-imported-private = { $count ->
     [one] Din privata nyckel importerades.
    *[other] { $count } privata nycklar importerades.
@@ -811,8 +811,8 @@ pgp-recipient-not-found = Ingen nyckel hittades. Senaste sökning: { $date }
 pgp-recipient-unusable = Nyckeln kan inte användas: { $state }
 pgp-recipients-intro = När meddelandet skickas krypteras det med mottagarnas nycklar och din egen nyckel.
 pgp-recipients-intro-missing = { $count ->
-    [one] En mottagare saknar en användbar krypteringsnyckel. Sök efter mottagarens nyckel, ta bort mottagaren från meddelandet eller skicka det utan kryptering.
-   *[other] { $count } mottagare saknar användbara krypteringsnycklar. Sök efter deras nycklar, ta bort mottagarna från meddelandet eller skicka det utan kryptering.
+    [one] En mottagare saknar en användbar krypteringsnyckel. Sök efter mottagarens nyckel, ta bort mottagaren från meddelandet eller skicka det utan kryptering om det inte innehåller text, bilder eller bilagor från krypterade meddelanden.
+   *[other] { $count } mottagare saknar användbara krypteringsnycklar. Sök efter deras nycklar, ta bort mottagarna från meddelandet eller skicka det utan kryptering om det inte innehåller text, bilder eller bilagor från krypterade meddelanden.
 }
 pgp-details-part = Del { $number }: { $label }
 attachment-from-part = Från del { $number }: { $label }
@@ -898,17 +898,17 @@ setup-account-signs-in-again = Du loggar in på det igen efter importen.
 setup-account-here = Det är redan konfigurerat här, så det hoppas över.
 setup-account-no-app = Det loggar in med { $app }, som inte är konfigurerad här. Importera inloggningsapparna också.
 setup-invalid-address = ”{ $address }” är inte en e-postadress.
-setup-invalid-server = Servern för { $server } har inget giltigt värdnamn eller portnummer.
+setup-invalid-server = Servern { $server } har ett ogiltigt namn, portnummer eller säkerhetsalternativ.
 setup-invalid-user = Det har inget användarnamn.
-setup-invalid-sign-in = Det loggar in på ett sätt som Inbox Classic inte känner till.
+setup-invalid-sign-in = Kontots inloggningsinställningar är ogiltiga.
 setup-error-empty = Filen är tom.
-setup-error-too-large = Filen är för stor för att vara en konfiguration från Inbox Classic.
+setup-error-too-large = Filen överskrider storleksgränsen för import av inställningar och konton.
 setup-error-not-setup = Filen är inte en konfiguration från Inbox Classic.
 setup-error-damaged = Konfigurationsfilen är skadad och kan inte läsas.
 setup-error-newer = Konfigurationen sparades av en nyare Inbox Classic ({ $version }). Uppdatera Inbox Classic och importera den sedan igen.
 setup-error-needs-passphrase = Konfigurationen skyddas med en lösenfras. Skriv lösenfrasen som den sparades med.
 setup-error-wrong-passphrase = Det är inte lösenfrasen som konfigurationen sparades med.
-setup-error-changed = Konfigurationsfilen ändrades eller skadades efter att den sparades, så den kan inte importeras.
+setup-error-changed = Konfigurationsfilens integritet kunde inte bekräftas. Filen kan inte importeras.
 setup-error-read = Konfigurationsfilen kunde inte läsas: { $error }
 setup-error-write = Konfigurationen kunde inte sparas: { $error }
 setup-error-no-parts = Välj minst en del.
@@ -978,9 +978,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Inget importerades.
 setup-account-servers = { $imap } och { $smtp } ({ $signin })
 setup-file-name = Inställningar och konton för Inbox Classic
-setup-skipped-unreachable = { $name } hoppades över eftersom inloggningstjänsten inte kunde nås. Kontrollera Inloggningsappar och försök igen.
+setup-skipped-unreachable = { $name } hoppades över eftersom inloggningstjänsten inte kunde kontrolleras. Kontrollera den nödvändiga appen under Inloggningsappar och försök igen.
 attachment-runs-programs = ”{ $name }” kan köra program, så Inbox Classic öppnar den inte. Spara den och öppna den sedan själv om du litar på var den kommer ifrån.
-attachment-decrypted-note = Bilagan kommer från ett krypterat meddelande. För att öppna den sparar Inbox Classic en okrypterad kopia i en tillfällig mapp för ditt användarkonto. Kopior som är äldre än ett dygn tas bort när programmet startar.
+attachment-decrypted-note = Bilagan kommer från ett krypterat meddelande. För att öppna den sparar Inbox Classic en okrypterad kopia i en tillfällig mapp för ditt användarkonto. När programmet startar försöker det ta bort kopior som är äldre än ett dygn.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Servern flyttade inte { $messages } till { $folder }, så det ligger i { $from } igen: { $reason }
@@ -1031,7 +1031,7 @@ preview-tile-format = Bilder i formatet { $format } kan inte visas ännu
 preview-tile-password = Skyddad med lösenord: öppna den för att ange lösenordet
 preview-tile-too-large = För stor för att visas
 preview-tile-unreadable = Kan inte visas
-preview-tile-timed-out = Det tog för lång tid att visa
+preview-tile-timed-out = Det tog för lång tid att förbereda förhandsvisningen
 preview-tile-crashed = Visas inte: Inbox Classic avslutades under en tidigare förhandsvisning
 preview-tile-off = Visas inte förrän Inbox Classic startas igen
 preview-not-printed = { $name } ({ $details }) skrivs inte ut. Öppna filen för att skriva ut den.

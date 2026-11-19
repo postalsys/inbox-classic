@@ -22,7 +22,7 @@ win-list-loading = Loading...
 
 win-delete-button = &Delete
 win-find-label = &Find:
-win-save-as-button = Save &As...
+win-save-as-button = Sav&e As...
 win-too-many-files = Too many files at once: choose fewer.
 
 ## The Outbox
@@ -83,7 +83,7 @@ win-browser-sign-in = (browser sign-in)
 win-add = &Add...
 win-properties-button = &Properties...
 win-signature-button = Si&gnature...
-win-sign-in-apps-button = Sign-in A&pps...
+win-sign-in-apps-button = &Sign-in Apps...
 
 ## AI agents
 
@@ -95,7 +95,7 @@ win-send = &Send
 win-dont-send = &Don’t Send
 win-unsubscribe = &Unsubscribe
 win-dont-unsubscribe = &Don’t Unsubscribe
-win-forget-program-ask = Remove this program, its permissions and its agents’ activity history? You will be asked for permission again the next time it connects.
+win-forget-program-ask = Remove this program’s saved permissions and its agents’ activity history? The program will not be uninstalled. You will be asked for permission again the next time it connects.
 win-clear-log-ask = Clear the agents’ activity history? This will not undo changes made by the agents.
 win-agent-programs = &Programs whose agents have requested access to your mail:
 win-change = &Change...
@@ -138,4 +138,4 @@ win-installer-welcome-update =
     If it is running it is closed first. Your accounts and mail are kept.
 win-installer-older-ask = Inbox Classic { $installed } is installed, which is newer than { $version }. Install the older version anyway?
 win-installer-still-running = Inbox Classic is still running. Close it and try again.
-win-installer-remove-mail-ask = Also remove the accounts and the mail Inbox Classic keeps on this computer? The mail on the servers stays.
+win-installer-remove-mail-ask = Also remove Inbox Classic’s local data, including accounts, downloaded mail, queued messages, settings, contacts, rules and encryption keys? Mail on the servers and entries in the system credential store will remain.

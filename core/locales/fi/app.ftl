@@ -178,7 +178,7 @@ ui-outbox-title = Lähtevät
 ui-outbox-status-waiting = Odottaa
 ui-outbox-status-not-sent = Ei lähetetty: { $reason }
 # This message is still queued, during the grace period before an agent’s send.
-ui-outbox-status-agent = Tekoälyagentin lisäämä, lähetetään klo { $time }
+ui-outbox-status-agent = Tekoälyagentin lisäämä; lähetys ajastettu klo { $time }
 ui-outbox-delete-ask = Poistetaanko tämä viesti lähettämättä?
 ui-open-link = Avaa linkki
 ui-edit-link = Muokkaa linkkiä...
@@ -299,7 +299,7 @@ ui-found-autodiscover = Nämä asetukset löytyivät Microsoft Autodiscoverin (E
 ui-found-other = Nämä asetukset löytyivät tälle osoitteelle.
 ui-app-password-needed = { $provider }: tavallista salasanaa ei voi käyttää tässä. Jos tilisi tukee sähköpostin sovellussalasanoja, luo sellainen palveluntarjoajan tiliasetuksissa ja kirjoita se seuraavan lomakkeen Salasana-kenttään. Outlook.com- ja Microsoft 365 -tileille kirjaudutaan selaimen kautta.
 ui-app-password-open = { $provider }: avataanko ohjeet selaimessa?
-ui-plain-warning = Ilman salausta kuka tahansa, joka sieppaa verkkoliikenteesi, voi lukea salasanasi ja viestisi. Käytä tätä yhteyttä vain oman tietokoneesi tai lähiverkkosi palvelimen kanssa.
+ui-plain-warning = Ilman salausta kuka tahansa, joka sieppaa verkkoliikenteesi, voi lukea salasanasi ja viestisi. Jatka vain, jos yhteys on suojattu muulla tavoin; lähiverkko ei itsessään tarjoa salausta.
 ui-continue-ask = Jatketaanko?
 ui-add-sign-in-app = Lisää kirjautumissovellus...
 ui-turned-off = Asetus ”{ $name }” on poistettu käytöstä tässä tietokoneessa.
@@ -601,7 +601,7 @@ ui-sending-in = Lähetetään { $subject }, { $count ->
 }
 ui-send-undone = Viestiä { $subject } ei lähetetty. Viesti avattiin uudelleen muokattavaksi.
 ui-send-too-late = Lähettämistä ei voi enää perua: { $subject }.
-ui-outbox-status-undo = Lähetetään klo { $time }
+ui-outbox-status-undo = Lähetys ajastettu klo { $time }
 ui-download-note = Etukäteen ladatut viestit avautuvat heti. Kun tallennustilan raja ylittyy, vanhimmat välimuistissa olevat viestisisällöt poistetaan ja ladataan tarvittaessa uudelleen. Luonnoksia ja ohjelman käynnistämisen jälkeen avattuja viestejä ei poisteta, joten raja voi ylittyä.
 ui-attachment-downloading = Tämän viestin lataus on kesken. Yritä uudelleen, kun lataus on valmis.
 ui-trusted-senders-button = L&uotetut lähettäjät...

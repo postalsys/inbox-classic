@@ -47,7 +47,7 @@ reader-downloading = Správa sa sťahuje…
 reader-downloading-detail = Správa sa tu zobrazí po dokončení sťahovania.
 reader-downloading-size = Správa má veľkosť { $size }. Zobrazí sa tu po stiahnutí.
 reader-failed = Správu sa nepodarilo stiahnuť
-reader-failed-network = Poštový server nie je dostupný ({ $reason }).
+reader-failed-network = Spojenie s poštovým serverom zlyhalo alebo bolo prerušené ({ $reason }).
 reader-failed-sign-in = Poštový server neprijal prihlásenie ({ $reason }). V nastaveniach konta skontrolujte heslo alebo sa znova prihláste.
 reader-failed-security = Pripojenie k poštovému serveru sa nepodarilo zabezpečiť ({ $reason }).
 reader-failed-other = Poštový server odpovedal: { $reason }.
@@ -118,7 +118,7 @@ bounce-spam-blocked = Odmietnutá ako spam
 bounce-spam-blocked-why = Prijímajúci server považoval správu za spam.
 bounce-spam-blocked-do = Pošlite ju znova bez toho, čo vyzerá ako spam, napríklad bez množstva odkazov, skrátených odkazov alebo veľkej prílohy. Ak sa to opakuje, obráťte sa na svojho poskytovateľa pošty.
 bounce-virus-detected = Odmietnutá pre vírus
-bounce-virus-detected-why = Prijímajúci server našiel v správe alebo v jej prílohách vírus alebo iný škodlivý obsah.
+bounce-virus-detected-why = Prijímajúci server oznámil vírus alebo iný škodlivý obsah v správe či jej prílohách.
 bounce-virus-detected-do = Skontrolujte prílohy antivírusovým programom. Niektoré servery odmietajú všetky programy a archívy, preto takéto súbory radšej zdieľajte ako odkaz.
 bounce-ip-blocklisted = Váš poštový server je na zozname blokovaných
 bounce-ip-blocklisted-why = Prijímajúci server odmieta poštu zo servera, ktorý odoslal vašu správu, pretože adresa toho servera je na zozname blokovaných.
@@ -396,9 +396,9 @@ error-import-not-mail = { $path } nie je e-mailová správa
 error-list-answered = server zoznamu adresátov vrátil stav { $status }
 error-not-built = správu sa nepodarilo zostaviť
 error-outbox-waits = { $count ->
-    [one] správa čaká v priečinku Pošta na odoslanie a odošle sa pri ďalšom príkaze Odoslať/prijať
-    [few] { $count } správy čakajú v priečinku Pošta na odoslanie a odošlú sa pri ďalšom príkaze Odoslať/prijať
-   *[other] { $count } správ čaká v priečinku Pošta na odoslanie a odošle sa pri ďalšom príkaze Odoslať/prijať
+    [one] správa čaká v priečinku Pošta na odoslanie a program ju znova skúsi odoslať pri ďalšom príkaze Odoslať/prijať
+    [few] { $count } správy čakajú v priečinku Pošta na odoslanie a program ich znova skúsi odoslať pri ďalšom príkaze Odoslať/prijať
+   *[other] { $count } správ čaká v priečinku Pošta na odoslanie a program ich znova skúsi odoslať pri ďalšom príkaze Odoslať/prijať
 }
 error-draft-not-removed = predchádzajúci koncept správy sa nepodarilo odstrániť z priečinka Koncepty: { $reason }
 error-sent-but = správa bola odoslaná, ale { $problem }
@@ -637,9 +637,9 @@ agent-undo-since-detail = Podľa druhu pôvodnej akcie sa obnoví priečinok spr
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nič sa nevrátilo.
-    [one] Vrátená 1 zmena.
-    [few] Vrátené { $count } zmeny.
-   *[other] Vrátených { $count } zmien.
+    [one] Vrátená 1 zmena, úplne alebo čiastočne.
+    [few] Vrátené { $count } zmeny, úplne alebo čiastočne.
+   *[other] Vrátených { $count } zmien, úplne alebo čiastočne.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 správa už nebola tam, kam ju zmena umiestnila.
@@ -686,9 +686,9 @@ agent-reads-messages = { $count ->
    *[other] prečítaných { $count } správ
 }
 agent-reads-attachments = { $count ->
-    [one] prečítaná 1 príloha
-    [few] prečítané { $count } prílohy
-   *[other] prečítaných { $count } príloh
+    [one] vyžiadaná 1 príloha
+    [few] vyžiadané { $count } prílohy
+   *[other] vyžiadaných { $count } príloh
 }
 agent-reads-searches = { $count ->
     [one] 1 vyhľadávanie
@@ -707,7 +707,7 @@ agent-read-conversation = { $count ->
     [few] Prečítaná konverzácia „{ $subject }“ ({ $count } správy)
    *[other] Prečítaná konverzácia „{ $subject }“ ({ $count } správ)
 }
-agent-read-attachment = Prečítané údaje prílohy „{ $name }“ zo správy „{ $subject }“
+agent-read-attachment = Vyžiadané údaje prílohy „{ $name }“ zo správy „{ $subject }“
 agent-read-search = { $count ->
     [one] Vyhľadávanie „{ $query }“: 1 správa
     [few] Vyhľadávanie „{ $query }“: { $count } správy
@@ -720,10 +720,10 @@ agent-read-list = { $count ->
    *[other] Zobrazených { $count } riadkov zoznamu (rozsah: { $folder })
 }
 agent-read-changes = { $count ->
-    [one] Zobrazená 1 nová správa
-    [few] Zobrazené { $count } nové správy
-   *[other] Zobrazených { $count } nových správ
-}
+        [one] Zobrazené údaje o 1 novej správe
+        [few] Zobrazené údaje o { $count } nových správach
+       *[other] Zobrazené údaje o { $count } nových správach
+    }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programy spustené z aplikácie { $terminal }
 agent-terminal-programs-windows = Programy spustené z terminálu ({ $terminal })
@@ -802,7 +802,7 @@ pgp-error-no-store = Súkromné kľúče chráni úložisko { $store }, ktoré n
 pgp-error-wrong-passphrase = Prístupová fráza nie je správna.
 pgp-error-not-a-key = Toto nie je kľúč OpenPGP.
 pgp-error-too-large = Kľúč je príliš veľký.
-pgp-error-unusable = Kľúč používa starú alebo slabú kryptografiu a nemožno ho použiť.
+pgp-error-unusable = Kľúč sa nedá použiť na túto operáciu. Môže chýbať vhodný podpisový alebo šifrovací kľúč alebo použitá kryptografia nie je podporovaná.
 pgp-imported-private = { $count ->
     [one] Váš súkromný kľúč bol importovaný.
     [few] Boli importované { $count } súkromné kľúče.
@@ -829,7 +829,7 @@ pgp-part-not-signed = Bez digitálneho podpisu
 pgp-part-not-checked = Digitálny podpis nebol skontrolovaný
 pgp-part-encrypted = Šifrované. { $signature }
 pgp-part-no-key = Šifrované pre kľúč, ktorý nemáte
-pgp-part-changed = Šifrovaná časť bola cestou zmenená a nezobrazuje sa
+pgp-part-changed = Nepodarilo sa potvrdiť celistvosť šifrovanej časti, preto sa nezobrazuje
 pgp-part-unprotected = Šifrované bez ochrany proti zmenám, nezobrazuje sa
 pgp-part-broken = Šifrovanú časť nemožno prečítať
 pgp-why-mismatch = Digitálny podpis nezodpovedá tomuto textu
@@ -893,9 +893,9 @@ pgp-recipient-not-found = Kľúč sa nenašiel. Posledné vyhľadávanie: { $dat
 pgp-recipient-unusable = Kľúč nemožno použiť: { $state }
 pgp-recipients-intro = Správa sa šifruje kľúčom každého príjemcu aj vaším kľúčom.
 pgp-recipients-intro-missing = { $count ->
-    [one] Jeden príjemca nemá použiteľný kľúč na šifrovanie. Nájdite jeho kľúč, odstráňte príjemcu zo správy alebo správu odošlite bez šifrovania.
-    [few] { $count } príjemcovia nemajú použiteľné kľúče na šifrovanie. Nájdite ich kľúče, odstráňte týchto príjemcov zo správy alebo správu odošlite bez šifrovania.
-   *[other] { $count } príjemcov nemá použiteľné kľúče na šifrovanie. Nájdite ich kľúče, odstráňte týchto príjemcov zo správy alebo správu odošlite bez šifrovania.
+    [one] Jeden príjemca nemá použiteľný kľúč na šifrovanie. Nájdite jeho kľúč, odstráňte príjemcu zo správy alebo správu odošlite bez šifrovania, ak neobsahuje text, obrázky ani prílohy zo šifrovaných správ.
+    [few] { $count } príjemcovia nemajú použiteľné kľúče na šifrovanie. Nájdite ich kľúče, odstráňte týchto príjemcov zo správy alebo správu odošlite bez šifrovania, ak neobsahuje text, obrázky ani prílohy zo šifrovaných správ.
+   *[other] { $count } príjemcov nemá použiteľné kľúče na šifrovanie. Nájdite ich kľúče, odstráňte týchto príjemcov zo správy alebo správu odošlite bez šifrovania, ak neobsahuje text, obrázky ani prílohy zo šifrovaných správ.
 }
 pgp-details-part = Časť { $number }: { $label }
 attachment-from-part = Z časti { $number }: { $label }
@@ -997,7 +997,7 @@ setup-account-no-app = Prihlasuje sa cez aplikáciu „{ $app }“, ktorá tu ni
 setup-invalid-address = „{ $address }“ nie je e-mailová adresa.
 setup-invalid-server = Server { $server } nemá platný názov hostiteľa, port alebo nastavenie zabezpečenia.
 setup-invalid-user = Nemá meno používateľa.
-setup-invalid-sign-in = Prihlasuje sa spôsobom, ktorý Inbox Classic nepozná.
+setup-invalid-sign-in = Nastavenia prihlásenia tohto konta nie sú platné.
 setup-error-empty = Súbor je prázdny.
 setup-error-too-large = Súbor nastavení prekračuje povolenú veľkosť.
 setup-error-not-setup = Tento súbor nie je súborom nastavení Inbox Classic.
@@ -1005,7 +1005,7 @@ setup-error-damaged = Súbor nastavení je poškodený a nemožno ho prečítať
 setup-error-newer = Tieto nastavenia uložila novšia verzia Inbox Classic ({ $version }). Aktualizujte Inbox Classic a potom ich importujte znova.
 setup-error-needs-passphrase = Tieto nastavenia sú chránené prístupovou frázou. Zadajte frázu, s ktorou boli uložené.
 setup-error-wrong-passphrase = To nie je prístupová fráza, s ktorou boli tieto nastavenia uložené.
-setup-error-changed = Súbor nastavení bol po uložení zmenený alebo poškodený, preto ho nemožno importovať.
+setup-error-changed = Nepodarilo sa potvrdiť celistvosť súboru nastavení, preto ho nemožno importovať.
 setup-error-read = Súbor nastavení sa nepodarilo prečítať: { $error }
 setup-error-write = Nastavenia sa nepodarilo uložiť: { $error }
 setup-error-no-parts = Vyberte aspoň jednu časť.
@@ -1089,9 +1089,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Nič sa neimportovalo.
 setup-account-servers = { $imap } a { $smtp } ({ $signin })
 setup-file-name = Nastavenia a kontá Inbox Classic
-setup-skipped-unreachable = Položka „{ $name }“ sa preskočila, pretože jej prihlasovacia služba nebola dostupná. Skontrolujte nastavenia v okne Prihlasovacie aplikácie a import skúste znova.
+setup-skipped-unreachable = Položka „{ $name }“ sa preskočila, pretože prihlasovaciu službu nebolo možné overiť. Skontrolujte potrebnú aplikáciu v okne Prihlasovacie aplikácie a skúste import znova.
 attachment-runs-programs = Súbor „{ $name }“ môže spúšťať programy, preto ho Inbox Classic neotvorí. Uložte ho a potom ho otvorte sami, ak dôverujete jeho zdroju.
-attachment-decrypted-note = Táto príloha pochádza zo šifrovanej správy. Pri otvorení Inbox Classic uloží nešifrovanú kópiu do dočasného priečinka vášho používateľského konta. Kópie staršie ako jeden deň odstráni pri spustení aplikácie.
+attachment-decrypted-note = Táto príloha pochádza zo šifrovanej správy. Pri otvorení Inbox Classic uloží nešifrovanú kópiu do dočasného priečinka vášho používateľského konta. Pri spustení sa aplikácia pokúsi odstrániť kópie staršie ako jeden deň.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Server nepresunul správu do priečinka { $folder }, takže { $messages } je opäť v priečinku { $from }: { $reason }
@@ -1151,7 +1151,7 @@ preview-tile-format = Obrázky { $format } sa zatiaľ nezobrazujú
 preview-tile-password = Súbor je chránený heslom. Otvorte ho a zadajte heslo
 preview-tile-too-large = Náhľad prekračuje limit veľkosti alebo spracovania
 preview-tile-unreadable = Nedá sa zobraziť
-preview-tile-timed-out = Zobrazenie trvalo príliš dlho
+preview-tile-timed-out = Príprava náhľadu trvala príliš dlho
 preview-tile-crashed = Náhľad sa nezobrazuje: predchádzajúce vytváranie náhľadu sa prerušilo
 preview-tile-off = Nezobrazené do ďalšieho spustenia Inbox Classic
 preview-not-printed = Súbor { $name } ({ $details }) sa nevytlačí. Ak ho chcete vytlačiť, otvorte ho.

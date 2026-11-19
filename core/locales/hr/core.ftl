@@ -480,7 +480,7 @@ agent-log-refused = Odbili ste slanje poruke „{ $subject }“
 agent-log-sent = Poruka „{ $subject }“ dodana je u red za slanje primateljima: { $to }
 agent-log-draft = Spremljena skica „{ $subject }“
 agent-log-draft-replaced = Zamijenjena skica „{ $subject }“
-agent-log-draft-discarded = Odbačena skica „{ $subject }“
+agent-log-draft-discarded = Zatraženo odbacivanje skice „{ $subject }“
 agent-draft-note = Ovu je skicu napisao AI agent { $program }. Prije slanja provjerite primatelje i tekst.
 agent-log-read = Poruka „{ $subject }“ označena je kao pročitana
 agent-log-unread = Poruka „{ $subject }“ označena je kao nepročitana
@@ -594,13 +594,13 @@ agent-undo-since-question = { $count ->
     [few] Poništiti { $count } promjene koje je { $program } napravio u tom razdoblju?
    *[other] Poništiti { $count } promjena koje je { $program } napravio u tom razdoblju?
 }
-agent-undo-since-detail = Poruke se vraćaju u prethodne mape, a oznake pročitanosti i zastavice u prethodno stanje. Poruke koje još čekaju u mapi Izlazna pošta brišu se. Ako ste vi ili poslužitelj u međuvremenu promijenili relevantno stanje ili mjesto poruke, ta se promjena zadržava.
+agent-undo-since-detail = Poruke se po mogućnosti vraćaju u prethodne mape, a oznake pročitanosti i zastavice u prethodno stanje. Poruke koje još čekaju u mapi Izlazna pošta brišu se. Prije poništavanja provjerava se relevantno stanje poruke. Neke kasnije promjene, primjerice boja zastavice, ipak se mogu zamijeniti.
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Ništa nije poništeno.
-    [one] Poništena je { $count } promjena.
-    [few] Poništene su { $count } promjene.
-   *[other] Poništeno je { $count } promjena.
+    [one] Poništena je { $count } promjena, u cijelosti ili djelomično.
+    [few] Poništene su { $count } promjene, u cijelosti ili djelomično.
+   *[other] Poništeno je { $count } promjena, u cijelosti ili djelomično.
 }
 agent-undo-left-gone = { $count ->
     [one] { $count } poruka više nije bila na očekivanom mjestu.
@@ -647,9 +647,9 @@ agent-reads-messages = { $count ->
    *[other] pročitano { $count } poruka
 }
 agent-reads-attachments = { $count ->
-    [one] pročitan { $count } privitak
-    [few] pročitana { $count } privitka
-   *[other] pročitano { $count } privitaka
+    [one] zatražen { $count } privitak
+    [few] zatražena { $count } privitka
+   *[other] zatraženo { $count } privitaka
 }
 agent-reads-searches = { $count ->
     [one] { $count } pretraživanje
@@ -668,7 +668,7 @@ agent-read-conversation = { $count ->
     [few] Pročitan razgovor „{ $subject }“ ({ $count } poruke)
    *[other] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
 }
-agent-read-attachment = Pročitan privitak „{ $name }“ poruke „{ $subject }“
+agent-read-attachment = Zatražen privitak „{ $name }“ poruke „{ $subject }“
 agent-read-search = { $count ->
     [one] Pretraživanje „{ $query }“: { $count } poruka
     [few] Pretraživanje „{ $query }“: { $count } poruke
@@ -676,9 +676,9 @@ agent-read-search = { $count ->
 }
 agent-read-people = Traženi kontakti čije ime ili adresa počinje s „{ $query }“
 agent-read-list = { $count ->
-    [one] Pregledani podaci za { $count } poruku u mapi { $folder }
-    [few] Pregledani podaci za { $count } poruke u mapi { $folder }
-   *[other] Pregledani podaci za { $count } poruka u mapi { $folder }
+    [one] Pregledani podaci za { $count } stavku popisa u mapi { $folder }
+    [few] Pregledani podaci za { $count } stavke popisa u mapi { $folder }
+   *[other] Pregledani podaci za { $count } stavki popisa u mapi { $folder }
 }
 agent-read-changes = { $count ->
     [one] Pregledani podaci za { $count } novu poruku
@@ -694,7 +694,7 @@ agent-terminal-program-mac = Program pokrenut iz aplikacije { $terminal }
 agent-terminal-program-windows = Program pokrenut iz terminala ({ $terminal })
 agent-terminal-program-linux = Program pokrenut iz terminala ({ $terminal })
 agent-connect-title-terminal = { $programs } žele koristiti vašu poštu
-agent-connect-terminal-detail = Svi AI agenti koje pokrenete iz ovog terminala dijele pristup koji ovdje dopustite. Da biste jednom od njih dali zaseban pristup, u MCP postavkama agenta dodajte među njegove argumente --name i naziv po izboru.
+agent-connect-terminal-detail = Agenti pokrenuti iz istog prepoznatog terminalskog programa dijele pristup koji ovdje dopustite. Za zasebno upravljanje agentom u njegovim MCP postavkama dodajte među argumente --name i naziv po izboru. Taj naziv ne potvrđuje identitet programa.
 agent-connect-claimed = Program se predstavio kao { $claimed }. Inbox Classic provjerio je koji ga je program pokrenuo: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -759,7 +759,7 @@ pgp-error-no-store = Privatne ključeve štiti ključ pohranjen u sustavu { $sto
 pgp-error-wrong-passphrase = Pristupna fraza nije točna.
 pgp-error-not-a-key = Ovo nije ključ OpenPGP.
 pgp-error-too-large = Ključ je prevelik.
-pgp-error-unusable = Ključ koristi staru ili slabu kriptografiju i ne može se koristiti.
+pgp-error-unusable = Ključ se ne može upotrijebiti za traženu radnju. Možda nedostaje odgovarajući ključ za potpisivanje ili šifriranje ili kriptografski algoritam nije podržan.
 pgp-imported-private = { $count ->
     [1] Vaš privatni ključ je uvezen.
     [one] Uvezen je { $count } privatni ključ.
@@ -782,13 +782,13 @@ pgp-pending = Drugi ključ za { $address } pronađen je { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitalno potpisano: { $signer } (vlasništvo ključa potvrđeno)
 pgp-part-signed = Digitalno potpisano: { $signer } (vlasništvo ključa nije potvrđeno)
-pgp-part-other = Digitalni potpis: { $signer }. Potpisnik se ne podudara s pošiljateljem
+pgp-part-other = Digitalni potpis: { $signer }. Potpis nije moguće jednoznačno povezati s pošiljateljem
 pgp-part-unknown-key = Digitalno potpisano, ali ključ nije poznat
 pgp-part-not-signed = Nije digitalno potpisano
 pgp-part-not-checked = Digitalni potpis nije provjeren
 pgp-part-encrypted = Šifrirano. { $signature }
 pgp-part-no-key = Šifrirano. Nemate potreban privatni ključ za dešifriranje
-pgp-part-changed = Šifrirani dio poruke izmijenjen je tijekom prijenosa pa se ne prikazuje
+pgp-part-changed = Provjera cjelovitosti šifriranog sadržaja nije uspjela. Sadržaj se ne prikazuje
 pgp-part-unprotected = Šifrirano bez zaštite od izmjena, ne prikazuje se
 pgp-part-broken = Šifrirani dio poruke nije moguće pročitati
 pgp-why-mismatch = Digitalni potpis ne odgovara ovom tekstu
@@ -804,8 +804,8 @@ pgp-why-not-key-in-use = Ključ kojim je poruka potpisana razlikuje se od ključ
 pgp-part-pictures-loaded = { $label }. Slike su učitane s interneta
 pgp-error-no-own-key = Nemate ključ za adresu { $address } kojim biste digitalno potpisivali ili šifrirali poruke. Stvorite ga u prozoru Ključevi za šifriranje ili isključite digitalno potpisivanje i šifriranje.
 pgp-error-missing-keys = { $count ->
-    [1] { $addresses } nema ključ za šifriranje.
-   *[other] Ovi primatelji nemaju ključ za šifriranje: { $addresses }.
+    [1] { $addresses } nema upotrebljiv ključ za šifriranje.
+   *[other] Ovi primatelji nemaju upotrebljiv ključ za šifriranje: { $addresses }.
 }
 pgp-error-encrypted-quote = Poruka sadrži tekst, slike ili privitke iz šifrirane poruke i može se poslati samo šifrirana. Uključite Šifriraj ili uklonite taj sadržaj.
 pgp-error-protect = Poruku nije moguće digitalno potpisati ili šifrirati: { $reason }
@@ -957,9 +957,9 @@ setup-account-signs-in-again = Nakon uvoza morat ćete se ponovno prijaviti na r
 setup-account-here = Račun je već postavljen na ovom računalu pa se preskače.
 setup-account-no-app = Prijavljuje se aplikacijom { $app }, koja ovdje nije postavljena. Uvezite i aplikacije za prijavu.
 setup-invalid-address = „{ $address }“ nije adresa e-pošte.
-setup-invalid-server = Postavke poslužitelja { $server } ne sadrže valjanu adresu i broj priključka.
+setup-invalid-server = Naziv, priključak ili sigurnosna postavka poslužitelja { $server } nisu valjani.
 setup-invalid-user = Nema korisničkog imena.
-setup-invalid-sign-in = Način prijave ovog računa nije podržan.
+setup-invalid-sign-in = Postavke prijave za ovaj račun nisu valjane ili koriste nepodržan način prijave.
 setup-error-empty = Datoteka je prazna.
 setup-error-too-large = Datoteka s postavkama programa Inbox Classic premašuje dopuštenu veličinu.
 setup-error-not-setup = Ova datoteka ne sadrži postavke programa Inbox Classic.
@@ -967,7 +967,7 @@ setup-error-damaged = Datoteka s postavkama oštećena je i nije je moguće pro�
 setup-error-newer = Ove su postavke spremljene u novijoj verziji programa Inbox Classic ({ $version }). Ažurirajte Inbox Classic pa ih ponovno uvezite.
 setup-error-needs-passphrase = Ova datoteka s postavkama zaštićena je pristupnom frazom. Unesite frazu kojom je zaštićena pri spremanju.
 setup-error-wrong-passphrase = Pristupna fraza nije točna za ovu datoteku s postavkama.
-setup-error-changed = Datoteka s postavkama promijenjena je ili oštećena nakon spremanja pa je nije moguće uvesti.
+setup-error-changed = Provjera cjelovitosti datoteke s postavkama nije uspjela pa je nije moguće uvesti.
 setup-error-read = Datoteku s postavkama nije moguće pročitati: { $error }
 setup-error-write = Postavke nije moguće spremiti: { $error }
 setup-error-no-parts = Odaberite barem jednu skupinu podataka.
@@ -1052,7 +1052,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Ništa nije uvezeno.
 setup-account-servers = { $imap } i { $smtp } ({ $signin })
 setup-file-name = Postavke i računi programa Inbox Classic
-setup-skipped-unreachable = Preskočeno: { $name }. Usluga za prijavu nije dostupna. Provjerite postavke u prozoru Aplikacije za prijavu i pokušajte ponovno.
+setup-skipped-unreachable = Preskočeno: { $name }. Uslugu za prijavu nije bilo moguće provjeriti. Provjerite potrebnu aplikaciju u prozoru Aplikacije za prijavu i pokušajte ponovno.
 attachment-runs-programs = Datoteka „{ $name }“ može pokretati programe pa je Inbox Classic ne otvara. Spremite je, a zatim je sami otvorite ako vjerujete njezinu izvoru.
 attachment-decrypted-note = Ovaj privitak potječe iz šifrirane poruke. Pri otvaranju Inbox Classic sprema nešifriranu kopiju u privremenu mapu vašeg korisničkog računa. Kopija može ostati ondje i nakon zatvaranja datoteke. Pri pokretanju program pokušava ukloniti kopije starije od jednog dana.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1119,7 +1119,7 @@ preview-tile-format = Slike u formatu { $format } još se ne prikazuju
 preview-tile-password = Zaštićeno lozinkom: otvorite datoteku i unesite lozinku
 preview-tile-too-large = Prevelika za prikaz
 preview-tile-unreadable = Ne može se prikazati
-preview-tile-timed-out = Prikaz je trajao predugo
+preview-tile-timed-out = Priprema pretpregleda trajala je predugo
 preview-tile-crashed = Ne prikazuje se: pri prethodnom pregledu Inbox Classic prestao je raditi ili odgovarati
 preview-tile-off = Nije prikazano dok se Inbox Classic ponovno ne pokrene
 preview-not-printed = { $name } ({ $details }) ne ispisuje se. Otvorite datoteku da biste je ispisali.

@@ -446,7 +446,7 @@ ui-undo-since-button = Annuler depuis…
 ui-undo-since-span = Annuler les modifications de ce programme :
 ui-take-back = Annuler
 ui-rules-title = Règles de message
-ui-rules-intro = Les règles trient les nouveaux messages reçus tant qu’Inbox Classic est ouvert. Les règles dont les critères sont remplis s’appliquent dans l’ordre. Dès qu’une règle déplace un message hors de la boîte de réception, les suivantes ne s’appliquent plus à ce message.
+ui-rules-intro = Les règles traitent les nouveaux messages reçus tant qu’Inbox Classic est ouvert. Les règles dont les critères sont remplis s’appliquent dans l’ordre. Dès qu’une règle déplace un message hors de la boîte de réception, les suivantes ne s’appliquent plus à ce message.
 ui-rules-none = Aucune règle pour l’instant. Cliquez sur Nouvelle pour en créer une.
 ui-rule-new = &Nouvelle...
 ui-rule-edit = M&odifier...
@@ -474,8 +474,8 @@ ui-rule-apply-now = L’appliquer aussi aux messages déjà dans la &boîte de r
 ui-rule-delete-ask = Supprimer la règle « { $name } » ?
 ui-create-rule = Créer une règle...
 ui-rules-applied = { $count ->
-    [one] { $count } message trié selon vos règles
-   *[other] { $count } messages triés selon vos règles
+    [one] { $count } message traité selon vos règles
+   *[other] { $count } messages traités selon vos règles
 }
 ui-col-rule-matches = Critères
 ui-clear-button = &Effacer
@@ -584,7 +584,7 @@ ui-download-ahead-all = Tous les messages
 ui-download-ahead-never = Seulement à l’ouverture
 ui-download-limit = &Espace maximal par compte :
 ui-send-delay = &Délai avant l’envoi :
-ui-send-delay-note = Tant qu’un message est en attente d’envoi, vous pouvez annuler son envoi avec le bouton Annuler.
+ui-send-delay-note = Pendant le compte à rebours, vous pouvez annuler l’envoi avec le bouton Annuler. Cette possibilité prend fin avec le compte à rebours, même si le message attend encore d’être envoyé.
 ui-dark-messages = Afficher les messages sur fond sombre lorsque le système est en mode sombre
 ui-preview-show = Afficher les &pièces jointes dans les messages
 ui-preview-show-note = Affiche les images et les premières pages des fichiers PDF après le texte du message. Inbox Classic génère ces aperçus sans exécuter le code contenu dans les fichiers ni charger leurs ressources externes.

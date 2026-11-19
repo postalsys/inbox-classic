@@ -172,4 +172,4 @@ gtk-metainfo-description = Inbox Classic omogućuje čitanje i pisanje e-pošte 
 gtk-metainfo-feature-sanitized = Skripte u porukama se ne izvršavaju, a vanjske slike preuzimaju se samo uz vaše dopuštenje
 gtk-metainfo-feature-search = Pretraživanje predmeta, pošiljatelja, primatelja, naziva privitaka i teksta poruka, uz operatore pretraživanja iz Gmaila
 gtk-metainfo-feature-replies = Citirani tekst ranijih poruka u odgovorima skriven je iza gumba za prikaz
-gtk-metainfo-feature-offline = Preuzete poruke možete čitati bez interneta. Podaci za prijavu prema zadanim se postavkama čuvaju u sustavskom spremištu tajni
+gtk-metainfo-feature-offline = Preuzetu poštu možete čitati bez interneta dok je lokalna kopija sačuvana; podaci za prijavu obično se čuvaju u sustavskom spremištu, ako je dostupno

@@ -2,13 +2,13 @@
 <p class="summary">Por qué se bloquean las imágenes externas y cómo mostrarlas en los mensajes en los que confía.</p>
 <p>Un mensaje puede incluir imágenes alojadas en internet. Al descargarlas, el remitente puede saber cuándo y desde dónde abrió el mensaje. Por eso Inbox Classic no descarga imágenes externas de forma predeterminada.</p>
 <p>Las imágenes incluidas en el propio mensaje sí se muestran, ya que al abrirlas no se envía información al remitente.</p>
-<p>Inbox Classic procesa estas imágenes, igual que las adjuntas, sin ejecutar código que contengan. Una imagen que no puede procesar (como HEIC) se muestra como un espacio en blanco. Las imágenes animadas muestran su primer fotograma. Las fuentes enviadas con un mensaje no se utilizan.</p>
+<p>Inbox Classic procesa las imágenes incrustadas, igual que las adjuntas, sin ejecutar código que contengan. Una imagen que no puede procesar (como HEIC) se muestra como un espacio en blanco. Las imágenes animadas muestran su primer fotograma. Las fuentes enviadas con un mensaje no se utilizan.</p>
 <p>Cuando un mensaje tiene imágenes de internet, una barra sobre él indica que se bloquearon algunas imágenes. Para verlas en un mensaje de confianza:</p>
 <ul>
     <li><!--os:windows,mac-->Haga clic en la barra.<!--/os--><!--os:linux-->Haga clic en <b data-text="gtk-download-pictures"></b> en la barra.<!--/os--></li>
     <li>O elija <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Así se muestran solo las imágenes de ese mensaje. Las imágenes externas de los demás mensajes siguen bloqueadas.</p>
+<p>Así se permiten las imágenes de ese mensaje. Los demás mensajes siguen la configuración de descarga automática y remitentes de confianza.</p>
 <h2>Remitentes de confianza</h2>
 <p>Para descargar automáticamente las imágenes de los mensajes de un remitente, <!--os:windows-->haga clic en la flecha del extremo derecho de la barra<!--/os--><!--os:mac-->haga clic en la flecha junto a <b data-text="cmd-pictures"></b> en la barra<!--/os--><!--os:linux-->haga clic en la flecha junto a <b data-text="gtk-download-pictures"></b> en la barra<!--/os-->. Elija descargar siempre las imágenes de ese remitente o de todos los de su dominio.</p>
 <p>Las imágenes solo se descargan automáticamente si su proveedor de correo confirma que el mensaje procede del dominio del remitente. Esto confirma el dominio, no la identidad de una persona ni la fiabilidad del contenido. Si no se puede verificar el dominio, las imágenes siguen bloqueadas y la barra muestra un aviso. En la carpeta <b data-text="folder-junk"></b>, las imágenes externas nunca se descargan automáticamente.</p>

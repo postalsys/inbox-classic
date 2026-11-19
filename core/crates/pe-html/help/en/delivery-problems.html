@@ -1,20 +1,20 @@
 <h1>Messages that were not delivered</h1>
-<p class="summary">When a message you sent bounces or is delayed, Inbox Classic explains why and what you can do.</p>
+<p class="summary">When Inbox Classic recognizes a delivery failure or delay notice, it explains the reported reason and what you can do.</p>
 <p>A delivery notice has an undelivered mark in the message list. When you open it, a card above it says whether your message was not delivered or is only delayed.</p>
 <img src="picture:bounce-1-failed" alt="A delivery notice with a card saying the message was not delivered, the recipient, the reason and what to do">
 <p>The card lists each recipient with the reason in plain words and what you can do. <b data-text="bounce-details"></b> shows the receiving server’s own words.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> selects the message you sent.</li>
-    <li>On a delay, <b data-text="bounce-show-delayed"></b> selects it. Your mail server is still trying, so you do not need to send it again.</li>
+    <li><b data-text="bounce-show-message"></b> selects the original message if it can be found in the account.</li>
+    <li>For a delay, <b data-text="bounce-show-delayed"></b> selects the original message if available. The notice reports that delivery is still being tried; wait for the outcome before sending again.</li>
 </ul>
-<p>Some common reasons:</p>
+<p>Some common reasons and advice for a final failure. If delivery is only delayed, wait for the outcome before sending again:</p>
 <table>
     <tr><th>The card says</th><th>What to do</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Check the spelling of the address, or ask the person for the one they use now.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Send it again in a few days, or reach the person another way.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Send it again without what looks like spam, such as many links or a large attachment.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Forward the notice to your mail provider. The message is not the problem.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Nothing. It is usually delivered within the hour.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Reach the person another way and ask them to make space before you try again.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Check the server’s explanation. If it rejected the content, revise the message before trying again.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Forward the notice to your mail provider. The sending server’s address was reported as blocked.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>The receiving server asked for a later attempt. A delay notice does not guarantee when delivery will succeed.</td></tr>
 </table>
-<p>To find every delivery notice, search for <code>is:bounce</code>. The reason is worked out on your computer, and nothing is sent anywhere.</p>
+<p>To find every delivery notice, search for <code>is:bounce</code>. The notice is analyzed on your computer; its contents are not sent to a separate analysis service.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

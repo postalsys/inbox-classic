@@ -7,19 +7,19 @@
     <li>Read the recipients and the text.</li>
     <li>Choose one:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> sends it. It comes on after a moment, so you cannot press it by accident.</li>
+            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> queues it for sending. The button becomes available after a short delay to reduce accidental confirmation.</li>
             <li><b data-text="ui-edit-first"></b> opens it in a new message for you to change.</li>
             <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, the default, does not send it.</li>
         </ul>
     </li>
 </ol>
 <p>An agent asks about one message at a time. If you take a while to answer, the agent is told that the message waits for you, and it can ask later what you decided. By default, the messages and drafts it writes end with your signature, as yours do, but the agent can leave it out.</p>
-<p>A message you send waits 30 seconds in the Outbox. Until it goes, you can delete it there, or click <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> in <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<p>An approved message waits 30 seconds in the Outbox before sending is attempted. Its log records queuing, not delivery. While it remains there, even after 30 seconds, you can delete it there, or click <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> in <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
 <h2>Answers to invitations</h2>
-<p>An agent that may send mail can accept, tentatively accept or decline a calendar invitation for you, through the same question. Above the text, the question says which invitation the message answers and when the event is. Inbox Classic writes the answer to the organizer from the invitation itself, so the message cannot be opened to change first. Your answer to the invitation changes only once the message has been sent.</p>
+<p>An agent that may send mail can accept, tentatively accept or decline a calendar invitation for you, through the same question. Above the text, the question says which invitation the message answers and when the event is. Inbox Classic writes the answer to the organizer from the invitation itself, so the message cannot be opened to change first. Each answer needs your approval and has no account signature text. Your local answer changes after the mail server accepts it, without confirmation from the organizer’s calendar.</p>
 <h2>Drafts an agent writes</h2>
 <p>When you open a draft an agent wrote, a line above the message names the agent. Check the recipients and the text before you send it.</p>
 <img src="picture:agents-8-draft" alt="A draft an AI agent wrote, open in its own window, with the line naming the agent above the text">
-<p>The agent can change or remove its draft until you save it yourself. From then on, the draft is yours.</p>
+<p>The agent can change or remove its draft until you save it in the editor, including automatic saving. From then on, the draft is yours.</p>
 <aside class="warning">An agent that also has other tools, such as browsing the web or reading your files, could pass on what it reads through them. Inbox Classic cannot see those. Let an agent send only if you need it to.</aside>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>

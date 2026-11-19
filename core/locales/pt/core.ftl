@@ -54,7 +54,7 @@ reader-downloading = A transferir a mensagem…
 reader-downloading-detail = A mensagem aparecerá aqui quando a transferência terminar.
 reader-downloading-size = A mensagem tem { $size }. Aparecerá aqui quando a transferência terminar.
 reader-failed = Não foi possível transferir a mensagem
-reader-failed-network = Não foi possível obter a mensagem do servidor de correio ({ $reason }).
+reader-failed-network = A ligação ao servidor de correio falhou ou foi interrompida ({ $reason }).
 reader-failed-sign-in = O servidor de correio não aceitou o início de sessão ({ $reason }). Verifique a palavra-passe ou inicie sessão novamente nas definições da conta.
 reader-failed-security = Não foi possível tornar segura a ligação ao servidor de correio ({ $reason }).
 reader-failed-other = O servidor de correio respondeu: { $reason }.
@@ -648,8 +648,8 @@ agent-reads-messages = { $count ->
    *[other] leu { $count } mensagens
 }
 agent-reads-attachments = { $count ->
-    [one] leu { $count } anexo
-   *[other] leu { $count } anexos
+    [one] pediu { $count } anexo
+   *[other] pediu { $count } anexos
 }
 agent-reads-searches = { $count ->
     [one] pesquisou uma vez
@@ -665,7 +665,7 @@ agent-read-conversation = { $count ->
     [one] Leu a conversa «{ $subject }» (1 mensagem)
    *[other] Leu a conversa «{ $subject }» ({ $count } mensagens)
 }
-agent-read-attachment = Leu o anexo «{ $name }» da mensagem «{ $subject }»
+agent-read-attachment = Pediu o anexo «{ $name }» da mensagem «{ $subject }»
 agent-read-search = { $count ->
     [one] Pesquisou «{ $query }»: 1 mensagem
    *[other] Pesquisou «{ $query }»: { $count } mensagens
@@ -947,7 +947,7 @@ setup-invalid-server = O nome, a porta ou a definição de segurança do servido
 setup-invalid-user = Não tem nome de utilizador.
 setup-invalid-sign-in = As definições de início de sessão não são válidas ou não são suportadas pelo Inbox Classic.
 setup-error-empty = O ficheiro está vazio.
-setup-error-too-large = O ficheiro é demasiado grande para ser uma configuração do Inbox Classic.
+setup-error-too-large = O ficheiro excede o limite de tamanho para a importação de definições e contas.
 setup-error-not-setup = Este ficheiro não é uma configuração do Inbox Classic.
 setup-error-damaged = O ficheiro de configuração está danificado e não pode ser lido.
 setup-error-newer = Esta configuração foi guardada por uma versão mais recente do Inbox Classic ({ $version }). Atualize o Inbox Classic e importe-a novamente.

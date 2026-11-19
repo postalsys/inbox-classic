@@ -1,13 +1,13 @@
 <h1>Engångskoder</h1>
 <p class="summary">Ett meddelande med en inloggnings- eller verifieringskod visar koden i ett kort som du kan kopiera från.</p>
-<p>När ett meddelande har en engångskod, till exempel en inloggnings-, verifierings- eller godkännandekod, visar ett kort ovanför det:</p>
+<p>När Inbox Classic känner igen en kod som stöds för inloggning, verifiering eller godkännande visar ett kort ovanför meddelandet:</p>
 <ul>
     <li>”Kod från” och domänen som koden gäller</li>
     <li>koden, i stor stil</li>
     <li><b data-text="otp-copy"></b>, som lägger koden i Urklipp</li>
 </ul>
 <aside class="warning">Ange bara en kod på en sida från domänen som kortet visar. Ett meddelande som ber dig skriva in en kod någon annanstans kan vara ett försök att ta över ditt konto.</aside>
-<p>Kortet visas bara när din e-postleverantör bekräftar att domänen har signerat meddelandet. Kontrollen gäller domänen, inte identiteten på personen bakom adressen. Inget kort visas i <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> eller <b data-text="folder-drafts"></b>, eller när leverantören inte rapporterar signaturer.</p>
+<p>Kortet visas bara när din e-postleverantör bekräftar en signatur från den relevanta domänen eller dess överordnade domän. Kontrollen gäller domänen, inte identiteten på personen bakom adressen. Inget kort visas i <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> eller <b data-text="folder-drafts"></b>, eller när leverantören inte rapporterar signaturer.</p>
 <p>Om meddelandets datum anger att det skickades för mer än en timme sedan varnar kortet för att koden kan ha gått ut. Kodens verkliga giltighetstid kan vara kortare eller längre.</p>
 <h2>Koder i aviseringar</h2>
 <p>Om du vill se koden i aviseringen om ett nytt meddelande slår du på <b data-text="ui-codes-in-notifications"></b> i <b data-settings="general"></b>. Inställningen är avstängd som standard, eftersom aviseringar kan synas på en låst skärm. För att koden ska visas måste aviseringar vara tillåtna och meddelandet vara tillräckligt nytt och litet för att hinna hämtas. Annars kan en vanlig avisering visas utan kod.</p>

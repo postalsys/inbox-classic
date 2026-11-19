@@ -130,7 +130,7 @@ bounce-geo-blocked-why = De ontvangende server neemt geen e-mail aan uit het lan
 bounce-geo-blocked-do = Neem op een andere manier contact op met de persoon, of vraag je e-mailprovider ernaar.
 bounce-relay-denied = De server weigerde het bericht door te sturen
 bounce-relay-denied-why = Een server weigerde het bericht verder te bezorgen, vaak omdat het zonder aanmelding is verzonden of via een server die deze ontvanger niet afhandelt.
-bounce-relay-denied-do = Controleer via Bestand > Accounts of de juiste server voor uitgaande e-mail is ingesteld en of je account zich daarbij aanmeldt.
+bounce-relay-denied-do = Controleer in de accountinstellingen of de juiste server voor uitgaande e-mail is ingesteld en of je account zich daarbij aanmeldt.
 bounce-auth-failure = Je afzenderadres kon niet worden geverifieerd
 bounce-auth-failure-why = De ontvangende server kon niet bevestigen dat het bericht echt van je domein kwam (SPF, DKIM of DMARC).
 bounce-auth-failure-do = Stuur deze melding door naar degene die de e-mail voor je domein beheert: de instellingen moeten worden gecorrigeerd. Verzenden via de eigen server van je provider kan intussen helpen.
@@ -473,7 +473,7 @@ agent-log-refused = Je hebt “{ $subject }” niet verzonden
 agent-log-sent = “{ $subject }” klaargezet voor verzending aan { $to }
 agent-log-draft = Het concept “{ $subject }” opgeslagen
 agent-log-draft-replaced = Het concept “{ $subject }” vervangen
-agent-log-draft-discarded = Het concept “{ $subject }” verwijderd
+agent-log-draft-discarded = Verwijderen van het concept “{ $subject }” aangevraagd
 agent-draft-note = { $program }, een AI-agent, heeft dit concept geschreven. Controleer de ontvangers en de tekst voordat je het verzendt.
 agent-log-read = “{ $subject }” gemarkeerd als gelezen
 agent-log-unread = “{ $subject }” gemarkeerd als ongelezen
@@ -487,7 +487,7 @@ agent-log-archived = “{ $subject }” gearchiveerd
 agent-log-folder = Aanmaken van de map “{ $name }” aangevraagd
 agent-log-unsubscribed = Je hebt het afmeldverzoek goedgekeurd. Bericht: “{ $subject }”
 agent-log-unsubscribe-failed = Afmelden voor de mailinglijst bij het bericht “{ $subject }” is mislukt: { $reason }
-agent-log-unsubscribe-refused = Je hebt je niet afgemeld voor deze mailinglijsten: { $senders }
+agent-log-unsubscribe-refused = Je hebt het afmeldverzoek niet goedgekeurd. Afzenders: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } wil je afmelden voor een mailinglijst
    *[other] { $program } wil je afmelden voor { $count } mailinglijsten
@@ -579,8 +579,8 @@ agent-undo-since-detail = Berichten gaan waar mogelijk terug naar hun vorige map
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Er is niets teruggedraaid.
-    [one] 1 wijziging teruggedraaid.
-   *[other] { $count } wijzigingen teruggedraaid.
+    [one] 1 wijziging teruggedraaid, geheel of gedeeltelijk.
+   *[other] { $count } wijzigingen teruggedraaid, geheel of gedeeltelijk.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 wijziging bleef behouden omdat een bericht niet meer op de verwachte plek stond.
@@ -591,9 +591,9 @@ agent-undo-left-changed = { $count ->
    *[other] { $count } wijzigingen bleven behouden omdat de betrokken eigenschappen sindsdien zijn veranderd.
 }
 agent-undo-left-sent = { $count ->
-    [one] 1 wijziging kon niet worden teruggedraaid omdat het bericht niet meer in Postvak UIT stond.
-   *[other] { $count } wijzigingen konden niet worden teruggedraaid omdat de berichten niet meer in Postvak UIT stonden.
-}
+        [one] 1 bericht stond niet meer in Postvak UIT en kon niet worden teruggehaald.
+       *[other] { $count } berichten stonden niet meer in Postvak UIT en konden niet worden teruggehaald.
+    }
 agent-undo-left-impossible = { $count ->
     [one] 1 wijziging kan niet worden teruggedraaid.
    *[other] { $count } wijzigingen kunnen niet worden teruggedraaid.
@@ -603,7 +603,7 @@ agent-invitation-reply = { $response ->
     [accept] Met dit bericht accepteer je de uitnodiging “{ $summary }” ({ $when }).
     [tentative] Met dit bericht accepteer je de uitnodiging “{ $summary }” ({ $when }) voorlopig.
    *[decline] Met dit bericht weiger je de uitnodiging “{ $summary }” ({ $when }).
-} Het antwoord wordt naar de agenda van de organisator gestuurd. Inbox Classic werkt je antwoord bij zodra de mailserver het bericht heeft geaccepteerd voor verzending.
+} Het antwoord wordt naar de organisator gestuurd. Inbox Classic werkt je antwoord bij zodra de mailserver het bericht heeft geaccepteerd voor verzending.
 # the subject of an answer to an invitation, as calendar programs write it
 invitation-reply-subject = { $response ->
     [accept] Geaccepteerd: { $summary }
@@ -622,8 +622,8 @@ agent-reads-messages = { $count ->
    *[other] { $count } berichten gelezen
 }
 agent-reads-attachments = { $count ->
-    [one] 1 bijlage gelezen
-   *[other] { $count } bijlagen gelezen
+    [one] 1 bijlage opgevraagd
+   *[other] { $count } bijlagen opgevraagd
 }
 agent-reads-searches = { $count ->
     [one] één keer gezocht
@@ -639,15 +639,15 @@ agent-read-conversation = { $count ->
     [one] Het gesprek “{ $subject }” gelezen (1 bericht)
    *[other] Het gesprek “{ $subject }” gelezen ({ $count } berichten)
 }
-agent-read-attachment = De gegevens van de bijlage “{ $name }” van “{ $subject }” gelezen
+agent-read-attachment = De gegevens van de bijlage “{ $name }” van “{ $subject }” opgevraagd
 agent-read-search = { $count ->
     [one] Gezocht naar “{ $query }”: 1 bericht
    *[other] Gezocht naar “{ $query }”: { $count } berichten
 }
 agent-read-people = Contactpersonen opgezocht met een naam of adres dat begint met “{ $query }”
 agent-read-list = { $count ->
-    [one] Lijstgegevens van 1 bericht in { $folder } bekeken
-   *[other] Lijstgegevens van { $count } berichten in { $folder } bekeken
+    [one] Lijstgegevens van 1 lijstvermelding in { $folder } bekeken
+   *[other] Lijstgegevens van { $count } lijstvermeldingen in { $folder } bekeken
 }
 agent-read-changes = { $count ->
     [one] Lijstgegevens van 1 nieuw bericht bekeken
@@ -662,7 +662,7 @@ agent-terminal-program-mac = Een programma gestart vanuit { $terminal }
 agent-terminal-program-windows = Een programma gestart vanuit een terminal ({ $terminal })
 agent-terminal-program-linux = Een programma gestart vanuit een terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } willen je e-mail gebruiken
-agent-connect-terminal-detail = Alle AI-agents die je vanuit deze terminal start, delen de toegang die je hier geeft. Wil je een agent eigen toegang geven, voeg dan --name en een naam naar keuze toe aan zijn argumenten in de MCP-instellingen van de agent.
+agent-connect-terminal-detail = Agents die vanuit hetzelfde herkende terminalprogramma worden gestart, delen de toegang die je hier geeft. Om een agent apart te beheren, voeg je --name en een naam naar keuze toe aan zijn argumenten in de MCP-instellingen. De naam bewijst niet welk programma het is.
 agent-connect-claimed = Het programma gaf aan { $claimed } te zijn. Inbox Classic heeft gecontroleerd welk programma het heeft gestart: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -684,7 +684,7 @@ secrets-windows = Referentiebeheer
 secrets-mac = de sleutelhanger
 secrets-linux = de sleutelbos van het systeem (Secret Service)
 error-no-such-file = dit bestand bestaat niet
-cards-file-too-big = Dit bestand is te groot om een adresboek te zijn.
+cards-file-too-big = Dit bestand overschrijdt de groottelimiet voor het importeren van een adresboek.
 ui-sender-added = { $name } is toegevoegd aan het Adresboek.
 ui-sender-known = { $name } staat al in het Adresboek.
 ui-sender-none = De afzender van dit bericht heeft geen e-mailadres om toe te voegen.
@@ -730,7 +730,7 @@ pgp-error-no-store = Privésleutels worden beveiligd via { $store }. Deze opslag
 pgp-error-wrong-passphrase = De wachtwoordzin klopt niet.
 pgp-error-not-a-key = Dit is geen OpenPGP-sleutel.
 pgp-error-too-large = De sleutel is te groot.
-pgp-error-unusable = De sleutel gebruikt oude of zwakke cryptografie en kan niet worden gebruikt.
+pgp-error-unusable = De sleutel is niet bruikbaar voor deze bewerking. Een geschikte ondertekenings- of versleutelingssleutel kan ontbreken, of de gebruikte cryptografie wordt niet ondersteund.
 pgp-imported-private = { $count ->
     [one] Je privésleutel is geïmporteerd.
    *[other] { $count } privésleutels zijn geïmporteerd.
@@ -749,13 +749,13 @@ pgp-pending = Op { $date } is een andere sleutel voor { $address } gevonden.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Geldige digitale handtekening van { $signer }, eigenaar van de sleutel geverifieerd
 pgp-part-signed = Geldige digitale handtekening van { $signer }, eigenaar van de sleutel niet geverifieerd
-pgp-part-other = Ondertekend door { $signer }, die niet de afzender is
+pgp-part-other = Ondertekend door { $signer }; de handtekening kon niet eenduidig aan de afzender worden gekoppeld
 pgp-part-unknown-key = Ondertekend, maar de sleutel is onbekend
 pgp-part-not-signed = Niet ondertekend
 pgp-part-not-checked = Handtekening niet gecontroleerd
 pgp-part-encrypted = Versleuteld. { $signature }
 pgp-part-no-key = Versleuteld; geen bijbehorende privésleutel beschikbaar
-pgp-part-changed = Het versleutelde deel is onderweg gewijzigd en wordt niet getoond
+pgp-part-changed = De integriteit van de versleutelde inhoud kon niet worden bevestigd. De inhoud wordt niet getoond
 pgp-part-unprotected = Versleuteld zonder bescherming tegen wijzigingen, niet getoond
 pgp-part-broken = Het versleutelde deel kan niet worden gelezen
 pgp-why-mismatch = De digitale handtekening komt niet overeen met deze tekst
@@ -771,8 +771,8 @@ pgp-why-not-key-in-use = Ondertekend met een andere sleutel dan die voor { $addr
 pgp-part-pictures-loaded = { $label }. Er zijn afbeeldingen van internet geladen
 pgp-error-no-own-key = Je hebt geen sleutel voor { $address } om mee te ondertekenen of te versleutelen. Open Versleutelingssleutels om er een te maken, of zet Ondertekenen en Versleutelen uit.
 pgp-error-missing-keys = { $count ->
-    [one] Er is geen sleutel beschikbaar om het bericht te versleutelen voor: { $addresses }.
-   *[other] Er zijn geen sleutels beschikbaar om het bericht te versleutelen voor deze ontvangers: { $addresses }.
+    [one] Er is geen bruikbare sleutel beschikbaar om het bericht te versleutelen voor: { $addresses }.
+   *[other] Er zijn geen bruikbare sleutels beschikbaar om het bericht te versleutelen voor deze ontvangers: { $addresses }.
 }
 pgp-error-encrypted-quote = Dit bericht bevat nog tekst, afbeeldingen of bijlagen uit een versleuteld bericht en kan daarom alleen versleuteld worden verzonden. Zet Versleutelen aan of verwijder die inhoud.
 pgp-error-protect = Het bericht kon niet worden ondertekend of versleuteld: { $reason }
@@ -893,17 +893,17 @@ setup-account-signs-in-again = Na het importeren meld je je er opnieuw bij aan.
 setup-account-here = Dit account staat hier al, dus het wordt overgeslagen.
 setup-account-no-app = Dit account gebruikt de aanmeldapp { $app }, die hier niet is ingesteld. Importeer ook de aanmeldapps.
 setup-invalid-address = “{ $address }” is geen e-mailadres.
-setup-invalid-server = Het serveradres of poortnummer voor { $server } is ongeldig of ontbreekt.
+setup-invalid-server = De naam, poort of beveiligingsinstelling van de server { $server } is ongeldig.
 setup-invalid-user = Er is geen gebruikersnaam.
-setup-invalid-sign-in = Dit account gebruikt een aanmeldmethode die Inbox Classic niet ondersteunt.
+setup-invalid-sign-in = De aanmeldinstellingen van dit account zijn ongeldig.
 setup-error-empty = Het bestand is leeg.
-setup-error-too-large = Het bestand is te groot om een instellingenbestand van Inbox Classic te zijn.
+setup-error-too-large = Het bestand overschrijdt de groottelimiet voor het importeren van instellingen en accounts.
 setup-error-not-setup = Dit bestand is geen instellingenbestand van Inbox Classic.
 setup-error-damaged = Het instellingenbestand is beschadigd en kan niet worden gelezen.
 setup-error-newer = Dit bestand is opgeslagen met een nieuwere versie van Inbox Classic ({ $version }). Werk Inbox Classic bij en importeer het bestand opnieuw.
 setup-error-needs-passphrase = Dit bestand is beveiligd met een wachtwoordzin. Typ de wachtwoordzin waarmee het is opgeslagen.
 setup-error-wrong-passphrase = Dat is niet de wachtwoordzin waarmee dit bestand is opgeslagen.
-setup-error-changed = Het instellingenbestand is na het opslaan gewijzigd of beschadigd, dus het kan niet worden geïmporteerd.
+setup-error-changed = De integriteit van het instellingenbestand kon niet worden bevestigd. Het bestand kan niet worden geïmporteerd.
 setup-error-read = Het instellingenbestand kon niet worden gelezen: { $error }
 setup-error-write = De instellingen konden niet worden opgeslagen: { $error }
 setup-error-no-parts = Kies ten minste één onderdeel.
@@ -973,7 +973,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Er is niets geïmporteerd.
 setup-account-servers = { $imap } en { $smtp } ({ $signin })
 setup-file-name = Instellingen en accounts van Inbox Classic
-setup-skipped-unreachable = { $name } is overgeslagen omdat de aanmeldservice niet bereikbaar was. Controleer de instellingen bij Aanmeldapps voordat je het opnieuw probeert.
+setup-skipped-unreachable = { $name } is overgeslagen omdat de aanmeldservice niet kon worden gecontroleerd. Controleer de benodigde app bij Aanmeldapps en probeer het opnieuw.
 attachment-runs-programs = “{ $name }” kan programma’s uitvoeren, dus Inbox Classic opent het niet. Sla het op en open het daarna zelf als je vertrouwt waar het vandaan komt.
 attachment-decrypted-note = Deze bijlage komt uit een versleuteld bericht. Bij het openen bewaart Inbox Classic een onversleutelde kopie in een tijdelijke map voor jouw gebruikersaccount. Die kopie blijft na het sluiten bestaan. Bij het starten probeert de app kopieën ouder dan een dag te verwijderen.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1026,7 +1026,7 @@ preview-tile-format = { $format }-afbeeldingen worden nog niet getoond
 preview-tile-password = Beveiligd met een wachtwoord: open het om het wachtwoord in te voeren
 preview-tile-too-large = Te groot om te tonen
 preview-tile-unreadable = Kan niet worden getoond
-preview-tile-timed-out = Tonen duurde te lang
+preview-tile-timed-out = Het voorbereiden van het voorbeeld duurde te lang
 preview-tile-crashed = Niet getoond: Inbox Classic werd bij een eerdere poging onderbroken of reageerde niet meer
 preview-tile-off = Niet getoond tot Inbox Classic opnieuw start
 preview-not-printed = { $name } ({ $details }) wordt niet afgedrukt. Open het om het af te drukken.

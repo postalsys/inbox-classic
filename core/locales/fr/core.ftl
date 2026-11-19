@@ -65,8 +65,8 @@ reader-downloading = Téléchargement du message…
 reader-downloading-detail = Le message s'affichera ici une fois le téléchargement terminé.
 reader-downloading-size = Le message fait { $size }. Il apparaîtra ici une fois téléchargé.
 reader-failed = Le message n'a pas pu être téléchargé
-reader-failed-network = Le serveur de messagerie est inaccessible ({ $reason }).
-reader-failed-sign-in = Le serveur de messagerie a refusé la connexion ({ $reason }). Vérifiez le mot de passe ou reconnectez-vous dans Fichier > Comptes.
+reader-failed-network = La connexion au serveur de messagerie a échoué ou a été interrompue ({ $reason }).
+reader-failed-sign-in = Le serveur de messagerie a refusé la connexion ({ $reason }). Vérifiez le mot de passe ou reconnectez-vous dans les paramètres du compte.
 reader-failed-security = Impossible d'établir une connexion sécurisée au serveur de messagerie ({ $reason }).
 reader-failed-other = Le serveur de messagerie a répondu : { $reason }.
 reader-retry-note = Une nouvelle tentative aura lieu dès que la connexion au compte sera rétablie.
@@ -144,7 +144,7 @@ bounce-geo-blocked-why = Le serveur de réception n'accepte pas le courrier du p
 bounce-geo-blocked-do = Contactez le destinataire par un autre moyen ou demandez de l'aide à votre fournisseur de messagerie.
 bounce-relay-denied = Le serveur a refusé de relayer le message
 bounce-relay-denied-why = Un serveur a refusé de relayer le message, souvent parce qu'il a été envoyé sans authentification ou par un serveur qui ne prend pas en charge ce destinataire.
-bounce-relay-denied-do = Dans Fichier > Comptes, vérifiez les paramètres du serveur sortant et assurez-vous que l'authentification auprès de ce serveur est configurée.
+bounce-relay-denied-do = Dans les paramètres du compte, vérifiez le serveur sortant et assurez-vous que l’authentification auprès de ce serveur est configurée.
 bounce-auth-failure = Votre adresse d'expéditeur n'a pas pu être vérifiée
 bounce-auth-failure-why = Le serveur de réception n'a pas pu confirmer que le message venait bien de votre domaine (SPF, DKIM ou DMARC).
 bounce-auth-failure-do = Transmettez cet avis à la personne qui gère la messagerie de votre domaine pour qu'elle en corrige les paramètres. En attendant, essayez d'envoyer le message via le serveur de votre fournisseur.
@@ -505,7 +505,7 @@ agent-log-archived = « { $subject } » archivé
 agent-log-folder = Création demandée pour le dossier « { $name } »
 agent-log-unsubscribed = Vous avez autorisé la demande de désabonnement. Message : « { $subject } »
 agent-log-unsubscribe-failed = Impossible de se désabonner de la liste ayant envoyé « { $subject } » : { $reason }
-agent-log-unsubscribe-refused = Vous avez refusé de vous désabonner des listes suivantes : { $senders }
+agent-log-unsubscribe-refused = Vous n’avez pas autorisé la demande de désabonnement. Expéditeurs : { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } souhaite vous désabonner d'une liste de diffusion
    *[other] { $program } souhaite vous désabonner de { $count } listes de diffusion
@@ -597,8 +597,8 @@ agent-undo-since-detail = Les messages retournent dans leurs dossiers précéden
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Rien n’a été annulé.
-    [one] { $count } modification annulée.
-   *[other] { $count } modifications annulées.
+    [one] { $count } modification annulée, en tout ou en partie.
+   *[other] { $count } modifications annulées, en tout ou en partie.
 }
 agent-undo-left-gone = { $count ->
     [one] { $count } message n’était plus là où la modification l’avait placé.
@@ -640,8 +640,8 @@ agent-reads-messages = { $count ->
    *[other] lu { $count } messages
 }
 agent-reads-attachments = { $count ->
-    [one] lu { $count } pièce jointe
-   *[other] lu { $count } pièces jointes
+    [one] demandé { $count } pièce jointe
+   *[other] demandé { $count } pièces jointes
 }
 agent-reads-searches = { $count ->
     [one] effectué { $count } recherche
@@ -657,7 +657,7 @@ agent-read-conversation = { $count ->
     [one] Conversation « { $subject } » lue ({ $count } message)
    *[other] Conversation « { $subject } » lue ({ $count } messages)
 }
-agent-read-attachment = Pièce jointe « { $name } » du message « { $subject } » lue
+agent-read-attachment = Pièce jointe « { $name } » du message « { $subject } » demandée
 agent-read-search = { $count ->
     [one] Recherche de « { $query } » : { $count } message
    *[other] Recherche de « { $query } » : { $count } messages
@@ -668,8 +668,8 @@ agent-read-list = { $count ->
    *[other] { $count } entrées de la liste consultées dans { $folder }
 }
 agent-read-changes = { $count ->
-    [one] { $count } nouveau message consulté
-   *[other] { $count } nouveaux messages consultés
+    [one] { $count } résumé de nouveau message consulté
+   *[other] { $count } résumés de nouveaux messages consultés
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programmes lancés depuis { $terminal }
@@ -680,7 +680,7 @@ agent-terminal-program-mac = Un programme lancé depuis { $terminal }
 agent-terminal-program-windows = Un programme lancé depuis un terminal ({ $terminal })
 agent-terminal-program-linux = Un programme lancé depuis un terminal ({ $terminal })
 agent-connect-title-terminal = { $programs } souhaitent utiliser votre messagerie
-agent-connect-terminal-detail = Tous les agents d'IA que vous lancez depuis ce terminal partagent l'accès que vous autorisez ici. Pour donner à un agent son propre accès, ajoutez --name et le nom de votre choix à ses arguments dans les paramètres MCP de l'agent.
+agent-connect-terminal-detail = Les agents lancés depuis le même programme de terminal reconnu partagent l’accès que vous autorisez ici. Pour gérer un agent séparément, ajoutez --name et le nom de votre choix à ses arguments dans ses paramètres MCP. Ce nom ne prouve pas l’identité du programme.
 agent-connect-claimed = Le programme s'est présenté comme { $claimed }. Inbox Classic a vérifié quel programme l'a lancé : { $program }.
 
 ## Keys
@@ -784,10 +784,10 @@ pgp-why-not-key-in-use = Signé avec une autre clé que celle utilisée pour { $
 pgp-part-pictures-loaded = { $label }. Des images ont été chargées depuis Internet
 pgp-error-no-own-key = Aucune clé n’est configurée pour signer ou chiffrer avec l’adresse { $address }. Créez-en une dans Outils > Clés de chiffrement ou désactivez les options Signer et Chiffrer.
 pgp-error-missing-keys = { $count ->
-    [one] La clé nécessaire pour envoyer un message chiffré à { $addresses } est introuvable.
-   *[other] Les clés nécessaires pour envoyer des messages chiffrés à ces destinataires sont introuvables : { $addresses }.
+    [one] Une clé utilisable nécessaire pour envoyer un message chiffré à { $addresses } est introuvable.
+   *[other] Les clés utilisables nécessaires pour envoyer des messages chiffrés à ces destinataires sont introuvables : { $addresses }.
 }
-pgp-error-encrypted-quote = Ce message contient des passages d’un message chiffré. Activez l’option Chiffrer ou retirez les passages cités avant de l’envoyer.
+pgp-error-encrypted-quote = Ce message contient du texte, des images ou des pièces jointes provenant d’un message chiffré. Activez l’option Chiffrer ou retirez tout ce contenu avant de l’envoyer.
 pgp-error-protect = Le message n’a pas pu être signé ou chiffré : { $reason }
 pgp-found-keys = Clés trouvées pour : { $addresses }.
 pgp-found-none = Aucune clé n’a été trouvée pour les adresses suivantes : { $addresses }. Demandez aux destinataires de vous envoyer leurs clés publiques.
@@ -1050,7 +1050,7 @@ preview-tile-format = Les images { $format } ne sont pas encore affichées
 preview-tile-password = Protégé par un mot de passe : ouvrez-le pour le saisir
 preview-tile-too-large = Trop volumineux pour être affiché
 preview-tile-unreadable = Impossible à afficher
-preview-tile-timed-out = L’affichage a pris trop de temps
+preview-tile-timed-out = La préparation de l’aperçu a pris trop de temps
 preview-tile-crashed = Aperçu désactivé après une interruption de l’affichage
 preview-tile-off = Non affiché jusqu’au prochain démarrage d’Inbox Classic
 preview-not-printed = { $name } ({ $details }) n’est pas imprimé. Ouvrez-le pour l’imprimer.

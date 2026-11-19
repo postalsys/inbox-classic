@@ -1,5 +1,5 @@
 <h1>Messages non remis</h1>
-<p class="summary">Quand un message que vous avez envoyé revient ou est retardé, Inbox Classic explique pourquoi et ce que vous pouvez faire.</p>
+<p class="summary">Inbox Classic explique les avis d’échec ou de retard de remise qu’il reconnaît et suggère des mesures à prendre.</p>
 <p>Un avis de non-remise porte une marque de non-distribution dans la liste des messages. Quand vous l'ouvrez, une carte au-dessus indique si votre message n'a pas été remis ou s'il est seulement retardé.</p>
 <img src="picture:bounce-1-failed" alt="Un avis de non-remise avec une carte indiquant que le message n'a pas été remis, le destinataire, la raison et ce qu'il faut faire">
 <p>La carte liste chaque destinataire, avec la raison en termes simples et ce que vous pouvez faire. <b data-text="bounce-details"></b> affiche les propres termes du serveur de réception.</p>
@@ -7,13 +7,13 @@
     <li><b data-text="bounce-show-message"></b> sélectionne le message envoyé s’il peut être retrouvé.</li>
     <li>En cas de retard, <b data-text="bounce-show-delayed"></b> le sélectionne s’il peut être retrouvé. Si l’avis indique que le serveur continue ses tentatives, vous n’avez pas besoin de renvoyer le message.</li>
 </ul>
-<p>Quelques raisons courantes :</p>
+<p>Quelques causes courantes et conseils en cas d’échec définitif. Si la remise est seulement retardée, attendez le résultat avant de renvoyer le message :</p>
 <table>
     <tr><th>La carte indique</th><th>Que faire</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Vérifiez l'orthographe de l'adresse, ou demandez à la personne celle qu'elle utilise maintenant.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Renvoyez le message dans quelques jours, ou contactez la personne autrement.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Renvoyez-le sans ce qui ressemble à du courrier indésirable, comme de nombreux liens ou une pièce jointe volumineuse.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Transférez l'avis à votre fournisseur de messagerie. Le message n'est pas en cause.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Contactez la personne autrement et demandez-lui de libérer de l’espace avant de réessayer.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Consultez l’explication du serveur. S’il a refusé le contenu, modifiez le message avant de réessayer.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Transférez l’avis à votre fournisseur de messagerie. Selon l’avis, l’adresse du serveur d’envoi est bloquée.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Attendez tant que le serveur continue ses tentatives. S’il a cessé de réessayer, vous devrez peut-être renvoyer le message.</td></tr>
 </table>
 <p>Pour trouver tous les avis de non-remise, recherchez <code>is:bounce</code>. La raison est déterminée sur votre ordinateur, sans transmettre le contenu à un service d’analyse externe.</p>

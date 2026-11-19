@@ -178,4 +178,4 @@ gtk-metainfo-description = Inbox Classic, solda klasörler, üstte ileti listesi
 gtk-metainfo-feature-sanitized = İletiler, betikleri çalıştırılmadan gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir
 gtk-metainfo-feature-search = Konularda, gönderenlerde, alıcılarda, ek adlarında ve ileti metninde arama yapın; Gmail tarzı arama ifadeleriyle sonuçları daraltın
 gtk-metainfo-feature-replies = Yanıtlardaki önceki iletiler, gerektiğinde açılabilecek şekilde gizlenir
-gtk-metainfo-feature-offline = Yerel kopyası bulunan iletileri çevrimdışı okuyun. Oturum açma bilgileri varsayılan olarak sistem anahtarlığında saklanır
+gtk-metainfo-feature-offline = Yerel kopyası bulunan iletileri çevrimdışı okuyun. Oturum açma bilgileri varsayılan olarak, kullanılabiliyorsa sistem anahtarlığında saklanır

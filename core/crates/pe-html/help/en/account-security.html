@@ -4,10 +4,10 @@
 <table>
     <tr><th>Setting</th><th>Meaning</th></tr>
     <tr><td>SSL/TLS</td><td>The connection is encrypted from the start. Usually port 993 for incoming mail and 465 for outgoing mail.</td></tr>
-    <tr><td>STARTTLS</td><td>The connection is encrypted right after it opens. Usually port 143 for incoming mail and 587 for outgoing mail. Inbox Classic stops if the server does not offer encryption.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>Your password and mail travel readable by anyone on the network.</td></tr>
+    <tr><td>STARTTLS</td><td>The connection starts unencrypted, then switches to TLS before sending sign-in credentials. Usually port 143 for incoming mail and 587 for outgoing mail. Inbox Classic stops if the server does not offer encryption.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Your password and mail travel unencrypted and can be read by someone intercepting the connection.</td></tr>
 </table>
 <aside class="warning">Use <b data-text="ui-security-none"></b> only for a server on your own computer or local network. Inbox Classic warns you before it uses it.</aside>
 <p>Inbox Classic checks that every server is the one it claims to be, against the certificates your system trusts. There is no switch to accept any certificate.</p>
-<p>Your password is kept in <!--os:windows-->the Windows Credential Manager<!--/os--><!--os:mac-->your login keychain<!--/os--><!--os:linux-->your keyring<!--/os-->, never in the mail store. An account that signs in through the browser keeps no password at all.</p>
+<p>By default, your password is kept in <!--os:windows-->the Windows Credential Manager<!--/os--><!--os:mac-->your login keychain<!--/os--><!--os:linux-->your keyring<!--/os-->, never in the mail store. Browser sign-in stores a token there instead of your password. Memory-only mode, or an unavailable system store, can limit credentials to the current session.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>

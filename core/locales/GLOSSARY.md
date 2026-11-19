@@ -6,9 +6,9 @@ more than one platform share, `ui-` ids), and `windows.ftl`, `mac.ftl` and `linu
 has. English (`en`) is the source; a word a language does not have yet is shown in English. The user help is
 `core/crates/pe-html/help/<lang>/<topic>.html`.
 
-**Status: the German, Estonian, French and Spanish files and help pages have had a native review; the other languages
-are drafts marked for review (below). A change to the English words needs the same review in every language before a
-release.**
+**Review status is recorded in [the review progress](../../docs/translation-review-progress.md) and its accompanying
+state file. A completed review does not by itself establish native-speaker approval. When English changes, recheck
+the affected meanings in every language before advancing the reviewed baseline.**
 
 **Adding a language.** Its catalogs (`core/locales/<code>/`, every file English has), its help
 (`core/crates/pe-html/help/<code>/`, every topic), both marked for review, and its line in `pe_i18n::LANGUAGES`
@@ -22,7 +22,7 @@ entry and metainfo again (commit them), and `scripts/build-sign-in-buttons.sh` m
 pictures (commit them too); the Mac's localizations, the Help Books, the homepage's help and the UI tests read the list
 themselves.
 
-**Drafts waiting for review.** `REVIEWED` holds the commit of the last native review. A message translated after it
+**Drafts waiting for review.** `REVIEWED` holds the commit of the last completed recorded review. A message translated after it
 (new, or its English changed) has `# review: new` or `# review: changed` on the line above it, and a new or changed
 passage of a help page sits between `<!--review-->` and `<!--/review-->` (the page shows it without them). `node
 scripts/i18n-review.mjs` lists them (`--html out.html` as a page with the English beside each draft); `--check`, which
@@ -57,6 +57,16 @@ is made. Translate it as user approval, not completed cancellation or a request 
 placeholder identifies the source message, not a list name; introduce it with the localized message label.
 Use the language's normal form of address. Polish uses an impersonal approval to avoid gendered user forms;
 Slovenian addresses the approving user here, rather than using the masculine participle for an agent action.
+
+## Requests, completion and identity
+
+Keep a request, a queued operation and a confirmed result distinct. Server changes may still fail after a local
+action. Undo can restore only changes that still qualify for that operation; its original count is not a promise
+that every item will be restored. An attachment activity entry records a request, which may be refused before any
+content is returned.
+
+Provider confirmation of a sending domain does not verify the identity of an individual person. Keep this separate
+from verification of an OpenPGP key's owner and from a signature's cryptographic validity.
 
 ## Fixed terms
 

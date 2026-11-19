@@ -178,4 +178,4 @@ gtk-metainfo-description = Con Inbox Classic leggi e scrivi e-mail in un’inter
 gtk-metainfo-feature-sanitized = I messaggi vengono ripuliti da script e altri contenuti attivi; le immagini da internet vengono caricate solo con il tuo consenso
 gtk-metainfo-feature-search = Ricerca nell’oggetto, nei mittenti, nei destinatari, nei nomi degli allegati e nel testo dei messaggi, con il supporto degli operatori di Gmail
 gtk-metainfo-feature-replies = Il testo dei messaggi precedenti citato nelle risposte viene compresso e può essere espanso quando serve
-gtk-metainfo-feature-offline = La posta scaricata si può leggere anche offline. Le credenziali vengono conservate per impostazione predefinita nell’archivio protetto del sistema
+gtk-metainfo-feature-offline = Leggi la posta offline finché la copia locale è conservata; le credenziali sono normalmente salvate nell’archivio protetto del sistema, se disponibile

@@ -1,5 +1,5 @@
 <h1>Mesaje care nu au fost livrate</h1>
-<p class="summary">Când un mesaj trimis de dvs. este returnat sau întârzie, Inbox Classic explică de ce și ce puteți face.</p>
+<p class="summary">Inbox Classic explică notificările recunoscute de livrare eșuată sau întârziată și sugerează ce puteți face.</p>
 <p>O notificare de livrare recunoscută de Inbox Classic are în lista de mesaje un semn de mesaj nelivrat. Când o deschideți, un card deasupra ei arată dacă mesajul dvs. nu a fost livrat sau doar întârzie.</p>
 <img src="picture:bounce-1-failed" alt="O notificare de livrare cu un card care spune că mesajul nu a fost livrat, destinatarul, motivul și ce trebuie făcut">
 <p>Cardul afișează fiecare destinatar cu motivul explicat simplu și ce puteți face. <b data-text="bounce-details"></b> afișează răspunsul serverului destinatar.</p>
@@ -7,13 +7,13 @@
     <li><b data-text="bounce-show-message"></b> selectează mesajul pe care l-ați trimis, dacă Inbox Classic îl poate găsi.</li>
     <li>La o întârziere, <b data-text="bounce-show-delayed"></b> îl selectează. Conform notificării, serverul dvs. încă încearcă să livreze mesajul. De obicei nu este nevoie să îl retrimiteți, dar livrarea nu este garantată.</li>
 </ul>
-<p>Câteva motive obișnuite:</p>
+<p>Motive frecvente și sfaturi pentru un eșec definitiv. Dacă livrarea doar întârzie, așteptați rezultatul înainte de a retrimite:</p>
 <table>
     <tr><th>Cardul spune</th><th>Ce puteți face</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Verificați cum este scrisă adresa sau cereți persoanei adresa pe care o folosește acum.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Trimiteți-l din nou peste câteva zile sau contactați persoana pe altă cale.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Încercați să retrimiteți mesajul fără elemente care pot părea spam, cum ar fi multe linkuri sau o atașare mare.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Redirecționați notificarea furnizorului de e-mail. Problema nu este mesajul.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Contactați persoana pe altă cale și cereți-i să elibereze spațiu înainte de a încerca din nou.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Citiți explicația serverului. Dacă a respins conținutul, modificați mesajul înainte de a încerca din nou.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Redirecționați notificarea furnizorului de e-mail. Conform notificării, adresa serverului de trimitere este blocată.</td></tr>
     <tr><td><b data-text="bounce-greylisting"></b></td><td>Dacă notificarea indică o întârziere, așteptați reîncercările serverului. Dacă livrarea a eșuat definitiv, încercați mai târziu sau contactați furnizorul.</td></tr>
 </table>
 <p>Pentru a găsi toate notificările de livrare, căutați <code>is:bounce</code>. Motivul este analizat pe computerul dvs., fără a trimite mesajele către alte servicii.</p>

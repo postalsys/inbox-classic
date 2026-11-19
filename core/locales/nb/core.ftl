@@ -131,7 +131,7 @@ bounce-geo-blocked-why = Mottakerserveren tar ikke imot e-post fra landet eller 
 bounce-geo-blocked-do = Kontakt personen på en annen måte, eller spør e-postleverandøren din om det.
 bounce-relay-denied = Serveren nektet å videresende meldingen
 bounce-relay-denied-why = En server nektet å levere meldingen videre, ofte fordi den ble sendt uten pålogging eller gjennom en server som ikke håndterer denne mottakeren.
-bounce-relay-denied-do = Kontroller innstillingene for utgående server under Fil > Kontoer. Kontroller også at pålogging er aktivert.
+bounce-relay-denied-do = Kontroller innstillingene for utgående server i kontoinnstillingene. Kontroller også at pålogging er aktivert.
 bounce-auth-failure = Avsenderdomenet kunne ikke bekreftes
 bounce-auth-failure-why = Mottakerserveren kunne ikke bekrefte at meldingen virkelig kom fra domenet ditt (SPF, DKIM eller DMARC).
 bounce-auth-failure-do = Videresend dette varselet til den som drifter e-posten for domenet ditt: innstillingene må rettes. I mellomtiden kan det hjelpe å sende gjennom leverandørens egen server.
@@ -576,8 +576,8 @@ agent-undo-since-detail = Inbox Classic forsøker å flytte meldinger tilbake, g
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Ingenting ble angret.
-    [one] Angret 1 endring.
-   *[other] Angret { $count } endringer.
+    [one] Angret 1 endring, helt eller delvis.
+   *[other] Angret { $count } endringer, helt eller delvis.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 melding var ikke lenger i mappen endringen flyttet den til.
@@ -619,8 +619,8 @@ agent-reads-messages = { $count ->
    *[other] leste { $count } meldinger
 }
 agent-reads-attachments = { $count ->
-    [one] leste 1 vedlegg
-   *[other] leste { $count } vedlegg
+    [one] ba om 1 vedlegg
+   *[other] ba om { $count } vedlegg
 }
 agent-reads-searches = { $count ->
     [one] søkte én gang
@@ -636,7 +636,7 @@ agent-read-conversation = { $count ->
     [one] Leste samtalen «{ $subject }» (1 melding)
    *[other] Leste samtalen «{ $subject }» ({ $count } meldinger)
 }
-agent-read-attachment = Leste vedlegget «{ $name }» i meldingen «{ $subject }»
+agent-read-attachment = Ba om vedlegget «{ $name }» i meldingen «{ $subject }»
 agent-read-search = { $count ->
     [one] Søkte etter «{ $query }»: 1 melding
    *[other] Søkte etter «{ $query }»: { $count } meldinger
@@ -681,7 +681,7 @@ secrets-windows = Legitimasjonsbehandling
 secrets-mac = nøkkelringen
 secrets-linux = systemets nøkkelring (Secret Service)
 error-no-such-file = filen finnes ikke
-cards-file-too-big = Denne filen er for stor til å være en adressebok.
+cards-file-too-big = Denne filen overskrider størrelsesgrensen for import av en adressebok.
 ui-sender-added = { $name } ble lagt til i adresseboken.
 ui-sender-known = { $name } er allerede i adresseboken.
 ui-sender-none = Avsenderen av denne meldingen har ingen e-postadresse som kan legges til.
@@ -901,7 +901,7 @@ setup-account-no-app = Kontoen bruker påloggingsappen { $app }, som ikke finnes
 setup-invalid-address = «{ $address }» er ikke en e-postadresse.
 setup-invalid-server = innstillingene for { $server } har et ugyldig vertsnavn, en ugyldig port eller en ukjent sikkerhetsinnstilling
 setup-invalid-user = Kontoen mangler brukernavn.
-setup-invalid-sign-in = oppføringen bruker en påloggingsmetode som Inbox Classic ikke støtter
+setup-invalid-sign-in = oppføringen har ugyldige påloggingsinnstillinger
 setup-error-empty = Filen er tom.
 setup-error-too-large = Oppsettfilen er større enn Inbox Classic tillater.
 setup-error-not-setup = Dette er ikke en fil med innstillinger og kontoer fra Inbox Classic.
@@ -1032,7 +1032,7 @@ preview-tile-format = Bildeformatet { $format } støttes ikke i forhåndsvisning
 preview-tile-password = Beskyttet med passord: åpne den for å skrive inn passordet
 preview-tile-too-large = For stor til å vises
 preview-tile-unreadable = Kan ikke vises
-preview-tile-timed-out = Det tok for lang tid å vise
+preview-tile-timed-out = Det tok for lang tid å klargjøre forhåndsvisningen
 preview-tile-crashed = Vises ikke: Inbox Classic ble avsluttet under en tidligere forhåndsvisning av filen
 preview-tile-off = Vises ikke før Inbox Classic starter igjen
 preview-not-printed = { $name } ({ $details }) skrives ikke ut. Åpne filen for å skrive den ut.

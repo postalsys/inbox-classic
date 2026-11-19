@@ -494,7 +494,7 @@ agent-log-refused = Non hai inviato “{ $subject }”
 agent-log-sent = “{ $subject }” messo in coda per l’invio a { $to }
 agent-log-draft = Salvata la bozza “{ $subject }”
 agent-log-draft-replaced = Sostituita la bozza “{ $subject }”
-agent-log-draft-discarded = Eliminata la bozza “{ $subject }”
+agent-log-draft-discarded = Richiesta l’eliminazione della bozza “{ $subject }”
 agent-draft-note = { $program }, un agente IA, ha scritto questa bozza. Controlla i destinatari e il testo prima di inviarla.
 agent-log-read = Segnato come letto “{ $subject }”
 agent-log-unread = Segnato come da leggere “{ $subject }”
@@ -596,12 +596,12 @@ agent-undo-since-question = { $count ->
     [one] Annullare la modifica fatta da { $program } in questo periodo?
    *[other] Annullare le { $count } modifiche fatte da { $program } in questo periodo?
 }
-agent-undo-since-detail = I messaggi tornano nelle cartelle precedenti e vengono ripristinati lo stato di lettura e i contrassegni. I messaggi ancora in Posta in uscita vengono eliminati. Se tu o il server avete modificato nel frattempo lo stato o la posizione interessati, quella modifica viene mantenuta.
+agent-undo-since-detail = L’app tenta di riportare i messaggi nelle cartelle precedenti e di ripristinare lo stato di lettura e i contrassegni. I messaggi ancora in Posta in uscita vengono eliminati. Prima verifica lo stato interessato dall’operazione. Alcune modifiche successive, come il colore di un contrassegno, possono comunque essere sovrascritte.
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Non è stato annullato nulla.
-    [one] Annullata 1 modifica.
-   *[other] Annullate { $count } modifiche.
+    [one] Annullata 1 modifica, in tutto o in parte.
+   *[other] Annullate { $count } modifiche, in tutto o in parte.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 messaggio non si trovava più nella posizione prevista.
@@ -643,8 +643,8 @@ agent-reads-messages = { $count ->
    *[other] letti { $count } messaggi
 }
 agent-reads-attachments = { $count ->
-    [one] letto 1 allegato
-   *[other] letti { $count } allegati
+    [one] richiesto 1 allegato
+   *[other] richiesti { $count } allegati
 }
 agent-reads-searches = { $count ->
     [one] eseguita 1 ricerca
@@ -660,15 +660,15 @@ agent-read-conversation = { $count ->
     [one] Letta la conversazione “{ $subject }” (1 messaggio)
    *[other] Letta la conversazione “{ $subject }” ({ $count } messaggi)
 }
-agent-read-attachment = Letto l’allegato “{ $name }” del messaggio “{ $subject }”
+agent-read-attachment = Richiesto l’allegato “{ $name }” del messaggio “{ $subject }”
 agent-read-search = { $count ->
     [one] Cercato “{ $query }”: 1 messaggio
    *[other] Cercato “{ $query }”: { $count } messaggi
 }
 agent-read-people = Cercati contatti con nome o indirizzo che inizia con “{ $query }”
 agent-read-list = { $count ->
-    [one] Consultati i dati di 1 messaggio in { $folder }
-   *[other] Consultati i dati di { $count } messaggi in { $folder }
+    [one] Consultati i dati di 1 voce dell’elenco in { $folder }
+   *[other] Consultati i dati di { $count } voci dell’elenco in { $folder }
 }
 agent-read-changes = { $count ->
     [one] Consultati i dati di 1 nuovo messaggio
@@ -683,7 +683,7 @@ agent-terminal-program-mac = Un programma avviato da { $terminal }
 agent-terminal-program-windows = Un programma avviato da un terminale ({ $terminal })
 agent-terminal-program-linux = Un programma avviato da un terminale ({ $terminal })
 agent-connect-title-terminal = { $programs } vogliono accedere alla tua posta
-agent-connect-terminal-detail = Tutti gli agenti IA che avvii da questo terminale condividono l’accesso che consenti qui. Per dare a un agente un accesso proprio, aggiungi --name e un nome a tua scelta ai suoi argomenti nelle impostazioni MCP dell’agente.
+agent-connect-terminal-detail = Gli agenti avviati dallo stesso programma di terminale riconosciuto condividono l’accesso che consenti qui. Per gestire un agente separatamente, aggiungi --name e un nome a tua scelta ai suoi argomenti nelle impostazioni MCP. Il nome non dimostra l’identità del programma.
 agent-connect-claimed = Ha dichiarato di essere { $claimed }. Inbox Classic ha verificato quale programma lo ha avviato: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -705,7 +705,7 @@ secrets-windows = Gestione credenziali
 secrets-mac = il portachiavi
 secrets-linux = il portachiavi di sistema (Secret Service)
 error-no-such-file = il file non esiste
-cards-file-too-big = Questo file è troppo grande per essere una rubrica.
+cards-file-too-big = Il file supera il limite di dimensione per l’importazione di una rubrica.
 ui-sender-added = Aggiunto alla Rubrica il contatto { $name }.
 ui-sender-known = { $name } è già nella Rubrica.
 ui-sender-none = Il mittente di questo messaggio non ha un indirizzo e-mail da aggiungere.
@@ -751,7 +751,7 @@ pgp-error-no-store = { $store } non è disponibile per proteggere le chiavi priv
 pgp-error-wrong-passphrase = La passphrase non è corretta.
 pgp-error-not-a-key = Questa non è una chiave OpenPGP.
 pgp-error-too-large = La chiave è troppo grande.
-pgp-error-unusable = La chiave usa algoritmi crittografici obsoleti o deboli e non può essere utilizzata.
+pgp-error-unusable = La chiave non è utilizzabile per l’operazione richiesta. Potrebbe mancare una chiave adatta alla firma o alla crittografia, oppure un algoritmo potrebbe non essere supportato.
 pgp-imported-private = { $count ->
     [one] La tua chiave privata è stata importata.
    *[other] Sono state importate { $count } chiavi private.
@@ -770,13 +770,13 @@ pgp-pending = Il { $date } è stata trovata una chiave diversa per { $address }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Firmato digitalmente da { $signer } (proprietario della chiave verificato)
 pgp-part-signed = Firmato digitalmente da { $signer } (proprietario della chiave non verificato)
-pgp-part-other = Firmato da { $signer }, che non è il mittente
+pgp-part-other = Firmato da { $signer }; non è stato possibile associare con certezza la firma al mittente
 pgp-part-unknown-key = Firmato, ma la chiave non è nota
 pgp-part-not-signed = Non firmato
 pgp-part-not-checked = Firma non verificata
 pgp-part-encrypted = Crittografato. { $signature }
 pgp-part-no-key = Messaggio crittografato; manca una chiave privata corrispondente
-pgp-part-changed = La parte crittografata è stata modificata durante la trasmissione e non viene mostrata
+pgp-part-changed = La verifica dell’integrità del contenuto crittografato non è riuscita. Il contenuto non viene mostrato
 pgp-part-unprotected = Crittografato senza protezione contro le modifiche, non mostrato
 pgp-part-broken = La parte crittografata non può essere letta
 pgp-why-mismatch = La firma digitale non corrisponde a questo testo
@@ -792,8 +792,8 @@ pgp-why-not-key-in-use = Firmato con una chiave diversa da quella in uso per { $
 pgp-part-pictures-loaded = { $label }. Le immagini sono state caricate da internet
 pgp-error-no-own-key = Non hai una chiave per { $address } con cui firmare o crittografare. Creane una in Chiavi di crittografia oppure disattiva la firma digitale e la crittografia.
 pgp-error-missing-keys = { $count ->
-    [one] Non è disponibile una chiave di crittografia per { $addresses }.
-   *[other] Non sono disponibili chiavi di crittografia per questi destinatari: { $addresses }.
+    [one] Non è disponibile una chiave di crittografia utilizzabile per { $addresses }.
+   *[other] Non sono disponibili chiavi di crittografia utilizzabili per questi destinatari: { $addresses }.
 }
 pgp-error-encrypted-quote = Questo messaggio contiene testo, immagini o allegati provenienti da un messaggio crittografato e può essere inviato solo crittografato. Attiva Crittografa oppure rimuovi quel contenuto.
 pgp-error-protect = Impossibile firmare o crittografare il messaggio: { $reason }
@@ -926,17 +926,17 @@ setup-account-signs-in-again = Dovrai accedere di nuovo dopo l’importazione.
 setup-account-here = L’account è già configurato su questo computer e verrà ignorato.
 setup-account-no-app = L’account usa l’app di accesso { $app }, che non è configurata su questo computer. Importa anche le app di accesso.
 setup-invalid-address = “{ $address }” non è un indirizzo e-mail.
-setup-invalid-server = Il server { $server } non ha un nome o una porta utilizzabili.
+setup-invalid-server = Il nome, la porta o le impostazioni di sicurezza del server { $server } non sono validi.
 setup-invalid-user = Manca il nome utente.
-setup-invalid-sign-in = L’account usa un metodo di accesso non supportato da Inbox Classic.
+setup-invalid-sign-in = Le impostazioni di accesso dell’account non sono valide.
 setup-error-empty = Il file è vuoto.
-setup-error-too-large = Il file è troppo grande per essere una configurazione di Inbox Classic.
+setup-error-too-large = Il file supera il limite di dimensione per l’importazione di impostazioni e account.
 setup-error-not-setup = Questo file non è una configurazione di Inbox Classic.
 setup-error-damaged = Il file di configurazione è danneggiato e non può essere letto.
 setup-error-newer = Questa configurazione è stata salvata da una versione più recente di Inbox Classic ({ $version }). Aggiorna Inbox Classic, poi importala di nuovo.
 setup-error-needs-passphrase = Questa configurazione è protetta da una passphrase. Inserisci la passphrase con cui è stata salvata.
 setup-error-wrong-passphrase = Non è la passphrase con cui è stata salvata questa configurazione.
-setup-error-changed = Il file di configurazione è stato modificato o danneggiato dopo il salvataggio, quindi non può essere importato.
+setup-error-changed = La verifica dell’integrità del file di configurazione non è riuscita, quindi il file non può essere importato.
 setup-error-read = Impossibile leggere il file di configurazione: { $error }
 setup-error-write = Impossibile salvare la configurazione: { $error }
 setup-error-no-parts = Scegli almeno un elemento da importare o esportare.
@@ -1006,7 +1006,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Non è stato importato niente.
 setup-account-servers = { $imap } e { $smtp } ({ $signin })
 setup-file-name = Impostazioni e account di Inbox Classic
-setup-skipped-unreachable = Voce ignorata: { $name }. Il servizio di accesso non era raggiungibile. Controlla la configurazione in App di accesso e riprova.
+setup-skipped-unreachable = Voce ignorata: { $name }. Non è stato possibile verificare il servizio di accesso. Controlla l’app necessaria in App di accesso e riprova.
 attachment-runs-programs = “{ $name }” può eseguire programmi, quindi Inbox Classic non lo apre. Salvalo, poi aprilo tu stesso se ti fidi della sua provenienza.
 attachment-decrypted-note = Questo allegato proviene da un messaggio crittografato. Per aprirlo, Inbox Classic salva una copia in chiaro in una cartella temporanea del tuo account utente. La copia può restare sul disco dopo la chiusura del file. All’avvio, l’app tenta di eliminare le copie più vecchie di un giorno.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1059,7 +1059,7 @@ preview-tile-format = Le immagini in formato { $format } non sono ancora support
 preview-tile-password = Protetto da password: aprilo per inserire la password
 preview-tile-too-large = Troppo grande per essere mostrato
 preview-tile-unreadable = Impossibile mostrarlo
-preview-tile-timed-out = La visualizzazione ha richiesto troppo tempo
+preview-tile-timed-out = La preparazione dell’anteprima ha richiesto troppo tempo
 preview-tile-crashed = Anteprima non disponibile: in precedenza Inbox Classic si è chiuso o ha smesso di rispondere durante la visualizzazione
 preview-tile-off = Non mostrato fino al prossimo avvio di Inbox Classic
 preview-not-printed = { $name } ({ $details }) non viene stampato. Aprilo per stamparlo.

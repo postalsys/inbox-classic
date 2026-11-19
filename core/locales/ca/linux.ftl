@@ -179,4 +179,4 @@ gtk-metainfo-description = Inbox Classic permet llegir i escriure correu electr�
 gtk-metainfo-feature-sanitized = Els missatges es mostren sense executar-ne els scripts; les imatges d’internet només es carreguen amb la vostra autorització
 gtk-metainfo-feature-search = Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb operadors inspirats en els del Gmail
 gtk-metainfo-feature-replies = El text de missatges anteriors citat a les respostes queda plegat i es pot desplegar quan calgui
-gtk-metainfo-feature-offline = El correu ja baixat es pot llegir sense connexió; les contrasenyes es desen normalment a l’anell de claus del sistema
+gtk-metainfo-feature-offline = El correu baixat es pot llegir sense connexió mentre se’n conserva la còpia local; les credencials es desen normalment al clauer del sistema, si està disponible
