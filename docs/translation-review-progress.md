@@ -4,7 +4,7 @@
 
 - Authoritative worktree: `/Users/andris/Projects/PostalExpress/build/i18n-developer-followup-20261119`, branch `i18n/developer-followup-20261119`.
 - Source and final upstream checkpoint: `a3ac000103b217077a4a054697cbe67db05e1d68` (PR #222). No upstream additions arrived during the review. No unmerged-source discovery was performed.
-- All requested content is reviewed and statically validated. Next: commit it, advance REVIEWED to that concrete commit, verify the final baseline, archive this round and publish under existing authorization.
+- Round 4 is complete. REVIEWED points to content commit `6c44a173d8daeb0383b7c294b2b04213e609abbe`. Final audit: zero pending messages, help passages or unmarked changes. Publication is the remaining operational step; the durable `publication.json` receipt records its outcome.
 - Previous completed round 3 is preserved in `translation-review-round3-state.json` and `translation-review-round3-progress.md`.
 
 ## Coverage and result
@@ -33,3 +33,10 @@ On Mac and Linux, a mailto unsubscribe opened from a separate message window can
 ## Evidence
 
 Frozen ledgers and the full source snapshot are in `/private/tmp/inbox-developer-followup-20261119-*`. The final verified archive will be at `/Users/andris/Projects/PostalExpress/build/i18n-developer-followup-completed-20261119`. State records contain exact per-file coverage, before/after hashes, validation and the previous-round links.
+
+## Completed baseline
+
+- Content and REVIEWED commit: `6c44a173d8daeb0383b7c294b2b04213e609abbe`.
+- Final check: `0 messages and 0 help passages wait for a review; 0 new or changed without a mark`.
+- Final full-file hashes match every frozen ledger after all edits. The review HTML has been regenerated.
+- No remaining translation edits. Publication remains pending in this immutable pre-merge record; consult the durable receipt for final PR/merge status.

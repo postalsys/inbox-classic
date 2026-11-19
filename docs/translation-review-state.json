@@ -1,6 +1,6 @@
 {
   "round": 4,
-  "status": "reviewed_pending_baseline",
+  "status": "complete",
   "starting_commit": "a3ac000103b217077a4a054697cbe67db05e1d68",
   "starting_review_baseline": "bf44141a12811e63e7e9f3c8302345c7a16d57cc",
   "guide": "/Users/andris/Downloads/inbox-classic-translation-guide.md",
@@ -4125,7 +4125,7 @@
     "core/crates/pe-html/help/en/write-message.html": "3377fece25fbd051a5bd557a3a604a4b768f12ed58e12948fe3a858435c20200"
   },
   "validation_policy": "No local test suites, CI queries or manually triggered workflows. Static checks, source/caller inspection and required offline build permitted. No unmerged-source discovery.",
-  "next_batch": "Commit reviewed content, advance REVIEWED to that commit, verify zero unmarked changes, archive and publish.",
+  "next_batch": "No pending translation work. Publish the completed branch and record the merge receipt; separately follow up the recorded runtime account-selection concern.",
   "known_runtime_concerns": [
     {
       "issue": "Mailto unsubscribe from a standalone message window on Mac/Linux can select the main window’s current account after that window changes accounts. Windows explicitly passes the message folder account.",
@@ -6156,7 +6156,17 @@
     "tests": "Not run under user restriction",
     "CI": "Not queried or manually triggered under user restriction",
     "since_audit": "0 new waiting messages/passages;316 unmarked changed values match28 catalog changes and288 help lines; baseline pending",
-    "pending_marks": 0
+    "pending_marks": 0,
+    "final_i18n_check": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+    "review_html": "/private/tmp/inbox-developer-followup-20261119-final-review.html"
   },
-  "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-developer-followup-completed-20261119"
+  "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-developer-followup-completed-20261119",
+  "content_commit": "6c44a173d8daeb0383b7c294b2b04213e609abbe",
+  "reviewed_baseline": "6c44a173d8daeb0383b7c294b2b04213e609abbe",
+  "publication": {
+    "status": "pending",
+    "branch": "i18n/developer-followup-20261119",
+    "authorized": true,
+    "receipt": "/Users/andris/Projects/PostalExpress/build/i18n-developer-followup-completed-20261119/publication.json"
+  }
 }
