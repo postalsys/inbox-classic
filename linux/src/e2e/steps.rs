@@ -4557,3 +4557,115 @@ pub async fn opened_from_store(d: &Driver) {
     search("").await;
     select_folder("Inbox");
 }
+
+/// SCENARIO 27a (Linux): a folder of more pages than the list keeps. GTK reads every row of the list when it is drawn
+/// again, which pushed its first page out of those kept for good: the list was blank, and a row selected opened
+/// nothing. From Flagged with a message of it read back to the folder, clicks in a row, a sync's refresh, a row far
+/// down: each list drawn shows its rows, and a row selected opens its message.
+pub async fn many_pages(d: &Driver) {
+    use crate::folders::FLAGGED;
+    const MESSAGES: u64 = 950;
+    d.step("a folder of many pages");
+    let main = shell().main();
+    let core = &shell().core;
+    let account = core.accounts().ok().and_then(|a| a.first().map(|a| a.id)).unwrap_or(0);
+    let _ = core.create_folder(account, None, "Many");
+    let Some(many) = wait_for(20, || folder_id("Many")).await else {
+        d.check(false, "the folder Many is made");
+        return;
+    };
+    for n in 1..=MESSAGES {
+        let raw = format!(
+            "From: Page Filler <filler@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Filler {n}\r\n\
+             Date: {}\r\nMessage-ID: <filler-{n}@example.com>\r\n\r\nOne of many.\r\n",
+            date_now(-(n as i32) - 100)
+        );
+        if let Err(error) = d.add_message_to("Many", &raw) {
+            d.check(false, &format!("a message went into Many ({error})"));
+            return;
+        }
+    }
+    run_command(Command::Sync);
+    main.folders.select(many, false);
+    let listed = wait_until(120, || {
+        main.list_view().own_folder() == Some(many) && u64::from(main.list.rows()) == MESSAGES
+    })
+    .await;
+    d.check(
+        listed,
+        &format!("Many lists its {MESSAGES} messages ({})", main.list.rows()),
+    );
+    // three of its oldest flagged, far down its list
+    let old: Vec<u64> = listed_in_folder(many, 900, 3).iter().map(|m| m.info.uid).collect();
+    let _ = core.set_flag_many(many, &old, "\\Flagged", true);
+    wait_list_settled().await;
+
+    let mut wrong: Vec<String> = Vec::new();
+    // as the user did: Flagged, a message of it read, then the folder again
+    main.folders.select(FLAGGED, true);
+    wait_list_settled().await;
+    select_row(0).await;
+    main.folders.select(many, true);
+    whole_list("back from Flagged", &mut wrong).await;
+    // a row selected opens its message
+    let top = listed_in_folder(many, 0, 1).first().map(|m| m.info.uid).unwrap_or(0);
+    main.list.select(0);
+    if !wait_until(20, || main.reader.uid() == top && top != 0).await {
+        wrong.push(format!(
+            "the top row did not open its message ({} shown, {top} selected)",
+            main.reader.uid()
+        ));
+    }
+    // clicks in a row, before the lists come
+    if let Some(inbox) = folder_id("Inbox") {
+        for id in [inbox, FLAGGED, many, inbox, many] {
+            main.folders.select(id, true);
+            pause(30).await;
+        }
+    }
+    whole_list("after quick clicks", &mut wrong).await;
+    // a sync reads the list shown again
+    run_command(Command::Sync);
+    pause(1500).await;
+    whole_list("after a sync", &mut wrong).await;
+    // a row far down: its page asked for as it comes on screen, then its message opened
+    let far = listed_in_folder(many, 930, 1).first().map(|m| m.info.uid).unwrap_or(0);
+    main.list.scroll_to(930, gtk::ListScrollFlags::NONE);
+    wait_until(20, || main.list.message_at(930).is_some()).await;
+    main.list.select(930);
+    if !wait_until(20, || main.reader.uid() == far && far != 0).await {
+        wrong.push(format!(
+            "row 930 did not open its message ({} shown, {far} selected)",
+            main.reader.uid()
+        ));
+    }
+    d.check(
+        wrong.is_empty(),
+        &format!(
+            "a list of {MESSAGES} messages shows its rows each time it is drawn, and a row selected opens its message ({})",
+            wrong.join("; ")
+        ),
+    );
+    d.shot(&main_window(), "many-1-pages").await;
+    // the folder goes again, for the steps after
+    let deleted = core.delete_folder(many);
+    d.check(
+        deleted.is_ok() && wait_until(20, || folder_id("Many").is_none()).await,
+        &format!("Many, made for this step, is deleted again ({deleted:?})"),
+    );
+}
+
+/// The list shown once it is drawn: as many rows as the core lists, its first rows filled
+async fn whole_list(what: &str, wrong: &mut Vec<String>) {
+    let main = shell().main();
+    wait_list_settled().await;
+    pause(300).await;
+    let expected = main.list_view().row_count(&shell().core).unwrap_or(0);
+    let drawn = main.list.rows();
+    let filled = main.list.shown_messages(5).len() as u64;
+    if u64::from(drawn) != expected || filled != expected.min(5) {
+        wrong.push(format!(
+            "{what}: {drawn} rows drawn, {filled} of the first 5 filled, {expected} listed"
+        ));
+    }
+}

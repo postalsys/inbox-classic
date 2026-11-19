@@ -1176,6 +1176,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::unsubscribing(&d).await;
     steps::invitation_and_logo(&d).await;
     steps::one_account_tree(&d).await;
+    steps::many_pages(&d).await;
     steps::agent(&d).await;
     steps::mark_all_read(&d).await;
     steps::dragging(&d).await;
