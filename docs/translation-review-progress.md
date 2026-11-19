@@ -11,16 +11,16 @@ Commit completed batches regularly and preserve an exact resume point.
   Finish what needs review in master `8757ab1c234bf3549979c06fdca14980fd3f9b80`, then stop.
   Do not discover unmerged translation branches or wait for further additions. Historical late-arrival rules below
   are superseded by this instruction. Keep normal master synchronization for publication and a final completeness audit.
-- **Next: Continue the 206 remaining Latvian app.ftl entries at ui-how-to-connect, covering the remaining agent controls, contacts, keys, settings and account-transfer dialogs in coherent batches. Latvian has 918 catalog entries and 51 help topics pending. All 55 checked menu/dialog scopes are collision-free; recheck them when shared labels change. Finish the fixed master queue and existing context comparisons for the remaining 27 languages, then perform its final completeness audit. Do not discover or wait for unmerged/new translation branches. Publish validated batches promptly; no local test suites.**
+- **Next: Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue contacts, settings and keys, then their remaining catalogs/help in isolated worktrees. Root integrates each validated immutable worker batch and publishes promptly. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.**
 - Current scope: 36,408 catalog entries and 1,380 help topics.
-  Completed: 24,370 entries and 791 full topics;
-  pending: 12,038 entries and 589 topics across 27 languages.
-  All 28 language directories are inventoried. Lithuanian has no pending IDs/topics or context comparisons.
-- Latest batch: Latvian reader actions, accounts and dialogs: 225 entries reviewed, 64 improved values.
-  Latvian structural checks pass with 569 expected mark-only diagnostics. Exact reconstruction verifies 225 catalog entries: 64 improved values and 161 retained. IDs, variables, access-key counts, comments and ellipses are preserved; ui-rule-count gains the required zero branch, with all other selector structures retained. Static plural inspection covers 26 samples and 19 placeable substitutions; no Fluent runtime execution claimed. All 55 checked menu/dialog scopes are collision-free, including the resolved agent-dialog M/M clash. Thirty-eight runtime/source files and six catalog dependencies match the evidence. Existing English Windows account/consent screenshots supply layout context; no Latvian GUI-fit claim. All 28 inventories, pending marks and latest file/English hashes reconcile. Global diagnostics account for 24,404 unmarked entries/12,883 help lines; since-start 2,495 entries/671 passages match the queue. Current Microsoft documentation was checked for the restored browser-sign-in condition; source links are recorded with the context findings. Master-only comparison has no changed review inputs. No local test suites, builds or manual CI; REVIEWED unchanged.
-- Latvian now has 918 catalog entries and 51 help topics pending. All 55 checked menu/dialog scopes are
-  collision-free; the agent connection checkbox now uses U. No help topics were counted in this catalog batch.
-- Publication checkpoint: [PR #211](https://github.com/postalsys/inbox-classic/pull/211) merged the preceding Latvian menu/compose batch as `839d2e5c` at 05:22 UTC on November 19. This worktree was synchronized before the current batch.
+  Completed: 26,008 entries and 791 full topics;
+  pending: 10,400 entries and 589 topics across 27 languages.
+  All 28 language directories are inventoried. Lithuanian has no pending marks but now needs the targeted zero-address key comparison.
+- Latest integration: first two Polish, Romanian and Russian worker batches, 1,432 entries reviewed and 274 improved values.
+  Parent independently reconstructed all six committed worker batches: 1,432 reviewed catalog entries, 274 improved values, selected marks only, no other edits. English/source hashes, IDs, variables, selectors, access keys, comments and ellipses match the evidence. Worker language checks have zero structural findings; expected draft-mark diagnostics are accounted for. Combined inventories and latest file/English hashes reconcile for all 28 languages. Global diagnostics account for 26,042 unmarked entries and 12,883 help lines; since-start 2,390 entries/671 passages match the pending queue. Master is an ancestor of this branch. Review HTML refreshed. No local test suites, builds, manual CI or localized GUI execution; REVIEWED unchanged.
+- Four languages are progressing in parallel: Latvian at root; Polish, Romanian and Russian in isolated worktrees.
+  Polish Windows catalog is fully reviewed. Pending totals: lv 712 catalog/51 topics; pl 843 catalog/51 topics; ro 918 catalog/51 topics; ru 919 catalog/51 topics.
+- Publication checkpoint: [PR #212](https://github.com/postalsys/inbox-classic/pull/212) merged the preceding Latvian account/dialog batch as `52d7e9fa` at 05:35 UTC on November 19.
 - MCP phase3a, phase3b and preview-CID translations are integrated into the fixed inventory. No separate incoming
   source remains to merge. Prior source audits and exact deltas remain recorded as history.
 - Exact inventories, completed batches and latest file/source hashes are in `translation-review-state.json`.
@@ -3203,3 +3203,25 @@ Publication checkpoint: [PR #211](https://github.com/postalsys/inbox-classic/pul
 Completed: 24,370 catalog entries and 791 full topics. Pending: 12,038 entries and 589 topics.
 
 Continue the 206 remaining Latvian app.ftl entries at ui-how-to-connect, covering the remaining agent controls, contacts, keys, settings and account-transfer dialogs in coherent batches. Latvian has 918 catalog entries and 51 help topics pending. All 55 checked menu/dialog scopes are collision-free; recheck them when shared labels change. Finish the fixed master queue and existing context comparisons for the remaining 27 languages, then perform its final completeness audit. Do not discover or wait for unmerged/new translation branches. Publish validated batches promptly; no local test suites.
+
+### Latvian contacts, settings, keys and account transfer
+
+Reviewed 206 remaining app entries and improved 54 values. Clarified independent contact import/export counts, trusted domains, download/cache behavior, preview and encrypted-search conditions, send cancellation, key ownership and account-transfer contents. Keys without email addresses now explain why ownership confirmation cannot be stored. Added a targeted comparison for the same existing string in other languages.
+
+Latvian structural checks pass with 775 expected mark-only diagnostics. Exact reconstruction verifies 206 catalog entries: 54 improved values and 152 retained. IDs, variables, access-key counts, comments and ellipses are preserved; ui-verify-marks gains exact [0] for a key without email addresses. Static plural inspection covers 247 samples and 16 placeable substitutions; no Fluent runtime execution claimed. All 60 checked menu/dialog scopes are collision-free. Thirty-nine runtime/source files and six catalog dependencies match the evidence. Existing English Windows screenshots supply layout context; no Latvian GUI-fit claim. All 28 inventories, pending marks and latest file/English hashes reconcile. Global diagnostics account for 24,610 unmarked entries/12,883 help lines; since-start 2,475 entries/671 passages match the queue. Master-only comparison has no changed review inputs. No local test suites, builds or manual CI; REVIEWED unchanged.
+
+[PR #212](https://github.com/postalsys/inbox-classic/pull/212) merged the preceding Latvian account/dialog batch as `52d7e9fa` at 05:35 UTC on November 19.
+
+Completed: 24,576 catalog entries and 791 full topics. Pending: 11,832 entries and 589 topics.
+
+Integrate ready Polish, Romanian and Russian worker batches, then continue Latvian core.ftl and remaining catalogs/help. Workers continue their assigned languages in isolated worktrees. Latvian has 712 catalog entries and 51 help topics pending; app.ftl is reviewed. Finish the fixed master queue and targeted context comparisons, including zero-address key verification in other languages. Publish validated batches promptly; no local test suites.
+
+### Parallel Polish, Romanian and Russian review, first six batches
+
+Integrated 1,432 catalog reviews and 274 wording improvements from isolated workers: Polish 527/81 changed, Romanian 453/98 changed, Russian 452/95 changed. Current app context informed sender/search labels, account setup and OAuth requirements, compose footers, unsubscribe outcomes, message rules, queued-send timing and agent undo dialogs. Polish Windows review is complete. Shared progress and terminology were reconciled centrally; workers keep their branches and continue without waiting for publication.
+
+Parent independently reconstructed all six committed worker batches: 1,432 reviewed catalog entries, 274 improved values, selected marks only, no other edits. English/source hashes, IDs, variables, selectors, access keys, comments and ellipses match the evidence. Worker language checks have zero structural findings; expected draft-mark diagnostics are accounted for. Combined inventories and latest file/English hashes reconcile for all 28 languages. Global diagnostics account for 26,042 unmarked entries and 12,883 help lines; since-start 2,390 entries/671 passages match the pending queue. Master is an ancestor of this branch. Review HTML refreshed. No local test suites, builds, manual CI or localized GUI execution; REVIEWED unchanged.
+
+Completed: 26,008 catalog entries and 791 full topics. Pending: 10,400 entries and 589 topics.
+
+Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue contacts, settings and keys, then their remaining catalogs/help in isolated worktrees. Root integrates each validated immutable worker batch and publishes promptly. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.

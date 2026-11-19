@@ -31,12 +31,10 @@ win-list-loading = Загрузка...
 
 ## Buttons and words used in many windows
 
-# review: new
 win-delete-button = &Удалить
 # review: new
 win-find-label = &Найти:
-# review: new
-win-save-as-button = Сохранить &как...
+win-save-as-button = &Сохранить как...
 # review: new
 win-too-many-files = Слишком много файлов сразу: выберите меньше.
 
@@ -58,8 +56,7 @@ win-format-link = Гиперссылка ({ $ctrl }+K)
 win-show-cc = &Копия
 # review: new
 win-show-bcc = &Скрытая
-# review: new
-win-signature-title = Подпись: { $account }
+win-signature-title = Текстовая подпись: { $account }
 
 ## The folders, the message list and the reading pane
 
@@ -106,7 +103,6 @@ win-files-not-saved = Не удалось сохранить { $failed } из { 
 win-new-folder-in-highlighted = Новая папка будет создана внутри выбранной папки.
 # review: new
 win-delete-folder-ask = Удалить папку «{ $folder }» вместе с ее сообщениями и вложенными папками? Она будет удалена и на сервере.
-# review: new
 win-rename = &Переименовать...
 # review: new
 win-messages-not-saved = Не удалось сохранить сообщения.
@@ -129,8 +125,7 @@ win-browser-sign-in = (вход через браузер)
 win-add = &Добавить...
 # review: new
 win-properties-button = &Свойства...
-# review: new
-win-signature-button = &Подпись...
+win-signature-button = Текстовая &подпись...
 # review: new
 win-sign-in-apps-button = Прило&жения для входа...
 

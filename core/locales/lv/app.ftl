@@ -489,423 +489,231 @@ ui-rules-applied = { $count ->
 }
 ui-col-rule-matches = Kritēriji
 ui-clear-button = &Notīrīt
-# review: new
 ui-how-to-connect = Kā pievienot aģentu…
-# review: new
 ui-agent-programs = Programmas, kuru aģenti ir lūguši piekļuvi jūsu pastam
-# review: new
 ui-what-agents-did = Aģentu darbības
-# review: new
 ui-restart-now = &Restartēt tagad
-# review: new
 ui-restart-later = &Vēlāk
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Jauna kontaktpersona
-# review: new
 ui-tb-new-group = Jauna grupa
-# review: new
 ui-tb-properties = Rekvizīti
-# review: new
 ui-tb-write-to = Rakstīt
-# review: new
 ui-menu-new-contact = Jauna &kontaktpersona...
-# review: new
 ui-menu-new-group = Jauna &grupa...
-# review: new
 ui-menu-write-to = &Rakstīt
-# review: new
 ui-menu-delete = &Dzēst
-# review: new
 ui-book-find-hint = Ierakstiet vārdu vai e-pasta adresi
-# review: new
 ui-book-all-contacts = Visas kontaktpersonas
-# review: new
 ui-col-phone = Tālrunis
-# review: new
-ui-book-empty = Adrešu grāmata ir tukša. Noklikšķiniet uz Jauna kontaktpersona, lai kādu pievienotu, vai importējiet vCard vai CSV failu no izvēlnes Fails.
-# review: new
+ui-book-empty = Adrešu grāmata ir tukša. Noklikšķiniet uz pogas „Jauna kontaktpersona” vai importējiet kontaktpersonas no vCard vai CSV faila.
 ui-book-no-match = Neviena kontaktpersona neatbilst „{ $words }”.
-# review: new
 ui-book-delete-ask = { $count ->
     [1] Vai dzēst šo kontaktpersonu no adrešu grāmatas?
-    [one] Vai dzēst šo { $count } kontaktpersonu no adrešu grāmatas?
-   *[other] Vai dzēst šīs { $count } kontaktpersonas no adrešu grāmatas?
+    [one] Vai dzēst { $count } kontaktpersonu no adrešu grāmatas?
+   *[other] Vai dzēst { $count } kontaktpersonas no adrešu grāmatas?
 }
-# review: new
 ui-group-delete-ask = Vai dzēst grupu „{ $name }”? Tajā esošās personas paliek adrešu grāmatā.
-# review: new
-ui-book-no-address = Kontaktpersonai { $name } nav e-pasta adreses.
-# review: new
+ui-book-no-address = Kontaktpersonai „{ $name }” nav e-pasta adreses.
 ui-new-contact-title = Jauna kontaktpersona
-# review: new
 ui-contact-title = { $name }: rekvizīti
-# review: new
 ui-contact-first = Vārds:
-# review: new
 ui-contact-last = Uzvārds:
-# review: new
 ui-contact-display = Parādāmais vārds:
-# review: new
 ui-contact-nickname = Iesauka:
-# review: new
 ui-contact-company = Uzņēmums:
-# review: new
 ui-contact-addresses = E-pasta adreses:
-# review: new
 ui-contact-address-hint = Ierakstiet e-pasta adresi
-# review: new
 ui-contact-add = &Pievienot
-# review: new
-ui-contact-set-default = Iestatīt kā &noklusējumu
-# review: new
-ui-contact-default = { $address } (noklusējums)
-# review: new
+ui-contact-set-default = Iestatīt par &noklusējuma adresi
+ui-contact-default = { $address } (noklusējuma adrese)
 ui-contact-phones = Tālruņa numuri:
-# review: new
 ui-phone-home = Mājas
-# review: new
 ui-phone-work = Darba
-# review: new
 ui-phone-mobile = Mobilais
-# review: new
 ui-phone-other = Cits
-# review: new
 ui-contact-notes = Piezīmes:
-# review: new
 ui-contact-name-needed = Ierakstiet kontaktpersonas vārdu vai e-pasta adresi.
-# review: new
 ui-contact-address-invalid = „{ $address }” nav derīga e-pasta adrese.
-# review: new
-ui-contact-not-saved = Kontaktpersonu nevarēja saglabāt: { $reason }
-# review: new
+ui-contact-not-saved = Neizdevās saglabāt kontaktpersonu: { $reason }
 ui-new-group-title = Jauna grupa
-# review: new
 ui-group-title = { $name }: rekvizīti
-# review: new
 ui-group-name = Grupas nosaukums:
-# review: new
 ui-group-members = Dalībnieki:
-# review: new
 ui-group-select-members = &Atlasīt dalībniekus...
-# review: new
 ui-group-new-member = Pievienot e-pasta adresi, kuras nav adrešu grāmatā:
-# review: new
 ui-group-name-needed = Ierakstiet grupas nosaukumu.
-# review: new
-ui-group-not-saved = Grupu nevarēja saglabāt: { $reason }
-# review: new
+ui-group-not-saved = Neizdevās saglabāt grupu: { $reason }
 ui-group-members-count = { $count ->
     [zero] { $count } dalībnieku
     [one] { $count } dalībnieks
    *[other] { $count } dalībnieki
 }
-# review: new
 ui-select-recipients = Atlasīt adresātus
-# review: new
 ui-select-members = Atlasīt grupas dalībniekus
-# review: new
 ui-pick-intro = Ierakstiet vārdu vai atlasiet to sarakstā:
-# review: new
 ui-pick-recipients = Ziņojuma adresāti:
-# review: new
 ui-pick-members = Grupas dalībnieki:
-# review: new
 ui-pick-to = &Kam →
-# review: new
 ui-pick-cc = K&opija →
-# review: new
 ui-pick-bcc = &Diskrētā kopija →
-# review: new
 ui-pick-add = &Pievienot →
-# review: new
 ui-pick-tip = Izvēlēties adresātus no adrešu grāmatas
-# review: new
 ui-filter-address-books = Adrešu grāmatas (vCard, CSV)
-# review: new
 ui-filter-vcard = vCard faili
-# review: new
 ui-book-export-name = Adrešu grāmata
-# review: new
 ui-book-imported = { $added ->
-    [one] Pievienota { $added } kontaktpersona
-   *[other] Pievienotas { $added } kontaktpersonas
-}, { $skipped ->
-    [one] izlaista { $skipped }, kas jau ir adrešu grāmatā.
-   *[other] izlaistas { $skipped }, kas jau ir adrešu grāmatā.
+    [one] Inbox Classic pievienoja { $added } kontaktpersonu.
+   *[other] Inbox Classic pievienoja { $added } kontaktpersonas.
+} { $skipped ->
+    [one] Izlaida { $skipped } kontaktpersonu, kas jau ir adrešu grāmatā.
+   *[other] Izlaida { $skipped } kontaktpersonas, kas jau ir adrešu grāmatā.
 }
-# review: new
-ui-book-not-imported = Adrešu grāmatu nevarēja importēt: { $reason }
-# review: new
+ui-book-not-imported = Neizdevās importēt adrešu grāmatu: { $reason }
 ui-book-exported = { $count ->
-    [one] { $count } kontaktpersona saglabāta failā { $file }.
-   *[other] { $count } kontaktpersonas saglabātas failā { $file }.
+    [one] Inbox Classic saglabāja { $count } kontaktpersonu failā „{ $file }”.
+   *[other] Inbox Classic saglabāja { $count } kontaktpersonas failā „{ $file }”.
 }
-# review: new
-ui-book-not-exported = Adrešu grāmatu nevarēja saglabāt: { $reason }
-# review: new
+ui-book-not-exported = Neizdevās saglabāt adrešu grāmatu: { $reason }
 ui-code-copied = Kods nokopēts
-# review: changed
-ui-codes-in-notifications = &Rādīt pierakstīšanās kodus paziņojumos par jaunu pastu
-# review: new
+ui-codes-in-notifications = &Rādīt pierakstīšanās kodus paziņojumos par jauniem ziņojumiem
 ui-tool-unread-only = Nelasītie
-# review: new
 ui-no-unread = Šeit nav nelasītu ziņojumu.
-# review: new
-ui-pictures-always-sender = Vienmēr lejupielādēt attēlus no { $sender }
-# review: new
-ui-pictures-always-domain = Vienmēr lejupielādēt attēlus no visiem domēnā { $domain }
-# review: new
-ui-pictures-unconfirmed = Sūtītāja domēnu ({ $domain }) nevarēja pārbaudīt, tāpēc attēli šajā ziņojumā netiek lejupielādēti automātiski.
-# review: changed
+ui-pictures-always-sender = Vienmēr lejupielādēt attēlus no šī sūtītāja: { $sender }
+ui-pictures-always-domain = Vienmēr lejupielādēt attēlus no visiem sūtītājiem šajā domēnā: { $domain }
+ui-pictures-unconfirmed = Sūtītāja domēns ({ $domain }) nav apstiprināts, tāpēc attēli šajā ziņojumā netiek lejupielādēti automātiski.
 ui-pictures-always-option = Lejupielādēt &attēlus visos ziņojumos
-# review: new
 ui-pictures-always-warning = Tad sūtītāji var redzēt, kad jūs lasāt viņu ziņojumus.
-# review: new
 ui-protection-details = &Detaļas...
-# review: new
-ui-protection-details-title = Drošības detaļas
-# review: new
+ui-protection-details-title = Informācija par drošību
 ui-download-heading = Lejupielāde
-# review: changed
 ui-download-ahead = Lejupielādēt &ziņojumus iepriekš:
-# review: new
-ui-download-ahead-recent = Nesenos ziņojumus līdz 1 MB katru
-# review: new
+ui-download-ahead-recent = Jaunākos ziņojumus, kas nav lielāki par 1 MB
 ui-download-ahead-all = Visus ziņojumus
-# review: new
 ui-download-ahead-never = Tikai atverot
-# review: changed
 ui-download-limit = &Krātuves ierobežojums kontam:
-# review: changed
 ui-send-delay = &Aizture pirms sūtīšanas:
-# review: new
-ui-send-delay-note = Kamēr ziņojums gaida nosūtīšanu, sūtīšanu var atcelt ar Atsaukt.
-# review: new
+ui-send-delay-note = Kamēr ziņojums gaida nosūtīšanu, sūtīšanu var atcelt ar pogu „Atsaukt”.
 ui-dark-messages = Rādīt ziņojumus uz tumša fona, kad sistēmā ir tumšais režīms
-# review: new
-ui-preview-show = Rādīt &pielikumus vēstulēs
-# review: new
-ui-preview-show-note = Pēc vēstules teksta rāda attēlus un PDF failu pirmās lappuses. Šos priekšskatījumus Inbox Classic veido pati, tāpēc nekas failā nevar tikt palaists.
-# review: new
-ui-preview-pdfs = Rādīt PDF &failus vēstulēs
-# review: new
-ui-sending-in = { $subject } tiks nosūtīts pēc { $count ->
+ui-preview-show = Rādīt &pielikumus ziņojumos
+ui-preview-show-note = Pēc ziņojuma teksta rāda attēlus un PDF failu pirmās lappuses. Inbox Classic pati izveido šos priekšskatījumus, neizpildot failos esošos skriptus.
+ui-preview-pdfs = Rādīt PDF &failus ziņojumos
+ui-sending-in = Ziņojuma { $subject } sūtīšana pēc { $count ->
     [one] { $count } sekundes
    *[other] { $count } sekundēm
 }
-# review: new
-ui-send-undone = { $subject } netika nosūtīts. Ziņojums ir atkal atvērts rediģēšanai.
-# review: new
-ui-send-too-late = { $subject } jau tika nosūtīts.
-# review: new
-ui-outbox-status-undo = Tiks nosūtīts plkst. { $time }
-# review: new
-ui-download-note = Iepriekš lejupielādēti ziņojumi atveras uzreiz. Kad krātuves ierobežojums ir pārsniegts, vecākās lokālās kopijas tiek noņemtas un atkal lejupielādētas, kad tās atverat.
-# review: new
+ui-send-undone = Ziņojums { $subject } netika nosūtīts. Tas ir atkal atvērts rediģēšanai.
+ui-send-too-late = Ziņojuma { $subject } sūtīšanu vairs nevar atsaukt.
+ui-outbox-status-undo = Sūtīšana ne agrāk kā plkst. { $time }
+ui-download-note = Iepriekš lejupielādēti ziņojumi atveras ātrāk. Pārsniedzot ierobežojumu, var tikt dzēstas vecākās lejupielādēto ziņojumu kopijas. Atverot šādu ziņojumu, tas jālejupielādē no servera vēlreiz. Melnraksti un ziņojumi, kas atvērti kopš pēdējās Inbox Classic palaišanas, netiek dzēsti.
 ui-attachment-downloading = Šī ziņojuma lejupielāde vēl nav pabeigta. Mēģiniet vēlreiz, kad lejupielāde būs pabeigta.
-# review: changed
 ui-trusted-senders-button = &Uzticamie sūtītāji...
-# review: new
 ui-trusted-senders-title = Uzticamie sūtītāji
-# review: new
-ui-trusted-senders-note = Attēli ziņojumos no šiem sūtītājiem tiek lejupielādēti automātiski, kad jūsu pasta pakalpojumu sniedzējs pārbauda sūtītāja domēnu.
-# review: new
-ui-trusted-everyone-at = Visi domēnā { $domain }
-# review: new
+ui-trusted-senders-note = Attēli šo sūtītāju ziņojumos tiek lejupielādēti automātiski, ja jūsu pasta pakalpojumu sniedzējs apstiprina sūtītāja domēnu.
+ui-trusted-everyone-at = Visi sūtītāji šajā domēnā: { $domain }
 ui-trusted-senders-empty = Vēl nav pievienots neviens uzticams sūtītājs.
-# review: new
-ui-search-encrypted = Meklēt &šifrētos ziņojumos
-# review: new
-ui-search-encrypted-note = Šifrētie ziņojumi šajā datorā tiek atšifrēti pēc lejupielādes vai atvēršanas, lai to vārdus varētu atrast un sarakstā būtu redzams to īstais temats. Indekss nav šifrēts, un MI aģenti tajā nekad nemeklē. Izslēdziet šo, lai tos noņemtu no indeksa.
-# review: new
+ui-search-encrypted = M&eklēt šifrētos ziņojumos
+ui-search-encrypted-note = Ja lejupielādētu vai atvērtu ziņojumu šajā datorā izdodas atšifrēt, var meklēt tā tekstā un sarakstā redzēt īsto tēmu. Meklēšanas indekss nav šifrēts. MI aģenti atšifrētajā saturā nemeklē. Izslēdzot šo opciju, atšifrētais saturs tiek noņemts no indeksa.
 ui-pgp-keyserver = &Meklēt atslēgas vietnē keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Kad šifrējat ziņojumu vai meklējat atslēgu, meklētā adrese tiek nosūtīta uz keys.openpgp.org. Vispirms tiek vaicāts pašas adreses domēnam.
-# review: changed
+ui-pgp-keyserver-note = Meklējot atslēgu pēc e-pasta adreses, vispirms tiek vaicāts adreses domēnam. Ja atslēga nav atrasta, e-pasta adrese tiek nosūtīta uz keys.openpgp.org. Šajā vietnē var meklēt atslēgas arī pēc to pirkstu nospiedumiem.
 ui-eml-default = Atvērt .&eml failus ar Inbox Classic
-# review: new
 ui-eml-default-done = Inbox Classic tagad atver .eml failus.
-# review: new
-ui-eml-default-failed = Inbox Classic nevarēja iestatīt kā noklusējuma lietotni .eml failiem: { $reason }
-# review: new
+ui-eml-default-failed = Neizdevās iestatīt Inbox Classic kā noklusējuma lietotni .eml failiem: { $reason }
 ui-folders = Mapes
-# review: new
 ui-sorted-by = Kārtots pēc: { $field }
-# review: changed
 ui-layout-label = &Izkārtojums:
-# review: new
-ui-columns-note = Logs ir pietiekami plats kolonnu izkārtojumam. Izkārtojumu var mainīt sadaļā Skats > Izkārtojums.
-# review: new
+ui-columns-note = Logs ir pietiekami plats kolonnu izkārtojumam. Citu izkārtojumu varat izvēlēties izvēlnē „Izkārtojums”.
 ui-row-unread = Nelasīts
-# review: new
 ui-row-flagged = Ar karodziņu
-# review: new
 ui-row-attachments = Ir pielikumi
-# review: new
 ui-row-encrypted = Šifrēts
-# review: new
 ui-row-signed = Parakstīts
-# review: new
 ui-row-messages = { $count ->
     [zero] { $count } ziņojumu
     [one] { $count } ziņojums
    *[other] { $count } ziņojumi
 }
-# review: changed
 ui-list-pictures = &Rādīt sūtītāju attēlus ziņojumu sarakstā
-# review: changed
-ui-list-pictures-note = Pārbaudītiem sūtītājiem rāda zīmolu logotipus vai adrešu grāmatas attēlus, bet, ja attēla nav, iniciāļus. Logotipi tiek lejupielādēti vienreiz katram zīmolam, nevis katram ziņojumam.
-# review: new
+ui-list-pictures-note = Kolonnu izkārtojumā rāda zīmolu logotipus vai adrešu grāmatas attēlus, ja pasta pakalpojumu sniedzējs ir apstiprinājis sūtītāja domēnu. Ja attēla nav, rāda iniciāļus. Lejupielādētos logotipus saglabā un izmanto arī citos ziņojumos; vajadzības gadījumā tos atjaunina.
 ui-card-picture = Attēls:
-# review: new
 ui-card-picture-choose = &Izvēlēties...
-# review: new
-ui-picture-not-picture = Šis fails nav PNG vai JPEG attēls.
-# review: new
+ui-picture-not-picture = Neizdevās nolasīt attēlu. Izvēlieties derīgu PNG vai JPEG failu.
 ui-picture-too-large = Šis attēls ir pārāk liels. Izvēlieties attēlu, kas nav lielāks par 10 MB un kura platums un augstums nepārsniedz 8000 pikseļu.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Šifrēšanas atslēgas
-# review: new
-ui-keys-intro = Jūsu atslēgas paraksta jūsu ziņojumus un atver jums šifrētu pastu. Jūsu kontaktpersonu atslēgas pārbauda viņu parakstus un šifrē viņiem sūtīto pastu.
-# review: new
-ui-keys-empty = Vēl nav atslēgu. Noklikšķiniet uz Jauna atslēga, lai izveidotu savējo, vai uz Importēt, lai pievienotu jau esošu atslēgu.
-# review: new
+ui-keys-intro = Ar savām atslēgām varat parakstīt ziņojumus un atšifrēt jums sūtītos šifrētos ziņojumus. Ar kontaktpersonu atslēgām varat pārbaudīt viņu parakstus un šifrēt viņiem sūtāmos ziņojumus.
+ui-keys-empty = Vēl nav atslēgu. Noklikšķiniet uz pogas „Jauna atslēga”, lai izveidotu savu atslēgu, vai uz „Importēt”, lai pievienotu jau esošu atslēgu.
 ui-keys-col-name = Vārds
-# review: new
 ui-keys-col-address = Adrese
-# review: new
 ui-keys-col-kind = Veids
-# review: new
 ui-keys-col-status = Statuss
-# review: new
 ui-keys-kind-own = Jūsu atslēga
-# review: new
 ui-keys-kind-contact = Kontaktpersona
-# review: new
-ui-keys-status-verified = { $status }, pārbaudīta
-# review: new
+ui-keys-status-verified = { $status }, piederība apstiprināta
 ui-keys-new = &Jauna atslēga...
-# review: new
 ui-keys-import = &Importēt...
-# review: new
 ui-keys-export = &Eksportēt...
-# review: new
 ui-keys-backup = &Dublēt...
-# review: new
 ui-keys-verify = &Pārbaudīt...
-# review: new
 ui-keys-new-title = Jauna atslēga
-# review: new
-ui-keys-new-for = Izveidot atslēgu:
-# review: new
+ui-keys-new-for = Izveidot atslēgu kontam:
 ui-keys-new-make = &Izveidot atslēgu
-# review: new
 ui-keys-no-account = Vispirms pievienojiet pasta kontu: atslēga tiek izveidota konta adresēm.
-# review: new
-ui-keys-memory-only = Paroles tiek glabātas tikai atmiņā, tāpēc tagad izveidotu vai importētu privāto atslēgu pēc Inbox Classic aizvēršanas nevarēs izmantot.
-# review: new
-ui-keys-backup-offer = Jūsu jaunā atslēga ir gatava. Vai saglabāt tās dublējumu tagad? Ja šis dators tiks pazaudēts vai atiestatīts, atslēgu varēs atgūt tikai no dublējuma.
-# review: new
+ui-keys-memory-only = Paroles tiek glabātas tikai atmiņā. Pēc Inbox Classic atkārtotas palaišanas tagad izveidotā vai importētā privātā atslēga vairs nebūs izmantojama.
+ui-keys-backup-offer = Jūsu jaunā atslēga ir gatava. Vai saglabāt tās dublējumu tagad? Ja zaudēsiet datoru vai tā datus, atslēgu varēs atjaunot no dublējuma.
 ui-keys-backup-now = &Saglabāt dublējumu...
-# review: new
 ui-keys-later = &Vēlāk
-# review: new
 ui-keys-backup-title = Dublēt atslēgu
-# review: new
 ui-keys-backup-intro = Dublējumu aizsargā paroles frāze. Glabājiet failu un paroles frāzi dažādās drošās vietās: lai atgūtu atslēgu, vajadzēs abus.
-# review: new
 ui-keys-passphrase = &Paroles frāze:
-# review: new
 ui-keys-passphrase-again = &Ierakstiet vēlreiz:
-# review: new
 ui-keys-passphrase-differ = Paroles frāzes nesakrīt.
-# review: new
 ui-keys-passphrase-short = Izmantojiet paroles frāzi, kurā ir vismaz 8 rakstzīmes.
-# review: new
-ui-keys-backup-saved = Dublējums tika saglabāts.
-# review: new
+ui-keys-backup-saved = Dublējums saglabāts.
 ui-keys-import-title = Importēt atslēgu
-# review: new
 ui-keys-import-passphrase = Šo privāto atslēgu aizsargā paroles frāze. Ierakstiet to, lai importētu atslēgu:
-# review: new
 ui-keys-file-filter = OpenPGP atslēgas
-# review: new
-ui-keys-use-for = Vai izmantot šo atslēgu adresei { $addresses }? Jūsu ziņojumi no turienes tiks parakstīti ar to, un ar to šifrētu pastu varēs lasīt šeit.
-# review: new
+ui-keys-use-for = Vai izmantot šo atslēgu šādām adresēm: { $addresses }? Ar šo atslēgu varēsiet parakstīt no šīm adresēm sūtītos ziņojumus un atšifrēt ar to šifrētos ziņojumus.
 ui-keys-use = &Izmantot
-# review: new
 ui-keys-not-now = &Ne tagad
-# review: new
-ui-keys-remove-own = Vai noņemt jūsu atslēgu { $fingerprint }? Ar to šifrētu pastu šeit vairs nevarēs lasīt, ja vien atkal neimportēsiet tās dublējumu.
-# review: new
-ui-keys-remove-contact = Vai noņemt kontaktpersonas { $name } atslēgu? Viņa parakstus nevarēs pārbaudīt un viņam sūtīto pastu nevarēs šifrēt, līdz atkal pievienosiet viņa atslēgu.
-# review: new
+ui-keys-remove-own = Vai noņemt savu atslēgu { $fingerprint }? Bez tās vairs nevarēs atšifrēt ar šo atslēgu šifrētos ziņojumus, ja vien neatjaunosiet atslēgu no dublējuma.
+ui-keys-remove-contact = Vai noņemt atslēgu „{ $name }”? Šo atslēgu vairs nevarēs izmantot parakstu pārbaudei vai ziņojumu šifrēšanai. Vajadzības gadījumā to varēs pievienot no jauna.
 ui-key-properties-title = Atslēgas rekvizīti
-# review: new
 ui-key-names = Vārdi:
-# review: new
 ui-key-fingerprint = Pirkstu nospiedums:
-# review: new
 ui-key-status = Statuss:
-# review: new
 ui-key-created = Izveidota:
-# review: new
 ui-key-expires = Derīga līdz:
-# review: new
 ui-key-never = Bez termiņa
-# review: new
 ui-key-algorithm = Algoritms:
-# review: new
 ui-key-source = Avots:
-# review: new
 ui-key-addresses = Adreses:
-# review: new
-ui-key-address-verified = { $address } (pārbaudīta)
-# review: new
-ui-key-address-not-verified = { $address } (nav pārbaudīta)
-# review: new
+ui-key-address-verified = { $address } (atslēgas piederība apstiprināta)
+ui-key-address-not-verified = { $address } (atslēgas piederība nav apstiprināta)
 ui-verify-title = Pārbaudīt atslēgu
-# review: new
-ui-verify-intro = Palūdziet, lai { $name } jums nolasa savas atslēgas pirkstu nospiedumu no savas lietotnes, klātienē vai pa tālruni. Nesalīdziniet to ar e-pastā sūtītu: tas, kurš varētu mainīt atslēgu, varētu mainīt arī to.
-# review: new
+ui-verify-intro = Atslēga: { $name }. Klātienē vai pa tālruni palūdziet otrai personai nolasīt savas atslēgas pirkstu nospiedumu no savas lietotnes. Nesalīdziniet to ar e-pastā atsūtītu nospiedumu: tas, kurš var aizstāt atslēgu, var aizstāt arī atsūtīto nospiedumu.
 ui-verify-fingerprint = Jūsu rīcībā esošās atslēgas pirkstu nospiedums:
-# review: new
 ui-verify-marks = { $count ->
-    [1] Ja tie sakrīt, atslēga tiek atzīmēta kā šīs personas atslēga adresei { $addresses }. Ja šī adrese nav šīs personas, noklikšķiniet uz Atšķiras.
-   *[other] Ja tie sakrīt, atslēga tiek atzīmēta kā šīs personas atslēga adresēm { $addresses }. Ja kāda no šīm adresēm nav šīs personas, noklikšķiniet uz Atšķiras.
+    [0] Šai atslēgai nav e-pasta adrešu, tāpēc tai nevar saglabāt piederības apstiprinājumu.
+    [1] Ja pirkstu nospiedumi sakrīt, atslēgas piederība šai personai tiks apstiprināta norādītajai adresei. Adrese: { $addresses }. Ja adrese nepieder šai personai, noklikšķiniet uz pogas „Atšķiras”.
+   *[other] Ja pirkstu nospiedumi sakrīt, atslēgas piederība šai personai tiks apstiprināta norādītajām adresēm. Adreses: { $addresses }. Ja kaut viena adrese nepieder šai personai, noklikšķiniet uz pogas „Atšķiras”.
 }
-# review: new
 ui-verify-match = &Sakrīt
-# review: new
 ui-verify-differ = &Atšķiras
-# review: new
-ui-verify-differs = Jūsu atslēga nav tā, kas ir personai { $name }. Noņemiet to un vēlreiz palūdziet viņa atslēgu.
-# review: new
-ui-verify-unmark = Atzīmēt kā &nepārbaudītu
-# review: new
+ui-verify-differs = Atslēga „{ $name }” nesakrīt ar otras personas atslēgu. Noņemiet to un lūdziet šai personai atsūtīt savu atslēgu vēlreiz.
+ui-verify-unmark = Atcelt piederības apstipri&nājumu
 ui-account-security = Drošība
-# review: new
 ui-account-security-intro = Ar atslēgu jūsu ziņojumus var parakstīt, un cilvēki var jums sūtīt šifrētu pastu.
-# review: new
 ui-account-key = &Atslēga šim kontam:
-# review: new
 ui-account-key-none = Nav
-# review: new
 ui-account-key-new = &Jauna atslēga...
-# review: new
 ui-account-autocrypt = &Sūtīt manu publisko atslēgu kopā ar ziņojumiem (Autocrypt)
-# review: new
 ui-contact-key = Šifrēšanas atslēga:
-# review: new
 ui-contact-key-none = Nav atslēgas
-# review: new
 ui-contact-key-use-new = Izmantot &jauno atslēgu
-# review: new
 ui-contact-key-keep = &Paturēt pašreizējo
 ui-recipient-keys-title = Adresātu atslēgas
 ui-recipient-col-recipient = Adresāts
@@ -917,29 +725,16 @@ ui-compose-make-key = &Izveidot atslēgu...
 ui-compose-show-keys = Šifrēšanas a&tslēgas...
 ui-compose-encrypt-off = &Izslēgt šifrēšanu
 ui-compose-keep-encrypted = &Atstāt ieslēgtu
-# review: new
 ui-setup-export-title = Eksportēt iestatījumus un kontus
-# review: new
 ui-setup-import-title = Importēt iestatījumus un kontus
-# review: new
-ui-setup-export-intro = Izvēlieties, ko pārnest uz citu datoru. Failā nav ziņojumu: tie tur tiks lejupielādēti no jauna.
-# review: new
+ui-setup-export-intro = Izvēlieties, ko pārnest uz citu datoru. Ziņojumi šajā failā netiek iekļauti. Citā datorā varēs lejupielādēt tikai tos ziņojumus, kas ir serverī.
 ui-setup-use-passphrase = &Aizsargāt failu ar paroles frāzi
-# review: new
-ui-setup-passphrase-note = Ar paroles frāzi fails tiek šifrēts un satur arī jūsu paroles, pierakstīšanās datus un privātās atslēgas. Bez tās katrs konts citā datorā prasīs savu paroli.
-# review: new
+ui-setup-passphrase-note = Ja izmantojat paroles frāzi, fails tiek šifrēts. Tajā iekļauj arī pieejamās saglabātās paroles, citus pierakstīšanās datus un privātās atslēgas. Bez šīs aizsardzības citā datorā kontos būs jāpierakstās no jauna.
 ui-setup-export-button = &Eksportēt...
-# review: new
 ui-setup-file-filter = Inbox Classic iestatījumi un konti
-# review: new
 ui-setup-ask-passphrase = Šo failu aizsargā paroles frāze. Ierakstiet to, lai redzētu, kas ir failā:
-# review: new
 ui-setup-import-intro = Izvēlieties, ko importēt. Konti, kas jau ir šajā datorā, paliek nemainīti.
-# review: new
-ui-setup-from = Saglabājusi Inbox Classic { $version }, { $date }.
-# review: new
+ui-setup-from = Fails saglabāts ar Inbox Classic { $version } ({ $date }).
 ui-setup-import-button = &Importēt
-# review: new
 ui-setup-done = Gatavs
-# review: new
 ui-setup-first-run = Importēt iestatījumus un kontus no cita datora...

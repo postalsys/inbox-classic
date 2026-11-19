@@ -600,6 +600,21 @@ where the singular reads better ("Pārvietot ziņojumu").
   menu/dialog scopes are collision-free at this checkpoint. Keep "ziņojums" in attachment commands too.
 - The sign-in app secret checkbox starts with its action: "Noņemt saglabāto klienta noslēpumu". A newly entered
   secret takes precedence over removal. Names and identifiers use quoted head nouns or labels, without inflection.
+- Contact import/export reports use active verbs with accusative count forms: counted one "kontaktpersonu",
+  other "kontaktpersonas" (also 0/10/11). Each import count selects independently. Contact deletion retains exact
+  [1] and the numeric placeholder in counted one. Key verification retains exact [1] for a single address.
+  Exact [0] explains that a key without email addresses cannot store an ownership confirmation.
+- Key ownership is "atslēgas piederība apstiprināta", distinct from signature integrity and key usability.
+  Fingerprints remain "pirkstu nospiedums". Verification names may be addresses/fingerprints, so use an explicit
+  key label. Removing a key prevents use of that key, without denying alternate keys or already decrypted text.
+- Send countdowns describe planned sending; failure to Undo Send does not prove delivery. Subjects arrive quoted.
+  Cached-mail limits spare drafts and messages opened since startup. Setup files carry no mail, so only server-held
+  messages can be downloaded on another computer. Unprotected transfers require signing in again, including OAuth.
+- Encrypted search depends on successful decryption. Its index is unencrypted; agents exclude decrypted content
+  but still search ordinary mail. Logos are cached and refreshed; verified domains do not prove personal identity.
+  Preview notes describe not executing scripts. Keep "ziņojums" in PDF/attachment settings.
+- Encrypted search uses ASCII E. All 60 checked menu/dialog scopes are collision-free, including key creation,
+  ownership verification, imports and group-member picking. Shared guidance avoids platform-specific parent menus.
 
 ### Lietuvių (lt)
 
@@ -1091,6 +1106,14 @@ written as the `[many]` form.
 - Attachment reminders recognize English, German, Estonian, Spanish and French phrases, not Polish. Do not
   suggest a Polish phrase will trigger a reminder or promise identical plain-text rendering in every mail app.
 
+- Use Nadawca and Odbiorcy for list/sort labels, retaining Od/Do in compose fields. Account sync specifies na wszystkich kontach.
+- Keep injected sender names uninflected using a nadawca label; search scope may be combined and is Zakres wyszukiwania, not always folder.
+- Tekst podpisu is the account footer. Ui-outbox-status-agent uses wysyłka najwcześniej o; adding to the queue is distinct from sending.
+
+- For required input use Uzupełnij pole plus the quoted field label. ui-turned-off receives a full sign-in button label; use Opcja plus quotes.
+- Language names are native labels; restart confirmation states Wybrany język rather than attempting to inflect them. System default choice is Język systemu.
+- Undo Send failure means cancellation is no longer possible, not guaranteed successful sending. Queue time is wysyłka najwcześniej o. Search summaries use zakres because the selected scope may be a combined view.
+
 ### Português (pt-BR, Brasil)
 
 Made from the European Portuguese catalogs and rewritten in Brazilian usage, with Microsoft's (Outlook, Windows) and
@@ -1216,6 +1239,13 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
   without a digital signature; inherited text, images and attachments require encryption until removed.
 - Writing help explains the actual account, completion and formatting behavior. Attachment reminders recognize
   English, German, Estonian, Spanish and French expressions, not Romanian. Do not give a Romanian trigger example.
+
+- Use Textul semnăturii for account footer controls; this is consistent with existing distinction from digital signatures.
+- Use Anulare marcare ca nedorit / Nu este nedorit for undoing junk classification.
+- Agent queue time is cel mai devreme la, reflecting not_before rather than guaranteed sending.
+
+- Use Anulare acțiune for agent Undo and Anulare modificări for Take Back; Cancel remains Anulare, so destructive confirmation and cancellation are distinguishable.
+- Required-field errors use Completați câmpul „{field}” to avoid gender disagreement with substituted display labels.
 
 ### Slovenčina (sk)
 
@@ -1638,6 +1668,16 @@ Plurals: `[one]` 1, 21, 31...; `[few]` 2 to 4, 22 to 24...; `[many]` 0, 5 to 20,
   Inherited text, images and attachments require encryption until removed, even with the toggle off in a draft.
 - Attachment reminders recognize English, German, Estonian, Spanish and French expressions, not Russian.
   Help describes the actual account selection and formatting behavior without promising identical rendering.
+
+- Use «Текстовая подпись» consistently in the signature editor, title and account button to distinguish the footer from a digital signature.
+- Notification sender names follow «отправитель:»; account names follow «учетная запись» inside quotes. Outbox subjects arrive already quoted; send status uses a neutral clause before the subject.
+- «Область поиска» covers actual folders and combined views. Search mentions sender/recipient names and addresses; empty message lists say «сообщения».
+- Agent queue time is «отправка не раньше», not a guarantee of sending at that instant.
+
+- Use «Сервер авторизации» for the OAuth issuer in client setup and its status messages; «публичный клиент» for an OAuth client without a secret.
+- Account setup uses «почтовая учетная запись» and «защита подключения»; app-password instructions preserve availability conditions and browser-only provider requirements from the app.
+- Unsubscribe success says only «Запрос на отписку принят». Floating invitation times remain as written without conversion to the reader timezone; calendar launch failure does not prove absence of an installed calendar.
+- Rules «обрабатывают» messages; status «По правилам обработано ...» covers flagging, read status and suppressed notifications as well as moving.
 
 ### Українська (uk)
 
