@@ -1,17 +1,15 @@
-<!--review-->
 <h1>Odpovedanie a preposielanie</h1>
 <p class="summary">Odpovedzte odosielateľovi alebo všetkým, prípadne pošlite správu ďalej niekomu inému.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) odpovie odosielateľovi.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) odpovie všetkým, ktorým správa išla.</li>
-    <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) pošle správu ďalej. Príjemcov zadáte vy.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) pripraví odpoveď na adresu Reply-To, ak ju správa uvádza, inak odosielateľovi.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) pripraví odpoveď na adresu Reply-To, prípadne odosielateľovi, a príjemcom z polí Komu a Kópia. Vaše vlastné adresy vynechá.</li>
+    <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) pripraví správu na preposlanie. Príjemcov zadáte vy a potom ju odošlete.</li>
 </ul>
-<p>Odpoveď alebo preposlaná správa ide z konta, v ktorom je pôvodná správa, a z adresy, na ktorú bola poslaná, ak je to jedna z ďalších adries konta.</p>
+<p>Odpoveď alebo preposlaná správa sa pripraví na odoslanie z konta, v ktorom je pôvodná správa. Ak bola pôvodná správa doručená na jednu z ďalších adries tohto konta, použije sa táto adresa.</p>
 <h2>Pôvodná správa</h2>
-<p>V odpovedi je pôvodná správa zbalená za tlačidlom ••• pod vaším textom, takže vidíte iba to, čo píšete. Odošle sa s vašou odpoveďou v každom prípade. Ak ju chcete skrátiť, kliknite na tlačidlo alebo vyberte všetko pomocou <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: pôvodná správa sa potom stane súčasťou vášho textu.</p>
-<p>Pri preposielaní je pôvodná správa v texte od začiatku, pretože je to to, čo posielate.</p>
+<p>V odpovedi je pôvodná správa zbalená za tlačidlom ••• pod vaším textom, takže vidíte iba to, čo píšete. Pri odoslaní sa priloží k odpovedi aj v zbalenom stave, pokiaľ ju predtým neupravíte alebo neodstránite. Ak ju chcete skrátiť, kliknite na tlačidlo alebo vyberte všetko pomocou <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os-->: citovaný text sa rozbalí a budete ho môcť upraviť alebo odstrániť.</p>
+<p>Pri preposielaní je text pôvodnej správy rozbalený od začiatku.</p>
 <p>Odpoveď sa riadi formátom pôvodnej správy. Odpoveď na správu vo formáte obyčajného textu je obyčajný text, s pôvodnou správou citovanou pomocou <b>&gt;</b>, pokiaľ niečo nenaformátujete.</p>
 <h2>Preposlanie viacerých správ</h2>
-<p>Vyberte viac správ a kliknite na <b data-text="ui-tb-forward"></b>. Vytvorí sa jedna nová správa so všetkými priloženými ako súbory <code>.eml</code>. Jej predmet je predmetom prvej správy.</p>
+<p>Vyberte viac správ a kliknite na <b data-text="ui-tb-forward"></b>. Vytvorí sa jedna nová správa, ku ktorej sa všetky vybraté správy priložia ako súbory <code>.eml</code>. Jej predmet vychádza z prvej vybratej správy a začína sa predponou Fw:.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>
-<!--/review-->

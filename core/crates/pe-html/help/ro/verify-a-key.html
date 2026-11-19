@@ -1,15 +1,14 @@
-<!--review--><h1>Verificarea cheii unui contact</h1>
-<p class="summary">Comparați amprenta unei chei cu proprietarul ei pentru a fi sigur că cheia este într-adevăr a lui.</p>
-<p>O cheie poate veni de oriunde: dintr-un mesaj, de pe un server de chei, dintr-un fișier. Oricine poate crea o cheie cu numele și adresa contactului dvs. Verificarea confirmă că cheia pe care o aveți este cea pe care o are contactul.</p>
+<h1>Verificarea cheii unui contact</h1>
+<p class="summary">Comparați amprenta cheii cu cea comunicată direct de contact, pentru a confirma că îi aparține.</p>
+<p>O cheie poate veni de oriunde: dintr-un mesaj, de pe un server de chei, dintr-un fișier. Oricine poate crea o cheie cu numele și adresa contactului dvs. Compararea amprentelor vă ajută să confirmați că aveți cheia contactului respectiv.</p>
 <p>Pentru a verifica o cheie:</p>
 <ol>
     <li>Alegeți <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, selectați cheia contactului și faceți clic pe <b data-text="ui-keys-verify"></b>. Puteți face clic pe acest buton și în proprietățile contactului din Agendă.</li>
-    <li>Rugați contactul să vă citească amprenta cheii sale din propria aplicație, în persoană sau la telefon.</li>
-    <li>Dacă fiecare grup de patru caractere este la fel, faceți clic pe <b data-text="ui-verify-match"></b>. Cheia apare ca verificată.</li>
-    <li>Fereastra afișează adresele pe care le marchează astfel. O cheie poate numi orice adresă, așa că dacă una dintre ele nu este a contactului, faceți clic în schimb pe <b data-text="ui-verify-differ"></b>.</li>
+    <li>Rugați contactul să vă citească amprenta cheii din propria aplicație, într-o întâlnire directă sau într-un apel. Verificați și dacă toate adresele afișate îi aparțin.</li>
+    <li>Dacă toate grupurile de câte patru caractere coincid și toate adresele îi aparțin contactului, faceți clic pe <b data-text="ui-verify-match"></b>. Proprietarul cheii va apărea ca fiind confirmat pentru adresele afișate.</li>
+    <li>Dacă o adresă afișată nu îi aparține contactului, chiar dacă amprentele coincid, faceți clic pe <b data-text="ui-verify-differ"></b>.</li>
 </ol>
 <aside class="warning">Nu comparați amprenta cu una trimisă prin e-mail. Cine ar putea schimba cheia dintr-un mesaj ar putea schimba și amprenta.</aside>
-<p>Dacă amprentele diferă, faceți clic pe <b data-text="ui-verify-differ"></b>. Cheia pe care o aveți nu este a contactului: eliminați-o și rugați contactul să vă trimită din nou cheia.</p>
-<p>Semnăturile făcute cu o cheie verificată apar cu verde. O cheie pe care nu ați verificat-o funcționează în continuare pentru criptare, iar semnăturile ei apar cu albastru.</p>
+<p>Dacă amprentele diferă, faceți clic pe <b data-text="ui-verify-differ"></b>. Cheia pe care o aveți nu corespunde celei confirmate de contact. Nu o considerați verificată; cereți-i cheia corectă și comparați din nou amprentele.</p>
+<p>Semnăturile valide ale expeditorului apar cu verde dacă ați confirmat cui îi aparține cheia sau cu albastru dacă nu ați confirmat acest lucru. O cheie cu proprietar neconfirmat poate fi folosită în continuare pentru criptare. Dacă cheia nu conține nicio adresă de e-mail, confirmarea proprietarului nu poate fi salvată.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

@@ -4,7 +4,7 @@
 
 ## The main window
 
-gtk-search-looks-in = Meklēšanas vieta: „{ $place }”. Meklēšana aptver tēmas, sūtītāju un adresātu vārdus un adreses, pielikumu nosaukumus un ziņojumu tekstu. Pārbaudiet pareizrakstību vai ievadiet mazāk vārdu.
+gtk-search-looks-in = Meklēšanas vieta: „{ $place }”. Meklēšana aptver temata, sūtītāju un adresātu vārdus un adreses, pielikumu nosaukumus un ziņojumu tekstu. Pārbaudiet pareizrakstību vai ievadiet mazāk vārdu.
 gtk-search-still-indexing = { $count ->
     [zero] Vēl tiek indeksēts { $count } ziņojumu teksts. Drīz var parādīties vairāk rezultātu.
     [one] Vēl tiek indeksēts { $count } ziņojuma teksts. Drīz var parādīties vairāk rezultātu.
@@ -96,7 +96,7 @@ gtk-files = { $count ->
     [one] { $count } fails
    *[other] { $count } faili
 }
-gtk-pictures-blocked = Daži attēli ir bloķēti, lai mazinātu iespēju sūtītājam identificēt jūsu datoru.
+gtk-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājam būtu grūtāk izsekot, kad lasāt ziņojumu.
 gtk-download-pictures = Lejupielādēt attēlus
 gtk-save-attachments-menu = Saglabāt pielikumus...
 
@@ -181,8 +181,8 @@ gtk-desktop-generic-name = Pasta klients
 gtk-desktop-comment = Lasiet un rakstiet e-pastu: ātra, vienkārša pasta programma
 gtk-desktop-keywords = pasts;e-pasts;vēstules;ziņojumi;iesūtne;
 gtk-metainfo-summary = Ātra, vienkārša pasta programma
-gtk-metainfo-description = Inbox Classic ir e-pasta programma ar klasisku izkārtojumu: mapes pa kreisi, ziņojumu saraksts augšā un atlasītā ziņojuma saturs apakšā. Tā darbojas ar jebkuru IMAP un SMTP kontu. Outlook.com un Microsoft 365 kontiem var pierakstīties pārlūkprogrammā.
+gtk-metainfo-description = Inbox Classic ir e-pasta programma ar klasisku izkārtojumu: mapes pa kreisi, ziņojumu saraksts augšā un atlasītā ziņojuma saturs apakšā. Tā atbalsta IMAP un SMTP kontus. Outlook.com un Microsoft 365 kontiem var pierakstīties pārlūkprogrammā.
 gtk-metainfo-feature-sanitized = Ziņojumi tiek attīrīti no nedroša satura un rādīti bez skriptiem; attēli no interneta tiek ielādēti tikai ar jūsu atļauju
-gtk-metainfo-feature-search = Meklējiet ziņojumu tēmās un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos; atbalstīti Gmail meklēšanas operatori
+gtk-metainfo-feature-search = Meklējiet ziņojumu tematos un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos; var izmantot Gmail meklēšanai līdzīgus operatorus
 gtk-metainfo-feature-replies = Atbildēs citētie iepriekšējie ziņojumi ir sakļauti, un tos var izvērst
-gtk-metainfo-feature-offline = Lejupielādēto pastu var lasīt arī bezsaistē; paroles tiek glabātas sistēmas atslēgu saišķī
+gtk-metainfo-feature-offline = Lejupielādēto pastu var lasīt bezsaistē; paroles pēc noklusējuma glabā sistēmas paroļu krātuvē

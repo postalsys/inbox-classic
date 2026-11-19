@@ -66,7 +66,7 @@ header-date = Datums
 header-to = Kam
 header-cc = Kopija
 header-sent = Nosūtīts
-header-subject = Tēma
+header-subject = Temats
 header-security = Drošība
 header-part = { $number }. daļa
 quote-original = ----- Sākotnējais ziņojums -----
@@ -116,12 +116,12 @@ bounce-mailbox-disabled-why = Adrese pastāv, bet tās pastkaste ir izslēgta va
 bounce-mailbox-disabled-do = Sazinieties ar cilvēku citādi un pajautājiet adresi, kuru viņš izmanto tagad.
 bounce-mailbox-full = Pastkaste ir pilna
 bounce-mailbox-full-why = Adresāta pastkastē nav vietas jaunam pastam.
-bounce-mailbox-full-do = Nosūtiet to vēlreiz pēc dažām dienām vai paziņojiet cilvēkam citādi. Vispirms tiek atteikti lieli pielikumi.
+bounce-mailbox-full-do = Mēģiniet nosūtīt vēlāk vai sazinieties ar adresātu citā veidā. Liels pielikums var pārsniegt pastkastē atlikušo vietu.
 bounce-spam-blocked = Noraidīts kā mēstule
 bounce-spam-blocked-why = Saņēmēja serveris uzskatīja ziņojumu par mēstuli.
 bounce-spam-blocked-do = Nosūtiet to vēlreiz bez tā, kas izskatās pēc mēstules, piemēram, bez daudzām saitēm, saīsinātām saitēm vai liela pielikuma. Ja tas atkārtojas, vērsieties pie sava pasta pakalpojumu sniedzēja.
 bounce-virus-detected = Noraidīts vīrusa dēļ
-bounce-virus-detected-why = Saņēmēja serveris ziņojumā vai tā pielikumos atrada vīrusu vai citu kaitīgu saturu.
+bounce-virus-detected-why = Saņēmēja serveris norādīja, ka ziņojumā vai tā pielikumos ir vīruss vai cits kaitīgs saturs.
 bounce-virus-detected-do = Pārbaudiet pielikumus ar pretvīrusu programmu. Daži serveri atsaka jebkuru programmu vai arhīvu, tāpēc kopīgojiet šādus failus kā saiti.
 bounce-ip-blocklisted = Jūsu pasta serveris ir bloķēšanas sarakstā
 bounce-ip-blocklisted-why = Saņēmēja serveris atsaka pastu no servera, kas nosūtīja jūsējo, jo šī servera adrese ir bloķēšanas sarakstā.
@@ -146,7 +146,7 @@ bounce-rate-limited-why = Saņēmēja serveris pagaidām pieņem mazāk ziņojum
 bounce-rate-limited-do = Pagaidiet kādu laiku un nosūtiet to vēlreiz. Rakstot daudziem cilvēkiem, sūtiet mazākam skaitam vienlaikus.
 bounce-greylisting = Uz brīdi aizturēts
 bounce-greylisting-why = Saņēmēja serveris lūdz nezināmiem sūtītājiem mēģināt vēlreiz nedaudz vēlāk; tā ir izplatīta pārbaude pret mēstulēm.
-bounce-greylisting-do = Neko. Pasta serveri mēģina vēlreiz paši, un ziņojums parasti tiek piegādāts stundas laikā.
+bounce-greylisting-do = Pagaidiet, kamēr sūtītāja serveris mēģina vēlreiz. Piegādes laiks ir atkarīgs no serveru iestatījumiem.
 bounce-server-error = Saņēmēja serverim radās problēma
 bounce-server-error-why = Ar saņēmēja serveri nevarēja sazināties, vai tas nevarēja pieņemt ziņojumu savas problēmas dēļ.
 bounce-server-error-do = Nosūtiet to vēlreiz vēlāk. Ja tas joprojām neizdodas, pārbaudiet, vai adreses daļā aiz @ nav drukas kļūdu.
@@ -404,7 +404,7 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google vēl nav apstiprinājis Inbox Classic, tāpēc ar to var pierakstīties tikai testa lietotāji. Izmantojiet savu Google pierakstīšanās lietotni vai lietotnes paroli. Ja esat testa lietotājs, varat ieslēgt iebūvēto Google lietotni logā „Pierakstīšanās lietotnes”, ko atver no loga „Konti”.
+sign-in-off-google = Iebūvētā Google pierakstīšanās lietotne šeit ir izslēgta. Ja lietotne ir testēšanas režīmā, ar to var pierakstīties tikai tās testa lietotāji. Varat izmantot savu Google pierakstīšanās lietotni vai lietotnes paroli, ja konts to atļauj. Iebūvēto lietotni var ieslēgt logā „Pierakstīšanās lietotnes”, ko atver no loga „Konti”.
 sign-in-off-other = Šī lietotne tika izslēgta logā „Pierakstīšanās lietotnes”, kur to var atkal ieslēgt. Šo logu var atvērt no loga „Konti”.
 sign-in-app-no-name = pierakstīšanās lietotnei jānorāda nosaukums
 sign-in-app-no-client = trūkst klienta ID
@@ -460,7 +460,7 @@ day-sunday = svētdiena
 
 ## AI agents
 
-agent-level-read = Lasīt pastu: skatīt mapes, ziņojumus un sarunas, meklēt ziņojumus un kontaktus, kā arī skatīt ziņojumu kārtulas
+agent-level-read = Lasīt pastu: skatīt mapes, ziņojumus, sarunas un atbalstītos pielikumus, meklēt ziņojumus un kontaktus, kā arī skatīt ziņojumu kārtulas
 agent-level-organize = Kārtot pastu: atzīmēt ziņojumus kā lasītus vai nelasītus, mainīt karodziņus, to krāsas un nevēlamā pasta atzīmes, pārvietot un arhivēt ziņojumus, veidot un pārdēvēt mapes, vērot sarunas un ignorēt tās, dzēst ziņojumus, pārvietojot tos uz mapi „Izdzēstie vienumi”, un ar jūsu piekrišanu atteikties no adresātu sarakstu abonēšanas
 agent-level-drafts = Rakstīt melnrakstus, kurus varat nosūtīt
 agent-level-send = Sūtīt pastu, katru ziņojumu tikai pēc jūsu piekrišanas
@@ -514,7 +514,7 @@ agent-log-refused = Noraidījāt pieprasījumu nosūtīt ziņojumu „{ $subject
 agent-log-sent = Ievietoja ziņojumu „{ $subject }” nosūtīšanas rindā. Adresāti: { $to }
 agent-log-draft = Saglabāja melnrakstu „{ $subject }”
 agent-log-draft-replaced = Aizstāja melnrakstu „{ $subject }”
-agent-log-draft-discarded = Atmeta melnrakstu „{ $subject }”
+agent-log-draft-discarded = Neatgriezeniski izdzēsa melnrakstu „{ $subject }”
 agent-draft-note = Šo melnrakstu uzrakstīja MI aģents { $program }. Pirms nosūtāt, pārbaudiet adresātus un tekstu.
 agent-log-read = Atzīmēja kā lasītu „{ $subject }”
 agent-log-unread = Atzīmēja kā nelasītu „{ $subject }”
@@ -525,7 +525,7 @@ agent-log-moved = Pārvietoja ziņojumu „{ $subject }” uz mapi „{ $folder 
 agent-log-junk = Atzīmēja „{ $subject }” kā nevēlamu
 agent-log-not-junk = Atzīmēja „{ $subject }” kā vēlamu
 agent-log-archived = Arhivēja „{ $subject }”
-agent-log-folder = Izveidoja mapi „{ $name }”
+agent-log-folder = Pieprasīja izveidot mapi „{ $name }”
 agent-log-unsubscribed = Apstiprinājāt pieprasījumu atteikties no abonēšanas. Ziņojums: „{ $subject }”
 agent-log-unsubscribe-failed = Neizdevās atteikties no abonēšanas. Ziņojums: „{ $subject }”. Iemesls: { $reason }
 agent-log-unsubscribe-refused = Noraidījāt pieprasījumu atteikties no abonēšanas. Sūtītāji: { $senders }
@@ -547,7 +547,7 @@ agent-log-flag-color = Atzīmēja „{ $subject }” ar { $color ->
     [purple] violetu
    *[gray] pelēku
 } karodziņu
-agent-log-renamed = Pārdēvēja mapi „{ $old }” par „{ $name }”
+agent-log-renamed = Pieprasīja pārdēvēt mapi „{ $old }” par „{ $name }”
 agent-log-watched = Sāka vērot sarunu „{ $subject }”
 agent-log-ignored = Sāka ignorēt sarunu „{ $subject }”
 agent-log-unmarked = Pārtrauca vērot vai ignorēt sarunu „{ $subject }”
@@ -628,13 +628,13 @@ agent-undo-since-question = { $count ->
     [one] Vai atsaukt { $count } izmaiņu, ko { $program } veica šajā laikā?
    *[other] Vai atsaukt { $count } izmaiņas, ko { $program } veica šajā laikā?
 }
-agent-undo-since-detail = Ziņojumi tiek pārvietoti atpakaļ uz iepriekšējām mapēm, tiek atjaunotas iepriekšējās lasīšanas atzīmes un karodziņi, bet ziņojumi, kas vēl gaida mapē „Izsūtne”, tiek izdzēsti. Vēlākās izmaiņas, ko veicāt jūs vai serveris, tiek saglabātas.
+agent-undo-since-detail = Ziņojumi tiek pārvietoti atpakaļ uz iepriekšējām mapēm, tiek atjaunotas iepriekšējās lasīšanas atzīmes un karodziņi, bet ziņojumi, kas vēl gaida izsūtnē, tiek izdzēsti. Izmaiņas, kuras pēc pašreizējā ziņojuma stāvokļa vairs nevar atsaukt, tiek izlaistas. Ne visi vēlākie labojumi ir pasargāti; piemēram, noņemot karodziņu, var pazust arī tā jaunā krāsa.
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nekas netika atsaukts.
-    [zero] Atsauktas { $count } izmaiņu.
-    [one] Atsaukta { $count } izmaiņa.
-   *[other] Atsauktas { $count } izmaiņas.
+    [zero] Vismaz daļēji atsauktas { $count } darbību.
+    [one] Vismaz daļēji atsaukta { $count } darbība.
+   *[other] Vismaz daļēji atsauktas { $count } darbības.
 }
 agent-undo-left-gone = { $count ->
     [zero] { $count } ziņojumu vairs nebija tur, kur izmaiņa tos ievietoja.
@@ -661,7 +661,7 @@ agent-invitation-reply = { $response ->
     [accept] Šis ziņojums pieņem uzaicinājumu „{ $summary }” ({ $when }).
     [tentative] Šis ziņojums provizoriski pieņem uzaicinājumu „{ $summary }” ({ $when }).
    *[decline] Šis ziņojums noraida uzaicinājumu „{ $summary }” ({ $when }).
-} Organizatora kalendārs atbildi reģistrē. Jūsu atbilde uz uzaicinājumu mainās tikai tad, kad ziņojums ir nosūtīts.
+} Atbilde tiks nosūtīta organizatoram. Tās statuss Inbox Classic mainīsies pēc veiksmīgas nosūtīšanas pasta serverim.
 # the subject of an answer to an invitation, as calendar programs write it
 invitation-reply-subject = { $response ->
     [accept] Pieņemts: { $summary }
@@ -681,9 +681,8 @@ agent-reads-messages = { $count ->
    *[other] izlasīja { $count } ziņojumus
 }
 agent-reads-attachments = { $count ->
-    [zero] atvēra { $count } pielikumus
-    [one] atvēra { $count } pielikumu
-   *[other] atvēra { $count } pielikumus
+    [one] nolasīja pielikumus { $count } reizi
+   *[other] nolasīja pielikumus { $count } reizes
 }
 agent-reads-searches = { $count ->
     [1] meklēja vienu reizi
@@ -704,7 +703,7 @@ agent-read-conversation = { $count ->
     [one] Izlasīja sarunu „{ $subject }” ({ $count } ziņojums)
    *[other] Izlasīja sarunu „{ $subject }” ({ $count } ziņojumi)
 }
-agent-read-attachment = Atvēra pielikumu „{ $name }” ziņojumā „{ $subject }”
+agent-read-attachment = Nolasīja pielikumu „{ $name }” no ziņojuma „{ $subject }”
 agent-read-search = { $count ->
     [zero] Meklēja „{ $query }”: { $count } ziņojumu
     [one] Meklēja „{ $query }”: { $count } ziņojums
@@ -712,9 +711,9 @@ agent-read-search = { $count ->
 }
 agent-read-people = Meklēja kontaktpersonas, kuru vārds vai adrese sākas ar „{ $query }”
 agent-read-list = { $count ->
-    [zero] Skatīja { $count } ziņojumus mapē „{ $folder }”
-    [one] Skatīja { $count } ziņojumu mapē „{ $folder }”
-   *[other] Skatīja { $count } ziņojumus mapē „{ $folder }”
+    [zero] Skatīja { $count } saraksta ierakstus. Saraksts: { $folder }
+    [one] Skatīja { $count } saraksta ierakstu. Saraksts: { $folder }
+   *[other] Skatīja { $count } saraksta ierakstus. Saraksts: { $folder }
 }
 agent-read-changes = { $count ->
     [zero] Skatīja { $count } jaunus ziņojumus
@@ -752,7 +751,7 @@ secrets-windows = Akreditācijas datu pārvaldnieks
 secrets-mac = Atslēgu piekariņš
 secrets-linux = sistēmas atslēgu saišķis (Secret Service)
 error-no-such-file = šāda faila nav
-cards-file-too-big = Šis fails ir pārāk liels, lai būtu adrešu grāmata.
+cards-file-too-big = Faila izmērs pārsniedz adrešu grāmatas importēšanas ierobežojumu.
 ui-sender-added = Adrešu grāmatai pievienota kontaktpersona „{ $name }”.
 ui-sender-known = Kontaktpersona „{ $name }” jau ir adrešu grāmatā.
 ui-sender-none = Šī ziņojuma sūtītājam nav e-pasta adreses, ko pievienot.
@@ -766,7 +765,7 @@ cards-file-failed = { $file }: { $reason }
 otp-heading = Kods no { $domain }
 otp-copy = Kopēt
 otp-note = Ievadiet to tikai domēna { $domain } lapā.
-otp-old = Šis kods tika nosūtīts vairāk nekā stundu pirms tā atvēršanas, un tā derīgums, visticamāk, ir beidzies.
+otp-old = Pēc ziņojuma datuma šis kods ir vairāk nekā stundu sens. Iespējams, tas vairs nav derīgs.
 
 # how many are invited, in the card of an event
 event-attendees =
@@ -786,7 +785,7 @@ pgp-key-expired = Derīguma termiņš beidzās { $date }
 pgp-key-revoked = Atsaukta
 pgp-key-revoked-why = Atsaukta: { $reason }
 pgp-key-not-valid = Nav derīga
-pgp-key-locked = Atslēgu nevar izmantot: tās aizsardzības atslēga vairs nav pieejama ({ $store }). Vēlreiz importējiet privātās atslēgas dublējumu.
+pgp-key-locked = Privāto atslēgu pašlaik nevar atvērt. Pārbaudiet, vai pieejama sistēmas krātuve „{ $store }”. Ja tajā glabātā aizsardzības atslēga ir zudusi, importējiet privātās atslēgas dublējumu.
 pgp-source-own = Izveidota programmā Inbox Classic
 pgp-source-file = Importēta no faila
 pgp-source-paste = Ielīmēta
@@ -799,7 +798,7 @@ pgp-error-no-store = Privātās atslēgas aizsargā { $store }, ko nevar izmanto
 pgp-error-wrong-passphrase = Paroles frāze nav pareiza.
 pgp-error-not-a-key = Šī nav OpenPGP atslēga.
 pgp-error-too-large = Atslēga ir pārāk liela.
-pgp-error-unusable = Atslēga izmanto vecu vai vāju kriptogrāfiju, un to nevar izmantot.
+pgp-error-unusable = Atslēgu nevar izmantot: tā neatbilst atbalstītajām kriptogrāfijas prasībām.
 pgp-imported-private = { $count ->
     [1] Jūsu privātā atslēga tika importēta.
     [zero] Tika importētas { $count } privāto atslēgu.
@@ -821,13 +820,13 @@ pgp-pending = Adresei { $address } { $date } tika atrasta cita atslēga.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Parakstītājs: { $signer }; atslēgas piederība apstiprināta
 pgp-part-signed = Parakstītājs: { $signer } (atslēgas piederība nav apstiprināta)
-pgp-part-other = Parakstītājs: { $signer }; tas nav ziņojuma sūtītājs
+pgp-part-other = Parakstītājs: { $signer }; parakstu nevar sasaistīt ar ziņojuma sūtītāju
 pgp-part-unknown-key = Parakstīts, bet atslēga nav zināma
 pgp-part-not-signed = Nav parakstīts
 pgp-part-not-checked = Paraksts nav pārbaudīts
 pgp-part-encrypted = Šifrēts. { $signature }
 pgp-part-no-key = Šifrēts ar atslēgu, kuras jums nav
-pgp-part-changed = Šifrētā daļa ceļā tika mainīta un netiek rādīta
+pgp-part-changed = Šifrētās daļas integritāti nevar apstiprināt, tāpēc tā netiek rādīta
 pgp-part-unprotected = Šifrēts bez aizsardzības pret izmaiņām, netiek rādīts
 pgp-part-broken = Šifrēto daļu nevar nolasīt
 pgp-why-mismatch = Paraksts neatbilst šim tekstam
@@ -882,7 +881,7 @@ pgp-compose-key-unusable =
 
     Iemesls: { $state }
 
-    Atveriet logu „Šifrēšanas atslēgas” un importējiet šīs atslēgas dublējumu vai izveidojiet jaunu atslēgu.
+    Vispirms pārbaudiet norādīto iemeslu un piekļuvi sistēmas atslēgu krātuvei. Ja vajadzīgs, logā „Šifrēšanas atslēgas” importējiet atslēgas dublējumu vai izveidojiet jaunu atslēgu.
 pgp-compose-encrypt-off-quote = Ziņojumā ir teksts, attēli vai pielikumi no šifrēta ziņojuma. Ziņojumu var nosūtīt nešifrētu tikai pēc šī satura noņemšanas. Vai tomēr izslēgt šifrēšanu?
 pgp-compose-encrypt-off-reply = Jūs atbildat uz šifrētu ziņojumu vai to pārsūtāt. Bez šifrēšanas tā saturu varēs izlasīt arī serveri, caur kuriem ziņojums tiek sūtīts. Vai izslēgt šifrēšanu?
 pgp-recipient-verified = Atslēgas piederība apstiprināta
@@ -995,17 +994,17 @@ setup-account-signs-in-again = Pēc importēšanas tajā jāpierakstās vēlreiz
 setup-account-here = Tas šeit jau ir iestatīts, tāpēc tiek izlaists.
 setup-account-no-app = Konts izmanto pierakstīšanās lietotni „{ $app }”, kas šeit nav iestatīta. Importējiet arī pierakstīšanās lietotnes.
 setup-invalid-address = „{ $address }” nav e-pasta adrese.
-setup-invalid-server = { $server } serverim nav izmantojama nosaukuma vai porta.
+setup-invalid-server = Servera { $server } iestatījumos nav derīga nosaukuma, porta vai savienojuma drošības veida.
 setup-invalid-user = Tam nav lietotājvārda.
-setup-invalid-sign-in = Tas pierakstās veidā, ko Inbox Classic nepazīst.
+setup-invalid-sign-in = Pierakstīšanās pakalpojuma izdevēja adrese nav derīga.
 setup-error-empty = Fails ir tukšs.
-setup-error-too-large = Fails ir pārāk liels, lai būtu Inbox Classic iestatījumu fails.
+setup-error-too-large = Fails pārsniedz Inbox Classic iestatījumu importa lieluma ierobežojumu.
 setup-error-not-setup = Šis fails nav Inbox Classic iestatījumu fails.
 setup-error-damaged = Iestatījumu fails ir bojāts, un to nevar nolasīt.
 setup-error-newer = Šos iestatījumus saglabāja jaunāka Inbox Classic versija ({ $version }). Atjauniniet Inbox Classic un pēc tam importējiet tos vēlreiz.
 setup-error-needs-passphrase = Šos iestatījumus aizsargā paroles frāze. Ierakstiet paroles frāzi, ar kuru tie tika saglabāti.
 setup-error-wrong-passphrase = Tā nav paroles frāze, ar kuru šie iestatījumi tika saglabāti.
-setup-error-changed = Iestatījumu fails pēc saglabāšanas tika mainīts vai bojāts, tāpēc to nevar importēt.
+setup-error-changed = Neizdevās apstiprināt iestatījumu faila integritāti. Fails var būt mainīts vai bojāts, tāpēc to nevar importēt.
 setup-error-read = Iestatījumu failu nevarēja nolasīt: { $error }
 setup-error-write = Iestatījumus nevarēja saglabāt: { $error }
 setup-error-no-parts = Izvēlieties vismaz vienu daļu.
@@ -1076,9 +1075,9 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } ziņojumu kārtulas ir paredzētas kontiem, kuru šeit nav, tāpēc tās tika izlaistas.
 }
 setup-rules-waiting = { $count ->
-    [zero] { $count } ziņojumu kārtulu pārvieto ziņojumus uz mapēm, kas parādīsies, kad to konti tiks sinhronizēti.
-    [one] { $count } ziņojumu kārtula pārvieto ziņojumus uz mapi, kas parādīsies, kad tās konts tiks sinhronizēts.
-   *[other] { $count } ziņojumu kārtulas pārvieto ziņojumus uz mapēm, kas parādīsies, kad to konti tiks sinhronizēti.
+    [zero] { $count } ziņojumu kārtulu gaida mērķa mapju atrašanu pēc kontu sinhronizācijas.
+    [one] { $count } ziņojumu kārtula gaida mērķa mapes atrašanu pēc konta sinhronizācijas.
+   *[other] { $count } ziņojumu kārtulas gaida mērķa mapju atrašanu pēc kontu sinhronizācijas.
 }
 setup-added-trusted-senders = { $count ->
     [zero] Pievienoti { $count } uzticamu sūtītāju.
@@ -1088,9 +1087,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Nekas netika importēts.
 setup-account-servers = { $imap } un { $smtp } ({ $signin })
 setup-file-name = Inbox Classic iestatījumi un konti
-setup-skipped-unreachable = Neizdevās importēt ierakstu „{ $name }”: nevarēja sazināties ar tā pierakstīšanās pakalpojumu. Pievienojiet pierakstīšanās lietotni vēlreiz logā „Pierakstīšanās lietotnes”.
+setup-skipped-unreachable = Neizdevās importēt ierakstu „{ $name }”: nevarēja pārbaudīt tā pierakstīšanās pakalpojuma konfigurāciju. Vajadzīgo pierakstīšanās lietotni pievienojiet vēlreiz logā „Pierakstīšanās lietotnes”.
 attachment-runs-programs = Fails „{ $name }” var palaist programmas, tāpēc Inbox Classic to neatver. Saglabājiet to un pēc tam atveriet paši, ja uzticaties tā izcelsmei.
-attachment-decrypted-note = Šis pielikums ir no šifrēta ziņojuma. Lai to atvērtu, Inbox Classic saglabā nešifrētu kopiju jūsu lietotāja konta pagaidu mapē. Kopijas, kas vecākas par vienu dienu, tiek dzēstas, palaižot programmu.
+attachment-decrypted-note = Šis pielikums ir no šifrēta ziņojuma. Lai to atvērtu, Inbox Classic saglabā nešifrētu kopiju jūsu lietotāja konta pagaidu mapē. Palaižot programmu, tā mēģina dzēst kopijas, kas vecākas par vienu dienu.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
    *[other] Pārvietošana uz mapi „{ $folder }” serverī neizdevās, tāpēc { $messages } atkal ir mapē „{ $from }”: { $reason }
@@ -1117,7 +1116,7 @@ undone-flags = { $count ->
 
 preview-pdf-option = Rādīt PDF failus ziņojumos
 preview-pdf-off = PDF faili ziņojumos netiek rādīti.
-preview-pdf-off-crashed = Inbox Classic darbība pārtrūka, rādot failu ziņojumā, tāpēc PDF faili ziņojumos vairs netiek rādīti. Attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, sadaļā „{ $settings }” ieslēdziet opciju „{ $option }”.
+preview-pdf-off-crashed = Iepriekšējais faila priekšskatījums tika pārtraukts vai iestrēga. Piesardzības dēļ PDF faili ziņojumos vairs netiek rādīti, bet attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, sadaļā „{ $settings }” ieslēdziet opciju „{ $option }”.
 preview-pdf-details = { $count ->
     [zero] { $count } lappušu, { $size }
     [one] { $count } lappuse, { $size }
@@ -1139,9 +1138,9 @@ preview-tile-downloading = Notiek lejupielāde…
 preview-tile-preparing = Notiek sagatavošana…
 preview-tile-format = { $format } attēli vēl netiek rādīti
 preview-tile-password = Aizsargāts ar paroli: atveriet, lai to ievadītu
-preview-tile-too-large = Pārāk liels, lai parādītu
+preview-tile-too-large = Pārsniedz priekšskatījuma ierobežojumu
 preview-tile-unreadable = Nevar parādīt
 preview-tile-timed-out = Parādīšana aizņēma pārāk ilgu laiku
-preview-tile-crashed = Netiek rādīts: šī faila rādīšanas laikā reiz pārtrūka Inbox Classic darbība
+preview-tile-crashed = Iepriekšējais priekšskatījums tika pārtraukts vai iestrēga
 preview-tile-off = Netiek rādīts, līdz Inbox Classic tiks palaists no jauna
 preview-not-printed = Fails „{ $name }” ({ $details }) netiek drukāts. Atveriet to, lai izdrukātu.

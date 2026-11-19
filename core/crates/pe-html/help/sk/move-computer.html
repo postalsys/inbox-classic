@@ -1,14 +1,13 @@
-<!--review-->
 <h1>Prechod na iný počítač</h1>
 <p class="summary">Preneste svoje kontá, nastavenia, kontakty, kľúče a pravidlá do iného počítača v jednom súbore.</p>
 <h2>Export</h2>
 <ol>
     <li>Vyberte <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Vyberte, čo preniesť: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> a <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Ak chcete preniesť aj heslá a súkromné kľúče, zapnite <b data-text="ui-setup-use-passphrase"></b> a dvakrát zadajte prístupovú frázu s aspoň 8 znakmi.</li>
+    <li>Ak chcete preniesť aj dostupné uložené heslá, prihlasovacie údaje a súkromné kľúče z vybraných častí, zapnite <b data-text="ui-setup-use-passphrase"></b> a dvakrát zadajte prístupovú frázu s aspoň 8 znakmi.</li>
     <li>Kliknite na <b data-text="ui-setup-export-button"></b> a vyberte, kam súbor uložiť.</li>
 </ol>
-<p>Súbor neobsahuje žiadne správy: v druhom počítači sa stiahnu znova. S prístupovou frázou je celý súbor šifrovaný. Bez nej neobsahuje žiadne heslá ani súkromné kľúče a každé konto si v druhom počítači raz vyžiada heslo.</p>
+<p>Súbor neobsahuje správy. Na druhom počítači možno znova stiahnuť poštu uloženú na serveri; miestne správy vrátane Pošty na odoslanie sa neprenesú. Prístupová fráza zašifruje celý súbor, ale neprístupné súkromné kľúče sa ani tak nedajú exportovať. Bez frázy sa heslá, prihlasovacie údaje a súkromné kľúče vynechajú. Do kont sa potom musíte prihlásiť znova, prípadne cez prehliadač.</p>
 <aside class="warning">Súbor a jeho prístupovú frázu uchovávajte oddelene a po importe súbor odstráňte. Ktokoľvek, kto má oboje, môže čítať vašu poštu.</aside>
 <h2>Import</h2>
 <ol>
@@ -16,6 +15,5 @@
     <li>Vyberte súbor a ak má prístupovú frázu, zadajte ju.</li>
     <li>Okno zobrazí, čo súbor obsahuje. Vyberte časti a kontá na import a kliknite na <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Konto, ktoré už v tomto počítači je, zostane tak, ako je. Kontakty sa pridajú do adresára, nastavenia a predvoľby okien sa nahradia a pravidlo, ktorého priečinok tu ešte nie je, počká, kým sa konto synchronizuje. Iný kľúč niektorého z vašich kontaktov čaká na vaše rozhodnutie, rovnako ako importovaný kľúč.</p>
+<p>Existujúce kontá zostanú nezmenené. Vybraté kontakty sa pridajú do adresára; nastavenia a predvoľby okien sa nahradia iba pri importe príslušných častí. Pravidlá s nepriradeným cieľovým priečinkom čakajú na jeho nájdenie po synchronizácii konta. Chýbajúci priečinok sa tým automaticky nevytvorí. Nový kľúč kontaktu nahradí doterajší až po vašom výbere vo vlastnostiach kontaktu.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

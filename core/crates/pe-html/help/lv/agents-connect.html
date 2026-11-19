@@ -1,19 +1,18 @@
-<!--review-->
+
 <h1>MI aģenta pievienošana</h1>
 <p class="summary">Ļaujiet MI aģentam, piemēram, Claude, lasīt un kārtot jūsu pastu ar Inbox Classic starpniecību.</p>
-<p>Varat ļaut MI aģentam strādāt ar jūsu pastu. Tas var būt Claude, Cursor vai cita programma, kas atbalsta Model Context Protocol (MCP). Inbox Classic nav mākslīgā intelekta, un nekas netiek sūtīts uz MI pakalpojumu, ja vien jūs neielaižat aģentu.</p>
+<p>Varat ļaut MI aģentam strādāt ar jūsu pastu. Tas var būt Claude, Cursor vai cita programma, kas atbalsta Model Context Protocol (MCP). Inbox Classic pati neizmanto MI pakalpojumu pasta analīzei. Savienojot aģentu un piešķirot tam piekļuvi, tas var nodot izlasīto savam MI pakalpojumam.</p>
 <p>Lai pievienotu aģentu:</p>
 <ol>
     <li>Izvēlieties <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> un noklikšķiniet uz <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic parāda rindas, kas jāpievieno aģenta iestatījumiem.</li>
-    <li>Pievienojiet tās aģenta MCP serveriem. Programmā Claude Desktop tas ir <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
+    <li>Pievienojiet konfigurāciju aģenta MCP serveru iestatījumiem. Claude Desktop konfigurācijas redaktoru parasti atver sadaļā <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
     <li>Palaidiet aģentu. Pirmajā savienojuma reizē Inbox Classic jums jautā, ko tas drīkst darīt.</li>
 </ol>
-<p>Ja Inbox Classic nedarbojas, aģents to palaiž fonā. Tam var piekļūt tikai programmas, kas šajā datorā darbojas jūsu vārdā.</p>
-<p>Inbox Classic jautā sistēmai, kura programma palaida aģentu, nevis paļaujas uz aģenta vārdiem, tāpēc viena programma nevar izmantot piekļuvi, ko piešķīrāt citai. Ja aģents apgalvo, ka ir cita programma, jautājumā tas tiek norādīts.</p>
-<p>Aģents var arī sekot jūsu Iesūtnei, kontam vai mapei un saņemt ziņu, kad tajos mainās pasts, kā arī piedāvāt divus gatavus pieprasījumus: „Triage my inbox” un „Summarize unread”. Abi ievēro to, ko atļaujat aģentam, un tas, ko aģents šādi izlasa, tiek rādīts tā žurnālā tāpat kā viss pārējais, ko tas lasa.</p>
-<p>No termināļa palaistus aģentus, piemēram, Claude Code, Inbox Classic uzskata par vienu programmu. Tā vienreiz jautā par <!--os:mac-->programmām, kas palaistas no lietotnes Terminal<!--/os--><!--os:windows,linux-->programmām, kas palaistas no termināļa<!--/os-->, un tās kopīgi izmanto jūsu atļauto piekļuvi. Lai aģentam piešķirtu atsevišķu piekļuvi, tā iestatījumos aiz <code>--mcp</code> pievienojiet <code>--name</code> un paša izvēlētu nosaukumu, piemēram, <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Pēc tam Inbox Classic jautā par to, izmantojot šo nosaukumu.</p>
-<!--/review-->
+<p>Ja Inbox Classic nedarbojas, aģents to palaiž fonā. Tam var piekļūt tikai programmas, kas šajā datorā darbojas ar jūsu operētājsistēmas lietotāja kontu.</p>
+<p>Inbox Classic noskaidro aģenta palaidējprogrammu no operētājsistēmas, nevis tikai no aģenta norādītā nosaukuma. Ar nosaukuma maiņu vien nevar iegūt citas palaidējprogrammas piekļuvi. Ja nosaukumi atšķiras, atļaujas logā tas ir norādīts. Tas palīdz nošķirt piekļuves lēmumus, taču neaizsargā pret ļaunprātīgu programmu, kas darbojas ar to pašu lietotāja kontu.</p>
+<p>Aģents var arī sekot jūsu Iesūtnei, kontam vai mapei un saņemt ziņu, kad tajos mainās pasts, kā arī piedāvāt divus gatavus pieprasījumus: „Triage my inbox” un „Summarize unread”. Skati un to atjauninājumi ievēro piešķirtās atļaujas, un veiktā lasīšana parādās žurnālā. Gatavie pieprasījumi ir norādījumu veidnes, kas aģentam nepiešķir papildu tiesības.</p>
+<p>No vienas atpazītās termināļa programmas palaisti aģenti, piemēram, Claude Code, parasti izmanto kopīgu piekļuves lēmumu. Inbox Classic prasa atļauju <!--os:mac-->programmām, kas palaistas no lietotnes Terminal<!--/os--><!--os:windows,linux-->programmām, kas palaistas no termināļa<!--/os-->, un tās kopīgi izmanto jūsu atļauto piekļuvi. Lai atsevišķi pārvaldītu aģenta piekļuvi, tā iestatījumos aiz <code>--mcp</code> pievienojiet <code>--name</code> un paša izvēlētu nosaukumu, piemēram, <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Pēc tam Inbox Classic prasa atļauju šim nosaukumam. Paša norādīts nosaukums palīdz nodalīt iestatījumus, taču nepierāda aģenta identitāti un nav aizsardzība pret citām tā paša lietotāja programmām.</p>
+
 <p>Lai liegtu piekļuvi visiem aģentiem, izslēdziet opciju <b data-text="ui-let-agents-connect"></b> sadaļā <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<!--review-->
+
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
-<!--/review-->

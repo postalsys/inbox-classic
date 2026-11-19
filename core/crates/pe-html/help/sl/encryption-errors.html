@@ -1,15 +1,15 @@
-<!--review--><h1>Napake šifriranja</h1>
-<p class="summary">Kaj storiti, ko strežnik ne ponuja šifriranja ali ga zahteva, kjer je izklopljeno.</p>
+<h1>Napake šifriranja</h1>
+<p class="summary">Kaj storiti, ko se varnostna nastavitev računa ne ujema z zahtevami strežnika.</p>
 <h2>»the server does not offer STARTTLS«</h2>
-<p>Račun je nastavljen na STARTTLS, vendar strežnik ni ponudil šifriranja. Inbox Classic se je ustavil, zato vaše geslo ni bilo poslano.</p>
+<p>Račun je nastavljen na STARTTLS, vendar strežnik ni ponudil šifriranja. Inbox Classic je prekinil povezavo, preden bi poslal prijavne podatke.</p>
 <ol>
     <li>Odprite lastnosti računa v meniju <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Varnost nastavite na SSL/TLS, z vrati 993 za dohodno pošto ali 465 za odhodno pošto.</li>
+    <li>Preverite ponudnikova navodila. Če strežnik podpira SSL/TLS, izberite ustrezna vrata, običajno 993 za dohodno ali 465 za odhodno pošto.</li>
     <li>Kliknite <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Če nič drugega ne deluje, strežnika ni mogoče varno uporabljati.</p>
+<p>Če strežnik ne podpira varne povezave, se pri ponudniku pozanimajte o drugi možnosti.</p>
 <h2>»the server takes the password only over an encrypted connection«</h2>
-<p>Strežnik za odhodno pošto je nastavljen na <b data-text="ui-security-none"></b>. Vaše geslo je pravilno. <b data-text="ui-field-smtp-security"></b> spremenite na STARTTLS z vrati 587 ali na SSL/TLS z vrati 465.</p>
+<p>Strežnik za odhodno pošto je nastavljen na <b data-text="ui-security-none"></b>. To sporočilo ne potrjuje, da je geslo pravilno. <b data-text="ui-field-smtp-security"></b> nastavite po ponudnikovih navodilih, običajno na STARTTLS z vrati 587 ali SSL/TLS z vrati 465.</p>
 <h2>Opozorilo o povezavi brez šifriranja</h2>
-<p>Ko izberete <b data-text="ui-security-none"></b>, vas Inbox Classic opozori, da lahko vsakdo, ki prestreže vaš omrežni promet, prebere vaše geslo in sporočila. Nadaljujte samo pri strežniku v svojem računalniku ali lokalnem omrežju.</p>
-<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<p>Ko izberete <b data-text="ui-security-none"></b>, vas Inbox Classic opozori, da lahko vsakdo, ki prestreže vaš omrežni promet, prebere vaše geslo in sporočila. Nadaljujte le, če nešifrirano povezavo izrecno potrebujete in poznate tveganje. Tudi lokalno omrežje ni nujno varno.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>

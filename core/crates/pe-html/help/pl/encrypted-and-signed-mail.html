@@ -1,20 +1,20 @@
-<!--review--><h1>Poczta szyfrowana i podpisana</h1>
-<p class="summary">Pasek nad wiadomością mówi, czy podpisał ją nadawca i czy została zaszyfrowana dla Ciebie.</p>
-<p>Podpisana wiadomość dowodzi, kto ją napisał i że nikt jej nie zmienił po drodze. Zaszyfrowaną wiadomość można odczytać tylko Twoim kluczem.</p>
+<h1>Poczta szyfrowana i podpisana cyfrowo</h1>
+<p class="summary">Pasek nad wiadomością informuje, czy podpisał ją nadawca i czy została zaszyfrowana dla Ciebie.</p>
+<p>Poprawny podpis cyfrowy potwierdza, że treść nie zmieniła się od podpisania. Aby ustalić, kto ją podpisał, potwierdź także właściciela klucza. Do odczytania zaszyfrowanej wiadomości potrzebny jest pasujący klucz prywatny.</p>
 <p>Pasek nad wiadomością opisuje wiadomość jako całość:</p>
 <table>
     <tr><th>Kolor</th><th>Co oznacza</th></tr>
-    <tr><td>Zielony</td><td>Podpisana przez nadawcę kluczem, który zweryfikowano.</td></tr>
-    <tr><td>Niebieski</td><td>Podpisana przez nadawcę kluczem, którego nie zweryfikowano, albo zaszyfrowana dla Ciebie.</td></tr>
-    <tr><td>Bursztynowy</td><td>Coś jest nie tak: podpis się nie zgadza, podpisał ktoś inny niż nadawca albo nie udało się odczytać części wiadomości.</td></tr>
-    <tr><td>Szary</td><td>Niepodpisana albo podpisana kluczem, którego nie masz.</td></tr>
+    <tr><td>Zielony</td><td>Podpisana przez nadawcę kluczem, którego właściciela potwierdzono.</td></tr>
+    <tr><td>Niebieski</td><td>Podpisana przez nadawcę kluczem, którego właściciela nie potwierdzono, albo zaszyfrowana dla Ciebie.</td></tr>
+    <tr><td>Bursztynowy</td><td>Coś jest nie tak: podpis się nie zgadza, nie udało się powiązać podpisu z nadawcą albo nie udało się odczytać części wiadomości.</td></tr>
+    <tr><td>Szary</td><td>Bez podpisu cyfrowego albo z podpisem, którego nie udało się sprawdzić, na przykład z powodu braku klucza.</td></tr>
 </table>
-<p>Wiadomość, której części są chronione różnie, pokazuje każdą część we własnej ramce, z własną etykietą. Pasek liczy wtedy części każdego rodzaju. Kliknij etykietę albo <b data-text="ui-protection-details"></b> na pasku, aby zobaczyć, kto podpisał każdą część, jakim kluczem i kiedy.</p>
-<aside class="warning">Tylko pasek i etykiety nad ramkami pisze Inbox Classic. Nadawca może narysować w swojej wiadomości cokolwiek, także coś, co wygląda jak etykieta. Patrz na pasek.</aside>
-<p>Obrazy z internetu w zaszyfrowanej części są wczytywane tylko po kliknięciu paska obrazów, za każdym razem. Jej etykieta mówi wtedy, że obrazy zostały wczytane.</p>
-<p>Obrazy i pliki PDF dołączone do części są pokazywane w ramce tej części, nigdy w ramce innej. Pliki zaszyfrowanej części są przechowywane tylko w pamięci, nigdy na dysku.</p>
+<p>Jeśli części wiadomości są chronione w różny sposób, każda jest wyświetlana w osobnej ramce z etykietą. Pasek podaje wtedy liczbę części każdego rodzaju. Kliknij etykietę albo <b data-text="ui-protection-details"></b> na pasku, aby zobaczyć, kto podpisał każdą część, jakim kluczem i kiedy.</p>
+<aside class="warning">Inbox Classic tworzy tylko pasek i etykiety nad ramkami. Nadawca może umieścić w treści wiadomości dowolne elementy, także przypominające te etykiety. Sprawdzaj informacje na pasku.</aside>
+<p>Obrazy z internetu w zaszyfrowanej części są pobierane dopiero po kliknięciu paska obrazów. Trzeba to zrobić przy każdym otwarciu wiadomości. Etykieta części informuje wtedy, że obrazy zostały wczytane.</p>
+<p>Obrazy i pliki PDF dołączone do części są pokazywane w ramce tej części, nigdy w ramce innej. Podglądy zaszyfrowanej części są przechowywane tylko w pamięci. Osobne otwarcie załącznika zapisuje jednak jego niezaszyfrowaną kopię tymczasową, a zapisanie pliku tworzy kopię w wybranym miejscu.</p>
 <p>Na liście załączonych plików kłódka oznacza każdy plik z zaszyfrowanej części. Wskaż plik, aby zobaczyć, z której części pochodzi.</p>
 <p>Gdy odpowiadasz lub przesyłasz dalej, cytowane jest tylko to, co zostało pokazane.</p>
-<p>Na liście wiadomości kłódka oznacza wiadomość zaszyfrowaną, a pieczęć podpisaną. Gdy Inbox Classic odszyfruje zaszyfrowaną wiadomość, po jej pobraniu lub otwarciu, lista pokazuje jej własny temat i pierwsze słowa. Do tego czasu lista i powiadomienie o nowej poczcie pokazują <b data-text="list-encrypted"></b>.</p>
-<p>Wyszukiwanie znajduje odszyfrowaną wiadomość po słowach jej tekstu, o ile opcja <b data-text="ui-search-encrypted"></b> jest włączona w <b data-settings="reading"></b>. Agenci AI nigdy nie widzą, co zawiera zaszyfrowana wiadomość, ani jej plików.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>Na liście wiadomości kłódka oznacza wiadomość zaszyfrowaną, a pieczęć podpisaną. Jeśli włączono indeksowanie zaszyfrowanej poczty i uda się ją odszyfrować, lista może pokazać chroniony temat i pierwsze słowa. Gdy nie ma odszyfrowanego podglądu tekstu, lista pokazuje etykietę zaszyfrowanej wiadomości. Powiadomienie o nowej poczcie zawsze pokazuje <b data-text="list-encrypted"></b>.</p>
+<p>Wyszukiwanie znajduje odszyfrowaną wiadomość po słowach jej treści, o ile opcja <b data-text="ui-search-encrypted"></b> jest włączona w <b data-settings="reading"></b>. Indeks zawiera lokalnie zapisany, niezaszyfrowany tekst i chroniony temat. Wyłączenie tej opcji usuwa te dane i przywraca zewnętrzne tematy na liście. Agenci AI nie otrzymują odszyfrowanej treści ani załączników, ale mogą widzieć zewnętrzne dane wiadomości, takie jak nadawca, odbiorcy, data i temat. Oznaczenie podpisu na liście samo w sobie nie potwierdza jego poprawności ani właściciela klucza.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

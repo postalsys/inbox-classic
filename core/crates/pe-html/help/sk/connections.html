@@ -1,16 +1,14 @@
-<!--review-->
 <h1>Pripojenia, ktoré Inbox Classic nadväzuje</h1>
-<p class="summary">Kam sa Inbox Classic pripája a prečo, pre technicky zvedavých.</p>
+<p class="summary">Prehľad sieťových pripojení Inbox Classic a ich účelu.</p>
 <ul>
     <li><b>Vaše poštové servery</b>, cez IMAP na čítanie pošty a SMTP na jej odosielanie. Pripojenia sú šifrované protokolom TLS a certifikát každého servera sa overuje podľa certifikátov, ktorým váš systém dôveruje. Inbox Classic odmietne server bez šifrovania, pokiaľ nevyberiete <b data-text="ui-security-none"></b> a nepotvrdíte to.</li>
-    <li><b>Pri pridávaní konta</b>, na vyhľadanie jeho serverov. Inbox Classic číta záznamy DNS vašej domény cez DNS over HTTPS (Cloudflare, potom Google), nikdy nie cez obyčajné DNS. Skúša aj súbor autoconfig vášho poskytovateľa a zoznam poskytovateľov Thunderbirdu (ISPDB). Pri Exchange sa pýta služby Microsoft Autodiscover, ktorá dostane vaše heslo, iba keď oň požiada cez HTTPS. Server bez šifrovania sa nikdy nevyberie.</li>
+    <li><b>Pri pridávaní konta</b>, na vyhľadanie jeho serverov. Pri zisťovaní konfigurácie Inbox Classic číta záznamy domény cez DNS over HTTPS (Cloudflare, potom Google). Pri známych doménach veľkých poskytovateľov môže použiť zabudované nastavenia bez tohto vyhľadávania. Skúša aj súbor autoconfig vášho poskytovateľa a zoznam poskytovateľov Thunderbirdu (ISPDB). Pri Exchange sa pýta služby Microsoft Autodiscover, ktorá dostane vaše heslo, iba keď oň požiada cez HTTPS. Server bez šifrovania sa nikdy nevyberie.</li>
     <li><b>Prihlásenie cez prehliadač</b>, s OAuth 2.0 a PKCE, ku Googlu, Microsoftu alebo k poskytovateľovi vašej prihlasovacej aplikácie. Prehliadač sa vracia do Inbox Classic iba v tomto počítači.</li>
-    <li><b>Logá značiek</b> (BIMI), z adresy HTTPS značky, keď správa logo neobsahuje, raz pri každom spustení Inbox Classic. Deje sa to, iba keď správa prešla na vašom poštovom serveri kontrolou DMARC a server logo schválil.</li>
-    <li><b>Obrázky z internetu</b>, iba keď o ne požiadate.</li>
-    <li><b>Odhlásenie odberu</b>, iba keď naň kliknete. Žiadosť jedným kliknutím (RFC 8058) sa posiela, iba keď zoznam adresátov správu podpísal pomocou DKIM.</li>
-    <li><b>Šifrovacie kľúče</b>, iba keď šifrujete niekomu, koho kľúč nemáte: vlastná doména jeho adresy (Web Key Directory), potom keys.openpgp.org, ak ste to nevypli. Odosiela sa iba adresa.</li>
-    <!--os:mac--><li><b>Aktualizácie</b>, z inboxclassic.com, aby sa zistilo, či vyšla nová verzia.</li><!--/os-->
+    <li><b>Logá značiek</b> (BIMI), z adresy HTTPS značky, keď logo nie je v správe ani v použiteľnej miestnej vyrovnávacej pamäti. Uložené logá sa opakovane používajú aj po reštarte a neskôr sa môžu obnoviť. Deje sa to, iba keď správa prešla na vašom poštovom serveri kontrolou DMARC a server logo schválil.</li>
+    <li><b>Obrázky z internetu</b>, keď ich výslovne povolíte alebo to umožňujú nastavenia automatického sťahovania. Šifrované časti vždy vyžadujú výslovné povolenie.</li>
+    <li><b>Odhlásenie odberu</b>, až po vašom potvrdení, aj keď ho navrhne AI agent. Priama žiadosť jedným kliknutím (RFC 8058) vyžaduje vhodné overenie domény a podpis DKIM pokrývajúci obe hlavičky odhlásenia.</li>
+    <li><b>Šifrovacie kľúče</b>, pri automatickom alebo vyžiadanom hľadaní chýbajúceho kľúča: najprv doména adresy cez Web Key Directory, potom podľa nastavenia keys.openpgp.org. Pri hľadaní podľa adresy sa odošle adresa, pri hľadaní podľa identifikátora alebo odtlačku tento identifikátor. Zverejnenie vlastného kľúča takisto vyžaduje pripojenie.</li>
+    <!--os:mac--><li><b>Aktualizácie</b>, z inboxclassic.com, pri povolenej automatickej alebo ručne vyžiadanej kontrole novej verzie.</li><!--/os-->
 </ul>
-<p>Prihlasovacie kódy sa ponúkajú, iba keď hlavička Authentication-Results vášho poskytovateľa uvádza, že doména správu podpísala (DKIM). Nepotrebuje to žiadne vlastné pripojenie.</p>
+<p>Jednorazové kódy sa ponúkajú podľa výsledkov overenia podpisovej domény v dôveryhodnej hlavičke Authentication-Results od vášho poskytovateľa. Toto rozpoznávanie nevyžaduje samostatné sieťové pripojenie.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

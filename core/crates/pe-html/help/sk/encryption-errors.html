@@ -1,17 +1,15 @@
-<!--review-->
-<h1>Chyby šifrovania</h1>
+<h1>Chyby zabezpečeného pripojenia</h1>
 <p class="summary">Čo robiť, keď server neponúka šifrovanie alebo ho vyžaduje tam, kde je vypnuté.</p>
 <h2>„the server does not offer STARTTLS“</h2>
-<p>Konto je nastavené na STARTTLS, ale server šifrovanie neponúkol. Inbox Classic sa zastavil, takže vaše heslo nebolo odoslané.</p>
+<p>Konto je nastavené na STARTTLS, ale server šifrovanie neponúkol. Inbox Classic ukončil tento pokus o pripojenie pred prihlásením, takže pri ňom heslo neodoslal.</p>
 <ol>
     <li>Otvorte vlastnosti konta v ponuke <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Nastavte zabezpečenie na SSL/TLS s portom 993 pre prichádzajúcu poštu alebo 465 pre odchádzajúcu poštu.</li>
+    <li>Podľa pokynov poskytovateľa nastavte podporovaný spôsob zabezpečenia a port. SSL/TLS bežne používa port 993 pre prichádzajúcu a 465 pre odchádzajúcu poštu.</li>
     <li>Kliknite na <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Ak nič iné nepomôže, server nemožno bezpečne používať.</p>
+<p>Ak server šifrované pripojenie nepodporuje, obráťte sa na poskytovateľa; samotné vypnutie šifrovania problém so zabezpečením nevyrieši.</p>
 <h2>„the server takes the password only over an encrypted connection“</h2>
-<p>Server odchádzajúcej pošty je nastavený na <b data-text="ui-security-none"></b>. Vaše heslo je v poriadku. Zmeňte <b data-text="ui-field-smtp-security"></b> na STARTTLS s portom 587 alebo na SSL/TLS s portom 465.</p>
+<p>Server odchádzajúcej pošty je nastavený na <b data-text="ui-security-none"></b>. Toto hlásenie nepotvrdzuje správnosť hesla. Podľa pokynov poskytovateľa zmeňte <b data-text="ui-field-smtp-security"></b> na STARTTLS s portom 587 alebo na SSL/TLS s portom 465.</p>
 <h2>Upozornenie na pripojenie bez šifrovania</h2>
-<p>Keď vyberiete <b data-text="ui-security-none"></b>, Inbox Classic upozorní, že ktokoľvek, kto zachytí vašu sieťovú komunikáciu, môže prečítať vaše heslo a správy. Pokračujte iba pri serveri vo vlastnom počítači alebo v lokálnej sieti.</p>
+<p>Keď vyberiete <b data-text="ui-security-none"></b>, Inbox Classic upozorní, že ktokoľvek, kto zachytí vašu sieťovú komunikáciu, môže prečítať vaše heslo a správy. Pokračujte len vtedy, ak je ochrana spojenia zabezpečená inak. Samotná lokálna sieť šifrovanie nezaručuje.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

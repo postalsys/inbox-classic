@@ -1,14 +1,14 @@
-<!--review--><h1>Cuvinte de căutare</h1>
-<p class="summary">Cuvintele și semnele pe care le înțelege caseta de căutare, pentru a găsi exact mesajele dorite.</p>
-<p>Caseta de căutare acceptă aceleași cuvinte ca Gmail. Combinați oricâte doriți: un mesaj trebuie să se potrivească cu toate. Țineți mouse-ul deasupra casetei de căutare pentru a vedea o listă scurtă.</p>
+<h1>Cuvinte de căutare</h1>
+<p class="summary">Termenii și operatorii de căutare cu care puteți găsi exact mesajele dorite.</p>
+<p>Caseta de căutare acceptă operatori similari celor din Gmail. Puteți combina mai multe criterii: un mesaj trebuie să le îndeplinească pe toate. Țineți mouse-ul deasupra casetei de căutare pentru a vedea o listă scurtă.</p>
 <table>
     <tr><th>Introduceți</th><th>Găsește</th></tr>
     <tr><td><code>buget</code></td><td>Mesajele cu un cuvânt care începe cu <i>buget</i>, oriunde în ele</td></tr>
     <tr><td><code>"expresie exactă"</code></td><td>Aceste cuvinte, în această ordine</td></tr>
-    <tr><td><code>-cuvânt</code></td><td>Mesajele fără acel cuvânt. Un minus funcționează înaintea oricărui cuvânt de căutare, de exemplu <code>-is:unread</code></td></tr>
+    <tr><td><code>-cuvânt</code></td><td>Mesajele fără acel cuvânt. Semnul minus poate exclude cuvinte și anumite criterii, de exemplu <code>-is:unread</code>. Nu inversează criteriile de dată, vechime sau dimensiune</td></tr>
     <tr><td><code>asta OR aia</code></td><td>Mesajele cu oricare dintre cuvinte. Scrieți <code>OR</code> cu majuscule</td></tr>
     <tr><td><code>from:ana</code></td><td>E-mailurile de la Ana</td></tr>
-    <tr><td><code>to:ana</code>, <code>cc:</code>, <code>bcc:</code></td><td>E-mailurile către Ana, în orice rând de destinatari</td></tr>
+    <tr><td><code>to:ana</code>, <code>cc:</code>, <code>bcc:</code></td><td>E-mailurile adresate Anei, indiferent dacă apare în Către, Cc sau Bcc. Toți cei trei operatori caută în toate câmpurile de destinatari</td></tr>
     <tr><td><code>subject:prânz</code></td><td>Cuvântul în subiect</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Cuvântul în numele unui fișier atașat</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>E-mailurile unei liste de corespondență, după List-Id</td></tr>
@@ -16,17 +16,16 @@
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Mesajele necitite sau citite</td></tr>
     <tr><td><code>is:starred</code> sau <code>is:flagged</code></td><td>Mesajele semnalizate</td></tr>
     <tr><td><code>is:answered</code></td><td>Mesajele la care ați răspuns</td></tr>
-    <tr><td><code>is:bounce</code></td><td>Notificările despre mesaje care nu au fost livrate sau întârzie</td></tr>
+    <tr><td><code>is:bounce</code></td><td>Notificările despre mesaje nelivrate sau cu livrarea întârziată</td></tr>
     <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Mesaje criptate sau semnate</td></tr>
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Doar acel folder, în toate conturile</td></tr>
     <tr><td><code>in:proiecte</code></td><td>Doar folderul cu acel nume</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Toate folderele</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-mailurile dinainte sau de după o zi. Funcționează și <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>E-mailurile mai vechi sau mai noi decât un număr de zile (<code>d</code>), luni (<code>m</code>) sau ani (<code>y</code>)</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-mailurile anterioare începutului datei indicate sau începând cu acea dată, după ora UTC. Funcționează și <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>E-mailurile mai vechi sau mai noi decât un număr de zile (<code>d</code>), luni (<code>m</code>) sau ani (<code>y</code>); o lună înseamnă 30 de zile, iar un an 365 de zile</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-mailurile mai mari sau mai mici decât o dimensiune, în octeți sau cu <code>K</code>, <code>M</code> ori <code>G</code></td></tr>
 </table>
-<p>Diacriticele și majusculele nu contează. Un cuvânt de căutare pe care Inbox Classic nu îl cunoaște este căutat ca un cuvânt obișnuit.</p>
+<p>Diacriticele și majusculele nu contează. Căutarea după începutul unui cuvânt cere cel puțin două caractere; un singur caracter se caută ca un cuvânt întreg. Un cuvânt de căutare pe care Inbox Classic nu îl cunoaște este căutat ca un cuvânt obișnuit.</p>
 <p>Un mesaj criptat este găsit după expeditor, destinatari și subiect, iar după decriptare și după cuvintele textului său, cât timp <b data-text="ui-search-encrypted"></b> este activată în <b data-settings="reading"></b>.</p>
-<p>Lista nu afișează dimensiuni. Pentru a vedea cât de mare este un mesaj, alegeți <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Dimensiunea mesajelor nu este afișată în listă. Pentru a vedea dimensiunea unui mesaj, alegeți <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

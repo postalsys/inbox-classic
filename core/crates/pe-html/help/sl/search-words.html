@@ -1,14 +1,14 @@
-<!--review--><h1>Iskalne besede</h1>
+<h1>Iskalne besede</h1>
 <p class="summary">Besede in znaki, ki jih razume iskalno polje, da najdete točno tista sporočila, ki jih želite.</p>
-<p>Iskalno polje sprejema enake besede kot Gmail. Kombinirate jih lahko poljubno: sporočilo se mora ujemati z vsemi. Pokažite na iskalno polje, da vidite kratek seznam.</p>
+<p>Iskalno polje podpira spodnje izraze, podobne Gmailovim. Če jih združite brez OR, se mora sporočilo ujemati z vsemi. Za kratek seznam zadržite kazalec nad iskalnim poljem.</p>
 <table>
     <tr><th>Vnesite</th><th>Najde</th></tr>
-    <tr><td><code>proračun</code></td><td>Sporočila z besedo, ki se začne s <i>proračun</i>, kjer koli v njih</td></tr>
+    <tr><td><code>proračun</code></td><td>Sporočila z besedo, ki se začne s <i>proračun</i>, v indeksiranih podatkih sporočila</td></tr>
     <tr><td><code>"natančna besedna zveza"</code></td><td>Te besede v tem vrstnem redu</td></tr>
-    <tr><td><code>-beseda</code></td><td>Sporočila brez te besede. Minus deluje pred katero koli iskalno besedo, na primer <code>-is:unread</code></td></tr>
+    <tr><td><code>-beseda</code></td><td>Sporočila brez te besede. Minus izključi besedo ali podprt pogoj, na primer <code>-is:unread</code>. Izključevanje ne velja za pogoje po datumu, starosti ali velikosti.</td></tr>
     <tr><td><code>to OR ono</code></td><td>Sporočila z eno ali drugo besedo. <code>OR</code> pišite z velikimi črkami</td></tr>
-    <tr><td><code>from:ana</code></td><td>Pošta od Ane</td></tr>
-    <tr><td><code>to:ana</code>, <code>cc:</code>, <code>bcc:</code></td><td>Pošta za Ano, v kateri koli vrstici prejemnikov</td></tr>
+    <tr><td><code>from:ana</code></td><td>Sporočila z ujemanjem v imenu ali naslovu pošiljatelja</td></tr>
+    <tr><td><code>to:ana</code>, <code>cc:</code>, <code>bcc:</code></td><td>Sporočila z ujemanjem v katerem koli prejemnikovem imenu ali naslovu. Vsi trije izrazi iščejo po skupnih podatkih o prejemnikih.</td></tr>
     <tr><td><code>subject:kosilo</code></td><td>Beseda v zadevi</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Beseda v imenu pripete datoteke</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>Pošta poštnega seznama, po njegovem List-Id</td></tr>
@@ -21,12 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Samo ta mapa, v vseh računih</td></tr>
     <tr><td><code>in:projekti</code></td><td>Samo mapa s tem imenom</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Vse mape</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Pošta pred dnevom ali po njem. Deluje tudi <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Pošta, starejša ali novejša od števila dni (<code>d</code>), mesecev (<code>m</code>) ali let (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Pošta, večja ali manjša od velikosti, v bajtih ali s <code>K</code>, <code>M</code> ali <code>G</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Prvi izraz išče pred začetkom navedenega dne, drugi od njegovega začetka naprej, vključno s tem dnem. Meja je ob polnoči UTC. Deluje tudi <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Pošta pred določeno starostno mejo ali od nje naprej. Uporabite število dni (<code>d</code>), mesecev (<code>m</code>) ali let (<code>y</code>). Mesec pomeni 30 dni, leto 365 dni.</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Pošta, večja ali manjša od velikosti, v bajtih ali s <code>K</code>, <code>M</code> ali <code>G</code> za večkratnike 1024</td></tr>
 </table>
-<p>Naglasi in velike črke niso pomembni. Iskalna beseda, ki je Inbox Classic ne pozna, se išče kot navadna beseda.</p>
+<p>Iskanje ne upošteva velikosti črk ali diakritičnih znamenj. Izrazi z vsaj dvema znakoma se ujemajo tudi z začetki besed; en znak se ujema le s celo besedo. Neprepoznani izrazi se iščejo kot navadne besede.</p>
 <p>Šifrirano sporočilo najdete po pošiljatelju, prejemnikih in zadevi, po dešifriranju pa tudi po besedah njegovega besedila, dokler je <b data-text="ui-search-encrypted"></b> vklopljeno v <b data-settings="reading"></b>.</p>
-<p>Seznam ne prikazuje velikosti. Če želite videti, kako veliko je sporočilo, izberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Velikost sporočila lahko preverite v njegovih lastnostih: izberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

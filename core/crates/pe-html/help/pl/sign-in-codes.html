@@ -1,15 +1,14 @@
-<!--review--><h1>Kody logowania</h1>
-<p class="summary">Wiadomość z kodem logowania lub weryfikacyjnym pokazuje kod na karcie, z której można go skopiować.</p>
+<h1>Kody logowania</h1>
+<p class="summary">Kod logowania lub kod weryfikacyjny z wiadomości pojawia się na karcie, z której można go skopiować.</p>
 <p>Gdy wiadomość zawiera kod jednorazowy, na przykład kod logowania, weryfikacyjny lub zatwierdzający, karta nad nią pokazuje:</p>
 <ul>
-    <li>„Kod od” i domenę, dla której jest kod</li>
+    <li>„Kod z domeny” i nazwę domeny, której dotyczy kod</li>
     <li>kod, dużą czcionką</li>
-    <li><b data-text="otp-copy"></b>, który umieszcza kod w schowku</li>
+    <li>przycisk <b data-text="otp-copy"></b>, który umieszcza kod w schowku</li>
 </ul>
 <aside class="warning">Wpisuj kod tylko na stronie domeny podanej na karcie. Wiadomość, która prosi o wpisanie kodu gdzie indziej, może być próbą przejęcia Twojego konta.</aside>
-<p>Karta pojawia się tylko wtedy, gdy dostawca poczty potwierdzi, że domena podpisała wiadomość. Kod w wiadomości sfabrykowanej przez kogoś innego nie jest proponowany. Karty nie ma w folderach <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ani <b data-text="folder-drafts"></b>, ani gdy dostawca nie raportuje podpisów.</p>
-<p>Kod wysłany ponad godzinę przed otwarciem wiadomości prawdopodobnie wygasł i karta o tym informuje.</p>
+<p>Karta pojawia się tylko wtedy, gdy dostawca poczty potwierdzi właściwy podpis DKIM dla domeny kodu lub domeny nadrzędnej. Potwierdzenie domeny nie dowodzi tożsamości osoby ani wiarygodności całej treści. Kod z wiadomości bez takiego potwierdzenia nie jest proponowany. Karty nie ma w folderach <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ani <b data-text="folder-drafts"></b>, ani gdy dostawca nie podaje wyniku sprawdzania podpisów.</p>
+<p>Ostrzeżenie o wieku kodu opiera się na dacie wiadomości: pojawia się, gdy ta data jest wcześniejsza o ponad godzinę od otwarcia. Program nie sprawdza ważności kodu u jego wystawcy.</p>
 <h2>Kody w powiadomieniach</h2>
-<p>Aby widzieć kod w powiadomieniu o nowej wiadomości, włącz <b data-text="ui-codes-in-notifications"></b> w <b data-settings="general"></b>. Na początku jest to wyłączone, bo powiadomienie można przeczytać na zablokowanym ekranie.</p>
+<p>Aby widzieć kod w powiadomieniu o nowej wiadomości, włącz <b data-text="ui-codes-in-notifications"></b> w <b data-settings="general"></b>. Domyślnie ta opcja jest wyłączona, bo powiadomienie można przeczytać na zablokowanym ekranie. Kod pojawi się tylko przy włączonych powiadomieniach, odpowiednio świeżej i małej wiadomości oraz pobraniu jej treści na czas.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

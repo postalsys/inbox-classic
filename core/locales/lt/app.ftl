@@ -698,6 +698,7 @@ ui-verify-title = Patikrinti raktą
 ui-verify-intro = Paprašykite, kad { $name } perskaitytų savo rakto kontrolinį kodą iš savo programos. Palyginkite kodus susitikę asmeniškai arba kalbėdamiesi telefonu. Nelyginkite su el. paštu atsiųstu kodu: galintis pakeisti raktą asmuo galėtų pakeisti ir atsiųstą kodą.
 ui-verify-fingerprint = Jūsų turimo rakto kontrolinis kodas:
 ui-verify-marks = { $count ->
+    [0] Šiame rakte nėra el. pašto adresų. Rakto savininko patikrinimo rezultatas nebus išsaugotas.
     [1] Jei kontroliniai kodai sutampa, raktas bus pažymėtas kaip priklausantis šiam asmeniui. Adresas: { $addresses }. Jei adresas nepriklauso tam asmeniui, spustelėkite mygtuką „Nesutampa“.
    *[other] Jei kontroliniai kodai sutampa, raktas bus pažymėtas kaip priklausantis šiam asmeniui. Adresai: { $addresses }. Jei bent vienas adresas nepriklauso tam asmeniui, spustelėkite mygtuką „Nesutampa“.
 }

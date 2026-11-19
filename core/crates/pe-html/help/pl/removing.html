@@ -1,8 +1,8 @@
-<!--review--><h1>Usuwanie Inbox Classic</h1>
+<h1>Usuwanie Inbox Classic</h1>
 <p class="summary">Usuń Inbox Classic z komputera, razem z pobraną pocztą lub bez niej.</p>
-<!--os:windows--><p>Odinstaluj Inbox Classic w <i>Ustawienia &gt; Aplikacje &gt; Zainstalowane aplikacje</i>. Deinstalator zapyta, czy usunąć także pobraną pocztę.</p><!--/os-->
-<!--os:mac--><p>Zakończ Inbox Classic i przenieś go z folderu Aplikacje do Kosza. Pobrana poczta pozostanie w <code>~/Library/Application Support/Inbox Classic</code>, dopóki nie usuniesz także tego folderu.</p><!--/os-->
+<!--os:windows--><p>Odinstaluj Inbox Classic w <i>Ustawienia &gt; Aplikacje &gt; Zainstalowane aplikacje</i>. Deinstalator zapyta, czy usunąć także lokalny folder danych: pocztę, konta, ustawienia, kontakty, klucze i kolejkę wysyłania. Nie usuwa wpisów z systemowego magazynu danych logowania.</p><!--/os-->
+<!--os:mac--><p>Zamknij Inbox Classic i przenieś go z folderu Aplikacje do Kosza. Pobrana poczta pozostanie w <code>~/Library/Application Support/Inbox Classic</code>, dopóki nie usuniesz także tego folderu.</p><!--/os-->
 <!--os:linux--><p>Usuń pakiet poleceniem <code>sudo apt remove inbox-classic</code> albo, w Arch Linux i Omarchy, poleceniem <code>sudo pacman -R inbox-classic</code>. Pobrana poczta pozostanie w <code>~/.local/share/inbox-classic</code>, dopóki nie usuniesz także tego folderu.</p><!--/os-->
-<p>Poczta na Twoich serwerach nigdy nie jest usuwana.</p>
-<p>Aby usunąć zapisane hasła, najpierw usuń każde konto w <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Aby usunąć tylko jedno konto, zobacz <a href="topic:manage-accounts"></a>.</p>
-<nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
+<p>Odinstalowanie programu nie usuwa poczty z Twoich serwerów. Usunięcie folderu danych na dowolnej platformie usuwa też zapisane lokalnie ustawienia, kontakty, klucze i pocztę oczekującą na wysłanie.</p>
+<p>Aby usunąć zapisane dane logowania kont, najpierw usuń każde konto w <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Nie usuwa to wszystkich sekretów aplikacji, na przykład kluczy tajnych klientów OAuth. Aby usunąć tylko jedno konto, zobacz <a href="topic:manage-accounts"></a>.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>

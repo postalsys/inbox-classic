@@ -162,7 +162,7 @@ gtk-nothing-yet = Пока ничего.
 ## Preferences
 
 gtk-preferences = Параметры
-gtk-notify-subtitle = Только когда Inbox Classic работает в фоновом режиме
+gtk-notify-subtitle = Только когда главное окно не на переднем плане
 
 ## The desktop entry and the page of the software stores
 

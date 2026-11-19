@@ -10,24 +10,17 @@ messages = { $count ->
    *[other] { $count } повідомлення
 }
 # the separator of decimals in sizes: 2,4 МБ
-# review: new
 decimal-separator = ,
-# review: new
 size-bytes = { $count ->
     [one] { $count } байт
     [few] { $count } байти
     [many] { $count } байтів
    *[other] { $count } байта
 }
-# review: new
 size-kb = { $size } КБ
-# review: new
 size-mb = { $size } МБ
-# review: new
 size-gb = { $size } ГБ
-# review: new
 send-delay-off = Вимкнено
-# review: new
 send-delay-seconds = { $count ->
     [one] { $count } секунда
     [few] { $count } секунди
@@ -35,120 +28,71 @@ send-delay-seconds = { $count ->
    *[other] { $count } секунди
 }
 # the status bar: "12 messages, 3 unread"
-# review: new
 list-counts = { $messages }, непрочитаних: { $unread }
-# review: new
 list-counts-selected = { $messages }, непрочитаних: { $unread }, виділено: { $selected }
 # the status bar while searching: "12 found, 3 unread"
-# review: new
 list-counts-found = Знайдено: { $found }, непрочитаних: { $unread }
-# review: new
 list-counts-found-selected = Знайдено: { $found }, непрочитаних: { $unread }, виділено: { $selected }
-# review: new
 list-counts-none = Повідомлень не знайдено
 
 ## Special folders, as Outlook names them
 
-# review: new
 folder-inbox = Вхідні
-# review: new
 folder-sent = Надіслані
-# review: new
 folder-deleted = Видалені
-# review: new
 folder-drafts = Чернетки
-# review: new
 folder-junk = Небажана пошта
-# review: new
 folder-archive = Архів
 
 ## The reading pane
 
-# review: new
 reader-no-message = Повідомлення не вибрано.
-# review: new
 reader-downloading = Повідомлення завантажується…
-# review: new
 reader-downloading-detail = Повідомлення з’явиться тут, щойно завантаження завершиться.
-# review: new
 reader-downloading-size = Розмір повідомлення: { $size }. Воно з’явиться тут, щойно завантажиться.
-# review: new
 reader-failed = Не вдалося завантажити повідомлення
-# review: new
-reader-failed-network = Не вдалося зв’язатися з поштовим сервером ({ $reason }).
-# review: new
-reader-failed-sign-in = Поштовий сервер не прийняв вхід ({ $reason }). Перевірте пароль або увійдіть знову в меню Файл > Облікові записи.
-# review: new
+reader-failed-network = Не вдалося встановити з’єднання з поштовим сервером або воно перервалося ({ $reason }).
+reader-failed-sign-in = Поштовий сервер відхилив вхід ({ $reason }). Відкрийте параметри облікового запису, перевірте пароль або ввійдіть знову.
 reader-failed-security = Не вдалося захистити з’єднання з поштовим сервером ({ $reason }).
-# review: new
 reader-failed-other = Відповідь поштового сервера: { $reason }.
-# review: new
 reader-retry-note = Спробу буде повторено, коли обліковий запис знову під’єднається.
-# review: new
 reader-unreadable = Це повідомлення неможливо показати: { $error }
-# review: new
-message-source-title = Джерело повідомлення: { $subject }
-# review: new
-message-source-untitled = Джерело повідомлення
-
+message-source-title = Вихідний текст повідомлення: { $subject }
+message-source-untitled = Вихідний текст повідомлення
 ## Printing a message, and the header of a message quoted in a reply or forward
 
-# review: new
 header-from = Від
-# review: new
 header-date = Дата
-# review: new
 header-to = Кому
-# review: new
 header-cc = Копія
-# review: new
 header-sent = Надіслано
-# review: new
 header-subject = Тема
-# review: new
 header-security = Безпека
-# review: new
 header-part = Частина { $number }
-# review: new
 quote-original = ----- Початкове повідомлення -----
-# review: new
 fold-show-earlier = Показати попередні повідомлення
 
 ## Bounces: the card at the top of a notice that a message was not delivered
 
-# review: new
 bounce-failed = Ваше повідомлення не доставлено
-# review: new
 bounce-delayed = Ваше повідомлення ще не доставлено
-# review: new
 bounce-delayed-note = Ваш поштовий сервер досі намагається його доставити. Надсилати його знову не потрібно.
 # the link to the message the notice is about, in Sent Items or another folder
-# review: new
-bounce-show-message = Показати повернене повідомлення
+bounce-show-message = Показати недоставлене повідомлення
 # the link of a delay's card to the message that is still on its way
-# review: new
-bounce-show-delayed = Показати затримане повідомлення
-# review: new
+bounce-show-delayed = Показати повідомлення, доставка якого затримується
 bounce-what-to-do = Що можна зробити:
 # what to do about a recipient the message is still on its way to: in the card of a delay, and in the card of a failure
-# review: new
 bounce-delayed-do = Поки нічого. Якщо доставити його так і не вдасться, ви отримаєте ще одне сповіщення.
-# review: new
 bounce-delayed-row-do = Поки нічого. Ваш поштовий сервер досі намагається його доставити, і якщо це не вдасться, ви отримаєте ще одне сповіщення.
 # folds the receiving server's own words
-# review: new
 bounce-details = Подробиці
 # a recipient the notice does not name
-# review: new
 bounce-someone = Одержувач
 # in Details: the server that refused the message, the status code it gave, and the server that wrote the notice
-# review: new
 bounce-server = Сервер: { $server }
-# review: new
 bounce-status = Стан: { $status }
-# review: new
 bounce-reported-by = Повідомив: { $server }
-# review: new
 bounce-retry-minutes = Сервер одержувача попросив зачекати { $count ->
     [1] хвилину
     [one] { $count } хвилину
@@ -156,7 +100,6 @@ bounce-retry-minutes = Сервер одержувача попросив зач
     [many] { $count } хвилин
    *[other] { $count } хвилини
 } до наступної спроби.
-# review: new
 bounce-retry-hours = Сервер одержувача попросив зачекати { $count ->
     [1] годину
     [one] { $count } годину
@@ -165,168 +108,101 @@ bounce-retry-hours = Сервер одержувача попросив заче
    *[other] { $count } години
 } до наступної спроби.
 # the names of the blocklists, "Spamhaus ZEN, Barracuda"
-# review: new
 bounce-blocklist = Чорний список: { $lists }
-# review: new
 bounce-user-unknown = Такої адреси не існує
-# review: new
 bounce-user-unknown-why = На сервері одержувача немає поштової скриньки з цією адресою. Можливо, в адресі помилка, або людина більше нею не користується.
-# review: new
 bounce-user-unknown-do = Перевірте написання адреси або запитайте в людини, якою адресою вона користується зараз.
-# review: new
 bounce-invalid-address = Адреса недійсна
-# review: new
-bounce-invalid-address-why = Адресу записано у формі, на яку неможливо надіслати пошту.
-# review: new
-bounce-invalid-address-do = Пошукайте помилки, наприклад пробіл, пропущену літеру або порожнє місце після @.
-# review: new
+bounce-invalid-address-why = Адресу записано неправильно, тому на неї неможливо надіслати пошту.
+bounce-invalid-address-do = Перевірте, чи немає помилок: зайвого пробілу, пропущеної літери або відсутньої частини після @.
 bounce-mailbox-disabled = Поштову скриньку закрито
-# review: new
 bounce-mailbox-disabled-why = Адреса існує, але її поштову скриньку вимкнено або вона більше не використовується.
-# review: new
 bounce-mailbox-disabled-do = Зв’яжіться з людиною іншим способом і запитайте адресу, якою вона користується зараз.
-# review: new
 bounce-mailbox-full = Поштова скринька переповнена
-# review: new
 bounce-mailbox-full-why = У поштовій скриньці одержувача немає місця для нової пошти.
-# review: new
-bounce-mailbox-full-do = Надішліть повідомлення знову через кілька днів або повідомте людину іншим способом. Великі вкладення відхиляються насамперед.
-# review: new
+bounce-mailbox-full-do = Надішліть повідомлення знову через кілька днів або зв’яжіться з одержувачем іншим способом.
 bounce-spam-blocked = Відхилено як спам
-# review: new
 bounce-spam-blocked-why = Сервер одержувача вважав повідомлення спамом.
-# review: new
 bounce-spam-blocked-do = Надішліть його знову без того, що схоже на спам, наприклад без великої кількості посилань, скорочених посилань чи великого вкладення. Якщо це повторюється, зверніться до свого поштового провайдера.
-# review: new
 bounce-virus-detected = Відхилено через вірус
-# review: new
-bounce-virus-detected-why = Сервер одержувача знайшов вірус або інший шкідливий вміст у повідомленні чи його вкладеннях.
-# review: new
+bounce-virus-detected-why = Сервер одержувача повідомив про вірус або інший шкідливий вміст у повідомленні чи його вкладеннях.
 bounce-virus-detected-do = Перевірте вкладення антивірусом. Деякі сервери відхиляють будь-які програми й архіви, тому діліться такими файлами за посиланням.
-# review: new
 bounce-ip-blocklisted = Ваш поштовий сервер у чорному списку
-# review: new
 bounce-ip-blocklisted-why = Сервер одержувача не приймає пошту від сервера, що надіслав ваше повідомлення, бо адреса того сервера є в чорному списку.
-# review: new
 bounce-ip-blocklisted-do = Проблема не в повідомленні. Перешліть це сповіщення своєму поштовому провайдеру й попросіть вилучити сервер зі списку.
-# review: new
 bounce-domain-blocklisted = Домен у чорному списку
-# review: new
 bounce-domain-blocklisted-why = Сервер одержувача відхиляє повідомлення, бо домен вашої адреси або домен у посиланнях повідомлення є в чорному списку.
-# review: new
 bounce-domain-blocklisted-do = Якщо в повідомленні є посилання, спробуйте надіслати його без них. Інакше перешліть це сповіщення тому, хто обслуговує пошту вашого домену.
-# review: new
 bounce-policy-blocked = Відхилено правилами сервера одержувача
-# review: new
 bounce-policy-blocked-why = Правила сервера одержувача не пропускають це повідомлення, наприклад через його розмір, вкладення або відправника.
-# review: new
 bounce-policy-blocked-do = Причину часто видно зі слів самого сервера в розділі «Подробиці». Запитайте одержувача, чи може він приймати таку пошту.
-# review: new
 bounce-geo-blocked = Відхилено через місце відправлення
-# review: new
 bounce-geo-blocked-why = Сервер одержувача не приймає пошту з країни чи мережі, де розташований ваш поштовий сервер.
-# review: new
 bounce-geo-blocked-do = Зв’яжіться з людиною іншим способом або зверніться до свого поштового провайдера.
-# review: new
 bounce-relay-denied = Сервер відмовився передати повідомлення далі
-# review: new
 bounce-relay-denied-why = Сервер відмовився доставити повідомлення далі, часто тому, що його надіслано без входу або через сервер, який не обслуговує цього одержувача.
-# review: new
-bounce-relay-denied-do = Перевірте сервер вихідної пошти облікового запису в меню Файл > Облікові записи, а також те, що він виконує вхід.
-# review: new
+bounce-relay-denied-do = У параметрах облікового запису перевірте сервер вихідної пошти та дані для входу на нього.
 bounce-auth-failure = Не вдалося перевірити вашу адресу відправника
-# review: new
 bounce-auth-failure-why = Сервер одержувача не зміг підтвердити, що повідомлення справді надійшло з вашого домену (SPF, DKIM або DMARC).
-# review: new
 bounce-auth-failure-do = Перешліть це сповіщення тому, хто обслуговує пошту вашого домену: його налаштування треба виправити. Тим часом може допомогти надсилання через власний сервер вашого провайдера.
-# review: new
 bounce-rate-limited = Забагато пошти водночас
-# review: new
 bounce-rate-limited-why = Сервер одержувача тимчасово приймає менше повідомлень від вашого поштового сервера.
-# review: new
-bounce-rate-limited-do = Зачекайте трохи й надішліть знову. Коли пишете багатьом людям, надсилайте меншими частинами.
-# review: new
+bounce-rate-limited-do = Зачекайте трохи й надішліть знову. Якщо одержувачів багато, спробуйте надсилати меншій кількості за раз.
 bounce-greylisting = Ненадовго затримано
-# review: new
 bounce-greylisting-why = Сервер одержувача просить невідомих відправників спробувати трохи пізніше. Це звичайна перевірка проти спаму.
-# review: new
-bounce-greylisting-do = Нічого. Поштові сервери повторюють спробу самі, і повідомлення зазвичай доставляється протягом години.
-# review: new
+bounce-greylisting-do = Якщо доставку лише затримано, зачекайте: поштовий сервер зазвичай повторює спробу сам. Якщо повідомлено про остаточну відмову, перевірте подробиці перед повторним надсиланням.
 bounce-server-error = Проблема на сервері одержувача
-# review: new
 bounce-server-error-why = Сервер одержувача недоступний або не зміг прийняти повідомлення через власну проблему.
-# review: new
 bounce-server-error-do = Надішліть повідомлення знову пізніше. Якщо не вдається й далі, перевірте частину адреси після @ на помилки.
-# review: new
 bounce-unknown = Не доставлено
-# review: new
 bounce-unknown-why = Сповіщення не пояснює чітко, чому.
-# review: new
 bounce-unknown-do = Більше можуть сказати слова самого сервера в розділі «Подробиці». Якщо вони не допомагають, перешліть це сповіщення своєму поштовому провайдеру.
 
 ## Several messages selected
 
-# review: new
 selection-title = { $count ->
     [one] Виділено { $count } повідомлення
     [few] Виділено { $count } повідомлення
     [many] Виділено { $count } повідомлень
    *[other] Виділено { $count } повідомлення
 }
-# review: new
 selection-unread = Непрочитаних: { $count }
-# review: new
 selection-flagged = З прапорцем: { $count }
-# review: new
 delete-for-good-one = Це повідомлення буде видалено назавжди. Видалити його?
-# review: new
 delete-for-good-all = Ці повідомлення ({ $count }) буде видалено назавжди. Видалити їх?
-# review: new
 delete-for-good-some = Назавжди буде видалено { $count } з { $total }. Видалити повідомлення?
-# review: new
 done-read = { $count ->
    *[other] Позначено як прочитані: { $messages }
 }
-# review: new
 done-unread = { $count ->
    *[other] Позначено як непрочитані: { $messages }
 }
-# review: new
 done-flagged = { $count ->
    *[other] Позначено прапорцем: { $messages }
 }
-# review: new
 done-unflagged = Знято прапорець: { $messages }
-# review: new
 done-deleted-for-good = { $count ->
    *[other] Видалено назавжди: { $messages }
 }
-# review: new
 done-archived = { $count ->
    *[other] Заархівовано: { $messages }
 }
-# review: new
 done-moved = { $count ->
-   *[other] Переміщено { $messages } у { $folder }
+   *[other] Переміщено: { $messages }. Призначення: { $folder }
 }
-# review: new
 done-copied = { $count ->
-   *[other] Скопійовано { $messages } у { $folder }
+   *[other] Скопійовано: { $messages }. Призначення: { $folder }
 }
-# review: new
 done-moving = { $count ->
-   *[other] Переміщення { $messages } у { $folder }...
+   *[other] Переміщення: { $messages }. Призначення: { $folder }...
 }
-# review: new
 done-copying = { $count ->
-   *[other] Копіювання { $messages } у { $folder }...
+   *[other] Копіювання: { $messages }. Призначення: { $folder }...
 }
-# review: new
 done-moved-back = { $count ->
-   *[other] Повернено { $messages } у { $folder }
+   *[other] Повернено: { $messages }. Призначення: { $folder }
 }
 # the status bar after Watch Conversation and Ignore Conversation, and after either again on a marked one
-# review: new
 done-watched = { $count ->
     [1] Розмова відстежується
     [one] Відстежується { $count } розмова
@@ -334,7 +210,6 @@ done-watched = { $count ->
     [many] Відстежується { $count } розмов
    *[other] Відстежується { $count } розмови
 }
-# review: new
 done-unwatched = { $count ->
     [1] Розмова більше не відстежується
     [one] Більше не відстежується { $count } розмова
@@ -342,7 +217,6 @@ done-unwatched = { $count ->
     [many] Більше не відстежується { $count } розмов
    *[other] Більше не відстежується { $count } розмови
 }
-# review: new
 done-ignored = { $count ->
     [1] Розмова ігнорується
     [one] Ігнорується { $count } розмова
@@ -350,7 +224,6 @@ done-ignored = { $count ->
     [many] Ігнорується { $count } розмов
    *[other] Ігнорується { $count } розмови
 }
-# review: new
 done-unignored = { $count ->
     [1] Розмова більше не ігнорується
     [one] Більше не ігнорується { $count } розмова
@@ -359,38 +232,23 @@ done-unignored = { $count ->
    *[other] Більше не ігнорується { $count } розмови
 }
 # the destination after "у" (into), in the accusative: "Переміщено 2 повідомлення у свої папки"
-# review: new
-their-folders = свої папки
-# review: new
+their-folders = відповідні папки
 undo-move = Скасувати переміщення
-# review: new
 undo-delete = Скасувати видалення
-# review: new
 undo-archive = Скасувати архівування
-# review: new
 undo-junk = Скасувати позначку «Небажане»
-# review: new
-undo-not-junk = Скасувати позначку «Не небажане»
-# review: new
+undo-not-junk = Скасувати позначку «Звичайне»
 undo-send = Скасувати надсилання
-# review: new
 nothing-to-undo = Немає чого скасовувати.
-# review: new
 messages-gone = Цих повідомлень уже немає.
 # A non-selectable IMAP folder cannot contain messages; this does not mean it is empty.
-# review: new
 folder-holds-no-messages = Ця папка не може містити повідомлень.
-# review: new
 not-archived-here = Повідомлення з цієї папки неможливо заархівувати.
-# review: new
 not-emptied-here = Очистити можна лише папки «Видалені» та «Небажана пошта».
-# review: new
 next-unread-question = У папці «{ $folder }» більше немає непрочитаних повідомлень.
 
     Перейти до папки «{ $next }», наступної з непрочитаними повідомленнями?
-# review: new
 no-unread-left = Непрочитаних повідомлень не залишилося.
-# review: new
 empty-question = { $count ->
     [1] Очистити папку «{ $folder }»?
 
@@ -399,13 +257,10 @@ empty-question = { $count ->
 
         Усі повідомлення в ній ({ $messages }) буде видалено назавжди. Відновити їх буде неможливо.
 }
-# review: new
 no-junk-folder = У цьому обліковому записі немає папки «Небажана пошта», куди можна перемістити повідомлення.
-# review: new
 no-inbox-folder = У цьому обліковому записі немає папки «Вхідні», куди можна перемістити повідомлення.
 # the status bar after a flag in a colour: "Flagged 2 messages blue"
-# review: new
-done-flagged-color = Позначено { $messages } { $color ->
+done-flagged-color = Позначено { $color ->
     [red] червоним
     [orange] помаранчевим
     [yellow] жовтим
@@ -413,9 +268,8 @@ done-flagged-color = Позначено { $messages } { $color ->
     [blue] синім
     [purple] фіолетовим
    *[gray] сірим
-} прапорцем
+} прапорцем: { $messages }
 # the Flag menu: the colours of Apple Mail's flags
-# review: new
 flag-color = { $color ->
     [red] Червоний
     [orange] Помаранчевий
@@ -428,278 +282,189 @@ flag-color = { $color ->
 
 ## The Move and Copy window
 
-# review: new
 move-window-title-move = { $count ->
     [1] Перемістити повідомлення
     [many] Перемістити { $count } повідомлень
    *[other] Перемістити { $count } повідомлення
 }
-# review: new
 move-window-title-copy = { $count ->
     [1] Копіювати повідомлення
     [many] Копіювати { $count } повідомлень
    *[other] Копіювати { $count } повідомлення
 }
-# review: new
 move-window-prompt-move = { $count ->
     [1] Перемістити виділене повідомлення в:
     [many] Перемістити { $count } виділених повідомлень у:
    *[other] Перемістити виділені повідомлення ({ $count }) у:
 }
-# review: new
 move-window-prompt-copy = { $count ->
     [1] Копіювати виділене повідомлення в:
     [many] Копіювати { $count } виділених повідомлень у:
    *[other] Копіювати виділені повідомлення ({ $count }) у:
 }
 # the folders used last, over the folder tree
-# review: new
 targets-recent = Нещодавні
 # the folder the messages are in, which can not be chosen
-# review: new
 target-current = { $folder } (поточна)
 # a folder used last, with its account when there are several: "Archive (Work)"
-# review: new
 target-recent = { $folder } ({ $account })
 
 ## Moving and copying to another account
 
-# review: new
-transfer-moving = Переміщення { $done } з { $messages } у { $folder }...
-# review: new
-transfer-copying = Копіювання { $done } з { $messages } у { $folder }...
+transfer-moving = Переміщення повідомлення №{ $done }. Усього: { $messages }. Призначення: { $folder }...
+transfer-copying = Копіювання повідомлення №{ $done }. Усього: { $messages }. Призначення: { $folder }...
 # the destination after "у" (into), in the accusative
-# review: new
 transfer-another-account = інший обліковий запис
-# review: new
-transfer-folder-gone = папки, куди їх надсилали, уже немає
-# review: new
+transfer-folder-gone = папки призначення більше немає
 transfer-not-on-server = повідомлення вже немає на сервері
-# review: new
 transfer-not-moved = { $count ->
    *[other] Не вдалося перемістити в інший обліковий запис { $messages }: { $reason }
 }
-# review: new
 transfer-not-copied = { $count ->
    *[other] Не вдалося скопіювати в інший обліковий запис { $messages }: { $reason }
 }
-# review: new
 transfer-none-moved = Не вдалося перемістити жодного повідомлення
-# review: new
 transfer-none-copied = Не вдалося скопіювати жодного повідомлення
 
 ## Messages as files
 
-# review: new
 export-not-in-time = повідомлення не вдалося вчасно завантажити
-# review: new
-export-not-saved = Не вдалося зберегти { $failed } з { $messages } ({ $problems })
-# review: new
+export-not-saved = Не збережено: { $failed }. Усього: { $messages } ({ $problems })
 export-not-attached = не вдалося вкласти повідомлення: { $error }
 # the status bar after Save As with several: "Saved 3 messages to Desktop"
-# review: new
 saved-to = { $count ->
    *[other] Збережено { $messages } у папку «{ $folder }»
 }
-# review: new
 download-progress = Завантаження: { $done } з { $total }
-# review: new
-download-done = Завантажено { $size }
-# review: new
+download-done = Завантажено: { $size }
 downloading-messages = { $count ->
    *[other] Завантаження: { $messages }...
 }
 # the status bar after files are dropped on a folder: "Put 3 messages in Archive"
-# review: new
 import-put = { $count ->
-   *[other] Поміщено { $messages } у { $folder }
+   *[other] Додано до черги імпорту: { $messages }. Папка: «{ $folder }»
 }
-# review: new
-import-not-put = Ці файли не поміщено в папку:
+import-not-put = Не вдалося імпортувати ці файли:
 
     { $problems }
-
 ## Problems the windows show
 
-# review: new
 error-store = локальне сховище: { $error }
-# review: new
 error-not-found = не знайдено
-# review: new
 error-closed = завершення роботи
-# review: new
-error-other-account = браузер увійшов у { $email }, а не в цей обліковий запис
+error-other-account = у браузері виконано вхід в обліковий запис { $email }, а не в цей обліковий запис
 # a password or sign-in the mail server refused, with the server's words
-# review: new
-failure-authentication = сервер не прийняв вхід ({ $reason })
+failure-authentication = сервер відхилив вхід ({ $reason })
 # the mail server could not be reached or the connection broke, with the reason
-# review: new
-failure-network = не вдалося з’єднатися із сервером ({ $reason })
-# review: new
-error-in-use = його неможливо вилучити, поки ним входять облікові записи: { $accounts }
-# review: new
+failure-network = не вдалося встановити з’єднання із сервером або воно перервалося ({ $reason })
+error-in-use = застосунок неможливо вилучити, поки його використовують для входу ці облікові записи: { $accounts }
 error-turned-off = цей застосунок для входу вимкнено для нових облікових записів
-# review: new
 error-folder-name = назва папки має містити від 1 до 200 символів і не може містити керівних символів
-# review: new
 error-folder-separator = на цьому сервері назва папки не може містити «{ $separator }»
-# review: new
 error-folder-special = папку «Вхідні» та спеціальні папки неможливо перейменувати або видалити
-# review: new
 error-no-recipients = у повідомлення немає одержувачів
-# review: new
 error-bad-address = «{ $address }» не є адресою електронної пошти
-# review: new
-error-not-own-address = { $address } не є однією з адрес відправника цього облікового запису. Додайте її в поле «Інші адреси, з яких ви надсилаєте» у властивостях облікового запису.
-# review: new
+error-not-own-address = Адреса { $address } не належить до адрес відправника цього облікового запису. Додайте її в поле «Інші адреси для надсилання повідомлень» у властивостях облікового запису.
 rule-query-refused = Правила не можуть фільтрувати за папкою чи датою ({ $words }).
-# review: new
 rule-no-query = Введіть умови пошуку для вхідних повідомлень.
-# review: new
 rule-no-action = Виберіть принаймні одну дію для правила.
-# review: new
-error-attachment = не вдалося прочитати { $path }: { $error }
-# review: new
+error-attachment = не вдалося прочитати файл «{ $path }»: { $error }
 error-no-drafts = в обліковому записі немає папки «Чернетки», щоб зберегти повідомлення
-# review: new
 error-draft-attachment = не вдалося зберегти вкладення чернетки: { $error }
-# review: new
 error-password-not-saved = не вдалося зберегти пароль для наступного запуску: { $error }
-# review: new
 error-sign-in-not-saved = не вдалося зберегти нові дані входу для наступного запуску: { $error }
-# review: new
-error-import-unreadable = неможливо прочитати { $path }: { $error }
-# review: new
-error-import-too-large = { $path } більший за 50 МБ
-# review: new
-error-import-not-mail = { $path } не є повідомленням електронної пошти
-# review: new
-error-list-answered = сервер списку розсилки повернув стан { $status }
-# review: new
+error-import-unreadable = не вдалося прочитати файл «{ $path }»: { $error }
+error-import-too-large = розмір файлу «{ $path }» перевищує 50 МБ
+error-import-not-mail = файл «{ $path }» не є повідомленням електронної пошти
+error-list-answered = сервер розсилки повернув код відповіді { $status }
 error-not-built = не вдалося створити повідомлення
-# review: new
 error-outbox-waits = { $count ->
-    [1] повідомлення чекає в папці «Вихідні» й буде надіслане під час наступного надсилання й отримання
-    [one] { $count } повідомлення чекає в папці «Вихідні» й буде надіслане під час наступного надсилання й отримання
-    [many] { $count } повідомлень чекають у папці «Вихідні» й будуть надіслані під час наступного надсилання й отримання
-   *[other] { $count } повідомлення чекають у папці «Вихідні» й будуть надіслані під час наступного надсилання й отримання
+    [1] повідомлення залишається в папці «Вихідні»; наступна перевірка пошти повторить спробу надсилання
+    [one] у папці «Вихідні» залишається { $count } повідомлення; наступна перевірка пошти повторить спробу надсилання
+    [few] у папці «Вихідні» залишаються { $count } повідомлення; наступна перевірка пошти повторить спробу надсилання
+    [many] у папці «Вихідні» залишається { $count } повідомлень; наступна перевірка пошти повторить спробу надсилання
+   *[other] у папці «Вихідні» залишається { $count } повідомлення; наступна перевірка пошти повторить спробу надсилання
 }
-# review: new
 error-draft-not-removed = не вдалося вилучити попередню чернетку повідомлення з папки «Чернетки»: { $reason }
-# review: new
 error-sent-but = повідомлення надіслано, але { $problem }
-# review: new
 error-sent-still-in-outbox = воно досі в папці «Вихідні»: { $error }
-# review: new
 error-sent-no-copy = не вдалося зберегти копію в папці «Надіслані»: { $reason }
-# review: new
 error-no-password = для цього облікового запису немає пароля
-# review: new
 error-no-sign-in = для цього облікового запису немає даних входу
-# review: new
-error-provider-missing = ця збірка не може виконати вхід у { $provider }: можливо, її застосунок для входу вилучено?
-# review: new
+error-provider-missing = ця версія не може виконати вхід. Провайдер: { $provider }. Можливо, застосунок для входу вилучено
 error-provider-servers = сервери цього облікового запису не збігаються із серверами його застосунку для входу
-# review: new
-error-app-scopes = { $reason }. Поштовий сервер не прийняв токен застосунку для входу: перевірте, чи дозволи (scopes) застосунку дають доступ до пошти
-# review: new
+error-app-scopes = { $reason }. Поштовий сервер не прийняв токен застосунку для входу: перевірте, чи області доступу (scopes) застосунку надають доступ до пошти
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-# review: new
-sign-in-off-google = Google ще не перевірив Inbox Classic, тому дозволяє входити через нього лише тестовим користувачам. Скористайтеся власним застосунком для входу Google або паролем застосунку, або, якщо ви тестовий користувач, увімкніть його в розділі «Застосунки для входу» (Файл > Облікові записи).
-# review: new
-sign-in-off-other = Його вимкнено в розділі «Застосунки для входу» (Файл > Облікові записи), де його можна знову ввімкнути.
-# review: new
+sign-in-off-google = Google ще не перевірив Inbox Classic, тому через вбудований застосунок можуть входити лише тестові користувачі. Скористайтеся власним застосунком для входу Google або паролем застосунку, якщо ваш обліковий запис його підтримує. Тестові користувачі можуть увімкнути вбудований застосунок у вікні «Застосунки для входу», яке відкривається зі списку облікових записів.
+sign-in-off-other = Цей застосунок вимкнено у вікні «Застосунки для входу». Відкрийте його зі списку облікових записів, щоб увімкнути застосунок знову.
 sign-in-app-no-name = застосунку для входу потрібна назва
-# review: new
 sign-in-app-no-client = бракує ідентифікатора клієнта
-# review: new
-sign-in-app-no-scopes = застосунку для входу потрібні дозволи (scopes), що дають доступ до пошти
-# review: new
-sign-in-app-bad-host = адреси сервера { $server } немає, або вона не є дійсною назвою вузла
-# review: new
+sign-in-app-no-scopes = для застосунку потрібно вказати області доступу (scopes), що надають доступ до пошти
+sign-in-app-bad-host = для сервера { $server } не вказано коректної назви вузла або порту
 sign-in-app-plain = сервер { $server } має використовувати SSL/TLS або STARTTLS
-# review: new
-sign-in-app-not-checked = видавця ще не перевірено
-# review: new
-sign-in-app-issuer-changed = видавець змінився: введіть секрет клієнта знову або вилучіть його
-# review: new
-sign-in-register-google = У Google Cloud Console створіть клієнт OAuth типу «Desktop app» із дозволом https://mail.google.com/ на екрані згоди. Поки застосунок у режимі тестування, входити можуть лише його тестові користувачі.
-# review: new
-sign-in-register-microsoft = У Microsoft Entra зареєструйте застосунок із платформою «Mobile and desktop applications», URI переспрямування http://localhost, дозволеними потоками публічного клієнта та делегованими дозволами IMAP.AccessAsUser.All, SMTP.Send і offline_access. Лише для своєї організації вкажіть видавцем https://login.microsoftonline.com/<tenant ID>/v2.0.
-# review: new
-sign-in-register-other = Зареєструйте нативний (публічний) клієнт із наведеним нижче URI переспрямування; провайдер має дозволяти в ньому будь-який порт (RFC 8252). Додайте дозвіл, яким провайдер надає доступ до пошти.
-
+sign-in-app-not-checked = сервер авторизації ще не перевірено
+sign-in-app-issuer-changed = сервер авторизації змінився: введіть секрет клієнта знову або вилучіть його
+sign-in-register-google = У Google Cloud Console створіть клієнт OAuth типу «Desktop app» з областю доступу https://mail.google.com/ на екрані згоди. Поки застосунок у режимі тестування, входити можуть лише його тестові користувачі.
+sign-in-register-microsoft = У Microsoft Entra зареєструйте застосунок із платформою «Mobile and desktop applications», URI переспрямування http://localhost, дозволом на способи входу для публічних клієнтів та делегованими дозволами IMAP.AccessAsUser.All, SMTP.Send і offline_access. Лише для своєї організації вкажіть сервером авторизації https://login.microsoftonline.com/<tenant ID>/v2.0.
+sign-in-register-other = Зареєструйте публічний клієнт для встановлюваної програми з наведеним нижче URI переспрямування. Провайдер має дозволяти в ньому будь-який порт (RFC 8252). Додайте область доступу (scope), яку провайдер використовує для доступу до пошти.
 ## Calendar invitations
 
-# review: new
 repeats = Повторення
-# review: new
 repeats-every = { $unit ->
     [day] { $interval ->
         [1] Щодня
-        [one] Кожен { $interval } день
-        [few] Кожні { $interval } дні
-        [many] Кожні { $interval } днів
-       *[other] Кожні { $interval } дня
+        [one] Раз на { $interval } день
+        [few] Раз на { $interval } дні
+        [many] Раз на { $interval } днів
+       *[other] Раз на { $interval } дня
     }
     [week] { $interval ->
         [1] Щотижня
-        [one] Кожен { $interval } тиждень
-        [few] Кожні { $interval } тижні
-        [many] Кожні { $interval } тижнів
-       *[other] Кожні { $interval } тижня
+        [one] Раз на { $interval } тиждень
+        [few] Раз на { $interval } тижні
+        [many] Раз на { $interval } тижнів
+       *[other] Раз на { $interval } тижня
     }
     [month] { $interval ->
         [1] Щомісяця
-        [one] Кожен { $interval } місяць
-        [few] Кожні { $interval } місяці
-        [many] Кожні { $interval } місяців
-       *[other] Кожні { $interval } місяця
+        [one] Раз на { $interval } місяць
+        [few] Раз на { $interval } місяці
+        [many] Раз на { $interval } місяців
+       *[other] Раз на { $interval } місяця
     }
    *[year] { $interval ->
         [1] Щороку
-        [one] Кожен { $interval } рік
-        [few] Кожні { $interval } роки
-        [many] Кожні { $interval } років
-       *[other] Кожні { $interval } року
+        [one] Раз на { $interval } рік
+        [few] Раз на { $interval } роки
+        [many] Раз на { $interval } років
+       *[other] Раз на { $interval } року
     }
 }
 # "Every week on Monday, Wednesday"
-# review: new
 repeats-on = { $repeats }, дні: { $days }
 # "Every week, 10 times"
-# review: new
 repeats-times = { $count ->
     [1] { $repeats }, один раз
     [one] { $repeats }, { $count } раз
     [few] { $repeats }, { $count } рази
     [many] { $repeats }, { $count } разів
-   *[other] { $repeats }, { $count } раза
+   *[other] { $repeats }, { $count } разу
 }
-# review: new
 day-monday = понеділок
-# review: new
 day-tuesday = вівторок
-# review: new
 day-wednesday = середа
-# review: new
 day-thursday = четвер
-# review: new
-day-friday = пʼятниця
-# review: new
+day-friday = п’ятниця
 day-saturday = субота
-# review: new
 day-sunday = неділя
 
 ## AI agents
 
-# review: changed
-agent-level-read = Читати пошту: папки, список повідомлень, пошук і повідомлення
-# review: changed
-agent-level-organize = Упорядковувати пошту: змінювати стан прочитання, прапорці та їхні кольори й позначки небажаної пошти, переміщувати й архівувати повідомлення, створювати й перейменовувати папки, стежити за розмовами та ігнорувати їх, переміщувати повідомлення до папки «Видалені» та скасовувати підписки на розсилки з вашої згоди
+agent-level-read = Читати пошту: папки, списки повідомлень, розмови, результати пошуку, повідомлення та вкладення, правила для повідомлень і відомості про людей, яким ви пишете
+agent-level-organize = Упорядковувати пошту: змінювати стан прочитання, прапорці та їхні кольори й позначки небажаної пошти, переміщувати й архівувати повідомлення, створювати й перейменовувати папки, відстежувати розмови та ігнорувати їх, переміщувати повідомлення до папки «Видалені» та скасовувати підписки на розсилки з вашої згоди
 agent-level-drafts = Писати чернетки, які ви можете надіслати
 agent-level-send = Надсилати пошту лише після вашого схвалення кожного повідомлення
 agent-connect-title = { $program } запитує доступ до вашої пошти
@@ -722,7 +487,7 @@ agent-undo-refused = Цю дію неможливо скасувати.
 agent-undo-refused-why = Цю дію неможливо скасувати: { $reason }.
 agent-undo-impossible = це неможливо скасувати
 agent-undo-not-in-folder = повідомлення вже немає в тій папці
-agent-undo-not-arrived = повідомлення немає в папці, до якої його переміщено
+agent-undo-not-arrived = повідомлення ще немає в папці призначення
 agent-undo-sent = повідомлення вже немає в папці «Вихідні»
 agent-original-not-downloaded = початкове повідомлення ще не завантажено. Спершу відкрийте його
 agent-turned-away = Доступ заборонено
@@ -745,18 +510,15 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Це повідомлення неможливо прочитати.
 agent-encrypted-original = Це повідомлення зашифроване. Агент не може відповісти на нього чи переслати його, оскільки не підтримує шифрування.
 agent-encrypted = Це повідомлення зашифроване, тому агент не може прочитати його вміст. Ви можете відкрити його в Inbox Classic.
-# review: new
-agent-too-many-changes = Забагато змін за останні 30 днів: цей агент зробив стільки, скільки Inbox Classic зберігає в журналі для однієї програми. Нові стануть можливими, коли найстарішим виповниться 30 днів.
-# review: new
-agent-too-many-reads = Забагато читання за останні 30 днів: цей агент прочитав стільки, скільки Inbox Classic зберігає в журналі для однієї програми. Читати знову можна буде, коли найстарішим читанням виповниться 30 днів.
-# review: new
+agent-too-many-changes = Досягнуто ліміту записів про зміни за останні 30 днів для цієї програми. Нові зміни стануть доступними, коли найстаріші записи перевищать цей строк.
+agent-too-many-reads = Досягнуто ліміту записів про читання за останні 30 днів для цієї програми. Читання стане доступним, коли найстаріші записи перевищать цей строк.
 list-encrypted = Зашифроване повідомлення
 agent-log-composed = Відкрито нове повідомлення для редагування. Тема: «{ $subject }»
 agent-log-refused = Ви відхилили запит на надсилання повідомлення «{ $subject }»
 agent-log-sent = Повідомлення «{ $subject }» додано до черги надсилання. Одержувачі: { $to }
 agent-log-draft = Збережено чернетку «{ $subject }»
 agent-log-draft-replaced = Замінено чернетку «{ $subject }»
-agent-log-draft-discarded = Чернетку «{ $subject }» видалено назавжди
+agent-log-draft-discarded = Подано запит на остаточне видалення чернетки «{ $subject }»
 agent-draft-note = Цю чернетку створив ШІ-агент { $program }. Перевірте одержувачів і текст, перш ніж надсилати її.
 agent-log-read = Позначено «{ $subject }» як прочитане
 agent-log-unread = Позначено «{ $subject }» як непрочитане
@@ -767,7 +529,7 @@ agent-log-moved = Переміщено «{ $subject }» до папки «{ $fol
 agent-log-junk = Позначено «{ $subject }» як небажане
 agent-log-not-junk = Знято позначку небажаної пошти з повідомлення «{ $subject }»
 agent-log-archived = Заархівовано «{ $subject }»
-agent-log-folder = Створено папку «{ $name }»
+agent-log-folder = Подано запит на створення папки «{ $name }»
 agent-log-unsubscribed = Ви схвалили запит на скасування підписки. Повідомлення: «{ $subject }»
 agent-log-unsubscribe-failed = Не вдалося скасувати підписку. Повідомлення: «{ $subject }». Причина: { $reason }
 agent-log-unsubscribe-refused = Ви відхилили запит на скасування підписок. Відправники: { $senders }
@@ -782,7 +544,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic надішле розсилці нижче запит через її функцію скасування підписки одним клацанням. Електронний лист не надсилатиметься, а ваші наявні повідомлення не зміняться.
    *[other] Inbox Classic надішле кожній розсилці нижче запит через її функцію скасування підписки одним клацанням. Електронний лист не надсилатиметься, а ваші наявні повідомлення не зміняться.
 }
-# review: new
 agent-log-flag-color = Позначено прапорцем «{ $subject }», колір: { $color ->
     [red] червоний
     [orange] помаранчевий
@@ -792,47 +553,37 @@ agent-log-flag-color = Позначено прапорцем «{ $subject }», �
     [purple] фіолетовий
    *[gray] сірий
 }
-# review: new
-agent-log-renamed = Перейменовано папку «{ $old }» на «{ $name }»
-# review: new
+agent-log-renamed = Подано запит на перейменування папки «{ $old }» на «{ $name }»
 agent-log-watched = Увімкнено відстеження розмови «{ $subject }»
-# review: new
 agent-log-ignored = Увімкнено ігнорування розмови «{ $subject }»
-# review: new
 agent-log-unmarked = Скасовано відстеження чи ігнорування розмови «{ $subject }»
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = повідомлення відтоді змінено
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Позначено як прочитане: { $count } повідомлення (пошук: { $query })
     [few] Позначено як прочитані: { $count } повідомлення (пошук: { $query })
     [many] Позначено як прочитані: { $count } повідомлень (пошук: { $query })
    *[other] Позначено як прочитані: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Позначено як непрочитане: { $count } повідомлення (пошук: { $query })
     [few] Позначено як непрочитані: { $count } повідомлення (пошук: { $query })
     [many] Позначено як непрочитані: { $count } повідомлень (пошук: { $query })
    *[other] Позначено як непрочитані: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Позначено прапорцем: { $count } повідомлення (пошук: { $query })
     [few] Позначено прапорцем: { $count } повідомлення (пошук: { $query })
     [many] Позначено прапорцем: { $count } повідомлень (пошук: { $query })
    *[other] Позначено прапорцем: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Знято прапорець: { $count } повідомлення (пошук: { $query })
     [few] Знято прапорець: { $count } повідомлення (пошук: { $query })
     [many] Знято прапорець: { $count } повідомлень (пошук: { $query })
    *[other] Знято прапорець: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] Позначено прапорцем: { $count } повідомлення
     [few] Позначено прапорцем: { $count } повідомлення
@@ -847,35 +598,30 @@ agent-log-bulk-color = { $count ->
     [purple] фіолетовий
    *[gray] сірий
 } (пошук: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Переміщено до папки «{ $folder }»: { $count } повідомлення (пошук: { $query })
     [few] Переміщено до папки «{ $folder }»: { $count } повідомлення (пошук: { $query })
     [many] Переміщено до папки «{ $folder }»: { $count } повідомлень (пошук: { $query })
    *[other] Переміщено до папки «{ $folder }»: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Заархівовано: { $count } повідомлення (пошук: { $query })
     [few] Заархівовано: { $count } повідомлення (пошук: { $query })
     [many] Заархівовано: { $count } повідомлень (пошук: { $query })
    *[other] Заархівовано: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Позначено як небажане: { $count } повідомлення (пошук: { $query })
     [few] Позначено як небажані: { $count } повідомлення (пошук: { $query })
     [many] Позначено як небажані: { $count } повідомлень (пошук: { $query })
    *[other] Позначено як небажані: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Знято позначку небажаної пошти: { $count } повідомлення (пошук: { $query })
     [few] Знято позначку небажаної пошти: { $count } повідомлення (пошук: { $query })
     [many] Знято позначку небажаної пошти: { $count } повідомлень (пошук: { $query })
    *[other] Знято позначку небажаної пошти: { $count } повідомлення (пошук: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Видалено: { $count } повідомлення (пошук: { $query })
     [few] Видалено: { $count } повідомлення (пошук: { $query })
@@ -883,7 +629,6 @@ agent-log-bulk-deleted = { $count ->
    *[other] Видалено: { $count } повідомлення (пошук: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] За останні 15 хвилин
     [hour] За останню годину
@@ -893,7 +638,6 @@ agent-undo-span = { $span ->
    *[all] За останні 30 днів
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] За цей час програма { $program } не внесла змін, які можна скасувати.
     [one] Скасувати { $count } зміну, яку програма { $program } внесла за цей час?
@@ -901,10 +645,8 @@ agent-undo-since-question = { $count ->
     [many] Скасувати { $count } змін, які програма { $program } внесла за цей час?
    *[other] Скасувати { $count } зміни, які програма { $program } внесла за цей час?
 }
-# review: new
-agent-undo-since-detail = Повідомлення повернуться до папок, з яких їх переміщено, стан прочитання й прапорці стануть такими, як були, а повідомлення, що ще чекають у папці «Вихідні», буде видалено. Те, що відтоді змінили ви або сервер, залишиться як є.
+agent-undo-since-detail = Скасування повертає повідомлення до попередніх папок, відновлює стан прочитання й прапорці та видаляє повідомлення, які ще очікують у папці «Вихідні». Перевіряється стан, якого стосується кожна дія; повідомлення з невідповідним станом пропускаються. Інші пізніші зміни можуть не враховуватися.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Нічого не скасовано.
     [one] Скасовано { $count } зміну.
@@ -912,28 +654,24 @@ agent-undo-done = { $count ->
     [many] Скасовано { $count } змін.
    *[other] Скасовано { $count } зміни.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] { $count } повідомлення вже було не там, куди його помістила зміна.
-    [few] { $count } повідомлення вже були не там, куди їх помістила зміна.
-    [many] { $count } повідомлень уже були не там, куди їх помістила зміна.
-   *[other] { $count } повідомлення вже були не там, куди їх помістила зміна.
+    [one] Не знайдено в очікуваній папці: { $count } повідомлення.
+    [few] Не знайдено в очікуваній папці: { $count } повідомлення.
+    [many] Не знайдено в очікуваній папці: { $count } повідомлень.
+   *[other] Не знайдено в очікуваній папці: { $count } повідомлення.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] { $count } повідомлення відтоді змінено вами або на сервері, тож його залишено як є.
     [few] { $count } повідомлення відтоді змінено вами або на сервері, тож їх залишено як є.
     [many] { $count } повідомлень відтоді змінено вами або на сервері, тож їх залишено як є.
    *[other] { $count } повідомлення відтоді змінено вами або на сервері, тож їх залишено як є.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] { $count } повідомлення вже покинуло папку «Вихідні».
-    [few] { $count } повідомлення вже покинули папку «Вихідні».
-    [many] { $count } повідомлень уже покинули папку «Вихідні».
-   *[other] { $count } повідомлення вже покинули папку «Вихідні».
+    [one] Уже відсутнє в папці «Вихідні»: { $count } повідомлення.
+    [few] Уже відсутні в папці «Вихідні»: { $count } повідомлення.
+    [many] Уже відсутні в папці «Вихідні»: { $count } повідомлень.
+   *[other] Уже відсутні в папці «Вихідні»: { $count } повідомлення.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] { $count } зміну неможливо скасувати.
     [few] { $count } зміни неможливо скасувати.
@@ -941,42 +679,36 @@ agent-undo-left-impossible = { $count ->
    *[other] { $count } зміни неможливо скасувати.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Це повідомлення приймає запрошення «{ $summary }» ({ $when }).
-    [tentative] Це повідомлення попередньо приймає запрошення «{ $summary }» ({ $when }).
-   *[decline] Це повідомлення відхиляє запрошення «{ $summary }» ({ $when }).
-} Календар організатора врахує цю відповідь. Ваша відповідь на запрошення зміниться лише після надсилання повідомлення.
+    [accept] Цим повідомленням ви приймаєте запрошення «{ $summary }» ({ $when }).
+    [tentative] Цим повідомленням ви попередньо приймаєте запрошення «{ $summary }» ({ $when }).
+   *[decline] Цим повідомленням ви відхиляєте запрошення «{ $summary }» ({ $when }).
+} Відповідь призначена для календаря організатора. Стан відповіді в Inbox Classic оновиться лише після успішного надсилання повідомлення.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Прийнято: { $summary }
-    [tentative] Під питанням: { $summary }
+    [tentative] Попередньо прийнято: { $summary }
    *[decline] Відхилено: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } приймає це запрошення.
     [tentative] { $name } попередньо приймає це запрошення.
    *[decline] { $name } відхиляє це запрошення.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] прочитано { $count } повідомлення
     [few] прочитано { $count } повідомлення
     [many] прочитано { $count } повідомлень
    *[other] прочитано { $count } повідомлення
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] відкрито { $count } вкладення
-    [few] відкрито { $count } вкладення
-    [many] відкрито { $count } вкладень
-   *[other] відкрито { $count } вкладення
+    [one] прочитано { $count } вкладення
+    [few] прочитано { $count } вкладення
+    [many] прочитано { $count } вкладень
+   *[other] прочитано { $count } вкладення
 }
-# review: new
 agent-reads-searches = { $count ->
     [1] виконано пошук один раз
     [one] виконано пошук { $count } раз
@@ -984,7 +716,6 @@ agent-reads-searches = { $count ->
     [many] виконано пошук { $count } разів
    *[other] виконано пошук { $count } разу
 }
-# review: new
 agent-reads-lists = { $count ->
     [1] переглянуто список повідомлень один раз
     [one] переглянуто списки повідомлень { $count } раз
@@ -993,122 +724,80 @@ agent-reads-lists = { $count ->
    *[other] переглянуто списки повідомлень { $count } разу
 }
 # each read under that row
-# review: new
 agent-read-message = Прочитано «{ $subject }»
-# review: new
 agent-read-conversation = { $count ->
     [one] Прочитано розмову «{ $subject }» ({ $count } повідомлення)
     [few] Прочитано розмову «{ $subject }» ({ $count } повідомлення)
     [many] Прочитано розмову «{ $subject }» ({ $count } повідомлень)
    *[other] Прочитано розмову «{ $subject }» ({ $count } повідомлення)
 }
-# review: new
-agent-read-attachment = Відкрито вкладення «{ $name }» з повідомлення «{ $subject }»
-# review: new
+agent-read-attachment = Прочитано вкладення «{ $name }» з повідомлення «{ $subject }»
 agent-read-search = { $count ->
     [one] Пошук «{ $query }»: { $count } повідомлення
     [few] Пошук «{ $query }»: { $count } повідомлення
     [many] Пошук «{ $query }»: { $count } повідомлень
    *[other] Пошук «{ $query }»: { $count } повідомлення
 }
-# review: new
 agent-read-people = Пошук людей за першими літерами «{ $query }»
-# review: new
 agent-read-list = { $count ->
-    [one] Переглянуто { $count } повідомлення в папці «{ $folder }»
-    [few] Переглянуто { $count } повідомлення в папці «{ $folder }»
-    [many] Переглянуто { $count } повідомлень у папці «{ $folder }»
-   *[other] Переглянуто { $count } повідомлення в папці «{ $folder }»
+    [one] Переглянуто { $count } запис. Список: «{ $folder }»
+    [few] Переглянуто { $count } записи. Список: «{ $folder }»
+    [many] Переглянуто { $count } записів. Список: «{ $folder }»
+   *[other] Переглянуто { $count } запису. Список: «{ $folder }»
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Переглянуто { $count } нове повідомлення
-    [few] Переглянуто { $count } нові повідомлення
-    [many] Переглянуто { $count } нових повідомлень
-   *[other] Переглянуто { $count } нового повідомлення
+    [one] Переглянуто { $count } новий запис
+    [few] Переглянуто { $count } нові записи
+    [many] Переглянуто { $count } нових записів
+   *[other] Переглянуто { $count } нового запису
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
-agent-terminal-programs-mac = Програми, запущені з { $terminal }
-# review: new
+agent-terminal-programs-mac = Програми, запущені з термінала «{ $terminal }»
 agent-terminal-programs-windows = Програми, запущені з термінала ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Програми, запущені з термінала ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
-agent-terminal-program-mac = Програма, запущена з { $terminal }
-# review: new
+agent-terminal-program-mac = Програма, запущена з термінала «{ $terminal }»
 agent-terminal-program-windows = Програма, запущена з термінала ({ $terminal })
-# review: new
 agent-terminal-program-linux = Програма, запущена з термінала ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } запитують доступ до вашої пошти
-# review: new
 agent-connect-terminal-detail = Усі ШІ-агенти, яких ви запускаєте з цього термінала, спільно використовують доступ, який ви дозволите тут. Щоб надати агенту окремий доступ, додайте --name та будь-яке ім’я до його аргументів у налаштуваннях MCP агента.
-# review: new
-agent-connect-claimed = Програма представилася як { $claimed }. Inbox Classic перевірив, яка програма її запустила: { $program }.
-
+agent-connect-claimed = Агент представився як «{ $claimed }». За даними системи, його запустила програма «{ $program }».
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
-# review: new
 key-ctrl = Ctrl
-# review: new
 key-alt = Alt
-# review: new
 key-shift = Shift
-# review: new
 key-del = Del
-# review: new
 key-enter = Enter
 
 ## Signing in and passwords
 
-# review: new
 sign-in-no-refresh = провайдер не надав токена оновлення
-# review: new
 sign-in-no-account = провайдер не повідомив, який обліковий запис увійшов
-# review: new
 sign-in-not-finished = вхід не завершено
-# review: new
-secrets-unavailable = { $store } недоступна
-# review: new
-secrets-unavailable-why = { $store } недоступна: { $error }
-# review: new
+secrets-unavailable = Сховище недоступне: { $store }
+secrets-unavailable-why = Сховище недоступне: { $store }. Причина: { $error }
 secrets-windows = Диспетчер облікових даних
-# review: new
-secrets-mac = Зв’язка ключів
-# review: new
-secrets-linux = Системна в’язка ключів (Secret Service)
-# review: new
+secrets-mac = В’язка ключів
+secrets-linux = Системне сховище ключів (Secret Service)
 error-no-such-file = такого файлу немає
-# review: new
-cards-file-too-big = Цей файл завеликий для адресної книги.
-# review: new
+cards-file-too-big = Розмір файлу перевищує ліміт для імпорту адресної книги.
 ui-sender-added = { $name } додано до адресної книги.
-# review: new
 ui-sender-known = { $name } уже є в адресній книзі.
-# review: new
 ui-sender-none = У відправника цього повідомлення немає адреси електронної пошти, яку можна додати.
-# review: new
 card-name-needed = У контакту немає ні імені, ні адреси електронної пошти.
 # a file of Import Address Book that could not be read: "contacts.vcf: there is no such file"
-# review: new
 cards-file-failed = { $file }: { $reason }
 
 ## One-time codes: the card at the top of a message with a sign-in or verification code
 
 # the domain the code is for, which signed the message
-# review: new
 otp-heading = Код від { $domain }
-# review: new
 otp-copy = Копіювати
-# review: new
-otp-note = Вводьте його лише на сторінці { $domain }.
-# review: new
+otp-note = Вводьте код лише на сторінці домену { $domain }.
 otp-old = Цей код надіслано більш ніж за годину до того, як ви його відкрили, і, імовірно, він уже не дійсний.
 
 # how many are invited, in the card of an event
-# review: new
 event-attendees =
     { $count ->
         [one] { $count } учасник
@@ -1118,51 +807,29 @@ event-attendees =
     }
 
 # the first line of a new message's notification when it has a code, for a domain that signed it
-# review: new
 otp-notification = { $code }: ваш код для { $domain }
 
 ## OpenPGP keys (keys.rs)
-# review: new
 pgp-key-valid = Дійсний
-# review: new
 pgp-key-expires = Дійсний до { $date }
-# review: new
 pgp-key-expired = Термін дії сплив { $date }
-# review: new
 pgp-key-revoked = Відкликаний
-# review: new
 pgp-key-revoked-why = Відкликаний: { $reason }
-# review: new
 pgp-key-not-valid = Недійсний
-# review: new
-pgp-key-locked = Неможливо використати: ключа, що його захищає, більше немає в сховищі «{ $store }». Імпортуйте його резервну копію знову.
-# review: new
+pgp-key-locked = Не вдалося відкрити закриту частину ключа. Перевірте доступ до сховища паролів ({ $store }). Якщо захисний ключ втрачено, знову імпортуйте резервну копію закритого ключа.
 pgp-source-own = Створено в Inbox Classic
-# review: new
 pgp-source-file = Імпортовано з файлу
-# review: new
 pgp-source-paste = Вставлено
-# review: new
 pgp-source-attachment = З повідомлення
-# review: new
 pgp-source-vcard = З картки контакту
-# review: new
 pgp-source-wkd = Від поштового провайдера відправника
-# review: new
 pgp-source-keyserver = З keys.openpgp.org
-# review: new
 pgp-source-autocrypt = Із заголовка Autocrypt повідомлення
-# review: new
-pgp-error-no-store = Закриті ключі захищено сховищем «{ $store }», яке неможливо використати: { $error }
-# review: new
+pgp-error-no-store = Сховище, потрібне для захисту закритих ключів, недоступне: { $store }. Причина: { $error }
 pgp-error-wrong-passphrase = Парольна фраза неправильна.
-# review: new
 pgp-error-not-a-key = Це не ключ OpenPGP.
-# review: new
 pgp-error-too-large = Ключ завеликий.
-# review: new
-pgp-error-unusable = Ключ використовує застарілу або слабку криптографію, тому його неможливо використати.
-# review: new
+pgp-error-unusable = Цей ключ не можна використати для підписування чи шифрування.
 pgp-imported-private = { $count ->
     [1] Ваш закритий ключ імпортовано.
     [one] Імпортовано { $count } закритий ключ.
@@ -1170,7 +837,6 @@ pgp-imported-private = { $count ->
     [many] Імпортовано { $count } закритих ключів.
    *[other] Імпортовано { $count } закритого ключа.
 }
-# review: new
 pgp-imported-public = { $count ->
     [1] Імпортовано один ключ.
     [one] Імпортовано { $count } ключ.
@@ -1178,89 +844,49 @@ pgp-imported-public = { $count ->
     [many] Імпортовано { $count } ключів.
    *[other] Імпортовано { $count } ключа.
 }
-# review: new
-pgp-imported-pending = Для { $addresses } уже використовується інший ключ: новий чекає в контакті, доки ви його не виберете.
-# review: new
+pgp-imported-pending = Для цих адрес уже використовується інший ключ: { $addresses }. Новий ключ очікує у властивостях контакту, доки ви його не виберете.
 pgp-error-needs-passphrase = Закритий ключ захищено парольною фразою. Введіть її, щоб імпортувати ключ.
-# review: new
 pgp-error-mismatch = Закритий ключ не відповідає своєму відкритому ключу. Можливо, його змінено.
-# review: new
 pgp-file-name-public = { $who } відкритий ключ.asc
-# review: new
 pgp-file-name-private = { $who } резервна копія закритого ключа.asc
-# review: new
-pgp-pending = { $date } знайдено інший ключ для { $address }.
-
+pgp-pending = Знайдено інший ключ для адреси { $address }. Дата: { $date }.
 ## Reading signed and encrypted mail (protect.rs)
-# review: new
-pgp-part-verified = Підписано: { $signer }, ключ перевірено
-# review: new
-pgp-part-signed = Підписано: { $signer } (ключ не перевірено)
-# review: new
-pgp-part-other = Підписано: { $signer }, але це не відправник
-# review: new
+pgp-part-verified = Підписано: { $signer }. Власника ключа підтверджено
+pgp-part-signed = Підписано: { $signer } (власника ключа не підтверджено)
+pgp-part-other = Підписано: { $signer }. Відповідність відправнику не підтверджено
 pgp-part-unknown-key = Підписано, але ключ невідомий
-# review: new
 pgp-part-not-signed = Не підписано
-# review: new
 pgp-part-not-checked = Підпис не перевірено
-# review: new
 pgp-part-encrypted = Зашифровано. { $signature }
-# review: new
-pgp-part-no-key = Зашифровано ключем, якого у вас немає
-# review: new
-pgp-part-changed = Зашифровану частину змінено дорогою, тому її не показано
-# review: new
+pgp-part-no-key = Зашифровано для ключа, якого у вас немає
+pgp-part-changed = Цілісність зашифрованої частини порушено, тому її не показано
 pgp-part-unprotected = Зашифровано без захисту від змін, тому не показано
-# review: new
 pgp-part-broken = Зашифровану частину неможливо прочитати
-# review: new
 pgp-why-mismatch = Підпис не відповідає цьому тексту
-# review: new
-pgp-why-weak-hash = Підпис використовує { $hash }, що вже не є безпечним
-# review: new
+pgp-why-weak-hash = У підписі використано алгоритм { $hash }, який більше не вважається безпечним
 pgp-why-key-expired = Підписано після того, як термін дії ключа сплив { $date }
-# review: new
 pgp-why-key-revoked = Підписано відкликаним ключем
-# review: new
-pgp-why-not-signing-key = Підписано ключем, якому не дозволено підписувати
-# review: new
-pgp-why-from-future = Підпис датовано майбутнім
-# review: new
+pgp-why-not-signing-key = Підписано ключем, не призначеним для підписування
+pgp-why-from-future = Дата підпису ще не настала
 pgp-why-signature-expired = Термін дії підпису сплив
-# review: new
 pgp-why-key-not-valid = Підписано недійсним ключем
-# review: new
 pgp-why-not-for-you = Підписано для інших одержувачів і передано вам
-pgp-why-not-key-in-use = Підписано іншим ключем, ніж той, що використовується для { $address }
-# review: new
+pgp-why-not-key-in-use = Для підпису використано інший ключ, ніж вибраний для адреси { $address }
 pgp-part-pictures-loaded = { $label }. Зображення завантажено з інтернету
-# review: new
-pgp-error-no-own-key = У вас немає ключа для { $address }, щоб підписувати чи шифрувати. Створіть його в меню Сервіс > Ключі шифрування або вимкніть «Підписати» та «Зашифрувати».
-# review: new
+pgp-error-no-own-key = Для адреси { $address } немає ключа, придатного для підписування чи шифрування. Створіть його у вікні «Ключі шифрування» або вимкніть підписування та шифрування.
 pgp-error-missing-keys = { $count ->
-    [1] Для { $addresses } немає ключа для шифрування.
-   *[other] Для цих одержувачів немає ключа для шифрування: { $addresses }.
+    [1] Для адреси { $addresses } немає придатного ключа для шифрування.
+   *[other] Немає придатних ключів для шифрування для цих одержувачів: { $addresses }.
 }
-# review: new
-pgp-error-encrypted-quote = Це повідомлення цитує або пересилає зашифроване повідомлення, тому його можна надіслати лише зашифрованим. Увімкніть «Зашифрувати» або вилучіть цитований текст.
-# review: new
+pgp-error-encrypted-quote = Повідомлення містить текст, зображення або вкладення із зашифрованого повідомлення, тому його можна надіслати лише зашифрованим. Увімкніть шифрування або вилучіть цей вміст.
 pgp-error-protect = Не вдалося підписати чи зашифрувати повідомлення: { $reason }
-# review: new
-pgp-found-keys = Знайдено ключ для { $addresses }.
-# review: new
-pgp-found-none = Для { $addresses } ключа не знайдено. Попросіть надіслати вам відкритий ключ.
-# review: new
+pgp-found-keys = Знайдено ключі для адрес: { $addresses }.
+pgp-found-none = Не знайдено ключів для адрес: { $addresses }. Попросіть власників надіслати свої відкриті ключі.
 pgp-found-no-key = Ключа не знайдено.
-# review: new
 pgp-find-unavailable = Зараз неможливо шукати ключі: { $error }
-# review: new
-pgp-publish-pending = keys.openpgp.org надіслав посилання для підтвердження на { $addresses }. Ваш ключ буде опубліковано там, щойно ви перейдете за ним.
-# review: new
-pgp-publish-done = Ваш ключ опубліковано на keys.openpgp.org для { $addresses }.
-# review: new
+pgp-publish-pending = keys.openpgp.org надіслав посилання для підтвердження на адреси: { $addresses }. Підтвердьте кожну адресу, щоб за нею можна було знайти ваш ключ.
+pgp-publish-done = Ваш ключ опубліковано на keys.openpgp.org для адрес: { $addresses }.
 pgp-publish-failed = Не вдалося опублікувати ключ: { $error }
-# review: changed
 pgp-keyserver-off = Пошук ключів на keys.openpgp.org вимкнено в розділі { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 pgp-compose-encrypted = { $count ->
@@ -1270,7 +896,7 @@ pgp-compose-encrypted = { $count ->
     [many] Під час надсилання повідомлення буде зашифровано й підписано. Вміст зможете прочитати лише ви та { $count } одержувачів.
    *[other] Під час надсилання повідомлення буде зашифровано й підписано. Вміст зможете прочитати лише ви та одержувачі ({ $count }).
 }
-pgp-compose-encrypt-ready = Під час надсилання повідомлення буде зашифровано й підписано. Додайте одержувачів, чиї ключі у вас є.
+pgp-compose-encrypt-ready = Під час надсилання повідомлення буде зашифровано й підписано. Додайте одержувачів, для яких у вас є придатні ключі.
 pgp-compose-missing = { $count ->
     [1] Одержувач не має придатного ключа: { $addresses }. Повідомлення ще не можна зашифрувати.
     [one] { $count } одержувач не має придатного ключа: { $addresses }. Повідомлення ще не можна зашифрувати.
@@ -1309,293 +935,211 @@ pgp-recipients-intro-missing = { $count ->
     [many] { $count } одержувачів не мають придатних ключів для шифрування. Знайдіть їхні ключі, вилучіть цих одержувачів із повідомлення або надішліть повідомлення без шифрування.
    *[other] Одержувачів без придатних ключів для шифрування: { $count }. Знайдіть їхні ключі, вилучіть цих одержувачів із повідомлення або надішліть повідомлення без шифрування.
 }
-# review: new
 pgp-details-part = Частина { $number }: { $label }
-# review: new
 attachment-from-part = З частини { $number }: { $label }
-# review: new
 pgp-details-signed = Підписано { $when } ключем { $key }
-# review: new
 pgp-details-unknown-key = Підписано ключем { $key }, якого у вас немає
-# review: new
-pgp-details-opened = Зашифровано вашим ключем { $key }
-# review: new
-pgp-details-for = Зашифровано для { $keys }
-# review: new
+pgp-details-opened = Розшифровано вашим ключем { $key }
+pgp-details-for = Зашифровано для ключів: { $keys }
 pgp-details-plain = Не підписано й не зашифровано
-# review: new
-pgp-bar-parts = Частин у цьому повідомленні: { $count } ({ $list }). Кожна частина вказує, як її захищено.
-# review: new
-pgp-bar-count-verified = перевірених: { $count }
-# review: new
+pgp-bar-parts = Частин у повідомленні: { $count } ({ $list }). Біля кожної частини вказано, як її захищено.
+pgp-bar-count-verified = з підтвердженим власником ключа: { $count }
 pgp-bar-count-encrypted-signed = зашифрованих і підписаних: { $count }
-# review: new
 pgp-bar-count-encrypted = зашифрованих: { $count }
-# review: new
 pgp-bar-count-signed = підписаних: { $count }
-# review: new
 pgp-bar-count-warning = { $count ->
    *[other] потребують уваги: { $count }
 }
-# review: new
 pgp-bar-count-neutral = без підтвердженого підпису: { $count }
 # the setup file: settings, accounts, contacts and keys carried to another computer
-# review: new
 setup-part-settings = Параметри
-# review: new
-setup-part-preferences = Налаштування вікон
-# review: new
+setup-part-preferences = Параметри інтерфейсу
 setup-part-accounts = Облікові записи
-# review: new
 setup-part-sign-in-apps = Застосунки для входу
-# review: new
 setup-part-contacts = Контакти й групи
-# review: new
 setup-part-keys = Ключі шифрування
-# review: new
 setup-part-rules = Правила для повідомлень
-# review: new
 setup-part-trusted-senders = Довірені відправники
-# review: new
 setup-holds-settings = { $count ->
     [one] { $count } параметр
     [few] { $count } параметри
     [many] { $count } параметрів
    *[other] { $count } параметра
 }
-# review: new
 setup-holds-preferences = { $count ->
     [one] { $count } налаштування
     [few] { $count } налаштування
     [many] { $count } налаштувань
    *[other] { $count } налаштування
 }
-# review: new
 setup-holds-accounts = { $count ->
     [one] { $count } обліковий запис
     [few] { $count } облікові записи
     [many] { $count } облікових записів
    *[other] { $count } облікового запису
 }
-# review: new
 setup-holds-sign-in-apps = { $count ->
     [one] { $count } застосунок для входу
     [few] { $count } застосунки для входу
     [many] { $count } застосунків для входу
    *[other] { $count } застосунку для входу
 }
-# review: new
 setup-holds-built-in = Які вбудовані застосунки для входу ввімкнено
-# review: new
 setup-holds-contacts = { $count ->
     [one] { $count } контакт
     [few] { $count } контакти
     [many] { $count } контактів
    *[other] { $count } контакту
 }
-# review: new
 setup-holds-groups = { $count ->
     [one] { $count } група
     [few] { $count } групи
     [many] { $count } груп
    *[other] { $count } групи
 }
-# review: new
 setup-holds-own-keys = { $count ->
     [one] { $count } власний ключ
     [few] { $count } власні ключі
     [many] { $count } власних ключів
    *[other] { $count } власного ключа
 }
-# review: new
 setup-holds-contact-keys = { $count ->
     [one] { $count } ключ контакту
     [few] { $count } ключі контактів
     [many] { $count } ключів контактів
    *[other] { $count } ключа контактів
 }
-# review: new
 setup-holds-rules = { $count ->
     [one] { $count } правило
     [few] { $count } правила
     [many] { $count } правил
    *[other] { $count } правила
 }
-# review: new
 setup-holds-trusted-senders = { $count ->
     [one] { $count } довірений відправник
     [few] { $count } довірені відправники
     [many] { $count } довірених відправників
    *[other] { $count } довіреного відправника
 }
-# review: new
 setup-sign-in-password = Пароль
-# review: new
-setup-account-secret-password = Його пароль є у файлі.
-# review: new
-setup-account-secret-token = Його дані входу є у файлі.
-# review: new
-setup-account-asks-password = Після імпорту він запитає пароль.
-# review: new
-setup-account-signs-in-again = Після імпорту в нього треба буде увійти знову.
-# review: new
-setup-account-here = Його вже налаштовано тут, тому його пропущено.
-# review: new
-setup-account-no-app = Він входить через { $app }, який тут не налаштовано. Імпортуйте також застосунки для входу.
-# review: new
+setup-account-secret-password = Пароль збережено у файлі.
+setup-account-secret-token = Дані для входу збережено у файлі.
+setup-account-asks-password = Після імпорту потрібно буде ввести пароль.
+setup-account-signs-in-again = Після імпорту потрібно буде ввійти знову.
+setup-account-here = Обліковий запис уже налаштовано на цьому комп’ютері, тому його буде пропущено.
+setup-account-no-app = Для входу використовується застосунок «{ $app }», який тут ще не налаштовано. Імпортуйте також застосунки для входу.
 setup-invalid-address = «{ $address }» не є адресою електронної пошти.
-# review: new
-setup-invalid-server = Сервер { $server } не має придатної назви чи порту.
-# review: new
+setup-invalid-server = Некоректні параметри сервера { $server }: назва, порт або спосіб захисту з’єднання.
 setup-invalid-user = Немає імені користувача.
-# review: new
-setup-invalid-sign-in = Він входить у спосіб, якого Inbox Classic не знає.
-# review: new
+setup-invalid-sign-in = Спосіб входу не підтримується або параметри авторизації некоректні.
 setup-error-empty = Файл порожній.
-# review: new
-setup-error-too-large = Файл завеликий для налаштувань Inbox Classic.
-# review: new
+setup-error-too-large = Розмір файлу параметрів Inbox Classic перевищує допустимий.
 setup-error-not-setup = Цей файл не містить налаштувань Inbox Classic.
-# review: new
 setup-error-damaged = Файл налаштувань пошкоджено, його неможливо прочитати.
-# review: new
 setup-error-newer = Ці налаштування збережено новішою версією Inbox Classic ({ $version }). Оновіть Inbox Classic і імпортуйте їх знову.
-# review: new
 setup-error-needs-passphrase = Ці налаштування захищено парольною фразою. Введіть парольну фразу, з якою їх збережено.
-# review: new
 setup-error-wrong-passphrase = Це не та парольна фраза, з якою збережено ці налаштування.
-# review: new
-setup-error-changed = Файл налаштувань змінено або пошкоджено після збереження, тому його неможливо імпортувати.
-# review: new
+setup-error-changed = Цілісність файлу параметрів порушено: його змінено або пошкоджено, тому імпорт неможливий.
 setup-error-read = Не вдалося прочитати файл налаштувань: { $error }
-# review: new
-setup-error-write = Не вдалося зберегти налаштування: { $error }
-# review: new
+setup-error-write = Не вдалося зберегти файл параметрів: { $error }
 setup-error-no-parts = Виберіть принаймні одну частину.
-# review: new
 setup-left-out = { $count ->
-    [one] { $count } запис розділу «{ $part }» неможливо використати, тому його пропущено.
-    [few] { $count } записи розділу «{ $part }» неможливо використати, тому їх пропущено.
-    [many] { $count } записів розділу «{ $part }» неможливо використати, тому їх пропущено.
-   *[other] { $count } запису розділу «{ $part }» неможливо використати, тому їх пропущено.
+    [one] Пропущено { $count } запис розділу «{ $part }»: дані непридатні для використання.
+    [few] Пропущено { $count } записи розділу «{ $part }»: дані непридатні для використання.
+    [many] Пропущено { $count } записів розділу «{ $part }»: дані непридатні для використання.
+   *[other] Пропущено { $count } запису розділу «{ $part }»: дані непридатні для використання.
 }
-# review: new
 setup-imported-settings = Параметри замінено.
-# review: new
-setup-imported-preferences = Налаштування вікон замінено.
-# review: new
+setup-imported-preferences = Параметри інтерфейсу замінено.
 setup-added-accounts = { $count ->
     [one] Додано { $count } обліковий запис.
     [few] Додано { $count } облікові записи.
     [many] Додано { $count } облікових записів.
    *[other] Додано { $count } облікового запису.
 }
-# review: new
-setup-skipped-here = { $address } уже налаштовано тут, тому його пропущено.
-# review: new
-setup-skipped-no-app = { $address } пропущено: він входить через { $app }, який тут не налаштовано.
-# review: new
+setup-skipped-here = Обліковий запис { $address } уже налаштовано на цьому комп’ютері, тому його пропущено.
+setup-skipped-no-app = Обліковий запис { $address } пропущено: потрібний застосунок для входу «{ $app }» тут не налаштовано.
 setup-skipped-invalid = { $address } пропущено: { $reason }
-# review: new
-setup-asks-password = { $address } запитає пароль під час з’єднання.
-# review: new
-setup-signs-in-again = { $address } попросить вас увійти знову під час з’єднання.
-# review: new
+setup-asks-password = Під час під’єднання облікового запису { $address } потрібно буде ввести пароль.
+setup-signs-in-again = Під час під’єднання облікового запису { $address } потрібно буде ввійти знову.
 setup-added-sign-in-apps = { $count ->
     [one] Додано { $count } застосунок для входу.
     [few] Додано { $count } застосунки для входу.
     [many] Додано { $count } застосунків для входу.
    *[other] Додано { $count } застосунку для входу.
 }
-# review: new
 setup-skipped-sign-in-apps = { $count ->
     [one] { $count } застосунок для входу вже налаштовано тут.
     [few] { $count } застосунки для входу вже налаштовано тут.
     [many] { $count } застосунків для входу вже налаштовано тут.
    *[other] { $count } застосунку для входу вже налаштовано тут.
 }
-# review: new
 setup-added-contacts = { $count ->
     [one] До адресної книги додано { $count } контакт.
     [few] До адресної книги додано { $count } контакти.
     [many] До адресної книги додано { $count } контактів.
    *[other] До адресної книги додано { $count } контакту.
 }
-# review: new
 setup-skipped-contacts = { $count ->
     [one] { $count } контакт уже є в адресній книзі.
     [few] { $count } контакти вже є в адресній книзі.
     [many] { $count } контактів уже є в адресній книзі.
    *[other] { $count } контакту вже є в адресній книзі.
 }
-# review: new
 setup-added-groups = { $count ->
     [one] Додано або доповнено { $count } групу.
     [few] Додано або доповнено { $count } групи.
     [many] Додано або доповнено { $count } груп.
    *[other] Додано або доповнено { $count } групи.
 }
-# review: new
 setup-added-own-keys = { $count ->
     [one] Додано { $count } власний ключ.
     [few] Додано { $count } власні ключі.
     [many] Додано { $count } власних ключів.
    *[other] Додано { $count } власного ключа.
 }
-# review: new
 setup-added-contact-keys = { $count ->
     [one] Додано { $count } ключ контакту.
     [few] Додано { $count } ключі контактів.
     [many] Додано { $count } ключів контактів.
    *[other] Додано { $count } ключа контактів.
 }
-# review: new
 setup-added-rules = { $count ->
     [one] Додано { $count } правило для повідомлень.
     [few] Додано { $count } правила для повідомлень.
     [many] Додано { $count } правил для повідомлень.
    *[other] Додано { $count } правила для повідомлень.
 }
-# review: new
 setup-skipped-rules = { $count ->
     [one] { $count } правило для повідомлень уже є тут.
     [few] { $count } правила для повідомлень уже є тут.
     [many] { $count } правил для повідомлень уже є тут.
    *[other] { $count } правила для повідомлень уже є тут.
 }
-# review: new
 setup-skipped-rules-account = { $count ->
     [one] { $count } правило для повідомлень стосується облікового запису, якого тут немає, тому його пропущено.
     [few] { $count } правила для повідомлень стосуються облікових записів, яких тут немає, тому їх пропущено.
     [many] { $count } правил для повідомлень стосуються облікових записів, яких тут немає, тому їх пропущено.
    *[other] { $count } правила для повідомлень стосуються облікових записів, яких тут немає, тому їх пропущено.
 }
-# review: new
 setup-rules-waiting = { $count ->
-    [one] { $count } правило для повідомлень переміщує повідомлення в папку, яка з’явиться після синхронізації її облікового запису.
-    [few] { $count } правила для повідомлень переміщують повідомлення в папки, які з’являться після синхронізації їхніх облікових записів.
-    [many] { $count } правил для повідомлень переміщують повідомлення в папки, які з’являться після синхронізації їхніх облікових записів.
-   *[other] { $count } правила для повідомлень переміщують повідомлення в папки, які з’являться після синхронізації їхніх облікових записів.
+    [one] Не знайдено папки призначення для { $count } правила. Пошук продовжиться після синхронізації.
+    [few] Не знайдено папок призначення для { $count } правил. Пошук продовжиться після синхронізації.
+    [many] Не знайдено папок призначення для { $count } правил. Пошук продовжиться після синхронізації.
+   *[other] Не знайдено папки призначення для { $count } правила. Пошук продовжиться після синхронізації.
 }
-# review: new
 setup-added-trusted-senders = { $count ->
     [one] Додано { $count } довіреного відправника.
-    [few] Додано { $count } довірені відправники.
+    [few] Додано { $count } довірених відправників.
     [many] Додано { $count } довірених відправників.
    *[other] Додано { $count } довіреного відправника.
 }
-# review: new
 setup-nothing = Нічого не імпортовано.
-# review: new
 setup-account-servers = { $imap } і { $smtp } ({ $signin })
-# review: new
 setup-file-name = Параметри й облікові записи Inbox Classic
-# review: new
-setup-skipped-unreachable = { $name } пропущено: його служба входу недоступна. Додайте його знову в розділі «Застосунки для входу».
-# review: new
+setup-skipped-unreachable = Запис «{ $name }» пропущено: не вдалося перевірити службу входу. Налаштуйте потрібний застосунок у вікні «Застосунки для входу» та повторіть імпорт.
 attachment-runs-programs = «{ $name }» може запускати програми, тому Inbox Classic не відкриває цей файл. Збережіть його й відкрийте самостійно, якщо довіряєте його джерелу.
-# review: new
-attachment-decrypted-note = Це вкладення із зашифрованого повідомлення. Щоб його відкрити, Inbox Classic зберігає розшифровану копію на цьому комп’ютері, у вашій папці, яку Inbox Classic очищає через добу.
+attachment-decrypted-note = Це вкладення із зашифрованого повідомлення. Щоб відкрити його, Inbox Classic зберігає незашифровану копію в тимчасовій папці вашого облікового запису користувача. Копії, старші за добу, видаляються під час запуску програми.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [1] Сервер не перемістив { $messages } у папку «{ $folder }», тому воно знову в папці «{ $from }»: { $reason }
@@ -1613,14 +1157,10 @@ undone-archive = { $count ->
    *[other] Сервер не заархівував { $messages }, тому вони знову в папці «{ $from }»: { $reason }
 }
 undone-read = { $count ->
-    [1] Сервер не позначив { $messages } як прочитане, тому воно знову позначене як непрочитане: { $reason }
-    [one] Сервер не позначив { $messages } як прочитане, тому повідомлення знову позначені як непрочитані: { $reason }
-   *[other] Сервер не позначив { $messages } як прочитані, тому вони знову позначені як непрочитані: { $reason }
+   *[other] Сервер не змінив стан прочитання. Відновлено стан «Непрочитане»: { $messages }. Причина: { $reason }
 }
 undone-unread = { $count ->
-    [1] Сервер не позначив { $messages } як непрочитане, тому воно знову позначене як прочитане: { $reason }
-    [one] Сервер не позначив { $messages } як непрочитане, тому повідомлення знову позначені як прочитані: { $reason }
-   *[other] Сервер не позначив { $messages } як непрочитані, тому вони знову позначені як прочитані: { $reason }
+   *[other] Сервер не змінив стан прочитання. Відновлено стан «Прочитане»: { $messages }. Причина: { $reason }
 }
 undone-flags = { $count ->
     [one] Сервер не змінив прапорці, тому зміну скасовано ({ $messages }): { $reason }
@@ -1629,52 +1169,33 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
-preview-pdf-option = Показувати PDF-файли в листах
-# review: new
-preview-pdf-off = PDF-файли в листах не показуються.
-# review: new
-preview-pdf-off-crashed = PDF-файл закрив Inbox Classic під час показу, тому PDF-файли в листах більше не показуються. Зображення й далі показуються. Щоб знову показувати PDF-файли, увімкніть параметр { $option } у розділі { $settings }.
-# review: new
+preview-pdf-option = Показувати PDF-файли в повідомленнях
+preview-pdf-off = PDF-файли в повідомленнях не показуються.
+preview-pdf-off-crashed = Робота Inbox Classic перервалася під час показу файлу в повідомленні, тому показ PDF-файлів вимкнено. Зображення й далі показуються. Щоб знову показувати PDF-файли, увімкніть параметр «{ $option }» у розділі { $settings }.
 preview-pdf-details = { $count ->
     [one] { $count } сторінка, { $size }
     [few] { $count } сторінки, { $size }
     [many] { $count } сторінок, { $size }
    *[other] { $count } сторінки, { $size }
 }
-# review: new
 preview-page-alt = { $name }, сторінка { $page } з { $count }
-# review: new
 preview-more-pages = { $count ->
-    [one] Відкрийте файл, щоб побачити всю { $count } сторінку
-    [few] Відкрийте файл, щоб побачити всі { $count } сторінки
-    [many] Відкрийте файл, щоб побачити всі { $count } сторінок
-   *[other] Відкрийте файл, щоб побачити всі { $count } сторінки
+    [1] Відкрийте файл, щоб переглянути сторінку
+   *[other] Відкрийте файл, щоб переглянути всі сторінки ({ $count })
 }
-# review: new
 preview-more-files = { $count ->
     [one] Ще { $count } файл у списку вище
     [few] Ще { $count } файли у списку вище
     [many] Ще { $count } файлів у списку вище
    *[other] Ще { $count } файлу у списку вище
 }
-# review: new
 preview-tile-downloading = Завантаження…
-# review: new
 preview-tile-preparing = Підготовка…
-# review: new
-preview-tile-format = Зображення { $format } поки не показуються
-# review: new
+preview-tile-format = Зображення у форматі { $format } поки не показуються
 preview-tile-password = Захищено паролем: відкрийте, щоб ввести пароль
-# review: new
-preview-tile-too-large = Завеликий для показу
-# review: new
+preview-tile-too-large = Перевищено ліміт розміру для показу
 preview-tile-unreadable = Неможливо показати
-# review: new
-preview-tile-timed-out = Показ тривав надто довго
-# review: new
-preview-tile-crashed = Не показано: цей файл одного разу закрив Inbox Classic
-# review: new
+preview-tile-timed-out = Час підготовки зображення вичерпано
+preview-tile-crashed = Не показано: попередня спроба показу перервалася або зависла
 preview-tile-off = Не показано до перезапуску Inbox Classic
-# review: new
-preview-not-printed = { $name } ({ $details }) не друкується. Відкрийте його, щоб надрукувати.
+preview-not-printed = Файл «{ $name }» ({ $details }) не включено до друку. Відкрийте його, щоб надрукувати.

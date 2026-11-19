@@ -1,20 +1,18 @@
-<!--review-->
 <h1>Ukladanie, tlač a import správ</h1>
-<p class="summary">Ukladajte správy ako súbory, otvárajte a preberajte súbory správ, tlačte správu a pozrite si jej hlavičky a zdroj.</p>
+<p class="summary">Ukladajte, otvárajte a importujte súbory správ, tlačte správy a zobrazujte ich hlavičky a zdrojový text.</p>
 <h2>Uloženie správ ako súborov</h2>
-<p>Príkazom <b data-text="menu-file"></b> &gt; <b data-text="cmd-save-as"></b><!--os:mac--> (<kbd data-command="save_as"></kbd>)<!--/os--> uložíte zobrazenú správu ako súbor <code>.eml</code>, ktorý otvoria aj iné poštové programy. Ak je vybratých viac správ, opýta sa na priečinok a každú tam uloží s názvom podľa predmetu. Súbor, ktorý tam už je, sa nikdy nenahradí.</p>
-<p>Správy môžete aj presunúť myšou zo zoznamu na pracovnú plochu alebo do priečinka v <!--os:windows-->Prieskumníkovi<!--/os--><!--os:mac-->Finderi<!--/os--><!--os:linux-->správcovi súborov<!--/os-->.</p>
+<p>Príkazom <b data-text="menu-file"></b> &gt; <b data-text="cmd-save-as"></b><!--os:mac--> (<kbd data-command="save_as"></kbd>)<!--/os--> uložíte zobrazenú správu ako súbor <code>.eml</code>, ktorý otvoria aj iné poštové programy. Pri viacerých vybratých správach zvolíte priečinok a každá sa uloží pod názvom podľa predmetu. Pri tomto hromadnom ukladaní sa vytvoria jedinečné názvy a existujúce súbory sa neprepíšu. Pri ukladaní jednej správy rozhoduje systémové dialógové okno o prípadnom nahradení súboru.</p>
+<p>Správy môžete aj presunúť myšou zo zoznamu na pracovnú plochu alebo do priečinka <!--os:windows-->v Prieskumníkovi<!--/os--><!--os:mac-->vo Finderi<!--/os--><!--os:linux-->v správcovi súborov<!--/os-->.</p>
 <h2>Import súborov správ</h2>
-<p>Vyberte priečinok a zvoľte <b data-text="menu-file"></b> &gt; <b data-text="cmd-import"></b>, alebo presuňte súbory <code>.eml</code> myšou na priečinok v zozname priečinkov. Správy sa vložia do tohto priečinka, aj na serveri. Súbor, ktorý nie je správa, sa neimportuje.</p>
+<p>Vyberte priečinok a zvoľte <b data-text="menu-file"></b> &gt; <b data-text="cmd-import"></b>, alebo presuňte súbory <code>.eml</code> myšou na priečinok v zozname priečinkov. Správy sa zaradia na import do vybratého priečinka na serveri. Po dokončení sa v ňom zobrazia. Súbor, ktorý nie je správa, sa neimportuje.</p>
 <h2>Otvorenie súborov správ</h2>
-<p>Dvakrát kliknite na súbor <code>.eml</code> v <!--os:windows-->Prieskumníkovi<!--/os--><!--os:mac-->Finderi<!--/os--><!--os:linux-->správcovi súborov<!--/os-->, alebo naň kliknite pravým tlačidlom a otvorte ho v Inbox Classic. Otvorí sa v okne správy s tlačidlami <b data-text="ui-tb-reply"></b>, <b data-text="ui-tb-reply-all"></b>, <b data-text="ui-tb-forward"></b>, <b data-text="ui-tb-print"></b> a <b data-text="cmd-save-as"></b>. Ak ho otvorí iná aplikácia, pozrite si tému <a href="topic:default-mail-program"></a>.</p>
+<p>Dvakrát kliknite na súbor <code>.eml</code> <!--os:windows-->v Prieskumníkovi<!--/os--><!--os:mac-->vo Finderi<!--/os--><!--os:linux-->v správcovi súborov<!--/os-->, alebo naň kliknite pravým tlačidlom a otvorte ho v Inbox Classic. Otvorí sa v okne správy s tlačidlami <b data-text="ui-tb-reply"></b>, <b data-text="ui-tb-reply-all"></b>, <b data-text="ui-tb-forward"></b>, <b data-text="ui-tb-print"></b> a <b data-text="cmd-save-as"></b>. Ak ho otvorí iná aplikácia, pozrite si tému <a href="topic:default-mail-program"></a>.</p>
 <h2>Tlač</h2>
 <ol>
-    <li>Vyberte <b data-text="menu-file"></b> &gt; <b data-text="cmd-print"></b> (<kbd data-command="print"></kbd>). Otvorí sa ukážka pred tlačou.</li>
-    <li>Vyberte tlačiareň, počet kópií a strany, alebo uložte ako PDF.</li>
+    <li>Vyberte <b data-text="menu-file"></b> &gt; <b data-text="cmd-print"></b> (<kbd data-command="print"></kbd>). Otvorí sa systémové tlačové rozhranie; náhľad a dostupné možnosti závisia od systému.</li>
+    <li>Vyberte tlačiareň, počet kópií a strany. Ak to systém umožňuje, môžete namiesto tlače uložiť PDF.</li>
     <li>Kliknite na tlačidlo tlače. Správa sa vytlačí s odosielateľom, dátumom, príjemcami a predmetom.</li>
 </ol>
 <h2>Hlavičky a zdroj</h2>
-<p><b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> (<kbd data-command="properties"></kbd>) zobrazí internetové hlavičky správy: kto ju poslal, cez ktoré servery a kedy. <b data-text="menu-view"></b> &gt; <b data-text="cmd-view-source"></b><!--os:windows,linux--> (<kbd data-command="view_source"></kbd>)<!--/os--> zobrazí celú správu ako text. <b data-text="cmd-save-as"></b> v tomto okne ju uloží ako súbor <code>.eml</code>.</p>
+<p><b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> (<kbd data-command="properties"></kbd>) zobrazí internetové hlavičky správy: odosielateľa a zaznamenané údaje o prechode cez servery. Zobrazenie hlavičiek je obmedzené na prvých 256 KiB. <b data-text="menu-view"></b> &gt; <b data-text="cmd-view-source"></b><!--os:windows,linux--> (<kbd data-command="view_source"></kbd>)<!--/os--> zobrazí zdrojový text správy, najviac prvé 4 MiB. Väčšie správy sa v tomto zobrazení skrátia. <b data-text="cmd-save-as"></b> v tomto okne ju uloží ako súbor <code>.eml</code>.</p>
 <nav class="related"><a href="topic:attachments"></a> <a href="topic:folders"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

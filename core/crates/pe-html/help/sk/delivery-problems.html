@@ -1,12 +1,11 @@
-<!--review-->
 <h1>Správy, ktoré neboli doručené</h1>
 <p class="summary">Keď sa správa, ktorú ste odoslali, vráti ako nedoručená alebo sa oneskorí, Inbox Classic vysvetlí prečo a čo môžete urobiť.</p>
 <p>Oznámenie o doručení má v zozname správ značku nedoručenia. Keď ho otvoríte, karta nad ním uvádza, či vaša správa nebola doručená, alebo sa iba oneskorila.</p>
 <img src="picture:bounce-1-failed" alt="Oznámenie o doručení s kartou, ktorá uvádza, že správa nebola doručená, príjemcu, dôvod a čo robiť">
-<p>Karta uvádza každého príjemcu s dôvodom vysvetleným jednoduchými slovami a s tým, čo môžete urobiť. <b data-text="bounce-details"></b> zobrazí vlastné slová prijímajúceho servera.</p>
+<p>Karta uvádza každého príjemcu s dôvodom vysvetleným jednoduchými slovami a s tým, čo môžete urobiť. <b data-text="bounce-details"></b> zobrazí pôvodnú odpoveď prijímajúceho servera.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> vyberie správu, ktorú ste odoslali.</li>
-    <li>Pri oneskorení ju vyberie <b data-text="bounce-show-delayed"></b>. Váš poštový server sa ju stále pokúša doručiť, preto ju nemusíte posielať znova.</li>
+    <li><b data-text="bounce-show-message"></b> vyberie pôvodnú odoslanú správu, ak ju aplikácia našla.</li>
+    <li>Pri oneskorení sa po nájdení pôvodnej správy ponúkne <b data-text="bounce-show-delayed"></b>. Váš poštový server sa ju stále pokúša doručiť, preto ju nemusíte posielať znova.</li>
 </ul>
 <p>Niektoré bežné dôvody:</p>
 <table>
@@ -15,8 +14,7 @@
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Pošlite správu znova o niekoľko dní alebo sa s dotyčným skontaktujte inak.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Pošlite ju znova bez toho, čo vyzerá ako spam, napríklad bez množstva odkazov alebo veľkej prílohy.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Prepošlite oznámenie svojmu poskytovateľovi pošty. Problém nie je v správe.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Nič. Zvyčajne sa doručí do hodiny.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Ak server stále skúša správu doručiť, počkajte. Ak už doručovanie ukončil, odošlite ju neskôr znova.</td></tr>
 </table>
-<p>Všetky oznámenia o doručení nájdete hľadaním výrazu <code>is:bounce</code>. Dôvod sa zisťuje vo vašom počítači a nikam sa nič neposiela.</p>
+<p>Všetky oznámenia o doručení nájdete hľadaním výrazu <code>is:bounce</code>. Samotná analýza oznámenia prebieha v tomto počítači a jeho obsah sa na tento účel nikam neposiela.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

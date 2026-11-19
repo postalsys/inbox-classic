@@ -1,21 +1,20 @@
-<!--review-->
+
 <h1>Pāreja uz citu datoru</h1>
 <p class="summary">Pārnesiet kontus, iestatījumus, kontaktpersonas, atslēgas un kārtulas uz citu datoru vienā failā.</p>
 <h2>Eksportēšana</h2>
 <ol>
     <li>Izvēlieties <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Izvēlieties, ko pārnest: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> un <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Lai pārnestu arī paroles un privātās atslēgas, ieslēdziet <b data-text="ui-setup-use-passphrase"></b> un divreiz ievadiet vismaz 8 rakstzīmju garu paroles frāzi.</li>
+    <li>Lai iekļautu arī saglabātās paroles, pierakstīšanās datus un savas privātās atslēgas, ieslēdziet <b data-text="ui-setup-use-passphrase"></b> un divreiz ievadiet vismaz 8 rakstzīmju garu paroles frāzi.</li>
     <li>Noklikšķiniet uz <b data-text="ui-setup-export-button"></b> un izvēlieties, kur saglabāt failu.</li>
 </ol>
-<p>Failā nav ziņojumu: tie otrā datorā tiek lejupielādēti vēlreiz. Ar paroles frāzi viss fails ir šifrēts. Bez tās failā nav paroļu un privāto atslēgu, un katrs konts otrā datorā vienreiz prasa savu paroli.</p>
-<aside class="warning">Glabājiet failu un tā paroles frāzi atsevišķi un izdzēsiet failu, kad esat to importējis. Ikviens, kam ir abi, var lasīt jūsu pastu.</aside>
+<p>Failā nav pasta ziņojumu. Otrā datorā tie tiek lejupielādēti no servera, tāpēc tikai vecajā datorā saglabātie ziņojumi šādi netiek pārnesti. Paroles frāze šifrē visu failu. Bez tās failā neiekļauj paroles, pierakstīšanās marķierus vai privātās atslēgas; būs jāievada parole vai jāpierakstās pārlūkprogrammā vēlreiz. Privāto atslēgu, ko eksportēšanas brīdī nevar atvērt, izlaidīs arī aizsargātā eksportā.</p>
+<aside class="warning">Glabājiet failu un tā paroles frāzi atsevišķi un pēc importēšanas izdzēsiet failu. Ikviens, kam ir abi, var lasīt jūsu pastu.</aside>
 <h2>Importēšana</h2>
 <ol>
     <li>Otrā datorā izvēlieties <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Pirms pirmā konta pievienošanas tam ir saite arī logā <b data-text="ui-add-account-title"></b>.</li>
     <li>Izvēlieties failu un, ja tam ir paroles frāze, ievadiet to.</li>
     <li>Logā redzams, kas ir failā. Izvēlieties importējamās daļas un kontus un noklikšķiniet uz <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Konts, kas šajā datorā jau ir, paliek nemainīts. Kontaktpersonas tiek pievienotas adrešu grāmatai, iestatījumi un logu preferences tiek aizstāti, un kārtula, kuras mapes vēl nav, gaida, līdz konts ir sinhronizēts. Cita atslēga kādai no jūsu kontaktpersonām gaida jūsu lēmumu, tāpat kā importēta atslēga.</p>
+<p>Jau iestatītie konti paliek nemainīti. Importētās kontaktpersonas apvieno ar adrešu grāmatas datiem; aizstāj tikai importēšanai izvēlētos iestatījumus un logu preferences. Pēc kontu sinhronizācijas programma meklē kārtulu mērķa mapes pēc nosaukuma; tā neizveido trūkstošās mapes automātiski. Jaunu kontaktpersonas atslēgu sāk izmantot esošās vietā tikai tad, kad to izvēlaties kontaktpersonas rekvizītos.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

@@ -1,15 +1,15 @@
-<!--review--><h1>Błędy szyfrowania</h1>
+<h1>Błędy szyfrowania</h1>
 <p class="summary">Co zrobić, gdy serwer nie oferuje szyfrowania albo go wymaga, a jest ono wyłączone.</p>
 <h2>„the server does not offer STARTTLS”</h2>
-<p>Konto jest ustawione na STARTTLS, ale serwer nie zaoferował szyfrowania. Inbox Classic przerwał połączenie, więc Twoje hasło nie zostało wysłane.</p>
+<p>Dla konta wybrano STARTTLS, ale serwer nie zaoferował szyfrowania. Inbox Classic przerwał połączenie, więc Twoje hasło nie zostało wysłane.</p>
 <ol>
     <li>Otwórz właściwości konta w <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Ustaw zabezpieczenia na SSL/TLS, z portem 993 dla poczty przychodzącej lub 465 dla wychodzącej.</li>
+    <li>Sprawdź ustawienia zalecane przez dostawcę. Jeśli je obsługuje, wybierz SSL/TLS z portem 993 dla poczty przychodzącej lub 465 dla wychodzącej.</li>
     <li>Kliknij <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Jeśli nic innego nie działa, z serwera nie da się korzystać bezpiecznie.</p>
+<p>Jeśli nie uda się nawiązać szyfrowanego połączenia, skontaktuj się z dostawcą, zamiast wyłączać szyfrowanie.</p>
 <h2>„the server takes the password only over an encrypted connection”</h2>
-<p>Serwer poczty wychodzącej jest ustawiony na <b data-text="ui-security-none"></b>. Twoje hasło jest w porządku. Zmień <b data-text="ui-field-smtp-security"></b> na STARTTLS z portem 587 albo SSL/TLS z portem 465.</p>
+<p>Dla serwera poczty wychodzącej wybrano <b data-text="ui-security-none"></b>. Serwer wymaga szyfrowania, zanim przyjmie hasło. Zmień <b data-text="ui-field-smtp-security"></b> na STARTTLS z portem 587 albo SSL/TLS z portem 465, zgodnie z ustawieniami dostawcy. Ten błąd nie potwierdza poprawności hasła.</p>
 <h2>Ostrzeżenie o połączeniu bez szyfrowania</h2>
-<p>Gdy wybierzesz <b data-text="ui-security-none"></b>, Inbox Classic ostrzega, że każdy, kto przechwyci ruch w Twojej sieci, może odczytać Twoje hasło i wiadomości. Kontynuuj tylko w przypadku serwera na własnym komputerze lub w sieci lokalnej.</p>
-<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<p>Gdy wybierzesz <b data-text="ui-security-none"></b>, Inbox Classic ostrzega, że każdy, kto przechwyci ruch w Twojej sieci, może odczytać Twoje hasło i wiadomości. Sama sieć lokalna nie zapewnia szyfrowania. Używaj połączenia bez szyfrowania tylko wtedy, gdy rozumiesz i akceptujesz ryzyko, na przykład przy połączeniu z serwerem na własnym komputerze.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>

@@ -1,18 +1,17 @@
-<!--review--><h1>Conectarea unui agent IA</h1>
-<p class="summary">Permiteți unui agent IA, cum ar fi Claude, să vă citească și să vă organizeze e-mailul prin Inbox Classic.</p>
-<p>Puteți permite unui agent IA să lucreze cu e-mailul dvs. Poate fi Claude, Cursor sau alt program care acceptă Model Context Protocol (MCP). În Inbox Classic nu există IA și nimic nu este trimis unui serviciu IA decât dacă permiteți accesul unui agent.</p>
+<h1>Conectarea unui agent IA</h1>
+<p class="summary">Permiteți unui agent IA, cum ar fi Claude, să vă citească și să vă organizeze mesajele prin Inbox Classic.</p>
+<p>Puteți permite unui agent IA să lucreze cu mesajele dvs. Poate fi Claude, Cursor sau alt program care acceptă Model Context Protocol (MCP). În Inbox Classic nu există IA și nimic nu este trimis unui serviciu IA decât dacă permiteți accesul unui agent.</p>
 <p>Pentru a conecta un agent:</p>
 <ol>
-    <li>Alegeți <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> și faceți clic pe <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic afișează rândurile de adăugat în setările agentului.</li>
-    <li>Adăugați-le la serverele MCP ale agentului. În Claude Desktop, acestea sunt în <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
+    <li>Alegeți <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> și faceți clic pe <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic afișează configurația pe care trebuie să o adăugați în setările agentului.</li>
+    <li>Adăugați această configurație la lista serverelor MCP ale agentului. În Claude Desktop, acestea sunt în <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
     <li>Porniți agentul. Prima dată când se conectează, Inbox Classic vă întreabă ce poate face.</li>
 </ol>
-<p>Agentul pornește Inbox Classic în fundal dacă nu rulează. Doar programele care rulează sub utilizatorul dvs. pe acest computer pot ajunge la el.</p>
-<p>Inbox Classic întreabă sistemul ce program a pornit agentul, în loc să se bazeze pe ce spune agentul, astfel încât un program să nu poată folosi accesul pe care l-ați dat altuia. Dacă un agent spune că este alt program, întrebarea vă arată acest lucru.</p>
-<p>Un agent poate, de asemenea, să urmărească folderul Mesaje primite, un cont sau un folder și să fie anunțat când se schimbă mesajele din ele, și poate oferi două solicitări gata pregătite, „Triage my inbox” și „Summarize unread”. Ambele respectă ce îi permiteți agentului, iar ce citește astfel apare în jurnalul său ca tot restul a ceea ce citește.</p>
-<p>Agenții pe care îi porniți dintr-un terminal, cum ar fi Claude Code, sunt un singur program pentru Inbox Classic. Aplicația întreabă o singură dată pentru <!--os:mac-->programele pornite din Terminal<!--/os--><!--os:windows,linux-->programele pornite dintr-un terminal<!--/os-->, iar acestea au în comun ce permiteți. Pentru ca un agent să aibă propriul acces, adăugați <code>--name</code> și un nume ales de dvs. după <code>--mcp</code> în setările sale, de exemplu <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic vă întreabă apoi despre el sub acest nume.</p>
-<!--/review-->
+<p>Agentul pornește Inbox Classic în fundal dacă nu rulează. Doar programele care rulează în contul dvs. de utilizator pe acest computer se pot conecta la Inbox Classic.</p>
+<p>Inbox Classic verifică prin sistemul de operare ce program a pornit agentul, fără să se bazeze pe numele declarat de agent. Simplul fapt că se prezintă sub alt nume nu îi permite agentului să folosească permisiunile altui program. Dacă declară un alt program, dialogul de confirmare vă arată acest lucru. Acest mecanism separă permisiunile agenților. Nu vă protejează de un program rău intenționat care rulează în contul dvs. de utilizator și ar putea citi oricum mesajele.</p>
+<p>Un agent poate urmări folderul Mesaje primite, un cont sau un folder și poate fi anunțat când se schimbă mesajele. Poate oferi și două cereri predefinite: „Triage my inbox” și „Summarize unread”. Ambele respectă permisiunile acordate agentului. Mesajele citite astfel sunt înregistrate în jurnal, la fel ca toate celelalte citiri.</p>
+<p>Agenții porniți fără un nume distinct din același terminal recunoscut, cum ar fi Claude Code, pot folosi aceleași permisiuni. Aplicația cere acordul pentru <!--os:mac-->programele pornite din Terminal<!--/os--><!--os:windows,linux-->programele pornite dintr-un terminal<!--/os-->, grupate după calea programului recunoscut. Terminalele diferite nu sunt neapărat grupate împreună. Pentru ca un agent să aibă propriul acces, adăugați <code>--name</code> și un nume ales de dvs. după <code>--mcp</code> în setările sale, de exemplu <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic vă cere apoi un acord separat pentru acel nume. Numele ales separă accesul salvat; nu este o dovadă verificată a identității agentului.</p>
+
 <p>Pentru a bloca accesul tuturor agenților, dezactivați opțiunea <b data-text="ui-let-agents-connect"></b> din <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<!--review-->
+
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
-<!--/review-->

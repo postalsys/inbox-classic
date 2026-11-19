@@ -1,15 +1,14 @@
-<!--review--><h1>Kontaktpersonas atslēgas pārbaude</h1>
-<p class="summary">Salīdziniet atslēgas pirkstu nospiedumu ar tās īpašnieku, lai pārliecinātos, ka atslēga tiešām ir viņa.</p>
-<p>Atslēga var nākt no jebkurienes: no ziņojuma, atslēgu servera, faila. Ikviens var izveidot atslēgu ar jūsu kontaktpersonas vārdu un adresi. Pārbaude apstiprina, ka jūsu rīcībā esošā atslēga ir tā pati, kas ir jūsu kontaktpersonai.</p>
+<h1>Kontaktpersonas atslēgas piederības pārbaude</h1>
+<p class="summary">Kopā ar kontaktpersonu salīdziniet atslēgas pirkstu nospiedumu un pārbaudiet, vai visas norādītās adreses pieder šai personai.</p>
+<p>Atslēga var nākt no jebkurienes: no ziņojuma, atslēgu servera, faila. Ikviens var izveidot atslēgu ar jūsu kontaktpersonas vārdu un adresi. Pirkstu nospiedumu salīdzināšana palīdz apstiprināt, ka jums abiem ir viena un tā pati atslēga.</p>
 <p>Lai pārbaudītu atslēgu:</p>
 <ol>
     <li>Izvēlieties <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, atlasiet kontaktpersonas atslēgu un noklikšķiniet uz <b data-text="ui-keys-verify"></b>. To var izdarīt arī kontaktpersonas rekvizītos adrešu grāmatā.</li>
-    <li>Palūdziet kontaktpersonai nolasīt jums savas atslēgas pirkstu nospiedumu no savas lietotnes, klātienē vai zvanā.</li>
-    <li>Ja visas četru zīmju grupas sakrīt, noklikšķiniet uz <b data-text="ui-verify-match"></b>. Atslēga tiek rādīta kā pārbaudīta.</li>
-    <li>Logā ir uzskaitītas adreses, kuras tas atzīmē. Atslēga var norādīt jebkuru adresi, tāpēc, ja kāda no tām nepieder jūsu kontaktpersonai, tā vietā noklikšķiniet uz <b data-text="ui-verify-differ"></b>.</li>
+    <li>Palūdziet kontaktpersonai klātienē vai zvanā nolasīt atslēgas pirkstu nospiedumu no savas lietotnes. Pārbaudiet arī katras uzskaitītās e-pasta adreses piederību.</li>
+    <li>Ja visas četru zīmju grupas sakrīt un visas adreses pieder kontaktpersonai, noklikšķiniet uz <b data-text="ui-verify-match"></b>. Atslēgas piederība tiek atzīmēta kā apstiprināta visām uzskaitītajām adresēm.</li>
+    <li>Ja kaut viena adrese nepieder kontaktpersonai, noklikšķiniet uz <b data-text="ui-verify-differ"></b>, pat ja pirkstu nospiedumi sakrīt. Atslēgai bez e-pasta adresēm piederības apstiprinājumu saglabāt nevar.</li>
 </ol>
 <aside class="warning">Nesalīdziniet pirkstu nospiedumu ar tādu, kas nosūtīts e-pastā. Tas, kurš varēja mainīt atslēgu ziņojumā, varēja mainīt arī pirkstu nospiedumu.</aside>
-<p>Ja pirkstu nospiedumi atšķiras, noklikšķiniet uz <b data-text="ui-verify-differ"></b>. Jūsu rīcībā esošā atslēga nepieder jūsu kontaktpersonai: noņemiet to un palūdziet kontaktpersonai vēlreiz nosūtīt savu atslēgu.</p>
-<p>Paraksti, kas veidoti ar pārbaudītu atslēgu, tiek rādīti zaļā krāsā. Nepārbaudīta atslēga joprojām der šifrēšanai, un tās paraksti tiek rādīti zilā krāsā.</p>
+<p>Ja pirkstu nospiedumi atšķiras, noklikšķiniet uz <b data-text="ui-verify-differ"></b>. Jums ir cita atslēga nekā kontaktpersonas pārbaudītā atslēga. Noņemiet neatbilstošo atslēgu un palūdziet nosūtīt pareizo vēlreiz.</p>
+<p>Derīgs sūtītāja paraksts tiek rādīts zaļā krāsā, ja atslēgas piederība ir apstiprināta, vai zilā krāsā, ja tā vēl nav apstiprināta. Izmantojamu atslēgu var lietot šifrēšanai arī bez piederības apstiprinājuma.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

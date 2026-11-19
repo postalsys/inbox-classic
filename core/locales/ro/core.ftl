@@ -48,8 +48,8 @@ reader-downloading = Se descarcă mesajul…
 reader-downloading-detail = Mesajul va apărea aici după ce se termină descărcarea.
 reader-downloading-size = Mesajul are { $size }. Va apărea aici după ce este descărcat.
 reader-failed = Mesajul nu a putut fi descărcat
-reader-failed-network = Serverul de e-mail nu a putut fi contactat ({ $reason }).
-reader-failed-sign-in = Serverul de e-mail nu a acceptat conectarea ({ $reason }). Verificați parola sau conectați-vă din nou în Fișier > Conturi.
+reader-failed-network = Conexiunea cu serverul de e-mail nu a putut fi stabilită sau a fost întreruptă ({ $reason }).
+reader-failed-sign-in = Serverul de e-mail nu a acceptat conectarea ({ $reason }). Verificați parola sau conectați-vă din nou din setările contului.
 reader-failed-security = Conexiunea cu serverul de e-mail nu a putut fi securizată ({ $reason }).
 reader-failed-other = Serverul de e-mail a răspuns: { $reason }.
 reader-retry-note = Se va încerca din nou descărcarea după reconectarea contului.
@@ -114,12 +114,12 @@ bounce-mailbox-disabled-why = Adresa există, dar căsuța ei poștală a fost d
 bounce-mailbox-disabled-do = Contactați persoana pe altă cale și cereți-i o adresă pe care o folosește acum.
 bounce-mailbox-full = Căsuța poștală este plină
 bounce-mailbox-full-why = Căsuța poștală a destinatarului nu mai are loc pentru mesaje noi.
-bounce-mailbox-full-do = Trimiteți-l din nou peste câteva zile sau anunțați persoana pe altă cale. Atașările mari sunt refuzate primele.
+bounce-mailbox-full-do = Încercați să retrimiteți mesajul peste câteva zile sau anunțați destinatarul pe altă cale.
 bounce-spam-blocked = Refuzat ca spam
 bounce-spam-blocked-why = Serverul destinatar a considerat mesajul spam.
 bounce-spam-blocked-do = Încercați să retrimiteți mesajul fără elemente care pot părea spam, cum ar fi multe linkuri, linkuri scurtate sau atașări mari. Dacă problema persistă, contactați furnizorul de e-mail.
 bounce-virus-detected = Refuzat din cauza unui virus
-bounce-virus-detected-why = Serverul destinatar a găsit un virus sau alt conținut periculos în mesaj sau în atașările lui.
+bounce-virus-detected-why = Serverul destinatar a raportat un virus sau alt conținut periculos în mesaj ori în atașările lui.
 bounce-virus-detected-do = Verificați atașările cu un antivirus. Unele servere refuză orice program sau arhivă, așa că partajați astfel de fișiere printr-un link.
 bounce-ip-blocklisted = Serverul dvs. de e-mail este pe o listă de blocare
 bounce-ip-blocklisted-why = Serverul destinatar refuză mesajele trimise de serverul dvs. de e-mail deoarece adresa IP a acestuia se află pe o listă de blocare.
@@ -135,7 +135,7 @@ bounce-geo-blocked-why = Serverul destinatar nu acceptă e-mail din țara sau re
 bounce-geo-blocked-do = Contactați persoana pe altă cale sau întrebați furnizorul de e-mail.
 bounce-relay-denied = Serverul nu l-a transmis mai departe
 bounce-relay-denied-why = Un server a refuzat să transmită mai departe mesajul, adesea pentru că a fost trimis fără autentificare sau printr-un server care nu deservește acest destinatar.
-bounce-relay-denied-do = În Fișier > Conturi, verificați setările serverului de ieșire și datele folosite pentru conectare.
+bounce-relay-denied-do = În setările contului, verificați serverul de trimitere și datele folosite pentru autentificare.
 bounce-auth-failure = Adresa dvs. de expeditor nu a putut fi verificată
 bounce-auth-failure-why = Serverul destinatar nu a putut confirma că mesajul vine într-adevăr de la domeniul dvs. (SPF, DKIM sau DMARC).
 bounce-auth-failure-do = Redirecționați această notificare celui care administrează e-mailul domeniului dvs.: setările lui trebuie corectate. Între timp poate ajuta trimiterea prin serverul furnizorului dvs.
@@ -144,7 +144,7 @@ bounce-rate-limited-why = Deocamdată, serverul destinatar acceptă mai puține 
 bounce-rate-limited-do = Așteptați puțin și trimiteți-l din nou. Când scrieți multor persoane, trimiteți la mai puține deodată.
 bounce-greylisting = Reținut pentru scurt timp
 bounce-greylisting-why = Serverul destinatar le cere expeditorilor necunoscuți să încerce din nou puțin mai târziu, o verificare obișnuită împotriva spamului.
-bounce-greylisting-do = Nu trebuie să faceți nimic. Serverele de e-mail reîncearcă automat, iar mesajul este livrat de obicei în decurs de o oră.
+bounce-greylisting-do = Dacă livrarea este doar întârziată, serverul de trimitere poate încerca din nou. Dacă notificarea anunță un eșec definitiv, încercați să retrimiteți mesajul mai târziu.
 bounce-server-error = Serverul destinatar a avut o problemă
 bounce-server-error-why = Serverul destinatar nu a putut fi contactat sau nu a putut prelua mesajul din cauza unei probleme proprii.
 bounce-server-error-do = Trimiteți-l din nou mai târziu. Dacă tot nu reușește, verificați partea adresei de după @ pentru greșeli de scriere.
@@ -343,8 +343,8 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "3 mesaje puse în Arhivă"
 import-put = { $count ->
-    [one] { $messages } importat în { $folder }
-   *[other] { $messages } importate în { $folder }
+    [one] Import în așteptare în { $folder }: { $messages }
+   *[other] Import în așteptare în { $folder }: { $messages }
 }
 import-not-put = Următoarele mesaje nu au fost importate în folder:
 
@@ -359,7 +359,7 @@ error-other-account = browserul s-a conectat la { $email }, nu la acest cont
 # a password or sign-in the mail server refused, with the server's words
 failure-authentication = serverul nu a acceptat conectarea ({ $reason })
 # the mail server could not be reached or the connection broke, with the reason
-failure-network = conexiunea cu serverul nu a reușit ({ $reason })
+failure-network = conexiunea cu serverul nu a putut fi stabilită sau a fost întreruptă ({ $reason })
 error-in-use = aplicația nu poate fi eliminată deoarece este folosită de următoarele conturi: { $accounts }
 error-turned-off = această aplicație de conectare este dezactivată pentru conturile noi
 error-folder-name = numele folderului trebuie să aibă între 1 și 200 de caractere și nu poate conține caractere de control
@@ -392,19 +392,19 @@ error-sent-still-in-outbox = este încă în folderul „Mesaje de trimis”: { 
 error-sent-no-copy = nu s-a putut salva nicio copie în folderul „Elemente trimise”: { $reason }
 error-no-password = nu există parolă pentru acest cont
 error-no-sign-in = nu există date de conectare pentru acest cont
-error-provider-missing = această versiune nu se poate conecta la { $provider }. Verificați dacă aplicația de conectare a fost eliminată
+error-provider-missing = această versiune nu poate folosi configurația de conectare „{ $provider }”. Verificați dacă aplicația de conectare a fost eliminată
 error-provider-servers = serverele acestui cont nu se potrivesc cu serverele aplicației sale de conectare
 error-app-scopes = { $reason }. Serverul de e-mail nu a acceptat tokenul aplicației de conectare: verificați dacă permisiunile (scopes) aplicației dau acces la e-mail
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google nu a verificat încă aplicația Inbox Classic, astfel că numai utilizatorii de test se pot conecta prin ea. Folosiți propria aplicație de conectare Google sau o parolă de aplicație. Dacă sunteți utilizator de test, puteți activa aplicația integrată în Aplicații de conectare (Fișier > Conturi).
-sign-in-off-other = A fost dezactivată în Aplicații de conectare (Fișier > Conturi), unde poate fi activată din nou.
+sign-in-off-google = Aplicația de conectare Google integrată este dezactivată implicit în această versiune. Folosiți propria aplicație de conectare Google sau, dacă este permisă pentru contul dvs., o parolă de aplicație. Dacă aveți acces ca utilizator de test, puteți activa aplicația integrată din fereastra Aplicații de conectare, accesibilă din Conturi.
+sign-in-off-other = A fost dezactivată în fereastra Aplicații de conectare, accesibilă din Conturi. O puteți activa din nou acolo.
 sign-in-app-no-name = aplicația de conectare are nevoie de un nume
 sign-in-app-no-client = lipsește ID-ul client
 sign-in-app-no-scopes = aplicația de conectare are nevoie de permisiunile (scopes) care dau acces la e-mail
-sign-in-app-bad-host = adresa serverului { $server } lipsește sau nu este un nume de gazdă valid
+sign-in-app-bad-host = configurația serverului { $server } este incompletă sau nevalidă. Verificați numele gazdei și portul
 sign-in-app-plain = serverul { $server } trebuie să folosească SSL/TLS sau STARTTLS
 sign-in-app-not-checked = emitentul nu a fost verificat încă
 sign-in-app-issuer-changed = emitentul s-a schimbat: introduceți din nou secretul client sau eliminați-l
@@ -520,7 +520,7 @@ agent-log-moved = A mutat mesajul „{ $subject }” în folderul „{ $folder }
 agent-log-junk = A marcat mesajul „{ $subject }” ca nedorit
 agent-log-not-junk = A eliminat marcajul de e-mail nedorit pentru mesajul „{ $subject }”
 agent-log-archived = A arhivat mesajul „{ $subject }”
-agent-log-folder = A creat folderul „{ $name }”
+agent-log-folder = A cerut crearea folderului „{ $name }”
 agent-log-unsubscribed = Ați aprobat cererea de dezabonare. Mesaj: „{ $subject }”
 agent-log-unsubscribe-failed = Cererea de dezabonare nu a reușit. Mesaj: „{ $subject }”. Motiv: { $reason }
 agent-log-unsubscribe-refused = Nu ați aprobat dezabonarea. Expeditori: { $senders }
@@ -542,7 +542,7 @@ agent-log-flag-color = A aplicat semnalizarea { $color ->
     [purple] violetă
    *[gray] cenușie
 } pentru mesajul „{ $subject }”
-agent-log-renamed = A redenumit folderul „{ $old }” în „{ $name }”
+agent-log-renamed = A cerut redenumirea folderului „{ $old }” în „{ $name }”
 agent-log-watched = A început să urmărească conversația „{ $subject }”
 agent-log-ignored = A început să ignore conversația „{ $subject }”
 agent-log-unmarked = A oprit urmărirea sau ignorarea conversației „{ $subject }”
@@ -623,13 +623,13 @@ agent-undo-since-question = { $count ->
     [few] Anulați cele { $count } modificări făcute de { $program } în acest interval?
    *[other] Anulați cele { $count } de modificări făcute de { $program } în acest interval?
 }
-agent-undo-since-detail = Mesajele revin în folderele din care au fost mutate, iar starea de citire și semnalizările anterioare sunt restabilite. Mesajele care încă așteaptă în folderul „Mesaje de trimis” sunt șterse. Modificările făcute între timp de dvs. sau pe server sunt păstrate.
+agent-undo-since-detail = Se încearcă readucerea mesajelor în folderele inițiale și restabilirea stării de citire și a semnalizărilor. Mesajele care încă așteaptă în folderul „Mesaje de trimis” sunt șterse. Mesajele a căror poziție sau stare relevantă nu mai corespunde sunt omise. Unele modificări ulterioare ale culorii unei semnalizări pot fi totuși anulate.
 # what taking back did, then a line for each kind of message it left as it is
 agent-undo-done = { $count ->
     [0] Nu s-a anulat nimic.
-    [one] S-a anulat 1 modificare.
-    [few] S-au anulat { $count } modificări.
-   *[other] S-au anulat { $count } de modificări.
+    [one] Anulare completă sau parțială pentru 1 operație.
+    [few] Anulare completă sau parțială pentru { $count } operații.
+   *[other] Anulare completă sau parțială pentru { $count } de operații.
 }
 agent-undo-left-gone = { $count ->
     [one] 1 mesaj nu mai era la locul în care se afla după acțiunea agentului.
@@ -656,7 +656,7 @@ agent-invitation-reply = { $response ->
     [accept] Prin acest mesaj acceptați invitația „{ $summary }” ({ $when }).
     [tentative] Prin acest mesaj acceptați provizoriu invitația „{ $summary }” ({ $when }).
    *[decline] Prin acest mesaj refuzați invitația „{ $summary }” ({ $when }).
-} Calendarul organizatorului înregistrează răspunsul. Răspunsul dvs. la invitație se schimbă numai după ce mesajul a fost trimis.
+} Răspunsul este trimis organizatorului pentru a fi prelucrat de aplicația sa de calendar. Starea invitației din Inbox Classic se schimbă numai după trimiterea cu succes a mesajului.
 # the subject of an answer to an invitation, as calendar programs write it
 invitation-reply-subject = { $response ->
     [accept] Invitație acceptată: { $summary }
@@ -676,9 +676,9 @@ agent-reads-messages = { $count ->
    *[other] a citit { $count } de mesaje
 }
 agent-reads-attachments = { $count ->
-    [one] a deschis 1 atașare
-    [few] a deschis { $count } atașări
-   *[other] a deschis { $count } de atașări
+    [one] a citit 1 atașare
+    [few] a citit { $count } atașări
+   *[other] a citit { $count } de atașări
 }
 agent-reads-searches = { $count ->
     [one] a căutat o dată
@@ -697,7 +697,7 @@ agent-read-conversation = { $count ->
     [few] A citit conversația „{ $subject }” ({ $count } mesaje)
    *[other] A citit conversația „{ $subject }” ({ $count } de mesaje)
 }
-agent-read-attachment = A deschis atașarea „{ $name }” din mesajul „{ $subject }”
+agent-read-attachment = A citit atașarea „{ $name }” din mesajul „{ $subject }”
 agent-read-search = { $count ->
     [one] A căutat „{ $query }”: 1 mesaj
     [few] A căutat „{ $query }”: { $count } mesaje
@@ -705,14 +705,14 @@ agent-read-search = { $count ->
 }
 agent-read-people = A căutat persoane al căror nume sau adresă începe cu „{ $query }”
 agent-read-list = { $count ->
-    [one] A consultat 1 mesaj din folderul „{ $folder }”
-    [few] A consultat { $count } mesaje din folderul „{ $folder }”
-   *[other] A consultat { $count } de mesaje din folderul „{ $folder }”
+    [one] A consultat 1 rând din lista „{ $folder }”
+    [few] A consultat { $count } rânduri din lista „{ $folder }”
+   *[other] A consultat { $count } de rânduri din lista „{ $folder }”
 }
 agent-read-changes = { $count ->
-    [one] A consultat 1 mesaj nou
-    [few] A consultat { $count } mesaje noi
-   *[other] A consultat { $count } de mesaje noi
+    [one] A consultat datele despre 1 mesaj nou
+    [few] A consultat datele despre { $count } mesaje noi
+   *[other] A consultat datele despre { $count } de mesaje noi
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Programe pornite din { $terminal }
@@ -745,7 +745,7 @@ secrets-windows = Managerul de acreditări
 secrets-mac = Portchei
 secrets-linux = portcheiul sistemului (Secret Service)
 error-no-such-file = fișierul nu există
-cards-file-too-big = Acest fișier este prea mare pentru a fi o agendă.
+cards-file-too-big = Fișierul depășește limita de dimensiune pentru importul agendei.
 ui-sender-added = Contactul „{ $name }” a fost adăugat în Agendă.
 ui-sender-known = { $name } este deja în Agendă.
 ui-sender-none = Expeditorul acestui mesaj nu are o adresă de e-mail de adăugat.
@@ -779,7 +779,7 @@ pgp-key-expired = A expirat pe { $date }
 pgp-key-revoked = Revocată
 pgp-key-revoked-why = Revocată: { $reason }
 pgp-key-not-valid = Neutilizabilă
-pgp-key-locked = Nu poate fi folosită: cheia care o protejează nu mai este în { $store }. Importați din nou copia de rezervă a cheii private.
+pgp-key-locked = Cheia privată nu poate fi deschisă. Verificați dacă { $store } este disponibil și deblocat. Dacă cheia de protecție a fost pierdută sau resetată, importați din nou copia de rezervă a cheii private.
 pgp-source-own = Creată în Inbox Classic
 pgp-source-file = Importată dintr-un fișier
 pgp-source-paste = Adăugată prin lipire
@@ -792,7 +792,7 @@ pgp-error-no-store = Nu se poate folosi { $store } pentru protejarea cheilor pri
 pgp-error-wrong-passphrase = Fraza-parolă nu este corectă.
 pgp-error-not-a-key = Aceasta nu este o cheie OpenPGP.
 pgp-error-too-large = Cheia este prea mare.
-pgp-error-unusable = Cheia folosește algoritmi criptografici învechiți sau nesiguri și nu poate fi folosită.
+pgp-error-unusable = Cheia nu conține componente utilizabile pentru operația cerută sau folosește algoritmi criptografici neacceptați.
 pgp-imported-private = { $count ->
     [one] Cheia dvs. privată a fost importată.
     [few] Au fost importate { $count } chei private.
@@ -813,13 +813,13 @@ pgp-pending = Pe { $date } s-a găsit o altă cheie pentru { $address }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Semnat de { $signer }; proprietarul cheii a fost confirmat
 pgp-part-signed = Semnat de { $signer } (proprietarul cheii nu a fost confirmat)
-pgp-part-other = Semnat de { $signer }, care nu este expeditorul
+pgp-part-other = Semnat de { $signer }; semnătura nu a fost asociată expeditorului mesajului
 pgp-part-unknown-key = Semnat, dar cheia nu este cunoscută
 pgp-part-not-signed = Nesemnat
 pgp-part-not-checked = Semnătura nu a fost verificată
 pgp-part-encrypted = Criptat. { $signature }
 pgp-part-no-key = Criptat pentru o cheie pe care nu o aveți
-pgp-part-changed = Partea criptată a fost modificată în timpul transmiterii și nu este afișată
+pgp-part-changed = Integritatea părții criptate nu a putut fi confirmată, așa că aceasta nu este afișată
 pgp-part-unprotected = Criptat fără protecție împotriva modificărilor, nu este afișat
 pgp-part-broken = Partea criptată nu poate fi citită
 pgp-why-mismatch = Semnătura nu corespunde acestui text
@@ -838,10 +838,10 @@ pgp-error-missing-keys = { $count ->
     [one] { $addresses } nu are o cheie pentru criptare.
    *[other] Acești destinatari nu au o cheie pentru criptare: { $addresses }.
 }
-pgp-error-encrypted-quote = Acest mesaj citează sau redirecționează un mesaj criptat, deci poate fi trimis doar criptat. Activați Criptare sau eliminați textul citat.
+pgp-error-encrypted-quote = Acest mesaj conține text, imagini sau atașări dintr-un mesaj criptat și poate fi trimis doar criptat. Activați Criptare sau eliminați tot conținutul preluat din mesajul criptat.
 pgp-error-protect = Mesajul nu a putut fi semnat sau criptat: { $reason }
 pgp-found-keys = Chei găsite pentru: { $addresses }.
-pgp-found-none = Nu s-a găsit nicio cheie pentru { $addresses }. Cereți-le să vă trimită cheia lor publică.
+pgp-found-none = Nu s-a găsit nicio cheie pentru adresele: { $addresses }. Cereți destinatarilor cheile publice corespunzătoare.
 pgp-found-no-key = Nu s-a găsit nicio cheie.
 pgp-find-unavailable = Cheile nu pot fi căutate acum: { $error }
 pgp-publish-pending = keys.openpgp.org a trimis un link de confirmare la fiecare dintre aceste adrese: { $addresses }. Confirmați fiecare adresă pentru ca cheia dvs. să poată fi găsită folosind adresa respectivă.
@@ -971,17 +971,17 @@ setup-account-signs-in-again = După import, va trebui să vă conectați din no
 setup-account-here = Contul este deja configurat pe acest computer și va fi omis.
 setup-account-no-app = Acest cont folosește aplicația de conectare „{ $app }”, care nu este configurată aici. Importați și aplicațiile de conectare.
 setup-invalid-address = „{ $address }” nu este o adresă de e-mail.
-setup-invalid-server = Serverul { $server } nu are un nume sau un port utilizabil.
+setup-invalid-server = Configurația serverului { $server } nu este utilizabilă. Verificați numele gazdei, portul și opțiunea de securitate.
 setup-invalid-user = Nu are nume de utilizator.
-setup-invalid-sign-in = Metoda de conectare nu este recunoscută de Inbox Classic.
+setup-invalid-sign-in = Configurația de conectare nu poate fi folosită de Inbox Classic.
 setup-error-empty = Fișierul este gol.
-setup-error-too-large = Fișierul este prea mare pentru a fi o configurație Inbox Classic.
+setup-error-too-large = Fișierul depășește limita de dimensiune pentru o configurație Inbox Classic.
 setup-error-not-setup = Acesta nu este un fișier de configurare Inbox Classic.
 setup-error-damaged = Fișierul de configurație este deteriorat și nu poate fi citit.
 setup-error-newer = Această configurație a fost salvată de o versiune mai nouă de Inbox Classic ({ $version }). Actualizați Inbox Classic, apoi importați-o din nou.
 setup-error-needs-passphrase = Această configurație este protejată de o frază-parolă. Introduceți fraza-parolă cu care a fost salvată.
 setup-error-wrong-passphrase = Aceasta nu este fraza-parolă cu care a fost salvată configurația.
-setup-error-changed = Fișierul de configurație a fost modificat sau deteriorat după salvare, așa că nu poate fi importat.
+setup-error-changed = Integritatea fișierului de configurație nu a putut fi confirmată. Fișierul poate fi modificat sau deteriorat și nu poate fi importat.
 setup-error-read = Fișierul de configurație nu a putut fi citit: { $error }
 setup-error-write = Configurația nu a putut fi salvată: { $error }
 setup-error-no-parts = Alegeți cel puțin o categorie de date.
@@ -1053,9 +1053,9 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } de reguli pentru mesaje se referă la conturi care nu sunt configurate pe acest computer și au fost omise.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 regulă pentru mesaje mută mesajele într-un folder care va apărea după sincronizarea contului corespunzător.
-    [few] { $count } reguli pentru mesaje mută mesajele în foldere care vor apărea după sincronizarea conturilor corespunzătoare.
-   *[other] { $count } de reguli pentru mesaje mută mesajele în foldere care vor apărea după sincronizarea conturilor corespunzătoare.
+    [one] 1 regulă pentru mesaje așteaptă identificarea folderului de destinație după sincronizarea contului.
+    [few] { $count } reguli pentru mesaje așteaptă identificarea folderelor de destinație după sincronizarea conturilor.
+   *[other] { $count } de reguli pentru mesaje așteaptă identificarea folderelor de destinație după sincronizarea conturilor.
 }
 setup-added-trusted-senders = { $count ->
     [one] S-a adăugat 1 expeditor de încredere.
@@ -1065,9 +1065,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Nu s-a importat nimic.
 setup-account-servers = { $imap } și { $smtp } ({ $signin })
 setup-file-name = Setări și conturi Inbox Classic
-setup-skipped-unreachable = Nu s-a putut importa „{ $name }”: serviciul de conectare nu a putut fi contactat. Adăugați din nou aplicația de conectare în Aplicații de conectare.
+setup-skipped-unreachable = Nu s-a putut importa „{ $name }”: configurația serviciului de conectare nu a putut fi verificată. Adăugați din nou aplicația de conectare necesară în Aplicații de conectare.
 attachment-runs-programs = Fișierul „{ $name }” poate rula programe, de aceea Inbox Classic nu îl deschide. Salvați-l, apoi deschideți-l manual dacă aveți încredere în sursa lui.
-attachment-decrypted-note = Această atașare provine dintr-un mesaj criptat. Pentru a o deschide, Inbox Classic salvează o copie necriptată într-un folder temporar al contului dvs. de utilizator. Copiile mai vechi de o zi sunt eliminate la pornirea aplicației.
+attachment-decrypted-note = Această atașare provine dintr-un mesaj criptat. Pentru a o deschide, Inbox Classic salvează o copie necriptată într-un folder temporar al contului dvs. de utilizator. La pornire, aplicația încearcă să elimine copiile mai vechi de o zi.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Serverul nu a mutat { $messages } în { $folder }, așa că este din nou în { $from }: { $reason }
@@ -1098,7 +1098,7 @@ undone-flags = { $count ->
 
 preview-pdf-option = Afișare fișiere PDF în mesaje
 preview-pdf-off = Fișierele PDF nu sunt afișate în mesaje.
-preview-pdf-off-crashed = Inbox Classic s-a închis în timpul afișării unui fișier în mesaj. Ca măsură de precauție, fișierele PDF nu mai sunt afișate în mesaje, dar imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați „{ $option }” în { $settings }.
+preview-pdf-off-crashed = O previzualizare a fost întreruptă de o închidere neașteptată sau de un blocaj. Ca măsură de precauție, fișierele PDF nu mai sunt afișate în mesaje, dar imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați „{ $option }” în { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 pagină, { $size }
     [few] { $count } pagini, { $size }
@@ -1119,9 +1119,9 @@ preview-tile-downloading = Se descarcă…
 preview-tile-preparing = Se pregătește…
 preview-tile-format = Imaginile { $format } nu sunt încă afișate
 preview-tile-password = Protejat cu parolă: deschideți-l pentru a introduce parola
-preview-tile-too-large = Prea mare pentru a fi afișat
+preview-tile-too-large = Depășește limita de previzualizare
 preview-tile-unreadable = Nu poate fi afișat
 preview-tile-timed-out = Afișarea a durat prea mult
-preview-tile-crashed = Nu este afișat: Inbox Classic s-a închis anterior în timpul afișării acestui fișier
+preview-tile-crashed = Previzualizarea anterioară a fost întreruptă sau s-a blocat
 preview-tile-off = Nu este afișat până la repornirea Inbox Classic
 preview-not-printed = Fișierul „{ $name }” ({ $details }) nu este inclus la imprimare. Deschideți-l pentru a-l imprima.

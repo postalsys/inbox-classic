@@ -1,17 +1,17 @@
-<!--review--><h1>Łączenie agenta AI</h1>
+<h1>Łączenie agenta AI</h1>
 <p class="summary">Pozwól agentowi AI, takiemu jak Claude, czytać i porządkować Twoją pocztę przez Inbox Classic.</p>
-<p>Możesz pozwolić agentowi AI pracować z Twoją pocztą. Może to być Claude, Cursor lub inny program obsługujący Model Context Protocol (MCP). W Inbox Classic nie ma AI i nic nie jest wysyłane do usługi AI, dopóki nie wpuścisz agenta.</p>
+<p>Możesz pozwolić agentowi AI pracować z Twoją pocztą. Może to być Claude, Cursor lub inny program obsługujący Model Context Protocol (MCP). Inbox Classic nie ma wbudowanej AI. Nic nie jest wysyłane do usługi AI, dopóki nie udzielisz agentowi dostępu.</p>
 <p>Aby połączyć agenta:</p>
 <ol>
-    <li>Wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> i kliknij <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic pokaże wiersze, które trzeba dodać do ustawień agenta.</li>
-    <li>Dodaj je do serwerów MCP agenta. W Claude Desktop jest to <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
+    <li>Wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> i kliknij <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic pokaże konfigurację, którą trzeba dodać do ustawień agenta.</li>
+    <li>Dodaj ją do ustawień serwerów MCP agenta. W Claude Desktop jest to <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
     <li>Uruchom agenta. Przy pierwszym połączeniu Inbox Classic zapyta Cię, co agent może robić.</li>
 </ol>
 <p>Agent uruchamia Inbox Classic w tle, jeśli program nie działa. Dostęp do niego mają tylko programy uruchomione na tym komputerze z Twojego konta.</p>
-<p>Inbox Classic pyta system, który program uruchomił agenta, zamiast wierzyć agentowi na słowo, dzięki czemu jeden program nie może korzystać z dostępu przyznanego innemu. Jeśli agent podaje się za inny program, pytanie o zgodę to pokaże.</p>
-<p>Agent może też obserwować Skrzynkę odbiorczą, konto lub folder i dostawać powiadomienie, gdy zmieni się w nich poczta, a także zaproponować dwa gotowe polecenia, „Triage my inbox” i „Summarize unread”. Oba przestrzegają tego, na co zezwolisz agentowi, a to, co agent w ten sposób odczyta, widać w jego dzienniku tak jak wszystko inne, co odczytuje.</p>
-<p>Agenci uruchamiani z terminala, na przykład Claude Code, są dla Inbox Classic jednym programem. Inbox Classic pyta raz o <!--os:mac-->programy uruchomione z aplikacji Terminal<!--/os--><!--os:windows,linux-->programy uruchomione z terminala<!--/os-->, a wszystkie one współdzielą to, na co zezwolisz. Aby dać agentowi osobny dostęp, dodaj <code>--name</code> i wybraną przez siebie nazwę po <code>--mcp</code> w jego ustawieniach, na przykład <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic zapyta wtedy o niego pod tą nazwą.</p>
-<!--/review-->
+<p>Inbox Classic sprawdza w systemie, który program uruchomił agenta. Agent nie uzyska dostępu przyznanego innemu programowi, podając jedynie jego nazwę. Jeśli podana nazwa się nie zgadza, zobaczysz to w pytaniu o zgodę. Pozwala to rozdzielić uprawnienia agentów, ale nie chroni przed złośliwym programem uruchomionym z Twojego konta, który i tak mógłby odczytać pocztę.</p>
+<p>Agent może też obserwować Skrzynkę odbiorczą, konto lub folder i otrzymywać powiadomienia o zmianach w poczcie, a także zaproponować dwa gotowe polecenia, „Triage my inbox” i „Summarize unread”. Oba działają w granicach przyznanych uprawnień. Odczytane w ten sposób wiadomości są odnotowywane w dzienniku, tak jak pozostałe odczyty agenta.</p>
+<p>Agenci uruchamiani przez ten sam rozpoznany program terminala, na przykład Claude Code, domyślnie współdzielą jego uprawnienia. Inbox Classic pyta raz o <!--os:mac-->programy uruchomione z aplikacji Terminal<!--/os--><!--os:windows,linux-->programy uruchomione z terminala<!--/os-->, a programy uruchomione przez ten sam terminal korzystają ze wspólnych uprawnień. Inny program terminala może mieć osobny zestaw uprawnień. Aby dać agentowi osobny dostęp, dodaj <code>--name</code> i wybraną przez siebie nazwę po <code>--mcp</code> w jego ustawieniach, na przykład <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic zapyta wtedy o niego pod tą nazwą. Nazwa służy do rozdzielenia dostępu, a nie do potwierdzenia tożsamości programu.</p>
+
 <p>Aby zablokować dostęp wszystkim agentom, wyłącz opcję <b data-text="ui-let-agents-connect"></b> w oknie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<!--review-->
-<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav><!--/review-->
+
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>

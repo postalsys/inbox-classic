@@ -106,7 +106,7 @@ win-send = &Wyślij
 win-dont-send = &Nie wysyłaj
 win-unsubscribe = &Wypisz się
 win-dont-unsubscribe = &Nie wypisuj
-win-forget-program-ask = Usunąć ten program, jego uprawnienia i historię działań jego agentów? Przy następnym połączeniu Inbox Classic ponownie poprosi o zgodę.
+win-forget-program-ask = Usunąć zapisane uprawnienia tego programu i historię działań jego agentów? Przy następnym połączeniu Inbox Classic ponownie poprosi o zgodę.
 win-clear-log-ask = Wyczyścić historię działań agentów? Nie cofnie to zmian wprowadzonych przez agentów.
 win-agent-programs = Programy, &których agenci poprosili o dostęp do Twojej poczty:
 win-change = &Zmień...
@@ -147,4 +147,4 @@ win-installer-welcome-update =
     Jeśli jest uruchomiony, najpierw zostanie zamknięty. Twoje konta i poczta zostaną zachowane.
 win-installer-older-ask = Zainstalowany jest Inbox Classic { $installed }, nowszy niż { $version }. Zainstalować mimo to starszą wersję?
 win-installer-still-running = Inbox Classic nadal działa. Zamknij go i spróbuj ponownie.
-win-installer-remove-mail-ask = Usunąć także konta i pocztę, które Inbox Classic przechowuje na tym komputerze? Poczta na serwerach pozostanie.
+win-installer-remove-mail-ask = Usunąć także lokalne dane Inbox Classic, w tym konta, pocztę oczekującą na wysłanie, ustawienia, kontakty i klucze? Poczta na serwerach pozostanie. Wpisy w systemowym magazynie danych logowania nie zostaną usunięte.

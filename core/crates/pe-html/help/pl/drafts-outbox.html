@@ -1,22 +1,21 @@
-<!--review--><h1>Wersje robocze i Skrzynka nadawcza</h1>
+<h1>Wersje robocze i Skrzynka nadawcza</h1>
 <p class="summary">Zapisz wiadomość, aby dokończyć ją później, i zobacz, co czeka na wysłanie.</p>
 <h2>Zapisywanie wersji roboczej</h2>
-<p>Kliknij <b data-text="ui-tb-save"></b> albo naciśnij <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Wiadomość zostanie zachowana w folderze <b data-text="folder-drafts"></b> konta, na serwerze. Ponowne zapisanie zastępuje wcześniejszą kopię. Pasek stanu wiadomości mówi, kiedy ją zapisano.</p>
-<p>Inbox Classic zapisuje też wiadomość automatycznie kilka sekund po tym, jak przestaniesz pisać, albo co trzydzieści sekund, gdy piszesz dalej. Jeśli Inbox Classic lub komputer nieoczekiwanie się zamknie, niedokończone wiadomości otworzą się ponownie przy następnym uruchomieniu Inbox Classic.</p>
+<p>Kliknij <b data-text="ui-tb-save"></b> albo naciśnij <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Wiadomość zostanie zachowana w folderze <b data-text="folder-drafts"></b> konta, na serwerze. Ponowne zapisanie zastępuje wcześniejszą kopię. Pasek stanu w oknie wiadomości informuje, kiedy ją zapisano.</p>
+<p>Inbox Classic zapisuje też wiadomość automatycznie kilka sekund po tym, jak przestaniesz pisać, albo co trzydzieści sekund, gdy piszesz dalej. Jeśli Inbox Classic niespodziewanie zakończy działanie lub komputer się wyłączy, niedokończone wiadomości otworzą się ponownie przy następnym uruchomieniu Inbox Classic.</p>
 <p>Zamknięcie wiadomości ze zmianami wywołuje pytanie, czy je zapisać:</p>
 <ul>
     <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os--> zapisuje ją w folderze <b data-text="folder-drafts"></b>.</li>
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os--> odrzuca zmiany. Jeśli wersja robocza była zapisana tylko automatycznie, zostaje też usunięta z folderu <b data-text="folder-drafts"></b>.</li>
     <li><b data-text="ui-cancel"></b> wraca do wiadomości.</li>
 </ul>
-<p>Aby pisać dalej, kliknij dwukrotnie wersję roboczą w folderze <b data-text="folder-drafts"></b>. Otworzy się z odbiorcami, tekstem i plikami. Po wysłaniu wersja robocza jest usuwana.</p>
-<p>Pisana wiadomość ma własne okno, więc możesz czytać pocztę, gdy jest otwarta. Zamknięcie Inbox Classic najpierw zamyka pisane wiadomości i pyta o te, które mają zmiany.</p>
+<p>Aby pisać dalej, kliknij dwukrotnie wersję roboczą w folderze <b data-text="folder-drafts"></b>. Otworzy się z odbiorcami, tekstem i plikami. Wersja robocza jest usuwana po bezpiecznym umieszczeniu wiadomości w kolejce wysyłania, jeszcze przed zakończeniem wysyłki.</p>
+<p>Pisana wiadomość ma własne okno, więc możesz czytać pocztę, gdy jest otwarta. Przed zakończeniem działania Inbox Classic zamyka okna pisanych wiadomości i pyta o zapisanie zmian.</p>
 <h2>Skrzynka nadawcza</h2>
-<p><b data-text="ui-tb-send"></b> umieszcza wiadomość w Skrzynce nadawczej. Domyślnie jest ona wysyłana po kilku sekundach. W tym czasie możesz anulować wysyłkę (zobacz niżej). Pasek stanu okna głównego mówi, kiedy wiadomość została wysłana.</p>
-<p>Gdy wiadomości nie można wysłać, na przykład bez połączenia, zostaje w Skrzynce nadawczej. Wyjdzie przy następnym sprawdzaniu poczty, więc nic, co napiszesz, nie zginie.</p>
-<p>Aby zobaczyć, co czeka, wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. Okno pokazuje każdą wiadomość z przyczyną, dla której nie wyszła. <b data-text="ui-outbox-send-all"></b> od razu próbuje ponownie, a wiadomość możesz tam też usunąć.</p>
+<p><b data-text="ui-tb-send"></b> umieszcza wiadomość w Skrzynce nadawczej. Domyślnie jest ona wysyłana po kilku sekundach. W tym czasie możesz anulować wysyłkę (zobacz niżej). Pasek stanu okna głównego informuje, kiedy wiadomość została wysłana.</p>
+<p>Gdy wiadomości nie można wysłać, na przykład bez połączenia, zostaje w Skrzynce nadawczej. Program ponowi próbę przy następnym sprawdzaniu poczty. Treść pozostaje w lokalnej Skrzynce nadawczej.</p>
+<p>Aby zobaczyć, co czeka, wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. Okno pokazuje każdą wiadomość z powodem wstrzymania wysyłki. <b data-text="ui-outbox-send-all"></b> od razu próbuje ponownie, a wiadomość możesz tam też usunąć.</p>
 <h2>Anulowanie wysyłania wiadomości</h2>
-<p>Domyślnie po kliknięciu <b data-text="ui-tb-send"></b> wiadomość czeka kilka sekund przed wysłaniem. Pasek stanu pokazuje odliczanie. W tym czasie kliknij <b data-text="ui-undo-button"></b> obok odliczania albo wybierz <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>, aby anulować wysyłkę. Wiadomość otworzy się ponownie, aby można ją było edytować lub odrzucić. Ta opcja jest dostępna tylko wtedy, gdy wiadomość czeka na wysłanie.</p>
-<p>Aby zmienić opóźnienie lub wysyłać wiadomości od razu, wybierz <b data-settings="general"></b> i dostosuj <b data-text="ui-send-delay"></b>. Jeśli zakończysz Inbox Classic, gdy wiadomość czeka, aplikacja spróbuje wysłać ją od razu.</p>
+<p>Domyślnie po kliknięciu <b data-text="ui-tb-send"></b> wiadomość czeka kilka sekund przed wysłaniem. Pasek stanu pokazuje odliczanie. W tym czasie kliknij <b data-text="ui-undo-button"></b> obok odliczania albo wybierz <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>, aby anulować wysyłkę. Wiadomość otworzy się ponownie, aby można ją było edytować lub odrzucić. Ta opcja jest dostępna tylko do końca odliczania. Po tym terminie nie można jej użyć, nawet jeśli wysyłanie jeszcze się nie rozpoczęło lub zakończyło się błędem.</p>
+<p>Aby zmienić opóźnienie lub wysyłać wiadomości od razu, wybierz <b data-settings="general"></b> i dostosuj <b data-text="ui-send-delay"></b>. Jeśli zamkniesz Inbox Classic, gdy wiadomość czeka na wysłanie, aplikacja spróbuje wysłać ją od razu.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

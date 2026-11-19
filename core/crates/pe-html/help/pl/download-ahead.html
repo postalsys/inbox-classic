@@ -1,12 +1,11 @@
-<!--review--><h1>Wiadomości pobierane z wyprzedzeniem</h1>
-<p class="summary">Nowa poczta jest pobierana od razu po nadejściu, więc otwiera się natychmiast.</p>
-<p>Inbox Classic pobiera nowe wiadomości w tle, gdy tylko nadejdą. Otwarta wiadomość wyświetla się wtedy od razu, także bez połączenia. Gdy otwierasz wiadomość, pobierane są też wiadomości nad nią i pod nią, aby następna otwierana wiadomość też była gotowa.</p>
+<h1>Wiadomości pobierane z wyprzedzeniem</h1>
+<p class="summary">Pobieraj pocztę w tle, aby otwierać ją bez czekania na połączenie z serwerem.</p>
+<p>Inbox Classic może pobierać nowe wiadomości w tle, zgodnie z wybranym ustawieniem. Po pobraniu można je czytać także bez połączenia. Przy otwieraniu wiadomości program może też pobrać wiadomości sąsiadujące z nią według daty w tym samym folderze. Przy ustawieniu pobierania najnowszych wiadomości ten dodatkowy odczyt stosuje limit rozmiaru, ale nie limit wieku.</p>
 <p>Aby wybrać, co jest pobierane z wyprzedzeniem, wybierz <b data-settings="downloading"></b>:</p>
 <ul>
-    <li><b data-text="ui-download-ahead"></b> <b data-text="ui-download-ahead-recent"></b> pobiera wiadomości z ostatnich 30 dni, do 1 MB każda. <b data-text="ui-download-ahead-all"></b> pobiera każdą wiadomość, na ile pozwala poniższy limit. <b data-text="ui-download-ahead-never"></b> pobiera wiadomość dopiero po jej otwarciu.</li>
-    <li><b data-text="ui-download-limit"></b> określa, ile miejsca zajmuje każde konto. Po jego przekroczeniu najstarsze wiadomości są usuwane z tego komputera, ale nie z serwera, i pobierane ponownie po otwarciu.</li>
+    <li><b data-text="ui-download-ahead"></b>: opcja „<b data-text="ui-download-ahead-recent"></b>” pobiera wiadomości z ostatnich 30 dni, do 1 MB każda. Opcja „<b data-text="ui-download-ahead-all"></b>” pobiera każdą wiadomość, na ile pozwala poniższy limit. Opcja „<b data-text="ui-download-ahead-never"></b>” wyłącza pobieranie z wyprzedzeniem, także wiadomości sąsiadujących według daty.</li>
+    <li><b data-text="ui-download-limit"></b> określa limit pobranych kopii treści dla każdego konta. Po jego przekroczeniu program usuwa najstarsze kopie, z wyjątkiem wersji roboczych i wiadomości otwartych od uruchomienia programu. Nie usuwa samych wiadomości z serwera ani wszystkich ich lokalnych danych. Treść może zostać pobrana ponownie przy otwarciu. Z powodu tych wyjątków limit może zostać przekroczony; nie jest limitem całej bazy poczty.</li>
 </ul>
-<p>Wiadomości z folderów <b data-text="folder-junk"></b> i <b data-text="folder-deleted"></b> oraz z folderu Wszystkie wiadomości w Gmailu są pobierane dopiero po otwarciu.</p>
-<p>Duża wiadomość, powyżej 1 MB, najpierw pokazuje tekst. Załączniki przychodzą później, a pasek stanu pokazuje postęp. Można je otworzyć, a wiadomość zapisać lub przesłać dalej, gdy zostanie pobrana w całości.</p>
+<p>Wiadomości z folderów <b data-text="folder-junk"></b> i <b data-text="folder-deleted"></b> oraz z folderu Wszystkie wiadomości w Gmailu są pomijane przy zbiorczym pobieraniu z wyprzedzeniem.</p>
+<p>Przy pobieraniu wiadomości większej niż 1 MB program może najpierw wyświetlić jej treść, jeśli struktura wiadomości i rozmiary jej części na to pozwalają. Załączniki są pobierane później, a pasek stanu pokazuje postęp. Można je otworzyć, a wiadomość zapisać lub przesłać dalej, gdy zostanie pobrana w całości.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:read-messages"></a> <a href="topic:options-language"></a></nav>
-<!--/review-->

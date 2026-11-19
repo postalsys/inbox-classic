@@ -1,21 +1,20 @@
-<!--review-->
+
 <h1>Attēli un izsekošana</h1>
 <p class="summary">Kāpēc attēli no interneta tiek bloķēti un kā tos parādīt ziņojumam vai sūtītājam, kuram uzticaties.</p>
-<p>Ziņojumā var būt attēli, ko sūtītājs glabā internetā. Šāda attēla lejupielāde sūtītājam pasaka, ka atvērāt ziņojumu, kad un no kurienes. Tāpēc Inbox Classic tos nelejupielādē.</p>
-<p>Attēli, kas nosūtīti pašā ziņojumā, tiek rādīti, jo tie sūtītājam neko nepasaka.</p>
-<p>Inbox Classic šos attēlus zīmē pats, tāpat kā pievienotos, tāpēc tajos nekas netiek izpildīts. Attēls, ko tas nevar uzzīmēt (piemēram, HEIC), tiek rādīts kā tukša vieta. Animētie attēli rāda savu pirmo kadru. Kopā ar ziņojumu nosūtītie fonti netiek izmantoti.</p>
+<p>Ziņojumā var būt attēli, ko sūtītājs glabā internetā. Šāda attēla pieprasījums var atklāt sūtītājam atvēršanas laiku un savienojuma informāciju. Tāpēc Inbox Classic pēc noklusējuma ārējos attēlus nelejupielādē.</p>
+<p>Ziņojumā iekļautos attēlus var parādīt bez atsevišķa pieprasījuma sūtītāja serverim.</p>
+<p>Inbox Classic pati veido iekļauto attēlu priekšskatījumus un neizpilda tajos esošos skriptus. Neatbalstīta attēla, piemēram, HEIC, vietā var būt tukšums. Animācijām redzams tikai pirmais kadrs. Kopā ar ziņojumu nosūtītie fonti netiek izmantoti.</p>
 <p>Ja ziņojumā ir attēli no interneta, josla pāri tam ziņo, ka daži attēli ir bloķēti. Lai tos redzētu ziņojumā, kuram uzticaties:</p>
 <ul>
     <li><!--os:windows,mac-->Noklikšķiniet uz joslas.<!--/os--><!--os:linux-->Joslā noklikšķiniet uz <b data-text="gtk-download-pictures"></b>.<!--/os--></li>
     <li>Vai izvēlieties <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Tā tiek parādīti tikai šī ziņojuma attēli. Nākamajā ziņojumā tie atkal ir bloķēti.</p>
+<p>Šī atļauja attiecas tikai uz atvērto ziņojumu. Citiem ziņojumiem atkal piemēro attēlu ielādes iestatījumus.</p>
 <h2>Sūtītāji, kuriem uzticaties</h2>
 <p>Lai sūtītāja attēlus saņemtu vienmēr, <!--os:windows-->noklikšķiniet uz bultiņas joslas labajā galā<!--/os--><!--os:mac-->noklikšķiniet uz bultiņas blakus <b data-text="cmd-pictures"></b> joslā<!--/os--><!--os:linux-->noklikšķiniet uz bultiņas blakus <b data-text="gtk-download-pictures"></b> joslā<!--/os-->. Izvēlieties vienmēr lejupielādēt attēlus no šī sūtītāja vai no visiem viņa domēnā.</p>
-<p>Tad viņu attēli ielādējas paši, bet tikai tad, ja jūsu pasta pakalpojumu sniedzējs apstiprina, ka ziņojums tiešām nāk no šī domēna. Ziņojums, kas tikai izliekas, ka ir no viņiem, joprojām jautā, un josla ziņo, ka sūtītāju nevarēja apstiprināt. Mapē <b data-text="folder-junk"></b> attēli nekad neielādējas paši.</p>
-<p>Lai sūtītāju izņemtu no saraksta, izmantojiet <b data-text="ui-trusted-senders-button"></b> sadaļā <b data-settings="reading"></b>.</p>
+<p>Attēli tad tiek ielādēti automātiski, ja pasta pakalpojumu sniedzējs apstiprina sūtītāja domēna izcelsmi. Tas pats par sevi neapstiprina konkrētā cilvēka identitāti vai ziņojuma uzticamību. Ja domēnu apstiprināt nevar, joslā tiek prasīta atļauja. Mapē „<b data-text="folder-junk"></b>” un šifrētās ziņojumu daļās attēli joprojām jāielādē ar atsevišķu klikšķi.</p>
+<p>Lai sūtītāju izņemtu no saraksta, izmantojiet pogu „<b data-text="ui-trusted-senders-button"></b>” iestatījumos <b data-settings="reading"></b>.</p>
 <h2>Attēli visos ziņojumos</h2>
-<p><b data-text="ui-pictures-always-option"></b> sadaļā <b data-settings="reading"></b> lejupielādē visu ziņojumu attēlus, izņemot mapē <b data-text="folder-junk"></b>. Sākumā tas ir izslēgts, jo tad sūtītāji var uzzināt, kad lasāt viņu ziņojumus.</p>
-<p>Zīmola logotips blakus galvenei nav izsekošanas attēls. To apstiprina jūsu pasta serveris, un tas nāk no zīmola, nevis no sūtītāja attēliem.</p>
+<p>Opcija „<b data-text="ui-pictures-always-option"></b>” iestatījumos <b data-settings="reading"></b> atļauj automātisku ārējo attēlu ielādi, izņemot mapē „<b data-text="folder-junk"></b>” un šifrētās ziņojumu daļās. Pēc noklusējuma opcija ir izslēgta, jo attēlu pieprasījumi var atklāt ziņojuma atvēršanu.</p>
+<p>Zīmola logotipam blakus galvenei izmanto atsevišķu pārbaudi un kešatmiņu. To rāda, ja pasta serveris apstiprina domēna pārbaudes rezultātu un logotipu. Logotipa iegūšanai vai atjaunošanai var būt vajadzīgs tīkla pieprasījums; tas nav pilnīgas aizsardzības solījums pret izsekošanu.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

@@ -1,20 +1,20 @@
-<!--review--><h1>Niedostarczone wiadomości</h1>
+<h1>Niedostarczone wiadomości</h1>
 <p class="summary">Gdy wysłana wiadomość wraca lub jest opóźniona, Inbox Classic wyjaśnia dlaczego i co możesz zrobić.</p>
-<p>Powiadomienie o doręczeniu ma na liście wiadomości znak niedostarczenia. Po jego otwarciu karta nad nim mówi, czy Twoja wiadomość nie została dostarczona, czy jest tylko opóźniona.</p>
-<img src="picture:bounce-1-failed" alt="Powiadomienie o doręczeniu z kartą informującą, że wiadomość nie została dostarczona, z odbiorcą, przyczyną i tym, co zrobić">
-<p>Karta wymienia każdego odbiorcę z przyczyną opisaną prostymi słowami i tym, co możesz zrobić. <b data-text="bounce-details"></b> pokazuje słowa samego serwera odbiorcy.</p>
+<p>Powiadomienie o problemie z dostarczeniem jest oznaczone odpowiednią ikoną na liście wiadomości. Po jego otwarciu karta nad treścią informuje, czy Twoja wiadomość nie została dostarczona, czy jest tylko opóźniona.</p>
+<img src="picture:bounce-1-failed" alt="Powiadomienie o niedostarczeniu z kartą zawierającą odbiorcę, przyczynę problemu i wskazówki">
+<p>Dla każdego odbiorcy karta opisuje prostymi słowami przyczynę problemu i podaje, co możesz zrobić. <b data-text="bounce-details"></b> pokazuje oryginalny komunikat serwera odbiorcy.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> zaznacza wysłaną wiadomość.</li>
-    <li>Przy opóźnieniu zaznacza ją <b data-text="bounce-show-delayed"></b>. Twój serwer poczty wciąż próbuje, więc nie musisz wysyłać jej ponownie.</li>
+    <li><b data-text="bounce-show-message"></b> zaznacza wysłaną wiadomość, jeśli udało się ją odnaleźć na koncie.</li>
+    <li>Przy opóźnieniu zaznacza ją <b data-text="bounce-show-delayed"></b>. Raport dotyczy opóźnienia, więc zwykle należy poczekać na wynik kolejnych prób, zamiast od razu wysyłać wiadomość ponownie. Nie gwarantuje to jej późniejszego dostarczenia.</li>
 </ul>
 <p>Kilka częstych przyczyn:</p>
 <table>
-    <tr><th>Karta mówi</th><th>Co zrobić</th></tr>
+    <tr><th>Komunikat na karcie</th><th>Co zrobić</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Sprawdź pisownię adresu albo zapytaj tę osobę, jakiego adresu teraz używa.</td></tr>
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Wyślij ją ponownie za kilka dni albo skontaktuj się z tą osobą w inny sposób.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Wyślij ją ponownie bez tego, co wygląda na spam, na przykład wielu linków czy dużego załącznika.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Prześlij powiadomienie swojemu dostawcy poczty. Problem nie leży w wiadomości.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Nic. Zwykle dociera w ciągu godziny.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Przy opóźnieniu poczekaj na wynik dalszych prób serwera. Przy ostatecznym niepowodzeniu spróbuj wysłać wiadomość ponownie później.</td></tr>
 </table>
-<p>Aby znaleźć wszystkie powiadomienia o doręczeniu, wyszukaj <code>is:bounce</code>. Przyczyna jest ustalana na Twoim komputerze i nic nie jest nigdzie wysyłane.</p>
-<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<p>Aby znaleźć wszystkie powiadomienia o niedostarczeniu lub opóźnieniu, wyszukaj <code>is:bounce</code>. Raport jest analizowany lokalnie, bez wysyłania jego treści do osobnej usługi analizy. Wskazówki o ponownym wysyłaniu dotyczą ostatecznych niepowodzeń.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

@@ -1,17 +1,16 @@
-<!--review--><h1>Параметры командной строки</h1>
+<h1>Параметры командной строки</h1>
 <p class="summary">Параметры для запуска Inbox Classic из терминала, для тестирования и для ИИ-агентов.</p>
 <p>Запустите программу <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> с этими параметрами:</p>
 <table>
     <tr><th>Параметр</th><th>Действие</th></tr>
-    <tr><td><code>--store &lt;file&gt;</code></td><td>Использует другое хранилище почты, например тестовое</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>Хранит пароли только на время этого запуска, никогда в системном хранилище паролей</td></tr>
-    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Принимает только сертификат сервера из этого файла (PEM или DER), для тестового сервера с самоподписанным сертификатом</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Записывает страницу входа через браузер в этот файл вместо открытия браузера</td></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>Использует указанный файл базы почты, например отдельную тестовую базу</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Хранит пароли и другие секретные данные только в памяти до выхода, без сохранения в системное хранилище</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Принимает только сертификаты сервера из указанного файла: один или несколько в PEM либо один в DER. Подходит для тестового сервера с самоподписанным сертификатом</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Записывает адрес страницы входа в указанный файл вместо открытия браузера</td></tr>
     <tr><td><code>--language &lt;code&gt;</code></td><td>Показывает окна на этом языке на время этого запуска, например <code>de</code></td></tr>
-    <tr><td><code>--background</code></td><td>Запускает программу без окна</td></tr>
+    <tr><td><code>--background</code></td><td>Запускает программу без главного окна</td></tr>
     <tr><td><code>--mcp</code></td><td>Подключает ИИ-агента к Inbox Classic. Этот параметр использует программа агента, а не вы</td></tr>
     <tr><td><code>--version</code></td><td>Выводит версию и завершает работу</td></tr>
 </table>
-<p>Ссылка <code>mailto:</code>, переданная как аргумент, открывает новое сообщение, как ссылка на адрес электронной почты.</p>
+<p>Ссылка <code>mailto:</code>, переданная как аргумент, открывает новое сообщение, если уже настроена учетная запись.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

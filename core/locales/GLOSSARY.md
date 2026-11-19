@@ -630,6 +630,17 @@ where the singular reads better ("Pārvietot ziņojumu").
 - Compose Cc uses ASCII O on Windows and GTK, distinct from Tools K; Bcc keeps D. Other tested scopes remain clear.
 - Installer scope is the Windows user account; optional data removal includes local settings and mail.
   Store descriptions refer to downloaded mail for offline reading and to the actual classic pane layout.
+- Use "Temats" for an email subject, including menus, columns, compose fields, search and help. Keep "tēma"
+  for a help topic. "Vērot sarunu" is the conversation command; keep its wording consistent in shortcut help.
+- Agent folder creation and renaming are queued requests ("Pieprasīja ..."). List reads count rows, which may
+  represent conversations or combined views; use "saraksta ieraksti" and a separate list label. Attachment
+  summaries count read operations. Undo totals count actions at least partly undone, not guaranteed complete reversals.
+- A locked private key can mean an unavailable system store; check access before restoring a backup. A valid
+  signature that cannot be linked to the sender does not establish another person's identity. Preview failure
+  and file-size messages describe the actual limit or failed operation, without claiming the file itself is invalid.
+- Settings and help distinguish a plaintext mail database, encrypted private keys, and default system credential
+  storage. Removing local data includes contacts, keys and the Outbox; the Windows uninstaller leaves system
+  credential entries. No test suites were run for this contextual followup.
 
 ### Lietuvių (lt)
 
@@ -861,6 +872,8 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   The Mac system path is given in English rather than asserting unverified Lithuanian system-control labels.
 - Code help uses the actual heading "Kodas svetainei:". A provider-confirmed domain is not personal identity;
   the age warning uses the message date. Notifications require enabled settings and timely eligible mail.
+
+- For a public key without email addresses, exact [0] explains that the owner-verification result cannot be saved. Keep patikrintas for verified ownership, distinct from signature validity.
 
 ### Magyar (hu)
 
@@ -1139,6 +1152,18 @@ written as the `[many]` form.
 - Temporary attachment cleanup happens during startup for copies older than a day; avoid implying a background 24-hour timer.
 - Linux credential storage: systemowy pęk kluczy. Offline readability refers to pobrane wiadomości.
 
+- Use Tekst podpisu for the footer help topic; Poczta szyfrowana i podpisana cyfrowo for protected mail; Operatory wyszukiwania for the search reference.
+- OTP notification wording is generic kod dla domeny because detection covers login, verification and approval codes.
+- Distinguish encrypted previews in memory from explicit attachment opening, which writes a temporary decrypted copy; startup cleans old copies.
+- Help explains domain authentication without treating it as guaranteed sender identity or complete tracking prevention.
+
+- Folder create/rename and permanent draft deletion logs use Zlecono to distinguish dispatch from server completion.
+- Agent attachment access is odczytano zawartość; a list log uses pozycje listy and does not force arbitrary scopes into folder grammar.
+- Blocked private key first requires checking system credential-store availability. Key ownership verification and valid signature remain distinct.
+- Domain confirmation is not person authentication; logos have persistent caching. Use generic request acceptance for unsubscribe without a promise of no future mail.
+- Search after includes its UTC boundary; age months/years are fixed 30/365 days; minus does not negate date/age/size filters.
+- Cofnij may only partly undo an agent batch and does not preserve every later color change.
+
 ### Português (pt-BR, Brasil)
 
 Made from the European Portuguese catalogs and rewritten in Brazilian usage, with Microsoft's (Outlook, Windows) and
@@ -1284,6 +1309,15 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - The app retries queued sending; lack of Undo or removal from Outbox does not by itself prove delivery.
 - Multipart counts and independent failure totals use labels when agreement would otherwise depend on separate numbers.
 
+- Help: prefer „textul semnăturii” for the compose footer, „semnătură validă” for cryptographic integrity, and explicit „proprietarul cheii a fost confirmat” for manually verified ownership.
+- Help: use „extindeți/restrângeți” for folder or conversation visibility, „vizualizări comune” for combined account views, „Agenți IA” consistently, and „copie temporară” distinct from a memory-only „previzualizare”.
+
+- Use „cerere/solicitare” for queued agent folder operations and accepted unsubscribe requests; reserve completed outcomes for confirmed operations.
+- Use „operații din jurnal” for Undo Since counts, „rânduri din listă” for agent list counts, and „a citit atașarea” for agent access to file data.
+- Describe a temporary unavailable key as „cheia privată nu poate fi deschisă”; do not equate „blocată” with lost protection.
+- Use „o regulă oprește notificările”, avoiding the literal phrasing „mesaje reduse la tăcere”. Domain confirmation differs from identity/ownership confirmation.
+- Distinguish „previzualizare păstrată în memorie”, „copie temporară necriptată” and „index local necriptat”. Cache size is a limită orientativă, not a hard database limit.
+
 ### Slovenčina (sk)
 
 Terms: Doručená pošta; Pošta na odoslanie; Odoslaná pošta; Odstránená pošta; Koncepty; Nevyžiadaná pošta; správa;
@@ -1324,6 +1358,18 @@ Slovak agent permissions and activity:
   digital signature. Inherited text, images and attachments require encryption until removed.
 - Writing help describes current completion, accounts, copied recipients and formatting. Attachment reminders
   recognize English, German, Estonian, Spanish and French expressions, not Slovak; do not give a Slovak trigger.
+
+- Use textový podpis for the account footer and digitálny podpis for cryptographic signatures; ownership is vlastník kľúča je overený.
+- their-folders must be príslušné priečinky because it is also used for forward moves/copies/junk destinations, not just undo.
+- Use rozsahy oprávnení for OAuth scopes; prístup/prihlasovacie údaje is broader than password.
+- Queued server actions use Zadané... or zaradené na import; accepted unsubscription request is not completed removal from a list.
+- Use Rozsah vyhľadávania or label-based scope grammar for combined folders; agent lists count riadky zoznamu.
+
+- Use textový podpis for account footer and digitálny podpis for cryptographic signatures; domain confirmation does not prove personal identity.
+- One-time codes are jednorazové kódy, not necessarily only sign-in codes.
+- Use uložené kópie obsahu správ for the download limit, which excludes other app data and can be exceeded by protected cache entries.
+- Search after is inclusive of UTC date; month/year age means 30/365 days; avoid promising negation for date/age/size filters.
+- Queued server operations and accepted unsubscribe requests must not imply completion. Agent undo/log summaries count entries, not necessarily individual messages.
 
 ### Slovenščina (sl)
 
@@ -1369,6 +1415,16 @@ Slovenian agent permissions and activity:
   require encryption until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Slovenian.
 - Quotes »...«; keys Ctrl, Shift, Alt, Del, Enter.
 - Review first: the `done-*` / `transfer-*` lines and the plural forms of `setup-*` and `pgp-imported-*`.
+
+- Commands/button text is imperative singular; prose addresses vi politely. Account footer labels consistently Besedilo podpisa; prose may use besedilni podpis računa.
+- Counts 101/102 keep their numeral; exact [1]/[2] only when copy says one/both or refers to a single key/address. Independent counts use separate labels when agreement cannot share one selector.
+- Prezirati means despise; ignoring a conversation is prezreti. Key ownership confirmation is distinct from digital-signature integrity.
+- No-address key verification cannot store an ownership confirmation; unavailable private keys may indicate a locked OS store rather than loss.
+
+- Help: besedilni podpis / Besedilo podpisa for account footer, digitalni podpis for cryptographic protection; lastnik ključa je potrjen for ownership confirmation.
+- Use pogled for combined views, prezreti/prezrtje for ignored conversation (not prezirati), razveljaviti for undo and preklicati pošiljanje for cancelling the queue.
+- Commands retain imperative singular, prose polite lowercase vi. Existing code/kbd literals retained; explain localized Alt+K/Alt+S beside original examples.
+- Use prijavni podatki for secrets including tokens, not only gesla; distinguish dešifrirani predogled in pomnilniku from temporary or saved decrypted file.
 
 ### Srpski, latinica (sr-Latn)
 
@@ -1739,6 +1795,12 @@ Plurals: `[one]` 1, 21, 31...; `[few]` 2 to 4, 22 to 24...; `[many]` 0, 5 to 20,
 - Setup window preferences are «Настройки интерфейса» (notification, list/layout and language settings). Skipped unreachable rows can be apps or accounts and use neutral «Запись».
 - Decrypted attachment copies are unencrypted files in the current user temporary folder; copies older than a day are removed when the app starts, not by a guaranteed daily timer.
 
+- queued agent folder actions: Запрошено создание / Запрошено переименование. Log is emitted after enqueue, before server completion.
+- locked private key: Недоступный закрытый ключ; проверьте доступ к системному хранилищу. Does not establish loss of the protecting secret; distinguish unavailable system store from lost key.
+
+- Notification suppression refers to the main window being in front, not the entire app being in the background. Encrypted search attempts decryption with available private keys; it does not promise every message decrypts.
+- Apply can prompt for a language restart; Cancel discards unapplied local settings, while Windows mail/file associations remain external. Signature ownership must not be inferred when the key cannot be associated with the From address.
+
 ### Українська (uk)
 
 Terms: Вхідні; Вихідні; Надіслані; Видалені; Чернетки; Небажана пошта; повідомлення; папка; обліковий запис; вкладення;
@@ -1779,3 +1841,9 @@ Ukrainian agent permissions and activity:
 - Keep polite lowercase ви, infinitive control labels, «…» quotes and literal keyboard text. Encrypted drafts use
   only the sender’s key, without a digital signature. Inherited text, images and attachments require encryption
   until removed. Attachment reminders recognize English/German/Estonian/Spanish/French, not Ukrainian.
+
+- Use Звичайне for Not Junk status and Позначити як звичайне for action, avoiding the machine-like double negative Не небажане; synchronize menu/undo/help references.
+- Use Вихідний текст повідомлення for message source; Текстовий підпис for footer signatures versus digital підпис.
+- Use В’язка ключів on macOS and Системне сховище ключів (Secret Service) on Linux; avoid branded GNOME assumptions.
+- Retain established Сервіс for Tools; use сервер авторизації for issuer, області доступу (scopes), публічний клієнт for OAuth.
+- Use curly U+2019 apostrophes consistently, e.g. п’ятниця, під’єднати.
