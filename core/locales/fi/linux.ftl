@@ -31,10 +31,9 @@ gtk-unsubscribe-one-click =
     Erotaanko tältä postituslistalta?
 
     Inbox Classic lähettää tilauksen peruutuspyynnön osoitteeseen { $target }. Mitään verkkosivua ei avata eikä sähköpostia lähetetä.
-gtk-unsubscribe-mail =
-    Erotaanko tältä postituslistalta?
+gtk-unsubscribe-mail = Erotaanko tältä postituslistalta?
 
-    Peruuta tilaus lähettämällä sähköposti osoitteeseen { $target }. Inbox Classic valmistelee sen puolestasi. Vahvista lähettämällä viesti.
+    Tilauksen peruuttamista varten on lähetettävä sähköposti osoitteeseen { $target }. Inbox Classic valmistelee viestin puolestasi. Lähetä viesti toimittaaksesi peruutuspyynnön.
 gtk-unsubscribe-web =
     Erotaanko tältä postituslistalta?
 
@@ -156,7 +155,7 @@ gtk-agent-it-may = Sallitut toiminnot
 gtk-agent-accounts = Sallitut tilit
 gtk-never-used = Ei koskaan käytetty
 gtk-last-used = Viimeksi käytetty { $date }
-gtk-forget-program = Poistetaanko tämä ohjelma?
+gtk-forget-program = Poistetaanko tämän ohjelman tallennetut käyttöoikeudet?
 gtk-forget-program-detail = Ohjelman käyttöoikeudet ja sen agenttien toimintahistoria poistetaan. Sinulta kysytään lupaa uudelleen, kun se seuraavan kerran muodostaa yhteyden.
 gtk-no-agents-yet = Mikään agentti ei ole vielä pyytänyt pääsyä postiisi.
 gtk-nothing-yet = Ei vielä mitään.
@@ -179,4 +178,4 @@ gtk-metainfo-description = Inbox Classic on perinteinen sähköpostiohjelma: kan
 gtk-metainfo-feature-sanitized = Viestit näytetään ilman skriptejä ja muuta suoritettavaa sisältöä. Internetin kuvat ladataan vain luvallasi
 gtk-metainfo-feature-search = Haku kattaa aiheen, lähettäjät, vastaanottajat, liitteiden nimet ja viestitekstin sekä tukee Gmailin hakuoperaattoreita
 gtk-metainfo-feature-replies = Vastausten lainaukset supistetaan, ja ne voi avata tarvittaessa
-gtk-metainfo-feature-offline = Ladattuja viestejä voi lukea ilman verkkoyhteyttä. Salasanat säilytetään järjestelmän avainnipussa
+gtk-metainfo-feature-offline = Ladattuja viestejä voi lukea ilman verkkoyhteyttä. Kirjautumistiedot säilytetään oletusarvoisesti järjestelmän avainnipussa

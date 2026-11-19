@@ -1,6 +1,6 @@
 <h1>Palabras de búsqueda</h1>
 <p class="summary">Las palabras y los signos que entiende el cuadro de búsqueda, para encontrar exactamente los mensajes que busca.</p>
-<p>El cuadro de búsqueda admite las mismas palabras que Gmail. Combine tantas como quiera: un mensaje debe cumplirlas todas. Sitúe el puntero sobre el cuadro de búsqueda para ver una lista breve.</p>
+<p>El cuadro de búsqueda admite operadores de búsqueda de Gmail. Combine tantas como quiera: un mensaje debe cumplirlas todas. Sitúe el puntero sobre el cuadro de búsqueda para ver una lista breve.</p>
 <table>
     <tr><th>Escriba</th><th>Encuentra</th></tr>
     <tr><td><code>presupuesto</code></td><td>Mensajes con una palabra que empieza por <i>presupuesto</i>, en cualquier parte</td></tr>
@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Solo esa carpeta, en todas las cuentas</td></tr>
     <tr><td><code>in:proyectos</code></td><td>Solo la carpeta con ese nombre</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Todas las carpetas</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Correo anterior o posterior a un día. También funciona <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Correo con más o menos antigüedad que un número de días (<code>d</code>), meses (<code>m</code>) o años (<code>y</code>)</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Correo anterior a un día o desde ese día, incluido. Las fechas se interpretan en UTC. También funciona <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Correo con más o menos antigüedad que un número de días (<code>d</code>), meses (<code>m</code>) o años (<code>y</code>). Un mes equivale a 30 días y un año a 365</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Correo mayor o menor que un tamaño, en bytes o con <code>K</code>, <code>M</code> o <code>G</code></td></tr>
 </table>
-<p>Los acentos y las mayúsculas no importan. Una palabra de búsqueda que Inbox Classic no conoce se busca como palabra normal.</p>
-<p>Puede encontrar mensajes cifrados por el remitente, los destinatarios y el asunto. Con la opción <b data-text="ui-search-encrypted"></b> activada en <b data-settings="reading"></b>, también puede buscar en su texto después de descifrarlos.</p>
+<p>Los acentos y las mayúsculas no importan. El signo menos no invierte los filtros de fecha, antigüedad ni tamaño. Una palabra de búsqueda que Inbox Classic no conoce se busca como palabra normal.</p>
+<p>Puede encontrar mensajes cifrados por el remitente, los destinatarios y el asunto. Con la opción <b data-text="ui-search-encrypted"></b> activada en <b data-settings="reading"></b>, también puede buscar en su texto después de descifrarlos e indexarlos. El contenido descifrado se guarda sin cifrar en el índice local.</p>
 <p>La lista no muestra tamaños. Para ver el tamaño de un mensaje, elija <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

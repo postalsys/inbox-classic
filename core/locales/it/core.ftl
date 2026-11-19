@@ -24,7 +24,10 @@ send-delay-seconds = { $count ->
 }
 # the status bar: "12 messaggi, 3 da leggere"
 list-counts = { $messages     }, { $unread } da leggere
-list-counts-selected = { $messages     }, { $unread } da leggere, { $selected } selezionati
+list-counts-selected = { $messages }, { $unread } da leggere, { $selected ->
+    [one] 1 selezionato
+   *[other] { $selected } selezionati
+}
 # the status bar while searching: "12 trovati, 3 da leggere"
 list-counts-found = { $found ->
     [one] { $found } trovato
@@ -49,8 +52,8 @@ reader-downloading = Download del messaggio in corso…
 reader-downloading-detail = Il messaggio apparirà qui al termine del download.
 reader-downloading-size = Il messaggio è di { $size }. Apparirà qui quando sarà scaricato.
 reader-failed = Impossibile scaricare il messaggio
-reader-failed-network = Impossibile raggiungere il server di posta ({ $reason }).
-reader-failed-sign-in = Il server di posta non ha accettato l’accesso ({ $reason }). Controlla la password o accedi di nuovo in File > Account.
+reader-failed-network = Impossibile collegarsi al server di posta, oppure la connessione è stata interrotta ({ $reason }).
+reader-failed-sign-in = Il server di posta non ha accettato l’accesso ({ $reason }). Controlla la password o accedi di nuovo nelle impostazioni dell’account.
 reader-failed-security = Impossibile rendere sicura la connessione al server di posta ({ $reason }).
 reader-failed-other = Risposta del server di posta: { $reason }.
 reader-retry-note = Il download verrà riprovato quando l’account sarà di nuovo connesso.
@@ -113,12 +116,12 @@ bounce-mailbox-disabled-why = L’indirizzo esiste, ma la sua casella è stata d
 bounce-mailbox-disabled-do = Contatta la persona in un altro modo e chiedile un indirizzo che usa ora.
 bounce-mailbox-full = La casella è piena
 bounce-mailbox-full-why = La casella del destinatario non ha spazio per nuova posta.
-bounce-mailbox-full-do = Prova a inviare di nuovo il messaggio tra qualche giorno oppure avvisa il destinatario in un altro modo. I messaggi con allegati grandi vengono rifiutati per primi.
+bounce-mailbox-full-do = Riprova a inviare il messaggio più tardi oppure contatta il destinatario in un altro modo, perché possa liberare spazio nella casella.
 bounce-spam-blocked = Rifiutato come spam
 bounce-spam-blocked-why = Il server di destinazione ha scambiato il messaggio per spam.
 bounce-spam-blocked-do = Rimuovi gli elementi che potrebbero sembrare spam, come molti link, link abbreviati o un allegato grande, e riprova a inviare. Se il problema persiste, contatta il tuo provider di posta.
 bounce-virus-detected = Rifiutato per un virus
-bounce-virus-detected-why = Il server di destinazione ha trovato un virus o altro contenuto dannoso nel messaggio o nei suoi allegati.
+bounce-virus-detected-why = Il server di destinazione ha rifiutato il messaggio perché sospetta un virus o altro contenuto dannoso nel testo o negli allegati.
 bounce-virus-detected-do = Controlla gli allegati con un antivirus. Alcuni server rifiutano ogni programma o archivio, quindi condividi questi file tramite un link.
 bounce-ip-blocklisted = Il tuo server di posta è in una lista di blocco
 bounce-ip-blocklisted-why = Il server di destinazione rifiuta il messaggio perché l’indirizzo del server che lo ha inviato compare in una lista di blocco.
@@ -134,7 +137,7 @@ bounce-geo-blocked-why = Il server di destinazione non accetta posta dal paese o
 bounce-geo-blocked-do = Contatta la persona in un altro modo, o chiedi informazioni al tuo provider di posta.
 bounce-relay-denied = Il server ha rifiutato di inoltrare il messaggio
 bounce-relay-denied-why = Un server ha rifiutato di inoltrare il messaggio. Può accadere se non è stato eseguito l’accesso o se il server non gestisce il destinatario.
-bounce-relay-denied-do = In File > Account, controlla le impostazioni del server della posta in uscita e verifica che l’account esegua l’accesso.
+bounce-relay-denied-do = Nelle impostazioni dell’account, controlla il server della posta in uscita e le credenziali di accesso.
 bounce-auth-failure = Impossibile verificare l’indirizzo del mittente
 bounce-auth-failure-why = Il server di destinazione non ha potuto confermare che il messaggio provenga davvero dal tuo dominio (SPF, DKIM o DMARC).
 bounce-auth-failure-do = Inoltra questo avviso a chi gestisce la posta del tuo dominio: le sue impostazioni vanno corrette. Nel frattempo può aiutare inviare tramite il server del tuo provider.
@@ -143,7 +146,7 @@ bounce-rate-limited-why = Per ora il server di destinazione accetta meno messagg
 bounce-rate-limited-do = Attendi un po’ e invialo di nuovo. Quando scrivi a molte persone, invia a meno destinatari alla volta.
 bounce-greylisting = Recapito temporaneamente rinviato
 bounce-greylisting-why = Il server di destinazione chiede ai mittenti sconosciuti di riprovare dopo un breve intervallo. È un controllo antispam comune.
-bounce-greylisting-do = Niente. I server di posta riprovano da soli e di solito il messaggio viene recapitato entro un’ora.
+bounce-greylisting-do = Il greylisting è normalmente un rifiuto temporaneo e i server di posta spesso riprovano. Se però questa notifica segnala un errore definitivo, prova a inviare di nuovo il messaggio più tardi.
 bounce-server-error = Il server di destinazione ha avuto un problema
 bounce-server-error-why = Il server di destinazione non era raggiungibile, o non ha potuto accettare il messaggio per un suo problema.
 bounce-server-error-do = Prova a inviare di nuovo il messaggio più tardi. Se il problema persiste, controlla che non ci siano errori nella parte dell’indirizzo dopo la @.
@@ -332,8 +335,8 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "3 messaggi messi in Archivio"
 import-put = { $count ->
-    [one] { $messages } importato in { $folder }
-   *[other] { $messages } importati in { $folder }
+    [one] { $messages } in coda per l’importazione in { $folder }
+   *[other] { $messages } in coda per l’importazione in { $folder }
 }
 import-not-put = Questi messaggi non sono stati aggiunti alla cartella:
 
@@ -371,8 +374,8 @@ error-import-not-mail = { $path } non è un messaggio e-mail
 error-list-answered = il server della mailing list ha restituito lo stato { $status }
 error-not-built = impossibile creare il messaggio
 error-outbox-waits = { $count ->
-    [one] il messaggio attende in Posta in uscita e verrà inviato al prossimo Invia/Ricevi
-   *[other] { $count } messaggi attendono in Posta in uscita e verranno inviati al prossimo Invia/Ricevi
+    [one] il messaggio attende in Posta in uscita; l’app riproverà a inviarlo al prossimo Invia/Ricevi
+   *[other] { $count } messaggi attendono in Posta in uscita; l’app riproverà a inviarli al prossimo Invia/Ricevi
 }
 error-draft-not-removed = impossibile rimuovere da Bozze la bozza precedente del messaggio: { $reason }
 error-sent-but = il messaggio è stato inviato, ma { $problem }
@@ -387,8 +390,8 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google non ha ancora verificato Inbox Classic, quindi consente l’accesso solo agli utenti di test. Usa la tua app di accesso Google o una password per le app, oppure attivala in App di accesso (File > Account) se sei un utente di test.
-sign-in-off-other = Questa app è disattivata. Puoi riattivarla in File > Account > App di accesso.
+sign-in-off-google = L’app di accesso Google integrata è disattivata per impostazione predefinita. Usa la tua app di accesso o una password per le app, se il tuo account la consente. Puoi attivare l’app integrata in App di accesso se sei autorizzato a usarla.
+sign-in-off-other = Questa app è disattivata. Puoi riattivarla in App di accesso, dalla finestra degli account.
 sign-in-app-no-name = l’app di accesso deve avere un nome
 sign-in-app-no-client = manca l’ID client
 sign-in-app-no-scopes = l’app di accesso richiede le autorizzazioni (scope) che danno accesso alla posta
@@ -438,9 +441,7 @@ day-sunday = domenica
 
 ## AI agents
 
-# review: changed
-agent-level-read = Leggere la posta: consultare cartelle e messaggi ed eseguire ricerche
-# review: changed
+agent-level-read = Leggere la posta: cartelle, elenchi, messaggi, allegati supportati, ricerche, regole e contatti
 agent-level-organize = Organizzare la posta: cambiare lo stato di lettura, i contrassegni e i loro colori, gestire la posta indesiderata, spostare, archiviare ed eliminare messaggi (in Posta eliminata), creare e rinominare cartelle, seguire e ignorare conversazioni e annullare l’iscrizione alle mailing list con il tuo consenso
 agent-level-drafts = Scrivere bozze che invierai tu
 agent-level-send = Inviare posta, con la tua conferma per ogni messaggio
@@ -485,10 +486,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Questo messaggio non può essere letto.
 agent-encrypted-original = Questo messaggio è crittografato: un agente non può rispondere o inoltrarlo, perché non può crittografare.
 agent-encrypted = Questo messaggio è crittografato. Gli agenti IA non possono leggerne il contenuto. L’utente deve aprirlo in Inbox Classic.
-# review: new
-agent-too-many-changes = Troppe modifiche negli ultimi 30 giorni: questo agente ne ha fatte quante Inbox Classic ne conserva nel registro per un programma. Potrà farne altre quando le più vecchie avranno 30 giorni.
-# review: new
-agent-too-many-reads = Troppe letture negli ultimi 30 giorni: questo agente ha letto quanto Inbox Classic conserva nel registro per un programma. Potrà leggere ancora quando le letture più vecchie avranno 30 giorni.
+agent-too-many-changes = L’agente ha raggiunto il limite di modifiche che Inbox Classic registra per un programma negli ultimi 30 giorni. Potrà effettuarne altre quando le più vecchie avranno 30 giorni.
+agent-too-many-reads = L’agente ha raggiunto il limite di letture che Inbox Classic registra per un programma negli ultimi 30 giorni. Potrà leggere altri dati quando le letture più vecchie avranno 30 giorni.
 list-encrypted = Messaggio crittografato
 agent-log-composed = Aperto “{ $subject }” in un nuovo messaggio da completare
 agent-log-refused = Non hai inviato “{ $subject }”
@@ -506,7 +505,7 @@ agent-log-moved = Spostato “{ $subject }” in { $folder }
 agent-log-junk = Segnato “{ $subject }” come posta indesiderata
 agent-log-not-junk = Segnato “{ $subject }” come posta desiderata
 agent-log-archived = Archiviato “{ $subject }”
-agent-log-folder = Creata la cartella “{ $name }”
+agent-log-folder = Richiesta la creazione della cartella “{ $name }”
 agent-log-unsubscribed = Hai autorizzato la richiesta di annullamento dell’iscrizione. Messaggio: “{ $subject }”
 agent-log-unsubscribe-failed = Impossibile annullare l’iscrizione alla mailing list del messaggio “{ $subject }”: { $reason }
 agent-log-unsubscribe-refused = Non hai confermato l’annullamento dell’iscrizione. Mittenti: { $senders }
@@ -518,7 +517,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic chiede alla mailing list qui sotto di non inviarti più messaggi, usando la funzione di annullamento dell’iscrizione con un clic. Non viene inviato nient’altro. I messaggi già presenti restano invariati.
    *[other] Inbox Classic chiede a ogni mailing list qui sotto di non inviarti più messaggi, usando la funzione di annullamento dell’iscrizione con un clic. Non viene inviato nient’altro. I messaggi già presenti restano invariati.
 }
-# review: new
 agent-log-flag-color = Contrassegno { $color ->
     [red] rosso
     [orange] arancione
@@ -528,39 +526,29 @@ agent-log-flag-color = Contrassegno { $color ->
     [purple] viola
    *[gray] grigio
 } aggiunto a “{ $subject }”
-# review: new
-agent-log-renamed = Rinominata la cartella “{ $old }” in “{ $name }”
-# review: new
+agent-log-renamed = Richiesta la rinomina della cartella “{ $old }” in “{ $name }”
 agent-log-watched = Seguita la conversazione “{ $subject }”
-# review: new
 agent-log-ignored = Ignorata la conversazione “{ $subject }”
-# review: new
 agent-log-unmarked = La conversazione “{ $subject }” non è più seguita né ignorata
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = il messaggio è stato modificato nel frattempo
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Segnato come letto 1 messaggio (ricerca: { $query })
    *[other] Segnati come letti { $count } messaggi (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Segnato come da leggere 1 messaggio (ricerca: { $query })
    *[other] Segnati come da leggere { $count } messaggi (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Contrassegnato 1 messaggio (ricerca: { $query })
    *[other] Contrassegnati { $count } messaggi (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Rimosso il contrassegno da 1 messaggio (ricerca: { $query })
    *[other] Rimosso il contrassegno da { $count } messaggi (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-color = Contrassegno { $color ->
     [red] rosso
     [orange] arancione
@@ -573,33 +561,27 @@ agent-log-bulk-color = Contrassegno { $color ->
     [one] 1 messaggio
    *[other] { $count } messaggi
 } (ricerca: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Spostato 1 messaggio in { $folder } (ricerca: { $query })
    *[other] Spostati { $count } messaggi in { $folder } (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Archiviato 1 messaggio (ricerca: { $query })
    *[other] Archiviati { $count } messaggi (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Segnato 1 messaggio come posta indesiderata (ricerca: { $query })
    *[other] Segnati { $count } messaggi come posta indesiderata (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Segnato 1 messaggio come posta desiderata (ricerca: { $query })
    *[other] Segnati { $count } messaggi come posta desiderata (ricerca: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Eliminato 1 messaggio (ricerca: { $query })
    *[other] Eliminati { $count } messaggi (ricerca: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Negli ultimi 15 minuti
     [hour] Nell’ultima ora
@@ -609,129 +591,99 @@ agent-undo-span = { $span ->
    *[all] Negli ultimi 30 giorni
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] { $program } non ha fatto modifiche annullabili in questo periodo.
     [one] Annullare la modifica fatta da { $program } in questo periodo?
    *[other] Annullare le { $count } modifiche fatte da { $program } in questo periodo?
 }
-# review: new
-agent-undo-since-detail = I messaggi tornano nelle cartelle da cui provenivano, lo stato di lettura e i contrassegni tornano com’erano e i messaggi ancora in attesa in Posta in uscita vengono eliminati. Ciò che tu o il server avete modificato nel frattempo resta com’è.
+agent-undo-since-detail = I messaggi tornano nelle cartelle precedenti e vengono ripristinati lo stato di lettura e i contrassegni. I messaggi ancora in Posta in uscita vengono eliminati. Se tu o il server avete modificato nel frattempo lo stato o la posizione interessati, quella modifica viene mantenuta.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Non è stato annullato nulla.
     [one] Annullata 1 modifica.
    *[other] Annullate { $count } modifiche.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 messaggio non era più dove la modifica l’aveva messo.
-   *[other] { $count } messaggi non erano più dove la modifica li aveva messi.
+    [one] 1 messaggio non si trovava più nella posizione prevista.
+   *[other] { $count } messaggi non si trovavano più nelle posizioni previste.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] 1 messaggio è stato modificato nel frattempo, da te o sul server, ed è rimasto com’era.
-   *[other] { $count } messaggi sono stati modificati nel frattempo, da te o sul server, e sono rimasti com’erano.
+    [one] 1 messaggio è stato saltato perché modificato nel frattempo da te o sul server.
+   *[other] { $count } messaggi sono stati saltati perché modificati nel frattempo da te o sul server.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] 1 messaggio aveva già lasciato Posta in uscita.
    *[other] { $count } messaggi avevano già lasciato Posta in uscita.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 modifica non può essere annullata.
    *[other] { $count } modifiche non possono essere annullate.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Questo messaggio accetta l’invito “{ $summary }” ({ $when }).
-    [tentative] Questo messaggio accetta l’invito “{ $summary }” ({ $when }) con riserva.
-   *[decline] Questo messaggio rifiuta l’invito “{ $summary }” ({ $when }).
-} Il calendario dell’organizzatore lo registra. La tua risposta all’invito cambia solo dopo l’invio del messaggio.
+    [accept] Con questo messaggio accetti l’invito “{ $summary }” ({ $when }).
+    [tentative] Con questo messaggio accetti con riserva l’invito “{ $summary }” ({ $when }).
+   *[decline] Con questo messaggio rifiuti l’invito “{ $summary }” ({ $when }).
+} All’organizzatore viene inviata una risposta di calendario. Inbox Classic aggiorna la tua risposta dopo l’invio, senza attendere una conferma dall’organizzatore.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Accettato: { $summary }
-    [tentative] Provvisorio: { $summary }
+    [tentative] Accettato con riserva: { $summary }
    *[decline] Rifiutato: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } ha accettato questo invito.
     [tentative] { $name } ha accettato questo invito con riserva.
    *[decline] { $name } ha rifiutato questo invito.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] letto 1 messaggio
    *[other] letti { $count } messaggi
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] aperto 1 allegato
-   *[other] aperti { $count } allegati
+    [one] letto 1 allegato
+   *[other] letti { $count } allegati
 }
-# review: new
 agent-reads-searches = { $count ->
-    [one] cercato una volta
-   *[other] cercato { $count } volte
+    [one] eseguita 1 ricerca
+   *[other] eseguite { $count } ricerche
 }
-# review: new
 agent-reads-lists = { $count ->
-    [one] consultato un elenco di messaggi una volta
-   *[other] consultato elenchi di messaggi { $count } volte
+    [one] consultata 1 riga degli elenchi dei messaggi
+   *[other] consultate { $count } righe degli elenchi dei messaggi
 }
 # each read under that row
-# review: new
 agent-read-message = Letto “{ $subject }”
-# review: new
 agent-read-conversation = { $count ->
     [one] Letta la conversazione “{ $subject }” (1 messaggio)
    *[other] Letta la conversazione “{ $subject }” ({ $count } messaggi)
 }
-# review: new
-agent-read-attachment = Aperto “{ $name }” di “{ $subject }”
-# review: new
+agent-read-attachment = Letto l’allegato “{ $name }” del messaggio “{ $subject }”
 agent-read-search = { $count ->
     [one] Cercato “{ $query }”: 1 messaggio
    *[other] Cercato “{ $query }”: { $count } messaggi
 }
-# review: new
-agent-read-people = Cercate persone che iniziano con “{ $query }”
-# review: new
+agent-read-people = Cercati contatti con nome o indirizzo che inizia con “{ $query }”
 agent-read-list = { $count ->
-    [one] Consultato 1 messaggio in { $folder }
-   *[other] Consultati { $count } messaggi in { $folder }
+    [one] Consultati i dati di 1 messaggio in { $folder }
+   *[other] Consultati i dati di { $count } messaggi in { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Consultato 1 nuovo messaggio
-   *[other] Consultati { $count } nuovi messaggi
+    [one] Consultati i dati di 1 nuovo messaggio
+   *[other] Consultati i dati di { $count } nuovi messaggi
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Programmi avviati da { $terminal }
-# review: new
 agent-terminal-programs-windows = Programmi avviati da un terminale ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Programmi avviati da un terminale ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Un programma avviato da { $terminal }
-# review: new
 agent-terminal-program-windows = Un programma avviato da un terminale ({ $terminal })
-# review: new
 agent-terminal-program-linux = Un programma avviato da un terminale ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } vogliono accedere alla tua posta
-# review: new
 agent-connect-terminal-detail = Tutti gli agenti IA che avvii da questo terminale condividono l’accesso che consenti qui. Per dare a un agente un accesso proprio, aggiungi --name e un nome a tua scelta ai suoi argomenti nelle impostazioni MCP dell’agente.
-# review: new
 agent-connect-claimed = Ha dichiarato di essere { $claimed }. Inbox Classic ha verificato quale programma lo ha avviato: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -767,7 +719,7 @@ cards-file-failed = { $file }: { $reason }
 otp-heading = Codice da { $domain }
 otp-copy = Copia
 otp-note = Inseriscilo solo su una pagina di { $domain }.
-otp-old = Questo codice è stato inviato più di un’ora prima dell’apertura del messaggio e probabilmente è scaduto.
+otp-old = La data del messaggio precede di oltre un’ora il momento dell’apertura. Il codice potrebbe essere scaduto; Inbox Classic non ne verifica la validità effettiva.
 
 # how many are invited, in the card of an event
 event-attendees =
@@ -786,7 +738,7 @@ pgp-key-expired = Scaduta il { $date }
 pgp-key-revoked = Revocata
 pgp-key-revoked-why = Revocata: { $reason }
 pgp-key-not-valid = Non valida
-pgp-key-locked = Chiave privata non utilizzabile: { $store } non contiene più la chiave che la protegge. Importa di nuovo il backup della chiave privata.
+pgp-key-locked = Impossibile recuperare da { $store } la chiave che protegge questa chiave privata. Controlla che l’archivio sia disponibile e sbloccato. Se la chiave di protezione è andata persa, importa di nuovo il backup della chiave privata.
 pgp-source-own = Creata in Inbox Classic
 pgp-source-file = Importata da un file
 pgp-source-paste = Incollata
@@ -816,8 +768,8 @@ pgp-file-name-private = Backup della chiave privata di { $who }.asc
 pgp-pending = Il { $date } è stata trovata una chiave diversa per { $address }.
 
 ## Reading signed and encrypted mail (protect.rs)
-pgp-part-verified = Firmato da { $signer }, chiave verificata
-pgp-part-signed = Firmato da { $signer } (chiave non verificata)
+pgp-part-verified = Firmato digitalmente da { $signer } (proprietario della chiave verificato)
+pgp-part-signed = Firmato digitalmente da { $signer } (proprietario della chiave non verificato)
 pgp-part-other = Firmato da { $signer }, che non è il mittente
 pgp-part-unknown-key = Firmato, ma la chiave non è nota
 pgp-part-not-signed = Non firmato
@@ -838,19 +790,19 @@ pgp-why-key-not-valid = Firmato con una chiave non valida
 pgp-why-not-for-you = Firmato per altri destinatari e successivamente inoltrato a te
 pgp-why-not-key-in-use = Firmato con una chiave diversa da quella in uso per { $address }
 pgp-part-pictures-loaded = { $label }. Le immagini sono state caricate da internet
-pgp-error-no-own-key = Non hai una chiave per { $address } con cui firmare o crittografare. Creane una in Strumenti > Chiavi di crittografia, o disattiva Firma e Crittografa.
+pgp-error-no-own-key = Non hai una chiave per { $address } con cui firmare o crittografare. Creane una in Chiavi di crittografia oppure disattiva la firma digitale e la crittografia.
 pgp-error-missing-keys = { $count ->
     [one] Non è disponibile una chiave di crittografia per { $addresses }.
    *[other] Non sono disponibili chiavi di crittografia per questi destinatari: { $addresses }.
 }
-pgp-error-encrypted-quote = Questo messaggio cita o inoltra un messaggio crittografato, quindi può essere inviato solo crittografato. Attiva Crittografa, o rimuovi il testo citato.
+pgp-error-encrypted-quote = Questo messaggio contiene testo, immagini o allegati provenienti da un messaggio crittografato e può essere inviato solo crittografato. Attiva Crittografa oppure rimuovi quel contenuto.
 pgp-error-protect = Impossibile firmare o crittografare il messaggio: { $reason }
 pgp-found-keys = Chiavi trovate per: { $addresses }.
 pgp-found-none = Nessuna chiave trovata per: { $addresses }. Richiedi le chiavi pubbliche necessarie.
 pgp-found-no-key = Nessuna chiave trovata.
 pgp-find-unavailable = Al momento non è possibile cercare le chiavi: { $error }
-pgp-publish-pending = keys.openpgp.org ha inviato un link di conferma a questi indirizzi: { $addresses }. Conferma ogni indirizzo per rendere la tua chiave reperibile tramite quell’indirizzo.
-pgp-publish-done = La tua chiave è pubblicata su keys.openpgp.org per { $addresses }.
+pgp-publish-pending = La chiave è stata inviata a keys.openpgp.org e sono stati richiesti link di conferma per: { $addresses }. Apri il link per ogni indirizzo ancora da confermare, così gli altri potranno trovare la chiave tramite quell’indirizzo.
+pgp-publish-done = La chiave è stata inviata a keys.openpgp.org per gli indirizzi: { $addresses }.
 pgp-publish-failed = Impossibile pubblicare la chiave: { $error }
 pgp-keyserver-off = La ricerca delle chiavi su keys.openpgp.org è disattivata in { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
@@ -888,7 +840,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Mancano chiavi utilizzabili per { $count } destinatari. Cerca le loro chiavi o rimuovi quei destinatari dal messaggio. Puoi inviare il messaggio senza crittografia solo se non contiene più testo, immagini o allegati provenienti da messaggi crittografati.
 }
 pgp-details-part = Parte { $number }: { $label }
-# review: new
 attachment-from-part = Dalla parte { $number }: { $label }
 pgp-details-signed = Firmato il { $when } con la chiave { $key }
 pgp-details-unknown-key = Firmato con la chiave { $key }, che non hai
@@ -900,17 +851,14 @@ pgp-bar-count-verified = { $count ->
     [one] { $count } verificata
    *[other] { $count } verificate
 }
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] 1 crittografata e firmata
    *[other] { $count } crittografate e firmate
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] 1 crittografata
    *[other] { $count } crittografate
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] 1 firmata
    *[other] { $count } firmate
@@ -1048,8 +996,8 @@ setup-skipped-rules-account = { $count ->
    *[other] Ignorate { $count } regole per i messaggi perché i relativi account non sono configurati su questo computer.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 regola per i messaggi sposta i messaggi in una cartella che apparirà dopo la sincronizzazione del suo account.
-   *[other] { $count } regole per i messaggi spostano i messaggi in cartelle che appariranno dopo la sincronizzazione dei loro account.
+    [one] Dopo la sincronizzazione, l’app cercherà la cartella di destinazione di 1 regola per i messaggi.
+   *[other] Dopo la sincronizzazione, l’app cercherà le cartelle di destinazione di { $count } regole per i messaggi.
 }
 setup-added-trusted-senders = { $count ->
     [one] Aggiunto 1 mittente attendibile.
@@ -1058,9 +1006,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Non è stato importato niente.
 setup-account-servers = { $imap } e { $smtp } ({ $signin })
 setup-file-name = Impostazioni e account di Inbox Classic
-setup-skipped-unreachable = L’app di accesso { $name } è stata ignorata perché il relativo servizio non era raggiungibile. Aggiungila di nuovo in App di accesso.
+setup-skipped-unreachable = Voce ignorata: { $name }. Il servizio di accesso non era raggiungibile. Controlla la configurazione in App di accesso e riprova.
 attachment-runs-programs = “{ $name }” può eseguire programmi, quindi Inbox Classic non lo apre. Salvalo, poi aprilo tu stesso se ti fidi della sua provenienza.
-attachment-decrypted-note = Questo allegato proviene da un messaggio crittografato. Per aprirlo, Inbox Classic salva una copia non crittografata in una cartella temporanea del tuo account utente. Le copie più vecchie di un giorno vengono eliminate all’avvio dell’app.
+attachment-decrypted-note = Questo allegato proviene da un messaggio crittografato. Per aprirlo, Inbox Classic salva una copia in chiaro in una cartella temporanea del tuo account utente. La copia può restare sul disco dopo la chiusura del file. All’avvio, l’app tenta di eliminare le copie più vecchie di un giorno.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Il server non ha spostato { $messages } in { $folder }, quindi è di nuovo in { $from }: { $reason }
@@ -1089,46 +1037,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Mostra i file PDF nei messaggi
-# review: new
 preview-pdf-off = I file PDF non vengono mostrati nei messaggi.
-# review: new
-preview-pdf-off-crashed = Un file PDF ha chiuso Inbox Classic mentre veniva mostrato, quindi i file PDF non vengono più mostrati nei messaggi. Le immagini sì. Per mostrare di nuovo i file PDF, attiva { $option } in { $settings }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic si è interrotto durante l’anteprima di un file in un messaggio. Le anteprime PDF sono quindi disattivate, mentre le immagini restano visibili. Per mostrare di nuovo i PDF, attiva { $option } in { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 pagina, { $size }
    *[other] { $count } pagine, { $size }
 }
-# review: new
 preview-page-alt = { $name }, pagina { $page } di { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Apri il file per vedere la pagina
    *[other] Apri il file per vedere tutte le { $count } pagine
 }
-# review: new
 preview-more-files = { $count ->
     [one] 1 altro file è nell’elenco qui sopra
    *[other] Altri { $count } file sono nell’elenco qui sopra
 }
-# review: new
 preview-tile-downloading = Download in corso…
-# review: new
 preview-tile-preparing = Preparazione in corso…
-# review: new
-preview-tile-format = Le immagini { $format } non vengono ancora mostrate
-# review: new
+preview-tile-format = Le immagini in formato { $format } non sono ancora supportate
 preview-tile-password = Protetto da password: aprilo per inserire la password
-# review: new
 preview-tile-too-large = Troppo grande per essere mostrato
-# review: new
 preview-tile-unreadable = Impossibile mostrarlo
-# review: new
 preview-tile-timed-out = La visualizzazione ha richiesto troppo tempo
-# review: new
-preview-tile-crashed = Non mostrato: ha chiuso Inbox Classic una volta
-# review: new
+preview-tile-crashed = Anteprima non disponibile: in precedenza Inbox Classic si è chiuso o ha smesso di rispondere durante la visualizzazione
 preview-tile-off = Non mostrato fino al prossimo avvio di Inbox Classic
-# review: new
 preview-not-printed = { $name } ({ $details }) non viene stampato. Aprilo per stamparlo.

@@ -4,8 +4,8 @@
 <img src="picture:bounce-1-failed" alt="Un aviso de entrega con una tarjeta que indica que el mensaje no se entregó, el destinatario, el motivo y qué hacer">
 <p>La tarjeta muestra cada destinatario con el motivo en palabras sencillas y lo que puede hacer. <b data-text="bounce-details"></b> muestra las palabras exactas del servidor receptor.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> selecciona el mensaje que envió.</li>
-    <li>En caso de retraso, <b data-text="bounce-show-delayed"></b> lo selecciona. Su servidor de correo sigue intentándolo, así que no hace falta que lo envíe de nuevo.</li>
+    <li><b data-text="bounce-show-message"></b> selecciona el mensaje que envió, si se puede encontrar.</li>
+    <li>En caso de retraso, <b data-text="bounce-show-delayed"></b> lo selecciona si se puede encontrar. Si el aviso indica que su servidor sigue intentando entregarlo, no hace falta enviarlo de nuevo.</li>
 </ul>
 <p>Algunos motivos habituales:</p>
 <table>
@@ -14,7 +14,7 @@
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Envíelo de nuevo dentro de unos días, o póngase en contacto con la persona por otra vía.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Envíelo de nuevo sin lo que parezca correo no deseado, como muchos enlaces o un archivo adjunto grande.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Reenvíe el aviso a su proveedor de correo. El problema no es el mensaje.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Nada. Normalmente se entrega en menos de una hora.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Espere mientras el servidor siga intentando entregarlo. Si ha dejado de intentarlo, puede que necesite enviarlo de nuevo.</td></tr>
 </table>
-<p>Para encontrar todos los avisos de entrega, busque <code>is:bounce</code>. El motivo se determina en su equipo, y no se envía nada a ningún sitio.</p>
+<p>Para encontrar todos los avisos de entrega, busque <code>is:bounce</code>. El aviso se analiza en su equipo; no se envía el correo a un servicio externo para explicar el motivo.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

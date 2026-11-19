@@ -85,8 +85,8 @@
     </p>
     <p xml:lang="it">
       Con Inbox Classic leggi e scrivi e-mail in un’interfaccia familiare: cartelle a sinistra, elenco dei messaggi in
-      alto e contenuto del messaggio selezionato sotto. Funziona con qualsiasi account IMAP e SMTP e permette di
-      accedere a Outlook.com e Microsoft 365 tramite il browser.
+      alto e contenuto del messaggio selezionato sotto. Supporta account IMAP e SMTP e l’accesso a Outlook.com e
+      Microsoft 365 tramite il browser
     </p>
     <p xml:lang="lv">
       Inbox Classic ir e-pasta programma ar klasisku izkārtojumu: mapes pa kreisi, ziņojumu saraksts augšā un atlasītā
@@ -216,10 +216,10 @@
       <li xml:lang="hr">Pretraživanje predmeta, pošiljatelja, primatelja, naziva privitaka i teksta poruka, uz operatore pretraživanja iz Gmaila</li>
       <li xml:lang="hr">Citirani tekst ranijih poruka u odgovorima skriven je iza gumba za prikaz</li>
       <li xml:lang="hr">Preuzete poruke možete čitati bez interneta. Podaci za prijavu prema zadanim se postavkama čuvaju u sustavskom spremištu tajni</li>
-      <li xml:lang="it">I messaggi vengono visualizzati senza script e altri contenuti potenzialmente pericolosi; le immagini da internet vengono caricate solo con il tuo consenso</li>
+      <li xml:lang="it">I messaggi vengono ripuliti da script e altri contenuti attivi; le immagini da internet vengono caricate solo con il tuo consenso</li>
       <li xml:lang="it">Ricerca nell’oggetto, nei mittenti, nei destinatari, nei nomi degli allegati e nel testo dei messaggi, con il supporto degli operatori di Gmail</li>
       <li xml:lang="it">Il testo dei messaggi precedenti citato nelle risposte viene compresso e può essere espanso quando serve</li>
-      <li xml:lang="it">La posta già scaricata si può leggere anche offline; le password vengono conservate nel portachiavi</li>
+      <li xml:lang="it">La posta scaricata si può leggere anche offline. Le credenziali vengono conservate per impostazione predefinita nell’archivio protetto del sistema</li>
       <li xml:lang="lv">Ziņojumi tiek attīrīti no nedroša satura un rādīti bez skriptiem; attēli no interneta tiek ielādēti tikai ar jūsu atļauju</li>
       <li xml:lang="lv">Meklējiet ziņojumu tematos un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos; var izmantot Gmail meklēšanai līdzīgus operatorus</li>
       <li xml:lang="lv">Atbildēs citētie iepriekšējie ziņojumi ir sakļauti, un tos var izvērst</li>
@@ -271,7 +271,7 @@
       <li xml:lang="fi">Viestit näytetään ilman skriptejä ja muuta suoritettavaa sisältöä. Internetin kuvat ladataan vain luvallasi</li>
       <li xml:lang="fi">Haku kattaa aiheen, lähettäjät, vastaanottajat, liitteiden nimet ja viestitekstin sekä tukee Gmailin hakuoperaattoreita</li>
       <li xml:lang="fi">Vastausten lainaukset supistetaan, ja ne voi avata tarvittaessa</li>
-      <li xml:lang="fi">Ladattuja viestejä voi lukea ilman verkkoyhteyttä. Salasanat säilytetään järjestelmän avainnipussa</li>
+      <li xml:lang="fi">Ladattuja viestejä voi lukea ilman verkkoyhteyttä. Kirjautumistiedot säilytetään oletusarvoisesti järjestelmän avainnipussa</li>
       <li xml:lang="sv">Meddelanden visas utan skript. Du bestämmer när bilder från internet får hämtas</li>
       <li xml:lang="sv">Sök i ämnen, avsändare, mottagare, bilagenamn och meddelandetext med sökvillkor som liknar Gmails</li>
       <li xml:lang="sv">Citerade meddelanden fälls ihop i svar så att din egen text får plats</li>

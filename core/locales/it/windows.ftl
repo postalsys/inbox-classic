@@ -95,20 +95,16 @@ win-send = &Invia
 win-dont-send = &Non inviare
 win-unsubscribe = &Annulla iscrizione
 win-dont-unsubscribe = &Non annullare l’iscrizione
-win-forget-program-ask = Rimuovere questo programma, le sue autorizzazioni e la cronologia delle attività dei suoi agenti? Alla prossima connessione ti verrà chiesta di nuovo l’autorizzazione.
+win-forget-program-ask = Rimuovere questo programma dall’elenco, insieme alle sue autorizzazioni e alla cronologia delle attività dei suoi agenti? Alla prossima connessione ti verrà chiesta di nuovo l’autorizzazione.
 win-clear-log-ask = Cancellare la cronologia delle attività degli agenti? Le modifiche fatte dagli agenti non verranno annullate.
 win-agent-programs = &Programmi i cui agenti hanno chiesto l’accesso alla tua posta:
 win-change = &Modifica...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Annulla &da...
-# review: new
-win-take-back = &Annulla
+win-undo-since = Annulla mo&difiche del periodo...
+win-take-back = Annulla &modifiche
 win-what-agents-did = At&tività degli agenti:
-# review: new
 win-agent-reads = Cosa è stato letto dalle { $from } alle { $to }:
-# review: new
-win-agent-reads-hint = Seleziona sopra una riga di letture per vedere cosa è stato letto.
+win-agent-reads-hint = Seleziona una riga del registro delle letture qui sopra per vedere i dettagli.
 win-how-to-connect = Come connettere un agente
 
 ## Sign-in apps
@@ -141,4 +137,4 @@ win-installer-welcome-update =
     Se è in esecuzione, verrà prima chiuso. I tuoi account e la tua posta verranno conservati.
 win-installer-older-ask = È installato Inbox Classic { $installed }, più recente di { $version }. Installare comunque la versione precedente?
 win-installer-still-running = Inbox Classic è ancora in esecuzione. Chiudilo e riprova.
-win-installer-remove-mail-ask = Rimuovere anche gli account e la posta che Inbox Classic conserva su questo computer? La posta sui server verrà conservata.
+win-installer-remove-mail-ask = Rimuovere tutti i dati locali di Inbox Classic, inclusi account, messaggi in Posta in uscita, posta scaricata, contatti, chiavi e impostazioni? La posta sui server verrà conservata. Le voci in Gestione credenziali di Windows non verranno eliminate.

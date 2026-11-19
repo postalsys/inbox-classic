@@ -1,8 +1,8 @@
 <h1>Desinstalar Inbox Classic</h1>
-<p class="summary">Quite Inbox Classic de su equipo, con o sin el correo que descargó.</p>
-<!--os:windows--><p>Desinstale Inbox Classic desde <i>Configuración &gt; Aplicaciones &gt; Aplicaciones instaladas</i>. El desinstalador pregunta si también debe quitar el correo descargado.</p><!--/os-->
-<!--os:mac--><p>Salga de Inbox Classic y muévalo de Aplicaciones a la Papelera. El correo descargado permanece en <code>~/Library/Application Support/Inbox Classic</code> hasta que elimine también esa carpeta.</p><!--/os-->
-<!--os:linux--><p>Quite el paquete con <code>sudo apt remove inbox-classic</code>, o con <code>sudo pacman -R inbox-classic</code> en Arch Linux y Omarchy. El correo descargado permanece en <code>~/.local/share/inbox-classic</code> hasta que elimine también esa carpeta.</p><!--/os-->
+<p class="summary">Quite Inbox Classic de su equipo, y decida si desea conservar sus datos locales.</p>
+<!--os:windows--><p>Desinstale Inbox Classic desde <i>Configuración &gt; Aplicaciones &gt; Aplicaciones instaladas</i>. El desinstalador pregunta si también debe eliminar los datos locales: correo descargado, mensajes pendientes de envío, cuentas, configuración, contactos, reglas y claves de cifrado.</p><!--/os-->
+<!--os:mac--><p>Salga de Inbox Classic y muévalo de Aplicaciones a la Papelera. Los datos locales, incluidos el correo descargado, la configuración, los contactos y las claves de cifrado, permanecen en <code>~/Library/Application Support/Inbox Classic</code> hasta que elimine también esa carpeta.</p><!--/os-->
+<!--os:linux--><p>Quite el paquete con <code>sudo apt remove inbox-classic</code>, o con <code>sudo pacman -R inbox-classic</code> en Arch Linux y Omarchy. Los datos locales, incluidos el correo descargado, la configuración, los contactos y las claves de cifrado, permanecen en <code>~/.local/share/inbox-classic</code> hasta que elimine también esa carpeta.</p><!--/os-->
 <p>El correo de sus servidores nunca se elimina.</p>
-<p>Para quitar las contraseñas guardadas, quite antes cada cuenta en <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Para quitar solo una cuenta, consulte <a href="topic:manage-accounts"></a>.</p>
+<p>El desinstalador y la eliminación de la carpeta de datos no borran los datos de acceso del almacén del sistema. Para quitar los datos de acceso de cada cuenta, elimine esa cuenta antes de desinstalar el programa, en <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Para quitar solo una cuenta, consulte <a href="topic:manage-accounts"></a>.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>

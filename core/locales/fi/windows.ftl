@@ -96,20 +96,16 @@ win-send = &Lähetä
 win-dont-send = Älä lä&hetä
 win-unsubscribe = &Peruuta tilaus
 win-dont-unsubscribe = Ä&lä peruuta tilausta
-win-forget-program-ask = Poistetaanko tämä ohjelma, sen käyttöoikeudet ja sen agenttien toimintahistoria? Sinulta kysytään lupaa uudelleen, kun se seuraavan kerran muodostaa yhteyden.
+win-forget-program-ask = Poistetaanko tämän ohjelman tallennetut käyttöoikeudet ja sen agenttien toimintahistoria? Seuraavalla yhteyskerralla kysytään lupaa uudelleen. Ohjelmaa ei poisteta tietokoneesta.
 win-clear-log-ask = Tyhjennetäänkö agenttien toimintahistoria? Tämä ei kumoa agenttien tekemiä muutoksia.
 win-agent-programs = &Ohjelmat, joiden agentit ovat pyytäneet pääsyä postiisi:
 win-change = &Muuta...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = Kumoa a&jalta...
-# review: new
-win-take-back = &Peru
+win-take-back = &Kumoa
 win-what-agents-did = Agenttien &toiminta:
-# review: new
-win-agent-reads = Luettu kello { $from } ja { $to } välillä:
-# review: new
-win-agent-reads-hint = Valitse yläpuolelta lukemisten rivi nähdäksesi, mitä luettiin.
+win-agent-reads = Lukutoiminnot ajalta { $from } - { $to }:
+win-agent-reads-hint = Valitse yllä oleva lukutoimintojen merkintä nähdäksesi, mitä luettiin.
 win-how-to-connect = Agentin yhdistäminen
 
 ## Sign-in apps
@@ -137,4 +133,4 @@ win-installer-welcome-update = Inbox Classic päivitetään versiosta { $install
     Jos ohjelma on käynnissä, se suljetaan ensin. Sähköpostitilisi ja viestisi säilyvät.
 win-installer-older-ask = Asennettuna on Inbox Classic { $installed }, joka on uudempi kuin { $version }. Asennetaanko vanhempi versio silti?
 win-installer-still-running = Inbox Classic on yhä käynnissä. Sulje se ja yritä uudelleen.
-win-installer-remove-mail-ask = Poistetaanko myös Inbox Classiciin lisätyt tilit ja tähän tietokoneeseen tallennetut viestit? Viestit säilyvät palvelimilla.
+win-installer-remove-mail-ask = Poistetaanko myös kaikki Inbox Classicin paikalliset tiedot, kuten tilit, viestit, asetukset, yhteystiedot ja avaimet? Palvelimilla olevat viestit ja Windowsin Tunnistetietojen hallinnan merkinnät säilyvät.

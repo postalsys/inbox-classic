@@ -77,7 +77,7 @@ mac-save-attachments-menu = Tallenna liitteet…
 mac-files-not-saved = { $count ->
        *[other] { $failed } tiedoston tallentaminen epäonnistui. Tiedostoja yhteensä: { $count }.
     }
-mac-no-calendar-app = Tässä Macissa ei ole kalenteriappia kutsujen (.ics-tiedostojen) avaamiseen.
+mac-no-calendar-app = Kutsua (.ics-tiedostoa) ei voitu avata kalenterisovelluksessa. Tarkista, että kalenterisovellus on asennettu ja asetettu avaamaan tämä tiedostotyyppi.
 mac-file-not-saved = Tiedostoa ei voitu tallentaa.
 mac-unsubscribing = Peruutetaan tilausta: { $target }…
 mac-loading-list = Ladataan…
@@ -115,7 +115,7 @@ mac-sign-in-apps-button = Kirjautumissovellukset…
 
 ## AI agents
 
-mac-forget-program = Poistetaanko tämä ohjelma ja sen agenttien toimintahistoria?
+mac-forget-program = Poistetaanko tämän ohjelman tallennetut käyttöoikeudet ja sen agenttien toimintahistoria?
 mac-forget-program-detail = Ohjelman käyttöoikeudet poistetaan. Sinulta kysytään lupaa uudelleen, kun se seuraavan kerran muodostaa yhteyden.
 
 ## Sign-in apps

@@ -78,7 +78,7 @@ cmd-text-size-smallest = Mu&y pequeño
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
 cmd-hide-read = Ocultar los mensajes &leídos
 cmd-notify = &Avisar de correo nuevo
-cmd-open = &Abrir Inbox Classic
+cmd-open = A&brir Inbox Classic
 cmd-default-app = Usar como programa de correo &predeterminado...
 cmd-view-source = &Formato original del mensaje
 cmd-ai-agents = Agentes de &IA...
@@ -200,7 +200,7 @@ ui-hyperlink = Enlace
 ui-hyperlink-intro = La dirección a la que lleva el texto seleccionado.
 ui-edit-hyperlink = Editar enlace
 ui-edit-hyperlink-intro = Dirección de destino del enlace. Borre la dirección para quitar el enlace y conservar el texto.
-ui-not-a-picture = Este archivo no es una imagen PNG, JPEG o GIF, o tiene más de 10 MB.
+ui-not-a-picture = No se pudo insertar la imagen. Use un archivo PNG, JPEG, GIF o WebP que se pueda leer y no supere los 10 MB.
 ui-format-color = Color de fuente
 ui-format-numbers = Lista numerada
 ui-format-bullets = Lista con viñetas
@@ -242,7 +242,7 @@ ui-no-items = No hay elementos en esta vista.
 ui-choose-folder = Elija una carpeta para ver sus mensajes.
 ui-unsubscribe = Cancelar suscripción
 ui-open-in-calendar = Abrir en el calendario
-ui-pictures-blocked = Se bloquearon algunas imágenes para evitar que el remitente identifique su equipo. Haga clic aquí para descargar las imágenes.
+ui-pictures-blocked = Se han bloqueado algunas imágenes para reducir el seguimiento por parte del remitente. Haga clic aquí para descargarlas.
 ui-not-shown = No se pudo mostrar el mensaje.
 ui-attachment-not-read = No se pudo leer el archivo adjunto.
 ui-attachment-not-saved = No se pudo guardar el archivo adjunto.
@@ -251,12 +251,12 @@ ui-leave-list = ¿Salir de esta lista de correo?
 ui-leave-one-click = Inbox Classic enviará una solicitud de baja a { $target }. No se abrirá ninguna página web ni se enviará ningún correo electrónico.
 ui-leave-mail = Para cancelar la suscripción, debe enviar un mensaje a { $target }. Inbox Classic lo prepara por usted. Envíelo para confirmar la baja.
 ui-leave-web = Se abrirá la página de baja de la lista en su navegador ({ $target }).
-ui-unsubscribing = Cancelando la suscripción a { $target }...
+ui-unsubscribing = Enviando la solicitud de baja a { $target }...
 ui-cannot-unsubscribe = Este mensaje no permite cancelar la suscripción.
-ui-unsubscribed = Baja confirmada. La lista indica que dejará de enviarle estos mensajes.
+ui-unsubscribed = La lista ha aceptado la solicitud de baja.
 ui-not-unsubscribed = No se pudo cancelar la suscripción: { $reason }
 ui-event-span = { $start } a { $end }
-ui-event-floating = { $when } (hora del remitente)
+ui-event-floating = { $when } (sin conversión de zona horaria)
 ui-invitation = Invitación: { $title }
 ui-invitation-updated = Invitación actualizada: { $title }
 ui-invitation-canceled = Cancelado: { $title }
@@ -264,7 +264,7 @@ ui-invitation-answer = Respuesta a una invitación: { $title }
 ui-no-title = (sin título)
 ui-organizer = Organizador: { $name }
 ui-invitation-not-read = No se pudo leer la invitación.
-ui-no-calendar = No hay ninguna aplicación de calendario disponible en este equipo para abrir invitaciones (archivos .ics).
+ui-no-calendar = No se pudo abrir la invitación. Compruebe que haya una aplicación de calendario configurada para abrir archivos .ics.
 ui-messages-not-changed = No se pudieron cambiar los mensajes.
 ui-new-folder-in-selected = La nueva carpeta se crea dentro de la carpeta seleccionada.
 ui-new-folder-at-top = La nueva carpeta se crea en el nivel superior de la cuenta.
@@ -296,7 +296,7 @@ ui-app-password-open = ¿Abrir las instrucciones de { $provider } en su navegado
 ui-plain-warning = Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Utilice esta conexión solo con un servidor en su propio equipo o en su red local.
 ui-continue-ask = ¿Continuar?
 ui-add-sign-in-app = Agregar una aplicación de inicio de sesión...
-ui-turned-off = { $name } está desactivado en este equipo.
+ui-turned-off = La opción «{ $name }» está desactivada en este equipo.
 ui-off-here = Desactivado en este equipo.
 ui-why = ¿Por qué?
 ui-more-sign-in = Más opciones de inicio de sesión...
@@ -329,7 +329,7 @@ ui-enter-password = Escriba la contraseña de { $account }.
 ui-signs-in-with = Aplicación de inicio de sesión: { $app }. La sesión se inicia en el navegador y la cuenta utiliza los servidores de esa aplicación.
 ui-keep-password = Deje vacío el campo de contraseña para conservar la contraseña actual.
 ui-remove-account = Quitar cuenta
-ui-remove-account-ask = ¿Quitar esta cuenta de Inbox Classic? Los mensajes permanecerán en el servidor. Se eliminarán las copias de este equipo y la contraseña guardada.
+ui-remove-account-ask = ¿Quitar esta cuenta de Inbox Classic? Se eliminarán sus datos locales, incluidos los mensajes de la Bandeja de salida, y los datos de acceso guardados. Los mensajes que estén en el servidor se conservarán.
 ui-col-email = Dirección de correo electrónico
 ui-col-incoming = Servidor de entrada
 ui-type-email = Escriba su dirección de correo, por ejemplo nombre@example.com.
@@ -412,7 +412,6 @@ ui-save-attachments = Guardar archivos adjuntos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Guardar como...
 ui-attachment-save-all = Guardar todos...
-# review: new
 ui-attachment-show-in-message = Mostrar en el mensaje
 ui-attachments-strip = Archivos adjuntos
 ui-attachment-note-title = Abrir archivo adjunto
@@ -422,7 +421,7 @@ ui-button-move = &Mover
 ui-button-copy = &Copiar
 ui-find-folder = Buscar una carpeta
 ui-new-folder-in = La nueva carpeta se crea dentro de { $folder }.
-ui-outbox-send-all = &Enviar todo ahora
+ui-outbox-send-all = En&viar todo ahora
 ui-yes = Sí
 ui-no = No
 ui-try-again = Reintentar
@@ -444,11 +443,8 @@ ui-let-agents-connect = &Permitir que los agentes de IA se conecten a Inbox Clas
 ui-change-button = Cambiar…
 ui-undo-button = Deshacer
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Deshacer desde…
-# review: new
-ui-undo-since-span = Deshacer lo que hizo este programa:
-# review: new
+ui-undo-since-span = Deshacer los cambios de este programa:
 ui-take-back = Deshacer
 ui-rules-title = Reglas de mensajes
 ui-rules-intro = Las reglas organizan los mensajes nuevos que llegan a sus bandejas de entrada mientras Inbox Classic está abierto. Las reglas cuyos criterios se cumplen se aplican por orden. Cuando una mueve un mensaje fuera de la Bandeja de entrada, no se le aplican más reglas.
@@ -591,11 +587,8 @@ ui-download-limit = &Espacio máximo por cuenta:
 ui-send-delay = &Retraso antes de enviar:
 ui-send-delay-note = Mientras un mensaje esté pendiente de envío, puede cancelar el envío con Deshacer.
 ui-dark-messages = Mostrar los mensajes sobre fondo oscuro cuando el sistema esté en modo oscuro
-# review: new
 ui-preview-show = Mostrar los archivos ad&juntos en los mensajes
-# review: new
-ui-preview-show-note = Muestra las imágenes y las primeras páginas de los archivos PDF después del texto del mensaje. Inbox Classic crea estas vistas previas por sí mismo, así que nada de un archivo puede ejecutarse.
-# review: new
+ui-preview-show-note = Muestra las imágenes y las primeras páginas de los archivos PDF después del texto del mensaje. Inbox Classic genera estas vistas previas sin ejecutar el código que puedan contener los archivos.
 ui-preview-pdfs = Mostrar archivos &PDF en los mensajes
 ui-sending-in = Se enviará { $subject } en { $count ->
     [one] 1 segundo
@@ -604,7 +597,7 @@ ui-sending-in = Se enviará { $subject } en { $count ->
 ui-send-undone = { $subject } no se envió. El mensaje se ha vuelto a abrir para editarlo.
 ui-send-too-late = Ya no se puede deshacer el envío de { $subject }.
 ui-outbox-status-undo = Se envía a las { $time }
-ui-download-note = Los mensajes descargados con antelación se abren al instante. Cuando se supera el límite de almacenamiento, se eliminan las copias locales más antiguas y se vuelven a descargar al abrir los mensajes.
+ui-download-note = Los mensajes descargados con antelación se abren al instante. Cuando se supera el límite, se eliminan las copias de contenido más antiguas y se descargan de nuevo al abrir los mensajes. Se conservan los borradores y los mensajes abiertos desde que inició el programa. El límite no abarca toda la base de datos.
 ui-attachment-downloading = La descarga de este mensaje aún no ha terminado. Vuelva a intentarlo cuando finalice.
 ui-trusted-senders-button = &Remitentes de confianza...
 ui-trusted-senders-title = Remitentes de confianza
@@ -635,7 +628,7 @@ ui-list-pictures = &Mostrar las imágenes de los remitentes en la lista de mensa
 ui-list-pictures-note = En el diseño en columnas, muestra logotipos de marca o fotos de la Libreta de direcciones si el dominio del remitente está confirmado. Si no hay imagen disponible, muestra sus iniciales. Los logotipos descargados se guardan y reutilizan en distintos mensajes.
 ui-card-picture = Imagen:
 ui-card-picture-choose = &Elegir...
-ui-picture-not-picture = Este archivo no es una imagen PNG ni JPEG.
+ui-picture-not-picture = No se pudo leer este archivo como una imagen PNG o JPEG.
 ui-picture-too-large = Esta imagen es demasiado grande. Elija una de un máximo de 10 MB, con un ancho y un alto de hasta 8000 píxeles.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
@@ -672,11 +665,11 @@ ui-keys-backup-saved = Se guardó la copia de seguridad.
 ui-keys-import-title = Importar clave
 ui-keys-import-passphrase = Esta clave privada está protegida con una contraseña. Introdúzcala para importar la clave:
 ui-keys-file-filter = Claves OpenPGP
-ui-keys-use-for = ¿Desea usar esta clave para las siguientes direcciones: { $addresses }? Se usará para firmar los mensajes que envíe desde ellas y le permitirá leer aquí los mensajes cifrados con esta clave.
+ui-keys-use-for = ¿Desea usar esta clave para las siguientes direcciones: { $addresses }? Le permitirá firmar los mensajes enviados desde ellas y leer aquí los mensajes cifrados con esta clave.
 ui-keys-use = &Usarla
 ui-keys-not-now = &Ahora no
-ui-keys-remove-own = ¿Desea quitar su clave { $fingerprint }? Para volver a leer aquí los mensajes cifrados con esta clave, tendrá que importar su copia de seguridad.
-ui-keys-remove-contact = ¿Desea quitar la clave de { $name }? Hasta que vuelva a añadirla, no podrá comprobar las firmas de este contacto ni enviarle mensajes cifrados.
+ui-keys-remove-own = ¿Desea quitar su clave { $fingerprint }? No podrá volver a descifrar mensajes con ella hasta que importe una copia de seguridad.
+ui-keys-remove-contact = ¿Desea quitar la clave de { $name }? Hasta que vuelva a añadirla, no podrá usar esta clave para comprobar firmas ni para cifrar mensajes.
 ui-key-properties-title = Propiedades de la clave
 ui-key-names = Nombres:
 ui-key-fingerprint = Huella digital:
@@ -693,8 +686,9 @@ ui-verify-title = Verificar clave
 ui-verify-intro = Compare la huella digital con { $name }, en persona o por teléfono. Pídale que la lea desde su propia aplicación. No use una huella enviada por correo: quien pudiera sustituir la clave también podría sustituir esa huella.
 ui-verify-fingerprint = Huella digital de la clave guardada:
 ui-verify-marks = { $count ->
-    [one] Si las huellas coinciden, la clave se marcará como verificada para esta dirección: { $addresses }. Si la dirección no pertenece a su contacto, haga clic en «No coinciden».
-   *[other] Si las huellas coinciden, la clave se marcará como verificada para estas direcciones: { $addresses }. Si alguna no pertenece a su contacto, haga clic en «No coinciden».
+    [0] Esta clave no contiene direcciones de correo, por lo que no se puede guardar la confirmación de su titular.
+    [one] Si las huellas coinciden, se confirmará el titular de la clave para esta dirección: { $addresses }. Si la dirección no pertenece a su contacto, haga clic en «No coinciden».
+   *[other] Si las huellas coinciden, se confirmará el titular de la clave para estas direcciones: { $addresses }. Si alguna no pertenece a su contacto, haga clic en «No coinciden».
 }
 ui-verify-match = &Coinciden
 ui-verify-differ = &No coinciden
@@ -722,9 +716,9 @@ ui-compose-encrypt-off = &Desactivar el cifrado
 ui-compose-keep-encrypted = &Mantenerlo cifrado
 ui-setup-export-title = Exportar configuración y cuentas
 ui-setup-import-title = Importar configuración y cuentas
-ui-setup-export-intro = Elija los datos que desea transferir a otro equipo. Los mensajes se descargarán de nuevo en ese equipo; no se incluyen en el archivo.
+ui-setup-export-intro = Elija los datos que desea transferir a otro equipo. El archivo no incluye mensajes, tampoco los de la Bandeja de salida. En el otro equipo se descargará el correo que esté en el servidor.
 ui-setup-use-passphrase = &Proteger el archivo con una contraseña
-ui-setup-passphrase-note = Si usa una contraseña, el archivo se cifra e incluye también las contraseñas guardadas, los datos de acceso y las claves privadas. Si no la usa, tendrá que volver a iniciar sesión en sus cuentas desde el otro equipo.
+ui-setup-passphrase-note = Si usa una contraseña, el archivo se cifra e incluye los datos de acceso guardados y las claves privadas disponibles de las categorías seleccionadas. Si no la usa, tendrá que volver a iniciar sesión en sus cuentas desde el otro equipo.
 ui-setup-export-button = &Exportar...
 ui-setup-file-filter = Configuración y cuentas de Inbox Classic
 ui-setup-ask-passphrase = Este archivo está protegido con una contraseña. Introdúzcala para ver su contenido:

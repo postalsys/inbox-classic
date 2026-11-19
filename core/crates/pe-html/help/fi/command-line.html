@@ -5,12 +5,12 @@
     <tr><th>Valitsin</th><th>Toiminto</th></tr>
     <tr><td><code>--store &lt;tiedosto&gt;</code></td><td>Käyttää toista postitietokantaa, esimerkiksi testausta varten</td></tr>
     <tr><td><code>--memory-passwords</code></td><td>Säilyttää salasanat ja muut kirjautumistiedot vain muistissa tämän käyttökerran ajan</td></tr>
-    <tr><td><code>--pin-certificate &lt;tiedosto&gt;</code></td><td>Hyväksyy vain tiedostossa olevan palvelinvarmenteen (PEM tai DER). Tarkoitettu testipalvelimelle, jolla on itse allekirjoitettu varmenne</td></tr>
+    <tr><td><code>--pin-certificate &lt;tiedosto&gt;</code></td><td>Hyväksyy vain tiedostossa olevat palvelinvarmenteet esimerkiksi testipalvelimelle. PEM-tiedostossa voi olla useita varmenteita, DER-tiedostossa yksi</td></tr>
     <tr><td><code>--sign-in-page-file &lt;tiedosto&gt;</code></td><td>Tallentaa selaimessa avattavan kirjautumissivun URL-osoitteen tiedostoon selaimen avaamisen sijaan</td></tr>
     <tr><td><code>--language &lt;koodi&gt;</code></td><td>Käyttää tällä käyttökerralla annettua kieltä, esimerkiksi <code>de</code></td></tr>
     <tr><td><code>--background</code></td><td>Käynnistää sovelluksen taustalle ilman pääikkunaa</td></tr>
     <tr><td><code>--mcp</code></td><td>Yhdistää tekoälyagentin Inbox Classiciin. Agentin ohjelma käyttää tätä valitsinta automaattisesti</td></tr>
     <tr><td><code>--version</code></td><td>Tulostaa versionumeron ja lopettaa ohjelman</td></tr>
 </table>
-<p>Argumenttina annettu <code>mailto:</code>-linkki avaa uuden viestin samoin kuin sähköpostilinkki.</p>
+<p>Argumenttina annettu <code>mailto:</code>-linkki avaa uuden viestin, kun tili on jo määritetty. Jos tiliä ei vielä ole, lisää se ja avaa linkki uudelleen.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>

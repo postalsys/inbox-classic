@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Solo quella cartella, in tutti gli account</td></tr>
     <tr><td><code>in:progetti</code></td><td>Solo la cartella con quel nome</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Tutte le cartelle</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Messaggi precedenti o successivi alla data indicata. Funziona anche <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Messaggi più vecchi o più recenti dell’intervallo indicato, espresso in giorni (<code>d</code>), mesi (<code>m</code>) o anni (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Messaggi di dimensioni superiori o inferiori al valore indicato, espresso in byte o con i suffissi <code>K</code>, <code>M</code> o <code>G</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Date calcolate in UTC: before esclude la data indicata, after la include. Funziona anche <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Messaggi più vecchi o più recenti dell’intervallo indicato, espresso in giorni (<code>d</code>), mesi (<code>m</code>) o anni (<code>y</code>); un mese equivale a 30 giorni e un anno a 365 giorni</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Messaggi di dimensioni superiori o inferiori al valore indicato, espresso in byte o con i suffissi <code>K</code>, <code>M</code> o <code>G</code>, con multipli di 1024</td></tr>
 </table>
-<p>La ricerca ignora gli accenti e non distingue tra maiuscole e minuscole. Gli operatori non riconosciuti vengono cercati come testo normale.</p>
+<p>La ricerca ignora gli accenti e non distingue tra maiuscole e minuscole. Gli operatori non riconosciuti vengono cercati come testo normale. Il segno meno non inverte i filtri per data, età o dimensione. Per cercare l’inizio di una parola servono almeno due caratteri; un solo carattere viene cercato come parola intera.</p>
 <p>Puoi trovare i messaggi crittografati per mittente, destinatari e oggetto. Con l’opzione <b data-text="ui-search-encrypted"></b> attiva in <b data-settings="reading"></b>, puoi cercare anche nel loro testo dopo la decrittografia.</p>
 <p>L’elenco non mostra le dimensioni. Per vedere quanto è grande un messaggio, scegli <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

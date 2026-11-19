@@ -46,8 +46,8 @@ reader-downloading = Ladataan viestiä…
 reader-downloading-detail = Viesti näkyy tässä, kun lataus on valmis.
 reader-downloading-size = Viestin koko on { $size }. Se näkyy tässä, kun se on ladattu.
 reader-failed = Viestiä ei voitu ladata
-reader-failed-network = Postipalvelimeen ei saatu yhteyttä ({ $reason }).
-reader-failed-sign-in = Postipalvelin ei hyväksynyt kirjautumista ({ $reason }). Tarkista salasana tai kirjaudu uudelleen kohdassa Tiedosto > Tilit.
+reader-failed-network = Yhteys postipalvelimeen epäonnistui tai katkesi ({ $reason }).
+reader-failed-sign-in = Postipalvelin ei hyväksynyt kirjautumista ({ $reason }). Tarkista salasana tai kirjaudu uudelleen tilin asetuksissa.
 reader-failed-security = Yhteyttä postipalvelimeen ei voitu suojata ({ $reason }).
 reader-failed-other = Postipalvelin vastasi: { $reason }.
 reader-retry-note = Latausta yritetään uudelleen, kun yhteys tiliin palautuu.
@@ -110,12 +110,12 @@ bounce-mailbox-disabled-why = Osoite on olemassa, mutta postilaatikko on suljett
 bounce-mailbox-disabled-do = Ota henkilöön yhteyttä muulla tavalla ja kysy hänen nykyistä sähköpostiosoitettaan.
 bounce-mailbox-full = Postilaatikko on täynnä
 bounce-mailbox-full-why = Vastaanottajan postilaatikossa ei ole tilaa uudelle postille.
-bounce-mailbox-full-do = Lähetä viesti uudelleen muutaman päivän kuluttua tai ilmoita asiasta henkilölle muulla tavalla. Suuret liitteet torjutaan ensimmäisinä.
+bounce-mailbox-full-do = Lähetä viesti uudelleen muutaman päivän kuluttua tai ilmoita asiasta vastaanottajalle muulla tavalla.
 bounce-spam-blocked = Torjuttu roskapostina
 bounce-spam-blocked-why = Vastaanottava palvelin piti viestiä roskapostina.
 bounce-spam-blocked-do = Poista viestistä roskapostilta vaikuttavaa sisältöä, kuten runsaita tai lyhennettyjä linkkejä ja suuria liitteitä, ja lähetä viesti uudelleen. Jos ongelma toistuu, ota yhteyttä postipalveluntarjoajaasi.
 bounce-virus-detected = Torjuttu viruksen vuoksi
-bounce-virus-detected-why = Vastaanottava palvelin löysi viestistä tai sen liitteistä viruksen tai muuta haitallista sisältöä.
+bounce-virus-detected-why = Vastaanottava palvelin ilmoittaa, että viestissä tai sen liitteissä on virus tai muuta haitallista sisältöä.
 bounce-virus-detected-do = Tarkista liitteet virustorjuntaohjelmalla. Jotkin palvelimet torjuvat kaikki ohjelmat ja arkistot, joten jaa tällaiset tiedostot mieluummin linkkinä.
 bounce-ip-blocklisted = Postipalvelimesi on estolistalla
 bounce-ip-blocklisted-why = Vastaanottava palvelin torjuu postin palvelimelta, joka lähetti viestisi, koska sen palvelimen osoite on estolistalla.
@@ -131,7 +131,7 @@ bounce-geo-blocked-why = Vastaanottava palvelin ei ota vastaan postia siitä maa
 bounce-geo-blocked-do = Ota henkilöön yhteyttä muulla tavalla tai kysy asiasta postipalveluntarjoajaltasi.
 bounce-relay-denied = Palvelin ei välittänyt viestiä eteenpäin
 bounce-relay-denied-why = Palvelin kieltäytyi toimittamasta viestiä eteenpäin, usein koska se lähetettiin kirjautumatta tai palvelimen kautta, joka ei käsittele tämän vastaanottajan postia.
-bounce-relay-denied-do = Tarkista tilin lähtevän postin palvelin kohdassa Tiedosto > Tilit. Varmista myös, että palvelimelle kirjaudutaan.
+bounce-relay-denied-do = Tarkista tilin asetuksissa lähtevän postin palvelin ja varmista, että palvelimelle kirjautuminen on määritetty.
 bounce-auth-failure = Lähettäjäosoitettasi ei voitu vahvistaa
 bounce-auth-failure-why = Vastaanottava palvelin ei voinut varmistaa, että viesti todella tuli verkkotunnuksestasi (SPF, DKIM tai DMARC).
 bounce-auth-failure-do = Välitä tämä ilmoitus sille, joka hoitaa verkkotunnuksesi postin: sen asetukset on korjattava. Sillä välin lähettäminen palveluntarjoajasi oman palvelimen kautta voi auttaa.
@@ -140,7 +140,7 @@ bounce-rate-limited-why = Vastaanottava palvelin ottaa toistaiseksi vastaan väh
 bounce-rate-limited-do = Odota hetki ja lähetä viesti uudelleen. Kun kirjoitat monille, lähetä harvemmille kerrallaan.
 bounce-greylisting = Toimitusta lykätty hetkeksi
 bounce-greylisting-why = Vastaanottava palvelin pyytää tuntemattomia lähettäjiä yrittämään hieman myöhemmin uudelleen. Se on yleinen roskapostin torjuntakeino.
-bounce-greylisting-do = Ei mitään. Postipalvelimet yrittävät uudelleen itse, ja viesti toimitetaan yleensä tunnin kuluessa.
+bounce-greylisting-do = Tilapäisessä viiveessä lähettävä palvelin yrittää yleensä uudelleen. Jos toimitusraportti ilmoittaa lopullisesta virheestä, lähetä viesti myöhemmin uudelleen.
 bounce-server-error = Vastaanottavalla palvelimella oli ongelma
 bounce-server-error-why = Vastaanottavaan palvelimeen ei saatu yhteyttä, tai se ei voinut ottaa viestiä vastaan oman ongelmansa vuoksi.
 bounce-server-error-do = Lähetä viesti myöhemmin uudelleen. Jos se epäonnistuu yhä, tarkista osoitteen @-merkin jälkeinen osa kirjoitusvirheiden varalta.
@@ -314,7 +314,7 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Lisätty: 3 viestiä. Kohde: Arkisto"
 import-put = { $count ->
-   *[other] Lisätty: { $messages }. Kohde: { $folder }
+   *[other] Lisätty tuontijonoon: { $messages }. Kohde: { $folder }
 }
 import-not-put = Näitä ei lisätty kansioon:
 
@@ -352,8 +352,8 @@ error-import-not-mail = Tiedosto { $path } ei ole sähköpostiviesti
 error-list-answered = postituslistan palvelin palautti tilan { $status }
 error-not-built = viestiä ei voitu muodostaa
 error-outbox-waits = { $count ->
-    [one] viesti odottaa Lähtevät-kansiossa ja lähetetään, kun seuraavan kerran valitset Lähetä ja vastaanota kaikki
-   *[other] { $count } viestiä odottaa Lähtevät-kansiossa, ja ne lähetetään, kun seuraavan kerran valitset Lähetä ja vastaanota kaikki
+    [one] viesti jää Lähtevät-kansioon; lähettämistä yritetään uudelleen seuraavan Lähetä ja vastaanota -toiminnon yhteydessä
+   *[other] { $count } viestiä jää Lähtevät-kansioon; lähettämistä yritetään uudelleen seuraavan Lähetä ja vastaanota -toiminnon yhteydessä
 }
 error-draft-not-removed = viestin aiempaa luonnosta ei voitu poistaa Luonnokset-kansiosta: { $reason }
 error-sent-but = viesti lähetettiin, mutta { $problem }
@@ -361,15 +361,15 @@ error-sent-still-in-outbox = se on yhä Lähtevät-kansiossa: { $error }
 error-sent-no-copy = kopiota ei voitu tallentaa Lähetetyt-kansioon: { $reason }
 error-no-password = tilin salasana puuttuu
 error-no-sign-in = tilin kirjautumistiedot puuttuvat
-error-provider-missing = tämä versio ei voi kirjautua palveluun { $provider }: onko sen kirjautumissovellus poistettu?
+error-provider-missing = kirjautuminen tunnisteella ”{ $provider }” ei onnistu; tarvittava kirjautumissovellus on ehkä poistettu
 error-provider-servers = tämän tilin palvelimet eivät vastaa sen kirjautumissovelluksen palvelimia
 error-app-scopes = { $reason }. Postipalvelin ei hyväksynyt kirjautumissovelluksen käyttöoikeustunnusta: tarkista, että sovelluksen käyttöoikeudet (scopes) sallivat postin käytön
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google ei ole vielä vahvistanut Inbox Classicia, joten se sallii kirjautumisen sillä vain testikäyttäjille. Käytä omaa Google-kirjautumissovellustasi tai sovellussalasanaa, tai ota se käyttöön kohdassa Kirjautumissovellukset (Tiedosto > Tilit), jos olet testikäyttäjä.
-sign-in-off-other = Se poistettiin käytöstä kohdassa Kirjautumissovellukset (Tiedosto > Tilit), jossa sen voi ottaa uudelleen käyttöön.
+sign-in-off-google = Sisäänrakennettu Google-kirjautumissovellus on poistettu käytöstä uusilta tileiltä. Käytä omaa Google-kirjautumissovellusta tai sovellussalasanaa, jos tilisi tukee sitä. Hyväksytyt testikäyttäjät voivat ottaa sisäänrakennetun sovelluksen käyttöön tiliasetusten Kirjautumissovellukset-kohdassa.
+sign-in-off-other = Tämä kirjautumissovellus poistettiin käytöstä tiliasetusten Kirjautumissovellukset-kohdassa. Sen voi ottaa siellä uudelleen käyttöön.
 sign-in-app-no-name = kirjautumissovellus tarvitsee nimen
 sign-in-app-no-client = asiakastunnus puuttuu
 sign-in-app-no-scopes = kirjautumissovellus tarvitsee käyttöoikeudet (scopes), jotka antavat pääsyn postiin
@@ -419,9 +419,7 @@ day-sunday = sunnuntai
 
 ## AI agents
 
-# review: changed
-agent-level-read = Lukea postia: kansiot, viestiluettelo, haku ja viestit
-# review: changed
+agent-level-read = Lukea postia: tarkastella kansioita, viestiluetteloita, keskusteluja ja hakutuloksia, lukea viestejä ja niiden liitteitä sekä tarkastella viestisääntöjä ja hakea yhteystietoja
 agent-level-organize = Järjestellä postia: merkitä viestejä luetuiksi tai lukemattomiksi, muuttaa lippuja ja niiden värejä, käsitellä roskapostia, siirtää ja arkistoida viestejä, luoda ja nimetä uudelleen kansioita, seurata ja ohittaa keskusteluja, poistaa viestejä siirtämällä ne Poistetut-kansioon ja peruuttaa postituslistojen tilauksia luvallasi
 agent-level-drafts = Kirjoittaa luonnoksia, jotka sinä lähetät
 agent-level-send = Lähettää postia, jokaisen viestin vasta hyväksyntäsi jälkeen
@@ -466,17 +464,15 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Tätä viestiä ei voi lukea.
 agent-encrypted-original = Tämä viesti on salattu: agentti ei voi vastata siihen tai välittää sitä, koska se ei osaa salata.
 agent-encrypted = Tämä viesti on salattu. Tekoälyagentit eivät voi lukea sen sisältöä. Käyttäjän on avattava viesti Inbox Classicissa.
-# review: new
-agent-too-many-changes = Liikaa muutoksia viimeisten 30 päivän aikana: tämä agentti on tehnyt niitä niin monta kuin Inbox Classic säilyttää lokissaan yhdelle ohjelmalle. Se voi tehdä lisää, kun vanhimmat ovat 30 päivää vanhoja.
-# review: new
-agent-too-many-reads = Liikaa lukemista viimeisten 30 päivän aikana: tämä agentti on lukenut niin paljon kuin Inbox Classic säilyttää lokissaan yhdelle ohjelmalle. Se voi lukea lisää, kun vanhimmat lukukerrat ovat 30 päivää vanhoja.
+agent-too-many-changes = Ohjelman viimeisten 30 päivän muutosloki on täynnä. Agentti voi tehdä lisää muutoksia, kun vanhimpien merkintöjen lisäämisestä on kulunut 30 päivää.
+agent-too-many-reads = Ohjelman viimeisten 30 päivän lukuloki on täynnä. Agentti voi lukea lisää, kun vanhimpien merkintöjen lisäämisestä on kulunut 30 päivää.
 list-encrypted = Salattu viesti
 agent-log-composed = Avasi viestin ”{ $subject }” uutena viestinä, jonka viimeistelet
 agent-log-refused = Et lähettänyt viestiä ”{ $subject }”
 agent-log-sent = Lisäsi viestin ”{ $subject }” lähetysjonoon. Vastaanottajat: { $to }
 agent-log-draft = Tallensi luonnoksen ”{ $subject }”
 agent-log-draft-replaced = Korvasi luonnoksen ”{ $subject }”
-agent-log-draft-discarded = Hylkäsi luonnoksen ”{ $subject }”
+agent-log-draft-discarded = Pyysi luonnoksen ”{ $subject }” hylkäämistä
 agent-draft-note = Tekoälyagentti { $program } kirjoitti tämän luonnoksen. Tarkista vastaanottajat ja teksti ennen lähettämistä.
 agent-log-read = Merkitsi luetuksi: ”{ $subject }”
 agent-log-unread = Merkitsi lukemattomaksi: ”{ $subject }”
@@ -487,7 +483,7 @@ agent-log-moved = Siirsi: ”{ $subject }”. Kohde: { $folder }
 agent-log-junk = Merkitsi roskapostiksi: ”{ $subject }”
 agent-log-not-junk = Poisti roskapostimerkinnän: ”{ $subject }”
 agent-log-archived = Arkistoi: ”{ $subject }”
-agent-log-folder = Loi kansion ”{ $name }”
+agent-log-folder = Pyysi luomaan kansion ”{ $name }”
 agent-log-unsubscribed = Hyväksyit tilauksen peruutuspyynnön. Viesti: ”{ $subject }”
 agent-log-unsubscribe-failed = Tilauksen peruuttaminen epäonnistui. Viesti: ”{ $subject }”. Syy: { $reason }
 agent-log-unsubscribe-refused = Et hyväksynyt tilauksen peruutuspyyntöä. Lähettäjät: { $senders }
@@ -499,7 +495,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic pyytää alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
    *[other] Inbox Classic pyytää jokaista alla olevaa postituslistaa lopettamaan viestien lähettämisen sinulle. Se käyttää kunkin listan tarjoamaa yhden napsautuksen peruutustoimintoa. Mitään muuta ei lähetetä. Nykyisiä viestejäsi ei muuteta eikä siirretä.
 }
-# review: new
 agent-log-flag-color = Liputti { $color ->
     [red] punaisella
     [orange] oranssilla
@@ -509,39 +504,29 @@ agent-log-flag-color = Liputti { $color ->
     [purple] violetilla
    *[gray] harmaalla
 } lipulla: ”{ $subject }”
-# review: new
-agent-log-renamed = Nimesi kansion ”{ $old }” uudelleen. Uusi nimi: ”{ $name }”
-# review: new
+agent-log-renamed = Pyysi nimeämään kansion ”{ $old }” uudelleen. Uusi nimi: ”{ $name }”
 agent-log-watched = Alkoi seurata keskustelua ”{ $subject }”
-# review: new
-agent-log-ignored = Alkoi ohittaa keskustelun ”{ $subject }”
-# review: new
+agent-log-ignored = Alkoi ohittaa keskustelua ”{ $subject }”
 agent-log-unmarked = Lopetti keskustelun ”{ $subject }” seuraamisen tai ohittamisen
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = viestiä on muutettu sen jälkeen
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Merkitsi 1 viestin luetuksi (haku: { $query })
    *[other] Merkitsi { $count } viestiä luetuiksi (haku: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Merkitsi 1 viestin lukemattomaksi (haku: { $query })
    *[other] Merkitsi { $count } viestiä lukemattomiksi (haku: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Liputti 1 viestin (haku: { $query })
    *[other] Liputti { $count } viestiä (haku: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Poisti lipun 1 viestistä (haku: { $query })
    *[other] Poisti lipun { $count } viestistä (haku: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] Liputti 1 viestin
    *[other] Liputti { $count } viestiä
@@ -554,33 +539,27 @@ agent-log-bulk-color = { $count ->
     [purple] violetilla
    *[gray] harmaalla
 } lipulla (haku: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Siirsi 1 viestin. Kohde: { $folder } (haku: { $query })
    *[other] Siirsi { $count } viestiä. Kohde: { $folder } (haku: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Arkistoi 1 viestin (haku: { $query })
    *[other] Arkistoi { $count } viestiä (haku: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Merkitsi 1 viestin roskapostiksi (haku: { $query })
    *[other] Merkitsi { $count } viestiä roskapostiksi (haku: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Poisti roskapostimerkinnän 1 viestistä (haku: { $query })
    *[other] Poisti roskapostimerkinnän { $count } viestistä (haku: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Poisti 1 viestin (haku: { $query })
    *[other] Poisti { $count } viestiä (haku: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Viimeisten 15 minuutin aikana
     [hour] Viimeisen tunnin aikana
@@ -590,129 +569,99 @@ agent-undo-span = { $span ->
    *[all] Viimeisten 30 päivän aikana
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
-    [0] { $program } ei tehnyt tänä aikana muutoksia, jotka voisi perua.
-    [one] Perutaanko muutos, jonka { $program } teki tänä aikana?
-   *[other] Perutaanko { $count } muutosta, jotka { $program } teki tänä aikana?
+    [0] { $program } ei tehnyt tänä aikana muutoksia, jotka voisi kumota.
+    [one] Kumotaanko muutos, jonka { $program } teki tänä aikana?
+   *[other] Kumotaanko { $count } muutosta, jotka { $program } teki tänä aikana?
 }
-# review: new
-agent-undo-since-detail = Viestit palaavat kansioihin, joista ne tulivat, luku- ja lipputilat palautetaan ennalleen ja Lähtevät-kansiossa yhä odottavat viestit poistetaan. Sitä, mitä sinä tai palvelin olette muuttaneet sen jälkeen, ei muuteta.
+agent-undo-since-detail = Viestit palautetaan mahdollisuuksien mukaan aiempiin kansioihin, lukutila ja liput palautetaan ja Lähtevät-kansiossa vielä odottavat viestit poistetaan. Ensin tarkistetaan nykyinen kansio ja muutokseen liittyvät merkinnät. Kaikkia myöhempiä muutoksia ei voida aina säilyttää.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
-    [0] Mitään ei peruttu.
-    [one] Peruttiin 1 muutos.
-   *[other] Peruttiin { $count } muutosta.
+    [0] Mitään ei kumottu.
+    [one] Kumottiin 1 muutos.
+   *[other] Kumottiin { $count } muutosta.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 viesti ei ollut enää siellä, minne muutos sen vei.
-   *[other] { $count } viestiä ei ollut enää siellä, minne muutos ne vei.
+    [one] 1 viestiä ei löytynyt enää odotetusta kansiosta.
+   *[other] { $count } viestiä ei löytynyt enää odotetusta kansiosta.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] Sinä tai palvelin oli muuttanut 1 viestiä sen jälkeen, joten se jätettiin ennalleen.
-   *[other] Sinä tai palvelin oli muuttanut { $count } viestiä sen jälkeen, joten ne jätettiin ennalleen.
+    [one] 1 myöhemmin muutettu viesti jätettiin ennalleen.
+   *[other] { $count } myöhemmin muutettua viestiä jätettiin ennalleen.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] 1 viesti oli jo lähtenyt Lähtevät-kansiosta.
-   *[other] { $count } viestiä oli jo lähtenyt Lähtevät-kansiosta.
+    [one] 1 viestiä ei ollut enää Lähtevät-kansiossa.
+   *[other] { $count } viestiä ei ollut enää Lähtevät-kansiossa.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
-    [one] 1 muutosta ei voi perua.
-   *[other] { $count } muutosta ei voi perua.
+    [one] 1 muutosta ei voi kumota.
+   *[other] { $count } muutosta ei voi kumota.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Tämä viesti hyväksyy kutsun ”{ $summary }” ({ $when }).
-    [tentative] Tämä viesti hyväksyy kutsun ”{ $summary }” ({ $when }) alustavasti.
-   *[decline] Tämä viesti hylkää kutsun ”{ $summary }” ({ $when }).
-} Järjestäjän kalenteri ottaa vastauksen huomioon. Vastauksesi kutsuun muuttuu vasta, kun viesti on lähetetty.
+    [accept] Tällä viestillä hyväksyt kutsun ”{ $summary }” ({ $when }).
+    [tentative] Tällä viestillä hyväksyt alustavasti kutsun ”{ $summary }” ({ $when }).
+   *[decline] Tällä viestillä hylkäät kutsun ”{ $summary }” ({ $when }).
+} Viesti sisältää vastauksen järjestäjän kalenteria varten. Näytettävä vastauksesi päivittyy vasta, kun viesti on lähetetty onnistuneesti. Tämä ei vahvista vastauksen tallentumista järjestäjän kalenteriin.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Hyväksytty: { $summary }
-    [tentative] Alustava: { $summary }
+    [tentative] Alustavasti hyväksytty: { $summary }
    *[decline] Hylätty: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } on hyväksynyt tämän kutsun.
     [tentative] { $name } on hyväksynyt tämän kutsun alustavasti.
    *[decline] { $name } on hylännyt tämän kutsun.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] luki 1 viestin
    *[other] luki { $count } viestiä
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] avasi 1 liitteen
-   *[other] avasi { $count } liitettä
+    [one] luki 1 liitteen
+   *[other] luki { $count } liitettä
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] haki kerran
    *[other] haki { $count } kertaa
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] katsoi viestiluetteloa kerran
    *[other] katsoi viestiluetteloita { $count } kertaa
 }
 # each read under that row
-# review: new
 agent-read-message = Luki viestin ”{ $subject }”
-# review: new
 agent-read-conversation = { $count ->
     [one] Luki keskustelun ”{ $subject }” (1 viesti)
    *[other] Luki keskustelun ”{ $subject }” ({ $count } viestiä)
 }
-# review: new
-agent-read-attachment = Avasi liitteen ”{ $name }” viestistä ”{ $subject }”
-# review: new
+agent-read-attachment = Luki liitteen ”{ $name }” viestistä ”{ $subject }”
 agent-read-search = { $count ->
     [one] Haki tekstillä ”{ $query }”: 1 viesti
    *[other] Haki tekstillä ”{ $query }”: { $count } viestiä
 }
-# review: new
-agent-read-people = Haki henkilöitä, joiden nimi tai osoite alkaa ”{ $query }”
-# review: new
+agent-read-people = Haki yhteystietoja nimen tai osoitteen alulla ”{ $query }”
 agent-read-list = { $count ->
-    [one] Katsoi 1 viestin kansiossa { $folder }
-   *[other] Katsoi { $count } viestiä kansiossa { $folder }
+    [one] Haki 1 luettelomerkinnän. Luettelo: { $folder }
+   *[other] Haki { $count } luettelomerkintää. Luettelo: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Katsoi 1 uuden viestin
-   *[other] Katsoi { $count } uutta viestiä
+    [one] Haki yhteenvedon 1 uudesta viestistä
+   *[other] Haki yhteenvedon { $count } uudesta viestistä
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Sovelluksesta { $terminal } käynnistetyt ohjelmat
-# review: new
 agent-terminal-programs-windows = Päätteestä ({ $terminal }) käynnistetyt ohjelmat
-# review: new
 agent-terminal-programs-linux = Päätteestä ({ $terminal }) käynnistetyt ohjelmat
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Sovelluksesta { $terminal } käynnistetty ohjelma
-# review: new
 agent-terminal-program-windows = Päätteestä ({ $terminal }) käynnistetty ohjelma
-# review: new
 agent-terminal-program-linux = Päätteestä ({ $terminal }) käynnistetty ohjelma
-# review: new
 agent-connect-title-terminal = { $programs } haluavat käyttää postiasi
-# review: new
-agent-connect-terminal-detail = Kaikki tästä päätteestä käynnistämäsi tekoälyagentit jakavat tässä sallimasi käyttöoikeudet. Jos haluat antaa agentille omat käyttöoikeudet, lisää sen argumentteihin agentin MCP-asetuksissa --name ja valitsemasi nimi.
-# review: new
+agent-connect-terminal-detail = Samasta tunnistetusta pääteohjelmasta käynnistetyt agentit jakavat tässä annetut käyttöoikeudet. Erillisiä oikeuksia varten lisää agentin MCP-asetuksissa sen argumentteihin --name ja valitsemasi nimi. Nimi ei todista, mikä ohjelma on kyseessä.
 agent-connect-claimed = Ohjelma kertoi olevansa { $claimed }. Inbox Classic tarkisti, mikä ohjelma sen käynnisti: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -767,7 +716,7 @@ pgp-key-expired = Vanhentui { $date }
 pgp-key-revoked = Mitätöity
 pgp-key-revoked-why = Mitätöity: { $reason }
 pgp-key-not-valid = Ei voimassa
-pgp-key-locked = Ei käytettävissä: yksityisen avaimen suojausavain puuttuu järjestelmän säilöstä ({ $store }). Tuo yksityinen avain uudelleen sen varmuuskopiosta.
+pgp-key-locked = Yksityistä avainta ei voi avata. Tarkista, että järjestelmän säilö ({ $store }) on käytettävissä ja avattu. Jos suojausavain puuttuu sieltä, tuo yksityinen avain uudelleen varmuuskopiosta.
 pgp-source-own = Luotu Inbox Classicissa
 pgp-source-file = Tuotu tiedostosta
 pgp-source-paste = Liitetty
@@ -776,11 +725,11 @@ pgp-source-vcard = Yhteystietokortista
 pgp-source-wkd = Lähettäjän postipalveluntarjoajalta
 pgp-source-keyserver = Palvelusta keys.openpgp.org
 pgp-source-autocrypt = Viestin Autocrypt-otsakkeesta
-pgp-error-no-store = Yksityisiä avaimia suojaa { $store }, jota ei voi käyttää: { $error }
+pgp-error-no-store = Yksityisten avainten suojausavainta ei voi käyttää järjestelmän säilössä ({ $store }): { $error }
 pgp-error-wrong-passphrase = Salalause on väärä.
 pgp-error-not-a-key = Tämä ei ole OpenPGP-avain.
 pgp-error-too-large = Avain on liian suuri.
-pgp-error-unusable = Avain käyttää vanhaa tai heikkoa salausta, eikä sitä voi käyttää.
+pgp-error-unusable = Avainta ei voi käyttää allekirjoittamiseen tai salaamiseen. Sopiva aliavain voi puuttua tai käytettyä salaustekniikkaa ei tueta.
 pgp-imported-private = { $count ->
     [one] Yksityinen avaimesi tuotiin.
    *[other] Tuotiin { $count } yksityistä avainta.
@@ -799,13 +748,13 @@ pgp-pending = Osoitteelle { $address } löytyi eri avain { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Allekirjoittaja: { $signer }, avaimen haltija vahvistettu
 pgp-part-signed = Allekirjoittaja: { $signer } (avaimen haltijaa ei ole vahvistettu)
-pgp-part-other = Allekirjoittaja: { $signer }, joka ei ole lähettäjä
+pgp-part-other = Allekirjoittaja: { $signer }. Allekirjoitusta ei voida yksiselitteisesti yhdistää lähettäjään
 pgp-part-unknown-key = Allekirjoitettu digitaalisesti, mutta avain on tuntematon
 pgp-part-not-signed = Ei digitaalista allekirjoitusta
 pgp-part-not-checked = Digitaalista allekirjoitusta ei tarkistettu
 pgp-part-encrypted = Salattu. { $signature }
 pgp-part-no-key = Salauksen purkamiseen tarvittava yksityinen avain puuttuu
-pgp-part-changed = Salattua osaa muutettiin matkalla, eikä sitä näytetä
+pgp-part-changed = Salatun sisällön eheystarkistus epäonnistui. Sisältöä ei näytetä
 pgp-part-unprotected = Salattu ilman suojausta muutoksia vastaan, ei näytetä
 pgp-part-broken = Salattua osaa ei voi lukea
 pgp-why-mismatch = Allekirjoitus ei vastaa tätä tekstiä
@@ -821,10 +770,10 @@ pgp-why-not-key-in-use = Allekirjoituksessa käytetty avain ei ole osoitteelle {
 pgp-part-pictures-loaded = { $label }. Kuvat ladattiin internetistä
 pgp-error-no-own-key = Sinulla ei ole osoitteelle { $address } avainta, jolla allekirjoittaa tai salata. Luo avain kohdassa Työkalut > Salausavaimet tai poista Allekirjoita ja Salaa käytöstä.
 pgp-error-missing-keys = { $count ->
-    [one] Vastaanottajalle { $addresses } ei ole julkista avainta viestin salaamiseen.
-   *[other] Näille vastaanottajille ei ole julkisia avaimia viestin salaamiseen: { $addresses }.
+    [one] Vastaanottajalle { $addresses } ei ole käyttökelpoista avainta viestin salaamiseen.
+   *[other] Näille vastaanottajille ei ole käyttökelpoisia avaimia viestin salaamiseen: { $addresses }.
 }
-pgp-error-encrypted-quote = Tämä viesti lainaa tai välittää salatun viestin, joten sen voi lähettää vain salattuna. Ota Salaa käyttöön tai poista lainattu teksti.
+pgp-error-encrypted-quote = Viestissä on salatusta viestistä peräisin olevaa sisältöä. Ota Salaa-toiminto käyttöön tai poista alkuperäisestä viestistä peräisin oleva sisältö kuvineen ja liitteineen ennen lähettämistä.
 pgp-error-protect = Viestiä ei voitu allekirjoittaa tai salata: { $reason }
 pgp-found-keys = Seuraaville osoitteille löytyi julkinen avain: { $addresses }.
 pgp-found-none = Avainta ei löytynyt seuraaville osoitteille: { $addresses }. Pyydä kunkin osoitteen haltijalta hänen julkinen avaimensa.
@@ -839,7 +788,7 @@ pgp-compose-encrypted = { $count ->
     [one] Viesti salataan ja allekirjoitetaan lähetettäessä. Vain sinä ja vastaanottaja { $addresses } voitte lukea sen sisällön.
    *[other] Viesti salataan ja allekirjoitetaan lähetettäessä. Vain sinä ja viestin { $count } vastaanottajaa voitte lukea sen sisällön.
 }
-pgp-compose-encrypt-ready = Viesti salataan ja allekirjoitetaan lähetettäessä. Lisää vastaanottajia, joiden avaimet sinulla on.
+pgp-compose-encrypt-ready = Viesti salataan ja allekirjoitetaan lähetettäessä. Lisää vastaanottajia, joiden käyttökelpoiset avaimet sinulla on.
 pgp-compose-missing = { $count ->
     [one] Viestiä ei voi vielä salata. Käyttökelpoinen avain puuttuu vastaanottajalta: { $addresses }.
    *[other] Viestiä ei voi vielä salata. Käyttökelpoinen avain puuttuu { $count } vastaanottajalta: { $addresses }.
@@ -873,7 +822,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Käyttökelpoinen salausavain puuttuu { $count } vastaanottajalta. Etsi puuttuvat avaimet, poista kyseiset vastaanottajat viestistä tai lähetä viesti ilman salausta.
 }
 pgp-details-part = Osa { $number }: { $label }
-# review: new
 attachment-from-part = Osasta { $number }: { $label }
 pgp-details-signed = Allekirjoitettu { $when } avaimella { $key }
 pgp-details-unknown-key = Allekirjoitettu avaimella { $key }, jota sinulla ei ole
@@ -882,17 +830,14 @@ pgp-details-for = Salattu avaimille { $keys }
 pgp-details-plain = Ei allekirjoitettu eikä salattu
 pgp-bar-parts = Tässä viestissä on { $count } osaa: { $list }. Kunkin osan kohdalla näkyy, miten se on suojattu.
 pgp-bar-count-verified = vahvistettuja { $count }
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] 1 salattu ja allekirjoitettu
    *[other] { $count } salattua ja allekirjoitettua
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] 1 salattu
    *[other] { $count } salattua
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] 1 allekirjoitettu
    *[other] { $count } allekirjoitettua
@@ -960,17 +905,17 @@ setup-account-signs-in-again = Tilille on kirjauduttava uudelleen tuonnin jälke
 setup-account-here = Tili on jo lisätty tähän tietokoneeseen, joten se ohitetaan.
 setup-account-no-app = Tilille kirjaudutaan sovelluksella { $app }, jota ei ole lisätty tähän tietokoneeseen. Tuo myös kirjautumissovellukset.
 setup-invalid-address = ”{ $address }” ei ole sähköpostiosoite.
-setup-invalid-server = Palvelimella { $server } ei ole käyttökelpoista nimeä tai porttia.
+setup-invalid-server = Palvelimen { $server } nimi, portti tai suojausasetus ei kelpaa.
 setup-invalid-user = Tilin käyttäjänimi puuttuu.
-setup-invalid-sign-in = Tilin kirjautumistapaa ei tueta Inbox Classicissa.
+setup-invalid-sign-in = Tilin kirjautumisasetuksia ei voi käyttää.
 setup-error-empty = Tiedosto on tyhjä.
-setup-error-too-large = Tiedosto on liian suuri tuotavaksi Inbox Classicin asetustiedostona.
+setup-error-too-large = Tiedosto ylittää asetusten ja tilien siirrolle sallitun koon.
 setup-error-not-setup = Tämä tiedosto ei ole Inbox Classicin asetustiedosto.
 setup-error-damaged = Asetustiedosto on vioittunut, eikä sitä voi lukea.
 setup-error-newer = Tämä asetustiedosto on tallennettu uudemmalla Inbox Classicilla ({ $version }). Päivitä Inbox Classic ja tuo tiedosto sitten uudelleen.
 setup-error-needs-passphrase = Tämä asetustiedosto on suojattu salalauseella. Kirjoita salalause, jolla se tallennettiin.
 setup-error-wrong-passphrase = Tämä ei ole salalause, jolla asetustiedosto tallennettiin.
-setup-error-changed = Asetustiedostoa muutettiin tai se vioittui tallennuksen jälkeen, joten sitä ei voi tuoda.
+setup-error-changed = Asetustiedoston eheystarkistus epäonnistui. Tiedostoa ei voi tuoda.
 setup-error-read = Asetustiedostoa ei voitu lukea: { $error }
 setup-error-write = Asetuksia ei voitu tallentaa: { $error }
 setup-error-no-parts = Valitse vähintään yksi osa.
@@ -1030,8 +975,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } viestisääntöä ohitettiin, koska niiden tilejä ei ole lisätty tähän tietokoneeseen.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 viestisääntö siirtää viestejä kansioon, joka ilmestyy, kun sen tili synkronoidaan.
-   *[other] { $count } viestisääntöä siirtää viestejä kansioihin, jotka ilmestyvät, kun niiden tilit synkronoidaan.
+    [one] 1 viestisääntö odottaa, että sen kohdekansio löytyy synkronoinnissa.
+   *[other] { $count } viestisääntöä odottaa, että niiden kohdekansiot löytyvät synkronoinnissa.
 }
 setup-added-trusted-senders = { $count ->
     [one] Lisättiin 1 luotettu lähettäjä.
@@ -1040,7 +985,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Mitään ei tuotu.
 setup-account-servers = { $imap } ja { $smtp } ({ $signin })
 setup-file-name = Inbox Classicin asetukset ja tilit
-setup-skipped-unreachable = { $name } ohitettiin: sen kirjautumispalveluun ei saatu yhteyttä. Lisää se uudelleen kohdassa Kirjautumissovellukset.
+setup-skipped-unreachable = ”{ $name }” ohitettiin, koska kirjautumispalvelua ei voitu tarkistaa. Lisää tarvittava kirjautumissovellus uudelleen Kirjautumissovellukset-kohdassa.
 attachment-runs-programs = ”{ $name }” voi suorittaa ohjelmia, joten Inbox Classic ei avaa sitä. Tallenna se ja avaa se sitten itse, jos luotat sen lähteeseen.
 attachment-decrypted-note = Tämä liite on peräisin salatusta viestistä. Liitteen avaamista varten Inbox Classic tallentaa siitä salaamattoman kopion käyttäjätilisi väliaikaiseen kansioon. Yli vuorokauden vanhat kopiot poistetaan sovelluksen käynnistyessä.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1071,46 +1016,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Näytä PDF-tiedostot viesteissä
-# review: new
 preview-pdf-off = PDF-tiedostoja ei näytetä viesteissä.
-# review: new
-preview-pdf-off-crashed = PDF-tiedosto sulki Inbox Classicin näytettäessä, joten PDF-tiedostoja ei enää näytetä viesteissä. Kuvat näytetään edelleen. Voit näyttää PDF-tiedostot uudelleen ottamalla asetuksen { $option } käyttöön kohdassa { $settings }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic sulkeutui tiedoston esikatselun aikana. Siksi PDF-tiedostoja ei enää näytetä viesteissä, mutta kuvat näytetään edelleen. Ota asetus ”{ $option }” uudelleen käyttöön kohdassa { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 sivu, { $size }
    *[other] { $count } sivua, { $size }
 }
-# review: new
 preview-page-alt = { $name }, sivu { $page }/{ $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Avaa tiedosto nähdäksesi sivun
    *[other] Avaa tiedosto nähdäksesi kaikki { $count } sivua
 }
-# review: new
 preview-more-files = { $count ->
     [one] 1 tiedosto lisää on yllä olevassa luettelossa
    *[other] { $count } tiedostoa lisää on yllä olevassa luettelossa
 }
-# review: new
 preview-tile-downloading = Ladataan…
-# review: new
 preview-tile-preparing = Valmistellaan…
-# review: new
 preview-tile-format = { $format }-kuvia ei vielä näytetä
-# review: new
 preview-tile-password = Suojattu salasanalla: avaa se ja anna salasana
-# review: new
 preview-tile-too-large = Liian suuri näytettäväksi
-# review: new
 preview-tile-unreadable = Ei voi näyttää
-# review: new
 preview-tile-timed-out = Näyttäminen kesti liian kauan
-# review: new
-preview-tile-crashed = Ei näytetä: tiedosto sulki Inbox Classicin kerran
-# review: new
+preview-tile-crashed = Ei esikatselua: Inbox Classic sulkeutui tai lakkasi vastaamasta edellisellä näyttökerralla
 preview-tile-off = Ei näytetä ennen kuin Inbox Classic käynnistetään uudelleen
-# review: new
 preview-not-printed = Tiedostoa { $name } ({ $details }) ei tulosteta. Avaa se tulostaaksesi sen.
