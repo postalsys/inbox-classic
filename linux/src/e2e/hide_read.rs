@@ -86,7 +86,8 @@ pub async fn hide_read(d: &Driver) {
             .any(|m| m.info.subject == UNREAD[0] && m.info.seen())
     })
     .await;
-    pause(1500).await;
+    // the list read again after the change, as it would drop a message it hides
+    wait_list_settled().await;
     d.check(
         read && lists(UNREAD[0]),
         "a message opened is read, and stays in the list",

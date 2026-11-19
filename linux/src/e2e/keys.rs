@@ -311,17 +311,19 @@ pub(super) async fn encryption_keys(d: &Driver) {
         }
         None => d.check(false, "Import of Carol's key asks for its passphrase"),
     }
-    pause(500).await;
-    let carol = fingerprint_of("Carol Example")
-        .map(|key| key.fingerprint)
-        .unwrap_or_default();
-    d.check(
+    let carols = || {
+        let carol = fingerprint_of("Carol Example")
+            .map(|key| key.fingerprint)
+            .unwrap_or_default();
         !carol.is_empty()
             && core
                 .pgp_identities()
                 .unwrap_or_default()
                 .iter()
-                .any(|i| i.address == "carol@example.org" && i.fingerprint == carol),
+                .any(|i| i.address == "carol@example.org" && i.fingerprint == carol)
+    };
+    d.check(
+        wait_until(5, carols).await,
         "Use It makes it the key of carol@example.org",
     );
     let _ = core.set_account_addresses_text(account_id, "");

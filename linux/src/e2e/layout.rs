@@ -37,7 +37,7 @@ pub async fn folder_list(d: &Driver) {
     // a folder chosen while the list is hidden: the folder button's popover holds the list
     if let Some(button) = named_in(&main_window(), "folder-list-button").and_downcast::<gtk::MenuButton>() {
         button.popup();
-        pause(500).await;
+        wait_until(5, || button.popover().is_some_and(|p| p.is_visible())).await;
         select_folder("Sent Items");
         d.check(
             wait_until(10, || main.selected_name() == "Sent Items").await
@@ -582,7 +582,6 @@ pub async fn contact_picture(d: &Driver) {
     wait_until(10, side_by_side).await;
     // the newest first, the list at its top: the two new messages on screen
     main.list.select(0);
-    pause(500).await;
     d.check(
         wait_until(20, || {
             row_on_screen(CONTACT_CONFIRMED).is_some_and(|r| crate::rows::picture_drawn(&r))

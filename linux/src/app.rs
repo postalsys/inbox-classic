@@ -53,6 +53,9 @@ pub struct Shell {
     hold: RefCell<Option<gio::ApplicationHoldGuard>>,
     /// The windows a message is written in
     pub composes: RefCell<Vec<Rc<compose::Compose>>>,
+    /// How many syncs have finished, for the UI test to wait for one
+    #[cfg(feature = "e2e")]
+    pub syncs_finished: Cell<u64>,
 }
 
 thread_local! {
@@ -116,6 +119,8 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         tray: RefCell::new(None),
         hold: RefCell::new(None),
         composes: RefCell::default(),
+        #[cfg(feature = "e2e")]
+        syncs_finished: Cell::new(0),
     });
     SHELL.with(|cell| {
         let _ = cell.set(state.clone());
@@ -318,6 +323,8 @@ impl Shell {
                 main.set_sync_status(&t!(UiChecking, account = &main.account_name(*account)), false);
             }
             Event::SyncFinished { .. } => {
+                #[cfg(feature = "e2e")]
+                self.syncs_finished.set(self.syncs_finished.get() + 1);
                 // a failure stays in the status bar until the account syncs without one; what the rules did, over Done
                 let rules_said = self.rules_said.take();
                 if self.failing.borrow().is_empty() {

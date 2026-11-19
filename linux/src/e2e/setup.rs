@@ -47,9 +47,10 @@ pub(super) async fn first_run(d: &Driver, form: &gtk::Widget) {
     FILE_ANSWERS.with(|a| a.borrow_mut().push_back(Vec::new()));
     click(form, "setup-first-run");
     let asked = wait_until(5, || FILE_ANSWERS.with(|a| a.borrow().is_empty())).await;
-    pause(200).await;
+    // the answer taken, nothing follows: no message, the form still there
+    let moved = wait_until(2, || dialog_named("account-start").is_none() || alert().is_some()).await;
     d.check(
-        asked && dialog_named("account-start").is_some() && alert().is_none(),
+        asked && !moved,
         "the link opens the file to import; cancelled, the account form stays",
     );
 }

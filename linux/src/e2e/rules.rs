@@ -77,10 +77,10 @@ pub(super) async fn message_rules(d: &Driver) {
         && set_check(&editor_widget, "rule-mark-read", true);
     d.check(set, "Name, query, Move to Archive and Mark as read set");
     // the count follows once typing stops
-    pause(800).await;
+    let counted = wait_until(5, || count_text(&editor_widget).contains("Inbox")).await;
     let count = count_text(&editor_widget);
     d.check(
-        count.contains("Inbox"),
+        counted,
         &format!("the editor says how many messages in the Inbox match now ({count})"),
     );
     d.shot(&editor, "rules-2-editor").await;
@@ -135,8 +135,10 @@ pub(super) async fn message_rules(d: &Driver) {
                 d.shot(&refused, "rules-6-bad-query").await;
                 answer(&refused, "OK");
             }
-            pause(500).await;
-            d.check(dialog_named("rule-dialog").is_some(), "the editor stays open");
+            d.check(
+                wait_until(5, || alert().is_none()).await && dialog_named("rule-dialog").is_some(),
+                "the editor stays open",
+            );
             click(&editor_widget, "dialog-cancel");
             wait_gone(10, "rule-dialog").await;
         } else {

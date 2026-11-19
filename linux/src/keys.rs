@@ -620,7 +620,11 @@ pub async fn keys_dialog(parent: &impl IsA<gtk::Widget>) {
         .child(&view)
         .build();
     dialog.set_widget_name("keys-dialog");
+    // closed with its close button or Esc, or by another part of the app while a question of the loop below waited
+    let closed: Rc<std::cell::Cell<bool>> = Rc::default();
+    let shut = closed.clone();
     dialog.connect_closed(move |_| {
+        shut.set(true);
         let _ = send.try_send("close");
     });
     OPEN.with(|open| *open.borrow_mut() = Some(dialog.downgrade()));
@@ -670,7 +674,9 @@ pub async fn keys_dialog(parent: &impl IsA<gtk::Widget>) {
         }
     }
     OPEN.with(|open| open.borrow_mut().take());
-    dialog.close();
+    if !closed.get() {
+        dialog.close();
+    }
 }
 
 // ---- Account Properties: Security ----

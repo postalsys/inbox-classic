@@ -189,42 +189,23 @@ pub async fn question(request: u64) {
 /// How long Send or Unsubscribe stays off once the question is on screen
 const SEND_DELAY: std::time::Duration = std::time::Duration::from_millis(1500);
 
-#[cfg(feature = "e2e")]
-thread_local! {
-    /// How long Send of the last question stayed off after it was on screen (for the UI test)
-    static SEND_WAITED: std::cell::Cell<Option<std::time::Duration>> = const { std::cell::Cell::new(None) };
-}
-
 /// The answer `id` (Send, Unsubscribe) comes on a moment after the question is on screen, so a key pressed for
 /// another window does not answer it. Counted
 /// from when it is shown, not made: a busy window can show it later than it was made
 fn enable_later(dialog: &adw::AlertDialog, id: &'static str) {
     dialog.set_response_enabled(id, false);
-    #[cfg(feature = "e2e")]
-    SEND_WAITED.with(|waited| waited.set(None));
     let started = std::cell::Cell::new(false);
     dialog.connect_map(move |dialog| {
         if started.replace(true) {
             return;
         }
         let later = dialog.downgrade();
-        #[cfg(feature = "e2e")]
-        let shown = std::time::Instant::now();
         glib::timeout_add_local_once(SEND_DELAY, move || {
             if let Some(dialog) = later.upgrade() {
                 dialog.set_response_enabled(id, true);
-                #[cfg(feature = "e2e")]
-                SEND_WAITED.with(|waited| waited.set(Some(shown.elapsed())));
             }
         });
     });
-}
-
-/// Whether Send of the question `dialog` was off for the whole moment after it was shown (for the UI test): still
-/// off, or on only after the moment
-#[cfg(feature = "e2e")]
-pub fn send_waited(dialog: &adw::AlertDialog) -> bool {
-    !dialog.is_response_enabled("send") || SEND_WAITED.with(|waited| waited.get()).is_some_and(|w| w >= SEND_DELAY)
 }
 
 /// The question of an agent that wants to leave mailing lists: Don't Unsubscribe the default and Esc, Unsubscribe
