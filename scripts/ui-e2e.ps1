@@ -4580,14 +4580,18 @@ public static class Dragger {
     if ($agents) {
         $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
         $logged = { param($row) [Native.Win]::RemoteListText($log, $row, 2) }
-        $bulkRow = "^Marked 2 messages read \(search: subject:`"Club newsletter`"\)$"
+        # the catalog's words of the log's row of the change of the two newsletters, and of it taken back
+        $bulkWords = $en['agent-log-bulk-read[other]']
+        $bulkRow = (Pattern $bulkWords @{ count = 2; query = 'subject:"Club newsletter"' }) + '$'
+        $bulkBack = (Pattern $en['agent-log-taken-back'].Replace('{ $entry }', $bulkWords) @{ count = 2; query = 'subject:"Club newsletter"' }) + '$'
+        $anyBulkBack = (Pattern $en['agent-log-taken-back'].Replace('{ $entry }', $bulkWords) @{ count = 2 }) + '$'
         # newest first: the change made again, over the one the agent took back (a row of reads may be over both, its
         # hour still going)
         $topRows = { @(0..4 | ForEach-Object { & $logged $_ }) }
         [void](WaitFor { @(& $topRows) -match $bulkRow } 10)
         $rows = @(& $topRows)
         $bulkAt = [Array]::FindIndex([string[]]$rows, [Predicate[string]] { param($r) $r -match $bulkRow })
-        Check ($bulkAt -ge 0 -and $bulkAt -le 1 -and $rows[$bulkAt + 1] -match '^Marked 2 messages read \(search: .+\) \(taken back\)$') "the change of many messages is one row of the log ($($rows -join '; '))"
+        Check ($bulkAt -ge 0 -and $bulkAt -le 1 -and $rows[$bulkAt + 1] -match $anyBulkBack) "the change of many messages is one row of the log ($($rows -join '; '))"
         Key $log $VK_HOME
         for ($i = 0; $i -lt $bulkAt; $i++) { Key $log $VK_DOWN }
         Start-Sleep -Milliseconds 300
@@ -4605,10 +4609,11 @@ public static class Dragger {
         if ($since) {
             $span = [Native.Win]::GetDlgItem($since, $IDC_AGENT_UNDO_SPAN)
             $spans = [int][Native.Win]::SendMessage($span, 0x0146, [IntPtr]::Zero, [IntPtr]::Zero)
-            Check ((Statics $since) -match '^Take back what this program did:' -and $spans -eq 6 -and (WindowText $span) -eq 'In the last 15 minutes') "which span to take back, the shortest first ($spans; $(WindowText $span))"
+            Check ((Statics $since) -match (Pattern $en['ui-undo-since-span']) -and $spans -eq 6 -and (WindowText $span) -eq $en['agent-undo-span[quarter]']) "which span to take back, the shortest first ($spans; $(WindowText $span))"
             $title = WindowText ([Native.Win]::GetDlgItem($since, $IDC_AGENT_UNDO_TITLE))
-            $count = if ($title -match '^Take back the (\d+) changes My AI agent made in this time\?$') { [int]$Matches[1] } else { 0 }
-            Check ($count -ge 2 -and (WindowText ([Native.Win]::GetDlgItem($since, $IDC_AGENT_UNDO_DETAIL))) -match '^Messages go back to the folders') "with the count of the changes and what taking back does ($title)"
+            $asked = ((Pattern $en['agent-undo-since-question[*]'] @{ count = 'COUNT'; program = 'My AI agent' }) + '$').Replace('COUNT', '(\d+)')
+            $count = if ($title -match $asked) { [int]$Matches[1] } else { 0 }
+            Check ($count -ge 2 -and (WindowText ([Native.Win]::GetDlgItem($since, $IDC_AGENT_UNDO_DETAIL))) -match (Pattern $en['agent-undo-since-detail'])) "with the count of the changes and what taking back does ($title)"
             $defId = [int64][Native.Win]::SendMessage($since, 0x400, [IntPtr]::Zero, [IntPtr]::Zero)
             Check ((($defId -shr 16) -band 0xFFFF) -eq 0x534B -and ($defId -band 0xFFFF) -eq 2 -and (Visible $since $IDC_AGENT_TAKE_BACK)) "Take Back beside Cancel, the default ($('{0:X}' -f $defId))"
             $cut = @([Native.Win]::FindDescendants($since, 'Static') | Where-Object { $t = WindowText $_; $t -and -not [Native.Win]::FitsOwnFont($_, $t) } | ForEach-Object { WindowText $_ })
@@ -4623,7 +4628,7 @@ public static class Dragger {
             Check ($said.Trim() -eq "Took back $count changes.") "and says what it took back ($said)"
             if ($report) { Shot $report 'agents-12b-undo-since-report'; [void][Native.Win]::PostMessage($report, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero) }
             [void](WaitFor { [Native.Win]::GetWindow($agents, 6) -eq $agents -or [Native.Win]::GetWindow($agents, 6) -eq [IntPtr]::Zero } 10)
-            Check ([bool](WaitFor { @(& $topRows) -match '^Marked 2 messages read \(search: subject:"Club newsletter"\) \(taken back\)$' } 10)) "the log shows the change taken back ($((& $topRows) -join '; '))"
+            Check ([bool](WaitFor { @(& $topRows) -match $bulkBack } 10)) "the log shows the change taken back ($((& $topRows) -join '; '))"
             Check ([bool](WaitFor { & $newslettersUnread } 20)) 'and the newsletters are unread again'
             # asked again, nothing is left to take back: only Close
             Click $agents $IDC_AGENTS_UNDO_SINCE
