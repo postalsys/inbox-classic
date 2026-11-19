@@ -696,6 +696,19 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   from the message being printed. Settings placeholders contain a complete platform-specific path.
 - Help uses "Papildomos laiškų funkcijos", "Išplėstinės funkcijos" and "Spartieji klavišai" for their respective
   sections and shortcut-table column. Reviewing these labels does not complete the pending help prose.
+- Platform search guidance names sender/recipient names and addresses. File-save failure totals use labels
+  ("Nepavyko įrašyti failų:", "Iš viso:") so independent counts, including one, fit. Search indexing is distinct
+  from downloading; more results may appear but are not promised.
+- Linux browser-sign-in guidance matches the shared app copy, including conditional app passwords. Mailing-list
+  questions use "atsisakyti prenumeratos"; the direct-request target is a server host, and the mail path still
+  requires sending the prepared request. Picture blocking reduces tracking without guaranteeing anonymity.
+- The Mac and Linux account buttons use "Parašo tekstas". Agent removal says "iš sąrašo" and removes stored
+  permissions/history rather than uninstalling an external program. Agent read details describe accessed data.
+- Mac Window > Zoom is "Keisti lango dydį", distinct from text scaling. Hide Others/Show All refer to programs;
+  Redo restores an undone edit. Link hints use a key plus "pelės spustelėjimas"; preserve the actual key symbols.
+- Installer copy distinguishes the Windows user account from mail accounts and describes removal of the whole
+  app data folder. Linux store copy promises offline reading of downloaded messages and describes supported
+  search fields. Retain protocol keywords: the generator already prepends the English keyword list.
 
 ### Magyar (hu)
 
