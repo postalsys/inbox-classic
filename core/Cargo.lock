@@ -2497,7 +2497,7 @@ dependencies = [
 
 [[package]]
 name = "pe-autoconfig"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "idna",
@@ -2509,7 +2509,7 @@ dependencies = [
 
 [[package]]
 name = "pe-bounce"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "pe-jsre",
  "pe-mime",
@@ -2519,7 +2519,7 @@ dependencies = [
 
 [[package]]
 name = "pe-content"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "pe-jsre",
  "regex",
@@ -2529,7 +2529,7 @@ dependencies = [
 
 [[package]]
 name = "pe-core"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "apple-native-keyring-store",
  "base64",
@@ -2565,7 +2565,7 @@ dependencies = [
 
 [[package]]
 name = "pe-ffi"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "cbindgen",
@@ -2590,7 +2590,7 @@ dependencies = [
 
 [[package]]
 name = "pe-html"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "ammonia",
  "base64",
@@ -2603,7 +2603,7 @@ dependencies = [
 
 [[package]]
 name = "pe-i18n"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "fluent-bundle",
  "fluent-syntax",
@@ -2612,7 +2612,7 @@ dependencies = [
 
 [[package]]
 name = "pe-imap"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "pe-mime",
@@ -2625,14 +2625,14 @@ dependencies = [
 
 [[package]]
 name = "pe-jsre"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "regex",
 ]
 
 [[package]]
 name = "pe-keys"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "pe-net",
  "pe-pgp",
@@ -2643,7 +2643,7 @@ dependencies = [
 
 [[package]]
 name = "pe-mcp"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "pe-core",
@@ -2659,7 +2659,7 @@ dependencies = [
 
 [[package]]
 name = "pe-mime"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "encoding_rs",
@@ -2670,7 +2670,7 @@ dependencies = [
 
 [[package]]
 name = "pe-net"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "rustls",
  "rustls-platform-verifier",
@@ -2681,7 +2681,7 @@ dependencies = [
 
 [[package]]
 name = "pe-oauth"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "getrandom 0.4.3",
@@ -2693,7 +2693,7 @@ dependencies = [
 
 [[package]]
 name = "pe-otp"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "pe-jsre",
  "regex",
@@ -2702,7 +2702,7 @@ dependencies = [
 
 [[package]]
 name = "pe-pgp"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "flate2",
@@ -2716,7 +2716,7 @@ dependencies = [
 
 [[package]]
 name = "pe-preview"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "flate2",
  "hayro",
@@ -2729,7 +2729,7 @@ dependencies = [
 
 [[package]]
 name = "pe-smtp"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "getrandom 0.4.3",
@@ -2744,7 +2744,7 @@ dependencies = [
 
 [[package]]
 name = "pe-store"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "pe-testkit",
  "rusqlite",
@@ -2752,7 +2752,7 @@ dependencies = [
 
 [[package]]
 name = "pe-sync"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "pe-imap",
  "pe-net",
@@ -2765,7 +2765,7 @@ dependencies = [
 
 [[package]]
 name = "pe-testkit"
-version = "0.19.0"
+version = "0.19.1"
 dependencies = [
  "base64",
  "pe-imap",
