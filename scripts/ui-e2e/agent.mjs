@@ -110,13 +110,20 @@ try {
     // the invitation answered through the Send question; the user's status changes only once it was sent
     const invitations = await call('search_messages', { query: 'subject:"Roadmap review"' });
     const invitation = invitations.messages[0];
-    let accepted = await call('respond_to_invitation', { folder: invitation.folder, uid: invitation.uid, response: 'accept' });
-    for (let waited = 0; accepted.status === 'waiting'; waited += 1000) {
-        if (waited > 180000) throw new Error('the user never answered the invitation');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        accepted = await call('get_send_status', { ask_id: accepted.ask_id });
+    const accept = async () => {
+        let answer = await call('respond_to_invitation', { folder: invitation.folder, uid: invitation.uid, response: 'accept' });
+        for (let waited = 0; answer.status === 'waiting'; waited += 1000) {
+            if (waited > 180000) throw new Error('the user never answered the invitation');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            answer = await call('get_send_status', { ask_id: answer.ask_id });
+        }
+        return answer;
+    };
+    // OUT.invitation-twice: the test answers the first question with Return (Don't Send), then asks to be asked again
+    if (existsSync(`${OUT}.invitation-twice`)) {
+        record('invitation-first', await accept());
     }
-    record('invitation', accepted);
+    record('invitation', await accept());
     record('invitation-status', (await call('get_message', { folder: invitation.folder, uid: invitation.uid })).invitation);
     // one change of many messages: what it would do, then done with its token, then taken back
     const bulk = { query: 'subject:"Club newsletter"', action: 'mark_read' };

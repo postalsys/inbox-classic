@@ -113,17 +113,14 @@ private func run(_ alert: NSAlert) -> NSApplication.ModalResponse {
 @MainActor
 enum Modal {
     static private(set) var windows: [NSWindow] = []
-    /// when each of them opened, so the test can tell a wait it came too late to see from one that was never there
-    static private(set) var openedAt: [ObjectIdentifier: Date] = [:]
 
     static func opened(_ window: NSWindow) {
         windows.append(window)
-        openedAt[ObjectIdentifier(window)] = Date()
+        TestHooks.modalOpened?(window)
     }
 
     static func closed(_ window: NSWindow) {
         windows.removeAll { $0 === window }
-        openedAt[ObjectIdentifier(window)] = nil
     }
 }
 
@@ -464,6 +461,8 @@ enum TestHooks {
     static var openURL: ((URL) -> Void)?
     /// the context menu of a message's web view as it opens, after the app took out what it does not offer
     static var webMenu: ((NSMenu) -> Void)?
+    /// a modal window as it is about to run, its buttons as they start
+    static var modalOpened: ((NSWindow) -> Void)?
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled

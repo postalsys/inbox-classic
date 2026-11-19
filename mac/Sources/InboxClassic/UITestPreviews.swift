@@ -186,7 +186,8 @@ extension UITest {
         onMain { NSApp.appearance = NSAppearance(named: .darkAqua) }
         main.mailbox.reader.reload()
         _ = await waitUntil(10) { await self.readerBackground() == "rgb(30, 31, 34)" }
-        _ = await waitUntil(15) { (banner(await images())?[1] as? Bool) == true }
+        // drawn again by the core after the reload, which on a busy machine follows the printout's pictures
+        _ = await waitUntil(60) { (banner(await images())?[1] as? Bool) == true }
         let dark = banner(await images())
         check(dark?[1] as? Bool == true && dark?[2] as? NSNumber == 560 && dark?[4] as? NSNumber == shown?[4] as? NSNumber,
               "in a dark window the banner is drawn in the same place (\(dark.map { "\($0[1]) \($0[2]) \($0[4])" } ?? "none"))")

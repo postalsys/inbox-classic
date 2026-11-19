@@ -581,7 +581,7 @@ extension UITest {
         onMain { AppDelegate.shared.application(NSApp, open: [missing]) }
         let alert = await waitWindow("alert", 10)
         check(alert != nil, "a file that can not be read is said so")
-        answer(alert, "OK")
+        answer(alert, Text.uiOk.text)
         _ = await waitUntil(5) { window("alert") == nil }
     }
 }
