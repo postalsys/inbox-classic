@@ -41,8 +41,8 @@ reader-downloading = Kirja laaditakse alla…
 reader-downloading-detail = Kiri kuvatakse siin, kui allalaadimine on lõppenud.
 reader-downloading-size = Kirja suurus on { $size }. Kiri kuvatakse siin, kui allalaadimine on lõppenud.
 reader-failed = Kirja ei saanud alla laadida
-reader-failed-network = Meiliserveriga ei saanud ühendust ({ $reason }).
-reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). Kontrollige parooli või logige uuesti sisse menüüs Fail > Kontod.
+reader-failed-network = Ühendus meiliserveriga ebaõnnestus või katkes ({ $reason }).
+reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). Kontrollige parooli või logige konto seadetes uuesti sisse.
 reader-failed-security = Meiliserveriga ei saanud luua turvalist ühendust ({ $reason }).
 reader-failed-other = Meiliserver vastas: { $reason }.
 reader-retry-note = Allalaadimist proovitakse uuesti, kui ühendus kontoga taastub.
@@ -99,12 +99,12 @@ bounce-mailbox-disabled-why = Aadress on olemas, kuid selle postkast on välja l
 bounce-mailbox-disabled-do = Võtke saajaga muul viisil ühendust ja küsige tema praegust e-posti aadressi.
 bounce-mailbox-full = Postkast on täis
 bounce-mailbox-full-why = Saaja postkastis pole uute kirjade jaoks ruumi.
-bounce-mailbox-full-do = Saatke kiri mõne päeva pärast uuesti või andke saajale muul viisil teada. Suurte manustega kirjad lükatakse tagasi esimesena.
+bounce-mailbox-full-do = Saatke kiri mõne päeva pärast uuesti või andke saajale muul viisil teada.
 bounce-spam-blocked = Tagasi lükatud rämpspostina
 bounce-spam-blocked-why = Vastuvõttev server pidas kirja rämpspostiks.
 bounce-spam-blocked-do = Proovige saata kiri uuesti, eemaldades rämpspostile viidata võivad elemendid, näiteks liigsed või lühendatud lingid ja suured manused. Kui probleem kordub, võtke ühendust oma meiliteenuse pakkujaga.
 bounce-virus-detected = Tagasi lükatud viiruse tõttu
-bounce-virus-detected-why = Vastuvõttev server leidis kirjast või selle manustest viiruse või muu kahjuliku sisu.
+bounce-virus-detected-why = Vastuvõttev server teatas, et kirjas või selle manustes on viirus või muu kahjulik sisu.
 bounce-virus-detected-do = Kontrollige manuseid viirusetõrjega. Mõni server lükkab tagasi kõik programmid ja arhiivid, nii et jagage selliseid faile lingina.
 bounce-ip-blocklisted = Teie meiliserver on blokeerimisloendis
 bounce-ip-blocklisted-why = Vastuvõttev server ei võta vastu kirju serverilt, mis teie kirja saatis, sest selle serveri aadress on blokeerimisloendis.
@@ -120,7 +120,7 @@ bounce-geo-blocked-why = Vastuvõttev server ei võta kirju vastu riigist või v
 bounce-geo-blocked-do = Võtke saajaga muul viisil ühendust või küsige abi oma meiliteenuse pakkujalt.
 bounce-relay-denied = Server ei saatnud kirja edasi
 bounce-relay-denied-why = Server keeldus kirja edasi toimetamast, sageli seetõttu, et see saadeti sisse logimata või serveri kaudu, mis seda saajat ei teeninda.
-bounce-relay-denied-do = Kontrollige menüüs Fail > Kontod väljamineva posti serveri sätteid ja veenduge, et serverisse sisselogimine on seadistatud.
+bounce-relay-denied-do = Kontrollige konto seadetes väljamineva posti serveri sätteid ja veenduge, et serverisse sisselogimine on seadistatud.
 bounce-auth-failure = Teie saatja-aadressi ei saanud kinnitada
 bounce-auth-failure-why = Vastuvõttev server ei saanud kinnitada, et kiri tuli tõesti teie domeenist (SPF, DKIM või DMARC).
 bounce-auth-failure-do = Edastage see teade oma domeeni e-posti haldajale, et ta saaks domeeni sätted parandada. Seni võib aidata saatmine teenusepakkuja enda serveri kaudu.
@@ -129,7 +129,7 @@ bounce-rate-limited-why = Vastuvõttev server piirab praegu teie meiliserverilt 
 bounce-rate-limited-do = Oodake veidi ja saatke kiri uuesti. Kui kirjutate paljudele, saatke korraga vähematele.
 bounce-greylisting = Kohaletoimetamine on ajutiselt edasi lükatud
 bounce-greylisting-why = Vastuvõttev server palub tundmatutel saatjatel veidi hiljem uuesti proovida. See on levinud rämpspostivastane meede.
-bounce-greylisting-do = Midagi pole vaja teha. Meiliserverid proovivad ise uuesti ja kiri jõuab tavaliselt kohale tunni jooksul.
+bounce-greylisting-do = Ajutise viivituse korral proovib saatev server tavaliselt ise uuesti. Kui kohaletoimetamise teade kirjeldab lõplikku tõrget, saatke kiri hiljem uuesti.
 bounce-server-error = Vastuvõtval serveril oli probleem
 bounce-server-error-why = Vastuvõtva serveriga ei saanud ühendust või ei saanud see kirja serveripoolse probleemi tõttu vastu võtta.
 bounce-server-error-do = Saatke kiri hiljem uuesti. Kui probleem kordub, kontrollige, kas aadressi @-märgi järel olevas domeeninimes on trükivigu.
@@ -297,7 +297,7 @@ downloading-messages = { $count ->
    *[other] Allalaadimine: { $messages }...
 }
 import-put = { $count ->
-   *[other] { $messages } imporditi kausta { $folder }
+   *[other] Importimiseks järjekorda lisatud: { $messages }. Sihtkoht: { $folder }
 }
 import-not-put = Järgmisi kirju ei saanud kausta importida:
 
@@ -335,8 +335,8 @@ error-import-not-mail = { $path } pole e-kiri
 error-list-answered = meililisti server vastas olekukoodiga { $status }
 error-not-built = kirja ei saanud koostada
 error-outbox-waits = { $count ->
-    [one] kiri ootab väljundkaustas ja saadetakse järgmise saatmise ja vastuvõtmisega
-   *[other] { $count } kirja ootavad väljundkaustas ja saadetakse järgmise saatmise ja vastuvõtmisega
+    [one] kiri jääb väljundkausta; järgmisel saatmisel ja vastuvõtmisel proovitakse seda uuesti saata
+   *[other] { $count } kirja jäävad väljundkausta; järgmisel saatmisel ja vastuvõtmisel proovitakse neid uuesti saata
 }
 error-draft-not-removed = kirja varasemat mustandit ei saanud mustandite kaustast eemaldada: { $reason }
 error-sent-but = kiri saadeti, aga { $problem }
@@ -344,19 +344,19 @@ error-sent-still-in-outbox = see on endiselt väljundkaustas: { $error }
 error-sent-no-copy = koopiat ei saanud saadetud kirjade kausta salvestada: { $reason }
 error-no-password = selle konto jaoks pole parooli
 error-no-sign-in = selle konto sisselogimisandmed puuduvad
-error-provider-missing = see versioon ei saa teenusesse { $provider } sisse logida: kas selle sisselogimisrakendus on eemaldatud?
+error-provider-missing = sisselogimine tunnusega „{ $provider }“ pole võimalik; vajalik sisselogimisrakendus võib olla eemaldatud
 error-provider-servers = konto serverid ei vasta sisselogimisrakenduse serveritele
 error-app-scopes = { $reason }. Meiliserver lükkas sisselogimisrakenduse juurdepääsutõendi tagasi. Kontrollige, kas rakenduse juurdepääsuõigused (scopes) lubavad e-posti kasutada
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google pole Inbox Classicut veel kinnitanud, seega lubab ta sellega sisse logida ainult testkasutajatel. Kasutage oma Google'i sisselogimisrakendust või rakenduse parooli või lülitage see sisse jaotises Sisselogimisrakendused (Fail > Kontod), kui olete testkasutaja.
-sign-in-off-other = See lülitati välja jaotises Sisselogimisrakendused (Fail > Kontod), kus selle saab uuesti sisse lülitada.
+sign-in-off-google = Sisseehitatud Google’i sisselogimisrakendus on uute kontode jaoks välja lülitatud. Kasutage oma Google’i sisselogimisrakendust või rakenduse parooli, kui teie konto seda toetab. Lubatud testkasutajad saavad sisseehitatud rakenduse konto seadete jaotises „Sisselogimisrakendused“ sisse lülitada.
+sign-in-off-other = See sisselogimisrakendus lülitati välja konto seadete jaotises „Sisselogimisrakendused“, kus selle saab uuesti sisse lülitada.
 sign-in-app-no-name = sisselogimisrakendus vajab nime
 sign-in-app-no-client = kliendi ID puudub
 sign-in-app-no-scopes = sisselogimisrakendusele tuleb määrata e-posti kasutamist lubavad juurdepääsuõigused (scopes)
-sign-in-app-bad-host = { $server }-serveri aadress puudub või ei ole kehtiv hostinimi
+sign-in-app-bad-host = serveri „{ $server }“ aadress puudub või pole kehtiv hostinimi
 sign-in-app-plain = { $server }-server peab kasutama SSL/TLS-i või STARTTLS-i
 sign-in-app-not-checked = väljaandjat pole veel kontrollitud
 sign-in-app-issuer-changed = väljaandja muutus: sisestage kliendi saladus uuesti või eemaldage see
@@ -400,10 +400,8 @@ day-sunday = pühapäeval
 
 ## AI agents
 
-# review: changed
-agent-level-read = Lugeda e-posti: vaadata kaustu ja kirju ning kasutada otsingut
-# review: changed
-agent-level-organize = Hallata e-posti: muuta kirjade lugemisolekut, lippe ja nende värve, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta Kustutatud kirjad, luua ja ümber nimetada kaustu, jälgida ja eirata vestlusi ning teie nõusolekul loobuda meililistide tellimustest
+agent-level-read = Lugeda e-posti: vaadata kaustu, kirjade loendeid, vestlusi ja otsingutulemusi, lugeda kirju ja nende manuseid, vaadata kirjareegleid ning otsida kontakte
+agent-level-organize = Hallata e-posti: muuta kirjade lugemisolekut, lippe ja nende värve, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta Kustutatud kirjad, luua ja ümber nimetada kaustu, jälgida ja ignoreerida vestlusi ning teie nõusolekul loobuda meililistide tellimustest
 agent-level-drafts = Koostada mustandeid, mille saadate ise
 agent-level-send = Saata kirju, küsides iga kirja jaoks teie nõusolekut
 agent-connect-title = { $program } soovib kasutada teie e-posti
@@ -445,18 +443,15 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
 agent-encrypted-original = Agent ei saa krüpteeritud kirjale vastata ega seda edastada, sest agent ei toeta kirjade krüpteerimist.
 agent-encrypted = See kiri on krüpteeritud. Tehisintellekti agentidel pole selle sisule ligipääsu. Kasutaja peab selle ise Inbox Classicus avama.
-# review: new
-agent-too-many-changes = Viimase 30 päeva jooksul liiga palju muudatusi: see agent on teinud neid nii palju, kui Inbox Classic ühe programmi kohta logis hoiab. Rohkem saab teha, kui vanimad on 30 päeva vanad.
-# review: new
-agent-too-many-reads = Viimase 30 päeva jooksul liiga palju lugemist: see agent on lugenud nii palju, kui Inbox Classic ühe programmi kohta logis hoiab. Rohkem saab lugeda, kui vanimad lugemised on 30 päeva vanad.
+agent-too-many-changes = Programmi viimase 30 päeva muudatuste logi on täis. Agent saab uusi muudatusi teha, kui vanimate kirjete lisamisest möödub 30 päeva.
+agent-too-many-reads = Programmi viimase 30 päeva lugemiste logi on täis. Agent saab uuesti lugeda, kui vanimate kirjete lisamisest möödub 30 päeva.
 list-encrypted = Krüpteeritud kiri
 agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite selle valmis kirjutada
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
-# review: changed
-agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
+agent-log-sent = Kiri „{ $subject }“ lisati väljundkausta. Saaja: { $to }
 agent-log-draft = Mustand „{ $subject }“ salvestati
 agent-log-draft-replaced = Mustand „{ $subject }“ asendati
-agent-log-draft-discarded = Mustand „{ $subject }“ kustutati
+agent-log-draft-discarded = Taotleti mustandi „{ $subject }“ kustutamist
 agent-draft-note = Selle mustandi koostas tehisintellekti agent { $program }. Kontrollige enne saatmist adressaate ja teksti.
 agent-log-read = „{ $subject }“ märgiti loetuks
 agent-log-unread = „{ $subject }“ märgiti lugemata kirjaks
@@ -467,10 +462,10 @@ agent-log-moved = „{ $subject }“ teisaldati kausta { $folder }
 agent-log-junk = „{ $subject }“ märgiti rämpspostiks
 agent-log-not-junk = „{ $subject }“ märgiti tavapostiks
 agent-log-archived = „{ $subject }“ arhiveeriti
-agent-log-folder = Loodi kaust „{ $name }“
+agent-log-folder = Taotleti kausta „{ $name }“ loomist
 agent-log-unsubscribed = Lubasite saata tellimusest loobumise taotluse. Kiri: „{ $subject }“
 agent-log-unsubscribe-failed = Kirja „{ $subject }“ saatnud meililisti tellimusest ei õnnestunud loobuda: { $reason }
-agent-log-unsubscribe-refused = Te ei loobunud tellimusest: { $senders }
+agent-log-unsubscribe-refused = Te ei lubanud loobuda järgmiste saatjate meililistide tellimustest: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } soovib teie nimel loobuda ühe meililisti tellimusest
    *[other] { $program } soovib teie nimel loobuda { $count } meililisti tellimusest
@@ -479,7 +474,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic saadab allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
    *[other] Inbox Classic saadab igale allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
 }
-# review: new
 agent-log-flag-color = „{ $subject }“ märgiti { $color ->
     [red] punase
     [orange] oranži
@@ -489,39 +483,29 @@ agent-log-flag-color = „{ $subject }“ märgiti { $color ->
     [purple] lilla
    *[gray] halli
 } lipuga
-# review: new
-agent-log-renamed = Kausta „{ $old }“ nimeks muudeti „{ $name }“
-# review: new
+agent-log-renamed = Taotleti kausta „{ $old }“ nime muutmist nimeks „{ $name }“
 agent-log-watched = Vestlust „{ $subject }“ hakati jälgima
-# review: new
 agent-log-ignored = Vestlust „{ $subject }“ hakati ignoreerima
-# review: new
 agent-log-unmarked = Vestluse „{ $subject }“ jälgimine või ignoreerimine lõpetati
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = kirja on vahepeal muudetud
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] 1 kiri märgiti loetuks (otsing: { $query })
    *[other] { $count } kirja märgiti loetuks (otsing: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] 1 kiri märgiti lugemata kirjaks (otsing: { $query })
    *[other] { $count } kirja märgiti lugemata kirjadeks (otsing: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] 1 kiri märgiti lipuga (otsing: { $query })
    *[other] { $count } kirja märgiti lipuga (otsing: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] 1 kirjalt eemaldati lipp (otsing: { $query })
    *[other] { $count } kirjalt eemaldati lipp (otsing: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] 1 kiri märgiti
    *[other] { $count } kirja märgiti
@@ -534,33 +518,27 @@ agent-log-bulk-color = { $count ->
     [purple] lilla
    *[gray] halli
 } lipuga (otsing: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] 1 kiri teisaldati kausta { $folder } (otsing: { $query })
    *[other] { $count } kirja teisaldati kausta { $folder } (otsing: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] 1 kiri arhiveeriti (otsing: { $query })
    *[other] { $count } kirja arhiveeriti (otsing: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] 1 kiri märgiti rämpspostiks (otsing: { $query })
    *[other] { $count } kirja märgiti rämpspostiks (otsing: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] 1 kiri märgiti tavapostiks (otsing: { $query })
    *[other] { $count } kirja märgiti tavapostiks (otsing: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] 1 kiri kustutati (otsing: { $query })
    *[other] { $count } kirja kustutati (otsing: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Viimase 15 minuti jooksul
     [hour] Viimase tunni jooksul
@@ -570,129 +548,99 @@ agent-undo-span = { $span ->
    *[all] Viimase 30 päeva jooksul
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] { $program } ei teinud selle aja jooksul ühtegi muudatust, mida saaks tagasi võtta.
     [one] Kas võtta tagasi muudatus, mille { $program } selle aja jooksul tegi?
    *[other] Kas võtta tagasi { $count } muudatust, mille { $program } selle aja jooksul tegi?
 }
-# review: new
-agent-undo-since-detail = Kirjad viiakse tagasi kaustadesse, kust need tulid, lugemisolek ja lipud taastatakse ning väljundkaustas veel ootavad kirjad kustutatakse. Seda, mida teie või server on vahepeal muutnud, ei puudutata.
+agent-undo-since-detail = Võimaluse korral viiakse kirjad tagasi varasematesse kaustadesse, taastatakse lugemisolek ja lipud ning eemaldatakse väljundkaustas veel ootavad kirjad. Seejuures kontrollitakse praegust kausta ja asjakohaseid märgistusi. Hilisemaid muudatusi ei saa alati säilitada.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Midagi ei võetud tagasi.
     [one] 1 muudatus võeti tagasi.
    *[other] { $count } muudatust võeti tagasi.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 kiri polnud enam seal, kuhu muudatus selle viis.
-   *[other] { $count } kirja polnud enam seal, kuhu muudatus need viis.
+    [one] 1 kirja ei leitud enam eeldatud kaustast.
+   *[other] { $count } kirja ei leitud enam eeldatud kaustast.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] 1 kirja olite teie või server vahepeal muutnud, see jäeti nii, nagu see on.
-   *[other] { $count } kirja olite teie või server vahepeal muutnud, need jäeti nii, nagu need on.
+    [one] 1 vahepeal muudetud kiri jäeti puutumata.
+   *[other] { $count } vahepeal muudetud kirja jäeti puutumata.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] 1 kiri oli väljundkaustast juba lahkunud.
-   *[other] { $count } kirja olid väljundkaustast juba lahkunud.
+    [one] 1 kirja polnud enam väljundkaustas.
+   *[other] { $count } kirja polnud enam väljundkaustas.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 muudatust ei saa tagasi võtta.
    *[other] { $count } muudatust ei saa tagasi võtta.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] See kiri võtab vastu kutse „{ $summary }“ ({ $when }).
-    [tentative] See kiri võtab kutse „{ $summary }“ ({ $when }) esialgselt vastu.
-   *[decline] See kiri lükkab tagasi kutse „{ $summary }“ ({ $when }).
-} Korraldaja kalender võtab vastuse arvesse. Teie vastus kutsele muutub alles siis, kui kiri on saadetud.
+    [accept] Selle kirjaga võtate vastu kutse „{ $summary }“ ({ $when }).
+    [tentative] Selle kirjaga võtate esialgu vastu kutse „{ $summary }“ ({ $when }).
+   *[decline] Selle kirjaga lükkate tagasi kutse „{ $summary }“ ({ $when }).
+} Kiri sisaldab korraldaja kalendrile mõeldud vastust. Inbox Classic muudab kuvatavat vastuse olekut alles pärast kirja edukat saatmist. See ei kinnita vastuse lisamist korraldaja kalendrisse.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Vastu võetud: { $summary }
-    [tentative] Esialgne: { $summary }
+    [tentative] Esialgu vastu võetud: { $summary }
    *[decline] Tagasi lükatud: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } võttis selle kutse vastu.
-    [tentative] { $name } võttis selle kutse esialgselt vastu.
+    [tentative] { $name } võttis selle kutse esialgu vastu.
    *[decline] { $name } lükkas selle kutse tagasi.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] loeti 1 kiri
    *[other] loeti { $count } kirja
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] avati 1 manus
-   *[other] avati { $count } manust
+    [one] loeti 1 manus
+   *[other] loeti { $count } manust
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] otsiti üks kord
    *[other] otsiti { $count } korda
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] vaadati kirjade loendit üks kord
    *[other] vaadati kirjade loendeid { $count } korda
 }
 # each read under that row
-# review: new
 agent-read-message = Loeti kiri „{ $subject }“
-# review: new
 agent-read-conversation = { $count ->
     [one] Loeti vestlus „{ $subject }“ (1 kiri)
    *[other] Loeti vestlus „{ $subject }“ ({ $count } kirja)
 }
-# review: new
-agent-read-attachment = Avati kirja „{ $subject }“ manus „{ $name }“
-# review: new
+agent-read-attachment = Loeti kirja „{ $subject }“ manus „{ $name }“
 agent-read-search = { $count ->
     [one] Otsiti teksti „{ $query }“: leiti 1 kiri
    *[other] Otsiti teksti „{ $query }“: leiti { $count } kirja
 }
-# review: new
 agent-read-people = Otsiti inimesi, kelle nimi või aadress algab tekstiga „{ $query }“
-# review: new
 agent-read-list = { $count ->
-    [one] Vaadati 1 kirja kaustas { $folder }
-   *[other] Vaadati { $count } kirja kaustas { $folder }
+    [one] Vaadati 1 kirjet. Loend: { $folder }
+   *[other] Vaadati { $count } kirjet. Loend: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Vaadati 1 uut kirja
-   *[other] Vaadati { $count } uut kirja
+    [one] Vaadati 1 uue kirja ülevaadet
+   *[other] Vaadati { $count } uue kirja ülevaadet
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Rakendusest { $terminal } käivitatud programmid
-# review: new
 agent-terminal-programs-windows = Terminalist ({ $terminal }) käivitatud programmid
-# review: new
 agent-terminal-programs-linux = Terminalist ({ $terminal }) käivitatud programmid
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Rakendusest { $terminal } käivitatud programm
-# review: new
 agent-terminal-program-windows = Terminalist ({ $terminal }) käivitatud programm
-# review: new
 agent-terminal-program-linux = Terminalist ({ $terminal }) käivitatud programm
-# review: new
 agent-connect-title-terminal = { $programs } soovivad kasutada teie e-posti
-# review: new
-agent-connect-terminal-detail = Kõik tehisintellekti agendid, mille sellest terminalist käivitate, jagavad siin antud juurdepääsu. Kui soovite anda agendile eraldi juurdepääsu, lisage agendi MCP-sätetes selle argumentidele --name ja enda valitud nimi.
-# review: new
+agent-connect-terminal-detail = Sama tuvastatud terminaliprogrammi kaudu käivitatud agendid jagavad siin antud õigusi. Eraldi õiguste jaoks lisage agendi MCP-sätetes argumentidele --name ja enda valitud nimi. See nimi ei tõenda programmi identiteeti.
 agent-connect-claimed = Programm väitis, et see on { $claimed }. Inbox Classic kontrollis, milline programm selle käivitas: { $program }.
 
 ## Keys
@@ -742,7 +690,7 @@ pgp-key-expired = Aegus { $date }
 pgp-key-revoked = Tühistatud
 pgp-key-revoked-why = Tühistatud: { $reason }
 pgp-key-not-valid = Ei kehti
-pgp-key-locked = Privaatvõtit ei saa avada, sest seda kaitsev võti puudub paroolihoidlast ({ $store }). Importige privaatvõtme varukoopia uuesti.
+pgp-key-locked = Privaatvõtit ei saa avada. Kontrollige, kas paroolihoidla ({ $store }) on saadaval ja lukustamata. Kui kaitsev võti sealt puudub, importige privaatvõtme varukoopia uuesti.
 pgp-source-own = Loodud Inbox Classicus
 pgp-source-file = Imporditud failist
 pgp-source-paste = Kleebitud
@@ -751,11 +699,11 @@ pgp-source-vcard = Kontaktikaardilt
 pgp-source-wkd = Saatja e-posti teenusepakkujalt
 pgp-source-keyserver = Saidilt keys.openpgp.org
 pgp-source-autocrypt = Kirja Autocrypti päisest
-pgp-error-no-store = Privaatvõtmeid kaitsev paroolihoidla pole saadaval ({ $store }): { $error }
+pgp-error-no-store = Privaatvõtmeid kaitsvat võtit ei saa paroolihoidlas ({ $store }) kasutada: { $error }
 pgp-error-wrong-passphrase = Vale parool.
 pgp-error-not-a-key = See ei ole OpenPGP võti.
 pgp-error-too-large = Võti on liiga suur.
-pgp-error-unusable = Võti kasutab aegunud või ebaturvalist krüptograafiat, mistõttu ei saa seda kasutada.
+pgp-error-unusable = Võtit ei saa allkirjastamiseks või krüpteerimiseks kasutada. Sobiv alamvõti võib puududa või kasutatud krüptograafia pole toetatud.
 pgp-imported-private = { $count ->
     [one] Teie privaatvõti imporditi.
    *[other] Imporditi { $count } privaatvõtit.
@@ -774,13 +722,13 @@ pgp-pending = Aadressile { $address } leiti { $date } uus võti, mis erineb seni
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Allkirjastaja: { $signer }, võtme omanik kinnitatud
 pgp-part-signed = Allkirjastaja: { $signer }, võtme omanik kinnitamata
-pgp-part-other = Allkirjastaja: { $signer }. Allkirjastaja ei ole kirja saatja
+pgp-part-other = Allkirjastaja: { $signer }. Allkirja ei saa üheselt kirja saatjaga seostada
 pgp-part-unknown-key = Allkirjastatud, kuid võti pole teada
 pgp-part-not-signed = Allkirjastamata
 pgp-part-not-checked = Allkirja ei kontrollitud
 pgp-part-encrypted = Krüpteeritud. { $signature }
 pgp-part-no-key = Kirja avamiseks vajalik krüpteerimisvõti puudub
-pgp-part-changed = Kirja krüpteeritud osa on edastamisel muudetud. Seda ei kuvata
+pgp-part-changed = Krüpteeritud sisu tervikluse kontroll ebaõnnestus. Sisu ei kuvata
 pgp-part-unprotected = Kirja krüpteeritud osal puudub kaitse muutmise vastu. Seda ei kuvata
 pgp-part-broken = Krüpteeritud osa ei saa lugeda
 pgp-why-mismatch = Allkiri ei vasta sellele sisule
@@ -796,10 +744,10 @@ pgp-why-not-key-in-use = Kirja allkirjastamiseks kasutatud võti erineb aadressi
 pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist
 pgp-error-no-own-key = Aadressile { $address } pole allkirjastamiseks ega krüpteerimiseks võtit seadistatud. Looge võti menüüs Tööriistad > Krüpteerimisvõtmed või lülitage allkirjastamine ja krüpteerimine välja.
 pgp-error-missing-keys = { $count ->
-    [one] Sellele saajale kirja krüpteerimiseks puudub võti: { $addresses }.
-   *[other] Neile saajatele kirja krüpteerimiseks puuduvad võtmed: { $addresses }.
+    [one] Sellele saajale kirja krüpteerimiseks puudub kasutatav võti: { $addresses }.
+   *[other] Neile saajatele kirja krüpteerimiseks puuduvad kasutatavad võtmed: { $addresses }.
 }
-pgp-error-encrypted-quote = See kiri sisaldab tsitaati krüpteeritud kirjast või edastab krüpteeritud kirja. Seetõttu saab seda saata ainult krüpteerituna. Lülitage krüpteerimine sisse või eemaldage tsiteeritud sisu.
+pgp-error-encrypted-quote = See kiri sisaldab krüpteeritud kirjast pärit sisu. Lülitage krüpteerimine sisse või eemaldage enne saatmist üle võetud sisu koos selles olevate piltide ja manustega.
 pgp-error-protect = Kirja ei saanud allkirjastada ega krüpteerida: { $reason }
 pgp-found-keys = Võtmed leiti järgmiste aadresside jaoks: { $addresses }.
 pgp-found-none = Võtit ei leitud järgmiste aadresside jaoks: { $addresses }. Paluge nende aadresside omanikel saata teile oma avalik võti.
@@ -844,7 +792,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } saaja jaoks puudub kasutatav võti. Otsige nende võtmeid või eemaldage need saajad kirjast. Krüpteerimata saab kirja saata ainult siis, kui selles pole enam krüpteeritud kirjadest pärit teksti, pilte ega manuseid.
 }
 pgp-details-part = Osa { $number }: { $label }
-# review: new
 attachment-from-part = Osast { $number }: { $label }
 pgp-details-signed = Allkirjastatud { $when } võtmega { $key }
 pgp-details-unknown-key = Allkirjastatud võtmega { $key }, mida teil pole
@@ -853,11 +800,8 @@ pgp-details-for = Krüpteerimiseks kasutatud võtmed: { $keys }
 pgp-details-plain = Allkirjastamata ja krüpteerimata
 pgp-bar-parts = Kirjal on { $count } osa: { $list }. Iga osa juures on näha selle kaitse olek.
 pgp-bar-count-verified = { $count } kontrollitud
-# review: new
 pgp-bar-count-encrypted-signed = { $count } krüpteeritud ja allkirjastatud
-# review: new
 pgp-bar-count-encrypted = { $count } krüpteeritud
-# review: new
 pgp-bar-count-signed = { $count } allkirjastatud
 pgp-bar-count-warning = { $count } vajab tähelepanu
 pgp-bar-count-neutral = { $count } kinnitatud allkirjata
@@ -919,17 +863,17 @@ setup-account-signs-in-again = Pärast importimist tuleb kontole uuesti sisse lo
 setup-account-here = Konto on selles arvutis juba seadistatud ning seda uuesti ei impordita.
 setup-account-no-app = Konto kasutab sisselogimisrakendust { $app }, mida selles arvutis pole seadistatud. Importige ka sisselogimisrakendused.
 setup-invalid-address = „{ $address }“ ei ole e-posti aadress.
-setup-invalid-server = Serveri ({ $server }) nimi või pordinumber ei ole korrektne.
+setup-invalid-server = Serveri „{ $server }“ nimi, port või turvasäte on vigane.
 setup-invalid-user = Konto kasutajanimi puudub.
-setup-invalid-sign-in = Inbox Classic ei toeta selle konto sisselogimisviisi.
+setup-invalid-sign-in = Selle konto sisselogimisseadistust ei saa kasutada.
 setup-error-empty = Fail on tühi.
-setup-error-too-large = Fail on seadete ja kontode importimiseks liiga suur.
+setup-error-too-large = Fail ületab seadete ja kontode ülekandmiseks lubatud mahu.
 setup-error-not-setup = See pole Inbox Classicu seadete ja kontode fail.
 setup-error-damaged = Seadete ja kontode fail on kahjustatud ning seda ei saa lugeda.
 setup-error-newer = Fail on salvestatud Inbox Classicu uuema versiooniga ({ $version }). Uuendage rakendust ja proovige seejärel uuesti importida.
 setup-error-needs-passphrase = See seadete ja kontode fail on parooliga kaitstud. Sisestage faili salvestamisel määratud parool.
 setup-error-wrong-passphrase = Sisestatud parool ei sobi selle seadete ja kontode faili avamiseks.
-setup-error-changed = Seadete ja kontode faili on pärast salvestamist muudetud või see on kahjustatud. Faili ei saa importida.
+setup-error-changed = Ekspordifaili tervikluse kontroll ebaõnnestus. Faili ei saa importida.
 setup-error-read = Seadete ja kontode faili ei saanud lugeda: { $error }
 setup-error-write = Seadeid ja kontosid ei saanud faili salvestada: { $error }
 setup-error-no-parts = Valige vähemalt üks andmerühm.
@@ -989,8 +933,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } reeglit jäeti importimata, sest nendega seotud kontosid pole selles arvutis.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 reegli sihtkaust muutub kättesaadavaks pärast konto sünkroonimist.
-   *[other] { $count } reegli sihtkaustad muutuvad kättesaadavaks pärast kontode sünkroonimist.
+    [one] 1 reegel ootab, kuni sünkroonimisel leitakse selle sihtkaust.
+   *[other] { $count } reeglit ootab, kuni sünkroonimisel leitakse nende sihtkaustad.
 }
 setup-added-trusted-senders = { $count ->
     [one] Lisati 1 usaldusväärne saatja.
@@ -999,7 +943,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Midagi ei imporditud.
 setup-account-servers = { $imap } ja { $smtp } ({ $signin })
 setup-file-name = Inbox Classicu seaded ja kontod
-setup-skipped-unreachable = Sisselogimisrakendus { $name } jäeti importimata, sest selle teenusega ei saadud ühendust. Lisage rakendus uuesti sisselogimisrakenduste seadetes.
+setup-skipped-unreachable = „{ $name }“ jäeti importimata, sest sisselogimisteenust ei saanud kontrollida. Lisage vajalik sisselogimisrakendus uuesti sisselogimisrakenduste seadetes.
 attachment-runs-programs = Fail „{ $name }“ võib käivitada programme, mistõttu Inbox Classic seda ei ava. Kui usaldate faili päritolu, salvestage see ja avage ise.
 attachment-decrypted-note = See manus on pärit krüpteeritud kirjast. Avamiseks salvestab Inbox Classic sellest krüpteerimata koopia teie ajutisse kausta. Üle päeva vanused koopiad kustutatakse rakenduse käivitamisel.
 undone-move = { $count ->
@@ -1029,46 +973,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Näita PDF-faile kirjades
-# review: new
 preview-pdf-off = PDF-faile kirjades ei näidata.
-# review: new
-preview-pdf-off-crashed = PDF-fail sulges Inbox Classicu selle näitamise ajal, seetõttu ei näidata PDF-faile kirjades enam. Pilte näidatakse endiselt. PDF-failide uuesti näitamiseks lülitage sisse { $option }, asukoht: { $settings }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic sulgus faili eelvaate kuvamise ajal. Seetõttu ei näidata PDF-faile enam kirjades. Pilte näidatakse endiselt. PDF-failide uuesti näitamiseks avage seaded ({ $settings }) ja lülitage sisse valik „{ $option }“.
 preview-pdf-details = { $count ->
     [one] 1 lehekülg, { $size }
    *[other] { $count } lehekülge, { $size }
 }
-# review: new
 preview-page-alt = { $name }, lehekülg { $page }/{ $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Avage fail, et lehekülge näha
    *[other] Avage fail, et näha kõiki { $count } lehekülge
 }
-# review: new
 preview-more-files = { $count ->
     [one] Veel 1 fail on ülal loendis
    *[other] Veel { $count } faili on ülal loendis
 }
-# review: new
 preview-tile-downloading = Laaditakse alla…
-# review: new
 preview-tile-preparing = Valmistatakse ette…
-# review: new
 preview-tile-format = { $format }-pilte veel ei näidata
-# review: new
 preview-tile-password = Kaitstud parooliga: avage see parooli sisestamiseks
-# review: new
 preview-tile-too-large = Näitamiseks liiga suur
-# review: new
 preview-tile-unreadable = Ei saa näidata
-# review: new
 preview-tile-timed-out = Näitamine võttis liiga kaua aega
-# review: new
-preview-tile-crashed = Ei näidata: see fail sulges korra Inbox Classicu
-# review: new
+preview-tile-crashed = Eelvaadet ei näidata: eelmisel korral sulgus Inbox Classic või lakkas reageerimast
 preview-tile-off = Ei näidata enne, kui Inbox Classic uuesti käivitub
-# review: new
 preview-not-printed = Faili { $name } ({ $details }) ei prindita. Printimiseks avage see.

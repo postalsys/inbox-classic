@@ -4,10 +4,10 @@
 <table>
     <tr><th>Indstilling</th><th>Betydning</th></tr>
     <tr><td>SSL/TLS</td><td>Forbindelsen er krypteret fra starten. Som regel port 993 til indgående mail og 465 til udgående mail.</td></tr>
-    <tr><td>STARTTLS</td><td>Forbindelsen krypteres lige efter, at den er åbnet. Som regel port 143 til indgående mail og 587 til udgående mail. Inbox Classic stopper, hvis serveren ikke tilbyder kryptering.</td></tr>
+    <tr><td>STARTTLS</td><td>Forbindelsen krypteres, før loginoplysninger sendes. Som regel port 143 til indgående mail og 587 til udgående mail. Inbox Classic stopper, hvis serveren ikke tilbyder kryptering.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Adgangskoden og din mail sendes ukrypteret og kan læses af andre, som opsnapper netværkstrafikken.</td></tr>
 </table>
-<aside class="warning">Brug kun <b data-text="ui-security-none"></b> til en server på din egen computer eller dit lokale netværk. Inbox Classic advarer dig, før den bruges.</aside>
+<aside class="warning">Brug kun <b data-text="ui-security-none"></b> i et kontrolleret miljø, fx med en testserver på din egen computer. Et lokalt netværk krypterer ikke i sig selv forbindelsen. Inbox Classic advarer dig, før den bruges.</aside>
 <p>Inbox Classic kontrollerer, at hver server er den, den giver sig ud for at være, ud fra de certifikater, dit system stoler på. Certifikatkontrollen kan ikke slås fra, og programmet kan ikke indstilles til at acceptere vilkårlige certifikater.</p>
-<p>Din adgangskode gemmes i <!--os:windows-->Windows Legitimationsstyring<!--/os--><!--os:mac-->din login-nøglering<!--/os--><!--os:linux-->din nøglering<!--/os-->, aldrig i mailarkivet. Ved login via browseren gemmes logintokens i stedet for adgangskoden, også i systemets beskyttede lager.</p>
+<p>Din adgangskode gemmes som udgangspunkt i <!--os:windows-->Windows Legitimationsstyring<!--/os--><!--os:mac-->din login-nøglering<!--/os--><!--os:linux-->din nøglering<!--/os-->, aldrig i mailarkivet. Ved login via browseren gemmes logintokens i stedet for adgangskoden, også i systemets beskyttede lager. Ved lagring kun i hukommelsen bevares loginoplysningerne kun, indtil programmet afsluttes.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>

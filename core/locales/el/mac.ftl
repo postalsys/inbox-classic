@@ -18,7 +18,7 @@ mac-cut = Αποκοπή
 mac-paste = Επικόλληση
 mac-menu-window = Παράθυρο
 mac-minimize = Ελαχιστοποίηση
-mac-zoom = Ζουμ
+mac-zoom = Αλλαγή μεγέθους παραθύρου
 mac-no-updates = Αυτή η έκδοση του Inbox Classic δεν υποστηρίζει αυτόματες ενημερώσεις. Κατεβάστε την πιο πρόσφατη έκδοση από το inboxclassic.com.
 
 ## Settings
@@ -81,7 +81,7 @@ mac-files-not-saved =
     { $count ->
        *[other] Αρχεία που δεν αποθηκεύτηκαν: { $failed } από { $count }.
     }
-mac-no-calendar-app = Δεν υπάρχει εφαρμογή ημερολογίου σε αυτό το Mac για το άνοιγμα προσκλήσεων (αρχεία .ics).
+mac-no-calendar-app = Δεν ήταν δυνατό το άνοιγμα της πρόσκλησης. Ελέγξτε την εφαρμογή που ανοίγει αρχεία .ics σε αυτό το Mac.
 mac-file-not-saved = Δεν ήταν δυνατή η αποθήκευση του αρχείου.
 mac-unsubscribing = Κατάργηση εγγραφής από { $target }…
 mac-loading-list = Φόρτωση…

@@ -1,11 +1,11 @@
 <h1>Poruke koje nisu isporučene</h1>
 <p class="summary">Kad dobijete obavijest o neuspjeloj ili odgođenoj isporuci, Inbox Classic objašnjava razlog i što možete učiniti.</p>
-<p>Obavijest o isporuci na popisu poruka ima oznaku neisporučene poruke. Kad je otvorite, kartica iznad nje pokazuje je li isporuka neuspjela ili samo kasni.</p>
+<p>Prepoznata obavijest o isporuci na popisu poruka ima oznaku neisporučene poruke. Kad je otvorite, kartica iznad nje pokazuje je li isporuka neuspjela ili samo kasni.</p>
 <img src="picture:bounce-1-failed" alt="Obavijest o isporuci s karticom koja kaže da poruka nije isporučena, s primateljem, razlogom i onim što možete učiniti">
 <p>Za svakog primatelja kartica jednostavnim riječima objašnjava razlog i predlaže što učiniti. Poveznica <b data-text="bounce-details"></b> prikazuje izvorni odgovor poslužitelja primatelja.</p>
 <ul>
-    <li>Poveznica <b data-text="bounce-show-message"></b> odabire poruku koju ste poslali.</li>
-    <li>Ako isporuka kasni, poruku odabire poveznica <b data-text="bounce-show-delayed"></b>. Vaš poslužitelj e-pošte još pokušava isporučiti poruku, pa je ne morate ponovno slati.</li>
+    <li>Poveznica <b data-text="bounce-show-message"></b> odabire izvornu poruku ako je program može pronaći.</li>
+    <li>Ako isporuka kasni, poruku odabire poveznica <b data-text="bounce-show-delayed"></b>. Obavijest o odgodi obično znači da će poslužitelj pokušati ponovno. Nemojte slati duplikat prije nego što provjerite je li isporuka obustavljena.</li>
 </ul>
 <p>Česti razlozi i moguća rješenja:</p>
 <table>
@@ -14,7 +14,7 @@
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Pošaljite poruku ponovno za nekoliko dana ili se osobi javite na drugi način.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Pokušajte ponovno poslati poruku nakon što uklonite suvišne poveznice ili veliki privitak zbog kojih bi mogla izgledati kao neželjena pošta.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Proslijedite obavijest svojem davatelju usluge e-pošte. Poslužitelj s kojeg šaljete nalazi se na popisu blokiranih.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Pričekajte da poslužitelj ponovno pokuša isporučiti poruku. Ne morate je ponovno slati.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Poslužitelji obično pokušavaju ponovno nakon privremenog odbijanja. Ako obavijest navodi konačan neuspjeh, sami pokušajte ponovno poslati poruku kasnije.</td></tr>
 </table>
 <p>Da biste pronašli sve obavijesti o isporuci, potražite <code>is:bounce</code>. Inbox Classic analizira obavijesti na vašem računalu, bez slanja podataka vanjskim uslugama.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

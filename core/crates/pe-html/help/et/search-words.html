@@ -1,11 +1,11 @@
 <h1>Otsingusõnad</h1>
 <p class="summary">Sõnad ja märgid, mida otsinguväli mõistab, et leida täpselt soovitud kirjad.</p>
-<p>Otsinguväli mõistab samu sõnu mis Gmaili oma. Kombineerige neid nii palju kui soovite: kiri peab vastama neile kõigile. Lühikese loendi nägemiseks osutage otsinguväljale.</p>
+<p>Otsinguväli toetab allpool kirjeldatud Gmaili-laadseid filtreid. Kombineerige neid nii palju kui soovite: kiri peab vastama neile kõigile. Lühikese loendi nägemiseks osutage otsinguväljale.</p>
 <table>
     <tr><th>Sisestage</th><th>Leiab</th></tr>
-    <tr><td><code>eelarve</code></td><td>Kirjad, milles on kus tahes sõna, mis algab sõnaga <i>eelarve</i></td></tr>
+    <tr><td><code>eelarve</code></td><td>Kirjad, milles on sõna algusega <i>eelarve</i>. Alguse järgi otsimine nõuab vähemalt kaht tähte</td></tr>
     <tr><td><code>"täpne fraas"</code></td><td>Need sõnad selles järjekorras</td></tr>
-    <tr><td><code>-sõna</code></td><td>Kirjad, milles seda sõna pole. Miinust saab kasutada ka mõne filtriga, näiteks <code>-is:unread</code></td></tr>
+    <tr><td><code>-sõna</code></td><td>Kirjad, milles seda sõna pole. Miinust saab kasutada ka mõne filtriga, näiteks <code>-is:unread</code>. Kuupäeva-, vanuse- ja suurusefiltrite ees olevat miinust eiratakse</td></tr>
     <tr><td><code>see OR teine</code></td><td>Kirjad, milles on kumbki sõna. Kirjutage <code>OR</code> suurtähtedega</td></tr>
     <tr><td><code>from:mari</code></td><td>Mari saadetud post</td></tr>
     <tr><td><code>to:mari</code>, <code>cc:</code>, <code>bcc:</code></td><td>Marile saadetud post, mis tahes adressaadireal</td></tr>
@@ -21,8 +21,8 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Ainult see kaust, igas kontos</td></tr>
     <tr><td><code>in:projektid</code></td><td>Ainult selle nimega kaust</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Kõik kaustad</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Post enne või pärast teatud päeva. Töötab ka <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Post, mis on vanem või uuem kui päevad (<code>d</code>), kuud (<code>m</code>) või aastad (<code>y</code>)</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Enne määratud päeva või alates määratud päevast UTC järgi; after hõlmab ka seda päeva. Töötab ka <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Post, mis on vanem või uuem kui päevad (<code>d</code>), 30-päevased kuud (<code>m</code>) või 365-päevased aastad (<code>y</code>)</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Post, mis on suurem või väiksem kui antud suurus, baitides või ühikuga <code>K</code>, <code>M</code> või <code>G</code></td></tr>
 </table>
 <p>Rõhumärgid ja suurtähed pole olulised. Otsingusõna, mida Inbox Classic ei tunne, otsitakse tavalise sõnana.</p>

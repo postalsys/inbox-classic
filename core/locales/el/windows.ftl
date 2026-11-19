@@ -101,14 +101,10 @@ win-clear-log-ask = Να διαγραφεί το ιστορικό δραστηρ
 win-agent-programs = &Προγράμματα των οποίων οι πράκτορες ζήτησαν πρόσβαση στην αλληλογραφία σας:
 win-change = &Αλλαγή...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = Αναίρεση &για διάστημα...
-# review: new
 win-take-back = &Αναίρεση
 win-what-agents-did = &Δραστηριότητα πρακτόρων:
-# review: new
 win-agent-reads = Τι διαβάστηκε από { $from } έως { $to }:
-# review: new
 win-agent-reads-hint = Επιλέξτε παραπάνω μια γραμμή αναγνώσεων για να δείτε τι διαβάστηκε.
 win-how-to-connect = Πώς να συνδέσετε έναν πράκτορα
 
@@ -142,4 +138,4 @@ win-installer-welcome-update =
     Αν εκτελείται, θα κλείσει πρώτα. Οι λογαριασμοί και η αλληλογραφία σας διατηρούνται.
 win-installer-older-ask = Η εγκατεστημένη έκδοση του Inbox Classic ({ $installed }) είναι νεότερη από την έκδοση { $version }. Θέλετε να εγκαταστήσετε την παλαιότερη έκδοση;
 win-installer-still-running = Το Inbox Classic εκτελείται ακόμη. Κλείστε το και δοκιμάστε ξανά.
-win-installer-remove-mail-ask = Θέλετε να διαγραφούν επίσης οι λογαριασμοί και τα τοπικά αντίγραφα αλληλογραφίας που αποθηκεύει το Inbox Classic; Η αλληλογραφία στους διακομιστές θα παραμείνει.
+win-installer-remove-mail-ask = Θέλετε να διαγραφούν επίσης τα τοπικά δεδομένα του Inbox Classic, μαζί με λογαριασμούς, ρυθμίσεις και μη απεσταλμένα μηνύματα; Η αλληλογραφία στους διακομιστές θα παραμείνει.

@@ -30,7 +30,10 @@ list-counts = { $messages }, { $unread ->
 list-counts-selected = { $messages }, { $unread ->
     [one] 1 ulæst
    *[other] { $unread } ulæste
-    }, { $selected } markerede
+}, { $selected ->
+    [one] 1 markeret
+   *[other] { $selected } markerede
+}
 # the status bar while searching: "12 fundet, 3 ulæste"
 list-counts-found = { $found } fundet, { $unread ->
     [one] 1 ulæst
@@ -58,8 +61,8 @@ reader-downloading = Henter meddelelsen…
 reader-downloading-detail = Meddelelsen vises her, når den er hentet.
 reader-downloading-size = Meddelelsen fylder { $size }. Den vises her, når den er hentet.
 reader-failed = Meddelelsen kunne ikke hentes
-reader-failed-network = Der kunne ikke oprettes forbindelse til mailserveren ({ $reason }).
-reader-failed-sign-in = Mailserveren godtog ikke login ({ $reason }). Kontrollér adgangskoden, eller log på igen under Filer > Konti.
+reader-failed-network = Forbindelsen til mailserveren kunne ikke oprettes eller blev afbrudt ({ $reason }).
+reader-failed-sign-in = Mailserveren godtog ikke login ({ $reason }). Kontrollér adgangskoden, eller log på igen i kontoens indstillinger.
 reader-failed-security = Der kunne ikke oprettes en sikker forbindelse til mailserveren ({ $reason }).
 reader-failed-other = Mailserveren svarede: { $reason }.
 reader-retry-note = Inbox Classic prøver igen, når forbindelsen til kontoen er genoprettet.
@@ -122,12 +125,12 @@ bounce-mailbox-disabled-why = Adressen findes, men postkassen er slået fra elle
 bounce-mailbox-disabled-do = Kontakt modtageren på en anden måde, og bed om en aktuel e-mailadresse.
 bounce-mailbox-full = Postkassen er fuld
 bounce-mailbox-full-why = Modtagerens postkasse har ikke plads til ny mail.
-bounce-mailbox-full-do = Send den igen om nogle dage, eller giv personen besked på en anden måde. Store vedhæftede filer afvises først.
+bounce-mailbox-full-do = Prøv at sende meddelelsen igen senere, eller kontakt personen på en anden måde, så vedkommende kan frigøre plads i postkassen.
 bounce-spam-blocked = Afvist som spam
 bounce-spam-blocked-why = Modtagerens server opfattede meddelelsen som spam.
 bounce-spam-blocked-do = Send den igen uden det, der ligner spam, fx mange links, forkortede links eller en stor vedhæftet fil. Hvis det bliver ved med at ske, så spørg din mailudbyder.
 bounce-virus-detected = Afvist på grund af virus
-bounce-virus-detected-why = Modtagerens server fandt en virus eller andet skadeligt indhold i meddelelsen eller dens vedhæftede filer.
+bounce-virus-detected-why = Modtagerens server afviste meddelelsen på grund af mistanke om en virus eller andet skadeligt indhold i teksten eller de vedhæftede filer.
 bounce-virus-detected-do = Kontrollér de vedhæftede filer med et antivirusprogram. Nogle servere afviser alle programmer og arkiver, så del i stedet sådanne filer som et link.
 bounce-ip-blocklisted = Din mailserver er på en blokeringsliste
 bounce-ip-blocklisted-why = Modtagerens server afviser mail fra din mailserver, fordi dens IP-adresse står på en blokeringsliste.
@@ -143,7 +146,7 @@ bounce-geo-blocked-why = Modtagerens server tager ikke imod mail fra det land el
 bounce-geo-blocked-do = Kontakt personen på en anden måde, eller spørg din mailudbyder om det.
 bounce-relay-denied = Serveren ville ikke sende den videre
 bounce-relay-denied-why = En server nægtede at levere meddelelsen videre, ofte fordi den blev sendt uden login eller gennem en server, der ikke håndterer denne modtager.
-bounce-relay-denied-do = Kontrollér kontoens udgående server under Filer > Konti, og sørg for, at kontoen logger på serveren ved afsendelse.
+bounce-relay-denied-do = Kontrollér den udgående server og loginoplysningerne i kontoens indstillinger.
 bounce-auth-failure = Din afsenderadresse kunne ikke bekræftes
 bounce-auth-failure-why = Modtagerens server kunne ikke bekræfte, at meddelelsen virkelig kom fra dit domæne (SPF, DKIM eller DMARC).
 bounce-auth-failure-do = Videresend denne fejlmeddelelse til administratoren for dit maildomæne, så indstillingerne kan blive rettet. Indtil da kan det hjælpe at sende via din udbyders egen server.
@@ -152,7 +155,7 @@ bounce-rate-limited-why = Modtagerens server tager indtil videre imod færre med
 bounce-rate-limited-do = Vent lidt, og send den igen. Når du skriver til mange personer, så send til færre ad gangen.
 bounce-greylisting = Levering midlertidigt udsat
 bounce-greylisting-why = Modtagerens server beder ukendte afsendere om at prøve igen lidt senere. Det er en almindelig metode til at begrænse spam.
-bounce-greylisting-do = Du behøver ikke gøre noget. Mailservere prøver automatisk igen, og meddelelsen leveres som regel inden for en time.
+bounce-greylisting-do = Greylisting er normalt en midlertidig afvisning, og mailservere prøver ofte igen. Hvis denne meddelelse angiver en endelig leveringsfejl, skal du selv prøve at sende igen senere.
 bounce-server-error = Modtagerens server havde et problem
 bounce-server-error-why = Modtagerens server kunne ikke kontaktes eller kunne ikke modtage meddelelsen på grund af en fejl på serveren.
 bounce-server-error-do = Send den igen senere. Hvis det bliver ved med at mislykkes, så kontrollér delen af adressen efter @ for tastefejl.
@@ -329,7 +332,7 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Lagde 3 meddelelser i Arkiv"
 import-put = { $count ->
-   *[other] Importerede { $messages } til { $folder }
+   *[other] Satte { $messages } i kø til import til { $folder }
 }
 import-not-put = Disse meddelelser blev ikke importeret til mappen:
 
@@ -383,8 +386,8 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google har endnu ikke godkendt Inbox Classic, så kun testbrugere kan logge på med den. Brug din egen login-app til Google eller en appadgangskode, eller slå den til under Login-apps (Filer > Konti), hvis du er testbruger.
-sign-in-off-other = Den blev slået fra under Login-apps (Filer > Konti), hvor den kan slås til igen.
+sign-in-off-google = Den indbyggede login-app til Google er som udgangspunkt slået fra. Brug din egen login-app eller en appadgangskode, hvis kontoen tillader det. Du kan slå den indbyggede app til under Login-apps, hvis du har adgang til at bruge den.
+sign-in-off-other = Den blev slået fra under Login-apps i kontovinduet, hvor du kan slå den til igen.
 sign-in-app-no-name = login-appen skal have et navn
 sign-in-app-no-client = klient-id mangler
 sign-in-app-no-scopes = login-appen skal have de tilladelser (scopes), der giver adgang til mail
@@ -434,9 +437,7 @@ day-sunday = søndag
 
 ## AI agents
 
-# review: changed
-agent-level-read = Læse mail: mapper, meddelelseslisten, søgning og meddelelser
-# review: changed
+agent-level-read = Læse mail: mapper, meddelelseslister, søgninger, meddelelser, understøttede vedhæftede filer, regler og kontakter
 agent-level-organize = Organisere mail: ændre læst/ulæst-status, flag og deres farver, håndtere uønsket mail, flytte og arkivere meddelelser, oprette og omdøbe mapper, følge og ignorere samtaler, slette ved at flytte til Slettet post og afmelde mailinglister med din godkendelse
 agent-level-drafts = Skrive kladder, som du selv sender
 agent-level-send = Sende mail, men kun efter din godkendelse af hver meddelelse
@@ -481,10 +482,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Denne meddelelse kan ikke læses.
 agent-encrypted-original = Meddelelsen er krypteret. En agent kan ikke svare på den eller videresende den gennem Inbox Classic, da agenten ikke kan kryptere mail her.
 agent-encrypted = Denne meddelelse er krypteret. AI-agenter kan ikke læse indholdet. Brugeren skal åbne den i Inbox Classic.
-# review: new
 agent-too-many-changes = For mange ændringer de seneste 30 dage: denne agent har foretaget så mange, som Inbox Classic gemmer i loggen for ét program. Den kan foretage flere, når de ældste er 30 dage gamle.
-# review: new
-agent-too-many-reads = For meget læst de seneste 30 dage: denne agent har læst så meget, som Inbox Classic gemmer i loggen for ét program. Den kan læse mere, når de ældste læsninger er 30 dage gamle.
+agent-too-many-reads = For mange læsninger de seneste 30 dage: denne agent har nået grænsen for, hvor mange læsninger Inbox Classic gemmer i loggen for ét program. Den kan læse mere, når de ældste læsninger er 30 dage gamle.
 list-encrypted = Krypteret meddelelse
 agent-log-composed = Åbnede »{ $subject }« i en ny meddelelse, som du kan gøre færdig
 agent-log-refused = Du sendte ikke »{ $subject }«
@@ -502,7 +501,7 @@ agent-log-moved = Flyttede »{ $subject }« til { $folder }
 agent-log-junk = Markerede »{ $subject }« som uønsket
 agent-log-not-junk = Markerede »{ $subject }« som ikke uønsket
 agent-log-archived = Arkiverede »{ $subject }«
-agent-log-folder = Oprettede mappen »{ $name }«
+agent-log-folder = Anmodede om at oprette mappen »{ $name }«
 agent-log-unsubscribed = Du godkendte afmeldingsanmodningen. Meddelelse: »{ $subject }«
 agent-log-unsubscribe-failed = Afmeldingen mislykkedes. Meddelelse: »{ $subject }«. Årsag: { $reason }
 agent-log-unsubscribe-refused = Du godkendte ikke afmeldingen. Afsendere: { $senders }
@@ -514,7 +513,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic beder mailinglisten nedenfor om at stoppe med at sende dig meddelelser. Det sker via listens mulighed for afmelding med ét klik. Der sendes ikke andet. Dine eksisterende meddelelser ændres eller flyttes ikke.
    *[other] Inbox Classic beder hver mailingliste nedenfor om at stoppe med at sende dig meddelelser. Det sker via den enkelte listes mulighed for afmelding med ét klik. Der sendes ikke andet. Dine eksisterende meddelelser ændres eller flyttes ikke.
 }
-# review: new
 agent-log-flag-color = { $color ->
     [red] Satte rødt flag på »{ $subject }«
     [orange] Satte orange flag på »{ $subject }«
@@ -524,39 +522,29 @@ agent-log-flag-color = { $color ->
     [purple] Satte lilla flag på »{ $subject }«
    *[gray] Satte gråt flag på »{ $subject }«
 }
-# review: new
-agent-log-renamed = Omdøbte mappen »{ $old }« til »{ $name }«
-# review: new
+agent-log-renamed = Anmodede om at omdøbe mappen »{ $old }« til »{ $name }«
 agent-log-watched = Begyndte at følge samtalen »{ $subject }«
-# review: new
 agent-log-ignored = Begyndte at ignorere samtalen »{ $subject }«
-# review: new
 agent-log-unmarked = Holdt op med at følge eller ignorere samtalen »{ $subject }«
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = meddelelsen er ændret siden
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Markerede 1 meddelelse som læst (søgning: { $query })
-   *[other] Markerede { $count } meddelelser som læst (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som læste (søgning: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Markerede 1 meddelelse som ulæst (søgning: { $query })
-   *[other] Markerede { $count } meddelelser som ulæst (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som ulæste (søgning: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Satte flag på 1 meddelelse (søgning: { $query })
    *[other] Satte flag på { $count } meddelelser (søgning: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Fjernede flaget fra 1 meddelelse (søgning: { $query })
    *[other] Fjernede flaget fra { $count } meddelelser (søgning: { $query })
 }
-# review: new
 agent-log-bulk-color = Satte { $color ->
     [red] rødt
     [orange] orange
@@ -569,33 +557,27 @@ agent-log-bulk-color = Satte { $color ->
     [one] 1 meddelelse
    *[other] { $count } meddelelser
 } (søgning: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Flyttede 1 meddelelse til { $folder } (søgning: { $query })
    *[other] Flyttede { $count } meddelelser til { $folder } (søgning: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Arkiverede 1 meddelelse (søgning: { $query })
    *[other] Arkiverede { $count } meddelelser (søgning: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Markerede 1 meddelelse som uønsket (søgning: { $query })
-   *[other] Markerede { $count } meddelelser som uønsket (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som uønskede (søgning: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Markerede 1 meddelelse som ikke uønsket (søgning: { $query })
-   *[other] Markerede { $count } meddelelser som ikke uønsket (søgning: { $query })
+   *[other] Markerede { $count } meddelelser som ikke uønskede (søgning: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Slettede 1 meddelelse (søgning: { $query })
    *[other] Slettede { $count } meddelelser (søgning: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Inden for de seneste 15 minutter
     [hour] Inden for den seneste time
@@ -605,129 +587,99 @@ agent-undo-span = { $span ->
    *[all] Inden for de seneste 30 dage
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] { $program } har ikke foretaget ændringer i dette tidsrum, som kan fortrydes.
     [one] Vil du fortryde den ændring, { $program } foretog i dette tidsrum?
    *[other] Vil du fortryde de { $count } ændringer, { $program } foretog i dette tidsrum?
 }
-# review: new
-agent-undo-since-detail = Meddelelser kommer tilbage i de mapper, de kom fra, læst/ulæst-status og flag bliver, som de var, og meddelelser, der stadig venter i Udbakke, slettes. Det, du eller serveren har ændret siden, bliver, som det er.
+agent-undo-since-detail = Meddelelser flyttes tilbage til deres tidligere mapper, og læst/ulæst-status og flag gendannes. Meddelelser, der stadig venter i Udbakke, slettes. Hvis du eller serveren siden har ændret den relevante status eller placering, bevares den.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Intet blev fortrudt.
     [one] Fortrød 1 ændring.
    *[other] Fortrød { $count } ændringer.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 meddelelse var ikke længere, hvor ændringen havde lagt den.
-   *[other] { $count } meddelelser var ikke længere, hvor ændringen havde lagt dem.
+    [one] 1 meddelelse fandtes ikke længere på den forventede placering.
+   *[other] { $count } meddelelser fandtes ikke længere på de forventede placeringer.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] 1 meddelelse er ændret siden, af dig eller på serveren, og blev ladt, som den er.
-   *[other] { $count } meddelelser er ændret siden, af dig eller på serveren, og blev ladt, som de er.
+    [one] 1 meddelelse var siden ændret af dig eller på serveren og blev derfor ikke ændret igen.
+   *[other] { $count } meddelelser var siden ændret af dig eller på serveren og blev derfor ikke ændret igen.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] 1 meddelelse havde allerede forladt Udbakke.
    *[other] { $count } meddelelser havde allerede forladt Udbakke.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 ændring kan ikke fortrydes.
    *[other] { $count } ændringer kan ikke fortrydes.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Denne meddelelse accepterer invitationen »{ $summary }« ({ $when }).
-    [tentative] Denne meddelelse accepterer foreløbigt invitationen »{ $summary }« ({ $when }).
-   *[decline] Denne meddelelse afslår invitationen »{ $summary }« ({ $when }).
-} Arrangørens kalender registrerer den. Dit svar på invitationen ændres først, når meddelelsen er sendt.
+    [accept] Meddelelsen indeholder dit ja til invitationen »{ $summary }« ({ $when }).
+    [tentative] Meddelelsen indeholder dit foreløbige ja til invitationen »{ $summary }« ({ $when }).
+   *[decline] Meddelelsen indeholder dit afslag på invitationen »{ $summary }« ({ $when }).
+} Svaret sendes til arrangøren som et kalendersvar. Inbox Classic opdaterer dit svar på invitationen, når meddelelsen er sendt, uden at vente på bekræftelse fra arrangøren.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Accepteret: { $summary }
     [tentative] Foreløbig: { $summary }
    *[decline] Afvist: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } har accepteret denne invitation.
     [tentative] { $name } har foreløbigt accepteret denne invitation.
    *[decline] { $name } har afslået denne invitation.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] læste 1 meddelelse
    *[other] læste { $count } meddelelser
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] åbnede 1 vedhæftet fil
-   *[other] åbnede { $count } vedhæftede filer
+    [one] læste 1 vedhæftet fil
+   *[other] læste { $count } vedhæftede filer
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] søgte én gang
    *[other] søgte { $count } gange
 }
-# review: new
 agent-reads-lists = { $count ->
-    [one] så på en meddelelsesliste én gang
-   *[other] så på meddelelseslister { $count } gange
+    [one] så 1 række i en meddelelsesliste
+   *[other] så { $count } rækker i meddelelseslister
 }
 # each read under that row
-# review: new
 agent-read-message = Læste »{ $subject }«
-# review: new
 agent-read-conversation = { $count ->
     [one] Læste samtalen »{ $subject }« (1 meddelelse)
    *[other] Læste samtalen »{ $subject }« ({ $count } meddelelser)
 }
-# review: new
-agent-read-attachment = Åbnede »{ $name }« fra »{ $subject }«
-# review: new
+agent-read-attachment = Læste den vedhæftede fil »{ $name }« fra »{ $subject }«
 agent-read-search = { $count ->
     [one] Søgte efter »{ $query }«: 1 meddelelse
    *[other] Søgte efter »{ $query }«: { $count } meddelelser
 }
-# review: new
-agent-read-people = Slog personer op, der begynder med »{ $query }«
-# review: new
+agent-read-people = Søgte efter kontakter med navne eller adresser, der begynder med »{ $query }«
 agent-read-list = { $count ->
-    [one] Så på 1 meddelelse i { $folder }
-   *[other] Så på { $count } meddelelser i { $folder }
+    [one] Så oplysninger om 1 meddelelse i { $folder }
+   *[other] Så oplysninger om { $count } meddelelser i { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Så på 1 ny meddelelse
-   *[other] Så på { $count } nye meddelelser
+    [one] Så oplysninger om 1 ny meddelelse
+   *[other] Så oplysninger om { $count } nye meddelelser
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Programmer startet fra { $terminal }
-# review: new
 agent-terminal-programs-windows = Programmer startet fra en terminal ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Programmer startet fra en terminal ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Et program startet fra { $terminal }
-# review: new
 agent-terminal-program-windows = Et program startet fra en terminal ({ $terminal })
-# review: new
 agent-terminal-program-linux = Et program startet fra en terminal ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } vil bruge din mail
-# review: new
 agent-connect-terminal-detail = Alle AI-agenter, du starter fra denne terminal, deler den adgang, du giver her. Hvis en agent skal have sin egen adgang, skal du føje --name og et navn efter eget valg til dens argumenter i agentens MCP-indstillinger.
-# review: new
 agent-connect-claimed = Programmet oplyste, at det var { $claimed }. Inbox Classic har tjekket, hvilket program der startede det: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -763,7 +715,7 @@ cards-file-failed = { $file }: { $reason }
 otp-heading = Kode fra { $domain }
 otp-copy = Kopier
 otp-note = Indtast den kun på en side fra { $domain }.
-otp-old = Koden blev sendt mere end en time før, du åbnede meddelelsen, og er sandsynligvis udløbet.
+otp-old = Meddelelsens dato ligger mere end en time før det tidspunkt, hvor du åbnede den. Koden kan være udløbet; Inbox Classic kontrollerer ikke, om den stadig virker.
 
 # how many are invited, in the card of an event
 event-attendees =
@@ -782,7 +734,7 @@ pgp-key-expired = Udløb { $date }
 pgp-key-revoked = Tilbagekaldt
 pgp-key-revoked-why = Tilbagekaldt: { $reason }
 pgp-key-not-valid = Ikke gyldig
-pgp-key-locked = Nøglen kan ikke bruges, fordi dens beskyttelsesnøgle mangler i { $store }. Importer en sikkerhedskopi af den private nøgle igen.
+pgp-key-locked = Nøglens beskyttelsesnøgle kan ikke hentes fra { $store }. Kontrollér, at lageret er tilgængeligt og låst op. Hvis beskyttelsesnøglen er gået tabt, skal du importere en sikkerhedskopi af den private nøgle igen.
 pgp-source-own = Oprettet i Inbox Classic
 pgp-source-file = Importeret fra en fil
 pgp-source-paste = Indsat
@@ -834,19 +786,19 @@ pgp-why-key-not-valid = Signeret med en nøgle, der ikke er gyldig
 pgp-why-not-for-you = Signeret til andre modtagere og sendt videre til dig
 pgp-why-not-key-in-use = Signeret med en anden nøgle end den, der bruges til { $address }
 pgp-part-pictures-loaded = { $label }. Billeder blev hentet fra internettet
-pgp-error-no-own-key = Du har ingen nøgle til { $address } at signere eller kryptere med. Opret en under Funktioner > Krypteringsnøgler, eller slå Signer og Krypter fra.
+pgp-error-no-own-key = Du har ingen nøgle til { $address } at signere eller kryptere med. Opret en under Krypteringsnøgler, eller slå digital signering og kryptering fra.
 pgp-error-missing-keys = { $count ->
     [one] { $addresses } har ingen nøgle at kryptere til.
    *[other] Disse modtagere har ingen nøgle at kryptere til: { $addresses }.
 }
-pgp-error-encrypted-quote = Denne meddelelse citerer eller videresender en krypteret meddelelse, så den kan kun sendes krypteret. Slå Krypter til, eller fjern den citerede tekst.
+pgp-error-encrypted-quote = Meddelelsen indeholder stadig tekst, billeder eller vedhæftede filer fra en krypteret meddelelse og kan kun sendes krypteret. Slå Krypter til, eller fjern dette indhold.
 pgp-error-protect = Meddelelsen kunne ikke signeres eller krypteres: { $reason }
 pgp-found-keys = Der er fundet nøgler til: { $addresses }.
 pgp-found-none = Der blev ikke fundet nogen nøgle til { $addresses }. Bed modtageren eller modtagerne om at sende deres offentlige nøgle.
 pgp-found-no-key = Der blev ikke fundet nogen nøgle.
 pgp-find-unavailable = Nøgler kunne ikke slås op lige nu: { $error }
-pgp-publish-pending = keys.openpgp.org har sendt et bekræftelseslink til hver af disse adresser: { $addresses }. Bekræft hver adresse, så andre kan finde din nøgle ved hjælp af den.
-pgp-publish-done = Din nøgle er offentliggjort på keys.openpgp.org for { $addresses }.
+pgp-publish-pending = Nøglen er sendt til keys.openpgp.org, og der er anmodet om bekræftelseslinks til: { $addresses }. Åbn linket for hver adresse, der endnu ikke er bekræftet, så andre kan finde din nøgle med adressen.
+pgp-publish-done = Nøglen er sendt til keys.openpgp.org for { $addresses }.
 pgp-publish-failed = Nøglen kunne ikke offentliggøres: { $error }
 pgp-keyserver-off = Søgning efter nøgler på keys.openpgp.org er slået fra under { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
@@ -884,7 +836,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Der mangler brugbare nøgler til { $count } modtagere. Find deres nøgler, eller fjern modtagerne fra meddelelsen. Du kan kun sende uden kryptering, hvis meddelelsen ikke indeholder tekst, billeder eller vedhæftede filer fra krypterede meddelelser.
 }
 pgp-details-part = Del { $number }: { $label }
-# review: new
 attachment-from-part = Fra del { $number }: { $label }
 pgp-details-signed = Signeret { $when } med nøglen { $key }
 pgp-details-unknown-key = Signeret med nøglen { $key }, som du ikke har
@@ -893,17 +844,14 @@ pgp-details-for = Krypteret til { $keys }
 pgp-details-plain = Hverken digitalt signeret eller krypteret
 pgp-bar-parts = Denne meddelelse har { $count } dele: { $list }. Hver del viser, hvordan den er beskyttet.
 pgp-bar-count-verified = { $count } med bekræftet nøgle
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] 1 krypteret og signeret
    *[other] { $count } krypterede og signerede
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] 1 krypteret
    *[other] { $count } krypterede
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] 1 signeret
    *[other] { $count } signerede
@@ -1041,8 +989,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } meddelelsesregler gælder konti, der ikke er her, så de blev sprunget over.
 }
 setup-rules-waiting = { $count ->
-    [one] Destinationsmappen for 1 meddelelsesregel findes, når kontoens mapper er synkroniseret.
-   *[other] Destinationsmapperne for { $count } meddelelsesregler findes, når kontienes mapper er synkroniseret.
+    [one] Programmet forsøger at knytte 1 meddelelsesregel til dens destinationsmappe efter synkroniseringen.
+   *[other] Programmet forsøger at knytte { $count } meddelelsesregler til deres destinationsmapper efter synkroniseringen.
 }
 setup-added-trusted-senders = { $count ->
     [one] Tilføjede 1 betroet afsender.
@@ -1051,9 +999,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Intet blev importeret.
 setup-account-servers = { $imap } og { $smtp } ({ $signin })
 setup-file-name = Inbox Classic-indstillinger og -konti
-setup-skipped-unreachable = { $name } blev sprunget over: dens logintjeneste kunne ikke nås. Tilføj den igen under Login-apps.
+setup-skipped-unreachable = Sprang over: { $name }. Logintjenesten kunne ikke nås. Kontrollér opsætningen under Login-apps, og prøv igen.
 attachment-runs-programs = Filen »{ $name }« kan køre programmer, så Inbox Classic åbner den ikke. Gem den, og åbn den selv, hvis du stoler på, hvor den kommer fra.
-attachment-decrypted-note = Den vedhæftede fil kommer fra en krypteret meddelelse. For at åbne den gemmer Inbox Classic en ukrypteret kopi i en midlertidig mappe til din brugerkonto. Kopier, der er over et døgn gamle, fjernes, når programmet starter.
+attachment-decrypted-note = Den vedhæftede fil kommer fra en krypteret meddelelse. For at åbne den gemmer Inbox Classic en ukrypteret kopi i en midlertidig mappe til din brugerkonto. Kopien kan blive liggende, efter at du har lukket filen. Ved programstart forsøger Inbox Classic at fjerne kopier, der er over et døgn gamle.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Serveren flyttede ikke { $messages } til { $folder }, så den er tilbage i { $from }: { $reason }
@@ -1082,46 +1030,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Vis PDF-filer i meddelelser
-# review: new
 preview-pdf-off = PDF-filer vises ikke i meddelelser.
-# review: new
-preview-pdf-off-crashed = En PDF-fil lukkede Inbox Classic, mens den blev vist, så PDF-filer vises ikke længere i meddelelser. Billeder vises stadig. Slå { $option } til under { $settings } for at vise PDF-filer igen.
-# review: new
+preview-pdf-off-crashed = Inbox Classic blev afbrudt, mens programmet viste en fil i en meddelelse. Derfor er forhåndsvisning af PDF-filer slået fra. Billeder vises stadig. Slå { $option } til under { $settings } for at vise PDF-filer igen.
 preview-pdf-details = { $count ->
     [one] 1 side, { $size }
    *[other] { $count } sider, { $size }
 }
-# review: new
 preview-page-alt = { $name }, side { $page } af { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Åbn filen for at se siden
    *[other] Åbn filen for at se alle { $count } sider
 }
-# review: new
 preview-more-files = { $count ->
     [one] 1 fil mere er på listen ovenfor
    *[other] { $count } filer mere er på listen ovenfor
 }
-# review: new
 preview-tile-downloading = Henter…
-# review: new
 preview-tile-preparing = Forbereder…
-# review: new
 preview-tile-format = { $format }-billeder vises ikke endnu
-# review: new
 preview-tile-password = Beskyttet med adgangskode: åbn den for at indtaste adgangskoden
-# review: new
 preview-tile-too-large = For stor til at blive vist
-# review: new
 preview-tile-unreadable = Kan ikke vises
-# review: new
-preview-tile-timed-out = Det tog for lang tid at vise
-# review: new
-preview-tile-crashed = Vises ikke: filen lukkede Inbox Classic én gang
-# review: new
+preview-tile-timed-out = Forhåndsvisningen tog for lang tid
+preview-tile-crashed = Vises ikke: Inbox Classic gik tidligere ned eller holdt op med at svare under forhåndsvisningen
 preview-tile-off = Vises ikke, før Inbox Classic starter igen
-# review: new
 preview-not-printed = { $name } ({ $details }) udskrives ikke. Åbn filen for at udskrive den.

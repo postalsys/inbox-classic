@@ -25,7 +25,7 @@
     <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Mail, der er ældre eller nyere end et antal dage (<code>d</code>), måneder (<code>m</code>) eller år (<code>y</code>)</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Mail over eller under den angivne størrelse, i byte eller med enheden <code>K</code>, <code>M</code> eller <code>G</code></td></tr>
 </table>
-<p>Søgningen skelner ikke mellem store og små bogstaver eller mellem bogstaver med og uden accent. Ukendte søgeoperatorer behandles som almindelige søgeord.</p>
+<p>Præfikssøgning kræver mindst to tegn; et enkelt tegn matches som et helt ord. Søgningen skelner ikke mellem store og små bogstaver eller mellem bogstaver med og uden accent. Datofiltre bruger UTC-døgn: after medtager den angivne dato, mens before udelader den. Aldersfiltre regner en måned som 30 dage og et år som 365 dage. Størrelsesenhederne K, M og G bruger potenser af 1024. Minus foran dato-, alders- og størrelsesfiltre vender ikke deres betydning om. Ukendte søgeoperatorer behandles som almindelige søgeord.</p>
 <p>Du kan finde krypterede meddelelser ved at søge efter afsender, modtagere og emne. Med <b data-text="ui-search-encrypted"></b> slået til under <b data-settings="reading"></b> kan du også søge i teksten, når meddelelsen er dekrypteret.</p>
 <p>Meddelelseslisten viser ikke meddelelsernes størrelse. Vælg <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> for at se, hvor stor en meddelelse er.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

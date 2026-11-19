@@ -2,7 +2,7 @@
 
 ## The main window
 
-gtk-search-looks-in = Pretraživanje u mapi { $place } obuhvaća predmete, pošiljatelje, primatelje, nazive privitaka i tekst poruka. Provjerite jesu li riječi ispravno napisane ili ih unesite manje.
+gtk-search-looks-in = Pretraživanje ({ $place }) obuhvaća predmete, pošiljatelje, primatelje, nazive privitaka i tekst poruka. Provjerite jesu li riječi ispravno napisane ili ih unesite manje.
 gtk-search-still-indexing = { $count ->
     [one] Još traje indeksiranje teksta poruka (preostalo: { $count }). Uskoro se može pojaviti više rezultata.
     [few] Još traje indeksiranje teksta poruka (preostalo: { $count }). Uskoro se može pojaviti više rezultata.
@@ -172,4 +172,4 @@ gtk-metainfo-description = Inbox Classic omogućuje čitanje i pisanje e-pošte 
 gtk-metainfo-feature-sanitized = Skripte u porukama se ne izvršavaju, a vanjske slike preuzimaju se samo uz vaše dopuštenje
 gtk-metainfo-feature-search = Pretraživanje predmeta, pošiljatelja, primatelja, naziva privitaka i teksta poruka, uz operatore pretraživanja iz Gmaila
 gtk-metainfo-feature-replies = Citirani tekst ranijih poruka u odgovorima skriven je iza gumba za prikaz
-gtk-metainfo-feature-offline = Preuzete poruke možete čitati i bez interneta, a lozinke su spremljene u sustavskom privjesku ključeva
+gtk-metainfo-feature-offline = Preuzete poruke možete čitati bez interneta. Podaci za prijavu prema zadanim se postavkama čuvaju u sustavskom spremištu tajni

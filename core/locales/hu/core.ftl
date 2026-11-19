@@ -45,8 +45,8 @@ reader-downloading = Az üzenet letöltése…
 reader-downloading-detail = Az üzenet itt jelenik meg, amint a letöltés befejeződik.
 reader-downloading-size = Az üzenet mérete { $size }. Itt jelenik meg, amint letöltődött.
 reader-failed = Az üzenetet nem sikerült letölteni
-reader-failed-network = A levelezőkiszolgáló nem érhető el ({ $reason }).
-reader-failed-sign-in = A levelezőkiszolgáló nem fogadta el a bejelentkezést ({ $reason }). Ellenőrizze a jelszót, vagy jelentkezzen be újra a Fájl > Fiókok ablakban.
+reader-failed-network = Nem sikerült adatot fogadni a levelezőkiszolgálótól ({ $reason }).
+reader-failed-sign-in = A levelezőkiszolgáló nem fogadta el a bejelentkezést ({ $reason }). Ellenőrizze a jelszót, vagy jelentkezzen be újra a fiók beállításaiban.
 reader-failed-security = Nem sikerült biztonságos kapcsolatot létesíteni a levelezőkiszolgálóval ({ $reason }).
 reader-failed-other = A levelezőkiszolgáló válasza: { $reason }.
 reader-retry-note = A fiók újbóli csatlakozásakor az alkalmazás ismét megpróbálja letölteni az üzenetet.
@@ -102,12 +102,12 @@ bounce-mailbox-disabled-why = A cím létezik, de a postafiókot kikapcsolták, 
 bounce-mailbox-disabled-do = Keresse a címzettet más módon, és kérdezze meg, melyik címet használja most.
 bounce-mailbox-full = A postafiók megtelt
 bounce-mailbox-full-why = A címzett postafiókjában nincs hely új levelek számára.
-bounce-mailbox-full-do = Küldje el újra néhány nap múlva, vagy értesítse a címzettet más módon. A nagy mellékleteket utasítják vissza elsőként.
+bounce-mailbox-full-do = Küldje el újra néhány nap múlva, vagy értesítse a címzettet más módon. A nagy mellékletek is okozhatnak tárhelyproblémát.
 bounce-spam-blocked = Levélszemétként visszautasítva
 bounce-spam-blocked-why = A fogadó kiszolgáló levélszemétnek tekintette az üzenetet.
 bounce-spam-blocked-do = Próbálja meg újra elküldeni az üzenetet kevesebb hivatkozással, rövidített hivatkozások és nagy mellékletek nélkül. Ha a hiba ismétlődik, forduljon a levelezési szolgáltatójához.
 bounce-virus-detected = Vírus miatt visszautasítva
-bounce-virus-detected-why = A fogadó kiszolgáló vírust vagy más kártékony tartalmat talált az üzenetben vagy a mellékleteiben.
+bounce-virus-detected-why = A fogadó kiszolgáló szerint az üzenet vagy valamelyik melléklete vírust vagy más kártékony tartalmat tartalmaz.
 bounce-virus-detected-do = Ellenőrizze a mellékleteket víruskeresővel. Egyes kiszolgálók minden programot és tömörített fájlt visszautasítanak, ezért az ilyen fájlokat inkább hivatkozásként ossza meg.
 bounce-ip-blocklisted = A levelezőkiszolgálója tiltólistán van
 bounce-ip-blocklisted-why = A fogadó kiszolgáló visszautasítja a levelezőkiszolgálójától érkező leveleket, mert annak címe tiltólistán szerepel.
@@ -123,7 +123,7 @@ bounce-geo-blocked-why = A fogadó kiszolgáló nem fogad levelet abból az orsz
 bounce-geo-blocked-do = Keresse a címzettet más módon, vagy kérdezze meg a levelezési szolgáltatóját.
 bounce-relay-denied = A kiszolgáló elutasította a továbbítást
 bounce-relay-denied-why = Egy kiszolgáló elutasította az üzenet továbbítását. Ez gyakran akkor történik, ha a küldés bejelentkezés nélkül történt, vagy a kiszolgáló nem kézbesít ennek a címzettnek.
-bounce-relay-denied-do = A Fájl > Fiókok ablakban ellenőrizze a kimenő levelezőkiszolgáló beállításait, és hogy be van-e állítva a bejelentkezés.
+bounce-relay-denied-do = A fiók beállításaiban ellenőrizze a kimenő levelezőkiszolgálót és a hozzá tartozó bejelentkezési adatokat.
 bounce-auth-failure = A feladócímét nem sikerült hitelesíteni
 bounce-auth-failure-why = A fogadó kiszolgáló nem tudta igazolni, hogy az üzenet valóban a feladócím tartományából érkezett (SPF, DKIM vagy DMARC).
 bounce-auth-failure-do = Továbbítsa ezt az értesítést annak, aki a tartománya levelezését kezeli: a beállításait javítani kell. Addig segíthet, ha a szolgáltatója saját kiszolgálóján keresztül küld.
@@ -132,7 +132,7 @@ bounce-rate-limited-why = A fogadó kiszolgáló egyelőre kevesebb üzenetet fo
 bounce-rate-limited-do = Várjon egy kicsit, és küldje el újra. Ha sok embernek ír, egyszerre kevesebbnek küldje.
 bounce-greylisting = Rövid időre visszatartva
 bounce-greylisting-why = A fogadó kiszolgáló arra kéri az ismeretlen feladókat, hogy kicsit később próbálkozzanak újra. Ez a levélszemét elleni szokásos ellenőrzés.
-bounce-greylisting-do = Nincs teendő. A levelezőkiszolgálók automatikusan újrapróbálkoznak, és az üzenet általában egy órán belül megérkezik.
+bounce-greylisting-do = Ideiglenes elutasításnál a küldő levelezőkiszolgáló rendszerint később újrapróbálkozik. Ha az értesítés végleges kézbesítési hibát jelez, az üzenetet újra el kell küldeni.
 bounce-server-error = A fogadó kiszolgálón hiba történt
 bounce-server-error-why = A fogadó kiszolgáló nem volt elérhető, vagy saját hibája miatt nem tudta fogadni az üzenetet.
 bounce-server-error-do = Küldje el újra később. Ha továbbra sem sikerül, ellenőrizze, nincs-e elírás a cím @ utáni részében.
@@ -297,7 +297,7 @@ downloading-messages = { $count ->
    *[other] Letöltés: { $messages }...
 }
 import-put = { $count ->
-   *[other] Importálva: { $messages }. Mappa: { $folder }
+   *[other] Importálásra sorba állítva: { $messages }. Célmappa: { $folder }
 }
 import-not-put = Ezek nem kerültek a mappába:
 
@@ -310,7 +310,7 @@ error-not-found = nem található
 error-closed = leállás folyamatban
 error-other-account = a böngészőben másik fiókkal történt a bejelentkezés: { $email }
 failure-authentication = a kiszolgáló nem fogadta el a bejelentkezést ({ $reason })
-failure-network = nem sikerült kapcsolódni a kiszolgálóhoz ({ $reason })
+failure-network = megszakadt vagy nem jött létre a kapcsolat a kiszolgálóval ({ $reason })
 error-in-use = nem távolítható el, mert a következő fiókok ezt használják a bejelentkezéshez: { $accounts }
 error-turned-off = ez a bejelentkezési alkalmazás új fiókok hozzáadásához nincs engedélyezve
 error-folder-name = a mappa neve 1 és 200 karakter közötti hosszúságú lehet, és nem tartalmazhat vezérlőkaraktert
@@ -342,19 +342,19 @@ error-sent-still-in-outbox = még a Postázandó üzenetek mappában van: { $err
 error-sent-no-copy = nem sikerült másolatot menteni az Elküldött elemek mappába: { $reason }
 error-no-password = ehhez a fiókhoz nincs jelszó
 error-no-sign-in = ehhez a fiókhoz nincsenek bejelentkezési adatok
-error-provider-missing = ez a kiadás nem tud bejelentkezni ehhez a szolgáltatóhoz: { $provider }. Eltávolították a bejelentkezési alkalmazását?
+error-provider-missing = a bejelentkezéshez szükséges alkalmazás nem érhető el: { $provider }. Lehetséges, hogy eltávolították?
 error-provider-servers = a fiók kiszolgálói nem egyeznek a bejelentkezési alkalmazásának kiszolgálóival
 error-app-scopes = { $reason }. A levelezőkiszolgáló nem fogadta el a bejelentkezési alkalmazás tokenjét: ellenőrizze, hogy az alkalmazás hatókörei hozzáférést adnak-e a levelekhez
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = A Google még nem hitelesítette az Inbox Classicot, ezért csak tesztfelhasználók jelentkezhetnek be vele. Használjon saját Google-bejelentkezési alkalmazást, vagy alkalmazásjelszót, ha a fiók ezt támogatja. Tesztfelhasználóként a Bejelentkezési alkalmazások ablakban (Fájl > Fiókok) is bekapcsolhatja a beépített alkalmazást.
+sign-in-off-google = A beépített Google-bejelentkezés ki van kapcsolva. Ha a Google-bejelentkezési alkalmazás tesztelési állapotban van, csak a hozzáadott tesztfelhasználók jelentkezhetnek be vele. Használjon saját Google-bejelentkezési alkalmazást, vagy alkalmazásjelszót, ha a fiók ezt támogatja. Jogosult felhasználóként a Bejelentkezési alkalmazások ablakban (Fájl > Fiókok) bekapcsolhatja a beépített lehetőséget.
 sign-in-off-other = A Bejelentkezési alkalmazások ablakban (Fájl > Fiókok) ki van kapcsolva. Ugyanott újra bekapcsolható.
 sign-in-app-no-name = a bejelentkezési alkalmazásnak nevet kell adni
 sign-in-app-no-client = hiányzik az ügyfél-azonosító
 sign-in-app-no-scopes = a bejelentkezési alkalmazásnak szüksége van a levelekhez hozzáférést adó hatókörökre
-sign-in-app-bad-host = hiányzik a kiszolgáló címe, vagy nem érvényes állomásnév ({ $server })
+sign-in-app-bad-host = hiányzik vagy érvénytelen a kiszolgáló címe vagy portja ({ $server })
 sign-in-app-plain = a kiszolgálónak SSL/TLS vagy STARTTLS titkosítást kell használnia ({ $server })
 sign-in-app-not-checked = a kibocsátó még nincs ellenőrizve
 sign-in-app-issuer-changed = a kibocsátó megváltozott: írja be újra a titkos ügyfélkulcsot, vagy távolítsa el
@@ -490,30 +490,24 @@ agent-log-watched = Beszélgetés figyelése bekapcsolva: „{ $subject }”
 agent-log-ignored = Beszélgetés figyelmen kívül hagyva: „{ $subject }”
 agent-log-unmarked = Beszélgetés figyelése vagy figyelmen kívül hagyása kikapcsolva: „{ $subject }”
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = az üzenet azóta megváltozott
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Olvasottként megjelölve: 1 üzenet (keresés: { $query })
    *[other] Olvasottként megjelölve: { $count } üzenet (keresés: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Olvasatlanként megjelölve: 1 üzenet (keresés: { $query })
    *[other] Olvasatlanként megjelölve: { $count } üzenet (keresés: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Jelölővel ellátva: 1 üzenet (keresés: { $query })
    *[other] Jelölővel ellátva: { $count } üzenet (keresés: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Jelölő eltávolítva: 1 üzenet (keresés: { $query })
    *[other] Jelölő eltávolítva: { $count } üzenet (keresés: { $query })
 }
-# review: new
 agent-log-bulk-color = { $color ->
     [red] Piros
     [orange] Narancssárga
@@ -526,33 +520,27 @@ agent-log-bulk-color = { $color ->
     [one] 1 üzenet
    *[other] { $count } üzenet
 } (keresés: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Áthelyezve: 1 üzenet. Cél: { $folder } (keresés: { $query })
    *[other] Áthelyezve: { $count } üzenet. Cél: { $folder } (keresés: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Archiválva: 1 üzenet (keresés: { $query })
    *[other] Archiválva: { $count } üzenet (keresés: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Levélszemétként megjelölve: 1 üzenet (keresés: { $query })
    *[other] Levélszemétként megjelölve: { $count } üzenet (keresés: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Nem levélszemétként megjelölve: 1 üzenet (keresés: { $query })
    *[other] Nem levélszemétként megjelölve: { $count } üzenet (keresés: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Törölve: 1 üzenet (keresés: { $query })
    *[other] Törölve: { $count } üzenet (keresés: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Az elmúlt 15 percben
     [hour] Az elmúlt órában
@@ -562,57 +550,47 @@ agent-undo-span = { $span ->
    *[all] Az elmúlt 30 napban
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
-    [0] { $program } ebben az időszakban nem végzett visszavonható módosítást.
-    [one] Visszavonja a módosítást, amelyet { $program } ebben az időszakban végzett?
-   *[other] Visszavonja azt a(z) { $count } módosítást, amelyet { $program } ebben az időszakban végzett?
+    [0] Ebben az időszakban nem történt visszavonható módosítás. Program: { $program }.
+    [one] Visszavonja a program ebben az időszakban végzett módosítását? Program: { $program }.
+   *[other] Visszavonja a program ebben az időszakban végzett módosításait? Program: { $program }. Módosítások száma: { $count }.
 }
-# review: new
-agent-undo-since-detail = Az üzenetek visszakerülnek abba a mappába, ahonnan jöttek, az olvasottsági állapot és a jelölők visszaállnak a korábbira, a Postázandó üzenetek mappában még várakozó üzenetek pedig törlődnek. Amit Ön vagy a kiszolgáló azóta módosított, az változatlan marad.
+agent-undo-since-detail = Az üzenetek visszakerülnek az eredeti mappáikba, olvasottsági állapotuk és jelölőik visszaállnak a korábbira. A Postázandó üzenetek mappában még várakozó üzenetek törlődnek. Az időközben megváltozott, már nem visszaállítható tételeket kihagyja.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
-    [0] Semmi sem lett visszavonva.
+    [0] Nem történt visszavonás.
     [one] 1 módosítás visszavonva.
    *[other] { $count } módosítás visszavonva.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 üzenet már nem ott volt, ahová a módosítás tette.
-   *[other] { $count } üzenet már nem ott volt, ahová a módosítás tette.
+    [one] 1 üzenet már nem található az érintett mappában.
+   *[other] { $count } üzenet már nem található az érintett mappában.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] 1 üzenetet azóta Ön vagy a kiszolgáló módosított, ezért változatlan maradt.
-   *[other] { $count } üzenetet azóta Ön vagy a kiszolgáló módosított, ezért változatlanok maradtak.
+    [one] Az azóta helyben vagy a kiszolgálón módosított 1 üzenet változatlan maradt.
+   *[other] Az azóta helyben vagy a kiszolgálón módosított { $count } üzenet változatlan maradt.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] 1 üzenet már elhagyta a Postázandó üzenetek mappát.
    *[other] { $count } üzenet már elhagyta a Postázandó üzenetek mappát.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 módosítás nem vonható vissza.
    *[other] { $count } módosítás nem vonható vissza.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Ez az üzenet elfogadja a(z) „{ $summary }” meghívót ({ $when }).
-    [tentative] Ez az üzenet feltételesen elfogadja a(z) „{ $summary }” meghívót ({ $when }).
-   *[decline] Ez az üzenet elutasítja a(z) „{ $summary }” meghívót ({ $when }).
-} A szervező naptára feldolgozza. A meghívóra adott válasza csak akkor változik meg, ha az üzenetet elküldték.
+    [accept] Ez az üzenet a következő esemény meghívójának elfogadását jelzi: „{ $summary }” ({ $when }).
+    [tentative] Ez az üzenet a következő esemény meghívójának feltételes elfogadását jelzi: „{ $summary }” ({ $when }).
+   *[decline] Ez az üzenet a következő esemény meghívójának elutasítását jelzi: „{ $summary }” ({ $when }).
+} A szervező naptáralkalmazása fel tudja dolgozni a választ. A meghívóra adott válasza csak az üzenet elküldése után változik meg.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Elfogadva: { $summary }
     [tentative] Feltételesen elfogadva: { $summary }
    *[decline] Elutasítva: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } elfogadta ezt a meghívót.
     [tentative] { $name } feltételesen elfogadta ezt a meghívót.
@@ -652,8 +630,8 @@ agent-read-list = { $count ->
    *[other] { $count } bejegyzés megtekintve. Lista: { $folder }
 }
 agent-read-changes = { $count ->
-    [one] 1 új üzenet megtekintve
-   *[other] { $count } új üzenet megtekintve
+    [one] 1 üzenet változási adatai lekérve
+   *[other] { $count } üzenet változási adatai lekérve
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
 agent-terminal-programs-mac = Terminálból ({ $terminal }) indított programok
@@ -665,7 +643,6 @@ agent-terminal-program-windows = Egy terminálból ({ $terminal }) indított pro
 agent-terminal-program-linux = Egy terminálból ({ $terminal }) indított program
 agent-connect-title-terminal = Hozzáférést kérnek a leveleihez: { $programs }
 agent-connect-terminal-detail = Az ugyanebből a terminálprogramból indított, külön név nélküli MI-ügynökök közös jogosultságokat kapnak. Egy ügynök külön kezeléséhez adja meg a --name kapcsolót és egy tetszőleges nevet az MCP-beállításaiban, az indítási argumentumok között.
-# review: new
 agent-connect-claimed = A program { $claimed } néven mutatkozott be. Az Inbox Classic ellenőrizte, melyik program indította el: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -728,11 +705,11 @@ pgp-source-vcard = Névjegykártyáról
 pgp-source-wkd = A feladó levelezési szolgáltatójától
 pgp-source-keyserver = A keys.openpgp.org oldalról
 pgp-source-autocrypt = Egy üzenet Autocrypt fejlécéből
-pgp-error-no-store = A titkos kulcsok védelméhez szükséges tároló nem érhető el ({ $store }): { $error }
+pgp-error-no-store = A titkos kulcsok védelméhez szükséges tároló nem használható ({ $store }): { $error }
 pgp-error-wrong-passphrase = Hibás jelmondat.
 pgp-error-not-a-key = Ez nem OpenPGP-kulcs.
 pgp-error-too-large = A kulcs túl nagy.
-pgp-error-unusable = A kulcs elavult vagy gyenge kriptográfiai eljárást használ, ezért nem használható.
+pgp-error-unusable = A kulcs nem tartalmaz az elvégzendő művelethez használható aláíró vagy titkosító kulcsot.
 pgp-imported-private = { $count ->
     [one] A titkos kulcsa importálva.
    *[other] { $count } titkos kulcs importálva.
@@ -751,13 +728,13 @@ pgp-pending = Egy másik kulcs került elő ehhez a címhez: { $address } (dátu
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitális aláíró: { $signer } (a kulcs tulajdonosa ellenőrizve)
 pgp-part-signed = Digitális aláíró: { $signer } (a kulcs tulajdonosa nincs ellenőrizve)
-pgp-part-other = Digitális aláíró: { $signer } (nem egyezik a feladóval)
+pgp-part-other = Digitális aláíró: { $signer } (a kulcs nem kapcsolható egyértelműen a feladó címéhez)
 pgp-part-unknown-key = Digitálisan aláírt, de a kulcs ismeretlen
 pgp-part-not-signed = Nincs digitális aláírás
 pgp-part-not-checked = A digitális aláírás nincs ellenőrizve
 pgp-part-encrypted = Titkosított. { $signature }
 pgp-part-no-key = Titkosított, de a visszafejtéshez szükséges titkos kulcs nem érhető el
-pgp-part-changed = A titkosított részt útközben módosították, ezért nem jelenik meg
+pgp-part-changed = A titkosított rész sértetlensége nem igazolható, ezért nem jelenik meg
 pgp-part-unprotected = Módosítás elleni védelem nélkül titkosítva, ezért nem jelenik meg
 pgp-part-broken = A titkosított rész nem olvasható
 pgp-why-mismatch = A digitális aláírás nem érvényes ehhez a szöveghez
@@ -773,10 +750,10 @@ pgp-why-not-key-in-use = Az aláíráshoz használt kulcs eltér az ehhez a cím
 pgp-part-pictures-loaded = { $label }. A képek az internetről töltődtek be
 pgp-error-no-own-key = Ehhez a feladócímhez nincs aláírásra vagy titkosításra használható saját kulcs: { $address }. Hozzon létre kulcsot az Eszközök > Titkosítási kulcsok menüpontban, vagy kapcsolja ki az üzenet digitális aláírását és titkosítását.
 pgp-error-missing-keys = { $count ->
-    [one] Ennek a címzettnek nincs kulcsa a titkosításhoz: { $addresses }.
-   *[other] Ezeknek a címzetteknek nincs kulcsa a titkosításhoz: { $addresses }.
+    [one] Ennek a címzettnek nincs titkosításra használható kulcsa: { $addresses }.
+   *[other] Ezeknek a címzetteknek nincs titkosításra használható kulcsa: { $addresses }.
 }
-pgp-error-encrypted-quote = Ez az üzenet egy titkosított üzenetet idéz vagy továbbít, ezért csak titkosítva küldhető el. Kapcsolja be az üzenet titkosítását, vagy távolítsa el az idézett szöveget.
+pgp-error-encrypted-quote = Ez az üzenet titkosított üzenetből származó tartalmat idéz vagy továbbít, ezért csak titkosítva küldhető el. Kapcsolja be a titkosítást, vagy távolítsa el az örökölt szöveget, képeket és mellékleteket.
 pgp-error-protect = Az üzenetet nem sikerült digitálisan aláírni vagy titkosítani: { $reason }
 pgp-found-keys = Kulcs található a következő címekhez: { $addresses }.
 pgp-found-none = Nem található kulcs a következő címekhez: { $addresses }. Kérje el a címzettek nyilvános kulcsát.
@@ -899,17 +876,17 @@ setup-account-signs-in-again = Az importálás után újra be kell jelentkeznie.
 setup-account-here = Itt már be van állítva, ezért kimarad.
 setup-account-no-app = A fiókhoz szükséges bejelentkezési alkalmazás itt nincs beállítva: { $app }. Importálja a bejelentkezési alkalmazásokat is.
 setup-invalid-address = „{ $address }” nem e-mail-cím.
-setup-invalid-server = A kiszolgálónak nincs használható neve vagy portja ({ $server }).
+setup-invalid-server = A kiszolgáló neve, portja vagy kapcsolati biztonsági beállítása nem használható ({ $server }).
 setup-invalid-user = Nincs felhasználóneve.
-setup-invalid-sign-in = Olyan módon jelentkezik be, amelyet az Inbox Classic nem ismer.
+setup-invalid-sign-in = A fiók bejelentkezési beállításai nem használhatók az Inbox Classicban.
 setup-error-empty = A fájl üres.
-setup-error-too-large = A fájl túl nagy a beállítások és fiókok importálásához.
+setup-error-too-large = A beállításfájl túl nagy.
 setup-error-not-setup = Ez nem az Inbox Classic beállításait és fiókjait tartalmazó fájl.
 setup-error-damaged = A beállításfájl sérült, és nem olvasható.
 setup-error-newer = Ezt a beállításfájlt az Inbox Classic egy újabb verziója ({ $version }) mentette. Frissítse az Inbox Classicot, majd importálja újra.
 setup-error-needs-passphrase = Ezt a beállításfájlt jelmondat védi. Írja be a mentéskor megadott jelmondatot.
 setup-error-wrong-passphrase = Nem ezzel a jelmondattal mentették a beállításfájlt.
-setup-error-changed = A beállításfájlt a mentése után módosították vagy megsérült, ezért nem importálható.
+setup-error-changed = A beállításfájl sérült vagy módosult, ezért nem importálható.
 setup-error-read = A beállításfájlt nem sikerült beolvasni: { $error }
 setup-error-write = A beállításfájlt nem sikerült menteni: { $error }
 setup-error-no-parts = Válasszon legalább egy részt.
@@ -969,8 +946,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } üzenetszabály kimaradt, mert olyan fiókokhoz tartozik, amelyek itt nincsenek beállítva.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 üzenetszabály olyan mappába helyez át üzeneteket, amely a fiókja szinkronizálása után jelenik meg.
-   *[other] { $count } üzenetszabály olyan mappákba helyez át üzeneteket, amelyek a fiókjaik szinkronizálása után jelennek meg.
+    [one] 1 üzenetszabály olyan célmappára vár, amely még nem érhető el. A megfelelő mappa megjelenése után használható.
+   *[other] { $count } üzenetszabály még nem elérhető célmappára vár. A megfelelő mappák megjelenése után használhatók.
 }
 setup-added-trusted-senders = { $count ->
     [one] 1 megbízható feladó hozzáadva.
@@ -979,9 +956,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Semmi sem lett importálva.
 setup-account-servers = { $imap } és { $smtp } ({ $signin })
 setup-file-name = Az Inbox Classic beállításai és fiókjai
-setup-skipped-unreachable = Kimaradt: { $name }. A bejelentkezési szolgáltatás nem volt elérhető. Adja hozzá újra a szükséges bejelentkezési alkalmazást a Bejelentkezési alkalmazások ablakban.
+setup-skipped-unreachable = Kimaradt: { $name }. Nem sikerült ellenőrizni a bejelentkezési szolgáltatást. Adja hozzá újra a szükséges bejelentkezési alkalmazást a Bejelentkezési alkalmazások ablakban.
 attachment-runs-programs = „{ $name }” programokat futtathat, ezért az Inbox Classic nem nyitja meg. Ha megbízik a forrásában, mentse, majd nyissa meg kézzel.
-attachment-decrypted-note = Ez a melléklet titkosított üzenetből származik. A megnyitásához az Inbox Classic titkosítatlan másolatot ment a felhasználói fiókjához tartozó ideiglenes mappába. Az egy napnál régebbi másolatokat az alkalmazás indításkor törli.
+attachment-decrypted-note = Ez a melléklet titkosított üzenetből származik. A megnyitásához az Inbox Classic titkosítatlan másolatot ment a felhasználói fiókjához tartozó ideiglenes mappába. Indításkor az alkalmazás megpróbálja törölni az egy napnál régebbi másolatokat.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] A kiszolgáló nem helyezte át az üzenetet (cél: { $folder }), így { $messages } ismét az eredeti mappájában van ({ $from }): { $reason }

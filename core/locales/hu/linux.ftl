@@ -88,7 +88,7 @@ gtk-files = { $count ->
     [one] { $count } fájl
    *[other] { $count } fájl
 }
-gtk-pictures-blocked = Az alkalmazás egyes képek letöltését letiltotta, hogy a feladó ne azonosíthassa velük a számítógépét.
+gtk-pictures-blocked = Néhány kép letöltése le van tiltva, hogy a feladó nehezebben követhesse nyomon az üzenet megnyitását.
 gtk-download-pictures = Képek letöltése
 gtk-save-attachments-menu = Mellékletek mentése...
 
@@ -160,7 +160,7 @@ gtk-nothing-yet = Még semmi.
 ## Preferences
 
 gtk-preferences = Beállítások
-gtk-notify-subtitle = Csak amíg az Inbox Classic a háttérben van
+gtk-notify-subtitle = Csak amikor a főablak nem aktív
 
 ## The desktop entry and the page of the software stores
 
@@ -174,4 +174,4 @@ gtk-metainfo-description = Az Inbox Classic a hagyományos levelezőprogramok el
 gtk-metainfo-feature-sanitized = Az üzenetekből az alkalmazás eltávolítja a szkripteket, az internetes képeket pedig csak engedéllyel tölti le
 gtk-metainfo-feature-search = Keresés a tárgyban, a feladók és címzettek adataiban, a mellékletnevekben és az üzenetszövegben, a Gmailből ismert keresőoperátorokkal
 gtk-metainfo-feature-replies = A válaszokban az alkalmazás elrejti az idézett korábbi üzeneteket
-gtk-metainfo-feature-offline = A letöltött levelek internetkapcsolat nélkül is olvashatók; a jelszavakat a rendszer kulcstartója tárolja
+gtk-metainfo-feature-offline = A letöltött levelek internetkapcsolat nélkül is olvashatók; a bejelentkezési adatokat alapértelmezés szerint a rendszer kulcstartója védi

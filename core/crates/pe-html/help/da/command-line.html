@@ -4,11 +4,11 @@
 <table>
     <tr><th>Indstilling</th><th>Funktion</th></tr>
     <tr><td><code>--store &lt;file&gt;</code></td><td>Bruger et andet mailarkiv, fx et til test</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>Gemmer kun adgangskoder i hukommelsen, indtil programmet afsluttes, ikke i systemets adgangskodelager</td></tr>
-    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Godtager kun servercertifikatet i denne fil (PEM eller DER), til en testserver med et selvsigneret certifikat</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Gemmer loginoplysninger og beskyttelsesnøglen til private nøgler i hukommelsen, indtil programmet afsluttes, i stedet for i systemets lager</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Godtager kun certifikater fra filen til en testserver med et selvsigneret certifikat. PEM kan indeholde flere certifikater; DER ét</td></tr>
     <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Skriver login-sidens URL til filen i stedet for at åbne browseren</td></tr>
     <tr><td><code>--language &lt;code&gt;</code></td><td>Viser vinduerne på dette sprog under denne kørsel, fx <code>de</code></td></tr>
-    <tr><td><code>--background</code></td><td>Starter uden vindue</td></tr>
+    <tr><td><code>--background</code></td><td>Starter uden hovedvinduet</td></tr>
     <tr><td><code>--mcp</code></td><td>Tilslutter en AI-agent til Inbox Classic. Indstillingen bruges af agentens program; du behøver ikke starte den manuelt</td></tr>
     <tr><td><code>--version</code></td><td>Udskriver versionen og afslutter</td></tr>
 </table>

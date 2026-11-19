@@ -82,7 +82,7 @@ mac-files-not-saved =
         [one] Filen kunne ikke gemmes.
        *[other] { $failed } af de { $count } filer kunne ikke gemmes.
     }
-mac-no-calendar-app = Der er intet kalenderprogram på denne Mac, som kan åbne invitationer (.ics-filer).
+mac-no-calendar-app = Invitationen (.ics-filen) kunne ikke åbnes i et kalenderprogram. Kontrollér, at et program til denne filtype er installeret.
 mac-file-not-saved = Filen kunne ikke gemmes.
 mac-unsubscribing = Sender anmodning om afmelding til { $target }…
 mac-loading-list = Indlæser…

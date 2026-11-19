@@ -74,7 +74,7 @@ mac-files-not-saved =
     { $count ->
        *[other] { $count } failist { $failed } ei saanud salvestada.
     }
-mac-no-calendar-app = Selles Macis pole kalendrirakendust, millega kutseid (.ics-faile) avada.
+mac-no-calendar-app = Kutset (.ics-faili) ei saanud kalendrirakenduses avada. Kontrollige, kas kalendrirakendus on installitud ja selle failitüübiga seotud.
 mac-file-not-saved = Faili ei saanud salvestada.
 mac-unsubscribing = Loobutakse tellimusest { $target }…
 mac-loading-list = Laadimine…
@@ -112,7 +112,7 @@ mac-sign-in-apps-button = Sisselogimisrakendused…
 
 ## AI agents
 
-mac-forget-program = Kas eemaldada see programm koos agentide tegevusajalooga?
+mac-forget-program = Kas eemaldada selle programmi salvestatud juurdepääsuõigused ja agentide tegevusajalugu?
 mac-forget-program-detail = Programmi õigused kustutatakse. Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 
 ## Sign-in apps

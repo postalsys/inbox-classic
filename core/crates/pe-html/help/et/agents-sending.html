@@ -7,18 +7,18 @@
     <li>Lugege adressaadid ja tekst läbi.</li>
     <li>Valige üks:
         <ul>
-            <li>Nupp <!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> saadab kirja. See muutub aktiivseks hetke pärast, nii et te ei saa seda kogemata vajutada.</li>
+            <li>Nupp <!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> lisab kirja saatmiseks väljundkausta. Nupp aktiveerub väikese viivitusega, et vähendada juhusliku kinnitamise ohtu.</li>
             <li>Nupp <b data-text="ui-edit-first"></b> avab selle muutmiseks uues kirjas.</li>
             <li>Nupp <!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, mis on vaikevalik, jätab selle saatmata.</li>
         </ul>
     </li>
 </ol>
 <p>Igal programmil saab korraga olla ainult üks kiri, mis ootab teie kinnitust. Kui te kohe ei vasta, teatab Inbox Classic agendile, et kiri ootab teie vastust. Hiljem saab agent vaadata, mida otsustasite. Vaikimisi lisatakse agendi koostatud kirjade ja mustandite lõppu teie konto allkirjatekst. Agent saab selle lisamisest loobuda.</p>
-<p>Saadetav kiri ootab väljundkaustas 30 sekundit. Kuni see pole läinud, saate selle seal kustutada või klõpsata menüüs <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> nuppu <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os-->.</p>
-<!--review--><h2>Vastused kutsetele</h2><!--/review-->
-<!--review--><p>Posti saatmise õigusega agent saab teie eest kalendrikutse vastu võtta, esialgselt vastu võtta või tagasi lükata, sama küsimuse kaudu. Teksti kohal ütleb küsimus, millisele kutsele kiri vastab ja millal sündmus toimub. Inbox Classic koostab vastuse korraldajale kutse enda põhjal, seega ei saa kirja enne muutmiseks avada. Teie vastus kutsele muutub alles siis, kui kiri on saadetud.</p><!--/review-->
+<p>Kinnitatud kiri ootab enne saatmiskatset väljundkaustas 30 sekundit. Kuni see on seal alles, saate selle kustutada või valida menüüs <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> nupu <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os-->. See tagasivõtmine võib olla võimalik ka pärast 30 sekundi möödumist. Kirja puudumine väljundkaustast ei tõenda kohaletoimetamist.</p>
+<h2>Vastused kutsetele</h2>
+<p>Posti saatmise õigusega agent saab teie eest kalendrikutse vastu võtta, esialgu vastu võtta või tagasi lükata. Iga vastus vajab teie kinnitust. Küsimus näitab kutset ja sündmuse aega. Vastus saadetakse kutse kalendriandmetes olevale korraldaja aadressile, mis võib erineda kirja saatjast. Vastust ei saa enne muutmiseks avada ning konto allkirjateksti sellele ei lisata. Kuvatav vastuse olek muutub pärast edukat SMTP-saatmist. See ei kinnita vastuse jõudmist korraldaja kalendrisse.</p>
 <h2>Agendi kirjutatud mustandid</h2>
-<p>Kui avate agendi koostatud mustandi, näete kirja teksti kohal agendi nime. Kontrollige enne saatmist adressaate ja teksti.</p>
+<p>Kui avate agendi koostatud mustandi, näete kirja teksti kohal agendi nime. See näitab mustandi päritolu, mitte kinnitatud identiteeti. Kontrollige enne saatmist adressaate ja teksti.</p>
 <img src="picture:agents-8-draft" alt="Tehisintellekti agendi koostatud mustand eraldi aknas. Kirja teksti kohal kuvatakse agendi nimi.">
 <p>Agent saab muuta või kustutada ainult enda loodud mustandeid. Kui salvestate sellise mustandi, ei saa agent seda enam muuta ega kustutada. Sama kehtib siis, kui Inbox Classic salvestab teie muudatused automaatselt. Kui mustandi ainult avate, saab agent seda endiselt muuta.</p>
 <aside class="warning">Agent, millel on ka muid tööriistu, näiteks veebi sirvimine või teie failide lugemine, võib loetu nende kaudu edasi anda. Inbox Classic neid ei näe. Laske agendil saata ainult siis, kui seda vajate.</aside>

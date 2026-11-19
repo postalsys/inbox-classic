@@ -162,6 +162,10 @@ Estonian settings review (round 2):
 - In help, a settings page is introduced by "seadetes" / "seadetest" before `data-settings`, not "kohas"
   or a bare menu reference. Apply "rakendab muudatused"; Cancel discards changes not yet applied.
 
+- Use manus for attachments and krüpteeritud for encrypted content; distinguish allkirjatekst from cryptographic allkirjastamine.
+- Use lugemine for agent data access; viewing list entries is not opening messages or files externally.
+- Keep Koopia/Pimekoopia shortcuts Alt+K/Alt+P and explain them alongside preserved English C/B examples.
+
 ### French compose signing and encryption
 
 - Use "signature numérique" and "signer numériquement" for cryptographic signing, distinct from signature text.
@@ -421,6 +425,10 @@ Outlook Express).
 - Keep "kassere en kladde" and explain permanent removal of agent-owned drafts. Saving, including autosave,
   ends agent access; opening alone does not. "Signaturtekst" is the optional account footer, distinct from "digital signatur".
 
+- Use Fortryd ændringer siden… for the period-based Undo Since command, with Windows Alt+S. Retain Fortryd for Take Back and Cc/Bcc Alt+C/Alt+B; all 61 current scopes pass.
+- Keep du instructions, meddelelse, signaturtekst versus digital signatur, and bekræftelse af nøglens ejerskab. Counted status adjectives agree independently: 1 læst/ulæst/markeret, plural læste/ulæste/markerede.
+- Queued folder operations use Anmodede om at oprette/omdøbe, imported messages Satte i kø. Key storage can be unavailable or locked rather than lost; attachment previews do not imply that opened decrypted files stay off disk.
+
 ### Hrvatski (hr)
 
 Terms: Ulazna pošta; Izlazna pošta; Poslane stavke; Izbrisane stavke; Skice; Neželjena e-pošta; poruka; mapa; račun;
@@ -515,6 +523,10 @@ Review notes (round 2):
   lists remain uninflected after a head noun or colon. Short controls keep singular commands; help keeps formal plural.
 - Keep "Jantarna" for warning status, matching the reading-security help. Unencrypted sending requires removal
   of inherited text, images and attachments. Encrypted drafts use the sender's key without a digital signature.
+
+- Use Poništi promjene iz razdoblja… for Undo Since, Windows Alt+R; retain Kopija/Skrivena kopija Alt+K/Alt+S. All 61 current menu/dialog scopes pass.
+- Keep formal plural help instructions and singular imperative controls. Croatian one includes 21/31: retain numeric counts; use exact [1] only for a single page and a neutral counted total for plural PDF-page links.
+- Queued server actions use Zatraženo stvaranje/preimenovanje and Dodano u red za uvoz. An unavailable or locked system store does not prove a lost protection key. Record already decrypted search content separately from key removal and attachment previews separately from external temporary copies.
 
 ### Italiano (it)
 
@@ -1020,6 +1032,10 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   previews use natural articles before Mellékletek and PDF. Download limits cover cached content, with exceptions.
 - Code cards verify a relevant domain's signature, not a person or every statement. Their expiry warning is based
   on the message timestamp. Notification codes depend on freshness, size, timely download and notification settings.
+
+- Use Módosítások visszavonása for the time-range action; count agreement remains singular after numbers. Avoid a(z) before unknown counts/names. The Windows agent button keeps I, while tray Check uses L to avoid Kilépés.
+- Identity checks assign agent permissions to the OS-identified launching program; a supplied name is not a security boundary. Bulk undo counts log entries and can be partial; account for the state checked by each operation.
+- Key ownership verification cannot be saved for zero-address keys. Describe temporary cleanup as an attempt, and server import/folder work as queued. Installer mail removal leaves Windows credential storage unchanged.
 
 ### Nederlands (nl)
 
@@ -1710,6 +1726,13 @@ Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Δ�
   the sender's own key without a signature; they stay encrypted while protected content remains. Sent copies retain encryption.
 - Compose menu paths differ: Tools on Windows/Mac, the primary menu on Linux; Attach My Public Key is in Insert
   on Windows, File on Mac and the primary menu on Linux. Preserve control labels and the existing platform branches.
+
+- Greek interface actions use nouns; keep grammatical heads before injected nominative labels. Retain exact Cc/Bcc abbreviations Κοιν./Ιδ. κοιν. and Greek Kappa/Iota shortcuts.
+- Queued requests (Ζητήθηκε...) must not promise server completion; read-list logs count καταχωρίσεις.
+- A locked private key can mean unavailable secure storage; verify ownership separately from a valid signature, with explicit no-address case.
+- Use κείμενο της υπογραφής for message footer where needed and ψηφιακή υπογραφή for cryptography. One-time codes are κωδικοί μίας χρήσης.
+- Download limits cover αντίγραφα περιεχομένου with exemptions; decrypted search indexes are unencrypted local data.
+- Default app changes are system requests that can fail; Windows uninstall removes local data beyond mail and leaves credentials in system storage.
 
 ### Български (bg)
 
