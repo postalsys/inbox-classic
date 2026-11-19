@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the newly merged Lithuanian agent-connect-claimed catalog entry and the six remaining help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. Use the current MCP phase3b runtime, including the identity-check limitations and resource/prompt access. Close existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b is now in the active inventory. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -28277,19 +28277,8 @@
       ]
     },
     "lt": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "agent-connect-claimed"
-        ]
-      },
-      "pending_help": [
-        "agents-connect.html",
-        "brand-logos.html",
-        "command-line.html",
-        "keyboard-shortcuts.html",
-        "options-language.html",
-        "sign-in-codes.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "lt-loading-round2",
@@ -33501,11 +33490,194 @@
             "screenshots.json": "/private/tmp/inbox-lt-storage-20261119-screenshots.json",
             "html.log": "/private/tmp/inbox-lt-storage-20261119-html.log"
           }
+        },
+        {
+          "id": "lt-final-help-and-agent-context-20261119",
+          "reviewed_ids": {
+            "core.ftl": [
+              "agent-connect-claimed"
+            ]
+          },
+          "reviewed_help": [
+            "agents-connect.html",
+            "brand-logos.html",
+            "command-line.html",
+            "keyboard-shortcuts.html",
+            "options-language.html",
+            "sign-in-codes.html"
+          ],
+          "changed_values": 3,
+          "files": {
+            "core/crates/pe-html/help/lt/agents-connect.html": "e132d46af2c58d595c2e48f4594ceb86de5f6d0f6f8cc46aaf397f176cb1d4fb",
+            "core/crates/pe-html/help/lt/brand-logos.html": "36d57286ff175988c69ea00a9ef2391bd6f97985f65a3937d04f22050b381602",
+            "core/crates/pe-html/help/lt/command-line.html": "5bd36ef0b07d53adb48e686c6159ba453f06213c5b20cd60b7f162cdfc713220",
+            "core/crates/pe-html/help/lt/keyboard-shortcuts.html": "f98ac9553543624e0653e330d4784689433d5354977cbf8d7b0305723ffa52c8",
+            "core/crates/pe-html/help/lt/options-language.html": "4420eafcf2ccbb4ed7e50285a699576b34b1437b2ef6e12e26691ad58046a7b2",
+            "core/crates/pe-html/help/lt/sign-in-codes.html": "346687aa574b4f80480746f301ff991bf5a18304fda55a61afb304dbb9034b11",
+            "core/locales/lt/core.ftl": "d03751f0700f10da94a9c57d6d7ded5a22951ee80cd844f409b3d62e4448dd1b",
+            "core/locales/GLOSSARY.md": "f89a31f1ced657f67fd2a7a52d9d6cd511859d95ff48a3fd7317178bbce0c644"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d1bdc168030651ca31b65ef4ff80d8a459c5404691c569f8b094416da88609a0",
+            "core/crates/pe-html/help/en/agents-connect.html": "9ad51eaa2a465684ac5cfcf8dd68bab8e1ad07749b3c2f8ffd0353e5779fffc2",
+            "core/crates/pe-html/help/en/brand-logos.html": "4adef2588009f361e1bc5f1c07768514f3cf7b259e55501ab82054e054f0c096",
+            "core/crates/pe-html/help/en/command-line.html": "39216fa072adf81b4ce1480e5df5729a4ef7524d25d69aef5e1f374044c18e70",
+            "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b",
+            "core/crates/pe-html/help/en/options-language.html": "62ff45b6b027d0ac736ace5b23aaca63877aab10d25adcf59aa60e89fe01746d",
+            "core/crates/pe-html/help/en/sign-in-codes.html": "b8306602ce765263073757429ea289fe5cfdb933bef75df30c291bafdaad8275"
+          },
+          "validation": "Lithuanian structural checks pass with 1,536 expected mark-only diagnostics. Exact reconstruction verifies one new catalog entry, two corrected previously reviewed log values and six complete help topics with 73 improved lines. Variables, plural branches, tags, attributes, controls, platform branches and literal keys/code are preserved. All three catalog changes are explained by current callers; existing compared values remain unchanged. Static Windows/Mac/Linux joins and current shortcut generation were inspected; historical English screenshots supply layout context. All 28 inventories, variables, marks and latest file/English hashes reconcile. Global diagnostics account for 23,952 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Source audit covers 195 refs/11 worktrees; no new translation source or changed upstream review input. Lithuanian has no pending catalog entries or help topics. Its three outstanding context comparisons are closed. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+          "notes": "Reviewed six full Lithuanian help topics and new agent identity text in current app context. Two previously reviewed agent log values corrected after targeted comparison; no duplicate review credit. No local test suites.",
+          "new_catalog_values_changed": 1,
+          "followup_values_changed": 2,
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-log-folder",
+              "agent-read-list"
+            ]
+          },
+          "context_compared_ids": {
+            "core.ftl": [
+              "agent-level-read",
+              "agent-level-organize",
+              "agent-log-renamed",
+              "agent-read-people",
+              "agent-reads-attachments",
+              "agent-read-attachment",
+              "otp-heading",
+              "otp-copy",
+              "otp-old",
+              "otp-notification"
+            ],
+            "windows.ftl": [
+              "win-show-cc",
+              "win-show-bcc"
+            ],
+            "linux.ftl": [
+              "gtk-show-cc",
+              "gtk-show-bcc"
+            ]
+          },
+          "followup_reason": "Reopened agent-log-folder and agent-read-list during the queued current-context comparison; corrected and reviewed in this batch without duplicate scope credit.",
+          "help_wording_lines_changed": 73,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/lt/agents-connect.html": 9,
+            "core/crates/pe-html/help/lt/brand-logos.html": 5,
+            "core/crates/pe-html/help/lt/command-line.html": 10,
+            "core/crates/pe-html/help/lt/keyboard-shortcuts.html": 19,
+            "core/crates/pe-html/help/lt/options-language.html": 22,
+            "core/crates/pe-html/help/lt/sign-in-codes.html": 8
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-html/src/editor.js": "4eff8c3b584ee32d5c4b38d320c0dcbcffdf88878e84ce6babac56fa4547a8d3",
+            "core/crates/pe-core/src/agents.rs": "0b037459496d47dc30d08776888e58ac60d28dc90daad88f0cc43e6b8cdc5629",
+            "core/crates/pe-core/src/agents/hosts.rs": "789a05f0e1bd276c2c4960c2507e8addac43ac86dc16f514e0114b921e25ac57",
+            "core/crates/pe-core/src/agents/reads.rs": "ea2b2f57cd1271c7aaba1f04942858d18a4b66fa686fff61b0b9cd771e720081",
+            "core/crates/pe-core/src/agents/log.rs": "2b3958e8fc1a18d030c587d70715575f17e71d15c33e71f7fc76a5feb33b7351",
+            "core/crates/pe-core/src/bimi.rs": "91cf358f5addda07ddc44f5b2b8e2a3b9db7d03f487938540ff2cfdd74e050c4",
+            "core/crates/pe-core/src/senders.rs": "314d87c5ea4d62c5fe9f678a1f656527e29cbc3cc8e1d8d3759a14eea132d548",
+            "core/crates/pe-core/src/pictures.rs": "b71999c78a2caaa5b18ba7a66676b9f3b6d6b9aca7d37b541d59c28665d60053",
+            "core/crates/pe-core/src/otp.rs": "99ed04f0777e21204105cf7f16225e74cb80b85027208de695908f91285566c3",
+            "core/crates/pe-core/src/worker.rs": "f2cde26a672eb37091081b91eb057262433a22325f690df9e2974c7c72398191",
+            "core/crates/pe-core/src/keys.rs": "6efcfda2e0932007c93882a240f5a977730ffd4aeb792fe49b4cb1160170c838",
+            "core/crates/pe-core/src/lookup.rs": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "core/crates/pe-core/src/secrets.rs": "f5aae6a69f175cd3837c86c816cfa767b9667073ccc52d7c59fed224a81fca6e",
+            "core/crates/pe-core/src/lib.rs": "b952ff4c78161c58a4d329bd16641e6b31be36a1e9ae5be11d05afd3ad723745",
+            "core/crates/pe-mcp/src/host.rs": "674a60841181cb654dc5eb1aaed5886fbca0c7e0a7a68ce8304a290a81d99168",
+            "core/crates/pe-mcp/src/server.rs": "f053bd7117f2ee0798ea56cf9afb385882ec4bead919ba28ae237a72a7caaed5",
+            "core/crates/pe-mcp/src/resources.rs": "91731834821a6c097dd5ce19ecbe0f002c7a7d11fe4953c68b215509f3b7a201",
+            "core/crates/pe-mcp/src/prompts.rs": "e8c5589e4bfca73b2e3f961423eb076896244102dd1e6c7135bd33b7b24bc16d",
+            "core/crates/pe-mcp/src/tools/organize.rs": "134f92bb1d8c9c368307f6b5b3c3cc847c4a2970121b497ea545bebcae625cd2",
+            "core/crates/pe-mcp/src/tools/mail.rs": "3951280b67c89402996123d228cf8df391325f763a6b6caa323d84bbf5196081",
+            "core/crates/pe-mcp/src/tools/lookups.rs": "af28646905f6b658120c2284eec46e24db1c766030165d928dc7a82efc0b39a8",
+            "core/crates/pe-mcp/src/tools/threads.rs": "61f49dafdce4e54fb4980c55934934f90e9d795db78ae2625e24ef38def1c268",
+            "core/crates/pe-ffi/src/agents.rs": "8f31de15a3d2cc9078634df1729eb8eab667838c0c7015a25b29e39270a3321b",
+            "core/crates/pe-store/src/senders.rs": "41651a5728f91e48cbef660a22df5cf6a30f72cd5e48bdb44d14167c7059f2a3",
+            "core/crates/pe-store/src/contacts.rs": "7ec9b4a767388a486e5ecec5e2e308cc9a3e6ac0899f9248c463b3a060ba2fad",
+            "core/crates/pe-store/src/pgp.rs": "c6d9f72c5ddfe0c51530928770925ccd5ff0b666f7102ac8ac0e1a3884599c96",
+            "core/crates/pe-store/src/download.rs": "ad42be9d65fd19aa20b494bc06fb28e83b0242d2fd5fe6d6e10f29442bb51c09",
+            "core/crates/pe-net/src/tls.rs": "30b345868ca678c57306858765129790b6b8b8959b8aaecb2dddce8e8d9f130d",
+            "app/src/main.cpp": "8e0b42ab8d372b03808d37e640ceadcb09b5e4a8bdadddb9b04db386d6df9971",
+            "app/src/options.cpp": "5204d767e2f09bfffaeb64ebeb13ef566cdcc5540cb774126a24771856b91a09",
+            "app/src/accounts.cpp": "d1965776fefd8a870c0558f5bf3b7d2e40ece8fd9de078a86c514ba554cb3f92",
+            "app/src/agents.cpp": "ece887f91292f4f803e2d56ac4ced6d5b88a7c7f3136762c4c7302be55950ec9",
+            "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+            "app/src/mailbox.cpp": "11baddaa5e35e8af4a296c28d04c10192bba8bed3ab220471a0da63b73a5bfcd",
+            "app/src/complete.cpp": "ea12d5f5c1e3fcea247a6e57e79ddec5185aa5c26a03c8fd1df16f4218e61717",
+            "app/src/addressbook.cpp": "5efecb61a6cc613a4d90be2cb0a740c5d65833c9a6f4c618fd0d7d6ae9dfa656",
+            "linux/src/main.rs": "dfa5deb4a064fc1c4289c30f4c9aa9f2dedfbc7eeb27a5fe3a635a244a525f0c",
+            "linux/src/app.rs": "b9be4dc0c21db6d73b4b9794c0f880e5de39a3eeb39796836f6ebdbd017c2e1e",
+            "linux/src/accounts.rs": "fd849106186b6a3c84a80398ddf08ead4e24f17cc00a2804545d9c024b905a43",
+            "linux/src/agents.rs": "95adcfb51973966da548961a795dc3e9c67c5ea7785a904f2f633736e90020ef",
+            "linux/src/words.rs": "dde79753e31d6d89cc5cb0be5e8b200021eeda0faeb34ed2bf6b3242f570a2ef",
+            "linux/src/preferences.rs": "110319b0d23078a5222c7b908a39e2e098115d3994143e1e0e0d2cd675bd049f",
+            "linux/src/compose.rs": "e4e84b79dbb54a6db7e89a41460ea354d165514d0077bcb8e750652e80d29233",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "linux/src/complete.rs": "3c6423fd914cee91cf4e672ba5097ffdd44c3d78a296cf755397802ce1da2f56",
+            "linux/src/address_book.rs": "1a21a953955f76b5f3104b10a5af720071f860fb964f1d20bf4ff3d5456241c9",
+            "mac/Sources/InboxClassic/App.swift": "f29d694e2400742756f579d8002be1cda04372dfee41ab2ec9d46d6a4bfa8234",
+            "mac/Sources/InboxClassic/Accounts.swift": "d7c4ec2ca26c51ed9404fc6e1f4e93aac6cdb79082e512c11984b236636cb53d",
+            "mac/Sources/InboxClassic/Settings.swift": "8c50dbffdf76b69cf63ea158bf39f0b608a43e0a42cef1b631a1f802dc79c3e2",
+            "mac/Sources/InboxClassic/Agents.swift": "f08e796fa598ca4b0d17636c0aed0ab6fb5c6359406f01bcd23fc1d902cb0adf",
+            "mac/Sources/InboxClassic/Mailbox.swift": "7a1ad5456e5599398d081cc3fa5274575d6bd4fbdc9104eaa285126e89263892",
+            "mac/Sources/InboxClassic/AddressBook.swift": "f3ffcee5110f604f8ab1d2d04a66a5ed2ef8681599f656d3795f41f5c5bc3ef8"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "8a676c1f434730809c37789d26bc30b64e33bd1ef159dccf2e8320f598a1f0fb",
+            "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
+            "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
+            "core/locales/lt/core.ftl": "d03751f0700f10da94a9c57d6d7ded5a22951ee80cd844f409b3d62e4448dd1b",
+            "core/locales/lt/windows.ftl": "18fa93d839edfa594938f39e9f473c7121ccf6bf4bcab6350e98f3cd63882688",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "source_context_findings": {
+            "agent_identity": "The system identifies the launching executable; the hello can add a chosen --name, but cannot acquire another program grant merely by claiming its path. This is not a security boundary against malicious same-user programs. Terminal grants are scoped to the recognized program path. Resource reads reuse tool permission/account checks and read logging; prompts supply instructions whose later tool calls use the same limits.",
+            "agent_context_followups": "Creation logs are written after enqueueing and before the 15-second wait, so agent-log-folder now describes a request. agent-read-list now says Sąrašas for both folders and combined scopes. Existing rename/read-count/attachment/people/permission wording retained after comparison; two older help reviews (agents-permissions and invitations) were checked unchanged.",
+            "logos_cli": "Provider-confirmed domains are distinct from personal identity. Logos have persistent caching and occasional requests; SVG scripts/external images do not run/load. CLI sign-in-page-file writes a URL; memory-passwords selects memory credentials; PEM pins can include several certificates. Literal options, placeholders and paths preserved.",
+            "shortcuts": "All literal kbd elements and the generated table are preserved. Actual Windows/GTK Cc/Bcc access keys are K/S. Shift-arrows adjust ranges, Return edits drafts, Tab follows focusable controls, Select All unfolds the quote, and completion accepts groups and preserves saved Address Book entries. The Mac folder-list Control modifier missing from the current help formatter is explained in prose.",
+            "settings_codes": "Cancel preserves external Windows file associations; Mac/Linux language needs restart. System language fallback tries preferred choices. PDF switch direction, trusted-image conditions, decrypted index/key availability and cached-body limits match source. OTP heading matches Kodas svetainei:, provider domain checks are conditional, and age is based on the message date; code notifications require timely eligible mail and enabled notifications.",
+            "reference_screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/agents-2-connect.png",
+                "sha256": "9bc71db364c6c48ba58faec4b1f805580f87424480cb78388a7fe8f0b8eae4bf",
+                "locale": "English",
+                "observation": "Historical English permission dialog: heading, explanation, program path and account/action choices. New mismatch text is verified in current shared connect_text and all native callers."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/otp-1-card.png",
+                "sha256": "d06957d5b41dbd7fe2eeb1c45f4d75f0baeca97bbcd65ea0ed410a92bfcd5e7a",
+                "locale": "English",
+                "observation": "Historical English code card: heading, code, Copy button, domain instruction and age warning. Lithuanian heading checked against its current catalog."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/read-11-logo.png",
+                "sha256": "b69c9daf8cbf5e776a8068f4ab25a164039c6ec44be81acf2fc823893d05cf4e",
+                "locale": "English",
+                "observation": "Historical English Linux message header with logo beside sender information."
+              }
+            ],
+            "limits": "Static sentence joins and source comparisons; no local test suites, builds, native-speaker verification or localized GUI-fit claim. The joins helper does not generate the command table; its generator and current command definitions were read directly."
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-final-help-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-final-help-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-final-help-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-final-help-20261119-since.log",
+            "joins.log": "/private/tmp/inbox-lt-final-help-20261119-joins.log",
+            "joins-summary.log": "/private/tmp/inbox-lt-final-help-20261119-joins-summary.log",
+            "source-audit.json": "/private/tmp/inbox-lt-final-help-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-final-help-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-final-help-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-final-help-20261119-html.log"
+          }
         }
       ],
       "pending_mnemonic_collisions": {
         "checkpoint": "lt-remaining-app-controls-20261119",
-        "status": "No collisions in 60 checked menu/dialog scopes; all access keys preserved in this batch. Recheck shared controls as remaining platform labels change. Source-only validation; no GUI execution.",
+        "status": "No unresolved collisions in the recorded 60 checked menu/dialog scopes. Subsequent batches changed prose only; final Cc/Bcc comparison confirms Windows/GTK K/S. Source-only verification; no localized GUI execution.",
         "collisions": []
       }
     },
@@ -80551,7 +80723,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "All 28 language structural checks pass apart from expected draft-mark requirements. The exact merged delta is one added catalog ID and two help paragraphs per language, plus English; all previously reviewed values and prose are preserved. IDs, variables, topic inventory and latest file/source hashes reconcile. Four nested review regions were flattened with no wording or coverage changes. Global unmarked diagnostics reconcile to prior review history: 23951 catalog entries and 12780 help lines. Since-start inventory matches 2517 entries/676 passages. Source audit covers 195 refs/11 worktrees; no additional unmerged translation delta or changed translation edits in other worktrees was found. No linguistic review credit, local test suites, builds or manually launched CI. REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,536 expected mark-only diagnostics. Exact reconstruction verifies one new catalog entry, two corrected previously reviewed log values and six complete help topics with 73 improved lines. Variables, plural branches, tags, attributes, controls, platform branches and literal keys/code are preserved. All three catalog changes are explained by current callers; existing compared values remain unchanged. Static Windows/Mac/Linux joins and current shortcut generation were inspected; historical English screenshots supply layout context. All 28 inventories, variables, marks and latest file/English hashes reconcile. Global diagnostics account for 23,952 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Source audit covers 195 refs/11 worktrees; no new translation source or changed upstream review input. Lithuanian has no pending catalog entries or help topics. Its three outstanding context comparisons are closed. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -141367,7 +141539,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review the newly merged Lithuanian agent-connect-claimed catalog entry and the six remaining help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. Use the current MCP phase3b runtime, including the identity-check limitations and resource/prompt access. Close existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b is now in the active inventory. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -144287,7 +144459,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review the newly merged Lithuanian agent-connect-claimed catalog entry and the six remaining help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. Use the current MCP phase3b runtime, including the identity-check limitations and resource/prompt access. Close existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b is now in the active inventory. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -146058,7 +146230,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review the newly merged Lithuanian agent-connect-claimed catalog entry and the six remaining help topics: agents-connect, brand-logos, command-line, keyboard-shortcuts, options-language and sign-in-codes. Use the current MCP phase3b runtime, including the identity-check limitations and resource/prompt access. Close existing context comparisons, then continue the other language queues and targeted followups. MCP phase3b is now in the active inventory. Recheck latest refs after each batch and during the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Begin the remaining Latvian app.ftl review in coherent menu/dialog batches (653 pending app entries), checking current native menus, shortcuts and control contexts. Latvian currently has 1,370 catalog entries and 51 help topics pending. Lithuanian now has no pending IDs/topics or context comparisons at this checkpoint; recheck it only for later source changes. Continue the other language queues, check latest refs after each batch and perform a final late-arrival audit before advancing REVIEWED. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -148334,6 +148506,27 @@
         },
         "incoming_source": "MCP phase3b b42800ab refreshed in committed state with identical translation files; no additional scope or credit.",
         "validation": "Static structural/context/inventory checks; no local test suites, builds or manually launched CI."
+      },
+      {
+        "batch_id": "mcp-phase3b-merged-after-lt-storage-20261119",
+        "pr": 209,
+        "url": "https://github.com/postalsys/inbox-classic/pull/209",
+        "review_commit": "e3ddb6e762c4146aa6b321bf58bb3068cca45c1d",
+        "merge_commit": "af5e7b7947b0c132148768b222024547ff48b6f2",
+        "merged_at": "2026-11-19T04:54:12Z",
+        "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+        "branch": "i18n/review-resume-20261118",
+        "verified": "MERGED; review commit is an ancestor of master, exact tree equality, clean review worktree synchronized to origin/master",
+        "counts": {
+          "catalog_scope": 36408,
+          "help_scope": 1380,
+          "pending_catalog": 12491,
+          "pending_help": 595,
+          "completed_catalog": 23917,
+          "completed_help": 785
+        },
+        "incoming_source": "Previously queued MCP phase3b integrated into active pending inventory. Latest source audit found no additional unmerged translation delta. Postmerge fetch advanced only master.",
+        "validation": "All 28 structural checks and exact inventories reconciled; no local test suites, builds or manually launched CI. No linguistic review credit for this integration."
       }
     ],
     "source_audit_helper_sha256": "187b1c07319c962244f6e3cb8c94de80aa00b92e79a80b1c788b8d3517681664",
@@ -158771,7 +158964,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "08b732d3b284defb985632d120178ad2bcbbb6332ac87b173674fa91f7e4dcf8",
       "core/locales/fi/core.ftl": "c55d1880e3d16b18db4c2b646240deef4dabee61bd153ec9a90ee4e23d3a3974",
-      "core/locales/GLOSSARY.md": "8c8553a1960ee994d2ce76ee2647b5c78bec34d11cdaecab9b0826850fa6f9e2",
+      "core/locales/GLOSSARY.md": "f89a31f1ced657f67fd2a7a52d9d6cd511859d95ff48a3fd7317178bbce0c644",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "62ab48e44fd7d41da8088de4be5eb3b9225b8821e334511083e7a090c6ef91c7",
@@ -158783,7 +158976,7 @@
       "core/crates/pe-html/help/hu/sign-and-encrypt.html": "baad23e5c91d6d2f02555881047b7b0edfc3dc7b3ccb974560e3cf1995781e8a",
       "core/crates/pe-html/help/hu/write-message.html": "4b360b8d6a1f293b24dee3fecc49b21944f1138a83cec3df519e0e8aaff10e83",
       "core/locales/lt/app.ftl": "93fa49cf57f0ae15b30105d48282ddb5359036c36a1fde34c15c6977124644ab",
-      "core/locales/lt/core.ftl": "39b6dc35227df7688350003b4f602587deb6c24fd59efa0b50d59eecb9bc979c",
+      "core/locales/lt/core.ftl": "d03751f0700f10da94a9c57d6d7ded5a22951ee80cd844f409b3d62e4448dd1b",
       "core/crates/pe-html/help/lt/sign-and-encrypt.html": "08f52e8024d5e6e35fb26a7cbc225872485631ab3d8346fb207a7c6d30d5f3e5",
       "core/crates/pe-html/help/lt/write-message.html": "9e67d59003aada9f1875bf9bd1add0d0a67040ece7b2ce29dfce0a5529ad1e7e",
       "core/locales/lv/app.ftl": "b51f23e217af3e53db457b296ad8f5df40fc02254f65448c00883eee79eb6832",
@@ -159117,7 +159310,7 @@
       "core/crates/pe-html/help/fr/agents-connect.html": "0709ed6b279551b2e297e3142943770141ca92affeba76608afdf65bfb716ff4",
       "core/crates/pe-html/help/hr/agents-connect.html": "e78c16b1593d2ed17c00e26bbeea583709e5ff324fa074e5630514d05071ed75",
       "core/crates/pe-html/help/it/agents-connect.html": "0a67b0517ac4fa70dd6d8b31b7e37df9adb739e0d2fee1190136087876af8c0d",
-      "core/crates/pe-html/help/lt/agents-connect.html": "4967beea9d8c6a762189039952f264ce3f9a98884fd0660d96cced267da4149b",
+      "core/crates/pe-html/help/lt/agents-connect.html": "e132d46af2c58d595c2e48f4594ceb86de5f6d0f6f8cc46aaf397f176cb1d4fb",
       "core/crates/pe-html/help/lv/agents-connect.html": "f7ea618bc2fbbb4f4e27e7ebf6857902c87de45e01be808d4fa601bed1ce2f11",
       "core/crates/pe-html/help/nb/agents-connect.html": "a9f5d55dd7f333786bbd19a4f11cf7701df6990a31e8342dbadde7fe0cded267",
       "core/crates/pe-html/help/nl/agents-connect.html": "eb5f956ed625b8a75af5c5b902cf847f0d77a8b6274650239c2281e14c03e55a",
@@ -159131,7 +159324,12 @@
       "core/crates/pe-html/help/sr-Latn/agents-connect.html": "4c8d408bf3eb96e23b192e8ac96919e42908ee3e6b7fda7df0d4c03ea71afe86",
       "core/crates/pe-html/help/sv/agents-connect.html": "e7261b2a894af620c8cb14f96bddad487323f5da551748b3ff0b899cd0a23aec",
       "core/crates/pe-html/help/tr/agents-connect.html": "175b2dc56c6846a0a2e3a4e522e2d5d8c2496d152164e3ca29d5ca5bd5763914",
-      "core/crates/pe-html/help/uk/agents-connect.html": "7ed40419eeb84cd2458af089fbc6960435f5a35e0c9131161319a264b1276821"
+      "core/crates/pe-html/help/uk/agents-connect.html": "7ed40419eeb84cd2458af089fbc6960435f5a35e0c9131161319a264b1276821",
+      "core/crates/pe-html/help/lt/brand-logos.html": "36d57286ff175988c69ea00a9ef2391bd6f97985f65a3937d04f22050b381602",
+      "core/crates/pe-html/help/lt/command-line.html": "5bd36ef0b07d53adb48e686c6159ba453f06213c5b20cd60b7f162cdfc713220",
+      "core/crates/pe-html/help/lt/keyboard-shortcuts.html": "f98ac9553543624e0653e330d4784689433d5354977cbf8d7b0305723ffa52c8",
+      "core/crates/pe-html/help/lt/options-language.html": "4420eafcf2ccbb4ed7e50285a699576b34b1437b2ef6e12e26691ad58046a7b2",
+      "core/crates/pe-html/help/lt/sign-in-codes.html": "346687aa574b4f80480746f301ff991bf5a18304fda55a61afb304dbb9034b11"
     },
     "resumed_review_checkpoints": [
       {
@@ -185255,6 +185453,132 @@
           "/private/tmp/inbox-mcp3b-merge-20261119-audit.py": "6e7f1cdf3c9e3067e20467b42448e9765eba0a17a246da2aa48507921a999ff5",
           "/private/tmp/inbox-mcp3b-merge-20261119-finalize.py": "821fb6f7976699057ed4af789a0f816c9c86c592ceb3b6b75134d419cadaca87"
         }
+      },
+      {
+        "batch": "lt-final-help-and-agent-context-20261119",
+        "review_parent": "af5e7b7947b0c132148768b222024547ff48b6f2",
+        "counts": {
+          "catalog_scope": 36408,
+          "help_scope": 1380,
+          "pending_catalog": 12490,
+          "pending_help": 589,
+          "completed_catalog": 23918,
+          "completed_help": 791
+        },
+        "validation": "Lithuanian structural checks pass with 1,536 expected mark-only diagnostics. Exact reconstruction verifies one new catalog entry, two corrected previously reviewed log values and six complete help topics with 73 improved lines. Variables, plural branches, tags, attributes, controls, platform branches and literal keys/code are preserved. All three catalog changes are explained by current callers; existing compared values remain unchanged. Static Windows/Mac/Linux joins and current shortcut generation were inspected; historical English screenshots supply layout context. All 28 inventories, variables, marks and latest file/English hashes reconcile. Global diagnostics account for 23,952 unmarked entries/12,883 help lines; since-start 2,516 entries/671 passages match the queue. Source audit covers 195 refs/11 worktrees; no new translation source or changed upstream review input. Lithuanian has no pending catalog entries or help topics. Its three outstanding context comparisons are closed. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 195,
+          "worktree_count": 11,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "af5e7b7947b0c132148768b222024547ff48b6f2",
+            "refs/remotes/origin/HEAD": "af5e7b7947b0c132148768b222024547ff48b6f2",
+            "refs/remotes/origin/i18n/review-resume-20261118": "e3ddb6e762c4146aa6b321bf58bb3068cca45c1d",
+            "refs/remotes/origin/master": "af5e7b7947b0c132148768b222024547ff48b6f2",
+            "refs/remotes/origin/release-please--branches--master--components--inbox-classic": "7d36abd502405b9a2a6601a3f89edae74bedcc5a"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "b42800ab0b3b53e44f45ce6047b6961dc737cc1e",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "75a8fc563b708dcf3b74a66597bb6597227e1a4b",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "de16d41423e638ba9e0e6fac8c7dce497796c369",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "dfdfbc336f054369336831f948930aad18f4f759",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-svgfix",
+              "HEAD": "e7868007093f2d6afdcae8259fa296504583517b",
+              "branch": "refs/heads/fix/svg-far-paths",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "af5e7b7947b0c132148768b222024547ff48b6f2",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lt/agents-connect.html\n M core/crates/pe-html/help/lt/brand-logos.html\n M core/crates/pe-html/help/lt/command-line.html\n M core/crates/pe-html/help/lt/keyboard-shortcuts.html\n M core/crates/pe-html/help/lt/options-language.html\n M core/crates/pe-html/help/lt/sign-in-codes.html\n M core/locales/GLOSSARY.md\n M core/locales/lt/core.ftl",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lt/agents-connect.html": "e132d46af2c58d595c2e48f4594ceb86de5f6d0f6f8cc46aaf397f176cb1d4fb",
+                "core/crates/pe-html/help/lt/brand-logos.html": "36d57286ff175988c69ea00a9ef2391bd6f97985f65a3937d04f22050b381602",
+                "core/crates/pe-html/help/lt/command-line.html": "5bd36ef0b07d53adb48e686c6159ba453f06213c5b20cd60b7f162cdfc713220",
+                "core/crates/pe-html/help/lt/keyboard-shortcuts.html": "f98ac9553543624e0653e330d4784689433d5354977cbf8d7b0305723ffa52c8",
+                "core/crates/pe-html/help/lt/options-language.html": "4420eafcf2ccbb4ed7e50285a699576b34b1437b2ef6e12e26691ad58046a7b2",
+                "core/crates/pe-html/help/lt/sign-in-codes.html": "346687aa574b4f80480746f301ff991bf5a18304fda55a61afb304dbb9034b11",
+                "core/locales/GLOSSARY.md": "f89a31f1ced657f67fd2a7a52d9d6cd511859d95ff48a3fd7317178bbce0c644",
+                "core/locales/lt/core.ftl": "d03751f0700f10da94a9c57d6d7ded5a22951ee80cd844f409b3d62e4448dd1b"
+              }
+            }
+          ],
+          "master": "af5e7b7947b0c132148768b222024547ff48b6f2",
+          "new_unmerged_source_deltas": [],
+          "note": "All previously queued MCP sources are integrated. Current master review inputs and other worktree translation edits are unchanged. The updated release-bot ref has no translation delta against its own merge base. No additional unmerged translation source or new language was found. Root and other worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "af5e7b7947b0c132148768b222024547ff48b6f2",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-final-help-20261119-edit.py": "33d8d1946a8d1d474df1bd8b2a0357fa3509389b6691745912211af2d49cafe7",
+          "/private/tmp/inbox-lt-final-help-20261119-recover.py": "4b044dbf7e0b46933fe96e94e417e01bb410ebed3f48424d61ffebe88d68ee2f",
+          "/private/tmp/inbox-lt-final-help-20261119-polish.py": "f01eaa57efb55d3e2b4ae0e9bbae2e6af9edd983a028625312b47a6761660bb0",
+          "/private/tmp/inbox-lt-final-help-20261119-finalize.py": "4fc4fa2401a134db176c7db6582c366a0d211086b9af636f247b0822e3ac5973",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -187428,7 +187752,12 @@
       "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
       "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59",
       "core/crates/pe-html/help/en/default-mail-program.html": "bbf56849460a56e424aad0d96f55b684807776aaab66bbbdc07daa0b8cf9382e",
-      "core/crates/pe-html/help/en/agents-connect.html": "9ad51eaa2a465684ac5cfcf8dd68bab8e1ad07749b3c2f8ffd0353e5779fffc2"
+      "core/crates/pe-html/help/en/agents-connect.html": "9ad51eaa2a465684ac5cfcf8dd68bab8e1ad07749b3c2f8ffd0353e5779fffc2",
+      "core/crates/pe-html/help/en/brand-logos.html": "4adef2588009f361e1bc5f1c07768514f3cf7b259e55501ab82054e054f0c096",
+      "core/crates/pe-html/help/en/command-line.html": "39216fa072adf81b4ce1480e5df5729a4ef7524d25d69aef5e1f374044c18e70",
+      "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b",
+      "core/crates/pe-html/help/en/options-language.html": "62ff45b6b027d0ac736ace5b23aaca63877aab10d25adcf59aa60e89fe01746d",
+      "core/crates/pe-html/help/en/sign-in-codes.html": "b8306602ce765263073757429ea289fe5cfdb933bef75df30c291bafdaad8275"
     },
     "resumed_source_integrations": [
       {
@@ -193772,7 +194101,8 @@
         "status": "pending targeted comparison",
         "source_checkpoint": "802ce727efec6b6990aaf4cee2fdca4dab664872",
         "completed_languages": [
-          "hu"
+          "hu",
+          "lt"
         ],
         "pending_languages": [
           "bg",
@@ -193786,7 +194116,6 @@
           "fr",
           "hr",
           "it",
-          "lt",
           "lv",
           "nl",
           "pl",
@@ -193905,6 +194234,44 @@
               "note": "Full topic review against current source. Other listed topics remain pending; no duplicate scope credit."
             }
           ]
+        },
+        "completed_language_reviews": {
+          "lt": {
+            "batch": "lt-final-help-and-agent-context-20261119",
+            "reviewed_topics": [
+              "agents-connect.html",
+              "agents-permissions.html"
+            ],
+            "note": "Completed the remaining comparisons in this full-topic review. Previously reviewed agents-permissions and invitations were compared unchanged; two agent-log values corrected. No duplicate scope credit.",
+            "source_context": {
+              "agent_identity": "The system identifies the launching executable; the hello can add a chosen --name, but cannot acquire another program grant merely by claiming its path. This is not a security boundary against malicious same-user programs. Terminal grants are scoped to the recognized program path. Resource reads reuse tool permission/account checks and read logging; prompts supply instructions whose later tool calls use the same limits.",
+              "agent_context_followups": "Creation logs are written after enqueueing and before the 15-second wait, so agent-log-folder now describes a request. agent-read-list now says Sąrašas for both folders and combined scopes. Existing rename/read-count/attachment/people/permission wording retained after comparison; two older help reviews (agents-permissions and invitations) were checked unchanged.",
+              "logos_cli": "Provider-confirmed domains are distinct from personal identity. Logos have persistent caching and occasional requests; SVG scripts/external images do not run/load. CLI sign-in-page-file writes a URL; memory-passwords selects memory credentials; PEM pins can include several certificates. Literal options, placeholders and paths preserved.",
+              "shortcuts": "All literal kbd elements and the generated table are preserved. Actual Windows/GTK Cc/Bcc access keys are K/S. Shift-arrows adjust ranges, Return edits drafts, Tab follows focusable controls, Select All unfolds the quote, and completion accepts groups and preserves saved Address Book entries. The Mac folder-list Control modifier missing from the current help formatter is explained in prose.",
+              "settings_codes": "Cancel preserves external Windows file associations; Mac/Linux language needs restart. System language fallback tries preferred choices. PDF switch direction, trusted-image conditions, decrypted index/key availability and cached-body limits match source. OTP heading matches Kodas svetainei:, provider domain checks are conditional, and age is based on the message date; code notifications require timely eligible mail and enabled notifications.",
+              "reference_screenshots": [
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/agents-2-connect.png",
+                  "sha256": "9bc71db364c6c48ba58faec4b1f805580f87424480cb78388a7fe8f0b8eae4bf",
+                  "locale": "English",
+                  "observation": "Historical English permission dialog: heading, explanation, program path and account/action choices. New mismatch text is verified in current shared connect_text and all native callers."
+                },
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/otp-1-card.png",
+                  "sha256": "d06957d5b41dbd7fe2eeb1c45f4d75f0baeca97bbcd65ea0ed410a92bfcd5e7a",
+                  "locale": "English",
+                  "observation": "Historical English code card: heading, code, Copy button, domain instruction and age warning. Lithuanian heading checked against its current catalog."
+                },
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/read-11-logo.png",
+                  "sha256": "b69c9daf8cbf5e776a8068f4ab25a164039c6ec44be81acf2fc823893d05cf4e",
+                  "locale": "English",
+                  "observation": "Historical English Linux message header with logo beside sender information."
+                }
+              ],
+              "limits": "Static sentence joins and source comparisons; no local test suites, builds, native-speaker verification or localized GUI-fit claim. The joins helper does not generate the command table; its generator and current command definitions were read directly."
+            }
+          }
         }
       },
       {
@@ -194336,7 +194703,8 @@
         "status": "pending targeted comparison",
         "source_checkpoint": "79b21a3e985d6eb615dcdffebfe0988a48a82780",
         "completed_languages": [
-          "hu"
+          "hu",
+          "lt"
         ],
         "pending_languages": [
           "bg",
@@ -194350,7 +194718,6 @@
           "fr",
           "hr",
           "it",
-          "lt",
           "lv",
           "nl",
           "pl",
@@ -194473,6 +194840,48 @@
               "note": "Full topic review against current source. Other listed topics remain pending; no duplicate scope credit."
             }
           ]
+        },
+        "completed_language_reviews": {
+          "lt": {
+            "batch": "lt-final-help-and-agent-context-20261119",
+            "reviewed_topics": [
+              "brand-logos.html",
+              "command-line.html",
+              "invitations.html",
+              "keyboard-shortcuts.html",
+              "options-language.html",
+              "sign-in-codes.html"
+            ],
+            "note": "Completed the remaining comparisons in this full-topic review. Previously reviewed agents-permissions and invitations were compared unchanged; two agent-log values corrected. No duplicate scope credit.",
+            "source_context": {
+              "agent_identity": "The system identifies the launching executable; the hello can add a chosen --name, but cannot acquire another program grant merely by claiming its path. This is not a security boundary against malicious same-user programs. Terminal grants are scoped to the recognized program path. Resource reads reuse tool permission/account checks and read logging; prompts supply instructions whose later tool calls use the same limits.",
+              "agent_context_followups": "Creation logs are written after enqueueing and before the 15-second wait, so agent-log-folder now describes a request. agent-read-list now says Sąrašas for both folders and combined scopes. Existing rename/read-count/attachment/people/permission wording retained after comparison; two older help reviews (agents-permissions and invitations) were checked unchanged.",
+              "logos_cli": "Provider-confirmed domains are distinct from personal identity. Logos have persistent caching and occasional requests; SVG scripts/external images do not run/load. CLI sign-in-page-file writes a URL; memory-passwords selects memory credentials; PEM pins can include several certificates. Literal options, placeholders and paths preserved.",
+              "shortcuts": "All literal kbd elements and the generated table are preserved. Actual Windows/GTK Cc/Bcc access keys are K/S. Shift-arrows adjust ranges, Return edits drafts, Tab follows focusable controls, Select All unfolds the quote, and completion accepts groups and preserves saved Address Book entries. The Mac folder-list Control modifier missing from the current help formatter is explained in prose.",
+              "settings_codes": "Cancel preserves external Windows file associations; Mac/Linux language needs restart. System language fallback tries preferred choices. PDF switch direction, trusted-image conditions, decrypted index/key availability and cached-body limits match source. OTP heading matches Kodas svetainei:, provider domain checks are conditional, and age is based on the message date; code notifications require timely eligible mail and enabled notifications.",
+              "reference_screenshots": [
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/agents-2-connect.png",
+                  "sha256": "9bc71db364c6c48ba58faec4b1f805580f87424480cb78388a7fe8f0b8eae4bf",
+                  "locale": "English",
+                  "observation": "Historical English permission dialog: heading, explanation, program path and account/action choices. New mismatch text is verified in current shared connect_text and all native callers."
+                },
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/otp-1-card.png",
+                  "sha256": "d06957d5b41dbd7fe2eeb1c45f4d75f0baeca97bbcd65ea0ed410a92bfcd5e7a",
+                  "locale": "English",
+                  "observation": "Historical English code card: heading, code, Copy button, domain instruction and age warning. Lithuanian heading checked against its current catalog."
+                },
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/read-11-logo.png",
+                  "sha256": "b69c9daf8cbf5e776a8068f4ab25a164039c6ec44be81acf2fc823893d05cf4e",
+                  "locale": "English",
+                  "observation": "Historical English Linux message header with logo beside sender information."
+                }
+              ],
+              "limits": "Static sentence joins and source comparisons; no local test suites, builds, native-speaker verification or localized GUI-fit claim. The joins helper does not generate the command table; its generator and current command definitions were read directly."
+            }
+          }
         }
       },
       {
@@ -196241,7 +196650,9 @@
         "id": "mcp3b-agent-identity-context-20261119",
         "status": "pending targeted comparison",
         "source_checkpoint": "e30acaa1a3289f13c52d37041de8954a895e0155",
-        "completed_languages": [],
+        "completed_languages": [
+          "lt"
+        ],
         "pending_languages": [
           "bg",
           "ca",
@@ -196256,7 +196667,6 @@
           "hr",
           "hu",
           "it",
-          "lt",
           "lv",
           "nb",
           "nl",
@@ -196294,7 +196704,44 @@
             ]
           }
         ],
-        "instruction": "Review while processing the already pending new catalog value and help passages. No additional scope or duplicate review credit."
+        "instruction": "Review while processing the already pending new catalog value and help passages. No additional scope or duplicate review credit.",
+        "completed_language_reviews": {
+          "lt": {
+            "batch": "lt-final-help-and-agent-context-20261119",
+            "reviewed_topics": [
+              "agents-connect.html"
+            ],
+            "note": "Completed the remaining comparisons in this full-topic review. Previously reviewed agents-permissions and invitations were compared unchanged; two agent-log values corrected. No duplicate scope credit.",
+            "source_context": {
+              "agent_identity": "The system identifies the launching executable; the hello can add a chosen --name, but cannot acquire another program grant merely by claiming its path. This is not a security boundary against malicious same-user programs. Terminal grants are scoped to the recognized program path. Resource reads reuse tool permission/account checks and read logging; prompts supply instructions whose later tool calls use the same limits.",
+              "agent_context_followups": "Creation logs are written after enqueueing and before the 15-second wait, so agent-log-folder now describes a request. agent-read-list now says Sąrašas for both folders and combined scopes. Existing rename/read-count/attachment/people/permission wording retained after comparison; two older help reviews (agents-permissions and invitations) were checked unchanged.",
+              "logos_cli": "Provider-confirmed domains are distinct from personal identity. Logos have persistent caching and occasional requests; SVG scripts/external images do not run/load. CLI sign-in-page-file writes a URL; memory-passwords selects memory credentials; PEM pins can include several certificates. Literal options, placeholders and paths preserved.",
+              "shortcuts": "All literal kbd elements and the generated table are preserved. Actual Windows/GTK Cc/Bcc access keys are K/S. Shift-arrows adjust ranges, Return edits drafts, Tab follows focusable controls, Select All unfolds the quote, and completion accepts groups and preserves saved Address Book entries. The Mac folder-list Control modifier missing from the current help formatter is explained in prose.",
+              "settings_codes": "Cancel preserves external Windows file associations; Mac/Linux language needs restart. System language fallback tries preferred choices. PDF switch direction, trusted-image conditions, decrypted index/key availability and cached-body limits match source. OTP heading matches Kodas svetainei:, provider domain checks are conditional, and age is based on the message date; code notifications require timely eligible mail and enabled notifications.",
+              "reference_screenshots": [
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/agents-2-connect.png",
+                  "sha256": "9bc71db364c6c48ba58faec4b1f805580f87424480cb78388a7fe8f0b8eae4bf",
+                  "locale": "English",
+                  "observation": "Historical English permission dialog: heading, explanation, program path and account/action choices. New mismatch text is verified in current shared connect_text and all native callers."
+                },
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/otp-1-card.png",
+                  "sha256": "d06957d5b41dbd7fe2eeb1c45f4d75f0baeca97bbcd65ea0ed410a92bfcd5e7a",
+                  "locale": "English",
+                  "observation": "Historical English code card: heading, code, Copy button, domain instruction and age warning. Lithuanian heading checked against its current catalog."
+                },
+                {
+                  "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/read-11-logo.png",
+                  "sha256": "b69c9daf8cbf5e776a8068f4ab25a164039c6ec44be81acf2fc823893d05cf4e",
+                  "locale": "English",
+                  "observation": "Historical English Linux message header with logo beside sender information."
+                }
+              ],
+              "limits": "Static sentence joins and source comparisons; no local test suites, builds, native-speaker verification or localized GUI-fit claim. The joins helper does not generate the command table; its generator and current command definitions were read directly."
+            }
+          }
+        }
       }
     ],
     "completed_source_followups": [

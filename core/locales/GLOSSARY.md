@@ -792,6 +792,23 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   key lookup/publication. Logos persist across runs. Remote pictures can load under settings/trusted-sender rules.
 - Updates follow the installed package/source; Mac automatic checks can be disabled. Default-app changes depend
   on system acceptance, and mailto links and .eml files have separate associations.
+- Agent connection help describes system-identified launching programs and terminal-specific shared grants.
+  A chosen --name separates stored permissions but is not a security boundary against hostile same-user programs.
+  Resource reads and prompt-driven tool reads use existing permissions and activity logging.
+- Folder creation and rename logs describe queued requests, not completed server actions. Agent list-read details
+  label the scope "Sąrašas", which also fits combined views instead of naming every scope an actual folder.
+- Logo help distinguishes provider-confirmed domains from personal identity. Downloads use a persistent cache;
+  a first fetch or refresh still reaches the logo server. No blanket anonymity or per-launch download claim.
+- Command-line help calls --store a database file and --memory-passwords memory-only credential storage.
+  --sign-in-page-file writes the URL; a PEM pin file may contain multiple certificates. Preserve literal examples.
+- Shortcut help keeps English literal keys and explains Lithuanian Alt+K / Alt+S for Kopija / Slapta kopija.
+  Mac folder-list shortcuts also need Control, which the current help formatter omits. Completion hides learned
+  addresses without removing saved Address Book entries; lists can include groups as well as individual addresses.
+- Settings help distinguishes unapplied dialog changes from Windows associations, immediate settings from a
+  language restart, image previews from PDF previews, and cached-message limits from the total database size.
+  The Mac system path is given in English rather than asserting unverified Lithuanian system-control labels.
+- Code help uses the actual heading "Kodas svetainei:". A provider-confirmed domain is not personal identity;
+  the age warning uses the message date. Notifications require enabled settings and timely eligible mail.
 
 ### Magyar (hu)
 
