@@ -1,19 +1,19 @@
-<!--review--><h1>Przenoszenie na inny komputer</h1>
+<h1>Przenoszenie na inny komputer</h1>
 <p class="summary">Przenieś konta, ustawienia, kontakty, klucze i reguły na inny komputer w jednym pliku.</p>
 <h2>Eksport</h2>
 <ol>
     <li>Wybierz <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Wybierz, co przenieść: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> i <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Aby przenieść także hasła i klucze prywatne, włącz <b data-text="ui-setup-use-passphrase"></b> i dwukrotnie wpisz frazę hasła o długości co najmniej 8 znaków.</li>
+    <li>Aby przenieść także zapisane hasła, dane logowania i klucze prywatne, włącz <b data-text="ui-setup-use-passphrase"></b> i dwukrotnie wpisz hasło o długości co najmniej 8 znaków.</li>
     <li>Kliknij <b data-text="ui-setup-export-button"></b> i wybierz, gdzie zapisać plik.</li>
 </ol>
-<p>Plik nie zawiera wiadomości: zostaną one ponownie pobrane na drugim komputerze. Z frazą hasła cały plik jest zaszyfrowany. Bez niej nie zawiera haseł ani kluczy prywatnych, a każde konto raz poprosi o hasło na drugim komputerze.</p>
-<aside class="warning">Przechowuj plik i jego frazę hasła osobno, a po zaimportowaniu usuń plik. Każdy, kto ma oba, może czytać Twoją pocztę.</aside>
+<p>Plik nie zawiera wiadomości: zostaną one ponownie pobrane z serwera na drugim komputerze. Jeśli ustawisz hasło, cały plik będzie zaszyfrowany. W przeciwnym razie zapisane hasła, dane logowania i klucze prywatne zostaną pominięte. Trzeba będzie ponownie zalogować się do kont.</p>
+<aside class="warning">Przechowuj plik i jego hasło osobno, a po zaimportowaniu usuń plik. Każdy, kto ma dostęp do obu, może czytać Twoją pocztę.</aside>
 <h2>Import</h2>
 <ol>
-    <li>Na drugim komputerze wybierz <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Zanim dodasz pierwsze konto, link do tego jest też w oknie <b data-text="ui-add-account-title"></b>.</li>
-    <li>Wybierz plik i wpisz jego frazę hasła, jeśli ją ma.</li>
-    <li>Okno pokaże, co zawiera plik. Wybierz części i konta do zaimportowania, a potem kliknij <b data-text="ui-setup-import-button"></b>.</li>
+    <li>Na drugim komputerze wybierz <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Przed dodaniem pierwszego konta możesz też skorzystać z linku w oknie <b data-text="ui-add-account-title"></b>.</li>
+    <li>Wybierz plik i wpisz hasło, jeśli jest nim zabezpieczony.</li>
+    <li>W oknie zobaczysz zawartość pliku. Wybierz elementy i konta do zaimportowania, a potem kliknij <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Konto, które już jest na tym komputerze, pozostaje bez zmian. Kontakty są dodawane do książki adresowej, ustawienia i preferencje okien są zastępowane, a reguła, której folderu jeszcze nie ma, czeka na synchronizację konta. Inny klucz dla jednego z kontaktów czeka na Twoją decyzję, tak jak klucz zaimportowany.</p>
-<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>Konta już skonfigurowane na tym komputerze pozostaną bez zmian. Kontakty zostaną dodane do książki adresowej, a ustawienia programu i okien zostaną zastąpione. Brakujące foldery docelowe reguł zostaną dopasowane po synchronizacji kont. Nowy klucz kontaktu zastąpi bieżący dopiero wtedy, gdy wybierzesz go we właściwościach kontaktu.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

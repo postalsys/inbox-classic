@@ -1155,8 +1155,7 @@ pgp-imported-public = { $count ->
 }
 # review: new
 pgp-imported-pending = Dla { $addresses } używany jest już inny klucz: nowy czeka w kontakcie, dopóki go nie wybierzesz.
-# review: new
-pgp-error-needs-passphrase = Klucz prywatny jest chroniony frazą hasła. Wpisz ją, aby zaimportować klucz.
+pgp-error-needs-passphrase = Klucz prywatny jest zabezpieczony hasłem. Wpisz je, aby zaimportować klucz.
 # review: new
 pgp-error-mismatch = Klucz prywatny nie pasuje do swojego klucza publicznego. Mógł zostać zmieniony.
 # review: new
@@ -1447,10 +1446,8 @@ setup-error-not-setup = Ten plik nie jest konfiguracją Inbox Classic.
 setup-error-damaged = Plik konfiguracji jest uszkodzony i nie można go odczytać.
 # review: new
 setup-error-newer = Tę konfigurację zapisała nowsza wersja Inbox Classic ({ $version }). Zaktualizuj Inbox Classic i zaimportuj ją ponownie.
-# review: new
-setup-error-needs-passphrase = Ta konfiguracja jest chroniona frazą hasła. Wpisz frazę hasła, z którą ją zapisano.
-# review: new
-setup-error-wrong-passphrase = To nie jest fraza hasła, z którą zapisano tę konfigurację.
+setup-error-needs-passphrase = Ten plik konfiguracji jest zabezpieczony hasłem. Wpisz hasło użyte przy jego zapisywaniu.
+setup-error-wrong-passphrase = To hasło nie pasuje do pliku konfiguracji.
 # review: new
 setup-error-changed = Plik konfiguracji został zmieniony lub uszkodzony po zapisaniu, więc nie można go zaimportować.
 # review: new

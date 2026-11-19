@@ -1,19 +1,19 @@
-<!--review--><h1>Klucze szyfrowania</h1>
+<h1>Klucze szyfrowania</h1>
 <p class="summary">Utwórz klucz do podpisywania wiadomości i odbierania zaszyfrowanej poczty oraz przechowuj klucze kontaktów.</p>
-<p>Inbox Classic podpisuje i szyfruje pocztę kluczami OpenPGP. Twój klucz ma dwie połowy: klucz publiczny, który dajesz innym, i klucz prywatny, który zostaje na Twoim komputerze. Klucze kontaktów pozwalają sprawdzać ich podpisy i szyfrować dla nich pocztę.</p>
+<p>Inbox Classic używa kluczy OpenPGP do cyfrowego podpisywania i szyfrowania poczty. Twój klucz składa się z części publicznej, którą udostępniasz innym, oraz prywatnej, która pozostaje na Twoim komputerze. Klucze kontaktów pozwalają sprawdzać ich podpisy cyfrowe i szyfrować wiadomości do nich.</p>
 <p>Aby utworzyć klucz:</p>
 <ol>
     <li>Wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, a potem kliknij <b data-text="ui-keys-new"></b>.</li>
-    <li>Wybierz konto i kliknij <b data-text="ui-keys-new-make"></b>. Klucz jest używany dla adresu konta i jego innych adresów.</li>
-    <li>Kliknij <b data-text="ui-keys-backup-now"></b> i wybierz frazę hasła. Przechowuj plik i frazę hasła w różnych bezpiecznych miejscach.</li>
+    <li>Wybierz konto i kliknij <b data-text="ui-keys-new-make"></b>. Klucz będzie używany dla głównego adresu konta i jego pozostałych adresów.</li>
+    <li>Kliknij <b data-text="ui-keys-backup-now"></b> i wybierz hasło do kopii zapasowej. Przechowuj plik i hasło w różnych bezpiecznych miejscach.</li>
 </ol>
-<aside class="warning">Bez kopii zapasowej Twojego klucza nie da się odzyskać, jeśli ten komputer zginie lub zostanie zresetowany, a poczty zaszyfrowanej dla niego nie będzie już można odczytać.</aside>
-<h2>Klucze są chronione bez fraz hasła</h2>
-<p>Twoje klucze prywatne chroni klucz przechowywany w <!--os:windows-->Menedżerze poświadczeń<!--/os--><!--os:mac-->pęku kluczy<!--/os--><!--os:linux-->systemowym pęku kluczy<!--/os-->, więc nigdy nie wpisujesz frazy hasła, aby ich użyć. Frazę hasła wybierasz tylko dla kopii zapasowej. Jeśli Twój klucz jest pokazywany jako zablokowany, ta ochrona została zresetowana: kliknij <b data-text="ui-keys-import"></b> i wybierz jego kopię zapasową.</p>
+<aside class="warning">Jeśli utracisz komputer lub przywrócisz go do ustawień fabrycznych, bez kopii zapasowej nie odzyskasz klucza ani nie odczytasz poczty zaszyfrowanej dla niego.</aside>
+<h2>Ochrona kluczy bez wpisywania hasła</h2>
+<p>Twoje klucze prywatne są zabezpieczone kluczem przechowywanym w <!--os:windows-->Menedżerze poświadczeń<!--/os--><!--os:mac-->pęku kluczy<!--/os--><!--os:linux-->systemowym pęku kluczy<!--/os-->. Dzięki temu nie musisz wpisywać hasła przy każdym ich użyciu. Hasło wybierasz tylko dla kopii zapasowej. Jeśli Twój klucz jest oznaczony jako zablokowany, jego systemowe zabezpieczenie zostało zresetowane. Kliknij <b data-text="ui-keys-import"></b> i wybierz kopię zapasową klucza.</p>
 <h2>Dodawanie kluczy</h2>
-<p>Kliknij <b data-text="ui-keys-import"></b>, aby dodać klucz z pliku, na przykład przysłany przez kontakt albo własną kopię zapasową. Klucz prywatny chroniony frazą hasła raz o nią poprosi. Inbox Classic zapyta potem, czy używać zaimportowanego Twojego klucza dla Twoich adresów.</p>
-<p>Klucz kontaktu jest od tej chwili używany dla jego adresu. Jeśli później pojawi się inny klucz dla tego samego adresu, bieżący pozostaje w użyciu, dopóki nie wybierzesz nowego we właściwościach kontaktu.</p>
+<p>Kliknij <b data-text="ui-keys-import"></b>, aby dodać klucz z pliku, np. otrzymanego od kontaktu lub zawierającego kopię zapasową Twojego klucza. Przy imporcie klucza prywatnego zabezpieczonego hasłem trzeba je wpisać tylko raz. Następnie Inbox Classic zapyta, czy przypisać Twój zaimportowany klucz do Twoich adresów.</p>
+<p>Klucz kontaktu będzie odtąd używany dla jego adresu. Jeśli później pojawi się inny klucz dla tego samego adresu, bieżący pozostanie w użyciu, dopóki nie wybierzesz nowego we właściwościach kontaktu.</p>
 <p>Aby udostępnić swój klucz publiczny, zaznacz go i kliknij <b data-text="ui-keys-export"></b>. Klucz konta możesz też wybrać w jego właściwościach, na karcie <b data-text="ui-account-security"></b>.</p>
-<p>Gdy szyfrujesz do kogoś, czyjego klucza nie masz, Inbox Classic pyta o niego domenę jego adresu, a potem keys.openpgp.org. Wysyłany jest tylko adres. Aby nigdy nie pytać keys.openpgp.org, wyłącz <b data-text="ui-pgp-keyserver"></b> w <b data-settings="reading"></b>.</p>
-<p>Klucze podróżują też z pocztą. Wiadomości z adresu, który ma klucz, niosą jego klucz publiczny, aby inne aplikacje mogły szyfrować do ciebie, a Inbox Classic w ten sam sposób poznaje klucz kontaktu z jego wiadomości. Aby przestać wysyłać swój, wyłącz <b data-text="ui-account-autocrypt"></b> na karcie <b data-text="ui-account-security"></b> konta.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
+<p>Gdy szyfrujesz wiadomość do osoby, której klucza nie masz, Inbox Classic szuka go najpierw w domenie jej adresu e-mail, a potem na keys.openpgp.org. Wysyłany jest tylko adres. Aby wyłączyć wyszukiwanie na keys.openpgp.org, wyłącz <b data-text="ui-pgp-keyserver"></b> w ustawieniach <b data-settings="reading"></b>.</p>
+<p>Klucze mogą być też dołączane do poczty. Wiadomości wysyłane z adresu, do którego przypisano klucz, zawierają jego część publiczną. Inne aplikacje, które ją odczytają, mogą jej użyć do szyfrowania wiadomości do Ciebie. Gdy otworzysz wiadomość zawierającą klucz nadawcy, Inbox Classic zapisze go bez potwierdzenia właściciela. Nowy klucz dla adresu, który już ma przypisany klucz, czeka na Twój wybór. Aby przestać dołączać swój klucz, wyłącz <b data-text="ui-account-autocrypt"></b> na karcie <b data-text="ui-account-security"></b> konta.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>

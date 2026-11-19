@@ -247,55 +247,30 @@ ui-no-match-in = Zakres wyszukiwania: „{ $folder }”. Przeszukiwane są temat
 ui-no-items = W tym widoku nie ma żadnych elementów.
 ui-choose-folder = Wybierz folder, aby zobaczyć jego wiadomości.
 ui-unsubscribe = Wypisz się
-# review: new
 ui-open-in-calendar = Otwórz w kalendarzu
-# review: new
-ui-pictures-blocked = Niektóre obrazy zostały zablokowane, aby nadawca nie mógł zidentyfikować Twojego komputera. Kliknij tutaj, aby pobrać obrazy.
-# review: new
+ui-pictures-blocked = Niektóre obrazy zostały zablokowane, aby utrudnić nadawcy identyfikację Twojego komputera. Kliknij tutaj, aby je pobrać.
 ui-not-shown = Nie udało się wyświetlić wiadomości.
-# review: new
 ui-attachment-not-read = Nie udało się odczytać załącznika.
-# review: new
 ui-attachment-not-saved = Nie udało się zapisać załącznika.
-# review: new
 ui-not-downloaded = Wiadomość nie została jeszcze pobrana.
-# review: new
 ui-leave-list = Wypisać się z tej listy mailingowej?
-# review: new
-ui-leave-one-click = Inbox Classic wyśle prośbę o wypisanie do { $target }. Nie otworzy się żadna strona i nie zostanie wysłany żaden e-mail.
-# review: new
-ui-leave-mail = Aby się wypisać, wyślij e-mail na adres { $target }. Inbox Classic go przygotuje. Wyślij wiadomość, aby potwierdzić.
-# review: new
+ui-leave-one-click = Inbox Classic wyśle prośbę o wypisanie do serwera { $target }. Nie otworzy się żadna strona i nie zostanie wysłany żaden e-mail.
+ui-leave-mail = Aby się wypisać, wyślij wiadomość e-mail na adres { $target }. Inbox Classic przygotuje jej treść. Wyślij ją, aby potwierdzić wypisanie.
 ui-leave-web = Strona wypisywania z listy mailingowej otworzy się w przeglądarce ({ $target }).
-# review: new
-ui-unsubscribing = Wypisywanie z { $target }...
-# review: new
-ui-cannot-unsubscribe = Ta wiadomość nie daje możliwości wypisania się.
-# review: new
+ui-unsubscribing = Wysyłanie prośby o wypisanie: { $target }...
+ui-cannot-unsubscribe = Ta wiadomość nie zawiera opcji wypisania się z listy mailingowej.
 ui-unsubscribed = Prośba o wypisanie została przyjęta. Lista mailingowa informuje, że przestanie wysyłać te wiadomości.
-# review: new
 ui-not-unsubscribed = Nie udało się wypisać: { $reason }
-# review: new
-ui-event-span = { $start } do { $end }
-# review: new
+ui-event-span = Od { $start } do { $end }
 ui-event-floating = { $when } (czas nadawcy)
-# review: new
 ui-invitation = Zaproszenie: { $title }
-# review: new
 ui-invitation-updated = Zaktualizowane zaproszenie: { $title }
-# review: new
 ui-invitation-canceled = Odwołane: { $title }
-# review: new
 ui-invitation-answer = Odpowiedź na zaproszenie: { $title }
-# review: new
 ui-no-title = (bez tytułu)
-# review: new
 ui-organizer = Organizator: { $name }
-# review: new
 ui-invitation-not-read = Nie udało się odczytać zaproszenia.
-# review: new
-ui-no-calendar = Na tym komputerze nie ma aplikacji kalendarza, która otworzy zaproszenia (pliki .ics).
-# review: new
+ui-no-calendar = Na tym komputerze nie ma aplikacji kalendarza obsługującej zaproszenia (pliki .ics).
 ui-messages-not-changed = Nie udało się zmienić wiadomości.
 ui-new-folder-in-selected = Nowy folder zostanie utworzony wewnątrz zaznaczonego folderu.
 ui-new-folder-at-top = Nowy folder zostanie utworzony na najwyższym poziomie konta.
@@ -439,23 +414,14 @@ ui-account-move-down = Przenieś w &dół
 ui-menu-open = &Otwórz
 ui-menu-flag = Fla&ga
 ui-menu-view-source = Pokaż ź&ródło
-# review: new
 ui-save-attachments = Zapisz załączniki
-# review: new
 ui-attachment-open = Otwórz
-# review: new
 ui-attachment-save-as = Zapisz jako...
-# review: new
 ui-attachment-save-all = Zapisz wszystkie...
-# review: new
 ui-attachment-show-in-message = Pokaż w wiadomości
-# review: new
 ui-attachments-strip = Załączniki
-# review: new
 ui-attachment-note-title = Otwieranie tego pliku
-# review: new
 ui-attachment-program-tip = Otwieranie jest wyłączone dla tego typu plików: mogą one uruchamiać programy. Zapisz plik, aby otworzyć go samodzielnie.
-# review: new
 ui-clear-flag = &Usuń flagę
 ui-button-move = &Przenieś
 ui-button-copy = &Kopiuj
@@ -532,135 +498,75 @@ ui-restart-later = &Później
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Nowy kontakt
-# review: new
 ui-tb-new-group = Nowa grupa
-# review: new
 ui-tb-properties = Właściwości
-# review: new
 ui-tb-write-to = Napisz do
-# review: new
 ui-menu-new-contact = Nowy &kontakt...
-# review: new
 ui-menu-new-group = Nowa &grupa...
-# review: new
 ui-menu-write-to = &Napisz do
-# review: new
 ui-menu-delete = &Usuń
-# review: new
 ui-book-find-hint = Wpisz nazwę lub adres e-mail
-# review: new
 ui-book-all-contacts = Wszystkie kontakty
-# review: new
 ui-col-phone = Telefon
-# review: new
 ui-book-empty = Książka adresowa jest pusta. Kliknij Nowy kontakt, aby kogoś dodać, albo zaimportuj plik vCard lub CSV z menu Plik.
-# review: new
 ui-book-no-match = Żaden kontakt nie pasuje do „{ $words }”.
-# review: new
 ui-book-delete-ask = { $count ->
     [one] Usunąć ten kontakt z Książki adresowej?
     [few] Usunąć te kontakty ({ $count }) z Książki adresowej?
     [many] Usunąć te kontakty ({ $count }) z Książki adresowej?
    *[other] Usunąć te kontakty ({ $count }) z Książki adresowej?
 }
-# review: new
 ui-group-delete-ask = Usunąć grupę „{ $name }”? Osoby z tej grupy pozostaną w Książce adresowej.
-# review: new
-ui-book-no-address = { $name } nie ma adresu e-mail.
-# review: new
+ui-book-no-address = Kontakt „{ $name }” nie ma adresu e-mail.
 ui-new-contact-title = Nowy kontakt
-# review: new
 ui-contact-title = Właściwości: { $name }
-# review: new
 ui-contact-first = Imię:
-# review: new
 ui-contact-last = Nazwisko:
-# review: new
 ui-contact-display = Nazwa wyświetlana:
-# review: new
 ui-contact-nickname = Pseudonim:
-# review: new
 ui-contact-company = Firma:
-# review: new
 ui-contact-addresses = Adresy e-mail:
-# review: new
 ui-contact-address-hint = Wpisz adres e-mail
-# review: new
 ui-contact-add = &Dodaj
-# review: new
 ui-contact-set-default = Ustaw jako do&myślny
-# review: new
 ui-contact-default = { $address } (domyślny)
-# review: new
 ui-contact-phones = Numery telefonów:
-# review: new
 ui-phone-home = Domowy
-# review: new
 ui-phone-work = Służbowy
-# review: new
 ui-phone-mobile = Komórkowy
-# review: new
 ui-phone-other = Inny
-# review: new
 ui-contact-notes = Notatki:
-# review: new
 ui-contact-name-needed = Wpisz nazwę lub adres e-mail kontaktu.
-# review: new
 ui-contact-address-invalid = „{ $address }” nie jest prawidłowym adresem e-mail.
-# review: new
 ui-contact-not-saved = Nie udało się zapisać kontaktu: { $reason }
-# review: new
 ui-new-group-title = Nowa grupa
-# review: new
 ui-group-title = Właściwości: { $name }
-# review: new
 ui-group-name = Nazwa grupy:
-# review: new
 ui-group-members = Członkowie:
-# review: new
 ui-group-select-members = &Wybierz członków...
-# review: new
 ui-group-new-member = Dodaj adres e-mail, którego nie ma w Książce adresowej:
-# review: new
 ui-group-name-needed = Wpisz nazwę grupy.
-# review: new
 ui-group-not-saved = Nie udało się zapisać grupy: { $reason }
-# review: new
 ui-group-members-count = { $count ->
     [one] 1 członek
     [few] { $count } członków
     [many] { $count } członków
    *[other] { $count } członków
 }
-# review: new
 ui-select-recipients = Wybierz odbiorców
-# review: new
 ui-select-members = Wybierz członków grupy
-# review: new
 ui-pick-intro = Wpisz nazwę lub wybierz ją z listy:
-# review: new
 ui-pick-recipients = Odbiorcy wiadomości:
-# review: new
 ui-pick-members = Członkowie grupy:
-# review: new
 ui-pick-to = &Do →
-# review: new
 ui-pick-cc = D&W →
-# review: new
 ui-pick-bcc = &UDW →
-# review: new
 ui-pick-add = Dod&aj →
-# review: new
 ui-pick-tip = Wybierz odbiorców z Książki adresowej
-# review: new
 ui-filter-address-books = Książki adresowe (vCard, CSV)
-# review: new
 ui-filter-vcard = Pliki vCard
-# review: new
 ui-book-export-name = Książka adresowa
-# review: new
 ui-book-imported = { $added ->
     [one] Dodano 1 kontakt
     [few] Dodano { $added } kontakty
@@ -672,35 +578,24 @@ ui-book-imported = { $added ->
     [many] pominięto { $skipped }, które już są w Książce adresowej.
    *[other] pominięto { $skipped }, które już są w Książce adresowej.
 }
-# review: new
 ui-book-not-imported = Nie udało się zaimportować książki adresowej: { $reason }
-# review: new
 ui-book-exported = { $count ->
     [one] Zapisano 1 kontakt w pliku { $file }.
     [few] Zapisano { $count } kontakty w pliku { $file }.
     [many] Zapisano { $count } kontaktów w pliku { $file }.
    *[other] Zapisano { $count } kontaktów w pliku { $file }.
 }
-# review: new
 ui-book-not-exported = Nie udało się zapisać książki adresowej: { $reason }
-# review: new
 ui-code-copied = Skopiowano kod
 ui-codes-in-notifications = Po&kazuj kody logowania w powiadomieniach o nowej poczcie
-# review: new
 ui-tool-unread-only = Nieprzeczytane
-# review: new
 ui-no-unread = Nie ma tu nieprzeczytanych wiadomości.
-# review: new
 ui-pictures-always-sender = Zawsze pobieraj obrazy od { $sender }
-# review: new
 ui-pictures-always-domain = Zawsze pobieraj obrazy od wszystkich z domeny { $domain }
-# review: new
 ui-pictures-unconfirmed = Nie udało się zweryfikować domeny nadawcy ({ $domain }), więc obrazy w tej wiadomości nie są pobierane automatycznie.
 ui-pictures-always-option = P&obieraj obrazy we wszystkich wiadomościach
 ui-pictures-always-warning = Nadawcy będą wtedy widzieć, kiedy czytasz ich wiadomości.
-# review: new
 ui-protection-details = &Szczegóły...
-# review: new
 ui-protection-details-title = Szczegóły zabezpieczeń
 ui-download-heading = Pobieranie
 ui-download-ahead = &Pobieraj wiadomości z wyprzedzeniem:
@@ -724,7 +619,6 @@ ui-send-undone = Nie wysłano { $subject }. Wiadomość została ponownie otwart
 ui-send-too-late = Nie można już cofnąć wysłania wiadomości { $subject }.
 ui-outbox-status-undo = Wysyłka najwcześniej o { $time }
 ui-download-note = Wiadomości pobrane z wyprzedzeniem otwierają się od razu. Po przekroczeniu limitu miejsca najstarsze lokalne kopie są usuwane i pobierane ponownie przy otwarciu.
-# review: new
 ui-attachment-downloading = Ta wiadomość nie została jeszcze w pełni pobrana. Spróbuj ponownie po zakończeniu pobierania.
 ui-trusted-senders-button = Zaufa&ni nadawcy...
 ui-trusted-senders-title = Zaufani nadawcy
@@ -738,23 +632,15 @@ ui-pgp-keyserver-note = Program wysyła szukany adres e-mail do keys.openpgp.org
 ui-eml-default = Otwi&eraj pliki .eml w Inbox Classic
 ui-eml-default-done = Inbox Classic otwiera teraz pliki .eml.
 ui-eml-default-failed = Nie udało się ustawić Inbox Classic jako domyślnej aplikacji dla plików .eml: { $reason }
-# review: new
 ui-folders = Foldery
-# review: new
 ui-sorted-by = Sortowanie: { $field }
 ui-layout-label = &Układ:
 ui-columns-note = Okno jest wystarczająco szerokie na układ kolumnowy. Układ możesz zmienić w menu Widok > Układ.
-# review: new
 ui-row-unread = Nieprzeczytana
-# review: new
 ui-row-flagged = Z flagą
-# review: new
 ui-row-attachments = Ma załączniki
-# review: new
 ui-row-encrypted = Zaszyfrowana
-# review: new
-ui-row-signed = Podpisana
-# review: new
+ui-row-signed = Podpisana cyfrowo
 ui-row-messages = { $count ->
     [one] { $count } wiadomość
     [few] { $count } wiadomości
@@ -763,155 +649,86 @@ ui-row-messages = { $count ->
 }
 ui-list-pictures = &Pokazuj obrazy nadawców na liście wiadomości
 ui-list-pictures-note = W układzie kolumnowym pokazuje logotypy marek lub zdjęcia z Książki adresowej dla zweryfikowanych nadawców, a jeśli ich nie ma, inicjały. Logotyp jest pobierany raz dla danej marki, a nie przy każdej wiadomości.
-# review: new
 ui-card-picture = Zdjęcie:
-# review: new
 ui-card-picture-choose = &Wybierz...
-# review: new
-ui-picture-not-picture = Ten plik nie jest obrazem PNG ani JPEG.
-# review: new
-ui-picture-too-large = To zdjęcie jest za duże. Wybierz takie, które ma najwyżej 10 MB oraz szerokość i wysokość najwyżej 8000 pikseli.
+ui-picture-not-picture = Ten plik nie jest prawidłowym obrazem PNG ani JPEG.
+ui-picture-too-large = To zdjęcie jest za duże. Wybierz plik o rozmiarze do 10 MB, którego szerokość i wysokość nie przekraczają 8000 pikseli.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
 
-# review: new
 ui-keys-title = Klucze szyfrowania
-# review: new
-ui-keys-intro = Twoje klucze podpisują Twoje wiadomości i otwierają pocztę zaszyfrowaną dla Ciebie. Klucze Twoich kontaktów sprawdzają ich podpisy i szyfrują pocztę do nich.
-# review: new
+ui-keys-intro = Twoje klucze służą do cyfrowego podpisywania wiadomości i odszyfrowywania poczty adresowanej do Ciebie. Klucze kontaktów pozwalają sprawdzać ich podpisy cyfrowe i szyfrować wiadomości do nich.
 ui-keys-empty = Nie ma jeszcze kluczy. Kliknij Nowy klucz, aby utworzyć swój, albo Importuj, aby dodać klucz, który już masz.
-# review: new
 ui-keys-col-name = Nazwa
-# review: new
 ui-keys-col-address = Adres
-# review: new
 ui-keys-col-kind = Rodzaj
-# review: new
 ui-keys-col-status = Stan
-# review: new
 ui-keys-kind-own = Twój klucz
-# review: new
-ui-keys-kind-contact = Kontakt
-# review: new
-ui-keys-status-verified = { $status }, zweryfikowany
-# review: new
+ui-keys-kind-contact = Klucz kontaktu
+ui-keys-status-verified = { $status }; potwierdzono właściciela klucza
 ui-keys-new = &Nowy klucz...
-# review: new
 ui-keys-import = &Importuj...
-# review: new
 ui-keys-export = &Eksportuj...
-# review: new
 ui-keys-backup = &Kopia zapasowa...
-# review: new
 ui-keys-verify = &Zweryfikuj...
-# review: new
 ui-keys-new-title = Nowy klucz
-# review: new
 ui-keys-new-for = Utwórz klucz dla:
-# review: new
 ui-keys-new-make = &Utwórz klucz
-# review: new
 ui-keys-no-account = Najpierw dodaj konto pocztowe: klucz tworzy się dla adresów konta.
-# review: new
 ui-keys-memory-only = Hasła są przechowywane tylko w pamięci, więc utworzonego lub zaimportowanego teraz klucza prywatnego nie będzie można użyć po zamknięciu Inbox Classic.
-# review: new
-ui-keys-backup-offer = Twój nowy klucz jest gotowy. Zapisać teraz jego kopię zapasową? Jeśli ten komputer zginie lub zostanie zresetowany, klucz można odzyskać tylko z kopii zapasowej.
-# review: new
+ui-keys-backup-offer = Twój nowy klucz jest gotowy. Zapisać teraz jego kopię zapasową? Jeśli utracisz komputer lub przywrócisz go do ustawień fabrycznych, klucz odzyskasz tylko z kopii zapasowej.
 ui-keys-backup-now = &Zapisz kopię zapasową...
-# review: new
 ui-keys-later = &Później
-# review: new
 ui-keys-backup-title = Kopia zapasowa klucza
-# review: new
-ui-keys-backup-intro = Kopia zapasowa jest chroniona frazą hasła. Przechowuj plik i frazę hasła w różnych bezpiecznych miejscach: do odzyskania klucza potrzebujesz obu.
-# review: new
-ui-keys-passphrase = &Fraza hasła:
-# review: new
-ui-keys-passphrase-again = &Wpisz ją ponownie:
-# review: new
-ui-keys-passphrase-differ = Frazy hasła nie są takie same.
-# review: new
-ui-keys-passphrase-short = Użyj frazy hasła o długości co najmniej 8 znaków.
-# review: new
+ui-keys-backup-intro = Kopia zapasowa jest zabezpieczona hasłem. Przechowuj plik i hasło w różnych bezpiecznych miejscach. Do przywrócenia klucza potrzebujesz obu.
+ui-keys-passphrase = &Hasło:
+ui-keys-passphrase-again = Po&wtórz hasło:
+ui-keys-passphrase-differ = Hasła nie są takie same.
+ui-keys-passphrase-short = Użyj hasła o długości co najmniej 8 znaków.
 ui-keys-backup-saved = Kopia zapasowa została zapisana.
-# review: new
 ui-keys-import-title = Importuj klucz
-# review: new
-ui-keys-import-passphrase = Ten klucz prywatny jest chroniony frazą hasła. Wpisz ją, aby zaimportować klucz:
-# review: new
+ui-keys-import-passphrase = Ten klucz prywatny jest zabezpieczony hasłem. Wpisz je, aby zaimportować klucz:
 ui-keys-file-filter = Klucze OpenPGP
-# review: new
-ui-keys-use-for = Używać tego klucza dla { $addresses }? Twoje wiadomości z tego adresu będą nim podpisywane, a pocztę zaszyfrowaną dla niego będzie można tu odczytać.
-# review: new
+ui-keys-use-for = Przypisać klucze do adresów: { $addresses }? Będą służyć do cyfrowego podpisywania wiadomości z tych adresów i odszyfrowywania poczty do nich.
 ui-keys-use = &Użyj go
-# review: new
 ui-keys-not-now = &Nie teraz
-# review: new
-ui-keys-remove-own = Usunąć Twój klucz { $fingerprint }? Poczty zaszyfrowanej dla niego nie będzie już można tu odczytać, chyba że ponownie zaimportujesz jego kopię zapasową.
-# review: new
-ui-keys-remove-contact = Usunąć klucz { $name }? Dopóki ponownie nie dodasz tego klucza, nie będzie można sprawdzać podpisów tej osoby ani szyfrować dla niej poczty.
-# review: new
+ui-keys-remove-own = Usunąć Twój klucz { $fingerprint }? Nie będzie już można odczytać tutaj poczty zaszyfrowanej dla tego klucza, chyba że ponownie zaimportujesz jego kopię zapasową.
+ui-keys-remove-contact = Usunąć klucz kontaktu „{ $name }”? Dopóki ponownie nie dodasz tego klucza, nie będzie można sprawdzać podpisów cyfrowych tej osoby ani szyfrować dla niej poczty.
 ui-key-properties-title = Właściwości klucza
-# review: new
 ui-key-names = Nazwy:
-# review: new
 ui-key-fingerprint = Odcisk klucza:
-# review: new
 ui-key-status = Stan:
-# review: new
 ui-key-created = Utworzono:
-# review: new
 ui-key-expires = Wygasa:
-# review: new
 ui-key-never = Nigdy
-# review: new
 ui-key-algorithm = Algorytm:
-# review: new
 ui-key-source = Źródło:
-# review: new
 ui-key-addresses = Adresy:
-# review: new
-ui-key-address-verified = { $address } (zweryfikowany)
-# review: new
-ui-key-address-not-verified = { $address } (niezweryfikowany)
-# review: new
+ui-key-address-verified = { $address } (potwierdzono właściciela klucza)
+ui-key-address-not-verified = { $address } (nie potwierdzono właściciela klucza)
 ui-verify-title = Zweryfikuj klucz
-# review: new
-ui-verify-intro = Poproś osobę { $name }, aby odczytała Ci odcisk swojego klucza ze swojej aplikacji, osobiście lub przez telefon. Nie porównuj go z odciskiem przysłanym e-mailem: kto mógłby zmienić klucz, mógłby zmienić i to.
-# review: new
+ui-verify-intro = Kontakt: { $name }. Poproś tę osobę, aby podczas spotkania lub rozmowy telefonicznej odczytała Ci odcisk klucza ze swojej aplikacji. Nie porównuj go z odciskiem przesłanym e-mailem: ktoś, kto podmienił klucz, mógł też zmienić treść wiadomości.
 ui-verify-fingerprint = Odcisk klucza, który masz:
-# review: new
 ui-verify-marks = { $count ->
-    [one] Jeśli są zgodne, klucz zostanie oznaczony jako należący do tej osoby dla { $addresses }. Jeśli ten adres do niej nie należy, kliknij Są różne.
-   *[other] Jeśli są zgodne, klucz zostanie oznaczony jako należący do tej osoby dla { $addresses }. Jeśli któryś z tych adresów do niej nie należy, kliknij Są różne.
+    [0] Ten klucz nie zawiera adresów e-mail. Nie można zapisać potwierdzenia jego właściciela.
+    [one] Jeśli odciski są zgodne, potwierdzisz właściciela klucza dla adresu: { $addresses }. Jeśli ten adres nie należy do tej osoby, kliknij „Są różne”.
+    [few] Jeśli odciski są zgodne, potwierdzisz właściciela klucza dla adresów: { $addresses }. Jeśli któryś z tych adresów nie należy do tej osoby, kliknij „Są różne”.
+    [many] Jeśli odciski są zgodne, potwierdzisz właściciela klucza dla adresów: { $addresses }. Jeśli któryś z tych adresów nie należy do tej osoby, kliknij „Są różne”.
+   *[other] Jeśli odciski są zgodne, potwierdzisz właściciela klucza dla adresów: { $addresses }. Jeśli któryś z tych adresów nie należy do tej osoby, kliknij „Są różne”.
 }
-# review: new
 ui-verify-match = Są &zgodne
-# review: new
 ui-verify-differ = Są &różne
-# review: new
-ui-verify-differs = Klucz, który masz, nie jest tym, który ma { $name }. Usuń go i poproś ponownie o klucz.
-# review: new
-ui-verify-unmark = Oznacz jako &niezweryfikowany
-# review: new
+ui-verify-differs = Odcisk klucza nie zgadza się z odciskiem podanym przez kontakt „{ $name }”. Usuń ten klucz i poproś tę osobę o ponowne przesłanie jej klucza.
+ui-verify-unmark = Usuń potwierdze&nie właściciela
 ui-account-security = Zabezpieczenia
-# review: new
-ui-account-security-intro = Z kluczem Twoje wiadomości mogą być podpisywane, a inni mogą wysyłać Ci zaszyfrowaną pocztę.
-# review: new
+ui-account-security-intro = Klucz pozwala cyfrowo podpisywać wiadomości i odbierać zaszyfrowaną pocztę od innych osób.
 ui-account-key = &Klucz dla tego konta:
-# review: new
 ui-account-key-none = Brak
-# review: new
 ui-account-key-new = &Nowy klucz...
-# review: new
 ui-account-autocrypt = &Wysyłaj mój klucz publiczny z wiadomościami (Autocrypt)
-# review: new
 ui-contact-key = Klucz szyfrowania:
-# review: new
 ui-contact-key-none = Brak klucza
-# review: new
 ui-contact-key-use-new = Użyj &nowego klucza
-# review: new
 ui-contact-key-keep = &Zachowaj bieżący
 ui-recipient-keys-title = Klucze odbiorców
 ui-recipient-col-recipient = Odbiorca
@@ -923,29 +740,16 @@ ui-compose-make-key = &Utwórz klucz...
 ui-compose-show-keys = &Klucze szyfrowania...
 ui-compose-encrypt-off = &Wyłącz szyfrowanie
 ui-compose-keep-encrypted = &Zachowaj szyfrowanie
-# review: new
 ui-setup-export-title = Eksportuj ustawienia i konta
-# review: new
 ui-setup-import-title = Importuj ustawienia i konta
-# review: new
 ui-setup-export-intro = Wybierz, co przenieść na inny komputer. Plik nie zawiera wiadomości: zostaną tam pobrane ponownie.
-# review: new
-ui-setup-use-passphrase = &Chroń plik frazą hasła
-# review: new
-ui-setup-passphrase-note = Z frazą hasła plik jest zaszyfrowany i zawiera też Twoje hasła, dane logowania i klucze prywatne. Bez niej każde konto poprosi o hasło na drugim komputerze.
-# review: new
+ui-setup-use-passphrase = &Chroń plik hasłem
+ui-setup-passphrase-note = Plik zabezpieczony hasłem jest zaszyfrowany i zawiera również zapisane hasła, dane logowania i klucze prywatne. Jeśli nie zabezpieczysz pliku hasłem, na drugim komputerze trzeba będzie ponownie zalogować się do kont.
 ui-setup-export-button = &Eksportuj...
-# review: new
 ui-setup-file-filter = Ustawienia i konta Inbox Classic
-# review: new
-ui-setup-ask-passphrase = Ten plik jest chroniony frazą hasła. Wpisz ją, aby zobaczyć, co zawiera plik:
-# review: new
+ui-setup-ask-passphrase = Ten plik jest zabezpieczony hasłem. Wpisz je, aby zobaczyć zawartość pliku:
 ui-setup-import-intro = Wybierz, co zaimportować. Konta, które już są na tym komputerze, pozostaną bez zmian.
-# review: new
-ui-setup-from = Zapisane przez Inbox Classic { $version } dnia { $date }.
-# review: new
+ui-setup-from = Zapisano w Inbox Classic { $version }. Data: { $date }.
 ui-setup-import-button = &Importuj
-# review: new
 ui-setup-done = Gotowe
-# review: new
 ui-setup-first-run = Importuj ustawienia i konta z innego komputera...
