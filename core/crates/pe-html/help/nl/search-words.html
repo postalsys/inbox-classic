@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Alleen die map, in elk account</td></tr>
     <tr><td><code>in:projecten</code></td><td>Alleen de map met die naam</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Elke map</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-mail van vóór of na een datum. <code>2025-01-31</code> werkt ook</td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Mail ouder of nieuwer dan een aantal dagen (<code>d</code>), maanden (<code>m</code>) of jaren (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-mail groter of kleiner dan de opgegeven omvang, in bytes of met <code>K</code>, <code>M</code> of <code>G</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Datums worden in UTC gelezen: before sluit de genoemde dag uit, after neemt die dag mee. <code>2025-01-31</code> werkt ook</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Mail ouder of nieuwer dan een aantal dagen (<code>d</code>), maanden (<code>m</code>) of jaren (<code>y</code>); een maand telt als 30 dagen en een jaar als 365 dagen</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-mail groter of kleiner dan de opgegeven omvang, in bytes of met <code>K</code>, <code>M</code> of <code>G</code>, in veelvouden van 1024</td></tr>
 </table>
-<p>Zoeken is niet gevoelig voor accenten of hoofdletters. Een onbekende zoekoperator wordt als gewone zoektekst behandeld.</p>
+<p>Zoeken is niet gevoelig voor accenten of hoofdletters. Een onbekende zoekoperator wordt als gewone zoektekst behandeld. Een minteken keert filters op datum, ouderdom of grootte niet om. Voor zoeken op het begin van een woord zijn minstens twee tekens nodig; één teken wordt als heel woord gezocht.</p>
 <p>Je kunt versleutelde berichten vinden op afzender, ontvangers en onderwerp. Staat de optie <b data-text="ui-search-encrypted"></b> aan bij <b data-settings="reading"></b>, dan kun je na ontsleuteling ook in de berichttekst zoeken.</p>
 <p>De berichtenlijst toont geen berichtgroottes. Om te zien hoe groot een bericht is, kies je <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

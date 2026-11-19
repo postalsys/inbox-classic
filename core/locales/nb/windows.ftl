@@ -96,20 +96,16 @@ win-send = &Send
 win-dont-send = &Ikke send
 win-unsubscribe = &Meld meg av
 win-dont-unsubscribe = &Ikke meld meg av
-win-forget-program-ask = Vil du fjerne dette programmet, tillatelsene og aktivitetsloggen til agentene? Du blir spurt om tillatelse igjen neste gang det kobler til.
+win-forget-program-ask = Vil du fjerne tillatelsene til dette programmet og aktivitetsloggen til agentene? Du blir spurt om tillatelse igjen neste gang det kobler til.
 win-clear-log-ask = Vil du tømme aktivitetsloggen til agentene? Dette angrer ikke endringer som agentene har gjort.
 win-agent-programs = &Programmer der agenter har bedt om tilgang til e-posten din:
 win-change = &Endre...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = Angre &siden...
-# review: new
 win-take-back = &Angre
 win-what-agents-did = Age&ntaktivitet:
-# review: new
-win-agent-reads = Hva som ble lest fra { $from } til { $to }:
-# review: new
-win-agent-reads-hint = Velg en rad med lesinger ovenfor for å se hva som ble lest.
+win-agent-reads = Lest i tidsrommet { $from } til { $to }:
+win-agent-reads-hint = Velg en oppføring fra leseloggen ovenfor for å se detaljene.
 win-how-to-connect = Slik kobler du til en agent
 
 ## Sign-in apps
@@ -142,4 +138,4 @@ win-installer-welcome-update =
     Hvis programmet kjører, lukkes det først. Kontoene og e-posten din beholdes.
 win-installer-older-ask = Inbox Classic { $installed } er allerede installert. Dette er en nyere versjon enn { $version }. Vil du installere den eldre versjonen likevel?
 win-installer-still-running = Inbox Classic kjører fortsatt. Lukk programmet og prøv igjen.
-win-installer-remove-mail-ask = Vil du også fjerne kontoene og de lokale kopiene av e-posten fra denne datamaskinen? E-posten blir liggende på serverne.
+win-installer-remove-mail-ask = Vil du også fjerne alle lokale data fra Inbox Classic, inkludert kontoer, meldinger, utkast, sendekø, kontakter, innstillinger og nøkler? E-post på serverne og oppføringer i systemets lager for påloggingsopplysninger beholdes.

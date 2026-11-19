@@ -4,17 +4,17 @@
 <img src="picture:bounce-1-failed" alt="Obaveštenje o isporuci sa karticom koja kaže da poruka nije isporučena, sa primaocem, razlogom i onim što možete da uradite">
 <p>Kartica za svakog primaoca objašnjava razlog jednostavnim rečima i predlaže šta možete da uradite. <b data-text="bounce-details"></b> prikazuje izvorni odgovor servera primaoca.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> bira poruku koju ste poslali.</li>
-    <li>Za poruku čija isporuka kasni koristite <b data-text="bounce-show-delayed"></b>. Vaš server e-pošte još uvek pokušava, pa ne morate ponovo da je šaljete.</li>
+    <li><b data-text="bounce-show-message"></b> bira poruku koju ste poslali, ako postoji u tom nalogu.</li>
+    <li>Za poruku čija isporuka kasni koristite <b data-text="bounce-show-delayed"></b>. Server obično nastavlja pokušaje isporuke. Odlaganje nije konačni neuspeh; nemojte slati duplikat samo zbog ovog obaveštenja.</li>
 </ul>
 <p>Neki česti razlozi:</p>
 <table>
     <tr><th>Na kartici piše</th><th>Šta da uradite</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Proverite da li je adresa tačno napisana ili pitajte osobu koju adresu sada koristi.</td></tr>
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Pošaljite je ponovo za nekoliko dana ili se toj osobi javite na drugi način.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Pošaljite je ponovo bez onoga što liči na neželjenu poštu, na primer mnogo veza ili velikog priloga.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Posle konačnog neuspeha pokušajte ponovo bez onoga što liči na neželjenu poštu, na primer mnogo veza ili velikog priloga.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Prosledite obaveštenje pružaocu usluge e-pošte. Problem nije u poruci.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Sačekajte da server ponovo pokuša. Kod privremenog odbijanja ovog tipa poruka se obično isporuči u roku od sat vremena.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Kod privremenog odlaganja server obično pokušava ponovo. Ako izveštaj pokazuje konačni neuspeh, pokušajte kasnije ponovo da pošaljete poruku.</td></tr>
 </table>
 <p>Da biste pronašli sva obaveštenja o isporuci, potražite <code>is:bounce</code>. Objašnjenje se priprema na vašem računaru, bez slanja sadržaja poruke drugim uslugama.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

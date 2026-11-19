@@ -84,7 +84,7 @@ mac-files-not-saved =
     { $count ->
        *[other] Ukupno datoteka: { $count }; nije sačuvano: { $failed }.
 }
-mac-no-calendar-app = Na ovom Macu nema aplikacije za kalendar koja može da otvori pozivnice (datoteke .ics).
+mac-no-calendar-app = Pozivnica (datoteka .ics) nije mogla da se otvori. Proverite da li je instalirana aplikacija za kalendar koja može da otvara takve datoteke.
 mac-file-not-saved = Datoteku nije moguće sačuvati.
 mac-unsubscribing = Otkazivanje pretplate: { $target }…
 mac-loading-list = Učitavanje…
@@ -123,7 +123,7 @@ mac-sign-in-apps-button = Aplikacije za prijavljivanje…
 
 ## AI agents
 
-mac-forget-program = Da li želite da uklonite ovaj program i istoriju aktivnosti njegovih agenata?
+mac-forget-program = Da li želite da uklonite dozvole ovog programa i istoriju aktivnosti njegovih agenata?
 mac-forget-program-detail = Dozvole programa biće izbrisane. Pri sledećem povezivanju ponovo će se tražiti vaša dozvola.
 
 ## Sign-in apps

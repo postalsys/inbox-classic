@@ -2,18 +2,18 @@
 <p class="summary">Zašto su slike sa interneta blokirane i kako da ih prikažete za poruku ili pošiljaoca kome verujete.</p>
 <p>Poruka može da prikazuje slike koje pošiljalac drži na internetu. Preuzimanje takve slike može da otkrije pošiljaocu da ste otvorili poruku, kada ste je otvorili i vašu IP adresu. Zato ih Inbox Classic podrazumevano blokira.</p>
 <p>Slike priložene uz samu poruku prikazuju se bez dodatnog povezivanja sa serverom pošiljaoca.</p>
-<!--review--><p>Inbox Classic te slike crta sam, kao i priložene slike, pa se ništa u njima ne izvršava. Slika koju ne može da nacrta (na primer HEIC) prikazuje se kao prazan prostor. Animirane slike prikazuju svoj prvi kadar. Fontovi poslati uz poruku ne koriste se.</p><!--/review-->
+<p>Inbox Classic ponovo kodira slike koje dolaze uz poruku, kao i preglede priloga. Nepodržani formati, kao što je HEIC, i nečitljive slike mogu da ostave prazan prostor. Animirane slike prikazuju se kao nepokretna slika. Priložene datoteke fontova se ne koriste. Ovo se ne odnosi na obradu spoljnih slika čije preuzimanje dozvolite.</p>
 <p>Kada poruka ima slike sa interneta, traka iznad nje javlja da su neke slike blokirane. Da biste ih videli u poruci kojoj verujete:</p>
 <ul>
     <li><!--os:windows,mac-->Kliknite na traku.<!--/os--><!--os:linux-->Na traci kliknite na <b data-text="gtk-download-pictures"></b>.<!--/os--></li>
     <li>Ili izaberite <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Tako se prikazuju slike samo te poruke. Slike u sledećoj poruci ostaju blokirane.</p>
+<p>Time dozvoljavate slike samo u toj poruci. Za ostale poruke važe uobičajena podešavanja.</p>
 <h2>Pošiljaoci kojima verujete</h2>
 <p>Da biste uvek učitavali slike određenog pošiljaoca, <!--os:windows-->kliknite na strelicu na desnom kraju trake<!--/os--><!--os:mac-->kliknite na strelicu pored stavke <b data-text="cmd-pictures"></b> na traci<!--/os--><!--os:linux-->kliknite na strelicu pored stavke <b data-text="gtk-download-pictures"></b> na traci<!--/os-->. Izaberite da se slike uvek preuzimaju od tog pošiljaoca ili od svih sa njegovog domena.</p>
 <p>Slike se tada učitavaju automatski, ali samo kada pružalac usluge e-pošte potvrdi domen pošiljaoca. Ako domen nije potvrđen, potrebna je vaša dozvola, a traka navodi razlog. Potvrda domena ne potvrđuje identitet osobe koja je napisala poruku. U fascikli <b data-text="folder-junk"></b> slike se nikada ne učitavaju same.</p>
 <p>Da biste uklonili pošiljaoca sa liste, upotrebite <b data-text="ui-trusted-senders-button"></b> u podešavanjima <b data-settings="reading"></b>.</p>
 <h2>Slike u svim porukama</h2>
 <p><b data-text="ui-pictures-always-option"></b> u podešavanjima <b data-settings="reading"></b> omogućava automatsko preuzimanje slika u porukama, osim u fascikli <b data-text="folder-junk"></b>. Opcija je podrazumevano isključena jer učitavanje slika može da otkrije pošiljaocu kada čitate poruku. Za spoljne slike u šifrovanim delovima potrebna je posebna dozvola pri svakom otvaranju poruke.</p>
-<p>Logotip brenda pored zaglavlja učitava se odvojeno od slika u tekstu poruke. Mora da ga odobri vaš server e-pošte; preuzima se uz poruku ili sa adrese brenda. Više o tome pročitajte u temi o logotipima.</p>
+<p>Logotip brenda pored zaglavlja učitava se odvojeno od slika u tekstu poruke. Prikazuje se nakon što vaš server e-pošte potvrdi domen i logotip. Preuzeti logotipi se čuvaju i ponovo koriste. Server sa kog se logotip preuzima može da zabeleži IP adresu i vreme zahteva. Više o tome pročitajte u temi o logotipima.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>

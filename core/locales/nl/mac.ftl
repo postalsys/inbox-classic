@@ -77,7 +77,7 @@ mac-files-not-saved =
     { $count ->
        *[other] Bewaren mislukt voor { $failed } van de { $count } bestanden.
     }
-mac-no-calendar-app = Er is op deze Mac geen agenda-app om uitnodigingen (.ics-bestanden) mee te openen.
+mac-no-calendar-app = De uitnodiging kon niet worden geopend. Controleer of er een app is ingesteld voor .ics-bestanden en probeer het opnieuw.
 mac-file-not-saved = Het bestand kon niet worden bewaard.
 mac-unsubscribing = Afmelden bij { $target }…
 mac-loading-list = Laden…
@@ -115,7 +115,7 @@ mac-sign-in-apps-button = Aanmeldapps…
 
 ## AI agents
 
-mac-forget-program = Dit programma en de activiteitengeschiedenis van de agents verwijderen?
+mac-forget-program = Dit programma uit de lijst verwijderen, samen met de activiteitengeschiedenis van de agents?
 mac-forget-program-detail = De machtigingen van het programma worden verwijderd. Bij de volgende verbinding wordt opnieuw om toestemming gevraagd.
 
 ## Sign-in apps

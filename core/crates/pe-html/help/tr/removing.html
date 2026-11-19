@@ -1,8 +1,8 @@
 <h1>Inbox Classic'i kaldırma</h1>
-<p class="summary">Inbox Classic'i bilgisayarınızdan kaldırın; isterseniz indirilmiş iletileri saklayın.</p>
-<!--os:windows--><p>Inbox Classic'i <i>Ayarlar &gt; Uygulamalar &gt; Yüklü uygulamalar</i> içinden kaldırın. Kaldırma programı, indirilmiş iletileri de silmek isteyip istemediğinizi sorar.</p><!--/os-->
-<!--os:mac--><p>Inbox Classic'ten çıkın ve onu Uygulamalar'dan Çöp Sepeti'ne taşıyın. İndirdiği postalar, siz o klasörü de silene kadar <code>~/Library/Application Support/Inbox Classic</code> içinde kalır.</p><!--/os-->
-<!--os:linux--><p>Paketi <code>sudo apt remove inbox-classic</code> ile, Arch Linux ve Omarchy'de ise <code>sudo pacman -R inbox-classic</code> ile kaldırın. İndirdiği postalar, siz o klasörü de silene kadar <code>~/.local/share/inbox-classic</code> içinde kalır.</p><!--/os-->
+<p class="summary">Inbox Classic'i bilgisayarınızdan kaldırın; isterseniz yerel verilerinizi saklayın.</p>
+<!--os:windows--><p>Inbox Classic'i <i>Ayarlar &gt; Uygulamalar &gt; Yüklü uygulamalar</i> içinden kaldırın. Kaldırma programı, tüm yerel verileri de silmek isteyip istemediğinizi sorar. Bu seçenek hesapları, posta kopyalarını, yerel taslakları, bekleyen gönderimleri, kişileri, anahtarları ve ayarları siler; sistem deposundaki kimlik bilgileri kalabilir.</p><!--/os-->
+<!--os:mac--><p>Inbox Classic'ten çıkın ve onu Uygulamalar'dan Çöp Sepeti'ne taşıyın. Yerel veriler, siz <code>~/Library/Application Support/Inbox Classic</code> klasörünü de silene kadar kalır. Bu klasörü silmek posta kopyalarını, kişileri, anahtarları, ayarları ve bekleyen gönderimleri de kaldırır.</p><!--/os-->
+<!--os:linux--><p>Paketi <code>sudo apt remove inbox-classic</code> ile, Arch Linux ve Omarchy'de ise <code>sudo pacman -R inbox-classic</code> ile kaldırın. Yerel veriler, siz <code>~/.local/share/inbox-classic</code> klasörünü de silene kadar kalır. Bu klasörü silmek posta kopyalarını, kişileri, anahtarları, ayarları ve bekleyen gönderimleri de kaldırır.</p><!--/os-->
 <p>Uygulamayı kaldırmak sunuculardaki postayı silmez.</p>
 <p>Kayıtlı oturum açma bilgilerini silmek için uygulamayı kaldırmadan önce <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> içinde her hesabı kaldırın. Yalnızca bir hesabı kaldırmak için bkz. <a href="topic:manage-accounts"></a>.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>

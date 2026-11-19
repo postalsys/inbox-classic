@@ -1,6 +1,6 @@
 <h1>Operadores de pesquisa</h1>
 <p class="summary">Os termos e operadores aceitos na caixa de pesquisa, para encontrar exatamente as mensagens que você quer.</p>
-<p>A caixa de pesquisa aceita os operadores abaixo, com a mesma sintaxe do Gmail. Combine vários critérios para encontrar mensagens que atendam a todos eles. Passe o ponteiro sobre a caixa de pesquisa para ver uma lista resumida.</p>
+<p>A caixa de pesquisa aceita os operadores abaixo, com uma sintaxe semelhante à do Gmail; nem todos os operadores e comportamentos do Gmail são suportados. Combine vários critérios para encontrar mensagens que atendam a todos eles. Passe o ponteiro sobre a caixa de pesquisa para ver uma lista resumida.</p>
 <table>
     <tr><th>Digite</th><th>Encontra</th></tr>
     <tr><td><code>orçamento</code></td><td>Mensagens com uma palavra que começa com <i>orçamento</i>, em qualquer parte</td></tr>
@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Apenas essa pasta, em todas as contas</td></tr>
     <tr><td><code>in:projetos</code></td><td>Apenas a pasta com esse nome</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Todas as pastas</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-mails anteriores ou posteriores à data indicada. <code>2025-01-31</code> também funciona</td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>E-mails mais antigos ou mais recentes que um número de dias (<code>d</code>), meses (<code>m</code>) ou anos (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-mails maiores ou menores que um tamanho, em bytes ou com <code>K</code>, <code>M</code> ou <code>G</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-mails anteriores ao início da data ou a partir dela, respectivamente, considerando o dia em UTC. <code>2025-01-31</code> também funciona</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>E-mails mais antigos ou mais recentes que um número de dias (<code>d</code>), meses (<code>m</code>) ou anos (<code>y</code>); um mês corresponde a 30 dias e um ano a 365 dias</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-mails maiores ou menores que um tamanho, em bytes ou com <code>K</code>, <code>M</code> ou <code>G</code>, em múltiplos de 1024</td></tr>
 </table>
-<p>A pesquisa não diferencia maiúsculas de minúsculas nem letras com ou sem acento. Operadores não reconhecidos são pesquisados como texto comum.</p>
+<p>A busca pelo início de uma palavra exige pelo menos dois caracteres; um único caractere é procurado como palavra inteira. O sinal de menos é ignorado nos filtros de data, idade e tamanho. A pesquisa não diferencia maiúsculas de minúsculas nem letras com ou sem acento. Operadores não reconhecidos são pesquisados como texto comum.</p>
 <p>Você pode encontrar mensagens criptografadas pelo remetente, pelos destinatários e pelo assunto. Com a opção <b data-text="ui-search-encrypted"></b> ativada em <b data-settings="reading"></b>, também pode pesquisar no texto depois de descriptografar as mensagens.</p>
 <p>A lista de mensagens não tem uma coluna de tamanho. Para ver o tamanho de uma mensagem, escolha <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

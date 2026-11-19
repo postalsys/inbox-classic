@@ -95,20 +95,16 @@ win-send = &Verzenden
 win-dont-send = &Niet verzenden
 win-unsubscribe = &Afmelden
 win-dont-unsubscribe = &Niet afmelden
-win-forget-program-ask = Dit programma verwijderen, met de machtigingen en de activiteitengeschiedenis van de agents? Bij de volgende verbinding wordt opnieuw om toestemming gevraagd.
+win-forget-program-ask = Dit programma uit de lijst verwijderen, samen met de machtigingen en de activiteitengeschiedenis van de agents? Bij de volgende verbinding wordt opnieuw om toestemming gevraagd.
 win-clear-log-ask = De activiteitengeschiedenis van de agents wissen? Wijzigingen die de agents hebben gemaakt, worden hiermee niet ongedaan gemaakt.
 win-agent-programs = &Programma’s waarvan agents toegang tot je e-mail hebben gevraagd:
 win-change = Wi&jzigen...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
-win-undo-since = Ongedaan maken &sinds...
-# review: new
+win-undo-since = Wijzigingen &terugdraaien...
 win-take-back = &Terugdraaien
 win-what-agents-did = &Activiteit van agents:
-# review: new
 win-agent-reads = Wat er is gelezen van { $from } tot { $to }:
-# review: new
-win-agent-reads-hint = Selecteer hierboven een rij met gelezen berichten om te zien wat er is gelezen.
+win-agent-reads-hint = Selecteer hierboven een regel met leesactiviteiten om de details te zien.
 win-how-to-connect = Een agent verbinden
 
 ## Sign-in apps
@@ -141,4 +137,4 @@ win-installer-welcome-update =
     Als Inbox Classic nog geopend is, wordt het eerst afgesloten. Je accounts en e-mail blijven behouden.
 win-installer-older-ask = Inbox Classic { $installed } is geïnstalleerd en is nieuwer dan { $version }. Toch de oudere versie installeren?
 win-installer-still-running = Inbox Classic is nog geopend. Sluit het programma af en probeer het opnieuw.
-win-installer-remove-mail-ask = Ook de accounts en de e-mail verwijderen die Inbox Classic op deze computer bewaart? De e-mail op de servers blijft staan.
+win-installer-remove-mail-ask = Ook de lokale gegevensmap van Inbox Classic verwijderen, met gedownloade e-mail, Postvak UIT, accounts, contactpersonen, sleutels en instellingen? De e-mail op de servers en de gegevens in Windows Referentiebeheer blijven behouden.

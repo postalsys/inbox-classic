@@ -1,8 +1,8 @@
 <h1>Beantwoorden en doorsturen</h1>
 <p class="summary">Antwoord alleen aan de afzender of aan alle geadresseerden, of stuur het bericht door.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) opent een antwoord aan de afzender.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) opent een antwoord aan de afzender en de andere geadresseerden.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) gebruikt het Reply-To-adres als dat aanwezig is, en anders het adres van de afzender.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) gebruikt Reply-To of de afzender en de adressen in Aan en Cc, zonder je eigen adressen.</li>
     <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) stuurt het bericht door. Je typt zelf de ontvangers.</li>
 </ul>
 <p>Antwoorden en doorgestuurde berichten gebruiken het account van het oorspronkelijke bericht. Was dat bericht gericht aan een van je andere afzenderadressen, dan wordt dat adres als afzender gekozen.</p>
@@ -11,5 +11,5 @@
 <p>Bij doorsturen is het oorspronkelijke bericht meteen zichtbaar in het opstelvenster.</p>
 <p>Een antwoord volgt de opmaak van het oorspronkelijke bericht. Een antwoord op een bericht in platte tekst is platte tekst, waarbij regels uit het oorspronkelijke bericht beginnen met <b>&gt;</b>, tenzij je iets opmaakt.</p>
 <h2>Meerdere berichten doorsturen</h2>
-<p>Selecteer meerdere berichten en klik op <b data-text="ui-tb-forward"></b>. Er wordt één nieuw bericht gemaakt waarin de geselecteerde berichten als <code>.eml</code>-bestanden worden bijgevoegd. Het onderwerp is dat van het eerste bericht.</p>
+<p>Selecteer meerdere berichten en klik op <b data-text="ui-tb-forward"></b>. Er wordt één nieuw bericht gemaakt waarin de geselecteerde berichten als <code>.eml</code>-bestanden worden bijgevoegd. Het onderwerp is dat van het eerste bericht, met het voorvoegsel voor doorsturen.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>

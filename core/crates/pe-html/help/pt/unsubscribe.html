@@ -1,5 +1,5 @@
 <h1>Sair de uma lista de correio</h1>
-<p class="summary">Deixe de receber mensagens de uma lista de correio com o botão Cancelar subscrição.</p>
+<p class="summary">Peça para sair de uma lista de correio com o botão Cancelar subscrição.</p>
 <p>Se uma mensagem de uma lista de correio incluir instruções para cancelar a subscrição, aparece o botão <b data-text="ui-unsubscribe"></b> à direita do cabeçalho.</p>
 <p>Para sair da lista:</p>
 <ol>
@@ -7,11 +7,11 @@
     <li>Confirme. Consoante a lista, acontece uma de três coisas:
         <ul>
             <li>O Inbox Classic envia um pedido de cancelamento diretamente ao serviço da lista. Não é aberta nenhuma página nem enviada uma mensagem de correio.</li>
-            <li>O Inbox Classic prepara a mensagem de cancelamento exigida pela lista. Clique em <b data-text="ui-tb-send"></b> para a enviar.</li>
+            <li>O Inbox Classic prepara a mensagem de cancelamento com a conta predefinida e o respetivo texto de assinatura. Verifique-a antes de a enviar. Clique em <b data-text="ui-tb-send"></b> para a enviar.</li>
             <li>A página da lista abre no seu browser, onde termina o processo.</li>
         </ul>
     </li>
 </ol>
-<p>A barra de estado indica quando a lista aceitou o pedido.</p>
-<aside class="note">O Inbox Classic só envia o pedido diretamente ao serviço da lista quando confirma a assinatura do servidor da lista. Esta verificação protege contra pedidos de cancelamento baseados em mensagens falsificadas.</aside>
+<p>No modo de pedido direto, a barra de estado indica que o serviço aceitou o pedido. Isso não confirma que deixará de receber mensagens. Os modos por e-mail e browser dependem da ação que concluir fora desse pedido direto.</p>
+<aside class="note">O Inbox Classic só envia o pedido diretamente ao serviço da lista quando uma verificação DKIM fiável do fornecedor cobre ambos os cabeçalhos de cancelamento. Isto reduz o risco de usar instruções falsificadas, sem comprovar a identidade de uma pessoa.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

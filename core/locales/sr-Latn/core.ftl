@@ -51,8 +51,8 @@ reader-downloading = Preuzimanje poruke…
 reader-downloading-detail = Poruka će se pojaviti ovde kada se preuzimanje završi.
 reader-downloading-size = Veličina poruke je { $size }. Poruka će se prikazati kada se preuzimanje završi.
 reader-failed = Poruku nije moguće preuzeti
-reader-failed-network = Server e-pošte nije dostupan ({ $reason }).
-reader-failed-sign-in = Server e-pošte nije prihvatio prijavu ({ $reason }). Proverite lozinku ili se ponovo prijavite u meniju Datoteka > Nalozi.
+reader-failed-network = Povezivanje sa serverom e-pošte nije uspelo ili je veza prekinuta ({ $reason }).
+reader-failed-sign-in = Server e-pošte nije prihvatio prijavu ({ $reason }). Proverite lozinku ili se ponovo prijavite u podešavanjima naloga.
 reader-failed-security = Nije moguće uspostaviti bezbednu vezu sa serverom e-pošte ({ $reason }).
 reader-failed-other = Server e-pošte je odgovorio: { $reason }.
 reader-retry-note = Inbox Classic će pokušati ponovo kada se nalog ponovo poveže.
@@ -124,7 +124,7 @@ bounce-spam-blocked = Odbijeno kao neželjena pošta
 bounce-spam-blocked-why = Server primaoca je poruku smatrao neželjenom poštom.
 bounce-spam-blocked-do = Pokušajte ponovo bez sadržaja koji može da aktivira filter za neželjenu poštu, na primer mnogo veza, skraćenih veza ili velikog priloga. Ako se problem ponavlja, obratite se pružaocu usluge e-pošte.
 bounce-virus-detected = Odbijeno zbog virusa
-bounce-virus-detected-why = Server primaoca je pronašao virus ili drugi štetni sadržaj u poruci ili njenim prilozima.
+bounce-virus-detected-why = Server primaoca navodi da je pronašao virus ili drugi štetni sadržaj u poruci ili njenim prilozima.
 bounce-virus-detected-do = Proverite priloge antivirusnim programom. Neki serveri odbijaju sve programe i arhive. Takve datoteke možete da postavite na servis za deljenje i pošaljete vezu ka njima.
 bounce-ip-blocklisted = Vaš server e-pošte se nalazi na listi blokiranih
 bounce-ip-blocklisted-why = Server primaoca odbija poštu sa servera koji je poslao vašu poruku jer se njegova IP adresa nalazi na listi blokiranih.
@@ -149,7 +149,7 @@ bounce-rate-limited-why = Server primaoca zasad prima manje poruka sa vašeg ser
 bounce-rate-limited-do = Sačekajte neko vreme i pošaljite je ponovo. Kada pišete mnogim ljudima, šaljite poruku manjem broju njih odjednom.
 bounce-greylisting = Isporuka je privremeno odložena
 bounce-greylisting-why = Server primaoca traži od nepoznatih pošiljalaca da pokušaju ponovo malo kasnije, što je uobičajena zaštita od neželjene pošte.
-bounce-greylisting-do = Sačekajte automatski ponovni pokušaj isporuke. Poruka se obično isporuči u roku od sat vremena.
+bounce-greylisting-do = Kod privremenog odlaganja server obično pokušava ponovo. Ako izveštaj pokazuje konačni neuspeh isporuke, pokušajte kasnije ponovo da pošaljete poruku.
 bounce-server-error = Server primaoca je imao problem
 bounce-server-error-why = Server primaoca nije bio dostupan ili nije mogao da primi poruku zbog sopstvenog problema.
 bounce-server-error-do = Pošaljite je ponovo kasnije. Ako i dalje ne uspeva, proverite da li ima grešaka u delu adrese iza znaka @.
@@ -334,7 +334,7 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Put 3 messages in Archive"
 import-put = { $count ->
-   *[other] Uvezeno u fasciklu { $folder }: { $messages }
+   *[other] Dodato u red za uvoz: { $messages } (odredište: { $folder })
 }
 import-not-put = Ove datoteke nisu uvezene:
 
@@ -383,15 +383,15 @@ error-sent-still-in-outbox = još uvek je u Izlaznom sandučetu: { $error }
 error-sent-no-copy = kopiju nije moguće sačuvati u fascikli Poslate stavke: { $reason }
 error-no-password = nema lozinke za ovaj nalog
 error-no-sign-in = nema podataka za prijavu za ovaj nalog
-error-provider-missing = aplikacija za prijavljivanje za uslugu { $provider } nije dostupna u ovoj verziji. Možda je uklonjena
+error-provider-missing = aplikacija za prijavljivanje nije dostupna. Identifikator: { $provider }. Možda je uklonjena
 error-provider-servers = serveri ovog naloga ne odgovaraju serverima njegove aplikacije za prijavljivanje
 error-app-scopes = { $reason }. Server e-pošte nije prihvatio token aplikacije za prijavljivanje: proverite da li opsezi (scopes) aplikacije daju pristup pošti
 error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google još nije potvrdio Inbox Classic, pa ugrađenu aplikaciju za prijavljivanje mogu da koriste samo test korisnici. Koristite sopstvenu aplikaciju za prijavljivanje na Google ili lozinku za aplikaciju. Ako ste test korisnik, uključite ugrađenu aplikaciju u prozoru Aplikacije za prijavljivanje (Datoteka > Nalozi).
-sign-in-off-other = Isključena je u prozoru Aplikacije za prijavljivanje (Datoteka > Nalozi), gde može ponovo da se uključi.
+sign-in-off-google = Ugrađena Google aplikacija podrazumevano se ne nudi za nove naloge. Odobreni test korisnici mogu da je uključe u prozoru Aplikacije za prijavljivanje (Datoteka > Nalozi). Možete da koristite i sopstvenu Google aplikaciju ili lozinku za aplikaciju ako je nalog podržava.
+sign-in-off-other = Ne nudi se za nove naloge. Možete da je uključite u prozoru Aplikacije za prijavljivanje (Datoteka > Nalozi).
 sign-in-app-no-name = aplikacija za prijavljivanje mora da ima naziv
 sign-in-app-no-client = nedostaje ID klijenta
 sign-in-app-no-scopes = aplikaciji za prijavljivanje potrebni su opsezi (scopes) koji daju pristup pošti
@@ -451,10 +451,8 @@ day-sunday = nedelja
 
 ## AI agents
 
-# review: changed
-agent-level-read = Čitanje pošte: fascikle, lista poruka, pretraga i poruke
-# review: changed
-agent-level-organize = Organizovanje pošte: promena stanja pročitanosti, zastavica i njihovih boja, upravljanje neželjenom poštom, premeštanje i arhiviranje poruka, pravljenje i preimenovanje fascikli, praćenje i ignorisanje razgovora, brisanje poruka premeštanjem u Izbrisane stavke i otkazivanje pretplata uz vaše odobrenje
+agent-level-read = Čitanje pošte: fascikle, lista poruka, razgovori, pretraga, poruke i prilozi, pravila za poruke i osobe kojima pišete
+agent-level-organize = Organizovanje pošte: promena stanja pročitanosti, zastavica i njihovih boja, upravljanje neželjenom poštom, premeštanje i arhiviranje poruka, pravljenje i preimenovanje fascikli, praćenje i zanemarivanje razgovora, brisanje poruka premeštanjem u Izbrisane stavke i otkazivanje pretplata uz vaše odobrenje
 agent-level-drafts = Pisanje radnih verzija koje ćete vi poslati
 agent-level-send = Slanje pošte, svake poruke tek nakon vašeg odobrenja
 agent-connect-title = { $program } želi da koristi vašu poštu
@@ -499,17 +497,15 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Ova poruka ne može da se pročita.
 agent-encrypted-original = Ova poruka je šifrovana: agent ne može na nju da odgovori niti da je prosledi jer ne može da šifruje.
 agent-encrypted = Ova poruka je šifrovana. AI agenti ne mogu da pročitaju njen sadržaj. Korisnik treba da je otvori u aplikaciji Inbox Classic.
-# review: new
-agent-too-many-changes = Previše promena u poslednjih 30 dana: ovaj agent ih je napravio onoliko koliko Inbox Classic za jedan program čuva u dnevniku. Moći će da napravi još kada najstarije budu stare 30 dana.
-# review: new
-agent-too-many-reads = Previše čitanja u poslednjih 30 dana: ovaj agent je pročitao onoliko koliko Inbox Classic za jedan program čuva u dnevniku. Moći će da čita još kada najstarija čitanja budu stara 30 dana.
+agent-too-many-changes = Dostignuto je ograničenje broja promena koje dnevnik čuva za ovaj program tokom 30 dana. Nove promene biće moguće kada najstariji zapisi isteknu.
+agent-too-many-reads = Dostignuto je ograničenje čitanja koje dnevnik čuva za ovaj program tokom 30 dana. Novo čitanje biće moguće kada najstariji zapisi isteknu.
 list-encrypted = Šifrovana poruka
 agent-log-composed = Poruka „{ $subject }“ je otvorena za uređivanje da biste je dovršili
 agent-log-refused = Odbili ste slanje poruke „{ $subject }“
 agent-log-sent = Poruka „{ $subject }“ je stavljena u red za slanje; primaoci: { $to }
 agent-log-draft = Sačuvana radna verzija „{ $subject }“
 agent-log-draft-replaced = Zamenjena radna verzija „{ $subject }“
-agent-log-draft-discarded = Odbačena radna verzija „{ $subject }“
+agent-log-draft-discarded = Zatraženo trajno brisanje radne verzije „{ $subject }“
 agent-draft-note = { $program }, AI agent, napisao je ovu radnu verziju. Pre slanja proverite primaoce i tekst.
 agent-log-read = Označeno kao pročitano: „{ $subject }“
 agent-log-unread = Označeno kao nepročitano: „{ $subject }“
@@ -520,7 +516,7 @@ agent-log-moved = Premešteno: „{ $subject }“ (odredište: { $folder })
 agent-log-junk = Označeno kao neželjena pošta: „{ $subject }“
 agent-log-not-junk = Označeno kao poželjna pošta: „{ $subject }“
 agent-log-archived = Arhivirano: „{ $subject }“
-agent-log-folder = Napravljena fascikla „{ $name }“
+agent-log-folder = Zatraženo pravljenje fascikle „{ $name }“
 agent-log-unsubscribed = Odobrili ste zahtev za otkazivanje pretplate. Poruka: „{ $subject }“
 agent-log-unsubscribe-failed = Otkazivanje pretplate na listu sa koje je stigla poruka „{ $subject }“ nije uspelo: { $reason }
 agent-log-unsubscribe-refused = Niste odobrili otkazivanje pretplata. Pošiljaoci: { $senders }
@@ -534,7 +530,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic šalje zahtev da vam sa navedene liste više ne stižu poruke, koristeći opciju za otkazivanje pretplate jednim klikom. Ništa drugo se ne šalje. Postojeće poruke se ne menjaju niti premeštaju.
    *[other] Inbox Classic šalje zahtev da vam sa svake od navedenih lista više ne stižu poruke, koristeći opciju za otkazivanje pretplate jednim klikom. Ništa drugo se ne šalje. Postojeće poruke se ne menjaju niti premeštaju.
 }
-# review: new
 agent-log-flag-color = Označeno zastavicom: „{ $subject }“, boja: { $color ->
     [red] crvena
     [orange] narandžasta
@@ -544,43 +539,33 @@ agent-log-flag-color = Označeno zastavicom: „{ $subject }“, boja: { $color 
     [purple] ljubičasta
    *[gray] siva
 }
-# review: new
-agent-log-renamed = Fascikla „{ $old }“ je preimenovana u „{ $name }“
-# review: new
+agent-log-renamed = Zatražena promena naziva fascikle „{ $old }“ u „{ $name }“
 agent-log-watched = Uključeno praćenje razgovora: „{ $subject }“
-# review: new
 agent-log-ignored = Uključeno zanemarivanje razgovora: „{ $subject }“
-# review: new
 agent-log-unmarked = Isključeno praćenje ili zanemarivanje razgovora: „{ $subject }“
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = poruka je u međuvremenu promenjena
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Označeno kao pročitano: { $count } poruka (pretraga: { $query })
     [few] Označeno kao pročitano: { $count } poruke (pretraga: { $query })
    *[other] Označeno kao pročitano: { $count } poruka (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Označeno kao nepročitano: { $count } poruka (pretraga: { $query })
     [few] Označeno kao nepročitano: { $count } poruke (pretraga: { $query })
    *[other] Označeno kao nepročitano: { $count } poruka (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Označeno zastavicom: { $count } poruka (pretraga: { $query })
     [few] Označeno zastavicom: { $count } poruke (pretraga: { $query })
    *[other] Označeno zastavicom: { $count } poruka (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Uklonjena zastavica: { $count } poruka (pretraga: { $query })
     [few] Uklonjena zastavica: { $count } poruke (pretraga: { $query })
    *[other] Uklonjena zastavica: { $count } poruka (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] Označeno zastavicom: { $count } poruka
     [few] Označeno zastavicom: { $count } poruke
@@ -594,38 +579,32 @@ agent-log-bulk-color = { $count ->
     [purple] ljubičasta
    *[gray] siva
 } (pretraga: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Premešteno: { $count } poruka, odredište: { $folder } (pretraga: { $query })
     [few] Premešteno: { $count } poruke, odredište: { $folder } (pretraga: { $query })
    *[other] Premešteno: { $count } poruka, odredište: { $folder } (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Arhivirano: { $count } poruka (pretraga: { $query })
     [few] Arhivirano: { $count } poruke (pretraga: { $query })
    *[other] Arhivirano: { $count } poruka (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Označeno kao neželjena pošta: { $count } poruka (pretraga: { $query })
     [few] Označeno kao neželjena pošta: { $count } poruke (pretraga: { $query })
    *[other] Označeno kao neželjena pošta: { $count } poruka (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Označeno kao poželjna pošta: { $count } poruka (pretraga: { $query })
     [few] Označeno kao poželjna pošta: { $count } poruke (pretraga: { $query })
    *[other] Označeno kao poželjna pošta: { $count } poruka (pretraga: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Premešteno u fasciklu Izbrisane stavke: { $count } poruka (pretraga: { $query })
     [few] Premešteno u fasciklu Izbrisane stavke: { $count } poruke (pretraga: { $query })
    *[other] Premešteno u fasciklu Izbrisane stavke: { $count } poruka (pretraga: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] U poslednjih 15 minuta
     [hour] U poslednjih sat vremena
@@ -635,143 +614,113 @@ agent-undo-span = { $span ->
    *[all] U poslednjih 30 dana
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
-    [0] Program { $program } u ovom periodu nije napravio promene koje mogu da se opozovu.
-    [one] Da li želite da opozovete { $count } promenu koju je program { $program } napravio u ovom periodu?
-    [few] Da li želite da opozovete { $count } promene koje je program { $program } napravio u ovom periodu?
-   *[other] Da li želite da opozovete { $count } promena koje je program { $program } napravio u ovom periodu?
+    [0] Program { $program } u ovom periodu nema zabeleženih promena koje mogu da se opozovu.
+    [one] Da li želite da pokušate da opozovete promene iz dnevnika programa { $program } za ovaj period? Broj zapisa: { $count }.
+    [few] Da li želite da pokušate da opozovete promene iz dnevnika programa { $program } za ovaj period? Broj zapisa: { $count }.
+   *[other] Da li želite da pokušate da opozovete promene iz dnevnika programa { $program } za ovaj period? Broj zapisa: { $count }.
 }
-# review: new
-agent-undo-since-detail = Poruke se vraćaju u fascikle iz kojih su došle, stanje pročitanosti i zastavice vraćaju se na ono što su bili, a poruke koje još čekaju u fascikli Izlazno sanduče brišu se. Ono što ste u međuvremenu promenili vi ili server ostaje kakvo jeste.
+agent-undo-since-detail = Inbox Classic pokušava da vrati poruke u prethodne fascikle, obnovi stanje pročitanosti i zastavice i izbriše poruke koje još čekaju u fascikli Izlazno sanduče. Promene koje više ne mogu da se opozovu preskaču se. Neke naknadne promene boje zastavice ipak mogu da budu prepisane.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Ništa nije opozvano.
     [one] Opozvana je { $count } promena.
     [few] Opozvane su { $count } promene.
    *[other] Opozvano je { $count } promena.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] { $count } poruka više nije bila tamo gde ju je promena stavila.
-    [few] { $count } poruke više nisu bile tamo gde ih je promena stavila.
-   *[other] { $count } poruka više nije bilo tamo gde ih je promena stavila.
+    [one] { $count } poruka više nije bila u fascikli u koju je premeštena.
+    [few] { $count } poruke više nisu bile u fasciklama u koje su premeštene.
+   *[other] { $count } poruka više nije bilo u fasciklama u koje su premeštene.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] { $count } poruka je u međuvremenu promenjena na vašem računaru ili na serveru, pa je ostavljena kakva jeste.
     [few] { $count } poruke su u međuvremenu promenjene na vašem računaru ili na serveru, pa su ostavljene kakve jesu.
    *[other] { $count } poruka je u međuvremenu promenjeno na vašem računaru ili na serveru, pa su ostavljene kakve jesu.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] { $count } poruka je već napustila fasciklu Izlazno sanduče.
-    [few] { $count } poruke su već napustile fasciklu Izlazno sanduče.
-   *[other] { $count } poruka je već napustilo fasciklu Izlazno sanduče.
+    [one] { $count } poruka više nije bila u fascikli Izlazno sanduče i nije mogla da se opozove ovde.
+    [few] { $count } poruke više nisu bile u fascikli Izlazno sanduče i nisu mogle da se opozovu ovde.
+   *[other] { $count } poruka više nije bilo u fascikli Izlazno sanduče i nisu mogle da se opozovu ovde.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] { $count } promena ne može da se opozove.
     [few] { $count } promene ne mogu da se opozovu.
    *[other] { $count } promena ne može da se opozove.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
     [accept] Ova poruka prihvata pozivnicu „{ $summary }“ ({ $when }).
     [tentative] Ova poruka uslovno prihvata pozivnicu „{ $summary }“ ({ $when }).
    *[decline] Ova poruka odbija pozivnicu „{ $summary }“ ({ $when }).
-} Kalendar organizatora će je uzeti u obzir. Vaš odgovor na pozivnicu menja se tek kada poruka bude poslata.
+} Odgovor se šalje organizatoru navedenom u pozivnici. Lokalni status menja se kada server prihvati slanje, što ne potvrđuje da je kalendar organizatora ažuriran.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Prihvaćeno: { $summary }
     [tentative] Uslovno prihvaćeno: { $summary }
    *[decline] Odbijeno: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } prihvata ovu pozivnicu.
     [tentative] { $name } uslovno prihvata ovu pozivnicu.
    *[decline] { $name } odbija ovu pozivnicu.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] pročitana { $count } poruka
     [few] pročitane { $count } poruke
    *[other] pročitano { $count } poruka
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] otvoren { $count } prilog
-    [few] otvorena { $count } priloga
-   *[other] otvoreno { $count } priloga
+    [one] pročitan { $count } prilog
+    [few] pročitana { $count } priloga
+   *[other] pročitano { $count } priloga
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] { $count } pretraga
     [few] { $count } pretrage
    *[other] { $count } pretraga
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] { $count } pregled liste poruka
     [few] { $count } pregleda liste poruka
    *[other] { $count } pregleda liste poruka
 }
 # each read under that row
-# review: new
 agent-read-message = Pročitano: „{ $subject }“
-# review: new
 agent-read-conversation = { $count ->
     [one] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
     [few] Pročitan razgovor „{ $subject }“ ({ $count } poruke)
    *[other] Pročitan razgovor „{ $subject }“ ({ $count } poruka)
 }
-# review: new
-agent-read-attachment = Otvoren prilog „{ $name }“ iz poruke „{ $subject }“
-# review: new
+agent-read-attachment = Pročitan prilog „{ $name }“ iz poruke „{ $subject }“
 agent-read-search = { $count ->
     [one] Pretraga za „{ $query }“: { $count } poruka
     [few] Pretraga za „{ $query }“: { $count } poruke
    *[other] Pretraga za „{ $query }“: { $count } poruka
 }
-# review: new
-agent-read-people = Potraženi kontakti čije ime počinje sa „{ $query }“
-# review: new
+agent-read-people = Pretraga osoba po početku imena ili adrese: „{ $query }“
 agent-read-list = { $count ->
-    [one] Pregledana { $count } poruka u fascikli { $folder }
-    [few] Pregledane { $count } poruke u fascikli { $folder }
-   *[other] Pregledano { $count } poruka u fascikli { $folder }
+    [one] Pregled liste: { $count } stavka. Opseg: { $folder }
+    [few] Pregled liste: { $count } stavke. Opseg: { $folder }
+   *[other] Pregled liste: { $count } stavki. Opseg: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Pregledana { $count } nova poruka
-    [few] Pregledane { $count } nove poruke
-   *[other] Pregledano { $count } novih poruka
+    [one] Pregledani podaci o novim porukama: { $count } poruka
+    [few] Pregledani podaci o novim porukama: { $count } poruke
+   *[other] Pregledani podaci o novim porukama: { $count } poruka
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Programi pokrenuti iz aplikacije { $terminal }
-# review: new
 agent-terminal-programs-windows = Programi pokrenuti iz terminala ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Programi pokrenuti iz terminala ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Program pokrenut iz aplikacije { $terminal }
-# review: new
 agent-terminal-program-windows = Program pokrenut iz terminala ({ $terminal })
-# review: new
 agent-terminal-program-linux = Program pokrenut iz terminala ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } žele da koriste vašu poštu
-# review: new
-agent-connect-terminal-detail = Svi AI agenti koje pokrenete iz ovog terminala dele pristup koji ovde dozvolite. Da biste nekom od njih dali zaseban pristup, u MCP podešavanjima agenta dodajte među njegove argumente --name i naziv po izboru.
-# review: new
+agent-connect-terminal-detail = AI agenti pokrenuti iz iste prepoznate terminalske aplikacije dele pristup koji ovde dozvolite. Za zasebne dozvole dodajte --name i naziv po izboru među argumente u MCP podešavanjima agenta. Taj naziv ne potvrđuje identitet programa.
 agent-connect-claimed = Program se predstavio kao { $claimed }. Inbox Classic je proverio koji ga je program pokrenuo: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -793,7 +742,7 @@ secrets-windows = Upravljač akreditivima
 secrets-mac = privezak ključeva
 secrets-linux = sistemski privezak ključeva (Secret Service)
 error-no-such-file = ta datoteka ne postoji
-cards-file-too-big = Ova datoteka je prevelika da bi bila adresar.
+cards-file-too-big = Datoteka premašuje dozvoljenu veličinu za uvoz adresara.
 ui-sender-added = U Adresar je dodat kontakt: { $name }.
 ui-sender-known = Kontakt { $name } je već u Adresaru.
 ui-sender-none = Pošiljalac ove poruke nema adresu e-pošte koja bi mogla da se doda.
@@ -827,7 +776,7 @@ pgp-key-expired = Istekao { $date }
 pgp-key-revoked = Opozvan
 pgp-key-revoked-why = Opozvan: { $reason }
 pgp-key-not-valid = Nije važeći
-pgp-key-locked = Ključ ne može da se koristi jer ključ za njegovu zaštitu više nije dostupan u sistemskom skladištu ({ $store }). Ponovo uvezite rezervnu kopiju privatnog ključa.
+pgp-key-locked = Ključ ne može da se koristi jer zaštitni ključ nije dostupan u skladištu { $store }. Proverite da li je skladište dostupno i otključano. Ako zaštitni ključ nedostaje, uvezite rezervnu kopiju privatnog ključa.
 pgp-source-own = Napravljen u programu Inbox Classic
 pgp-source-file = Uvezen iz datoteke
 pgp-source-paste = Nalepljen
@@ -836,11 +785,11 @@ pgp-source-vcard = Iz kartice kontakta
 pgp-source-wkd = Iz servisa ključeva domena (WKD)
 pgp-source-keyserver = Sa servera keys.openpgp.org
 pgp-source-autocrypt = Iz Autocrypt zaglavlja poruke
-pgp-error-no-store = Sistemsko skladište koje štiti privatne ključeve ({ $store }) nije dostupno: { $error }
+pgp-error-no-store = Privatni ključevi šifrovani su zaštitnim ključem u sistemskom skladištu { $store }, koje nije dostupno: { $error }
 pgp-error-wrong-passphrase = Pristupna fraza nije tačna.
 pgp-error-not-a-key = Ovo nije OpenPGP ključ.
 pgp-error-too-large = Ključ je prevelik.
-pgp-error-unusable = Ključ koristi staru ili slabu kriptografiju i ne može da se koristi.
+pgp-error-unusable = Ključ ne može da se koristi. Možda nema upotrebljiv potključ ili koristi nepodržanu kriptografiju.
 pgp-imported-private = { $count ->
     [1] Vaš privatni ključ je uvezen.
     [one] Uvezen je { $count } privatni ključ.
@@ -863,7 +812,7 @@ pgp-pending = Drugi ključ za { $address } je pronađen { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Potpisnik: { $signer }; vlasništvo nad ključem je provereno
 pgp-part-signed = Potpisnik: { $signer }; vlasništvo nad ključem nije provereno
-pgp-part-other = Potpisnik: { $signer }; potpis ne odgovara adresi pošiljaoca
+pgp-part-other = Potpisnik: { $signer }; ključ nije mogao da se poveže sa navedenim pošiljaocem
 pgp-part-unknown-key = Potpisano, ali ključ nije poznat
 pgp-part-not-signed = Nije potpisano
 pgp-part-not-checked = Potpis nije proveren
@@ -885,10 +834,10 @@ pgp-why-not-key-in-use = Potpisano ključem koji se razlikuje od onog izabranog 
 pgp-part-pictures-loaded = { $label }. Slike su učitane sa interneta
 pgp-error-no-own-key = Nemate ključ za { $address } kojim biste potpisivali ili šifrovali. Napravite ga u meniju Alatke > Ključevi za šifrovanje ili isključite Potpiši i Šifruj.
 pgp-error-missing-keys = { $count ->
-    [1] { $addresses } nema ključ za šifrovanje.
-   *[other] Ovi primaoci nemaju ključ za šifrovanje: { $addresses }.
+    [1] Nema upotrebljivog ključa za šifrovanje za ovog primaoca: { $addresses }.
+   *[other] Nema upotrebljivih ključeva za šifrovanje za ove primaoce: { $addresses }.
 }
-pgp-error-encrypted-quote = Ova poruka citira ili prosleđuje šifrovanu poruku, pa može da se pošalje samo šifrovana. Uključite Šifruj ili uklonite citirani tekst.
+pgp-error-encrypted-quote = Poruka sadrži tekst, slike ili priloge iz šifrovane poruke i može da se pošalje samo šifrovana. Uključite Šifruj ili uklonite sav taj sadržaj.
 pgp-error-protect = Poruku nije moguće potpisati ni šifrovati: { $reason }
 pgp-found-keys = Pronađeni su ključevi za sledeće adrese: { $addresses }.
 pgp-found-none = Nisu pronađeni ključevi za sledeće adrese: { $addresses }. Zamolite primaoce da vam pošalju svoje javne ključeve.
@@ -939,7 +888,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } primalaca nema upotrebljiv ključ. Pronađite ključeve ili uklonite te primaoce iz poruke. Slanje bez šifrovanja je moguće samo ako poruka ne sadrži tekst, slike ili priloge iz šifrovanih poruka.
 }
 pgp-details-part = Deo { $number }: { $label }
-# review: new
 attachment-from-part = Iz dela { $number }: { $label }
 pgp-details-signed = Potpisano { $when } ključem { $key }
 pgp-details-unknown-key = Potpisano ključem { $key }, koji nemate
@@ -948,19 +896,16 @@ pgp-details-for = Šifrovano za { $keys }
 pgp-details-plain = Nije potpisano ni šifrovano
 pgp-bar-parts = Ova poruka ima više delova ({ $count }): { $list }. Za svaki deo je navedeno kako je zaštićen.
 pgp-bar-count-verified = Provereno: { $count }
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] { $count } šifrovan i potpisan deo
     [few] { $count } šifrovana i potpisana dela
    *[other] { $count } šifrovanih i potpisanih delova
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] { $count } šifrovan deo
     [few] { $count } šifrovana dela
    *[other] { $count } šifrovanih delova
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] { $count } potpisan deo
     [few] { $count } potpisana dela
@@ -1040,17 +985,17 @@ setup-account-signs-in-again = Nakon uvoza moraćete ponovo da se prijavite pute
 setup-account-here = Nalog je već podešen na ovom računaru i biće preskočen.
 setup-account-no-app = Nalog koristi aplikaciju za prijavljivanje { $app }, koja ovde nije podešena. Uvezite i aplikacije za prijavljivanje.
 setup-invalid-address = „{ $address }“ nije adresa e-pošte.
-setup-invalid-server = Naziv servera ili port za { $server } nije važeći.
+setup-invalid-server = podešavanja za { $server } imaju nevažeći naziv servera, port ili nepoznatu bezbednosnu opciju
 setup-invalid-user = Nalog nema korisničko ime.
-setup-invalid-sign-in = Nalog koristi način prijavljivanja koji Inbox Classic ne podržava.
+setup-invalid-sign-in = stavka koristi način prijavljivanja koji Inbox Classic ne podržava
 setup-error-empty = Datoteka je prazna.
-setup-error-too-large = Datoteka je prevelika da bi bila datoteka podešavanja programa Inbox Classic.
+setup-error-too-large = Datoteka podešavanja premašuje dozvoljenu veličinu.
 setup-error-not-setup = Ova datoteka nije datoteka podešavanja programa Inbox Classic.
 setup-error-damaged = Datoteka podešavanja je oštećena i ne može da se pročita.
 setup-error-newer = Ovu datoteku je sačuvala novija verzija programa Inbox Classic ({ $version }). Ažurirajte Inbox Classic, a zatim je ponovo uvezite.
 setup-error-needs-passphrase = Ova datoteka je zaštićena pristupnom frazom. Unesite pristupnu frazu sa kojom je sačuvana.
 setup-error-wrong-passphrase = To nije pristupna fraza sa kojom je ova datoteka sačuvana.
-setup-error-changed = Datoteka podešavanja je promenjena ili oštećena nakon čuvanja, pa ne može da se uveze.
+setup-error-changed = Nije moguće potvrditi celovitost datoteke podešavanja. Možda je izmenjena ili oštećena i ne može da se uveze.
 setup-error-read = Datoteku podešavanja nije moguće pročitati: { $error }
 setup-error-write = Podešavanja nije moguće sačuvati: { $error }
 setup-error-no-parts = Izaberite bar jednu kategoriju.
@@ -1136,9 +1081,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Ništa nije uvezeno.
 setup-account-servers = { $imap } i { $smtp } ({ $signin })
 setup-file-name = Podešavanja i nalozi programa Inbox Classic
-setup-skipped-unreachable = Aplikacija { $name } je preskočena jer njena usluga za prijavljivanje nije dostupna. Ponovo je dodajte u prozoru Aplikacije za prijavljivanje.
+setup-skipped-unreachable = Preskočeno: { $name }. Usluga za prijavljivanje nije mogla da se dosegne ili proveri. Proverite potrebnu aplikaciju u prozoru Aplikacije za prijavljivanje pre ponovnog pokušaja.
 attachment-runs-programs = Datoteka „{ $name }“ može da izvršava kôd, pa je Inbox Classic ne otvara direktno. Sačuvajte je i otvorite sami samo ako verujete njenom izvoru.
-attachment-decrypted-note = Ovaj prilog potiče iz šifrovane poruke. Da bi ga otvorio u drugom programu, Inbox Classic čuva privremenu dešifrovanu kopiju u fascikli vašeg korisničkog naloga. Kopije starije od 24 sata uklanjaju se pri sledećem pokretanju programa.
+attachment-decrypted-note = Ovaj prilog potiče iz šifrovane poruke. Za otvaranje u drugom programu Inbox Classic čuva nešifrovanu kopiju u privremenoj fascikli vašeg korisničkog naloga. Pri pokretanju pokušava da ukloni kopije starije od jednog dana.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [1] Server nije premestio poruku u fasciklu { $folder } ({ $messages }), pa je ona ponovo u fascikli { $from }: { $reason }
@@ -1167,49 +1112,31 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Prikaži PDF datoteke u porukama
-# review: new
 preview-pdf-off = PDF datoteke se ne prikazuju u porukama.
-# review: new
-preview-pdf-off-crashed = PDF datoteka je zatvorila Inbox Classic dok se prikazivala, pa se PDF datoteke više ne prikazuju u porukama. Slike se i dalje prikazuju. Da biste ponovo prikazivali PDF datoteke, uključite { $option } u { $settings }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic se zatvorio tokom prikazivanja datoteke u poruci, pa je pregled PDF datoteka isključen. Slike se i dalje prikazuju. Da biste ponovo prikazivali PDF datoteke, uključite { $option } u { $settings }.
 preview-pdf-details = { $count ->
     [one] { $count } stranica, { $size }
     [few] { $count } stranice, { $size }
    *[other] { $count } stranica, { $size }
 }
-# review: new
 preview-page-alt = { $name }, stranica { $page } od { $count }
-# review: new
 preview-more-pages = { $count ->
-    [one] Otvorite datoteku da biste videli svih { $count } stranicu
-    [few] Otvorite datoteku da biste videli sve { $count } stranice
-   *[other] Otvorite datoteku da biste videli svih { $count } stranica
+    [1] Otvorite datoteku da biste videli stranicu
+   *[other] Otvorite datoteku da biste videli sve stranice. Ukupno: { $count }
 }
-# review: new
 preview-more-files = { $count ->
     [one] Još { $count } datoteka se nalazi na listi iznad
     [few] Još { $count } datoteke se nalaze na listi iznad
    *[other] Još { $count } datoteka se nalazi na listi iznad
 }
-# review: new
 preview-tile-downloading = Preuzimanje…
-# review: new
 preview-tile-preparing = Priprema se…
-# review: new
-preview-tile-format = { $format } slike se još ne prikazuju
-# review: new
-preview-tile-password = Zaštićeno lozinkom: otvorite ga da biste uneli lozinku
-# review: new
+preview-tile-format = Slike u formatu { $format } još nisu podržane u pregledu
+preview-tile-password = Datoteka je zaštićena lozinkom. Otvorite je da biste uneli lozinku
 preview-tile-too-large = Prevelika za prikaz
-# review: new
 preview-tile-unreadable = Ne može da se prikaže
-# review: new
-preview-tile-timed-out = Prikaz je trajao predugo
-# review: new
-preview-tile-crashed = Nije prikazano: ova datoteka je jednom zatvorila Inbox Classic
-# review: new
+preview-tile-timed-out = Priprema pregleda trajala je predugo
+preview-tile-crashed = Pregled nije dostupan: Inbox Classic se zatvorio pri ranijem prikazivanju ove datoteke
 preview-tile-off = Nije prikazano dok se Inbox Classic ponovo ne pokrene
-# review: new
 preview-not-printed = { $name } ({ $details }) se ne štampa. Otvorite datoteku da biste je odštampali.

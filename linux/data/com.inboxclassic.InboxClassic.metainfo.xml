@@ -45,9 +45,9 @@
       through the browser.
     </p>
     <p xml:lang="ca">
-      Inbox Classic permet llegir i escriure correu electrònic amb una disposició familiar: carpetes a l’esquerra,
-      llista de missatges a dalt i contingut del missatge seleccionat a sota. Funciona amb qualsevol compte IMAP i SMTP
-      i permet iniciar la sessió a Outlook.com i Microsoft 365 a través del navegador.
+      Inbox Classic permet llegir i escriure correu electrònic amb una disposició configurable. La disposició clàssica
+      mostra les carpetes a l’esquerra, els missatges a dalt i el contingut seleccionat a sota. Funciona amb comptes
+      IMAP i SMTP i permet iniciar la sessió a Outlook.com i Microsoft 365 a través del navegador.
     </p>
     <p xml:lang="cs">
       Inbox Classic je aplikace pro čtení a psaní e-mailů s klasickým rozložením: složky vlevo, seznam zpráv nahoře a
@@ -118,13 +118,13 @@
     </p>
     <p xml:lang="pt_BR">
       O Inbox Classic permite ler e escrever e-mails em uma interface familiar: pastas à esquerda, lista de mensagens na
-      parte superior e conteúdo da mensagem selecionada logo abaixo. Funciona com qualquer conta IMAP e SMTP e permite
-      fazer login no Outlook.com e no Microsoft 365 pelo navegador.
+      parte superior e conteúdo da mensagem selecionada logo abaixo. Funciona com contas IMAP e SMTP compatíveis e
+      permite fazer login no Outlook.com e no Microsoft 365 pelo navegador.
     </p>
     <p xml:lang="pt">
-      O Inbox Classic permite ler e escrever correio eletrónico numa interface familiar: pastas à esquerda, lista de
-      mensagens em cima e conteúdo da mensagem selecionada por baixo. Funciona com qualquer conta IMAP e SMTP e permite
-      iniciar sessão no Outlook.com e no Microsoft 365 através do browser.
+      O Inbox Classic permite ler e escrever correio eletrónico numa interface familiar e configurável. Por
+      predefinição, mostra as pastas à esquerda, as mensagens em cima e a mensagem selecionada por baixo. Funciona com
+      contas IMAP e SMTP e permite iniciar sessão no Outlook.com e no Microsoft 365 através do browser.
     </p>
     <p xml:lang="ro">
       Inbox Classic este un program de e-mail cu o interfață clasică: folderele în stânga, lista mesajelor sus și
@@ -155,9 +155,9 @@
       inloggning via webbläsaren för Outlook.com och Microsoft 365.
     </p>
     <p xml:lang="tr">
-      Inbox Classic, alışılmış e-posta düzenini sunar: solda klasörler, üstte ileti listesi, altta okuma bölmesi. IMAP
-      ve SMTP hesaplarıyla çalışır; Outlook.com ve Microsoft 365 hesaplarında tarayıcı üzerinden oturum açmayı
-      destekler.
+      Inbox Classic, solda klasörler, üstte ileti listesi, altta okuma bölmesi bulunan klasik düzeni veya yan yana
+      sütunları sunar. IMAP ve SMTP hesaplarıyla çalışır; Outlook.com ve Microsoft 365 hesaplarında tarayıcı üzerinden
+      oturum açmayı destekler.
     </p>
     <p xml:lang="el">
       Με το Inbox Classic διαβάζετε και γράφετε email σε γνώριμη διάταξη: οι φάκελοι αριστερά, η λίστα μηνυμάτων επάνω
@@ -184,10 +184,10 @@
       <li>A search that finds words in the subject, the people, the file names and the text, with Gmail's operators</li>
       <li>Replies fold away the earlier messages they quote</li>
       <li>Mail stays readable offline; passwords are kept in your keyring</li>
-      <li xml:lang="ca">Els missatges es mostren sense scripts ni altres continguts potencialment perillosos; les imatges d’internet només es carreguen amb la vostra autorització</li>
-      <li xml:lang="ca">Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb els operadors del Gmail</li>
+      <li xml:lang="ca">Els missatges es mostren sense executar-ne els scripts; les imatges d’internet només es carreguen amb la vostra autorització</li>
+      <li xml:lang="ca">Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb operadors inspirats en els del Gmail</li>
       <li xml:lang="ca">El text de missatges anteriors citat a les respostes queda plegat i es pot desplegar quan calgui</li>
-      <li xml:lang="ca">El correu ja baixat es pot llegir sense connexió; les contrasenyes es desen a l’anell de claus del sistema</li>
+      <li xml:lang="ca">El correu ja baixat es pot llegir sense connexió; les contrasenyes es desen normalment a l’anell de claus del sistema</li>
       <li xml:lang="cs">Zprávy se zobrazují bez skriptů a dalšího nebezpečného obsahu. Obrázky z internetu se stahují jen s vaším svolením</li>
       <li xml:lang="cs">Vyhledávání v předmětech, odesílatelích, příjemcích, názvech příloh a textu zpráv s podporou operátorů známých z Gmailu</li>
       <li xml:lang="cs">Starší zprávy citované v odpovědích se sbalí a můžete je znovu rozbalit</li>
@@ -209,9 +209,9 @@
       <li xml:lang="es">Los mensajes citados en las respuestas se muestran contraídos</li>
       <li xml:lang="es">Lea el correo descargado sin conexión; las contraseñas se guardan en el llavero del sistema</li>
       <li xml:lang="fr">Les messages sont affichés sans scripts ; les images provenant d’Internet ne sont chargées qu’avec votre accord</li>
-      <li xml:lang="fr">Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec les opérateurs de recherche de Gmail</li>
+      <li xml:lang="fr">Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec des opérateurs de recherche inspirés de Gmail</li>
       <li xml:lang="fr">Les messages cités dans les réponses sont repliés</li>
-      <li xml:lang="fr">Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont enregistrés dans le trousseau du système</li>
+      <li xml:lang="fr">Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont normalement enregistrés dans le trousseau du système</li>
       <li xml:lang="hr">Skripte u porukama se ne izvršavaju, a vanjske slike preuzimaju se samo uz vaše dopuštenje</li>
       <li xml:lang="hr">Pretraživanje predmeta, pošiljatelja, primatelja, naziva privitaka i teksta poruka, uz operatore pretraživanja iz Gmaila</li>
       <li xml:lang="hr">Citirani tekst ranijih poruka u odgovorima skriven je iza gumba za prikaz</li>
@@ -235,23 +235,23 @@
       <li xml:lang="nl">Berichten worden weergegeven zonder scripts; afbeeldingen van internet worden alleen geladen als je dat toestaat</li>
       <li xml:lang="nl">Zoeken in onderwerp, afzender, ontvangers, bijlagenamen en berichttekst, met de zoekoperatoren van Gmail</li>
       <li xml:lang="nl">Geciteerde eerdere berichten in antwoorden worden ingeklapt</li>
-      <li xml:lang="nl">Gedownloade e-mail blijft offline leesbaar; wachtwoorden worden bewaard in de sleutelbos van je systeem</li>
+      <li xml:lang="nl">Gedownloade e-mail blijft offline leesbaar; aanmeldgegevens worden standaard bewaard in de beveiligde opslag van het systeem</li>
       <li xml:lang="nb">Meldinger vises uten skript og annet usikkert innhold. Bilder fra internett lastes bare ned med din tillatelse</li>
       <li xml:lang="nb">Søk i emne, avsendere, mottakere, vedleggsnavn og meldingstekst med søkeoperatorer som i Gmail</li>
       <li xml:lang="nb">Siterte meldinger foldes sammen i svar og kan utvides når du vil lese dem</li>
-      <li xml:lang="nb">Les nedlastet e-post uten nett. Passord lagres i systemets nøkkelring</li>
+      <li xml:lang="nb">Les nedlastet e-post uten nett. Passord lagres som standard i systemets nøkkelring</li>
       <li xml:lang="pl">Wiadomości są wyświetlane po usunięciu skryptów i innych niebezpiecznych elementów, a obrazy z internetu tylko za Twoją zgodą</li>
       <li xml:lang="pl">Wyszukiwanie słów w temacie, danych nadawców i odbiorców, nazwach plików i treści, z użyciem operatorów Gmaila</li>
       <li xml:lang="pl">Cytowane wcześniejsze wiadomości są zwijane w odpowiedziach</li>
       <li xml:lang="pl">Pobrane wiadomości można czytać bez połączenia z internetem; hasła są przechowywane w systemowym pęku kluczy</li>
-      <li xml:lang="pt_BR">As mensagens são exibidas sem scripts ou outros conteúdos potencialmente perigosos; as imagens da internet só são carregadas com sua autorização</li>
+      <li xml:lang="pt_BR">Remove scripts e outros conteúdos ativos das mensagens antes de exibi-las; as imagens da internet só são carregadas com sua autorização</li>
       <li xml:lang="pt_BR">Pesquisa no assunto, nos remetentes, nos destinatários, nos nomes dos anexos e no texto das mensagens, com suporte aos operadores do Gmail</li>
       <li xml:lang="pt_BR">O texto de mensagens anteriores citado nas respostas fica recolhido e pode ser expandido quando necessário</li>
-      <li xml:lang="pt_BR">Os e-mails já baixados podem ser lidos sem conexão à internet; as senhas ficam armazenadas no chaveiro do sistema</li>
-      <li xml:lang="pt">As mensagens são apresentadas sem scripts nem outros conteúdos potencialmente perigosos; as imagens da internet só são carregadas com a sua autorização</li>
+      <li xml:lang="pt_BR">As mensagens baixadas e ainda armazenadas podem ser lidas sem conexão; por padrão, as credenciais de login são protegidas pelo chaveiro do sistema, quando disponível</li>
+      <li xml:lang="pt">As mensagens são apresentadas sem scripts; as imagens da internet só são carregadas com a sua autorização</li>
       <li xml:lang="pt">Pesquisa no assunto, nos remetentes, nos destinatários, nos nomes dos anexos e no texto das mensagens, com suporte para os operadores do Gmail</li>
       <li xml:lang="pt">O texto das mensagens anteriores citado nas respostas fica recolhido e pode ser expandido quando necessário</li>
-      <li xml:lang="pt">O correio já transferido pode ser lido sem ligação à internet; as palavras-passe ficam guardadas no porta-chaves</li>
+      <li xml:lang="pt">O correio em cache pode ser lido sem ligação à internet; por predefinição, as credenciais são guardadas no porta-chaves, quando disponível</li>
       <li xml:lang="ro">Mesajele sunt afișate fără scripturi sau alte elemente active, iar imaginile de pe internet sunt încărcate doar cu acordul dvs.</li>
       <li xml:lang="ro">Căutare în subiecte, numele și adresele expeditorilor și destinatarilor, numele fișierelor și textul mesajelor, cu operatori de căutare ca în Gmail</li>
       <li xml:lang="ro">În răspunsuri, mesajele anterioare citate sunt restrânse</li>
@@ -267,7 +267,7 @@
       <li xml:lang="sr@latin">Poruke se prikazuju bez skripti i drugog nebezbednog sadržaja. Slike sa interneta preuzimaju se samo uz vašu dozvolu</li>
       <li xml:lang="sr@latin">Pretraga tema, pošiljalaca, primalaca, naziva priloga i teksta poruka, uz operatore kao u Gmailu</li>
       <li xml:lang="sr@latin">Citirane poruke u odgovorima su sažete i mogu da se prošire po potrebi</li>
-      <li xml:lang="sr@latin">Čitajte preuzetu poštu i bez interneta. Lozinke se čuvaju u sistemskom privesku ključeva</li>
+      <li xml:lang="sr@latin">Čitajte preuzetu poštu i bez interneta. Lozinke se podrazumevano čuvaju u sistemskom privesku ključeva</li>
       <li xml:lang="fi">Viestit näytetään ilman skriptejä ja muuta suoritettavaa sisältöä. Internetin kuvat ladataan vain luvallasi</li>
       <li xml:lang="fi">Haku kattaa aiheen, lähettäjät, vastaanottajat, liitteiden nimet ja viestitekstin sekä tukee Gmailin hakuoperaattoreita</li>
       <li xml:lang="fi">Vastausten lainaukset supistetaan, ja ne voi avata tarvittaessa</li>
@@ -276,10 +276,10 @@
       <li xml:lang="sv">Sök i ämnen, avsändare, mottagare, bilagenamn och meddelandetext med sökvillkor som liknar Gmails</li>
       <li xml:lang="sv">Citerade meddelanden fälls ihop i svar så att din egen text får plats</li>
       <li xml:lang="sv">Hämtad e-post kan läsas utan internetanslutning. Inloggningsuppgifter sparas normalt i systemets nyckelring</li>
-      <li xml:lang="tr">İletiler, betikler ve güvenli olmayan içerikler temizlenerek gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir</li>
+      <li xml:lang="tr">İletiler, betikleri çalıştırılmadan gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir</li>
       <li xml:lang="tr">Konularda, gönderenlerde, alıcılarda, ek adlarında ve ileti metninde arama yapın; Gmail tarzı arama ifadeleriyle sonuçları daraltın</li>
       <li xml:lang="tr">Yanıtlardaki önceki iletiler, gerektiğinde açılabilecek şekilde gizlenir</li>
-      <li xml:lang="tr">Önceden indirilen iletileri çevrimdışı okuyun. Parolalarınız sistemin güvenli kimlik bilgileri deposunda saklanır</li>
+      <li xml:lang="tr">Yerel kopyası bulunan iletileri çevrimdışı okuyun. Oturum açma bilgileri varsayılan olarak sistem anahtarlığında saklanır</li>
       <li xml:lang="el">Αφαίρεση επικίνδυνου περιεχομένου και σεναρίων από τα μηνύματα· λήψη εικόνων από το διαδίκτυο μόνο με την άδειά σας</li>
       <li xml:lang="el">Αναζήτηση σε θέματα, αποστολείς, παραλήπτες, ονόματα συνημμένων και κείμενο μηνυμάτων, με τελεστές τύπου Gmail</li>
       <li xml:lang="el">Σύμπτυξη των προηγούμενων μηνυμάτων που παρατίθενται στις απαντήσεις</li>

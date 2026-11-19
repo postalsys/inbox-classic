@@ -1,6 +1,6 @@
 <h1>Aanmeldapps</h1>
 <p class="summary">Registreer je eigen aanmeldapp bij Google, Microsoft of een andere OpenID Connect-provider, om je via de browser aan te melden.</p>
-<p>Aanmelden via de browser gebruikt een OAuth-client die bij de provider is geregistreerd. Inbox Classic heeft er zelf een voor Google en Microsoft. Google laat alleen testgebruikers de client van Inbox Classic gebruiken totdat Google de app heeft geverifieerd. Daarom staat <b data-text="win-sign-in-google"></b> standaard uit. Je kunt een eigen client registreren: in je Google Cloud-project, in je Microsoft Entra-tenant of bij een andere OpenID Connect-provider.</p>
+<p>Aanmelden via de browser gebruikt een OAuth-client die bij de provider is geregistreerd. Inbox Classic heeft er zelf een voor Google en Microsoft. In Inbox Classic staat <b data-text="win-sign-in-google"></b> standaard uit. Je kunt een eigen client registreren: in je Google Cloud-project, in je Microsoft Entra-tenant of bij een andere OpenID Connect-provider.</p>
 <p>Zo voeg je een aanmeldapp toe:</p>
 <ol>
     <li>Kies <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
@@ -8,7 +8,7 @@
     <li>Klik naast <b data-text="ui-fill-in-for"></b> op Google of Microsoft om de uitgever, de machtigingen (scopes) en de servers in te vullen. Typ ze voor een andere provider zelf.</li>
     <li>Registreer de client bij de provider volgens de instructies onderaan het venster. Registreer de <b data-text="ui-redirect-uri"></b> die daar staat.</li>
     <li>Typ de <b data-text="ui-client-id"></b>, en het <b data-text="ui-client-secret"></b> als de provider je er een heeft gegeven. Het geheim wordt bewaard in <!--os:windows-->Windows Referentiebeheer<!--/os--><!--os:mac-->je inlogsleutelhanger<!--/os--><!--os:linux-->je sleutelbos<!--/os--> en nooit meer getoond.</li>
-    <li>Klik op <b data-text="ui-check"></b> om de uitgever te controleren, en daarna op <b data-text="ui-ok"></b>.</li>
+    <li>Klik op <b data-text="ui-check"></b> om de configuratie van de uitgever op te halen. Dit controleert niet het client-ID, clientgeheim, de machtigingen of de toegang tot e-mail. Klik daarna op <b data-text="ui-ok"></b>.</li>
     <li>Voeg het account toe met <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> op de eerste pagina van <b data-text="ui-add-account-title"></b>.</li>
 </ol>
 <p>In <b data-text="ui-sign-in-apps"></b> geeft <!--os:windows,mac-->het selectievakje van elke app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> aan of de app beschikbaar is voor nieuwe accounts. Dit geldt ook voor de ingebouwde apps. De accounts die een app al gebruiken, blijven werken. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> wijzigt een app, en <b data-text="ui-remove"></b> verwijdert een app als geen enkel account die nog gebruikt.</p>

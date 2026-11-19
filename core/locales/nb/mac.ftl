@@ -78,7 +78,7 @@ mac-files-not-saved =
     { $count ->
        *[other] Kunne ikke lagre { $failed } av totalt { $count } filer.
     }
-mac-no-calendar-app = Ingen kalenderapp på denne Macen kan åpne invitasjoner (.ics-filer).
+mac-no-calendar-app = Kunne ikke åpne invitasjonen (.ics-filen). Kontroller at en kalenderapp er installert og kan åpne slike filer.
 mac-file-not-saved = Filen kunne ikke lagres.
 mac-unsubscribing = Sender avmelding til { $target }…
 mac-loading-list = Laster inn…
@@ -116,7 +116,7 @@ mac-sign-in-apps-button = Påloggingsapper…
 
 ## AI agents
 
-mac-forget-program = Vil du fjerne dette programmet og aktivitetsloggen til agentene?
+mac-forget-program = Vil du fjerne tillatelsene til dette programmet og aktivitetsloggen til agentene?
 mac-forget-program-detail = Tillatelsene til programmet slettes. Du blir spurt om tillatelse igjen neste gang det kobler til.
 
 ## Sign-in apps

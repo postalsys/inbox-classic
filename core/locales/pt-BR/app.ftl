@@ -81,7 +81,7 @@ cmd-text-size-smallest = Muito peq&ueno
 cmd-hide-ignored = Oc&ultar conversas ignoradas
 cmd-hide-read = Ocultar mensagens li&das
 cmd-notify = &Notificar a chegada de e-mails
-cmd-open = &Abrir o Inbox Classic
+cmd-open = A&brir o Inbox Classic
 cmd-default-app = Definir como aplicativo de e-mail &padrão...
 cmd-view-source = Código-&fonte da mensagem
 cmd-ai-agents = &Agentes de IA...
@@ -206,7 +206,7 @@ ui-hyperlink = Hiperlink
 ui-hyperlink-intro = O endereço para onde o texto selecionado aponta.
 ui-edit-hyperlink = Editar hiperlink
 ui-edit-hyperlink-intro = O endereço de destino do link. Apague o endereço para remover o link e manter o texto.
-ui-not-a-picture = Este arquivo não é uma imagem PNG, JPEG ou GIF, ou tem mais de 10 MB.
+ui-not-a-picture = Não foi possível ler a imagem. Escolha um arquivo PNG, JPEG, GIF ou WebP de até 10 MB.
 ui-format-color = Cor da fonte
 ui-format-numbers = Lista numerada
 ui-format-bullets = Lista com marcadores
@@ -270,7 +270,7 @@ ui-invitation-answer = Resposta a um convite: { $title }
 ui-no-title = (sem título)
 ui-organizer = Organizador: { $name }
 ui-invitation-not-read = Não foi possível ler o convite.
-ui-no-calendar = Não há nenhum aplicativo de calendário neste computador para abrir convites (arquivos .ics).
+ui-no-calendar = Não foi possível abrir o convite. Verifique se há um aplicativo de calendário configurado para abrir arquivos .ics neste computador.
 ui-messages-not-changed = Não foi possível alterar as mensagens.
 ui-new-folder-in-selected = A nova pasta será criada dentro da pasta selecionada.
 ui-new-folder-at-top = A nova pasta será criada no nível principal da conta.
@@ -335,7 +335,7 @@ ui-enter-password = Digite a senha de { $account }.
 ui-signs-in-with = Aplicativo de login: { $app }. O login é feito no navegador e a conta usa os servidores deste aplicativo.
 ui-keep-password = Deixe o campo da senha vazio para manter a senha atual.
 ui-remove-account = Remover conta
-ui-remove-account-ask = Remover esta conta do Inbox Classic? Os e-mails ficam no servidor; a cópia neste computador e a senha salva são removidas.
+ui-remove-account-ask = Remover esta conta do Inbox Classic? Os e-mails ficam no servidor; as cópias locais da conta e suas credenciais de login salvas são removidas.
 ui-col-email = Endereço de e-mail
 ui-col-incoming = Servidor de recepção
 ui-type-email = Digite seu endereço de e-mail, nome@example.com.
@@ -418,7 +418,6 @@ ui-save-attachments = Salvar anexos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Salvar como...
 ui-attachment-save-all = Salvar todos...
-# review: new
 ui-attachment-show-in-message = Mostrar na mensagem
 ui-attachments-strip = Anexos
 ui-attachment-note-title = Abrindo este arquivo
@@ -450,11 +449,8 @@ ui-let-agents-connect = &Permitir que os agentes de IA se conectem ao Inbox Clas
 ui-change-button = Alterar…
 ui-undo-button = Desfazer
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Desfazer desde…
-# review: new
 ui-undo-since-span = Desfazer o que este programa fez:
-# review: new
 ui-take-back = Desfazer
 ui-rules-title = Regras de mensagens
 ui-rules-intro = As regras organizam as mensagens novas da Caixa de Entrada enquanto o Inbox Classic está em execução. As regras correspondentes são executadas em ordem. Quando uma regra move uma mensagem para fora da Caixa de Entrada, as regras seguintes não se aplicam mais a ela.
@@ -599,13 +595,10 @@ ui-download-ahead-all = Todas as mensagens
 ui-download-ahead-never = Só quando são abertas
 ui-download-limit = &Limite de armazenamento por conta:
 ui-send-delay = Tempo &de espera antes do envio:
-ui-send-delay-note = Enquanto uma mensagem aguarda o envio, você pode cancelar o envio com Desfazer.
+ui-send-delay-note = Durante o tempo de espera configurado, você pode cancelar o envio com Desfazer.
 ui-dark-messages = Mostrar as mensagens em um fundo escuro quando o sistema está no modo escuro
-# review: new
 ui-preview-show = Mostrar os a&nexos nas mensagens
-# review: new
-ui-preview-show-note = Mostra as imagens e as primeiras páginas dos arquivos PDF depois do texto da mensagem. O Inbox Classic cria essas visualizações sozinho, então nada em um arquivo pode ser executado.
-# review: new
+ui-preview-show-note = Mostra imagens e as primeiras páginas de arquivos PDF depois do texto da mensagem. O Inbox Classic cria essas visualizações localmente, sem executar scripts ou carregar conteúdo externo dos arquivos.
 ui-preview-pdfs = Mostrar arquivos PD&F nas mensagens
 ui-sending-in = { $subject } será enviada em { $count ->
     [one] { $count } segundo
@@ -614,7 +607,7 @@ ui-sending-in = { $subject } será enviada em { $count ->
 ui-send-undone = { $subject } não foi enviada. A mensagem foi reaberta para edição.
 ui-send-too-late = Não é mais possível desfazer o envio: { $subject }.
 ui-outbox-status-undo = Será enviada às { $time }
-ui-download-note = As mensagens baixadas antecipadamente abrem imediatamente. Quando o limite de armazenamento é excedido, as cópias locais mais antigas são removidas e baixadas novamente quando você as abrir.
+ui-download-note = As mensagens já baixadas abrem sem esperar pelo servidor. Ao exceder o limite, o aplicativo remove as cópias locais mais antigas que podem ser descartadas; elas serão baixadas novamente quando você as abrir. Rascunhos e mensagens abertas nesta execução ficam fora desse limite.
 ui-attachment-downloading = O download desta mensagem ainda não terminou. Tente novamente quando o download estiver concluído.
 ui-trusted-senders-button = &Remetentes confiáveis...
 ui-trusted-senders-title = Remetentes confiáveis
@@ -646,7 +639,7 @@ ui-list-pictures = &Mostrar as imagens dos remetentes na lista de mensagens
 ui-list-pictures-note = No layout em colunas, mostra logotipos de marcas ou imagens do Catálogo de Endereços quando o domínio do remetente é verificado, e as iniciais quando não há imagem. Os logotipos baixados são salvos e reutilizados em várias mensagens.
 ui-card-picture = Imagem:
 ui-card-picture-choose = &Escolher...
-ui-picture-not-picture = Este arquivo não é uma imagem PNG ou JPEG.
+ui-picture-not-picture = Não foi possível ler este arquivo como uma imagem PNG ou JPEG.
 ui-picture-too-large = Esta imagem é grande demais. Escolha uma que não tenha mais de 10 MB, com largura e altura de no máximo 8000 pixels.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
@@ -686,7 +679,7 @@ ui-keys-file-filter = Chaves OpenPGP
 ui-keys-use-for = Usar esta chave para { $addresses }? As mensagens enviadas por esses endereços serão assinadas digitalmente com ela. Você também poderá ler aqui os e-mails criptografados com a chave pública correspondente.
 ui-keys-use = &Usar
 ui-keys-not-now = &Agora não
-ui-keys-remove-own = Remover sua chave { $fingerprint }? Sem ela, você não poderá ler aqui os e-mails que dependem dessa chave para serem descriptografados. Para voltar a lê-los, será necessário importar o backup da chave.
+ui-keys-remove-own = Remover sua chave { $fingerprint }? Sem ela, você não poderá descriptografar e-mails que dependam dessa chave, a menos que importe o backup novamente. Isso não apaga conteúdo já descriptografado do índice de pesquisa local.
 ui-keys-remove-contact = Remover a chave de { $name }? Até importá-la novamente, não será possível verificar as assinaturas digitais feitas com ela nem usá-la para criptografar mensagens para esse contato.
 ui-key-properties-title = Propriedades da chave
 ui-key-names = Nomes:
@@ -704,6 +697,7 @@ ui-verify-title = Verificar chave
 ui-verify-intro = Peça a { $name }, pessoalmente ou por telefone, que leia a impressão digital da chave no próprio aplicativo. Não a compare com uma recebida por e-mail: quem alterasse a chave também poderia alterar a impressão digital.
 ui-verify-fingerprint = A impressão digital da chave que você tem:
 ui-verify-marks = { $count ->
+    [0] Esta chave não tem endereços de e-mail que possam ser associados ao contato. Não é possível salvar a confirmação de titularidade.
     [one] Antes de confirmar, verifique se { $addresses } pertence ao contato. Clique em Coincidem somente se o endereço e todos os grupos da impressão digital estiverem corretos. Caso contrário, clique em São diferentes.
    *[other] Antes de confirmar, verifique se todos estes endereços pertencem ao contato: { $addresses }. Clique em Coincidem somente se todos os endereços e grupos da impressão digital estiverem corretos. Caso contrário, clique em São diferentes.
 }
@@ -735,7 +729,7 @@ ui-setup-export-title = Exportar configurações e contas
 ui-setup-import-title = Importar configurações e contas
 ui-setup-export-intro = Escolha o que transferir para outro computador. O arquivo não inclui mensagens: elas serão baixadas novamente do servidor.
 ui-setup-use-passphrase = &Proteger o arquivo com uma frase secreta
-ui-setup-passphrase-note = Com uma frase secreta, o arquivo é criptografado e inclui senhas salvas, credenciais de login e chaves privadas. Sem ela, você precisará fazer login nas contas novamente no outro computador.
+ui-setup-passphrase-note = Com uma frase secreta, o arquivo é criptografado e pode incluir as credenciais de login e as chaves privadas selecionadas que estiverem acessíveis. Sem ela, você precisará fazer login nas contas novamente no outro computador.
 ui-setup-export-button = &Exportar...
 ui-setup-file-filter = Configurações e contas do Inbox Classic
 ui-setup-ask-passphrase = Este arquivo está protegido por uma frase secreta. Digite-a para ver o que o arquivo contém:

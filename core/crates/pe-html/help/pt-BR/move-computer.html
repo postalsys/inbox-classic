@@ -7,7 +7,7 @@
     <li>Para incluir também as credenciais de login e as chaves privadas, ative <b data-text="ui-setup-use-passphrase"></b> e digite duas vezes uma frase secreta com pelo menos 8 caracteres.</li>
     <li>Clique em <b data-text="ui-setup-export-button"></b> e escolha onde salvar o arquivo.</li>
 </ol>
-<p>O arquivo não contém mensagens: elas são baixadas novamente no outro computador. Com uma frase secreta, o arquivo inteiro é criptografado e pode incluir senhas, tokens de login pelo navegador, segredos de aplicativos de login e suas chaves privadas. Sem essa proteção, esses dados são omitidos e você precisa fazer login novamente no outro computador, com uma senha ou pelo navegador, conforme a conta.</p>
+<p>O arquivo não contém mensagens: as que ainda estão no servidor são baixadas novamente no outro computador. A Caixa de Saída local não é transferida. Com uma frase secreta, o arquivo inteiro é criptografado e pode incluir senhas, tokens de login pelo navegador, segredos de aplicativos de login e suas chaves privadas, conforme as categorias selecionadas e apenas quando esses dados estiverem acessíveis. Sem essa proteção, esses dados são omitidos e você precisa fazer login novamente no outro computador, com uma senha ou pelo navegador, conforme a conta.</p>
 <aside class="warning">Guarde o arquivo e a frase secreta em locais separados e exclua o arquivo depois de importá-lo. Quem tiver os dois pode ler seus e-mails.</aside>
 <h2>Importar</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Escolha o arquivo e digite a frase secreta, se houver uma.</li>
     <li>A janela mostra o que o arquivo contém. Escolha as partes e as contas a importar e clique em <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>As contas que já existem neste computador permanecem inalteradas. Os contatos são adicionados ao Catálogo de Endereços, os grupos são mesclados e as configurações e preferências das janelas são substituídas. Se a pasta de destino de uma regra ainda não existir, o Inbox Classic tenta associá-la após a sincronização da conta. Uma nova chave diferente da chave já conhecida de um contato fica pendente de aprovação, como na importação de chaves.</p>
+<p>As contas que já existem neste computador permanecem inalteradas. Os contatos são adicionados ao Catálogo de Endereços, os grupos são mesclados e as configurações e preferências das janelas são substituídas. Se a pasta de destino de uma regra ainda não existir, o Inbox Classic tenta associá-la após a sincronização da conta; não cria automaticamente uma pasta para essa regra. Uma nova chave diferente da chave já conhecida de um contato fica pendente de aprovação, como na importação de chaves.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

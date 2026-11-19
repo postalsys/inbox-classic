@@ -7,8 +7,8 @@
     <li><b data-text="otp-copy"></b>, que coloca o código na área de transferência</li>
 </ul>
 <aside class="warning">Introduza um código apenas numa página do domínio indicado no painel. Uma mensagem que lhe peça para escrever um código noutro sítio pode ser uma tentativa de se apoderarem da sua conta.</aside>
-<p>O painel só aparece quando o seu fornecedor de correio confirma uma assinatura digital válida para o domínio do código. Isto confirma a origem da mensagem, mas não garante a segurança do conteúdo. O painel também não aparece em <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ou <b data-text="folder-drafts"></b>, nem quando o seu fornecedor não fornece os resultados dessa verificação.</p>
-<p>Se a mensagem tiver sido enviada há mais de uma hora quando a abrir, o código provavelmente já expirou. O painel avisa dessa possibilidade.</p>
+<p>O painel só aparece quando o seu fornecedor de correio confirma uma assinatura DKIM válida do domínio do código ou de um domínio superior. Isso não identifica a pessoa nem garante a segurança do conteúdo. O painel também não aparece em <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ou <b data-text="folder-drafts"></b>, nem quando o seu fornecedor não fornece os resultados dessa verificação.</p>
+<p>Se a mensagem tiver sido enviada há mais de uma hora quando a abrir, o código provavelmente já expirou. O painel calcula essa idade a partir da data da mensagem; não consulta o serviço que emitiu o código.</p>
 <h2>Códigos nas notificações</h2>
-<p>Para ver o código na notificação de uma mensagem nova, ative <b data-text="ui-codes-in-notifications"></b> em <b data-settings="general"></b>. Esta opção está desativada por predefinição, porque uma notificação pode ser lida com o ecrã bloqueado.</p>
+<p>Para ver o código na notificação de uma mensagem nova, ative <b data-text="ui-codes-in-notifications"></b> em <b data-settings="general"></b>. Esta opção está desativada por predefinição, porque uma notificação pode ser lida com o ecrã bloqueado. Requer notificações ativadas, autenticação do domínio e a transferência atempada de uma mensagem recente e pequena.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>

@@ -175,6 +175,12 @@ Estonian settings review (round 2):
 - Put complete key-state reasons after "Motif :" with the following instruction separate. Use "pour" before
   arbitrary names/address lists to avoid required elision after "de". Date placeholders follow Dernière recherche.
 
+- Use polite vous in prose and familiar French UI command labels.
+- Keep données de connexion broader than mot de passe, phrase secrète for protected exports, and distinguish a signature appended to a message from a signature numérique.
+- Surveiller une conversation matches the existing command; read counts include zero in one forms and retain the supplied count.
+- Cc/Cci uses Alt+C/Alt+I; Insertion uses Alt+N alongside Outils Alt+O. Preserve literal English shortcut example with a French explanation.
+- Do not add quotes around Undo Send subject placeholders, which already include quotation marks.
+
 ### Spanish encryption and settings transfer
 
 - Use "contraseña" for the password protecting a key backup or settings export, as in the account dialogs.
@@ -355,6 +361,13 @@ Plurals: `[one]` (exactly 1) and `*[other]` (0, 2 and more). A literal 1 in `[on
   A cancellation is a request, not a guarantee. "Text de la signatura" is the optional account footer, distinct from "signatura digital".
 - Keep "descartar l’esborrany" for abandoning an agent-created draft and explain its permanent removal. Saving,
   including autosave, ends agent access; opening alone does not. Prose keeps vós, while buttons use singular imperatives.
+
+- Use polite vós in prose and singular imperative command labels; use curly apostrophes and «» quotation marks.
+- Keep credencials d’inici de sessió broader than contrasenya and frase de pas for protected exports.
+- Seguir una conversa matches the command, and bandera is the flag term. Catalan one applies to exactly 1.
+- Cc/Cco uses Alt+C/Alt+O; Insereix uses Alt+N alongside Eines Alt+I. Preserve literal English shortcut examples with a Catalan explanation.
+- Use field, option, button or view noun heads when an inserted imperative or plural label would make the sentence awkward.
+- Do not add quotes around Undo Send subject placeholders, which already include quotation marks.
 
 ### Čeština (cs)
 
@@ -1071,6 +1084,10 @@ Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; O
 - Keys Ctrl / Shift / Del as Dutch keyboards print them. Google's button "Inloggen met Google", Microsoft's
   "Aanmelden met Microsoft".
 
+- Keep informal je throughout help, including new attachment previews; use infinitives in controls and direct instructions in prose.
+- Use Terugdraaien for agent Take Back and Wijzigingen terugdraaien for the period selector. A list-read count describes berichtregels, while attachment reads describe reading data.
+- Use voorbeeld for an inline attachment preview and geverifieerde sleuteleigenaar to distinguish ownership from a valid digitale handtekening.
+
 ### Norsk bokmål (nb)
 
 Terms: Innboks; Utboks; Sendte elementer; Slettede elementer; Utkast; Søppelpost; Arkiv; Alle innbokser; melding (f./m.,
@@ -1127,6 +1144,10 @@ Review notes (round 2):
 - Keep "forkaste utkast" for abandoning an agent-created draft and explain that removal is permanent. Saving,
   including autosave, ends agent access; opening alone does not. Warn that email content must not be treated as
   instructions to the agent, not that messages cannot contain instructions.
+
+- Retain Norwegian Bokmål vedlegg, passfrase, påloggingsopplysninger and brukbar nøkkel; distinguish digital signatur from signaturtekst.
+- Locked private key recovery first checks whether system secret storage is accessible and unlocked; backup import is the remedy if the wrapping key is missing, not the only possible recovery step.
+- Preserve literal keyboard examples and explain localized Alt+K/Alt+B in surrounding Norwegian Bokmål prose.
 
 ### Polski (pl)
 
@@ -1256,6 +1277,10 @@ Plurals: CLDR's `pt` (pe-i18n gives the catalog that locale), where 0 and 1 are 
 - Keep "descartar o rascunho" for abandoning an agent-created draft; explain that this permanently deletes it.
   Saving, including autosave, ends agent access; opening alone does not. Keep Brazilian "salvar", "contatos" and "você".
 
+- Agent read logs say ler o conteúdo de anexo and consultar itens da lista; they do not imply an external attachment app was opened. Use numeric placeholders in the Brazilian one category and explicit zero wording where zero can occur.
+- Describe queued folder creation, rename, draft discard and import as requests or a queue. Undo summaries count registros de alterações and can be partial.
+- Keep Cc and Cco with C/O mnemonics. Tray Open uses A&brir to avoid S&air. Key-lock guidance checks access to the system store before assuming loss; signature text remains distinct from digital signatures.
+
 ### Português (pt, Portugal)
 
 Terms: Caixa de Entrada; Caixa de Saída; Itens Enviados; Itens Eliminados; Rascunhos; Lixo Eletrónico; mensagem (f.);
@@ -1288,6 +1313,10 @@ Plurals: the catalog's plurals follow pt-PT (pe-i18n gives the bundle that local
   does not guarantee cancellation. "Texto da assinatura" is the optional account footer, distinct from "assinatura digital".
 - Use "eliminar" for draft removal. Agents can permanently remove only their own unchanged drafts. Saving, including
   autosave, ends their access; opening a draft alone does not. Retain European Portuguese "guardar" and "contactos".
+
+- Use “Anular alterações” for the agent time-range action, “Seguir” for watched conversations, and “pedido” for operations queued before server confirmation. Undo summaries count log entries; detail reasons count messages.
+- Distinguish “texto da assinatura” from a digital signature, usable keys from any key, and key ownership from signature validity. Empty-address keys cannot retain ownership confirmation.
+- “Cache de conteúdos” is the body cache, with draft/current-session exceptions; decrypted indexing stores local plaintext. Key recovery first checks whether system credential storage is available.
 
 ### Română (ro)
 
@@ -1523,6 +1552,10 @@ Review notes (round 2):
 - Agent drafts use "radna verzija" and "odbaciti". Saving, including autosave, ends agent access; opening alone
   does not. "Tekst potpisa" is the optional account footer, distinct from a digital signature.
 
+- Retain Serbian Latin Ekavian and formal plural help prose, with fascikla, nalog, prilog, upotrebljiv ključ, pristupna fraza and podaci za prijavu.
+- Use zanemarivanje razgovora consistently with the actual Zanemari razgovor command, and distinguish digitalni potpis from tekst potpisa.
+- Counts in one/few/other retain numbers; exact [1] is used when wording means only one. Address, folder and combined-list placeables remain uninflected.
+
 ### Suomi (fi)
 
 Terms: Saapuneet; Lähtevät; Lähetetyt; Poistetut; Luonnokset; Roskaposti; viesti; kansio; tili; liite; lippu (liputa,
@@ -1696,6 +1729,10 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"
   "Gönderenler:" before address placeholders, without suffixes.
 - Agent-owned draft discard is "taslağı silme", with permanent deletion explained in help. Saving, including
   autosave, ends agent access; opening alone does not. "İmza metni" is the optional account footer, not a digital signature.
+
+- Agent create/rename/discard logs use istek gönderildi for queued requests. Read-list records describe liste kaydı and Kapsam, not message content or a guaranteed folder name. Undo can partially restore relevant state; summary counts are günlük kaydı.
+- Preview interruptions are yarıda kaldı or takıldı, without assigning PDF causation. Distinguish bellekte önizleme verileri from diske kaydedilen şifresi çözülmüş kopyalar and the unencrypted arama dizini.
+- Key lock instructions check the system store before backup recovery. Exact zero-address verification cannot record ownership. Oturum açma bilgileri includes credentials beyond parolalar; setup transfers only selected available secrets.
 
 ### Ελληνικά (el)
 

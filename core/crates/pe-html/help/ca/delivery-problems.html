@@ -4,8 +4,8 @@
 <img src="picture:bounce-1-failed" alt="Un avís de lliurament amb una targeta que diu que el missatge no s’ha lliurat, el destinatari, el motiu i què cal fer">
 <p>Per a cada destinatari, la targeta explica el motiu amb paraules senzilles i suggereix què podeu fer. <b data-text="bounce-details"></b> mostra la resposta original del servidor de destinació.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> selecciona el missatge que heu enviat.</li>
-    <li>En cas de retard, <b data-text="bounce-show-delayed"></b> el selecciona. El vostre servidor de correu encara ho està provant, de manera que no cal que el torneu a enviar.</li>
+    <li><b data-text="bounce-show-message"></b> selecciona el missatge que heu enviat, si es pot trobar al compte.</li>
+    <li>En cas de retard, <b data-text="bounce-show-delayed"></b> el selecciona si es pot trobar. Si l’avís diu que el servidor encara ho està provant, no cal que el torneu a enviar.</li>
 </ul>
 <p>Alguns motius habituals:</p>
 <table>
@@ -14,7 +14,7 @@
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Torneu-lo a enviar d’aquí a uns dies, o contacteu amb la persona d’una altra manera.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Torneu-lo a enviar sense allò que sembla correu brossa, com ara molts enllaços o un fitxer adjunt gran.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Reenvieu l’avís al vostre proveïdor de correu. El problema no és el missatge.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Espereu el nou intent automàtic. Normalment el missatge es lliura en menys d’una hora.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Espereu mentre el servidor continuï intentant el lliurament. Si ja no ho torna a provar, potser haureu de reenviar el missatge.</td></tr>
 </table>
 <p>Per trobar tots els avisos de lliurament, cerqueu <code>is:bounce</code>. L’anàlisi del motiu es fa a l’ordinador, sense enviar el contingut a serveis externs.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

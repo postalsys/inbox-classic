@@ -4,10 +4,10 @@
 <ol>
     <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b> öğesini seçin.</li>
     <li>Neyin taşınacağını seçin: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> ve <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Parolalarınızı, diğer oturum açma bilgilerinizi ve gizli anahtarlarınızı da taşımak için <b data-text="ui-setup-use-passphrase"></b> seçeneğini açın ve en az 8 karakterlik bir anahtar parolasını iki kez yazın.</li>
+    <li>Seçtiğiniz bölümlerdeki erişilebilir parolaları, diğer oturum açma bilgilerini ve gizli anahtarları da taşımak için <b data-text="ui-setup-use-passphrase"></b> seçeneğini açın ve en az 8 karakterlik bir anahtar parolasını iki kez yazın.</li>
     <li><b data-text="ui-setup-export-button"></b> düğmesine tıklayın ve dosyanın nereye kaydedileceğini seçin.</li>
 </ol>
-<p>Dosya ileti içermez; iletiler diğer bilgisayarda yeniden indirilir. Anahtar parolası kullanırsanız dosyanın tamamı şifrelenir. Koruma kullanmazsanız parolalar, OAuth oturum açma bilgileri, istemci gizli dizileri ve gizli anahtarlar dosyaya eklenmez. Diğer bilgisayarda hesaplarınıza parolayla veya tarayıcı üzerinden yeniden giriş yapmanız gerekir.</p>
+<p>Dosya ileti içermez; yalnızca sunucuda bulunan iletiler diğer bilgisayarda yeniden indirilebilir. Yerel taslaklar ve Giden Kutusu bu dosyayla taşınmaz. Anahtar parolası kullanırsanız dosyanın tamamı şifrelenir. Koruma kullanmazsanız parolalar, OAuth oturum açma bilgileri, istemci gizli dizileri ve gizli anahtarlar dosyaya eklenmez. Diğer bilgisayarda hesaplarınıza parolayla veya tarayıcı üzerinden yeniden giriş yapmanız gerekir.</p>
 <aside class="warning">Dosyayı ve anahtar parolasını ayrı tutun ve içe aktardıktan sonra dosyayı silin. İkisine birden sahip olan herkes postalarınızı okuyabilir.</aside>
 <h2>İçe aktarma</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Dosyayı seçin ve varsa anahtar parolasını yazın.</li>
     <li>Pencere dosyanın neler içerdiğini gösterir. İçe aktarılacak bölümleri ve hesapları seçip <b data-text="ui-setup-import-button"></b> düğmesine tıklayın.</li>
 </ol>
-<p>Bu bilgisayarda zaten bulunan hesaplar değiştirilmez. Kişiler Adres Defteri'ne eklenir, gruplar yeni üyelerle güncellenir. Ayarlar ve pencere tercihleri içe aktarılan değerlerle değiştirilir. Bir kuralın hedef klasörü henüz bulunamıyorsa hesap eşitlendiğinde klasör kuralla eşleştirilir. Mevcut bir kişi için farklı bir anahtar içe aktarıldığında, kişi özelliklerinden siz seçene kadar yeni anahtar kullanılmaz.</p>
+<p>Bu bilgisayarda zaten bulunan hesaplar değiştirilmez. Kişiler Adres Defteri'ne eklenir veya eşleştirilir, gruplar yeni üyelerle güncellenir. Ayarlar ve pencere tercihleri içe aktarılan değerlerle değiştirilir. Bir kuralın hedef klasörü henüz bulunamıyorsa hesap eşitlendiğinde eşleştirme yeniden denenir; içe aktarma eksik hedef klasörünü oluşturmaz. Mevcut bir kişi için farklı bir anahtar içe aktarıldığında, kişi özelliklerinden siz seçene kadar yeni anahtar kullanılmaz.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

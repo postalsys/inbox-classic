@@ -2,13 +2,13 @@
 <p class="summary">Oturum açma veya doğrulama kodu içeren bir ileti, kodu kopyalayabileceğiniz bir kartta gösterir.</p>
 <p>Bir iletide oturum açma, doğrulama veya onay kodu gibi tek kullanımlık bir kod varsa iletinin üstündeki bir kart şunları gösterir:</p>
 <ul>
-    <li>kodun ait olduğu etki alanını adlandıran “… kodu” başlığı</li>
+    <li>gönderenin doğrulanmış etki alanını adlandıran “… kodu” başlığı</li>
     <li>büyük yazıyla kodun kendisi</li>
-    <li>kodu panoya kopyalayan <b data-text="otp-copy"></b></li>
+    <li>kodu panoya kopyalayan <b data-text="otp-copy"></b> düğmesi</li>
 </ul>
 <aside class="warning">Bir kodu yalnızca kartın adını verdiği etki alanına ait bir sayfaya girin. Kodu başka bir yere yazmanızı isteyen bir ileti, hesabınızı ele geçirme girişimi olabilir.</aside>
-<p>Kart yalnızca e-posta sağlayıcınız, kodun ait olduğu etki alanını doğrulayan geçerli bir dijital imza bildirdiğinde görünür. Bu doğrulama iletiyi yazan kişinin kimliğini veya içeriğin güvenilirliğini kanıtlamaz. <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> veya <b data-text="folder-drafts"></b> klasörlerinde ya da sağlayıcınız etki alanı imzasının doğrulama sonucunu bildirmediğinde kart gösterilmez.</p>
-<p>İletiyi açtığınızda gönderilmesinin üzerinden bir saatten fazla geçmişse, kart kodun süresinin büyük olasılıkla dolduğunu belirtir.</p>
+<p>Kart yalnızca e-posta sağlayıcınız, gönderen etki alanı veya onun üst etki alanıyla uyumlu geçerli bir DKIM imzası bildirdiğinde görünür. Bu doğrulama iletiyi yazan kişinin kimliğini veya içeriğin güvenilirliğini kanıtlamaz. <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> veya <b data-text="folder-drafts"></b> klasörlerinde ya da sağlayıcınız etki alanı imzasının doğrulama sonucunu bildirmediğinde kart gösterilmez.</p>
+<p>İletiyi açtığınızda iletinin tarihine göre üzerinden bir saatten fazla geçmişse, kart kodun süresinin büyük olasılıkla dolduğunu belirtir.</p>
 <h2>Bildirimlerdeki kodlar</h2>
-<p>Kodu yeni bir iletinin bildiriminde görmek için <b data-settings="general"></b> sayfasında <b data-text="ui-codes-in-notifications"></b> seçeneğini açın. Bildirimler kilit ekranında da okunabildiği için bu seçenek varsayılan olarak kapalıdır.</p>
+<p>Kodu yeni bir iletinin bildiriminde görmek için <b data-settings="general"></b> sayfasında <b data-text="ui-codes-in-notifications"></b> seçeneğini açın. Bildirimler kilit ekranında da okunabildiği için bu seçenek varsayılan olarak kapalıdır. Genel bildirim koşulları yine geçerlidir; kodun zamanında indirilebilen yeni ve küçük bir iletide bulunması gerekir.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>

@@ -4,10 +4,10 @@
 <ol>
     <li>Velg <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Velg hva du vil ta med: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> og <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>For også å ta med passord, andre påloggingsopplysninger og private nøkler slår du på <b data-text="ui-setup-use-passphrase"></b> og skriver en passfrase på minst 8 tegn to ganger.</li>
+    <li>For også å ta med de valgte delenes lagrede passord, andre påloggingsopplysninger og private nøkler som appen får tilgang til, slår du på <b data-text="ui-setup-use-passphrase"></b> og skriver en passfrase på minst 8 tegn to ganger.</li>
     <li>Klikk på <b data-text="ui-setup-export-button"></b>, og velg hvor filen skal lagres.</li>
 </ol>
-<p>Filen inneholder ingen meldinger: De lastes ned igjen på den andre datamaskinen. Med en passfrase krypteres hele filen. Uten passfrase utelates passord, OAuth-påloggingsopplysninger, klienthemmeligheter og private nøkler. Du må da logge på kontoene igjen på den andre datamaskinen, enten med passord eller gjennom nettleseren.</p>
+<p>Filen inneholder ingen meldinger. E-post på serveren kan lastes ned igjen på den andre datamaskinen, men lokale utkast og meldinger i sendekøen følger ikke med. Med en passfrase krypteres hele filen. Uten passfrase utelates passord, OAuth-påloggingsopplysninger, klienthemmeligheter og private nøkler. Du må da logge på kontoene igjen på den andre datamaskinen, enten med passord eller gjennom nettleseren.</p>
 <aside class="warning">Oppbevar filen og passfrasen hver for seg, og slett filen når du har importert den. Alle som har begge, kan lese e-posten din.</aside>
 <h2>Importer innstillinger og kontoer</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Velg filen, og skriv passfrasen hvis den har en.</li>
     <li>Vinduet viser hva filen inneholder. Velg delene og kontoene du vil importere, og klikk på <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Eksisterende kontoer endres ikke. Kontakter legges til, og grupper oppdateres med importerte medlemmer. Innstillinger og vindusinnstillinger erstattes. Hvis målmappen for en regels flyttehandling ikke finnes ennå, kobles den til når mappen blir funnet ved synkronisering. En ny nøkkel for en eksisterende kontakt må velges i kontaktens egenskaper før den tas i bruk.</p>
+<p>Eksisterende kontoer endres ikke. Kontakter flettes inn, og grupper oppdateres med importerte medlemmer. Bare de valgte innstillingene og vindusinnstillingene erstattes. Hvis målmappen for en regels flyttehandling ikke finnes ennå, venter regelen til en tilsvarende mappe blir funnet ved synkronisering. En ny nøkkel for en eksisterende kontakt må velges i kontaktens egenskaper før den tas i bruk.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

@@ -4,10 +4,10 @@
 <ol>
     <li>Choisissez <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Sélectionnez les données à transférer : <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> et <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Pour inclure les mots de passe enregistrés, les données de connexion et les clés privées, activez <b data-text="ui-setup-use-passphrase"></b>. Saisissez deux fois la même phrase secrète, d’au moins 8 caractères.</li>
+    <li>Pour inclure les mots de passe enregistrés, les données de connexion et les clés privées disponibles pour les catégories sélectionnées, activez <b data-text="ui-setup-use-passphrase"></b>. Saisissez deux fois la même phrase secrète, d’au moins 8 caractères.</li>
     <li>Cliquez sur <b data-text="ui-setup-export-button"></b> et choisissez où enregistrer le fichier.</li>
 </ol>
-<p>Les messages ne sont pas exportés : ils seront téléchargés à nouveau depuis le serveur sur l’autre ordinateur. Avec une phrase secrète, tout le fichier est chiffré. Sans elle, les mots de passe enregistrés, les données de connexion et les clés privées sont exclus. Vous devrez alors vous reconnecter à vos comptes.</p>
+<p>Aucun message n’est exporté, pas même ceux de la Boîte d’envoi. Sur l’autre ordinateur, les messages conservés par le serveur seront téléchargés à nouveau. Les clés privées verrouillées ou inaccessibles ne sont pas incluses, même avec une phrase secrète. Avec une phrase secrète, tout le fichier est chiffré. Sans elle, les mots de passe enregistrés, les données de connexion et les clés privées sont exclus. Vous devrez alors vous reconnecter à vos comptes.</p>
 <aside class="warning">Conservez le fichier et sa phrase secrète séparément, puis supprimez le fichier après l’importation. Toute personne disposant des deux peut accéder à votre courrier.</aside>
 <h2>Importer les données</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Sélectionnez le fichier et saisissez sa phrase secrète s’il est protégé.</li>
     <li>Vérifiez le contenu du fichier. Choisissez les catégories et les comptes à importer, puis cliquez sur <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Les comptes déjà configurés restent inchangés. Les contacts sont ajoutés au carnet d’adresses ; les paramètres et les préférences des fenêtres sont remplacés. Les dossiers de destination manquants des règles seront associés après la synchronisation des comptes. Si un contact possède déjà une clé, sélectionnez la nouvelle dans ses propriétés pour la remplacer.</p>
+<p>Les comptes déjà configurés restent inchangés. Les contacts sont ajoutés au carnet d’adresses ; les paramètres et les préférences des fenêtres sont remplacés. Après la synchronisation, Inbox Classic tente de retrouver les dossiers de destination manquants des règles. S’il ne les trouve pas, vous devrez les sélectionner. Les comptes et applications de connexion qui ne peuvent pas être validés peuvent être ignorés ; vérifiez le résultat de l’importation. Si un contact possède déjà une clé, sélectionnez la nouvelle dans ses propriétés pour la remplacer.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

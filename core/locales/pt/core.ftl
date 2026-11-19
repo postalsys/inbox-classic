@@ -54,8 +54,8 @@ reader-downloading = A transferir a mensagem…
 reader-downloading-detail = A mensagem aparecerá aqui quando a transferência terminar.
 reader-downloading-size = A mensagem tem { $size }. Aparecerá aqui quando a transferência terminar.
 reader-failed = Não foi possível transferir a mensagem
-reader-failed-network = Não foi possível contactar o servidor de correio ({ $reason }).
-reader-failed-sign-in = O servidor de correio não aceitou o início de sessão ({ $reason }). Verifique a palavra-passe ou inicie sessão novamente em Ficheiro > Contas.
+reader-failed-network = Não foi possível obter a mensagem do servidor de correio ({ $reason }).
+reader-failed-sign-in = O servidor de correio não aceitou o início de sessão ({ $reason }). Verifique a palavra-passe ou inicie sessão novamente nas definições da conta.
 reader-failed-security = Não foi possível tornar segura a ligação ao servidor de correio ({ $reason }).
 reader-failed-other = O servidor de correio respondeu: { $reason }.
 reader-retry-note = A transferência será repetida quando a conta voltar a ligar-se ao servidor.
@@ -118,12 +118,12 @@ bounce-mailbox-disabled-why = O endereço existe, mas a caixa de correio foi des
 bounce-mailbox-disabled-do = Contacte a pessoa de outra forma e peça-lhe um endereço que use agora.
 bounce-mailbox-full = A caixa de correio está cheia
 bounce-mailbox-full-why = A caixa de correio do destinatário não tem espaço para correio novo.
-bounce-mailbox-full-do = Envie-a novamente daqui a alguns dias, ou avise a pessoa de outra forma. Os anexos grandes são os primeiros a ser recusados.
+bounce-mailbox-full-do = Se o aviso indicar uma falha definitiva, tente reenviar mais tarde ou contacte a pessoa de outra forma. Num aviso de atraso, aguarde nova tentativa do servidor.
 bounce-spam-blocked = Recusada como lixo eletrónico
 bounce-spam-blocked-why = O servidor de destino classificou a mensagem como lixo eletrónico.
 bounce-spam-blocked-do = Experimente enviar a mensagem com menos ligações, sem ligações encurtadas ou sem anexos grandes. Se o problema persistir, contacte o seu fornecedor de correio.
 bounce-virus-detected = Recusada por deteção de vírus
-bounce-virus-detected-why = O servidor de destino encontrou um vírus ou outro conteúdo nocivo na mensagem ou nos anexos.
+bounce-virus-detected-why = O servidor de destino recusou a mensagem por suspeitar de um vírus ou de outro conteúdo nocivo na mensagem ou nos anexos.
 bounce-virus-detected-do = Verifique os anexos com um antivírus. Alguns servidores recusam programas ou ficheiros comprimidos. Nesse caso, partilhe-os através de uma ligação.
 bounce-ip-blocklisted = O seu servidor de correio está numa lista de bloqueio
 bounce-ip-blocklisted-why = O servidor de destino recusa mensagens do seu servidor de envio porque o endereço desse servidor consta de uma lista de bloqueio.
@@ -139,7 +139,7 @@ bounce-geo-blocked-why = O servidor de destino não aceita correio do país ou d
 bounce-geo-blocked-do = Contacte a pessoa de outra forma, ou pergunte ao seu fornecedor de correio.
 bounce-relay-denied = O servidor não a reencaminhou
 bounce-relay-denied-why = Um servidor recusou-se a entregar a mensagem, muitas vezes porque foi enviada sem iniciar sessão ou através de um servidor que não trata deste destinatário.
-bounce-relay-denied-do = Em Ficheiro > Contas, verifique o servidor de envio e confirme que a conta está configurada para se autenticar nesse servidor.
+bounce-relay-denied-do = Nas definições da conta, verifique o servidor de envio e confirme que a conta está configurada para se autenticar nesse servidor.
 bounce-auth-failure = Não foi possível verificar o seu endereço de remetente
 bounce-auth-failure-why = O servidor de destino não conseguiu confirmar que a mensagem veio realmente do seu domínio (SPF, DKIM ou DMARC).
 bounce-auth-failure-do = Reencaminhe este aviso para quem gere o correio do seu domínio: as definições precisam de ser corrigidas. Entretanto, enviar através do servidor do seu fornecedor pode ajudar.
@@ -148,7 +148,7 @@ bounce-rate-limited-why = Por agora, o servidor de destino aceita menos mensagen
 bounce-rate-limited-do = Aguarde um pouco e envie-a novamente. Quando escrever a muitas pessoas, envie a menos de cada vez.
 bounce-greylisting = Retida por momentos
 bounce-greylisting-why = O servidor de destino pede aos remetentes desconhecidos que tentem novamente um pouco mais tarde, uma verificação comum contra o spam.
-bounce-greylisting-do = Aguarde. Os servidores de correio repetem a tentativa automaticamente e a mensagem costuma ser entregue dentro de uma hora.
+bounce-greylisting-do = Se o aviso indicar apenas um atraso, aguarde uma nova tentativa do servidor. Se indicar uma falha definitiva, tente enviar novamente mais tarde.
 bounce-server-error = O servidor de destino teve um problema
 bounce-server-error-why = Não foi possível contactar o servidor de destino, ou este não conseguiu aceitar a mensagem por causa de um problema próprio.
 bounce-server-error-do = Envie-a novamente mais tarde. Se continuar a falhar, procure erros de escrita na parte do endereço depois do @.
@@ -340,8 +340,8 @@ downloading-messages = { $count ->
 }
 # the status bar after files are dropped on a folder: "Put 3 messages in Archive"
 import-put = { $count ->
-    [one] { $messages } importada para { $folder }
-   *[other] { $messages } importadas para { $folder }
+    [one] Importação de { $messages } para { $folder } em espera
+   *[other] Importação de { $messages } para { $folder } em espera
 }
 import-not-put = Não foi possível importar as seguintes mensagens para a pasta:
 
@@ -379,8 +379,8 @@ error-import-not-mail = { $path } não é uma mensagem de e-mail
 error-list-answered = o servidor da lista de correio devolveu o estado { $status }
 error-not-built = não foi possível criar a mensagem
 error-outbox-waits = { $count ->
-    [one] a mensagem aguarda na Caixa de Saída e será enviada no próximo Enviar/Receber
-   *[other] { $count } mensagens aguardam na Caixa de Saída e serão enviadas no próximo Enviar/Receber
+    [one] a mensagem aguarda na Caixa de Saída uma nova tentativa de envio no próximo Enviar/Receber
+   *[other] { $count } mensagens aguardam na Caixa de Saída uma nova tentativa de envio no próximo Enviar/Receber
 }
 error-draft-not-removed = não foi possível remover o rascunho anterior da mensagem de Rascunhos: { $reason }
 error-sent-but = a mensagem foi enviada, mas { $problem }
@@ -395,12 +395,12 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = A Google ainda não verificou o Inbox Classic, por isso só deixa iniciar sessão com ele aos utilizadores de teste. Use a sua própria aplicação de início de sessão da Google ou uma palavra-passe de aplicação, ou ative-a em Aplicações de início de sessão (Ficheiro > Contas) se for um utilizador de teste.
-sign-in-off-other = Foi desativada em Aplicações de início de sessão (Ficheiro > Contas), onde pode ser ativada novamente.
+sign-in-off-google = A aplicação Google integrada está desativada por predefinição nesta configuração. Use uma aplicação de início de sessão sua ou, se a conta o permitir, uma palavra-passe de aplicação. Se tiver acesso como utilizador de teste, pode ativar a opção integrada em Aplicações de início de sessão nas definições de contas.
+sign-in-off-other = Foi desativada em Aplicações de início de sessão nas definições de contas, onde pode ser ativada novamente.
 sign-in-app-no-name = a aplicação de início de sessão precisa de um nome
 sign-in-app-no-client = falta o ID do cliente
 sign-in-app-no-scopes = a aplicação de início de sessão precisa das permissões (scopes) que dão acesso ao correio
-sign-in-app-bad-host = o endereço do servidor { $server } está em falta ou não é um nome de anfitrião válido
+sign-in-app-bad-host = o nome ou a porta do servidor { $server } não são válidos
 sign-in-app-plain = o servidor { $server } tem de usar SSL/TLS ou STARTTLS
 sign-in-app-not-checked = o emissor ainda não foi verificado
 sign-in-app-issuer-changed = o emissor foi alterado: introduza novamente o segredo do cliente ou remova-o
@@ -446,10 +446,8 @@ day-sunday = domingo
 
 ## AI agents
 
-# review: changed
-agent-level-read = Ler o correio: pastas, lista de mensagens, pesquisa e mensagens
-# review: changed
-agent-level-organize = Organizar o correio: alterar o estado de leitura, os sinalizadores e as suas cores, gerir o lixo eletrónico, mover e arquivar mensagens, criar e mudar o nome de pastas, acompanhar e ignorar conversas, eliminar mensagens (movendo-as para Itens Eliminados) e cancelar subscrições de listas de correio com a sua autorização
+agent-level-read = Ler o correio: pastas, listas, pesquisas, mensagens, conversas, anexos, regras e pesquisa de contactos
+agent-level-organize = Organizar o correio: alterar o estado de leitura, os sinalizadores e as suas cores, gerir o lixo eletrónico, mover e arquivar mensagens, criar e mudar o nome de pastas, seguir e ignorar conversas, eliminar mensagens (movendo-as para Itens Eliminados) e cancelar subscrições de listas de correio com a sua autorização
 agent-level-drafts = Escrever rascunhos para que os possa enviar
 agent-level-send = Enviar correio, com a sua confirmação para cada mensagem
 agent-connect-title = { $program } quer usar o seu correio
@@ -493,17 +491,15 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Não é possível ler esta mensagem.
 agent-encrypted-original = Esta mensagem está encriptada: um agente não pode responder-lhe nem reencaminhá-la, porque não consegue encriptar.
 agent-encrypted = Esta mensagem está encriptada. Os agentes de IA não podem ler o seu conteúdo. O utilizador tem de a abrir no Inbox Classic.
-# review: new
-agent-too-many-changes = Demasiadas alterações nos últimos 30 dias: este agente fez tantas quantas o Inbox Classic guarda no registo para um programa. Poderá fazer mais quando as mais antigas tiverem 30 dias.
-# review: new
-agent-too-many-reads = Demasiadas leituras nos últimos 30 dias: este agente leu tanto quanto o Inbox Classic guarda no registo para um programa. Poderá ler mais quando as leituras mais antigas tiverem 30 dias.
+agent-too-many-changes = Este programa atingiu o limite de alterações registadas nos últimos 30 dias, partilhado pelos seus agentes. Poderá fazer mais quando as alterações mais antigas saírem desse período.
+agent-too-many-reads = Este programa atingiu o limite de leituras registadas nos últimos 30 dias, partilhado pelos seus agentes. Poderá ler mais quando as leituras mais antigas saírem desse período.
 list-encrypted = Mensagem encriptada
 agent-log-composed = Abriu «{ $subject }» numa janela de composição para que possa terminar a mensagem
 agent-log-refused = Não enviou «{ $subject }»
 agent-log-sent = Colocou «{ $subject }» em espera para envio a { $to }
 agent-log-draft = Guardou o rascunho «{ $subject }»
-agent-log-draft-replaced = Substituiu o rascunho «{ $subject }»
-agent-log-draft-discarded = Eliminou o rascunho «{ $subject }»
+agent-log-draft-replaced = Pediu a substituição do rascunho «{ $subject }»
+agent-log-draft-discarded = Pediu a eliminação do rascunho «{ $subject }»
 agent-draft-note = { $program }, um agente de IA, escreveu este rascunho. Verifique os destinatários e o texto antes de o enviar.
 agent-log-read = Marcou como lida «{ $subject }»
 agent-log-unread = Marcou como não lida «{ $subject }»
@@ -514,7 +510,7 @@ agent-log-moved = Moveu «{ $subject }» para { $folder }
 agent-log-junk = Marcou «{ $subject }» como lixo eletrónico
 agent-log-not-junk = Marcou «{ $subject }» como correio legítimo
 agent-log-archived = Arquivou «{ $subject }»
-agent-log-folder = Criou a pasta «{ $name }»
+agent-log-folder = Pediu a criação da pasta «{ $name }»
 agent-log-unsubscribed = Autorizou o pedido de cancelamento da subscrição. Mensagem: «{ $subject }»
 agent-log-unsubscribe-failed = Não foi possível cancelar a subscrição da lista de correio associada à mensagem «{ $subject }»: { $reason }
 agent-log-unsubscribe-refused = Não autorizou o cancelamento de subscrições. Remetentes: { $senders }
@@ -526,7 +522,6 @@ agent-unsubscribe-detail = { $count ->
     [1] O Inbox Classic pede à lista de correio abaixo que deixe de lhe enviar mensagens, usando a opção de cancelamento com um clique. Não é enviado mais nada. As mensagens existentes não são alteradas nem movidas.
    *[other] O Inbox Classic pede a cada lista de correio abaixo que deixe de lhe enviar mensagens, usando a opção de cancelamento com um clique. Não é enviado mais nada. As mensagens existentes não são alteradas nem movidas.
 }
-# review: new
 agent-log-flag-color = Sinalizador { $color ->
     [red] vermelho
     [orange] laranja
@@ -536,39 +531,29 @@ agent-log-flag-color = Sinalizador { $color ->
     [purple] roxo
    *[gray] cinzento
 } aplicado a «{ $subject }»
-# review: new
-agent-log-renamed = Mudou o nome da pasta «{ $old }» para «{ $name }»
-# review: new
+agent-log-renamed = Pediu a mudança do nome da pasta «{ $old }» para «{ $name }»
 agent-log-watched = Começou a seguir a conversa «{ $subject }»
-# review: new
 agent-log-ignored = Começou a ignorar a conversa «{ $subject }»
-# review: new
 agent-log-unmarked = Deixou de seguir ou ignorar a conversa «{ $subject }»
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = a mensagem foi alterada entretanto
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Marcou 1 mensagem como lida (pesquisa: { $query })
    *[other] Marcou { $count } mensagens como lidas (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Marcou 1 mensagem como não lida (pesquisa: { $query })
    *[other] Marcou { $count } mensagens como não lidas (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Sinalizou 1 mensagem (pesquisa: { $query })
    *[other] Sinalizou { $count } mensagens (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Removeu o sinalizador de 1 mensagem (pesquisa: { $query })
    *[other] Removeu o sinalizador de { $count } mensagens (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-color = Sinalizador { $color ->
     [red] vermelho
     [orange] laranja
@@ -581,33 +566,27 @@ agent-log-bulk-color = Sinalizador { $color ->
     [one] 1 mensagem
    *[other] { $count } mensagens
 } (pesquisa: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Moveu 1 mensagem para { $folder } (pesquisa: { $query })
    *[other] Moveu { $count } mensagens para { $folder } (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Arquivou 1 mensagem (pesquisa: { $query })
    *[other] Arquivou { $count } mensagens (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Marcou 1 mensagem como lixo eletrónico (pesquisa: { $query })
    *[other] Marcou { $count } mensagens como lixo eletrónico (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Marcou 1 mensagem como correio legítimo (pesquisa: { $query })
    *[other] Marcou { $count } mensagens como correio legítimo (pesquisa: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Eliminou 1 mensagem (pesquisa: { $query })
    *[other] Eliminou { $count } mensagens (pesquisa: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Nos últimos 15 minutos
     [hour] Na última hora
@@ -617,129 +596,99 @@ agent-undo-span = { $span ->
    *[all] Nos últimos 30 dias
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] { $program } não fez neste período alterações que possam ser anuladas.
     [one] Anular a alteração que { $program } fez neste período?
    *[other] Anular as { $count } alterações que { $program } fez neste período?
 }
-# review: new
-agent-undo-since-detail = As mensagens regressam às pastas de onde vieram, o estado de leitura e os sinalizadores voltam a ser o que eram, e as mensagens que ainda aguardam na Caixa de Saída são eliminadas. O que alterou entretanto, ou o que o servidor alterou, fica como está.
+agent-undo-since-detail = O Inbox Classic tenta repor as pastas, o estado de leitura e os sinalizadores anteriores e remover as mensagens ainda na Caixa de Saída. Verifica o estado relevante de cada mensagem. Algumas alterações podem ser anuladas apenas em parte; nem todas as alterações posteriores são preservadas.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Nada foi anulado.
-    [one] Foi anulada 1 alteração.
-   *[other] Foram anuladas { $count } alterações.
+    [one] Foi anulada, total ou parcialmente, { $count } alteração registada.
+   *[other] Foram anuladas, total ou parcialmente, { $count } alterações registadas.
 }
-# review: new
 agent-undo-left-gone = { $count ->
     [one] 1 mensagem já não estava onde a alteração a colocou.
    *[other] { $count } mensagens já não estavam onde a alteração as colocou.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] 1 mensagem foi alterada entretanto, por si ou no servidor, e ficou como estava.
    *[other] { $count } mensagens foram alteradas entretanto, por si ou no servidor, e ficaram como estavam.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] 1 mensagem já tinha saído da Caixa de Saída.
    *[other] { $count } mensagens já tinham saído da Caixa de Saída.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
-    [one] 1 alteração não pode ser anulada.
-   *[other] { $count } alterações não podem ser anuladas.
+    [one] Não foi possível anular a alteração em { $count } mensagem.
+   *[other] Não foi possível anular as alterações em { $count } mensagens.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
     [accept] Esta mensagem aceita o convite «{ $summary }» ({ $when }).
     [tentative] Esta mensagem aceita provisoriamente o convite «{ $summary }» ({ $when }).
    *[decline] Esta mensagem recusa o convite «{ $summary }» ({ $when }).
-} O calendário do organizador regista a resposta. A sua resposta ao convite só muda depois de a mensagem ser enviada.
+} A resposta é enviada ao organizador para ser processada pelo respetivo calendário. O estado local só muda depois de a mensagem ser enviada, sem confirmar que o organizador a recebeu.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Aceite: { $summary }
-    [tentative] Provisório: { $summary }
+    [tentative] Aceite provisoriamente: { $summary }
    *[decline] Recusado: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } aceitou este convite.
     [tentative] { $name } aceitou provisoriamente este convite.
    *[decline] { $name } recusou este convite.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] leu 1 mensagem
    *[other] leu { $count } mensagens
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] abriu 1 anexo
-   *[other] abriu { $count } anexos
+    [one] leu { $count } anexo
+   *[other] leu { $count } anexos
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] pesquisou uma vez
    *[other] pesquisou { $count } vezes
 }
-# review: new
 agent-reads-lists = { $count ->
-    [one] consultou uma lista de mensagens uma vez
-   *[other] consultou listas de mensagens { $count } vezes
+    [one] consultou listas { $count } vez
+   *[other] consultou listas { $count } vezes
 }
 # each read under that row
-# review: new
 agent-read-message = Leu «{ $subject }»
-# review: new
 agent-read-conversation = { $count ->
     [one] Leu a conversa «{ $subject }» (1 mensagem)
    *[other] Leu a conversa «{ $subject }» ({ $count } mensagens)
 }
-# review: new
-agent-read-attachment = Abriu «{ $name }» de «{ $subject }»
-# review: new
+agent-read-attachment = Leu o anexo «{ $name }» da mensagem «{ $subject }»
 agent-read-search = { $count ->
     [one] Pesquisou «{ $query }»: 1 mensagem
    *[other] Pesquisou «{ $query }»: { $count } mensagens
 }
-# review: new
-agent-read-people = Procurou contactos que começam por «{ $query }»
-# review: new
+agent-read-people = Procurou contactos: «{ $query }»
 agent-read-list = { $count ->
-    [one] Consultou 1 mensagem em { $folder }
-   *[other] Consultou { $count } mensagens em { $folder }
+    [one] Consultou { $count } entrada na lista: { $folder }
+   *[other] Consultou { $count } entradas na lista: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] Consultou 1 mensagem nova
-   *[other] Consultou { $count } mensagens novas
+    [one] Consultou { $count } alteração de mensagem
+   *[other] Consultou { $count } alterações de mensagens
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Programas iniciados a partir de { $terminal }
-# review: new
 agent-terminal-programs-windows = Programas iniciados a partir de um terminal ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Programas iniciados a partir de um terminal ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Um programa iniciado a partir de { $terminal }
-# review: new
 agent-terminal-program-windows = Um programa iniciado a partir de um terminal ({ $terminal })
-# review: new
 agent-terminal-program-linux = Um programa iniciado a partir de um terminal ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } querem usar o seu correio
-# review: new
-agent-connect-terminal-detail = Todos os agentes de IA que iniciar a partir deste terminal partilham o acesso que autorizar aqui. Para dar a um agente o seu próprio acesso, adicione --name e um nome à sua escolha aos argumentos dele nas definições MCP do agente.
-# review: new
+agent-connect-terminal-detail = Os agentes sem nome próprio iniciados pelo mesmo programa de terminal identificado partilham esta autorização. Para guardar uma autorização separada, adicione --name e um nome à sua escolha aos argumentos nas definições MCP do agente. O nome não comprova a identidade do programa.
 agent-connect-claimed = O programa apresentou-se como { $claimed }. O Inbox Classic verificou que programa o iniciou: { $program }.
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -795,7 +744,7 @@ pgp-key-expired = Expirou a { $date }
 pgp-key-revoked = Revogada
 pgp-key-revoked-why = Revogada: { $reason }
 pgp-key-not-valid = Não válida
-pgp-key-locked = Não é possível usar esta chave: { $store } já não contém a chave que a protegia. Importe novamente a cópia de segurança da sua chave privada.
+pgp-key-locked = Não foi possível desbloquear esta chave privada através de { $store }. Verifique se o armazenamento de credenciais está disponível e desbloqueado. Se a chave de proteção se tiver perdido, importe novamente a cópia de segurança da chave privada.
 pgp-source-own = Criada no Inbox Classic
 pgp-source-file = Importada de um ficheiro
 pgp-source-paste = Colada
@@ -808,7 +757,7 @@ pgp-error-no-store = Não é possível usar { $store }, que protege as chaves pr
 pgp-error-wrong-passphrase = A frase de acesso não está correta.
 pgp-error-not-a-key = Isto não é uma chave OpenPGP.
 pgp-error-too-large = A chave é demasiado grande.
-pgp-error-unusable = A chave utiliza métodos criptográficos obsoletos ou inseguros e não pode ser utilizada.
+pgp-error-unusable = A chave não contém uma chave de assinatura ou encriptação utilizável, ou usa métodos criptográficos não aceites.
 pgp-imported-private = { $count ->
     [one] A sua chave privada foi importada.
    *[other] Foram importadas { $count } chaves privadas.
@@ -828,13 +777,13 @@ pgp-pending = Foi encontrada uma chave diferente para { $address } a { $date }.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Assinada por { $signer }, chave verificada
 pgp-part-signed = Assinada por { $signer } (chave não verificada)
-pgp-part-other = Assinada por { $signer }, que não é o remetente
+pgp-part-other = Assinada por { $signer }; não foi possível associar a assinatura ao remetente
 pgp-part-unknown-key = Assinada, mas a chave não é conhecida
 pgp-part-not-signed = Não assinada
 pgp-part-not-checked = Assinatura não verificada
 pgp-part-encrypted = Encriptada. { $signature }
 pgp-part-no-key = Encriptada; falta a chave privada necessária para a ler
-pgp-part-changed = A parte encriptada foi alterada durante a transmissão e não é apresentada
+pgp-part-changed = Não foi possível confirmar a integridade desta parte encriptada; não é apresentada
 pgp-part-unprotected = Encriptada sem proteção contra alterações, não é mostrada
 pgp-part-broken = Não é possível ler a parte encriptada
 pgp-why-mismatch = A assinatura não corresponde a este texto
@@ -848,18 +797,18 @@ pgp-why-key-not-valid = Assinada com uma chave que não é válida
 pgp-why-not-for-you = Assinada para outros destinatários e reencaminhada para si
 pgp-why-not-key-in-use = Assinada com uma chave diferente da usada para { $address }
 pgp-part-pictures-loaded = { $label }. Foram carregadas imagens da Internet
-pgp-error-no-own-key = Não tem nenhuma chave para { $address } com que assinar ou encriptar. Crie uma em Ferramentas > Chaves de encriptação, ou desative Assinar e Encriptar.
+pgp-error-no-own-key = Não tem nenhuma chave utilizável para { $address } com que assinar ou encriptar. Crie ou importe uma em Chaves de encriptação, ou desative Assinar e Encriptar.
 pgp-error-missing-keys = { $count ->
-    [one] Não existe uma chave para encriptar mensagens para este destinatário: { $addresses }.
-   *[other] Não existem chaves para encriptar mensagens para estes destinatários: { $addresses }.
+    [one] Não existe uma chave utilizável para encriptar mensagens para este destinatário: { $addresses }.
+   *[other] Não existem chaves utilizáveis para encriptar mensagens para estes destinatários: { $addresses }.
 }
-pgp-error-encrypted-quote = Esta mensagem cita ou reencaminha uma mensagem encriptada, por isso só pode ser enviada encriptada. Ative Encriptar, ou remova o texto citado.
+pgp-error-encrypted-quote = Esta mensagem contém texto, imagens ou anexos provenientes de uma mensagem encriptada, por isso só pode ser enviada encriptada. Ative Encriptar ou remova todo esse conteúdo.
 pgp-error-protect = Não foi possível assinar ou encriptar a mensagem: { $reason }
 pgp-found-keys = Foram encontradas chaves para: { $addresses }.
 pgp-found-none = Não foi encontrada nenhuma chave para estes endereços: { $addresses }. Peça aos respetivos titulares que enviem as suas chaves públicas.
 pgp-found-no-key = Não foi encontrada nenhuma chave.
 pgp-find-unavailable = Não foi possível procurar chaves agora: { $error }
-pgp-publish-pending = O serviço keys.openpgp.org enviou uma ligação de confirmação para cada um destes endereços: { $addresses }. Confirme cada endereço para que a sua chave possa ser encontrada através dele.
+pgp-publish-pending = Foi pedido ao serviço keys.openpgp.org que envie ligações de confirmação para estes endereços: { $addresses }. Confirme cada endereço para que a sua chave possa ser encontrada através dele.
 pgp-publish-done = A sua chave está publicada em keys.openpgp.org para { $addresses }.
 pgp-publish-failed = Não foi possível publicar a chave: { $error }
 pgp-keyserver-off = A procura de chaves em keys.openpgp.org está desativada em { $settings }.
@@ -898,7 +847,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Faltam chaves utilizáveis para { $count } destinatários. Procure as respetivas chaves ou remova esses destinatários da mensagem. Só pode enviar a mensagem sem encriptação se esta já não contiver texto, imagens ou anexos de mensagens encriptadas.
 }
 pgp-details-part = Parte { $number }: { $label }
-# review: new
 attachment-from-part = Da parte { $number }: { $label }
 pgp-details-signed = Data da assinatura: { $when }. Chave: { $key }
 pgp-details-unknown-key = Assinada com a chave { $key }, que não tem
@@ -910,17 +858,14 @@ pgp-bar-count-verified = { $count ->
     [one] { $count } verificada
    *[other] { $count } verificadas
 }
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] { $count } encriptada e assinada
    *[other] { $count } encriptadas e assinadas
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] { $count } encriptada
    *[other] { $count } encriptadas
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] { $count } assinada
    *[other] { $count } assinadas
@@ -998,9 +943,9 @@ setup-account-signs-in-again = Será necessário iniciar sessão novamente após
 setup-account-here = Já está configurada aqui, por isso é ignorada.
 setup-account-no-app = Esta conta usa a aplicação { $app }, que não está configurada neste computador. Importe também as aplicações de início de sessão.
 setup-invalid-address = «{ $address }» não é um endereço de e-mail.
-setup-invalid-server = O nome ou a porta do servidor { $server } não são válidos.
+setup-invalid-server = O nome, a porta ou a definição de segurança do servidor { $server } não são válidos.
 setup-invalid-user = Não tem nome de utilizador.
-setup-invalid-sign-in = O método de início de sessão não é suportado pelo Inbox Classic.
+setup-invalid-sign-in = As definições de início de sessão não são válidas ou não são suportadas pelo Inbox Classic.
 setup-error-empty = O ficheiro está vazio.
 setup-error-too-large = O ficheiro é demasiado grande para ser uma configuração do Inbox Classic.
 setup-error-not-setup = Este ficheiro não é uma configuração do Inbox Classic.
@@ -1008,7 +953,7 @@ setup-error-damaged = O ficheiro de configuração está danificado e não pode 
 setup-error-newer = Esta configuração foi guardada por uma versão mais recente do Inbox Classic ({ $version }). Atualize o Inbox Classic e importe-a novamente.
 setup-error-needs-passphrase = Esta configuração está protegida por uma frase de acesso. Escreva a frase de acesso com que foi guardada.
 setup-error-wrong-passphrase = Essa não é a frase de acesso com que esta configuração foi guardada.
-setup-error-changed = O ficheiro de configuração foi alterado ou danificado depois de ser guardado, por isso não pode ser importado.
+setup-error-changed = Não foi possível confirmar a integridade do ficheiro de configuração, por isso não pode ser importado.
 setup-error-read = Não foi possível ler o ficheiro de configuração: { $error }
 setup-error-write = Não foi possível guardar a configuração: { $error }
 setup-error-no-parts = Selecione pelo menos um tipo de dados.
@@ -1068,8 +1013,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } regras de mensagens são para contas que não estão aqui, por isso foram ignoradas.
 }
 setup-rules-waiting = { $count ->
-    [one] { $count } regra de mensagens move mensagens para uma pasta que aparece quando a respetiva conta sincronizar.
-   *[other] { $count } regras de mensagens movem mensagens para pastas que aparecem quando as respetivas contas sincronizarem.
+    [one] A pasta de destino de { $count } regra ainda não foi encontrada. O Inbox Classic tentará encontrá-la quando a conta sincronizar.
+   *[other] As pastas de destino de { $count } regras ainda não foram encontradas. O Inbox Classic tentará encontrá-las quando as contas sincronizarem.
 }
 setup-added-trusted-senders = { $count ->
     [one] Foi adicionado { $count } remetente fidedigno.
@@ -1078,9 +1023,9 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Não foi importado nada.
 setup-account-servers = { $imap } e { $smtp } ({ $signin })
 setup-file-name = Definições e contas do Inbox Classic
-setup-skipped-unreachable = A aplicação { $name } não foi importada porque não foi possível contactar o respetivo serviço de início de sessão. Adicione-a novamente em Aplicações de início de sessão.
+setup-skipped-unreachable = Não foi possível importar: { $name }. Não foi possível validar o serviço de início de sessão necessário. Verifique ou adicione a aplicação em Aplicações de início de sessão.
 attachment-runs-programs = «{ $name }» pode executar código, por isso o Inbox Classic não o abre diretamente. Guarde o ficheiro e abra-o manualmente apenas se confiar na sua origem.
-attachment-decrypted-note = Este anexo provém de uma mensagem encriptada. Para o abrir, o Inbox Classic guarda uma cópia sem encriptação numa pasta temporária do seu utilizador. As cópias com mais de 24 horas são removidas quando a aplicação é iniciada.
+attachment-decrypted-note = Este anexo provém de uma mensagem encriptada. Para o abrir, o Inbox Classic guarda uma cópia sem encriptação numa pasta temporária do seu utilizador. Ao iniciar, tenta remover as cópias com mais de 24 horas.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] O servidor não moveu { $messages } para { $folder }, por isso está de novo em { $from }: { $reason }
@@ -1109,46 +1054,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Mostrar ficheiros PDF nas mensagens
-# review: new
 preview-pdf-off = Os ficheiros PDF não são mostrados nas mensagens.
-# review: new
-preview-pdf-off-crashed = Um ficheiro PDF fechou o Inbox Classic enquanto era mostrado, pelo que os ficheiros PDF deixaram de ser mostrados nas mensagens. As imagens continuam a ser. Para voltar a mostrar ficheiros PDF, ative { $option } em { $settings }.
-# review: new
+preview-pdf-off-crashed = O Inbox Classic terminou enquanto criava uma pré-visualização. Por precaução, as pré-visualizações de PDF foram desativadas; as imagens continuam a ser mostradas. Para voltar a mostrar ficheiros PDF, ative { $option } em { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 página, { $size }
    *[other] { $count } páginas, { $size }
 }
-# review: new
 preview-page-alt = { $name }, página { $page } de { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Abra o ficheiro para ver a página
    *[other] Abra o ficheiro para ver as { $count } páginas
 }
-# review: new
 preview-more-files = { $count ->
     [one] Mais 1 ficheiro está na lista acima
    *[other] Mais { $count } ficheiros estão na lista acima
 }
-# review: new
 preview-tile-downloading = A transferir…
-# review: new
 preview-tile-preparing = A preparar…
-# review: new
 preview-tile-format = As imagens { $format } ainda não são mostradas
-# review: new
-preview-tile-password = Protegido por palavra-passe: abra para introduzir a palavra-passe
-# review: new
-preview-tile-too-large = Demasiado grande para mostrar
-# review: new
-preview-tile-unreadable = Não é possível mostrar
-# review: new
-preview-tile-timed-out = Demorou demasiado a mostrar
-# review: new
-preview-tile-crashed = Não mostrado: fechou o Inbox Classic uma vez
-# review: new
-preview-tile-off = Não mostrado até o Inbox Classic ser iniciado novamente
-# review: new
-preview-not-printed = { $name } ({ $details }) não é impresso. Abra-o para o imprimir.
+preview-tile-password = Requer palavra-passe: abra o ficheiro para a introduzir
+preview-tile-too-large = Limite de tamanho da pré-visualização excedido
+preview-tile-unreadable = Não foi possível criar a pré-visualização
+preview-tile-timed-out = O tempo limite para criar a pré-visualização foi excedido
+preview-tile-crashed = Pré-visualização bloqueada após uma falha ou interrupção
+preview-tile-off = Pré-visualização desativada até reiniciar o Inbox Classic
+preview-not-printed = O ficheiro { $name } ({ $details }) não está incluído nesta impressão. Abra o ficheiro para o imprimir.

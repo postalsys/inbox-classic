@@ -95,20 +95,16 @@ win-send = &Envia
 win-dont-send = &No l’enviïs
 win-unsubscribe = &Cancel·la la subscripció
 win-dont-unsubscribe = &No cancel·lis la subscripció
-win-forget-program-ask = Voleu eliminar aquest programa, els seus permisos i l’historial d’activitat dels seus agents? Se us tornarà a demanar permís la propera vegada que es connecti.
+win-forget-program-ask = Voleu eliminar els permisos i l’historial d’activitat dels agents d’aquest programa? El programa no es desinstal·larà. Se us tornarà a demanar permís quan es connecti.
 win-clear-log-ask = Voleu esborrar l’historial d’activitat dels agents? Això no desfarà els canvis que han fet els agents.
 win-agent-programs = Pro&grames que han demanat accés al vostre correu mitjançant agents:
 win-change = &Canvia...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = Desfés de&s de...
-# review: new
 win-take-back = &Desfés
 win-what-agents-did = &Activitat dels agents:
-# review: new
 win-agent-reads = Què s’ha llegit de { $from } a { $to }:
-# review: new
-win-agent-reads-hint = Seleccioneu a dalt una fila de lectures per veure què s’ha llegit.
+win-agent-reads-hint = Seleccioneu una entrada de lectures a la llista superior per veure què s’ha llegit.
 win-how-to-connect = Com connectar un agent
 
 ## Aplicacions d’inici de sessió
@@ -141,4 +137,4 @@ win-installer-welcome-update =
     Si s’està executant, primer es tancarà. Es conservaran els vostres comptes i el vostre correu.
 win-installer-older-ask = Hi ha instal·lat Inbox Classic { $installed }, que és més recent que la versió { $version }. Voleu instal·lar igualment la versió anterior?
 win-installer-still-running = Inbox Classic encara s’està executant. Tanqueu-lo i torneu-ho a provar.
-win-installer-remove-mail-ask = Voleu eliminar també els comptes i el correu que Inbox Classic guarda en aquest ordinador? El correu dels servidors es conserva.
+win-installer-remove-mail-ask = Voleu eliminar també les dades locals d’Inbox Classic: comptes, correu baixat, missatges pendents d’enviament, configuració, contactes, regles i claus de xifratge? Es conservaran el correu dels servidors i les credencials del gestor del sistema.

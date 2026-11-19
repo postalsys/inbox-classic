@@ -45,8 +45,8 @@ reader-downloading = İleti indiriliyor…
 reader-downloading-detail = İndirme tamamlanınca ileti burada görünecek.
 reader-downloading-size = İletinin boyutu: { $size }. İndirildiğinde burada görünecek.
 reader-failed = İleti indirilemedi
-reader-failed-network = Posta sunucusuna ulaşılamadı ({ $reason }).
-reader-failed-sign-in = Posta sunucusu oturum açmayı kabul etmedi ({ $reason }). Parolayı denetleyin veya Dosya > Hesaplar'da yeniden oturum açın.
+reader-failed-network = Posta sunucusuyla bağlantı kurulamadı veya bağlantı kesildi ({ $reason }).
+reader-failed-sign-in = Posta sunucusu oturum açmayı kabul etmedi ({ $reason }). Hesap ayarlarından parolayı denetleyin veya tarayıcıda yeniden oturum açın.
 reader-failed-security = Posta sunucusuyla güvenli bağlantı kurulamadı ({ $reason }).
 reader-failed-other = Posta sunucusunun yanıtı: { $reason }.
 reader-retry-note = Hesap yeniden bağlandığında tekrar denenecek.
@@ -114,7 +114,7 @@ bounce-spam-blocked = İstenmeyen posta olarak reddedildi
 bounce-spam-blocked-why = Alıcı sunucu iletiyi istenmeyen posta olarak değerlendirdi.
 bounce-spam-blocked-do = Çok sayıda bağlantı, kısaltılmış URL veya büyük ek gibi istenmeyen posta şüphesi uyandırabilecek içerikleri çıkarıp yeniden deneyin. Sorun sürerse e-posta sağlayıcınıza başvurun.
 bounce-virus-detected = Virüs nedeniyle reddedildi
-bounce-virus-detected-why = Alıcı sunucu iletide veya eklerinde virüs ya da başka zararlı içerik buldu.
+bounce-virus-detected-why = Alıcı sunucu, iletide veya eklerinde zararlı içerik olabileceğini bildirdi.
 bounce-virus-detected-do = Ekleri bir antivirüs programıyla tarayın. Bazı sunucular tüm çalıştırılabilir dosyaları veya arşivleri engeller. Gerekirse bu dosyaları bir bağlantı üzerinden paylaşın.
 bounce-ip-blocklisted = Posta sunucunuz bir engelleme listesinde
 bounce-ip-blocklisted-why = Alıcı sunucu, gönderim yapan sunucunun IP adresi bir engelleme listesinde olduğu için iletiyi reddediyor.
@@ -130,7 +130,7 @@ bounce-geo-blocked-why = Alıcı sunucu, posta sunucunuzun bulunduğu ülkeden v
 bounce-geo-blocked-do = Kişiye başka bir yoldan ulaşın veya posta sağlayıcınıza sorun.
 bounce-relay-denied = Sunucu iletiyi aktarmadı
 bounce-relay-denied-why = Sunucu iletiyi başka bir sunucuya aktarmayı reddetti. Bunun nedeni genellikle oturum açılmadan gönderim yapılması veya alıcıya posta iletmeye yetkili olmayan bir sunucunun kullanılmasıdır.
-bounce-relay-denied-do = Dosya > Hesaplar bölümünde giden posta sunucusunu ve oturum açma ayarlarını denetleyin.
+bounce-relay-denied-do = Hesap ayarlarında giden posta sunucusunu ve oturum açma ayarlarını denetleyin.
 bounce-auth-failure = Gönderen adresiniz doğrulanamadı
 bounce-auth-failure-why = Alıcı sunucu, iletinin gerçekten etki alanınızdan geldiğini doğrulayamadı (SPF, DKIM veya DMARC).
 bounce-auth-failure-do = Bu bildirimi etki alanınızın postasını yöneten kişiye iletin: ayarlarının düzeltilmesi gerekiyor. Bu arada sağlayıcınızın kendi sunucusu üzerinden göndermek işe yarayabilir.
@@ -139,7 +139,7 @@ bounce-rate-limited-why = Alıcı sunucu şimdilik posta sunucunuzdan daha az il
 bounce-rate-limited-do = Bir süre bekleyip yeniden gönderin. Çok kişiye yazarken her seferinde daha az kişiye gönderin.
 bounce-greylisting = Kısa bir süre bekletildi
 bounce-greylisting-why = Alıcı sunucu, tanımadığı gönderenlerden biraz sonra yeniden denemelerini istiyor; bu, istenmeyen postaya karşı yaygın bir denetimdir.
-bounce-greylisting-do = Bir şey yapmanız gerekmez. Posta sunucuları kendiliğinden yeniden dener ve ileti genellikle bir saat içinde teslim edilir.
+bounce-greylisting-do = Posta sunucusunun yeniden denemesini bekleyin. Bu gecikme genellikle geçicidir, ancak teslimat süresi kesin değildir.
 bounce-server-error = Alıcı sunucuda bir sorun oluştu
 bounce-server-error-why = Alıcı sunucuya ulaşılamadı veya sunucu kendi sorunu nedeniyle iletiyi alamadı.
 bounce-server-error-do = Daha sonra yeniden gönderin. Başarısız olmaya devam ederse adresin @ işaretinden sonraki kısmında yazım hatası olup olmadığına bakın.
@@ -311,7 +311,7 @@ downloading-messages = { $count ->
 }
 # dosyalar bir klasöre bırakıldıktan sonra durum çubuğu: "Eklendi: 3 ileti. Hedef: Arşiv"
 import-put = { $count ->
-   *[other] Eklendi: { $messages }. Hedef: { $folder }
+   *[other] İçe aktarmak için sıraya alındı: { $messages }. Hedef: { $folder }
 }
 import-not-put = Şu iletiler klasöre eklenemedi:
 
@@ -349,8 +349,8 @@ error-import-not-mail = { $path } bir e-posta iletisi değil
 error-list-answered = posta listesi sunucusu şu durumu döndürdü: { $status }
 error-not-built = ileti oluşturulamadı
 error-outbox-waits = { $count ->
-    [one] ileti Giden Kutusu'nda bekliyor ve bir sonraki Gönder/Al ile gönderilecek
-   *[other] { $count } ileti Giden Kutusu'nda bekliyor ve bir sonraki Gönder/Al ile gönderilecek
+    [one] ileti Giden Kutusu'nda bekliyor; bir sonraki Gönder/Al işleminde gönderim yeniden denenecek
+   *[other] { $count } ileti Giden Kutusu'nda bekliyor; bir sonraki Gönder/Al işleminde gönderim yeniden denenecek
 }
 error-draft-not-removed = iletinin önceki taslağı Taslaklar'dan kaldırılamadı: { $reason }
 error-sent-but = ileti gönderildi, ancak { $problem }
@@ -365,7 +365,7 @@ error-in-folder = { $folder }: { $reason }
 
 ## Oturum açma uygulamaları
 
-sign-in-off-google = Google, Inbox Classic'i henüz doğrulamadığı için yalnızca test kullanıcıları bu uygulamayla oturum açabilir. Kendi Google oturum açma uygulamanızı veya hesabınız destekliyorsa bir uygulama parolası kullanın. Test kullanıcısıysanız Dosya > Hesaplar > Oturum Açma Uygulamaları bölümünden bu seçeneği etkinleştirebilirsiniz.
+sign-in-off-google = Yerleşik Google oturum açma seçeneği bu yapılandırmada varsayılan olarak kapalıdır ve test kullanıcıları için ayarlanmıştır. Kendi Google oturum açma uygulamanızı veya hesabınız destekliyorsa bir uygulama parolasını kullanın. Test kullanıcısıysanız Hesaplar penceresindeki Oturum Açma Uygulamaları bölümünden yerleşik seçeneği etkinleştirebilirsiniz.
 sign-in-off-other = Dosya > Hesaplar > Oturum Açma Uygulamaları bölümünde devre dışı bırakıldı. Aynı yerden yeniden etkinleştirebilirsiniz.
 sign-in-app-no-name = oturum açma uygulamasının bir adı olmalı
 sign-in-app-no-client = istemci kimliği eksik
@@ -416,9 +416,7 @@ day-sunday = Pazar
 
 ## Yapay zeka aracıları
 
-# review: changed
-agent-level-read = Postayı okuma: klasörleri, ileti listelerini ve içeriklerini görüntüleme, arama yapma
-# review: changed
+agent-level-read = Postayı okuma: klasörleri, ileti listelerini, konuşmaları, iletileri ve eklerini görüntüleme, arama yapma, ileti kurallarını inceleme ve yazıştığınız kişileri bulma
 agent-level-organize = Postayı düzenleme: okundu durumunu, bayrakları ve renklerini değiştirme, gereksiz postayı yönetme, iletileri taşıma ve arşivleme, klasör oluşturma ve yeniden adlandırma, konuşmaları izleme ve yok sayma, iletileri Silinmiş Öğeler'e taşıyarak silme ve onayınızla posta listelerinden çıkma
 agent-level-drafts = Göndermeniz için taslak yazma
 agent-level-send = Posta gönderme, her iletiyi ancak siz onayladıktan sonra
@@ -443,7 +441,7 @@ agent-undo-refused-why = Geri alınamaz: { $reason }.
 agent-undo-impossible = bu geri alınamaz
 agent-undo-not-in-folder = ileti artık o klasörde değil
 agent-undo-not-arrived = ileti henüz hedef klasörde görünmüyor
-agent-undo-sent = ileti artık Giden Kutusu’nda değil
+agent-undo-sent = ileti artık Giden Kutusu'nda değil
 agent-original-not-downloaded = özgün ileti henüz indirilmedi. Önce onu açın
 agent-turned-away = Geri çevrildi
 agent-can-nothing = Hiçbir şey
@@ -463,9 +461,7 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Bu ileti okunamıyor.
 agent-encrypted-original = Bu ileti şifreli: aracı şifreleme yapamadığı için ona yanıt veremez veya onu iletemez.
 agent-encrypted = Bu ileti şifreli. Yapay zeka aracıları içeriğini okuyamaz. Kullanıcının iletiyi Inbox Classic'te açması gerekir.
-# review: new
 agent-too-many-changes = Son 30 günde çok fazla değişiklik: bu aracı, Inbox Classic'in bir program için günlükte tuttuğu kadar değişiklik yaptı. En eskileri 30 günlük olduğunda daha fazlasını yapabilir.
-# review: new
 agent-too-many-reads = Son 30 günde çok fazla okuma: bu aracı, Inbox Classic'in bir program için günlükte tuttuğu kadar okudu. En eski okumalar 30 günlük olduğunda daha fazlasını okuyabilir.
 list-encrypted = Şifreli ileti
 agent-log-composed = Tamamlamanız için yeni bir ileti açıldı: “{ $subject }”
@@ -473,7 +469,7 @@ agent-log-refused = Gönderimi reddedildi: “{ $subject }”
 agent-log-sent = Gönderilmek üzere sıraya alındı: “{ $subject }”. Alıcı: { $to }
 agent-log-draft = Taslak kaydedildi: “{ $subject }”
 agent-log-draft-replaced = Taslak değiştirildi: “{ $subject }”
-agent-log-draft-discarded = Taslak silindi: “{ $subject }”
+agent-log-draft-discarded = Taslağı silme isteği gönderildi: “{ $subject }”
 agent-draft-note = Bu taslağı bir yapay zeka aracısı olan { $program } yazdı. Göndermeden önce alıcıları ve metni kontrol edin.
 agent-log-read = Okundu olarak işaretlendi: “{ $subject }”
 agent-log-unread = Okunmadı olarak işaretlendi: “{ $subject }”
@@ -484,7 +480,7 @@ agent-log-moved = Taşındı: “{ $subject }”. Hedef: { $folder }
 agent-log-junk = Gereksiz olarak işaretlendi: “{ $subject }”
 agent-log-not-junk = Gereksiz değil olarak işaretlendi: “{ $subject }”
 agent-log-archived = Arşivlendi: “{ $subject }”
-agent-log-folder = Klasör oluşturuldu: “{ $name }”
+agent-log-folder = Klasör oluşturma isteği gönderildi: “{ $name }”
 agent-log-unsubscribed = Abonelikten çıkma isteğini onayladınız. İleti: “{ $subject }”
 agent-log-unsubscribe-failed = “{ $subject }” konulu iletinin geldiği listeden çıkılamadı: { $reason }
 agent-log-unsubscribe-refused = Abonelikten çıkmayı onaylamadınız. Gönderenler: { $senders }
@@ -496,7 +492,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic, aşağıdaki listeye abonelikten çıkma isteği gönderir. Bunun için listenin sunduğu tek tıklamayla abonelikten çıkma seçeneğini kullanır. Başka bir şey gönderilmez. Mevcut iletiler değiştirilmez veya taşınmaz.
    *[other] Inbox Classic, aşağıdaki listelerin her birine abonelikten çıkma isteği gönderir. Bunun için her listenin sunduğu tek tıklamayla abonelikten çıkma seçeneğini kullanır. Başka bir şey gönderilmez. Mevcut iletiler değiştirilmez veya taşınmaz.
 }
-# review: new
 agent-log-flag-color = Bayrak kondu: “{ $subject }”, { $color ->
     [red] kırmızı
     [orange] turuncu
@@ -506,39 +501,29 @@ agent-log-flag-color = Bayrak kondu: “{ $subject }”, { $color ->
     [purple] mor
    *[gray] gri
 }
-# review: new
-agent-log-renamed = Klasör yeniden adlandırıldı: “{ $old }”. Yeni ad: “{ $name }”
-# review: new
+agent-log-renamed = Klasörü yeniden adlandırma isteği gönderildi: “{ $old }”. Yeni ad: “{ $name }”
 agent-log-watched = Konuşma izlemeye alındı: “{ $subject }”
-# review: new
-agent-log-ignored = Konuşma yoksayıldı: “{ $subject }”
-# review: new
-agent-log-unmarked = Konuşmanın izlenmesi veya yoksayılması kaldırıldı: “{ $subject }”
+agent-log-ignored = Konuşma yok sayıldı: “{ $subject }”
+agent-log-unmarked = Konuşmayı izleme veya yok sayma işareti kaldırıldı: “{ $subject }”
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
-agent-undo-changed = ileti o zamandan beri değiştirildi
+agent-undo-changed = ileti, geri alınacak işlemle ilgili bir değişiklik geçirdi
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
     [one] Okundu olarak işaretlendi: 1 ileti (arama: { $query })
    *[other] Okundu olarak işaretlendi: { $count } ileti (arama: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
     [one] Okunmadı olarak işaretlendi: 1 ileti (arama: { $query })
    *[other] Okunmadı olarak işaretlendi: { $count } ileti (arama: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
     [one] Bayrak kondu: 1 ileti (arama: { $query })
    *[other] Bayrak kondu: { $count } ileti (arama: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Bayrak kaldırıldı: 1 ileti (arama: { $query })
    *[other] Bayrak kaldırıldı: { $count } ileti (arama: { $query })
 }
-# review: new
 agent-log-bulk-color = { $count ->
     [one] Bayrak kondu: 1 ileti
    *[other] Bayrak kondu: { $count } ileti
@@ -551,33 +536,27 @@ agent-log-bulk-color = { $count ->
     [purple] mor
    *[gray] gri
 } (arama: { $query })
-# review: new
 agent-log-bulk-moved = { $count ->
     [one] Taşındı: 1 ileti. Hedef: { $folder } (arama: { $query })
    *[other] Taşındı: { $count } ileti. Hedef: { $folder } (arama: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
     [one] Arşivlendi: 1 ileti (arama: { $query })
    *[other] Arşivlendi: { $count } ileti (arama: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
     [one] Gereksiz olarak işaretlendi: 1 ileti (arama: { $query })
    *[other] Gereksiz olarak işaretlendi: { $count } ileti (arama: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
     [one] Gereksiz değil olarak işaretlendi: 1 ileti (arama: { $query })
    *[other] Gereksiz değil olarak işaretlendi: { $count } ileti (arama: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
     [one] Silinmiş Öğeler'e taşındı: 1 ileti (arama: { $query })
    *[other] Silinmiş Öğeler'e taşındı: { $count } ileti (arama: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Son 15 dakikada
     [hour] Son 1 saatte
@@ -587,129 +566,99 @@ agent-undo-span = { $span ->
    *[all] Son 30 günde
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] { $program } programı bu sürede geri alınabilecek bir değişiklik yapmadı.
     [one] { $program } programının bu sürede yaptığı değişiklik geri alınsın mı?
    *[other] { $program } programının bu sürede yaptığı { $count } değişiklik geri alınsın mı?
 }
-# review: new
-agent-undo-since-detail = İletiler geldikleri klasörlere döner, okundu durumları ve bayraklar eski hâline gelir, hâlâ Giden Kutusu'nda bekleyen iletiler silinir. Sizin veya sunucunun o zamandan beri değiştirdikleri olduğu gibi bırakılır.
+agent-undo-since-detail = Geri alınabilen değişiklikler en yeniden başlayarak işlenir. İşleme göre iletilerin klasörü, okundu durumu veya bayrağı geri yüklenir; hâlâ Giden Kutusu'nda bekleyen iletiler silinir. İlgili durum değişmişse işlem atlanabilir veya kısmen geri alınabilir. Sonradan seçilen bir bayrak rengi de kaybolabilir.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Hiçbir şey geri alınmadı.
     [one] 1 değişiklik geri alındı.
    *[other] { $count } değişiklik geri alındı.
 }
-# review: new
 agent-undo-left-gone = { $count ->
-    [one] 1 ileti artık değişikliğin koyduğu yerde değildi.
-   *[other] { $count } ileti artık değişikliğin koyduğu yerde değildi.
+    [one] 1 ileti artık işlemin uygulandığı konumda değildi.
+   *[other] { $count } ileti artık işlemin uygulandığı konumda değildi.
 }
-# review: new
 agent-undo-left-changed = { $count ->
-    [one] 1 ileti o zamandan beri sizin tarafınızdan veya sunucuda değiştirildiği için olduğu gibi bırakıldı.
-   *[other] { $count } ileti o zamandan beri sizin tarafınızdan veya sunucuda değiştirildiği için olduğu gibi bırakıldı.
+    [one] 1 iletinin ilgili durumu sonradan değiştiği için işlem tamamen geri alınamadı.
+   *[other] { $count } iletinin ilgili durumu sonradan değiştiği için işlemler tamamen geri alınamadı.
 }
-# review: new
 agent-undo-left-sent = { $count ->
     [one] 1 ileti Giden Kutusu'ndan çoktan çıkmıştı.
    *[other] { $count } ileti Giden Kutusu'ndan çoktan çıkmıştı.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 değişiklik geri alınamaz.
    *[other] { $count } değişiklik geri alınamaz.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
     [accept] Bu ileti “{ $summary }” davetini ({ $when }) kabul ediyor.
     [tentative] Bu ileti “{ $summary }” davetini ({ $when }) geçici olarak kabul ediyor.
    *[decline] Bu ileti “{ $summary }” davetini ({ $when }) reddediyor.
-} Düzenleyenin takvimi bu yanıtı işler. Davete verdiğiniz yanıt yalnızca ileti gönderildikten sonra değişir.
+} Yanıt, takviminde işlenmesi için düzenleyene gönderilir. Inbox Classic'teki yanıt durumunuz ancak ileti gönderildikten sonra değişir; bu, düzenleyenin yanıtı aldığı veya işlediği anlamına gelmez.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Kabul Edildi: { $summary }
     [tentative] Kesin Değil: { $summary }
    *[decline] Reddedildi: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name } bu daveti kabul etti.
     [tentative] { $name } bu daveti geçici olarak kabul etti.
    *[decline] { $name } bu daveti reddetti.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] 1 ileti okudu
    *[other] { $count } ileti okudu
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] 1 ek açtı
-   *[other] { $count } ek açtı
+    [one] 1 ekin içeriğini okudu
+   *[other] { $count } ekin içeriğini okudu
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] bir kez arama yaptı
    *[other] { $count } kez arama yaptı
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] bir kez ileti listesine baktı
    *[other] { $count } kez ileti listelerine baktı
 }
 # each read under that row
-# review: new
 agent-read-message = Okudu: “{ $subject }”
-# review: new
 agent-read-conversation = { $count ->
     [one] Konuşmayı okudu: “{ $subject }” (1 ileti)
    *[other] Konuşmayı okudu: “{ $subject }” ({ $count } ileti)
 }
-# review: new
-agent-read-attachment = Ek açtı: “{ $name }”. İleti: “{ $subject }”
-# review: new
+agent-read-attachment = Ekin içeriğini okudu: “{ $name }”. İleti: “{ $subject }”
 agent-read-search = { $count ->
     [one] Arama yaptı: “{ $query }”, 1 ileti
    *[other] Arama yaptı: “{ $query }”, { $count } ileti
 }
-# review: new
-agent-read-people = “{ $query }” ile başlayan kişileri aradı
-# review: new
+agent-read-people = Adı veya adresi “{ $query }” ile başlayan kişileri aradı
 agent-read-list = { $count ->
-    [one] 1 iletiye baktı. Klasör: { $folder }
-   *[other] { $count } iletiye baktı. Klasör: { $folder }
+    [one] 1 ileti liste kaydını görüntüledi. Kapsam: { $folder }
+   *[other] { $count } ileti liste kaydını görüntüledi. Kapsam: { $folder }
 }
-# review: new
 agent-read-changes = { $count ->
-    [one] 1 yeni iletiye baktı
-   *[other] { $count } yeni iletiye baktı
+    [one] Yeni veya değişen 1 ileti kaydını görüntüledi
+   *[other] Yeni veya değişen { $count } ileti kaydını görüntüledi
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = { $terminal } uygulamasından başlatılan programlar
-# review: new
 agent-terminal-programs-windows = Bir terminalden ({ $terminal }) başlatılan programlar
-# review: new
 agent-terminal-programs-linux = Bir terminalden ({ $terminal }) başlatılan programlar
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = { $terminal } uygulamasından başlatılan bir program
-# review: new
 agent-terminal-program-windows = Bir terminalden ({ $terminal }) başlatılan bir program
-# review: new
 agent-terminal-program-linux = Bir terminalden ({ $terminal }) başlatılan bir program
-# review: new
 agent-connect-title-terminal = { $programs } postanıza erişmek istiyor
-# review: new
 agent-connect-terminal-detail = Bu terminalden başlattığınız her yapay zeka aracısı, burada izin verdiğiniz erişimi paylaşır. Bir aracıya ayrı erişim vermek için aracının MCP ayarlarında bağımsız değişkenlerine --name ve seçtiğiniz bir ad ekleyin.
-# review: new
 agent-connect-claimed = Program kendini { $claimed } olarak tanıttı. Inbox Classic, onu hangi programın başlattığını kontrol etti: { $program }.
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
@@ -764,7 +713,7 @@ pgp-key-expired = Süresi doldu: { $date }
 pgp-key-revoked = İptal edildi
 pgp-key-revoked-why = İptal edildi: { $reason }
 pgp-key-not-valid = Geçerli değil
-pgp-key-locked = Gizli anahtarı koruyan anahtar bulunamadığı için kullanılamıyor. Depo: { $store }. Gizli anahtarınızın yedeğini yeniden içe aktarın.
+pgp-key-locked = Gizli anahtarı koruyan anahtara erişilemiyor. Depo: { $store }. Önce deponun kullanılabilir ve kilidinin açık olduğunu denetleyin. Koruma anahtarı kaybolduysa gizli anahtarınızın yedeğini yeniden içe aktarın.
 pgp-source-own = Inbox Classic'te oluşturuldu
 pgp-source-file = Bir dosyadan içe aktarıldı
 pgp-source-paste = Yapıştırıldı
@@ -816,18 +765,18 @@ pgp-why-key-not-valid = Geçerli olmayan bir anahtarla imzalanmış
 pgp-why-not-for-you = Başka alıcılar için imzalanmış ve size iletilmiş
 pgp-why-not-key-in-use = { $address } için kullanılan anahtardan farklı bir anahtarla imzalanmış
 pgp-part-pictures-loaded = { $label }. Resimler internetten yüklendi
-pgp-error-no-own-key = İmzalamak veya şifrelemek için şu adrese ait bir anahtarınız yok: { $address }. Araçlar > Şifreleme Anahtarları'nda bir anahtar oluşturun veya İmzala ve Şifrele'yi kapatın.
+pgp-error-no-own-key = İmzalamak veya şifrelemek için şu adrese ait bir anahtarınız yok: { $address }. Şifreleme Anahtarları penceresinde bir anahtar oluşturun veya İmzala ve Şifrele seçeneklerini kapatın.
 pgp-error-missing-keys = { $count ->
-    [one] Şifrelemek için bu alıcının anahtarı yok: { $addresses }.
-   *[other] Şifrelemek için bu alıcıların anahtarı yok: { $addresses }.
+    [one] Şifrelemek için bu alıcının kullanılabilir anahtarı yok: { $addresses }.
+   *[other] Şifrelemek için bu alıcıların kullanılabilir anahtarı yok: { $addresses }.
 }
-pgp-error-encrypted-quote = Bu ileti şifreli bir iletiyi alıntılıyor veya iletiyor, bu yüzden yalnızca şifreli gönderilebilir. Şifrele'yi açın veya alıntılanan metni kaldırın.
+pgp-error-encrypted-quote = Bu ileti şifreli bir iletiden alınan metin, resim veya ekler içeriyor. Şifrele seçeneğini açın veya bu içeriğin tamamını kaldırın.
 pgp-error-protect = İleti imzalanamadı veya şifrelenemedi: { $reason }
 pgp-found-keys = Şu adresler için anahtar bulundu: { $addresses }.
 pgp-found-none = Şu adresler için anahtar bulunamadı: { $addresses }. Bu adreslerin sahiplerinden ortak anahtarlarını göndermelerini isteyin.
 pgp-found-no-key = Anahtar bulunamadı.
 pgp-find-unavailable = Anahtar araması yapılamadı: { $error }
-pgp-publish-pending = keys.openpgp.org şu adreslere onay bağlantıları gönderdi: { $addresses }. Anahtarınızın her adres için bulunabilmesi, o adrese gelen bağlantıyı onaylamanıza bağlıdır.
+pgp-publish-pending = keys.openpgp.org hizmetinden şu adreslere onay bağlantısı göndermesi istendi: { $addresses }. Gelen bağlantıları onaylayın; anahtarınız ancak onayladığınız adreslerle bulunabilir.
 pgp-publish-done = Anahtarınız keys.openpgp.org'da şu adresler için yayımlandı: { $addresses }.
 pgp-publish-failed = Anahtar yayımlanamadı: { $error }
 pgp-keyserver-off = keys.openpgp.org'da anahtar arama, { $settings } bölümünde kapalı.
@@ -866,7 +815,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] { $count } alıcı için kullanılabilir anahtar yok. Anahtarlarını bulun veya bu alıcıları iletiden kaldırın. İletide şifreli iletilerden alınan metin, resim veya ek varsa şifrelemeden gönderemezsiniz.
 }
 pgp-details-part = Bölüm { $number }: { $label }
-# review: new
 attachment-from-part = Bölüm { $number } içinden: { $label }
 pgp-details-signed = İmzalandı: { $when }, anahtar: { $key }
 pgp-details-unknown-key = Sizde olmayan bir anahtarla imzalandı: { $key }
@@ -875,11 +823,8 @@ pgp-details-for = Şifrelendiği anahtarlar: { $keys }
 pgp-details-plain = İmzalı değil ve şifreli değil
 pgp-bar-parts = Bu iletinin { $count } bölümü var: { $list }. Her bölüm nasıl korunduğunu gösterir.
 pgp-bar-count-verified = Doğrulanmış: { $count }
-# review: new
 pgp-bar-count-encrypted-signed = { $count } şifreli ve imzalı
-# review: new
 pgp-bar-count-encrypted = { $count } şifreli
-# review: new
 pgp-bar-count-signed = { $count } imzalı
 pgp-bar-count-warning = { $count ->
     [one] 1 bölüm dikkat gerektiriyor
@@ -1014,8 +959,8 @@ setup-skipped-rules-account = { $count ->
    *[other] { $count } ileti kuralı burada olmayan hesaplara ait, bu yüzden atlandı.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 kuralın hedef klasörü henüz bulunamadı. Hesap eşitlendiğinde klasör kuralla eşleştirilecek.
-   *[other] { $count } kuralın hedef klasörleri henüz bulunamadı. Hesaplar eşitlendiğinde klasörler kurallarla eşleştirilecek.
+    [one] 1 kuralın hedef klasörü henüz bulunamadı. Hesap eşitlendiğinde klasörü eşleştirme yeniden denenecek.
+   *[other] { $count } kuralın hedef klasörleri henüz bulunamadı. Hesaplar eşitlendiğinde klasörleri eşleştirme yeniden denenecek.
 }
 setup-added-trusted-senders = { $count ->
     [one] 1 güvenilen gönderen eklendi.
@@ -1026,7 +971,7 @@ setup-account-servers = { $imap } ve { $smtp } ({ $signin })
 setup-file-name = Inbox Classic ayarları ve hesapları
 setup-skipped-unreachable = Atlandı: { $name }. Oturum açma hizmetine ulaşılamadı. Oturum Açma Uygulamaları'nda yeniden ekleyin.
 attachment-runs-programs = “{ $name }” kod çalıştırabilen bir dosya türünde olduğu için Inbox Classic tarafından doğrudan açılmaz. Kaynağına güveniyorsanız dosyayı kaydedip kendiniz açabilirsiniz.
-attachment-decrypted-note = Bu ek, şifreli bir iletiden geliyor. Açabilmeniz için bu bilgisayarda, kullanıcı hesabınıza ait bir klasöre şifresi çözülmüş geçici bir kopyası kaydedilir. Dosyayı açan programı kapatmanız kopyayı silmez. 24 saatten eski kopyalar Inbox Classic'in bir sonraki açılışında temizlenir.
+attachment-decrypted-note = Bu ek, şifreli bir iletiden geliyor. Açabilmeniz için kullanıcı hesabınıza ait geçici klasöre şifresi çözülmüş bir kopyası kaydedilir. Dosyayı açan programı kapatmanız kopyayı silmez. Inbox Classic her açılışta 24 saatten eski kopyaları temizlemeyi dener.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] Sunucuda { $messages } { $folder } klasörüne taşınamadı; ileti yeniden { $from } klasöründe: { $reason }
@@ -1055,46 +1000,29 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = İletilerde PDF dosyalarını göster
-# review: new
 preview-pdf-off = PDF dosyaları iletilerde gösterilmiyor.
-# review: new
-preview-pdf-off-crashed = Bir PDF dosyası gösterilirken Inbox Classic'i kapattı, bu yüzden PDF dosyaları artık iletilerde gösterilmiyor. Resimler hâlâ gösteriliyor. PDF dosyalarını yeniden göstermek için { $settings } altında { $option } seçeneğini açın.
-# review: new
+preview-pdf-off-crashed = Bir dosyanın önizlemesi tamamlanmadan Inbox Classic kapandı. Bu nedenle PDF önizlemeleri kapatıldı; resimler gösterilmeye devam eder. PDF dosyalarını yeniden göstermek için { $settings } bölümündeki { $option } seçeneğini açın.
 preview-pdf-details = { $count ->
     [one] { $count } sayfa, { $size }
    *[other] { $count } sayfa, { $size }
 }
-# review: new
 preview-page-alt = { $name }, sayfa { $page }/{ $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Sayfayı görmek için dosyayı açın
    *[other] { $count } sayfanın tümünü görmek için dosyayı açın
 }
-# review: new
 preview-more-files = { $count ->
     [one] 1 dosya daha yukarıdaki listede
    *[other] { $count } dosya daha yukarıdaki listede
 }
-# review: new
 preview-tile-downloading = İndiriliyor…
-# review: new
 preview-tile-preparing = Hazırlanıyor…
-# review: new
 preview-tile-format = { $format } resimleri henüz gösterilmiyor
-# review: new
 preview-tile-password = Parolayla korunuyor: parolayı girmek için açın
-# review: new
 preview-tile-too-large = Gösterilemeyecek kadar büyük
-# review: new
 preview-tile-unreadable = Gösterilemiyor
-# review: new
-preview-tile-timed-out = Gösterilmesi çok uzun sürdü
-# review: new
-preview-tile-crashed = Gösterilmiyor: Inbox Classic'i bir kez kapattı
-# review: new
+preview-tile-timed-out = Önizleme zaman aşımına uğradı
+preview-tile-crashed = Önceki önizleme yarıda kaldığı veya takıldığı için gösterilmiyor
 preview-tile-off = Inbox Classic yeniden başlayana kadar gösterilmiyor
-# review: new
 preview-not-printed = { $name } ({ $details }) yazdırılmaz. Yazdırmak için açın.

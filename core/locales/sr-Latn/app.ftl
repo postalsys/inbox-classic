@@ -209,7 +209,7 @@ ui-hyperlink = Hiperveza
 ui-hyperlink-intro = Adresa na koju će voditi veza u izabranom tekstu.
 ui-edit-hyperlink = Uredi hipervezu
 ui-edit-hyperlink-intro = Odredišna adresa veze. Izbrišite adresu da biste uklonili vezu i zadržali tekst.
-ui-not-a-picture = Ova datoteka nije PNG, JPEG ili GIF slika ili je veća od 10 MB.
+ui-not-a-picture = Datoteka ne može da se pročita kao PNG, JPEG, GIF ili WebP slika ili je veća od 10 MB.
 ui-format-color = Boja fonta
 ui-format-numbers = Numerisana lista
 ui-format-bullets = Lista sa znakovima za nabrajanje
@@ -258,14 +258,14 @@ ui-attachment-not-saved = Prilog nije moguće sačuvati.
 ui-not-downloaded = Poruka još nije preuzeta.
 ui-leave-list = Da li želite da se odjavite sa ove liste za slanje?
 ui-leave-one-click = Inbox Classic će poslati zahtev za otkazivanje pretplate na { $target }. Neće se otvoriti nijedna veb-stranica niti će biti poslata poruka e-pošte.
-ui-leave-mail = Da biste otkazali pretplatu, pošaljite poruku e-pošte na { $target }. Inbox Classic će je pripremiti za vas. Pošaljite poruku kao potvrdu.
+ui-leave-mail = Inbox Classic će pripremiti zahtev za otkazivanje pretplate za adresu { $target }. Proverite poruku i pošaljite je da biste zatražili otkazivanje.
 ui-leave-web = Stranica za odjavu sa liste otvoriće se u pregledaču ({ $target }).
-ui-unsubscribing = Otkazivanje pretplate: { $target }...
+ui-unsubscribing = Slanje zahteva za otkazivanje pretplate: { $target }...
 ui-cannot-unsubscribe = Ova poruka ne nudi opciju za otkazivanje pretplate.
-ui-unsubscribed = Zahtev za otkazivanje pretplate je prihvaćen. Prema odgovoru liste, ove poruke vam više neće stizati.
+ui-unsubscribed = Lista je prihvatila zahtev za otkazivanje pretplate.
 ui-not-unsubscribed = Otkazivanje pretplate nije uspelo: { $reason }
 ui-event-span = { $start } do { $end }
-ui-event-floating = { $when } (vreme pošiljaoca)
+ui-event-floating = { $when } (vreme navedeno u pozivnici)
 ui-invitation = Pozivnica: { $title }
 ui-invitation-updated = Ažurirana pozivnica: { $title }
 ui-invitation-canceled = Otkazano: { $title }
@@ -273,7 +273,7 @@ ui-invitation-answer = Odgovor na pozivnicu: { $title }
 ui-no-title = (bez naslova)
 ui-organizer = Organizator: { $name }
 ui-invitation-not-read = Pozivnicu nije moguće pročitati.
-ui-no-calendar = Na ovom računaru nema aplikacije za kalendar koja može da otvori pozivnice (datoteke .ics).
+ui-no-calendar = Pozivnica (datoteka .ics) nije mogla da se otvori. Proverite da li je instalirana aplikacija za kalendar koja može da otvara takve datoteke.
 ui-messages-not-changed = Poruke nije moguće promeniti.
 ui-new-folder-in-selected = Nova fascikla biće napravljena unutar izabrane fascikle.
 ui-new-folder-at-top = Nova fascikla biće napravljena na najvišem nivou naloga.
@@ -300,12 +300,12 @@ ui-found-mx = Inbox Classic je prepoznao vašeg pružaoca usluge e-pošte i popu
 ui-found-srv = Ova podešavanja su pronađena u DNS zapisima vašeg domena.
 ui-found-autodiscover = Ova podešavanja je pronašao Microsoft Autodiscover (Exchange).
 ui-found-other = Za ovu adresu su pronađena ova podešavanja.
-ui-app-password-needed = { $provider } ne prihvata vašu uobičajenu lozinku u programima za e-poštu. U podešavanjima naloga kod tog pružaoca usluge napravite lozinku za aplikaciju i unesite je u polje Lozinka u sledećem koraku.
+ui-app-password-needed = { $provider }: Uobičajena lozinka ne može da se koristi ovde. Ako nalog podržava lozinke za aplikacije, napravite jednu u bezbednosnim podešavanjima pružaoca usluge i unesite je u polje Lozinka u sledećem koraku.
 ui-app-password-open = { $provider }: Da li želite da otvorite uputstvo u pregledaču?
 ui-plain-warning = Bez šifrovanja svako ko presretne vaš mrežni saobraćaj može da pročita vašu lozinku i poruke. Ovu vezu koristite samo sa serverom na svom računaru ili u lokalnoj mreži.
 ui-continue-ask = Da li želite da nastavite?
 ui-add-sign-in-app = Dodaj aplikaciju za prijavljivanje...
-ui-turned-off = Aplikacija { $name } je isključena na ovom računaru.
+ui-turned-off = Aplikacija { $name } ne nudi se pri dodavanju novih naloga na ovom računaru.
 ui-off-here = Isključeno na ovom računaru.
 ui-why = Zašto?
 ui-more-sign-in = Još opcija za prijavljivanje...
@@ -338,7 +338,7 @@ ui-enter-password = Unesite lozinku za nalog { $account }.
 ui-signs-in-with = Aplikacija za prijavljivanje: { $app }. Prijavljivanje se obavlja u pregledaču, a nalog koristi servere ove aplikacije.
 ui-keep-password = Ostavite polje lozinke prazno da biste zadržali trenutnu lozinku.
 ui-remove-account = Ukloni nalog
-ui-remove-account-ask = Da li želite da uklonite ovaj nalog iz programa Inbox Classic? Pošta ostaje na serveru. Sa ovog računara uklanjaju se lokalne kopije poruka i sačuvani podaci za prijavu.
+ui-remove-account-ask = Da li želite da uklonite ovaj nalog iz programa Inbox Classic? Sa ovog računara brišu se lokalne poruke, radne verzije, red za slanje i podaci za prijavu naloga. Poruke na serveru ostaju.
 ui-col-email = Adresa e-pošte
 ui-col-incoming = Server dolazne pošte
 ui-type-email = Unesite svoju adresu e-pošte, na primer ime@example.com.
@@ -421,7 +421,6 @@ ui-save-attachments = Sačuvaj priloge
 ui-attachment-open = Otvori
 ui-attachment-save-as = Sačuvaj kao...
 ui-attachment-save-all = Sačuvaj sve...
-# review: new
 ui-attachment-show-in-message = Prikaži u poruci
 ui-attachments-strip = Prilozi
 ui-attachment-note-title = Otvaranje ove datoteke
@@ -453,11 +452,8 @@ ui-let-agents-connect = &Dozvoli AI agentima da se povežu sa programom Inbox Cl
 ui-change-button = Promeni…
 ui-undo-button = Opozovi
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 ui-undo-since-button = Opozovi za period…
-# review: new
 ui-undo-since-span = Opozovi ono što je ovaj program uradio:
-# review: new
 ui-take-back = Opozovi
 ui-rules-title = Pravila za poruke
 ui-rules-intro = Pravila obrađuju nove poruke u Prijemnom sandučetu dok Inbox Classic radi. Primenjuju se redom na poruke koje ispunjavaju njihove kriterijume. Kada pravilo premesti poruku iz Prijemnog sandučeta, na nju se više ne primenjuju druga pravila.
@@ -603,13 +599,10 @@ ui-download-ahead-all = Sve poruke
 ui-download-ahead-never = Samo pri otvaranju
 ui-download-limit = Ograničenje pr&ostora po nalogu:
 ui-send-delay = Odlaganje pre &slanja:
-ui-send-delay-note = Dok poruka čeka na slanje, slanje možete da otkažete komandom Opozovi.
+ui-send-delay-note = Slanje možete da otkažete komandom Opozovi dok traje izabrano odlaganje. Kada ono istekne, ova mogućnost nestaje, što ne potvrđuje da je poruka isporučena.
 ui-dark-messages = Prikazuj poruke na tamnoj pozadini kada je sistem u tamnom režimu
-# review: new
 ui-preview-show = Prikaži pri&loge u porukama
-# review: new
-ui-preview-show-note = Prikazuje slike i prve stranice PDF datoteka posle teksta poruke. Inbox Classic sam pravi ove preglede, pa ništa iz datoteke ne može da se pokrene.
-# review: new
+ui-preview-show-note = Prikazuje slike i prve stranice PDF datoteka posle teksta poruke. Inbox Classic pravi preglede bez izvršavanja skripti i preuzimanja sadržaja sa interneta iz tih datoteka.
 ui-preview-pdfs = Prikaži PDF &datoteke u porukama
 ui-sending-in = Poruka { $subject } se šalje za { $count ->
     [one] { $count } sekundu
@@ -618,12 +611,12 @@ ui-sending-in = Poruka { $subject } se šalje za { $count ->
 }
 ui-send-undone = Poruka { $subject } nije poslata. Ponovo je otvorena za uređivanje.
 ui-send-too-late = Slanje poruke { $subject } više ne može da se otkaže.
-ui-outbox-status-undo = Šalje se u { $time }
-ui-download-note = Unapred preuzete poruke otvaraju se odmah. Kada se prekorači ograničenje skladišta, najstarije lokalne kopije se uklanjaju i ponovo preuzimaju kada ih otvorite.
+ui-outbox-status-undo = Planirano slanje: { $time }
+ui-download-note = Unapred preuzete poruke otvaraju se odmah. Kada se prekorači ograničenje, stariji sadržaj poruka uklanja se iz keša i ponovo preuzima po potrebi. Radne verzije i poruke otvorene u tekućoj sesiji zadržavaju se, pa ograničenje može da bude prekoračeno.
 ui-attachment-downloading = Preuzimanje ove poruke nije završeno. Pokušajte ponovo kada se preuzimanje završi.
 ui-trusted-senders-button = P&ouzdani pošiljaoci...
 ui-trusted-senders-title = Pouzdani pošiljaoci
-ui-trusted-senders-note = Slike u porukama ovih pošiljalaca preuzimaju se automatski kada vaš pružalac usluge e-pošte potvrdi domen pošiljaoca.
+ui-trusted-senders-note = Slike ovih pošiljalaca preuzimaju se automatski kada pružalac usluge potvrdi domen pošiljaoca, osim u neželjenoj pošti. Spoljne slike u šifrovanim delovima zahtevaju vašu dozvolu pri svakom otvaranju poruke.
 ui-trusted-everyone-at = Svi sa domena { $domain }
 ui-trusted-senders-empty = Još nije dodat nijedan pouzdani pošiljalac.
 ui-search-encrypted = Pretraži &šifrovane poruke
@@ -651,7 +644,7 @@ ui-list-pictures = Prikazuj &slike pošiljalaca na listi poruka
 ui-list-pictures-note = U rasporedu sa kolonama prikazuje logotipe brendova ili slike iz Adresara kada je potvrđen domen pošiljaoca. Ako nema slike, prikazuju se inicijali. Preuzeti logotipi se čuvaju i ponovo koriste za više poruka.
 ui-card-picture = Slika:
 ui-card-picture-choose = &Izaberi...
-ui-picture-not-picture = Ova datoteka nije PNG ili JPEG slika.
+ui-picture-not-picture = Datoteka ne može da se pročita kao PNG ili JPEG slika.
 ui-picture-too-large = Ova slika je prevelika. Izaberite sliku od najviše 10 MB, čija širina i visina nisu veće od 8000 piksela.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
@@ -688,7 +681,7 @@ ui-keys-backup-saved = Rezervna kopija je sačuvana.
 ui-keys-import-title = Uvezi ključ
 ui-keys-import-passphrase = Ovaj privatni ključ je zaštićen pristupnom frazom. Unesite je da biste uvezli ključ:
 ui-keys-file-filter = OpenPGP ključevi
-ui-keys-use-for = Da li želite da koristite ovaj ključ za sledeće adrese: { $addresses }? Poruke koje šaljete sa tih adresa biće potpisane ovim ključem. Moći ćete i da čitate poruke šifrovane njegovim javnim delom.
+ui-keys-use-for = Da li želite da izaberete ovaj ključ za potpisivanje i šifrovanje za sledeće adrese: { $addresses }? Poruke šifrovane njegovim javnim delom mogu da se dešifruju ovde kada je privatni ključ dostupan.
 ui-keys-use = &Koristi ga
 ui-keys-not-now = &Ne sada
 ui-keys-remove-own = Da li želite da uklonite svoj ključ { $fingerprint }? Za poruke koje se mogu dešifrovati samo tim ključem moraćete ponovo da uvezete rezervnu kopiju privatnog ključa.
@@ -709,6 +702,7 @@ ui-verify-title = Proveri ključ
 ui-verify-intro = Proveravate ključ za: { $name }. Zamolite vlasnika da vam uživo ili telefonom pročita otisak ključa iz svoje aplikacije. Ne koristite otisak poslat e-poštom za poređenje. Neko ko može da zameni ključ u poruci može da zameni i taj otisak.
 ui-verify-fingerprint = Otisak sačuvanog ključa:
 ui-verify-marks = { $count ->
+    [0] Ključ ne sadrži nijednu adresu e-pošte, pa potvrda vlasništva ne može da se sačuva.
     [1] Proverite da li ova adresa pripada vlasniku ključa: { $addresses }. Kliknite Podudaraju se samo ako se poklapaju i otisak i adresa. U suprotnom kliknite Razlikuju se.
    *[other] Proverite da li sve ove adrese pripadaju vlasniku ključa: { $addresses }. Kliknite Podudaraju se samo ako se poklapaju i otisak i sve adrese. U suprotnom kliknite Razlikuju se.
 }
@@ -738,9 +732,9 @@ ui-compose-encrypt-off = &Isključi šifrovanje
 ui-compose-keep-encrypted = &Zadrži šifrovanje
 ui-setup-export-title = Izvezi podešavanja i naloge
 ui-setup-import-title = Uvezi podešavanja i naloge
-ui-setup-export-intro = Izaberite šta želite da prenesete na drugi računar. Datoteka ne sadrži poruke: tamo se ponovo preuzimaju.
+ui-setup-export-intro = Izaberite šta želite da prenesete na drugi računar. Datoteka ne sadrži poruke. Pošta sa servera može ponovo da se preuzme, ali lokalne radne verzije i red za slanje ne prenose se.
 ui-setup-use-passphrase = &Zaštiti datoteku pristupnom frazom
-ui-setup-passphrase-note = Uz pristupnu frazu datoteka je šifrovana i sadrži sačuvane lozinke, podatke za prijavu i privatne ključeve. Bez pristupne fraze moraćete ponovo da se prijavite na naloge na drugom računaru, lozinkom ili putem pregledača.
+ui-setup-passphrase-note = Uz pristupnu frazu datoteka se šifruje i može da uključi dostupne sačuvane lozinke, podatke za prijavu i privatne ključeve iz izabranih kategorija. Bez pristupne fraze moraćete ponovo da se prijavite na naloge na drugom računaru, lozinkom ili putem pregledača.
 ui-setup-export-button = &Izvezi...
 ui-setup-file-filter = Podešavanja i nalozi programa Inbox Classic
 ui-setup-ask-passphrase = Ova datoteka je zaštićena pristupnom frazom. Unesite je da biste videli šta datoteka sadrži:

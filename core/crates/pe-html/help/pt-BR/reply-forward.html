@@ -1,8 +1,8 @@
 <h1>Responder e encaminhar</h1>
 <p class="summary">Responda ao remetente ou a todos, ou encaminhe uma mensagem para outra pessoa.</p>
 <ul>
-    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) responde ao remetente.</li>
-    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) responde ao remetente e aos outros destinatários da mensagem.</li>
+    <li><b data-text="ui-tb-reply"></b> (<kbd data-command="reply"></kbd>) usa o endereço Reply-To da mensagem, quando presente; caso contrário, responde ao remetente.</li>
+    <li><b data-text="ui-tb-reply-all"></b> (<kbd data-command="reply_all"></kbd>) usa o endereço de resposta e os destinatários visíveis em Para e Cc, excluindo seus próprios endereços. Endereços ocultos em Cco não são revelados.</li>
     <li><b data-text="ui-tb-forward"></b> (<kbd data-command="forward"></kbd>) encaminha a mensagem aos destinatários que você escolher.</li>
 </ul>
 <p>Respostas e encaminhamentos usam a conta que recebeu a mensagem original. Se a mensagem foi enviada para um dos outros endereços de envio da conta, esse endereço é usado como remetente.</p>
@@ -11,5 +11,5 @@
 <p>Em um encaminhamento, a mensagem original fica no texto desde o início, porque é ela que você envia.</p>
 <p>Uma resposta segue o formato da mensagem original. Uma resposta a uma mensagem de texto simples é texto simples, com a mensagem original citada com <b>&gt;</b>, a menos que você aplique formatação à resposta.</p>
 <h2>Encaminhar várias mensagens</h2>
-<p>Selecione várias mensagens e clique em <b data-text="ui-tb-forward"></b>. É criada uma mensagem nova com todas elas anexadas como arquivos <code>.eml</code>. O assunto é o da primeira mensagem.</p>
+<p>Selecione várias mensagens e clique em <b data-text="ui-tb-forward"></b>. É criada uma mensagem nova com todas elas anexadas como arquivos <code>.eml</code>. O assunto usa o prefixo Fw: seguido do assunto da primeira mensagem.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:signatures"></a> <a href="topic:attachments"></a></nav>
