@@ -758,8 +758,7 @@ pgp-pending = На { $date } беше намерен друг ключ за { $a
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Подписано от { $signer }, притежателят на ключа е потвърден
 pgp-part-signed = Подписано от { $signer } (притежателят на ключа не е потвърден)
-# review: changed
-pgp-part-other = Подписано от { $signer }, но подписът не потвърждава посочения подател
+pgp-part-other = Подписано от { $signer }, който не е подателят
 pgp-part-unknown-key = Подписано, но ключът не е известен
 pgp-part-not-signed = Не е подписано
 pgp-part-not-checked = Подписът не е проверен

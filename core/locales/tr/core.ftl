@@ -745,8 +745,7 @@ pgp-pending = { $date } tarihinde şu adres için farklı bir anahtar bulundu: {
 ## İmzalı ve şifreli postayı okuma (protect.rs)
 pgp-part-verified = İmzalayan: { $signer }, anahtar doğrulandı
 pgp-part-signed = İmzalayan: { $signer } (anahtar doğrulanmadı)
-# review: changed
-pgp-part-other = İmzalayan: { $signer }; imza gönderenle kesin olarak ilişkilendirilemedi
+pgp-part-other = İmzalayan: { $signer } (gönderenden farklı biri)
 pgp-part-unknown-key = İmzalı, ancak anahtar bilinmiyor
 pgp-part-not-signed = İmzalı değil
 pgp-part-not-checked = İmza denetlenmedi

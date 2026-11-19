@@ -809,8 +809,7 @@ pgp-pending = Rastas kitas raktas. Adresas: { $address }. Radimo data: { $date }
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Pasirašė: { $signer }; rakto savininkas patikrintas
 pgp-part-signed = Pasirašė: { $signer } (rakto savininkas nepatikrintas)
-# review: changed
-pgp-part-other = Nepavyko patvirtinti, kad parašas atitinka laiško siuntėją. Pasirašė: { $signer }
+pgp-part-other = Pasirašė: { $signer } (ne laiško siuntėjas)
 pgp-part-unknown-key = Pasirašyta, bet raktas nežinomas
 pgp-part-not-signed = Nepasirašyta
 pgp-part-not-checked = Parašas netikrintas
