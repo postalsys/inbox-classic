@@ -492,7 +492,7 @@ extension UITest {
         step("message rules")
         selectFolder(named: "Inbox")
         _ = await waitUntil(20) { self.list.numberOfRows >= 4 && self.main.core.folders(self.main.mailbox.currentAccount).count > 1 }
-        command(.messageRules)
+        check(fromMenu(.messageRules), "Tools > Message Rules is in the menu bar")
         guard let rules = await waitWindow("rules", 10) else { throw Failed(description: "no Message Rules window") }
         let table: NSTableView? = find("rules.list", in: rules)
         let none: NSTextField? = find("rules.none", in: rules)
@@ -598,7 +598,7 @@ extension UITest {
         _ = await waitUntil(10) { !self.main.mailbox.listLoading && self.list.numberOfRows > 0 }
         let row = (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == "Photos from Saturday" } ?? 0
         await selectRow(row)
-        command(.createRuleFromMessage)
+        check(fromMenu(.createRuleFromMessage), "Message > Create Rule from Message is in the menu bar")
         if let (editor, query) = await waitRuleEditor() {
             check(query.hasPrefix("from:"), "Create Rule from Message makes one of its sender (\(query))")
             await shot(editor, "rules-4-from-message")

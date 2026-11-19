@@ -24,7 +24,7 @@ extension UITest {
     }
 
     func openKeys() async throws -> (NSWindow, NSTableView?) {
-        command(.encryptionKeys)
+        check(fromMenu(.encryptionKeys), "Tools > Encryption Keys is in the menu bar")
         guard let keys = await waitWindow("keys", 10) else { throw Failed(description: "no Encryption Keys window") }
         return (keys, find("keys.list", in: keys))
     }
