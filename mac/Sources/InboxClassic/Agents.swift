@@ -300,6 +300,16 @@ private func sendQuestion(core: Core, request: UInt64) {
     }
     grid.column(at: 0).xPlacement = .trailing
     stack.addArrangedSubview(grid)
+    // an answer to a calendar invitation: what it answers and when, above the text the core wrote
+    let invitation = text(send.invitation)
+    if !invitation.isEmpty {
+        let line = wrappingLabel(invitation)
+        line.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        line.preferredMaxLayoutWidth = 460
+        line.widthAnchor.constraint(equalToConstant: 460).isActive = true
+        line.setAccessibilityIdentifier("agent.invitation")
+        stack.addArrangedSubview(line)
+    }
     let scroll = NSTextView.scrollableTextView()
     let body = scroll.documentView as! NSTextView
     body.isEditable = false
@@ -315,24 +325,27 @@ private func sendQuestion(core: Core, request: UInt64) {
     if !files.isEmpty {
         stack.addArrangedSubview(note(files))
     }
-    let question = QuestionWindow(title: Text.uiSendMessageAsk.text, heading: text(send.title), detail: text(send.detail),
-                                  id: "agent.send", accessory: stack,
-                                  answers: [(Text.uiEditFirst.text, "agent.compose"), (Text.uiTbSend.text, "agent.sendButton"),
-                                            (Text.uiDontSend.text, "agent.dontSend")],
-                                  safe: 2, apart: 1)
-    // Send comes on after a moment, so a key pressed for another window does not send
-    holdBack(question.buttons[1])
-    let account = send.account
-    let answer: PeAgentSendAnswer
-    switch question.run() {
-    case 1: answer = PE_AGENT_SEND_ANSWER_SEND
-    case 0: answer = PE_AGENT_SEND_ANSWER_COMPOSE
-    default: answer = PE_AGENT_SEND_ANSWER_DONT_SEND
+    // Edit First, at the far left, only for a message the user may change: an answer to an invitation is the core's
+    var answers: [(String, String, PeAgentSendAnswer)] = [(Text.uiTbSend.text, "agent.sendButton", PE_AGENT_SEND_ANSWER_SEND),
+                                                          (Text.uiDontSend.text, "agent.dontSend", PE_AGENT_SEND_ANSWER_DONT_SEND)]
+    if send.can_edit {
+        answers.insert((Text.uiEditFirst.text, "agent.compose", PE_AGENT_SEND_ANSWER_COMPOSE), at: 0)
     }
+    let apart = send.can_edit ? 1 : 0
+    let question = QuestionWindow(title: Text.uiSendMessageAsk.text, heading: text(send.title), detail: text(send.detail),
+                                  id: "agent.send", accessory: stack, answers: answers.map { ($0.0, $0.1) },
+                                  safe: answers.count - 1, apart: apart)
+    // Send comes on after a moment, so a key pressed for another window does not send
+    holdBack(question.buttons[apart])
+    let account = send.account
+    let answer = answers[question.run()].2
     if let draft = Draft(pe_agent_answer_send(core.handle, request, answer)) {
         ComposeWindow.open(core: core, account: account, draft: draft)
     }
 }
+
+/// How long `holdBack` keeps an answer off
+let holdBackSeconds: TimeInterval = 1.5
 
 /// An answer that can not be taken back comes on only after a moment, so a click or a key meant for another window
 /// does not give it
@@ -340,7 +353,7 @@ private func sendQuestion(core: Core, request: UInt64) {
 private func holdBack(_ button: NSButton) {
     button.isEnabled = false
     // in the common modes: the window runs modally, where a timer of the default mode never fires
-    let timer = Timer(timeInterval: 1.5, repeats: false) { _ in
+    let timer = Timer(timeInterval: holdBackSeconds, repeats: false) { _ in
         MainActor.assumeIsolated { button.isEnabled = true }
     }
     RunLoop.main.add(timer, forMode: .common)
@@ -506,6 +519,7 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     private let logTable = NSOutlineView()
     private let change = NSButton(title: Text.uiChangeButton.text, target: nil, action: nil)
     private let remove = NSButton(title: Text.uiRemove.text, target: nil, action: nil)
+    private let undoSince = NSButton(title: Text.uiUndoSinceButton.text, target: nil, action: nil)
     private let undo = NSButton(title: Text.uiUndoButton.text, target: nil, action: nil)
     private let clear = NSButton(title: Text.uiClearButton.text, target: nil, action: nil)
     private var hosts: [Host] = []
@@ -548,7 +562,7 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         logTable.target = self
         logTable.doubleAction = #selector(toggleReads)
         for (button, action, id) in [(change, #selector(changeHost), "agents.change"), (remove, #selector(removeHost), "agents.remove"),
-                                     (undo, #selector(undoEntry), "agents.undo"), (clear, #selector(clearLog), "agents.clear")] {
+                                     (undoSince, #selector(undoSinceHost), "agents.undoSince"), (undo, #selector(undoEntry), "agents.undo"), (clear, #selector(clearLog), "agents.clear")] {
             button.target = self
             button.action = action
             button.setAccessibilityIdentifier(id)
@@ -578,7 +592,7 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
             row.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
             return stack
         }
-        let programs = section(Text.uiAgentPrograms.text, hostScroll, [change, remove])
+        let programs = section(Text.uiAgentPrograms.text, hostScroll, [change, remove, undoSince])
         let log = section(Text.uiWhatAgentsDid.text, logScroll, [undo, clear])
         hostScroll.heightAnchor.constraint(equalToConstant: 120).isActive = true
         logScroll.heightAnchor.constraint(greaterThanOrEqualToConstant: 180).isActive = true
@@ -665,6 +679,7 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     private func updateButtons() {
         change.isEnabled = hosts.indices.contains(hostTable.selectedRow)
         remove.isEnabled = change.isEnabled
+        undoSince.isEnabled = change.isEnabled
         undo.isEnabled = selectedEntry?.canUndo == true
         clear.isEnabled = !entries.isEmpty
     }
@@ -771,9 +786,26 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     @objc private func undoEntry() {
         guard let entry = selectedEntry, entry.canUndo else { return }
         if let why = taken(pe_agent_undo(core.handle, entry.id)) {
-            inform(why, title: Text.uiAiAgents.text)
+            inform(reportAlert(why), title: Text.uiAiAgents.text)
         }
         fill()
+    }
+
+    /// everything the selected program did in a span the user picks, taken back after a question that counts it
+    @objc private func undoSinceHost() {
+        guard hosts.indices.contains(hostTable.selectedRow) else { return }
+        let host = hosts[hostTable.selectedRow]
+        guard let since = UndoSinceWindow(core: core, host: host.id).run() else { return }
+        if let report = taken(pe_agent_undo_since(core.handle, host.id, since)) {
+            inform(reportAlert(report), title: Text.uiAiAgents.text)
+        }
+        fill()
+    }
+
+    /// what taking back did as an alert has it: the first line its heading, what was left under it
+    private func reportAlert(_ report: String) -> String {
+        guard let end = report.firstIndex(of: "\n") else { return report }
+        return report[..<end] + "\n\n" + report[report.index(after: end)...]
     }
 
     @objc private func clearLog() {
@@ -798,5 +830,134 @@ final class AgentsWindow: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         NSApp.runModal(for: window)
         Modal.closed(window)
         window.orderOut(nil)
+    }
+}
+
+/// Undo Since: the span to reach back over, and the core's question for it (how many changes, what taking back does);
+/// Cancel is the default, Take Back marked destructive, and with nothing to take back only Close is left
+@MainActor
+private final class UndoSinceWindow: NSObject {
+    let window: NSWindow
+    private let core: Core
+    private let host: Int64
+    private let span = NSPopUpButton(frame: .zero, pullsDown: false)
+    private let heading = wrappingLabel("")
+    private let detail = wrappingLabel("")
+    private let takeBack = NSButton(title: Text.uiTakeBack.text, target: nil, action: nil)
+    private let cancel = NSButton(title: Text.uiCancel.text, target: nil, action: nil)
+    /// the moment the question shown reaches back to, what Take Back takes back since
+    private var since: Int64?
+    private var accepted = false
+
+    init(core: Core, host: Int64) {
+        self.core = core
+        self.host = host
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 520, height: 200), styleMask: [.titled], backing: .buffered,
+                          defer: true)
+        window.autorecalculatesKeyViewLoop = true
+        window.title = Text.uiAiAgents.text
+        window.identifier = NSUserInterfaceItemIdentifier("agents.undoSinceWindow")
+        super.init()
+        let icon = NSImageView(image: NSApp.applicationIconImage ?? NSImage())
+        icon.widthAnchor.constraint(equalToConstant: 56).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 56).isActive = true
+        let label = NSTextField(labelWithString: Text.uiUndoSinceSpan.text)
+        label.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+        for index in 0..<Int(PE_AGENT_UNDO_SPAN_COUNT) {
+            span.addItem(withTitle: taken(pe_agent_undo_span_label(index)) ?? "")
+        }
+        span.target = self
+        span.action = #selector(spanChanged)
+        span.setAccessibilityIdentifier("undoSince.span")
+        span.setAccessibilityLabel(Text.uiUndoSinceSpan.text)
+        heading.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+        heading.setAccessibilityIdentifier("undoSince.heading")
+        detail.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        detail.textColor = .secondaryLabelColor
+        detail.setAccessibilityIdentifier("undoSince.detail")
+        for view in [heading, detail] {
+            view.preferredMaxLayoutWidth = 400
+            view.widthAnchor.constraint(equalToConstant: 400).isActive = true
+        }
+        let text = NSStackView(views: [label, span, heading, detail])
+        text.orientation = .vertical
+        text.alignment = .leading
+        text.spacing = 8
+        text.setCustomSpacing(16, after: span)
+        let top = NSStackView(views: [icon, text])
+        top.alignment = .top
+        top.spacing = 16
+        takeBack.target = self
+        takeBack.action = #selector(accept)
+        takeBack.hasDestructiveAction = true
+        takeBack.setAccessibilityIdentifier("undoSince.takeBack")
+        cancel.target = self
+        cancel.action = #selector(close)
+        cancel.setAccessibilityIdentifier("undoSince.cancel")
+        let row = buttonRow([takeBack, cancel], help: "agents")
+        let content = NSStackView(views: [top, row])
+        content.orientation = .vertical
+        content.spacing = 20
+        content.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 18, right: 20)
+        row.widthAnchor.constraint(equalTo: content.widthAnchor, constant: -40).isActive = true
+        window.contentView = content
+        // the shortest span first, the least to take back; the question names the program
+        spanChanged()
+    }
+
+    /// the question for the span picked, counted from now
+    @objc private func spanChanged() {
+        since = nil
+        var count: UInt64 = 0
+        if let info = pe_agent_undo_question(core.handle, host, span.indexOfSelectedItem) {
+            defer { pe_agent_undo_question_free(info) }
+            if let question = pe_agent_undo_question_get(info)?.pointee {
+                heading.stringValue = text(question.title)
+                detail.stringValue = text(question.detail)
+                count = question.count
+                since = question.since
+            }
+        }
+        // nothing to take back: Close alone
+        takeBack.isHidden = count == 0
+        detail.isHidden = count == 0
+        cancel.title = count == 0 ? Text.uiClose.text : Text.uiCancel.text
+        keepDefault()
+        window.contentView?.layoutSubtreeIfNeeded()
+        window.setContentSize(NSSize(width: 520, height: window.contentView?.fittingSize.height ?? 200))
+    }
+
+    /// Cancel (or Close) answers Return and Esc, never Take Back
+    private func keepDefault() {
+        takeBack.keyEquivalent = ""
+        cancel.keyEquivalent = "\r"
+        window.defaultButtonCell = cancel.cell as? NSButtonCell
+    }
+
+    @objc private func accept() {
+        accepted = since != nil
+        NSApp.stopModal()
+    }
+
+    @objc private func close() {
+        NSApp.stopModal()
+    }
+
+    /// the moment to take back since, nil when cancelled
+    func run() -> Int64? {
+        window.center()
+        let keys = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [cancel, window] event in
+            let answering: Set<UInt16> = [53, 36, 76]  // Esc, Return, keypad Enter
+            guard answering.contains(event.keyCode), event.window === window,
+                  event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty else { return event }
+            cancel.performClick(nil)
+            return nil
+        }
+        defer { keys.map(NSEvent.removeMonitor) }
+        Modal.opened(window)
+        NSApp.runModal(for: window)
+        Modal.closed(window)
+        window.orderOut(nil)
+        return accepted ? since : nil
     }
 }

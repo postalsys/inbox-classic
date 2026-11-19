@@ -99,6 +99,11 @@ win-forget-program-ask = Voleu eliminar aquest programa, els seus permisos i l�
 win-clear-log-ask = Voleu esborrar l’historial d’activitat dels agents? Això no desfarà els canvis que han fet els agents.
 win-agent-programs = Pro&grames que han demanat accés al vostre correu mitjançant agents:
 win-change = &Canvia...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Desfés de&s de...
+# review: new
+win-take-back = &Desfés
 win-what-agents-did = &Activitat dels agents:
 # review: new
 win-agent-reads = Què s’ha llegit de { $from } a { $to }:

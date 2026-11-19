@@ -764,6 +764,26 @@ CREATE TABLE agent_reads (
 CREATE INDEX agent_reads_by_host ON agent_reads (host_id, at);
 CREATE INDEX agent_reads_by_time ON agent_reads (at);
 "#,
+    // how many changes an entry of the AI Agents log stands for: one change of many messages (apply_to_search) is one
+    // entry with one Undo, counted by the per-program ceiling as the messages it changed. The answers the user sent to
+    // calendar invitations (an agent's, through the Send question): the user's status of an event, once its reply went.
+    r#"
+ALTER TABLE agent_log ADD COLUMN changes INTEGER NOT NULL DEFAULT 1;
+CREATE TABLE invitation_replies (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    -- the event's UID, as its invitation names it
+    event_uid TEXT NOT NULL,
+    -- accepted, tentative or declined
+    partstat TEXT NOT NULL,
+    -- the reply's Message-ID, by which the Outbox says it went
+    message_id TEXT NOT NULL,
+    -- NULL until the reply left the Outbox
+    sent_at INTEGER
+);
+CREATE INDEX invitation_replies_by_event ON invitation_replies (account_id, event_uid);
+CREATE INDEX invitation_replies_by_message ON invitation_replies (message_id);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

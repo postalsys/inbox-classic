@@ -866,6 +866,13 @@ ui-let-agents-connect = Ļaut &MI aģentiem pieslēgties Inbox Classic
 ui-change-button = Mainīt…
 # review: new
 ui-undo-button = Atsaukt
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Atsaukt kopš…
+# review: new
+ui-undo-since-span = Atsaukt, ko šī programma darīja:
+# review: new
+ui-take-back = Atsaukt
 # review: new
 ui-rules-title = Ziņojumu kārtulas
 # review: new

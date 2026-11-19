@@ -420,7 +420,7 @@ async fn collapsed_account(d: &Driver, account: i64) {
 }
 
 /// The lines the test's agent (scripts/ui-e2e/agent.mjs) wrote: the result of `step`
-fn agent_said(file: &std::path::Path, step: &str) -> Option<Value> {
+pub(super) fn agent_said(file: &std::path::Path, step: &str) -> Option<Value> {
     let text = std::fs::read_to_string(file).ok()?;
     text.lines()
         .filter_map(|line| serde_json::from_str::<Value>(line).ok())
@@ -535,7 +535,7 @@ pub async fn agent(d: &Driver) {
     let tools = agent_said(&out, "tools")
         .and_then(|t| t.as_array().map(Vec::len))
         .unwrap_or(0);
-    d.check(tools == 28, &format!("with the tools of what it may do ({tools})"));
+    d.check(tools == 31, &format!("with the tools of what it may do ({tools})"));
     let read = agent_said(&out, "read").unwrap_or_default();
     d.check(
         read["notice"]
@@ -673,6 +673,7 @@ pub async fn agent(d: &Driver) {
     );
     agent_draft(d, &out).await;
     agent_unsubscribes(d, &out).await;
+    super::agent_bulk::bulk_and_invitation(d, &out).await;
     if let Some(agent) = agent.as_mut() {
         let _ = agent.kill();
         let _ = agent.wait();

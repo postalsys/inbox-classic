@@ -100,6 +100,11 @@ win-forget-program-ask = Vil du fjerne dette programmet, tillatelsene og aktivit
 win-clear-log-ask = Vil du tømme aktivitetsloggen til agentene? Dette angrer ikke endringer som agentene har gjort.
 win-agent-programs = &Programmer der agenter har bedt om tilgang til e-posten din:
 win-change = &Endre...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = Angre &siden...
+# review: new
+win-take-back = &Angre
 win-what-agents-did = Age&ntaktivitet:
 # review: new
 win-agent-reads = Hva som ble lest fra { $from } til { $to }:

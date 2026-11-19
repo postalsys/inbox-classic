@@ -70,6 +70,8 @@ mod previews;
 /// Step 45a: settings and accounts to another computer
 mod setup;
 
+/// Step 28, continued: an invitation answered, a change of many messages and Undo Since
+mod agent_bulk;
 /// Step 28, continued: the AI Agents log of reads, its language and Clear Log, and programs started from a terminal
 mod agent_log;
 

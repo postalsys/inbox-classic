@@ -86,6 +86,12 @@ public:
     int64_t TestFrames() { return preview_.TestFrames(); }
     int RemoteRequests() const { return preview_.RemoteRequests(); }
     int64_t TestPreviews(const std::wstring& query) { return preview_.TestPreviews(query); }
+    // the UI test's look at the last Find in This Message: how many places it found, -1 before it answered, -2 when
+    // this WebView2 can not find
+    int TestFound() const { return testFound_; }
+    // the UI test's look at the message shown: 1 when one is shown, its document loaded, and its subject is `subject`
+    // (any, when empty), else 0
+    int TestShown(const std::wstring& subject) const;
 
     void OnEvent(const UiEvent& event);
     bool OnCommand(WORD id, WORD code);
@@ -237,6 +243,8 @@ private:
     HWND printOwner_ = nullptr;
     // the words of the last Find in This Message
     std::wstring findWords_;
+    // what the last find answered (TestFound)
+    int testFound_ = -1;
 };
 
 // the keys for reading that work while a message has the keyboard as in the list (F3, Ctrl+. and Ctrl+,): the

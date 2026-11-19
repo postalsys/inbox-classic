@@ -14,6 +14,7 @@ use serde_json::{Map, Value, json};
 
 use crate::server::Progress;
 
+mod bulk;
 mod drafts;
 mod lookups;
 mod mail;
@@ -394,7 +395,7 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::ORGANIZE,
         hints: SETS,
         description: Description::Text(
-            "Marks messages of a folder read, or unread. The user can take it back in Inbox Classic.",
+            "Marks messages of a folder read, or unread. The user can take it back in Inbox Classic, and the agent with undo_my_change and the answer's change_ids.",
         ),
         schema: || {
             object(
@@ -413,7 +414,7 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::ORGANIZE,
         hints: SETS,
         description: Description::Text(
-            "Flags messages of a folder for follow-up, or takes their flag away. The user can take it back in Inbox Classic.",
+            "Flags messages of a folder for follow-up, or takes their flag away. The user can take it back in Inbox Classic, and the agent with undo_my_change and the answer's change_ids.",
         ),
         schema: || {
             object(
@@ -432,7 +433,7 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::ORGANIZE,
         hints: SETS,
         description: Description::Text(
-            "Moves messages to another folder of the same account. The user can take it back in Inbox Classic.",
+            "Moves messages to another folder of the same account. The user can take it back in Inbox Classic, and the agent with undo_my_change and the answer's change_ids.",
         ),
         schema: || {
             object(
@@ -451,7 +452,7 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::ORGANIZE,
         hints: SETS,
         description: Description::Text(
-            "Archives messages of the Inbox or of a folder of the user's: into the account's Archive folder (made when there is none), or on Gmail with every label taken off, so they are left in All Mail. Not for messages of Sent Items, Drafts, Junk E-mail, Deleted Items or the Archive itself. The user can take it back in Inbox Classic.",
+            "Archives messages of the Inbox or of a folder of the user's: into the account's Archive folder (made when there is none), or on Gmail with every label taken off, so they are left in All Mail. Not for messages of Sent Items, Drafts, Junk E-mail, Deleted Items or the Archive itself. The user can take it back in Inbox Classic, and the agent with undo_my_change and the answer's change_ids.",
         ),
         schema: folder_and_uids,
     },
@@ -461,7 +462,7 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::ORGANIZE,
         hints: REMOVES,
         description: Description::Text(
-            "Moves messages to the account's Deleted Items, from where the user can bring them back. Messages already in Deleted Items are not deleted for good: only the user can do that.",
+            "Moves messages to the account's Deleted Items, from where the user can bring them back. Messages already in Deleted Items are not deleted for good: only the user can do that. undo_my_change with the answer's change_ids brings them back.",
         ),
         schema: folder_and_uids,
     },
@@ -471,7 +472,7 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::ORGANIZE,
         hints: REMOVES,
         description: Description::Text(
-            "Marks messages as junk and moves them to Junk E-mail, or as not junk and moves them to the Inbox, so the server's spam filter learns from it. The user can take it back in Inbox Classic.",
+            "Marks messages as junk and moves them to Junk E-mail, or as not junk and moves them to the Inbox, so the server's spam filter learns from it. The user can take it back in Inbox Classic, and the agent with undo_my_change and the answer's change_ids.",
         ),
         schema: || {
             object(
@@ -490,7 +491,7 @@ const TOOLS: &[Tool] = &[
         level: AgentLevels::ORGANIZE,
         hints: SETS,
         description: Description::Text(
-            "Flags messages of a folder in one of the colours Inbox Classic offers (the colours of Apple Mail's flags), or takes the flag away with `color` none. The user can take it back in Inbox Classic.",
+            "Flags messages of a folder in one of the colours Inbox Classic offers (the colours of Apple Mail's flags), or takes the flag away with `color` none. The user can take it back in Inbox Classic, and the agent with undo_my_change and the answer's change_ids.",
         ),
         schema: || {
             object(
@@ -556,6 +557,47 @@ const TOOLS: &[Tool] = &[
         },
     },
     Tool {
+        name: "apply_to_search",
+        title: "Change every message a search finds",
+        level: AgentLevels::ORGANIZE,
+        hints: Hints {
+            idempotent: false,
+            ..REMOVES
+        },
+        description: Description::Text(
+            "Changes every message a search finds, in two calls. First the dry run: `query` (as search_messages takes it), `action` and `dry_run` true; it changes nothing and answers how many messages the action would change (`matches`; those already so or where it does not apply are `unchanged`), a few of them, and a `token`. Then call again with only the `token`, within 5 minutes: exactly the messages the dry run counted are changed, not mail that arrived since, and the answer's `change_id` takes all of it back with undo_my_change (the user has one Undo for it in Inbox Classic). A token works once, for this agent and the accounts it may use then. Actions: mark_read, mark_unread, flag, unflag, flag_color (with `color`), move (with `to_folder`, within its account), archive, junk, not_junk (from Junk E-mail), delete (into Deleted Items, never for good). At most 1000 messages a call. Nothing is ever sent.",
+        ),
+        schema: || {
+            object(
+                json!({
+                    "query": text("The search, as search_messages takes it. Give it with `dry_run`."),
+                    "action": { "type": "string", "enum": bulk::ACTIONS, "description": "What to do to each message. Give it with `dry_run`." },
+                    "color": { "type": "string", "enum": &organize::COLORS[..7], "description": "The flag's colour, for flag_color." },
+                    "to_folder": integer("The folder to move them to, for move."),
+                    "account": integer("Only this account's messages."),
+                    "dry_run": boolean("Count what the action would change, and get the token: changes nothing."),
+                    "token": text("The token of the dry run: changes what it counted.")
+                }),
+                &[],
+            )
+        },
+    },
+    Tool {
+        name: "undo_my_change",
+        title: "Take back a change",
+        level: AgentLevels::ORGANIZE,
+        hints: SETS,
+        description: Description::Text(
+            "Takes back one change this agent made, by the change_id its answer gave (change_ids of mark_messages_read, flag_messages, set_flag_color, move_messages, archive_messages, delete_messages and mark_messages_junk; change_id of apply_to_search, all of whose messages go back). Each message goes back only while it is as the change left it: what the user or the server changed since is left as it is, and the answer says how many. Only this agent's own changes.",
+        ),
+        schema: || {
+            object(
+                json!({ "change_id": integer("The change, as the answer of the tool that made it named it.") }),
+                &["change_id"],
+            )
+        },
+    },
+    Tool {
         name: "unsubscribe_from_list",
         title: "Unsubscribe from mailing lists",
         level: AgentLevels::ORGANIZE,
@@ -611,6 +653,27 @@ const TOOLS: &[Tool] = &[
         schema: message_schema,
     },
     Tool {
+        name: "respond_to_invitation",
+        title: "Answer a calendar invitation",
+        level: AgentLevels::SEND,
+        hints: REACHES_OUT,
+        description: Description::Text(
+            "Asks the user to send an answer to a calendar invitation (get_message shows a message's `invitation`): accept, tentative or decline. Inbox Classic writes the answer from the invitation itself, to its organizer, as calendar programs do; `comment` adds a line of the agent's own above it. As with send_message, the user sees it first and only their yes sends it; it then waits 30 seconds in the Outbox. The user's answer to the invitation (`your_status`) changes only once it has been sent. Not for cancellations, for answers, or for encrypted messages. When the user has not answered in about 20 seconds, the answer is `status: waiting` with an `ask_id` for get_send_status.",
+        ),
+        schema: || {
+            object(
+                json!({
+                    "folder": integer("The folder of the invitation."),
+                    "uid": integer("Its uid."),
+                    "response": { "type": "string", "enum": ["accept", "tentative", "decline"] },
+                    "comment": text("A line of the agent's own above the answer, at most 2000 characters."),
+                    "idempotency_key": text("A key of the agent's own for this answer: the same key again gives the answer of the first call, never a second question.")
+                }),
+                &["folder", "uid", "response"],
+            )
+        },
+    },
+    Tool {
         name: "get_send_status",
         title: "Check a message to send",
         level: AgentLevels::SEND,
@@ -638,6 +701,7 @@ const GIVES_MAIL: &[&str] = &[
     "test_rule",
     "find_contacts",
     "unsubscribe_from_list",
+    "apply_to_search",
 ];
 
 /// The description of search_messages, from the operators pe-store reads
@@ -894,9 +958,9 @@ impl Call<'_> {
         self.core.log_agent_reads(&[read]).map_err(engine)
     }
 
-    /// Writes what this call did in the log, all at once
-    fn log(&self, entries: &[NewLogEntry]) -> Result<(), String> {
-        self.core.log_agent(entries).map_err(engine)
+    /// Writes what this call did in the log, all at once: the entries' ids, by which undo_my_change takes them back
+    fn log(&self, entries: &[NewLogEntry]) -> Result<Vec<i64>, String> {
+        self.core.log_agent_ids(entries).map_err(engine)
     }
 }
 
@@ -1089,6 +1153,9 @@ async fn run(
         "set_flag_color" => organize::set_flag_color(&call, &args),
         "set_conversation_mark" => organize::set_conversation_mark(&call, &args),
         "unsubscribe_from_list" => unsubscribe(&call, &args).await,
+        "apply_to_search" => bulk::apply_to_search(&call, &args).await,
+        "undo_my_change" => bulk::undo_my_change(&call, &args),
+        "respond_to_invitation" => drafts::respond_to_invitation(&call, &args).await,
         "save_draft" => drafts::save_draft(&call, &args),
         "replace_draft" => drafts::replace_draft(&call, &args).await,
         "discard_draft" => drafts::discard_draft(&call, &args).await,
@@ -1341,8 +1408,8 @@ fn set_flag(call: &Call, args: &Args, flag: &'static str, on: bool) -> Outcome {
             call.message_entry(&folder, message, done, &[], Some(undo))
         })
         .collect();
-    call.log(&entries)?;
-    Ok(json!({ "done": true, "messages": uids.len() }))
+    let ids = call.log(&entries)?;
+    Ok(json!({ "done": true, "messages": uids.len(), "change_ids": ids }))
 }
 
 const FOR_GOOD: &str = "These messages would be deleted for good (they are in Deleted Items, or the account has none). \
@@ -1391,8 +1458,8 @@ fn move_messages(call: &Call, args: &Args, trash: bool) -> Outcome {
             }
         })
         .collect();
-    call.log(&entries)?;
-    Ok(json!({ "done": true, "messages": uids.len(), "to_folder": to }))
+    let ids = call.log(&entries)?;
+    Ok(json!({ "done": true, "messages": uids.len(), "to_folder": to, "change_ids": ids }))
 }
 
 fn mark_junk(call: &Call, args: &Args) -> Outcome {
@@ -1422,8 +1489,8 @@ fn mark_junk(call: &Call, args: &Args) -> Outcome {
             }
         })
         .collect();
-    call.log(&entries)?;
-    Ok(json!({ "done": true, "messages": uids.len(), "to_folder": to }))
+    let ids = call.log(&entries)?;
+    Ok(json!({ "done": true, "messages": uids.len(), "to_folder": to, "change_ids": ids }))
 }
 
 const NOT_ARCHIVED: &str =
@@ -1455,8 +1522,8 @@ fn archive_messages(call: &Call, args: &Args) -> Outcome {
             }
         })
         .collect();
-    call.log(&entries)?;
-    Ok(json!({ "done": true, "messages": uids.len() }))
+    let ids = call.log(&entries)?;
+    Ok(json!({ "done": true, "messages": uids.len(), "change_ids": ids }))
 }
 
 async fn unsubscribe(call: &Call<'_>, args: &Args<'_>) -> Outcome {

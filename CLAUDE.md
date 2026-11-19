@@ -80,6 +80,8 @@ cargo clippy --workspace --all-targets
 cargo fmt --all
 ```
 
+Tests check outcomes, wait on real events with generous budgets, compare with catalog text and stay off the internet unless `PE_NETWORK_TESTS` is set: `docs/testing.md` has the rules and an example for each platform.
+
 `Cargo.lock` is committed and the Windows build uses `--locked`, so commit lockfile changes along with dependency changes.
 
 The app only builds on Windows. The build machine is `andri@10.8.0.8` (Windows 11, VS 2022 Build Tools, Rust via rustup); the sources live at `C:\Users\andri\src\postal-express`. From the Mac:

@@ -94,9 +94,8 @@
       caur pārlūku.
     </p>
     <p xml:lang="lt">
-      Inbox Classic skaito ir rašo el. laiškus: aplankai kairėje, laiškų sąrašas viršuje, o laiškas po juo, kaip
-      anksčiau pašto programose. Ji veikia su bet kuria IMAP ir SMTP paskyra ir prisijungia prie Outlook.com bei
-      Microsoft 365 per naršyklę.
+      Inbox Classic yra el. pašto programa su įprastu išdėstymu: aplankai kairėje, laiškų sąrašas viršuje, o skaitomas
+      laiškas apačioje. Ji palaiko IMAP ir SMTP paskyras. Prie Outlook.com ir Microsoft 365 prisijungiama per naršyklę.
     </p>
     <p xml:lang="hu">
       Az Inbox Classic a hagyományos levelezőprogramok elrendezését követi: bal oldalon a mappák, felül az üzenetlista,
@@ -226,10 +225,10 @@
       <li xml:lang="lv">Meklēšana, kas atrod vārdus tēmā, sūtītājos un adresātos, failu nosaukumos un tekstā, ar Gmail operatoriem</li>
       <li xml:lang="lv">Atbildēs tiek sakļauti agrākie ziņojumi, ko tās citē</li>
       <li xml:lang="lv">Pasts ir lasāms arī bezsaistē; paroles glabājas jūsu atslēgu saišķī</li>
-      <li xml:lang="lt">Kiekvienas laiškas rodomas išvalytas, be scenarijų, o paveikslėliai iš interneto tik jums leidus</li>
-      <li xml:lang="lt">Paieška, kuri randa žodžius temoje, siuntėjuose ir gavėjuose, failų pavadinimuose ir tekste, su Gmail operatoriais</li>
+      <li xml:lang="lt">Prieš rodant iš laiškų pašalinami scenarijai ir kitas neleidžiamas turinys; paveikslėliai iš interneto atsisiunčiami tik jums leidus</li>
+      <li xml:lang="lt">Paieška pagal laiškų temas, siuntėjų ir gavėjų vardus bei adresus, priedų pavadinimus ir tekstą, su Gmail stiliaus paieškos operatoriais</li>
       <li xml:lang="lt">Atsakymuose suskleidžiami ankstesni cituojami laiškai</li>
-      <li xml:lang="lt">Laiškus galima skaityti ir neprisijungus prie interneto; slaptažodžiai laikomi jūsų raktinėje</li>
+      <li xml:lang="lt">Galite skaityti atsisiųstus laiškus be interneto ir saugoti slaptažodžius sistemos raktinėje</li>
       <li xml:lang="hu">Az üzenetekből az alkalmazás eltávolítja a szkripteket, az internetes képeket pedig csak engedéllyel tölti le</li>
       <li xml:lang="hu">Keresés a tárgyban, a feladók és címzettek adataiban, a mellékletnevekben és az üzenetszövegben, a Gmailből ismert keresőoperátorokkal</li>
       <li xml:lang="hu">A válaszokban az alkalmazás elrejti az idézett korábbi üzeneteket</li>

@@ -3,7 +3,7 @@
 <p>La première fois que l'agent d'un programme se connecte, Inbox Classic vous demande votre accord en nommant le programme. Choisissez ce qu'il peut faire :</p>
 <ul>
     <!--review--><li>lire le courrier : consulter et rechercher des messages, y compris leurs fichiers PDF, Office et images jusqu'à 10 Mo, afficher les dossiers et les conversations, consulter les règles de messages et rechercher des contacts</li><!--/review-->
-    <!--review--><li>gérer le courrier : modifier l'état lu ou non lu, les indicateurs et leurs couleurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer des dossiers, renommer vos propres dossiers, surveiller et ignorer des conversations, et vous désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans <b data-text="folder-deleted"></b>.</li><!--/review-->
+    <!--review--><li>gérer le courrier : modifier l'état lu ou non lu, les indicateurs et leurs couleurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer des dossiers, renommer vos propres dossiers, surveiller et ignorer des conversations, tout cela aussi d'un coup pour tous les messages qu'une recherche trouve, et vous désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans <b data-text="folder-deleted"></b>.</li><!--/review-->
     <li>rédiger des brouillons que vous enverrez vous-même, et modifier ou supprimer ceux qu'il a créés tant que vous ne les avez pas enregistrés</li>
     <li>envoyer du courrier, chaque message seulement après votre accord</li>
 </ul>
@@ -16,6 +16,8 @@
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> est sélectionné par défaut et n'envoie aucune demande de désabonnement.</li>
 </ul>
 <p>Un agent ne peut pas utiliser les messages du dossier <b data-text="folder-junk"></b> pour vous désabonner. Chaque programme est limité à 30 demandes de désabonnement approuvées au cours des 24 dernières heures. Les demandes qui échouent comptent aussi.</p>
+<!--review--><h2>Modifier de nombreux messages à la fois</h2><!--/review-->
+<!--review--><p>Un agent autorisé à gérer le courrier peut modifier en une seule fois tous les messages qu'une recherche trouve, par exemple marquer toutes les lettres d'information comme lues ou les déplacer vers un dossier. Il compte d'abord les messages et en voit quelques-uns. Puis il modifie exactement ceux-là, 1 000 au plus à la fois, et jamais le courrier arrivé depuis. Inbox Classic ne vous demande rien avant, car tout peut être annulé. Le journal l'affiche sur une seule ligne, par exemple « 37 messages marqués comme lus (recherche : from:news) », et une seule annulation annule le tout.</p><!--/review-->
 <h2>Consulter et modifier les accès</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> liste les programmes que vous avez laissés entrer ou refusés, et tout ce que les agents ont fait, du plus récent au plus ancien.</p>
 <!--review--><p>Ce qu'un agent lit apparaît sur une ligne par programme et par heure, par exemple « Lu 14 messages et effectué 3 recherches ». <!--os:windows-->Sélectionnez la ligne<!--/os--><!--os:mac,linux-->Ouvrez la ligne avec sa flèche<!--/os--> pour voir les objets des messages lus et ce qu'il a recherché, jamais le texte des messages. Le journal est conservé 30 jours. L'effacer ne change pas le nombre de messages qu'un agent peut encore envoyer.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> modifie ce qu'un programme peut faire.</li>
     <li><b data-text="ui-remove"></b> oublie un programme : la question vous sera de nouveau posée à sa prochaine connexion.</li>
     <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> annule les changements d'état lu ou non lu, d'indicateurs et de leurs couleurs, le classement en courrier indésirable, les déplacements, l'archivage et les suppressions. Il peut aussi annuler l'envoi d'un message tant que celui-ci se trouve dans la Boîte d'envoi.</li><!--/review-->
+    <!--review--><li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> annule tout ce que le programme sélectionné a fait pendant la période choisie, par exemple la dernière heure, du plus récent au plus ancien.</li><!--/review-->
 </ul>
+<!--review--><p>Un message que vous ou le serveur avez modifié après l'agent reste tel quel, et Inbox Classic vous indique combien il y en a eu. Un agent peut aussi annuler ses propres modifications, jamais celles d'un autre programme.</p><!--/review-->
 <aside class="warning">Le courrier est écrit par d'autres personnes, et un message peut tenter de persuader un agent de transférer ou de supprimer votre courrier. Inbox Classic cache aux agents le texte qu'un message vous cache, et leur indique de ne pas traiter le contenu des messages comme des instructions. Un agent peut tout de même être trompé. N'autorisez que ce dont vous avez besoin.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

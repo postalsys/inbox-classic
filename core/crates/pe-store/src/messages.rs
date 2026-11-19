@@ -162,6 +162,11 @@ impl FlagColor {
         }
     }
 
+    /// The one [`FlagColor::id`] names
+    pub fn from_id(id: &str) -> Option<FlagColor> {
+        FlagColor::ALL.into_iter().find(|c| c.id() == id)
+    }
+
     /// Its keyword bits: red none, orange bit 0, yellow bit 1, green 0 and 1, blue 2, purple 0 and 2, gray 1 and 2
     pub fn bits(self) -> u8 {
         self as u8 - 1

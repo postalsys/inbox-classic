@@ -99,6 +99,11 @@ win-forget-program-ask = Bu program, izinleri ve aracılarının etkinlik geçmi
 win-clear-log-ask = Aracıların etkinlik geçmişi temizlensin mi? Bu, aracıların yaptığı değişiklikleri geri almaz.
 win-agent-programs = Postanıza erişim isteyen aracıların &programları:
 win-change = &Değiştir...
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+win-undo-since = &Süre Seçerek Geri Al...
+# review: new
+win-take-back = &Geri Al
 win-what-agents-did = Aracı &etkinliği:
 # review: new
 win-agent-reads = { $from } ile { $to } arasında okunanlar:

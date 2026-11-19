@@ -449,6 +449,13 @@ ui-clear-agent-log-detail = Това няма да отмени променит
 ui-let-agents-connect = &Разрешаване на ИИ агентите да се свързват с Inbox Classic
 ui-change-button = Промяна…
 ui-undo-button = Отмяна
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Отмяна за период…
+# review: new
+ui-undo-since-span = Отмяна на действията на тази програма:
+# review: new
+ui-take-back = Отмяна
 ui-rules-title = Правила за съобщения
 ui-rules-intro = Правилата обработват новите съобщения във „Входящи“, докато Inbox Classic работи. Те се прилагат по ред, когато съобщението отговаря на условията им. След като правило премести съобщението извън „Входящи“, следващите правила не се прилагат за него.
 ui-rules-none = Все още няма правила. Щракнете върху „Ново“, за да създадете такова.

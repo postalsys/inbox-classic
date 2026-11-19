@@ -189,6 +189,34 @@ const messages = [
             references: ['<q0@example.com>', '<q1@example.com>'],
             text: '> quoted\r\nanswer\r\n'
         }
+    },
+    {
+        name: 'invitation reply',
+        mail: {
+            from: 'b@example.com',
+            to: 'organizer@example.com',
+            subject: 'Accepted: Team planning',
+            text: 'Bob has accepted.\r\n',
+            html: '<p>Bob has accepted.</p>',
+            icalEvent: {
+                method: 'reply',
+                content:
+                    'BEGIN:VCALENDAR\r\nPRODID:-//Inbox Classic//EN\r\nVERSION:2.0\r\nMETHOD:REPLY\r\nBEGIN:VEVENT\r\nUID:1@example.com\r\n' +
+                    'DTSTAMP:20251006T100000Z\r\nORGANIZER:mailto:organizer@example.com\r\nATTENDEE;PARTSTAT=ACCEPTED:mailto:b@example.com\r\n' +
+                    'SUMMARY:Team planning\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n'
+            }
+        }
+    },
+    {
+        name: 'invitation reply with a file',
+        mail: {
+            from: 'b@example.com',
+            to: 'organizer@example.com',
+            subject: 'Declined: Ünicode',
+            text: 'Declined.\r\n',
+            attachments: [{ filename: 'note.txt', content: 'a note\r\n', contentType: 'text/plain' }],
+            icalEvent: { method: 'REPLY', content: 'BEGIN:VCALENDAR\r\nMETHOD:REPLY\r\nSUMMARY:Ünicode\r\nEND:VCALENDAR\r\n' }
+        }
     }
 ];
 for (const { name, mail } of messages) {

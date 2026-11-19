@@ -731,6 +731,10 @@ public:
     bool TestLink(const std::wstring& uri) { return reader_.FollowLink(uri.c_str()); }
     // the UI test's look at the parts of a signed or encrypted message shown (Reader::TestFrames)
     int64_t TestFrames() { return reader_.TestFrames(); }
+    // the UI test's look at the last Find in This Message (Reader::TestFound), and at the message shown: 1 when it has
+    // loaded with this subject, or with none given when it is the message of the selected row (Reader::TestShown)
+    int TestFound() const { return reader_.TestFound(); }
+    int TestShown(const std::wstring& subject);
     // the UI test's count of requests of the message shown to the internet (Preview::RemoteRequests)
     int TestRemoteRequests() const { return reader_.RemoteRequests(); }
     // the UI test's look at the previews of the message shown (Preview::TestPreviews)
@@ -1529,6 +1533,8 @@ enum AgentControlId : WORD {
     IDC_AGENT_LISTS,
     IDC_AGENT_UNSUBSCRIBE,
     IDC_AGENT_DONT_UNSUBSCRIBE,
+    // a message to send that answers a calendar invitation: the line over the text that says so
+    IDC_AGENT_INVITATION,
     // Tools > AI Agents
     IDC_AGENTS_ENABLED = 630,
     IDC_AGENTS_HOSTS,
@@ -1541,6 +1547,13 @@ enum AgentControlId : WORD {
     // under the log: what the selected row of reads covers, and its words
     IDC_AGENTS_READS,
     IDC_AGENTS_READS_LABEL,
+    // beside the programs: take back what the selected one did in a span
+    IDC_AGENTS_UNDO_SINCE,
+    // its window: the span, the question's heading and words, Take Back
+    IDC_AGENT_UNDO_SPAN,
+    IDC_AGENT_UNDO_TITLE,
+    IDC_AGENT_UNDO_DETAIL,
+    IDC_AGENT_TAKE_BACK,
 };
 
 // the controls of Tools > Options (options.cpp), which the UI test finds by them

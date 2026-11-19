@@ -781,6 +781,167 @@ agent-log-watched = Začel spremljati pogovor »{ $subject }«
 agent-log-ignored = Prezrl pogovor »{ $subject }«
 # review: new
 agent-log-unmarked = Prenehal spremljati ali prezirati pogovor »{ $subject }«
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = sporočilo je bilo medtem spremenjeno
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Označil { $count } sporočilo kot prebrano (iskanje: { $query })
+    [two] Označil { $count } sporočili kot prebrani (iskanje: { $query })
+    [few] Označil { $count } sporočila kot prebrana (iskanje: { $query })
+   *[other] Označil { $count } sporočil kot prebrana (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Označil { $count } sporočilo kot neprebrano (iskanje: { $query })
+    [two] Označil { $count } sporočili kot neprebrani (iskanje: { $query })
+    [few] Označil { $count } sporočila kot neprebrana (iskanje: { $query })
+   *[other] Označil { $count } sporočil kot neprebrana (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Označil { $count } sporočilo z zastavico (iskanje: { $query })
+    [two] Označil { $count } sporočili z zastavico (iskanje: { $query })
+    [few] Označil { $count } sporočila z zastavico (iskanje: { $query })
+   *[other] Označil { $count } sporočil z zastavico (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Odstranil zastavico pri { $count } sporočilu (iskanje: { $query })
+    [two] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
+    [few] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
+   *[other] Odstranil zastavico pri { $count } sporočilih (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Označil { $count } sporočilo
+    [two] Označil { $count } sporočili
+    [few] Označil { $count } sporočila
+   *[other] Označil { $count } sporočil
+} { $color ->
+    [red] z rdečo zastavico
+    [orange] z oranžno zastavico
+    [yellow] z rumeno zastavico
+    [green] z zeleno zastavico
+    [blue] z modro zastavico
+    [purple] z vijolično zastavico
+   *[gray] s sivo zastavico
+} (iskanje: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Premaknil { $count } sporočilo v mapo »{ $folder }« (iskanje: { $query })
+    [two] Premaknil { $count } sporočili v mapo »{ $folder }« (iskanje: { $query })
+    [few] Premaknil { $count } sporočila v mapo »{ $folder }« (iskanje: { $query })
+   *[other] Premaknil { $count } sporočil v mapo »{ $folder }« (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arhiviral { $count } sporočilo (iskanje: { $query })
+    [two] Arhiviral { $count } sporočili (iskanje: { $query })
+    [few] Arhiviral { $count } sporočila (iskanje: { $query })
+   *[other] Arhiviral { $count } sporočil (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Označil { $count } sporočilo kot neželeno (iskanje: { $query })
+    [two] Označil { $count } sporočili kot neželeni (iskanje: { $query })
+    [few] Označil { $count } sporočila kot neželena (iskanje: { $query })
+   *[other] Označil { $count } sporočil kot neželena (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Odstranil oznako neželene pošte pri { $count } sporočilu (iskanje: { $query })
+    [two] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
+    [few] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
+   *[other] Odstranil oznako neželene pošte pri { $count } sporočilih (iskanje: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Izbrisal { $count } sporočilo (iskanje: { $query })
+    [two] Izbrisal { $count } sporočili (iskanje: { $query })
+    [few] Izbrisal { $count } sporočila (iskanje: { $query })
+   *[other] Izbrisal { $count } sporočil (iskanje: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] V zadnjih 15 minutah
+    [hour] V zadnji uri
+    [hours] V zadnjih 4 urah
+    [day] V zadnjih 24 urah
+    [week] V zadnjih 7 dneh
+   *[all] V zadnjih 30 dneh
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] Program { $program } v tem času ni naredil sprememb, ki bi jih bilo mogoče razveljaviti.
+    [one] Želite razveljaviti { $count } spremembo, ki jo je program { $program } naredil v tem času?
+    [two] Želite razveljaviti { $count } spremembi, ki ju je program { $program } naredil v tem času?
+    [few] Želite razveljaviti { $count } spremembe, ki jih je program { $program } naredil v tem času?
+   *[other] Želite razveljaviti { $count } sprememb, ki jih je program { $program } naredil v tem času?
+}
+# review: new
+agent-undo-since-detail = Sporočila se vrnejo v mape, iz katerih so prišla, prebranost in zastavice se vrnejo v prejšnje stanje, sporočila, ki še čakajo v mapi Odpošiljanje, pa se izbrišejo. Kar ste medtem spremenili vi ali strežnik, ostane, kot je.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nič ni bilo razveljavljeno.
+    [one] Razveljavljena { $count } sprememba.
+    [two] Razveljavljeni { $count } spremembi.
+    [few] Razveljavljene { $count } spremembe.
+   *[other] Razveljavljenih { $count } sprememb.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] { $count } sporočilo ni bilo več tam, kamor ga je postavila sprememba.
+    [two] { $count } sporočili nista bili več tam, kamor ju je postavila sprememba.
+    [few] { $count } sporočila niso bila več tam, kamor jih je postavila sprememba.
+   *[other] { $count } sporočil ni bilo več tam, kamor jih je postavila sprememba.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] { $count } sporočilo je bilo medtem spremenjeno, z vaše strani ali na strežniku, in je ostalo, kot je.
+    [two] { $count } sporočili sta bili medtem spremenjeni, z vaše strani ali na strežniku, in sta ostali, kot sta.
+    [few] { $count } sporočila so bila medtem spremenjena, z vaše strani ali na strežniku, in so ostala, kot so.
+   *[other] { $count } sporočil je bilo medtem spremenjenih, z vaše strani ali na strežniku, in je ostalo, kot je.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] { $count } sporočilo je že zapustilo mapo Odpošiljanje.
+    [two] { $count } sporočili sta že zapustili mapo Odpošiljanje.
+    [few] { $count } sporočila so že zapustila mapo Odpošiljanje.
+   *[other] { $count } sporočil je že zapustilo mapo Odpošiljanje.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] { $count } spremembe ni mogoče razveljaviti.
+    [two] { $count } spremembi ni mogoče razveljaviti.
+    [few] { $count } spremembe ni mogoče razveljaviti.
+   *[other] { $count } sprememb ni mogoče razveljaviti.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] To sporočilo sprejme povabilo »{ $summary }« ({ $when }).
+    [tentative] To sporočilo pogojno sprejme povabilo »{ $summary }« ({ $when }).
+   *[decline] To sporočilo zavrne povabilo »{ $summary }« ({ $when }).
+} Koledar organizatorja odgovor upošteva. Vaš odgovor na povabilo se spremeni šele, ko je sporočilo poslano.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Sprejeto: { $summary }
+    [tentative] Pogojno sprejeto: { $summary }
+   *[decline] Zavrnjeno: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } sprejema to povabilo.
+    [tentative] { $name } pogojno sprejema to povabilo.
+   *[decline] { $name } zavrača to povabilo.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

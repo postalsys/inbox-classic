@@ -3,7 +3,7 @@
 <p>La primera vez que se conecta el agente de un programa, Inbox Classic le pregunta, indicando el nombre del programa. Elija qué puede hacer:</p>
 <ul>
     <!--review--><li>leer el correo: ver carpetas, mensajes y conversaciones, con sus archivos PDF, de Office e imágenes de hasta 10 MB, buscar mensajes, consultar reglas de mensajes y buscar personas por su nombre o dirección de correo</li><!--/review-->
-    <!--review--><li>organizar el correo: cambiar el estado de lectura, las marcas y sus colores, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a <b data-text="folder-deleted"></b>, crear carpetas, cambiar el nombre de sus propias carpetas, seguir e ignorar conversaciones y cancelar suscripciones a listas de correo con su autorización</li><!--/review-->
+    <!--review--><li>organizar el correo: cambiar el estado de lectura, las marcas y sus colores, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a <b data-text="folder-deleted"></b>, crear carpetas, cambiar el nombre de sus propias carpetas, seguir e ignorar conversaciones, todo ello también de una vez para todos los mensajes que encuentra una búsqueda, y cancelar suscripciones a listas de correo con su autorización</li><!--/review-->
     <li>escribir borradores para que usted los envíe y modificar o descartar los que haya creado el agente, mientras usted no los haya guardado</li>
     <li>enviar correo, cada mensaje solo después de que usted lo confirme</li>
 </ul>
@@ -16,6 +16,8 @@
     <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> es la opción predeterminada y no envía ninguna solicitud de baja.</li>
 </ul>
 <p>No se pueden usar mensajes de la carpeta <b data-text="folder-junk"></b> para que un agente cancele una suscripción. Cada programa tiene un límite de 30 solicitudes de baja autorizadas en las últimas 24 horas. Las solicitudes fallidas también cuentan.</p>
+<!--review--><h2>Cambiar muchos mensajes a la vez</h2><!--/review-->
+<!--review--><p>Un agente que puede organizar el correo puede cambiar en un solo paso todos los mensajes que encuentra una búsqueda, por ejemplo marcar como leídos todos los boletines o moverlos a una carpeta. Primero cuenta los mensajes y ve algunos de ellos. Después cambia exactamente esos, como máximo 1000 a la vez, y nunca el correo que haya llegado después. Inbox Classic no le pregunta antes, ya que todo se puede deshacer. El registro lo muestra en una sola fila, como «37 mensajes marcados como leídos (búsqueda: from:news)», y un solo Deshacer lo revierte todo.</p><!--/review-->
 <h2>Ver y cambiar el acceso</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> muestra los programas a los que permitió o denegó el acceso, y todo lo que hicieron los agentes, empezando por lo más reciente.</p>
 <!--review--><p>Lo que lee un agente aparece en una fila por programa y hora, como «Leyó 14 mensajes y buscó 3 veces». <!--os:windows-->Seleccione la fila<!--/os--><!--os:mac,linux-->Abra la fila con su flecha<!--/os--> para ver los asuntos que leyó y lo que buscó, nunca el texto de los mensajes. El registro se conserva 30 días. Borrarlo no cambia cuántos mensajes puede enviar todavía un agente.</p><!--/review-->
@@ -23,6 +25,8 @@
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> cambia lo que puede hacer un programa.</li>
     <li><b data-text="ui-remove"></b> olvida un programa, de modo que se le volverá a preguntar la próxima vez que se conecte.</li>
     <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> revierte cambios en el estado de lectura, las marcas y sus colores, así como la clasificación como correo no deseado. También permite deshacer traslados, archivados y eliminaciones. Puede cancelar un envío si el mensaje sigue en la Bandeja de salida.</li><!--/review-->
+    <!--review--><li><!--os:windows--><b data-text="win-undo-since"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-since-button"></b><!--/os--> deshace todo lo que hizo el programa seleccionado en el tiempo que elija, como la última hora, empezando por lo más reciente.</li><!--/review-->
 </ul>
+<!--review--><p>Un mensaje que usted o el servidor cambiaron después del agente se deja como está, e Inbox Classic le indica cuántos fueron. Un agente también puede deshacer sus propios cambios, nunca los de otro programa.</p><!--/review-->
 <aside class="warning">El correo lo escriben otras personas, y un mensaje puede intentar convencer a un agente de que reenvíe o elimine su correo. Inbox Classic oculta a los agentes el texto que un mensaje le oculta a usted, y les indica que el correo no son instrucciones. Aun así, un agente puede dejarse engañar. Permita solo lo que necesite.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

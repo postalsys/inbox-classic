@@ -55,6 +55,8 @@ public:
     int64_t TestFrames();
     // the requests to the internet the document shown made (allowed or refused), for the UI test
     int RemoteRequests() const { return remoteRequests_; }
+    // whether the newest document given has loaded (NavigationCompleted of its own address), for the UI test
+    bool Loaded() const { return !pending_ && shown_ > 0 && loaded_ == shown_; }
     // empty; with "There is no message selected." centered in it, as Outlook Express has it, when `noMessage`
     void Clear(bool noMessage = false);
     // the core's page for a message that is not here: being downloaded, or why it could not be (`reason` in UTF-8)
@@ -132,6 +134,8 @@ private:
     bool focusPending_ = false;
     // documents shown, for an address of each
     unsigned shown_ = 0;
+    // the number of the newest of those that finished loading (Loaded)
+    unsigned loaded_ = 0;
     // documents asked for (Show): a scroll read for one that is not the newest is dropped
     unsigned asked_ = 0;
     // where the document loading is scrolled to once its DOM is there (none when negative), and its address

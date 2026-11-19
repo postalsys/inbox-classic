@@ -84,6 +84,9 @@ pub struct Outgoing {
     /// The AI agent that wrote it, by its program's name: its copy in Drafts says so ([`AGENT_HEADER`]), which a
     /// message that goes never does. None for the user's own.
     pub agent: Option<String>,
+    /// A calendar file it carries (an answer to an invitation, `METHOD:REPLY`): an alternative and an attachment, as
+    /// calendar programs look for either. Only the core makes one, never from what a window or an agent wrote.
+    pub calendar: Option<pe_smtp::IcalEvent>,
 }
 
 /// The header of a draft an AI agent wrote, naming its program: kept only in Drafts, so the compose window can say
@@ -339,6 +342,7 @@ fn build(
         date: now,
         message_id: outgoing.message_id.clone().unwrap_or_default(),
         signed: outgoing.sign || outgoing.encrypt,
+        ical_event: outgoing.calendar.clone(),
         ..Default::default()
     })
 }

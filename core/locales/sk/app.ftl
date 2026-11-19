@@ -863,6 +863,13 @@ ui-let-agents-connect = &Povoliť AI agentom pripájať sa k Inbox Classic
 ui-change-button = Zmeniť…
 # review: new
 ui-undo-button = Späť
+# Tools > AI Agents: takes back everything the selected program did in a span the user picks
+# review: new
+ui-undo-since-button = Vrátiť za obdobie…
+# review: new
+ui-undo-since-span = Vrátiť, čo tento program urobil:
+# review: new
+ui-take-back = Vrátiť
 # review: new
 ui-rules-title = Pravidlá správ
 # review: new

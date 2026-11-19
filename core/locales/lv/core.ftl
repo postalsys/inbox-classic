@@ -786,6 +786,151 @@ agent-log-watched = Sāka vērot sarunu „{ $subject }”
 agent-log-ignored = Sāka ignorēt sarunu „{ $subject }”
 # review: new
 agent-log-unmarked = Pārtrauca vērot vai ignorēt sarunu „{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = ziņojums kopš tā laika ir mainīts
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [zero] Atzīmēja kā lasītus { $count } ziņojumu (meklējums: { $query })
+    [one] Atzīmēja kā lasītu { $count } ziņojumu (meklējums: { $query })
+   *[other] Atzīmēja kā lasītus { $count } ziņojumus (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [zero] Atzīmēja kā nelasītus { $count } ziņojumu (meklējums: { $query })
+    [one] Atzīmēja kā nelasītu { $count } ziņojumu (meklējums: { $query })
+   *[other] Atzīmēja kā nelasītus { $count } ziņojumus (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [zero] Atzīmēja ar karodziņu { $count } ziņojumu (meklējums: { $query })
+    [one] Atzīmēja ar karodziņu { $count } ziņojumu (meklējums: { $query })
+   *[other] Atzīmēja ar karodziņu { $count } ziņojumus (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [zero] Noņēma karodziņu { $count } ziņojumiem (meklējums: { $query })
+    [one] Noņēma karodziņu { $count } ziņojumam (meklējums: { $query })
+   *[other] Noņēma karodziņu { $count } ziņojumiem (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [zero] Atzīmēja { $count } ziņojumu
+    [one] Atzīmēja { $count } ziņojumu
+   *[other] Atzīmēja { $count } ziņojumus
+} ar { $color ->
+    [red] sarkanu
+    [orange] oranžu
+    [yellow] dzeltenu
+    [green] zaļu
+    [blue] zilu
+    [purple] violetu
+   *[gray] pelēku
+} karodziņu (meklējums: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [zero] Pārvietoja { $count } ziņojumu uz mapi „{ $folder }” (meklējums: { $query })
+    [one] Pārvietoja { $count } ziņojumu uz mapi „{ $folder }” (meklējums: { $query })
+   *[other] Pārvietoja { $count } ziņojumus uz mapi „{ $folder }” (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [zero] Arhivēja { $count } ziņojumu (meklējums: { $query })
+    [one] Arhivēja { $count } ziņojumu (meklējums: { $query })
+   *[other] Arhivēja { $count } ziņojumus (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [zero] Atzīmēja { $count } ziņojumu kā nevēlamus (meklējums: { $query })
+    [one] Atzīmēja { $count } ziņojumu kā nevēlamu (meklējums: { $query })
+   *[other] Atzīmēja { $count } ziņojumus kā nevēlamus (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [zero] Atzīmēja { $count } ziņojumu kā vēlamus (meklējums: { $query })
+    [one] Atzīmēja { $count } ziņojumu kā vēlamu (meklējums: { $query })
+   *[other] Atzīmēja { $count } ziņojumus kā vēlamus (meklējums: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [zero] Izdzēsa { $count } ziņojumu (meklējums: { $query })
+    [one] Izdzēsa { $count } ziņojumu (meklējums: { $query })
+   *[other] Izdzēsa { $count } ziņojumus (meklējums: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Pēdējās 15 minūtēs
+    [hour] Pēdējā stundā
+    [hours] Pēdējās 4 stundās
+    [day] Pēdējās 24 stundās
+    [week] Pēdējās 7 dienās
+   *[all] Pēdējās 30 dienās
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } šajā laikā nav veikusi izmaiņas, kuras var atsaukt.
+    [zero] Vai atsaukt { $count } izmaiņas, ko { $program } veica šajā laikā?
+    [one] Vai atsaukt { $count } izmaiņu, ko { $program } veica šajā laikā?
+   *[other] Vai atsaukt { $count } izmaiņas, ko { $program } veica šajā laikā?
+}
+# review: new
+agent-undo-since-detail = Ziņojumi atgriežas mapēs, no kurām tie tika pārvietoti, lasīšanas stāvokļi un karodziņi kļūst tādi, kādi tie bija, un ziņojumi, kas vēl gaida mapē „Izsūtne”, tiek izdzēsti. To, ko kopš tā laika mainījāt jūs vai serveris, atstāj, kā ir.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Nekas netika atsaukts.
+    [zero] Atsauktas { $count } izmaiņas.
+    [one] Atsaukta { $count } izmaiņa.
+   *[other] Atsauktas { $count } izmaiņas.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [zero] { $count } ziņojumi vairs nebija tur, kur izmaiņa tos ievietoja.
+    [one] { $count } ziņojums vairs nebija tur, kur izmaiņa to ievietoja.
+   *[other] { $count } ziņojumi vairs nebija tur, kur izmaiņa tos ievietoja.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [zero] { $count } ziņojumus kopš tā laika mainījāt jūs vai serveris, tāpēc tie atstāti, kā ir.
+    [one] { $count } ziņojumu kopš tā laika mainījāt jūs vai serveris, tāpēc tas atstāts, kā ir.
+   *[other] { $count } ziņojumus kopš tā laika mainījāt jūs vai serveris, tāpēc tie atstāti, kā ir.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [zero] { $count } ziņojumi jau bija izgājuši no mapes „Izsūtne”.
+    [one] { $count } ziņojums jau bija izgājis no mapes „Izsūtne”.
+   *[other] { $count } ziņojumi jau bija izgājuši no mapes „Izsūtne”.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [zero] { $count } izmaiņas nevar atsaukt.
+    [one] { $count } izmaiņu nevar atsaukt.
+   *[other] { $count } izmaiņas nevar atsaukt.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Šis ziņojums pieņem uzaicinājumu „{ $summary }” ({ $when }).
+    [tentative] Šis ziņojums provizoriski pieņem uzaicinājumu „{ $summary }” ({ $when }).
+   *[decline] Šis ziņojums noraida uzaicinājumu „{ $summary }” ({ $when }).
+} Organizatora kalendārs atbildi reģistrē. Jūsu atbilde uz uzaicinājumu mainās tikai tad, kad ziņojums ir nosūtīts.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Pieņemts: { $summary }
+    [tentative] Provizoriski: { $summary }
+   *[decline] Noraidīts: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } pieņēma šo uzaicinājumu.
+    [tentative] { $name } provizoriski pieņēma šo uzaicinājumu.
+   *[decline] { $name } noraidīja šo uzaicinājumu.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->

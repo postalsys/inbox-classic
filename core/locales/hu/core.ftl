@@ -489,6 +489,135 @@ agent-log-renamed = Mappa átnevezése kérve: „{ $old }”. Új név: „{ $n
 agent-log-watched = Beszélgetés figyelése bekapcsolva: „{ $subject }”
 agent-log-ignored = Beszélgetés figyelmen kívül hagyva: „{ $subject }”
 agent-log-unmarked = Beszélgetés figyelése vagy figyelmen kívül hagyása kikapcsolva: „{ $subject }”
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = az üzenet azóta megváltozott
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Olvasottként megjelölve: 1 üzenet (keresés: { $query })
+   *[other] Olvasottként megjelölve: { $count } üzenet (keresés: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Olvasatlanként megjelölve: 1 üzenet (keresés: { $query })
+   *[other] Olvasatlanként megjelölve: { $count } üzenet (keresés: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Jelölővel ellátva: 1 üzenet (keresés: { $query })
+   *[other] Jelölővel ellátva: { $count } üzenet (keresés: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Jelölő eltávolítva: 1 üzenet (keresés: { $query })
+   *[other] Jelölő eltávolítva: { $count } üzenet (keresés: { $query })
+}
+# review: new
+agent-log-bulk-color = { $color ->
+    [red] Piros
+    [orange] Narancssárga
+    [yellow] Sárga
+    [green] Zöld
+    [blue] Kék
+    [purple] Lila
+   *[gray] Szürke
+} jelölővel ellátva: { $count ->
+    [one] 1 üzenet
+   *[other] { $count } üzenet
+} (keresés: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Áthelyezve: 1 üzenet. Cél: { $folder } (keresés: { $query })
+   *[other] Áthelyezve: { $count } üzenet. Cél: { $folder } (keresés: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Archiválva: 1 üzenet (keresés: { $query })
+   *[other] Archiválva: { $count } üzenet (keresés: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Levélszemétként megjelölve: 1 üzenet (keresés: { $query })
+   *[other] Levélszemétként megjelölve: { $count } üzenet (keresés: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Nem levélszemétként megjelölve: 1 üzenet (keresés: { $query })
+   *[other] Nem levélszemétként megjelölve: { $count } üzenet (keresés: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Törölve: 1 üzenet (keresés: { $query })
+   *[other] Törölve: { $count } üzenet (keresés: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Az elmúlt 15 percben
+    [hour] Az elmúlt órában
+    [hours] Az elmúlt 4 órában
+    [day] Az elmúlt 24 órában
+    [week] Az elmúlt 7 napban
+   *[all] Az elmúlt 30 napban
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } ebben az időszakban nem végzett visszavonható módosítást.
+    [one] Visszavonja a módosítást, amelyet { $program } ebben az időszakban végzett?
+   *[other] Visszavonja azt a(z) { $count } módosítást, amelyet { $program } ebben az időszakban végzett?
+}
+# review: new
+agent-undo-since-detail = Az üzenetek visszakerülnek abba a mappába, ahonnan jöttek, az olvasottsági állapot és a jelölők visszaállnak a korábbira, a Postázandó üzenetek mappában még várakozó üzenetek pedig törlődnek. Amit Ön vagy a kiszolgáló azóta módosított, az változatlan marad.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Semmi sem lett visszavonva.
+    [one] 1 módosítás visszavonva.
+   *[other] { $count } módosítás visszavonva.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 üzenet már nem ott volt, ahová a módosítás tette.
+   *[other] { $count } üzenet már nem ott volt, ahová a módosítás tette.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] 1 üzenetet azóta Ön vagy a kiszolgáló módosított, ezért változatlan maradt.
+   *[other] { $count } üzenetet azóta Ön vagy a kiszolgáló módosított, ezért változatlanok maradtak.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 üzenet már elhagyta a Postázandó üzenetek mappát.
+   *[other] { $count } üzenet már elhagyta a Postázandó üzenetek mappát.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 módosítás nem vonható vissza.
+   *[other] { $count } módosítás nem vonható vissza.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Ez az üzenet elfogadja a(z) „{ $summary }” meghívót ({ $when }).
+    [tentative] Ez az üzenet feltételesen elfogadja a(z) „{ $summary }” meghívót ({ $when }).
+   *[decline] Ez az üzenet elutasítja a(z) „{ $summary }” meghívót ({ $when }).
+} A szervező naptára feldolgozza. A meghívóra adott válasza csak akkor változik meg, ha az üzenetet elküldték.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Elfogadva: { $summary }
+    [tentative] Feltételesen elfogadva: { $summary }
+   *[decline] Elutasítva: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } elfogadta ezt a meghívót.
+    [tentative] { $name } feltételesen elfogadta ezt a meghívót.
+   *[decline] { $name } elutasította ezt a meghívót.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 agent-reads-messages = { $count ->
     [one] 1 üzenetet olvasott el

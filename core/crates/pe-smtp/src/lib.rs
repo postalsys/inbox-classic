@@ -10,4 +10,4 @@ pub mod message;
 pub mod mime_types;
 
 pub use client::{Client, Config, Credentials, Error, ErrorKind, Response, SendReport};
-pub use message::{Attachment, Built, Envelope, Message, build, build_with};
+pub use message::{Attachment, Built, Envelope, IcalEvent, Message, build, build_with};

@@ -517,6 +517,135 @@ agent-log-watched = Alkoi seurata keskustelua ”{ $subject }”
 agent-log-ignored = Alkoi ohittaa keskustelun ”{ $subject }”
 # review: new
 agent-log-unmarked = Lopetti keskustelun ”{ $subject }” seuraamisen tai ohittamisen
+# the reason one change can not be taken back (agent-undo-refused-why)
+# review: new
+agent-undo-changed = viestiä on muutettu sen jälkeen
+# one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
+# review: new
+agent-log-bulk-read = { $count ->
+    [one] Merkitsi 1 viestin luetuksi (haku: { $query })
+   *[other] Merkitsi { $count } viestiä luetuiksi (haku: { $query })
+}
+# review: new
+agent-log-bulk-unread = { $count ->
+    [one] Merkitsi 1 viestin lukemattomaksi (haku: { $query })
+   *[other] Merkitsi { $count } viestiä lukemattomiksi (haku: { $query })
+}
+# review: new
+agent-log-bulk-flagged = { $count ->
+    [one] Liputti 1 viestin (haku: { $query })
+   *[other] Liputti { $count } viestiä (haku: { $query })
+}
+# review: new
+agent-log-bulk-unflagged = { $count ->
+    [one] Poisti lipun 1 viestistä (haku: { $query })
+   *[other] Poisti lipun { $count } viestistä (haku: { $query })
+}
+# review: new
+agent-log-bulk-color = { $count ->
+    [one] Liputti 1 viestin
+   *[other] Liputti { $count } viestiä
+} { $color ->
+    [red] punaisella
+    [orange] oranssilla
+    [yellow] keltaisella
+    [green] vihreällä
+    [blue] sinisellä
+    [purple] violetilla
+   *[gray] harmaalla
+} lipulla (haku: { $query })
+# review: new
+agent-log-bulk-moved = { $count ->
+    [one] Siirsi 1 viestin. Kohde: { $folder } (haku: { $query })
+   *[other] Siirsi { $count } viestiä. Kohde: { $folder } (haku: { $query })
+}
+# review: new
+agent-log-bulk-archived = { $count ->
+    [one] Arkistoi 1 viestin (haku: { $query })
+   *[other] Arkistoi { $count } viestiä (haku: { $query })
+}
+# review: new
+agent-log-bulk-junk = { $count ->
+    [one] Merkitsi 1 viestin roskapostiksi (haku: { $query })
+   *[other] Merkitsi { $count } viestiä roskapostiksi (haku: { $query })
+}
+# review: new
+agent-log-bulk-not-junk = { $count ->
+    [one] Poisti roskapostimerkinnän 1 viestistä (haku: { $query })
+   *[other] Poisti roskapostimerkinnän { $count } viestistä (haku: { $query })
+}
+# review: new
+agent-log-bulk-deleted = { $count ->
+    [one] Poisti 1 viestin (haku: { $query })
+   *[other] Poisti { $count } viestiä (haku: { $query })
+}
+# Undo Everything Since in the AI Agents window: how far back it reaches
+# review: new
+agent-undo-span = { $span ->
+    [quarter] Viimeisten 15 minuutin aikana
+    [hour] Viimeisen tunnin aikana
+    [hours] Viimeisten 4 tunnin aikana
+    [day] Viimeisten 24 tunnin aikana
+    [week] Viimeisten 7 päivän aikana
+   *[all] Viimeisten 30 päivän aikana
+}
+# the question before it takes back what a program did in the span chosen
+# review: new
+agent-undo-since-question = { $count ->
+    [0] { $program } ei tehnyt tänä aikana muutoksia, jotka voisi perua.
+    [one] Perutaanko muutos, jonka { $program } teki tänä aikana?
+   *[other] Perutaanko { $count } muutosta, jotka { $program } teki tänä aikana?
+}
+# review: new
+agent-undo-since-detail = Viestit palaavat kansioihin, joista ne tulivat, luku- ja lipputilat palautetaan ennalleen ja Lähtevät-kansiossa yhä odottavat viestit poistetaan. Sitä, mitä sinä tai palvelin olette muuttaneet sen jälkeen, ei muuteta.
+# what taking back did, then a line for each kind of message it left as it is
+# review: new
+agent-undo-done = { $count ->
+    [0] Mitään ei peruttu.
+    [one] Peruttiin 1 muutos.
+   *[other] Peruttiin { $count } muutosta.
+}
+# review: new
+agent-undo-left-gone = { $count ->
+    [one] 1 viesti ei ollut enää siellä, minne muutos sen vei.
+   *[other] { $count } viestiä ei ollut enää siellä, minne muutos ne vei.
+}
+# review: new
+agent-undo-left-changed = { $count ->
+    [one] Sinä tai palvelin oli muuttanut 1 viestiä sen jälkeen, joten se jätettiin ennalleen.
+   *[other] Sinä tai palvelin oli muuttanut { $count } viestiä sen jälkeen, joten ne jätettiin ennalleen.
+}
+# review: new
+agent-undo-left-sent = { $count ->
+    [one] 1 viesti oli jo lähtenyt Lähtevät-kansiosta.
+   *[other] { $count } viestiä oli jo lähtenyt Lähtevät-kansiosta.
+}
+# review: new
+agent-undo-left-impossible = { $count ->
+    [one] 1 muutosta ei voi perua.
+   *[other] { $count } muutosta ei voi perua.
+}
+# the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
+# review: new
+agent-invitation-reply = { $response ->
+    [accept] Tämä viesti hyväksyy kutsun ”{ $summary }” ({ $when }).
+    [tentative] Tämä viesti hyväksyy kutsun ”{ $summary }” ({ $when }) alustavasti.
+   *[decline] Tämä viesti hylkää kutsun ”{ $summary }” ({ $when }).
+} Järjestäjän kalenteri ottaa vastauksen huomioon. Vastauksesi kutsuun muuttuu vasta, kun viesti on lähetetty.
+# the subject of an answer to an invitation, as calendar programs write it
+# review: new
+invitation-reply-subject = { $response ->
+    [accept] Hyväksytty: { $summary }
+    [tentative] Alustava: { $summary }
+   *[decline] Hylätty: { $summary }
+}
+# the text of an answer to an invitation; { $name } is the user's name, or address
+# review: new
+invitation-reply-text = { $response ->
+    [accept] { $name } on hyväksynyt tämän kutsun.
+    [tentative] { $name } on hyväksynyt tämän kutsun alustavasti.
+   *[decline] { $name } on hylännyt tämän kutsun.
+}
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
 # review: new
 agent-reads-messages = { $count ->
