@@ -10,7 +10,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Lithuanian account and connection help: add-account, gmail-outlook, manage-accounts, sign-in-apps, account-security, certificate-errors, no-connection and password-not-accepted. All current Lithuanian catalogs are reviewed; 32 help topics remain. Its reading/search and writing/contact behavior comparisons are complete. Apply the corrected Windows credential-store term during the flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+  "next_batch": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 24 help topics remain. Reading/search, writing/contact and account/connection behavior comparisons are complete. Apply the Windows credential-store term during encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -27909,12 +27909,9 @@
     "lt": {
       "pending_catalogs": {},
       "pending_help": [
-        "account-security.html",
-        "add-account.html",
         "agents-connect.html",
         "agents-permissions.html",
         "brand-logos.html",
-        "certificate-errors.html",
         "command-line.html",
         "connections.html",
         "data-storage.html",
@@ -27923,20 +27920,15 @@
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "gmail-outlook.html",
         "invitations.html",
         "keyboard-shortcuts.html",
         "links-scripts.html",
-        "manage-accounts.html",
         "message-not-shown.html",
         "message-rules.html",
         "move-computer.html",
-        "no-connection.html",
         "options-language.html",
-        "password-not-accepted.html",
         "pictures-tracking.html",
         "removing.html",
-        "sign-in-apps.html",
         "sign-in-codes.html",
         "unsubscribe.html",
         "updates.html",
@@ -32087,6 +32079,218 @@
             "source-notes.json": "/private/tmp/inbox-lt-writing-20261119-source-notes.json",
             "screenshots.json": "/private/tmp/inbox-lt-writing-20261119-screenshots.json",
             "html.log": "/private/tmp/inbox-lt-writing-20261119-html.log"
+          }
+        },
+        {
+          "id": "lt-accounts-connections-help-20261119",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "add-account.html",
+            "gmail-outlook.html",
+            "manage-accounts.html",
+            "sign-in-apps.html",
+            "account-security.html",
+            "certificate-errors.html",
+            "no-connection.html",
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/lt/add-account.html": "da98a84d739777cb35c2eda1c02c4a693305fe17991054ffdc91d18d7b63deb0",
+            "core/crates/pe-html/help/lt/gmail-outlook.html": "70f0efe100e00b2b5bbb3ecc5175b84185787e5c5d3bcb88658c7b0d59105c26",
+            "core/crates/pe-html/help/lt/manage-accounts.html": "48a9448d62164e1e47b5a1d73f66076e1b550b2c972a92264560854bc89cfb94",
+            "core/crates/pe-html/help/lt/sign-in-apps.html": "39ba878b747b2e30d83d9a1501d2b741fe27a6a83d80d552bb266a74e537100f",
+            "core/crates/pe-html/help/lt/account-security.html": "b5cc5dab5795a1ea66035335f6490542051b58f09090ed1afa5298f3ef3fda5d",
+            "core/crates/pe-html/help/lt/certificate-errors.html": "fd8263dc4318a2f45464bfe2b4a9f08fda6f5385d871b7eb2936cbbb62c62b5f",
+            "core/crates/pe-html/help/lt/no-connection.html": "cfe461467fcf34c0be52d2cf3e06e4f1c9568a8ac4c1c37d26d847ca1c2cd14c",
+            "core/crates/pe-html/help/lt/password-not-accepted.html": "3d9edc180fb13174f9d2282b474816c6144d8a1113f67d9031ebdb3e77cf5bd0"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/add-account.html": "07fe4a8ae27c3acaf2594782a770b21b1b1b229b0ce81a5f88986feddc823b25",
+            "core/crates/pe-html/help/en/gmail-outlook.html": "c815db80af701f352ccebbb72b2ccbaf4d7ba2d01ee60309ee7e9a54f4f27c71",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/sign-in-apps.html": "c092b49a13a0eab86b8571ec49c3fe49696b16b2e71bc1cc1020bcbc0222c1b1",
+            "core/crates/pe-html/help/en/account-security.html": "adf8cbee09afd1c8bcaaf46181d1cbf6667a67e1b3ce6f35c13af4d1c016ed44",
+            "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+            "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+            "core/crates/pe-html/help/en/password-not-accepted.html": "389ccc305db88334ddbebd4d296b864d0c47c27cf0423a7e7bed5b679cf5c7e7"
+          },
+          "validation": "Lithuanian structural checks pass with 1,485 expected mark-only diagnostics. Exact before/after reconstruction verifies eight full help topics and 82 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keys and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows setup, Linux properties and Mac account-list captures were inspected alongside current native source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,572 help lines; since-start 1,760 entries/448 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Google/Microsoft primary documentation was checked for app-password and authorization guidance. Account/connection behavior comparison is complete for Lithuanian; platform setup/control differences are recorded for targeted comparison elsewhere. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+          "notes": "Reviewed eight complete Lithuanian account/connection help topics against current native dialogs, provider discovery, OAuth, secret storage, removal and TLS behavior. Corrected provider/app-password scope, actual error quotations, local-only mail loss, issuer-check scope and conditional setup controls. Preserved tags/attributes/platform branches/literal keys/code. No local test suites.",
+          "help_wording_lines_changed": 82,
+          "help_changes_by_file": {
+            "core/crates/pe-html/help/lt/add-account.html": 16,
+            "core/crates/pe-html/help/lt/gmail-outlook.html": 10,
+            "core/crates/pe-html/help/lt/manage-accounts.html": 16,
+            "core/crates/pe-html/help/lt/sign-in-apps.html": 9,
+            "core/crates/pe-html/help/lt/account-security.html": 7,
+            "core/crates/pe-html/help/lt/certificate-errors.html": 7,
+            "core/crates/pe-html/help/lt/no-connection.html": 8,
+            "core/crates/pe-html/help/lt/password-not-accepted.html": 9
+          },
+          "runtime_files": {
+            "core/commands.toml": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "core/settings.toml": "a578fee87613a35051021dfdf96b0ba168027ea2c1caee3d16e8083a281aa340",
+            "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "core/crates/pe-core/src/lib.rs": "cb12b9746d699544ff2ce866bd89b9477de4609458af5ef5d5d8a1750b7a75a7",
+            "core/crates/pe-core/src/worker.rs": "f5c1c28f0117606cf9b544a1d75736e84c88ad9bc53f26c7d7dda6985db8c28b",
+            "core/crates/pe-core/src/secrets.rs": "f5aae6a69f175cd3837c86c816cfa767b9667073ccc52d7c59fed224a81fca6e",
+            "core/crates/pe-core/src/sign_in_apps.rs": "f2f6ec3fed94e298979d5f8d688691b9b5918568781c2ef86c8a0999348d21bb",
+            "core/crates/pe-store/src/accounts.rs": "e35286fca375800e346f9c4fd99d6f5fff38e639e3246d12e522fee4cf52e3f8",
+            "core/crates/pe-store/src/schema.rs": "aa2bbc100f1069f46282a6d405dbaa5e2c2da642592d1092ef69b14853ed4e85",
+            "core/crates/pe-store/src/sign_in_apps.rs": "280c907936ab27bd4132d362045167ed8b3627010a1c71784f975561e159ee87",
+            "core/crates/pe-autoconfig/src/app_password.rs": "d71c340b3677cd7193efd89a940231f2d6df12ac65f3a9e18fad329d12b4330a",
+            "core/crates/pe-net/src/stream.rs": "5a90bc2fef1c9b12587ae587cacc27f79d71bb5734f9cf0cba04711e99ffc79a",
+            "core/crates/pe-net/src/tls.rs": "30b345868ca678c57306858765129790b6b8b8959b8aaecb2dddce8e8d9f130d",
+            "core/crates/pe-imap/src/client/mod.rs": "7f79a9453da917bf8e1585976e1de1b8e47b265b140e132c4352d1e5dd7bf29f",
+            "core/crates/pe-imap/src/client/error.rs": "47dc53f00234b80d19539b0dfbe200b97fc3f5ba2171f64085c27c271b8205f7",
+            "core/crates/pe-smtp/src/client.rs": "773e7d3f5b7f8eb6d6d4c89484bb5625d38bbaa4322afd39c2e134510deca7dc",
+            "app/src/accounts.cpp": "d1965776fefd8a870c0558f5bf3b7d2e40ece8fd9de078a86c514ba554cb3f92",
+            "app/src/signinapps.cpp": "6cd5a5fb374f8c39326d0e96c7d1f6d8a4c7b6d67cd2f205dd8a3fba8879d6cc",
+            "linux/src/accounts.rs": "fd849106186b6a3c84a80398ddf08ead4e24f17cc00a2804545d9c024b905a43",
+            "linux/src/sign_in_apps.rs": "bb8ee879c383754b53338a89689aaf8179cff0fd12868764d85ae2c8959b7233",
+            "mac/Sources/InboxClassic/Accounts.swift": "d7c4ec2ca26c51ed9404fc6e1f4e93aac6cdb79082e512c11984b236636cb53d",
+            "mac/Sources/InboxClassic/SignInApps.swift": "c07ac8825c4d4a4c390ca33726851bd9932128c4f1d874e66b54b1ee767157a1",
+            "linux/src/mailbox.rs": "5a1f7398868d4bbe557391867b2c02976f5d4db9540c857919834be924f75aa7",
+            "linux/src/folders.rs": "b7de49c1a55459767160f818d1ddfa914e4ed0d4f59e5d7170a1aaa4d29b8687",
+            "app/src/mailbox.cpp": "11baddaa5e35e8af4a296c28d04c10192bba8bed3ab220471a0da63b73a5bfcd",
+            "mac/Sources/InboxClassic/Mailbox.swift": "7a1ad5456e5599398d081cc3fa5274575d6bd4fbdc9104eaa285126e89263892"
+          },
+          "catalog_dependencies": {
+            "core/locales/lt/mac.ftl": "8a676c1f434730809c37789d26bc30b64e33bd1ef159dccf2e8320f598a1f0fb",
+            "core/locales/lt/linux.ftl": "7789eefd88bfc5843442ed1f67e26cac72f99bb90b1e487d6efc3896ec0243bd",
+            "core/locales/lt/app.ftl": "c704e3afa8bdf7f568ac9f15c8df46d837e3375cf61c3b86f58a48270a987d6c",
+            "core/locales/lt/core.ftl": "24192c43a90ce43611024019f8aa0122f1501fc107b0c30d8a5c9ac701441e4d",
+            "core/locales/lt/windows.ftl": "50e1dc0c1d1efb9d57916bfc5608b11c35d12ea8b38ec63f5633832930a5907a",
+            "core/locales/lt/help.ftl": "f3be14d6fdaf533c0c936adbac83338c400b4892ae70a9247b23814ba10ff8aa"
+          },
+          "source_context_findings": {
+            "review_basis": "Full English/Lithuanian topic pairs, current catalogs and native dialogs, existing English captures, and current OAuth/TLS/storage call paths. Static sentence substitution is not Fluent or GUI testing.",
+            "issues": [
+              {
+                "topics": [
+                  "add-account.html",
+                  "gmail-outlook.html"
+                ],
+                "finding": "Lookup cancellation skips lookup on Windows/Linux but exits setup on Mac. Provider sign-in alternatives, including the app-password button, are shown only when a built-in or added provider choice is enabled. Failed/cancelled lookup can leave blank fields, so guessed hosts are conditional.",
+                "sources": [
+                  "app/src/accounts.cpp::NewAccountDialog",
+                  "linux/src/accounts.rs::look_up/new_account",
+                  "mac/Sources/InboxClassic/Accounts.swift::newAccount"
+                ]
+              },
+              {
+                "topics": [
+                  "gmail-outlook.html",
+                  "password-not-accepted.html"
+                ],
+                "finding": "Gmail app passwords require two-step verification and account support, not simply the presence of a second sign-in step. Microsoft accounts in this client are directed to browser sign-in. Literal error quotations now match current Lithuanian catalogs.",
+                "sources": [
+                  "core/crates/pe-autoconfig/src/app_password.rs",
+                  "core/locales/lt/app.ftl",
+                  "core/locales/lt/core.ftl"
+                ]
+              },
+              {
+                "topics": [
+                  "sign-in-apps.html",
+                  "gmail-outlook.html"
+                ],
+                "finding": "The built-in Google choice starts disabled in this source; this does not establish the live verification status of its registration. Check tests issuer discovery/configuration rather than mail authorization. Disabling affects new account choices; in-use apps cannot be removed. Client secrets are hidden in the editor and use system storage by default.",
+                "sources": [
+                  "core/crates/pe-core/src/sign_in_apps.rs",
+                  "core/crates/pe-core/src/secrets.rs",
+                  "core/crates/pe-store/src/sign_in_apps.rs",
+                  "app/src/signinapps.cpp",
+                  "linux/src/sign_in_apps.rs",
+                  "mac/Sources/InboxClassic/SignInApps.swift"
+                ]
+              },
+              {
+                "topics": [
+                  "manage-accounts.html"
+                ],
+                "finding": "Account removal removes local mail, queued unsent rows and account credentials; server-held mail stays. Mark All Read applies to messages in all account folders. Native Windows list handles Delete; no removal key handler is installed in the current Mac NSTableView or Linux ListBox account dialogs, so shortcut instructions are scoped to Windows. File/Tools are valid Linux primary-menu submenus.",
+                "sources": [
+                  "core/crates/pe-core/src/lib.rs::remove_account/mark_account_read",
+                  "core/crates/pe-store/src/schema.rs::outbox",
+                  "app/src/accounts.cpp",
+                  "linux/src/accounts.rs::accounts_dialog",
+                  "mac/Sources/InboxClassic/Accounts.swift::AccountsWindow",
+                  "linux/src/mailbox.rs::primary_menu"
+                ]
+              },
+              {
+                "topics": [
+                  "account-security.html",
+                  "certificate-errors.html"
+                ],
+                "finding": "STARTTLS upgrade fails before authentication; the app ends the attempt rather than stopping itself. TLS errors include more than certificate identity failures. Default trust uses the system verifier; explicit pinned trust is separate from accepting any certificate. Plain local-network traffic is not encrypted. OAuth persists refresh credentials instead of an account password; memory-only/unavailable storage can require later sign-in.",
+                "sources": [
+                  "core/crates/pe-imap/src/client/mod.rs::start_session",
+                  "core/crates/pe-smtp/src/client.rs::connect",
+                  "core/crates/pe-net/src/tls.rs",
+                  "core/crates/pe-net/src/stream.rs",
+                  "core/crates/pe-core/src/secrets.rs",
+                  "core/crates/pe-core/src/worker.rs"
+                ]
+              },
+              {
+                "topics": [
+                  "no-connection.html"
+                ],
+                "finding": "Raw low-level errors remain English; localized wrapper sentences use current catalog wording. Provider port and TLS mode must match. Queued mail remains after a failed connection and is retried, without a promise of delivery.",
+                "sources": [
+                  "core/crates/pe-net/src/stream.rs",
+                  "core/crates/pe-core/src/worker.rs",
+                  "core/crates/pe-store/src/schema.rs",
+                  "core/locales/lt/core.ftl"
+                ]
+              }
+            ],
+            "external_sources": [
+              {
+                "url": "https://support.google.com/accounts/answer/185833?hl=en",
+                "finding": "App passwords require two-step verification and may be unavailable for some accounts."
+              },
+              {
+                "url": "https://support.microsoft.com/en-us/support/known-issues/modern-authentication-methods-now-needed-to-continue-syncing-outlook-email-in-non-microsoft-email-ap",
+                "finding": "Outlook.com requires modern authentication; app-password-only setup is not valid guidance."
+              },
+              {
+                "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/policy-compliance",
+                "finding": "Google verification requirements depend on scopes and production/testing configuration; current live status of this app was not established."
+              }
+            ],
+            "screenshots": [
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e/account-1-form.png",
+                "sha256": "99a94cb4b5d05651ed8fcce35f5edc2c6afbd3a90579713fc9c8f116077df0e3",
+                "limitation": "Existing English capture inspected for layout/context; current source checked for later differences. No Lithuanian GUI-fit evidence."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/accounts-2-properties.png",
+                "sha256": "b38a7a039424e92286f8f60387b3b23b9eea1a059c90511351288b142e9a4ced",
+                "limitation": "Existing English capture inspected for layout/context; current source checked for later differences. No Lithuanian GUI-fit evidence."
+              },
+              {
+                "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-mac/accounts-1-list.png",
+                "sha256": "a9e1cf2216a0aa16fcdbd6dc06241c1d434df620ddf0de4627e52b9956698f7e",
+                "limitation": "Existing English capture inspected for layout/context; current source checked for later differences. No Lithuanian GUI-fit evidence."
+              }
+            ]
+          },
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-lt-accounts-20261119-edits.json",
+            "check.log": "/private/tmp/inbox-lt-accounts-20261119-check.log",
+            "global-check.log": "/private/tmp/inbox-lt-accounts-20261119-global-check.log",
+            "since.log": "/private/tmp/inbox-lt-accounts-20261119-since.log",
+            "joins.log": "/private/tmp/inbox-lt-accounts-20261119-joins.log",
+            "joins-summary.log": "/private/tmp/inbox-lt-accounts-20261119-joins-summary.log",
+            "source-audit.json": "/private/tmp/inbox-lt-accounts-20261119-source-audit.json",
+            "source-notes.json": "/private/tmp/inbox-lt-accounts-20261119-source-notes.json",
+            "screenshots.json": "/private/tmp/inbox-lt-accounts-20261119-screenshots.json",
+            "html.log": "/private/tmp/inbox-lt-accounts-20261119-html.log"
           }
         }
       ],
@@ -78680,7 +78884,7 @@
     "branch": "i18n/review-resume-20261118",
     "note": "Authoritative review checkout resumed from master 45f519ae1fe8e9f7bd8ebac4f634b2a676953d2f. The former build/i18n-wave1 worktree no longer exists. Earlier workspace/checkpoint fields are historical.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Lithuanian structural checks pass with 1,477 expected mark-only diagnostics. Exact before/after reconstruction verifies six complete help topics and 69 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keyboard contents and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current catalog labels, settings paths and shortcuts. Thirty-four runtime/source files and six catalog dependencies match the evidence. Existing English Windows signature, Linux attachment and Mac contact-picture captures were inspected, supplemented by current preview/opening and native-dialog source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,453 help lines; since-start 1,760 entries/448 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Source findings cover reply addresses, draft queue/removal timing, Undo Send deadlines, preview versus opened-file storage, contact domains and duplicate rules, batch naming and platform printing. Source-view truncation and the automatic preview budget are recorded for targeted comparison elsewhere. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+    "latest_source_audit": "Lithuanian structural checks pass with 1,485 expected mark-only diagnostics. Exact before/after reconstruction verifies eight full help topics and 82 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keys and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows setup, Linux properties and Mac account-list captures were inspected alongside current native source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,572 help lines; since-start 1,760 entries/448 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Google/Microsoft primary documentation was checked for app-password and authorization guidance. Account/connection behavior comparison is complete for Lithuanian; platform setup/control differences are recorded for targeted comparison elsewhere. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -139496,7 +139700,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Lithuanian account and connection help: add-account, gmail-outlook, manage-accounts, sign-in-apps, account-security, certificate-errors, no-connection and password-not-accepted. All current Lithuanian catalogs are reviewed; 32 help topics remain. Its reading/search and writing/contact behavior comparisons are complete. Apply the corrected Windows credential-store term during the flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
+      "next": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 24 help topics remain. Reading/search, writing/contact and account/connection behavior comparisons are complete. Apply the Windows credential-store term during encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -142416,7 +142620,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Lithuanian account and connection help: add-account, gmail-outlook, manage-accounts, sign-in-apps, account-security, certificate-errors, no-connection and password-not-accepted. All current Lithuanian catalogs are reviewed; 32 help topics remain. Its reading/search and writing/contact behavior comparisons are complete. Apply the corrected Windows credential-store term during the flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+    "pending_phase2_resume": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 24 help topics remain. Reading/search, writing/contact and account/connection behavior comparisons are complete. Apply the Windows credential-store term during encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -144187,7 +144391,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Lithuanian account and connection help: add-account, gmail-outlook, manage-accounts, sign-in-apps, account-security, certificate-errors, no-connection and password-not-accepted. All current Lithuanian catalogs are reviewed; 32 help topics remain. Its reading/search and writing/contact behavior comparisons are complete. Apply the corrected Windows credential-store term during the flagged later help topics. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
+      "next": "Review Lithuanian encryption and privacy help: encrypted-and-signed-mail, encryption-keys, verify-a-key, encryption-errors, pictures-tracking and links-scripts. All current Lithuanian catalogs are reviewed; 24 help topics remain. Reading/search, writing/contact and account/connection behavior comparisons are complete. Apply the Windows credential-store term during encryption-keys and later data-storage. Continue other language queues and targeted behavior comparisons; incoming MCP translations remain separate. Inspect latest refs after each batch and at the final late-arrival audit. Publish validated batches promptly; no local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -146323,6 +146527,18 @@
         "merge_commit": "109c61441d2b6090f9e22ef099ee911291462bee",
         "merged_at": "2026-11-19T01:18:20Z",
         "verified_master": "109c61441d2b6090f9e22ef099ee911291462bee",
+        "clean_worktree": true,
+        "review_tree_equals_merge": true,
+        "no_local_test_suites": true
+      },
+      {
+        "batch": "lt-writing-contacts-help-20261119",
+        "pr": 200,
+        "url": "https://github.com/postalsys/inbox-classic/pull/200",
+        "review_commit": "9c777742559655876df6026d5d6cbafe1c6e0821",
+        "merge_commit": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+        "merged_at": "2026-11-19T01:29:55Z",
+        "verified_master": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
         "clean_worktree": true,
         "review_tree_equals_merge": true,
         "no_local_test_suites": true
@@ -156763,7 +156979,7 @@
     "resumed_review_latest_files": {
       "core/locales/fi/app.ftl": "5ff21c2a88305b9fd989dacd7e2fd33ee3b56339fe97a2471ddb5c1613f69fa9",
       "core/locales/fi/core.ftl": "255adcb8eb106122b475ea14fad73ad7346bea138c30a59ee2aa7eaf77a95a1a",
-      "core/locales/GLOSSARY.md": "2ea75a594b1e7f9a653f4ffc848187ca4c1c0ab9d73ec0685026b7305e85e540",
+      "core/locales/GLOSSARY.md": "76dc0e685eb411266ed674804fac0a6acc645a3d2b6510d078e39d82b3e13d79",
       "core/crates/pe-html/help/fi/sign-and-encrypt.html": "0581582428e559b6ccc62f767fc4ff1b1c02463713e19b8898550823c03f765d",
       "core/crates/pe-html/help/fi/write-message.html": "a9d967c138057dd4d6aca6800922fd48155fe75ef1c04717a639e49c95f69d38",
       "core/locales/hr/app.ftl": "2110805351add799ae85ded70fe0b5d20f8ba51eef25c32a8067f0f0afb92f2b",
@@ -156934,7 +157150,15 @@
       "core/crates/pe-html/help/lt/attachments.html": "f633a89ae3b9642b575606bd086ea882a05157feb022fd9b0799ac936087bf2a",
       "core/crates/pe-html/help/lt/signatures.html": "f57669baaa375f9dafe7e6528a4e7d9275c2220b07e1ccec55fc2b0b07d0f227",
       "core/crates/pe-html/help/lt/address-book.html": "2bf1f6351bc57c543cbc03c7b2a7e6078f306a4801758eeede9a21e929c4e9c9",
-      "core/crates/pe-html/help/lt/save-print-import.html": "5785ffa2d4f5a9e573aa58468c3af172ded25b13913907cc1a22891f5f5c1dc2"
+      "core/crates/pe-html/help/lt/save-print-import.html": "5785ffa2d4f5a9e573aa58468c3af172ded25b13913907cc1a22891f5f5c1dc2",
+      "core/crates/pe-html/help/lt/add-account.html": "da98a84d739777cb35c2eda1c02c4a693305fe17991054ffdc91d18d7b63deb0",
+      "core/crates/pe-html/help/lt/gmail-outlook.html": "70f0efe100e00b2b5bbb3ecc5175b84185787e5c5d3bcb88658c7b0d59105c26",
+      "core/crates/pe-html/help/lt/manage-accounts.html": "48a9448d62164e1e47b5a1d73f66076e1b550b2c972a92264560854bc89cfb94",
+      "core/crates/pe-html/help/lt/sign-in-apps.html": "39ba878b747b2e30d83d9a1501d2b741fe27a6a83d80d552bb266a74e537100f",
+      "core/crates/pe-html/help/lt/account-security.html": "b5cc5dab5795a1ea66035335f6490542051b58f09090ed1afa5298f3ef3fda5d",
+      "core/crates/pe-html/help/lt/certificate-errors.html": "fd8263dc4318a2f45464bfe2b4a9f08fda6f5385d871b7eb2936cbbb62c62b5f",
+      "core/crates/pe-html/help/lt/no-connection.html": "cfe461467fcf34c0be52d2cf3e06e4f1c9568a8ac4c1c37d26d847ca1c2cd14c",
+      "core/crates/pe-html/help/lt/password-not-accepted.html": "3d9edc180fb13174f9d2282b474816c6144d8a1113f67d9031ebdb3e77cf5bd0"
     },
     "resumed_review_checkpoints": [
       {
@@ -180705,6 +180929,124 @@
           "/private/tmp/inbox-lt-writing-20261119-finalize.py": "5f4a2a729537d4079350225e586ab66779f7fa6f9a72b6c7e13453513c0932c2",
           "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
         }
+      },
+      {
+        "batch": "lt-accounts-connections-help-20261119",
+        "review_parent": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+        "counts": {
+          "catalog_scope": 35624,
+          "help_scope": 1376,
+          "pending_catalog": 11734,
+          "pending_help": 565,
+          "completed_catalog": 23890,
+          "completed_help": 811
+        },
+        "validation": "Lithuanian structural checks pass with 1,485 expected mark-only diagnostics. Exact before/after reconstruction verifies eight full help topics and 82 improved wording lines. Catalogs are unchanged. Tags, attributes, controls, platform branches, literal keys and code examples are preserved. Static Windows/Mac/Linux sentence joins were inspected with current labels. Twenty-six runtime/source files and six catalog dependencies match the evidence. Existing English Windows setup, Linux properties and Mac account-list captures were inspected alongside current native source. No Lithuanian screenshots found, so no localized GUI-fit claim. All 28 inventories, variables, pending marks and latest translation/English hashes reconcile. Global diagnostics account for 23,924 unmarked entries and 12,572 help lines; since-start 1,760 entries/448 passages match the queue. Source checkpoint covers 192 refs/10 worktrees, with no changed upstream review inputs, new incoming translation deltas or new edits in other translation worktrees. Google/Microsoft primary documentation was checked for app-password and authorization guidance. Account/connection behavior comparison is complete for Lithuanian; platform setup/control differences are recorded for targeted comparison elsewhere. Incoming MCP translations remain separately queued. No local test suites, builds or manually launched CI; REVIEWED unchanged.",
+        "source_audit": {
+          "ref_count": 192,
+          "worktree_count": 10,
+          "changed_refs": {
+            "refs/heads/i18n/review-resume-20261118": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+            "refs/remotes/origin/HEAD": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+            "refs/remotes/origin/i18n/review-resume-20261118": "9c777742559655876df6026d5d6cbafe1c6e0821",
+            "refs/remotes/origin/master": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8"
+          },
+          "worktrees": [
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress",
+              "HEAD": "80b67e8db524e1f0e8a7157d23953e50e5b41635",
+              "branch": "refs/heads/master",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-icons",
+              "HEAD": "3b3fbcb83d75d454d62b3cc71a193d1bf44080d1",
+              "branch": "refs/heads/fix/linux-icons-kept",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-macprint",
+              "HEAD": "551e73a1e63af0c631b940d020718cedcec4fd8d",
+              "branch": "refs/heads/fix/mac-print-pictures",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3",
+              "HEAD": "88b0f44e23303d070c9d3a0d3c76233e22a639b8",
+              "branch": "refs/heads/feat/mcp-phase3a",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-mcp3b",
+              "HEAD": "42bed14a89cf27acbf180469a0cf78310a20d07a",
+              "branch": "refs/heads/feat/mcp-phase3b",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-linux",
+              "HEAD": "7ac55d1b22af496d1fbb0f68f7b9d034b57ecc38",
+              "branch": "refs/heads/test/steady-linux",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-mac",
+              "HEAD": "f0a1d2c033a47346911fe7fafde06abfea9144ef",
+              "branch": "refs/heads/test/steady-mac",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-rust",
+              "HEAD": "25b57fdb413954c7e11ec2a0d63776d0c06ce3a7",
+              "branch": "refs/heads/test/steady-rust",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress-steady-win",
+              "HEAD": "dfdfbc336f054369336831f948930aad18f4f759",
+              "branch": "refs/heads/test/steady-win",
+              "translation_status": "",
+              "translation_hashes": {}
+            },
+            {
+              "worktree": "/Users/andris/Projects/PostalExpress/build/i18n-review-resume",
+              "HEAD": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+              "branch": "refs/heads/i18n/review-resume-20261118",
+              "translation_status": " M core/crates/pe-html/help/lt/account-security.html\n M core/crates/pe-html/help/lt/add-account.html\n M core/crates/pe-html/help/lt/certificate-errors.html\n M core/crates/pe-html/help/lt/gmail-outlook.html\n M core/crates/pe-html/help/lt/manage-accounts.html\n M core/crates/pe-html/help/lt/no-connection.html\n M core/crates/pe-html/help/lt/password-not-accepted.html\n M core/crates/pe-html/help/lt/sign-in-apps.html\n M core/locales/GLOSSARY.md",
+              "translation_hashes": {
+                "core/crates/pe-html/help/lt/account-security.html": "b5cc5dab5795a1ea66035335f6490542051b58f09090ed1afa5298f3ef3fda5d",
+                "core/crates/pe-html/help/lt/add-account.html": "da98a84d739777cb35c2eda1c02c4a693305fe17991054ffdc91d18d7b63deb0",
+                "core/crates/pe-html/help/lt/certificate-errors.html": "fd8263dc4318a2f45464bfe2b4a9f08fda6f5385d871b7eb2936cbbb62c62b5f",
+                "core/crates/pe-html/help/lt/gmail-outlook.html": "70f0efe100e00b2b5bbb3ecc5175b84185787e5c5d3bcb88658c7b0d59105c26",
+                "core/crates/pe-html/help/lt/manage-accounts.html": "48a9448d62164e1e47b5a1d73f66076e1b550b2c972a92264560854bc89cfb94",
+                "core/crates/pe-html/help/lt/no-connection.html": "cfe461467fcf34c0be52d2cf3e06e4f1c9568a8ac4c1c37d26d847ca1c2cd14c",
+                "core/crates/pe-html/help/lt/password-not-accepted.html": "3d9edc180fb13174f9d2282b474816c6144d8a1113f67d9031ebdb3e77cf5bd0",
+                "core/crates/pe-html/help/lt/sign-in-apps.html": "39ba878b747b2e30d83d9a1501d2b741fe27a6a83d80d552bb266a74e537100f",
+                "core/locales/GLOSSARY.md": "76dc0e685eb411266ed674804fac0a6acc645a3d2b6510d078e39d82b3e13d79"
+              }
+            }
+          ],
+          "master": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+          "new_unmerged_source_deltas": [],
+          "note": "Preview-cid help merged in PR 159; its 56 translated insertions were integrated during Polish review and remain in the active queue. Exact merged source deltas are recorded in resumed_source_integrations. MCP phase3 drafts remain queued from the preceding checkpoint; any additional committed source revisions are inventoried here. Source branches/worktrees remain untouched."
+        },
+        "upstream_inputs_check": {
+          "master": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+          "changed_review_paths": []
+        },
+        "helpers": {
+          "/private/tmp/inbox-lt-accounts-20261119-edit.py": "5119621e16803fe94aae3619e8238f5dfe92dbf9f230a18ec049eea23fb6c594",
+          "/private/tmp/inbox-lt-accounts-20261119-polish.py": "cbaff208fcc82c5ab0074a99c40f14102e08231de0b05d3762c44fd21f3e4618",
+          "/private/tmp/inbox-lt-accounts-20261119-finalize.py": "76cc3254345df9fa8bdb68ba3df5e2de2d80568c8ef04172da9a919449f4fbd5",
+          "/private/tmp/inbox-hu-reading-joins.py": "75a13378683c5e13e08aa24c9b6ae8628f151b978a0d004aef290825e63c544a"
+        }
       }
     ],
     "resumed_incoming_source_queue": {
@@ -181128,7 +181470,15 @@
       "core/crates/pe-html/help/en/attachments.html": "c8101fa81f2edc398632f0d2178e419ff021ade7431abe5691273900cccbcf14",
       "core/crates/pe-html/help/en/signatures.html": "5b16b6f8daa40f8a34940e50f29c1409d89e0e074e450b7f063cea4d4c1b1f66",
       "core/crates/pe-html/help/en/address-book.html": "5b5c8d345f153c33f75ee6bcea399a1d36abbc0043efc210445c007acd1c2e53",
-      "core/crates/pe-html/help/en/save-print-import.html": "91e96db89168f7d0b359513f4bb7870171d89fc69fa700e77fde8efb53f3d1f9"
+      "core/crates/pe-html/help/en/save-print-import.html": "91e96db89168f7d0b359513f4bb7870171d89fc69fa700e77fde8efb53f3d1f9",
+      "core/crates/pe-html/help/en/add-account.html": "07fe4a8ae27c3acaf2594782a770b21b1b1b229b0ce81a5f88986feddc823b25",
+      "core/crates/pe-html/help/en/gmail-outlook.html": "c815db80af701f352ccebbb72b2ccbaf4d7ba2d01ee60309ee7e9a54f4f27c71",
+      "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+      "core/crates/pe-html/help/en/sign-in-apps.html": "c092b49a13a0eab86b8571ec49c3fe49696b16b2e71bc1cc1020bcbc0222c1b1",
+      "core/crates/pe-html/help/en/account-security.html": "adf8cbee09afd1c8bcaaf46181d1cbf6667a67e1b3ce6f35c13af4d1c016ed44",
+      "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+      "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+      "core/crates/pe-html/help/en/password-not-accepted.html": "389ccc305db88334ddbebd4d296b864d0c47c27cf0423a7e7bed5b679cf5c7e7"
     },
     "resumed_source_integrations": [
       {
@@ -182121,7 +182471,8 @@
         "status": "pending targeted comparison",
         "source_checkpoint": "db6982094be19c9b193a0d6bc249a4a425f12e5d",
         "completed_languages": [
-          "hu"
+          "hu",
+          "lt"
         ],
         "pending_languages": [
           "bg",
@@ -182135,7 +182486,6 @@
           "fr",
           "hr",
           "it",
-          "lt",
           "lv",
           "nl",
           "pl",
@@ -182232,7 +182582,21 @@
             ]
           }
         ],
-        "instruction": "Compare exact current passages against verified behavior, retaining already accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review."
+        "instruction": "Compare exact current passages against verified behavior, retaining already accurate wording. Reopen only affected text; this comparison queue adds no mark inventory or review credit until affected passages are identified. Do not edit English/app code under this review.",
+        "completed_language_reviews": {
+          "lt": {
+            "batch": "lt-accounts-connections-help-20261119",
+            "reviewed_topics": [
+              "account-security.html",
+              "manage-accounts.html",
+              "sign-in-apps.html",
+              "certificate-errors.html",
+              "no-connection.html",
+              "password-not-accepted.html"
+            ],
+            "note": "All six existing account/connection topics compared against current source during this eight-topic full review. No extra scope credit."
+          }
+        }
       },
       {
         "id": "mail-delivery-rules-behavior-context-20261118",
@@ -184010,6 +184374,75 @@
           }
         ],
         "instruction": "Reuse the existing writing/contact audit; compare only preview-limit and whole-source display claims. Reopen only affected passages and add no duplicate scope credit. Do not edit English or app code."
+      },
+      {
+        "id": "account-setup-controls-context-20261119",
+        "status": "pending targeted comparison",
+        "source_checkpoint": "ea3364b0458c37629eb87ecbc82ffc61f901e8a8",
+        "completed_languages": [
+          "lt"
+        ],
+        "pending_languages": [
+          "bg",
+          "cs",
+          "da",
+          "de",
+          "el",
+          "es",
+          "et",
+          "fi",
+          "fr",
+          "hr",
+          "hu",
+          "it",
+          "lv",
+          "nl",
+          "pl",
+          "pt",
+          "ro",
+          "ru",
+          "sk",
+          "sl",
+          "sv",
+          "uk",
+          "ca",
+          "nb",
+          "pt-BR",
+          "sr-Latn",
+          "tr"
+        ],
+        "topics": [
+          "add-account.html",
+          "gmail-outlook.html",
+          "manage-accounts.html"
+        ],
+        "issues": [
+          {
+            "topics": [
+              "add-account.html",
+              "gmail-outlook.html"
+            ],
+            "finding": "Lookup cancellation skips lookup on Windows/Linux but exits setup on Mac. Provider sign-in alternatives, including the app-password button, are shown only when a built-in or added provider choice is enabled. Failed/cancelled lookup can leave blank fields, so guessed hosts are conditional.",
+            "sources": [
+              "app/src/accounts.cpp::NewAccountDialog",
+              "linux/src/accounts.rs::look_up/new_account",
+              "mac/Sources/InboxClassic/Accounts.swift::newAccount"
+            ]
+          },
+          {
+            "topics": [
+              "manage-accounts.html"
+            ],
+            "finding": "Delete removes an account through the Windows list handler; current Mac/Linux account dialogs do not install that shortcut. Scope the preserved literal key to Windows. Double-click properties is verified for Windows/Mac; Linux uses row activation. File/Tools paths are valid Linux primary-menu submenus.",
+            "sources": [
+              "app/src/accounts.cpp",
+              "linux/src/accounts.rs",
+              "mac/Sources/InboxClassic/Accounts.swift",
+              "linux/src/mailbox.rs"
+            ]
+          }
+        ],
+        "instruction": "Compare only affected lookup-cancellation, app-password-choice and account-list shortcut claims. Reuse the account/connection comparison; reopen only affected passages without duplicate scope credit. Do not edit English/app code."
       }
     ],
     "completed_source_followups": [

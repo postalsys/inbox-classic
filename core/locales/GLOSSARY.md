@@ -740,6 +740,18 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   compare email addresses, not names; a card with no addresses is not a duplicate merely for lacking an address.
 - Source-view text can be shortened for large messages. The automatic preview budget is 20 pictures/PDF pages;
   manually requested previews may exceed that total. Avoid absolute whole-source or universal preview-limit claims.
+- Account help uses "prisijungimo duomenys" for both passwords and browser-session credentials. Removing an
+  account also removes its local unsent mail. Mark All Read applies to messages, not folders as read objects.
+- App-password guidance is conditional on provider/account support; Outlook.com/Microsoft 365 instructions use
+  browser sign-in. Google’s built-in button starts disabled; do not assert the live verification status of its client.
+- "Kredencialų tvarkytuvas" is now applied in sign-in-apps and account-security. Data-storage and encryption-keys
+  remain pending. Client secrets are hidden when revisiting the editor; the secret store is the default, not universal.
+- Error quotations match current catalogs; low-level English diagnostics remain literal and get a Lithuanian
+  explanation. STARTTLS failure ends the connection attempt, not the whole program. Local networks are not encryption.
+- The sign-in app Check button validates issuer configuration, not permission to read mail. The app-password
+  choice only appears when sign-in alternatives are offered. Lookup cancellation ends lookup; on Mac it also exits setup.
+- The account-list Delete shortcut is documented only for Windows; the current Mac and Linux dialogs expose
+  removal through their button. Linux File/Tools paths are valid submenus of the primary menu.
 
 ### Magyar (hu)
 
