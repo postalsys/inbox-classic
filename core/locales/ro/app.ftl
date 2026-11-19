@@ -489,427 +489,235 @@ ui-rules-applied = { $count ->
 }
 ui-col-rule-matches = Criterii
 ui-clear-button = Ș&tergere
-# review: new
 ui-how-to-connect = Cum se conectează un agent…
-# review: new
-ui-agent-programs = Programe ai căror agenți au cerut acces la e-mailul dvs.
-# review: new
+ui-agent-programs = Programe ai căror agenți au cerut acces la mesajele dvs.
 ui-what-agents-did = Activitatea agenților
-# review: new
 ui-restart-now = &Repornire acum
-# review: new
 ui-restart-later = Mai &târziu
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Contact nou
-# review: new
 ui-tb-new-group = Grup nou
-# review: new
 ui-tb-properties = Proprietăți
-# review: new
 ui-tb-write-to = Scrieți
-# review: new
 ui-menu-new-contact = &Contact nou...
-# review: new
 ui-menu-new-group = &Grup nou...
-# review: new
 ui-menu-write-to = &Scrieți
-# review: new
 ui-menu-delete = Șt&ergere
-# review: new
 ui-book-find-hint = Introduceți un nume sau o adresă de e-mail
-# review: new
 ui-book-all-contacts = Toate contactele
-# review: new
 ui-col-phone = Telefon
-# review: new
 ui-book-empty = Agenda este goală. Faceți clic pe Contact nou pentru a adăuga pe cineva sau importați un fișier vCard sau CSV din meniul Fișier.
-# review: new
 ui-book-no-match = Niciun contact nu se potrivește cu „{ $words }”.
-# review: new
 ui-book-delete-ask = { $count ->
     [one] Ștergeți acest contact din Agendă?
     [few] Ștergeți aceste { $count } contacte din Agendă?
    *[other] Ștergeți aceste { $count } de contacte din Agendă?
 }
-# review: new
 ui-group-delete-ask = Ștergeți grupul „{ $name }”? Persoanele din el rămân în Agendă.
-# review: new
 ui-book-no-address = { $name } nu are adresă de e-mail.
-# review: new
 ui-new-contact-title = Contact nou
-# review: new
-ui-contact-title = Proprietăți { $name }
-# review: new
+ui-contact-title = Proprietăți: { $name }
 ui-contact-first = Prenume:
-# review: new
 ui-contact-last = Nume de familie:
-# review: new
 ui-contact-display = Nume afișat:
-# review: new
 ui-contact-nickname = Poreclă:
-# review: new
 ui-contact-company = Companie:
-# review: new
 ui-contact-addresses = Adrese de e-mail:
-# review: new
 ui-contact-address-hint = Introduceți o adresă de e-mail
-# review: new
-ui-contact-add = &Adăugare
-# review: new
+ui-contact-add = A&dăugare
 ui-contact-set-default = Setare ca &implicită
-# review: new
 ui-contact-default = { $address } (implicită)
-# review: new
 ui-contact-phones = Numere de telefon:
-# review: new
 ui-phone-home = Acasă
-# review: new
 ui-phone-work = Serviciu
-# review: new
 ui-phone-mobile = Mobil
-# review: new
 ui-phone-other = Altul
-# review: new
 ui-contact-notes = Note:
-# review: new
 ui-contact-name-needed = Introduceți un nume sau o adresă de e-mail pentru contact.
-# review: new
 ui-contact-address-invalid = „{ $address }” nu este o adresă de e-mail validă.
-# review: new
 ui-contact-not-saved = Contactul nu a putut fi salvat: { $reason }
-# review: new
 ui-new-group-title = Grup nou
-# review: new
-ui-group-title = Proprietăți { $name }
-# review: new
+ui-group-title = Proprietăți: { $name }
 ui-group-name = Nume grup:
-# review: new
 ui-group-members = Membri:
-# review: new
 ui-group-select-members = &Selectare membri...
-# review: new
 ui-group-new-member = Adăugați o adresă de e-mail care nu este în Agendă:
-# review: new
 ui-group-name-needed = Introduceți un nume pentru grup.
-# review: new
 ui-group-not-saved = Grupul nu a putut fi salvat: { $reason }
-# review: new
 ui-group-members-count = { $count ->
     [one] 1 membru
     [few] { $count } membri
    *[other] { $count } de membri
 }
-# review: new
 ui-select-recipients = Selectare destinatari
-# review: new
 ui-select-members = Selectare membri grup
-# review: new
 ui-pick-intro = Introduceți un nume sau selectați-l din listă:
-# review: new
 ui-pick-recipients = Destinatarii mesajului:
-# review: new
 ui-pick-members = Membrii grupului:
-# review: new
-ui-pick-to = &Către →
-# review: new
+ui-pick-to = Că&tre →
 ui-pick-cc = C&c →
-# review: new
 ui-pick-bcc = &Bcc →
-# review: new
 ui-pick-add = &Adăugare →
-# review: new
 ui-pick-tip = Alegeți destinatari din Agendă
-# review: new
 ui-filter-address-books = Agende (vCard, CSV)
-# review: new
 ui-filter-vcard = Fișiere vCard
-# review: new
 ui-book-export-name = Agendă
-# review: new
 ui-book-imported = { $added ->
-    [one] S-a adăugat 1 contact
-    [few] S-au adăugat { $added } contacte
-   *[other] S-au adăugat { $added } de contacte
-}, { $skipped ->
-    [one] 1 omis, fiind deja în Agendă.
-    [few] { $skipped } omise, fiind deja în Agendă.
-   *[other] { $skipped } de omise, fiind deja în Agendă.
+    [one] S-a adăugat 1 contact.
+    [few] S-au adăugat { $added } contacte.
+   *[other] S-au adăugat { $added } de contacte.
+} { $skipped ->
+    [one] S-a omis 1 contact care era deja în Agendă.
+    [few] S-au omis { $skipped } contacte care erau deja în Agendă.
+   *[other] S-au omis { $skipped } de contacte care erau deja în Agendă.
 }
-# review: new
 ui-book-not-imported = Agenda nu a putut fi importată: { $reason }
-# review: new
 ui-book-exported = { $count ->
     [one] 1 contact salvat în { $file }.
     [few] { $count } contacte salvate în { $file }.
    *[other] { $count } de contacte salvate în { $file }.
 }
-# review: new
 ui-book-not-exported = Agenda nu a putut fi salvată: { $reason }
-# review: new
 ui-code-copied = Codul a fost copiat
-# review: changed
-ui-codes-in-notifications = Afișare &coduri de conectare în notificările de e-mail nou
-# review: new
+ui-codes-in-notifications = Afișare &coduri de conectare în notificările pentru mesaje noi
 ui-tool-unread-only = Necitite
-# review: new
 ui-no-unread = Nu există mesaje necitite aici.
-# review: new
 ui-pictures-always-sender = Descărcați întotdeauna imaginile de la { $sender }
-# review: new
-ui-pictures-always-domain = Descărcați întotdeauna imaginile de la oricine din { $domain }
-# review: new
+ui-pictures-always-domain = Descărcați întotdeauna imaginile de la toți expeditorii din domeniul „{ $domain }”
 ui-pictures-unconfirmed = Domeniul expeditorului ({ $domain }) nu a putut fi verificat, așa că imaginile din acest mesaj nu se descarcă automat.
-# review: changed
 ui-pictures-always-option = &Descărcare imagini în toate mesajele
-# review: new
 ui-pictures-always-warning = Expeditorii pot vedea atunci când le citiți mesajele.
-# review: new
 ui-protection-details = &Detalii...
-# review: new
 ui-protection-details-title = Detalii de securitate
-# review: new
 ui-download-heading = Descărcare
-# review: changed
 ui-download-ahead = &Descărcare mesaje în avans:
-# review: new
 ui-download-ahead-recent = Mesajele recente, de până la 1 MB fiecare
-# review: new
 ui-download-ahead-all = Toate mesajele
-# review: new
 ui-download-ahead-never = Doar la deschidere
-# review: changed
 ui-download-limit = &Limită de stocare pe cont:
-# review: changed
-ui-send-delay = &Întârziere înainte de trimitere:
-# review: new
+ui-send-delay = Întârziere înainte &de trimitere:
 ui-send-delay-note = Cât timp un mesaj așteaptă să fie trimis, puteți anula trimiterea cu Anulare.
-# review: new
 ui-dark-messages = Afișare mesaje pe fundal întunecat când sistemul este în modul întunecat
-# review: new
-ui-preview-show = Afișează a&tașamentele în mesaje
-# review: new
-ui-preview-show-note = Afișează imaginile și primele pagini ale fișierelor PDF după textul mesajului. Inbox Classic creează singur aceste previzualizări, așa că nimic dintr-un fișier nu poate rula.
-# review: new
-ui-preview-pdfs = Afișează &fișierele PDF în mesaje
-# review: new
-ui-sending-in = { $subject } se trimite în { $count ->
+ui-preview-show = Afișare a&tașări în mesaje
+ui-preview-show-note = Afișează imaginile și primele pagini ale fișierelor PDF după textul mesajului. Inbox Classic generează aceste previzualizări fără a rula cod din fișiere.
+ui-preview-pdfs = A&fișare fișiere PDF în mesaje
+ui-sending-in = Mesajul { $subject } se trimite în { $count ->
     [one] 1 secundă
     [few] { $count } secunde
    *[other] { $count } de secunde
 }
-# review: new
-ui-send-undone = { $subject } nu a fost trimis. Mesajul s-a redeschis pentru editare.
-# review: new
-ui-send-too-late = { $subject } a fost deja trimis.
-# review: new
-ui-outbox-status-undo = Pleacă la { $time }
-# review: new
+ui-send-undone = Mesajul { $subject } nu a fost trimis. A fost redeschis pentru editare.
+ui-send-too-late = Trimiterea mesajului { $subject } nu mai poate fi anulată.
+ui-outbox-status-undo = Trimitere cel mai devreme la { $time }
 ui-download-note = Mesajele descărcate în avans se deschid imediat. Când se depășește limita de stocare, cele mai vechi copii locale sunt eliminate și descărcate din nou când le deschideți.
-# review: new
 ui-attachment-downloading = Descărcarea acestui mesaj nu s-a terminat. Încercați din nou după ce se termină descărcarea.
-# review: changed
 ui-trusted-senders-button = &Expeditori de încredere...
-# review: new
 ui-trusted-senders-title = Expeditori de încredere
-# review: new
 ui-trusted-senders-note = Imaginile din mesajele acestor expeditori se descarcă automat când furnizorul dvs. de e-mail verifică domeniul expeditorului.
-# review: new
-ui-trusted-everyone-at = Oricine din { $domain }
-# review: new
+ui-trusted-everyone-at = Toți expeditorii din domeniul „{ $domain }”
 ui-trusted-senders-empty = Nu a fost adăugat încă niciun expeditor de încredere.
-# review: new
 ui-search-encrypted = Căutare în mesajele &criptate
-# review: new
-ui-search-encrypted-note = Mesajele criptate sunt decriptate pe acest computer după ce sunt descărcate sau deschise, ca să le puteți găsi cuvintele, iar lista să le afișeze subiectul propriu. Indexul nu este criptat, iar agenții AI nu caută niciodată în el. Dezactivați opțiunea pentru a le elimina din index.
-# review: new
+ui-search-encrypted-note = Mesajele criptate sunt decriptate pe acest computer după descărcare sau deschidere, astfel încât să puteți căuta în textul lor, iar lista să le afișeze subiectele originale. Indexul nu este criptat. Agenții IA nu caută în textul decriptat. Dezactivarea opțiunii elimină textul decriptat din index.
 ui-pgp-keyserver = Căutare chei &pe keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Când criptați un mesaj sau căutați o cheie, adresa căutată este trimisă la keys.openpgp.org. Mai întâi este întrebat domeniul adresei.
-# review: changed
-ui-eml-default = &Deschidere fișiere .eml cu Inbox Classic
-# review: new
+ui-pgp-keyserver-note = Numai când criptați un mesaj sau căutați o cheie: se caută mai întâi pe domeniul adresei de e-mail. Dacă cheia nu este găsită acolo, adresa este trimisă la keys.openpgp.org pentru a o căuta.
+ui-eml-default = Deschidere &fișiere .eml cu Inbox Classic
 ui-eml-default-done = Inbox Classic deschide acum fișierele .eml.
-# review: new
 ui-eml-default-failed = Inbox Classic nu a putut fi setat ca aplicație implicită pentru fișierele .eml: { $reason }
-# review: new
 ui-folders = Foldere
-# review: new
-ui-sorted-by = Sortat după { $field }
-# review: changed
+ui-sorted-by = Sortare după: { $field }
 ui-layout-label = A&spect:
-# review: new
 ui-columns-note = Fereastra este destul de lată pentru aspectul pe coloane. Puteți schimba aspectul din Vizualizare > Aspect.
-# review: new
 ui-row-unread = Necitit
-# review: new
 ui-row-flagged = Semnalizat
-# review: new
 ui-row-attachments = Are atașări
-# review: new
 ui-row-encrypted = Criptat
-# review: new
 ui-row-signed = Semnat
-# review: new
 ui-row-messages = { $count ->
     [one] { $count } mesaj
     [few] { $count } mesaje
    *[other] { $count } de mesaje
 }
-# review: changed
-ui-list-pictures = Af&ișare imaginile expeditorilor în lista de mesaje
-# review: changed
-ui-list-pictures-note = Afișează sigle de mărci sau imagini din Agendă pentru expeditorii verificați și inițiale când nu există nicio imagine. Siglele se descarcă o singură dată pentru fiecare marcă, nu pentru fiecare mesaj.
-# review: new
+ui-list-pictures = Af&ișare imagini ale expeditorilor în lista de mesaje
+ui-list-pictures-note = În aspectul pe coloane, afișează sigle sau imagini din Agendă pentru expeditorii al căror domeniu a fost verificat. Dacă nu există o imagine, afișează inițialele. Siglele sunt descărcate o singură dată pentru fiecare marcă, nu pentru fiecare mesaj.
 ui-card-picture = Imagine:
-# review: new
 ui-card-picture-choose = &Alegere...
-# review: new
-ui-picture-not-picture = Acest fișier nu este o imagine PNG sau JPEG.
-# review: new
+ui-picture-not-picture = Fișierul nu este o imagine PNG sau JPEG validă.
 ui-picture-too-large = Această imagine este prea mare. Alegeți una de cel mult 10 MB, cu lățimea și înălțimea de cel mult 8000 de pixeli.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Chei de criptare
-# review: new
-ui-keys-intro = Cheile dvs. vă semnează mesajele și deschid e-mailurile criptate pentru dvs. Cheile contactelor verifică semnăturile lor și criptează e-mailurile către ele.
-# review: new
-ui-keys-empty = Nicio cheie încă. Faceți clic pe Cheie nouă pentru a o crea pe a dvs. sau pe Import pentru a adăuga o cheie pe care o aveți deja.
-# review: new
+ui-keys-intro = Cu cheile dvs. puteți semna mesajele pe care le trimiteți și citi mesajele criptate pentru dvs. Cheile contactelor permit verificarea semnăturilor acestora și criptarea mesajelor pe care li le trimiteți.
+ui-keys-empty = Nu există încă nicio cheie. Faceți clic pe „Cheie nouă” pentru a crea o cheie proprie sau pe „Import” pentru a adăuga o cheie pe care o aveți deja.
 ui-keys-col-name = Nume
-# review: new
 ui-keys-col-address = Adresă
-# review: new
 ui-keys-col-kind = Tip
-# review: new
 ui-keys-col-status = Stare
-# review: new
 ui-keys-kind-own = Cheia dvs.
-# review: new
 ui-keys-kind-contact = Contact
-# review: new
-ui-keys-status-verified = { $status }, verificată
-# review: new
+ui-keys-status-verified = { $status }; proprietarul cheii a fost confirmat
 ui-keys-new = Cheie &nouă...
-# review: new
 ui-keys-import = &Import...
-# review: new
 ui-keys-export = &Export...
-# review: new
 ui-keys-backup = &Copie de rezervă...
-# review: new
 ui-keys-verify = &Verificare...
-# review: new
 ui-keys-new-title = Cheie nouă
-# review: new
 ui-keys-new-for = Creați o cheie pentru:
-# review: new
 ui-keys-new-make = &Creare cheie
-# review: new
 ui-keys-no-account = Adăugați mai întâi un cont de e-mail: o cheie se creează pentru adresele unui cont.
-# review: new
 ui-keys-memory-only = Parolele sunt păstrate doar în memorie, așa că o cheie privată creată sau importată acum nu poate fi folosită după închiderea Inbox Classic.
-# review: new
 ui-keys-backup-offer = Cheia nouă este gata. Salvați acum o copie de rezervă? Dacă acest computer se pierde sau este resetat, cheia poate fi recuperată doar dintr-o copie de rezervă.
-# review: new
 ui-keys-backup-now = &Salvare copie de rezervă...
-# review: new
 ui-keys-later = Mai &târziu
-# review: new
 ui-keys-backup-title = Copie de rezervă a cheii
-# review: new
 ui-keys-backup-intro = Copia de rezervă este protejată de o frază-parolă. Păstrați fișierul și fraza-parolă în locuri sigure diferite: aveți nevoie de amândouă pentru a recupera cheia.
-# review: new
 ui-keys-passphrase = &Frază-parolă:
-# review: new
 ui-keys-passphrase-again = &Reintroduceți-o:
-# review: new
-ui-keys-passphrase-differ = Frazele-parolă nu sunt la fel.
-# review: new
+ui-keys-passphrase-differ = Frazele-parolă nu coincid.
 ui-keys-passphrase-short = Folosiți o frază-parolă de cel puțin 8 caractere.
-# review: new
 ui-keys-backup-saved = Copia de rezervă a fost salvată.
-# review: new
 ui-keys-import-title = Import cheie
-# review: new
 ui-keys-import-passphrase = Această cheie privată este protejată de o frază-parolă. Introduceți-o pentru a importa cheia:
-# review: new
 ui-keys-file-filter = Chei OpenPGP
-# review: new
-ui-keys-use-for = Folosiți această cheie pentru { $addresses }? Mesajele dvs. de acolo vor fi semnate cu ea, iar e-mailurile criptate pentru ea pot fi citite aici.
-# review: new
+ui-keys-use-for = Asociați această cheie cu { $addresses }? Mesajele trimise de la adresele asociate vor fi semnate cu ea, iar mesajele criptate cu această cheie vor putea fi citite aici.
 ui-keys-use = &Folosire
-# review: new
 ui-keys-not-now = &Nu acum
-# review: new
-ui-keys-remove-own = Eliminați cheia dvs. { $fingerprint }? E-mailurile criptate pentru ea nu mai pot fi citite aici, decât dacă importați din nou copia ei de rezervă.
-# review: new
-ui-keys-remove-contact = Eliminați cheia lui { $name }? Semnăturile acestei persoane nu pot fi verificate și nu i se pot trimite e-mailuri criptate până când nu adăugați din nou cheia ei.
-# review: new
+ui-keys-remove-own = Eliminați cheia dvs. { $fingerprint }? Mesajele criptate cu această cheie nu vor mai putea fi citite aici decât dacă importați din nou copia ei de rezervă.
+ui-keys-remove-contact = Eliminați cheia „{ $name }”? Semnăturile făcute cu această cheie nu vor mai putea fi verificate, iar mesajele către proprietarul ei nu vor mai putea fi criptate până când adăugați din nou cheia.
 ui-key-properties-title = Proprietăți cheie
-# review: new
 ui-key-names = Nume:
-# review: new
 ui-key-fingerprint = Amprentă:
-# review: new
 ui-key-status = Stare:
-# review: new
 ui-key-created = Creată:
-# review: new
 ui-key-expires = Expiră:
-# review: new
 ui-key-never = Niciodată
-# review: new
 ui-key-algorithm = Algoritm:
-# review: new
 ui-key-source = Sursă:
-# review: new
 ui-key-addresses = Adrese:
-# review: new
-ui-key-address-verified = { $address } (verificată)
-# review: new
-ui-key-address-not-verified = { $address } (neverificată)
-# review: new
+ui-key-address-verified = { $address } (proprietarul cheii a fost confirmat)
+ui-key-address-not-verified = { $address } (proprietarul cheii nu a fost confirmat)
 ui-verify-title = Verificare cheie
-# review: new
-ui-verify-intro = Rugați-o pe persoana { $name } să vă citească amprenta cheii sale din propria aplicație, în persoană sau la telefon. Nu o comparați cu una trimisă prin e-mail: cine ar putea schimba cheia ar putea schimba și amprenta.
-# review: new
+ui-verify-intro = Luați legătura cu proprietarul cheii „{ $name }”, direct sau la telefon, și cereți-i să vă citească amprenta cheii din propria aplicație. Nu o comparați cu o amprentă primită prin e-mail: cine poate înlocui cheia poate înlocui și amprenta trimisă astfel.
 ui-verify-fingerprint = Amprenta cheii pe care o aveți:
-# review: new
 ui-verify-marks = { $count ->
-    [one] Dacă se potrivesc, cheia este marcată ca fiind a persoanei pentru { $addresses }. Dacă adresa nu este a ei, faceți clic pe Diferă.
-   *[other] Dacă se potrivesc, cheia este marcată ca fiind a persoanei pentru { $addresses }. Dacă una dintre aceste adrese nu este a ei, faceți clic pe Diferă.
+    [0] Această cheie nu conține nicio adresă de e-mail. Confirmarea proprietarului nu poate fi salvată.
+    [one] Dacă amprentele coincid, confirmați că această cheie aparține persoanei care folosește adresa { $addresses }. Dacă adresa nu îi aparține, alegeți „Diferă”.
+   *[other] Dacă amprentele coincid, confirmați că această cheie aparține persoanei care folosește adresele { $addresses }. Dacă una dintre adrese nu îi aparține, alegeți „Diferă”.
 }
-# review: new
 ui-verify-match = &Se potrivesc
-# review: new
 ui-verify-differ = &Diferă
-# review: new
-ui-verify-differs = Cheia pe care o aveți nu este cea pe care o are { $name }. Eliminați-o și cereți din nou cheia.
-# review: new
-ui-verify-unmark = Marcare ca &neverificată
-# review: new
+ui-verify-differs = Amprentele nu coincid pentru cheia „{ $name }”. Eliminați cheia salvată și cereți din nou cheia proprietarului.
+ui-verify-unmark = Anulare &confirmare proprietar
 ui-account-security = Securitate
-# review: new
-ui-account-security-intro = Cu o cheie, mesajele dvs. pot fi semnate, iar alții vă pot trimite e-mailuri criptate.
-# review: new
+ui-account-security-intro = Cu o cheie, puteți semna mesajele pe care le trimiteți și primi mesaje criptate.
 ui-account-key = &Cheie pentru acest cont:
-# review: new
 ui-account-key-none = Niciuna
-# review: new
 ui-account-key-new = Cheie &nouă...
-# review: new
-ui-account-autocrypt = &Trimite cheia mea publică împreună cu mesajele (Autocrypt)
-# review: new
+ui-account-autocrypt = &Trimitere cheie publică proprie împreună cu mesajele (Autocrypt)
 ui-contact-key = Cheie de criptare:
-# review: new
 ui-contact-key-none = Nicio cheie
-# review: new
 ui-contact-key-use-new = Folosire cheie &nouă
-# review: new
 ui-contact-key-keep = &Păstrare cheie actuală
 ui-recipient-keys-title = Cheile destinatarilor
 ui-recipient-col-recipient = Destinatar
@@ -921,29 +729,16 @@ ui-compose-make-key = &Creare cheie...
 ui-compose-show-keys = Chei de c&riptare...
 ui-compose-encrypt-off = &Dezactivare criptare
 ui-compose-keep-encrypted = &Păstrare criptare
-# review: new
 ui-setup-export-title = Export setări și conturi
-# review: new
 ui-setup-import-title = Import setări și conturi
-# review: new
-ui-setup-export-intro = Alegeți ce să luați pe alt computer. Fișierul nu conține mesaje: acestea se descarcă din nou acolo.
-# review: new
+ui-setup-export-intro = Alegeți ce să transferați pe alt computer. Fișierul nu conține mesaje: acestea vor fi descărcate din nou acolo.
 ui-setup-use-passphrase = &Protejare fișier cu o frază-parolă
-# review: new
-ui-setup-passphrase-note = Cu o frază-parolă, fișierul este criptat și conține și parolele, datele de conectare și cheile private. Fără ea, fiecare cont vă cere parola pe celălalt computer.
-# review: new
+ui-setup-passphrase-note = Cu o frază-parolă, fișierul este criptat și include parolele salvate, datele de conectare și cheile private. Fără ea, va trebui să vă conectați din nou la conturi pe celălalt computer.
 ui-setup-export-button = &Export...
-# review: new
 ui-setup-file-filter = Setări și conturi Inbox Classic
-# review: new
 ui-setup-ask-passphrase = Acest fișier este protejat de o frază-parolă. Introduceți-o pentru a vedea ce conține fișierul:
-# review: new
 ui-setup-import-intro = Alegeți ce să importați. Conturile care există deja pe acest computer rămân neschimbate.
-# review: new
 ui-setup-from = Salvat de Inbox Classic { $version } pe { $date }.
-# review: new
 ui-setup-import-button = &Import
-# review: new
 ui-setup-done = Gata
-# review: new
 ui-setup-first-run = Import setări și conturi de pe alt computer...
