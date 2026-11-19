@@ -166,21 +166,12 @@ gtk-notify-subtitle = Только когда Inbox Classic работает в 
 
 ## The desktop entry and the page of the software stores
 
-# review: new
 gtk-desktop-generic-name = Почтовый клиент
-# review: new
-gtk-desktop-comment = Чтение и создание электронной почты: быстрая и простая почтовая программа
-# review: new
+gtk-desktop-comment = Быстрая и простая программа для работы с электронной почтой
 gtk-desktop-keywords = почта;письмо;сообщение;входящие;
-# review: new
 gtk-metainfo-summary = Быстрая и простая почтовая программа
-# review: new
-gtk-metainfo-description = Inbox Classic читает и пишет электронную почту: папки слева, список сообщений сверху и сообщение под ним, как в почтовых программах прежних лет. Она работает с любой учетной записью IMAP и SMTP и входит в Outlook.com и Microsoft 365 через браузер.
-# review: new
-gtk-metainfo-feature-sanitized = Каждое сообщение показывается очищенным, без скриптов, а изображения из интернета загружаются только с вашего разрешения
-# review: new
-gtk-metainfo-feature-search = Поиск слов в теме, именах отправителей и получателей, именах файлов и тексте, с операторами Gmail
-# review: new
-gtk-metainfo-feature-replies = В ответах сворачиваются предыдущие сообщения, которые они цитируют
-# review: new
-gtk-metainfo-feature-offline = Почту можно читать без подключения к сети; пароли хранятся в вашей связке ключей
+gtk-metainfo-description = В Inbox Classic папки находятся слева, список сообщений сверху, а выбранное сообщение под ним, как в классических почтовых программах. Поддерживаются учетные записи с IMAP и SMTP, а для Outlook.com и Microsoft 365 используется вход через браузер.
+gtk-metainfo-feature-sanitized = Сообщения отображаются без скриптов, а изображения из интернета загружаются только с вашего разрешения
+gtk-metainfo-feature-search = Поиск по темам и тексту сообщений, именам и адресам отправителей и получателей, а также именам файлов с поддержкой операторов Gmail
+gtk-metainfo-feature-replies = Предыдущие сообщения в ответах отображаются в виде свернутых цитат
+gtk-metainfo-feature-offline = Загруженные сообщения можно читать без сети; пароли хранятся в системном хранилище ключей

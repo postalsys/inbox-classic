@@ -124,26 +124,19 @@ win-folders-show = Показать папки
 
 ## The installer
 
-# review: new
 win-installer-start = Запустить Inbox Classic
-# review: new
 win-installer-welcome-new =
     Будет установлена почтовая программа Inbox Classic { $version }.
 
-    Права администратора не нужны: программа устанавливается только для вашей учетной записи.
-# review: new
+    Права администратора не нужны: программа устанавливается только для текущего пользователя Windows.
 win-installer-welcome-same =
     Inbox Classic { $version } уже установлена. Она будет установлена заново.
 
     Ваши учетные записи и почта сохранятся.
-# review: new
 win-installer-welcome-update =
     Inbox Classic { $installed } будет обновлена до версии { $version }.
 
     Если программа запущена, сначала она будет закрыта. Ваши учетные записи и почта сохранятся.
-# review: new
-win-installer-older-ask = Установлена Inbox Classic { $installed }, более новая, чем { $version }. Все равно установить старую версию?
-# review: new
+win-installer-older-ask = Уже установлена более новая версия Inbox Classic { $installed }. Все равно установить версию { $version }?
 win-installer-still-running = Inbox Classic все еще работает. Закройте ее и повторите попытку.
-# review: new
 win-installer-remove-mail-ask = Удалить также учетные записи и почту, которые Inbox Classic хранит на этом компьютере? Почта на серверах останется.
