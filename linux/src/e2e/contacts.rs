@@ -46,13 +46,16 @@ pub async fn address_book(d: &Driver) {
         d.check(false, "Tools > Address Book opens the Address Book");
         return;
     };
-    pause(600).await;
     let root: gtk::Widget = book.window.clone().upcast();
-    d.check(
+    let empty = wait_until(5, || {
         book.people().is_empty()
             && book
                 .empty_text()
-                .is_some_and(|t| t.starts_with("The Address Book is empty")),
+                .is_some_and(|t| t.starts_with("The Address Book is empty"))
+    })
+    .await;
+    d.check(
+        empty,
         &format!("Tools > Address Book opens it, empty ({:?})", book.empty_text()),
     );
     let buttons = [
@@ -111,12 +114,16 @@ pub async fn address_book(d: &Driver) {
         "with both addresses, mary@example.com the default",
     );
     book.find.set_text("smi");
-    pause(600).await;
-    d.check(names(&book) == ["Mary Smith"], "the find box finds her by \"smi\"");
-    book.find.set_text("zed");
-    pause(600).await;
     d.check(
-        book.people().is_empty() && book.empty_text().is_some_and(|t| t.contains("zed")),
+        wait_until(5, || names(&book) == ["Mary Smith"]).await,
+        "the find box finds her by \"smi\"",
+    );
+    book.find.set_text("zed");
+    d.check(
+        wait_until(5, || {
+            book.people().is_empty() && book.empty_text().is_some_and(|t| t.contains("zed"))
+        })
+        .await,
         &format!("and lists no one for \"zed\" ({:?})", book.empty_text()),
     );
     book.find.set_text("");
@@ -135,9 +142,8 @@ pub async fn address_book(d: &Driver) {
     match wait_dialog(10, "pick-dialog").await {
         Some(pick) => {
             let p: gtk::Widget = pick.clone().upcast();
-            pause(300).await;
             d.check(
-                pick_rows(&p, "pick-list").len() == 1 && pick.title() == "Select Group Members",
+                wait_until(5, || pick_rows(&p, "pick-list").len() == 1).await && pick.title() == "Select Group Members",
                 &format!(
                     "Select Members lists the people of the book ({:?})",
                     pick_rows(&p, "pick-list")
@@ -155,9 +161,11 @@ pub async fn address_book(d: &Driver) {
     }
     set_text(&g, "group-new-member", "dave@example.com");
     click(&g, "group-add-member");
-    pause(300).await;
     d.check(
-        named_in(&g, "group-member-0").is_some() && named_in(&g, "group-member-1").is_some(),
+        wait_until(5, || {
+            named_in(&g, "group-member-0").is_some() && named_in(&g, "group-member-1").is_some()
+        })
+        .await,
         "Mary Smith from Select Members and dave@example.com typed are its members",
     );
     d.shot(&form, "contacts-3-group").await;
@@ -193,7 +201,7 @@ pub async fn address_book(d: &Driver) {
     match wait_dialog(10, "pick-dialog").await {
         Some(pick) => {
             let p: gtk::Widget = pick.clone().upcast();
-            pause(300).await;
+            wait_until(5, || pick_rows(&p, "pick-list").len() == 2).await;
             let rows = pick_rows(&p, "pick-list");
             d.check(
                 rows.len() == 2 && rows[0].starts_with("Team") && rows[1].starts_with("Mary Smith"),
@@ -203,9 +211,8 @@ pub async fn address_book(d: &Driver) {
                 list.select_all();
             }
             click(&p, "pick-to");
-            pause(300).await;
             d.check(
-                pick_rows(&p, "pick-to-list").len() == 2,
+                wait_until(5, || pick_rows(&p, "pick-to-list").len() == 2).await,
                 "To -> puts them in the message's recipients",
             );
             d.shot(&pick, "contacts-4-pick").await;
@@ -256,11 +263,11 @@ pub async fn address_book(d: &Driver) {
         "the message list's right-click menu has Add Sender to Address Book",
     );
     run_command(Command::AddSenderToBook);
-    pause(400).await;
-    let status = main.status_texts().0;
+    let added = t!(UiSenderAdded, name = "Trail Notes");
+    let said = wait_until(5, || main.status_texts().0 == added).await;
     d.check(
-        status == "Trail Notes was added to the Address Book.",
-        &format!("Add Sender adds Trail Notes ({status})"),
+        said,
+        &format!("Add Sender adds Trail Notes ({})", main.status_texts().0),
     );
     let senders = |core: &pe_core::Core| {
         core.cards("news@example.com")
@@ -270,12 +277,17 @@ pub async fn address_book(d: &Driver) {
             .count()
     };
     d.check(senders(&shell().core) == 1, "with the address news@example.com");
+    // the status bar emptied first, so the words looked for are this answer's
+    main.set_status("");
     run_command(Command::AddSenderToBook);
-    pause(400).await;
-    let status = main.status_texts().0;
+    let known = t!(UiSenderKnown, name = "Trail Notes");
+    let said = wait_until(5, || main.status_texts().0 == known).await;
     d.check(
-        status == "Trail Notes is already in the Address Book." && senders(&shell().core) == 1,
-        &format!("and again says the sender is in the Address Book already, without a second card ({status})"),
+        said && senders(&shell().core) == 1,
+        &format!(
+            "and again says the sender is in the Address Book already, without a second card ({})",
+            main.status_texts().0
+        ),
     );
     main.clear_find();
 

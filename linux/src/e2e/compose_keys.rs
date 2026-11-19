@@ -450,7 +450,7 @@ async fn reply_to_encrypted(d: &Driver) {
     );
     d.shot(&c.window, "write-33-reply-encrypted").await;
     answer(&question, "Keep It Encrypted");
-    pause(800).await;
+    wait_until(5, || alert().is_none()).await;
     d.check(
         p.encrypt_button.is_active() && p.encrypt.get(),
         "Keep It Encrypted leaves it on",
@@ -485,8 +485,10 @@ async fn reply_to_encrypted(d: &Driver) {
         }
         None => d.check(false, "Send is refused"),
     }
-    pause(500).await;
-    d.check(c.window.is_visible(), "and the message stays open");
+    d.check(
+        wait_until(5, || alert().is_none()).await && c.window.is_visible(),
+        "and the message stays open",
+    );
     c.editor.run_script(
         "document.getElementById('more').click();var q=document.querySelector('#body > div.quoted');if(q)q.remove();document.getElementById('body').dispatchEvent(new Event('input'));",
     );

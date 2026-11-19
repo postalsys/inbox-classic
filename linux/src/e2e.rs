@@ -512,8 +512,28 @@ impl Driver {
             self.write(&format!("   ok: {what}"));
         } else {
             self.write(&format!("   FAILED: {what}"));
+            self.annotate(what);
             self.failures.borrow_mut().push(what.to_string());
         }
+    }
+
+    /// A failure as an error annotation of the GitHub Actions run, so it shows on the run's page without its log
+    fn annotate(&self, what: &str) {
+        if std::env::var_os("GITHUB_ACTIONS").is_some() {
+            // a workflow command ends at the line's end; % and the line breaks escaped as the runner reads them
+            let what = what.replace('%', "%25").replace('\r', "%0D").replace('\n', "%0A");
+            println!("::error title=UI check::{what}");
+        }
+    }
+
+    /// A step the rest of the test needs did not do its part (`what`): said once, and the test ends there, instead
+    /// of every later step failing for the same reason
+    fn blocked(&self, what: &str) {
+        self.write(&format!(
+            "   BLOCKED: {what}; the steps after it need it, so the test ends here"
+        ));
+        self.annotate(&format!("blocked: {what}"));
+        self.failures.borrow_mut().push(format!("blocked: {what}"));
     }
 
     /// The result written once, and the app ended when it still runs
@@ -882,7 +902,21 @@ fn alert() -> Option<adw::AlertDialog> {
     windows()
         .iter()
         .flat_map(|w| descendants::<adw::AlertDialog>(w.upcast_ref()).into_iter().rev())
-        .find(|d| d.is_mapped() && d.widget_name() != "wait-dialog")
+        .find(|d| d.is_mapped() && d.widget_name() != "wait-dialog" && !answered(d))
+}
+
+thread_local! {
+    /// The message boxes the driver answered: one still closing (its animation) is not the next one asked about
+    static ANSWERED: RefCell<Vec<glib::WeakRef<adw::AlertDialog>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Whether the driver answered `dialog` already
+fn answered(dialog: &adw::AlertDialog) -> bool {
+    ANSWERED.with(|answered| {
+        let mut answered = answered.borrow_mut();
+        answered.retain(|d| d.upgrade().is_some());
+        answered.iter().any(|d| d.upgrade().as_ref() == Some(dialog))
+    })
 }
 
 /// What a message box says, its no-break spaces (`ui::no_lone_word`) read as spaces
@@ -908,6 +942,10 @@ fn answer(dialog: &adw::AlertDialog, label: &str) -> bool {
     });
     match button {
         Some(button) => {
+            // a button that is off takes no click, and the box stays to be answered
+            if button.is_sensitive() {
+                ANSWERED.with(|answered| answered.borrow_mut().push(dialog.downgrade()));
+            }
             button.emit_clicked();
             true
         }
@@ -969,6 +1007,19 @@ fn listed_in_folder(folder: i64, offset: u64, limit: u64) -> Vec<pe_store::Messa
     listed_in(pe_core::Scope::Folder(folder), offset, limit)
 }
 
+/// What the status bar says once something is done to `count` messages, in the words of the catalogs: `text` one of
+/// the core's sentences of `$messages` ("3 messages") and `$folder` (`DoneMoved`, `SavedTo`, `ImportPut`)
+fn done_words(text: pe_core::i18n::Text, count: u64, folder: &str) -> String {
+    pe_core::i18n::tr_args(
+        text,
+        &[
+            ("messages", (&pe_core::messages(count)).into()),
+            ("count", count.into()),
+            ("folder", folder.into()),
+        ],
+    )
+}
+
 /// Selects the folder of the first account named so in the tree (the display name: Inbox, Sent Items, Drafts)
 fn select_folder(name: &str) -> bool {
     let core = &shell().core;
@@ -983,11 +1034,32 @@ fn select_folder(name: &str) -> bool {
     folder.is_some_and(|f| shell().main().folders.select(f.id, false))
 }
 
+/// Waits (10 seconds at most) until the main window's list is no longer about to be read again: the rows it shows
+/// are those of the list asked for, which is read off the window thread
+async fn wait_list_settled() {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while list_settling() && Instant::now() < deadline {
+        pause(100).await;
+    }
+}
+
+/// Selects the row `index` of the list as it is drawn, and waits until the reading pane shows its message, its page
+/// loaded (or why it could not: not downloaded, not shown). Several rows, or none, wait for nothing more
 async fn select_row(index: u32) {
-    // the list asked for drawn first: it is read off the window thread
-    wait_until(10, || true).await;
-    shell().main().list.select(index);
-    pause(1500).await;
+    let Some((folder, uid)) = select_row_asked(index).await else {
+        return;
+    };
+    let reader = &shell().main().reader;
+    wait_until(30, || reader.shows(folder, uid)).await;
+}
+
+/// Selects the row `index` once the list is drawn, and returns the message the reading pane asked for, without
+/// waiting for it to come (a message whose server says nothing)
+async fn select_row_asked(index: u32) -> Option<(i64, u64)> {
+    wait_list_settled().await;
+    let main = shell().main();
+    main.list.select(index);
+    main.list.selected().map(|(_, m)| (m.folder_id, m.info.uid))
 }
 
 /// The compose window open last
@@ -1047,8 +1119,16 @@ async fn scenario(d: Rc<Driver>) {
     // the Classic layout, whatever the window's width, so the screenshots of every step are of it; the layout steps
     // choose the others
     shell().settings.set_text(crate::settings::LAYOUT, Some("classic"));
-    add_account(&d, "Alex Morgan", "testuser", "testpass", true, false).await;
+    // every later step reads the account's mail: without it, one line says why, not every step after
+    if !add_account(&d, "Alex Morgan", "testuser", "testpass", true, false).await {
+        d.blocked("the first account was not added");
+        return;
+    }
     steps::waiting(&d).await;
+    if !synced(&d).await {
+        d.blocked("the first sync did not bring the account's folders and messages");
+        return;
+    }
     reading(&d).await;
     writing(&d).await;
     steps::not_downloaded(&d).await;
@@ -1125,8 +1205,9 @@ async fn scenario(d: Rc<Driver>) {
     steps::closing(&d).await;
 }
 
-/// Both steps of the account form: the name and address, then the servers with the password; on the `second` server
-async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: bool, second: bool) {
+/// Both steps of the account form: the name and address, then the servers with the password; on the `second` server.
+/// Whether the form took the account
+async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: bool, second: bool) -> bool {
     let (imap, smtp) = if second {
         (d.ports.second_imap, d.ports.second_smtp)
     } else {
@@ -1134,13 +1215,12 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     };
     d.step(&format!("adding the account {name}"));
     // a server form an earlier step cancelled may still be closing; the one this step waits for must be its own
-    d.check(
-        wait_gone(20, "account-servers").await,
-        "no server form of an earlier step is left open",
-    );
+    if !wait_gone(20, "account-servers").await {
+        d.write("   (a server form of an earlier step is still open)");
+    }
     let Some(first) = wait_dialog(20, "account-start").await else {
         d.check(false, &format!("the account form opens ({name})"));
-        return;
+        return false;
     };
     d.check(true, &format!("the account form opens ({name})"));
     let first = first.upcast::<gtk::Widget>();
@@ -1177,7 +1257,7 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     // the lookup finds nothing for this domain: the second form comes with the usual names to correct
     let Some(servers) = wait_dialog(40, "account-servers").await else {
         d.check(false, "the server settings form follows the lookup");
-        return;
+        return false;
     };
     let servers = servers.upcast::<gtk::Widget>();
     d.check(true, "the server settings form follows the lookup");
@@ -1222,12 +1302,13 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     click(&servers, "dialog-ok");
     let warning = wait_alert(10).await;
     d.check(warning.is_some(), "a connection without encryption is warned about");
-    if let Some(warning) = warning {
-        if shots {
-            d.shot(&warning, "account-4-warning").await;
-        }
-        answer(&warning, "Yes");
+    let Some(warning) = warning else {
+        return false;
+    };
+    if shots {
+        d.shot(&warning, "account-4-warning").await;
     }
+    answer(&warning, "Yes")
 }
 
 /// The dates follow the system's regional format (LC_ALL, LC_TIME, then LANG), not the app's language:
@@ -1255,9 +1336,9 @@ fn regional_dates(d: &Driver) {
     );
 }
 
-async fn reading(d: &Driver) {
+/// The first sync: the account's folders in the tree, the Inbox's messages in the list. Whether they came
+async fn synced(d: &Driver) -> bool {
     d.step("syncing");
-    let main = main_window();
     let folders = wait_for(30, || {
         let n = shell().main().folders.rows();
         (n >= 7).then_some(n)
@@ -1270,6 +1351,11 @@ async fn reading(d: &Driver) {
     select_folder("Inbox");
     let count = wait_for(30, || (rows() >= 4).then(rows)).await;
     d.check(count == Some(4), &format!("the messages are in the list ({count:?})"));
+    folders.is_some() && count.is_some()
+}
+
+async fn reading(d: &Driver) {
+    let main = main_window();
     d.shot(&main, "main-1-inbox").await;
     regional_dates(d);
 
@@ -1288,15 +1374,16 @@ async fn reading(d: &Driver) {
     if let (Some(list), Some(window)) = (named("message-list"), main.root().and_downcast::<gtk::Window>()) {
         list.grab_focus();
         window.child_focus(gtk::DirectionType::TabForward);
-        let focused = GtkWindowExt::focus(&window);
-        let name = focused
-            .as_ref()
-            .map(|f| format!("{} {}", f.type_().name(), f.widget_name()));
+        // what the user would see: a line of the header with the focus ring, or all of its text selected
+        let taken: Vec<String> = ["reader-subject", "reader-from", "reader-to", "reader-date"]
+            .iter()
+            .filter_map(|name| named(name).and_downcast::<gtk::Label>())
+            .filter(|line| line.has_focus() || line.selection_bounds().is_some_and(|(start, end)| start != end))
+            .map(|line| line.text().to_string())
+            .collect();
         d.check(
-            focused.is_some_and(|f| {
-                !["reader-subject", "reader-from", "reader-to", "reader-date"].contains(&f.widget_name().as_str())
-            }),
-            &format!("Tab from the list passes the lines of the header by ({name:?})"),
+            taken.is_empty(),
+            &format!("Tab from the list passes the lines of the header by, none taken or selected ({taken:?})"),
         );
     }
     d.check(
@@ -1412,9 +1499,8 @@ async fn reading(d: &Driver) {
 
     d.step("saving the attachment");
     reader.attachments.popup();
-    pause(500).await;
     d.check(
-        reader.attachments.is_active(),
+        wait_until(5, || reader.attachments.is_active()).await,
         "the paper clip offers the files to save",
     );
     d.shot(&main, "read-3-attachments").await;
@@ -1868,8 +1954,8 @@ async fn drafts_saved_automatically(d: &Driver) {
         d.find("Drafts", "Subject: Written when it crashed").is_some(),
         "and leaves its draft in Drafts, as it may be one the user kept",
     );
+    // what the next start does, at once: it opens what a crash left
     crate::compose::open_recovered();
-    pause(1000).await;
     d.check(
         shell().composes.borrow().is_empty(),
         "closed, it is not opened again at the next start",
@@ -1944,11 +2030,9 @@ async fn undo_send(d: &Driver) {
         &format!("the status bar says it was not sent ({})", main.status_texts().0),
     );
     d.shot(&again.window, "write-23-undone").await;
-    pause(12_000).await;
-    d.check(
-        d.find("INBOX", "Subject: Taken back in the UI test").is_none(),
-        "taken back, it never goes",
-    );
+    // its 10 seconds and more go by, and it does not arrive
+    let arrived = wait_until(15, || d.find("INBOX", "Subject: Taken back in the UI test").is_some()).await;
+    d.check(!arrived, "taken back, it never goes");
     // sent again and left alone: it goes once its time came
     click(again.window.upcast_ref(), "compose-send");
     let went = wait_for(40, || d.find("INBOX", "Subject: Taken back in the UI test")).await;
@@ -1981,8 +2065,10 @@ async fn attachment_reminder(d: &Driver) {
         d.shot(&ask, "write-25-attachment-reminder").await;
         answer(&ask, "Go Back");
     }
-    pause(1000).await;
-    d.check(c.window.is_visible(), "Go Back keeps the message open");
+    d.check(
+        wait_until(5, || alert().is_none()).await && c.window.is_visible(),
+        "Go Back keeps the message open",
+    );
     click(c.window.upcast_ref(), "compose-send");
     if let Some(ask) = wait_alert(10).await {
         answer(&ask, "Send Anyway");

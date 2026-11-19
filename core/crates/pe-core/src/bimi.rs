@@ -105,6 +105,8 @@ pub fn render(svg: &[u8], size: u32) -> Option<Vec<u8>> {
         (size as f32 - bounds.height() * scale) / 2.0,
     );
     let transform = resvg::tiny_skia::Transform::from_scale(scale, scale).post_translate(dx, dy);
+    // a shape out at millions of pixels breaks resvg's drawing (pe-preview's fuzzing found it)
+    pe_preview::svg::check_extent(&tree, transform).ok()?;
     resvg::render(&tree, transform, &mut pixmap.as_mut());
     // the alpha multiplied in already
     Some(crate::card_pictures::to_bgra(pixmap.take(), true))
@@ -183,5 +185,13 @@ mod tests {
         assert!(render(&vec![b' '; MAX_SVG + 1], 32).is_none());
         assert!(render(b"not an svg", 32).is_none());
         assert!(render(SVG.as_bytes(), 4).is_none());
+    }
+
+    #[test]
+    fn a_logo_reaching_out_millions_of_pixels_is_not_drawn() {
+        let far = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" viewBox=\"0 0 100 100\">\
+            <title>Brand</title><path d=\"M0 0L30 10Q15 0 6-6666666666666660 1010Q15 0 0 10z\" stroke=\"green\"/></svg>";
+        assert!(render(far.as_bytes(), 64).is_none());
+        assert!(render(SVG.as_bytes(), 64).is_some());
     }
 }

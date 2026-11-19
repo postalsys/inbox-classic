@@ -1,19 +1,17 @@
-<!--review-->
 <h1>DI agento prijungimas</h1>
 <p class="summary">Leiskite DI agentui, pavyzdžiui, Claude, per Inbox Classic skaityti ir tvarkyti jūsų paštą.</p>
-<p>Galite leisti DI agentui dirbti su jūsų paštu. Tai gali būti Claude, Cursor ar kita programa, palaikanti Model Context Protocol (MCP). Pačioje Inbox Classic dirbtinio intelekto nėra, ir niekas nesiunčiama jokiai DI paslaugai, nebent įsileidžiate agentą.</p>
+<p>Galite leisti DI agentui skaityti ir tvarkyti jūsų paštą. Tinka Claude, Cursor ir kitos Model Context Protocol (MCP) palaikančios programos. Inbox Classic pati neturi DI funkcijų ir nesiunčia laiškų DI paslaugai, kol nesuteikiate agentui prieigos.</p>
 <p>Norėdami prijungti agentą:</p>
 <ol>
-    <li>Pasirinkite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> ir spustelėkite <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic parodo eilutes, kurias reikia įtraukti į agento nustatymus.</li>
-    <li>Įtraukite jas į savo agento MCP serverius. Programoje Claude Desktop tai <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
-    <li>Paleiskite agentą. Pirmą kartą jam prisijungus, Inbox Classic jūsų paklausia, ką jis gali daryti.</li>
+    <li>Pasirinkite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> ir spustelėkite <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic parodo nustatymus, kuriuos reikia nukopijuoti į agento konfigūraciją.</li>
+    <li>Įrašykite šiuos nustatymus į agento MCP serverių konfigūraciją. Programoje Claude Desktop ją atidarysite pasirinkę <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
+    <li>Paleiskite agentą. Jam jungiantis pirmą kartą, Inbox Classic paklausia, kokius veiksmus leisite atlikti ir kurias paskyras leisite pasiekti.</li>
 </ol>
-<p>Jei Inbox Classic neveikia, agentas ją paleidžia fone. Ją pasiekti gali tik programos, veikiančios šiame kompiuteryje jūsų vardu.</p>
-<!--review--><p>Inbox Classic klausia sistemos, kuri programa paleido agentą, o ne tiki agento žodžiais, todėl viena programa negali naudotis prieiga, kurią suteikėte kitai. Jei agentas teigia esąs kita programa, klausimas jums tai parodys.</p><!--/review-->
-<!--review--><p>Agentas taip pat gali stebėti jūsų aplanką „Gauti laiškai“, paskyrą ar aplanką ir gauti pranešimą, kai juose pasikeičia paštas, be to, jis gali pasiūlyti dvi paruoštas užklausas, „Triage my inbox“ ir „Summarize unread“. Abi laikosi to, ką leidžiate agentui, o tai, ką jis taip perskaito, rodoma jo žurnale kaip ir visa kita, ką jis skaito.</p><!--/review-->
-<p>Iš terminalo paleistus agentus, pavyzdžiui, Claude Code, Inbox Classic laiko viena programa. Ji vieną kartą paklausia apie <!--os:mac-->iš programėlės Terminal paleistas programas<!--/os--><!--os:windows,linux-->iš terminalo paleistas programas<!--/os-->, ir jos bendrai naudojasi jūsų suteiktomis teisėmis. Norėdami suteikti agentui atskirą prieigą, jo nustatymuose po <code>--mcp</code> įrašykite <code>--name</code> ir savo pasirinktą pavadinimą, pavyzdžiui, <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Tada Inbox Classic klaus apie jį tuo pavadinimu.</p>
-<!--/review-->
-<p>Norėdami uždrausti visiems agentams prisijungti, išjunkite parinktį <b data-text="ui-let-agents-connect"></b> lange <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<!--review-->
+<p>Jei Inbox Classic neveikia, agentas ją paleidžia fone. Prie jos agentai gali jungtis tik iš šio kompiuterio programų, veikiančių su jūsų operacinės sistemos naudotojo paskyra.</p>
+<p>Pagal operacinės sistemos duomenis Inbox Classic nustato, kuri programa paleido agentą. Vien prisistačius kita programa, jos leidimų gauti negalima. Jei agento nurodyta programa nesutampa su nustatytąja, tai parodoma leidimo užklausoje. Taip atskiriami agentų leidimai, tačiau tai neapsaugo nuo kenkėjiškos programos, veikiančios su jūsų naudotojo paskyra: ji galėtų pasiekti paštą ir kitais būdais.</p>
+<p>Agentas taip pat gali stebėti gautus laiškus, paskyrą ar aplanką ir gauti pranešimus apie pokyčius. Jis gali pasiūlyti paruoštus prašymus „Triage my inbox“ (įvertinti gautus laiškus) ir „Summarize unread“ (apibendrinti neskaitytus laiškus). Visais šiais atvejais galioja jūsų suteikti leidimai, o skaitymo veiksmai įrašomi agento veiklos žurnale.</p>
+<p>Iš tos pačios terminalo programos paleisti agentai, pavyzdžiui, Claude Code, bendrai naudojasi vienu leidimų rinkiniu. Inbox Classic vieną kartą paprašo suteikti leidimus <!--os:mac-->iš tos pačios terminalo programos (pavyzdžiui, Terminal) paleistiems agentams<!--/os--><!--os:windows,linux-->per tą pačią terminalo programą paleistiems agentams<!--/os-->. Agentui atskirus leidimus galite suteikti jo MCP nustatymuose po <code>--mcp</code> įrašę <code>--name</code> ir pasirinktą pavadinimą, pavyzdžiui, <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Tada leidimo užklausoje rodomas šis pavadinimas. Jis padeda atskirti leidimus, bet nepatvirtina agento tapatybės.</p>
+
+<p>Norėdami uždrausti visiems agentams prisijungti, išjunkite parinktį „<b data-text="ui-let-agents-connect"></b>“ lange <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
-<!--/review-->

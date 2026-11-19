@@ -140,7 +140,6 @@ async fn import_keys(d: &Driver) {
     while let Some(said) = wait_alert(5).await {
         let text = alert_text(&said);
         answer(&said, if text.contains("Use this key") { "Use" } else { "OK" });
-        pause(400).await;
     }
     for name in ["alice.asc", "mallory.asc"] {
         FILE_ANSWERS.with(|a| a.borrow_mut().push_back(vec![fixture(name)]));
@@ -148,14 +147,18 @@ async fn import_keys(d: &Driver) {
         if let Some(said) = wait_alert(10).await {
             answer(&said, "OK");
         }
-        pause(400).await;
     }
-    let listed = keys::keys_listed(&keys);
-    d.check(
+    let imported = || {
+        let listed = keys::keys_listed(&keys);
         ["Alice Example", "Mallory"]
             .iter()
             .all(|name| listed.iter().any(|row| row.contains(name)))
-            && listed.len() >= 3,
+            && listed.len() >= 3
+    };
+    let all = wait_until(10, imported).await;
+    let listed = keys::keys_listed(&keys);
+    d.check(
+        all,
         &format!("the account's key, Alice's and Mallory's are imported ({listed:?})"),
     );
     keys::close_keys(&keys).await;
@@ -435,7 +438,6 @@ async fn link_in_part(d: &Driver) {
     })
     .await
     .unwrap_or_default();
-    pause(500).await;
     let (fits, frames) = measured(3).await;
     d.check(
         clicked && opened == ["https://example.org/mill"],
@@ -608,9 +610,16 @@ async fn long(d: &Driver, inbox: i64) {
     let (width, height) = (window.width(), window.height());
     window.set_default_size(760, height);
     wait_until(10, || window.width() <= 800).await;
-    pause(1200).await;
-    let (fits, found) = measured(1).await;
-    let narrow = found.first().map_or(0, |f| f.0);
+    // the frame is measured again every 400 ms: until it has grown to its part, 10 seconds at most
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let (fits, narrow) = loop {
+        let (fits, found) = measured(1).await;
+        let narrow = found.first().map_or(0, |f| f.0);
+        if (fits && narrow >= unfolded) || Instant::now() > deadline {
+            break (fits, narrow);
+        }
+        pause(250).await;
+    };
     d.check(
         fits && narrow >= unfolded,
         &format!("and stays as tall as its part when the window is narrower ({unfolded} to {narrow}), nothing cut off"),
@@ -731,9 +740,9 @@ async fn previews_window(d: &Driver, inbox: i64) {
     let _ = WidgetExt::activate_action(&window.window, "window.close", None);
     wait_until(10, || crate::message_window::windows().is_empty()).await;
     // the window's view asked for at the same time as nothing here: the reading pane still shows the message
-    pause(500).await;
+    let shown = wait_until(5, || main.reader.has_view() && bar().is_some()).await;
     d.check(
-        main.reader.has_view() && bar().is_some() && measured(2).await.0,
+        shown && measured(2).await.0,
         "the reading pane still shows the message the window opened, its bar and its frames",
     );
 }
@@ -981,7 +990,7 @@ pub(super) async fn attachment_previews(d: &Driver) {
     pause(300).await;
     d.shot(main.window(), "secure-14c-attachment-previews-dark").await;
     d.check(
-        main.reader.strip.widget.has_css_class("dark"),
+        wait_until(5, || main.reader.strip.widget.has_css_class("dark")).await,
         "in dark mode the strip's lock takes the dark colour of its tone",
     );
     d.shot(main.window(), "secure-15b-strip-parts-dark").await;

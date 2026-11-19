@@ -255,8 +255,9 @@ pub(super) async fn opening_attachments(d: &Driver) {
         }
         None => d.check(false, "opening the program says why not"),
     }
-    pause(500).await;
-    d.check(take_opened().is_empty(), "and nothing is opened");
+    // refused before anything is written or handed over: nothing comes after the answer either
+    let opened = wait_until(2, || !take_opened().is_empty()).await;
+    d.check(!opened, "and nothing is opened");
 
     // pages: Open greyed, and opening one refused naming it, for the one known by its extension and the one known
     // by what it holds
@@ -285,8 +286,8 @@ pub(super) async fn opening_attachments(d: &Driver) {
             None => d.check(false, &format!("opening {name} says why not")),
         }
     }
-    pause(500).await;
-    d.check(take_opened().is_empty(), "and no page is opened");
+    let opened = wait_until(2, || !take_opened().is_empty()).await;
+    d.check(!opened, "and no page is opened");
 
     in_window(d, inbox).await;
     encrypted(d, inbox).await;
@@ -332,12 +333,14 @@ async fn in_window(d: &Driver, inbox: i64) {
     if let Some(cabin) = strip.flow.child_at_index(3) {
         strip.flow.select_child(&cabin);
     }
-    pause(800).await;
     d.check(
-        strip
-            .flow
-            .child_at_index(3)
-            .is_some_and(|last| last.compute_bounds(&strip.flow).is_some_and(|b| b.y() > 10.0)),
+        wait_until(5, || {
+            strip
+                .flow
+                .child_at_index(3)
+                .is_some_and(|last| last.compute_bounds(&strip.flow).is_some_and(|b| b.y() > 10.0))
+        })
+        .await,
         "in a narrow window the files wrap onto more lines",
     );
     d.shot(&window.window, "attach-6-narrow-dark").await;
