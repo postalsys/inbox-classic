@@ -727,6 +727,19 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
 - The download limit describes storage space, not time. It removes cached copies, spares drafts and messages
   opened since startup, and can be exceeded. Bulk prefetch exclusions do not forbid every neighboring download.
   A large message's text appears first only when its structure allows it.
+- Writing help uses "parašo tekstas" for the account footer and "skaitmeninis parašas" for cryptographic signing.
+  The footer is inserted below the writing area, above the quote; choosing an account without one removes it.
+- Reply follows the specified reply address when present; Reply All includes other visible recipients but omits
+  the account's own addresses. A quoted original can be edited or removed. Forwarded subjects retain "Fw:".
+- "Siuntimo eilė" describes the Outbox. A draft is removed after queueing, before sending succeeds. Undo Send
+  lasts only through the countdown; a retry is an attempt, not promised delivery. Recovery restores saved copies.
+- Attachment previews are "peržiūros" and fallback tiles are "kortelės". Decrypted previews in memory differ
+  from opened/saved files on disk. Temporary opened copies are cleaned at later startup once older than a day.
+  Numbered collision names apply to batch saves; single Save As uses the platform's file dialog.
+- Contact pictures rely on a provider-confirmed domain, not verified personal identity. Import duplicate checks
+  compare email addresses, not names; a card with no addresses is not a duplicate merely for lacking an address.
+- Source-view text can be shortened for large messages. The automatic preview budget is 20 pictures/PDF pages;
+  manually requested previews may exceed that total. Avoid absolute whole-source or universal preview-limit claims.
 
 ### Magyar (hu)
 
