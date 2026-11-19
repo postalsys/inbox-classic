@@ -30,10 +30,9 @@ gtk-unsubscribe-one-click =
     Diese Mailingliste verlassen?
 
     Inbox Classic sendet eine Abmeldeanfrage an { $target }. Dabei wird keine Webseite geöffnet und keine E-Mail versendet.
-gtk-unsubscribe-mail =
-    Diese Mailingliste verlassen?
+gtk-unsubscribe-mail = Diese Mailingliste verlassen?
 
-    Zum Abbestellen ist eine E-Mail an { $target } erforderlich. Inbox Classic bereitet sie für Sie vor. Senden Sie die Nachricht, um die Abmeldung abzuschließen.
+    Zum Abbestellen ist eine E-Mail an { $target } erforderlich. Inbox Classic bereitet sie für Sie vor. Senden Sie die Nachricht, um die Abmeldeanfrage zu übermitteln.
 gtk-unsubscribe-web =
     Diese Mailingliste verlassen?
 
@@ -88,7 +87,7 @@ gtk-files = { $count ->
     [one] { $count } Datei
    *[other] { $count } Dateien
 }
-gtk-pictures-blocked = Einige Bilder wurden blockiert, damit der Absender Ihren Computer nicht erkennen kann.
+gtk-pictures-blocked = Einige Bilder wurden zum Schutz vor Nachverfolgung blockiert.
 gtk-download-pictures = Bilder herunterladen
 gtk-save-attachments-menu = Anlagen speichern...
 
@@ -154,7 +153,7 @@ gtk-agent-it-may = Erlaubte Aktionen
 gtk-agent-accounts = Freigegebene Konten
 gtk-never-used = Nie verwendet
 gtk-last-used = Zuletzt verwendet { $date }
-gtk-forget-program = Dieses Programm entfernen?
+gtk-forget-program = Gespeicherte Zugriffsrechte dieses Programms entfernen?
 gtk-forget-program-detail = Die Berechtigungen des Programms und der Aktivitätsverlauf seiner Agenten werden gelöscht. Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
 gtk-no-agents-yet = Bisher hat kein Agent Zugriff auf Ihre E-Mails angefordert.
 gtk-nothing-yet = Noch nichts.
@@ -174,4 +173,4 @@ gtk-metainfo-description = Inbox Classic bietet die klassische E-Mail-Ansicht: O
 gtk-metainfo-feature-sanitized = Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen
 gtk-metainfo-feature-search = Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail
 gtk-metainfo-feature-replies = Zitierte Nachrichten in Antworten werden eingeklappt
-gtk-metainfo-feature-offline = Heruntergeladene E-Mails lassen sich auch offline lesen; Kennwörter werden in Ihrem Schlüsselbund gespeichert
+gtk-metainfo-feature-offline = Heruntergeladene E-Mails lassen sich auch offline lesen; Anmeldedaten werden standardmäßig im Systemschlüsselbund gespeichert

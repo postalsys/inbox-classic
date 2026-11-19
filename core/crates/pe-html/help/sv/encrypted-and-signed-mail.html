@@ -1,21 +1,20 @@
-<!--review--><h1>Krypterad och signerad e-post</h1>
-<p class="summary">Fältet ovanför ett meddelande visar om det är signerat av avsändaren och om det krypterades till dig.</p>
-<p>Ett signerat meddelande visar vem som skrev det och att ingen har ändrat det på vägen. Ett krypterat meddelande kan bara läsas med din nyckel.</p>
+<h1>Krypterad och signerad e-post</h1>
+<p class="summary">Fältet ovanför ett meddelande visar om det är signerat av avsändaren och om det krypterades för dig.</p>
+<p>En giltig digital signatur bekräftar att innehållet inte har ändrats efter signeringen. För att bekräfta vem som signerade behöver du också verifiera nyckelns ägare. Ett krypterat meddelande kräver en passande privat nyckel för att kunna läsas.</p>
 <p>Fältet ovanför meddelandet gäller meddelandet som helhet:</p>
 <table>
     <tr><th>Färg</th><th>Vad det betyder</th></tr>
-    <tr><td>Grön</td><td>Signerat av avsändaren, med en nyckel som du har verifierat.</td></tr>
-    <tr><td>Blå</td><td>Signerat av avsändaren med en nyckel som du inte har verifierat, eller krypterat till dig.</td></tr>
-    <tr><td>Bärnsten</td><td>Något stämmer inte: signaturen stämmer inte, någon annan än avsändaren har signerat, eller en del kunde inte läsas.</td></tr>
-    <tr><td>Grå</td><td>Inte signerat, eller signerat med en nyckel som du inte har.</td></tr>
+    <tr><td>Grön</td><td>Signerat av avsändaren, med en nyckel vars ägare du har verifierat.</td></tr>
+    <tr><td>Blå</td><td>Signerat av avsändaren med en nyckel vars ägare du inte har verifierat, eller krypterat för dig.</td></tr>
+    <tr><td>Bärnstensgul</td><td>Något stämmer inte: signaturen stämmer inte, signerarens koppling till avsändaren är inte bekräftad, eller en del kunde inte läsas.</td></tr>
+    <tr><td>Grå</td><td>Inte signerat, eller signaturen kunde inte kontrolleras, till exempel för att nyckeln saknas.</td></tr>
 </table>
 <p>Ett meddelande vars delar är skyddade på olika sätt visar varje del i en egen ram, med en egen etikett. Fältet räknar då delarna av varje slag. Klicka på en etikett, eller på <b data-text="ui-protection-details"></b> i fältet, för att se vem som signerade varje del, med vilken nyckel och när.</p>
 <aside class="warning">Bara fältet och etiketterna ovanför ramarna skrivs av Inbox Classic. En avsändare kan rita vad som helst i sitt eget meddelande, även något som ser ut som en etikett. Titta på fältet.</aside>
 <p>Bilder från internet i en krypterad del läses bara in när du klickar på bildfältet, varje gång. Dess etikett säger då att bilder har lästs in.</p>
-<p>Bilder och PDF-filer som hör till en del visas i den delens ram, aldrig i en annan dels. De från en krypterad del finns bara i minnet, aldrig på disken.</p>
+<p>Bilder och PDF-filer som hör till en del visas i den delens ram, aldrig i en annan dels. Förhandsvisningen av en krypterad del sparas bara i minnet. Om du öppnar bilagan i ett annat program skapas däremot en okrypterad tillfällig fil. Sparar du bilagan hamnar kopian där du väljer.</p>
 <p>I listan över bifogade filer markerar ett hänglås varje fil från en krypterad del. Peka på en fil för att se vilken del den kommer från.</p>
 <p>När du svarar eller vidarebefordrar citeras bara det som visades.</p>
-<p>I meddelandelistan markerar ett lås ett krypterat meddelande och ett sigill ett signerat. När Inbox Classic har dekrypterat ett krypterat meddelande, efter att ha hämtat eller öppnat det, visar listan dess eget ämne och första ord. Fram till dess visar listan och aviseringen om ny e-post <b data-text="list-encrypted"></b>.</p>
-<p>Sökningen hittar ett dekrypterat meddelande efter orden i texten, så länge <b data-text="ui-search-encrypted"></b> är på under <b data-settings="reading"></b>. AI-agenter ser aldrig vad ett krypterat meddelande säger, eller dess filer.</p>
+<p>I meddelandelistan markerar ett lås ett krypterat meddelande och ett sigill ett signerat. Sigillet i sig bekräftar varken signaturens giltighet eller nyckelns ägare. Skyddat ämne och textutdrag visas när meddelandet har dekrypterats och lagts i det aktiverade sökindexet. Annars visas en beteckning för krypterat innehåll. Aviseringar om krypterad e-post visar alltid <b data-text="list-encrypted"></b>.</p>
+<p>När <b data-text="ui-search-encrypted"></b> är aktiverat under <b data-settings="reading"></b> försöker programmet dekryptera hämtade eller öppnade meddelanden med en tillgänglig nyckel. Text och skyddat ämne sparas då i ett lokalt okrypterat index. När alternativet stängs av tas de uppgifterna bort ur indexet. AI-agenter kan se yttre meddelandeuppgifter men får inte dekrypterat innehåll eller bilagor.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

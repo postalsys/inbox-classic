@@ -1,11 +1,11 @@
 <h1>Suchwörter</h1>
 <p class="summary">Die Wörter und Zeichen, die das Suchfeld versteht, um genau die Nachrichten zu finden, die Sie suchen.</p>
-<p>Das Suchfeld versteht dieselben Wörter wie Gmail. Kombinieren Sie beliebig viele: Eine Nachricht muss zu allen passen. Zeigen Sie auf das Suchfeld, um eine kurze Liste zu sehen.</p>
+<p>Das Suchfeld unterstützt viele Suchoperatoren von Gmail. Kombinieren Sie beliebig viele: Eine Nachricht muss zu allen passen. Zeigen Sie auf das Suchfeld, um eine kurze Liste zu sehen.</p>
 <table>
     <tr><th>Eingabe</th><th>Findet</th></tr>
     <tr><td><code>budget</code></td><td>Nachrichten mit einem Wort, das mit <i>Budget</i> beginnt, an beliebiger Stelle</td></tr>
     <tr><td><code>"genauer Wortlaut"</code></td><td>Diese Wörter in dieser Reihenfolge</td></tr>
-    <tr><td><code>-wort</code></td><td>Nachrichten ohne dieses Wort. Ein Minus ist auch bei manchen Suchbedingungen möglich, etwa <code>-is:unread</code></td></tr>
+    <tr><td><code>-wort</code></td><td>Nachrichten ohne dieses Wort. Ein Minus ist auch bei manchen Suchbedingungen möglich, etwa <code>-is:unread</code>. Bei Datums-, Alters- und Größenfiltern wird das Minus ignoriert</td></tr>
     <tr><td><code>dies OR das</code></td><td>Nachrichten mit einem der beiden Wörter. Schreiben Sie <code>OR</code> in Großbuchstaben</td></tr>
     <tr><td><code>from:anna</code></td><td>E-Mails von Anna</td></tr>
     <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>E-Mails an Anna, in einer beliebigen Empfängerzeile</td></tr>
@@ -17,15 +17,15 @@
     <tr><td><code>is:starred</code> oder <code>is:flagged</code></td><td>Gekennzeichnete Nachrichten</td></tr>
     <tr><td><code>is:answered</code></td><td>Nachrichten, auf die Sie geantwortet haben</td></tr>
     <tr><td><code>is:bounce</code></td><td>Benachrichtigungen über Nachrichten, die nicht zugestellt wurden oder sich verzögern</td></tr>
-    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Verschlüsselte oder signierte Nachrichten</td></tr>
+    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Verschlüsselte oder signierte Nachrichten; das bestätigt weder die Gültigkeit einer Signatur noch den Schlüsselinhaber</td></tr>
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Nur dieser Ordner, in jedem Konto</td></tr>
     <tr><td><code>in:projekte</code></td><td>Nur der Ordner mit diesem Namen</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Alle Ordner</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-Mails vor oder nach einem Tag. <code>2025-01-31</code> funktioniert auch</td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>E-Mails, die älter oder neuer sind als eine Anzahl Tage (<code>d</code>), Monate (<code>m</code>) oder Jahre (<code>y</code>)</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-Mails vor einem Tag oder ab diesem Tag, jeweils ab Mitternacht UTC gerechnet. <code>2025-01-31</code> funktioniert auch</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>E-Mails, die älter oder neuer sind als eine Anzahl Tage (<code>d</code>), Monate (<code>m</code>) oder Jahre (<code>y</code>); Monate zählen als 30, Jahre als 365 Tage</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-Mails, die größer oder kleiner als eine Größe sind, in Byte oder mit <code>K</code>, <code>M</code> oder <code>G</code></td></tr>
 </table>
 <p>Akzente sowie Groß- und Kleinschreibung spielen keine Rolle. Ein Suchwort, das Inbox Classic nicht kennt, wird als gewöhnliches Wort gesucht.</p>
 <p>Über Absender, Empfänger und den verfügbaren Betreff können Sie auch verschlüsselte Nachrichten finden. Wenn die Option <b data-text="ui-search-encrypted"></b> unter <b data-settings="reading"></b> aktiviert ist, wird nach erfolgreicher Entschlüsselung auch ihr Text durchsucht.</p>
-<p>Die Liste zeigt keine Größen. Um zu sehen, wie groß eine Nachricht ist, wählen Sie <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Je nach Layout zeigt die Liste auch eine Größe. Um zu sehen, wie groß eine Nachricht ist, wählen Sie <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

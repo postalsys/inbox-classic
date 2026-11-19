@@ -1,20 +1,19 @@
-<!--review--><h1>Flytta till en annan dator</h1>
+<h1>Flytta till en annan dator</h1>
 <p class="summary">Ta med dina konton, inställningar, kontakter, nycklar och regler till en annan dator i en enda fil.</p>
 <h2>Exportera dem</h2>
 <ol>
     <li>Välj <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Välj vad du vill ta med: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> och <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Om du vill ta med dina lösenord och privata nycklar också slår du på <b data-text="ui-setup-use-passphrase"></b> och skriver en lösenfras på minst 8 tecken två gånger.</li>
+    <li>Om du vill ta med sparade lösenord, andra inloggningsuppgifter och tillgängliga privata nycklar slår du på <b data-text="ui-setup-use-passphrase"></b> och skriver en lösenfras på minst 8 tecken två gånger.</li>
     <li>Klicka på <b data-text="ui-setup-export-button"></b> och välj var filen ska sparas.</li>
 </ol>
-<p>Filen innehåller inga meddelanden: de hämtas på nytt på den andra datorn. Med en lösenfras krypteras hela filen. Utan en innehåller den inga lösenord eller privata nycklar, och varje konto frågar efter sitt lösenord en gång på den andra datorn.</p>
+<p>Filen innehåller inga meddelanden. E-post som finns på servern hämtas på nytt på den andra datorn; oskickade meddelanden i den lokala Utkorgen följer inte med. Med en lösenfras krypteras hela filen och tillgängliga hemliga uppgifter för de valda delarna tas med. Utan lösenfras utelämnas sparade lösenord, andra inloggningsuppgifter och privata nycklar. Du behöver då logga in på kontona igen.</p>
 <aside class="warning">Förvara filen och lösenfrasen åtskilda, och radera filen när du har importerat den. Den som har båda kan läsa din e-post.</aside>
 <h2>Importera dem</h2>
 <ol>
-    <li>På den andra datorn väljer du <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Innan du lägger till ditt första konto har <b data-text="ui-add-account-title"></b> också en länk för det.</li>
+    <li>På den andra datorn väljer du <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Innan du lägger till ditt första konto finns också en länk i fönstret <b data-text="ui-add-account-title"></b> för det.</li>
     <li>Välj filen och skriv dess lösenfras om den har en.</li>
     <li>Fönstret visar vad filen innehåller. Välj de delar och konton som ska importeras och klicka på <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Ett konto som redan finns på den här datorn lämnas som det är. Kontakter läggs till i din adressbok, inställningar och fönsterinställningar ersätts, och en regel vars mapp inte finns än väntar tills kontot har synkroniserats. En annan nyckel för en av dina kontakter väntar på att du bestämmer dig, precis som en importerad nyckel gör.</p>
+<p>Ett konto som redan finns på den här datorn lämnas som det är. Kontakter läggs till i din adressbok, inställningar och fönsterinställningar ersätts, och en regel vars mapp inte finns än väntar tills kontot har synkroniserats. En ny nyckel för en kontakt ersätter den befintliga först när du väljer den i kontaktens egenskaper.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

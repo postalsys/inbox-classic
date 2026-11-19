@@ -1,9 +1,8 @@
-<!--review--><h1>Ta bort Inbox Classic</h1>
+<h1>Ta bort Inbox Classic</h1>
 <p class="summary">Ta bort Inbox Classic från datorn, med eller utan den e-post som hämtats.</p>
-<!--os:windows--><p>Avinstallera Inbox Classic i <i>Inställningar &gt; Appar &gt; Installerade appar</i>. Du får frågan om den hämtade e-posten också ska tas bort.</p><!--/os-->
-<!--os:mac--><p>Avsluta Inbox Classic och flytta programmet från Program till papperskorgen. Den hämtade e-posten finns kvar i <code>~/Library/Application Support/Inbox Classic</code> tills du också tar bort den mappen.</p><!--/os-->
-<!--os:linux--><p>Ta bort paketet med <code>sudo apt remove inbox-classic</code>, eller med <code>sudo pacman -R inbox-classic</code> på Arch Linux och Omarchy. Den hämtade e-posten finns kvar i <code>~/.local/share/inbox-classic</code> tills du också tar bort den mappen.</p><!--/os-->
-<p>E-posten på dina servrar tas aldrig bort.</p>
-<p>Om du vill ta bort de sparade lösenorden tar du först bort varje konto i <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Om du bara vill ta bort ett konto, se <a href="topic:manage-accounts"></a>.</p>
+<!--os:windows--><p>Avinstallera Inbox Classic i <i>Inställningar &gt; Appar &gt; Installerade appar</i>. Du får frågan om även den lokala datan ska tas bort. Det omfattar konton, inställningar, hämtad e-post och oskickade meddelanden i Utkorgen. Sparade uppgifter i Autentiseringshanteraren i Windows blir kvar.</p><!--/os-->
+<!--os:mac--><p>Avsluta Inbox Classic och flytta programmet från Program till papperskorgen. Den lokala datan, inklusive konton och hämtad e-post, finns kvar i <code>~/Library/Application Support/Inbox Classic</code> tills du också tar bort den mappen.</p><!--/os-->
+<!--os:linux--><p>Ta bort paketet med <code>sudo apt remove inbox-classic</code>, eller med <code>sudo pacman -R inbox-classic</code> på Arch Linux och Omarchy. Den lokala datan, inklusive konton och hämtad e-post, finns kvar i <code>~/.local/share/inbox-classic</code> tills du också tar bort den mappen.</p><!--/os-->
+<p>Avinstallationen tar inte bort e-post från dina servrar.</p>
+<p>Om du vill ta bort kontonas sparade lösenord och andra inloggningsuppgifter tar du först bort varje konto i <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>. Om du bara vill ta bort ett konto, se <a href="topic:manage-accounts"></a>.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

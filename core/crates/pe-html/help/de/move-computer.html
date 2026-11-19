@@ -7,7 +7,7 @@
     <li>Für gespeicherte Kennwörter, Anmeldedaten und private Schlüssel aktivieren Sie <b data-text="ui-setup-use-passphrase"></b>. Geben Sie zweimal dieselbe Passphrase mit mindestens 8 Zeichen ein.</li>
     <li>Klicken Sie auf <b data-text="ui-setup-export-button"></b> und wählen Sie den Speicherort.</li>
 </ol>
-<p>Nachrichten werden nicht exportiert. Inbox Classic lädt sie auf dem anderen Computer erneut vom Server. Mit einer Passphrase wird die gesamte Datei verschlüsselt. Ohne Passphrase fehlen gespeicherte Kennwörter, Anmeldedaten und private Schlüssel. Dann müssen Sie sich auf dem anderen Computer erneut bei Ihren Konten anmelden.</p>
+<p>Nachrichten werden nicht exportiert. Nur Nachrichten, die noch auf dem Server liegen, können auf dem anderen Computer erneut heruntergeladen werden. Rein lokale Entwürfe und Nachrichten im Postausgang werden nicht übertragen. Mit einer Passphrase wird die gesamte Datei verschlüsselt. Nicht entsperrbare private Schlüssel werden ausgelassen. Ohne Passphrase fehlen gespeicherte Kennwörter, Anmeldedaten und private Schlüssel. Dann müssen Sie sich auf dem anderen Computer erneut bei Ihren Konten anmelden.</p>
 <aside class="warning">Bewahren Sie Datei und Passphrase getrennt auf und löschen Sie die Datei nach dem Import. Wer beides besitzt, kann auf Ihre E-Mails zugreifen.</aside>
 <h2>Importieren</h2>
 <ol>
@@ -15,5 +15,5 @@
     <li>Wählen Sie die Datei und geben Sie bei einer geschützten Datei die Passphrase ein.</li>
     <li>Prüfen Sie die Vorschau. Wählen Sie die gewünschten Datenbereiche und Konten und klicken Sie auf <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Bereits eingerichtete Konten bleiben unverändert. Kontakte werden zum Adressbuch hinzugefügt; Einstellungen und Fenstereinstellungen werden ersetzt. Fehlende Zielordner für Nachrichtenregeln werden nach der Kontosynchronisierung zugeordnet. Ein neuer Schlüssel für einen Kontakt ersetzt einen vorhandenen erst, wenn Sie ihn in den Kontakteigenschaften auswählen.</p>
+<p>Bereits eingerichtete Konten bleiben unverändert. Kontakte werden zum Adressbuch hinzugefügt; ausgewählte enthaltene Einstellungen und Fenstereinstellungen werden übernommen. Fehlende Zielordner für Nachrichtenregeln werden zugeordnet, sobald die Synchronisierung den passenden Ordner findet. Ein neuer Schlüssel für einen Kontakt ersetzt einen vorhandenen erst, wenn Sie ihn in den Kontakteigenschaften auswählen.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

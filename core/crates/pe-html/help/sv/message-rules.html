@@ -1,5 +1,5 @@
-<!--review--><h1>Sortera ny e-post med regler</h1>
-<p class="summary">Flytta, markera som läst, flagga eller arkivera inkommande meddelanden som uppfyller dina villkor, automatiskt.</p>
+<h1>Sortera ny e-post med regler</h1>
+<p class="summary">Låt regler flytta, lästmarkera, flagga eller arkivera inkommande meddelanden automatiskt utifrån dina villkor.</p>
 <p>En regel kombinerar sökvillkor med åtgärder för de meddelanden som matchar när de kommer till Inkorgen. En regel med <code>from:news@example.com</code> kan till exempel flytta nyhetsbrev från den adressen till en egen mapp och markera dem som lästa.</p>
 <p>Så här skapar du en regel:</p>
 <ol>
@@ -10,10 +10,9 @@
 </ol>
 <p>Du kan också skapa en regel från ett meddelande eller en sökning. Välj <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> för att fylla i avsändaren eller e-postlistan för det markerade meddelandet. Klicka på <b data-text="ui-create-rule"></b> ovanför sökresultatet för att använda dina aktuella sökvillkor.</p>
 <h2>Så fungerar regler</h2>
-<p>Regler behandlar nya meddelanden i Inkorgen medan Inbox Classic körs, även när det är minimerat till meddelandefältet. Befintliga meddelanden påverkas bara om du markerar <b data-text="ui-rule-apply-now"></b>. Regler som matchar körs i den ordning listan visar. När en regel har flyttat ett meddelande ut ur Inkorgen gäller inga fler regler för det. Avmarkera en regels kryssruta i listan för att stänga av den utan att ta bort den.</p>
+<p>Regler behandlar nya meddelanden i Inkorgen medan Inbox Classic körs, även när programmet körs i bakgrunden. Befintliga meddelanden påverkas bara om du markerar <b data-text="ui-rule-apply-now"></b>. Regler som matchar körs i den ordning listan visar. När en regel har lagt en flytt från Inkorgen i kö behandlas meddelandet inte av fler regler, även om flytten ännu inte är klar. Avmarkera en regels kryssruta i listan för att stänga av den utan att ta bort den.</p>
 <h2>Ändra regler</h2>
-<p>Om du vill redigera en regel markerar du den i listan och klickar på <b data-text="ui-rule-edit"></b>, eller dubbelklickar på den. Använd <b data-text="ui-account-move-up"></b> och <b data-text="ui-account-move-down"></b> för att ändra ordningen, eller <b data-text="ui-rule-delete-button"></b> för att ta bort regeln. Klicka på <b data-text="ui-rule-show"></b> i regelredigeraren för att se de meddelanden som matchar just nu i huvudfönstret.</p>
-<p>Regler gäller nya meddelanden i Inkorgen, så filter på mapp och datum stöds inte. Om du använder <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> eller <code>newer_than:</code> förklarar ett meddelande varför de filtren inte kan användas. Regler kan inte skicka meddelanden eller ta bort dem permanent: <b data-text="ui-rule-delete"></b> flyttar dem till <b data-text="folder-deleted"></b>.</p>
+<p>Om du vill redigera en regel markerar du den i listan och klickar på <b data-text="ui-rule-edit"></b>, eller dubbelklickar på den. Använd <b data-text="ui-account-move-up"></b> och <b data-text="ui-account-move-down"></b> för att ändra ordningen, eller <b data-text="ui-rule-delete-button"></b> för att ta bort regeln. Klicka på <b data-text="ui-rule-show"></b> i regelredigeraren för att söka efter matchande meddelanden i alla inkorgar i huvudfönstret. Regelredigeraren stängs utan att dess osparade ändringar sparas.</p>
+<p>Regler gäller nya meddelanden i Inkorgen, så filter på mapp och datum stöds inte. Om du använder <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> eller <code>newer_than:</code> förklarar ett meddelande varför de filtren inte kan användas. Regler kan inte skicka meddelanden eller ta bort dem permanent: åtgärden <b data-text="ui-rule-delete"></b> flyttar dem till <b data-text="folder-deleted"></b>. Kontot måste ha en sådan mapp.</p>
 <aside class="note">Regler körs på den här datorn. Använd e-postleverantörens filter om du vill sortera e-post när datorn är avstängd.</aside>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
-<!--/review-->

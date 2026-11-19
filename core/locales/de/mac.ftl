@@ -72,7 +72,7 @@ mac-import-messages = Nachrichten importieren
 mac-save-messages = Nachrichten speichern
 mac-save-attachments-menu = Anlagen speichern…
 mac-files-not-saved = Nicht gespeicherte Dateien: { $failed } von { $count }.
-mac-no-calendar-app = Auf diesem Mac ist keine Kalender-App zum Öffnen von Einladungen (.ics-Dateien) verfügbar.
+mac-no-calendar-app = Die Einladung (.ics-Datei) konnte nicht in einer Kalender-App geöffnet werden. Prüfen Sie, ob eine installiert und diesem Dateityp zugeordnet ist.
 mac-file-not-saved = Die Datei konnte nicht gespeichert werden.
 mac-unsubscribing = Abbestellen bei { $target }…
 mac-loading-list = Wird geladen…
@@ -110,7 +110,7 @@ mac-sign-in-apps-button = Anmelde-Apps…
 
 ## AI agents
 
-mac-forget-program = Dieses Programm und den Aktivitätsverlauf seiner Agenten entfernen?
+mac-forget-program = Gespeicherte Zugriffsrechte dieses Programms und den Aktivitätsverlauf seiner Agenten entfernen?
 mac-forget-program-detail = Die Berechtigungen des Programms werden gelöscht. Bei der nächsten Verbindung wird erneut um Erlaubnis gefragt.
 
 ## Sign-in apps

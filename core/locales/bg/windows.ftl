@@ -101,15 +101,11 @@ win-clear-log-ask = Да се изчисти ли историята на дей
 win-agent-programs = &Програми, чиито агенти са поискали достъп до пощата ви:
 win-change = Пром&яна...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
-# review: new
 win-undo-since = Отмяна &за период...
-# review: new
-win-take-back = &Отмяна
+win-take-back = Отмяна на &промените
 win-what-agents-did = &Действия на агентите:
-# review: new
 win-agent-reads = Прочетено от { $from } до { $to }:
-# review: new
-win-agent-reads-hint = Изберете по-горе ред с прочетеното, за да видите какво е прочетено.
+win-agent-reads-hint = Изберете запис за четене по-горе, за да видите подробностите.
 win-how-to-connect = Как да свържете агент
 
 ## Sign-in apps
@@ -142,4 +138,4 @@ win-installer-welcome-update =
     Ако програмата работи, първо ще бъде затворена. Акаунтите и пощата ви се запазват.
 win-installer-older-ask = Инсталирана е Inbox Classic { $installed }, която е по-нова от { $version }. Да се инсталира ли все пак по-старата версия?
 win-installer-still-running = Inbox Classic все още работи. Затворете я и опитайте отново.
-win-installer-remove-mail-ask = Искате ли да премахнете и акаунтите и локалните копия на пощата, запазени от Inbox Classic на този компютър? Пощата на сървърите се запазва.
+win-installer-remove-mail-ask = Искате ли да изтриете и локалните данни на Inbox Classic, включително акаунтите, пощата, чакащите съобщения, настройките, контактите и ключовете? Пощата на сървърите и записите в системното хранилище за идентификационни данни се запазват.

@@ -44,8 +44,8 @@ reader-downloading = Stahování zprávy…
 reader-downloading-detail = Zpráva se zde zobrazí po dokončení stahování.
 reader-downloading-size = Zpráva má velikost { $size }. Zobrazí se zde, až bude stažena.
 reader-failed = Zprávu se nepodařilo stáhnout
-reader-failed-network = K poštovnímu serveru se nepodařilo připojit ({ $reason }).
-reader-failed-sign-in = Poštovní server nepřijal přihlášení ({ $reason }). Zkontrolujte heslo nebo se znovu přihlaste v nabídce Soubor > Účty.
+reader-failed-network = Spojení s poštovním serverem se nepodařilo navázat nebo bylo přerušeno ({ $reason }).
+reader-failed-sign-in = Poštovní server nepřijal přihlášení ({ $reason }). V nastavení účtu zkontrolujte heslo nebo se znovu přihlaste.
 reader-failed-security = Nepodařilo se navázat zabezpečené spojení s poštovním serverem ({ $reason }).
 reader-failed-other = Poštovní server odpověděl: { $reason }.
 reader-retry-note = Po obnovení připojení účtu se aplikace pokusí zprávu stáhnout znovu.
@@ -103,12 +103,12 @@ bounce-mailbox-disabled-why = Adresa existuje, ale její schránka byla vypnuta 
 bounce-mailbox-disabled-do = Spojte se s danou osobou jinak a zeptejte se na adresu, kterou používá teď.
 bounce-mailbox-full = Schránka je plná
 bounce-mailbox-full-why = Ve schránce příjemce není místo pro novou poštu.
-bounce-mailbox-full-do = Pošlete zprávu znovu za několik dní nebo příjemce upozorněte jiným způsobem. Velké přílohy mohou být odmítnuty jako první.
+bounce-mailbox-full-do = Pošlete zprávu znovu za několik dní nebo příjemce upozorněte jiným způsobem. Můžete také zkusit menší přílohy.
 bounce-spam-blocked = Odmítnuto jako spam
 bounce-spam-blocked-why = Server příjemce považoval zprávu za spam.
 bounce-spam-blocked-do = Zkuste zprávu odeslat bez velkého množství odkazů, zkrácených odkazů nebo velkých příloh, které mohou působit jako spam. Pokud se odmítnutí opakuje, obraťte se na svého poskytovatele pošty.
 bounce-virus-detected = Odmítnuto kvůli viru
-bounce-virus-detected-why = Server příjemce našel ve zprávě nebo v jejích přílohách virus nebo jiný škodlivý obsah.
+bounce-virus-detected-why = Server příjemce hlásí, že ve zprávě nebo jejích přílohách našel virus či jiný škodlivý obsah.
 bounce-virus-detected-do = Zkontrolujte přílohy antivirovým programem. Některé servery odmítají všechny programy a archivy, takové soubory proto sdílejte jako odkaz.
 bounce-ip-blocklisted = Váš poštovní server je na seznamu blokovaných
 bounce-ip-blocklisted-why = Server příjemce odmítá poštu ze serveru, který odeslal vaši zprávu, protože adresa tohoto serveru je na seznamu blokovaných.
@@ -124,7 +124,7 @@ bounce-geo-blocked-why = Server příjemce nepřijímá poštu ze země nebo sí
 bounce-geo-blocked-do = Spojte se s danou osobou jinak, nebo se obraťte na svého poskytovatele pošty.
 bounce-relay-denied = Server zprávu nepředal dál
 bounce-relay-denied-why = Server odmítl zprávu doručit dál, často proto, že byla odeslána bez přihlášení nebo přes server, který tohoto příjemce neobsluhuje.
-bounce-relay-denied-do = V nabídce Soubor > Účty zkontrolujte nastavení serveru odchozí pošty a přihlašování k němu.
+bounce-relay-denied-do = V nastavení účtu zkontrolujte server odchozí pošty a přihlašování k němu.
 bounce-auth-failure = Adresu odesílatele nelze ověřit
 bounce-auth-failure-why = Server příjemce nemohl potvrdit, že zpráva opravdu přišla z vaší domény (SPF, DKIM nebo DMARC).
 bounce-auth-failure-do = Přepošlete toto oznámení tomu, kdo spravuje poštu vaší domény: její nastavení je třeba opravit. Mezitím může pomoci odesílání přes vlastní server vašeho poskytovatele.
@@ -133,7 +133,7 @@ bounce-rate-limited-why = Server příjemce dočasně omezuje počet zpráv při
 bounce-rate-limited-do = Chvíli počkejte a pošlete zprávu znovu. Pokud píšete mnoha lidem, rozdělte je do menších skupin příjemců.
 bounce-greylisting = Na chvíli pozdrženo
 bounce-greylisting-why = Server příjemce žádá neznámé odesílatele, aby to zkusili o něco později. Je to běžná ochrana proti spamu.
-bounce-greylisting-do = Nic. Poštovní servery to zkusí znovu samy a zpráva se obvykle doručí do hodiny.
+bounce-greylisting-do = Při dočasném odkladu odesílající server obvykle zkusí doručení znovu. Pokud oznámení hlásí konečné selhání, může být nutné zprávu později odeslat znovu.
 bounce-server-error = Server příjemce měl problém
 bounce-server-error-why = Server příjemce nebyl dostupný, nebo zprávu nemohl přijmout kvůli vlastnímu problému.
 bounce-server-error-do = Pošlete zprávu znovu později. Pokud se to stále nedaří, zkontrolujte, zda část adresy za znakem @ neobsahuje překlep.
@@ -330,9 +330,7 @@ downloading-messages = { $count ->
    *[other] Stahování: { $messages }...
 }
 import-put = { $count ->
-    [one] { $messages } vložena do složky { $folder }
-    [few] { $messages } vloženy do složky { $folder }
-   *[other] { $messages } vloženo do složky { $folder }
+   *[other] Zařazeno k importu: { $messages } (cíl: { $folder })
 }
 import-not-put = Tyto soubory nebyly vloženy do složky:
 
@@ -368,9 +366,9 @@ error-import-not-mail = soubor { $path } není e-mailová zpráva
 error-list-answered = server poštovní konference vrátil stav { $status }
 error-not-built = zprávu nelze sestavit
 error-outbox-waits = { $count ->
-    [one] zpráva čeká ve složce Pošta k odeslání a odešle se při příštím odeslání a přijetí
-    [few] { $count } zprávy čekají ve složce Pošta k odeslání a odešlou se při příštím odeslání a přijetí
-   *[other] { $count } zpráv čeká ve složce Pošta k odeslání a odešle se při příštím odeslání a přijetí
+    [one] zpráva zůstává ve složce Pošta k odeslání; při příštím odeslání a přijetí se aplikace pokusí odeslat ji znovu
+    [few] { $count } zprávy zůstávají ve složce Pošta k odeslání; při příštím odeslání a přijetí se aplikace pokusí odeslat je znovu
+   *[other] { $count } zpráv zůstává ve složce Pošta k odeslání; při příštím odeslání a přijetí se aplikace pokusí odeslat je znovu
 }
 error-draft-not-removed = předchozí koncept zprávy nelze odebrat ze složky Koncepty: { $reason }
 error-sent-but = zpráva byla odeslána, ale { $problem }
@@ -385,12 +383,12 @@ error-in-folder = { $folder }: { $reason }
 
 ## Sign-in apps
 
-sign-in-off-google = Google zatím aplikaci Inbox Classic neověřil, takže se přes ni mohou přihlásit jen testovací uživatelé. Použijte vlastní přihlašovací aplikaci Google nebo heslo aplikace, nebo ji zapněte v okně Přihlašovací aplikace (Soubor > Účty), pokud jste testovací uživatel.
-sign-in-off-other = Byla vypnuta v okně Přihlašovací aplikace (Soubor > Účty), kde ji lze znovu zapnout.
+sign-in-off-google = Vestavěné přihlášení ke Googlu je vypnuté. Použijte vlastní přihlašovací aplikaci nebo heslo aplikace, pokud je účet podporuje. Máte-li přístup jako testovací uživatel, můžete vestavěnou aplikaci zapnout v okně Přihlašovací aplikace, které otevřete z okna Účty.
+sign-in-off-other = Aplikace byla vypnuta v okně Přihlašovací aplikace, které otevřete z okna Účty. Tam ji lze znovu zapnout.
 sign-in-app-no-name = přihlašovací aplikace musí mít název
 sign-in-app-no-client = chybí ID klienta
 sign-in-app-no-scopes = přihlašovací aplikace potřebuje oprávnění (scopes), která dávají přístup k poště
-sign-in-app-bad-host = adresa serveru { $server } chybí nebo není platným názvem hostitele
+sign-in-app-bad-host = nastavení serveru { $server } neobsahuje platný název hostitele a port
 sign-in-app-plain = server { $server } musí používat SSL/TLS nebo STARTTLS
 sign-in-app-not-checked = vydavatel ještě nebyl ověřen
 sign-in-app-issuer-changed = vydavatel se změnil: zadejte znovu tajný kód klienta, nebo ho odeberte
@@ -439,9 +437,7 @@ day-sunday = neděle
 
 ## AI agents
 
-# review: changed
-agent-level-read = Číst poštu: prohlížet složky a zprávy a vyhledávat v nich
-# review: changed
+agent-level-read = Číst poštu: složky, seznamy zpráv, konverzace, výsledky hledání, zprávy a jejich přílohy, pravidla zpráv a vyhledávání kontaktů
 agent-level-organize = Uspořádat poštu: měnit stav přečtení, příznaky a jejich barvy, spravovat nevyžádanou poštu, přesouvat a archivovat zprávy, vytvářet a přejmenovávat složky, sledovat a ignorovat konverzace, odstraňovat zprávy přesunem do složky Odstraněná pošta a s vaším souhlasem odhlašovat odběr zpráv
 agent-level-drafts = Psát koncepty, které odešlete vy
 agent-level-send = Odesílat poštu, každou zprávu až po vašem souhlasu
@@ -485,10 +481,8 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Tuto zprávu nelze přečíst.
 agent-encrypted-original = Tato zpráva je šifrovaná: agent na ni nemůže odpovědět ani ji přeposlat, protože neumí šifrovat.
 agent-encrypted = Tato zpráva je šifrovaná. Agenti AI nemohou číst její obsah. Uživatel ji musí otevřít v aplikaci Inbox Classic.
-# review: new
-agent-too-many-changes = Příliš mnoho změn za posledních 30 dní: tento agent jich provedl tolik, kolik Inbox Classic pro jeden program uchovává v protokolu. Další bude moci provést, až budou nejstarší staré 30 dní.
-# review: new
-agent-too-many-reads = Příliš mnoho čtení za posledních 30 dní: tento agent přečetl tolik, kolik Inbox Classic pro jeden program uchovává v protokolu. Dál bude moci číst, až budou nejstarší čtení stará 30 dní.
+agent-too-many-changes = Byl dosažen limit záznamů o změnách tohoto programu za posledních 30 dní. Další změny bude moci provést, až nejstarší záznamy dosáhnou stáří 30 dní.
+agent-too-many-reads = Byl dosažen limit záznamů o čtení tohoto programu za posledních 30 dní. Dál bude moci číst, až nejstarší záznamy dosáhnou stáří 30 dní.
 list-encrypted = Šifrovaná zpráva
 agent-log-composed = Otevřena nová zpráva „{ $subject }“, abyste ji mohli dokončit
 agent-log-refused = Odeslání zprávy „{ $subject }“ nebylo schváleno
@@ -506,7 +500,7 @@ agent-log-moved = „{ $subject }“ přesunuto (cíl: { $folder })
 agent-log-junk = Označeno jako nevyžádané: „{ $subject }“
 agent-log-not-junk = Označeno jako vyžádané: „{ $subject }“
 agent-log-archived = Archivováno: „{ $subject }“
-agent-log-folder = Vytvořena složka „{ $name }“
+agent-log-folder = Požádáno o vytvoření složky „{ $name }“
 agent-log-unsubscribed = Schválili jste žádost o odhlášení odběru. Zpráva: „{ $subject }“
 agent-log-unsubscribe-failed = Odhlášení odběru se nezdařilo. Zpráva: „{ $subject }“. Důvod: { $reason }
 agent-log-unsubscribe-refused = Odhlášení odběru jste neschválili. Odesílatelé: { $senders }
@@ -519,7 +513,6 @@ agent-unsubscribe-detail = { $count ->
     [1] Inbox Classic odešle níže uvedenému rozesílacímu seznamu žádost o ukončení zasílání zpráv. Použije k tomu možnost odhlášení jedním kliknutím, kterou seznam nabízí. Nic dalšího se neodešle. Stávající zprávy se nezmění ani nepřesunou.
    *[other] Inbox Classic odešle každému z níže uvedených rozesílacích seznamů žádost o ukončení zasílání zpráv. Použije k tomu možnost odhlášení jedním kliknutím, kterou daný seznam nabízí. Nic dalšího se neodešle. Stávající zprávy se nezmění ani nepřesunou.
 }
-# review: new
 agent-log-flag-color = Označeno příznakem: „{ $subject }“. Barva: { $color ->
     [red] červená
     [orange] oranžová
@@ -529,43 +522,33 @@ agent-log-flag-color = Označeno příznakem: „{ $subject }“. Barva: { $colo
     [purple] fialová
    *[gray] šedá
 }
-# review: new
-agent-log-renamed = Složka „{ $old }“ přejmenována na „{ $name }“
-# review: new
+agent-log-renamed = Požádáno o přejmenování složky „{ $old }“ na „{ $name }“
 agent-log-watched = Zahájeno sledování konverzace „{ $subject }“
-# review: new
 agent-log-ignored = Zahájeno ignorování konverzace „{ $subject }“
-# review: new
 agent-log-unmarked = Ukončeno sledování nebo ignorování konverzace „{ $subject }“
 # the reason one change can not be taken back (agent-undo-refused-why)
-# review: new
 agent-undo-changed = zpráva byla mezitím změněna
 # one change of many messages an agent made with a search (apply_to_search), a row of the log; { $query } is the search
-# review: new
 agent-log-bulk-read = { $count ->
-    [one] Označeno jako přečtené: 1 zpráva (hledání: { $query })
-    [few] Označeno jako přečtené: { $count } zprávy (hledání: { $query })
-   *[other] Označeno jako přečtené: { $count } zpráv (hledání: { $query })
+    [one] 1 zpráva označena za přečtenou (hledání: { $query })
+    [few] { $count } zprávy označeny za přečtené (hledání: { $query })
+   *[other] { $count } zpráv označeno za přečtené (hledání: { $query })
 }
-# review: new
 agent-log-bulk-unread = { $count ->
-    [one] Označeno jako nepřečtené: 1 zpráva (hledání: { $query })
-    [few] Označeno jako nepřečtené: { $count } zprávy (hledání: { $query })
-   *[other] Označeno jako nepřečtené: { $count } zpráv (hledání: { $query })
+    [one] 1 zpráva označena za nepřečtenou (hledání: { $query })
+    [few] { $count } zprávy označeny za nepřečtené (hledání: { $query })
+   *[other] { $count } zpráv označeno za nepřečtené (hledání: { $query })
 }
-# review: new
 agent-log-bulk-flagged = { $count ->
-    [one] Označeno příznakem: 1 zpráva (hledání: { $query })
-    [few] Označeno příznakem: { $count } zprávy (hledání: { $query })
+    [one] Označena příznakem: 1 zpráva (hledání: { $query })
+    [few] Označeny příznakem: { $count } zprávy (hledání: { $query })
    *[other] Označeno příznakem: { $count } zpráv (hledání: { $query })
 }
-# review: new
 agent-log-bulk-unflagged = { $count ->
     [one] Zrušen příznak: 1 zpráva (hledání: { $query })
     [few] Zrušen příznak: { $count } zprávy (hledání: { $query })
    *[other] Zrušen příznak: { $count } zpráv (hledání: { $query })
 }
-# review: new
 agent-log-bulk-color = Označeno příznakem: { $count ->
     [one] 1 zpráva
     [few] { $count } zprávy
@@ -579,38 +562,32 @@ agent-log-bulk-color = Označeno příznakem: { $count ->
     [purple] fialová
    *[gray] šedá
 }
-# review: new
 agent-log-bulk-moved = { $count ->
-    [one] Přesunuto: 1 zpráva (cíl: { $folder }, hledání: { $query })
-    [few] Přesunuto: { $count } zprávy (cíl: { $folder }, hledání: { $query })
+    [one] Přesunuta: 1 zpráva (cíl: { $folder }, hledání: { $query })
+    [few] Přesunuty: { $count } zprávy (cíl: { $folder }, hledání: { $query })
    *[other] Přesunuto: { $count } zpráv (cíl: { $folder }, hledání: { $query })
 }
-# review: new
 agent-log-bulk-archived = { $count ->
-    [one] Archivováno: 1 zpráva (hledání: { $query })
-    [few] Archivováno: { $count } zprávy (hledání: { $query })
+    [one] Archivována: 1 zpráva (hledání: { $query })
+    [few] Archivovány: { $count } zprávy (hledání: { $query })
    *[other] Archivováno: { $count } zpráv (hledání: { $query })
 }
-# review: new
 agent-log-bulk-junk = { $count ->
-    [one] Označeno jako nevyžádané: 1 zpráva (hledání: { $query })
-    [few] Označeno jako nevyžádané: { $count } zprávy (hledání: { $query })
-   *[other] Označeno jako nevyžádané: { $count } zpráv (hledání: { $query })
+    [one] 1 zpráva označena za nevyžádanou (hledání: { $query })
+    [few] { $count } zprávy označeny za nevyžádané (hledání: { $query })
+   *[other] { $count } zpráv označeno za nevyžádané (hledání: { $query })
 }
-# review: new
 agent-log-bulk-not-junk = { $count ->
-    [one] Označeno jako vyžádané: 1 zpráva (hledání: { $query })
-    [few] Označeno jako vyžádané: { $count } zprávy (hledání: { $query })
-   *[other] Označeno jako vyžádané: { $count } zpráv (hledání: { $query })
+    [one] 1 zpráva označena za vyžádanou (hledání: { $query })
+    [few] { $count } zprávy označeny za vyžádané (hledání: { $query })
+   *[other] { $count } zpráv označeno za vyžádané (hledání: { $query })
 }
-# review: new
 agent-log-bulk-deleted = { $count ->
-    [one] Odstraněno: 1 zpráva (hledání: { $query })
-    [few] Odstraněno: { $count } zprávy (hledání: { $query })
-   *[other] Odstraněno: { $count } zpráv (hledání: { $query })
+    [one] Do složky Odstraněná pošta přesunuta: 1 zpráva (hledání: { $query })
+    [few] Do složky Odstraněná pošta přesunuty: { $count } zprávy (hledání: { $query })
+   *[other] Do složky Odstraněná pošta přesunuto: { $count } zpráv (hledání: { $query })
 }
 # Undo Everything Since in the AI Agents window: how far back it reaches
-# review: new
 agent-undo-span = { $span ->
     [quarter] Za posledních 15 minut
     [hour] Za poslední hodinu
@@ -620,143 +597,113 @@ agent-undo-span = { $span ->
    *[all] Za posledních 30 dní
 }
 # the question before it takes back what a program did in the span chosen
-# review: new
 agent-undo-since-question = { $count ->
     [0] Program { $program } v této době neprovedl žádné změny, které lze vrátit zpět.
     [one] Vrátit zpět změnu, kterou program { $program } v této době provedl?
     [few] Vrátit zpět { $count } změny, které program { $program } v této době provedl?
    *[other] Vrátit zpět { $count } změn, které program { $program } v této době provedl?
 }
-# review: new
-agent-undo-since-detail = Zprávy se vrátí do složek, odkud přišly, stav přečtení a příznaky budou jako dřív a zprávy, které dosud čekají ve složce Pošta k odeslání, se odstraní. Co jste mezitím změnili vy nebo server, zůstane beze změny.
+agent-undo-since-detail = Pokud to stav zpráv dovolí, vrátí se do původních složek, obnoví se stav přečtení a příznaky a odstraní se zprávy, které ještě čekají ve složce Pošta k odeslání. Některé pozdější změny mohou vrácení zabránit. Zrušení příznaku může odstranit i barvu, kterou jste mezitím změnili.
 # what taking back did, then a line for each kind of message it left as it is
-# review: new
 agent-undo-done = { $count ->
     [0] Nic nebylo vráceno zpět.
     [one] Vrácena zpět 1 změna.
     [few] Vráceny zpět { $count } změny.
    *[other] Vráceno zpět { $count } změn.
 }
-# review: new
 agent-undo-left-gone = { $count ->
     [one] 1 zpráva už nebyla tam, kam ji změna přesunula.
     [few] { $count } zprávy už nebyly tam, kam je změna přesunula.
    *[other] { $count } zpráv už nebylo tam, kam je změna přesunula.
 }
-# review: new
 agent-undo-left-changed = { $count ->
     [one] 1 zpráva byla mezitím změněna, vámi nebo na serveru, a zůstala beze změny.
     [few] { $count } zprávy byly mezitím změněny, vámi nebo na serveru, a zůstaly beze změny.
    *[other] { $count } zpráv bylo mezitím změněno, vámi nebo na serveru, a zůstalo beze změny.
 }
-# review: new
 agent-undo-left-sent = { $count ->
-    [one] 1 zpráva už opustila složku Pošta k odeslání.
-    [few] { $count } zprávy už opustily složku Pošta k odeslání.
-   *[other] { $count } zpráv už opustilo složku Pošta k odeslání.
+    [one] 1 zpráva už nebyla ve složce Pošta k odeslání.
+    [few] { $count } zprávy už nebyly ve složce Pošta k odeslání.
+   *[other] { $count } zpráv už nebylo ve složce Pošta k odeslání.
 }
-# review: new
 agent-undo-left-impossible = { $count ->
     [one] 1 změnu nelze vrátit zpět.
     [few] { $count } změny nelze vrátit zpět.
    *[other] { $count } změn nelze vrátit zpět.
 }
 # the Send question of an agent's answer to a calendar invitation: what it answers, and when the event is
-# review: new
 agent-invitation-reply = { $response ->
-    [accept] Tato zpráva přijímá pozvánku „{ $summary }“ ({ $when }).
-    [tentative] Tato zpráva předběžně přijímá pozvánku „{ $summary }“ ({ $when }).
-   *[decline] Tato zpráva odmítá pozvánku „{ $summary }“ ({ $when }).
-} Kalendář organizátora ji zaznamená. Vaše odpověď na pozvánku se změní až po odeslání zprávy.
+    [accept] Touto zprávou přijmete pozvánku „{ $summary }“ ({ $when }).
+    [tentative] Touto zprávou předběžně přijmete pozvánku „{ $summary }“ ({ $when }).
+   *[decline] Touto zprávou odmítnete pozvánku „{ $summary }“ ({ $when }).
+} Odpověď je určena kalendáři organizátora. Stav pozvánky v Inbox Classic se změní po úspěšném odeslání, bez potvrzení od kalendáře organizátora.
 # the subject of an answer to an invitation, as calendar programs write it
-# review: new
 invitation-reply-subject = { $response ->
     [accept] Přijato: { $summary }
     [tentative] Předběžně přijato: { $summary }
    *[decline] Odmítnuto: { $summary }
 }
 # the text of an answer to an invitation; { $name } is the user's name, or address
-# review: new
 invitation-reply-text = { $response ->
     [accept] { $name }: tato pozvánka byla přijata.
     [tentative] { $name }: tato pozvánka byla předběžně přijata.
    *[decline] { $name }: tato pozvánka byla odmítnuta.
 }
 # what a program read in an hour, a row of the log: "Read 14 messages and searched 3 times" (joined by agent-can-list)
-# review: new
 agent-reads-messages = { $count ->
     [one] přečtena 1 zpráva
     [few] přečteny { $count } zprávy
    *[other] přečteno { $count } zpráv
 }
-# review: new
 agent-reads-attachments = { $count ->
-    [one] otevřena 1 příloha
-    [few] otevřeny { $count } přílohy
-   *[other] otevřeno { $count } příloh
+    [one] přečtena 1 příloha
+    [few] přečteny { $count } přílohy
+   *[other] přečteno { $count } příloh
 }
-# review: new
 agent-reads-searches = { $count ->
     [one] 1 vyhledávání
     [few] { $count } vyhledávání
    *[other] { $count } vyhledávání
 }
-# review: new
 agent-reads-lists = { $count ->
     [one] 1 zobrazení seznamu zpráv
     [few] { $count } zobrazení seznamů zpráv
    *[other] { $count } zobrazení seznamů zpráv
 }
 # each read under that row
-# review: new
 agent-read-message = Přečteno: „{ $subject }“
-# review: new
 agent-read-conversation = { $count ->
     [one] Přečtena konverzace „{ $subject }“ (1 zpráva)
     [few] Přečtena konverzace „{ $subject }“ ({ $count } zprávy)
    *[other] Přečtena konverzace „{ $subject }“ ({ $count } zpráv)
 }
-# review: new
-agent-read-attachment = Otevřena příloha „{ $name }“ ze zprávy „{ $subject }“
-# review: new
+agent-read-attachment = Přečtena příloha „{ $name }“ ze zprávy „{ $subject }“
 agent-read-search = { $count ->
     [one] Hledáno „{ $query }“: 1 zpráva
     [few] Hledáno „{ $query }“: { $count } zprávy
    *[other] Hledáno „{ $query }“: { $count } zpráv
 }
-# review: new
 agent-read-people = Hledány kontakty začínající na „{ $query }“
-# review: new
 agent-read-list = { $count ->
-    [one] Zobrazena 1 zpráva ve složce { $folder }
-    [few] Zobrazeny { $count } zprávy ve složce { $folder }
-   *[other] Zobrazeno { $count } zpráv ve složce { $folder }
+    [one] Zobrazena 1 položka seznamu „{ $folder }“
+    [few] Zobrazeny { $count } položky seznamu „{ $folder }“
+   *[other] Zobrazeno { $count } položek seznamu „{ $folder }“
 }
-# review: new
 agent-read-changes = { $count ->
     [one] Zobrazena 1 nová zpráva
     [few] Zobrazeny { $count } nové zprávy
    *[other] Zobrazeno { $count } nových zpráv
 }
 # the programs started from a terminal app, which share one access: in the list of programs and the question when one connects
-# review: new
 agent-terminal-programs-mac = Programy spuštěné z aplikace { $terminal }
-# review: new
 agent-terminal-programs-windows = Programy spuštěné z terminálu ({ $terminal })
-# review: new
 agent-terminal-programs-linux = Programy spuštěné z terminálu ({ $terminal })
 # one of them, as the questions to send or unsubscribe name it: "A program started from Terminal wants to send this message"
-# review: new
 agent-terminal-program-mac = Program spuštěný z aplikace { $terminal }
-# review: new
 agent-terminal-program-windows = Program spuštěný z terminálu ({ $terminal })
-# review: new
 agent-terminal-program-linux = Program spuštěný z terminálu ({ $terminal })
-# review: new
 agent-connect-title-terminal = { $programs } chtějí používat vaši poštu
-# review: new
-agent-connect-terminal-detail = Všichni agenti AI, které spustíte z tohoto terminálu, sdílejí přístup, který zde povolíte. Chcete-li některému z nich dát vlastní přístup, přidejte v nastavení MCP agenta do jeho argumentů --name a název podle svého výběru.
-# review: new
+agent-connect-terminal-detail = Agenti spuštění ze stejného rozpoznaného terminálového programu sdílejí oprávnění, která zde udělíte. Pro samostatná oprávnění přidejte --name a zvolený název k argumentům Inbox Classic v nastavení MCP agenta. Název neověřuje totožnost programu.
 agent-connect-claimed = Program se představil jako { $claimed }. Inbox Classic ověřil, který program ho spustil: { $program }.
 
 ## Keys
@@ -808,7 +755,7 @@ pgp-key-expired = Platnost vypršela { $date }
 pgp-key-revoked = Odvolaný
 pgp-key-revoked-why = Odvolaný: { $reason }
 pgp-key-not-valid = Neplatný
-pgp-key-locked = Tento soukromý klíč nelze použít, protože v úložišti { $store } chybí klíč, který jej chrání. Obnovte soukromý klíč importem jeho zálohy.
+pgp-key-locked = Soukromý klíč nelze otevřít, protože jeho ochranný klíč není dostupný v úložišti { $store }. Nejdříve ověřte, zda je systémové úložiště dostupné a odemčené. Pokud byl ochranný klíč ztracen, obnovte soukromý klíč ze zálohy.
 pgp-source-own = Vytvořen v aplikaci Inbox Classic
 pgp-source-file = Importován ze souboru
 pgp-source-paste = Vložen
@@ -821,7 +768,7 @@ pgp-error-no-store = Soukromé klíče chrání úložiště { $store }, které 
 pgp-error-wrong-passphrase = Heslová fráze není správná.
 pgp-error-not-a-key = Toto není klíč OpenPGP.
 pgp-error-too-large = Klíč je příliš velký.
-pgp-error-unusable = Klíč používá zastaralé nebo slabé šifrovací postupy a nelze jej použít.
+pgp-error-unusable = Klíč nelze použít: chybí vhodný klíč pro podpis nebo šifrování, případně používá nepodporované kryptografické postupy.
 pgp-imported-private = { $count ->
     [one] Váš soukromý klíč byl importován.
     [few] Byly importovány { $count } soukromé klíče.
@@ -842,13 +789,13 @@ pgp-pending = Pro { $address } byl { $date } nalezen jiný klíč.
 ## Reading signed and encrypted mail (protect.rs)
 pgp-part-verified = Digitální podpis: { $signer }, vlastnictví klíče ověřeno
 pgp-part-signed = Digitální podpis: { $signer } (vlastnictví klíče neověřeno)
-pgp-part-other = Digitální podpis: { $signer }, podpis není od odesílatele
+pgp-part-other = Digitální podpis: { $signer }, podpis nepotvrzuje uvedeného odesílatele
 pgp-part-unknown-key = Digitálně podepsáno, ale podpisový klíč není známý
 pgp-part-not-signed = Bez digitálního podpisu
 pgp-part-not-checked = Digitální podpis nebyl zkontrolován
 pgp-part-encrypted = Šifrováno. { $signature }
 pgp-part-no-key = Šifrováno pro klíč, který nemáte
-pgp-part-changed = Šifrovaná část byla cestou změněna a nezobrazuje se
+pgp-part-changed = Celistvost šifrované části nelze ověřit, proto se nezobrazuje
 pgp-part-unprotected = Šifrováno bez ochrany proti změnám, nezobrazuje se
 pgp-part-broken = Šifrovanou část nelze přečíst
 pgp-why-mismatch = Digitální podpis neodpovídá tomuto textu
@@ -867,7 +814,7 @@ pgp-error-missing-keys = { $count ->
     [one] Chybí klíč pro šifrování zpráv příjemci: { $addresses }.
    *[other] Chybějí klíče pro šifrování zpráv těmto příjemcům: { $addresses }.
 }
-pgp-error-encrypted-quote = Tato zpráva cituje nebo přeposílá šifrovanou zprávu, a lze ji proto odeslat jen šifrovaně. Zapněte Šifrovat, nebo odeberte citovaný text.
+pgp-error-encrypted-quote = Zpráva obsahuje text, obrázky nebo přílohy ze šifrované zprávy a lze ji odeslat jen zašifrovanou. Zapněte „Šifrovat“ nebo tento obsah odeberte.
 pgp-error-protect = Zprávu nelze podepsat ani zašifrovat: { $reason }
 pgp-found-keys = Klíče nalezeny pro adresy: { $addresses }.
 pgp-found-none = Pro { $addresses } nebyl nalezen žádný klíč. Požádejte o zaslání veřejného klíče.
@@ -876,7 +823,7 @@ pgp-find-unavailable = Klíče teď nelze vyhledat: { $error }
 pgp-publish-pending = Služba keys.openpgp.org poslala potvrzovací odkaz na tyto adresy: { $addresses }. Potvrďte každou adresu, aby podle ní bylo možné váš klíč vyhledat.
 pgp-publish-done = Váš klíč je zveřejněn na keys.openpgp.org pro { $addresses }.
 pgp-publish-failed = Klíč nelze zveřejnit: { $error }
-pgp-keyserver-off = Vyhledávání klíčů na serveru keys.openpgp.org je vypnuté v nastavení { $settings }.
+pgp-keyserver-off = Vyhledávání klíčů na keys.openpgp.org je vypnuté. Nastavení: { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
 pgp-compose-encrypted = { $count ->
     [one] Při odeslání se zpráva zašifruje a podepíše. Obsah si můžete přečíst jen vy a { $addresses }.
@@ -898,11 +845,11 @@ pgp-compose-sign-tip-encrypted = Šifrované zprávy se při odeslání vždy po
 pgp-compose-encrypt-tip = Zašifrovat obsah zprávy při odeslání, abyste si ho mohli přečíst jen vy a příjemci
 pgp-compose-make-key = Pro adresu { $address } zatím nemáte nastavený vlastní klíč. Chcete ho nyní vytvořit? Umožní vám podepisovat a šifrovat zprávy.
 pgp-compose-key-unusable = Váš klíč pro adresu { $address } nelze použít. Důvod: { $state }
-    Otevřete „Šifrovací klíče“ a importujte zálohu tohoto klíče nebo vytvořte nový.
+    Otevřete „Šifrovací klíče“ a zkontrolujte jeho stav. Podle potřeby importujte zálohu nebo vytvořte nový klíč.
 pgp-compose-encrypt-off-quote = Zpráva stále obsahuje text, obrázky nebo přílohy ze šifrované zprávy. Před odesláním bez šifrování tento obsah odeberte. Chcete přesto vypnout šifrování?
 pgp-compose-encrypt-off-reply = Původní zpráva byla šifrovaná. Pokud odpověď nebo přeposlanou zprávu odešlete bez šifrování, budou mít poštovní servery přístup k jejímu obsahu. Chcete vypnout šifrování?
-pgp-recipient-verified = Klíč ověřen
-pgp-recipient-found = Klíč neověřen
+pgp-recipient-verified = Vlastnictví klíče ověřeno
+pgp-recipient-found = Vlastnictví klíče neověřeno
 pgp-recipient-own = Váš klíč
 pgp-recipient-looking = Hledá se klíč...
 pgp-recipient-missing = Žádný klíč
@@ -915,7 +862,6 @@ pgp-recipients-intro-missing = { $count ->
    *[other] Pro { $count } příjemců chybí použitelné klíče. Najděte jejich klíče nebo tyto příjemce odeberte ze zprávy. Bez šifrování lze odeslat jen zprávu, která neobsahuje text, obrázky ani přílohy ze šifrovaných zpráv.
 }
 pgp-details-part = Část { $number }: { $label }
-# review: new
 attachment-from-part = Z části { $number }: { $label }
 pgp-details-signed = Digitálně podepsáno: { $when }. Klíč: { $key }
 pgp-details-unknown-key = Podepsáno klíčem { $key }, který nemáte
@@ -924,19 +870,16 @@ pgp-details-for = Šifrováno pro klíče: { $keys }
 pgp-details-plain = Bez digitálního podpisu a šifrování
 pgp-bar-parts = Tato zpráva má více částí ({ $count }): { $list }. U každé části je uvedeno, jak je chráněna.
 pgp-bar-count-verified = ověřené: { $count }
-# review: new
 pgp-bar-count-encrypted-signed = { $count ->
     [one] 1 šifrovaná a podepsaná
     [few] { $count } šifrované a podepsané
    *[other] { $count } šifrovaných a podepsaných
 }
-# review: new
 pgp-bar-count-encrypted = { $count ->
     [one] 1 šifrovaná
     [few] { $count } šifrované
    *[other] { $count } šifrovaných
 }
-# review: new
 pgp-bar-count-signed = { $count ->
     [one] 1 podepsaná
     [few] { $count } podepsané
@@ -1014,17 +957,17 @@ setup-account-signs-in-again = Po importu se k němu znovu přihlásíte.
 setup-account-here = Tady už je nastaven, proto se přeskočí.
 setup-account-no-app = Účet používá přihlašovací aplikaci { $app }, která zde není nastavená. Importujte také přihlašovací aplikace.
 setup-invalid-address = „{ $address }“ není e-mailová adresa.
-setup-invalid-server = Server { $server } nemá použitelný název nebo port.
+setup-invalid-server = Server { $server } nemá platný název, port nebo nastavení zabezpečení.
 setup-invalid-user = Nemá uživatelské jméno.
-setup-invalid-sign-in = Přihlašuje se způsobem, který Inbox Classic nezná.
+setup-invalid-sign-in = Nastavení přihlášení nelze v Inbox Classic použít.
 setup-error-empty = Soubor je prázdný.
-setup-error-too-large = Soubor je pro import nastavení aplikace Inbox Classic příliš velký.
+setup-error-too-large = Soubor s nastavením překračuje povolenou velikost.
 setup-error-not-setup = Tento soubor neobsahuje nastavení aplikace Inbox Classic.
 setup-error-damaged = Soubor s nastavením je poškozený a nelze ho přečíst.
 setup-error-newer = Toto nastavení uložila novější verze aplikace Inbox Classic ({ $version }). Aktualizujte aplikaci a pak nastavení importujte znovu.
 setup-error-needs-passphrase = Toto nastavení je chráněno heslovou frází. Zadejte heslovou frázi, se kterou bylo uloženo.
 setup-error-wrong-passphrase = To není heslová fráze, se kterou bylo toto nastavení uloženo.
-setup-error-changed = Soubor s nastavením byl po uložení změněn nebo poškozen, a proto ho nelze importovat.
+setup-error-changed = Celistvost souboru s nastavením nelze ověřit. Soubor mohl být změněn nebo poškozen, proto jej nelze importovat.
 setup-error-read = Soubor s nastavením nelze přečíst: { $error }
 setup-error-write = Nastavení nelze uložit: { $error }
 setup-error-no-parts = Zvolte alespoň jednu část.
@@ -1091,14 +1034,14 @@ setup-skipped-rules = { $count ->
    *[other] { $count } pravidel zpráv už tady je.
 }
 setup-skipped-rules-account = { $count ->
-    [one] 1 pravidlo zpráv patří k účtu, který tady není, proto bylo přeskočeno.
-    [few] { $count } pravidla zpráv patří k účtům, které tady nejsou, proto byla přeskočena.
-   *[other] { $count } pravidel zpráv patří k účtům, které tady nejsou, proto bylo přeskočeno.
+    [one] Přeskočeno 1 pravidlo, protože používá účet, který zde není nastavený.
+    [few] Přeskočena { $count } pravidla, protože používají účty, které zde nejsou nastavené.
+   *[other] Přeskočeno { $count } pravidel, protože používají účty, které zde nejsou nastavené.
 }
 setup-rules-waiting = { $count ->
-    [one] 1 pravidlo zpráv přesouvá zprávy do složky, která se objeví po synchronizaci jejího účtu.
-    [few] { $count } pravidla zpráv přesouvají zprávy do složek, které se objeví po synchronizaci jejich účtů.
-   *[other] { $count } pravidel zpráv přesouvá zprávy do složek, které se objeví po synchronizaci jejich účtů.
+    [one] 1 pravidlo čeká na nalezení cílové složky při synchronizaci účtu.
+    [few] { $count } pravidla čekají na nalezení cílových složek při synchronizaci účtů.
+   *[other] { $count } pravidel čeká na nalezení cílových složek při synchronizaci účtů.
 }
 setup-added-trusted-senders = { $count ->
     [one] Přidán 1 důvěryhodný odesílatel.
@@ -1108,7 +1051,7 @@ setup-added-trusted-senders = { $count ->
 setup-nothing = Nic nebylo importováno.
 setup-account-servers = { $imap } a { $smtp } ({ $signin })
 setup-file-name = Nastavení a účty Inbox Classic
-setup-skipped-unreachable = Přihlašovací aplikace { $name } byla přeskočena, protože její služba nebyla dostupná. Přidejte ji znovu v okně Přihlašovací aplikace.
+setup-skipped-unreachable = Přeskočená položka: { $name }. Přihlašovací službu se nepodařilo ověřit. Nastavte potřebnou aplikaci v okně Přihlašovací aplikace a zkuste to znovu.
 attachment-runs-programs = Soubor „{ $name }“ může spouštět programy, proto ho Inbox Classic neotevře. Uložte ho a otevřete ho sami, pokud důvěřujete jeho původu.
 attachment-decrypted-note = Tato příloha pochází ze šifrované zprávy. Při otevření uloží Inbox Classic nešifrovanou kopii do dočasné složky vašeho uživatelského účtu. Při spuštění aplikace se odstraní kopie starší než jeden den.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
@@ -1145,52 +1088,32 @@ undone-flags = { $count ->
 
 ## Previews of attachments: the pictures and PDF files shown in a message
 
-# review: new
 preview-pdf-option = Zobrazovat soubory PDF ve zprávách
-# review: new
 preview-pdf-off = Soubory PDF se ve zprávách nezobrazují.
-# review: new
-preview-pdf-off-crashed = Soubor PDF ukončil Inbox Classic během zobrazení, proto se soubory PDF ve zprávách už nezobrazují. Obrázky ano. Chcete-li soubory PDF znovu zobrazovat, zapněte { $option } v { $settings }.
-# review: new
+preview-pdf-off-crashed = Inbox Classic se ukončil při vytváření náhledu souboru, proto se soubory PDF ve zprávách už nezobrazují. Obrázky se zobrazují dál. Chcete-li náhledy PDF obnovit, zapněte { $option } v { $settings }.
 preview-pdf-details = { $count ->
     [one] 1 stránka, { $size }
     [few] { $count } stránky, { $size }
-    [many] { $count } stránky, { $size }
    *[other] { $count } stránek, { $size }
 }
-# review: new
 preview-page-alt = { $name }, stránka { $page } z { $count }
-# review: new
 preview-more-pages = { $count ->
     [one] Otevřete soubor a uvidíte stránku
     [few] Otevřete soubor a uvidíte všechny { $count } stránky
-    [many] Otevřete soubor a uvidíte všech { $count } stránky
    *[other] Otevřete soubor a uvidíte všech { $count } stránek
 }
-# review: new
 preview-more-files = { $count ->
     [one] Další 1 soubor je v seznamu nahoře
     [few] Další { $count } soubory jsou v seznamu nahoře
-    [many] Dalších { $count } souboru je v seznamu nahoře
    *[other] Dalších { $count } souborů je v seznamu nahoře
 }
-# review: new
 preview-tile-downloading = Stahování…
-# review: new
 preview-tile-preparing = Připravuje se…
-# review: new
-preview-tile-format = Obrázky { $format } se zatím nezobrazují
-# review: new
+preview-tile-format = Obrázky ve formátu { $format } se zatím nezobrazují
 preview-tile-password = Chráněno heslem: otevřete soubor a zadejte heslo
-# review: new
-preview-tile-too-large = Příliš velké k zobrazení
-# review: new
+preview-tile-too-large = Překročen limit pro náhled
 preview-tile-unreadable = Nelze zobrazit
-# review: new
 preview-tile-timed-out = Zobrazení trvalo příliš dlouho
-# review: new
-preview-tile-crashed = Nezobrazeno: tento soubor jednou ukončil Inbox Classic
-# review: new
+preview-tile-crashed = Nezobrazeno: předchozí vytváření náhledu se přerušilo nebo přestalo reagovat
 preview-tile-off = Nezobrazeno do příštího spuštění Inbox Classic
-# review: new
 preview-not-printed = { $name } ({ $details }) se netiskne. Chcete-li jej vytisknout, otevřete jej.

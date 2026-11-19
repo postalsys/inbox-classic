@@ -150,9 +150,9 @@
       kautta.
     </p>
     <p xml:lang="sv">
-      Inbox Classic läser och skriver e-post med mapparna till vänster, meddelandena överst och meddelandet nedanför,
-      som e-postprogram brukade se ut. Det fungerar med alla IMAP- och SMTP-konton och loggar in på Outlook.com och
-      Microsoft 365 via webbläsaren.
+      Med Inbox Classic kan du läsa och skriva e-post i ett klassiskt gränssnitt med mappar till vänster,
+      meddelandelistan överst och det valda meddelandet nedanför. Programmet stöder konton med IMAP och SMTP och
+      inloggning via webbläsaren för Outlook.com och Microsoft 365.
     </p>
     <p xml:lang="tr">
       Inbox Classic, alışılmış e-posta düzenini sunar: solda klasörler, üstte ileti listesi, altta okuma bölmesi. IMAP
@@ -191,7 +191,7 @@
       <li xml:lang="cs">Zprávy se zobrazují bez skriptů a dalšího nebezpečného obsahu. Obrázky z internetu se stahují jen s vaším svolením</li>
       <li xml:lang="cs">Vyhledávání v předmětech, odesílatelích, příjemcích, názvech příloh a textu zpráv s podporou operátorů známých z Gmailu</li>
       <li xml:lang="cs">Starší zprávy citované v odpovědích se sbalí a můžete je znovu rozbalit</li>
-      <li xml:lang="cs">Staženou poštu lze číst i bez připojení. Hesla jsou uložena v systémové klíčence</li>
+      <li xml:lang="cs">Staženou poštu lze číst i bez připojení. Přihlašovací údaje se ve výchozím nastavení uchovávají v systémovém úložišti tajných údajů</li>
       <li xml:lang="da">Meddelelser renses for scripts og andet aktivt indhold. Billeder fra internettet hentes kun med din tilladelse</li>
       <li xml:lang="da">Søg i emner, afsendere, modtagere, navne på vedhæftede filer og meddelelsestekst med søgeoperatorer som i Gmail</li>
       <li xml:lang="da">Citerede tidligere meddelelser foldes sammen i svar</li>
@@ -199,7 +199,7 @@
       <li xml:lang="de">Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen</li>
       <li xml:lang="de">Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail</li>
       <li xml:lang="de">Zitierte Nachrichten in Antworten werden eingeklappt</li>
-      <li xml:lang="de">Heruntergeladene E-Mails lassen sich auch offline lesen; Kennwörter werden in Ihrem Schlüsselbund gespeichert</li>
+      <li xml:lang="de">Heruntergeladene E-Mails lassen sich auch offline lesen; Anmeldedaten werden standardmäßig im Systemschlüsselbund gespeichert</li>
       <li xml:lang="et">Kirju kuvatakse ilma skriptideta ning veebipilte laaditakse ainult teie loal</li>
       <li xml:lang="et">Otsige teema, saatjate, adressaatide, manuste nimede ja kirja sisu järgi, kasutades ka Gmaili otsinguoperaatoreid</li>
       <li xml:lang="et">Vastustes on varasemate kirjade tsitaadid kokku ahendatud</li>
@@ -272,10 +272,10 @@
       <li xml:lang="fi">Haku kattaa aiheen, lähettäjät, vastaanottajat, liitteiden nimet ja viestitekstin sekä tukee Gmailin hakuoperaattoreita</li>
       <li xml:lang="fi">Vastausten lainaukset supistetaan, ja ne voi avata tarvittaessa</li>
       <li xml:lang="fi">Ladattuja viestejä voi lukea ilman verkkoyhteyttä. Salasanat säilytetään järjestelmän avainnipussa</li>
-      <li xml:lang="sv">Varje meddelande visas rensat, utan skript, och bilder från internet bara när du tillåter det</li>
-      <li xml:lang="sv">En sökning som hittar ord i ämnet, personerna, filnamnen och texten, med Gmails operatorer</li>
-      <li xml:lang="sv">Svar fäller ihop de tidigare meddelanden som de citerar</li>
-      <li xml:lang="sv">E-posten går att läsa offline; lösenorden förvaras i din nyckelring</li>
+      <li xml:lang="sv">Meddelanden visas utan skript. Du bestämmer när bilder från internet får hämtas</li>
+      <li xml:lang="sv">Sök i ämnen, avsändare, mottagare, bilagenamn och meddelandetext med sökvillkor som liknar Gmails</li>
+      <li xml:lang="sv">Citerade meddelanden fälls ihop i svar så att din egen text får plats</li>
+      <li xml:lang="sv">Hämtad e-post kan läsas utan internetanslutning. Inloggningsuppgifter sparas normalt i systemets nyckelring</li>
       <li xml:lang="tr">İletiler, betikler ve güvenli olmayan içerikler temizlenerek gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir</li>
       <li xml:lang="tr">Konularda, gönderenlerde, alıcılarda, ek adlarında ve ileti metninde arama yapın; Gmail tarzı arama ifadeleriyle sonuçları daraltın</li>
       <li xml:lang="tr">Yanıtlardaki önceki iletiler, gerektiğinde açılabilecek şekilde gizlenir</li>
@@ -287,7 +287,7 @@
       <li xml:lang="bg">Съобщенията се показват без скриптове, а изображенията от интернет се изтеглят само с ваше разрешение</li>
       <li xml:lang="bg">Търсене в темите, подателите, получателите, имената на прикачените файлове и текста на съобщенията с операторите на Gmail</li>
       <li xml:lang="bg">Цитираният текст от по-ранни съобщения е свит и може да се разгъне при нужда</li>
-      <li xml:lang="bg">Изтеглената поща е достъпна и без връзка с интернет; паролите се пазят в системния ключодържател</li>
+      <li xml:lang="bg">Изтеглената поща е достъпна и без връзка с интернет; данните за влизане по подразбиране се пазят в системното хранилище за тайни</li>
       <li xml:lang="ru">Сообщения отображаются без скриптов, а изображения из интернета загружаются только с вашего разрешения</li>
       <li xml:lang="ru">Поиск по темам и тексту сообщений, именам и адресам отправителей и получателей, а также именам файлов с поддержкой операторов Gmail</li>
       <li xml:lang="ru">Предыдущие сообщения в ответах отображаются в виде свернутых цитат</li>

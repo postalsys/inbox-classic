@@ -1,13 +1,13 @@
 <h1>Odkazy, skripty a přílohy</h1>
 <p class="summary">Jak Inbox Classic brání zprávě, aby sama spouštěla kód nebo otevírala stránky.</p>
 <ul>
-    <li><b>Skripty</b> ve zprávách se nikdy nespustí. Inbox Classic každou zprávu před zobrazením vyčistí a podokno čtení nemůže spouštět kód.</li>
-    <li><b>Odkazy</b> se otevírají ve webovém prohlížeči, nikdy uvnitř Inbox Classic. Zpráva nemůže sama otevřít stránku ani okno.</li>
-    <li><b>Přílohy</b> se před otevřením uloží do dočasné složky a otevřou se v příslušném externím programu. Rizikové typy souborů Inbox Classic přímo neotevírá. Názvy souborů se při ukládání upraví tak, aby neobsahovaly zavádějící znaky.</li>
+    <li><b>Skripty</b> ve zprávách se nikdy nespustí. Inbox Classic každou zprávu před zobrazením vyčistí a odstraní z ní skripty a aktivní obsah. Vlastní skripty aplikace tím nejsou dotčeny.</li>
+    <li><b>Webové odkazy</b> se otevírají v prohlížeči. E-mailové odkazy otevřou okno pro psaní zprávy. Zpráva nemůže sama otevřít stránku ani okno.</li>
+    <li><b>Přílohy</b> se před otevřením uloží do dočasné složky a otevřou se v příslušném externím programu. Rozpoznané spustitelné a aktivní typy souborů Inbox Classic přímo neotevírá. Názvy souborů se při ukládání upraví tak, aby neobsahovaly zavádějící znaky.</li>
     <li><b>Odhlášení odběru</b> nejprve vysvětlí další krok a vyžádá si potvrzení.</li>
 </ul>
 <aside class="warning">Než zadáte heslo na stránce, na kterou jste se dostali ze zprávy, zkontrolujte adresu v prohlížeči. Zpráva může ukazovat jednu adresu a odkazovat na jinou.</aside>
-<p>Když píšete zprávu, stavový řádek ukazuje, kam vede odkaz u kurzoru, takže jej můžete před odesláním zkontrolovat.</p>
-<p>Přihlašovací kód se nabídne, jen když váš poskytovatel pošty ověří doménu, která zprávu podepsala. Viz <a href="topic:sign-in-codes"></a>.</p>
-<!--review--><p>Obrázky a písma ve zprávě se nikdy nedostanou k dekodérům systému.</p><!--/review-->
+<p>Když píšete zprávu, stavový řádek ukazuje, kam vede odkaz pod ukazatelem myši nebo, pokud tam žádný není, u textového kurzoru, takže jej můžete před odesláním zkontrolovat.</p>
+<p>Přihlašovací kód se nabídne, jen když váš poskytovatel pošty ověří podpis DKIM domény kódu nebo její nadřazené domény. To nepotvrzuje totožnost osoby ani důvěryhodnost celého obsahu. Viz <a href="topic:sign-in-codes"></a>.</p>
+<p>Vložené obrázky se převádějí na místní náhledy bez spouštění skriptů ze souborů a pak se zobrazují ve webovém zobrazení. Povolené obrázky z internetu se načítají samostatně. Písma přiložená ke zprávě se nepoužívají.</p>
 <nav class="related"><a href="topic:pictures-tracking"></a> <a href="topic:attachments"></a> <a href="topic:data-storage"></a></nav>

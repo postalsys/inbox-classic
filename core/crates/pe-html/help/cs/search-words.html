@@ -7,7 +7,7 @@
     <tr><td><code>"přesná fráze"</code></td><td>Tato slova v tomto pořadí</td></tr>
     <tr><td><code>-slovo</code></td><td>Zprávy bez tohoto slova. Minus lze použít i u některých filtrů, například <code>-is:unread</code></td></tr>
     <tr><td><code>toto OR tamto</code></td><td>Zprávy s jedním nebo druhým slovem. <code>OR</code> pište velkými písmeny</td></tr>
-    <tr><td><code>from:anna</code></td><td>Pošta od Anny</td></tr>
+    <tr><td><code>from:anna</code></td><td>Pošta s odpovídajícím jménem nebo adresou odesílatele</td></tr>
     <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>Pošta pro Annu v libovolném poli příjemců. Všechny tři výrazy hledají v polích Komu, Kopie i Skrytá kopie</td></tr>
     <tr><td><code>subject:oběd</code></td><td>Slovo v předmětu</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Slovo v názvu připojeného souboru</td></tr>
@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Jen tato složka, ve všech účtech</td></tr>
     <tr><td><code>in:projekty</code></td><td>Jen složka s tímto názvem</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Všechny složky</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Pošta před určitým dnem nebo po něm. Funguje i <code>2025-01-31</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Pošta před začátkem prvního dne nebo od začátku druhého dne včetně, v UTC. Funguje i <code>2025-01-31</code></td></tr>
     <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Pošta starší nebo novější než zadaný počet dní (<code>d</code>), měsíců (<code>m</code>) nebo let (<code>y</code>)</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Pošta větší nebo menší než daná velikost, v bajtech nebo s <code>K</code>, <code>M</code> či <code>G</code></td></tr>
 </table>
-<p>Vyhledávání nerozlišuje diakritiku ani velikost písmen. Nerozpoznaný operátor se hledá jako běžný text.</p>
+<p>Hledání podle začátku slova vyžaduje alespoň dva znaky; jeden znak odpovídá jen celému slovu. Měsíc znamená 30 dní a rok 365 dní. Jednotky K, M a G jsou mocniny 1024. Minus neobrací podmínky data, stáří ani velikosti. Vyhledávání nerozlišuje diakritiku ani velikost písmen. Nerozpoznaný operátor se hledá jako běžný text.</p>
 <p>Šifrované zprávy můžete najít podle odesílatele, příjemců a předmětu. Pokud je volba <b data-text="ui-search-encrypted"></b> zapnutá v nastavení <b data-settings="reading"></b>, můžete po dešifrování hledat i v jejich textu.</p>
 <p>Seznam zpráv neuvádí jejich velikost. Velikost zprávy zjistíte volbou <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

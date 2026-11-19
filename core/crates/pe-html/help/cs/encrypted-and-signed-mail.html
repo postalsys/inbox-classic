@@ -5,16 +5,16 @@
 <table>
     <tr><th>Barva</th><th>Význam</th></tr>
     <tr><td>Zelená</td><td>Platný digitální podpis odesílatele a ověřené vlastnictví klíče.</td></tr>
-    <tr><td>Modrá</td><td>Platný digitální podpis odesílatele s neověřeným vlastnictvím klíče nebo zpráva šifrovaná pro vás bez podpisu.</td></tr>
-    <tr><td>Oranžová</td><td>Zpráva vyžaduje pozornost: podpis neodpovídá obsahu, podepisující se liší od odesílatele nebo některou část nelze přečíst.</td></tr>
+    <tr><td>Modrá</td><td>Platný digitální podpis odesílatele s neověřeným vlastnictvím klíče nebo zpráva šifrovaná pro vás bez ověřeného podpisu odesílatele.</td></tr>
+    <tr><td>Oranžová</td><td>Zpráva vyžaduje pozornost: podpis neodpovídá obsahu, podpis nepotvrzuje uvedeného odesílatele nebo některou část nelze přečíst.</td></tr>
     <tr><td>Šedá</td><td>Bez digitálního podpisu nebo podpis nelze zkontrolovat, například kvůli chybějícímu klíči.</td></tr>
 </table>
 <p>Pokud jsou části zprávy chráněny různě, každá má vlastní rámeček a štítek. Panel uvádí počet částí v jednotlivých kategoriích. Kliknutím na štítek nebo na <b data-text="ui-protection-details"></b> na panelu zjistíte, kdo každou část podepsal, jakým klíčem a kdy.</p>
 <aside class="warning">Inbox Classic vytváří pouze panel a štítky nad rámečky. Obsah zprávy řídí odesílatel a může do něj vložit i napodobeninu štítku. Řiďte se panelem aplikace.</aside>
 <p>Obrázky z internetu v šifrované části se stáhnou pouze po kliknutí na panel pro stažení obrázků. Souhlas je nutný při každém otevření. Štítek části pak uvádí, že se obrázky načetly.</p>
-<!--review--><p>Obrázky a soubory PDF připojené k části se zobrazují v rámečku této části, nikdy v rámečku jiné. Soubory šifrované části se uchovávají jen v paměti, nikdy na disku.</p><!--/review-->
-<!--review--><p>V seznamu připojených souborů označuje zámek každý soubor ze šifrované části. Najeďte na soubor ukazatelem a uvidíte, ze které části pochází.</p><!--/review-->
+<p>Obrázky a soubory PDF připojené k části se zobrazují v rámečku této části, nikdy v rámečku jiné. Dešifrované náhledy zůstávají jen v paměti. Otevření v externím programu zapíše nešifrovanou dočasnou kopii; uložením souboru vytvoříte kopii na zvoleném místě na disku.</p>
+<p>V seznamu připojených souborů označuje zámek každý soubor ze šifrované části. Najeďte na soubor ukazatelem a uvidíte, ze které části pochází.</p>
 <p>Při odpovědi nebo přeposlání se cituje jen to, co bylo zobrazeno.</p>
 <p>V seznamu zpráv označuje zámek šifrovanou zprávu a pečeť podepsanou. Pokud je hledání v šifrovaných zprávách zapnuté a odpovídající soukromý klíč je k dispozici, může Inbox Classic zprávy dešifrovat po stažení nebo při otevření. Seznam pak zobrazí začátek textu i předmět ze šifrované části, pokud je uveden. Pokud není k dispozici dešifrovaný náhled textu, zobrazí se <b data-text="list-encrypted"></b>. Oznámení o nových šifrovaných zprávách používají tento text vždy.</p>
-<p>Volba <b data-text="ui-search-encrypted"></b> v nastavení <b data-settings="reading"></b> umožňuje hledat i v textu dešifrovaných zpráv. Agenti AI nemohou číst obsah ani přílohy šifrovaných zpráv ani v jejich obsahu hledat.</p>
+<p>Volba <b data-text="ui-search-encrypted"></b> v nastavení <b data-settings="reading"></b> umožňuje hledat i v textu dešifrovaných zpráv. Text a chráněný předmět se ukládají nešifrovaně v místním indexu. Vypnutí volby tyto odvozené údaje odstraní a obnoví vnější předměty v seznamu. Agenti AI nemohou číst obsah ani přílohy šifrovaných zpráv ani v jejich obsahu hledat.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

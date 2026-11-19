@@ -174,4 +174,4 @@ gtk-metainfo-description = Inbox Classic je aplikace pro čtení a psaní e-mail
 gtk-metainfo-feature-sanitized = Zprávy se zobrazují bez skriptů a dalšího nebezpečného obsahu. Obrázky z internetu se stahují jen s vaším svolením
 gtk-metainfo-feature-search = Vyhledávání v předmětech, odesílatelích, příjemcích, názvech příloh a textu zpráv s podporou operátorů známých z Gmailu
 gtk-metainfo-feature-replies = Starší zprávy citované v odpovědích se sbalí a můžete je znovu rozbalit
-gtk-metainfo-feature-offline = Staženou poštu lze číst i bez připojení. Hesla jsou uložena v systémové klíčence
+gtk-metainfo-feature-offline = Staženou poštu lze číst i bez připojení. Přihlašovací údaje se ve výchozím nastavení uchovávají v systémovém úložišti tajných údajů

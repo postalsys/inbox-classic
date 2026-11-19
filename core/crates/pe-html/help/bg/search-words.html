@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Само тази папка, във всеки акаунт</td></tr>
     <tr><td><code>in:projects</code></td><td>Само папката с това име</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Всички папки</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Поща преди или след даден ден. <code>2025-01-31</code> също работи</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Поща преди началото на първия ден или от началото на втория ден включително, по UTC. <code>2025-01-31</code> също работи</td></tr>
     <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Съобщения, по-стари или по-нови от посочения брой дни (<code>d</code>), месеци (<code>m</code>) или години (<code>y</code>)</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Съобщения, по-големи или по-малки от посочения размер, в байтове или с <code>K</code>, <code>M</code> или <code>G</code></td></tr>
 </table>
-<p>Ударенията и главните букви нямат значение. Неразпознатите оператори се търсят като обикновен текст.</p>
+<p>За търсене по начало на дума са нужни поне два знака; един знак съвпада само с цяла дума. Месецът е 30 дни, а годината 365 дни. Размерите K, M и G са степени на 1024. Минусът не обръща условията за дата, възраст или размер. Ударенията и главните букви нямат значение. Неразпознатите оператори се търсят като обикновен текст.</p>
 <p>Можете да намирате шифровани съобщения по подател, получатели и тема. Ако опцията <b data-text="ui-search-encrypted"></b> е включена в <b data-settings="reading"></b>, след дешифриране можете да търсите и в текста им.</p>
-<p>Списъкът със съобщения няма колона за размер. За да видите колко голямо е съобщението, изберете <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Можете да сортирате по размер от менюто за сортиране. За да видите колко голямо е съобщението, изберете <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

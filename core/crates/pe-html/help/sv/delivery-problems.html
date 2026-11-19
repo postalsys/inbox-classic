@@ -1,21 +1,20 @@
-<!--review--><h1>Meddelanden som inte levererades</h1>
+<h1>Meddelanden som inte levererades</h1>
 <p class="summary">När ett meddelande du skickat studsar eller fördröjs förklarar Inbox Classic varför och vad du kan göra.</p>
 <p>Ett leveransmeddelande har en markering för ej levererat i meddelandelistan. När du öppnar det visar ett kort ovanför om ditt meddelande inte levererades eller bara är fördröjt.</p>
 <img src="picture:bounce-1-failed" alt="Ett leveransmeddelande med ett kort som säger att meddelandet inte levererades, mottagaren, orsaken och vad du kan göra">
 <p>Kortet visar varje mottagare med orsaken i klartext och vad du kan göra. <b data-text="bounce-details"></b> visar den mottagande serverns egna ord.</p>
 <ul>
-    <li><b data-text="bounce-show-message"></b> markerar meddelandet du skickade.</li>
+    <li><b data-text="bounce-show-message"></b> markerar meddelandet du skickade, om det går att hitta.</li>
     <li>Vid en fördröjning markerar <b data-text="bounce-show-delayed"></b> det. Din e-postserver försöker fortfarande, så du behöver inte skicka det igen.</li>
 </ul>
 <p>Några vanliga orsaker:</p>
 <table>
     <tr><th>Kortet säger</th><th>Vad du kan göra</th></tr>
-    <tr><td><b data-text="bounce-user-unknown"></b></td><td>Kontrollera stavningen av adressen, eller fråga personen vilken adress den använder nu.</td></tr>
+    <tr><td><b data-text="bounce-user-unknown"></b></td><td>Kontrollera stavningen av adressen, eller fråga personen vilken adress personen använder nu.</td></tr>
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Skicka det igen om några dagar, eller nå personen på annat sätt.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Skicka det igen utan det som ser ut som skräppost, till exempel många länkar eller en stor bilaga.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Vidarebefordra meddelandet till din e-postleverantör. Det är inte ditt meddelande som är problemet.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Ingenting. Det levereras oftast inom en timme.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Vidarebefordra leveransmeddelandet till din e-postleverantör. Blockeringen gäller den sändande serverns IP-adress.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Avvakta så länge servern fortfarande försöker leverera. Om försöken har upphört kan du behöva skicka meddelandet igen.</td></tr>
 </table>
-<p>Om du vill hitta alla leveransmeddelanden söker du efter <code>is:bounce</code>. Orsaken tas fram på din dator, och ingenting skickas någonstans.</p>
+<p>Om du vill hitta alla leveransmeddelanden söker du efter <code>is:bounce</code>. Leveransfelet tolkas lokalt på datorn; uppgifterna skickas inte till någon extern tjänst för analys.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

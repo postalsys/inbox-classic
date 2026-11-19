@@ -162,7 +162,7 @@ gtk-nothing-yet = Kol kas nieko.
 ## Preferences
 
 gtk-preferences = Nuostatos
-gtk-notify-subtitle = Tik kai Inbox Classic veikia fone
+gtk-notify-subtitle = Tik kai pagrindinis langas nėra aktyvus
 
 ## The desktop entry and the page of the software stores
 
