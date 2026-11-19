@@ -6,34 +6,24 @@ Commit completed batches regularly and preserve an exact resume point.
 ## Resume here
 
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-review-resume`; branch `i18n/review-resume-20261118`.
-  The old `build/i18n-wave1` worktree no longer exists. Older checkout references below are historical.
-- **Scope fixed by the user on November 19:** all requested translatable strings are already on master.
-  Finish what needs review in master `8757ab1c234bf3549979c06fdca14980fd3f9b80`, then stop.
-  Do not discover unmerged translation branches or wait for further additions. Historical late-arrival rules below
-  are superseded by this instruction. Keep normal master synchronization for publication and a final completeness audit.
-- **Next: Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue their remaining catalogs/help in isolated worktrees. Root integrates immutable worker batches promptly, including required generated outputs for installer/Linux metadata changes. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.**
-- Current scope: 36,408 catalog entries and 1,380 help topics.
-  Completed: 26,421 entries and 791 full topics;
-  pending: 9,987 entries and 589 topics across 27 languages.
-  All 28 language directories are inventoried. Lithuanian has no pending marks but now needs the targeted zero-address key comparison.
-- Latest integration: Romanian and Russian contacts, settings, keys and account transfer, 413 entries reviewed and 93 improved values.
-  Parent independently reconstructed 2 committed worker batches: 413 reviewed catalog entries and 93 improved values, selected marks only, no other edits. IDs, variables, access-key counts, comments, ellipses, source hashes and documented selector changes match the evidence. Worker language checks have zero structural findings; expected draft-mark diagnostics are accounted for. Combined inventories and latest file/English hashes reconcile for all 28 languages. Global diagnostics account for 26,455 unmarked entries and 12,883 help lines; since-start 2,350 entries/671 passages match the pending queue. Master is an ancestor of this branch. Review HTML refreshed. No local test suites, builds, manual CI or localized GUI execution; REVIEWED unchanged.
-- Four languages are progressing in parallel. Latvian, Romanian and Russian app catalogs and Polish Windows catalog are reviewed.
-  Pending totals: lv 712 catalog/51 topics; pl 843 catalog/51 topics; ro 711 catalog/51 topics; ru 713 catalog/51 topics.
-- Publication checkpoint: [PR #213](https://github.com/postalsys/inbox-classic/pull/213) merged the preceding review batches as `232f95c1` at 2026-11-19T05:58:27Z.
-- MCP phase3a, phase3b and preview-CID translations are integrated into the fixed inventory. No separate incoming
-  source remains to merge. Prior source audits and exact deltas remain recorded as history.
-- Exact inventories, completed batches and latest file/source hashes are in `translation-review-state.json`.
-  `review_workspace.review_scope` records the fixed scope and the user's instruction. Reuse helpers only after
-  checking their root and assumptions; older source-audit loops must not reopen unmerged translation queues.
-- Review guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`; SHA-256
-  `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`.
-  Round start remains `e99f7e59248bed137903150db7ef417e27755d18`; review baseline remains
-  `7c0b1672581c9bd7a33c226f35da16cedca4b528` until the fixed queue is complete.
-- Review HTML: `/Users/andris/Projects/PostalExpress/build/i18n-review.html`, regenerated from this checkout.
-- Standing authorization: push and merge each validated batch into GitHub master, then synchronize this clean branch.
-  No local test suites, builds for ordinary catalog/help batches, manually launched CI or releases.
-- Validation is source-based editorial review and structural checks, not native-speaker or localized GUI-fit certification.
+- **Scope fixed by the user:** review what is already on master `8757ab1c234bf3549979c06fdca14980fd3f9b80` and finish.
+  Do not discover unmerged translation branches or wait for additions. Historical late-arrival instructions below are superseded.
+- **Cadence updated by the user:** review languages in parallel and commit/publish only major updates.
+  Earlier instructions to publish each small batch are superseded. Root handles shared records, generation and publication.
+- **Next: Review the 51 remaining Latvian help topics while Polish (48), Romanian (51) and Russian (51) workers finish help in parallel. Finish full language/help milestones before further commits. Integrate exact worker ledgers centrally; do not merge/reset their branches. Process the remaining fixed master catalog/help queues and targeted context comparisons afterward. No local test suites and no discovery of unmerged/new translation branches.**
+- Current scope: 36,408 catalog entries and 1,380 help topics. Completed locally: 29,400 entries and 794 full topics;
+  pending: 7,008 entries and 586 topics. All 28 languages are inventoried. These totals include this major checkpoint awaiting publication.
+- Latvian, Polish, Romanian and Russian catalogs are fully reviewed. Their remaining help topics are 51/48/51/51 respectively.
+  Lithuanian has no pending marks but remains in the targeted zero-address key comparison; whole-round review is incomplete.
+- Latest major checkpoint: 2,979 entries reviewed, 722 improved values including one follow-up, and three Polish help topics.
+  Major four-language checkpoint: 2,979 catalog entries reviewed, 721 pending-entry values improved plus one app-prompt follow-up; three complete Polish help topics reviewed with 25 wording lines improved. Exact root/worker reconstruction, IDs, variables, comments, access-key counts, ellipses and deliberate plural changes reconcile. Language checkers have only expected draft-mark diagnostics and no structural findings. Source-derived mnemonic checks include visible compose Cc/Bcc controls with menus. Latvian static samples cover 117 selector messages, 1,583 count cases and 61 platform substitutions; no native UI execution claimed. Required offline pe-ffi generation succeeded in 13.40s in the separate translation target, with 28 installer, 12 desktop and 24 metainfo values checked; other-language bytes unchanged. All 28 inventories and latest English/translation hashes reconcile. Global diagnostics account for 29,434 unmarked entries/12,924 help lines; since-start 2,022 entries/670 passages match pending work. Review HTML refreshed. No test suites or manual CI; REVIEWED unchanged.
+- Publication checkpoint: [PR #214](https://github.com/postalsys/inbox-classic/pull/214) merged the preceding Romanian/Russian app review
+  as `c6e754ac9` at 2026-11-19T06:01:56Z. The current major catalog update is prepared on this branch.
+- Exact inventories, immutable worker commits and ledgers, current file/source hashes, context comparisons and generation evidence
+  are in `translation-review-state.json`. Do not replay successful edit/record helpers or mutate active worker branches.
+- Guide: `/Users/andris/Downloads/inbox-classic-translation-guide.md`, SHA-256 `00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f`.
+  Round start: `e99f7e59248bed137903150db7ef417e27755d18`. REVIEWED remains `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
+- No test suites. Required metadata generation used the separate translation Cargo target; no release scripts or manually launched CI.
 
 ## Review and checkpoint rules
 
@@ -3237,3 +3227,15 @@ Parent independently reconstructed 2 committed worker batches: 413 reviewed cata
 Completed: 26,421 catalog entries and 791 full topics. Pending: 9,987 entries and 589 topics.
 
 Continue Latvian core.ftl (468 pending entries), then remaining platform catalogs/help. Polish, Romanian and Russian workers continue their remaining catalogs/help in isolated worktrees. Root integrates immutable worker batches promptly, including required generated outputs for installer/Linux metadata changes. Finish the fixed master queue and targeted context comparisons; no local test suites and no discovery of unmerged/new translation branches.
+
+### Latvian core catalog, held for the major checkpoint
+
+Reviewed all 468 remaining core entries and improved 132 values. Corrected decrypted/encrypted wording, key ownership, key publication and temporary-file cleanup conditions, counted status grammar, arbitrary names and folder/account fallbacks. Exact reconstruction and language checks passed; 98 selector messages have 1,336 static samples, and all 60 checked mnemonic scopes remain clear. No tests or builds. Combined global audit and publication will follow with the remaining platform catalogs and parallel workers, per the new major-update cadence.
+
+### Major Latvian, Polish, Romanian and Russian catalog completion
+
+All four catalogs are reviewed. This checkpoint covers 2,979 newly reviewed entries, 721 changed pending values, one corrected app prompt already reviewed, and three Polish key-management help topics (25 wording lines changed). The review corrected decrypted/encrypted wording, key ownership and publication, counted phrases and arbitrary names, missing provider conditions, temporary-file cleanup, platform controls, installer scope and software-store descriptions. Latvian Cc access keys now avoid the compose Tools menu; account sign-in guidance also handles the Windows generic-account fallback.
+
+Major four-language checkpoint: 2,979 catalog entries reviewed, 721 pending-entry values improved plus one app-prompt follow-up; three complete Polish help topics reviewed with 25 wording lines improved. Exact root/worker reconstruction, IDs, variables, comments, access-key counts, ellipses and deliberate plural changes reconcile. Language checkers have only expected draft-mark diagnostics and no structural findings. Source-derived mnemonic checks include visible compose Cc/Bcc controls with menus. Latvian static samples cover 117 selector messages, 1,583 count cases and 61 platform substitutions; no native UI execution claimed. Required offline pe-ffi generation succeeded in 13.40s in the separate translation target, with 28 installer, 12 desktop and 24 metainfo values checked; other-language bytes unchanged. All 28 inventories and latest English/translation hashes reconcile. Global diagnostics account for 29,434 unmarked entries/12,924 help lines; since-start 2,022 entries/670 passages match pending work. Review HTML refreshed. No test suites or manual CI; REVIEWED unchanged.
+
+Completed: 29,400 entries and 794 full topics. Pending: 7,008 entries and 586 topics. Publication follows as one major update; help review continues in parallel.

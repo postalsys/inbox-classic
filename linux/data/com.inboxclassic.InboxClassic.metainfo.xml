@@ -89,9 +89,9 @@
       accedere a Outlook.com e Microsoft 365 tramite il browser.
     </p>
     <p xml:lang="lv">
-      Inbox Classic lasa un raksta e-pastu ar mapēm kreisajā pusē, ziņojumiem augšā un ziņojumu apakšā, kā to darīja
-      agrākās pasta programmas. Tā darbojas ar jebkuru IMAP un SMTP kontu un pierakstās Outlook.com un Microsoft 365
-      caur pārlūku.
+      Inbox Classic ir e-pasta programma ar klasisku izkārtojumu: mapes pa kreisi, ziņojumu saraksts augšā un atlasītā
+      ziņojuma saturs apakšā. Tā darbojas ar jebkuru IMAP un SMTP kontu. Outlook.com un Microsoft 365 kontiem var
+      pierakstīties pārlūkprogrammā.
     </p>
     <p xml:lang="lt">
       Inbox Classic yra el. pašto programa su įprastu išdėstymu: aplankai kairėje, laiškų sąrašas viršuje, o skaitomas
@@ -112,8 +112,8 @@
       fungerer med alle IMAP- og SMTP-kontoer og lar deg logge på Outlook.com og Microsoft 365 gjennom nettleseren.
     </p>
     <p xml:lang="pl">
-      Inbox Classic czyta i pisze pocztę e-mail z folderami po lewej, wiadomościami u góry i treścią wiadomości poniżej,
-      tak jak dawniej programy pocztowe. Działa z każdym kontem IMAP i SMTP, a do Outlook.com i Microsoft 365 loguje się
+      Inbox Classic umożliwia czytanie i pisanie poczty w klasycznym układzie: foldery po lewej, lista wiadomości u góry
+      i treść wybranej wiadomości poniżej. Obsługuje konta IMAP i SMTP oraz logowanie do Outlook.com i Microsoft 365
       przez przeglądarkę.
     </p>
     <p xml:lang="pt_BR">
@@ -127,9 +127,9 @@
       iniciar sessão no Outlook.com e no Microsoft 365 através do browser.
     </p>
     <p xml:lang="ro">
-      Inbox Classic citește și scrie e-mailuri cu folderele în stânga, mesajele sus și mesajul dedesubt, ca programele
-      de e-mail de odinioară. Funcționează cu orice cont IMAP și SMTP și se conectează la Outlook.com și Microsoft 365
-      prin browser.
+      Inbox Classic este un program de e-mail cu o interfață clasică: folderele în stânga, lista mesajelor sus și
+      mesajul selectat dedesubt. Funcționează cu orice cont IMAP și SMTP și se conectează la Outlook.com și Microsoft
+      365 prin browser.
     </p>
     <p xml:lang="sk">
       Inbox Classic číta a píše e-maily s priečinkami vľavo, správami hore a správou pod nimi, ako to poštové programy
@@ -171,9 +171,9 @@
       Outlook.com и Microsoft 365 чрез браузъра.
     </p>
     <p xml:lang="ru">
-      Inbox Classic читает и пишет электронную почту: папки слева, список сообщений сверху и сообщение под ним, как в
-      почтовых программах прежних лет. Она работает с любой учетной записью IMAP и SMTP и входит в Outlook.com и
-      Microsoft 365 через браузер.
+      В Inbox Classic папки находятся слева, список сообщений сверху, а выбранное сообщение под ним, как в классических
+      почтовых программах. Поддерживаются учетные записи с IMAP и SMTP, а для Outlook.com и Microsoft 365 используется
+      вход через браузер.
     </p>
     <p xml:lang="uk">
       Inbox Classic читає й пише електронну пошту так, як це робили класичні поштові програми: папки ліворуч,
@@ -221,10 +221,10 @@
       <li xml:lang="it">Ricerca nell’oggetto, nei mittenti, nei destinatari, nei nomi degli allegati e nel testo dei messaggi, con il supporto degli operatori di Gmail</li>
       <li xml:lang="it">Il testo dei messaggi precedenti citato nelle risposte viene compresso e può essere espanso quando serve</li>
       <li xml:lang="it">La posta già scaricata si può leggere anche offline; le password vengono conservate nel portachiavi</li>
-      <li xml:lang="lv">Katrs ziņojums tiek parādīts attīrīts, bez skriptiem, un attēli no interneta tikai tad, kad jūs to atļaujat</li>
-      <li xml:lang="lv">Meklēšana, kas atrod vārdus tēmā, sūtītājos un adresātos, failu nosaukumos un tekstā, ar Gmail operatoriem</li>
-      <li xml:lang="lv">Atbildēs tiek sakļauti agrākie ziņojumi, ko tās citē</li>
-      <li xml:lang="lv">Pasts ir lasāms arī bezsaistē; paroles glabājas jūsu atslēgu saišķī</li>
+      <li xml:lang="lv">Ziņojumi tiek attīrīti no nedroša satura un rādīti bez skriptiem; attēli no interneta tiek ielādēti tikai ar jūsu atļauju</li>
+      <li xml:lang="lv">Meklējiet ziņojumu tēmās un tekstā, sūtītāju un adresātu vārdos un adresēs, kā arī pielikumu nosaukumos; atbalstīti Gmail meklēšanas operatori</li>
+      <li xml:lang="lv">Atbildēs citētie iepriekšējie ziņojumi ir sakļauti, un tos var izvērst</li>
+      <li xml:lang="lv">Lejupielādēto pastu var lasīt arī bezsaistē; paroles tiek glabātas sistēmas atslēgu saišķī</li>
       <li xml:lang="lt">Prieš rodant iš laiškų pašalinami scenarijai ir kitas neleidžiamas turinys; paveikslėliai iš interneto atsisiunčiami tik jums leidus</li>
       <li xml:lang="lt">Paieška pagal laiškų temas, siuntėjų ir gavėjų vardus bei adresus, priedų pavadinimus ir tekstą, su Gmail stiliaus paieškos operatoriais</li>
       <li xml:lang="lt">Atsakymuose suskleidžiami ankstesni cituojami laiškai</li>
@@ -241,10 +241,10 @@
       <li xml:lang="nb">Søk i emne, avsendere, mottakere, vedleggsnavn og meldingstekst med søkeoperatorer som i Gmail</li>
       <li xml:lang="nb">Siterte meldinger foldes sammen i svar og kan utvides når du vil lese dem</li>
       <li xml:lang="nb">Les nedlastet e-post uten nett. Passord lagres i systemets nøkkelring</li>
-      <li xml:lang="pl">Każda wiadomość jest wyświetlana oczyszczona, bez skryptów, a obrazy z internetu tylko wtedy, gdy na to pozwolisz</li>
-      <li xml:lang="pl">Wyszukiwanie słów w temacie, nadawcach i odbiorcach, nazwach plików i treści, z operatorami Gmaila</li>
-      <li xml:lang="pl">Odpowiedzi zwijają cytowane wcześniejsze wiadomości</li>
-      <li xml:lang="pl">Poczta jest dostępna offline; hasła są przechowywane w Twoim pęku kluczy</li>
+      <li xml:lang="pl">Wiadomości są wyświetlane po usunięciu skryptów i innych niebezpiecznych elementów, a obrazy z internetu tylko za Twoją zgodą</li>
+      <li xml:lang="pl">Wyszukiwanie słów w temacie, danych nadawców i odbiorców, nazwach plików i treści, z użyciem operatorów Gmaila</li>
+      <li xml:lang="pl">Cytowane wcześniejsze wiadomości są zwijane w odpowiedziach</li>
+      <li xml:lang="pl">Pobrane wiadomości można czytać bez połączenia z internetem; hasła są przechowywane w systemowym pęku kluczy</li>
       <li xml:lang="pt_BR">As mensagens são exibidas sem scripts ou outros conteúdos potencialmente perigosos; as imagens da internet só são carregadas com sua autorização</li>
       <li xml:lang="pt_BR">Pesquisa no assunto, nos remetentes, nos destinatários, nos nomes dos anexos e no texto das mensagens, com suporte aos operadores do Gmail</li>
       <li xml:lang="pt_BR">O texto de mensagens anteriores citado nas respostas fica recolhido e pode ser expandido quando necessário</li>
@@ -253,10 +253,10 @@
       <li xml:lang="pt">Pesquisa no assunto, nos remetentes, nos destinatários, nos nomes dos anexos e no texto das mensagens, com suporte para os operadores do Gmail</li>
       <li xml:lang="pt">O texto das mensagens anteriores citado nas respostas fica recolhido e pode ser expandido quando necessário</li>
       <li xml:lang="pt">O correio já transferido pode ser lido sem ligação à internet; as palavras-passe ficam guardadas no porta-chaves</li>
-      <li xml:lang="ro">Fiecare mesaj este afișat curățat, fără scripturi, iar imaginile de pe internet doar când le permiteți</li>
-      <li xml:lang="ro">O căutare care găsește cuvinte în subiect, în expeditori și destinatari, în numele fișierelor și în text, cu operatorii din Gmail</li>
-      <li xml:lang="ro">Răspunsurile pliază mesajele anterioare pe care le citează</li>
-      <li xml:lang="ro">E-mailurile rămân de citit și offline; parolele sunt păstrate în portcheiul dvs.</li>
+      <li xml:lang="ro">Mesajele sunt afișate fără scripturi sau alte elemente active, iar imaginile de pe internet sunt încărcate doar cu acordul dvs.</li>
+      <li xml:lang="ro">Căutare în subiecte, numele și adresele expeditorilor și destinatarilor, numele fișierelor și textul mesajelor, cu operatori de căutare ca în Gmail</li>
+      <li xml:lang="ro">În răspunsuri, mesajele anterioare citate sunt restrânse</li>
+      <li xml:lang="ro">Mesajele pot fi citite și offline, iar parolele sunt păstrate în portchei</li>
       <li xml:lang="sk">Každá správa sa zobrazuje očistená, bez skriptov, a obrázky z internetu iba vtedy, keď ich povolíte</li>
       <li xml:lang="sk">Hľadanie, ktoré nájde slová v predmete, ľuďoch, názvoch súborov aj texte, s operátormi Gmailu</li>
       <li xml:lang="sk">Odpovede skryjú staršie správy, ktoré citujú</li>
@@ -289,10 +289,10 @@
       <li xml:lang="bg">Търсене в темите, подателите, получателите, имената на прикачените файлове и текста на съобщенията с операторите на Gmail</li>
       <li xml:lang="bg">Цитираният текст от по-ранни съобщения е свит и може да се разгъне при нужда</li>
       <li xml:lang="bg">Изтеглената поща е достъпна и без връзка с интернет; паролите се пазят в системния ключодържател</li>
-      <li xml:lang="ru">Каждое сообщение показывается очищенным, без скриптов, а изображения из интернета загружаются только с вашего разрешения</li>
-      <li xml:lang="ru">Поиск слов в теме, именах отправителей и получателей, именах файлов и тексте, с операторами Gmail</li>
-      <li xml:lang="ru">В ответах сворачиваются предыдущие сообщения, которые они цитируют</li>
-      <li xml:lang="ru">Почту можно читать без подключения к сети; пароли хранятся в вашей связке ключей</li>
+      <li xml:lang="ru">Сообщения отображаются без скриптов, а изображения из интернета загружаются только с вашего разрешения</li>
+      <li xml:lang="ru">Поиск по темам и тексту сообщений, именам и адресам отправителей и получателей, а также именам файлов с поддержкой операторов Gmail</li>
+      <li xml:lang="ru">Предыдущие сообщения в ответах отображаются в виде свернутых цитат</li>
+      <li xml:lang="ru">Загруженные сообщения можно читать без сети; пароли хранятся в системном хранилище ключей</li>
       <li xml:lang="uk">Кожне повідомлення показується очищеним, без скриптів, а зображення з інтернету лише тоді, коли ви дозволите</li>
       <li xml:lang="uk">Пошук слів у темі, людях, назвах файлів і тексті, з операторами Gmail</li>
       <li xml:lang="uk">Відповіді згортають попередні повідомлення, які вони цитують</li>

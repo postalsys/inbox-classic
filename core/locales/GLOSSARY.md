@@ -550,8 +550,9 @@ where the singular reads better ("Pārvietot ziņojumu").
 - Polite plural "jūs" ("Noklikšķiniet", "Ievadiet"); menus and buttons in the infinitive, sentence case.
 - A verb or participle next to `$messages` agrees through `$count` (`[one]` Pārvietots, `*[other]` Pārvietoti).
 - For actual folder names, inflect a head noun and quote the name ("uz mapi „{ $folder }”",
-  "mapē „{ $from }”"). Where a destination can instead be `their-folders` ("to mapēm") or
-  `transfer-another-account` ("citu kontu"), phrase the sentence to accommodate that fallback too.
+  "mapē „{ $from }”"). Where a destination can instead be `their-folders` or
+  `transfer-another-account`, phrase the sentence to accommodate that fallback too. The current completion and
+  transfer statuses use the label "Mērķis:" with "attiecīgās mapes" / "cits konts" as nominative fallbacks.
 - Quotes „…”; days of the week lowercase; keys unchanged.
 - Access keys on ASCII letters only (no ā, č, ē and so on).
 
@@ -615,6 +616,20 @@ where the singular reads better ("Pārvietot ziņojumu").
   Preview notes describe not executing scripts. Keep "ziņojums" in PDF/attachment settings.
 - Encrypted search uses ASCII E. All 60 checked menu/dialog scopes are collision-free, including key creation,
   ownership verification, imports and group-member picking. Shared guidance avoids platform-specific parent menus.
+
+- Core security details distinguish "Atšifrēts" from "Šifrēts" and say "atslēgas piederība apstiprināta"
+  for verified ownership. Key publication requires confirming each address; a returned list is not one address.
+- Complete counted `$messages` phrases stay intact after status labels. Nominative zero counts use genitive
+  plurals, while accusative/dative actions retain their own endings. Preview navigation has exact [1].
+- SetupSkippedUnreachable can name an account or a sign-in app; use "ieraksts" and explicitly name the sign-in app
+  in recovery instructions. Decrypted attachment copies are cleaned at startup once older than a day.
+- Platform search uses "Meklēšanas vieta" for folders and combined views. Save failures use independent labeled
+  counts. GTK provider guidance retains app-password conditions and Microsoft browser sign-in.
+- Mac Zoom changes window size; account signature buttons say "Paraksta teksts". Agent removal deletes its access
+  record, not the installed program. Undo Since selects a "laikposms"; its confirmation is "Atsaukt darbības".
+- Compose Cc uses ASCII O on Windows and GTK, distinct from Tools K; Bcc keeps D. Other tested scopes remain clear.
+- Installer scope is the Windows user account; optional data removal includes local settings and mail.
+  Store descriptions refer to downloaded mail for offline reading and to the actual classic pane layout.
 
 ### Lietuvių (lt)
 
@@ -1114,6 +1129,16 @@ written as the `[many]` form.
 - Language names are native labels; restart confirmation states Wybrany język rather than attempting to inflect them. System default choice is Język systemu.
 - Undo Send failure means cancellation is no longer possible, not guaranteed successful sending. Queue time is wysyłka najwcześniej o. Search summaries use zakres because the selected scope may be a combined view.
 
+- Use hasło for passphrase in backup, private-key import and setup transfer. The app accepts eight or more characters; fraza hasła is an unnatural calque. Use hasło do kopii zapasowej when disambiguation helps.
+- Key validity and ownership confirmation are separate: potwierdzono właściciela klucza, and Usuń potwierdzenie właściciela for removing that confirmation. Keep podpis cyfrowy distinct from tekst podpisu.
+- ui-verify-marks has an exact [0] branch because keys without email addresses can open Verify but have no stored per-address ownership flag to update. A matching fingerprint alone does not save confirmation for such a key.
+- Private-key assignments may include multiple addresses; use an explicit adresy label. Unsubscribe one-click target is a host; status says a request is being sent, not a guaranteed subscription removal.
+
+- Use Poprawny podpis cyfrowy for signature validity, potwierdzono właściciela klucza for verified ownership; never describe decrypted content as encrypted in the key-details action.
+- TheirFolders is odpowiednie foldery in generic multi-destination status messages. $messages already contains its noun.
+- Temporary attachment cleanup happens during startup for copies older than a day; avoid implying a background 24-hour timer.
+- Linux credential storage: systemowy pęk kluczy. Offline readability refers to pobrane wiadomości.
+
 ### Português (pt-BR, Brasil)
 
 Made from the European Portuguese catalogs and rewritten in Brazilian usage, with Microsoft's (Outlook, Windows) and
@@ -1250,6 +1275,14 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - Key verification explicitly confirms the key owner; status and address rows use proprietarul cheii a fost confirmat.
 - Take-back failure says trimiterea nu mai poate fi anulată, without asserting delivery.
 - Use atașări and agenți IA consistently in settings.
+
+- Use Textul semnăturii consistently on GTK/macOS/Windows account buttons.
+- Partial attachment-save counts use label plus failed din total to handle independent singular/plural values.
+
+- Use Utilizabilă/Neutilizabilă for key usability; reserve proprietarul cheii a fost confirmat for manual ownership confirmation.
+- Use culoare/semnalizare cenușie in core status and agent log phrases, matching the Cenușiu menu label.
+- The app retries queued sending; lack of Undo or removal from Outbox does not by itself prove delivery.
+- Multipart counts and independent failure totals use labels when agreement would otherwise depend on separate numbers.
 
 ### Slovenčina (sk)
 
@@ -1689,6 +1722,22 @@ Plurals: `[one]` 1, 21, 31...; `[few]` 2 to 4, 22 to 24...; `[many]` 0, 5 to 20,
 - Encrypted-search settings distinguish decrypted content from the full index and its remaining ordinary headers; ИИ-агенты cannot search decrypted content.
 - The column-layout name is «В столбцах» in its explanatory notes as well as its menu command. Contact pictures accept PNG/JPEG only, unlike the composer insertion formats.
 - Setup files omit messages; on another computer only mail still on the server can be downloaded. Without a passphrase, users sign in again, rather than necessarily entering passwords.
+
+- Mac Bcc uses «Скрытая» beside the recipient field; all platform signature buttons use «Текстовая подпись».
+- Removing an agent program is «Удалить запись об этой программе», avoiding an implication that the application itself is uninstalled. Linux unused-access status is «Доступ еще не использовался».
+- Windows/macOS search scope labels may be combined views; avoid assuming they are actual folders. Genitive indexing counts retain one for 1/21/... and other for the remaining integer counts.
+- Help shortcut-table header is «Сочетания клавиш»; the message-features section is «Особенности сообщений».
+
+- Installer «учетная запись» refers to the current Windows user, not a mail account; the new-install copy says «текущий пользователь Windows».
+- Linux desktop and store copy uses «программа для работы с электронной почтой»; offline reading explicitly refers to already downloaded messages. English desktop keywords are added by the generator.
+
+- Core status destinations use «Назначение:» with arbitrary folder names and the multiple-folder fallback. «transfer-another-account» is nominative «другая учетная запись» for those labels, superseding its previous accusative-only guidance.
+- A counted $messages phrase is nominative: show progress as «выполнено: N» and export totals as «Всего: ...», rather than putting the phrase after из.
+- Use exact [1] when wording describes a single selected message/recipient/page; Russian one includes 21. Recurrence intervals use «Раз в 21 день»; preserve explicit counts.
+- Read Mail permissions include conversations, attachments, message rules and correspondents; 30-day read/change limits apply to the program and its audit records.
+- Key protection text distinguishes «владелец ключа подтвержден» from signature validity; «Расшифровано с помощью вашего ключа» describes actual decryption. Every published address needs separate confirmation to make lookup possible.
+- Setup window preferences are «Настройки интерфейса» (notification, list/layout and language settings). Skipped unreachable rows can be apps or accounts and use neutral «Запись».
+- Decrypted attachment copies are unencrypted files in the current user temporary folder; copies older than a day are removed when the app starts, not by a guaranteed daily timer.
 
 ### Українська (uk)
 
