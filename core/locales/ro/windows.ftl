@@ -161,8 +161,7 @@ win-change = &Modificare...
 # Tools > AI Agents: takes back everything the selected program did in a span the user picks
 # review: new
 win-undo-since = Anulare pe &interval...
-# review: new
-win-take-back = &Anulare
+win-take-back = &Anulare modificări
 # review: new
 win-what-agents-did = &Activitatea agenților:
 # review: new
