@@ -488,146 +488,84 @@ ui-rules-applied = { $count ->
 }
 ui-col-rule-matches = Условия
 ui-clear-button = &Очистить
-# review: new
 ui-how-to-connect = Как подключить агента…
-# review: new
 ui-agent-programs = Программы, агенты которых запросили доступ к вашей почте
-# review: new
 ui-what-agents-did = Действия агентов
-# review: new
 ui-restart-now = &Перезапустить
-# review: new
 ui-restart-later = По&зже
 
 ## The Address Book (Tools > Address Book), Contact and Group Properties, Select Recipients
 
-# review: new
 ui-tb-new-contact = Новый контакт
-# review: new
 ui-tb-new-group = Новая группа
-# review: new
 ui-tb-properties = Свойства
-# review: new
 ui-tb-write-to = Написать
-# review: new
 ui-menu-new-contact = &Новый контакт...
-# review: new
 ui-menu-new-group = Новая &группа...
-# review: new
 ui-menu-write-to = На&писать
-# review: new
 ui-menu-delete = &Удалить
-# review: new
 ui-book-find-hint = Введите имя или адрес электронной почты
-# review: new
 ui-book-all-contacts = Все контакты
-# review: new
 ui-col-phone = Телефон
-# review: new
-ui-book-empty = Адресная книга пуста. Нажмите «Новый контакт», чтобы добавить человека, или импортируйте файл vCard или CSV через меню «Файл».
-# review: new
-ui-book-no-match = Нет контактов, соответствующих запросу «{ $words }».
-# review: new
+ui-book-empty = Адресная книга пуста. Чтобы добавить контакт, нажмите «Новый контакт» или импортируйте файл vCard или CSV через меню «Файл».
+ui-book-no-match = По запросу «{ $words }» контактов не найдено.
 ui-book-delete-ask = { $count ->
-    [one] Удалить этот контакт из адресной книги?
-   *[other] Удалить эти контакты ({ $count }) из адресной книги?
+    [1] Удалить этот контакт из адресной книги?
+    [one] Удалить { $count } контакт из адресной книги?
+    [few] Удалить { $count } контакта из адресной книги?
+    [many] Удалить { $count } контактов из адресной книги?
+   *[other] Удалить { $count } контакта из адресной книги?
 }
-# review: new
 ui-group-delete-ask = Удалить группу «{ $name }»? Ее участники останутся в адресной книге.
-# review: new
-ui-book-no-address = У контакта { $name } нет адреса электронной почты.
-# review: new
+ui-book-no-address = У контакта «{ $name }» нет адреса электронной почты.
 ui-new-contact-title = Новый контакт
-# review: new
 ui-contact-title = Свойства: { $name }
-# review: new
 ui-contact-first = Имя:
-# review: new
 ui-contact-last = Фамилия:
-# review: new
 ui-contact-display = Отображаемое имя:
-# review: new
 ui-contact-nickname = Псевдоним:
-# review: new
 ui-contact-company = Организация:
-# review: new
 ui-contact-addresses = Адреса электронной почты:
-# review: new
 ui-contact-address-hint = Введите адрес электронной почты
-# review: new
 ui-contact-add = &Добавить
-# review: new
 ui-contact-set-default = Сделать &основным
-# review: new
 ui-contact-default = { $address } (основной)
-# review: new
 ui-contact-phones = Номера телефонов:
-# review: new
 ui-phone-home = Домашний
-# review: new
 ui-phone-work = Рабочий
-# review: new
 ui-phone-mobile = Мобильный
-# review: new
 ui-phone-other = Другой
-# review: new
 ui-contact-notes = Заметки:
-# review: new
 ui-contact-name-needed = Введите имя или адрес электронной почты контакта.
-# review: new
-ui-contact-address-invalid = «{ $address }» не является допустимым адресом электронной почты.
-# review: new
+ui-contact-address-invalid = Недопустимый адрес электронной почты: «{ $address }».
 ui-contact-not-saved = Не удалось сохранить контакт: { $reason }
-# review: new
 ui-new-group-title = Новая группа
-# review: new
 ui-group-title = Свойства: { $name }
-# review: new
-ui-group-name = Имя группы:
-# review: new
+ui-group-name = Название группы:
 ui-group-members = Участники:
-# review: new
 ui-group-select-members = &Выбрать участников...
-# review: new
 ui-group-new-member = Добавить адрес электронной почты, которого нет в адресной книге:
-# review: new
-ui-group-name-needed = Введите имя группы.
-# review: new
+ui-group-name-needed = Введите название группы.
 ui-group-not-saved = Не удалось сохранить группу: { $reason }
-# review: new
 ui-group-members-count = { $count ->
     [one] { $count } участник
     [few] { $count } участника
     [many] { $count } участников
    *[other] { $count } участника
 }
-# review: new
 ui-select-recipients = Выбор получателей
-# review: new
 ui-select-members = Выбор участников группы
-# review: new
 ui-pick-intro = Введите имя или выберите его в списке:
-# review: new
 ui-pick-recipients = Получатели сообщения:
-# review: new
 ui-pick-members = Участники группы:
-# review: new
 ui-pick-to = &Кому →
-# review: new
 ui-pick-cc = К&опия →
-# review: new
 ui-pick-bcc = &Скрытая →
-# review: new
 ui-pick-add = &Добавить →
-# review: new
 ui-pick-tip = Выбрать получателей из адресной книги
-# review: new
 ui-filter-address-books = Адресные книги (vCard, CSV)
-# review: new
 ui-filter-vcard = Файлы vCard
-# review: new
 ui-book-export-name = Адресная книга
-# review: new
 ui-book-imported = { $added ->
     [one] Добавлен { $added } контакт
     [few] Добавлено { $added } контакта
@@ -636,281 +574,154 @@ ui-book-imported = { $added ->
 }, { $skipped ->
    *[other] пропущено (уже есть в адресной книге): { $skipped }.
 }
-# review: new
 ui-book-not-imported = Не удалось импортировать адресную книгу: { $reason }
-# review: new
 ui-book-exported = { $count ->
-    [one] { $count } контакт сохранен в { $file }.
-    [few] { $count } контакта сохранены в { $file }.
-    [many] { $count } контактов сохранены в { $file }.
-   *[other] { $count } контакта сохранены в { $file }.
+    [one] В файл «{ $file }» сохранен { $count } контакт.
+    [few] В файл «{ $file }» сохранено { $count } контакта.
+    [many] В файл «{ $file }» сохранено { $count } контактов.
+   *[other] В файл «{ $file }» сохранено { $count } контакта.
 }
-# review: new
 ui-book-not-exported = Не удалось сохранить адресную книгу: { $reason }
-# review: new
 ui-code-copied = Код скопирован
-# review: changed
 ui-codes-in-notifications = По&казывать коды для входа в уведомлениях о новой почте
-# review: new
 ui-tool-unread-only = Непрочитанные
-# review: new
 ui-no-unread = Здесь нет непрочитанных сообщений.
-# review: new
 ui-pictures-always-sender = Всегда загружать изображения от { $sender }
-# review: new
-ui-pictures-always-domain = Всегда загружать изображения от всех отправителей из { $domain }
-# review: new
-ui-pictures-unconfirmed = Не удалось проверить домен отправителя ({ $domain }), поэтому изображения в этом сообщении не загружаются автоматически.
-# review: changed
+ui-pictures-always-domain = Всегда загружать изображения от отправителей с адресами в домене { $domain }
+ui-pictures-unconfirmed = Не удалось подтвердить домен отправителя ({ $domain }), поэтому изображения в этом сообщении не загружаются автоматически.
 ui-pictures-always-option = &Загружать изображения во всех сообщениях
-# review: new
-ui-pictures-always-warning = Тогда отправители смогут видеть, когда вы читаете их сообщения.
-# review: new
+ui-pictures-always-warning = В этом случае отправители могут узнать, когда вы читаете их сообщения.
 ui-protection-details = &Подробности...
-# review: new
 ui-protection-details-title = Сведения о защите
-# review: new
 ui-download-heading = Загрузка
-# review: changed
 ui-download-ahead = &Загружать сообщения заранее:
-# review: new
-ui-download-ahead-recent = Недавние сообщения размером до 1 МБ
-# review: new
+ui-download-ahead-recent = Недавние сообщения размером до 1 МБ каждое
 ui-download-ahead-all = Все сообщения
-# review: new
 ui-download-ahead-never = Только при открытии
-# review: changed
-ui-download-limit = &Лимит хранилища на учетную запись:
-# review: changed
+ui-download-limit = &Лимит места для сообщений на учетную запись:
 ui-send-delay = &Задержка перед отправкой:
-# review: new
-ui-send-delay-note = Пока сообщение ждет отправки, ее можно отменить командой «Отменить».
-# review: new
+ui-send-delay-note = Пока сообщение ожидает отправки, ее можно отменить командой «Отменить».
 ui-dark-messages = Показывать сообщения на темном фоне, когда в системе включен темный режим
-# review: new
-ui-preview-show = Показывать &вложения в письмах
-# review: new
-ui-preview-show-note = Показывает изображения и первые страницы PDF-файлов после текста письма. Inbox Classic сам создаёт эти превью, поэтому ничто в файле не может запуститься.
-# review: new
-ui-preview-pdfs = Показывать PDF-&файлы в письмах
-# review: new
-ui-sending-in = { $subject } будет отправлено через { $count ->
+ui-preview-show = Показы&вать вложения в сообщениях
+ui-preview-show-note = Показывает изображения и первые страницы PDF-файлов после текста сообщения. Inbox Classic сама создает изображения для просмотра, не выполняя код из вложений.
+ui-preview-pdfs = Показывать PDF-&файлы в сообщениях
+ui-sending-in = Отправка { $subject } через { $count ->
     [one] { $count } секунду
     [few] { $count } секунды
     [many] { $count } секунд
    *[other] { $count } секунды
 }
-# review: new
-ui-send-undone = { $subject } не отправлено. Сообщение снова открыто для редактирования.
-# review: new
-ui-send-too-late = { $subject } уже отправлено.
-# review: new
-ui-outbox-status-undo = Будет отправлено в { $time }
-# review: new
-ui-download-note = Сообщения, загруженные заранее, открываются сразу. Когда лимит хранилища превышен, самые старые локальные копии удаляются и загружаются снова при открытии.
-# review: new
+ui-send-undone = Отправка отменена: { $subject }. Сообщение снова открыто для редактирования.
+ui-send-too-late = Отправку сообщения { $subject } уже нельзя отменить.
+ui-outbox-status-undo = Отправка не раньше { $time }
+ui-download-note = Сообщения, загруженные заранее, открываются сразу. При превышении лимита места самые старые загруженные копии удаляются с компьютера. При открытии этих сообщений они загружаются с сервера заново.
 ui-attachment-downloading = Это сообщение еще не загружено полностью. Повторите попытку, когда загрузка завершится.
-# review: changed
 ui-trusted-senders-button = &Надежные отправители...
-# review: new
 ui-trusted-senders-title = Надежные отправители
-# review: new
 ui-trusted-senders-note = Изображения в сообщениях от этих отправителей загружаются автоматически, если ваш почтовый провайдер подтверждает домен отправителя.
-# review: new
-ui-trusted-everyone-at = Все из { $domain }
-# review: new
+ui-trusted-everyone-at = Все отправители с адресами в домене { $domain }
 ui-trusted-senders-empty = Надежные отправители пока не добавлены.
-# review: new
 ui-search-encrypted = Искать в за&шифрованных сообщениях
-# review: new
-ui-search-encrypted-note = Зашифрованные сообщения расшифровываются на этом компьютере после загрузки или открытия, чтобы их слова можно было найти, а список показывал их настоящую тему. Индекс не зашифрован, и агенты ИИ никогда не выполняют в нем поиск. Выключите этот параметр, чтобы удалить их из индекса.
-# review: new
+ui-search-encrypted-note = После загрузки или открытия зашифрованные сообщения расшифровываются на этом компьютере. Это позволяет искать по их тексту и показывать в списке исходные темы. Поисковый индекс не зашифрован. ИИ-агенты не ищут по расшифрованному содержимому. Отключите этот параметр, чтобы удалить из индекса расшифрованное содержимое сообщений.
 ui-pgp-keyserver = Искать &ключи на keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Когда вы шифруете сообщение или ищете ключ, искомый адрес отправляется на keys.openpgp.org. Сначала запрос идет к домену самого адреса.
-# review: changed
+ui-pgp-keyserver-note = Адрес электронной почты отправляется на keys.openpgp.org только при шифровании сообщения или поиске ключа для этого адреса. Сначала поиск выполняется через домен самого адреса.
 ui-eml-default = &Открывать файлы .eml в Inbox Classic
-# review: new
 ui-eml-default-done = Теперь Inbox Classic открывает файлы .eml.
-# review: new
 ui-eml-default-failed = Не удалось сделать Inbox Classic программой по умолчанию для файлов .eml: { $reason }
-# review: new
 ui-folders = Папки
-# review: new
 ui-sorted-by = Сортировка: { $field }
-# review: changed
 ui-layout-label = &Макет:
-# review: new
-ui-columns-note = Окно достаточно широкое для макета со столбцами. Макет можно изменить в меню Вид > Макет.
-# review: new
+ui-columns-note = Окно достаточно широкое для макета «В столбцах». Макет можно изменить в меню «Вид» > «Макет».
 ui-row-unread = Непрочитано
-# review: new
 ui-row-flagged = С флажком
-# review: new
 ui-row-attachments = Есть вложения
-# review: new
 ui-row-encrypted = Зашифровано
-# review: new
 ui-row-signed = Подписано
-# review: new
 ui-row-messages = { $count ->
     [one] { $count } сообщение
     [few] { $count } сообщения
     [many] { $count } сообщений
    *[other] { $count } сообщения
 }
-# review: changed
 ui-list-pictures = Показывать &изображения отправителей в списке сообщений
-# review: changed
-ui-list-pictures-note = Показывает логотипы брендов или изображения из адресной книги для проверенных отправителей и инициалы, если изображения нет. Логотипы загружаются один раз для каждого бренда, а не для каждого сообщения.
-# review: new
+ui-list-pictures-note = В макете «В столбцах» показывает логотипы брендов или изображения из адресной книги для отправителей с подтвержденным доменом. Если изображения нет, отображаются инициалы. Логотип загружается один раз для каждого бренда, а не для каждого сообщения.
 ui-card-picture = Изображение:
-# review: new
 ui-card-picture-choose = &Выбрать...
-# review: new
-ui-picture-not-picture = Этот файл не является изображением PNG или JPEG.
-# review: new
-ui-picture-too-large = Это изображение слишком большое. Выберите изображение не больше 10 МБ, шириной и высотой не более 8000 пикселей.
+ui-picture-not-picture = Не удалось распознать изображение. Выберите исправный файл PNG или JPEG.
+ui-picture-too-large = Изображение слишком большое. Выберите файл размером не более 10 МБ. Ширина и высота изображения не должны превышать 8000 пикселей каждая.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Ключи шифрования
-# review: new
-ui-keys-intro = Ваши ключи подписывают ваши сообщения и открывают почту, зашифрованную для вас. Ключи ваших контактов проверяют их подписи и шифруют почту для них.
-# review: new
-ui-keys-empty = Ключей пока нет. Нажмите «Создать ключ», чтобы создать свой, или «Импорт», чтобы добавить уже имеющийся ключ.
-# review: new
+ui-keys-intro = Ваши ключи позволяют подписывать сообщения и читать почту, зашифрованную для вас. Ключи контактов нужны для проверки их цифровых подписей и шифрования сообщений, которые вы им отправляете.
+ui-keys-empty = Ключей пока нет. Чтобы создать свой ключ, нажмите «Создать ключ». Чтобы добавить имеющийся ключ, нажмите «Импорт».
 ui-keys-col-name = Имя
-# review: new
 ui-keys-col-address = Адрес
-# review: new
 ui-keys-col-kind = Тип
-# review: new
 ui-keys-col-status = Состояние
-# review: new
 ui-keys-kind-own = Ваш ключ
-# review: new
-ui-keys-kind-contact = Контакт
-# review: new
-ui-keys-status-verified = { $status }, проверен
-# review: new
-ui-keys-new = &Создать ключ...
-# review: new
+ui-keys-kind-contact = Ключ контакта
+ui-keys-status-verified = { $status }, владелец ключа подтвержден
+ui-keys-new = Создать &ключ...
 ui-keys-import = &Импорт...
-# review: new
 ui-keys-export = &Экспорт...
-# review: new
 ui-keys-backup = &Резервная копия...
-# review: new
-ui-keys-verify = &Проверить...
-# review: new
+ui-keys-verify = &Подтвердить владельца...
 ui-keys-new-title = Новый ключ
-# review: new
 ui-keys-new-for = Создать ключ для:
-# review: new
 ui-keys-new-make = &Создать ключ
-# review: new
-ui-keys-no-account = Сначала добавьте учетную запись почты: ключ создается для адресов учетной записи.
-# review: new
+ui-keys-no-account = Сначала добавьте почтовую учетную запись: ключ создается для ее адресов.
 ui-keys-memory-only = Пароли хранятся только в памяти, поэтому закрытый ключ, созданный или импортированный сейчас, нельзя будет использовать после закрытия Inbox Classic.
-# review: new
-ui-keys-backup-offer = Ваш новый ключ готов. Сохранить его резервную копию сейчас? Если этот компьютер будет утерян или сброшен, ключ можно будет восстановить только из резервной копии.
-# review: new
+ui-keys-backup-offer = Новый ключ готов. Сохранить его резервную копию сейчас? Если компьютер будет утерян или его данные будут стерты при сбросе, ключ можно будет восстановить только из резервной копии.
 ui-keys-backup-now = &Сохранить резервную копию...
-# review: new
 ui-keys-later = &Позже
-# review: new
 ui-keys-backup-title = Резервная копия ключа
-# review: new
 ui-keys-backup-intro = Резервная копия защищена парольной фразой. Храните файл и парольную фразу в разных надежных местах: чтобы восстановить ключ, нужно и то и другое.
-# review: new
 ui-keys-passphrase = &Парольная фраза:
-# review: new
 ui-keys-passphrase-again = П&овторите:
-# review: new
 ui-keys-passphrase-differ = Парольные фразы не совпадают.
-# review: new
 ui-keys-passphrase-short = Используйте парольную фразу длиной не менее 8 символов.
-# review: new
 ui-keys-backup-saved = Резервная копия сохранена.
-# review: new
 ui-keys-import-title = Импорт ключа
-# review: new
 ui-keys-import-passphrase = Этот закрытый ключ защищен парольной фразой. Введите ее, чтобы импортировать ключ:
-# review: new
 ui-keys-file-filter = Ключи OpenPGP
-# review: new
-ui-keys-use-for = Использовать этот ключ для { $addresses }? Ваши сообщения с этих адресов будут подписываться им, а почту, зашифрованную для него, можно будет читать здесь.
-# review: new
+ui-keys-use-for = Использовать этот ключ для адресов { $addresses }? Им будут подписываться сообщения с этих адресов. Здесь также можно будет читать почту, зашифрованную для этого ключа.
 ui-keys-use = &Использовать
-# review: new
 ui-keys-not-now = &Не сейчас
-# review: new
-ui-keys-remove-own = Удалить ваш ключ { $fingerprint }? Почту, зашифрованную для него, больше нельзя будет прочитать здесь, если вы снова не импортируете его резервную копию.
-# review: new
-ui-keys-remove-contact = Удалить ключ контакта { $name }? Его подписи нельзя будет проверить, а почту для него нельзя будет зашифровать, пока вы снова не добавите его ключ.
-# review: new
+ui-keys-remove-own = Удалить ваш ключ { $fingerprint }? Здесь больше нельзя будет читать сообщения, зашифрованные для этого ключа, пока вы не импортируете его резервную копию.
+ui-keys-remove-contact = Удалить ключ контакта «{ $name }»? Проверка цифровых подписей этого контакта и шифрование сообщений для него будут недоступны, пока вы снова не добавите его ключ.
 ui-key-properties-title = Свойства ключа
-# review: new
 ui-key-names = Имена:
-# review: new
 ui-key-fingerprint = Отпечаток:
-# review: new
 ui-key-status = Состояние:
-# review: new
 ui-key-created = Создан:
-# review: new
 ui-key-expires = Действителен до:
-# review: new
 ui-key-never = Бессрочно
-# review: new
 ui-key-algorithm = Алгоритм:
-# review: new
 ui-key-source = Источник:
-# review: new
 ui-key-addresses = Адреса:
-# review: new
-ui-key-address-verified = { $address } (проверен)
-# review: new
-ui-key-address-not-verified = { $address } (не проверен)
-# review: new
-ui-verify-title = Проверка ключа
-# review: new
-ui-verify-intro = Попросите контакт { $name } зачитать вам отпечаток своего ключа из своей программы, лично или по телефону. Не сравнивайте его с отпечатком, присланным по почте: тот, кто смог подменить ключ, может подменить и его.
-# review: new
+ui-key-address-verified = { $address } (владелец ключа подтвержден)
+ui-key-address-not-verified = { $address } (владелец ключа не подтвержден)
+ui-verify-title = Подтверждение владельца ключа
+ui-verify-intro = Попросите владельца ключа (контакт: { $name }) зачитать вам его отпечаток из своей программы при личной встрече или по телефону. Не сравнивайте его с отпечатком из сообщения электронной почты: тот, кто смог подменить ключ, мог подменить и этот отпечаток.
 ui-verify-fingerprint = Отпечаток ключа, который есть у вас:
-# review: new
 ui-verify-marks = { $count ->
-    [one] Если они совпадают, ключ будет отмечен как принадлежащий этому человеку для { $addresses }. Если этот адрес ему не принадлежит, нажмите «Различаются».
-   *[other] Если они совпадают, ключ будет отмечен как принадлежащий этому человеку для { $addresses }. Если один из этих адресов ему не принадлежит, нажмите «Различаются».
+    [0] В этом ключе нет адресов электронной почты, поэтому подтверждение владельца сохранить нельзя.
+    [1] Если отпечатки совпадают, будет подтверждено, что этот ключ принадлежит владельцу адреса { $addresses }. Если адрес не принадлежит вашему собеседнику, нажмите «Различаются».
+   *[other] Если отпечатки совпадают, будет подтверждено, что этот ключ принадлежит владельцу этих адресов: { $addresses }. Если хотя бы один адрес не принадлежит вашему собеседнику, нажмите «Различаются».
 }
-# review: new
 ui-verify-match = &Совпадают
-# review: new
 ui-verify-differ = &Различаются
-# review: new
-ui-verify-differs = Ваш ключ не совпадает с ключом контакта { $name }. Удалите его и снова попросите ключ у этого человека.
-# review: new
-ui-verify-unmark = Пометить как &непроверенный
-# review: new
+ui-verify-differs = Сохраненный у вас ключ отличается от ключа контакта «{ $name }». Удалите сохраненный ключ и снова запросите ключ у этого контакта.
+ui-verify-unmark = С&нять подтверждение владельца
 ui-account-security = Безопасность
-# review: new
-ui-account-security-intro = С ключом ваши сообщения можно подписывать, а другие люди могут отправлять вам зашифрованную почту.
-# review: new
+ui-account-security-intro = Ключ позволяет подписывать ваши сообщения и получать зашифрованную почту от других людей.
 ui-account-key = &Ключ для этой учетной записи:
-# review: new
 ui-account-key-none = Нет
-# review: new
 ui-account-key-new = &Создать ключ...
-# review: new
 ui-account-autocrypt = &Отправлять мой открытый ключ вместе с сообщениями (Autocrypt)
-# review: new
 ui-contact-key = Ключ шифрования:
-# review: new
 ui-contact-key-none = Нет ключа
-# review: new
 ui-contact-key-use-new = &Использовать новый ключ
-# review: new
 ui-contact-key-keep = &Оставить текущий
 ui-recipient-keys-title = Ключи получателей
 ui-recipient-col-recipient = Получатель
@@ -922,29 +733,16 @@ ui-compose-make-key = &Создать ключ...
 ui-compose-show-keys = &Ключи шифрования...
 ui-compose-encrypt-off = &Выключить шифрование
 ui-compose-keep-encrypted = Оставить &шифрование
-# review: new
 ui-setup-export-title = Экспорт настроек и учетных записей
-# review: new
 ui-setup-import-title = Импорт настроек и учетных записей
-# review: new
-ui-setup-export-intro = Выберите, что перенести на другой компьютер. Файл не содержит сообщений: там они загрузятся снова.
-# review: new
+ui-setup-export-intro = Выберите, что перенести на другой компьютер. Сообщения в этот файл не входят. На другом компьютере снова загрузится только почта, которая есть на сервере.
 ui-setup-use-passphrase = &Защитить файл парольной фразой
-# review: new
-ui-setup-passphrase-note = С парольной фразой файл шифруется и содержит также ваши пароли, данные для входа и закрытые ключи. Без нее каждая учетная запись запросит пароль на другом компьютере.
-# review: new
+ui-setup-passphrase-note = Если задать парольную фразу, файл будет зашифрован и будет содержать сохраненные пароли, данные для входа и закрытые ключи. Без парольной фразы на другом компьютере потребуется заново войти в учетные записи.
 ui-setup-export-button = &Экспорт...
-# review: new
 ui-setup-file-filter = Настройки и учетные записи Inbox Classic
-# review: new
 ui-setup-ask-passphrase = Этот файл защищен парольной фразой. Введите ее, чтобы увидеть содержимое файла:
-# review: new
 ui-setup-import-intro = Выберите, что импортировать. Учетные записи, которые уже есть на этом компьютере, останутся без изменений.
-# review: new
-ui-setup-from = Сохранено в Inbox Classic { $version } { $date }.
-# review: new
+ui-setup-from = Сохранено в Inbox Classic { $version }. Дата: { $date }.
 ui-setup-import-button = &Импорт
-# review: new
 ui-setup-done = Готово
-# review: new
 ui-setup-first-run = Импортировать настройки и учетные записи с другого компьютера...
