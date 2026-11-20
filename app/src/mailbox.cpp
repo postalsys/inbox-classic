@@ -1106,7 +1106,10 @@ void Mailbox::StartLoad(const LoadPlan& plan) {
         hint = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
         one(reader_.Folder(), reader_.Uid());
     }
-    loadRequest_ = pe_list_view_load(core_, view_.get(), selected, hint, plan.after, undoPending_);
+    // a list chosen just now with no message of the app's: the core selects the one it showed when it was left, else
+    // its newest
+    bool arrived = newList_ && !plan.selectUid && plan.after < 0;
+    loadRequest_ = pe_list_view_load(core_, view_.get(), selected, hint, plan.after, undoPending_, arrived);
     if (!loadRequest_) {
         // the core is closing: the list stays as it is
         ListNotRead(L"");
@@ -1707,6 +1710,8 @@ void Mailbox::OnSelectionChanged(bool rebuild) {
     if (!uid) {
         return;
     }
+    // for the list to open with it when it is come back to
+    pe_list_view_shown(core_, view_.get(), folder, uid);
     reader_.Open(folder, uid, AccountOf(folder), row);
 }
 
@@ -2014,6 +2019,14 @@ void Mailbox::SelectStart() {
         return;
     }
     started_ = true;
+    // the row the app was closed on, its list opening with the message it showed (the core selects it)
+    if (shownList_ == PE_TREE_LIST_NONE) {
+        core::String key(pe_tree_start(core_));
+        if (HTREEITEM item = key ? FindRow(key.get()) : nullptr) {
+            ChooseRow(item);
+            return;
+        }
+    }
     bool allInboxes = false;
     int64_t folder = 0;
     uint64_t uid = 0;
@@ -2985,6 +2998,10 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
             const TreeRow* row = RowAt(change->itemNew.hItem);
             TreeRow none;
             const TreeRow& place = row ? *row : none;
+            // the row to start with next time; a heading lists nothing
+            if (row && row->list != PE_TREE_LIST_NONE) {
+                pe_tree_chosen(core_, row->key.c_str());
+            }
             // an account has no messages of its own (folder 0); the folder bar and the title name what is selected: an account too, from another account's item, and
             // the same Inbox from its other row. Clicked or chosen with a key, the highlight is painted before the list is
             // read; chosen by the app, the list is read at once for what follows

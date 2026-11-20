@@ -173,6 +173,13 @@ const sections = [
                 checked: ['Flagging a message counts it', 'Flagged lists the flagged messages of every folder', 'Unflagged, it is no longer counted']
             },
             {
+                shot: 'folder-1-reopen',
+                name: 'A folder opens with a message',
+                what: 'Coming back to a folder (or All Inboxes, Flagged and the like) selects and shows the message that was shown in it when it was left; a folder not opened before shows its newest message. The app starts with the folder and the message it was closed on.',
+                how: 'Always on. Choose a folder in the folder list.',
+                checked: ['A folder come to shows its newest message', 'Back in the Inbox, the message shown when it was left is shown again']
+            },
+            {
                 shot: 'all-sent-1-list',
                 name: 'All Sent',
                 what: "With two or more accounts, All Sent after All Inboxes lists what every account sent in one list, newest first, with the To column and an Account column. Opened, it has a row per account for that account's Sent Items alone; the account headings no longer list Sent Items. It starts closed.",

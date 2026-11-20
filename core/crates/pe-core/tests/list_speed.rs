@@ -307,6 +307,16 @@ fn time_list(
         load(core, events, list).rows
     });
     let rows = list.row_count(core).unwrap();
+    // come to from another list with nothing remembered: its newest message found and selected
+    report.time(&format!("{name}: load come to (its newest selected)"), quick, || {
+        let reselect = pe_core::Reselect {
+            arrived: true,
+            ..Default::default()
+        };
+        let request = core.list_load(list, reselect).unwrap();
+        wait(events, request);
+        core.list_load_result(request).unwrap().unwrap().reselected.rows.len()
+    });
     report.time(&format!("{name}: a page in the middle"), far, || {
         page(core, events, list, rows / 2)
     });

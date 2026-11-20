@@ -4087,6 +4087,22 @@ public static class Dragger {
     Check ([bool](WaitFor { (Rows) -gt 0 -and (Rows) -eq $flaggedCount } 15)) "Flagged lists the flagged messages of every folder ($(Rows) of $flaggedCount)"
     Shot $main 'main-10-flagged'
     SelectFolder 0
+
+    Step 'a folder opens with a message'
+    # the subject of the row selected once the list is drawn and the reading pane shows its message
+    $openedRow = { WaitFor { $s = SelectedRow; if ($s -ge 0 -and (Shown)) { "$s" } } 20 }
+    [void](WaitFor { (Rows) -ge 2 })
+    SelectRow 1
+    $leftSubject = [Native.Win]::RemoteListText($list, 1, $COL_SUBJECT)
+    SelectFolder 3
+    $archiveRow = & $openedRow
+    # the list is newest first at this point of the test
+    Check ($archiveRow -eq '0') "a folder come to selects and shows its newest message (row $archiveRow)"
+    SelectFolder 0
+    $backRow = & $openedRow
+    $backSubject = if ($null -ne $backRow) { [Native.Win]::RemoteListText($list, [int]$backRow, $COL_SUBJECT) } else { '' }
+    Check ($leftSubject -ne '' -and $backSubject -eq $leftSubject) "back in the Inbox, the message shown when it was left is selected and shown ($backSubject, left $leftSubject)"
+    Shot $main 'folder-1-reopen'
     Step 'unsubscribing'
     # the list's server: a socket of the test, answered by hand
     $listServer = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, 0)

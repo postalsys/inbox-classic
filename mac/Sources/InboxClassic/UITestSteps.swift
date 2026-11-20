@@ -416,6 +416,33 @@ extension UITest {
         selectFolder(named: "Inbox")
     }
 
+    /// SCENARIO: a folder opens with a message: the one shown in it when it was left, else its newest
+    func folderOpensMessage() async throws {
+        step("a folder opens with a message")
+        let mailbox = main.mailbox
+        // the message selected once the list is drawn, and shown in the reading pane
+        func shown() async -> Message? {
+            _ = await waitUntil(20) {
+                !mailbox.listLoading && mailbox.selectedRow.map { mailbox.reader.uid == $0.uid } == true
+            }
+            return mailbox.selectedRow
+        }
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { !mailbox.listLoading && self.list.numberOfRows >= 2 }
+        await selectRow(1)
+        let left = mailbox.selectedRow?.subject
+        selectFolder(named: "Archive")
+        let opened = await shown()
+        let newest = (0..<list.numberOfRows).compactMap { mailbox.row($0)?.date }.max()
+        check(opened != nil && opened?.date == newest,
+              "a folder come to selects and shows its newest message (\(opened?.subject ?? "none"))")
+        selectFolder(named: "Inbox")
+        let back = await shown()
+        check(left != nil && back?.subject == left,
+              "back in the Inbox, the message shown when it was left is selected and shown (\(back?.subject ?? "none"), left \(left ?? "none"))")
+        await shot(main.window, "folder-1-reopen")
+    }
+
     /// the other addresses of the account set in Properties (field 11), empty to have none
     func setOtherAddresses(_ text: String, shot: String? = nil) async throws {
         command(.accounts)

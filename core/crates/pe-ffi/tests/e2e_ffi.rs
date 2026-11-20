@@ -360,7 +360,7 @@ fn reads_mail_through_the_c_api() {
     let list = view_of(inbox, None);
     let shown = pe_selection_new();
     unsafe { pe_selection_add(shown, inbox, uid) };
-    let request = unsafe { pe_list_view_load(core, list, shown, -1, -1, false) };
+    let request = unsafe { pe_list_view_load(core, list, shown, -1, -1, false, false) };
     wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
     let load = unsafe { pe_list_load_result(core, request) };
     let info = unsafe { &*pe_list_load_info(load) };
@@ -404,7 +404,7 @@ fn reads_mail_through_the_c_api() {
     unsafe { pe_list_load_free(load) };
     // a list that can not be read says why
     let nowhere = view_of(inbox + 1000, None);
-    let request = unsafe { pe_list_view_load(core, nowhere, std::ptr::null(), -1, -1, false) };
+    let request = unsafe { pe_list_view_load(core, nowhere, std::ptr::null(), -1, -1, false, false) };
     wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
     let load = unsafe { pe_list_load_result(core, request) };
     assert!(unsafe { &*pe_list_load_info(load) }.failed);
@@ -428,7 +428,7 @@ fn reads_mail_through_the_c_api() {
     let mut counted = PeSelectionSummary::default();
     assert!(unsafe { pe_selection_summary_result(core, request, &mut counted) });
     assert_eq!((counted.count, counted.unread), (2, 1));
-    let request = unsafe { pe_list_view_load(core, list, all, -1, -1, false) };
+    let request = unsafe { pe_list_view_load(core, list, all, -1, -1, false, false) };
     wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
     let load = unsafe { pe_list_load_result(core, request) };
     assert_eq!(unsafe { &*pe_list_load_info(load) }.reselection, PeReselection::All);
@@ -1034,7 +1034,15 @@ fn null_and_bad_arguments() {
         assert!(pe_message_view(core, 1, 1, false).is_null());
         assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);
         assert_eq!(
-            pe_list_view_load(std::ptr::null(), std::ptr::null(), std::ptr::null(), -1, -1, true),
+            pe_list_view_load(
+                std::ptr::null(),
+                std::ptr::null(),
+                std::ptr::null(),
+                -1,
+                -1,
+                true,
+                false
+            ),
             0
         );
         assert_eq!(pe_list_view_load_page(std::ptr::null(), std::ptr::null(), 0), 0);

@@ -744,6 +744,8 @@ pub enum PeReselection {
     Restored = 3,
     /// The row after a removal (`after`): a new selection
     After = 4,
+    /// A list come to (`arrived`): the message it showed when it was left, else its newest; a new selection, shown
+    Arrived = 5,
 }
 
 impl From<pe_core::Reselection> for PeReselection {
@@ -754,6 +756,7 @@ impl From<pe_core::Reselection> for PeReselection {
             pe_core::Reselection::All => PeReselection::All,
             pe_core::Reselection::Restored => PeReselection::Restored,
             pe_core::Reselection::After => PeReselection::After,
+            pe_core::Reselection::Arrived => PeReselection::Arrived,
         }
     }
 }
@@ -801,7 +804,9 @@ pub struct PeListLoad {
 /// - `after`: the row to select in place of the selection, where the rows an action took out of the list were (the
 ///   last row when the list is shorter now); -1 for none;
 /// - `restored`: select what the last `pe_undo` brought back, or the store took back after `ActionUndone`, in place of
-///   the selection when the list has it (a write after the list was read reads it again first).
+///   the selection when the list has it (a write after the list was read reads it again first);
+/// - `arrived`: the user came to this list from another (a row of the folder tree chosen) and nothing is selected: the
+///   message it showed when it was left (`pe_list_view_shown`) is selected, else its newest (`PE_RESELECTION_ARRIVED`).
 ///
 /// `ListReady` follows with the request this returns in `uid`, then `pe_list_load_result`. A newer load of the same
 /// view cancels this one and the pages asked for before it: their events never come. What it read is kept for the
@@ -818,6 +823,7 @@ pub unsafe extern "C" fn pe_list_view_load(
     hint: i64,
     after: i64,
     restored: bool,
+    arrived: bool,
 ) -> u64 {
     // SAFETY: as the caller guarantees
     let Some(view) = (unsafe { view.as_ref() }) else {
@@ -829,9 +835,26 @@ pub unsafe extern "C" fn pe_list_view_load(
         hint: u64::try_from(hint).ok(),
         after: u64::try_from(after).ok(),
         restored,
+        arrived,
     };
     // SAFETY: as the caller guarantees
     unsafe { with_shared(core, 0, |core| core.list_load(&view.0, reselect).unwrap_or(0)) }
+}
+
+/// The message `uid` of `folder` is the one the list `view` shows in the reading pane now: coming back to the list
+/// selects it again (`arrived` of `pe_list_view_load`), also after a restart. A list of words typed remembers nothing.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_shown(core: *const PeCore, view: *const PeListView, folder: i64, uid: u64) {
+    // SAFETY: as the caller guarantees
+    let Some(view) = (unsafe { view.as_ref() }) else {
+        return;
+    };
+    let message = pe_core::MessageRef { folder, uid };
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, (), |core| core.list_shown(&view.0, message).unwrap_or(())) }
 }
 
 /// Loads `PE_LIST_PAGE` rows of the list `view` shows from `offset` on, off the window thread as `pe_list_view_load`

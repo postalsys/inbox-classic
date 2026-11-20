@@ -3325,6 +3325,11 @@ pub async fn all_inboxes_by_account(d: &Driver) {
     if let Some(popover) = main.folder_popover.borrow().as_ref() {
         popover.popdown();
     }
+    // the second account's Inbox opened above with its newest message, which was read: one made unread there again
+    if let Some(uid) = d.messages_at(d.ports.second_rest, "INBOX").first().and_then(|m| m["uid"].as_u64()) {
+        let body = format!(r#"{{"uids":[{uid}],"flags":["\\Seen"],"action":"remove"}}"#);
+        let _ = super::http(d.ports.second_rest, "POST", "/v1/mailboxes/INBOX/messages/flags", Some(&body));
+    }
     let _ = tree.activate_action("account.mark-all-read", None);
     d.check(
         wait_until(20, || d.unread_at(d.ports.rest) == 0).await && d.unread_at(d.ports.second_rest) >= 1,
@@ -4668,4 +4673,59 @@ async fn whole_list(what: &str, wrong: &mut Vec<String>) {
             "{what}: {drawn} rows drawn, {filled} of the first 5 filled, {expected} listed"
         ));
     }
+}
+
+/// The newest message of `folder` by date: what a folder opened for the first time selects
+fn newest_in(folder: i64) -> Option<pe_store::Message> {
+    let mut view = pe_core::ListView::new();
+    view.set_scope(Some(pe_core::Scope::Folder(folder)));
+    view.set_sort(pe_store::Sort {
+        field: pe_store::SortField::Date,
+        ascending: false,
+    });
+    view.rows(&shell().core, 0, 1).ok()?.into_iter().next()
+}
+
+/// The message selected and shown in the reading pane, waited for: its subject
+async fn shown_subject() -> Option<String> {
+    let main = shell().main();
+    let shown = wait_until(20, || {
+        !list_settling()
+            && main
+                .list
+                .selected()
+                .is_some_and(|(_, m)| main.reader.shows(m.folder_id, m.info.uid))
+    })
+    .await;
+    shown.then(|| main.list.selected().map(|(_, m)| m.info.subject)).flatten()
+}
+
+/// SCENARIO: a folder opens with a message: the one shown in it when it was left, else its newest
+pub async fn folder_opens_message(d: &Driver) {
+    d.step("a folder opens with a message");
+    let main = shell().main();
+    select_folder("Inbox");
+    wait_until(20, || rows() >= 2).await;
+    // a message that is not the newest, shown
+    select_row(1).await;
+    let left = main.list.selected().map(|(_, m)| m.info.subject);
+    let Some(archive) = folder_id("Archive") else {
+        d.check(false, "the account has an Archive folder");
+        return;
+    };
+    let newest = newest_in(archive).map(|m| m.info.subject);
+    select_folder("Archive");
+    let shown = shown_subject().await;
+    d.check(
+        newest.is_some() && shown == newest,
+        &format!("a folder come to selects and shows its newest message ({shown:?}, newest {newest:?})"),
+    );
+    select_folder("Inbox");
+    let back = shown_subject().await;
+    d.check(
+        left.is_some() && back == left,
+        &format!("back in the Inbox, the message shown when it was left is selected and shown ({back:?}, left {left:?})"),
+    );
+    pause(500).await;
+    d.shot(&main_window(), "folder-1-reopen").await;
 }

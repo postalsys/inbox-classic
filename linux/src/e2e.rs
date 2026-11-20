@@ -1173,6 +1173,7 @@ async fn scenario(d: Rc<Driver>) {
     files(&d).await;
     organizing(&d).await;
     flagged_folder(&d).await;
+    steps::folder_opens_message(&d).await;
     steps::unsubscribing(&d).await;
     steps::invitation_and_logo(&d).await;
     steps::one_account_tree(&d).await;

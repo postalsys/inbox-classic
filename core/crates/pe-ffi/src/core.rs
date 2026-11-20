@@ -1423,6 +1423,36 @@ pub unsafe extern "C" fn pe_tree_reselect(tree: *const PeTree, key: *const c_cha
     pe_core::tree::reselect(&tree.1, key).map_or(-1, |at| at as i64)
 }
 
+/// The row of the folder tree the user chose (its `key`), kept for the app to start with it next time
+/// (`pe_tree_start`)
+///
+/// # Safety
+/// `core` must be a live handle, `key` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_tree_chosen(core: *const PeCore, key: *const c_char) {
+    // SAFETY: as the caller guarantees
+    let Some(key) = (unsafe { arg(key) }) else {
+        return;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, (), |core| core.tree_chosen(key).unwrap_or(())) }
+}
+
+/// The key of the row of the folder tree chosen when the app was closed (`pe_tree_chosen`), for the app to start with
+/// that row when its tree has it; NULL when none was. Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_tree_start(core: *const PeCore) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.tree_start().ok().flatten().map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
 /// # Safety
 /// `tree` must be NULL or a list that was not freed yet.
 #[unsafe(no_mangle)]

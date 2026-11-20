@@ -199,6 +199,16 @@ impl Store {
         self.set_bool_setting("previews.pdf_crashed", crashed)
     }
 
+    /// What the window remembers of a list or of the folder tree (`key`), kept from one start to the next; None when
+    /// nothing was
+    pub fn remembered(&self, key: &str) -> Result<Option<String>> {
+        self.text_setting(&format!("remembered.{key}"))
+    }
+
+    pub fn remember(&self, key: &str, value: &str) -> Result<()> {
+        self.set_text_setting(&format!("remembered.{key}"), value)
+    }
+
     /// A setting that is on or off, `fallback` when it was never set
     pub(crate) fn bool_setting(&self, key: &str, fallback: bool) -> Result<bool> {
         Ok(self.text_setting(key)?.map_or(fallback, |value| value == "1"))
