@@ -10,5 +10,5 @@
     <li><b>Krypteringsnøgler</b> søges, når du krypterer en meddelelse og mangler modtagerens nøgle, eller når du selv starter en søgning. Ved søgning med en e-mailadresse kontakter Inbox Classic først adressens domæne (Web Key Directory). Hvis nøglen ikke findes, og søgning på keys.openpgp.org er slået til, sendes adressen også dertil. Ved søgning med et fingeraftryk eller nøgle-id sendes denne identifikator til keys.openpgp.org i stedet for e-mailadressen. Når du offentliggør din nøgle, sendes den offentlige nøgle til keys.openpgp.org, og der anmodes om bekræftelse af dens e-mailadresser.</li>
     <!--os:mac--><li><b>Opdateringer</b>, fra inboxclassic.com, når du selv søger, eller automatisk søgning er slået til.</li><!--/os-->
 </ul>
-<p>Loginkoder vises kun særskilt, når udbyderens Authentication-Results-header bekræfter afsenderens domæne via DKIM. Genkendelsen foregår lokalt og kræver ingen særskilt forbindelse.</p>
+<!--review--><p>Loginkoder vises kun særskilt, når udbyderens Authentication-Results / ARC-Authentication-Results-header bekræfter afsenderens domæne via DKIM. Genkendelsen foregår lokalt og kræver ingen særskilt forbindelse.</p><!--/review-->
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>

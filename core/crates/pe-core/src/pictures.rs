@@ -54,15 +54,18 @@ pub(crate) fn sender_of(address: &str, headers: &[pe_mime::parser::Header], trus
 /// domain, or DKIM passed for a signature of that domain or of a domain it is under (`news.shop.com` signed by
 /// `shop.com`; never a sibling, so `evil.me.uk` does not vouch for `shop.me.uk`). Only the topmost
 /// Authentication-Results counts, and only when it is the provider's (a `trusted` authserv-id): one the sender wrote
-/// into the message sits below the provider's, or is the only one where the provider adds none.
+/// into the message sits below the provider's, or is the only one where the provider adds none. Without it, the
+/// provider's own ARC set counts (authres.rs `arc_verdict`).
 pub(crate) fn from_verified(headers: &[pe_mime::parser::Header], trusted: &[String], domain: &str) -> bool {
-    let Some(topmost) = headers
+    let topmost = headers
         .iter()
-        .find(|h| h.key.eq_ignore_ascii_case("authentication-results"))
-    else {
-        return false;
-    };
-    let Some(results) = verdict(std::slice::from_ref(topmost), trusted) else {
+        .find(|h| h.key.eq_ignore_ascii_case("authentication-results"));
+    // the topmost Authentication-Results when it is the provider's; else the provider's own ARC set (Microsoft's
+    // Authentication-Results names no authserv-id, its ARC-Authentication-Results does)
+    let results = topmost
+        .and_then(|topmost| verdict(std::slice::from_ref(topmost), trusted))
+        .or_else(|| crate::authres::arc_verdict(headers, trusted));
+    let Some(results) = results else {
         return false;
     };
     let under = |signer: &str| {
@@ -234,5 +237,34 @@ mod tests {
             "never in Junk E-mail"
         );
         assert!(super::sender(&message("undisclosed-recipients:;", "dkim=pass"), &providers).is_none());
+    }
+
+    /// Microsoft's verdict is in its ARC set: its Authentication-Results names no authserv-id
+    #[test]
+    fn a_sender_is_confirmed_by_the_providers_arc_set() {
+        let providers = vec!["microsoft.com".to_string()];
+        let parse = |text: &str| pe_mime::parser::parse(text.as_bytes()).unwrap();
+        let microsoft = parse(
+            "ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none; b=x\r\n\
+             ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass smtp.mailfrom=shop.com; dmarc=pass\r\n \
+             action=none header.from=shop.com; dkim=pass header.d=shop.com; arc=none\r\n\
+             Authentication-Results: spf=pass smtp.mailfrom=shop.com; dkim=pass header.d=shop.com;dmarc=pass\r\n \
+             action=none header.from=shop.com;\r\n\
+             From: news@shop.com\r\nSubject: hi\r\n\r\nbody",
+        );
+        assert!(
+            super::sender(&microsoft, &providers).unwrap().verified,
+            "Microsoft's ARC set confirms it"
+        );
+        // the same set sealed in another name, as a sender could write it: nothing confirmed
+        let forged = parse(
+            "ARC-Seal: i=1; a=rsa-sha256; d=forged.example; cv=none; b=x\r\n\
+             ARC-Authentication-Results: i=1; mx.microsoft.com 1; dmarc=pass header.from=shop.com\r\n\
+             From: news@shop.com\r\nSubject: hi\r\n\r\nbody",
+        );
+        assert!(
+            !super::sender(&forged, &providers).unwrap().verified,
+            "a set the provider did not seal"
+        );
     }
 }
