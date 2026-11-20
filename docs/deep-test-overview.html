@@ -1,0 +1,244 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Deep Test Plan</title>
+<style>
+/* Layout: one reading column; the incident first, then what it teaches, then the suite as layers, then the order of work. */
+:root{
+  --bg:#f4f5f7;--panel:#fff;--ink:#1b1e25;--muted:#5b6270;--line:#dfe2e8;
+  --accent:#1f5fae;--soft:#e6eefa;
+  --ok:#1d7a46;--okbg:#e3f3ea;--warn:#8a5c00;--warnbg:#fbf0d6;--bad:#a3352b;--badbg:#f9e4e1;
+  --blank:#c9ced8;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#14161a;--panel:#1d2026;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;
+  --ok:#6fd39b;--okbg:#173325;--warn:#e8c05a;--warnbg:#3a3018;--bad:#f0897d;--badbg:#3d1f1c;
+  --blank:#3b404a;color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#14161a;--panel:#1d2026;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;
+  --ok:#6fd39b;--okbg:#173325;--warn:#e8c05a;--warnbg:#3a3018;--bad:#f0897d;--badbg:#3d1f1c;
+  --blank:#3b404a;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1000px;margin:0 auto;padding-block:36px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+h1{font-size:30px;line-height:1.2;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:21px;margin:30px 0 0;text-wrap:balance}
+h3{font-size:16px;margin:0 0 4px}
+p{margin:0}
+ul{margin:4px 0 0;padding-left:20px}
+li{margin:3px 0}
+code{font:12.5px var(--mono);background:var(--soft);padding:1px 5px;border-radius:4px}
+.lede{color:var(--muted);font-size:16px;max-width:760px}
+.meta{color:var(--muted);font-size:13px}
+.sub{color:var(--muted);max-width:760px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+.grid3{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.stack{display:flex;flex-direction:column;gap:8px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;vertical-align:1px}
+.tag.ok{background:var(--okbg);color:var(--ok)}.tag.warn{background:var(--warnbg);color:var(--warn)}.tag.bad{background:var(--badbg);color:var(--bad)}.tag.info{background:var(--soft);color:var(--accent)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+/* the page strip: the list's pages, which were kept and which the window showed */
+.strip{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:10px}
+.pg{height:34px;border-radius:5px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font:11px var(--mono);color:var(--muted);background:var(--bg)}
+.pg.kept{background:var(--okbg);color:var(--ok);border-color:transparent}
+.pg.lost{background:var(--badbg);color:var(--bad);border-color:transparent}
+.pg.see{outline:2px solid var(--accent);outline-offset:1px}
+.key{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted);margin-top:8px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.layers{display:flex;flex-direction:column;gap:8px}
+.layer{display:grid;grid-template-columns:150px 1fr;gap:6px 16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.layer .name{font-weight:700}
+.layer .name small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+@media (max-width:640px){.layer{grid-template-columns:1fr}}
+.steps{display:flex;flex-direction:column;gap:8px;counter-reset:pr}
+.pr{display:grid;grid-template-columns:54px 1fr;gap:4px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 18px}
+.pr .no{font:700 13px var(--mono);color:var(--accent)}
+.open{border:1px dashed var(--accent);background:var(--soft);border-radius:10px;padding:14px 18px}
+.open h3{color:var(--accent)}
+.mock{font:12.5px/1.55 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre}
+</style>
+
+<main>
+<header class="stack">
+  <h1>The deep test: Inbox Classic on mailboxes the size people really have</h1>
+  <p class="lede">An on-demand suite that runs all three apps against several accounts of thousands of messages each, does what a user does for a long time, and checks after every step that the window still shows what the server has.</p>
+  <p class="meta">Draft for review, 2026-11-20. Follows the 0.19.1 fix (#226). All seven decisions are made. The written plan is <code>docs/deep-test-plan.md</code>, the journeys are in <code>scripts/ui-e2e/DEEP.md</code>. Nothing is built yet.</p>
+</header>
+
+<h2>What happened</h2>
+<p class="sub">On Linux, with a large Inbox, going to Flagged and back left a list of blank rows that opened nothing. It shipped in 0.19.0 with every test green.</p>
+
+<div class="card">
+  <h3>The list of a 950 message folder, as pages of 100</h3>
+  <p class="sub">The window keeps 8 pages. GTK read every row when the list was replaced, so all 10 pages were asked for at once and the first two were pushed out again. Those are the ones on screen.</p>
+  <div class="strip" aria-label="Ten pages of the list; the first two were lost, the rest kept">
+    <div class="pg lost see">0</div><div class="pg lost">100</div><div class="pg kept">200</div><div class="pg kept">300</div><div class="pg kept">400</div><div class="pg kept">500</div><div class="pg kept">600</div><div class="pg kept">700</div><div class="pg kept">800</div><div class="pg kept">900</div>
+  </div>
+  <div class="key"><span><span class="sw" style="background:var(--badbg)"></span>asked for, then dropped, never asked for again</span><span><span class="sw" style="background:var(--okbg)"></span>kept, off screen</span><span><span class="sw" style="outline:2px solid var(--accent)"></span>what the user sees</span></div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h3>Why no test saw it</h3>
+    <ul>
+      <li>The UI tests use folders of 4 to 30 messages. No list ever had a second page, let alone a ninth.</li>
+      <li>The speed test has 229,000 messages, but it calls the core. The core was right all along.</li>
+      <li>It needed a sequence (a list replaced while another was shown), not one action.</li>
+      <li>It needed one toolkit's habit. The Mac and Windows read only the rows in sight.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>What that says about the gap</h3>
+    <ul>
+      <li>Nothing tests <b>the windows</b> at scale. Each app has its own cache of pages between the core and the screen (Windows keeps 8 pages of 100 too).</li>
+      <li>Nothing tests <b>long sequences</b>. The user's words were "eventually all folders are empty".</li>
+      <li>Nothing compares the screen with the server continuously. Each step checks only what it just did.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Where the same kind of bug can hide</h2>
+<p class="sub">Each row is a family of situations the regular tests can not reach, with what the deep test would do about it. The first is the incident.</p>
+
+<div class="card scroll">
+<table>
+<thead><tr><th>Family</th><th>Situations</th><th>Needs</th></tr></thead>
+<tbody>
+<tr><td><b>Pages and what is kept</b></td><td>More pages than kept; a page asked for twice; the last, partial page; a folder of exactly 100, 800, 801; rows read far from the screen (End, Page Down held, a scroll bar dragged, type to find)</td><td class="n">scale</td></tr>
+<tr><td><b>Answers that come late</b></td><td>A page of the folder before arrives after the switch; sort changed while a page is on its way; a search typed fast, then cleared; folders clicked faster than their lists come</td><td class="n">scale, speed</td></tr>
+<tr><td><b>The list changes under the window</b></td><td>New mail while scrolled to the middle; another client deletes the rows on screen, or the selected one; the count shrinks below the scroll position; a folder emptied, renamed or deleted elsewhere; UIDVALIDITY changes</td><td class="n">scale, a second client</td></tr>
+<tr><td><b>Selection across pages</b></td><td>Select All of 5,000 then delete, move, flag, mark read; Shift ranges over pages not loaded; the selection kept through a sync; Undo; a move the server refuses half way</td><td class="n">scale</td></tr>
+<tr><td><b>Views built from many folders</b></td><td>All Inboxes, All Sent, All Drafts, Flagged over 4 accounts; one account off line or with a wrong password; an account removed while its rows are listed; "by account" on and off</td><td class="n">several accounts</td></tr>
+<tr><td><b>Conversations</b></td><td>A conversation of 300; expanding one at a page boundary; a conversation across folders; Watch, Ignore; conversations switched on and off in a big folder</td><td class="n">scale</td></tr>
+<tr><td><b>Finding</b></td><td>A search with thousands of hits, paged; a search while the text is still being fetched; every operator against the server's truth; a search in All Inboxes</td><td class="n">scale</td></tr>
+<tr><td><b>The first sync and restarts</b></td><td>The list usable while 20,000 messages arrive; counts that only go up; quit in the middle and start again; the same folder, row and scroll position after a restart</td><td class="n">scale, time</td></tr>
+<tr><td><b>The connection</b></td><td>Dropped in the middle of a batch; a server slow for one command; refused extra connections; IDLE through hours; the queue while off line</td><td class="n">faults, time</td></tr>
+<tr><td><b>Rules, agents, bulk commands</b></td><td>A rule run on 5,000; Empty Folder of 10,000; Mark All Read; an agent's bulk move with the window open on that folder</td><td class="n">scale</td></tr>
+<tr><td><b>The folder tree</b></td><td>400 folders, nested deep; names in other scripts; unread counts of every folder against the server after every step</td><td class="n">scale</td></tr>
+<tr><td><b>Slow growth</b></td><td>Memory, open files, connections, the store's size after an hour of use; windows opened and closed 500 times</td><td class="n">time</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>The suite</h2>
+<p class="sub">Five layers. The lower ones are cheap and find the core's bugs before a window is involved. The upper ones are where this incident lived.</p>
+
+<div class="layers">
+  <div class="layer">
+    <div class="name">1. The world<small>what the servers hold</small></div>
+    <div>A mailbox generator with a seed: accounts, folder trees, messages with real shapes (conversations, attachments, flags, dates over years, other scripts, a few huge ones). Built once into an ImapKit snapshot and loaded in seconds, so no run spends ten minutes adding mail. One ImapKit plays every account (it has users). The same seed gives the same world on every platform.</div>
+  </div>
+  <div class="layer">
+    <div class="name">2. The checks<small>after every step</small></div>
+    <div>One set of things that must always hold, compared with the server over ImapKit's REST API:
+      <ul>
+        <li>the list has as many rows as the server has messages for that view;</li>
+        <li>no row in sight is blank once the app is quiet, and the rows in sight are the server's, in the sort order;</li>
+        <li>the selected row's message is the one in the reading pane;</li>
+        <li>every folder's total and unread count match the server; no message is listed twice;</li>
+        <li>nothing the window shows belongs to a folder left behind.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="layer">
+    <div class="name">3. Journeys<small>written, named</small></div>
+    <div>One for each family above: a fixed sequence with its own checks, as the regular scenario has, but in the big world. They are the readable part and the list a release is judged by. They go into <code>scripts/ui-e2e/DEEP.md</code> the way steps go into <code>SCENARIO.md</code>.</div>
+  </div>
+  <div class="layer">
+    <div class="name">4. The walk<small>random, with a seed</small></div>
+    <div>Thousands of steps drawn from a table of what a user and a server can do (click a folder, scroll, sort, search, select, delete, move, flag, reply, send, switch accounts; new mail, another client's changes, a dropped connection), with the checks after each. Some stretches run "fast fingers": several actions before anything has come back. A failure prints its seed and step, and the run can be played again up to that step. This is the layer that finds "eventually".</div>
+  </div>
+  <div class="layer">
+    <div class="name">5. Health<small>over the run</small></div>
+    <div>Memory, open files, IMAP connections and the store's size sampled through the walk. Judged as growth between the first and last third of the run, not as fixed numbers, so a slow runner fails nothing.</div>
+  </div>
+</div>
+
+<h2>How it is built</h2>
+<div class="grid">
+  <div class="card">
+    <h3>One conductor, three small drivers <span class="tag ok">decided</span></h3>
+    <p>The world, the journeys, the walk and the checks are written once, in Rust (<code>pe-testkit</code> and a new <code>pe-deep</code> binary). Each app's UI test learns a short vocabulary: about 30 actions ("click folder X", "scroll to row N", "press Delete") and one "say what the window shows". The conductor sends lines, the driver answers lines.</p>
+    <div class="mock">&gt; folder work/Inbox
+&gt; scroll 4200
+&gt; observe
+&lt; rows 18044 first 4188 blank 0 selected - pane -
+&gt; select 4201
+&lt; rows 18044 selected 4201 pane "Re: Q3 numbers"</div>
+    
+  </div>
+  <div class="card">
+    <h3>The same walk without a window</h3>
+    <p>The conductor can also drive the core directly. That run takes minutes, needs no desktop, and tells a core bug from a window bug at once: the same seed fails in both, or only with a window. It can run on GitHub on a schedule, as the OpenPGP suite does.</p>
+    <h3 style="margin-top:12px">Nothing new in the shipped apps</h3>
+    <p>The drivers live where the UI tests live now: Linux's <code>e2e</code> feature, the Mac's in-process test host, PowerShell outside the Windows exe. No port, no pipe and no test command in a release build. The security review checks exactly that.</p>
+  </div>
+</div>
+
+<div class="card scroll">
+  <h3>The world <span class="tag ok">decided</span></h3>
+  <table>
+  <thead><tr><th>Account</th><th>Messages</th><th>Shape</th><th>There for</th></tr></thead>
+  <tbody>
+    <tr><td>Work</td><td class="n">20,000</td><td>Inbox of 18,000, 60 folders, long conversations</td><td>pages, selection, conversations</td></tr>
+    <tr><td>Home</td><td class="n">6,000</td><td>400 folders nested 6 deep, names in other scripts</td><td>the tree, counts</td></tr>
+    <tr><td>Gmail-like</td><td class="n">5,000</td><td>signed in with OAuth, All Mail, labels</td><td>Archive, sign-in that expires</td></tr>
+    <tr><td>Lists</td><td class="n">3,000</td><td>newsletters, bounces, invitations, encrypted mail, 40 MB messages</td><td>every kind of message in a big list</td></tr>
+    <tr><td>Broken</td><td class="n">200</td><td>slow, drops connections, refuses a second one, password changed half way</td><td>the views of many accounts when one is ill</td></tr>
+  </tbody>
+  </table>
+  <p class="sub" style="margin-top:8px">About 34,000 messages. A larger profile (150,000 and more) takes only another seed and more time.</p>
+</div>
+
+<h2>Running it</h2>
+<div class="grid3">
+  <div class="card"><h3>By hand</h3><p><code>scripts/deep-test.sh linux</code>, <code>mac</code>, <code>windows</code>, <code>core</code> or all. <code>--seed</code>, <code>--steps</code>, <code>--until</code> to play a failure again.</p></div>
+  <div class="card"><h3>On GitHub <span class="tag ok">decided</span></h3><p>A workflow started by hand runs the three apps on GitHub's machines and is what a release reads. The core walk also runs weekly with a new seed, not a gate. Never part of a pull request's checks.</p></div>
+  <div class="card"><h3>Before a release <span class="tag ok">decided</span></h3><p><code>release.sh</code> refuses to start without a passing deep run of the commit, as it does for translations not reviewed. <code>ALLOW_NO_DEEP=1</code> releases anyway, with a warning.</p></div>
+</div>
+<div class="card">
+  <h3>What a run leaves</h3>
+  <p>A page like the feature map: the journeys with pass or fail, the walk as a timeline with its seed, the health curves, and for a failure the last 30 steps, a screenshot, the window's answer, the server's answer and a copy of the store.</p>
+  <h3 style="margin-top:12px">What a failure becomes</h3>
+  <p>Every bug the deep test finds is fixed with a small, fixed step in the regular scenario, as 27a was for this one. The deep test finds, the regular test keeps.</p>
+</div>
+
+<h2>The order of work</h2>
+<p class="sub">Each step is a pull request. Each one ends with <code>/simplify</code>, <code>/security-review</code>, prettier, the tests, and CI watched to the end. Bugs found on the way get pull requests of their own.</p>
+<div class="steps">
+  <div class="pr"><div class="no">PR 1</div><div><b>The plan and the catalog.</b> <code>docs/deep-test-plan.md</code>, this page, and <code>DEEP.md</code> with every journey written out before any is built.</div></div>
+  <div class="pr"><div class="no">PR 2</div><div><b>The world.</b> The generator in <code>pe-testkit</code>, several users on one ImapKit, the snapshot. A test that the same seed gives the same mailboxes.</div></div>
+  <div class="pr"><div class="no">PR 3</div><div><b>The conductor on the core.</b> Checks, the table of actions, the walk, replay by seed. On demand and weekly on GitHub. Expect it to find things.</div></div>
+  <div class="pr"><div class="no">PR 4</div><div><b>Linux's driver and the journeys.</b> Where the incident was. The hand-started workflow, and <code>release.sh</code> asks for Linux's run from here on. Proof first: the walk on 0.19.0's list model must find the blank list by itself.</div></div>
+  <div class="pr"><div class="no">PR 5</div><div><b>The Mac's driver.</b> The release asks for its run too.</div></div>
+  <div class="pr"><div class="no">PR 6</div><div><b>Windows' driver.</b> On GitHub's runner; the build machine is not steady enough. The release asks for all three.</div></div>
+  <div class="pr"><div class="no">PR 7</div><div><b>Faults and a second client.</b> Dropped connections, slow commands, another client's changes during the walk; the Broken account.</div></div>
+  <div class="pr"><div class="no">PR 8</div><div><b>Health, the report page, the docs.</b> The samples, the page a run leaves, and the docs (<code>docs/testing.md</code>, <code>CLAUDE.md</code>).</div></div>
+</div>
+
+<h2>Decisions</h2>
+<div class="card scroll">
+<table>
+<thead><tr><th>Decided</th><th>Choice</th></tr></thead>
+<tbody>
+<tr><td>How it is built</td><td>One conductor in Rust, a small driver in each app's UI test, and the same run on the core without a window.</td></tr>
+<tr><td>What it contains</td><td>Named journeys for each family, and the random walk with a seed.</td></tr>
+<tr><td>Size</td><td>About 34,000 messages in 5 accounts, about 30 minutes a platform. A larger overnight profile by seed.</td></tr>
+<tr><td>The release</td><td><code>release.sh</code> refuses without a passing run of the commit; <code>ALLOW_NO_DEEP=1</code> goes on.</td></tr>
+<tr><td>From when</td><td>For each platform from the pull request that gives it a driver, Linux first. Platforms without one are skipped with a note.</td></tr>
+<tr><td>On a schedule</td><td>The core walk weekly on GitHub with a new seed, not a gate.</td></tr>
+<tr><td>Where</td><td>GitHub's runners, started by hand, the result recorded for the commit. Local runs stay possible.</td></tr>
+<tr><td>Now</td><td>The plan and the journeys are written for review. Building starts when you say so.</td></tr>
+</tbody>
+</table>
+</div>
+</main>
