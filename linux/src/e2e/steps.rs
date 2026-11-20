@@ -3326,9 +3326,18 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         popover.popdown();
     }
     // the second account's Inbox opened above with its newest message, which was read: one made unread there again
-    if let Some(uid) = d.messages_at(d.ports.second_rest, "INBOX").first().and_then(|m| m["uid"].as_u64()) {
+    if let Some(uid) = d
+        .messages_at(d.ports.second_rest, "INBOX")
+        .first()
+        .and_then(|m| m["uid"].as_u64())
+    {
         let body = format!(r#"{{"uids":[{uid}],"flags":["\\Seen"],"action":"remove"}}"#);
-        let _ = super::http(d.ports.second_rest, "POST", "/v1/mailboxes/INBOX/messages/flags", Some(&body));
+        let _ = super::http(
+            d.ports.second_rest,
+            "POST",
+            "/v1/mailboxes/INBOX/messages/flags",
+            Some(&body),
+        );
     }
     let _ = tree.activate_action("account.mark-all-read", None);
     d.check(
@@ -4697,7 +4706,9 @@ async fn shown_subject() -> Option<String> {
                 .is_some_and(|(_, m)| main.reader.shows(m.folder_id, m.info.uid))
     })
     .await;
-    shown.then(|| main.list.selected().map(|(_, m)| m.info.subject)).flatten()
+    shown
+        .then(|| main.list.selected().map(|(_, m)| m.info.subject))
+        .flatten()
 }
 
 /// SCENARIO: a folder opens with a message: the one shown in it when it was left, else its newest
@@ -4724,7 +4735,9 @@ pub async fn folder_opens_message(d: &Driver) {
     let back = shown_subject().await;
     d.check(
         left.is_some() && back == left,
-        &format!("back in the Inbox, the message shown when it was left is selected and shown ({back:?}, left {left:?})"),
+        &format!(
+            "back in the Inbox, the message shown when it was left is selected and shown ({back:?}, left {left:?})"
+        ),
     );
     pause(500).await;
     d.shot(&main_window(), "folder-1-reopen").await;
