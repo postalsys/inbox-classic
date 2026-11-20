@@ -159,6 +159,8 @@ pub struct Mailbox {
     undo_label: RefCell<Option<String>>,
     /// The selected draft opens once its source is fetched
     open_when_ready: Cell<bool>,
+    /// The draft read last asked for to open: only its answer opens a compose window
+    draft_reading: Cell<u64>,
     /// True while the list is reloaded: its selection changes are the reload's, not the user's
     reloading: Cell<bool>,
     mark_read: RefCell<Option<glib::SourceId>>,
@@ -366,6 +368,7 @@ impl Mailbox {
             picks: Cell::new(0),
             undo_label: RefCell::default(),
             open_when_ready: Cell::new(false),
+            draft_reading: Cell::new(0),
             reloading: Cell::new(false),
             mark_read: RefCell::new(None),
             reload_later: RefCell::new(None),
@@ -1493,6 +1496,7 @@ impl Mailbox {
     /// The reading pane emptied; with "There is no message selected." in it unless a message is `loading`
     fn clear_reader(&self, loading: bool) {
         self.open_when_ready.set(false);
+        self.draft_reading.set(0);
         if let Some(timer) = self.mark_read.borrow_mut().take() {
             timer.remove();
         }
@@ -1537,31 +1541,24 @@ impl Mailbox {
             crate::message_window::open(message, self.list_view());
             return;
         }
-        // read off the window thread: the compose window opens when it is
+        // read off the window thread: the compose window opens when it is. Not fetched yet, it is read again once it
+        // is: waited for before the read starts, so a fetch that ends while it runs reads it again (waited for only
+        // after, that fetch was missed and the draft never opened); only the newest read opens it, never twice
+        self.open_when_ready.set(true);
         let Ok(request) = shell().core.reopen_draft_start(folder, uid) else {
+            self.open_when_ready.set(false);
             return;
         };
+        self.draft_reading.set(request);
         let this = self.clone();
         spawn(async move {
-            if !ui::wait_read(&this.window, request).await {
+            if !ui::wait_read(&this.window, request).await || this.draft_reading.get() != request {
                 return;
             }
-            match shell().core.draft_result(request) {
-                Some(draft) => {
-                    this.open_when_ready.set(false);
-                    crate::compose::open(this.current_account(), Some(draft));
-                }
-                // not fetched yet: MessageReady follows, unless another message is shown by then. It may have come while
-                // this was read (the message shown as its folder was chosen): then the draft is read again now
-                None if this.reader.folder() == folder && this.reader.uid() == uid => {
-                    if this.reader.has_view() && !this.open_when_ready.get() {
-                        this.open_when_ready.set(true);
-                        this.open_selected();
-                    } else {
-                        this.open_when_ready.set(true);
-                    }
-                }
-                None => {}
+            if let Some(draft) = shell().core.draft_result(request) {
+                this.open_when_ready.set(false);
+                this.draft_reading.set(0);
+                crate::compose::open(this.current_account(), Some(draft));
             }
         });
     }
