@@ -1413,6 +1413,9 @@ private:
     // the tree painted the row chosen highlighted while its list waited
     bool highlightPainted_ = false;
     // what TestListOrder tells, less 10; the UI test holds a list waiting (TestHoldList)
+    // the message shown was in sight when the list was asked for again (StartLoad): ShowList scrolls to keep it so,
+    // and else leaves the list where the user scrolled it
+    bool keptInSight_ = false;
     int testListOrder_ = 0;
     bool holdList_ = false;
     // TIMER_RELOAD is running

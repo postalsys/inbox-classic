@@ -1104,6 +1104,7 @@ void Mailbox::StartLoad(const LoadPlan& plan) {
         one(plan.selectFolder, plan.selectUid);
     } else if (selected && reader_.Uid() && ListView_GetSelectedCount(list_) == 1) {
         hint = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
+        keptInSight_ = ListView_IsItemVisible(list_, static_cast<int>(hint)) != FALSE;
         one(reader_.Folder(), reader_.Uid());
     }
     // a list chosen just now with no message of the app's: the core selects the one it showed when it was left, else
@@ -1208,7 +1209,10 @@ void Mailbox::ShowList(const PeListLoad* load, const PeListLoadInfo& info) {
     if (info.focus >= 0 && info.focus < count) {
         int focus = static_cast<int>(info.focus);
         ListView_SetItemState(list_, focus, LVIS_FOCUSED, LVIS_FOCUSED);
-        ListView_EnsureVisible(list_, focus, FALSE);
+        // the message kept is scrolled to only when it was in sight: else the list stays where the user scrolled it
+        if (info.reselection != PE_RESELECTION_KEPT || keptInSight_) {
+            ListView_EnsureVisible(list_, focus, FALSE);
+        }
     }
     reloading_ = false;
     InvalidateRect(list_, nullptr, FALSE);

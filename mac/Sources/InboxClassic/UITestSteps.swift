@@ -457,6 +457,25 @@ extension UITest {
         check(left != nil && back?.subject == left,
               "back in the Inbox, the message shown when it was left is selected and shown (\(back?.subject ?? "none"), left \(left ?? "none"))")
         await shot(main.window, "folder-1-reopen")
+        // a list read again keeps its place: its top shown, scrolled to its end, then mail comes
+        for n in 4...43 {
+            let date = dates.string(from: Date().addingTimeInterval(Double(-1000 - n) * 60))
+            try await addMessage("From: Fresh Sender <fresh@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Fresh \(n)\r\n" +
+                                 "Date: \(date)\r\nMessage-ID: <fresh-\(n)@example.com>\r\n\r\nA fresh one.\r\n", to: "Fresh")
+        }
+        AppDelegate.shared.perform(.sync)
+        selectFolder(named: "Fresh")
+        _ = await waitUntil(30) { !mailbox.listLoading && self.list.numberOfRows == 43 }
+        await selectRow(0)
+        list.scrollRowToVisible(42)
+        let newest = dates.string(from: Date())
+        try await addMessage("From: Fresh Sender <fresh@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Fresh newest\r\n" +
+                             "Date: \(newest)\r\nMessage-ID: <fresh-newest@example.com>\r\n\r\nThe newest.\r\n", to: "Fresh")
+        AppDelegate.shared.perform(.sync)
+        let grew = await waitUntil(30) { !mailbox.listLoading && self.list.numberOfRows == 44 }
+        await pause(0.5)
+        check(grew && !list.rows(in: list.visibleRect).contains(list.selectedRow),
+              "a list read again as mail came stays where it was scrolled, not at the message shown")
         var remove = URLRequest(url: URL(string: "\(rest)/Fresh")!)
         remove.httpMethod = "DELETE"
         _ = try? await URLSession.shared.data(for: remove)

@@ -337,6 +337,7 @@ Screenshot: `folder-1-reopen`
 
 - in the Inbox a message that is not the newest is shown, then Archive is chosen: Archive's newest message is selected and shown
 - back in the Inbox, the message shown when it was left is selected and shown again
+- Fresh with 40 more, its top row shown, scrolled to its end, then a new message comes: the list read again stays where it was scrolled, not at the message shown (found by the deep test)
 - what each list showed and the row of the tree chosen are kept through a restart (`pe-core` `a_list_come_to_opens_with_a_message`, as the test does not start the app again)
 
 ## 19f. Sending from another address
