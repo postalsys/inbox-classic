@@ -258,6 +258,30 @@ mod tests {
         assert_eq!(verdict(&both, &trusted).unwrap(), ["dmarc=fail"]);
     }
 
+    /// What a Microsoft 365 mailbox has most often: Authentication-Results in Microsoft's own name (mx.microsoft.com),
+    /// which counts once microsoft.com is among the account's provider's names; and, with ARC sets, the receiving
+    /// side's set on top, its Authentication-Results under it, the sending tenant's set below
+    #[test]
+    fn microsoft_365_names_itself_mx_microsoft_com() {
+        let trusted = trusted(&outlook());
+        let named = parse(
+            "Authentication-Results: mx.microsoft.com 1; dkim=pass header.d=bank.example; dmarc=pass header.from=bank.example",
+        );
+        let found = verdict(&named, &trusted).expect("Microsoft's own Authentication-Results");
+        assert!(found.iter().any(|r| passes(r, "dmarc")));
+        let relayed = parse(
+            "ARC-Seal: i=2; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=pass; b=x\r\n\
+             ARC-Authentication-Results: i=2; mx.microsoft.com 1; dmarc=pass header.from=bank.example\r\n\
+             Authentication-Results: mx.microsoft.com 1; dmarc=pass header.from=bank.example\r\n\
+             ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d=microsoft.com; cv=none; b=x\r\n\
+             ARC-Authentication-Results: i=1; mx.microsoft.com 1; dmarc=fail header.from=bank.example",
+        );
+        assert_eq!(
+            verdict(&relayed, &trusted).unwrap(),
+            ["dmarc=pass header.from=bank.example"]
+        );
+    }
+
     #[test]
     fn an_arc_set_the_sender_wrote_counts_for_nothing() {
         let trusted = trusted(&outlook());
