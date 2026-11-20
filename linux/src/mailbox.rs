@@ -1536,9 +1536,20 @@ impl Mailbox {
                 return;
             }
             match shell().core.draft_result(request) {
-                Some(draft) => crate::compose::open(this.current_account(), Some(draft)),
-                // not fetched yet: MessageReady follows, unless another message is shown by then
-                None if this.reader.folder() == folder && this.reader.uid() == uid => this.open_when_ready.set(true),
+                Some(draft) => {
+                    this.open_when_ready.set(false);
+                    crate::compose::open(this.current_account(), Some(draft));
+                }
+                // not fetched yet: MessageReady follows, unless another message is shown by then. It may have come while
+                // this was read (the message shown as its folder was chosen): then the draft is read again now
+                None if this.reader.folder() == folder && this.reader.uid() == uid => {
+                    if this.reader.has_view() && !this.open_when_ready.get() {
+                        this.open_when_ready.set(true);
+                        this.open_selected();
+                    } else {
+                        this.open_when_ready.set(true);
+                    }
+                }
                 None => {}
             }
         });

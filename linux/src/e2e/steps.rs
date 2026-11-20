@@ -3325,20 +3325,17 @@ pub async fn all_inboxes_by_account(d: &Driver) {
     if let Some(popover) = main.folder_popover.borrow().as_ref() {
         popover.popdown();
     }
-    // the second account's Inbox opened above with its newest message, which was read: one made unread there again
-    if let Some(uid) = d
-        .messages_at(d.ports.second_rest, "INBOX")
-        .first()
-        .and_then(|m| m["uid"].as_u64())
-    {
-        let body = format!(r#"{{"uids":[{uid}],"flags":["\\Seen"],"action":"remove"}}"#);
-        let _ = super::http(
-            d.ports.second_rest,
-            "POST",
-            "/v1/mailboxes/INBOX/messages/flags",
-            Some(&body),
-        );
-    }
+    // the second account's Inbox opened above with its newest message, which was read: a new one comes, unread
+    let body = serde_json::json!({
+        "raw": "From: Second Sender <second@example.com>\r\nTo: testuser2@inboxclassic.test\r\nSubject: Unread on the second\r\n\r\nStays unread.\r\n",
+        "flags": [],
+    });
+    let _ = super::http(
+        d.ports.second_rest,
+        "POST",
+        "/v1/mailboxes/INBOX/messages",
+        Some(&body.to_string()),
+    );
     let _ = tree.activate_action("account.mark-all-read", None);
     d.check(
         wait_until(20, || d.unread_at(d.ports.rest) == 0).await && d.unread_at(d.ports.second_rest) >= 1,
@@ -4684,17 +4681,6 @@ async fn whole_list(what: &str, wrong: &mut Vec<String>) {
     }
 }
 
-/// The newest message of `folder` by date: what a folder opened for the first time selects
-fn newest_in(folder: i64) -> Option<pe_store::Message> {
-    let mut view = pe_core::ListView::new();
-    view.set_scope(Some(pe_core::Scope::Folder(folder)));
-    view.set_sort(pe_store::Sort {
-        field: pe_store::SortField::Date,
-        ascending: false,
-    });
-    view.rows(&shell().core, 0, 1).ok()?.into_iter().next()
-}
-
 /// The message selected and shown in the reading pane, waited for: its subject
 async fn shown_subject() -> Option<String> {
     let main = shell().main();
@@ -4711,25 +4697,38 @@ async fn shown_subject() -> Option<String> {
         .flatten()
 }
 
-/// SCENARIO: a folder opens with a message: the one shown in it when it was left, else its newest
+/// SCENARIO: a folder opens with a message: the one shown in it when it was left, else its newest. Fresh, a folder of
+/// its own, has never been opened; its newest message is not its first or last row by UID
 pub async fn folder_opens_message(d: &Driver) {
     d.step("a folder opens with a message");
     let main = shell().main();
-    select_folder("Inbox");
-    wait_until(20, || rows() >= 2).await;
-    // a message that is not the newest, shown
-    select_row(1).await;
-    let left = main.list.selected().map(|(_, m)| m.info.subject);
-    let Some(archive) = folder_id("Archive") else {
-        d.check(false, "the account has an Archive folder");
+    let core = &shell().core;
+    let account = core.accounts().ok().and_then(|a| a.first().map(|a| a.id)).unwrap_or(0);
+    let _ = core.create_folder(account, None, "Fresh");
+    let Some(fresh) = wait_for(20, || folder_id("Fresh")).await else {
+        d.check(false, "the folder Fresh is made");
         return;
     };
-    let newest = newest_in(archive).map(|m| m.info.subject);
-    select_folder("Archive");
+    for (n, minutes) in [(1, -300), (2, -100), (3, -200)] {
+        let raw = format!(
+            "From: Fresh Sender <fresh@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Fresh {n}\r\n\
+             Date: {}\r\nMessage-ID: <fresh-{n}@example.com>\r\n\r\nA fresh one.\r\n",
+            date_now(minutes)
+        );
+        let _ = d.add_message_to("Fresh", &raw);
+    }
+    run_command(Command::Sync);
+    wait_until(30, || listed_in_folder(fresh, 0, 10).len() == 3).await;
+    // a message of the Inbox that is not its newest, shown
+    select_folder("Inbox");
+    wait_until(20, || rows() >= 2).await;
+    select_row(1).await;
+    let left = main.list.selected().map(|(_, m)| m.info.subject);
+    main.folders.select(fresh, true);
     let shown = shown_subject().await;
     d.check(
-        newest.is_some() && shown == newest,
-        &format!("a folder come to selects and shows its newest message ({shown:?}, newest {newest:?})"),
+        shown.as_deref() == Some("Fresh 2"),
+        &format!("a folder come to for the first time selects and shows its newest message ({shown:?})"),
     );
     select_folder("Inbox");
     let back = shown_subject().await;
@@ -4741,4 +4740,6 @@ pub async fn folder_opens_message(d: &Driver) {
     );
     pause(500).await;
     d.shot(&main_window(), "folder-1-reopen").await;
+    let _ = core.delete_folder(fresh);
+    wait_until(20, || folder_id("Fresh").is_none()).await;
 }

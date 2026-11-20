@@ -1779,12 +1779,13 @@ public static class Dragger {
         "Message-ID: <waiting@example.com>`r`nDate: $([DateTime]::UtcNow.AddMinutes(5).ToString('r'))`r`n`r`nHere at last.`r`n") @() 'Archive'
     Command $main $IDM_SYNC
     [void](WaitFor { Find 'Archive' $waiting })
-    SelectFolder 3
-    Start-Sleep -Seconds 2
-    # a server that takes the connection and says nothing: the download waits
+    # a server that takes the connection and says nothing: the download waits. Set before Archive is chosen, as a
+    # folder opens with its newest message
     $silent = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, 0)
     $silent.Start()
     SetPort 106 "$($silent.LocalEndpoint.Port)"
+    SelectFolder 3
+    Start-Sleep -Seconds 2
     SelectRow 0
     $header = Statics $main
     Check ($header -like '*Waiting on the server*' -and $header -like '*Hal Example*') 'the header shows the message''s sender and subject at once'
@@ -4089,20 +4090,34 @@ public static class Dragger {
     SelectFolder 0
 
     Step 'a folder opens with a message'
+    # Fresh, a folder of its own, has never been opened; its newest message is not its first or last by UID
+    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body '{"path":"Fresh"}' "$rest")
+    foreach ($fresh in @(@(1, -300), @(2, -100), @(3, -200))) {
+        $date = [DateTime]::UtcNow.AddMinutes($fresh[1]).ToString('r')
+        AddMessage ("From: Fresh Sender <fresh@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Fresh $($fresh[0])`r`n" +
+            "Date: $date`r`nMessage-ID: <fresh-$($fresh[0])@example.com>`r`n`r`nA fresh one.`r`n") @() 'Fresh'
+    }
+    Command $main $IDM_SYNC
+    $freshItem = WaitFor { $item = FolderItem 'Fresh'; if ($item -ne [IntPtr]::Zero) { $item } } 30
     # the subject of the row selected once the list is drawn and the reading pane shows its message
-    $openedRow = { WaitFor { $s = SelectedRow; if ($s -ge 0 -and (Shown)) { "$s" } } 20 }
+    $openedSubject = {
+        $row = WaitFor { $s = SelectedRow; if ($s -ge 0 -and (Shown)) { "$s" } } 20
+        if ($null -ne $row) { [Native.Win]::RemoteListText($list, [int]$row, $COL_SUBJECT) } else { '' }
+    }
+    SelectFolder 0
     [void](WaitFor { (Rows) -ge 2 })
     SelectRow 1
     $leftSubject = [Native.Win]::RemoteListText($list, 1, $COL_SUBJECT)
-    SelectFolder 3
-    $archiveRow = & $openedRow
-    # the list is newest first at this point of the test
-    Check ($archiveRow -eq '0') "a folder come to selects and shows its newest message (row $archiveRow)"
+    if ($freshItem) { [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $freshItem); Settled }
+    $freshSubject = & $openedSubject
+    Check ($freshSubject -eq 'Fresh 2') "a folder come to for the first time selects and shows its newest message ($freshSubject)"
     SelectFolder 0
-    $backRow = & $openedRow
-    $backSubject = if ($null -ne $backRow) { [Native.Win]::RemoteListText($list, [int]$backRow, $COL_SUBJECT) } else { '' }
+    $backSubject = & $openedSubject
     Check ($leftSubject -ne '' -and $backSubject -eq $leftSubject) "back in the Inbox, the message shown when it was left is selected and shown ($backSubject, left $leftSubject)"
     Shot $main 'folder-1-reopen'
+    [void](Invoke-RestMethod -Method Delete "$rest/Fresh")
+    Command $main $IDM_SYNC
+    [void](WaitFor { (FolderItem 'Fresh') -eq [IntPtr]::Zero } 20)
     Step 'unsubscribing'
     # the list's server: a socket of the test, answered by hand
     $listServer = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, 0)
@@ -7923,6 +7938,10 @@ public static bool HasIcon(IntPtr window) {
         if ($window) {
             $t = [Native.Win]::GetDlgItem($window, $IDC_TREE)
             [void](WaitFor { if (@(TreeTexts $t).Count -gt 2) { $true } } 30)
+            # the app starts with the row it was closed on (the core's test checks that); the steps after a new start
+            # begin from the first row, All Inboxes, as a first start does
+            $root = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+            [void][Native.Win]::SendMessage($t, $TVM_SELECTITEM, [IntPtr]9, $root)
             Start-Sleep -Seconds 2
         }
         $window
