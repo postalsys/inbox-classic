@@ -122,13 +122,20 @@ pub(crate) fn list_id_of(header: &[u8]) -> Option<String> {
     (!id.is_empty()).then_some(id)
 }
 
-/// The header fields of the provider's verdicts on the sender: Authentication-Results (DMARC, DKIM, BIMI), and
-/// BIMI-Location with the logo's address, which the receiving server adds (BIMI-Indicator, the logo itself, is left
-/// out: it is large)
-const AUTH_FIELDS: [&str; 3] = ["Authentication-Results", "BIMI-Location", "BIMI-Selector"];
+/// The header fields of the provider's verdicts on the sender: Authentication-Results (DMARC, DKIM, BIMI), the ARC
+/// set's ARC-Authentication-Results and ARC-Seal (Microsoft's verdict, pe-core authres.rs), and BIMI-Location with the
+/// logo's address, which the receiving server adds (BIMI-Indicator, the logo itself, is left out: it is large)
+const AUTH_FIELDS: [&str; 5] = [
+    "Authentication-Results",
+    "ARC-Authentication-Results",
+    "ARC-Seal",
+    "BIMI-Location",
+    "BIMI-Selector",
+];
 
-/// The most of those fields kept for a message: a provider's results fit in far less
-const AUTH_LIMIT: usize = 4 * 1024;
+/// The most of those fields kept for a message: a provider's results fit in far less, its ARC sets with their seals
+/// (a few for mail that passed through several services) too
+const AUTH_LIMIT: usize = 8 * 1024;
 
 /// `fields` and the verdict fields, for a FETCH of header fields
 pub(crate) fn with_auth_fields(mut fields: Vec<String>) -> Vec<String> {
@@ -226,6 +233,25 @@ mod tests {
         assert_eq!(auth_fields(header.as_bytes()), "");
         let header = format!("Authentication-Results: first\r\n{long}BIMI-Location: l=x\r\n");
         assert_eq!(auth_fields(header.as_bytes()), "Authentication-Results: first\r\n");
+    }
+
+    /// Microsoft's verdict is in its ARC set: its seal and results are kept, its signature of the message is not
+    #[test]
+    fn keeps_the_arc_verdict_fields() {
+        let header = b"ARC-Seal: i=1; a=rsa-sha256; d=microsoft.com; cv=none; b=x\r\n\
+                       ARC-Message-Signature: i=1; a=rsa-sha256; d=microsoft.com; b=y\r\n\
+                       ARC-Authentication-Results: i=1; mx.microsoft.com 1;\r\n dmarc=pass header.from=shop.example\r\n\
+                       Subject: hi\r\n\r\n";
+        assert_eq!(
+            auth_fields(header),
+            "ARC-Seal: i=1; a=rsa-sha256; d=microsoft.com; cv=none; b=x\r\n\
+             ARC-Authentication-Results: i=1; mx.microsoft.com 1;\r\n dmarc=pass header.from=shop.example\r\n"
+        );
+        assert!(
+            with_auth_fields(Vec::new())
+                .iter()
+                .any(|f| f == "ARC-Authentication-Results")
+        );
     }
 
     #[test]

@@ -158,6 +158,26 @@ mod tests {
         assert_eq!(code.domain, "accounts.example.com");
     }
 
+    /// Microsoft's verdict is in its ARC set: its Authentication-Results names no authserv-id
+    #[test]
+    fn a_code_of_mail_microsoft_confirmed_in_its_arc_set() {
+        let microsoft = ["microsoft.com".to_string()];
+        let arc = |seal: &str| {
+            format!(
+                "ARC-Seal: i=1; a=rsa-sha256; s=arcselector10001; d={seal}; cv=none; b=x\r\n\
+                 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass smtp.mailfrom=example.com;\r\n \
+                 dmarc=pass action=none header.from=example.com; dkim=pass header.d=example.com; arc=none\r\n\
+                 Authentication-Results: spf=pass smtp.mailfrom=example.com; dkim=pass\r\n \
+                 header.d=example.com;dmarc=pass action=none header.from=example.com;\r\n"
+            )
+        };
+        let sealed = message("no-reply@example.com", None, &arc("microsoft.com"), BODY);
+        assert_eq!(of(&sealed, &microsoft).map(|c| c.code), Some("482913".into()));
+        // the same set sealed in another name, as a sender could write it: no code offered
+        let forged = message("no-reply@example.com", None, &arc("forged.example"), BODY);
+        assert_eq!(of(&forged, &microsoft), None);
+    }
+
     #[test]
     fn no_code_without_the_providers_word() {
         // no verdict, a verdict for another domain, a verdict the sender wrote itself

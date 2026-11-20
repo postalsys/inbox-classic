@@ -177,10 +177,10 @@ mod tests {
 
     #[test]
     fn an_oversized_verdict_on_top_gives_none() {
-        // the provider's results on top, too large to keep; a forged pass below them
+        // the provider's results on top, too large to keep (8 KiB of verdict fields at most); a forged pass below them
         let provider = format!(
             "Authentication-Results: mx.example.com; dmarc=fail header.from=shop.example; {}\r\n",
-            "x".repeat(5000)
+            "x".repeat(9000)
         );
         let header = format!(
             "{provider}Authentication-Results: mx.example.com; dmarc=pass header.from=shop.example; bimi=pass\r\n\

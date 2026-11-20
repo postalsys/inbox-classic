@@ -10,5 +10,5 @@
     <li><b>Encryption keys</b>, when a recipient’s key is needed or you start a lookup. Address searches query the address’s domain (Web Key Directory), then keys.openpgp.org if enabled. Fingerprint or key-ID searches send that identifier to keys.openpgp.org instead of an address. Publishing your public key sends it to keys.openpgp.org and requests confirmation of its addresses.</li>
     <!--os:mac--><li><b>Updates</b>, from inboxclassic.com, to see whether a new version is out.</li><!--/os-->
 </ul>
-<p>Sign-in codes are offered only when your provider’s Authentication-Results header says the domain signed the message (DKIM). This needs no connection of its own.</p>
+<p>Sign-in codes are offered only when your provider’s Authentication-Results header (ARC-Authentication-Results at Microsoft) says the domain signed the message (DKIM). This needs no connection of its own.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
