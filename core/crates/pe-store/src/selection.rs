@@ -333,24 +333,36 @@ impl Store {
             .collect())
     }
 
-    /// The UIDs in `folder` of messages with these Message-IDs, the newest of each
+    /// The UIDs in `folder` of messages with these Message-IDs: for a Message-ID named `n` times, the newest `n`
+    /// messages that have it (two copies of one message moved together are both found again)
     pub fn uids_of_message_ids(&self, folder: FolderId, message_ids: &[String]) -> Result<Vec<u64>> {
+        let mut wanted: std::collections::HashMap<&str, usize> = std::collections::HashMap::new();
+        for id in message_ids {
+            *wanted.entry(id.as_str()).or_default() += 1;
+        }
+        let distinct: Vec<&str> = wanted.keys().copied().collect();
         let mut uids = Vec::new();
-        for chunk in message_ids.chunks(CHUNK) {
+        for chunk in distinct.chunks(CHUNK) {
             let mut statement = self.db.prepare(&format!(
-                "SELECT MAX(uid) FROM messages WHERE folder_id = ? AND message_id IN ({}) GROUP BY message_id",
+                "SELECT message_id, uid FROM messages WHERE folder_id = ? AND message_id IN ({}) ORDER BY uid DESC",
                 marks(chunk.len())
             ))?;
             let values = std::iter::once(Value::Integer(folder))
-                .chain(chunk.iter().map(|id| Value::Text(id.clone())))
+                .chain(chunk.iter().map(|id| Value::Text(id.to_string())))
                 .collect::<Vec<_>>();
-            let found: Vec<u64> = statement
-                .query_map(params_from_iter(values), |row| row.get(0))?
+            let found: Vec<(String, u64)> = statement
+                .query_map(params_from_iter(values), |row| Ok((row.get(0)?, row.get(1)?)))?
                 .collect::<Result<_>>()?;
-            uids.extend(found);
+            for (id, uid) in found {
+                if let Some(left) = wanted.get_mut(id.as_str())
+                    && *left > 0
+                {
+                    *left -= 1;
+                    uids.push(uid);
+                }
+            }
         }
         uids.sort_unstable();
-        uids.dedup();
         Ok(uids)
     }
 }
@@ -449,5 +461,26 @@ mod tests {
                 .unwrap(),
             vec![3]
         );
+    }
+
+    /// Two copies of one message (the same Message-ID) moved together are both found again: Undo brings both back
+    #[test]
+    fn copies_of_one_message_are_each_found() {
+        let (store, inbox, _) = setup();
+        let copy = |uid: u64| MessageInfo {
+            uid,
+            date: Some(uid as i64 * 100),
+            message_id: Some("<copy@example.com>".into()),
+            ..Default::default()
+        };
+        store.add_messages(inbox, &[copy(10), copy(11), copy(12)]).unwrap();
+        let ids = |n: usize| vec!["<copy@example.com>".to_string(); n];
+        // as many as were named, the newest first
+        assert_eq!(store.uids_of_message_ids(inbox, &ids(2)).unwrap(), vec![11, 12]);
+        assert_eq!(store.uids_of_message_ids(inbox, &ids(1)).unwrap(), vec![12]);
+        assert_eq!(store.uids_of_message_ids(inbox, &ids(5)).unwrap(), vec![10, 11, 12]);
+        let mut both = ids(2);
+        both.push("<1@example.com>".into());
+        assert_eq!(store.uids_of_message_ids(inbox, &both).unwrap(), vec![1, 11, 12]);
     }
 }
