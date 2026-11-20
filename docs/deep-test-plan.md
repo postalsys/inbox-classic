@@ -23,6 +23,8 @@ No test saw it, for four reasons that each name a gap:
 6. **The core walk runs weekly on GitHub** with a new seed, not a gate, as the OpenPGP interoperability suite does.
 7. **The runs a release reads happen on GitHub's runners**, in a workflow started by hand. Local runs stay possible on all three.
 
+8. **A folder opens with a message** (asked for with this plan, a feature of its own, see below): the message left there, else the newest. Kept through a restart. No setting.
+
 It never runs on a pull request.
 
 ## Where the same kind of bug can hide
@@ -111,10 +113,30 @@ A run leaves a page like the feature map (`build/deep/<platform>/report.html`, a
 
 **What a failure becomes.** Every bug the deep test finds is fixed with a small, fixed step in the regular scenario, as 27a was for this incident. The deep test finds, the regular test keeps.
 
+## Beside it: a folder opens with a message
+
+Today a folder switch clears the selection on all three apps, as the core says (`Reselection::None` when what was selected is not in the new list): Inbox with a message open, Flagged, Inbox again, and the reading pane says no message is selected. Decided 2026-11-20:
+
+- **The message left there.** Every row of the folder tree (a folder, All Inboxes, Flagged and the like) remembers the one message shown in it. Coming back selects it and scrolls to it.
+- **Else the newest.** A row with nothing remembered, or whose message is gone, selects its newest message by date (the newest conversation when grouped), wherever the sort puts it. An empty folder selects nothing.
+- **Kept in the store** (a new migration), so the folder shown and each folder's message are the same after a restart.
+- **No setting.**
+
+The rules that keep it from doing harm:
+
+- It opens as a click does (marked read, a trusted sender's pictures loaded). That is the price of "else the newest", taken knowingly. If it proves too eager, the remedy is to mark read only once the message has stayed shown a moment, not a setting.
+- A message opened this way never raises a question by itself: no passphrase prompt, no sign-in. It shows the locked or failed state a click would show after Cancel.
+- Only the folder that is drawn opens a message. Folders passed through with fast clicks or the arrow keys open nothing and mark nothing read.
+- Several messages selected are not remembered, only the one shown. A search, Unread Only and a sort change keep today's rule (what is selected stays if it is still listed).
+- A choice of the app's own wins: a notification's message, a search hit opened in its folder, Undo's rows.
+
+Where it lives: the core decides (`list_load` gets "arrived at this row" and answers with the row to select, a new `Reselection`), the store remembers, the apps follow as they follow `Kept` today. One pull request for the core and all three apps, with its step in `SCENARIO.md`, its entry in `feature-map.mjs` and a sentence in the help of every language. It does not wait for the deep test; the journeys D2, D3, D6 and D14 check it at scale.
+
 ## The order of work
 
 Each step is a pull request. Before each commit: `/simplify` (with the look at the functions that grew), `/security-review`, prettier, the tests; then CI watched to the end. Bugs found on the way get pull requests of their own, with their step in `SCENARIO.md`.
 
+0. **A folder opens with a message.** The feature above, by itself, whenever it is asked for.
 1. **The plan and the catalog.** This file, the overview, `DEEP.md`.
 2. **The world.** The generator, several users, the snapshot, the test that a seed gives one world. Whatever ImapKit needs first, in ImapKit.
 3. **The conductor on the core.** The checks, the table, the walk, replay and shrinking, `seeds.txt`, `scripts/deep-test.sh core`, the weekly workflow.

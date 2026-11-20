@@ -71,7 +71,7 @@ tr:last-child td{border-bottom:0}
 <header class="stack">
   <h1>The deep test: Inbox Classic on mailboxes the size people really have</h1>
   <p class="lede">An on-demand suite that runs all three apps against several accounts of thousands of messages each, does what a user does for a long time, and checks after every step that the window still shows what the server has.</p>
-  <p class="meta">Draft for review, 2026-11-20. Follows the 0.19.1 fix (#226). All seven decisions are made. The written plan is <code>docs/deep-test-plan.md</code>, the journeys are in <code>scripts/ui-e2e/DEEP.md</code>. Nothing is built yet.</p>
+  <p class="meta">Draft for review, 2026-11-20. Follows the 0.19.1 fix (#226). All decisions are made, with the folder selection added on 2026-11-20. The written plan is <code>docs/deep-test-plan.md</code>, the journeys are in <code>scripts/ui-e2e/DEEP.md</code>. Nothing is built yet.</p>
 </header>
 
 <h2>What happened</h2>
@@ -212,9 +212,35 @@ tr:last-child td{border-bottom:0}
   <p>Every bug the deep test finds is fixed with a small, fixed step in the regular scenario, as 27a was for this one. The deep test finds, the regular test keeps.</p>
 </div>
 
+<h2>Beside it: a folder opens with a message</h2>
+<p class="sub">Asked for with this plan. Today a folder switch clears the selection on all three apps, so Inbox, Flagged, Inbox ends with "no message is selected". That is how the core was written, not a fault of one app.</p>
+<div class="grid">
+  <div class="card">
+    <h3>The rule <span class="tag ok">decided</span></h3>
+    <ul>
+      <li><b>The message left there.</b> Every row of the folder tree remembers the one message shown in it. Coming back selects it and scrolls to it.</li>
+      <li><b>Else the newest.</b> Nothing remembered, or the message is gone: the newest by date, wherever the sort puts it. An empty folder selects nothing.</li>
+      <li><b>Through a restart.</b> Kept in the store: the folder shown and each folder's message come back.</li>
+      <li><b>No setting.</b></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>What keeps it from doing harm</h3>
+    <ul>
+      <li>It opens as a click does, so a folder's newest unread message is marked read. That is the price of "else the newest". If it proves too eager, the remedy is to mark read only after the message has stayed shown a moment.</li>
+      <li>It never raises a question by itself: no passphrase prompt, no sign-in.</li>
+      <li>Only the folder that is drawn opens a message. Folders passed through with fast clicks or arrow keys open nothing.</li>
+      <li>Several selected messages are not remembered. Search, Unread Only and sorting keep today's rule.</li>
+      <li>The app's own choice wins: a notification's message, a search hit, Undo's rows.</li>
+    </ul>
+  </div>
+</div>
+<p class="sub">The core decides, the store remembers, the three apps follow, in one pull request with its step in the regular scenario and a sentence in the help. It does not wait for the deep test; journeys D2, D3, D6 and D14 check it at scale.</p>
+
 <h2>The order of work</h2>
 <p class="sub">Each step is a pull request. Each one ends with <code>/simplify</code>, <code>/security-review</code>, prettier, the tests, and CI watched to the end. Bugs found on the way get pull requests of their own.</p>
 <div class="steps">
+  <div class="pr"><div class="no">PR 0</div><div><b>A folder opens with a message.</b> The feature above, by itself, on all three apps.</div></div>
   <div class="pr"><div class="no">PR 1</div><div><b>The plan and the catalog.</b> <code>docs/deep-test-plan.md</code>, this page, and <code>DEEP.md</code> with every journey written out before any is built.</div></div>
   <div class="pr"><div class="no">PR 2</div><div><b>The world.</b> The generator in <code>pe-testkit</code>, several users on one ImapKit, the snapshot. A test that the same seed gives the same mailboxes.</div></div>
   <div class="pr"><div class="no">PR 3</div><div><b>The conductor on the core.</b> Checks, the table of actions, the walk, replay by seed. On demand and weekly on GitHub. Expect it to find things.</div></div>
@@ -237,6 +263,7 @@ tr:last-child td{border-bottom:0}
 <tr><td>From when</td><td>For each platform from the pull request that gives it a driver, Linux first. Platforms without one are skipped with a note.</td></tr>
 <tr><td>On a schedule</td><td>The core walk weekly on GitHub with a new seed, not a gate.</td></tr>
 <tr><td>Where</td><td>GitHub's runners, started by hand, the result recorded for the commit. Local runs stay possible.</td></tr>
+<tr><td>A folder's message</td><td>The message left there, else the newest; kept through a restart; no setting.</td></tr>
 <tr><td>Now</td><td>The plan and the journeys are written for review. Building starts when you say so.</td></tr>
 </tbody>
 </table>

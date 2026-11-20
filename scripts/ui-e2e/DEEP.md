@@ -16,8 +16,9 @@ The accounts: Work (20,000), Home (6,000, 400 folders), Gmail-like (5,000, OAuth
 
 ## D2. Pages
 
-- Work's Inbox (18,000): the first rows are filled
-- to Flagged and back: the first rows are filled and the top row opens its message (the incident)
+- Work's Inbox (18,000), come to for the first time: the first rows are filled, the newest message is selected and shown
+- row 4,200 selected, to Flagged and back: row 4,200 is selected, in sight, filled and shown (the incident, and the message left there)
+- its message deleted by another client meanwhile: back in the Inbox the newest is selected
 - End: the last rows are filled, the last row opens; Home: the first again
 - Page Down held for 40 pages, then a row in sight opens
 - the scroll bar dragged to the middle: the rows in sight are the server's rows of that place
@@ -28,6 +29,7 @@ The accounts: Work (20,000), Home (6,000, 400 folders), Gmail-like (5,000, OAuth
 ## D3. Fast fingers
 
 - ten folders clicked without waiting, then one: only its rows are ever shown, and they are filled
+- none of the ten opened a message: their newest messages are still unread on the server
 - the sort changed three times without waiting
 - a search typed a letter at a time, then cleared at once: the folder's list is back, whole
 - a row clicked, then another folder, then back before the first message has come: the reading pane shows what is selected or nothing
@@ -59,6 +61,7 @@ The accounts: Work (20,000), Home (6,000, 400 folders), Gmail-like (5,000, OAuth
 - an account is removed while its rows are in sight in All Inboxes: they go, the selection lands on a row that is there
 - the accounts' order changed: the tree and "by account" follow
 - from a row of All Inboxes to its own folder and back: the same row selected
+- All Inboxes and each Inbox remember their own message
 
 ## D7. Conversations
 
@@ -110,5 +113,7 @@ The accounts: Work (20,000), Home (6,000, 400 folders), Gmail-like (5,000, OAuth
 ## D14. Restarts
 
 - the folder, the sort, the selected message and the place in the list are the same after a restart
+- every other folder still has the message left in it
+- a folder whose newest message is encrypted, come to for the first time: no passphrase is asked for
 - a restart with a message window and a compose window open
 - the store closed hard in the middle of a sync opens again and ends with the server's counts
