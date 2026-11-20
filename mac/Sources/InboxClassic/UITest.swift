@@ -664,6 +664,7 @@ final class UITest {
         try await files()
         try await organizing()
         try await flaggedFolder()
+        try await folderOpensMessage()
         try await listMail()
         try await folders()
         try await writingMore()

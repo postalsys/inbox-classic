@@ -42,6 +42,7 @@ mod secrets;
 mod selection;
 pub mod senders;
 pub mod setup;
+mod shown;
 mod sign_in_apps;
 mod snippet;
 mod targets;
@@ -468,6 +469,12 @@ pub enum NextUnread {
 /// How many messages the worker threads, or fetches the References of, at a time in the background
 pub(crate) const THREAD_BATCH: usize = 200;
 
+/// Newest first by date, the list's order out of the box
+pub(crate) const NEWEST_FIRST: Sort = Sort {
+    field: pe_store::SortField::Date,
+    ascending: false,
+};
+
 /// What the main window selects when it opens, see [`Core::start_message`]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Start {
@@ -588,6 +595,8 @@ pub struct Core {
     reads: reads::Reads,
     /// Previews of attachments: the render thread and what it drew (previews.rs)
     previews: previews::Previews,
+    /// The message each list showed last and the row of the folder tree chosen (shown.rs)
+    shown: shown::Shown,
 }
 
 impl Core {
@@ -691,6 +700,7 @@ impl Core {
             list_loads: Default::default(),
             reads: Default::default(),
             previews: Default::default(),
+            shown: Default::default(),
         };
         if pdfs_turned_off {
             let events = core.events.clone();
@@ -977,15 +987,26 @@ impl Core {
             },
             ..Default::default()
         };
-        let newest = Sort {
-            field: pe_store::SortField::Date,
-            ascending: false,
-        };
-        let message = store.search(&search, newest, 0, 1)?.into_iter().next();
+        drop(store);
+        let message = self.newest_found(&search)?;
         Ok(Some(Start {
             all_inboxes,
-            folder: message.as_ref().map_or(inbox.id, |m| m.folder_id),
-            uid: message.map(|m| m.info.uid),
+            folder: message.map_or(inbox.id, |m| m.folder),
+            uid: message.map(|m| m.uid),
+        }))
+    }
+
+    /// The newest message by date `search` finds, one a row whatever its conversations: one row read from the index
+    /// of dates. What the window starts with, and a list come to with nothing remembered.
+    pub(crate) fn newest_found(&self, search: &Search) -> Result<Option<MessageRef>> {
+        let messages = Search {
+            threads: None,
+            ..search.clone()
+        };
+        let found = self.store().search(&messages, NEWEST_FIRST, 0, 1)?;
+        Ok(found.first().map(|m| MessageRef {
+            folder: m.folder_id,
+            uid: m.info.uid,
         }))
     }
 

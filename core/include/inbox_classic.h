@@ -609,6 +609,8 @@ typedef enum PeReselection {
   PE_RESELECTION_RESTORED = 3,
   // The row after a removal (`after`): a new selection
   PE_RESELECTION_AFTER = 4,
+  // A list come to (`arrived`): the message it showed when it was left, else its newest; a new selection, shown
+  PE_RESELECTION_ARRIVED = 5,
 } PeReselection;
 
 // What Mark All Read marks (`pe_mark_read_start`)
@@ -2884,6 +2886,21 @@ const struct PeTreeRow *pe_tree_get(const struct PeTree *tree, size_t index);
 int64_t pe_tree_reselect(const struct PeTree *tree,
                          const char *key);
 
+// The row of the folder tree the user chose (its `key`), kept for the app to start with it next time
+// (`pe_tree_start`)
+//
+// # Safety
+// `core` must be a live handle, `key` NULL or a NUL-terminated string.
+void pe_tree_chosen(const struct PeCore *core,
+                    const char *key);
+
+// The key of the row of the folder tree chosen when the app was closed (`pe_tree_chosen`), for the app to start with
+// that row when its tree has it; NULL when none was. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_tree_start(const struct PeCore *core);
+
 // # Safety
 // `tree` must be NULL or a list that was not freed yet.
 void pe_tree_free(struct PeTree *tree);
@@ -4597,7 +4614,9 @@ bool pe_list_view_leaves_list(const struct PeListView *view,
 // - `after`: the row to select in place of the selection, where the rows an action took out of the list were (the
 //   last row when the list is shorter now); -1 for none;
 // - `restored`: select what the last `pe_undo` brought back, or the store took back after `ActionUndone`, in place of
-//   the selection when the list has it (a write after the list was read reads it again first).
+//   the selection when the list has it (a write after the list was read reads it again first);
+// - `arrived`: the user came to this list from another (a row of the folder tree chosen) and nothing is selected: the
+//   message it showed when it was left (`pe_list_view_shown`) is selected, else its newest (`PE_RESELECTION_ARRIVED`).
 //
 // `ListReady` follows with the request this returns in `uid`, then `pe_list_load_result`. A newer load of the same
 // view cancels this one and the pages asked for before it: their events never come. What it read is kept for the
@@ -4611,7 +4630,18 @@ uint64_t pe_list_view_load(const struct PeCore *core,
                            const struct PeSelection *selection,
                            int64_t hint,
                            int64_t after,
-                           bool restored);
+                           bool restored,
+                           bool arrived);
+
+// The message `uid` of `folder` is the one the list `view` shows in the reading pane now: coming back to the list
+// selects it again (`arrived` of `pe_list_view_load`), also after a restart. A list of words typed remembers nothing.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+void pe_list_view_shown(const struct PeCore *core,
+                        const struct PeListView *view,
+                        int64_t folder,
+                        uint64_t uid);
 
 // Loads `PE_LIST_PAGE` rows of the list `view` shows from `offset` on, off the window thread as `pe_list_view_load`
 // does: `ListPageReady` follows with the request this returns in `uid`. Ask for the page after the one shown too, so

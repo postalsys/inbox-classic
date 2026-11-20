@@ -391,8 +391,28 @@ final class Core {
     /// returns. The load selects again what `selection` has (nil for nothing): one message found nearest `hint` (the
     /// row it had, -1 when not known), several, or Select All while it is still the whole list; in its place the row
     /// `after` a removal (-1 for none), or what Undo brought back (`restored`). 0 on failure
-    func load(_ view: ListView, selection: OpaquePointer?, hint: Int = -1, after: Int = -1, restored: Bool) -> UInt64 {
-        pe_list_view_load(handle, view.handle, selection, Int64(hint), Int64(after), restored)
+    /// `arrived`: another row of the tree chosen, nothing selected: the message the list showed when it was left is
+    /// selected, else its newest (`PE_RESELECTION_ARRIVED`)
+    func load(_ view: ListView, selection: OpaquePointer?, hint: Int = -1, after: Int = -1, restored: Bool,
+              arrived: Bool = false) -> UInt64 {
+        pe_list_view_load(handle, view.handle, selection, Int64(hint), Int64(after), restored, arrived)
+    }
+
+    /// the message the list `view` shows in the reading pane, for the list to open with it when it is come back to
+    func listShown(_ view: ListView, folder: Int64, uid: UInt64) {
+        pe_list_view_shown(handle, view.handle, folder, uid)
+    }
+
+    /// the row of the folder tree the user chose (its key), for the app to start with it next time
+    func treeChosen(_ key: String) {
+        key.withCString { pe_tree_chosen(handle, $0) }
+    }
+
+    /// the key of the row of the folder tree chosen when the app was closed, nil when none was
+    func treeStart() -> String? {
+        guard let key = pe_tree_start(handle) else { return nil }
+        defer { pe_string_free(key) }
+        return String(cString: key)
     }
 
     /// a page of the list from `offset` on read the same way: `ListPageReady` follows. 0 on failure

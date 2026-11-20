@@ -147,6 +147,9 @@ pub struct Mailbox {
     after: Cell<Option<u64>>,
     /// The message the app chose to show, selected once the list is read again
     chosen: Cell<Option<Chosen>>,
+    /// Another row of the tree was chosen and its list is not drawn yet: the core selects the message it showed when
+    /// it was left, else its newest
+    arrived: Cell<bool>,
     /// How often the user changed the selection: a load asked for before the latest is asked for again
     picks: Cell<u64>,
     /// What Edit > Undo says now
@@ -355,6 +358,7 @@ impl Mailbox {
             undone: Cell::new(false),
             after: Cell::new(None),
             chosen: Cell::new(None),
+            arrived: Cell::new(false),
             picks: Cell::new(0),
             undo_label: RefCell::default(),
             open_when_ready: Cell::new(false),
@@ -856,11 +860,16 @@ impl Mailbox {
         } else {
             0
         });
+        if row.selectable {
+            let _ = shell().core.tree_chosen(&row.key);
+        }
         if !self.choose_list(row.folder, row.list) {
             self.show_folder_name();
         } else if by_user {
+            self.arrived.set(true);
             self.load_list_after_paint(None);
         } else {
+            self.arrived.set(true);
             self.reload_list();
         }
         self.enable(Command::NewFolder, row.new_folder_account != 0);
@@ -1070,6 +1079,7 @@ impl Mailbox {
         let mut reselect = Reselect {
             after: self.after.get(),
             restored: self.undone.get(),
+            arrived: self.arrived.get(),
             ..Reselect::default()
         };
         if let Some(chosen) = self.chosen.get() {
@@ -1133,6 +1143,7 @@ impl Mailbox {
         self.unread.set(load.unread);
         self.show_list_columns(load.lists_recipients);
         let reselected = load.reselected;
+        self.arrived.set(false);
         self.reloading.set(true);
         self.list.reset(
             load.rows,
@@ -1349,6 +1360,8 @@ impl Mailbox {
         self.clear_reader(uid != 0);
         self.selection_shown();
         if uid != 0 {
+            // for the list to open with it when it is come back to
+            let _ = core.list_shown(&self.list.view(), MessageRef { folder, uid });
             let account = self.folder_account(folder);
             self.reader
                 .open(account, folder, uid, selected.as_ref().map(|(_, m)| &m.info));
@@ -1523,9 +1536,20 @@ impl Mailbox {
                 return;
             }
             match shell().core.draft_result(request) {
-                Some(draft) => crate::compose::open(this.current_account(), Some(draft)),
-                // not fetched yet: MessageReady follows, unless another message is shown by then
-                None if this.reader.folder() == folder && this.reader.uid() == uid => this.open_when_ready.set(true),
+                Some(draft) => {
+                    this.open_when_ready.set(false);
+                    crate::compose::open(this.current_account(), Some(draft));
+                }
+                // not fetched yet: MessageReady follows, unless another message is shown by then. It may have come while
+                // this was read (the message shown as its folder was chosen): then the draft is read again now
+                None if this.reader.folder() == folder && this.reader.uid() == uid => {
+                    if this.reader.has_view() && !this.open_when_ready.get() {
+                        this.open_when_ready.set(true);
+                        this.open_selected();
+                    } else {
+                        this.open_when_ready.set(true);
+                    }
+                }
                 None => {}
             }
         });
@@ -1677,6 +1701,14 @@ impl Mailbox {
     /// its newest message selected
     pub fn select_start(self: &Rc<Self>) {
         if self.started.replace(true) || self.listed.get() != TreeList::None {
+            return;
+        }
+        // the row the app was closed on, its list opening with the message it showed (the core selects it)
+        let core = &shell().core;
+        if let Ok(Some(key)) = core.tree_start()
+            && let Some(row) = core.folder_tree().unwrap_or_default().iter().find(|r| r.key == key)
+            && self.folders.select(crate::folders::row_id(row), true)
+        {
             return;
         }
         let Ok(Some(start)) = shell().core.start_message() else {

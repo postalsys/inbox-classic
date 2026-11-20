@@ -124,7 +124,7 @@ Today a folder switch clears the selection on all three apps, as the core says (
 
 The rules that keep it from doing harm:
 
-- It opens as a click does (marked read, a trusted sender's pictures loaded). That is the price of "else the newest", taken knowingly. If it proves too eager, the remedy is to mark read only once the message has stayed shown a moment, not a setting.
+- It opens as a click does: marked read once it has been shown for a second (as every app already does), a trusted sender's pictures loaded. That is the price of "else the newest", taken knowingly.
 - A message opened this way never raises a question by itself: no passphrase prompt, no sign-in. It shows the locked or failed state a click would show after Cancel.
 - Only the folder that is drawn opens a message. Folders passed through with fast clicks or the arrow keys open nothing and mark nothing read.
 - Several messages selected are not remembered, only the one shown. A search, Unread Only and a sort change keep today's rule (what is selected stays if it is still listed).

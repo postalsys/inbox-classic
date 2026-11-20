@@ -416,6 +416,54 @@ extension UITest {
         selectFolder(named: "Inbox")
     }
 
+    /// SCENARIO: a folder opens with a message: the one shown in it when it was left, else its newest. Fresh, a folder
+    /// of its own, has never been opened; its newest message is not its first or last by UID
+    func folderOpensMessage() async throws {
+        step("a folder opens with a message")
+        let mailbox = main.mailbox
+        // the message selected once the list is drawn, and shown in the reading pane
+        func shown() async -> Message? {
+            _ = await waitUntil(20) {
+                !mailbox.listLoading && mailbox.selectedRow.map { mailbox.reader.uid == $0.uid } == true
+            }
+            return mailbox.selectedRow
+        }
+        var create = URLRequest(url: URL(string: rest)!)
+        create.httpMethod = "POST"
+        create.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        create.httpBody = try JSONSerialization.data(withJSONObject: ["path": "Fresh"])
+        _ = try await URLSession.shared.data(for: create)
+        let dates = DateFormatter()
+        dates.locale = Locale(identifier: "en_US_POSIX")
+        dates.timeZone = TimeZone(identifier: "UTC")
+        dates.dateFormat = "EEE, dd MMM yyyy HH:mm:ss '+0000'"
+        for (n, minutes) in [(1, -300), (2, -100), (3, -200)] {
+            let date = dates.string(from: Date().addingTimeInterval(Double(minutes) * 60))
+            try await addMessage("From: Fresh Sender <fresh@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Fresh \(n)\r\n" +
+                                 "Date: \(date)\r\nMessage-ID: <fresh-\(n)@example.com>\r\n\r\nA fresh one.\r\n", to: "Fresh")
+        }
+        AppDelegate.shared.perform(.sync)
+        _ = await waitUntil(30) { self.folderRow("Fresh") != nil }
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { !mailbox.listLoading && self.list.numberOfRows >= 2 }
+        await selectRow(1)
+        let left = mailbox.selectedRow?.subject
+        selectFolder(named: "Fresh")
+        let opened = await shown()
+        check(opened?.subject == "Fresh 2",
+              "a folder come to for the first time selects and shows its newest message (\(opened?.subject ?? "none"))")
+        selectFolder(named: "Inbox")
+        let back = await shown()
+        check(left != nil && back?.subject == left,
+              "back in the Inbox, the message shown when it was left is selected and shown (\(back?.subject ?? "none"), left \(left ?? "none"))")
+        await shot(main.window, "folder-1-reopen")
+        var remove = URLRequest(url: URL(string: "\(rest)/Fresh")!)
+        remove.httpMethod = "DELETE"
+        _ = try? await URLSession.shared.data(for: remove)
+        AppDelegate.shared.perform(.sync)
+        _ = await waitUntil(20) { self.folderRow("Fresh") == nil }
+    }
+
     /// the other addresses of the account set in Properties (field 11), empty to have none
     func setOtherAddresses(_ text: String, shot: String? = nil) async throws {
         command(.accounts)

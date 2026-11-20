@@ -1173,6 +1173,7 @@ async fn scenario(d: Rc<Driver>) {
     files(&d).await;
     organizing(&d).await;
     flagged_folder(&d).await;
+    steps::folder_opens_message(&d).await;
     steps::unsubscribing(&d).await;
     steps::invitation_and_logo(&d).await;
     steps::one_account_tree(&d).await;
@@ -1846,7 +1847,18 @@ async fn drafts(d: &Driver) {
     // Enter on the draft opens it to go on writing
     shell().main().open_selected();
     let Some(c) = wait_compose(20).await else {
-        d.check(false, "opening the draft opens a compose window");
+        let main = shell().main();
+        d.check(
+            false,
+            &format!(
+                "opening the draft opens a compose window (the pane shows {}:{} {:?}, its view {}, the row selected {:?})",
+                main.reader.folder(),
+                main.reader.uid(),
+                main.reader.message(),
+                main.reader.has_view(),
+                main.list.selected().map(|(at, m)| (at, m.folder_id, m.info.uid, m.info.subject)),
+            ),
+        );
         return;
     };
     d.check(c.subject.text() == "Draft from the UI test", "with its subject");

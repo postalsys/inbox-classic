@@ -403,6 +403,114 @@ pub(crate) mod tests {
         assert!(matches!(load.reselected.selection, Selected::Listed(_)));
     }
 
+    fn arrived() -> Reselect {
+        Reselect {
+            arrived: true,
+            ..Reselect::default()
+        }
+    }
+
+    /// A list come to selects the message it showed when it was left, else its newest by date wherever the sort puts
+    /// it; a message the app chose wins; an empty list selects nothing; what it showed is there after a restart
+    #[test]
+    fn a_list_come_to_opens_with_a_message() {
+        let dir = pe_testkit::TempDir::new("core-list-load-arrived");
+        let (core, inbox, events) = opened(&dir, 250);
+        let at = |uid| MessageRef { folder: inbox, uid };
+        let mut view = inbox_view(inbox);
+        let newest = |rows: Vec<u64>| Reselected {
+            how: Reselection::Arrived,
+            focus: rows.first().copied(),
+            rows,
+            selection: Selected::Listed(vec![at(250)]),
+        };
+        assert_eq!(loaded(&core, &events, &view, arrived()).reselected, newest(vec![0]));
+        view.set_sort(pe_store::Sort {
+            field: pe_store::SortField::Date,
+            ascending: true,
+        });
+        assert_eq!(loaded(&core, &events, &view, arrived()).reselected, newest(vec![249]));
+        view.set_sort(pe_store::Sort {
+            field: pe_store::SortField::Subject,
+            ascending: true,
+        });
+        let row = view.index_of(&core, inbox, 250).unwrap().unwrap();
+        assert_eq!(loaded(&core, &events, &view, arrived()).reselected, newest(vec![row]));
+
+        let mut grouped = inbox_view(inbox);
+        grouped.set_grouped(true);
+        let load = loaded(&core, &events, &grouped, arrived());
+        assert_eq!(
+            (load.reselected.how, load.reselected.rows),
+            (Reselection::Arrived, vec![0])
+        );
+
+        // the message shown when the list was left
+        let view = inbox_view(inbox);
+        core.list_shown(&view, at(7)).unwrap();
+        let row = view.index_of(&core, inbox, 7).unwrap().unwrap();
+        let load = loaded(&core, &events, &view, arrived());
+        assert_eq!(
+            load.reselected,
+            Reselected {
+                how: Reselection::Arrived,
+                rows: vec![row],
+                focus: Some(row),
+                selection: Selected::Listed(vec![at(7)]),
+            }
+        );
+        // a message the app chose wins
+        let chosen = Reselect {
+            arrived: true,
+            ..listed(&[at(100)])
+        };
+        let load = loaded(&core, &events, &view, chosen);
+        assert_eq!(load.reselected.how, Reselection::Kept);
+        assert_eq!(load.reselected.selection, Selected::Listed(vec![at(100)]));
+        // a search remembers nothing
+        let mut found = inbox_view(inbox);
+        found.set_text("m9");
+        core.list_shown(&found, at(9)).unwrap();
+        assert_eq!(core.shown_in(Scope::Folder(inbox)).unwrap(), Some(at(7)));
+
+        // gone: the newest again
+        core.store().remove_messages(inbox, &[7]).unwrap();
+        assert_eq!(loaded(&core, &events, &view, arrived()).reselected, newest(vec![0]));
+
+        // an empty list: nothing
+        let mut flagged = ListView::new();
+        flagged.set_scope(Some(Scope::Flagged));
+        assert_eq!(
+            loaded(&core, &events, &flagged, arrived()).reselected,
+            Reselected::default()
+        );
+
+        // kept through a restart, with the row of the folder tree chosen
+        core.list_shown(&view, at(42)).unwrap();
+        core.tree_chosen(&format!("folder:{inbox}")).unwrap();
+        pe_testkit::eventually(
+            || {
+                core.store().remembered("tree_row").ok().flatten().is_some()
+                    && core
+                        .store()
+                        .remembered(&format!("shown.folder:{inbox}"))
+                        .ok()
+                        .flatten()
+                        .as_deref()
+                        == Some(format!("{inbox}:42").as_str())
+            },
+            "what the list showed written to the store",
+        );
+        drop(core);
+        let options = crate::Options {
+            passwords: crate::PasswordStore::Memory,
+            ..Default::default()
+        };
+        let core = Core::open_with(dir.path().join("store.db"), options, |_| {}).unwrap();
+        assert_eq!(core.shown_in(Scope::Folder(inbox)).unwrap(), Some(at(42)));
+        assert_eq!(core.tree_start().unwrap(), Some(format!("folder:{inbox}")));
+    }
+
     /// The row after a removal is selected in place of the selection, the last row when the list is shorter
     #[test]
     fn the_row_after_a_removal() {

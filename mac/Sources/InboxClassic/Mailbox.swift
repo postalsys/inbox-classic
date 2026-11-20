@@ -174,6 +174,9 @@ public final class Mailbox: NSObject {
     /// after a removal: the row that took the place of the messages taken out, selected by the next load (until the
     /// user or Undo selects otherwise)
     private var rowAfter: Int?
+    /// another row of the tree chosen and its list not drawn yet: the core selects the message the list showed when it
+    /// was left, else its newest; false once the app chose a message of its own to show in it
+    private var arriving = false
 
     var selectedCount: Int { list.numberOfSelectedRows }
     /// the messages being dragged out of the list, as files for the Finder
@@ -708,6 +711,7 @@ public final class Mailbox: NSObject {
         listView.setList(list, folder: id)
         resetFind()
         clearReader()
+        arriving = true
         reloadList(keepSelection: false, covering: true)
         changed()
         selectionChanged()
@@ -939,7 +943,7 @@ public final class Mailbox: NSObject {
     private func startLoad() -> UInt64 {
         let (after, restored) = (rowAfter ?? -1, restorePending)
         guard loadKeepsSelection && selectedCount > 0 else {
-            return core.load(listView, selection: nil, after: after, restored: restored)
+            return core.load(listView, selection: nil, after: after, restored: restored, arrived: arriving)
         }
         guard !allSelected && selectedCount == 1 && uid != 0 else {
             return core.load(listView, selection: selection, after: after, restored: restored)
@@ -1018,10 +1022,13 @@ public final class Mailbox: NSObject {
             restorePending = false
         }
         let all = load.reselection == PE_RESELECTION_ALL && rows > 0
+        // the message the list showed when it was left, or its newest: not when the app chose one to show meanwhile
+        let passed = load.reselection == PE_RESELECTION_ARRIVED && !arriving
+        arriving = false
         reloading = true
-        list.selectRowIndexes(all ? IndexSet(integersIn: 0..<numberOfRows(in: list)) : load.selected,
+        list.selectRowIndexes(all ? IndexSet(integersIn: 0..<numberOfRows(in: list)) : passed ? IndexSet() : load.selected,
                               byExtendingSelection: false)
-        if load.focus >= 0 {
+        if load.focus >= 0 && !passed {
             list.scrollRowToVisible(load.focus)
         }
         reloading = false
@@ -1408,6 +1415,8 @@ public final class Mailbox: NSObject {
         }
         clearReader(loading: newUid != 0)
         if newUid != 0 {
+            // for the list to open with it when it is come back to
+            core.listShown(listView, folder: newFolder, uid: newUid)
             reader.open(folder: newFolder, uid: newUid, account: folderAccount(newFolder), row: row)
         }
         // after the message is the reader's: Reply and Print ask for it
@@ -1603,6 +1612,7 @@ public final class Mailbox: NSObject {
     /// when it is not there
     @discardableResult
     private func selectInList(folder id: Int64, uid message: UInt64) -> Bool {
+        arriving = false
         // the list being read: selected once it is drawn
         if listRequest != 0 {
             afterListed { [weak self] in self?.selectInList(folder: id, uid: message) }
@@ -1625,18 +1635,28 @@ public final class Mailbox: NSObject {
     func selectStart() {
         guard !started else { return }
         started = true
+        // the row the app was closed on, its list opening with the message it showed (the core selects it)
+        if shownList == PE_TREE_LIST_NONE, let key = core.treeStart(), let node = treeNodes.first(where: { $0.row.key == key }) {
+            startWith(node)
+            return
+        }
         guard shownList == PE_TREE_LIST_NONE, let start = core.startMessage(),
               let node = start.allInboxes ? topNode(PE_TREE_LIST_ALL_INBOXES) : folderRows[start.folder] else { return }
-        // the window drawn with the tree first, the list after, as a click does
+        startWith(node) { [weak self] in self?.selectInList(folder: start.folder, uid: start.uid) }
+    }
+
+    /// the row `node` chosen at the start, the window drawn with the tree first and the list after, as a click does;
+    /// `then` once the list is there
+    private func startWith(_ node: TreeNode, then: (() -> Void)? = nil) {
         deferChoice = true
         selectTreeNode(node)
         deferChoice = false
         if pendingNode === node {
-            pendingThen = { [weak self] in self?.selectInList(folder: start.folder, uid: start.uid) }
+            pendingThen = then
         } else {
             // the row was selected already: nothing waits
             choose(node)
-            selectInList(folder: start.folder, uid: start.uid)
+            then?()
         }
     }
 
@@ -1672,6 +1692,8 @@ public final class Mailbox: NSObject {
         }
         choose(node)
         if let then {
+            // the app shows a message of its own in it
+            arriving = false
             afterListed(then)
         }
         afterListed { [weak self] in
@@ -2677,6 +2699,9 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
 
     /// the list of the row `node` shown
     private func choose(_ node: TreeNode) {
+        if node.row.selectable {
+            core.treeChosen(node.row.key)
+        }
         show(node.row.list, folder: node.row.folder)
     }
 

@@ -860,6 +860,9 @@ impl ListView {
         let Selected::Listed(refs) = selected else {
             return Ok(Some(Reselected::default()));
         };
+        if reselect.arrived && refs.is_empty() {
+            return self.arrival(core, found).map(Some);
+        }
         let search = found.moment.search;
         let rows = match refs.as_slice() {
             [] => Vec::new(),
@@ -885,6 +888,35 @@ impl ListView {
             rows,
             selection: Selected::Listed(refs),
         }))
+    }
+
+    /// The row to select in a list come to (`found`): the message it showed when it was left, when it is still in it,
+    /// else its newest by date wherever the sort puts it; nothing in an empty list
+    fn arrival(&self, core: &Core, found: &Found) -> Result<Reselected> {
+        let search = found.moment.search;
+        let row_of = |message: MessageRef| core.search_index(search, self.sort, message.folder, message.uid);
+        let left = self.scope.map(|scope| core.shown_in(scope)).transpose()?.flatten();
+        let mut chosen = match left {
+            Some(message) => row_of(message)?.map(|row| (message, row)),
+            None => None,
+        };
+        if chosen.is_none()
+            && found.total > 0
+            && let Some(message) = core.newest_found(search)?
+        {
+            // the list's own order newest first and one row a message: its first row
+            let first = self.sort == crate::NEWEST_FIRST && search.threads.is_none();
+            chosen = if first { Some(0) } else { row_of(message)? }.map(|row| (message, row));
+        }
+        let Some((message, row)) = chosen else {
+            return Ok(Reselected::default());
+        };
+        Ok(Reselected {
+            how: Reselection::Arrived,
+            rows: vec![row],
+            focus: Some(row),
+            selection: Selected::Listed(vec![message]),
+        })
     }
 
     /// The row `after` selected (where rows an action took out of the list were), the last row when the list is
@@ -996,6 +1028,9 @@ pub struct Reselect {
     /// The messages the last Undo brought back, or the store took back as the server refused an action, selected in
     /// place of the selection when the list has them (after `ActionUndone` or an Undo)
     pub restored: bool,
+    /// The user came to this list from another (a row of the folder tree chosen) with nothing selected: the message it
+    /// showed when it was left is selected, else its newest ([`Reselection::Arrived`])
+    pub arrived: bool,
 }
 
 /// How a load selected rows for what the window had selected
@@ -1012,6 +1047,8 @@ pub enum Reselection {
     Restored,
     /// The row after a removal: a new selection
     After,
+    /// A list come to: the message it showed when it was left, else its newest; a new selection, shown
+    Arrived,
 }
 
 /// The rows a load selected ([`ListLoad::reselected`])

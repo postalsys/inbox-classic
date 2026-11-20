@@ -331,6 +331,14 @@ Screenshot: `main-10-flagged`
 - Flagged lists the flagged messages of every folder, with the Folder column, and names the window
 - unflagged, it is no longer counted (the Mac and Linux; on Windows the row and its count are shown)
 
+## 19e2. A folder opens with a message
+
+Screenshot: `folder-1-reopen`
+
+- in the Inbox a message that is not the newest is shown, then Archive is chosen: Archive's newest message is selected and shown
+- back in the Inbox, the message shown when it was left is selected and shown again
+- what each list showed and the row of the tree chosen are kept through a restart (`pe-core` `a_list_come_to_opens_with_a_message`, as the test does not start the app again)
+
 ## 19f. Sending from another address
 
 Screenshots: `account-12-other-addresses`, `write-26-from-alias`, `write-27-reply-from-alias`
