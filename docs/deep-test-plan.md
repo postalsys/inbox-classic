@@ -70,7 +70,7 @@ One set, compared with the server over ImapKit's REST API, after every step once
 - every folder's total and unread count match the server, and no message is listed twice;
 - nothing the window shows belongs to a folder left behind.
 
-"Quiet" needs a real signal, not a sleep: the core says when no command, sync or page is on its way (to be added to the core's test surface if what is there does not say it). Some checks hold even before quiet: rows of another folder are never shown, and a blank row in sight gets its text within the patience.
+"Quiet" is a real signal, not a sleep: `Core::quiet` (activity.rs) says when no sync asked for and no action queued is under way, and a sync asked for then is the barrier after the commands before it. Some checks hold even before quiet: rows of another folder are never shown, and a blank row in sight gets its text within the patience.
 
 ### The conductor (`pe-deep`)
 
@@ -86,18 +86,20 @@ Timing differs between runs even with one seed; that is why checks wait for quie
 
 ### The drivers
 
-A driver reads lines and answers lines over the test's standard input and output:
+A driver reads a JSON object a line on its standard input and answers with a line that starts with `DEEP ` and a JSON object (`core/crates/pe-deep/src/driver.rs` has the whole protocol, `model.rs` its words):
 
 ```
-> folder work/Inbox
-> scroll 4200
-> observe
-< rows 18044 first 4188 blank 0 selected - pane -
+> {"act":"open","list":{"account":"Work","path":"INBOX"}}
+< DEEP {"ok":true}
+> {"settle":600}
+< DEEP {"ok":true}
+> {"observe":true}
+< DEEP {"ok":true,"seen":{"rows":18044,"sight":[{"row":4188,"blank":false,...}],"selected":[4201],"shown":{...}}}
 ```
 
-About 30 actions and `observe` (the folder shown, the row count, the rows in sight with their text, the selection, the reading pane's subject, the tree's counts, the status bar, bars over the list). They do what a user's hand does (a click on a row, a key), not calls into the core.
+The acts are what a hand does (a row of the tree chosen, a row clicked, scrolled, a menu command); `observe` says what the window shows (the list chosen, its rows, those in sight with their messages, the selection, the reading pane's message, the tree's counts). `settle` waits for `Core::quiet` (no sync asked for that has not finished, no action queued that is not done; `pe_quiet` in the C API), then asks a sync of every account as a barrier (it finishes after the commands queued before it) and waits again, then for the list not being read.
 
-They live where the UI tests live: Linux in `linux/src/e2e/` behind the `e2e` feature, the Mac in the in-process test host (`UITest*.swift`), Windows in PowerShell outside the exe (`scripts/ui-e2e/`), which reads the list as the regular test does. A release build gets no port, pipe or test command. The security review of each driver's pull request checks that.
+They live where the UI tests live: Linux in `linux/src/e2e/deep.rs` behind the `e2e` feature (`inbox-classic --deep`), the Mac in the UI test's host (`UITestDeep.swift`, `InboxClassicUITest --deep`), Windows in PowerShell outside the exe (`scripts/deep-driver.ps1`) with the hooks of `--test-hooks` the UI test uses. The app's own release build has none of the drivers: Linux and the Mac build them into the test's executable only, and Windows' hooks answer only with `--test-hooks`. The security review of each driver's pull request checks that.
 
 ### Health
 

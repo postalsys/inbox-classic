@@ -729,6 +729,12 @@ impl MessageList {
         self.model.n_items()
     }
 
+    /// The first and the last row on screen; None before the list has a size
+    #[cfg(feature = "e2e")]
+    pub fn rows_in_sight(&self) -> Option<(u32, u32)> {
+        sight(&self.widget, &self.view, &self.rows_view, self.model.n_items())
+    }
+
     /// Whether every selected row is in sight
     pub fn selection_in_sight(&self) -> bool {
         let selected = self.selection.selection();

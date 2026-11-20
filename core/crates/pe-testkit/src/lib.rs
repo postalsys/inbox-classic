@@ -136,6 +136,22 @@ impl ImapKit {
         }
     }
 
+    /// The messages of a mailbox without their sources: `uid`, `flags`, `internaldate`, `size`
+    pub fn message_list(&self, mailbox: &str) -> Vec<Value> {
+        match self.request("GET", &messages_path(mailbox, ""), None) {
+            Value::Array(messages) => messages,
+            other => panic!("not a message list: {other}"),
+        }
+    }
+
+    /// Every mailbox with its counts: `path`, `messages`, `unseen`, `specialUse`, `selectable`
+    pub fn mailboxes(&self) -> Vec<Value> {
+        match self.request("GET", "/v1/mailboxes", None) {
+            Value::Array(mailboxes) => mailboxes,
+            other => panic!("not a mailbox list: {other}"),
+        }
+    }
+
     /// The subjects of the messages of a mailbox, in the order the server keeps them
     pub fn subjects(&self, mailbox: &str) -> Vec<String> {
         self.messages(mailbox)
@@ -436,7 +452,7 @@ fn messages_path(mailbox: &str, suffix: &str) -> String {
 }
 
 /// A mailbox path in a REST URL: percent encoded, `/` included
-fn encode_path(path: &str) -> String {
+pub fn encode_path(path: &str) -> String {
     path.bytes()
         .map(|c| match c {
             b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => (c as char).to_string(),

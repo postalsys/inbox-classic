@@ -1,0 +1,2 @@
+# Seeds of the deep test's walk that once found a bug: each runs again (a shorter walk) in every run, after the new
+# seed. A line is a seed; what follows # is what it found.

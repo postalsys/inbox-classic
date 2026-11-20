@@ -1180,6 +1180,9 @@ struct Arguments {
     // asks which notification was shown (kTestNotification); messages are downloaded only when opened, which the test's
     // steps expect (its step of Options checks the choices)
     bool testHooks = false;
+    // --adds-accounts: with --test-hooks only, the test adds its accounts itself (the deep test's driver, through
+    // kTestDeep): the first start asks for none
+    bool addsAccounts = false;
     // --opened-files-log <path>: with --test-hooks only, the files and links the app would open are written there
     // in place of opening them
     std::wstring openedFilesLog;
@@ -1287,6 +1290,8 @@ void ReadArguments() {
             g_arguments.background = true;
         } else if (arg == L"--test-hooks") {
             g_arguments.testHooks = true;
+        } else if (arg == L"--adds-accounts") {
+            g_arguments.addsAccounts = true;
         }
     }
     LocalFree(argv);
@@ -1655,6 +1660,8 @@ constexpr ULONG_PTR kTestHoldList = 0x484F4C44;
 constexpr ULONG_PTR kTestPreviews = 0x50565753;
 // with --test-hooks only: PDF previews off as after a PDF file ended the app (pe_pdf_previews_crashed_for_tests)
 constexpr ULONG_PTR kTestPdfCrashed = 0x50444643;
+// with --test-hooks only: a request of the deep test's driver (Mailbox::TestDeep, scripts/deep-driver.ps1)
+constexpr ULONG_PTR kTestDeep = 0x44454550;
 // with --test-hooks only: the newest Print window's look at its page (TestPrint, the text to find in it)
 constexpr ULONG_PTR kTestPrint = 0x50524E54;
 // the link it handed over, opened once WM_COPYDATA returned
@@ -2158,6 +2165,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_arguments.testHooks && data->dwData == kTestFound) {
             return static_cast<LRESULT>(g_mailbox.TestFound() + 10);
         }
+        if (g_arguments.testHooks && data->dwData == kTestDeep && data->cbData % sizeof(wchar_t) == 0) {
+            return g_mailbox.TestDeep(std::wstring(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t)));
+        }
         if (g_arguments.testHooks && data->dwData == kTestShown && data->cbData % sizeof(wchar_t) == 0) {
             return g_mailbox.TestShown(std::wstring(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t)));
         }
@@ -2446,6 +2456,9 @@ void Restart() {
 void FirstRun() {
     core::AccountList accounts(pe_accounts(g_core.get()));
     if (pe_account_list_count(accounts.get()) == 0) {
+        if (g_arguments.testHooks && g_arguments.addsAccounts) {
+            return;
+        }
         AddAccount();
     } else {
         SyncAll();

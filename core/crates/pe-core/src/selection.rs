@@ -639,11 +639,15 @@ impl Core {
     /// Queues the action `act`: [`Event::Acted`] with the request this returns once it ran
     fn start_action(self: &Arc<Self>, act: impl FnOnce(&Core) -> Result<String> + Send + 'static) -> Result<u64> {
         let request = self.next_request.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        self.queue_action(Box::new(move |core| {
+        self.activity.action_queued();
+        let queued = self.queue_action(Box::new(move |core| {
             let said = act(core).map_err(|error| error.to_string());
             (core.events)(crate::Event::Acted { request, said });
-        }))?;
-        Ok(request)
+        }));
+        if queued.is_err() {
+            self.activity.action_done();
+        }
+        queued.map(|()| request)
     }
 }
 

@@ -1973,6 +1973,14 @@ public final class Mailbox: NSObject {
         }
     }
 
+    /// the selection moved to the folder `to`, as Move to Folder does once a folder is chosen in its window (the deep
+    /// test's driver chooses it without the window)
+    func moveSelection(to: Int64) {
+        guard hasSelection else { return }
+        if afterSummary({ [weak self] in self?.moveSelection(to: to) }) { return }
+        _ = actAndRemove(PE_ACTION_MOVE, to: to)
+    }
+
     /// the first selected message, which tells the account of them all
     private var firstSelected: (folder: Int64, uid: UInt64)? {
         var folder: Int64 = 0

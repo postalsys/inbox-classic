@@ -12,6 +12,10 @@ import WebKit
 
 @MainActor
 public func runUITest() -> Never {
+    // the deep test's driver (UITestDeep.swift), started by its conductor
+    if CommandLine.arguments.contains("--deep") {
+        runDeepDriver(Array(CommandLine.arguments.dropFirst()))
+    }
     var out = "build/ui-e2e-mac"
     var arguments = CommandLine.arguments.dropFirst().makeIterator()
     while let argument = arguments.next() {

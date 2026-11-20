@@ -255,7 +255,9 @@ fn first_run(arguments: Arguments) {
         .accounts()
         .map(|accounts| accounts.is_empty())
         .unwrap_or(true)
-        && !arguments.background;
+        && !arguments.background
+        // the deep test's driver adds its accounts itself: no Add Mail Account form over the window
+        && !arguments.deep;
     spawn(async move {
         if none {
             add_account().await;

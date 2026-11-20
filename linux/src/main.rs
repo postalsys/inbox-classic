@@ -80,6 +80,8 @@ pub struct Arguments {
     pub files: Vec<PathBuf>,
     /// The UI end-to-end test, its screenshots and log to this folder (builds with the `e2e` feature only)
     pub e2e: Option<PathBuf>,
+    /// --deep: the deep test's driver reads its requests from standard input (builds with the `e2e` feature only)
+    pub deep: bool,
     /// --mcp: relay an AI agent's MCP connection to the app that is running (started when it is not), no window
     pub mcp: bool,
     /// --background: started for an agent (by --mcp), without its window
@@ -107,6 +109,7 @@ impl Arguments {
                 "--pin-certificate" => parsed.certificate = rest.next().map(PathBuf::from),
                 "--sign-in-page-file" => parsed.sign_in_page_file = rest.next().map(PathBuf::from),
                 "--e2e" => parsed.e2e = rest.next().map(PathBuf::from),
+                "--deep" => parsed.deep = true,
                 "--language" => parsed.language = rest.next().map(str::to_string),
                 "--key-server" => parsed.key_server = rest.next().map(str::to_string),
                 "--memory-passwords" => parsed.memory_passwords = true,
@@ -169,6 +172,16 @@ fn main() -> glib::ExitCode {
     }
     if arguments.mcp {
         return relay(&arguments);
+    }
+    if arguments.deep {
+        // the deep test's driver (docs/deep-test-plan.md), built with the UI test only
+        #[cfg(feature = "e2e")]
+        return e2e::deep::run(arguments, argv);
+        #[cfg(not(feature = "e2e"))]
+        {
+            eprintln!("this build has no deep test driver (--deep): build it with --features e2e");
+            return glib::ExitCode::FAILURE;
+        }
     }
     if let Some(out) = arguments.e2e.clone() {
         #[cfg(feature = "e2e")]

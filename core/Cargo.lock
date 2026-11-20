@@ -2564,6 +2564,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "pe-deep"
+version = "0.19.1"
+dependencies = [
+ "base64",
+ "pe-core",
+ "pe-imap",
+ "pe-mime",
+ "pe-net",
+ "pe-store",
+ "pe-testkit",
+ "serde_json",
+]
+
+[[package]]
 name = "pe-ffi"
 version = "0.19.1"
 dependencies = [

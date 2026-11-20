@@ -7,12 +7,15 @@
 // second account, and adds `"second": { "imap": port, "smtp": port, "rest": port }`; both have the same certificate.
 // It also answers `POST http://127.0.0.1:<pgp>/pgp/check` (`"pgp": port` in that line): a sent message checked with
 // OpenPGP.js (pgp.mjs `check`), for the UI tests to see that what they signed and encrypted reads as such elsewhere.
+// `storageFile` names a JSON file of ImapKit's `storage` to start from, in place of `storage` (the deep test's
+// mailboxes, too large for a line).
 // The server runs until stdin closes, so it goes away with the test process.
 
 import { createInterface } from 'node:readline';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { createServer } from 'node:http';
+import { readFileSync } from 'node:fs';
 import imapkit from 'imapkit';
 import { check } from './pgp.mjs';
 
@@ -90,7 +93,10 @@ const config = JSON.parse((first || '').replace(/^\uFEFF/, '') || '{}');
 
 const { second, ...main } = config;
 
-async function start(options) {
+async function start({ storageFile, ...options }) {
+    if (storageFile) {
+        options.storage = JSON.parse(readFileSync(storageFile, 'utf8'));
+    }
     const server = imapkit({
         plugins: ALL_PLUGINS,
         storage: DEFAULT_STORAGE,

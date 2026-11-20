@@ -1,0 +1,183 @@
+# The deep test (docs/deep-test-plan.md): the apps and the core on mailboxes the size people have, the journeys of
+# scripts/ui-e2e/DEEP.md and a seeded walk with the checks after every step. Started by hand for a commit, which is
+# what scripts/release.sh asks for before a release (each platform that has a driver); the core's walk also runs
+# weekly with a new seed. Never part of a pull request's checks.
+name: Deep test
+
+on:
+    workflow_dispatch:
+        inputs:
+            platforms:
+                description: The targets, comma separated (core, linux, mac, windows)
+                default: core,linux,mac,windows
+            profile:
+                description: small, standard or overnight
+                default: standard
+            seed:
+                description: The walk's seed, empty for a new one
+                default: ''
+    schedule:
+        # Mondays, 03:17 UTC: the core's walk with a new seed
+        - cron: '17 3 * * 1'
+
+permissions:
+    contents: read
+
+env:
+    PROFILE: ${{ inputs.profile || 'standard' }}
+    SEED: ${{ inputs.seed }}
+
+jobs:
+    core:
+        name: The core without a window
+        if: github.event_name == 'schedule' || contains(inputs.platforms, 'core')
+        runs-on: ubuntu-24.04
+        timeout-minutes: 120
+        steps:
+            - uses: actions/checkout@v6
+            - uses: dtolnay/rust-toolchain@stable
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: core
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+            - run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            - name: The deep test
+              run: scripts/deep-test.sh core --profile "$PROFILE" ${SEED:+--seed "$SEED"} --shrink
+            - uses: actions/upload-artifact@v7
+              if: always()
+              continue-on-error: true
+              with:
+                  name: deep-core
+                  path: |
+                      build/deep/core/**/report.html
+                      build/deep/core/**/result.json
+                      build/deep/core/**/*.png
+                  if-no-files-found: ignore
+
+    linux:
+        name: The Linux app
+        if: github.event_name == 'workflow_dispatch' && contains(inputs.platforms, 'linux')
+        runs-on: ubuntu-latest
+        container: ubuntu:26.04
+        timeout-minutes: 180
+        steps:
+            - name: Packages (as linux/Dockerfile installs them)
+              env:
+                  DEBIAN_FRONTEND: noninteractive
+              run: |
+                  apt-get update
+                  apt-get install -y --no-install-recommends \
+                      build-essential pkg-config ca-certificates curl xz-utils git \
+                      libgtk-4-dev libadwaita-1-dev libwebkitgtk-6.0-dev libdbus-1-dev \
+                      xvfb xauth dbus dbus-x11 at-spi2-core gnome-keyring libsecret-tools \
+                      fonts-dejavu-core fonts-cantarell adwaita-icon-theme locales
+                  locale-gen en_GB.UTF-8
+            - uses: actions/checkout@v6
+            - uses: dtolnay/rust-toolchain@stable
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: |
+                      linux
+                      core
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+            - run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            - name: The deep test
+              run: |
+                  (cd linux && cargo build --release --locked --features e2e)
+                  cargo build --release --locked --manifest-path core/Cargo.toml -p pe-deep
+                  core/target/release/pe-deep run --target linux --out build/deep/linux --worlds build/deep \
+                      --profile "$PROFILE" ${SEED:+--seed "$SEED"} \
+                      --driver scripts/linux-deep-driver.sh linux/target/release/inbox-classic
+            - uses: actions/upload-artifact@v7
+              if: always()
+              continue-on-error: true
+              with:
+                  name: deep-linux
+                  path: |
+                      build/deep/linux/report.html
+                      build/deep/linux/result.json
+                      build/deep/linux/*.png
+                  if-no-files-found: ignore
+
+    mac:
+        name: The Mac app
+        if: github.event_name == 'workflow_dispatch' && contains(inputs.platforms, 'mac')
+        runs-on: macos-26
+        timeout-minutes: 180
+        steps:
+            - uses: actions/checkout@v6
+            - uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: aarch64-apple-darwin
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: |
+                      core -> ../build/cargo
+                      core
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+            - run: brew install librsvg
+            - run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            - name: The deep test
+              run: |
+                  TEST=1 scripts/mac-build.sh
+                  cargo build --release --locked --manifest-path core/Cargo.toml -p pe-deep
+                  core/target/release/pe-deep run --target mac --out build/deep/mac --worlds build/deep \
+                      --profile "$PROFILE" ${SEED:+--seed "$SEED"} \
+                      --driver "build/mac/Inbox Classic.app/Contents/MacOS/InboxClassicUITest" --deep
+            - uses: actions/upload-artifact@v7
+              if: always()
+              continue-on-error: true
+              with:
+                  name: deep-mac
+                  path: |
+                      build/deep/mac/report.html
+                      build/deep/mac/result.json
+                      build/deep/mac/*.png
+                  if-no-files-found: ignore
+
+    windows:
+        name: The Windows app
+        if: (github.event_name == 'workflow_dispatch' && contains(inputs.platforms, 'windows'))
+        runs-on: windows-latest
+        timeout-minutes: 180
+        steps:
+            - uses: actions/checkout@v6
+            - uses: dtolnay/rust-toolchain@stable
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: |
+                      core -> ../build/cargo
+                      core
+            - name: Build
+              shell: cmd
+              run: scripts\win-build.cmd
+            - uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+            - run: npm ci --no-audit --no-fund
+              working-directory: core/e2e
+            - name: The deep test
+              shell: bash
+              run: |
+                  cargo build --release --locked --manifest-path core/Cargo.toml -p pe-deep
+                  core/target/release/pe-deep.exe run --target windows --out build/deep/windows --worlds build/deep \
+                      --profile "$PROFILE" ${SEED:+--seed "$SEED"} \
+                      --driver powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deep-driver.ps1 build/InboxClassic.exe
+            - uses: actions/upload-artifact@v7
+              if: always()
+              continue-on-error: true
+              with:
+                  name: deep-windows
+                  path: |
+                      build/deep/windows/report.html
+                      build/deep/windows/result.json
+                  if-no-files-found: ignore

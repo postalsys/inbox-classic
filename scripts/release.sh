@@ -7,6 +7,7 @@
 #   PLATFORMS=mac scripts/release.sh         builds only these (windows, mac, linux, comma separated) and uploads
 #                                            what is in dist/, to finish a release one of whose builds failed
 #   ALLOW_UNREVIEWED=1 scripts/release.sh    releases although translations wait for a review (it refuses otherwise)
+#   ALLOW_NO_DEEP=1 scripts/release.sh       releases without a passing deep test of the commit (it refuses otherwise)
 #
 # release-please drafts the release and pushes the tag when its release PR is merged (.github/workflows/release.yaml).
 # This builds from that tag:
@@ -83,6 +84,32 @@ if [ "$translations_ok" = "no" ]; then
         sleep 5
     else
         fail "No release while translations wait: review them on master first, or ALLOW_UNREVIEWED=1 to release anyway"
+    fi
+fi
+# the deep test (docs/deep-test-plan.md): a passing run of the deep workflow on this commit for every platform that has
+# a driver, started by hand (gh workflow run deep.yml --ref <tag>) while CI runs. ALLOW_NO_DEEP=1 releases anyway.
+DEEP_PLATFORMS="linux mac windows"
+deep_job() {
+    case "$1" in
+        linux) echo "The Linux app" ;;
+        mac) echo "The Mac app" ;;
+        windows) echo "The Windows app" ;;
+    esac
+}
+deep_passed=$(gh run list --repo "$REPO" --workflow deep.yml --commit "$(git rev-parse HEAD)" --event workflow_dispatch \
+    --json databaseId --jq '.[].databaseId' 2>/dev/null | while read -r run; do
+    gh run view "$run" --repo "$REPO" --json jobs --jq '.jobs[] | select(.conclusion == "success") | .name'
+done || true)
+deep_missing=""
+for platform in $DEEP_PLATFORMS; do
+    grep -qxF "$(deep_job "$platform")" <<<"$deep_passed" || deep_missing="$deep_missing $platform"
+done
+if [ -n "$deep_missing" ]; then
+    if [ "${ALLOW_NO_DEEP:-}" = "1" ]; then
+        echo "!!  ALLOW_NO_DEEP=1: releasing without a passing deep test of:${deep_missing}" >&2
+        sleep 5
+    else
+        fail "No passing deep test of this commit for:${deep_missing} (gh workflow run deep.yml --ref ${TAG}), or ALLOW_NO_DEEP=1 to release anyway"
     fi
 fi
 if building windows; then
