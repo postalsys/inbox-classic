@@ -177,6 +177,9 @@ public final class Mailbox: NSObject {
     /// another row of the tree chosen and its list not drawn yet: the core selects the message the list showed when it
     /// was left, else its newest; false once the app chose a message of its own to show in it
     private var arriving = false
+    /// the message shown was in sight when the list was asked for again: the list scrolls to keep it so, and else stays
+    /// where the user scrolled it
+    private var keptInSight = false
 
     var selectedCount: Int { list.numberOfSelectedRows }
     /// the messages being dragged out of the list, as files for the Finder
@@ -949,6 +952,7 @@ public final class Mailbox: NSObject {
             return core.load(listView, selection: selection, after: after, restored: restored)
         }
         // the message shown alone, not the rest of a closed conversation whose row it is
+        keptInSight = list.rows(in: list.visibleRect).contains(list.selectedRow)
         let shown = newSelection([(messageFolder, uid)])
         defer { pe_selection_free(shown) }
         return core.load(listView, selection: shown, hint: list.selectedRow, after: after, restored: restored)
@@ -1028,7 +1032,9 @@ public final class Mailbox: NSObject {
         reloading = true
         list.selectRowIndexes(all ? IndexSet(integersIn: 0..<numberOfRows(in: list)) : passed ? IndexSet() : load.selected,
                               byExtendingSelection: false)
-        if load.focus >= 0 && !passed {
+        // the message kept is scrolled to only when it was in sight: else the list stays where the user scrolled it
+        let stays = load.reselection == PE_RESELECTION_KEPT
+        if load.focus >= 0 && !passed && (!stays || keptInSight) {
             list.scrollRowToVisible(load.focus)
         }
         reloading = false

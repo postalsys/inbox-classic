@@ -4115,6 +4115,25 @@ public static class Dragger {
     $backSubject = & $openedSubject
     Check ($leftSubject -ne '' -and $backSubject -eq $leftSubject) "back in the Inbox, the message shown when it was left is selected and shown ($backSubject, left $leftSubject)"
     Shot $main 'folder-1-reopen'
+    # a list read again keeps its place: its top shown, scrolled to its end, then mail comes
+    foreach ($n in 4..43) {
+        AddMessage ("From: Fresh Sender <fresh@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Fresh $n`r`n" +
+            "Date: $([DateTime]::UtcNow.AddMinutes(-1000 - $n).ToString('r'))`r`nMessage-ID: <fresh-$n@example.com>`r`n`r`nA fresh one.`r`n") @() 'Fresh'
+    }
+    Command $main $IDM_SYNC
+    if ($freshItem) { [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $freshItem); Settled }
+    [void](WaitFor { (Rows) -eq 43 } 30)
+    SelectRow 0
+    [void][Native.Win]::SendMessage($list, 0x1013, [IntPtr]42, [IntPtr]0)
+    AddMessage ("From: Fresh Sender <fresh@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Fresh newest`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <fresh-newest@example.com>`r`n`r`nThe newest.`r`n") @() 'Fresh'
+    Command $main $IDM_SYNC
+    $grew = [bool](WaitFor { (Rows) -eq 44 } 30)
+    Settled
+    Start-Sleep -Milliseconds 500
+    $selectedNow = SelectedRow
+    $inSight = $selectedNow -ge 0 -and [int][Native.Win]::SendMessage($list, 0x10B6, [IntPtr]$selectedNow, [IntPtr]::Zero) -ne 0
+    Check ($grew -and -not $inSight) 'a list read again as mail came stays where it was scrolled, not at the message shown'
     [void](Invoke-RestMethod -Method Delete "$rest/Fresh")
     Command $main $IDM_SYNC
     [void](WaitFor { (FolderItem 'Fresh') -eq [IntPtr]::Zero } 20)

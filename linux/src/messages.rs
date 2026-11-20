@@ -621,8 +621,16 @@ impl MessageList {
 
     /// The list again: the rows of its view, `total` of them (`read` the page of them read already, its offset and
     /// rows), the rows `select` selected; scrolled as it was when it is the same list read again (`same`, GTK keeps
-    /// the place), else from the top
-    pub fn reset(self: &Rc<Self>, total: u64, read: Option<(u64, Vec<Message>)>, select: &[u64], same: bool) {
+    /// the place), else from the top. `reveal`: the rows selected scrolled to when they are not in sight; not for the
+    /// message shown kept when it was out of sight, so the list stays where the user scrolled it
+    pub fn reset(
+        self: &Rc<Self>,
+        total: u64,
+        read: Option<(u64, Vec<Message>)>,
+        select: &[u64],
+        same: bool,
+        reveal: bool,
+    ) {
         self.clock.set(crate::rows::Clock::now());
         self.model.reset(total, read);
         self.select_positions(select);
@@ -630,7 +638,9 @@ impl MessageList {
         if !same && select.is_empty() && self.model.n_items() > 0 {
             self.scroll_to(0, gtk::ListScrollFlags::NONE);
         }
-        self.reveal(select);
+        if reveal {
+            self.reveal(select);
+        }
     }
 
     /// The scrolling of the list shown
@@ -694,8 +704,7 @@ impl MessageList {
         self.model.n_items()
     }
 
-    /// Whether every selected row is in sight, for the e2e driver
-    #[cfg(feature = "e2e")]
+    /// Whether every selected row is in sight
     pub fn selection_in_sight(&self) -> bool {
         let selected = self.selection.selection();
         let rows = self.model.n_items();

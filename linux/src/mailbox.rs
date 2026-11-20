@@ -150,6 +150,9 @@ pub struct Mailbox {
     /// Another row of the tree was chosen and its list is not drawn yet: the core selects the message it showed when
     /// it was left, else its newest
     arrived: Cell<bool>,
+    /// The message shown was in sight when the list was asked for again: the list scrolls to keep it so, and else stays
+    /// where the user scrolled it
+    kept_in_sight: Cell<bool>,
     /// How often the user changed the selection: a load asked for before the latest is asked for again
     picks: Cell<u64>,
     /// What Edit > Undo says now
@@ -359,6 +362,7 @@ impl Mailbox {
             after: Cell::new(None),
             chosen: Cell::new(None),
             arrived: Cell::new(false),
+            kept_in_sight: Cell::new(false),
             picks: Cell::new(0),
             undo_label: RefCell::default(),
             open_when_ready: Cell::new(false),
@@ -1076,6 +1080,8 @@ impl Mailbox {
     /// What the core selects again in the list it loads: the message the app chose, else what is selected (Select
     /// All, several messages, the one shown near its row), or the row after a removal, or what Undo brought back
     fn reselect(&self) -> Reselect {
+        // several selected are scrolled to as before; the message shown alone only when it is in sight now
+        self.kept_in_sight.set(true);
         let mut reselect = Reselect {
             after: self.after.get(),
             restored: self.undone.get(),
@@ -1091,6 +1097,7 @@ impl Mailbox {
         } else if let Some(shown) = self.reader.message() {
             reselect.selected = Selected::Listed(vec![shown]);
             reselect.hint = self.list.selected().map(|(at, _)| u64::from(at));
+            self.kept_in_sight.set(self.list.selection_in_sight());
         }
         reselect
     }
@@ -1145,11 +1152,15 @@ impl Mailbox {
         let reselected = load.reselected;
         self.arrived.set(false);
         self.reloading.set(true);
+        // the message shown kept is scrolled to only when it was in sight (mail came above it): else the list stays
+        // where the user scrolled it
+        let reveal = reselected.how != Reselection::Kept || self.kept_in_sight.get();
         self.list.reset(
             load.rows,
             Some((load.offset, load.messages)),
             &reselected.rows,
             pending.same,
+            reveal,
         );
         self.reloading.set(false);
         // no longer dimmed: the selection drawn is the new list's

@@ -4740,6 +4740,34 @@ pub async fn folder_opens_message(d: &Driver) {
     );
     pause(500).await;
     d.shot(&main_window(), "folder-1-reopen").await;
+    // a list read again keeps its place: its top shown, scrolled to its end, then mail comes
+    for n in 4..=43 {
+        let raw = format!(
+            "From: Fresh Sender <fresh@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Fresh {n}\r\n\
+             Date: {}\r\nMessage-ID: <fresh-{n}@example.com>\r\n\r\nA fresh one.\r\n",
+            date_now(-1000 - n)
+        );
+        let _ = d.add_message_to("Fresh", &raw);
+    }
+    run_command(Command::Sync);
+    main.folders.select(fresh, true);
+    wait_until(30, || main.list_view().own_folder() == Some(fresh) && rows() == 43).await;
+    select_row(0).await;
+    main.list.scroll_to(42, gtk::ListScrollFlags::NONE);
+    pause(500).await;
+    let raw = format!(
+        "From: Fresh Sender <fresh@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Fresh newest\r\n\
+         Date: {}\r\nMessage-ID: <fresh-newest@example.com>\r\n\r\nThe newest.\r\n",
+        date_now(0)
+    );
+    let _ = d.add_message_to("Fresh", &raw);
+    run_command(Command::Sync);
+    let grew = wait_until(30, || rows() == 44 && !list_settling()).await;
+    pause(500).await;
+    d.check(
+        grew && !main.list.selection_in_sight(),
+        "a list read again as mail came stays where it was scrolled, not at the message shown",
+    );
     let _ = core.delete_folder(fresh);
     wait_until(20, || folder_id("Fresh").is_none()).await;
 }
