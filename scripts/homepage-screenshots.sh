@@ -46,10 +46,11 @@ for platform in "${platforms[@]}"; do
             linux)
                 crop=""
                 { [ "$shot" = write-5-new ] || [ "$shot" = write-31-encrypt ]; } && crop="-crop x400+0+0 +repage"
-                # the account form is a dialog over the main window: the dialog, where it is in a window of 1190x750
-                [ "$shot" = account-1-form ] && crop="-crop 551x459+320+146 +repage"
-                # the send confirmation is a dialog over the main window too
-                [ "$shot" = agents-4-send ] && crop="-crop 528x481+331+135 +repage"
+                # the account form and the send confirmation are dialogs over the dimmed main window: the dialog alone,
+                # found as the one bright area, so that a change in the window's or the dialog's size needs nothing here
+                if [ "$shot" = account-1-form ] || [ "$shot" = agents-4-send ]; then
+                    crop="-crop $(magick "$source" -colorspace gray -threshold 93% -morphology Open Square:3 -format '%@' info:) +repage"
+                fi
                 magick "$source" $crop -strip "$target"
                 ;;
         esac
