@@ -121,7 +121,7 @@ mod imp {
 
     impl MessageModel {
         /// The page at `offset` asked of the core once GTK is done drawing, unless asked for already
-        fn want(&self, offset: u32) {
+        pub(super) fn want(&self, offset: u32) {
             if !self.asked.borrow_mut().insert(offset) {
                 return;
             }
@@ -194,6 +194,26 @@ impl MessageModel {
         let now = u32::try_from(total).unwrap_or(u32::MAX);
         imp.total.set(now);
         self.items_changed(0, before, now);
+    }
+
+    /// The pages of the rows `first` to `last` (those on screen) asked for when they are neither here nor asked for:
+    /// a row drawn while the list's scrolling still described the list before (a list read again, grouped or not)
+    /// was taken for one off screen and its page not asked for, and GTK, which keeps the row it drew, does not draw
+    /// it again, so it stayed blank once the list was scrolled to it
+    fn ask_on_screen(&self, first: u32, last: u32) {
+        let imp = self.imp();
+        let total = imp.total.get();
+        if total == 0 {
+            return;
+        }
+        let last = last.min(total - 1);
+        let mut offset = first.min(last) / PAGE * PAGE;
+        while offset <= last {
+            if !imp.pages.borrow().iter().any(|(at, _)| *at == offset) {
+                imp.want(offset);
+            }
+            offset += PAGE;
+        }
     }
 
     /// The page read at `offset` in place of its blank lines: the range of rows that changed, None when the page is
@@ -323,6 +343,7 @@ impl MessageList {
         let sort_button = sort_button();
         let widget = list_stack(&view, &rows_view, &sort_button);
         *model.imp().in_sight.borrow_mut() = Some(in_sight(&model, &widget, &view, &rows_view));
+        ask_on_screen_when_scrolled(&model, &widget, &view, &rows_view);
         Rc::new(MessageList {
             view,
             rows_view,
@@ -384,6 +405,10 @@ impl MessageList {
 
     /// The list shown scrolled to the row `index`, with `flags` (the focus on it)
     pub fn scroll_to(&self, index: u32, flags: gtk::ListScrollFlags) {
+        // a row past the end (a place asked for before the list became shorter) is no place: GTK would refuse it
+        if index >= self.model.n_items() {
+            return;
+        }
         if self.columns_shown() {
             self.rows_view.scroll_to(index, flags, None);
         } else {
@@ -836,22 +861,48 @@ fn in_sight(model: &MessageModel, stack: &gtk::Stack, view: &gtk::ColumnView, ro
         let Some(model) = model.upgrade() else {
             return false;
         };
-        let adjustment = if stack.visible_child_name().as_deref() == Some("columns") {
-            rows.vadjustment()
-        } else {
-            view.vadjustment()
-        };
-        let total = model.n_items();
-        let Some(adjustment) = adjustment.filter(|a| a.upper() > 0.0 && total > 0) else {
+        let Some((first, last)) = sight(&stack, &view, &rows, model.n_items()) else {
             return true;
         };
-        let row = adjustment.upper() / f64::from(total);
-        let first = (adjustment.value() / row) as u32;
-        let last = ((adjustment.value() + adjustment.page_size()) / row) as u32;
         let from = (first / PAGE * PAGE).saturating_sub(PAGE);
         let to = last / PAGE * PAGE + PAGE;
         (from..=to).contains(&offset)
     })
+}
+
+/// Whenever either list's scrolling changes (scrolled, or its length changed with the rows), the pages on screen not
+/// here are asked for (`MessageModel::ask_on_screen`)
+fn ask_on_screen_when_scrolled(model: &MessageModel, stack: &gtk::Stack, view: &gtk::ColumnView, rows: &gtk::ListView) {
+    let adjustments = [view.vadjustment(), rows.vadjustment()];
+    for adjustment in adjustments.into_iter().flatten() {
+        let ask = {
+            let model = model.downgrade();
+            let (stack, view, rows) = (stack.clone(), view.clone(), rows.clone());
+            move || {
+                let Some(model) = model.upgrade() else { return };
+                if let Some((first, last)) = sight(&stack, &view, &rows, model.n_items()) {
+                    model.ask_on_screen(first, last);
+                }
+            }
+        };
+        let again = ask.clone();
+        adjustment.connect_value_changed(move |_| ask());
+        adjustment.connect_changed(move |_| again());
+    }
+}
+
+/// The first and the last row of `total` on screen, from the shown list's scrolling; None before it has a size
+fn sight(stack: &gtk::Stack, view: &gtk::ColumnView, rows: &gtk::ListView, total: u32) -> Option<(u32, u32)> {
+    let adjustment = if stack.visible_child_name().as_deref() == Some("columns") {
+        rows.vadjustment()
+    } else {
+        view.vadjustment()
+    };
+    let adjustment = adjustment.filter(|a| a.upper() > 0.0 && total > 0)?;
+    let row = adjustment.upper() / f64::from(total);
+    let first = (adjustment.value() / row) as u32;
+    let last = ((adjustment.value() + adjustment.page_size()) / row) as u32;
+    Some((first, last.min(total - 1)))
 }
 
 /// The two lists in a stack: the Classic one, and the Columns one under its Sorted by button
@@ -1390,6 +1441,35 @@ mod tests {
             answer(&model, &asked);
             assert_eq!(uid(&model, 0), Some(1));
             assert_eq!(uid(&model, 99), Some(100));
+        });
+    }
+
+    /// A row drawn while the scrolling still says the list before is taken for one off screen and its page not asked
+    /// for; once the list is scrolled there, the page is asked for and the row filled, never blank for good (the deep
+    /// test's row 1625 of a search turned from conversations to messages)
+    #[test]
+    fn a_row_drawn_before_the_scrolling_caught_up_is_filled() {
+        with_context(|| {
+            let (model, asked) = model(1902, Rc::default());
+            *model.imp().in_sight.borrow_mut() = Some(Rc::new(|offset| offset < 200));
+            let _ = model.item(1625);
+            idle();
+            assert!(asked.borrow().is_empty(), "taken for a row off screen");
+            assert_eq!(uid(&model, 1625), None);
+            // the scrolling catches up: rows 1610 to 1640 on screen
+            *model.imp().in_sight.borrow_mut() = Some(Rc::new(|offset| (1500..=1700).contains(&offset)));
+            model.ask_on_screen(1610, 1640);
+            model.ask_on_screen(1610, 1640);
+            idle();
+            // (with the page after it, which a blank row read asks for too)
+            let once = asked.borrow().iter().filter(|&&offset| offset == 1600).count();
+            assert_eq!(once, 1, "asked for once ({:?})", asked.borrow());
+            answer(&model, &asked);
+            assert_eq!(uid(&model, 1625), Some(1626));
+            // pages here are not asked for again
+            model.ask_on_screen(0, 40);
+            idle();
+            assert!(asked.borrow().is_empty());
         });
     }
 
