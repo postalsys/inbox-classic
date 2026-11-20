@@ -662,10 +662,15 @@ function Describe([IntPtr]$w) {
 # a dialog of the app closed as a user would: Cancel, else No (a question with Yes and No only), else its close box.
 # Whether it closed
 function CloseDialog([IntPtr]$dialog) {
-    foreach ($answer in 2, 7) {
+    # Cancel again every 3 seconds for up to 30: the system's file dialog on a cold runner can take several seconds
+    # before it acts on Cancel
+    for ($tries = 0; $tries -lt 10; $tries++) {
         if (-not [Native.Win]::IsWindow($dialog)) { return $true }
-        if ($answer -eq 7 -and [Native.Win]::GetDlgItem($dialog, 7) -eq [IntPtr]::Zero) { continue }
-        [void][Native.Win]::PostMessage($dialog, $WM_COMMAND, [IntPtr]$answer, [Native.Win]::GetDlgItem($dialog, $answer))
+        [void][Native.Win]::PostMessage($dialog, $WM_COMMAND, [IntPtr]2, [Native.Win]::GetDlgItem($dialog, 2))
+        if (WaitFor { -not [Native.Win]::IsWindow($dialog) } 3) { return $true }
+    }
+    if ([Native.Win]::GetDlgItem($dialog, 7) -ne [IntPtr]::Zero) {
+        [void][Native.Win]::PostMessage($dialog, $WM_COMMAND, [IntPtr]7, [Native.Win]::GetDlgItem($dialog, 7))
         if (WaitFor { -not [Native.Win]::IsWindow($dialog) } 3) { return $true }
     }
     [void][Native.Win]::PostMessage($dialog, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)

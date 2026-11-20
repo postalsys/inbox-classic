@@ -1559,6 +1559,43 @@ fn flags_moves_and_deletes_messages() {
     assert!(s.core.mark_junk_many(inbox, &[999_999], true).is_err());
 }
 
+/// Two copies of one message (the same Message-ID, as a list and a Cc both deliver it) moved together come back
+/// together with Undo: it finds them again by their Message-IDs
+#[test]
+fn undo_brings_back_copies_of_one_message() {
+    let Some(s) = setup() else { return };
+    let copy = "From: Sender <sender@example.com>\r\nTo: Receiver <receiver@example.com>\r\nSubject: Twice\r\n\
+                Message-ID: <twice@example.com>\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\n\r\nDelivered twice.\r\n";
+    let uids = [
+        s.server.add_message("INBOX", copy, &[]),
+        s.server.add_message("INBOX", copy, &[]),
+        s.server.add_message("INBOX", &rfc822("Other", "x"), &[]),
+    ];
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive) = (id("INBOX"), id("Archive"));
+    let both = [
+        MessageRef {
+            folder: inbox,
+            uid: uids[0],
+        },
+        MessageRef {
+            folder: inbox,
+            uid: uids[1],
+        },
+    ];
+    s.core.act(&both, Action::Move(archive)).unwrap();
+    pe_testkit::eventually(|| s.server.subjects("Archive").len() == 2, "both copies moved");
+    s.core.undo().unwrap();
+    pe_testkit::eventually(
+        || s.server.subjects("Archive").is_empty() && s.server.subjects("INBOX").len() == 3,
+        "both copies back in the Inbox",
+    );
+}
+
 #[test]
 fn acts_on_selected_messages_and_undoes() {
     let Some(s) = setup() else { return };
