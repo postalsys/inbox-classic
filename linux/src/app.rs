@@ -19,6 +19,48 @@ use crate::{Arguments, compose, notify, tray};
 
 /// Every account is synced this often
 const SYNC_INTERVAL: u32 = 10 * 60;
+/// How many requests done before anyone waited for them are remembered (`Requests::done_early`)
+const DONE_EARLY_KEPT: usize = 64;
+
+/// Who waits for the event of each request (a lookup, a sign-in, a check, a read), and the requests done before
+/// anyone waited for them: a read can end before the task that waits for it has run (a draft already stored is read
+/// at once), and its event was lost, the task waiting for good
+#[derive(Default)]
+struct Requests {
+    waiting: HashMap<u64, async_channel::Sender<bool>>,
+    /// The newest last; the oldest go, as most requests are waited for elsewhere
+    done_early: std::collections::VecDeque<u64>,
+}
+
+impl Requests {
+    fn watch(&mut self, request: u64, done: async_channel::Sender<bool>) {
+        if let Some(at) = self.done_early.iter().position(|&r| r == request) {
+            self.done_early.remove(at);
+            let _ = done.try_send(true);
+            return;
+        }
+        self.waiting.insert(request, done);
+    }
+
+    /// The request's event: whoever waits hears `done` (false: dropped before its event); done with nobody waiting
+    /// yet, the one who comes to wait hears it then
+    fn answer(&mut self, request: u64, done: bool) {
+        if let Some(waiting) = self.waiting.remove(&request) {
+            let _ = waiting.try_send(done);
+            return;
+        }
+        if done {
+            self.done_early.push_back(request);
+            if self.done_early.len() > DONE_EARLY_KEPT {
+                self.done_early.pop_front();
+            }
+        }
+    }
+
+    fn forget(&mut self, request: u64) {
+        self.waiting.remove(&request);
+    }
+}
 
 pub struct Shell {
     pub core: std::sync::Arc<pe_core::Core>,
@@ -31,8 +73,8 @@ pub struct Shell {
     /// Test runs (--sign-in-page-file): a browser sign-in writes its page here instead of opening the browser
     pub sign_in_page_file: Option<PathBuf>,
     main: RefCell<Option<Rc<Mailbox>>>,
-    /// The dialogs waiting for the event of a request (a lookup, a sign-in, a check), by request
-    requests: RefCell<HashMap<u64, async_channel::Sender<bool>>>,
+    /// The dialogs and tasks waiting for the event of a request
+    requests: RefCell<Requests>,
     /// Accounts whose password prompt is open, so a second failure does not open another
     prompting: RefCell<HashSet<i64>>,
     /// Accounts whose last sync failed: their failure stays in the status bar
@@ -288,24 +330,20 @@ impl Shell {
     // ---- requests the dialogs wait for ----
 
     pub fn watch_request(&self, request: u64, done: async_channel::Sender<bool>) {
-        self.requests.borrow_mut().insert(request, done);
+        self.requests.borrow_mut().watch(request, done);
     }
 
     pub fn forget_request(&self, request: u64) {
-        self.requests.borrow_mut().remove(&request);
+        self.requests.borrow_mut().forget(request);
     }
 
     /// A request dropped before its event: whoever waits for it hears false
     pub fn cancel_request(&self, request: u64) {
-        if let Some(done) = self.requests.borrow_mut().remove(&request) {
-            let _ = done.try_send(false);
-        }
+        self.requests.borrow_mut().answer(request, false);
     }
 
     fn request_done(&self, request: u64) {
-        if let Some(done) = self.requests.borrow_mut().remove(&request) {
-            let _ = done.try_send(true);
-        }
+        self.requests.borrow_mut().answer(request, true);
     }
 
     // ---- the core's events ----
@@ -841,4 +879,43 @@ fn install_app_actions(application: &adw::Application) {
     let open = gio::SimpleAction::new("open", None);
     open.connect_activate(|_, _| shell().show_main());
     application.add_action(&open);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A read that ends before its task begins to wait (a draft already stored) is heard once the task waits: it was
+    /// lost, and the draft did not open
+    #[test]
+    fn a_request_done_before_anyone_waits_is_heard_when_they_do() {
+        let mut requests = Requests::default();
+        requests.answer(7, true);
+        let (send, answers) = async_channel::bounded(2);
+        requests.watch(7, send);
+        assert_eq!(answers.try_recv(), Ok(true));
+        assert!(requests.done_early.is_empty(), "heard once");
+
+        // waited for first, as before
+        let (send, answers) = async_channel::bounded(2);
+        requests.watch(8, send);
+        assert!(answers.try_recv().is_err());
+        requests.answer(8, true);
+        assert_eq!(answers.try_recv(), Ok(true));
+        assert!(requests.done_early.is_empty());
+
+        // a request dropped says false to whoever waits, and nothing to who comes later
+        let (send, answers) = async_channel::bounded(2);
+        requests.watch(9, send);
+        requests.answer(9, false);
+        assert_eq!(answers.try_recv(), Ok(false));
+        requests.answer(10, false);
+        assert!(requests.done_early.is_empty());
+
+        // those nobody waits for do not pile up
+        for request in 100..100 + DONE_EARLY_KEPT as u64 * 2 {
+            requests.answer(request, true);
+        }
+        assert_eq!(requests.done_early.len(), DONE_EARLY_KEPT);
+    }
 }

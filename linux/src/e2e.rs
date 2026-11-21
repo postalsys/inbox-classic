@@ -1851,12 +1851,20 @@ async fn drafts(d: &Driver) {
         d.check(
             false,
             &format!(
-                "opening the draft opens a compose window (the pane shows {}:{} {:?}, its view {}, the row selected {:?})",
+                "opening the draft opens a compose window (the pane shows {}:{} {:?}, its view {}, the row selected {:?}, \
+                 a Drafts folder {}, the windows {:?})",
                 main.reader.folder(),
                 main.reader.uid(),
                 main.reader.message(),
                 main.reader.has_view(),
                 main.list.selected().map(|(at, m)| (at, m.folder_id, m.info.uid, m.info.subject)),
+                main.is_draft_folder(main.reader.folder()),
+                gtk::Window::list_toplevels()
+                    .iter()
+                    .filter_map(|w| w.downcast_ref::<gtk::Window>())
+                    .filter(|w| w.is_visible())
+                    .map(|w| (w.widget_name().to_string(), w.title().map(|t| t.to_string())))
+                    .collect::<Vec<_>>(),
             ),
         );
         return;
