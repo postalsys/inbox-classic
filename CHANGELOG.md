@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.20.0](https://github.com/postalsys/inbox-classic/compare/v0.19.1...v0.20.0) (2026-11-21)
+
+
+### Features
+
+* a folder opens with a message ([b892a40](https://github.com/postalsys/inbox-classic/commit/b892a407b09db8fed1c5dadcfe4816412e7a0f81))
+* a folder opens with a message ([5a09965](https://github.com/postalsys/inbox-classic/commit/5a09965b5466ca273e846ae79765177fcff6378d))
+* flag changes the server still owes are kept until it makes them ([427c2a7](https://github.com/postalsys/inbox-classic/commit/427c2a7875beb644fb0d64a39f868db7c081f7a4))
+* flag changes the server still owes are kept until it makes them ([161b23d](https://github.com/postalsys/inbox-classic/commit/161b23d6ae3aff6b50775b61165d25e4ede37d27))
+* the deep test ([a51e60b](https://github.com/postalsys/inbox-classic/commit/a51e60bbbcce654adbd5b962fef70daa1f4633f3))
+* the deep test ([9c1ad29](https://github.com/postalsys/inbox-classic/commit/9c1ad29d5b9ecc7fea726bfa359df4e982158417))
+* the provider's verdict from its ARC set, as Microsoft gives it ([57aecf5](https://github.com/postalsys/inbox-classic/commit/57aecf52fa25b7a753aa211f49447253779d819b))
+* the provider's verdict from its ARC set, as Microsoft gives it ([87d8fce](https://github.com/postalsys/inbox-classic/commit/87d8fce73d8d41e5c76422fe859ed228e3c0856b))
+
+
+### Bug Fixes
+
+* a draft opened on Linux always opens ([94ea111](https://github.com/postalsys/inbox-classic/commit/94ea111e8c28ce4a7f8495f646addc9aa3115a17))
+* a draft opened while it is being fetched opens once it is (Linux) ([64cbb72](https://github.com/postalsys/inbox-classic/commit/64cbb7290f65228bc7eeb72910f9e5ab7430ab34))
+* a list read again stays where the user scrolled it ([d71241d](https://github.com/postalsys/inbox-classic/commit/d71241d4883791fa0fc894a870bb7c711adf3f47))
+* a list read again stays where the user scrolled it ([e1f6880](https://github.com/postalsys/inbox-classic/commit/e1f6880005c42339fe05906c975019dfa33e2166))
+* a read that ends before its task waits is heard (Linux) ([43e02e7](https://github.com/postalsys/inbox-classic/commit/43e02e7716eacbddc1188ef56f03ae1b8b964630))
+* a row drawn before the list's scrolling caught up is filled once on screen (Linux) ([37e1bd3](https://github.com/postalsys/inbox-classic/commit/37e1bd3455057a2baea571be869d167e7aa245a6))
+* a row drawn before the list's scrolling caught up is filled once on screen (Linux) ([574dfb8](https://github.com/postalsys/inbox-classic/commit/574dfb861f49010b0f0893e000357e789b9cbe8a))
+* **deep:** one meaning of settled, answered by the core ([34b8ed9](https://github.com/postalsys/inbox-classic/commit/34b8ed9a0097a73779011f7b93594b6a73d9d638))
+* **deep:** one meaning of settled, answered by the core ([05e11cd](https://github.com/postalsys/inbox-classic/commit/05e11cd237ad2ddd6bd1ffa5fcf69e93c0099e3d))
+* Undo brings back every copy of a message moved ([9e33407](https://github.com/postalsys/inbox-classic/commit/9e334073b443aa25178dbff6dba4bab946988718))
+* Undo brings back every copy of a message moved ([63c1797](https://github.com/postalsys/inbox-classic/commit/63c1797dc86210510ea3eef5b1669d45e8296fcb))
+* what came back is selected before the row after; the deep hooks see what is drawn ([d8e6b4e](https://github.com/postalsys/inbox-classic/commit/d8e6b4ebd2300b3336506965358c7e2b2e1d7b7b))
+* what the deep test found at 20,000 messages ([8e28b4a](https://github.com/postalsys/inbox-classic/commit/8e28b4aee70874706297dde1ffe5b7e5d4a57c89))
+* what the deep test found at 20,000 messages ([1f913fd](https://github.com/postalsys/inbox-classic/commit/1f913fdf4f2e9d3b6e2e2125676649f115df0d43))
+
 ## [0.19.1](https://github.com/postalsys/inbox-classic/compare/v0.19.0...v0.19.1) (2026-11-19)
 
 
