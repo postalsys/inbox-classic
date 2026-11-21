@@ -203,7 +203,7 @@ void SecurityDetailsDialog(HWND owner, PeProtectionTone tone, bool encrypted, co
     state.encrypted = encrypted;
     state.summary = summary;
     LOGFONTW font = {};
-    GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
+    GetObjectW(UiFont(), sizeof(font), &font);
     font.lfWeight = FW_BOLD;
     state.bold = CreateFontIndirectW(&font);
 
@@ -212,7 +212,7 @@ void SecurityDetailsDialog(HWND owner, PeProtectionTone tone, bool encrypted, co
     // the text as tall as it is, up to a size that leaves the window on any screen; longer, it scrolls
     int boxWidth = width - 2 * pad;
     HDC dc = GetDC(nullptr);
-    int textHeight = WordsHeight(dc, static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT)), details,
+    int textHeight = WordsHeight(dc, UiFont(), details,
                                  boxWidth - GetSystemMetrics(SM_CXVSCROLL) - Scale(10));
     ReleaseDC(nullptr, dc);
     int boxHeight = std::clamp(textHeight + Scale(12), Scale(110), Scale(380));

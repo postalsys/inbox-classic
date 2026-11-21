@@ -294,13 +294,13 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     ShowWindow(undoneClose_, SW_HIDE);
 
     LOGFONTW font = {};
-    GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
+    GetObjectW(UiFont(), sizeof(font), &font);
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
     // the list's own (a stock font, not deleted)
     normal_ = reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0));
     if (!normal_) {
-        normal_ = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        normal_ = UiFont();
     }
     LOGFONTW listFont = {};
     GetObjectW(normal_, sizeof(listFont), &listFont);

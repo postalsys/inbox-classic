@@ -223,6 +223,21 @@ pub unsafe extern "C" fn pe_date_locale(region: *const c_char) -> *mut c_char {
     guard(|| into_c_string(pe_i18n::date_locale(pe_i18n::language(), region.as_deref()))).unwrap_or(null_mut())
 }
 
+/// The face the Windows app draws its windows' words in for the language in use: for Chinese, Japanese and Korean the
+/// one Windows itself uses in that language (`Yu Gothic UI`), empty for the system's default GUI font. Free with
+/// `pe_string_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_windows_font() -> *mut c_char {
+    guard(|| {
+        into_c_string(
+            pe_i18n::windows_font(pe_i18n::language())
+                .unwrap_or_default()
+                .to_string(),
+        )
+    })
+    .unwrap_or(null_mut())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

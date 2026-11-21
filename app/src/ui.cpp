@@ -127,7 +127,7 @@ SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0, UI
     if (!(flags & DT_NOPREFIX)) {
         plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
     }
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     RECT bounds = {0, 0, wrapWidth > 0 ? wrapWidth : 0, 0};
     DrawTextW(dc, plain.c_str(), static_cast<int>(plain.size()), &bounds,
               DT_CALCRECT | DT_NOPREFIX | flags | (wrapWidth > 0 ? DT_WORDBREAK : DT_SINGLELINE));
@@ -229,6 +229,27 @@ SIZE MeasureText(const std::wstring& text, int wrapWidth, UINT flags) {
     return size;
 }
 
+HFONT UiFont() {
+    static std::map<std::wstring, HFONT> made;
+    auto* system = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+    std::wstring face = core::WindowsFont();
+    if (face.empty()) {
+        return system;
+    }
+    if (auto found = made.find(face); found != made.end()) {
+        return found->second;
+    }
+    LOGFONTW font = {};
+    GetObjectW(system, sizeof(font), &font);
+    wcsncpy_s(font.lfFaceName, face.c_str(), _TRUNCATE);
+    font.lfCharSet = DEFAULT_CHARSET;
+    // 9 points where the default is 8, as the Windows of those languages draws them: their characters need it
+    font.lfHeight = MulDiv(font.lfHeight, 9, 8);
+    HFONT created = CreateFontIndirectW(&font);
+    made[face] = created ? created : system;
+    return made[face];
+}
+
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least) {
     return Widest(labels, least, 20);
 }
@@ -276,7 +297,7 @@ HWND CreateChild(HWND parent, const wchar_t* className, const wchar_t* text, DWO
     HWND child = CreateWindowExW(exStyle, className, text, WS_CHILD | WS_VISIBLE | style, bounds.left, bounds.top,
                                  bounds.right - bounds.left, bounds.bottom - bounds.top, parent,
                                  reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
-    SendMessageW(child, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), FALSE);
+    SendMessageW(child, WM_SETFONT, reinterpret_cast<WPARAM>(UiFont()), FALSE);
     return child;
 }
 
@@ -392,7 +413,7 @@ void DrawLinkButton(const DRAWITEMSTRUCT& item) {
     auto font = reinterpret_cast<HFONT>(SendMessageW(item.hwndItem, WM_GETFONT, 0, 0));
     if (font != base || !underlined) {
         LOGFONTW logFont = {};
-        GetObjectW(font ? font : GetStockObject(DEFAULT_GUI_FONT), sizeof(logFont), &logFont);
+        GetObjectW(font ? font : UiFont(), sizeof(logFont), &logFont);
         logFont.lfUnderline = TRUE;
         if (underlined) {
             DeleteObject(underlined);

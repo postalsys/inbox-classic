@@ -47,11 +47,12 @@ MICROSOFT_FONTS=("$FONTS/selawik/selawksb.ttf" "$FONTS/open-sans-greek-600.ttf" 
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 
-# a catalog's message, its value alone
+# a catalog's message, its value alone; English's for a language that has none yet, as the app shows it
 words() {
     local found
     found=$(sed -n "s/^$2 = //p" "core/locales/$1/windows.ftl")
-    [ -n "$found" ] || { echo "core/locales/$1/windows.ftl has no $2" >&2; exit 1; }
+    [ -n "$found" ] || found=$(sed -n "s/^$2 = //p" core/locales/en/windows.ftl)
+    [ -n "$found" ] || { echo "core/locales/en/windows.ftl has no $2" >&2; exit 1; }
     echo "$found"
 }
 

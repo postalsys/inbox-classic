@@ -886,7 +886,7 @@ void DrawChevron(const DRAWITEMSTRUCT& item) {
         OffsetRect(&face, 1, 1);
     }
     face.top += Scale(4);
-    HGDIOBJ old = SelectObject(item.hDC, GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(item.hDC, UiFont());
     SetBkMode(item.hDC, TRANSPARENT);
     SetTextColor(item.hDC, GetSysColor(COLOR_BTNTEXT));
     DrawTextW(item.hDC, L"\u00BB", 1, &face, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
@@ -1076,7 +1076,7 @@ void LayoutStatus() {
     std::wstring counts = StatusText(2);
     HDC dc = GetDC(g_status);
     HGDIOBJ font = reinterpret_cast<HGDIOBJ>(SendMessageW(g_status, WM_GETFONT, 0, 0));
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     SIZE text = {};
     GetTextExtentPoint32W(dc, counts.c_str(), static_cast<int>(counts.size()), &text);
     SelectObject(dc, old);

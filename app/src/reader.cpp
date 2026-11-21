@@ -299,7 +299,7 @@ void Reader::Create(HWND parent, PeCore* core) {
     preview_.SetLinks([this](const wchar_t* uri) { return FollowLink(uri); });
 
     LOGFONTW font = {};
-    GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
+    GetObjectW(UiFont(), sizeof(font), &font);
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
 }

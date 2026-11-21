@@ -116,11 +116,11 @@ fn chooses_the_language() {
     assert_eq!(supported("de-AT"), Some("de"));
     assert_eq!(supported("et_EE.UTF-8"), Some("et"));
     assert_eq!(supported("FR"), Some("fr"));
-    assert_eq!(supported("ja-JP"), None);
+    assert_eq!(supported("th-TH"), None);
     assert_eq!(supported("qps"), Some(PSEUDO));
-    assert_eq!(resolve(&["ja-JP", "es-419", "en"]), "es");
+    assert_eq!(resolve(&["th-TH", "es-419", "en"]), "es");
     assert_eq!(resolve::<&str>(&[]), "en");
-    assert_eq!(resolve(&["qps", "ja"]), "en");
+    assert_eq!(resolve(&["qps", "th"]), "en");
 }
 
 #[test]
@@ -158,10 +158,44 @@ fn chooses_by_region_and_script() {
     for (code, _) in LANGUAGES {
         assert_eq!(supported(code), Some(*code));
     }
-    assert_eq!(resolve(&["ja-JP", "pt-BR", "pt-PT"]), "pt-BR");
+    assert_eq!(resolve(&["th-TH", "pt-BR", "pt-PT"]), "pt-BR");
     assert_eq!(resolve(&["pt-PT", "pt-BR"]), "pt");
     assert_eq!(resolve(&["sr-Cyrl-RS", "en"]), "sr-Latn");
     assert_eq!(resolve(&["nn", "no", "en"]), "nb");
+}
+
+#[test]
+fn chinese_japanese_korean_and_the_rest_of_wave_two() {
+    // Chinese by script, the script by region where the system names only the region
+    for tag in ["zh-CN", "zh_CN.UTF-8", "zh-SG", "zh-Hans-CN", "zh-Hans", "zh", "ZH"] {
+        assert_eq!(supported(tag), Some("zh-Hans"), "{tag}");
+    }
+    for tag in [
+        "zh-TW",
+        "zh_TW.UTF-8",
+        "zh-HK",
+        "zh-MO",
+        "zh-Hant-TW",
+        "zh-Hant",
+        "zh_HK",
+    ] {
+        assert_eq!(supported(tag), Some("zh-Hant"), "{tag}");
+    }
+    assert_eq!(supported("ja-JP"), Some("ja"));
+    assert_eq!(supported("ja_JP.eucJP"), Some("ja"));
+    assert_eq!(supported("ko-KR"), Some("ko"));
+    assert_eq!(supported("vi-VN"), Some("vi"));
+    // Indonesian by its old code too
+    assert_eq!(supported("id-ID"), Some("id"));
+    assert_eq!(supported("in_ID"), Some("id"));
+    assert_eq!(resolve(&["zh-Hant-HK", "en"]), "zh-Hant");
+    assert_eq!(gettext_locale("zh-Hans"), "zh_CN");
+    assert_eq!(gettext_locale("zh-Hant"), "zh_TW");
+    assert_eq!(gettext_locale("ja"), "ja");
+    assert_eq!(windows_font("ja"), Some("Yu Gothic UI"));
+    assert_eq!(windows_font("zh-Hant"), Some("Microsoft JhengHei UI"));
+    assert_eq!(windows_font("vi"), None);
+    assert_eq!(windows_font("de"), None);
 }
 
 #[test]
@@ -212,6 +246,17 @@ fn mnemonics() {
     assert_eq!(without_mnemonic("Q&&A"), "Q&A");
     assert_eq!(gtk_mnemonic("&Reply to_all"), "_Reply to__all");
     assert_eq!(gtk_mnemonic("Q&&A"), "Q&A");
+    // the letter in brackets after the words, as Japanese, Chinese and Korean Windows writes it: the Mac drops the
+    // bracket whole, GTK underlines the letter in it
+    assert_eq!(without_mnemonic("ファイル(&F)"), "ファイル");
+    assert_eq!(without_mnemonic("開く(&O)..."), "開く...");
+    assert_eq!(without_mnemonic("新建邮件 (&N)"), "新建邮件");
+    assert_eq!(without_mnemonic("받은 편지함(&I)"), "받은 편지함");
+    assert_eq!(gtk_mnemonic("ファイル(&F)"), "ファイル(_F)");
+    // brackets that are no mnemonic stay
+    assert_eq!(without_mnemonic("Q(&&A)"), "Q(&A)");
+    assert_eq!(without_mnemonic("Reply (&1 more)"), "Reply (1 more)");
+    assert_eq!(field_title("名前(&N):"), "名前");
 }
 
 #[test]
