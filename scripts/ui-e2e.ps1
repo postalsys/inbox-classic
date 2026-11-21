@@ -963,8 +963,12 @@ function RawText($message) {
 }
 function Find([string]$mailbox, [string]$pattern) { (Messages $mailbox) | Where-Object { (RawText $_) -match $pattern } | Select-Object -First 1 }
 function Seen([string]$pattern) { (Find 'INBOX' $pattern).flags -contains '\Seen' }
-function AddMessage([string]$raw, [string[]]$flags = @(), [string]$mailbox = 'INBOX', [string]$server = $rest) {
+# $arrived: when the server says it got the message (its INTERNALDATE), else now or its Date when that is ahead
+function AddMessage([string]$raw, [string[]]$flags = @(), [string]$mailbox = 'INBOX', [string]$server = $rest, [Nullable[DateTime]]$arrived = $null) {
     $body = @{ raw = $raw; flags = $flags }
+    if ($arrived) {
+        $body.internaldate = ([DateTime]$arrived).ToString("dd-MMM-yyyy HH:mm:ss '+0000'", [Globalization.CultureInfo]::InvariantCulture)
+    }
     # a message dated ahead, so it lists above what came before it, arrives at its date: the list shows no date
     # later than the arrival
     if ($raw -match '(?m)^Date: ([^\r\n]+)') {
@@ -4211,19 +4215,24 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($main, 0x0117, $messageMenu, [IntPtr]4)
     Check ((([Native.Win]::GetMenuState($messageMenu, $IDM_UNSUBSCRIBE, 0) -band 0x3) -ne 0)) 'and Unsubscribe from List is off'
     Shot $main 'read-9b-unsubscribe-asked'
-    # another message of the list, three days later (its Date ahead, so the server says it arrived then) and with a
-    # picture on the internet: the list did not stop
+    # another message of the list that the server got three days later, with a picture on the internet: the list did
+    # not stop
     AddMessage ("Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com`r`n" +
         "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; b=y`r`n" +
         "From: Weekly List <news@list.example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Weekly list news again`r`n" +
-        "Date: $([DateTime]::UtcNow.AddDays(3).ToString('r'))`r`nMessage-ID: <weekly-list-2@list.example.com>`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <weekly-list-2@list.example.com>`r`n" +
         "List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:$listPort/u/42>`r`n" +
         "List-Unsubscribe-Post: List-Unsubscribe=One-Click`r`nContent-Type: text/html`r`n`r`n" +
-        "<p>Still here.</p><img src=`"https://pictures.example.com/news.png`" width=`"10`" height=`"10`">`r`n")
+        "<p>Still here.</p><img src=`"https://pictures.example.com/news.png`" width=`"10`" height=`"10`">`r`n") @() 'INBOX' $rest ([DateTime]::UtcNow.AddDays(3))
     Command $main $IDM_SYNC
     [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: Weekly list news again') } 20)
+    # the search before ended first, so its one row is not taken for the new search's
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
+    [void](WaitFor { (Rows) -gt 1 } 20)
+    Settled
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Weekly list news again"')
     [void](WaitFor { (Rows) -eq 1 } 20)
+    Settled
     SelectRow 0
     $both = [bool](WaitFor { (Visible $main $IDC_LIST_BAR) -and (Visible $main $IDC_PICTURES) } 15)
     Check $both 'a list message with pictures blocked shows both bars'
