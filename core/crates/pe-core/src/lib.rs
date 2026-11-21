@@ -2281,7 +2281,7 @@ impl Core {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
             let changed = store
-                .set_flag_many(folder, uids, flag, on)
+                .set_flag_many_owed(folder, uids, flag, on)
                 .map_err(|error| match error {
                     pe_store::Error::QueryReturnedNoRows => Error::NotFound,
                     other => Error::Store(other),
@@ -2316,7 +2316,7 @@ impl Core {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
             let changed = store
-                .change_flags_many(folder, uids, add, remove)
+                .change_flags_owed(folder, uids, add, remove)
                 .map_err(|error| match error {
                     pe_store::Error::QueryReturnedNoRows => Error::NotFound,
                     other => Error::Store(other),

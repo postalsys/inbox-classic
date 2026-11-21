@@ -1679,6 +1679,51 @@ fn a_barrier_syncs_again_when_its_sync_failed() {
 }
 
 #[test]
+fn a_flag_change_survives_a_dropped_connection() {
+    let Some(s) = setup() else { return };
+    s.server.add_message("INBOX", &rfc822("Dropped", "x"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let uid = s.core.messages(inbox, Sort::default(), 0, 1).unwrap()[0].info.uid;
+    // the server drops the connection on the STORE: the change stays, owed, and the next sync sends it first
+    s.server.request(
+        "POST",
+        "/v1/script/rules",
+        Some(serde_json::json!({"close": true, "match": "UID STORE", "on": "command", "times": 1})),
+    );
+    s.core
+        .act(&[MessageRef { folder: inbox, uid }], Action::Read(true))
+        .unwrap();
+    let read_here = || {
+        s.core.messages(inbox, Sort::default(), 0, 1).unwrap()[0]
+            .info
+            .flags
+            .iter()
+            .any(|f| f == "\\Seen")
+    };
+    // the dropped connection is told
+    s.wait(|e| matches!(e, Event::Failed { account: a, .. } if *a == account));
+    assert!(read_here(), "the change kept while the server owes it");
+    assert!(!s.server.flags("INBOX", uid).iter().any(|f| f == "\\Seen"));
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    assert!(
+        s.server.flags("INBOX", uid).iter().any(|f| f == "\\Seen"),
+        "read on the server too"
+    );
+    assert!(read_here());
+}
+
+#[test]
 fn acts_on_selected_messages_and_undoes() {
     let Some(s) = setup() else { return };
     let uids: Vec<u64> = ["One", "Two", "Three", "Four"]

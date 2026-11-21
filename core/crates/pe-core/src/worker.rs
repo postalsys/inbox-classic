@@ -1103,7 +1103,10 @@ impl Worker {
                 uids,
                 add,
                 remove,
-            } => Ok(pe_sync::change_flags(self.client(store).await?, store, folder, &uids, &add, &remove).await?),
+            } => {
+                self.change_flags_or_take_back(store, folder, &uids, &add, &remove, Undone::Flag { flag: "", on: true })
+                    .await
+            }
             Command::Move {
                 folder,
                 uids,
@@ -1210,9 +1213,8 @@ impl Worker {
         }
     }
 
-    /// Sets or clears `flag` of the messages `uids` of `folder` on the server, as the store has them already. Refused by
-    /// the server, the store is as it was again and a bar over the list says so; offline, the store keeps the change,
-    /// which the next sync puts right.
+    /// Sets or clears `flag` of the messages `uids` of `folder` on the server, as the store has them already
+    /// ([`Worker::change_flags_or_take_back`])
     async fn set_flag_or_take_back(
         &mut self,
         store: &mut Store,
@@ -1221,23 +1223,64 @@ impl Worker {
         flag: &'static str,
         on: bool,
     ) -> Result<(), Failure> {
-        let set = match self.client(store).await {
-            Ok(client) => set_flag(client, store, folder, uids, flag, on)
+        let (add, remove): (&[&str], &[&str]) = if on { (&[flag], &[]) } else { (&[], &[flag]) };
+        self.change_flags_or_take_back(store, folder, uids, add, remove, Undone::Flag { flag, on })
+            .await
+    }
+
+    /// Flags added to messages of a folder on the server and others taken away, as the store has them already and
+    /// owes them ([`Store::change_flags_owed`]): no longer owed once the server did it; taken back in the store when
+    /// it refused, with `undone` saying so; still owed when the connection failed, and sent again before the folder's
+    /// next sync ([`Worker::pay_owed`])
+    async fn change_flags_or_take_back(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        uids: &[u64],
+        add: &[&str],
+        remove: &[&str],
+        undone: Undone,
+    ) -> Result<(), Failure> {
+        let changed = match self.client(store).await {
+            Ok(client) => pe_sync::change_flags(client, store, folder, uids, add, remove)
                 .await
                 .map_err(Failure::from),
             Err(failure) => Err(failure),
         };
-        match set {
+        match changed {
+            Ok(()) => Ok(store.paid(folder, uids, add, remove)?),
             Err(failure) if failure.kind == FailureKind::Other => {
-                store.set_flag_many(folder, uids, flag, !on)?;
+                let flags: Vec<&str> = add.iter().chain(remove).copied().collect();
+                store.forgive(folder, uids, &flags)?;
+                store.change_flags_many(folder, uids, remove, add)?;
                 self.emit(Event::FolderChanged {
                     account: self.account,
                     folder,
                 });
-                Err(self.undone(store, folder, uids.len(), Undone::Flag { flag, on }, failure))
+                Err(self.undone(store, folder, uids.len(), undone, failure))
             }
             other => other,
         }
+    }
+
+    /// What the server still owes of `folder` ([`Store::owed`]: changes made while the connection failed or there
+    /// was none) sent before it is synced, so the sync starts from the user's changes
+    async fn pay_owed(&mut self, store: &mut Store, folder: FolderId) -> Outcome {
+        let mut ways: std::collections::BTreeMap<(String, bool), Vec<u64>> = std::collections::BTreeMap::new();
+        for owed in store.owed(folder)? {
+            ways.entry((owed.flag, owed.on)).or_default().push(owed.uid);
+        }
+        for ((flag, on), uids) in ways {
+            let seen = flag.eq_ignore_ascii_case("\\Seen");
+            let undone = Undone::Flag {
+                flag: if seen { "\\Seen" } else { "" },
+                on,
+            };
+            let (add, remove): (&[&str], &[&str]) = if on { (&[&flag], &[]) } else { (&[], &[&flag]) };
+            self.change_flags_or_take_back(store, folder, &uids, add, remove, undone)
+                .await?;
+        }
+        Ok(())
     }
 
     /// The rows taken out of the store for a command back in it, with their sources, when the command failed
@@ -1679,6 +1722,7 @@ impl Worker {
     }
 
     async fn sync_one(&mut self, store: &mut Store, folder: FolderId) -> Outcome {
+        self.pay_owed(store, folder).await?;
         let before = store.folder(folder)?;
         let report = sync_folder(self.client(store).await?, store, folder).await?;
         if report != pe_sync::Report::default() {
@@ -1776,7 +1820,7 @@ impl Worker {
             (pick(&|p| p.flag), vec!["\\Flagged"], vec![]),
             (junked, vec![junk_on], vec![junk_off]),
         ] {
-            let changed = store.change_flags_many(folder, &uids, &add, &remove)?;
+            let changed = store.change_flags_owed(folder, &uids, &add, &remove)?;
             if !changed.is_empty() {
                 let command = Command::SetFlags {
                     folder,
@@ -1882,7 +1926,7 @@ impl Worker {
         if uids.is_empty() {
             return Ok(());
         }
-        let changed = store.set_flag_many(folder, uids, "\\Seen", true)?;
+        let changed = store.set_flag_many_owed(folder, uids, "\\Seen", true)?;
         if changed.is_empty() {
             return Ok(());
         }
@@ -1890,7 +1934,8 @@ impl Worker {
             account: self.account,
             folder,
         });
-        Ok(set_flag(self.client(store).await?, store, folder, &changed, "\\Seen", true).await?)
+        self.set_flag_or_take_back(store, folder, &changed, "\\Seen", true)
+            .await
     }
 
     /// Applies the changes the server reported during the last command; folders that only a
