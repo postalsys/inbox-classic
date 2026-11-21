@@ -206,18 +206,19 @@ pub fn always(
             format!("row {} is in sight and blank once all is done", blank.row),
         ));
     }
-    // the rows in sight: messages the server has, of this list, each once
+    // the rows in sight: messages the server has, of this list, each once. Settled only: while a list is read again
+    // (another folder, a search, an order) the window shows the rows it had until the new ones come
     let mut twice = HashSet::new();
     let mut by_folder: BTreeMap<(String, String), Vec<(u64, u64)>> = BTreeMap::new();
     for row in &seen.sight {
         let Some(message) = &row.message else { continue };
-        if !twice.insert(message.clone()) && !seen.grouped {
+        if settled && !twice.insert(message.clone()) && !seen.grouped {
             failures.push(failure(
                 "twice",
                 format!("{message:?} is in sight twice (row {})", row.row),
             ));
         }
-        if seen.search.is_empty() && !truth.in_scope(&list, message) {
+        if settled && seen.search.is_empty() && !truth.in_scope(&list, message) {
             failures.push(failure(
                 "scope",
                 format!("row {} shows {message:?}, which is not of {}", row.row, list.label()),
@@ -250,7 +251,7 @@ pub fn always(
         }
     }
     // in the order of the dates, while sorted by date and one row a message
-    if shape.sort == SortBy::Date && !seen.grouped {
+    if settled && shape.sort == SortBy::Date && !seen.grouped {
         let drawn: Vec<&crate::model::Row> = seen.sight.iter().filter(|r| !r.blank).collect();
         for pair in drawn.windows(2) {
             let (a, b) = (pair[0], pair[1]);
