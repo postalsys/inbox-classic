@@ -1314,8 +1314,10 @@ const PeMessage* Mailbox::Row(int index) {
     auto page = std::find_if(pages_.begin(), pages_.end(), [offset](const Page& p) { return p.offset == offset; });
     if (page == pages_.end()) {
         // not here: a blank row until it is, read off the window thread with the page after it (the list is scrolled
-        // that way), and none while the list itself loads, whose first page comes with it
-        if (!listPending_ && !loadRequest_) {
+        // that way), and none while the list itself loads, whose first page comes with it. Only for a row on screen:
+        // the list asks for the text of every row a Shift range selects, and reading each of their pages kept the
+        // page on screen waiting behind all of them
+        if (!listPending_ && !loadRequest_ && InSight(index)) {
             RequestPage(offset);
             if (offset + kPageSize < rowCount_) {
                 RequestPage(offset + kPageSize);
@@ -1328,6 +1330,11 @@ const PeMessage* Mailbox::Row(int index) {
         std::rotate(page, page + 1, pages_.end());
     }
     return pe_message_list_get(pages_.back().rows.get(), static_cast<size_t>(static_cast<uint64_t>(index) - offset));
+}
+
+bool Mailbox::InSight(int index) const {
+    int top = ListView_GetTopIndex(list_);
+    return index >= top && index <= top + ListView_GetCountPerPage(list_);
 }
 
 void Mailbox::AskOnScreen() {
