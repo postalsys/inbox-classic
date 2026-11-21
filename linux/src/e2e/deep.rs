@@ -287,11 +287,24 @@ async fn settle(seconds: u64) -> Result<(), String> {
         return Err(format!("still busy after {seconds} s"));
     }
     pause(300).await;
-    if wait_until(seconds, quiet).await {
-        Ok(())
-    } else {
-        Err(format!("still busy after {seconds} s"))
+    if !wait_until(seconds, quiet).await {
+        return Err(format!("still busy after {seconds} s"));
     }
+    // the rows GTK binds after the list is drawn ask for their pages then: filled within a few seconds, or the check
+    // says which stayed blank
+    wait_until(5, || quiet() && !blank_in_sight()).await;
+    Ok(())
+}
+
+/// Whether a row on screen has no message yet (its page not read); the rows at either edge left out, as
+/// [`observe`] leaves them out when blank
+fn blank_in_sight() -> bool {
+    let list = &shell().main().list;
+    let rows = list.rows();
+    list.rows_in_sight().is_some_and(|(first, last)| {
+        let last = last.min(rows.saturating_sub(1));
+        (first + 1..last).any(|row| list.message_at(row).is_none())
+    })
 }
 
 /// What the window shows, read off its controls

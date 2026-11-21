@@ -830,6 +830,16 @@ impl ListView {
     /// The rows to select in the list a load read (`found`) for what the window had selected ([`Reselect`]); None
     /// when what Undo brought back is in the list but the store changed since it was read
     fn reselect(&self, core: &Core, found: &Found, reselect: &Reselect) -> Result<Option<Reselected>> {
+        // what came back first: a move the server refused soon is back before the list it left is drawn, and the row
+        // after them would take their place
+        if reselect.restored {
+            match self.restored_rows(core, found)? {
+                Back::Found(back) => return Ok(Some(*back)),
+                Back::Behind if !found.last => return Ok(None),
+                // the last read: they are left for the next load
+                Back::Behind | Back::None => {}
+            }
+        }
         if let Some(after) = reselect.after {
             return self.row_after(core, found, after).map(Some);
         }
@@ -848,14 +858,6 @@ impl ListView {
             }
             // no longer the whole list: the messages Select All had, found where they are now, the newer ones not
             selected = Selected::Listed(core.selected_refs(&selected)?);
-        }
-        if reselect.restored {
-            match self.restored_rows(core, found)? {
-                Back::Found(back) => return Ok(Some(*back)),
-                Back::Behind if !found.last => return Ok(None),
-                // the last read: they are left for the next load
-                Back::Behind | Back::None => {}
-            }
         }
         let Selected::Listed(refs) = selected else {
             return Ok(Some(Reselected::default()));

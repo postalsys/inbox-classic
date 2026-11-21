@@ -4031,10 +4031,13 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
     }
     if (verb == L"quiet") {
         // the driver's question is a sent message, answered before what is posted: the core's events still in the
-        // queue (a folder changed, a page read) are work under way too
+        // queue (a folder changed, a page read) are work under way too, as is a reload gathering changes on its timer
         MSG waiting;
         bool posted = PeekMessageW(&waiting, nullptr, WM_APP, 0xBFFF, PM_NOREMOVE | PM_NOYIELD);
-        return !posted && pe_quiet(core_) && !listPending_ && !loadRequest_ && pageRequests_.empty() ? 11 : 10;
+        bool listed = !listPending_ && !newList_ && !reloadPending_ && !loadRequest_ && pageRequests_.empty();
+        // rows ask for their pages as they are painted: a list still to be painted has not asked yet
+        listed = listed && !GetUpdateRect(list_, nullptr, FALSE);
+        return !posted && pe_quiet(core_) && listed ? 11 : 10;
     }
     if (verb == L"observe" && words.size() >= 2) {
         // the folders' places, for the messages' account and path
@@ -4077,6 +4080,10 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
         int count = ListView_GetItemCount(list_);
         int top = ListView_GetTopIndex(list_);
         int last = std::min(count, top + ListView_GetCountPerPage(list_) + 1);
+        // a list chosen and not read yet: the rows drawn, dimmed, are still the list before's, none of this one's
+        if (newList_) {
+            last = top;
+        }
         std::string sight;
         for (int row = top; row < last; row++) {
             const PeMessage* m = CachedRow(row);

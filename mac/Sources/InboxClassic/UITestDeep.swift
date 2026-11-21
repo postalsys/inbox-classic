@@ -338,6 +338,22 @@ final class DeepDriver {
         guard await wait() else { throw DeepError("still busy after \(Int(seconds)) s") }
         try? await Task.sleep(nanoseconds: 300_000_000)
         guard await wait() else { throw DeepError("still busy after \(Int(seconds)) s") }
+        // the rows drawn ask for their pages as they are drawn: filled within a few seconds, or the check says which
+        // stayed blank
+        let until = Date().addingTimeInterval(5)
+        while Date() < until && !(quiet() && !blankInSight()) {
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        }
+    }
+
+    /// whether a row on screen has no message yet (its page not read), the rows at either edge left out
+    func blankInSight() -> Bool {
+        let list = mailbox.list
+        let rows = Int(mailbox.rows)
+        let sight = list.rows(in: list.visibleRect)
+        let last = min(sight.location + sight.length, rows) - 1
+        guard sight.location + 1 < last else { return false }
+        return (sight.location + 1..<last).contains { mailbox.row($0) == nil }
     }
 
     // ---- what is seen ----
@@ -352,7 +368,8 @@ final class DeepDriver {
         let rows = Int(mailbox.rows)
         let sight = list.rows(in: list.visibleRect)
         var seen: [[String: Any]] = []
-        if rows > 0 {
+        // the list before, covered while the one chosen is read: none of its rows are this list's
+        if rows > 0 && !mailbox.listCovered {
             for row in sight.location..<min(sight.location + sight.length, rows) {
                 if let m = mailbox.row(row) {
                     seen.append(["row": row, "blank": false, "message": message(m.folder, m.uid) as Any,
