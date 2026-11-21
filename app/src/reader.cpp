@@ -325,8 +325,6 @@ void Reader::Destroy() {
     view_.reset();
     DeleteObject(bold_);
     bold_ = nullptr;
-    DeleteObject(link_);
-    link_ = nullptr;
 }
 
 // the links of the document's own cards: the core says which link it is, the view has what it needs. The bounce
@@ -1371,7 +1369,7 @@ void Reader::ListsChanged() {
         return;
     }
     PeListBar bar = pe_list_bar(core_, folder_, uid_);
-    ShowListBar(bar.text ? Text(bar.text) : L"", bar.button ? Text(bar.button) : L"");
+    ShowListBar(Text(bar.text), Text(bar.button));
     pe_list_bar_free(bar);
 }
 

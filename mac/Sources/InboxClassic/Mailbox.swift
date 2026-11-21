@@ -105,7 +105,7 @@ public final class Mailbox: NSObject {
     var selectionChanged: () -> Void = {}
     /// a line for the status bar
     var status: (String) -> Void = { _ in }
-    /// a mailto: link to write (a mailing list's unsubscribe address)
+    /// a message to write (leaving a mailing list by mail), from the account of the message it is about
     var openDraft: (_ draft: Draft, _ account: Int64) -> Void = { _, _ in }
     /// Edit > Undo when the last thing done was sending a message that still waits
     var undoSend: (() -> Void)?

@@ -6,8 +6,8 @@
 //! sender) offers it again, since the list did not stop.
 
 use pe_i18n::{Text, tr, tr_args};
-use pe_mime::parser::Header;
-use pe_store::Asked;
+use pe_mime::parser::{Message, ParsedAddress};
+use pe_store::{AccountId, Asked, Store};
 
 use crate::authres::headers as header;
 use crate::unsubscribe::{self, Unsubscribe};
@@ -26,10 +26,9 @@ pub struct ListBar {
     pub button: String,
 }
 
-/// What the bar is decided from
+/// What the bar is decided from, besides the list
 #[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct Facts<'a> {
-    pub how: Option<&'a Unsubscribe>,
     /// The folder may show it: not Junk E-mail (leaving confirms the address to a spammer), Sent Items or Drafts
     pub shown_here: bool,
     /// When and how its list was asked, for a message of an account
@@ -50,23 +49,33 @@ pub struct List {
 }
 
 impl List {
-    /// The list of a message with `headers`, whose provider's verdicts `trusted` names
-    pub(crate) fn of(headers: &[Header], trusted: &[String]) -> List {
-        let how = unsubscribe::of(headers, trusted);
+    /// The list of `message`, whose provider's verdicts `trusted` names
+    pub(crate) fn of(message: &Message, trusted: &[String]) -> List {
+        let how = unsubscribe::of(&message.headers, trusted);
         if how.is_none() {
             return List::default();
         }
         List {
             how,
-            key: list_key(headers),
-            domain: domain(headers, trusted),
+            key: list_key(message),
+            domain: domain(message, trusted),
         }
     }
 }
 
-/// The bar of a message whose list names `domain`, None when it has none
-pub(crate) fn bar(domain: Option<&str>, facts: Facts) -> Option<ListBar> {
-    facts.how?;
+/// The bar of a message of `account` with `list`, from what `store` remembers of the list: the one way both the view
+/// and the bar read again after [`crate::Event::ListsChanged`] decide it
+pub(crate) fn bar_in(store: &Store, account: AccountId, list: &List, facts: Facts) -> Option<ListBar> {
+    let asked = list
+        .key
+        .as_ref()
+        .and_then(|key| store.unsubscribed(account, key).ok().flatten());
+    bar(list, Facts { asked, ..facts })
+}
+
+/// The bar of a message of `list`, None when it has none
+pub(crate) fn bar(list: &List, facts: Facts) -> Option<ListBar> {
+    list.how.as_ref()?;
     if !facts.shown_here {
         return None;
     }
@@ -80,8 +89,8 @@ pub(crate) fn bar(domain: Option<&str>, facts: Facts) -> Option<ListBar> {
     let on = |at: i64| crate::calendar::local_date(at);
     Some(match facts.asked {
         None => ListBar {
-            text: match domain {
-                Some(domain) => tr_args(Text::UiListBar, &[("domain", domain.into())]),
+            text: match &list.domain {
+                Some(domain) => tr_args(Text::UiListBar, &[("domain", domain.as_str().into())]),
                 None => tr(Text::UiListBarPlain),
             },
             button: ask,
@@ -101,67 +110,50 @@ pub(crate) fn bar(domain: Option<&str>, facts: Facts) -> Option<ListBar> {
     })
 }
 
-/// The list a message is of, as its requests are remembered: List-Id's identifier, else the sender's address
-pub(crate) fn list_key(headers: &[Header]) -> Option<String> {
-    list_id(headers)
-        .or_else(|| sender(headers))
-        .map(|key| key.to_ascii_lowercase())
+/// The list a message is of, as its requests are remembered: List-Id's identifier as the store keeps it
+/// (`messages.list_id`), else the sender's address
+pub(crate) fn list_key(message: &Message) -> Option<String> {
+    list_id(message)
+        .or_else(|| sender(message).map(|address| address.to_lowercase()))
         .filter(|key| !key.is_empty())
 }
 
 /// The domain the bar names: the confirmed signer of a one-click list, else List-Id's, else the sender's; None when the
 /// candidate does not read as a host name
-pub(crate) fn domain(headers: &[Header], trusted: &[String]) -> Option<String> {
-    let candidate = unsubscribe::signer(headers, trusted)
-        .or_else(|| list_id(headers))
-        .or_else(|| sender(headers).and_then(|address| address.rsplit_once('@').map(|(_, host)| host.to_string())))?;
+pub(crate) fn domain(message: &Message, trusted: &[String]) -> Option<String> {
+    let candidate = unsubscribe::signer(&message.headers, trusted)
+        .or_else(|| list_id(message))
+        .or_else(|| sender(message).and_then(|address| address.rsplit_once('@').map(|(_, host)| host.to_string())))?;
     host_name(&candidate)
 }
 
-/// The identifier of List-Id (RFC 2919): what is in angle brackets, else the whole value
-fn list_id(headers: &[Header]) -> Option<String> {
-    let value = header(headers, "list-id").next()?;
-    let id = match value.rsplit_once('<') {
-        Some((_, rest)) => rest.split_once('>').map_or(rest, |(id, _)| id),
-        None => value,
-    };
-    Some(id.trim().to_string()).filter(|id| !id.is_empty())
+/// The identifier of List-Id (RFC 2919), as pe-sync reads it for the store
+fn list_id(message: &Message) -> Option<String> {
+    pe_sync::list_id(header(&message.headers, "list-id").next()?)
 }
 
-/// The address of From
-fn sender(headers: &[Header]) -> Option<String> {
-    let from = header(headers, "from").next()?;
-    let address = match from.rsplit_once('<') {
-        Some((_, rest)) => rest.split_once('>').map_or(rest, |(address, _)| address),
-        None => from,
-    };
-    Some(address.trim().to_string()).filter(|address| address.contains('@'))
+/// The address of From, None for a From that is no single address
+fn sender(message: &Message) -> Option<String> {
+    match &message.from {
+        Some(ParsedAddress::Mailbox(from)) if from.address.contains('@') => Some(from.address.clone()),
+        _ => None,
+    }
 }
 
-/// `text` lowercased when it is a host name: ASCII letters, digits and hyphens in labels between dots, at least two
-/// labels, none empty or starting or ending with a hyphen, not longer than the bar shows. Anything else (spaces,
-/// controls, direction marks, letters of other scripts that may look like Latin ones) is not shown at all.
+/// `text` as a host name the bar shows: one DNS accepts (pe-autoconfig's rule), of at least two labels and not longer
+/// than the bar shows. Anything else (spaces, controls, direction marks, letters of other scripts that may look like
+/// Latin ones) is not shown at all.
 fn host_name(text: &str) -> Option<String> {
-    let host = text.trim().trim_end_matches('.').to_ascii_lowercase();
-    let labels: Vec<&str> = host.split('.').collect();
-    let fine = host.len() <= LONGEST_DOMAIN
-        && labels.len() >= 2
-        && labels.iter().all(|label| {
-            !label.is_empty()
-                && !label.starts_with('-')
-                && !label.ends_with('-')
-                && label.bytes().all(|b| b.is_ascii_alphanumeric() || b == b'-')
-        });
-    fine.then_some(host)
+    pe_autoconfig::dns::host_name(text).filter(|host| host.len() <= LONGEST_DOMAIN && host.contains('.'))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn headers(text: &str) -> Vec<Header> {
+    fn headers(text: &str) -> Message {
         let source = format!("{text}\r\nSubject: x\r\n\r\nbody\r\n");
-        pe_mime::parser::parse(source.as_bytes()).unwrap().headers
+        pe_mime::parser::parse(source.as_bytes()).unwrap()
     }
 
     const TRUSTED: &[String] = &[];
@@ -228,11 +220,16 @@ mod tests {
             Some("deals@shop.example")
         );
         assert_eq!(list_key(&headers("X-Other: 1")), None);
+        // List-Id read as the store reads it for `messages.list_id`, so the two always agree
+        assert_eq!(
+            list_key(&headers("List-Id: News <News.Example.COM>")),
+            pe_sync::list_id(" News <News.Example.COM>")
+        );
     }
 
-    fn facts(how: &Unsubscribe) -> Facts<'_> {
+    /// Shown where it may be, nothing else known
+    fn here() -> Facts<'static> {
         Facts {
-            how: Some(how),
             shown_here: true,
             ..Default::default()
         }
@@ -240,12 +237,8 @@ mod tests {
 
     #[test]
     fn each_state_says_its_words() {
-        let how = Unsubscribe::OneClick {
-            url: "https://list.example.com/u/1".into(),
-        };
-        let domain = domain(&headers(SIGNED), &trusted());
-        let domain = domain.as_deref();
-        let offered = bar(domain, facts(&how)).unwrap();
+        let list = List::of(&headers(SIGNED), &trusted());
+        let offered = bar(&list, here()).unwrap();
         assert_eq!(
             offered.text,
             tr_args(Text::UiListBar, &[("domain", "mail.list.example.com".into())])
@@ -257,11 +250,11 @@ mod tests {
         let asked_at = 100 * day;
         let asked = |arrived: i64, asked: Asked| {
             bar(
-                domain,
+                &list,
                 Facts {
                     asked: Some((asked, asked_at)),
                     arrived: Some(arrived),
-                    ..facts(&how)
+                    ..here()
                 },
             )
             .unwrap()
@@ -287,10 +280,10 @@ mod tests {
         assert!(opened.text.contains(&crate::calendar::local_date(asked_at)));
         // a request that failed says why and is tried again
         let failed = bar(
-            domain,
+            &list,
             Facts {
                 failed: Some("The list answered 500"),
-                ..facts(&how)
+                ..here()
             },
         )
         .unwrap();
@@ -300,24 +293,30 @@ mod tests {
 
     #[test]
     fn no_bar_without_a_way_or_in_junk_sent_and_drafts() {
-        let how = Unsubscribe::Web {
-            url: "https://list.example.com/u/1".into(),
-        };
-        assert_eq!(bar(Some("list.example.com"), Facts::default()), None);
+        // the list of a message without a way to leave it is nothing to remember, and has no bar
+        let none = List::of(&headers("List-Id: <a.example.com>"), TRUSTED);
+        assert_eq!(none, List::default());
+        assert_eq!(bar(&none, here()), None);
+        let list = List::of(
+            &headers("List-Unsubscribe: <https://list.example.com/u/1>\r\nFrom: News <news@list.example.com>"),
+            TRUSTED,
+        );
         assert_eq!(
             bar(
-                Some("list.example.com"),
+                &list,
                 Facts {
                     shown_here: false,
-                    ..facts(&how)
+                    ..here()
                 }
             ),
             None
         );
         // no host name to name: the bar still offers it, without one
-        assert_eq!(bar(None, facts(&how)).unwrap().text, tr(Text::UiListBarPlain));
-        // the list of a message without a way to leave it is nothing to remember
-        assert_eq!(List::of(&headers("List-Id: <a.example.com>"), TRUSTED), List::default());
+        let nameless = List {
+            domain: None,
+            ..list.clone()
+        };
+        assert_eq!(bar(&nameless, here()).unwrap().text, tr(Text::UiListBarPlain));
         let list = List::of(&headers(SIGNED), &trusted());
         assert_eq!(list.key.as_deref(), Some("weekly.list.example.com"));
         assert_eq!(list.domain.as_deref(), Some("mail.list.example.com"));

@@ -460,7 +460,7 @@ pub(crate) fn build_unless(
         pictures_loaded: allow_remote_images,
         sender,
         attachments,
-        list: crate::list_bar::List::of(&message.headers, trust.domains),
+        list: crate::list_bar::List::of(&message, trust.domains),
         list_bar: None,
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         picture: 0,
@@ -762,7 +762,7 @@ fn protected_view(
         // pictures of encrypted mail load on a click only, never remembered: the bar offers no "always"
         sender: if any_encrypted { None } else { sender },
         attachments,
-        list: crate::list_bar::List::of(&message.headers, trust.domains),
+        list: crate::list_bar::List::of(message, trust.domains),
         list_bar: None,
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         part_documents: documents.into_iter().map(Option::unwrap_or_default).collect(),

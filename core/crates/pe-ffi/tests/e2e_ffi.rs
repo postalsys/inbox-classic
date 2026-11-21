@@ -317,7 +317,7 @@ fn reads_mail_through_the_c_api() {
     // of no mailing list: no bar, now or when asked again
     assert!(text(info.list_bar).is_empty() && text(info.list_button).is_empty());
     let bar = unsafe { pe_list_bar(core, inbox, uid) };
-    assert!(bar.text.is_null() && bar.button.is_null());
+    assert!(text(bar.text).is_empty() && text(bar.button).is_empty());
     unsafe { pe_list_bar_free(bar) };
     assert!(unsafe { pe_unsubscribe_draft(core, inbox, uid) }.is_null());
     assert!(!unsafe { pe_unsubscribe_opened(core, inbox, uid) });
@@ -1040,7 +1040,8 @@ fn null_and_bad_arguments() {
         assert!(!pe_sync(core, 42));
         assert!(pe_message_view(core, 1, 1, false).is_null());
         let bar = pe_list_bar(std::ptr::null(), 1, 1);
-        assert!(bar.text.is_null() && bar.button.is_null());
+        assert!(text(bar.text).is_empty() && text(bar.button).is_empty());
+        pe_list_bar_free(bar);
         assert!(pe_unsubscribe_draft(std::ptr::null(), 1, 1).is_null());
         assert!(!pe_unsubscribe_opened(std::ptr::null(), 1, 1));
         assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);

@@ -987,12 +987,12 @@ pub unsafe extern "C" fn pe_unsubscribe(core: *const PeCore, folder: i64, uid: u
 }
 
 /// The bar over a stored message of a mailing list as it is now, for a window showing it when `ListsChanged` comes: its
-/// words and its button, NULL for none. Free with `pe_list_bar_free`.
+/// words and its button, as `PeMessageInfo` has them. Free with `pe_list_bar_free`.
 #[repr(C)]
 pub struct PeListBar {
-    /// NULL when the message has no bar
+    /// Empty when the message has no bar
     pub text: *mut c_char,
-    /// NULL when the bar has no button
+    /// Empty when the bar has no button
     pub button: *mut c_char,
 }
 
@@ -1002,22 +1002,11 @@ pub struct PeListBar {
 /// `core` must be a live handle.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_list_bar(core: *const PeCore, folder: i64, uid: u64) -> PeListBar {
-    let none = PeListBar {
-        text: null_mut(),
-        button: null_mut(),
-    };
     // SAFETY: as the caller guarantees
-    let bar = unsafe { with(core, None, |core| core.list_bar(folder, uid).ok().flatten()) };
-    match bar {
-        None => none,
-        Some(bar) => PeListBar {
-            text: into_c_string(bar.text),
-            button: if bar.button.is_empty() {
-                null_mut()
-            } else {
-                into_c_string(bar.button)
-            },
-        },
+    let bar = unsafe { with(core, None, |core| core.list_bar(folder, uid).ok().flatten()) }.unwrap_or_default();
+    PeListBar {
+        text: into_c_string(bar.text),
+        button: into_c_string(bar.button),
     }
 }
 

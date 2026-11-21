@@ -391,10 +391,10 @@ impl Driver {
         .map(|_| ())
     }
 
-    /// A message into the Inbox that the server says it got at `arrived` (an ISO 8601 time, its INTERNALDATE)
+    /// A message into the Inbox that the server says it got at `arrived` (its INTERNALDATE, as IMAP writes a date-time:
+    /// `24-Nov-2026 10:00:00 +0000`)
     pub fn add_message_arrived(&self, raw: &str, arrived: &str) -> Result<(), String> {
-        let body = serde_json::json!({ "raw": raw, "flags": [], "internaldate": arrived }).to_string();
-        http(self.ports.rest, "POST", "/v1/mailboxes/INBOX/messages", Some(&body)).map(|_| ())
+        self.add_message_in_at(self.ports.rest, "INBOX", raw, &[], Some(arrived))
     }
 
     /// A message into the Inbox of the server whose REST API is at `rest`
@@ -404,8 +404,29 @@ impl Driver {
 
     /// A message into `mailbox` of the server whose REST API is at `rest`
     fn add_message_in(&self, rest: u16, mailbox: &str, raw: &str, flags: &[&str]) -> Result<(), String> {
-        let body = serde_json::json!({ "raw": raw, "flags": flags }).to_string();
-        http(rest, "POST", &format!("/v1/mailboxes/{mailbox}/messages"), Some(&body)).map(|_| ())
+        self.add_message_in_at(rest, mailbox, raw, flags, None)
+    }
+
+    /// [`Driver::add_message_in`], the server saying it got the message at `arrived` when there is one
+    fn add_message_in_at(
+        &self,
+        rest: u16,
+        mailbox: &str,
+        raw: &str,
+        flags: &[&str],
+        arrived: Option<&str>,
+    ) -> Result<(), String> {
+        let mut body = serde_json::json!({ "raw": raw, "flags": flags });
+        if let Some(arrived) = arrived {
+            body["internaldate"] = arrived.into();
+        }
+        http(
+            rest,
+            "POST",
+            &format!("/v1/mailboxes/{mailbox}/messages"),
+            Some(&body.to_string()),
+        )
+        .map(|_| ())
     }
 }
 

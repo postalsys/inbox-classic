@@ -30,7 +30,7 @@ const STYLE: &str = "
 .unread-dot { min-width: 8px; min-height: 8px; border-radius: 4px; background-color: @accent_bg_color; }
 .sort-button { margin: 2px 4px; }
 .sort-button label { font-weight: normal; }
-.info-bar { background-color: alpha(@accent_bg_color, 0.14); padding: 6px 10px; }
+.info-bar { background-color: alpha(@accent_bg_color, 0.14); padding: 6px 10px; border-bottom: 1px solid alpha(currentColor, 0.12); }
 .info-bar .title { font-weight: bold; }
 .reader-header { padding: 8px 10px; background-color: @headerbar_bg_color; border-bottom: 1px solid alpha(@borders, 0.6); }
 .reader-header .field { opacity: 0.7; }

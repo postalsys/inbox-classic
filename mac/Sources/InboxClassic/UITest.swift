@@ -456,7 +456,12 @@ final class UITest {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         var body: [String: Any] = ["raw": raw, "flags": flags]
         if let arrived {
-            body["internaldate"] = ISO8601DateFormatter().string(from: arrived)
+            // as IMAP writes a date-time, which is what the server takes
+            let format = DateFormatter()
+            format.locale = Locale(identifier: "en_US_POSIX")
+            format.timeZone = TimeZone(identifier: "UTC")
+            format.dateFormat = "dd-MMM-yyyy HH:mm:ss '+0000'"
+            body["internaldate"] = format.string(from: arrived)
         }
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
         _ = try await URLSession.shared.data(for: request)

@@ -889,7 +889,7 @@ extension UITest {
         let rowMenu = main.mailbox.messageMenu()?.items.map(\.title) ?? []
         check(rowMenu.contains(Command.unsubscribe.label), "and on its right-click menu")
         await shot(main.window, "read-8-unsubscribe")
-        bar?.press()
+        onMain { bar?.press() }
         var sure = await waitWindow("alert", 10)
         check(alertText(sure).contains("127.0.0.1"), "it asks first, naming where it goes")
         check(!alertText(sure).contains("e-mail") && hyphensKept("no e-mail") == "no e\u{2011}mail",
@@ -898,7 +898,7 @@ extension UITest {
         answer(sure, Text.uiCancel.text)
         await pause(1)
         check(server.received.isEmpty && bar?.buttonTitle == Text.uiUnsubscribeAsk.text, "Cancel asks the list nothing")
-        bar?.press()
+        onMain { bar?.press() }
         sure = await waitWindow("alert", 10)
         answer(sure, Text.uiUnsubscribe.text)
         check(await waitUntil(15) { server.received.hasPrefix("POST /u/42 ") && server.received.contains("List-Unsubscribe=One-Click") },

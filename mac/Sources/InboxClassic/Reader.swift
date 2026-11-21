@@ -14,7 +14,6 @@ final class Reader: NSObject {
     let core: Core
     /// what it has to say in the main window's status bar (leaving a mailing list)
     var status: (String) -> Void = { _ in }
-    /// a mailto: link to write a message for (a mailing list left by mail)
     /// a message to write (leaving a mailing list by mail), from the account of the message it is about
     var openDraft: (_ draft: Draft, _ account: Int64) -> Void = { _, _ in }
     /// the message asked for is here, before it is shown (a draft opened before it was fetched opens then)
@@ -136,6 +135,8 @@ final class Reader: NSObject {
         listBar.clicked = { [weak self] in self?.unsubscribeList() }
         listBar.setAccessibilityIdentifier("reader.list")
         listBar.isHidden = true
+        // the size of the pictures bar's buttons, so stacked bars line up
+        listBar.smallButton()
         // the links of the document's own cards: the core says which link it is, the view has what it needs
         preview.links = { [weak self] link in self?.followLink(link) ?? false }
         pictures.isHidden = true
@@ -161,7 +162,7 @@ final class Reader: NSObject {
         preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
         pictures.heightAnchor.constraint(equalToConstant: 28).isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
-        listBar.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        listBar.heightAnchor.constraint(equalToConstant: 28).isActive = true
         findBar.heightAnchor.constraint(equalToConstant: 36).isActive = true
         clearView(loading: false)
     }
@@ -434,7 +435,7 @@ final class Reader: NSObject {
         else { return }
         let bar = pe_list_bar(core.handle, folder, uid)
         defer { pe_list_bar_free(bar) }
-        showListBar(text: bar.text.map { String(cString: $0) } ?? "", button: bar.button.map { String(cString: $0) } ?? "")
+        showListBar(text: text(bar.text), button: text(bar.button))
     }
 
     /// Message > Unsubscribe from List: on while the bar offers its button
@@ -1142,7 +1143,15 @@ final class InfoBar: NSView {
         stack.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
+        // a hairline under the bar, so bars stacked in the same colour read as separate bars
+        let line = NSBox()
+        line.boxType = .separator
+        line.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(line)
         NSLayoutConstraint.activate([
+            line.leadingAnchor.constraint(equalTo: leadingAnchor),
+            line.trailingAnchor.constraint(equalTo: trailingAnchor),
+            line.bottomAnchor.constraint(equalTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
             stack.topAnchor.constraint(equalTo: topAnchor),
@@ -1211,6 +1220,12 @@ final class InfoBar: NSView {
         textLabel.setContentCompressionResistancePriority(.required, for: .vertical)
         row?.alignment = .centerY
         row?.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+    }
+
+    /// a small button, as the pictures bar's, for a bar stacked with it
+    func smallButton() {
+        action?.controlSize = .small
+        action?.font = .systemFont(ofSize: NSFont.systemFontSize(for: .small))
     }
 
     /// the button's words; empty hides it (a bar that only says something)

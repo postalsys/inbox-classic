@@ -1400,11 +1400,7 @@ impl Reader {
 
     /// The core's ListsChanged: a list was asked to let the user go, or a request failed, so the bar is read again
     pub fn lists_changed(&self) {
-        let has_list = self
-            .view
-            .borrow()
-            .as_ref()
-            .is_some_and(|view| view.list.how.is_some());
+        let has_list = self.view.borrow().as_ref().is_some_and(|view| view.list.how.is_some());
         if self.file.borrow().is_some() || self.uid.get() == 0 || !has_list {
             return;
         }

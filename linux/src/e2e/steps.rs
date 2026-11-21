@@ -165,13 +165,19 @@ pub async fn unsubscribing(d: &Driver) {
     show_found("subject:\"Weekly list news\"").await;
     let reader = shell().main().reader.clone();
     let shown = wait_until(15, || reader.list_bar_shown()).await;
-    d.check(shown, "a message of a mailing list has the mailing-list bar over its text");
+    d.check(
+        shown,
+        "a message of a mailing list has the mailing-list bar over its text",
+    );
     let (text, button) = reader.list_bar_words();
     d.check(
         text.contains("(list.example.com)") && button == t!(UiUnsubscribeAsk),
         &format!("it names the list by its domain and offers Unsubscribe... ({text}, {button})"),
     );
-    d.check(!reader.header_text().contains("Unsubscribe"), "the header has no Unsubscribe link");
+    d.check(
+        !reader.header_text().contains("Unsubscribe"),
+        "the header has no Unsubscribe link",
+    );
     let enabled = |command: Command| {
         shell()
             .main()
@@ -179,7 +185,10 @@ pub async fn unsubscribing(d: &Driver) {
             .lookup_action(command.name())
             .is_some_and(|a| a.is_enabled())
     };
-    d.check(enabled(Command::Unsubscribe), "Message > Unsubscribe from List is on for it");
+    d.check(
+        enabled(Command::Unsubscribe),
+        "Message > Unsubscribe from List is on for it",
+    );
     let mailbox = shell().main();
     let list_view: gtk::Widget = mailbox.list.view.clone().upcast();
     mailbox.message_menu(&list_view, 40.0, 24.0);
@@ -258,7 +267,8 @@ pub async fn unsubscribing(d: &Driver) {
     );
     let later = glib::DateTime::now_utc()
         .and_then(|t| t.add_days(3))
-        .and_then(|t| t.format_iso8601())
+        // as IMAP writes a date-time, which is what the server takes
+        .and_then(|t| t.format("%d-%b-%Y %H:%M:%S +0000"))
         .map(|t| t.to_string())
         .unwrap_or_default();
     let _ = d.add_message_arrived(&again, &later);
@@ -270,7 +280,8 @@ pub async fn unsubscribing(d: &Driver) {
     d.check(reader.bars_in_order(), "the pictures bar above the mailing-list bar");
     let (text, button) = reader.list_bar_words();
     d.check(
-        text.starts_with("You asked to leave this list on") && text.contains("came after")
+        text.starts_with("You asked to leave this list on")
+            && text.contains("came after")
             && button == t!(UiUnsubscribeAgain),
         &format!("a message that came more than two days after the request offers Unsubscribe Again... ({text})"),
     );

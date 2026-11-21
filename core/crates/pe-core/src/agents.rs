@@ -1096,10 +1096,9 @@ impl Core {
     fn lists_of(&self, folder: FolderId, uids: &[u64]) -> Result<Vec<UnsubscribeList>> {
         let mut lists: Vec<UnsubscribeList> = Vec::new();
         let mut none = Vec::new();
-        let trusted = self.trusted(folder)?;
         for &uid in uids {
             let message = self.store().message(folder, uid)?.ok_or(Error::NotFound)?;
-            let Some((account, list)) = self.stored_list_of(folder, uid, &trusted)? else {
+            let Ok((account, list)) = self.stored_list(folder, uid) else {
                 none.push(uid.to_string());
                 continue;
             };

@@ -1179,11 +1179,11 @@ typedef struct PeAccount {
 } PeAccount;
 
 // The bar over a stored message of a mailing list as it is now, for a window showing it when `ListsChanged` comes: its
-// words and its button, NULL for none. Free with `pe_list_bar_free`.
+// words and its button, as `PeMessageInfo` has them. Free with `pe_list_bar_free`.
 typedef struct PeListBar {
-  // NULL when the message has no bar
+  // Empty when the message has no bar
   char *text;
-  // NULL when the bar has no button
+  // Empty when the bar has no button
   char *button;
 } PeListBar;
 
