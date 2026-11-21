@@ -1154,6 +1154,7 @@ void Mailbox::OnPageLoaded(uint64_t request) {
     KeepPage({offset, core::MessageList(pe_list_load_messages(load.get()))});
     int last = static_cast<int>(std::min<uint64_t>(std::min<uint64_t>(offset + kPageSize, rowCount_), INT_MAX)) - 1;
     RepaintRows(static_cast<int>(offset), last);
+    AskOnScreen();
 }
 
 void Mailbox::ListNotRead(const std::wstring& why) {
@@ -1163,6 +1164,7 @@ void Mailbox::ListNotRead(const std::wstring& why) {
         EndPending();
         InvalidateRect(list_, nullptr, FALSE);
     }
+    AskOnScreen();
     if (!why.empty()) {
         Say(why);
     }
@@ -1218,6 +1220,7 @@ void Mailbox::ShowList(const PeListLoad* load, const PeListLoadInfo& info) {
     }
     reloading_ = false;
     InvalidateRect(list_, nullptr, FALSE);
+    AskOnScreen();
     if (!pe_list_load_selection(load, selection_.get())) {
         pe_selection_clear(selection_.get());
     }
@@ -1324,6 +1327,23 @@ const PeMessage* Mailbox::Row(int index) {
         std::rotate(page, page + 1, pages_.end());
     }
     return pe_message_list_get(pages_.back().rows.get(), static_cast<size_t>(static_cast<uint64_t>(index) - offset));
+}
+
+void Mailbox::AskOnScreen() {
+    // a row asks for its page as it is painted, but not while the list itself loads (its first page comes with it):
+    // painted then, it stays blank until something paints it again. So once the list is drawn and as pages come, the
+    // pages of the rows in sight are asked for, whenever they were painted
+    if (listPending_ || loadRequest_) {
+        return;
+    }
+    int count = ListView_GetItemCount(list_);
+    int top = ListView_GetTopIndex(list_);
+    int last = std::min(count, top + ListView_GetCountPerPage(list_) + 1);
+    for (int row = top; row < last; row++) {
+        if (!CachedRow(row)) {
+            RequestPage(static_cast<uint64_t>(row) / kPageSize * kPageSize);
+        }
+    }
 }
 
 void Mailbox::RequestPage(uint64_t offset) {

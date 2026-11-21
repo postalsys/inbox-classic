@@ -1095,6 +1095,8 @@ private:
     const PeMessage* Row(int index);
     // the row `index` if its page is read already, nullptr otherwise; reads nothing
     const PeMessage* CachedRow(int index) const;
+    // the pages of the rows in sight not here asked for, whenever those rows were painted
+    void AskOnScreen();
     // the row `index` for a command: its page read now when it is not here (nullptr while the list itself loads)
     const PeMessage* RowNow(int index);
     const PeMessage* SelectedRow();

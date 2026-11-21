@@ -637,11 +637,7 @@ impl MessageList {
 
     /// A page of the list read at `offset`, drawn in place of its blank lines with the selection kept
     pub fn fill_page(&self, offset: u64, rows: Vec<Message>) {
-        let selected = self.selection.selection().copy();
-        if let Some((start, count)) = self.model.fill(offset, rows) {
-            self.selection
-                .set_selection(&selected, &gtk::Bitset::new_range(start, count));
-        }
+        fill_keeping_selection(&self.selection, &self.model, offset, rows);
     }
 
     /// The list again: the rows of its view, `total` of them (`read` the page of them read already, its offset and
@@ -908,6 +904,27 @@ fn in_sight(model: &MessageModel, stack: &gtk::Stack, view: &gtk::ColumnView, ro
         let to = last / PAGE * PAGE + PAGE;
         (from..=to).contains(&offset)
     })
+}
+
+/// A page of `model` read at `offset` drawn with the selection kept. A row selected while it was blank (clicked before
+/// its page came) is told as changed once it has its message: setting the same selection again tells nothing, and
+/// the window would never open the message it shows selected
+fn fill_keeping_selection(selection: &gtk::MultiSelection, model: &MessageModel, offset: u64, rows: Vec<Message>) {
+    let selected = selection.selection().copy();
+    let Some((start, count)) = model.fill(offset, rows) else {
+        return;
+    };
+    selection.set_selection(&selected, &gtk::Bitset::new_range(start, count));
+    if let Some((position, n)) = selected_among(|row| selected.contains(row), start, count) {
+        selection.selection_changed(position, n);
+    }
+}
+
+/// The span of the selected rows among `count` rows from `start` (position, how many); None when none is
+fn selected_among(selected: impl Fn(u32) -> bool, start: u32, count: u32) -> Option<(u32, u32)> {
+    let first = (start..start + count).find(|&row| selected(row))?;
+    let last = (start..start + count).rev().find(|&row| selected(row))?;
+    Some((first, last - first + 1))
 }
 
 /// Whenever either list's scrolling changes (scrolled, or its length changed with the rows), the pages on screen not
@@ -1511,6 +1528,17 @@ mod tests {
             idle();
             assert!(asked.borrow().is_empty());
         });
+    }
+
+    /// A row clicked while it was blank opens once its page comes: the rows selected among those a page fills are told
+    /// as changed then
+    #[test]
+    fn a_row_selected_blank_is_told_when_its_page_comes() {
+        let one = |row| row == 1625 || row == 3000;
+        assert_eq!(super::selected_among(one, 1600, 100), Some((1625, 1)));
+        assert_eq!(super::selected_among(one, 0, 100), None);
+        let more = |row| row == 1625 || (1690..1710).contains(&row);
+        assert_eq!(super::selected_among(more, 1600, 100), Some((1625, 75)));
     }
 
     /// GTK reads every row when the whole list changes: the first page stays, and only the pages on screen or next to
