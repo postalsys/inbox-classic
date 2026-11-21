@@ -64,17 +64,17 @@ final class Reader: NSObject {
     let strip = AttachmentStrip()
     /// over a signed or encrypted message: its state, and Details
     let security = SecurityBar()
-    private let pictures = InfoBar(icon: "image", link: nil)
+    private let pictures = InfoBar(icon: "image")
     /// the bar's Download Pictures with its menu: the Always choices for a sender the provider confirmed, the
     /// greyed line that says why there are none for one it did not
     let picturesChoices = NSComboButton()
     /// the bar's Download Pictures alone, for a message without a single sender
     let picturesDownload = NSButton()
     /// over a message that could not be downloaded: Try Again
-    private let retry = InfoBar(icon: "arrow_sync", link: nil, button: Text.uiTryAgain.text)
+    private let retry = InfoBar(icon: "arrow_sync", button: Text.uiTryAgain.text)
     /// over a message of a mailing list: the core's words (the list's domain, or when it was asked) and its button,
     /// which leaves the list as Message > Unsubscribe from List does
-    private let listBar = InfoBar(icon: "mail_multiple", link: nil, button: Text.uiUnsubscribeAsk.text)
+    private let listBar = InfoBar(icon: "mail_multiple", button: Text.uiUnsubscribeAsk.text)
     /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
     private var downloadingTimer: Timer?
     private(set) var picturesOffered = false
@@ -125,7 +125,6 @@ final class Reader: NSObject {
         headerLine.boxType = .separator
 
         pictures.text = Text.uiPicturesBlocked.text
-        pictures.clicked = { [weak self] in self?.loadPictures() }
         pictures.setAccessibilityIdentifier("reader.pictures")
         setUpPicturesButtons()
         retry.text = taken(pe_retry_note()) ?? ""
@@ -1062,8 +1061,9 @@ extension Reader: NSMenuDelegate {
     }
 }
 
-/// A bar in the colors of an information bar: an icon, a bold title and a line of text (or one line), clicked as a
-/// whole or with a link or a button at its right
+/// A bar in the colors of an information bar: an icon, a bold title and a line of text (or one line), with a push
+/// button or a closing cross at its right, and controls of its own before it; never clicked as a whole or by a link,
+/// so each action is a button a keyboard and a screen reader reach
 final class InfoBar: NSView {
     var clicked: () -> Void = {}
     var heightConstraint: NSLayoutConstraint?
@@ -1085,8 +1085,9 @@ final class InfoBar: NSView {
         set { textLabel.stringValue = newValue }
     }
 
-    /// `close`: a cross at the trailing edge, named so for a screen reader, that closes the bar (`clicked`)
-    init(icon: String, link: String?, button: String? = nil, close: String? = nil) {
+    /// `button`: a push button at the trailing edge (`clicked`); `close`: a cross there, named so for a screen reader,
+    /// that closes the bar (`clicked`); neither: the bar's controls are its accessories
+    init(icon: String, button: String? = nil, close: String? = nil) {
         if let close {
             let cross = NSButton(image: Icons.list("dismiss") ?? NSImage(), target: nil, action: nil)
             cross.isBordered = false
@@ -1096,12 +1097,6 @@ final class InfoBar: NSView {
         } else if let button {
             action = NSButton(title: button, target: nil, action: nil)
             action?.bezelStyle = .push
-        } else if let link {
-            action = NSButton(title: link, target: nil, action: nil)
-            action?.isBordered = false
-            action?.attributedTitle = NSAttributedString(string: link, attributes: [
-                .foregroundColor: NSColor.linkColor, .underlineStyle: NSUnderlineStyle.single.rawValue,
-            ])
         } else {
             action = nil
         }
@@ -1132,9 +1127,9 @@ final class InfoBar: NSView {
             action.action = #selector(fire)
             action.setContentHuggingPriority(.required, for: .horizontal)
             action.setContentCompressionResistancePriority(.required, for: .horizontal)
-            // a long text gives way in its middle, never under the link
+            // a long text gives way in its middle, never under the button
             textLabel.lineBreakMode = .byTruncatingMiddle
-            views += button != nil || close != nil ? [spacer, action] : [action, spacer]
+            views += [spacer, action]
         }
         let stack = NSStackView(views: views)
         row = stack
@@ -1164,11 +1159,10 @@ final class InfoBar: NSView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    /// controls at the trailing edge of a bar without a button of its own (without a link, the rest of it is still
-    /// clicked as a whole); a link stays right after the words
+    /// controls at the trailing edge of the bar, before its own button when it has one
     func setAccessories(_ views: [NSView]) {
-        guard let row, action == nil || action?.isBordered == false else { return }
-        // a bar with a link has its spacer after it already
+        guard let row else { return }
+        // a bar with a button has its spacer before it already
         if action == nil {
             let spacer = NSView()
             spacer.setContentHuggingPriority(.init(1), for: .horizontal)
@@ -1178,7 +1172,11 @@ final class InfoBar: NSView {
         for view in views {
             view.setContentHuggingPriority(.required, for: .horizontal)
             view.setContentCompressionResistancePriority(.required, for: .horizontal)
-            row.addArrangedSubview(view)
+            if let action, let at = row.arrangedSubviews.firstIndex(of: action) {
+                row.insertArrangedSubview(view, at: at)
+            } else {
+                row.addArrangedSubview(view)
+            }
         }
     }
 
@@ -1191,19 +1189,6 @@ final class InfoBar: NSView {
     }
 
     override var wantsUpdateLayer: Bool { true }
-
-    // a bar without a link or button is clicked as a whole, like a link
-    override func mouseDown(with event: NSEvent) {
-        if action == nil {
-            clicked()
-        }
-    }
-
-    override func resetCursorRects() {
-        if action == nil {
-            addCursorRect(bounds, cursor: .pointingHand)
-        }
-    }
 
     @objc private func fire() {
         clicked()
@@ -1237,15 +1222,11 @@ final class InfoBar: NSView {
         }
     }
 
-    /// the bar's link, button or cross pressed, as a click does (the UI test)
+    /// the bar's button or cross pressed, as a click does (the UI test)
     func press() {
         action?.performClick(nil)
     }
 
-    override func accessibilityPerformPress() -> Bool {
-        clicked()
-        return true
-    }
 }
 
 /// The find bar of a message, as Safari and Mail have it: the words, the place before and after, Done. Return and

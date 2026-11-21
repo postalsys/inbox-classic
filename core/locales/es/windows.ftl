@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } archivo
    *[other] { $count } archivos
 }
-win-click-to-retry = Haga clic aquí para volver a intentarlo.
 win-save-attachments = &Guardar archivos adjuntos...
 win-files-not-saved = Archivos sin guardar: { $failed } de { $count }.
 win-new-folder-in-highlighted = La nueva carpeta se creará dentro de la carpeta seleccionada.
@@ -105,7 +104,6 @@ win-take-back = &Deshacer
 win-what-agents-did = &Historial de los agentes:
 win-agent-reads = Lo que se leyó de { $from } a { $to }:
 win-agent-reads-hint = Seleccione arriba una fila de lecturas para ver lo que se leyó.
-win-how-to-connect = Cómo conectar un agente
 
 ## Aplicaciones de inicio de sesión
 

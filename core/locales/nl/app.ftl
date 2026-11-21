@@ -249,7 +249,8 @@ ui-no-items = Er zijn geen items in deze weergave.
 ui-choose-folder = Kies een map om de berichten te bekijken.
 ui-unsubscribe = Afmelden
 ui-open-in-calendar = Openen in agenda
-ui-pictures-blocked = Sommige afbeeldingen zijn geblokkeerd om het volgen door de afzender te beperken. Klik hier om ze te downloaden.
+# review: changed
+ui-pictures-blocked = Sommige afbeeldingen zijn geblokkeerd om het volgen door de afzender te beperken.
 ui-not-shown = Het bericht kon niet worden weergegeven.
 ui-attachment-not-read = De bijlage kon niet worden gelezen.
 ui-attachment-not-saved = De bijlage kon niet worden opgeslagen.

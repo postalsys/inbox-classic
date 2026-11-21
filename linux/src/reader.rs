@@ -1592,7 +1592,7 @@ fn unconfirmed_note(text: &str) -> gtk::Label {
 /// The bar over a message whose pictures on the internet are blocked: what it says, Download Pictures and beside it
 /// its menu (Always, or why not)
 fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton) {
-    let text = wrapping(&t!(GtkPicturesBlocked));
+    let text = wrapping(&t!(UiPicturesBlocked));
     text.set_hexpand(true);
     text.set_valign(gtk::Align::Center);
     let download = gtk::Button::with_label(&t!(GtkDownloadPictures));

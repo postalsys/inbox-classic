@@ -95,7 +95,6 @@ gtk-files = { $count ->
     [few] { $count } fișiere
    *[other] { $count } de fișiere
 }
-gtk-pictures-blocked = Unele imagini au fost blocate pentru a limita urmărirea deschiderii mesajului de către expeditor.
 gtk-download-pictures = Descărcare imagini
 gtk-save-attachments-menu = Salvare atașări...
 

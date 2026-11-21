@@ -88,7 +88,6 @@ gtk-files = { $count ->
     [one] { $count } fájl
    *[other] { $count } fájl
 }
-gtk-pictures-blocked = Néhány kép letöltése le van tiltva, hogy a feladó nehezebben követhesse nyomon az üzenet megnyitását.
 gtk-download-pictures = Képek letöltése
 gtk-save-attachments-menu = Mellékletek mentése...
 

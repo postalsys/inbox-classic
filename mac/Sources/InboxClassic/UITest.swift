@@ -828,8 +828,11 @@ final class UITest {
         }
 
         step("pictures from the internet")
-        onMain { _ = pictures?.accessibilityPerformPress() }
-        check(await waitUntil(10) { pictures?.isHidden == true }, "clicking the bar shows the pictures, and the bar goes away")
+        // Download Pictures on the bar: the combo button beside the sender's choices, or the button alone
+        let reader = main.mailbox.reader
+        let download: NSControl = reader.picturesChoices.isHidden ? reader.picturesDownload : reader.picturesChoices
+        onMain { _ = download.sendAction(download.action, to: download.target) }
+        check(await waitUntil(10) { pictures?.isHidden == true }, "Download Pictures shows the pictures, and the bar goes away")
         await pause(3)
         await shot(main.window, "read-2-pictures")
 
@@ -1013,6 +1016,7 @@ final class UITest {
         check(found == 1, "the search finds the newsletter (\(found ?? 0))")
         let bar: InfoBar? = find("search.bar", in: main.window)
         check(bar?.isHidden == false && bar?.text.contains("1 result") == true, "the bar over the list says what was found")
+        check(bar?.buttonTitle == Text.uiClearSearch.text, "with Clear search, a push button")
         await selectRow(0)
         await shot(main.window, "find-1-results")
         await search("lunch OR minutes")

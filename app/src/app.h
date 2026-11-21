@@ -1242,7 +1242,6 @@ private:
     HFONT normal_ = nullptr;
     // the list's font in italics: a line that says a message's state ("Encrypted message"), not its sender's words
     HFONT italic_ = nullptr;
-    HFONT link_ = nullptr;
     // where the list goes, with the search bar over it while searching
     RECT listArea_ = {};
     HWND searchBar_ = nullptr;
@@ -1262,7 +1261,6 @@ private:
     void AddHeaderTips();
     void PlaceHeaderTips();
     HWND headerTip_ = nullptr;
-    int LinkWidth(HWND link) const;
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;
     int iconSize_ = 16;
@@ -1806,6 +1804,9 @@ enum SetupControlId : WORD {
     IDC_SETUP_FIRST_RUN,
     // the bar over a message of a mailing list (its button is IDC_UNSUBSCRIBE); last here, so no id above moves
     IDC_LIST_BAR,
+    // the words of the pictures bar and of the download that failed (their buttons are IDC_PICTURES and IDC_RETRY)
+    IDC_PICTURES_BAR,
+    IDC_RETRY_BAR,
     // Import: an account's check box, IDC_SETUP_ACCOUNT + its place in the file's list
     IDC_SETUP_ACCOUNT = 1000,
 };

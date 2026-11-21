@@ -96,7 +96,6 @@ gtk-files = { $count ->
     [one] { $count } fails
    *[other] { $count } faili
 }
-gtk-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājam būtu grūtāk izsekot, kad lasāt ziņojumu.
 gtk-download-pictures = Lejupielādēt attēlus
 gtk-save-attachments-menu = Saglabāt pielikumus...
 

@@ -550,6 +550,15 @@ function InFront([IntPtr]$a, [IntPtr]$b) {
 # presses a button as its click ends up: BN_CLICKED to its window, which works whether or not that window is active
 # (BM_CLICK can be lost when it is not, as on the CI runner). A disabled button can not be pressed, as with the mouse:
 # one is waited for a few seconds (a window turns its buttons on as it fills in), then the harness says it stayed off
+# whether control `id` of `window` is a push button that Tab reaches (not a link drawn on a button, not a static)
+function PushButton([IntPtr]$window, [int]$id) {
+    $control = [Native.Win]::GetDlgItem($window, $id)
+    if ($control -eq [IntPtr]::Zero) { return $false }
+    $class = New-Object System.Text.StringBuilder 64
+    [void][Native.Win]::GetClassName($control, $class, 64)
+    $style = [Native.Win]::GetWindowLong($control, -16)
+    $class.ToString() -eq 'Button' -and ($style -band 0xF) -le 1 -and ($style -band 0x00010000) -ne 0
+}
 function Click([IntPtr]$window, [int]$id) {
     $button = [Native.Win]::GetDlgItem($window, $id)
     if ($button -ne [IntPtr]::Zero -and -not [Native.Win]::IsWindowEnabled($button)) {
@@ -1128,16 +1137,17 @@ try {
         Click $warning 6
     }
     # before the first account, Add Mail Account offers the settings and accounts of another computer (setup.cpp, app.h
-    # SetupControlId): the link opens the import, which asks for a file first; cancelled, the page is there again
+    # SetupControlId): its push button opens the import, which asks for a file first; cancelled, the page is there again
     $IDC_SETUP_FIRST_RUN = 956
     $start = StartPage $true 20
     $importLink = if ($start) { [Native.Win]::GetDlgItem($start, $IDC_SETUP_FIRST_RUN) } else { [IntPtr]::Zero }
     Check ($importLink -ne [IntPtr]::Zero -and (WindowText $importLink) -eq 'Import settings and accounts from another computer...') "before the first account, Add Mail Account offers to import settings and accounts from another computer ($(if ($importLink -ne [IntPtr]::Zero) { WindowText $importLink }))"
     if ($importLink -ne [IntPtr]::Zero) {
         Shot $start 'setup-5-first-run'
+        Check (PushButton $start $IDC_SETUP_FIRST_RUN) 'the import is a push button, which Tab reaches'
         Click $start $IDC_SETUP_FIRST_RUN
         $open = WaitWindow '#32770' 'Import Settings and Accounts' 40
-        Check ($null -ne $open) 'the link opens the import, which asks for a file'
+        Check ($null -ne $open) 'the button opens the import, which asks for a file'
         if ($open) { Check (CloseDialog $open) 'Cancel closes it' }
         Check ($null -ne (StartPage $true 20)) 'cancelled, Add Mail Account is there again'
     }
@@ -1414,12 +1424,10 @@ try {
     }
 
     Step 'pictures from the internet'
-    # a click on the information bar, as the mouse would
-    $bar = [Native.Win]::GetDlgItem($main, $IDC_PICTURES)
-    $point = [IntPtr]((8 -shl 16) -bor 40)
-    [void][Native.Win]::PostMessage($bar, 0x0201, [IntPtr]1, $point)
-    [void][Native.Win]::PostMessage($bar, 0x0202, [IntPtr]::Zero, $point)
-    Check ([bool](WaitFor { -not (Visible $main $IDC_PICTURES) } 10)) 'clicking the bar shows the pictures, and the bar goes away'
+    # Download Pictures on the information bar: a push button, which Tab reaches
+    Check (PushButton $main $IDC_PICTURES) 'the bar offers Download Pictures, a push button'
+    Click $main $IDC_PICTURES
+    Check ([bool](WaitFor { -not (Visible $main $IDC_PICTURES) } 10)) 'Download Pictures shows the pictures, and the bar goes away'
     Start-Sleep -Seconds 3
     Shot $main 'read-2-pictures'
 
@@ -1802,7 +1810,7 @@ public static class Dragger {
     Shot $main 'read-13-downloading'
     # the server gone: why, and Try Again
     $silent.Stop()
-    Check ([bool](WaitFor { Visible $main $IDC_RETRY } 30)) 'a message that can not be downloaded says why, with Try Again'
+    Check ([bool](WaitFor { Visible $main $IDC_RETRY } 30) -and (PushButton $main $IDC_RETRY)) 'a message that can not be downloaded says why, with Try Again, a push button'
     Shot $main 'read-12-not-downloaded'
     # the server back: the account syncs, and the message is tried again by itself
     SetPort 106 "$($ports.imap)"
@@ -2214,7 +2222,7 @@ public static class Dragger {
     $ruleFind = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
     $inboxRows = Rows
     [void][Native.Win]::SendMessage($ruleFind, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
-    Check ([bool](WaitFor { (Visible $main 208) -and (Visible $main $IDC_SEARCH_RULE) } 10)) 'the search bar has Create Rule'
+    Check ([bool](WaitFor { (Visible $main 208) -and (Visible $main $IDC_SEARCH_RULE) } 10) -and (PushButton $main $IDC_SEARCH_RULE) -and (PushButton $main 209)) 'the search bar has Create Rule and Clear search, push buttons'
     Click $main $IDC_SEARCH_RULE
     $editor = WaitShown 'InboxClassicRule'
     Check ($editor -and (GetText $editor $IDC_RULE_QUERY) -eq 'lunch') "Create Rule opens the editor with the words searched for ($(if ($editor) { GetText $editor $IDC_RULE_QUERY }))"
@@ -4496,6 +4504,7 @@ public static class Dragger {
                (& $logged 1) -match (Pattern $en['agent-log-sent'] @{ subject = 'Lunch on Friday?'; to = 'pat@example.net' }) -and (& $logged 4) -match (Pattern $en['agent-log-read'])) "and what its agent did, newest first ($(@(0..4 | ForEach-Object { & $logged $_ }) -join '; '))"
         # the colour of a flag and a conversation watched, by the agent
         Check ((& $logged 2) -match "^Watched the conversation $([char]0x201C)" -and (& $logged 3) -match "^Flagged $([char]0x201C).+$([char]0x201D) blue$") "a flag's colour and a watched conversation are listed ($(& $logged 2); $(& $logged 3))"
+        Check (PushButton $agents 637) 'How to Connect an Agent is a push button'
         Shot $agents 'agents-6-window'
         # the message sent selected (the row under the draft): Undo takes it out of the Outbox before it goes
         Key $log $VK_HOME
@@ -7343,6 +7352,7 @@ public static class Dragger {
         }
         # the address typed goes to the provider as the account to sign in to
         SetText $first 101 'alice@example.com'
+        Check (PushButton $first 122) 'More sign-in options is a push button'
         Click $first 122
         $menu = WaitWindow '#32768' $null 10
         Check ($null -ne $menu) 'More sign-in options opens a menu'

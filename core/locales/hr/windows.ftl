@@ -66,7 +66,6 @@ win-files = { $count ->
     [few] { $count } datoteke
    *[other] { $count } datoteka
 }
-win-click-to-retry = Kliknite ovdje da biste pokušali ponovno.
 win-save-attachments = &Spremi privitke...
 win-files-not-saved = Broj datoteka koje nije moguće spremiti: { $failed } od ukupno { $count }.
 win-new-folder-in-highlighted = Nova će se mapa stvoriti unutar odabrane mape.
@@ -107,7 +106,6 @@ win-take-back = &Poništi
 win-what-agents-did = &Aktivnost agenata:
 win-agent-reads = Što je pročitano od { $from } do { $to }:
 win-agent-reads-hint = Odaberite redak u zapisniku čitanja iznad da biste vidjeli što je pročitano.
-win-how-to-connect = Kako povezati agenta
 
 ## Sign-in apps
 

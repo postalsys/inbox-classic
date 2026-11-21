@@ -250,7 +250,8 @@ ui-no-items = Tässä näkymässä ei ole kohteita.
 ui-choose-folder = Valitse kansio, niin näet sen viestit.
 ui-unsubscribe = Peruuta tilaus
 ui-open-in-calendar = Avaa kalenterissa
-ui-pictures-blocked = Ulkoisia kuvia on estetty yksityisyytesi suojaamiseksi. Lataa kuvat napsauttamalla tätä.
+# review: changed
+ui-pictures-blocked = Ulkoisia kuvia on estetty yksityisyytesi suojaamiseksi.
 ui-not-shown = Viestiä ei voitu näyttää.
 ui-attachment-not-read = Liitettä ei voitu lukea.
 ui-attachment-not-saved = Liitettä ei voitu tallentaa.

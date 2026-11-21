@@ -196,9 +196,12 @@ private:
     PendingRead saveRead_;
     // ShowInfo lays the pane out once, at its end
     bool holdLayout_ = false;
+    // the bars' words and their push buttons
     HWND pictures_ = nullptr;
+    HWND picturesButton_ = nullptr;
     HWND picturesMenu_ = nullptr;
     HWND retry_ = nullptr;
+    HWND retryButton_ = nullptr;
     // the security bar over a signed or encrypted message (owner-drawn, its words its text) with its Details button,
     // the state it shows, and the part whose label was clicked for the Details window it opens
     HWND security_ = nullptr;

@@ -89,7 +89,6 @@ gtk-files = { $count ->
     [one] { $count } ficheiro
    *[other] { $count } ficheiros
 }
-gtk-pictures-blocked = Algumas imagens foram bloqueadas para ajudar a impedir que o remetente identifique o seu computador.
 gtk-download-pictures = Transferir imagens
 gtk-save-attachments-menu = Guardar anexos...
 

@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } fájl
    *[other] { $count } fájl
 }
-win-click-to-retry = Kattintson ide az újrapróbálkozáshoz.
 win-save-attachments = Mellékletek &mentése...
 win-files-not-saved = Nem sikerült menteni: { $failed } fájl. Összesen: { $count } fájl.
 win-new-folder-in-highlighted = Az új mappa a kijelölt mappán belül jön létre.
@@ -105,7 +104,6 @@ win-take-back = &Visszavonás
 win-what-agents-did = Ügynöki &tevékenység:
 win-agent-reads = Olvasási műveletek: { $from } - { $to }
 win-agent-reads-hint = Válasszon ki fent egy olvasási összesítőt a részletek megtekintéséhez.
-win-how-to-connect = Hogyan csatlakoztatható egy ügynök
 
 ## Sign-in apps
 

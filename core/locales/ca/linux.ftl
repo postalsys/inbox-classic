@@ -90,7 +90,6 @@ gtk-files = { $count ->
     [one] { $count } fitxer
    *[other] { $count } fitxers
 }
-gtk-pictures-blocked = S’han bloquejat algunes imatges per limitar el seguiment de la vostra lectura pel remitent.
 gtk-download-pictures = Baixa les imatges
 gtk-save-attachments-menu = Desa els fitxers adjunts...
 

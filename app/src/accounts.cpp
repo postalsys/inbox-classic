@@ -550,14 +550,14 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     int introHeight = std::max(Scale(30), static_cast<int>(MeasureText(offer.intro, width - 2 * pad).cy) + Scale(4));
     int otherTextHeight = std::max(Scale(30), static_cast<int>(MeasureText(other, width - 2 * pad).cy) + Scale(4));
     int buttonsHeight = shown.empty() ? 0 : buttonHeight + (anyOff ? reasonHeight : 0) + Scale(8);
-    int moreHeight = offer.more ? linkHeight + Scale(6) : 0;
+    int moreHeight = offer.more ? Scale(25) + Scale(6) : 0;
     int otherHeight = offer.fields ? Scale(12) + otherTextHeight + 2 * (rowHeight + Scale(6)) : 0;
     int buttonWidth = ButtonWidth({offer.nextLabel}, 110), cancelWidth = ButtonWidth({cancel});
-    // the import link at the left of the buttons, or over them when it does not fit beside them
+    // the import button at the left of the button row, or over it when it does not fit beside Next and Cancel
     std::wstring importText = core::T(PE_TEXT_UI_SETUP_FIRST_RUN);
-    int importWidth = offer.importLink ? static_cast<int>(MeasureText(importText).cx) + Scale(12) : 0;
+    int importWidth = offer.importLink ? ButtonWidth({importText}) : 0;
     bool importAbove = offer.importLink && pad + importWidth + Scale(12) > width - pad - buttonWidth - cancelWidth - Scale(6);
-    int importHeight = importAbove ? linkHeight + Scale(10) : 0;
+    int importHeight = importAbove ? Scale(25) + Scale(8) : 0;
     int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + importHeight + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kStartClass, core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), width, height);
     StartState state{core, &apps};
@@ -593,8 +593,10 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     }
     top += buttonsHeight;
     if (offer.more) {
-        int moreWidth = std::max(Scale(160), static_cast<int>(MeasureText(more).cx) + Scale(12));
-        state.more = CreateLinkButton(dialog, more.c_str(), IDC_SIGN_IN_MORE, {pad, top, pad + moreWidth, top + linkHeight});
+        // a push button: it opens the list of sign-in apps
+        int moreWidth = ButtonWidth({more});
+        state.more = CreateChild(dialog, L"BUTTON", more.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SIGN_IN_MORE,
+                                 {pad, top, pad + moreWidth, top + Scale(25)});
         top += moreHeight;
     }
     top += Scale(6);
@@ -619,10 +621,11 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
                 {width - pad - buttonWidth - cancelWidth - Scale(6), buttonTop, width - pad - cancelWidth - Scale(6), buttonTop + Scale(25)});
     CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL, {width - pad - cancelWidth, buttonTop, width - pad, buttonTop + Scale(25)});
     if (offer.importLink) {
-        int linkTop = importAbove ? buttonTop - importHeight : buttonTop + (Scale(25) - linkHeight) / 2;
-        HWND link = CreateLinkButton(dialog, importText.c_str(), IDC_SETUP_FIRST_RUN, {pad, linkTop, pad + importWidth, linkTop + linkHeight});
+        int importTop = importAbove ? buttonTop - importHeight : buttonTop;
+        HWND import = CreateChild(dialog, L"BUTTON", importText.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SETUP_FIRST_RUN,
+                                  {pad, importTop, pad + importWidth, importTop + Scale(25)});
         // after the fields and before Next in the Tab order, as it is placed
-        SetWindowPos(link, state.emailInput ? state.emailInput : HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        SetWindowPos(import, state.emailInput ? state.emailInput : HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }
 
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));

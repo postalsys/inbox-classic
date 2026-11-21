@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } Datei
    *[other] { $count } Dateien
 }
-win-click-to-retry = Klicken Sie hier, um es erneut zu versuchen.
 win-save-attachments = Anlagen &speichern...
 win-files-not-saved = Nicht gespeicherte Dateien: { $failed } von { $count }.
 win-new-folder-in-highlighted = Der neue Ordner wird im ausgewählten Ordner angelegt.
@@ -105,7 +104,6 @@ win-take-back = &Zurücknehmen
 win-what-agents-did = &Aktivitätsverlauf der Agenten:
 win-agent-reads = Lesezugriffe von { $from } bis { $to }:
 win-agent-reads-hint = Wählen Sie oben einen Eintrag mit Lesezugriffen aus, um die Details anzuzeigen.
-win-how-to-connect = So verbinden Sie einen Agenten
 
 ## Anmelde-Apps
 

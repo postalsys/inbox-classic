@@ -89,7 +89,6 @@ gtk-files = { $count ->
     [one] { $count } tiedosto
    *[other] { $count } tiedostoa
 }
-gtk-pictures-blocked = Ulkoisia kuvia on estetty yksityisyytesi suojaamiseksi.
 gtk-download-pictures = Lataa kuvat
 gtk-save-attachments-menu = Tallenna liitteet...
 

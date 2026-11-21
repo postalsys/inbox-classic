@@ -249,7 +249,8 @@ ui-no-items = Det finns inga objekt i den här vyn.
 ui-choose-folder = Välj en mapp för att se dess meddelanden.
 ui-unsubscribe = Avsluta prenumeration
 ui-open-in-calendar = Öppna i kalendern
-ui-pictures-blocked = Vissa bilder har blockerats för att minska risken för spårning. Klicka här för att hämta bilderna.
+# review: changed
+ui-pictures-blocked = Vissa bilder har blockerats för att minska risken för spårning.
 ui-not-shown = Det gick inte att visa meddelandet.
 ui-attachment-not-read = Det gick inte att läsa bilagan.
 ui-attachment-not-saved = Det gick inte att spara bilagan.
