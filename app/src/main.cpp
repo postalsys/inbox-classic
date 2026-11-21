@@ -241,7 +241,9 @@ void UpdateMenu(HMENU menu) {
     }
     for (int i = 0, count = GetMenuItemCount(menu); i < count; i++) {
         UINT id = GetMenuItemID(menu, i);
-        if (int fits = CommandFitsSelection(id); fits >= 0) {
+        if (id == IDM_UNSUBSCRIBE) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanUnsubscribe() ? MF_ENABLED : MF_GRAYED));
+        } else if (int fits = CommandFitsSelection(id); fits >= 0) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (fits ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_EXPAND_ALL_THREADS || id == IDM_COLLAPSE_ALL_THREADS) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.Grouped() ? MF_ENABLED : MF_GRAYED));
@@ -712,6 +714,7 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_STRING, IDM_IGNORE_CONVERSATION, MenuItem(PE_TEXT_CMD_IGNORE_CONVERSATION, L"K").c_str());
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_CREATE_RULE_FROM_MESSAGE, MenuItem(PE_TEXT_CMD_CREATE_RULE_FROM_MESSAGE).c_str());
+    AppendMenuW(compose, MF_STRING, IDM_UNSUBSCRIBE, MenuItem(PE_TEXT_CMD_UNSUBSCRIBE).c_str());
     HMENU edit = CreatePopupMenu();
     AppendMenuW(edit, MF_STRING | MF_GRAYED, IDM_UNDO, MenuItem(PE_TEXT_CMD_UNDO, L"Ctrl+Z").c_str());
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
@@ -1528,7 +1531,10 @@ void NewMessage(int64_t account) {
 }  // namespace
 
 void OpenMailto(const std::wstring& link, int64_t account) {
-    core::Draft draft(pe_mailto_draft(core::Narrow(link).c_str()));
+    OpenDraft(core::Draft(pe_mailto_draft(core::Narrow(link).c_str())), account);
+}
+
+void OpenDraft(core::Draft draft, int64_t account) {
     if (!draft) {
         return;
     }
@@ -1850,17 +1856,17 @@ void OnCommand(WORD id, WORD code) {
     case IDM_DEFAULT_APP:
         MakeDefaultMailApp(g_main);
         return;
-    case IDC_UNSUBSCRIBE: {
-        if (code != STN_CLICKED) {
+    case IDC_UNSUBSCRIBE:
+    case IDM_UNSUBSCRIBE: {
+        if (id == IDC_UNSUBSCRIBE && code != BN_CLICKED) {
             return;
         }
-        std::wstring mailto;
-        if (std::wstring said = g_mailbox.Unsubscribe(mailto); !said.empty()) {
+        core::Draft draft;
+        if (std::wstring said = g_mailbox.Unsubscribe(draft); !said.empty()) {
             SetStatus(said);
         }
-        if (!mailto.empty()) {
-            OpenMailto(mailto);
-        }
+        // from the account of the message, whatever the folder shown is (a search of every folder, All Inboxes)
+        OpenDraft(std::move(draft), g_mailbox.ShownAccount());
         return;
     }
     case IDM_NOTIFY:

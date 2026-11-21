@@ -89,6 +89,8 @@ cmd-options = &Asetukset...
 cmd-message-rules = Viestisää&nnöt...
 cmd-encryption-keys = Salausa&vaimet...
 cmd-create-rule-from-message = Luo säänt&ö viestistä...
+# review: new
+cmd-unsubscribe = Peruuta &listan tilaus...
 cmd-select-all = &Valitse kaikki
 cmd-undo = &Kumoa
 cmd-copy = K&opioi kansioon...
@@ -261,6 +263,22 @@ ui-unsubscribing = Lähetetään tilauksen peruutuspyyntöä: { $target }...
 ui-cannot-unsubscribe = Tässä viestissä ei ole tilauksen peruutusmahdollisuutta.
 ui-unsubscribed = Tilauksen peruutuspyyntö hyväksyttiin.
 ui-not-unsubscribed = Tilausta ei voitu peruuttaa: { $reason }
+# review: new
+ui-list-bar = Tämä viesti on postituslistalta ({ $domain }).
+# review: new
+ui-list-bar-plain = Tämä viesti on postituslistalta.
+# review: new
+ui-list-bar-asked = Pyysit eroa tältä listalta { $date }.
+# review: new
+ui-list-bar-came-after = Pyysit eroa tältä listalta { $date }, mutta tämä viesti tuli sen jälkeen.
+# review: new
+ui-list-bar-opened = Avasit listan eroamissivun { $date }.
+# review: new
+ui-list-bar-failed = Lista ei hyväksynyt pyyntöä: { $reason }
+# review: new
+ui-unsubscribe-ask = Peruuta tilaus…
+# review: new
+ui-unsubscribe-again = Peruuta tilaus uudelleen…
 ui-event-span = { $start } - { $end }
 ui-event-floating = { $when } (aikavyöhykettä muuntamatta)
 ui-invitation = Kutsu: { $title }

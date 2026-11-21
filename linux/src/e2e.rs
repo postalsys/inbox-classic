@@ -391,6 +391,12 @@ impl Driver {
         .map(|_| ())
     }
 
+    /// A message into the Inbox that the server says it got at `arrived` (an ISO 8601 time, its INTERNALDATE)
+    pub fn add_message_arrived(&self, raw: &str, arrived: &str) -> Result<(), String> {
+        let body = serde_json::json!({ "raw": raw, "flags": [], "internaldate": arrived }).to_string();
+        http(self.ports.rest, "POST", "/v1/mailboxes/INBOX/messages", Some(&body)).map(|_| ())
+    }
+
     /// A message into the Inbox of the server whose REST API is at `rest`
     fn add_message_at(&self, rest: u16, raw: &str, flags: &[&str]) -> Result<(), String> {
         self.add_message_in(rest, "INBOX", raw, flags)

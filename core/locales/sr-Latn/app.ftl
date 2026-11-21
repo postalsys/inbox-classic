@@ -90,6 +90,8 @@ cmd-options = &Opcije...
 cmd-message-rules = &Pravila za poruke...
 cmd-encryption-keys = &Ključevi za šifrovanje...
 cmd-create-rule-from-message = Napravi pravi&lo iz poruke...
+# review: new
+cmd-unsubscribe = &Otkaži pretplatu na listu...
 cmd-select-all = &Izaberi sve
 cmd-undo = &Opozovi
 cmd-copy = Kopiraj &u fasciklu...
@@ -264,6 +266,22 @@ ui-unsubscribing = Slanje zahteva za otkazivanje pretplate: { $target }...
 ui-cannot-unsubscribe = Ova poruka ne nudi opciju za otkazivanje pretplate.
 ui-unsubscribed = Lista je prihvatila zahtev za otkazivanje pretplate.
 ui-not-unsubscribed = Otkazivanje pretplate nije uspelo: { $reason }
+# review: new
+ui-list-bar = Ova poruka je sa liste za slanje ({ $domain }).
+# review: new
+ui-list-bar-plain = Ova poruka je sa liste za slanje.
+# review: new
+ui-list-bar-asked = Zatražili ste odjavu sa ove liste { $date }.
+# review: new
+ui-list-bar-came-after = Zatražili ste odjavu sa ove liste { $date }, ali ova poruka je stigla posle toga.
+# review: new
+ui-list-bar-opened = Otvorili ste stranicu liste za odjavu { $date }.
+# review: new
+ui-list-bar-failed = Lista nije prihvatila zahtev: { $reason }
+# review: new
+ui-unsubscribe-ask = Otkaži pretplatu…
+# review: new
+ui-unsubscribe-again = Ponovo otkaži pretplatu…
 ui-event-span = { $start } do { $end }
 ui-event-floating = { $when } (vreme navedeno u pozivnici)
 ui-invitation = Pozivnica: { $title }

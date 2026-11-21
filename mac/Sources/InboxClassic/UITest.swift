@@ -448,11 +448,17 @@ final class UITest {
         (await findMessage("INBOX", pattern)?["flags"] as? [String])?.contains("\\Seen") ?? false
     }
 
-    func addMessage(_ raw: String, flags: [String] = [], at server: String? = nil, to mailbox: String = "INBOX") async throws {
+    /// `arrived`: when the server says it got it (its INTERNALDATE), now when nil
+    func addMessage(_ raw: String, flags: [String] = [], at server: String? = nil, to mailbox: String = "INBOX",
+                    arrived: Date? = nil) async throws {
         var request = URLRequest(url: URL(string: "\(server ?? rest)/\(mailbox)/messages")!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: ["raw": raw, "flags": flags])
+        var body: [String: Any] = ["raw": raw, "flags": flags]
+        if let arrived {
+            body["internaldate"] = ISO8601DateFormatter().string(from: arrived)
+        }
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
         _ = try await URLSession.shared.data(for: request)
     }
 

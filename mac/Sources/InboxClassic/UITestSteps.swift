@@ -879,20 +879,60 @@ extension UITest {
         await search("subject:\"Weekly list news\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
-        let unsubscribe: NSButton? = find("reader.unsubscribe", in: main.window)
-        check(await waitUntil(15) { unsubscribe?.isHidden == false }, "a message of a mailing list has Unsubscribe in its header")
+        let bar: InfoBar? = find("reader.list", in: main.window)
+        check(await waitUntil(15) { bar?.isHidden == false }, "a message of a mailing list has the mailing-list bar over its text")
+        check(bar?.text.contains("(list.example.com)") == true && bar?.buttonTitle == Text.uiUnsubscribeAsk.text,
+              "it names the list by its domain and offers Unsubscribe... (\(bar?.text ?? ""))")
+        let header: NSTextField? = find("reader.header", in: main.window)
+        check(header?.stringValue.contains(Text.uiUnsubscribe.text) == false, "the header has no Unsubscribe link")
+        check(menuEnabled(.unsubscribe), "Message > Unsubscribe from List is on for it")
+        let rowMenu = main.mailbox.messageMenu()?.items.map(\.title) ?? []
+        check(rowMenu.contains(Command.unsubscribe.label), "and on its right-click menu")
         await shot(main.window, "read-8-unsubscribe")
-        press(unsubscribe)
-        let sure = await waitWindow("alert", 10)
+        bar?.press()
+        var sure = await waitWindow("alert", 10)
         check(alertText(sure).contains("127.0.0.1"), "it asks first, naming where it goes")
         check(!alertText(sure).contains("e-mail") && hyphensKept("no e-mail") == "no e\u{2011}mail",
               "a word with a hyphen is not wrapped at it")
         await shot(sure, "read-9-unsubscribe-ask")
-        answer(sure, Text.uiYes.text)
+        answer(sure, Text.uiCancel.text)
+        await pause(1)
+        check(server.received.isEmpty && bar?.buttonTitle == Text.uiUnsubscribeAsk.text, "Cancel asks the list nothing")
+        bar?.press()
+        sure = await waitWindow("alert", 10)
+        answer(sure, Text.uiUnsubscribe.text)
         check(await waitUntil(15) { server.received.hasPrefix("POST /u/42 ") && server.received.contains("List-Unsubscribe=One-Click") },
-              "Yes posts List-Unsubscribe=One-Click to the list")
+              "Unsubscribe posts List-Unsubscribe=One-Click to the list")
         let status: NSTextField? = find("status.text", in: main.window)
         check(await waitUntil(10) { status?.stringValue.contains(Text.uiUnsubscribed.text) == true }, "and the status bar says it is done")
+        let asked = lead(Text.uiListBarAsked)
+        check(await waitUntil(10) { bar?.text.hasPrefix(asked) == true && bar?.buttonTitle.isEmpty == true },
+              "the bar then says when the list was asked, without a button (\(bar?.text ?? ""))")
+        check(!menuEnabled(.unsubscribe), "and Unsubscribe from List is off")
+        await shot(main.window, "read-9b-unsubscribe-asked")
+        // another message of the list, three days later and with a picture on the internet: the list did not stop
+        try await addMessage("Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com\r\n"
+            + "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n"
+            + "From: Weekly List <news@list.example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Weekly list news again\r\n"
+            + "Date: \(rfc2822(Date()))\r\nMessage-ID: <weekly-list-2@list.example.com>\r\n"
+            + "List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:\(server.port)/u/42>\r\n"
+            + "List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\nContent-Type: text/html\r\n\r\n"
+            + "<p>Still here.</p><img src=\"https://pictures.example.com/news.png\" width=\"10\" height=\"10\">\r\n",
+            arrived: Date().addingTimeInterval(3 * 86400))
+        command(.sync)
+        _ = await waitFor(20) { await findMessage("INBOX", "Subject: Weekly list news again") }
+        await search("subject:\"Weekly list news again\"")
+        _ = await waitUntil(20) { list.numberOfRows == 1 }
+        await selectRow(0)
+        let pictures: InfoBar? = find("reader.pictures", in: main.window)
+        check(await waitUntil(15) { bar?.isHidden == false && pictures?.isHidden == false },
+              "a list message with pictures blocked shows both bars")
+        let order = main.mailbox.reader.view.arrangedSubviews
+        check((order.firstIndex { $0 === pictures } ?? 0) < (order.firstIndex { $0 === bar } ?? 0),
+              "the pictures bar above the mailing-list bar")
+        check(bar?.text.hasPrefix(lead(Text.uiListBarCameAfter)) == true && bar?.buttonTitle == Text.uiUnsubscribeAgain.text,
+              "a message that came more than two days after the request offers Unsubscribe Again... (\(bar?.text ?? ""))")
+        await shot(main.window, "read-9c-two-bars")
         await search("")
         step("a calendar invitation")
         try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Invitation: Quarterly planning\r\n"

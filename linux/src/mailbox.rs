@@ -386,6 +386,13 @@ impl Mailbox {
         });
         mailbox.install_actions(application);
         mailbox.connect(&clear);
+        // Message > Unsubscribe from List follows the mailing-list bar of the message shown
+        let weak = Rc::downgrade(&mailbox);
+        mailbox.reader.on_list_offered(move |on| {
+            if let Some(this) = weak.upgrade() {
+                this.enable(Command::Unsubscribe, on && this.list.selected_count() == 1);
+            }
+        });
         mailbox.connect_layout(&panes);
         mailbox.update_undo();
         mailbox.reload();
@@ -1398,6 +1405,8 @@ impl Mailbox {
         for command in Command::ALL.iter().filter(|c| c.needs_one()) {
             self.enable(*command, one_row);
         }
+        // only while the message shown offers it
+        self.enable(Command::Unsubscribe, one_row && self.reader.can_unsubscribe());
         let any = self.selection_count() > 0;
         for command in Command::ALL.iter().filter(|c| c.needs_some()) {
             self.enable(*command, any);
@@ -3058,6 +3067,9 @@ impl Mailbox {
             None,
         );
         add(&organize, Command::CreateRuleFromMessage, None);
+        if self.reader.can_unsubscribe() {
+            add(&organize, Command::Unsubscribe, None);
+        }
         add(&organize, Command::Move, None);
         add(&organize, Command::Copy, None);
         add(&organize, Command::Delete, Some(&t!(UiTbDelete)));

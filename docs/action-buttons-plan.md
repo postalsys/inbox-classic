@@ -31,7 +31,7 @@ From `read-8-unsubscribe` and `read-9-unsubscribe-ask` of the three UI tests:
 
 ## Defaults chosen (say if you want otherwise)
 
-- **Where the bar is shown**: on a message whose List-Unsubscribe the core can act on, in the reading pane and in message windows. Not in Junk E-mail, Sent Items or Drafts, and the menu command is disabled there. This is a change: today the link shows in Junk E-mail too, where unsubscribing confirms the address to a spammer (which is why agents may not do it there).
+- **Where the bar is shown**: on a message whose List-Unsubscribe the core can act on, in the reading pane and in message windows of a stored message (a message file opened from disk has none, as on the Mac today: no account to remember the request for). Not in Junk E-mail, Sent Items or Drafts, and the menu command is disabled there. This is a change: today the link shows in Junk E-mail too, where unsubscribing confirms the address to a spammer (which is why agents may not do it there).
 - **The domain**, from the core: for a one-click list the domain whose signature the provider confirmed (the one the request is trusted for today); else the host of the List-Id, else of the sender's address. Only a valid host name is shown (letters, digits, hyphens and dots, an internationalized one in its `xn--` form, 80 characters at most); otherwise the bar says "This message is from a mailing list." without one. The button says "Unsubscribe..." (the dots: it asks first).
 - **Remembered per list and account**: by the List-Id the store already keeps for each message (`messages.list_id`), else by the From address. Agent requests count too.
 - **After a request**: the bar reads "You asked to leave this list on 21 November 2026." with no button. A one-click request is remembered when the list accepts it, an e-mail one when its draft is sent, a web page one when the page is opened (the app can not see the page, so the bar says "You opened the list's page to leave it on ..." and keeps its button).
@@ -45,11 +45,11 @@ The same place and words; each platform's own idiom:
 
 - **Windows**: the Outlook Express band across the reading pane under the header, as the pictures bar, with a classic push button at its right (part 2 gives every Windows bar this form).
 - **The Mac**: the reader's info bar (as the pictures and Try Again bars) with a small push button, as Mail's own "This message is from a mailing list" bar.
-- **Linux**: an `AdwBanner`, libadwaita's bar for exactly this: a title and one button.
+- **Linux**: the reader's own info bar (as its pictures and Try Again bars: an icon, the words, a button), so stacked bars look alike; an `AdwBanner` would center its title and differ from the bars beside it.
 
 ## The work
 
-1. **Core**: on the message view, the bar's state (`none`, `offered`, `requested`, `opened`, `came_after`, `failed`), its words and its button's label, already put together, so the apps compute nothing (`pe-core/src/unsubscribe.rs`, the C API's message info, the header regenerated). The domain rule above as a pure function. A migration (a new entry in `MIGRATIONS`) with a table `unsubscribed (account, list, method, at)`, its key the account and the list; written when a one-click request is accepted, when the draft the bar opened is sent (the draft carries the list it is for, and the Outbox writes the row once the server took the message), or when the page is opened; agent requests go through the same function. An event when a row is written, so every open view of that list redraws its bar. The command `unsubscribe` in `core/commands.toml`, enabled by the state. The folder rule (not in Junk E-mail, Sent Items, Drafts) in the core, for the bar and for the command alike.
+1. **Core**: on the message view, the bar's state (`none`, `offered`, `requested`, `opened`, `came_after`, `failed`), its words and its button's label, already put together, so the apps compute nothing (`pe-core/src/unsubscribe.rs`, the C API's message info, the header regenerated). The domain rule above as a pure function. A migration (a new entry in `MIGRATIONS`) with a table `unsubscribed (account, list, method, at)`, its key the account and the list; written when a one-click request is accepted, when a message to the list's address leaves the Outbox (the bar's draft notes the address it goes to, and the Outbox counts the request once the server took a message to it; a draft carrying a Message-ID of its own would be taken for a saved draft and lose its signature), or when the page is opened; agent requests go through the same function. An event when a row is written, so every open view of that list redraws its bar. The command `unsubscribe` in `core/commands.toml`, enabled by the state. The folder rule (not in Junk E-mail, Sent Items, Drafts) in the core, for the bar and for the command alike.
 2. **The three apps**: the bar in the reading pane and message windows, the link removed from the header, the menu entries, the verb buttons on the Mac and Linux. Status bar text stays as it is.
 3. **Help**: `unsubscribe.html` in every language describes the bar, the menu command, the remembered state and the two-day rule (marked for review).
 4. **The bars' order** in each reader: download failed, pictures blocked, mailing list, each a row of its own that takes no height when hidden.
@@ -125,7 +125,7 @@ Every new function gets a test where it is written, and each pull request's desc
 - A list message with blocked pictures shows both bars in order; a message window shows the bar too.
 - Step 28 (agents, `agents-7-unsubscribe`): after the agent's approved request the message's bar says it was asked.
 - On the Mac and Linux, whose tests run in the app's process, the remembered date is moved back three days and a new list message shows "came after" with "Unsubscribe again...". Windows' test drives the windows from outside and can not move the date, so there the rule is covered by the core's tests only; the PR says so.
-- Screenshots `read-8-unsubscribe`, `read-9-unsubscribe-ask`, `read-10-unsubscribe-requested`, `read-11-two-bars`, in light and dark where the tests take both, each reviewed.
+- Screenshots `read-8-unsubscribe`, `read-9-unsubscribe-ask`, `read-9b-unsubscribe-asked`, `read-9c-two-bars` (`read-10` and `read-11` are taken), in light and dark where the tests take both, each reviewed.
 
 ## Part 2
 
@@ -155,6 +155,6 @@ Two pull requests on all three platforms: part 1, then part 2. Both merge before
 
 - The bar shows a domain, never the List-Id's name: sender-chosen words do not belong in the app's own bar.
 - "Still arriving" is decided from each message's own arrival, with no search for later messages.
-- An e-mail request is remembered when the Outbox has sent the draft the bar opened, not by matching sent mail against links.
+- An e-mail request is remembered when the Outbox has sent a message to the address the bar's draft was written to.
 - Hiding it in Junk E-mail is a change from today, not existing behaviour.
 - Added: the bars' stacking order, keyboard and screen reader checks, the tests by layer, and what each /security-review looks at.

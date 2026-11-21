@@ -88,6 +88,8 @@ cmd-options = &Opties...
 cmd-message-rules = Berichte&nregels...
 cmd-encryption-keys = Versle&utelingssleutels...
 cmd-create-rule-from-message = Regel maken van beri&cht...
+# review: new
+cmd-unsubscribe = &Afmelden voor lijst...
 cmd-select-all = &Alles selecteren
 cmd-undo = &Ongedaan maken
 cmd-copy = &Kopiëren naar map...
@@ -260,6 +262,22 @@ ui-unsubscribing = Afmelden bij { $target }...
 ui-cannot-unsubscribe = Dit bericht biedt geen mogelijkheid om je af te melden.
 ui-unsubscribed = Het afmeldverzoek is geaccepteerd.
 ui-not-unsubscribed = Afmelden is mislukt: { $reason }
+# review: new
+ui-list-bar = Dit bericht komt van een mailinglijst ({ $domain }).
+# review: new
+ui-list-bar-plain = Dit bericht komt van een mailinglijst.
+# review: new
+ui-list-bar-asked = U hebt op { $date } gevraagd deze lijst te verlaten.
+# review: new
+ui-list-bar-came-after = U hebt op { $date } gevraagd deze lijst te verlaten, maar dit bericht kwam daarna.
+# review: new
+ui-list-bar-opened = U hebt op { $date } de pagina van de lijst geopend om u af te melden.
+# review: new
+ui-list-bar-failed = De lijst heeft het verzoek niet aangenomen: { $reason }
+# review: new
+ui-unsubscribe-ask = Afmelden…
+# review: new
+ui-unsubscribe-again = Opnieuw afmelden…
 ui-event-span = { $start } tot { $end }
 ui-event-floating = { $when } (zonder tijdzoneconversie)
 ui-invitation = Uitnodiging: { $title }

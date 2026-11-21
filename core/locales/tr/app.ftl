@@ -88,6 +88,8 @@ cmd-options = &Seçenekler...
 cmd-message-rules = İleti &Kuralları...
 cmd-encryption-keys = Şif&releme Anahtarları...
 cmd-create-rule-from-message = İletide&n Kural Oluştur...
+# review: new
+cmd-unsubscribe = L&istenin Aboneliğinden Çık...
 cmd-select-all = &Tümünü Seç
 cmd-undo = &Geri Al
 cmd-copy = Klasöre Ko&pyala...
@@ -260,6 +262,22 @@ ui-unsubscribing = Abonelikten çıkılıyor: { $target }...
 ui-cannot-unsubscribe = Bu ileti abonelikten çıkma seçeneği sunmuyor.
 ui-unsubscribed = Abonelikten çıkma isteği kabul edildi. Listeden gelen iletilerin durması biraz zaman alabilir.
 ui-not-unsubscribed = Abonelikten çıkılamadı: { $reason }
+# review: new
+ui-list-bar = Bu ileti bir posta listesinden geldi ({ $domain }).
+# review: new
+ui-list-bar-plain = Bu ileti bir posta listesinden geldi.
+# review: new
+ui-list-bar-asked = { $date } tarihinde bu listeden çıkmak istediniz.
+# review: new
+ui-list-bar-came-after = { $date } tarihinde bu listeden çıkmak istediniz, ancak bu ileti daha sonra geldi.
+# review: new
+ui-list-bar-opened = { $date } tarihinde listeden çıkmak için listenin sayfasını açtınız.
+# review: new
+ui-list-bar-failed = Liste isteği kabul etmedi: { $reason }
+# review: new
+ui-unsubscribe-ask = Abonelikten Çık…
+# review: new
+ui-unsubscribe-again = Yeniden Abonelikten Çık…
 ui-event-span = { $start } ile { $end } arası
 ui-event-floating = { $when } (gönderenin belirttiği saat)
 ui-invitation = Davet: { $title }

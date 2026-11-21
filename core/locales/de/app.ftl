@@ -86,6 +86,8 @@ cmd-options = &Optionen...
 cmd-message-rules = Nachrichten&regeln...
 cmd-encryption-keys = &Verschlüsselungsschlüssel...
 cmd-create-rule-from-message = Regel au&s Nachricht erstellen...
+# review: new
+cmd-unsubscribe = &Von Liste abbestellen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
 cmd-copy = In Ordner &kopieren...
@@ -255,6 +257,22 @@ ui-unsubscribing = Abmeldeanfrage an { $target } wird gesendet...
 ui-cannot-unsubscribe = Diese Nachricht bietet keine Möglichkeit zum Abbestellen.
 ui-unsubscribed = Die Abmeldeanfrage wurde angenommen.
 ui-not-unsubscribed = Abbestellen nicht möglich: { $reason }
+# review: new
+ui-list-bar = Diese Nachricht stammt von einer Mailingliste ({ $domain }).
+# review: new
+ui-list-bar-plain = Diese Nachricht stammt von einer Mailingliste.
+# review: new
+ui-list-bar-asked = Sie haben am { $date } darum gebeten, diese Liste zu verlassen.
+# review: new
+ui-list-bar-came-after = Sie haben am { $date } darum gebeten, diese Liste zu verlassen, aber diese Nachricht kam danach.
+# review: new
+ui-list-bar-opened = Sie haben am { $date } die Seite der Liste zum Abbestellen geöffnet.
+# review: new
+ui-list-bar-failed = Die Liste hat die Anfrage nicht angenommen: { $reason }
+# review: new
+ui-unsubscribe-ask = Abbestellen…
+# review: new
+ui-unsubscribe-again = Erneut abbestellen…
 ui-event-span = { $start } bis { $end }
 ui-event-floating = { $when } (ohne Umrechnung der Zeitzone)
 ui-invitation = Einladung: { $title }

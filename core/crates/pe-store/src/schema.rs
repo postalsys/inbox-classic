@@ -796,6 +796,20 @@ CREATE TABLE flags_owed (
     PRIMARY KEY (message_id, flag)
 ) WITHOUT ROWID;
 "#,
+    // the mailing lists the user asked to leave (unsubscribed.rs): `at` NULL for a request by mail whose draft has not
+    // left the Outbox yet, `mail_to` the address it goes to until then
+    r#"
+CREATE TABLE unsubscribed (
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    -- the List-Id, else the sender's address
+    list TEXT NOT NULL COLLATE NOCASE,
+    -- 1 one-click, 2 mail, 3 web page
+    method INTEGER NOT NULL,
+    at INTEGER,
+    mail_to TEXT,
+    PRIMARY KEY (account_id, list)
+) WITHOUT ROWID;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

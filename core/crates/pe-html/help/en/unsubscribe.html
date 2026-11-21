@@ -1,10 +1,10 @@
 <h1>Leave a mailing list</h1>
-<p class="summary">Ask a mailing list to stop sending messages with the Unsubscribe button.</p>
-<p>A message of a mailing list that says how to leave it has <b data-text="ui-unsubscribe"></b> at the right of its header.</p>
+<p class="summary">Ask a mailing list to stop sending messages, from the bar over its messages.</p>
+<p>A message of a mailing list that says how to leave it has a bar over its text, with the list’s domain and <b data-text="ui-unsubscribe-ask"></b>. The bar names the list only by its domain, never by a name the sender chose. Junk E-mail, Sent Items and Drafts show no bar: leaving a list from spam tells the sender that your address works.</p>
 <p>To leave the list:</p>
 <ol>
-    <li>Click <b data-text="ui-unsubscribe"></b>. Inbox Classic says what will happen and asks first.</li>
-    <li>Confirm. Depending on the list, one of three things happens:
+    <li>Click <b data-text="ui-unsubscribe-ask"></b> on the bar, or choose <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic says what will happen and asks first.</li>
+    <li>Click <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Depending on the list, one of three things happens:
         <ul>
             <li>Inbox Classic asks the list to stop. No page opens and no email is sent.</li>
             <li>Inbox Classic prepares the requested email from the account you are reading the message in, with that account’s signature. Click <b data-text="ui-tb-send"></b> to send it.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p>Afterwards the bar says when you asked, on every message of that list, and offers nothing more. A request by email counts once it has been sent. For a list whose page you opened, the bar keeps its button, as Inbox Classic cannot see whether you finished there.</p>
+<p>A list may take up to two days to stop. If one of its messages arrives later than that, the bar offers <b data-text="ui-unsubscribe-again"></b>.</p>
 <p>For a direct request, the status bar reports the server’s acceptance. This does not confirm that future mail will stop.</p>
 <aside class="note">A direct request requires your approval and a provider-confirmed signature covering both required unsubscribe headers. Other requests open an email draft or a web page.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

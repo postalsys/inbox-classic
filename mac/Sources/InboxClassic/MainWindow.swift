@@ -64,7 +64,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             self?.window.toolbar?.validateVisibleItems()
         }
         mailbox.status = { [weak self] in self?.setStatus($0) }
-        mailbox.openMailto = { [weak self] in self?.openMailto($0, account: $1) }
+        mailbox.openDraft = { [weak self] in self?.openDraft($0, account: $1) }
         mailbox.undoSend = { [weak self] in self?.undoSend() }
         showOutbox()
         showCounts()
@@ -285,6 +285,9 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             Pending.finish(event)
         case PE_EVENT_KIND_NEW_MAIL:
             notifyNewMail(event)
+        case PE_EVENT_KIND_LISTS_CHANGED:
+            mailbox.reader.listsChanged()
+            MessageWindow.listsChanged()
         case PE_EVENT_KIND_UNSUBSCRIBED:
             if let said = mailbox.unsubscribed(event.uid, problem: event.message)
                 ?? MessageWindow.unsubscribed(event.uid, problem: event.message) {
@@ -480,6 +483,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     /// a link from elsewhere, written from the account of what is shown
     func openMailto(_ link: String, account from: Int64 = 0) {
         guard let draft = link.withCString({ Draft(pe_mailto_draft($0)) }) else { return }
+        openDraft(draft, account: from)
+    }
+
+    /// a new message from `draft`, from `account`: the account of the message it is about (a message window's
+    /// Unsubscribe writes from that message's account whatever the main window shows); 0 for the account shown
+    func openDraft(_ draft: Draft, account from: Int64) {
         let account = from != 0 ? from : mailbox.currentAccount
         guard account != 0 else {
             inform(Text.uiAddAccountFirstLink.text)

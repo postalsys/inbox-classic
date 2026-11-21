@@ -481,7 +481,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
                                           item(for: .forward), separator(), item(for: .flag), flagMenu(), separator(),
                                           item(for: .watchConversation), item(for: .ignoreConversation), separator(),
                                           item(for: .archive), item(for: .junk), item(for: .notJunk), separator(),
-                                          item(for: .createRuleFromMessage)]
+                                          item(for: .createRuleFromMessage), item(for: .unsubscribe)]
         assert(commands("message").allSatisfy { command in messageItems.contains { $0.tag == command.rawValue } })
         _ = submenu(Text.menuMessage.text, messageItems)
         // Settings is in the app's menu, as on every Mac
@@ -650,6 +650,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .messageRules: RulesWindow.open(core: core)
         case .encryptionKeys: KeysWindow.open(core: core)
         case .createRuleFromMessage: main.mailbox.createRuleFromMessage()
+        case .unsubscribe: main.mailbox.reader.unsubscribeList()
         case .exportSetup: SetupFiles.export(core: core)
         case .importSetup: SetupFiles.importFile(core: core)
         // above, for the compose window in front
@@ -767,6 +768,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         switch command {
         case .delete: return !typing && main.mailbox.hasSelection
+        case .unsubscribe: return main.mailbox.reader.canUnsubscribe
         case .markRead, .markUnread, .flag: return main.mailbox.hasSelection
         case .move, .copy: return main.mailbox.hasSelection
         case .undo: return main.core.undoLabel != nil

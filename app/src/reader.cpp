@@ -229,10 +229,7 @@ void SetOpenedFilesLog(const std::wstring& path) {
 void Reader::Create(HWND parent, PeCore* core) {
     parent_ = parent;
     core_ = core;
-    // not drawn over the Unsubscribe link that lies on it
     header_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_NOPREFIX | SS_SUNKEN | WS_CLIPSIBLINGS, 0, {});
-    unsubscribe_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), SS_NOTIFY | SS_RIGHT | SS_NOPREFIX, IDC_UNSUBSCRIBE, {});
-    ShowWindow(unsubscribe_, SW_HIDE);
     logo_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW, IDC_LOGO, {});
     ShowWindow(logo_, SW_HIDE);
     // the paper clip at the right of the header, as Outlook Express has it: the files of the message in its menu
@@ -281,8 +278,14 @@ void Reader::Create(HWND parent, PeCore* core) {
     retry_ = CreateChild(parent, L"STATIC", retry.c_str(), SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER,
                          IDC_RETRY, {});
     ShowWindow(retry_, SW_HIDE);
+    // the same bar over a message of a mailing list, with a push button at its right end (not drawn over it)
+    listBar_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER | WS_CLIPSIBLINGS,
+                           IDC_LIST_BAR, {});
+    listButton_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_UNSUBSCRIBE_ASK).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_UNSUBSCRIBE, {});
+    ShowWindow(listBar_, SW_HIDE);
+    ShowWindow(listButton_, SW_HIDE);
     // the links of the pane: Tab reaches them, Enter clicks them
-    for (HWND link : {unsubscribe_, pictures_, picturesMenu_, retry_}) {
+    for (HWND link : {pictures_, picturesMenu_, retry_}) {
         KeyboardLink(link);
     }
     // the message itself is a Tab stop too: its host hands the keyboard to the WebView2
@@ -296,10 +299,6 @@ void Reader::Create(HWND parent, PeCore* core) {
 
     LOGFONTW font = {};
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
-    font.lfUnderline = TRUE;
-    link_ = CreateFontIndirectW(&font);
-    SendMessageW(unsubscribe_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
-    font.lfUnderline = FALSE;
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
 }
@@ -454,7 +453,7 @@ bool Reader::OnSetCursor(HWND window) const {
     if (BusyCursor()) {
         return true;
     }
-    if (window != pictures_ && window != picturesMenu_ && window != retry_ && window != unsubscribe_) {
+    if (window != pictures_ && window != picturesMenu_ && window != retry_) {
         return false;
     }
     // the information bar is clicked like a link
@@ -463,14 +462,7 @@ bool Reader::OnSetCursor(HWND window) const {
 }
 
 bool Reader::OnCtlColor(HWND window, HDC dc, LRESULT& brush) const {
-    if (window == unsubscribe_) {
-        // a link on the header
-        SetTextColor(dc, GetSysColor(COLOR_HOTLIGHT));
-        SetBkColor(dc, GetSysColor(COLOR_BTNFACE));
-        brush = reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_BTNFACE));
-        return true;
-    }
-    if (window != pictures_ && window != retry_) {
+    if (window != pictures_ && window != retry_ && window != listBar_) {
         return false;
     }
     // the colors of tooltips and information bars of the Windows scheme
@@ -509,13 +501,6 @@ void Reader::Layout() {
         MoveWindow(logo_, reader.left, reader.top, logoWidth - Scale(4), headerHeight, TRUE);
     }
     MoveWindow(header_, reader.left + logoWidth, reader.top, width - clipWidth - logoWidth, headerHeight, TRUE);
-    // Unsubscribe at the right end of the Subject line, inside the header's edge
-    if (IsWindowVisible(unsubscribe_)) {
-        int linkWidth = TextWidth(unsubscribe_, link_) + Scale(8), edge = GetSystemMetrics(SM_CXEDGE);
-        MoveWindow(unsubscribe_, reader.left + width - clipWidth - linkWidth - edge - Scale(4), reader.top + headerHeight - edge - Scale(26),
-                   linkWidth, Scale(16), TRUE);
-        SetWindowPos(unsubscribe_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-    }
     if (files) {
         int buttonHeight = button.bottom - button.top;
         MoveWindow(attachments_, reader.right - clipWidth, reader.top + std::max(0, (headerHeight - buttonHeight) / 2), clipWidth, buttonHeight,
@@ -543,6 +528,17 @@ void Reader::Layout() {
         int arrowWidth = IsWindowVisible(picturesMenu_) ? Scale(22) : 1;
         MoveWindow(pictures_, reader.left, top, width - arrowWidth + 1, barHeight, TRUE);
         MoveWindow(picturesMenu_, reader.left + width - arrowWidth, top, arrowWidth, barHeight, TRUE);
+        top += barHeight + Scale(2);
+    }
+    if (IsWindowVisible(listBar_)) {
+        // as tall as a push button needs; the text gives way at its end, never the button
+        int barHeight = Scale(28);
+        int buttonWidth = IsWindowVisible(listButton_) ? ButtonWidth({GetWindowString(listButton_)}) : 0;
+        MoveWindow(listBar_, reader.left, top, width, barHeight, TRUE);
+        if (buttonWidth > 0) {
+            MoveWindow(listButton_, reader.left + width - buttonWidth - Scale(3), top + Scale(3), buttonWidth, barHeight - Scale(6), TRUE);
+            SetWindowPos(listButton_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        }
         top += barHeight + Scale(2);
     }
     MoveWindow(previewHost_, reader.left, top, width, std::max(0L, reader.bottom - top), TRUE);
@@ -579,7 +575,7 @@ void Reader::Clear(bool loading) {
     }
     SetWindowTextW(header_, L"");
     unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
-    ShowWindow(unsubscribe_, SW_HIDE);
+    ShowListBar(L"", L"");
     ShowLogo(false, 0);
     // says so rather than a blank pane, unless a message is about to be shown
     preview_.Clear(!loading);
@@ -681,9 +677,8 @@ void Reader::ShowInfo() {
     unsubscribeKind_ = file ? PE_UNSUBSCRIBE_NONE : info->unsubscribe;
     unsubscribeLink_ = Text(info->unsubscribe_link);
     unsubscribeTarget_ = Text(info->unsubscribe_target);
-    ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
+    ShowListBar(Text(info->list_bar), Text(info->list_button));
     ShowLogo(info->has_logo && !file, file ? 0 : info->picture);
-    InvalidateRect(unsubscribe_, nullptr, TRUE);
     // a signed or encrypted message is a page of parts, each in a frame sized to its document: once it loaded, and
     // again while it is shown (pictures loading, "..." unfolded, another width or text size)
     std::vector<std::string> parts;
@@ -1312,34 +1307,72 @@ void Reader::CancelReads() {
     draftDone_ = nullptr;
 }
 
-std::wstring Reader::Unsubscribe(HWND owner, std::wstring& mailto) {
+std::wstring Reader::Unsubscribe(HWND owner, core::Draft& draft) {
+    if (!CanUnsubscribe()) {
+        return L"";
+    }
     const std::wstring& target = unsubscribeTarget_;
+    std::wstring detail;
     switch (unsubscribeKind_) {
-    case PE_UNSUBSCRIBE_ONE_CLICK: {
-        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_ONE_CLICK, {{"target", target}});
-        if (MessageBoxW(owner, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
-            return L"";
-        }
-        unsubscribeRequest_ = pe_unsubscribe(core_, folder_, uid_);
-        return unsubscribeRequest_ ? core::T(PE_TEXT_UI_UNSUBSCRIBING, {{"target", target}}) : core::T(PE_TEXT_UI_CANNOT_UNSUBSCRIBE);
-    }
-    case PE_UNSUBSCRIBE_MAIL: {
-        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_MAIL, {{"target", target}});
-        if (MessageBoxW(owner, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
-            mailto = unsubscribeLink_;
-        }
-        return L"";
-    }
-    case PE_UNSUBSCRIBE_WEB: {
-        std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + core::T(PE_TEXT_UI_LEAVE_WEB, {{"target", target}});
-        if (MessageBoxW(owner, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_OKCANCEL | MB_ICONQUESTION) == IDOK) {
-            webview::OpenExternally(unsubscribeLink_.c_str());
-        }
-        return L"";
-    }
+    case PE_UNSUBSCRIBE_ONE_CLICK:
+        detail = core::T(PE_TEXT_UI_LEAVE_ONE_CLICK, {{"target", target}});
+        break;
+    case PE_UNSUBSCRIBE_MAIL:
+        detail = core::T(PE_TEXT_UI_LEAVE_MAIL, {{"target", target}});
+        break;
+    case PE_UNSUBSCRIBE_WEB:
+        detail = core::T(PE_TEXT_UI_LEAVE_WEB, {{"target", target}});
+        break;
     default:
         return L"";
     }
+    // the classic message box: Yes and No, as every question of the Windows app asks
+    std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + detail;
+    if (MessageBoxW(owner, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
+        return L"";
+    }
+    switch (unsubscribeKind_) {
+    case PE_UNSUBSCRIBE_ONE_CLICK:
+        unsubscribeRequest_ = pe_unsubscribe(core_, folder_, uid_);
+        return unsubscribeRequest_ ? core::T(PE_TEXT_UI_UNSUBSCRIBING, {{"target", target}}) : core::T(PE_TEXT_UI_CANNOT_UNSUBSCRIBE);
+    case PE_UNSUBSCRIBE_MAIL:
+        draft.reset(pe_unsubscribe_draft(core_, folder_, uid_));
+        return draft ? L"" : core::T(PE_TEXT_UI_CANNOT_UNSUBSCRIBE);
+    default:
+        webview::OpenExternally(unsubscribeLink_.c_str());
+        pe_unsubscribe_opened(core_, folder_, uid_);
+        return L"";
+    }
+}
+
+bool Reader::CanUnsubscribe() const {
+    return IsWindowVisible(listBar_) && IsWindowVisible(listButton_);
+}
+
+void Reader::ShowListBar(const std::wstring& text, const std::wstring& button) {
+    bool shown = !text.empty(), offered = shown && !button.empty();
+    if (!offered && GetFocus() == listButton_) {
+        SetFocus(previewHost_);
+    }
+    SetWindowTextW(listBar_, (L" " + text).c_str());
+    SetWindowTextW(listButton_, button.c_str());
+    // a screen reader on the button says what it is about
+    SetAccessibleDescription(listButton_, text);
+    bool changed = (IsWindowVisible(listBar_) != FALSE) != shown || (IsWindowVisible(listButton_) != FALSE) != offered;
+    ShowWindow(listBar_, shown ? SW_SHOW : SW_HIDE);
+    ShowWindow(listButton_, offered ? SW_SHOW : SW_HIDE);
+    if (changed || offered) {
+        Layout();
+    }
+}
+
+void Reader::ListsChanged() {
+    if (!uid_ || unsubscribeKind_ == PE_UNSUBSCRIBE_NONE) {
+        return;
+    }
+    PeListBar bar = pe_list_bar(core_, folder_, uid_);
+    ShowListBar(bar.text ? Text(bar.text) : L"", bar.button ? Text(bar.button) : L"");
+    pe_list_bar_free(bar);
 }
 
 std::wstring Reader::Unsubscribed(uint64_t request, const std::wstring& problem) {
@@ -1536,6 +1569,9 @@ void Reader::OnReadDone(uint64_t request) {
 
 void Reader::OnEvent(const UiEvent& event) {
     switch (event.kind) {
+    case PE_EVENT_KIND_LISTS_CHANGED:
+        ListsChanged();
+        break;
     case PE_EVENT_KIND_MESSAGE_READY:
         if (uid_ && event.folder == folder_ && event.uid == uid_) {
             KillTimer(parent_, TIMER_DOWNLOADING);

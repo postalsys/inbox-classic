@@ -2077,8 +2077,16 @@ void Mailbox::SelectStart() {
     SelectInList(folder, uid);
 }
 
-std::wstring Mailbox::Unsubscribe(std::wstring& mailto) {
-    return reader_.Unsubscribe(parent_, mailto);
+std::wstring Mailbox::Unsubscribe(core::Draft& draft) {
+    return reader_.Unsubscribe(parent_, draft);
+}
+
+bool Mailbox::CanUnsubscribe() const {
+    return SelectedCount() == 1 && reader_.CanUnsubscribe();
+}
+
+int64_t Mailbox::ShownAccount() const {
+    return reader_.Uid() ? AccountOf(reader_.Folder()) : 0;
 }
 
 std::wstring Mailbox::Unsubscribed(uint64_t request, const std::wstring& problem) {
@@ -3386,6 +3394,10 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, MenuItem(junk ? PE_TEXT_CMD_NOT_JUNK : PE_TEXT_CMD_JUNK).c_str());
     AppendMenuW(menu, MF_STRING | (SelectedCount() > 1 ? MF_GRAYED : 0), IDM_CREATE_RULE_FROM_MESSAGE,
                 MenuItem(PE_TEXT_CMD_CREATE_RULE_FROM_MESSAGE).c_str());
+    // the message shown is of a mailing list whose bar offers leaving it
+    if (CanUnsubscribe()) {
+        AppendMenuW(menu, MF_STRING, IDM_UNSUBSCRIBE, MenuItem(PE_TEXT_CMD_UNSUBSCRIBE).c_str());
+    }
     AppendMenuW(menu, MF_STRING, IDM_MOVE, MenuItem(PE_TEXT_CMD_MOVE).c_str());
     AppendMenuW(menu, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());
     AppendMenuW(menu, MF_STRING, IDM_DELETE, MenuItem(PE_TEXT_WIN_DELETE_BUTTON).c_str());

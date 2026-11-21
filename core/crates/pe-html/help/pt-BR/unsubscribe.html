@@ -1,10 +1,10 @@
 <h1>Sair de uma lista de e-mails</h1>
-<p class="summary">Solicite o cancelamento da inscrição em uma lista de e-mails com o botão Cancelar inscrição.</p>
-<p>Se uma mensagem inclui instruções para sair da lista de e-mails, ela mostra o botão <b data-text="ui-unsubscribe"></b> à direita do cabeçalho.</p>
+<p class="summary"><!--review-->Peça a uma lista de e-mails que pare de enviar mensagens, pela barra exibida acima das mensagens dela.<!--/review--></p>
+<p><!--review-->Uma mensagem de uma lista de e-mails que informa como sair dela tem uma barra acima do texto, com o domínio da lista e <b data-text="ui-unsubscribe-ask"></b>. A barra identifica a lista apenas pelo domínio, nunca por um nome escolhido pelo remetente. Lixo Eletrônico, Itens Enviados e Rascunhos não mostram a barra: sair de uma lista a partir de spam informa ao remetente que seu endereço funciona.<!--/review--></p>
 <p>Para sair da lista:</p>
 <ol>
-    <li>Clique em <b data-text="ui-unsubscribe"></b>. O Inbox Classic explica o que será feito e pede confirmação.</li>
-    <li>Confirme. Dependendo da lista, acontece uma de três coisas:
+    <li><!--review-->Clique em <b data-text="ui-unsubscribe-ask"></b> na barra ou escolha <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. O Inbox Classic explica o que será feito e pede confirmação.<!--/review--></li>
+    <li><!--review-->Clique em <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Dependendo da lista, acontece uma de três coisas:<!--/review-->
         <ul>
             <li>O Inbox Classic envia uma solicitação direta de cancelamento. Nenhuma página é aberta e nenhum e-mail é enviado.</li>
             <li>O Inbox Classic prepara o e-mail exigido pela lista para cancelar a inscrição, usando a conta em que você está lendo a mensagem, com a assinatura dessa conta. Confira o remetente e o texto. Clique em <b data-text="ui-tb-send"></b> para enviá-lo.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Depois disso, a barra mostra em cada mensagem dessa lista quando você fez o pedido e não oferece mais nada. Uma solicitação por e-mail conta a partir do momento em que é enviada. Para uma lista cuja página você abriu, a barra mantém o botão, pois o Inbox Classic não consegue saber se você concluiu o cancelamento lá.<!--/review--></p>
+<p><!--review-->Uma lista pode levar até dois dias para parar de enviar mensagens. Se uma mensagem dela chegar depois desse prazo, a barra oferece <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Na solicitação direta, a barra de status informa quando o servidor da lista aceita o pedido. Isso não garante que todas as mensagens futuras parem.</p>
 <aside class="note">O Inbox Classic só envia a solicitação direta de cancelamento quando uma assinatura DKIM aceita pelo seu servidor cobre os dois cabeçalhos de cancelamento de inscrição. Isso ajuda a impedir que mensagens falsificadas usem esse recurso para enviar solicitações indevidas.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

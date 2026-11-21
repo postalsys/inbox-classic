@@ -1,10 +1,10 @@
 <h1>Otkazivanje pretplate na listu e-pošte</h1>
-<p class="summary">Gumbom Otkaži pretplatu zatražite prestanak primanja poruka s liste e-pošte.</p>
-<p>Ako poruka s liste e-pošte sadrži podatke za otkazivanje pretplate, desno od zaglavlja prikazuje se gumb <b data-text="ui-unsubscribe"></b>.</p>
+<p class="summary"><!--review-->Zatražite od liste e-pošte da vam prestane slati poruke putem trake iznad njezinih poruka.<!--/review--></p>
+<p><!--review-->Poruka s liste e-pošte koja navodi kako je napustiti ima traku iznad teksta s domenom liste i gumbom <b data-text="ui-unsubscribe-ask"></b>. Traka listu imenuje samo njezinom domenom, nikad imenom koje je odabrao pošiljatelj. Mape Neželjena e-pošta, Poslane stavke i Skice ne prikazuju traku: otkazivanje pretplate iz neželjene pošte pošiljatelju otkriva da vaša adresa radi.<!--/review--></p>
 <p>Da biste otkazali pretplatu:</p>
 <ol>
-    <li>Kliknite <b data-text="ui-unsubscribe"></b>. Inbox Classic prikazuje što će učiniti i traži vašu potvrdu.</li>
-    <li>Potvrdite postupak. Ovisno o listi, slijedi jedna od ovih radnji:
+    <li><!--review-->Kliknite <b data-text="ui-unsubscribe-ask"></b> na traci ili odaberite <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic prikazuje što će učiniti i traži vašu potvrdu.<!--/review--></li>
+    <li><!--review-->Kliknite <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Ovisno o listi, slijedi jedna od ovih radnji:<!--/review-->
         <ul>
             <li>Inbox Classic šalje izravan zahtjev za otkazivanje pretplate. Ne otvara se web-stranica i ne šalje se poruka e-pošte.</li>
             <li>Inbox Classic priprema poruku za otkazivanje pretplate s računa u kojem čitate poruku, s njegovim tekstom potpisa. Kliknite <b data-text="ui-tb-send"></b> da biste je poslali.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Nakon toga traka na svakoj poruci te liste prikazuje kad ste zatražili otkazivanje i ne nudi ništa više. Zahtjev e-poštom računa se tek kad je poslan. Za listu čiju ste stranicu otvorili traka zadržava svoj gumb jer Inbox Classic ne može vidjeti jeste li ondje dovršili postupak.<!--/review--></p>
+<p><!--review-->Listi može trebati do dva dana da prestane slati poruke. Ako neka njezina poruka stigne nakon toga, traka nudi <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Kad poslužitelj prihvati izravan zahtjev, na traci stanja prikazuje se potvrda. To ne jamči da je pretplata već otkazana niti da poruke odmah prestaju stizati.</p>
 <aside class="note">Izravan zahtjev šalje se samo ako davatelj usluge e-pošte potvrdi potpis poruke koji obuhvaća i podatke za otkazivanje pretplate. Bez te potvrde Inbox Classic može ponuditi pripremu poruke ili otvaranje stranice, ovisno o podacima u poruci.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

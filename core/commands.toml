@@ -511,6 +511,14 @@ windows = 171
 menu = "message"
 one = true
 
+# leave the mailing list of the message shown, as its bar's button does: asked first (list_bar.rs); also on the
+# message's right-click menu; off for a message without a bar or whose bar has no button
+[[command]]
+id = "unsubscribe"
+windows = 178
+menu = "message"
+one = true
+
 # the sender of the message selected into the Address Book; also on the message list's right-click menu
 [[command]]
 id = "add_sender_to_book"

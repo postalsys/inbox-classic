@@ -1,10 +1,10 @@
 <h1>Afmeld en mailingliste</h1>
-<p class="summary">Anmod om at stoppe meddelelser fra en mailingliste med knappen Afmeld.</p>
-<p>Hvis en meddelelse indeholder oplysninger om afmelding fra en mailingliste, vises knappen <b data-text="ui-unsubscribe"></b> til højre i meddelelseshovedet.</p>
+<p class="summary"><!--review-->Bed en mailingliste om at holde op med at sende meddelelser, direkte fra infolinjen over dens meddelelser.<!--/review--></p>
+<p><!--review-->En meddelelse fra en mailingliste, der oplyser, hvordan man afmelder sig, har en infolinje over teksten med listens domæne og <b data-text="ui-unsubscribe-ask"></b>. Infolinjen angiver kun listen ved dens domæne, aldrig ved et navn, som afsenderen har valgt. Uønsket mail, Sendt post og Kladder viser ingen infolinje: Hvis du afmelder dig fra en liste fra spam, fortæller du afsenderen, at din adresse virker.<!--/review--></p>
 <p>Sådan afmelder du dig:</p>
 <ol>
-    <li>Klik på <b data-text="ui-unsubscribe"></b>. Inbox Classic fortæller, hvad der vil ske, og beder om din bekræftelse.</li>
-    <li>Bekræft. Afhængigt af listen sker der én af tre ting:
+    <li><!--review-->Klik på <b data-text="ui-unsubscribe-ask"></b> på infolinjen, eller vælg <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic fortæller, hvad der vil ske, og beder om din bekræftelse.<!--/review--></li>
+    <li><!--review-->Klik på <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Afhængigt af listen sker der én af tre ting:<!--/review-->
         <ul>
             <li>Inbox Classic sender en afmeldingsanmodning til listens server. Der åbnes ingen webside og sendes ingen mail.</li>
             <li>Inbox Classic opretter en afmeldingsmail fra den konto, hvor du læser meddelelsen, med kontoens signaturtekst. Klik på <b data-text="ui-tb-send"></b> for at sende den.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Derefter viser infolinjen på alle meddelelser fra listen, hvornår du bad om afmelding, og tilbyder ikke mere. En anmodning via mail tæller, når den er sendt. For en liste, hvis side du har åbnet, beholder infolinjen sin knap, da Inbox Classic ikke kan se, om du gennemførte afmeldingen der.<!--/review--></p>
+<p><!--review-->Det kan tage op til to dage, før en liste holder op med at sende. Hvis en af dens meddelelser kommer senere end det, tilbyder infolinjen <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Statuslinjen viser, når listens server har accepteret afmeldingsanmodningen. Det garanterer ikke, at afmeldingen er gennemført, eller at meddelelserne stopper med det samme.</p>
 <aside class="note">Den direkte afmeldingsanmodning bruges kun, når de nødvendige oplysninger er beskyttet af listens DKIM-signatur. Ubekræftede afmeldingsoplysninger kan derfor ikke udløse denne type anmodning.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

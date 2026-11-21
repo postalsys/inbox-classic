@@ -220,16 +220,14 @@ void SaveFileAs(MessageWindow* state) {
     }
 }
 
-// the Unsubscribe link: asked first; what it did in the main window's status bar, a message to write for a mailto:
-// link
+// the mailing-list bar's button: asked first; what it did in the main window's status bar, a message to write from
+// the message's account when the list wants one
 void Unsubscribe(MessageWindow* state) {
-    std::wstring mailto;
-    if (std::wstring said = state->reader.Unsubscribe(state->hwnd, mailto); !said.empty()) {
+    core::Draft draft;
+    if (std::wstring said = state->reader.Unsubscribe(state->hwnd, draft); !said.empty()) {
         state->mailbox->Say(said);
     }
-    if (!mailto.empty()) {
-        OpenMailto(mailto, state->mailbox->AccountOf(state->folder));
-    }
+    OpenDraft(std::move(draft), state->mailbox->AccountOf(state->folder));
 }
 
 // the command of a shortcut of the window, 0 for a key that is none: Esc closes it, the others are the main window's
@@ -335,9 +333,12 @@ bool OnCommand(MessageWindow* state, WORD id, WORD code) {
         Act(state, id == IDM_JUNK ? PE_ACTION_JUNK : PE_ACTION_NOT_JUNK);
         return true;
     case IDC_UNSUBSCRIBE:
-        if (code == STN_CLICKED) {
+        if (code == BN_CLICKED) {
             Unsubscribe(state);
         }
+        return true;
+    case IDM_UNSUBSCRIBE:
+        Unsubscribe(state);
         return true;
     }
     return state->reader.OnCommand(id, code);

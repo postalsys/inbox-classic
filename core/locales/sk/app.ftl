@@ -86,6 +86,8 @@ cmd-options = &Možnosti...
 cmd-message-rules = P&ravidlá správ...
 cmd-encryption-keys = Šifrovacie &kľúče...
 cmd-create-rule-from-message = V&ytvoriť pravidlo zo správy...
+# review: new
+cmd-unsubscribe = Odhlásiť odber &zoznamu...
 cmd-select-all = &Vybrať všetko
 cmd-undo = &Späť
 cmd-copy = &Kopírovať do priečinka...
@@ -260,6 +262,22 @@ ui-unsubscribing = Odosiela sa žiadosť o odhlásenie odberu: { $target }...
 ui-cannot-unsubscribe = Táto správa neponúka možnosť odhlásiť odber.
 ui-unsubscribed = Žiadosť o odhlásenie odberu bola prijatá.
 ui-not-unsubscribed = Odber sa nepodarilo odhlásiť: { $reason }
+# review: new
+ui-list-bar = Táto správa je z e-mailovej konferencie ({ $domain }).
+# review: new
+ui-list-bar-plain = Táto správa je z e-mailovej konferencie.
+# review: new
+ui-list-bar-asked = O odhlásenie z tejto konferencie ste požiadali { $date }.
+# review: new
+ui-list-bar-came-after = O odhlásenie z tejto konferencie ste požiadali { $date }, ale táto správa prišla až potom.
+# review: new
+ui-list-bar-opened = Stránku konferencie na odhlásenie ste otvorili { $date }.
+# review: new
+ui-list-bar-failed = Konferencia žiadosť neprijala: { $reason }
+# review: new
+ui-unsubscribe-ask = Odhlásiť odber…
+# review: new
+ui-unsubscribe-again = Znova odhlásiť odber…
 ui-event-span = { $start } až { $end }
 ui-event-floating = { $when } (bez prepočtu časového pásma)
 ui-invitation = Pozvánka: { $title }

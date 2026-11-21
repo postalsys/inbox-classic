@@ -4162,16 +4162,30 @@ public static class Dragger {
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Weekly list news"')
     [void](WaitFor { (Rows) -eq 1 } 20)
     SelectRow 0
-    $IDC_UNSUBSCRIBE = 210
-    Check ([bool](WaitFor { Visible $main $IDC_UNSUBSCRIBE } 15)) 'a message of a mailing list has Unsubscribe in its header'
+    $IDC_UNSUBSCRIBE = 210; $IDC_LIST_BAR = 957; $IDM_UNSUBSCRIBE = 178
+    Check ([bool](WaitFor { Visible $main $IDC_LIST_BAR } 15)) 'a message of a mailing list has the mailing-list bar over its text'
+    $barText = GetText $main $IDC_LIST_BAR
+    $offer = GetText $main $IDC_UNSUBSCRIBE
+    Check ($barText -match '\(list\.example\.com\)' -and $offer -eq $en['ui-unsubscribe-ask'] -and (Visible $main $IDC_UNSUBSCRIBE)) "it names the list by its domain and offers Unsubscribe... ($barText, $offer)"
+    $header = (Statics $main)
+    Check ($header -notmatch '(?m)^Unsubscribe$') 'the header has no Unsubscribe link'
+    # the Message menu as it opens (the fifth)
+    $messageMenu = [Native.Win]::GetSubMenu([Native.Win]::GetMenu($main), 4)
+    [void][Native.Win]::SendMessage($main, 0x0117, $messageMenu, [IntPtr]4)
+    Check ((([Native.Win]::GetMenuState($messageMenu, $IDM_UNSUBSCRIBE, 0) -band 0x3) -eq 0)) 'Message > Unsubscribe from List is on for it'
     Shot $main 'read-8-unsubscribe'
     [void][Native.Win]::PostMessage($main, $WM_COMMAND, [IntPtr]$IDC_UNSUBSCRIBE, [Native.Win]::GetDlgItem($main, $IDC_UNSUBSCRIBE))
     $sure = WaitWindow '#32770' 'Unsubscribe' 10
     Check ($null -ne $sure -and (Statics $sure) -match '127\.0\.0\.1') "it asks first, naming where it goes ($(if ($sure) { Statics $sure }))"
     if ($sure) {
         Shot $sure 'read-9-unsubscribe-ask'
-        Click $sure 6
+        Click $sure 7
     }
+    Start-Sleep -Milliseconds 1000
+    Check (-not $accepted.IsCompleted -and (GetText $main $IDC_UNSUBSCRIBE) -eq $en['ui-unsubscribe-ask']) 'Cancel asks the list nothing'
+    [void][Native.Win]::PostMessage($main, $WM_COMMAND, [IntPtr]$IDM_UNSUBSCRIBE, [IntPtr]::Zero)
+    $sure = WaitWindow '#32770' 'Unsubscribe' 10
+    if ($sure) { Click $sure 6 }
     # the POST of RFC 8058, answered 200
     $sent = ''
     if ($accepted.Wait(15000)) {
@@ -4189,9 +4203,37 @@ public static class Dragger {
         $client.Close()
     }
     $listServer.Stop()
-    Check ($sent -match '^POST /u/42 ' -and $sent -match 'List-Unsubscribe=One-Click') "Yes posts List-Unsubscribe=One-Click to the list ($(($sent -split "`r`n")[0]))"
+    Check ($sent -match '^POST /u/42 ' -and $sent -match 'List-Unsubscribe=One-Click') "Unsubscribe posts List-Unsubscribe=One-Click to the list ($(($sent -split "`r`n")[0]))"
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'The mailing list has accepted the unsubscribe request' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
+    $asked = [bool](WaitFor { (GetText $main $IDC_LIST_BAR) -match 'You asked to leave this list on' -and -not (Visible $main $IDC_UNSUBSCRIBE) } 10)
+    Check $asked "the bar then says when the list was asked, without a button ($(GetText $main $IDC_LIST_BAR))"
+    [void][Native.Win]::SendMessage($main, 0x0117, $messageMenu, [IntPtr]4)
+    Check ((([Native.Win]::GetMenuState($messageMenu, $IDM_UNSUBSCRIBE, 0) -band 0x3) -ne 0)) 'and Unsubscribe from List is off'
+    Shot $main 'read-9b-unsubscribe-asked'
+    # another message of the list, three days later (its Date ahead, so the server says it arrived then) and with a
+    # picture on the internet: the list did not stop
+    AddMessage ("Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com`r`n" +
+        "DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; b=y`r`n" +
+        "From: Weekly List <news@list.example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Weekly list news again`r`n" +
+        "Date: $([DateTime]::UtcNow.AddDays(3).ToString('r'))`r`nMessage-ID: <weekly-list-2@list.example.com>`r`n" +
+        "List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:$listPort/u/42>`r`n" +
+        "List-Unsubscribe-Post: List-Unsubscribe=One-Click`r`nContent-Type: text/html`r`n`r`n" +
+        "<p>Still here.</p><img src=`"https://pictures.example.com/news.png`" width=`"10`" height=`"10`">`r`n")
+    Command $main $IDM_SYNC
+    [void](WaitFor { $null -ne (Find 'INBOX' 'Subject: Weekly list news again') } 20)
+    [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, 'subject:"Weekly list news again"')
+    [void](WaitFor { (Rows) -eq 1 } 20)
+    SelectRow 0
+    $both = [bool](WaitFor { (Visible $main $IDC_LIST_BAR) -and (Visible $main $IDC_PICTURES) } 15)
+    Check $both 'a list message with pictures blocked shows both bars'
+    $picturesBox = New-Object Native.Win+RECT; $listBox = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($main, $IDC_PICTURES), [ref]$picturesBox)
+    [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($main, $IDC_LIST_BAR), [ref]$listBox)
+    Check ($picturesBox.Top -lt $listBox.Top) 'the pictures bar above the mailing-list bar'
+    $barText = GetText $main $IDC_LIST_BAR
+    Check ($barText -match 'came after' -and (GetText $main $IDC_UNSUBSCRIBE) -eq $en['ui-unsubscribe-again']) "a message that came more than two days after the request offers Unsubscribe Again... ($barText)"
+    Shot $main 'read-9c-two-bars'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
     Step 'a calendar invitation'
