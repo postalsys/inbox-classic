@@ -10,5 +10,5 @@
     <li><b>Šifrovacie kľúče</b>, pri automatickom alebo vyžiadanom hľadaní chýbajúceho kľúča: najprv doména adresy cez Web Key Directory, potom podľa nastavenia keys.openpgp.org. Pri hľadaní podľa adresy sa odošle adresa, pri hľadaní podľa identifikátora alebo odtlačku tento identifikátor. Zverejnenie vlastného kľúča takisto vyžaduje pripojenie.</li>
     <!--os:mac--><li><b>Aktualizácie</b>, z inboxclassic.com, pri povolenej automatickej alebo ručne vyžiadanej kontrole novej verzie.</li><!--/os-->
 </ul>
-<!--review--><p>Jednorazové kódy sa ponúkajú podľa výsledkov overenia podpisovej domény v dôveryhodnej hlavičke Authentication-Results / ARC-Authentication-Results od vášho poskytovateľa. Toto rozpoznávanie nevyžaduje samostatné sieťové pripojenie.</p><!--/review-->
+<p>Jednorazové kódy sa ponúkajú iba vtedy, keď váš poskytovateľ potvrdí platný podpis DKIM domény, pre ktorú je kód určený, alebo jej nadradenej domény. Inbox Classic tento výsledok číta z hlavičiek Authentication-Results alebo ARC-Authentication-Results od poskytovateľa. Toto rozpoznávanie nevyžaduje samostatné sieťové pripojenie.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
