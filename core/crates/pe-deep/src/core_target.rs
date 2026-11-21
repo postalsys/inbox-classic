@@ -471,6 +471,10 @@ impl Target for CoreTarget {
             Act::ShiftClick(row) => {
                 let from = self.anchor.unwrap_or(0);
                 let (a, b) = (from.min(*row), from.max(*row).min(self.rows.saturating_sub(1)));
+                if a == b {
+                    // a range of one row is that row clicked, as the windows open it
+                    return self.click(a);
+                }
                 self.selected = (a..=b).collect();
                 self.all = None;
                 self.shown = None;

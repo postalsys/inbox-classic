@@ -1132,8 +1132,9 @@ void Mailbox::OnListLoaded(uint64_t request) {
         ListNotRead(why ? Text(why.get()) : L"");
         return;
     }
-    // the user chose other messages while it was read: read again for those
-    if (loadPlan_.selectionAt != selectionChanges_) {
+    // the user chose other messages while it was read: read again for those. Not for a list chosen: the rows clicked
+    // meanwhile were the list before's (and read again it would wait for a paint that came already, for good)
+    if (!newList_ && loadPlan_.selectionAt != selectionChanges_) {
         ReloadList();
         return;
     }

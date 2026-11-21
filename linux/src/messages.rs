@@ -274,6 +274,8 @@ pub struct MessageList {
     clock: Rc<Cell<crate::rows::Clock>>,
     /// The rows of three lines show the senders' pictures (Preferences)
     pictures: Rc<Cell<bool>>,
+    /// A page is being drawn: a change of the selection told meanwhile is the list's, not the user's
+    filling: Cell<bool>,
 }
 
 impl MessageList {
@@ -365,6 +367,7 @@ impl MessageList {
             several_folders,
             clock,
             pictures,
+            filling: Cell::new(false),
         })
     }
 
@@ -637,7 +640,14 @@ impl MessageList {
 
     /// A page of the list read at `offset`, drawn in place of its blank lines with the selection kept
     pub fn fill_page(&self, offset: u64, rows: Vec<Message>) {
+        self.filling.set(true);
         fill_keeping_selection(&self.selection, &self.model, offset, rows);
+        self.filling.set(false);
+    }
+
+    /// Whether a change of the selection told now is a page drawn ([`MessageList::fill_page`]), not the user's pick
+    pub fn filling(&self) -> bool {
+        self.filling.get()
     }
 
     /// The list again: the rows of its view, `total` of them (`read` the page of them read already, its offset and
