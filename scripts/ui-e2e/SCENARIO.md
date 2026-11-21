@@ -490,11 +490,22 @@ Screenshots: `organize-1-flagged`, `organize-2-move`, `organize-3-after`, `organ
 
 ## 24. Unsubscribing
 
-Screenshots: `read-8-unsubscribe`, `read-9-unsubscribe-ask`
+Screenshots: `read-8-unsubscribe`, `read-9-unsubscribe-ask`, `read-9b-unsubscribe-asked`, `read-9c-two-bars`
 
-- a message of a mailing list has Unsubscribe in its header
-- it asks first, naming where it goes
+- a message of a mailing list has the mailing-list bar over its text
+- it names the list by its domain and offers Unsubscribe...
+- the header has no Unsubscribe link
+- Message > Unsubscribe from List is on for it
+- and on its right-click menu
+- it asks first, naming where it goes (Unsubscribe and Cancel on the Mac and Linux, Yes and No on Windows)
+- Cancel asks the list nothing
+- Unsubscribe posts List-Unsubscribe=One-Click to the list
 - and the status bar says it is done
+- the bar then says when the list was asked, without a button
+- and Unsubscribe from List is off
+- a list message with pictures blocked shows both bars
+- the pictures bar above the mailing-list bar
+- a message that came more than two days after the request (its arrival set three days ahead) offers Unsubscribe Again...
 
 ## 25. A calendar invitation
 

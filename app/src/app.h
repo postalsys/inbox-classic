@@ -654,6 +654,8 @@ void ContactPictureChanged();
 // a new message from a mailto: link (the core reads it), from `account`, or from the account of what the main window
 // shows when 0
 void OpenMailto(const std::wstring& link, int64_t account = 0);
+// a new message from `draft` (none: nothing), from `account`, the account shown when 0
+void OpenDraft(core::Draft draft, int64_t account);
 // a new message to `to` (as it goes in the To field), from the account of what the main window shows (Write To)
 void WriteTo(const std::wstring& to);
 // the words put into the Find box of the main window, which searches for them at once (the rule editor's Show)
@@ -832,9 +834,13 @@ public:
     bool CanArchive() const;
     // whether the selected messages, or else the folder, are in a Junk folder: the toolbar offers Not Junk there
     bool InJunk() const;
-    // the Unsubscribe link of the message shown, after asking: what the status bar says; a mailto: link to write a
-    // message to in `mailto` when the list wants one
-    std::wstring Unsubscribe(std::wstring& mailto);
+    // the mailing-list bar's button or Message > Unsubscribe from List for the message shown, after asking: what the
+    // status bar says; in `draft` the message to write when the list wants one
+    std::wstring Unsubscribe(core::Draft& draft);
+    // the message shown offers leaving its mailing list
+    bool CanUnsubscribe() const;
+    // the account of the message shown, 0 for none
+    int64_t ShownAccount() const;
     // the one-click unsubscribe `request` done, or not for `problem`: what the status bar says, empty for another
     std::wstring Unsubscribed(uint64_t request, const std::wstring& problem);
     // what was done to messages, in the main window's status bar (the message windows say it there too)
@@ -1469,7 +1475,7 @@ enum ControlId : WORD {
     // over the list while searching: what was found, and a link that ends the search
     IDC_SEARCH_BAR,
     IDC_SEARCH_CLEAR,
-    // at the right of the message header: leaving the message's mailing list
+    // the button of the bar over a message of a mailing list: leaving the list
     IDC_UNSUBSCRIBE,
     // no longer used (a calendar event is a card in the message now), kept so the ids after them stay as they were
     IDC_INVITATION,
@@ -1798,6 +1804,8 @@ enum SetupControlId : WORD {
     IDC_SETUP_FROM,
     // Add Mail Account: the link to the import
     IDC_SETUP_FIRST_RUN,
+    // the bar over a message of a mailing list (its button is IDC_UNSUBSCRIBE); last here, so no id above moves
+    IDC_LIST_BAR,
     // Import: an account's check box, IDC_SETUP_ACCOUNT + its place in the file's list
     IDC_SETUP_ACCOUNT = 1000,
 };

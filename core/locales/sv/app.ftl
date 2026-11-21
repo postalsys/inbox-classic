@@ -88,6 +88,8 @@ cmd-options = Al&ternativ...
 cmd-message-rules = Meddelande&regler...
 cmd-encryption-keys = &Krypteringsnycklar...
 cmd-create-rule-from-message = Skapa regel utifrån me&ddelande...
+# review: new
+cmd-unsubscribe = Avsluta prenumeration på &listan...
 cmd-select-all = Markera &allt
 cmd-undo = &Ångra
 cmd-copy = &Kopiera till mapp...
@@ -260,6 +262,22 @@ ui-unsubscribing = Avslutar prenumerationen hos { $target }...
 ui-cannot-unsubscribe = Det här meddelandet erbjuder inget sätt att avsluta prenumerationen.
 ui-unsubscribed = Servern tog emot begäran om att avsluta prenumerationen.
 ui-not-unsubscribed = Det gick inte att avsluta prenumerationen: { $reason }
+# review: new
+ui-list-bar = Det här meddelandet kommer från en e-postlista ({ $domain }).
+# review: new
+ui-list-bar-plain = Det här meddelandet kommer från en e-postlista.
+# review: new
+ui-list-bar-asked = Du bad om att lämna den här listan { $date }.
+# review: new
+ui-list-bar-came-after = Du bad om att lämna den här listan { $date }, men det här meddelandet kom efteråt.
+# review: new
+ui-list-bar-opened = Du öppnade listans sida för att lämna den { $date }.
+# review: new
+ui-list-bar-failed = Listan tog inte emot begäran: { $reason }
+# review: new
+ui-unsubscribe-ask = Avsluta prenumeration…
+# review: new
+ui-unsubscribe-again = Avsluta prenumeration igen…
 ui-event-span = { $start } till { $end }
 ui-event-floating = { $when } (utan tidszonsomvandling)
 ui-invitation = Inbjudan: { $title }

@@ -88,6 +88,8 @@ cmd-options = O&pcions...
 cmd-message-rules = &Regles de missatge...
 cmd-encryption-keys = &Claus de xifratge...
 cmd-create-rule-from-message = Crea una regla per a a&quest missatge...
+# review: new
+cmd-unsubscribe = &Cancel·la la subscripció a la llista...
 cmd-select-all = Selecciona-ho &tot
 cmd-undo = &Desfés
 cmd-copy = &Copia a la carpeta...
@@ -260,6 +262,22 @@ ui-unsubscribing = S’està enviant la sol·licitud de baixa a { $target }...
 ui-cannot-unsubscribe = Aquest missatge no ofereix cap manera de cancel·lar la subscripció.
 ui-unsubscribed = La llista de correu ha acceptat la sol·licitud de baixa.
 ui-not-unsubscribed = No s’ha pogut cancel·lar la subscripció: { $reason }
+# review: new
+ui-list-bar = Aquest missatge és d’una llista de correu ({ $domain }).
+# review: new
+ui-list-bar-plain = Aquest missatge és d’una llista de correu.
+# review: new
+ui-list-bar-asked = Vau demanar deixar aquesta llista el { $date }.
+# review: new
+ui-list-bar-came-after = Vau demanar deixar aquesta llista el { $date }, però aquest missatge ha arribat després.
+# review: new
+ui-list-bar-opened = Vau obrir la pàgina de la llista per deixar-la el { $date }.
+# review: new
+ui-list-bar-failed = La llista no ha acceptat la sol·licitud: { $reason }
+# review: new
+ui-unsubscribe-ask = Cancel·la la subscripció…
+# review: new
+ui-unsubscribe-again = Torna a cancel·lar la subscripció…
 ui-event-span = { $start } fins a { $end }
 ui-event-floating = { $when } (hora indicada, sense conversió de fus horari)
 ui-invitation = Invitació: { $title }

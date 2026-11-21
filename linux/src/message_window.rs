@@ -157,6 +157,14 @@ impl MessageWindow {
             file,
         });
         this.install_actions();
+        // Unsubscribe from List follows the mailing-list bar
+        let weak = Rc::downgrade(&this);
+        this.reader.on_list_offered(move |on| {
+            if let Some(this) = weak.upgrade() {
+                this.enable(Command::Unsubscribe.name(), on);
+            }
+        });
+        this.enable(Command::Unsubscribe.name(), false);
         this.connect();
         this
     }
@@ -179,6 +187,10 @@ impl MessageWindow {
         add(Command::ReplyAll.name(), |this| this.reply(DraftKind::ReplyAll));
         add(Command::Forward.name(), |this| this.reply(DraftKind::Forward));
         add(Command::Print.name(), |this| this.reader.print(&this.window));
+        add(Command::Unsubscribe.name(), |this| {
+            let reader = this.reader.clone();
+            spawn(async move { reader.unsubscribe().await });
+        });
         add(Command::SaveAs.name(), |this| {
             let this = this.clone();
             spawn(async move { this.save_file_as().await });

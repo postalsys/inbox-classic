@@ -76,10 +76,10 @@ pub(crate) fn passed_domains(headers: &[Header], trusted: &[String]) -> Vec<Stri
         .collect()
 }
 
-/// Whether a signature of a domain that passed covers both List-Unsubscribe headers
-fn signed(headers: &[Header], trusted: &[String]) -> bool {
+/// The domain that passed whose signature covers both List-Unsubscribe headers, None when no such signature is there
+pub(crate) fn signer(headers: &[Header], trusted: &[String]) -> Option<String> {
     let passed = passed_domains(headers, trusted);
-    header(headers, "dkim-signature").any(|signature| {
+    header(headers, "dkim-signature").find_map(|signature| {
         let compact: String = signature.chars().filter(|c| !c.is_whitespace()).collect();
         let domain = tag(&compact, "d").unwrap_or_default().to_ascii_lowercase();
         let covered: Vec<String> = tag(&compact, "h")
@@ -87,9 +87,10 @@ fn signed(headers: &[Header], trusted: &[String]) -> bool {
             .split(':')
             .map(|h| h.to_ascii_lowercase())
             .collect();
-        passed.contains(&domain)
+        (passed.contains(&domain)
             && covered.iter().any(|h| h == "list-unsubscribe")
-            && covered.iter().any(|h| h == "list-unsubscribe-post")
+            && covered.iter().any(|h| h == "list-unsubscribe-post"))
+        .then_some(domain)
     })
 }
 
@@ -111,7 +112,7 @@ pub fn of(headers: &[Header], trusted: &[String]) -> Option<Unsubscribe> {
         .next()
         .is_some_and(|post| post.trim().eq_ignore_ascii_case("List-Unsubscribe=One-Click"));
     match (web, mail) {
-        (Some(url), _) if one_click && signed(headers, trusted) => Some(Unsubscribe::OneClick { url }),
+        (Some(url), _) if one_click && signer(headers, trusted).is_some() => Some(Unsubscribe::OneClick { url }),
         (_, Some(link)) => Some(Unsubscribe::Mail { link }),
         (Some(url), None) => Some(Unsubscribe::Web { url }),
         (None, None) => None,

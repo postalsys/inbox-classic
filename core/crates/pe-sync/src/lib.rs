@@ -6,7 +6,7 @@
 mod summary;
 mod text_first;
 
-pub use summary::auth_fields;
+pub use summary::{auth_fields, list_id};
 pub use text_first::{TextFirst, fetch_text_first};
 
 use std::collections::HashSet;

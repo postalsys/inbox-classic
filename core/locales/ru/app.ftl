@@ -86,6 +86,8 @@ cmd-options = Пара&метры...
 cmd-message-rules = &Правила для сообщений...
 cmd-encryption-keys = &Ключи шифрования...
 cmd-create-rule-from-message = Со&здать правило из сообщения...
+# review: new
+cmd-unsubscribe = Отпис&аться от рассылки...
 cmd-select-all = В&ыделить все
 cmd-undo = О&тменить
 cmd-copy = &Копировать в папку...
@@ -259,6 +261,22 @@ ui-unsubscribing = Отправка запроса на отписку: { $targe
 ui-cannot-unsubscribe = В этом сообщении нет ссылки или адреса для отписки.
 ui-unsubscribed = Запрос на отписку принят.
 ui-not-unsubscribed = Не удалось отписаться: { $reason }
+# review: new
+ui-list-bar = Это сообщение из рассылки ({ $domain }).
+# review: new
+ui-list-bar-plain = Это сообщение из рассылки.
+# review: new
+ui-list-bar-asked = Вы попросили отписать вас от этой рассылки { $date }.
+# review: new
+ui-list-bar-came-after = Вы попросили отписать вас от этой рассылки { $date }, но это сообщение пришло позже.
+# review: new
+ui-list-bar-opened = Вы открыли страницу рассылки для отписки { $date }.
+# review: new
+ui-list-bar-failed = Рассылка не приняла запрос: { $reason }
+# review: new
+ui-unsubscribe-ask = Отписаться…
+# review: new
+ui-unsubscribe-again = Отписаться снова…
 ui-event-span = с { $start } до { $end }
 ui-event-floating = { $when } (время из приглашения, без пересчета в ваш часовой пояс)
 ui-invitation = Приглашение: { $title }

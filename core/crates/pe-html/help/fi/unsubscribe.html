@@ -1,10 +1,10 @@
 <h1>Postituslistalta eroaminen</h1>
-<p class="summary">Peru postituslistan tilaus suoraan viestistä.</p>
-<p>Jos postituslistan viesti sisältää tilauksen perumisohjeet, otsikkotietojen oikeassa reunassa näkyy painike <b data-text="ui-unsubscribe"></b>.</p>
+<p class="summary"><!--review-->Pyydä postituslistaa lopettamaan viestien lähettäminen sen viestien yläpuolella olevasta palkista.<!--/review--></p>
+<p><!--review-->Jos postituslistan viesti kertoo, miten listalta erotaan, viestin tekstin yläpuolella on palkki, jossa näkyvät listan verkkotunnus ja <b data-text="ui-unsubscribe-ask"></b>. Palkki nimeää listan vain sen verkkotunnuksella, ei koskaan lähettäjän valitsemalla nimellä. Kansioissa Roskaposti, Lähetetyt ja Luonnokset palkkia ei näytetä: roskapostin kautta listalta eroaminen kertoo lähettäjälle, että osoitteesi toimii.<!--/review--></p>
 <p>Näin perut tilauksen:</p>
 <ol>
-    <li>Napsauta <b data-text="ui-unsubscribe"></b>. Inbox Classic kertoo perumistavan ja pyytää vahvistuksen.</li>
-    <li>Vahvista peruminen. Postituslistasta riippuen tapahtuu jokin seuraavista:
+    <li><!--review-->Napsauta palkissa <b data-text="ui-unsubscribe-ask"></b> tai valitse <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic kertoo perumistavan ja pyytää vahvistuksen.<!--/review--></li>
+    <li><!--review-->Napsauta <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Postituslistasta riippuen tapahtuu jokin seuraavista:<!--/review-->
         <ul>
             <li>Inbox Classic lähettää perumispyynnön suoraan postituslistan palvelimelle. Verkkosivua ei avata eikä sähköpostiviestiä lähetetä.</li>
             <li>Inbox Classic valmistelee postituslistan edellyttämän perumisviestin. Luonnos käyttää tiliä, jolla luet viestiä, ja sen allekirjoitustekstiä, jos sellainen on asetettu. Tarkista se ja lähetä napsauttamalla <b data-text="ui-tb-send"></b>.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Sen jälkeen palkki näyttää jokaisessa listan viestissä, milloin pyysit eroa, eikä tarjoa enää muuta. Sähköpostitse tehty pyyntö lasketaan tehdyksi, kun viesti on lähetetty. Jos avasit listan verkkosivun, palkki säilyttää painikkeensa, koska Inbox Classic ei näe, viimeistelitkö perumisen siellä.<!--/review--></p>
+<p><!--review-->Voi kestää jopa kaksi päivää, ennen kuin lista lopettaa lähettämisen. Jos listan viesti saapuu tätä myöhemmin, palkissa on <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Tilarivi ilmoittaa, kun postituslistan palvelin on hyväksynyt suoran perumispyynnön. Tämä ei vielä takaa, että viestien lähettäminen loppuu.</p>
 <aside class="note">Suora perumispyyntö edellyttää postipalveluntarjoajan hyväksymää DKIM-allekirjoitusta, joka kattaa molemmat tilauksen perumisessa käytetyt otsakkeet. Tämä varmistaa perumisohjeiden yhteyden allekirjoitettuun viestiin, ei koko viestin luotettavuutta.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

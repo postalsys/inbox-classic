@@ -1,6 +1,6 @@
-// The reading pane: a message's header (the brand's logo at its left, the Unsubscribe link and the paper clip of its
-// files at its right), the strip of its files under it, the bars under that (a signed or encrypted message's security bar, a download that failed,
-// blocked pictures) and the message itself in the locked-down WebView2 (preview.h). The main window has one under its
+// The reading pane: a message's header (the brand's logo at its left, the paper clip of its files at its right), the
+// strip of its files under it, the bars under that (a signed or encrypted message's security bar, a download that
+// failed, blocked pictures, a mailing list) and the message itself in the locked-down WebView2 (preview.h). The main window has one under its
 // list, each message window one of its own. Every string shown was decoded by the core; the body is the sanitized
 // document the core made.
 #pragma once
@@ -61,9 +61,11 @@ public:
     // `account`): `done` gets it, empty when the message is not here; false while no message is shown. A newer one
     // replaces one not done yet
     bool DraftOf(PeDraftKind kind, int64_t account, std::function<void(core::Draft)> done);
-    // the Unsubscribe link, after asking over `owner`: what the status bar says; a mailto: link to write a message to
-    // in `mailto` when the list wants one
-    std::wstring Unsubscribe(HWND owner, std::wstring& mailto);
+    // the mailing-list bar's button and Message > Unsubscribe from List, after asking over `owner`: what the status bar
+    // says; in `draft` the message to write when the list wants one (the core remembers the list once it is sent)
+    std::wstring Unsubscribe(HWND owner, core::Draft& draft);
+    // the mailing-list bar offers its button: Unsubscribe from List is on
+    bool CanUnsubscribe() const;
     // the one-click unsubscribe `request` done, or not for `problem`: what the status bar says, empty for another
     std::wstring Unsubscribed(uint64_t request, const std::wstring& problem);
     // the keys pressed while the message has the keyboard that its window handles (Esc, Delete, the shortcuts with
@@ -120,6 +122,9 @@ private:
     void ChoosePictures();
     // the bar over a message that could not be downloaded, shown or not
     void ShowRetry(bool shown);
+    // the mailing-list bar with the core's words and its button's (none hides it); after ListsChanged as it is then
+    void ShowListBar(const std::wstring& text, const std::wstring& button);
+    void ListsChanged();
     void ShowDownloading();
     // Try Again, or the account synced again after the message could not be downloaded
     void Retry();
@@ -203,9 +208,10 @@ private:
     int detailsPart_ = -1;
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
-    HFONT link_ = nullptr;
-    // the Unsubscribe link, and how the message shown lets its reader leave its list (PeMessageInfo)
-    HWND unsubscribe_ = nullptr;
+    // the bar over a message of a mailing list (the core's words: the list's domain, or when it was asked) and its
+    // button; how the message shown lets its reader leave its list (PeMessageInfo)
+    HWND listBar_ = nullptr;
+    HWND listButton_ = nullptr;
     PeUnsubscribe unsubscribeKind_ = PE_UNSUBSCRIBE_NONE;
     std::wstring unsubscribeLink_;
     std::wstring unsubscribeTarget_;

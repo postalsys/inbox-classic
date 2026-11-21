@@ -314,6 +314,13 @@ fn reads_mail_through_the_c_api() {
     let document = text(info.document);
     assert!(document.contains("<p>Hi</p>") && !document.contains("script"));
     assert_eq!(info.attachment_count, 1);
+    // of no mailing list: no bar, now or when asked again
+    assert!(text(info.list_bar).is_empty() && text(info.list_button).is_empty());
+    let bar = unsafe { pe_list_bar(core, inbox, uid) };
+    assert!(text(bar.text).is_empty() && text(bar.button).is_empty());
+    unsafe { pe_list_bar_free(bar) };
+    assert!(unsafe { pe_unsubscribe_draft(core, inbox, uid) }.is_null());
+    assert!(!unsafe { pe_unsubscribe_opened(core, inbox, uid) });
     let attachment = unsafe { &*pe_message_view_attachment(view, 0) };
     assert_eq!(text(attachment.safe_filename), "evil.pdf");
     assert_eq!(text(attachment.mime_type), "application/pdf");
@@ -1032,6 +1039,11 @@ fn null_and_bad_arguments() {
     unsafe {
         assert!(!pe_sync(core, 42));
         assert!(pe_message_view(core, 1, 1, false).is_null());
+        let bar = pe_list_bar(std::ptr::null(), 1, 1);
+        assert!(text(bar.text).is_empty() && text(bar.button).is_empty());
+        pe_list_bar_free(bar);
+        assert!(pe_unsubscribe_draft(std::ptr::null(), 1, 1).is_null());
+        assert!(!pe_unsubscribe_opened(std::ptr::null(), 1, 1));
         assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);
         assert_eq!(
             pe_list_view_load(

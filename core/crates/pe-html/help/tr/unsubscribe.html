@@ -1,10 +1,10 @@
 <h1>Posta listesi aboneliğinden çıkma</h1>
-<p class="summary">Abonelikten Çık düğmesiyle posta listesine aboneliğinizi sonlandırma isteği gönderin.</p>
-<p>Posta listesi iletisi abonelikten çıkma bilgisi içeriyorsa üst bilginin sağında <b data-text="ui-unsubscribe"></b> düğmesi görünür.</p>
+<p class="summary"><!--review-->Posta listesinin iletileri üzerindeki çubuktan listeden ileti göndermeyi durdurmasını isteyin.<!--/review--></p>
+<p><!--review-->Nasıl ayrılacağını belirten bir posta listesi iletisinin metninin üzerinde, listenin etki alanını ve <b data-text="ui-unsubscribe-ask"></b> düğmesini içeren bir çubuk bulunur. Çubuk listeyi yalnızca etki alanıyla adlandırır, hiçbir zaman gönderenin seçtiği bir adla adlandırmaz. Gereksiz E-posta, Gönderilmiş Öğeler ve Taslaklar klasörlerinde çubuk gösterilmez: istenmeyen bir iletiden listeden çıkmak, gönderene adresinizin çalıştığını bildirir.<!--/review--></p>
 <p>Listeden ayrılmak için:</p>
 <ol>
-    <li><b data-text="ui-unsubscribe"></b> düğmesine tıklayın. Inbox Classic yapılacak işlemi açıklayıp onayınızı ister.</li>
-    <li>Onaylayın. Listeye bağlı olarak şu işlemlerden biri yapılır:
+    <li><!--review-->Çubuktaki <b data-text="ui-unsubscribe-ask"></b> düğmesine tıklayın veya <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b> komutunu seçin. Inbox Classic yapılacak işlemi açıklayıp onayınızı ister.<!--/review--></li>
+    <li><!--review--><!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> düğmesine tıklayın. Listeye bağlı olarak şu işlemlerden biri yapılır:<!--/review-->
         <ul>
             <li>Inbox Classic listeden göndermeyi durdurmasını ister. Hiçbir sayfa açılmaz ve e-posta iletisi gönderilmez.</li>
             <li>Inbox Classic, listenin istediği abonelikten çıkma iletisini iletiyi okuduğunuz hesapla hazırlar; hesabın imza metni varsa onu da ekler. Göndermek için <b data-text="ui-tb-send"></b> düğmesine tıklayın.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Bundan sonra çubuk, o listenin her iletisinde ne zaman istekte bulunduğunuzu gösterir ve başka bir şey sunmaz. E-postayla yapılan istek, gönderildiği anda geçerli sayılır. Sayfasını açtığınız bir listede çubuk düğmesini korur, çünkü Inbox Classic işlemi orada tamamlayıp tamamlamadığınızı göremez.<!--/review--></p>
+<p><!--review-->Bir listenin göndermeyi durdurması iki güne kadar sürebilir. Listenin bir iletisi bundan daha sonra gelirse çubuk <b data-text="ui-unsubscribe-again"></b> seçeneğini sunar.<!--/review--></p>
 <p>Liste sunucusu isteği kabul ettiğinde durum çubuğunda bildirilir. Bu, iletilerin hemen duracağı anlamına gelmez.</p>
 <aside class="note">Inbox Classic, doğrudan isteği yalnızca güvenilen DKIM doğrulaması hem abonelikten çıkma adresini hem de tek tıklamalı işlem üst bilgisini kapsıyorsa gönderir. Bu kontrol isteğin doğrulanmış liste bilgilerine dayanmasını sağlar; iletinin tüm içeriğinin güvenilir olduğunu kanıtlamaz.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

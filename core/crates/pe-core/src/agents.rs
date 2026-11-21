@@ -145,6 +145,9 @@ pub struct UnsubscribeList {
     /// [`UnsubscribeList::target`] as the question shows it: `→ list.example.com`
     pub target_label: String,
     pub(crate) url: String,
+    /// The account and the list as its requests are remembered (list_bar.rs), so the bars say it was asked
+    pub(crate) account: AccountId,
+    pub(crate) key: Option<String>,
 }
 
 impl UnsubscribeList {
@@ -1093,10 +1096,13 @@ impl Core {
     fn lists_of(&self, folder: FolderId, uids: &[u64]) -> Result<Vec<UnsubscribeList>> {
         let mut lists: Vec<UnsubscribeList> = Vec::new();
         let mut none = Vec::new();
-        let trusted = self.trusted(folder)?;
         for &uid in uids {
             let message = self.store().message(folder, uid)?.ok_or(Error::NotFound)?;
-            let Some(url) = self.one_click_with(folder, uid, &trusted)? else {
+            let Ok((account, list)) = self.stored_list(folder, uid) else {
+                none.push(uid.to_string());
+                continue;
+            };
+            let Some(crate::unsubscribe::Unsubscribe::OneClick { url }) = list.how else {
                 none.push(uid.to_string());
                 continue;
             };
@@ -1116,6 +1122,8 @@ impl Core {
                 target_label: format!("\u{2192} {target}"),
                 target,
                 url,
+                account,
+                key: list.key,
             });
         }
         if !none.is_empty() {
@@ -1219,6 +1227,13 @@ impl Core {
     fn note_unsubscribe_failures(&self, ask: &UnsubscribeAsk, ids: &[i64], outcome: &[(String, Option<String>)]) {
         let mut changed = false;
         for ((list, id), (_, problem)) in ask.lists.iter().zip(ids).zip(outcome) {
+            // the bars of the list's messages say it was asked, or why it failed, as after the user's own request
+            self.list_answered(
+                list.account,
+                list.key.as_deref(),
+                pe_store::Asked::OneClick,
+                problem.as_deref(),
+            );
             if let Some(why) = problem {
                 let args = log::encode_args(&[("subject", (&list.subject).into()), ("reason", why.into())]);
                 let kind = Text::AgentLogUnsubscribeFailed.id();

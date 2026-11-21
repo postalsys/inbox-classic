@@ -108,6 +108,13 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         open.lazy.compactMap { $0.reader.unsubscribed(request, problem: problem) }.first
     }
 
+    /// the core's ListsChanged: each window's mailing-list bar read again
+    static func listsChanged() {
+        for window in open {
+            window.reader.listsChanged()
+        }
+    }
+
     private init(core: Core, mailbox: Mailbox, file: URL? = nil) {
         self.core = core
         self.mailbox = mailbox
@@ -141,7 +148,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
             window.representedURL = file
         }
         reader.status = { [weak mailbox] in mailbox?.status($0) }
-        reader.openMailto = { [weak mailbox] in mailbox?.openMailto($0, $1) }
+        reader.openDraft = { [weak mailbox] in mailbox?.openDraft($0, $1) }
         // the message that bounced, in the main window
         reader.bouncedHandler = { [weak mailbox] folder, uid in
             AppDelegate.shared?.main?.show()
@@ -241,6 +248,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     private static let notForFiles: Set<Command> = [
         .delete, .archive, .junk, .notJunk, .markRead, .markUnread, .flag, .watchConversation, .ignoreConversation,
         .nextMessage, .previousMessage, .nextUnread, .properties, .viewSource, .addSenderToBook, .move, .copy, .selectAll,
+        .unsubscribe,
     ]
 
     /// what the menus do with this window in front; false for a command that is not about the message
@@ -271,6 +279,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .properties: mailbox?.showProperties(folder: folder, uid: uid, subject: reader.subject)
         case .viewSource: mailbox?.showSource(folder: folder, uid: uid)
         case .addSenderToBook: mailbox?.status(addSenderToAddressBook(core: core, folder: folder, uid: uid))
+        case .unsubscribe: reader.unsubscribeList()
         default: return false
         }
         return true
@@ -312,6 +321,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
         case .junk: return !summary.in_junk
         case .notJunk: return summary.in_junk
         case .pictures: return reader.picturesBlocked
+        case .unsubscribe: return reader.canUnsubscribe
         case .nextMessage: return next != nil
         case .previousMessage: return previous != nil
         case .nextUnread: return true

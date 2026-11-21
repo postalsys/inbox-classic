@@ -37,7 +37,7 @@ pub struct SrvRecord {
 
 /// A host name of a DNS answer or a server setting, lowercase and without a trailing dot; None for anything that is
 /// not one (`.` included, the "no such service" target)
-pub(crate) fn host_name(text: &str) -> Option<String> {
+pub fn host_name(text: &str) -> Option<String> {
     let host = text.trim();
     let host = host.strip_suffix('.').unwrap_or(host).to_ascii_lowercase();
     let valid = !host.is_empty()

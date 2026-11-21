@@ -88,6 +88,8 @@ cmd-options = &Opzioni...
 cmd-message-rules = Re&gole per i messaggi...
 cmd-encryption-keys = &Chiavi di crittografia...
 cmd-create-rule-from-message = C&rea regola dal messaggio...
+# review: new
+cmd-unsubscribe = Annulla iscrizione alla &lista...
 cmd-select-all = Seleziona &tutto
 cmd-undo = &Annulla
 cmd-copy = &Copia nella cartella...
@@ -260,6 +262,22 @@ ui-unsubscribing = Annullamento dell’iscrizione da { $target }...
 ui-cannot-unsubscribe = Questo messaggio non contiene istruzioni per annullare l’iscrizione.
 ui-unsubscribed = La mailing list ha accettato la richiesta di annullamento dell’iscrizione.
 ui-not-unsubscribed = Impossibile annullare l’iscrizione: { $reason }
+# review: new
+ui-list-bar = Questo messaggio proviene da una mailing list ({ $domain }).
+# review: new
+ui-list-bar-plain = Questo messaggio proviene da una mailing list.
+# review: new
+ui-list-bar-asked = Hai chiesto di lasciare questa lista il { $date }.
+# review: new
+ui-list-bar-came-after = Hai chiesto di lasciare questa lista il { $date }, ma questo messaggio è arrivato dopo.
+# review: new
+ui-list-bar-opened = Hai aperto la pagina della lista per lasciarla il { $date }.
+# review: new
+ui-list-bar-failed = La lista non ha accettato la richiesta: { $reason }
+# review: new
+ui-unsubscribe-ask = Annulla iscrizione…
+# review: new
+ui-unsubscribe-again = Annulla di nuovo l’iscrizione…
 ui-event-span = da { $start } a { $end }
 ui-event-floating = { $when } (senza conversione del fuso orario)
 ui-invitation = Invito: { $title }

@@ -89,6 +89,8 @@ cmd-options = &Опции...
 cmd-message-rules = П&равила за съобщения...
 cmd-encryption-keys = &Ключове за шифроване...
 cmd-create-rule-from-message = Съ&здаване на правило от съобщението...
+# review: new
+cmd-unsubscribe = О&тписване от списъка...
 cmd-select-all = Избиране на в&сички
 cmd-undo = &Отмяна
 cmd-copy = &Копиране в папка...
@@ -261,6 +263,22 @@ ui-unsubscribing = Отписване от { $target }...
 ui-cannot-unsubscribe = Това съобщение не предлага възможност за отписване.
 ui-unsubscribed = Заявката за отписване е приета. Това не потвърждава, че изпращането на съобщения вече е спряно.
 ui-not-unsubscribed = Отписването не успя: { $reason }
+# review: new
+ui-list-bar = Това съобщение е от пощенски списък ({ $domain }).
+# review: new
+ui-list-bar-plain = Това съобщение е от пощенски списък.
+# review: new
+ui-list-bar-asked = Поискахте да се отпишете от този списък на { $date }.
+# review: new
+ui-list-bar-came-after = Поискахте да се отпишете от този списък на { $date }, но това съобщение е пристигнало след това.
+# review: new
+ui-list-bar-opened = Отворихте страницата за отписване на списъка на { $date }.
+# review: new
+ui-list-bar-failed = Списъкът не прие заявката: { $reason }
+# review: new
+ui-unsubscribe-ask = Отписване…
+# review: new
+ui-unsubscribe-again = Повторно отписване…
 ui-event-span = { $start } до { $end }
 ui-event-floating = { $when } (без преобразуване на часовата зона)
 ui-invitation = Покана: { $title }

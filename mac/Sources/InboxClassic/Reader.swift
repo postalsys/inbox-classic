@@ -14,9 +14,8 @@ final class Reader: NSObject {
     let core: Core
     /// what it has to say in the main window's status bar (leaving a mailing list)
     var status: (String) -> Void = { _ in }
-    /// a mailto: link to write a message for (a mailing list left by mail)
-    /// a message to write from a mailto: link, and the account of the message it came from (0 for a message file)
-    var openMailto: (_ link: String, _ account: Int64) -> Void = { _, _ in }
+    /// a message to write (leaving a mailing list by mail), from the account of the message it is about
+    var openDraft: (_ draft: Draft, _ account: Int64) -> Void = { _, _ in }
     /// the message asked for is here, before it is shown (a draft opened before it was fetched opens then)
     var arrivedHandler: () -> Void = {}
     /// the message is shown
@@ -63,7 +62,6 @@ final class Reader: NSObject {
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
     /// the files under the header, to open
     let strip = AttachmentStrip()
-    private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
     /// over a signed or encrypted message: its state, and Details
     let security = SecurityBar()
     private let pictures = InfoBar(icon: "image", link: nil)
@@ -74,6 +72,9 @@ final class Reader: NSObject {
     let picturesDownload = NSButton()
     /// over a message that could not be downloaded: Try Again
     private let retry = InfoBar(icon: "arrow_sync", link: nil, button: Text.uiTryAgain.text)
+    /// over a message of a mailing list: the core's words (the list's domain, or when it was asked) and its button,
+    /// which leaves the list as Message > Unsubscribe from List does
+    private let listBar = InfoBar(icon: "mail_multiple", link: nil, button: Text.uiUnsubscribeAsk.text)
     /// a moment after a message is asked for, the pane says it is being downloaded (one that is cached shows first)
     private var downloadingTimer: Timer?
     private(set) var picturesOffered = false
@@ -101,18 +102,8 @@ final class Reader: NSObject {
         attachments.setAccessibilityIdentifier("reader.attachments")
         attachments.isHidden = true
         attachments.menu?.delegate = self
-        unsubscribe.isBordered = false
-        unsubscribe.contentTintColor = .linkColor
-        unsubscribe.attributedTitle = NSAttributedString(string: Text.uiUnsubscribe.text, attributes: [
-            .foregroundColor: NSColor.linkColor, .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
-        ])
-        unsubscribe.target = self
-        unsubscribe.action = #selector(unsubscribeClicked)
-        unsubscribe.isHidden = true
-        unsubscribe.setAccessibilityIdentifier("reader.unsubscribe")
 
-        let right = NSStackView(views: [attachments, unsubscribe])
+        let right = NSStackView(views: [attachments])
         right.orientation = .vertical
         right.alignment = .trailing
         right.setContentHuggingPriority(.required, for: .horizontal)
@@ -141,6 +132,11 @@ final class Reader: NSObject {
         retry.clicked = { [weak self] in self?.retryDownload() }
         retry.setAccessibilityIdentifier("reader.retry")
         retry.isHidden = true
+        listBar.clicked = { [weak self] in self?.unsubscribeList() }
+        listBar.setAccessibilityIdentifier("reader.list")
+        listBar.isHidden = true
+        // the size of the pictures bar's buttons, so stacked bars line up
+        listBar.smallButton()
         // the links of the document's own cards: the core says which link it is, the view has what it needs
         preview.links = { [weak self] link in self?.followLink(link) ?? false }
         pictures.isHidden = true
@@ -157,7 +153,8 @@ final class Reader: NSObject {
             guard let self else { return }
             view.window?.makeFirstResponder(preview.view)
         }
-        for part in [headerBox, strip, headerLine, security, retry, pictures, findBar, preview.view] as [NSView] {
+        // the bars in one order: the download that failed, the pictures, the mailing list
+        for part in [headerBox, strip, headerLine, security, retry, pictures, listBar, findBar, preview.view] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
@@ -165,6 +162,7 @@ final class Reader: NSObject {
         preview.view.setContentHuggingPriority(.defaultLow, for: .vertical)
         pictures.heightAnchor.constraint(equalToConstant: 28).isActive = true
         retry.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        listBar.heightAnchor.constraint(equalToConstant: 28).isActive = true
         findBar.heightAnchor.constraint(equalToConstant: 36).isActive = true
         clearView(loading: false)
     }
@@ -201,8 +199,8 @@ final class Reader: NSObject {
             attachments.isHidden = true
             pictures.isHidden = true
             picturesOffered = false
+            listBar.isHidden = true
         }
-        unsubscribe.isHidden = true
         // never the bar of the message before over the next one
         security.hide()
         logo.isHidden = true
@@ -249,6 +247,7 @@ final class Reader: NSObject {
         strip.clear()
         pictures.isHidden = true
         picturesOffered = false
+        listBar.isHidden = true
         security.hide()
         retry.isHidden = false
         preview.showState(PE_READER_STATE_FAILED, failure: kind, reason: reason)
@@ -265,6 +264,7 @@ final class Reader: NSObject {
         strip.clear()
         pictures.isHidden = true
         picturesOffered = false
+        listBar.isHidden = true
     }
 
     private func show(_ info: PeMessageInfo, view: MessageView) {
@@ -279,8 +279,8 @@ final class Reader: NSObject {
         attachments.addItem(withTitle: Text.macFiles.text(["count": files]))
         attachments.item(at: 0)?.image = Icons.list("attach")
         strip.show(view.attachments)
-        // a mailing list that says how to leave it
-        unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE || file != nil
+        // a mailing list that says how to leave it: the core's bar (none for a message file)
+        showListBar(text: text(info.list_bar), button: text(info.list_button))
         // asked for, or loaded by themselves (Settings, a trusted sender the provider confirmed): the core says
         let allowed = info.pictures_loaded || remoteImages
         security.show(info)
@@ -422,9 +422,24 @@ final class Reader: NSObject {
         logo.isHidden = false
     }
 
-    @objc private func unsubscribeClicked() {
-        unsubscribeList()
+    /// the mailing list's bar as the core words it; no words, no bar
+    private func showListBar(text words: String, button: String) {
+        listBar.text = words
+        listBar.buttonTitle = button
+        listBar.isHidden = words.isEmpty
     }
+
+    /// the core's ListsChanged: a list was asked to let the user go, or a request failed, so the bar is read again
+    func listsChanged() {
+        guard file == nil, uid != 0, messageView?.info?.pointee.unsubscribe ?? PE_UNSUBSCRIBE_NONE != PE_UNSUBSCRIBE_NONE
+        else { return }
+        let bar = pe_list_bar(core.handle, folder, uid)
+        defer { pe_list_bar_free(bar) }
+        showListBar(text: text(bar.text), button: text(bar.button))
+    }
+
+    /// Message > Unsubscribe from List: on while the bar offers its button
+    var canUnsubscribe: Bool { !listBar.isHidden && !listBar.buttonTitle.isEmpty }
 
     // ---- the message it shows ----
 
@@ -991,28 +1006,34 @@ final class Reader: NSObject {
 
     // ---- leaving a mailing list ----
 
+    /// the bar's button and Message > Unsubscribe from List: what will happen, asked with the verb, then done; the core
+    /// remembers the list for the bars (a message to write once it is sent, a page once it is opened)
     func unsubscribeList() {
-        guard let info = messageView?.info?.pointee else { return }
+        guard canUnsubscribe, let info = messageView?.info?.pointee else { return }
         let target = text(info.unsubscribe_target)
-        let link = text(info.unsubscribe_link)
+        let detail: String
+        switch info.unsubscribe {
+        case PE_UNSUBSCRIBE_ONE_CLICK: detail = Text.uiLeaveOneClick.text(["target": target])
+        case PE_UNSUBSCRIBE_MAIL: detail = Text.uiLeaveMail.text(["target": target])
+        case PE_UNSUBSCRIBE_WEB: detail = Text.uiLeaveWeb.text(["target": target])
+        default: return
+        }
+        guard ask(Text.uiLeaveList.text + "\n\n" + detail, title: Text.uiUnsubscribe.text,
+                  yes: Text.uiUnsubscribe.text, no: Text.uiCancel.text, style: .information) else { return }
         switch info.unsubscribe {
         case PE_UNSUBSCRIBE_ONE_CLICK:
-            guard ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveOneClick.text(["target": target]),
-                      title: Text.uiUnsubscribe.text, style: .information) else { return }
             unsubscribeRequest = pe_unsubscribe(core.handle, folder, uid)
             status(unsubscribeRequest != 0 ? Text.macUnsubscribing.text(["target": target]) : Text.uiCannotUnsubscribe.text)
         case PE_UNSUBSCRIBE_MAIL:
-            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveMail.text(["target": target]),
-                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
-                openMailto(link, account)
-            }
-        case PE_UNSUBSCRIBE_WEB:
-            if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveWeb.text(["target": target]),
-                   title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
-                openExternally(URL(string: link))
+            // from the account of the message, whatever the main window shows
+            if let draft = Draft(pe_unsubscribe_draft(core.handle, folder, uid)) {
+                openDraft(draft, account)
+            } else {
+                status(Text.uiCannotUnsubscribe.text)
             }
         default:
-            break
+            openExternally(URL(string: text(info.unsubscribe_link)))
+            pe_unsubscribe_opened(core.handle, folder, uid)
         }
     }
 
@@ -1122,7 +1143,15 @@ final class InfoBar: NSView {
         stack.edgeInsets = NSEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
+        // a hairline under the bar, so bars stacked in the same colour read as separate bars
+        let line = NSBox()
+        line.boxType = .separator
+        line.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(line)
         NSLayoutConstraint.activate([
+            line.leadingAnchor.constraint(equalTo: leadingAnchor),
+            line.trailingAnchor.constraint(equalTo: trailingAnchor),
+            line.bottomAnchor.constraint(equalTo: bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: trailingAnchor),
             stack.topAnchor.constraint(equalTo: topAnchor),
@@ -1191,6 +1220,21 @@ final class InfoBar: NSView {
         textLabel.setContentCompressionResistancePriority(.required, for: .vertical)
         row?.alignment = .centerY
         row?.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+    }
+
+    /// a small button, as the pictures bar's, for a bar stacked with it
+    func smallButton() {
+        action?.controlSize = .small
+        action?.font = .systemFont(ofSize: NSFont.systemFontSize(for: .small))
+    }
+
+    /// the button's words; empty hides it (a bar that only says something)
+    var buttonTitle: String {
+        get { action?.isHidden == false ? action?.title ?? "" : "" }
+        set {
+            action?.title = newValue
+            action?.isHidden = newValue.isEmpty
+        }
     }
 
     /// the bar's link, button or cross pressed, as a click does (the UI test)

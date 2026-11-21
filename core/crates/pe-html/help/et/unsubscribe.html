@@ -1,10 +1,10 @@
 <h1>Meililisti tellimusest loobumine</h1>
-<p class="summary">Saatke meililistile tellimusest loobumise taotlus.</p>
-<p>Meililisti kirjal, mis ütleb, kuidas loendist lahkuda, on päise paremas servas nupp <b data-text="ui-unsubscribe"></b>.</p>
+<p class="summary"><!--review-->Paluge meililistil kirjade saatmine lõpetada, kasutades selle kirjade kohal olevat riba.<!--/review--></p>
+<p><!--review-->Meililisti kirjal, mis ütleb, kuidas listist lahkuda, on teksti kohal riba listi domeeni ja nupuga <b data-text="ui-unsubscribe-ask"></b>. Riba nimetab listi ainult domeeni järgi, mitte kunagi saatja valitud nimega. Kaustades Rämpspost, Saadetud kirjad ja Mustandid riba ei kuvata: rämpspostist listist loobumine annab saatjale teada, et teie aadress töötab.<!--/review--></p>
 <p>Loendist lahkumiseks tehke järgmist.</p>
 <ol>
-    <li>Klõpsake nuppu <b data-text="ui-unsubscribe"></b>. Inbox Classic ütleb, mis juhtub, ja küsib enne.</li>
-    <li>Kinnitage. Olenevalt loendist juhtub üks kolmest:
+    <li><!--review-->Klõpsake ribal nuppu <b data-text="ui-unsubscribe-ask"></b> või valige <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic ütleb, mis juhtub, ja küsib enne.<!--/review--></li>
+    <li><!--review-->Klõpsake nuppu <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Olenevalt loendist juhtub üks kolmest:<!--/review-->
         <ul>
             <li>Inbox Classic palub loendil saatmise lõpetada. Ühtegi lehte ei avata ja kirja ei saadeta.</li>
             <li>Inbox Classic koostab listi nõutud kirja kontolt, millel te kirja loete, ja lisab selle konto allkirjateksti, kui see on määratud. Selle saatmiseks klõpsake nuppu <b data-text="ui-tb-send"></b>.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Seejärel näitab riba selle listi igal kirjal, millal te loobumist palusite, ega paku midagi muud. E-kirjaga taotlus loetakse tehtuks, kui see on saadetud. Kui avasite listi lehe, jääb ribale nupp alles, sest Inbox Classic ei näe, kas lõpetasite loobumise seal.<!--/review--></p>
+<p><!--review-->Listil võib saatmise lõpetamine võtta kuni kaks päeva. Kui mõni selle kiri saabub hiljem, pakub riba nuppu <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Ühe klõpsuga loobumise korral näitab olekuriba, kas list võttis taotluse vastu. See ei taga edasise posti lõppemist ega kinnita e-kirjaga taotluse kohaletoimetamist.</p>
 <aside class="note">Otsetaotlus saadetakse pärast teie kinnitust ainult siis, kui meiliteenuse pakkuja kinnitab DKIM-allkirja, mis hõlmab mõlemat vajalikku loobumispäist. Muudel juhtudel avatakse kirja mustand või veebileht.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

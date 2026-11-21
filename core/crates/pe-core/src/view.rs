@@ -115,8 +115,11 @@ pub struct MessageView {
     /// The sender as the pictures bar names them, None for a From that is no single address
     pub sender: Option<crate::pictures::Sender>,
     pub attachments: Vec<AttachmentView>,
-    /// How the message lets its reader leave its mailing list, None when it does not say
-    pub unsubscribe: Option<crate::unsubscribe::Unsubscribe>,
+    /// How the message lets its reader leave its mailing list (`list.how`, None when it does not say), the list it is
+    /// and the domain its bar names
+    pub list: crate::list_bar::List,
+    /// The bar over a message of a mailing list, None without one ([`crate::list_bar::bar`])
+    pub list_bar: Option<crate::list_bar::ListBar>,
     /// The event of its calendar part (an invitation, an update, a cancellation), None without one
     pub invitation: Option<crate::calendar::Invitation>,
     /// The brand has a BIMI logo the receiving server passed ([`crate::Core::logo_start`] draws it)
@@ -457,7 +460,8 @@ pub(crate) fn build_unless(
         pictures_loaded: allow_remote_images,
         sender,
         attachments,
-        unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
+        list: crate::list_bar::List::of(&message, trust.domains),
+        list_bar: None,
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         picture: 0,
         invitation,
@@ -758,7 +762,8 @@ fn protected_view(
         // pictures of encrypted mail load on a click only, never remembered: the bar offers no "always"
         sender: if any_encrypted { None } else { sender },
         attachments,
-        unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
+        list: crate::list_bar::List::of(message, trust.domains),
+        list_bar: None,
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         part_documents: documents.into_iter().map(Option::unwrap_or_default).collect(),
         print_document: Some(print_document),
