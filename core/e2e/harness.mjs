@@ -106,6 +106,11 @@ async function start({ storageFile, ...options }) {
         rest: { port: 0, host: '127.0.0.1' }
     });
     const imap = await server.start(0, '127.0.0.1');
+    // answers leave at once, as real servers send them: with Nagle's algorithm on, a tagged line written after the
+    // untagged ones waits for the client's delayed ACK, 40 ms a command on Linux
+    for (const listener of [server.server, server.tlsServer]) {
+        listener?.on('connection', socket => socket.setNoDelay(true));
+    }
     return { server, imap };
 }
 

@@ -14,8 +14,8 @@ use crate::worker::Command;
 use crate::{Core, Error, Result};
 
 /// The most UIDs one command carries, so a command line stays short whatever was selected (a UID set of messages
-/// that are not next to each other is as long as its UIDs)
-pub(crate) const PER_COMMAND: usize = 1000;
+/// that are not next to each other is as long as its UIDs) and a server with MESSAGELIMIT acts on all of them
+pub(crate) const PER_COMMAND: usize = pe_sync::PER_COMMAND;
 
 /// What to do to the selected messages
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

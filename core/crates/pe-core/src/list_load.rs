@@ -582,6 +582,24 @@ pub(crate) mod tests {
         assert!(core.restored.lock().unwrap().is_empty(), "taken");
         let load = loaded(&core, &events, &view, restored);
         assert_eq!(load.reselected.how, Reselection::Kept);
+
+        // refused before the list they left was drawn: they win over the row after them
+        *core.restored.lock().unwrap() = vec![crate::selection::Back::There(inbox, vec![10, 12])];
+        let both = Reselect {
+            restored: true,
+            after: Some(18),
+            ..listed(&[at(10), at(12)])
+        };
+        let load = loaded(&core, &events, &view, both);
+        assert_eq!(load.reselected.how, Reselection::Restored);
+        assert_eq!(load.reselected.selection, Selected::Listed(vec![at(10), at(12)]));
+        // none back: the row after, as before
+        let after = Reselect {
+            restored: true,
+            after: Some(5),
+            ..listed(&[at(2)])
+        };
+        assert_eq!(loaded(&core, &events, &view, after).reselected.how, Reselection::After);
     }
 
     /// The store changing after the list was counted and before the rows of what came back were found: the list is

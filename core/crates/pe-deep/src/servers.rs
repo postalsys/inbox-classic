@@ -125,6 +125,13 @@ impl AccountServer {
         self.kit.set_flags(&storage_name(path), uids, flags, action);
     }
 
+    /// Those of `uids` the server has in `path`: what a window shows may be gone (its checks say so), and the REST API
+    /// refuses a change that names a message it does not have
+    pub fn present(&self, path: &str, uids: &[u64]) -> Vec<u64> {
+        let listed = self.listed(path);
+        uids.iter().copied().filter(|uid| listed.contains_key(uid)).collect()
+    }
+
     /// Messages expunged by another client
     pub fn expunge(&self, path: &str, uids: &[u64]) {
         self.kit.expunge(&storage_name(path), uids);

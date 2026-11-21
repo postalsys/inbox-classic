@@ -535,9 +535,9 @@ pub async fn change_flags(
     add: &[&str],
     remove: &[&str],
 ) -> Result<()> {
-    let Some(set) = SequenceSet::from_numbers(uids) else {
+    if uids.is_empty() {
         return Ok(());
-    };
+    }
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
     let permanent: Vec<String> = client.selected().map(|s| s.permanent_flags.clone()).unwrap_or_default();
@@ -550,11 +550,12 @@ pub async fn change_flags(
     };
     // the store has the change already: the flags the server would report for it could overwrite a newer one
     for (action, flags) in [(StoreAction::Add, kept(add)), (StoreAction::Remove, kept(remove))] {
-        if !flags.is_empty() {
-            let flags: Vec<&str> = flags.iter().map(String::as_str).collect();
-            client
-                .store_silent(&Messages::Uids(set.clone()), action, &flags)
-                .await?;
+        if flags.is_empty() {
+            continue;
+        }
+        let flags: Vec<&str> = flags.iter().map(String::as_str).collect();
+        for set in uid_sets(uids) {
+            client.store_silent(&Messages::Uids(set), action, &flags).await?;
         }
     }
     Ok(())
@@ -578,13 +579,33 @@ pub async fn move_message(
     uids: &[u64],
     to: FolderId,
 ) -> Result<Vec<(u64, u64)>> {
-    let Some(set) = SequenceSet::from_numbers(uids) else {
+    if uids.is_empty() {
         return Ok(Vec::new());
-    };
+    }
     let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
     ensure_selected(client, &from).await?;
-    let copied = client.move_messages(&Messages::Uids(set), &to).await?;
-    Ok(copied.map(|copied| moved_pairs(&copied)).unwrap_or_default())
+    let mut became = Vec::new();
+    for set in uid_sets(uids) {
+        if let Some(copied) = client.move_messages(&Messages::Uids(set), &to).await? {
+            became.extend(moved_pairs(&copied));
+        }
+    }
+    Ok(became)
+}
+
+/// The most messages one command names: a server with MESSAGELIMIT (RFC 9738) acts on no more of them (MOVE, STORE,
+/// FETCH, UID EXPUNGE on the newest so many, COPY not at all), and the RFC has no server's limit below 1000
+pub const PER_COMMAND: usize = 1000;
+
+/// `uids` as the sets of commands of at most [`PER_COMMAND`] messages each, in UID order
+pub fn uid_sets(uids: &[u64]) -> Vec<SequenceSet> {
+    let mut sorted = uids.to_vec();
+    sorted.sort_unstable();
+    sorted.dedup();
+    sorted
+        .chunks(PER_COMMAND)
+        .filter_map(SequenceSet::from_numbers)
+        .collect()
 }
 
 /// The UIDs messages had and the UIDs they got (COPYUID, in the order of the source UIDs); nothing when the two
@@ -605,12 +626,14 @@ pub async fn copy_messages(
     uids: &[u64],
     to: FolderId,
 ) -> Result<()> {
-    let Some(set) = SequenceSet::from_numbers(uids) else {
+    if uids.is_empty() {
         return Ok(());
-    };
+    }
     let (from, to) = (store.folder(folder)?.info.path, store.folder(to)?.info.path);
     ensure_selected(client, &from).await?;
-    client.copy(&Messages::Uids(set), &to).await?;
+    for set in uid_sets(uids) {
+        client.copy(&Messages::Uids(set), &to).await?;
+    }
     Ok(())
 }
 
@@ -653,21 +676,26 @@ async fn fetch_header_fields<T>(
     fields: Vec<String>,
     read: fn(&[u8]) -> T,
 ) -> Result<Vec<(u64, T)>> {
-    let Some(set) = SequenceSet::from_numbers(uids) else {
+    if uids.is_empty() {
         return Ok(Vec::new());
-    };
+    }
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
     let query = FetchQuery {
         headers: Some(fields),
         ..Default::default()
     };
-    Ok(client
-        .fetch(&Messages::Uids(set), &query)
-        .await?
-        .into_iter()
-        .filter_map(|m| Some((m.uid?, read(m.headers.as_deref().unwrap_or_default()))))
-        .collect())
+    let mut found = Vec::with_capacity(uids.len());
+    for set in uid_sets(uids) {
+        found.extend(
+            client
+                .fetch(&Messages::Uids(set), &query)
+                .await?
+                .into_iter()
+                .filter_map(|m| Some((m.uid?, read(m.headers.as_deref().unwrap_or_default())))),
+        );
+    }
+    Ok(found)
 }
 
 /// Gmail's labels that say what a message is rather than where it was filed: they stay when it is archived
@@ -825,15 +853,14 @@ pub async fn expunge_messages(client: &mut Client, store: &mut Store, folder: Fo
 
 /// Removes these messages of the selected folder for good
 async fn expunge_uids(client: &mut Client, uids: &[u64]) -> Result<()> {
-    let Some(set) = SequenceSet::from_numbers(uids) else {
-        return Ok(());
-    };
-    client
-        .store(&Messages::Uids(set.clone()), StoreAction::Add, &["\\Deleted"])
-        .await?;
-    match client.expunge(Some(&set)).await {
-        Err(pe_imap::Error::Unsupported(_)) => client.expunge(None).await?,
-        other => other?,
+    for set in uid_sets(uids) {
+        client
+            .store(&Messages::Uids(set.clone()), StoreAction::Add, &["\\Deleted"])
+            .await?;
+        match client.expunge(Some(&set)).await {
+            Err(pe_imap::Error::Unsupported(_)) => client.expunge(None).await?,
+            other => other?,
+        }
     }
     Ok(())
 }
