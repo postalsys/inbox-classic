@@ -59,6 +59,35 @@ const WORDS: &[&str] = &[
     "status",
     "launch",
 ];
+/// Chinese, Japanese and Korean words, which a subject writes without spaces between them (the index takes each
+/// character as a word)
+const CJK_WORDS: &[&str] = &[
+    "会议",
+    "报告",
+    "预算",
+    "安排",
+    "通知",
+    "見積書",
+    "打ち合わせ",
+    "資料",
+    "確認",
+    "請求書",
+    "회의",
+    "보고서",
+    "출장",
+    "일정",
+    "東京",
+    "项目",
+    "合同",
+    "發票",
+];
+/// What a message's text says in them, a share of the messages getting one
+const CJK_TEXT: &[&str] = &[
+    "下周的会议安排已经确定，请查看附件中的预算报告。",
+    "お世話になっております。見積書を添付いたしましたので、ご確認ください。",
+    "내일 회의에서 논의할 보고서를 첨부합니다.",
+    "請參閱附件中的發票與合同。",
+];
 const FIRST: &[&str] = &[
     "Anna", "Bob", "Carla", "Dmitri", "Eve", "Frank", "Grace", "Hiro", "Ines", "Jaan", "Kaisa", "Liam", "Mari", "Nils",
     "Olga", "Peeter", "Quinn", "Rita", "Sven", "Tiina", "Uku", "Vera", "Walt", "Xenia", "Yuri", "Zoe",
@@ -108,6 +137,10 @@ impl Iterator for Mail<'_> {
                 references.remove(0);
             }
             (format!("Re: {}", subject.trim_start_matches("Re: ")), references)
+        } else if r.chance(12) {
+            // one in eight in Chinese, Japanese or Korean, no spaces between the words
+            let words: Vec<&str> = (0..2 + r.below(4)).map(|_| *r.pick(CJK_WORDS)).collect();
+            (format!("{} #{}", words.concat(), r.below(10_000)), Vec::new())
         } else {
             let words: Vec<&str> = (0..2 + r.below(5)).map(|_| *r.pick(WORDS)).collect();
             (format!("{} #{}", words.join(" "), r.below(10_000)), Vec::new())
@@ -208,7 +241,50 @@ fn build(store: &mut Store) {
             for batch in all.chunks(5000) {
                 store.transaction(|store| store.add_messages(id, batch)).unwrap();
             }
+            index_texts(store, id, &all);
         }
+    }
+}
+
+/// The text of every tenth message into the search index, as the workers write it: in Chinese, Japanese or Korean for
+/// those whose subject is, otherwise in English words
+fn index_texts(store: &mut Store, folder: FolderId, mail: &[MessageInfo]) {
+    let ids: Vec<(i64, u64)> = store
+        .messages(folder, Sort::default(), 0, mail.len() as u64)
+        .unwrap()
+        .iter()
+        .map(|m| (m.id, m.info.uid))
+        .collect();
+    let texts: Vec<(i64, String)> = ids
+        .iter()
+        .filter(|(_, uid)| uid % 10 == 0)
+        .map(|&(id, uid)| {
+            let subject = &mail[uid as usize - 1].subject;
+            let body = if subject.chars().any(|c| c > '\u{2E80}') {
+                CJK_TEXT[uid as usize % CJK_TEXT.len()].to_string()
+            } else {
+                (0..40)
+                    .map(|n| WORDS[(uid as usize + n * 7) % WORDS.len()])
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            };
+            (id, body)
+        })
+        .collect();
+    for batch in texts.chunks(5000) {
+        store
+            .transaction(|store| {
+                for (id, body) in batch {
+                    let text = pe_store::IndexText {
+                        body: body.clone(),
+                        snippet: body.chars().take(60).collect(),
+                        ..Default::default()
+                    };
+                    store.set_indexed(*id, &text)?;
+                }
+                Ok(())
+            })
+            .unwrap();
     }
 }
 
@@ -421,6 +497,11 @@ fn list_calls_within_budget() {
         ("Flagged", Scope::Flagged, "", false, newest),
         ("search 'report'", Scope::AllInboxes, "report", false, newest),
         ("search 'report' grouped", Scope::AllInboxes, "report", true, newest),
+        // words without spaces: a phrase of their characters, found inside longer words
+        ("search '会议'", Scope::AllInboxes, "会议", false, newest),
+        ("search '会议' grouped", Scope::AllInboxes, "会议", true, newest),
+        ("search '見積書'", Scope::AllInboxes, "見積書", false, newest),
+        ("search '회의'", Scope::AllInboxes, "회의", false, newest),
         // a mark rather than words: few messages have it, read from the order's index
         (
             "search 'is:encrypted'",
@@ -468,5 +549,8 @@ fn list_calls_within_budget() {
     report.time("All Inboxes, unread only: load", QUICK, || {
         load(&core, &events, &unread).rows
     });
+    // what the search index takes on disk, for the record (FTS5 keeps its words in messages_fts_data)
+    let index = Store::open(&path).unwrap().index_size().unwrap();
+    println!("search index (messages_fts_data): {:.1} MB", index as f64 / 1_048_576.0);
     report.check();
 }

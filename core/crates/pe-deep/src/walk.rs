@@ -154,7 +154,19 @@ fn user_act(rng: &mut Rng, m: Move, seen: &Seen, folders: &Folders) -> Option<Ac
         Move::Sort => Act::Sort(*rng.pick(&SortBy::ALL), rng.chance(30)),
         Move::Search => {
             if seen.search.is_empty() {
-                Act::Search((*rng.pick(&["budget", "review", "notes", "Re:", "from:maria", "has:attachment"])).into())
+                Act::Search(
+                    (*rng.pick(&[
+                        "budget",
+                        "review",
+                        "notes",
+                        "Re:",
+                        "from:maria",
+                        "has:attachment",
+                        "纪要",
+                        "確認",
+                    ]))
+                    .into(),
+                )
             } else {
                 Act::Search(String::new())
             }

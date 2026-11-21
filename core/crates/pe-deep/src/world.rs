@@ -172,6 +172,19 @@ const SCRIPTS: &[&str] = &[
     "हिन्दी समाचार",
     "Türkçe özet",
     "ქართული",
+    // words without spaces between them: the search finds a word inside (會議 and 会议 are other characters)
+    "会议纪要",
+    "見積書のご確認",
+    "주간회의록",
+    "請求書送付のお知らせ",
+    "關於發票的問題",
+];
+
+/// A sentence in Chinese, Japanese or Korean that some texts end with, none of the words of [`SCRIPTS`]' subjects
+const CJK_TEXT: &[&str] = &[
+    "请查看附件中的预算报告。",
+    "お世話になっております。資料を添付いたします。",
+    "내일 일정을 공유드립니다.",
 ];
 
 /// Real messages to fill the world with in place of made ones, for runs on this computer only: a folder of `.eml`
@@ -507,7 +520,11 @@ impl Maker<'_> {
 
     fn text(&mut self) -> String {
         let words: Vec<&str> = (0..12 + self.rng.below(60)).map(|_| *self.rng.pick(WORDS)).collect();
-        words.join(" ")
+        let text = words.join(" ");
+        if self.rng.chance(5) {
+            return format!("{text}\r\n{}", self.rng.pick(CJK_TEXT));
+        }
+        text
     }
 }
 
