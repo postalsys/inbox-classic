@@ -120,8 +120,9 @@ fn pages(run: &mut Run<'_>, _: &mut Vec<String>) -> Result<(), Stop> {
     run.expect(
         back.selected == [far] && shown_subject(&back) == left && left.is_some(),
         format!(
-            "back from Flagged, row {far} is selected, in sight and shown ({:?})",
-            shown_subject(&back)
+            "back from Flagged, row {far} is selected, in sight and shown ({:?}, selected {:?}; {left:?} before)",
+            shown_subject(&back),
+            back.selected
         ),
     );
     // its message deleted by another client meanwhile: the newest again
