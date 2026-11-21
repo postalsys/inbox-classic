@@ -676,6 +676,7 @@ final class UITest {
         try await draftsSavedAutomatically()
         try await textSize()
         try await searching()
+        try await wordsWithoutSpaces()
         try await files()
         try await organizing()
         try await flaggedFolder()
@@ -1028,6 +1029,37 @@ final class UITest {
         main.showCounts()
         _ = await waitUntil(20) { !main.mailbox.listLoading }
         check(await waitUntil { list.numberOfRows >= 5 }, "clearing the search shows the folder again")
+    }
+
+    /// SCENARIO 21a: words of Japanese, Chinese and Korean, which have no spaces between them (or endings on them),
+    /// found inside the subject; in a folder of their own, deleted at the end
+    func wordsWithoutSpaces() async throws {
+        step("words without spaces")
+        var create = URLRequest(url: URL(string: rest)!)
+        create.httpMethod = "POST"
+        create.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        create.httpBody = try JSONSerialization.data(withJSONObject: ["path": "CJK"])
+        _ = try await URLSession.shared.data(for: create)
+        try await addMessage("From: Lee <lee@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: =?UTF-8?B?5piO5pel44Gu5Lya6K2w44Gu6LOH5paZ44Gr44Gk44GE44Gm?=\r\n" + "Date: \(rfc2822(Date()))\r\nMessage-ID: <cjk-ja@example.com>\r\nContent-Type: text/plain; charset=utf-8\r\n" + "Content-Transfer-Encoding: base64\r\n\r\n5Lya6K2w44Gu6LOH5paZ44KS5re75LuY44GX44G+44GZ44CC\r\n", to: "CJK")
+        try await addMessage("From: Lee <lee@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: =?UTF-8?B?5YWz5LqO5piO5aSp5Lya6K6u55qE5a6J5o6S?=\r\n" + "Date: \(rfc2822(Date()))\r\nMessage-ID: <cjk-zh@example.com>\r\nContent-Type: text/plain; charset=utf-8\r\n" + "Content-Transfer-Encoding: base64\r\n\r\n6K+35p+l55yL5Lya6K6u5a6J5o6S44CC\r\n", to: "CJK")
+        try await addMessage("From: Lee <lee@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: =?UTF-8?B?64K07J28IO2ajOydmOyXkOyEnCDrsJztkZztlaAg7J6Q66OM?=\r\n" + "Date: \(rfc2822(Date()))\r\nMessage-ID: <cjk-ko@example.com>\r\nContent-Type: text/plain; charset=utf-8\r\n" + "Content-Transfer-Encoding: base64\r\n\r\n7ZqM7J2YIOyekOujjOyeheuLiOuLpC4=\r\n", to: "CJK")
+        command(.sync)
+        let found = { (words: String) async -> Bool in
+            await self.search(words)
+            return await self.waitUntil(20) { self.list.numberOfRows == 1 }
+        }
+        check(await found("会議"), "a Japanese word inside the subject finds its message (会議)")
+        await selectRow(0)
+        await shot(main.window, "find-4-cjk")
+        check(await found("会议"), "a Chinese word inside the subject finds its message (会议)")
+        check(await found("회의"), "a Korean word with its ending left off finds its message (회의 in 회의에서)")
+        check(await found("議"), "one character alone finds it too (議)")
+        await search("")
+        var remove = URLRequest(url: URL(string: "\(rest)/CJK")!)
+        remove.httpMethod = "DELETE"
+        _ = try? await URLSession.shared.data(for: remove)
+        command(.sync)
+        _ = await waitUntil(20) { self.folderRow("CJK") == nil }
     }
 
     // ---- accounts, sign-in apps, outbox, help ----
