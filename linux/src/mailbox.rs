@@ -1529,6 +1529,12 @@ impl Mailbox {
         *self.mark_read.borrow_mut() = Some(timer);
     }
 
+    /// Whether the window takes `folder` for a Drafts folder (what the UI test says when a draft did not open)
+    #[cfg(feature = "e2e")]
+    pub fn is_draft_folder(&self, folder: i64) -> bool {
+        self.draft_folders.borrow().contains(&folder)
+    }
+
     /// The selected message in a window of its own (double-click or Enter), Previous and Next going through the
     /// list as it is now; a draft in a compose window instead, to go on writing it, once it is fetched when it is not
     /// yet
