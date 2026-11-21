@@ -1132,8 +1132,9 @@ void Mailbox::OnListLoaded(uint64_t request) {
         ListNotRead(why ? Text(why.get()) : L"");
         return;
     }
-    // the user chose other messages while it was read: read again for those
-    if (loadPlan_.selectionAt != selectionChanges_) {
+    // the user chose other messages while it was read: read again for those. Not for a list chosen: the rows clicked
+    // meanwhile were the list before's (and read again it would wait for a paint that came already, for good)
+    if (!newList_ && loadPlan_.selectionAt != selectionChanges_) {
         ReloadList();
         return;
     }
@@ -1154,6 +1155,7 @@ void Mailbox::OnPageLoaded(uint64_t request) {
     KeepPage({offset, core::MessageList(pe_list_load_messages(load.get()))});
     int last = static_cast<int>(std::min<uint64_t>(std::min<uint64_t>(offset + kPageSize, rowCount_), INT_MAX)) - 1;
     RepaintRows(static_cast<int>(offset), last);
+    AskOnScreen();
 }
 
 void Mailbox::ListNotRead(const std::wstring& why) {
@@ -1163,6 +1165,7 @@ void Mailbox::ListNotRead(const std::wstring& why) {
         EndPending();
         InvalidateRect(list_, nullptr, FALSE);
     }
+    AskOnScreen();
     if (!why.empty()) {
         Say(why);
     }
@@ -1218,6 +1221,7 @@ void Mailbox::ShowList(const PeListLoad* load, const PeListLoadInfo& info) {
     }
     reloading_ = false;
     InvalidateRect(list_, nullptr, FALSE);
+    AskOnScreen();
     if (!pe_list_load_selection(load, selection_.get())) {
         pe_selection_clear(selection_.get());
     }
@@ -1324,6 +1328,23 @@ const PeMessage* Mailbox::Row(int index) {
         std::rotate(page, page + 1, pages_.end());
     }
     return pe_message_list_get(pages_.back().rows.get(), static_cast<size_t>(static_cast<uint64_t>(index) - offset));
+}
+
+void Mailbox::AskOnScreen() {
+    // a row asks for its page as it is painted, but not while the list itself loads (its first page comes with it):
+    // painted then, it stays blank until something paints it again. So once the list is drawn and as pages come, the
+    // pages of the rows in sight are asked for, whenever they were painted
+    if (listPending_ || loadRequest_) {
+        return;
+    }
+    int count = ListView_GetItemCount(list_);
+    int top = ListView_GetTopIndex(list_);
+    int last = std::min(count, top + ListView_GetCountPerPage(list_) + 1);
+    for (int row = top; row < last; row++) {
+        if (!CachedRow(row)) {
+            RequestPage(static_cast<uint64_t>(row) / kPageSize * kPageSize);
+        }
+    }
 }
 
 void Mailbox::RequestPage(uint64_t offset) {
@@ -3927,6 +3948,21 @@ std::string DecodedPath(const char* path) {
 
 } // namespace
 
+std::string Mailbox::DeepNotes() const {
+    // the list's own state, for the report beside a failure: what it waits for and what it holds
+    std::string notes = "load " + std::to_string(loadRequest_) + (listPending_ ? " pending" : "") +
+                        (newList_ ? " new" : "") + (reloadPending_ ? " reload" : "") + " rows " +
+                        std::to_string(rowCount_) + " top " + std::to_string(ListView_GetTopIndex(list_)) + "; pages";
+    for (const Page& page : pages_) {
+        notes += " " + std::to_string(page.offset);
+    }
+    notes += "; asked";
+    for (const auto& [offset, request] : pageRequests_) {
+        notes += " " + std::to_string(offset) + ":" + std::to_string(request);
+    }
+    return notes;
+}
+
 bool Mailbox::DrawnCurrent() {
     // the rows in sight as drawn: each the message there, or blank while its page is not read
     int count = ListView_GetItemCount(list_);
@@ -4113,7 +4149,7 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
                            ",\"grouped\":" + (Grouped() ? "true" : "false") + ",\"unreadOnly\":" +
                            (UnreadOnly() ? "true" : "false") + ",\"tree\":[" + tree + "]" +
                            // a list chosen and not read yet: the rows drawn, dimmed, are still the list before's
-                           ",\"pending\":" + (newList_ ? "true" : "false") + "}";
+                           ",\"pending\":" + (newList_ ? "true" : "false") + ",\"notes\":" + JsonString(DeepNotes()) + "}";
         std::ofstream out(std::filesystem::path(words[1]), std::ios::binary);
         out << seen;
         return out.good() ? 11 : 10;

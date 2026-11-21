@@ -492,7 +492,7 @@ impl Mailbox {
             }
         };
         let changed = on(|this| {
-            if !this.reloading.get() {
+            if !this.reloading.get() && !this.list.filling() {
                 this.user_picked();
             }
             this.on_selection_changed();
@@ -1097,6 +1097,10 @@ impl Mailbox {
             reselect.selected = all.clone();
         } else if self.several() {
             reselect.selected = Selected::Listed(self.refs.borrow().clone());
+        } else if let Some(picked) = self.picked_not_shown() {
+            // a row clicked while the list was read (the pane is not told then): that row, not the message before
+            reselect.selected = Selected::Listed(vec![picked]);
+            reselect.hint = self.list.selected().map(|(at, _)| u64::from(at));
         } else if let Some(shown) = self.reader.message() {
             reselect.selected = Selected::Listed(vec![shown]);
             reselect.hint = self.list.selected().map(|(at, _)| u64::from(at));
@@ -1426,6 +1430,22 @@ impl Mailbox {
 
     /// Several rows are selected: the reading pane says how many messages, none is shown (one collapsed
     /// conversation's row shows its first message, though what is done to it is done to all of its messages)
+    /// The one row selected, when it is not the message the pane shows: picked while the list was read, when the
+    /// selection is not taken. None while the list drawn is the one before (dimmed), whose rows are not this list's,
+    /// and grouped, where a row stands for a conversation and the pane for one of its messages.
+    fn picked_not_shown(&self) -> Option<MessageRef> {
+        if self.list.selected_count() != 1 || self.list_load.dimmed() || self.view.borrow().grouped() {
+            return None;
+        }
+        // the message the row shows as drawn, not the row's place read again: new mail above moves the rows
+        let (_, drawn) = self.list.selected()?;
+        let picked = MessageRef {
+            folder: drawn.folder_id,
+            uid: drawn.info.uid,
+        };
+        (Some(picked) != self.reader.message()).then_some(picked)
+    }
+
     pub fn several(&self) -> bool {
         self.list.selected_count() > 1
     }
