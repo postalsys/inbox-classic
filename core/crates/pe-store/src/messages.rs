@@ -430,6 +430,22 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     })
 }
 
+/// Whether the search index takes some of what the trigger indexes of `m` otherwise than it is written
+/// ([`crate::fold::segment`]): the fields of [`crate::search::fts_columns`]
+fn indexed_segmented(m: &MessageInfo) -> bool {
+    [
+        &m.subject,
+        &m.from_name,
+        &m.from_address,
+        &m.sender_people,
+        &m.recipients,
+        &m.recipient_people,
+        &m.attachment_names,
+    ]
+    .into_iter()
+    .any(|text| crate::fold::segments(text))
+}
+
 impl Store {
     /// Adds messages to a folder. For a UID it has, only the flags are updated: within one
     /// UIDVALIDITY the rest of a message never changes.
@@ -465,10 +481,11 @@ impl Store {
         for m in messages {
             // a message new to the store goes into its conversation at once (one already here keeps its own), so its
             // row is stored with it and counted there once (schema.rs, the conversations' triggers)
-            let thread = if known.exists(params![folder, m.uid])? {
-                0
-            } else {
+            let new = !known.exists(params![folder, m.uid])?;
+            let thread = if new {
                 self.thread_of(account, &crate::threads::thread_keys(m))?
+            } else {
+                0
             };
             let flags = canonical_flags(&m.flags);
             statement.execute(params![
@@ -504,6 +521,9 @@ impl Store {
                 thread,
                 m.protection
             ])?;
+            if new && indexed_segmented(m) {
+                self.segment_stored(self.db.last_insert_rowid())?;
+            }
         }
         // a message read again (ON CONFLICT) has the server's flags now: what the server still owes back over them
         self.lay_owed_over(folder)?;

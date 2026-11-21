@@ -20,6 +20,7 @@ pe-mime = { path = "../crates/pe-mime" }
 pe-otp = { path = "../crates/pe-otp" }
 pe-pgp = { path = "../crates/pe-pgp" }
 pe-core = { path = "../crates/pe-core" }
+pe-store = { path = "../crates/pe-store" }
 pe-preview = { path = "../crates/pe-preview" }
 
 [[bin]]
@@ -118,6 +119,13 @@ bench = false
 [[bin]]
 name = "preview_pdf"
 path = "fuzz_targets/preview_pdf.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "store_segment"
+path = "fuzz_targets/store_segment.rs"
 test = false
 doc = false
 bench = false
