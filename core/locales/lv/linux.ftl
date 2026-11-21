@@ -96,7 +96,6 @@ gtk-files = { $count ->
     [one] { $count } fails
    *[other] { $count } faili
 }
-gtk-download-pictures = Lejupielādēt attēlus
 gtk-save-attachments-menu = Saglabāt pielikumus...
 
 ## The compose window

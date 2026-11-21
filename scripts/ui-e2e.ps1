@@ -547,9 +547,6 @@ function InFront([IntPtr]$a, [IntPtr]$b) {
     }
     return $false
 }
-# presses a button as its click ends up: BN_CLICKED to its window, which works whether or not that window is active
-# (BM_CLICK can be lost when it is not, as on the CI runner). A disabled button can not be pressed, as with the mouse:
-# one is waited for a few seconds (a window turns its buttons on as it fills in), then the harness says it stayed off
 # whether control `id` of `window` is a push button that Tab reaches (not a link drawn on a button, not a static)
 function PushButton([IntPtr]$window, [int]$id) {
     $control = [Native.Win]::GetDlgItem($window, $id)
@@ -559,6 +556,9 @@ function PushButton([IntPtr]$window, [int]$id) {
     $style = [Native.Win]::GetWindowLong($control, -16)
     $class.ToString() -eq 'Button' -and ($style -band 0xF) -le 1 -and ($style -band 0x00010000) -ne 0
 }
+# presses a button as its click ends up: BN_CLICKED to its window, which works whether or not that window is active
+# (BM_CLICK can be lost when it is not, as on the CI runner). A disabled button can not be pressed, as with the mouse:
+# one is waited for a few seconds (a window turns its buttons on as it fills in), then the harness says it stayed off
 function Click([IntPtr]$window, [int]$id) {
     $button = [Native.Win]::GetDlgItem($window, $id)
     if ($button -ne [IntPtr]::Zero -and -not [Native.Win]::IsWindowEnabled($button)) {
@@ -2222,7 +2222,8 @@ public static class Dragger {
     $ruleFind = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
     $inboxRows = Rows
     [void][Native.Win]::SendMessage($ruleFind, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
-    Check ([bool](WaitFor { (Visible $main 208) -and (Visible $main $IDC_SEARCH_RULE) } 10) -and (PushButton $main $IDC_SEARCH_RULE) -and (PushButton $main 209)) 'the search bar has Create Rule and Clear search, push buttons'
+    $IDC_SEARCH_CLEAR = 209
+    Check ([bool](WaitFor { (Visible $main 208) -and (Visible $main $IDC_SEARCH_RULE) } 10) -and (PushButton $main $IDC_SEARCH_RULE) -and (PushButton $main $IDC_SEARCH_CLEAR)) 'the search bar has Create Rule and Clear search, push buttons'
     Click $main $IDC_SEARCH_RULE
     $editor = WaitShown 'InboxClassicRule'
     Check ($editor -and (GetText $editor $IDC_RULE_QUERY) -eq 'lunch') "Create Rule opens the editor with the words searched for ($(if ($editor) { GetText $editor $IDC_RULE_QUERY }))"
@@ -4504,7 +4505,8 @@ public static class Dragger {
                (& $logged 1) -match (Pattern $en['agent-log-sent'] @{ subject = 'Lunch on Friday?'; to = 'pat@example.net' }) -and (& $logged 4) -match (Pattern $en['agent-log-read'])) "and what its agent did, newest first ($(@(0..4 | ForEach-Object { & $logged $_ }) -join '; '))"
         # the colour of a flag and a conversation watched, by the agent
         Check ((& $logged 2) -match "^Watched the conversation $([char]0x201C)" -and (& $logged 3) -match "^Flagged $([char]0x201C).+$([char]0x201D) blue$") "a flag's colour and a watched conversation are listed ($(& $logged 2); $(& $logged 3))"
-        Check (PushButton $agents 637) 'How to Connect an Agent is a push button'
+        $IDC_AGENTS_SETUP = 637
+        Check (PushButton $agents $IDC_AGENTS_SETUP) 'How to Connect an Agent is a push button'
         Shot $agents 'agents-6-window'
         # the message sent selected (the row under the draft): Undo takes it out of the Outbox before it goes
         Key $log $VK_HOME
@@ -7352,8 +7354,9 @@ public static class Dragger {
         }
         # the address typed goes to the provider as the account to sign in to
         SetText $first 101 'alice@example.com'
-        Check (PushButton $first 122) 'More sign-in options is a push button'
-        Click $first 122
+        $IDC_SIGN_IN_MORE = 122
+        Check (PushButton $first $IDC_SIGN_IN_MORE) 'More sign-in options is a push button'
+        Click $first $IDC_SIGN_IN_MORE
         $menu = WaitWindow '#32768' $null 10
         Check ($null -ne $menu) 'More sign-in options opens a menu'
         if ($menu) {

@@ -94,7 +94,6 @@ gtk-files = { $count ->
     [few] { $count } datoteke
    *[other] { $count } datotek
 }
-gtk-download-pictures = Prenesi slike
 gtk-save-attachments-menu = Shrani priponke...
 
 ## The compose window

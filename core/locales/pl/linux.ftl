@@ -101,7 +101,6 @@ gtk-files = { $count ->
     [many] { $count } plików
    *[other] { $count } plików
 }
-gtk-download-pictures = Pobierz obrazy
 gtk-save-attachments-menu = Zapisz załączniki...
 
 ## The compose window

@@ -437,16 +437,8 @@ void Mailbox::LayoutList() {
     int width = list.right - list.left;
     LayoutUndoneBar(list);
     if (IsWindowVisible(searchBar_)) {
-        // as tall as a push button needs, as the reading pane's bars
-        int height = Scale(28), inset = Scale(3);
-        MoveWindow(searchBar_, list.left, list.top, width, height, TRUE);
-        // the buttons inside the bar, at its right, each as wide as its words: Create Rule, then Clear search
-        int clearWidth = ButtonWidth({GetWindowString(searchClear_)}), ruleWidth = ButtonWidth({GetWindowString(searchRule_)});
-        MoveWindow(searchClear_, list.right - inset - clearWidth, list.top + inset, clearWidth, height - 2 * inset, TRUE);
-        SetWindowPos(searchClear_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        MoveWindow(searchRule_, list.right - inset - clearWidth - Scale(4) - ruleWidth, list.top + inset, ruleWidth, height - 2 * inset, TRUE);
-        SetWindowPos(searchRule_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        list.top += height + Scale(2);
+        // as the reading pane's bars, Create Rule left of Clear search
+        list.top += PlaceBar(searchBar_, {searchClear_, searchRule_}, list.left, list.top, width) + Scale(2);
     }
     // the Columns list has no headings: "Sorted by" over it says the order, and changes it
     ShowWindow(sortButton_, columns_ ? SW_SHOW : SW_HIDE);

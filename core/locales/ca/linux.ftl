@@ -90,7 +90,6 @@ gtk-files = { $count ->
     [one] { $count } fitxer
    *[other] { $count } fitxers
 }
-gtk-download-pictures = Baixa les imatges
 gtk-save-attachments-menu = Desa els fitxers adjunts...
 
 ## La finestra de redacció

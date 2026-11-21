@@ -528,7 +528,7 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     int pad = Scale(10), width = Scale(440), rowHeight = Scale(22);
     // the labels and the texts measured: longer words make the column and the rows grow, not get cut
     int labelWidth = LabelWidth({nameLabel, emailLabel}, 110);
-    int buttonHeight = Scale(40), gap = Scale(12), reasonHeight = Scale(18), linkHeight = Scale(20);
+    int buttonHeight = Scale(40), gap = Scale(12), reasonHeight = Scale(18), pushHeight = Scale(25);
     // the buttons centered, each as wide as its picture is at this height; under one that is off, its words wrap
     // beside Why? (the row as tall as the longest of them)
     std::vector<HBITMAP> pictures;
@@ -550,14 +550,14 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     int introHeight = std::max(Scale(30), static_cast<int>(MeasureText(offer.intro, width - 2 * pad).cy) + Scale(4));
     int otherTextHeight = std::max(Scale(30), static_cast<int>(MeasureText(other, width - 2 * pad).cy) + Scale(4));
     int buttonsHeight = shown.empty() ? 0 : buttonHeight + (anyOff ? reasonHeight : 0) + Scale(8);
-    int moreHeight = offer.more ? Scale(25) + Scale(6) : 0;
+    int moreHeight = offer.more ? pushHeight + Scale(6) : 0;
     int otherHeight = offer.fields ? Scale(12) + otherTextHeight + 2 * (rowHeight + Scale(6)) : 0;
     int buttonWidth = ButtonWidth({offer.nextLabel}, 110), cancelWidth = ButtonWidth({cancel});
     // the import button at the left of the button row, or over it when it does not fit beside Next and Cancel
     std::wstring importText = core::T(PE_TEXT_UI_SETUP_FIRST_RUN);
     int importWidth = offer.importLink ? ButtonWidth({importText}) : 0;
     bool importAbove = offer.importLink && pad + importWidth + Scale(12) > width - pad - buttonWidth - cancelWidth - Scale(6);
-    int importHeight = importAbove ? Scale(25) + Scale(8) : 0;
+    int importHeight = importAbove ? pushHeight + Scale(8) : 0;
     int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + importHeight + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kStartClass, core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), width, height);
     StartState state{core, &apps};
@@ -596,7 +596,7 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
         // a push button: it opens the list of sign-in apps
         int moreWidth = ButtonWidth({more});
         state.more = CreateChild(dialog, L"BUTTON", more.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SIGN_IN_MORE,
-                                 {pad, top, pad + moreWidth, top + Scale(25)});
+                                 {pad, top, pad + moreWidth, top + pushHeight});
         top += moreHeight;
     }
     top += Scale(6);
@@ -623,7 +623,7 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     if (offer.importLink) {
         int importTop = importAbove ? buttonTop - importHeight : buttonTop;
         HWND import = CreateChild(dialog, L"BUTTON", importText.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SETUP_FIRST_RUN,
-                                  {pad, importTop, pad + importWidth, importTop + Scale(25)});
+                                  {pad, importTop, pad + importWidth, importTop + pushHeight});
         // after the fields and before Next in the Tab order, as it is placed
         SetWindowPos(import, state.emailInput ? state.emailInput : HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
     }

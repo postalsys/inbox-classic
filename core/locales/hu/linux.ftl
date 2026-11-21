@@ -88,7 +88,6 @@ gtk-files = { $count ->
     [one] { $count } fájl
    *[other] { $count } fájl
 }
-gtk-download-pictures = Képek letöltése
 gtk-save-attachments-menu = Mellékletek mentése...
 
 ## The compose window

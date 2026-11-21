@@ -300,20 +300,25 @@ final class Reader: NSObject {
 
     // ---- the pictures bar ----
 
+    /// Download Pictures on the bar, as a click does: the combo button beside the sender's choices, or the button
+    /// alone (the UI test)
+    func pressDownloadPictures() {
+        let download: NSControl = picturesChoices.isHidden ? picturesDownload : picturesChoices
+        download.sendAction(download.action, to: download.target)
+    }
+
     private func setUpPicturesButtons() {
         let label = Command.pictures.label
         picturesChoices.title = label
         picturesChoices.style = .split
-        picturesChoices.controlSize = .small
-        // the combo button keeps the regular font at the small size: the plain button's, so the two match
-        picturesChoices.font = .systemFont(ofSize: NSFont.systemFontSize(for: .small))
+        picturesChoices.makeSmall()
         picturesChoices.target = self
         picturesChoices.action = #selector(downloadClicked)
         picturesChoices.menu = NSMenu()
         picturesChoices.setAccessibilityIdentifier("reader.pictures.choices")
         picturesDownload.title = label
         picturesDownload.bezelStyle = .push
-        picturesDownload.controlSize = .small
+        picturesDownload.makeSmall()
         picturesDownload.target = self
         picturesDownload.action = #selector(downloadClicked)
         picturesDownload.setAccessibilityIdentifier("reader.pictures.download")
@@ -1118,7 +1123,7 @@ final class InfoBar: NSView {
         // as tall as its lines, in the middle of the bar beside taller buttons
         words.setHuggingPriority(.required, for: .vertical)
         var views: [NSView] = [image, words]
-        // takes what is left: a button goes to the trailing edge, a link right after the words
+        // takes what is left: the button goes to the trailing edge
         let spacer = NSView()
         spacer.setContentHuggingPriority(.init(1), for: .horizontal)
         spacer.setContentCompressionResistancePriority(.init(1), for: .horizontal)
@@ -1209,8 +1214,7 @@ final class InfoBar: NSView {
 
     /// a small button, as the pictures bar's, for a bar stacked with it
     func smallButton() {
-        action?.controlSize = .small
-        action?.font = .systemFont(ofSize: NSFont.systemFontSize(for: .small))
+        action?.makeSmall()
     }
 
     /// the button's words; empty hides it (a bar that only says something)
@@ -1398,4 +1402,13 @@ final class ReaderStack: NSStackView {
 /// select all of it on the way from the list to the message
 final class HeaderText: NSTextField {
     override var canBecomeKeyView: Bool { false }
+}
+
+extension NSControl {
+    /// the small size the bars' buttons share, and its font: a combo button keeps the regular font otherwise, so the
+    /// buttons side by side would not match
+    func makeSmall() {
+        controlSize = .small
+        font = .systemFont(ofSize: NSFont.systemFontSize(for: .small))
+    }
 }

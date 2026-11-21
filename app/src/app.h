@@ -160,6 +160,10 @@ SIZE MeasureText(const std::wstring& text, int wrapWidth = 0, UINT flags = 0);
 // a push button wide enough for the longest of `labels`, at least `least` pixels at 96 DPI
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least = 80);
 int ButtonWidth(const std::vector<std::wstring>& labels, int least = 80);
+// an information bar laid out across `width` from `left`, `top`: its words `bar`, and its visible `controls` at its
+// right inside it, the rightmost first, each as wide as its words (a drop-down arrow without words narrow); all bars
+// one height, so stacked bars line up and a long translation shortens the words, never a button. Its height
+int PlaceBar(HWND bar, std::initializer_list<HWND> controls, int left, int top, int width);
 // a column of labels as wide as its widest label plus `margin`, at least `least` (both unscaled)
 int LabelWidth(std::initializer_list<std::wstring> labels, int least, int margin = 8);
 int LabelWidth(const std::vector<std::wstring>& labels, int least, int margin = 8);
@@ -186,9 +190,6 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
 void DrawLinkButton(const DRAWITEMSTRUCT& item);
 // a button that looks like a link (draw it with DrawLinkButton); Tab reaches it and Enter or Space clicks it
 HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& bounds);
-// a label clicked as a link (SS_NOTIFY) that the keyboard reaches too: a Tab stop with a focus rectangle, Enter or Space
-// clicks it (STN_CLICKED to its window)
-void KeyboardLink(HWND label);
 // Alt with a letter in a window that is no dialog (the main window, a message window): the push button anywhere in
 // `root` whose text marks that letter (&Details...), visible and enabled, clicked; false when there is none
 bool ClickMnemonic(HWND root, wchar_t letter);

@@ -266,8 +266,7 @@ public final class Mailbox: NSObject {
         // a rule that sorts what the search finds as it arrives
         let createRule = NSButton(title: Text.uiCreateRule.opens, target: self, action: #selector(createRuleFromSearch))
         createRule.bezelStyle = .push
-        createRule.controlSize = .small
-        createRule.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        createRule.makeSmall()
         createRule.setAccessibilityIdentifier("search.rule")
         searchBar.smallButton()
         searchBar.setAccessories([createRule])

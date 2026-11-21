@@ -93,7 +93,6 @@ gtk-files = { $count ->
     [one] { $count } fil
    *[other] { $count } filer
 }
-gtk-download-pictures = Hent billeder
 gtk-save-attachments-menu = Gem vedhæftede filer...
 
 ## The compose window

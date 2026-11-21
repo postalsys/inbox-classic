@@ -95,7 +95,6 @@ gtk-files = { $count ->
     [few] { $count } fișiere
    *[other] { $count } de fișiere
 }
-gtk-download-pictures = Descărcare imagini
 gtk-save-attachments-menu = Salvare atașări...
 
 ## The compose window

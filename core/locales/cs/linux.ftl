@@ -89,7 +89,6 @@ gtk-files = { $count ->
     [few] { $count } soubory
    *[other] { $count } souborů
 }
-gtk-download-pictures = Stáhnout obrázky
 gtk-save-attachments-menu = Uložit přílohy...
 
 ## The compose window

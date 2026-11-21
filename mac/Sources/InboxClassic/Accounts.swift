@@ -256,7 +256,8 @@ private final class StartPage: NSObject {
             width = max(width, ceil(buttons.fittingSize.width))
         }
         if offer.more {
-            let more = pushButton(Text.macMoreSignInOptions.text, action: #selector(chooseMore(_:)))
+            let more = NSButton(title: Text.macMoreSignInOptions.text, target: self, action: #selector(chooseMore(_:)))
+            more.bezelStyle = .push
             more.setAccessibilityIdentifier("account.more")
             moreButton = more
             rows.append(more)
@@ -280,7 +281,8 @@ private final class StartPage: NSObject {
             line.boxType = .separator
             rows.append(line)
             // a push button on its own row: beside Cancel and Next its words would not fit
-            let importButton = pushButton(Text.uiSetupFirstRun.opens, action: #selector(importClicked))
+            let importButton = NSButton(title: Text.uiSetupFirstRun.opens, target: self, action: #selector(importClicked))
+            importButton.bezelStyle = .push
             importButton.setAccessibilityIdentifier("account.import")
             rows.append(importButton)
         }
@@ -307,13 +309,6 @@ private final class StartPage: NSObject {
         buttons.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
         window.setContentSize(NSSize(width: width + 40, height: stack.fittingSize.height))
         window.initialFirstResponder = offer.fields ? nameField : nil
-    }
-
-    /// a push button that starts something (the sign-in apps, the import)
-    private func pushButton(_ title: String, action: Selector) -> NSButton {
-        let button = NSButton(title: title, target: self, action: action)
-        button.bezelStyle = .push
-        return button
     }
 
     private func linkButton(_ title: String, action: Selector) -> NSButton {

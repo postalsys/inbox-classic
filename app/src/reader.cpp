@@ -270,7 +270,7 @@ void Reader::Create(HWND parent, PeCore* core) {
     // its Download Pictures at its right end, and the drop-down arrow beside it, as Outlook's bar has: the Always
     // choices
     picturesButton_ = CreateChild(parent, L"BUTTON", core::Plain(PE_TEXT_CMD_PICTURES).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_PICTURES, {});
-    picturesMenu_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | SS_NOTIFY | WS_BORDER, IDC_PICTURES_MENU, {});
+    picturesMenu_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW, IDC_PICTURES_MENU, {});
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
     ShowWindow(picturesButton_, SW_HIDE);
@@ -289,8 +289,6 @@ void Reader::Create(HWND parent, PeCore* core) {
     listButton_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_UNSUBSCRIBE_ASK).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_UNSUBSCRIBE, {});
     ShowWindow(listBar_, SW_HIDE);
     ShowWindow(listButton_, SW_HIDE);
-    // the pictures bar's arrow: Tab reaches it, Enter opens its menu
-    KeyboardLink(picturesMenu_);
     // the message itself is a Tab stop too: its host hands the keyboard to the WebView2
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN | WS_TABSTOP, 0, {});
     SetWindowSubclass(previewHost_, BodyHostProc, 0, reinterpret_cast<DWORD_PTR>(&preview_));
@@ -457,17 +455,9 @@ void Reader::ShowRetry(bool shown) {
     }
 }
 
-bool Reader::OnSetCursor(HWND window) const {
+bool Reader::OnSetCursor(HWND) const {
     // a reply or an attachment that takes long to read
-    if (BusyCursor()) {
-        return true;
-    }
-    if (window != picturesMenu_) {
-        return false;
-    }
-    // the pictures bar's arrow is clicked like a button
-    SetCursor(LoadCursorW(nullptr, IDC_HAND));
-    return true;
+    return BusyCursor();
 }
 
 bool Reader::OnCtlColor(HWND window, HDC dc, LRESULT& brush) const {
@@ -526,31 +516,15 @@ void Reader::Layout() {
     if (int stripHeight = PlaceStrip(reader.left, top, width); stripHeight > 0) {
         top += stripHeight + Scale(2);
     }
-    // a bar of the pane: its words across, its push button (and the pictures bar's arrow) at the right inside it, all
-    // of one height, so stacked bars line up; a long translation shortens the words, never the button
-    auto placeBar = [&](HWND bar, HWND button, HWND arrow) {
-        int barHeight = Scale(28), inset = Scale(3), right = reader.left + width - inset;
-        MoveWindow(bar, reader.left, top, width, barHeight, TRUE);
-        for (HWND control : {arrow, button}) {
-            if (!control || !IsWindowVisible(control)) {
-                continue;
-            }
-            int controlWidth = control == arrow ? Scale(18) : ButtonWidth({GetWindowString(control)});
-            MoveWindow(control, right - controlWidth, top + inset, controlWidth, barHeight - 2 * inset, TRUE);
-            SetWindowPos(control, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-            right -= controlWidth;
-        }
-        top += barHeight + Scale(2);
-    };
-    // in one order: the download that failed, the pictures, the mailing list
+    // the bars in one order: the download that failed, the pictures (Download Pictures and its arrow), the mailing list
     if (IsWindowVisible(retry_)) {
-        placeBar(retry_, retryButton_, nullptr);
+        top += PlaceBar(retry_, {retryButton_}, reader.left, top, width) + Scale(2);
     }
     if (IsWindowVisible(pictures_)) {
-        placeBar(pictures_, picturesButton_, picturesMenu_);
+        top += PlaceBar(pictures_, {picturesMenu_, picturesButton_}, reader.left, top, width) + Scale(2);
     }
     if (IsWindowVisible(listBar_)) {
-        placeBar(listBar_, listButton_, nullptr);
+        top += PlaceBar(listBar_, {listButton_}, reader.left, top, width) + Scale(2);
     }
     MoveWindow(previewHost_, reader.left, top, width, std::max(0L, reader.bottom - top), TRUE);
     RECT inner;
@@ -1445,12 +1419,20 @@ void Reader::OpenInCalendar() {
 
 bool Reader::OnDrawItem(const DRAWITEMSTRUCT& item) {
     if (item.hwndItem == picturesMenu_) {
-        // a small arrow down on the bar's color, as a drop-down button's
-        FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_INFOBK));
-        int cx = (item.rcItem.left + item.rcItem.right) / 2, cy = (item.rcItem.top + item.rcItem.bottom) / 2;
+        // a push button with a small arrow down, the drop-down part beside Download Pictures
+        RECT face = item.rcItem;
+        bool pushed = (item.itemState & ODS_SELECTED) != 0;
+        DrawFrameControl(item.hDC, &face, DFC_BUTTON, DFCS_BUTTONPUSH | (pushed ? DFCS_PUSHED : 0));
+        if (item.itemState & ODS_FOCUS) {
+            RECT focus = item.rcItem;
+            InflateRect(&focus, -Scale(3), -Scale(3));
+            DrawFocusRect(item.hDC, &focus);
+        }
+        int shift = pushed ? 1 : 0;
+        int cx = (item.rcItem.left + item.rcItem.right) / 2 + shift, cy = (item.rcItem.top + item.rcItem.bottom) / 2 + shift;
         int half = Scale(4);
         POINT points[] = {{cx - half, cy - half / 2}, {cx + half + 1, cy - half / 2}, {cx, cy + half / 2 + 1}};
-        HBRUSH ink = CreateSolidBrush(GetSysColor(COLOR_INFOTEXT));
+        HBRUSH ink = CreateSolidBrush(GetSysColor(COLOR_BTNTEXT));
         HGDIOBJ oldBrush = SelectObject(item.hDC, ink);
         HGDIOBJ oldPen = SelectObject(item.hDC, GetStockObject(NULL_PEN));
         Polygon(item.hDC, points, 3);

@@ -828,10 +828,7 @@ final class UITest {
         }
 
         step("pictures from the internet")
-        // Download Pictures on the bar: the combo button beside the sender's choices, or the button alone
-        let reader = main.mailbox.reader
-        let download: NSControl = reader.picturesChoices.isHidden ? reader.picturesDownload : reader.picturesChoices
-        onMain { _ = download.sendAction(download.action, to: download.target) }
+        onMain { self.main.mailbox.reader.pressDownloadPictures() }
         check(await waitUntil(10) { pictures?.isHidden == true }, "Download Pictures shows the pictures, and the bar goes away")
         await pause(3)
         await shot(main.window, "read-2-pictures")

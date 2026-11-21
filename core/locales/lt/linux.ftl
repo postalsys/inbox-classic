@@ -88,7 +88,6 @@ gtk-files = { $count ->
     [few] { $count } failai
    *[other] { $count } failų
 }
-gtk-download-pictures = Atsisiųsti paveikslėlius
 gtk-save-attachments-menu = Įrašyti priedus...
 
 ## The compose window

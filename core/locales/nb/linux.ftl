@@ -89,7 +89,6 @@ gtk-files = { $count ->
     [one] { $count } fil
    *[other] { $count } filer
 }
-gtk-download-pictures = Last ned bilder
 gtk-save-attachments-menu = Lagre vedlegg...
 
 ## The compose window

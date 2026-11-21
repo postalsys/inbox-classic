@@ -89,7 +89,6 @@ gtk-files = { $count ->
     [one] { $count } dosya
    *[other] { $count } dosya
 }
-gtk-download-pictures = Resimleri İndir
 gtk-save-attachments-menu = Ekleri Kaydet...
 
 ## İleti yazma penceresi

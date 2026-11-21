@@ -90,7 +90,6 @@ gtk-files = { $count ->
     [one] { $count } αρχείο
    *[other] { $count } αρχεία
 }
-gtk-download-pictures = Λήψη εικόνων
 gtk-save-attachments-menu = Αποθήκευση συνημμένων...
 
 ## The compose window
