@@ -697,6 +697,53 @@ pub unsafe extern "C" fn pe_list_view_restored(
     }
 }
 
+/// A row a window draws: its place in the list and the message there, `folder` 0 when it is drawn blank
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct PeDrawnRow {
+    pub row: u64,
+    pub folder: i64,
+    pub uid: u64,
+}
+
+/// Whether the window draws the list of `view` as the store has it now: `rows` rows, and `drawn` (`count` of them,
+/// those in sight) each the message there. What a test waits for before it looks (the deep test's hooks). False for
+/// NULL or on failure.
+///
+/// # Safety
+/// `core` and `view` must be NULL or live; `drawn` NULL or `count` valid rows.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_drawn_current(
+    core: *const PeCore,
+    view: *const PeListView,
+    rows: u64,
+    drawn: *const PeDrawnRow,
+    count: usize,
+) -> bool {
+    let drawn: &[PeDrawnRow] = match (drawn.is_null(), count) {
+        (_, 0) => &[],
+        (true, _) => return false,
+        // SAFETY: as the caller guarantees
+        (false, _) => unsafe { std::slice::from_raw_parts(drawn, count) },
+    };
+    let drawn: Vec<(u64, Option<pe_store::MessageRef>)> = drawn
+        .iter()
+        .map(|d| {
+            let at = (d.folder != 0).then_some(pe_store::MessageRef {
+                folder: d.folder,
+                uid: d.uid,
+            });
+            (d.row, at)
+        })
+        .collect();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        listed(core, view, false, |core, view| {
+            view.drawn_current(core, rows, &drawn).unwrap_or(false)
+        })
+    }
+}
+
 /// Whether `action` (to `to`) on the messages of `summary` takes them out of the list (Ignore Conversation does while
 /// it hides ignored conversations): then the app selects the row after them, as it does after Delete
 ///

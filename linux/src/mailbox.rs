@@ -1974,6 +1974,12 @@ impl Mailbox {
             || !self.actions.borrow().is_empty()
     }
 
+    /// Whether the list drawn is the one before, dimmed while the list chosen is read
+    #[cfg(feature = "e2e")]
+    pub fn list_dimmed(&self) -> bool {
+        self.list_load.dimmed()
+    }
+
     /// The bar over the list that says the server did not do what was asked, as the core words it (the rows came
     /// back with the `FolderChanged` before it); None when it is not shown
     #[cfg(feature = "e2e")]

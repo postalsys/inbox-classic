@@ -290,22 +290,15 @@ async fn settle(seconds: u64) -> Result<(), String> {
     if !wait_until(seconds, quiet).await {
         return Err(format!("still busy after {seconds} s"));
     }
-    // the rows GTK binds after the list is drawn ask for their pages then: filled within a few seconds, or the check
-    // says which stayed blank
-    wait_until(5, || quiet() && !blank_in_sight()).await;
+    // then the rows drawn the list as the store has it now (the core says, scripts/ui-e2e/DEEP.md): whatever is still
+    // on its way to the window gets there; a row left blank or a list left behind is the checks' to report
+    let main = shell().main();
+    wait_until(CURRENT_WITHIN, || quiet() && main.list.drawn_current()).await;
     Ok(())
 }
 
-/// Whether a row on screen has no message yet (its page not read); the rows at either edge left out, as
-/// [`observe`] leaves them out when blank
-fn blank_in_sight() -> bool {
-    let list = &shell().main().list;
-    let rows = list.rows();
-    list.rows_in_sight().is_some_and(|(first, last)| {
-        let last = last.min(rows.saturating_sub(1));
-        (first + 1..last).any(|row| list.message_at(row).is_none())
-    })
-}
+/// How long the rows drawn may take to be the list once all is quiet, in seconds
+const CURRENT_WITHIN: u64 = 10;
 
 /// What the window shows, read off its controls
 fn observe() -> Seen {
@@ -325,7 +318,7 @@ fn observe() -> Seen {
         .map(|(first, last)| {
             (first..=last.min(rows.saturating_sub(1)))
                 .filter(|_| rows > 0)
-                .map(|row| match main.list.message_at(row) {
+                .map(|row| match main.list.drawn_at(row) {
                     Some(m) => Row {
                         row: u64::from(row),
                         blank: false,
@@ -398,5 +391,7 @@ fn observe() -> Seen {
         grouped: view.grouped(),
         unread_only: view.show() == pe_store::Show::Unread,
         tree,
+        // the list before, dimmed while the one chosen is read: its rows are not this list's
+        pending: main.list_dimmed(),
     }
 }

@@ -3927,6 +3927,19 @@ std::string DecodedPath(const char* path) {
 
 } // namespace
 
+bool Mailbox::DrawnCurrent() {
+    // the rows in sight as drawn: each the message there, or blank while its page is not read
+    int count = ListView_GetItemCount(list_);
+    int top = ListView_GetTopIndex(list_);
+    int last = std::min(count, top + ListView_GetCountPerPage(list_) + 1);
+    std::vector<PeDrawnRow> drawn;
+    for (int row = top; row < last; row++) {
+        const PeMessage* m = CachedRow(row);
+        drawn.push_back({static_cast<uint64_t>(row), m ? m->folder : 0, m ? m->uid : 0});
+    }
+    return pe_list_view_drawn_current(core_, view_.get(), static_cast<uint64_t>(count), drawn.data(), drawn.size());
+}
+
 LRESULT Mailbox::TestDeep(const std::wstring& request) {
     std::vector<std::wstring> words = SplitTabs(request);
     const std::wstring& verb = words[0];
@@ -4030,14 +4043,13 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
         return 11;
     }
     if (verb == L"quiet") {
-        // the driver's question is a sent message, answered before what is posted: the core's events still in the
-        // queue (a folder changed, a page read) are work under way too, as is a reload gathering changes on its timer
-        MSG waiting;
-        bool posted = PeekMessageW(&waiting, nullptr, WM_APP, 0xBFFF, PM_NOREMOVE | PM_NOYIELD);
-        bool listed = !listPending_ && !newList_ && !reloadPending_ && !loadRequest_ && pageRequests_.empty();
-        // rows ask for their pages as they are painted: a list still to be painted has not asked yet
-        listed = listed && !GetUpdateRect(list_, nullptr, FALSE);
-        return !posted && pe_quiet(core_) && listed ? 11 : 10;
+        // the core quiet and no load of the list under way (it selects again)
+        return pe_quiet(core_) && !loadRequest_ ? 11 : 10;
+    }
+    if (verb == L"current") {
+        // the rows drawn the list as the store has it now: whatever is still on its way to the window (an event, a
+        // reload gathering changes, a page, a paint) leaves them other than the core reads them
+        return DrawnCurrent() ? 11 : 10;
     }
     if (verb == L"observe" && words.size() >= 2) {
         // the folders' places, for the messages' account and path
@@ -4080,10 +4092,6 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
         int count = ListView_GetItemCount(list_);
         int top = ListView_GetTopIndex(list_);
         int last = std::min(count, top + ListView_GetCountPerPage(list_) + 1);
-        // a list chosen and not read yet: the rows drawn, dimmed, are still the list before's, none of this one's
-        if (newList_) {
-            last = top;
-        }
         std::string sight;
         for (int row = top; row < last; row++) {
             const PeMessage* m = CachedRow(row);
@@ -4103,7 +4111,9 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
         std::string seen = "{\"list\":" + list + ",\"rows\":" + std::to_string(count) + ",\"sight\":[" + sight +
                            "],\"selected\":[" + selected + "],\"shown\":" + message(reader_.Folder(), reader_.Uid()) +
                            ",\"grouped\":" + (Grouped() ? "true" : "false") + ",\"unreadOnly\":" +
-                           (UnreadOnly() ? "true" : "false") + ",\"tree\":[" + tree + "]}";
+                           (UnreadOnly() ? "true" : "false") + ",\"tree\":[" + tree + "]" +
+                           // a list chosen and not read yet: the rows drawn, dimmed, are still the list before's
+                           ",\"pending\":" + (newList_ ? "true" : "false") + "}";
         std::ofstream out(std::filesystem::path(words[1]), std::ios::binary);
         out << seen;
         return out.good() ? 11 : 10;

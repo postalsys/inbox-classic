@@ -790,6 +790,8 @@ public:
     // plus 10 for `account`. `observe <file>` writes what the window shows to the file as JSON, in the words of
     // core/crates/pe-deep/src/model.rs
     LRESULT TestDeep(const std::wstring& request);
+    // whether the rows drawn are the list as the core reads it now (the deep test's quiet)
+    bool DrawnCurrent();
     // the accounts changed: builds the tree again
     void Reload();
     // a contact's picture changed: the rows (and their picture keys) read again, the selection kept

@@ -110,7 +110,9 @@ function AnswerYes {
         Start-Sleep -Milliseconds 100
     }
 }
-# nothing under way: the core quiet and the list read, then Send/Recv as a barrier, then quiet again
+# nothing under way: the core quiet and the list read, then Send/Recv as a barrier, then quiet again; then the rows
+# drawn the list as the store has it now (the core says, scripts/ui-e2e/DEEP.md), within 10 s, or the checks report
+# what is left
 function Settle([int]$seconds) {
     foreach ($round in 1..2) {
         $until = (Get-Date).AddSeconds($seconds)
@@ -119,6 +121,10 @@ function Settle([int]$seconds) {
             Start-Sleep -Milliseconds 100
         }
         if ($round -eq 1) { [void](Ask 'barrier') }
+    }
+    $until = (Get-Date).AddSeconds(10)
+    while ((Get-Date) -lt $until -and -not ((Ask 'quiet') -eq 11 -and (Ask 'current') -eq 11)) {
+        Start-Sleep -Milliseconds 100
     }
 }
 function Observe {
@@ -213,6 +219,16 @@ while ($null -ne ($line = [Console]::In.ReadLine())) {
             $p = Get-Process -Id $process.Id
             Reply ('{"ok":true,"memory_kib":' + [int64]($p.WorkingSet64 / 1024) + ',"open_files":' + $p.HandleCount + '}')
         } elseif ($request.screenshot) {
+            # the whole screen, so what covers the window shows too
+            Add-Type -AssemblyName System.Drawing, System.Windows.Forms
+            $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+            try {
+                [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+                $bitmap.Save([string]$request.screenshot, [System.Drawing.Imaging.ImageFormat]::Png)
+            } finally {
+                $bitmap.Dispose()
+            }
             Reply '{"ok":true}'
         } else {
             Act $request

@@ -1108,6 +1108,31 @@ public final class Mailbox: NSObject {
         }
     }
 
+    /// a row as drawn: its message when its page is here, nil while it is not, asking for nothing (what a test looks
+    /// at, so that looking does not fill a row the window left blank)
+    func drawnRow(_ index: Int) -> Message? {
+        guard index >= 0, UInt64(index) < rows else { return nil }
+        let offset = UInt64(index) / pageSize * pageSize
+        guard let page = pages.first(where: { $0.offset == offset }) else { return nil }
+        let row = Int(UInt64(index) - offset)
+        return row < page.rows.count ? page.rows[row] : nil
+    }
+
+    /// whether the rows drawn are the list as the core reads it now (the deep test's quiet): whatever is still on
+    /// its way to the window leaves them other than the core reads them
+    func drawnCurrent() -> Bool {
+        let sight = list.rows(in: list.visibleRect)
+        let end = min(sight.location + sight.length, Int(rows))
+        var drawn: [PeDrawnRow] = []
+        if sight.location < end {
+            for row in sight.location..<end {
+                let m = drawnRow(row)
+                drawn.append(PeDrawnRow(row: UInt64(row), folder: m?.folder ?? 0, uid: m?.uid ?? 0))
+            }
+        }
+        return pe_list_view_drawn_current(core.handle, listView.handle, rows, drawn, drawn.count)
+    }
+
     func row(_ index: Int) -> Message? {
         guard index >= 0, UInt64(index) < rows else { return nil }
         let offset = UInt64(index) / pageSize * pageSize

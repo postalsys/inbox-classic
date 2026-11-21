@@ -735,6 +735,40 @@ impl MessageList {
         sight(&self.widget, &self.view, &self.rows_view, self.model.n_items())
     }
 
+    /// The message drawn at `position`: its page's when it is here, None while it is not, asking for nothing (what a
+    /// test looks at, so that looking does not fill a row the window left blank)
+    #[cfg(feature = "e2e")]
+    pub fn drawn_at(&self, position: u32) -> Option<Message> {
+        let offset = position / PAGE * PAGE;
+        let pages = self.model.imp().pages.borrow();
+        let (_, rows) = pages.iter().find(|(at, _)| *at == offset)?;
+        rows.get((position - offset) as usize)?.with(Message::clone)
+    }
+
+    /// Whether the rows drawn are the list as the core reads it now (the deep test's quiet): the rows strictly inside
+    /// the estimate of those on screen, which can be a row off at either edge
+    #[cfg(feature = "e2e")]
+    pub fn drawn_current(&self) -> bool {
+        let rows = self.rows();
+        let drawn: Vec<(u64, Option<pe_store::MessageRef>)> = self
+            .rows_in_sight()
+            .map(|(first, last)| {
+                (first + 1..last.min(rows.saturating_sub(1)))
+                    .map(|row| {
+                        let at = self.drawn_at(row).map(|m| pe_store::MessageRef {
+                            folder: m.folder_id,
+                            uid: m.info.uid,
+                        });
+                        (u64::from(row), at)
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        self.view()
+            .drawn_current(&shell().core, u64::from(rows), &drawn)
+            .unwrap_or(false)
+    }
+
     /// Whether every selected row is in sight
     pub fn selection_in_sight(&self) -> bool {
         let selected = self.selection.selection();

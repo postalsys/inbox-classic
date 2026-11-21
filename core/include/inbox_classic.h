@@ -1698,6 +1698,13 @@ typedef struct PeIdentity {
   bool autocrypt;
 } PeIdentity;
 
+// A row a window draws: its place in the list and the message there, `folder` 0 when it is drawn blank
+typedef struct PeDrawnRow {
+  uint64_t row;
+  int64_t folder;
+  uint64_t uid;
+} PeDrawnRow;
+
 // The selected messages in numbers (those gone meanwhile are not counted)
 typedef struct PeSelectionSummary {
   uint64_t count;
@@ -4616,6 +4623,18 @@ struct PePositions *pe_list_view_positions(const struct PeCore *core,
 struct PePositions *pe_list_view_restored(const struct PeCore *core,
                                           const struct PeListView *view,
                                           bool *behind);
+
+// Whether the window draws the list of `view` as the store has it now: `rows` rows, and `drawn` (`count` of them,
+// those in sight) each the message there. What a test waits for before it looks (the deep test's hooks). False for
+// NULL or on failure.
+//
+// # Safety
+// `core` and `view` must be NULL or live; `drawn` NULL or `count` valid rows.
+bool pe_list_view_drawn_current(const struct PeCore *core,
+                                const struct PeListView *view,
+                                uint64_t rows,
+                                const struct PeDrawnRow *drawn,
+                                size_t count);
 
 // Whether `action` (to `to`) on the messages of `summary` takes them out of the list (Ignore Conversation does while
 // it hides ignored conversations): then the app selects the row after them, as it does after Delete
