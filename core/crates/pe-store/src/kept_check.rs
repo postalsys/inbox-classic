@@ -732,7 +732,7 @@ fn the_migration_counts_what_was_stored_before() {
          DROP TABLE drafts_taken; DROP TABLE agent_reads; ALTER TABLE agent_log DROP COLUMN kind; \
          ALTER TABLE agent_log DROP COLUMN args; ALTER TABLE agent_log DROP COLUMN call_id; \
          ALTER TABLE agent_log DROP COLUMN hidden; ALTER TABLE agent_log DROP COLUMN changes; \
-         DROP TABLE invitation_replies;",
+         DROP TABLE invitation_replies; DROP TABLE flags_owed;",
     )
     .unwrap();
     // from the migration that counts, and those after it

@@ -16,12 +16,12 @@ A check runs either settled, after the driver waited for things to be quiet, or 
 
 A driver reads what is drawn and never fills it: looking at a row does not ask for its page.
 
-While a list chosen is read, the windows keep the list before drawn and dimmed. The observation says so (`pending`).
+While a list is read again (another folder chosen, a search, an order, conversations grouped), the windows show the rows they had until the new ones come: by design, as nothing waits on the window thread. So a check before settled asks only that the window answers and says what it shows; what its rows are is a settled check. While a folder chosen is read, the windows keep the list before drawn and dimmed, and the observation says so (`pending`).
 
 | Check                                                                  | Before settled                  | Settled                                           |
 | ---------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------- |
 | `pending`: the list before still drawn                                 | allowed, and no row check runs  | a failure                                         |
-| `scope`, `twice`, `order`: rows of this list, each once, in date order | yes                             | yes                                               |
+| `scope`, `twice`, `order`: rows of this list, each once, in date order | no (the rows before may show)   | yes                                               |
 | `rows`: the list's row count against the server                        | no                              | yes                                               |
 | `blank`: a row in sight without its message                            | no (its page may be on its way) | yes                                               |
 | `ghost`, `flagged`: rows the server has, flagged ones in Flagged       | no                              | yes                                               |

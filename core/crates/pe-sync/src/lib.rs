@@ -255,7 +255,7 @@ async fn sync_flags(
     Ok(store.transaction(|store| {
         let mut changed = 0;
         for (uid, flags, modseq) in &changes {
-            changed += usize::from(store.set_flags(folder, *uid, flags, *modseq)?);
+            changed += usize::from(store.set_server_flags(folder, *uid, flags, *modseq)?);
         }
         Ok(changed)
     })?)
@@ -1111,7 +1111,7 @@ pub fn apply_event(store: &mut Store, account: AccountId, event: &Event) -> Resu
             flags,
             modseq,
             ..
-        } => Change::updated_if(store.set_flags(folder, *uid, flags, *modseq)?, folder),
+        } => Change::updated_if(store.set_server_flags(folder, *uid, flags, *modseq)?, folder),
         Event::Vanished { uids, .. } => {
             let largest = store.max_uid(folder)?.unwrap_or(0);
             let gone = uids.expand(largest).unwrap_or_default();

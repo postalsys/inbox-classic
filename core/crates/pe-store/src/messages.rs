@@ -505,6 +505,8 @@ impl Store {
                 m.protection
             ])?;
         }
+        // a message read again (ON CONFLICT) has the server's flags now: what the server still owes back over them
+        self.lay_owed_over(folder)?;
         Ok(())
     }
 
@@ -553,6 +555,19 @@ impl Store {
     /// that changed. Refused when one of them is not there.
     pub fn change_flags_many(&self, folder: FolderId, uids: &[u64], add: &[&str], remove: &[&str]) -> Result<Vec<u64>> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
+        let changed = self.change_flags_in(folder, uids, add, remove)?;
+        tx.commit()?;
+        Ok(changed)
+    }
+
+    /// [`Store::change_flags_many`] in the transaction of the caller
+    pub(crate) fn change_flags_in(
+        &self,
+        folder: FolderId,
+        uids: &[u64],
+        add: &[&str],
+        remove: &[&str],
+    ) -> Result<Vec<u64>> {
         let mut changed = Vec::new();
         for &uid in uids {
             let message = self.message(folder, uid)?.ok_or(rusqlite::Error::QueryReturnedNoRows)?;
@@ -563,7 +578,6 @@ impl Store {
                 changed.push(uid);
             }
         }
-        tx.commit()?;
         Ok(changed)
     }
 
@@ -590,7 +604,8 @@ impl Store {
             .flatten())
     }
 
-    /// Marks every unread message of a folder read; their UIDs, for the server
+    /// Marks every unread message of a folder read, owed to the server until it says it did
+    /// ([`Store::owe_flags`]); their UIDs, for the server
     pub fn mark_all_seen(&self, folder: FolderId) -> Result<Vec<u64>> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let unread: Vec<(u64, String)> = self
@@ -603,8 +618,10 @@ impl Store {
             flags.push("\\Seen".into());
             self.set_flags(folder, *uid, &flags, None)?;
         }
+        let uids: Vec<u64> = unread.into_iter().map(|(uid, _)| uid).collect();
+        self.owe_flags(folder, &uids, &["\\Seen"], &[])?;
         tx.commit()?;
-        Ok(unread.into_iter().map(|(uid, _)| uid).collect())
+        Ok(uids)
     }
 
     /// Whether the source of a message is cached

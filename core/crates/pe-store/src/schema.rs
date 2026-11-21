@@ -784,6 +784,18 @@ CREATE TABLE invitation_replies (
 CREATE INDEX invitation_replies_by_event ON invitation_replies (account_id, event_uid);
 CREATE INDEX invitation_replies_by_message ON invitation_replies (message_id);
 "#,
+    // the flag changes the server still owes: the user's change is in `messages` at once and here until the server
+    // says it made it (a dropped connection, offline), sent again before each sync of the folder, and laid over the
+    // flags a sync brings, which would otherwise undo it unseen. The newest change of a flag of a message wins.
+    r#"
+CREATE TABLE flags_owed (
+    message_id INTEGER NOT NULL REFERENCES messages(id) ON DELETE CASCADE,
+    flag TEXT NOT NULL COLLATE NOCASE,
+    -- 1 to add it, 0 to take it away
+    set_on INTEGER NOT NULL,
+    PRIMARY KEY (message_id, flag)
+) WITHOUT ROWID;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
