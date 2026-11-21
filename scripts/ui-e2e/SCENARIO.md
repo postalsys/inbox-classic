@@ -964,6 +964,7 @@ Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the
 - the status bar counts both Inboxes
 - its right-click menu has Mark All Read alone
 - a reply goes from the account of the message
+- the Mac and Linux: an e-mail link handed over with a message's account (a message window's Unsubscribe by mail) goes from that account, not from the account of the message shown; Windows' message window passes its message's account the same way
 - Mark All Read marks both Inboxes read on the servers
 
 ## 42a. All Inboxes by account, account names, the account's menu

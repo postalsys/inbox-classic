@@ -1349,7 +1349,7 @@ impl Reader {
             Unsubscribe::Mail { link } => {
                 let question = t!(GtkUnsubscribeMail, target = &*target);
                 if ui::ask(&window, &title, &question, &ok, "ok", "cancel", None).await == "ok" {
-                    shell().open_mailto(&link).await;
+                    shell().open_mailto(&link, self.account.get()).await;
                 }
             }
             Unsubscribe::Web { url } => {

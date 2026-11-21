@@ -15,7 +15,8 @@ final class Reader: NSObject {
     /// what it has to say in the main window's status bar (leaving a mailing list)
     var status: (String) -> Void = { _ in }
     /// a mailto: link to write a message for (a mailing list left by mail)
-    var openMailto: (String) -> Void = { _ in }
+    /// a message to write from a mailto: link, and the account of the message it came from (0 for a message file)
+    var openMailto: (_ link: String, _ account: Int64) -> Void = { _, _ in }
     /// the message asked for is here, before it is shown (a draft opened before it was fetched opens then)
     var arrivedHandler: () -> Void = {}
     /// the message is shown
@@ -1003,7 +1004,7 @@ final class Reader: NSObject {
         case PE_UNSUBSCRIBE_MAIL:
             if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveMail.text(["target": target]),
                    title: Text.uiUnsubscribe.text, yes: Text.uiOk.text, no: Text.uiCancel.text, style: .information) {
-                openMailto(link)
+                openMailto(link, account)
             }
         case PE_UNSUBSCRIBE_WEB:
             if ask(Text.uiLeaveList.text + "\n\n" + Text.uiLeaveWeb.text(["target": target]),

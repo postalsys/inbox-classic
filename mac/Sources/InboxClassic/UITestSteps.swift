@@ -2544,6 +2544,19 @@ extension UITest {
         } else {
             check(false, "Reply opens a compose window")
         }
+        // a message window's Unsubscribe by mail hands the link over with its message's account: with the second
+        // account's message shown here, a link from the first account's message is written from the first account
+        let firstAccount = main.mailbox.core.accounts().first?.id ?? 0
+        main.openMailto("mailto:leave@list.example.com?subject=unsubscribe", account: firstAccount)
+        if let compose = await waitCompose() {
+            await pause(1)
+            let from: NSPopUpButton? = find("compose.from", in: compose)
+            check(from?.titleOfSelectedItem?.contains("testuser@inboxclassic.test") == true,
+                  "an e-mail link from a message goes from the account of that message, not of the one shown (\(from?.titleOfSelectedItem ?? ""))")
+            await closeCompose(compose)
+        } else {
+            check(false, "the e-mail link opens a compose window")
+        }
         command(.markAllRead)
         check(await waitUntil(20) {
             let first = await unreadOnServer()

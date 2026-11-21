@@ -141,7 +141,7 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
             window.representedURL = file
         }
         reader.status = { [weak mailbox] in mailbox?.status($0) }
-        reader.openMailto = { [weak mailbox] in mailbox?.openMailto($0) }
+        reader.openMailto = { [weak mailbox] in mailbox?.openMailto($0, $1) }
         // the message that bounced, in the main window
         reader.bouncedHandler = { [weak mailbox] folder, uid in
             AppDelegate.shared?.main?.show()
