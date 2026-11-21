@@ -282,7 +282,7 @@ pub fn hand_over(arguments: Arguments) {
 async fn open_arguments(arguments: Arguments) {
     let shell = shell();
     if let Some(link) = &arguments.mailto {
-        shell.open_mailto(link).await;
+        shell.open_mailto(link, 0).await;
     }
     // a message file (.eml) opens in a window of its own; another file is offered to the selected folder
     for file in &arguments.files {
@@ -606,12 +606,18 @@ impl Shell {
         compose::open(account, None);
     }
 
-    /// A new message from a mailto: link, from the account of what is shown (the core reads the link)
-    pub async fn open_mailto(&self, link: &str) {
+    /// A new message from a mailto: link (the core reads the link), from `account`: the account of the message it came
+    /// from, so a message window's Unsubscribe writes from that message's account whatever the main window shows; 0 for
+    /// a link from elsewhere, written from the account of what is shown
+    pub async fn open_mailto(&self, link: &str, account: i64) {
         let Some(draft) = pe_core::mailto::draft(link) else {
             return;
         };
-        let account = self.main().current_account();
+        let account = if account != 0 {
+            account
+        } else {
+            self.main().current_account()
+        };
         if account == 0 {
             ui::alert(self.main().window(), TITLE, &t!(UiAddAccountFirstLink)).await;
             return;

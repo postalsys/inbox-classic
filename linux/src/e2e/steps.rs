@@ -3113,6 +3113,25 @@ pub async fn all_inboxes(d: &Driver) {
         }
         None => d.check(false, "Reply opens a compose window"),
     }
+    // a message window's Unsubscribe by mail hands the link over with its message's account: with the second account's
+    // message shown here, a link from the first account's message is written from the first account
+    let first = shell().core.accounts().unwrap_or_default().first().map_or(0, |a| a.id);
+    shell()
+        .open_mailto("mailto:leave@list.example.com?subject=unsubscribe", first)
+        .await;
+    match wait_compose(10).await {
+        Some(c) => {
+            let from = compose_from(&c);
+            d.check(
+                from.contains("testuser@inboxclassic.test"),
+                &format!(
+                    "an e-mail link from a message goes from the account of that message, not of the one shown ({from})"
+                ),
+            );
+            close_compose(&c).await;
+        }
+        None => d.check(false, "the e-mail link opens a compose window"),
+    }
     let unread = |rest: u16| d.unread_at(rest);
     run_command(Command::MarkAllRead);
     d.check(

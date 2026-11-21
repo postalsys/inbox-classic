@@ -64,7 +64,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             self?.window.toolbar?.validateVisibleItems()
         }
         mailbox.status = { [weak self] in self?.setStatus($0) }
-        mailbox.openMailto = { [weak self] in self?.openMailto($0) }
+        mailbox.openMailto = { [weak self] in self?.openMailto($0, account: $1) }
         mailbox.undoSend = { [weak self] in self?.undoSend() }
         showOutbox()
         showCounts()
@@ -475,10 +475,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         return ComposeWindow.open(core: core, account: account, draft: nil)
     }
 
-    /// a new message from a mailto: link, from the account of what is shown (the core reads the link)
-    func openMailto(_ link: String) {
+    /// a new message from a mailto: link (the core reads the link), from `account`: the account of the message it came
+    /// from, so a message window's Unsubscribe writes from that message's account whatever the main window shows; 0 for
+    /// a link from elsewhere, written from the account of what is shown
+    func openMailto(_ link: String, account from: Int64 = 0) {
         guard let draft = link.withCString({ Draft(pe_mailto_draft($0)) }) else { return }
-        let account = mailbox.currentAccount
+        let account = from != 0 ? from : mailbox.currentAccount
         guard account != 0 else {
             inform(Text.uiAddAccountFirstLink.text)
             return
