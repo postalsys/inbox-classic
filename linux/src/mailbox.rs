@@ -1364,7 +1364,9 @@ impl Mailbox {
         let (folder, uid) = selected.as_ref().map_or((0, 0), |(_, m)| (m.folder_id, m.info.uid));
         // grouped, the core says what the row stands for: a collapsed conversation's row all of its messages
         let grouped = self.view.borrow().grouped();
-        let refs: Vec<MessageRef> = if grouped {
+        // a row selected while still blank (its page not read) names its message through the core, read now, while
+        // the rows are as drawn: a list read again before the page comes keeps it so
+        let refs: Vec<MessageRef> = if grouped || selected.is_none() {
             self.list.refs_in_ranges(&self.list.selected_ranges())
         } else {
             selected.iter().map(|_| MessageRef { folder, uid }).collect()
@@ -1437,11 +1439,17 @@ impl Mailbox {
         if self.list.selected_count() != 1 || self.list_load.dimmed() || self.view.borrow().grouped() {
             return None;
         }
-        // the message the row shows as drawn, not the row's place read again: new mail above moves the rows
-        let (_, drawn) = self.list.selected()?;
-        let picked = MessageRef {
-            folder: drawn.folder_id,
-            uid: drawn.info.uid,
+        // the message the row shows as drawn, not the row's place read again: new mail above moves the rows. A row
+        // still blank: the message it stood for when it was selected
+        let picked = match self.list.selected() {
+            Some((_, drawn)) => MessageRef {
+                folder: drawn.folder_id,
+                uid: drawn.info.uid,
+            },
+            None => match self.refs.borrow().as_slice() {
+                [one] => *one,
+                _ => return None,
+            },
         };
         (Some(picked) != self.reader.message()).then_some(picked)
     }
