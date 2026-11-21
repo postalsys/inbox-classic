@@ -91,6 +91,9 @@ pub(crate) fn numbered_marks(values: &mut Vec<Value>, ids: &[i64]) -> String {
         .join(", ")
 }
 
+/// More ranges than this are read as one span and picked out of it ([`Store::refs_in_ranges`])
+const FEW_RANGES: usize = 64;
+
 /// More ids than this go into a statement as one value ([`id_list`])
 const INLINE_IDS: usize = 500;
 
@@ -126,6 +129,9 @@ impl Store {
             return self.thread_refs_in_ranges(search, sort, &ranges);
         }
         let (positioned, mut values) = search.positioned(sort);
+        if ranges.len() > FEW_RANGES {
+            return self.refs_in_many_ranges(&positioned, values, ranges);
+        }
         let mut wanted = Vec::with_capacity(ranges.len());
         for (start, end) in &ranges {
             values.push(Value::Integer(*start as i64));
@@ -148,6 +154,55 @@ impl Store {
                 })
             })?
             .collect()
+    }
+
+    /// [`Store::refs_in_ranges`] for more ranges than one statement's expression may name (SQLite stops at a depth of
+    /// 1000, a selection made by clicking every other row has thousands): the rows from the first range's start to the
+    /// last one's end, kept when a range holds them
+    fn refs_in_many_ranges(
+        &self,
+        positioned: &str,
+        mut values: Vec<Value>,
+        mut ranges: Vec<(u64, u64)>,
+    ) -> Result<Vec<MessageRef>> {
+        ranges.sort_unstable();
+        let mut merged: Vec<(u64, u64)> = Vec::with_capacity(ranges.len());
+        for (start, end) in ranges {
+            match merged.last_mut() {
+                Some(previous) if start <= previous.1 => previous.1 = previous.1.max(end),
+                _ => merged.push((start, end)),
+            }
+        }
+        let ranges = merged;
+        let first = ranges[0].0;
+        let last = ranges[ranges.len() - 1].1;
+        values.push(Value::Integer(first as i64));
+        values.push(Value::Integer(last as i64));
+        let mut statement = self.db.prepare(&format!(
+            "SELECT position, folder_id, uid FROM ({positioned}) WHERE position >= ?{} AND position < ?{} \
+             ORDER BY position",
+            values.len() - 1,
+            values.len()
+        ))?;
+        let rows = statement.query_map(params_from_iter(values), |row| {
+            Ok((
+                row.get::<_, i64>(0)? as u64,
+                MessageRef {
+                    folder: row.get(1)?,
+                    uid: row.get(2)?,
+                },
+            ))
+        })?;
+        let mut found = Vec::new();
+        for row in rows {
+            let (position, at) = row?;
+            // the ranges are apart now, so only the last one starting at or before the row can hold it
+            let starts_before = ranges.partition_point(|(start, _)| *start <= position);
+            if starts_before > 0 && position < ranges[starts_before - 1].1 {
+                found.push(at);
+            }
+        }
+        Ok(found)
     }
 
     /// Where `refs` are now in what `search` finds in the order of `sort`, ascending; those no longer there are left
@@ -437,6 +492,44 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(store.positions(&one_folder, sort, &refs).unwrap(), vec![2]);
+    }
+
+    #[test]
+    fn every_other_row_of_a_big_list_is_found() {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        store
+            .set_folders(
+                account,
+                &[FolderInfo {
+                    path: "INBOX".into(),
+                    name: "INBOX".into(),
+                    selectable: true,
+                    ..Default::default()
+                }],
+            )
+            .unwrap();
+        let inbox = store.folders(account).unwrap()[0].id;
+        let messages: Vec<MessageInfo> = (1..=6000)
+            .map(|uid| MessageInfo {
+                uid,
+                date: Some(uid as i64 * 100),
+                ..Default::default()
+            })
+            .collect();
+        store.add_messages(inbox, &messages).unwrap();
+        let folder = Search {
+            scope: Scope::Folder(inbox),
+            ..Default::default()
+        };
+        // newest first, so position p is UID 6000 - p; 3000 ranges are more than one expression can hold
+        let mut ranges: Vec<(u64, u64)> = (0..3000).map(|i| (i * 2, i * 2 + 1)).collect();
+        ranges.push((10, 13)); // overlapping ones count once
+        ranges.reverse();
+        let refs = store.refs_in_ranges(&folder, Sort::default(), &ranges).unwrap();
+        let mut wanted: Vec<MessageRef> = (0..3000).map(|i| at(inbox, 6000 - i * 2)).collect();
+        wanted.insert(6, at(inbox, 6000 - 11));
+        assert_eq!(refs, wanted);
     }
 
     #[test]

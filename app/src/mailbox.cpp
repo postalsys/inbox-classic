@@ -4030,7 +4030,11 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
         return 11;
     }
     if (verb == L"quiet") {
-        return pe_quiet(core_) && !listPending_ && !loadRequest_ && pageRequests_.empty() ? 11 : 10;
+        // the driver's question is a sent message, answered before what is posted: the core's events still in the
+        // queue (a folder changed, a page read) are work under way too
+        MSG waiting;
+        bool posted = PeekMessageW(&waiting, nullptr, WM_APP, 0xBFFF, PM_NOREMOVE | PM_NOYIELD);
+        return !posted && pe_quiet(core_) && !listPending_ && !loadRequest_ && pageRequests_.empty() ? 11 : 10;
     }
     if (verb == L"observe" && words.size() >= 2) {
         // the folders' places, for the messages' account and path

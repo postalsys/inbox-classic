@@ -1597,6 +1597,62 @@ fn undo_brings_back_copies_of_one_message() {
 }
 
 #[test]
+fn undo_brings_back_a_move_of_more_than_one_command() {
+    let Some(s) = setup() else { return };
+    // more than one MOVE takes (PER_COMMAND is 1000)
+    let uids: Vec<u64> = (0..2300)
+        .map(|i| s.server.add_message("INBOX", &rfc822(&format!("Many {i}"), "x"), &[]))
+        .collect();
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive) = (id("INBOX"), id("Archive"));
+    let picked: Vec<MessageRef> = uids[..2251]
+        .iter()
+        .map(|&uid| MessageRef { folder: inbox, uid })
+        .collect();
+    s.core.act(&picked, Action::Move(archive)).unwrap();
+    pe_testkit::eventually(|| s.server.subjects("Archive").len() == 2251, "all of them moved");
+    s.core.undo().unwrap();
+    pe_testkit::eventually(
+        || s.server.subjects("Archive").is_empty() && s.server.subjects("INBOX").len() == 2300,
+        "all of them back in the Inbox",
+    );
+}
+
+#[test]
+fn mark_all_read_reaches_every_message_of_a_big_folder() {
+    let Some(s) = setup() else { return };
+    // more than a server with MESSAGELIMIT (ImapKit's is 1000) stores flags on in one command
+    for i in 0..1500 {
+        s.server.add_message("INBOX", &rfc822(&format!("Unread {i}"), "x"), &[]);
+    }
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    assert_eq!(s.core.mark_all_read(inbox).unwrap(), 1500);
+    pe_testkit::eventually(
+        || {
+            s.server
+                .messages("INBOX")
+                .iter()
+                .all(|m| m["flags"].as_array().is_some_and(|f| f.iter().any(|f| f == "\\Seen")))
+        },
+        "the server has every message read",
+    );
+}
+
+#[test]
 fn acts_on_selected_messages_and_undoes() {
     let Some(s) = setup() else { return };
     let uids: Vec<u64> = ["One", "Two", "Three", "Four"]

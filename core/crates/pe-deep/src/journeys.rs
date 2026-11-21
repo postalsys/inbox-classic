@@ -129,7 +129,9 @@ fn pages(run: &mut Run<'_>, _: &mut Vec<String>) -> Result<(), Stop> {
         run.act(Act::Open(List::Flagged))?;
         run.settled()?;
         run.server(format!("expunges {gone:?}"), |s| {
-            if let Some(a) = s.account(&gone.account) {
+            if let Some(a) = s.account(&gone.account)
+                && !a.present(&gone.path, &[gone.uid]).is_empty()
+            {
                 a.expunge(&gone.path, &[gone.uid]);
             }
         })?;
@@ -302,7 +304,9 @@ fn changes_under(run: &mut Run<'_>, _: &mut Vec<String>) -> Result<(), Stop> {
     // another client deletes the message shown
     if let Some(gone) = after.shown.clone() {
         run.server(format!("expunges the message shown {gone:?}"), |s| {
-            if let Some(a) = s.account(&gone.account) {
+            if let Some(a) = s.account(&gone.account)
+                && !a.present(&gone.path, &[gone.uid]).is_empty()
+            {
                 a.expunge(&gone.path, &[gone.uid]);
             }
         })?;
@@ -339,7 +343,11 @@ fn changes_under(run: &mut Run<'_>, _: &mut Vec<String>) -> Result<(), Stop> {
         .collect();
     run.server("flags the rows in sight".into(), |s| {
         if let Some(a) = s.account(&work.name) {
-            a.flags("INBOX", &uids, &["\\Flagged"], "add");
+            // a window behind shows some the server no longer has, which the checks report
+            let uids = a.present("INBOX", &uids);
+            if !uids.is_empty() {
+                a.flags("INBOX", &uids, &["\\Flagged"], "add");
+            }
         }
     })?;
     run.act(Act::Sync)?;
