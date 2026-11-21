@@ -77,6 +77,36 @@
         "subject": "Hello"
     },
     {
+        "name": "otp-detect: vietnamese text",
+        "subject": "Mã xác minh",
+        "text": "Mã xác minh của bạn là 482913. Mã có hiệu lực trong 10 phút."
+    },
+    {
+        "name": "otp-detect: vietnamese html",
+        "subject": "Mã OTP",
+        "html": "<p>Xin chào,</p><p>Mã OTP của bạn là:</p><p style=\"font-size:28px\"><b>739204</b></p><p>Mã có hiệu lực trong 5 phút. Không chia sẻ mã này với bất kỳ ai.</p>"
+    },
+    {
+        "name": "otp-detect: indonesian text",
+        "subject": "Kode verifikasi",
+        "text": "Kode verifikasi Anda adalah 482913. Jangan bagikan kode ini kepada siapa pun."
+    },
+    {
+        "name": "otp-detect: indonesian html",
+        "subject": "Kode OTP",
+        "html": "<p>Halo,</p><p>Kode OTP Anda:</p><p style=\"font-size:28px\"><b>739204</b></p><p>Kode berlaku selama 5 menit. Jangan berikan kode ini kepada siapa pun.</p>"
+    },
+    {
+        "name": "otp-detect: vietnamese order confirmation",
+        "subject": "Đơn hàng của bạn đang được giao",
+        "text": "Xin chào,\n\nMã đơn hàng: 582317\nMã vận đơn: 77341209\nTổng tiền: 350.000 đ\nHotline: 1900 6035\n\nCảm ơn bạn đã mua sắm.\n"
+    },
+    {
+        "name": "otp-detect: indonesian order confirmation",
+        "subject": "Pesanan Anda sedang dikirim",
+        "text": "Halo,\n\nNomor pesanan: 582317\nNomor resi: 77341209\nTotal pembayaran: Rp 350.000\nHubungi kami di 1500 123.\n\nTerima kasih.\n"
+    },
+    {
         "name": "en html grouped code",
         "subject": "Your Lumora security code",
         "html": "<table width=\"100%\"><tr><td align=\"center\"><h2>Confirm it's you</h2></td></tr><tr><td><p>Enter this security code to finish signing in to Lumora:</p></td></tr><tr><td style=\"font-family:'Courier New',monospace;font-size:30px;letter-spacing:8px;font-weight:700\">604 381</td></tr><tr><td><p style=\"color:#888;font-size:12px\">This code expires in 5 minutes. Never share it with anyone, Lumora staff will never ask for it.</p></td></tr></table>"
@@ -225,6 +255,11 @@
         "name": "tr text dogrulama kodu",
         "subject": "Doğrulama kodu",
         "text": "Doğrulama kodunuz: 552813. Bu kodu kimseyle paylaşmayın.\n"
+    },
+    {
+        "name": "vi text guarded ma",
+        "subject": "MÃ và mãi mãi",
+        "text": "Mãi mãi 7712045, chữ mãn 5521, mã 448213, MÃ: 990177, khuyến mãi 3344\n"
     },
     {
         "name": "both bodies, same code",
