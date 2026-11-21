@@ -62,7 +62,7 @@ pub struct Reader {
     list_text: gtk::Label,
     pub list_button: gtk::Button,
     /// Told whether the bar offers its button, for the window's Unsubscribe from List
-    list_offered: RefCell<Option<Box<dyn Fn(bool)>>>,
+    list_offered: RefCell<Option<Offered>>,
     pub preview: DocumentView,
     /// Find in This Message: the bar over the message and its box
     find_bar: gtk::SearchBar,
@@ -1467,6 +1467,9 @@ impl Reader {
         }
     }
 }
+
+/// What hears whether the mailing-list bar offers its button
+type Offered = Box<dyn Fn(bool)>;
 
 thread_local! {
     /// The web view of a document being printed, kept until its print dialog is done
