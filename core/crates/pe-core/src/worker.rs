@@ -54,6 +54,10 @@ pub(crate) enum Command {
     Background {
         reply: tokio::sync::oneshot::Sender<bool>,
     },
+    /// Answered once the commands before it are done (`Core::sync_barrier`): the worker runs its commands in order
+    Barrier {
+        reply: tokio::sync::oneshot::Sender<()>,
+    },
     /// A folder synced: an upload put a message in it (upload.rs)
     SyncFolder {
         folder: FolderId,
@@ -1085,6 +1089,10 @@ impl Worker {
             }
             Command::Background { reply } => {
                 let _ = reply.send(self.background_slice(store).await);
+                Ok(())
+            }
+            Command::Barrier { reply } => {
+                let _ = reply.send(());
                 Ok(())
             }
             Command::SetFlag { folder, uids, flag, on } => {

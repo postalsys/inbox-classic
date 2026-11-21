@@ -2170,6 +2170,7 @@ dependencies = [
  "libadwaita",
  "pe-autoconfig",
  "pe-core",
+ "pe-deep",
  "pe-html",
  "pe-i18n",
  "pe-imap",
@@ -2908,6 +2909,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "pe-deep"
+version = "0.19.1"
+dependencies = [
+ "base64",
+ "pe-core",
+ "pe-imap",
+ "pe-mime",
+ "pe-net",
+ "pe-store",
+ "pe-testkit",
+ "serde_json",
+]
+
+[[package]]
 name = "pe-html"
 version = "0.19.1"
 dependencies = [
@@ -3063,6 +3078,18 @@ dependencies = [
  "pe-net",
  "pe-smtp",
  "pe-store",
+]
+
+[[package]]
+name = "pe-testkit"
+version = "0.19.1"
+dependencies = [
+ "base64",
+ "pe-imap",
+ "pe-net",
+ "pe-store",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]

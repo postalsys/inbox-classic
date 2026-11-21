@@ -258,7 +258,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         // the first start: an account to read mail from
         onMain { [self] in
-            if core.accounts().isEmpty && !arguments.background {
+            if core.accounts().isEmpty && !arguments.background && !TestHooks.addsAccounts {
                 main.addAccount()
             } else {
                 core.syncAll()

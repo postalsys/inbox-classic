@@ -1423,6 +1423,44 @@ pub unsafe extern "C" fn pe_tree_reselect(tree: *const PeTree, key: *const c_cha
     pe_core::tree::reselect(&tree.1, key).map_or(-1, |at| at as i64)
 }
 
+/// Every account synced, then a barrier behind the sync in each account's worker: `pe_quiet` is false until every
+/// barrier is passed, so until the syncs asked for now and everything queued before them are done (the deep test's
+/// drivers)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_sync_barrier(core: *const PeCore) {
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, (), |core| core.sync_barrier().unwrap_or(())) }
+}
+
+/// A folder's path as the server names it (modified UTF-7, IMAP's) as the user reads it, each level decoded. Free
+/// with `pe_string_free`; NULL for NULL.
+///
+/// # Safety
+/// `path` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_path_decoded(path: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(path) = (unsafe { arg(path) }) else {
+        return null_mut();
+    };
+    guard(|| into_c_string(pe_core::folder_path_decoded(path))).unwrap_or(null_mut())
+}
+
+/// Nothing asked of the core is under way: no sync asked for that has not finished, no action queued that is not done.
+/// A sync asked for after a change finishes only after the commands queued before it, so a test waits for this
+/// rather than for a time.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_quiet(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, true, |core| core.quiet()) }
+}
+
 /// The row of the folder tree the user chose (its `key`), kept for the app to start with it next time
 /// (`pe_tree_start`)
 ///

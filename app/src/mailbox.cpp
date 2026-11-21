@@ -11,6 +11,8 @@
 
 #include <algorithm>
 #include <cwctype>
+#include <filesystem>
+#include <fstream>
 #include <limits>
 #include <span>
 #include <string_view>
@@ -3875,4 +3877,225 @@ void Mailbox::OnEvent(const UiEvent& event) {
         break;
     }
     reader_.OnEvent(event);
+}
+
+// ---- the deep test's driver (--test-hooks only) ----
+
+namespace {
+
+// `text` as a JSON string, quotes included
+std::string JsonString(std::string_view text) {
+    std::string out = "\"";
+    for (unsigned char c : text) {
+        switch (c) {
+        case '"': out += "\\\""; break;
+        case '\\': out += "\\\\"; break;
+        case '\n': out += "\\n"; break;
+        case '\r': out += "\\r"; break;
+        case '\t': out += "\\t"; break;
+        default:
+            if (c < 0x20) {
+                char escaped[8];
+                snprintf(escaped, sizeof escaped, "\\u%04x", c);
+                out += escaped;
+            } else {
+                out += static_cast<char>(c);
+            }
+        }
+    }
+    return out + "\"";
+}
+
+std::vector<std::wstring> SplitTabs(const std::wstring& text) {
+    std::vector<std::wstring> words;
+    size_t start = 0;
+    for (;;) {
+        size_t tab = text.find(L'\t', start);
+        words.push_back(text.substr(start, tab == std::wstring::npos ? std::wstring::npos : tab - start));
+        if (tab == std::wstring::npos) {
+            return words;
+        }
+        start = tab + 1;
+    }
+}
+
+// a folder's path as the user reads it (each level's modified UTF-7 decoded)
+std::string DecodedPath(const char* path) {
+    core::String decoded(pe_folder_path_decoded(path));
+    return decoded ? decoded.get() : "";
+}
+
+} // namespace
+
+LRESULT Mailbox::TestDeep(const std::wstring& request) {
+    std::vector<std::wstring> words = SplitTabs(request);
+    const std::wstring& verb = words[0];
+    auto word = [&](size_t i) { return i < words.size() ? core::Narrow(words[i]) : std::string(); };
+    // a number of the request, 0 for none or one that does not read as a number (never an exception in the window
+    // procedure)
+    auto number = [&](size_t i) -> int {
+        return i < words.size() ? static_cast<int>(std::wcstol(words[i].c_str(), nullptr, 10)) : 0;
+    };
+    // the account named so, 0 for none
+    auto accountNamed = [&](const std::string& name) -> int64_t {
+        for (const auto& [id, title] : accountNames_) {
+            if (core::Narrow(title) == name) {
+                return id;
+            }
+        }
+        return 0;
+    };
+    // the folder of the account named `account` at `path`, 0 for none
+    auto folderAt = [&](const std::string& account, const std::string& path) -> int64_t {
+        int64_t id = accountNamed(account);
+        core::FolderList folders(pe_folders(core_, id));
+        for (size_t i = 0; i < pe_folder_list_count(folders.get()); i++) {
+            const PeFolder* folder = pe_folder_list_get(folders.get(), i);
+            if (folder && DecodedPath(folder->path) == path) {
+                return folder->id;
+            }
+        }
+        return 0;
+    };
+    if (verb == L"ping") {
+        return 11;
+    }
+    if (verb == L"account" && words.size() >= 7) {
+        std::string name = word(1), email = word(2), user = word(3), password = word(4);
+        PeAccountSettings settings{.name = name.c_str(),
+                                   .email = email.c_str(),
+                                   .username = user.c_str(),
+                                   .imap_host = "127.0.0.1",
+                                   .imap_port = static_cast<uint16_t>(number(5)),
+                                   .imap_security = PE_SECURITY_PLAIN,
+                                   .smtp_host = "127.0.0.1",
+                                   .smtp_port = static_cast<uint16_t>(number(6)),
+                                   // ImapKit's SMTP server takes AUTH after STARTTLS only
+                                   .smtp_security = PE_SECURITY_START_TLS};
+        int64_t id = pe_account_add(core_, &settings, password.c_str());
+        if (id <= 0) {
+            // 2: the core did not add it
+            return 2;
+        }
+        pe_account_set_name(core_, id, name.c_str());
+        // a message sent goes at once
+        pe_set_send_delay_index(core_, 0);
+        pe_sync(core_, id);
+        Reload();
+        return static_cast<LRESULT>(id + 10);
+    }
+    if (verb == L"open" && words.size() >= 2) {
+        std::string key = word(1);
+        if (key == "folder") {
+            key = "folder:" + std::to_string(folderAt(word(2), word(3)));
+        }
+        HTREEITEM item = FindRow(key);
+        if (!item) {
+            return 10;
+        }
+        ChooseRow(item);
+        return 11;
+    }
+    if (verb == L"move" && words.size() >= 3) {
+        int64_t to = folderAt(word(1), word(2));
+        return to && Act(PE_ACTION_MOVE, to) ? 11 : 10;
+    }
+    if (verb == L"group" && words.size() >= 2) {
+        SetGrouped(words[1] == L"1");
+        return 11;
+    }
+    if (verb == L"select" && words.size() >= 3) {
+        int from = number(1), to = number(2);
+        SetFocus(list_);
+        ListView_SetItemState(list_, -1, 0, LVIS_SELECTED);
+        for (int row = std::min(from, to); row <= std::max(from, to); row++) {
+            ListView_SetItemState(list_, row, LVIS_SELECTED, LVIS_SELECTED);
+        }
+        ListView_SetItemState(list_, to, LVIS_FOCUSED, LVIS_FOCUSED);
+        ListView_EnsureVisible(list_, to, FALSE);
+        return 11;
+    }
+    if (verb == L"scroll" && words.size() >= 2) {
+        // the row at the top: to the end first, then back up to it, as a scroll bar dragged leaves it
+        int row = number(1);
+        int count = ListView_GetItemCount(list_);
+        if (count > 0) {
+            ListView_EnsureVisible(list_, count - 1, FALSE);
+            ListView_EnsureVisible(list_, std::clamp(row, 0, count - 1), FALSE);
+        }
+        return 11;
+    }
+    if (verb == L"barrier") {
+        pe_sync_barrier(core_);
+        return 11;
+    }
+    if (verb == L"quiet") {
+        return pe_quiet(core_) && !listPending_ && !loadRequest_ && pageRequests_.empty() ? 11 : 10;
+    }
+    if (verb == L"observe" && words.size() >= 2) {
+        // the folders' places, for the messages' account and path
+        std::unordered_map<int64_t, std::pair<std::string, std::string>> places;
+        std::string tree;
+        for (const auto& [id, title] : accountNames_) {
+            core::FolderList folders(pe_folders(core_, id));
+            for (size_t i = 0; i < pe_folder_list_count(folders.get()); i++) {
+                const PeFolder* folder = pe_folder_list_get(folders.get(), i);
+                if (!folder) {
+                    continue;
+                }
+                std::string path = DecodedPath(folder->path);
+                places[folder->id] = {core::Narrow(title), path};
+                tree += (tree.empty() ? "" : ",") + std::string("[") + JsonString(core::Narrow(title)) + "," +
+                        JsonString(path) + "," + std::to_string(folder->unread) + "]";
+            }
+        }
+        auto message = [&](int64_t folder, uint64_t uid) -> std::string {
+            auto place = places.find(folder);
+            if (place == places.end() || !uid) {
+                return "null";
+            }
+            return "{\"account\":" + JsonString(place->second.first) + ",\"path\":" + JsonString(place->second.second) +
+                   ",\"uid\":" + std::to_string(uid) + "}";
+        };
+        std::string list = "null";
+        switch (shownList_) {
+        case PE_TREE_LIST_ALL_INBOXES: list = "\"inboxes\""; break;
+        case PE_TREE_LIST_FLAGGED: list = "\"flagged\""; break;
+        case PE_TREE_LIST_ALL_SENT: list = "\"sent\""; break;
+        case PE_TREE_LIST_ALL_DRAFTS: list = "\"drafts\""; break;
+        case PE_TREE_LIST_FOLDER:
+            if (auto place = places.find(folder_); place != places.end()) {
+                list = "{\"account\":" + JsonString(place->second.first) + ",\"path\":" + JsonString(place->second.second) + "}";
+            }
+            break;
+        default: break;
+        }
+        int count = ListView_GetItemCount(list_);
+        int top = ListView_GetTopIndex(list_);
+        int last = std::min(count, top + ListView_GetCountPerPage(list_) + 1);
+        std::string sight;
+        for (int row = top; row < last; row++) {
+            const PeMessage* m = CachedRow(row);
+            sight += (sight.empty() ? "" : ",") + std::string("{\"row\":") + std::to_string(row);
+            if (m) {
+                sight += ",\"blank\":false,\"message\":" + message(m->folder, m->uid) + ",\"subject\":" +
+                         JsonString(m->subject ? m->subject : "") + ",\"date\":" + std::to_string(m->has_date ? m->date : 0);
+            } else {
+                sight += ",\"blank\":true";
+            }
+            sight += "}";
+        }
+        std::string selected;
+        for (int row = ListView_GetNextItem(list_, -1, LVNI_SELECTED); row >= 0; row = ListView_GetNextItem(list_, row, LVNI_SELECTED)) {
+            selected += (selected.empty() ? "" : ",") + std::to_string(row);
+        }
+        std::string seen = "{\"list\":" + list + ",\"rows\":" + std::to_string(count) + ",\"sight\":[" + sight +
+                           "],\"selected\":[" + selected + "],\"shown\":" + message(reader_.Folder(), reader_.Uid()) +
+                           ",\"grouped\":" + (Grouped() ? "true" : "false") + ",\"unreadOnly\":" +
+                           (UnreadOnly() ? "true" : "false") + ",\"tree\":[" + tree + "]}";
+        std::ofstream out(std::filesystem::path(words[1]), std::ios::binary);
+        out << seen;
+        return out.good() ? 11 : 10;
+    }
+    return 0;
 }

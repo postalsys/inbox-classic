@@ -8,112 +8,100 @@ The accounts: Work (20,000), Home (6,000, 400 folders), Gmail-like (5,000, OAuth
 
 ## D1. The first sync
 
-- the five accounts are added one after another; the window is usable from the first
-- Work's Inbox lists its newest messages while the rest still arrive, and a message opens
-- every folder's count only goes up until it is the server's
-- the app is quit in the middle and started again: the sync goes on, nothing is listed twice
-- at the end every folder of every account has the server's total and unread count
+- the five accounts are added and synced as the target starts; each Inbox opened: every folder of every account has the server's total and unread count, each Inbox lists all its messages
+
+Not built yet: the window used while the first sync runs, the counts only going up, the app quit in the middle of it.
 
 ## D2. Pages
 
-- Work's Inbox (18,000), come to for the first time: the first rows are filled, the newest message is selected and shown
-- row 4,200 selected, to Flagged and back: row 4,200 is selected, in sight, filled and shown (the incident, and the message left there)
+- Work's Inbox, come to for the first time: a message is selected and it is its newest
+- a row a fifth of the way down selected, to Flagged and back: the same row is selected, in sight, filled and shown (the incident, and the message left there)
 - its message deleted by another client meanwhile: back in the Inbox the newest is selected
-- End: the last rows are filled, the last row opens; Home: the first again
-- Page Down held for 40 pages, then a row in sight opens
-- the scroll bar dragged to the middle: the rows in sight are the server's rows of that place
-- folders of exactly 100, 800 and 801 messages, and an empty one, each from the big Inbox and back
-- every sort column, both directions: the rows in sight follow the server's order
-- Unread Only on and off; the column layout on and off; dark mode on and off: the same rows, the same selection
+- End: the last rows are in sight and filled, the last row opens; Home and Page Down 40 times, then a row in sight opens
+- scrolled to the middle: the rows in sight are filled and are the server's
+- folders of exactly 100, 800 and 801 messages, and an empty one, each from the big Inbox and back: a message selected unless it is empty
+- every sort column, both directions, scrolled to row 1,000: the rows in sight are the server's, in the order of their dates when sorted by date
+- Unread Only on and off; conversations on and off
+
+Not built yet: the column layout and dark mode switched in the big list.
 
 ## D3. Fast fingers
 
-- ten folders clicked without waiting, then one: only its rows are ever shown, and they are filled
+- ten of Home's folders clicked without waiting, then Work's Inbox: only its rows are shown, and they are filled
 - none of the ten opened a message: their newest messages are still unread on the server
 - the sort changed three times without waiting
-- a search typed a letter at a time, then cleared at once: the folder's list is back, whole
-- a row clicked, then another folder, then back before the first message has come: the reading pane shows what is selected or nothing
+- a search typed a letter at a time, then cleared at once: the folder's list is back
+- a row clicked, then Flagged, then back before anything came
 
 ## D4. The list changes under the window
 
-- scrolled to the middle, 200 new messages arrive: the rows in sight stay, the count grows
-- at the top, new mail arrives: it is listed, the selection stays on its message
-- another client deletes the selected message: the selection moves as Delete would move it, the pane follows
-- another client deletes 3,000 while the list is scrolled to its end: the list ends where the server's does
-- another client flags, reads and moves messages in sight: the rows follow
-- the folder shown is renamed, then deleted, by another client
-- the folder's UIDVALIDITY changes: its list is read again, whole
+- scrolled to the middle, 200 new messages arrive: the count grows by 200
+- at the top with a message shown, new mail arrives: the same message stays shown
+- another client deletes the message shown: it is no longer shown
+- scrolled to the end, another client deletes a sixth of the oldest: the list ends where the server's does
+- another client flags the rows in sight
+- the folder shown is renamed by another client: the list follows; another folder's UIDVALIDITY changes while it is shown
 
 ## D5. Selection across pages
 
-- Select All in a folder of 5,000: the reading pane says how many, and how many are unread
-- Mark as Read, Flag, then Move to another folder: the server has all of them there, each once; Undo brings them back
-- a Shift range from row 50 to row 2,300 without scrolling between: Delete removes exactly those
-- a move the server refuses half way: the bar over the list says so, the rows are back and selected
-- Select All, a sync, then Delete: what was selected is deleted, not what arrived
+- Select All in the big Inbox, Mark as Read: the server has none unread; Select All, Mark as Unread
+- a Shift range from row 50 to row 2,300 without scrolling between, moved to Archive: Archive has exactly those more; Undo brings them back
+
+Not built yet: a move the server refuses half way; Select All, a sync, then Delete.
 
 ## D6. Views of many folders
 
-- All Inboxes has the sum of the Inboxes, in the order of the dates; "by account" groups them
-- All Sent, All Drafts and Flagged likewise
-- Broken's server stops: its rows stay, its state is said, the other accounts' rows work
-- Broken's password changes: the same, and it asks once
-- an account is removed while its rows are in sight in All Inboxes: they go, the selection lands on a row that is there
-- the accounts' order changed: the tree and "by account" follow
-- from a row of All Inboxes to its own folder and back: the same row selected
-- All Inboxes and each Inbox remember their own message
+- All Inboxes, All Sent, All Drafts and Flagged, each to its end: the rows the servers have (Flagged: each row flagged on its server)
+- All Inboxes remembers its own message apart from Work's Inbox
+
+Not built yet: an account removed while its rows are in sight; the accounts' order changed. Broken's server ill is in D13 and the walk.
 
 ## D7. Conversations
 
-- Work's Inbox by conversations: as many rows as the server's messages make conversations
-- a conversation of 300 expanded and collapsed; one at row 99 and 100 expanded
-- a conversation with messages in three folders
-- Watch and Ignore on a long conversation, then new mail in it
-- conversations off and on in the big Inbox: the selected message stays selected
+- Work's Inbox by conversations: rows 99, 100 and 0 clicked, End; conversations off again
+
+Not built yet: a conversation of 300 expanded; one across three folders; Watch and Ignore on a long one.
 
 ## D8. Finding
 
-- a word with thousands of hits: the count is the server's, End reaches the last hit, it opens
-- every operator of the query syntax in Work, against the same question asked of the server's messages
-- a search in All Inboxes; a search while a first sync still fetches the text
-- a hit deleted from the results: it leaves the results and its folder
+- a common word in Work's Inbox finds many: End, the last hit opens; `subject:` alone; a search in All Inboxes
 
-## D9. Bulk commands, rules and agents
+Not built yet: every operator of the query syntax against the same question asked of the server; a hit deleted from the results.
 
-- Empty Folder on 10,000; Mark All Read on 18,000: the window stays usable meanwhile, the server agrees at the end
-- a message rule run on a folder of 5,000 while its list is shown
-- an agent moves 2,000 messages of the folder shown: the list follows; Undo from the agent's log
-- 500 messages dragged to a folder; saved as files; imported again
+## D9. Bulk commands
 
-## D10. Writing, in the big world
+- Mark All Read on the big Inbox: the window stays usable meanwhile (scrolled while it runs), the server agrees at the end
+- a folder of 800 deleted with Select All, then Empty Folder on Deleted Items: it is empty
 
-- a reply to a message of a long conversation lands in it
-- 50 messages sent in a row, some with Undo Send: Sent has each once
-- drafts saved, opened and deleted while All Drafts is shown
-- off line: 20 actions queued, then on line: the server has them in order
+Not built yet: a message rule run on a folder of 5,000 while its list is shown; an agent's bulk move with the window on that folder and its Undo; 500 messages dragged to a folder, saved as files and imported again. The regular scenario has each of them on a small folder (19g, 28, 30, 32).
+
+## D10. Writing
+
+- five messages sent in a row from Work, without waiting between them: Sent has each once; All Sent lists them
+
+Not built yet: a reply into a long conversation, Undo Send among them, drafts while All Drafts is shown, actions queued off line.
 
 ## D11. The folder tree
 
-- Home's 400 folders: the tree scrolls, expands and collapses; every count matches
-- folders created, renamed, moved and deleted, here and by another client, deep in the tree
-- names in other scripts sort and show as the core says
+- twelve of Home's folders three levels deep and more, in other scripts too, opened one after another; every count matches the server's
+
+Not built yet: folders created, renamed, moved and deleted deep in the tree.
 
 ## D12. Every kind of message
 
-- in Lists, each kind opened from a big list by its row: a bounce, an invitation, a one-time code, signed and encrypted mail, a brand logo, pictures and PDF previews, a message of 40 MB (its text first)
-- encrypted messages in search results and in All Inboxes show no text they should not
+- in Lists, found among 3,000 and opened from their rows: a bounce, an invitation, a one-time code, encrypted mail, a newsletter, a huge message (2, 8 or 40 MB by profile)
 
 ## D13. The connection
 
-- the connection dropped in the middle of a move of 3,000: the server has each message once at the end
-- one slow command: reading other mail does not wait for it
-- a server that refuses the extra connections: everything above still works
-- an hour of IDLE with mail arriving now and then (the overnight profile: a night)
+- the connection dropped at the next MOVE of a move of 220: each message is in Archive once at the end
+- two slow FETCH commands on Lists: Work's mail is read meanwhile
+- a server that refuses the next three connections (Home): the list and the counts still come right
+- Broken's password changed elsewhere and set back: the other accounts work meanwhile (the core's run; an app asks for the new password in a window of its own, which the drivers do not answer)
+
+The walk adds faults to Broken now and then: a dropped connection, a slow command, a refused connection.
 
 ## D14. Restarts
 
-- the folder, the sort, the selected message and the place in the list are the same after a restart
-- every other folder still has the message left in it
-- a folder whose newest message is encrypted, come to for the first time: no passphrase is asked for
-- a restart with a message window and a compose window open
-- the store closed hard in the middle of a sync opens again and ends with the server's counts
+- Archive and the Inbox each left with a message shown, the app closed and started again: the same list and message, and Archive still opens with its own (the core's run; the drivers start their app once)
+
+Not built yet: the sort and the place in the list after a restart, an encrypted newest message come to (no passphrase asked), a restart with a message window and a compose window open, the store closed hard in the middle of a sync.

@@ -2886,6 +2886,29 @@ const struct PeTreeRow *pe_tree_get(const struct PeTree *tree, size_t index);
 int64_t pe_tree_reselect(const struct PeTree *tree,
                          const char *key);
 
+// Every account synced, then a barrier behind the sync in each account's worker: `pe_quiet` is false until every
+// barrier is passed, so until the syncs asked for now and everything queued before them are done (the deep test's
+// drivers)
+//
+// # Safety
+// `core` must be a live handle.
+void pe_sync_barrier(const struct PeCore *core);
+
+// A folder's path as the server names it (modified UTF-7, IMAP's) as the user reads it, each level decoded. Free
+// with `pe_string_free`; NULL for NULL.
+//
+// # Safety
+// `path` must be NULL or a NUL-terminated string.
+char *pe_folder_path_decoded(const char *path);
+
+// Nothing asked of the core is under way: no sync asked for that has not finished, no action queued that is not done.
+// A sync asked for after a change finishes only after the commands queued before it, so a test waits for this
+// rather than for a time.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_quiet(const struct PeCore *core);
+
 // The row of the folder tree the user chose (its `key`), kept for the app to start with it next time
 // (`pe_tree_start`)
 //

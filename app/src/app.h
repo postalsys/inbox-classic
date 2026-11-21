@@ -785,6 +785,11 @@ public:
     int TestListOrder() const { return listPending_ || loadRequest_ ? 9 : testListOrder_ + 10; }
     // the UI test holds the list of a folder clicked unread (`hold`), to see it waiting, and lets it go
     void TestHoldList(bool hold);
+    // the deep test's driver (scripts/deep-driver.ps1, with --test-hooks only): a request in tab-separated words
+    // (`account`, `open`, `move`, `group`, `select`, `scroll`, `quiet`, `observe`); 11 done, 10 not, an account's id
+    // plus 10 for `account`. `observe <file>` writes what the window shows to the file as JSON, in the words of
+    // core/crates/pe-deep/src/model.rs
+    LRESULT TestDeep(const std::wstring& request);
     // the accounts changed: builds the tree again
     void Reload();
     // a contact's picture changed: the rows (and their picture keys) read again, the selection kept

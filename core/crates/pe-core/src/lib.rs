@@ -6,6 +6,7 @@
 //! windows start runs on the workers and reports back as [`Event`]s, on a worker thread.
 #![forbid(unsafe_code)]
 
+mod activity;
 pub mod agents;
 pub mod attachment_words;
 mod authres;
@@ -469,6 +470,12 @@ pub enum NextUnread {
 /// How many messages the worker threads, or fetches the References of, at a time in the background
 pub(crate) const THREAD_BATCH: usize = 200;
 
+/// A folder's path as the server names it (modified UTF-7) as the user reads it, each level decoded (`/` between
+/// levels, as ImapKit and most servers separate them)
+pub fn folder_path_decoded(path: &str) -> String {
+    path.split('/').map(pe_imap::utf7::decode).collect::<Vec<_>>().join("/")
+}
+
 /// Newest first by date, the list's order out of the box
 pub(crate) const NEWEST_FIRST: Sort = Sort {
     field: pe_store::SortField::Date,
@@ -597,6 +604,8 @@ pub struct Core {
     previews: previews::Previews,
     /// The message each list showed last and the row of the folder tree chosen (shown.rs)
     shown: shown::Shown,
+    /// The syncs and actions under way (activity.rs)
+    activity: Arc<activity::Activity>,
 }
 
 impl Core {
@@ -635,6 +644,8 @@ impl Core {
                 let _ = search::index_pending(&mut store);
             }
         });
+        let activity = Arc::new(activity::Activity::default());
+        let tracked = activity.clone();
         let wake = Arc::new(tokio::sync::watch::Sender::new(0));
         runtime.spawn(worker::watch_sleep(wake.clone()));
         // what a move the app was in the middle of when it last ended left behind
@@ -665,6 +676,7 @@ impl Core {
             pgp_certs: Default::default(),
             trust,
             events: Arc::new(move |event| {
+                tracked.saw(&event);
                 if !open.load(Ordering::Acquire) {
                     if let Some(change) = MailChange::of(&event) {
                         // nobody listening is no failure
@@ -701,6 +713,7 @@ impl Core {
             reads: Default::default(),
             previews: Default::default(),
             shown: Default::default(),
+            activity,
         };
         if pdfs_turned_off {
             let events = core.events.clone();
@@ -1473,7 +1486,11 @@ impl Core {
 
     /// Syncs the folder list and every folder of an account, in the background
     pub fn sync(&self, account: AccountId) -> Result<()> {
-        self.send_command(account, Command::Sync)?;
+        self.activity.sync_asked(account);
+        if let Err(error) = self.send_command(account, Command::Sync) {
+            self.activity.forget(account);
+            return Err(error);
+        }
         // the reader connects after the first sync, ready for the first message opened; the background worker starts
         // then too
         self.send_to(Kind::Reader, account, Command::Connect)?;

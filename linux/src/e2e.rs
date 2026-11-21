@@ -24,6 +24,7 @@ use crate::settings_pages::{Setting, SettingsPage};
 use crate::ui::FILE_ANSWERS;
 
 /// The steps after organizing: lists, invitations, logos, dragging, junk, folders, links, completion, signatures
+pub mod deep;
 mod steps;
 
 /// Step 39a: the Address Book

@@ -463,6 +463,8 @@ enum TestHooks {
     static var webMenu: ((NSMenu) -> Void)?
     /// a modal window as it is about to run, its buttons as they start
     static var modalOpened: ((NSWindow) -> Void)?
+    /// the test adds its accounts itself (the deep test's driver): the first start asks for none
+    static var addsAccounts = false
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled
