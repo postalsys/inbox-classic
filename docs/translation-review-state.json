@@ -1,6 +1,6 @@
 {
   "round": 5,
-  "status": "reviewed_pending_baseline",
+  "status": "complete",
   "starting_commit": "fa016a57c0149783b910a5a3197b7362262eac9b",
   "starting_review_baseline": "6c44a173d8daeb0383b7c294b2b04213e609abbe",
   "previous_round": {
@@ -2477,7 +2477,7 @@
     "local_only_diff": "scripts/homepage-screenshots.sh crop geometry; inspected, no user-facing strings or semantic help impact; not included in publication branch."
   },
   "validation_policy": "No local suites, CI queries or manually triggered workflows. Static checks, source/caller inspection and offline build permitted. No unmerged-source discovery.",
-  "next_batch": "Commit reviewed content; advance REVIEWED to that concrete commit; verify zero pending/unmarked changes, archive and publish.",
+  "next_batch": "No pending translation work. Publish the completed branch and record its merge receipt. The existing standalone unsubscribe account issue remains a separate runtime follow-up.",
   "current_files_sha256": {
     "core/locales/bg/mac.ftl": "637ed18a861b036d0ea8b2edf53d5585ce4b95787348bf0ac44b31e627df2a7b",
     "core/locales/bg/linux.ftl": "d6aea698abf558cea346a11b84ed7bb9e03287329d26686d6874012a4dbcfa2a",
@@ -4671,7 +4671,17 @@
     "tests": "Not run under user restriction",
     "CI": "Not queried or manually triggered under user restriction",
     "since_audit": "No additional waiting content;84 unmarked values are the exact reviewed target passages compared with prior REVIEWED baseline.",
-    "pending_marks": 0
+    "pending_marks": 0,
+    "final_i18n_check": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+    "review_html": "/private/tmp/inbox-code-followup-20261121-final-review.html"
   },
-  "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-code-followup-completed-20261121"
+  "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-code-followup-completed-20261121",
+  "content_commit": "a040e21e1f2955f1cc9ce37962ce74280d05e672",
+  "reviewed_baseline": "a040e21e1f2955f1cc9ce37962ce74280d05e672",
+  "publication": {
+    "status": "pending",
+    "branch": "i18n/code-followup-20261121",
+    "authorized": true,
+    "receipt": "/Users/andris/Projects/PostalExpress/build/i18n-code-followup-completed-20261121/publication.json"
+  }
 }

@@ -4,7 +4,7 @@
 
 - Authoritative worktree: `/Users/andris/Projects/PostalExpress/build/i18n-code-followup-20261121`, branch `i18n/code-followup-20261121`.
 - Starting and final upstream checkpoint: `fa016a57c0149783b910a5a3197b7362262eac9b`. Prior round 4 remains archived and was merged in PR #223 at `36351eb2209264d74286335b905653c756e09894`.
-- All requested content is reviewed and validated. Next: commit content, advance REVIEWED, verify the final baseline, archive and publish under existing authorization.
+- Round 5 is complete. REVIEWED points to `a040e21e1f2955f1cc9ce37962ce74280d05e672`. Final audit: zero pending messages, help passages or unmarked changes. Publication is the remaining operational step; the durable `publication.json` receipt records its outcome.
 - No unmerged-source discovery. Local master-only commit `347e720e8bcecd40b579f82bdd2b5edcccfbe9e4` changes screenshot cropping, with no string/help meaning impact; it remains outside this publication branch.
 
 ## Coverage and corrections
@@ -35,3 +35,10 @@ The connections review also identified stale internal BIMI/sender-picture commen
 ## Evidence
 
 Exact before/after text, hashes, language decisions, source/caller evidence, broader runtime audit and validation artifacts are in `/private/tmp/inbox-code-followup-20261121-*`. The final verified archive will be at `/Users/andris/Projects/PostalExpress/build/i18n-code-followup-completed-20261121`. Round-4 records remain unchanged.
+
+## Completed baseline
+
+- Content and REVIEWED commit: `a040e21e1f2955f1cc9ce37962ce74280d05e672`.
+- Final audit: `0 messages and 0 help passages wait for a review; 0 new or changed without a mark`.
+- All final file hashes match the frozen ledgers and validation snapshot. The review HTML is regenerated.
+- No remaining translation edits. Publication remains pending in this immutable pre-merge record; consult the durable receipt for final PR and merge status.
