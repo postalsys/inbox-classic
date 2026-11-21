@@ -219,6 +219,16 @@ while ($null -ne ($line = [Console]::In.ReadLine())) {
             $p = Get-Process -Id $process.Id
             Reply ('{"ok":true,"memory_kib":' + [int64]($p.WorkingSet64 / 1024) + ',"open_files":' + $p.HandleCount + '}')
         } elseif ($request.screenshot) {
+            # the whole screen, so what covers the window shows too
+            Add-Type -AssemblyName System.Drawing, System.Windows.Forms
+            $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+            try {
+                [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+                $bitmap.Save([string]$request.screenshot, [System.Drawing.Imaging.ImageFormat]::Png)
+            } finally {
+                $bitmap.Dispose()
+            }
             Reply '{"ok":true}'
         } else {
             Act $request

@@ -180,4 +180,5 @@ jobs:
                   path: |
                       build/deep/windows/report.html
                       build/deep/windows/result.json
+                      build/deep/windows/*.png
                   if-no-files-found: ignore
