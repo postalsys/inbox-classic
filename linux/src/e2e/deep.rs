@@ -393,5 +393,6 @@ fn observe() -> Seen {
         tree,
         // the list before, dimmed while the one chosen is read: its rows are not this list's
         pending: main.list_dimmed(),
+        notes: String::new(),
     }
 }

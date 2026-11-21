@@ -792,6 +792,8 @@ public:
     LRESULT TestDeep(const std::wstring& request);
     // whether the rows drawn are the list as the core reads it now (the deep test's quiet)
     bool DrawnCurrent();
+    // the list's loads and pages, for the deep test's report
+    std::string DeepNotes() const;
     // the accounts changed: builds the tree again
     void Reload();
     // a contact's picture changed: the rows (and their picture keys) read again, the selection kept
@@ -1095,6 +1097,8 @@ private:
     const PeMessage* Row(int index);
     // the row `index` if its page is read already, nullptr otherwise; reads nothing
     const PeMessage* CachedRow(int index) const;
+    // the pages of the rows in sight not here asked for, whenever those rows were painted
+    void AskOnScreen();
     // the row `index` for a command: its page read now when it is not here (nullptr while the list itself loads)
     const PeMessage* RowNow(int index);
     const PeMessage* SelectedRow();

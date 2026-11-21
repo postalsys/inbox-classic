@@ -277,6 +277,8 @@ pub struct Seen {
     pub tree: Vec<(String, String, u64)>,
     /// The list chosen is being read and the list before is still drawn (dimmed): the rows are that list's
     pub pending: bool,
+    /// What the window says of its own state (its loads and pages), shown in the report beside a failure
+    pub notes: String,
 }
 
 impl Seen {
@@ -295,6 +297,7 @@ impl Seen {
             "unreadOnly": self.unread_only,
             "tree": self.tree.iter().map(|(a, p, u)| json!([a, p, u])).collect::<Vec<_>>(),
             "pending": self.pending,
+            "notes": self.notes,
         })
     }
 
@@ -334,6 +337,7 @@ impl Seen {
             unread_only: value["unreadOnly"].as_bool().unwrap_or(false),
             tree,
             pending: value["pending"].as_bool().unwrap_or(false),
+            notes: value["notes"].as_str().unwrap_or_default().into(),
         })
     }
 
@@ -406,6 +410,7 @@ mod tests {
             unread_only: false,
             tree: vec![("Work".into(), "INBOX".into(), 12)],
             pending: true,
+            notes: "load 0".into(),
         };
         assert_eq!(Seen::from_json(&seen.to_json()), Some(seen));
     }
