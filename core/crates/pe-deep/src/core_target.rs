@@ -650,6 +650,8 @@ impl Target for CoreTarget {
             grouped: self.view.grouped(),
             unread_only: self.view.show() == Show::Unread,
             tree,
+            // it reads the list chosen before it answers, so it never draws the one before
+            pending: false,
         })
     }
 

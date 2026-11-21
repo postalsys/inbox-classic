@@ -110,7 +110,9 @@ function AnswerYes {
         Start-Sleep -Milliseconds 100
     }
 }
-# nothing under way: the core quiet and the list read, then Send/Recv as a barrier, then quiet again
+# nothing under way: the core quiet and the list read, then Send/Recv as a barrier, then quiet again; then the rows
+# drawn the list as the store has it now (the core says, scripts/ui-e2e/DEEP.md), within 10 s, or the checks report
+# what is left
 function Settle([int]$seconds) {
     foreach ($round in 1..2) {
         $until = (Get-Date).AddSeconds($seconds)
@@ -119,6 +121,10 @@ function Settle([int]$seconds) {
             Start-Sleep -Milliseconds 100
         }
         if ($round -eq 1) { [void](Ask 'barrier') }
+    }
+    $until = (Get-Date).AddSeconds(10)
+    while ((Get-Date) -lt $until -and -not ((Ask 'quiet') -eq 11 -and (Ask 'current') -eq 11)) {
+        Start-Sleep -Milliseconds 100
     }
 }
 function Observe {

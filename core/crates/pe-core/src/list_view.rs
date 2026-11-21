@@ -683,6 +683,33 @@ impl ListView {
         self.listed(Vec::new(), |search| core.positions(search, self.sort, refs))
     }
 
+    /// Whether a window draws this list as the store has it now: `rows` rows, and at each row of `drawn` the message
+    /// there (None: drawn blank, its page not read). What a test waits for before it looks (the deep test's drivers):
+    /// one answer for every window, whatever is still on its way to it (an event, a reload gathering changes, a page,
+    /// a paint)
+    pub fn drawn_current(&self, core: &Core, rows: u64, drawn: &[(u64, Option<MessageRef>)]) -> Result<bool> {
+        let Some(search) = self.search() else {
+            return Ok(rows == 0);
+        };
+        if rows_of(core, &search, self.grouped, core.count_search(&search)?.0)? != rows {
+            return Ok(false);
+        }
+        let (Some(first), Some(last)) = (drawn.iter().map(|d| d.0).min(), drawn.iter().map(|d| d.0).max()) else {
+            return Ok(true);
+        };
+        if drawn.iter().any(|(_, at)| at.is_none()) {
+            return Ok(false);
+        }
+        let now = core.search(&search, self.sort, first, last - first + 1)?;
+        Ok(drawn.iter().all(|(row, at)| {
+            let there = now.get((row - first) as usize).map(|m| MessageRef {
+                folder: m.folder_id,
+                uid: m.info.uid,
+            });
+            there == *at
+        }))
+    }
+
     /// The rows of the messages the last Undo brought back ([`Core::undo`]), and of those the store took back of an
     /// action the server refused, for the window to select them once its list has them: empty while none is back yet. None when something was written since the list was last counted: the
     /// rows found now could be other rows of the list shown (the messages back in the store, the list counted before
@@ -1428,6 +1455,40 @@ mod tests {
 
     /// What Undo brought back is given as rows only of the list as it was counted: messages back in the store after
     /// the count wait for the list to be read again, and are kept until then
+    #[test]
+    fn drawn_current_says_whether_the_window_shows_the_list_now() {
+        let dir = pe_testkit::TempDir::new("core-list-view-drawn");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        view.set_scope(Some(Scope::Folder(inbox)));
+        let at = |uid| Some(MessageRef { folder: inbox, uid });
+        // newest first: 4, 3, 6, 2, 5, 1
+        assert!(
+            view.drawn_current(&core, 6, &[(0, at(4)), (1, at(3)), (2, at(6))])
+                .unwrap()
+        );
+        assert!(
+            view.drawn_current(&core, 6, &[]).unwrap(),
+            "nothing in sight, the count right"
+        );
+        assert!(!view.drawn_current(&core, 5, &[(0, at(4))]).unwrap(), "a row short");
+        assert!(
+            !view.drawn_current(&core, 6, &[(0, at(4)), (1, None)]).unwrap(),
+            "a row blank"
+        );
+        assert!(!view.drawn_current(&core, 6, &[(1, at(4))]).unwrap(), "a row not there");
+        // a message gone from the store: the rows drawn before are no longer the list
+        core.store().remove_messages(inbox, &[3]).unwrap();
+        assert!(!view.drawn_current(&core, 6, &[(0, at(4)), (1, at(3))]).unwrap());
+        assert!(view.drawn_current(&core, 5, &[(0, at(4)), (1, at(6))]).unwrap());
+        // grouped: a row a conversation
+        view.set_grouped(true);
+        assert!(view.drawn_current(&core, 3, &[]).unwrap());
+        // no list chosen: nothing drawn
+        assert!(ListView::new().drawn_current(&core, 0, &[]).unwrap());
+    }
+
     #[test]
     fn restored_rows_only_of_the_list_counted() {
         let dir = pe_testkit::TempDir::new("core-list-view-restored");

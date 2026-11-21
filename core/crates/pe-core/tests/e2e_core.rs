@@ -1653,6 +1653,32 @@ fn mark_all_read_reaches_every_message_of_a_big_folder() {
 }
 
 #[test]
+fn a_barrier_syncs_again_when_its_sync_failed() {
+    let Some(s) = setup() else { return };
+    s.server.add_message("INBOX", &rfc822("First", "x"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let archive = folders.iter().find(|f| f.info.path == "Archive").unwrap().id;
+    // mail in a folder IDLE does not watch, and the barrier's sync loses its connection when it opens that folder
+    s.server.add_message("Archive", &rfc822("Second", "x"), &[]);
+    let rule =
+        serde_json::json!({"close": true, "match": r#"(SELECT|EXAMINE) "?Archive"#, "on": "command", "times": 1});
+    s.server.request("POST", "/v1/script/rules", Some(rule));
+    s.core.sync_barrier().unwrap();
+    let until = std::time::Instant::now() + pe_testkit::patience();
+    while !s.core.quiet() {
+        assert!(std::time::Instant::now() < until, "the barrier was never passed");
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
+    let rules = s.server.request("GET", "/v1/script/rules", None);
+    assert_eq!(rules[0]["hits"], 1, "the sync failed once");
+    let listed = s.core.messages(archive, Sort::default(), 0, 10).unwrap();
+    assert_eq!(listed.len(), 1, "quiet once a sync got through");
+}
+
+#[test]
 fn acts_on_selected_messages_and_undoes() {
     let Some(s) = setup() else { return };
     let uids: Vec<u64> = ["One", "Two", "Three", "Four"]

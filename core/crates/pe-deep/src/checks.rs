@@ -156,6 +156,20 @@ pub fn always(
     let Some(list) = seen.list.clone() else {
         return failures;
     };
+    // the list before, still drawn (dimmed) while the one chosen is read: its rows are not this list's, which
+    // holds only before things are quiet (scripts/ui-e2e/DEEP.md)
+    if seen.pending {
+        if settled {
+            failures.push(failure(
+                "pending",
+                format!(
+                    "{} is chosen and the list before is still drawn once all is done",
+                    list.label()
+                ),
+            ));
+        }
+        return failures;
+    }
     let whole = seen.search.is_empty() && !seen.unread_only;
     // the rows the list has: every message of the list, one a row while not grouped
     if settled

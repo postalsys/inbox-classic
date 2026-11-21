@@ -275,6 +275,8 @@ pub struct Seen {
     pub unread_only: bool,
     /// The folders of the tree with the unread count each shows: (account, path, unread)
     pub tree: Vec<(String, String, u64)>,
+    /// The list chosen is being read and the list before is still drawn (dimmed): the rows are that list's
+    pub pending: bool,
 }
 
 impl Seen {
@@ -292,6 +294,7 @@ impl Seen {
             "grouped": self.grouped,
             "unreadOnly": self.unread_only,
             "tree": self.tree.iter().map(|(a, p, u)| json!([a, p, u])).collect::<Vec<_>>(),
+            "pending": self.pending,
         })
     }
 
@@ -330,6 +333,7 @@ impl Seen {
             grouped: value["grouped"].as_bool().unwrap_or(false),
             unread_only: value["unreadOnly"].as_bool().unwrap_or(false),
             tree,
+            pending: value["pending"].as_bool().unwrap_or(false),
         })
     }
 
@@ -401,6 +405,7 @@ mod tests {
             grouped: true,
             unread_only: false,
             tree: vec![("Work".into(), "INBOX".into(), 12)],
+            pending: true,
         };
         assert_eq!(Seen::from_json(&seen.to_json()), Some(seen));
     }

@@ -336,25 +336,16 @@ final class DeepDriver {
         pe_sync_barrier(core.handle)
         try? await Task.sleep(nanoseconds: 300_000_000)
         guard await wait() else { throw DeepError("still busy after \(Int(seconds)) s") }
-        try? await Task.sleep(nanoseconds: 300_000_000)
-        guard await wait() else { throw DeepError("still busy after \(Int(seconds)) s") }
-        // the rows drawn ask for their pages as they are drawn: filled within a few seconds, or the check says which
-        // stayed blank
-        let until = Date().addingTimeInterval(5)
-        while Date() < until && !(quiet() && !blankInSight()) {
+        // then the rows drawn the list as the store has it now (the core says, scripts/ui-e2e/DEEP.md): whatever is
+        // still on its way to the window gets there; a row left blank or a list left behind is the checks' to report
+        let until = Date().addingTimeInterval(currentWithin)
+        while Date() < until && !(quiet() && mailbox.drawnCurrent()) {
             try? await Task.sleep(nanoseconds: 100_000_000)
         }
     }
 
-    /// whether a row on screen has no message yet (its page not read), the rows at either edge left out
-    func blankInSight() -> Bool {
-        let list = mailbox.list
-        let rows = Int(mailbox.rows)
-        let sight = list.rows(in: list.visibleRect)
-        let last = min(sight.location + sight.length, rows) - 1
-        guard sight.location + 1 < last else { return false }
-        return (sight.location + 1..<last).contains { mailbox.row($0) == nil }
-    }
+    /// how long the rows drawn may take to be the list once all is quiet
+    let currentWithin: Double = 10
 
     // ---- what is seen ----
 
@@ -368,10 +359,9 @@ final class DeepDriver {
         let rows = Int(mailbox.rows)
         let sight = list.rows(in: list.visibleRect)
         var seen: [[String: Any]] = []
-        // the list before, covered while the one chosen is read: none of its rows are this list's
-        if rows > 0 && !mailbox.listCovered {
+        if rows > 0 {
             for row in sight.location..<min(sight.location + sight.length, rows) {
-                if let m = mailbox.row(row) {
+                if let m = mailbox.drawnRow(row) {
                     seen.append(["row": row, "blank": false, "message": message(m.folder, m.uid) as Any,
                                  "subject": m.subject, "date": m.date ?? 0])
                 } else {
@@ -399,6 +389,8 @@ final class DeepDriver {
             "list": listed, "rows": rows, "sight": seen, "selected": Array(list.selectedRowIndexes), "shown": shown,
             "search": main.searchField.stringValue, "grouped": delegate.groupByConversation,
             "unreadOnly": delegate.hideRead, "tree": tree,
+            // the list before, covered while the one chosen is read: its rows are not this list's
+            "pending": mailbox.listCovered,
         ]
     }
 }

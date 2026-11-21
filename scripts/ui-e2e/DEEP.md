@@ -6,6 +6,28 @@ The regular scenario is `SCENARIO.md`. A bug found here gets a small step there.
 
 The accounts: Work (20,000), Home (6,000, 400 folders), Gmail-like (5,000, OAuth), Lists (3,000, every kind of message), Broken (200, an ill server).
 
+## Settled, and what holds before
+
+A check runs either settled, after the driver waited for things to be quiet, or now and then before that (the walk's checks while things are under way, and those between Fast fingers' acts). Settled means, the same on every target:
+
+1. the core is quiet (no sync, no action, no barrier: `pe_quiet`) and the window is not reading its list;
+2. a sync of every account as a barrier, which ends after every command queued before it, then 1 again;
+3. the rows the window draws are the list as the store has it now. The window hands the core its row count and the message at each row in sight (blank where its page is not read), and the core answers (`ListView::drawn_current`, `pe_list_view_drawn_current`). This is the only test of the window's own state. Whatever is still on its way to it (an event in its queue, a reload gathering changes, a page, a paint) leaves the rows other than the core reads them, so no driver lists those things itself. The driver waits at most 10 seconds for it and does not fail. A row left blank, or a list left behind, is then the checks' to report.
+
+A driver reads what is drawn and never fills it: looking at a row does not ask for its page.
+
+While a list chosen is read, the windows keep the list before drawn and dimmed. The observation says so (`pending`).
+
+| Check                                                                  | Before settled                  | Settled                                           |
+| ---------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------- |
+| `pending`: the list before still drawn                                 | allowed, and no row check runs  | a failure                                         |
+| `scope`, `twice`, `order`: rows of this list, each once, in date order | yes                             | yes                                               |
+| `rows`: the list's row count against the server                        | no                              | yes                                               |
+| `blank`: a row in sight without its message                            | no (its page may be on its way) | yes                                               |
+| `ghost`, `flagged`: rows the server has, flagged ones in Flagged       | no                              | yes                                               |
+| `pane`: the one row selected is the message shown                      | no                              | yes                                               |
+| `tree`: each folder's unread count                                     | no                              | yes, except folders read in the last three opened |
+
 ## D1. The first sync
 
 - the five accounts are added and synced as the target starts; each Inbox opened: every folder of every account has the server's total and unread count, each Inbox lists all its messages

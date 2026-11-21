@@ -21,6 +21,8 @@ struct State {
     actions: u64,
     /// Barriers asked for and not answered by every account's worker
     barriers: u64,
+    /// A sync failed while a barrier waited: the barrier syncs again ([`Core::sync_barrier`])
+    failed_in_barrier: bool,
 }
 
 impl Activity {
@@ -31,8 +33,12 @@ impl Activity {
     /// An event on its way to the windows: what it ends
     pub(crate) fn saw(&self, event: &Event) {
         match event {
-            Event::SyncFinished { account, .. } => {
-                self.state().syncing.remove(account);
+            Event::SyncFinished { account, failure } => {
+                let mut state = self.state();
+                state.syncing.remove(account);
+                if failure.is_some() && state.barriers > 0 {
+                    state.failed_in_barrier = true;
+                }
             }
             Event::Acted { .. } => self.action_done(),
             _ => {}
@@ -69,9 +75,36 @@ impl Core {
 
     /// Every account synced, then a barrier behind the sync in each account's worker: [`Core::quiet`] is false until
     /// every barrier is passed, so until the syncs asked for now and everything queued before them are done. A sync
-    /// that was running already when this was asked can not end it early, as a finished sync alone could. For tests
-    /// (the deep test's drivers) that wait for the state, not for a time.
+    /// that was running already when this was asked can not end it early, as a finished sync alone could. A sync that
+    /// failed meanwhile (a connection that dropped, a server that answered too late) leaves folders behind, so the
+    /// barrier syncs again, [`BARRIER_ROUNDS`] times at most. For tests (the deep test's drivers) that wait for the
+    /// state, not for a time.
     pub fn sync_barrier(self: &std::sync::Arc<Self>) -> Result<()> {
+        let answers = self.barrier_round()?;
+        self.activity.state().barriers += 1;
+        let core = std::sync::Arc::downgrade(self);
+        let activity = self.activity.clone();
+        self.runtime()?.spawn(async move {
+            let mut answers = answers;
+            for round in 1..=BARRIER_ROUNDS {
+                for answer in answers {
+                    // a worker that stops answers no more: it is passed all the same
+                    let _ = answer.await;
+                }
+                let failed = std::mem::take(&mut activity.state().failed_in_barrier);
+                answers = match core.upgrade() {
+                    Some(core) if failed && round < BARRIER_ROUNDS => core.barrier_round().unwrap_or_default(),
+                    _ => break,
+                };
+            }
+            let mut state = activity.state();
+            state.barriers = state.barriers.saturating_sub(1);
+        });
+        Ok(())
+    }
+
+    /// A sync of every account asked for, and a barrier behind it in each worker: their answers
+    fn barrier_round(&self) -> Result<Vec<tokio::sync::oneshot::Receiver<()>>> {
         let mut answers = Vec::new();
         // read first: the store's lock is not held while the syncs are asked for, which take it themselves
         let accounts = self.store().accounts()?;
@@ -87,19 +120,12 @@ impl Core {
                 answers.push(answer);
             }
         }
-        self.activity.state().barriers += 1;
-        let activity = self.activity.clone();
-        self.runtime()?.spawn(async move {
-            for answer in answers {
-                // a worker that stops answers no more: it is passed all the same
-                let _ = answer.await;
-            }
-            let mut state = activity.state();
-            state.barriers = state.barriers.saturating_sub(1);
-        });
-        Ok(())
+        Ok(answers)
     }
 }
+
+/// How many times a barrier syncs when a sync fails meanwhile
+const BARRIER_ROUNDS: u32 = 3;
 
 #[cfg(test)]
 mod tests {
