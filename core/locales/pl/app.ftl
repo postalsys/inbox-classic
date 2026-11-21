@@ -86,6 +86,8 @@ cmd-options = &Opcje...
 cmd-message-rules = &Reguły wiadomości...
 cmd-encryption-keys = Klucze &szyfrowania...
 cmd-create-rule-from-message = U&twórz regułę z wiadomości...
+# review: new
+cmd-unsubscribe = Wypisz się z &listy...
 cmd-select-all = Zaznacz &wszystko
 cmd-undo = &Cofnij
 cmd-copy = &Kopiuj do folderu...
@@ -261,6 +263,22 @@ ui-unsubscribing = Wysyłanie prośby o wypisanie: { $target }...
 ui-cannot-unsubscribe = Ta wiadomość nie zawiera opcji wypisania się z listy mailingowej.
 ui-unsubscribed = Prośba o wypisanie została przyjęta.
 ui-not-unsubscribed = Nie udało się wypisać: { $reason }
+# review: new
+ui-list-bar = Ta wiadomość pochodzi z listy mailingowej ({ $domain }).
+# review: new
+ui-list-bar-plain = Ta wiadomość pochodzi z listy mailingowej.
+# review: new
+ui-list-bar-asked = Prośbę o wypisanie z tej listy wysłano { $date }.
+# review: new
+ui-list-bar-came-after = Prośbę o wypisanie z tej listy wysłano { $date }, ale ta wiadomość przyszła później.
+# review: new
+ui-list-bar-opened = Stronę listy do wypisania się otwarto { $date }.
+# review: new
+ui-list-bar-failed = Lista nie przyjęła prośby: { $reason }
+# review: new
+ui-unsubscribe-ask = Wypisz się…
+# review: new
+ui-unsubscribe-again = Wypisz się ponownie…
 ui-event-span = Od { $start } do { $end }
 ui-event-floating = { $when } (bez przeliczenia strefy czasowej)
 ui-invitation = Zaproszenie: { $title }

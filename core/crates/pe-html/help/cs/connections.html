@@ -10,5 +10,5 @@
     <li><b>Šifrovací klíče</b> hledá Inbox Classic při šifrování zprávy, pokud nemáte klíč příjemce, nebo když sami spustíte hledání. Při hledání podle e-mailové adresy se nejprve dotáže její domény (Web Key Directory). Pokud klíč nenajde a hledání na keys.openpgp.org je zapnuté, odešle adresu i tam. Při hledání podle otisku nebo ID klíče odešle na keys.openpgp.org tento identifikátor místo e-mailové adresy. Při zveřejnění klíče se odesílá veřejný klíč a jeho adresy, které je třeba jednotlivě potvrdit.</li>
     <!--os:mac--><li><b>Aktualizace</b> z inboxclassic.com, když si vyžádáte kontrolu nebo je zapnutá automatická kontrola.</li><!--/os-->
 </ul>
-<!--review--><p>Přihlašovací kódy se nabízejí, jen když hlavička Authentication-Results / ARC-Authentication-Results od vašeho poskytovatele uvádí, platný podpis DKIM domény kódu nebo její nadřazené domény. K tomu není potřeba žádné další připojení.</p><!--/review-->
+<p>Přihlašovací kódy se nabízejí jen tehdy, když váš poskytovatel potvrdí platný podpis DKIM domény kódu nebo její nadřazené domény. Inbox Classic tento výsledek čte z hlavičky Authentication-Results nebo ARC-Authentication-Results od poskytovatele. K tomu není potřeba žádné další připojení.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>

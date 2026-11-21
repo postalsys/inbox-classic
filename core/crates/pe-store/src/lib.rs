@@ -39,6 +39,7 @@ mod transfers;
 mod trusted;
 #[cfg(test)]
 mod turkish;
+mod unsubscribed;
 
 use std::path::Path;
 
@@ -70,6 +71,7 @@ pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
 pub use threads::{MAX_REFERENCES, RowRef, ThreadPlace, parse_references};
 pub use transfers::Transfer;
 pub use trusted::TrustedSender;
+pub use unsubscribed::Asked;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

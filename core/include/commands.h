@@ -74,6 +74,7 @@ enum PeCommandId : unsigned short {
     IDM_MESSAGE_RULES = 170,
     IDM_ENCRYPTION_KEYS = 172,
     IDM_CREATE_RULE_FROM_MESSAGE = 171,
+    IDM_UNSUBSCRIBE = 178,
     IDM_ADD_SENDER_TO_BOOK = 148,
     IDM_IMPORT_ADDRESS_BOOK = 149,
     IDM_EXPORT_ADDRESS_BOOK = 150,
@@ -94,6 +95,7 @@ inline bool CommandNeedsOne(unsigned id) {
     case IDM_PROPERTIES:
     case IDM_VIEW_SOURCE:
     case IDM_CREATE_RULE_FROM_MESSAGE:
+    case IDM_UNSUBSCRIBE:
     case IDM_ADD_SENDER_TO_BOOK:
         return true;
     default:
@@ -161,6 +163,7 @@ inline bool CommandActsOnList(unsigned id) {
     case IDM_HIDE_IGNORED:
     case IDM_HIDE_READ:
     case IDM_CREATE_RULE_FROM_MESSAGE:
+    case IDM_UNSUBSCRIBE:
     case IDM_ADD_SENDER_TO_BOOK:
         return true;
     default:
@@ -252,6 +255,7 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_MESSAGE_RULES: return PE_TEXT_CMD_MESSAGE_RULES;
     case IDM_ENCRYPTION_KEYS: return PE_TEXT_CMD_ENCRYPTION_KEYS;
     case IDM_CREATE_RULE_FROM_MESSAGE: return PE_TEXT_CMD_CREATE_RULE_FROM_MESSAGE;
+    case IDM_UNSUBSCRIBE: return PE_TEXT_CMD_UNSUBSCRIBE;
     case IDM_ADD_SENDER_TO_BOOK: return PE_TEXT_CMD_ADD_SENDER_TO_BOOK;
     case IDM_IMPORT_ADDRESS_BOOK: return PE_TEXT_CMD_IMPORT_ADDRESS_BOOK;
     case IDM_EXPORT_ADDRESS_BOOK: return PE_TEXT_CMD_EXPORT_ADDRESS_BOOK;

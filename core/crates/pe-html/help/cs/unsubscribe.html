@@ -1,10 +1,10 @@
 <h1>Odhlášení odběru zpráv</h1>
-<p class="summary">Pomocí tlačítka pro odhlášení odběru požádejte o zastavení pravidelně zasílaných zpráv.</p>
-<p>Pokud zpráva obsahuje údaje pro odhlášení odběru, zobrazí se vpravo v záhlaví tlačítko <b data-text="ui-unsubscribe"></b>.</p>
+<p class="summary"><!--review-->Pomocí lišty nad zprávami poštovní konference požádejte o zastavení jejich zasílání.<!--/review--></p>
+<p><!--review-->Pokud zpráva z poštovní konference obsahuje údaje pro odhlášení odběru, zobrazí se nad jejím textem lišta s doménou konference a tlačítkem <b data-text="ui-unsubscribe-ask"></b>. Lišta konferenci označuje jen její doménou, nikdy názvem, který zvolil odesílatel. Ve složkách Nevyžádaná pošta, Odeslaná pošta a Koncepty se lišta nezobrazuje: odhlášení ze spamu prozradí odesílateli, že vaše adresa funguje.<!--/review--></p>
 <p>Jak odhlásit odběr:</p>
 <ol>
-    <li>Klikněte na <b data-text="ui-unsubscribe"></b>. Inbox Classic vysvětlí další krok a vyžádá si potvrzení.</li>
-    <li>Potvrďte. Podle možností odesílajícího seznamu se provede jeden z těchto kroků:
+    <li><!--review-->Klikněte na liště na <b data-text="ui-unsubscribe-ask"></b> nebo zvolte <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic vysvětlí další krok a vyžádá si potvrzení.<!--/review--></li>
+    <li><!--review-->Klikněte na <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Podle možností konference se provede jeden z těchto kroků:<!--/review-->
         <ul>
             <li>Inbox Classic odešle přímo žádost o odhlášení. Neotevře se žádná stránka a neodešle se žádný e-mail.</li>
             <li>Inbox Classic připraví požadovaný e-mail pro odhlášení z účtu, ve kterém zprávu čtete, včetně jeho textového podpisu. Odešlete jej kliknutím na <b data-text="ui-tb-send"></b>.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Potom lišta u každé zprávy z této konference uvádí, kdy jste o odhlášení požádali, a nic dalšího nenabízí. Žádost e-mailem se počítá až po jejím odeslání. U konference, jejíž stránku jste otevřeli, si lišta tlačítko ponechá, protože Inbox Classic nevidí, zda jste odhlášení na stránce dokončili.<!--/review--></p>
+<p><!--review-->Zastavení zasílání může konferenci trvat až dva dny. Pokud některá její zpráva přijde později, lišta nabídne <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Stavový řádek oznámí přijetí přímé žádosti o odhlášení. To nepotvrzuje, že zasílání zpráv už skončilo.</p>
 <aside class="note">Inbox Classic odešle přímou žádost až po vašem potvrzení a pouze u zprávy s ověřeným podpisem odesílajícího seznamu. Tím omezuje zneužití podvržených pokynů k odhlášení.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

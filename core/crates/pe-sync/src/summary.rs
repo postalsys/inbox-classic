@@ -113,7 +113,13 @@ pub(crate) fn list_id_of(header: &[u8]) -> Option<String> {
     let (_, raw) = header_fields(header)
         .into_iter()
         .find(|(name, _)| name.eq_ignore_ascii_case("List-Id"))?;
-    let value = raw.split_once(':').map_or("", |(_, v)| v).replace(['\r', '\n'], " ");
+    list_id(raw.split_once(':').map_or("", |(_, v)| v))
+}
+
+/// The mailing list a List-Id header's `value` names, as [`list_id_of`] gives it: the store's `list_id`, and the key
+/// the core remembers a list by
+pub fn list_id(value: &str) -> Option<String> {
+    let value = value.replace(['\r', '\n'], " ");
     let id = match (value.rfind('<'), value.rfind('>')) {
         (Some(start), Some(end)) if start < end => &value[start + 1..end],
         _ => value.trim(),

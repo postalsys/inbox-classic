@@ -282,7 +282,7 @@ pub fn hand_over(arguments: Arguments) {
 async fn open_arguments(arguments: Arguments) {
     let shell = shell();
     if let Some(link) = &arguments.mailto {
-        shell.open_mailto(link).await;
+        shell.open_mailto(link, 0).await;
     }
     // a message file (.eml) opens in a window of its own; another file is offered to the selected folder
     for file in &arguments.files {
@@ -377,6 +377,12 @@ impl Shell {
             | Event::SignInAppChecked { request }
             | Event::ReadDone { request } => self.request_done(*request),
             Event::NewMail { .. } => self.notify_new_mail(&event),
+            Event::ListsChanged => {
+                main.reader.lists_changed();
+                for window in crate::message_window::windows() {
+                    window.reader.lists_changed();
+                }
+            }
             Event::Unsubscribed { request, problem } => {
                 let mut said = main.reader.unsubscribed(*request, problem.as_deref());
                 if said.is_empty() {
@@ -606,12 +612,18 @@ impl Shell {
         compose::open(account, None);
     }
 
-    /// A new message from a mailto: link, from the account of what is shown (the core reads the link)
-    pub async fn open_mailto(&self, link: &str) {
+    /// A new message from a mailto: link (the core reads the link), from `account`: the account of the message it came
+    /// from, so a message window's Unsubscribe writes from that message's account whatever the main window shows; 0 for
+    /// a link from elsewhere, written from the account of what is shown
+    pub async fn open_mailto(&self, link: &str, account: i64) {
         let Some(draft) = pe_core::mailto::draft(link) else {
             return;
         };
-        let account = self.main().current_account();
+        let account = if account != 0 {
+            account
+        } else {
+            self.main().current_account()
+        };
         if account == 0 {
             ui::alert(self.main().window(), TITLE, &t!(UiAddAccountFirstLink)).await;
             return;
@@ -852,6 +864,10 @@ pub fn run_command(command: Command) {
         Command::AddSenderToBook => spawn(async move { main.add_sender_to_book().await }),
         Command::MessageRules => spawn(async move { crate::rules::rules_dialog(main.window()).await }),
         Command::CreateRuleFromMessage => spawn(crate::rules::from_message()),
+        Command::Unsubscribe => {
+            let reader = main.reader.clone();
+            spawn(async move { reader.unsubscribe().await });
+        }
         Command::EncryptionKeys => spawn(async move { crate::keys::keys_dialog(main.window()).await }),
         Command::ImportAddressBook => {
             spawn(async move { crate::address_book::import(main.window().upcast_ref()).await })

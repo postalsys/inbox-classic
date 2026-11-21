@@ -105,8 +105,8 @@ public final class Mailbox: NSObject {
     var selectionChanged: () -> Void = {}
     /// a line for the status bar
     var status: (String) -> Void = { _ in }
-    /// a mailto: link to write (a mailing list's unsubscribe address)
-    var openMailto: (String) -> Void = { _ in }
+    /// a message to write (leaving a mailing list by mail), from the account of the message it is about
+    var openDraft: (_ draft: Draft, _ account: Int64) -> Void = { _, _ in }
     /// Edit > Undo when the last thing done was sending a message that still waits
     var undoSend: (() -> Void)?
 
@@ -313,7 +313,7 @@ public final class Mailbox: NSObject {
         listWidthMin = listArea.widthAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestListWidth)
 
         reader.status = { [weak self] in self?.status($0) }
-        reader.openMailto = { [weak self] in self?.openMailto($0) }
+        reader.openDraft = { [weak self] in self?.openDraft($0, $1) }
         reader.arrivedHandler = { [weak self] in self?.messageArrived() }
         reader.shownHandler = { [weak self] in self?.messageShown() }
         reader.bouncedHandler = { [weak self] in self?.showMessage(folder: $0, uid: $1) }
@@ -2332,6 +2332,10 @@ public final class Mailbox: NSObject {
         add(inJunk ? .notJunk : .junk)
         if message != nil {
             add(.createRuleFromMessage)
+            // the message shown is of a mailing list whose bar offers leaving it
+            if reader.canUnsubscribe {
+                add(.unsubscribe)
+            }
         }
         add(.move)
         add(.copy)

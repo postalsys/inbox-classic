@@ -1554,6 +1554,13 @@ impl Worker {
                         account: self.account,
                         subject: message.subject.clone(),
                     });
+                    // a request to leave a mailing list by mail counts once it went (list_bar.rs)
+                    if store
+                        .unsubscribe_mail_sent(self.account, &envelope.to, unix_now())
+                        .unwrap_or(false)
+                    {
+                        self.emit(Event::ListsChanged);
+                    }
                     self.emit(Event::OutboxChanged { account: self.account });
                     if let Err(error) = unqueued {
                         self.sent_but(tr_args(

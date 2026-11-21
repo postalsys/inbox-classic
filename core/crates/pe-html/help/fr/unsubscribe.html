@@ -1,10 +1,10 @@
 <h1>Quitter une liste de diffusion</h1>
-<p class="summary">Demandez votre retrait d’une liste de diffusion avec le bouton de désabonnement.</p>
-<p>Un message d'une liste de diffusion qui indique comment la quitter affiche <b data-text="ui-unsubscribe"></b> à droite de son en-tête.</p>
+<p class="summary"><!--review-->Demandez à une liste de diffusion de cesser ses envois, depuis la barre affichée au-dessus de ses messages.<!--/review--></p>
+<p><!--review-->Un message d’une liste de diffusion qui indique comment la quitter affiche une barre au-dessus de son texte, avec le domaine de la liste et <b data-text="ui-unsubscribe-ask"></b>. La barre ne désigne la liste que par son domaine, jamais par un nom choisi par l’expéditeur. Courrier indésirable, Éléments envoyés et Brouillons n’affichent pas de barre : se désabonner d’une liste depuis un courrier indésirable indique à l’expéditeur que votre adresse fonctionne.<!--/review--></p>
 <p>Pour quitter la liste :</p>
 <ol>
-    <li>Cliquez sur <b data-text="ui-unsubscribe"></b>. Inbox Classic indique ce qui va se passer et demande d'abord confirmation.</li>
-    <li>Confirmez. Selon la liste, l'une de ces trois choses se produit :
+    <li><!--review-->Cliquez sur <b data-text="ui-unsubscribe-ask"></b> dans la barre, ou choisissez <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic indique ce qui va se passer et demande d’abord confirmation.<!--/review--></li>
+    <li><!--review-->Cliquez sur <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Selon la liste, l’une de ces trois choses se produit :<!--/review-->
         <ul>
             <li>Inbox Classic demande à la liste d'arrêter. Aucune page ne s’ouvre et aucun e-mail n’est envoyé.</li>
             <li>Inbox Classic prépare l’e-mail demandé depuis le compte dans lequel vous lisez le message, avec la signature textuelle de ce compte. Cliquez sur <b data-text="ui-tb-send"></b> pour l'envoyer.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Ensuite, sur chaque message de cette liste, la barre indique quand vous avez fait la demande et ne propose plus rien. Une demande par e-mail compte dès qu’elle a été envoyée. Pour une liste dont vous avez ouvert la page, la barre garde son bouton, car Inbox Classic ne peut pas savoir si vous avez terminé l’opération sur cette page.<!--/review--></p>
+<p><!--review-->Une liste peut mettre jusqu’à deux jours pour cesser ses envois. Si l’un de ses messages arrive après ce délai, la barre propose <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>La barre d'état indique quand la liste a accepté la demande ; cela ne prouve pas encore que les envois ont cessé.</p>
 <aside class="note">Inbox Classic n’envoie une demande de désabonnement en un clic que si une signature DKIM valide couvre les en-têtes nécessaires. Cela ne garantit pas que l’expéditeur soit digne de confiance.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

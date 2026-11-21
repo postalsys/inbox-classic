@@ -3530,66 +3530,205 @@ fn ignored_conversations_arrive_read_and_watched_ones_are_announced() {
     assert_eq!(s.core.count_search(&hidden).unwrap(), (1, 1));
 }
 
-#[test]
-fn unsubscribes_with_one_click() {
-    let Some(s) = setup() else { return };
-    // the list's server: one request, answered 200, kept for the test to read
+/// A list's server for the tests: answers its requests in turn with `statuses`, the requests it got kept for the test
+fn list_server(statuses: &'static [u16]) -> (u16, std::thread::JoinHandle<Vec<String>>) {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let port = listener.local_addr().unwrap().port();
     let server = std::thread::spawn(move || {
         use std::io::{Read, Write};
-        let (mut stream, _) = listener.accept().unwrap();
-        stream.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
-        let mut request = Vec::new();
-        let mut buffer = [0u8; 4096];
-        while !String::from_utf8_lossy(&request).contains("One-Click") {
-            let read = stream.read(&mut buffer).unwrap();
-            if read == 0 {
-                break;
+        let mut got = Vec::new();
+        for status in statuses {
+            let (mut stream, _) = listener.accept().unwrap();
+            stream.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
+            let mut request = Vec::new();
+            let mut buffer = [0u8; 4096];
+            while !String::from_utf8_lossy(&request).contains("One-Click") {
+                let read = stream.read(&mut buffer).unwrap();
+                if read == 0 {
+                    break;
+                }
+                request.extend_from_slice(&buffer[..read]);
             }
-            request.extend_from_slice(&buffer[..read]);
+            let answer = format!("HTTP/1.0 {status} X\r\nContent-Length: 2\r\n\r\nok");
+            stream.write_all(answer.as_bytes()).unwrap();
+            got.push(String::from_utf8_lossy(&request).into_owned());
         }
-        stream
-            .write_all(b"HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nok")
-            .unwrap();
-        String::from_utf8_lossy(&request).into_owned()
+        got
     });
-    let raw = format!(
-        "Authentication-Results: mx.example.com; dkim=pass header.d=list.example.com\r\n\
-         DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n\
-         From: News <news@list.example.com>\r\nSubject: Weekly news\r\n\
-         List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:{port}/u/42>\r\n\
-         List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThe news.\r\n"
-    );
-    let uid = s.server.add_message("INBOX", &raw, &[]);
-    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
-    s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
-    let inbox = s
-        .core
+    (port, server)
+}
+
+/// The id of the folder of `account` at `path`
+fn folder_at(s: &Setup, account: pe_store::AccountId, path: &str) -> pe_store::FolderId {
+    s.core
         .folders(account)
         .unwrap()
         .into_iter()
-        .find(|f| f.info.path == "INBOX")
+        .find(|f| f.info.path == path)
         .unwrap()
-        .id;
+        .id
+}
+
+#[test]
+fn unsubscribes_with_one_click() {
+    let Some(s) = setup() else { return };
+    // the list refuses the first request and takes the second
+    let (port, server) = list_server(&[500, 200]);
+    let raw = |n: u32| {
+        format!(
+            "Authentication-Results: mx.example.com; dkim=pass header.d=list.example.com\r\n\
+             DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n\
+             From: News <news@list.example.com>\r\nSubject: Weekly news {n}\r\n\
+             List-Id: Your Bank Security <weekly.list.example.com>\r\n\
+             List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:{port}/u/42>\r\n\
+             List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThe news.\r\n"
+        )
+    };
+    let uid = s.server.add_message("INBOX", &raw(1), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = folder_at(&s, account, "INBOX");
     // read once the message is opened: its source is in the store then
     assert!(s.core.unsubscribe(inbox, uid).is_err());
     s.core.open_message(inbox, uid).unwrap();
     s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
     let view = s.core.message_view(inbox, uid, false).unwrap().unwrap();
     assert!(
-        matches!(&view.unsubscribe, Some(pe_core::unsubscribe::Unsubscribe::OneClick { url }) if url.ends_with("/u/42")),
+        matches!(&view.list.how, Some(pe_core::unsubscribe::Unsubscribe::OneClick { url }) if url.ends_with("/u/42")),
         "{:?}",
-        view.unsubscribe
+        view.list.how
     );
+    // the bar names the domain the provider confirmed, never List-Id's words
+    let bar = view.list_bar.expect("a bar");
+    assert!(
+        bar.text.contains("(list.example.com)") && !bar.text.contains("Bank"),
+        "{}",
+        bar.text
+    );
+    assert_eq!(bar.button, pe_i18n::tr(pe_i18n::Text::UiUnsubscribeAsk));
+
+    // refused: why, on the bar, with Try Again
     let request = s.core.unsubscribe(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::ListsChanged);
+    let done = s.wait(|e| matches!(e, Event::Unsubscribed { .. }));
+    assert!(
+        matches!(&done, Event::Unsubscribed { request: r, problem: Some(_) } if *r == request),
+        "{done:?}"
+    );
+    let failed = s.core.list_bar(inbox, uid).unwrap().unwrap();
+    assert!(failed.text.contains("500"), "{}", failed.text);
+    assert_eq!(failed.button, pe_i18n::tr(pe_i18n::Text::UiTryAgain));
+
+    // taken: remembered, and the bar says when, without a button
+    let request = s.core.unsubscribe(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::ListsChanged);
     let done = s.wait(|e| matches!(e, Event::Unsubscribed { .. }));
     assert_eq!(done, Event::Unsubscribed { request, problem: None });
+    let asked = s.core.list_bar(inbox, uid).unwrap().unwrap();
+    assert!(asked.button.is_empty(), "{asked:?}");
     let sent = server.join().unwrap();
-    assert!(sent.starts_with("POST /u/42 "), "{sent}");
-    assert!(sent.contains("List-Unsubscribe=One-Click"), "{sent}");
-    assert!(!sent.to_ascii_lowercase().contains("cookie"), "{sent}");
+    assert_eq!(sent.len(), 2);
+    assert!(sent[1].starts_with("POST /u/42 "), "{}", sent[1]);
+    assert!(sent[1].contains("List-Unsubscribe=One-Click"), "{}", sent[1]);
+    assert!(!sent[1].to_ascii_lowercase().contains("cookie"), "{}", sent[1]);
+
+    // another message of the same list, synced afterwards, says the same: the list is remembered, not the message
+    let second = s.server.add_message("INBOX", &raw(2), &[]);
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    s.core.open_message(inbox, second).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: second,
+        }
+    });
+    let view = s.core.message_view(inbox, second, false).unwrap().unwrap();
+    assert_eq!(
+        view.list_bar.as_ref().map(|bar| bar.text.as_str()),
+        Some(asked.text.as_str())
+    );
+}
+
+#[test]
+fn an_unsubscribe_by_mail_counts_once_sent() {
+    let Some(s) = setup() else { return };
+    let raw = "From: Shop <deals@shop.example>\r\nSubject: Deals\r\nList-Id: <deals.shop.example>\r\n\
+               List-Unsubscribe: <mailto:leave-42@shop.example?subject=unsubscribe>\r\n\r\nDeals.\r\n";
+    let uid = s.server.add_message("INBOX", raw, &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = folder_at(&s, account, "INBOX");
+    s.core.open_message(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    let offered = s.core.list_bar(inbox, uid).unwrap().unwrap();
+    assert!(offered.text.contains("(deals.shop.example)"), "{}", offered.text);
+    // the message to write: to the list's address, with its subject
+    let draft = s.core.unsubscribe_draft(inbox, uid).unwrap();
+    assert_eq!(draft.to, "leave-42@shop.example");
+    assert_eq!(draft.subject, "unsubscribe");
+    // a draft not sent asks nothing
+    assert_eq!(s.core.list_bar(inbox, uid).unwrap().unwrap(), offered);
+    let outgoing = pe_core::Outgoing {
+        to: draft.to.clone(),
+        subject: draft.subject.clone(),
+        text: "unsubscribe".into(),
+        ..Default::default()
+    };
+    s.core.send(account, outgoing).unwrap();
+    s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
+    s.wait(|e| *e == Event::ListsChanged);
+    let asked = s.core.list_bar(inbox, uid).unwrap().unwrap();
+    assert!(asked.button.is_empty(), "{asked:?}");
+    assert_ne!(asked.text, offered.text);
+}
+
+#[test]
+fn no_list_is_left_from_junk() {
+    let Some(s) = setup() else { return };
+    let raw = "From: Shop <deals@shop.example>\r\nSubject: Deals\r\n\
+               List-Unsubscribe: <https://shop.example/leave>\r\n\r\nDeals.\r\n";
+    let uid = s.server.add_message("Junk", raw, &[]);
+    let kept = s.server.add_message("INBOX", raw, &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let junk = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.special_use.as_deref() == Some("\\Junk"))
+        .unwrap()
+        .id;
+    s.core.open_message(junk, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: junk, uid });
+    let view = s.core.message_view(junk, uid, false).unwrap().unwrap();
+    assert!(view.list.how.is_some(), "the message says how to leave it");
+    assert_eq!(view.list_bar, None, "but Junk E-mail shows no bar");
+    assert_eq!(s.core.list_bar(junk, uid).unwrap(), None);
+    assert!(s.core.unsubscribe_opened(junk, uid).is_err(), "and leaves nothing");
+    assert!(s.core.unsubscribe_draft(junk, uid).is_err());
+
+    // the same list in the Inbox: its page opened is remembered, and the bar keeps its button, as the app can not
+    // see whether the user finished there
+    let inbox = folder_at(&s, account, "INBOX");
+    s.core.open_message(inbox, kept).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox,
+            uid: kept,
+        }
+    });
+    let offered = s.core.list_bar(inbox, kept).unwrap().unwrap();
+    assert!(offered.text.contains("(shop.example)"), "{}", offered.text);
+    s.core.unsubscribe_opened(inbox, kept).unwrap();
+    s.wait(|e| *e == Event::ListsChanged);
+    let opened = s.core.list_bar(inbox, kept).unwrap().unwrap();
+    assert_ne!(opened.text, offered.text);
+    assert_eq!(opened.button, offered.button);
 }
 
 #[test]

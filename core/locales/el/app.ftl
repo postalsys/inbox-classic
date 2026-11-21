@@ -88,6 +88,8 @@ cmd-options = Επιλο&γές...
 cmd-message-rules = &Κανόνες μηνυμάτων...
 cmd-encryption-keys = Κλειδιά κρ&υπτογράφησης...
 cmd-create-rule-from-message = &Δημιουργία κανόνα από μήνυμα...
+# review: new
+cmd-unsubscribe = &Κατάργηση εγγραφής από τη λίστα...
 cmd-select-all = Επι&λογή όλων
 cmd-undo = Αναί&ρεση
 cmd-copy = Αντιγρα&φή σε φάκελο...
@@ -260,6 +262,22 @@ ui-unsubscribing = Κατάργηση εγγραφής από { $target }...
 ui-cannot-unsubscribe = Αυτό το μήνυμα δεν προσφέρει δυνατότητα κατάργησης εγγραφής.
 ui-unsubscribed = Το αίτημα κατάργησης εγγραφής έγινε δεκτό.
 ui-not-unsubscribed = Δεν ήταν δυνατή η κατάργηση εγγραφής: { $reason }
+# review: new
+ui-list-bar = Αυτό το μήνυμα είναι από λίστα αλληλογραφίας ({ $domain }).
+# review: new
+ui-list-bar-plain = Αυτό το μήνυμα είναι από λίστα αλληλογραφίας.
+# review: new
+ui-list-bar-asked = Ζητήσατε να αποχωρήσετε από αυτή τη λίστα στις { $date }.
+# review: new
+ui-list-bar-came-after = Ζητήσατε να αποχωρήσετε από αυτή τη λίστα στις { $date }, αλλά αυτό το μήνυμα ήρθε αργότερα.
+# review: new
+ui-list-bar-opened = Ανοίξατε τη σελίδα της λίστας για αποχώρηση στις { $date }.
+# review: new
+ui-list-bar-failed = Η λίστα δεν αποδέχτηκε το αίτημα: { $reason }
+# review: new
+ui-unsubscribe-ask = Κατάργηση εγγραφής…
+# review: new
+ui-unsubscribe-again = Νέα κατάργηση εγγραφής…
 ui-event-span = { $start } έως { $end }
 ui-event-floating = { $when } (χωρίς μετατροπή ζώνης ώρας)
 ui-invitation = Πρόσκληση: { $title }

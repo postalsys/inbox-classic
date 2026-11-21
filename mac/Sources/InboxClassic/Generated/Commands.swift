@@ -72,6 +72,7 @@ enum Command: Int, CaseIterable {
     case messageRules = 170
     case encryptionKeys = 172
     case createRuleFromMessage = 171
+    case unsubscribe = 178
     case addSenderToBook = 148
     case importAddressBook = 149
     case exportAddressBook = 150
@@ -153,6 +154,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return "tools"
         case .encryptionKeys: return "tools"
         case .createRuleFromMessage: return "message"
+        case .unsubscribe: return "message"
         case .addSenderToBook: return "tools"
         case .importAddressBook: return "file"
         case .exportAddressBook: return "file"
@@ -236,6 +238,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return "main"
         case .encryptionKeys: return "main"
         case .createRuleFromMessage: return "main"
+        case .unsubscribe: return "main"
         case .addSenderToBook: return "main"
         case .importAddressBook: return "main"
         case .exportAddressBook: return "main"
@@ -324,6 +327,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return .cmdMessageRules
         case .encryptionKeys: return .cmdEncryptionKeys
         case .createRuleFromMessage: return .cmdCreateRuleFromMessage
+        case .unsubscribe: return .cmdUnsubscribe
         case .addSenderToBook: return .cmdAddSenderToBook
         case .importAddressBook: return .cmdImportAddressBook
         case .exportAddressBook: return .cmdExportAddressBook
@@ -407,6 +411,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return nil
         case .encryptionKeys: return nil
         case .createRuleFromMessage: return nil
+        case .unsubscribe: return nil
         case .addSenderToBook: return nil
         case .importAddressBook: return nil
         case .exportAddressBook: return nil
@@ -490,6 +495,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return false
         case .encryptionKeys: return false
         case .createRuleFromMessage: return false
+        case .unsubscribe: return false
         case .addSenderToBook: return false
         case .importAddressBook: return false
         case .exportAddressBook: return false
@@ -573,6 +579,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return false
         case .encryptionKeys: return false
         case .createRuleFromMessage: return false
+        case .unsubscribe: return false
         case .addSenderToBook: return false
         case .importAddressBook: return false
         case .exportAddressBook: return false
@@ -656,6 +663,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return false
         case .encryptionKeys: return false
         case .createRuleFromMessage: return true
+        case .unsubscribe: return true
         case .addSenderToBook: return true
         case .importAddressBook: return false
         case .exportAddressBook: return false
@@ -739,6 +747,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return false
         case .encryptionKeys: return false
         case .createRuleFromMessage: return true
+        case .unsubscribe: return true
         case .addSenderToBook: return true
         case .importAddressBook: return false
         case .exportAddressBook: return false
@@ -822,6 +831,7 @@ enum Command: Int, CaseIterable {
         case .messageRules: return nil
         case .encryptionKeys: return nil
         case .createRuleFromMessage: return nil
+        case .unsubscribe: return nil
         case .addSenderToBook: return nil
         case .importAddressBook: return nil
         case .exportAddressBook: return nil

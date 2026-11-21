@@ -87,6 +87,8 @@ cmd-options = Пара&метри...
 cmd-message-rules = &Правила для повідомлень...
 cmd-encryption-keys = &Ключі шифрування...
 cmd-create-rule-from-message = &Створити правило з повідомлення...
+# review: new
+cmd-unsubscribe = С&касувати підписку на розсилку...
 cmd-select-all = Виді&лити все
 cmd-undo = &Скасувати
 cmd-copy = &Копіювати в папку...
@@ -261,6 +263,22 @@ ui-unsubscribing = Надсилання запиту на скасування �
 ui-cannot-unsubscribe = Це повідомлення не містить способу скасувати підписку.
 ui-unsubscribed = Запит на скасування підписки прийнято.
 ui-not-unsubscribed = Не вдалося скасувати підписку: { $reason }
+# review: new
+ui-list-bar = Це повідомлення з розсилки ({ $domain }).
+# review: new
+ui-list-bar-plain = Це повідомлення з розсилки.
+# review: new
+ui-list-bar-asked = Ви попросили скасувати підписку на цю розсилку { $date }.
+# review: new
+ui-list-bar-came-after = Ви попросили скасувати підписку на цю розсилку { $date }, але це повідомлення надійшло пізніше.
+# review: new
+ui-list-bar-opened = Ви відкрили сторінку розсилки для скасування підписки { $date }.
+# review: new
+ui-list-bar-failed = Розсилка не прийняла запит: { $reason }
+# review: new
+ui-unsubscribe-ask = Скасувати підписку…
+# review: new
+ui-unsubscribe-again = Скасувати підписку знову…
 ui-event-span = { $start } - { $end }
 ui-event-floating = { $when } (часовий пояс не визначено)
 ui-invitation = Запрошення: { $title }

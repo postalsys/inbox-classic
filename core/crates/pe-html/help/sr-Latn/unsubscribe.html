@@ -1,10 +1,10 @@
 <h1>Odjava sa liste za slanje</h1>
-<p class="summary">Zatražite odjavu sa liste za slanje pomoću dugmeta za otkazivanje pretplate.</p>
-<p>Ako poruka sa liste sadrži podatke za odjavu, prikazuje se dugme <b data-text="ui-unsubscribe"></b> sa desne strane zaglavlja.</p>
+<p class="summary"><!--review-->Zatražite od liste za slanje da prestane da vam šalje poruke, pomoću trake iznad njenih poruka.<!--/review--></p>
+<p><!--review-->Poruka sa liste za slanje koja navodi kako se odjaviti ima traku iznad teksta, sa domenom liste i dugmetom <b data-text="ui-unsubscribe-ask"></b>. Traka listu imenuje samo po domenu, nikada po imenu koje je izabrao pošiljalac. Fascikle Neželjena e-pošta, Poslate stavke i Radne verzije ne prikazuju traku: odjava sa liste iz neželjene pošte otkriva pošiljaocu da vaša adresa radi.<!--/review--></p>
 <p>Da biste se odjavili sa liste:</p>
 <ol>
-    <li>Kliknite na <b data-text="ui-unsubscribe"></b>. Inbox Classic objašnjava šta će se desiti i najpre vas pita.</li>
-    <li>Potvrdite. U zavisnosti od liste, sledi jedan od tri postupka:
+    <li><!--review-->Kliknite na <b data-text="ui-unsubscribe-ask"></b> na traci ili izaberite <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic objašnjava šta će se desiti i najpre vas pita.<!--/review--></li>
+    <li><!--review-->Kliknite na <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. U zavisnosti od liste, sledi jedan od tri postupka:<!--/review-->
         <ul>
             <li>Inbox Classic traži od liste da prestane sa slanjem. Ne otvara se stranica i ne šalje se e-pošta.</li>
             <li>Inbox Classic priprema poruku za odjavu sa naloga na kojem čitate poruku, sa tekstom potpisa tog naloga. Kliknite na <b data-text="ui-tb-send"></b> da biste je poslali.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Nakon toga traka na svakoj poruci te liste prikazuje kada ste zatražili odjavu i ne nudi ništa više. Zahtev poslat e-poštom računa se kada je poslat. Za listu čiju ste stranicu otvorili, traka zadržava svoje dugme jer Inbox Classic ne može da vidi da li ste tamo završili postupak.<!--/review--></p>
+<p><!--review-->Listi može biti potrebno do dva dana da prestane sa slanjem. Ako neka njena poruka stigne posle toga, traka nudi <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Statusna traka javlja kada server prihvati neposredan zahtev. To ne potvrđuje da će slanje budućih poruka prestati.</p>
 <aside class="note">Inbox Classic šalje neposredan zahtev za odjavu samo kada pružalac usluge potvrdi važeći DKIM potpis koji obuhvata oba potrebna zaglavlja za odjavu. Zahtev se šalje tek nakon vaše potvrde.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

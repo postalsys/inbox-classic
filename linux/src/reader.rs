@@ -41,8 +41,6 @@ pub struct Reader {
     to: gtk::Label,
     /// Why the message is not shown
     note: gtk::Label,
-    /// Leaving the message's mailing list: its click goes to the window
-    pub unsubscribe: gtk::Label,
     /// The paper clip with the files of the message
     pub attachments: gtk::MenuButton,
     attachments_label: gtk::Label,
@@ -58,6 +56,13 @@ pub struct Reader {
     /// The bar over a message that could not be downloaded; its button tries again
     retry: gtk::Box,
     pub try_again: gtk::Button,
+    /// The bar over a message of a mailing list: the core's words (the list's domain, or when it was asked) and its
+    /// button, which leaves the list as Message > Unsubscribe from List does
+    list_bar: gtk::Box,
+    list_text: gtk::Label,
+    pub list_button: gtk::Button,
+    /// Told whether the bar offers its button, for the window's Unsubscribe from List
+    list_offered: RefCell<Option<Offered>>,
     pub preview: DocumentView,
     /// Find in This Message: the bar over the message and its box
     find_bar: gtk::SearchBar,
@@ -160,17 +165,8 @@ impl Reader {
         let note = gtk::Label::new(None);
         note.set_xalign(0.0);
         note.set_widget_name("reader-note");
-        let unsubscribe = gtk::Label::new(None);
-        unsubscribe.set_markup(&format!(
-            "<a href=\"unsubscribe\">{}</a>",
-            gtk::glib::markup_escape_text(&t!(UiUnsubscribe))
-        ));
-        unsubscribe.set_widget_name("reader-unsubscribe");
-        unsubscribe.set_valign(gtk::Align::Start);
-        unsubscribe.set_visible(false);
         let top = gtk::Box::new(gtk::Orientation::Horizontal, 8);
         top.append(&PassedByTab::new(&subject));
-        top.append(&unsubscribe);
         let text = gtk::Box::new(gtk::Orientation::Vertical, 6);
         text.set_hexpand(true);
         text.append(&top);
@@ -228,6 +224,23 @@ impl Reader {
         retry.append(&try_again);
         retry.set_visible(false);
 
+        let list_text = gtk::Label::new(None);
+        list_text.set_xalign(0.0);
+        list_text.set_hexpand(true);
+        list_text.set_wrap(true);
+        list_text.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+        list_text.set_widget_name("reader-list-text");
+        let list_button = gtk::Button::with_label(&t!(UiUnsubscribeAsk));
+        list_button.set_widget_name("reader-list-button");
+        list_button.set_valign(gtk::Align::Center);
+        let list_bar = gtk::Box::new(gtk::Orientation::Horizontal, 10);
+        list_bar.add_css_class("info-bar");
+        list_bar.set_widget_name("reader-list");
+        list_bar.append(&crate::icons::image("ic-mail-multiple-symbolic"));
+        list_bar.append(&list_text);
+        list_bar.append(&list_button);
+        list_bar.set_visible(false);
+
         let preview = DocumentView::new("preview", false);
         preview.view.set_widget_name("reader-preview");
         let (find_bar, find_entry) = find_bar();
@@ -235,8 +248,10 @@ impl Reader {
         widget.append(&header);
         widget.append(&strip.widget);
         widget.append(&security.widget);
+        // the bars in one order: the download that failed, the pictures, the mailing list
         widget.append(&retry);
         widget.append(&pictures);
+        widget.append(&list_bar);
         widget.append(&find_bar);
         widget.append(&preview.view);
         let reader = Reader {
@@ -249,7 +264,6 @@ impl Reader {
             date,
             to,
             note,
-            unsubscribe,
             attachments,
             attachments_label,
             strip,
@@ -259,6 +273,10 @@ impl Reader {
             pictures_always,
             retry,
             try_again,
+            list_bar,
+            list_text,
+            list_button,
+            list_offered: RefCell::default(),
             preview,
             find_bar,
             find_entry,
@@ -313,10 +331,7 @@ impl Reader {
             let this = this.clone();
             spawn(async move { this.unsubscribe().await });
         });
-        self.unsubscribe.connect_activate_link(move |_, _| {
-            leave();
-            glib::Propagation::Stop
-        });
+        self.list_button.connect_clicked(move |_| leave());
         // "Show the message that bounced" on a bounce's card: the message selected in the main window, its folder
         // shown, as Go to Folder shows one (from a message window too, which then gives way to the main window). The
         // core says which link it is, the view names the message.
@@ -852,8 +867,8 @@ impl Reader {
             self.hide_attachments();
             self.security.hide();
             self.pictures.set_visible(false);
+            self.set_list_bar(None);
         }
-        self.unsubscribe.set_visible(false);
         self.retry.set_visible(false);
         self.stop_downloading_note();
         self.set_logo_shown(false);
@@ -976,7 +991,7 @@ impl Reader {
             format!("{}    Cc:  {}", view.to, view.cc)
         };
         self.to.set_text(&to);
-        self.unsubscribe.set_visible(view.unsubscribe.is_some());
+        self.set_list_bar(view.list_bar.as_ref());
         self.show_attachments(view);
         // the same message again (Show in Message, its whole source after its text, its pictures): where it was
         let again = self.view.borrow().is_some();
@@ -1321,24 +1336,106 @@ impl Reader {
         }
     }
 
-    /// The Unsubscribe link of the message shown, after asking; what is done is said in the main window's status bar
-    async fn unsubscribe(&self) {
+    /// The mailing-list bar as the core words it; none hides it
+    fn set_list_bar(&self, bar: Option<&pe_core::list_bar::ListBar>) {
+        self.list_bar.set_visible(bar.is_some());
+        if let Some(bar) = bar {
+            self.list_text.set_text(&bar.text);
+            self.list_button.set_label(&bar.button);
+            self.list_button.set_visible(!bar.button.is_empty());
+        }
+        if let Some(told) = self.list_offered.borrow().as_ref() {
+            told(self.can_unsubscribe());
+        }
+    }
+
+    /// `told` hears whether the bar offers its button, for the window's Unsubscribe from List
+    pub fn on_list_offered(&self, told: impl Fn(bool) + 'static) {
+        *self.list_offered.borrow_mut() = Some(Box::new(told));
+    }
+
+    /// Whether the mailing-list bar is shown (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn list_bar_shown(&self) -> bool {
+        self.list_bar.is_visible()
+    }
+
+    /// The mailing-list bar's words and its button's, empty when it has none (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn list_bar_words(&self) -> (String, String) {
+        let button = if self.list_button.is_visible() {
+            self.list_button.label().map(|l| l.to_string()).unwrap_or_default()
+        } else {
+            String::new()
+        };
+        (self.list_text.text().to_string(), button)
+    }
+
+    /// Whether the pictures bar is shown (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn pictures_bar_shown(&self) -> bool {
+        self.pictures.is_visible()
+    }
+
+    /// The pictures bar comes before the mailing-list bar in the pane (the UI test)
+    #[cfg(feature = "e2e")]
+    pub fn bars_in_order(&self) -> bool {
+        let mut child = self.widget.first_child();
+        while let Some(widget) = child {
+            if widget == self.pictures {
+                return true;
+            }
+            if widget == self.list_bar {
+                return false;
+            }
+            child = widget.next_sibling();
+        }
+        false
+    }
+
+    /// The bar offers its button: Message > Unsubscribe from List is on
+    pub fn can_unsubscribe(&self) -> bool {
+        self.list_bar.is_visible() && self.list_button.is_visible()
+    }
+
+    /// The core's ListsChanged: a list was asked to let the user go, or a request failed, so the bar is read again
+    pub fn lists_changed(&self) {
+        let has_list = self.view.borrow().as_ref().is_some_and(|view| view.list.how.is_some());
+        if self.file.borrow().is_some() || self.uid.get() == 0 || !has_list {
+            return;
+        }
+        let bar = shell().core.list_bar(self.folder.get(), self.uid.get()).ok().flatten();
+        self.set_list_bar(bar.as_ref());
+    }
+
+    /// The bar's button and Message > Unsubscribe from List: what will happen, asked with the verb, then done; the core
+    /// remembers the list for the bars (a message to write once it is sent, a page once it is opened). What is done is
+    /// said in the main window's status bar.
+    pub async fn unsubscribe(&self) {
         use pe_core::unsubscribe::Unsubscribe;
         let Some(window) = self.window() else { return };
-        let Some(how) = self.view.borrow().as_ref().and_then(|v| v.unsubscribe.clone()) else {
+        if !self.can_unsubscribe() {
+            return;
+        }
+        let Some(how) = self.view.borrow().as_ref().and_then(|v| v.list.how.clone()) else {
             return;
         };
         let target = how.target();
-        let (cancel, okay) = (t!(UiCancel), t!(UiOk));
-        let ok = [("cancel", cancel.as_str()), ("ok", okay.as_str())];
+        let question = match &how {
+            Unsubscribe::OneClick { .. } => t!(GtkUnsubscribeOneClick, target = &*target),
+            Unsubscribe::Mail { .. } => t!(GtkUnsubscribeMail, target = &*target),
+            Unsubscribe::Web { .. } => t!(GtkUnsubscribeWeb, target = &*target),
+        };
+        let (cancel, leave) = (t!(UiCancel), t!(UiUnsubscribe));
+        let answers = [("cancel", cancel.as_str()), ("unsubscribe", leave.as_str())];
         let title = t!(UiUnsubscribe);
+        if ui::ask(&window, &title, &question, &answers, "unsubscribe", "cancel", None).await != "unsubscribe" {
+            return;
+        }
+        let (folder, uid) = (self.folder.get(), self.uid.get());
         match how {
             Unsubscribe::OneClick { .. } => {
-                let question = t!(GtkUnsubscribeOneClick, target = &*target);
-                if !ui::confirm(&window, &title, &question, false).await {
-                    return;
-                }
-                let request = shell().core.unsubscribe(self.folder.get(), self.uid.get()).unwrap_or(0);
+                let request = shell().core.unsubscribe(folder, uid).unwrap_or(0);
                 self.unsubscribe_request.set(request);
                 shell().main().set_status(&if request != 0 {
                     t!(UiUnsubscribing, target = &*target)
@@ -1346,17 +1443,14 @@ impl Reader {
                     t!(UiCannotUnsubscribe)
                 });
             }
-            Unsubscribe::Mail { link } => {
-                let question = t!(GtkUnsubscribeMail, target = &*target);
-                if ui::ask(&window, &title, &question, &ok, "ok", "cancel", None).await == "ok" {
-                    shell().open_mailto(&link).await;
-                }
-            }
+            // from the account of the message, whatever the main window shows
+            Unsubscribe::Mail { .. } => match shell().core.unsubscribe_draft(folder, uid) {
+                Ok(draft) => crate::compose::open(self.account.get(), Some(draft)),
+                Err(_) => shell().main().set_status(&t!(UiCannotUnsubscribe)),
+            },
             Unsubscribe::Web { url } => {
-                let question = t!(GtkUnsubscribeWeb, target = &*target);
-                if ui::ask(&window, &title, &question, &ok, "ok", "cancel", None).await == "ok" {
-                    ui::open_externally(&url, Some(&window));
-                }
+                ui::open_externally(&url, Some(&window));
+                let _ = shell().core.unsubscribe_opened(folder, uid);
             }
         }
     }
@@ -1373,6 +1467,9 @@ impl Reader {
         }
     }
 }
+
+/// What hears whether the mailing-list bar offers its button
+type Offered = Box<dyn Fn(bool)>;
 
 thread_local! {
     /// The web view of a document being printed, kept until its print dialog is done

@@ -182,6 +182,9 @@ pub enum PeEventKind {
     /// the view whose `preview_token` is `detail` builds it again, keeping its scroll as after `pe_preview_show`.
     /// Once a view, never for one whose previews ended (`pe_previews_end`)
     PreviewsPrepared = 39,
+    /// A mailing list was asked to let the user go, or a request failed: the windows read the bar of the message they
+    /// show again (`pe_list_bar`)
+    ListsChanged = 40,
 }
 
 #[repr(C)]
@@ -279,6 +282,7 @@ impl Callback {
             Event::PdfPreviewsOff => (PeEventKind::PdfPreviewsOff, 0, 0, 0),
             Event::PrintReady { request } => (PeEventKind::PrintReady, 0, 0, *request),
             Event::PreviewsPrepared { .. } => (PeEventKind::PreviewsPrepared, 0, 0, 0),
+            Event::ListsChanged => (PeEventKind::ListsChanged, 0, 0, 0),
             Event::OutboxChanged { account } => (PeEventKind::OutboxChanged, *account, 0, 0),
             Event::NewMail {
                 account, folder, uid, ..
@@ -979,7 +983,73 @@ pub unsafe extern "C" fn pe_logo_result(core: *const PeCore, request: u64, len: 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_unsubscribe(core: *const PeCore, folder: i64, uid: u64) -> u64 {
     // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.unsubscribe(folder, uid).unwrap_or(0)) }
+    unsafe { with_shared(core, 0, |core| core.unsubscribe(folder, uid).unwrap_or(0)) }
+}
+
+/// The bar over a stored message of a mailing list as it is now, for a window showing it when `ListsChanged` comes: its
+/// words and its button, as `PeMessageInfo` has them. Free with `pe_list_bar_free`.
+#[repr(C)]
+pub struct PeListBar {
+    /// Empty when the message has no bar
+    pub text: *mut c_char,
+    /// Empty when the bar has no button
+    pub button: *mut c_char,
+}
+
+/// [`PeListBar`] of `folder`/`uid`
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_bar(core: *const PeCore, folder: i64, uid: u64) -> PeListBar {
+    // SAFETY: as the caller guarantees
+    let bar = unsafe { with(core, None, |core| core.list_bar(folder, uid).ok().flatten()) }.unwrap_or_default();
+    PeListBar {
+        text: into_c_string(bar.text),
+        button: into_c_string(bar.button),
+    }
+}
+
+/// Frees the strings of a [`PeListBar`]
+///
+/// # Safety
+/// `bar` must come from `pe_list_bar`, freed once.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_bar_free(bar: PeListBar) {
+    for text in [bar.text, bar.button] {
+        if !text.is_null() {
+            // SAFETY: made by into_c_string and not freed before, as the caller guarantees
+            drop(unsafe { CString::from_raw(text) });
+        }
+    }
+}
+
+/// The message to write to leave the mailing list of `folder`/`uid` by mail (the list asks for one): its request is
+/// remembered once a message to the list's address left the Outbox. NULL for a message whose list asks for no
+/// message. Free with `pe_draft_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_unsubscribe_draft(core: *const PeCore, folder: i64, uid: u64) -> *mut PeDraft {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.unsubscribe_draft(folder, uid)
+                .map_or(null_mut(), |draft| draft_handle(&draft))
+        })
+    }
+}
+
+/// The page of the mailing list of `folder`/`uid` was opened in the browser to leave it: remembered, and
+/// `ListsChanged` follows. False for a message that is not of such a list.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_unsubscribe_opened(core: *const PeCore, folder: i64, uid: u64) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.unsubscribe_opened(folder, uid).is_ok()) }
 }
 
 /// How many messages are unread in the Inboxes of all accounts (the tray and the taskbar show it); 0 also when the
@@ -2235,6 +2305,11 @@ pub struct PeMessageInfo {
     pub unsubscribe_link: *const c_char,
     /// Where it goes, for the window to say: the host, or the address of the message
     pub unsubscribe_target: *const c_char,
+    /// The bar over a message of a mailing list (it names the list by a domain only), empty when it has none; after
+    /// `ListsChanged`, `pe_list_bar` gives it as it is then
+    pub list_bar: *const c_char,
+    /// The bar's button, empty when it has none; it runs Unsubscribe as the menu command does (ask, then do)
+    pub list_button: *const c_char,
     /// The event of its calendar part, NULL without one; owned by the view
     pub invitation: *const PeInvitation,
     /// The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
@@ -2365,7 +2440,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             repeats: strings.add(&event.repeats),
         })
     });
-    let (unsubscribe, unsubscribe_link) = match &view.unsubscribe {
+    let (unsubscribe, unsubscribe_link) = match &view.list.how {
         None => (PeUnsubscribe::None, ""),
         Some(Unsubscribe::OneClick { .. }) => (PeUnsubscribe::OneClick, ""),
         Some(Unsubscribe::Mail { link }) => (PeUnsubscribe::Mail, link.as_str()),
@@ -2389,7 +2464,9 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         remote_images: view.remote_images,
         unsubscribe,
         unsubscribe_link: strings.add(unsubscribe_link),
-        unsubscribe_target: strings.add(&view.unsubscribe.as_ref().map(Unsubscribe::target).unwrap_or_default()),
+        unsubscribe_target: strings.add(&view.list.how.as_ref().map(Unsubscribe::target).unwrap_or_default()),
+        list_bar: strings.add(view.list_bar.as_ref().map_or("", |bar| bar.text.as_str())),
+        list_button: strings.add(view.list_bar.as_ref().map_or("", |bar| bar.button.as_str())),
         invitation: invitation.as_deref().map_or(null(), |i| i as *const PeInvitation),
         has_logo: view.has_logo,
         picture: view.picture,

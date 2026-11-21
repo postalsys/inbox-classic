@@ -289,6 +289,9 @@ typedef enum PeEventKind {
   // the view whose `preview_token` is `detail` builds it again, keeping its scroll as after `pe_preview_show`.
   // Once a view, never for one whose previews ended (`pe_previews_end`)
   PE_EVENT_KIND_PREVIEWS_PREPARED = 39,
+  // A mailing list was asked to let the user go, or a request failed: the windows read the bar of the message they
+  // show again (`pe_list_bar`)
+  PE_EVENT_KIND_LISTS_CHANGED = 40,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -1175,6 +1178,15 @@ typedef struct PeAccount {
   const char *account_name;
 } PeAccount;
 
+// The bar over a stored message of a mailing list as it is now, for a window showing it when `ListsChanged` comes: its
+// words and its button, as `PeMessageInfo` has them. Free with `pe_list_bar_free`.
+typedef struct PeListBar {
+  // Empty when the message has no bar
+  char *text;
+  // Empty when the bar has no button
+  char *button;
+} PeListBar;
+
 // Someone (or a group of the address book) to complete an address with
 typedef struct PeContact {
   // The person's name, or the group's
@@ -1380,6 +1392,11 @@ typedef struct PeMessageInfo {
   const char *unsubscribe_link;
   // Where it goes, for the window to say: the host, or the address of the message
   const char *unsubscribe_target;
+  // The bar over a message of a mailing list (it names the list by a domain only), empty when it has none; after
+  // `ListsChanged`, `pe_list_bar` gives it as it is then
+  const char *list_bar;
+  // The bar's button, empty when it has none; it runs Unsubscribe as the menu command does (ask, then do)
+  const char *list_button;
   // The event of its calendar part, NULL without one; owned by the view
   const struct PeInvitation *invitation;
   // The sender's brand has a BIMI logo the receiving server passed: `pe_logo_start` draws it
@@ -2801,6 +2818,37 @@ uint8_t *pe_logo_result(const struct PeCore *core,
 uint64_t pe_unsubscribe(const struct PeCore *core,
                         int64_t folder,
                         uint64_t uid);
+
+// [`PeListBar`] of `folder`/`uid`
+//
+// # Safety
+// `core` must be a live handle.
+struct PeListBar pe_list_bar(const struct PeCore *core, int64_t folder, uint64_t uid);
+
+// Frees the strings of a [`PeListBar`]
+//
+// # Safety
+// `bar` must come from `pe_list_bar`, freed once.
+void pe_list_bar_free(struct PeListBar bar);
+
+// The message to write to leave the mailing list of `folder`/`uid` by mail (the list asks for one): its request is
+// remembered once a message to the list's address left the Outbox. NULL for a message whose list asks for no
+// message. Free with `pe_draft_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeDraft *pe_unsubscribe_draft(const struct PeCore *core,
+                                     int64_t folder,
+                                     uint64_t uid);
+
+// The page of the mailing list of `folder`/`uid` was opened in the browser to leave it: remembered, and
+// `ListsChanged` follows. False for a message that is not of such a list.
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_unsubscribe_opened(const struct PeCore *core,
+                           int64_t folder,
+                           uint64_t uid);
 
 // How many messages are unread in the Inboxes of all accounts (the tray and the taskbar show it); 0 also when the
 // core can not say

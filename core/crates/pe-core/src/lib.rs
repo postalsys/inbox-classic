@@ -25,6 +25,7 @@ mod export;
 mod fold;
 pub mod keys;
 pub mod layout;
+pub mod list_bar;
 mod list_load;
 mod list_view;
 mod lookup;
@@ -179,6 +180,9 @@ pub enum Event {
         request: u64,
         problem: Option<String>,
     },
+    /// A mailing list was asked to let the user go, or a request failed: the bars over the messages shown read
+    /// [`Core::list_bar`] again
+    ListsChanged,
     /// New unread mail came in the Inbox of `account` (`count` messages), or in a watched conversation in another folder
     /// of the user's ([`Core::mark_conversations`]), `uid` the newest, from `from` about `subject`
     NewMail {
@@ -587,6 +591,8 @@ pub struct Core {
     discoveries: Discoveries,
     oauth: OAuthProviders,
     next_request: std::sync::atomic::AtomicU64,
+    /// Why the last one-click request of a list failed this session, by its account and list ([`list_bar::Facts`])
+    unsubscribe_failures: Mutex<HashMap<(AccountId, String), String>>,
     /// What Edit > Undo takes back (selection.rs)
     undo: Mutex<Option<selection::Undo>>,
     /// The message the user sent last while it waits to be taken back (undo_send.rs)
@@ -705,6 +711,7 @@ impl Core {
             discoveries: Discoveries::default(),
             oauth: OAuthProviders(Arc::new(options.oauth_providers)),
             next_request: std::sync::atomic::AtomicU64::new(1),
+            unsubscribe_failures: Mutex::default(),
             undo: Mutex::new(None),
             last_sent: Mutex::new(None),
             restored: Arc::default(),
@@ -1227,38 +1234,134 @@ impl Core {
 
     /// Unsubscribes from the mailing list of a message the one-click way (RFC 8058): a POST of
     /// `List-Unsubscribe=One-Click` to the address the message gives, without cookies, redirects not followed, in
-    /// the background; [`Event::Unsubscribed`] follows with the request this returns. Refused for a message that
-    /// offers no one-click way ([`crate::unsubscribe::of`]), whose source is not in the store.
-    pub fn unsubscribe(&self, folder: FolderId, uid: u64) -> Result<u64> {
-        let url = self.one_click(folder, uid)?.ok_or(Error::NotFound)?;
+    /// the background; [`Event::Unsubscribed`] follows with the request this returns, after the list's request is
+    /// remembered (or why it failed) and [`Event::ListsChanged`] said so. Refused for a message that offers no one-click
+    /// way ([`crate::unsubscribe::of`]), whose source is not in the store, or in a folder that shows no bar.
+    pub fn unsubscribe(self: &Arc<Self>, folder: FolderId, uid: u64) -> Result<u64> {
+        let (account, list) = self.stored_list(folder, uid)?;
+        let Some(unsubscribe::Unsubscribe::OneClick { url }) = list.how else {
+            return Err(Error::NotFound);
+        };
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let events = self.events.clone();
+        let core = Arc::downgrade(self);
         self.runtime()?.spawn(async move {
             let problem = unsubscribe::post(&url).await;
+            let noted = problem.clone();
+            connections::in_background(core, Connection::Actions, move |core| {
+                core.list_answered(
+                    account,
+                    list.key.as_deref(),
+                    pe_store::Asked::OneClick,
+                    noted.as_deref(),
+                );
+            })
+            .await;
             events(Event::Unsubscribed { request, problem });
         });
         Ok(request)
     }
 
-    /// The address a message's one-click unsubscribe (RFC 8058) goes to, None when it offers none
-    /// ([`crate::unsubscribe::of`]) or its source is not in the store
-    pub(crate) fn one_click(&self, folder: FolderId, uid: u64) -> Result<Option<String>> {
-        self.one_click_with(folder, uid, &self.trusted(folder)?)
+    /// A list of `account` was asked `how`, and answered with `problem` (None when it took the request): remembered,
+    /// or why not kept for its bar, and the bars told
+    pub(crate) fn list_answered(
+        &self,
+        account: AccountId,
+        list: Option<&str>,
+        how: pe_store::Asked,
+        problem: Option<&str>,
+    ) {
+        let Some(list) = list else {
+            return;
+        };
+        let key = (account, list.to_string());
+        let mut failures = self.unsubscribe_failures.lock().unwrap_or_else(|e| e.into_inner());
+        match problem {
+            None => {
+                failures.remove(&key);
+                drop(failures);
+                // a store that can not write it shows the bar as before, which offers the request again
+                let _ = self.store().note_unsubscribed(account, list, how, worker::unix_now());
+            }
+            Some(problem) => {
+                failures.insert(key, problem.to_string());
+            }
+        }
+        (self.events)(Event::ListsChanged);
     }
 
-    /// [`Core::one_click`] with the servers whose verdicts count for the folder's account already read
-    pub(crate) fn one_click_with(&self, folder: FolderId, uid: u64, trusted: &[String]) -> Result<Option<String>> {
+    /// A stored message's account and list, read from its header block; refused for a message whose source is not in
+    /// the store, or in a folder that shows no bar (Junk E-mail, Sent Items, Drafts): neither the user nor an agent
+    /// leaves a list from there
+    pub(crate) fn stored_list(&self, folder: FolderId, uid: u64) -> Result<(AccountId, list_bar::List)> {
+        let store = self.store();
+        let (account, info) = store.folder_info(folder)?;
+        if !sender_cards_shown(&info) {
+            return Err(Error::NotFound);
+        }
+        let trusted = authres::trusted(&store.account(account)?.settings);
         // the header block is all it takes
-        let Some(start) = self.store().source_start(folder, uid, view::MAX_HEADER_TEXT)? else {
+        let start = store
+            .source_start(folder, uid, view::MAX_HEADER_TEXT)?
+            .ok_or(Error::NotFound)?;
+        let message = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?;
+        Ok((account, list_bar::List::of(&message, &trusted)))
+    }
+
+    /// Why the last one-click request of `list` of `account` failed this session
+    fn list_failure(&self, account: AccountId, list: &list_bar::List) -> Option<String> {
+        let failures = self.unsubscribe_failures.lock().unwrap_or_else(|e| e.into_inner());
+        failures.get(&(account, list.key.clone()?)).cloned()
+    }
+
+    /// The bar over a stored message of a mailing list, as it is now (after [`Event::ListsChanged`]); None when it has
+    /// none, its source is not in the store, or its folder shows none
+    pub fn list_bar(&self, folder: FolderId, uid: u64) -> Result<Option<list_bar::ListBar>> {
+        let Ok((account, list)) = self.stored_list(folder, uid) else {
             return Ok(None);
         };
-        let Ok(message) = pe_mime::parser::parse(&start) else {
-            return Ok(None);
+        let arrived = self.store().message(folder, uid)?.and_then(|m| m.info.internal_date);
+        let failed = self.list_failure(account, &list);
+        let facts = list_bar::Facts {
+            shown_here: true,
+            arrived,
+            failed: failed.as_deref(),
+            ..Default::default()
         };
-        Ok(match unsubscribe::of(&message.headers, trusted) {
-            Some(unsubscribe::Unsubscribe::OneClick { url }) => Some(url),
-            _ => None,
-        })
+        Ok(list_bar::bar_in(&self.store(), account, &list, facts))
+    }
+
+    /// The message to write to leave the list of a stored message by mail, its request remembered once a message to
+    /// that address left the Outbox ([`pe_store::Store::unsubscribe_mail_sent`]); refused for a message whose list
+    /// asks for no message
+    pub fn unsubscribe_draft(&self, folder: FolderId, uid: u64) -> Result<Draft> {
+        let (account, list) = self.stored_list(folder, uid)?;
+        let Some(unsubscribe::Unsubscribe::Mail { link }) = &list.how else {
+            return Err(Error::NotFound);
+        };
+        let draft = mailto::draft(link).ok_or(Error::NotFound)?;
+        // the list's address: the link's first, where the message goes
+        let address = pe_mime::parser::parse_addresses(&draft.to)
+            .into_iter()
+            .find_map(|address| match address {
+                pe_mime::parser::ParsedAddress::Mailbox(mailbox) => Some(mailbox.address),
+                _ => None,
+            });
+        if let (Some(key), Some(address)) = (&list.key, address) {
+            self.store().note_unsubscribe_mail(account, key, &address)?;
+        }
+        Ok(draft)
+    }
+
+    /// The list's page of a stored message was opened in the browser to leave it: remembered, the bars told; refused
+    /// for a message whose list has no such page
+    pub fn unsubscribe_opened(&self, folder: FolderId, uid: u64) -> Result<()> {
+        let (account, list) = self.stored_list(folder, uid)?;
+        if !matches!(list.how, Some(unsubscribe::Unsubscribe::Web { .. })) {
+            return Err(Error::NotFound);
+        }
+        self.list_answered(account, list.key.as_deref(), pe_store::Asked::Web, None);
+        Ok(())
     }
 
     /// Looks up the servers of `email` in the background: [`Event::AutoconfigDone`] follows with the request
@@ -1570,7 +1673,7 @@ impl Core {
         let (account, place) = store.folder_info(folder)?;
         let trusted = authres::trusted(&store.account(account)?.settings);
         // a code in Junk E-mail may be bait, and one in Sent Items or Drafts is the user's own
-        let codes = !matches!(place.special_use.as_deref(), Some("\\Junk" | "\\Sent" | "\\Drafts"));
+        let codes = sender_cards_shown(&place);
         // pictures load by themselves for the senders the user trusts, or every message's; never in Junk E-mail
         let junk = place.special_use.as_deref() == Some("\\Junk");
         let always_pictures = store.always_load_pictures()?;
@@ -1588,6 +1691,14 @@ impl Core {
             },
         };
         let ring = source.as_ref().and_then(|source| self.ring_for(&store, source));
+        let list_failures = self
+            .unsubscribe_failures
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .iter()
+            .filter(|((of, _), _)| *of == account)
+            .map(|((_, list), why)| (list.clone(), why.clone()))
+            .collect();
         Ok(source.map(|source| ViewSource {
             source,
             ring,
@@ -1602,6 +1713,7 @@ impl Core {
             account,
             folder,
             uid,
+            list_failures,
         }))
     }
 
@@ -2987,6 +3099,8 @@ struct ViewSource {
     account: AccountId,
     folder: FolderId,
     uid: u64,
+    /// Why the account's lists failed their last one-click request this session, by list ([`list_bar::Facts`])
+    list_failures: HashMap<String, String>,
 }
 
 /// The calendar part of `source` written into `dir` as invitation.ics (numbered when that is taken), its bytes as they
@@ -3112,6 +3226,13 @@ fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
     found
 }
 
+/// Whether a folder shows the cards and bars about a message's sender (a one-time code, the mailing-list bar): not Junk
+/// E-mail (a code may be bait, leaving a list confirms the address to a spammer), Sent Items or Drafts (the user's own
+/// mail)
+fn sender_cards_shown(folder: &pe_store::FolderInfo) -> bool {
+    !matches!(folder.special_use.as_deref(), Some("\\Junk" | "\\Sent" | "\\Drafts"))
+}
+
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
 /// give up. `store` gives the store a bounce needs: the message it returns is looked up there, and a bounce the list
 /// did not mark yet (one found by the heuristics) is marked, with `events` told the folder changed. `previews` shows
@@ -3171,6 +3292,17 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     }
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(found.received);
+    // the bar of a mailing list's message, as the store remembers its list
+    if let Some(store) = store() {
+        let failed = view.list.key.as_ref().and_then(|key| found.list_failures.get(key));
+        let facts = list_bar::Facts {
+            shown_here: found.codes,
+            arrived: found.received,
+            failed: failed.map(String::as_str),
+            ..Default::default()
+        };
+        view.list_bar = list_bar::bar_in(&store, found.account, &view.list, facts);
+    }
     // without a logo, the contact's picture the list's row has: one decision for both, so they never differ
     if !view.has_logo
         && let Some(row) = store().and_then(|store| store.message(found.folder, found.uid).ok().flatten())

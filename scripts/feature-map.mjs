@@ -1145,12 +1145,25 @@ const sections = [
             {
                 shot: 'read-8-unsubscribe',
                 name: 'Unsubscribe',
-                what: 'A message with List-Unsubscribe has Unsubscribe in its header. With List-Unsubscribe-Post and a DKIM signature that the receiving server passed and that covers both headers (RFC 8058), it asks the list to stop with a one-click POST, without cookies or redirects; otherwise it writes the message the list wants, or opens its https page. It always asks first, saying which.',
-                how: 'Unsubscribe at the right of the message header.',
+                what: 'A message with List-Unsubscribe has a bar over its text that names the list by its domain only (the signer the provider confirmed, else List-Id, else the sender; never a name the sender chose), with Unsubscribe...; Message > Unsubscribe from List and the right-click menu do the same. With List-Unsubscribe-Post and a DKIM signature that the receiving server passed and that covers both headers (RFC 8058), it asks the list to stop with a one-click POST, without cookies or redirects; otherwise it writes the message the list wants, or opens its https page. It always asks first, saying which. The list is remembered: the bar then says when it was asked, and a message that came more than two days later offers Unsubscribe Again. Junk E-mail, Sent Items and Drafts show no bar.',
+                how: 'Unsubscribe... on the bar over a mailing list message, or Message > Unsubscribe from List.',
                 checked: [
-                    'A message of a mailing list has Unsubscribe in its header',
+                    'A message of a mailing list has the mailing-list bar over its text',
+                    'It names the list by its domain and offers Unsubscribe...',
                     'It asks first, naming where it goes',
-                    'Yes posts List-Unsubscribe=One-Click to the list, and the status bar says it is done'
+                    'Unsubscribe posts List-Unsubscribe=One-Click to the list',
+                    'The bar then says when the list was asked, without a button'
+                ]
+            },
+            {
+                shot: 'read-9c-two-bars',
+                name: 'Unsubscribe again',
+                what: 'A message of a list that arrived more than two days after the user asked to leave it offers Unsubscribe Again on its bar, as the list did not stop. Its bar sits under the pictures bar: the bars of a message keep one order (a download that failed, pictures, the mailing list).',
+                how: 'Open a message a list sent after it was asked to stop.',
+                checked: [
+                    'A list message with pictures blocked shows both bars',
+                    'The pictures bar above the mailing-list bar',
+                    'A message that came more than two days after the request offers Unsubscribe Again...'
                 ]
             },
             {

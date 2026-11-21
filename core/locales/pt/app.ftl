@@ -89,6 +89,8 @@ cmd-options = &Opções...
 cmd-message-rules = Regras de &mensagens...
 cmd-encryption-keys = C&haves de encriptação...
 cmd-create-rule-from-message = Criar re&gra a partir da mensagem...
+# review: new
+cmd-unsubscribe = &Cancelar subscrição da lista...
 cmd-select-all = Selecionar t&udo
 cmd-undo = &Anular
 cmd-copy = Co&piar para pasta...
@@ -261,6 +263,22 @@ ui-unsubscribing = A enviar o pedido de cancelamento da subscrição para { $tar
 ui-cannot-unsubscribe = Esta mensagem não oferece uma opção para cancelar a subscrição.
 ui-unsubscribed = Pedido de cancelamento da subscrição aceite.
 ui-not-unsubscribed = Não foi possível cancelar a subscrição: { $reason }
+# review: new
+ui-list-bar = Esta mensagem é de uma lista de correio ({ $domain }).
+# review: new
+ui-list-bar-plain = Esta mensagem é de uma lista de correio.
+# review: new
+ui-list-bar-asked = Pediu para sair desta lista a { $date }.
+# review: new
+ui-list-bar-came-after = Pediu para sair desta lista a { $date }, mas esta mensagem chegou depois.
+# review: new
+ui-list-bar-opened = Abriu a página da lista para sair dela a { $date }.
+# review: new
+ui-list-bar-failed = A lista não aceitou o pedido: { $reason }
+# review: new
+ui-unsubscribe-ask = Cancelar subscrição…
+# review: new
+ui-unsubscribe-again = Cancelar subscrição novamente…
 ui-event-span = { $start } a { $end }
 ui-event-floating = { $when } (sem fuso horário utilizável)
 ui-invitation = Convite: { $title }

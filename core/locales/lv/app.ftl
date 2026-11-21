@@ -89,6 +89,8 @@ cmd-options = &Opcijas...
 cmd-message-rules = Ziņojumu &kārtulas...
 cmd-encryption-keys = Šifrēšanas &atslēgas...
 cmd-create-rule-from-message = I&zveidot kārtulu no ziņojuma...
+# review: new
+cmd-unsubscribe = Atteikties no &saraksta...
 cmd-select-all = Atlasīt &visu
 cmd-undo = &Atsaukt
 cmd-copy = Kopēt uz &mapi...
@@ -263,6 +265,22 @@ ui-unsubscribing = Nosūta atteikšanās pieprasījumu vietnei „{ $target }”
 ui-cannot-unsubscribe = Šajā ziņojumā nav iespējas atteikties no abonēšanas.
 ui-unsubscribed = Atteikšanās pieprasījums pieņemts.
 ui-not-unsubscribed = Neizdevās atteikties no abonēšanas: { $reason }
+# review: new
+ui-list-bar = Šis ziņojums ir no adresātu saraksta ({ $domain }).
+# review: new
+ui-list-bar-plain = Šis ziņojums ir no adresātu saraksta.
+# review: new
+ui-list-bar-asked = Jūs lūdzāt izstāties no šī saraksta { $date }.
+# review: new
+ui-list-bar-came-after = Jūs lūdzāt izstāties no šī saraksta { $date }, bet šis ziņojums pienāca vēlāk.
+# review: new
+ui-list-bar-opened = Jūs atvērāt saraksta atteikšanās lapu { $date }.
+# review: new
+ui-list-bar-failed = Saraksts nepieņēma pieprasījumu: { $reason }
+# review: new
+ui-unsubscribe-ask = Atteikties…
+# review: new
+ui-unsubscribe-again = Atteikties vēlreiz…
 ui-event-span = { $start } līdz { $end }
 ui-event-floating = { $when } (laika josla nav noteikta)
 ui-invitation = Uzaicinājums: { $title }

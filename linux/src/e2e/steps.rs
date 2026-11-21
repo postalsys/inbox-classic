@@ -163,26 +163,67 @@ pub async fn unsubscribing(d: &Driver) {
     select_folder("Inbox");
     in_the_inbox("Weekly list news").await;
     show_found("subject:\"Weekly list news\"").await;
-    let reader = &shell().main().reader;
-    let shown = wait_until(15, || reader.unsubscribe.is_visible()).await;
-    d.check(shown, "a message of a mailing list has Unsubscribe in its header");
+    let reader = shell().main().reader.clone();
+    let shown = wait_until(15, || reader.list_bar_shown()).await;
+    d.check(
+        shown,
+        "a message of a mailing list has the mailing-list bar over its text",
+    );
+    let (text, button) = reader.list_bar_words();
+    d.check(
+        text.contains("(list.example.com)") && button == t!(UiUnsubscribeAsk),
+        &format!("it names the list by its domain and offers Unsubscribe... ({text}, {button})"),
+    );
+    d.check(
+        !reader.header_text().contains("Unsubscribe"),
+        "the header has no Unsubscribe link",
+    );
+    let enabled = |command: Command| {
+        shell()
+            .main()
+            .window()
+            .lookup_action(command.name())
+            .is_some_and(|a| a.is_enabled())
+    };
+    d.check(
+        enabled(Command::Unsubscribe),
+        "Message > Unsubscribe from List is on for it",
+    );
+    let mailbox = shell().main();
+    let list_view: gtk::Widget = mailbox.list.view.clone().upcast();
+    mailbox.message_menu(&list_view, 40.0, 24.0);
+    let labels = menu_labels(mailbox.message_popover.borrow().as_ref());
+    if let Some(popover) = mailbox.message_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+    d.check(
+        labels.iter().any(|l| l.starts_with("Unsubscribe from List")),
+        &format!("and on its right-click menu ({})", labels.join(", ")),
+    );
     d.shot(&main, "read-8-unsubscribe").await;
-    reader
-        .unsubscribe
-        .emit_by_name::<bool>("activate-link", &[&"unsubscribe"]);
+    reader.list_button.emit_clicked();
     let sure = wait_alert(10).await;
     let names = sure.as_ref().is_some_and(|s| alert_text(s).contains("127.0.0.1"));
     d.check(names, "it asks first, naming where it goes");
     if let Some(sure) = sure {
         d.shot(&sure, "read-9-unsubscribe-ask").await;
-        answer(&sure, "Yes");
+        answer(&sure, &t!(UiCancel));
+    }
+    pause(1000).await;
+    d.check(
+        received.try_recv().is_err() && reader.list_bar_words().1 == t!(UiUnsubscribeAsk),
+        "Cancel asks the list nothing",
+    );
+    reader.list_button.emit_clicked();
+    if let Some(sure) = wait_alert(10).await {
+        answer(&sure, &t!(UiUnsubscribe));
     }
     let request = wait_for(15, || received.try_recv().ok()).await.unwrap_or_default();
     let first = request.lines().next().unwrap_or_default().to_string();
     let posted = request.starts_with("POST /u/42 ") && request.contains("List-Unsubscribe=One-Click");
     d.check(
         posted,
-        &format!("Yes posts List-Unsubscribe=One-Click to the list ({first})"),
+        &format!("Unsubscribe posts List-Unsubscribe=One-Click to the list ({first})"),
     );
     let done = wait_until(10, || {
         shell()
@@ -199,6 +240,52 @@ pub async fn unsubscribing(d: &Driver) {
             shell().main().status_texts().0
         ),
     );
+    let asked = wait_until(10, || {
+        let (text, button) = reader.list_bar_words();
+        text.starts_with("You asked to leave this list on") && button.is_empty()
+    })
+    .await;
+    d.check(
+        asked,
+        &format!(
+            "the bar then says when the list was asked, without a button ({})",
+            reader.list_bar_words().0
+        ),
+    );
+    d.check(!enabled(Command::Unsubscribe), "and Unsubscribe from List is off");
+    d.shot(&main, "read-9b-unsubscribe-asked").await;
+    // another message of the list, three days later and with a picture on the internet: the list did not stop
+    let again = format!(
+        "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com\r\n\
+         DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:subject:list-unsubscribe:list-unsubscribe-post; bh=x; \
+         b=y\r\nFrom: Weekly List <news@list.example.com>\r\nTo: testuser@inboxclassic.test\r\n\
+         Subject: Weekly list news again\r\nDate: {}\r\nMessage-ID: <weekly-list-2@list.example.com>\r\n\
+         List-Unsubscribe: <mailto:leave@list.example.com>, <http://127.0.0.1:{port}/u/42>\r\n\
+         List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\nContent-Type: text/html\r\n\r\n\
+         <p>Still here.</p><img src=\"https://pictures.example.com/news.png\" width=\"10\" height=\"10\">\r\n",
+        date_now(0)
+    );
+    let later = glib::DateTime::now_utc()
+        .and_then(|t| t.add_days(3))
+        // as IMAP writes a date-time, which is what the server takes
+        .and_then(|t| t.format("%d-%b-%Y %H:%M:%S +0000"))
+        .map(|t| t.to_string())
+        .unwrap_or_default();
+    let _ = d.add_message_arrived(&again, &later);
+    run_command(Command::Sync);
+    in_the_inbox("Weekly list news again").await;
+    show_found("subject:\"Weekly list news again\"").await;
+    let both = wait_until(15, || reader.list_bar_shown() && reader.pictures_bar_shown()).await;
+    d.check(both, "a list message with pictures blocked shows both bars");
+    d.check(reader.bars_in_order(), "the pictures bar above the mailing-list bar");
+    let (text, button) = reader.list_bar_words();
+    d.check(
+        text.starts_with("You asked to leave this list on")
+            && text.contains("came after")
+            && button == t!(UiUnsubscribeAgain),
+        &format!("a message that came more than two days after the request offers Unsubscribe Again... ({text})"),
+    );
+    d.shot(&main, "read-9c-two-bars").await;
     search("").await;
 }
 
@@ -3112,6 +3199,25 @@ pub async fn all_inboxes(d: &Driver) {
             close_compose(&c).await;
         }
         None => d.check(false, "Reply opens a compose window"),
+    }
+    // a message window's Unsubscribe by mail hands the link over with its message's account: with the second account's
+    // message shown here, a link from the first account's message is written from the first account
+    let first = shell().core.accounts().unwrap_or_default().first().map_or(0, |a| a.id);
+    shell()
+        .open_mailto("mailto:leave@list.example.com?subject=unsubscribe", first)
+        .await;
+    match wait_compose(10).await {
+        Some(c) => {
+            let from = compose_from(&c);
+            d.check(
+                from.contains("testuser@inboxclassic.test"),
+                &format!(
+                    "an e-mail link from a message goes from the account of that message, not of the one shown ({from})"
+                ),
+            );
+            close_compose(&c).await;
+        }
+        None => d.check(false, "the e-mail link opens a compose window"),
     }
     let unread = |rest: u16| d.unread_at(rest);
     run_command(Command::MarkAllRead);

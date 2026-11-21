@@ -1,10 +1,10 @@
 <h1>Meld deg av en e-postliste</h1>
-<p class="summary">Be om å bli fjernet fra en e-postliste med knappen for å melde deg av.</p>
-<p>En melding som inneholder avmeldingsinformasjon, har knappen <b data-text="ui-unsubscribe"></b> til høyre i meldingshodet.</p>
+<p class="summary"><!--review-->Be en e-postliste om å slutte å sende meldinger, rett fra infolinjen over meldingene fra listen.<!--/review--></p>
+<p><!--review-->En melding fra en e-postliste som forteller hvordan du melder deg av, har en infolinje over teksten med listens domene og <b data-text="ui-unsubscribe-ask"></b>. Infolinjen navngir listen bare med domenet, aldri med et navn avsenderen har valgt. Søppelpost, Sendte elementer og Utkast viser ingen infolinje: Å melde seg av en liste fra søppelpost forteller avsenderen at adressen din virker.<!--/review--></p>
 <p>Slik melder du deg av:</p>
 <ol>
-    <li>Klikk på <b data-text="ui-unsubscribe"></b>. Inbox Classic forteller hva som vil skje, og spør først.</li>
-    <li>Bekreft. Avhengig av listen skjer én av tre ting:
+    <li><!--review-->Klikk på <b data-text="ui-unsubscribe-ask"></b> på infolinjen, eller velg <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic forteller hva som vil skje, og spør først.<!--/review--></li>
+    <li><!--review-->Klikk på <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Avhengig av listen skjer én av tre ting:<!--/review-->
         <ul>
             <li>Inbox Classic sender en avmeldingsforespørsel til listen. Ingen nettside åpnes, og ingen e-post sendes.</li>
             <li>Inbox Classic klargjør en e-post med avmeldingsforespørselen fra kontoen du leser meldingen i, med kontoens signaturtekst. Klikk på <b data-text="ui-tb-send"></b> for å sende den.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Etterpå viser infolinjen på hver melding fra listen når du ba om avmelding, og tilbyr ikke noe mer. En forespørsel per e-post teller når den er sendt. For en liste der du åpnet nettsiden, beholder infolinjen knappen sin, siden Inbox Classic ikke kan se om du fullførte der.<!--/review--></p>
+<p><!--review-->Det kan ta opptil to dager før en liste slutter å sende. Hvis en av meldingene fra listen kommer senere enn det, tilbyr infolinjen <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
 <p>Statuslinjen sier fra når serveren har godtatt en direkte forespørsel. Det er ikke en bekreftelse på at fremtidige meldinger vil stoppe.</p>
 <aside class="note">Inbox Classic sender en direkte avmeldingsforespørsel bare når leverandøren har bekreftet en gyldig DKIM-signatur som dekker begge de nødvendige avmeldingshodene. Forespørselen sendes først etter at du har bekreftet.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

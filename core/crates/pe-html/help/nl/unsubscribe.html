@@ -1,10 +1,10 @@
 <h1>Afmelden voor een mailinglijst</h1>
-<p class="summary">Meld je af voor een mailinglijst via de afmeldknop in het bericht.</p>
-<p>Als een mailinglijst afmeldgegevens meestuurt, verschijnt de knop <b data-text="ui-unsubscribe"></b> rechts in de koptekst.</p>
+<p class="summary"><!--review-->Vraag een mailinglijst om geen berichten meer te sturen, via de balk boven de berichten van die lijst.<!--/review--></p>
+<p><!--review-->Een bericht van een mailinglijst dat vermeldt hoe je je afmeldt, heeft boven de tekst een balk met het domein van de lijst en <b data-text="ui-unsubscribe-ask"></b>. De balk noemt de lijst alleen bij het domein, nooit bij een naam die de afzender heeft gekozen. Ongewenste e-mail, Verzonden items en Concepten tonen geen balk: je afmelden vanuit spam laat de afzender weten dat je adres werkt.<!--/review--></p>
 <p>Zo meld je je af:</p>
 <ol>
-    <li>Klik op <b data-text="ui-unsubscribe"></b>. Inbox Classic legt uit wat er gaat gebeuren en vraagt om bevestiging.</li>
-    <li>Bevestig. Afhankelijk van de lijst gebeurt een van deze drie dingen:
+    <li><!--review-->Klik op <b data-text="ui-unsubscribe-ask"></b> in de balk of kies <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic legt uit wat er gaat gebeuren en vraagt om bevestiging.<!--/review--></li>
+    <li><!--review-->Klik op <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Afhankelijk van de lijst gebeurt een van deze drie dingen:<!--/review-->
         <ul>
             <li>Inbox Classic stuurt een afmeldverzoek naar de mailinglijst. Er wordt geen webpagina geopend en geen e-mail verzonden.</li>
             <li>Inbox Classic stelt een afmeldbericht op vanuit het account waarin je het bericht leest, met de handtekeningtekst van dat account. Klik op <b data-text="ui-tb-send"></b> om het te verzenden.</li>
@@ -12,6 +12,8 @@
         </ul>
     </li>
 </ol>
+<p><!--review-->Daarna toont de balk bij elk bericht van die lijst wanneer je om afmelding hebt gevraagd, en biedt niets meer aan. Een verzoek per e-mail telt zodra het is verzonden. Bij een lijst waarvan je de pagina hebt geopend, houdt de balk zijn knop, omdat Inbox Classic niet kan zien of je het afmelden daar hebt afgerond.<!--/review--></p>
+<p><!--review-->Het kan tot twee dagen duren voordat een lijst stopt met verzenden. Komt er daarna nog een bericht van die lijst binnen, dan biedt de balk <b data-text="ui-unsubscribe-again"></b> aan.<!--/review--></p>
 <p>De statusbalk meldt wanneer de server het verzoek heeft geaccepteerd. Dit garandeert niet dat de mailinglijst al is gestopt met verzenden.</p>
 <aside class="note">Een rechtstreeks afmeldverzoek vereist jouw toestemming en een door de mailprovider bevestigde DKIM-handtekening die beide vereiste afmeldheaders omvat. In andere gevallen wordt een e-mail opgesteld of een webpagina geopend.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

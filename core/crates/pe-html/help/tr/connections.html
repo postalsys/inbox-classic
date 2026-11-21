@@ -10,5 +10,5 @@
     <li><b>Şifreleme anahtarları</b>, bir iletiyi şifrelemek için alıcının anahtarı eksik olduğunda veya siz anahtar araması başlattığınızda aranır. E-posta adresiyle arama yapılırken önce adresin etki alanındaki anahtar dizinine (Web Key Directory) başvurulur. Gerekirse, bu arama açıksa adres keys.openpgp.org sunucusuna gönderilir. Parmak izi veya anahtar kimliğiyle aramada e-posta adresi yerine bu bilgi keys.openpgp.org sunucusuna gönderilir.</li>
     <!--os:mac--><li><b>Güncellemeler</b>: otomatik denetim açıksa veya siz denetlerseniz yeni sürüm bilgisi inboxclassic.com'dan alınır.</li><!--/os-->
 </ul>
-<!--review--><p>Oturum açma kodları yalnızca sağlayıcınızın Authentication-Results / ARC-Authentication-Results üst bilgisi gönderen etki alanının imzasının doğrulandığını (DKIM) bildirdiğinde gösterilir. Bunun için ayrı bir bağlantı gerekmez.</p><!--/review-->
+<p>Oturum açma kodları yalnızca e-posta sağlayıcınız kodun ait olduğu etki alanının veya bir üst etki alanının geçerli bir DKIM imzasını doğruladığını bildirdiğinde gösterilir. Inbox Classic bu sonucu sağlayıcının Authentication-Results veya ARC-Authentication-Results üst bilgilerinden okur. Bunun için ayrı bir bağlantı gerekmez.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>

@@ -88,6 +88,8 @@ cmd-options = &Beállítások...
 cmd-message-rules = Üzenet&szabályok...
 cmd-encryption-keys = &Titkosítási kulcsok...
 cmd-create-rule-from-message = &Szabály létrehozása az üzenetből...
+# review: new
+cmd-unsubscribe = Le&iratkozás a listáról...
 cmd-select-all = Az összes k&ijelölése
 cmd-undo = &Visszavonás
 cmd-copy = M&ásolás mappába...
@@ -259,6 +261,22 @@ ui-unsubscribing = Leiratkozás: { $target }...
 ui-cannot-unsubscribe = Ez az üzenet nem kínál leiratkozási lehetőséget.
 ui-unsubscribed = A leiratkozási kérést elfogadták.
 ui-not-unsubscribed = Nem sikerült leiratkozni: { $reason }
+# review: new
+ui-list-bar = Ez az üzenet egy levelezőlistáról érkezett ({ $domain }).
+# review: new
+ui-list-bar-plain = Ez az üzenet egy levelezőlistáról érkezett.
+# review: new
+ui-list-bar-asked = { $date } napon kérte, hogy leiratkozzon erről a listáról.
+# review: new
+ui-list-bar-came-after = { $date } napon kérte, hogy leiratkozzon erről a listáról, de ez az üzenet ezután érkezett.
+# review: new
+ui-list-bar-opened = { $date } napon megnyitotta a lista leiratkozási oldalát.
+# review: new
+ui-list-bar-failed = A lista nem fogadta el a kérést: { $reason }
+# review: new
+ui-unsubscribe-ask = Leiratkozás…
+# review: new
+ui-unsubscribe-again = Leiratkozás újra…
 ui-event-span = Kezdés: { $start }, befejezés: { $end }
 ui-event-floating = { $when } (nincs használható időzónaadat)
 ui-invitation = Meghívó: { $title }
