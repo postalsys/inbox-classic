@@ -65,7 +65,6 @@ win-files = { $count ->
     [one] { $count } tiedosto
    *[other] { $count } tiedostoa
 }
-win-click-to-retry = Yritä uudelleen napsauttamalla tätä.
 win-save-attachments = &Tallenna liitteet...
 win-files-not-saved = { $failed } tiedoston tallentaminen epäonnistui. Tiedostoja yhteensä: { $count }.
 win-new-folder-in-highlighted = Uusi kansio luodaan valitun kansion sisään.
@@ -106,7 +105,6 @@ win-take-back = &Kumoa
 win-what-agents-did = Agenttien &toiminta:
 win-agent-reads = Lukutoiminnot ajalta { $from } - { $to }:
 win-agent-reads-hint = Valitse yllä oleva lukutoimintojen merkintä nähdäksesi, mitä luettiin.
-win-how-to-connect = Agentin yhdistäminen
 
 ## Sign-in apps
 

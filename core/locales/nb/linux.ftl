@@ -89,8 +89,6 @@ gtk-files = { $count ->
     [one] { $count } fil
    *[other] { $count } filer
 }
-gtk-pictures-blocked = Noen bilder er blokkert for å hindre at avsenderen sporer deg.
-gtk-download-pictures = Last ned bilder
 gtk-save-attachments-menu = Lagre vedlegg...
 
 ## The compose window

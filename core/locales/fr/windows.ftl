@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } fichier
    *[other] { $count } fichiers
 }
-win-click-to-retry = Cliquez ici pour réessayer.
 win-save-attachments = &Enregistrer les pièces jointes...
 win-files-not-saved = Fichiers non enregistrés : { $failed } sur { $count }.
 win-new-folder-in-highlighted = Le nouveau dossier sera créé dans le dossier sélectionné.
@@ -105,7 +104,6 @@ win-take-back = &Annuler
 win-what-agents-did = &Historique des agents :
 win-agent-reads = Ce qui a été lu de { $from } à { $to } :
 win-agent-reads-hint = Sélectionnez ci-dessus une ligne de lectures pour voir ce qui a été lu.
-win-how-to-connect = Comment connecter un agent
 
 ## Applications de connexion
 

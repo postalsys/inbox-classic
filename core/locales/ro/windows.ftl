@@ -70,7 +70,6 @@ win-files = { $count ->
     [few] { $count } fișiere
    *[other] { $count } de fișiere
 }
-win-click-to-retry = Faceți clic aici pentru a încerca din nou.
 win-save-attachments = &Salvare atașări...
 win-files-not-saved = Fișiere care nu au putut fi salvate: { $failed } din { $count }.
 win-new-folder-in-highlighted = Folderul nou va fi creat în folderul selectat.
@@ -111,7 +110,6 @@ win-take-back = &Anulare modificări
 win-what-agents-did = &Activitatea agenților:
 win-agent-reads = Ce s-a citit între { $from } și { $to }:
 win-agent-reads-hint = Selectați mai sus o activitate de citire pentru a vedea detaliile.
-win-how-to-connect = Cum se conectează un agent
 
 ## Sign-in apps
 

@@ -89,8 +89,6 @@ gtk-files = { $count ->
     [one] { $count } fil
    *[other] { $count } filer
 }
-gtk-pictures-blocked = Vissa bilder har blockerats för att minska risken för spårning.
-gtk-download-pictures = Hämta bilder
 gtk-save-attachments-menu = Spara bilagor...
 
 ## The compose window

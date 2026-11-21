@@ -248,7 +248,8 @@ ui-no-items = Ebben a nézetben nincsenek elemek.
 ui-choose-folder = Válasszon egy mappát az üzenetei megtekintéséhez.
 ui-unsubscribe = Leiratkozás
 ui-open-in-calendar = Megnyitás a naptárban
-ui-pictures-blocked = Néhány kép letöltése le van tiltva, hogy a feladó nehezebben követhesse nyomon az üzenet megnyitását. Kattintson ide a képek letöltéséhez.
+# review: changed
+ui-pictures-blocked = Néhány kép letöltése le van tiltva, hogy a feladó nehezebben követhesse nyomon az üzenet megnyitását.
 ui-not-shown = Az üzenetet nem sikerült megjeleníteni.
 ui-attachment-not-read = A mellékletet nem sikerült beolvasni.
 ui-attachment-not-saved = A mellékletet nem sikerült menteni.

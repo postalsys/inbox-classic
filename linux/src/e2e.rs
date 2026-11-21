@@ -1543,7 +1543,7 @@ async fn reading(d: &Driver) {
     reader.download_pictures.emit_clicked();
     d.check(
         wait_until(10, || !reader.pictures_blocked()).await,
-        "clicking the bar shows the pictures, and the bar goes away",
+        "Download Pictures shows the pictures, and the bar goes away",
     );
     pause(3000).await;
     d.shot(&main, "read-2-pictures").await;

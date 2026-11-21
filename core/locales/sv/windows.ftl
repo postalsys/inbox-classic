@@ -63,7 +63,6 @@ win-files = { $count ->
     [one] { $count } fil
    *[other] { $count } filer
 }
-win-click-to-retry = Klicka här för att försöka igen.
 win-save-attachments = &Spara bilagor...
 win-files-not-saved = Filer som inte kunde sparas: { $failed } av { $count }.
 win-new-folder-in-highlighted = Den nya mappen skapas i den markerade mappen.
@@ -104,7 +103,6 @@ win-take-back = &Ångra
 win-what-agents-did = Agent&aktivitet:
 win-agent-reads = Vad som lästes från { $from } till { $to }:
 win-agent-reads-hint = Markera en rad med läsningar ovan för att se vad som lästes.
-win-how-to-connect = Så ansluter du en agent
 
 ## Sign-in apps
 

@@ -72,7 +72,6 @@ win-files = { $count ->
     [few] { $count } datoteke
    *[other] { $count } datoteka
 }
-win-click-to-retry = Kliknite ovde da biste pokušali ponovo.
 win-save-attachments = &Sačuvaj priloge...
 win-files-not-saved = Ukupno datoteka: { $count }; nije sačuvano: { $failed }.
 win-new-folder-in-highlighted = Nova fascikla biće napravljena unutar izabrane fascikle.
@@ -113,7 +112,6 @@ win-take-back = &Opozovi
 win-what-agents-did = &Aktivnost agenata:
 win-agent-reads = Čitanje u periodu od { $from } do { $to }:
 win-agent-reads-hint = Izaberite stavku dnevnika čitanja iznad da biste videli detalje.
-win-how-to-connect = Kako povezati agenta
 
 ## Sign-in apps
 

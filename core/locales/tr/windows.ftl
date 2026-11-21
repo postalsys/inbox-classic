@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } dosya
    *[other] { $count } dosya
 }
-win-click-to-retry = Yeniden denemek için buraya tıklayın.
 win-save-attachments = Ekleri &Kaydet...
 win-files-not-saved = { $count } dosyadan { $failed } tanesi kaydedilemedi.
 win-new-folder-in-highlighted = Yeni klasör, seçili klasörün içinde oluşturulacak.
@@ -105,7 +104,6 @@ win-take-back = &Geri Al
 win-what-agents-did = Aracı &etkinliği:
 win-agent-reads = { $from } ile { $to } arasında okunanlar:
 win-agent-reads-hint = Neyin okunduğunu görmek için yukarıdan okumaları özetleyen bir satır seçin.
-win-how-to-connect = Aracı Nasıl Bağlanır
 
 ## Oturum açma uygulamaları
 

@@ -250,7 +250,8 @@ ui-no-items = W tym widoku nie ma żadnych elementów.
 ui-choose-folder = Wybierz folder, aby zobaczyć jego wiadomości.
 ui-unsubscribe = Wypisz się
 ui-open-in-calendar = Otwórz w kalendarzu
-ui-pictures-blocked = Niektóre obrazy zostały zablokowane, aby utrudnić nadawcy identyfikację Twojego komputera. Kliknij tutaj, aby je pobrać.
+# review: changed
+ui-pictures-blocked = Niektóre obrazy zostały zablokowane, aby utrudnić nadawcy identyfikację Twojego komputera.
 ui-not-shown = Nie udało się wyświetlić wiadomości.
 ui-attachment-not-read = Nie udało się odczytać załącznika.
 ui-attachment-not-saved = Nie udało się zapisać załącznika.

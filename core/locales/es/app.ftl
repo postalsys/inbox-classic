@@ -244,7 +244,8 @@ ui-no-items = No hay elementos en esta vista.
 ui-choose-folder = Elija una carpeta para ver sus mensajes.
 ui-unsubscribe = Cancelar suscripción
 ui-open-in-calendar = Abrir en el calendario
-ui-pictures-blocked = Se han bloqueado algunas imágenes para reducir el seguimiento por parte del remitente. Haga clic aquí para descargarlas.
+# review: changed
+ui-pictures-blocked = Se han bloqueado algunas imágenes para reducir el seguimiento por parte del remitente.
 ui-not-shown = No se pudo mostrar el mensaje.
 ui-attachment-not-read = No se pudo leer el archivo adjunto.
 ui-attachment-not-saved = No se pudo guardar el archivo adjunto.

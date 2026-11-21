@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } fitxer
    *[other] { $count } fitxers
 }
-win-click-to-retry = Feu clic aquí per tornar-ho a provar.
 win-save-attachments = De&sa els fitxers adjunts...
 win-files-not-saved = Fitxers no desats: { $failed } de { $count }.
 win-new-folder-in-highlighted = La carpeta nova es crearà dins de la carpeta seleccionada.
@@ -105,7 +104,6 @@ win-take-back = &Desfés
 win-what-agents-did = &Activitat dels agents:
 win-agent-reads = Què s’ha llegit de { $from } a { $to }:
 win-agent-reads-hint = Seleccioneu una entrada de lectures a la llista superior per veure què s’ha llegit.
-win-how-to-connect = Com connectar un agent
 
 ## Aplicacions d’inici de sessió
 

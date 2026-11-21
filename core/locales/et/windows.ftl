@@ -63,7 +63,6 @@ win-files = { $count ->
     [one] { $count } fail
    *[other] { $count } faili
 }
-win-click-to-retry = Uuesti proovimiseks klõpsake siin.
 win-save-attachments = &Salvesta manused...
 win-files-not-saved = { $count } failist { $failed } ei saanud salvestada.
 win-new-folder-in-highlighted = Uus kaust luuakse valitud kausta alamkaustana.
@@ -104,7 +103,6 @@ win-take-back = &Võta tagasi
 win-what-agents-did = &Agentide tegevusajalugu:
 win-agent-reads = Lugemised ajavahemikus { $from } kuni { $to }:
 win-agent-reads-hint = Valige ülalt lugemiste kirje, et vaadata üksikasju.
-win-how-to-connect = Kuidas agenti ühendada
 
 ## Sisselogimisrakendused
 

@@ -92,8 +92,6 @@ gtk-files = { $count ->
     [few] { $count } súbory
    *[other] { $count } súborov
 }
-gtk-pictures-blocked = Niektoré obrázky boli zablokované, aby sa obmedzila možnosť sledovania odosielateľom.
-gtk-download-pictures = Stiahnuť obrázky
 gtk-save-attachments-menu = Uložiť prílohy...
 
 ## The compose window

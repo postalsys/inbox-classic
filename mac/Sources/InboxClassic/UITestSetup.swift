@@ -6,12 +6,13 @@ import AppKit
 import CInboxClassic
 
 extension UITest {
-    /// Before the first account, Add Mail Account offers the import; the link opens the file panel, cancelled here, and
-    /// the form comes back: the form shown now
+    /// Before the first account, Add Mail Account offers the import; its push button opens the file panel, cancelled
+    /// here, and the form comes back: the form shown now
     func firstRunImport(_ start: NSWindow) async throws -> NSWindow {
         let link: NSButton? = find("account.import", in: start)
         check(link?.title.hasPrefix(Text.uiSetupFirstRun.title) == true,
               "before the first account, Add Mail Account offers to import settings and accounts (\(link?.title ?? ""))")
+        check(link?.isBordered == true && link?.bezelStyle == .push, "the import is a push button")
         await shot(start, "setup-5-first-run")
         var asked: String?
         TestHooks.open = { title in
@@ -21,7 +22,7 @@ extension UITest {
         press(link)
         _ = await waitUntil(10) { asked != nil }
         TestHooks.open = nil
-        check(asked == Text.uiSetupImportTitle.text, "the link opens the import's file panel (\(asked ?? "none"))")
+        check(asked == Text.uiSetupImportTitle.text, "the button opens the import's file panel (\(asked ?? "none"))")
         guard let again = await waitFor(10, { window("account.start").flatMap { $0 === start ? nil : $0 } }) else {
             throw Failed(description: "no account form after the import was cancelled")
         }

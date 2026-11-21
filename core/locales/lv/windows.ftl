@@ -71,7 +71,6 @@ win-files = { $count ->
     [one] { $count } fails
    *[other] { $count } faili
 }
-win-click-to-retry = Noklikšķiniet šeit, lai mēģinātu vēlreiz.
 win-save-attachments = &Saglabāt pielikumus...
 win-files-not-saved = Neizdevās saglabāt failus: { $failed } no { $count }.
 win-new-folder-in-highlighted = Jaunā mape tiks izveidota atlasītajā mapē.
@@ -112,7 +111,6 @@ win-take-back = &Atsaukt darbības
 win-what-agents-did = Aģentu &darbības:
 win-agent-reads = Ziņas par lasīšanu (no { $from } līdz { $to }):
 win-agent-reads-hint = Atlasiet lasīšanas ierakstu augšējā sarakstā, lai skatītu ziņas par to, kas tika lasīts.
-win-how-to-connect = Kā pieslēgt aģentu
 
 ## Sign-in apps
 

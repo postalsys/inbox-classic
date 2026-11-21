@@ -219,7 +219,7 @@ const sections = [
                 name: 'Import on the first run',
                 what: 'Before the first account, Add Mail Account offers to import settings and accounts from another computer.',
                 how: 'The link in Add Mail Account.',
-                checked: ['The link opens the import']
+                checked: ['The import is a push button that opens it']
             },
             {
                 shot: 'all-inboxes-1-list',
