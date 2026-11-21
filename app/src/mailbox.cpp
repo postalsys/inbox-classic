@@ -3948,6 +3948,21 @@ std::string DecodedPath(const char* path) {
 
 } // namespace
 
+std::string Mailbox::DeepNotes() const {
+    // the list's own state, for the report beside a failure: what it waits for and what it holds
+    std::string notes = "load " + std::to_string(loadRequest_) + (listPending_ ? " pending" : "") +
+                        (newList_ ? " new" : "") + (reloadPending_ ? " reload" : "") + " rows " +
+                        std::to_string(rowCount_) + " top " + std::to_string(ListView_GetTopIndex(list_)) + "; pages";
+    for (const Page& page : pages_) {
+        notes += " " + std::to_string(page.offset);
+    }
+    notes += "; asked";
+    for (const auto& [offset, request] : pageRequests_) {
+        notes += " " + std::to_string(offset) + ":" + std::to_string(request);
+    }
+    return notes;
+}
+
 bool Mailbox::DrawnCurrent() {
     // the rows in sight as drawn: each the message there, or blank while its page is not read
     int count = ListView_GetItemCount(list_);
@@ -4134,7 +4149,7 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
                            ",\"grouped\":" + (Grouped() ? "true" : "false") + ",\"unreadOnly\":" +
                            (UnreadOnly() ? "true" : "false") + ",\"tree\":[" + tree + "]" +
                            // a list chosen and not read yet: the rows drawn, dimmed, are still the list before's
-                           ",\"pending\":" + (newList_ ? "true" : "false") + "}";
+                           ",\"pending\":" + (newList_ ? "true" : "false") + ",\"notes\":" + JsonString(DeepNotes()) + "}";
         std::ofstream out(std::filesystem::path(words[1]), std::ios::binary);
         out << seen;
         return out.good() ? 11 : 10;

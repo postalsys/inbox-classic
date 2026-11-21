@@ -656,6 +656,7 @@ impl Target for CoreTarget {
             tree,
             // it reads the list chosen before it answers, so it never draws the one before
             pending: false,
+            notes: String::new(),
         })
     }
 

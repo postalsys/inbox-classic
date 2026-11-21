@@ -792,6 +792,8 @@ public:
     LRESULT TestDeep(const std::wstring& request);
     // whether the rows drawn are the list as the core reads it now (the deep test's quiet)
     bool DrawnCurrent();
+    // the list's loads and pages, for the deep test's report
+    std::string DeepNotes() const;
     // the accounts changed: builds the tree again
     void Reload();
     // a contact's picture changed: the rows (and their picture keys) read again, the selection kept
