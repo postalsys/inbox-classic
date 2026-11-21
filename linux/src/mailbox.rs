@@ -1437,7 +1437,12 @@ impl Mailbox {
         if self.list.selected_count() != 1 || self.list_load.dimmed() || self.view.borrow().grouped() {
             return None;
         }
-        let picked = *self.list.refs_in_ranges(&self.list.selected_ranges()).first()?;
+        // the message the row shows as drawn, not the row's place read again: new mail above moves the rows
+        let (_, drawn) = self.list.selected()?;
+        let picked = MessageRef {
+            folder: drawn.folder_id,
+            uid: drawn.info.uid,
+        };
         (Some(picked) != self.reader.message()).then_some(picked)
     }
 
