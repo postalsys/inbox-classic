@@ -123,6 +123,12 @@ pub(super) fn folder_of(index: usize, name: &str) -> Option<i64> {
 }
 
 /// The list's server: a socket of the test, answered by hand; the request it got comes on the channel
+/// The words of a catalog message before its date, which the system's format writes
+fn before_date(text: Text) -> String {
+    let marked = pe_core::i18n::tr_args(text, &[("date", "\u{1}".into())]);
+    marked.split('\u{1}').next().unwrap_or_default().to_string()
+}
+
 fn list_server() -> (u16, std::sync::mpsc::Receiver<String>) {
     let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a socket for the list");
     let port = listener.local_addr().map(|a| a.port()).unwrap_or(0);
@@ -242,7 +248,7 @@ pub async fn unsubscribing(d: &Driver) {
     );
     let asked = wait_until(10, || {
         let (text, button) = reader.list_bar_words();
-        text.starts_with("You asked to leave this list on") && button.is_empty()
+        text.starts_with(&before_date(Text::UiListBarAsked)) && button.is_empty()
     })
     .await;
     d.check(
@@ -280,9 +286,7 @@ pub async fn unsubscribing(d: &Driver) {
     d.check(reader.bars_in_order(), "the pictures bar above the mailing-list bar");
     let (text, button) = reader.list_bar_words();
     d.check(
-        text.starts_with("You asked to leave this list on")
-            && text.contains("came after")
-            && button == t!(UiUnsubscribeAgain),
+        text.starts_with(&before_date(Text::UiListBarCameAfter)) && button == t!(UiUnsubscribeAgain),
         &format!("a message that came more than two days after the request offers Unsubscribe Again... ({text})"),
     );
     d.shot(&main, "read-9c-two-bars").await;
