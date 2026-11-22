@@ -5017,6 +5017,10 @@ public static class Dragger {
     # another client deletes Gone: the server refuses a move there, and the message comes back with why over the list
     SelectRow 0
     $refused = [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT)
+    # the core done with opening it (its read mark), so the bar says the move's refusal and nothing that followed the
+    # message into Gone
+    $kTestDeep = 0x44454550
+    [void](WaitFor { [Native.Win]::SendText($main, $kTestDeep, 'quiet') -eq 11 } 20)
     Command $main $IDM_MOVE
     $move = WaitPicker 'Move Message'
     Check ($null -ne $move -and (PickIn $move 'inboxclassic.test' 'Gone')) 'the Move window offers Gone'
