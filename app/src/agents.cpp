@@ -687,7 +687,7 @@ void ChangeHost(HWND hwnd, AgentsState* state) {
 void RemoveHost(HWND hwnd, AgentsState* state) {
     int index = Selected(state->hosts);
     if (index >= 0 && static_cast<size_t>(index) < state->hostIds.size() &&
-        MessageBoxW(hwnd, core::T(PE_TEXT_WIN_FORGET_PROGRAM_ASK).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
+        MessageBoxApp(hwnd, core::T(PE_TEXT_WIN_FORGET_PROGRAM_ASK).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
         pe_agent_host_remove(state->core, state->hostIds[index]);
         FillAgents(state);
     }
@@ -700,7 +700,7 @@ void UndoEntry(HWND hwnd, AgentsState* state) {
     }
     core::String why(pe_agent_undo(state->core, state->entries[index].id));
     if (why) {
-        MessageBoxW(hwnd, Text(why.get()).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(hwnd, Text(why.get()).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_OK | MB_ICONINFORMATION);
     }
     FillAgents(state);
 }
@@ -837,7 +837,7 @@ void UndoSince(HWND hwnd, AgentsState* state) {
     core::String report(pe_agent_undo_since(state->core, undo.host, undo.since));
     FillAgents(state);
     if (report) {
-        MessageBoxW(hwnd, Text(report.get()).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(hwnd, Text(report.get()).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(), MB_OK | MB_ICONINFORMATION);
     }
 }
 
@@ -867,7 +867,7 @@ LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
             UndoSince(hwnd, state);
             return 0;
         case IDC_AGENTS_CLEAR:
-            if (MessageBoxW(hwnd, core::T(PE_TEXT_WIN_CLEAR_LOG_ASK).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(),
+            if (MessageBoxApp(hwnd, core::T(PE_TEXT_WIN_CLEAR_LOG_ASK).c_str(), core::Plain(PE_TEXT_UI_AI_AGENTS).c_str(),
                             MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
                 pe_agent_log_clear(state->core);
                 FillAgents(state);

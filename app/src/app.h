@@ -161,6 +161,9 @@ SIZE MeasureText(const std::wstring& text, int wrapWidth = 0, UINT flags = 0);
 // the font of the windows' words: the system's default GUI font, or for Chinese, Japanese and Korean the face Windows
 // itself uses in that language (core::WindowsFont), at its 9 points; made once, kept for the run
 HFONT UiFont();
+// MessageBoxW with its buttons in the language of the windows (Yes, No, OK, Cancel from the catalogs), where Windows
+// would write them in its own: every message box of the app is shown through it
+int MessageBoxApp(HWND owner, const wchar_t* text, const wchar_t* title, UINT type);
 // whether UiFont is the language's own face rather than the system's default
 bool UiFontChosen();
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least = 80);

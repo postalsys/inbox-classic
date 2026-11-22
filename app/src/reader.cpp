@@ -761,7 +761,7 @@ void Reader::SaveRead(uint8_t* data, size_t length, char* name) {
         if (WriteFileBytes(path, data, length)) {
             MarkFromInternet(path);
         } else {
-            MessageBoxW(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+            MessageBoxApp(parent_, core::T(PE_TEXT_UI_ATTACHMENT_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         }
     }
     pe_bytes_free(data, length);
@@ -784,11 +784,11 @@ void Reader::SaveAllAttachments() {
     size_t total = 0;
     std::string dir = core::Narrow(folder);
     if (!SaveAttachments(dir, saved, total)) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(parent_, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     } else if (saved < total) {
         std::wstring text =
             core::T(PE_TEXT_WIN_FILES_NOT_SAVED, {{"failed", std::to_wstring(total - saved)}, {"count", std::to_wstring(total)}});
-        MessageBoxW(parent_, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxApp(parent_, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
     }
 }
 
@@ -824,7 +824,7 @@ void Reader::SayNotHere() {
     // a large message shows its text before the rest of it is here
     bool downloading = file_.empty() && pe_message_downloading(core_, folder_, uid_);
     std::wstring why = core::T(downloading ? PE_TEXT_UI_ATTACHMENT_DOWNLOADING : PE_TEXT_UI_ATTACHMENT_NOT_READ);
-    MessageBoxW(parent_, why.c_str(), L"Inbox Classic", MB_OK | (downloading ? MB_ICONINFORMATION : MB_ICONERROR));
+    MessageBoxApp(parent_, why.c_str(), L"Inbox Classic", MB_OK | (downloading ? MB_ICONINFORMATION : MB_ICONERROR));
 }
 
 void Reader::FillStrip(const PeMessageInfo* info) {
@@ -911,7 +911,7 @@ void Reader::OpenAttachment(int item) {
     }
     // a file that can run code: refused from its row, in the core's words
     if (!attachment->can_open) {
-        MessageBoxW(parent_, Text(attachment->refusal).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+        MessageBoxApp(parent_, Text(attachment->refusal).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
         return;
     }
     // one at a time: a double-click while one is opened waits for it
@@ -952,7 +952,7 @@ void Reader::OpenDone(StripOpened* opened) {
     openingItem_ = -1;
     if (done->path.empty()) {
         if (!done->refused.empty()) {
-            MessageBoxW(parent_, done->refused.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+            MessageBoxApp(parent_, done->refused.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
         } else {
             SayNotHere();
         }
@@ -960,7 +960,7 @@ void Reader::OpenDone(StripOpened* opened) {
     }
     // an encrypted message's file, the first time: it is stored decrypted while it is open
     if (!done->note.empty()) {
-        MessageBoxW(parent_, done->note.c_str(), core::T(PE_TEXT_UI_ATTACHMENT_NOTE_TITLE).c_str(), MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(parent_, done->note.c_str(), core::T(PE_TEXT_UI_ATTACHMENT_NOTE_TITLE).c_str(), MB_OK | MB_ICONINFORMATION);
     }
     OpenWithSystem(parent_, done->path);
 }
@@ -1313,7 +1313,7 @@ std::wstring Reader::Unsubscribe(HWND owner, core::Draft& draft) {
     }
     // the classic message box: Yes and No, as every question of the Windows app asks
     std::wstring question = core::T(PE_TEXT_UI_LEAVE_LIST) + L"\n\n" + detail;
-    if (MessageBoxW(owner, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
+    if (MessageBoxApp(owner, question.c_str(), core::T(PE_TEXT_UI_UNSUBSCRIBE).c_str(), MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return L"";
     }
     switch (unsubscribeKind_) {
@@ -1407,13 +1407,13 @@ void Reader::OpenInCalendar() {
                       : file_.empty()     ? pe_invitation_file(core_, folder_, uid_, dir.get())
                                           : pe_file_invitation_file(core_, core::Narrow(file_).c_str(), dir.get()));
     if (!path) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxApp(parent_, core::T(PE_TEXT_UI_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     // marked as from the internet by the core, which wrote it
     std::wstring file = Text(path.get());
     if (reinterpret_cast<INT_PTR>(ShellExecuteW(parent_, L"open", file.c_str(), nullptr, nullptr, SW_SHOWNORMAL)) <= 32) {
-        MessageBoxW(parent_, core::T(PE_TEXT_UI_NO_CALENDAR).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(parent_, core::T(PE_TEXT_UI_NO_CALENDAR).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
     }
 }
 

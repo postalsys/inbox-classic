@@ -29,7 +29,7 @@ std::wstring AskFolderName(HWND owner, PeText title, const std::wstring& intro, 
 
 // the reason the core gave, shown
 void ShowRefusal(HWND owner, char* reason, PeText fallback) {
-    MessageBoxW(owner, ReasonText(reason, fallback).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+    MessageBoxApp(owner, ReasonText(reason, fallback).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
 // Tools > Options: a row a conversation (on unless turned off)
@@ -2249,7 +2249,7 @@ void Mailbox::DeleteSelected() {
         return;
     }
     core::String question(pe_selection_delete_question(&summary_));
-    if (question && MessageBoxW(parent_, Text(question.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+    if (question && MessageBoxApp(parent_, Text(question.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
     Act(PE_ACTION_DELETE);
@@ -2748,7 +2748,7 @@ void Mailbox::DeleteFolder(HWND owner) {
         return;
     }
     std::wstring question = core::T(PE_TEXT_WIN_DELETE_FOLDER_ASK, {{"folder", name}});
-    if (MessageBoxW(owner, question.c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+    if (MessageBoxApp(owner, question.c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
     char* reason = nullptr;
@@ -2763,7 +2763,7 @@ void Mailbox::EmptyFolder(HWND owner) {
     }
     // the core words the question, with how many go; none when there is nothing to empty
     core::String question(pe_folder_empty_question(core_, folder_));
-    if (!question || MessageBoxW(owner, Text(question.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+    if (!question || MessageBoxApp(owner, Text(question.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
     char* reason = nullptr;
@@ -2799,7 +2799,7 @@ void Mailbox::NextUnread(HWND owner) {
         return;
     }
     // none left here: on to the folder the core names, after asking, from its top
-    if (MessageBoxW(owner, Text(asked.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION) != IDYES) {
+    if (MessageBoxApp(owner, Text(asked.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return;
     }
     ChooseRow(row);
@@ -3202,7 +3202,7 @@ void Mailbox::FilesDone(LPARAM lParam) {
     std::unique_ptr<FilesDoneInfo> done(reinterpret_cast<FilesDoneInfo*>(lParam));
     if (!done->problem.empty()) {
         Say(L"");
-        MessageBoxW(parent_, done->problem.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+        MessageBoxApp(parent_, done->problem.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
         return;
     }
     if (done->draft) {
@@ -3222,7 +3222,7 @@ void Mailbox::SaveShownAs(HWND owner) {
     uint8_t* data = pe_message_source(core_, reader_.Folder(), reader_.Uid(), &length, &name);
     core::String safeName(name);
     if (!data) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
@@ -3231,7 +3231,7 @@ void Mailbox::SaveShownAs(HWND owner) {
         if (WriteFileBytes(path, data, length)) {
             MarkFromInternet(path);
         } else {
-            MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+            MessageBoxApp(owner, core::T(PE_TEXT_UI_NOT_SAVED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         }
     }
     pe_bytes_free(data, length);
@@ -3239,12 +3239,12 @@ void Mailbox::SaveShownAs(HWND owner) {
 
 void Mailbox::ShowProperties(HWND owner) {
     if (!reader_.Uid()) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     core::String headers(pe_message_headers(core_, reader_.Folder(), reader_.Uid()));
     if (!headers) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     const PeMessageInfo* info = reader_.Info();
@@ -3255,7 +3255,7 @@ void Mailbox::ShowProperties(HWND owner) {
 
 void Mailbox::AddSenderToBook(HWND owner) {
     if (!reader_.Uid()) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     bool added = false;
@@ -3270,7 +3270,7 @@ void Mailbox::AddSenderToBook(HWND owner) {
 
 void Mailbox::CreateRuleFromShown(HWND owner) {
     if (!reader_.Uid()) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     core::String query(pe_rule_query_of_message(core_, reader_.Folder(), reader_.Uid()));
@@ -3279,14 +3279,14 @@ void Mailbox::CreateRuleFromShown(HWND owner) {
 
 void Mailbox::ShowSource(HWND owner) {
     if (!reader_.Uid()) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     char* title = nullptr;
     core::String text(pe_message_source_text(core_, reader_.Folder(), reader_.Uid(), &title));
     core::String titleText(title);
     if (!text) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
         return;
     }
     // Save As from here saves the message shown, as File > Save As does
@@ -3383,7 +3383,7 @@ void Mailbox::PrintShown() {
 void Mailbox::Import(HWND owner) {
     int64_t folder = pe_list_view_own_folder(view_.get());
     if (!folder) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_IMPORT_CHOOSE_FOLDER).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_IMPORT_CHOOSE_FOLDER).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
         return;
     }
     std::vector<std::wstring> files = OpenFilesDialog(owner, core::Title(PE_TEXT_CMD_IMPORT).c_str(),
@@ -3716,7 +3716,7 @@ void Mailbox::ImportFiles(int64_t folder, const std::vector<std::wstring>& files
         Say(Text(text.get()));
     }
     if (core::String told(report); told) {
-        MessageBoxW(owner, Text(told.get()).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, Text(told.get()).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONWARNING);
     }
 }
 

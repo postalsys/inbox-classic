@@ -120,13 +120,13 @@ bool CheckIssuer(HWND dialog, PeCore* core, std::wstring& said) {
 bool SaveApp(HWND dialog, EditorState& state) {
     uint16_t imapPort = PortOf(dialog, IDC_APP_IMAP_PORT), smtpPort = PortOf(dialog, IDC_APP_SMTP_PORT);
     if (!imapPort || !smtpPort) {
-        MessageBoxW(dialog, core::T(PE_TEXT_UI_PORTS_INVALID).c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(dialog, core::T(PE_TEXT_UI_PORTS_INVALID).c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
         return false;
     }
     std::wstring said;
     if (!CheckIssuer(dialog, state.core, said)) {
         if (!said.empty()) {
-            MessageBoxW(dialog, core::T(PE_TEXT_UI_ISSUER_UNUSABLE, {{"reason", said}}).c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
+            MessageBoxApp(dialog, core::T(PE_TEXT_UI_ISSUER_UNUSABLE, {{"reason", said}}).c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
             SetFocus(Item(dialog, IDC_APP_ISSUER));
         }
         return false;
@@ -157,7 +157,7 @@ bool SaveApp(HWND dialog, EditorState& state) {
     if (!saved) {
         std::wstring message =
             core::T(PE_TEXT_UI_SIGN_IN_APP_NOT_SAVED, {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
-        MessageBoxW(dialog, message.c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(dialog, message.c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
         return false;
     }
     state.saved = saved;
@@ -182,7 +182,7 @@ void OnEditorCommand(HWND dialog, EditorState& state, int id, int code) {
         if (!said.empty()) {
             std::wstring text = usable ? core::T(PE_TEXT_UI_ISSUER_USABLE) + L"\n\n" + said
                                        : core::T(PE_TEXT_UI_ISSUER_UNUSABLE, {{"reason", said}});
-            MessageBoxW(dialog, text.c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | (usable ? MB_ICONINFORMATION : MB_ICONWARNING));
+            MessageBoxApp(dialog, text.c_str(), core::Plain(PE_TEXT_UI_SIGN_IN_APP).c_str(), MB_OK | (usable ? MB_ICONINFORMATION : MB_ICONWARNING));
         }
         return;
     }
@@ -432,7 +432,7 @@ void OnAppsCommand(HWND hwnd, AppsState& state, WORD id) {
             return;
         }
         std::wstring question = core::T(PE_TEXT_UI_REMOVE_SIGN_IN_APP_ASK, {{"name", Text(app->name)}});
-        if (MessageBoxW(hwnd, question.c_str(), core::Plain(PE_TEXT_UI_REMOVE_SIGN_IN_APP).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+        if (MessageBoxApp(hwnd, question.c_str(), core::Plain(PE_TEXT_UI_REMOVE_SIGN_IN_APP).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
             return;
         }
         char* error = nullptr;
@@ -440,7 +440,7 @@ void OnAppsCommand(HWND hwnd, AppsState& state, WORD id) {
             core::String reason(error);
             std::wstring text =
                 core::T(PE_TEXT_UI_SIGN_IN_APP_NOT_REMOVED, {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
-            MessageBoxW(hwnd, text.c_str(), core::Plain(PE_TEXT_UI_REMOVE_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
+            MessageBoxApp(hwnd, text.c_str(), core::Plain(PE_TEXT_UI_REMOVE_SIGN_IN_APP).c_str(), MB_OK | MB_ICONWARNING);
             return;
         }
         FillApps(hwnd, state, index);

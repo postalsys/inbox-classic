@@ -26,7 +26,7 @@ bool SaveOtherAddresses(HWND owner, PeCore* core, int64_t account, const std::ws
         return true;
     }
     core::String why(reason);
-    MessageBoxW(owner, why ? Text(why.get()).c_str() : core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(),
+    MessageBoxApp(owner, why ? Text(why.get()).c_str() : core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(),
                 core::Title(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONWARNING);
     return false;
 }
@@ -197,7 +197,7 @@ void ExplainAppPassword(HWND owner, const PeAutoconfigInfo* info) {
     if (linkable) {
         text += L"\n\n" + core::T(PE_TEXT_UI_APP_PASSWORD_OPEN, {{"provider", provider}});
     }
-    int answer = MessageBoxW(owner, text.c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), (linkable ? MB_YESNO : MB_OK) | MB_ICONINFORMATION);
+    int answer = MessageBoxApp(owner, text.c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), (linkable ? MB_YESNO : MB_OK) | MB_ICONINFORMATION);
     if (linkable && answer == IDYES) {
         ShellExecuteW(owner, L"open", page.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
     }
@@ -207,7 +207,7 @@ void ExplainAppPassword(HWND owner, const PeAutoconfigInfo* info) {
 bool AcceptPlain(HWND owner, const std::vector<FormField>& fields, PeText title) {
     bool plain = SecurityOf(fields[IMAP_SECURITY].value) == PE_SECURITY_PLAIN || SecurityOf(fields[SMTP_SECURITY].value) == PE_SECURITY_PLAIN;
     std::wstring warning = core::T(PE_TEXT_UI_PLAIN_WARNING) + L"\n\n" + core::T(PE_TEXT_UI_CONTINUE_ASK);
-    return !plain || MessageBoxW(owner, warning.c_str(), core::Plain(title).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES;
+    return !plain || MessageBoxApp(owner, warning.c_str(), core::Plain(title).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES;
 }
 
 // the settings of the server form; `utf8` keeps the strings they point to
@@ -412,7 +412,7 @@ bool Choose(HWND hwnd, StartState& state, int id) {
     if (signIn && id == signIn->why) {
         const PeSignInApp* app = state.apps->Builtin(signIn->provider);
         std::wstring text = core::T(PE_TEXT_UI_TURNED_OFF, {{"name", core::T(signIn->label)}}) + L"\n\n" + (app ? Text(app->off_reason) : L"");
-        MessageBoxW(hwnd, text.c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(hwnd, text.c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), MB_OK | MB_ICONINFORMATION);
         return false;
     }
     if (signIn) {
@@ -427,7 +427,7 @@ bool Choose(HWND hwnd, StartState& state, int id) {
     } else if (id == IDOK) {
         // the page of another account wants an address to look up
         if (state.emailInput && GetWindowString(state.emailInput).find(L'@') == std::wstring::npos) {
-            MessageBoxW(hwnd, core::T(PE_TEXT_UI_TYPE_EMAIL).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+            MessageBoxApp(hwnd, core::T(PE_TEXT_UI_TYPE_EMAIL).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
             SetFocus(state.emailInput);
             return false;
         }
@@ -656,7 +656,7 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const st
     // the core makes the page, and gives only an https page or one of a provider on this computer (a test server)
     std::wstring address = url ? Text(url.get()) : L"";
     if (!request || address.empty()) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_SIGN_IN_NOT_STARTED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_SIGN_IN_NOT_STARTED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return 0;
     }
     if (g_signInPageFile.empty()) {
@@ -674,7 +674,7 @@ uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const st
         core::String reason(why);
         std::wstring text =
             core::T(PE_TEXT_UI_SIGN_IN_FAILED, {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
-        MessageBoxW(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
         return 0;
     }
     return request;
@@ -691,7 +691,7 @@ int64_t AddSignedIn(HWND owner, PeCore* core, SignInChoice with, const std::wstr
     }
     int64_t account = pe_account_add_signed_in(core, request, core::Narrow(name).c_str());
     if (account <= 0) {
-        MessageBoxW(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(),
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(),
                     MB_OK | MB_ICONERROR);
     }
     return account;
@@ -792,7 +792,7 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
             pe_account_set_name(core, account, core::Narrow(fields[ACCOUNT_NAME].value).c_str());
             return account;
         }
-        MessageBoxW(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(),
+        MessageBoxApp(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(),
                     MB_OK | MB_ICONERROR);
     }
     SecureZeroMemory(fields[PASSWORD].value.data(), fields[PASSWORD].value.size() * sizeof(wchar_t));
@@ -937,7 +937,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
         PeAccountSettings settings = SettingsOf(fields, utf8);
         if (!pe_account_update(core, account, &settings) ||
             !pe_account_set_name(core, account, core::Narrow(fields[ACCOUNT_NAME].value).c_str())) {
-            MessageBoxW(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Title(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONERROR);
+            MessageBoxApp(owner, core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(), core::Title(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONERROR);
             continue;
         }
         if (!fields[PASSWORD].value.empty()) {
@@ -980,7 +980,7 @@ void OnAccountsCommand(HWND hwnd, AccountsState* state, WORD id) {
         }
         return;
     case IDC_ACCOUNT_REMOVE:
-        if (account && MessageBoxW(hwnd, core::T(PE_TEXT_UI_REMOVE_ACCOUNT_ASK).c_str(), core::Plain(PE_TEXT_UI_REMOVE_ACCOUNT).c_str(),
+        if (account && MessageBoxApp(hwnd, core::T(PE_TEXT_UI_REMOVE_ACCOUNT_ASK).c_str(), core::Plain(PE_TEXT_UI_REMOVE_ACCOUNT).c_str(),
                                    MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
             pe_account_remove(state->core, account);
             state->changed = true;

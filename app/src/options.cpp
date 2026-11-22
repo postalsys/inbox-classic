@@ -212,7 +212,7 @@ void OpenDefaultAppsSettings(HWND owner) {
 }
 
 void Tell(HWND owner, const std::wstring& text) {
-    MessageBoxW(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+    MessageBoxApp(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
 }
 
 // Open .eml Files with Inbox Classic: Windows lets only the user choose it, in Settings, where the installer listed

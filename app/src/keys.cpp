@@ -312,7 +312,7 @@ void MakeKey(HWND dialog, NewKeyState& state) {
     core::String made(pe_pgp_generate(state.core, state.accounts[index], &error));
     SetCursor(old);
     if (!made) {
-        MessageBoxW(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), core::Plain(PE_TEXT_UI_KEYS_NEW_TITLE).c_str(),
+        MessageBoxApp(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), core::Plain(PE_TEXT_UI_KEYS_NEW_TITLE).c_str(),
                     MB_OK | MB_ICONWARNING);
         return;
     }
@@ -390,7 +390,7 @@ void BackUpKey(HWND owner, PeCore* core, const std::string& fingerprint) {
     core::String backup(pe_pgp_backup(core, fingerprint.c_str(), passphrase.c_str(), &error));
     Wipe(passphrase);
     if (!backup) {
-        MessageBoxW(owner, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
         return;
     }
     core::String unused(error);
@@ -402,10 +402,10 @@ void BackUpKey(HWND owner, PeCore* core, const std::string& fingerprint) {
     }
     std::wstring why;
     if (!WriteKeyFile(path, backup.get(), why)) {
-        MessageBoxW(owner, why.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, why.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
         return;
     }
-    MessageBoxW(owner, core::T(PE_TEXT_UI_KEYS_BACKUP_SAVED).c_str(), title.c_str(), MB_OK | MB_ICONINFORMATION);
+    MessageBoxApp(owner, core::T(PE_TEXT_UI_KEYS_BACKUP_SAVED).c_str(), title.c_str(), MB_OK | MB_ICONINFORMATION);
 }
 
 // right after a key was made: a backup offered, the only way back for it should this computer be lost
@@ -458,10 +458,10 @@ bool ImportKeys(HWND owner, PeCore* core) {
     }
     SecureZeroMemory(bytes.data(), bytes.size());
     if (outcome != PE_IMPORT_OUTCOME_IMPORTED) {
-        MessageBoxW(owner, said.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, said.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
         return false;
     }
-    MessageBoxW(owner, said.c_str(), title.c_str(), MB_OK | MB_ICONINFORMATION);
+    MessageBoxApp(owner, said.c_str(), title.c_str(), MB_OK | MB_ICONINFORMATION);
     OfferUnclaimed(owner, core);
     return true;
 }
@@ -478,7 +478,7 @@ void ExportKey(HWND owner, PeCore* core, const std::string& fingerprint) {
     std::wstring path = SaveFileDialog(owner, Text(name.get()), title.c_str(), filter.c_str(), L"asc");
     std::wstring why;
     if (!path.empty() && !WriteKeyFile(path, text.get(), why)) {
-        MessageBoxW(owner, why.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, why.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
     }
 }
 
@@ -508,7 +508,7 @@ LRESULT CALLBACK VerifyProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
             return 0;
         case IDC_VERIFY_DIFFER:
             // not marked: the key they have is another
-            MessageBoxW(hwnd, core::T(PE_TEXT_UI_VERIFY_DIFFERS, {{"name", state->name}}).c_str(), core::Plain(PE_TEXT_UI_VERIFY_TITLE).c_str(),
+            MessageBoxApp(hwnd, core::T(PE_TEXT_UI_VERIFY_DIFFERS, {{"name", state->name}}).c_str(), core::Plain(PE_TEXT_UI_VERIFY_TITLE).c_str(),
                         MB_OK | MB_ICONWARNING);
             state->done = true;
             return 0;
@@ -777,7 +777,7 @@ void DrawEmptyKeys(HWND list, HDC dc) {
 // Remove, asked first in words that say what goes with the key
 void RemoveKey(HWND hwnd, KeysState& state, const PeKey& key, int index) {
     std::wstring question = Text(key.remove_question);
-    if (MessageBoxW(hwnd, question.c_str(), KeysTitle().c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+    if (MessageBoxApp(hwnd, question.c_str(), KeysTitle().c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
         return;
     }
     pe_pgp_remove(state.core, key.fingerprint);
