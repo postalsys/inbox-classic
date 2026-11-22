@@ -3,7 +3,6 @@
 #include <windows.h>
 
 #include <mutex>
-#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -45,8 +44,6 @@ namespace {
 // for the same words again and again
 std::mutex g_wordsLock;
 std::unordered_map<uint32_t, std::wstring> g_words, g_plainWords;
-// the face of the windows' words in the language in use (pe_windows_font), read once a language
-std::optional<std::wstring> g_windowsFont;
 
 std::wstring Cached(std::unordered_map<uint32_t, std::wstring>& cache, PeText text, char* (*lookup)(uint32_t)) {
     std::lock_guard lock(g_wordsLock);
@@ -63,16 +60,11 @@ void SetLanguage(const std::wstring& code) {
     std::lock_guard lock(g_wordsLock);
     g_words.clear();
     g_plainWords.clear();
-    g_windowsFont.reset();
 }
 
 std::wstring WindowsFont() {
-    std::lock_guard lock(g_wordsLock);
-    if (!g_windowsFont) {
-        String face(pe_windows_font());
-        g_windowsFont = face ? Widen(face.get()) : std::wstring();
-    }
-    return *g_windowsFont;
+    String face(pe_windows_font());
+    return face ? Widen(face.get()) : std::wstring();
 }
 
 std::wstring T(PeText text) {

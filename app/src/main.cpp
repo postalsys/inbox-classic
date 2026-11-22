@@ -1489,6 +1489,11 @@ void CreateChildren(HWND hwnd) {
     SystemParametersInfoForDpi(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, GetDpiForWindow(hwnd));
     metrics.lfMessageFont.lfHeight = -Scale(16);
     metrics.lfMessageFont.lfWeight = FW_BOLD;
+    // the folder's name in the language's own face too where it has one
+    if (UiFontChosen()) {
+        wcsncpy_s(metrics.lfMessageFont.lfFaceName, core::WindowsFont().c_str(), _TRUNCATE);
+        metrics.lfMessageFont.lfCharSet = DEFAULT_CHARSET;
+    }
     g_folderFont = CreateFontIndirectW(&metrics.lfMessageFont);
     g_folderBrush = CreateSolidBrush(kFolderBarColor);
     SendMessageW(g_folderBar, WM_SETFONT, reinterpret_cast<WPARAM>(g_folderFont), FALSE);

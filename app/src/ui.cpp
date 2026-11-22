@@ -230,24 +230,27 @@ SIZE MeasureText(const std::wstring& text, int wrapWidth, UINT flags) {
 }
 
 HFONT UiFont() {
-    static std::map<std::wstring, HFONT> made;
-    auto* system = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
-    std::wstring face = core::WindowsFont();
-    if (face.empty()) {
-        return system;
-    }
-    if (auto found = made.find(face); found != made.end()) {
-        return found->second;
-    }
-    LOGFONTW font = {};
-    GetObjectW(system, sizeof(font), &font);
-    wcsncpy_s(font.lfFaceName, face.c_str(), _TRUNCATE);
-    font.lfCharSet = DEFAULT_CHARSET;
-    // 9 points where the default is 8, as the Windows of those languages draws them: their characters need it
-    font.lfHeight = MulDiv(font.lfHeight, 9, 8);
-    HFONT created = CreateFontIndirectW(&font);
-    made[face] = created ? created : system;
-    return made[face];
+    // the language is set before the first window (StartLanguage) and changes only with a restart
+    static const HFONT font = [] {
+        auto* system = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        std::wstring face = core::WindowsFont();
+        if (face.empty()) {
+            return system;
+        }
+        LOGFONTW font = {};
+        GetObjectW(system, sizeof(font), &font);
+        wcsncpy_s(font.lfFaceName, face.c_str(), _TRUNCATE);
+        font.lfCharSet = DEFAULT_CHARSET;
+        // 9 points where the default is 8, as the Windows of those languages draws them: their characters need it
+        font.lfHeight = MulDiv(font.lfHeight, 9, 8);
+        HFONT created = CreateFontIndirectW(&font);
+        return created ? created : system;
+    }();
+    return font;
+}
+
+bool UiFontChosen() {
+    return UiFont() != static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
 }
 
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least) {
@@ -1055,6 +1058,10 @@ HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
     // the small bar's labels are tooltips; a big button can have a menu beside it (BTNS_DROPDOWN)
     SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, icons == BarIcons::Small ? TBSTYLE_EX_MIXEDBUTTONS : TBSTYLE_EX_DRAWDDARROWS);
     SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(IconList(icons == BarIcons::Big ? IconSet::Toolbar : IconSet::Format)));
+    // the labels in the language's own face where it has one (UiFont); else the bar's own font, as ever
+    if (UiFontChosen()) {
+        SendMessageW(bar, WM_SETFONT, reinterpret_cast<WPARAM>(UiFont()), FALSE);
+    }
     return bar;
 }
 

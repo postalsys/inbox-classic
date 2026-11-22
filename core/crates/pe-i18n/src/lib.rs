@@ -123,12 +123,14 @@ pub fn supported(tag: &str) -> Option<&'static str> {
             .filter(move |code| code.split('-').next() == Some(primary))
     };
     let mut subtags: Vec<&str> = parts.collect();
-    // Chinese is told by its script, which a system names by its region more often (`zh-TW`, `zh_HK.UTF-8`)
-    if let Some((_, _, script)) = REGION_SCRIPTS
-        .iter()
-        .find(|(language, region, _)| *language == primary && subtags.iter().any(|s| s.eq_ignore_ascii_case(region)))
+    // Chinese is told by its script, which a system names by its region more often (`zh-TW`, `zh_HK.UTF-8`):
+    // Traditional in Taiwan, Hong Kong and Macau, Simplified (the first of its catalogs) elsewhere
+    if primary == "zh"
+        && subtags
+            .iter()
+            .any(|s| TRADITIONAL_REGIONS.iter().any(|r| s.eq_ignore_ascii_case(r)))
     {
-        subtags.push(script);
+        subtags.push("Hant");
     }
     same()
         .find(|code| {
@@ -142,9 +144,8 @@ pub fn supported(tag: &str) -> Option<&'static str> {
 /// Languages a system may name by another code: Norwegian (`no`) is Bokmål's `nb`, Indonesian's old code `in` is `id`
 pub const ALIASES: &[(&str, &str)] = &[("no", "nb"), ("in", "id")];
 
-/// The script a language is written in by region, where a system's tag names the region and not the script:
-/// Traditional Chinese in Taiwan, Hong Kong and Macau (Simplified elsewhere, the first of Chinese's catalogs)
-const REGION_SCRIPTS: &[(&str, &str, &str)] = &[("zh", "TW", "Hant"), ("zh", "HK", "Hant"), ("zh", "MO", "Hant")];
+/// The regions that write Chinese in Traditional characters
+const TRADITIONAL_REGIONS: &[&str] = &["TW", "HK", "MO"];
 
 /// The face the Windows app draws its windows' words in for language `code`, None for the system's default: for
 /// Chinese, Japanese and Korean the one Windows itself uses in that language, so an English Windows shows them in their
@@ -492,7 +493,7 @@ pub fn pseudo(text: &str) -> String {
 /// Windows does): the bracket goes as a whole, with a space before it, as Apple's own menus in those languages have it
 pub fn without_mnemonic(label: &str) -> String {
     let label = without_bracketed_mnemonic(label);
-    let label = label.as_str();
+    let label = label.as_ref();
     let mut out = String::with_capacity(label.len());
     let mut chars = label.chars().peekable();
     while let Some(c) = chars.next() {
@@ -510,20 +511,20 @@ pub fn without_mnemonic(label: &str) -> String {
 
 /// `label` without a bracketed mnemonic (`(&F)`, a space before it or not) where its words end or before their
 /// trailing dots and colon (`開く(&O)...`); unchanged without one
-fn without_bracketed_mnemonic(label: &str) -> String {
+fn without_bracketed_mnemonic(label: &str) -> std::borrow::Cow<'_, str> {
     let Some(open) = label.find("(&") else {
-        return label.to_string();
+        return label.into();
     };
     let rest = &label[open + 2..];
     let mut chars = rest.chars();
     let (Some(letter), Some(')')) = (chars.next(), chars.next()) else {
-        return label.to_string();
+        return label.into();
     };
     if !letter.is_ascii_alphanumeric() {
-        return label.to_string();
+        return label.into();
     }
     let after = &rest[letter.len_utf8() + 1..];
-    format!("{}{after}", label[..open].trim_end())
+    format!("{}{after}", label[..open].trim_end()).into()
 }
 
 /// A picture with words in it, in the language in use: `brands/google-sign-in.png` is `brands/google-sign-in.de.png` in

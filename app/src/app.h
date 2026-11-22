@@ -159,8 +159,10 @@ int TextWidth(HWND control, HFONT font);
 SIZE MeasureText(const std::wstring& text, int wrapWidth = 0, UINT flags = 0);
 // a push button wide enough for the longest of `labels`, at least `least` pixels at 96 DPI
 // the font of the windows' words: the system's default GUI font, or for Chinese, Japanese and Korean the face Windows
-// itself uses in that language (core::WindowsFont), at its 9 points; created once a face, kept for the run
+// itself uses in that language (core::WindowsFont), at its 9 points; made once, kept for the run
 HFONT UiFont();
+// whether UiFont is the language's own face rather than the system's default
+bool UiFontChosen();
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least = 80);
 int ButtonWidth(const std::vector<std::wstring>& labels, int least = 80);
 // an information bar laid out across `width` from `left`, `top`: its words `bar`, and its visible `controls` at its
