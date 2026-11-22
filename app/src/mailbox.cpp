@@ -3481,6 +3481,13 @@ void Mailbox::FocusFind() {
     SendMessageW(findEdit_, EM_SETSEL, 0, -1);
 }
 
+// the words of the Find box as they are searched: what only has spaces finds everything, as the core reads it
+std::wstring Mailbox::FindBoxWords() const {
+    std::wstring text = GetWindowString(findEdit_);
+    size_t first = text.find_first_not_of(L" \t");
+    return first == std::wstring::npos ? L"" : text.substr(first, text.find_last_not_of(L" \t") - first + 1);
+}
+
 // the Find box emptied and the search dropped, without the list following it (the caller reloads)
 void Mailbox::ResetFind() {
     SetWindowTextW(findEdit_, L"");
@@ -3793,10 +3800,7 @@ void Mailbox::OnTimer(UINT_PTR id) {
     }
     if (id == TIMER_FIND) {
         KillTimer(parent_, TIMER_FIND);
-        std::wstring text = GetWindowString(findEdit_);
-        // what only has spaces finds everything, as the core reads it
-        size_t first = text.find_first_not_of(L" \t");
-        text = first == std::wstring::npos ? L"" : text.substr(first, text.find_last_not_of(L" \t") - first + 1);
+        std::wstring text = FindBoxWords();
         if (text != find_) {
             find_ = text;
             std::string utf8 = core::Narrow(find_);
@@ -4059,8 +4063,9 @@ LRESULT Mailbox::TestDeep(const std::wstring& request) {
         return 11;
     }
     if (verb == L"quiet") {
-        // the core quiet and no load of the list under way (it selects again)
-        return pe_quiet(core_) && !loadRequest_ ? 11 : 10;
+        // the core quiet, no load of the list under way (it selects again) and no search waiting for its moment after
+        // the last key (the list it gives would take the place of what is selected meanwhile)
+        return pe_quiet(core_) && !loadRequest_ && FindBoxWords() == find_ ? 11 : 10;
     }
     if (verb == L"current") {
         // the rows drawn the list as the store has it now: whatever is still on its way to the window (an event, a

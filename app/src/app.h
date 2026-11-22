@@ -782,6 +782,8 @@ public:
     void Import(HWND owner);
     bool ClearFind();
     void ResetFind();
+    // the words of the Find box as a search takes them (trimmed)
+    std::wstring FindBoxWords() const;
     void OnTimer(UINT_PTR id);
     void OnEvent(const UiEvent& event);
     // a folder was clicked, or the list's order or grouping changed, and its list is read off the window thread
