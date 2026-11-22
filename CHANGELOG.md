@@ -1,5 +1,68 @@
 # Changelog
 
+## [0.20.0](https://github.com/postalsys/inbox-classic/compare/v0.19.1...v0.20.0) (2026-11-22)
+
+
+### Features
+
+* a folder opens with a message ([b892a40](https://github.com/postalsys/inbox-classic/commit/b892a407b09db8fed1c5dadcfe4816412e7a0f81))
+* a folder opens with a message ([5a09965](https://github.com/postalsys/inbox-classic/commit/5a09965b5466ca273e846ae79765177fcff6378d))
+* a mailing-list bar in place of the Unsubscribe link, remembered per list ([d42951a](https://github.com/postalsys/inbox-classic/commit/d42951a569eaf1313da6312ae5127da0bda1a2dd))
+* a mailing-list bar in place of the Unsubscribe link, remembered per list ([7b1cbc6](https://github.com/postalsys/inbox-classic/commit/7b1cbc61054e6b871a2fe63d0134ec090172f258))
+* Chinese, Japanese and Korean words found by search, and their reply prefixes ([50f1a81](https://github.com/postalsys/inbox-classic/commit/50f1a8168cb3b3be352d733cf6869d34e0ac734a))
+* **content, otp:** Chinese, Japanese and Korean quote headers, Vietnamese and Indonesian codes ([cf382e1](https://github.com/postalsys/inbox-classic/commit/cf382e18a2aabea461f81a19f5cecc07bd72ec6f))
+* **core:** keep foreign reply prefixes and draw CJK mail in its own language ([44368f9](https://github.com/postalsys/inbox-classic/commit/44368f98f22b06363d7ba9dc2dd536fe6fc51dc6))
+* flag changes the server still owes are kept until it makes them ([427c2a7](https://github.com/postalsys/inbox-classic/commit/427c2a7875beb644fb0d64a39f868db7c081f7a4))
+* flag changes the server still owes are kept until it makes them ([161b23d](https://github.com/postalsys/inbox-classic/commit/161b23d6ae3aff6b50775b61165d25e4ede37d27))
+* **i18n:** Japanese, Chinese, Korean, Indonesian and Vietnamese translated ([b59928c](https://github.com/postalsys/inbox-classic/commit/b59928c683ae31c722ca8f5b5a686ae4d8951aa7))
+* **i18n:** Japanese, Simplified and Traditional Chinese, Korean, Indonesian and Vietnamese ([2f8d1ea](https://github.com/postalsys/inbox-classic/commit/2f8d1ea44a21d2784a61fa261c5998bf378cb57c))
+* Japanese, Chinese (Simplified and Traditional), Korean, Indonesian and Vietnamese registered ([1598581](https://github.com/postalsys/inbox-classic/commit/1598581b53dda69d7e5b4896edf0699a41141119))
+* Japanese, Chinese, Korean, Indonesian and Vietnamese registered, with the Windows font for CJK ([c350dfb](https://github.com/postalsys/inbox-classic/commit/c350dfb591abb7740381539371dd3fd944c143f4))
+* **store:** find words written without spaces (Chinese, Japanese, Korean) ([1fe6c4c](https://github.com/postalsys/inbox-classic/commit/1fe6c4c755f9e522c39ac585c8e5f14e68f1fda8))
+* the deep test ([a51e60b](https://github.com/postalsys/inbox-classic/commit/a51e60bbbcce654adbd5b962fef70daa1f4633f3))
+* the deep test ([9c1ad29](https://github.com/postalsys/inbox-classic/commit/9c1ad29d5b9ecc7fea726bfa359df4e982158417))
+* the other link actions are push buttons ([4469174](https://github.com/postalsys/inbox-classic/commit/4469174b4e193383eb2a5d52f0fdf086fae2fac0))
+* the other link actions are push buttons ([5295924](https://github.com/postalsys/inbox-classic/commit/5295924c93b0331914897d7be09d012bced4809e))
+* the provider's verdict from its ARC set, as Microsoft gives it ([57aecf5](https://github.com/postalsys/inbox-classic/commit/57aecf52fa25b7a753aa211f49447253779d819b))
+* the provider's verdict from its ARC set, as Microsoft gives it ([87d8fce](https://github.com/postalsys/inbox-classic/commit/87d8fce73d8d41e5c76422fe859ed228e3c0856b))
+
+
+### Bug Fixes
+
+* a click while a list is read is not lost ([7b05ac6](https://github.com/postalsys/inbox-classic/commit/7b05ac6cab01694abd0f44a8ec3a8b27806f227d))
+* a draft opened on Linux always opens ([94ea111](https://github.com/postalsys/inbox-classic/commit/94ea111e8c28ce4a7f8495f646addc9aa3115a17))
+* a draft opened while it is being fetched opens once it is (Linux) ([64cbb72](https://github.com/postalsys/inbox-classic/commit/64cbb7290f65228bc7eeb72910f9e5ab7430ab34))
+* a list read again stays where the user scrolled it ([d71241d](https://github.com/postalsys/inbox-classic/commit/d71241d4883791fa0fc894a870bb7c711adf3f47))
+* a list read again stays where the user scrolled it ([e1f6880](https://github.com/postalsys/inbox-classic/commit/e1f6880005c42339fe05906c975019dfa33e2166))
+* a read that ends before its task waits is heard (Linux) ([43e02e7](https://github.com/postalsys/inbox-classic/commit/43e02e7716eacbddc1188ef56f03ae1b8b964630))
+* a row drawn before the list's scrolling caught up is filled once on screen (Linux) ([37e1bd3](https://github.com/postalsys/inbox-classic/commit/37e1bd3455057a2baea571be869d167e7aa245a6))
+* a row drawn before the list's scrolling caught up is filled once on screen (Linux) ([574dfb8](https://github.com/postalsys/inbox-classic/commit/574dfb861f49010b0f0893e000357e789b9cbe8a))
+* **deep:** one meaning of settled, answered by the core ([34b8ed9](https://github.com/postalsys/inbox-classic/commit/34b8ed9a0097a73779011f7b93594b6a73d9d638))
+* **deep:** one meaning of settled, answered by the core ([05e11cd](https://github.com/postalsys/inbox-classic/commit/05e11cd237ad2ddd6bd1ffa5fcf69e93c0099e3d))
+* **i18n:** review mailing-list originals and translations ([66bbfb4](https://github.com/postalsys/inbox-classic/commit/66bbfb45ab02f75bf2a51d990da7194de6d01925))
+* **i18n:** review new languages and align English help ([bc4bf82](https://github.com/postalsys/inbox-classic/commit/bc4bf82c7b8ccfa62bf222c1938ab769da02c339))
+* **i18n:** review six new languages and align English help ([739fb42](https://github.com/postalsys/inbox-classic/commit/739fb428de5632d62b1c3767051e701868d6cf86))
+* **linux:** a row selected while still blank keeps its message ([fa016a5](https://github.com/postalsys/inbox-classic/commit/fa016a57c0149783b910a5a3197b7362262eac9b))
+* **linux:** a row selected while still blank keeps its message when the list is read again ([6c51ab0](https://github.com/postalsys/inbox-classic/commit/6c51ab048fc438cf4930815407d6a40274c314ce))
+* **linux:** a type for the bar's listener, as clippy asks ([c9802c9](https://github.com/postalsys/inbox-classic/commit/c9802c94b92fc814dc31b2422223e21551127c84))
+* **linux:** the row picked is the message it shows as drawn, not its place read again ([d4aff2f](https://github.com/postalsys/inbox-classic/commit/d4aff2f7b8e5d92ec0f320c3e1d3de3dc7ee89a4))
+* **mac, linux:** a message window's Unsubscribe by mail writes from that message's account ([b6644b3](https://github.com/postalsys/inbox-classic/commit/b6644b3c6f001f964b35d0a7e353636c44c48262))
+* **mac, linux:** an input method's composition keeps its keys and is not searched ([7668e55](https://github.com/postalsys/inbox-classic/commit/7668e552b45bd4db5fe3067617eac2ead13f8b05))
+* **mac, linux:** an input method's composition keeps its keys and is not searched ([0d3551f](https://github.com/postalsys/inbox-classic/commit/0d3551fe089f04e6332030067590a3a0c9420186))
+* **mac, linux:** Unsubscribe by mail from a message window writes from that message's account ([5443b59](https://github.com/postalsys/inbox-classic/commit/5443b59e2b61b0b734dbbe0ab16df2301d364dbc))
+* rows in sight get their messages whenever they were drawn ([b4cfd04](https://github.com/postalsys/inbox-classic/commit/b4cfd04aab48ed65ef15cec24552f5e4ffeced20))
+* rows in sight get their messages whenever they were drawn ([8982011](https://github.com/postalsys/inbox-classic/commit/8982011aabf98bc8cc022ca21e17f5bae1ac0904))
+* Taiwan, Hong Kong and Macau find the Traditional Chinese help ([1bd7582](https://github.com/postalsys/inbox-classic/commit/1bd7582f0fdb4a6536616ec2de9703532a2042f3))
+* Taiwan, Hong Kong and Macau find the Traditional Chinese help ([35e5aad](https://github.com/postalsys/inbox-classic/commit/35e5aad5e02001d7b80a21a4f2bd90c1ac44c1d9))
+* Undo brings back every copy of a message moved ([9e33407](https://github.com/postalsys/inbox-classic/commit/9e334073b443aa25178dbff6dba4bab946988718))
+* Undo brings back every copy of a message moved ([63c1797](https://github.com/postalsys/inbox-classic/commit/63c1797dc86210510ea3eef5b1669d45e8296fcb))
+* what came back is selected before the row after; the deep hooks see what is drawn ([d8e6b4e](https://github.com/postalsys/inbox-classic/commit/d8e6b4ebd2300b3336506965358c7e2b2e1d7b7b))
+* what the deep test found at 20,000 messages ([8e28b4a](https://github.com/postalsys/inbox-classic/commit/8e28b4aee70874706297dde1ffe5b7e5d4a57c89))
+* what the deep test found at 20,000 messages ([1f913fd](https://github.com/postalsys/inbox-classic/commit/1f913fdf4f2e9d3b6e2e2125676649f115df0d43))
+* **windows:** a message box's buttons in the language of the windows ([f66af7c](https://github.com/postalsys/inbox-classic/commit/f66af7cb6e9a0ba65a008f1885179a4b8a8ebdef))
+* **windows:** a message box's buttons in the language of the windows ([f62c716](https://github.com/postalsys/inbox-classic/commit/f62c716eead0cd212da82fd590c0636f24b64ad7))
+* **windows:** only rows on screen read their pages ([f8e324b](https://github.com/postalsys/inbox-classic/commit/f8e324b3a22b81164ca2d967dd5ef778cb109071))
+
 ## [0.19.1](https://github.com/postalsys/inbox-classic/compare/v0.19.0...v0.19.1) (2026-11-19)
 
 
