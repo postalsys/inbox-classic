@@ -1419,7 +1419,8 @@ final class AddressField: NSTextField {
     /// typed in: the list of people for what is typed now
     @MainActor
     func typed(_ notification: Notification) {
-        guard !completing, let editor = currentEditor() as? NSTextView,
+        // not while an input method composes: completing would replace its unconfirmed text
+        guard !completing, let editor = currentEditor() as? NSTextView, !editor.hasMarkedText(),
               let event = NSApp.currentEvent, event.type == .keyDown,
               let characters = event.characters, !characters.isEmpty,
               characters.unicodeScalars.allSatisfy({ !CharacterSet.controlCharacters.contains($0) && $0 != "\u{7f}" })

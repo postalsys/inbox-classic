@@ -1054,6 +1054,26 @@ final class UITest {
         check(await found("会议"), "a Chinese word inside the subject finds its message (会议)")
         check(await found("회의"), "a Korean word with its ending left off finds its message (회의 in 회의에서)")
         check(await found("議"), "one character alone finds it too (議)")
+        // what an input method has not confirmed yet is not searched: the folder stays as it is while it composes
+        await search("")
+        let all = list.numberOfRows
+        onMain { self.main.window.makeFirstResponder(self.main.searchField) }
+        await pause(0.3)
+        if let editor = main.searchField.currentEditor() as? NSTextView {
+            onMain {
+                editor.setMarkedText("かいg", selectedRange: NSRange(location: 3, length: 0),
+                                     replacementRange: NSRange(location: NSNotFound, length: 0))
+            }
+            await pause(1)
+            check(editor.hasMarkedText() && list.numberOfRows == all && !main.mailbox.listLoading,
+                  "while an input method composes, the search waits for its text (\(list.numberOfRows) of \(all) rows)")
+            onMain {
+                editor.unmarkText()
+                editor.string = ""
+            }
+        } else {
+            check(false, "the search box takes the keys")
+        }
         await search("")
         var remove = URLRequest(url: URL(string: "\(rest)/CJK")!)
         remove.httpMethod = "DELETE"
