@@ -781,7 +781,7 @@ ui-settings-encryption = 暗号化
 # review: new
 ui-settings-language = 言語
 # review: new
-ui-settings-label = { $label }：
+ui-settings-label = { $label }:
 # review: new
 ui-apply = 適用(&A)
 # review: new

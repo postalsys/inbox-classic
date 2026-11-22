@@ -8481,6 +8481,14 @@ public static bool HasIcon(IntPtr window) {
         } else {
             Check (@($faces.Values) -notcontains $face) "${code}: the windows' words in the default font ($face)"
         }
+        # the sign-in prompt of a start without passwords (its words are in the language too) shot, then cancelled, so
+        # the main window's shot shows the window
+        $prompt = WaitShown 'InboxClassicForm' 5
+        if ($prompt) {
+            Shot $prompt "tour-$code-1b-sign-in"
+            Click $prompt 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($prompt) } 5)
+        }
         Shot $main "tour-$code-1-main"
         $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
         if ($compose) {

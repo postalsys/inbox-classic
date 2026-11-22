@@ -189,7 +189,9 @@ extension UITest {
             var bracketed: [String] = []
             func walk(_ menu: NSMenu?) {
                 for item in menu?.items ?? [] {
-                    if item.title.contains("&") || item.title.range(of: #"\([A-Z0-9]\)"#, options: .regularExpression) != nil {
+                    // an access key: & before a letter (`&File`), or a letter in brackets (`(F)`); AppKit's own "Emoji &
+                    // Symbols" writes & as a word
+                    if item.title.range(of: #"&[^\s&]|\([A-Z0-9]\)"#, options: .regularExpression) != nil {
                         bracketed.append(item.title)
                     }
                     walk(item.submenu)
