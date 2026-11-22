@@ -145,7 +145,7 @@ pub fn supported(tag: &str) -> Option<&'static str> {
 pub const ALIASES: &[(&str, &str)] = &[("no", "nb"), ("in", "id")];
 
 /// The regions that write Chinese in Traditional characters
-const TRADITIONAL_REGIONS: &[&str] = &["TW", "HK", "MO"];
+pub const TRADITIONAL_REGIONS: &[&str] = &["TW", "HK", "MO"];
 
 /// The face the Windows app draws its windows' words in for language `code`, None for the system's default: for
 /// Chinese, Japanese and Korean the one Windows itself uses in that language, so an English Windows shows them in their
