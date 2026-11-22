@@ -1504,8 +1504,7 @@ fn searches_words_written_without_spaces() {
     s.server
         .add_message("INBOX", &rfc822("Weekly report", "nothing in Chinese"), &[]);
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
-    s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    sync(&s, account);
     let inbox = s
         .core
         .folders(account)
@@ -1549,8 +1548,7 @@ fn searches_words_written_without_spaces() {
                 Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 8bit\r\n\r\n\
                 来週の会議資料と予算案を送ります。\r\n";
     s.server.add_message("INBOX", utf8, &["\\Seen"]);
-    s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    sync(&s, account);
     eventually(|| s.core.unindexed_count().unwrap() == 0, "the text was indexed");
     let words: Vec<(&str, bool)> = subjects
         .iter()
@@ -1579,10 +1577,8 @@ fn searches_words_written_without_spaces() {
         1,
     );
     let uid = s.server.add_message("INBOX", &chinese, &["\\Seen"]);
-    s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
-    s.core.open_message(inbox, uid).unwrap();
-    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    sync(&s, account);
+    open(&s, inbox, uid);
     let reply = s.core.draft(inbox, uid, pe_core::DraftKind::Reply).unwrap().unwrap();
     assert_eq!(reply.subject, "回复: 项目进度");
     let sent = s
@@ -1612,8 +1608,7 @@ fn searches_words_written_without_spaces() {
         },
         "the copy in Sent Items",
     );
-    s.core.sync(account).unwrap();
-    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    sync(&s, account);
     let copy = &s.core.messages(sent, Sort::default(), 0, 10).unwrap()[0].info;
     assert_eq!(copy.subject, "回复: 项目进度");
 }
@@ -4577,6 +4572,12 @@ fn synced_with(s: &Setup, subjects: &[&str]) -> (pe_store::AccountId, pe_store::
 fn open(s: &Setup, folder: pe_store::FolderId, uid: u64) {
     s.core.open_message(folder, uid).unwrap();
     s.wait(|e| *e == Event::MessageReady { folder, uid });
+}
+
+/// Syncs `account` and waits until the sync is done
+fn sync(s: &Setup, account: pe_store::AccountId) {
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
 }
 
 #[test]

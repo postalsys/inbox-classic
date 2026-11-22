@@ -33,14 +33,7 @@ fn opened() -> (Store, i64) {
 fuzz_target!(|data: &[u8]| {
     let text = String::from_utf8_lossy(data);
     let segmented = pe_store::segment(&text);
-    let narrowed: String = text
-        .chars()
-        .map(|c| match c {
-            '\u{FF01}'..='\u{FF5E}' => char::from_u32(c as u32 - 0xFEE0).unwrap_or(c),
-            c => c,
-        })
-        .filter(|c| *c != ' ')
-        .collect();
+    let narrowed: String = text.chars().map(pe_store::narrow).filter(|c| *c != ' ').collect();
     assert_eq!(segmented.replace(' ', ""), narrowed);
     assert_eq!(pe_store::segment(&segmented), segmented);
 

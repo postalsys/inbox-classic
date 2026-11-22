@@ -939,6 +939,7 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::{found, words};
     use crate::{AccountSettings, FolderInfo, MessageInfo};
 
     fn setup() -> (Store, FolderId, FolderId) {
@@ -965,25 +966,6 @@ mod tests {
             subject: subject.into(),
             from_name: from.into(),
             from_address: format!("{}@example.com", from.to_lowercase()),
-            ..Default::default()
-        }
-    }
-
-    fn found(store: &Store, search: &Search) -> Vec<u64> {
-        let mut uids: Vec<u64> = store
-            .search(search, Sort::default(), 0, 100)
-            .unwrap()
-            .iter()
-            .map(|m| m.info.uid)
-            .collect();
-        uids.sort();
-        uids
-    }
-
-    fn words(folder: Option<FolderId>, text: &str) -> Search {
-        Search {
-            scope: folder.map_or(Scope::Everywhere, Scope::Folder),
-            text: text.into(),
             ..Default::default()
         }
     }

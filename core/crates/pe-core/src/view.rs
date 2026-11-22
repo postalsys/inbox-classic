@@ -294,18 +294,18 @@ fn is_listed(attachment: &Attachment) -> bool {
             .any(|p| attachment.mime_type.eq_ignore_ascii_case(p))
 }
 
-/// The language the reading pane draws a message's text in ([`pe_html::message_lang`]): by the charset of its first
-/// text part that is not an attachment, else the app's
+/// The language the reading pane draws a message's text in: Japanese, Chinese or Korean by the charset of its first
+/// text part that is not an attachment (any label the decoder reads, ms_kanji or csshiftjis), else the app's
 fn text_lang(source: &[u8]) -> &'static str {
     let outline = pe_mime::outline::outline(source);
-    let charset = outline
+    outline
         .parts
         .iter()
         .find(|part| part.content_type.starts_with("text/") && part.disposition != "attachment")
-        .and_then(|part| part.param("charset"));
-    // by its encoding's own name, so that every label the decoder reads (ms_kanji, csshiftjis) counts
-    let name = charset.map(|label| pe_mime::charset::encoding_for(label).map_or(label, |encoding| encoding.name()));
-    pe_html::message_lang(name, pe_i18n::language())
+        .and_then(|part| part.param("charset"))
+        .and_then(pe_mime::charset::encoding_for)
+        .and_then(pe_mime::charset::lang_of)
+        .unwrap_or_else(pe_i18n::language)
 }
 
 #[cfg(test)]

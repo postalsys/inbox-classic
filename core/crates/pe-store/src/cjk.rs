@@ -4,36 +4,15 @@
 
 use rusqlite::Connection;
 
-use crate::{AccountSettings, Card, FolderInfo, IndexText, MessageInfo, Scope, Search, Sort, SortField, Store};
+use crate::test_support::{self, id_of, message_to, store_of, words};
+use crate::{Card, IndexText, MessageInfo, Scope, Search, Sort, SortField, Store};
 
 fn store() -> (Store, i64, i64) {
-    let store = Store::open_in_memory().unwrap();
-    let account = store.add_account(&AccountSettings::example("me@example.com")).unwrap();
-    let folder = |path: &str, special: Option<&str>| FolderInfo {
-        path: path.into(),
-        name: path.into(),
-        special_use: special.map(String::from),
-        selectable: true,
-        ..Default::default()
-    };
-    store
-        .set_folders(account, &[folder("INBOX", None), folder("Sent", Some("\\Sent"))])
-        .unwrap();
-    let id = |path| store.find_folder(account, path).unwrap().unwrap().id;
-    let (inbox, sent) = (id("INBOX"), id("Sent"));
-    (store, inbox, sent)
+    store_of("me@example.com")
 }
 
 fn message(uid: u64, subject: &str, from: (&str, &str)) -> MessageInfo {
-    MessageInfo {
-        uid,
-        date: Some(uid as i64 * 100),
-        subject: subject.into(),
-        from_name: from.0.into(),
-        from_address: from.1.into(),
-        recipients: "Me <me@example.com>".into(),
-        ..Default::default()
-    }
+    message_to(uid, subject, from, "Me <me@example.com>")
 }
 
 fn mail(store: &Store, inbox: i64) {
@@ -53,30 +32,7 @@ fn mail(store: &Store, inbox: i64) {
 }
 
 fn found(store: &Store, folder: i64, text: &str) -> Vec<u64> {
-    let search = Search {
-        scope: Scope::Folder(folder),
-        text: text.into(),
-        ..Default::default()
-    };
-    let mut uids: Vec<u64> = store
-        .search(&search, Sort::default(), 0, 100)
-        .unwrap()
-        .iter()
-        .map(|m| m.info.uid)
-        .collect();
-    uids.sort();
-    uids
-}
-
-fn id_of(store: &Store, folder: i64, uid: u64) -> i64 {
-    store
-        .db
-        .query_row(
-            "SELECT id FROM messages WHERE folder_id = ?1 AND uid = ?2",
-            [folder, uid as i64],
-            |r| r.get(0),
-        )
-        .unwrap()
+    test_support::found(store, &words(Some(folder), text))
 }
 
 #[test]

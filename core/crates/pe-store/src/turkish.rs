@@ -3,38 +3,15 @@
 //! that does not know it is in Turkish (the store lowercases with no locale); and every capital beside its small
 //! letter in the list's order, in any alphabet.
 
-use crate::{AccountSettings, Card, FolderInfo, IndexText, MessageInfo, Scope, Search, Sort, SortField, Store};
+use crate::test_support::{found, id_of, message_to, store_of, words};
+use crate::{Card, IndexText, MessageInfo, Scope, Search, Sort, SortField, Store};
 
 fn store() -> (Store, i64, i64) {
-    let store = Store::open_in_memory().unwrap();
-    let account = store
-        .add_account(&AccountSettings::example("ben@example.com.tr"))
-        .unwrap();
-    let folder = |path: &str, special: Option<&str>| FolderInfo {
-        path: path.into(),
-        name: path.into(),
-        special_use: special.map(String::from),
-        selectable: true,
-        ..Default::default()
-    };
-    store
-        .set_folders(account, &[folder("INBOX", None), folder("Sent", Some("\\Sent"))])
-        .unwrap();
-    let id = |path| store.find_folder(account, path).unwrap().unwrap().id;
-    let (inbox, sent) = (id("INBOX"), id("Sent"));
-    (store, inbox, sent)
+    store_of("ben@example.com.tr")
 }
 
 fn message(uid: u64, subject: &str, from: (&str, &str)) -> MessageInfo {
-    MessageInfo {
-        uid,
-        date: Some(uid as i64 * 100),
-        subject: subject.into(),
-        from_name: from.0.into(),
-        from_address: from.1.into(),
-        recipients: "Ben <ben@example.com.tr>".into(),
-        ..Default::default()
-    }
+    message_to(uid, subject, from, "Ben <ben@example.com.tr>")
 }
 
 /// Turkish mail: the words in each of their cases
@@ -59,14 +36,7 @@ fn search_takes_dotted_and_dotless_i_alike() {
     let (store, inbox, _) = store();
     turkish_mail(&store, inbox);
     // the text of a message read, its body as the index takes it
-    let id: i64 = store
-        .db
-        .query_row(
-            "SELECT id FROM messages WHERE folder_id = ?1 AND uid = 4",
-            [inbox],
-            |r| r.get(0),
-        )
-        .unwrap();
+    let id = id_of(&store, inbox, 4);
     store
         .set_indexed(
             id,
@@ -76,21 +46,7 @@ fn search_takes_dotted_and_dotless_i_alike() {
             },
         )
         .unwrap();
-    let found = |text: &str| -> Vec<u64> {
-        let search = Search {
-            scope: Scope::Folder(inbox),
-            text: text.into(),
-            ..Default::default()
-        };
-        let mut uids: Vec<u64> = store
-            .search(&search, Sort::default(), 0, 100)
-            .unwrap()
-            .iter()
-            .map(|m| m.info.uid)
-            .collect();
-        uids.sort();
-        uids
-    };
+    let found = |text: &str| found(&store, &words(Some(inbox), text));
     // İstanbul as it is typed: lower case, upper case, with the dotless capital of a keyboard without Turkish keys
     for typed in ["istanbul", "İstanbul", "İSTANBUL", "ISTANBUL", "ist"] {
         assert_eq!(found(typed), [1, 5], "{typed}");

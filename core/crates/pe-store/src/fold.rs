@@ -24,7 +24,7 @@ pub(crate) fn fold(text: &str) -> String {
 }
 
 /// A full width letter, digit or sign (U+FF01 to U+FF5E) as its ASCII form; any other character as it is
-fn narrow(c: char) -> char {
+pub fn narrow(c: char) -> char {
     match c {
         '\u{FF01}'..='\u{FF5E}' => char::from_u32(c as u32 - 0xFEE0).unwrap_or(c),
         c => c,
@@ -126,33 +126,27 @@ pub(crate) fn indexed(text: &str) -> String {
 /// an older version must be able to write without them.
 pub(crate) fn register(db: &rusqlite::Connection) -> rusqlite::Result<()> {
     use rusqlite::functions::FunctionFlags;
-    let text_function = |name: &str, f: fn(&str) -> String| {
+    fn text_function<T: rusqlite::ToSql + Default + 'static>(
+        db: &rusqlite::Connection,
+        name: &str,
+        f: fn(&str) -> T,
+    ) -> rusqlite::Result<()> {
         db.create_scalar_function(
             name,
             1,
             FunctionFlags::SQLITE_UTF8 | FunctionFlags::SQLITE_DETERMINISTIC,
             move |ctx| {
                 Ok(match ctx.get_raw(0) {
-                    rusqlite::types::ValueRef::Text(text) => Some(f(&String::from_utf8_lossy(text))),
-                    _ => None,
+                    rusqlite::types::ValueRef::Text(text) => f(&String::from_utf8_lossy(text)),
+                    _ => T::default(),
                 })
             },
         )
-    };
-    text_function("fold", fold)?;
-    text_function("segment", |text| segment(text).into_owned())?;
+    }
+    text_function(db, "fold", |text| Some(fold(text)))?;
+    text_function(db, "segment", |text| Some(segment(text).into_owned()))?;
     // whether segment changes it, without writing it out (the migration that indexes such messages again)
-    db.create_scalar_function(
-        "segments",
-        1,
-        FunctionFlags::SQLITE_UTF8 | FunctionFlags::SQLITE_DETERMINISTIC,
-        |ctx| {
-            Ok(match ctx.get_raw(0) {
-                rusqlite::types::ValueRef::Text(text) => segments(&String::from_utf8_lossy(text)),
-                _ => false,
-            })
-        },
-    )
+    text_function(db, "segments", segments)
 }
 
 #[cfg(test)]

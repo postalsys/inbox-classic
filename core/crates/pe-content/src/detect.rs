@@ -46,7 +46,26 @@ static FORWARD_SUBJECT: LazyLock<JsRegex> = LazyLock::new(|| {
 
 /// A forward, and not a reply to one.
 pub(crate) fn is_forward_subject(subject: &str) -> bool {
-    !REPLY_SUBJECT.is_match(subject) && FORWARD_SUBJECT.is_match(subject)
+    subject_prefix(subject) == Some(SubjectPrefix::Forward)
+}
+
+/// What a subject's leading prefix marks, in any of the languages the detectors know.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SubjectPrefix {
+    Reply,
+    Forward,
+}
+
+/// The prefix a subject starts with ('Re:', 'AW:', 'Fwd:', 'WG:', '转发:'), a reply's before a forward's,
+/// None for none.
+pub fn subject_prefix(subject: &str) -> Option<SubjectPrefix> {
+    if REPLY_SUBJECT.is_match(subject) {
+        Some(SubjectPrefix::Reply)
+    } else if FORWARD_SUBJECT.is_match(subject) {
+        Some(SubjectPrefix::Forward)
+    } else {
+        None
+    }
 }
 
 /// The field value after the first colon, ASCII or full width. Chinese, Japanese and Korean Outlook
@@ -405,5 +424,8 @@ mod tests {
         assert!(REPLY_SUBJECT.is_match("AW[2]: hi"));
         assert!(is_forward_subject("Fwd: hi"));
         assert!(!is_forward_subject("Re: Fwd: hi"));
+        assert_eq!(subject_prefix("SV: hi"), Some(SubjectPrefix::Reply));
+        assert_eq!(subject_prefix("WG: hi"), Some(SubjectPrefix::Forward));
+        assert_eq!(subject_prefix("Report"), None);
     }
 }
