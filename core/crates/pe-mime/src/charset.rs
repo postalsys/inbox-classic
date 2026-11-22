@@ -30,6 +30,22 @@ fn normalize(label: &str) -> String {
     }
 }
 
+/// The language of text in a Japanese, Chinese or Korean encoding (a BCP 47 tag), None for any other
+pub fn lang_of(encoding: &'static Encoding) -> Option<&'static str> {
+    use encoding_rs::{BIG5, EUC_JP, EUC_KR, GB18030, GBK, ISO_2022_JP, SHIFT_JIS};
+    if [SHIFT_JIS, EUC_JP, ISO_2022_JP].contains(&encoding) {
+        Some("ja")
+    } else if [GBK, GB18030].contains(&encoding) {
+        Some("zh-Hans")
+    } else if encoding == BIG5 {
+        Some("zh-Hant")
+    } else if encoding == EUC_KR {
+        Some("ko")
+    } else {
+        None
+    }
+}
+
 /// Decodes `bytes` from `charset`
 pub fn decode(bytes: &[u8], charset: &str) -> String {
     match encoding_for(charset) {
@@ -59,6 +75,40 @@ mod tests {
         assert_eq!(decode("õ".as_bytes(), "utf_8"), "õ");
         assert_eq!(decode(b"\xb1", "iso_8859_2"), "ą");
         assert_eq!(decode("õ".as_bytes(), "utf-8*en"), "õ");
+    }
+
+    #[test]
+    fn languages_of_cjk_encodings() {
+        let lang = |label: &str| encoding_for(label).and_then(lang_of);
+        for (label, expected) in [
+            ("ISO-2022-JP", "ja"),
+            ("Shift_JIS", "ja"),
+            ("ms_kanji", "ja"),
+            ("windows-31j", "ja"),
+            ("euc-jp", "ja"),
+            ("GB18030", "zh-Hans"),
+            ("gbk", "zh-Hans"),
+            ("GB2312", "zh-Hans"),
+            ("Big5", "zh-Hant"),
+            ("big5-hkscs", "zh-Hant"),
+            ("EUC-KR", "ko"),
+            ("ks_c_5601-1987", "ko"),
+            ("windows-949", "ko"),
+        ] {
+            assert_eq!(lang(label), Some(expected), "{label}");
+        }
+        // other encodings, unknown labels and iso-2022-kr (the replacement encoding) have none
+        for label in [
+            "utf-8",
+            "iso-8859-1",
+            "koi8-r",
+            "x-unknown",
+            "iso-2022-kr",
+            "hz-gb-2312",
+            "\"><script>",
+        ] {
+            assert_eq!(lang(label), None, "{label}");
+        }
     }
 
     #[test]

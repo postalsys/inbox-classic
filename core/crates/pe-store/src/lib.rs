@@ -12,6 +12,8 @@ mod accounts;
 mod agents;
 mod bounces;
 mod cards;
+#[cfg(test)]
+mod cjk;
 mod contacts;
 mod counts;
 mod download;
@@ -34,6 +36,8 @@ mod search;
 mod selection;
 mod senders;
 mod sign_in_apps;
+#[cfg(test)]
+mod test_support;
 pub(crate) mod threads;
 mod transfers;
 mod trusted;
@@ -54,6 +58,10 @@ pub use cards::{Card, CardId, Group, GroupId, Member, MemberRow, display_name};
 pub use contacts::{Contact, Person};
 pub use counts::AccountCounts;
 pub use download::{Ahead, AheadRule, DEFAULT_LIMIT_MB, Downloaded, RECENT_DAYS, RECENT_MAX_SIZE, ToDownload};
+/// For the fuzz target of `segment`
+#[doc(hidden)]
+pub use fold::narrow;
+pub use fold::segment;
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use marks::{Conversation, ThreadMark};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Protection, Sort, SortField};

@@ -158,8 +158,20 @@ impl World {
         } else {
             None
         };
-        let names = ["Ann", "ann", "Bob", "", "Émile", "Zed", "İpek"];
-        let subjects = ["Hello", "hello", "Re: Hello", "Budget", "", "Ärger", "zebra"];
+        let names = ["Ann", "ann", "Bob", "", "Émile", "Zed", "İpek", "张伟"];
+        // Chinese and Japanese, which the index writes segmented (fold.rs), and full width letters, ordered as ASCII
+        let subjects = [
+            "Hello",
+            "hello",
+            "Re: Hello",
+            "Budget",
+            "",
+            "Ärger",
+            "zebra",
+            "会议纪要",
+            "会議資料",
+            "Ｈｅｌｌｏ",
+        ];
         let name = r.pick(&names).to_string();
         let subject = r.pick(&subjects).to_string();
         let recipients = r.pick(&["Ann", "Bob", "", "carol@x"]).to_string();
@@ -496,7 +508,18 @@ impl World {
         };
         // now and then a search of a mark: its terms read the messages, in pages from a row next to them too
         let text = r
-            .pick(&["", "", "", "", "", "is:encrypted", "is:signed", "-is:encrypted"])
+            .pick(&[
+                "",
+                "",
+                "",
+                "",
+                "",
+                "is:encrypted",
+                "is:signed",
+                "-is:encrypted",
+                "会议",
+                "会",
+            ])
             .to_string();
         // now and then an agent's list: the accounts it may use, one, none or all
         let accounts = match r.below(6) {
@@ -530,6 +553,24 @@ impl World {
         assert!(found.iter().all(|m| wanted(m.info.protection)), "{what}");
     }
 
+    /// A search of characters written without spaces finds the messages whose subject or sender has them together,
+    /// and no other
+    fn check_words(&self, search: &Search, sort: Sort, what: &str) {
+        let word = search.text.as_str();
+        if !word.starts_with('会') {
+            return;
+        }
+        let has = |m: &Message| m.info.subject.contains(word) || m.info.from_name.contains(word);
+        let found = self.store.search(&search.ungrouped(), sort, 0, 10_000).unwrap();
+        assert!(found.iter().all(has), "{what}");
+        let everything = Search {
+            text: String::new(),
+            ..search.ungrouped()
+        };
+        let all = self.store.search(&everything, sort, 0, 10_000).unwrap();
+        assert_eq!(found.len(), all.iter().filter(|m| has(m)).count(), "{what}");
+    }
+
     /// Every call of the list reads what it read from the messages: rows, counts, places, neighbours, Next Unread and
     /// pages read from a row next to them
     fn check_list(&mut self, search: &Search, sort: Sort) {
@@ -549,6 +590,7 @@ impl World {
             .map(Message::at)
             .collect();
         self.check_marks(search, sort, &what);
+        self.check_words(search, sort, &what);
         self.check_places(search, sort, &all, &members, &what);
         self.check_walks(search, sort, &all, &members, &what);
         self.check_anchored_pages(search, sort, &all, &what);

@@ -29,10 +29,18 @@ pub struct Person {
 const SENT_WEIGHT: i64 = 3;
 
 /// The LIKE patterns of what is typed, its wildcards taken as themselves, folded ([`crate::fold`]) to match
-/// `fold(column)`: at the start (`typed%`), and at the start of any word (`% typed%`, against `' ' || fold(column)`)
+/// `fold(column)`: at the start (`typed%`), and at the start of any word (`% typed%`, against `' ' || fold(column)`).
+/// A name in characters written without spaces (张伟) has no words to start: what is typed in them is found anywhere
+/// in the name (`%typed%`).
 pub(crate) fn like_starts(typed: &str) -> (String, String) {
-    let escaped = like_escaped(&crate::fold::fold(typed.trim()));
-    (format!("{escaped}%"), format!("% {escaped}%"))
+    let folded = crate::fold::fold(typed.trim());
+    let escaped = like_escaped(&folded);
+    let word = if folded.chars().any(crate::fold::is_segmented) {
+        format!("%{escaped}%")
+    } else {
+        format!("% {escaped}%")
+    };
+    (format!("{escaped}%"), word)
 }
 
 /// The words of LIKE that match themselves

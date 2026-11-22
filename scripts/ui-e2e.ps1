@@ -4032,6 +4032,35 @@ public static class Dragger {
 
     # ---- files ----
 
+    Step 'words without spaces'
+    # SCENARIO 21a: words of Japanese, Chinese and Korean, which have no spaces between them (or endings on them), found
+    # inside the subject; in a folder of their own, deleted at the end
+    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' -Body '{"path":"CJK"}' "$rest")
+    AddMessage ("From: Lee <lee@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: =?UTF-8?B?5piO5pel44Gu5Lya6K2w44Gu6LOH5paZ44Gr44Gk44GE44Gm?=`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <cjk-ja@example.com>`r`nContent-Type: text/plain; charset=utf-8`r`n" +
+        "Content-Transfer-Encoding: base64`r`n`r`n5Lya6K2w44Gu6LOH5paZ44KS5re75LuY44GX44G+44GZ44CC`r`n") @() 'CJK'
+    AddMessage ("From: Lee <lee@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: =?UTF-8?B?5YWz5LqO5piO5aSp5Lya6K6u55qE5a6J5o6S?=`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <cjk-zh@example.com>`r`nContent-Type: text/plain; charset=utf-8`r`n" +
+        "Content-Transfer-Encoding: base64`r`n`r`n6K+35p+l55yL5Lya6K6u5a6J5o6S44CC`r`n") @() 'CJK'
+    AddMessage ("From: Lee <lee@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: =?UTF-8?B?64K07J28IO2ajOydmOyXkOyEnCDrsJztkZztlaAg7J6Q66OM?=`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <cjk-ko@example.com>`r`nContent-Type: text/plain; charset=utf-8`r`n" +
+        "Content-Transfer-Encoding: base64`r`n`r`n7ZqM7J2YIOyekOujjOyeheuLiOuLpC4=`r`n") @() 'CJK'
+    Command $main $IDM_SYNC
+    # the words as base64 of their UTF-8: this script is read as ANSI by Windows PowerShell, which garbles them
+    $cjkFound = { param($words) [void][Native.Win]::SendMessage($find, $WM_SETTEXT, [IntPtr]::Zero, [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($words))); [bool](WaitFor { (Rows) -eq 1 } 20) }
+    Check (& $cjkFound '5Lya6K2w') 'a Japanese word inside the subject finds its message'
+    SelectRow 0
+    Shot $main 'find-4-cjk'
+    Check (& $cjkFound '5Lya6K6u') 'a Chinese word inside the subject finds its message'
+    Check (& $cjkFound '7ZqM7J2Y') 'a Korean word with its ending left off finds its message'
+    Check (& $cjkFound '6K2w') 'one character alone finds it too'
+    Key $find $VK_ESCAPE
+    [void](Invoke-RestMethod -Method Delete "$rest/CJK")
+    Command $main $IDM_SYNC
+    # gone from the tree before the next step picks a folder and a row, which its reload would take away
+    [void](WaitFor { (FolderItem 'CJK') -eq [IntPtr]::Zero } 20)
+    Settled
+
     Step 'saving and importing a message as a file'
     SelectFolder 0
     [void](WaitFor { if ((Rows) -ge 7) { Rows } })

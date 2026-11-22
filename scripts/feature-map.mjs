@@ -330,6 +330,18 @@ const sections = [
                 checked: ['Nothing is listed for what nothing has', 'The search bar says there are no results']
             },
             {
+                shot: 'find-4-cjk',
+                name: 'Words without spaces',
+                what: 'Japanese and Chinese write words without spaces between them, and Korean words carry endings, so the search index takes each of their characters as a word and searches a word as those characters in a row: a word is found inside a longer one, in the subject, the people, file names and the text. Full width letters and digits are found as their ASCII forms.',
+                how: 'Search for a Japanese, Chinese or Korean word.',
+                checked: [
+                    'A Japanese word inside the subject finds its message',
+                    'A Chinese word inside the subject finds its message',
+                    'A Korean word with its ending left off finds its message',
+                    'One character alone finds it too'
+                ]
+            },
+            {
                 shot: 'find-2-every-folder',
                 name: 'Gmail search syntax',
                 what: 'The search takes Gmail\'s syntax: "phrases", -word, OR, from:, to:, subject:, filename:, is:unread, is:read, is:starred, is:answered, has:attachment, in:inbox or in: and a folder name, before:, after:, older_than:, newer_than:, larger: and smaller: (the field\'s tooltip lists them). Results from other folders open, and Reply, Delete, Move and Flag work on them, in their own folder.',

@@ -72,6 +72,10 @@ pub struct RenderOptions {
     /// in the top page (`<base target="_top">`), whose navigation the apps cancel and open in the browser. A link
     /// that navigated the frame would be refused by the page's `frame-src` before the app is asked, and never open
     pub in_frame: bool,
+    /// The language of the message's text for the document (`<html lang>`): Japanese and Chinese share characters
+    /// that each draws otherwise. A constant of the core's (the charset's language or the app's), never the
+    /// message's own words; None for none.
+    pub lang: Option<&'static str>,
 }
 
 /// The most bytes the `data:` URIs of embedded images add to a message, so a small image referenced a million times
@@ -303,6 +307,7 @@ pub struct Rendered {
 pub struct PrintParts {
     body: String,
     allow_remote_images: bool,
+    lang: Option<&'static str>,
     header: Vec<(String, String)>,
     card: String,
     /// The parts of a message with signed or encrypted parts ([`print_parts`]), each sanitized on its own with its
@@ -326,6 +331,7 @@ pub fn print_document_with(parts: &PrintParts, items: &[(Option<usize>, PrintIte
         .collect();
     let options = RenderOptions {
         allow_remote_images: parts.allow_remote_images,
+        lang: parts.lang,
         ..Default::default()
     };
     // the section of the items whose part `pick` takes
@@ -420,6 +426,7 @@ pub fn print_parts(parts: &[(usize, String)], header: &[(&str, &str)]) -> PrintP
     PrintParts {
         body: String::new(),
         allow_remote_images: false,
+        lang: None,
         header: header
             .iter()
             .map(|(name, value)| (name.to_string(), value.to_string()))
@@ -521,6 +528,7 @@ pub fn render_view_cards(
     let inline = routed.map(|(_, prefix)| (prefix, pictures.iter().map(|picture| picture.number).collect()));
     let print = (!previewed.is_empty() || inline.is_some()).then(|| PrintParts {
         allow_remote_images: options.allow_remote_images,
+        lang: options.lang,
         header: header
             .iter()
             .map(|(name, value)| (name.to_string(), value.to_string()))
@@ -701,13 +709,15 @@ fn wrap_as(
         .collect();
     // a part's frame: its links navigate the top page (the frame's sandbox lets a click do that, nothing else)
     let base = if options.in_frame { "<base target=\"_top\">" } else { "" };
+    // a constant of the core's, never the message's own words
+    let lang = options.lang.map(|lang| format!(" lang=\"{lang}\"")).unwrap_or_default();
     let printed = if printed.is_empty() {
         String::new()
     } else {
         format!("<div class=\"{class}\">{printed}</div>")
     };
     let document = format!(
-        "<!doctype html><html><head><meta charset=\"utf-8\">\
+        "<!doctype html><html{lang}><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src 'none'\">\
          <meta name=\"color-scheme\" content=\"{scheme}\">{base}\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
@@ -734,6 +744,21 @@ fn wrap_as(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_document_has_the_language_it_is_given() {
+        let options = |lang| RenderOptions {
+            lang,
+            ..Default::default()
+        };
+        let document = render_document("<p>会議</p>", &options(Some("ja")));
+        assert!(
+            document.starts_with("<!doctype html><html lang=\"ja\"><head>"),
+            "{document}"
+        );
+        let document = render_document("<p>x</p>", &options(None));
+        assert!(document.starts_with("<!doctype html><html><head>"), "{document}");
+    }
 
     /// A whole document's title (a Stripe payout notice's "Your €1,910.91 payout ... is on the way") is not the
     /// body's first line: the text of an element a browser never shows goes with it, the body and its styles stay

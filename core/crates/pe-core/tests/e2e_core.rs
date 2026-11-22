@@ -1457,6 +1457,188 @@ fn searches_the_local_index() {
     assert_eq!(subjects(Some(inbox), "zebra"), ["Kvartali aruanne"]);
 }
 
+/// Chinese, Japanese and Korean mail in the charsets their mail programs write, each subject and text with base64 in
+/// it (ImapKit takes the source as text): (charset, subject, text)
+const CJK_MAIL: [(&str, &str, &str); 5] = [
+    // 週次の打ち合わせについて, 来週の見積書をお送りします。
+    (
+        "ISO-2022-JP",
+        "GyRCPTU8ISROQkckQTlnJG8kOyRLJEQkJCRGGyhC",
+        "GyRCTWg9NSROOCtAUT1xJHIkKkF3JGokNyReJDkhIxsoQg==",
+    ),
+    // 关于下周会议的安排, 请查看预算报告。
+    ("GB18030", "udjT2s/C1ty74dLptcSwssXF", "x+uy6b+01KTL47GouOahow=="),
+    // 關於發票的問題, 請參閱附件中的合約。
+    ("Big5", "w/ap87VvsryqurDdw0Q=", "vdCw0b5cqv6l86SkqrqmWKz5oUM="),
+    // 내일 회의에서 논의할 내용, 보고서를 첨부합니다.
+    (
+        "EUC-KR",
+        "s7vAzyDIuMDHv6G8rSCz7cDHx9Igs7u/6w==",
+        "uriw7bytuKYgw7e6zsfVtM+02S4=",
+    ),
+    // 東京都の天気予報, 明日は晴れでしょう。
+    (
+        "UTF-8",
+        "5p2x5Lqs6YO944Gu5aSp5rCX5LqI5aCx",
+        "5piO5pel44Gv5pm044KM44Gn44GX44KH44GG44CC",
+    ),
+];
+
+/// A message of [`CJK_MAIL`]
+fn cjk_message(n: usize, (charset, subject, text): (&str, &str, &str)) -> String {
+    format!(
+        "From: Sender {n} <s{n}@example.com>\r\nTo: me@example.com\r\nSubject: =?{charset}?B?{subject}?=\r\n\
+         Message-ID: <cjk{n}@example.com>\r\nDate: Mon, 6 Oct 2025 10:0{n}:00 +0000\r\nMIME-Version: 1.0\r\n\
+         Content-Type: text/plain; charset={charset}\r\nContent-Transfer-Encoding: base64\r\n\r\n{text}\r\n"
+    )
+}
+
+/// Chinese, Japanese and Korean mail in their own charsets is found by a word in the middle of its subject and of
+/// its text, as ImapKit's own SEARCH finds it; a reply to a Chinese reply keeps its one prefix
+#[test]
+fn searches_words_written_without_spaces() {
+    let Some(s) = setup() else { return };
+    for (n, mail) in CJK_MAIL.iter().enumerate() {
+        s.server.add_message("INBOX", &cjk_message(n, *mail), &["\\Seen"]);
+    }
+    s.server
+        .add_message("INBOX", &rfc822("Weekly report", "nothing in Chinese"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    sync(&s, account);
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let uids = |text: &str| -> Vec<u64> {
+        let search = pe_core::Search {
+            scope: pe_core::Scope::Folder(inbox),
+            text: text.into(),
+            ..Default::default()
+        };
+        let mut found: Vec<u64> = s
+            .core
+            .search(&search, Sort::default(), 0, 50)
+            .unwrap()
+            .iter()
+            .map(|m| m.info.uid)
+            .collect();
+        found.sort();
+        found
+    };
+    // the subjects, decoded from their charsets, from the summary alone
+    let subjects = ["打ち合わせ", "会议", "發票", "회의", "天気"];
+    for (n, word) in subjects.iter().enumerate() {
+        assert_eq!(uids(word), [n as u64 + 1], "{word}");
+    }
+    assert_eq!(uids("subject:会议"), [2]);
+    // the texts, fetched in the background
+    eventually(|| s.core.unindexed_count().unwrap() == 0, "the texts were indexed");
+    let texts = ["見積書", "预算", "合約", "보고서", "晴れ"];
+    for (n, word) in texts.iter().enumerate() {
+        assert_eq!(uids(word), [n as u64 + 1], "{word}");
+    }
+    assert_eq!(uids("subject:预算"), [] as [u64; 0]);
+    // as the server finds them: ImapKit decodes the encoded words of a subject (SUBJECT), and looks for TEXT in the
+    // source as it is, which only a text in 8-bit UTF-8 has as it reads
+    let utf8 = "From: s@example.com\r\nSubject: 8bit\r\nMIME-Version: 1.0\r\n\
+                Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: 8bit\r\n\r\n\
+                来週の会議資料と予算案を送ります。\r\n";
+    s.server.add_message("INBOX", utf8, &["\\Seen"]);
+    sync(&s, account);
+    eventually(|| s.core.unindexed_count().unwrap() == 0, "the text was indexed");
+    let words: Vec<(&str, bool)> = subjects
+        .iter()
+        .map(|word| (*word, true))
+        .chain(["会議資料", "予算案", "資料", "会議", "送ります"].map(|word| (word, false)))
+        .collect();
+    for (word, found) in server_search(&s.server, "INBOX", &words) {
+        assert!(!found.is_empty(), "ImapKit finds {word}");
+        let field = if subjects.contains(&word.as_str()) {
+            "subject:"
+        } else {
+            ""
+        };
+        assert_eq!(
+            uids(&format!("{field}{word}")),
+            found,
+            "{word} as ImapKit's SEARCH finds it"
+        );
+    }
+
+    // a reply to a Chinese mail program's reply: its prefix, not ours in front of it
+    let mut chinese = rfc822("回复: 项目进度", "好的");
+    chinese = chinese.replacen(
+        "Subject: 回复: 项目进度",
+        "Subject: =?UTF-8?B?5Zue5aSNOiDpobnnm67ov5vluqY=?=",
+        1,
+    );
+    let uid = s.server.add_message("INBOX", &chinese, &["\\Seen"]);
+    sync(&s, account);
+    open(&s, inbox, uid);
+    let reply = s.core.draft(inbox, uid, pe_core::DraftKind::Reply).unwrap().unwrap();
+    assert_eq!(reply.subject, "回复: 项目进度");
+    let sent = s
+        .core
+        .folders(account)
+        .unwrap()
+        .iter()
+        .find(|f| f.info.special_use.as_deref() == Some("\\Sent"))
+        .unwrap()
+        .id;
+    let answer = pe_core::Outgoing {
+        to: "ann@example.com".into(),
+        subject: reply.subject.clone(),
+        text: "收到".into(),
+        in_reply_to: reply.in_reply_to.clone(),
+        references: reply.references.clone(),
+        ..Default::default()
+    };
+    s.core.send(account, answer).unwrap();
+    s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
+    s.wait_until(
+        || {
+            s.server
+                .messages("Sent")
+                .iter()
+                .any(|m| pe_testkit::raw_text(m).contains("In-Reply-To"))
+        },
+        "the copy in Sent Items",
+    );
+    sync(&s, account);
+    let copy = &s.core.messages(sent, Sort::default(), 0, 10).unwrap()[0].info;
+    assert_eq!(copy.subject, "回复: 项目进度");
+}
+
+/// What ImapKit's own `UID SEARCH` finds in `mailbox` for each of `words`, in the subject (true) or the text, over an
+/// IMAP connection of the test's own
+fn server_search(server: &ImapKit, mailbox: &str, words: &[(&str, bool)]) -> Vec<(String, Vec<u64>)> {
+    use pe_imap::Client;
+    use pe_imap::client::SearchKey;
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let config = server.imap_config(pe_net::Security::Plain, pe_testkit::password());
+        let (mut client, _events) = Client::connect(config).await.expect("connect");
+        client.select(mailbox).await.expect("select");
+        let mut found = Vec::new();
+        for &(word, subject) in words {
+            let key = match subject {
+                true => SearchKey::Subject(word.to_string()),
+                false => SearchKey::Text(word.to_string()),
+            };
+            let uids = client.search(&key).await.expect("search");
+            found.push((word.to_string(), uids));
+        }
+        found
+    })
+}
+
 #[test]
 fn flags_moves_and_deletes_messages() {
     let Some(s) = setup() else { return };
@@ -4390,6 +4572,12 @@ fn synced_with(s: &Setup, subjects: &[&str]) -> (pe_store::AccountId, pe_store::
 fn open(s: &Setup, folder: pe_store::FolderId, uid: u64) {
     s.core.open_message(folder, uid).unwrap();
     s.wait(|e| *e == Event::MessageReady { folder, uid });
+}
+
+/// Syncs `account` and waits until the sync is done
+fn sync(s: &Setup, account: pe_store::AccountId) {
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
 }
 
 #[test]

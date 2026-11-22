@@ -251,6 +251,23 @@ mod tests {
         );
     }
 
+    /// otp-detect's Vietnamese words name the code, its expiry and the warning not to share it
+    #[test]
+    fn a_vietnamese_sign_in_code_gets_its_card() {
+        let raw = "Authentication-Results: mx.mail.test; dkim=pass header.d=example.vn; spf=pass\r\n\
+                   From: Dịch vụ <no-reply@example.vn>\r\nTo: me@mail.test\r\nSubject: Mã xác minh\r\n\
+                   Content-Type: text/plain; charset=utf-8\r\n\r\n\
+                   Xin chào,\r\n\r\nMã xác minh của bạn là 482913. Mã có hiệu lực trong 10 phút. \
+                   Không chia sẻ mã này với bất kỳ ai.\r\n";
+        let code = of(&parse(raw.as_bytes()).unwrap(), &trusted()).expect("a code");
+        assert_eq!(code.code, "482913");
+        assert_eq!(code.domain, "example.vn");
+        let card = card(&code, Some(1000), 1000 + 60);
+        assert_eq!(card.code, "482913");
+        assert!(card.heading.contains("example.vn"), "{}", card.heading);
+        assert_eq!(card.old, None);
+    }
+
     #[test]
     fn the_card_says_when_the_code_is_old() {
         let code = Code {

@@ -1,5 +1,5 @@
 target/
-# the corpora are kept in the CI cache, but for the OpenPGP and preview targets, which are committed (minimized with
+# the corpora are kept in the CI cache, but for the OpenPGP, preview and search index targets, which are committed (minimized with
 # `cargo fuzz cmin`) so a run starts from what earlier fuzzing found
 corpus/*
 !corpus/pgp_cert/
@@ -10,6 +10,7 @@ corpus/*
 !corpus/preview_picture/
 !corpus/preview_pdf/
 !corpus/preview_svg/
+!corpus/store_segment/
 artifacts/
 coverage/
 logs/

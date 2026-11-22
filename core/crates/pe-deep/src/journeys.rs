@@ -496,6 +496,15 @@ fn finding(run: &mut Run<'_>, _: &mut Vec<String>) -> Result<(), Stop> {
     run.act(Act::Open(List::AllInboxes))?;
     run.act(Act::Search("notes".into()))?;
     run.settled()?;
+    // a word in the middle of subjects that have no spaces (会议纪要, 見積書のご確認), typed a character at a time
+    for typed in ["纪", "纪要", "確", "確認"] {
+        run.act(Act::Search(typed.into()))?;
+    }
+    let found = run.settled()?;
+    run.expect(
+        found.rows > 0,
+        format!("a word inside words without spaces finds them ({})", found.rows),
+    );
     run.act(Act::Search(String::new()))?;
     run.settled()?;
     Ok(())
