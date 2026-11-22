@@ -1,0 +1,19 @@
+<!--review-->
+<h1>証明書のエラー</h1>
+<p class="summary">接続先が本物のメール サーバーであることをInbox Classicが確認できないときの対処方法。</p>
+<p>次のいずれかが表示されることがあります。</p>
+<ul>
+    <li>ステータス バーに「TLS error: …」</li>
+    <li>閲覧ウィンドウに「メール サーバーとの接続を保護できませんでした（…）。」</li>
+</ul>
+<p>Inbox Classicは、サーバーが名乗っているとおりのサーバーであることを確認できなかったため、パスワードを送信しませんでした。</p>
+<p>解決するには、次のようにします。</p>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>でアカウントのプロパティを開きます。</li>
+    <li>サーバー名を確認します。サーバーの証明書が発行された名前である必要があります。多くの場合、それは自分のドメインではなく、<code>imap.provider.com</code>のようなプロバイダーの名前です。</li>
+    <li>コンピューターの日付と時刻が正しいことを確認します。</li>
+</ol>
+<p>職場や学校のネットワークなど、暗号化された通信を検査するネットワークでは、その管理者に問い合わせてください。</p>
+<aside class="note">どんな証明書でも受け入れるような設定はありません。偽の証明書を受け入れると、ネットワーク上の誰かにパスワードやメールを読まれるおそれがあります。</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

@@ -409,7 +409,11 @@ fn translated_only_from_the_language_itself() {
     assert_eq!(translated("de", "menu-file", &[]).as_deref(), Some("&Datei"));
     assert_eq!(translated("en", "menu-file", &[]).as_deref(), Some("&File"));
     assert_eq!(translated("de", "no-such-message", &[]), None);
-    assert_eq!(translated("ja", "menu-file", &[]), None);
+    // a language without a catalog
+    assert_eq!(translated("th", "menu-file", &[]), None);
+    // a list's separator keeps its space, which only the quotes keep in a message
+    assert_eq!(translated("en", "list-separator", &[]).as_deref(), Some(", "));
+    assert_eq!(translated("zh-Hant", "list-separator", &[]).as_deref(), Some("、"));
     assert_eq!(translated(PSEUDO, "menu-file", &[]), None);
     assert_eq!(
         translated("en", "messages", &[("count", 2u64.into())]).as_deref(),

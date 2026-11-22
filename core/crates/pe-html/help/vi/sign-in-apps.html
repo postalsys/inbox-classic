@@ -1,0 +1,18 @@
+<!--review-->
+<h1>Ứng dụng đăng nhập</h1>
+<p class="summary">Đăng ký ứng dụng đăng nhập của riêng bạn với Google, Microsoft hoặc một nhà cung cấp OpenID Connect tương thích, để đăng nhập qua trình duyệt.</p>
+<p>Đăng nhập qua trình duyệt dùng một OAuth client đã được đăng ký với nhà cung cấp. Inbox Classic có sẵn client riêng cho Google và Microsoft. Trong cấu hình này, client Google có sẵn chỉ dành cho người dùng thử nghiệm, nên <b data-text="win-sign-in-google"></b> tắt theo mặc định. Bạn có thể đăng ký client của riêng mình: trong dự án Google Cloud, trong tenant Microsoft Entra của bạn, hoặc với một nhà cung cấp OpenID Connect tương thích có hỗ trợ truy cập thư.</p>
+<p>Để thêm một ứng dụng đăng nhập:</p>
+<ol>
+    <li>Chọn <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Bấm <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, rồi <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Bên cạnh <b data-text="ui-fill-in-for"></b>, bấm Google hoặc Microsoft để điền bên phát hành, phạm vi (scopes) và máy chủ. Với nhà cung cấp khác, hãy tự nhập các thông tin này.</li>
+    <li>Đăng ký client với nhà cung cấp như hướng dẫn trong khung ở phía dưới. Đăng ký <b data-text="ui-redirect-uri"></b> hiện ở đó.</li>
+    <li>Nhập <b data-text="ui-client-id"></b>, và <b data-text="ui-client-secret"></b> nếu nhà cung cấp đã cấp cho bạn. Theo mặc định, bí mật máy khách được lưu trong <!--os:windows-->Windows Credential Manager<!--/os--><!--os:mac-->chuỗi khóa đăng nhập<!--/os--><!--os:linux-->vòng khóa (keyring) của bạn<!--/os--> và không bao giờ hiện lại.</li>
+    <li>Bấm <b data-text="ui-check"></b> để kiểm tra việc tìm bên phát hành và các địa chỉ dịch vụ của nó. Bước này không kiểm tra ID máy khách, bí mật máy khách hay quyền truy cập thư. Sau đó bấm <b data-text="ui-ok"></b>.</li>
+    <li>Thêm tài khoản bằng <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> trên trang đầu tiên của <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>Trong <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->hộp kiểm của mỗi ứng dụng<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> cho biết ứng dụng đó có được đề xuất cho tài khoản mới hay không, kể cả các ứng dụng có sẵn. Các tài khoản đang dùng một ứng dụng vẫn tiếp tục hoạt động. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> thay đổi một ứng dụng, và <b data-text="ui-remove"></b> xóa ứng dụng khi không còn tài khoản nào dùng nó.</p>
+<p>Nếu máy chủ thư từ chối token của ứng dụng, hãy kiểm tra xem phạm vi (scopes) của ứng dụng có cho phép truy cập thư không.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->

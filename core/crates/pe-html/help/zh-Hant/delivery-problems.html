@@ -1,0 +1,22 @@
+<!--review-->
+<h1>未送達的郵件</h1>
+<p class="summary">Inbox Classic 辨識出傳遞失敗或延遲通知時，會說明回報的原因，以及您可以怎麼做。</p>
+<p>傳遞通知在郵件清單中會有未送達的標記。開啟它時，上方的卡片會說明您的郵件是未送達，還是只是延遲。</p>
+<img src="picture:bounce-1-failed" alt="一則傳遞通知，卡片上說明郵件未送達，並列出收件者、原因和處理方式">
+<p>卡片會列出每位收件者，以淺顯的文字說明原因和您可以怎麼做。<b data-text="bounce-details"></b>會顯示收件伺服器自己的說明文字。</p>
+<ul>
+    <li><b data-text="bounce-show-message"></b>會在帳戶中找得到原始郵件時將其選取。</li>
+    <li>若是延遲，<b data-text="bounce-show-delayed"></b>會在原始郵件可用時將其選取。通知表示系統仍在嘗試傳遞；請等待結果後再重新寄送。</li>
+</ul>
+<p>以下是最終失敗的一些常見原因和建議。如果只是延遲傳遞，請等待結果後再重新寄送：</p>
+<table>
+    <tr><th>卡片上顯示</th><th>處理方式</th></tr>
+    <tr><td><b data-text="bounce-user-unknown"></b></td><td>檢查地址的拼字，或向對方詢問他現在使用的地址。</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>以其他方式聯絡對方，請他清出空間後您再試一次。</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>查看伺服器的說明。如果是內容遭拒，請修改郵件後再試一次。</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>將通知轉寄給您的郵件服務提供者。寄件伺服器的位址被回報為已封鎖。</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>收件伺服器要求稍後再試。延遲通知並不保證何時能傳遞成功。</td></tr>
+</table>
+<p>若要找出所有傳遞通知，請搜尋 <code>is:bounce</code>。通知是在您的電腦上分析的；其內容不會傳送到另外的分析服務。</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

@@ -5,7 +5,8 @@
 # providers' branding allows. The words are the catalogs' win-sign-in-google and win-sign-in-microsoft, in the fonts the
 # pictures use: Roboto Medium for Google (Apache 2.0), its Latin, Latin Extended, Greek and Cyrillic subsets, and
 # Selawik Semibold for Microsoft (OFL, Microsoft's open stand-in for Segoe UI), which has no Greek or Cyrillic, so Open
-# Sans SemiBold (OFL, by Segoe's designer) writes those. Each letter is written in the first of the fonts that has it,
+# Sans SemiBold (OFL, by Segoe's designer) writes those; Noto Sans JP, SC, TC and KR (OFL) write Japanese, Chinese and
+# Korean, Medium for Google and SemiBold for Microsoft. Each letter is written in the first of the fonts that has it,
 # and a letter none has stops the script. The fonts are fetched into build/fonts, checked by their hashes; the pictures
 # are committed. Run it after those words change or a language is added. Needs ImageMagick (with fontconfig's
 # fc-query), perl and curl.
@@ -36,12 +37,46 @@ fetch "$FONTSOURCE/open-sans@5.2.5/greek-600-normal.ttf" "$FONTS/open-sans-greek
     e0b3fe7d7ae2252906e6e62ec66242bb973f9c9a8a4d174addbeb63d0683e311
 fetch "$FONTSOURCE/open-sans@5.2.5/cyrillic-600-normal.ttf" "$FONTS/open-sans-cyrillic-600.ttf" \
     1283b92fac478fc060552a5dbe812fd411d0e61070c837f08a71c5a2e72e2ee0
+# Vietnamese: Roboto's own subset for Google; Selawik has none of its toned letters, so Microsoft's button writes
+# Vietnamese wholly in Open Sans SemiBold rather than a word in two fonts
+fetch "$FONTSOURCE/roboto@5.2.5/vietnamese-500-normal.ttf" "$FONTS/roboto-vietnamese-500.ttf" \
+    132e77411bea3204501f42e3737eff0931a74bf9ad9b3c7ef5f3159dbaca507c
+fetch "$FONTSOURCE/open-sans@5.2.5/latin-600-normal.ttf" "$FONTS/open-sans-latin-600.ttf" \
+    28376028a2c5141c0c1a3fe359dd605bd70b370a4926bf798880d40704984bfc
+fetch "$FONTSOURCE/open-sans@5.2.5/latin-ext-600-normal.ttf" "$FONTS/open-sans-latin-ext-600.ttf" \
+    1e85fe1eceeef718847eb3e16e242712dddef0b74f8c43c9ecbd84cf65f47464
+fetch "$FONTSOURCE/open-sans@5.2.5/vietnamese-600-normal.ttf" "$FONTS/open-sans-vietnamese-600.ttf" \
+    f57d0014bd5eac6d22daf22f760213a962d7b390816948c78ff15220041be6f6
+# Noto Sans (OFL) for Japanese, Chinese and Korean, which neither picture's font has: Medium beside Roboto Medium,
+# SemiBold beside Selawik Semibold; fontsource's subsets of each script's common characters
+fetch "$FONTSOURCE/noto-sans-jp@5.2.5/japanese-500-normal.ttf" "$FONTS/noto-sans-jp-500.ttf" \
+    b897784e60cfeb982c038d321d9e874c083c7257887d3652a6696012a5290f55
+fetch "$FONTSOURCE/noto-sans-jp@5.2.5/japanese-600-normal.ttf" "$FONTS/noto-sans-jp-600.ttf" \
+    2190a363708fc60540d9c4f96a9f7494901cd3f5ab8745bab3098199cc13d90f
+fetch "$FONTSOURCE/noto-sans-sc@5.2.5/chinese-simplified-500-normal.ttf" "$FONTS/noto-sans-sc-500.ttf" \
+    9b72ca2f1fff35211663b1ef21adfd4f719ad975f620d3d687de19e7adb9ca78
+fetch "$FONTSOURCE/noto-sans-sc@5.2.5/chinese-simplified-600-normal.ttf" "$FONTS/noto-sans-sc-600.ttf" \
+    a467410d28e44dbed89c730161b3d7a1e2b43a4f72b251d324eae1bac8ec6d24
+fetch "$FONTSOURCE/noto-sans-tc@5.2.5/chinese-traditional-500-normal.ttf" "$FONTS/noto-sans-tc-500.ttf" \
+    da5792fc87ce2bb59e67e68a5d94617d85e9319e65f194cae43a5947a361167d
+fetch "$FONTSOURCE/noto-sans-tc@5.2.5/chinese-traditional-600-normal.ttf" "$FONTS/noto-sans-tc-600.ttf" \
+    f866e44b909ef06990531e929d86ff8819c4eaff45091a9d9c0f786b3a3955ef
+fetch "$FONTSOURCE/noto-sans-kr@5.2.5/korean-500-normal.ttf" "$FONTS/noto-sans-kr-500.ttf" \
+    d8a99685c0486a939d6db2060ef374abd240cdf93ff8170f58e130a7dbc5cb2e
+fetch "$FONTSOURCE/noto-sans-kr@5.2.5/korean-600-normal.ttf" "$FONTS/noto-sans-kr-600.ttf" \
+    6e3dbd5b486ad4e0bd188e2240d96ab95a9c765b00383d695be6b71daeaf05d3
 fetch "$SELAWIK_URL" "$FONTS/selawik/Selawik_Release.zip" "$SELAWIK_SHA"
 [ -f "$FONTS/selawik/selawksb.ttf" ] || unzip -o -q "$FONTS/selawik/Selawik_Release.zip" -d "$FONTS/selawik"
 
 # each provider's fonts, the first one the picture's own
 GOOGLE_FONTS=("$FONTS/roboto-500.ttf" "$FONTS/roboto-latin-ext-500.ttf" "$FONTS/roboto-greek-500.ttf"
     "$FONTS/roboto-cyrillic-500.ttf")
+# the Noto font of a language's script, after the Latin ones, so a Han character takes that language's forms
+cjk() {
+    case $1 in
+        ja) echo jp ;; zh-Hans) echo sc ;; zh-Hant) echo tc ;; ko) echo kr ;; *) echo "" ;;
+    esac
+}
 MICROSOFT_FONTS=("$FONTS/selawik/selawksb.ttf" "$FONTS/open-sans-greek-600.ttf" "$FONTS/open-sans-cyrillic-600.ttf")
 
 WORK=$(mktemp -d)
@@ -151,9 +186,20 @@ english() {
 
 for lang in $(scripts/languages.sh --codes); do
     [ "$lang" = en ] && continue
+    google=("${GOOGLE_FONTS[@]}")
+    microsoft=("${MICROSOFT_FONTS[@]}")
+    if [ "$lang" = vi ]; then
+        google+=("$FONTS/roboto-vietnamese-500.ttf")
+        microsoft=("$FONTS/open-sans-latin-600.ttf" "$FONTS/open-sans-latin-ext-600.ttf" "$FONTS/open-sans-vietnamese-600.ttf")
+    fi
+    script=$(cjk "$lang")
+    if [ -n "$script" ]; then
+        google+=("$FONTS/noto-sans-$script-500.ttf")
+        microsoft+=("$FONTS/noto-sans-$script-600.ttf")
+    fi
     button "$BRANDS/google-sign-in.png" 103 31 18 29 "#757575" \
-        "$(words "$lang" win-sign-in-google)" "$BRANDS/google-sign-in.$lang.png" "${GOOGLE_FONTS[@]}"
+        "$(words "$lang" win-sign-in-google)" "$BRANDS/google-sign-in.$lang.png" "${google[@]}"
     button "$BRANDS/microsoft-sign-in.png" 138 43 20 44 "#5e5e5e" \
-        "$(words "$lang" win-sign-in-microsoft)" "$BRANDS/microsoft-sign-in.$lang.png" "${MICROSOFT_FONTS[@]}"
+        "$(words "$lang" win-sign-in-microsoft)" "$BRANDS/microsoft-sign-in.$lang.png" "${microsoft[@]}"
     echo "$BRANDS/google-sign-in.$lang.png $BRANDS/microsoft-sign-in.$lang.png"
 done

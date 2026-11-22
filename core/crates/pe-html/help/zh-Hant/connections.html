@@ -1,0 +1,16 @@
+<!--review-->
+<h1>Inbox Classic 建立的連線</h1>
+<p class="summary">寫給對技術好奇的人：Inbox Classic 會連線到哪裡，以及原因。</p>
+<ul>
+    <li><b>您的郵件伺服器</b>：透過 IMAP 讀取郵件，透過 SMTP 寄送郵件。連線使用 TLS 加密，每部伺服器的憑證都會依照您系統信任的憑證進行檢查。除非您選擇<b data-text="ui-security-none"></b>並確認，否則 Inbox Classic 會拒絕沒有加密的伺服器。</li>
+    <li><b>新增帳戶時</b>：查詢帳戶的伺服器。Inbox Classic 會透過 DNS over HTTPS（先 Cloudflare，再 Google）讀取您網域的 DNS 記錄，絕不使用一般的 DNS。它也會嘗試您服務提供者的 autoconfig 檔案，以及 Thunderbird 的服務提供者清單（ISPDB）。對於 Exchange，它會詢問 Microsoft Autodiscover，只有在對方透過 HTTPS 要求時才會提供您的密碼。絕不會選用沒有加密的伺服器。</li>
+    <li><b>瀏覽器登入</b>：使用 OAuth 2.0 和 PKCE，連線到 Google、Microsoft 或您登入應用程式的服務提供者。瀏覽器只會回到這部電腦上的 Inbox Classic。</li>
+    <li><b>品牌標誌</b>（BIMI）：郵件沒有附帶可用的標誌，也沒有可重複使用的已存副本時，從品牌的 HTTPS 位址取得。下載的標誌會快取起來，應用程式重新啟動後仍可使用。只有在您的郵件伺服器判定郵件通過 DMARC 檢查並核准該標誌時，才會這麼做。</li>
+    <li><b>來自網際網路的圖片</b>：在您允許時，包括透過信任的寄件者或自動下載設定。</li>
+    <li><b>取消訂閱</b>：只有在您核准後。一鍵式要求（RFC 8058）需要一個經您郵件伺服器接受、且涵蓋兩個取消訂閱標頭的 DKIM 簽章。</li>
+    <li><b>加密金鑰</b>：需要收件者的金鑰，或您開始查詢時。依地址搜尋時，會先查詢該地址的網域（Web Key Directory），若已啟用，再查詢 keys.openpgp.org。依指紋或金鑰識別碼搜尋時，傳送到 keys.openpgp.org 的是該識別碼，而不是地址。發布您的公開金鑰時，會將它傳送到 keys.openpgp.org，並要求確認其中的地址。</li>
+    <!--os:mac--><li><b>更新</b>：連線到 inboxclassic.com，查看是否有新版本。</li><!--/os-->
+</ul>
+<p>只有在您的服務提供者回報來自驗證碼所屬網域或其上層網域的有效 DKIM 簽章時，才會提供登入驗證碼。Inbox Classic 從服務提供者的 Authentication-Results 或 ARC-Authentication-Results 標頭讀取這項結果。這不需要另外建立連線。</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

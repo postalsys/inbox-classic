@@ -8,6 +8,8 @@ messages = { $count ->
    *[other] { $count } zpráv
 }
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bajt
     [few] { $count } bajty

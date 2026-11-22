@@ -1,0 +1,18 @@
+<!--review-->
+<h1>登入應用程式</h1>
+<p class="summary">向 Google、Microsoft 或相容的 OpenID Connect 服務提供者註冊您自己的登入應用程式，以便透過瀏覽器登入。</p>
+<p>透過瀏覽器登入時，會使用一個已向服務提供者註冊的 OAuth 用戶端。Inbox Classic 有自己的 Google 和 Microsoft 用戶端。在這個設定下，內建的 Google 用戶端只保留給測試使用者，因此<b data-text="win-sign-in-google"></b>一開始是關閉的。您可以註冊自己的用戶端：在您的 Google Cloud 專案中、在您的 Microsoft Entra 租用戶中，或向支援郵件存取的相容 OpenID Connect 服務提供者註冊。</p>
+<p>若要新增登入應用程式：</p>
+<ol>
+    <li>選擇<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>。</li>
+    <li>按一下<!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->，然後按一下<!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->。</li>
+    <li>在<b data-text="ui-fill-in-for"></b>旁，按一下 Google 或 Microsoft，即可填入簽發者、範圍和伺服器。若是其他服務提供者，請自行輸入。</li>
+    <li>依照底部方塊的說明，向服務提供者註冊用戶端。請註冊那裡顯示的<b data-text="ui-redirect-uri"></b>。</li>
+    <li>輸入<b data-text="ui-client-id"></b>，如果服務提供者給了您<b data-text="ui-client-secret"></b>，也請輸入。根據預設，用戶端密碼會保存在<!--os:windows--> Windows 認證管理員<!--/os--><!--os:mac-->您的登入鑰匙圈<!--/os--><!--os:linux-->您的金鑰圈<!--/os-->中，而且不會再次顯示。</li>
+    <li>按一下<b data-text="ui-check"></b>，檢查簽發者探索及其服務位址。這不會驗證用戶端識別碼、用戶端密碼或郵件權限。然後按一下<b data-text="ui-ok"></b>。</li>
+    <li>在<b data-text="ui-add-account-title"></b>的第一頁，使用<!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os-->新增帳戶。</li>
+</ol>
+<p>在<b data-text="ui-sign-in-apps"></b>中，<!--os:windows,mac-->每個應用程式的核取方塊<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os-->表示是否向新帳戶提供它，內建的應用程式也包括在內。已經在使用某個應用程式的帳戶會繼續運作。<!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os-->可變更應用程式，<b data-text="ui-remove"></b>則可在沒有帳戶使用它時將其移除。</p>
+<p>如果郵件伺服器拒絕應用程式的權杖，請檢查它的範圍是否提供郵件存取權。</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->

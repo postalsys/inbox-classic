@@ -1,0 +1,23 @@
+<!--review-->
+<h1>草稿和发件箱</h1>
+<p class="summary">保存邮件以便以后完成，并查看等待发送的邮件。</p>
+<h2>保存草稿</h2>
+<p>单击<b data-text="ui-tb-save"></b>，或按 <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->。邮件会保存在服务器上该帐户的<b data-text="folder-drafts"></b>文件夹中。再次保存会替换先前的副本。邮件窗口的状态栏会显示保存的时间。</p>
+<p>在您停止键入几秒后，或者在您持续键入时每隔三十秒，Inbox Classic 也会自动保存邮件。如果 Inbox Classic 或计算机意外关闭，未完成的邮件会在 Inbox Classic 下次启动时重新打开。</p>
+<p>关闭有更改的邮件时，会询问是否保存更改：</p>
+<ul>
+    <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os-->将其保存到<b data-text="folder-drafts"></b>。</li>
+    <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os-->放弃更改。如果该草稿只是自动保存的，它也会从<b data-text="folder-drafts"></b>中删除。</li>
+    <li><b data-text="ui-cancel"></b>返回到邮件。</li>
+</ul>
+<p>要继续撰写，请双击<b data-text="folder-drafts"></b>中的草稿。它会连同收件人、正文和文件一起打开。邮件安全地排入发件箱后（在发送完成之前），该草稿就会被删除。</p>
+<p>您撰写的邮件是一个独立的窗口，因此在它打开时您仍可以阅读邮件。关闭 Inbox Classic 时，会先关闭您正在撰写的邮件，并就有更改的邮件询问您。</p>
+<h2>发件箱</h2>
+<p><b data-text="ui-tb-send"></b>会把邮件放入发件箱。默认情况下，邮件会在几秒后发送。在此期间您可以取消发送（见下文）。主窗口的状态栏会显示邮件何时发送。</p>
+<p>如果邮件无法发送（例如没有连接），它会留在发件箱中。Inbox Classic 会在下次检查邮件时再次尝试发送。</p>
+<p>要查看等待发送的邮件，请选择<b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>。其中列出每封邮件及其尚未发送的原因。<b data-text="ui-outbox-send-all"></b>会立即重试，您也可以在那里删除邮件。</p>
+<h2>取消发送邮件</h2>
+<p>默认情况下，单击<b data-text="ui-tb-send"></b>后，邮件会等待几秒再发送。状态栏会显示倒计时。在此期间，单击倒计时旁的<b data-text="ui-undo-button"></b>，或选择<b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>即可取消发送。邮件会重新打开，供您编辑或放弃。此选项仅在倒计时结束前可用，即使邮件仍在发件箱中也是如此。它无法召回已经发送的邮件。</p>
+<p>要更改延迟时间或立即发送邮件，请选择<b data-settings="general"></b>并调整<b data-text="ui-send-delay"></b>。如果您在邮件等待发送时退出 Inbox Classic，应用会尝试立即发送它。</p>
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

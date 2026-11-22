@@ -1,0 +1,18 @@
+<!--review-->
+<h1>命令行选项</h1>
+<p class="summary">从终端启动 Inbox Classic 的选项，用于测试和 AI 代理。</p>
+<p>使用以下选项启动程序 <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os-->：</p>
+<table>
+    <tr><th>选项</th><th>作用</th></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>使用其他邮件存储，例如用于测试的存储</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>登录凭据仅在本次运行中保留，而不保存到系统的凭据存储中</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>对于测试服务器，只接受此文件中的证书：一个 DER 证书，或者一个或多个 PEM 证书</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>将浏览器登录的 URL 写入此文件，而不是打开浏览器</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>本次运行以此语言显示窗口，例如 <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>启动时不显示窗口</td></tr>
+    <tr><td><code>--mcp</code></td><td>将 AI 代理连接到 Inbox Classic。由代理的程序启动，而不是由您启动</td></tr>
+    <tr><td><code>--version</code></td><td>显示版本号后退出</td></tr>
+</table>
+<p>如果以 <code>mailto:</code> 链接作为参数，在已配置帐户的情况下会打开一封新邮件，与单击电子邮件链接的效果相同。</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

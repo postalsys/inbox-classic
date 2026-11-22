@@ -1,0 +1,21 @@
+<!--review-->
+<h1>Khóa mã hóa</h1>
+<p class="summary">Tạo khóa để ký số thư và nhận thư mã hóa, và lưu giữ khóa của các liên hệ.</p>
+<p>Inbox Classic ký số và mã hóa thư bằng khóa OpenPGP. Khóa của bạn có hai nửa: khóa công khai mà bạn đưa cho người khác, và khóa riêng nằm lại trên máy tính của bạn. Khóa của các liên hệ cho phép bạn kiểm tra chữ ký số của họ và mã hóa thư gửi cho họ.</p>
+<p>Để tạo khóa của bạn:</p>
+<ol>
+    <li>Chọn <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, rồi bấm <b data-text="ui-keys-new"></b>.</li>
+    <li>Chọn tài khoản và bấm <b data-text="ui-keys-new-make"></b>. Khóa được dùng cho địa chỉ của tài khoản và các địa chỉ khác của nó.</li>
+    <li>Bấm <b data-text="ui-keys-backup-now"></b> và chọn một cụm mật khẩu. Hãy cất tệp và cụm mật khẩu ở hai nơi an toàn khác nhau.</li>
+</ol>
+<aside class="warning">Nếu không có bản sao lưu, khóa của bạn không thể khôi phục khi máy tính này bị mất hoặc được đặt lại, và thư được mã hóa bằng khóa đó sẽ không đọc được nữa.</aside>
+<h2>Khóa vẫn được bảo vệ mà không cần cụm mật khẩu</h2>
+<p>Khóa riêng của bạn được bảo vệ bằng một khóa cất trong <!--os:windows-->Windows Credential Manager<!--/os--><!--os:mac-->chuỗi khóa đăng nhập<!--/os--><!--os:linux-->vòng khóa (keyring) của hệ thống<!--/os-->, nên thông thường bạn không phải nhập cụm mật khẩu để dùng chúng. Cụm mật khẩu bảo vệ bản sao lưu và có thể cần khi nhập. Nếu một khóa bị khóa, trước tiên hãy kiểm tra kho lưu trữ của hệ thống có sẵn và đã mở khóa chưa. Nếu thiếu khóa bảo vệ của nó, bấm <b data-text="ui-keys-import"></b> và chọn bản sao lưu của khóa.</p>
+<h2>Thêm khóa</h2>
+<p>Bấm <b data-text="ui-keys-import"></b> để thêm khóa từ một tệp, chẳng hạn khóa mà liên hệ gửi cho bạn hoặc bản sao lưu của chính bạn. Khóa riêng được bảo vệ bằng cụm mật khẩu sẽ hỏi cụm mật khẩu một lần. Sau đó Inbox Classic hỏi có dùng khóa của bạn vừa nhập cho các địa chỉ của bạn không.</p>
+<p>Từ đó trở đi, khóa của liên hệ được dùng cho địa chỉ của họ. Nếu sau này xuất hiện một khóa khác cho cùng địa chỉ, khóa hiện tại vẫn được dùng cho đến khi bạn chọn khóa mới trong thuộc tính của liên hệ.</p>
+<p>Để chia sẻ khóa công khai, chọn khóa và bấm <b data-text="ui-keys-export"></b>. Bạn cũng có thể chọn khóa của tài khoản trong thuộc tính của tài khoản, trên tab <b data-text="ui-account-security"></b>.</p>
+<p>Khi thiếu khóa dùng được của người nhận, Inbox Classic hỏi tên miền của địa chỉ trước, rồi đến keys.openpgp.org nếu việc tra cứu đó được bật. Bạn cũng có thể tìm theo dấu vân tay hoặc ID khóa; khi đó mã định danh được gửi đi thay cho địa chỉ email. Để không bao giờ hỏi keys.openpgp.org, tắt <b data-text="ui-pgp-keyserver"></b> trong <b data-settings="reading"></b>.</p>
+<p>Khóa cũng đi kèm thư. Khi Autocrypt được bật, thư từ một địa chỉ có khóa đã chọn sẽ mang theo khóa công khai của nó, và các ứng dụng khác đọc được khóa này có thể dùng nó để mã hóa thư gửi cho bạn. Khi bạn mở thư mang theo khóa của người gửi, Inbox Classic giữ khóa đó ở trạng thái chưa xác minh; một khóa khác cho địa chỉ đã có khóa sẽ chờ bạn chọn. Để ngừng gửi khóa của bạn, tắt <b data-text="ui-account-autocrypt"></b> trên tab <b data-text="ui-account-security"></b> của tài khoản.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

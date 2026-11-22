@@ -128,7 +128,10 @@ pub fn read_summary_text(summary: &ReadSummary) -> String {
         [one] => one.clone(),
         [first @ .., last] => tr_args(
             Text::AgentCanList,
-            &[("first", (&first.join(", ")).into()), ("last", last.into())],
+            &[
+                ("first", (&crate::text::word_list(first)).into()),
+                ("last", last.into()),
+            ],
         ),
     };
     super::capitalized(&line)

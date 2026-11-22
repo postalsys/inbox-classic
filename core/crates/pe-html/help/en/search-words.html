@@ -26,6 +26,7 @@
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Mail larger or smaller than a size, in bytes or with <code>K</code>, <code>M</code> or <code>G</code></td></tr>
 </table>
 <p>Accents and letter case do not matter. Unquoted terms of at least two characters match word beginnings; a single character matches a whole word. An unrecognized search operator is treated as ordinary text.</p>
+<p>Chinese, Japanese and Korean are written without spaces between words, so in them a term is found anywhere in the text: <code>会议</code> finds <i>会议室</i>, and <code>회의</code> finds <i>회의에서</i>.</p>
 <p>An encrypted message can be found by its outer sender, recipients and subject. Decrypted text and protected subjects become searchable after indexing with available keys, while <b data-text="ui-search-encrypted"></b> is on under <b data-settings="reading"></b>.</p>
 <p>The list shows no sizes. To see a message’s Internet headers, choose <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

@@ -1,0 +1,20 @@
+<!--review-->
+<h1>Mengurutkan email baru dengan aturan</h1>
+<p class="summary">Secara otomatis pindahkan, tandai sebagai sudah dibaca, tandai dengan bendera, atau arsipkan pesan masuk yang memenuhi kriteria Anda.</p>
+<p>Aturan menggabungkan kriteria pencarian dengan tindakan yang diterapkan pada pesan yang cocok saat pesan tiba di Kotak Masuk. Misalnya, aturan dengan <code>from:news@example.com</code> dapat memindahkan buletin dari alamat itu ke folder tersendiri dan menandainya sebagai sudah dibaca.</p>
+<p>Untuk membuat aturan:</p>
+<ol>
+    <li>Pilih <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, lalu klik <b data-text="ui-rule-new"></b>.</li>
+    <li>Masukkan nama dan isi <b data-text="ui-rule-query"></b> dengan istilah yang sama seperti di kotak pencarian, misalnya <code>from:</code>, <code>subject:</code>, atau <code>list:</code>. Baris di bawahnya menghitung pesan Kotak Masuk yang cocok di akun yang dipilih, atau di semua akun jika tidak ada yang dipilih.</li>
+    <li>Pilih satu atau beberapa tindakan untuk pesan yang cocok: memindahkannya ke folder, menandainya sebagai sudah dibaca, menandainya dengan bendera, mengarsipkannya, memindahkannya ke Email Sampah, menghapusnya, atau menahan pemberitahuan.</li>
+    <li>Klik <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Anda juga dapat membuat aturan dari pesan atau pencarian. Pilih <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> untuk mengisi pengirim atau milis dari pesan yang dipilih. Klik <b data-text="ui-create-rule"></b> di atas hasil pencarian untuk menggunakan kriteria pencarian Anda saat ini.</p>
+<h2>Cara kerja aturan</h2>
+<p>Aturan memproses pesan baru yang tiba di Kotak Masuk selama Inbox Classic berjalan, termasuk saat jendela utamanya disembunyikan. Pesan yang sudah ada hanya terpengaruh jika Anda mencentang <b data-text="ui-rule-apply-now"></b>. Aturan yang cocok dijalankan sesuai urutan dalam daftar. Begitu sebuah aturan menjadwalkan pemindahan yang valid keluar dari Kotak Masuk, aturan berikutnya dilewati untuk pesan itu. Pemrosesan di server tetap dapat gagal. Kosongkan kotak centang aturan di daftar untuk menonaktifkannya tanpa menghapusnya.</p>
+<h2>Mengubah aturan</h2>
+<p>Untuk mengedit aturan, pilih aturan di daftar dan klik <b data-text="ui-rule-edit"></b>, atau klik dua kali aturan tersebut. Gunakan <b data-text="ui-account-move-up"></b> dan <b data-text="ui-account-move-down"></b> untuk mengubah urutan, atau <b data-text="ui-rule-delete-button"></b> untuk menghapus aturan. Di editor aturan, <b data-text="ui-rule-show"></b> menutup editor tanpa menyimpan perubahannya dan mencari di semua Kotak Masuk dengan kueri yang diketik. Berbeda dengan jumlah yang cocok, pencarian ini tidak mempertahankan batasan akun.</p>
+<p>Aturan berlaku untuk pesan baru di Kotak Masuk, sehingga filter folder dan tanggal tidak didukung. Jika Anda menggunakan <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code>, atau <code>newer_than:</code>, sebuah pesan menjelaskan mengapa filter ini tidak dapat digunakan. Aturan tidak dapat mengirim pesan atau menghapusnya secara permanen: <b data-text="ui-rule-delete"></b> memindahkan pesan ke <b data-text="folder-deleted"></b> hanya jika folder itu ada.</p>
+<aside class="note">Aturan berjalan di komputer ini. Untuk mengurutkan email saat komputer mati, gunakan filter dari penyedia email Anda.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

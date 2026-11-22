@@ -1,0 +1,20 @@
+<!--review-->
+<h1>Inbox Classicが接続できない</h1>
+<p class="summary">メール サーバーに接続できないとき、またはサーバーが応答しないときの対処方法。</p>
+<p>ステータス バーまたは閲覧ウィンドウに、次のいずれかが表示されることがあります。</p>
+<ul>
+    <li>「connection error: …」</li>
+    <li>「the server did not answer in time」</li>
+    <li>「サーバーへの接続に失敗しました（…）」</li>
+    <li>「メール サーバーに接続できなかったか、接続が中断されました（…）。」</li>
+</ul>
+<p>解決するには、次のようにします。</p>
+<ol>
+    <li>インターネット接続を確認します。</li>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>でアカウントのプロパティを開き、サーバー名とポートを確認します。</li>
+    <li>送信に失敗する場合は、送信サーバーのセキュリティとポートを確認します。一般的には、ポート465のSSL/TLSか、ポート587のSTARTTLSです。ネットワークによってはメール用のポート、特にポート25がブロックされています。</li>
+</ol>
+<p>Inbox Classicは、次回のメールの確認時に再試行します。今すぐ試すには、<b data-text="ui-tb-sync"></b>をクリックします。</p>
+<p>接続がないときに送信したメッセージは、ローカルの送信トレイに残ります。Inbox Classicは接続できるようになると再試行しますが、サーバーがメッセージを拒否することもあります。</p>
+<nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>
+<!--/review-->
