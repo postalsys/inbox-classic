@@ -1,6 +1,6 @@
 {
   "round": 6,
-  "status": "in_progress",
+  "status": "complete",
   "starting_commit": "d42951a569eaf1313da6312ae5127da0bda1a2dd",
   "starting_review_baseline": "a040e21e1f2955f1cc9ce37962ce74280d05e672",
   "previous_round": 5,
@@ -17402,12 +17402,13 @@
     "core/locales/en/windows.ftl": "d226eb0385c347b5cc203eea82c0b7dba24e78e69ed1c0e3c69075defa02bac8"
   },
   "source_branches": {
-    "origin/master": "7668e552b45bd4db5fe3067617eac2ead13f8b05",
-    "PR244": "c9802c94b92fc814dc31b2422223e21551127c84"
+    "origin/master": "f66af7cb6e9a0ba65a008f1885179a4b8a8ebdef",
+    "PR244": "c9802c94b92fc814dc31b2422223e21551127c84",
+    "PR244_merged": "d42951a569eaf1313da6312ae5127da0bda1a2dd"
   },
   "validation_policy": "No local test suites, CI queries or manually triggered workflows. Static checks, source/caller inspection and required offline build permitted.",
   "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor",
-  "next_batch": "Commit reviewed content, integrate audited upstream, advance REVIEWED to the concrete reviewed commit, complete/archive records, publish and sync master.",
+  "next_batch": "None. Round 6 review is complete; publish the review branch and sync master after integration.",
   "publication": {
     "authorized": true,
     "status": "pending",
@@ -19497,7 +19498,14 @@
     "git_diff_check": "passed",
     "test_suites": "not run, per user restriction",
     "CI": "not queried or manually triggered",
-    "native_speaker_or_GUI_certification": false
+    "native_speaker_or_GUI_certification": false,
+    "review_baseline_check": {
+      "exit_code": 0,
+      "result": "0 messages and 0 help passages wait for a review; 0 new or changed without a mark",
+      "baseline": "cc96034650ebb623dad6fb4f5b7a806971d75e52",
+      "log_sha256": "b1c34ba0bdb98083b3495bd5142c475b9a57f7e00a57bfe38fadbde7c1539398"
+    },
+    "post_merge_catalog_help_hash_drift": 0
   },
   "late_arrivals": {
     "source": "7668e552b45bd4db5fe3067617eac2ead13f8b05",
@@ -21580,9 +21588,10 @@
   },
   "latest_upstream_check": {
     "commit": "f66af7cb6e9a0ba65a008f1885179a4b8a8ebdef",
-    "checked_at": "2026-11-22T07:32:44.565934+00:00",
+    "checked_at": "2026-11-22T07:34:39.528188+00:00",
     "catalog_or_help_changes_after_7668": 0,
-    "PR251_runtime_audit": "complete"
+    "PR251_runtime_audit": "complete",
+    "integrated_in_review_commit": "cc96034650ebb623dad6fb4f5b7a806971d75e52"
   },
   "parallel_review": {
     "authorized_by_user": true,
@@ -21878,7 +21887,7 @@
     "core/crates/pe-html/help/en/write-message.html": "3377fece25fbd051a5bd557a3a604a4b768f12ed58e12948fe3a858435c20200"
   },
   "final_reconciliation": {
-    "completed_at": "2026-11-22T07:32:44.565934+00:00",
+    "completed_at": "2026-11-22T07:34:39.528188+00:00",
     "scope": "English and affected originals/translations; full catalogs and help for all six new languages.",
     "files": 2065,
     "new_language_catalog_entries_reviewed": 8940,
@@ -21930,11 +21939,19 @@
       },
       "final-coverage-audit-report.json": {
         "path": "/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor/final-coverage-audit-report.json",
-        "sha256": "9e6f4e58dea9e4db7a299fd6ac51d275741ced48985458d4871ab493c6b831a7"
+        "sha256": "094c5396b8256e1d43b83443fdbee4d8d8869bc839ffbf7aac1c92b7282cb604"
       },
       "final-quality-audit.json": {
         "path": "/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor/final-quality-audit.json",
         "sha256": "ceb647f9d5f19ea3a4bee47315b8e6d8267a4f362ef836194af336757add4ef4"
+      },
+      "final-source-generated-review.json": {
+        "path": "/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor/final-source-generated-review.json",
+        "sha256": "7d80ed36978f8ccbc243721993b31c4c507e5d6b27ae5ad1e9584fd97c2a9313"
+      },
+      "final-coverage-audit-seal.json": {
+        "path": "/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor/final-coverage-audit-seal.json",
+        "sha256": "44e68546ad91d334a64a708aeb4c5d3c686659f54290bcc89a1b2e452c86ff2c"
       }
     },
     "historical_records": "Frozen evidence and batch hashes are historical checkpoints; latest_file_hashes is the reconciled current snapshot. Exact replay accounts for superseding followups.",
@@ -21942,6 +21959,10 @@
       "zh-Hans plaintext warning and account-security holds",
       "all translations_pending in historical source-followups.json",
       "all six full-language review queues"
-    ]
-  }
+    ],
+    "queued_review_items": 9868,
+    "queue_gaps": 0
+  },
+  "completed_at": "2026-11-22T07:35:49.594612+00:00",
+  "reviewed_content_commit": "cc96034650ebb623dad6fb4f5b7a806971d75e52"
 }
