@@ -17408,11 +17408,13 @@
   },
   "validation_policy": "No local test suites, CI queries or manually triggered workflows. Static checks, source/caller inspection and required offline build permitted.",
   "evidence_checkpoint": "/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor",
-  "next_batch": "None. Round 6 review is complete; publish the review branch and sync master after integration.",
+  "next_batch": "None. Round 6 review is complete and published in PR #252. Review later source changes in a followup round.",
   "publication": {
     "authorized": true,
-    "status": "pending",
-    "branch": "i18n/pr244-review-20261122"
+    "status": "published",
+    "branch": "i18n/pr244-review-20261122",
+    "pr": 252,
+    "url": "https://github.com/postalsys/inbox-classic/pull/252"
   },
   "latest_file_hashes": {
     "core/locales/bg/app.ftl": "426e595f4e529ef49a18de4a67fcb08127499fbdd4cc7ef8db62f66a9700d731",
