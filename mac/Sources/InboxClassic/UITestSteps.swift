@@ -887,7 +887,7 @@ extension UITest {
         check(header?.stringValue.contains(Text.uiUnsubscribe.text) == false, "the header has no Unsubscribe link")
         check(menuEnabled(.unsubscribe), "Message > Unsubscribe from List is on for it")
         let rowMenu = main.mailbox.messageMenu()?.items.map(\.title) ?? []
-        check(rowMenu.contains(Command.unsubscribe.label), "and on its right-click menu")
+        check(rowMenu.contains(Text.uiMenuUnsubscribe.text), "and on its right-click menu (\(rowMenu.joined(separator: ", ")))")
         await shot(main.window, "read-8-unsubscribe")
         onMain { bar?.press() }
         var sure = await waitWindow("alert", 10)
@@ -1841,7 +1841,6 @@ extension UITest {
             throw Failed(description: "no folder Bulk")
         }
         check(await waitUntil(30) { list.numberOfRows == 3 && !mailbox.listCovered }, "the folder lists its three messages")
-        await serverMailbox("Gone", create: false)
 
         command(.selectAll)
         check(await waitUntil(10) { mailbox.selectedCount == 3 && !mailbox.summaryWaiting && mailbox.summary.count == 3 },
@@ -1857,7 +1856,12 @@ extension UITest {
         let move = await waitWindow("move", 10)
         check(waitedForMove && move != nil, "Move chosen before Select All's summary is here opens its window once it is")
         if let move {
-            choose(folder(ofAccount: 0, named: "Gone"), in: move)
+            let gone = folder(ofAccount: 0, named: "Gone")
+            check(gone != 0, "the Move window offers Gone")
+            choose(gone, in: move)
+            // deleted on the server once chosen, so the move is refused there: deleted before, a sync could take it
+            // out of the window first and the move go to the folder chosen last
+            await serverMailbox("Gone", create: false)
             press(find("move.ok", in: move))
             _ = await waitUntil(5) { !move.isVisible }
         }

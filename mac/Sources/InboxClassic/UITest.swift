@@ -1031,6 +1031,59 @@ final class UITest {
         check(await waitUntil { list.numberOfRows >= 5 }, "clearing the search shows the folder again")
     }
 
+    /// The system's own input methods in the search box (Japanese Romaji, Chinese Pinyin, Korean 2-Set), where this Mac
+    /// has them turned on: keys handed to the field's input context as the system hands them, the composition left
+    /// unsearched and the confirmed word searched. Skipped, and said so, where they are off (CI's Mac)
+    func realInputMethods() async {
+        // each with the key its users confirm a word with: Return for Japanese and Korean, Space for Pinyin's first
+        // candidate (its Return takes the letters as typed)
+        let methods: [(id: String, name: String, keys: [UInt16], confirm: UInt16, word: String)] = [
+            ("com.apple.inputmethod.Kotoeri.RomajiTyping.Japanese", "Japanese", [40, 0, 34, 5, 34], 36, "会議"),  // kaigi
+            ("com.apple.inputmethod.SCIM.ITABC", "Chinese", [4, 32, 34, 16, 34], 49, "会议"),  // huiyi
+            ("com.apple.inputmethod.Korean.2SetKorean", "Korean", [5, 4, 37, 2, 46, 37], 36, "회의"),  // ghldml
+        ]
+        for method in methods {
+            await search("")
+            let all = list.numberOfRows
+            onMain { self.main.window.makeFirstResponder(self.main.searchField) }
+            await pause(0.3)
+            guard let editor = main.searchField.currentEditor() as? NSTextView, let context = editor.inputContext,
+                  context.keyboardInputSources?.contains(method.id) == true else {
+                print("     (\(method.name) input method not turned on here: skipped)")
+                continue
+            }
+            let before = context.selectedKeyboardInputSource
+            context.selectedKeyboardInputSource = method.id
+            await pause(0.5)
+            // a key down, the input method's alone, as the system hands it one before the field
+            let press = { (code: UInt16) async in
+                guard let key = CGEvent(keyboardEventSource: CGEventSource(stateID: .hidSystemState), virtualKey: code, keyDown: true),
+                      let event = NSEvent(cgEvent: key) else { return }
+                _ = context.handleEvent(event)
+                await self.pause(0.12)
+            }
+            for code in method.keys { await press(code) }
+            await pause(1)
+            // Korean confirms each finished syllable as it goes (the Mac's 2-Set all of them here): only a syllable still
+            // in progress is unconfirmed, and what is confirmed is searched
+            if method.name != "Korean" {
+                check(editor.hasMarkedText() && list.numberOfRows == all,
+                      "\(method.name) input method: while it composes (\(editor.string)), the composition is not searched")
+            }
+            await press(method.confirm)
+            await pause(1)
+            _ = await waitUntil(20) { !self.main.mailbox.listLoading }
+            let found = await waitUntil(20) { self.list.numberOfRows == 1 }
+            check(!editor.hasMarkedText() && main.searchField.stringValue.trimmingCharacters(in: .whitespaces) == method.word && found,
+                  "and confirming it gives \(method.word), which finds its message (\(main.searchField.stringValue), \(list.numberOfRows) rows)")
+            context.selectedKeyboardInputSource = before
+            onMain {
+                editor.string = ""
+                self.main.window.makeFirstResponder(nil)
+            }
+        }
+    }
+
     /// SCENARIO 21a: words of Japanese, Chinese and Korean, which have no spaces between them (or endings on them),
     /// found inside the subject; in a folder of their own, deleted at the end
     func wordsWithoutSpaces() async throws {
@@ -1074,6 +1127,7 @@ final class UITest {
         } else {
             check(false, "the search box takes the keys")
         }
+        await realInputMethods()
         await search("")
         var remove = URLRequest(url: URL(string: "\(rest)/CJK")!)
         remove.httpMethod = "DELETE"

@@ -4248,7 +4248,7 @@ public static class Dragger {
     Check ($sent -match '^POST /u/42 ' -and $sent -match 'List-Unsubscribe=One-Click') "Unsubscribe posts List-Unsubscribe=One-Click to the list ($(($sent -split "`r`n")[0]))"
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
     Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match 'The mailing list has accepted the unsubscribe request' } 10)) "and the status bar says it is done ($(StatusPart $mainStatus 0))"
-    $asked = [bool](WaitFor { (GetText $main $IDC_LIST_BAR) -match 'You asked to leave this list on' -and -not (Visible $main $IDC_UNSUBSCRIBE) } 10)
+    $asked = [bool](WaitFor { (GetText $main $IDC_LIST_BAR).Trim() -match (Pattern $en['ui-list-bar-asked']) -and -not (Visible $main $IDC_UNSUBSCRIBE) } 10)
     Check $asked "the bar then says when the list was asked, without a button ($(GetText $main $IDC_LIST_BAR))"
     [void][Native.Win]::SendMessage($main, 0x0117, $messageMenu, [IntPtr]4)
     Check ((([Native.Win]::GetMenuState($messageMenu, $IDM_UNSUBSCRIBE, 0) -band 0x3) -ne 0)) 'and Unsubscribe from List is off'
@@ -4279,7 +4279,7 @@ public static class Dragger {
     [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($main, $IDC_LIST_BAR), [ref]$listBox)
     Check ($picturesBox.Top -lt $listBox.Top) 'the pictures bar above the mailing-list bar'
     $barText = GetText $main $IDC_LIST_BAR
-    Check ($barText -match 'came after' -and (GetText $main $IDC_UNSUBSCRIBE) -eq $en['ui-unsubscribe-again']) "a message that came more than two days after the request offers Unsubscribe Again... ($barText)"
+    Check ($barText.Trim() -match (Pattern $en['ui-list-bar-came-after']) -and (GetText $main $IDC_UNSUBSCRIBE) -eq $en['ui-unsubscribe-again']) "a message that came more than two days after the request offers Unsubscribe Again... ($barText)"
     Shot $main 'read-9c-two-bars'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
@@ -5017,10 +5017,11 @@ public static class Dragger {
     # another client deletes Gone: the server refuses a move there, and the message comes back with why over the list
     SelectRow 0
     $refused = [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT)
-    [void](Invoke-RestMethod -Method Delete "$rest/Gone")
     Command $main $IDM_MOVE
     $move = WaitPicker 'Move Message'
-    Check ($null -ne $move -and (PickIn $move 'inboxclassic.test' 'Gone')) 'the folder deleted elsewhere is still offered (the app has not synced since)'
+    Check ($null -ne $move -and (PickIn $move 'inboxclassic.test' 'Gone')) 'the Move window offers Gone'
+    # deleted on the server once chosen: deleted before, a sync could take it out of the window first
+    [void](Invoke-RestMethod -Method Delete "$rest/Gone")
     if ($move) { Click $move 1 }
     $undoneBar = [Native.Win]::GetDlgItem($main, $IDC_UNDONE_BAR)
     $said = WaitFor { if ([Native.Win]::IsWindowVisible($undoneBar)) { WindowText $undoneBar } } 30
