@@ -102,7 +102,9 @@ const NSIS_LANGUAGES: &[(&str, &str)] = &[
     ("uk", "Ukrainian"),
     ("uz", "Uzbek"),
     ("vi", "Vietnamese"),
-    ("zh", "SimpChinese"),
+    // Chinese in Simplified, and in Traditional characters
+    ("zh-Hans", "SimpChinese"),
+    ("zh-Hant", "TradChinese"),
 ];
 
 /// The installer's words: its LangString names and their messages in windows.ftl

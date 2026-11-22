@@ -281,7 +281,7 @@ void CreateControls(HWND hwnd) {
     w.toolbar = CreateWindowExW(0, TOOLBARCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | TBSTYLE_FLAT | TBSTYLE_LIST | CCS_TOP, 0, 0, 0, 0, hwnd,
                                 reinterpret_cast<HMENU>(static_cast<INT_PTR>(IDC_HELP_TOOLBAR)), GetModuleHandleW(nullptr), nullptr);
     SendMessageW(w.toolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    SendMessageW(w.toolbar, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), FALSE);
+    SendMessageW(w.toolbar, WM_SETFONT, reinterpret_cast<WPARAM>(UiFont()), FALSE);
     struct Button {
         WORD id;
         PeText text;

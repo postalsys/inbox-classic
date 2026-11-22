@@ -10,6 +10,8 @@ messages = { $count ->
 }
 # a tizedesjel a méretekben: 2,4 MB
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bájt
    *[other] { $count } bájt

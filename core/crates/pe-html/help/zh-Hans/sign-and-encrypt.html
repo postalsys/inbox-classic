@@ -1,0 +1,26 @@
+<!--review-->
+<h1>对邮件签名和加密</h1>
+<p class="summary">对邮件签名以保护其完整性，并为您和收件人加密邮件内容。</p>
+<p>有效的签名可以表明签名内容是否被更改过。收件人还必须验证密钥的所有者是谁。加密的邮件只有收件人和您自己能够阅读，而且始终同时签名。这两项都需要您有自己的密钥。</p>
+<p>要对邮件签名或加密，请：</p>
+<ol>
+    <li>在邮件窗口中，单击<b data-text="ui-tb-sign"></b>或<b data-text="ui-tb-encrypt"></b>，或选择<!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b>或<b data-text="cmd-compose-encrypt"></b>。也可以按<kbd data-command="compose_sign"></kbd>或<kbd data-command="compose_encrypt"></kbd>。如果您的发件地址还没有选定的密钥，Inbox Classic 会提出为您创建一个。</li>
+    <li>单击<b data-text="ui-tb-send"></b>。</li>
+</ol>
+<p>打开<b data-text="ui-tb-encrypt"></b>后，主题下方的一行会用颜色和图标显示每位收件人，Inbox Classic 也会查找它尚未拥有的密钥：</p>
+<table>
+    <tr><th>收件人</th><th>含义</th></tr>
+    <tr><td>绿色，带锁</td><td>您已验证该收件人的密钥。</td></tr>
+    <tr><td>蓝色，带锁</td><td>密钥尚未验证，或者是您自己的密钥。</td></tr>
+    <tr><td>灰色，带<!--os:windows-->锁<!--/os--><!--os:mac-->沙漏<!--/os--><!--os:linux-->旋转的圆圈<!--/os--></td><td>Inbox Classic 正在查找该收件人的密钥。</td></tr>
+    <tr><td>琥珀色，带警告标志</td><td>未找到该收件人可用的密钥。</td></tr>
+</table>
+<h2>收件人没有密钥时</h2>
+<p>加密发送要求每位收件人都有可用的密钥。如果有人没有，<b data-text="ui-tb-send"></b>会打开<b data-text="ui-recipient-keys-title"></b>。在那里，您可以单击<b data-text="ui-recipient-find-key"></b>再次查找，单击<b data-text="ui-recipient-remove"></b>不发给此人，或者在邮件中已不含任何来自加密邮件的内容时单击<b data-text="ui-send-unencrypted"></b>。您也可以向对方索取公钥并导入。</p>
+<h2>答复加密邮件</h2>
+<p>答复或转发加密邮件时，<b data-text="ui-tb-encrypt"></b>一开始就是打开的，您要关闭它时 Inbox Classic 会先询问。只要邮件中含有来自加密邮件的文字、图片或附件，就只能加密发送。</p>
+<p>加密邮件的草稿以您自己的密钥加密保存，不带数字签名。发出的邮件及其在<b data-text="folder-sent"></b>中的副本仍是加密并签名的。</p>
+<h2>分享您的公钥</h2>
+<p>要让别人能给您发送加密邮件，请选择<!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>。您的公钥会以文件形式附加到邮件中。</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

@@ -1,0 +1,20 @@
+<!--review-->
+<h1>用规则整理新邮件</h1>
+<p class="summary">自动移动符合条件的传入邮件，将其标记为已读、加上标志或存档。</p>
+<p>规则将搜索条件与操作组合在一起，在匹配的邮件到达收件箱时对其执行这些操作。例如，一条包含 <code>from:news@example.com</code> 的规则可以将来自该地址的新闻稿移到单独的文件夹并标记为已读。</p>
+<p>要创建规则，请：</p>
+<ol>
+    <li>选择<b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>，然后单击<b data-text="ui-rule-new"></b>。</li>
+    <li>输入名称，并使用与搜索框相同的搜索词（例如 <code>from:</code>、<code>subject:</code> 或 <code>list:</code>）填写<b data-text="ui-rule-query"></b>。下面一行统计所选帐户中匹配的收件箱邮件数；如果未选择帐户，则统计所有帐户。</li>
+    <li>为匹配的邮件选择一项或多项操作：移到某个文件夹、标记为已读、加上标志、存档、移到垃圾邮件、删除或不发出通知。</li>
+    <li>单击<b data-text="ui-ok"></b>。</li>
+</ol>
+<p>您也可以根据邮件或搜索创建规则。选择<b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>，即可填入所选邮件的发件人或邮件列表。单击搜索结果上方的<b data-text="ui-create-rule"></b>，即可使用当前的搜索条件。</p>
+<h2>规则的工作方式</h2>
+<p>Inbox Classic 运行期间（包括主窗口隐藏时），规则会处理新到达收件箱的邮件。只有勾选<b data-text="ui-rule-apply-now"></b>时，现有邮件才会受到影响。匹配的规则按列表中显示的顺序运行。一旦某条规则为邮件安排了有效的移出收件箱操作，该邮件就会跳过后面的规则。服务器上的处理仍可能失败。清除列表中规则的复选框即可停用该规则而不删除它。</p>
+<h2>更改规则</h2>
+<p>要编辑规则，请在列表中选中它并单击<b data-text="ui-rule-edit"></b>，或者双击它。使用<b data-text="ui-account-move-up"></b>和<b data-text="ui-account-move-down"></b>更改顺序，或使用<b data-text="ui-rule-delete-button"></b>删除规则。在规则编辑器中，<b data-text="ui-rule-show"></b>会关闭编辑器而不保存其更改，并用输入的查询搜索所有收件箱。与匹配计数不同，此搜索不保留帐户限制。</p>
+<p>规则适用于新的收件箱邮件，因此不支持文件夹和日期筛选条件。如果您使用 <code>in:</code>、<code>before:</code>、<code>after:</code>、<code>older_than:</code> 或 <code>newer_than:</code>，会有一条消息说明为什么不能使用这些筛选条件。规则不能发送邮件，也不能永久删除邮件：<b data-text="ui-rule-delete"></b>只在<b data-text="folder-deleted"></b>文件夹存在时将邮件移到该文件夹。</p>
+<aside class="note">规则在这台计算机上运行。要在计算机关闭时整理邮件，请使用邮件服务提供商的筛选器。</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

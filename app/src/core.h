@@ -121,6 +121,9 @@ std::wstring Version();
 // a word of the catalogs (core/locales) in the language in use, `&` marking a menu letter as the catalog has it
 // Sets the language of the words (once, at start), and forgets the words looked up before
 void SetLanguage(const std::wstring& code);
+// the face the windows' words are drawn in for the language in use (Yu Gothic UI for Japanese), empty for the
+// system's default GUI font
+std::wstring WindowsFont();
 std::wstring T(PeText text);
 // the same without the menu letter marks
 std::wstring Plain(PeText text);

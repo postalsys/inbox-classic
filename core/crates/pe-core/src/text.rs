@@ -104,6 +104,11 @@ pub fn format_size(bytes: u64) -> String {
 }
 
 /// "1 message", "3 messages"
+/// Words of the language in use as a list: `Monday, Wednesday`, or with Chinese's and Japanese's 、
+pub fn word_list(words: &[String]) -> String {
+    words.join(&tr(Text::ListSeparator))
+}
+
 pub fn messages(count: u64) -> String {
     tr_args(Text::Messages, &[("count", count.into())])
 }

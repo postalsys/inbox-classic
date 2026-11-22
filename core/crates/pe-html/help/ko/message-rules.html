@@ -1,0 +1,20 @@
+<!--review-->
+<h1>규칙으로 새 메일 정리</h1>
+<p class="summary">조건에 맞는 받은 메시지를 자동으로 이동하거나, 읽은 상태로 표시하거나, 플래그를 지정하거나, 보관합니다.</p>
+<p>규칙은 검색 조건과, 받은 편지함에 도착하는 메시지 중 조건에 맞는 메시지에 적용할 작업으로 이루어집니다. 예를 들어 <code>from:news@example.com</code> 조건을 사용하는 규칙으로 그 주소에서 온 뉴스레터를 별도의 폴더로 옮기고 읽은 상태로 표시할 수 있습니다.</p>
+<p>규칙을 만들려면 다음과 같이 합니다.</p>
+<ol>
+    <li><b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>을 선택한 다음 <b data-text="ui-rule-new"></b> 단추를 클릭합니다.</li>
+    <li>이름을 입력하고, 검색 상자에서와 같은 검색어(<code>from:</code>, <code>subject:</code>, <code>list:</code> 등)를 사용하여 <b data-text="ui-rule-query"></b> 상자를 채웁니다. 그 아래 줄에는 선택한 계정의 받은 편지함에서, 계정을 선택하지 않았으면 모든 계정에서 일치하는 메시지 수가 표시됩니다.</li>
+    <li>일치하는 메시지에 적용할 작업을 하나 이상 선택합니다. 폴더로 이동, 읽은 상태로 표시, 플래그 지정, 보관, 정크 메일 폴더로 이동, 삭제, 알림 표시 안 함 중에서 선택할 수 있습니다.</li>
+    <li><b data-text="ui-ok"></b> 단추를 클릭합니다.</li>
+</ol>
+<p>메시지나 검색 결과에서 규칙을 만들 수도 있습니다. <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>를 선택하면 선택한 메시지의 보낸 사람이나 메일링 리스트가 채워집니다. 검색 결과 위의 <b data-text="ui-create-rule"></b> 단추를 클릭하면 현재 검색 조건이 사용됩니다.</p>
+<h2>규칙의 작동 방식</h2>
+<p>규칙은 Inbox Classic이 실행 중일 때 받은 편지함에 새로 도착한 메시지를 처리하며, 기본 창이 숨겨져 있을 때도 마찬가지입니다. 기존 메시지는 <b data-text="ui-rule-apply-now"></b> 확인란을 선택한 경우에만 처리됩니다. 일치하는 규칙은 목록에 표시된 순서대로 실행됩니다. 어떤 규칙이 받은 편지함 밖으로의 유효한 이동을 예약하면 그 메시지에는 이후 규칙이 적용되지 않습니다. 이동은 서버에서 처리하는 중에 실패할 수도 있습니다. 규칙을 삭제하지 않고 사용하지 않으려면 목록에서 해당 규칙의 확인란 선택을 취소합니다.</p>
+<h2>규칙 변경</h2>
+<p>규칙을 편집하려면 목록에서 규칙을 선택하고 <b data-text="ui-rule-edit"></b> 단추를 클릭하거나 규칙을 두 번 클릭합니다. 순서를 바꾸려면 <b data-text="ui-account-move-up"></b> 및 <b data-text="ui-account-move-down"></b> 단추를, 규칙을 삭제하려면 <b data-text="ui-rule-delete-button"></b> 단추를 사용합니다. 규칙 편집기에서 <b data-text="ui-rule-show"></b> 단추를 클릭하면 변경 내용을 저장하지 않고 편집기가 닫히며, 입력한 검색 조건으로 모든 받은 편지함을 검색합니다. 일치하는 메시지 수와 달리 이 검색에는 계정 제한이 적용되지 않습니다.</p>
+<p>규칙은 받은 편지함의 새 메시지에 적용되므로 폴더 및 날짜 필터는 지원되지 않습니다. <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> 또는 <code>newer_than:</code>을 사용하면 이 필터를 사용할 수 없는 이유를 알려 주는 메시지가 표시됩니다. 규칙으로 메시지를 보내거나 영구적으로 삭제할 수는 없습니다. <b data-text="ui-rule-delete"></b> 작업은 <b data-text="folder-deleted"></b> 폴더가 있는 경우에만 메시지를 그 폴더로 옮깁니다.</p>
+<aside class="note">규칙은 이 컴퓨터에서 실행됩니다. 컴퓨터가 꺼져 있는 동안에도 메일을 정리하려면 메일 공급자의 필터를 사용하십시오.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

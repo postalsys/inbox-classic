@@ -1,0 +1,26 @@
+<!--review-->
+<h1>メッセージにデジタル署名して暗号化する</h1>
+<p class="summary">メッセージにデジタル署名して内容が改ざんされていないことを示し、内容を自分と受信者のために暗号化します。</p>
+<p>有効な署名によって、署名された内容が変更されたかどうかがわかります。受信者は、キーの所有者も確認する必要があります。暗号化されたメッセージは、受信者とあなただけが読むことができ、常に署名も付きます。どちらにも、自分のキーが必要です。</p>
+<p>メッセージに署名または暗号化するには、次のようにします。</p>
+<ol>
+    <li>メッセージのウィンドウで、<b data-text="ui-tb-sign"></b>または<b data-text="ui-tb-encrypt"></b>をクリックするか、<!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b>または<b data-text="cmd-compose-encrypt"></b>を選択します。<kbd data-command="compose_sign"></kbd>または<kbd data-command="compose_encrypt"></kbd>を押してもかまいません。送信に使うアドレスのキーが選択されていない場合は、Inbox Classicがキーの作成を提案します。</li>
+    <li><b data-text="ui-tb-send"></b>をクリックします。</li>
+</ol>
+<p><b data-text="ui-tb-encrypt"></b>がオンの間は、件名の下の行に、各受信者が色とアイコン付きで表示され、Inbox Classicはまだ持っていないキーを探します。</p>
+<table>
+    <tr><th>受信者</th><th>意味</th></tr>
+    <tr><td>緑、ロックのマーク</td><td>受信者のキーを確認済みです。</td></tr>
+    <tr><td>青、ロックのマーク</td><td>キーが未確認か、あなた自身のキーです。</td></tr>
+    <tr><td>灰色、<!--os:windows-->ロックのマーク<!--/os--><!--os:mac-->砂時計<!--/os--><!--os:linux-->回転する円<!--/os--></td><td>Inbox Classicが受信者のキーを探しています。</td></tr>
+    <tr><td>黄色、警告のマーク</td><td>受信者の使用できるキーが見つかりませんでした。</td></tr>
+</table>
+<h2>受信者にキーがない場合</h2>
+<p>暗号化して送信するには、すべての受信者について使用できるキーが必要です。ない受信者がいる場合、<b data-text="ui-tb-send"></b>をクリックすると<b data-text="ui-recipient-keys-title"></b>が開きます。そこで、<b data-text="ui-recipient-find-key"></b>をクリックしてもう一度探すか、<b data-text="ui-recipient-remove"></b>をクリックしてその人をメッセージから外すか、暗号化されたメールの内容が残っていなければ<b data-text="ui-send-unencrypted"></b>をクリックします。相手に公開キーを送ってもらい、インポートすることもできます。</p>
+<h2>暗号化されたメールへの返信</h2>
+<p>暗号化されたメッセージへの返信や転送は、<b data-text="ui-tb-encrypt"></b>がオンの状態で始まり、オフにする前にInbox Classicが確認します。暗号化されたメールの本文、画像、添付ファイルを含む間は、暗号化しないと送信できません。</p>
+<p>暗号化されたメッセージの下書きは、自分のキーで暗号化して保存され、デジタル署名は付きません。送信されたメッセージと<b data-text="folder-sent"></b>のコピーは、暗号化され署名された状態のままです。</p>
+<h2>公開キーを共有する</h2>
+<p>相手から暗号化されたメールを受け取れるようにするには、<!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>を選択します。公開キーがファイルとしてメッセージに添付されます。</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

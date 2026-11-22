@@ -1,0 +1,27 @@
+<!--review-->
+<h1>附件</h1>
+<p class="summary">打开或保存邮件附带的文件，并为您撰写的邮件添加附件。</p>
+<h2>在邮件中查看图片和 PDF 文件</h2>
+<p>图片预览和每个 PDF 文件的前五页显示在邮件正文之后，并附有名称和大小。单击其中一个即可打开该文件。较长的 PDF 文件带有一个用于打开它的链接。最多自动显示 20 张图片和页面，下方的一行会统计其余的文件。</p>
+<p>这些是 Inbox Classic 自行绘制的副本：文件中的任何内容都不会运行，也不会从 Internet 加载任何内容。无法绘制的文件会显示为一个图块，其中列出名称、大小和原因，例如 HEIC 图片或受密码保护的 PDF 文件；单击该图块即可打开文件。大邮件仍在下载时，其文件会以图块显示，直到下载完成。在已签名或已加密的邮件中，每个部分在各自的框架内显示自己的文件。加密部分的预览只保留在内存中，不会写入预览文件。单独打开或保存附件时会写入一份未加密的副本。</p>
+<p>要在邮件中显示某个文件或将其移出，请在文件列表中右键单击该文件，然后选择<b data-text="ui-attachment-show-in-message"></b>。此设置在该邮件显示期间有效。</p>
+<p>如果只想查看列表，请在<b data-settings="reading"></b>中关闭<b data-text="ui-preview-show"></b>。如果 Inbox Classic 在绘制文件预览时停止运行，它会在下次启动时停用 PDF 预览并说明原因。这并不能证明是该文件导致了中断；打开<b data-text="ui-preview-pdfs"></b>即可重新显示它们。</p>
+<p>打印邮件时，邮件中显示的图片预览也会一并打印。PDF 文件不会打印：每个 PDF 文件以一行列出其名称，请在它自己的程序中打印。在已签名或已加密的邮件中，每个部分的图片紧跟在该部分的正文之后，并分别标明所属部分。</p>
+<h2>打开附件</h2>
+<p>邮件的文件列在其标头下方，每个文件都显示名称和大小。双击文件即可用计算机为该类文件使用的程序打开它。使用键盘时，请按<kbd>Tab</kbd>直到选中文件，用箭头键选择一个文件，然后按<kbd>Enter</kbd>。</p>
+<p>右键单击文件可以使用<b data-text="ui-attachment-open"></b>、<b data-text="ui-attachment-save-as"></b>和<b data-text="ui-attachment-save-all"></b>。标头右侧的回形针也会列出这些文件。</p>
+<p>Inbox Classic 会阻止打开可识别的程序、脚本、安装程序、快捷方式、磁盘映像、网页和带宏的 Office 文档。这类文件的<b data-text="ui-attachment-open"></b>不可用；请保存此类文件，并且只有在信任其来源时才自行打开。</p>
+<p>为了打开文件，Inbox Classic 会在您的用户帐户的临时文件夹中保存一份副本。应用启动时，会尝试删除存在超过一天的临时副本。在 Windows 和 macOS 上，这些文件会被标记为来自 Internet。加密邮件的附件以未加密的形式存放在那里；您第一次打开此类附件时，Inbox Classic 会说明这一点。</p>
+<h2>保存附件</h2>
+<p>右键单击文件并选择<b data-text="ui-attachment-save-as"></b>，或选择<b data-text="ui-attachment-save-all"></b>将所有文件保存到一个文件夹中。Inbox Classic 会建议一个安全的名称，其中不含可能让名称看起来像别的东西的字符。保存所有附件时，已有的文件会保留，同名的新文件会加上编号。保存单个文件时遵循系统的保存对话框，该对话框可能会提出替换某个文件。</p>
+<aside class="warning">只打开您预期会收到的人发来的附件。程序或要求您“启用内容”的文档可能会控制您的计算机。程序包括<!--os:windows--> <code>.exe</code>、<code>.msi</code>、<code>.js</code>、<code>.vbs</code>、<code>.bat</code> 和 <code>.scr</code> 文件。<!--/os--><!--os:mac--> <code>.app</code>、<code>.pkg</code>、<code>.dmg</code> 和 <code>.command</code> 文件。<!--/os--><!--os:linux--> <code>.sh</code>、<code>.deb</code>、<code>.AppImage</code> 和 <code>.desktop</code> 文件。<!--/os--></aside>
+<h2>添加附件</h2>
+<p>要为您撰写的邮件添加文件，请：</p>
+<ol>
+    <li>单击<b data-text="ui-tb-attach"></b>。</li>
+    <li>选择文件。它们会连同大小一起列在<b data-text="ui-field-attach"></b>中。</li>
+</ol>
+<p>您也可以将文件从<!--os:windows-->文件资源管理器<!--/os--><!--os:mac-->访达<!--/os--><!--os:linux-->文件管理器<!--/os-->拖到地址字段上。不是图片的文件也可以拖到正文上。</p>
+<p>要移除文件，请选中它并按<kbd>Delete</kbd>，或者右键单击它并选择<b data-text="ui-remove"></b>。文件在邮件发送时才会被读取，因此在此之前请不要移动它们。</p>
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:save-print-import"></a> <a href="topic:links-scripts"></a></nav>
+<!--/review-->

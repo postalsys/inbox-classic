@@ -1,0 +1,15 @@
+<!--review-->
+<h1>アカウントのセキュリティ設定</h1>
+<p class="summary">アカウントのサーバーのセキュリティ設定と、それぞれの意味。</p>
+<p>各アカウントには、受信サーバー用の<b data-text="ui-field-imap-security"></b>と送信サーバー用の<b data-text="ui-field-smtp-security"></b>があります。プロバイダーの設定が見つかると、Inbox Classicがこれらを入力します。変更するには、<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>でアカウントのプロパティを開きます。</p>
+<table>
+    <tr><th>設定</th><th>意味</th></tr>
+    <tr><td>SSL/TLS</td><td>接続は最初から暗号化されます。通常、受信メールはポート993、送信メールはポート465です。</td></tr>
+    <tr><td>STARTTLS</td><td>接続は暗号化されずに始まり、サインイン情報を送る前にTLSに切り替わります。通常、受信メールはポート143、送信メールはポート587です。サーバーが暗号化を提供しない場合、Inbox Classicは接続を中止します。</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>パスワードとメールは暗号化されずに送られ、接続を傍受した人に読まれるおそれがあります。</td></tr>
+</table>
+<aside class="warning"><b data-text="ui-security-none"></b>は、自分のコンピューターやローカル ネットワーク上のサーバーにだけ使ってください。使う前にInbox Classicが警告します。</aside>
+<p>Inbox Classicは、システムが信頼する証明書を使って、すべてのサーバーが本物であることを確認します。どんな証明書でも受け入れるような設定はありません。</p>
+<p>既定では、パスワードは<!--os:windows-->Windows資格情報マネージャー<!--/os--><!--os:mac-->ログインキーチェーン<!--/os--><!--os:linux-->キーリング<!--/os-->に保存され、メールの保存場所には保存されません。ブラウザーでのサインインでは、パスワードの代わりにトークンがそこに保存されます。メモリのみのモードや、システムの保管場所が利用できない場合は、サインイン情報が現在のセッションに限られることがあります。</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

@@ -1,0 +1,27 @@
+<!--review-->
+<h1>AI 代理发送邮件时</h1>
+<p class="summary">AI 代理想要发送的每封邮件都会先显示给您，并在发出之前在发件箱中等待。</p>
+<p>只有在您允许的情况下，代理才能发送邮件，而且每封邮件都要在您同意后才会发送。</p>
+<img src="picture:agents-4-send" alt="询问是否发送代理所写邮件的窗口，其中列出每个收件人，并标出一个新地址">
+<p>代理想要发送邮件时，Inbox Classic 会显示该邮件，并按地址列出每个收件人。您从未写信给过的地址会标记为<b data-text="ui-new-address"></b>。</p>
+<ol>
+    <li>阅读收件人和正文。</li>
+    <li>选择以下一项：
+        <ul>
+            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os-->将其排入发送队列。为减少误点确认，该按钮会在短暂延迟后才可用。</li>
+            <li><b data-text="ui-edit-first"></b>在新邮件中打开它，供您修改。</li>
+            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->（默认选项）不发送该邮件。</li>
+        </ul>
+    </li>
+</ol>
+<p>代理一次只询问一封邮件。如果您过了一段时间才回答，代理会被告知该邮件正在等待您处理，之后它可以询问您的决定。默认情况下，它写的邮件和草稿会像您自己的一样以您的签名结尾，但代理可以省略签名。</p>
+<p>获得批准的邮件会在发件箱中等待 30 秒，然后才尝试发送。其日志记录的是排入队列，而不是投递成功。只要邮件仍在发件箱中，即使已过 30 秒，您也可以在那里删除它，或者在<b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>中单击<!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os-->。</p>
+<h2>答复邀请</h2>
+<p>可以发送邮件的代理还可以通过同样的询问，代您接受、暂定接受或拒绝日历邀请。询问会在正文上方说明该邮件答复的是哪个邀请以及活动的时间。Inbox Classic 根据邀请本身写出发给组织者的答复，因此无法先打开该邮件进行修改。每个答复都需要您的批准，并且不带帐户签名文字。邮件服务器接受答复后，您本地的答复状态就会改变，无需组织者的日历确认。</p>
+<h2>代理写的草稿</h2>
+<p>打开代理写的草稿时，邮件上方会有一行注明该代理的名称。发送之前，请检查收件人和正文。</p>
+<img src="picture:agents-8-draft" alt="AI 代理写的草稿在自己的窗口中打开，正文上方有一行注明该代理">
+<p>在您于编辑器中保存草稿（包括自动保存）之前，代理都可以更改或删除它的草稿。从那以后，草稿就归您所有。</p>
+<aside class="warning">如果代理还具有其他工具，例如浏览网页或读取您的文件，它可能会通过这些工具传出所读取的内容。Inbox Classic 无法看到这些工具。只有在确实需要时，才允许代理发送邮件。</aside>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>
+<!--/review-->

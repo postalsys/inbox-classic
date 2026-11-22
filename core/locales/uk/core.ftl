@@ -11,6 +11,8 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2,4 МБ
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } байт
     [few] { $count } байти

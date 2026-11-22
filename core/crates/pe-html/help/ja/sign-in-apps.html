@@ -1,0 +1,18 @@
+<!--review-->
+<h1>サインイン アプリ</h1>
+<p class="summary">Google、Microsoft、または互換性のあるOpenID Connectプロバイダーに独自のサインイン アプリを登録し、ブラウザーでサインインします。</p>
+<p>ブラウザーでのサインインには、プロバイダーに登録されたOAuthクライアントが使われます。Inbox Classicには、GoogleとMicrosoft用の独自のクライアントがあります。この構成では、組み込みのGoogleクライアントはテスト ユーザー専用のため、<b data-text="win-sign-in-google"></b>は最初は無効です。独自のクライアントを登録することもできます。Google Cloudのプロジェクト、Microsoft Entraのテナント、またはメールへのアクセスに対応した互換性のあるOpenID Connectプロバイダーで登録します。</p>
+<p>サインイン アプリを追加するには、次のようにします。</p>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>を選択します。</li>
+    <li><!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->をクリックし、<!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->をクリックします。</li>
+    <li><b data-text="ui-fill-in-for"></b>の横にあるGoogleまたはMicrosoftをクリックすると、発行者、スコープ、サーバーが入力されます。ほかのプロバイダーの場合は、これらを入力します。</li>
+    <li>下部の説明に従って、プロバイダーにクライアントを登録します。そこに表示される<b data-text="ui-redirect-uri"></b>を登録してください。</li>
+    <li><b data-text="ui-client-id"></b>と、プロバイダーから発行されていれば<b data-text="ui-client-secret"></b>を入力します。既定では、シークレットは<!--os:windows-->Windows資格情報マネージャー<!--/os--><!--os:mac-->ログインキーチェーン<!--/os--><!--os:linux-->キーリング<!--/os-->に保存され、再び表示されることはありません。</li>
+    <li><b data-text="ui-check"></b>をクリックして、発行者の検出とそのサービスのアドレスを確認します。クライアントID、シークレット、メールの権限は検証されません。その後、<b data-text="ui-ok"></b>をクリックします。</li>
+    <li><b data-text="ui-add-account-title"></b>の最初のページで、<!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os-->を使ってアカウントを追加します。</li>
+</ol>
+<p><b data-text="ui-sign-in-apps"></b>では、<!--os:windows,mac-->各アプリのチェック ボックス<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os-->で、組み込みのものも含め、新しいアカウントに提示するかどうかを指定します。すでにそのアプリを使っているアカウントは引き続き使えます。<!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os-->でアプリを変更し、<b data-text="ui-remove"></b>で、使っているアカウントがなくなったアプリを削除します。</p>
+<p>メール サーバーがアプリのトークンを拒否する場合は、そのスコープでメールへのアクセスが許可されているか確認してください。</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->

@@ -170,9 +170,69 @@ extension UITest {
             check(false, "Tools > Encryption Keys opens")
         }
 
+        try await languagesOfWaveTwo()
+
         step("back in English")
         await startIn("en")
         check(main.window.toolbar?.items.contains { $0.label == Text.uiTbReply.text } == true, "the windows are in English again")
+    }
+
+    /// Japanese, Chinese (Simplified and Traditional), Korean, Indonesian and Vietnamese: the main window, a new message,
+    /// Add Mail Account and each Settings pane, nothing cut off (`tour-<code>-<n>-<view>`); the menus without the
+    /// bracketed access keys their catalogs write for Windows (`ファイル(&F)`)
+    private func languagesOfWaveTwo() async throws {
+        step("the languages of wave 2")
+        for code in ["ja", "zh-Hans", "zh-Hant", "ko", "id", "vi"] {
+            await startIn(code)
+            await shot(main.window, "tour-\(code)-1-main")
+            checkCatalogWords(in: main.window, "the main window (\(code))", cutOnly: true)
+            var bracketed: [String] = []
+            func walk(_ menu: NSMenu?) {
+                for item in menu?.items ?? [] {
+                    // an access key: & before a letter (`&File`), or a letter in brackets (`(F)`); AppKit's own "Emoji &
+                    // Symbols" writes & as a word
+                    if item.title.range(of: #"&[^\s&]|\([A-Z0-9]\)"#, options: .regularExpression) != nil {
+                        bracketed.append(item.title)
+                    }
+                    walk(item.submenu)
+                }
+            }
+            walk(NSApp.mainMenu)
+            check(bracketed.isEmpty, "no menu item of \(code) shows an access key (\(bracketed.joined(separator: " | ")))")
+            command(.newMail)
+            if let compose = await waitFor(10, { ComposeWindow.open.last?.window }) {
+                await pause(1)
+                await shot(compose, "tour-\(code)-2-compose")
+                checkCatalogWords(in: compose, "the compose window (\(code))", cutOnly: true)
+                await closeCompose(compose)
+            } else {
+                check(false, "a new message opens (\(code))")
+            }
+            command(.newAccount)
+            if let form = await waitWindow("account.start", 10) {
+                await pause(0.5)
+                await shot(form, "tour-\(code)-3-account")
+                checkCatalogWords(in: form, "Add Mail Account (\(code))", cutOnly: true)
+                NSApp.stopModal()
+                _ = await waitUntil { !form.isVisible }
+            } else {
+                check(false, "File > New Account opens the form (\(code))")
+            }
+            command(.options)
+            if let options = await waitFor(10, { SettingsWindow.current }) {
+                for (page, name) in [(SettingsPage.general, "4-options"), (.reading, "4b-options-reading"),
+                                     (.downloading, "4c-options-downloading")] {
+                    await showPane(options, page)
+                    await shot(options.window, "tour-\(code)-\(name)")
+                    checkCatalogWords(in: options.window, "Settings, \(page.rawValue) (\(code))", cutOnly: true)
+                }
+                await showPane(options, .general)
+                options.window.close()
+                _ = await waitUntil { SettingsWindow.current == nil }
+            } else {
+                check(false, "Settings opens (\(code))")
+            }
+        }
     }
 
     /// the AI Agents window and the question for programs started from a terminal in `language`: the log's rows,
@@ -314,7 +374,8 @@ extension UITest {
     }
 
     /// every word of the window from the catalogs, and every label and button wide enough for its words
-    private func checkCatalogWords(in window: NSWindow, _ name: String) {
+    /// with `cutOnly` only that nothing is cut off (a language of its own, where a word may be the same as English's)
+    private func checkCatalogWords(in window: NSWindow, _ name: String, cutOnly: Bool = false) {
         var words = ownWords(in: window.contentView)
         words.append((window.title, nil))
         for item in window.toolbar?.items ?? [] {
@@ -326,7 +387,9 @@ extension UITest {
         }
         // e-mail addresses and the like are examples, not words
         let left = Set(words.filter { english($0.0) && !$0.0.contains("@") }.map { $0.0 + ($0.1.map(diagnose) ?? "") })
-        check(left.isEmpty, "nothing in \(name) is left in English\(left.isEmpty ? "" : ": " + left.sorted().joined(separator: " | "))")
+        if !cutOnly {
+            check(left.isEmpty, "nothing in \(name) is left in English\(left.isEmpty ? "" : ": " + left.sorted().joined(separator: " | "))")
+        }
         var cut: [String] = []
         for case let (text, view?) in words where !text.isEmpty {
             guard !view.isHiddenOrHasHiddenAncestor, view.bounds.width > 0 else { continue }

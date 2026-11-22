@@ -1,0 +1,21 @@
+<!--review-->
+<h1>別のコンピューターに移行する</h1>
+<p class="summary">アカウント、設定、連絡先、キー、ルールを1つのファイルで別のコンピューターに移します。</p>
+<h2>エクスポートする</h2>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>を選択します。</li>
+    <li>移すものを選択します：<b data-text="setup-part-settings"></b>、<b data-text="setup-part-preferences"></b>、<b data-text="setup-part-accounts"></b>、<b data-text="setup-part-sign-in-apps"></b>、<b data-text="setup-part-contacts"></b>、<b data-text="setup-part-keys"></b>、<b data-text="setup-part-rules"></b>、<b data-text="setup-part-trusted-senders"></b>。</li>
+    <li>選択したアカウントの利用可能なサインイン情報と、選択した利用可能な秘密キーを含めるには、<b data-text="ui-setup-use-passphrase"></b>をオンにし、8文字以上のパスフレーズを2回入力します。</li>
+    <li><b data-text="ui-setup-export-button"></b>をクリックし、ファイルの保存先を選択します。</li>
+</ol>
+<p>ファイルにメッセージは含まれません。サーバーにあるメールは、移行先のコンピューターで再びダウンロードされます。ローカルの送信トレイは移されません。パスフレーズを設定すると、ファイル全体が暗号化されます。ロックを解除できない秘密キーは含まれません。パスフレーズを設定しない場合は、保存されたパスワード、サインイン情報、秘密キーは含まれず、アカウントにもう一度サインインする必要があります。</p>
+<aside class="warning">ファイルとパスフレーズは別々に保管し、インポートが済んだらファイルを削除してください。両方を手に入れた人は、あなたのメールを読むことができます。</aside>
+<h2>インポートする</h2>
+<ol>
+    <li>移行先のコンピューターで、<b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>を選択します。最初のアカウントを追加する前であれば、<b data-text="ui-add-account-title"></b>にもそのためのリンクがあります。</li>
+    <li>ファイルを選択し、パスフレーズがあれば入力します。</li>
+    <li>ウィンドウにファイルの内容が表示されます。インポートする項目とアカウントを選択し、<b data-text="ui-setup-import-button"></b>をクリックします。</li>
+</ol>
+<p>このコンピューターにすでに設定されているアカウントは変更されません。連絡先はグループも含めてアドレス帳に統合され、選択した設定とウィンドウの設定は現在のものと置き換わります。Inbox Classicは、アカウントの同期後に、見つからないルールの移動先を照合しようとしますが、そのフォルダーを作成することはありません。連絡先の新しいキーが既存のキーと置き換わるのは、連絡先のプロパティでそのキーを選択した場合だけです。</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
+<!--/review-->

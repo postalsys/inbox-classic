@@ -1165,6 +1165,7 @@ Screenshots: `options-1-language` (the General page), `options-2-reading` (the R
   terminal is in German and in the pseudo-language with nothing cut off (`agents-10b-terminal-german`,
   `agents-10c-terminal-pseudo`, not features)
 - in each language of `pe_i18n::LANGUAGES` but English, the main window, a new message, Add Mail Account, the accounts and each page of Preferences, nothing cut off in them: `tour-<language>-<n>-<view>` (Linux)
+- in Japanese, Simplified and Traditional Chinese, Korean, Indonesian and Vietnamese, the main window, a new message, Add Mail Account and each page of Options or Settings, nothing cut off in them: `tour-<language>-1-main`, `-2-compose`, `-3-account`, `-4-options`, `-4b-options-reading`, `-4c-options-downloading` (Windows, the Mac); on Windows the windows' words of Japanese, Chinese and Korean are in Yu Gothic UI, Microsoft YaHei UI, Microsoft JhengHei UI and Malgun Gothic, of Indonesian and Vietnamese in the default font; on the Mac no menu item shows a bracketed access key
 - started in the pseudo-language, each page of Options (Windows) and Settings (the Mac) fits its longer words: long
   check box labels wrap, the window does not grow wider than its fixed content width
 

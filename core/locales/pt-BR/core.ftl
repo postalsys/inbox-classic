@@ -13,6 +13,8 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2.4 MB
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [0] 0 bytes
     [one] { $count } byte

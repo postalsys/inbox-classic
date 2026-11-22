@@ -1,0 +1,10 @@
+<!--review-->
+<h1>移除 Inbox Classic</h1>
+<p class="summary">從您的電腦移除 Inbox Classic，並選擇是否保留它的本機資料。</p>
+<!--os:windows--><p>從<i>「設定」&gt;「應用程式」&gt;「已安裝的應用程式」</i>解除安裝 Inbox Classic。它會詢問是否也要移除所有本機應用程式資料，包括帳戶、郵件、連絡人、金鑰和設定。</p><!--/os-->
+<!--os:mac--><p>結束 Inbox Classic，然後將它從「應用程式」移到垃圾桶。它下載的郵件會留在 <code>~/Library/Application Support/Inbox Classic</code> 中，直到您也刪除該資料夾為止。</p><!--/os-->
+<!--os:linux--><p>使用 <code>sudo apt remove inbox-classic</code> 移除套件；在 Arch Linux 和 Omarchy 上則使用 <code>sudo pacman -R inbox-classic</code>。它下載的郵件會留在 <code>~/.local/share/inbox-classic</code> 中，直到您也刪除該資料夾為止。</p><!--/os-->
+<p>這些預設的資料資料夾也包含連絡人、金鑰和設定；刪除它們會移除所有這些本機資料。如果您變更過位置，位置可能會不同。解除安裝不會移除伺服器上的郵件，也不一定會從系統的密碼存放區移除認證。</p>
+<p>若要移除已儲存的帳戶登入認證，請先在<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>中移除每個帳戶。若只要移除一個帳戶，請參閱<a href="topic:manage-accounts"></a>。</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:updates"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

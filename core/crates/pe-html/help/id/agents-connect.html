@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Menyambungkan agen AI</h1>
+<p class="summary">Izinkan agen AI, seperti Claude, membaca dan mengatur email Anda melalui Inbox Classic.</p>
+<p>Anda dapat mengizinkan agen AI bekerja dengan email Anda. Agen tersebut dapat berupa Claude, Cursor, atau program lain yang mendukung Model Context Protocol (MCP). Inbox Classic tidak berisi AI, dan tidak ada yang dikirim ke layanan AI kecuali Anda mengizinkan agen masuk.</p>
+<p>Untuk menyambungkan agen:</p>
+<ol>
+    <li>Pilih <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> dan klik <b data-text="ui-how-to-connect"></b>. Inbox Classic menampilkan baris yang perlu ditambahkan ke pengaturan agen Anda.</li>
+    <li>Tambahkan baris tersebut ke server MCP agen Anda. Di Claude Desktop, tempatnya adalah <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
+    <li>Mulai agen. Saat pertama kali tersambung, Inbox Classic menanyakan kepada Anda apa yang boleh dilakukannya.</li>
+</ol>
+<p>Agen memulai Inbox Classic di latar belakang jika belum berjalan. Hanya program yang berjalan atas nama Anda di komputer ini yang dapat menjangkaunya.</p>
+<p>Inbox Classic menanyakan kepada sistem program mana yang memulai agen, alih-alih memercayai pengakuan agen, sehingga agen tidak dapat memperoleh akses yang Anda berikan kepada program lain hanya dengan mengaku sebagai program tersebut. Jika agen mengaku sebagai program lain, pertanyaannya memberi tahu Anda. Hal ini memisahkan agen-agen Anda; hal ini tidak melindungi Anda dari program berbahaya yang berjalan atas nama Anda, yang toh dapat membaca email Anda.</p>
+<p>Agen juga dapat memantau Kotak Masuk, akun, atau folder Anda dan diberi tahu saat emailnya berubah, serta dapat menawarkan dua permintaan siap pakai, “Triage my inbox” (memilah Kotak Masuk) dan “Summarize unread” (meringkas pesan yang belum dibaca). Keduanya mengikuti apa yang Anda izinkan bagi agen, dan apa yang dibacanya dengan cara ini tampil di lognya seperti semua yang dibacanya.</p>
+<p>Agen seperti Claude Code berbagi akses jika dimulai dari program terminal yang sama yang dikenali. Inbox Classic bertanya satu kali untuk <!--os:mac-->program yang dimulai dari Terminal<!--/os--><!--os:windows,linux-->program yang dimulai dari terminal<!--/os-->, dan program tersebut berbagi apa yang Anda izinkan. Untuk memberi agen aksesnya sendiri, tambahkan <code>--name</code> dan nama pilihan Anda setelah <code>--mcp</code> di pengaturannya, misalnya <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Inbox Classic kemudian menanyakannya dengan nama tersebut. Nama yang dipilih tidak memverifikasi identitas agen.</p>
+<p>Untuk menonaktifkan semua agen sekaligus, nonaktifkan <b data-text="ui-let-agents-connect"></b> di <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
+<!--/review-->

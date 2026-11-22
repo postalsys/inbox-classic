@@ -886,7 +886,7 @@ void DrawChevron(const DRAWITEMSTRUCT& item) {
         OffsetRect(&face, 1, 1);
     }
     face.top += Scale(4);
-    HGDIOBJ old = SelectObject(item.hDC, GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(item.hDC, UiFont());
     SetBkMode(item.hDC, TRANSPARENT);
     SetTextColor(item.hDC, GetSysColor(COLOR_BTNTEXT));
     DrawTextW(item.hDC, L"\u00BB", 1, &face, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX);
@@ -1076,7 +1076,7 @@ void LayoutStatus() {
     std::wstring counts = StatusText(2);
     HDC dc = GetDC(g_status);
     HGDIOBJ font = reinterpret_cast<HGDIOBJ>(SendMessageW(g_status, WM_GETFONT, 0, 0));
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     SIZE text = {};
     GetTextExtentPoint32W(dc, counts.c_str(), static_cast<int>(counts.size()), &text);
     SelectObject(dc, old);
@@ -1489,6 +1489,11 @@ void CreateChildren(HWND hwnd) {
     SystemParametersInfoForDpi(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, GetDpiForWindow(hwnd));
     metrics.lfMessageFont.lfHeight = -Scale(16);
     metrics.lfMessageFont.lfWeight = FW_BOLD;
+    // the folder's name in the language's own face too where it has one
+    if (UiFontChosen()) {
+        wcsncpy_s(metrics.lfMessageFont.lfFaceName, core::WindowsFont().c_str(), _TRUNCATE);
+        metrics.lfMessageFont.lfCharSet = DEFAULT_CHARSET;
+    }
     g_folderFont = CreateFontIndirectW(&metrics.lfMessageFont);
     g_folderBrush = CreateSolidBrush(kFolderBarColor);
     SendMessageW(g_folderBar, WM_SETFONT, reinterpret_cast<WPARAM>(g_folderFont), FALSE);

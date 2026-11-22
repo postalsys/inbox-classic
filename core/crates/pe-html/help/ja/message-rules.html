@@ -1,0 +1,20 @@
+<!--review-->
+<h1>ルールで新着メールを仕分ける</h1>
+<p class="summary">条件に一致する受信メッセージを、自動的に移動したり、既読にしたり、フラグを設定したり、アーカイブしたりします。</p>
+<p>ルールは、検索条件と、受信トレイに届いた一致するメッセージに対して実行する処理を組み合わせたものです。たとえば<code>from:news@example.com</code>というルールで、そのアドレスからのニュースレターを別のフォルダーへ移動し、既読にすることができます。</p>
+<p>ルールを作成するには、次のようにします。</p>
+<ol>
+    <li><b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>を選択し、<b data-text="ui-rule-new"></b>をクリックします。</li>
+    <li>名前を入力し、検索ボックスと同じ検索語（<code>from:</code>、<code>subject:</code>、<code>list:</code>など）を使って<b data-text="ui-rule-query"></b>を入力します。その下の行には、選択したアカウントの受信トレイで一致するメッセージの数が表示されます。アカウントを選択していない場合は、すべてのアカウントが対象です。</li>
+    <li>一致するメッセージに対する処理を1つ以上選択します。フォルダーへ移動、既読にする、フラグを設定する、アーカイブする、迷惑メールに移動する、削除する、通知しない、から選べます。</li>
+    <li><b data-text="ui-ok"></b>をクリックします。</li>
+</ol>
+<p>メッセージや検索からルールを作成することもできます。<b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>を選択すると、選択したメッセージの差出人またはメーリング リストが入力されます。検索結果の上にある<b data-text="ui-create-rule"></b>をクリックすると、現在の検索条件が使われます。</p>
+<h2>ルールのしくみ</h2>
+<p>ルールは、Inbox Classicが実行中であれば、メイン ウィンドウが隠れていても、受信トレイに新しく届いたメッセージに適用されます。既存のメッセージは、<b data-text="ui-rule-apply-now"></b>をオンにした場合にのみ対象になります。一致したルールは、一覧に表示されている順に実行されます。あるルールで受信トレイの外への有効な移動が予定されると、そのメッセージには以降のルールは適用されません。サーバーでの処理は失敗することもあります。ルールを削除せずに無効にするには、一覧でそのチェック ボックスをオフにします。</p>
+<h2>ルールを変更する</h2>
+<p>ルールを編集するには、一覧で選択して<b data-text="ui-rule-edit"></b>をクリックするか、ダブルクリックします。順序を変えるには<b data-text="ui-account-move-up"></b>と<b data-text="ui-account-move-down"></b>を、ルールを削除するには<b data-text="ui-rule-delete-button"></b>を使います。ルールの編集画面で<b data-text="ui-rule-show"></b>をクリックすると、変更を保存せずに編集画面を閉じ、入力した条件ですべての受信トレイを検索します。一致する件数とは異なり、この検索ではアカウントの絞り込みは保持されません。</p>
+<p>ルールは新しく届いた受信トレイのメッセージに適用されるため、フォルダーや日付による絞り込みには対応していません。<code>in:</code>、<code>before:</code>、<code>after:</code>、<code>older_than:</code>、<code>newer_than:</code>を使うと、これらを使えない理由がメッセージで表示されます。ルールでメッセージを送信したり、完全に削除したりすることはできません。<b data-text="ui-rule-delete"></b>は、<b data-text="folder-deleted"></b>フォルダーがある場合にのみ、そこへメッセージを移動します。</p>
+<aside class="note">ルールはこのコンピューター上で実行されます。コンピューターの電源が切れている間もメールを仕分けるには、メール プロバイダーのフィルターを使ってください。</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

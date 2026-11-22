@@ -8114,8 +8114,8 @@ public static bool HasIcon(IntPtr window) {
         ''
     }
     # every static and button of $window: its words not left in English (a word of the pseudo-language starts with
-    # "["), and, unless $wordsOnly, not cut off
-    function CheckPseudo([IntPtr]$window, [string]$what, [bool]$wordsOnly = $false) {
+    # "["), and, unless $wordsOnly, not cut off; with $cutOnly only that they are not cut off (a language of its own)
+    function CheckPseudo([IntPtr]$window, [string]$what, [bool]$wordsOnly = $false, [bool]$cutOnly = $false) {
         $english = @(); $cut = @()
         foreach ($class in 'Static', 'Button') {
             foreach ($control in [Native.Win]::FindDescendants($window, $class)) {
@@ -8136,7 +8136,7 @@ public static bool HasIcon(IntPtr window) {
                 if (-not [Native.Win]::Fits($control, $text, $isButton, $hasBox, $wraps, $edit)) { $cut += $text }
             }
         }
-        Check ($english.Count -eq 0) "${what}: no word left in English ($($english -join ' | '))"
+        if (-not $cutOnly) { Check ($english.Count -eq 0) "${what}: no word left in English ($($english -join ' | '))" }
         if (-not $wordsOnly) { Check ($cut.Count -eq 0) "${what}: nothing cut off ($($cut -join ' | '))" }
     }
 
@@ -8463,6 +8463,61 @@ public static bool HasIcon(IntPtr window) {
             [void](WaitFor { if (-not [Native.Win]::IsWindow($form)) { $true } } 10)
         }
         Quit $main 'pseudo-language'
+    }
+
+    # the languages of wave 2 on this English Windows, the case the window font is for: Japanese, Chinese and Korean
+    # in the face Windows itself uses for them, Indonesian and Vietnamese in the default one; the main window, a new
+    # message, Add Mail Account and Options in each, nothing cut off (tour-<code>-<n>-<view>)
+    Step 'the languages of wave 2'
+    $faces = [ordered]@{ 'ja' = 'Yu Gothic UI'; 'zh-Hans' = 'Microsoft YaHei UI'; 'zh-Hant' = 'Microsoft JhengHei UI'; 'ko' = 'Malgun Gothic'; 'id' = ''; 'vi' = '' }
+    foreach ($code in $faces.Keys) {
+        $main = StartAgain @('--language', $code)
+        Check ($null -ne $main) "the app starts in $code"
+        if (-not $main) { continue }
+        $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
+        $face = ([System.Drawing.Font]::FromHfont([Native.Win]::SendMessage($tree, 0x0031, [IntPtr]::Zero, [IntPtr]::Zero))).Name
+        if ($faces[$code]) {
+            Check ($face -eq $faces[$code]) "${code}: the windows' words in $($faces[$code]) ($face)"
+        } else {
+            Check (@($faces.Values) -notcontains $face) "${code}: the windows' words in the default font ($face)"
+        }
+        # the sign-in prompt of a start without passwords (its words are in the language too) shot, then cancelled, so
+        # the main window's shot shows the window
+        $prompt = WaitShown 'InboxClassicForm' 5
+        if ($prompt) {
+            Shot $prompt "tour-$code-1b-sign-in"
+            Click $prompt 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($prompt) } 5)
+        }
+        Shot $main "tour-$code-1-main"
+        $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
+        if ($compose) {
+            CheckPseudo $compose "${code}, the compose window" $false $true
+            Shot $compose "tour-$code-2-compose"
+            Check (CloseCompose $compose) "the new message closes ($code)"
+        }
+        Command $main $IDM_NEW_ACCOUNT
+        $form = WaitShown 'InboxClassicAccountStart' 10
+        if ($form) {
+            Start-Sleep -Milliseconds 500
+            CheckPseudo $form "${code}, Add Mail Account" $false $true
+            Shot $form "tour-$code-3-account"
+            Click $form 2
+            [void](WaitFor { if (-not [Native.Win]::IsWindow($form)) { $true } } 10)
+        }
+        Command $main $IDM_OPTIONS
+        $options = WaitShown 'InboxClassicOptions'
+        if ($options) {
+            $pages = @('4-options', '4b-options-reading', '4c-options-downloading')
+            for ($page = 0; $page -lt $pages.Count; $page++) {
+                if ($page) { OptionsPage $options $page }
+                CheckPseudo $options "${code}, Options $($pages[$page])" $false $true
+                Shot $options "tour-$code-$($pages[$page])"
+            }
+            Click $options 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($options) } 10)
+        }
+        Quit $main $code
     }
 } catch {
     Harness "unexpected error: $_ at line $($_.InvocationInfo.ScriptLineNumber)"

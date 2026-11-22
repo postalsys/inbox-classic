@@ -1,6 +1,7 @@
 # Generated from pe_i18n::LANGUAGES and core/locales by core/crates/pe-ffi/build.rs, do not edit
 # tag	name	gettext	nsis	lookup (comma separated)
 en	English	en	English	en
+id	Bahasa Indonesia	id	Indonesian	id,in
 ca	Català	ca	Catalan	ca
 cs	Čeština	cs	Czech	cs
 da	Dansk	da	Danish	da
@@ -24,8 +25,13 @@ sl	Slovenščina	sl	Slovenian	sl
 sr-Latn	Srpski	sr@latin	SerbianLatin	sr-latn,sr
 fi	Suomi	fi	Finnish	fi
 sv	Svenska	sv	Swedish	sv
+vi	Tiếng Việt	vi	Vietnamese	vi
 tr	Türkçe	tr	Turkish	tr
 el	Ελληνικά	el	Greek	el
 bg	Български	bg	Bulgarian	bg
 ru	Русский	ru	Russian	ru
 uk	Українська	uk	Ukrainian	uk
+ja	日本語	ja	Japanese	ja
+zh-Hans	简体中文	zh_CN	SimpChinese	zh-hans,zh
+zh-Hant	繁體中文	zh_TW	TradChinese	zh-hant
+ko	한국어	ko	Korean	ko

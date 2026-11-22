@@ -182,7 +182,7 @@ fn repeats(rule: &str) -> String {
             .map(tr)
             .collect();
         if !names.is_empty() {
-            let days = names.join(", ");
+            let days = crate::text::word_list(&names);
             words = tr_args(
                 Text::RepeatsOn,
                 &[("repeats", (&words).into()), ("days", (&days).into())],

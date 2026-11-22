@@ -882,7 +882,10 @@ fn counted(parts: &[PartView]) -> String {
         .collect();
     pe_i18n::tr_args(
         Text::PgpBarParts,
-        &[("count", parts.len().into()), ("list", (&list.join(", ")).into())],
+        &[
+            ("count", parts.len().into()),
+            ("list", (&crate::text::word_list(&list)).into()),
+        ],
     )
 }
 

@@ -5,6 +5,7 @@
   <id>com.inboxclassic.InboxClassic</id>
   <name>Inbox Classic</name>
   <summary>A fast, simple mail program</summary>
+  <summary xml:lang="id">Program email yang cepat dan sederhana</summary>
   <summary xml:lang="ca">Un programa de correu ràpid i senzill</summary>
   <summary xml:lang="cs">Rychlý a jednoduchý poštovní program</summary>
   <summary xml:lang="da">Et hurtigt og enkelt mailprogram</summary>
@@ -28,11 +29,16 @@
   <summary xml:lang="sr@latin">Brz i jednostavan program za poštu</summary>
   <summary xml:lang="fi">Nopea ja yksinkertainen sähköpostiohjelma</summary>
   <summary xml:lang="sv">Ett snabbt och enkelt e-postprogram</summary>
+  <summary xml:lang="vi">Một chương trình thư nhanh, đơn giản</summary>
   <summary xml:lang="tr">Hızlı, basit bir posta programı</summary>
   <summary xml:lang="el">Ένα γρήγορο, απλό πρόγραμμα αλληλογραφίας</summary>
   <summary xml:lang="bg">Бърза и лесна за използване програма за електронна поща</summary>
   <summary xml:lang="ru">Быстрая и простая почтовая программа</summary>
   <summary xml:lang="uk">Швидка й проста поштова програма</summary>
+  <summary xml:lang="ja">高速でシンプルなメール プログラム</summary>
+  <summary xml:lang="zh_CN">快速、简洁的邮件程序</summary>
+  <summary xml:lang="zh_TW">快速、簡單的郵件程式</summary>
+  <summary xml:lang="ko">빠르고 간단한 메일 프로그램</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <developer id="com.postalsys">
@@ -43,6 +49,11 @@
       Inbox Classic reads and writes e-mail. Its classic layout has folders on the left, messages at the top and the
       selected message below. It works with compatible IMAP and SMTP accounts, and signs in to Outlook.com and Microsoft
       365 through the browser.
+    </p>
+    <p xml:lang="id">
+      Inbox Classic membaca dan menulis email. Tata letak klasiknya menampilkan folder di kiri, pesan di atas, dan pesan
+      yang dipilih di bawahnya. Program ini bekerja dengan akun IMAP dan SMTP yang kompatibel, dan masuk ke Outlook.com
+      serta Microsoft 365 lewat browser.
     </p>
     <p xml:lang="ca">
       Inbox Classic permet llegir i escriure correu electrònic amb una disposició configurable. La disposició clàssica
@@ -155,6 +166,11 @@
       meddelandelistan överst och det valda meddelandet nedanför. Programmet stöder konton med IMAP och SMTP och
       inloggning via webbläsaren för Outlook.com och Microsoft 365.
     </p>
+    <p xml:lang="vi">
+      Inbox Classic đọc và viết email. Bố cục cổ điển của ứng dụng có thư mục ở bên trái, danh sách thư ở phía trên và
+      thư đang chọn ở bên dưới. Ứng dụng hoạt động với các tài khoản IMAP và SMTP tương thích, và đăng nhập vào
+      Outlook.com và Microsoft 365 qua trình duyệt.
+    </p>
     <p xml:lang="tr">
       Inbox Classic, solda klasörler, üstte ileti listesi, altta okuma bölmesi bulunan klasik düzeni veya yan yana
       sütunları sunar. IMAP ve SMTP hesaplarıyla çalışır; Outlook.com ve Microsoft 365 hesaplarında tarayıcı üzerinden
@@ -180,11 +196,32 @@
       повідомлень угорі, а вміст вибраного повідомлення під ним. Програма підтримує облікові записи IMAP і SMTP та вхід
       в Outlook.com і Microsoft 365 через браузер.
     </p>
+    <p xml:lang="ja">
+      Inbox
+      Classicはメールを読み書きするアプリです。クラシックなレイアウトで、左にフォルダー、上にメッセージ一覧、下に選択したメッセージが表示されます。互換性のあるIMAPとSMTPのアカウントで動作し、Outlook.comとMicrosoft
+      365にはブラウザーでサインインします。
+    </p>
+    <p xml:lang="zh_CN">
+      Inbox Classic 用于阅读和撰写电子邮件。它采用经典布局：左侧是文件夹，上方是邮件，下方是所选邮件。它适用于兼容的 IMAP 和 SMTP 帐户，并可通过浏览器登录 Outlook.com 和 Microsoft
+      365。
+    </p>
+    <p xml:lang="zh_TW">
+      Inbox Classic 可以閱讀及撰寫電子郵件。其傳統的版面配置將資料夾放在左側，郵件清單在上方，選取的郵件在下方。它可搭配相容的 IMAP 與 SMTP 帳戶使用，並可透過瀏覽器登入 Outlook.com 與
+      Microsoft 365。
+    </p>
+    <p xml:lang="ko">
+      Inbox Classic은 전자 메일을 읽고 씁니다. 왼쪽에 폴더, 위쪽에 메시지, 아래쪽에 선택한 메시지가 있는 클래식 레이아웃을 사용합니다. 호환되는 IMAP 및 SMTP 계정에서 작동하며,
+      Outlook.com과 Microsoft 365에는 브라우저를 통해 로그인합니다.
+    </p>
     <ul>
       <li>Message scripts and other active content are removed; pictures from the internet load only when you allow them</li>
       <li>Search subjects, senders, recipients, attachment names and message text with familiar Gmail-style operators</li>
       <li>Replies fold away the earlier messages they quote</li>
       <li>Downloaded mail stays readable offline while its local copy is kept; sign-in credentials normally use your system keyring when available</li>
+      <li xml:lang="id">Skrip pesan dan konten aktif lainnya dihapus; gambar dari internet hanya dimuat jika Anda mengizinkannya</li>
+      <li xml:lang="id">Cari subjek, pengirim, penerima, nama lampiran, dan teks pesan dengan operator gaya Gmail yang sudah dikenal</li>
+      <li xml:lang="id">Balasan melipat pesan sebelumnya yang dikutipnya</li>
+      <li xml:lang="id">Email yang diunduh tetap dapat dibaca secara offline selama salinan lokalnya disimpan; kredensial masuk biasanya disimpan di keyring sistem jika tersedia</li>
       <li xml:lang="ca">Els missatges es mostren sense executar-ne els scripts; les imatges d’internet només es carreguen amb la vostra autorització</li>
       <li xml:lang="ca">Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb operadors inspirats en els del Gmail</li>
       <li xml:lang="ca">El text de missatges anteriors citat a les respostes queda plegat i es pot desplegar quan calgui</li>
@@ -277,6 +314,10 @@
       <li xml:lang="sv">Sök i ämnen, avsändare, mottagare, bilagenamn och meddelandetext med sökvillkor som liknar Gmails</li>
       <li xml:lang="sv">Citerade meddelanden fälls ihop i svar så att din egen text får plats</li>
       <li xml:lang="sv">E-post kan läsas utan internet så länge den lokala kopian finns kvar; inloggningsuppgifter sparas normalt i systemets nyckelring när den är tillgänglig</li>
+      <li xml:lang="vi">Tập lệnh và nội dung động khác trong thư bị loại bỏ; ảnh từ internet chỉ được tải khi bạn cho phép</li>
+      <li xml:lang="vi">Tìm trong chủ đề, người gửi, người nhận, tên tệp đính kèm và nội dung thư bằng các toán tử quen thuộc kiểu Gmail</li>
+      <li xml:lang="vi">Thư trả lời tự thu gọn các thư trước đó mà chúng trích dẫn</li>
+      <li xml:lang="vi">Thư đã tải xuống vẫn đọc được khi ngoại tuyến trong thời gian bản sao cục bộ còn được giữ; thông tin đăng nhập thường được lưu trong vòng khóa của hệ thống khi có thể</li>
       <li xml:lang="tr">İletiler, betikleri çalıştırılmadan gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir</li>
       <li xml:lang="tr">Konularda, gönderenlerde, alıcılarda, ek adlarında ve ileti metninde arama yapın; Gmail tarzı arama ifadeleriyle sonuçları daraltın</li>
       <li xml:lang="tr">Yanıtlardaki önceki iletiler, gerektiğinde açılabilecek şekilde gizlenir</li>
@@ -297,6 +338,22 @@
       <li xml:lang="uk">Пошук у темах, іменах та адресах людей, назвах вкладень і тексті повідомлень з операторами, як у Gmail</li>
       <li xml:lang="uk">Цитований текст попередніх повідомлень у відповіді можна згорнути</li>
       <li xml:lang="uk">Пошту можна читати без мережі, поки зберігається локальна копія; дані входу зазвичай зберігаються в системному сховищі ключів, якщо воно доступне</li>
+      <li xml:lang="ja">メッセージ内のスクリプトなどのアクティブ コンテンツは削除され、インターネット上の画像は許可したときだけ読み込まれます</li>
+      <li xml:lang="ja">件名、差出人、受信者、添付ファイル名、本文を、おなじみのGmail形式の演算子で検索できます</li>
+      <li xml:lang="ja">返信に引用された以前のメッセージは折りたたまれます</li>
+      <li xml:lang="ja">ダウンロードしたメールは、ローカルのコピーが保持されている間はオフラインでも読めます。サインイン資格情報は、利用できる場合は通常システムのキーリングに保存されます</li>
+      <li xml:lang="zh_CN">邮件中的脚本和其他活动内容会被删除；来自 Internet 的图片只有在您允许后才会加载</li>
+      <li xml:lang="zh_CN">使用熟悉的 Gmail 风格运算符搜索主题、发件人、收件人、附件名称和邮件正文</li>
+      <li xml:lang="zh_CN">答复会折叠其引用的早期邮件</li>
+      <li xml:lang="zh_CN">已下载的邮件在本地副本保留期间可离线阅读；登录凭据通常会使用系统密钥环（如果可用）</li>
+      <li xml:lang="zh_TW">會移除郵件中的指令碼及其他主動式內容；網際網路上的圖片只在您允許時才會載入</li>
+      <li xml:lang="zh_TW">使用熟悉的 Gmail 式運算子，搜尋主旨、寄件者、收件者、附件名稱與郵件內文</li>
+      <li xml:lang="zh_TW">回覆會摺疊其引用的較早郵件</li>
+      <li xml:lang="zh_TW">只要保留本機副本，已下載的郵件在離線時仍可閱讀；登入認證通常會在可用時使用系統金鑰圈</li>
+      <li xml:lang="ko">메시지의 스크립트와 기타 활성 콘텐츠는 제거되며, 인터넷의 그림은 허용할 때만 불러옵니다</li>
+      <li xml:lang="ko">익숙한 Gmail 방식의 연산자로 제목, 보낸 사람, 받는 사람, 첨부 파일 이름, 메시지 텍스트를 검색합니다</li>
+      <li xml:lang="ko">회신에 인용된 이전 메시지는 접어서 표시합니다</li>
+      <li xml:lang="ko">다운로드한 메일은 로컬 사본이 유지되는 동안 오프라인에서도 읽을 수 있으며, 로그인 자격 증명은 사용 가능한 경우 일반적으로 시스템 키링을 사용합니다</li>
     </ul>
   </description>
   <launchable type="desktop-id">com.inboxclassic.InboxClassic.desktop</launchable>

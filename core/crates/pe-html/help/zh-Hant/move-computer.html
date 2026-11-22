@@ -1,0 +1,21 @@
+<!--review-->
+<h1>移到另一部電腦</h1>
+<p class="summary">用一個檔案，將您的帳戶、設定、連絡人、金鑰和規則帶到另一部電腦。</p>
+<h2>匯出</h2>
+<ol>
+    <li>選擇<b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>。</li>
+    <li>選擇要帶走的項目：<b data-text="setup-part-settings"></b>、<b data-text="setup-part-preferences"></b>、<b data-text="setup-part-accounts"></b>、<b data-text="setup-part-sign-in-apps"></b>、<b data-text="setup-part-contacts"></b>、<b data-text="setup-part-keys"></b>、<b data-text="setup-part-rules"></b>和<b data-text="setup-part-trusted-senders"></b>。</li>
+    <li>若要包含所選帳戶可存取的登入認證，以及您選取的可存取私密金鑰，請開啟<b data-text="ui-setup-use-passphrase"></b>，並輸入兩次至少 8 個字元的密語。</li>
+    <li>按一下<b data-text="ui-setup-export-button"></b>，然後選擇儲存檔案的位置。</li>
+</ol>
+<p>檔案中不含任何郵件：仍在伺服器上的郵件會在另一部電腦上重新下載。本機寄件匣不會轉移。密語會加密整個檔案。無法解鎖的私密金鑰會被省略。沒有密語時，已儲存的密碼、登入認證和私密金鑰都不會包含在內。您將需要重新登入您的帳戶。</p>
+<aside class="warning">請將檔案和它的密語分開保存，匯入後就刪除檔案。同時擁有兩者的人可以讀取您的郵件。</aside>
+<h2>匯入</h2>
+<ol>
+    <li>在另一部電腦上，選擇<b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>。在您新增第一個帳戶之前，<b data-text="ui-add-account-title"></b>中也有它的連結。</li>
+    <li>選擇檔案，如果檔案有密語，請輸入密語。</li>
+    <li>視窗會顯示檔案中的內容。選擇要匯入的項目和帳戶，然後按一下<b data-text="ui-setup-import-button"></b>。</li>
+</ol>
+<p>這部電腦上已設定的帳戶會保持不變。連絡人（包括群組）會合併到您的通訊錄中；選取的設定和視窗偏好設定會取代目前的設定。帳戶同步後，Inbox Classic 會嘗試對應缺少的規則目的地資料夾；它不會建立這些資料夾。連絡人的新金鑰只有在您於連絡人的內容中選取它時，才會取代現有的金鑰。</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
+<!--/review-->

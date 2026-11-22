@@ -1,0 +1,21 @@
+<!--review-->
+<h1>加密金鑰</h1>
+<p class="summary">建立金鑰來簽署您的郵件並接收加密郵件，並保存您連絡人的金鑰。</p>
+<p>Inbox Classic 使用 OpenPGP 金鑰簽署和加密郵件。您自己的金鑰分成兩半：交給別人的公開金鑰，以及留在您電腦上的私密金鑰。有了連絡人的金鑰，您就能檢查他們的簽章，並寄送加密郵件給他們。</p>
+<p>若要建立您的金鑰：</p>
+<ol>
+    <li>選擇<b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>，然後按一下<b data-text="ui-keys-new"></b>。</li>
+    <li>選擇帳戶，然後按一下<b data-text="ui-keys-new-make"></b>。這把金鑰會用於該帳戶的地址及其其他地址。</li>
+    <li>按一下<b data-text="ui-keys-backup-now"></b>，然後選擇一個密語。請將檔案和密語分別存放在不同的安全地方。</li>
+</ol>
+<aside class="warning">如果沒有備份，這部電腦遺失或重設時，您的金鑰將無法復原，以它加密的郵件也再也無法讀取。</aside>
+<h2>不用密語，金鑰也受到保護</h2>
+<p>您的私密金鑰受到一把存放在<!--os:windows-->認證管理員<!--/os--><!--os:mac-->鑰匙圈<!--/os--><!--os:linux-->系統金鑰圈<!--/os-->中的金鑰保護，因此您平常使用時不需要輸入密語。密語用於保護備份，匯入時也可能需要。如果金鑰已鎖定，請先檢查系統存放區是否可用且已解鎖。如果缺少它的保護金鑰，請按一下<b data-text="ui-keys-import"></b>，然後選擇它的備份。</p>
+<h2>新增金鑰</h2>
+<p>按一下<b data-text="ui-keys-import"></b>，即可從檔案新增金鑰，例如連絡人寄給您的金鑰，或您自己的備份。受密語保護的私密金鑰會詢問一次密語。接著 Inbox Classic 會詢問是否要將匯入的您自己的金鑰用於您的地址。</p>
+<p>從此之後，連絡人的金鑰就會用於他的地址。如果之後出現同一地址的另一把金鑰，目前的金鑰會繼續使用，直到您在連絡人的內容中選擇新的金鑰為止。</p>
+<p>若要分享您的公開金鑰，請選取它，然後按一下<b data-text="ui-keys-export"></b>。您也可以在帳戶內容的<b data-text="ui-account-security"></b>索引標籤中，選擇該帳戶的金鑰。</p>
+<p>缺少可用的收件者金鑰時，Inbox Classic 會先詢問該地址的網域，若已啟用查詢，再詢問 keys.openpgp.org。您也可以依指紋或金鑰識別碼搜尋；這樣傳送的是該識別碼，而不是電子郵件地址。若要永不詢問 keys.openpgp.org，請在<b data-settings="reading"></b>中關閉<b data-text="ui-pgp-keyserver"></b>。</p>
+<p>郵件也可以附帶公開金鑰。啟用 Autocrypt 時，從已選取金鑰的地址寄出的郵件會附帶其公開金鑰，其他能讀取它的應用程式可以用它來寄送加密郵件給您。當您開啟附帶寄件者金鑰的郵件時，Inbox Classic 會保存該金鑰，但標示為未驗證；如果某個地址已有金鑰，又出現另一把金鑰，會等您選擇。若要停止寄送您的金鑰，請在帳戶的<b data-text="ui-account-security"></b>索引標籤中關閉<b data-text="ui-account-autocrypt"></b>。</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->
