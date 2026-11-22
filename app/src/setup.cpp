@@ -312,7 +312,7 @@ void WriteExport(HWND dialog, ExportState& state) {
     // the passphrase leaves memory with the export
     setup.reset();
     if (!lines) {
-        MessageBoxW(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), state.title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), state.title.c_str(), MB_OK | MB_ICONWARNING);
         return;
     }
     core::String unused(error);
@@ -400,7 +400,7 @@ void RunImport(HWND dialog, ImportState& state) {
     core::SetupLines lines;
     RunWaiting(dialog, [&] { lines.reset(pe_setup_import(state.core, state.file, parts, accounts.data(), accounts.size(), &error)); });
     if (!lines) {
-        MessageBoxW(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), state.title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), state.title.c_str(), MB_OK | MB_ICONWARNING);
         return;
     }
     core::String unused(error);
@@ -454,7 +454,7 @@ core::SetupFile ReadSetup(HWND owner, PeCore* core, const std::wstring& path, co
             return file;
         }
         if (kind != PE_SETUP_ERROR_NEEDS_PASSPHRASE && kind != PE_SETUP_ERROR_WRONG_PASSPHRASE) {
-            MessageBoxW(owner, said.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+            MessageBoxApp(owner, said.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
             return nullptr;
         }
         // asked again after a wrong one, with the core's words for it

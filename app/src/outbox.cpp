@@ -87,7 +87,7 @@ void StatusTip(OutboxState* state, NMLVGETINFOTIPW* tip) {
 void DeleteSelected(HWND hwnd, OutboxState* state) {
     int index = ListView_GetNextItem(state->list, -1, LVNI_SELECTED);
     if (index >= 0 && static_cast<size_t>(index) < state->ids.size() &&
-        MessageBoxW(hwnd, core::T(PE_TEXT_UI_OUTBOX_DELETE_ASK).c_str(), core::Plain(PE_TEXT_UI_OUTBOX_TITLE).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+        MessageBoxApp(hwnd, core::T(PE_TEXT_UI_OUTBOX_DELETE_ASK).c_str(), core::Plain(PE_TEXT_UI_OUTBOX_TITLE).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
         pe_outbox_delete(state->core, state->ids[index]);
         // the next one selected, where the deleted one was
         FillOutbox(state, index);

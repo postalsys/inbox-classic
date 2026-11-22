@@ -143,7 +143,7 @@ bool SaveRule(HWND dialog, EditorState& state) {
     char* error = nullptr;
     int64_t saved = pe_rule_save(state.core, &rule, &error);
     if (!saved) {
-        MessageBoxW(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), core::Plain(PE_TEXT_UI_RULE_TITLE).c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), core::Plain(PE_TEXT_UI_RULE_TITLE).c_str(), MB_OK | MB_ICONWARNING);
         SetFocus(Item(dialog, IDC_RULE_QUERY));
         return false;
     }
@@ -394,7 +394,7 @@ void OnChecked(HWND hwnd, RulesState& state, int row) {
     changed.enabled = on;
     char* error = nullptr;
     if (!pe_rule_save(state.core, &changed, &error)) {
-        MessageBoxW(hwnd, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), core::Plain(PE_TEXT_UI_RULES_TITLE).c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(hwnd, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), core::Plain(PE_TEXT_UI_RULES_TITLE).c_str(), MB_OK | MB_ICONWARNING);
     }
     PostMessageW(hwnd, WM_REFILL, static_cast<WPARAM>(row), 0);
 }
@@ -439,7 +439,7 @@ void OnRulesCommand(HWND hwnd, RulesState& state, WORD id) {
             return;
         }
         std::wstring question = core::T(PE_TEXT_UI_RULE_DELETE_ASK, {{"name", Text(rule->name)}});
-        if (MessageBoxW(hwnd, question.c_str(), core::Plain(PE_TEXT_UI_RULES_TITLE).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+        if (MessageBoxApp(hwnd, question.c_str(), core::Plain(PE_TEXT_UI_RULES_TITLE).c_str(), MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
             return;
         }
         pe_rule_delete(state.core, rule->id);

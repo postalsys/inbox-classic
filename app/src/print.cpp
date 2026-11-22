@@ -105,7 +105,7 @@ LRESULT CALLBACK PrintProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
 void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const char* document, bool remoteImages, const std::wstring& subject) {
     core::String page(pe_print_page(document));
     if (!page) {
-        MessageBoxW(owner, core::T(PE_TEXT_WIN_PRINT_FAILED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxApp(owner, core::T(PE_TEXT_WIN_PRINT_FAILED).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
     }
     static bool registered = false;
@@ -140,7 +140,7 @@ void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const ch
         Configure(hwnd, state);
     };
     auto failed = [hwnd](const std::wstring& error) {
-        MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
+        MessageBoxApp(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         DestroyWindow(hwnd);
     };
     // the reading pane's environment when there is one: the browser process is there already

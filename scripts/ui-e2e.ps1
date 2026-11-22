@@ -8489,6 +8489,17 @@ public static bool HasIcon(IntPtr window) {
             Click $prompt 2
             [void](WaitFor { -not [Native.Win]::IsWindow($prompt) } 5)
         }
+        # the question to sign in again in the browser (this start's account that signs in so): a message box, its
+        # buttons in the language too and not in Windows' own
+        $words = Catalog $code
+        $box = WaitFor { [Native.Win]::TopWindowsOf((AppIds), '#32770') | Where-Object { [Native.Win]::GetDlgItem($_, 6) -ne [IntPtr]::Zero } | Select-Object -First 1 } 5
+        if ($box) {
+            $yes = WindowText ([Native.Win]::GetDlgItem($box, 6))
+            $no = WindowText ([Native.Win]::GetDlgItem($box, 7))
+            Check ($yes -eq $words['ui-yes'] -and $no -eq $words['ui-no']) "${code}: a message box's buttons in the language ($yes, $no)"
+            Click $box 7
+            [void](WaitFor { -not [Native.Win]::IsWindow($box) } 5)
+        }
         Shot $main "tour-$code-1-main"
         $compose = WaitCompose { Command $main $IDM_NEW_MAIL }
         if ($compose) {

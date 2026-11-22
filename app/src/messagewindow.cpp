@@ -169,7 +169,7 @@ void Act(MessageWindow* state, PeAction action) {
         // from Deleted Items, or an account without one, it is gone for good: asked first, as in the main window
         core::String question(pe_selection_delete_question(&summary));
         if (question &&
-            MessageBoxW(state->hwnd, Text(question.get()).c_str(), kTitle, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
+            MessageBoxApp(state->hwnd, Text(question.get()).c_str(), kTitle, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) != IDYES) {
             return;
         }
     }
@@ -193,19 +193,19 @@ void Reply(MessageWindow* state, PeDraftKind kind) {
     // a message file is answered from the account the main window has
     int64_t account = state->file.empty() ? state->mailbox->AccountOf(state->folder) : state->mailbox->CurrentAccount();
     if (!state->file.empty() && !account) {
-        MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(state->hwnd, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     // made off the window thread: the compose window opens once it is (the reader drops it when this window closes)
     bool started = state->reader.DraftOf(kind, account, [hwnd = state->hwnd, main = state->main, handle = state->core, account](core::Draft draft) {
         if (!draft) {
-            MessageBoxW(hwnd, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+            MessageBoxApp(hwnd, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
             return;
         }
         OpenCompose(main, handle, account, pe_draft_info(draft.get()));
     });
     if (!started) {
-        MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(state->hwnd, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
     }
 }
 
@@ -216,7 +216,7 @@ void SaveFileAs(MessageWindow* state) {
     std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
     std::wstring path = SaveFileDialog(state->hwnd, name, core::Plain(PE_TEXT_UI_SAVE_MESSAGE_AS).c_str(), filter.c_str(), L"eml");
     if (!path.empty() && !CopyFileW(state->file.c_str(), path.c_str(), FALSE)) {
-        MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_NOT_SAVED).c_str(), kTitle, MB_OK | MB_ICONERROR);
+        MessageBoxApp(state->hwnd, core::T(PE_TEXT_UI_NOT_SAVED).c_str(), kTitle, MB_OK | MB_ICONERROR);
     }
 }
 
@@ -376,7 +376,7 @@ LRESULT CALLBACK MessageProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         return 0;
     case WM_NOT_FOUND:
         if (!state->notFound.empty()) {
-            MessageBoxW(hwnd, std::exchange(state->notFound, {}).c_str(), core::Title(PE_TEXT_CMD_FIND_IN_MESSAGE).c_str(),
+            MessageBoxApp(hwnd, std::exchange(state->notFound, {}).c_str(), core::Title(PE_TEXT_CMD_FIND_IN_MESSAGE).c_str(),
                         MB_OK | MB_ICONINFORMATION);
         }
         return 0;

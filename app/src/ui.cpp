@@ -54,7 +54,7 @@ LRESULT CALLBACK FormProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             std::wstring error;
             if (state->validate && !state->validate(values, error)) {
-                MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+                MessageBoxApp(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
                 return 0;
             }
             // moved, so no copy of a password is left behind
@@ -247,6 +247,38 @@ HFONT UiFont() {
         return created ? created : system;
     }();
     return font;
+}
+
+namespace {
+// the hook of the message box being opened on this thread, until it shows
+thread_local HHOOK g_boxHook = nullptr;
+
+LRESULT CALLBACK BoxHook(int code, WPARAM wParam, LPARAM lParam) {
+    LRESULT next = CallNextHookEx(g_boxHook, code, wParam, lParam);
+    if (code == HCBT_ACTIVATE) {
+        auto* box = reinterpret_cast<HWND>(wParam);
+        for (auto [id, text] : {std::pair{IDYES, PE_TEXT_UI_YES}, {IDNO, PE_TEXT_UI_NO}, {IDOK, PE_TEXT_UI_OK},
+                                {IDCANCEL, PE_TEXT_UI_CANCEL}}) {
+            if (HWND button = GetDlgItem(box, id)) {
+                SetWindowTextW(button, core::T(text).c_str());
+            }
+        }
+        UnhookWindowsHookEx(g_boxHook);
+        g_boxHook = nullptr;
+    }
+    return next;
+}
+}  // namespace
+
+int MessageBoxApp(HWND owner, const wchar_t* text, const wchar_t* title, UINT type) {
+    g_boxHook = SetWindowsHookExW(WH_CBT, BoxHook, nullptr, GetCurrentThreadId());
+    int answer = MessageBoxW(owner, text, title, type);
+    // a box that never showed (no memory) leaves its hook
+    if (g_boxHook) {
+        UnhookWindowsHookEx(g_boxHook);
+        g_boxHook = nullptr;
+    }
+    return answer;
 }
 
 bool UiFontChosen() {
@@ -1286,7 +1318,7 @@ std::vector<std::wstring> OpenFilesDialog(HWND owner, const wchar_t* title, cons
     dialog.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_NOCHANGEDIR;
     if (!GetOpenFileNameW(&dialog)) {
         if (CommDlgExtendedError() == FNERR_BUFFERTOOSMALL) {
-            MessageBoxW(owner, core::T(PE_TEXT_WIN_TOO_MANY_FILES).c_str(), title, MB_OK | MB_ICONWARNING);
+            MessageBoxApp(owner, core::T(PE_TEXT_WIN_TOO_MANY_FILES).c_str(), title, MB_OK | MB_ICONWARNING);
         }
         return {};
     }
