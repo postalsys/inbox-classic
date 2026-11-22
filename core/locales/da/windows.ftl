@@ -65,7 +65,6 @@ win-files = { $count ->
     [one] { $count } fil
    *[other] { $count } filer
 }
-win-click-to-retry = Klik her for at prøve igen.
 win-save-attachments = &Gem vedhæftede filer...
 win-files-not-saved = { $count ->
     [one] Filen kunne ikke gemmes.
@@ -109,7 +108,6 @@ win-take-back = &Fortryd
 win-what-agents-did = Agent&aktivitet:
 win-agent-reads = Hvad der blev læst fra { $from } til { $to }:
 win-agent-reads-hint = Marker en række med læsninger ovenfor for at se, hvad der blev læst.
-win-how-to-connect = Sådan tilslutter du en agent
 
 ## Sign-in apps
 

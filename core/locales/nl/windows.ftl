@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } bestand
    *[other] { $count } bestanden
 }
-win-click-to-retry = Klik hier om het opnieuw te proberen.
 win-save-attachments = Bijlagen op&slaan...
 win-files-not-saved = Opslaan mislukt voor { $failed } van de { $count } bestanden.
 win-new-folder-in-highlighted = De nieuwe map wordt gemaakt in de geselecteerde map.
@@ -105,7 +104,6 @@ win-take-back = &Terugdraaien
 win-what-agents-did = &Activiteit van agents:
 win-agent-reads = Wat er is gelezen van { $from } tot { $to }:
 win-agent-reads-hint = Selecteer hierboven een regel met leesactiviteiten om de details te zien.
-win-how-to-connect = Een agent verbinden
 
 ## Sign-in apps
 

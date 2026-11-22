@@ -466,6 +466,17 @@ Screenshots: `find-1-results`, `find-3-no-results`, `find-2-every-folder`
 - Clear search on the search bar ends the search
 - Esc ends the search: the folder again, without the Folder column
 
+## 21a. Words without spaces
+
+Screenshot: `find-4-cjk`
+
+A Japanese, a Chinese and a Korean message, in a folder of their own (CJK), deleted at the end:
+
+- a Japanese word inside the subject finds its message (会議)
+- a Chinese word inside the subject finds its message (会议)
+- a Korean word with its ending left off finds its message (회의 in 회의에서)
+- one character alone finds it too (議)
+
 ## 22. Saving and importing a message as a file
 
 - Save As asks where, with the subject as the name

@@ -219,7 +219,7 @@ const sections = [
                 name: 'Import on the first run',
                 what: 'Before the first account, Add Mail Account offers to import settings and accounts from another computer.',
                 how: 'The link in Add Mail Account.',
-                checked: ['The link opens the import']
+                checked: ['The import is a push button that opens it']
             },
             {
                 shot: 'all-inboxes-1-list',
@@ -328,6 +328,18 @@ const sections = [
                 what: 'When nothing matches, the search bar says "No results for" the words, and the list says so in its middle, with what the search looks at and what to try. While the text of some messages is still being indexed, both say how many, as more may be found soon. An empty folder says "There are no items in this view."',
                 how: 'Search for something no message has.',
                 checked: ['Nothing is listed for what nothing has', 'The search bar says there are no results']
+            },
+            {
+                shot: 'find-4-cjk',
+                name: 'Words without spaces',
+                what: 'Japanese and Chinese write words without spaces between them, and Korean words carry endings, so the search index takes each of their characters as a word and searches a word as those characters in a row: a word is found inside a longer one, in the subject, the people, file names and the text. Full width letters and digits are found as their ASCII forms.',
+                how: 'Search for a Japanese, Chinese or Korean word.',
+                checked: [
+                    'A Japanese word inside the subject finds its message',
+                    'A Chinese word inside the subject finds its message',
+                    'A Korean word with its ending left off finds its message',
+                    'One character alone finds it too'
+                ]
             },
             {
                 shot: 'find-2-every-folder',

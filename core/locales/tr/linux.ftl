@@ -89,8 +89,6 @@ gtk-files = { $count ->
     [one] { $count } dosya
    *[other] { $count } dosya
 }
-gtk-pictures-blocked = Gönderenin iletiyi ne zaman açtığınızı öğrenmesini önlemek için bazı resimler engellendi.
-gtk-download-pictures = Resimleri İndir
 gtk-save-attachments-menu = Ekleri Kaydet...
 
 ## İleti yazma penceresi

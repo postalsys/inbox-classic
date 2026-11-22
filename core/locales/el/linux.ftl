@@ -90,8 +90,6 @@ gtk-files = { $count ->
     [one] { $count } αρχείο
    *[other] { $count } αρχεία
 }
-gtk-pictures-blocked = Ορισμένες εικόνες αποκλείστηκαν για να περιοριστεί η δυνατότητα παρακολούθησης από τον αποστολέα.
-gtk-download-pictures = Λήψη εικόνων
 gtk-save-attachments-menu = Αποθήκευση συνημμένων...
 
 ## The compose window

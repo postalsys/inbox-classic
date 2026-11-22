@@ -249,7 +249,8 @@ ui-no-items = Šiame rodinyje nėra laiškų.
 ui-choose-folder = Pasirinkite aplanką, kad pamatytumėte jo laiškus.
 ui-unsubscribe = Atsisakyti prenumeratos
 ui-open-in-calendar = Atidaryti kalendoriuje
-ui-pictures-blocked = Kai kurie paveikslėliai užblokuoti, kad siuntėjui būtų sunkiau sekti, kada skaitote laišką. Spustelėkite čia, kad juos atsisiųstumėte.
+# review: changed
+ui-pictures-blocked = Kai kurie paveikslėliai užblokuoti, kad siuntėjui būtų sunkiau sekti, kada skaitote laišką.
 ui-not-shown = Laiško parodyti nepavyko.
 ui-attachment-not-read = Priedo perskaityti nepavyko.
 ui-attachment-not-saved = Priedo įrašyti nepavyko.

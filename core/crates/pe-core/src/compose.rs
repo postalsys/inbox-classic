@@ -529,13 +529,30 @@ fn editable(list: &[ParsedAddress]) -> String {
     items.join(", ")
 }
 
-/// `Re: ` or `Fw: ` in front, unless the subject already has it
+/// The words before a colon that mark a reply, beyond the ones pe-content knows: ours, then Chinese (Simplified and
+/// Traditional), Japanese and Korean ones, with an ASCII or full width colon
+const REPLY_PREFIXES: &[&str] = &["re", "回复", "答复", "回覆", "返信", "회신"];
+
+/// The words that mark a forward, as [`REPLY_PREFIXES`]
+const FORWARD_PREFIXES: &[&str] = &["fw", "fwd", "转发", "轉寄", "転送", "전달"];
+
+/// `Re: ` or `Fw: ` in front, unless the subject already has it or a mail program's word for it in another language
+/// (`AW:`, `WG:`, `回复:`, `RE：` with a full width colon), so a reply is not `Re: AW: ...`
 pub(crate) fn prefixed(prefix: &str, subject: &str) -> String {
     let trimmed = subject.trim();
-    let already = trimmed
-        .get(..prefix.len())
-        .is_some_and(|start| start.eq_ignore_ascii_case(prefix))
-        || (prefix == "Fw: " && trimmed.get(..4).is_some_and(|s| s.eq_ignore_ascii_case("fwd:")));
+    let forward = prefix == "Fw: ";
+    let (words, kind) = if forward {
+        (FORWARD_PREFIXES, pe_content::SubjectPrefix::Forward)
+    } else {
+        (REPLY_PREFIXES, pe_content::SubjectPrefix::Reply)
+    };
+    let already = pe_content::subject_prefix(trimmed) == Some(kind)
+        || words.iter().any(|word| {
+            trimmed
+                .get(..word.len())
+                .is_some_and(|start| start.eq_ignore_ascii_case(word))
+                && trimmed[word.len()..].starts_with([':', '：'])
+        });
     if already {
         trimmed.to_string()
     } else {
@@ -983,6 +1000,52 @@ Cc: me@example.com\r\nSubject: Prices\r\nMessage-ID: <1@example.com>\r\n\r\nHow 
 
         assert_eq!(prefixed("Re: ", "RE: x"), "RE: x");
         assert_eq!(prefixed("Fw: ", "Fwd: x"), "Fwd: x");
+    }
+
+    #[test]
+    fn replies_keep_one_prefix_in_any_language() {
+        // as before: ours added, one already there kept
+        assert_eq!(prefixed("Re: ", "Plans"), "Re: Plans");
+        assert_eq!(prefixed("Re: ", "  re: Plans "), "re: Plans");
+        assert_eq!(prefixed("Re: ", "Re:Plans"), "Re:Plans");
+        assert_eq!(prefixed("Fw: ", "FW: Plans"), "FW: Plans");
+        assert_eq!(prefixed("Fw: ", "Re: Plans"), "Fw: Re: Plans");
+        assert_eq!(prefixed("Re: ", "Fw: Plans"), "Re: Fw: Plans");
+        // a word that only starts like one is no prefix
+        assert_eq!(prefixed("Re: ", "Report"), "Re: Report");
+        assert_eq!(prefixed("Fw: ", "Fwd"), "Fw: Fwd");
+        // the replies of Chinese, Japanese and Korean mail programs, and the full width colon
+        for subject in [
+            "回复: 会议",
+            "答复: 会议",
+            "回覆: 會議",
+            "返信: 会議",
+            "회신: 회의",
+            "RE：会议",
+            "回复：会议",
+        ] {
+            assert_eq!(prefixed("Re: ", subject), subject);
+        }
+        for subject in [
+            "转发: 会议",
+            "轉寄: 會議",
+            "転送: 会議",
+            "전달: 회의",
+            "FW：会议",
+            "Fwd：x",
+        ] {
+            assert_eq!(prefixed("Fw: ", subject), subject);
+        }
+        // a forward of a reply in Chinese gets ours, a reply of a forward too
+        assert_eq!(prefixed("Fw: ", "回复: 会议"), "Fw: 回复: 会议");
+        assert_eq!(prefixed("Re: ", "转发: 会议"), "Re: 转发: 会议");
+        assert_eq!(prefixed("Re: ", "回复会议"), "Re: 回复会议");
+        // the European ones pe-content knows: German, Scandinavian
+        assert_eq!(prefixed("Re: ", "AW: x"), "AW: x");
+        assert_eq!(prefixed("Re: ", "SV: x"), "SV: x");
+        assert_eq!(prefixed("Fw: ", "WG: x"), "WG: x");
+        assert_eq!(prefixed("Fw: ", "AW: x"), "Fw: AW: x");
+        assert_eq!(prefixed("Re: ", "WG: x"), "Re: WG: x");
     }
 
     #[test]

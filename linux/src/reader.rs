@@ -1592,15 +1592,16 @@ fn unconfirmed_note(text: &str) -> gtk::Label {
 /// The bar over a message whose pictures on the internet are blocked: what it says, Download Pictures and beside it
 /// its menu (Always, or why not)
 fn pictures_bar() -> (gtk::Box, gtk::Button, gtk::MenuButton) {
-    let text = wrapping(&t!(GtkPicturesBlocked));
+    let text = wrapping(&t!(UiPicturesBlocked));
     text.set_hexpand(true);
     text.set_valign(gtk::Align::Center);
-    let download = gtk::Button::with_label(&t!(GtkDownloadPictures));
+    // the words of View > Download Pictures, as on Windows and the Mac
+    let download = gtk::Button::with_label(crate::commands::Command::Pictures.label());
     download.set_widget_name("reader-download-pictures");
     let always = crate::icons::kept(
         gtk::MenuButton::builder()
             .icon_name("pan-down-symbolic")
-            .tooltip_text(t!(GtkDownloadPictures))
+            .tooltip_text(crate::commands::Command::Pictures.label())
             .build(),
     );
     always.set_widget_name("reader-pictures-always");

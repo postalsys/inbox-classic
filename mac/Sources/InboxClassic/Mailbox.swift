@@ -66,7 +66,7 @@ public final class Mailbox: NSObject {
     public let list = MessageTable()
     let reader: Reader
     private let listArea = NSView()
-    private let searchBar = InfoBar(icon: "search", link: Text.uiClearSearch.text)
+    private let searchBar = InfoBar(icon: "search", button: Text.uiClearSearch.text)
     private let emptyTitle = NSTextField(labelWithString: "")
     private let emptyMore = NSTextField(wrappingLabelWithString: "")
     private lazy var emptyMoreWidth = emptyMore.widthAnchor.constraint(equalToConstant: Mailbox.emptyTextWidth)
@@ -224,7 +224,7 @@ public final class Mailbox: NSObject {
     private var allSelected = false
     private var summaryRequest: UInt64 = 0
     /// the bar over the list that says what the server refused, taken back (`ActionUndone`)
-    private let undoneBar = InfoBar(icon: "warning", link: nil, close: Text.uiClose.text)
+    private let undoneBar = InfoBar(icon: "warning", close: Text.uiClose.text)
 
     init(core: Core) {
         self.core = core
@@ -266,9 +266,9 @@ public final class Mailbox: NSObject {
         // a rule that sorts what the search finds as it arrives
         let createRule = NSButton(title: Text.uiCreateRule.opens, target: self, action: #selector(createRuleFromSearch))
         createRule.bezelStyle = .push
-        createRule.controlSize = .small
-        createRule.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        createRule.makeSmall()
         createRule.setAccessibilityIdentifier("search.rule")
+        searchBar.smallButton()
         searchBar.setAccessories([createRule])
         let barHeight = searchBar.heightAnchor.constraint(equalToConstant: 0)
         searchBar.heightConstraint = barHeight

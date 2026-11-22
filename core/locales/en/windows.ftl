@@ -64,7 +64,6 @@ win-files = { $count ->
     [one] { $count } file
    *[other] { $count } files
 }
-win-click-to-retry = Click here to try again.
 win-save-attachments = &Save Attachments...
 win-files-not-saved = { $failed } of the { $count } files could not be saved.
 win-new-folder-in-highlighted = The new folder will be created inside the selected folder.
@@ -106,7 +105,6 @@ win-what-agents-did = Agent &activity:
 # under the log of Tools > AI Agents: what the selected row of reads covers (the start and end of its hour), or how to see it
 win-agent-reads = What was read from { $from } to { $to }:
 win-agent-reads-hint = Select a row of reads above to see what was read.
-win-how-to-connect = How to connect an agent
 
 ## Sign-in apps
 

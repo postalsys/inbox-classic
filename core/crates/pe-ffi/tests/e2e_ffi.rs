@@ -653,6 +653,82 @@ fn reads_mail_through_the_c_api() {
     drop(unsafe { Box::from_raw(context) });
 }
 
+/// Japanese and Chinese mail in their own charsets is found through the C API by a word in the middle of its subject
+/// and of its text, which nothing separates from the words around it
+#[test]
+fn finds_words_without_spaces_through_the_c_api() {
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    // 週次の打ち合わせについて in ISO-2022-JP, its text 请查看预算报告。 in GB18030
+    let mail = "From: s@example.com\r\nSubject: =?ISO-2022-JP?B?GyRCPTU8ISROQkckQTlnJG8kOyRLJEQkJCRGGyhC?=\r\n\
+                MIME-Version: 1.0\r\nContent-Type: text/plain; charset=GB18030\r\nContent-Transfer-Encoding: base64\r\n\
+                \r\nx+uy6b+01KTL47GouOahow==\r\n";
+    let uid = server.add_message("INBOX", mail, &["\\Seen"]);
+    server.add_message("INBOX", &rfc822("Weekly report", "x"), &["\\Seen"]);
+    let dir = TempDir::new("ffi-cjk");
+    let path = CString::new(dir.path().join("store.db").to_str().unwrap()).unwrap();
+    let (sender, events) = channel();
+    let context = Box::into_raw(Box::new(Mutex::new(sender)));
+    let certificate = dir.path().join("server.der");
+    std::fs::write(&certificate, &server.cert).unwrap();
+    let certificate = CString::new(certificate.to_str().unwrap()).unwrap();
+    let core = unsafe {
+        pe_core_open_with(
+            path.as_ptr(),
+            PE_OPEN_MEMORY_PASSWORDS,
+            certificate.as_ptr(),
+            Some(on_event),
+            context.cast(),
+        )
+    };
+    assert!(!core.is_null());
+    let c = |s: &str| CString::new(s).unwrap();
+    let (name, email, user, host) = (c("Test"), c("testuser@example.com"), c(USER), c("127.0.0.1"));
+    let settings = PeAccountSettings {
+        name: name.as_ptr(),
+        email: email.as_ptr(),
+        username: user.as_ptr(),
+        imap_host: host.as_ptr(),
+        imap_port: server.imap,
+        imap_security: PeSecurity::Plain,
+        smtp_host: host.as_ptr(),
+        smtp_port: server.smtp,
+        smtp_security: PeSecurity::StartTls,
+    };
+    let password = c(PASSWORD);
+    let account = unsafe { pe_account_add(core, &settings, password.as_ptr()) };
+    assert!(account > 0);
+    assert!(unsafe { pe_sync(core, account) });
+    wait(&events, |e| e.kind == PeEventKind::SyncFinished && e.account == account);
+    let until = std::time::Instant::now() + pe_testkit::patience();
+    while unsafe { pe_search_unindexed_count(core) } > 0 {
+        assert!(std::time::Instant::now() < until, "the texts were not indexed");
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+    let found = |text: &str| -> Vec<(u64, String)> {
+        let view = view_of(0, Some(text));
+        let list = unsafe { pe_list_view_messages(core, view, 0, 50) };
+        let rows = (0..unsafe { pe_message_list_count(list) })
+            .map(|i| {
+                let row = unsafe { &*pe_message_list_get(list, i) };
+                (row.uid, self::text(row.subject))
+            })
+            .collect();
+        unsafe { pe_message_list_free(list) };
+        unsafe { pe_list_view_free(view) };
+        rows
+    };
+    let subject = "週次の打ち合わせについて".to_string();
+    for word in ["打ち合わせ", "週次", "subject:合わ", "预算", "报告", "查看预算"] {
+        assert_eq!(found(word), [(uid, subject.clone())], "{word}");
+    }
+    assert!(found("预报").is_empty());
+    assert!(found("subject:预算").is_empty());
+    unsafe { pe_core_close(core) };
+    drop(unsafe { Box::from_raw(context) });
+}
+
 /// A list view of `folder` (0 for All Inboxes), searching for `text` when given
 fn view_of(folder: i64, text: Option<&str>) -> *mut PeListView {
     let view = pe_list_view_new();

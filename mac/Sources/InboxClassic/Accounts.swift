@@ -256,7 +256,8 @@ private final class StartPage: NSObject {
             width = max(width, ceil(buttons.fittingSize.width))
         }
         if offer.more {
-            let more = linkButton(Text.macMoreSignInOptions.text, action: #selector(chooseMore(_:)))
+            let more = NSButton(title: Text.macMoreSignInOptions.text, target: self, action: #selector(chooseMore(_:)))
+            more.bezelStyle = .push
             more.setAccessibilityIdentifier("account.more")
             moreButton = more
             rows.append(more)
@@ -279,10 +280,11 @@ private final class StartPage: NSObject {
             let line = NSBox()
             line.boxType = .separator
             rows.append(line)
-            let link = linkButton(Text.uiSetupFirstRun.opens,
-                                  action: #selector(importClicked))
-            link.setAccessibilityIdentifier("account.import")
-            rows.append(link)
+            // a push button on its own row: beside Cancel and Next its words would not fit
+            let importButton = NSButton(title: Text.uiSetupFirstRun.opens, target: self, action: #selector(importClicked))
+            importButton.bezelStyle = .push
+            importButton.setAccessibilityIdentifier("account.import")
+            rows.append(importButton)
         }
         let cancel = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"

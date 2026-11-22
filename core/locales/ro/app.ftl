@@ -251,7 +251,8 @@ ui-no-items = Nu există mesaje în această vizualizare.
 ui-choose-folder = Alegeți un folder pentru a-i vedea mesajele.
 ui-unsubscribe = Dezabonare
 ui-open-in-calendar = Deschidere în Calendar
-ui-pictures-blocked = Unele imagini au fost blocate pentru a limita urmărirea deschiderii mesajului de către expeditor. Faceți clic aici pentru a descărca imaginile.
+# review: changed
+ui-pictures-blocked = Unele imagini au fost blocate pentru a limita urmărirea deschiderii mesajului de către expeditor.
 ui-not-shown = Mesajul nu a putut fi afișat.
 ui-attachment-not-read = Atașarea nu a putut fi citită.
 ui-attachment-not-saved = Atașarea nu a putut fi salvată.

@@ -67,7 +67,6 @@ win-files = { $count ->
     [few] { $count } failai
    *[other] { $count } failų
 }
-win-click-to-retry = Spustelėkite čia, kad bandytumėte dar kartą.
 win-save-attachments = Įra&šyti priedus...
 win-files-not-saved = Nepavyko įrašyti failų: { $failed }. Iš viso: { $count }.
 win-new-folder-in-highlighted = Naujas aplankas bus sukurtas pažymėtame aplanke.
@@ -108,7 +107,6 @@ win-take-back = &Atšaukti pakeitimus
 win-what-agents-did = Agentų &veikla:
 win-agent-reads = Pasiekti duomenys nuo { $from } iki { $to }:
 win-agent-reads-hint = Viršuje pasirinkite skaitymo veiklos įrašą, kad pamatytumėte, kokie duomenys buvo pasiekti.
-win-how-to-connect = Kaip prijungti agentą
 
 ## Sign-in apps
 

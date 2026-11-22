@@ -75,7 +75,6 @@ win-files = { $count ->
     [many] { $count } файлів
    *[other] { $count } файлу
 }
-win-click-to-retry = Клацніть тут, щоб спробувати знову.
 win-save-attachments = Зберегти &вкладення...
 win-files-not-saved = Не збережено: { $failed }. Усього файлів: { $count }.
 win-new-folder-in-highlighted = Нову папку буде створено всередині виділеної папки.
@@ -116,7 +115,6 @@ win-take-back = &Скасувати зміни
 win-what-agents-did = &Дії агентів:
 win-agent-reads = Прочитані дані за період { $from } - { $to }:
 win-agent-reads-hint = Виберіть вище рядок читання, щоб переглянути подробиці.
-win-how-to-connect = Як під’єднати агента
 
 ## Sign-in apps
 

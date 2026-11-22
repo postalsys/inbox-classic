@@ -94,8 +94,6 @@ gtk-files = { $count ->
     [few] { $count } datoteke
    *[other] { $count } datotek
 }
-gtk-pictures-blocked = Nekatere slike so blokirane, da bi omejili pošiljateljevo sledenje odpiranju sporočila.
-gtk-download-pictures = Prenesi slike
 gtk-save-attachments-menu = Shrani priponke...
 
 ## The compose window

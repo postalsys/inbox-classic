@@ -67,7 +67,6 @@ win-files = { $count ->
     [few] { $count } soubory
    *[other] { $count } souborů
 }
-win-click-to-retry = Kliknutím sem to zkusíte znovu.
 win-save-attachments = &Uložit přílohy...
 win-files-not-saved = Celkem souborů: { $count }. Nepodařilo se uložit: { $failed }.
 win-new-folder-in-highlighted = Nová složka bude vytvořena uvnitř vybrané složky.
@@ -108,7 +107,6 @@ win-take-back = &Vrátit změny
 win-what-agents-did = Či&nnost agentů:
 win-agent-reads = Co bylo přečteno od { $from } do { $to }:
 win-agent-reads-hint = Výběrem záznamu o čtení výše zobrazíte podrobnosti.
-win-how-to-connect = Jak připojit agenta
 
 ## Sign-in apps
 

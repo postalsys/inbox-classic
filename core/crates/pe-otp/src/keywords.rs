@@ -12,13 +12,21 @@ use crate::js::Units;
 /// A list of phrases as one expression, `(?:a)|(?:b)|...` with JavaScript's `giu` flags
 pub struct Keywords {
     re: Regex,
+    /// The bare words of the list's guarded phrases, lower case
+    guarded: Vec<String>,
 }
 
-/// The one lookaround of the lists, which the `regex` crate has no syntax for: the phrase is
-/// matched bare and its neighbours are checked after. No other phrase of its list starts with the
-/// same letter, so a match it refuses hides no other match at that place.
-const GUARDED: &str = r"(?<!\p{L})код(?!\p{L})";
-const GUARDED_BARE: &str = "код";
+/// The lookarounds of the lists, which the `regex` crate has no syntax for: each phrase, written
+/// `(?<!\p{L})word(?!\p{L})`, is matched bare and its neighbours are checked after. No other phrase
+/// of its list starts with the same letter, so a match it refuses hides no other match at that
+/// place.
+const GUARD_BEFORE: &str = r"(?<!\p{L})";
+const GUARD_AFTER: &str = r"(?!\p{L})";
+
+/// The bare word of a guarded phrase
+fn guarded(phrase: &str) -> Option<&str> {
+    phrase.strip_prefix(GUARD_BEFORE)?.strip_suffix(GUARD_AFTER)
+}
 
 static LETTER: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\p{L}$").expect("valid"));
 
@@ -57,16 +65,21 @@ impl Keywords {
     fn compile(phrases: &[&str]) -> Keywords {
         let source = phrases
             .iter()
-            .map(|p| format!("(?:{})", if *p == GUARDED { GUARDED_BARE } else { p }))
+            .map(|p| format!("(?:{})", guarded(p).unwrap_or(p)))
             .collect::<Vec<_>>()
             .join("|");
         Keywords {
             re: pe_jsre::regex(&source, "giu"),
+            guarded: phrases
+                .iter()
+                .filter_map(|p| guarded(p))
+                .map(str::to_lowercase)
+                .collect(),
         }
     }
 
-    fn accepted(text: &str, start: usize, end: usize) -> bool {
-        if text[start..end].to_lowercase() != GUARDED_BARE {
+    fn accepted(&self, text: &str, start: usize, end: usize) -> bool {
+        if self.guarded.is_empty() || !self.guarded.contains(&text[start..end].to_lowercase()) {
             return true;
         }
         !is_letter(text[..start].chars().next_back()) && !is_letter(text[end..].chars().next())
@@ -82,7 +95,7 @@ impl Keywords {
             let Some(m) = self.re.find_at(text, at) else {
                 break;
             };
-            if Self::accepted(text, m.start(), m.end()) {
+            if self.accepted(text, m.start(), m.end()) {
                 out.push((units.at(m.start()), units.at(m.end())));
                 // No phrase matches the empty string
                 at = if m.end() > m.start() {
@@ -105,7 +118,7 @@ impl Keywords {
             let Some(m) = self.re.find_at(text, at) else {
                 return false;
             };
-            if Self::accepted(text, m.start(), m.end()) {
+            if self.accepted(text, m.start(), m.end()) {
                 return true;
             }
             at = next_char(text, m.start());
@@ -228,6 +241,13 @@ const STRONG_PHRASES: &[&str] = &[
     r#"인증 코드"#,
     r#"doğrulama kodu"#,
     r#"güvenlik kodu"#,
+    // Vietnamese
+    r#"mã (?:xác (?:minh|thực|nhận)|otp|bảo mật|đăng nhập|kích hoạt)"#,
+    r#"mã của bạn"#,
+    // Indonesian, Malay
+    r#"kode (?:verifikasi|otp|konfirmasi|keamanan|masuk|aktivasi|akses)"#,
+    r#"kode anda"#,
+    r#"kod (?:pengesahan|keselamatan)"#,
 ];
 
 const WEAK_PHRASES: &[&str] = &[
@@ -251,6 +271,8 @@ const WEAK_PHRASES: &[&str] = &[
     r#"码"#,
     r#"碼"#,
     r#"kontrollsõna"#,
+    // \b would also match inside Vietnamese words such as "mãi"
+    r#"(?<!\p{L})mã(?!\p{L})"#,
 ];
 
 const CUE_PHRASES: &[&str] = &[
@@ -284,6 +306,19 @@ const CUE_PHRASES: &[&str] = &[
     r#"минут"#,
     r#"分钟"#,
     r#"有效"#,
+    // Vietnamese
+    r#"nhập"#,
+    r#"hiệu lực"#,
+    r#"hết hạn"#,
+    r#"phút"#,
+    r#"không (?:chia sẻ|cung cấp)"#,
+    // Indonesian, Malay
+    r#"masukkan"#,
+    r#"berlaku"#,
+    r#"kedaluwarsa"#,
+    r#"\bmenit\b"#,
+    r#"\bminit\b"#,
+    r#"jangan (?:bagikan|berikan|beritahu)"#,
 ];
 
 const NEGATIVE_PHRASES: &[&str] = &[
@@ -345,6 +380,21 @@ const NEGATIVE_PHRASES: &[&str] = &[
     r#"facture"#,
     r#"заказ"#,
     r#"счет"#,
+    // Vietnamese
+    r#"đơn hàng"#,
+    r#"hóa đơn"#,
+    r#"tổng (?:tiền|cộng)"#,
+    r#"số điện thoại"#,
+    r#"điện thoại"#,
+    r#"mã vận đơn"#,
+    // Indonesian
+    r#"pesanan"#,
+    r#"tagihan"#,
+    r#"faktur"#,
+    r#"pembayaran"#,
+    r#"nomor resi"#,
+    r#"pengiriman"#,
+    r#"\bhubungi\b"#,
 ];
 
 const PROMO_PHRASES: &[&str] = &[
@@ -383,4 +433,8 @@ const PROMO_PHRASES: &[&str] = &[
     r#"скидк"#,
     r#"промокод"#,
     r#"优惠"#,
+    r#"mã giảm giá"#,
+    r#"khuyến mãi"#,
+    r#"kode promo"#,
+    r#"diskon"#,
 ];
