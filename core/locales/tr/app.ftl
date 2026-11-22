@@ -248,8 +248,7 @@ ui-no-items = Bu görünümde öğe yok.
 ui-choose-folder = İletilerini görmek için bir klasör seçin.
 ui-unsubscribe = Abonelikten Çık
 ui-open-in-calendar = Takvimde Aç
-# review: changed
-ui-pictures-blocked = Gönderenin iletiyi ne zaman açtığınızı öğrenmesini önlemek için bazı resimler engellendi.
+ui-pictures-blocked = Gönderenin iletiyi ne zaman açtığınızı öğrenmesini zorlaştırmak için bazı resimler engellendi.
 ui-not-shown = İleti gösterilemedi.
 ui-attachment-not-read = Ek okunamadı.
 ui-attachment-not-saved = Ek kaydedilemedi.

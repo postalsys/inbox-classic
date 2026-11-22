@@ -250,7 +250,6 @@ ui-no-items = Nu există mesaje în această vizualizare.
 ui-choose-folder = Alegeți un folder pentru a-i vedea mesajele.
 ui-unsubscribe = Dezabonare
 ui-open-in-calendar = Deschidere în Calendar
-# review: changed
 ui-pictures-blocked = Unele imagini au fost blocate pentru a limita urmărirea deschiderii mesajului de către expeditor.
 ui-not-shown = Mesajul nu a putut fi afișat.
 ui-attachment-not-read = Atașarea nu a putut fi citită.
@@ -310,7 +309,7 @@ ui-found-autodiscover = Aceste setări au fost găsite prin Microsoft Autodiscov
 ui-found-other = Aceste setări au fost găsite pentru această adresă.
 ui-app-password-needed = { $provider } nu acceptă parola obișnuită în programele de e-mail. Dacă acest cont permite parole de aplicație, creați una în contul { $provider } și introduceți-o în câmpul Parolă din formularul următor. Pentru Outlook.com și Microsoft 365, folosiți conectarea prin browser.
 ui-app-password-open = Deschideți în browser instrucțiunile oferite de { $provider }?
-ui-plain-warning = Fără criptare, oricine interceptează traficul de rețea vă poate citi parola și mesajele. O rețea locală nu protejează singură conexiunea. Continuați numai dacă înțelegeți și acceptați expunerea datelor.
+ui-plain-warning = Fără criptare, oricine interceptează traficul de rețea vă poate citi parola și mesajele. O rețea locală nu protejează singură conexiunea. Continuați numai dacă conexiunea este protejată în alt mod.
 ui-continue-ask = Continuați?
 ui-add-sign-in-app = Adăugare aplicație de conectare...
 ui-turned-off = Opțiunea „{ $name }” este dezactivată pe acest computer.

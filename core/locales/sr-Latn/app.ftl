@@ -252,8 +252,7 @@ ui-no-items = U ovom prikazu nema stavki.
 ui-choose-folder = Izaberite fasciklu da biste videli njene poruke.
 ui-unsubscribe = Otkaži pretplatu
 ui-open-in-calendar = Otvori u kalendaru
-# review: changed
-ui-pictures-blocked = Neke slike su blokirane da bi se sprečilo praćenje.
+ui-pictures-blocked = Neke slike su blokirane da bi se ograničilo praćenje od strane pošiljaoca.
 ui-not-shown = Poruku nije moguće prikazati.
 ui-attachment-not-read = Prilog nije moguće pročitati.
 ui-attachment-not-saved = Prilog nije moguće sačuvati.

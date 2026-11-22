@@ -1,4 +1,3 @@
-<!--review-->
 <h1>帐户安全设置</h1>
 <p class="summary">帐户服务器的安全设置，以及每项设置的含义。</p>
 <p>每个帐户的接收服务器有<b data-text="ui-field-imap-security"></b>，发送服务器有<b data-text="ui-field-smtp-security"></b>。Inbox Classic 找到您的提供商的设置后会自动填写它们。要更改它们，请在<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>中打开该帐户的属性。</p>
@@ -8,8 +7,7 @@
     <tr><td>STARTTLS</td><td>连接开始时未加密，在发送登录凭据之前切换到 TLS。接收邮件通常使用端口 143，发送邮件通常使用端口 587。如果服务器不提供加密，Inbox Classic 会停止连接。</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>您的密码和邮件以未加密方式传输，截获连接的人可以读取它们。</td></tr>
 </table>
-<aside class="warning">仅对您自己计算机或本地网络上的服务器使用<b data-text="ui-security-none"></b>。Inbox Classic 在使用它之前会警告您。</aside>
-<p>Inbox Classic 会根据系统信任的证书，检查每个服务器是否就是它声称的服务器。没有接受任意证书的开关。</p>
+<aside class="warning">仅当连接已通过其他方式受到保护时，才使用<b data-text="ui-security-none"></b>。仅靠局域网并不能提供加密。Inbox Classic 在使用它之前会警告您。</aside>
+<p>使用加密连接时，Inbox Classic 会根据系统信任的证书，检查每个服务器是否就是它声称的服务器。没有接受任意证书的开关。</p>
 <p>默认情况下，您的密码保存在<!--os:windows-->Windows 凭据管理器<!--/os--><!--os:mac-->登录钥匙串<!--/os--><!--os:linux-->密钥环<!--/os-->中，从不保存在邮件存储中。浏览器登录会在那里存储令牌，而不是您的密码。仅内存模式或系统存储不可用时，凭据可能只在当前会话中有效。</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

@@ -118,7 +118,7 @@ gtk-link-status = { $link }    (Ctrl+kliknięcie, aby otworzyć)
 ## Accounts
 
 gtk-plain-warning =
-    Bez szyfrowania każdy, kto przechwyci ruch w Twojej sieci, może odczytać Twoje hasło i wiadomości. Używaj tego połączenia tylko z serwerem na własnym komputerze lub w sieci lokalnej.
+    Bez szyfrowania każdy, kto przechwyci ruch w Twojej sieci, może odczytać Twoje hasło i wiadomości. Kontynuuj tylko wtedy, gdy połączenie jest chronione w inny sposób; sama sieć lokalna nie zapewnia szyfrowania.
 
     Kontynuować?
 gtk-account-name-title = Nazwa konta
@@ -173,7 +173,7 @@ gtk-nothing-yet = Na razie nic.
 ## Preferences
 
 gtk-preferences = Preferencje
-gtk-notify-subtitle = Tylko gdy Inbox Classic działa w tle
+gtk-notify-subtitle = Tylko gdy główne okno nie jest na pierwszym planie
 
 ## The desktop entry and the page of the software stores
 

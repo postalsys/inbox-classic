@@ -104,7 +104,7 @@ gtk-link-status = { $link }    (Strg+Klick zum Öffnen)
 ## Accounts
 
 gtk-plain-warning =
-    Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
+    Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Fahren Sie nur fort, wenn die Verbindung auf andere Weise geschützt ist; ein lokales Netzwerk allein bietet keine Verschlüsselung.
 
     Fortfahren?
 gtk-account-name-title = Kontoname
@@ -159,7 +159,7 @@ gtk-nothing-yet = Noch nichts.
 ## Preferences
 
 gtk-preferences = Einstellungen
-gtk-notify-subtitle = Nur wenn Inbox Classic im Hintergrund ist
+gtk-notify-subtitle = Nur wenn das Hauptfenster nicht im Vordergrund ist
 
 ## The desktop entry and the page of the software stores
 

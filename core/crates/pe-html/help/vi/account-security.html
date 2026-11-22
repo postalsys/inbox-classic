@@ -1,15 +1,13 @@
-<!--review-->
-<h1>Cài đặt bảo mật tài khoản</h1>
-<p class="summary">Các cài đặt bảo mật cho máy chủ của một tài khoản, và ý nghĩa của từng cài đặt.</p>
-<p>Mỗi tài khoản có <b data-text="ui-field-imap-security"></b> cho máy chủ thư đến và <b data-text="ui-field-smtp-security"></b> cho máy chủ thư đi. Inbox Classic tự điền các cài đặt này khi tìm thấy cài đặt của nhà cung cấp. Để thay đổi, hãy mở thuộc tính của tài khoản trong <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<h1>Thiết đặt bảo mật tài khoản</h1>
+<p class="summary">Các thiết đặt bảo mật cho máy chủ của một tài khoản, và ý nghĩa của từng thiết đặt.</p>
+<p>Mỗi tài khoản có <b data-text="ui-field-imap-security"></b> cho máy chủ thư đến và <b data-text="ui-field-smtp-security"></b> cho máy chủ thư đi. Inbox Classic tự điền các thiết đặt này khi tìm thấy thiết đặt của nhà cung cấp. Để thay đổi, hãy mở thuộc tính của tài khoản trong <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
-    <tr><th>Cài đặt</th><th>Ý nghĩa</th></tr>
+    <tr><th>Thiết đặt</th><th>Ý nghĩa</th></tr>
     <tr><td>SSL/TLS</td><td>Kết nối được mã hóa ngay từ đầu. Thường là cổng 993 cho thư đến và 465 cho thư đi.</td></tr>
     <tr><td>STARTTLS</td><td>Kết nối bắt đầu không mã hóa, rồi chuyển sang TLS trước khi gửi thông tin đăng nhập. Thường là cổng 143 cho thư đến và 587 cho thư đi. Inbox Classic dừng lại nếu máy chủ không hỗ trợ mã hóa.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Mật khẩu và thư của bạn được truyền đi không mã hóa, và người chặn được kết nối có thể đọc chúng.</td></tr>
 </table>
-<aside class="warning">Chỉ dùng <b data-text="ui-security-none"></b> cho máy chủ trên chính máy tính hoặc mạng cục bộ của bạn. Inbox Classic cảnh báo bạn trước khi dùng cài đặt này.</aside>
-<p>Inbox Classic kiểm tra để chắc rằng mỗi máy chủ đúng là máy chủ nó tự nhận, dựa trên các chứng chỉ mà hệ thống của bạn tin cậy. Không có tùy chọn nào để chấp nhận mọi chứng chỉ.</p>
-<p>Theo mặc định, mật khẩu của bạn được lưu trong <!--os:windows-->Windows Credential Manager<!--/os--><!--os:mac-->chuỗi khóa đăng nhập<!--/os--><!--os:linux-->vòng khóa (keyring) của bạn<!--/os-->, không bao giờ trong kho thư. Khi đăng nhập qua trình duyệt, một mã thông báo (token) được lưu ở đó thay cho mật khẩu. Chế độ chỉ lưu trong bộ nhớ, hoặc khi kho của hệ thống không dùng được, có thể khiến thông tin đăng nhập chỉ có hiệu lực trong phiên hiện tại.</p>
+<aside class="warning">Chỉ dùng <b data-text="ui-security-none"></b> khi kết nối được bảo vệ theo cách khác. Bản thân mạng cục bộ không mã hóa dữ liệu. Inbox Classic cảnh báo bạn trước khi dùng thiết đặt này.</aside>
+<p>Với kết nối được mã hóa, Inbox Classic kiểm tra để chắc rằng mỗi máy chủ đúng là máy chủ nó tự nhận, dựa trên các chứng chỉ mà hệ thống của bạn tin cậy. Không có tùy chọn nào để chấp nhận mọi chứng chỉ.</p>
+<p>Theo mặc định, mật khẩu của bạn được lưu trong <!--os:windows-->Trình quản lý Thông tin xác thực của Windows<!--/os--><!--os:mac-->chuỗi khóa đăng nhập<!--/os--><!--os:linux-->vòng khóa (keyring) của bạn<!--/os-->, không bao giờ trong kho thư. Khi đăng nhập qua trình duyệt, một mã thông báo (token) được lưu ở đó thay cho mật khẩu. Chế độ chỉ lưu trong bộ nhớ, hoặc khi kho của hệ thống không dùng được, có thể khiến thông tin đăng nhập chỉ được lưu trong phiên hiện tại.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

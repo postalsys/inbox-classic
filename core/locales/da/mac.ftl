@@ -120,7 +120,7 @@ mac-sign-in-apps-button = Login-apps…
 
 ## AI agents
 
-mac-forget-program = Vil du fjerne dette program og dets agenters aktivitetshistorik?
+mac-forget-program = Vil du fjerne dette programs gemte tilladelser og dets agenters aktivitetshistorik?
 mac-forget-program-detail = Programmets tilladelser slettes. Du bliver spurgt om tilladelse igen, næste gang det opretter forbindelse.
 
 ## Sign-in apps

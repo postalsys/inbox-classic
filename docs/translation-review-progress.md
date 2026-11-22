@@ -1,14 +1,17 @@
-# Mailing-list bar and late-arrival review, round 6
+# Translation review, round 6
 
 ## Resume here
 
 - Authoritative checkout: `/Users/andris/Projects/PostalExpress/build/i18n-pr244-review-20261122`, branch `i18n/pr244-review-20261122`.
-- PR #244 merged at `d42951a569eaf1313da6312ae5127da0bda1a2dd`; local master was synced.
-- Completed its 252 marked catalog entries and 168 marked help passages across the original 28 target languages, plus English, the new context-menu label in all 29 languages, and affected neighboring unsubscribe/agent help. There are 154 changed catalog values including 29 new labels, and 58 changed help topics.
-- Static checks: 174 catalogs parse; all 28 language structural checks pass after accounting for draft-mark assumptions; 67 Windows menu/dialog scopes per language have no key collisions. Linux/macOS context labels strip mnemonic marks. Offline pe-ffi build passed; generated C/Swift text IDs included. No test suites or CI queries.
-- Late upstream arrival: master `7668e552b45bd4db5fe3067617eac2ead13f8b05` now includes Japanese, Simplified and Traditional Chinese, Korean, Indonesian and Vietnamese, plus action-button/search help changes. These require integration, exact inventory and review next. This round is incomplete.
-- Keep `REVIEWED` at `a040e21e1f2955f1cc9ce37962ce74280d05e672`. Previous round 5 is archived. Evidence is in `build/i18n-pr244-monitor` of the root checkout.
+- PR #244 merged at `d42951a569eaf1313da6312ae5127da0bda1a2dd`; local master was synced. Latest audited upstream is `f66af7cb6e9a0ba65a008f1885179a4b8a8ebdef`.
+- Linguistic review is finished. English and affected strings/help in the original 28 translations were reviewed against app callers. Japanese, Simplified Chinese, Traditional Chinese, Korean, Indonesian and Vietnamese received full reviews: 8,940 catalog entries and 318 help topics.
+- Current inventory: 35 languages including English, each with 1,490 catalog entries and 53 help topics. No review marks or unresolved language passages remain.
+- Final replay accounts for all 2,065 catalog/help files, including 499 changed catalog values and 415 changed help topics compared with the latest upstream. Historical review hashes remain preserved; the state records final hashes and superseding followups.
+- Corrections cover mailing-list request/history wording, agent permissions, plaintext/TLS/DNS scope, CJK search, key ownership versus signature integrity, forwarding prefixes and account import. Context-menu Unsubscribe has its own access key. Help strips complete CJK mnemonic suffixes and full-width field colons.
+- Validation: 210 Fluent catalogs parse; 34 language checkers have zero structural findings after accounting for 52,462 expected removed-mark diagnostics; all 35 × 67 modeled mnemonic scopes are clear. All 5,565 platform help documents are balanced and references valid. Offline pe-ffi/help-export builds and all three platform exports passed. Generated installer and Linux metadata are included.
+- The language work is saved locally and not published yet. Next: commit, integrate audited upstream, advance the review baseline, archive this round, publish and sync master. Keep `REVIEWED` unchanged until the concrete fully reviewed commit exists.
+- Evidence: `/Users/andris/Projects/PostalExpress/build/i18n-pr244-monitor`. Full new-language ledgers and exact followup ledgers are retained there; final coverage and quality reports reconcile them.
 
 ## Validation policy
 
-No local test suites, CI queries or manually triggered workflows. Static checks, caller inspection and offline builds only. No native-speaker certification or GUI fit claim.
+No local test suites, CI queries or manually triggered workflows. Static checks, caller inspection and offline builds only. No native-speaker certification, native GUI fit check or Windows keyboard-runtime certification is claimed.

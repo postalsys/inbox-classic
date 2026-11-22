@@ -115,7 +115,7 @@ mac-sign-in-apps-button = Přihlašovací aplikace…
 
 ## AI agents
 
-mac-forget-program = Odebrat tento program a historii činnosti jeho agentů?
+mac-forget-program = Odebrat uložená oprávnění tohoto programu a historii činnosti jeho agentů?
 mac-forget-program-detail = Oprávnění programu budou odstraněna. Při příštím připojení budete znovu požádáni o svolení.
 
 ## Sign-in apps

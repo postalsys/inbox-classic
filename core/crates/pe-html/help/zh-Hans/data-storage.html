@@ -1,12 +1,10 @@
-<!--review-->
 <h1>邮件和密码的保存位置</h1>
 <p class="summary">Inbox Classic 在您的计算机上保存了哪些内容，以及保存在哪里。</p>
 <ul>
     <li><b>已下载的邮件和帐户设置</b>默认保存在<!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->中。启动选项或您的环境可以更改此位置。已同步的邮件保留在服务器上；发件箱只在本地。缓存的副本在保存期间可供脱机阅读。数据库和搜索索引并未整体加密。</li>
-    <li><b>密码</b>、浏览器登录令牌和登录应用的客户端密码通常保存在<!--os:windows-->Windows 凭据管理器中的 <i>InboxClassic</i> 下，并针对您的 Windows 帐户加密。<!--/os--><!--os:mac-->您的登录钥匙串中的 <i>InboxClassic</i> 下，并针对您的 Mac 帐户加密。“钥匙串访问”中可以看到它们。<!--/os--><!--os:linux-->您的密钥环（GNOME 密钥环）中的 <i>InboxClassic</i> 下，并针对您的登录加密。如果没有密钥环，它们只保留到 Inbox Classic 退出为止。<!--/os-->这些凭据不保存在邮件数据库中。在仅内存模式下，它们只保留到应用退出为止。</li>
+    <li><b>密码</b>、浏览器登录令牌和登录应用的客户端密码通常保存在<!--os:windows-->Windows 凭据管理器中的 <i>InboxClassic</i> 下，并针对您的 Windows 帐户加密。<!--/os--><!--os:mac-->您的登录钥匙串中的 <i>InboxClassic</i> 下，并针对您的 Mac 帐户加密。“钥匙串访问”中可以看到它们。<!--/os--><!--os:linux-->系统密钥环（Secret Service）中的 <i>InboxClassic</i> 下，并针对您的登录加密。如果没有密钥环，它们只保留到 Inbox Classic 退出为止。<!--/os-->这些凭据不保存在邮件数据库中。在仅内存模式下，它们只保留到应用退出为止。</li>
     <li><b>加密密钥</b>与已下载的邮件保存在一起。您的私钥在那里由一个与密码保存在一起的密钥加密，因此单凭邮件文件无法打开它们。</li>
 </ul>
 <p>搜索、退信说明、对话分组和验证码识别都在您的计算机上运行。这些功能不会将您的邮件内容发送到外部服务。</p>
 <p>只有在您允许时，AI 代理才能看到您的邮件，而且只能看到您选择的帐户。请参阅<a href="topic:agents-permissions"></a>。</p>
 <nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav>
-<!--/review-->

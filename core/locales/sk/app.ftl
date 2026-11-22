@@ -248,7 +248,6 @@ ui-no-items = V tomto zobrazení nie sú žiadne položky.
 ui-choose-folder = Vyberte priečinok, ak chcete vidieť jeho správy.
 ui-unsubscribe = Odhlásiť odber
 ui-open-in-calendar = Otvoriť v kalendári
-# review: changed
 ui-pictures-blocked = Niektoré obrázky boli zablokované, aby sa obmedzila možnosť sledovania odosielateľom.
 ui-not-shown = Správu sa nepodarilo zobraziť.
 ui-attachment-not-read = Prílohu sa nepodarilo prečítať.
@@ -308,7 +307,7 @@ ui-found-autodiscover = Tieto nastavenia sa našli cez Microsoft Autodiscover (E
 ui-found-other = Tieto nastavenia sa našli pre túto adresu.
 ui-app-password-needed = Poskytovateľ: { $provider }. Ak vaše konto podporuje heslá aplikácií, vytvorte si takéto heslo v nastaveniach zabezpečenia konta a zadajte ho do poľa Heslo v ďalšom formulári. Outlook.com a Microsoft 365 vyžadujú prihlásenie cez prehliadač.
 ui-app-password-open = Otvoriť pokyny služby { $provider } v prehliadači?
-ui-plain-warning = Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Samotná lokálna sieť neposkytuje šifrovanie. Takéto pripojenie použite len vtedy, keď rozumiete riziku, napríklad so serverom vo vlastnom počítači.
+ui-plain-warning = Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Samotná lokálna sieť neposkytuje šifrovanie. Pokračujte len vtedy, ak je pripojenie chránené iným spôsobom.
 ui-continue-ask = Pokračovať?
 ui-add-sign-in-app = Pridať prihlasovaciu aplikáciu...
 ui-turned-off = Možnosť „{ $name }“ je v tomto počítači vypnutá.

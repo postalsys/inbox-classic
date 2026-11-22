@@ -251,7 +251,6 @@ ui-no-items = Šajā skatā nav ziņojumu.
 ui-choose-folder = Izvēlieties mapi, lai redzētu tās ziņojumus.
 ui-unsubscribe = Atteikties no abonēšanas
 ui-open-in-calendar = Atvērt kalendārā
-# review: changed
 ui-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājam būtu grūtāk izsekot, kad lasāt ziņojumu.
 ui-not-shown = Neizdevās parādīt ziņojumu.
 ui-attachment-not-read = Neizdevās nolasīt pielikumu.
@@ -311,7 +310,7 @@ ui-found-autodiscover = Šie iestatījumi atrasti, izmantojot Microsoft Autodisc
 ui-found-other = Šai adresei tika atrasti šie iestatījumi.
 ui-app-password-needed = Pakalpojuma sniedzējs: { $provider }. Ja konts atbalsta lietotņu paroles, izveidojiet tādu konta drošības iestatījumos un ierakstiet to nākamās veidlapas laukā Parole. Pretējā gadījumā pierakstieties pārlūkā, ja tas ir pieejams.
 ui-app-password-open = Vai pārlūkprogrammā atvērt norādījumus, ko sniedz { $provider }?
-ui-plain-warning = Bez šifrēšanas ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Izmantojiet nešifrētu savienojumu tikai apzināti izvēlētā un citādi aizsargātā vidē. Arī lokāls tīkls pats par sevi nenodrošina drošību.
+ui-plain-warning = Bez šifrēšanas ikviens, kas pārtver jūsu tīkla datplūsmu, var izlasīt jūsu paroli un ziņojumus. Turpiniet tikai tad, ja savienojums ir aizsargāts citā veidā. Lokāls tīkls pats par sevi nenodrošina šifrēšanu.
 ui-continue-ask = Vai turpināt?
 ui-add-sign-in-app = Pievienot pierakstīšanās lietotni...
 ui-turned-off = Iespēja „{ $name }” šajā datorā ir izslēgta.

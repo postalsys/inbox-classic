@@ -109,7 +109,7 @@ gtk-link-status = { $link }    (otvoríte kliknutím so stlačeným Ctrl)
 ## Accounts
 
 gtk-plain-warning =
-    Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Samotná lokálna sieť neposkytuje šifrovanie. Takéto pripojenie použite len vtedy, keď rozumiete riziku, napríklad so serverom vo vlastnom počítači.
+    Bez šifrovania môže ktokoľvek, kto zachytí vašu sieťovú komunikáciu, prečítať vaše heslo a správy. Samotná lokálna sieť neposkytuje šifrovanie. Pokračujte len vtedy, ak je pripojenie chránené iným spôsobom.
 
     Pokračovať?
 gtk-account-name-title = Názov konta
@@ -164,7 +164,7 @@ gtk-nothing-yet = Zatiaľ nič.
 ## Preferences
 
 gtk-preferences = Predvoľby
-gtk-notify-subtitle = Len keď je Inbox Classic na pozadí
+gtk-notify-subtitle = Len keď hlavné okno nie je v popredí
 
 ## The desktop entry and the page of the software stores
 

@@ -7,7 +7,7 @@
     <tr><td>STARTTLS</td><td>Tilkoblingen oppgraderes til kryptering før pålogging og overføring av e-post. Vanligvis port 143 for innkommende e-post og 587 for utgående e-post. Tilkoblingen avbrytes hvis serveren ikke tilbyr kryptering.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Passordet og e-posten sendes ukryptert og kan leses av noen som fanger opp nettverkstrafikken.</td></tr>
 </table>
-<aside class="warning">Et lokalt nettverk krypterer ikke trafikken i seg selv. Bruk <b data-text="ui-security-none"></b> bare for en server på din egen datamaskin eller ditt eget lokale nettverk. Inbox Classic advarer deg før innstillingen tas i bruk.</aside>
-<p>Inbox Classic kontrollerer serverens identitet ved hjelp av sertifikater systemet stoler på. Du kan ikke slå av sertifikatkontrollen.</p>
+<aside class="warning">Et lokalt nettverk krypterer ikke trafikken i seg selv. Bruk <b data-text="ui-security-none"></b> bare hvis tilkoblingen er beskyttet på en annen måte. Inbox Classic advarer deg før innstillingen tas i bruk.</aside>
+<p>Ved krypterte tilkoblinger kontrollerer Inbox Classic serverens identitet ved hjelp av sertifikater systemet stoler på. Du kan ikke slå av sertifikatkontrollen.</p>
 <p>Passordet ditt oppbevares som standard i <!--os:windows-->Legitimasjonsbehandling i Windows<!--/os--><!--os:mac-->påloggingsnøkkelringen din<!--/os--><!--os:linux-->nøkkelringen din<!--/os-->, aldri i e-postlageret. For kontoer som logger på gjennom nettleseren, lagres OAuth-påloggingsopplysninger på samme sikre sted i stedet for kontopassordet. Hvis bare minnet brukes, eller lagringen mislykkes, kan opplysningene gå tapt når programmet lukkes.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>

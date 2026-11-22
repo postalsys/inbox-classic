@@ -9,7 +9,6 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } byte
@@ -646,7 +645,7 @@ agent-read-search = { $count ->
     [one] Gezocht naar “{ $query }”: 1 bericht
    *[other] Gezocht naar “{ $query }”: { $count } berichten
 }
-agent-read-people = Contactpersonen opgezocht met een naam of adres dat begint met “{ $query }”
+agent-read-people = Contactpersonen opgezocht op naam of adres: “{ $query }”
 agent-read-list = { $count ->
     [one] Lijstgegevens van 1 lijstvermelding in { $folder } bekeken
    *[other] Lijstgegevens van { $count } lijstvermeldingen in { $folder } bekeken

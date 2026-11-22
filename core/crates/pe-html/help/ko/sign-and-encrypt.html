@@ -1,7 +1,6 @@
-<!--review-->
 <h1>메시지 서명 및 암호화</h1>
 <p class="summary">메시지에 서명하여 무결성을 보호하고, 내용을 사용자 본인과 받는 사람을 위해 암호화합니다.</p>
-<p>유효한 서명은 서명된 내용이 바뀌었는지를 보여 줍니다. 받는 사람은 키의 소유자도 확인해야 합니다. 암호화된 메시지는 받는 사람과 사용자 본인만 읽을 수 있으며, 항상 서명도 함께 됩니다. 둘 다 사용자 본인의 키가 필요합니다.</p>
+<p>유효한 서명은 서명된 내용이 바뀌었는지를 보여 줍니다. 받는 사람은 키의 소유자도 확인해야 합니다. 암호화된 메시지는 받는 사람과 사용자 본인만 읽을 수 있으며, 항상 디지털 서명도 함께 적용됩니다. 둘 다 사용자 본인의 키가 필요합니다.</p>
 <p>메시지에 서명하거나 메시지를 암호화하려면 다음과 같이 합니다.</p>
 <ol>
     <li>메시지 창에서 <b data-text="ui-tb-sign"></b> 또는 <b data-text="ui-tb-encrypt"></b> 단추를 클릭하거나, <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> 또는 <b data-text="cmd-compose-encrypt"></b>를 선택합니다. <kbd data-command="compose_sign"></kbd> 또는 <kbd data-command="compose_encrypt"></kbd> 키를 눌러도 됩니다. 보내는 주소에 선택된 키가 없으면 Inbox Classic이 키를 만들도록 제안합니다.</li>
@@ -10,10 +9,10 @@
 <p><b data-text="ui-tb-encrypt"></b> 단추가 켜져 있는 동안 제목 아래 줄에 받는 사람마다 색과 그림이 표시되며, Inbox Classic은 아직 없는 키를 찾습니다.</p>
 <table>
     <tr><th>받는 사람</th><th>의미</th></tr>
-    <tr><td>녹색, 자물쇠</td><td>받는 사람의 키를 확인했습니다.</td></tr>
-    <tr><td>파란색, 자물쇠</td><td>키가 확인되지 않았거나 사용자 본인의 키입니다.</td></tr>
+    <tr><td>초록색, 자물쇠</td><td>키의 소유자가 받는 사람임을 확인했습니다.</td></tr>
+    <tr><td>파란색, 자물쇠</td><td>키 소유자를 확인하지 않았거나 사용자 본인의 키입니다.</td></tr>
     <tr><td>회색, <!--os:windows-->자물쇠<!--/os--><!--os:mac-->모래시계<!--/os--><!--os:linux-->회전하는 원<!--/os--></td><td>Inbox Classic이 받는 사람의 키를 찾고 있습니다.</td></tr>
-    <tr><td>호박색, 경고 표시</td><td>받는 사람의 사용할 수 있는 키를 찾지 못했습니다.</td></tr>
+    <tr><td>호박색, 경고 표시</td><td>받는 사람에게 사용할 수 있는 키를 찾지 못했습니다.</td></tr>
 </table>
 <h2>받는 사람에게 키가 없는 경우</h2>
 <p>암호화하여 보내려면 모든 받는 사람에게 사용할 수 있는 키가 있어야 합니다. 키가 없는 받는 사람이 있으면 <b data-text="ui-tb-send"></b> 단추를 클릭할 때 <b data-text="ui-recipient-keys-title"></b> 창이 열립니다. 이 창에서 <b data-text="ui-recipient-find-key"></b> 단추를 클릭하여 다시 찾거나, <b data-text="ui-recipient-remove"></b> 단추를 클릭하여 그 사람을 빼거나, 암호화된 메일에서 가져온 내용이 남아 있지 않으면 <b data-text="ui-send-unencrypted"></b> 단추를 클릭할 수 있습니다. 상대방에게 공개 키를 요청하여 가져올 수도 있습니다.</p>
@@ -23,4 +22,3 @@
 <h2>공개 키 공유</h2>
 <p>다른 사람이 암호화된 메일을 보낼 수 있게 하려면 <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>를 선택합니다. 공개 키가 파일로 메시지에 첨부됩니다.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

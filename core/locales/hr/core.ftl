@@ -8,7 +8,6 @@ messages = { $count ->
    *[other] { $count } poruka
 }
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } bajt
@@ -676,7 +675,7 @@ agent-read-search = { $count ->
     [few] Pretraživanje „{ $query }“: { $count } poruke
    *[other] Pretraživanje „{ $query }“: { $count } poruka
 }
-agent-read-people = Traženi kontakti čije ime ili adresa počinje s „{ $query }“
+agent-read-people = Pretraga kontakata po imenu ili adresi: „{ $query }“
 agent-read-list = { $count ->
     [one] Pregledani podaci za { $count } stavku popisa u mapi { $folder }
     [few] Pregledani podaci za { $count } stavke popisa u mapi { $folder }

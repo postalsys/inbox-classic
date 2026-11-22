@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (otevřete kliknutím s klávesou Ctrl)
 ## Accounts
 
 gtk-plain-warning =
-    Bez šifrování může kdokoli, kdo zachytí váš síťový provoz, přečíst vaše heslo i zprávy. Toto spojení používejte jen se serverem ve vlastním počítači nebo v místní síti.
+    Bez šifrování může kdokoli, kdo zachytí váš síťový provoz, přečíst vaše heslo i zprávy. Pokračujte pouze tehdy, je-li spojení chráněno jiným způsobem; samotná místní síť šifrování neposkytuje.
 
     Pokračovat?
 gtk-account-name-title = Název účtu
@@ -152,7 +152,7 @@ gtk-agent-it-may = Povolené akce
 gtk-agent-accounts = Povolené účty
 gtk-never-used = Nikdy nepoužito
 gtk-last-used = Naposledy použito { $date }
-gtk-forget-program = Odebrat tento program?
+gtk-forget-program = Odebrat uložená oprávnění tohoto programu?
 gtk-forget-program-detail = Oprávnění programu a historie činnosti jeho agentů budou odstraněny. Při příštím připojení budete znovu požádáni o svolení.
 gtk-no-agents-yet = Zatím žádný agent nepožádal o přístup k vaší poště.
 gtk-nothing-yet = Zatím nic.
@@ -160,7 +160,7 @@ gtk-nothing-yet = Zatím nic.
 ## Preferences
 
 gtk-preferences = Předvolby
-gtk-notify-subtitle = Jen když je Inbox Classic na pozadí
+gtk-notify-subtitle = Jen když hlavní okno není v popředí
 
 ## The desktop entry and the page of the software stores
 

@@ -243,8 +243,7 @@ ui-no-items = Selles vaates pole üksusi.
 ui-choose-folder = Kirjade nägemiseks valige kaust.
 ui-unsubscribe = Loobu tellimusest
 ui-open-in-calendar = Ava kalendris
-# review: changed
-ui-pictures-blocked = Mõned pildid blokeeriti jälgimise piiramiseks.
+ui-pictures-blocked = Mõned pildid blokeeriti, et piirata saatja võimalusi teid jälgida.
 ui-not-shown = Kirja ei saanud kuvada.
 ui-attachment-not-read = Manust ei saanud lugeda.
 ui-attachment-not-saved = Manust ei saanud salvestada.

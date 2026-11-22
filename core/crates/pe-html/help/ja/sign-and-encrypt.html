@@ -1,4 +1,3 @@
-<!--review-->
 <h1>メッセージにデジタル署名して暗号化する</h1>
 <p class="summary">メッセージにデジタル署名して内容が改ざんされていないことを示し、内容を自分と受信者のために暗号化します。</p>
 <p>有効な署名によって、署名された内容が変更されたかどうかがわかります。受信者は、キーの所有者も確認する必要があります。暗号化されたメッセージは、受信者とあなただけが読むことができ、常に署名も付きます。どちらにも、自分のキーが必要です。</p>
@@ -10,8 +9,8 @@
 <p><b data-text="ui-tb-encrypt"></b>がオンの間は、件名の下の行に、各受信者が色とアイコン付きで表示され、Inbox Classicはまだ持っていないキーを探します。</p>
 <table>
     <tr><th>受信者</th><th>意味</th></tr>
-    <tr><td>緑、ロックのマーク</td><td>受信者のキーを確認済みです。</td></tr>
-    <tr><td>青、ロックのマーク</td><td>キーが未確認か、あなた自身のキーです。</td></tr>
+    <tr><td>緑、ロックのマーク</td><td>受信者のキーの所有者を確認済みです。</td></tr>
+    <tr><td>青、ロックのマーク</td><td>キーの所有者が未確認か、あなた自身のキーです。</td></tr>
     <tr><td>灰色、<!--os:windows-->ロックのマーク<!--/os--><!--os:mac-->砂時計<!--/os--><!--os:linux-->回転する円<!--/os--></td><td>Inbox Classicが受信者のキーを探しています。</td></tr>
     <tr><td>黄色、警告のマーク</td><td>受信者の使用できるキーが見つかりませんでした。</td></tr>
 </table>
@@ -23,4 +22,3 @@
 <h2>公開キーを共有する</h2>
 <p>相手から暗号化されたメールを受け取れるようにするには、<!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>を選択します。公開キーがファイルとしてメッセージに添付されます。</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

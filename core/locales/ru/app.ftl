@@ -247,7 +247,6 @@ ui-no-items = Здесь нет сообщений.
 ui-choose-folder = Выберите папку, чтобы просмотреть сообщения в ней.
 ui-unsubscribe = Отписаться
 ui-open-in-calendar = Открыть в календаре
-# review: changed
 ui-pictures-blocked = Некоторые изображения заблокированы для защиты от отслеживания отправителем.
 ui-not-shown = Не удалось отобразить сообщение.
 ui-attachment-not-read = Не удалось прочитать вложение.

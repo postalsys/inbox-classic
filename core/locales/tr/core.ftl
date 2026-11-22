@@ -9,7 +9,6 @@ messages = { $count ->
 }
 # boyutlardaki ondalık ayırıcı: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bayt
@@ -642,7 +641,7 @@ agent-read-search = { $count ->
     [one] Arama yaptı: “{ $query }”, 1 ileti
    *[other] Arama yaptı: “{ $query }”, { $count } ileti
 }
-agent-read-people = Adı veya adresi “{ $query }” ile başlayan kişileri aradı
+agent-read-people = Kişileri ad veya adresle aradı: “{ $query }”
 agent-read-list = { $count ->
     [one] 1 ileti liste kaydını görüntüledi. Kapsam: { $folder }
    *[other] { $count } ileti liste kaydını görüntüledi. Kapsam: { $folder }

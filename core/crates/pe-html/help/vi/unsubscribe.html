@@ -1,7 +1,6 @@
-<!--review-->
 <h1>Rời khỏi danh sách gửi thư</h1>
 <p class="summary">Yêu cầu một danh sách gửi thư ngừng gửi thư, ngay từ thanh phía trên thư của danh sách đó.</p>
-<p>Thư của một danh sách gửi thư có ghi cách rời khỏi danh sách sẽ có một thanh phía trên nội dung, với tên miền của danh sách và nút <b data-text="ui-unsubscribe-ask"></b>. Thanh chỉ gọi danh sách bằng tên miền, không bao giờ bằng tên do người gửi tự đặt. Email rác, Mục đã gửi và Thư nháp không có thanh này: hủy đăng ký từ thư rác chỉ cho người gửi biết địa chỉ của bạn có hoạt động.</p>
+<p>Thư có hướng dẫn hủy đăng ký sẽ có một thanh phía trên nội dung, với nút <b data-text="ui-unsubscribe-ask"></b>. Khi có thông tin tên miền, thanh dùng tên miền để nhận diện danh sách thay vì tên do người gửi tự đặt. Thanh này bị ẩn trong <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> và <b data-text="folder-drafts"></b>. Hủy đăng ký từ thư rác có thể xác nhận với người gửi rằng địa chỉ của bạn đang hoạt động.</p>
 <p>Để rời khỏi danh sách:</p>
 <ol>
     <li>Bấm <b data-text="ui-unsubscribe-ask"></b> trên thanh, hoặc chọn <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic cho biết điều gì sẽ xảy ra và hỏi bạn trước.</li>
@@ -13,9 +12,8 @@
         </ul>
     </li>
 </ol>
-<p>Sau đó, trên mọi thư của danh sách đó, thanh cho biết thời điểm bạn đã yêu cầu và không đề xuất gì thêm. Yêu cầu bằng email được tính khi email đã được gửi. Với danh sách mà bạn đã mở trang, thanh vẫn giữ nút của nó, vì Inbox Classic không biết bạn đã hoàn tất ở đó hay chưa.</p>
-<p>Danh sách có thể mất đến hai ngày mới ngừng gửi. Nếu có thư của danh sách đến muộn hơn thế, thanh sẽ đề xuất <b data-text="ui-unsubscribe-again"></b>.</p>
+<p>Sau khi yêu cầu trực tiếp được chấp nhận hoặc email hủy đăng ký được gửi, thanh hiện ngày yêu cầu và ẩn nút. Điều này áp dụng cho các thư của danh sách trong cùng tài khoản. Nếu bạn mở trang web của danh sách, nút vẫn còn: Inbox Classic không biết bạn đã hoàn tất việc hủy đăng ký ở đó hay chưa.</p>
+<p>Danh sách có thể cần thời gian để ngừng gửi thư. Nếu một thư đến sau yêu cầu của bạn hơn hai ngày, thanh sẽ đề xuất <b data-text="ui-unsubscribe-again"></b>.</p>
 <p>Với yêu cầu trực tiếp, thanh trạng thái báo khi máy chủ chấp nhận yêu cầu. Điều này không xác nhận rằng thư sẽ ngừng đến.</p>
 <aside class="note">Yêu cầu trực tiếp cần sự phê duyệt của bạn và một chữ ký số được nhà cung cấp xác nhận, bao gồm cả hai tiêu đề hủy đăng ký bắt buộc. Các yêu cầu khác mở một email nháp hoặc một trang web.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

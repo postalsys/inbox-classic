@@ -107,7 +107,7 @@ gtk-link-status = { $link }    (Ctrl+clic per obrir)
 ## Comptes
 
 gtk-plain-warning =
-    Sense xifratge, qualsevol persona que intercepti el trànsit de la xarxa pot llegir la vostra contrasenya i els vostres missatges. Feu servir aquesta connexió només amb un servidor del vostre ordinador o de la vostra xarxa local.
+    Sense xifratge, qualsevol persona que intercepti el trànsit de la xarxa pot llegir la vostra contrasenya i els missatges. Continueu només si la connexió està protegida d’una altra manera. Una xarxa local no garanteix aquesta protecció.
 
     Voleu continuar?
 gtk-account-name-title = Nom del compte
@@ -154,7 +154,7 @@ gtk-agent-it-may = Accions permeses
 gtk-agent-accounts = Comptes permesos
 gtk-never-used = No s’ha fet servir mai
 gtk-last-used = Darrer ús: { $date }
-gtk-forget-program = Voleu eliminar aquest programa?
+gtk-forget-program = Voleu eliminar els permisos desats d’aquest programa?
 gtk-forget-program-detail = S’eliminaran els permisos del programa i l’historial d’activitat dels seus agents. Se us tornarà a demanar permís la propera vegada que es connecti.
 gtk-no-agents-yet = Encara no hi ha cap agent que hagi demanat accés al vostre correu.
 gtk-nothing-yet = Encara no hi ha activitat.
@@ -162,7 +162,7 @@ gtk-nothing-yet = Encara no hi ha activitat.
 ## Preferències
 
 gtk-preferences = Preferències
-gtk-notify-subtitle = Només mentre Inbox Classic és en segon pla
+gtk-notify-subtitle = Només quan la finestra principal no és en primer pla
 
 ## L’entrada d’escriptori i la pàgina de les botigues de programari
 

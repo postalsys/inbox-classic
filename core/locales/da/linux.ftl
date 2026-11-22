@@ -110,7 +110,7 @@ gtk-link-status = { $link }    (Ctrl+klik for at åbne)
 ## Accounts
 
 gtk-plain-warning =
-    Uden kryptering kan alle, der opsnapper din netværkstrafik, læse din adgangskode og dine meddelelser. Brug kun denne forbindelse med en server på din egen computer eller dit lokale netværk.
+    Uden kryptering kan alle, der opsnapper din netværkstrafik, læse din adgangskode og dine meddelelser. Fortsæt kun, hvis forbindelsen er beskyttet på anden vis; et lokalt netværk giver ikke i sig selv kryptering.
 
     Vil du fortsætte?
 gtk-account-name-title = Kontonavn
@@ -157,7 +157,7 @@ gtk-agent-it-may = Tilladte handlinger
 gtk-agent-accounts = Tilladte konti
 gtk-never-used = Aldrig brugt
 gtk-last-used = Senest brugt { $date }
-gtk-forget-program = Vil du fjerne dette program?
+gtk-forget-program = Vil du fjerne dette programs gemte tilladelser?
 gtk-forget-program-detail = Programmets tilladelser og dets agenters aktivitetshistorik slettes. Du bliver spurgt om tilladelse igen, næste gang det opretter forbindelse.
 gtk-no-agents-yet = Ingen agent har bedt om at bruge din mail endnu.
 gtk-nothing-yet = Intet endnu.
@@ -165,7 +165,7 @@ gtk-nothing-yet = Intet endnu.
 ## Preferences
 
 gtk-preferences = Indstillinger
-gtk-notify-subtitle = Kun mens Inbox Classic er i baggrunden
+gtk-notify-subtitle = Kun når hovedvinduet ikke er i forgrunden
 
 # linux/data/com.inboxclassic.InboxClassic.desktop and .metainfo.xml, made by the build. The keywords are the words a
 # search of the applications finds Inbox Classic by, each ended by a semicolon, in your language only: the English

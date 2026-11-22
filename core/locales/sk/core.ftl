@@ -9,7 +9,6 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bajt
@@ -715,7 +714,7 @@ agent-read-search = { $count ->
     [few] Vyhľadávanie „{ $query }“: { $count } správy
    *[other] Vyhľadávanie „{ $query }“: { $count } správ
 }
-agent-read-people = Vyhľadané kontakty s menom alebo adresou začínajúcou na „{ $query }“
+agent-read-people = Vyhľadanie kontaktov podľa mena alebo adresy: „{ $query }“
 agent-read-list = { $count ->
     [one] Zobrazený 1 riadok zoznamu (rozsah: { $folder })
     [few] Zobrazené { $count } riadky zoznamu (rozsah: { $folder })

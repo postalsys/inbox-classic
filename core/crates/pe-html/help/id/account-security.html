@@ -1,15 +1,13 @@
-<!--review-->
 <h1>Pengaturan keamanan akun</h1>
 <p class="summary">Pengaturan keamanan server suatu akun, dan arti masing-masing.</p>
 <p>Setiap akun memiliki <b data-text="ui-field-imap-security"></b> untuk server masuk dan <b data-text="ui-field-smtp-security"></b> untuk server keluar. Inbox Classic mengisinya saat menemukan pengaturan penyedia Anda. Untuk mengubahnya, buka properti akun di <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Pengaturan</th><th>Arti</th></tr>
     <tr><td>SSL/TLS</td><td>Koneksi dienkripsi sejak awal. Biasanya port 993 untuk email masuk dan 465 untuk email keluar.</td></tr>
-    <tr><td>STARTTLS</td><td>Koneksi dimulai tanpa enkripsi, lalu beralih ke TLS sebelum data masuk dikirim. Biasanya port 143 untuk email masuk dan 587 untuk email keluar. Inbox Classic berhenti jika server tidak menawarkan enkripsi.</td></tr>
+    <tr><td>STARTTLS</td><td>Koneksi dimulai tanpa enkripsi, lalu beralih ke TLS sebelum kredensial masuk dikirim. Biasanya port 143 untuk email masuk dan 587 untuk email keluar. Inbox Classic berhenti jika server tidak menawarkan enkripsi.</td></tr>
     <tr><td><b data-text="ui-security-none"></b></td><td>Kata sandi dan email Anda dikirim tanpa enkripsi dan dapat dibaca oleh siapa pun yang menyadap koneksi.</td></tr>
 </table>
-<aside class="warning">Gunakan <b data-text="ui-security-none"></b> hanya untuk server di komputer Anda sendiri atau di jaringan lokal. Inbox Classic memperingatkan Anda sebelum menggunakannya.</aside>
-<p>Inbox Classic memeriksa bahwa setiap server memang server yang diakuinya, berdasarkan sertifikat yang dipercaya sistem Anda. Tidak ada pilihan untuk menerima sembarang sertifikat.</p>
-<p>Secara default, kata sandi Anda disimpan di <!--os:windows-->Manajer Kredensial Windows<!--/os--><!--os:mac-->rantai kunci login Anda<!--/os--><!--os:linux-->keyring Anda<!--/os-->, tidak pernah di penyimpanan email. Masuk melalui browser menyimpan token di sana, bukan kata sandi Anda. Mode khusus memori, atau penyimpanan sistem yang tidak tersedia, dapat membatasi data masuk hanya untuk sesi saat ini.</p>
+<aside class="warning">Gunakan <b data-text="ui-security-none"></b> hanya jika koneksi dilindungi dengan cara lain. Jaringan lokal saja tidak menyediakan enkripsi. Inbox Classic memperingatkan Anda sebelum menggunakannya.</aside>
+<p>Untuk koneksi terenkripsi, Inbox Classic memeriksa bahwa setiap server memang server yang diakuinya, berdasarkan sertifikat yang dipercaya sistem Anda. Tidak ada pilihan untuk menerima sembarang sertifikat.</p>
+<p>Secara default, kata sandi Anda disimpan di <!--os:windows-->Manajer Kredensial Windows<!--/os--><!--os:mac-->rantai kunci login Anda<!--/os--><!--os:linux-->keyring Anda<!--/os-->, tidak pernah di penyimpanan email. Masuk melalui browser menyimpan token di sana, bukan kata sandi Anda. Mode khusus memori, atau penyimpanan sistem yang tidak tersedia, dapat membatasi kredensial masuk hanya untuk sesi saat ini.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

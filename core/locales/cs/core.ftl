@@ -8,7 +8,6 @@ messages = { $count ->
    *[other] { $count } zpráv
 }
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bajt
@@ -685,7 +684,7 @@ agent-read-search = { $count ->
     [few] Hledáno „{ $query }“: { $count } zprávy
    *[other] Hledáno „{ $query }“: { $count } zpráv
 }
-agent-read-people = Hledání osob podle začátku jména nebo adresy: „{ $query }“
+agent-read-people = Hledání osob podle jména nebo adresy: „{ $query }“
 agent-read-list = { $count ->
     [one] Zobrazena 1 položka seznamu „{ $folder }“
     [few] Zobrazeny { $count } položky seznamu „{ $folder }“

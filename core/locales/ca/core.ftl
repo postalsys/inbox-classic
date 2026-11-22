@@ -9,7 +9,6 @@ messages = { $count ->
 }
 # el separador decimal de les mides: 2,4 MB
 decimal-separator = ,
-# review: new
 list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 byte
@@ -660,7 +659,7 @@ agent-read-search = { $count ->
     [one] Ha cercat «{ $query }»: 1 missatge
    *[other] Ha cercat «{ $query }»: { $count } missatges
 }
-agent-read-people = Ha cercat persones amb un nom o una adreça que comença per «{ $query }»
+agent-read-people = Ha cercat persones pel nom o l’adreça: «{ $query }»
 agent-read-list = { $count ->
     [one] Ha consultat 1 entrada de la llista: { $folder }
    *[other] Ha consultat { $count } entrades de la llista: { $folder }

@@ -1,4 +1,3 @@
-<!--review-->
 <h1>暗号化キー</h1>
 <p class="summary">メッセージへの署名と暗号化されたメールの受信に使うキーを作成し、連絡先のキーを管理します。</p>
 <p>Inbox Classicは、OpenPGPのキーでメールに署名し、暗号化します。自分のキーは2つで1組です。ほかの人に渡す公開キーと、自分のコンピューターに保管する秘密キーです。連絡先のキーを使うと、その人の署名を確認したり、その人宛てにメールを暗号化したりできます。</p>
@@ -18,4 +17,3 @@
 <p>受信者の使用できるキーがない場合、Inbox Classicはまずアドレスのドメインに問い合わせ、その検索が有効であれば次にkeys.openpgp.orgに問い合わせます。フィンガープリントやキーIDで検索することもでき、その場合はメール アドレスの代わりにその識別子が送られます。keys.openpgp.orgに問い合わせないようにするには、<b data-settings="reading"></b>で<b data-text="ui-pgp-keyserver"></b>をオフにします。</p>
 <p>キーはメールとともにやり取りされることもあります。Autocryptが有効な場合、キーが選択されているアドレスからのメッセージにはその公開キーが含まれ、それを読み取るほかのアプリはそのキーであなた宛てに暗号化できます。差出人のキーを含むメッセージを開くと、Inbox Classicはそのキーを未確認のまま保存します。すでにキーがあるアドレスの別のキーは、あなたが選択するまで保留されます。自分のキーを送らないようにするには、アカウントの<b data-text="ui-account-security"></b>タブで<b data-text="ui-account-autocrypt"></b>をオフにします。</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

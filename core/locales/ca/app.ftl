@@ -248,7 +248,6 @@ ui-no-items = No hi ha cap element en aquesta visualització.
 ui-choose-folder = Trieu una carpeta per veure’n els missatges.
 ui-unsubscribe = Cancel·la la subscripció
 ui-open-in-calendar = Obre al calendari
-# review: changed
 ui-pictures-blocked = S’han bloquejat algunes imatges per limitar el seguiment de la vostra lectura pel remitent.
 ui-not-shown = No s’ha pogut mostrar el missatge.
 ui-attachment-not-read = No s’ha pogut llegir el fitxer adjunt.

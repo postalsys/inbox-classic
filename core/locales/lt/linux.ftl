@@ -105,7 +105,7 @@ gtk-link-status = { $link }    (Atidaryti: Ctrl + pelės spustelėjimas)
 ## Accounts
 
 gtk-plain-warning =
-    Be šifravimo bet kas, perimantis jūsų tinklo srautą, gali perskaityti jūsų slaptažodį ir laiškus. Naudokite šį ryšį tik su serveriu, esančiu jūsų kompiuteryje arba vietiniame tinkle.
+    Be šifravimo bet kas, perimantis jūsų tinklo srautą, gali perskaityti jūsų slaptažodį ir laiškus. Tęskite tik jei ryšys apsaugotas kitu būdu; vien vietinis tinklas šifravimo nesuteikia.
 
     Tęsti?
 gtk-account-name-title = Paskyros pavadinimas

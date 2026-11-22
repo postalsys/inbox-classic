@@ -246,7 +246,6 @@ ui-no-items = U ovom prikazu nema stavki.
 ui-choose-folder = Odaberite mapu da biste vidjeli njezine poruke.
 ui-unsubscribe = Otkaži pretplatu
 ui-open-in-calendar = Otvori u kalendaru
-# review: changed
 ui-pictures-blocked = Neke su slike blokirane kako bi se pošiljatelju otežalo praćenje.
 ui-not-shown = Poruku nije moguće prikazati.
 ui-attachment-not-read = Privitak nije moguće pročitati.

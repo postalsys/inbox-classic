@@ -251,7 +251,6 @@ ui-no-items = V tem pogledu ni sporočil.
 ui-choose-folder = Izberite mapo, da vidite njena sporočila.
 ui-unsubscribe = Odjavi
 ui-open-in-calendar = Odpri v koledarju
-# review: changed
 ui-pictures-blocked = Nekatere slike so blokirane, da bi omejili pošiljateljevo sledenje odpiranju sporočila.
 ui-not-shown = Sporočila ni bilo mogoče prikazati.
 ui-attachment-not-read = Priponke ni bilo mogoče prebrati.
@@ -311,7 +310,7 @@ ui-found-autodiscover = Te nastavitve je našla storitev Microsoft Autodiscover 
 ui-found-other = Te nastavitve so bile najdene za ta naslov.
 ui-app-password-needed = Ponudnik { $provider } v poštnih programih ne sprejema običajnega gesla. Če vaš račun podpira gesla za aplikacije, ga ustvarite v njegovih varnostnih nastavitvah in vnesite v polje Geslo v naslednjem obrazcu. Za Outlook.com in Microsoft 365 uporabite prijavo prek brskalnika.
 ui-app-password-open = Želite odpreti navodila ponudnika { $provider } v brskalniku?
-ui-plain-warning = Brez šifriranja lahko vsakdo, ki prestreže omrežni promet, prebere vaše geslo in sporočila. Tudi lokalno omrežje samo po sebi ne zaščiti povezave. Nadaljujte le, če razumete in sprejemate izpostavljenost podatkov.
+ui-plain-warning = Brez šifriranja lahko vsakdo, ki prestreže omrežni promet, prebere vaše geslo in sporočila. Tudi lokalno omrežje samo po sebi ne zaščiti povezave. Nadaljujte le, če je povezava zaščitena na drug način.
 ui-continue-ask = Želite nadaljevati?
 ui-add-sign-in-app = Dodaj aplikacijo za prijavo...
 ui-turned-off = Možnost »{ $name }« je v tem računalniku izklopljena.

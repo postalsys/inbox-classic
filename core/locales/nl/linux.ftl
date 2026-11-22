@@ -106,7 +106,7 @@ gtk-link-status = { $link }    (Ctrl+klik om te openen)
 ## Accounts
 
 gtk-plain-warning =
-    Zonder versleuteling kan iedereen die je netwerkverkeer onderschept je wachtwoord en berichten lezen. Gebruik deze verbinding alleen met een server op je eigen computer of lokale netwerk.
+    Zonder versleuteling kan iedereen die je netwerkverkeer onderschept je wachtwoord en berichten lezen. Ga alleen door als de verbinding op een andere manier is beveiligd; een lokaal netwerk biedt op zichzelf geen versleuteling.
 
     Doorgaan?
 gtk-account-name-title = Accountnaam
@@ -161,7 +161,7 @@ gtk-nothing-yet = Nog niets.
 ## Preferences
 
 gtk-preferences = Voorkeuren
-gtk-notify-subtitle = Alleen als Inbox Classic op de achtergrond staat
+gtk-notify-subtitle = Alleen als het hoofdvenster niet op de voorgrond staat
 
 ## The desktop entry and the page of the software stores
 
