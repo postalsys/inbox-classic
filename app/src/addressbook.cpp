@@ -143,7 +143,7 @@ std::vector<int> SelectedIndexes(HWND list) {
 }
 
 void Warn(HWND owner, const std::wstring& text) {
-    MessageBoxW(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+    MessageBoxApp(owner, text.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
 std::wstring Trimmed(const std::wstring& text) {
@@ -1529,7 +1529,7 @@ void Delete(Book* book) {
     const wchar_t* title = L"Inbox Classic";
     if (OnGroup(book)) {
         std::wstring ask = core::T(PE_TEXT_UI_GROUP_DELETE_ASK, {{"name", book->groupName}});
-        if (MessageBoxW(book->hwnd, ask.c_str(), title, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+        if (MessageBoxApp(book->hwnd, ask.c_str(), title, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
             pe_group_delete(book->core, book->group);
             Reload(book, 0);
         }
@@ -1550,7 +1550,7 @@ void Delete(Book* book) {
         return;
     }
     std::wstring ask = core::T(PE_TEXT_UI_BOOK_DELETE_ASK, {{"count", std::to_wstring(count)}});
-    if (MessageBoxW(book->hwnd, ask.c_str(), title, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
+    if (MessageBoxApp(book->hwnd, ask.c_str(), title, MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES) {
         std::vector<const char*> typed;
         for (const std::string& address : addresses) {
             typed.push_back(address.c_str());
@@ -1905,7 +1905,7 @@ std::wstring ImportAddressBook(HWND owner, PeCore* core) {
     // the files that could not be read are named in a message; the others are read all the same
     if (!pe_book_import(core, pointers.data(), pointers.size(), &added, &skipped, &error)) {
         std::wstring text = core::T(PE_TEXT_UI_BOOK_NOT_IMPORTED, {{"reason", ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON)}});
-        MessageBoxW(owner, text.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, text.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
     } else {
         core::String unused(error);
     }
@@ -1924,7 +1924,7 @@ std::wstring ExportAddressBook(HWND owner, PeCore* core) {
     char* error = nullptr;
     if (!pe_book_export(core, nullptr, 0, core::Narrow(path).c_str(), &written, &error)) {
         std::wstring text = core::T(PE_TEXT_UI_BOOK_NOT_EXPORTED, {{"reason", ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON)}});
-        MessageBoxW(owner, text.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(owner, text.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
         return L"";
     }
     core::String unused(error);

@@ -501,7 +501,7 @@ void AccountMenu(const NMTOOLBARW* button) {
 void SignInAgain(int64_t account) {
     std::wstring text = core::T(PE_TEXT_UI_SIGN_IN_REFUSED, {{"account", g_mailbox.AccountName(account)}}) + L"\n\n" +
                         core::T(PE_TEXT_UI_SIGN_IN_AGAIN_ASK);
-    if (MessageBoxW(g_main, text.c_str(), kTitle, MB_YESNO | MB_ICONQUESTION) != IDYES) {
+    if (MessageBoxApp(g_main, text.c_str(), kTitle, MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return;
     }
     uint64_t request =
@@ -517,7 +517,7 @@ void SignInAgain(int64_t account) {
     core::String reason(why);
     std::wstring refused = core::T(PE_TEXT_UI_SIGN_IN_AGAIN_FAILED,
                                    {{"reason", reason ? Text(reason.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON)}});
-    MessageBoxW(g_main, refused.c_str(), kTitle, MB_OK | MB_ICONWARNING);
+    MessageBoxApp(g_main, refused.c_str(), kTitle, MB_OK | MB_ICONWARNING);
 }
 
 void PromptFor(int64_t account) {
@@ -1521,13 +1521,13 @@ void AddAccount() {
 void ShowAbout() {
     std::wstring text = std::wstring(L"Inbox Classic ") + APP_VERSION_W + L"\n" +
                         core::T(PE_TEXT_UI_ABOUT_CORE, {{"version", core::Version()}}) + L"\n\nPostal Systems OÜ";
-    MessageBoxW(g_main, text.c_str(), core::Plain(PE_TEXT_CMD_ABOUT).c_str(), MB_OK | MB_ICONINFORMATION);
+    MessageBoxApp(g_main, text.c_str(), core::Plain(PE_TEXT_CMD_ABOUT).c_str(), MB_OK | MB_ICONINFORMATION);
 }
 
 void NewMessage(int64_t account) {
     account = account ? account : g_mailbox.CurrentAccount();
     if (!account) {
-        MessageBoxW(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), account, nullptr);
@@ -1545,7 +1545,7 @@ void OpenDraft(core::Draft draft, int64_t account) {
     }
     account = account ? account : g_mailbox.CurrentAccount();
     if (!account) {
-        MessageBoxW(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST_LINK).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST_LINK).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
@@ -1610,7 +1610,7 @@ int64_t ImportSetup(HWND owner) {
 void WriteTo(const std::wstring& to) {
     int64_t account = g_mailbox.CurrentAccount();
     if (!account) {
-        MessageBoxW(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(g_main, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     std::string recipients = core::Narrow(to);
@@ -1687,7 +1687,7 @@ void OpenFileWindow(const std::wstring& path) {
     std::wstring error;
     if (!OpenMessageFile(g_main, g_core.get(), &g_mailbox, path, error)) {
         std::wstring text = core::T(PE_TEXT_UI_NOT_SHOWN) + (error.empty() ? L"" : L"\n\n" + error);
-        MessageBoxW(g_main, text.c_str(), kTitle, MB_OK | MB_ICONERROR);
+        MessageBoxApp(g_main, text.c_str(), kTitle, MB_OK | MB_ICONERROR);
     }
 }
 
@@ -1738,13 +1738,13 @@ void Reply(PeDraftKind kind) {
     // made off the window thread: the compose window opens once it is
     bool started = g_mailbox.DraftOfShown(kind, [](core::Draft draft, int64_t account) {
         if (!draft) {
-            MessageBoxW(g_main, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+            MessageBoxApp(g_main, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
             return;
         }
         OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
     });
     if (!started) {
-        MessageBoxW(g_main, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxApp(g_main, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
     }
 }
 
@@ -2123,7 +2123,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         SetScaleWindow(hwnd);
         if (!OpenCore(hwnd)) {
             std::wstring why = core::T(g_arguments.certificate.empty() ? PE_TEXT_UI_STORE_NOT_OPENED : PE_TEXT_UI_STORE_OR_CERT_NOT_OPENED);
-            MessageBoxW(hwnd, why.c_str(), kTitle, MB_OK | MB_ICONERROR);
+            MessageBoxApp(hwnd, why.c_str(), kTitle, MB_OK | MB_ICONERROR);
             return -1;
         }
         CreateChildren(hwnd);

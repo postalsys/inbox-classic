@@ -535,7 +535,7 @@ struct Fields {
 void ShowRefusal(HWND hwnd, char* reason, PeText fallback) {
     core::String error(reason);
     std::wstring why = error ? Text(error.get()) : core::T(fallback);
-    MessageBoxW(hwnd, why.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+    MessageBoxApp(hwnd, why.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
 }
 
 // ---- signing and encrypting ----
@@ -975,7 +975,7 @@ void AttachMyKey(HWND hwnd, Compose* state) {
     core::String why(error);
     if (!path) {
         std::wstring reason = why ? Text(why.get()) : core::T(PE_TEXT_UI_UNKNOWN_REASON);
-        MessageBoxW(hwnd, reason.c_str(), core::Plain(CommandText(IDM_ATTACH_MY_KEY)).c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(hwnd, reason.c_str(), core::Plain(CommandText(IDM_ATTACH_MY_KEY)).c_str(), MB_OK | MB_ICONWARNING);
         return;
     }
     AddFiles(state, {Text(path.get())});
@@ -1014,7 +1014,7 @@ bool MaySend(HWND hwnd, Compose* state, const PeOutgoing& outgoing, const std::w
         Toggle(hwnd, state, state->encrypt ? PE_COMPOSE_SWITCH_ENCRYPT : PE_COMPOSE_SWITCH_SIGN, true, false);
         return false;
     case PE_COMPOSE_BLOCK_ENCRYPTED_QUOTE:
-        MessageBoxW(hwnd, Text(info->block_text).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+        MessageBoxApp(hwnd, Text(info->block_text).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
         return false;
     }
     return true;
@@ -1029,7 +1029,7 @@ void Send(HWND hwnd, Compose* state, const std::wstring& html) {
     // it says a file is attached and none is: No (back to the message) is the default
     if (core::String word{pe_forgotten_attachment(&fields.outgoing)}) {
         std::wstring ask = core::T(PE_TEXT_UI_ATTACHMENT_FORGOTTEN, {{"word", Text(word.get())}});
-        if (MessageBoxW(hwnd, ask.c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) != IDYES) {
+        if (MessageBoxApp(hwnd, ask.c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) != IDYES) {
             return;
         }
     }
@@ -1215,7 +1215,7 @@ void InsertPicture(HWND hwnd, Writing* state) {
         return;
     }
     if (!InsertPictureFile(state, path)) {
-        MessageBoxW(hwnd, core::T(PE_TEXT_UI_NOT_A_PICTURE).c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+        MessageBoxApp(hwnd, core::T(PE_TEXT_UI_NOT_A_PICTURE).c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
     }
 }
 
@@ -1517,7 +1517,7 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
     }
     core::String page(pe_editor_document(draft ? draft->quote : nullptr, draft && draft->quote_folded, body.c_str()));
     Editor::Handlers handlers;
-    handlers.error = [hwnd](const std::wstring& error) { MessageBoxW(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
+    handlers.error = [hwnd](const std::wstring& error) { MessageBoxApp(hwnd, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
     handlers.html = [hwnd, state](const std::wstring& html, EditorQuote quote, const std::wstring& edited) {
         state->html = html;
         state->quoteState = quote;
@@ -1554,7 +1554,7 @@ bool MayClose(HWND hwnd, Compose* state) {
     if (!state->dirty && !state->autosaved) {
         return true;
     }
-    switch (MessageBoxW(hwnd, core::T(PE_TEXT_UI_SAVE_CHANGES_ASK).c_str(), L"Inbox Classic", MB_YESNOCANCEL | MB_ICONQUESTION)) {
+    switch (MessageBoxApp(hwnd, core::T(PE_TEXT_UI_SAVE_CHANGES_ASK).c_str(), L"Inbox Classic", MB_YESNOCANCEL | MB_ICONQUESTION)) {
     case IDYES:
         Request(state, Compose::Pending::SaveAndClose);
         return false;
@@ -1853,11 +1853,11 @@ bool EditSignature(HWND owner, PeCore* core, int64_t account, const std::wstring
     CreateFormatBar(dialog, &state);
     core::String page(pe_editor_document(nullptr, false, current.get()));
     Editor::Handlers handlers;
-    handlers.error = [dialog](const std::wstring& error) { MessageBoxW(dialog, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
+    handlers.error = [dialog](const std::wstring& error) { MessageBoxApp(dialog, error.c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR); };
     handlers.html = [dialog, &state](const std::wstring& html, EditorQuote, const std::wstring&) {
         state.saved = pe_account_set_signature(state.core, state.account, core::Narrow(html).c_str());
         if (!state.saved) {
-            MessageBoxW(dialog, core::T(PE_TEXT_UI_SIGNATURE_NOT_SAVED).c_str(), core::Plain(PE_TEXT_UI_SIGNATURE).c_str(), MB_OK | MB_ICONERROR);
+            MessageBoxApp(dialog, core::T(PE_TEXT_UI_SIGNATURE_NOT_SAVED).c_str(), core::Plain(PE_TEXT_UI_SIGNATURE).c_str(), MB_OK | MB_ICONERROR);
             state.saving = false;
             return;
         }
