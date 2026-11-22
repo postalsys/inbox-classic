@@ -73,7 +73,7 @@ void PaintCaption(HWND caption) {
     words.left += Scale(6);
     words.right -= ButtonSize() + Scale(6);
     auto font = reinterpret_cast<HGDIOBJ>(SendMessageW(caption, WM_GETFONT, 0, 0));
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     SetBkMode(dc, TRANSPARENT);
     SetTextColor(dc, GetSysColor(COLOR_BTNTEXT));
     // the words once: the language changes only with a restart

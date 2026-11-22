@@ -19,7 +19,7 @@ const wchar_t* kUndoSinceClass = L"InboxClassicAgentUndoSince";
 HFONT HeadingFont() {
     static HFONT font = [] {
         LOGFONTW face = {};
-        GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(face), &face);
+        GetObjectW(UiFont(), sizeof(face), &face);
         face.lfHeight = -Scale(15);
         face.lfWeight = FW_BOLD;
         return CreateFontIndirectW(&face);
@@ -38,7 +38,7 @@ HWND Heading(HWND parent, const std::wstring& text, const RECT& bounds, bool wra
 // word longer than a line broken as a static text with SS_EDITCONTROL breaks it
 int TextHeight(HWND parent, const std::wstring& text, int width, HFONT font = nullptr, bool breakWords = false) {
     HDC dc = GetDC(parent);
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     RECT bounds = {0, 0, width, 0};
     DrawTextW(dc, text.c_str(), -1, &bounds, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX | (breakWords ? DT_EDITCONTROL : 0));
     SelectObject(dc, old);

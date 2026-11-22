@@ -127,7 +127,7 @@ SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0, UI
     if (!(flags & DT_NOPREFIX)) {
         plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
     }
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     RECT bounds = {0, 0, wrapWidth > 0 ? wrapWidth : 0, 0};
     DrawTextW(dc, plain.c_str(), static_cast<int>(plain.size()), &bounds,
               DT_CALCRECT | DT_NOPREFIX | flags | (wrapWidth > 0 ? DT_WORDBREAK : DT_SINGLELINE));
@@ -229,6 +229,30 @@ SIZE MeasureText(const std::wstring& text, int wrapWidth, UINT flags) {
     return size;
 }
 
+HFONT UiFont() {
+    // the language is set before the first window (StartLanguage) and changes only with a restart
+    static const HFONT font = [] {
+        auto* system = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        std::wstring face = core::WindowsFont();
+        if (face.empty()) {
+            return system;
+        }
+        LOGFONTW font = {};
+        GetObjectW(system, sizeof(font), &font);
+        wcsncpy_s(font.lfFaceName, face.c_str(), _TRUNCATE);
+        font.lfCharSet = DEFAULT_CHARSET;
+        // 9 points where the default is 8, as the Windows of those languages draws them: their characters need it
+        font.lfHeight = MulDiv(font.lfHeight, 9, 8);
+        HFONT created = CreateFontIndirectW(&font);
+        return created ? created : system;
+    }();
+    return font;
+}
+
+bool UiFontChosen() {
+    return UiFont() != static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+}
+
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least) {
     return Widest(labels, least, 20);
 }
@@ -276,7 +300,7 @@ HWND CreateChild(HWND parent, const wchar_t* className, const wchar_t* text, DWO
     HWND child = CreateWindowExW(exStyle, className, text, WS_CHILD | WS_VISIBLE | style, bounds.left, bounds.top,
                                  bounds.right - bounds.left, bounds.bottom - bounds.top, parent,
                                  reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
-    SendMessageW(child, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), FALSE);
+    SendMessageW(child, WM_SETFONT, reinterpret_cast<WPARAM>(UiFont()), FALSE);
     return child;
 }
 
@@ -392,7 +416,7 @@ void DrawLinkButton(const DRAWITEMSTRUCT& item) {
     auto font = reinterpret_cast<HFONT>(SendMessageW(item.hwndItem, WM_GETFONT, 0, 0));
     if (font != base || !underlined) {
         LOGFONTW logFont = {};
-        GetObjectW(font ? font : GetStockObject(DEFAULT_GUI_FONT), sizeof(logFont), &logFont);
+        GetObjectW(font ? font : UiFont(), sizeof(logFont), &logFont);
         logFont.lfUnderline = TRUE;
         if (underlined) {
             DeleteObject(underlined);
@@ -1034,6 +1058,10 @@ HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
     // the small bar's labels are tooltips; a big button can have a menu beside it (BTNS_DROPDOWN)
     SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, icons == BarIcons::Small ? TBSTYLE_EX_MIXEDBUTTONS : TBSTYLE_EX_DRAWDDARROWS);
     SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(IconList(icons == BarIcons::Big ? IconSet::Toolbar : IconSet::Format)));
+    // the labels in the language's own face where it has one (UiFont); else the bar's own font, as ever
+    if (UiFontChosen()) {
+        SendMessageW(bar, WM_SETFONT, reinterpret_cast<WPARAM>(UiFont()), FALSE);
+    }
     return bar;
 }
 
