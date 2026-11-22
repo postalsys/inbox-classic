@@ -122,10 +122,13 @@ pub struct Search {
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
-/// column, matched at the start of a word so that results come while typing (a phrase: its last word whole). None when
-/// it has no word in it (only punctuation).
+/// column, matched at the start of a word so that results come while typing (a phrase: its last word whole). Segmented
+/// as the index is ([`crate::fold::segment`]): characters of words without spaces (会议) a phrase of each (`"会 议"`),
+/// which finds them next to each other inside any longer word. None when it has no word in it (only punctuation).
 fn fts_word(word: &Word) -> Option<String> {
-    let text = crate::fold::indexed(&word.text.replace('"', ""));
+    // the quotes dropped after segmenting, which writes a full width quote as one; and NUL, where FTS5 reads the
+    // query as ending, inside the quotes
+    let text = crate::fold::indexed(&word.text).replace(['"', '\0'], "");
     if !text.chars().any(char::is_alphanumeric) {
         return None;
     }
@@ -137,8 +140,10 @@ fn fts_word(word: &Word) -> Option<String> {
         Field::Filename => "attachments : ",
     };
     // a word of one letter is matched whole: as the start of words it would match nearly every message, and the
-    // first letter typed would make the search read them all
-    let prefix = if word.phrase || text.chars().count() < 2 {
+    // first letter typed would make the search read them all. So is one ending in a character segmented, which is a
+    // whole word of the index.
+    let ends_segmented = text.chars().next_back().is_some_and(crate::fold::is_segmented);
+    let prefix = if word.phrase || ends_segmented || text.chars().count() < 2 {
         ""
     } else {
         "*"
@@ -157,14 +162,24 @@ fn fts_term(any_of: &[Word]) -> Option<String> {
 }
 
 /// The subject, senders, recipients and file names of a message as the search index has them, of the row `row`
-/// (`new.` in the schema's trigger, empty in a SELECT): ı as i, which unicode61 does not fold
-pub(crate) fn fts_columns(row: &str) -> String {
-    format!(
-        "replace({row}subject, 'ı', 'i'), \
-         replace(CASE {row}sender_people WHEN '' THEN {row}from_name || ' ' || {row}from_address ELSE {row}sender_people END, 'ı', 'i'), \
-         replace(CASE {row}recipient_people WHEN '' THEN {row}recipients ELSE {row}recipient_people END, 'ı', 'i'), \
-         replace({row}attachment_names, 'ı', 'i')"
-    )
+/// (`new.` in the schema's trigger, empty in a SELECT): ı as i, which unicode61 does not fold, and `segmented`
+/// ([`crate::fold::segment`]) when the store writes them. The schema's trigger does not segment: a function of ours
+/// there would fail every write of an older version, which has none; the store segments what it stored after it
+/// ([`Store::add_messages`]).
+pub(crate) fn fts_columns(row: &str, segmented: bool) -> String {
+    [
+        format!("{row}subject"),
+        format!("CASE {row}sender_people WHEN '' THEN {row}from_name || ' ' || {row}from_address ELSE {row}sender_people END"),
+        format!("CASE {row}recipient_people WHEN '' THEN {row}recipients ELSE {row}recipient_people END"),
+        format!("{row}attachment_names"),
+    ]
+    .iter()
+    .map(|column| {
+        let dotless = format!("replace({column}, 'ı', 'i')");
+        if segmented { format!("segment({dotless})") } else { dotless }
+    })
+    .collect::<Vec<_>>()
+    .join(", ")
 }
 
 /// Whether a page in the order of `sort` walks an index of every folder (date, received, sender, subject) for a list of
@@ -691,6 +706,34 @@ impl Store {
                     text.attachment_count
                 ])?;
         }
+        self.write_index_row(message, &crate::fold::indexed(&text.body))?;
+        self.db
+            .prepare_cached("UPDATE bodies SET indexed = 1 WHERE message_id = ?1 AND indexed = 0")?
+            .execute([message])?;
+        self.db
+            .prepare_cached("UPDATE messages SET text_indexed = 1, snippet = ?2 WHERE id = ?1")?
+            .execute(params![message, text.snippet])?;
+        Ok(())
+    }
+
+    /// The bytes the search index's words take (FTS5's data blocks), for the speed test's record
+    pub fn index_size(&self) -> Result<i64> {
+        self.db.query_row(
+            "SELECT COALESCE(SUM(length(block)), 0) FROM messages_fts_data",
+            [],
+            |row| row.get(0),
+        )
+    }
+
+    /// The search index's row of a message just stored, its subject, people and file names segmented, which the
+    /// schema's trigger wrote as they are ([`fts_columns`]); it has no text yet
+    pub(crate) fn segment_stored(&self, message: i64) -> Result<()> {
+        self.write_index_row(message, "")
+    }
+
+    /// The search index's row of a message written again: its columns as the message has them, and `body` as the
+    /// index takes it
+    fn write_index_row(&self, message: i64, body: &str) -> Result<()> {
         self.db
             .prepare_cached("DELETE FROM messages_fts WHERE rowid = ?1")?
             .execute([message])?;
@@ -698,15 +741,9 @@ impl Store {
             .prepare_cached(&format!(
                 "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
                  SELECT id, {}, ?2 FROM messages WHERE id = ?1",
-                fts_columns("")
+                fts_columns("", true)
             ))?
-            .execute(params![message, crate::fold::indexed(&text.body)])?;
-        self.db
-            .prepare_cached("UPDATE bodies SET indexed = 1 WHERE message_id = ?1 AND indexed = 0")?
-            .execute([message])?;
-        self.db
-            .prepare_cached("UPDATE messages SET text_indexed = 1, snippet = ?2 WHERE id = ?1")?
-            .execute(params![message, text.snippet])?;
+            .execute(params![message, body])?;
         Ok(())
     }
 
@@ -760,7 +797,7 @@ impl Store {
             &format!(
                 "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
                  SELECT id, {}, '' FROM messages WHERE decrypted = 1",
-                fts_columns("")
+                fts_columns("", true)
             ),
             [],
         )?;
@@ -902,6 +939,7 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_support::{found, words};
     use crate::{AccountSettings, FolderInfo, MessageInfo};
 
     fn setup() -> (Store, FolderId, FolderId) {
@@ -928,25 +966,6 @@ mod tests {
             subject: subject.into(),
             from_name: from.into(),
             from_address: format!("{}@example.com", from.to_lowercase()),
-            ..Default::default()
-        }
-    }
-
-    fn found(store: &Store, search: &Search) -> Vec<u64> {
-        let mut uids: Vec<u64> = store
-            .search(search, Sort::default(), 0, 100)
-            .unwrap()
-            .iter()
-            .map(|m| m.info.uid)
-            .collect();
-        uids.sort();
-        uids
-    }
-
-    fn words(folder: Option<FolderId>, text: &str) -> Search {
-        Search {
-            scope: folder.map_or(Scope::Everywhere, Scope::Folder),
-            text: text.into(),
             ..Default::default()
         }
     }
@@ -1159,6 +1178,8 @@ mod tests {
         assert_eq!(fts_word(&word("NEAR(x)")).as_deref(), Some("\"NEAR(x)\"*"));
         assert_eq!(fts_word(&word("...")), None);
         assert_eq!(fts_word(&word("a")).as_deref(), Some("\"a\""));
+        // a NUL would end the query for FTS5 inside the quotes (found by the store_segment fuzz target)
+        assert_eq!(fts_word(&word("ab\0c")).as_deref(), Some("\"abc\"*"));
         let phrase = Word {
             field: Field::Subject,
             text: "q3 plans".into(),
@@ -1169,6 +1190,47 @@ mod tests {
             fts_term(&[word("ab"), word("c")]).as_deref(),
             Some("(\"ab\"* OR \"c\")")
         );
+    }
+
+    #[test]
+    fn words_without_spaces_are_phrases_of_their_characters() {
+        let fts = |text: &str| -> Vec<String> {
+            Query::parse(text, 0)
+                .terms
+                .iter()
+                .map(|term| match term {
+                    Term::Text { any_of, negated } => {
+                        format!(
+                            "{}{}",
+                            if *negated { "-" } else { "" },
+                            fts_term(any_of).unwrap_or_default()
+                        )
+                    }
+                    other => format!("{other:?}"),
+                })
+                .collect()
+        };
+        // a word of them a phrase of each, matched whole; one alone a plain word
+        assert_eq!(fts("会议"), ["\"会 议\""]);
+        assert_eq!(fts("会"), ["\"会\""]);
+        assert_eq!(fts("회의"), ["\"회 의\""]);
+        // mixed: the Latin end still matched as it starts, a word of its own after a space
+        assert_eq!(fts("会议 report"), ["\"会 议\"", "\"report\"*"]);
+        assert_eq!(fts("Q3会议rep"), ["\"Q3 会 议 rep\"*"]);
+        // the full width space between words, full width letters as ASCII
+        assert_eq!(fts("会议\u{3000}报告"), ["\"会 议\"", "\"报 告\""]);
+        assert_eq!(fts("ＡＢＣ"), ["\"ABC\"*"]);
+        // quoted, operators, negation, OR
+        assert_eq!(fts("\"会议 报告\""), ["\"会 议 报 告\""]);
+        assert_eq!(fts("subject:会议"), ["subject : \"会 议\""]);
+        assert_eq!(fts("from:张伟"), ["senders : \"张 伟\""]);
+        assert_eq!(fts("-会议"), ["-\"会 议\""]);
+        assert_eq!(fts("会议 OR 打ち合わせ"), ["(\"会 议\" OR \"打 ち 合 わ せ\")"]);
+        // a quote or an asterisk inside stays text: a full width quote is dropped as any quote, never closes the word
+        assert_eq!(fts("会＂议"), ["\"会  议\""]);
+        assert_eq!(fts("会\"OR\"议"), ["\"会 OR 议\""]);
+        assert_eq!(fts("会*议"), ["\"会 * 议\""]);
+        assert_eq!(fts("＂＊"), [""]);
     }
 
     #[test]

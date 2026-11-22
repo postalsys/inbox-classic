@@ -1,0 +1,22 @@
+<!--review-->
+<h1>配信されなかったメッセージ</h1>
+<p class="summary">配信の失敗や遅延の通知を認識すると、Inbox Classicは報告された理由と、できることを説明します。</p>
+<p>配信の通知には、メッセージ一覧で配信不能のマークが付きます。開くと、上のカードに、メッセージが配信されなかったのか、遅れているだけなのかが表示されます。</p>
+<img src="picture:bounce-1-failed" alt="配信の通知。メッセージが配信されなかったこと、受信者、理由、対処方法がカードに表示されています">
+<p>カードには、受信者ごとに理由がわかりやすい言葉で示され、できることが表示されます。<b data-text="bounce-details"></b>で、受信側サーバーの原文が表示されます。</p>
+<ul>
+    <li><b data-text="bounce-show-message"></b>は、アカウント内で元のメッセージが見つかれば、それを選択します。</li>
+    <li>遅延の場合、<b data-text="bounce-show-delayed"></b>は、元のメッセージがあればそれを選択します。通知は配信がまだ試みられていることを伝えるものなので、結果が出るまで待ってから再送してください。</li>
+</ul>
+<p>最終的に配信に失敗した場合のよくある理由と対処方法です。配信が遅れているだけの場合は、結果が出るまで待ってから再送してください。</p>
+<table>
+    <tr><th>カードの表示</th><th>対処方法</th></tr>
+    <tr><td><b data-text="bounce-user-unknown"></b></td><td>アドレスのつづりを確認するか、現在使っているアドレスを相手に尋ねてください。</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>別の方法で相手に連絡し、空き容量を作ってもらってから再送してください。</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>サーバーの説明を確認してください。内容が拒否された場合は、メッセージを修正してから再送してください。</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>通知をメール プロバイダーに転送してください。送信側サーバーのアドレスがブロックされていると報告されています。</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>受信側サーバーが後で再試行するよう求めています。遅延の通知は、いつ配信されるかを保証するものではありません。</td></tr>
+</table>
+<p>配信の通知をすべて探すには、<code>is:bounce</code>で検索します。通知の分析はこのコンピューター上で行われ、内容が別の分析サービスに送られることはありません。</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

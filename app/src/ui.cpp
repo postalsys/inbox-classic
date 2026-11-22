@@ -127,7 +127,7 @@ SIZE Measure(HDC dc, HFONT font, const std::wstring& text, int wrapWidth = 0, UI
     if (!(flags & DT_NOPREFIX)) {
         plain.erase(std::remove(plain.begin(), plain.end(), L'&'), plain.end());
     }
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     RECT bounds = {0, 0, wrapWidth > 0 ? wrapWidth : 0, 0};
     DrawTextW(dc, plain.c_str(), static_cast<int>(plain.size()), &bounds,
               DT_CALCRECT | DT_NOPREFIX | flags | (wrapWidth > 0 ? DT_WORDBREAK : DT_SINGLELINE));
@@ -229,12 +229,53 @@ SIZE MeasureText(const std::wstring& text, int wrapWidth, UINT flags) {
     return size;
 }
 
+HFONT UiFont() {
+    // the language is set before the first window (StartLanguage) and changes only with a restart
+    static const HFONT font = [] {
+        auto* system = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        std::wstring face = core::WindowsFont();
+        if (face.empty()) {
+            return system;
+        }
+        LOGFONTW font = {};
+        GetObjectW(system, sizeof(font), &font);
+        wcsncpy_s(font.lfFaceName, face.c_str(), _TRUNCATE);
+        font.lfCharSet = DEFAULT_CHARSET;
+        // 9 points where the default is 8, as the Windows of those languages draws them: their characters need it
+        font.lfHeight = MulDiv(font.lfHeight, 9, 8);
+        HFONT created = CreateFontIndirectW(&font);
+        return created ? created : system;
+    }();
+    return font;
+}
+
+bool UiFontChosen() {
+    return UiFont() != static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+}
+
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least) {
     return Widest(labels, least, 20);
 }
 
 int ButtonWidth(const std::vector<std::wstring>& labels, int least) {
     return Widest(labels, least, 20);
+}
+
+int PlaceBar(HWND bar, std::initializer_list<HWND> controls, int left, int top, int width) {
+    int height = Scale(28), inset = Scale(3), right = left + width - inset;
+    MoveWindow(bar, left, top, width, height, TRUE);
+    for (HWND control : controls) {
+        if (!control || !IsWindowVisible(control)) {
+            continue;
+        }
+        std::wstring words = GetWindowString(control);
+        int controlWidth = words.empty() ? Scale(18) : ButtonWidth({words});
+        // over the bar, which does not draw over it (WS_CLIPSIBLINGS)
+        SetWindowPos(control, HWND_TOP, right - controlWidth, top + inset, controlWidth, height - 2 * inset, SWP_NOACTIVATE);
+        // two buttons apart, an arrow against the button it belongs to
+        right -= controlWidth + (words.empty() ? 0 : Scale(4));
+    }
+    return height;
 }
 
 int LabelWidth(std::initializer_list<std::wstring> labels, int least, int margin) {
@@ -259,7 +300,7 @@ HWND CreateChild(HWND parent, const wchar_t* className, const wchar_t* text, DWO
     HWND child = CreateWindowExW(exStyle, className, text, WS_CHILD | WS_VISIBLE | style, bounds.left, bounds.top,
                                  bounds.right - bounds.left, bounds.bottom - bounds.top, parent,
                                  reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr), nullptr);
-    SendMessageW(child, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), FALSE);
+    SendMessageW(child, WM_SETFONT, reinterpret_cast<WPARAM>(UiFont()), FALSE);
     return child;
 }
 
@@ -375,7 +416,7 @@ void DrawLinkButton(const DRAWITEMSTRUCT& item) {
     auto font = reinterpret_cast<HFONT>(SendMessageW(item.hwndItem, WM_GETFONT, 0, 0));
     if (font != base || !underlined) {
         LOGFONTW logFont = {};
-        GetObjectW(font ? font : GetStockObject(DEFAULT_GUI_FONT), sizeof(logFont), &logFont);
+        GetObjectW(font ? font : UiFont(), sizeof(logFont), &logFont);
         logFont.lfUnderline = TRUE;
         if (underlined) {
             DeleteObject(underlined);
@@ -413,49 +454,6 @@ HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& boun
     SetPropW(link, L"InboxClassicLink", reinterpret_cast<HANDLE>(1));
     return link;
 }
-
-namespace {
-
-LRESULT CALLBACK KeyboardLinkProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
-    switch (message) {
-    case WM_GETDLGCODE: {
-        // Enter is the label's, not the window's default button
-        const auto* msg = reinterpret_cast<const MSG*>(lParam);
-        if (msg && msg->message == WM_KEYDOWN && msg->wParam == VK_RETURN) {
-            return DefSubclassProc(hwnd, message, wParam, lParam) | DLGC_WANTMESSAGE;
-        }
-        break;
-    }
-    case WM_KEYDOWN:
-        if (wParam == VK_RETURN || wParam == VK_SPACE) {
-            SendMessageW(GetParent(hwnd), WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(hwnd), STN_CLICKED), reinterpret_cast<LPARAM>(hwnd));
-            return 0;
-        }
-        break;
-    case WM_SETFOCUS:
-    case WM_KILLFOCUS:
-        InvalidateRect(hwnd, nullptr, TRUE);
-        break;
-    case WM_PAINT: {
-        LRESULT result = DefSubclassProc(hwnd, message, wParam, lParam);
-        if (GetFocus() == hwnd) {
-            HDC dc = GetDC(hwnd);
-            RECT area;
-            GetClientRect(hwnd, &area);
-            InflateRect(&area, -1, -1);
-            DrawFocusRect(dc, &area);
-            ReleaseDC(hwnd, dc);
-        }
-        return result;
-    }
-    case WM_NCDESTROY:
-        RemoveWindowSubclass(hwnd, KeyboardLinkProc, 0);
-        break;
-    }
-    return DefSubclassProc(hwnd, message, wParam, lParam);
-}
-
-}  // namespace
 
 namespace {
 
@@ -498,11 +496,6 @@ bool ClickMnemonic(HWND root, wchar_t letter) {
     PostMessageW(GetParent(search.found), WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(search.found), BN_CLICKED),
                  reinterpret_cast<LPARAM>(search.found));
     return true;
-}
-
-void KeyboardLink(HWND label) {
-    SetWindowLongPtrW(label, GWL_STYLE, GetWindowLongPtrW(label, GWL_STYLE) | WS_TABSTOP);
-    SetWindowSubclass(label, KeyboardLinkProc, 0, 0);
 }
 
 void SetAccessibleDescription(HWND control, const std::wstring& text, long child) {
@@ -1065,6 +1058,10 @@ HWND CreateBar(HWND hwnd, DWORD style, int id, BarIcons icons) {
     // the small bar's labels are tooltips; a big button can have a menu beside it (BTNS_DROPDOWN)
     SendMessageW(bar, TB_SETEXTENDEDSTYLE, 0, icons == BarIcons::Small ? TBSTYLE_EX_MIXEDBUTTONS : TBSTYLE_EX_DRAWDDARROWS);
     SendMessageW(bar, TB_SETIMAGELIST, 0, reinterpret_cast<LPARAM>(IconList(icons == BarIcons::Big ? IconSet::Toolbar : IconSet::Format)));
+    // the labels in the language's own face where it has one (UiFont); else the bar's own font, as ever
+    if (UiFontChosen()) {
+        SendMessageW(bar, WM_SETFONT, reinterpret_cast<WPARAM>(UiFont()), FALSE);
+    }
     return bar;
 }
 

@@ -466,6 +466,20 @@ Screenshots: `find-1-results`, `find-3-no-results`, `find-2-every-folder`
 - Clear search on the search bar ends the search
 - Esc ends the search: the folder again, without the Folder column
 
+## 21a. Words without spaces
+
+Screenshot: `find-4-cjk`
+
+A Japanese, a Chinese and a Korean message, in a folder of their own (CJK), deleted at the end:
+
+- a Japanese word inside the subject finds its message (会議)
+- a Chinese word inside the subject finds its message (会议)
+- a Korean word with its ending left off finds its message (회의 in 회의에서)
+- one character alone finds it too (議)
+- while an input method composes, its unconfirmed text is not searched; the folder stays as it is (the Mac, its
+  marked text set as an input method does; Windows' edit control gets only confirmed text, GTK's search entry no
+  composition)
+
 ## 22. Saving and importing a message as a file
 
 - Save As asks where, with the subject as the name
@@ -890,6 +904,8 @@ Screenshots: `write-17-complete`
 
 - typing in To lists the people it may be
 - with someone heard from
+- while an input method composes, Enter and the arrows are its own and take no address (Linux, its composition as GTK
+  says it; Windows' edit control sees no key of a composition, AppKit gives them to the input method first)
 - Enter takes the first, with a comma for the next
 - and closes the list
 
@@ -1154,6 +1170,7 @@ Screenshots: `options-1-language` (the General page), `options-2-reading` (the R
   terminal is in German and in the pseudo-language with nothing cut off (`agents-10b-terminal-german`,
   `agents-10c-terminal-pseudo`, not features)
 - in each language of `pe_i18n::LANGUAGES` but English, the main window, a new message, Add Mail Account, the accounts and each page of Preferences, nothing cut off in them: `tour-<language>-<n>-<view>` (Linux)
+- in Japanese, Simplified and Traditional Chinese, Korean, Indonesian and Vietnamese, the main window, a new message, Add Mail Account and each page of Options or Settings, nothing cut off in them: `tour-<language>-1-main`, `-2-compose`, `-3-account`, `-4-options`, `-4b-options-reading`, `-4c-options-downloading` (Windows, the Mac); on Windows the windows' words of Japanese, Chinese and Korean are in Yu Gothic UI, Microsoft YaHei UI, Microsoft JhengHei UI and Malgun Gothic, of Indonesian and Vietnamese in the default font; on the Mac no menu item shows a bracketed access key
 - started in the pseudo-language, each page of Options (Windows) and Settings (the Mac) fits its longer words: long
   check box labels wrap, the window does not grow wider than its fixed content width
 

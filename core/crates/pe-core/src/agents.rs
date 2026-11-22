@@ -587,7 +587,10 @@ pub fn access_text(host: &AgentHost) -> String {
         [one] => capitalized(one),
         [first @ .., last] => capitalized(&tr_args(
             Text::AgentCanList,
-            &[("first", (&first.join(", ")).into()), ("last", last.into())],
+            &[
+                ("first", (&crate::text::word_list(first)).into()),
+                ("last", last.into()),
+            ],
         )),
     };
     let accounts = tr_args(Text::AgentAccounts, &[("count", host.accounts.len().into())]);

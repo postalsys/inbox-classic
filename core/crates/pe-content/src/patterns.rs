@@ -238,7 +238,7 @@ mod tests {
             "patterns that do not compile: {:?}",
             sets.invalid
         );
-        assert_eq!(sets.reply_headers.len(), 64);
+        assert_eq!(sets.reply_headers.len(), 66);
         assert_eq!(sets.inline_announcements.len(), 5);
         assert_eq!(sets.forward_headers.len(), 8);
         assert_eq!(sets.quoted_header_fields.len(), 7);

@@ -24,9 +24,10 @@ static ORIGINATOR_VALUE: LazyLock<JsRegex> =
 const MAX_CHECKED_VALUE_LENGTH: usize = 300;
 
 /// A date field carries something date shaped: a numeric date, a month or day name, or a time.
+/// Chinese, Japanese and Korean dates are written with month and day signs ('9月29日', '9월 29일').
 static DATE_VALUE: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::fixed(
-        r"(\d{1,4}[./-]\d{1,2}[./-]\d{1,4}|\b\d{1,2}:\d{2}\b|\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|mon|tue|wed|thu|fri|sat|sun|maj|okt|sty|lut|kwi|cze|lip|sie|wrz|paz|lis|gru|tammi|helmi|maalis|huhti|touko|kesä|heinä|elo|syys|loka|marras|joulu)[a-zäö]*\.?\b|(^|\s)(янв|фев|мар|апр|ма[йя]|июн|июл|авг|сен|окт|ноя|дек)|\b(esmaspäev|teisipäev|kolmapäev|neljapäev|reede|laupäev|pühapäev|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b)",
+        r"(\d{1,4}[./-]\d{1,2}[./-]\d{1,4}|\b\d{1,2}:\d{2}\b|\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|mon|tue|wed|thu|fri|sat|sun|maj|okt|sty|lut|kwi|cze|lip|sie|wrz|paz|lis|gru|tammi|helmi|maalis|huhti|touko|kesä|heinä|elo|syys|loka|marras|joulu)[a-zäö]*\.?\b|(^|\s)(янв|фев|мар|апр|ма[йя]|июн|июл|авг|сен|окт|ноя|дек)|\b(esmaspäev|teisipäev|kolmapäev|neljapäev|reede|laupäev|pühapäev|montag|dienstag|mittwoch|donnerstag|freitag|samstag|sonntag|lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)\b|\d{1,2}\s*[月월]\s*\d{1,2}\s*[日일])",
         "i",
     )
 });
@@ -45,11 +46,35 @@ static FORWARD_SUBJECT: LazyLock<JsRegex> = LazyLock::new(|| {
 
 /// A forward, and not a reply to one.
 pub(crate) fn is_forward_subject(subject: &str) -> bool {
-    !REPLY_SUBJECT.is_match(subject) && FORWARD_SUBJECT.is_match(subject)
+    subject_prefix(subject) == Some(SubjectPrefix::Forward)
 }
 
+/// What a subject's leading prefix marks, in any of the languages the detectors know.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SubjectPrefix {
+    Reply,
+    Forward,
+}
+
+/// The prefix a subject starts with ('Re:', 'AW:', 'Fwd:', 'WG:', '转发:'), a reply's before a forward's,
+/// None for none.
+pub fn subject_prefix(subject: &str) -> Option<SubjectPrefix> {
+    if REPLY_SUBJECT.is_match(subject) {
+        Some(SubjectPrefix::Reply)
+    } else if FORWARD_SUBJECT.is_match(subject) {
+        Some(SubjectPrefix::Forward)
+    } else {
+        None
+    }
+}
+
+/// The field value after the first colon, ASCII or full width. Chinese, Japanese and Korean Outlook
+/// write either, and with a full width one the first ASCII colon is inside the clock time, which
+/// would leave '18' as the value of '发送时间：2026年9月29日 10:18'.
 fn value_of(line: &str) -> &str {
-    line.find(':').map_or("", |colon| js_trim(&line[colon + 1..]))
+    line.char_indices()
+        .find(|&(_, c)| c == ':' || c == '\u{FF1A}')
+        .map_or("", |(at, colon)| js_trim(&line[at + colon.len_utf8()..]))
 }
 
 #[derive(Debug, Clone)]
@@ -399,5 +424,8 @@ mod tests {
         assert!(REPLY_SUBJECT.is_match("AW[2]: hi"));
         assert!(is_forward_subject("Fwd: hi"));
         assert!(!is_forward_subject("Re: Fwd: hi"));
+        assert_eq!(subject_prefix("SV: hi"), Some(SubjectPrefix::Reply));
+        assert_eq!(subject_prefix("WG: hi"), Some(SubjectPrefix::Forward));
+        assert_eq!(subject_prefix("Report"), None);
     }
 }

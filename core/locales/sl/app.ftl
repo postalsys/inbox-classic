@@ -251,7 +251,8 @@ ui-no-items = V tem pogledu ni sporočil.
 ui-choose-folder = Izberite mapo, da vidite njena sporočila.
 ui-unsubscribe = Odjavi
 ui-open-in-calendar = Odpri v koledarju
-ui-pictures-blocked = Nekatere slike so blokirane, da bi omejili pošiljateljevo sledenje odpiranju sporočila. Kliknite tukaj za prenos slik.
+# review: changed
+ui-pictures-blocked = Nekatere slike so blokirane, da bi omejili pošiljateljevo sledenje odpiranju sporočila.
 ui-not-shown = Sporočila ni bilo mogoče prikazati.
 ui-attachment-not-read = Priponke ni bilo mogoče prebrati.
 ui-attachment-not-saved = Priponke ni bilo mogoče shraniti.

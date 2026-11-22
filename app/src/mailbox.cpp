@@ -279,12 +279,11 @@ void Mailbox::Create(HWND parent, PeCore* core) {
         }
         return id != 0;
     });
-    // over the list while searching, in the colors of the information bar: what was found, and a link to end it
+    // over the list while searching, in the colors of the information bar: what was found, and the push buttons that
+    // make a rule of it and end it
     searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
-    searchClear_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_CLEAR_SEARCH).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
-                               IDC_SEARCH_CLEAR, {});
-    searchRule_ = CreateChild(parent, L"STATIC", core::Plain(PE_TEXT_UI_CREATE_RULE).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
-                              IDC_SEARCH_RULE, {});
+    searchClear_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_CLEAR_SEARCH).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SEARCH_CLEAR, {});
+    searchRule_ = CreateChild(parent, L"BUTTON", core::Plain(PE_TEXT_UI_CREATE_RULE).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_SEARCH_RULE, {});
     ShowWindow(searchBar_, SW_HIDE);
     ShowWindow(searchClear_, SW_HIDE);
     ShowWindow(searchRule_, SW_HIDE);
@@ -295,18 +294,13 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     ShowWindow(undoneClose_, SW_HIDE);
 
     LOGFONTW font = {};
-    GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
-    font.lfUnderline = TRUE;
-    link_ = CreateFontIndirectW(&font);
-    SendMessageW(searchClear_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
-    SendMessageW(searchRule_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
-    font.lfUnderline = FALSE;
+    GetObjectW(UiFont(), sizeof(font), &font);
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
     // the list's own (a stock font, not deleted)
     normal_ = reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0));
     if (!normal_) {
-        normal_ = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        normal_ = UiFont();
     }
     LOGFONTW listFont = {};
     GetObjectW(normal_, sizeof(listFont), &listFont);
@@ -402,8 +396,6 @@ void Mailbox::Destroy() {
     pages_.clear();
     DeleteObject(bold_);
     bold_ = nullptr;
-    DeleteObject(link_);
-    link_ = nullptr;
     DeleteObject(italic_);
     italic_ = nullptr;
 }
@@ -416,11 +408,6 @@ void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
     listArea_ = list;
     LayoutList();
     reader_.Layout(reader);
-}
-
-// how wide the words of a link are, in the link font
-int Mailbox::LinkWidth(HWND link) const {
-    return TextWidth(link, link_);
 }
 
 // the bar of an action the server did not do at the top of `list`, as tall as its words wrapped to the width left of
@@ -450,16 +437,8 @@ void Mailbox::LayoutList() {
     int width = list.right - list.left;
     LayoutUndoneBar(list);
     if (IsWindowVisible(searchBar_)) {
-        int height = Scale(22), edge = GetSystemMetrics(SM_CXBORDER);
-        MoveWindow(searchBar_, list.left, list.top, width, height, TRUE);
-        // the links inside the bar's border, at its right, each as wide as its words: Create Rule, then Clear search
-        int linkWidth = LinkWidth(searchClear_) + Scale(16);
-        MoveWindow(searchClear_, list.right - edge - linkWidth, list.top + edge, linkWidth, height - 2 * edge, TRUE);
-        SetWindowPos(searchClear_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        int ruleWidth = LinkWidth(searchRule_) + Scale(16);
-        MoveWindow(searchRule_, list.right - edge - linkWidth - ruleWidth, list.top + edge, ruleWidth, height - 2 * edge, TRUE);
-        SetWindowPos(searchRule_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        list.top += height + Scale(2);
+        // as the reading pane's bars, Create Rule left of Clear search
+        list.top += PlaceBar(searchBar_, {searchClear_, searchRule_}, list.left, list.top, width) + Scale(2);
     }
     // the Columns list has no headings: "Sorted by" over it says the order, and changes it
     ShowWindow(sortButton_, columns_ ? SW_SHOW : SW_HIDE);
@@ -571,29 +550,11 @@ void Mailbox::UpdateSearchBar() {
 }
 
 bool Mailbox::OnSetCursor(HWND window) {
-    if (reader_.OnSetCursor(window)) {
-        return true;
-    }
-    if (window != searchClear_ && window != searchRule_) {
-        return false;
-    }
-    // the links on the information bar
-    SetCursor(LoadCursorW(nullptr, IDC_HAND));
-    return true;
+    return reader_.OnSetCursor(window);
 }
 
 bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
-    if (reader_.OnCtlColor(window, dc, brush)) {
-        return true;
-    }
-    if (window != searchClear_ && window != searchRule_) {
-        return false;
-    }
-    // a link on the information bar
-    SetTextColor(dc, GetSysColor(COLOR_HOTLIGHT));
-    SetBkColor(dc, GetSysColor(COLOR_INFOBK));
-    brush = reinterpret_cast<LRESULT>(GetSysColorBrush(COLOR_INFOBK));
-    return true;
+    return reader_.OnCtlColor(window, dc, brush);
 }
 
 // ---- the folder tree ----

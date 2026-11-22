@@ -1,31 +1,37 @@
 # Generated from pe_i18n::LANGUAGES and core/locales by core/crates/pe-ffi/build.rs, do not edit
 # tag	name	gettext	nsis	lookup (comma separated)
-en	English	en	English	en
-ca	Català	ca	Catalan	ca
-cs	Čeština	cs	Czech	cs
-da	Dansk	da	Danish	da
-de	Deutsch	de	German	de
-et	Eesti	et	Estonian	et
-es	Español	es	Spanish	es
-fr	Français	fr	French	fr
-hr	Hrvatski	hr	Croatian	hr
-it	Italiano	it	Italian	it
-lv	Latviešu	lv	Latvian	lv
-lt	Lietuvių	lt	Lithuanian	lt
-hu	Magyar	hu	Hungarian	hu
-nl	Nederlands	nl	Dutch	nl
-nb	Norsk bokmål	nb	Norwegian	nb,no
-pl	Polski	pl	Polish	pl
+en	English	en	English	en,en-tw,en-hk,en-mo
+id	Bahasa Indonesia	id	Indonesian	id,in,id-tw,id-hk,id-mo
+ca	Català	ca	Catalan	ca,ca-tw,ca-hk,ca-mo
+cs	Čeština	cs	Czech	cs,cs-tw,cs-hk,cs-mo
+da	Dansk	da	Danish	da,da-tw,da-hk,da-mo
+de	Deutsch	de	German	de,de-tw,de-hk,de-mo
+et	Eesti	et	Estonian	et,et-tw,et-hk,et-mo
+es	Español	es	Spanish	es,es-tw,es-hk,es-mo
+fr	Français	fr	French	fr,fr-tw,fr-hk,fr-mo
+hr	Hrvatski	hr	Croatian	hr,hr-tw,hr-hk,hr-mo
+it	Italiano	it	Italian	it,it-tw,it-hk,it-mo
+lv	Latviešu	lv	Latvian	lv,lv-tw,lv-hk,lv-mo
+lt	Lietuvių	lt	Lithuanian	lt,lt-tw,lt-hk,lt-mo
+hu	Magyar	hu	Hungarian	hu,hu-tw,hu-hk,hu-mo
+nl	Nederlands	nl	Dutch	nl,nl-tw,nl-hk,nl-mo
+nb	Norsk bokmål	nb	Norwegian	nb,no,nb-tw,nb-hk,nb-mo
+pl	Polski	pl	Polish	pl,pl-tw,pl-hk,pl-mo
 pt-BR	Português (Brasil)	pt_BR	PortugueseBR	pt-br
-pt	Português (Portugal)	pt	Portuguese	pt
-ro	Română	ro	Romanian	ro
-sk	Slovenčina	sk	Slovak	sk
-sl	Slovenščina	sl	Slovenian	sl
-sr-Latn	Srpski	sr@latin	SerbianLatin	sr-latn,sr
-fi	Suomi	fi	Finnish	fi
-sv	Svenska	sv	Swedish	sv
-tr	Türkçe	tr	Turkish	tr
-el	Ελληνικά	el	Greek	el
-bg	Български	bg	Bulgarian	bg
-ru	Русский	ru	Russian	ru
-uk	Українська	uk	Ukrainian	uk
+pt	Português (Portugal)	pt	Portuguese	pt,pt-tw,pt-hk,pt-mo
+ro	Română	ro	Romanian	ro,ro-tw,ro-hk,ro-mo
+sk	Slovenčina	sk	Slovak	sk,sk-tw,sk-hk,sk-mo
+sl	Slovenščina	sl	Slovenian	sl,sl-tw,sl-hk,sl-mo
+sr-Latn	Srpski	sr@latin	SerbianLatin	sr-latn,sr,sr-tw,sr-hk,sr-mo
+fi	Suomi	fi	Finnish	fi,fi-tw,fi-hk,fi-mo
+sv	Svenska	sv	Swedish	sv,sv-tw,sv-hk,sv-mo
+vi	Tiếng Việt	vi	Vietnamese	vi,vi-tw,vi-hk,vi-mo
+tr	Türkçe	tr	Turkish	tr,tr-tw,tr-hk,tr-mo
+el	Ελληνικά	el	Greek	el,el-tw,el-hk,el-mo
+bg	Български	bg	Bulgarian	bg,bg-tw,bg-hk,bg-mo
+ru	Русский	ru	Russian	ru,ru-tw,ru-hk,ru-mo
+uk	Українська	uk	Ukrainian	uk,uk-tw,uk-hk,uk-mo
+ja	日本語	ja	Japanese	ja,ja-tw,ja-hk,ja-mo
+zh-Hans	简体中文	zh_CN	SimpChinese	zh-hans,zh
+zh-Hant	繁體中文	zh_TW	TradChinese	zh-hant,zh-tw,zh-hk,zh-mo
+ko	한국어	ko	Korean	ko,ko-tw,ko-hk,ko-mo

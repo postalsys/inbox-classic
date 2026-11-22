@@ -10,6 +10,9 @@ messages = { $count ->
 }
 # the separator of decimals in sizes: 2.4 MB
 decimal-separator = .
+# what goes between the items of a list of words (Read, organize and draft; Monday, Wednesday): a comma and a space
+# here, 、 in Chinese and Japanese; the quotes keep the space, which a message would otherwise lose
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 byte
    *[other] { $count } bytes

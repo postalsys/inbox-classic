@@ -1,0 +1,20 @@
+<!--review-->
+<h1>使用規則分類新郵件</h1>
+<p class="summary">自動移動、標示為已讀、標幟或封存符合您條件的內送郵件。</p>
+<p>規則結合了搜尋條件和動作，會在郵件送達您的收件匣時，套用到符合條件的郵件上。例如，含有 <code>from:news@example.com</code> 的規則，可以將該地址寄來的電子報移至另一個資料夾，並標示為已讀。</p>
+<p>若要建立規則：</p>
+<ol>
+    <li>選擇<b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>，然後按一下<b data-text="ui-rule-new"></b>。</li>
+    <li>輸入名稱，並使用與搜尋方塊相同的字詞填寫<b data-text="ui-rule-query"></b>，例如 <code>from:</code>、<code>subject:</code> 或 <code>list:</code>。下方那一行會計算所選帳戶收件匣中符合條件的郵件數；若未選取帳戶，則計算所有帳戶。</li>
+    <li>為符合條件的郵件選擇一或多個動作：移至資料夾、標示為已讀、加上標幟、封存、移至垃圾郵件、刪除，或不顯示通知。</li>
+    <li>按一下<b data-text="ui-ok"></b>。</li>
+</ol>
+<p>您也可以從郵件或搜尋建立規則。選擇<b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>，即可填入所選郵件的寄件者或郵寄清單。按一下搜尋結果上方的<b data-text="ui-create-rule"></b>，即可使用您目前的搜尋條件。</p>
+<h2>規則的運作方式</h2>
+<p>Inbox Classic 執行期間（包括主視窗隱藏時），規則會處理新送達收件匣的郵件。只有在您勾選<b data-text="ui-rule-apply-now"></b>時，才會影響現有的郵件。符合條件的規則會依清單中顯示的順序執行。一旦某條規則排定了有效的移出收件匣動作，該郵件就會略過之後的規則。伺服器端的處理仍可能失敗。清除清單中規則的核取方塊，即可停用規則而不刪除它。</p>
+<h2>變更規則</h2>
+<p>若要編輯規則，請在清單中選取它，然後按一下<b data-text="ui-rule-edit"></b>，或按兩下該規則。使用<b data-text="ui-account-move-up"></b>和<b data-text="ui-account-move-down"></b>可變更順序，<b data-text="ui-rule-delete-button"></b>則會刪除規則。在規則編輯器中，<b data-text="ui-rule-show"></b>會關閉編輯器而不儲存變更，並以輸入的查詢搜尋所有收件匣。與符合郵件數不同，這項搜尋不會保留帳戶限制。</p>
+<p>規則套用在新的收件匣郵件上，因此不支援資料夾和日期篩選條件。如果您使用 <code>in:</code>、<code>before:</code>、<code>after:</code>、<code>older_than:</code> 或 <code>newer_than:</code>，會有訊息說明為何無法使用這些篩選條件。規則無法寄送郵件，也無法永久刪除郵件：<b data-text="ui-rule-delete"></b>只有在<b data-text="folder-deleted"></b>資料夾存在時，才會將郵件移至該資料夾。</p>
+<aside class="note">規則在這部電腦上執行。若要在電腦關機時分類郵件，請使用您郵件服務提供者的篩選器。</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

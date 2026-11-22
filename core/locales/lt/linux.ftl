@@ -88,8 +88,6 @@ gtk-files = { $count ->
     [few] { $count } failai
    *[other] { $count } failų
 }
-gtk-pictures-blocked = Kai kurie paveikslėliai užblokuoti, kad siuntėjui būtų sunkiau sekti, kada skaitote laišką.
-gtk-download-pictures = Atsisiųsti paveikslėlius
 gtk-save-attachments-menu = Įrašyti priedus...
 
 ## The compose window

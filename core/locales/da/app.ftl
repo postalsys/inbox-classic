@@ -248,7 +248,8 @@ ui-no-items = Der er ingen elementer i denne visning.
 ui-choose-folder = Vælg en mappe for at se dens meddelelser.
 ui-unsubscribe = Afmeld
 ui-open-in-calendar = Åbn i Kalender
-ui-pictures-blocked = Nogle billeder er blokeret for at begrænse afsenderens mulighed for at spore dig. Klik her for at hente billederne.
+# review: changed
+ui-pictures-blocked = Nogle billeder er blokeret for at begrænse afsenderens mulighed for at spore dig.
 ui-not-shown = Meddelelsen kunne ikke vises.
 ui-attachment-not-read = Den vedhæftede fil kunne ikke læses.
 ui-attachment-not-saved = Den vedhæftede fil kunne ikke gemmes.

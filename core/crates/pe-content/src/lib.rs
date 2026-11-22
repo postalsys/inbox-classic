@@ -28,6 +28,7 @@ mod text;
 mod util;
 
 pub use analyze::{analyze, sender_tokens_from};
+pub use detect::{SubjectPrefix, subject_prefix};
 pub use matching::HistoryDocument;
 pub use text::canonicalise_plain_text;
 

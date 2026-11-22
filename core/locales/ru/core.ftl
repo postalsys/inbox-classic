@@ -9,6 +9,8 @@ messages = { $count ->
    *[other] { $count } сообщения
 }
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } байт
     [few] { $count } байта

@@ -62,6 +62,11 @@ void SetLanguage(const std::wstring& code) {
     g_plainWords.clear();
 }
 
+std::wstring WindowsFont() {
+    String face(pe_windows_font());
+    return face ? Widen(face.get()) : std::wstring();
+}
+
 std::wstring T(PeText text) {
     return Cached(g_words, text, pe_text);
 }

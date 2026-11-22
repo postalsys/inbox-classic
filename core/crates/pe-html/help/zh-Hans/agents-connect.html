@@ -1,0 +1,17 @@
+<!--review-->
+<h1>连接 AI 代理</h1>
+<p class="summary">让 AI 代理（例如 Claude）通过 Inbox Classic 阅读和整理您的邮件。</p>
+<p>您可以让 AI 代理处理您的邮件。它可以是 Claude、Cursor 或其他支持模型上下文协议（MCP）的程序。Inbox Classic 本身不含 AI，除非您允许某个代理接入，否则不会向任何 AI 服务发送任何内容。</p>
+<p>要连接代理，请：</p>
+<ol>
+    <li>选择<b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>，然后单击<b data-text="ui-how-to-connect"></b>。Inbox Classic 会显示需要添加到代理设置中的几行内容。</li>
+    <li>将它们添加到代理的 MCP 服务器中。在 Claude Desktop 中，位置是 <i>Settings &gt; Developer &gt; Edit Config</i>。</li>
+    <li>启动代理。它第一次连接时，Inbox Classic 会询问您允许它做什么。</li>
+</ol>
+<p>如果 Inbox Classic 未运行，代理会在后台启动它。只有在这台计算机上以您的身份运行的程序才能访问它。</p>
+<p>Inbox Classic 会向系统询问是哪个程序启动了代理，而不是听信代理的自我介绍，因此代理不能仅凭声称自己是另一个程序就获得您给予该程序的访问权限。如果代理自称是另一个程序，询问中会告诉您。这样可以让各个代理互不相干；但它无法防范以您的身份运行的有害程序，因为这类程序本来就能读取您的邮件。</p>
+<p>代理还可以持续关注您的收件箱、某个帐户或某个文件夹，并在其中的邮件发生变化时得到通知；它还可以提供两个现成的请求：“Triage my inbox”和“Summarize unread”。两者都遵循您允许该代理做的事情，代理以这种方式读取的内容会像它读取的其他内容一样显示在其日志中。</p>
+<p>Claude Code 等代理从同一个可识别的终端程序启动时，会共享访问权限。系统会为<!--os:mac-->从“终端”启动的程序<!--/os--><!--os:windows,linux-->从终端启动的程序<!--/os-->询问一次，这些程序共享您允许的权限。要为某个代理提供单独的访问权限，请在其设置中的 <code>--mcp</code> 后面添加 <code>--name</code> 和您选择的名称，例如 <code>"args": ["--mcp", "--name", "Claude Code"]</code>。之后 Inbox Classic 会用这个名称询问它的权限。所选名称并不能验证代理的身份。</p>
+<p>要一次关闭所有代理，请在<b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>中关闭<b data-text="ui-let-agents-connect"></b>。</p>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
+<!--/review-->

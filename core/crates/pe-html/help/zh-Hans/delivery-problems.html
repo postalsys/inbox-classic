@@ -1,0 +1,22 @@
+<!--review-->
+<h1>未投递的邮件</h1>
+<p class="summary">Inbox Classic 识别出投递失败或延迟通知时，会说明报告的原因以及您可以采取的措施。</p>
+<p>投递通知在邮件列表中带有未投递标记。打开它时，上方的卡片会说明您的邮件是未投递，还是只是延迟。</p>
+<img src="picture:bounce-1-failed" alt="一封投递通知，卡片上说明邮件未投递，并列出收件人、原因和应对措施">
+<p>卡片列出每个收件人，用通俗的语言说明原因以及您可以采取的措施。<b data-text="bounce-details"></b>显示接收服务器的原话。</p>
+<ul>
+    <li><b data-text="bounce-show-message"></b>会在帐户中找到原始邮件时选中它。</li>
+    <li>对于延迟，<b data-text="bounce-show-delayed"></b>会在原始邮件可用时选中它。通知表明仍在尝试投递；请等待结果，再决定是否重新发送。</li>
+</ul>
+<p>下面是最终失败的一些常见原因和建议。如果只是延迟投递，请等待结果，再决定是否重新发送：</p>
+<table>
+    <tr><th>卡片显示</th><th>应对措施</th></tr>
+    <tr><td><b data-text="bounce-user-unknown"></b></td><td>检查地址的拼写，或向对方询问其目前使用的地址。</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>通过其他方式联系对方，请其腾出空间后再重试。</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>查看服务器的说明。如果它拒绝的是内容，请修改邮件后再重试。</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>将该通知转发给您的邮件服务提供商。发送服务器的地址被报告为已被阻止。</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>接收服务器要求稍后再试。延迟通知并不能保证何时投递成功。</td></tr>
+</table>
+<p>要找到所有投递通知，请搜索 <code>is:bounce</code>。通知在您的计算机上进行分析，其内容不会发送给单独的分析服务。</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

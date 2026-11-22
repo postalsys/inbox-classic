@@ -173,12 +173,14 @@ the localized combinations beside them.
   do not embed it in parentheses. Keep polite plural wording in explanations and confirmation questions.
 
 Estonian agent unsubscribe additions:
+
 - Use "meililist" and "tellimusest loobumine" with the existing "Loobu tellimusest" action. A "loobumistaotlus"
   requests removal; it does not guarantee future mail will stop. "Lugemisolek" is the read/unread state of a message.
   The account footer is "allkirjatekst", distinct from "digiallkiri". Keep polite plural explanations and concise
   imperative buttons; explain the per-program quota over the preceding 24 hours, counting approvals.
 
 Estonian settings review (round 2):
+
 - New-mail settings heading: "Uued kirjad". A notification is a "teatis"; "teavita" remains the action.
 - Use "Kettaruumi piir konto kohta" for the downloaded-message storage limit, not a possible network quota.
 - In help, a settings page is introduced by "seadetes" / "seadetest" before `data-settings`, not "kohas"
@@ -329,6 +331,64 @@ Each new language's key terms and the rules its draft follows, for its reviewer.
 - Use permissions/permisos for OAuth scopes; preserve code examples exactly.
 - Cc/Bcc labels are CC/CCO and actual Spanish shortcuts Alt+C/Alt+O; explain retained English literal shortcut example in prose.
 - Describe body cache exemptions, unavailable key storage, zero-address verification, persistent logo caches and conditional system associations precisely.
+
+### Bahasa Indonesia (id)
+
+Terms (Microsoft Indonesian, Outlook and Windows): Kotak Masuk; Kotak Keluar; Item Terkirim; Item Terhapus; Draf;
+Email Sampah; Arsip; Semua Kotak Masuk; pesan; folder; akun; lampiran; bendera (Tandai dengan Bendera, Hapus Bendera;
+the Flagged view and row state "Berbendera"); Kirim/Terima; Balas ke Pengirim (toolbar Balas); Balas Semua; Teruskan;
+Tandai sebagai Sampah / Tandai sebagai Bukan Sampah (toolbar Sampah / Bukan Sampah); Pindahkan ke Folder / Salin ke
+Folder; Batalkan (Undo; Cancel is "Batal"); Pilih Semua; Terbaru (Recent); Buku Alamat; kontak; grup; percakapan
+(Pantau / Abaikan Percakapan); milis (mailing list), berhenti berlangganan (unsubscribe), Tetap Berlangganan (Don't
+Unsubscribe); menus File, Edit, Tampilan, Alat, Pesan, Bantuan, Sisipkan; File > Akun; Opsi (Windows), Pengaturan (Mac
+and Linux); Dari / Kepada / Cc / Bcc / Subjek; email (never "e-mail" or "surel" in the UI); kata sandi; unduh; masuk
+(sign in), proses masuk (sign-in as a noun), lewat browser.
+Colours: Merah, Oranye, Kuning, Hijau, Biru, Ungu, Abu-abu (lowercase after "diberi bendera").
+OAuth: aplikasi masuk (sign-in app); ID klien; rahasia klien; penerbit (issuer); cakupan (scopes), with "(scopes)"
+kept on labels; URI pengalihan; token. AI agent: agen AI.
+Encryption: kunci publik / kunci privat; sidik jari; frasa sandi (passphrase), apart from kata sandi (password);
+kata sandi aplikasi; terenkripsi, mengenkripsi, mendekripsi; ditandatangani, Tanda Tangani Secara Digital;
+terverifikasi / belum diverifikasi; kunci yang dapat digunakan (usable key).
+Stores: Manajer Kredensial (Windows), rantai kunci (Mac), keyring sistem (Secret Service) (Linux).
+
+Plurals: Indonesian has only `*[other]`, and a noun after a number does not change ("3 pesan"). Plain messages
+wherever the count stays in the text; a selector is kept only where English selects on a variable the text would
+otherwise lose (`done-*`, `undone-*`, `transfer-not-*`, `pgp-error-missing-keys`), or where a single item reads
+differently, using an exact `[1]` (never `[one]`), and `[0]` where English has it.
+
+- Formal "Anda"; prose in the active voice; menu items and buttons short imperatives in Title Case as Microsoft
+  Indonesian writes them ("Simpan Sebagai...", "Pindahkan ke Folder..."); settings check boxes in sentence case.
+- Status lines put `$messages` first with a passive verb ("{ $messages } dipindahkan ke { $folder }"), so the count
+  phrase needs no change; `their-folders` = "folder asalnya", `transfer-another-account` = "akun lain", both fitting
+  "ke { $folder }". Indonesian has no case endings, so placeables never need inflection.
+- Agent log entries are active past-tense verbs without a subject ("Memindahkan ...", "Meminta penghapusan draf ...")
+  so requests stay requests; agent-log-unsubscribed records the user's approval ("Anda menyetujui ...") and names
+  the message ("dari pesan “{ $subject }”").
+- Provider sentences use "di situs web { $provider }", which works for "penyedia" (ui-the-provider) and names alike.
+- The account footer is "tanda tangan"; cryptographic signing is "menandatangani (secara digital)" / "tanda tangan
+  digital"; a key-state reason follows "Alasan:".
+- Quotes “…” as English; decimal comma (2,4 MB); days Senin to Minggu; reply header "----- Pesan Asli -----";
+  "Re: " and "Fw: " stay; invitation replies "Diterima:", "Tentatif:", "Ditolak:".
+- Keys Ctrl / Alt / Shift / Del / Enter (Indonesian keyboards are US layout).
+- Access keys: main menus F, E, T, A, P, B (File, Edit, Tampilan, Alat, Pesan, Bantuan), unique within every menu
+  bar menu, submenu, the tray menu, the folder and account context menus and each Settings page with Terapkan (T).
+  The Flag submenu's colours take M, O, K, H, B, U, A, so Hapus Bendera uses P. The message list's context menu has
+  more items than letters: Tambahkan Pengirim ke Buku Alamat (P, with Balas ke Pengirim), Lihat Sumber (U, with
+  Belum Dibaca) and Properti (O, with Salin ke Folder) share letters there; the toggled pairs (read/unread,
+  junk/not junk) are never shown together. Some keys sit on less obvious letters to stay unique ("Salin ke F&older",
+  "Simpan Seba&gai...", "Pa&ntau Percakapan").
+
+Review first:
+
+- "Item Terhapus" against "Item yang Dihapus" (both appear in Microsoft products), "Email Sampah", "Berbendera".
+- "aplikasi masuk" for sign-in app: it can read as "incoming app"; alternatives "aplikasi login" or "aplikasi
+  proses masuk".
+- Undo as "Batalkan" (brief) while Windows 11 often says "Urungkan"; "Tarik Kembali" for an agent's Take Back.
+- Linux Preferences: written "Pengaturan" as the brief asks, although GNOME Indonesian uses "Preferensi".
+- Mac system menu words (Keluar dari Inbox Classic, Sembunyikan Lainnya, Perbesar for Zoom) against macOS Indonesian.
+- "Tetap Berlangganan" for Don't Unsubscribe, "Tetap Enkripsi" for Keep It Encrypted, "Cocok" / "Berbeda" for They
+  Match / They Differ.
+- The Linux search keywords (surel; pesan; kotak masuk; surat).
 
 ### Català (ca)
 
@@ -493,6 +553,7 @@ means the single one with no number, an exact `[1]` branch comes first and `[one
 - Folder names follow Outlook on every platform, not Apple Mail's "Smeće" and "Poslano".
 
 Review notes (round 2):
+
 - Commands use the imperative singular; instructions keep the formal plural. Write To is "Napiši poruku".
 - Pair "Označi kao neželjenu poštu" / "Označi kao poželjnu poštu"; the folder remains "Neželjena e-pošta".
 - Rules "obrađuju" messages; "sortiranje" describes the displayed order. Mailing list is "lista e-pošte".
@@ -1157,6 +1218,7 @@ Lim inn, Gjør om, Minimer).
   "passfrase", "Legitimasjonsbehandling".
 
 Review notes (round 2):
+
 - Retain direct du prose, imperative commands, Kopi/Blindkopi, KI-agent and passfrase.
 - Rules behandler messages; matching is based on kriterier. Folding a conversation is "Trekk sammen",
   distinct from hiding messages. Digital signatures and confirmed key ownership are separate checks.
@@ -1560,6 +1622,7 @@ Plurals: `[one]` 1, 21, 31... (not 11); `[few]` 2 to 4, 22 to 24... (not 12 to 1
   the mail provider; "Prijemno sanduče" (Outlook.com) versus Outlook's longer "Prijemno poštansko sanduče".
 
 Review notes (round 2):
+
 - Keep Serbian Ekavian and formal plural prose. Prefer "pružalac usluge e-pošte" over the supplier-like
   "dobavljač"; inflect the head noun and keep provider/name placeholders intact.
 - "Označi kao neželjenu poštu" / "Označi kao poželjnu poštu" are the paired actions; toolbar labels use
@@ -1694,6 +1757,52 @@ Swedish agent permissions and activity:
 - Queued server operations and accepted unsubscribe requests must not imply completion. Agent undo/log summaries count entries, not necessarily messages.
 - Swedish Cc/Bcc shortcuts are Alt+K/Alt+H; retain fixed literal help shortcuts and explain localized letters nearby. Key export action uses Exportera, consistent with other export buttons.
 - Windows credential storage is Autentiseringshanteraren i Windows.
+
+### Tiếng Việt (vi)
+
+Terms (Microsoft's Vietnamese for Windows and Outlook): Hộp thư đến, Hộp thư đi, Mục đã gửi, Mục đã xóa, Thư nháp,
+Email rác, Lưu trữ, Tất cả Hộp thư đến; thư (message), thư mục, tài khoản, tệp đính kèm, cờ (Gắn cờ thư, Xóa cờ, Đã
+gắn cờ), Gửi/Nhận, Trả lời người gửi, Trả lời tất cả, Chuyển tiếp, Đánh dấu là thư rác / là không phải thư rác, Di
+chuyển đến thư mục, Sao chép vào thư mục, Hoàn tác, Chọn tất cả, Sổ địa chỉ, liên hệ, nhóm, cuộc hội thoại (Theo dõi /
+Bỏ qua cuộc hội thoại), Công cụ, Tùy chọn (Windows), Cài đặt (Mac and Linux), Từ / Đến / Cc / Bcc / Chủ đề, mật khẩu,
+máy chủ, tải xuống, đăng nhập, trình duyệt, Thuộc tính, Lưu dưới dạng, Quy tắc thư, danh sách gửi thư, Hủy đăng ký.
+
+- Encryption: khóa, khóa công khai, khóa riêng tư, cụm mật khẩu (passphrase), dấu vân tay (fingerprint), mã hóa / giải
+  mã, Ký điện tử (the command) and "ký" for cryptographic signing; "Chữ ký" is the account's signature text, as in
+  Outlook. Verifying a key is "xác minh"; a signature check alone never says "đã xác minh" the owner.
+- Sign-in apps: ứng dụng đăng nhập, ID máy khách, bí mật máy khách, bên phát hành (issuer), phạm vi (scopes), URI chuyển
+  hướng, mã thông báo (token), thông tin đăng nhập (credentials, broader than mật khẩu). AI agent is "tác nhân AI", as
+  Microsoft's Vietnamese names Copilot agents. Trusted senders: người gửi tin cậy.
+- "Settings" in the sense of server or account values is "thiết đặt" (Microsoft's word); the app's Settings window and
+  the setup file (Export Settings and Accounts) are "cài đặt". Linux Preferences is also "Cài đặt", as the brief asks;
+  older GNOME Vietnamese says "Tùy thích", so a reviewer may prefer that for `gtk-preferences`.
+- Address: "bạn" throughout, imperative sentences with "Hãy ..." in instructions, bare verbs on buttons and menu items.
+  Sentence case everywhere (Microsoft's and Apple's Vietnamese), so menu items are not Title Case.
+- Tone marks in the modern Microsoft placement (xóa, hóa, khóa, tùy), NFC throughout.
+- Plurals: Vietnamese has only `other`. Selectors that English uses only for the plural are plain messages; where the
+  English needs `$count` without showing it (`done-*`, `transfer-not-*`, `undone-*`), a selector with only `*[other]`
+  keeps it. Where the singular reads differently ("Đang theo dõi cuộc hội thoại", "Làm trống ...? Thư trong thư mục ...")
+  an exact `[1]` variant is used, never `[one]`. `[0]` variants kept as English has them.
+- Colours: đỏ, cam, vàng, xanh lá, xanh lam, tím, xám; in sentences "Đã gắn cờ đỏ cho 2 thư" (colour after cờ, the
+  messages after "cho").
+- Days: Thứ Hai ... Thứ Bảy, Chủ Nhật. Repeats: Hằng ngày / Mỗi 3 ngày. Decimal separator is a comma.
+- "----- Thư gốc -----" for the quoted header; "Re: " and "Fw: " stay English.
+- Access keys are on ASCII letters only (a Vietnamese keyboard cannot type a toned letter with Alt), unique in each main
+  menu, each submenu and each settings page with Apply ("Áp &dụng"). Menu bar: &Tệp, &Chỉnh sửa, &Xem, Cô&ng cụ,
+  T&hư, Trợ &giúp. The message context menu has two unavoidable repeats: M (Mở, only for drafts, and Xe&m nguồn) and H
+  (&Hủy đăng ký, only for list mail, and T&huộc tính).
+
+Check first:
+
+- `cmd-reply` "Trả lời người gửi" (Outlook's menu says only "Trả lời"; the toolbar `ui-tb-reply` is "Trả lời").
+- `ui-tb-not-junk` "Không phải rác" is shortened for the toolbar; `ui-tb-mark-read` / `-unread` are "Đã đọc" / "Chưa đọc".
+- `cmd-layout-columns` "Dạng cột" and `ui-col-queued` "Đưa vào hàng đợi" (a column header; maybe "Thời gian xếp hàng").
+- `their-folders` "thư mục ban đầu của chúng" (in "Đã chuyển 3 thư trở lại thư mục ban đầu của chúng").
+- `agent-log-unsubscribed` records approval ("Bạn đã đồng ý hủy đăng ký ..."), not a completed unsubscribe.
+- `mac-zoom` "Thu/Phóng" and `mac-hide-others` "Ẩn các mục khác" should match the current macOS Vietnamese menus.
+- `secrets-windows` "Trình quản lý Thông tin xác thực", `secrets-mac` "chuỗi khóa", `secrets-linux` "vòng khóa của hệ
+  thống" in "{ $store } không khả dụng".
+- `gtk-desktop-keywords` is a first guess at what Vietnamese users type in an app search.
 
 ### Türkçe (tr)
 
@@ -1986,3 +2095,196 @@ Ukrainian agent permissions and activity:
 
 - Help headings use Текстові підписи for footers and Підтвердження власника ключа for ownership confirmation, distinct from cryptographic signature checking.
 - Use параметр/кнопка/команда before dynamically inserted nominative labels, and розділ before full settings paths to preserve Ukrainian grammar.
+
+### 日本語 (ja)
+
+Terms: 受信トレイ; 送信トレイ; 送信済みアイテム; 削除済みアイテム; 下書き; 迷惑メール; アーカイブ; すべての受信トレイ;
+メッセージ; フォルダー; アカウント; 添付ファイル; フラグ (メッセージにフラグを設定, フラグをクリア, フラグ付き); 送受信 (すべて送受信);
+送信者へ返信 (menu, as Outlook Express) / 返信 (toolbar); 全員へ返信; 転送; 迷惑メールとしてマーク / 迷惑メールではないとしてマーク
+(toolbar 迷惑メール / 迷惑メールではない); フォルダーへ移動... / フォルダーへコピー...; フォルダーを開く... (Go to Folder, kept apart from
+Move); 元に戻す; すべて選択; 最近使用したフォルダー (Recent); アドレス帳; 連絡先; グループ; スレッド (conversation: スレッドをウォッチ,
+スレッドを無視); ファイル > アカウント; ツール; オプション (Windows), 設定 (Mac and Linux Preferences, as GNOME's Japanese);
+差出人 / 宛先 / CC / BCC / 件名; パスワード; サーバー; ダウンロード; サインイン; サインイン アプリ; AIエージェント; クライアントID;
+クライアント シークレット; 発行者 (issuer); スコープ; リダイレクトURI; メーリング リスト; 配信停止 (unsubscribe, as Gmail's Japanese);
+既読にする / 未読にする (modern Outlook; Outlook Express said 開封済み / 未開封); メッセージ ルール; 信頼できる送信者; 列表示 (the Columns layout).
+
+Encryption: 暗号化キー; 公開キー / 秘密キー (Microsoft's キー, not GnuPG's 鍵); フィンガープリント; パスフレーズ; 署名 / 署名済み; 検証 /
+検証済み / 未検証 (key owner verification); 復号; 整合性チェック. 署名 alone is also the account's text signature (Outlook's term);
+the compose command is デジタル署名(&S) to keep them apart, the compose toolbar button 署名 beside 暗号化.
+
+Colours: 赤, オレンジ, 黄, 緑, 青, 紫, 灰色 ("{ $messages }に赤のフラグを設定しました").
+
+Plurals: Japanese has only `*[other]`. Where English's `[one]` wording differs (a title without a count, "毎日" for every day, the
+addresses named for a single recipient), the draft uses an exact `[1]` variant, which Fluent matches by number; `[0]` variants are kept.
+Selectors whose only use of `$count` is the selector stay as `{ $count -> *[other] ... }` so the variables match English.
+
+- Sentences in です・ます; commands, buttons and labels in Windows' short forms (名詞 or 〜する for check boxes).
+- Full width 、。「」（）：！？ in sentences; English “quotes” become 「」 and UI element names in prose ［］ as Microsoft does
+  (［ツール］>［AIエージェント］). Labels ending a form field keep ASCII `:` after the access key (`名前(&N):`); `ui-settings-label`
+  (the Mac's group labels) uses full width `：` as macOS does. A message never mixes the two.
+- Access keys: `(&F)` after the words, before `...` or `:`, English's letter where possible. GTK's `_Cc` is `CC(_C)`.
+- No space between Japanese and a placeable or a Latin word (`{ $count }件`, `Inbox Classicを開く`); Windows-style half-width
+  space between katakana words of a compound (メール アドレス, サインイン アプリ, メーリング リスト), also in mac.ftl for consistency
+  with the shared catalogs. Sizes keep the space of the unit (`10 MB`).
+- Counters: 件 for messages, contacts, rules, list entries and changes; 個 for accounts, files, keys, groups, apps, parts; 人 for
+  recipients, members, attendees; 回 for times.
+- `list-separator` is 、; `agent-can-list` is "{ $first }、{ $last }" (no "and"), so agent permissions and read summaries read as
+  lists of nouns (読み取り、整理、下書きの作成; 3件のメッセージの読み取り、2回の検索).
+- `their-folders` = 元のフォルダー, `transfer-another-account` = 別のアカウント, both working in "{ $folder }に移動しました / 戻しました".
+- `$subject` in Undo Send and Outbox lines is already quoted (「...」) by the core; no extra quotes.
+- "Re: " and "Fw: " stay; the reply header is "----- 元のメッセージ -----" (Outlook's Japanese kept "Original Message";
+  reviewer, please choose). Invitation answers use Outlook's 承諾: / 仮承諾: / 辞退: with an ASCII colon.
+- `agent-log-unsubscribed` is approval only: "メッセージ「{ $subject }」のリストの配信停止を承認しました".
+- mac.ftl follows Apple's Japanese for system menus (Inbox Classicを終了, 非表示, しまう, 拡大/縮小, ウインドウ, カット, ペースト,
+  ボールド / イタリック / アンダーライン), but keeps the shared terms フォルダー, 既定のメール アプリ and インポート.
+- Keys in prose: Ctrl, Alt, Shift, Del, Enter, as Japanese keyboards print them; "Ctrlキーを押しながらクリック".
+
+Check first: 送信者へ返信 vs 返信 for the menu; 既読 / 未読 vs Outlook Express's 開封済み / 未開封; 配信停止 vs 登録解除 for unsubscribe;
+the two meanings of 署名; 元のメッセージ in replies; the katakana spacing style; ui-remove-secret (a check box that both explains
+and acts; its wording is awkward); ui-about-core ("コア{ $version }", no space allowed before the placeable); the Microsoft Entra
+portal labels quoted in sign-in-register-microsoft; and the exact `[1]` variants (done-watched family, move window titles,
+repeats-every, pgp-compose-*), which a reviewer may prefer to fold into one counted form.
+
+### 简体中文 (zh-Hans)
+
+Terms (Microsoft Simplified Chinese, Outlook Express and Outlook): 收件箱; 发件箱; 已发送邮件; 已删除邮件; 草稿; 垃圾邮件;
+存档; 所有收件箱; 邮件 (message); 文件夹; 帐户 (Microsoft's form, also on the Mac and Linux; Apple and Google write 账户/账号);
+附件; 标志 (Flag: 标志邮件, 设置标志, 清除标志, 带标志的邮件); 发送/接收; 答复发件人; 全部答复; 转发; 标记为垃圾邮件 /
+标记为非垃圾邮件; 移动到文件夹... / 复制到文件夹...; 撤消 (Microsoft's 消, not 销); 全选; 最近使用; 通讯簿; 联系人; 组;
+对话 (conversation; 监视对话 / 忽略对话 for Watch / Ignore, as OE's 监视); 文件 > 帐户; 工具; 选项 (Windows), 设置 (the Mac),
+首选项 (Linux, GNOME's word for Preferences); 发件人 / 收件人 / 抄送 / 密件抄送 / 主题; 密码; 服务器; 下载; 登录.
+Menus: 文件(&F), 编辑(&E), 查看(&V), 工具(&T), 邮件(&M), 帮助(&H). Colours: 红色, 橙色, 黄色, 绿色, 蓝色, 紫色, 灰色.
+OAuth: 登录应用 (sign-in app); 客户端 ID; 客户端密码 (client secret, as the Azure portal writes it); 颁发者 (issuer);
+范围 (scopes); 重定向 URI; 令牌. AI agent: AI 代理 (Microsoft's word for Copilot agents; 智能体 is the other common word).
+Encryption: OpenPGP; 密钥; 公钥 / 私钥; 指纹; 数字签名 / 已签名; 已加密; 密码短语 (passphrase, apart from 密码);
+应用密码 (app password); 吊销 (revoked); 验证 (verify ownership). Sign-in or one-time code: 验证码.
+Other: 域 (domain, as Microsoft); 端口; 阅读窗格; 退订 (unsubscribe); 邮件列表 (mailing list); 阻止列表 (blocklist);
+凭据管理器 (Windows), 钥匙串 (the Mac), 系统密钥环 (Linux); 原始邮件 (reply header "----- 原始邮件 -----"); 标头 (headers).
+
+Rules the draft follows:
+
+- Polite 您 throughout; questions as 要……吗？, buttons and menu items short verbs or nouns.
+- Full width ，。：；（）！？“” in Chinese text; ASCII `...` after a command that opens a window, `…` where English has
+  it (the Mac's own file, reader-downloading, the bar's Unsubscribe…). The checker forbids mixing a full-width mark and its
+  ASCII twin in one message, so ASCII colons survive only inside search operators (from:, mailto:).
+- No space between Chinese and a placeable (checked), and so no space between a number and its measure word either
+  ("{ $count }封邮件", "{ $count }名成员"). A half-width space between Chinese and Latin words or digits written in the text
+  (Inbox Classic, IMAP, 10 MB), as Microsoft does.
+- Measure words: 封 for messages, 个 for files, accounts, contacts, keys and parts, 条 for rules, 项 for changes and settings,
+  位 for recipients and attendees, 名 for group members, 次 for times.
+- Plurals: only `*[other]`. Where English's `[one]` says something other than the number ("Delete this contact?",
+  "Watching the conversation"), the draft uses the exact `[1]` (CLDR `one` never matches in Chinese). Selectors whose
+  `$count` English uses only to choose (done-_, undone-_, transfer-not-*) are kept with `*[other]` alone so the
+  placeable stays; `[0]` branches are kept.
+- Access keys: the Latin letter in brackets after the words, before a trailing `...`, colon or arrow, always English's
+  letter, so each menu keeps English's distinct letters (`移动到文件夹(&V)...`, `语言(&L)：`, `收件人(&T) →`). Linux
+  mnemonics the same with `_` (`抄送(_C)`).
+- `$messages` is "N封邮件", used as an object ("已将{ $messages }移动到{ $folder }"); their-folders = 各自原来的文件夹,
+  transfer-another-account = 另一个帐户, both fitting after 到/回.
+- list-separator is 、. Folder names in sentences are quoted with “” only where the text names a fixed folder
+  (“草稿”, “垃圾邮件”); `$folder` placeables are left unquoted.
+- Save is 保存 on all three platforms, also in mac.ftl, to match the shared catalog (Apple writes 存储).
+
+Review first:
+
+- 帐户 versus 账户 on the Mac and Linux, and 保存 versus Apple's 存储 in the Mac's own strings.
+- 标志 for flag (Outlook 2010+ writes 后续标志 / 标记; 标志 keeps it apart from 标记为已读).
+- 监视对话 for Watch Conversation, 撤回 for Take Back and 按时间段撤消 for Undo Since.
+- 邮件列表 means both the mailing list and the message list; where an agent's permissions or log could be read either
+  way, the draft says 文件夹中的邮件列表 / 文件夹的邮件列表 for the message list. A reviewer may prefer another word.
+- AI 代理 versus 智能体; 客户端密码 (client secret) next to 密码 (password) in the setup-export note.
+- The Windows sign-in button text 使用 Google 账号登录 follows Google's own button (账号), not Microsoft's 帐户.
+- ui-connect-agent-intro keeps Claude Desktop's menu path in English (Settings > Developer > Edit Config).
+
+### 繁體中文 (zh-Hant)
+
+Taiwan usage, written from English (not converted from Simplified). The voice of the windows is Microsoft's Traditional Chinese (Taiwan) Windows, Outlook Express and Outlook; the Mac catalog follows Apple's Taiwan terms, the Linux one GNOME's zh_TW where they differ.
+
+Terms:
+
+- Inbox 收件匣, Outbox 寄件匣, Sent Items 寄件備份, Deleted Items 刪除的郵件, Drafts 草稿, Junk E-mail 垃圾郵件, Archive 封存, All Inboxes 所有收件匣, Flagged 已標幟.
+- message 郵件 (measure word 封), folder 資料夾, account 帳戶, attachment 附件, flag 標幟 (加上標幟, 清除標幟), conversation 交談, mailing list 郵寄清單, unsubscribe 取消訂閱 (leave a list 退出清單).
+- Send/Recv 傳送/接收, Send and Receive All 全部傳送及接收, Reply to Sender 回覆寄件者, Reply to All 全部回覆, Forward 轉寄, Mark as Junk 標示為垃圾郵件, Mark as Not Junk 標示為非垃圾郵件, Mark as Read/Unread 標示為已讀取/未讀取, Move to Folder 移至資料夾, Copy to Folder 複製到資料夾, Go to Folder 前往資料夾 (kept apart from 移至), Undo 復原, Select All 全選, Properties 內容, Exit 結束, Help > Contents 說明 > 目錄, Save As 另存新檔.
+- From/To/Cc/Bcc/Subject 寄件者/收件者/副本/密件副本/主旨; Received/Sent columns 收件日期/寄件日期.
+- Address Book 通訊錄, contact 連絡人 (Microsoft's spelling, not 聯絡人), group 群組, Tools 工具, Options 選項 (Windows), Settings 設定 (Mac), Preferences 偏好設定 (Linux, GNOME).
+- password 密碼, passphrase 密語 (as GnuPG's zh_TW; Microsoft would say 複雜密碼), server 伺服器, port 連接埠, sign in 登入, credentials 認證 (登入認證), token 權杖, browser 瀏覽器, file 檔案, picture 圖片, network 網路, provider 服務提供者.
+- AI agent AI 代理程式, sign-in app 登入應用程式, client ID 用戶端識別碼, client secret 用戶端密碼, issuer 簽發者, scopes 權限範圍（scopes）, redirect URI 重新導向 URI.
+- key 金鑰, private key 私密金鑰, public key 公開金鑰, fingerprint 指紋, encrypt/decrypt 加密/解密, digitally sign 數位簽署 (toolbar 簽署), a cryptographic signature 簽章, the signature text of an account 簽名, verified 已驗證, revoked 已撤銷.
+- take back (agent log) 收回, Undo Since 復原自; Turn Away 拒絕存取; Credential Manager 認證管理員, keychain 鑰匙圈, keyring 金鑰圈.
+- Flag colours 紅色, 橘色 (Taiwan, not 橙色), 黃色, 綠色, 藍色, 紫色, 灰色.
+
+Rules the draft follows:
+
+- Full width ，。：；（）！？ and 「」 in Chinese text; ASCII `...` for every ellipsis (menu items and progress), including the Mac's, where English writes `…`. Search syntax, URLs and `mailto:` stay ASCII, and a message never mixes the two kinds of the same mark.
+- No space between Chinese and a placeable (`{ $count }封郵件`, `登入{ $account }`); a half-width space between Chinese and Latin words or literal numbers (`AI 代理程式`, `10 MB`, `過去 30 天`), as Microsoft's Taiwan style does.
+- Access keys are the English letter in brackets after the words, `檔案(&F)`, before `...` or the colon; Linux's own buttons use GTK's `副本(_C)`.
+- Chinese has only `*[other]`: counts became plain messages. Where English's singular reads differently (no number shown), the draft uses an exact `[1]` variant, since `[one]` never matches in Chinese; `[0]` variants are kept.
+- `$messages` already holds "N封郵件", so sentences put it where a noun goes (已將{ $messages }移至{ $folder }). `$subject` in send status messages is already quoted, so no 「」 is added there.
+- Polite 您 throughout; questions end with 嗎？; commands are short verbs (刪除, 傳送, 匯入).
+- "Re: " and "Fw: " stay English; the reply header is `----- 原始郵件 -----`, as Outlook's Taiwan version writes it.
+
+For the reviewer to check first:
+
+- 密語 for passphrase (or Microsoft's 複雜密碼), and 簽章 (signature) next to 簽名 (signature text).
+- 簽發者 for the OAuth issuer, 用戶端密碼 for client secret.
+- `agent-can-list` and the agents' read summaries: the core joins the first items with an ASCII ", ", so a Chinese line reads "讀取, 整理和撰寫草稿". A Chinese 、 would need a core change.
+- `ui-about-core` (核心版本{ $version }) and `ui-setup-from`: the no-space rule leaves a version number right next to Chinese.
+- `ui-the-account` (此帳戶) and `ui-the-provider` (服務提供者), which stand in for names inside other sentences.
+- The Mac menus use ASCII `...`, not Apple's ⋯; Apple Taiwan's terms used: 結束, 隱藏其他, 顯示全部, 檢查更新項目, 縮到最小, 縮放, App.
+- Linux uses GNOME's 主選單 (Main Menu) and 離開 (Quit); Windows' own word for a menu is 功能表.
+
+### 한국어 (ko)
+
+Terms (Outlook / Outlook Express Korean): 받은 편지함; 보낼 편지함; 보낸 편지함; 지운 편지함; 임시 보관함; 정크 메일; 보관;
+모든 받은 편지함; 메시지; 폴더; 계정; 첨부 파일; 플래그 (플래그 지정, 플래그 지우기); 보내기/받기; 보낸 사람에게 회신 (menu),
+회신 (toolbar); 전체 회신; 전달; 정크 메일로 표시; 정크 메일 아님으로 표시; 폴더로 이동; 폴더로 복사; 실행 취소; 모두 선택;
+최근 항목; 주소록; 연락처; 그룹; 대화 (대화 지켜보기, 대화 무시); 파일, 편집, 보기, 도구, 메시지, 도움말; 파일 > 계정.
+Fields: 보낸 사람 / 받는 사람 / 참조 / 숨은 참조 / 제목; columns 받은 날짜 / 보낸 날짜 / 크기.
+Colours: 빨간색, 주황색, 노란색, 초록색, 파란색, 보라색, 회색 (as Apple Mail's Korean flags).
+OAuth: 로그인 앱; 클라이언트 ID; 클라이언트 암호 (as Azure/Entra Korean); 발급자 (issuer); 범위 (scopes); 리디렉션 URI;
+토큰 엔드포인트. AI agent: AI 에이전트.
+Encryption: OpenPGP; 키; 공개 키 / 개인 키; 지문 (fingerprint); 서명됨; 암호화됨; 해독 (decrypt); 해지됨 (revoked); 확인됨
+(verified); 암호 문구 (passphrase), apart from 암호 (password); 앱 암호 (app password); 디지털 서명 (cryptographic signing)
+apart from 서명 (the signature text of an account).
+Settings: Windows 옵션 (Options), the Mac 설정 (Settings…), Linux 기본 설정 (Preferences, GNOME Korean). Quit: the Mac
+"Inbox Classic 종료", Linux 끝내기, Windows Exit 끝내기.
+Stores: 자격 증명 관리자 (Windows), 키체인 (Mac), 시스템 키링 (Linux).
+Others: 공급자 (provider); 도메인; 포트; 서버; 로그인 / 로그온 (the password dialog title, as OE); 초안 (a draft message; the
+folder stays 임시 보관함); 구독 취소 / 메일링 리스트 탈퇴; 원본 메시지 (reply header "----- 원본 메시지 -----"); 미리 보기; 색인.
+Mac (Apple Korean): 윈도우, 오려두기, 붙여넣기, 실행 복귀, 가리기, 기타 가리기, 모두 보기, 확대/축소, 저장 안 함, 새로운 폴더.
+
+Plurals: CLDR's ko has only `other`, so most selectors became plain messages ("메시지 { $count }개", counters 개, 명 for people,
+회 for times, 초/분/시간). Where English's `[one]` says something other than the number (no number, "the conversation", one
+address named), an exact `[1]` variant carries it, since `[one]` would never match in Korean. `[0]` variants are kept.
+
+- Sentences in 합니다체: statements "~합니다", questions "~하시겠습니까?", instructions "~하십시오". Buttons and menu items short
+  noun or verb-stem forms ("보내기", "삭제", "다시 시도"); status-bar and agent-log rows are full past sentences ("~했습니다").
+- Access keys: the English letter in brackets after the words, before a trailing "..." or colon: 파일(&F), 새 계정(&N)...,
+  찾기(&F):, 받는 사람(&T) →. Linux's own catalog uses the same form with `_`: 참조(_C). Reusing English's letters keeps them
+  unique wherever English's are.
+- Particles after placeables: `$messages` always ends in 개, so it takes 를/가/는 directly. Other placeables take the paired
+  forms Korean software uses (을(를), 이(가), 은(는), (으)로, 과(와), (이)라고), or a head noun after them ("“{ $subject }”
+  메시지를", "“{ $folder }” 폴더"). `their-folders` = "원래 폴더", `transfer-another-account` = "다른 계정", both fine before (으)로.
+- `ui-the-provider` = "공급자"; provider sentences use "{ $provider } 웹 사이트에서" (no particle on the name).
+- Sizes without a space: 10MB, 2.4KB, as Korean Windows writes them. Parentheses follow a Korean word without a space
+  ("없음(암호화 안 함)"), but follow a placeable with one ("{ $address } (기본값)", "{ $name } (기본 제공)").
+- Quotes “…” as English; spaces and ASCII punctuation; no full-width marks.
+- Help keys stay Ctrl / Shift / Del / Enter / Alt.
+- `agent-log-unsubscribed` records the user's approval ("…구독 취소를 승인했습니다"), the subject introduced as "메시지 “…”".
+- Folder-creation and rename agent logs say 요청했습니다 (requested), not done.
+
+Review first:
+
+- 합니다체 imperative "~하십시오" (Outlook Express era) versus modern Windows 11's "~하세요"; the brief asked for 합니다체, but a
+  reviewer may prefer "~하세요" in instructions.
+- 전자 메일 (Microsoft) versus 이메일 in running text; this draft uses 전자 메일 throughout.
+- Go to Folder is "폴더로 가기" so that it differs from Move to Folder "폴더로 이동" (Outlook Korean uses 폴더로 이동 for Go to
+  Folder); Watch Conversation "대화 지켜보기"; Turn Away "거부"; Undo Since "기간 지정 실행 취소".
+- 클라이언트 암호 for client secret (shares 암호 with password), 암호 문구 for passphrase, 해독 versus 암호 해독 for decrypt.
+- 초안 for a draft against the folder name 임시 보관함; "보관" both for Archive (folder and command).
+- Agent read summaries joined by agent-can-list ("메시지 14개 읽기 및 검색 3회") read as noun phrases; check that they flow.
+- `agent-connect-claimed`, `ui-remove-secret` (a checkbox label) and `ui-fill-in-for` ("설정 가져올 공급자:") were rephrased
+  rather than translated literally.
+
+- The help attaches a particle to a command name where it reads best (파일 > 새 계정을 선택합니다), chosen by the final
+  consonant of the catalog word: renaming such a command in the catalog means checking its particle in the help.

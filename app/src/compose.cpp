@@ -666,7 +666,7 @@ int ChipIconSize() {
 std::vector<Chip> LayChips(const Compose* state, HDC dc, int width, int height) {
     std::vector<Chip> chips;
     size_t count = state->security ? pe_compose_security_count(state->security.get()) : 0;
-    HGDIOBJ old = SelectObject(dc, GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, UiFont());
     int inner = Scale(5), gap = Scale(4), top = Scale(2), bottom = height - Scale(2), icon = ChipIconSize();
     auto textWidth = [dc](const std::wstring& text) {
         SIZE size = {};
@@ -719,7 +719,7 @@ void DrawChip(HDC dc, const RECT& box, PeProtectionTone tone, IconSet set, int p
 
 void DrawChips(const Compose* state, const DRAWITEMSTRUCT& item) {
     FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
-    HGDIOBJ old = SelectObject(item.hDC, GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(item.hDC, UiFont());
     for (const Chip& chip : LayChips(state, item.hDC, item.rcItem.right - item.rcItem.left, item.rcItem.bottom - item.rcItem.top)) {
         if (chip.count > 1) {
             DrawChip(item.hDC, chip.box, PE_PROTECTION_TONE_NEUTRAL, IconSet::SecureNeutral, -1, L"+" + std::to_wstring(chip.count));
@@ -1411,7 +1411,7 @@ void CreateFields(HWND hwnd, Compose* state) {
                                          WS_TABSTOP | BS_PUSHBUTTON, IDC_COMPOSE_SECURITY_DETAILS, {});
     ShowWindow(state->securityLine, SW_HIDE);
     LOGFONTW font = {};
-    GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
+    GetObjectW(UiFont(), sizeof(font), &font);
     font.lfWeight = FW_BOLD;
     state->bold = CreateFontIndirectW(&font);
     CreateFormatBar(hwnd, state);

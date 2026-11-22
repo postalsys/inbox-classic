@@ -1,0 +1,17 @@
+<!--review-->
+<h1>暗号化のエラー</h1>
+<p class="summary">サーバーが暗号化を提供しないとき、または暗号化がオフなのにサーバーが暗号化を求めるときの対処方法。</p>
+<h2>「the server does not offer STARTTLS」</h2>
+<p>アカウントはSTARTTLSに設定されていますが、サーバーが暗号化を提供しませんでした。Inbox Classicは、パスワードを送信する前にこの接続の試みを中止しました。</p>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>でアカウントのプロパティを開きます。</li>
+    <li>プロバイダーの設定を確認します。対応していれば、受信メールにはポート993、送信メールにはポート465でSSL/TLSを使います。</li>
+    <li><b data-text="ui-ok"></b>をクリックします。</li>
+</ol>
+<p>どの方法でもうまくいかない場合、そのサーバーは安全に使えません。</p>
+<h2>「the server takes the password only over an encrypted connection」</h2>
+<p>送信サーバーが<b data-text="ui-security-none"></b>に設定されています。このエラーは、パスワードが正しいことを示すものではありません。プロバイダーの設定に従って、<b data-text="ui-field-smtp-security"></b>をポート587のSTARTTLS、またはポート465のSSL/TLSに変更してください。</p>
+<h2>暗号化なしの接続についての警告</h2>
+<p><b data-text="ui-security-none"></b>を選択すると、ネットワークの通信を傍受した人にパスワードやメッセージを読まれるおそれがあるとInbox Classicが警告します。ローカル ネットワークであっても、通信そのものは暗号化されません。自分のコンピューターやローカル ネットワーク上のサーバーについて、この危険を受け入れる場合にのみ続行してください。</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

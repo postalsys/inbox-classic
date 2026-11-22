@@ -249,7 +249,8 @@ ui-no-items = Não há itens nesta exibição.
 ui-choose-folder = Escolha uma pasta para ver suas mensagens.
 ui-unsubscribe = Cancelar inscrição
 ui-open-in-calendar = Abrir no Calendário
-ui-pictures-blocked = Algumas imagens foram bloqueadas para ajudar a impedir que o remetente identifique o seu computador. Clique aqui para baixar as imagens.
+# review: changed
+ui-pictures-blocked = Algumas imagens foram bloqueadas para ajudar a impedir que o remetente identifique o seu computador.
 ui-not-shown = Não foi possível mostrar a mensagem.
 ui-attachment-not-read = Não foi possível ler o anexo.
 ui-attachment-not-saved = Não foi possível salvar o anexo.

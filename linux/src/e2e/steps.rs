@@ -2704,6 +2704,35 @@ pub async fn completing(d: &Driver) {
         "typing in To lists the people it may be, with someone heard from",
     );
     d.shot(&c.window, "write-17-complete").await;
+    // while an input method composes (Japanese, Chinese, Korean), Enter and the arrows are its own: they confirm the
+    // composition and choose its candidates, and do not take an address. The composition as GTK says it.
+    if let Some(text) = c.to.delegate().and_downcast::<gtk::Text>() {
+        let press = |key: gdk::Key| {
+            let controllers = c.to.observe_controllers();
+            (0..controllers.n_items())
+                .filter_map(|i| controllers.item(i).and_downcast::<gtk::EventControllerKey>())
+                .any(|keys| {
+                    keys.emit_by_name::<bool>(
+                        "key-pressed",
+                        &[
+                            &glib::translate::IntoGlib::into_glib(key),
+                            &0u32,
+                            &gdk::ModifierType::empty(),
+                        ],
+                    )
+                })
+        };
+        text.emit_by_name::<()>("preedit-changed", &[&"\u{304b}\u{3044}\u{304e}"]);
+        let taken = press(gdk::Key::Return) || press(gdk::Key::Down);
+        d.check(
+            !taken && c.to.text() == "ann" && crate::complete::shown_rows(&c.to).is_some(),
+            &format!(
+                "while an input method composes, Enter and the arrows are its own ({})",
+                c.to.text()
+            ),
+        );
+        text.emit_by_name::<()>("preedit-changed", &[&""]);
+    }
     // a click takes one, with a comma for the next
     if let Some(row) = descendants::<gtk::ListBox>(c.to.upcast_ref())
         .first()

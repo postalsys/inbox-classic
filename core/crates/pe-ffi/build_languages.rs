@@ -102,7 +102,9 @@ const NSIS_LANGUAGES: &[(&str, &str)] = &[
     ("uk", "Ukrainian"),
     ("uz", "Uzbek"),
     ("vi", "Vietnamese"),
-    ("zh", "SimpChinese"),
+    // Chinese in Simplified, and in Traditional characters
+    ("zh-Hans", "SimpChinese"),
+    ("zh-Hant", "TradChinese"),
 ];
 
 /// The installer's words: its LangString names and their messages in windows.ftl
@@ -183,9 +185,13 @@ fn table() -> String {
                 .filter(|(_, target)| *target == language)
                 .map(|(alias, _)| *alias),
         );
-        for key in candidates {
-            if supported(key) == Some(*code) && !keys.iter().any(|k| k == key) {
-                keys.push(key.to_string());
+        // and the regions a system names a script by (`zh-tw` for Traditional Chinese)
+        let regions = pe_i18n::TRADITIONAL_REGIONS
+            .iter()
+            .map(|region| format!("{language}-{}", region.to_ascii_lowercase()));
+        for key in candidates.map(str::to_string).chain(regions) {
+            if supported(&key) == Some(*code) && !keys.contains(&key) {
+                keys.push(key);
             }
         }
         writeln!(

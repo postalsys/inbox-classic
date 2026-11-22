@@ -245,7 +245,8 @@ ui-no-items = V tomto zobrazení nejsou žádné položky.
 ui-choose-folder = Vyberte složku, jejíž zprávy chcete zobrazit.
 ui-unsubscribe = Odhlásit odběr
 ui-open-in-calendar = Otevřít v kalendáři
-ui-pictures-blocked = Některé obrázky jsou zablokovány, aby se omezilo sledování ze strany odesílatele. Kliknutím sem je stáhnete.
+# review: changed
+ui-pictures-blocked = Některé obrázky jsou zablokovány, aby se omezilo sledování ze strany odesílatele.
 ui-not-shown = Zprávu nelze zobrazit.
 ui-attachment-not-read = Přílohu nelze přečíst.
 ui-attachment-not-saved = Přílohu nelze uložit.

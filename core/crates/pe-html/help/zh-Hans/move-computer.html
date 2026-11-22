@@ -1,0 +1,21 @@
+<!--review-->
+<h1>迁移到另一台计算机</h1>
+<p class="summary">用一个文件将您的帐户、设置、联系人、密钥和规则带到另一台计算机。</p>
+<h2>导出</h2>
+<ol>
+    <li>选择<b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>。</li>
+    <li>选择要带走的内容：<b data-text="setup-part-settings"></b>、<b data-text="setup-part-preferences"></b>、<b data-text="setup-part-accounts"></b>、<b data-text="setup-part-sign-in-apps"></b>、<b data-text="setup-part-contacts"></b>、<b data-text="setup-part-keys"></b>、<b data-text="setup-part-rules"></b>和<b data-text="setup-part-trusted-senders"></b>。</li>
+    <li>要包含所选帐户可访问的登录凭据和您所选的可访问私钥，请打开<b data-text="ui-setup-use-passphrase"></b>，并将至少 8 个字符的密码短语键入两次。</li>
+    <li>单击<b data-text="ui-setup-export-button"></b>，然后选择文件的保存位置。</li>
+</ol>
+<p>该文件不包含邮件：仍在服务器上的邮件会在另一台计算机上重新下载。本地的发件箱不会迁移。密码短语会加密整个文件。无法解锁的私钥会被略过。如果不设密码短语，已保存的密码、登录凭据和私钥都不会包含在内，您需要重新登录各个帐户。</p>
+<aside class="warning">请将文件和密码短语分开保存，导入后删除该文件。同时拥有两者的人可以阅读您的邮件。</aside>
+<h2>导入</h2>
+<ol>
+    <li>在另一台计算机上，选择<b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>。在添加第一个帐户之前，<b data-text="ui-add-account-title"></b>中也有相应的链接。</li>
+    <li>选择该文件；如果文件有密码短语，请键入密码短语。</li>
+    <li>窗口会显示文件中包含的内容。选择要导入的部分和帐户，然后单击<b data-text="ui-setup-import-button"></b>。</li>
+</ol>
+<p>这台计算机上已配置的帐户保持不变。联系人（包括组）会合并到您的通讯簿中；所选的设置和窗口首选项会替换当前的设置。帐户同步后，Inbox Classic 会尝试匹配缺失的规则目标文件夹，但不会创建这些文件夹。联系人的新密钥只有在您于联系人属性中选择它时才会替换现有密钥。</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
+<!--/review-->

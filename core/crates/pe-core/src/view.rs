@@ -294,6 +294,20 @@ fn is_listed(attachment: &Attachment) -> bool {
             .any(|p| attachment.mime_type.eq_ignore_ascii_case(p))
 }
 
+/// The language the reading pane draws a message's text in: Japanese, Chinese or Korean by the charset of its first
+/// text part that is not an attachment (any label the decoder reads, ms_kanji or csshiftjis), else the app's
+fn text_lang(source: &[u8]) -> &'static str {
+    let outline = pe_mime::outline::outline(source);
+    outline
+        .parts
+        .iter()
+        .find(|part| part.content_type.starts_with("text/") && part.disposition != "attachment")
+        .and_then(|part| part.param("charset"))
+        .and_then(pe_mime::charset::encoding_for)
+        .and_then(pe_mime::charset::lang_of)
+        .unwrap_or_else(pe_i18n::language)
+}
+
 #[cfg(test)]
 pub(crate) fn build(source: &[u8], allow_remote_images: bool) -> MessageView {
     build_unless(source, allow_remote_images, &Trust::default(), &|| false, &|_| None).unwrap_or_default()
@@ -346,6 +360,7 @@ pub(crate) fn build_unless(
     }
     let options = RenderOptions {
         allow_remote_images,
+        lang: Some(text_lang(source)),
         ..Default::default()
     };
     let images = crate::compose::inline_images(&message);
@@ -563,6 +578,7 @@ struct PartPreviews<'a, 'p> {
 fn render_part(
     part: &parser::Message,
     allow: bool,
+    lang: &'static str,
     first: usize,
     index: usize,
     mut previews: Option<&mut PartPreviews>,
@@ -596,6 +612,7 @@ fn render_part(
     let options = RenderOptions {
         allow_remote_images: allow,
         in_frame: true,
+        lang: Some(lang),
     };
     let rendered = pe_html::render_view_cards(&body, &options, &images, &[], &cards);
     let inline = inline_files(plan, Some(index), &rendered.inline);
@@ -670,7 +687,8 @@ fn protected_view(
         );
         let first = attachments.len();
         let document = part.as_ref().map(|part| {
-            let rendered = render_part(part, allow, first, parts.len(), previews.as_mut());
+            let lang = text_lang(section.entity.as_deref().unwrap_or_default());
+            let rendered = render_part(part, allow, lang, first, parts.len(), previews.as_mut());
             remote_images |= rendered.remote_images;
             blocked |= rendered.remote_images && !allow;
             if encrypted && allow && rendered.remote_images {
@@ -864,7 +882,10 @@ fn counted(parts: &[PartView]) -> String {
         .collect();
     pe_i18n::tr_args(
         Text::PgpBarParts,
-        &[("count", parts.len().into()), ("list", (&list.join(", ")).into())],
+        &[
+            ("count", parts.len().into()),
+            ("list", (&crate::text::word_list(&list)).into()),
+        ],
     )
 }
 
@@ -1041,6 +1062,35 @@ mod tests {
     use super::*;
 
     const MESSAGE: &[u8] = b"From: Andris <andris@example.com>\r\nTo: a@example.com, Team: b@example.com;\r\nSubject: Report\r\nDate: Mon, 6 Oct 2025 10:00:00 +0000\r\nContent-Type: multipart/mixed; boundary=m\r\n\r\n--m\r\nContent-Type: multipart/related; boundary=r\r\n\r\n--r\r\nContent-Type: text/html\r\n\r\n<p onclick=x()>Hi <img src=\"cid:logo@x\"></p><script>bad()</script>\r\n--r\r\nContent-Type: image/png\r\nContent-ID: <logo@x>\r\nContent-Transfer-Encoding: base64\r\n\r\niVBORw==\r\n--r--\r\n--m\r\nContent-Type: application/pdf; name=\"../../report.pdf\"\r\nContent-Transfer-Encoding: base64\r\n\r\nJVBERg==\r\n--m--\r\n";
+
+    #[test]
+    fn the_reading_pane_draws_a_message_in_the_language_of_its_charset() {
+        let lang = |source: &[u8]| -> String {
+            let document = build(source, false).document;
+            let start = document.find("<html").unwrap();
+            document[start..start + document[start..].find('>').unwrap() + 1].to_string()
+        };
+        // 会議 in ISO-2022-JP
+        let japanese = b"Subject: x\r\nContent-Type: text/plain; charset=\"ISO-2022-JP\"\r\n\r\n\x1b$B2q5D\x1b(B\r\n";
+        assert_eq!(lang(japanese), "<html lang=\"ja\">");
+        assert!(build(japanese, false).document.contains("会議"));
+        let chinese = b"Subject: x\r\nContent-Type: multipart/alternative; boundary=b\r\n\r\n--b\r\n\
+            Content-Type: text/plain; charset=GB2312\r\n\r\nx\r\n--b\r\nContent-Type: text/html; charset=GB2312\r\n\r\n\
+            <p>x</p>\r\n--b--\r\n";
+        assert_eq!(lang(chinese), "<html lang=\"zh-Hans\">");
+        let korean = b"Subject: x\r\nContent-Type: text/plain; charset=euc-kr\r\n\r\nx\r\n";
+        // a label of the decoder that is no name of the encoding
+        let alias = b"Subject: x\r\nContent-Type: text/plain; charset=ms_kanji\r\n\r\nx\r\n";
+        assert_eq!(lang(alias), "<html lang=\"ja\">");
+        assert_eq!(lang(korean), "<html lang=\"ko\">");
+        // an attachment's charset is not the text's; UTF-8 and none are in the app's language
+        let attached = b"Subject: x\r\nContent-Type: multipart/mixed; boundary=b\r\n\r\n--b\r\n\
+            Content-Type: text/plain; charset=big5\r\nContent-Disposition: attachment; filename=a.txt\r\n\r\nx\r\n--b\r\n\
+            Content-Type: text/plain; charset=utf-8\r\n\r\nx\r\n--b--\r\n";
+        let app = format!("<html lang=\"{}\">", pe_i18n::language());
+        assert_eq!(lang(attached), app);
+        assert_eq!(lang(b"Subject: x\r\n\r\nx\r\n"), app);
+    }
 
     #[test]
     fn a_view_nobody_waits_for_gives_up() {

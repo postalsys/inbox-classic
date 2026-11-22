@@ -19,7 +19,7 @@ const wchar_t* kUndoSinceClass = L"InboxClassicAgentUndoSince";
 HFONT HeadingFont() {
     static HFONT font = [] {
         LOGFONTW face = {};
-        GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(face), &face);
+        GetObjectW(UiFont(), sizeof(face), &face);
         face.lfHeight = -Scale(15);
         face.lfWeight = FW_BOLD;
         return CreateFontIndirectW(&face);
@@ -38,7 +38,7 @@ HWND Heading(HWND parent, const std::wstring& text, const RECT& bounds, bool wra
 // word longer than a line broken as a static text with SS_EDITCONTROL breaks it
 int TextHeight(HWND parent, const std::wstring& text, int width, HFONT font = nullptr, bool breakWords = false) {
     HDC dc = GetDC(parent);
-    HGDIOBJ old = SelectObject(dc, font ? font : GetStockObject(DEFAULT_GUI_FONT));
+    HGDIOBJ old = SelectObject(dc, font ? font : UiFont());
     RECT bounds = {0, 0, width, 0};
     DrawTextW(dc, text.c_str(), -1, &bounds, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX | (breakWords ? DT_EDITCONTROL : 0));
     SelectObject(dc, old);
@@ -902,14 +902,6 @@ LRESULT CALLBACK AgentsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
         }
         return 0;
     }
-    case WM_DRAWITEM:
-        DrawLinkButton(*reinterpret_cast<DRAWITEMSTRUCT*>(lParam));
-        return TRUE;
-    case WM_SETCURSOR:
-        if (SetLinkCursor(hwnd, wParam)) {
-            return TRUE;
-        }
-        break;
     case WM_AGENTS_REFRESH:
         FillAgents(state);
         return 0;
@@ -971,7 +963,7 @@ void AgentsDialog(HWND owner, PeCore* core) {
     RegisterDialogClass(kAgentsClass, AgentsProc);
     int pad = Scale(12);
     std::wstring change = core::T(PE_TEXT_WIN_CHANGE), remove = core::T(PE_TEXT_UI_REMOVE), undo = core::T(PE_TEXT_CMD_UNDO);
-    std::wstring clear = core::T(PE_TEXT_UI_CLEAR_BUTTON), close = core::T(PE_TEXT_UI_CLOSE), setup = core::T(PE_TEXT_WIN_HOW_TO_CONNECT);
+    std::wstring clear = core::T(PE_TEXT_UI_CLEAR_BUTTON), close = core::T(PE_TEXT_UI_CLOSE), setup = core::T(PE_TEXT_UI_HOW_TO_CONNECT);
     std::wstring undoSince = core::T(PE_TEXT_WIN_UNDO_SINCE);
     int button = ButtonWidth({change, remove, undoSince, undo, clear, close}, 100);
     // wide enough for what each program may do beside its name and when it was last used, within the screen
@@ -1022,8 +1014,9 @@ void AgentsDialog(HWND owner, PeCore* core) {
     AddColumn(state.reads, 0, core::T(PE_TEXT_UI_COL_WHEN).c_str(), 110);
     AddColumn(state.reads, 1, core::T(PE_TEXT_UI_COL_WHAT).c_str(), 320);
     int bottom = height - pad - Scale(25);
-    int setupWidth = std::max(Scale(200), static_cast<int>(MeasureText(setup).cx) + Scale(12));
-    CreateLinkButton(dialog, setup.c_str(), IDC_AGENTS_SETUP, {pad, bottom + Scale(4), pad + setupWidth, bottom + Scale(21)});
+    // a push button at the left of the row, as the Mac and Linux have it: it opens the help on connecting one
+    int setupWidth = ButtonWidth({setup});
+    CreateChild(dialog, L"BUTTON", setup.c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_AGENTS_SETUP, {pad, bottom, pad + setupWidth, height - pad});
     CreateChild(dialog, L"BUTTON", close.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK, {width - pad - button, bottom, width - pad, height - pad});
     FillAgents(&state);
     g_agents = dialog;

@@ -1,0 +1,15 @@
+<!--review-->
+<h1>帳戶的安全性設定</h1>
+<p class="summary">帳戶伺服器的安全性設定，以及每一項的意義。</p>
+<p>每個帳戶的內送伺服器有<b data-text="ui-field-imap-security"></b>，外寄伺服器有<b data-text="ui-field-smtp-security"></b>。Inbox Classic 找到您服務提供者的設定時會自動填入。若要變更，請在<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>中開啟帳戶的內容。</p>
+<table>
+    <tr><th>設定</th><th>意義</th></tr>
+    <tr><td>SSL/TLS</td><td>連線從一開始就加密。內送郵件通常使用連接埠 993，外寄郵件通常使用 465。</td></tr>
+    <tr><td>STARTTLS</td><td>連線一開始未加密，在傳送登入認證之前切換為 TLS。內送郵件通常使用連接埠 143，外寄郵件通常使用 587。伺服器若不提供加密，Inbox Classic 就會停止連線。</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>您的密碼和郵件以未加密的方式傳輸，攔截連線的人可以讀取。</td></tr>
+</table>
+<aside class="warning">只有伺服器位於您自己的電腦或區域網路上時，才使用<b data-text="ui-security-none"></b>。Inbox Classic 使用它之前會先警告您。</aside>
+<p>Inbox Classic 會依照您系統信任的憑證，檢查每部伺服器是否確實是它所宣稱的伺服器。沒有任何開關可以接受所有憑證。</p>
+<p>根據預設，您的密碼保存在<!--os:windows--> Windows 認證管理員<!--/os--><!--os:mac-->您的登入鑰匙圈<!--/os--><!--os:linux-->您的金鑰圈<!--/os-->中，絕不存放在郵件存放區。透過瀏覽器登入時，儲存在那裡的是權杖，而不是您的密碼。在僅限記憶體模式下，或系統存放區無法使用時，認證可能只在本次工作階段有效。</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

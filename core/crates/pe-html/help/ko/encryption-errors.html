@@ -1,0 +1,17 @@
+<!--review-->
+<h1>암호화 오류</h1>
+<p class="summary">서버가 암호화를 제공하지 않거나, 꺼져 있는 암호화를 서버가 요구할 때의 해결 방법입니다.</p>
+<h2>“the server does not offer STARTTLS”</h2>
+<p>계정이 STARTTLS로 설정되어 있지만 서버가 암호화를 제공하지 않았습니다. Inbox Classic은 암호를 보내기 전에 이 연결 시도를 중단했습니다.</p>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> 명령으로 계정 속성을 엽니다.</li>
+    <li>공급자의 설정을 확인합니다. 지원되면 받는 메일에는 포트 993, 보내는 메일에는 포트 465로 SSL/TLS를 사용합니다.</li>
+    <li><b data-text="ui-ok"></b> 단추를 클릭합니다.</li>
+</ol>
+<p>다른 방법이 모두 통하지 않으면 그 서버는 안전하게 사용할 수 없습니다.</p>
+<h2>“the server takes the password only over an encrypted connection”</h2>
+<p>보내는 메일 서버의 보안 설정이 <b data-text="ui-security-none"></b> 옵션으로 되어 있습니다. 이 오류가 암호가 맞다는 뜻은 아닙니다. 공급자의 설정에 따라 <b data-text="ui-field-smtp-security"></b> 설정을 포트 587의 STARTTLS나 포트 465의 SSL/TLS로 바꿉니다.</p>
+<h2>암호화되지 않은 연결에 대한 경고</h2>
+<p><b data-text="ui-security-none"></b> 옵션을 선택하면 Inbox Classic은 네트워크 트래픽을 가로채는 사람이 누구든 암호와 메시지를 읽을 수 있다고 경고합니다. 로컬 네트워크라고 해서 트래픽이 암호화되는 것은 아닙니다. 사용자 컴퓨터나 로컬 네트워크에 있는 서버에 대해 이 위험을 감수할 경우에만 계속하십시오.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

@@ -22,6 +22,8 @@ struct Completion {
     rows: RefCell<Vec<(String, String)>>,
     /// The field's text is being set from here: not typing
     taking: Cell<bool>,
+    /// An input method is composing in the field (Japanese, Chinese, Korean): its keys are the input method's
+    composing: Cell<bool>,
 }
 
 fn is_separator(c: char) -> bool {
@@ -156,7 +158,9 @@ impl Completion {
     }
 
     fn on_key(&self, key: gdk::Key, modifiers: gdk::ModifierType) -> glib::Propagation {
-        if !self.shown() {
+        // this controller sees the keys before the field's input method: Enter confirms a composition and the arrows
+        // choose among its candidates, not among the addresses
+        if !self.shown() || self.composing.get() {
             return glib::Propagation::Proceed;
         }
         match key {
@@ -193,7 +197,16 @@ pub fn attach(entry: &gtk::Entry) {
         list: list.clone(),
         rows: RefCell::default(),
         taking: Cell::new(false),
+        composing: Cell::new(false),
     });
+    if let Some(text) = entry.delegate().and_downcast::<gtk::Text>() {
+        let composed = Rc::downgrade(&completion);
+        text.connect_preedit_changed(move |_, preedit| {
+            if let Some(completion) = composed.upgrade() {
+                completion.composing.set(!preedit.is_empty());
+            }
+        });
+    }
     let typed = Rc::downgrade(&completion);
     entry.connect_changed(move |_| {
         if typed.upgrade().is_some_and(|c| c.taking.get()) {

@@ -1,0 +1,23 @@
+<!--review-->
+<h1>下書きと送信トレイ</h1>
+<p class="summary">後で仕上げるためにメッセージを保存し、送信を待っているものを確認します。</p>
+<h2>下書きを保存する</h2>
+<p><b data-text="ui-tb-save"></b>をクリックするか、<!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->キーを押します。メッセージは、サーバー上のアカウントの<b data-text="folder-drafts"></b>フォルダーに保存されます。もう一度保存すると、前のコピーが置き換えられます。メッセージのステータス バーに、保存した時刻が表示されます。</p>
+<p>Inbox Classicは、入力をやめてから数秒後、または入力を続けている間は30秒ごとに、メッセージを自動的に保存します。Inbox Classicやコンピューターが予期せず終了した場合は、次にInbox Classicを起動したときに、書きかけのメッセージが再び開きます。</p>
+<p>変更のあるメッセージを閉じると、変更を保存するかどうか尋ねられます。</p>
+<ul>
+    <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os-->を選ぶと、<b data-text="folder-drafts"></b>に保存されます。</li>
+    <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os-->を選ぶと、変更が破棄されます。下書きが自動的に保存されただけの場合は、<b data-text="folder-drafts"></b>からも削除されます。</li>
+    <li><b data-text="ui-cancel"></b>を選ぶと、メッセージに戻ります。</li>
+</ul>
+<p>続きを書くには、<b data-text="folder-drafts"></b>の下書きをダブルクリックします。宛先、本文、ファイルとともに開きます。下書きは、メッセージが送信トレイに確実に入った時点で、送信が完了する前に削除されます。</p>
+<p>作成中のメッセージは専用のウィンドウなので、開いたままメールを読むことができます。Inbox Classicを閉じると、まず作成中のメッセージが閉じられ、変更のあるものについては確認されます。</p>
+<h2>送信トレイ</h2>
+<p><b data-text="ui-tb-send"></b>をクリックすると、メッセージが送信トレイに入ります。既定では、数秒後に送信されます。その間は送信を取り消せます（下記参照）。メイン ウィンドウのステータス バーに、送信された時刻が表示されます。</p>
+<p>接続がないなどの理由でメッセージを送信できない場合は、送信トレイに残ります。Inbox Classicは、次回のメールの確認時に再び送信を試みます。</p>
+<p>送信を待っているものを確認するには、<b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>を選択します。各メッセージと、まだ送信されていない理由が表示されます。<b data-text="ui-outbox-send-all"></b>ですぐに再試行できるほか、そこでメッセージを削除することもできます。</p>
+<h2>メッセージの送信を取り消す</h2>
+<p>既定では、<b data-text="ui-tb-send"></b>をクリックした後、メッセージは数秒待ってから送信されます。ステータス バーにカウントダウンが表示されます。その間に、カウントダウンの横の<b data-text="ui-undo-button"></b>をクリックするか、<b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>を選択すると、送信を取り消せます。メッセージが再び開くので、編集するか破棄します。この操作ができるのはカウントダウンが終わるまでで、その後メッセージが送信トレイに残っていても取り消せません。すでに送信されたメッセージを取り戻すことはできません。</p>
+<p>待ち時間を変更する、またはすぐに送信するようにするには、<b data-settings="general"></b>を選択し、<b data-text="ui-send-delay"></b>を調整します。メッセージが待機中にInbox Classicを終了すると、すぐに送信が試みられます。</p>
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

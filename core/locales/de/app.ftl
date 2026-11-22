@@ -243,7 +243,8 @@ ui-no-items = In dieser Ansicht gibt es keine Elemente.
 ui-choose-folder = Wählen Sie einen Ordner, um seine Nachrichten zu sehen.
 ui-unsubscribe = Abbestellen
 ui-open-in-calendar = Im Kalender öffnen
-ui-pictures-blocked = Einige Bilder wurden zum Schutz vor Nachverfolgung blockiert. Klicken Sie hier, um die Bilder herunterzuladen.
+# review: changed
+ui-pictures-blocked = Einige Bilder wurden zum Schutz vor Nachverfolgung blockiert.
 ui-not-shown = Die Nachricht konnte nicht angezeigt werden.
 ui-attachment-not-read = Die Anlage konnte nicht gelesen werden.
 ui-attachment-not-saved = Die Anlage konnte nicht gespeichert werden.

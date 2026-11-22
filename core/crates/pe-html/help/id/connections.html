@@ -1,0 +1,16 @@
+<!--review-->
+<h1>Koneksi yang dibuat Inbox Classic</h1>
+<p class="summary">Ke mana Inbox Classic terhubung, dan mengapa, bagi yang ingin tahu detail teknisnya.</p>
+<ul>
+    <li><b>Server email Anda</b>, melalui IMAP untuk membaca email dan SMTP untuk mengirimnya. Koneksi dienkripsi dengan TLS, dan sertifikat setiap server diperiksa terhadap sertifikat yang dipercaya sistem Anda. Inbox Classic menolak server tanpa enkripsi, kecuali Anda memilih <b data-text="ui-security-none"></b> dan mengonfirmasinya.</li>
+    <li><b>Saat Anda menambahkan akun</b>, untuk mencari servernya. Inbox Classic membaca catatan DNS domain Anda melalui DNS over HTTPS (Cloudflare, lalu Google), tidak pernah melalui DNS biasa. Aplikasi juga mencoba file autoconfig penyedia Anda dan daftar penyedia Thunderbird (ISPDB). Untuk Exchange, aplikasi menanyakan Microsoft Autodiscover, yang menerima kata sandi Anda hanya jika memintanya melalui HTTPS. Server tanpa enkripsi tidak pernah dipilih.</li>
+    <li><b>Masuk melalui browser</b>, dengan OAuth 2.0 dan PKCE, ke Google, Microsoft, atau penyedia aplikasi masuk Anda. Browser kembali ke Inbox Classic hanya di komputer ini.</li>
+    <li><b>Logo merek</b> (BIMI), dari alamat HTTPS merek tersebut jika pesan tidak membawa logo yang dapat digunakan dan tidak ada salinan tersimpan yang dapat dipakai ulang. Logo yang diunduh disimpan di cache meskipun aplikasi dimulai ulang. Ini hanya terjadi jika server email Anda meloloskan pemeriksaan DMARC pesan dan menyetujui logonya.</li>
+    <li><b>Gambar dari internet</b>, jika Anda mengizinkannya, termasuk melalui pengaturan pengirim tepercaya atau unduhan otomatis.</li>
+    <li><b>Berhenti berlangganan</b>, hanya dengan persetujuan Anda. Permintaan sekali klik (RFC 8058) memerlukan tanda tangan DKIM yang diterima server email Anda dan mencakup kedua header berhenti berlangganan.</li>
+    <li><b>Kunci enkripsi</b>, saat kunci penerima diperlukan atau Anda memulai pencarian. Pencarian alamat menanyakan domain alamat tersebut (Web Key Directory), lalu keys.openpgp.org jika diaktifkan. Pencarian sidik jari atau ID kunci mengirim pengenal itu ke keys.openpgp.org, bukan alamat. Menerbitkan kunci publik Anda mengirimnya ke keys.openpgp.org dan meminta konfirmasi alamat-alamatnya.</li>
+    <!--os:mac--><li><b>Pembaruan</b>, dari inboxclassic.com, untuk melihat apakah versi baru sudah tersedia.</li><!--/os-->
+</ul>
+<p>Kode masuk hanya ditawarkan jika penyedia Anda melaporkan tanda tangan DKIM yang valid dari domain kode tersebut atau domain induknya. Inbox Classic membaca hasil ini dari header Authentication-Results atau ARC-Authentication-Results penyedia. Ini tidak memerlukan koneksi tersendiri.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

@@ -1,0 +1,35 @@
+<!--review-->
+<h1>設定</h1>
+<p class="summary">選擇 Inbox Classic 的語言、它顯示和通知郵件的方式，以及要預先下載的內容。</p>
+<p>選擇<b data-settings=""></b>。設定分成三頁：<b data-text="ui-settings-general"></b>、<b data-text="ui-settings-reading"></b>和<b data-text="ui-download-heading"></b>。<!--os:windows-->按一下<b data-text="ui-ok"></b>可保留變更，按一下<b data-text="ui-apply"></b>則保留變更並讓視窗保持開啟。<b data-text="ui-cancel"></b>會捨棄自開啟對話方塊或上次套用以來所做的變更，包括尚未套用的信任寄件者移除。您在 Windows 設定中為 .eml 檔案選擇的應用程式會維持原樣。<!--/os--><!--os:mac,linux-->每項變更都會立即生效，但語言除外，語言會在 Inbox Classic 重新啟動時變更。<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
+<ul>
+    <li><b data-text="ui-language-label"></b>選擇視窗和這份說明的語言：您系統的語言，或清單中的其中一種語言。Inbox Classic 會依序嘗試系統偏好的語言，若都不支援，則改用英文。</li>
+    <li><b data-text="ui-notify-new-mail"></b>會在主視窗不在最上層且系統允許時，顯示新郵件通知。一開始是開啟的。</li>
+    <li><b data-text="ui-codes-in-notifications"></b>會在登入郵件的通知中顯示驗證碼。一開始是關閉的，因為通知可能在鎖定畫面上被看見；通知關閉時無法使用此選項。</li>
+    <li><b data-text="ui-send-delay"></b>會延後開始寄送的時間，讓您在倒數結束前可以用復原取消。一開始是 10 秒。</li>
+    <li><b data-text="cmd-default-app"></b>可讓您為電子郵件連結選擇 Inbox Classic，<b data-text="ui-eml-default"></b>則用於郵件檔案。請參閱<a href="topic:default-mail-program"></a>。</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b>會不時尋找 Inbox Classic 的新版本。請參閱<a href="topic:updates"></a>。</li><!--/os-->
+</ul>
+<p>變更語言時，Inbox Classic 會重新啟動。按一下<b data-text="ui-restart-now"></b>，或按一下<b data-text="ui-restart-later"></b>，在下次啟動時再變更。</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li><b data-text="ui-layout-label"></b>選擇版面配置：依視窗寬度自動決定、傳統或欄式。請參閱<a href="topic:layouts"></a>。</li>
+    <li><b data-text="ui-group-by-conversation"></b>會將互相回覆的郵件歸成一列。一開始是開啟的。</li>
+    <li><b data-text="ui-list-pictures"></b>會在欄式版面配置中顯示品牌標誌、連絡人的圖片和姓名縮寫。一開始是開啟的。</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b>會在系統處於深色模式時，以深色背景顯示您閱讀和撰寫的郵件。一開始是開啟的。</li><!--/os-->
+    <li><b data-text="ui-preview-show"></b>會在郵件內文之後顯示圖片和 PDF 檔案的前幾頁。一開始是開啟的。關閉<b data-text="ui-preview-pdfs"></b>，即可只顯示圖片而不顯示 PDF 檔案。請參閱<a href="topic:attachments"></a>。</li>
+    <li><b data-text="ui-pictures-always-option"></b>會自動載入遠端圖片，但垃圾郵件和加密的郵件部分除外。一開始是關閉的，因為開啟後，寄件者就能得知您何時閱讀了他們的郵件。請參閱<a href="topic:pictures-tracking"></a>。</li>
+    <li><b data-text="ui-trusted-senders-button"></b>會列出信任的寄件者地址和網域，您可以在那裡將其移除。自動載入需要確認網域，而且仍然排除垃圾郵件和加密部分。</li>
+    <li><b data-text="ui-search-encrypted"></b>會在有可用的解密金鑰時，為已下載的加密郵件建立索引，讓搜尋能找到它們的內文和受保護的主旨。一開始是開啟的。這些內文和受保護的主旨會以未加密的方式保存在本機索引中。關閉此選項會移除解密後的索引資料，並還原外層主旨。代理程式的文字搜尋不包括這些解密後的索引。</li>
+    <li><b data-text="ui-pgp-keyserver"></b>可讓 Inbox Classic 在詢問地址本身的網域之後，再向 keys.openpgp.org 查詢您要加密寄送的地址的金鑰。依要求而定，查詢可能會傳送地址、指紋或金鑰識別碼。查詢會在您加密或尋找金鑰時進行。一開始是開啟的。</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b>選擇在您開啟之前就先下載的郵件：一開始是最近的郵件，每封最大 1 MB。請參閱<a href="topic:download-ahead"></a>。</li>
+    <li><b data-text="ui-download-limit"></b>控制每個帳戶快取的郵件內容，不包括草稿和這次執行期間開啟過的郵件。它並不是資料庫大小的硬性限制。一開始是 1 GB。</li>
+</ul>
+<!--os:windows--><p>第一次安裝時，安裝程式會詢問語言，並將它保留為這裡選擇的語言。</p><!--/os-->
+<!--os:mac--><p>您也可以在<i>「系統設定」&gt;「一般」&gt;「語言與地區」&gt;「App」</i>中，單獨為 Inbox Classic 選擇語言。</p><!--/os-->
+<nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>
+<!--/review-->

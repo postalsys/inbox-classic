@@ -65,7 +65,6 @@ win-files = { $count ->
     [one] { $count } αρχείο
    *[other] { $count } αρχεία
 }
-win-click-to-retry = Κάντε κλικ εδώ για να δοκιμάσετε ξανά.
 win-save-attachments = &Αποθήκευση συνημμένων...
 win-files-not-saved = Αρχεία που δεν αποθηκεύτηκαν: { $failed } από { $count }.
 win-new-folder-in-highlighted = Ο νέος φάκελος θα δημιουργηθεί μέσα στον επιλεγμένο φάκελο.
@@ -106,7 +105,6 @@ win-take-back = &Αναίρεση
 win-what-agents-did = &Δραστηριότητα πρακτόρων:
 win-agent-reads = Τι διαβάστηκε από { $from } έως { $to }:
 win-agent-reads-hint = Επιλέξτε παραπάνω μια γραμμή αναγνώσεων για να δείτε τι διαβάστηκε.
-win-how-to-connect = Πώς να συνδέσετε έναν πράκτορα
 
 ## Sign-in apps
 

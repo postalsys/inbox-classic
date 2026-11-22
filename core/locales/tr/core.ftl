@@ -9,6 +9,8 @@ messages = { $count ->
 }
 # boyutlardaki ondalık ayırıcı: 2,4 MB
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 bayt
    *[other] { $count } bayt

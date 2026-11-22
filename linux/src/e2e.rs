@@ -1198,6 +1198,7 @@ async fn scenario(d: Rc<Driver>) {
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;
+    words_without_spaces(&d).await;
     files(&d).await;
     organizing(&d).await;
     flagged_folder(&d).await;
@@ -1543,7 +1544,7 @@ async fn reading(d: &Driver) {
     reader.download_pictures.emit_clicked();
     d.check(
         wait_until(10, || !reader.pictures_blocked()).await,
-        "clicking the bar shows the pictures, and the bar goes away",
+        "Download Pictures shows the pictures, and the bar goes away",
     );
     pause(3000).await;
     d.shot(&main, "read-2-pictures").await;
@@ -2344,6 +2345,57 @@ async fn send_receive(d: &Driver) {
 async fn search(text: &str) {
     shell().main().find.set_text(text);
     pause(600).await;
+}
+
+/// SCENARIO 21a: words of Japanese, Chinese and Korean, which have no spaces between them (or endings on them), found
+/// inside the subject; in a folder of their own, deleted at the end
+async fn words_without_spaces(d: &Driver) {
+    d.step("words without spaces");
+    let main = main_window();
+    let _ = http(d.ports.rest, "POST", "/v1/mailboxes", Some(r#"{"path":"CJK"}"#));
+    let _ = d.add_message_to("CJK", &format!(
+        "From: Lee <lee@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: =?UTF-8?B?5piO5pel44Gu5Lya6K2w44Gu6LOH5paZ44Gr44Gk44GE44Gm?=\r\nDate: {}\r\n\
+         Message-ID: <cjk-ja@example.com>\r\nContent-Type: text/plain; charset=utf-8\r\n\
+         Content-Transfer-Encoding: base64\r\n\r\n5Lya6K2w44Gu6LOH5paZ44KS5re75LuY44GX44G+44GZ44CC\r\n",
+        steps::date_now(0)
+    ));
+    let _ = d.add_message_to("CJK", &format!(
+        "From: Lee <lee@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: =?UTF-8?B?5YWz5LqO5piO5aSp5Lya6K6u55qE5a6J5o6S?=\r\nDate: {}\r\n\
+         Message-ID: <cjk-zh@example.com>\r\nContent-Type: text/plain; charset=utf-8\r\n\
+         Content-Transfer-Encoding: base64\r\n\r\n6K+35p+l55yL5Lya6K6u5a6J5o6S44CC\r\n",
+        steps::date_now(0)
+    ));
+    let _ = d.add_message_to("CJK", &format!(
+        "From: Lee <lee@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: =?UTF-8?B?64K07J28IO2ajOydmOyXkOyEnCDrsJztkZztlaAg7J6Q66OM?=\r\nDate: {}\r\n\
+         Message-ID: <cjk-ko@example.com>\r\nContent-Type: text/plain; charset=utf-8\r\n\
+         Content-Transfer-Encoding: base64\r\n\r\n7ZqM7J2YIOyekOujjOyeheuLiOuLpC4=\r\n",
+        steps::date_now(0)
+    ));
+    run_command(Command::Sync);
+    let found = |words: &'static str| async move {
+        search(words).await;
+        wait_until(20, || rows() == 1).await
+    };
+    d.check(
+        found("会議").await,
+        "a Japanese word inside the subject finds its message (会議)",
+    );
+    select_row(0).await;
+    d.shot(&main, "find-4-cjk").await;
+    d.check(
+        found("会议").await,
+        "a Chinese word inside the subject finds its message (会议)",
+    );
+    d.check(
+        found("회의").await,
+        "a Korean word with its ending left off finds its message (회의 in 회의에서)",
+    );
+    d.check(found("議").await, "one character alone finds it too (議)");
+    search("").await;
+    let _ = http(d.ports.rest, "DELETE", "/v1/mailboxes/CJK", None);
+    run_command(Command::Sync);
+    // gone from the tree before the next step picks a folder and a row, which its reload would take away
+    wait_until(20, || steps::folder_id("CJK").is_none()).await;
 }
 
 async fn finding(d: &Driver) {

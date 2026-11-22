@@ -1,0 +1,36 @@
+<!--review-->
+<h1>계정 변경, 정렬 및 제거</h1>
+<p class="summary">계정 이름을 바꾸거나, 설정이나 암호를 변경하거나, 계정을 원하는 순서로 정렬하거나, 계정을 제거합니다.</p>
+<h2>계정 변경</h2>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>을 선택합니다. 창에 계정이 나열됩니다.</li>
+    <li>계정을 선택하고 <!--os:windows--><b data-text="win-properties-button"></b><!--/os--><!--os:mac--><b data-text="mac-properties-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-properties"></b><!--/os--> 단추를 클릭하거나 계정을 두 번 클릭합니다.</li>
+    <li>필요한 내용을 변경하고 <b data-text="ui-ok"></b> 단추를 클릭합니다.</li>
+</ol>
+<ul>
+    <li><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os--> 필드: 폴더 목록에 표시되는 계정 이름입니다(예: <i>Gmail</i> 또는 <i>회사</i>).</li>
+    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> 필드: 메시지를 받는 사람에게 보이는 이름입니다.</li>
+    <li>암호를 그대로 두려면 <b data-text="ui-field-password"></b> 필드를 비워 둡니다.</li>
+    <li>브라우저를 통해 로그인하는 계정에는 사용하는 로그인 앱이 표시됩니다.</li>
+    <li><b data-text="ui-field-other-addresses"></b> 필드: 이 계정으로 보낼 때 사용하는 별칭 같은 다른 주소를 쉼표로 구분하여 나열합니다. <code>Sales &lt;sales@example.com&gt;</code>처럼 쓰거나 주소만 씁니다. 그러면 <b data-text="ui-field-from"></b> 필드에서 계정 아래에 이 주소들을 선택할 수 있습니다.</li>
+</ul>
+<p>같은 창의 <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os--> 단추를 클릭하면 다른 계정을 추가할 수 있습니다.</p>
+<h2>계정 순서 정하기</h2>
+<p>계정이 두 개 이상이면 폴더 목록의 계정이나 <b data-text="ui-all-inboxes"></b> 폴더 아래의 계정 행을 다른 계정의 위나 아래로 끌어 놓습니다. 놓일 위치가 선으로 표시됩니다. 또는 계정을 마우스 오른쪽 단추로 클릭하고 <b data-text="ui-account-move-up"></b> 또는 <b data-text="ui-account-move-down"></b>을 선택합니다. 폴더 목록과 <b data-text="ui-all-inboxes"></b> 폴더 아래의 행 모두 새 순서를 따릅니다.</p>
+<h2>계정 메뉴</h2>
+<p>계정이 두 개 이상이면 폴더 목록에서 계정 이름을 마우스 오른쪽 단추로 클릭하여 메뉴를 엽니다. 계정이 하나뿐이면 계정 이름 행이 없습니다. 이때는 <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> 명령으로 속성을 열고, 다른 계정 명령은 <b data-text="menu-tools"></b> 메뉴에서 찾습니다.</p>
+<ul>
+    <li><b data-text="ui-account-sync"></b>: 그 계정만 확인합니다.</li>
+    <li><b data-text="cmd-mark-all-read"></b>: 계정의 모든 폴더를 읽은 것으로 표시합니다.</li>
+    <li><b data-text="cmd-new-folder"></b>, <b data-text="ui-account-properties"></b>, <b data-text="ui-account-move-up"></b>, <b data-text="ui-account-move-down"></b> 명령도 있습니다.</li>
+</ul>
+<h2>계정 제거</h2>
+<aside class="note">계정을 제거하면 이 컴퓨터에서 그 계정용으로 다운로드한 메일과 저장된 로그인 자격 증명이 삭제됩니다. 서버에 사본이 없는 메시지를 포함하여 그 계정의 로컬 보낼 편지함에 있는 보내지 않은 메시지도 삭제됩니다. 서버에 있는 메일은 그대로 남습니다.</aside>
+<p>계정을 제거하려면 다음과 같이 합니다.</p>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>을 선택합니다.</li>
+    <li>계정을 선택하고 <b data-text="ui-remove"></b> 단추를 클릭하거나, Windows에서는 <kbd>Delete</kbd> 키를 누릅니다.</li>
+    <li>확인합니다. 계정이 폴더 목록에서 제거됩니다.</li>
+</ol>
+<nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav>
+<!--/review-->

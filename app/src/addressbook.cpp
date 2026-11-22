@@ -747,7 +747,7 @@ HFONT WellFont(HWND dialog, ContactState& state, int size) {
     if (!state.wellFont) {
         auto boxes = reinterpret_cast<HFONT>(SendDlgItemMessageW(dialog, IDC_CONTACT_FIRST, WM_GETFONT, 0, 0));
         LOGFONTW face = {};
-        GetObjectW(boxes ? boxes : static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT)), sizeof(face), &face);
+        GetObjectW(boxes ? boxes : UiFont(), sizeof(face), &face);
         face.lfHeight = -size * 3 / 8;
         face.lfWeight = FW_BOLD;
         state.wellFont = CreateFontIndirectW(&face);

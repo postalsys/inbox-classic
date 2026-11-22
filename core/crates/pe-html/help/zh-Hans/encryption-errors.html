@@ -1,0 +1,17 @@
+<!--review-->
+<h1>加密错误</h1>
+<p class="summary">服务器不提供加密，或在已关闭加密的情况下要求加密时该怎么办。</p>
+<h2>“the server does not offer STARTTLS”</h2>
+<p>该帐户设置为使用 STARTTLS，但服务器没有提供加密。Inbox Classic 在发送密码之前就停止了这次连接尝试。</p>
+<ol>
+    <li>在<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>中打开帐户属性。</li>
+    <li>查看提供商的设置。如果支持，接收邮件请使用 SSL/TLS 和端口 993，发送邮件请使用端口 465。</li>
+    <li>单击<b data-text="ui-ok"></b>。</li>
+</ol>
+<p>如果其他方法都不起作用，说明无法安全地使用该服务器。</p>
+<h2>“the server takes the password only over an encrypted connection”</h2>
+<p>发送邮件服务器设置为<b data-text="ui-security-none"></b>。此错误并不表示密码正确。请按照提供商的设置，将<b data-text="ui-field-smtp-security"></b>更改为 STARTTLS 和端口 587，或 SSL/TLS 和端口 465。</p>
+<h2>关于不加密连接的警告</h2>
+<p>当您选择<b data-text="ui-security-none"></b>时，Inbox Classic 会警告：任何截获您网络流量的人都能读取您的密码和邮件。局域网本身并不会加密流量。只有当服务器位于您自己的计算机或局域网上，并且您接受此风险时，才应继续。</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

@@ -5499,6 +5499,11 @@ char *pe_localized_picture_resource(const char *name);
 // `region` must be NULL or a NUL-terminated string.
 char *pe_date_locale(const char *region);
 
+// The face the Windows app draws its windows' words in for the language in use: for Chinese, Japanese and Korean the
+// one Windows itself uses in that language (`Yu Gothic UI`), empty for the system's default GUI font. Free with
+// `pe_string_free`.
+char *pe_windows_font(void);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus

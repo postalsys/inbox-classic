@@ -251,7 +251,8 @@ ui-no-items = Šajā skatā nav ziņojumu.
 ui-choose-folder = Izvēlieties mapi, lai redzētu tās ziņojumus.
 ui-unsubscribe = Atteikties no abonēšanas
 ui-open-in-calendar = Atvērt kalendārā
-ui-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājam būtu grūtāk izsekot, kad lasāt ziņojumu. Noklikšķiniet šeit, lai tos lejupielādētu.
+# review: changed
+ui-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājam būtu grūtāk izsekot, kad lasāt ziņojumu.
 ui-not-shown = Neizdevās parādīt ziņojumu.
 ui-attachment-not-read = Neizdevās nolasīt pielikumu.
 ui-attachment-not-saved = Neizdevās saglabāt pielikumu.

@@ -266,28 +266,29 @@ void Reader::Create(HWND parent, PeCore* core) {
     // shows them
     std::wstring blocked = L" " + core::T(PE_TEXT_UI_PICTURES_BLOCKED);
     pictures_ = CreateChild(parent, L"STATIC", blocked.c_str(),
-                            SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER, IDC_PICTURES, {});
-    // its drop-down arrow at its right end, as Outlook's bar has: the Always choices
-    picturesMenu_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | SS_NOTIFY | WS_BORDER, IDC_PICTURES_MENU, {});
+                            SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER | WS_CLIPSIBLINGS, IDC_PICTURES_BAR, {});
+    // its Download Pictures at its right end, and the drop-down arrow beside it, as Outlook's bar has: the Always
+    // choices
+    picturesButton_ = CreateChild(parent, L"BUTTON", core::Plain(PE_TEXT_CMD_PICTURES).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_PICTURES, {});
+    picturesMenu_ = CreateChild(parent, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW, IDC_PICTURES_MENU, {});
     ShowWindow(attachments_, SW_HIDE);
     ShowWindow(pictures_, SW_HIDE);
+    ShowWindow(picturesButton_, SW_HIDE);
     ShowWindow(picturesMenu_, SW_HIDE);
-    // the same bar over a message that could not be downloaded: a click tries again
+    // the same bar over a message that could not be downloaded, with Try Again
     core::String note(pe_retry_note());
-    std::wstring retry = L" " + Text(note.get()) + L" " + core::T(PE_TEXT_WIN_CLICK_TO_RETRY);
-    retry_ = CreateChild(parent, L"STATIC", retry.c_str(), SS_LEFT | SS_NOTIFY | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER,
-                         IDC_RETRY, {});
+    std::wstring retry = L" " + Text(note.get());
+    retry_ = CreateChild(parent, L"STATIC", retry.c_str(), SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER | WS_CLIPSIBLINGS,
+                         IDC_RETRY_BAR, {});
+    retryButton_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_TRY_AGAIN).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_RETRY, {});
     ShowWindow(retry_, SW_HIDE);
+    ShowWindow(retryButton_, SW_HIDE);
     // the same bar over a message of a mailing list, with a push button at its right end (not drawn over it)
     listBar_ = CreateChild(parent, L"STATIC", L"", SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_BORDER | WS_CLIPSIBLINGS,
                            IDC_LIST_BAR, {});
     listButton_ = CreateChild(parent, L"BUTTON", core::T(PE_TEXT_UI_UNSUBSCRIBE_ASK).c_str(), WS_TABSTOP | BS_PUSHBUTTON, IDC_UNSUBSCRIBE, {});
     ShowWindow(listBar_, SW_HIDE);
     ShowWindow(listButton_, SW_HIDE);
-    // the links of the pane: Tab reaches them, Enter clicks them
-    for (HWND link : {pictures_, picturesMenu_, retry_}) {
-        KeyboardLink(link);
-    }
     // the message itself is a Tab stop too: its host hands the keyboard to the WebView2
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN | WS_TABSTOP, 0, {});
     SetWindowSubclass(previewHost_, BodyHostProc, 0, reinterpret_cast<DWORD_PTR>(&preview_));
@@ -298,7 +299,7 @@ void Reader::Create(HWND parent, PeCore* core) {
     preview_.SetLinks([this](const wchar_t* uri) { return FollowLink(uri); });
 
     LOGFONTW font = {};
-    GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
+    GetObjectW(UiFont(), sizeof(font), &font);
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
 }
@@ -387,6 +388,9 @@ void Reader::ShowBars(bool files, bool pictures) {
     bool arrow = pictures && info &&
                  ((info->pictures_always_sender && *info->pictures_always_sender) || (info->pictures_always_domain && *info->pictures_always_domain) ||
                   (info->pictures_unconfirmed && *info->pictures_unconfirmed));
+    if (!pictures && (GetFocus() == picturesButton_ || GetFocus() == picturesMenu_)) {
+        SetFocus(previewHost_);
+    }
     bool changed = (IsWindowVisible(attachments_) != FALSE) != files || (IsWindowVisible(pictures_) != FALSE) != pictures ||
                    (IsWindowVisible(picturesMenu_) != FALSE) != arrow;
     if (!files && GetFocus() == strip_) {
@@ -395,6 +399,7 @@ void Reader::ShowBars(bool files, bool pictures) {
     ShowWindow(attachments_, files ? SW_SHOW : SW_HIDE);
     ShowWindow(stripFrame_, files ? SW_SHOW : SW_HIDE);
     ShowWindow(pictures_, pictures ? SW_SHOW : SW_HIDE);
+    ShowWindow(picturesButton_, pictures ? SW_SHOW : SW_HIDE);
     ShowWindow(picturesMenu_, arrow ? SW_SHOW : SW_HIDE);
     if (changed || files) {
         Layout();
@@ -441,22 +446,18 @@ void Reader::ShowSecurityDetails(int part) {
 
 void Reader::ShowRetry(bool shown) {
     if ((IsWindowVisible(retry_) != FALSE) != shown) {
+        if (!shown && GetFocus() == retryButton_) {
+            SetFocus(previewHost_);
+        }
         ShowWindow(retry_, shown ? SW_SHOW : SW_HIDE);
+        ShowWindow(retryButton_, shown ? SW_SHOW : SW_HIDE);
         Layout();
     }
 }
 
-bool Reader::OnSetCursor(HWND window) const {
+bool Reader::OnSetCursor(HWND) const {
     // a reply or an attachment that takes long to read
-    if (BusyCursor()) {
-        return true;
-    }
-    if (window != pictures_ && window != picturesMenu_ && window != retry_) {
-        return false;
-    }
-    // the information bar is clicked like a link
-    SetCursor(LoadCursorW(nullptr, IDC_HAND));
-    return true;
+    return BusyCursor();
 }
 
 bool Reader::OnCtlColor(HWND window, HDC dc, LRESULT& brush) const {
@@ -515,29 +516,15 @@ void Reader::Layout() {
     if (int stripHeight = PlaceStrip(reader.left, top, width); stripHeight > 0) {
         top += stripHeight + Scale(2);
     }
+    // the bars in one order: the download that failed, the pictures (Download Pictures and its arrow), the mailing list
     if (IsWindowVisible(retry_)) {
-        int barHeight = Scale(22);
-        MoveWindow(retry_, reader.left, top, width, barHeight, TRUE);
-        top += barHeight + Scale(2);
+        top += PlaceBar(retry_, {retryButton_}, reader.left, top, width) + Scale(2);
     }
     if (IsWindowVisible(pictures_)) {
-        int barHeight = Scale(22);
-        // the arrow's border over the bar's right one; without the arrow, the bar is the whole width
-        int arrowWidth = IsWindowVisible(picturesMenu_) ? Scale(22) : 1;
-        MoveWindow(pictures_, reader.left, top, width - arrowWidth + 1, barHeight, TRUE);
-        MoveWindow(picturesMenu_, reader.left + width - arrowWidth, top, arrowWidth, barHeight, TRUE);
-        top += barHeight + Scale(2);
+        top += PlaceBar(pictures_, {picturesMenu_, picturesButton_}, reader.left, top, width) + Scale(2);
     }
     if (IsWindowVisible(listBar_)) {
-        // as tall as a push button needs; the text gives way at its end, never the button
-        int barHeight = Scale(28);
-        int buttonWidth = IsWindowVisible(listButton_) ? ButtonWidth({GetWindowString(listButton_)}) : 0;
-        MoveWindow(listBar_, reader.left, top, width, barHeight, TRUE);
-        if (buttonWidth > 0) {
-            MoveWindow(listButton_, reader.left + width - buttonWidth - Scale(3), top + Scale(3), buttonWidth, barHeight - Scale(6), TRUE);
-            SetWindowPos(listButton_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-        }
-        top += barHeight + Scale(2);
+        top += PlaceBar(listBar_, {listButton_}, reader.left, top, width) + Scale(2);
     }
     MoveWindow(previewHost_, reader.left, top, width, std::max(0L, reader.bottom - top), TRUE);
     RECT inner;
@@ -1432,12 +1419,20 @@ void Reader::OpenInCalendar() {
 
 bool Reader::OnDrawItem(const DRAWITEMSTRUCT& item) {
     if (item.hwndItem == picturesMenu_) {
-        // a small arrow down on the bar's color, as a drop-down button's
-        FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_INFOBK));
-        int cx = (item.rcItem.left + item.rcItem.right) / 2, cy = (item.rcItem.top + item.rcItem.bottom) / 2;
+        // a push button with a small arrow down, the drop-down part beside Download Pictures
+        RECT face = item.rcItem;
+        bool pushed = (item.itemState & ODS_SELECTED) != 0;
+        DrawFrameControl(item.hDC, &face, DFC_BUTTON, DFCS_BUTTONPUSH | (pushed ? DFCS_PUSHED : 0));
+        if (item.itemState & ODS_FOCUS) {
+            RECT focus = item.rcItem;
+            InflateRect(&focus, -Scale(3), -Scale(3));
+            DrawFocusRect(item.hDC, &focus);
+        }
+        int shift = pushed ? 1 : 0;
+        int cx = (item.rcItem.left + item.rcItem.right) / 2 + shift, cy = (item.rcItem.top + item.rcItem.bottom) / 2 + shift;
         int half = Scale(4);
         POINT points[] = {{cx - half, cy - half / 2}, {cx + half + 1, cy - half / 2}, {cx, cy + half / 2 + 1}};
-        HBRUSH ink = CreateSolidBrush(GetSysColor(COLOR_INFOTEXT));
+        HBRUSH ink = CreateSolidBrush(GetSysColor(COLOR_BTNTEXT));
         HGDIOBJ oldBrush = SelectObject(item.hDC, ink);
         HGDIOBJ oldPen = SelectObject(item.hDC, GetStockObject(NULL_PEN));
         Polygon(item.hDC, points, 3);

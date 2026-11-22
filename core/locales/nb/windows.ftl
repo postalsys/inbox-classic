@@ -65,7 +65,6 @@ win-files = { $count ->
     [one] { $count } fil
    *[other] { $count } filer
 }
-win-click-to-retry = Klikk her for å prøve igjen.
 win-save-attachments = &Lagre vedlegg...
 win-files-not-saved = Kunne ikke lagre { $failed } av totalt { $count } filer.
 win-new-folder-in-highlighted = Den nye mappen opprettes inne i den valgte mappen.
@@ -106,7 +105,6 @@ win-take-back = &Angre
 win-what-agents-did = Age&ntaktivitet:
 win-agent-reads = Lest i tidsrommet { $from } til { $to }:
 win-agent-reads-hint = Velg en oppføring fra leseloggen ovenfor for å se detaljene.
-win-how-to-connect = Slik kobler du til en agent
 
 ## Sign-in apps
 

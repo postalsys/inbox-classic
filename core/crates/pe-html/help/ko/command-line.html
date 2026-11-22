@@ -1,0 +1,18 @@
+<!--review-->
+<h1>명령줄 옵션</h1>
+<p class="summary">테스트와 AI 에이전트를 위해 터미널에서 Inbox Classic을 시작할 때 사용하는 옵션입니다.</p>
+<p>다음 옵션과 함께 <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> 프로그램을 시작합니다.</p>
+<table>
+    <tr><th>옵션</th><th>기능</th></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>테스트용 저장소처럼 다른 메일 저장소를 사용합니다.</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>로그인 자격 증명을 시스템의 자격 증명 저장소에 저장하지 않고 이번 실행 동안만 유지합니다.</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>테스트 서버에 대해 이 파일에 있는 인증서만 허용합니다. DER 인증서 하나 또는 PEM 인증서 하나 이상을 사용할 수 있습니다.</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>브라우저를 여는 대신 브라우저 로그인 URL을 이 파일에 씁니다.</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>이번 실행 동안 창을 이 언어로 표시합니다(예: <code>ko</code>).</td></tr>
+    <tr><td><code>--background</code></td><td>창 없이 시작합니다.</td></tr>
+    <tr><td><code>--mcp</code></td><td>AI 에이전트를 Inbox Classic에 연결합니다. 사용자가 아니라 에이전트의 프로그램이 이 옵션으로 시작합니다.</td></tr>
+    <tr><td><code>--version</code></td><td>버전을 출력하고 종료합니다.</td></tr>
+</table>
+<p>인수로 <code>mailto:</code> 링크를 지정하면 계정이 구성되어 있는 경우 전자 메일 링크처럼 새 메시지가 열립니다.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

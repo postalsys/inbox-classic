@@ -75,7 +75,6 @@ win-files = { $count ->
     [many] { $count } plików
    *[other] { $count } plików
 }
-win-click-to-retry = Kliknij tutaj, aby spróbować ponownie.
 win-save-attachments = &Zapisz załączniki...
 win-files-not-saved = Nie udało się zapisać plików: { $failed } z { $count }.
 win-new-folder-in-highlighted = Nowy folder zostanie utworzony wewnątrz zaznaczonego folderu.
@@ -116,7 +115,6 @@ win-take-back = &Cofnij
 win-what-agents-did = &Działania agentów:
 win-agent-reads = Odczytane dane (od { $from } do { $to }):
 win-agent-reads-hint = Wybierz powyżej wpis dotyczący odczytu, aby zobaczyć odczytane dane.
-win-how-to-connect = Jak połączyć agenta
 
 ## Sign-in apps
 

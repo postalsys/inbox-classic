@@ -810,6 +810,31 @@ CREATE TABLE unsubscribed (
     PRIMARY KEY (account_id, list)
 ) WITHOUT ROWID;
 "#,
+    // words without spaces between them (Chinese, Japanese) and Korean's syllables in the search index: each of their
+    // characters a word of its own, and full width letters and digits as ASCII (fold.rs segment), which the From and
+    // Subject orders take as ASCII too. The messages with any indexed again: from the cached source where there is
+    // one, read again by the workers otherwise; their sort keys written again. One whose text came from decrypting it
+    // goes back to how it came, as forget_decrypted does (search.rs), for the background pass to decrypt again: a
+    // plain read of its source would lose that text. The trigger stays as it was, without a function of ours (the
+    // store segments what it stores after it, messages.rs).
+    r#"
+CREATE TEMP TABLE segmented AS SELECT id FROM messages WHERE segments(subject) OR segments(from_name)
+    OR segments(from_address) OR segments(sender_people) OR segments(recipients) OR segments(recipient_people)
+    OR segments(attachment_names) OR segments(snippet);
+UPDATE messages SET subject = outer_subject, sort_subject = fold(outer_subject), outer_subject = NULL
+    WHERE decrypted = 1 AND outer_subject IS NOT NULL AND id IN (SELECT id FROM segmented);
+UPDATE messages SET snippet = '', sender_people = '', recipient_people = '', attachment_names = '', attachment_count = 0,
+    decrypted = 0 WHERE decrypted = 1 AND id IN (SELECT id FROM segmented);
+DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM segmented);
+INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body)
+    SELECT id, segment(replace(subject, 'ı', 'i')), segment(replace(CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, 'ı', 'i')), segment(replace(CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, 'ı', 'i')), segment(replace(attachment_names, 'ı', 'i')), '' FROM messages WHERE id IN (SELECT id FROM segmented);
+UPDATE bodies SET indexed = 0 WHERE message_id IN (SELECT id FROM segmented);
+UPDATE messages SET text_indexed = 0 WHERE id IN (SELECT id FROM segmented) AND id NOT IN (SELECT message_id FROM bodies);
+UPDATE messages SET sort_from = fold(CASE from_name WHEN '' THEN from_address ELSE from_name END), sort_subject = fold(subject)
+    WHERE id IN (SELECT id FROM segmented) AND (sort_subject IS NOT fold(subject)
+    OR sort_from IS NOT fold(CASE from_name WHEN '' THEN from_address ELSE from_name END));
+DROP TABLE segmented;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
@@ -904,10 +929,22 @@ mod tests {
             .iter()
             .find(|m| m.contains("DROP TRIGGER messages_fts_add"))
             .unwrap();
-        assert!(migration.contains(&format!("VALUES (new.id, {}, '')", crate::search::fts_columns("new."))));
+        assert!(migration.contains(&format!(
+            "VALUES (new.id, {}, '')",
+            crate::search::fts_columns("new.", false)
+        )));
         assert!(migration.contains(&format!(
             "SELECT id, {}, '' FROM messages",
-            crate::search::fts_columns("")
+            crate::search::fts_columns("", false)
+        )));
+        // and segmented, as the store writes them
+        let migration = MIGRATIONS
+            .iter()
+            .find(|m| m.contains("CREATE TEMP TABLE segmented"))
+            .unwrap();
+        assert!(migration.contains(&format!(
+            "SELECT id, {}, '' FROM messages",
+            crate::search::fts_columns("", true)
         )));
     }
 

@@ -23,9 +23,13 @@ echo "Changed for every app:"
 printf '  %s\n' $shared
 missing=()
 for shell in app mac linux; do
+    # Windows' UI test lives outside app/ (the Mac's and Linux's are in their folders): a feature only its test shows
+    # changes it there
+    pattern="^${shell}/"
+    [ "$shell" = app ] && pattern='^(app/|scripts/ui-e2e\.ps1$)'
     # a here-string, not a pipe: grep -q stops at the first match, and a long list written into a closed pipe fails
     # the pipeline under pipefail
-    grep -q "^${shell}/" <<< "$changed" || missing+=("$shell/")
+    grep -qE "$pattern" <<< "$changed" || missing+=("$shell/")
 done
 if [ ${#missing[@]} -eq 0 ]; then
     echo "app/, mac/ and linux/ changed with it"

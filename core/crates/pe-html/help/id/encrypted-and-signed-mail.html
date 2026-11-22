@@ -1,0 +1,22 @@
+<!--review-->
+<h1>Email terenkripsi dan bertanda tangan</h1>
+<p class="summary">Bilah di atas pesan menunjukkan apakah pesan ditandatangani oleh pengirimnya dan apakah pesan dienkripsi untuk Anda.</p>
+<p>Tanda tangan yang valid memastikan bahwa isinya tidak berubah sejak ditandatangani. Untuk memastikan siapa yang menandatanganinya, verifikasi juga pemilik kuncinya. Pesan terenkripsi hanya dapat dibaca dengan kunci privat yang cocok.</p>
+<p>Bilah di atas pesan menjelaskan pesan secara keseluruhan:</p>
+<table>
+    <tr><th>Warna</th><th>Artinya</th></tr>
+    <tr><td>Hijau</td><td>Ditandatangani oleh pengirim, dengan kunci yang sudah Anda verifikasi.</td></tr>
+    <tr><td>Biru</td><td>Ditandatangani oleh pengirim dengan kunci yang belum Anda verifikasi, atau dienkripsi untuk Anda.</td></tr>
+    <tr><td>Kuning tua</td><td>Ada yang tidak beres: tanda tangan tidak cocok, orang lain selain pengirim yang menandatangani, atau suatu bagian tidak dapat dibaca.</td></tr>
+    <tr><td>Abu-abu</td><td>Tidak ditandatangani, atau tanda tangan tidak dapat diperiksa, misalnya karena kuncinya tidak ada.</td></tr>
+</table>
+<p>Pesan yang bagian-bagiannya dilindungi secara berbeda menampilkan setiap bagian dalam bingkainya sendiri, dengan labelnya sendiri. Bilah lalu menghitung bagian dari setiap jenis. Klik label, atau <b data-text="ui-protection-details"></b> di bilah, untuk melihat siapa yang menandatangani setiap bagian, dengan kunci apa, dan kapan.</p>
+<aside class="warning">Hanya bilah dan label di atas bingkai yang ditulis oleh Inbox Classic. Pengirim dapat menggambar apa saja di dalam pesannya sendiri, termasuk sesuatu yang terlihat seperti label. Perhatikan bilahnya.</aside>
+<p>Gambar dari internet di bagian yang terenkripsi hanya dimuat saat Anda mengeklik bilah gambar, setiap kali. Labelnya lalu menyatakan bahwa gambar telah dimuat.</p>
+<p>Gambar dan file PDF yang dilampirkan pada suatu bagian ditampilkan di dalam bingkai bagian itu, tidak pernah di bingkai bagian lain. Pratinjau yang didekripsi tetap berada di memori. Membuka lampiran di aplikasi lain menulis salinan sementara yang tidak terenkripsi; menyimpan menulis salinan di tempat yang Anda pilih.</p>
+<p>Di daftar file yang dilampirkan, ikon gembok menandai setiap file dari bagian yang terenkripsi. Arahkan penunjuk ke file untuk melihat asal bagiannya.</p>
+<p>Saat Anda membalas atau meneruskan, hanya yang ditampilkan yang dikutip.</p>
+<p>Di daftar pesan, ikon gembok menandai pesan terenkripsi dan ikon segel menandai pesan yang ditandatangani. Tanda ini tidak memverifikasi keabsahan tanda tangan atau kepemilikan kunci. Setelah berhasil didekripsi dan diindeks, daftar dapat menampilkan subjek yang dilindungi dan kata-kata pertamanya. Jika tidak, daftar menampilkan teks pengganti; pemberitahuan email baru selalu menampilkan <b data-text="list-encrypted"></b>.</p>
+<p>Jika <b data-text="ui-search-encrypted"></b> aktif di <b data-settings="reading"></b>, kunci privat yang tersedia memungkinkan teks yang didekripsi dan subjek yang dilindungi masuk ke indeks pencarian lokal tanpa enkripsi. Menonaktifkannya menghapus data turunan ini dan mengembalikan subjek luarnya. Agen AI hanya melihat detail luar, tanpa teks yang didekripsi, subjek yang dilindungi, atau lampiran.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
+<!--/review-->

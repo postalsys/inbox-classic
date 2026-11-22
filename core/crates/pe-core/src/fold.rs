@@ -337,6 +337,25 @@ mod tests {
         assert!(html[fold..].contains("&#x3C;ann@example.com&#x3E;"), "{html}");
     }
 
+    /// A Chinese Outlook reply: its header block of the message replied to, with full width colons,
+    /// starts the history
+    #[test]
+    fn folds_the_quote_of_a_chinese_outlook_reply() {
+        let raw = "From: =?UTF-8?B?5byg5Lyf?= <wei@example.cn>\r\nTo: li@example.cn\r\nSubject: =?UTF-8?B?5Zue5aSNOiDkvJrorq4=?=\r\n\
+                   In-Reply-To: <m1@example.cn>\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n\
+                   好的，我们周三下午三点见。\r\n\r\n\
+                   发件人：李娜 <li@example.cn>\r\n\
+                   发送时间：2026年9月29日 10:18\r\n\
+                   收件人：张伟 <wei@example.cn>\r\n\
+                   主题：会议\r\n\r\n\
+                   周三下午可以开会吗？\r\n";
+        let html = body_of(raw);
+        let fold = html.find("<details").expect(&html);
+        assert!(html[..fold].contains("好的，我们周三下午三点见。"), "{html}");
+        assert!(html[fold..].contains("发件人"), "{html}");
+        assert!(html[fold..].contains("周三下午可以开会吗"), "{html}");
+    }
+
     #[test]
     fn leaves_a_message_without_history_alone() {
         let raw =
@@ -449,7 +468,7 @@ mod tests {
             }
         }
         // the HTML bodies email-content folds (hidden, or collapsed history and forwards): all of them
-        assert_eq!(folded, 8);
+        assert_eq!(folded, 17);
     }
 
     #[test]

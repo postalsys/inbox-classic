@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Kết nối tác nhân AI</h1>
+<p class="summary">Cho phép một tác nhân AI, chẳng hạn Claude, đọc và sắp xếp thư của bạn thông qua Inbox Classic.</p>
+<p>Bạn có thể cho phép một tác nhân AI làm việc với thư của mình. Đó có thể là Claude, Cursor hoặc một chương trình khác hỗ trợ Model Context Protocol (MCP). Inbox Classic không có AI, và không có gì được gửi đến dịch vụ AI nào trừ khi bạn cho một tác nhân kết nối.</p>
+<p>Để kết nối một tác nhân:</p>
+<ol>
+    <li>Chọn <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> rồi bấm <b data-text="ui-how-to-connect"></b>. Inbox Classic hiển thị các dòng cần thêm vào phần cài đặt của tác nhân.</li>
+    <li>Thêm các dòng đó vào danh sách máy chủ MCP của tác nhân. Trong Claude Desktop, đó là <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
+    <li>Khởi động tác nhân. Lần đầu tác nhân kết nối, Inbox Classic hỏi bạn tác nhân được phép làm gì.</li>
+</ol>
+<p>Nếu Inbox Classic chưa chạy, tác nhân sẽ khởi động nó ở chế độ nền. Chỉ các chương trình chạy dưới tài khoản của bạn trên máy tính này mới kết nối được với nó.</p>
+<p>Inbox Classic hỏi hệ thống xem chương trình nào đã khởi động tác nhân, thay vì tin vào lời tác nhân tự nhận. Vì vậy, một tác nhân không thể có được quyền bạn đã cấp cho chương trình khác chỉ bằng cách tự xưng là chương trình đó. Nếu tác nhân tự nhận là một chương trình khác, câu hỏi sẽ cho bạn biết. Cách này giữ các tác nhân của bạn tách biệt với nhau, nhưng không bảo vệ bạn khỏi một chương trình độc hại chạy dưới tài khoản của bạn, vì chương trình đó vẫn có thể đọc thư của bạn.</p>
+<p>Tác nhân cũng có thể theo dõi Hộp thư đến, một tài khoản hoặc một thư mục và được báo khi thư trong đó thay đổi. Tác nhân còn có thể đưa ra hai yêu cầu soạn sẵn, “Triage my inbox” và “Summarize unread”. Cả hai đều tuân theo những gì bạn cho phép tác nhân, và những gì tác nhân đọc theo cách này cũng hiện trong nhật ký như mọi thứ khác nó đọc.</p>
+<p>Các tác nhân như Claude Code dùng chung quyền khi được khởi động từ cùng một chương trình dòng lệnh được nhận diện. Inbox Classic hỏi một lần cho <!--os:mac-->các chương trình được khởi động từ Terminal<!--/os--><!--os:windows,linux-->các chương trình được khởi động từ một cửa sổ dòng lệnh<!--/os-->, và chúng dùng chung những gì bạn cho phép. Để cấp quyền riêng cho một tác nhân, hãy thêm <code>--name</code> và một tên tùy chọn sau <code>--mcp</code> trong phần cài đặt của tác nhân, ví dụ <code>"args": ["--mcp", "--name", "Claude Code"]</code>. Khi đó Inbox Classic hỏi về tác nhân theo tên này. Tên bạn chọn không xác minh danh tính của tác nhân.</p>
+<p>Để tắt mọi tác nhân cùng lúc, hãy tắt <b data-text="ui-let-agents-connect"></b> trong <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
+<!--/review-->

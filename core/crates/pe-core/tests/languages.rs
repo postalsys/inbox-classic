@@ -117,7 +117,7 @@ fn the_core_speaks_the_language_set() {
     let mac = pe_html::help_topic("find-messages", pe_html::Platform::Mac, "de").unwrap();
     assert!(mac.contains("\u{2318}") && !mac.contains("Strg"));
     assert!(
-        pe_html::help_topic("find-messages", pe_html::Platform::Linux, "ja")
+        pe_html::help_topic("find-messages", pe_html::Platform::Linux, "th")
             .unwrap()
             .contains("Find messages")
     );
