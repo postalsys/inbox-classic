@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Kesalahan enkripsi</h1>
+<p class="summary">Yang harus dilakukan jika server tidak menawarkan enkripsi, atau memintanya padahal enkripsi dinonaktifkan.</p>
+<h2>“the server does not offer STARTTLS”</h2>
+<p>Akun diatur ke STARTTLS, tetapi server tidak menawarkan enkripsi. Inbox Classic menghentikan upaya koneksi ini sebelum mengirim kata sandi.</p>
+<ol>
+    <li>Buka properti akun di <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Periksa pengaturan dari penyedia Anda. Jika didukung, gunakan SSL/TLS dengan port 993 untuk email masuk atau 465 untuk email keluar.</li>
+    <li>Klik <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Jika tidak ada cara lain yang berhasil, server tersebut tidak dapat digunakan dengan aman.</p>
+<h2>“the server takes the password only over an encrypted connection”</h2>
+<p>Server email keluar diatur ke <b data-text="ui-security-none"></b>. Kesalahan ini tidak memastikan bahwa kata sandinya benar. Sesuai pengaturan dari penyedia Anda, ubah <b data-text="ui-field-smtp-security"></b> ke STARTTLS dengan port 587, atau SSL/TLS dengan port 465.</p>
+<h2>Peringatan tentang koneksi tanpa enkripsi</h2>
+<p>Saat Anda memilih <b data-text="ui-security-none"></b>, Inbox Classic memperingatkan bahwa siapa pun yang menyadap lalu lintas jaringan Anda dapat membaca kata sandi dan pesan Anda. Jaringan lokal tidak dengan sendirinya mengenkripsi lalu lintas. Lanjutkan hanya jika Anda menerima risiko ini untuk server di komputer Anda sendiri atau di jaringan lokal.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

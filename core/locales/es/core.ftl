@@ -7,6 +7,8 @@ messages = { $count ->
    *[other] { $count } mensajes
 }
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] 1 byte
    *[other] { $count } bytes

@@ -1,0 +1,17 @@
+<!--review-->
+<h1>AI 에이전트 연결</h1>
+<p class="summary">Claude 같은 AI 에이전트가 Inbox Classic을 통해 메일을 읽고 정리하도록 허용합니다.</p>
+<p>AI 에이전트가 메일을 다루도록 허용할 수 있습니다. 에이전트는 Claude, Cursor 또는 MCP(Model Context Protocol)를 지원하는 다른 프로그램일 수 있습니다. Inbox Classic 자체에는 AI가 없으며, 에이전트를 허용하지 않는 한 어떤 내용도 AI 서비스로 전송되지 않습니다.</p>
+<p>에이전트를 연결하려면 다음과 같이 합니다.</p>
+<ol>
+    <li><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>를 선택하고 <b data-text="ui-how-to-connect"></b> 단추를 클릭합니다. 에이전트 설정에 추가할 줄이 Inbox Classic에 표시됩니다.</li>
+    <li>이 줄을 에이전트의 MCP 서버 설정에 추가합니다. Claude Desktop에서는 <i>Settings &gt; Developer &gt; Edit Config</i>입니다.</li>
+    <li>에이전트를 시작합니다. 에이전트가 처음 연결되면 Inbox Classic이 에이전트에 허용할 작업을 묻습니다.</li>
+</ol>
+<p>Inbox Classic이 실행 중이 아니면 에이전트가 백그라운드에서 Inbox Classic을 시작합니다. 이 컴퓨터에서 사용자 본인의 계정으로 실행되는 프로그램만 Inbox Classic에 연결할 수 있습니다.</p>
+<p>Inbox Classic은 에이전트가 밝히는 이름을 그대로 믿지 않고, 에이전트를 시작한 프로그램이 무엇인지 시스템에 확인합니다. 따라서 에이전트가 다른 프로그램이라고 주장하는 것만으로는 그 프로그램에 허용한 권한을 얻을 수 없습니다. 에이전트가 다른 프로그램이라고 밝히면 확인 질문에 그 사실이 표시됩니다. 이 방식은 에이전트끼리 서로 분리할 뿐이며, 사용자 계정으로 실행되는 유해한 프로그램은 어차피 메일을 읽을 수 있으므로 그런 프로그램으로부터 보호해 주지는 않습니다.</p>
+<p>에이전트는 받은 편지함, 계정 또는 폴더를 지켜보다가 메일이 바뀌면 알림을 받을 수도 있으며, “받은 편지함 분류”와 “읽지 않은 메일 요약”이라는 두 가지 기본 요청을 제공할 수 있습니다. 두 요청 모두 에이전트에 허용한 범위를 따르며, 이렇게 읽은 내용도 다른 읽기와 마찬가지로 에이전트의 기록에 표시됩니다.</p>
+<p>Claude Code 같은 에이전트는 인식된 같은 터미널 프로그램에서 시작되면 권한을 공유합니다. <!--os:mac-->터미널 앱에서 시작한 프로그램<!--/os--><!--os:windows,linux-->터미널에서 시작한 프로그램<!--/os-->에 대해 한 번만 묻고, 그 프로그램들은 허용한 권한을 함께 사용합니다. 에이전트에 별도의 권한을 주려면 에이전트 설정에서 <code>--mcp</code> 뒤에 <code>--name</code>과 원하는 이름을 추가합니다(예: <code>"args": ["--mcp", "--name", "Claude Code"]</code>). 그러면 Inbox Classic이 그 이름으로 에이전트에 대해 묻습니다. 지정한 이름이 에이전트의 신원을 확인해 주지는 않습니다.</p>
+<p>모든 에이전트를 한 번에 끄려면 <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> 창에서 <b data-text="ui-let-agents-connect"></b> 확인란의 선택을 취소합니다.</p>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
+<!--/review-->

@@ -1,0 +1,18 @@
+<!--review-->
+<h1>コマンドライン オプション</h1>
+<p class="summary">テストやAIエージェントのために、ターミナルからInbox Classicを起動するときのオプション。</p>
+<p>プログラム<!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os-->を、次のオプションを付けて起動します。</p>
+<table>
+    <tr><th>オプション</th><th>動作</th></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>テスト用など、別のメールの保存場所を使います</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>サインイン情報をシステムの資格情報の保管場所に保存せず、今回の実行中だけ保持します</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>テスト サーバーについて、このファイルにある証明書だけを受け入れます。DER形式の証明書1つ、またはPEM形式の証明書1つ以上です</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>ブラウザーを開く代わりに、ブラウザーでのサインインのURLをこのファイルに書き込みます</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>今回の実行中、ウィンドウをこの言語で表示します（例：<code>de</code>）</td></tr>
+    <tr><td><code>--background</code></td><td>ウィンドウを表示せずに起動します</td></tr>
+    <tr><td><code>--mcp</code></td><td>AIエージェントをInbox Classicに接続します。これを起動するのはあなたではなく、エージェントのプログラムです</td></tr>
+    <tr><td><code>--version</code></td><td>バージョンを表示して終了します</td></tr>
+</table>
+<p>引数として<code>mailto:</code>リンクを指定すると、アカウントが設定されていれば、メールのリンクと同じように新しいメッセージが開きます。</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

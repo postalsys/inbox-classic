@@ -1,0 +1,21 @@
+<!--review-->
+<h1>Kunci enkripsi</h1>
+<p class="summary">Buat kunci untuk menandatangani pesan Anda dan menerima email terenkripsi, serta simpan kunci kontak Anda.</p>
+<p>Inbox Classic menandatangani dan mengenkripsi email dengan kunci OpenPGP. Kunci Anda sendiri memiliki dua bagian: kunci publik yang Anda berikan kepada orang lain, dan kunci privat yang tetap berada di komputer Anda. Kunci kontak Anda memungkinkan Anda memeriksa tanda tangan mereka dan mengenkripsi email untuk mereka.</p>
+<p>Untuk membuat kunci Anda:</p>
+<ol>
+    <li>Pilih <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, lalu klik <b data-text="ui-keys-new"></b>.</li>
+    <li>Pilih akun lalu klik <b data-text="ui-keys-new-make"></b>. Kunci digunakan untuk alamat akun tersebut dan alamat-alamat lainnya.</li>
+    <li>Klik <b data-text="ui-keys-backup-now"></b> dan pilih frasa sandi. Simpan file dan frasa sandi di tempat aman yang berbeda.</li>
+</ol>
+<aside class="warning">Tanpa cadangan, kunci Anda tidak dapat dipulihkan jika komputer ini hilang atau diatur ulang, dan email yang dienkripsi untuk kunci itu tidak dapat dibaca lagi.</aside>
+<h2>Kunci tetap terlindungi tanpa frasa sandi</h2>
+<p>Kunci privat Anda dilindungi oleh kunci yang disimpan di <!--os:windows-->Manajer Kredensial<!--/os--><!--os:mac-->rantai kunci<!--/os--><!--os:linux-->keyring sistem<!--/os-->, sehingga biasanya Anda tidak perlu mengetik frasa sandi untuk menggunakannya. Frasa sandi melindungi cadangan dan mungkin diperlukan saat mengimpor. Jika kunci terkunci, periksa dulu apakah penyimpanan sistem tersedia dan tidak terkunci. Jika kunci pelindungnya hilang, klik <b data-text="ui-keys-import"></b> dan pilih cadangannya.</p>
+<h2>Menambahkan kunci</h2>
+<p>Klik <b data-text="ui-keys-import"></b> untuk menambahkan kunci dari file, misalnya kunci yang dikirim kontak kepada Anda atau cadangan kunci Anda sendiri. Kunci privat yang dilindungi frasa sandi menanyakannya satu kali. Inbox Classic lalu menanyakan apakah kunci Anda yang diimpor akan digunakan untuk alamat-alamat Anda.</p>
+<p>Sejak saat itu, kunci kontak digunakan untuk alamatnya. Jika kemudian muncul kunci lain untuk alamat yang sama, kunci saat ini tetap digunakan sampai Anda memilih kunci baru di properti kontak tersebut.</p>
+<p>Untuk membagikan kunci publik Anda, pilih kunci itu lalu klik <b data-text="ui-keys-export"></b>. Anda juga dapat memilih kunci akun di propertinya, pada tab <b data-text="ui-account-security"></b>.</p>
+<p>Jika kunci penerima yang dapat digunakan tidak ada, Inbox Classic terlebih dahulu menanyakan domain alamat itu, lalu keys.openpgp.org jika pencarian tersebut diaktifkan. Anda juga dapat mencari berdasarkan sidik jari atau ID kunci; yang dikirim adalah pengenal itu, bukan alamat email. Agar tidak pernah menanyakan keys.openpgp.org, nonaktifkan <b data-text="ui-pgp-keyserver"></b> di <b data-settings="reading"></b>.</p>
+<p>Kunci juga ikut terbawa bersama email. Jika Autocrypt diaktifkan, pesan dari alamat yang memiliki kunci terpilih membawa kunci publiknya, yang dapat digunakan aplikasi lain yang membacanya untuk mengenkripsi email kepada Anda. Saat Anda membuka pesan yang membawa kunci pengirimnya, Inbox Classic menyimpan kunci itu dalam keadaan belum diverifikasi; kunci lain untuk alamat yang sudah memiliki kunci menunggu pilihan Anda. Untuk berhenti mengirim kunci Anda, nonaktifkan <b data-text="ui-account-autocrypt"></b> pada tab <b data-text="ui-account-security"></b> akun tersebut.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

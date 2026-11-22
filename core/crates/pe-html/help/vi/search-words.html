@@ -1,0 +1,34 @@
+<!--review-->
+<h1>Từ khóa tìm kiếm</h1>
+<p class="summary">Các từ và ký hiệu mà hộp tìm kiếm hiểu, để tìm đúng những thư bạn muốn.</p>
+<p>Hộp tìm kiếm hỗ trợ các cú pháp kiểu Gmail liệt kê bên dưới. Bạn có thể kết hợp bao nhiêu tùy thích: thư phải khớp với tất cả. Trỏ chuột vào hộp tìm kiếm để xem danh sách tóm tắt.</p>
+<table>
+    <tr><th>Nhập</th><th>Tìm thấy</th></tr>
+    <tr><td><code>budget</code></td><td>Thư có một từ bắt đầu bằng <i>budget</i>, ở bất kỳ đâu trong thư</td></tr>
+    <tr><td><code>"exact phrase"</code></td><td>Các từ này, theo đúng thứ tự này</td></tr>
+    <tr><td><code>-word</code></td><td>Thư không có từ đó. Dấu trừ cũng phủ định các bộ lọc được hỗ trợ, như <code>-is:unread</code>, nhưng không áp dụng cho bộ lọc ngày, độ cũ hoặc kích thước</td></tr>
+    <tr><td><code>this OR that</code></td><td>Thư có một trong hai từ. Viết <code>OR</code> bằng chữ hoa</td></tr>
+    <tr><td><code>from:ann</code></td><td>Thư từ Ann</td></tr>
+    <tr><td><code>to:ann</code>, <code>cc:</code>, <code>bcc:</code></td><td>Thư gửi đến Ann ở bất kỳ dòng người nhận nào; ba toán tử này tìm trong cùng một chỉ mục người nhận</td></tr>
+    <tr><td><code>subject:lunch</code></td><td>Từ đó trong chủ đề</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>Từ đó trong tên của tệp đính kèm</td></tr>
+    <tr><td><code>list:news.example.com</code></td><td>Thư từ một danh sách gửi thư, nhận diện theo List-Id của nó</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Thư có tệp đính kèm</td></tr>
+    <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Thư chưa đọc hoặc đã đọc</td></tr>
+    <tr><td><code>is:starred</code> hoặc <code>is:flagged</code></td><td>Thư đã gắn cờ</td></tr>
+    <tr><td><code>is:answered</code></td><td>Thư bạn đã trả lời</td></tr>
+    <tr><td><code>is:bounce</code></td><td>Thông báo về thư không gửi được hoặc bị chậm</td></tr>
+    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Thư đã mã hóa hoặc đã ký</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Chỉ thư mục đó, trong mọi tài khoản</td></tr>
+    <tr><td><code>in:projects</code></td><td>Chỉ thư mục có tên đó</td></tr>
+    <tr><td><code>in:anywhere</code></td><td>Mọi thư mục</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Thư trước thời điểm bắt đầu một ngày, hoặc từ thời điểm đó trở về sau, theo giờ UTC. <code>2025-01-31</code> cũng dùng được</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Thư cũ hơn hoặc mới hơn khoảng thời gian đã cho, tính bằng ngày (<code>d</code>), tháng 30 ngày (<code>m</code>) hoặc năm 365 ngày (<code>y</code>)</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Thư lớn hơn hoặc nhỏ hơn một kích thước, tính bằng byte hoặc kèm <code>K</code>, <code>M</code> hay <code>G</code></td></tr>
+</table>
+<p>Chữ có dấu hay không dấu, chữ hoa hay chữ thường đều không ảnh hưởng đến kết quả. Các từ không đặt trong dấu ngoặc kép, dài từ hai ký tự trở lên, khớp với phần đầu của từ; một ký tự đơn khớp với cả từ. Toán tử tìm kiếm không được nhận ra sẽ được coi là văn bản thông thường.</p>
+<p>Tiếng Trung, tiếng Nhật và tiếng Hàn viết các từ liền nhau không có khoảng trắng, nên với các ngôn ngữ này, một từ tìm kiếm được tìm thấy ở bất kỳ vị trí nào trong văn bản: <code>会议</code> tìm thấy <i>会议室</i>, và <code>회의</code> tìm thấy <i>회의에서</i>.</p>
+<p>Thư đã mã hóa có thể được tìm theo người gửi, người nhận và chủ đề bên ngoài. Nội dung đã giải mã và chủ đề được bảo vệ tìm được sau khi được lập chỉ mục bằng các khóa sẵn có, khi <b data-text="ui-search-encrypted"></b> được bật trong <b data-settings="reading"></b>.</p>
+<p>Danh sách không hiện kích thước. Để xem tiêu đề Internet của một thư, hãy chọn <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
+<!--/review-->

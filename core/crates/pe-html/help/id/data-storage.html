@@ -1,0 +1,12 @@
+<!--review-->
+<h1>Tempat email dan kata sandi Anda disimpan</h1>
+<p class="summary">Apa saja yang disimpan Inbox Classic di komputer Anda, dan di mana.</p>
+<ul>
+    <li><b>Email yang diunduh dan pengaturan akun</b> secara default berada di <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Opsi saat memulai atau lingkungan Anda dapat mengubah lokasi ini. Email yang disinkronkan tetap ada di server; Kotak Keluar bersifat lokal. Salinan dalam cache memungkinkan Anda membaca secara offline selama salinan itu masih tersimpan. Basis data dan indeks pencarian tidak dienkripsi secara keseluruhan.</li>
+    <li><b>Kata sandi</b>, token masuk browser, dan rahasia aplikasi masuk biasanya disimpan di <!--os:windows-->Manajer Kredensial Windows, di bawah <i>InboxClassic</i>, terenkripsi untuk akun Windows Anda.<!--/os--><!--os:mac-->rantai kunci login Anda, di bawah <i>InboxClassic</i>, terenkripsi untuk akun Mac Anda. Akses Rantai Kunci menampilkannya.<!--/os--><!--os:linux-->keyring Anda (GNOME Keyring), di bawah <i>InboxClassic</i>, terenkripsi untuk login Anda. Tanpa keyring, semuanya hanya disimpan sampai Inbox Classic ditutup.<!--/os--> Kredensial ini tidak disimpan di basis data email. Dalam mode khusus memori, kredensial hanya bertahan sampai aplikasi ditutup.</li>
+    <li><b>Kunci enkripsi</b> disimpan bersama email yang diunduh. Kunci privat Anda dienkripsi di sana dengan kunci yang disimpan di samping kata sandi Anda, sehingga file email saja tidak dapat membukanya.</li>
+</ul>
+<p>Pencarian, penjelasan pesan yang gagal terkirim, pengelompokan ke dalam percakapan, dan penemuan kode masuk semuanya berjalan di komputer Anda. Fitur-fitur ini tidak mengirim isi email Anda ke layanan eksternal.</p>
+<p>Agen AI hanya melihat email Anda jika Anda mengizinkannya, dan hanya akun yang Anda pilih. Lihat <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav>
+<!--/review-->

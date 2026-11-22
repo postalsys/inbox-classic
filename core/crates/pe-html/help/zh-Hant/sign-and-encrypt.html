@@ -1,0 +1,26 @@
+<!--review-->
+<h1>簽署和加密郵件</h1>
+<p class="summary">簽署郵件以保護其完整性，並為您和收件者加密郵件內容。</p>
+<p>有效的簽章能顯示簽署的內容是否已變更。收件者還必須驗證金鑰的擁有者。加密的郵件只有收件者和您能夠讀取，而且一律也會簽署。兩者都需要您自己的金鑰。</p>
+<p>若要簽署或加密郵件：</p>
+<ol>
+    <li>在郵件視窗中，按一下<b data-text="ui-tb-sign"></b>或<b data-text="ui-tb-encrypt"></b>，或選擇<!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b>或<b data-text="cmd-compose-encrypt"></b>。您也可以按 <kbd data-command="compose_sign"></kbd> 或 <kbd data-command="compose_encrypt"></kbd>。如果您的寄件地址沒有選取金鑰，Inbox Classic 會提議建立一把。</li>
+    <li>按一下<b data-text="ui-tb-send"></b>。</li>
+</ol>
+<p>開啟<b data-text="ui-tb-encrypt"></b>時，主旨下方那一行會以色彩和圖示顯示每位收件者，Inbox Classic 也會尋找它尚未擁有的金鑰：</p>
+<table>
+    <tr><th>收件者</th><th>意義</th></tr>
+    <tr><td>綠色，附鎖頭</td><td>您已驗證收件者的金鑰。</td></tr>
+    <tr><td>藍色，附鎖頭</td><td>金鑰尚未驗證，或是您自己的金鑰。</td></tr>
+    <tr><td>灰色，附<!--os:windows-->鎖頭<!--/os--><!--os:mac-->沙漏<!--/os--><!--os:linux-->旋轉的圓圈<!--/os--></td><td>Inbox Classic 正在尋找收件者的金鑰。</td></tr>
+    <tr><td>琥珀色，附警告標誌</td><td>找不到收件者可用的金鑰。</td></tr>
+</table>
+<h2>收件者沒有金鑰時</h2>
+<p>加密寄送時，每位收件者都需要有可用的金鑰。如果有人沒有，<b data-text="ui-tb-send"></b>會開啟<b data-text="ui-recipient-keys-title"></b>。您可以在那裡按一下<b data-text="ui-recipient-find-key"></b>再找一次、按一下<b data-text="ui-recipient-remove"></b>不寄給該人，或在郵件中已沒有任何來自加密郵件的內容時，按一下<b data-text="ui-send-unencrypted"></b>。您也可以向對方索取公開金鑰並匯入。</p>
+<h2>回覆加密郵件</h2>
+<p>回覆或轉寄加密郵件時，一開始就會開啟<b data-text="ui-tb-encrypt"></b>，您要關閉它之前，Inbox Classic 會先詢問。只要郵件中含有來自加密郵件的文字、圖片或附件，就只能以加密方式寄出。</p>
+<p>加密郵件的草稿會以您自己的金鑰加密儲存，不含數位簽章。寄出的郵件及其在<b data-text="folder-sent"></b>中的副本，仍會保持加密和簽署。</p>
+<h2>分享您的公開金鑰</h2>
+<p>若要讓別人能寄加密郵件給您，請選擇<!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>。您的公開金鑰會以檔案附加到郵件中。</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

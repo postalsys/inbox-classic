@@ -8,6 +8,8 @@ messages = { $count ->
    *[other] { $count } poruka
 }
 decimal-separator = ,
+# review: new
+list-separator = { ", " }
 size-bytes = { $count ->
     [one] { $count } bajt
     [few] { $count } bajta

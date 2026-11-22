@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Ký số và mã hóa thư</h1>
+<p class="summary">Ký số thư để bảo vệ tính toàn vẹn của nó, và mã hóa nội dung cho bạn và những người nhận.</p>
+<p>Chữ ký số hợp lệ cho biết nội dung đã ký có bị thay đổi hay không. Người nhận còn phải xác minh ai là chủ của khóa. Thư đã mã hóa chỉ người nhận và bạn đọc được, và thư đó luôn được ký số. Với cả hai việc, bạn cần một khóa của riêng mình.</p>
+<p>Để ký số hoặc mã hóa thư:</p>
+<ol>
+    <li>Trong cửa sổ thư, bấm <b data-text="ui-tb-sign"></b> hoặc <b data-text="ui-tb-encrypt"></b>, hoặc chọn <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> hoặc <b data-text="cmd-compose-encrypt"></b>. Bạn cũng có thể nhấn <kbd data-command="compose_sign"></kbd> hoặc <kbd data-command="compose_encrypt"></kbd>. Nếu chưa có khóa nào được chọn cho địa chỉ gửi của bạn, Inbox Classic đề nghị tạo một khóa.</li>
+    <li>Bấm <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Khi <b data-text="ui-tb-encrypt"></b> đang bật, dòng bên dưới chủ đề hiện từng người nhận bằng một màu kèm hình, và Inbox Classic tìm các khóa mà ứng dụng chưa có:</p>
+<table>
+    <tr><th>Người nhận</th><th>Ý nghĩa</th></tr>
+    <tr><td>Xanh lá, có ổ khóa</td><td>Bạn đã xác minh khóa của người nhận.</td></tr>
+    <tr><td>Xanh lam, có ổ khóa</td><td>Khóa chưa được xác minh, hoặc đó là khóa của chính bạn.</td></tr>
+    <tr><td>Xám, có <!--os:windows-->ổ khóa<!--/os--><!--os:mac-->đồng hồ cát<!--/os--><!--os:linux-->vòng tròn xoay<!--/os--></td><td>Inbox Classic đang tìm khóa của người nhận.</td></tr>
+    <tr><td>Hổ phách, có dấu cảnh báo</td><td>Không tìm thấy khóa dùng được cho người nhận.</td></tr>
+</table>
+<h2>Nếu người nhận không có khóa</h2>
+<p>Gửi thư mã hóa cần một khóa dùng được cho mỗi người nhận. Nếu có người nhận không có, <b data-text="ui-tb-send"></b> sẽ mở <b data-text="ui-recipient-keys-title"></b>. Tại đó, bạn có thể bấm <b data-text="ui-recipient-find-key"></b> để tìm lại, <b data-text="ui-recipient-remove"></b> để bỏ người đó ra khỏi thư, hoặc <b data-text="ui-send-unencrypted"></b> khi thư không còn nội dung nào từ thư đã mã hóa. Bạn cũng có thể xin khóa công khai của họ và nhập khóa đó.</p>
+<h2>Trả lời thư đã mã hóa</h2>
+<p>Thư trả lời hoặc thư chuyển tiếp của một thư đã mã hóa bắt đầu với <b data-text="ui-tb-encrypt"></b> đang bật, và Inbox Classic hỏi trước khi bạn tắt nó. Khi thư còn chứa văn bản, ảnh hoặc tệp đính kèm từ thư đã mã hóa, thư chỉ có thể được gửi ở dạng mã hóa.</p>
+<p>Thư nháp của thư mã hóa được lưu ở dạng mã hóa bằng khóa của chính bạn, không có chữ ký số. Thư đã gửi và bản sao của nó trong <b data-text="folder-sent"></b> vẫn được mã hóa và ký số.</p>
+<h2>Chia sẻ khóa công khai</h2>
+<p>Để người khác có thể gửi thư mã hóa cho bạn, chọn <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Khóa công khai của bạn được đính kèm vào thư dưới dạng tệp.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->

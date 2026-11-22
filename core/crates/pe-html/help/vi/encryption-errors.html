@@ -1,0 +1,17 @@
+<!--review-->
+<h1>Lỗi mã hóa</h1>
+<p class="summary">Việc cần làm khi máy chủ không hỗ trợ mã hóa, hoặc yêu cầu mã hóa khi mã hóa đang tắt.</p>
+<h2>“the server does not offer STARTTLS”</h2>
+<p>Tài khoản được đặt dùng STARTTLS, nhưng máy chủ không hỗ trợ mã hóa. Inbox Classic đã dừng lần kết nối này trước khi gửi mật khẩu.</p>
+<ol>
+    <li>Mở thuộc tính của tài khoản trong <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Kiểm tra thiết đặt của nhà cung cấp. Nếu được hỗ trợ, hãy dùng SSL/TLS với cổng 993 cho thư đến hoặc 465 cho thư đi.</li>
+    <li>Bấm <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Nếu không có cách nào khác hiệu quả, máy chủ đó không thể dùng an toàn.</p>
+<h2>“the server takes the password only over an encrypted connection”</h2>
+<p>Máy chủ thư đi đang được đặt là <b data-text="ui-security-none"></b>. Lỗi này không xác nhận mật khẩu là đúng. Theo thiết đặt của nhà cung cấp, hãy đổi <b data-text="ui-field-smtp-security"></b> thành STARTTLS với cổng 587, hoặc SSL/TLS với cổng 465.</p>
+<h2>Cảnh báo về kết nối không mã hóa</h2>
+<p>Khi bạn chọn <b data-text="ui-security-none"></b>, Inbox Classic cảnh báo rằng bất kỳ ai chặn bắt được lưu lượng mạng của bạn đều có thể đọc mật khẩu và thư của bạn. Bản thân mạng cục bộ không mã hóa lưu lượng. Chỉ tiếp tục nếu bạn chấp nhận rủi ro này với máy chủ trên chính máy tính hoặc mạng cục bộ của bạn.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

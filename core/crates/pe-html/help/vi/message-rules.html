@@ -1,0 +1,20 @@
+<!--review-->
+<h1>Sắp xếp thư mới bằng quy tắc</h1>
+<p class="summary">Tự động di chuyển, đánh dấu là đã đọc, gắn cờ hoặc lưu trữ các thư đến khớp với tiêu chí của bạn.</p>
+<p>Một quy tắc kết hợp tiêu chí tìm kiếm với các hành động áp dụng cho thư khớp khi thư đến Hộp thư đến. Ví dụ, quy tắc với <code>from:news@example.com</code> có thể chuyển bản tin từ địa chỉ đó vào một thư mục riêng và đánh dấu là đã đọc.</p>
+<p>Để tạo quy tắc:</p>
+<ol>
+    <li>Chọn <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, rồi bấm <b data-text="ui-rule-new"></b>.</li>
+    <li>Nhập tên và điền <b data-text="ui-rule-query"></b> bằng các từ giống như trong hộp tìm kiếm, như <code>from:</code>, <code>subject:</code> hoặc <code>list:</code>. Dòng bên dưới đếm số thư khớp trong Hộp thư đến của tài khoản đang chọn, hoặc của mọi tài khoản nếu chưa chọn tài khoản nào.</li>
+    <li>Chọn một hoặc nhiều hành động cho thư khớp: chuyển vào một thư mục, đánh dấu là đã đọc, gắn cờ, lưu trữ, chuyển vào Email rác, xóa hoặc tắt thông báo.</li>
+    <li>Bấm <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Bạn cũng có thể tạo quy tắc từ một thư hoặc một lần tìm kiếm. Chọn <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> để điền sẵn người gửi hoặc danh sách gửi thư của thư đang chọn. Bấm <b data-text="ui-create-rule"></b> phía trên kết quả tìm kiếm để dùng tiêu chí tìm kiếm hiện tại.</p>
+<h2>Cách quy tắc hoạt động</h2>
+<p>Quy tắc xử lý thư mới đến Hộp thư đến khi Inbox Classic đang chạy, kể cả khi cửa sổ chính bị ẩn. Thư đã có chỉ bị ảnh hưởng nếu bạn chọn <b data-text="ui-rule-apply-now"></b>. Các quy tắc khớp chạy theo thứ tự trong danh sách. Khi một quy tắc đã lên lịch chuyển hợp lệ một thư ra khỏi Hộp thư đến, các quy tắc sau bị bỏ qua cho thư đó. Việc xử lý trên máy chủ vẫn có thể thất bại. Bỏ chọn hộp kiểm của một quy tắc trong danh sách để tắt quy tắc mà không xóa nó.</p>
+<h2>Thay đổi quy tắc</h2>
+<p>Để sửa một quy tắc, chọn quy tắc trong danh sách và bấm <b data-text="ui-rule-edit"></b>, hoặc bấm đúp vào nó. Dùng <b data-text="ui-account-move-up"></b> và <b data-text="ui-account-move-down"></b> để đổi thứ tự, hoặc <b data-text="ui-rule-delete-button"></b> để xóa quy tắc. Trong trình sửa quy tắc, <b data-text="ui-rule-show"></b> đóng trình sửa mà không lưu thay đổi và tìm trong mọi Hộp thư đến bằng truy vấn đã nhập. Khác với số thư khớp, lần tìm kiếm này không giữ giới hạn theo tài khoản.</p>
+<p>Quy tắc áp dụng cho thư mới trong Hộp thư đến, nên không hỗ trợ bộ lọc theo thư mục và theo ngày. Nếu bạn dùng <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> hoặc <code>newer_than:</code>, một thông báo sẽ giải thích vì sao không dùng được các bộ lọc này. Quy tắc không thể gửi thư hay xóa vĩnh viễn thư: <b data-text="ui-rule-delete"></b> chỉ chuyển thư vào <b data-text="folder-deleted"></b> nếu thư mục đó tồn tại.</p>
+<aside class="note">Quy tắc chạy trên máy tính này. Để sắp xếp thư khi máy tính tắt, hãy dùng bộ lọc của nhà cung cấp email.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

@@ -1,0 +1,36 @@
+<!--review-->
+<h1>アカウントの変更、並べ替え、削除</h1>
+<p class="summary">アカウントの名前、設定、パスワードを変更したり、アカウントを好きな順に並べたり、削除したりします。</p>
+<h2>アカウントを変更する</h2>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>を選択します。ウィンドウにアカウントの一覧が表示されます。</li>
+    <li>アカウントを選択して<!--os:windows--><b data-text="win-properties-button"></b><!--/os--><!--os:mac--><b data-text="mac-properties-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-properties"></b><!--/os-->をクリックするか、ダブルクリックします。</li>
+    <li>必要な項目を変更し、<b data-text="ui-ok"></b>をクリックします。</li>
+</ol>
+<ul>
+    <li><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os-->は、フォルダー一覧でのアカウントの呼び名です（例：<i>Gmail</i>、<i>仕事</i>）。</li>
+    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os-->は、メールを送る相手に表示される名前です。</li>
+    <li>パスワードを変えない場合は、<b data-text="ui-field-password"></b>を空のままにします。</li>
+    <li>ブラウザーでサインインするアカウントには、使用しているサインイン アプリが表示されます。</li>
+    <li><b data-text="ui-field-other-addresses"></b>には、このアカウントで送信に使うほかのアドレス（エイリアスなど）をコンマで区切って入力します。<code>Sales &lt;sales@example.com&gt;</code>の形式でも、アドレスだけでもかまいません。<b data-text="ui-field-from"></b>に、そのアカウントの下でそれぞれのアドレスが表示されるようになります。</li>
+</ul>
+<p>同じウィンドウの<!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->で、別のアカウントを追加できます。</p>
+<h2>アカウントを並べ替える</h2>
+<p>アカウントが2つ以上ある場合は、フォルダー一覧のアカウント、または<b data-text="ui-all-inboxes"></b>の下のその行を、ほかのアカウントの上や下にドラッグします。移動先が線で示されます。または、アカウントを右クリックして<b data-text="ui-account-move-up"></b>か<b data-text="ui-account-move-down"></b>を選択します。フォルダー一覧と<b data-text="ui-all-inboxes"></b>の下の行は、どちらも新しい順序になります。</p>
+<h2>アカウントのメニュー</h2>
+<p>アカウントが2つ以上ある場合は、フォルダー一覧でアカウント名を右クリックするとメニューが開きます。アカウントが1つの場合は、アカウント名の行はありません。プロパティは<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>から開き、ほかのアカウントのコマンドは<b data-text="menu-tools"></b>にあります。</p>
+<ul>
+    <li><b data-text="ui-account-sync"></b>は、そのアカウントだけを確認します。</li>
+    <li><b data-text="cmd-mark-all-read"></b>は、そのアカウントのすべてのフォルダーを既読にします。</li>
+    <li><b data-text="cmd-new-folder"></b>、<b data-text="ui-account-properties"></b>、<b data-text="ui-account-move-up"></b>、<b data-text="ui-account-move-down"></b>。</li>
+</ul>
+<h2>アカウントを削除する</h2>
+<aside class="note">アカウントを削除すると、そのアカウント用にダウンロードしたメールと、保存されているサインイン情報がこのコンピューターから削除されます。そのアカウントのローカルの送信トレイにある未送信のメッセージも、サーバーにコピーのないものを含めて削除されます。サーバー上のメールは残ります。</aside>
+<p>アカウントを削除するには、次のようにします。</p>
+<ol>
+    <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>を選択します。</li>
+    <li>アカウントを選択して<b data-text="ui-remove"></b>をクリックします。Windowsでは<kbd>Del</kbd>キーを押してもかまいません。</li>
+    <li>確認します。アカウントがフォルダー一覧から削除されます。</li>
+</ol>
+<nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav>
+<!--/review-->

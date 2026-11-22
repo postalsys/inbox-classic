@@ -1,0 +1,29 @@
+<!--review-->
+<h1>メッセージを読む</h1>
+<p class="summary">メッセージを閲覧ウィンドウや専用のウィンドウで読み、キーボードでメールを移動します。</p>
+<p>一覧でメッセージを選択すると、差出人、日時、宛先、件名の下に、閲覧ウィンドウでその内容が表示されます。メッセージは1秒間表示されると既読になります。一覧には各メッセージの日時が表示されますが、受信した時刻より後の日時は表示されないため、未来の日付が付いたメールがいつまでも先頭に残ることはありません。</p>
+<p>フォルダーに戻ると、Inbox Classicは最後に表示したメッセージ、またはそのスレッドが一覧にあれば、それを選択します。ない場合は、最新のメッセージまたはそのスレッドを選択します。折りたたまれたスレッドでは、最初のメッセージが表示されます。Inbox Classicは、再起動してもフォルダーと最後に表示したメッセージを覚えています。</p>
+<ul>
+    <li>手動で既読や未読にするには、<b data-text="menu-edit"></b> &gt; <b data-text="cmd-mark-read"></b>（<kbd data-command="mark_read"></kbd>）または<b data-text="cmd-mark-unread"></b>を選択します。</li>
+    <li>フォルダー内のすべてのメッセージを既読にするには、<b data-text="menu-edit"></b> &gt; <b data-text="cmd-mark-all-read"></b>（<kbd data-command="mark_all_read"></kbd>）を選択するか、フォルダーを右クリックします。</li>
+</ul>
+<h2>未読メッセージだけを表示する</h2>
+<p>まだ読んでいないメッセージだけを一覧に表示するには、<b data-text="menu-view"></b> &gt; <b data-text="cmd-hide-read"></b>を選択するか、<!--os:windows-->ツールバーの<b data-text="ui-tool-unread-only"></b>をクリックします<!--/os--><!--os:mac-->ツールバーのフィルター ボタンをクリックします<!--/os--><!--os:linux-->ヘッダーバーのフィルター ボタンをクリックします<!--/os-->。この設定はすべてのフォルダーで有効で、オフにするまで続きます。現在の一覧を開いた後に既読になったメッセージは、一覧を切り替えるまで表示されたままです。</p>
+<h2>メッセージを専用のウィンドウで開く</h2>
+<p>メッセージをダブルクリックするか、選択して<!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os-->キーを押します。ウィンドウには<b data-text="ui-tb-reply"></b>、<b data-text="ui-tb-reply-all"></b>、<b data-text="ui-tb-forward"></b>、<b data-text="ui-tb-print"></b>、<b data-text="ui-tb-delete"></b>、<b data-text="ui-tb-archive"></b>、<b data-text="ui-tb-junk"></b>があります。<b data-text="ui-tb-previous"></b>と<b data-text="ui-tb-next"></b>で、開いた元の一覧を順に移動します。下書きは、続きを書くために開きます。</p>
+<h2>キーボードで読む</h2>
+<ul>
+    <li><b data-text="menu-view"></b> &gt; <b data-text="cmd-next-message"></b>（<kbd data-command="next_message"></kbd>）と<b data-text="cmd-previous-message"></b>（<kbd data-command="previous_message"></kbd>）で、一覧を下や上に移動します。</li>
+    <li><b data-text="menu-view"></b> &gt; <b data-text="cmd-next-unread"></b>、またはメッセージ一覧で<kbd>N</kbd>キーを押すと、次の未読メッセージを探します。現在のフォルダーに未読がなくなると、未読メールのある別のフォルダーを提案することがあります。</li>
+    <li><b data-text="menu-view"></b> &gt; <b data-text="cmd-go-to-folder"></b>（<kbd data-command="go_to_folder"></kbd>）で、任意のアカウントの任意のフォルダーを開けます。名前の一部を入力すると見つかります。</li>
+    <li><b data-text="menu-edit"></b> &gt; <b data-text="cmd-find-in-message"></b>（<kbd data-command="find_in_message"></kbd>）で、表示中のメッセージ内の語句を検索します。</li>
+</ul>
+<h2>返信に含まれる以前のメッセージ</h2>
+<p>返信には、それ以前のメッセージが含まれていることがよくあります。Inbox Classicは、差出人が書いた部分の下にある•••ボタンの中にそれらを折りたたみます。クリックすると表示されます。</p>
+<p>アカウントを追加した直後は、メッセージがまだダウンロード中と表示されることがあります。<a href="topic:message-not-shown"></a>を参照してください。</p>
+<!--os:mac--><h2>ダーク モード</h2><p>Macがダーク モードのときは、読むメッセージや書くメッセージも暗い背景で表示されます。ニュースレターや領収書など、独自の背景色を持つメッセージは、ダーク版が含まれていない限り元の外観のまま表示されます。印刷は常にライトモードです。メッセージをライトモードのままにするには、<b data-settings="reading"></b>で<b data-text="ui-dark-messages"></b>をオフにします。</p><!--/os-->
+<!--os:linux--><h2>ダーク モード</h2><p>デスクトップがダーク モードのときは、読むメッセージや書くメッセージも暗い背景で表示されます。ニュースレターや領収書など、独自の背景色を持つメッセージは、ダーク版が含まれていない限り元の外観のまま表示されます。印刷は常にライトモードです。メッセージをライトモードのままにするには、<b data-settings="reading"></b>で<b data-text="ui-dark-messages"></b>をオフにします。</p><!--/os-->
+<h2>文字のサイズ</h2>
+<p>メッセージを大きくまたは小さく表示するには、<b data-text="menu-view"></b> &gt; <b data-text="menu-text-size"></b>を選択し、サイズを選びます。メッセージを書いている間の表示サイズも変わりますが、受信者に表示される書式は変わりません。既定の表示サイズに戻すには、<b data-text="cmd-text-size-medium"></b>を選択します。</p>
+<nav class="related"><a href="topic:conversations"></a> <a href="topic:organize-mail"></a> <a href="topic:message-not-shown"></a></nav>
+<!--/review-->

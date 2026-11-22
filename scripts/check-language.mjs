@@ -41,6 +41,32 @@ function messages(text) {
     return found;
 }
 
+// Japanese and Chinese: the sentence has no spaces, so none around a placeable either; one kind of each punctuation
+// mark in a message (full width as the language writes it, or ASCII), and the access key a Latin letter in brackets
+// after the words (ファイル(&F)), as their Windows has it. Korean writes spaces and ASCII punctuation, so only the access
+// key rule is its.
+const CJK = ['ja', 'zh-Hans', 'zh-Hant', 'ko'].includes(code);
+const SPACELESS = ['ja', 'zh-Hans', 'zh-Hant'].includes(code);
+const ideograph = '\\p{Script=Han}\\p{Script=Hiragana}\\p{Script=Katakana}';
+const PAIRS = [['，', ','], ['：', ':'], ['；', ';'], ['！', '!'], ['？', '?'], ['（', '(']];
+function cjkProblems(m) {
+    const found = [];
+    // the value and attributes alone: no id, no placeables, no access key, no links or command line options
+    const text = m.text
+        .replace(/^[^=]*=/, '')
+        .replace(/^\s*\.[a-z-]+\s*=/gm, '')
+        .replace(/\(&[A-Za-z0-9]\)/g, '')
+        .replace(/https?:\/\/\S+/g, '');
+    if (/&[^&\sA-Za-z0-9]/u.test(text.replace(/&&/g, ''))) found.push('marks a non-Latin access key: write it as (&F) after the words');
+    if (!SPACELESS) return found;
+    if (new RegExp(`[${ideograph}] \\{|\\} [${ideograph}]`, 'u').test(text)) found.push('has a space between a placeable and the words around it');
+    const plain = text.replace(/\{[^{}]*\}/g, '').replace(/\[[a-z]+\]|\*\[[a-z]+\]/g, '');
+    for (const [wide, ascii] of PAIRS) {
+        if (plain.includes(wide) && plain.includes(ascii)) found.push(`mixes ${wide} and ${ascii}`);
+    }
+    return found;
+}
+
 const variables = (text) => new Set([...text.matchAll(/\$([a-zA-Z][a-zA-Z0-9_-]*)/g)].map((m) => m[1]));
 const same = (a, b) => a.size === b.size && [...a].every((x) => b.has(x));
 
@@ -73,6 +99,7 @@ for (const file of readdirSync(english).filter((f) => f.endsWith('.ftl'))) {
         if (/&[^&\s]/.test(source.text.replace(/&&/g, '')) && !/&[^&\s]/.test(m.text.replace(/&&/g, ''))) {
             problem(`${where}:${m.line}`, `${m.id} has no access key (&) where English has one`);
         }
+        if (CJK) cjkProblems(m).forEach((what) => problem(`${where}:${m.line}`, `${m.id} ${what}`));
     }
     for (const id of en.keys()) if (!seen.has(id)) problem(where, `${id} is missing`);
 }
@@ -113,6 +140,8 @@ for (const file of readdirSync(join(help, 'en')).filter((f) => f.endsWith('.html
 if (problems.length) {
     console.log(problems.join('\n'));
     console.log(`${problems.length} problems in ${code}`);
-    process.exit(1);
+    // not process.exit: a long list written into a pipe would be cut off
+    process.exitCode = 1;
+} else {
+    console.log(`${code}: every catalog and help topic matches English`);
 }
-console.log(`${code}: every catalog and help topic matches English`);

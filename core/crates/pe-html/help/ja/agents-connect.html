@@ -1,0 +1,17 @@
+<!--review-->
+<h1>AIエージェントを接続する</h1>
+<p class="summary">ClaudeなどのAIエージェントが、Inbox Classicを通じてメールを読んだり整理したりできるようにします。</p>
+<p>AIエージェントにメールを扱わせることができます。Claude、Cursor、またはModel Context Protocol（MCP）に対応したほかのプログラムが使えます。Inbox ClassicにAIは組み込まれておらず、エージェントの接続を許可しない限り、AIサービスに何かが送られることはありません。</p>
+<p>エージェントを接続するには、次のようにします。</p>
+<ol>
+    <li><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>を選択し、<b data-text="ui-how-to-connect"></b>をクリックします。エージェントの設定に追加する行が表示されます。</li>
+    <li>それをエージェントのMCPサーバーに追加します。Claude Desktopでは<i>Settings &gt; Developer &gt; Edit Config</i>です。</li>
+    <li>エージェントを起動します。初めて接続するときに、Inbox Classicがエージェントに何を許可するかを尋ねます。</li>
+</ol>
+<p>Inbox Classicが実行されていない場合は、エージェントがバックグラウンドで起動します。接続できるのは、このコンピューター上であなたとして実行されているプログラムだけです。</p>
+<p>Inbox Classicは、エージェントの自己申告をうのみにせず、どのプログラムがエージェントを起動したかをシステムに問い合わせます。そのため、エージェントが別のプログラムを名乗るだけで、そのプログラムに与えたアクセス権を得ることはできません。エージェントが別のプログラムを名乗った場合は、確認の画面でそのことが示されます。これはエージェント同士を区別するためのもので、あなたとして実行される有害なプログラムからは守れません。そのようなプログラムは、どのみちメールを読むことができます。</p>
+<p>エージェントは、受信トレイ、アカウント、フォルダーを監視し、メールが変わったときに通知を受けることもできます。また、「Triage my inbox」（受信トレイの仕分け）と「Summarize unread」（未読の要約）という2つの定型の依頼を提供できます。どちらもエージェントに許可した範囲に従い、この方法で読んだものも、ほかに読んだものと同じようにログに記録されます。</p>
+<p>Claude Codeなどのエージェントは、同じ認識済みのターミナル プログラムから起動された場合、アクセス権を共有します。<!--os:mac-->「ターミナル」から起動されたプログラム<!--/os--><!--os:windows,linux-->ターミナルから起動されたプログラム<!--/os-->について1回だけ確認され、許可した内容が共有されます。エージェントに個別のアクセス権を与えるには、その設定の<code>--mcp</code>の後に<code>--name</code>と任意の名前を追加します。例：<code>"args": ["--mcp", "--name", "Claude Code"]</code>。Inbox Classicは、その名前でエージェントについて確認します。指定した名前は、エージェントの身元を証明するものではありません。</p>
+<p>すべてのエージェントを一度に無効にするには、<b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>で<b data-text="ui-let-agents-connect"></b>をオフにします。</p>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
+<!--/review-->

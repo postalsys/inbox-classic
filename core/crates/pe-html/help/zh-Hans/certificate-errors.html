@@ -1,0 +1,19 @@
+<!--review-->
+<h1>证书错误</h1>
+<p class="summary">Inbox Classic 无法确认正在通信的是真正的邮件服务器时，应该怎么办。</p>
+<p>您可能会看到以下内容之一：</p>
+<ul>
+    <li>在状态栏中：“TLS error: …”</li>
+    <li>在阅读窗格中：“无法与邮件服务器建立安全连接（…）。”</li>
+</ul>
+<p>Inbox Classic 无法确认该服务器就是它所声称的服务器，因此没有发送您的密码。</p>
+<p>要解决此问题，请：</p>
+<ol>
+    <li>在<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>中打开该帐户的属性。</li>
+    <li>检查服务器名称。它们必须是服务器证书所针对的名称。这通常是您的服务提供商的名称（例如 <code>imap.provider.com</code>），而不是您自己的域。</li>
+    <li>检查计算机的日期和时间是否正确。</li>
+</ol>
+<p>在会检查加密流量的网络上（例如某些办公室或学校网络），请咨询其管理员。</p>
+<aside class="note">没有接受任何证书的开关。接受伪造的证书会让网络上的其他人读取您的密码和邮件。</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

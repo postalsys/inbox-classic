@@ -103,7 +103,7 @@ impl Summary {
         if self.flagged > 0 {
             parts.push(tr_args(Text::SelectionFlagged, &[("count", self.flagged.into())]));
         }
-        parts.join(", ")
+        crate::text::word_list(&parts)
     }
 
     /// Whether `action` on them takes them out of the list, which then selects the row after them: Delete, Move,

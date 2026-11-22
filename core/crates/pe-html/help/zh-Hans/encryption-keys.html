@@ -1,0 +1,21 @@
+<!--review-->
+<h1>加密密钥</h1>
+<p class="summary">创建用于对邮件签名和接收加密邮件的密钥，并保存联系人的密钥。</p>
+<p>Inbox Classic 使用 OpenPGP 密钥对邮件签名和加密。您自己的密钥由两部分组成：交给他人的公钥，以及保留在您计算机上的私钥。有了联系人的密钥，您就可以检查他们的签名，并向他们发送加密邮件。</p>
+<p>要创建您的密钥，请：</p>
+<ol>
+    <li>选择<b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>，然后单击<b data-text="ui-keys-new"></b>。</li>
+    <li>选择帐户并单击<b data-text="ui-keys-new-make"></b>。该密钥将用于此帐户的地址及其其他地址。</li>
+    <li>单击<b data-text="ui-keys-backup-now"></b>并选择一个密码短语。请将文件和密码短语分别保存在不同的安全位置。</li>
+</ol>
+<aside class="warning">如果没有备份，一旦这台计算机丢失或重置，您的密钥将无法恢复，用它加密的邮件也将无法再阅读。</aside>
+<h2>无需密码短语即可保护密钥</h2>
+<p>您的私钥由保存在<!--os:windows-->凭据管理器<!--/os--><!--os:mac-->钥匙串<!--/os--><!--os:linux-->系统密钥环<!--/os-->中的一个密钥保护，因此平时使用时无需键入密码短语。密码短语用于保护备份，导入时也可能需要。如果某个密钥被锁定，请先检查系统存储是否可用且已解锁。如果缺少它的保护密钥，请单击<b data-text="ui-keys-import"></b>并选择它的备份。</p>
+<h2>添加密钥</h2>
+<p>单击<b data-text="ui-keys-import"></b>可从文件添加密钥，例如联系人发给您的密钥或您自己的备份。受密码短语保护的私钥会要求输入一次密码短语。随后，Inbox Classic 会询问是否将导入的您自己的密钥用于您的地址。</p>
+<p>此后，联系人的密钥将用于其地址。如果以后出现了同一地址的另一个密钥，在您于联系人属性中选择新密钥之前，仍会继续使用当前密钥。</p>
+<p>要分享您的公钥，请选择它并单击<b data-text="ui-keys-export"></b>。您也可以在帐户属性的<b data-text="ui-account-security"></b>选项卡中选择帐户的密钥。</p>
+<p>缺少可用的收件人密钥时，Inbox Classic 会先询问该地址所属的域，如果启用了相应查询，再询问 keys.openpgp.org。您也可以按指纹或密钥 ID 搜索，这样发送的是该标识符而不是电子邮件地址。如果从不想询问 keys.openpgp.org，请在<b data-settings="reading"></b>下关闭<b data-text="ui-pgp-keyserver"></b>。</p>
+<p>密钥也会随邮件传递。启用 Autocrypt 后，从已选择密钥的地址发出的邮件会携带其公钥，能读取它的其他应用可以用它向您发送加密邮件。当您打开携带发件人密钥的邮件时，Inbox Classic 会保存该密钥，但标记为未验证；如果某个地址已有密钥，又出现了不同的密钥，则会等您来选择。要停止发送您的密钥，请在帐户的<b data-text="ui-account-security"></b>选项卡中关闭<b data-text="ui-account-autocrypt"></b>。</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

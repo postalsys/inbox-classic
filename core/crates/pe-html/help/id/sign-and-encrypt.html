@@ -1,0 +1,26 @@
+<!--review-->
+<h1>Menandatangani dan mengenkripsi pesan</h1>
+<p class="summary">Tandatangani pesan untuk melindungi keutuhannya, dan enkripsi isinya untuk Anda dan penerimanya.</p>
+<p>Tanda tangan digital yang valid menunjukkan apakah isi yang ditandatangani telah berubah. Penerima juga harus memverifikasi siapa pemilik kuncinya. Pesan terenkripsi hanya dapat dibaca oleh penerimanya dan oleh Anda, dan pesan itu selalu ditandatangani juga. Untuk keduanya, Anda memerlukan kunci milik Anda sendiri.</p>
+<p>Untuk menandatangani atau mengenkripsi pesan:</p>
+<ol>
+    <li>Di jendela pesan, klik <b data-text="ui-tb-sign"></b> atau <b data-text="ui-tb-encrypt"></b>, atau pilih <!--os:windows,mac--><b data-text="menu-tools"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-compose-sign"></b> atau <b data-text="cmd-compose-encrypt"></b>. Anda juga dapat menekan <kbd data-command="compose_sign"></kbd> atau <kbd data-command="compose_encrypt"></kbd>. Jika belum ada kunci yang dipilih untuk alamat pengirim Anda, Inbox Classic menawarkan untuk membuatnya.</li>
+    <li>Klik <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>Selama <b data-text="ui-tb-encrypt"></b> aktif, baris di bawah subjek menampilkan setiap penerima dengan warna dan gambar, dan Inbox Classic mencari kunci yang belum dimilikinya:</p>
+<table>
+    <tr><th>Penerima</th><th>Artinya</th></tr>
+    <tr><td>Hijau, dengan gembok</td><td>Anda telah memverifikasi kunci penerima.</td></tr>
+    <tr><td>Biru, dengan gembok</td><td>Kunci belum diverifikasi, atau kunci tersebut milik Anda sendiri.</td></tr>
+    <tr><td>Abu-abu, dengan <!--os:windows-->gembok<!--/os--><!--os:mac-->jam pasir<!--/os--><!--os:linux-->lingkaran berputar<!--/os--></td><td>Inbox Classic sedang mencari kunci penerima.</td></tr>
+    <tr><td>Kuning tua, dengan tanda peringatan</td><td>Tidak ditemukan kunci yang dapat digunakan untuk penerima.</td></tr>
+</table>
+<h2>Jika penerima tidak memiliki kunci</h2>
+<p>Pengiriman terenkripsi memerlukan kunci yang dapat digunakan untuk setiap penerima. Jika ada penerima yang tidak memilikinya, <b data-text="ui-tb-send"></b> membuka <b data-text="ui-recipient-keys-title"></b>. Di sana Anda dapat mengklik <b data-text="ui-recipient-find-key"></b> untuk mencari lagi, <b data-text="ui-recipient-remove"></b> untuk mengeluarkan orang tersebut dari pesan, atau <b data-text="ui-send-unencrypted"></b> jika tidak ada lagi isi dari email terenkripsi. Anda juga dapat meminta kunci publik mereka dan mengimpornya.</p>
+<h2>Balasan untuk email terenkripsi</h2>
+<p>Balasan untuk pesan terenkripsi, atau penerusannya, dimulai dengan <b data-text="ui-tb-encrypt"></b> aktif, dan Inbox Classic bertanya sebelum Anda menonaktifkannya. Selama pesan berisi teks, gambar, atau lampiran dari email terenkripsi, pesan itu hanya dapat dikirim dalam keadaan terenkripsi.</p>
+<p>Draf pesan terenkripsi disimpan dalam keadaan terenkripsi dengan kunci Anda sendiri, tanpa tanda tangan digital. Pesan yang dikirim dan salinannya di <b data-text="folder-sent"></b> tetap terenkripsi dan ditandatangani.</p>
+<h2>Membagikan kunci publik Anda</h2>
+<p>Agar seseorang dapat mengirimi Anda email terenkripsi, pilih <!--os:windows--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Kunci publik Anda dilampirkan ke pesan sebagai file.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
+<!--/review-->
