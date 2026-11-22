@@ -2334,7 +2334,7 @@ public final class Mailbox: NSObject {
             add(.createRuleFromMessage)
             // the message shown is of a mailing list whose bar offers leaving it
             if reader.canUnsubscribe {
-                add(.unsubscribe)
+                add(.unsubscribe, Text.uiMenuUnsubscribe.text)
             }
         }
         add(.move)

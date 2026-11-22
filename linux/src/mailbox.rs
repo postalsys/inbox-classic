@@ -3068,7 +3068,11 @@ impl Mailbox {
         );
         add(&organize, Command::CreateRuleFromMessage, None);
         if self.reader.can_unsubscribe() {
-            add(&organize, Command::Unsubscribe, None);
+            add(
+                &organize,
+                Command::Unsubscribe,
+                Some(&crate::words::plain(crate::words::Text::UiMenuUnsubscribe)),
+            );
         }
         add(&organize, Command::Move, None);
         add(&organize, Command::Copy, None);

@@ -87,7 +87,6 @@ cmd-options = &Možnosti...
 cmd-message-rules = P&ravila za sporočila...
 cmd-encryption-keys = Šifrirni &ključi...
 cmd-create-rule-from-message = &Ustvari pravilo iz sporočila...
-# review: new
 cmd-unsubscribe = O&djavi se s seznama...
 cmd-select-all = Izberi &vse
 cmd-undo = &Razveljavi
@@ -265,21 +264,13 @@ ui-unsubscribing = Pošiljanje zahteve za odjavo: { $target }...
 ui-cannot-unsubscribe = To sporočilo ne ponuja možnosti odjave.
 ui-unsubscribed = Zahteva za odjavo je bila sprejeta.
 ui-not-unsubscribed = Odjava ni uspela: { $reason }
-# review: new
 ui-list-bar = To sporočilo je s poštnega seznama ({ $domain }).
-# review: new
 ui-list-bar-plain = To sporočilo je s poštnega seznama.
-# review: new
 ui-list-bar-asked = Za odjavo s tega seznama ste zaprosili { $date }.
-# review: new
-ui-list-bar-came-after = Za odjavo s tega seznama ste zaprosili { $date }, vendar je to sporočilo prispelo pozneje.
-# review: new
-ui-list-bar-opened = Stran seznama za odjavo ste odprli { $date }.
-# review: new
-ui-list-bar-failed = Seznam zahteve ni sprejel: { $reason }
-# review: new
+ui-list-bar-came-after = Za odjavo ste zaprosili { $date }, vendar je to sporočilo prispelo več kot dva dni pozneje.
+ui-list-bar-opened = Stran za odjavo s tega seznama ste odprli { $date }.
+ui-list-bar-failed = Zahteva za odjavo ni uspela: { $reason }
 ui-unsubscribe-ask = Odjavi…
-# review: new
 ui-unsubscribe-again = Znova odjavi…
 ui-event-span = { $start } do { $end }
 ui-event-floating = { $when } (časovni pas ni naveden ali ni prepoznan)
@@ -434,6 +425,8 @@ ui-account-move-down = Premakni &dol
 ui-menu-open = O&dpri
 ui-menu-flag = Zastavi&ca
 ui-menu-view-source = Pokaži i&zvorno kodo
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = O&djavi se s seznama...
 ui-save-attachments = Shrani priponke
 ui-attachment-open = Odpri
 ui-attachment-save-as = Shrani kot...

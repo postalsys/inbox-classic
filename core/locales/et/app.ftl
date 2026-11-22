@@ -86,7 +86,6 @@ cmd-options = &Seaded...
 cmd-message-rules = Kirjade &reeglid...
 cmd-encryption-keys = Krü&pteerimisvõtmed...
 cmd-create-rule-from-message = L&oo kirjast reegel...
-# review: new
 cmd-unsubscribe = Loo&bu listi tellimusest...
 cmd-select-all = Vali &kõik
 cmd-undo = &Võta tagasi
@@ -257,21 +256,13 @@ ui-unsubscribing = Tellimusest loobumise taotlust saadetakse aadressile { $targe
 ui-cannot-unsubscribe = See kiri ei sisalda tellimusest loobumise võimalust.
 ui-unsubscribed = Tellimusest loobumise taotlus võeti vastu.
 ui-not-unsubscribed = Tellimusest ei saanud loobuda: { $reason }
-# review: new
 ui-list-bar = See kiri on meililistist ({ $domain }).
-# review: new
 ui-list-bar-plain = See kiri on meililistist.
-# review: new
-ui-list-bar-asked = Palusite sellest listist lahkuda { $date }.
-# review: new
-ui-list-bar-came-after = Palusite sellest listist lahkuda { $date }, kuid see kiri saabus hiljem.
-# review: new
-ui-list-bar-opened = Avasite listist lahkumiseks selle lehe { $date }.
-# review: new
-ui-list-bar-failed = List ei võtnud taotlust vastu: { $reason }
-# review: new
+ui-list-bar-asked = Palusite selle listi tellimusest loobuda { $date }.
+ui-list-bar-came-after = Palusite tellimusest loobuda { $date }, kuid see kiri saabus rohkem kui kaks päeva hiljem.
+ui-list-bar-opened = Avasite selle listi tellimusest loobumise lehe { $date }.
+ui-list-bar-failed = Loobumistaotlus ebaõnnestus: { $reason }
 ui-unsubscribe-ask = Loobu tellimusest…
-# review: new
 ui-unsubscribe-again = Loobu uuesti…
 ui-event-span = { $start } kuni { $end }
 ui-event-floating = { $when } (ajavööndit teisendamata)
@@ -426,6 +417,8 @@ ui-account-move-down = Liiguta &alla
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
 ui-menu-view-source = Vaata lä&htekoodi
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Loobu listi telli&musest...
 ui-save-attachments = Salvesta manused
 ui-attachment-open = Ava
 ui-attachment-save-as = Salvesta kui...

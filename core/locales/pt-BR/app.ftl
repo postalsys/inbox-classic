@@ -89,8 +89,7 @@ cmd-options = &Opções...
 cmd-message-rules = Regras de &mensagens...
 cmd-encryption-keys = C&haves de criptografia...
 cmd-create-rule-from-message = Criar re&gra a partir da mensagem...
-# review: new
-cmd-unsubscribe = Cancelar inscrição na &lista...
+cmd-unsubscribe = Cance&lar inscrição na lista...
 cmd-select-all = Selecionar t&udo
 cmd-undo = &Desfazer
 cmd-copy = &Copiar para pasta...
@@ -263,21 +262,13 @@ ui-unsubscribing = Cancelando a inscrição em { $target }...
 ui-cannot-unsubscribe = Esta mensagem não oferece uma opção para cancelar a inscrição.
 ui-unsubscribed = Pedido de cancelamento da inscrição aceito.
 ui-not-unsubscribed = Não foi possível cancelar a inscrição: { $reason }
-# review: new
 ui-list-bar = Esta mensagem é de uma lista de e-mails ({ $domain }).
-# review: new
 ui-list-bar-plain = Esta mensagem é de uma lista de e-mails.
-# review: new
-ui-list-bar-asked = Você pediu para sair desta lista em { $date }.
-# review: new
-ui-list-bar-came-after = Você pediu para sair desta lista em { $date }, mas esta mensagem chegou depois.
-# review: new
-ui-list-bar-opened = Você abriu a página da lista para sair dela em { $date }.
-# review: new
-ui-list-bar-failed = A lista não aceitou a solicitação: { $reason }
-# review: new
+ui-list-bar-asked = Você pediu o cancelamento da inscrição nesta lista em { $date }.
+ui-list-bar-came-after = Você pediu o cancelamento em { $date }, mas esta mensagem chegou mais de dois dias depois.
+ui-list-bar-opened = Você abriu a página de cancelamento da inscrição nesta lista em { $date }.
+ui-list-bar-failed = A solicitação de cancelamento da inscrição falhou: { $reason }
 ui-unsubscribe-ask = Cancelar inscrição…
-# review: new
 ui-unsubscribe-again = Cancelar inscrição novamente…
 ui-event-span = { $start } a { $end }
 ui-event-floating = { $when } (sem conversão de fuso horário)
@@ -432,6 +423,8 @@ ui-account-move-down = Mover para &baixo
 ui-menu-open = A&brir
 ui-menu-flag = Sinali&zar
 ui-menu-view-source = Exibir código-&fonte
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Cancelar inscriçã&o na lista...
 ui-save-attachments = Salvar anexos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Salvar como...

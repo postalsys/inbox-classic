@@ -1,10 +1,10 @@
 <h1>Odhlásenie odberu správ</h1>
-<p class="summary"><!--review-->Pomocou lišty nad správami e-mailovej konferencie požiadajte o ukončenie ich zasielania.<!--/review--></p>
-<p><!--review-->Správa z e-mailovej konferencie, ktorá uvádza, ako sa z nej odhlásiť, má nad textom lištu s doménou konferencie a tlačidlom <b data-text="ui-unsubscribe-ask"></b>. Lišta označuje konferenciu iba jej doménou, nikdy názvom, ktorý zvolil odosielateľ. V priečinkoch Nevyžiadaná pošta, Odoslaná pošta a Koncepty sa lišta nezobrazuje: odhlásenie zo spamu prezradí odosielateľovi, že vaša adresa funguje.<!--/review--></p>
+<p class="summary">Pomocou lišty nad správou požiadajte zoznam adresátov o ukončenie zasielania správ.</p>
+<p>Správy s pokynmi na odhlásenie odberu zobrazujú nad textom lištu s tlačidlom <b data-text="ui-unsubscribe-ask"></b>. Ak je doména zoznamu k dispozícii, lišta ju zobrazí namiesto názvu zvoleného odosielateľom. V priečinkoch <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> a <b data-text="folder-drafts"></b> sa lišta nezobrazuje. Odhlásenie zo spamu môže odosielateľovi potvrdiť, že sa vaša adresa používa.</p>
 <p>Odhlásenie zo zoznamu:</p>
 <ol>
-    <li><!--review-->Kliknite na lište na <b data-text="ui-unsubscribe-ask"></b> alebo vyberte <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic uvedie, čo sa stane, a najprv sa opýta.<!--/review--></li>
-    <li><!--review-->Kliknite na <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Podľa konferencie sa stane jedna z troch vecí:<!--/review-->
+    <li>Kliknite na lište na <b data-text="ui-unsubscribe-ask"></b> alebo vyberte <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic vysvetlí, čo sa stane, a požiada o potvrdenie.</li>
+    <li>Kliknite na <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Podľa možností zoznamu sa vykoná jeden z týchto krokov:
         <ul>
             <li>Inbox Classic odošle serveru zoznamu žiadosť o odhlásenie odberu. Neotvorí sa webová stránka a neodošle sa e-mail.</li>
             <li>Inbox Classic pripraví požadovanú správu z konta, v ktorom správu čítate, s jeho textovým podpisom. Odošlete ju kliknutím na <b data-text="ui-tb-send"></b>.</li>
@@ -12,8 +12,8 @@
         </ul>
     </li>
 </ol>
-<p><!--review-->Potom lišta pri každej správe z tejto konferencie uvádza, kedy ste o odhlásenie požiadali, a nič ďalšie neponúka. Žiadosť e-mailom sa počíta až po jej odoslaní. Pri konferencii, ktorej stránku ste otvorili, si lišta tlačidlo ponechá, pretože Inbox Classic nevidí, či ste odhlásenie na stránke dokončili.<!--/review--></p>
-<p><!--review-->Zastavenie zasielania môže konferencii trvať až dva dni. Ak niektorá jej správa príde neskôr, lišta ponúkne <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
+<p>Po prijatí priamej žiadosti alebo odoslaní e-mailu na odhlásenie odberu lišta zobrazí dátum žiadosti a skryje tlačidlo. Platí to pre správy z tohto zoznamu v tom istom konte. Ak otvoríte webovú stránku zoznamu, tlačidlo zostane: Inbox Classic nedokáže zistiť, či ste na stránke odhlásenie dokončili.</p>
+<p>Môže chvíľu trvať, kým zoznam prestane posielať správy. Ak správa príde viac ako dva dni po vašej žiadosti, jej lišta ponúkne <b data-text="ui-unsubscribe-again"></b>.</p>
 <p>Stavový riadok oznámi prijatie žiadosti serverom. Nezaručuje to, že už nepríde žiadna ďalšia správa.</p>
 <aside class="note">Priame odhlásenie jedným kliknutím sa ponúka iba pri vhodnom overení odosielateľovej domény od poštového servera a podpise DKIM pokrývajúcom obe hlavičky odhlásenia. Aj túto žiadosť musíte najprv schváliť.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

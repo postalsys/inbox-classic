@@ -86,7 +86,6 @@ cmd-options = &Možnosti...
 cmd-message-rules = P&ravidlá správ...
 cmd-encryption-keys = Šifrovacie &kľúče...
 cmd-create-rule-from-message = V&ytvoriť pravidlo zo správy...
-# review: new
 cmd-unsubscribe = Odhlásiť odber &zoznamu...
 cmd-select-all = &Vybrať všetko
 cmd-undo = &Späť
@@ -262,21 +261,13 @@ ui-unsubscribing = Odosiela sa žiadosť o odhlásenie odberu: { $target }...
 ui-cannot-unsubscribe = Táto správa neponúka možnosť odhlásiť odber.
 ui-unsubscribed = Žiadosť o odhlásenie odberu bola prijatá.
 ui-not-unsubscribed = Odber sa nepodarilo odhlásiť: { $reason }
-# review: new
-ui-list-bar = Táto správa je z e-mailovej konferencie ({ $domain }).
-# review: new
-ui-list-bar-plain = Táto správa je z e-mailovej konferencie.
-# review: new
-ui-list-bar-asked = O odhlásenie z tejto konferencie ste požiadali { $date }.
-# review: new
-ui-list-bar-came-after = O odhlásenie z tejto konferencie ste požiadali { $date }, ale táto správa prišla až potom.
-# review: new
-ui-list-bar-opened = Stránku konferencie na odhlásenie ste otvorili { $date }.
-# review: new
-ui-list-bar-failed = Konferencia žiadosť neprijala: { $reason }
-# review: new
+ui-list-bar = Táto správa je zo zoznamu adresátov ({ $domain }).
+ui-list-bar-plain = Táto správa je zo zoznamu adresátov.
+ui-list-bar-asked = O odhlásenie odberu z tohto zoznamu ste požiadali { $date }.
+ui-list-bar-came-after = O odhlásenie odberu ste požiadali { $date }, ale táto správa prišla o viac ako dva dni neskôr.
+ui-list-bar-opened = Stránku na odhlásenie odberu z tohto zoznamu ste otvorili { $date }.
+ui-list-bar-failed = Žiadosť o odhlásenie odberu zlyhala: { $reason }
 ui-unsubscribe-ask = Odhlásiť odber…
-# review: new
 ui-unsubscribe-again = Znova odhlásiť odber…
 ui-event-span = { $start } až { $end }
 ui-event-floating = { $when } (bez prepočtu časového pásma)
@@ -431,6 +422,8 @@ ui-account-move-down = Posunúť nado&l
 ui-menu-open = Ot&voriť
 ui-menu-flag = &Farba príznaku
 ui-menu-view-source = Zo&braziť zdroj
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Odhlá&siť odber zoznamu...
 ui-save-attachments = Uložiť prílohy
 ui-attachment-open = Otvoriť
 ui-attachment-save-as = Uložiť ako...

@@ -86,7 +86,6 @@ cmd-options = &Mogućnosti...
 cmd-message-rules = &Pravila za poruke...
 cmd-encryption-keys = &Ključevi za šifriranje...
 cmd-create-rule-from-message = Stvori pravilo iz por&uke...
-# review: new
 cmd-unsubscribe = Ot&kaži pretplatu na listu...
 cmd-select-all = &Odaberi sve
 cmd-undo = Poni&šti
@@ -260,21 +259,13 @@ ui-unsubscribing = Otkazivanje pretplate: { $target }...
 ui-cannot-unsubscribe = Ova poruka ne nudi mogućnost otkazivanja pretplate.
 ui-unsubscribed = Zahtjev za otkazivanje pretplate je prihvaćen. Može proći neko vrijeme prije nego što lista e-pošte prestane slati poruke.
 ui-not-unsubscribed = Otkazivanje pretplate nije uspjelo: { $reason }
-# review: new
-ui-list-bar = Ova poruka je s liste e-pošte ({ $domain }).
-# review: new
-ui-list-bar-plain = Ova poruka je s liste e-pošte.
-# review: new
-ui-list-bar-asked = Zatražili ste izlazak s ove liste { $date }.
-# review: new
-ui-list-bar-came-after = Zatražili ste izlazak s ove liste { $date }, ali ova je poruka stigla nakon toga.
-# review: new
-ui-list-bar-opened = Otvorili ste stranicu liste za izlazak { $date }.
-# review: new
-ui-list-bar-failed = Lista nije prihvatila zahtjev: { $reason }
-# review: new
+ui-list-bar = Ova je poruka s liste e-pošte ({ $domain }).
+ui-list-bar-plain = Ova je poruka s liste e-pošte.
+ui-list-bar-asked = Zatražili ste otkazivanje pretplate na ovu listu dana { $date }.
+ui-list-bar-came-after = Zatražili ste otkazivanje pretplate dana { $date }, ali ova je poruka stigla više od dva dana poslije.
+ui-list-bar-opened = Otvorili ste stranicu za otkazivanje pretplate na ovu listu dana { $date }.
+ui-list-bar-failed = Zahtjev za otkazivanje pretplate nije uspio: { $reason }
 ui-unsubscribe-ask = Otkaži pretplatu…
-# review: new
 ui-unsubscribe-again = Ponovno otkaži pretplatu…
 ui-event-span = { $start } do { $end }
 ui-event-floating = { $when } (bez pretvorbe vremenske zone)
@@ -429,6 +420,8 @@ ui-account-move-down = Premjesti &dolje
 ui-menu-open = Ot&vori
 ui-menu-flag = &Zastavica
 ui-menu-view-source = Prika&ži izvorni kod
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Otkaži pretp&latu na listu...
 ui-save-attachments = Spremi privitke
 ui-attachment-open = Otvori
 ui-attachment-save-as = Spremi kao...

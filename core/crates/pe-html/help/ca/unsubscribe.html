@@ -1,10 +1,10 @@
 <h1>Sortir d’una llista de correu</h1>
-<p class="summary"><!--review-->Demaneu a una llista de correu que deixi d’enviar missatges des de la barra que hi ha sobre els seus missatges.<!--/review--></p>
-<p><!--review-->Si un missatge d’una llista de correu indica com donar-se’n de baixa, mostra una barra sobre el text amb el domini de la llista i <b data-text="ui-unsubscribe-ask"></b>. La barra identifica la llista només pel domini, mai per un nom triat pel remitent. Correu brossa, Elements enviats i Esborranys no mostren la barra: donar-se de baixa d’una llista des del correu brossa indica al remitent que la vostra adreça funciona.<!--/review--></p>
+<p class="summary">Demaneu a una llista de correu que deixi d’enviar-vos missatges amb la barra que hi ha sobre el missatge.</p>
+<p>Els missatges amb instruccions de baixa mostren una barra sobre el text amb <b data-text="ui-unsubscribe-ask"></b>. Si el domini de la llista està disponible, la barra el mostra en lloc d’un nom triat pel remitent. La barra no es mostra a les carpetes <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> i <b data-text="folder-drafts"></b>. Donar-se de baixa des del correu brossa pot confirmar al remitent que la vostra adreça és activa.</p>
 <p>Per sortir de la llista:</p>
 <ol>
-    <li><!--review-->Feu clic a <b data-text="ui-unsubscribe-ask"></b> a la barra o trieu <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic explica quina acció farà i en demana confirmació.<!--/review--></li>
-    <li><!--review-->Feu clic a <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Segons la llista, passa una de tres coses:<!--/review-->
+    <li>Feu clic a <b data-text="ui-unsubscribe-ask"></b> a la barra o trieu <b data-text="menu-message"></b> &gt; <b data-text="cmd-unsubscribe"></b>. Inbox Classic explica quina acció farà i en demana confirmació.</li>
+    <li>Feu clic a <!--os:windows--><b data-text="ui-yes"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->. Segons la llista, passa una de tres coses:
         <ul>
             <li>Inbox Classic envia una sol·licitud directa de baixa. No s’obre cap pàgina ni s’envia cap correu electrònic.</li>
             <li>Inbox Classic prepara el correu que la llista demana per cancel·lar la subscripció des del compte on llegiu el missatge, amb la signatura d’aquell compte. Feu clic a <b data-text="ui-tb-send"></b> per enviar-lo.</li>
@@ -12,8 +12,8 @@
         </ul>
     </li>
 </ol>
-<p><!--review-->Després, la barra indica a cada missatge d’aquella llista quan ho vau demanar, i no ofereix res més. Una sol·licitud per correu electrònic compta un cop s’ha enviat. En una llista de la qual heu obert la pàgina, la barra conserva el botó, perquè Inbox Classic no pot saber si hi heu completat la baixa.<!--/review--></p>
-<p><!--review-->Una llista pot trigar fins a dos dies a deixar d’enviar missatges. Si n’arriba un missatge més tard, la barra ofereix <b data-text="ui-unsubscribe-again"></b>.<!--/review--></p>
+<p>Quan s’accepta una sol·licitud directa o s’envia un correu de baixa, la barra mostra la data de la sol·licitud i amaga el botó. Això s’aplica als missatges d’aquella llista del mateix compte. Si obriu la pàgina web de la llista, el botó es manté: Inbox Classic no pot saber si hi heu completat la baixa.</p>
+<p>Una llista pot trigar a deixar d’enviar missatges. Si un missatge arriba més de dos dies després de la vostra sol·licitud, la barra ofereix <b data-text="ui-unsubscribe-again"></b>.</p>
 <p>La barra d’estat diu quan la llista ha acceptat la sol·licitud, però això encara no confirma que hagi deixat d’enviar missatges.</p>
 <aside class="note">Inbox Classic només envia la sol·licitud directa de baixa quan una signatura DKIM vàlida cobreix les capçaleres necessàries. Això no garanteix que el remitent sigui de confiança.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

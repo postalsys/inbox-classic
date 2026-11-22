@@ -85,7 +85,6 @@ cmd-options = &Options...
 cmd-message-rules = &Règles de message...
 cmd-encryption-keys = Clés de c&hiffrement...
 cmd-create-rule-from-message = Créer une règl&e à partir du message...
-# review: new
 cmd-unsubscribe = Se &désabonner de la liste...
 cmd-select-all = Sélectionner &tout
 cmd-undo = &Annuler
@@ -256,21 +255,13 @@ ui-unsubscribing = Envoi de la demande de désabonnement à { $target }...
 ui-cannot-unsubscribe = Ce message ne permet pas de vous désabonner.
 ui-unsubscribed = La liste de diffusion a accepté la demande de désabonnement.
 ui-not-unsubscribed = Le désabonnement a échoué : { $reason }
-# review: new
 ui-list-bar = Ce message provient d’une liste de diffusion ({ $domain }).
-# review: new
 ui-list-bar-plain = Ce message provient d’une liste de diffusion.
-# review: new
-ui-list-bar-asked = Vous avez demandé à quitter cette liste le { $date }.
-# review: new
-ui-list-bar-came-after = Vous avez demandé à quitter cette liste le { $date }, mais ce message est arrivé après.
-# review: new
-ui-list-bar-opened = Vous avez ouvert la page de la liste pour la quitter le { $date }.
-# review: new
-ui-list-bar-failed = La liste n’a pas accepté la demande : { $reason }
-# review: new
+ui-list-bar-asked = Vous avez demandé à vous désabonner de cette liste le { $date }.
+ui-list-bar-came-after = Vous avez demandé le désabonnement le { $date }, mais ce message est arrivé plus de deux jours après.
+ui-list-bar-opened = Vous avez ouvert la page de désabonnement de cette liste le { $date }.
+ui-list-bar-failed = La demande de désabonnement a échoué : { $reason }
 ui-unsubscribe-ask = Se désabonner…
-# review: new
 ui-unsubscribe-again = Se désabonner de nouveau…
 ui-event-span = { $start } à { $end }
 ui-event-floating = { $when } (heure indiquée, sans conversion de fuseau horaire)
@@ -425,6 +416,8 @@ ui-account-move-down = &Descendre
 ui-menu-open = &Ouvrir
 ui-menu-flag = Indi&cateur
 ui-menu-view-source = &Afficher la source
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Se désa&bonner de la liste...
 ui-save-attachments = Enregistrer les pièces jointes
 ui-attachment-open = Ouvrir
 ui-attachment-save-as = Enregistrer sous...

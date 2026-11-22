@@ -88,8 +88,7 @@ cmd-options = Επιλο&γές...
 cmd-message-rules = &Κανόνες μηνυμάτων...
 cmd-encryption-keys = Κλειδιά κρ&υπτογράφησης...
 cmd-create-rule-from-message = &Δημιουργία κανόνα από μήνυμα...
-# review: new
-cmd-unsubscribe = &Κατάργηση εγγραφής από τη λίστα...
+cmd-unsubscribe = Δια&κοπή συνδρομής στη λίστα...
 cmd-select-all = Επι&λογή όλων
 cmd-undo = Αναί&ρεση
 cmd-copy = Αντιγρα&φή σε φάκελο...
@@ -262,22 +261,14 @@ ui-unsubscribing = Κατάργηση εγγραφής από { $target }...
 ui-cannot-unsubscribe = Αυτό το μήνυμα δεν προσφέρει δυνατότητα κατάργησης εγγραφής.
 ui-unsubscribed = Το αίτημα κατάργησης εγγραφής έγινε δεκτό.
 ui-not-unsubscribed = Δεν ήταν δυνατή η κατάργηση εγγραφής: { $reason }
-# review: new
 ui-list-bar = Αυτό το μήνυμα είναι από λίστα αλληλογραφίας ({ $domain }).
-# review: new
 ui-list-bar-plain = Αυτό το μήνυμα είναι από λίστα αλληλογραφίας.
-# review: new
-ui-list-bar-asked = Ζητήσατε να αποχωρήσετε από αυτή τη λίστα στις { $date }.
-# review: new
-ui-list-bar-came-after = Ζητήσατε να αποχωρήσετε από αυτή τη λίστα στις { $date }, αλλά αυτό το μήνυμα ήρθε αργότερα.
-# review: new
-ui-list-bar-opened = Ανοίξατε τη σελίδα της λίστας για αποχώρηση στις { $date }.
-# review: new
-ui-list-bar-failed = Η λίστα δεν αποδέχτηκε το αίτημα: { $reason }
-# review: new
+ui-list-bar-asked = Ζητήσατε την κατάργηση της εγγραφής σας σε αυτή τη λίστα στις { $date }.
+ui-list-bar-came-after = Ζητήσατε κατάργηση εγγραφής στις { $date }, αλλά αυτό το μήνυμα έφτασε πάνω από δύο ημέρες αργότερα.
+ui-list-bar-opened = Ανοίξατε τη σελίδα κατάργησης εγγραφής της λίστας στις { $date }.
+ui-list-bar-failed = Το αίτημα κατάργησης εγγραφής απέτυχε: { $reason }
 ui-unsubscribe-ask = Κατάργηση εγγραφής…
-# review: new
-ui-unsubscribe-again = Νέα κατάργηση εγγραφής…
+ui-unsubscribe-again = Επανάληψη κατάργησης εγγραφής…
 ui-event-span = { $start } έως { $end }
 ui-event-floating = { $when } (χωρίς μετατροπή ζώνης ώρας)
 ui-invitation = Πρόσκληση: { $title }
@@ -431,6 +422,8 @@ ui-account-move-down = Μετακίνηση &κάτω
 ui-menu-open = Ά&νοιγμα
 ui-menu-flag = Σ&ημαία
 ui-menu-view-source = Πρ&οβολή κώδικα
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Διακοπή συ&νδρομής στη λίστα...
 ui-save-attachments = Αποθήκευση συνημμένων
 ui-attachment-open = Άνοιγμα
 ui-attachment-save-as = Αποθήκευση ως...

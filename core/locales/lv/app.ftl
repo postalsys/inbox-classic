@@ -89,8 +89,7 @@ cmd-options = &Opcijas...
 cmd-message-rules = Ziņojumu &kārtulas...
 cmd-encryption-keys = Šifrēšanas &atslēgas...
 cmd-create-rule-from-message = I&zveidot kārtulu no ziņojuma...
-# review: new
-cmd-unsubscribe = Atteikties no &saraksta...
+cmd-unsubscribe = Atteiktie&s no saraksta...
 cmd-select-all = Atlasīt &visu
 cmd-undo = &Atsaukt
 cmd-copy = Kopēt uz &mapi...
@@ -265,21 +264,13 @@ ui-unsubscribing = Nosūta atteikšanās pieprasījumu vietnei „{ $target }”
 ui-cannot-unsubscribe = Šajā ziņojumā nav iespējas atteikties no abonēšanas.
 ui-unsubscribed = Atteikšanās pieprasījums pieņemts.
 ui-not-unsubscribed = Neizdevās atteikties no abonēšanas: { $reason }
-# review: new
 ui-list-bar = Šis ziņojums ir no adresātu saraksta ({ $domain }).
-# review: new
 ui-list-bar-plain = Šis ziņojums ir no adresātu saraksta.
-# review: new
-ui-list-bar-asked = Jūs lūdzāt izstāties no šī saraksta { $date }.
-# review: new
-ui-list-bar-came-after = Jūs lūdzāt izstāties no šī saraksta { $date }, bet šis ziņojums pienāca vēlāk.
-# review: new
-ui-list-bar-opened = Jūs atvērāt saraksta atteikšanās lapu { $date }.
-# review: new
-ui-list-bar-failed = Saraksts nepieņēma pieprasījumu: { $reason }
-# review: new
+ui-list-bar-asked = Jūs pieprasījāt atteikties no šī saraksta abonēšanas { $date }.
+ui-list-bar-came-after = Jūs pieprasījāt atteikšanos { $date }, bet šis ziņojums pienāca vairāk nekā divas dienas vēlāk.
+ui-list-bar-opened = Jūs atvērāt šī saraksta atteikšanās lapu { $date }.
+ui-list-bar-failed = Atteikšanās pieprasījums neizdevās: { $reason }
 ui-unsubscribe-ask = Atteikties…
-# review: new
 ui-unsubscribe-again = Atteikties vēlreiz…
 ui-event-span = { $start } līdz { $end }
 ui-event-floating = { $when } (laika josla nav noteikta)
@@ -434,6 +425,8 @@ ui-account-move-down = Pārvietot l&ejup
 ui-menu-open = &Atvērt
 ui-menu-flag = &Karodziņš
 ui-menu-view-source = Skatīt p&irmkodu
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = &Atteikties no saraksta...
 ui-save-attachments = Saglabāt pielikumus
 ui-attachment-open = Atvērt
 ui-attachment-save-as = Saglabāt kā...

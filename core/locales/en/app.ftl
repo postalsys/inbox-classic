@@ -265,11 +265,11 @@ ui-not-unsubscribed = Could not unsubscribe: { $reason }
 ui-list-bar = This message is from a mailing list ({ $domain }).
 ui-list-bar-plain = This message is from a mailing list.
 # $date is a day as the system writes it ("21 November 2026")
-ui-list-bar-asked = You asked to leave this list on { $date }.
+ui-list-bar-asked = You asked to unsubscribe from this list on { $date }.
 # a message that arrived more than two days after the request: the list did not stop
-ui-list-bar-came-after = You asked to leave this list on { $date }, but this message came after.
-ui-list-bar-opened = You opened the list’s page to leave it on { $date }.
-ui-list-bar-failed = The list did not accept the request: { $reason }
+ui-list-bar-came-after = You asked to unsubscribe on { $date }, but this message arrived more than two days later.
+ui-list-bar-opened = You opened this list’s unsubscribe page on { $date }.
+ui-list-bar-failed = The unsubscribe request failed: { $reason }
 # the bar's button; it asks first
 ui-unsubscribe-ask = Unsubscribe…
 ui-unsubscribe-again = Unsubscribe Again…
@@ -429,6 +429,8 @@ ui-account-move-down = Move Do&wn
 ui-menu-open = &Open
 ui-menu-flag = Fla&g
 ui-menu-view-source = View So&urce
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Unsu&bscribe from List...
 ui-save-attachments = Save Attachments
 ui-attachment-open = Open
 ui-attachment-save-as = Save As...

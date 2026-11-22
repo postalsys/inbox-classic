@@ -86,8 +86,7 @@ cmd-options = &Možnosti...
 cmd-message-rules = Pravidla &zpráv...
 cmd-encryption-keys = Šif&rovací klíče...
 cmd-create-rule-from-message = Vytvořit pravidlo ze zpr&ávy...
-# review: new
-cmd-unsubscribe = &Odhlásit odběr seznamu...
+cmd-unsubscribe = &Odhlásit odběr ze seznamu...
 cmd-select-all = Vybrat &vše
 cmd-undo = &Zpět
 cmd-copy = &Kopírovat do složky...
@@ -259,21 +258,13 @@ ui-unsubscribing = Odesílání žádosti o odhlášení odběru: { $target }...
 ui-cannot-unsubscribe = Tato zpráva nenabízí možnost odhlášení.
 ui-unsubscribed = Žádost o odhlášení odběru byla přijata. To ještě nepotvrzuje, že zasílání zpráv skončilo.
 ui-not-unsubscribed = Odhlášení se nezdařilo: { $reason }
-# review: new
-ui-list-bar = Tato zpráva je z poštovní konference ({ $domain }).
-# review: new
-ui-list-bar-plain = Tato zpráva je z poštovní konference.
-# review: new
-ui-list-bar-asked = O odhlášení z této konference jste požádali { $date }.
-# review: new
-ui-list-bar-came-after = O odhlášení z této konference jste požádali { $date }, ale tato zpráva přišla až potom.
-# review: new
-ui-list-bar-opened = Stránku konference pro odhlášení jste otevřeli { $date }.
-# review: new
-ui-list-bar-failed = Konference žádost nepřijala: { $reason }
-# review: new
+ui-list-bar = Tato zpráva je z rozesílacího seznamu ({ $domain }).
+ui-list-bar-plain = Tato zpráva je z rozesílacího seznamu.
+ui-list-bar-asked = O odhlášení odběru z tohoto seznamu jste požádali dne { $date }.
+ui-list-bar-came-after = O odhlášení jste požádali dne { $date }, ale tato zpráva přišla o více než dva dny později.
+ui-list-bar-opened = Stránku pro odhlášení odběru z tohoto seznamu jste otevřeli dne { $date }.
+ui-list-bar-failed = Žádost o odhlášení se nezdařila: { $reason }
 ui-unsubscribe-ask = Odhlásit odběr…
-# review: new
 ui-unsubscribe-again = Znovu odhlásit odběr…
 ui-event-span = { $start } až { $end }
 ui-event-floating = { $when } (bez převodu časového pásma)
@@ -428,6 +419,8 @@ ui-account-move-down = Posunout &dolů
 ui-menu-open = &Otevřít
 ui-menu-flag = P&říznak
 ui-menu-view-source = Zobrazit &zdrojový kód
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = &Odhlásit odběr ze seznamu...
 ui-save-attachments = Uložit přílohy
 ui-attachment-open = Otevřít
 ui-attachment-save-as = Uložit jako...

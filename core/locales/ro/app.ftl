@@ -88,7 +88,6 @@ cmd-options = &Opțiuni...
 cmd-message-rules = Reguli pentru m&esaje...
 cmd-encryption-keys = &Chei de criptare...
 cmd-create-rule-from-message = Creare regulă din mesa&j...
-# review: new
 cmd-unsubscribe = D&ezabonare de la listă...
 cmd-select-all = Selectare &totală
 cmd-undo = An&ulare
@@ -264,21 +263,13 @@ ui-unsubscribing = Se face dezabonarea de la { $target }...
 ui-cannot-unsubscribe = Acest mesaj nu oferă o opțiune de dezabonare.
 ui-unsubscribed = Cererea de dezabonare a fost acceptată.
 ui-not-unsubscribed = Dezabonarea nu a reușit: { $reason }
-# review: new
 ui-list-bar = Acest mesaj este de la o listă de corespondență ({ $domain }).
-# review: new
 ui-list-bar-plain = Acest mesaj este de la o listă de corespondență.
-# review: new
-ui-list-bar-asked = Ați cerut să părăsiți această listă pe { $date }.
-# review: new
-ui-list-bar-came-after = Ați cerut să părăsiți această listă pe { $date }, dar acest mesaj a sosit după aceea.
-# review: new
-ui-list-bar-opened = Ați deschis pagina listei pentru a o părăsi pe { $date }.
-# review: new
-ui-list-bar-failed = Lista nu a acceptat cererea: { $reason }
-# review: new
+ui-list-bar-asked = Ați solicitat dezabonarea de la această listă la { $date }.
+ui-list-bar-came-after = Ați solicitat dezabonarea la { $date }, dar acest mesaj a sosit cu mai mult de două zile mai târziu.
+ui-list-bar-opened = Ați deschis pagina de dezabonare a acestei liste la { $date }.
+ui-list-bar-failed = Cererea de dezabonare a eșuat: { $reason }
 ui-unsubscribe-ask = Dezabonare…
-# review: new
 ui-unsubscribe-again = Dezabonare din nou…
 ui-event-span = De la { $start } până la { $end }
 ui-event-floating = { $when } (fus orar nespecificat sau necunoscut)
@@ -433,6 +424,8 @@ ui-account-move-down = Mutare în &jos
 ui-menu-open = Desc&hidere
 ui-menu-flag = Semnali&zare
 ui-menu-view-source = &Vizualizare sursă
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Deza&bonare de la listă...
 ui-save-attachments = Salvare atașări
 ui-attachment-open = Deschidere
 ui-attachment-save-as = Salvare ca...

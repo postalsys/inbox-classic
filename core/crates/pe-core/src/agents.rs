@@ -1128,8 +1128,9 @@ impl Core {
         }
         if !none.is_empty() {
             return Err(Error::Unavailable(format!(
-                "The messages with uids {} offer no one-click unsubscribe from a verified sender, or are not \
-                 downloaded yet (get_message downloads a message). Nothing was asked of the user.",
+                "The messages with uids {} cannot be used for unsubscribe. They may be in Junk E-mail, Sent Items or \
+                 Drafts, lack a supported one-click unsubscribe option, or not be downloaded yet (get_message \
+                 downloads a message). Nothing was asked of the user.",
                 none.join(", ")
             )));
         }
@@ -1150,8 +1151,8 @@ impl Core {
         let found = self.store().folder(folder)?;
         if found.info.special_use.as_deref() == Some("\\Junk") {
             return Err(Error::Unavailable(
-                "Lists are not unsubscribed from in Junk E-mail: a link in junk may be a spammer's, and using it tells \
-                 them the address is read. Only the user can do that."
+                "Unsubscribing is unavailable in Junk E-mail. Using an unsubscribe link in spam can confirm to the \
+                 sender that the address is active."
                     .into(),
             ));
         }

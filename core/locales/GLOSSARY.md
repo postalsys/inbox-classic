@@ -50,6 +50,18 @@ Rules for every language:
 - Keys in the help stay `<kbd>Ctrl</kbd>`, `<kbd>Shift</kbd>`, `<kbd>Alt</kbd>`, `<kbd>Del</kbd>`, `<kbd>Enter</kbd>`
   in every language: the page names them as the keyboard does (`key-*` in `core.ftl`, and the Mac's symbols there).
 
+## Mailing-list bar and menu labels
+
+Request history belongs to a list within one account. A direct request is recorded after acceptance; an email
+request after sending. Opening a web page records only that it opened. The retry threshold is a message arriving
+more than two days after a request, not a promise that the list will stop within two days. A failed request may be a
+transport failure, not a refusal by the list. The domain is optional. Junk, Sent Items and Drafts suppress the bar
+and cannot supply agent unsubscribe requests.
+
+`cmd-unsubscribe` labels the main Message menu; `ui-menu-unsubscribe` labels the message context menu. Keep the same
+visible wording, but choose each access key against its own menu. Open Draft and Unsubscribe cannot appear together.
+Linux and macOS display these context labels without the Windows mnemonic marker.
+
 ## Agent unsubscribe log timing
 
 The `agent-log-unsubscribed` entry is written when the user approves the request, before any HTTP request
@@ -381,6 +393,8 @@ Plurals: `[one]` (exactly 1) and `*[other]` (0, 2 and more). A literal 1 in `[on
 
 ### Čeština (cs)
 
+- Use rozesílací seznam for mailing lists, including newsletters; do not narrow this to poštovní konference.
+
 Terms: Doručená pošta; Pošta k odeslání; Odeslaná pošta; Odstraněná pošta; Koncepty; Nevyžádaná pošta; zpráva;
 složka; účet; příloha; příznak (Označit příznakem, Zrušit příznak); Odpovědět všem; Přeposlat.
 
@@ -423,6 +437,8 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
 
 ### Dansk (da)
 
+- Use afmelding and afmeldingsside for leaving a mailing list. The full menu label is Afmeld abonnement på listen; the bar button may remain shorter.
+
 Terms: Indbakke; Udbakke; Sendt post; Slettet post; Kladder; Uønsket mail; meddelelse ("mail" as the mass noun);
 mappe; konto (pl. konti); vedhæftet fil; flag (sætte flag på, Fjern flag); Svar alle; Videresend; Adressekartotek (as
 Outlook Express).
@@ -460,6 +476,8 @@ Outlook Express).
 - Queued folder operations use Anmodede om at oprette/omdøbe, imported messages Satte i kø. Key storage can be unavailable or locked rather than lost; attachment previews do not imply that opened decrypted files stay off disk.
 
 ### Hrvatski (hr)
+
+- Use otkazivanje pretplate for leaving a mailing list, not literal izlazak.
 
 Terms: Ulazna pošta; Izlazna pošta; Poslane stavke; Izbrisane stavke; Skice; Neželjena e-pošta; poruka; mapa; račun;
 privitak; zastavica (Označi zastavicom); Odgovori svima; Proslijedi.
@@ -1100,6 +1118,8 @@ Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; O
 
 ### Norsk bokmål (nb)
 
+- Use avmelding and avmeldingsside in list history. The full menu label Avslutt abonnementet på listen permits distinct main-menu and context-menu keys; the bar button may remain shorter.
+
 Terms: Innboks; Utboks; Sendte elementer; Slettede elementer; Utkast; Søppelpost; Arkiv; Alle innbokser; melding (f./m.,
 "meldingen", pl. "meldinger"; "e-post" as the mass noun); mappe; konto (pl. kontoer); vedlegg; flagg (Merk med flagg,
 Fjern flagg); Svar avsender; Svar alle; Videresend; Send/motta; Merk som søppelpost / Merk som ikke søppelpost; Flytt
@@ -1394,6 +1414,8 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - Distinguish „previzualizare păstrată în memorie”, „copie temporară necriptată” and „index local necriptat”. Cache size is a limită orientativă, not a hard database limit.
 
 ### Slovenčina (sk)
+
+- Use the existing zoznam adresátov for a mailing list, rather than e-mailová konferencia.
 
 Terms: Doručená pošta; Pošta na odoslanie; Odoslaná pošta; Odstránená pošta; Koncepty; Nevyžiadaná pošta; správa;
 priečinok; konto (as Microsoft Slovak); príloha; príznak (Označiť príznakom, Zrušiť príznak); Odpovedať všetkým;
@@ -1745,6 +1767,8 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"
 - Key lock instructions check the system store before backup recovery. Exact zero-address verification cannot record ownership. Oturum açma bilgileri includes credentials beyond parolalar; setup transfers only selected available secrets.
 
 ### Ελληνικά (el)
+
+- Use Διακοπή συνδρομής στη λίστα for the full unsubscribe menu label; the shorter bar action keeps its established wording.
 
 Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Διαγραμμένα; Πρόχειρα; Ανεπιθύμητη αλληλογραφία; Archive: Αρχειοθέτηση
 (Outlook's name, as "Αρχείο" is the File menu); μήνυμα; φάκελος; λογαριασμός; συνημμένο; σημαία; Απάντηση σε όλους;

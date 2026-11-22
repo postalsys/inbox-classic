@@ -88,7 +88,6 @@ cmd-options = &Opties...
 cmd-message-rules = Berichte&nregels...
 cmd-encryption-keys = Versle&utelingssleutels...
 cmd-create-rule-from-message = Regel maken van beri&cht...
-# review: new
 cmd-unsubscribe = &Afmelden voor lijst...
 cmd-select-all = &Alles selecteren
 cmd-undo = &Ongedaan maken
@@ -262,21 +261,13 @@ ui-unsubscribing = Afmelden bij { $target }...
 ui-cannot-unsubscribe = Dit bericht biedt geen mogelijkheid om je af te melden.
 ui-unsubscribed = Het afmeldverzoek is geaccepteerd.
 ui-not-unsubscribed = Afmelden is mislukt: { $reason }
-# review: new
 ui-list-bar = Dit bericht komt van een mailinglijst ({ $domain }).
-# review: new
 ui-list-bar-plain = Dit bericht komt van een mailinglijst.
-# review: new
-ui-list-bar-asked = U hebt op { $date } gevraagd deze lijst te verlaten.
-# review: new
-ui-list-bar-came-after = U hebt op { $date } gevraagd deze lijst te verlaten, maar dit bericht kwam daarna.
-# review: new
-ui-list-bar-opened = U hebt op { $date } de pagina van de lijst geopend om u af te melden.
-# review: new
-ui-list-bar-failed = De lijst heeft het verzoek niet aangenomen: { $reason }
-# review: new
+ui-list-bar-asked = Je hebt op { $date } gevraagd om je af te melden voor deze lijst.
+ui-list-bar-came-after = Je hebt op { $date } om afmelding gevraagd, maar dit bericht kwam meer dan twee dagen later.
+ui-list-bar-opened = Je hebt op { $date } de afmeldpagina van deze lijst geopend.
+ui-list-bar-failed = Het afmeldverzoek is mislukt: { $reason }
 ui-unsubscribe-ask = Afmelden…
-# review: new
 ui-unsubscribe-again = Opnieuw afmelden…
 ui-event-span = { $start } tot { $end }
 ui-event-floating = { $when } (zonder tijdzoneconversie)
@@ -431,6 +422,8 @@ ui-account-move-down = Om&laag
 ui-menu-open = &Openen
 ui-menu-flag = Marker&ing
 ui-menu-view-source = Bron &weergeven
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = A&fmelden voor lijst...
 ui-save-attachments = Bijlagen opslaan
 ui-attachment-open = Openen
 ui-attachment-save-as = Opslaan als...

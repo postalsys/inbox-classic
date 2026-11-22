@@ -88,7 +88,6 @@ cmd-options = O&pcions...
 cmd-message-rules = &Regles de missatge...
 cmd-encryption-keys = &Claus de xifratge...
 cmd-create-rule-from-message = Crea una regla per a a&quest missatge...
-# review: new
 cmd-unsubscribe = &Cancel·la la subscripció a la llista...
 cmd-select-all = Selecciona-ho &tot
 cmd-undo = &Desfés
@@ -262,21 +261,13 @@ ui-unsubscribing = S’està enviant la sol·licitud de baixa a { $target }...
 ui-cannot-unsubscribe = Aquest missatge no ofereix cap manera de cancel·lar la subscripció.
 ui-unsubscribed = La llista de correu ha acceptat la sol·licitud de baixa.
 ui-not-unsubscribed = No s’ha pogut cancel·lar la subscripció: { $reason }
-# review: new
 ui-list-bar = Aquest missatge és d’una llista de correu ({ $domain }).
-# review: new
 ui-list-bar-plain = Aquest missatge és d’una llista de correu.
-# review: new
-ui-list-bar-asked = Vau demanar deixar aquesta llista el { $date }.
-# review: new
-ui-list-bar-came-after = Vau demanar deixar aquesta llista el { $date }, però aquest missatge ha arribat després.
-# review: new
-ui-list-bar-opened = Vau obrir la pàgina de la llista per deixar-la el { $date }.
-# review: new
-ui-list-bar-failed = La llista no ha acceptat la sol·licitud: { $reason }
-# review: new
+ui-list-bar-asked = Vau demanar cancel·lar la subscripció a aquesta llista el { $date }.
+ui-list-bar-came-after = Vau demanar la baixa el { $date }, però aquest missatge ha arribat més de dos dies després.
+ui-list-bar-opened = Vau obrir la pàgina de baixa de la llista el { $date }.
+ui-list-bar-failed = La sol·licitud de baixa ha fallat: { $reason }
 ui-unsubscribe-ask = Cancel·la la subscripció…
-# review: new
 ui-unsubscribe-again = Torna a cancel·lar la subscripció…
 ui-event-span = { $start } fins a { $end }
 ui-event-floating = { $when } (hora indicada, sense conversió de fus horari)
@@ -431,6 +422,8 @@ ui-account-move-down = Mou a&vall
 ui-menu-open = &Obre
 ui-menu-flag = Ban&dera
 ui-menu-view-source = Mostra el codi &font
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Cancel·la la subscripci&ó a la llista...
 ui-save-attachments = Desa els fitxers adjunts
 ui-attachment-open = Obre
 ui-attachment-save-as = Desa com a...

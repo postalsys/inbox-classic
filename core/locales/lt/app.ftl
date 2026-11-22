@@ -86,8 +86,7 @@ cmd-options = Pa&rinktys...
 cmd-message-rules = Laiškų &taisyklės...
 cmd-encryption-keys = Šifravimo ra&ktai...
 cmd-create-rule-from-message = Kurti &taisyklę iš laiško...
-# review: new
-cmd-unsubscribe = Atsisakyti &sąrašo prenumeratos...
+cmd-unsubscribe = At&sisakyti sąrašo prenumeratos...
 cmd-select-all = &Pažymėti viską
 cmd-undo = &Atšaukti
 cmd-copy = K&opijuoti į aplanką...
@@ -262,21 +261,13 @@ ui-unsubscribing = Siunčiamas prašymas atsisakyti prenumeratos: { $target }...
 ui-cannot-unsubscribe = Šiame laiške nėra galimybės atsisakyti prenumeratos.
 ui-unsubscribed = Prašymas atsisakyti prenumeratos priimtas.
 ui-not-unsubscribed = Nepavyko atsisakyti prenumeratos: { $reason }
-# review: new
 ui-list-bar = Šis laiškas yra iš adresatų sąrašo ({ $domain }).
-# review: new
 ui-list-bar-plain = Šis laiškas yra iš adresatų sąrašo.
-# review: new
-ui-list-bar-asked = Paprašėte atsisakyti šio sąrašo { $date }.
-# review: new
-ui-list-bar-came-after = Paprašėte atsisakyti šio sąrašo { $date }, tačiau šis laiškas atėjo vėliau.
-# review: new
-ui-list-bar-opened = Atsisakymo puslapį atidarėte { $date }.
-# review: new
-ui-list-bar-failed = Sąrašas nepriėmė užklausos: { $reason }
-# review: new
+ui-list-bar-asked = Paprašėte atsisakyti šio sąrašo prenumeratos { $date }.
+ui-list-bar-came-after = Paprašėte atsisakyti prenumeratos { $date }, tačiau šis laiškas gautas daugiau nei po dviejų dienų.
+ui-list-bar-opened = Šio sąrašo prenumeratos atsisakymo puslapį atidarėte { $date }.
+ui-list-bar-failed = Nepavyko pateikti prašymo atsisakyti prenumeratos: { $reason }
 ui-unsubscribe-ask = Atsisakyti prenumeratos…
-# review: new
 ui-unsubscribe-again = Dar kartą atsisakyti…
 ui-event-span = { $start } iki { $end }
 ui-event-floating = { $when } (laiko juosta nenustatyta)
@@ -431,6 +422,8 @@ ui-account-move-down = Perkelti ž&emyn
 ui-menu-open = Ati&daryti
 ui-menu-flag = V&ėliavėlė
 ui-menu-view-source = Rodyti &šaltinį
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Atsisa&kyti sąrašo prenumeratos...
 ui-save-attachments = Įrašyti priedus
 ui-attachment-open = Atidaryti
 ui-attachment-save-as = Įrašyti kaip...

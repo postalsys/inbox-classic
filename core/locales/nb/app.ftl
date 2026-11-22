@@ -89,8 +89,7 @@ cmd-options = &Alternativer...
 cmd-message-rules = Meldings&regler...
 cmd-encryption-keys = Krypterings&nøkler...
 cmd-create-rule-from-message = Opprett regel fra &melding...
-# review: new
-cmd-unsubscribe = M&eld av listen...
+cmd-unsubscribe = Avslutt abonn&ementet på listen...
 cmd-select-all = Merk al&t
 cmd-undo = &Angre
 cmd-copy = Kopi&er til mappe...
@@ -263,21 +262,13 @@ ui-unsubscribing = Sender avmeldingsforespørsel til { $target }...
 ui-cannot-unsubscribe = Denne meldingen inneholder ingen avmeldingsinformasjon.
 ui-unsubscribed = E-postlisten har godtatt avmeldingsforespørselen.
 ui-not-unsubscribed = Avmeldingen mislyktes: { $reason }
-# review: new
 ui-list-bar = Denne meldingen er fra en e-postliste ({ $domain }).
-# review: new
 ui-list-bar-plain = Denne meldingen er fra en e-postliste.
-# review: new
-ui-list-bar-asked = Du ba om å forlate denne listen { $date }.
-# review: new
-ui-list-bar-came-after = Du ba om å forlate denne listen { $date }, men denne meldingen kom etterpå.
-# review: new
-ui-list-bar-opened = Du åpnet listens side for å forlate den { $date }.
-# review: new
-ui-list-bar-failed = Listen godtok ikke forespørselen: { $reason }
-# review: new
+ui-list-bar-asked = Du ba om å bli meldt av denne listen { $date }.
+ui-list-bar-came-after = Du ba om avmelding { $date }, men denne meldingen kom mer enn to dager senere.
+ui-list-bar-opened = Du åpnet avmeldingssiden til denne listen { $date }.
+ui-list-bar-failed = Avmeldingsforespørselen mislyktes: { $reason }
 ui-unsubscribe-ask = Meld av…
-# review: new
 ui-unsubscribe-again = Meld av igjen…
 ui-event-span = { $start } til { $end }
 ui-event-floating = { $when } (tid som oppgitt i invitasjonen)
@@ -432,6 +423,8 @@ ui-account-move-down = Flytt &ned
 ui-menu-open = &Åpne
 ui-menu-flag = &Flagg
 ui-menu-view-source = Vis kil&de
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Avslutt abonnementet p&å listen...
 ui-save-attachments = Lagre vedlegg
 ui-attachment-open = Åpne
 ui-attachment-save-as = Lagre som...

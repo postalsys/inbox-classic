@@ -89,7 +89,6 @@ cmd-options = &Opções...
 cmd-message-rules = Regras de &mensagens...
 cmd-encryption-keys = C&haves de encriptação...
 cmd-create-rule-from-message = Criar re&gra a partir da mensagem...
-# review: new
 cmd-unsubscribe = &Cancelar subscrição da lista...
 cmd-select-all = Selecionar t&udo
 cmd-undo = &Anular
@@ -263,21 +262,13 @@ ui-unsubscribing = A enviar o pedido de cancelamento da subscrição para { $tar
 ui-cannot-unsubscribe = Esta mensagem não oferece uma opção para cancelar a subscrição.
 ui-unsubscribed = Pedido de cancelamento da subscrição aceite.
 ui-not-unsubscribed = Não foi possível cancelar a subscrição: { $reason }
-# review: new
 ui-list-bar = Esta mensagem é de uma lista de correio ({ $domain }).
-# review: new
 ui-list-bar-plain = Esta mensagem é de uma lista de correio.
-# review: new
-ui-list-bar-asked = Pediu para sair desta lista a { $date }.
-# review: new
-ui-list-bar-came-after = Pediu para sair desta lista a { $date }, mas esta mensagem chegou depois.
-# review: new
-ui-list-bar-opened = Abriu a página da lista para sair dela a { $date }.
-# review: new
-ui-list-bar-failed = A lista não aceitou o pedido: { $reason }
-# review: new
+ui-list-bar-asked = Pediu o cancelamento da subscrição desta lista a { $date }.
+ui-list-bar-came-after = Pediu o cancelamento da subscrição a { $date }, mas esta mensagem chegou mais de dois dias depois.
+ui-list-bar-opened = Abriu a página de cancelamento da subscrição desta lista a { $date }.
+ui-list-bar-failed = O pedido de cancelamento da subscrição falhou: { $reason }
 ui-unsubscribe-ask = Cancelar subscrição…
-# review: new
 ui-unsubscribe-again = Cancelar subscrição novamente…
 ui-event-span = { $start } a { $end }
 ui-event-floating = { $when } (sem fuso horário utilizável)
@@ -432,6 +423,8 @@ ui-account-move-down = Mover para &baixo
 ui-menu-open = &Abrir
 ui-menu-flag = Sinali&zar
 ui-menu-view-source = Ver código-&fonte
+# Context menu: the same action as cmd-unsubscribe, with its own access key.
+ui-menu-unsubscribe = Cancelar su&bscrição da lista...
 ui-save-attachments = Guardar anexos
 ui-attachment-open = Abrir
 ui-attachment-save-as = Guardar como...
