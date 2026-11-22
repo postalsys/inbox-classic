@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.20.1](https://github.com/postalsys/inbox-classic/compare/v0.20.0...v0.20.1) (2026-11-22)
+
+
+### Bug Fixes
+
+* **windows:** the deep test's quiet waits for a search still to come ([d2baf1b](https://github.com/postalsys/inbox-classic/commit/d2baf1b8c5a5882e82e84b1c31dfb99f2f466b73))
+* **windows:** the deep test's quiet waits for a search still to come ([f0f5d93](https://github.com/postalsys/inbox-classic/commit/f0f5d93785083b658836e27e33b1a8e2ac73f54b))
+
 ## [0.20.0](https://github.com/postalsys/inbox-classic/compare/v0.19.1...v0.20.0) (2026-11-22)
 
 
